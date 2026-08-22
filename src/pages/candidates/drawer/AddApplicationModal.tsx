@@ -52,7 +52,7 @@
  * seeds (owner derivation chain, default start stage) stand down in edit mode so
  * they can never overwrite what the record already holds.
  */
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useId } from 'react'
 import { useTranslation } from 'react-i18next'
 import { AlertTriangle } from 'lucide-react'
 import api, { unwrap } from '@/lib/api'
@@ -66,9 +66,18 @@ import { useApplicationStages } from '@/hooks/useApplicationStages'
 import { useActionRulePreflight, ActionRuleBanner } from '@/components/actionrules'
 import { useAuth } from '@/context/AuthContext'
 import { useUsers } from '@/lib/queries'
+import { useApplicationSources } from '@/lib/useApplicationSources'
+import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
 import { CANON_LABEL_STYLE } from '@/components/drawer/fieldRowCanon'
 import type { Id } from '@/types/common'
 import Button from '@/components/ui/Button'
+import { tintBg, tintBorder } from '@/lib/tint'
+
+// APP-REQUIRED-FE-1: red asterisk after a label whose field the tenant marked
+// required (Settings → Sollicitaties → Verplichte velden) — same visual token
+// the shared Label/FieldRow components use, kept local since neither picker row
+// in this modal is built from those components (custom CANON_LABEL_STYLE rows).
+const requiredMark = <span aria-hidden="true" style={{ color: 'var(--color-danger-text)', marginLeft: 2 }}>*</span>
 
 // Label-left canon (P32, batch 5): label column fixed at CANON_LABEL_WIDTH, control fills the rest.
 const fieldRow: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: 10 }
@@ -81,7 +90,10 @@ const pickerMenuWidth = 340
 const fieldFootprint: React.CSSProperties = { padding: '8px 11px', borderRadius: 8, fontSize: 13 }
 
 // 422 field-error keys are snake_case; map them back to this form's field names.
-const API_TO_FORM: Record<string, string> = { candidate_id: 'candidateId', vacancy_id: 'vacancyId', owner_id: 'ownerId', application_stage_id: 'phase' }
+const API_TO_FORM: Record<string, string> = {
+  candidate_id: 'candidateId', vacancy_id: 'vacancyId', owner_id: 'ownerId',
+  application_stage_id: 'phase', source: 'source',
+}
 
 export default function AddApplicationModal({ candidateId, candidateOwnerId, candidateOwnerName, initialVacancyId, suggestedVacancyId, editApplicationId, onClose, onCreated }: {
   candidateId: Id
@@ -104,6 +116,8 @@ export default function AddApplicationModal({ candidateId, candidateOwnerId, can
 }) {
   const { t } = useTranslation('candidates')
   const editing = editApplicationId != null
+  // §6: stable id pair linking the Bron label to its combobox trigger.
+  const sourceFieldId = useId()
   const vacancyOptions = useVacancyOptions(true)
   // S24b: the real stage id (not just the slug) — needed to submit application_stage_id.
   const { stages, defaultStage } = useApplicationStages()
@@ -116,6 +130,27 @@ export default function AddApplicationModal({ candidateId, candidateOwnerId, can
   const { data: users = [] } = useUsers() as { data?: { id: Id; name: string }[] }
   const userOptions = users.map(u => ({ value: String(u.id), label: u.name }))
   const meIsAssignable = me?.id != null && userOptions.some(o => o.value === String(me.id))
+
+  // Acquisition source (APP-REQUIRED-FE-1 measured gap: this modal had NO source
+  // field at all — pages/applications/AddApplicationModal.tsx's variant already
+  // does) — same searchable/creatable tenant lookup, mirrors ApplicationDetailsCard.
+  const { sources: sourceOptions, allowFreeEntry: sourceAllowFreeEntry } = useApplicationSources()
+
+  // APP-REQUIRED-FE-1: tenant-configurable required fields for this popup (Settings
+  // → Sollicitaties → Verplichte velden) — a flat array, no phase axis, mirroring
+  // `FlatRequiredFieldsGuard('application')` on the backend (create only, hence the
+  // `!editing` gate on the client preflight below, exactly like appRuleBlocked above).
+  const settingsValues = useAllSettings()
+  // Required-ness applies to CREATE only — the backend guard runs on store, never
+  // on update (Opus round 22-08: an ungated flag showed a false asterisk in edit
+  // mode AND removed the VAC-CLEAR-1 crosses there, over-enforcing a rule the
+  // server does not have on PATCH).
+  const requiredActive = !editing
+  const requiredFields = getJsonSetting<string[]>(settingsValues, 'application_required_fields', [])
+  const sourceRequired = requiredActive && requiredFields.includes('source')
+  const vacancyRequired = requiredActive && requiredFields.includes('vacancy_id')
+  const ownerRequired = requiredActive && requiredFields.includes('owner_id')
+  const phaseRequired = requiredActive && requiredFields.includes('application_stage_id')
 
   // AXIS-MATRIX-2 preflight (mirrors MatchModal's match.create wiring, the
   // reference implementation): POST /applications enforces application.create against
@@ -138,10 +173,12 @@ export default function AddApplicationModal({ candidateId, candidateOwnerId, can
   })
   // Default to the tenant's flagged start stage (APP-CREATE-STAGE-1), falling back to the first.
   const [phaseId, setPhaseId] = useState(() => defaultStage?.id ?? '')
+  // Acquisition source — optional unless the tenant requires it (APP-REQUIRED-FE-1).
+  const [source, setSource] = useState('')
   const [saving, setSaving] = useState(false)
   const [errors, setErrors] = useState<Record<string, boolean>>({})
   // EDIT MODE: the record as loaded, so the PATCH below can send only what changed.
-  const [loaded, setLoaded] = useState<{ vacancyId: string; ownerId: string; phaseKey: string } | null>(null)
+  const [loaded, setLoaded] = useState<{ vacancyId: string; ownerId: string; phaseKey: string; source: string } | null>(null)
   const phaseSeededRef = useRef(false)
 
   // The picked vacancy's own option row — carries ownerId/ownerName (useVacancyOptions
@@ -211,14 +248,19 @@ export default function AddApplicationModal({ candidateId, candidateOwnerId, can
     api.get(`/applications/${editApplicationId}`)
       .then(r => {
         if (!alive) return
-        const d = unwrap(r) as { vacancy?: { id?: Id } | null; owner?: { id?: Id } | null; phase_key?: string | null }
+        const d = unwrap(r) as {
+          vacancy?: { id?: Id } | null; owner?: { id?: Id } | null; phase_key?: string | null
+          source?: string | null; source_name?: string | null
+        }
         const snap = {
           vacancyId: d?.vacancy?.id != null ? String(d.vacancy.id) : '',
           ownerId: d?.owner?.id != null ? String(d.owner.id) : '',
           phaseKey: d?.phase_key ?? '',
+          source: d?.source ?? d?.source_name ?? '',
         }
         setLoaded(snap)
         setVacancyId(snap.vacancyId)
+        setSource(snap.source)
         // The stored owner counts as an explicit choice: the create-time derivation
         // chain (vacancy > candidate > me) must never overwrite it.
         ownerManualRef.current = true
@@ -245,6 +287,18 @@ export default function AddApplicationModal({ candidateId, candidateOwnerId, can
   // fields only (measured contract: UpdateApplicationRequest takes vacancy_id /
   // owner_id / application_stage_id, each `sometimes`).
   const submit = async () => {
+    // APP-REQUIRED-FE-1: client-side required-field preflight (UX only, §7 — the
+    // backend's own FlatRequiredFieldsGuard('application') on
+    // ApplicationController::store is the real enforcement, create only, so this
+    // gates on `!editing` exactly like appRuleBlocked above).
+    if (!editing) {
+      const missing: Record<string, boolean> = {}
+      if (vacancyRequired && !vacancyId) missing.vacancyId = true
+      if (phaseRequired && !phaseId) missing.phase = true
+      if (ownerRequired && !ownerId) missing.ownerId = true
+      if (sourceRequired && !source.trim()) missing.source = true
+      if (Object.keys(missing).length > 0) { setErrors(missing); return }
+    }
     setSaving(true)
     setErrors({})
     try {
@@ -254,6 +308,7 @@ export default function AddApplicationModal({ candidateId, candidateOwnerId, can
         if ((loaded?.ownerId ?? '') !== ownerId) payload.owner_id = ownerId || null
         const loadedStageId = loaded?.phaseKey ? (stages.find(s => s.value === loaded.phaseKey)?.id ?? '') : ''
         if (phaseId && phaseId !== loadedStageId) payload.application_stage_id = phaseId
+        if ((loaded?.source ?? '') !== source.trim()) payload.source = source.trim() || null
         // Nothing changed: close without a pointless write (and without a fake
         // "bijgewerkt" toast for a request that never happened).
         if (Object.keys(payload).length > 0) {
@@ -266,6 +321,7 @@ export default function AddApplicationModal({ candidateId, candidateOwnerId, can
       await api.post('/applications', {
         candidate_id: candidateId, vacancy_id: vacancyId || null, owner_id: ownerId || null,
         application_stage_id: phaseId || undefined,
+        ...(source.trim() ? { source: source.trim() } : {}),
       })
       notifySuccess(t('work.applicationCreated'))
       onCreated(); onClose()
@@ -308,13 +364,17 @@ export default function AddApplicationModal({ candidateId, candidateOwnerId, can
             (padding '8px 11px' / fontSize 13) so every drawer combobox reads as one system. */}
         <div style={{ marginBottom: 14 }}>
           <div style={fieldRow}>
-            <div style={CANON_LABEL_STYLE}>{t('work.vacancyOptional')}</div>
+            <div style={CANON_LABEL_STYLE}>
+              {t(vacancyRequired ? 'work.vacancy' : 'work.vacancyOptional')}
+              {vacancyRequired && requiredMark}
+            </div>
             <div style={fieldControl}>
               {/* Clearable (Danny 13-08 'hier ook niet — eenmaal gekozen blijft hij
                   staan'): an OPTIONAL vacancy must be releasable back to an open
-                  application — VAC-CLEAR-1 cross, same as the intake modal. */}
+                  application — VAC-CLEAR-1 cross, same as the intake modal. No cross
+                  once the tenant made it required (APP-REQUIRED-FE-1). */}
               <CreatableSelect value={vacancyId || null} onChange={setVacancyId} placeholder={t('work.pickVacancy')}
-                clearable clearLabel={t('work.vacancyOptional')}
+                clearable={!vacancyRequired} clearLabel={t('work.vacancyOptional')}
                 allowCreate={false} menuWidth={pickerMenuWidth} style={fieldFootprint}
                 options={vacancyOptions.map(v => ({ value: String(v.value), label: v.client ? `${v.label} · ${v.client}` : v.label }))} />
               {/* The badge lives exactly as long as the suggestion holds — cleared
@@ -322,31 +382,69 @@ export default function AddApplicationModal({ candidateId, candidateOwnerId, can
               {suggestedVacancyId != null && String(vacancyId) === String(suggestedVacancyId) && !editApplicationId && <KoiosSuggestionBadge />}
             </div>
           </div>
-          {errors.vacancyId && <div style={{ fontSize: 11, color: 'var(--color-danger-text)', marginTop: 3 }}>{t('work.applicationFailed')}</div>}
+          {errors.vacancyId && (
+            <div role="alert" style={{ fontSize: 11, color: 'var(--color-danger-text)', marginTop: 3 }}>
+              {!vacancyId && vacancyRequired ? t('common:errors.fieldRequired', { field: t('work.vacancy') }) : t('work.applicationFailed')}
+            </div>
+          )}
         </div>
-        {/* Fase — searchable pick-only combobox; now submits the real stage id (S24b). */}
+        {/* Fase — searchable pick-only combobox; now submits the real stage id (S24b).
+            No clear cross here (never had one): unlike vacancy/source this field
+            never carried a VAC-CLEAR-1 affordance, and retrofitting one is a
+            separate change — only the required-marker is added here. */}
         <div style={{ marginBottom: 14 }}>
           <div style={fieldRow}>
-            <div style={CANON_LABEL_STYLE}>{t('work.phase')}</div>
+            <div style={CANON_LABEL_STYLE}>{t('work.phase')}{phaseRequired && requiredMark}</div>
             <div style={fieldControl}>
               <CreatableSelect value={phaseId || null} onChange={setPhaseId} allowCreate={false} menuWidth={pickerMenuWidth}
                 style={fieldFootprint} options={stages.map(s => ({ value: s.id, label: s.label }))} />
             </div>
           </div>
-          {errors.phase && <div style={{ fontSize: 11, color: 'var(--color-danger-text)', marginTop: 3 }}>{t('work.applicationFailed')}</div>}
+          {errors.phase && (
+            <div role="alert" style={{ fontSize: 11, color: 'var(--color-danger-text)', marginTop: 3 }}>
+              {!phaseId && phaseRequired ? t('common:errors.fieldRequired', { field: t('work.phase') }) : t('work.applicationFailed')}
+            </div>
+          )}
         </div>
         {/* APP-OWNER-1: recruiter picker, seeded from the derivation chain above
             (vacancy recruiter > candidate owner > logged-in user) but always
-            changeable via the house user-picker, same footprint as the fields above. */}
+            changeable via the house user-picker, same footprint as the fields above.
+            No clear cross here either, for the same reason as phase above. */}
         <div style={{ marginBottom: 14 }}>
           <div style={fieldRow}>
-            <div style={CANON_LABEL_STYLE}>{t('work.owner')}</div>
+            <div style={CANON_LABEL_STYLE}>{t('work.owner')}{ownerRequired && requiredMark}</div>
             <div style={fieldControl}>
               <CreatableSelect value={ownerId || null} onChange={setOwnerId} placeholder={t('work.pickOwner')}
                 allowCreate={false} menuWidth={pickerMenuWidth} style={fieldFootprint} options={userOptions} />
             </div>
           </div>
-          {errors.ownerId && <div style={{ fontSize: 11, color: 'var(--color-danger-text)', marginTop: 3 }}>{t('work.applicationFailed')}</div>}
+          {errors.ownerId && (
+            <div role="alert" style={{ fontSize: 11, color: 'var(--color-danger-text)', marginTop: 3 }}>
+              {!ownerId && ownerRequired ? t('common:errors.fieldRequired', { field: t('work.owner') }) : t('work.applicationFailed')}
+            </div>
+          )}
+        </div>
+        {/* Bron (APP-REQUIRED-FE-1) — searchable/creatable tenant-lookup picker,
+            mirrors ApplicationDetailsCard/pages/applications/AddApplicationModal's
+            own source field. Optional unless the tenant requires it in Settings. */}
+        <div style={{ marginBottom: 14 }}>
+          <div style={fieldRow}>
+            <div id={`${sourceFieldId}-label`} style={CANON_LABEL_STYLE}>{t('filters.source')}{sourceRequired && requiredMark}</div>
+            <div style={fieldControl}>
+              {/* §6: the picker's accessible name is the LABEL, never the picked
+                  raw value — same id/aria-labelledby wiring as the sibling modal. */}
+              <CreatableSelect id={sourceFieldId} aria-labelledby={`${sourceFieldId}-label`}
+                value={source || null} onChange={setSource} placeholder={t('filters.source')}
+                clearable={!sourceRequired} clearLabel={t('filters.source')}
+                allowCreate={sourceAllowFreeEntry} menuWidth={pickerMenuWidth} style={fieldFootprint}
+                options={sourceOptions} />
+            </div>
+          </div>
+          {errors.source && (
+            <div role="alert" style={{ fontSize: 11, color: 'var(--color-danger-text)', marginTop: 3 }}>
+              {!source.trim() && sourceRequired ? t('common:errors.fieldRequired', { field: t('filters.source') }) : t('work.applicationFailed')}
+            </div>
+          )}
         </div>
         {/* Soft warning (never a block, Danny: "wel een melding") — mirrors the
             AXIS-MATRIX banner's warn tint (ActionRuleBanner) so both notices in this
@@ -355,8 +453,8 @@ export default function AddApplicationModal({ candidateId, candidateOwnerId, can
         {(ownerDiffersFromCandidate || ownerDiffersFromVacancy) && (
           <div role="alert" aria-label={t('work.ownerDeviation')} style={{ display: 'flex', gap: 8, alignItems: 'flex-start',
             padding: '8px 10px', borderRadius: 8, marginBottom: 20,
-            background: 'color-mix(in srgb, var(--color-warning) 10%, transparent)',
-            border: '1px solid color-mix(in srgb, var(--color-warning) 30%, transparent)' }}>
+            background: tintBg('var(--color-warning)'),
+            border: tintBorder('var(--color-warning)') }}>
             <AlertTriangle size={15} color="var(--color-warning)" style={{ flexShrink: 0, marginTop: 1 }} aria-hidden="true" />
             <div style={{ minWidth: 0, display: 'flex', flexDirection: 'column', gap: 2 }}>
               {ownerDiffersFromCandidate && (

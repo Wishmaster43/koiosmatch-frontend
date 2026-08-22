@@ -87,6 +87,7 @@
     "application_sources": "Fuentes",
     "rejection": "Motivos de rechazo",
     "application_proposal": "Propuestas",
+    "application_required_fields": "Campos obligatorios",
     "cv_template": "Plantilla de CV",
     "view_customers": "Clientes",
     "notif_sollicitaties": "Candidaturas",
@@ -2099,6 +2100,11 @@
     "customEmpty": "Todavía no hay campos propios de candidatos. En cuanto crees uno, aparecerá aquí y podrás hacerlo obligatorio por fase.",
     "customAlwaysRequired": "Siempre obligatorio, en todas las fases",
     "customSaveFailed": "No se ha podido guardar la definición del campo. Inténtalo de nuevo."
+  },
+  "applicationRequiredFields": {
+    "title": "Campos obligatorios",
+    "subtitle": "Determine qué campos son obligatorios al crear una nueva solicitud.",
+    "hint": "Esto se comprueba al crear una nueva solicitud."
   },
   "vacancyTab": {
     "title": "Pestaña Vacantes en candidatos",

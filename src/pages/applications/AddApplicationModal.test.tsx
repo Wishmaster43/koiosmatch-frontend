@@ -76,6 +76,14 @@ vi.mock('@/lib/queries', () => ({ useUsers: () => ({ data: [
 ] }) }))
 vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ user: { id: 'u1', name: 'Piet Recruiter' } }) }))
 vi.mock('@/context/LookupsContext', () => ({ useLookups: () => ({ funnelTypes: [] }) }))
+// APP-REQUIRED-FE-1: the tenant `application_required_fields` setting, controlled
+// per test — mirrors the candidate-drawer variant's own settingsRef pattern.
+// Absent (== {}) by default, matching "nothing extra required" everywhere above.
+const settingsRef = vi.hoisted(() => ({ current: {} as Record<string, unknown> }))
+vi.mock('@/lib/settings/useAllSettings', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/lib/settings/useAllSettings')>()),
+  useAllSettings: () => settingsRef.current,
+}))
 vi.mock('@/hooks/useApplicationStages', () => ({
   useApplicationStages: () => ({
     stages: stageState.stages,
@@ -144,6 +152,7 @@ beforeEach(() => {
   rowState.candidates = [{ id: 'c1', name: 'Anna Kandidaat' }]
   rowState.vacancies = [{ id: 'v1', title: 'Verzorgende IG', client_name: 'Zorggroep A' }]
   rowState.lockedVacancyOwner = null
+  settingsRef.current = {}
   vi.mocked(useActionRulePreflight).mockReturnValue({ decision: null, loading: false, error: false })
 })
 
@@ -614,5 +623,98 @@ describe('AddApplicationModal · source (S-SOURCE-1, supersedes CMBE 5961c673)',
     expect(screen.queryByText('mock-create-candidate')).not.toBeInTheDocument()
     expect(screen.getByRole('button', { name: /Nieuwe Kandidaat · Verpleegkundige · Utrecht/ })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'add.create' })).toBeEnabled()
+  })
+})
+
+// The required-marker asterisk is a sibling <span>, so the label text is split
+// across two DOM nodes — RTL's default getByText only reads a node's OWN direct
+// text and ignores nested elements ("text broken up by multiple elements"), so a
+// plain string/regex query can't see the combined "label*" text. This scoped
+// function matcher checks the full textContent (label + marker) of ONE element
+// exactly, which only the label's own wrapping element can match.
+const exactText = (text: string) => (_content: string, el: Element | null) => el?.textContent === text
+
+/**
+ * APP-REQUIRED-FE-1 (Danny: "hoe zorg ik dat BRON bij nieuwe sollicitatie
+ * verplicht is? moet bij instellingen komen") — the tenant `application_required_
+ * fields` setting (flat array, no phase axis). §13: the block/allow assertions
+ * check the REQUEST (api.post called or not), never only a callback.
+ */
+describe('AddApplicationModal · APP-REQUIRED-FE-1 (tenant-configurable required fields)', () => {
+  it('with the setting absent, nothing extra is required — Create submits without a source', async () => {
+    const user = userEvent.setup()
+    render(<AddApplicationModal onClose={vi.fn()} onCreated={vi.fn()} />)
+    await pickCandidateAndVacancy(user)
+    await user.click(screen.getByRole('button', { name: 'add.create' }))
+
+    await waitFor(() => expect(api.post).toHaveBeenCalled())
+    const body = vi.mocked(api.post).mock.calls[0][1] as Record<string, unknown>
+    expect(body).not.toHaveProperty('source')
+  })
+
+  it('marks Bron required (asterisk) and blocks an empty submit client-side, without calling the server', async () => {
+    settingsRef.current = { application_required_fields: JSON.stringify(['source']) }
+    const user = userEvent.setup()
+    render(<AddApplicationModal onClose={vi.fn()} onCreated={vi.fn()} />)
+
+    expect(screen.getByText(exactText('drawer.source*'))).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: /add\.candidatePlaceholder/ }))
+    await user.click(await screen.findByRole('button', { name: 'Anna Kandidaat' }))
+    await user.click(screen.getByRole('button', { name: 'add.create' }))
+
+    expect(api.post).not.toHaveBeenCalled()
+    expect(screen.getByText('common:errors.fieldRequired')).toBeInTheDocument()
+  })
+
+  it('lets the recruiter proceed once the required source is picked', async () => {
+    settingsRef.current = { application_required_fields: ['source'] }
+    const user = userEvent.setup()
+    render(<AddApplicationModal onClose={vi.fn()} onCreated={vi.fn()} />)
+
+    await user.click(screen.getByRole('button', { name: /drawer\.source/ }))
+    await user.click(screen.getByRole('button', { name: 'Indeed' }))
+    await pickCandidateAndVacancy(user)
+    await user.click(screen.getByRole('button', { name: 'add.create' }))
+
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/applications', expect.objectContaining({
+      source: 'Indeed',
+    })))
+  })
+
+  it('maps a source 422 onto the picker border — existing path, unaffected by the required feature', async () => {
+    vi.mocked(api.post).mockRejectedValueOnce({
+      response: { data: { message: 'Ongeldige gegevens.', errors: { source: ['ongeldige bron'] } } },
+    })
+    const user = userEvent.setup()
+    render(<AddApplicationModal onClose={vi.fn()} onCreated={vi.fn()} />)
+    await pickCandidateAndVacancy(user)
+    await user.click(screen.getByRole('button', { name: 'add.create' }))
+
+    const sourceTrigger = await screen.findByRole('button', { name: 'drawer.source' })
+    await waitFor(() => expect(sourceTrigger.getAttribute('style')).toContain('var(--color-danger)'))
+  })
+
+  it('marks Vacature/Recruiter/Fase required too, each from the same flat array', () => {
+    settingsRef.current = { application_required_fields: ['vacancy_id', 'owner_id', 'application_stage_id'] }
+    render(<AddApplicationModal onClose={vi.fn()} onCreated={vi.fn()} />)
+
+    expect(screen.getByText(exactText('add.vacancy*'))).toBeInTheDocument()
+    expect(screen.getByText(exactText('add.owner*'))).toBeInTheDocument()
+    expect(screen.getByText(exactText('add.phase*'))).toBeInTheDocument()
+    // The honest "(optioneel)" hint is gone once the tenant requires the vacancy.
+    expect(screen.queryByText('add.vacancyOptional')).not.toBeInTheDocument()
+  })
+
+  it('blocks Create when a required vacancy is missing, without touching the server', async () => {
+    settingsRef.current = { application_required_fields: ['vacancy_id'] }
+    const user = userEvent.setup()
+    render(<AddApplicationModal onClose={vi.fn()} onCreated={vi.fn()} />)
+    await user.click(screen.getByRole('button', { name: /add\.candidatePlaceholder/ }))
+    await user.click(await screen.findByRole('button', { name: 'Anna Kandidaat' }))
+    await user.click(screen.getByRole('button', { name: 'add.create' }))
+
+    expect(api.post).not.toHaveBeenCalled()
+    expect(screen.getByText('common:errors.fieldRequired')).toBeInTheDocument()
   })
 })

@@ -90,6 +90,7 @@
     "application_sources": "Sources",
     "rejection": "Rejection reasons",
     "application_proposal": "Proposals",
+    "application_required_fields": "Required fields",
     "cv_template": "CV template",
     "view_customers": "Customers",
     "notif_sollicitaties": "Applications",
@@ -2121,6 +2122,11 @@
     "customEmpty": "There are no custom candidate fields yet. As soon as you create one, it appears here and you can make it required per phase.",
     "customAlwaysRequired": "Always required, in every phase",
     "customSaveFailed": "Saving the field definition failed. Please try again."
+  },
+  "applicationRequiredFields": {
+    "title": "Required fields",
+    "subtitle": "Decide which fields are required when creating a new application.",
+    "hint": "This is checked when a new application is created."
   },
   "vacancyTab": {
     "title": "Vacancies tab on candidates",

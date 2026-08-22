@@ -39,15 +39,27 @@ vi.mock('@/hooks/useApplicationStages', () => ({
   }),
 }))
 vi.mock('@/lib/notify', () => ({ notifyError: vi.fn(), notifySuccess: vi.fn() }))
+// APP-REQUIRED-FE-1: the component now ALSO fires useApplicationSources's own
+// `/candidate-sources` GET on every mount (via useCachedLookup) — that call now
+// races the edit-mode `/applications/{id}` GET, so a bare `mockResolvedValueOnce`
+// (order-only, ignores the url) could get consumed by the WRONG call. Dispatch by
+// URL instead: `appDetailRef` holds the per-test edit-mode fixture explicitly.
+const appDetailRef = vi.hoisted(() => ({ current: null as unknown }))
 // `unwrap` is exported for real (the component uses it to read the edit-mode
 // GET) — a factory mock must carry every named export the component imports.
 vi.mock('@/lib/api', () => ({
   default: {
     post: vi.fn(() => Promise.resolve({ data: { data: {} } })),
     patch: vi.fn(() => Promise.resolve({ data: { data: {} } })),
-    get: vi.fn(() => Promise.reject({ response: { status: 404 } })),
+    get: vi.fn((url: string) => {
+      if (url === '/settings') return Promise.resolve({ data: {} })
+      if (url === '/candidate-sources') return Promise.resolve({ data: { data: [], allow_free_entry: true } })
+      if (url.startsWith('/applications/') && appDetailRef.current) return Promise.resolve(appDetailRef.current)
+      return Promise.reject({ response: { status: 404 } })
+    }),
   },
   unwrap: (r: { data?: { data?: unknown } }) => r?.data?.data ?? r?.data,
+  getActiveTenantId: vi.fn(() => 'tenant-1'),
 }))
 // Only the network-backed hook is stubbed (defaults to "no decision") — the real
 // ActionRuleBanner renders, so its own P-code styling/markup is what's asserted.
@@ -58,6 +70,15 @@ vi.mock('@/components/actionrules', async (importOriginal) => ({
 // OWNER-DEVIATION-1: logged-in user + the tenant's assignable users list.
 vi.mock('@/lib/queries', () => ({ useUsers: vi.fn() }))
 vi.mock('@/context/AuthContext', () => ({ useAuth: vi.fn() }))
+
+// APP-REQUIRED-FE-1: the tenant `application_required_fields` setting, controlled
+// per test — mirrors CandidateRequiredFieldsSettings.test.tsx's own blobRef pattern.
+// Absent (== {}) by default, matching "nothing extra required" everywhere above.
+const settingsRef = vi.hoisted(() => ({ current: {} as Record<string, unknown> }))
+vi.mock('@/lib/settings/useAllSettings', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/lib/settings/useAllSettings')>()),
+  useAllSettings: () => settingsRef.current,
+}))
 
 const noop = () => {}
 
@@ -73,6 +94,8 @@ beforeEach(() => {
     data: [{ id: 'u1', name: 'Piet Recruiter' }, { id: 'u2', name: 'Klaas Anders' }, { id: 'u3', name: 'Anna Derde' }],
   } as unknown as ReturnType<typeof useUsers>)
   vi.mocked(useAuth).mockReturnValue({ user: { id: 'u1', name: 'Piet Recruiter' } } as unknown as ReturnType<typeof useAuth>)
+  settingsRef.current = {}
+  appDetailRef.current = null
   // Reset back to "no decision" — a prior test's own mockReturnValue (the
   // warn/block AXIS-MATRIX-2 tests below) otherwise leaks into every later
   // test's Create-button state, since this mock is one shared vi.fn() for
@@ -343,7 +366,7 @@ describe('AddApplicationModal · EDIT mode (punt 5)', () => {
   const detail = { data: { data: { id: 'app-1', vacancy: { id: 'vac-1', title: 'Verzorgende IG' }, owner: { id: 'u2', name: 'Klaas Anders' }, phase_key: 'invited' } } }
 
   it('prefills vacancy, recruiter and fase from GET /applications/{id}', async () => {
-    vi.mocked(api.get).mockResolvedValueOnce(detail)
+    appDetailRef.current = detail
     render(<AddApplicationModal candidateId="cand-1" editApplicationId="app-1" onClose={noop} onCreated={noop} />)
 
     expect(api.get).toHaveBeenCalledWith('/applications/app-1')
@@ -357,7 +380,7 @@ describe('AddApplicationModal · EDIT mode (punt 5)', () => {
   })
 
   it('PATCHes the exact route + only the CHANGED field', async () => {
-    vi.mocked(api.get).mockResolvedValueOnce(detail)
+    appDetailRef.current = detail
     const user = userEvent.setup()
     render(<AddApplicationModal candidateId="cand-1" editApplicationId="app-1" onClose={noop} onCreated={noop} />)
 
@@ -372,7 +395,7 @@ describe('AddApplicationModal · EDIT mode (punt 5)', () => {
   })
 
   it('sends the changed recruiter as owner_id', async () => {
-    vi.mocked(api.get).mockResolvedValueOnce(detail)
+    appDetailRef.current = detail
     const user = userEvent.setup()
     render(<AddApplicationModal candidateId="cand-1" editApplicationId="app-1" onClose={noop} onCreated={noop} />)
 
@@ -384,7 +407,7 @@ describe('AddApplicationModal · EDIT mode (punt 5)', () => {
   })
 
   it('writes nothing when nothing changed (an unchanged stage would log a phantom transition)', async () => {
-    vi.mocked(api.get).mockResolvedValueOnce(detail)
+    appDetailRef.current = detail
     const onCreated = vi.fn()
     const onClose = vi.fn()
     const user = userEvent.setup()
@@ -419,4 +442,101 @@ it('shows NO badge for the score-panel initialVacancyId (own click, not a propos
   render(<AddApplicationModal candidateId="cand-1" initialVacancyId="v1" onClose={noop} onCreated={noop} />)
   fireEvent.click(await screen.findByTitle(/clearField/i))
   expect(screen.queryByTestId('koios-suggestion')).toBeNull()
+})
+
+/**
+ * APP-REQUIRED-FE-1 (Danny: "hoe zorg ik dat BRON bij nieuwe sollicitatie
+ * verplicht is? moet bij instellingen komen") — the tenant `application_required_
+ * fields` setting (flat array, no phase axis). §13: the block/allow assertions
+ * check the REQUEST (api.post called or not), never only a callback.
+ */
+// The required-marker asterisk is a sibling <span>, so the label text is split
+// across two DOM nodes — RTL's default getByText only reads a node's OWN direct
+// text and ignores nested elements ("text broken up by multiple elements"), so a
+// plain string/regex query can't see the combined "label*" text. This scoped
+// function matcher checks the full textContent (label + marker) of ONE element
+// exactly, which only the label's own wrapping div can match.
+const exactText = (text: string) => (_content: string, el: Element | null) => el?.textContent === text
+
+describe('AddApplicationModal · APP-REQUIRED-FE-1 (tenant-configurable required fields)', () => {
+  it('with the setting absent, nothing extra is required and Create submits without a source', async () => {
+    const user = userEvent.setup()
+    render(<AddApplicationModal candidateId="cand-1" onClose={noop} onCreated={noop} />)
+    await user.click(screen.getByRole('button', { name: 'work.createApplication' }))
+
+    expect(api.post).toHaveBeenCalledWith('/applications', expect.not.objectContaining({ source: expect.anything() }))
+  })
+
+  it('marks Bron required (asterisk) and blocks an empty submit client-side, without calling the server', async () => {
+    settingsRef.current = { application_required_fields: JSON.stringify(['source']) }
+    const user = userEvent.setup()
+    render(<AddApplicationModal candidateId="cand-1" onClose={noop} onCreated={noop} />)
+
+    // The label reads plain "filters.source" plus the red asterisk marker — an
+    // EXACT match so this never collides with the picker's own OWN placeholder
+    // span, which shows the unmarked "filters.source" text while unset.
+    expect(screen.getByText(exactText('filters.source*'))).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'work.createApplication' }))
+    expect(api.post).not.toHaveBeenCalled()
+    expect(screen.getByText('common:errors.fieldRequired')).toBeInTheDocument()
+  })
+
+  it('lets the recruiter proceed once the required source is picked', async () => {
+    settingsRef.current = { application_required_fields: ['source'] }
+    const user = userEvent.setup()
+    render(<AddApplicationModal candidateId="cand-1" onClose={noop} onCreated={noop} />)
+
+    // The trigger's accessible name is LABEL + own content (§6 aria-labelledby
+    // wiring, added in the Opus round) — match on the label part.
+    await user.click(screen.getByRole('button', { name: /filters\.source/ }))
+    await user.click(await screen.findByRole('button', { name: 'Indeed' }))
+    await user.click(screen.getByRole('button', { name: 'work.createApplication' }))
+
+    expect(api.post).toHaveBeenCalledWith('/applications', expect.objectContaining({ source: 'Indeed' }))
+  })
+
+  it('a server 422 naming source still maps onto the field via the existing API_TO_FORM path', async () => {
+    vi.mocked(api.post).mockRejectedValueOnce({
+      response: { data: { message: 'Ongeldige gegevens.', errors: { source: ['ongeldige bron'] } } },
+    })
+    const user = userEvent.setup()
+    render(<AddApplicationModal candidateId="cand-1" onClose={noop} onCreated={noop} />)
+    await user.click(screen.getByRole('button', { name: 'work.createApplication' }))
+
+    // Not client-required here (setting absent) — the generic existing message
+    // shows, proving the 422 -> errors.source mapping still fires (API_TO_FORM).
+    await screen.findByText('work.applicationFailed')
+  })
+
+  it('marks Vacature/Fase/Recruiter required too, each from the same flat array', () => {
+    settingsRef.current = { application_required_fields: ['vacancy_id', 'owner_id', 'application_stage_id'] }
+    render(<AddApplicationModal candidateId="cand-1" onClose={noop} onCreated={noop} />)
+
+    expect(screen.getByText(exactText('work.vacancy*'))).toBeInTheDocument()
+    expect(screen.getByText(exactText('work.phase*'))).toBeInTheDocument()
+    expect(screen.getByText(exactText('work.owner*'))).toBeInTheDocument()
+  })
+
+  it('blocks Create when a required vacancy is missing, without touching the server', async () => {
+    settingsRef.current = { application_required_fields: ['vacancy_id'] }
+    const user = userEvent.setup()
+    render(<AddApplicationModal candidateId="cand-1" onClose={noop} onCreated={noop} />)
+    await user.click(screen.getByRole('button', { name: 'work.createApplication' }))
+
+    expect(api.post).not.toHaveBeenCalled()
+    expect(screen.getByText('common:errors.fieldRequired')).toBeInTheDocument()
+  })
+
+  it('the client preflight never runs in EDIT mode (the guard is create-only)', async () => {
+    settingsRef.current = { application_required_fields: ['source'] }
+    appDetailRef.current = { data: { data: { id: 'app-1', vacancy: null, owner: null, phase_key: 'applied' } } }
+    const user = userEvent.setup()
+    render(<AddApplicationModal candidateId="cand-1" editApplicationId="app-1" onClose={noop} onCreated={noop} />)
+
+    // Nothing changed from the loaded (empty) record, so Save closes without a
+    // PATCH — the required-source rule must not block an edit of other fields.
+    await user.click(await screen.findByRole('button', { name: 'common:save' }))
+    expect(api.patch).not.toHaveBeenCalled()
+  })
 })

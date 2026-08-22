@@ -72,6 +72,7 @@ import { OutreachStatusSettings, OutreachOutcomeSettings } from './sections/Outr
 import RejectionSettings from './sections/RejectionSettings'
 import ProposalSettings from './sections/ProposalSettings'
 import CandidateRequiredFieldsSettings from './sections/CandidateRequiredFieldsSettings'
+import ApplicationRequiredFieldsSettings from './sections/ApplicationRequiredFieldsSettings'
 import CandidateVacancyTabSettings from './sections/CandidateVacancyTabSettings'
 import RetentionSettings from './sections/RetentionSettings'
 // NATIONALITY-1 / BLACKLIST-REASON-1 / ESCALATION-REASON-1 / OPP-LOOKUPS-1 (audit findings).
@@ -247,6 +248,11 @@ export const NAV_GROUPS = [
       { id: 'rejection', icon: XCircle, component: RejectionSettings },
       { id: 'application_proposal', icon: Mail, component: ProposalSettings },
       { id: 'application_display', icon: Palette, schema: applicationDisplay },
+      // APP-REQUIRED-FE-1: flat required-fields toggle list for the "nieuwe
+      // sollicitatie" popup (source / vacancy / owner / phase) — same Flag icon
+      // as the candidate/customer required-fields items, so it reads as "the
+      // same thing on another entity".
+      { id: 'application_required_fields', icon: Flag, component: ApplicationRequiredFieldsSettings },
     ],
   },
   {

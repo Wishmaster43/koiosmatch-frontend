@@ -90,6 +90,7 @@
     "application_sources": "Bronnen",
     "rejection": "Afwijsredenen",
     "application_proposal": "Voorstellen",
+    "application_required_fields": "Verplichte velden",
     "cv_template": "CV-sjabloon",
     "view_customers": "Klanten",
     "notif_sollicitaties": "Sollicitaties",
@@ -2121,6 +2122,11 @@
     "customEmpty": "Er zijn nog geen eigen velden voor kandidaten. Zodra je er een aanmaakt, verschijnt hij hier en kun je hem per fase verplicht maken.",
     "customAlwaysRequired": "Altijd verplicht, in elke fase",
     "customSaveFailed": "Opslaan van de velddefinitie is mislukt. Probeer het opnieuw."
+  },
+  "applicationRequiredFields": {
+    "title": "Verplichte velden",
+    "subtitle": "Bepaal welke velden verplicht zijn bij het aanmaken van een nieuwe sollicitatie.",
+    "hint": "Dit wordt gecontroleerd bij het aanmaken van een nieuwe sollicitatie."
   },
   "vacancyTab": {
     "title": "Vacatures-tabblad bij kandidaten",

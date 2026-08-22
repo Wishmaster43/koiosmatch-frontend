@@ -87,6 +87,7 @@
     "application_sources": "Sources",
     "rejection": "Motifs de refus",
     "application_proposal": "Propositions",
+    "application_required_fields": "Champs obligatoires",
     "cv_template": "Modèle de CV",
     "view_customers": "Clients",
     "notif_sollicitaties": "Candidatures",
@@ -2099,6 +2100,11 @@
     "customEmpty": "Il n'y a pas encore de champs personnalisés pour les candidats. Dès que vous en créez un, il apparaît ici et vous pouvez le rendre obligatoire par phase.",
     "customAlwaysRequired": "Toujours obligatoire, à chaque phase",
     "customSaveFailed": "L'enregistrement de la définition du champ a échoué. Veuillez réessayer."
+  },
+  "applicationRequiredFields": {
+    "title": "Champs obligatoires",
+    "subtitle": "Déterminez quels champs sont obligatoires lors de la création d'une nouvelle candidature.",
+    "hint": "Ceci est vérifié lors de la création d'une nouvelle candidature."
   },
   "vacancyTab": {
     "title": "Onglet Postes chez les candidats",

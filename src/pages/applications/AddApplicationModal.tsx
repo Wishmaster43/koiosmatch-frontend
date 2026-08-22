@@ -17,6 +17,7 @@ import { useApplicationStages } from '@/hooks/useApplicationStages'
 import { useActionRulePreflight, ActionRuleBanner } from '@/components/actionrules'
 import { useCustomFields } from '@/lib/useCustomFields'
 import { useApplicationSources } from '@/lib/useApplicationSources'
+import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
 import { mapApplication } from './data/mapApplication'
 import CreatableSelectJs from '@/components/ui/CreatableSelect'
 import RichTextEditor from '@/components/ui/RichTextEditor'
@@ -38,12 +39,18 @@ import type { Candidate } from '@/types/candidate'
 import Button from '@/components/ui/Button'
 // HUISSTIJL-1: the "Extra" custom-fields section title is an exact match for
 // the shared uppercase GroupLabel atom (11/600/uppercase/muted).
-import { GroupLabel } from '@/components/ui/typography'
+import { GroupLabel, BodyText } from '@/components/ui/typography'
+import { tintBorder } from '@/lib/tint'
 
 type AnyProps = Record<string, unknown>
 const CreatableSelect = CreatableSelectJs as unknown as ComponentType<AnyProps>
 
 interface AppUser { id: Id; name?: string }
+
+// APP-REQUIRED-FE-1: red asterisk after a label whose field the tenant marked
+// required (Settings → Sollicitaties → Verplichte velden) — same visual token
+// the shared Label/FieldRow components use (components/forms/fields.tsx).
+const requiredMark = <span aria-hidden="true" style={{ color: 'var(--color-danger-text)', marginLeft: 2 }}>*</span>
 
 // ownerId/ownerName (APP-OWNER-1): both /candidates and /vacancies already carry
 // an `owner` object (CandidateListResource / VacancyListResource) — captured here
@@ -168,6 +175,18 @@ export default function AddApplicationModal({ onClose, onCreated, lockedVacancy 
   // owner outside this list is never offered as a pickable/submittable option.
   const ownerOptions = users.map(u => ({ value: String(u.id), label: u.name ?? '—' }))
   const meIsAssignable = me?.id != null && ownerOptions.some(o => o.value === String(me.id))
+
+  // APP-REQUIRED-FE-1: tenant-configurable required fields for this popup (Settings
+  // → Sollicitaties → Verplichte velden) — a flat array, no phase axis, mirroring
+  // `FlatRequiredFieldsGuard('application')` on the backend (create only — this
+  // modal has no edit mode, so no `!editing` gate is needed here).
+  const settingsValues = useAllSettings()
+  const requiredFields = getJsonSetting<string[]>(settingsValues, 'application_required_fields', [])
+  const vacancyRequired = requiredFields.includes('vacancy_id')
+  const ownerRequired = requiredFields.includes('owner_id')
+  const phaseRequired = requiredFields.includes('application_stage_id')
+  const sourceRequired = requiredFields.includes('source')
+
   // W30: server-searched candidate/vacancy options (see useSearchOptions above).
   // The vacancy search is skipped entirely while locked (data minimisation, §8/§9).
   const candidateSearch = useSearchOptions('/candidates', mapCandidateRow, false)
@@ -295,6 +314,15 @@ export default function AddApplicationModal({ onClose, onCreated, lockedVacancy 
     // StoreApplicationRequest — an "open application" with no vacancy yet is a
     // real, backend-supported case. Only the candidate is required to submit.
     if (!candidateId || saving || appRuleBlocked) return
+    // APP-REQUIRED-FE-1: client-side required-field preflight (UX only, §7 — the
+    // backend's own FlatRequiredFieldsGuard('application') on
+    // ApplicationController::store is the real enforcement).
+    const missing: Record<string, boolean> = {}
+    if (vacancyRequired && !vacancyId) missing.vacancyId = true
+    if (ownerRequired && !ownerId) missing.ownerId = true
+    if (phaseRequired && !phaseId) missing.phase = true
+    if (sourceRequired && !source.trim()) missing.source = true
+    if (Object.keys(missing).length > 0) { setErrors(missing); return }
     setSaving(true)
     setCreateError(null)
     setErrors({})
@@ -331,10 +359,17 @@ export default function AddApplicationModal({ onClose, onCreated, lockedVacancy 
   // null` above) — once auto-seeded or manually picked, it must be releasable back
   // to "let the server decide" rather than stuck on whatever was last chosen.
   const ownerField = (
-    <PickField label={t('add.owner')} placeholder={t('add.ownerPlaceholder')}
-      clearable clearLabel={t('add.owner')}
-      options={ownerOptions} value={ownerId} onChange={setOwnerId}
-      style={errors.ownerId ? { borderColor: 'var(--color-danger)' } : undefined} />
+    <div>
+      <PickField label={<>{t('add.owner')}{ownerRequired && requiredMark}</>} placeholder={t('add.ownerPlaceholder')}
+        clearable={!ownerRequired} clearLabel={t('add.owner')}
+        options={ownerOptions} value={ownerId} onChange={setOwnerId}
+        style={errors.ownerId ? { borderColor: 'var(--color-danger)' } : undefined} />
+      {errors.ownerId && !ownerId && ownerRequired && (
+        <div role="alert" style={{ fontSize: 11, color: 'var(--color-danger-text)', marginTop: 4 }}>
+          {t('common:errors.fieldRequired', { field: t('add.owner') })}
+        </div>
+      )}
+    </div>
   )
 
   return (
@@ -362,30 +397,39 @@ export default function AddApplicationModal({ onClose, onCreated, lockedVacancy 
                 searchError={candidateSearch.error} onRetry={candidateSearch.retry} />
               {/* NEWCAND-1: a real button (§3A), never coloured text-as-link — opens the
                   house AddCandidateModal (with its own CV-parse entry points) on top. */}
-              <button type="button" onClick={() => setAddingCandidate(true)}
-                style={{ display: 'flex', alignItems: 'center', gap: 5, marginTop: 6, padding: '4px 8px',
-                  fontSize: 11, fontWeight: 500, border: '1px solid var(--border)', borderRadius: 6,
-                  background: 'var(--surface)', color: 'var(--text)', cursor: 'pointer' }}>
+              <Button variant="secondary" size="sm" style={{ marginTop: 6 }} onClick={() => setAddingCandidate(true)}>
                 <UserPlus size={12} /> {t('add.newCandidate')}
-              </button>
+              </Button>
             </div>
             {lockedVacancy ? (
               <div>
                 <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 5 }}>{t('add.vacancy')}</div>
-                <div style={{ padding: '8px 10px', fontSize: 13, borderRadius: 8, border: '1px solid var(--border)',
-                  background: 'var(--bg)', color: 'var(--text)' }}>
-                  {lockedVacancy.client ? `${lockedVacancy.title} · ${lockedVacancy.client}` : lockedVacancy.title}
+                <div style={{ padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg)' }}>
+                  <BodyText as="span">
+                    {lockedVacancy.client ? `${lockedVacancy.title} · ${lockedVacancy.client}` : lockedVacancy.title}
+                  </BodyText>
                 </div>
               </div>
             ) : (
               // VACATURE-OPTIONEEL: labelled optional so the field's own placement never
               // reads as a required step — an open application (no vacancy yet) is real.
-              <SearchPickField
-                label={<><span>{t('add.vacancy')}</span> <span style={{ fontWeight: 400, color: 'var(--text-muted)' }}>{t('add.vacancyOptional')}</span></>}
-                placeholder={t('add.vacancyPlaceholder')}
-                value={pickedVacancy} options={vacancySearch.options} onPick={pickVacancy}
-                onSearch={vacancySearch.setQuery} error={errors.vacancyId}
-                searchError={vacancySearch.error} onRetry={vacancySearch.retry} />
+              // APP-REQUIRED-FE-1: once the tenant requires it, the honest "(optioneel)"
+              // hint is replaced by the same red-asterisk marker every other field uses.
+              <div>
+                <SearchPickField
+                  label={vacancyRequired
+                    ? <>{t('add.vacancy')}{requiredMark}</>
+                    : <><span>{t('add.vacancy')}</span> <span style={{ fontWeight: 400, color: 'var(--text-muted)' }}>{t('add.vacancyOptional')}</span></>}
+                  placeholder={t('add.vacancyPlaceholder')}
+                  value={pickedVacancy} options={vacancySearch.options} onPick={pickVacancy}
+                  onSearch={vacancySearch.setQuery} error={errors.vacancyId}
+                  searchError={vacancySearch.error} onRetry={vacancySearch.retry} />
+                {errors.vacancyId && !vacancyId && vacancyRequired && (
+                  <div role="alert" style={{ fontSize: 11, color: 'var(--color-danger-text)', marginTop: 4 }}>
+                    {t('common:errors.fieldRequired', { field: t('add.vacancy') })}
+                  </div>
+                )}
+              </div>
             )}
           </div>
           {/* Owner + start stage share a row (§3A: pair short fields into two columns).
@@ -397,11 +441,18 @@ export default function AddApplicationModal({ onClose, onCreated, lockedVacancy 
               {/* CLEAR-SWEEP (Danny 13-08): start stage is optional too — omitted from
                   the POST body entirely when empty (see `create` above), so the server's
                   own default-stage fallback decides. Must be releasable, not sticky. */}
-              <PickField label={t('add.phase')} placeholder={t('add.phasePlaceholder')}
-                clearable clearLabel={t('add.phase')}
-                options={stageOptions.map(s => ({ value: s.id, label: s.label }))}
-                value={phaseId} onChange={setPhaseIdManual}
-                style={errors.phase ? { borderColor: 'var(--color-danger)' } : undefined} />
+              <div>
+                <PickField label={<>{t('add.phase')}{phaseRequired && requiredMark}</>} placeholder={t('add.phasePlaceholder')}
+                  clearable={!phaseRequired} clearLabel={t('add.phase')}
+                  options={stageOptions.map(s => ({ value: s.id, label: s.label }))}
+                  value={phaseId} onChange={setPhaseIdManual}
+                  style={errors.phase ? { borderColor: 'var(--color-danger)' } : undefined} />
+                {errors.phase && !phaseId && phaseRequired && (
+                  <div style={{ fontSize: 11, color: 'var(--color-danger-text)', marginTop: 4 }}>
+                    {t('common:errors.fieldRequired', { field: t('add.phase') })}
+                  </div>
+                )}
+              </div>
             </div>
           ) : ownerField}
 
@@ -409,14 +460,24 @@ export default function AddApplicationModal({ onClose, onCreated, lockedVacancy 
               real distinct source values already on applications (see useApplicationSources'
               doc comment for why no tenant-CRUD lookup exists behind it yet). Mirrors
               ApplicationDetailsCard's own Bron picker byte-for-byte. Own full-width row,
-              same style as the pickers above. Clearable: source is optional. */}
+              same style as the pickers above. Clearable unless the tenant requires it
+              (APP-REQUIRED-FE-1, VAC-CLEAR-1: no clear-cross once required). */}
           <div>
-            <label id={`${sourceFieldId}-label`} htmlFor={sourceFieldId} style={{ display: 'block', fontSize: 12, color: 'var(--text-muted)', marginBottom: 5 }}>{t('drawer.source')}</label>
+            <label id={`${sourceFieldId}-label`} htmlFor={sourceFieldId} style={{ display: 'block', fontSize: 12, color: 'var(--text-muted)', marginBottom: 5 }}>
+              {t('drawer.source')}{sourceRequired && requiredMark}
+            </label>
             <CreatableSelectJs id={sourceFieldId} aria-labelledby={`${sourceFieldId}-label`}
               value={source} options={sourceOptions} onChange={setSource}
               allowCreate={sourceAllowFreeEntry} placeholder={t('drawer.source')}
-              clearable clearLabel={t('drawer.source')}
-              style={{ width: '100%', padding: '6px 10px', fontSize: 12, borderRadius: 6, border: '1px solid var(--border)', background: 'var(--input-bg)', color: 'var(--text)', boxSizing: 'border-box' }} />
+              clearable={!sourceRequired} clearLabel={t('drawer.source')}
+              style={{ width: '100%', padding: '6px 10px', fontSize: 12, borderRadius: 6,
+                border: `1px solid ${errors.source ? 'var(--color-danger)' : 'var(--border)'}`,
+                background: 'var(--input-bg)', color: 'var(--text)', boxSizing: 'border-box' }} />
+            {errors.source && !source.trim() && sourceRequired && (
+              <div role="alert" style={{ fontSize: 11, color: 'var(--color-danger-text)', marginTop: 4 }}>
+                {t('common:errors.fieldRequired', { field: t('drawer.source') })}
+              </div>
+            )}
           </div>
 
           {/* W30 / §3A(f): the "Extra" section — tenant custom fields for applications,
@@ -454,7 +515,7 @@ export default function AddApplicationModal({ onClose, onCreated, lockedVacancy 
         {createError && (
           <div role="alert" style={{ margin: '0 22px 4px', padding: '8px 10px', fontSize: 12, borderRadius: 8,
             color: 'var(--color-on-danger-bg)', background: 'var(--color-danger-bg)',
-            border: '1px solid color-mix(in srgb, var(--color-danger) 40%, transparent)' }}>
+            border: tintBorder('var(--color-danger)') }}>
             {createError}
           </div>
         )}

@@ -87,6 +87,7 @@
     "application_sources": "Quellen",
     "rejection": "Ablehnungsgründe",
     "application_proposal": "Vorschläge",
+    "application_required_fields": "Pflichtfelder",
     "cv_template": "Lebenslauf-Vorlage",
     "view_customers": "Kunden",
     "notif_sollicitaties": "Bewerbungen",
@@ -2099,6 +2100,11 @@
     "customEmpty": "Es gibt noch keine eigenen Kandidatenfelder. Sobald du eines anlegst, erscheint es hier und kann je Phase als Pflichtfeld gesetzt werden.",
     "customAlwaysRequired": "Immer erforderlich, in jeder Phase",
     "customSaveFailed": "Das Speichern der Felddefinition ist fehlgeschlagen. Bitte versuche es erneut."
+  },
+  "applicationRequiredFields": {
+    "title": "Pflichtfelder",
+    "subtitle": "Legen Sie fest, welche Felder beim Anlegen einer neuen Bewerbung Pflicht sind.",
+    "hint": "Dies wird beim Anlegen einer neuen Bewerbung geprüft."
   },
   "vacancyTab": {
     "title": "Stellen-Tab bei Kandidaten",
