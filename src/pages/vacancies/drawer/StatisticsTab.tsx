@@ -2,7 +2,7 @@ import type { ComponentType } from 'react'
 import { useTranslation } from 'react-i18next'
 import StatsTabJs from '@/components/drawer/tabs/StatsTab'
 import MiniDonutJs from '@/components/charts/MiniDonut'
-import { GroupLabel } from '@/components/ui/typography'
+import { GroupLabel, monoStyle } from '@/components/ui/typography'
 import { useNavigation } from '@/context/NavigationContext'
 import { useVacancyLookups } from '@/context/VacancyLookupsContext'
 import { useDateFormat } from '@/lib/datetime'
@@ -30,14 +30,21 @@ const MiniDonut = MiniDonutJs as unknown as ComponentType<AnyProps>
  */
 // V-stats-1: ghost-button treatment for a deep-linking count — mirrors the
 // table's own leadsBtn/applications ghost buttons (§3A: one look, everywhere).
-const linkBtn = { display: 'inline-flex', fontFamily: 'JetBrains Mono, monospace', fontSize: 12,
+const linkBtn = { display: 'inline-flex', ...monoStyle, fontSize: 12,
   color: 'var(--color-primary-text)', background: 'none', border: 'none', padding: 0, cursor: 'pointer', font: 'inherit' }
 
-export default function StatisticsTab({ vacancy: v, onNavigateTab }: { vacancy: VacancyDetail
+export default function StatisticsTab({ vacancy: v, onNavigateTab, navigableTabs }: { vacancy: VacancyDetail
   // V-stats-1: jumps to a sibling drawer tab (VacancyDrawer's own setActiveTab) —
   // Leads → Kandidaten zoeken, Sollicitaties → Sollicitaties, kanalen → Publiceren.
-  onNavigateTab?: (id: string) => void }) {
+  onNavigateTab?: (id: string) => void
+  // EMBED-GUARD (Opus 22-08): a host embedding a CURATED tab set (the application
+  // drawer's Vacature tab) names which targets exist — a number whose target tab
+  // is absent renders as plain text, never a button into a blank pane (§3).
+  // Omitted = every target navigable (the real drawer, unchanged).
+  navigableTabs?: string[] }) {
   const { t } = useTranslation('vacancies')
+  // True when this target tab exists on the host — gates every deep-link below.
+  const canGo = (id: string) => Boolean(onNavigateTab) && (navigableTabs?.includes(id) ?? true)
   // Phase-donut click → Sollicitaties, pre-filtered on this vacancy + that stage.
   const { navigate } = useNavigation()
   const { phases } = useVacancyLookups()
@@ -101,7 +108,7 @@ export default function StatisticsTab({ vacancy: v, onNavigateTab }: { vacancy: 
           // V-stats-1: published-channels KPI jumps straight to the Publiceren tab.
           { label: t('statistics.channelsPublished'), value: publishedChannels.length,
             sub: t('statistics.channelsPublishedSub', { total: (v.channels ?? []).length }), color: 'var(--color-violet)',
-            onClick: onNavigateTab ? () => onNavigateTab('publishing') : undefined },
+            onClick: canGo('publishing') ? () => onNavigateTab?.('publishing') : undefined },
         ]}
         overview={{
           title: t('statistics.overviewTitle'),
@@ -112,16 +119,16 @@ export default function StatisticsTab({ vacancy: v, onNavigateTab }: { vacancy: 
             [t('statistics.lastActivity'), lastActivity ? formatDateTime(lastActivity) : '—'],
             // V-stats-1: Leads deep-links to Kandidaten zoeken — real, keyboard-
             // operable buttons (not the row itself, which stays a static label).
-            [t('columns.leads'), leadsKnown && onNavigateTab ? (
+            [t('columns.leads'), leadsKnown && canGo('candidateSearch') ? (
               // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- inline mono value link inside a DetailTable cell (font: inherit, zero padding), not a button-shaped affordance
               <button type="button" style={linkBtn} aria-label={t('columns.leadsOpenSearch')}
-                onClick={() => onNavigateTab('candidateSearch')}>{String(leads)}</button>
+                onClick={() => onNavigateTab?.('candidateSearch')}>{String(leads)}</button>
             ) : (leadsKnown ? String(leads) : '—')],
             // V-stats-1: Sollicitaties deep-links to the applicants tab.
-            [t('columns.applications'), onNavigateTab ? (
+            [t('columns.applications'), canGo('applicants') ? (
               // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- inline mono value link inside a DetailTable cell (font: inherit, zero padding), not a button-shaped affordance
               <button type="button" style={linkBtn} aria-label={t('columns.applicationsOpen')}
-                onClick={() => onNavigateTab('applicants')}>{String(totalApps)}</button>
+                onClick={() => onNavigateTab?.('applicants')}>{String(totalApps)}</button>
             ) : String(totalApps)],
           ],
         }}

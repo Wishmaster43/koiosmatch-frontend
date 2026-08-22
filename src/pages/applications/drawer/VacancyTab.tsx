@@ -7,10 +7,22 @@ import api from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
 import { buildEntityDeepLink } from '@/components/ui/EntityLink'
+import DrawerTabs from '@/components/drawer/DrawerTabs'
 import { VacancyLookupsProvider } from '@/context/VacancyLookupsContext'
-import { DetailsTab } from '@/pages/vacancies/shared'
-import { DescriptionTab } from '@/pages/vacancies/shared'
+import { ApplicantsTab } from '@/pages/vacancies/shared'
+import { AppointmentsTab } from '@/pages/vacancies/shared'
 import { buildVacancyPatch } from '@/pages/vacancies/shared'
+import { DescriptionTab } from '@/pages/vacancies/shared'
+import { DetailsTab } from '@/pages/vacancies/shared'
+import { DocumentsTab } from '@/pages/vacancies/shared'
+import { MatchesTab } from '@/pages/vacancies/shared'
+import { MatchingTab } from '@/pages/vacancies/shared'
+import { NotesTab } from '@/pages/vacancies/shared'
+import { PublishingTab } from '@/pages/vacancies/shared'
+import { StatisticsTab } from '@/pages/vacancies/shared'
+import { TimelineTab } from '@/pages/vacancies/shared'
+import { VacancyAgentTab } from '@/pages/vacancies/shared'
+import { VacancyTasksTab } from '@/pages/vacancies/shared'
 import { SectionTitle } from '@/components/ui/typography'
 import { useApplicationVacancy } from '../hooks/useApplicationVacancy'
 import VacancyLinkField from './VacancyLinkField'
@@ -22,6 +34,7 @@ import type { Id } from '@/types/common'
 import Button from '@/components/ui/Button'
 
 type LoadState = 'loading' | 'error' | 'empty' | 'ok'
+const muted: CSSProperties = { fontSize: 12, color: 'var(--text-muted)', padding: '24px 0', textAlign: 'center' }
 
 interface VacancyTabProps {
   application: ApplicationDetail
@@ -31,24 +44,30 @@ interface VacancyTabProps {
 }
 
 /**
- * VacancyTab — reuses the real vacancy detail inside the application drawer:
- * fetches the linked vacancy and renders the shared vacancy DetailsTab, so it
- * looks and BEHAVES identical to the real vacancy drawer instead of a bespoke
- * banner. The empty state gets a "Vacature koppelen" CTA and the linked state a
- * subtle "Ontkoppelen" affordance — both drive the same onLinkVacancy handler as
- * the Sollicitatie tab's Details block (VacancyLinkField, useVacancyLinkOptions).
+ * VacancyTab — the FULL vacancy drill-down inside the application drawer, the
+ * vacancy-side mirror of CandidateTab.tsx (Danny, with emphasis: the Vacature
+ * tab must show the real vacancy drill-down). Fetches the linked vacancy and
+ * reuses the vacancy feature's own tab components + a sub-tab bar, so it looks
+ * and BEHAVES identical to the real VacancyDrawer instead of the old bespoke
+ * Details+Description stack with no tab bar.
  *
- * S20 fix (2026-07-17): this used to render <DetailsTab> WITHOUT an `onUpdate`,
- * intending it as "read-only" — but DetailsTab always shows its edit pencils
- * regardless (it has no read-only mode), so every field (incl. "Vereiste
- * vaardigheden") looked editable and silently did nothing on save (`onUpdate?.`
- * no-op'd). The BE write path already exists (VacancyWriter handles skills/etc.
- * for the real vacancy drawer), so the FE fix is to wire a real `onUpdate` here
- * too — reusing the exact PATCH shape (`buildVacancyPatch`) the vacancy page
- * uses — rather than fake a read-only mode DetailsTab doesn't support.
+ * Tab set mirrors VacancyDrawer's own TABS 1:1, minus the same THREE categories
+ * CandidateTab already excludes from its own mirror of CandidateDrawer:
+ * autoExpand tabs that need the drawer to widen (candidateSearch, like the
+ * candidate side's vacancySearch), the PDOK/koppelingen tab (like the
+ * candidate side's integrations tab), and the tenant-custom-fields "Extra" tab
+ * (conditional on ≥1 active custom field, like the candidate side's own
+ * "extra" exclusion here). There is no module-gated tab on the vacancy side
+ * (candidate excludes "planning" for hasModule('plan')).
+ *
+ * The empty state (no vacancy linked yet) keeps its OWN "Vacature koppelen"
+ * link flow — unlike CandidateTab's absent-candidate fallback (which just
+ * reuses the loading/error copy, since an application always has a candidate),
+ * an application legitimately has no vacancy yet, and this flow is the real,
+ * tested business path for it (VacancyLinkField, useVacancyLinkOptions).
  */
 export default function VacancyTab({ application: a, onLinkVacancy }: VacancyTabProps) {
-  const { t } = useTranslation(['applications', 'common'])
+  const { t } = useTranslation(['applications', 'vacancies', 'common'])
   const queryClient = useQueryClient()
   // Shared vacancy-detail fetch (adopted from useApplicationVacancy — §11: land the
   // new helper WITH adoption at this exact copy site instead of leaving VacancyTab's
@@ -56,6 +75,9 @@ export default function VacancyTab({ application: a, onLinkVacancy }: VacancyTab
   // same cache entry, so the two tabs never issue duplicate requests.
   const { vacancy: vac, loading, error } = useApplicationVacancy(a.vacancyId)
   const state: LoadState = a.vacancyId == null ? 'empty' : loading ? 'loading' : error ? 'error' : vac ? 'ok' : 'empty'
+  // Sub-tab bar state — mirrors CandidateTab's own local `tab` state (this drill-down
+  // has no EntityDrawer of its own, so it owns its active tab locally).
+  const [tab, setTab] = useState('details')
   // Linking flow (empty state) — the CTA opens the shared picker directly (there
   // is nothing read-only to show yet, so no separate pencil step is needed).
   const [linking, setLinking] = useState(false)
@@ -73,30 +95,29 @@ export default function VacancyTab({ application: a, onLinkVacancy }: VacancyTab
     onLinkVacancy?.(a.id, vacancyId, { title: picked?.label, client: picked?.client })
   }
 
-  // S20: make the reused DetailsTab actually persist — optimistic local merge,
-  // then PATCH /vacancies/{id} with the same UI-patch → API-body mapping the
-  // real vacancy drawer uses (buildVacancyPatch), so "Vereiste vaardigheden"
-  // (and every other DetailsTab field) saves for real instead of no-op'ing.
+  // Make the reused vacancy tabs actually persist — optimistic local merge into the
+  // shared React Query cache entry, then PATCH /vacancies/{id} with the same
+  // UI-patch → API-body mapping the real vacancy drawer uses (buildVacancyPatch).
+  // OPTIMISTIC-REVERT-1 (audit 2026-07-27, same bug class as useApplicationDrawerActions):
+  // snapshot ONLY the fields this patch touches, read off the cache BEFORE the optimistic
+  // write, and revert exactly those fields on failure — never the whole cached vacancy,
+  // so a parallel edit to another field (e.g. from CompetitionBlock reading the same
+  // entry) is not clobbered by the revert.
   const updateVacancy = (id: Id | undefined, patch: Record<string, unknown>) => {
     if (id == null) return
-    // OPTIMISTIC-REVERT-1 (audit 2026-07-27, same bug class as useApplicationDrawerActions):
-    // snapshot ONLY the fields this patch touches, read off the cache BEFORE the optimistic
-    // write — never the whole cached vacancy, so a parallel edit to another field (e.g. from
-    // CompetitionBlock reading the same entry) is not clobbered by the revert.
     const queryKey = ['vacancies', id, 'detail']
     const cached = queryClient.getQueryData<VacancyDetail>(queryKey) as Record<string, unknown> | undefined
     const beforeFields = cached ? Object.fromEntries(Object.keys(patch).map(k => [k, cached[k]])) : null
     // Optimistic merge straight into the shared React Query cache entry (the same
-    // key useApplicationVacancy reads), so both this tab and CompetitionBlock see
-    // the edit immediately without a duplicate local copy of the vacancy.
+    // key useApplicationVacancy reads), so every embedded tab sees the edit
+    // immediately without a duplicate local copy of the vacancy.
     queryClient.setQueryData(queryKey, (prev: VacancyDetail | undefined) =>
       prev ? ({ ...prev, ...patch } as VacancyDetail) : prev)
     const body = buildVacancyPatch(patch)
     if (!Object.keys(body).length) return
     api.patch(`/vacancies/${id}`, body).catch(err => {
       // Revert only the touched fields onto the CURRENT cache value — a rejected PATCH
-      // must not leave "Vereiste vaardigheden" (or any other field) showing a value the
-      // server never accepted.
+      // must not leave an edited field showing a value the server never accepted.
       if (beforeFields) {
         queryClient.setQueryData(queryKey, (prev: VacancyDetail | undefined) =>
           prev ? ({ ...prev, ...beforeFields } as VacancyDetail) : prev)
@@ -105,82 +126,121 @@ export default function VacancyTab({ application: a, onLinkVacancy }: VacancyTab
     })
   }
 
-  // Canon (05-08): 12px muted body text, matching the sibling tabs' loading/error copy.
-  const muted: CSSProperties = { fontSize: 12, color: 'var(--text-muted)', padding: '24px 0', textAlign: 'center' }
-  if (state === 'loading') return <div style={muted}>{t('vacancyDetail.loading')}</div>
-  if (state === 'error') return <div style={muted}>{t('vacancyDetail.error')}</div>
+  // Sub-tab bar — mirrors VacancyDrawer's own tab list (see the file doc comment
+  // for the three excluded categories). "Beschrijving" reuses the SAME
+  // details.description key the real drawer's tab label does (VAC-TEKST-TAB-1).
+  const tabs = [
+    { id: 'details',      label: t('vacancies:drawer.tabs.details') },
+    { id: 'description',  label: t('vacancies:details.description') },
+    { id: 'applicants',   label: t('vacancies:drawer.tabs.applicants') },
+    { id: 'appointments', label: t('vacancies:drawer.tabs.appointments') },
+    { id: 'matching',     label: t('vacancies:drawer.tabs.matching') },
+    { id: 'matches',      label: t('vacancies:drawer.tabs.matches') },
+    { id: 'aiagent',      label: t('vacancies:drawer.tabs.aiagent') },
+    { id: 'publishing',   label: t('vacancies:drawer.tabs.publishing') },
+    { id: 'documents',    label: t('vacancies:drawer.tabs.documents') },
+    { id: 'timeline',     label: t('vacancies:drawer.tabs.timeline') },
+    { id: 'notes',        label: t('vacancies:drawer.tabs.notes') },
+    { id: 'tasks',        label: t('vacancies:drawer.tabs.tasks') },
+    { id: 'statistics',   label: t('vacancies:drawer.tabs.statistics') },
+  ]
 
-  // Empty state — offer to link a vacancy right here (respects the guard-422
-  // toast on save, surfaced by the parent handler).
-  if (state === 'empty' || !vac) {
-    return (
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14, padding: '24px 0' }}>
-        <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('vacancyDetail.empty')}</div>
-        {onLinkVacancy && (linking ? (
-          <div style={{ display: 'flex', gap: 6, alignItems: 'center', width: '100%', maxWidth: 340 }}>
-            <div style={{ flex: 1 }}>
-              <VacancyLinkField value={vacancyId} options={vacancyOptions} onChange={setVacancyId} />
-            </div>
-            <Button variant="primary" iconOnly size="sm" onClick={saveLink} disabled={!vacancyId} title={t('common:save')} aria-label={t('common:save')}><Save size={13} /></Button>
-            <Button variant="secondary" iconOnly size="sm" onClick={() => setLinking(false)} title={t('common:cancel')} aria-label={t('common:cancel')}><X size={13} /></Button>
-          </div>
-        ) : (
-          // Primary, not secondary (Danny 20-08, pasted this button: "Huisstijl") —
-          // coupling the vacancy is THE action of this empty state.
-          <Button variant="primary" size="sm" onClick={() => { setVacancyId(''); setLinking(true) }}>
-            <Link2 size={13} /> {t('vacancyDetail.linkButton')}
-          </Button>
-        ))}
-      </div>
-    )
+  // Mirror EntityDrawer's own guard (EntityDrawer.tsx:52): a navigation to a tab
+  // this curated set does not carry must never blank the pane (Opus 22-08 —
+  // StatisticsTab's Leads used to jump to the excluded candidateSearch).
+  const goTab = (id: string) => { if (tabs.some(x => x.id === id)) setTab(id) }
+
+  // Rendered only once `vv` (the fetched vacancy) is confirmed non-null below.
+  const renderTab = (vv: VacancyDetail) => {
+    switch (tab) {
+      case 'details':      return <DetailsTab vacancy={vv} onUpdate={updateVacancy} />
+      case 'description':  return <DescriptionTab vacancy={vv} onUpdate={updateVacancy} />
+      case 'applicants':   return <ApplicantsTab vacancy={vv} />
+      case 'appointments': return <AppointmentsTab vacancy={vv} />
+      case 'matching':     return <MatchingTab vacancy={vv} onUpdate={updateVacancy} />
+      case 'matches':      return <MatchesTab vacancyId={vv.id} />
+      case 'aiagent':      return <VacancyAgentTab vacancy={vv} onUpdate={updateVacancy} />
+      case 'publishing':   return <PublishingTab vacancy={vv} onUpdate={updateVacancy} />
+      case 'documents':    return <DocumentsTab vacancy={vv} />
+      case 'timeline':     return <TimelineTab vacancy={vv} />
+      case 'notes':        return <NotesTab vacancy={vv} />
+      case 'tasks':        return <VacancyTasksTab vacancy={vv} />
+      case 'statistics':   return <StatisticsTab vacancy={vv} onNavigateTab={goTab} navigableTabs={tabs.map(x => x.id)} />
+      default:             return null
+    }
   }
 
-  // Full reuse: DetailsTab needs the vacancy lookups it renders labels from, and
-  // (S20) now gets a real onUpdate so its edit pencils actually persist. A link
-  // still jumps to the full vacancy record. Ontkoppelen lives ONLY in the drawer
-  // footer (Danny 21-07: no duplicate top link) — that one collects the required
-  // reason (S15); the top affordance both duplicated it and skipped that reason.
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+    <div style={{ display: 'flex', flexDirection: 'column' }}>
       {/* Vacancy NAME left + "Open vacature" right on ONE row — mirrors the Kandidaat
           tab's [name … Open kandidaat] header so both drill-downs read the same
-          (Danny 21-07: "vacature moet zelfde soort worden … naam van de vacature links"). */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 14 }}>
-        <SectionTitle as="span" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0 }}>
-          {a.vacancyTitle}
-        </SectionTitle>
-        {/* S14/S22: stash the current subtab so browser BACK from the full vacancy
-            page reopens THIS application's drawer on the Vacature tab again.
-            Danny 21-07: this is an explicit "Open vacancy" AFFORDANCE (not the
-            name+trailing-icon EntityLink pattern), so it is a real new-tab anchor
-            rather than EntityLink's in-app button wrapped around the icon+label. */}
-        <span onClickCapture={() => { if (a.id != null) rememberReturnTab(a.id, 'vacancy') }} style={{ flexShrink: 0 }}>
-          {/* A TRUE text link (accent ink, no chrome) — V7 covers button-lookalikes
-              only. Block form: the style attribute sits inside the opening tag. */}
-          {/* eslint-disable huisstijlLegacy/no-restricted-syntax */}
-          {a.vacancyId != null ? (
+          (Danny 21-07: "vacature moet zelfde soort worden … naam van de vacature links").
+          Shown whenever a vacancy is linked, independent of the fetch state below
+          (the title/id are denormalised on the application already). Deliberate
+          sibling deviation: CandidateTab still renders a muted non-clickable
+          placeholder without an id — here NOTHING renders instead, because a
+          dead "Open vacature" text is a §3 fake affordance. */}
+      {a.vacancyId != null && (
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 14, marginBottom: 8 }}>
+          <SectionTitle as="span" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0 }}>
+            {a.vacancyTitle}
+          </SectionTitle>
+          {/* S14/S22: stash the current subtab so browser BACK from the full vacancy
+              page reopens THIS application's drawer on the Vacature tab again.
+              Danny 21-07: this is an explicit "Open vacancy" AFFORDANCE (not the
+              name+trailing-icon EntityLink pattern), so it is a real new-tab anchor
+              rather than EntityLink's in-app button wrapped around the icon+label. */}
+          <span onClickCapture={() => { if (a.id != null) rememberReturnTab(a.id, 'vacancy') }} style={{ flexShrink: 0 }}>
+            {/* A TRUE text link (accent ink, no chrome) — V7 covers button-lookalikes
+                only. Block form: the style attribute sits inside the opening tag. */}
+            {/* eslint-disable huisstijlLegacy/no-restricted-syntax -- deliberate calm text-link, not a button-lookalike (V7 scope) */}
             <a href={buildEntityDeepLink('vacancies', a.vacancyId)} target="_blank" rel="noopener noreferrer"
               title={t('drawer.openVacancy')} aria-label={t('drawer.openVacancy')}
               style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 12, color: 'var(--color-primary-text)', textDecoration: 'none' }}>
               <ExternalLink size={13} /> {t('drawer.openVacancy')}
             </a>
-          ) : (
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 12, color: 'var(--text-muted)' }}>
-              <ExternalLink size={13} /> {t('drawer.openVacancy')}
-            </span>
-          )}
-          {/* eslint-enable huisstijlLegacy/no-restricted-syntax */}
-        </span>
-      </div>
-      <VacancyLookupsProvider>
-        <DetailsTab vacancy={vac} onUpdate={updateVacancy} />
-        {/* Danny 21-07: Beschrijving moved to its own drawer main-tab on the real
-            vacancy — this drill-down has no main-tab bar, so it stays visible here
-            by rendering right below Details (same shared onUpdate path). */}
-        <div style={{ marginTop: 12 }}>
-          <DescriptionTab vacancy={vac} onUpdate={updateVacancy} />
+            {/* eslint-enable huisstijlLegacy/no-restricted-syntax */}
+          </span>
         </div>
-      </VacancyLookupsProvider>
+      )}
+      {state === 'loading' ? (
+        <div style={muted}>{t('vacancyDetail.loading')}</div>
+      ) : state === 'error' ? (
+        <div style={muted}>{t('vacancyDetail.error')}</div>
+      ) : state === 'empty' || !vac ? (
+        // Empty state — offer to link a vacancy right here (respects the guard-422
+        // toast on save, surfaced by the parent handler).
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14, padding: '24px 0' }}>
+          <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('vacancyDetail.empty')}</div>
+          {onLinkVacancy && (linking ? (
+            <div style={{ display: 'flex', gap: 6, alignItems: 'center', width: '100%', maxWidth: 340 }}>
+              <div style={{ flex: 1 }}>
+                <VacancyLinkField value={vacancyId} options={vacancyOptions} onChange={setVacancyId} />
+              </div>
+              <Button variant="primary" iconOnly size="sm" onClick={saveLink} disabled={!vacancyId} title={t('common:save')} aria-label={t('common:save')}><Save size={13} /></Button>
+              <Button variant="secondary" iconOnly size="sm" onClick={() => setLinking(false)} title={t('common:cancel')} aria-label={t('common:cancel')}><X size={13} /></Button>
+            </div>
+          ) : (
+            // Primary, not secondary (Danny 20-08, pasted this button: "Huisstijl") —
+            // coupling the vacancy is THE action of this empty state.
+            <Button variant="primary" size="sm" onClick={() => { setVacancyId(''); setLinking(true) }}>
+              <Link2 size={13} /> {t('vacancyDetail.linkButton')}
+            </Button>
+          ))}
+        </div>
+      ) : (
+        // Full reuse: the tabs need the vacancy lookups they render labels from, and
+        // each gets the real onUpdate so its edit pencils actually persist. A link
+        // still jumps to the full vacancy record. Ontkoppelen lives ONLY in the drawer
+        // footer (Danny 21-07: no duplicate top link) — that one collects the required
+        // reason (S15); the top affordance both duplicated it and skipped that reason.
+        <VacancyLookupsProvider>
+          <div style={{ borderBottom: '1px solid var(--border)', marginBottom: 14 }}>
+            <DrawerTabs tabs={tabs} active={tab} onChange={setTab} />
+          </div>
+          {renderTab(vac)}
+        </VacancyLookupsProvider>
+      )}
     </div>
   )
 }

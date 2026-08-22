@@ -191,4 +191,20 @@ describe('StatisticsTab · V-stats-1 counts deep-link to their own tab', () => {
     await user.click(screen.getByText(nlVacancies.statistics.channelsPublished))
     expect(onNavigateTab).toHaveBeenCalledWith('publishing')
   })
+
+  // EMBED-GUARD (Opus 22-08): a host with a CURATED tab set (the application
+  // drawer's Vacature tab excludes candidateSearch) names its targets — the
+  // Leads number must render as plain TEXT there, never a button into a tab
+  // that does not exist; targets that DO exist keep their deep-link.
+  it('renders Leads as plain text when the host does not carry candidateSearch', () => {
+    const onNavigateTab = vi.fn()
+    const v = mapVacancyDetail({ id: 'v1', title: 'Test', candidate_match_count: 4 })
+    render(<StatisticsTab vacancy={v} onNavigateTab={onNavigateTab}
+      navigableTabs={['applicants', 'publishing']} />)
+    // No Leads deep-link button — the value shows as text.
+    expect(screen.queryByRole('button', { name: nlVacancies.columns.leadsOpenSearch })).toBeNull()
+    expect(screen.getByText('4')).toBeInTheDocument()
+    // The applications deep-link survives: its target IS in the curated set.
+    expect(screen.getByRole('button', { name: nlVacancies.columns.applicationsOpen })).toBeInTheDocument()
+  })
 })
