@@ -1,5 +1,5 @@
-import { describe, it, expect, vi } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { render, screen, waitFor, act } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import KoiosRadar from './KoiosRadar'
 
@@ -32,7 +32,11 @@ describe('KoiosRadar', () => {
     }))
     render(<KoiosRadar />)
     expect(await screen.findByText('common:koios.radar.empty')).toBeInTheDocument()
-    expect(screen.queryByRole('button')).toBeNull()
+    // No signal-row buttons — only the card's own collapse/expand toggle remains
+    // (it carries no aria-label, unlike every signal row).
+    const buttons = screen.queryAllByRole('button')
+    expect(buttons.filter(b => b.hasAttribute('aria-label'))).toHaveLength(0)
+    expect(buttons).toHaveLength(1)
   })
 
   it('renders only the non-zero signals, most-urgent first, excluding missing_appointment', async () => {
@@ -42,7 +46,12 @@ describe('KoiosRadar', () => {
       missing_appointment: 9, // v1 scope: no candidate-list filter yet — must never render
     }))
     render(<KoiosRadar />)
-    const buttons = await screen.findAllByRole('button')
+    // The toggle button renders synchronously (before the stats fetch resolves),
+    // so wait for a specific ROW first — findAllByRole would otherwise resolve
+    // immediately with just the toggle and never retry.
+    await screen.findByRole('button', { name: 'candidates:kpi.tasks: 3' })
+    // Drop the card's own collapse/expand toggle (no aria-label) before comparing rows.
+    const buttons = screen.getAllByRole('button').filter(b => b.hasAttribute('aria-label'))
     // Priority order: intake → stale → neverContacted → noFollowup → activeConv → tasks;
     // zero-count and stale/noFollowup are dropped here, missing_appointment has no row at all.
     expect(buttons.map(b => b.getAttribute('aria-label'))).toEqual([
@@ -70,5 +79,51 @@ describe('KoiosRadar', () => {
     const row = await screen.findByRole('button', { name: 'candidates:kpi.tasks: 1' })
     await user.click(row)
     await waitFor(() => expect(row).toBeInTheDocument())
+  })
+})
+
+// COLLAPSE-1 (Danny 22-08: "nu te veel ruimte in beslag" — closable + re-summonable).
+describe('KoiosRadar — collapse', () => {
+  beforeEach(() => localStorage.clear())
+
+  it('is open by default — rows render and the toggle reports aria-expanded=true', async () => {
+    heavyGetMock.mockResolvedValue(statsResponse({ never_contacted: 5 }))
+    render(<KoiosRadar />)
+    await screen.findByRole('button', { name: 'candidates:analytics.neverContacted: 5' })
+    expect(screen.getByRole('button', { name: 'common:koios.radar.title' })).toHaveAttribute('aria-expanded', 'true')
+  })
+
+  it('collapsing hides the rows and flips aria-expanded; expanding restores them', async () => {
+    const user = userEvent.setup()
+    heavyGetMock.mockResolvedValue(statsResponse({ never_contacted: 5 }))
+    render(<KoiosRadar />)
+    await screen.findByRole('button', { name: 'candidates:analytics.neverContacted: 5' })
+    const toggle = screen.getByRole('button', { name: 'common:koios.radar.title' })
+
+    await user.click(toggle)
+    expect(toggle).toHaveAttribute('aria-expanded', 'false')
+    expect(screen.queryByRole('button', { name: 'candidates:analytics.neverContacted: 5' })).not.toBeInTheDocument()
+
+    await user.click(toggle)
+    expect(toggle).toHaveAttribute('aria-expanded', 'true')
+    expect(await screen.findByRole('button', { name: 'candidates:analytics.neverContacted: 5' })).toBeInTheDocument()
+  })
+
+  it('persists the collapsed choice across a remount (mocked seam: localStorage)', async () => {
+    const user = userEvent.setup()
+    heavyGetMock.mockResolvedValue(statsResponse({ never_contacted: 5 }))
+    const { unmount } = render(<KoiosRadar />)
+    await screen.findByRole('button', { name: 'candidates:analytics.neverContacted: 5' })
+    await user.click(screen.getByRole('button', { name: 'common:koios.radar.title' }))
+    // Assert the WRITE, not just that the callback fired (§13).
+    expect(localStorage.getItem('koios.radar.collapsed')).toBe('true')
+    unmount()
+
+    render(<KoiosRadar />)
+    // The restored render reads the persisted flag synchronously — no need to
+    // wait for the (independent) stats fetch to resolve first. Still flush that
+    // fetch's own microtask inside act() so it never resolves after the test ends.
+    await act(async () => { await Promise.resolve() })
+    expect(screen.getByRole('button', { name: 'common:koios.radar.title' })).toHaveAttribute('aria-expanded', 'false')
   })
 })

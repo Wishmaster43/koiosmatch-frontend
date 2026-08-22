@@ -196,6 +196,7 @@
     "forbidden": "Sie haben keinen Zugriff auf Koios.",
     "usageLine": "{{model}} · {{tokens}} Tokens · {{cost}}",
     "offline": "Nicht verbunden",
+    "offlineConnect": "Koios ist nicht verbunden. Klicken Sie, um zu verbinden.",
     "contextPending": "Dieser Datensatz kann noch nicht als KI-Kontext verknüpft werden. Nur zur Referenz angeheftet.",
     "radar": {
       "title": "Koios-Empfehlungen",

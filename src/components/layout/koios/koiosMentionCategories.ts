@@ -104,20 +104,15 @@ export const MENTION_CATEGORIES: MentionCategoryConfig[] = [
     present: (r) => ({ id: id(r), name: str(r, 'name') || '?', subtitle: str(r, 'city') }),
   } },
   { id: 'locations', labelKey: 'koios.mention.locations' }, // MEASURED: no global list endpoint yet.
-  { id: 'departments', labelKey: 'koios.mention.departments', search: {
+  { id: 'departments', labelKey: 'koios.mention.departments', countKey: 'departments', search: {
     endpoint: '/departments', param: 'q', permission: 'customers.view', refType: 'department',
     present: (r) => ({ id: id(r), name: str(r, 'name') || '?', subtitle: str(r, 'customer_name') }),
   } },
-  { id: 'contacts', labelKey: 'koios.mention.contacts', search: {
+  { id: 'contacts', labelKey: 'koios.mention.contacts', countKey: 'contacts', search: {
     endpoint: '/contacts', param: 'q', permission: 'customers.view', refType: 'contact',
     present: (r) => ({ id: id(r), name: str(r, 'name') || '?', subtitle: str(r, 'customer_name') }),
   } },
-  { id: 'aiagents', labelKey: 'nav.aiagents', search: {
-    endpoint: '/workflows', param: 'search', pageGate: 'aiagents', refType: 'workflow',
-    present: (r) => ({ id: id(r), name: str(r, 'name') || '?', subtitle: str(r, 'trigger') }),
-  } },
-  { id: 'whatsapp', labelKey: 'nav.whatsapp', search: {
-    endpoint: '/conversations', param: 'search', pageGate: 'whatsapp', refType: 'conversation',
-    present: (r) => ({ id: id(r), name: nested(r, ['candidate', 'full_name']) || str(r, 'wa_number') || '?', subtitle: str(r, 'wa_number') }),
-  } },
 ]
+// AI & Workflows + WhatsApp were REMOVED as mention categories (Danny 22-08:
+// "hoeven toch niet" — @-context is for records, not tooling). Their refType
+// handling elsewhere is untouched; re-adding is one config entry here.

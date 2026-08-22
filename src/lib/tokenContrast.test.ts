@@ -92,6 +92,17 @@ describe('house token pairs stay readable (defaults, light theme)', () => {
     }
   })
 
+  it('warning-text clears 4.5:1 on surface and bg, light and dark', () => {
+    const lastDef = (name: string): string => {
+      const all = [...css.matchAll(new RegExp(`--${name}:\\s*([^;]+);`, 'g'))]
+      return all[all.length - 1][1].trim()
+    }
+    for (const ground of ['surface', 'bg']) {
+      expect(ratio(token('color-warning-text'), token(ground)), `licht/${ground}`).toBeGreaterThanOrEqual(4.5)
+      expect(ratio(lastDef('color-warning-text'), lastDef(ground)), `donker/${ground}`).toBeGreaterThanOrEqual(4.5)
+    }
+  })
+
   it('danger-text clears 4.5:1 on surface and bg, light and dark', () => {
     // Last definition in index.css = the dark block's value (mirrors the on-*-bg loop).
     const lastDef = (name: string): string => {

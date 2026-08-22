@@ -6,12 +6,23 @@
  * to it — and disappears the moment a real conversation starts. Read-only,
  * no new data model; labels are reused verbatim from the candidates page's own
  * attention KPIs (candidateInsights.tsx) so the wording never drifts.
+ *
+ * COLLAPSE-1 (Danny 22-08: "nu te veel ruimte in beslag" — the card must be
+ * closable and re-summonable via a small button): rides the shared
+ * `components/ui/CollapsedCard` disclosure header instead of a bespoke toggle
+ * (same chevron/aria-expanded contract MatchScoreSection's own collapsible
+ * card already uses) — no new hand-styled <button> lands in this file.
+ * `open`/`onOpenChange` put it in CONTROLLED mode so the choice can be
+ * PERSISTED (useKoiosRadarCollapse mirrors useKoiosPanelWidth's own
+ * localStorage convention). Default is OPEN — only closing is new.
  */
 import { useTranslation } from 'react-i18next'
 import { CalendarCheck, Clock, UserX, CalendarX, MessageCircle, CheckSquare } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { tintBg, chipInk } from '@/lib/tint'
+import CollapsedCard from '@/components/ui/CollapsedCard'
 import { useKoiosRadarSignals } from './useKoiosRadarSignals'
+import { useKoiosRadarCollapse } from './useKoiosRadarCollapse'
 import type { RadarSignalId } from './useKoiosRadarSignals'
 
 // Teal accent for the "tasks" row — mirrors candidateInsights.tsx / applicationInsights.ts's
@@ -34,61 +45,70 @@ const SIGNAL_META: Record<RadarSignalId, { Icon: LucideIcon; labelKey: string; c
 export default function KoiosRadar({ onNavigate }: { onNavigate?: (page: string, intent?: unknown) => void }) {
   const { t } = useTranslation(['common', 'candidates'])
   const { signals, loading, error } = useKoiosRadarSignals()
+  // Persisted per-user collapse choice (Danny 22-08) — default OPEN.
+  const { collapsed, setCollapsed } = useKoiosRadarCollapse()
+  // The header's presence dot lights up while there is something to act on;
+  // muted during loading/error/empty (CollapsedCard's own "filled" idiom,
+  // repurposed here as "this list currently has rows").
+  const hasSignals = !loading && !error && (signals?.length ?? 0) > 0
 
   return (
-    <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, overflow: 'hidden' }}>
-      <div style={{ padding: '10px 14px', borderBottom: '1px solid var(--border)', fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>
-        {t('common:koios.radar.title')}
-      </div>
-
-      {/* Four explicit UI states: loading / error / empty / non-zero signal rows. */}
-      {loading && (
-        <p style={{ margin: 0, padding: '10px 14px', fontSize: 12, color: 'var(--text-muted)' }}>{t('common:loading')}</p>
-      )}
-      {!loading && error && (
-        <p style={{ margin: 0, padding: '10px 14px', fontSize: 12, color: 'var(--text-muted)' }}>{t('common:error.body')}</p>
-      )}
-      {!loading && !error && signals?.length === 0 && (
-        <p style={{ margin: 0, padding: '10px 14px', fontSize: 12, color: 'var(--text-muted)' }}>{t('common:koios.radar.empty')}</p>
-      )}
-      {!loading && !error && signals && signals.length > 0 && (
-        <div style={{ padding: '4px 0' }}>
-          {signals.map(s => {
-            const meta = SIGNAL_META[s.id]
-            const Icon = meta.Icon
-            const label = t(meta.labelKey)
-            return (
-              <button key={s.id} type="button"
-                onClick={() => onNavigate?.('candidates', { attention: s.id })}
-                aria-label={`${label}: ${s.count}`}
-                // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- full-width clickable list row with an imperative hover swap (structural, not an action button), pre-existing and out of this ink/tint task's scope
-                style={{
-                  display: 'flex', alignItems: 'center', gap: 10, width: '100%',
-                  padding: '7px 14px', background: 'none', border: 'none', cursor: 'pointer',
-                  textAlign: 'left', fontFamily: 'inherit', color: 'inherit',
-                }}
-                onMouseEnter={e => { e.currentTarget.style.background = 'var(--hover-bg)' }}
-                onMouseLeave={e => { e.currentTarget.style.background = 'none' }}>
-                <span style={{
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-                  width: 22, height: 22, borderRadius: 6,
-                  // Tint via lib/tint; ink via chipInk — the raw colour on its own tint
-                  // reads 2.4-3.0:1, AA fail (herhaal-slotaudit r3.5).
-                  background: tintBg(meta.color, true), color: chipInk(meta.color),
-                }}>
-                  <Icon size={12} />
-                </span>
-                <span style={{ flex: 1, minWidth: 0, fontSize: 12.5, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                  {label}
-                </span>
-                <span style={{ fontSize: 12.5, fontWeight: 600, color: meta.color, fontFamily: 'var(--font-mono, monospace)' }}>
-                  {s.count}
-                </span>
-              </button>
-            )
-          })}
-        </div>
-      )}
+    <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, overflow: 'hidden', padding: '10px 14px' }}>
+      <CollapsedCard
+        title={<span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>{t('common:koios.radar.title')}</span>}
+        filled={hasSignals}
+        open={!collapsed}
+        onOpenChange={(open) => setCollapsed(!open)}
+      >
+        {/* Four explicit UI states: loading / error / empty / non-zero signal rows. */}
+        {loading && (
+          <p style={{ margin: '6px 0 0', fontSize: 12, color: 'var(--text-muted)' }}>{t('common:loading')}</p>
+        )}
+        {!loading && error && (
+          <p style={{ margin: '6px 0 0', fontSize: 12, color: 'var(--text-muted)' }}>{t('common:error.body')}</p>
+        )}
+        {!loading && !error && signals?.length === 0 && (
+          <p style={{ margin: '6px 0 0', fontSize: 12, color: 'var(--text-muted)' }}>{t('common:koios.radar.empty')}</p>
+        )}
+        {!loading && !error && signals && signals.length > 0 && (
+          <div style={{ margin: '4px 0 0' }}>
+            {signals.map(s => {
+              const meta = SIGNAL_META[s.id]
+              const Icon = meta.Icon
+              const label = t(meta.labelKey)
+              return (
+                <button key={s.id} type="button"
+                  onClick={() => onNavigate?.('candidates', { attention: s.id })}
+                  aria-label={`${label}: ${s.count}`}
+                  // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- full-width clickable list row with an imperative hover swap (structural, not an action button), pre-existing and out of this ink/tint task's scope
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: 10, width: '100%',
+                    padding: '7px 8px', borderRadius: 8, background: 'none', border: 'none', cursor: 'pointer',
+                    textAlign: 'left', fontFamily: 'inherit', color: 'inherit',
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.background = 'var(--hover-bg)' }}
+                  onMouseLeave={e => { e.currentTarget.style.background = 'none' }}>
+                  <span style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                    width: 22, height: 22, borderRadius: 6,
+                    // Tint via lib/tint; ink via chipInk — the raw colour on its own tint
+                    // reads 2.4-3.0:1, AA fail (herhaal-slotaudit r3.5).
+                    background: tintBg(meta.color, true), color: chipInk(meta.color),
+                  }}>
+                    <Icon size={12} />
+                  </span>
+                  <span style={{ flex: 1, minWidth: 0, fontSize: 12.5, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {label}
+                  </span>
+                  <span style={{ fontSize: 12.5, fontWeight: 600, color: meta.color, fontFamily: 'var(--font-mono, monospace)' }}>
+                    {s.count}
+                  </span>
+                </button>
+              )
+            })}
+          </div>
+        )}
+      </CollapsedCard>
     </div>
   )
 }

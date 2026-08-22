@@ -66,11 +66,11 @@ describe('useKoiosEntitySearch', () => {
     expect(result.current.results).toEqual([])
   })
 
-  // Results are capped at 5 client-side (the workflows endpoint has no per_page cap server-side).
+  // Results are capped at 5 client-side regardless of what the endpoint returns.
   it('caps results at 5 even when the endpoint returns more', async () => {
-    const rows = Array.from({ length: 8 }, (_, i) => ({ id: `w${i}`, name: `Workflow ${i}` }))
+    const rows = Array.from({ length: 8 }, (_, i) => ({ id: `c${i}`, name: `Klant ${i}` }))
     mockGet.mockResolvedValue({ data: { data: rows } })
-    const { result } = renderHook(() => useKoiosEntitySearch('aiagents', 'flow'))
+    const { result } = renderHook(() => useKoiosEntitySearch('customers', 'zorg'))
     await waitFor(() => expect(result.current.results.length).toBeGreaterThan(0))
     expect(result.current.results).toHaveLength(5)
   })

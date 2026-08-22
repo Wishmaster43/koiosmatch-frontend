@@ -196,6 +196,7 @@
     "forbidden": "Vous n'avez pas accès à Koios.",
     "usageLine": "{{model}} · {{tokens}} tokens · {{cost}}",
     "offline": "Non connecté",
+    "offlineConnect": "Koios n'est pas connecté. Cliquez pour vous connecter.",
     "contextPending": "Cet enregistrement ne peut pas encore être lié comme contexte IA. Épinglé à titre indicatif uniquement.",
     "radar": {
       "title": "Conseils Koios",

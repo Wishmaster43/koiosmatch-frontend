@@ -196,6 +196,7 @@
     "forbidden": "You don't have access to Koios.",
     "usageLine": "{{model}} · {{tokens}} tokens · {{cost}}",
     "offline": "Not connected",
+    "offlineConnect": "Koios is not connected. Click to connect.",
     "contextPending": "This record can't be linked as AI context yet. Pinned for reference only.",
     "radar": {
       "title": "Koios Advice",

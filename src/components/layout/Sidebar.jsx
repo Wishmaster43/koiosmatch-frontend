@@ -295,36 +295,34 @@ export default function Sidebar({ expanded, activePage, setActivePage, koiosOpen
             gap:            expanded ? 9 : 0,
             padding:        expanded ? '7px 10px' : '7px',
             justifyContent: expanded ? 'flex-start' : 'center',
-            // Koios AI brand gradient: primary + violet token (mirrors KoiosHeader/KoiosMentionMenu).
-            background: koiosOpen
-              ? 'linear-gradient(135deg, var(--color-primary), var(--color-violet))'
-              // color-mix — a var() cannot take a hex-alpha suffix ('var(--x)20' is
-              // invalid CSS, the declaration was silently dropped; audit-consolidatie 23-07).
-              // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- chrome-/merktint met bewust eigen percentage (Koios-gradiënt zachte staat / sidebar-hover), predates lib/tint en is geen statuschip
-              : 'linear-gradient(135deg, color-mix(in srgb, var(--color-primary) 12%, transparent), color-mix(in srgb, var(--color-violet) 12%, transparent))',
-            // Solid accent gradient needs the tenant's readable-on-accent token; the
-            // soft-tint (non-open) state is a light surface, so it uses the accent as TEXT
-            // instead (mirrors the "Koios" label below) — never a hardcoded white/#fff.
-            // ACCENT-INK-1: closed, this label sits on the white sidebar, so it needs the
-            // contrast-safe twin of the accent, not the accent itself (AENF measured 1.17:1).
-            color: koiosOpen ? 'var(--color-on-accent)' : 'var(--color-primary-text)',
+            // KOIOS-NAV-TINT-1 (Danny 22-08): ONE visual language for both states —
+            // the brand-gradient TINT pair (rest 12% / open 22%), per the active-nav
+            // rule (tint = place-marker; a full fill reads as an action button).
+            // color-mix — a var() cannot take a hex-alpha suffix ('var(--x)20' is
+            // invalid CSS, the declaration was silently dropped; audit-consolidatie 23-07).
+            // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- chrome-/merktint met bewust eigen percentages (Koios-gradiënt rust/actief-paar), predates lib/tint en is geen statuschip
+            background: `linear-gradient(135deg, color-mix(in srgb, var(--color-primary) ${koiosOpen ? 22 : 12}%, transparent), color-mix(in srgb, var(--color-violet) ${koiosOpen ? 22 : 12}%, transparent))`,
+            // ACCENT-INK-1: both states are light tint surfaces now, so the ink is
+            // always the contrast-safe accent twin (AENF measured the raw accent 1.17:1).
+            color: 'var(--color-primary-text)',
           }}
         >
           <div className="flex items-center justify-center rounded-full flex-shrink-0"
             // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- chrome-accentvlak (actieve nav-marker/merkcirkel, zie de aangrenzende ACCENT-INK/SIDEBAR-CONTRAST-comments), geen actieoppervlak
-            style={{ width: 18, height: 18, background: koiosOpen ? 'rgba(255,255,255,0.25)' : 'var(--color-primary)' }}>
-            {/* Translucent white circle (koiosOpen) stays white; the solid accent circle
-                (collapsed) needs the on-accent token so a light brand keeps a readable icon. */}
-            <BrainCircuit size={11} color={koiosOpen ? 'white' : 'var(--color-on-accent)'} />
+            style={{ width: 18, height: 18, background: 'var(--color-primary)' }}>
+            {/* The solid accent brand circle is the one constant across both states;
+                on-accent keeps the icon readable on a light tenant brand. */}
+            <BrainCircuit size={11} color="var(--color-on-accent)" />
           </div>
           {expanded && (
-            // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- Koios-merklabel in het chroom met eigen kleurwissel per open-staat; SectionTitle-atoom draagt --text en past hier niet
+            // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- Koios-merklabel in het chroom met vaste accentinkt; SectionTitle-atoom draagt --text en past hier niet
             <span style={{ fontSize: 13, fontWeight: 600, flex: 1, textAlign: 'left',
-              color: koiosOpen ? 'var(--color-on-accent)' : 'var(--color-primary-text)' }}>
+              color: 'var(--color-primary-text)' }}>
               Koios
             </span>
           )}
-          {expanded && !koiosOpen && (
+          {/* AI badge stays in BOTH states (KOIOS-NAV-TINT-1: one button, two strengths). */}
+          {expanded && (
             <span style={{ fontSize: 9, fontWeight: 600, padding: '2px 6px',
               // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- chrome-accentvlak (actieve nav-marker/merkcirkel, zie de aangrenzende ACCENT-INK/SIDEBAR-CONTRAST-comments), geen actieoppervlak
               background: 'var(--color-primary)', color: 'var(--color-on-accent)', borderRadius: 99, letterSpacing: '0.04em' }}>

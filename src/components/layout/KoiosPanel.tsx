@@ -3,6 +3,7 @@ import type { ChangeEvent, KeyboardEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { X, Bot, AtSign, Paperclip, ArrowUp } from 'lucide-react'
 import { useLocale } from '@/lib/datetime'
+import { tint, tintBg, TINT_BORDER } from '@/lib/tint'
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion'
 import { useKoiosChat } from './koios/useKoiosChat'
 import { useKoiosSettings } from './koios/useKoiosSettings'
@@ -257,6 +258,20 @@ export default function KoiosPanel({ open, onClose, onNavigate }: { open?: boole
 
   const newChat = () => { reset(); setInput(''); setShowMention(false); setActiveCategory(null); setContextRefs([]) }
 
+  // CONNECT-1 (Danny 22-08): the header's disconnected indicator jumps straight
+  // to the screen that configures this connection (Settings → AI → Koios,
+  // KoiosStatusCard) via SettingsPage's canonical #settings/<category>/<tab>
+  // hash contract. `onNavigate` already pushes a '#settings' history entry, so
+  // the deep sub-tab hash REPLACES that entry (a second push would make Back
+  // land on the rejected bare '#settings' — the documented dead-Back trap in
+  // DashboardLayout); replaceState fires no hashchange, so an already-mounted
+  // SettingsPage is told explicitly.
+  const goToKoiosSettings = () => {
+    onNavigate?.('settings')
+    window.history.replaceState(null, '', '#settings/ai/koios')
+    window.dispatchEvent(new HashChangeEvent('hashchange'))
+  }
+
   if (!open) return null
 
   return (
@@ -269,7 +284,7 @@ export default function KoiosPanel({ open, onClose, onNavigate }: { open?: boole
 
       {/* ── Header ── */}
       <KoiosHeader connected={connected} expanded={isExpanded} onNewChat={newChat}
-        onToggleExpanded={toggleExpanded} onClose={onClose} t={t} />
+        onToggleExpanded={toggleExpanded} onClose={onClose} onConfigure={goToKoiosSettings} t={t} />
 
       {/* ── Resize handle: drag or arrow-keys to resize, Home/End to the bounds ── */}
       <KoiosResizeHandle width={width} minWidth={minWidth} maxWidth={maxWidth}
@@ -320,12 +335,15 @@ export default function KoiosPanel({ open, onClose, onNavigate }: { open?: boole
                 <span key={ref.id} title={pending ? t('koios.contextPending') : undefined} style={{
                   display: 'inline-flex', alignItems: 'center', gap: 4, padding: '3px 8px', borderRadius: 999,
                   fontSize: 11, fontWeight: 500,
-                  background: 'color-mix(in srgb, var(--color-primary) 12%, transparent)',
+                  // §4 tint formula via lib/tint, not an ad-hoc color-mix percentage.
+                  // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- tintBg/tintBorder ARE the canonical §4 tint helpers; the primary token here is only their argument, not a hand-painted fill
+                  background: tintBg('var(--color-primary)'),
                   color: 'var(--color-primary-text)',
-                  border: `1px ${pending ? 'dashed' : 'solid'} color-mix(in srgb, var(--color-primary) 40%, transparent)`,
+                  border: `1px ${pending ? 'dashed' : 'solid'} ${tint('var(--color-primary)', TINT_BORDER)}`,
                 }}>
                   {ref.label}
                   <button onClick={() => removeContext(ref.id)} aria-label={`${t('remove')} ${ref.label}`}
+                    // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- bare × INSIDE a chip: a nested Button would paint a second face inside the chip (BranchSection/PoolsSection precedent)
                     style={{ display: 'flex', border: 'none', background: 'none', cursor: 'pointer', color: 'inherit', padding: 0 }}>
                     <X size={10} />
                   </button>
@@ -354,6 +372,7 @@ export default function KoiosPanel({ open, onClose, onNavigate }: { open?: boole
             onBlur={() => setFocused(false)}
             placeholder={t('koios.taskPlaceholder')}
             rows={1}
+            // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- the composer's own <textarea> control, not a text-display atom; BodyText renders a <p>/<span> and cannot back a form control
             style={{
               width: '100%', background: 'none', border: 'none', outline: 'none',
               resize: 'none', fontSize: 13, color: 'var(--text)', fontFamily: 'inherit',
@@ -368,6 +387,7 @@ export default function KoiosPanel({ open, onClose, onNavigate }: { open?: boole
             <button
               onClick={() => { setInput(v => v + '@'); setShowMention(true); setMentionQ(''); setActiveCategory(null); textareaRef.current?.focus() }}
               title={t('koios.addContext')}
+              // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- imperative two-property hover swap (background AND ink together); not a static Button variant
               style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px 5px',
                 borderRadius: 7, color: 'var(--sidebar-muted)', display: 'flex',
                 transition: 'background 0.1s, color 0.1s' }}
@@ -377,7 +397,9 @@ export default function KoiosPanel({ open, onClose, onNavigate }: { open?: boole
             </button>
 
             {/* Paperclip */}
-            <button title={t('koios.attachFile')}
+            <button
+              title={t('koios.attachFile')}
+              // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- imperative two-property hover swap (background AND ink together); not a static Button variant
               style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px 5px',
                 borderRadius: 7, color: 'var(--sidebar-muted)', display: 'flex',
                 transition: 'background 0.1s, color 0.1s' }}
@@ -404,6 +426,7 @@ export default function KoiosPanel({ open, onClose, onNavigate }: { open?: boole
               onClick={() => submit(input)}
               disabled={!input.trim() || loading}
               aria-label={t('koios.taskPlaceholder')}
+              // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- circular send control with a dynamic disabled-state fill/ink pair AND a hover-scale transform; none of Button's static variants model either
               style={{
                 width: 30, height: 30, borderRadius: '50%', border: 'none', flexShrink: 0,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -431,7 +454,7 @@ export default function KoiosPanel({ open, onClose, onNavigate }: { open?: boole
         @keyframes bounce { 0%,80%,100%{transform:translateY(0)} 40%{transform:translateY(-5px)} }
         @keyframes fadeSlideIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
         .km-koios-resize-handle:hover, .km-koios-resize-handle:focus-visible {
-          background: color-mix(in srgb, var(--color-primary) 35%, transparent);
+          background: ${tint('var(--color-primary)', TINT_BORDER)};
         }
       `}</style>
     </div>

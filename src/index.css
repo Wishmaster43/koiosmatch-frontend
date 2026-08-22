@@ -23,6 +23,11 @@
   --color-success-text:  #15803D;
   --color-success-bg:    #DCFCE7;
   --color-warning:       #D97706;
+  /* Warning as TEXT ink (same twin family as danger/success): the fill
+     colour reads 3.19:1 on the light --bg — an AA fail; amber-700 clears
+     4.5:1 on both light grounds. Dark redefines the twin. Never
+     --color-warning itself as text. */
+  --color-warning-text:  #B45309;
   --color-warning-bg:    #FEF3C7;
   --color-danger:        #DC2626;
   /* Danger as TEXT ink (mirrors --color-primary-text): the fill colour is NOT
@@ -240,6 +245,9 @@
   /* Success-as-text twin: green-400 reads 9.60:1 on the dark surface (the fill
      colour manages 5.08 there, but one twin per family keeps the rule simple). */
   --color-success-text:  #4ADE80;
+  /* Warning-as-text twin on the dark surfaces: amber-400 clears both dark
+     grounds comfortably where the raw fill sits near the AA line. */
+  --color-warning-text:  #FBBF24;
   /* Warm/light inks for the dark warning (≈#422E26) and info (≈#193550)
      composites — 10.21:1 and 9.53:1 (r8). */
   --color-on-warning-bg: #FDE68A;

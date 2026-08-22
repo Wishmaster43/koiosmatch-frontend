@@ -196,6 +196,7 @@
     "forbidden": "Je hebt geen toegang tot Koios.",
     "usageLine": "{{model}} · {{tokens}} tokens · {{cost}}",
     "offline": "Niet gekoppeld",
+    "offlineConnect": "Koios is niet gekoppeld. Klik om te koppelen.",
     "contextPending": "Dit record kan nog niet als AI-context worden gekoppeld. Alleen ter referentie vastgepind.",
     "radar": {
       "title": "Koios Advies",
