@@ -66,6 +66,7 @@
       "changelog": "Modifications",
       "notes": "Notes",
       "tasks": "Tâches",
+      "emails": "E-mails",
       "extra": "Extra",
       "customer": "Client"
     },
@@ -153,6 +154,18 @@
     "error": "Impossible de charger les modifications.",
     "empty": "Aucune modification pour l’instant.",
     "system": "Système"
+  },
+  "email": {
+    "loading": "Chargement des e-mails…",
+    "error": "Impossible de charger les e-mails.",
+    "noAccess": "Pas d'accès au journal des e-mails.",
+    "empty": "Aucun e-mail pour cette opportunité pour le moment.",
+    "showingOf": "Les {{shown}} premiers e-mails sur {{total}}.",
+    "body": {
+      "loading": "Chargement du message…",
+      "error": "Impossible de charger ce message.",
+      "noAccess": "Pas d'accès à ce message."
+    }
   },
   "notes": {
     "title": "Notes",

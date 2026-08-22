@@ -68,6 +68,7 @@
       "statistics": "Statistieken",
       "notes": "Notities",
       "tasks": "Taken",
+      "emails": "E-mails",
       "changelog": "Wijzigingen",
       "extra": "Extra",
       "customer": "Klant"
@@ -80,6 +81,18 @@
       "empty": "Nog geen kansstatistieken beschikbaar.",
       "onlyOpportunity": "Geen andere kansen gevonden.",
       "openOpportunity": "Kans openen"
+    }
+  },
+  "email": {
+    "loading": "E-mails laden…",
+    "error": "E-mails konden niet geladen worden.",
+    "noAccess": "Geen toegang tot het e-maillog.",
+    "empty": "Nog geen e-mails voor deze kans.",
+    "showingOf": "Eerste {{shown}} van {{total}} e-mails.",
+    "body": {
+      "loading": "Bericht laden…",
+      "error": "Bericht kon niet geladen worden.",
+      "noAccess": "Geen toegang tot dit bericht."
     }
   },
   "notes": {

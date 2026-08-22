@@ -68,6 +68,7 @@
       "statistics": "Statistics",
       "notes": "Notes",
       "tasks": "Tasks",
+      "emails": "Emails",
       "changelog": "Changelog",
       "extra": "Extra",
       "customer": "Client"
@@ -80,6 +81,18 @@
       "empty": "No opportunity statistics available yet.",
       "onlyOpportunity": "No other opportunities found.",
       "openOpportunity": "Open opportunity"
+    }
+  },
+  "email": {
+    "loading": "Loading emails…",
+    "error": "Emails could not be loaded.",
+    "noAccess": "No access to the email log.",
+    "empty": "No emails for this opportunity yet.",
+    "showingOf": "First {{shown}} of {{total}} emails.",
+    "body": {
+      "loading": "Loading message…",
+      "error": "The message could not be loaded.",
+      "noAccess": "No access to this message."
     }
   },
   "notes": {

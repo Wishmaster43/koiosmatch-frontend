@@ -66,6 +66,7 @@
       "changelog": "Cambios",
       "notes": "Notas",
       "tasks": "Tareas",
+      "emails": "Correos",
       "extra": "Extra",
       "customer": "Cliente"
     },
@@ -153,6 +154,18 @@
     "error": "No se pudieron cargar los cambios.",
     "empty": "Aún no hay cambios.",
     "system": "Sistema"
+  },
+  "email": {
+    "loading": "Cargando correos…",
+    "error": "No se pudieron cargar los correos.",
+    "noAccess": "Sin acceso al registro de correos.",
+    "empty": "Aún no hay correos para esta oportunidad.",
+    "showingOf": "Primeros {{shown}} de {{total}} correos.",
+    "body": {
+      "loading": "Cargando mensaje…",
+      "error": "No se pudo cargar el mensaje.",
+      "noAccess": "Sin acceso a este mensaje."
+    }
   },
   "notes": {
     "title": "Notas",

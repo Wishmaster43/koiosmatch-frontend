@@ -17,6 +17,7 @@ import DetailsTab from './drawer/DetailsTab'
 import StatisticsTab from './drawer/StatisticsTab'
 import CustomerRelationTab from './drawer/CustomerRelationTab'
 import NotesTab from './drawer/NotesTab'
+import EmailTab from './drawer/EmailTab'
 import TasksTab from './drawer/TasksTab'
 import ChangelogPopover from '@/components/drawer/ChangelogPopover'
 import ChangelogTab from './drawer/ChangelogTab'
@@ -98,6 +99,8 @@ export default function OpportunityDrawer({
     { id: 'statistics', label: t('drawer.tabs.statistics'), render: () => <StatisticsTab opportunity={o} allRows={allRows} valueInHours={valueInHours} /> },
     { id: 'customer', label: t('drawer.tabs.customer'), render: () => <CustomerRelationTab opportunity={o} customers={customers} onUpdate={onUpdate} /> },
     { id: 'notes',   label: t('drawer.tabs.notes'),   render: () => <NotesTab opportunity={o} /> },
+    // KANSEN-VERDIEPING-PLAN DEEL 2 fase A item 5: e-mail history, e-mail-only sub-tab.
+    { id: 'emails',  label: t('drawer.tabs.emails'),  render: () => <EmailTab opportunity={o} /> },
     { id: 'tasks',   label: t('drawer.tabs.tasks'),   render: () => <TasksTab opportunity={o} /> },
     ...(customFieldDefs.length > 0 ? [{ id: 'extra', label: t('drawer.tabs.extra'), render: () => (
       <CustomFieldsTab entityType="opportunity" values={o.customFieldValues ?? {}}

@@ -66,6 +66,7 @@
       "changelog": "Änderungen",
       "notes": "Notizen",
       "tasks": "Aufgaben",
+      "emails": "E-Mails",
       "extra": "Extra",
       "customer": "Kunde"
     },
@@ -153,6 +154,18 @@
     "error": "Änderungen konnten nicht geladen werden.",
     "empty": "Noch keine Änderungen.",
     "system": "System"
+  },
+  "email": {
+    "loading": "E-Mails werden geladen…",
+    "error": "E-Mails konnten nicht geladen werden.",
+    "noAccess": "Kein Zugriff auf das E-Mail-Protokoll.",
+    "empty": "Noch keine E-Mails für diese Chance.",
+    "showingOf": "Erste {{shown}} von {{total}} E-Mails.",
+    "body": {
+      "loading": "Nachricht wird geladen…",
+      "error": "Die Nachricht konnte nicht geladen werden.",
+      "noAccess": "Kein Zugriff auf diese Nachricht."
+    }
   },
   "notes": {
     "title": "Notizen",
