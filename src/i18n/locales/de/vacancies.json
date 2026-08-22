@@ -339,6 +339,7 @@
     "functions": "Funktion",
     "statuses": "Einsetzbarkeit",
     "contractForms": "Vertragsform",
+    "removeFilter": "Filter '{{label}}' entfernen",
     "onMap": "{{count}} Kandidaten auf der Karte",
     "empty": "Keine Kandidaten innerhalb dieser Filter gefunden.",
     "centerVacancy": "Standort der Stelle",

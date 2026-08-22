@@ -39,10 +39,13 @@ const mockPost = api.post as unknown as ReturnType<typeof vi.fn>
 // Toast helper spies — asserted for the refresh-advice queued/failed outcomes.
 vi.mock('@/lib/notify', () => ({ notify: vi.fn(), notifyError: vi.fn(), notifySuccess: vi.fn() }))
 
-// Stub the map — Leaflet cannot run under jsdom; assert the props it receives instead.
-vi.mock('@/components/map/RadiusMapPanel', () => ({
-  default: ({ points, radiusKm, pointsLabel }: { points: Array<{ id: string | number }>; radiusKm: number; pointsLabel?: string }) => (
-    <div data-testid="radius-map-panel" data-radius={radiusKm} data-points={points.length}>{pointsLabel}</div>
+// Stub the bare map — Leaflet cannot run under jsdom; assert the props it
+// receives instead. GEOSEARCH-1 (22-08): the radius slider/km input/point-count
+// line now render for real inside GeoSearchShell (this tab no longer mounts
+// RadiusMapPanel).
+vi.mock('@/components/map/RadiusMap', () => ({
+  default: ({ points, radiusKm }: { points: Array<{ id: string | number }>; radiusKm: number }) => (
+    <div data-testid="radius-map" data-radius={radiusKm} data-points={points.length} />
   ),
 }))
 
@@ -125,7 +128,7 @@ describe('CandidateSearchTab · fetch + defaults', () => {
     expect(text.indexOf('Alice')).toBeLessThan(text.indexOf('Bob'))
     expect(screen.getByText('92%')).toBeInTheDocument()
     expect(screen.getByText('60%')).toBeInTheDocument()
-    expect(screen.getByTestId('radius-map-panel')).toHaveAttribute('data-points', '2')
+    expect(screen.getByTestId('radius-map')).toHaveAttribute('data-points', '2')
   })
 })
 
@@ -179,7 +182,7 @@ describe('CandidateSearchTab · no location (degrades, never dead-ends)', () => 
     render(<CandidateSearchTab vacancy={vacancyNoLocation} />)
 
     expect(screen.getByText(nl.candidateSearch.noLocation)).toBeInTheDocument()
-    expect(screen.queryByTestId('radius-map-panel')).toBeNull()
+    expect(screen.queryByTestId('radius-map')).toBeNull()
     await waitFor(() => expect(screen.getByText('Alice')).toBeInTheDocument())
   })
 })
@@ -190,8 +193,10 @@ describe('CandidateSearchTab · status toggle via the searchable dropdown', () =
     render(<CandidateSearchTab vacancy={vacancyWithLocation} />)
     await waitFor(() => expect(mockGet).toHaveBeenCalledTimes(1))
 
-    // Open the "Inzetbaarheid" SearchSelect (trigger restates the label + the
-    // 1 pre-selected default), then check the second status option.
+    // Open the "Inzetbaarheid" SearchSelect — GEOSEARCH-1 (22-08): the trigger's
+    // accessible name is now just the field label (FilterTriggerPill shows the
+    // count visually, mirrors candidates/drawer/VacancySearchFilters), then
+    // check the second status option.
     await userEvent.click(screen.getByRole('button', { name: 'Inzetbaarheid (1)' }))
     await userEvent.click(screen.getByRole('button', { name: 'Niet beschikbaar' }))
 
@@ -217,6 +222,65 @@ describe('CandidateSearchTab · contract-form filter (new third dropdown)', () =
       params: { radius: 30, status: ['available'], function_title: ['Verzorgende IG'], contract_form: ['freelance'], per_page: 100 },
       signal: expect.anything(),
     })
+  })
+})
+
+// GEOSEARCH-1 (Danny 22-08): this side has no HIDDEN secondary filter to mirror
+// the candidate side's "Meer filters" chips with — instead every currently
+// SELECTED value across the three visible filters gets its own removable chip
+// (the shared ActiveFilterChip, extracted for both search twins).
+describe('CandidateSearchTab · active-filter chips (GEOSEARCH-1)', () => {
+  it('shows a chip for the default-seeded function AND status, none for the (empty) contract form', async () => {
+    mockGet.mockResolvedValue({ data: { data: [] } })
+    render(<CandidateSearchTab vacancy={vacancyWithLocation} />)
+    await waitFor(() => expect(mockGet).toHaveBeenCalledTimes(1))
+
+    expect(screen.getByText('Verzorgende IG')).toBeInTheDocument()
+    expect(screen.getByText('Beschikbaar')).toBeInTheDocument()
+    expect(screen.queryByText('ZZP')).toBeNull()
+    expect(screen.queryByText('Uitzendkracht')).toBeNull()
+  })
+
+  it('removing the function chip drops it from the request without opening the dropdown', async () => {
+    mockGet.mockResolvedValue({ data: { data: [] } })
+    render(<CandidateSearchTab vacancy={vacancyWithLocation} />)
+    await waitFor(() => expect(mockGet).toHaveBeenCalledTimes(1))
+
+    await userEvent.click(screen.getByRole('button', { name: "Filter 'Verzorgende IG' verwijderen" }))
+
+    await waitFor(() => expect(mockGet).toHaveBeenCalledTimes(2))
+    expect(mockGet).toHaveBeenLastCalledWith('/vacancies/v1/candidate-matches', {
+      params: { radius: 30, status: ['available'], per_page: 100 },
+      signal: expect.anything(),
+    })
+    expect(screen.queryByText('Verzorgende IG')).toBeNull()
+  })
+
+  it('a toggled-in contract form gets its own chip, labelled from the tenant lookup', async () => {
+    mockGet.mockResolvedValue({ data: { data: [] } })
+    render(<CandidateSearchTab vacancy={vacancyWithLocation} />)
+    await waitFor(() => expect(mockGet).toHaveBeenCalledTimes(1))
+
+    await userEvent.click(screen.getByRole('button', { name: 'Contractvorm' }))
+    await userEvent.click(screen.getByRole('button', { name: 'ZZP' }))
+    await waitFor(() => expect(mockGet).toHaveBeenCalledTimes(2))
+    // Close the still-open multi-select popover — its own "ZZP" option button
+    // would otherwise collide with the new chip's identical text.
+    await userEvent.keyboard('{Escape}')
+
+    expect(screen.getByText('ZZP')).toBeInTheDocument()
+  })
+
+  it('keeps only the seeded status chip when nothing else is selected (no function chip without a category)', async () => {
+    mockGet.mockResolvedValue({ data: { data: [] } })
+    render(<CandidateSearchTab vacancy={vacancyNoLocation} />)
+    await waitFor(() => expect(mockGet).toHaveBeenCalledTimes(1))
+
+    // vacancyNoLocation carries no category, so no function seeds; the mocked
+    // tenant status/candidateTypes lookups still seed 'available' via the
+    // shared soft-default rule, so only the status chip is expected here.
+    expect(screen.queryByText('Verzorgende IG')).toBeNull()
+    expect(screen.getByText('Beschikbaar')).toBeInTheDocument()
   })
 })
 

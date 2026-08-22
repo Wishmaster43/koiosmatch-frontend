@@ -339,6 +339,7 @@
     "functions": "Fonction",
     "statuses": "Disponibilité",
     "contractForms": "Forme de contrat",
+    "removeFilter": "Supprimer le filtre '{{label}}'",
     "onMap": "{{count}} candidats sur la carte",
     "empty": "Aucun candidat trouvé avec ces filtres.",
     "centerVacancy": "Lieu du poste",

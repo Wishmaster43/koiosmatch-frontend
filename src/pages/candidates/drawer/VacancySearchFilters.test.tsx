@@ -10,21 +10,26 @@
  * now live behind the shared DrawerFilterMenu popover — tests that reach
  * those two controls open it ("Meer filters") first. A section below covers
  * the popover trigger + the removable secondary-filter chips it feeds.
+ *
+ * GEOSEARCH-1 (Danny 22-08): the trigger row (VacancySearchFilters, default
+ * export) and the chips row (VacancySearchActiveFilters) are now two separate
+ * components rendered into GeoSearchShell's own slots — tests below render
+ * whichever one owns the behaviour under test.
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 // Real i18next instance so t() resolves actual locale strings, not raw keys.
 import '@/i18n'
-import VacancySearchFilters from './VacancySearchFilters'
+import VacancySearchFilters, { VacancySearchActiveFilters } from './VacancySearchFilters'
 
 // This project ships no @types/node; process.env.TZ is a genuine Node global at
 // test runtime (Vitest runs under Node) — this is a minimal local type shim for it.
 declare const process: { env: Record<string, string | undefined> }
 
-// Minimal, fully-inert prop set — every callback is a spy, every gated filter
-// off by default so each test opts IN to only what it needs.
-const baseProps = {
+// Minimal, fully-inert prop set for the TRIGGER ROW — every callback is a spy,
+// every gated filter off by default so each test opts IN to only what it needs.
+const filtersBaseProps = {
   statusOptions: [{ value: 'open', label: 'Open' }],
   statuses: [],
   onStatusesChange: vi.fn(),
@@ -35,6 +40,17 @@ const baseProps = {
   contractvormOptions: ['ZZP'],
   contractvorm: [],
   onContractvormChange: vi.fn(),
+  hasHoursData: false,
+  hoursRange: [0, 40] as [number, number],
+  hoursRangeMax: 40,
+  onHoursRangeChange: vi.fn(),
+  hasAvailableFromData: false,
+  availableFrom: '',
+  onAvailableFromChange: vi.fn(),
+}
+
+// Same shape, minus the fields only the trigger row needs — for the CHIPS row.
+const chipsBaseProps = {
   hasHoursData: false,
   hoursRange: [0, 40] as [number, number],
   hoursRangeMax: 40,
@@ -56,7 +72,7 @@ describe('VacancySearchFilters · no native browser controls (COMPACT-1 regressi
   it('never renders a native <input type="date"> or <input type="range">, even with both gated filters on', async () => {
     const user = userEvent.setup()
     const { container } = render(
-      <VacancySearchFilters {...baseProps} hasHoursData hasAvailableFromData availableFrom="2026-08-20" />,
+      <VacancySearchFilters {...filtersBaseProps} hasHoursData hasAvailableFromData availableFrom="2026-08-20" />,
     )
     await openMoreFilters(user)
     expect(container.querySelector('input[type="date"]')).toBeNull()
@@ -65,7 +81,7 @@ describe('VacancySearchFilters · no native browser controls (COMPACT-1 regressi
 
   it('renders the "Inzetbaar vanaf" value as DD-MM-YYYY via the shared datepicker, once the popover is open', async () => {
     const user = userEvent.setup()
-    render(<VacancySearchFilters {...baseProps} hasAvailableFromData availableFrom="2026-08-20" />)
+    render(<VacancySearchFilters {...filtersBaseProps} hasAvailableFromData availableFrom="2026-08-20" />)
     await openMoreFilters(user)
     expect(screen.getByDisplayValue('20-08-2026')).toBeInTheDocument()
   })
@@ -94,7 +110,7 @@ describe('VacancySearchFilters · no native browser controls (COMPACT-1 regressi
     it('reports "2026-01-15" when the today cell is picked, not "2026-01-14"', async () => {
       const user = userEvent.setup()
       const onAvailableFromChange = vi.fn()
-      render(<VacancySearchFilters {...baseProps} hasAvailableFromData availableFrom="" onAvailableFromChange={onAvailableFromChange} />)
+      render(<VacancySearchFilters {...filtersBaseProps} hasAvailableFromData availableFrom="" onAvailableFromChange={onAvailableFromChange} />)
       await openMoreFilters(user)
       await user.click(screen.getByRole('textbox'))
       // The calendar renders into the shared datepicker-portal, outside this filter row —
@@ -108,7 +124,7 @@ describe('VacancySearchFilters · no native browser controls (COMPACT-1 regressi
 
   it('renders the hours-per-week range as the shared two-thumb Slider, not a raw input', async () => {
     const user = userEvent.setup()
-    render(<VacancySearchFilters {...baseProps} hasHoursData />)
+    render(<VacancySearchFilters {...filtersBaseProps} hasHoursData />)
     await openMoreFilters(user)
     expect(screen.getAllByRole('slider')).toHaveLength(2)
   })
@@ -116,85 +132,88 @@ describe('VacancySearchFilters · no native browser controls (COMPACT-1 regressi
 
 describe('VacancySearchFilters · gated filters stay gated', () => {
   it('omits the "Meer filters" trigger entirely when neither secondary filter is offered', () => {
-    render(<VacancySearchFilters {...baseProps} />)
+    render(<VacancySearchFilters {...filtersBaseProps} />)
     expect(screen.queryByRole('button', { name: 'Meer filters' })).toBeNull()
+  })
+
+  it('the badge on "Meer filters" counts exactly the active secondary filters', () => {
+    render(<VacancySearchFilters {...filtersBaseProps} hasHoursData hoursRange={[8, 32]} hasAvailableFromData availableFrom="2026-08-20" />)
+    expect(screen.getByText('2')).toBeInTheDocument()
   })
 })
 
-describe('VacancySearchFilters · secondary filters as removable chips (P8-more-filters)', () => {
-  it('an active hours-per-week narrowing shows as a removable chip beside the trigger', async () => {
-    render(<VacancySearchFilters {...baseProps} hasHoursData hoursRange={[8, 32]} />)
+describe('VacancySearchActiveFilters · secondary filters as removable chips (P8-more-filters)', () => {
+  it('an active hours-per-week narrowing shows as a removable chip', () => {
+    render(<VacancySearchActiveFilters {...chipsBaseProps} hasHoursData hoursRange={[8, 32]} />)
     expect(screen.getByText('8–32 uur/week')).toBeInTheDocument()
   })
 
   it('the resting (unbounded) hours range shows NO chip — it has not actually narrowed anything', () => {
-    render(<VacancySearchFilters {...baseProps} hasHoursData hoursRange={[0, 40]} />)
+    render(<VacancySearchActiveFilters {...chipsBaseProps} hasHoursData hoursRange={[0, 40]} />)
     expect(screen.queryByText(/uur\/week/)).toBeNull()
   })
 
-  it('clicking the hours chip\'s × resets the range to fully open, without opening the popover', async () => {
+  it('clicking the hours chip\'s × resets the range to fully open', async () => {
     const user = userEvent.setup()
     const onHoursRangeChange = vi.fn()
-    render(<VacancySearchFilters {...baseProps} hasHoursData hoursRange={[8, 32]} onHoursRangeChange={onHoursRangeChange} />)
+    render(<VacancySearchActiveFilters {...chipsBaseProps} hasHoursData hoursRange={[8, 32]} onHoursRangeChange={onHoursRangeChange} />)
     await user.click(screen.getByRole('button', { name: "Filter 'Uren per week' verwijderen" }))
     expect(onHoursRangeChange).toHaveBeenCalledWith([0, 40])
   })
 
   it('an active "Inzetbaar vanaf" shows as a removable chip with a DD-MM-YYYY label', () => {
-    render(<VacancySearchFilters {...baseProps} hasAvailableFromData availableFrom="2026-08-20" />)
+    render(<VacancySearchActiveFilters {...chipsBaseProps} hasAvailableFromData availableFrom="2026-08-20" />)
     expect(screen.getByText('Inzetbaar vanaf: 20-08-2026')).toBeInTheDocument()
   })
 
   it('clicking the "Inzetbaar vanaf" chip\'s × clears it to \'\'', async () => {
     const user = userEvent.setup()
     const onAvailableFromChange = vi.fn()
-    render(<VacancySearchFilters {...baseProps} hasAvailableFromData availableFrom="2026-08-20" onAvailableFromChange={onAvailableFromChange} />)
+    render(<VacancySearchActiveFilters {...chipsBaseProps} hasAvailableFromData availableFrom="2026-08-20" onAvailableFromChange={onAvailableFromChange} />)
     await user.click(screen.getByRole('button', { name: "Filter 'Inzetbaar vanaf' verwijderen" }))
     expect(onAvailableFromChange).toHaveBeenCalledWith('')
-  })
-
-  it('the badge on "Meer filters" counts exactly the active secondary filters', () => {
-    render(<VacancySearchFilters {...baseProps} hasHoursData hoursRange={[8, 32]} hasAvailableFromData availableFrom="2026-08-20" />)
-    expect(screen.getByText('2')).toBeInTheDocument()
   })
 })
 
 // FILTER-VLAK-1 (Danny 13-08, rustplan step 1+2): the three fixed triggers
 // carry their own label + count, no separate field label; the reset link and
-// the active secondary chips only render on a SITUATIONAL second row, and only
-// while something is genuinely active — this pins that structure.
+// the active secondary chips only render on a SITUATIONAL row, and only while
+// something is genuinely active — this pins that structure.
 describe('VacancySearchFilters · single-row structure (FILTER-VLAK-1)', () => {
   it('renders no bare field labels beside the three fixed triggers — the label lives inside the trigger', () => {
-    render(<VacancySearchFilters {...baseProps} statuses={['open']} />)
+    render(<VacancySearchFilters {...filtersBaseProps} statuses={['open']} />)
     // The trigger carries the label + a count badge, never a separate label span.
-    const trigger = screen.getByRole('button', { name: 'Vacaturestatus' })
+    const trigger = screen.getByRole('button', { name: 'Vacaturestatus (1)' })
     expect(trigger).toHaveTextContent('Vacaturestatus')
     expect(trigger).toHaveTextContent('1')
   })
+})
 
-  it('shows no second row at all while every filter is at rest', () => {
-    render(<VacancySearchFilters {...baseProps} />)
+describe('VacancySearchActiveFilters · situational row (FILTER-VLAK-1)', () => {
+  it('renders nothing at all while every filter is at rest', () => {
+    const { container } = render(<VacancySearchActiveFilters {...chipsBaseProps} />)
+    expect(container).toBeEmptyDOMElement()
     expect(screen.queryByRole('button', { name: 'Filters herstellen' })).toBeNull()
     expect(screen.queryByText(/uur\/week/)).toBeNull()
   })
 
   it('the active hours chip and the reset link appear TOGETHER once a filter narrows the search', () => {
-    render(<VacancySearchFilters {...baseProps} hasHoursData hoursRange={[8, 32]} filtersDirty />)
+    render(<VacancySearchActiveFilters {...chipsBaseProps} hasHoursData hoursRange={[8, 32]} filtersDirty />)
     expect(screen.getByText('8–32 uur/week')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Filters herstellen' })).toBeInTheDocument()
   })
 })
 
-describe('VacancySearchFilters · reset button only shows when something actually changed', () => {
+describe('VacancySearchActiveFilters · reset button only shows when something actually changed', () => {
   it('is absent while filtersDirty is false', () => {
-    render(<VacancySearchFilters {...baseProps} filtersDirty={false} />)
+    render(<VacancySearchActiveFilters {...chipsBaseProps} filtersDirty={false} />)
     expect(screen.queryByRole('button', { name: 'Filters herstellen' })).toBeNull()
   })
 
   it('appears once filtersDirty flips true and calls onReset on click', async () => {
     const onReset = vi.fn()
     const user = userEvent.setup()
-    render(<VacancySearchFilters {...baseProps} filtersDirty onReset={onReset} />)
+    render(<VacancySearchActiveFilters {...chipsBaseProps} filtersDirty onReset={onReset} />)
 
     const button = screen.getByRole('button', { name: 'Filters herstellen' })
     expect(button).toBeInTheDocument()

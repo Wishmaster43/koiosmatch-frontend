@@ -2,18 +2,19 @@ import type { CSSProperties, ReactNode } from 'react'
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { X, ChevronRight } from 'lucide-react'
-import MatchExplorerLayout from '@/components/match/MatchExplorerLayout'
+import GeoSearchShell from '@/components/search/GeoSearchShell'
 import ScorePill from '@/components/match/ScorePill'
 import MatchScoreBlock from '@/components/match/MatchScoreBlock'
-import RadiusMapPanel from '@/components/map/RadiusMapPanel'
+import RadiusMap from '@/components/map/RadiusMap'
 import DrillPager from '@/components/drawer/DrillPager'
 import EntityLink from '@/components/ui/EntityLink'
+import Button from '@/components/ui/Button'
 import KoiosAiMark from '@/components/ui/KoiosAiMark'
 import GeocodeButton from '@/components/ui/GeocodeButton'
 import StatusPill from '@/components/ui/StatusPill'
 import DrawerAddButton from './DrawerAddButton'
 import AddApplicationModal from './AddApplicationModal'
-import VacancySearchFilters from './VacancySearchFilters'
+import VacancySearchFilters, { VacancySearchActiveFilters } from './VacancySearchFilters'
 import api, { unwrap } from '@/lib/api'
 import { useVacancySearch } from '../hooks/useVacancySearch'
 import { useFunctions } from '@/lib/useFunctions'
@@ -21,7 +22,7 @@ import { VacancyLookupsProvider, useVacancyLookups } from '@/context/VacancyLook
 import { toCoord } from '@/lib/coords'
 import { formatCurrency } from '@/lib/formatters'
 // HUISSTIJL-1: the shared JetBrains Mono atom + the muted-caption atom (identity-only swaps).
-import { Mono, Caption } from '@/components/ui/typography'
+import { Mono, Caption, SectionTitle } from '@/components/ui/typography'
 import type { Candidate } from '@/types/candidate'
 import type { Id } from '@/types/common'
 
@@ -159,9 +160,10 @@ function VacancySearchTabInner({ candidate }: { candidate: Candidate }) {
     .filter(r => r.lat != null && r.lng != null)
     .map(r => ({ id: r.id, lat: r.lat as number, lng: r.lng as number, label: r.title, sub: [r.customer, r.city].filter(Boolean).join(' · ') }))
 
-  // Filter bar (own component — the tab stays a thin container, §3): every value
-  // and setter comes straight from the hook, including the reset action.
-  const filtersRow: ReactNode = (
+  // GEOSEARCH-1: the trigger row + the situational chips row are now two
+  // separate slots on the shared GeoSearchShell (own component — the tab
+  // stays a thin container, §3): every value/setter comes straight from the hook.
+  const triggersRow: ReactNode = (
     <VacancySearchFilters
       candidateTitle={candidate.title}
       statusOptions={statusOptions} statuses={selectedStatuses} onStatusesChange={setStatuses}
@@ -170,13 +172,21 @@ function VacancySearchTabInner({ candidate }: { candidate: Candidate }) {
       contractvormOptions={contractvormOptions} contractvorm={contractvorm} onContractvormChange={setContractvorm}
       hasHoursData={hasHoursData} hoursRange={hoursRange} hoursRangeMax={hoursRangeMax} onHoursRangeChange={setHoursRange}
       hasAvailableFromData={hasAvailableFromData} availableFrom={availableFrom} onAvailableFromChange={setAvailableFrom}
+    />
+  )
+  const chipsRow: ReactNode = (
+    <VacancySearchActiveFilters
+      hasHoursData={hasHoursData} hoursRange={hoursRange} hoursRangeMax={hoursRangeMax} onHoursRangeChange={setHoursRange}
+      hasAvailableFromData={hasAvailableFromData} availableFrom={availableFrom} onAvailableFromChange={setAvailableFrom}
       filtersDirty={filtersDirty} onReset={resetFilters}
     />
   )
 
   // GEO-DEGRADE-1 (Danny 08-08): an un-geocoded candidate used to blank the WHOLE tab
   // — filters, list and all. Only the map genuinely needs coordinates, so the notice
-  // takes the map's place (with the shared geocode trigger) and everything else works.
+  // takes the map's place (with the shared geocode trigger) and everything else works;
+  // the radius chrome (GeoSearchShell's own `radius` prop) is omitted entirely too —
+  // there is nothing to measure a radius from.
   const mapPane: ReactNode = noLocation ? (
     <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: 16, border: '1px dashed var(--border)', borderRadius: 10 }}>
       <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('vacancySearch.noLocation')}</span>
@@ -184,18 +194,12 @@ function VacancySearchTabInner({ candidate }: { candidate: Candidate }) {
         variant="row" disabled={!candidate.address} />
     </div>
   ) : (
-    <RadiusMapPanel padded={false} points={points} center={center} radiusKm={radiusKm}
-      // Larger viewport offset (Danny 23-07, live feedback) — the drawer chrome
-      // above the tab was pushing the map tall enough to force page scroll;
-      // matches the vacancy-side CandidateSearchTab's own map height 1:1.
-      mapHeight={'clamp(340px, calc(100vh - 540px), 720px)'}
+    <RadiusMap points={points} center={center} radiusKm={radiusKm} height="100%"
       centerMarker={{ label: candidate.name ?? '', sub: t('vacancySearch.centerHome') }}
-      onRadiusChange={setRadiusKm}
       // The candidate's home pin stays fixed — re-centring by clicking the map must
       // never move the search origin away from the candidate's own address.
       onCenterChange={() => {}}
-      onPick={selectVacancy}
-      pointsLabel={t('vacancySearch.onMap', { count: points.length })} />
+      onPickPoint={selectVacancy} />
   )
 
   // Compact summary card for the SELECTED vacancy — shown before navigating away,
@@ -206,9 +210,9 @@ function VacancySearchTabInner({ candidate }: { candidate: Candidate }) {
         <div style={{ minWidth: 0 }}>
           {/* The title IS the link (Danny 23-07): Match-style EntityLink — orange
               name opens in-app, trailing icon a new tab. No separate action row. */}
-          <div style={{ fontSize: 13, fontWeight: 600 }}>
+          <SectionTitle as="div">
             <EntityLink page="vacancies" id={selectedRow.id}>{selectedRow.title}</EntityLink>
-          </div>
+          </SectionTitle>
           {/* HUISSTIJL-1: identical 11/400/var(--text-muted) render as a div. */}
           <Caption as="div">{[selectedRow.customer, selectedRow.city].filter(Boolean).join(' · ') || '—'}</Caption>
         </div>
@@ -220,10 +224,9 @@ function VacancySearchTabInner({ candidate }: { candidate: Candidate }) {
             {/* Browse through the current result list (Danny 05-08, point 3) — same
                 corner as every other detail pager (ContactDetail/LocationDetail). */}
             <DrillPager index={selectedIndex + 1} total={rows.length} onPrev={goPrev} onNext={goNext} />
-            <button onClick={() => setSelectedId(null)} aria-label={t('common:close')}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 2, display: 'flex' }}>
+            <Button variant="ghost" iconOnly size="sm" onClick={() => setSelectedId(null)} aria-label={t('common:close')}>
               <X size={14} />
-            </button>
+            </Button>
           </div>
           {/* Solliciteren (Danny 06-08): the primary action for this open score panel —
               opens the shared AddApplicationModal with this vacancy prefilled. */}
@@ -231,33 +234,33 @@ function VacancySearchTabInner({ candidate }: { candidate: Candidate }) {
         </div>
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-        {/* HUISSTIJL-1: identical fontFamily/size/colour render. */}
+        {/* HUISSTIJL-1: Caption owns the 11/muted identity; Mono only adds the font-family. */}
         {selectedRow.distanceKm != null && (
-          <Mono style={{ fontSize: 11, color: 'var(--text-muted)' }}>{selectedRow.distanceKm.toFixed(1)} km</Mono>
+          <Caption><Mono>{selectedRow.distanceKm.toFixed(1)} km</Mono></Caption>
         )}
         <StatusPill label={statusMeta(selectedRow.status).label} color={statusMeta(selectedRow.status).color} />
         {/* Already-fetched search-row fields (hours + contract form) — render on
             the card too, no extra request needed. */}
         {selectedRow.employmentType && <StatusPill label={selectedRow.employmentType} color="var(--text-muted)" />}
-        {/* HUISSTIJL-1: identical fontFamily/size/colour render. */}
+        {/* HUISSTIJL-1: Caption owns the 11/muted identity; Mono only adds the font-family. */}
         {formatRange(selectedRow.hoursMin, selectedRow.hoursMax, n => String(n)) && (
-          <Mono style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+          <Caption><Mono>
             {t('vacancySearch.cardHours', { range: formatRange(selectedRow.hoursMin, selectedRow.hoursMax, n => String(n)) })}
-          </Mono>
+          </Mono></Caption>
         )}
       </div>
       {/* P8-result-cards: the lazily-fetched detail line (salary/experience) +
           education/seniority soft-chips — summary card ONLY, list rows stay calm. */}
       {detail && (formatRange(detail.salaryMin, detail.salaryMax, n => formatCurrency(n, 'EUR', 'nl-NL', 0)) || formatRange(detail.experienceMin, detail.experienceMax, n => String(n)) || detail.education || detail.seniority) && (
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-          {/* HUISSTIJL-1: identical fontFamily/size/colour render. */}
+          {/* HUISSTIJL-1: Caption owns the 11/muted identity; Mono only adds the font-family. */}
           {formatRange(detail.salaryMin, detail.salaryMax, n => formatCurrency(n, 'EUR', 'nl-NL', 0)) && (
-            <Mono style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+            <Caption><Mono>
               {t('vacancySearch.cardSalary', {
                 range: formatRange(detail.salaryMin, detail.salaryMax, n => formatCurrency(n, 'EUR', 'nl-NL', 0)),
                 period: detail.salaryPeriod ? t(`vacancySearch.salaryPeriod.${detail.salaryPeriod}`, { defaultValue: detail.salaryPeriod }) : '',
               })}
-            </Mono>
+            </Mono></Caption>
           )}
           {formatRange(detail.experienceMin, detail.experienceMax, n => String(n)) && (
             // HUISSTIJL-1: identical 11/400/var(--text-muted) render.
@@ -293,9 +296,9 @@ function VacancySearchTabInner({ candidate }: { candidate: Candidate }) {
   ) : error ? (
     <div style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 8 }}>
       <span style={{ fontSize: 12, color: 'var(--color-danger-text)' }}>{t('common:error.body')}</span>
-      <button onClick={retry} style={{ alignSelf: 'flex-start', fontSize: 12, fontWeight: 600, color: 'var(--color-primary-text)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
+      <Button variant="secondary" size="sm" onClick={retry} style={{ alignSelf: 'flex-start' }}>
         {t('common:error.retry')}
-      </button>
+      </Button>
     </div>
   ) : rows.length === 0 ? (
     // GEO-EMPTY-1 (Danny 14-08 "bij de demo vind ik geen vacatures terwijl die er wel
@@ -331,12 +334,16 @@ function VacancySearchTabInner({ candidate }: { candidate: Candidate }) {
             <div style={{ minWidth: 0 }}>
               {/* Title clicks must not ALSO flip the summary selection; the AI mark
                   signals a Koios-advised match (MATCH-EXPLORER-1 fase 2+3). */}
-              <div style={{ fontSize: 13, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 4, minWidth: 0 }}
-                onClick={e => e.stopPropagation()} onKeyDown={e => e.stopPropagation()}>
-                {r.aiAdvised && <KoiosAiMark size={16} title={r.aiAdviceReason ?? t('vacancySearch.aiAdvised')} />}
-                <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', minWidth: 0 }}>
-                  <EntityLink page="vacancies" id={r.id} title={t('vacancySearch.openInApp')}>{r.title}</EntityLink>
-                </span>
+              {/* SectionTitle carries the text identity only — the click/keydown stop-
+                  propagation sits on this plain wrapping div (the atom's props don't
+                  carry event handlers). */}
+              <div onClick={e => e.stopPropagation()} onKeyDown={e => e.stopPropagation()}>
+                <SectionTitle as="div" style={{ display: 'flex', alignItems: 'center', gap: 4, minWidth: 0 }}>
+                  {r.aiAdvised && <KoiosAiMark size={16} title={r.aiAdviceReason ?? t('vacancySearch.aiAdvised')} />}
+                  <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', minWidth: 0 }}>
+                    <EntityLink page="vacancies" id={r.id} title={t('vacancySearch.openInApp')}>{r.title}</EntityLink>
+                  </span>
+                </SectionTitle>
               </div>
               {/* HUISSTIJL-1: identical 11/400/var(--text-muted) render as a div. */}
               <Caption as="div" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
@@ -365,11 +372,9 @@ function VacancySearchTabInner({ candidate }: { candidate: Candidate }) {
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
               {r.score != null && <ScorePill score={r.score} />}
-              {/* HUISSTIJL-1: identical fontFamily/size/colour render. */}
+              {/* HUISSTIJL-1: Caption owns the 11/muted identity; Mono only adds the font-family. */}
               {r.distanceKm != null && (
-                <Mono style={{ fontSize: 11, color: 'var(--text-muted)' }}>
-                  {r.distanceKm.toFixed(1)} km
-                </Mono>
+                <Caption><Mono>{r.distanceKm.toFixed(1)} km</Mono></Caption>
               )}
               {/* Expand affordance (Danny 05-08, point 2: "niet duidelijk dat je een
                   vacature kan openklappen") — a visible chevron on EVERY row, on top
@@ -389,7 +394,18 @@ function VacancySearchTabInner({ candidate }: { candidate: Candidate }) {
 
   return (
     <>
-      <MatchExplorerLayout filters={filtersRow} map={mapPane} list={listPane} />
+      <GeoSearchShell
+        triggers={triggersRow} chips={chipsRow}
+        radius={noLocation ? undefined : {
+          value: radiusKm, onChange: setRadiusKm,
+          countLabel: t('vacancySearch.onMap', { count: points.length }),
+        }}
+        // Larger viewport offset (Danny 23-07, live feedback) — the drawer chrome
+        // above the tab was pushing the map tall enough to force page scroll;
+        // matches the vacancy-side CandidateSearchTab's own map height 1:1.
+        mapHeight={'clamp(340px, calc(100vh - 540px), 720px)'}
+        map={mapPane} results={listPane}
+      />
       {/* Solliciteren modal — only reachable while a vacancy is selected (the button
           itself lives inside summaryCard, so selectedRow is always set here too).
           onCreated re-triggers the same hook `retry` the error state already uses —

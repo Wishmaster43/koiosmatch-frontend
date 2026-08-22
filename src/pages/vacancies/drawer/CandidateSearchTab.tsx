@@ -2,10 +2,10 @@ import type { CSSProperties } from 'react'
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { RefreshCw, X, ChevronRight } from 'lucide-react'
-import MatchExplorerLayout from '@/components/match/MatchExplorerLayout'
+import GeoSearchShell from '@/components/search/GeoSearchShell'
 import ScorePill from '@/components/match/ScorePill'
 import MatchScoreBlock from '@/components/match/MatchScoreBlock'
-import RadiusMapPanel from '@/components/map/RadiusMapPanel'
+import RadiusMap from '@/components/map/RadiusMap'
 import DrillPager from '@/components/drawer/DrillPager'
 import EntityLink from '@/components/ui/EntityLink'
 import Button from '@/components/ui/Button'
@@ -15,12 +15,13 @@ import FilterTriggerPill from '@/components/ui/FilterTriggerPill'
 import GeocodeButton from '@/components/ui/GeocodeButton'
 import StatusPill from '@/components/ui/StatusPill'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
+import ActiveFilterChip from '@/components/search/ActiveFilterChip'
 // Reuse the candidate-anchored "+ Solliciteren" flow (mirrors ApplicantsTab's own
 // CandidateAddApplicationModal reuse, §2 sanctioned cross-entity import for this
 // exact shared flow) — never a second apply form.
 import { CandidateAddApplicationModal } from '@/pages/candidates/shared'
-// HUISSTIJL-1: filter labels/meta captions (11/muted) and distance readouts (Mono) are the shared atoms.
-import { Caption, Mono } from '@/components/ui/typography'
+// HUISSTIJL-1: filter labels/meta captions (11/muted), titles (13/600) and distance readouts (Mono) are the shared atoms.
+import { Caption, Mono, SectionTitle } from '@/components/ui/typography'
 import { useCandidateSearch } from '../hooks/useCandidateSearch'
 import { useFunctions } from '@/lib/useFunctions'
 import { useLookups } from '@/context/LookupsContext'
@@ -37,9 +38,10 @@ const rowStyle: CSSProperties = { display: 'flex', alignItems: 'center', justify
  * 2+3): candidates matching radius/function/status/contract-form filters,
  * scored best-first by the backend, plotted on the shared RadiusMap + listed
  * side by side (§3A blueprint: thin container, all data via the hook, one
- * small component per tab). Mirrors candidates/drawer/VacancySearchTab's
- * summary-card idiom 1:1 (Danny 23-07): a row/marker pick SELECTS a candidate
- * (a card above the list) instead of navigating away immediately.
+ * small component per tab). GEOSEARCH-1 (Danny 22-08): this tab and
+ * candidates/drawer/VacancySearchTab are functional TWINS — both now mount the
+ * SAME GeoSearchShell (trigger pills, active-filter chips, radius chrome, map,
+ * results) instead of two hand-drifted layouts.
  */
 export default function CandidateSearchTab({ vacancy }: { vacancy: VacancyDetail }) {
   const { t } = useTranslation('vacancies')
@@ -105,9 +107,11 @@ export default function CandidateSearchTab({ vacancy }: { vacancy: VacancyDetail
     .filter(r => r.lat != null && r.lng != null)
     .map(r => ({ id: r.id, lat: r.lat as number, lng: r.lng as number, label: r.name, sub: [r.functionTitle, r.city].filter(Boolean).join(' · ') }))
 
-  // Searchable checklist dropdowns (shared SearchSelect, §3A — never a hand-rolled
-  // chip row), side by side: three filters wrap onto a new line only when narrow
-  // (Danny 23-07: filters must sit next to each other, never stacked).
+  // GEOSEARCH-1 (Danny 22-08): each trigger now carries its OWN label INSIDE the
+  // pill (FilterTriggerPill), mirroring candidates/drawer/VacancySearchFilters —
+  // the caption-above-the-pill layout this tab used to have is gone, and so is
+  // the per-field `minWidth: 180` wrapper it needed. One flex row, same canon
+  // metrics as the candidate side (gap 10, minHeight 36, flexWrap wrap).
   //
   // NOT ADDED (verified 08-08, KAND-FILTERS-1 relocation): hours-per-week +
   // available-before were asked for here too, mirrored after candidates/drawer/
@@ -123,68 +127,80 @@ export default function CandidateSearchTab({ vacancy }: { vacancy: VacancyDetail
   // silently no-op (fake affordance, §3) or need a backend addition (shape +
   // params) PLUS changes to ../hooks/useCandidateSearch.ts, which sits outside
   // this task's file scope. Left out rather than shipped disabled/dead.
-  const filtersRow = (
-    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16 }}>
-      <div style={{ minWidth: 180 }}>
-        <Caption style={{ display: 'block', marginBottom: 4 }}>{t('candidateSearch.functions')}</Caption>
-        <SearchSelect
-          triggerLabel={`${t('candidateSearch.functions')}${selectedFunctions.length > 0 ? ` (${selectedFunctions.length})` : ''}`}
-          renderTrigger={toggle => (
-            <button type="button" onClick={toggle} aria-haspopup="listbox"
-              aria-label={`${t('candidateSearch.functions')}${selectedFunctions.length > 0 ? ` (${selectedFunctions.length})` : ''}`}
-              style={{ background: 'none', border: 'none', padding: 0 }}>
-              <FilterTriggerPill label={t('candidateSearch.functions')} count={selectedFunctions.length} />
-            </button>
-          )}
-          options={functionOptions} selected={selectedFunctions} onToggle={toggleFunction} width={240} />
-      </div>
-      <div style={{ minWidth: 180 }}>
-        <Caption style={{ display: 'block', marginBottom: 4 }}>{t('candidateSearch.statuses')}</Caption>
-        <SearchSelect
-          triggerLabel={`${t('candidateSearch.statuses')}${selectedStatuses.length > 0 ? ` (${selectedStatuses.length})` : ''}`}
-          renderTrigger={toggle => (
-            <button type="button" onClick={toggle} aria-haspopup="listbox"
-              aria-label={`${t('candidateSearch.statuses')}${selectedStatuses.length > 0 ? ` (${selectedStatuses.length})` : ''}`}
-              style={{ background: 'none', border: 'none', padding: 0 }}>
-              <FilterTriggerPill label={t('candidateSearch.statuses')} count={selectedStatuses.length} />
-            </button>
-          )}
-          options={statusOptions.map(s => ({ value: s.value, label: s.label }))} selected={selectedStatuses} onToggle={toggleStatus} width={240} />
-      </div>
-      <div style={{ minWidth: 180 }}>
-        <Caption style={{ display: 'block', marginBottom: 4 }}>{t('candidateSearch.contractForms')}</Caption>
-        <SearchSelect
-          triggerLabel={`${t('candidateSearch.contractForms')}${selectedContractForms.length > 0 ? ` (${selectedContractForms.length})` : ''}`}
-          renderTrigger={toggle => (
-            <button type="button" onClick={toggle} aria-haspopup="listbox"
-              aria-label={`${t('candidateSearch.contractForms')}${selectedContractForms.length > 0 ? ` (${selectedContractForms.length})` : ''}`}
-              style={{ background: 'none', border: 'none', padding: 0 }}>
-              <FilterTriggerPill label={t('candidateSearch.contractForms')} count={selectedContractForms.length} />
-            </button>
-          )}
-          options={candidateTypes.map(c => ({ value: c.value, label: c.label }))} selected={selectedContractForms} onToggle={toggleContractForm} width={240} />
-      </div>
+  const triggersRow = (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 10, minHeight: 36, flexWrap: 'wrap' }}>
+      <SearchSelect
+        renderTrigger={toggle => (
+          // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- zero-chrome SearchSelect renderTrigger wrapper (no fill/border/padding of its own); visible identity is entirely FilterTriggerPill's, mirrors candidates/drawer/VacancySearchFilters.tsx
+          <button type="button" onClick={toggle} aria-haspopup="listbox" aria-label={`${t('candidateSearch.functions')}${selectedFunctions.length > 0 ? ` (${selectedFunctions.length})` : ''}`} style={{ background: 'none', border: 'none', padding: 0 }}>
+            <FilterTriggerPill label={t('candidateSearch.functions')} count={selectedFunctions.length} />
+          </button>
+        )}
+        options={functionOptions} selected={selectedFunctions} onToggle={toggleFunction} width={240} />
+      <SearchSelect
+        renderTrigger={toggle => (
+          // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- zero-chrome SearchSelect renderTrigger wrapper, see the functions trigger above
+          <button type="button" onClick={toggle} aria-haspopup="listbox" aria-label={`${t('candidateSearch.statuses')}${selectedStatuses.length > 0 ? ` (${selectedStatuses.length})` : ''}`} style={{ background: 'none', border: 'none', padding: 0 }}>
+            <FilterTriggerPill label={t('candidateSearch.statuses')} count={selectedStatuses.length} />
+          </button>
+        )}
+        options={statusOptions.map(s => ({ value: s.value, label: s.label }))} selected={selectedStatuses} onToggle={toggleStatus} width={240} />
+      <SearchSelect
+        renderTrigger={toggle => (
+          // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- zero-chrome SearchSelect renderTrigger wrapper, see the functions trigger above
+          <button type="button" onClick={toggle} aria-haspopup="listbox" aria-label={`${t('candidateSearch.contractForms')}${selectedContractForms.length > 0 ? ` (${selectedContractForms.length})` : ''}`} style={{ background: 'none', border: 'none', padding: 0 }}>
+            <FilterTriggerPill label={t('candidateSearch.contractForms')} count={selectedContractForms.length} />
+          </button>
+        )}
+        options={candidateTypes.map(c => ({ value: c.value, label: c.label }))} selected={selectedContractForms} onToggle={toggleContractForm} width={240} />
     </div>
   )
 
+  // GEOSEARCH-1: the candidate side surfaces its (gated, secondary) filters as
+  // removable chips; this tab has no hidden dimension to mirror that with — all
+  // three filters here are already visible via their own trigger+count. Instead
+  // this chips row surfaces every currently SELECTED value across the three,
+  // each with its own × (reusing the toggle handlers above), so a recruiter can
+  // drop one without reopening its dropdown. `useCandidateSearch` exposes no
+  // seed/filtersDirty (out of this task's file scope), so unlike the candidate
+  // side this row shows whenever a filter is non-empty, not only once it drifts
+  // from a tenant default — still honest (§3): every chip here is really active.
+  const functionChips = selectedFunctions.map(name => (
+    <ActiveFilterChip key={`fn-${name}`} label={name}
+      ariaLabel={t('candidateSearch.removeFilter', { label: name })} onRemove={() => toggleFunction(name)} />
+  ))
+  const statusChips = selectedStatuses.map(value => {
+    const label = statusOptions.find(s => s.value === value)?.label ?? value
+    return <ActiveFilterChip key={`st-${value}`} label={label}
+      ariaLabel={t('candidateSearch.removeFilter', { label })} onRemove={() => toggleStatus(value)} />
+  })
+  const contractFormChips = selectedContractForms.map(value => {
+    const label = candidateTypes.find(c => c.value === value)?.label ?? value
+    return <ActiveFilterChip key={`cf-${value}`} label={label}
+      ariaLabel={t('candidateSearch.removeFilter', { label })} onRemove={() => toggleContractForm(value)} />
+  })
+  const chipsRow = (functionChips.length + statusChips.length + contractFormChips.length > 0) ? (
+    <div style={{ display: 'flex', alignItems: 'center', gap: '6px 10px', flexWrap: 'wrap' }}>
+      {functionChips}{statusChips}{contractFormChips}
+    </div>
+  ) : null
+
   // GEO-DEGRADE-1 (Danny 08-08) — mirrors candidates/drawer/VacancySearchTab: only the
   // map needs coordinates, so an un-geocoded vacancy shows the notice in the map's
-  // place instead of blanking the whole tab. The candidate search itself keeps working.
+  // place instead of blanking the whole tab. The candidate search itself keeps working;
+  // the radius chrome (GeoSearchShell's own `radius` prop) is omitted entirely too.
   const mapPane = noLocation ? (
     <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: 16, border: '1px dashed var(--border)', borderRadius: 10 }}>
       <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('candidateSearch.noLocation')}</span>
       <GeocodeButton endpoint={`/vacancies/${vacancy.id}/geocode`} permission="vacancies.update" variant="row" />
     </div>
   ) : (
-    <RadiusMapPanel padded={false} points={points} center={center} radiusKm={radiusKm}
-      mapHeight={'clamp(340px, calc(100vh - 540px), 720px)'}
+    <RadiusMap points={points} center={center} radiusKm={radiusKm} height="100%"
       centerMarker={{ label: vacancy.title ?? '', sub: t('candidateSearch.centerVacancy') }}
-      onRadiusChange={setRadiusKm}
       // The vacancy pin stays fixed — re-centring by clicking the map must never
       // move the search origin away from the vacancy's own address.
       onCenterChange={() => {}}
-      onPick={selectCandidate}
-      pointsLabel={t('candidateSearch.onMap', { count: points.length })} />
+      onPickPoint={selectCandidate} />
   )
 
   // Compact summary card for the SELECTED candidate — shown before navigating
@@ -195,9 +211,9 @@ export default function CandidateSearchTab({ vacancy }: { vacancy: VacancyDetail
         <div style={{ minWidth: 0 }}>
           {/* The title IS the link (Match-tab style): orange name opens in-app,
               trailing icon a new tab. No separate action row. */}
-          <div style={{ fontSize: 13, fontWeight: 600 }}>
+          <SectionTitle as="div">
             <EntityLink page="candidates" id={selectedRow.id}>{selectedRow.name}</EntityLink>
-          </div>
+          </SectionTitle>
           <Caption as="div">{[selectedRow.functionTitle, selectedRow.city].filter(Boolean).join(' · ') || '—'}</Caption>
         </div>
         {/* Right column (mirrors VacancySearchTab's own layout): pager+close on top,
@@ -206,10 +222,9 @@ export default function CandidateSearchTab({ vacancy }: { vacancy: VacancyDetail
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6, flexShrink: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
             <DrillPager index={selectedIndex + 1} total={rows.length} onPrev={goPrev} onNext={goNext} />
-            <button onClick={() => setSelectedId(null)} aria-label={t('common:close')}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 2, display: 'flex' }}>
+            <Button variant="ghost" iconOnly size="sm" onClick={() => setSelectedId(null)} aria-label={t('common:close')}>
               <X size={14} />
-            </button>
+            </Button>
           </div>
           {/* Solliciteren (point 18): the primary action for this candidate score
               panel — opens the shared candidate-anchored apply flow with this
@@ -219,8 +234,9 @@ export default function CandidateSearchTab({ vacancy }: { vacancy: VacancyDetail
         </div>
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+        {/* HUISSTIJL-1: Caption owns the 11/muted identity; Mono only adds the font-family. */}
         {selectedRow.distanceKm != null && (
-          <Mono style={{ fontSize: 11, color: 'var(--text-muted)' }}>{selectedRow.distanceKm.toFixed(1)} km</Mono>
+          <Caption><Mono>{selectedRow.distanceKm.toFixed(1)} km</Mono></Caption>
         )}
         <StatusPill label={selectedRow.statusLabel || selectedRow.status} color={selectedRow.statusColor} />
       </div>
@@ -245,9 +261,9 @@ export default function CandidateSearchTab({ vacancy }: { vacancy: VacancyDetail
   ) : error ? (
     <div style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 8 }}>
       <span style={{ fontSize: 12, color: 'var(--color-danger-text)' }}>{t('common:error.body')}</span>
-      <button onClick={retry} style={{ alignSelf: 'flex-start', fontSize: 12, fontWeight: 600, color: 'var(--color-primary-text)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
+      <Button variant="secondary" size="sm" onClick={retry} style={{ alignSelf: 'flex-start' }}>
         {t('common:error.retry')}
-      </button>
+      </Button>
     </div>
   ) : rows.length === 0 ? (
     <div style={{ padding: 16, fontSize: 12, color: 'var(--text-muted)' }}>{t('candidateSearch.empty')}</div>
@@ -269,13 +285,15 @@ export default function CandidateSearchTab({ vacancy }: { vacancy: VacancyDetail
             onMouseLeave={e => { if (!isSelected) e.currentTarget.style.background = 'transparent' }}>
             <div style={{ minWidth: 0 }}>
               {/* Title clicks must not ALSO flip the summary selection; the AI mark
-                  signals a Koios-advised match (MATCH-EXPLORER-1 fase 2+3). */}
-              <div style={{ fontSize: 13, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 4, minWidth: 0 }}
-                onClick={e => e.stopPropagation()} onKeyDown={e => e.stopPropagation()}>
-                {r.aiAdvised && <KoiosAiMark size={14} title={r.aiAdviceReason ?? t('candidateSearch.aiAdvised')} />}
-                <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', minWidth: 0 }}>
-                  <EntityLink page="candidates" id={r.id}>{r.name}</EntityLink>
-                </span>
+                  signals a Koios-advised match (MATCH-EXPLORER-1 fase 2+3). SectionTitle
+                  carries the text identity only — stop-propagation sits on this plain div. */}
+              <div onClick={e => e.stopPropagation()} onKeyDown={e => e.stopPropagation()}>
+                <SectionTitle as="div" style={{ display: 'flex', alignItems: 'center', gap: 4, minWidth: 0 }}>
+                  {r.aiAdvised && <KoiosAiMark size={14} title={r.aiAdviceReason ?? t('candidateSearch.aiAdvised')} />}
+                  <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', minWidth: 0 }}>
+                    <EntityLink page="candidates" id={r.id}>{r.name}</EntityLink>
+                  </span>
+                </SectionTitle>
               </div>
               <Caption as="div" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                 {[r.functionTitle, r.city].filter(Boolean).join(' · ') || '—'}
@@ -283,10 +301,9 @@ export default function CandidateSearchTab({ vacancy }: { vacancy: VacancyDetail
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
               {r.score != null && <ScorePill score={r.score} />}
+              {/* HUISSTIJL-1: Caption owns the 11/muted identity; Mono only adds the font-family. */}
               {r.distanceKm != null && (
-                <Mono style={{ fontSize: 11, color: 'var(--text-muted)' }}>
-                  {r.distanceKm.toFixed(1)} km
-                </Mono>
+                <Caption><Mono>{r.distanceKm.toFixed(1)} km</Mono></Caption>
               )}
               {/* Expand affordance (point 17, mirrors VacancySearchTab): a visible
                   chevron on EVERY row signals the row opens a preview, on top of
@@ -301,9 +318,11 @@ export default function CandidateSearchTab({ vacancy }: { vacancy: VacancyDetail
 
   // HUISSTIJL-1: the house Button (variant="soft") — solid tenant trio, same as
   // every other accent action button. Queues a batched Koios advice refresh
-  // (fase 3) for this vacancy's best matches.
+  // (fase 3) for this vacancy's best matches. GEOSEARCH-1 (22-08): moved into
+  // GeoSearchShell's `actions` slot, right-aligned beside the radius controls
+  // (was a stray button above the summary card) — same handler, same button.
   const refreshButton = (
-    <Button variant="soft" onClick={handleRefreshAdvice} disabled={refreshing} style={{ marginBottom: 10 }}>
+    <Button variant="soft" onClick={handleRefreshAdvice} disabled={refreshing}>
       <RefreshCw size={13} className={refreshing ? 'animate-spin' : ''} />
       {t('candidateSearch.refreshAdvice')}
     </Button>
@@ -328,11 +347,20 @@ export default function CandidateSearchTab({ vacancy }: { vacancy: VacancyDetail
     <Caption as="div" style={{ marginBottom: 10 }}>{caveat}</Caption>
   )
 
-  const listPane = <div>{caveatLine}{refreshButton}{summaryCard}{listBody}</div>
+  const listPane = <div>{caveatLine}{summaryCard}{listBody}</div>
 
   return (
     <>
-      <MatchExplorerLayout filters={filtersRow} map={mapPane} list={listPane} />
+      <GeoSearchShell
+        triggers={triggersRow} chips={chipsRow}
+        radius={noLocation ? undefined : {
+          value: radiusKm, onChange: setRadiusKm,
+          countLabel: t('candidateSearch.onMap', { count: points.length }),
+        }}
+        actions={refreshButton}
+        mapHeight={'clamp(340px, calc(100vh - 540px), 720px)'}
+        map={mapPane} results={listPane}
+      />
       {/* Solliciteren modal — only reachable while a candidate is selected (the
           button itself lives inside summaryCard, so selectedRow is always set
           here too). onCreated re-triggers the same hook `retry` the error state

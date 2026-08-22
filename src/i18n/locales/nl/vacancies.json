@@ -339,6 +339,7 @@
     "functions": "Functie",
     "statuses": "Inzetbaarheid",
     "contractForms": "Contractvorm",
+    "removeFilter": "Filter '{{label}}' verwijderen",
     "onMap": "{{count}} kandidaten op de kaart",
     "empty": "Geen kandidaten gevonden binnen deze filters.",
     "centerVacancy": "Vacaturelocatie",

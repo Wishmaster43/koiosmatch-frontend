@@ -339,6 +339,7 @@
     "functions": "Función",
     "statuses": "Disponibilidad",
     "contractForms": "Forma de contrato",
+    "removeFilter": "Eliminar filtro '{{label}}'",
     "onMap": "{{count}} candidatos en el mapa",
     "empty": "No se han encontrado candidatos con estos filtros.",
     "centerVacancy": "Ubicación de la vacante",

@@ -97,15 +97,14 @@ vi.mock('@/components/actionrules', async (importOriginal) => ({
   useActionRulePreflight: () => ({ decision: null, loading: false, error: false }),
 }))
 
-// Stub the map — Leaflet cannot run under jsdom; assert the props it receives instead.
-// The stub button drives the SAME onRadiusChange callback the real panel's radius
-// slider does, so the reset test below can prove the radius is restored too.
-vi.mock('@/components/map/RadiusMapPanel', () => ({
-  default: ({ points, radiusKm, pointsLabel, onRadiusChange }: { points: Array<{ id: string | number }>; radiusKm: number; pointsLabel?: string; onRadiusChange?: (km: number) => void }) => (
-    <div data-testid="radius-map-panel" data-radius={radiusKm} data-points={points.length}>
-      {pointsLabel}
-      <button type="button" onClick={() => onRadiusChange?.(80)}>stub-set-radius</button>
-    </div>
+// Stub the bare map — Leaflet cannot run under jsdom; assert the props it
+// receives instead. GEOSEARCH-1 (22-08): the radius slider/km input/point-count
+// line now render for real inside GeoSearchShell (this tab no longer mounts
+// RadiusMapPanel), so the reset test below drives the REAL km input instead of
+// a stub button.
+vi.mock('@/components/map/RadiusMap', () => ({
+  default: ({ points, radiusKm }: { points: Array<{ id: string | number }>; radiusKm: number }) => (
+    <div data-testid="radius-map" data-radius={radiusKm} data-points={points.length} />
   ),
 }))
 
@@ -231,7 +230,7 @@ describe('VacancySearchTab · fetch + defaults', () => {
     expect(text.indexOf('Verzorgende IG | Amersfoort')).toBeLessThan(text.indexOf('Verpleegkundige | Utrecht'))
     expect(screen.getByText('82%')).toBeInTheDocument()
     expect(screen.getByText('60%')).toBeInTheDocument()
-    expect(screen.getByTestId('radius-map-panel')).toHaveAttribute('data-points', '2')
+    expect(screen.getByTestId('radius-map')).toHaveAttribute('data-points', '2')
   })
 })
 
@@ -291,7 +290,7 @@ describe('VacancySearchTab · no location (degrades, never dead-ends)', () => {
 
     // The honest notice replaces the map…
     expect(screen.getByText(nl.vacancySearch.noLocation)).toBeInTheDocument()
-    expect(screen.queryByTestId('radius-map-panel')).toBeNull()
+    expect(screen.queryByTestId('radius-map')).toBeNull()
     // …but the filters and the real results are still there (the actual bug).
     expect(screen.getByText(nl.vacancySearch.statuses)).toBeInTheDocument()
     await waitFor(() => expect(screen.getByText('Verzorgende IG | Amersfoort')).toBeInTheDocument())
@@ -307,7 +306,7 @@ describe('VacancySearchTab · status filter (searchable dropdown)', () => {
     // Statuses are a searchable SearchSelect checklist now, not chips — FILTER-VLAK-1
     // (13-08): the field's own label now lives INSIDE the trigger button's
     // accessible name, so it is queried directly, no more label-then-sibling.
-    const statusesTrigger = screen.getByRole('button', { name: nl.vacancySearch.statuses })
+    const statusesTrigger = screen.getByRole('button', { name: new RegExp('^' + nl.vacancySearch.statuses) })
     await userEvent.click(statusesTrigger)
     await userEvent.click(await screen.findByRole('button', { name: 'Gesloten' }))
 
@@ -622,7 +621,7 @@ describe('VacancySearchTab · contract-form filter (Contractvorm, Danny 06-08)',
     // Toggling in 'Tijdelijk' — an option OUTSIDE the tenant lookup, offered only
     // because a fetched row carries it — brings the second vacancy back.
     // FILTER-VLAK-1 (13-08): the label lives inside the trigger's accessible name.
-    const trigger = screen.getByRole('button', { name: 'Contractvorm' })
+    const trigger = screen.getByRole('button', { name: /^Contractvorm/ })
     await userEvent.click(trigger)
     await userEvent.click(await screen.findByRole('button', { name: 'Tijdelijk' }))
 
@@ -640,7 +639,7 @@ describe('VacancySearchTab · contract-form filter (Contractvorm, Danny 06-08)',
     expect(screen.getByText('Tijdelijk-vacature | Arnhem')).toBeInTheDocument()
     // FILTER-VLAK-1 (13-08): an empty selection shows just the field label, no
     // count badge — the old "Kies contractvorm…" placeholder text is gone.
-    const trigger = screen.getByRole('button', { name: 'Contractvorm' })
+    const trigger = screen.getByRole('button', { name: /^Contractvorm/ })
     expect(trigger).toHaveTextContent('Contractvorm')
     expect(within(trigger).queryByText(/^\d+$/)).toBeNull()
   })
@@ -892,9 +891,11 @@ describe('VacancySearchTab · reset filters (Danny 08-08, point 8)', () => {
 
     // Deviate on TWO axes at once: an extra status and a bigger radius.
     // FILTER-VLAK-1 (13-08): the label lives inside the trigger's accessible name.
-    await userEvent.click(screen.getByRole('button', { name: nl.vacancySearch.statuses }))
+    await userEvent.click(screen.getByRole('button', { name: new RegExp('^' + nl.vacancySearch.statuses) }))
     await userEvent.click(await screen.findByRole('button', { name: 'Gesloten' }))
-    await userEvent.click(screen.getByRole('button', { name: 'stub-set-radius' }))
+    // GEOSEARCH-1 (22-08): the km input is now the REAL GeoSearchShell control
+    // (aria-label 'Straal', common:map.radius) — no more stub-map button.
+    fireEvent.change(screen.getByRole('spinbutton', { name: 'Straal' }), { target: { value: '80' } })
     await waitFor(() => expect(mockGet).toHaveBeenLastCalledWith('/candidates/cand1/vacancy-matches', {
       params: { radius: 80, status: ['open', 'closed'], per_page: 100 },
       signal: expect.anything(),
@@ -945,7 +946,7 @@ describe('VacancySearchTab · reset filters (Danny 08-08, point 8)', () => {
 
     // Add a second contract form, then reset back to the seed. FILTER-VLAK-1
     // (13-08): the label lives inside the trigger's accessible name.
-    await userEvent.click(screen.getByRole('button', { name: 'Contractvorm' }))
+    await userEvent.click(screen.getByRole('button', { name: /^Contractvorm/ }))
     await userEvent.click(await screen.findByRole('button', { name: 'Tijdelijk' }))
     await waitFor(() => expect(screen.getByText('Tijdelijk-vacature | Arnhem')).toBeInTheDocument())
 
