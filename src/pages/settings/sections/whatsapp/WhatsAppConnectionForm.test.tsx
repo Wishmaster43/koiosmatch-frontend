@@ -4,11 +4,19 @@
  * (POST /whatsapp, CONSIST-2 — blank optionals omitted) and EDIT (PATCH
  * /whatsapp/{id} — blank secrets omitted/"unchanged", but scope/label/provider
  * always explicit so switching back to "everyone" really clears the old value).
+ *
+ * WA-WABA-EDIT-1 (waba_id editable in edit mode too): an UNCHANGED value never
+ * appears in the PATCH body (server treats it as a no-op anyway); a CHANGED value
+ * is gated behind the shared ConfirmDialog (the server deactivates every linked
+ * phone number on a real switch) and only reaches the request after confirming;
+ * a `phone_numbers_deactivated` count on the response surfaces as a notify()
+ * notice; emptying the field is a validation error, never a silent drop.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import api from '@/lib/api'
+import { notify } from '@/lib/notify'
 import WhatsAppConnectionForm from './WhatsAppConnectionForm'
 import type { WhatsappConnectionRow } from '@/types/whatsapp'
 
@@ -17,6 +25,10 @@ vi.mock('@/lib/api', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@/lib/api')>()
   return { ...actual, default: { ...actual.default, get: vi.fn(), post: vi.fn(), patch: vi.fn() } }
 })
+// notify() is a fire-and-forget window event dispatch — mock it flat so the
+// post-save notice can be asserted as a plain call, mirroring the sibling list's
+// own notifyError/notifySuccess mock.
+vi.mock('@/lib/notify', () => ({ notify: vi.fn(), notifyError: vi.fn(), notifySuccess: vi.fn() }))
 
 // react-query-backed lookups, mocked directly (no QueryClientProvider needed) —
 // mirrors AddCustomerModal.test.tsx's useLocations convention.
@@ -166,13 +178,12 @@ describe('WhatsAppConnectionForm · WA-VESTIGING-FE-1 · edit', () => {
     vi.mocked(api.patch).mockResolvedValue({ data: { data: { ...EXISTING } } })
   })
 
-  it('waba_id renders read-only — the update route never accepts it (§3 no fake affordance)', () => {
+  it('waba_id renders as a pre-filled EDITABLE field (WA-WABA-EDIT-1 — no longer read-only)', () => {
     render(<WhatsAppConnectionForm connection={EXISTING} onSaved={noop} onCancel={noop} />)
-    expect(screen.queryByLabelText(/whatsapp\.wabaId/)).not.toBeInTheDocument()
-    expect(screen.getByText('10229012934')).toBeInTheDocument()
+    expect(screen.getByLabelText(/whatsapp\.wabaId/)).toHaveValue('10229012934')
   })
 
-  it('PATCHes with provider/label/location_id/role_name explicit, omitting untouched secrets', async () => {
+  it('PATCHes with provider/label/location_id/role_name explicit, omitting untouched secrets AND an unchanged waba_id', async () => {
     const user = userEvent.setup()
     render(<WhatsAppConnectionForm connection={EXISTING} onSaved={noop} onCancel={noop} />)
     await user.click(screen.getByRole('button', { name: 'common.save' }))
@@ -184,6 +195,65 @@ describe('WhatsAppConnectionForm · WA-VESTIGING-FE-1 · edit', () => {
     expect(body).not.toHaveProperty('access_token')
     expect(body).not.toHaveProperty('app_secret')
     expect(body).not.toHaveProperty('webhook_verify_token')
+    // §13 seam pin: an untouched waba_id must never appear in the body.
+    expect(body).not.toHaveProperty('waba_id')
+    // No real switch happened — no confirmation dialog, no deactivation notice.
+    expect(screen.queryByText('whatsapp.wabaSwitchConfirmMessage')).not.toBeInTheDocument()
+    expect(notify).not.toHaveBeenCalled()
+  })
+
+  it('changing waba_id shows the ConfirmDialog before sending anything, and cancelling sends no request', async () => {
+    const user = userEvent.setup()
+    render(<WhatsAppConnectionForm connection={EXISTING} onSaved={noop} onCancel={noop} />)
+    const wabaField = screen.getByLabelText(/whatsapp\.wabaId/)
+    await user.clear(wabaField)
+    await user.type(wabaField, '999888777')
+    await user.click(screen.getByRole('button', { name: 'common.save' }))
+
+    expect(await screen.findByText('whatsapp.wabaSwitchConfirmMessage')).toBeInTheDocument()
+    expect(api.patch).not.toHaveBeenCalled()
+
+    await user.click(screen.getByRole('button', { name: 'cancel' }))
+    expect(screen.queryByText('whatsapp.wabaSwitchConfirmMessage')).not.toBeInTheDocument()
+    expect(api.patch).not.toHaveBeenCalled()
+  })
+
+  it('confirming a changed waba_id sends it in the PATCH body', async () => {
+    const user = userEvent.setup()
+    render(<WhatsAppConnectionForm connection={EXISTING} onSaved={noop} onCancel={noop} />)
+    const wabaField = screen.getByLabelText(/whatsapp\.wabaId/)
+    await user.clear(wabaField)
+    await user.type(wabaField, '999888777')
+    await user.click(screen.getByRole('button', { name: 'common.save' }))
+    await screen.findByText('whatsapp.wabaSwitchConfirmMessage')
+    await user.click(screen.getByRole('button', { name: 'whatsapp.wabaSwitchConfirmButton' }))
+
+    await waitFor(() => expect(api.patch).toHaveBeenCalledWith('/whatsapp/conn-1',
+      expect.objectContaining({ waba_id: '999888777' })))
+  })
+
+  it('a phone_numbers_deactivated count on the response surfaces as a notify() notice', async () => {
+    vi.mocked(api.patch).mockResolvedValue({ data: { data: { ...EXISTING, waba_id: '999888777', phone_numbers_deactivated: 2 } } })
+    const user = userEvent.setup()
+    render(<WhatsAppConnectionForm connection={EXISTING} onSaved={noop} onCancel={noop} />)
+    const wabaField = screen.getByLabelText(/whatsapp\.wabaId/)
+    await user.clear(wabaField)
+    await user.type(wabaField, '999888777')
+    await user.click(screen.getByRole('button', { name: 'common.save' }))
+    await screen.findByText('whatsapp.wabaSwitchConfirmMessage')
+    await user.click(screen.getByRole('button', { name: 'whatsapp.wabaSwitchConfirmButton' }))
+
+    await waitFor(() => expect(notify).toHaveBeenCalledWith('info', expect.stringContaining('whatsapp.wabaSwitchDeactivatedNotice')))
+  })
+
+  it('emptying waba_id in edit mode is a validation error — no request fires', async () => {
+    const user = userEvent.setup()
+    render(<WhatsAppConnectionForm connection={EXISTING} onSaved={noop} onCancel={noop} />)
+    await user.clear(screen.getByLabelText(/whatsapp\.wabaId/))
+    await user.click(screen.getByRole('button', { name: 'common.save' }))
+
+    expect(api.patch).not.toHaveBeenCalled()
+    expect(screen.getByText('whatsapp.wabaIdRequired')).toBeInTheDocument()
   })
 
   it('sends a rotated access token and re-verifies it via check-status', async () => {

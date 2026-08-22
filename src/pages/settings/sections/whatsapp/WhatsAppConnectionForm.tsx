@@ -10,10 +10,16 @@
  * chosen location_id/role_name only. A valid token is verified straight away (check-status),
  * same as the old form — tolerated on failure, the row's own check-status action takes over.
  *
- * EDIT (PATCH /whatsapp/{id}): waba_id is immutable server-side (the update route never
- * accepts it) so it renders read-only, never as a dead editable field (§3 no fake
- * affordance). A blank secret field means "leave unchanged" (the contract's own words) —
- * so access_token/app_secret/webhook_verify_token are OMITTED when blank, exactly like
+ * EDIT (PATCH /whatsapp/{id}): waba_id is now EDITABLE too (WA-WABA-EDIT-1) — the
+ * update route accepts `waba_id` and, when the trimmed value differs from the stored
+ * one, treats it as a real WABA switch: it deactivates every phone number linked to
+ * the connection (they were registered under the old account) and returns
+ * `phone_numbers_deactivated` on the response. So a changed waba_id is confirmed
+ * (ConfirmDialog, danger tone) before it is sent, and a deactivation count > 0 in the
+ * response surfaces as a notice telling the user to re-sync. An unchanged value is
+ * never sent (the server would treat it as a no-op anyway; omitting it pins the seam).
+ * A blank secret field means "leave unchanged" (the contract's own words) — so
+ * access_token/app_secret/webhook_verify_token are OMITTED when blank, exactly like
  * create's CONSIST-2 convention. label/provider/location_id/role_name are always sent
  * explicitly (incl. null) so switching scope back to "everyone" actually clears the old
  * value — omitting them would leave the previous scope untouched.
@@ -23,13 +29,19 @@ import { useTranslation } from 'react-i18next'
 import { Plus } from 'lucide-react'
 import api, { unwrap } from '@/lib/api'
 import { extractApiError } from '@/lib/extractApiError'
+import { notify } from '@/lib/notify'
+import { useConfirm } from '@/hooks/useConfirm'
 import { Field, TextField, SelectField, Label } from '@/components/forms/fields'
 import SegmentedControl from '@/components/ui/SegmentedControl'
 import Button from '@/components/ui/Button'
-import { SectionTitle, Caption, Mono } from '@/components/ui/typography'
+import { SectionTitle } from '@/components/ui/typography'
 import { useLocations } from '@/lib/useLocations'
 import { useAssignableRoles, roleLabel } from '@/pages/users/shared'
 import type { WhatsappConnectionRow } from '@/types/whatsapp'
+
+// The update response merges the connection with this count (0 when no real switch
+// happened) — see WhatsappController::update's measured contract.
+interface WhatsappUpdateResponse extends WhatsappConnectionRow { phone_numbers_deactivated?: number }
 
 // Provider options are brand names (data, not prose) — no i18n by design.
 const PROVIDERS = [
@@ -66,13 +78,19 @@ export default function WhatsAppConnectionForm({ connection, onSaved, onCancel }
 
   const locations = useLocations()
   const { roles } = useAssignableRoles()
+  const { confirm, dialog } = useConfirm()
   const locationOptions = locations.map(l => ({ value: String(l.value), label: l.label }))
   // Same translated label the Users screen shows (roleLabel → users:roles.<name>).
   const roleOptions = roles.map(r => ({ value: r.name, label: String(roleLabel(tUsers, r.name)) }))
 
-  const missingWaba = !isEdit && tried && !wabaId.trim()
+  // waba_id is required in BOTH modes now (WA-WABA-EDIT-1) — emptying it in edit
+  // mode is a validation error, never a silently-dropped PATCH (§3).
+  const missingWaba = tried && !wabaId.trim()
   const missingToken = !isEdit && tried && !accessToken.trim()
   const missingScope = tried && ((scope === 'location' && !locationId) || (scope === 'role' && !roleName))
+  // A real WABA switch — the value the server would actually act on.
+  const trimmedWaba = wabaId.trim()
+  const wabaChanged = Boolean(isEdit && connection && trimmedWaba !== connection.waba_id)
 
   const SCOPE_OPTIONS = [
     { value: 'everyone', label: t('whatsapp.scopeEveryone'), description: t('whatsapp.scopeEveryoneDesc') },
@@ -80,13 +98,9 @@ export default function WhatsAppConnectionForm({ connection, onSaved, onCancel }
     { value: 'role', label: t('whatsapp.scopeRole'), description: t('whatsapp.scopeRoleDesc') },
   ]
 
-  // One submit for both modes — the request shape (and what counts as "required")
-  // differs, but the scope/error/save plumbing is identical.
-  const submit = async () => {
-    setTried(true)
-    if (!isEdit && (!wabaId.trim() || !accessToken.trim())) return
-    if (scope === 'location' && !locationId) return
-    if (scope === 'role' && !roleName) return
+  // The actual save — split out from `submit` so a WABA switch can be gated behind
+  // a confirmation without duplicating the request-building logic.
+  const performSave = async () => {
     setSaving(true); setError(null)
     try {
       if (isEdit && connection) {
@@ -98,16 +112,24 @@ export default function WhatsAppConnectionForm({ connection, onSaved, onCancel }
           location_id: scope === 'location' ? locationId : null,
           role_name: scope === 'role' ? roleName : null,
         }
+        // Only present when it actually changed — an unchanged value is never sent
+        // (the server treats same-value as a no-op anyway; this pins the seam).
+        if (wabaChanged) body.waba_id = trimmedWaba
         // Blank secret = "leave unchanged" (the contract's own words) — never sent.
         if (accessToken) body.access_token = accessToken
         if (appSecret) body.app_secret = appSecret
         if (verifyToken.trim()) body.webhook_verify_token = verifyToken.trim()
-        await api.patch(`/whatsapp/${connection.id}`, body)
+        const res = await api.patch(`/whatsapp/${connection.id}`, body)
+        // A real switch deactivated the connection's phone numbers server-side —
+        // tell the user so it is never a silent side effect (§3).
+        const updated = unwrap<WhatsappUpdateResponse>(res)
+        const deactivated = updated?.phone_numbers_deactivated ?? 0
+        if (deactivated > 0) notify('info', t('whatsapp.wabaSwitchDeactivatedNotice', { count: deactivated }))
         // A rotated token is worth re-verifying immediately, same as on create.
         if (accessToken) { try { await api.post(`/whatsapp/${connection.id}/check-status`) } catch { /* tolerated — the row's own check-status action takes over */ } }
       } else {
         // Create-path: optional empty fields are OMITTED, never sent as '' (CONSIST-2).
-        const body: Record<string, unknown> = { waba_id: wabaId.trim(), access_token: accessToken, provider }
+        const body: Record<string, unknown> = { waba_id: trimmedWaba, access_token: accessToken, provider }
         if (appSecret) body.app_secret = appSecret
         if (verifyToken.trim()) body.webhook_verify_token = verifyToken.trim()
         if (label.trim()) body.label = label.trim()
@@ -124,6 +146,26 @@ export default function WhatsAppConnectionForm({ connection, onSaved, onCancel }
     }
   }
 
+  // One submit for both modes — the request shape (and what counts as "required")
+  // differs, but the scope/error/save plumbing is identical. A real WABA switch is
+  // gated behind a confirmation (it deactivates every linked phone number).
+  const submit = () => {
+    setTried(true)
+    if (!wabaId.trim()) return
+    if (!isEdit && !accessToken.trim()) return
+    if (scope === 'location' && !locationId) return
+    if (scope === 'role' && !roleName) return
+    if (wabaChanged) {
+      confirm(t('whatsapp.wabaSwitchConfirmMessage'), () => { void performSave() }, {
+        title: t('whatsapp.wabaSwitchConfirmTitle'),
+        danger: true,
+        confirmLabel: t('whatsapp.wabaSwitchConfirmButton'),
+      })
+      return
+    }
+    void performSave()
+  }
+
   return (
     <div style={{ marginTop: 16, padding: '18px 18px', background: 'var(--surface)',
                   border: '1px solid var(--border)', borderRadius: 12 }}>
@@ -134,18 +176,11 @@ export default function WhatsAppConnectionForm({ connection, onSaved, onCancel }
           <TextField value={label} onChange={setLabel} placeholder={t('whatsapp.labelFieldPlaceholder')} />
         </Field>
 
-        {/* waba_id is immutable once created — the update route never accepts it, so
-            editing it here would silently be dropped by the server (§3). */}
-        {isEdit ? (
-          <div>
-            <Label>{t('whatsapp.wabaId')}</Label>
-            <Caption as="div"><Mono>{connection?.waba_id}</Mono></Caption>
-          </div>
-        ) : (
-          <Field label={t('whatsapp.wabaId')} required>
-            <TextField value={wabaId} onChange={setWabaId} error={missingWaba} placeholder={t('whatsapp.wabaIdPlaceholder')} />
-          </Field>
-        )}
+        {/* WA-WABA-EDIT-1: editable in both modes now — a real change is confirmed
+            (see submit()) since the server deactivates every linked phone number. */}
+        <Field label={t('whatsapp.wabaId')} required>
+          <TextField value={wabaId} onChange={setWabaId} error={missingWaba} placeholder={t('whatsapp.wabaIdPlaceholder')} />
+        </Field>
 
         {/* Password type + new-password: never rendered back, never autofilled. */}
         <Field label={t('whatsapp.accessToken')} required={!isEdit}>
@@ -189,7 +224,9 @@ export default function WhatsAppConnectionForm({ connection, onSaved, onCancel }
       </div>
 
       {(missingWaba || missingToken) && (
-        <div style={{ fontSize: 12, color: 'var(--color-danger-text)', marginTop: 10 }}>{t('whatsapp.addConnectionRequired')}</div>
+        <div style={{ fontSize: 12, color: 'var(--color-danger-text)', marginTop: 10 }}>
+          {t(isEdit ? 'whatsapp.wabaIdRequired' : 'whatsapp.addConnectionRequired')}
+        </div>
       )}
       {missingScope && (
         <div style={{ fontSize: 12, color: 'var(--color-danger-text)', marginTop: 10 }}>{t('whatsapp.scopeRequired')}</div>
@@ -205,6 +242,7 @@ export default function WhatsAppConnectionForm({ connection, onSaved, onCancel }
           {saving ? t('common.saving') : isEdit ? t('common.save') : t('whatsapp.addConnection')}
         </Button>
       </div>
+      {dialog}
     </div>
   )
 }
