@@ -554,7 +554,8 @@
     "recalculateScore": "Match-Score neu berechnen",
     "recalculateDone": "Match-Score neu berechnet",
     "editScore": "Match-Score manuell anpassen",
-    "scoreSaved": "Match-Score gespeichert"
+    "scoreSaved": "Match-Score gespeichert",
+    "planAppointment": "Termin planen"
   },
   "competition": {
     "title": "Andere Bewerber",

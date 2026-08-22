@@ -554,7 +554,8 @@
     "recalculateScore": "Recalculate match score",
     "recalculateDone": "Match score recalculated",
     "editScore": "Edit match score manually",
-    "scoreSaved": "Match score saved"
+    "scoreSaved": "Match score saved",
+    "planAppointment": "Plan appointment"
   },
   "competition": {
     "title": "Other applicants",

@@ -8,9 +8,10 @@
 import { useTranslation } from 'react-i18next'
 import ReferenceNumberChip from '@/components/ui/ReferenceNumberChip'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
-// HUISSTIJL-1: the "for vacancy" line is an exact 11px/muted match for the
-// house Caption scale (the 15/700 name and 12/muted function lines are near
-// misses — see the batch report — and stay hand-styled).
+// HUISSTIJL-1: name inputs carry the sectionTitle identity via its raw style
+// export (an <input> cannot BE a text atom — stijlfabriek route, §4 r6);
+// the read-mode name renders through the PageTitle atom itself.
+import { PageTitle, sectionTitleStyle } from '@/components/ui/typography'
 import type { ApplicationCandidateForm } from '../hooks/useApplicationCandidateEdit'
 
 // Canon field style (G33/fieldMetrics) — mirrors CandidateHeaderBits' inputBase;
@@ -36,16 +37,19 @@ export default function ApplicationHeaderTitle({
   // disabled while the candidate's separate name parts are still loading.
   if (editing) return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 6, minWidth: 0 }}>
-      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr)', gap: 6 }}>
+      {/* Danny 22-08: tussenvoegsel is the SHORT part — weighted narrower so
+          first/last name get the room; the propose action hides while editing
+          (ApplicationDrawer), so this grid finally has the full header width. */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.4fr) minmax(96px, 0.7fr) minmax(0, 1.6fr)', gap: 6 }}>
         <input aria-label={t('drawer.firstName')} placeholder={t('drawer.firstName')} value={form.firstName}
           disabled={loading} onChange={e => setField('firstName', e.target.value)}
-          style={{ ...inputBase, fontSize: 13, fontWeight: 600 }} />
+          style={{ ...inputBase, fontSize: sectionTitleStyle.fontSize, fontWeight: sectionTitleStyle.fontWeight }} />
         <input aria-label={t('drawer.middleName')} placeholder={t('drawer.middleName')} value={form.middleName}
           disabled={loading} onChange={e => setField('middleName', e.target.value)}
-          style={{ ...inputBase, fontSize: 13, fontWeight: 600 }} />
+          style={{ ...inputBase, fontSize: sectionTitleStyle.fontSize, fontWeight: sectionTitleStyle.fontWeight }} />
         <input aria-label={t('drawer.lastName')} placeholder={t('drawer.lastName')} value={form.lastName}
           disabled={loading} onChange={e => setField('lastName', e.target.value)}
-          style={{ ...inputBase, fontSize: 13, fontWeight: 600 }} />
+          style={{ ...inputBase, fontSize: sectionTitleStyle.fontSize, fontWeight: sectionTitleStyle.fontWeight }} />
       </div>
       <input aria-label={t('drawer.functionTitle')} placeholder={t('drawer.functionTitle')} value={form.functionTitle}
         disabled={loading} onChange={e => setField('functionTitle', e.target.value)}
@@ -58,7 +62,7 @@ export default function ApplicationHeaderTitle({
   return (
     <>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-        <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{candidateName}</span>
+        <PageTitle as="span">{candidateName}</PageTitle>
         <ReferenceNumberChip value={referenceNumber} />
       </div>
       <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>

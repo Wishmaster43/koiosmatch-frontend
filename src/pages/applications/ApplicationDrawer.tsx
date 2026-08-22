@@ -236,7 +236,7 @@ export default function ApplicationDrawer({ application: a, onClose, expanded, o
               {/* "Voorstellen aan klant" — prepares the house-style CV + a drafted
                   message and records it (no send capability yet, see the modal's
                   own honest line). */}
-              {canPropose && (
+              {canPropose && !candidateEdit.editing && (
                 <Button variant="soft" onClick={() => setProposeModalOpen(true)}
                   title={t('propose.trigger')} aria-label={t('propose.trigger')}>
                   <Send size={12} /> {t('propose.trigger')}

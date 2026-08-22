@@ -554,7 +554,8 @@
     "recalculateScore": "Recalcular puntuación de match",
     "recalculateDone": "Puntuación de match recalculada",
     "editScore": "Editar la puntuación de match manualmente",
-    "scoreSaved": "Puntuación de match guardada"
+    "scoreSaved": "Puntuación de match guardada",
+    "planAppointment": "Planificar una cita"
   },
   "competition": {
     "title": "Otros solicitantes",

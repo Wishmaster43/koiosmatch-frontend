@@ -554,7 +554,8 @@
     "recalculateScore": "Matchscore herberekenen",
     "recalculateDone": "Matchscore herberekend",
     "editScore": "Matchscore handmatig aanpassen",
-    "scoreSaved": "Matchscore opgeslagen"
+    "scoreSaved": "Matchscore opgeslagen",
+    "planAppointment": "Afspraak plannen"
   },
   "competition": {
     "title": "Andere sollicitanten",

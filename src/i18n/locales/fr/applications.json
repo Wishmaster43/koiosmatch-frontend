@@ -554,7 +554,8 @@
     "recalculateScore": "Recalculer le score de match",
     "recalculateDone": "Score de match recalculé",
     "editScore": "Modifier le score de match manuellement",
-    "scoreSaved": "Score de match enregistré"
+    "scoreSaved": "Score de match enregistré",
+    "planAppointment": "Planifier un rendez-vous"
   },
   "competition": {
     "title": "Autres candidats",

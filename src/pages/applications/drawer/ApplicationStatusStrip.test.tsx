@@ -12,6 +12,17 @@ import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import ApplicationStatusStrip from './ApplicationStatusStrip'
+
+vi.mock('@/pages/candidates/shared', () => ({
+  PlanIntakeModal: ({ mode, candidateId, applicationId, defaultVacancyId, onCreated }: {
+    mode?: string; candidateId?: unknown; applicationId?: unknown; defaultVacancyId?: unknown; onCreated?: () => void
+  }) => (
+    <div data-testid="plan-intake-modal" data-mode={mode} data-candidate={String(candidateId)}
+      data-application={String(applicationId)} data-vacancy={String(defaultVacancyId)}>
+      <button onClick={() => onCreated?.()}>stub-created</button>
+    </div>
+  ),
+}))
 // HUISSTIJL-1: assert against the Caption atom's own raw style identity
 // (the legal source for a genuine style-object need) rather than a hand-
 // rolled 11px/muted literal.
@@ -40,6 +51,7 @@ const app = (over: Partial<ApplicationDetail> = {}) => ({
   // eslint-disable-next-line no-restricted-syntax -- DATA fixture (a tenant lookup colour), not a UI colour choice
   phaseColor: '#2563EB',
   score: null, created: '', appointments: [], interview: null,
+  candidateId: 'c1', vacancyId: 'v1',
   stageDurations: [], currentStageEnteredAt: null,
   matchSource: 'ai', aiScore: null,
   ...over,
@@ -88,7 +100,7 @@ describe('ApplicationStatusStrip', () => {
         { stageKey: 'invited', stageLabel: 'Invited', enteredAt: new Date(Date.now() - 5 * 86400000).toISOString(), leftAt: null, days: 5 },
       ],
     })} />)
-    expect(screen.getByText('status.inPhase')).toBeInTheDocument()
+    expect(screen.getByText(/status\.inPhase/)).toBeInTheDocument()
     expect(screen.getByText(/status\.phaseSince/)).toBeInTheDocument()
     // The application-level "in process" line must not also render — the
     // real per-phase figure wins, never both/either ambiguously.
@@ -100,7 +112,7 @@ describe('ApplicationStatusStrip', () => {
   it('falls back to currentStageEnteredAt when stage_durations is empty', () => {
     const enteredAt = new Date(Date.now() - 7 * 86400000).toISOString()
     render(<ApplicationStatusStrip application={app({ stageDurations: [], currentStageEnteredAt: enteredAt })} />)
-    expect(screen.getByText('status.inPhase')).toBeInTheDocument()
+    expect(screen.getByText(/status\.inPhase/)).toBeInTheDocument()
     expect(screen.getByText(/status\.phaseSince/)).toBeInTheDocument()
   })
 
@@ -114,7 +126,7 @@ describe('ApplicationStatusStrip', () => {
       ],
     })} />)
     expect(screen.getByText(new RegExp(`Intake gesprek.*${future}`))).toBeInTheDocument()
-    expect(screen.getByText('Bram')).toBeInTheDocument()
+    expect(screen.getByText(/Bram/)).toBeInTheDocument()
     expect(screen.queryByText(/Follow-up call/)).toBeNull()
   })
 
@@ -123,20 +135,22 @@ describe('ApplicationStatusStrip', () => {
       interview: { category: 'busy', currentStatus: 'Question 3', step: 3, total: 5, id: null, agent: null, flowName: null, turn: null, startedAt: null, lastMessageAt: null, endedAt: null, durationSeconds: null, pausedAt: null, pausedBy: null },
     })} />)
     expect(screen.getByText('Question 3')).toBeInTheDocument()
-    expect(screen.getByText('interview.stepOf')).toBeInTheDocument()
+    expect(screen.getByText(/interview\.stepOf/)).toBeInTheDocument()
   })
 
   // DD-FE-11 (08-08 drill-down audit): the interview row reads the step NAME
   // first, with the numeric position ("Stap X van Y") demoted to a small muted
   // line right after it — never the count as the only/leading signal.
-  it('renders the step name above the muted step-count line, never the reverse', () => {
+  // Danny 22-08 ("alles netjes doorloopt in de breedte"): the step count flows
+  // INLINE after the step name now — same reading order, one line.
+  it('renders the step name before the muted inline step-count, never the reverse', () => {
     render(<ApplicationStatusStrip application={app({
       interview: { category: 'busy', currentStatus: 'Question 3', step: 3, total: 5, id: null, agent: null, flowName: null, turn: null, startedAt: null, lastMessageAt: null, endedAt: null, durationSeconds: null, pausedAt: null, pausedBy: null },
     })} />)
     const name = screen.getByText('Question 3')
-    const count = screen.getByText('interview.stepOf')
+    const count = screen.getByText(/interview\.stepOf/)
     expect(name.compareDocumentPosition(count) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
-    expect(count.tagName).toBe('DIV')
+    expect(count.tagName).toBe('SPAN')
     expect(count).toHaveStyle({ fontSize: captionStyle.fontSize, color: captionStyle.color })
   })
 
@@ -171,3 +185,37 @@ describe('ApplicationStatusStrip', () => {
     expect(screen.getByText(/Intake gesprek/).closest('button')).toBeNull()
   })
 })
+
+// Eindcontrole 22-08 (finding: the "+" shipped untested): the plan-appointment
+// affordance — present in BOTH branches, honestly disabled without a candidate,
+// and opening the SAME PlanIntakeModal flow the Afspraken tab mounts (§13).
+describe('ApplicationStatusStrip · "+" plant een afspraak', () => {
+  it('renders the + beside an EXISTING appointment and inside the empty state', () => {
+    const future = new Date(Date.now() + 86400000).toISOString()
+    const { unmount } = render(<ApplicationStatusStrip application={app({
+      appointments: [{ id: 1, type: 'Intake', title: 'Intake gesprek', when: future, with: 'Bram', status: 'planned', durationMin: null, modality: '', ownerId: null, locationName: '' }],
+    })} />)
+    expect(screen.getByRole('button', { name: 'status.planAppointment' })).toBeEnabled()
+    unmount()
+    render(<ApplicationStatusStrip application={app({ appointments: [] })} />)
+    expect(screen.getByRole('button', { name: 'status.planAppointment' })).toBeEnabled()
+  })
+
+  it('is DISABLED (never hidden) when the application has no candidate link', () => {
+    render(<ApplicationStatusStrip application={app({ candidateId: null })} />)
+    expect(screen.getByRole('button', { name: 'status.planAppointment' })).toBeDisabled()
+  })
+
+  it('opens PlanIntakeModal (mode appointment, candidate+application+vacancy prefilled); onCreated jumps to the Afspraken tab', async () => {
+    const user = userEvent.setup()
+    const onNavigateTab = vi.fn()
+    render(<ApplicationStatusStrip application={app({})} onNavigateTab={onNavigateTab} />)
+    await user.click(screen.getByRole('button', { name: 'status.planAppointment' }))
+    const modal = screen.getByTestId('plan-intake-modal')
+    expect(modal).toHaveAttribute('data-mode', 'appointment')
+    expect(modal).toHaveAttribute('data-candidate', 'c1')
+    await user.click(screen.getByText('stub-created'))
+    expect(onNavigateTab).toHaveBeenCalledWith('appointments')
+  })
+})
+

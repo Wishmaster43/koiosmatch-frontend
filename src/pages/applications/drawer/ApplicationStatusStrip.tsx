@@ -1,7 +1,11 @@
+import { useState } from 'react'
 import type { CSSProperties, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import SectionCard from '@/components/ui/SectionCard'
 import SoftChip from '@/components/ui/SoftChip'
+import Button from '@/components/ui/Button'
+import { Plus } from 'lucide-react'
+import { PlanIntakeModal } from '@/pages/candidates/shared'
 import { CANON_LABEL_STYLE } from '@/components/drawer/fieldRowCanon'
 // HUISSTIJL-1: shared typography atom — every muted secondary line in this
 // strip is an exact 11px/muted match for Caption.
@@ -28,7 +32,6 @@ function Row({ label, children }: { label: ReactNode; children: ReactNode }) {
 const mutedItalic: CSSProperties = { color: 'var(--text-muted)', fontStyle: 'italic' }
 // HUISSTIJL-1: layout only (marginTop) — fontSize/colour come from the Caption
 // atom's own default identity, never redeclared locally.
-const mutedLine: CSSProperties = { marginTop: 2 }
 
 // Whole days between an ISO date and now; null when the date is missing/unparseable.
 function daysSince(iso: string | undefined, now: Date = new Date()): number | null {
@@ -95,6 +98,9 @@ function TabLink({ onClick, children }: { onClick: () => void; children: ReactNo
  * useMatchScoreOverride.ts.
  */
 export default function ApplicationStatusStrip({ application: a, onNavigateTab }: ApplicationStatusStripProps) {
+  // Danny 22-08: the "+" on the appointment row — the SAME plan flow the
+  // Afspraken tab mounts (PlanIntakeModal, mode appointment).
+  const [planning, setPlanning] = useState(false)
   const { t } = useTranslation(['applications', 'common'])
   const { formatDate, formatDateTime } = useDateFormat()
   // RAW-KEY-1: flow-authored status first through i18n (the three markers the
@@ -126,39 +132,47 @@ export default function ApplicationStatusStrip({ application: a, onNavigateTab }
             back to the "in process" since-created line when neither exists —
             the two must never be conflated (APP-STAGE-DURATIONS-1). */}
         <Row label={t('status.phase')}>
-          <SoftChip label={a.phaseLabel ?? a.phaseKey ?? '—'} color={a.phaseColor} />
-          {phaseEnteredAt != null ? (
-            <>
-              <Caption as="div" style={mutedLine}>{t('status.inPhase', { days: daysInPhase ?? 0, phase: a.phaseLabel ?? a.phaseKey ?? '' })}</Caption>
-              <Caption as="div" style={mutedLine}>{t('status.phaseSince', { date: formatDate(phaseEnteredAt) })}</Caption>
-            </>
-          ) : daysInProcess !== null ? (
-            <Caption as="div" style={mutedLine}>{`${t('status.inProcess')} · ${t('status.days', { count: daysInProcess })}`}</Caption>
-          ) : (
-            <Caption as="div" style={mutedLine}>{t('status.phaseUnknown')}</Caption>
-          )}
+          {/* One flowing line (Danny 22-08: "gewoon de breedte gebruiken") —
+              chip + facts with middot separators; wraps only when truly narrow. */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', minWidth: 0 }}>
+            <SoftChip label={a.phaseLabel ?? a.phaseKey ?? '—'} color={a.phaseColor} />
+            {phaseEnteredAt != null ? (
+              <Caption as="span">{t('status.inPhase', { days: daysInPhase ?? 0, phase: a.phaseLabel ?? a.phaseKey ?? '' })} · {t('status.phaseSince', { date: formatDate(phaseEnteredAt) })}</Caption>
+            ) : daysInProcess !== null ? (
+              <Caption as="span">{`${t('status.inProcess')} · ${t('status.days', { count: daysInProcess })}`}</Caption>
+            ) : (
+              <Caption as="span">{t('status.phaseUnknown')}</Caption>
+            )}
+          </div>
         </Row>
 
         {/* Next appointment — the first upcoming one, owner on a muted second
             line. S2: clickable when a drawer tab-switch is wired AND there is
             something to jump to — a "no appointment" line has nothing to open. */}
         <Row label={t('status.nextAppointment')}>
-          {nextAppointment ? (
-            <>
-              <div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', minWidth: 0 }}>
+            {nextAppointment ? (
+              <>
                 {onNavigateTab ? (
                   <TabLink onClick={() => onNavigateTab('appointments')}>
                     {(nextAppointment.title || nextAppointment.type) ?? '—'} · {formatDateTime(nextAppointment.when)}
                   </TabLink>
                 ) : (
-                  <>{(nextAppointment.title || nextAppointment.type) ?? '—'} · {formatDateTime(nextAppointment.when)}</>
+                  <span>{(nextAppointment.title || nextAppointment.type) ?? '—'} · {formatDateTime(nextAppointment.when)}</span>
                 )}
-              </div>
-              {nextAppointment.with && <Caption as="div" style={mutedLine}>{nextAppointment.with}</Caption>}
-            </>
-          ) : (
-            <span style={mutedItalic}>{t('status.noAppointment')}</span>
-          )}
+                {nextAppointment.with && <Caption as="span">· {nextAppointment.with}</Caption>}
+              </>
+            ) : (
+              <span style={mutedItalic}>{t('status.noAppointment')}</span>
+            )}
+            {/* Danny 22-08: a real "+" here — the SAME PlanIntakeModal flow the
+                Afspraken tab uses; disabled (never hidden) without a candidate. */}
+            <Button variant="secondary" size="sm" iconOnly onClick={() => setPlanning(true)}
+              disabled={a.candidateId == null}
+              title={t('status.planAppointment')} aria-label={t('status.planAppointment')}>
+              <Plus size={13} />
+            </Button>
+          </div>
         </Row>
 
         {/* Interview — current status + step progress when a session exists.
@@ -169,7 +183,7 @@ export default function ApplicationStatusStrip({ application: a, onNavigateTab }
             tenant's own step name reads as prose and never as a raw constant. */}
         <Row label={t('status.interview')}>
           {a.interview ? (
-            <>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', minWidth: 0 }}>
               <div>
                 {onNavigateTab ? (
                   <TabLink onClick={() => onNavigateTab('interviews')}>
@@ -180,14 +194,21 @@ export default function ApplicationStatusStrip({ application: a, onNavigateTab }
                 )}
               </div>
               {a.interview.step != null && a.interview.total > 0 && (
-                <Caption as="div" style={mutedLine}>{t('interview.stepOf', { step: a.interview.step, total: a.interview.total })}</Caption>
+                <Caption as="span">· {t('interview.stepOf', { step: a.interview.step, total: a.interview.total })}</Caption>
               )}
-            </>
+            </div>
           ) : (
             <span style={mutedItalic}>{t('status.noInterview')}</span>
           )}
         </Row>
       </div>
+      {planning && a.candidateId != null && (
+        <PlanIntakeModal candidateId={a.candidateId} applicationId={a.id ?? null} defaultVacancyId={a.vacancyId} mode="appointment"
+          onClose={() => setPlanning(false)}
+          // After planning: jump to the Afspraken tab, which loads its own fresh
+          // list — the strip's payload-derived row updates on the next fetch.
+          onCreated={() => { setPlanning(false); onNavigateTab?.('appointments') }} />
+      )}
     </SectionCard>
   )
 }
