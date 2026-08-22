@@ -22,6 +22,9 @@ export default makeEntityModule({
     { value: 'availability',    label: 'Beschikbaarheid' },
     { value: 'owner',           label: 'Eigenaar / recruiter' },
     { value: 'last_contact_at', label: 'Laatste contact' },
+    // AUTOMATIONS-MIGRATIE-1: the seeded reactivation templates target on
+    // consent — boolean, filtered as = true/false (backend casts).
+    { value: 'whatsapp_consent', label: 'WhatsApp-consent' },
     { value: 'city',            label: 'Plaats' },
   ],
   sortOptions: [

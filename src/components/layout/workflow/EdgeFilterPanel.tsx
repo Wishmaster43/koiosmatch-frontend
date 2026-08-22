@@ -25,11 +25,16 @@ import { OperatorSelect } from './OperatorSelect'
 import { MODULE_META } from '@/modules/index'
 import type { FilterCondition, FilterConditionGroup, EdgeFilters, FlowNode, FlowEdge } from '@/types/workflow'
 import Button from '@/components/ui/Button'
+import { PageTitle } from '@/components/ui/typography'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 
 // A short syntax reminder for the newer date/time operators — undefined (no
 // hint row rendered) for the plain equality/text operators.
 function operatorHint(t: (key: string) => string, operator?: string): string | undefined {
+  // date_older_than_days takes a DAY COUNT, not a date — the exact-match branch
+  // must run before the date_ prefix test or it inherits the wrong syntax hint
+  // (verify round 22-08: the hint told users to type a date here).
+  if (operator === 'date_older_than_days') return t('canvas.filterDaysHint')
   if (operator?.startsWith('date_')) return t('canvas.filterDateHint')
   if (operator === '>' || operator === '>=' || operator === '<' || operator === '<=') return t('canvas.filterClockHint')
   return undefined
@@ -85,7 +90,7 @@ export function EdgeFilterPanel({ filters, label, sourceNodeId, nodes = [], edge
     // the same focus trap / Escape-to-close it had inline.
     <FloatingPanel open onClose={onClose} ariaLabel={t('canvas.filterTitle')}
       width={660} maxWidth="96vw" persistKey="edge-filter" bodyStyle={{ padding: 24 }}
-      header={<div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{t('canvas.filterTitle')}</div>}>
+      header={<PageTitle as="div">{t('canvas.filterTitle')}</PageTitle>}>
 
       {/* Route naam — the Router branch name (Make-style); shown on the edge */}
       <div style={{ marginBottom: 16 }}>
@@ -116,10 +121,10 @@ export function EdgeFilterPanel({ filters, label, sourceNodeId, nodes = [], edge
                   <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                     {t('canvas.groupLabel', { n: gi + 1 })}
                   </span>
-                  <button onClick={() => removeGroup(gi)} title={t('canvas.removeGroup')} aria-label={t('canvas.removeGroup')}
-                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 2, display: 'flex' }}>
+                  <Button variant="ghost" size="sm" iconOnly onClick={() => removeGroup(gi)}
+                    title={t('canvas.removeGroup')} aria-label={t('canvas.removeGroup')}>
                     <Trash2 size={12} />
-                  </button>
+                  </Button>
                 </div>
               )}
               {group.map((c, ci) => {
@@ -145,6 +150,7 @@ export function EdgeFilterPanel({ filters, label, sourceNodeId, nodes = [], edge
                           style={{ flex: 1, padding: '6px 8px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 6, outline: 'none' }} />
                       )}
                       <button onClick={() => delCond(gi, ci)} aria-label={t('canvas.deleteCondition')} title={t('canvas.deleteCondition')}
+                        // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- danger-ink ghost icon: no Button tone carries danger ink on a bare face (ProfileTab precedent)
                         style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-danger-text)', padding: 4 }}><Trash2 size={12} /></button>
                     </div>
                     {hint && (
@@ -167,7 +173,7 @@ export function EdgeFilterPanel({ filters, label, sourceNodeId, nodes = [], edge
       </Button>
 
       <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-        <button onClick={onClose} style={{ padding: '8px 16px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', cursor: 'pointer', color: 'var(--text-muted)' }}>{t('common:cancel')}</button>
+        <Button variant="secondary" onClick={onClose}>{t('common:cancel')}</Button>
         <Button variant="primary" onClick={handleSave}>
           {t('common:save')}
         </Button>

@@ -92,7 +92,8 @@
     "operator": "Operator",
     "multiselectSearch": "Zoeken…",
     "multiselectNoResults": "Geen resultaten.",
-    "multiselectFreeEntry": "Typ een waarde en druk op Enter om toe te voegen."
+    "multiselectFreeEntry": "Typ een waarde en druk op Enter om toe te voegen.",
+    "removeCondition": "Voorwaarde verwijderen"
   },
   "scheduleModal": {
     "title": "Planning instellen",
@@ -448,7 +449,9 @@
     "displayAsDate": "Datum (d-m-Y)",
     "displayAsDay": "Dag (Ma/Di/…)",
     "displayAsDayTime": "Dag + tijd",
-    "unknownModule": "Onbekende module"
+    "unknownModule": "Onbekende module",
+    "opDateOlderThanDays": "langer dan N dagen geleden",
+    "filterDaysHint": "Aantal dagen (bijv. 30)"
   },
   "picker": {
     "title": "Module kiezen",
@@ -778,7 +781,8 @@
     "Systeem": "Systeem",
     "Ontvangers": "Ontvangers",
     "Rol": "Rol",
-    "Type (event)": "Type (event)"
+    "Type (event)": "Type (event)",
+    "WhatsApp-consent": "WhatsApp-consent"
   },
   "fieldOptions": {
     "Array (meerdere bundles)": "Array (meerdere bundles)",

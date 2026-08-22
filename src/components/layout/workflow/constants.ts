@@ -26,6 +26,10 @@ export const OPERATOR_OPTIONS: Array<{ value: string; symbol?: string; labelKey?
   { value: 'date_gt', labelKey: 'canvas.opDateGt', group: 'date' },
   { value: 'date_lte', labelKey: 'canvas.opDateLte', group: 'date' },
   { value: 'date_lt', labelKey: 'canvas.opDateLt', group: 'date' },
+  // AUTOMATIONS-MIGRATIE-1 (22-08): relative age — "longer than N days ago".
+  // Value = a day count, re-evaluated every run (an absolute date would freeze
+  // the rule); backend evaluator support lands with the same CMBE delivery.
+  { value: 'date_older_than_days', labelKey: 'canvas.opDateOlderThanDays', group: 'date' },
 ]
 
 // <optgroup> header i18n keys per operator group, in render order.

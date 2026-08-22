@@ -57,7 +57,8 @@
     "operator": "Operator",
     "multiselectSearch": "Search…",
     "multiselectNoResults": "No results.",
-    "multiselectFreeEntry": "Type a value and press Enter to add it."
+    "multiselectFreeEntry": "Type a value and press Enter to add it.",
+    "removeCondition": "Remove condition"
   },
   "scheduleModal": {
     "title": "Set schedule",
@@ -413,7 +414,9 @@
     "displayAsDate": "Date (d-m-Y)",
     "displayAsDay": "Day (Mon/Tue/…)",
     "displayAsDayTime": "Day + time",
-    "unknownModule": "Unknown module"
+    "unknownModule": "Unknown module",
+    "opDateOlderThanDays": "more than N days ago",
+    "filterDaysHint": "Number of days (e.g. 30)"
   },
   "picker": {
     "title": "Choose a module",
@@ -743,7 +746,8 @@
     "Systeem": "System",
     "Ontvangers": "Recipients",
     "Rol": "Role",
-    "Type (event)": "Type (event)"
+    "Type (event)": "Type (event)",
+    "WhatsApp-consent": "WhatsApp consent"
   },
   "fieldOptions": {
     "Array (meerdere bundles)": "Array (multiple bundles)",

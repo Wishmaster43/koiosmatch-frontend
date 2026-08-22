@@ -53,7 +53,8 @@
     "operator": "Operator",
     "multiselectSearch": "Suchen…",
     "multiselectNoResults": "Keine Ergebnisse.",
-    "multiselectFreeEntry": "Wert eingeben und mit Enter hinzufügen."
+    "multiselectFreeEntry": "Wert eingeben und mit Enter hinzufügen.",
+    "removeCondition": "Bedingung entfernen"
   },
   "scheduleModal": {
     "title": "Zeitplan festlegen",
@@ -413,7 +414,9 @@
     "displayAsDate": "Datum (d-m-Y)",
     "displayAsDay": "Tag (Mo/Di/…)",
     "displayAsDayTime": "Tag + Uhrzeit",
-    "unknownModule": "Unbekanntes Modul"
+    "unknownModule": "Unbekanntes Modul",
+    "opDateOlderThanDays": "vor mehr als N Tagen",
+    "filterDaysHint": "Anzahl Tage (z. B. 30)"
   },
   "picker": {
     "title": "Modul auswählen",
@@ -743,7 +746,8 @@
     "Systeem": "System",
     "Ontvangers": "Empfänger",
     "Rol": "Rolle",
-    "Type (event)": "Typ (Ereignis)"
+    "Type (event)": "Typ (Ereignis)",
+    "WhatsApp-consent": "WhatsApp-Einwilligung"
   },
   "fieldOptions": {
     "Array (meerdere bundles)": "Array (mehrere Bundles)",

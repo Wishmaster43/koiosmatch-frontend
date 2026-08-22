@@ -17,6 +17,8 @@ import { unwrap, unwrapList } from '@/lib/api'
 // <select> below (webhook / lookup / response-structure-type pickers).
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import Button from '@/components/ui/Button'
+import SegmentedControl from '@/components/ui/SegmentedControl'
+import { Caption, Mono } from '@/components/ui/typography'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 import Spinner from '@/components/ui/Spinner'
 
@@ -144,10 +146,10 @@ export function WebhookSelectField({ value, onChange, fieldKey }: { value?: unkn
           <Button variant="primary" size="sm" onClick={create} disabled={!newName.trim() || creating}>
             {creating ? <Spinner size={11} /> : <Plus size={11} />} {t('fields.create')}
           </Button>
-          <button type="button" onClick={() => { setShowNew(false); setNewName('') }}
-            style={{ padding: '6px 8px', background: 'none', border: '1px solid var(--border)', borderRadius: 8, cursor: 'pointer', color: 'var(--text-muted)', display: 'flex' }}>
+          <Button variant="secondary" size="sm" iconOnly onClick={() => { setShowNew(false); setNewName('') }}
+            title={t('common:cancel')} aria-label={t('common:cancel')}>
             <X size={12} />
-          </button>
+          </Button>
         </div>
       ) : (
         // HUISSTIJL-1: the ONE "+ add" affordance, app-wide (§3A).
@@ -159,15 +161,16 @@ export function WebhookSelectField({ value, onChange, fieldKey }: { value?: unkn
         <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
           <div style={{ fontSize: 10, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{t('fields.receivingUrl')}</div>
           <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-            <code style={{ flex: 1, fontSize: 10, fontFamily: "'JetBrains Mono', monospace", background: 'var(--hover-bg)', border: '1px solid var(--border)', borderRadius: 6, padding: '6px 8px', color: 'var(--text)', wordBreak: 'break-all' }}>
+            <Mono as="code" style={{ flex: 1, fontSize: 10, background: 'var(--hover-bg)', border: '1px solid var(--border)', borderRadius: 6, padding: '6px 8px', color: 'var(--text)', wordBreak: 'break-all' }}>
               {WEBHOOK_BASE}/{selected.token}
-            </code>
-            <button type="button" onClick={copy} title={t('fields.copyUrl')}
-              style={{ padding: '6px 8px', background: copied ? 'var(--color-success-bg)' : 'var(--hover-bg)', color: copied ? 'var(--color-success)' : 'var(--text-muted)', border: '1px solid var(--border)', borderRadius: 6, cursor: 'pointer', display: 'flex' }}>
+            </Mono>
+            <button type="button" onClick={copy} title={t('fields.copyUrl')} aria-label={t('fields.copyUrl')}
+              // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- copied-state success-feedback face (bg/ink pair swaps on state), matches no fixed Button variant; ChangelogPopover precedent
+              style={{ padding: '6px 8px', background: copied ? 'var(--color-success-bg)' : 'var(--hover-bg)', color: copied ? 'var(--color-on-success-bg)' : 'var(--text-muted)', border: '1px solid var(--border)', borderRadius: 6, cursor: 'pointer', display: 'flex' }}>
               {copied ? <Check size={12} /> : <Copy size={12} />}
             </button>
           </div>
-          <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('fields.webhookHint')}</div>
+          <Caption as="div">{t('fields.webhookHint')}</Caption>
         </div>
       )}
     </div>
@@ -247,15 +250,12 @@ export function FiltersField({ field, value, onChange }: { field: WorkflowField;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-      {/* AND / OR */}
+      {/* AND / OR — verify round 22-08: a choice-switch is the shared
+          SegmentedControl (compact), never hand-painted accent pills. */}
       {conds.length > 1 && (
-        <div style={{ display: 'flex', gap: 6 }}>
-          {[['AND', t('fields.logicAll')], ['OR', t('fields.logicAny')]].map(([l, lbl]) => (
-            <button key={l} type="button" onClick={() => setLogic(l)}
-              style={{ padding: '3px 10px', fontSize: 11, fontWeight: 600, borderRadius: 999, border: 'none', cursor: 'pointer',
-                background: logic === l ? 'var(--color-primary)' : 'var(--border)', color: logic === l ? 'var(--color-on-accent)' : 'var(--text-muted)' }}>{lbl}</button>
-          ))}
-        </div>
+        <SegmentedControl size="compact" ariaLabel={t('fields.logicAll')}
+          options={[{ value: 'AND', label: t('fields.logicAll') }, { value: 'OR', label: t('fields.logicAny') }]}
+          value={logic} onChange={setLogic} />
       )}
       {/* Condition rows — the field+"Toon als" picker gets its own full-width row
           (packs two controls); this panel is narrower than the edge-filter modal,
@@ -272,7 +272,8 @@ export function FiltersField({ field, value, onChange }: { field: WorkflowField;
                 <input value={c.value ?? ''} onChange={e => upd(i, 'value', e.target.value)} placeholder={t('fields.valuePlaceholder')} aria-label={t('fields.valuePlaceholder')}
                   style={{ flex: 1, minWidth: 0, padding: '5px 7px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 6, outline: 'none' }} />
               )}
-              <button type="button" onClick={() => del(i)}
+              <button type="button" onClick={() => del(i)} aria-label={t('fields.removeCondition')} title={t('fields.removeCondition')}
+                // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- dense inline row-remove with imperative hover swap (EntityHeader menu-row precedent); a 28px Button breaks the row height
                 style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--border)', padding: 2, display: 'flex' }}
                 onMouseEnter={e => (e.currentTarget.style.color = 'var(--color-danger)')}
                 onMouseLeave={e => (e.currentTarget.style.color = 'var(--border)')}><X size={13} /></button>
@@ -280,7 +281,7 @@ export function FiltersField({ field, value, onChange }: { field: WorkflowField;
           </div>
         )
       })}
-      // HUISSTIJL-1: the ONE "+ add" affordance, app-wide (§3A).
+      {/* HUISSTIJL-1: the ONE "+ add" affordance, app-wide (§3A). */}
       <DrawerAddButton onClick={add} label={t('fields.addCondition')} />
     </div>
   )
@@ -322,7 +323,8 @@ export function ResponseStructureField({ value, onChange, fieldKey }: { value?: 
             aria-labelledby={`${typeLabelBaseId}-${i}`} allowCreate={false}
             options={RS_TYPES.map(rt => ({ value: rt, label: rt }))} menuWidth={110}
             style={{ padding: '5px 5px', fontSize: 12 }} />
-          <button type="button" onClick={() => remove(i)}
+          <button type="button" onClick={() => remove(i)} aria-label={t('fields.removeCondition')} title={t('fields.removeCondition')}
+            // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- dense inline row-remove with imperative hover swap (EntityHeader menu-row precedent); a 28px Button breaks the row height
             style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--border)', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
             onMouseEnter={e => (e.currentTarget.style.color = 'var(--color-danger)')}
             onMouseLeave={e => (e.currentTarget.style.color = 'var(--border)')}>

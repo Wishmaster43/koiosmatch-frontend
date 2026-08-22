@@ -53,7 +53,8 @@
     "operator": "Opérateur",
     "multiselectSearch": "Rechercher…",
     "multiselectNoResults": "Aucun résultat.",
-    "multiselectFreeEntry": "Saisissez une valeur et appuyez sur Entrée pour l'ajouter."
+    "multiselectFreeEntry": "Saisissez une valeur et appuyez sur Entrée pour l'ajouter.",
+    "removeCondition": "Supprimer la condition"
   },
   "scheduleModal": {
     "title": "Définir la planification",
@@ -413,7 +414,9 @@
     "displayAsDate": "Date (d-m-Y)",
     "displayAsDay": "Jour (Lun/Mar/…)",
     "displayAsDayTime": "Jour + heure",
-    "unknownModule": "Module inconnu"
+    "unknownModule": "Module inconnu",
+    "opDateOlderThanDays": "il y a plus de N jours",
+    "filterDaysHint": "Nombre de jours (p. ex. 30)"
   },
   "picker": {
     "title": "Choisir un module",
@@ -743,7 +746,8 @@
     "Systeem": "Système",
     "Ontvangers": "Destinataires",
     "Rol": "Rôle",
-    "Type (event)": "Type (événement)"
+    "Type (event)": "Type (événement)",
+    "WhatsApp-consent": "Consentement WhatsApp"
   },
   "fieldOptions": {
     "Array (meerdere bundles)": "Tableau (plusieurs bundles)",
