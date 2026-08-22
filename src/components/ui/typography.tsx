@@ -59,5 +59,8 @@ export const Caption = make(captionStyle, 'span')
 // Uppercase group label (the 11px/600 tracked heading the settings cards use).
 export const GroupLabel = make(groupLabelStyle, 'div')
 // Numbers/IDs/code — JetBrains Mono per §1; size rides with the surrounding text.
+// The raw identity is exported for style-object contexts (r6: an <input>'s style
+// can't wrap a component) — JSX renders the <Mono> atom, never this directly.
 // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- the canonical Mono font identity itself; the font name lives on exactly this line
-export const Mono = make({ fontFamily: "'JetBrains Mono', monospace" }, 'span')
+export const monoStyle: CSSProperties = { fontFamily: "'JetBrains Mono', monospace" }
+export const Mono = make(monoStyle, 'span')

@@ -68,10 +68,6 @@
       "created": "Creado",
       "status": "Estado",
       "lastSynced": "Última sincronización",
-      "contractType": "Tipo de contrato",
-      "startDate": "Fecha de inicio",
-      "endDate": "Fecha de fin",
-      "hoursPerWeek": "Horas por semana",
       "lastSyncedHelloflex": "Última sincronización con HelloFlex",
       "branch": "Sucursal",
       "customerLocation": "Ubicación",
@@ -122,7 +118,6 @@
       "success": "Match finalizado.",
       "error": "No se pudo finalizar el match."
     },
-    "detailSection": "Detalles",
     "remarks": {
       "title": "Observaciones",
       "saved": "Observaciones guardadas.",

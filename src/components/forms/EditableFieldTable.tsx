@@ -25,7 +25,7 @@ import FieldNotice from '@/components/ui/FieldNotice'
 import { CANON_LABEL_WIDTH } from '@/components/drawer/fieldRowCanon'
 import SoftChip from '@/components/ui/SoftChip'
 import Button from '@/components/ui/Button'
-import { GroupLabel } from '@/components/ui/typography'
+import { GroupLabel, monoStyle } from '@/components/ui/typography'
 import { tintBg, tintBorder, chipInk } from '@/lib/tint'
 
 export interface FieldRow {
@@ -40,6 +40,10 @@ export interface FieldRow {
   step?: string
   group?: string
   allowCreate?: boolean
+  // VAC-CLEAR-1 passthrough for OPTIONAL selects (MATCH-EDIT-1, 22-08): renders
+  // CreatableSelect's own clear-cross instead of forcing callers to inject an
+  // artificial "none" option (which also leaked its label into read mode).
+  clearable?: boolean
   // Numbers/IDs render in JetBrains Mono (§4) — e.g. rates, cost codes.
   mono?: boolean
   // 'chip-select' empty-state text (e.g. "no locations yet").
@@ -242,7 +246,8 @@ export default function EditableFieldTable({
     // vestiging on every entity that uses this table — a native <select> forces you to
     // scroll a 200-item country list. allowCreate stays off: these are tenant lookups,
     // adding a value belongs in Settings, not in a record's edit row.
-    if (f.type === 'select')   return <CreatableSelect value={(v as string) ?? ''} onChange={val => setF(f.key, val)} options={selectOptions(f.options)} placeholder={t('select')} allowCreate={false} style={compact} />
+    if (f.type === 'select')   return <CreatableSelect value={(v as string) ?? ''} onChange={val => setF(f.key, val)} options={selectOptions(f.options)} placeholder={t('select')} allowCreate={false} style={compact}
+      clearable={f.clearable} clearLabel={f.clearable && typeof f.label === 'string' ? f.label : undefined} />
     if (f.type === 'creatable') {
       // Lookup combobox that can also add a free-text value (tenant `allowCreate`).
       const opts = (f.options ?? []).map(o => (typeof o === 'string' ? o : { value: o.value, label: String(o.label ?? o.value) }))
@@ -289,7 +294,7 @@ export default function EditableFieldTable({
     }
     // Numbers/IDs render in mono (§4) — rates, cost codes, etc.
     return <input value={(v as string) ?? ''} type={f.inputType} step={f.step} onChange={e => setF(f.key, e.target.value)}
-      style={f.mono ? { ...compact, fontFamily: 'JetBrains Mono, monospace' } : compact} />
+      style={f.mono ? { ...compact, ...monoStyle } : compact} />
   }
 
   const renderValue = (f: FieldRow) => {
@@ -354,7 +359,7 @@ export default function EditableFieldTable({
         ? <SafeHtml html={v as string} style={{ fontSize: 12, color: 'var(--text)', lineHeight: 1.5 }} />
         : <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>-</span>
     }
-    return <span style={{ fontSize: 12, color: 'var(--text)', ...(f.mono ? { fontFamily: 'JetBrains Mono, monospace' } : {}) }}>{f.prefix ? `${f.prefix} ` : ''}{(v as ReactNode) || '-'}</span>
+    return <span style={{ fontSize: 12, color: 'var(--text)', ...(f.mono ? monoStyle : {}) }}>{f.prefix ? `${f.prefix} ` : ''}{(v as ReactNode) || '-'}</span>
   }
 
   // One row — full-width for textarea/chips/richtext (they need the width), label-left otherwise.
@@ -422,6 +427,11 @@ export default function EditableFieldTable({
   // titleless UNGROUPED table (e.g. DepartmentDetail's `title=""`, which intentionally
   // skips a duplicate sub-tab title) is untouched — there the bar is still the only
   // place for the pencil, so it keeps rendering exactly as before.
+  // §3 no fake affordances (MATCH-EDIT-1 Opus round, 22-08): without an onSave
+  // (and outside controlled editing) the pencil opened an edit mode whose save
+  // silently did nothing — a table with no persistence path is read-only, so it
+  // shows no pencil at all. Callers already pass `onSave={can ? fn : undefined}`.
+  const editable = Boolean(onSave) || controlled
   const showTopHeader = editButton === 'header' && (Boolean(title) || !hasGroups)
   // Grouped + titleless: the shared pencil (ONE edit cycle governs every group in the
   // table, unchanged) has no header of its own left to sit in — it moves onto the
@@ -434,7 +444,7 @@ export default function EditableFieldTable({
       {showTopHeader && (
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
           <GroupLabel as="span" style={{ letterSpacing: '0.04em' }}>{title}</GroupLabel>
-          {editing ? editControls() : <EditPencil onClick={startEdit} title={t('edit')} />}
+          {editable && (editing ? editControls() : <EditPencil onClick={startEdit} title={t('edit')} />)}
         </div>
       )}
 
@@ -446,7 +456,7 @@ export default function EditableFieldTable({
               {g.group && (
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
                   <GroupLabel as="span" style={{ letterSpacing: '0.04em' }}>{g.group}</GroupLabel>
-                  {groupHeaderPencil && i === 0 && (editing ? editControls() : <EditPencil onClick={startEdit} title={t('edit')} />)}
+                  {editable && groupHeaderPencil && i === 0 && (editing ? editControls() : <EditPencil onClick={startEdit} title={t('edit')} />)}
                 </div>
               )}
               <div style={cardStyle}>{renderFieldRows(g.fields)}</div>
@@ -455,7 +465,7 @@ export default function EditableFieldTable({
         </div>
       ) : (
         <div style={{ ...cardStyle, marginBottom: dividers ? 12 : 0, position: 'relative' }}>
-          {editButton === 'inside' && (
+          {editable && editButton === 'inside' && (
             <div style={{ position: 'absolute', top: 8, right: 8, zIndex: 1 }}>
               {editing ? editControls() : <EditPencil onClick={startEdit} title={t('edit')} />}
             </div>

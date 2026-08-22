@@ -7,36 +7,48 @@
  * that used to sit under those relations MOVED to its own Statistieken tab
  * (StatisticsTab), which also shows WHO/WHAT the other matches on each axis
  * are — a bare "2 van 2" told nobody which other match that was.
- * Stays read-only for the
- * derived facts (a match is the continuation of a Hired application, §3B);
- * the editable contract/financial layer remains its own tab
- * (MatchContractSection). Added on top of the facts card: the contract
- * window's duration + progress (M25/M26, MatchDurationBar — renders only once
- * both dates are set), the Koios AI advice block (M18, a pure FE heuristic —
- * buildMatchAdviceInsights, no AI/API call, mirrors every other entity's
- * KoiosAdviceBlock usage), Matchtekst (M17/optie A, MatchTextBlock — customer-
- * facing rich text, OFFERED-IFF-READ: hidden until the fetched payload
- * actually carries the not-yet-existing `match_text` key, ticket
- * MATCH-TEXT-FIELD-1) and — until it is emptied — the RETIRED Opmerkingen
- * field (REMARKS-INTO-NOTES-1, MatchRemarksBlock: read-only legacy content with
- * a move-into-notes action; see that file's header for the decision).
+ * Stays read-only for the DERIVED facts (candidate/vacancy/client/owner/score/
+ * stage/created — a match is the continuation of a Hired application, §3B,
+ * and owner is already editable via the header's own picker, MATCH-OWNER-1 —
+ * making it editable here too would put one field in two places again).
+ * Added on top of the facts card: the contract window's duration + progress
+ * (M25/M26, MatchDurationBar — renders only once both dates are set), the
+ * Koios AI advice block (M18, a pure FE heuristic — buildMatchAdviceInsights,
+ * no AI/API call, mirrors every other entity's KoiosAdviceBlock usage),
+ * Matchtekst (M17/optie A, MatchTextBlock — customer-facing rich text,
+ * OFFERED-IFF-READ: hidden until the fetched payload actually carries the
+ * not-yet-existing `match_text` key, ticket MATCH-TEXT-FIELD-1) and — until
+ * it is emptied — the RETIRED Opmerkingen field (REMARKS-INTO-NOTES-1,
+ * MatchRemarksBlock: read-only legacy content with a move-into-notes action;
+ * see that file's header for the decision).
  *
- * OVERZICHT-DATA-1 (overzicht-data cluster follow-up wave): adds the facts
- * that already ride on the LIST row (mapMatch) but never surfaced here —
- * contract form (M1), the literal begin/end dates (M2, next to the M25/26
- * duration bar which only shows elapsed/remaining, never the dates
- * themselves) and branch/vestiging (M19). A second card covers what is
- * DETAIL-only (§8 data minimization, never on the list row): hours/week +
- * cost centre + billing e-mail (M3/M28) and the HelloFlex last-sync
- * timestamp (M12) — fetched here via useMatchContract, the same lazy
- * per-tab fetch every other tab already does on its own (NotesTab/
- * ChangelogTab/BackofficeLinksTab). Overview is the default active tab, so
- * this fires once on open, and again only if the user also opens the
- * Contract tab — an accepted duplicate fetch; no shared-fetch plumbing
- * between tabs exists yet.
+ * OVERZICHT-DATA-1 (overzicht-data cluster follow-up wave): adds branch/
+ * vestiging (M19, the DRILLDOWN-VOLGORDE-CANON's own last block, unchanged).
+ *
+ * MATCH-EDIT-1 (Danny 22-08, "waar is het potlootje bij een match? ik kan
+ * niets wijzigen???"): contract_type/start_date/end_date/hours_per_week
+ * (M1/M2/M3) and cost_center/billing_emails (M28) are now EDITABLE here, in
+ * one EditableFieldTable card (Contract/Financieel groups, mirroring the
+ * Contract tab's own group titles since these are exactly the fields that
+ * used to live there) — and they LEAVE MatchContractSection, so no field
+ * renders in two places (§3A). Persisted via the SAME useMatchContract
+ * instance/PATCH /matches/{id} the Contract tab uses (measured: the only path
+ * that reaches the match's contract layer) — never a second save route. A
+ * successful save also patches the parent row's contractType/startDate/
+ * endDate (via onUpdate) so MatchDurationBar below — which reads match.* , not
+ * this fetch — and the list row never go stale. The other Overview fields
+ * (candidate/vacancy/client/owner/score/stage/created) stay read-only: some
+ * have no server path in MatchRules at all (candidate/vacancy — a match's
+ * relations aren't reassignable via PATCH), owner already has its OWN editable
+ * path in the header, and client (customer_id) DOES have a server path but
+ * reassigning a placement's customer is a materially bigger, guarded operation
+ * (guardCustomerApplicability) that nobody asked for here — flagged for Danny
+ * rather than built silently (§3A cell-doorklik-canon: inventory, don't decide).
  */
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Unplug } from 'lucide-react'
+import Button from '@/components/ui/Button'
 import SectionCard from '@/components/ui/SectionCard'
 import { CANON_LABEL_STYLE } from '@/components/drawer/fieldRowCanon'
 import SharedBranchSection from '@/components/drawer/BranchSection'
@@ -46,8 +58,14 @@ import EntityLink from '@/components/ui/EntityLink'
 import KoiosAdviceBlock from '@/components/ai/KoiosAdviceBlock'
 import { useMatchAdvice } from '@/lib/useMatchAdvice'
 import { adviceInsightRows } from '@/lib/koiosAdviceInsight'
+import EditableFieldTable from '@/components/forms/EditableFieldTable'
+import type { FieldRow } from '@/components/forms/EditableFieldTable'
+import { useContractTypes } from '@/lib/useContractTypes'
+import { notifySuccess, notifyError } from '@/lib/notify'
 import ScorePill from '../ScorePill'
 import { useMatchContract } from '../hooks/useMatchContract'
+import type { MatchContract } from '../hooks/useMatchContract'
+import { parseEmails, numOrNull } from './matchContractFieldUtils'
 import { buildMatchAdviceInsights } from './matchAiInsights'
 import MatchDurationBar from './MatchDurationBar'
 import MatchTextBlock from './MatchTextBlock'
@@ -87,15 +105,74 @@ export default function OverviewTab({ match, onUpdate, onOpenNotes }: OverviewTa
   // KOIOS-ADVIES-OVERAL-1: the SAME resolver the matches table's Koios column
   // uses — the advisory block below prepends its advice so the two never disagree.
   const resolveAdvice = useMatchAdvice()
-  // M3/M28/M12: hours/week + cost centre + billing e-mail are DETAIL-only fields
-  // (§8 — never on the list row), so this tab fetches them itself, same as every
-  // other lazy per-tab fetch in this drawer (§0.19 abort/alive-guard lives inside the hook).
-  // ONE instance for the whole tab: MatchRemarksBlock (M29) and MatchTextBlock
-  // (M17) both reuse this same data/save pair (for `remarks` and `match_text`)
-  // instead of opening a second GET /matches/{id} — all three now live on
-  // Overview together, so a second hook instance here would be a genuine
-  // duplicate fetch, not the "one per tab" pattern the comment above describes.
-  const { data: contract, loading: contractLoading, save: saveContract, matchTextPresent } = useMatchContract(match.id, onUpdate)
+  // MATCH-EDIT-1: contract_type is a tenant lookup (mirrors the Contract tab's
+  // own dropdown) — never a hardcoded option list.
+  const { types: contractTypes } = useContractTypes()
+  // M3/M28/M12 + MATCH-EDIT-1: the contract/financial layer is DETAIL-only (§8 —
+  // never on the list row), so this tab fetches (and now edits) it itself, same
+  // as every other lazy per-tab fetch in this drawer (§0.19 abort/alive-guard
+  // lives inside the hook). ONE instance for the whole tab: MatchRemarksBlock
+  // (M29), MatchTextBlock (M17) and the Contract/Financieel card below all
+  // reuse this same data/save pair instead of opening a second GET
+  // /matches/{id} — a second hook instance here would be a genuine duplicate
+  // fetch, not the "one per tab" pattern the comment above describes.
+  const { data: contract, loading: contractLoading, error: contractError, unavailable: contractUnavailable,
+    retry: retryContract, revertTick, save: saveContract, matchTextPresent } = useMatchContract(match.id, onUpdate)
+
+  // MATCH-EDIT-1: the six fields that used to live on the Contract tab — now
+  // editable here, grouped under that tab's OWN "Contract"/"Financieel" titles
+  // (one source per label §11 — these are exactly the fields that moved).
+  // contract_type is optional → the real VAC-CLEAR-1 clear-cross via the table's
+  // `clearable` passthrough (Opus round 22-08: the earlier injected "none" option
+  // leaked its label into read mode where every sibling empty renders a dash).
+  const contractFields: FieldRow[] = [
+    { key: 'contract_type', label: t('drawer.contract.contractType'), type: 'select', clearable: true,
+      options: contractTypes.map(c => ({ value: c, label: c })),
+      group: t('drawer.contract.groupContract') },
+    { key: 'start_date', label: t('drawer.contract.startDate'), type: 'date', group: t('drawer.contract.groupContract') },
+    { key: 'end_date', label: t('drawer.contract.endDate'), type: 'date', group: t('drawer.contract.groupContract') },
+    { key: 'hours_per_week', label: t('drawer.contract.hoursPerWeek'), inputType: 'number', group: t('drawer.contract.groupContract') },
+    { key: 'cost_center', label: t('drawer.contract.costCenter'), group: t('drawer.contract.groupFinancial') },
+    // billing_emails is a multi-line LIST (one address per line) — the shared
+    // textarea row deliberately renders label-above/full-width (same as it did on
+    // the Contract tab); the label-left canon governs single-value field rows.
+    { key: 'billing_emails_text', label: t('drawer.contract.billingEmails'), type: 'textarea', group: t('drawer.contract.groupFinancial') },
+  ]
+  const contractValues: Record<string, unknown> = {
+    contract_type: contract.contract_type ?? '',
+    start_date: contract.start_date ?? '',
+    end_date: contract.end_date ?? '',
+    hours_per_week: contract.hours_per_week ?? '',
+    cost_center: contract.cost_center ?? '',
+    billing_emails_text: contract.billing_emails.join('\n'),
+  }
+  // Map the UI draft back to the PATCH body and persist through the SAME
+  // useMatchContract instance the Contract tab uses (measured: the only path
+  // that reaches PATCH /matches/{id} for this layer) — never a second save route.
+  const handleSaveContract = async (v: Record<string, unknown>) => {
+    const patch: Partial<MatchContract> = {
+      contract_type:  (v.contract_type as string) || null,
+      start_date:     (v.start_date as string) || null,
+      end_date:       (v.end_date as string) || null,
+      hours_per_week: numOrNull(v.hours_per_week),
+      cost_center:    (v.cost_center as string) || null,
+      billing_emails: parseEmails(String(v.billing_emails_text ?? '')),
+    }
+    try {
+      await saveContract(patch)
+      // Keep the list row / MatchDurationBar below in sync — they read match.*
+      // (the list-row shape), not this tab's own contract fetch.
+      onUpdate?.(match.id, {
+        contractType: patch.contract_type ?? null,
+        startDate: patch.start_date ?? null,
+        endDate: patch.end_date ?? null,
+      })
+      notifySuccess(t('drawer.contract.saved'))
+    } catch (err) {
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message
+      notifyError(msg || t('drawer.contract.saveError'))
+    }
+  }
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -133,37 +210,37 @@ export default function OverviewTab({ match, onUpdate, onOpenNotes }: OverviewTa
             </Field>
           )}
           <Field label={t('drawer.fields.created')}>{formatDate(match.date)}</Field>
-          {/* M1: contract form — MatchListResource already ships `contract_type` on
-              every list row; the mapper just never picked it up before this wave. */}
-          <Field label={t('drawer.contract.contractType')}>{textOrDash(match.contractType ?? '')}</Field>
-          {/* M2: the literal begin/end dates — the duration bar below only shows
-              elapsed/remaining, never the dates themselves. */}
-          <Field label={t('drawer.contract.startDate')}>{match.startDate ? formatDate(match.startDate) : dash}</Field>
-          <Field label={t('drawer.contract.endDate')}>{match.endDate ? formatDate(match.endDate) : dash}</Field>
         </div>
       </SectionCard>
 
       {/* M25/M26: contract window duration + progress — only once both dates are set. */}
       <MatchDurationBar startDate={match.startDate} endDate={match.endDate} />
 
-      {/* M3/M28/M12: DETAIL-only facts (§8) — hours/week, cost centre, billing
-          e-mail (reuse the Contract tab's own labels, one source per label §11)
-          and the HelloFlex last-sync timestamp. Loading is a quiet skeleton state,
-          never a blank card — an unconfigured integration/never-synced match just
-          reads as an honest dash, not an error. */}
-      <SectionCard title={t('drawer.detailSection')}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-          <Field label={t('drawer.contract.hoursPerWeek')}>
-            {contractLoading ? dash : (contract.hours_per_week != null ? contract.hours_per_week : dash)}
-          </Field>
-          <Field label={t('drawer.contract.costCenter')}>
-            {contractLoading ? dash : textOrDash(contract.cost_center ?? '')}
-          </Field>
-          <Field label={t('drawer.contract.billingEmails')}>
-            {contractLoading ? dash : (contract.billing_emails.length > 0 ? contract.billing_emails.join(', ') : dash)}
-          </Field>
+      {/* MATCH-EDIT-1: contract_type/start_date/end_date/hours_per_week (Contract)
+          and cost_center/billing_emails (Financieel) — now EDITABLE here, one
+          pencil governs both groups (mirrors MatchContractSection's own
+          titleless-grouped pencil). FOUR states before any edit control (§3,
+          Opus round 22-08): an editable card seeded from a FAILED fetch renders
+          blank and one save then null-wipes all six stored fields — so the
+          unavailable/error gates mirror the Contract tab's own, and the pencil
+          only exists once real data is on screen. Archived matches are
+          read-only here, same as every other edit surface in this drawer. */}
+      {contractLoading ? (
+        <div style={{ fontSize: 12, color: 'var(--text-muted)', padding: '10px 2px' }}>{t('drawer.contract.loading')}</div>
+      ) : contractUnavailable ? (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 12, color: 'var(--text-muted)', padding: '10px 2px' }}>
+          <Unplug size={14} />
+          <span>{t('drawer.contract.unavailable')}</span>
         </div>
-      </SectionCard>
+      ) : contractError ? (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 12, color: 'var(--color-danger-text)', padding: '10px 2px' }}>
+          <span>{t('drawer.contract.error')}</span>
+          <Button variant="secondary" size="sm" onClick={retryContract}>{t('common:error.retry')}</Button>
+        </div>
+      ) : (
+        <EditableFieldTable key={`${match.id}-${revertTick}`} fields={contractFields} value={contractValues}
+          onSave={match.archived ? undefined : handleSaveContract} />
+      )}
 
       {/* DRILLDOWN-VOLGORDE-CANON (Danny 21-08): informatie → TEKST met pop-out
           → Koios AI → vestiging. De matchtekst staat dus vóór het Koios-blok. */}

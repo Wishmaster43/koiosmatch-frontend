@@ -68,10 +68,6 @@
       "created": "Aangemaakt",
       "status": "Status",
       "lastSynced": "Laatst gesynchroniseerd",
-      "contractType": "Contractsoort",
-      "startDate": "Begindatum",
-      "endDate": "Einddatum",
-      "hoursPerWeek": "Uren per week",
       "lastSyncedHelloflex": "Laatst gesynced met HelloFlex",
       "branch": "Vestiging",
       "customerLocation": "Locatie",
@@ -122,7 +118,6 @@
       "success": "Match beëindigd.",
       "error": "Match kon niet worden beëindigd."
     },
-    "detailSection": "Details",
     "remarks": {
       "title": "Opmerkingen",
       "saved": "Opmerkingen opgeslagen.",

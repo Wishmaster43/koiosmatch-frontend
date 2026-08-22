@@ -3,9 +3,15 @@
  * M1 (contract form), M2 (literal begin/end dates), M19 (branch) straight off
  * the list row, and the DETAIL-only card (M3/M28/M12 — hours/week, cost
  * centre, billing e-mail, HelloFlex last-sync) fetched via useMatchContract.
+ *
+ * MATCH-EDIT-1 (Danny 22-08): contract_type/start_date/end_date/hours_per_week/
+ * cost_center/billing_emails are now EDITABLE here (moved off MatchContractSection,
+ * see that file's own tests for the "no longer renders there" regression) — the
+ * tests below cover the new save path and the contract_type clear cycle.
  */
 import { describe, it, expect, vi, afterEach } from 'vitest'
 import { render, screen, waitFor, renderHook } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { I18nextProvider } from 'react-i18next'
 import i18n from '@/i18n'
 import OverviewTab from './OverviewTab'
@@ -16,9 +22,14 @@ import type { MatchRow } from '@/types/match'
 // Only the default axios client is stubbed — useMatchContract's own unwrap logic runs for real.
 vi.mock('@/lib/api', async () => {
   const actual = await vi.importActual<typeof import('@/lib/api')>('@/lib/api')
-  return { ...actual, default: { get: vi.fn() } }
+  return { ...actual, default: { get: vi.fn(), patch: vi.fn() } }
 })
 const mockedGet = vi.mocked(api.get)
+const mockedPatch = vi.mocked(api.patch)
+
+// MATCH-EDIT-1: a fixed tenant lookup, decoupling these tests from the real
+// useCachedLookup network/caching behaviour (mirrors MatchContractSection.test.tsx).
+vi.mock('@/lib/useContractTypes', () => ({ useContractTypes: () => ({ types: ['ZZP Flex', 'Fase 1-2 z.u.b. (Works)'] }) }))
 
 afterEach(() => vi.clearAllMocks())
 
@@ -36,8 +47,13 @@ function renderTab(match: MatchRow) {
 }
 
 describe('OverviewTab · overzicht-data cluster', () => {
-  it('renders contract form, dates and branch straight off the list row (no extra fetch needed for those)', async () => {
-    mockedGet.mockResolvedValue({ data: { data: {} } })
+  // MATCH-EDIT-1: contract_type/start_date/end_date now come from the SAME
+  // detail-only fetch as hours/week etc. (they moved into the editable
+  // Contract/Financieel card) — branch still comes straight off the list row.
+  it('renders the fetched contract type/dates in the editable card, and branch straight off the list row', async () => {
+    mockedGet.mockResolvedValue({
+      data: { data: { contract_type: 'ZZP Flex', start_date: '2026-01-01', end_date: '2026-06-30' } },
+    })
     renderTab(baseMatch)
     expect(await screen.findByText('ZZP Flex')).toBeInTheDocument()
     expect(screen.getByText('Utrecht')).toBeInTheDocument()
@@ -92,8 +108,10 @@ describe('OverviewTab · overzicht-data cluster', () => {
     // more when the note-type lookup lands, which can detach the node found by an
     // earlier query and turn a correct render into a flaky failure.
     await waitFor(() => expect(screen.getByText('Oude opmerking')).toBeInTheDocument())
-    // …but only one pencil is on the tab, and it belongs to Matchtekst.
-    await waitFor(() => expect(screen.getAllByRole('button', { name: i18n.t('common:edit') })).toHaveLength(1))
+    // …Matchtekst's own pencil, plus the Contract/Financieel card's pencil
+    // (MATCH-EDIT-1, unrelated to free text) — exactly two, never a third
+    // free-text editor for the retired Opmerkingen field.
+    await waitFor(() => expect(screen.getAllByRole('button', { name: i18n.t('common:edit') })).toHaveLength(2))
   })
 
   it('drops the retired Opmerkingen block entirely once the field is empty', async () => {
@@ -101,6 +119,87 @@ describe('OverviewTab · overzicht-data cluster', () => {
     renderTab(baseMatch)
     await waitFor(() => expect(mockedGet).toHaveBeenCalledWith('/matches/m1'))
     expect(screen.queryByText(i18n.t('matches:drawer.remarks.title'))).not.toBeInTheDocument()
+  })
+})
+
+// MATCH-EDIT-1 (Danny 22-08, "waar is het potlootje bij een match?"): the
+// Contract/Financieel card is now editable — asserts the actual PATCH request
+// (route + mapped body), never just that a callback fired (§13).
+describe('OverviewTab · Contract/Financieel card is editable (MATCH-EDIT-1)', () => {
+  // match_text/remarks omitted from the payload so MatchTextBlock/MatchRemarksBlock
+  // stay unmounted — this card's pencil is then the ONLY one on the page.
+  const emptyContract = {
+    contract_type: null, start_date: null, end_date: null,
+    hours_per_week: null, cost_center: null, billing_emails: [] as string[],
+  }
+
+  it('edits and saves cost_center via PATCH /matches/{id} with the mapped body, syncing the list row', async () => {
+    const user = userEvent.setup()
+    mockedGet.mockResolvedValue({ data: { data: emptyContract } })
+    mockedPatch.mockResolvedValue({ data: { data: {} } })
+    const onUpdate = vi.fn()
+    render(<I18nextProvider i18n={i18n}><OverviewTab match={baseMatch} onUpdate={onUpdate} /></I18nextProvider>)
+    await waitFor(() => expect(mockedGet).toHaveBeenCalledWith('/matches/m1'))
+    await user.click(screen.getByRole('button', { name: i18n.t('common:edit') }))
+    // Locate the cost_center input via its own label sibling — DOM-order-proof,
+    // never guessed off getAllByRole('textbox') index (start_date/end_date's
+    // DatePicker inputs are textboxes too).
+    const costCenterLabel = screen.getByText(i18n.t('matches:drawer.contract.costCenter'))
+    const costCenterInput = costCenterLabel.nextElementSibling?.querySelector('input') as HTMLInputElement
+    expect(costCenterInput).toBeTruthy()
+    await user.type(costCenterInput, 'KP-9')
+    await user.click(screen.getByTitle(i18n.t('common:save')))
+    await waitFor(() => expect(mockedPatch).toHaveBeenCalledWith('/matches/m1', expect.objectContaining({ cost_center: 'KP-9' })))
+    // MatchDurationBar + the list row read match.* (not this tab's own fetch) —
+    // a successful save must patch them too, or they go stale (measured gap).
+    expect(onUpdate).toHaveBeenCalledWith('m1', expect.objectContaining({ contractType: null, startDate: null, endDate: null }))
+  })
+
+  // VAC-CLEAR-1: the optional contract_type select carries the REAL clear-cross
+  // (EditableFieldTable's `clearable` passthrough → CreatableSelect's own X) —
+  // an unset value renders the plain placeholder, never an artificial "none"
+  // option label (Opus round 22-08: that label leaked into read mode).
+  it('supports pick → clear → placeholder on the optional contract_type select, and PATCHes null', async () => {
+    const user = userEvent.setup()
+    mockedGet.mockResolvedValue({ data: { data: emptyContract } })
+    mockedPatch.mockResolvedValue({ data: { data: {} } })
+    render(<I18nextProvider i18n={i18n}><OverviewTab match={baseMatch} /></I18nextProvider>)
+    await waitFor(() => expect(mockedGet).toHaveBeenCalledWith('/matches/m1'))
+    await user.click(screen.getByRole('button', { name: i18n.t('common:edit') }))
+    // Unset shows the plain placeholder — open it and pick a real option.
+    await user.click(screen.getByRole('button', { name: i18n.t('common:select') }))
+    await user.click(await screen.findByRole('button', { name: 'ZZP Flex' }))
+    expect(screen.getByRole('button', { name: 'ZZP Flex' })).toBeInTheDocument()
+    // The clear-cross exists only while a value is set (VAC-CLEAR-1) — press it.
+    const clearName = i18n.t('common:clearField', { field: i18n.t('matches:drawer.contract.contractType') })
+    await user.click(screen.getByTitle(clearName))
+    // Back to the placeholder — the clear reached the draft, not just the menu.
+    expect(screen.getByRole('button', { name: i18n.t('common:select') })).toBeInTheDocument()
+    await user.click(screen.getByTitle(i18n.t('common:save')))
+    await waitFor(() => expect(mockedPatch).toHaveBeenCalledWith('/matches/m1', expect.objectContaining({ contract_type: null })))
+  })
+})
+
+// §3 four states (Opus round 22-08): a FAILED contract fetch must never yield an
+// editable blank card — the save path builds all six keys unconditionally, so one
+// save on top of never-fetched data would null-wipe the stored record.
+describe('OverviewTab · contract card guard states', () => {
+  it('renders the error line + retry and NO pencil when the contract fetch fails', async () => {
+    mockedGet.mockRejectedValue(new Error('boom'))
+    renderTab(baseMatch)
+    await waitFor(() => expect(screen.getByText(i18n.t('matches:drawer.contract.error'))).toBeInTheDocument())
+    expect(screen.getByRole('button', { name: i18n.t('common:error.retry') })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: i18n.t('common:edit') })).not.toBeInTheDocument()
+  })
+
+  it('offers no contract pencil on an archived match (read-only, like every drawer surface)', async () => {
+    mockedGet.mockResolvedValue({ data: { data: {
+      contract_type: null, start_date: null, end_date: null,
+      hours_per_week: null, cost_center: null, billing_emails: [] as string[],
+    } } })
+    renderTab({ ...baseMatch, archived: true })
+    await waitFor(() => expect(mockedGet).toHaveBeenCalledWith('/matches/m1'))
+    expect(screen.queryByRole('button', { name: i18n.t('common:edit') })).not.toBeInTheDocument()
   })
 })
 

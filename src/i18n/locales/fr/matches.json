@@ -68,10 +68,6 @@
       "created": "Créé",
       "status": "Statut",
       "lastSynced": "Dernière synchro",
-      "contractType": "Type de contrat",
-      "startDate": "Date de début",
-      "endDate": "Date de fin",
-      "hoursPerWeek": "Heures par semaine",
       "lastSyncedHelloflex": "Dernière synchro HelloFlex",
       "branch": "Agence",
       "customerLocation": "Site",
@@ -122,7 +118,6 @@
       "success": "Match résilié.",
       "error": "Le match n'a pas pu être résilié."
     },
-    "detailSection": "Détails",
     "remarks": {
       "title": "Remarques",
       "saved": "Remarques enregistrées.",

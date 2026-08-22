@@ -21,7 +21,6 @@ const mockHasPermission = vi.fn()
 vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ hasPermission: mockHasPermission }) }))
 beforeEach(() => { mockHasPermission.mockImplementation(() => true) })
 
-vi.mock('@/lib/useContractTypes', () => ({ useContractTypes: () => ({ types: [] }) }))
 vi.mock('@/lib/useCao', () => ({ useCao: () => ({ types: [] }) }))
 
 const baseData: MatchContract = {
@@ -42,6 +41,32 @@ function setup(data: Partial<MatchContract> = {}) {
   })
   return render(<MatchContractSection matchId="m1" />)
 }
+
+/**
+ * MATCH-EDIT-1 (Danny 22-08, "waar is het potlootje bij een match?"): contract_type,
+ * start_date, end_date, hours_per_week, cost_center and billing_emails moved to
+ * OverviewTab's own Contract/Financieel card (see OverviewTab.test.tsx for the new
+ * editable-card coverage) — this is the regression proof that they no longer
+ * render here too, so no field lives in two places (§3A).
+ */
+describe('MatchContractSection · MATCH-EDIT-1 (fields moved to Overview)', () => {
+  it('no longer renders the six fields that moved to OverviewTab, even when the data still carries them', () => {
+    setup({
+      contract_type: 'ZZP Flex', start_date: '2026-01-01', end_date: '2026-06-30',
+      hours_per_week: 32, cost_center: 'KP-1', billing_emails: ['a@example.org'],
+    })
+    expect(screen.queryByText('drawer.contract.contractType')).toBeNull()
+    expect(screen.queryByText('drawer.contract.startDate')).toBeNull()
+    expect(screen.queryByText('drawer.contract.endDate')).toBeNull()
+    expect(screen.queryByText('drawer.contract.hoursPerWeek')).toBeNull()
+    expect(screen.queryByText('drawer.contract.costCenter')).toBeNull()
+    expect(screen.queryByText('drawer.contract.billingEmails')).toBeNull()
+    // What stays: function title + CAO (Contract) and scale/step/surcharge/rates (Financieel).
+    expect(screen.getByText('drawer.contract.functionTitle')).toBeInTheDocument()
+    expect(screen.getByText('drawer.contract.cao')).toBeInTheDocument()
+    expect(screen.getByText('drawer.contract.scale')).toBeInTheDocument()
+  })
+})
 
 describe('MatchContractSection · financial permission gate', () => {
   it('shows the purchase rate field, the margin block and the sale rate with the permission', () => {

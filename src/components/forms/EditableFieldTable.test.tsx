@@ -63,7 +63,7 @@ describe('EditableFieldTable · address composite (read mode)', () => {
 describe('EditableFieldTable · address composite (edit mode)', () => {
   it('expands into the loose addressFields once editing starts', async () => {
     const user = userEvent.setup()
-    render(<EditableFieldTable fields={fields} value={value} />)
+    render(<EditableFieldTable fields={fields} value={value} onSave={vi.fn()} />)
     await user.click(screen.getByTitle('edit'))
     // The composed line is gone; each declared child field is now its own row.
     expect(screen.queryByText('Kerkstraat 12-a, 1234 AB Amsterdam')).toBeNull()
@@ -111,7 +111,7 @@ describe('EditableFieldTable · address composite (edit mode)', () => {
 
   it('other field types keep editing normally alongside the expanded address', async () => {
     const user = userEvent.setup()
-    render(<EditableFieldTable fields={fields} value={value} />)
+    render(<EditableFieldTable fields={fields} value={value} onSave={vi.fn()} />)
     await user.click(screen.getByTitle('edit'))
     expect(screen.getByDisplayValue('0612345678')).toBeInTheDocument()
     expect(screen.getByRole('switch')).toHaveAttribute('aria-checked', 'true')
@@ -159,7 +159,7 @@ describe('EditableFieldTable · name composite (read mode)', () => {
 describe('EditableFieldTable · name composite (edit mode)', () => {
   it('expands into the loose nameFields once editing starts', async () => {
     const user = userEvent.setup()
-    render(<EditableFieldTable fields={nameTableFields} value={nameValue} />)
+    render(<EditableFieldTable fields={nameTableFields} value={nameValue} onSave={vi.fn()} />)
     await user.click(screen.getByTitle('edit'))
     // The composed line is gone; each declared child field is now its own row.
     expect(screen.queryByText('Jan de Vries')).toBeNull()
@@ -218,7 +218,7 @@ describe('EditableFieldTable · grouped table with no top-level title (M7)', () 
   const groupedValue = { a: 'Alpha', b: 'Beta' }
 
   it('renders no empty header bar above the group titles', () => {
-    render(<EditableFieldTable fields={groupedFields} value={groupedValue} />)
+    render(<EditableFieldTable fields={groupedFields} value={groupedValue} onSave={vi.fn()} />)
     // Both group titles render as real headings...
     expect(screen.getByText('Group one')).toBeInTheDocument()
     expect(screen.getByText('Group two')).toBeInTheDocument()
@@ -228,7 +228,7 @@ describe('EditableFieldTable · grouped table with no top-level title (M7)', () 
 
   it('puts the shared pencil on the FIRST group only, and it edits every group at once', async () => {
     const user = userEvent.setup()
-    render(<EditableFieldTable fields={groupedFields} value={groupedValue} />)
+    render(<EditableFieldTable fields={groupedFields} value={groupedValue} onSave={vi.fn()} />)
     await user.click(screen.getByTitle('edit'))
     // Entering edit mode via the (single) pencil edits BOTH groups in one cycle.
     expect(screen.getByDisplayValue('Alpha')).toBeInTheDocument()
@@ -236,7 +236,7 @@ describe('EditableFieldTable · grouped table with no top-level title (M7)', () 
   })
 
   it('still shows the ordinary top header when a title IS given, even when grouped', () => {
-    render(<EditableFieldTable title="My table" fields={groupedFields} value={groupedValue} />)
+    render(<EditableFieldTable title="My table" fields={groupedFields} value={groupedValue} onSave={vi.fn()} />)
     expect(screen.getByText('My table')).toBeInTheDocument()
     // Top header owns the pencil again; the group titles carry none of their own.
     expect(screen.getAllByTitle('edit')).toHaveLength(1)
@@ -245,8 +245,17 @@ describe('EditableFieldTable · grouped table with no top-level title (M7)', () 
   it('keeps the titleless header bar (and its pencil) for an UNGROUPED table — unchanged', () => {
     // Mirrors DepartmentDetail's `title=""` usage: a deliberately empty title, no
     // `group` on any field, so the single header bar stays the only pencil spot.
-    render(<EditableFieldTable title="" fields={[{ key: 'a', label: 'Field A' }]} value={{ a: 'Alpha' }} />)
+    render(<EditableFieldTable title="" fields={[{ key: 'a', label: 'Field A' }]} value={{ a: 'Alpha' }} onSave={vi.fn()} />)
     expect(screen.getByTitle('edit')).toBeInTheDocument()
+  })
+
+  // §3 no fake affordances (MATCH-EDIT-1 Opus round, 22-08): a table without any
+  // persistence path is read-only — it never offers a pencil whose save would
+  // silently do nothing.
+  it('shows NO pencil at all when neither onSave nor controlled editing is provided', () => {
+    render(<EditableFieldTable title="Read only" fields={[{ key: 'a', label: 'Field A' }]} value={{ a: 'Alpha' }} />)
+    expect(screen.getByText('Alpha')).toBeInTheDocument()
+    expect(screen.queryByTitle('edit')).not.toBeInTheDocument()
   })
 })
 

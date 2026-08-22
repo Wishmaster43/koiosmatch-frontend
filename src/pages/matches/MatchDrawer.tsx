@@ -205,7 +205,7 @@ export default function MatchDrawer({
     // MOVED-FROM-OVERVIEW-1 (Danny 22-08): the ordinal footnote moved off Overview
     // onto its own tab, now WITH who/what the other matches on each axis are.
     { id: 'statistics', label: t('drawer.tabs.statistics'), render: () => <StatisticsTab match={match} allRows={allRows} ordinals={ordinals} /> },
-    { id: 'contract',  label: t('drawer.contract.title'), render: () => <MatchContractSection matchId={match.id} onUpdate={onUpdate} /> },
+    { id: 'contract',  label: t('drawer.contract.title'), render: () => <MatchContractSection matchId={match.id} onUpdate={onUpdate} archived={match.archived} /> },
     // NT-MATCH-1: notes, after the content tabs above and before Extra/Koppelingen
     // (there is no Changelog TAB — record history stays the icon-popover, §3A(d)).
     { id: 'notes', label: t('notes.title'), render: () => <NotesTab match={match} /> },

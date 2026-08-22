@@ -41,7 +41,7 @@ describe('EditableFieldTable · validate gate', () => {
   })
 
   it('announces a warning politely (role=status), never as an alert', async () => {
-    render(<EditableFieldTable fields={[cocRow('warning')]} value={{ cocNumber: '0123456789' }} />)
+    render(<EditableFieldTable fields={[cocRow('warning')]} value={{ cocNumber: '0123456789' }} onSave={vi.fn()} />)
     await openEditor()
     expect(screen.getByRole('status')).toHaveTextContent('coc looks wrong')
     expect(screen.queryByRole('alert')).toBeNull()

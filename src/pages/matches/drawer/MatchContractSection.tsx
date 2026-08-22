@@ -5,15 +5,20 @@
  * Grouped into CONTRACT + FINANCIEEL cards via the shared EditableFieldTable (§3A
  * in-place edit pattern: one pencil governs both cards), sourced from GET /matches/{id} (detail-only fields, §8)
  * and saved via useMatchContract's optimistic PATCH /matches/{id} (revert + toast
- * on 422/409). Billing emails have no dedicated tenant lookup, so they're edited
- * as one line/comma-separated text field and mapped back to the array the
- * backend expects (the match-form multi-input list was judged out of scope
- * for the shared table component — see the Self-Audit note).
+ * on 422/409).
  *
  * M29 (overzicht-layout cluster): `remarks` moved OUT of this shared-pencil
  * table onto the Overview tab as its own block with its own pencil
  * (MatchRemarksBlock) — editing it here too would be two truths for one
  * field (§11). This table no longer carries it.
+ *
+ * MATCH-EDIT-1 (Danny 22-08, "waar is het potlootje bij een match?"): contract_type,
+ * start_date, end_date, hours_per_week, cost_center and billing_emails moved to
+ * OverviewTab's own Contract/Financieel card (that card renders the moment the
+ * drawer opens, so it is now the one place to edit them, §3A "no field in two
+ * places") — this tab keeps only what Overview does NOT also show. The email
+ * parsing/number-coercion helpers moved to the shared matchContractFieldUtils
+ * so both callers use the one mapping, never two copies (§11).
  */
 import { useTranslation } from 'react-i18next'
 import { Unplug } from 'lucide-react'
@@ -22,32 +27,24 @@ import type { FieldRow } from '@/components/forms/EditableFieldTable'
 import { Caption, Mono } from '@/components/ui/typography'
 import Button from '@/components/ui/Button'
 import { notifySuccess, notifyError } from '@/lib/notify'
-import { useContractTypes } from '@/lib/useContractTypes'
 import { useCao } from '@/lib/useCao'
 import { useAuth } from '@/context/AuthContext'
 import ContractFormChip from '../ContractFormChip'
 import { useMatchContract } from '../hooks/useMatchContract'
 import type { MatchContract } from '../hooks/useMatchContract'
+import { numOrNull } from './matchContractFieldUtils'
 import type { MatchRow } from '@/types/match'
-
-// Split the textarea's free text back into a trimmed, de-duplicated email array.
-function parseEmails(text: string): string[] {
-  return [...new Set(text.split(/[\n,]/).map(s => s.trim()).filter(Boolean))]
-}
-
-// Coerce an empty/undefined UI value to null; else Number(...) for the API.
-function numOrNull(v: unknown): number | null {
-  return v === '' || v == null ? null : Number(v)
-}
 
 interface Props {
   matchId: MatchRow['id'] | undefined
   onUpdate?: (id: MatchRow['id'], patch: Partial<MatchRow>) => void
+  // Archived matches are read-only everywhere in this drawer (pickers, terminate,
+  // renewal) — this tab's pencil follows the same rule (MATCH-EDIT-1 Opus round).
+  archived?: boolean
 }
 
-export default function MatchContractSection({ matchId, onUpdate }: Props) {
+export default function MatchContractSection({ matchId, onUpdate, archived }: Props) {
   const { t } = useTranslation(['matches', 'common'])
-  const { types: contractTypes } = useContractTypes()
   const { types: caoTypes } = useCao()
   const { data, loading, error, unavailable, revertTick, retry, save } = useMatchContract(matchId, onUpdate)
 
@@ -61,15 +58,13 @@ export default function MatchContractSection({ matchId, onUpdate }: Props) {
   const canSeeFinancial = !!auth?.hasPermission?.('matches.financial.view')
 
   // Editable schema — two titled cards (Contract / Financieel) in one table.
+  // MATCH-EDIT-1: contract_type/start_date/end_date/hours_per_week (Contract) and
+  // cost_center/billing_emails (Financieel) moved to OverviewTab — only what
+  // Overview does not also show stays here.
   const fields: FieldRow[] = [
     { key: 'function_title', label: t('drawer.contract.functionTitle'), group: t('drawer.contract.groupContract') },
-    { key: 'contract_type', label: t('drawer.contract.contractType'), type: 'select',
-      options: contractTypes.map(c => ({ value: c, label: c })), group: t('drawer.contract.groupContract') },
     { key: 'cao', label: t('drawer.contract.cao'), type: 'select',
       options: caoTypes.map(c => ({ value: c.value, label: c.label })), group: t('drawer.contract.groupContract') },
-    { key: 'start_date', label: t('drawer.contract.startDate'), type: 'date', group: t('drawer.contract.groupContract') },
-    { key: 'end_date', label: t('drawer.contract.endDate'), type: 'date', group: t('drawer.contract.groupContract') },
-    { key: 'hours_per_week', label: t('drawer.contract.hoursPerWeek'), inputType: 'number', group: t('drawer.contract.groupContract') },
 
     { key: 'scale', label: t('drawer.contract.scale'), group: t('drawer.contract.groupFinancial') },
     { key: 'step', label: t('drawer.contract.step'), group: t('drawer.contract.groupFinancial') },
@@ -80,25 +75,17 @@ export default function MatchContractSection({ matchId, onUpdate }: Props) {
       ? [{ key: 'purchase_rate', label: t('drawer.contract.purchaseRate'), inputType: 'number', mono: true, group: t('drawer.contract.groupFinancial') } as FieldRow]
       : []),
     { key: 'sell_rate', label: t('drawer.contract.sellRate'), inputType: 'number', mono: true, group: t('drawer.contract.groupFinancial') },
-    { key: 'cost_center', label: t('drawer.contract.costCenter'), group: t('drawer.contract.groupFinancial') },
-    { key: 'billing_emails_text', label: t('drawer.contract.billingEmails'), type: 'textarea', group: t('drawer.contract.groupFinancial') },
   ]
 
-  // Current values, mapped to the schema's UI keys (billing_emails → newline text).
+  // Current values, mapped to the schema's UI keys.
   const values: Record<string, unknown> = {
     function_title: data.function_title ?? '',
-    contract_type: data.contract_type ?? '',
     cao: data.cao ?? '',
-    start_date: data.start_date ?? '',
-    end_date: data.end_date ?? '',
-    hours_per_week: data.hours_per_week ?? '',
     scale: data.scale ?? '',
     step: data.step ?? '',
     surcharge: data.surcharge ?? '',
     purchase_rate: data.purchase_rate ?? '',
     sell_rate: data.sell_rate ?? '',
-    cost_center: data.cost_center ?? '',
-    billing_emails_text: data.billing_emails.join('\n'),
   }
 
   // Map the UI draft back to the PATCH body, then persist through the hook
@@ -106,11 +93,7 @@ export default function MatchContractSection({ matchId, onUpdate }: Props) {
   const handleSave = async (v: Record<string, unknown>) => {
     const patch: Partial<MatchContract> = {
       function_title: (v.function_title as string) || null,
-      contract_type:  (v.contract_type as string) || null,
       cao:            (v.cao as string) || null,
-      start_date:     (v.start_date as string) || null,
-      end_date:       (v.end_date as string) || null,
-      hours_per_week: numOrNull(v.hours_per_week),
       scale:          (v.scale as string) || null,
       step:           (v.step as string) || null,
       surcharge:      numOrNull(v.surcharge),
@@ -120,8 +103,6 @@ export default function MatchContractSection({ matchId, onUpdate }: Props) {
       // "unset means unchanged") rather than send `null` and silently wipe it.
       ...(canSeeFinancial ? { purchase_rate: numOrNull(v.purchase_rate) } : {}),
       sell_rate:      numOrNull(v.sell_rate),
-      cost_center:    (v.cost_center as string) || null,
-      billing_emails: parseEmails(String(v.billing_emails_text ?? '')),
     }
     try {
       await save(patch)
@@ -193,7 +174,8 @@ export default function MatchContractSection({ matchId, onUpdate }: Props) {
           uncontrolled table re-seeds its draft from the reverted/fresh data. */}
       {/* Canon (05-08): clean cards — no row dividers, 11px labels (candidate = leading);
           label width now the EditableFieldTable default (fieldRowCanon). */}
-      <EditableFieldTable key={`${matchId}-${revertTick}`} fields={fields} value={values} onSave={handleSave} />
+      <EditableFieldTable key={`${matchId}-${revertTick}`} fields={fields} value={values}
+        onSave={archived ? undefined : handleSave} />
       {/* Derived margin — read-only, sits right under the rate fields. MATCH-FIN-GATE-1:
           hidden without the permission, same as the purchase rate row above — the
           margin is reconstructible from purchase+sell, so both must go together. */}

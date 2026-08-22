@@ -68,10 +68,6 @@
       "created": "Created",
       "status": "Status",
       "lastSynced": "Last synced",
-      "contractType": "Contract type",
-      "startDate": "Start date",
-      "endDate": "End date",
-      "hoursPerWeek": "Hours per week",
       "lastSyncedHelloflex": "Last synced with HelloFlex",
       "branch": "Branch",
       "customerLocation": "Location",
@@ -122,7 +118,6 @@
       "success": "Match terminated.",
       "error": "The match could not be terminated."
     },
-    "detailSection": "Details",
     "remarks": {
       "title": "Remarks",
       "saved": "Remarks saved.",
