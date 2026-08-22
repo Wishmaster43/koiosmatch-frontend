@@ -19,6 +19,14 @@ GDPR/AVG. Treat every line accordingly.
 These are absolute. If a request conflicts with them, say so and propose a
 compliant alternative.
 
+0. **API-CREDITS-1 (Danny 2026-08-22, verbatim: "jij en FE mogen niets verbruiken alleen
+   ik!!").** There are REAL prepaid credits on the Anthropic API key behind the backend.
+   **No Claude/CMFE/CMBE session may ever trigger a live AI call** — no live probes or E2E
+   flows that POST to `/api/ai/koios/*`, the agent test panel, assistGenerate, the notes
+   wizard, or any workflow run containing an AI module. Only Danny consumes credits,
+   through the app, himself. FE tests mock the AI endpoints. If verifying seems to require
+   a real AI call: STOP and ask Danny.
+
 1. **English only** — all code, identifiers, comments, commit messages, and
    docs are in English. No Dutch in the codebase. **This explicitly includes every
    URL/route segment and settings slug (Danny 2026-08-13):** settings section ids,
@@ -762,6 +770,17 @@ the code is worse than no rule, because the next reader builds on it. What is tr
   eslint-disable reason (a calendar-grid cell, 34px search-chrome, …) or it is drift.
   **HERAUDIT-CADANS (Danny akkoord 20-08):** de huisstijl-lus is formeel gesloten;
   heraudit per milestone, niet continu — de slagbomen/plafond bewaken continu.
+  **SCOPE-UITZONDERING-LES (Danny 22-08, Koios-zijbalkknop: "hoe kan het dat jij
+  Koios AI gemist hebt toen jij de huisstijl controleerde"):** een gebied dat bij een
+  veegronde bewust WERD uitgezonderd (app-chroom in components/layout, "chroom is
+  geen Button-werk") blijft stil op de OUDE regels hangen wanneer er daarna nieuwe
+  conventies landen (PRIMAIR-VLAK-1, CHIP-TINT-1, tint=actieve-nav, ink-twins) — de
+  uitzondering is nooit herbeoordeeld en de gedocumenteerde disables passeren de
+  poorten per ontwerp. Regel: **elke nieuwe huisstijlconventie heropent expliciet de
+  lijst van eerder uitgezonderde gebieden** (chroom, e2e-chrome, popouts) met een
+  regel in de betreffende WORKLIST-rij: "uitzonderingsgebieden herbeoordeeld: ja/nee
+  + welke". Een gesloten lus + plafond bewijst "geen NIEUWE drift", nooit "overal
+  conform" — rapporteer hem ook zo.
   **FACE-WISSEL-LES (20-08, StatusFilterSelect):** wie een component een nieuw
   GEZICHT geeft (veld → pil), reviewt ook de WRAPPER-maten van het oude gezicht —
   een minWidth die bij het oude face hoorde rendert bij een krimpend face als
