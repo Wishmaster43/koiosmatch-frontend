@@ -68,7 +68,7 @@ describe('tasks DetailsTab — split fields/description edit sections', () => {
   it('renders both sections read-only with their own pencil', () => {
     render(<DetailsTab task={task} onUpdate={vi.fn()} />)
     expect(screen.getByTitle('Taakdetails')).toBeInTheDocument()
-    expect(screen.getByTitle('Omschrijving')).toBeInTheDocument()
+    expect(screen.getByTitle('Taakomschrijving')).toBeInTheDocument()
     expect(screen.queryByTitle('Plaatsen')).toBeNull()
   })
 
@@ -81,7 +81,7 @@ describe('tasks DetailsTab — split fields/description edit sections', () => {
 
   it('hides the popout button once description editing starts (mirrors MatchTextBlock)', () => {
     render(<DetailsTab task={task} onUpdate={vi.fn()} />)
-    fireEvent.click(screen.getByTitle('Omschrijving'))
+    fireEvent.click(screen.getByTitle('Taakomschrijving'))
     expect(screen.queryByTitle('Open op tweede scherm')).toBeNull()
   })
 
@@ -90,7 +90,7 @@ describe('tasks DetailsTab — split fields/description edit sections', () => {
     render(<DetailsTab task={task} onUpdate={onUpdate} />)
     fireEvent.click(screen.getByTitle('Taakdetails'))
     // Only the fields section is editing; its own Save/Cancel appear, description's pencil stays put.
-    expect(screen.getByTitle('Omschrijving')).toBeInTheDocument()
+    expect(screen.getByTitle('Taakomschrijving')).toBeInTheDocument()
     fireEvent.click(screen.getByTitle('Plaatsen'))
     expect(onUpdate).toHaveBeenCalledWith({
       typeKey: 'call', statusKey: 'todo', priorityKey: 'normal',
@@ -104,7 +104,7 @@ describe('tasks DetailsTab — split fields/description edit sections', () => {
   it('saving the description section sends ONLY { description }', () => {
     const onUpdate = vi.fn()
     render(<DetailsTab task={task} onUpdate={onUpdate} />)
-    fireEvent.click(screen.getByTitle('Omschrijving'))
+    fireEvent.click(screen.getByTitle('Taakomschrijving'))
     // The fields pencil is unaffected while description is mid-edit.
     expect(screen.getByTitle('Taakdetails')).toBeInTheDocument()
     fireEvent.click(screen.getByTitle('Plaatsen'))
@@ -126,7 +126,7 @@ describe('tasks DetailsTab — split fields/description edit sections', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Prioriteit' }))
     fireEvent.click(screen.getByRole('button', { name: 'Hoog' }))
     // Open + cancel the description section without touching the fields section.
-    fireEvent.click(screen.getByTitle('Omschrijving'))
+    fireEvent.click(screen.getByTitle('Taakomschrijving'))
     fireEvent.click(screen.getAllByTitle('Annuleren')[1])
     // The fields section is still mid-edit, with the changed value intact.
     expect(screen.getByRole('button', { name: 'Prioriteit' })).toHaveTextContent('Hoog')
@@ -138,7 +138,7 @@ describe('tasks DetailsTab — split fields/description edit sections', () => {
   it('hides both pencils on an archived task', () => {
     render(<DetailsTab task={{ ...task, archived: true }} onUpdate={vi.fn()} />)
     expect(screen.queryByTitle('Taakdetails')).toBeNull()
-    expect(screen.queryByTitle('Omschrijving')).toBeNull()
+    expect(screen.queryByTitle('Taakomschrijving')).toBeNull()
   })
 })
 

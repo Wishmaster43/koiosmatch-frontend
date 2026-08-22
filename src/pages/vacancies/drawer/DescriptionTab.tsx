@@ -4,6 +4,7 @@ import { Edit2, Save, X, Trash2, ExternalLink } from 'lucide-react'
 import RichTextEditorJs from '@/components/ui/RichTextEditor'
 import SafeHtmlJs from '@/components/ui/SafeHtml'
 import Button from '@/components/ui/Button'
+import { GroupLabel } from '@/components/ui/typography'
 import { useVacancyDescription } from '../hooks/useVacancyDescription'
 import { useVacancySkills } from '../hooks/useVacancySkills'
 import AdditionalSkillsSection from './AdditionalSkillsSection'
@@ -60,10 +61,11 @@ export default function DescriptionTab({ vacancy: v, onUpdate }: { vacancy: Vaca
     // skills directly under it — one column, one gap, on this single tab.
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
       <div>
-        {/* No heading here: since VAC-TEKST-TAB-1 the tab itself is named
-            "Vacaturetekst", so repeating it was dubbel (Danny 20-08) — the row
-            keeps only the pop-out + edit controls, right-aligned. */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginBottom: 6 }}>
+        {/* Section head (Danny 22-08, supersedes the 20-08 no-heading call:
+            with the skills section now ALSO on this tab, each section names
+            itself — a bare text block read naked next to a headed sibling). */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+          <GroupLabel as="span">{t('details.description')}</GroupLabel>
           <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
             {/* V-desc-1: second screen — same icon + footprint the candidate
                 profile-text pop-out uses, in this block's own title row. */}

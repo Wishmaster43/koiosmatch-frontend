@@ -69,7 +69,7 @@
     "dueTime": "Uhrzeit",
     "assignee": "Zugewiesen an",
     "owner": "Inhaber",
-    "description": "Beschreibung",
+    "description": "Aufgabenbeschreibung",
     "location": "Niederlassung",
     "locationPlaceholder": "Niederlassung wählen",
     "team": "Abteilung",

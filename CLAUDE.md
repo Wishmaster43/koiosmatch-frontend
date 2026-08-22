@@ -224,6 +224,18 @@ tweede referentie-implementatie.
 **Table** — `<Entity>Table` only declares **columns** and hands them to the shared
 `components/ui/DataTable` (sorting, selection, loading/empty/row-click live there). Cells
 reuse `Avatar`, `StatusPill` and the soft-chip convention. No table chrome re-implemented.
+**CEL-DOORKLIK-CANON (Danny 22-08: "alle informatie in de tabellen moet nuttig zijn en
+wil je meer weten moet je bij de juiste drilldown uitkomen").** Every table cell that
+refers to more information than it shows deep-links to the CORRECT drill-down TAB of the
+right entity — a cell is a gateway, never a dead end. Two hard rules: (1) a NEW column
+ships only after ASKING Danny which drilldown/tab it must link to — never guessed, never
+silently unlinked; (2) an audit finding of a wrong/missing cell link is INVENTORIED and
+put to Danny as a question, never self-decided (his explicit instruction: "niet zelf
+aanpassen maar mij vragen, wel inventariseren"). The rule governs columns added
+AFTER 22-08; columns that predate it are the audit's inventory, and the matches
+"Type" column (born in the same delivery as this rule) is explicitly on Danny's
+question list for its routing. A periodic all-tables doorklik-audit
+(TABEL-DOORKLIK-AUDIT-1 in WORKLIST) verifies cell → tab routing per table.
 
 **Insights row** — `<Entity>InsightsRow` is **config-driven** (`donuts[]` + `kpis[]`),
 equal-footprint cards, click-to-filter. Reuse `MiniDonut` / `KpiCard` / `StatCard`; never

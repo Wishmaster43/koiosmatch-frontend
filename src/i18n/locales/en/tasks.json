@@ -83,7 +83,7 @@
     "dueTime": "Time",
     "assignee": "Assigned to",
     "owner": "Created by",
-    "description": "Description",
+    "description": "Task description",
     "location": "Branch",
     "locationPlaceholder": "Pick a branch",
     "team": "Department",

@@ -69,7 +69,7 @@
     "dueTime": "Heure",
     "assignee": "Assignée à",
     "owner": "Responsable",
-    "description": "Description",
+    "description": "Description de la tâche",
     "location": "Agence",
     "locationPlaceholder": "Choisir une agence",
     "team": "Service",

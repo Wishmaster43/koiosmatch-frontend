@@ -69,7 +69,7 @@
     "dueTime": "Hora",
     "assignee": "Asignada a",
     "owner": "Responsable",
-    "description": "Descripción",
+    "description": "Descripción de la tarea",
     "location": "Sucursal",
     "locationPlaceholder": "Elige una sucursal",
     "team": "Departamento",
