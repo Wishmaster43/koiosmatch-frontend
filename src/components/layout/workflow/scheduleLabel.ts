@@ -23,7 +23,7 @@
 import type { TFunction } from 'i18next'
 import type { ScheduleConfig } from '@/types/workflow'
 import { WORKFLOW_EVENT_KEYS, eventKeyToI18nKey } from './eventCatalog'
-import { dateRelativeFieldLabel } from './DateRelativeFields'
+import { dateRelativeFieldLabel } from './dateRelativeFieldOptions'
 
 // Localized short day/month names from Intl. `dayIndex` is Sunday=0 (Intl/Date
 // convention); `dayNameIso` below is the ISO-weekday (Monday=1..Sunday=7) wrapper

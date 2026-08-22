@@ -22,7 +22,7 @@
 import { useState } from 'react'
 import type { ScheduleConfig } from '@/types/workflow'
 import { WORKFLOW_EVENT_KEYS } from './eventCatalog'
-import { DATE_RELATIVE_FIELDS } from './DateRelativeFields'
+import { DATE_RELATIVE_FIELDS } from './dateRelativeFieldOptions'
 import { normalizeScheduleConfig } from './scheduleLabel'
 
 export function useScheduleForm(
