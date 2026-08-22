@@ -3054,16 +3054,6 @@
     "colVat": "Numéro de TVA",
     "unknownCountryHint": "Pour les pays sans règle ci-dessus, rien n'est bloqué. Vous recevez tout au plus une indication discrète."
   },
-  "automations": {
-    "title": "Automatisations",
-    "subtitle": "Tous les workflows du tenant en une liste : activer ou désactiver, définir le nombre de jours d'avance d'un déclencheur relatif à une date, et choisir les candidats ciblés.",
-    "loadError": "Impossible de charger les workflows.",
-    "empty": "Aucun workflow pour l'instant. Créez-en un dans le générateur de workflows.",
-    "dateFieldReadOnly": "Se déclenche par rapport à : {{field}}",
-    "toggleAriaLabel": "Activer ou désactiver {{name}}",
-    "segmentStatusLabel": "Statut ciblé",
-    "segmentPhaseLabel": "Phase ciblée"
-  },
   "platformPricing": {
     "title": "Tarification de la plateforme",
     "subtitle": "Marge IA et prix du crédit workflow pour toute la plateforme (superadmin).",

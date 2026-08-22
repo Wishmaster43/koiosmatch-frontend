@@ -125,7 +125,6 @@ import outreachDisplay from './schemas/outreachDisplay'
 import DriverLicenseSettings from './sections/DriverLicenseSettings'
 import ActionRulesSettings from './sections/ActionRulesSettings'
 import workflowRunHistory from './schemas/workflowRunHistory'
-import AutomationsSettings from './sections/AutomationsSettings'
 
 export const NAV_GROUPS = [
   {
@@ -554,7 +553,6 @@ export const NAV_GROUPS = [
     // workflows module has nothing to retain, so the group auto-hides for them.
     key: 'workflows', icon: History,
     items: [
-      { id: 'automations', icon: CalendarCheck, component: AutomationsSettings, requiresPage: 'workflows' },
       { id: 'workflow_run_history', icon: History, schema: workflowRunHistory, requiresPage: 'workflows' },
     ],
   },

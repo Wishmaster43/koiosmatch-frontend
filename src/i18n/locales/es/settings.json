@@ -3054,16 +3054,6 @@
     "colVat": "Número de IVA",
     "unknownCountryHint": "Para países sin una regla arriba no se bloquea nada: solo recibirás un aviso suave."
   },
-  "automations": {
-    "title": "Automatizaciones",
-    "subtitle": "Todos los flujos de trabajo del tenant en una lista: actívalos o desactívalos, define con cuántos días de antelación se dispara un disparador relativo a una fecha y elige a qué candidatos se dirige.",
-    "loadError": "No se pudieron cargar los flujos de trabajo.",
-    "empty": "Aún no hay flujos de trabajo. Crea uno en el generador de flujos de trabajo.",
-    "dateFieldReadOnly": "Se dispara en relación con: {{field}}",
-    "toggleAriaLabel": "Activar o desactivar {{name}}",
-    "segmentStatusLabel": "Estado objetivo",
-    "segmentPhaseLabel": "Fase objetivo"
-  },
   "platformPricing": {
     "title": "Precios de la plataforma",
     "subtitle": "Margen de IA y precio del crédito de workflow para toda la plataforma (superadmin).",

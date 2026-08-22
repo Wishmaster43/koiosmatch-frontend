@@ -396,6 +396,14 @@ export default defineConfig([
     files: ['src/types/api-generated.ts'],
     rules: { 'max-lines': 'off' },
   },
+  // The settings registry is a pure CONFIG LISTING (one entry per settings
+  // screen) — it grows a line per screen, not per responsibility; splitting it
+  // per group is planned with the features/ move (§2), not ad hoc. max-lines
+  // stays off ONLY here; the section components it points at keep the rule.
+  {
+    files: ['src/pages/settings/registry.jsx'],
+    rules: { 'max-lines': 'off' },
+  },
   // Testbestanden vallen buiten §3's splitstabel (die noemt component/hook/util)
   // — een testsuite groeit legitiem met zijn gedragsoppervlak mee, en de
   // 400-regel-warn maakte elke kleine assertion-toevoeging een verplichte

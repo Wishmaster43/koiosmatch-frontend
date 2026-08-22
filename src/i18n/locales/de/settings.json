@@ -3054,16 +3054,6 @@
     "colVat": "USt-IdNr.",
     "unknownCountryHint": "Für Länder ohne obige Regel wird nichts blockiert. Es erscheint höchstens ein dezenter Hinweis."
   },
-  "automations": {
-    "title": "Automatisierungen",
-    "subtitle": "Alle Mandanten-Workflows in einer Liste: ein- oder ausschalten, einstellen, wie viele Tage vorher ein datumsbezogener Auslöser startet, und die Zielkandidaten wählen.",
-    "loadError": "Workflows konnten nicht geladen werden.",
-    "empty": "Noch keine Workflows. Erstellen Sie einen im Workflow-Builder.",
-    "dateFieldReadOnly": "Löst aus relativ zu: {{field}}",
-    "toggleAriaLabel": "{{name}} ein- oder ausschalten",
-    "segmentStatusLabel": "Zielstatus",
-    "segmentPhaseLabel": "Zielphase"
-  },
   "platformPricing": {
     "title": "Plattformpreise",
     "subtitle": "KI-Marge und Workflow-Creditpreis für die gesamte Plattform (Superadmin).",

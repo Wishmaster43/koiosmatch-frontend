@@ -46,6 +46,14 @@ export function passesModuleOrApp(requirement, { hasModule, isAppEnabled }) {
   return moduleOn || appOn
 }
 
+// Removed/renamed settings slugs keep resolving (§0.1): old deep-links land on
+// their successor instead of the silent first-tab fallback. One map, append-only.
+const SLUG_ALIASES = {
+  // AUTOMATIONS-MIGRATIE-1 (22-08): the automations tab died — its rules ARE
+  // workflows now; the run history is the closest surviving surface.
+  'workflows/automations': { category: 'workflows', tab: 'workflow_run_history' },
+}
+
 function parseHash() {
   const raw = window.location.hash.replace(/^#/, '')
   const parts = raw.split('/')
@@ -53,7 +61,8 @@ function parseHash() {
   // from colliding with page hashes (#applications/… booted the Applications LIST).
   // The legacy unprefixed #<category>/<tab> is still accepted for old bookmarks.
   const [category, tab] = parts[0] === 'settings' ? parts.slice(1) : parts
-  return category && tab ? { category, tab } : null
+  if (!category || !tab) return null
+  return SLUG_ALIASES[`${category}/${tab}`] ?? { category, tab }
 }
 
 export default function SettingsPage() {

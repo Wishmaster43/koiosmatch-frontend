@@ -3054,16 +3054,6 @@
     "colVat": "Btw-nummer",
     "unknownCountryHint": "Voor landen zonder regel hierboven wordt niets geblokkeerd. Je krijgt hooguit een zachte hint."
   },
-  "automations": {
-    "title": "Automatiseringen",
-    "subtitle": "Alle tenant-workflows in één lijst: zet ze aan of uit, stel in hoeveel dagen van tevoren een datum-gerelateerde trigger afgaat, en kies welke kandidaten hij raakt.",
-    "loadError": "Workflows konden niet worden geladen.",
-    "empty": "Nog geen workflows. Maak er een aan in de workflow-builder.",
-    "dateFieldReadOnly": "Gaat af relatief aan: {{field}}",
-    "toggleAriaLabel": "{{name}} aan- of uitzetten",
-    "segmentStatusLabel": "Doelgroep status",
-    "segmentPhaseLabel": "Doelgroep fase"
-  },
   "platformPricing": {
     "title": "Platformprijzen",
     "subtitle": "AI-marge en workflow-creditprijs voor het hele platform (superadmin).",
