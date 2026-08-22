@@ -10,15 +10,23 @@ import { useTranslation } from 'react-i18next'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 import type { MouseEvent, DragEvent } from 'react'
 import { Handle, Position, BaseEdge, EdgeLabelRenderer, getStraightPath } from '@xyflow/react'
-import { CheckCircle, Filter, HelpCircle, Play, Plus, X } from 'lucide-react'
+import { AlertTriangle, CheckCircle, Filter, HelpCircle, Play, Plus, X } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { MODULE_META } from '@/modules/index'
+import { monoStyle } from '@/components/ui/typography'
 import { NODE_W, NODE_H, countEdgeFilterConditions } from './serialization'
 import { EdgeAddContext, EdgeDeleteContext, EdgeFilterContext, NodeRunContext, StartContext } from './contexts'
+import { useModuleCatalog } from './useModuleCatalog'
 import OutputTree from './OutputTree'
 import type { FlowNodeData, EdgeFilters } from '@/types/workflow'
 import { tint } from '@/lib/tint'
 import Spinner from '@/components/ui/Spinner'
+
+// PICKER-INTERSECT: trigger-role modules (registry category 'Triggers' — webhook,
+// applicant_event, gateway_mail_hook) start a workflow run rather than execute as an
+// engine action step, so the backend engine's action map never lists them by design —
+// they stay exempt from the "not executable" marker below regardless of the catalog.
+const TRIGGER_CATEGORY = 'Triggers'
 
 // ── Custom node ───────────────────────────────────────────────────────────────
 
@@ -48,6 +56,16 @@ function ModuleNode({ id, data, selected }: { id: string; data: FlowNodeData; se
   // as ConfigPanel/ModulePicker; an unrecognised type shows a translated notice
   // instead of the raw Dutch registry fallback.
   const nodeLabel = knownMeta ? t('modules.' + rawType, { defaultValue: knownMeta.label }) : t('canvas.unknownModule')
+  // PICKER-INTERSECT: a SAVED node whose type the engine cannot execute wears an
+  // honest marker instead of disappearing. An EMPTY catalog (still loading, or the
+  // fetch failed soft) carries no executability info — never flag on that, or every
+  // node would falsely light up while offline; only a non-empty catalog is real signal.
+  const { catalog } = useModuleCatalog()
+  // Shape floor mirrors ModulePicker's (Opus F4): a corrupted couple-of-keys
+  // response must never light a warning on every saved node.
+  const catalogKnown = Object.keys(catalog).length >= 5
+  const isTriggerType = meta.category === TRIGGER_CATEGORY
+  const notExecutable = catalogKnown && !!rawType && !isTriggerType && !(rawType in catalog)
   // WF-R3 live per-step status → node ring + badge colour.
   const status = data.status as string | undefined
   const failed = status === 'failed'
@@ -173,7 +191,7 @@ function ModuleNode({ id, data, selected }: { id: string; data: FlowNodeData; se
                          minWidth: 16, padding: '2px 6px', borderRadius: 999,
                          display: 'flex', alignItems: 'center', justifyContent: 'center',
                          background: meta.bg, color: meta.color, fontSize: 10, fontWeight: 700,
-                         fontFamily: "'JetBrains Mono', monospace", lineHeight: '14px',
+                         ...monoStyle, lineHeight: '14px',
                          border: '2px solid var(--surface)', whiteSpace: 'nowrap' }}>
             {badgeCount}
           </span>
@@ -231,6 +249,24 @@ function ModuleNode({ id, data, selected }: { id: string; data: FlowNodeData; se
             {/* Icon on a FIXED semantic fill — the on-danger/on-success tokens, never a raw
                 'white' (white only reaches 3.3:1 on --color-success, failing 4.5:1). */}
             {failed ? <X size={9} color="var(--color-on-danger)" /> : <CheckCircle size={9} color="var(--color-on-success)" />}
+          </div>
+        )}
+        {/* PICKER-INTERSECT: "not executable" marker — TOP-LEFT. The status badge above
+            already owns top-right (done/failed/output) and the counter badge owns
+            bottom-left, so top-left is the one corner nothing else on this node claims.
+            The node itself keeps rendering fully either way (never hide saved work). */}
+        {notExecutable && (
+          <div
+            title={t('canvas.notExecutable')} aria-label={t('canvas.notExecutable')} role="img"
+            style={{
+              // z above the START pill (zIndex 5): with a two-line label the two
+              // overlap a few px on the first node, and the WARNING must win.
+              position: 'absolute', top: -4, left: -4, zIndex: 6,
+              width: 16, height: 16, borderRadius: '50%',
+              background: 'var(--color-warning-bg)', border: '2px solid var(--surface)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>
+            <AlertTriangle size={9} color="var(--color-warning)" />
           </div>
         )}
       </div>

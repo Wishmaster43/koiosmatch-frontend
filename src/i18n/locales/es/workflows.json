@@ -415,6 +415,7 @@
     "displayAsDay": "Día (Lun/Mar/…)",
     "displayAsDayTime": "Día + hora",
     "unknownModule": "Módulo desconocido",
+    "notExecutable": "No ejecutable",
     "opDateOlderThanDays": "hace más de N días",
     "filterDaysHint": "Número de días (p. ej. 30)"
   },

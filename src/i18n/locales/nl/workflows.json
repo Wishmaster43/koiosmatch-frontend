@@ -450,6 +450,7 @@
     "displayAsDay": "Dag (Ma/Di/…)",
     "displayAsDayTime": "Dag + tijd",
     "unknownModule": "Onbekende module",
+    "notExecutable": "Niet uitvoerbaar",
     "opDateOlderThanDays": "langer dan N dagen geleden",
     "filterDaysHint": "Aantal dagen (bijv. 30)"
   },

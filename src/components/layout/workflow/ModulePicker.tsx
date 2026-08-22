@@ -12,12 +12,19 @@ import { useApps } from '@/context/AppsContext'
 import { useAuth } from '@/context/AuthContext'
 import { categorySlug } from './moduleI18n'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
+import { useModuleCatalog } from './useModuleCatalog'
 import Button from '@/components/ui/Button'
 
 // One [type, meta] pair from the module registry (used by the picker rows).
 type ModuleMetaEntry = [string, (typeof MODULE_META)[string]]
 
 const CATEGORY_ORDER = ['Alle', 'Triggers', 'Kandidaten', 'Sollicitaties', 'Vacatures', 'Matches', 'Kansen', 'Taken', 'Klanten', 'Planning', 'Communicatie', 'AI', 'Shiftmanager', 'HelloFlex', 'Intus', 'Facebook', 'Flow beheer', 'Tekst & Parsing']
+
+// PICKER-INTERSECT: trigger-role modules (registry category 'Triggers' — webhook,
+// applicant_event, gateway_mail_hook) start a workflow run rather than execute as an
+// engine action step, so the backend engine's action map never lists them by design —
+// they stay exempt from the executability gate below regardless of the catalog.
+const TRIGGER_CATEGORY = 'Triggers'
 
 export default function ModulePicker({ insertAfterEdgeId, onSelect, onClose }: {
   insertAfterEdgeId: string | null
@@ -31,6 +38,9 @@ export default function ModulePicker({ insertAfterEdgeId, onSelect, onClose }: {
   const [tab,    setTab]    = useState('Alle')
   const { isAppEnabled } = useApps() ?? {}
   const { hasModule } = (useAuth() as unknown as { hasModule?: (m: string) => boolean }) ?? {}
+  // PICKER-INTERSECT: GET /workflows/modules, keyed by type — the backend engine's
+  // real executable set. Fails soft to {} on error/while loading (useModuleCatalog).
+  const { catalog } = useModuleCatalog()
 
   // Translated module label + category (registry value = nl source / defaultValue).
   const modLabel = (type: string, label: string) => t('modules.' + type, { defaultValue: label })
@@ -47,7 +57,22 @@ export default function ModulePicker({ insertAfterEdgeId, onSelect, onClose }: {
     return apps.some(a => isAppEnabled?.(a))
   }
 
-  const allEntries = Object.entries(MODULE_META).filter(([type]) => isModuleEnabled(type))
+  // PICKER-INTERSECT: only offer a module the engine can actually run. An EMPTY
+  // catalog carries no executability info at all (still loading, or the fetch
+  // failed soft) — degrade honestly by offering everything the app/module gates
+  // already allowed, never an empty picker; a NON-EMPTY catalog is real signal and
+  // filters for real. Trigger-role modules never appear in that map by design.
+  // Shape floor (Opus F4): the engine map carries ~40 types, so a response that
+  // unwraps to a couple of stray keys is corruption, not signal — treating it as
+  // known would strip ~67 of 68 modules and mark every saved node.
+  const catalogKnown = Object.keys(catalog).length >= 5
+  const isExecutable = (type: string, category?: string) => {
+    if (category === TRIGGER_CATEGORY) return true
+    if (!catalogKnown) return true
+    return type in catalog
+  }
+
+  const allEntries = Object.entries(MODULE_META).filter(([type, m]) => isModuleEnabled(type) && isExecutable(type, m.category))
 
   const visible = allEntries.filter(([type, m]) => {
     const matchSearch = !search || modLabel(type, m.label).toLowerCase().includes(search.toLowerCase())
