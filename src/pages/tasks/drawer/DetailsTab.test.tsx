@@ -7,18 +7,35 @@ import { render, screen, fireEvent, renderHook } from '@testing-library/react'
 import i18n from '@/i18n'
 import DetailsTab from './DetailsTab'
 import { useTaskAdvice } from '@/lib/useTaskAdvice'
+import { chipInk } from '@/lib/tint'
 import type { TaskDetail } from '@/types/task'
 
-// Lookups/users arrive via mocked hooks — no providers needed.
+// Controllable tenant task lookups (mirrors EntityTasksTab.test.tsx's statusesRef/
+// typesRef/prioritiesRef convention) — a vi.hoisted() ref so TAKEN-CHIP-KLEUR-BUG-1's
+// regression tests can mutate a lookup's colour IN PLACE between renders, modelling
+// a tenant Settings edit landing in the real TaskLookupsContext.
+/* eslint-disable no-restricted-syntax -- test fixture lookup colours (DATA, not UI styling) */
+const typesRef = vi.hoisted(() => ({ current: [{ value: 'call', label: 'Belafspraak', color: '#888888' }] }))
+const statusesRef = vi.hoisted(() => ({ current: [{ value: 'todo', label: 'Te doen', color: '#888888' }, { value: 'done', label: 'Afgerond', color: '#00aa00' }] }))
+const prioritiesRef = vi.hoisted(() => ({ current: [{ value: 'normal', label: 'Normaal', color: '#888888' }, { value: 'high', label: 'Hoog', color: '#cc0000' }] }))
+/* eslint-enable no-restricted-syntax */
+
+// Lookups/users arrive via mocked hooks — no providers needed. statusMeta/typeMeta/
+// priorityMeta mirror the REAL makeMetaResolver fallback (lib/lookupUtils.ts): an
+// unmatched value (a DEACTIVATED row never reaches this list in production either —
+// TaskLookupsContext's sortActiveRows already dropped it) falls back to its own raw
+// value as the label, neutral grey as the colour — never a blank/broken chip.
 vi.mock('@/context/TaskLookupsContext', () => ({
-  useTaskLookups: () => ({
-    // eslint-disable-next-line no-restricted-syntax -- test fixture lookup colours (DATA, not UI styling)
-    types: [{ value: 'call', label: 'Belafspraak', color: '#888888' }],
-    // eslint-disable-next-line no-restricted-syntax -- test fixture lookup colours (DATA, not UI styling)
-    statuses: [{ value: 'todo', label: 'Te doen', color: '#888888' }, { value: 'done', label: 'Afgerond', color: '#00aa00' }],
-    // eslint-disable-next-line no-restricted-syntax -- test fixture lookup colours (DATA, not UI styling)
-    priorities: [{ value: 'normal', label: 'Normaal', color: '#888888' }, { value: 'high', label: 'Hoog', color: '#cc0000' }],
-  }),
+  useTaskLookups: () => {
+    const metaOf = (list: { value: string; label: string; color: string }[]) =>
+      (v?: string | number | null) => list.find(i => i.value === v) ??
+        // eslint-disable-next-line no-restricted-syntax -- test fixture fallback colour, mirrors the real makeMetaResolver default
+        { value: String(v ?? ''), label: String(v ?? ''), color: '#9CA3AF' }
+    return {
+      types: typesRef.current, statuses: statusesRef.current, priorities: prioritiesRef.current,
+      typeMeta: metaOf(typesRef.current), statusMeta: metaOf(statusesRef.current), priorityMeta: metaOf(prioritiesRef.current),
+    }
+  },
 }))
 vi.mock('@/lib/queries', () => ({ useUsers: () => ({ data: [{ id: 'u1', name: 'Anna' }] }) }))
 // TASK-LOCATION-READ-1: the tenant's own establishments, same mock shape as every
@@ -341,5 +358,64 @@ describe('tasks DetailsTab — internal department (TEAM-1)', () => {
     render(<DetailsTab task={task} onUpdate={vi.fn()} />)
     fireEvent.click(screen.getByTitle('Taakdetails'))
     expect(screen.queryByLabelText(i18n.t('tasks:details.team'), { selector: 'select' })).toBeNull()
+  })
+})
+
+/**
+ * TAKEN-CHIP-KLEUR-BUG-1 (Danny's bug report): a colour change or deactivation of
+ * a task lookup value showed correctly in the TABLE (useTasksData's decorate() runs
+ * again on every lookup change) but stayed stale in the DRAWER — DetailsTab used to
+ * render from task.typeLabel/typeColor/statusLabel/statusColor/priorityLabel/
+ * priorityColor, baked onto the task ONCE at select/fetch time
+ * (useTaskDrawerActions) and never re-derived. The fix resolves the read-view
+ * chips from the LIVE tenant lookup (statusMeta/typeMeta/priorityMeta) by the raw
+ * key, at render — mirroring MatchesTab's metaOf() pattern (§3A reference).
+ */
+describe('tasks DetailsTab — chips read the LIVE lookup, not a baked snapshot (TAKEN-CHIP-KLEUR-BUG-1)', () => {
+  it('renders the CURRENT lookup label/colour even when task.statusLabel/statusColor disagree (stale bake)', () => {
+    // Deliberately stale baked fields — a real payload right after a Settings edit
+    // would look exactly like this: the raw key is still 'todo', but whatever was
+    // baked onto the record at select time no longer matches the live lookup row.
+    // eslint-disable-next-line no-restricted-syntax -- test fixture colour (DATA, not UI styling)
+    const stale: TaskDetail = { ...task, statusLabel: 'Oude naam', statusColor: '#000000' }
+    render(<DetailsTab task={stale} onUpdate={vi.fn()} />)
+    // The live lookup ('todo' → 'Te doen' / '#888888') wins, never the stale bake.
+    expect(screen.getByText('Te doen')).toBeInTheDocument()
+    // eslint-disable-next-line no-restricted-syntax -- asserting chipInk() output for the test fixture colour, not a UI colour choice
+    expect(screen.getByText('Te doen')).toHaveStyle({ color: chipInk('#888888') })
+    expect(screen.queryByText('Oude naam')).not.toBeInTheDocument()
+  })
+
+  it('updates the chip colour on rerender once the tenant lookup colour changes (live reactivity)', () => {
+    const { rerender } = render(<DetailsTab task={task} onUpdate={vi.fn()} />)
+    // eslint-disable-next-line no-restricted-syntax -- asserting chipInk() output for the test fixture colour, not a UI colour choice
+    expect(screen.getByText('Te doen')).toHaveStyle({ color: chipInk('#888888') })
+
+    // Simulate a tenant Settings colour edit landing in the SAME TaskLookupsContext
+    // — mutate the lookup row IN PLACE and rerender the SAME task prop. A drawer
+    // that still reads task.statusColor would show no change at all here; the fix
+    // must re-resolve statusMeta('todo') on every render.
+    // eslint-disable-next-line no-restricted-syntax -- test fixture lookup colour (DATA, not UI styling)
+    statusesRef.current[0].color = '#123456'
+    rerender(<DetailsTab task={task} onUpdate={vi.fn()} />)
+    // eslint-disable-next-line no-restricted-syntax -- asserting chipInk() output for the test fixture colour, not a UI colour choice
+    expect(screen.getByText('Te doen')).toHaveStyle({ color: chipInk('#123456') })
+    // eslint-disable-next-line no-restricted-syntax -- restore the fixture colour for tests running after this one
+    statusesRef.current[0].color = '#888888'
+  })
+
+  it('renders a DEACTIVATED value exactly like the table\'s fallback: raw key label, neutral grey', () => {
+    // 'retired_type' is not in the (active-only) type lookup — mirrors a tenant
+    // deactivating it; TaskLookupsContext's sortActiveRows already drops inactive
+    // rows before useTaskLookups() ever returns them, in the table AND the drawer.
+    const deactivated: TaskDetail = { ...task, typeKey: 'retired_type' }
+    render(<DetailsTab task={deactivated} onUpdate={vi.fn()} />)
+    // Same fallback shape as makeMetaResolver/the table's decorate(): the raw key
+    // as the label, the neutral grey fallback as the colour — never blank.
+    const chip = screen.getByText('retired_type')
+    // Lowercase: jsdom lowercases hex inside a color-mix() string on serialization
+    // (mirrors EntityTasksTab.test.tsx's own documented convention).
+    // eslint-disable-next-line no-restricted-syntax -- asserting chipInk() output for the real makeMetaResolver fallback colour, not a UI colour choice
+    expect(chip).toHaveStyle({ color: chipInk('#9ca3af') })
   })
 })

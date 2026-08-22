@@ -16,19 +16,35 @@ import userEvent from '@testing-library/user-event'
 // copy for the new 'notes' tab key has landed in tasks.json yet.
 import i18n from '@/i18n'
 import api from '@/lib/api'
+import { chipInk } from '@/lib/tint'
 import TaskDrawer from './TaskDrawer'
 import type { TaskDetail } from '@/types/task'
 
+// Controllable tenant task lookups (vi.hoisted ref, mirrors EntityTasksTab.test.tsx's
+// statusesRef/typesRef convention) — lets the TAKEN-CHIP-KLEUR-BUG-1 regression test
+// below mutate a lookup row without a network round-trip.
+/* eslint-disable no-restricted-syntax -- test fixture lookup colours (DATA, not UI styling) */
+const statusesRef = vi.hoisted(() => ({ current: [{ value: 'todo', label: 'Te doen', color: '#888888' }, { value: 'done', label: 'Afgerond', color: '#00aa00' }] }))
+const typesRef = vi.hoisted(() => ({ current: [{ value: 'call', label: 'Belafspraak', color: '#888888' }] }))
+const prioritiesRef = vi.hoisted(() => ({ current: [{ value: 'normal', label: 'Normaal', color: '#888888' }] }))
+/* eslint-enable no-restricted-syntax */
+
 // Lookups/users/custom-fields arrive via mocked hooks — no providers needed.
+// statusMeta/typeMeta mirror the REAL makeMetaResolver fallback (lib/lookupUtils.ts):
+// an unmatched value falls back to its raw value as the label, neutral grey as the
+// colour (same shape a deactivated lookup row produces in production).
 vi.mock('@/context/TaskLookupsContext', () => ({
-  useTaskLookups: () => ({
-    // eslint-disable-next-line no-restricted-syntax -- test fixture lookup colours (DATA, not UI styling)
-    statuses: [{ value: 'todo', label: 'Te doen', color: '#888888' }, { value: 'done', label: 'Afgerond', color: '#00aa00' }],
-    // eslint-disable-next-line no-restricted-syntax -- test fixture lookup colours (DATA, not UI styling)
-    types: [], priorities: [{ value: 'normal', label: 'Normaal', color: '#888888' }],
-    statusMeta: () => ({}), typeMeta: () => ({}), priorityMeta: () => ({}),
-    doneStatusValues: ['done'], defaultPriority: null,
-  }),
+  useTaskLookups: () => {
+    const metaOf = (list: { value: string; label: string; color: string }[]) =>
+      (v?: string | number | null) => list.find(i => i.value === v) ??
+        // eslint-disable-next-line no-restricted-syntax -- test fixture fallback colour, mirrors the real makeMetaResolver default
+        { value: String(v ?? ''), label: String(v ?? ''), color: '#9CA3AF' }
+    return {
+      statuses: statusesRef.current, types: typesRef.current, priorities: prioritiesRef.current,
+      statusMeta: metaOf(statusesRef.current), typeMeta: metaOf(typesRef.current), priorityMeta: metaOf(prioritiesRef.current),
+      doneStatusValues: ['done'], defaultPriority: null,
+    }
+  },
 }))
 vi.mock('@/lib/queries', () => ({ useUsers: () => ({ data: [] }) }))
 // TASK-LOCATION-READ-1: DetailsTab (rendered inside the 'details' tab) now reads
@@ -287,5 +303,48 @@ describe('TaskDrawer · trash lifecycle (TRASH-OVERAL-2)', () => {
 
     await waitFor(() => expect(api.post).toHaveBeenCalledWith('/tasks/t1/unmark-deletion'))
     expect(wiring.onUnmarked).toHaveBeenCalledWith('t1')
+  })
+})
+
+/**
+ * TAKEN-CHIP-KLEUR-BUG-1: the header's status badge/avatar and type subtitle used
+ * to read task.statusLabel/statusColor/typeLabel — baked once at select/fetch time
+ * and never re-derived. Same fix as DetailsTab.tsx: resolve from the LIVE tenant
+ * lookup (statusMeta/typeMeta) by the raw key, at render.
+ */
+describe('TaskDrawer · header badge reads the LIVE lookup, not a baked snapshot (TAKEN-CHIP-KLEUR-BUG-1)', () => {
+  // The status BADGE sits in EntityHeader's own "title row" — the same flex row
+  // as the close button, and a separate row from the meta pickers below it (whose
+  // "status" SelectMenu ALSO shows "Te doen" as its live current value, by design)
+  // and from DetailsTab's own chip in the visible 'details' tab body.
+  const titleRowScope = () => within(screen.getByRole('button', { name: 'Sluiten' }).parentElement!)
+  // The TYPE subtitle sits right below the title text, in its own wrapper div —
+  // scoped there too, away from DetailsTab's own type chip in the tab body.
+  const subtitleScope = () => within(screen.getByText('Bel kandidaat').parentElement!.parentElement!)
+
+  it('renders the CURRENT lookup label/colour even when task.statusLabel/statusColor/typeLabel disagree (stale bake)', () => {
+    // eslint-disable-next-line no-restricted-syntax -- test fixture colour (DATA, not UI styling)
+    const stale = { ...task(false), statusLabel: 'Oude naam', statusColor: '#000000', typeLabel: 'Oud type' }
+    mount(stale)
+    // The live lookup ('todo' → 'Te doen'/'#888888', 'call' → 'Belafspraak') wins.
+    // eslint-disable-next-line no-restricted-syntax -- asserting chipInk() output for the test fixture colour, not a UI colour choice
+    expect(titleRowScope().getByText('Te doen')).toHaveStyle({ color: chipInk('#888888') })
+    expect(subtitleScope().getByText('Belafspraak')).toBeInTheDocument()
+    expect(screen.queryByText('Oude naam')).not.toBeInTheDocument()
+    expect(screen.queryByText('Oud type')).not.toBeInTheDocument()
+  })
+
+  it('updates the badge colour once the tenant lookup colour changes (live reactivity)', () => {
+    const { rerender } = mount(task(false))
+    // eslint-disable-next-line no-restricted-syntax -- asserting chipInk() output for the test fixture colour, not a UI colour choice
+    expect(titleRowScope().getByText('Te doen')).toHaveStyle({ color: chipInk('#888888') })
+
+    // eslint-disable-next-line no-restricted-syntax -- test fixture lookup colour (DATA, not UI styling)
+    statusesRef.current[0].color = '#123456'
+    rerender(<TaskDrawer task={task(false)} onClose={noop} onUpdate={noop} onAddLink={noop} onRemoveLink={noop} />)
+    // eslint-disable-next-line no-restricted-syntax -- asserting chipInk() output for the test fixture colour, not a UI colour choice
+    expect(titleRowScope().getByText('Te doen')).toHaveStyle({ color: chipInk('#123456') })
+    // eslint-disable-next-line no-restricted-syntax -- restore the fixture colour for tests running after this one
+    statusesRef.current[0].color = '#888888'
   })
 })

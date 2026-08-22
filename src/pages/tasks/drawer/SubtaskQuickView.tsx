@@ -102,8 +102,9 @@ export default function SubtaskQuickView({ id, onClose, onChanged }: {
   const changeStatus = (statusKey: string) => {
     const resolved = lookupIds.status[statusKey]
     if (!resolved) { notifyError(t('drawer.lookupNotReady')); return }
-    const meta = statuses.find(s => s.value === statusKey)
-    setTask(prev => (prev ? { ...prev, statusKey, statusLabel: meta?.label ?? prev.statusLabel, statusColor: meta?.color ?? prev.statusColor } : prev))
+    // Only the raw key is merged — baked label/colour copies are the exact
+    // stale-bake pattern TAKEN-CHIP-KLEUR-BUG-1 removed; consumers resolve live.
+    setTask(prev => (prev ? { ...prev, statusKey } : prev))
     api.patch(`/tasks/${id}`, { status_id: resolved })
       .then(() => onChanged?.())
       .catch(err => { notifyError(extractApiError(err, t('common:actionFailed'))); fetchTask() })

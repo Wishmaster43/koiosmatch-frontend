@@ -67,7 +67,7 @@ interface TaskDrawerProps {
 export default function TaskDrawer({ task, onClose, expanded, onToggleExpand, onUpdate, onAddLink, onRemoveLink, onRestore, trash, onSubtaskCreated }: TaskDrawerProps) {
   const { t } = useTranslation('tasks')
   const { formatDate, formatDateTime } = useDateFormat()
-  const { statuses, priorities, doneStatusValues } = useTaskLookups()
+  const { statuses, priorities, doneStatusValues, statusMeta, typeMeta } = useTaskLookups()
   const { data: users = [] } = useUsers() as { data?: UserLike[] }
   // The Extra tab only shows when the tenant has defined task custom fields (§3A(f)).
   const { fields: customFieldDefs } = useCustomFields('task')
@@ -83,6 +83,16 @@ export default function TaskDrawer({ task, onClose, expanded, onToggleExpand, on
 
   const startTitleEdit = () => { setTitleDraft(task.title); setEditingTitle(true) }
   const saveTitleEdit = () => { const val = titleDraft.trim(); if (val && val !== task.title) onUpdate(task.id, { title: val }); setEditingTitle(false) }
+
+  // TAKEN-CHIP-KLEUR-BUG-1: the header badge/avatar/subtitle read the LIVE tenant
+  // lookup by the raw key, AT RENDER — same fix as DetailsTab.tsx (see its own
+  // comment for the full staleness story: task.statusLabel/statusColor/typeLabel
+  // are baked once at select/fetch time and never re-derived when a lookup's
+  // colour changes or a value is deactivated later).
+  // String(): typeKey/statusKey are `string | number` (Task type), the resolvers
+  // take `string | null` — same coercion useTasksData's decorate() uses.
+  const statusInfo = statusMeta(String(task.statusKey))
+  const typeInfo = typeMeta(String(task.typeKey))
 
   // Map a tab id to its content component.
   const renderTab = (id: string): ReactNode => {
@@ -130,8 +140,10 @@ export default function TaskDrawer({ task, onClose, expanded, onToggleExpand, on
 
   // "Mark done" quick action — only when a done status exists and the task isn't
   // done; never on an archived task (same product-choice gating as the pickers above).
+  // Done-ness is resolved LIVE against the lookup's done set, never the baked
+  // task.statusIsDone (same stale-bake class as TAKEN-CHIP-KLEUR-BUG-1).
   const doneValue = doneStatusValues[0]
-  const markDone = doneValue != null && !task.statusIsDone && !task.archived
+  const markDone = doneValue != null && !doneStatusValues.includes(String(task.statusKey)) && !task.archived
     ? (
       // HUISSTIJL-1: left hand-styled — the success token PAIR (--color-success
       // fill + --color-on-success text) is deliberate (§4 "aan/gelukt" green),
@@ -164,9 +176,9 @@ export default function TaskDrawer({ task, onClose, expanded, onToggleExpand, on
         <EntityHeader
           // TITEL-CHIP-1 (Danny 19-08): the status badge IS the title — the static
           // entity word doubled with the badge beside the name.
-          label={<TitleBadge label={task.statusLabel} color={task.statusColor} />}
+          label={<TitleBadge label={statusInfo.label} color={statusInfo.color} />}
           expanded={expanded} onToggleExpand={onToggleExpand} onClose={onClose}
-          avatar={{ initials: initialsOf(task.title, 'T'), soft: true, color: task.statusColor }}
+          avatar={{ initials: initialsOf(task.title, 'T'), soft: true, color: statusInfo.color }}
           renderTitle={() => editingTitle ? (
             // T1: inline title edit — mirror VacancyDrawer's renderTitle swap.
             <input autoFocus value={titleDraft} onChange={e => setTitleDraft(e.target.value)}
@@ -183,7 +195,7 @@ export default function TaskDrawer({ task, onClose, expanded, onToggleExpand, on
                 {/* Status badge — colour-coded, read-only (mirrors the candidate phase badge,
                     §3A(c)); the status meta picker below still handles the actual change. */}
               </div>
-              <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{task.typeLabel || '—'}</div>
+              <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{typeInfo.label || '—'}</div>
             </>
           )}
           // Danny 27-07: the shared house ChangelogPopover shell (§3A(d)) — was a

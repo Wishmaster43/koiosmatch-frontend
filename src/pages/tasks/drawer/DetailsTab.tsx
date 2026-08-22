@@ -83,7 +83,7 @@ export default function DetailsTab({ task, onUpdate, onSubtaskCreated }: {
   // uses — the advisory block below prepends its advice so the two never disagree.
   const resolveAdvice = useTaskAdvice()
   const { formatDate, formatDateTime } = useDateFormat()
-  const { statuses, types, priorities } = useTaskLookups()
+  const { statuses, types, priorities, statusMeta, typeMeta, priorityMeta } = useTaskLookups()
   const { data: users = [] } = useUsers() as { data?: UserLike[] }
   // TEAM-1: the tenant's internal departments, same shared hook the create modal uses.
   const { teams } = useTeams()
@@ -166,6 +166,20 @@ export default function DetailsTab({ task, onUpdate, onSubtaskCreated }: {
     onUpdate({ locationId: v || null, location: sel ? { id: sel.value, name: sel.label } : null })
   }
 
+  // TAKEN-CHIP-KLEUR-BUG-1: resolve type/status/priority label+colour from the LIVE
+  // tenant lookup by the raw key, AT RENDER — never from task.typeLabel/typeColor/…
+  // (those are baked once onto the task at select/fetch time in useTaskDrawerActions
+  // and never re-derived when a lookup's colour changes or a value is deactivated
+  // later — the table never has this bug because useTasksData's decorate() re-runs
+  // on every lookup change). Mirrors the table's own resolution path and
+  // MatchesTab's metaOf() pattern (§3A reference). A deactivated/unknown value
+  // naturally falls back to its raw key + neutral grey, exactly like the table.
+  // String(): typeKey/statusKey/priorityKey are `string | number` (Task type),
+  // the resolvers take `string | null` — same coercion useTasksData's decorate() uses.
+  const typeInfo = typeMeta(String(task.typeKey))
+  const statusInfo = statusMeta(String(task.statusKey))
+  const priorityInfo = priorityMeta(String(task.priorityKey))
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
       <div>
@@ -211,9 +225,9 @@ export default function DetailsTab({ task, onUpdate, onSubtaskCreated }: {
           </div>
         ) : (
           <div style={{ borderRadius: 10, overflow: 'hidden', border: '1px solid var(--border)', background: 'var(--surface)', padding: '6px 12px', display: 'flex', flexDirection: 'column', gap: 2 }}>
-            <Row label={t('details.type')}>{task.typeLabel ? <SoftChip label={task.typeLabel} color={task.typeColor} /> : <span style={{ color: 'var(--text-muted)' }}>—</span>}</Row>
-            <Row label={t('details.status')}>{task.statusLabel ? <SoftChip label={task.statusLabel} color={task.statusColor} /> : <span style={{ color: 'var(--text-muted)' }}>—</span>}</Row>
-            <Row label={t('details.priority')}>{task.priorityLabel ? <SoftChip label={task.priorityLabel} color={task.priorityColor} dot /> : <span style={{ color: 'var(--text-muted)' }}>—</span>}</Row>
+            <Row label={t('details.type')}>{typeInfo.label ? <SoftChip label={typeInfo.label} color={typeInfo.color} /> : <span style={{ color: 'var(--text-muted)' }}>—</span>}</Row>
+            <Row label={t('details.status')}>{statusInfo.label ? <SoftChip label={statusInfo.label} color={statusInfo.color} /> : <span style={{ color: 'var(--text-muted)' }}>—</span>}</Row>
+            <Row label={t('details.priority')}>{priorityInfo.label ? <SoftChip label={priorityInfo.label} color={priorityInfo.color} dot /> : <span style={{ color: 'var(--text-muted)' }}>—</span>}</Row>
             <Row label={t('details.due')}>
               <span style={{ fontSize: 12, color: task.due ? (isTaskOverdue(task) ? 'var(--color-danger)' : 'var(--text)') : 'var(--text-muted)', fontWeight: isTaskOverdue(task) ? 600 : 400 }}>
                 {/* TASK-DUE-TIME-1: DD-MM-YYYY HH:mm when a time is set, date-only otherwise. */}
