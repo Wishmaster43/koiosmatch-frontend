@@ -35,6 +35,7 @@ import { GENERIC_LOOKUP_ICON_NAMES, resolveGenericLookupIcon } from './lookupIco
 import CandidateLookupItemModal from './CandidateLookupItemModal'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 import Button from '@/components/ui/Button'
+import { Caption } from '@/components/ui/typography'
 
 const BASE = '/settings/candidate-lookups'
 
@@ -164,6 +165,11 @@ export function LookupBlock({ slug, title, subtitle, items, setItems, locked = f
         <div>
           <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)' }}>{title}</h3>
           <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{subtitle}</p>
+          {/* KANDIDATEN-13 (Danny): everything hangs off these two phases (automation,
+              KPIs) — the list stays locked (no add/remove/reorder) and only the colour
+              is tenant-adjustable. Shown here so the reason is visible without opening
+              the edit modal. */}
+          {isPhaseBlock && <Caption as="p" style={{ marginTop: 4 }}>{t('lookups.phaseLockedHint')}</Caption>}
         </div>
         {/* HUISSTIJL-1: the ONE "+ add" affordance, app-wide (§3A). */}
         {!locked && <DrawerAddButton onClick={openAdd} label={t('lookups.add')} />}
@@ -172,6 +178,11 @@ export function LookupBlock({ slug, title, subtitle, items, setItems, locked = f
       <DragList
         items={items}
         onReorder={reorder}
+        // KANDIDATEN-13: add is already blocked so this set can never grow past its two
+        // seeded phases — reordering two fixed rows carries no meaning, so hide the
+        // drag handle and the keyboard move buttons entirely.
+        // One lock concept (verify round 22-08): reorder follows `locked`, like add/delete.
+        sortable={!locked}
         renderItem={(item) => (
           <>
             {/* eslint-disable-next-line no-restricted-syntax -- DATA: fallback swatch colour for a lookup row without one stored yet, not UI chrome */}

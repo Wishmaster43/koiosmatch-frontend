@@ -135,7 +135,9 @@ describe('built-in fields — saving keeps the phase-keyed shape', () => {
   it('a stored required field renders its toggle as ON (round trip)', () => {
     blobRef.current = { candidate_required_fields: { candidate: ['mobile'] } }
     render(<CandidateRequiredFieldsSettings />)
+    // Asserting the shared Toggle's actual rendered token value (Toggle.tsx), not authoring UI.
     expect(screen.getByRole('switch', { name: `${ct('candidates:modal.fields.mobile')} — Kandidaat` }))
+      // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- test assertion on the real component style, not new UI
       .toHaveStyle({ background: 'var(--color-primary)' })
   })
 
@@ -145,6 +147,7 @@ describe('built-in fields — saving keeps the phase-keyed shape', () => {
     render(<CandidateRequiredFieldsSettings />)
 
     const postcodeToggle = screen.getByRole('switch', { name: `${ct('candidates:modal.fields.postalCode')} — Lead` })
+    // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- test assertion on the real component style, not new UI
     expect(postcodeToggle).toHaveStyle({ background: 'var(--color-primary)' })
 
     // Toggling any other field rewrites the map onto guard-readable keys.
@@ -173,20 +176,34 @@ describe('built-in fields — saving keeps the phase-keyed shape', () => {
   })
 })
 
-describe('expand all / collapse all — drives every built-in group at once', () => {
-  it('collapse all closes every group, expand all reopens every group', async () => {
+describe('expand all / collapse all — one toggle button reflects real state', () => {
+  it('a mixed state resolves to expand; the same button flips to collapse once everything opens', async () => {
     const user = userEvent.setup()
     blobRef.current = CONTACT_OPEN
     render(<CandidateRequiredFieldsSettings />)
 
     const contactHeader = screen.getByRole('button', { name: new RegExp(ct('candidates:modal.fields.cardContact')) })
+    const personalHeader = screen.getByRole('button', { name: new RegExp(ct('candidates:modal.fields.cardPersonal')) })
+    // Mixed on mount: only the contact group (which holds the seeded required field) is open.
     expect(contactHeader).toHaveAttribute('aria-expanded', 'true')
+    expect(personalHeader).toHaveAttribute('aria-expanded', 'false')
 
-    await user.click(screen.getByRole('button', { name: i18n.t('requiredFields.collapseAll', { ns: 'settings' }) }))
-    expect(contactHeader).toHaveAttribute('aria-expanded', 'false')
-
+    // Mixed state resolves to the expand action — never collapse — and there is only
+    // ONE button (no separate collapse-all sitting next to it).
+    expect(screen.queryByRole('button', { name: i18n.t('requiredFields.collapseAll', { ns: 'settings' }) })).not.toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: i18n.t('requiredFields.expandAll', { ns: 'settings' }) }))
+
+    // Expand-all opens every group, including ones with nothing required.
     expect(contactHeader).toHaveAttribute('aria-expanded', 'true')
+    expect(personalHeader).toHaveAttribute('aria-expanded', 'true')
+
+    // All open now — the SAME button swapped its label to the collapse action.
+    expect(screen.queryByRole('button', { name: i18n.t('requiredFields.expandAll', { ns: 'settings' }) })).not.toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: i18n.t('requiredFields.collapseAll', { ns: 'settings' }) }))
+
+    // Collapse-all closes every group.
+    expect(contactHeader).toHaveAttribute('aria-expanded', 'false')
+    expect(personalHeader).toHaveAttribute('aria-expanded', 'false')
   })
 })
 

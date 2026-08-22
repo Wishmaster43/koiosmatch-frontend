@@ -67,18 +67,24 @@ export default function CandidateRequiredFieldsSettings() {
   })
   const toggleOpen = (id: string) => setOpenIds(ids => ids.includes(id) ? ids.filter(x => x !== id) : [...ids, id])
 
+  // Real state, not a fixed label: only once every built-in group is open does the button
+  // offer to collapse — a mixed or fully-closed state always offers to expand (opening wins).
+  const allGroupsOpen = CANDIDATE_FIELD_GROUPS.every(g => openIds.includes(g.id))
+  const toggleAllGroups = () => setOpenIds(allGroupsOpen ? [] : CANDIDATE_FIELD_GROUPS.map(g => g.id))
+
   return (
     <div style={{ maxWidth: 760 }}>
-      <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)', marginBottom: 4 }}>{t('requiredFields.title')}</h3>
-      <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 14 }}>{t('requiredFields.subtitle')}</p>
-
-      {/* Expand/collapse all built-in groups at once — v1 scope only, CandidateCustomRequiredFields keeps its own open state. */}
-      <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
-        <Button variant="secondary" size="sm" onClick={() => setOpenIds(CANDIDATE_FIELD_GROUPS.map(g => g.id))}>
-          {t('requiredFields.expandAll')}
-        </Button>
-        <Button variant="secondary" size="sm" onClick={() => setOpenIds([])}>
-          {t('requiredFields.collapseAll')}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 14 }}>
+        <div>
+          <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)', marginBottom: 4 }}>{t('requiredFields.title')}</h3>
+          <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('requiredFields.subtitle')}</p>
+        </div>
+        {/* One toggle drives every built-in group at once (v1 scope only —
+            CandidateCustomRequiredFields keeps its own open state). The label always
+            names the action that reveals more: "expand" while anything is closed,
+            "collapse" only once everything is already open. */}
+        <Button variant="secondary" size="sm" onClick={toggleAllGroups}>
+          {allGroupsOpen ? t('requiredFields.collapseAll') : t('requiredFields.expandAll')}
         </Button>
       </div>
 

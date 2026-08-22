@@ -12,7 +12,7 @@ import { Toggle } from '../components/SettingsKit'
 import IconPickerControl from './IconPickerControl'
 import { GENERIC_LOOKUP_ICON_NAMES, resolveGenericLookupIcon } from './lookupIcons'
 import Button from '@/components/ui/Button'
-import { Caption } from '@/components/ui/typography'
+import { Caption, BodyText, PageTitle, SectionTitle } from '@/components/ui/typography'
 
 // "Niet actief" → "niet_actief" — a stable English-ish slug suggestion (mirrors
 // the parent's slugify; duplicated here to avoid a cross-file import cycle).
@@ -29,27 +29,37 @@ export default function CandidateLookupItemModal({
   return (
     <>
       <div className="fixed inset-0 z-40" style={{ background: 'rgba(0,0,0,0.3)' }} onClick={onClose} />
-      <div className="fixed z-50" style={{ top: '50%', left: '50%', transform: 'translate(-50%,-50%)', background: 'var(--surface)', borderRadius: 12, padding: 24, width: 400, boxShadow: '0 20px 60px rgba(0,0,0,0.15)' }}>
+      <div className="fixed z-50" style={{ top: '50%', left: '50%', transform: 'translate(-50%,-50%)', background: 'var(--surface)', borderRadius: 12, padding: 24, width: 400, boxShadow: 'var(--shadow-modal)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
-          <span style={{ fontSize: 15, fontWeight: 700 }}>{modal.mode === 'add' ? t('lookups.add') : t('lookups.edit')}</span>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}><X size={16} /></button>
+          <PageTitle as="span">{modal.mode === 'add' ? t('lookups.add') : t('lookups.edit')}</PageTitle>
+          <Button variant="ghost" iconOnly onClick={onClose} aria-label={t('common:close')}><X size={16} /></Button>
         </div>
 
         <div style={{ marginBottom: 14 }}>
           <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 5 }}>{t('lookups.labelField')}</div>
-          {/* Phase label lock (P21, mirrors the BE 422 in CandidateLookupController::update()):
-              a locked lookup's label is structural (automations/matrix read it by slug, but
-              tenants renaming the seeded Lead/Candidate label breaks recognisability across
-              screens) — so on a locked list, only the label input disables in edit mode.
-              Colour/is_applicant/is_default stay editable (04-08 audit re-enabled the pencil
-              deliberately) — this is a narrower lock, not a re-disable of the whole modal. */}
-          <input value={modal.label} autoFocus={!(locked && modal.mode === 'edit')}
-            disabled={locked && modal.mode === 'edit'}
-            onChange={e => setModal(m => ({ ...m, label: e.target.value }))}
-            placeholder={t('lookups.labelPlaceholder')}
-            style={{ width: '100%', height: 36, padding: '0 10px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, outline: 'none', boxSizing: 'border-box',
-                     background: (locked && modal.mode === 'edit') ? 'var(--hover-bg)' : 'var(--surface)',
-                     color: (locked && modal.mode === 'edit') ? 'var(--text-muted)' : 'var(--text)' }} />
+          {/* Phase label lock (P21/KANDIDATEN-13, mirrors the BE 422 in
+              CandidateLookupController::update()): a locked lookup's label is structural
+              (automations/matrix read it by slug, but tenants renaming the seeded
+              Lead/Candidate label breaks recognisability across screens) — so on a locked
+              list in edit mode the label renders as READ-ONLY DATA, never a disabled form
+              control (§3: no fake editable field). Colour/is_applicant/is_default stay
+              editable (04-08 audit re-enabled the pencil deliberately) — this is a
+              narrower lock, not a re-disable of the whole modal. */}
+          {locked && modal.mode === 'edit' ? (
+            <div data-testid="locked-label-value"
+              style={{ width: '100%', minHeight: 36, display: 'flex', alignItems: 'center', padding: '0 10px',
+                       fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, boxSizing: 'border-box',
+                       background: 'var(--hover-bg)', color: 'var(--text-muted)' }}>
+              {modal.label}
+            </div>
+          ) : (
+            <input value={modal.label} autoFocus
+              onChange={e => setModal(m => ({ ...m, label: e.target.value }))}
+              placeholder={t('lookups.labelPlaceholder')}
+              // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- native form <input> text size/colour; BodyText renders a span/div and cannot replace an editable form control
+              style={{ width: '100%', height: 36, padding: '0 10px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, outline: 'none', boxSizing: 'border-box',
+                       background: 'var(--surface)', color: 'var(--text)' }} />
+          )}
           {locked && modal.mode === 'edit' && (
             <Caption as="div" style={{ marginTop: 4 }}>{t('lookups.labelLocked')}</Caption>
           )}
@@ -81,8 +91,9 @@ export default function CandidateLookupItemModal({
           <div style={{ marginBottom: 14 }}>
             <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 5 }}>{t('lookups.iconField')}</div>
             {/* eslint-disable-next-line no-restricted-syntax -- DATA: fallback swatch colour for a lookup row without one stored yet, not UI chrome */}
-            <IconPickerControl icons={GENERIC_LOOKUP_ICON_NAMES} resolve={resolveGenericLookupIcon} value={modal.icon}
-              color={modal.color ?? '#6B7280'} label={modal.label || t('lookups.iconField')}
+            <IconPickerControl color={modal.color ?? '#6B7280'}
+              icons={GENERIC_LOOKUP_ICON_NAMES} resolve={resolveGenericLookupIcon} value={modal.icon}
+              label={modal.label || t('lookups.iconField')}
               onPick={icon => setModal(m => ({ ...m, icon }))} />
           </div>
         )}
@@ -94,7 +105,7 @@ export default function CandidateLookupItemModal({
           <div style={{ marginBottom: 14 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <Toggle checked={modal.customer_not_applicable} onChange={v => setModal(m => ({ ...m, customer_not_applicable: v }))} />
-              <span style={{ fontSize: 13, color: 'var(--text)' }}>{t('lookups.customerNotApplicable')}</span>
+              <BodyText as="span">{t('lookups.customerNotApplicable')}</BodyText>
             </div>
             <Caption as="div" style={{ marginTop: 4 }}>{t('lookups.customerNotApplicableHint')}</Caption>
           </div>
@@ -108,8 +119,14 @@ export default function CandidateLookupItemModal({
         {isPhaseBlock && (
           <div style={{ marginBottom: 14 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <Toggle checked={modal.is_applicant} onChange={v => setModal(m => ({ ...m, is_applicant: v }))} />
-              <span style={{ fontSize: 13, color: 'var(--text)' }}>{t('lookups.phaseApplicant')}</span>
+              {/* Verify round 22-08: on a LOCKED list the flag is read-only — this
+                  delivery removed reorder, the only tiebreaker when several phases
+                  carry it, so leaving it editable created an unfixable state; the
+                  list badge keeps communicating the flag. Danny's "alleen de kleur". */}
+              {locked
+                ? <Toggle checked={modal.is_applicant} onChange={() => {}} disabled />
+                : <Toggle checked={modal.is_applicant} onChange={v => setModal(m => ({ ...m, is_applicant: v }))} />}
+              <BodyText as="span">{t('lookups.phaseApplicant')}</BodyText>
             </div>
             <Caption as="div" style={{ marginTop: 4 }}>{t('lookups.phaseApplicantHint')}</Caption>
           </div>
@@ -120,7 +137,7 @@ export default function CandidateLookupItemModal({
           <div style={{ marginBottom: 14 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <Toggle checked={modal.requires_reason} onChange={v => setModal(m => ({ ...m, requires_reason: v }))} />
-              <span style={{ fontSize: 13, color: 'var(--text)' }}>{t('lookups.requiresReason')}</span>
+              <BodyText as="span">{t('lookups.requiresReason')}</BodyText>
             </div>
             <Caption as="div" style={{ marginTop: 4 }}>{t('lookups.requiresReasonHint')}</Caption>
           </div>
@@ -131,7 +148,7 @@ export default function CandidateLookupItemModal({
           <div style={{ marginBottom: 14 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <Toggle checked={modal.requires_match} onChange={v => setModal(m => ({ ...m, requires_match: v }))} />
-              <span style={{ fontSize: 13, color: 'var(--text)' }}>{t('lookups.requiresMatch')}</span>
+              <BodyText as="span">{t('lookups.requiresMatch')}</BodyText>
             </div>
             <Caption as="div" style={{ marginTop: 4 }}>{t('lookups.requiresMatchHint')}</Caption>
           </div>
@@ -142,7 +159,7 @@ export default function CandidateLookupItemModal({
           <div style={{ marginBottom: 14 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <Toggle checked={modal.expects_return_date} onChange={v => setModal(m => ({ ...m, expects_return_date: v }))} />
-              <span style={{ fontSize: 13, color: 'var(--text)' }}>{t('lookups.expectsReturnDate')}</span>
+              <BodyText as="span">{t('lookups.expectsReturnDate')}</BodyText>
             </div>
             <Caption as="div" style={{ marginTop: 4 }}>{t('lookups.expectsReturnDateHint')}</Caption>
           </div>
@@ -153,7 +170,7 @@ export default function CandidateLookupItemModal({
           <div style={{ marginBottom: 14 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <Toggle checked={modal.is_blacklist} onChange={v => setModal(m => ({ ...m, is_blacklist: v }))} />
-              <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--color-danger-text)' }}>{t('lookups.isBlacklist')}</span>
+              <SectionTitle as="span" style={{ color: 'var(--color-danger-text)' }}>{t('lookups.isBlacklist')}</SectionTitle>
             </div>
             <Caption as="div" style={{ marginTop: 4 }}>{t('lookups.isBlacklistHint')}</Caption>
           </div>
@@ -164,7 +181,7 @@ export default function CandidateLookupItemModal({
           <div style={{ marginBottom: 14 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <Toggle checked={modal.requires_appointment} onChange={v => setModal(m => ({ ...m, requires_appointment: v }))} />
-              <span style={{ fontSize: 13, color: 'var(--text)' }}>{t('lookups.requiresAppointment')}</span>
+              <BodyText as="span">{t('lookups.requiresAppointment')}</BodyText>
             </div>
             <Caption as="div" style={{ marginTop: 4 }}>{t('lookups.requiresAppointmentHint')}</Caption>
           </div>
@@ -175,7 +192,7 @@ export default function CandidateLookupItemModal({
           <div style={{ marginBottom: 14 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <Toggle checked={modal.is_match} onChange={v => setModal(m => ({ ...m, is_match: v }))} />
-              <span style={{ fontSize: 13, color: 'var(--text)' }}>{t('lookups.isMatch')}</span>
+              <BodyText as="span">{t('lookups.isMatch')}</BodyText>
             </div>
             <Caption as="div" style={{ marginTop: 4 }}>{t('lookups.isMatchHint')}</Caption>
           </div>
@@ -186,7 +203,7 @@ export default function CandidateLookupItemModal({
           <div style={{ marginBottom: 14 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <Toggle checked={modal.is_rejected} onChange={v => setModal(m => ({ ...m, is_rejected: v }))} />
-              <span style={{ fontSize: 13, color: 'var(--text)' }}>{t('lookups.isRejected')}</span>
+              <BodyText as="span">{t('lookups.isRejected')}</BodyText>
             </div>
             <Caption as="div" style={{ marginTop: 4 }}>{t('lookups.isRejectedHint')}</Caption>
           </div>
@@ -197,7 +214,7 @@ export default function CandidateLookupItemModal({
           <div style={{ marginBottom: 14 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <Toggle checked={modal.is_proposal} onChange={v => setModal(m => ({ ...m, is_proposal: v }))} />
-              <span style={{ fontSize: 13, color: 'var(--text)' }}>{t('lookups.isProposal')}</span>
+              <BodyText as="span">{t('lookups.isProposal')}</BodyText>
             </div>
             <Caption as="div" style={{ marginTop: 4 }}>{t('lookups.isProposalHint')}</Caption>
           </div>

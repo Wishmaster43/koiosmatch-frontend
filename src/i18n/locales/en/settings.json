@@ -642,6 +642,7 @@
     "phaseApplicant": "Is the applicant phase",
     "phaseApplicantHint": "New leads automatically move to this phase on their first application (Lead → Candidate).",
     "phaseApplicantBadge": "Applicant phase",
+    "phaseLockedHint": "Automations and KPIs rely on these phases, so nothing here can be added, removed or reordered. Only the colour is tenant-adjustable.",
     "customerNotApplicable": "Customer not applicable",
     "customerNotApplicableHint": "A match with this contract form has no customer, location, department or contact person; a branch is then required.",
     "iconField": "Icon"

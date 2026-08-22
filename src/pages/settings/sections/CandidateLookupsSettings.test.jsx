@@ -104,6 +104,32 @@ describe('CandidateLookupsSettings — funnel stage default singleton', () => {
     await waitFor(() => expect(api.put).toHaveBeenCalledWith(
       '/settings/candidate-lookups/phases/p2', expect.objectContaining({ is_default: true })))
   })
+
+  // Verify round 22-08 (Opus F2): the delivery's central claim — "only the
+  // colour is adjustable" on the locked phases list — asserted on the SEAM:
+  // the row swatch PUTs the new colour with the label untouched (§13).
+  it('saves a phase COLOUR via the row swatch — label unchanged in the PUT body', async () => {
+    api.get.mockResolvedValue({ data: {
+      /* eslint-disable no-restricted-syntax -- DATA: fixture phase colours, not a style rule. */
+      phases: [
+        { id: 'p1', value: 'lead', label: 'Lead', color: '#3B8FD4', is_default: true },
+      ],
+      /* eslint-enable no-restricted-syntax */
+    } })
+    api.put.mockResolvedValue({ data: {} })
+    const user = userEvent.setup()
+    const { container } = render(<CandidatePhasesSettings />)
+
+    await screen.findByText('Lead')
+    const swatchBtn = container.querySelector('button[style*="rgb(59, 143, 212)"]')
+    await user.click(swatchBtn)
+    const preset = container.querySelector('button[style*="rgb(100, 116, 139)"]') // preset #64748B
+    await user.click(preset)
+
+    await waitFor(() => expect(api.put).toHaveBeenCalledWith(
+      // eslint-disable-next-line no-restricted-syntax -- DATA: asserting the picked preset colour, not a style rule.
+      '/settings/candidate-lookups/phases/p1', { label: 'Lead', color: '#64748B' }))
+  })
 })
 
 // Audit finding: candidate_phases.is_applicant is a real backend flag (Candidate
@@ -126,7 +152,10 @@ describe('CandidateLookupsSettings — phase is_applicant flag', () => {
     expect(screen.getByText(st('lookups.phaseApplicantBadge'))).toBeInTheDocument()
   })
 
-  it('saves is_applicant:true on a phase via the edit modal', async () => {
+  // Verify round 22-08 (Opus): the flag is READ-ONLY on the locked phases list —
+  // this delivery removed reorder, the only tiebreaker when several phases carry
+  // it, so an editable flag created a state the tenant could never fix.
+  it('renders the is_applicant switch DISABLED on a locked phase — no write path', async () => {
     api.get.mockResolvedValue({ data: {
       // eslint-disable-next-line no-restricted-syntax -- DATA: fixture phase colour, not a style rule.
       phases: [{ id: 'p1', value: 'lead', label: 'Lead', color: '#3B8FD4', is_applicant: false }],
@@ -137,17 +166,18 @@ describe('CandidateLookupsSettings — phase is_applicant flag', () => {
 
     await screen.findByText('Lead')
     await user.click(screen.getByTitle(st('lookups.edit')))
-    await user.click(screen.getByRole('switch'))
+    expect(screen.getByRole('switch')).toBeDisabled()
     await user.click(screen.getByText(st('common.save')))
 
-    await waitFor(() => expect(api.put).toHaveBeenCalledWith(
-      '/settings/candidate-lookups/phases/p1', expect.objectContaining({ is_applicant: true })))
+    await waitFor(() => expect(api.put).toHaveBeenCalled())
+    expect(api.put.mock.calls[0][1]).toEqual(expect.objectContaining({ is_applicant: false }))
   })
 
-  // P21: the label input locks on a structural phase (the server 422s a label
-  // rename), but every other modal field — colour, is_applicant, is_default —
-  // stays interactive (the 04-08 audit re-enabled the pencil deliberately).
-  it('disables the label input (with a hint) on a locked phase, while the switch stays interactive', async () => {
+  // P21/KANDIDATEN-13: the label renders as READ-ONLY DATA (not a disabled input) on a
+  // structural phase (the server 422s a label rename), but every other modal field —
+  // colour, is_applicant, is_default — stays interactive (04-08 audit re-enabled the
+  // pencil deliberately; Danny 22-08 asked for the label itself to stop looking editable).
+  it('renders the label as static text (with a hint) on a locked phase, and the switch read-only', async () => {
     api.get.mockResolvedValue({ data: {
       // eslint-disable-next-line no-restricted-syntax -- DATA: fixture phase colour, not a style rule.
       phases: [{ id: 'p1', value: 'lead', label: 'Lead', color: '#3B8FD4', is_applicant: false }],
@@ -158,16 +188,24 @@ describe('CandidateLookupsSettings — phase is_applicant flag', () => {
     await screen.findByText('Lead')
     await user.click(screen.getByTitle(st('lookups.edit')))
 
-    const labelInput = screen.getByDisplayValue('Lead')
-    expect(labelInput).toBeDisabled()
+    // No input carries the label anymore — it is a static value, never a fake field (§3).
+    expect(screen.queryByDisplayValue('Lead')).not.toBeInTheDocument()
+    const labelValue = screen.getByTestId('locked-label-value')
+    expect(labelValue.tagName).toBe('DIV')
+    expect(labelValue).toHaveTextContent('Lead')
     expect(screen.getByText(st('lookups.labelLocked'))).toBeInTheDocument()
-    expect(screen.getByRole('switch')).not.toBeDisabled()
+    // Verify round 22-08: read-only on the locked list (see the disabled-switch test above).
+    expect(screen.getByRole('switch')).toBeDisabled()
   })
 
-  it('keeps the edit pencil enabled on the locked phases block while hiding add/delete', async () => {
+  it('keeps the edit pencil enabled on the locked phases block while hiding add/delete/reorder', async () => {
     api.get.mockResolvedValue({ data: {
-      // eslint-disable-next-line no-restricted-syntax -- DATA: fixture phase colour, not a style rule.
-      phases: [{ id: 'p1', value: 'lead', label: 'Lead', color: '#3B8FD4', is_applicant: false }],
+      /* eslint-disable no-restricted-syntax -- DATA: fixture phase colours, not a style rule. */
+      phases: [
+        { id: 'p1', value: 'lead', label: 'Lead', color: '#3B8FD4', is_applicant: false },
+        { id: 'p2', value: 'candidate', label: 'Candidate', color: '#6E8FD6', is_applicant: true },
+      ],
+      /* eslint-enable no-restricted-syntax */
     } })
     render(<CandidatePhasesSettings />)
 
@@ -176,8 +214,23 @@ describe('CandidateLookupsSettings — phase is_applicant flag', () => {
     // (CandidateLookupController::update() carries no phases restriction, only store()/
     // destroy() abort_if — audit finding, 04-08).
     expect(screen.queryByRole('button', { name: st('lookups.add') })).not.toBeInTheDocument()
-    const editBtn = screen.getByTitle(st('lookups.edit'))
+    const editBtn = screen.getAllByTitle(st('lookups.edit'))[0]
     expect(editBtn).not.toBeDisabled()
+    // KANDIDATEN-13: two fixed, locked phases have nothing meaningful to reorder — the
+    // drag handle and its keyboard up/down equivalent (§6) are both absent.
+    expect(screen.queryByRole('button', { name: i18n.t('dragList.moveUp', { ns: 'common' }) })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: i18n.t('dragList.moveDown', { ns: 'common' }) })).not.toBeInTheDocument()
+  })
+
+  it('shows the colour-only lock hint on the phases list without opening the edit modal', async () => {
+    api.get.mockResolvedValue({ data: {
+      // eslint-disable-next-line no-restricted-syntax -- DATA: fixture phase colour, not a style rule.
+      phases: [{ id: 'p1', value: 'lead', label: 'Lead', color: '#3B8FD4', is_applicant: false }],
+    } })
+    render(<CandidatePhasesSettings />)
+
+    await screen.findByText('Lead')
+    expect(screen.getByText(st('lookups.phaseLockedHint'))).toBeInTheDocument()
   })
 })
 

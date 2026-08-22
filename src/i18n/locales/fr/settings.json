@@ -1777,6 +1777,7 @@
     "phaseApplicant": "Est la phase de candidature",
     "phaseApplicantHint": "Les nouveaux leads passent automatiquement à cette phase lors de leur première candidature (Lead → Candidat).",
     "phaseApplicantBadge": "Phase de candidat",
+    "phaseLockedHint": "Les automatisations et les KPI s'appuient sur ces phases, donc rien ne peut être ajouté, supprimé ou réordonné ici. Seule la couleur est modifiable.",
     "customerNotApplicable": "Client non applicable",
     "customerNotApplicableHint": "Un match avec cette forme de contrat n'a ni client, ni site, ni service, ni personne de contact ; une agence est alors obligatoire.",
     "iconField": "Icône"

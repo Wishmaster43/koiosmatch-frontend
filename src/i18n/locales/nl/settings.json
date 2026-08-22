@@ -642,6 +642,7 @@
     "phaseApplicant": "Is de sollicitant-fase",
     "phaseApplicantHint": "Nieuwe leads komen automatisch in deze fase terecht bij hun eerste sollicitatie (Lead → Kandidaat).",
     "phaseApplicantBadge": "Sollicitant-fase",
+    "phaseLockedHint": "Automatiseringen en KPI's leunen op deze fasen, dus hier kun je niets toevoegen, verwijderen of herschikken. Alleen de kleur is aanpasbaar.",
     "customerNotApplicable": "Klant niet van toepassing",
     "customerNotApplicableHint": "Bij een match met deze contractvorm vervallen klant, locatie, afdeling en contactpersoon; een vestiging is dan verplicht.",
     "iconField": "Icoon"

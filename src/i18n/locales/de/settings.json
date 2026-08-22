@@ -1777,6 +1777,7 @@
     "phaseApplicant": "Ist die Bewerber-Phase",
     "phaseApplicantHint": "Neue Leads wechseln bei ihrer ersten Bewerbung automatisch in diese Phase (Lead → Kandidat).",
     "phaseApplicantBadge": "Bewerber-Phase",
+    "phaseLockedHint": "Automatisierungen und KPIs stützen sich auf diese Phasen, daher kann hier nichts hinzugefügt, gelöscht oder neu sortiert werden. Nur die Farbe ist anpassbar.",
     "customerNotApplicable": "Kunde nicht zutreffend",
     "customerNotApplicableHint": "Ein Match mit dieser Vertragsform hat keinen Kunden, keinen Standort, keine Abteilung und keinen Ansprechpartner; eine Niederlassung ist dann Pflicht.",
     "iconField": "Symbol"
