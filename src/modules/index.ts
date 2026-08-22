@@ -3,6 +3,7 @@ import appointment_create from './appointment_create'
 import calllist_add       from './calllist_add'
 import webhook_send       from './webhook_send'
 import candidate_archive  from './candidate_archive'
+import leads_recount      from './leads_recount'
 import experience_add     from './experience_add'
 import sm_employee_create from './sm_employee_create'
 import workflow_call      from './workflow_call'
@@ -105,6 +106,7 @@ const MODULES: ModuleDef[] = [
   calllist_add,
   webhook_send,
   candidate_archive,
+  leads_recount,
   experience_add,
   sm_employee_create,
   workflow_call,

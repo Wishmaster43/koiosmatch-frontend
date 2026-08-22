@@ -203,6 +203,7 @@
     "calllist_add": "Zur Anrufliste hinzufügen",
     "webhook_send": "Webhook senden",
     "candidate_archive": "Kandidat archivieren",
+    "leads_recount": "Leads-Zählung der Stellen",
     "experience_add": "Berufserfahrung hinzufügen",
     "sm_employee_create": "SM-Mitarbeiter erstellen",
     "workflow_call": "Workflow aufrufen"
@@ -768,6 +769,7 @@
     "Endpoint-slug": "Endpoint-Slug",
     "Richting": "Richtung",
     "Archiefreden": "Archivierungsgrund",
+    "Welke vacatures": "Welche Stellen",
     "Positie in CV": "Position im Lebenslauf",
     "Workflow": "Workflow"
   },
@@ -882,6 +884,8 @@
     "all": "alle",
     "role": "Rolle",
     "candidate_owner": "Kandidateneigentümer",
+    "Alleen gewijzigde (aanbevolen)": "Nur geänderte (empfohlen)",
+    "Alle vacatures": "Alle Stellen",
     "owner": "Eigentümer",
     "applicationcreated": "Bewerbung erstellt",
     "applicationstage_changed": "Phase geändert (Bewerbung)",
@@ -1055,6 +1059,7 @@
     "Tekst die op de kandidaat en in de audit-trail komt te staan": "Text, der beim Kandidaten und im Audit-Trail vermerkt wird.",
     "De workflow die als kind wordt gestart (async, via de wachtrij) Zelf-aanroep en kringlopen worden geweigerd; maximaal 5 niveaus diep": "Der Workflow, der als Kind gestartet wird (asynchron, über die Warteschlange). Selbstaufrufe und Kreisläufe werden abgelehnt; maximal 5 Ebenen tief.",
     "Eerst proefdraaien rapporteert WIE er aangemaakt zou worden (incl payload), schrijft niets Zet expliciet uit om echt in Shiftmanager aan te maken": "Erst testen: meldet, WER angelegt werden würde (inkl. Payload), schreibt nichts. Explizit ausschalten, um wirklich in Shiftmanager anzulegen.",
+    "De voorwaarden volgen altijd de matchcriteria van de vacature zelf wie ze wil wijzigen, wijzigt de matchcriteria of de wegingstemplates Deze stap kiest alleen de set": "Die Bedingungen folgen immer den Matchkriterien der Stelle selbst: wer sie ändern will, ändert die Matchkriterien oder die Gewichtungsvorlagen. Dieser Schritt wählt nur die Menge.",
     "Datum en tijd (bv 10-08-2026 1400) of een variabele": "Datum und Uhrzeit (z. B. 10-08-2026 14:00) oder eine Variable."
   },
   "triggers": {

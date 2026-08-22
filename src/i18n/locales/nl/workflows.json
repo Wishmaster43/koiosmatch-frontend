@@ -242,6 +242,7 @@
     "calllist_add": "Toevoegen aan bellijst",
     "webhook_send": "Webhook versturen",
     "candidate_archive": "Kandidaat archiveren",
+    "leads_recount": "Leads-telling vacatures",
     "experience_add": "Werkervaring toevoegen",
     "sm_employee_create": "SM medewerker aanmaken",
     "workflow_call": "Workflow aanroepen"
@@ -803,6 +804,7 @@
     "Endpoint-slug": "Endpoint-slug",
     "Richting": "Richting",
     "Archiefreden": "Archiefreden",
+    "Welke vacatures": "Welke vacatures",
     "Positie in CV": "Positie in CV",
     "Workflow": "Workflow"
   },
@@ -917,6 +919,8 @@
     "all": "alle",
     "role": "rol",
     "candidate_owner": "eigenaar kandidaat",
+    "Alleen gewijzigde (aanbevolen)": "Alleen gewijzigde (aanbevolen)",
+    "Alle vacatures": "Alle vacatures",
     "owner": "eigenaar",
     "applicationcreated": "sollicitatie aangemaakt",
     "applicationstage_changed": "fase gewijzigd (sollicitatie)",
@@ -1055,6 +1059,7 @@
     "Tekst die op de kandidaat en in de audit-trail komt te staan": "Tekst die op de kandidaat en in de audit-trail komt te staan.",
     "De workflow die als kind wordt gestart (async, via de wachtrij) Zelf-aanroep en kringlopen worden geweigerd; maximaal 5 niveaus diep": "De workflow die als kind wordt gestart (async, via de wachtrij). Zelf-aanroep en kringlopen worden geweigerd; maximaal 5 niveaus diep.",
     "Eerst proefdraaien rapporteert WIE er aangemaakt zou worden (incl payload), schrijft niets Zet expliciet uit om echt in Shiftmanager aan te maken": "Eerst proefdraaien: rapporteert WIE er aangemaakt zou worden (incl. payload), schrijft niets. Zet expliciet uit om echt in Shiftmanager aan te maken.",
+    "De voorwaarden volgen altijd de matchcriteria van de vacature zelf wie ze wil wijzigen, wijzigt de matchcriteria of de wegingstemplates Deze stap kiest alleen de set": "De voorwaarden volgen altijd de matchcriteria van de vacature zelf: wie ze wil wijzigen, wijzigt de matchcriteria of de wegingstemplates. Deze stap kiest alleen de set.",
     "Datum en tijd (bv 10-08-2026 1400) of een variabele": "Datum en tijd (bv. 10-08-2026 14:00) of een variabele."
   },
   "triggers": {

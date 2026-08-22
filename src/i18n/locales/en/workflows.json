@@ -207,6 +207,7 @@
     "calllist_add": "Add to call list",
     "webhook_send": "Send webhook",
     "candidate_archive": "Archive candidate",
+    "leads_recount": "Vacancy leads count",
     "experience_add": "Add work experience",
     "sm_employee_create": "Create SM employee",
     "workflow_call": "Call workflow"
@@ -768,6 +769,7 @@
     "Endpoint-slug": "Endpoint slug",
     "Richting": "Direction",
     "Archiefreden": "Archive reason",
+    "Welke vacatures": "Which vacancies",
     "Positie in CV": "Position in CV",
     "Workflow": "Workflow"
   },
@@ -882,6 +884,8 @@
     "all": "everyone",
     "role": "role",
     "candidate_owner": "candidate owner",
+    "Alleen gewijzigde (aanbevolen)": "Only changed (recommended)",
+    "Alle vacatures": "All vacancies",
     "owner": "owner",
     "applicationcreated": "application created",
     "applicationstage_changed": "stage changed (application)",
@@ -1055,6 +1059,7 @@
     "Tekst die op de kandidaat en in de audit-trail komt te staan": "Text that is stamped on the candidate and in the audit trail.",
     "De workflow die als kind wordt gestart (async, via de wachtrij) Zelf-aanroep en kringlopen worden geweigerd; maximaal 5 niveaus diep": "The workflow started as a child (async, via the queue). Self-calls and cycles are refused; maximum 5 levels deep.",
     "Eerst proefdraaien rapporteert WIE er aangemaakt zou worden (incl payload), schrijft niets Zet expliciet uit om echt in Shiftmanager aan te maken": "Dry-run first: reports WHO would be created (incl. payload), writes nothing. Turn off explicitly to really create in Shiftmanager.",
+    "De voorwaarden volgen altijd de matchcriteria van de vacature zelf wie ze wil wijzigen, wijzigt de matchcriteria of de wegingstemplates Deze stap kiest alleen de set": "The conditions always follow the vacancy's own match criteria: to change them, change the match criteria or the weighting templates. This step only picks the set.",
     "Datum en tijd (bv 10-08-2026 1400) of een variabele": "Date and time (e.g. 10-08-2026 14:00) or a variable."
   },
   "triggers": {

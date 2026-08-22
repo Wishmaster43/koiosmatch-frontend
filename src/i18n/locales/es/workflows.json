@@ -203,6 +203,7 @@
     "calllist_add": "Añadir a la lista de llamadas",
     "webhook_send": "Enviar webhook",
     "candidate_archive": "Archivar candidato",
+    "leads_recount": "Recuento de leads de vacantes",
     "experience_add": "Añadir experiencia laboral",
     "sm_employee_create": "Crear empleado SM",
     "workflow_call": "Llamar a un workflow"
@@ -768,6 +769,7 @@
     "Endpoint-slug": "Slug del endpoint",
     "Richting": "Dirección",
     "Archiefreden": "Motivo de archivo",
+    "Welke vacatures": "Qué vacantes",
     "Positie in CV": "Posición en el CV",
     "Workflow": "Workflow"
   },
@@ -882,6 +884,8 @@
     "all": "todos",
     "role": "rol",
     "candidate_owner": "propietario del candidato",
+    "Alleen gewijzigde (aanbevolen)": "Solo modificadas (recomendado)",
+    "Alle vacatures": "Todas las vacantes",
     "owner": "propietario",
     "applicationcreated": "solicitud creada",
     "applicationstage_changed": "etapa modificada (solicitud)",
@@ -1055,6 +1059,7 @@
     "Tekst die op de kandidaat en in de audit-trail komt te staan": "Texto que queda registrado en el candidato y en el registro de auditoría.",
     "De workflow die als kind wordt gestart (async, via de wachtrij) Zelf-aanroep en kringlopen worden geweigerd; maximaal 5 niveaus diep": "El workflow que se inicia como hijo (async, mediante la cola). Las autollamadas y los bucles se rechazan; máximo 5 niveles de profundidad.",
     "Eerst proefdraaien rapporteert WIE er aangemaakt zou worden (incl payload), schrijft niets Zet expliciet uit om echt in Shiftmanager aan te maken": "Primero simulación: informa QUIÉN se crearía (incl. payload), no escribe nada. Desactívalo explícitamente para crear de verdad en Shiftmanager.",
+    "De voorwaarden volgen altijd de matchcriteria van de vacature zelf wie ze wil wijzigen, wijzigt de matchcriteria of de wegingstemplates Deze stap kiest alleen de set": "Las condiciones siguen siempre los criterios de match de la propia vacante: para cambiarlas, cambia los criterios de match o las plantillas de ponderación. Este paso solo elige el conjunto.",
     "Datum en tijd (bv 10-08-2026 1400) of een variabele": "Fecha y hora (p. ej. 10-08-2026 14:00) o una variable."
   },
   "triggers": {

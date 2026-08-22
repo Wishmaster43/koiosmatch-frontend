@@ -203,6 +203,7 @@
     "calllist_add": "Ajouter à la liste d'appels",
     "webhook_send": "Envoyer un webhook",
     "candidate_archive": "Archiver le candidat",
+    "leads_recount": "Comptage des leads des postes",
     "experience_add": "Ajouter une expérience professionnelle",
     "sm_employee_create": "Créer un employé SM",
     "workflow_call": "Appeler un workflow"
@@ -768,6 +769,7 @@
     "Endpoint-slug": "Slug de l'endpoint",
     "Richting": "Direction",
     "Archiefreden": "Motif d'archivage",
+    "Welke vacatures": "Quels postes",
     "Positie in CV": "Position dans le CV",
     "Workflow": "Workflow"
   },
@@ -882,6 +884,8 @@
     "all": "tous",
     "role": "rôle",
     "candidate_owner": "propriétaire du candidat",
+    "Alleen gewijzigde (aanbevolen)": "Seulement les modifiés (recommandé)",
+    "Alle vacatures": "Tous les postes",
     "owner": "propriétaire",
     "applicationcreated": "candidature créée",
     "applicationstage_changed": "étape modifiée (candidature)",
@@ -1055,6 +1059,7 @@
     "Tekst die op de kandidaat en in de audit-trail komt te staan": "Texte enregistré sur le candidat et dans la piste d'audit.",
     "De workflow die als kind wordt gestart (async, via de wachtrij) Zelf-aanroep en kringlopen worden geweigerd; maximaal 5 niveaus diep": "Le workflow démarré comme enfant (async, via la file d'attente). Les auto-appels et les boucles sont refusés ; 5 niveaux maximum.",
     "Eerst proefdraaien rapporteert WIE er aangemaakt zou worden (incl payload), schrijft niets Zet expliciet uit om echt in Shiftmanager aan te maken": "D'abord un essai à blanc : indique QUI serait créé (avec la charge utile), n'écrit rien. Désactivez explicitement pour créer réellement dans Shiftmanager.",
+    "De voorwaarden volgen altijd de matchcriteria van de vacature zelf wie ze wil wijzigen, wijzigt de matchcriteria of de wegingstemplates Deze stap kiest alleen de set": "Les conditions suivent toujours les critères de match du poste lui-même : pour les modifier, modifiez les critères de match ou les modèles de pondération. Cette étape ne choisit que l'ensemble.",
     "Datum en tijd (bv 10-08-2026 1400) of een variabele": "Date et heure (p. ex. 10-08-2026 14:00) ou une variable."
   },
   "triggers": {
