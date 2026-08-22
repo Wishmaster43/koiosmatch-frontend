@@ -23,7 +23,7 @@
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useAllSettings, getJsonSetting, saveSettingsKeys } from '@/lib/settings/useAllSettings'
+import { useAllSettings, useSettingsLoaded, getJsonSetting, saveSettingsKeys } from '@/lib/settings/useAllSettings'
 import { useLookups } from '@/context/LookupsContext'
 import CandidateCustomRequiredFields from './candidates/CandidateCustomRequiredFields'
 import RequiredFieldsGroup, { type PhaseColumn } from './candidates/RequiredFieldsGroup'
@@ -36,6 +36,9 @@ export default function CandidateRequiredFieldsSettings() {
   const { t } = useTranslation(['settings', 'candidates'])
   const { phases } = useLookups()
   const values = useAllSettings()
+  // REQFIELDS-TOGGLE-RACE-1: a click before GET /settings resolves would rebuild
+  // the WHOLE phase-keyed map from the {} fallback and wipe every phase's list.
+  const loaded = useSettingsLoaded()
   const cfg = getJsonSetting<Record<string, string[]>>(values, KEY, {})
 
   // Phase columns come from the tenant lookup; LookupsContext already seeds lead/candidate.
@@ -50,6 +53,7 @@ export default function CandidateRequiredFieldsSettings() {
   // the way out: the aliases can never be satisfied, so leaving one in place would block
   // every save for that phase — folding keeps the tenant's intent on a key that works.
   const toggle = (phase: string, field: string) => {
+    if (!loaded) return
     const next: Record<string, string[]> = {}
     for (const [p, list] of Object.entries(cfg)) next[p] = normalizeRequiredFieldKeys(list ?? [])
     const current = next[phase] ?? []
@@ -91,7 +95,7 @@ export default function CandidateRequiredFieldsSettings() {
       {/* Built-in fields — one collapsible block per card of the candidate screens. */}
       {CANDIDATE_FIELD_GROUPS.map(group => (
         <RequiredFieldsGroup key={group.id} group={group} phases={cols}
-          isRequired={isRequired} onToggle={toggle}
+          isRequired={isRequired} onToggle={toggle} disabled={!loaded}
           open={openIds.includes(group.id)} onOpenToggle={() => toggleOpen(group.id)} />
       ))}
 

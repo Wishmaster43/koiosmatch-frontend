@@ -25,7 +25,9 @@ const ct = (key: string) => i18n.t(key.split(':')[1], { ns: 'candidates' })
 const blobRef = vi.hoisted(() => ({ current: {} as Record<string, unknown> }))
 vi.mock('@/lib/settings/useAllSettings', async () => {
   const actual = await vi.importActual('@/lib/settings/useAllSettings')
-  return { ...actual, useAllSettings: () => blobRef.current }
+  // Settings count as loaded here — the pending-state race has its own dedicated
+  // tests (FlatRequiredFieldsToggleList.test.tsx / ApplicationRequiredFieldsSettings.test.tsx).
+  return { ...actual, useAllSettings: () => blobRef.current, useSettingsLoaded: () => true }
 })
 
 // One api mock for all three seams: GET /custom-fields, POST /settings, PATCH /custom-fields/{id}.

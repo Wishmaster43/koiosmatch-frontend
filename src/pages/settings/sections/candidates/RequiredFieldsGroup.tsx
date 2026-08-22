@@ -15,13 +15,15 @@ import type { CandidateRequiredFieldGroup } from './requiredFieldsCatalog'
 /** One phase column, narrowed from the tenant lookup item. */
 export interface PhaseColumn { value: string; label: string }
 
-export default function RequiredFieldsGroup({ group, phases, isRequired, onToggle, open, onOpenToggle }: {
+export default function RequiredFieldsGroup({ group, phases, isRequired, onToggle, open, onOpenToggle, disabled }: {
   group: CandidateRequiredFieldGroup
   phases: PhaseColumn[]
   isRequired: (phase: string, field: string) => boolean
   onToggle: (phase: string, field: string) => void
   open: boolean
   onOpenToggle: () => void
+  // REQFIELDS-TOGGLE-RACE-1: inert until GET /settings has resolved.
+  disabled?: boolean
 }) {
   const { t } = useTranslation(['settings', 'candidates'])
 
@@ -51,7 +53,7 @@ export default function RequiredFieldsGroup({ group, phases, isRequired, onToggl
                   <td key={p.value} style={cell}>
                     {/* Toggle, never a checkbox (Danny 28-07: "GEEN VINKJES MAAR TOGGLES!!!"). */}
                     <PermissionToggle checked={isRequired(p.value, f.key)} onChange={() => onToggle(p.value, f.key)}
-                      aria-label={`${t(f.labelKey)} — ${p.label}`} />
+                      disabled={disabled} aria-label={`${t(f.labelKey)} — ${p.label}`} />
                   </td>
                 ))}
               </tr>

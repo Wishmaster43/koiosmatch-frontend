@@ -14,7 +14,7 @@
  * a placeholder — showing anything else here would misrepresent what is actually enforced.
  */
 import { useTranslation } from 'react-i18next'
-import { useAllSettings, getJsonSetting, saveSettingsKeys } from '@/lib/settings/useAllSettings'
+import { useAllSettings, useSettingsLoaded, getJsonSetting, saveSettingsKeys } from '@/lib/settings/useAllSettings'
 import { useCustomerPhases } from '@/lib/useCustomerPhases'
 import { PermissionToggle } from '@/pages/settings/components/SettingsControls'
 import { CUSTOMER_FIELDS } from './requiredFieldsCatalog'
@@ -25,12 +25,17 @@ export default function CustomerPhaseRequiredFieldsMatrix() {
   const { t } = useTranslation(['settings', 'customers'])
   const { phases } = useCustomerPhases()
   const values = useAllSettings()
+  // REQFIELDS-TOGGLE-RACE-1: a click before GET /settings resolves would rebuild
+  // the WHOLE phase map from the {} fallback and wipe every phase's list — worse
+  // than the flat variant. Toggles stay inert until the real blob has loaded.
+  const loaded = useSettingsLoaded()
   const cfg = getJsonSetting<Record<string, string[]>>(values, KEY, {})
 
   // Required-set membership for one phase/field cell, and a toggle that persists the
   // whole map (merge-by-phase) — mirrors CandidateRequiredFieldsSettings' toggle().
   const isReq = (phase: string, field: string) => (cfg[phase] ?? []).includes(field)
   const toggle = (phase: string, field: string) => {
+    if (!loaded) return
     const cur = cfg[phase] ?? []
     const next = cur.includes(field) ? cur.filter(x => x !== field) : [...cur, field]
     saveSettingsKeys({ [KEY]: { ...cfg, [phase]: next } }).catch(() => {})
@@ -59,7 +64,7 @@ export default function CustomerPhaseRequiredFieldsMatrix() {
                 {phases.map(p => (
                   <td key={String(p.value)} style={cell}>
                     <PermissionToggle checked={isReq(String(p.value), f.key)} onChange={() => toggle(String(p.value), f.key)}
-                      aria-label={`${t(f.labelKey)} — ${p.label}`} />
+                      disabled={!loaded} aria-label={`${t(f.labelKey)} — ${p.label}`} />
                   </td>
                 ))}
               </tr>

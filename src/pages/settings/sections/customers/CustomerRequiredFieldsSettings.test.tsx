@@ -25,7 +25,9 @@ const st = (key: string) => i18n.t(key, { ns: 'settings' })
 const blobRef = vi.hoisted(() => ({ current: {} as Record<string, unknown> }))
 vi.mock('@/lib/settings/useAllSettings', async () => {
   const actual = await vi.importActual('@/lib/settings/useAllSettings')
-  return { ...actual, useAllSettings: () => blobRef.current }
+  // Settings count as loaded here — the pending-state race has its own dedicated
+  // tests (FlatRequiredFieldsToggleList.test.tsx / ApplicationRequiredFieldsSettings.test.tsx).
+  return { ...actual, useAllSettings: () => blobRef.current, useSettingsLoaded: () => true }
 })
 const postMock = vi.hoisted(() => vi.fn(() => Promise.resolve({ data: {} })))
 // getActiveTenantId is the real (unmocked, via importActual above) useAllSettings
@@ -74,7 +76,8 @@ describe('CustomerRequiredFieldsSettings — Klant tab (phase matrix)', () => {
   it('a stored required field renders its toggle as ON (round trip)', () => {
     blobRef.current = { customer_required_fields: { klant_fase: ['name'] } }
     render(<CustomerRequiredFieldsSettings />)
-    expect(screen.getByRole('switch', { name: 'Naam — Klant-fase' })).toHaveStyle({ background: 'var(--color-primary)' })
+    // Semantic state, never the paint (same swap as ApplicationRequiredFieldsSettings.test.tsx).
+    expect(screen.getByRole('switch', { name: 'Naam — Klant-fase' })).toBeChecked()
   })
 })
 
@@ -108,6 +111,6 @@ describe('CustomerRequiredFieldsSettings — flat sub-entity tabs', () => {
     blobRef.current = { customer_location_required_fields: ['name'] }
     render(<CustomerRequiredFieldsSettings />)
     await user.click(screen.getByRole('tab', { name: st('customerRequiredFields.tabs.location') }))
-    expect(screen.getByRole('switch', { name: 'Naam' })).toHaveStyle({ background: 'var(--color-primary)' })
+    expect(screen.getByRole('switch', { name: 'Naam' })).toBeChecked()
   })
 })
