@@ -4,12 +4,25 @@
  * moved here verbatim (§3 no lost affordance), plus showOverall being back to
  * true now that the strip no longer duplicates the number. Request-shape
  * coverage (method/route/body, §13) mirrors the tests the old cell carried.
+ *
+ * COLLAPSE-1 (Danny 22-08): the card now rides CollapsedCard, default CLOSED.
+ * The title/overall-score header and the quick pencil/recalculate `action` pair
+ * stay reachable regardless of open state (CollapsedCard's `action` slot), so
+ * every test below that only touches those keeps working unchanged. Tests that
+ * reach MatchScoreBlock's OWN body content (the criteria breakdown, the
+ * "detailsSoon" placeholder, the manual-override note, its own criteria-slider
+ * edit pencil) now expand the card first via `expandCard()`.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import MatchScoreSection from './MatchScoreSection'
 import type { ApplicationDetail } from '@/types/application'
+
+// Opens the CollapsedCard — the toggle button's accessible name is the title
+// span's text ("matchScore.title"), possibly followed by the overall-score
+// badge, hence a regex rather than an exact-string match.
+const expandCard = () => userEvent.click(screen.getByRole('button', { name: /matchScore\.title/ }))
 
 // Key-echo (repo-wide precedent) — honours defaultValue like the real t() does.
 vi.mock('react-i18next', () => ({
@@ -51,11 +64,41 @@ describe('MatchScoreSection · showOverall restored (Danny 21-08 ruling 1)', () 
     expect(screen.getByText('82%')).toBeInTheDocument()
   })
 
-  it('shows the honest placeholder when there is no score yet', () => {
+  it('shows the honest placeholder when there is no score yet, once expanded', async () => {
     render(<MatchScoreSection application={app({ score: null })} />)
+    // The recalculate trigger must still be there without expanding — a never-
+    // scored application can still be scored from this title row (§3 no lost affordance).
+    expect(screen.getByRole('button', { name: 'status.recalculateScore' })).toBeInTheDocument()
+    expect(screen.queryByText('matchScore.detailsSoon')).toBeNull()
+    await expandCard()
     expect(screen.getByText('matchScore.detailsSoon')).toBeInTheDocument()
-    // The recalculate trigger must still be there — a never-scored application
-    // can still be scored from this title row (§3 no lost affordance).
+  })
+})
+
+// COLLAPSE-1 (Danny 22-08: "Match score moet je kunnen openklappen en
+// dichtklappen, standaard dichtgeklapt") — the card's own collapse contract.
+describe('MatchScoreSection · collapsible, default collapsed (Danny 22-08)', () => {
+  it('starts collapsed — the criteria breakdown never mounts before it is opened', () => {
+    render(<MatchScoreSection application={app({ score: 82, matchCriteria: [{ key: 'c1', label: 'Skills', score: 80, weight: 1 }] })} />)
+    const toggle = screen.getByRole('button', { name: /matchScore\.title/ })
+    expect(toggle).toHaveAttribute('aria-expanded', 'false')
+    expect(screen.queryByText('Skills')).toBeNull()
+    // The overall score stays readable even collapsed.
+    expect(screen.getByText('82%')).toBeInTheDocument()
+  })
+
+  it('expands on click, aria-expanded flips, and the breakdown becomes visible', async () => {
+    render(<MatchScoreSection application={app({ score: 82, matchCriteria: [{ key: 'c1', label: 'Skills', score: 80, weight: 1 }] })} />)
+    const toggle = screen.getByRole('button', { name: /matchScore\.title/ })
+    await expandCard()
+    expect(toggle).toHaveAttribute('aria-expanded', 'true')
+    expect(screen.getByText('Skills')).toBeInTheDocument()
+  })
+
+  it('keeps the quick-override pencil and recalculate trigger reachable while collapsed', () => {
+    render(<MatchScoreSection application={app({ score: 40 })} />)
+    expect(screen.getByRole('button', { name: /matchScore\.title/ })).toHaveAttribute('aria-expanded', 'false')
+    expect(screen.getByRole('button', { name: 'status.editScore' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'status.recalculateScore' })).toBeInTheDocument()
   })
 })
@@ -121,6 +164,8 @@ describe('MatchScoreSection · manual score override (MATCHSCORE-EDIT-1, moved f
     // The REQUEST — method, route and the body it carries (§13).
     expect(mockPatch).toHaveBeenCalledWith('/applications/1', { match_score: 72 })
     await waitFor(() => expect(screen.getByText('72%')).toBeInTheDocument())
+    // The manual-override note lives in MatchScoreBlock's own body — expand first.
+    await expandCard()
     expect(screen.getByText('matchScore.manualNote')).toBeInTheDocument()
     expect(mockNotifySuccess).toHaveBeenCalledWith('status.scoreSaved')
   })
@@ -175,6 +220,8 @@ describe('MatchScoreSection · MatchScoreBlock\'s own criteria edit stays wired'
     const onAdjustScore = vi.fn()
     const user = userEvent.setup()
     render(<MatchScoreSection application={app({ id: 3, score: 75, matchCriteria: [{ key: 'c1', label: 'Skills', score: 80, weight: 1 }] })} onAdjustScore={onAdjustScore} />)
+    // MatchScoreBlock's own criteria editor lives in the collapsed body — open first.
+    await user.click(screen.getByRole('button', { name: /matchScore\.title/ }))
     await user.click(screen.getByTitle('matchScore.edit'))
     await user.click(screen.getByTitle('matchScore.save'))
     expect(onAdjustScore).toHaveBeenCalledWith(3, { score: 80, criteria: [{ key: 'c1', label: 'Skills', score: 80, weight: 1 }] })

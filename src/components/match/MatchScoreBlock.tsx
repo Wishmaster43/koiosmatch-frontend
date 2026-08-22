@@ -11,8 +11,9 @@ import { BodyText, SectionTitle, Caption } from '@/components/ui/typography'
 
 export interface Criterion { key?: string; label?: string; hard?: boolean; score: number; weight?: number; note?: string }
 
-// Score colour (green ≥75, amber ≥50, red below).
-const scoreColor = (v?: number | null): string => { const n = v ?? 0; return n >= 75 ? 'var(--color-success)' : n >= 50 ? 'var(--color-warning)' : 'var(--color-danger)' }
+// The ONE score-colour source lives in ./scoreColor (react-refresh: this file
+// exports only components).
+import { scoreColor } from './scoreColor'
 
 // Weighted overall from the criteria (falls back to a plain average, or the
 // explicit overall when there are no criteria).

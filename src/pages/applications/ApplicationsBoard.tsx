@@ -12,11 +12,10 @@ import { SectionTitle, Caption } from '@/components/ui/typography'
 import type { Application } from '@/types/application'
 import type { Id } from '@/types/common'
 import { useDragAutoScroll } from '@/lib/useDragAutoScroll'
+import { scoreColor } from '@/components/match/scoreColor'
+import { tintBg, chipInk } from '@/lib/tint'
 
 export interface BoardPhase { key: string; label: string; color: string }
-
-// Score as soft-coloured text (green ≥75, amber ≥50, red below).
-const scoreColor = (v: number): string => (v >= 75 ? 'var(--color-success)' : v >= 50 ? 'var(--color-warning)' : 'var(--color-danger)')
 
 // A single draggable application card.
 function BoardCard({ app, onDragStart, onClick, selected }: {
@@ -39,9 +38,9 @@ function BoardCard({ app, onDragStart, onClick, selected }: {
             plain text — every other application surface links them (see
             CustomerApplicationsList's own candidate cell). hideIcon: the compact
             card has no room for the "open in new tab" trailing icon. */}
-        <span style={{ flex: 1, minWidth: 0, fontWeight: 600, fontSize: 13 }}>
+        <SectionTitle as="span" style={{ flex: 1, minWidth: 0 }}>
           <EntityLink page="candidates" id={app.candidateId} tone="neutral" hideIcon>{app.candidateName}</EntityLink>
-        </span>
+        </SectionTitle>
         {/* PLACED-1: subtle placed badge — colour never the only signal, the icon
             shape + aria/title text carry the meaning on their own. */}
         {app.hasMatch && (
@@ -101,11 +100,10 @@ function BoardColumn({ phase, items, onDragStart, onDrop, onDragOver, onSelect, 
       onDrop={e => onDrop(e, phase.key)} onDragOver={onDragOver}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
         <SectionTitle as="span">{phase.label}</SectionTitle>
-        {/* F7 (audit R1): color-mix instead of a hex-concat tint (`color + '20'`
-            silently breaks once `phase.color` is a `var(--…)` token, not a hex —
-            color-mix works for both). */}
+        {/* Count pill in the phase's own tint — the house tint helper (lib/tint),
+            token-safe for both hex and var(--…) phase colours. */}
         <span style={{ fontSize: 11, fontWeight: 600, padding: '1px 7px', borderRadius: 99,
-          background: `color-mix(in srgb, ${phase.color} 12%, transparent)`, color: phase.color }}>{items.length}</span>
+          background: tintBg(phase.color), color: chipInk(phase.color) }}>{items.length}</span>
       </div>
       <div style={{ flex: 1, minHeight: 60 }}>
         {items.map(app => (

@@ -107,6 +107,7 @@
     },
     "tabs": {
       "application": "Candidatura",
+      "statistics": "Estadísticas",
       "candidate": "Candidato",
       "vacancy": "Vacante",
       "interviews": "Entrevista",

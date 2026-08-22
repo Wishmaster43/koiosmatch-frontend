@@ -107,6 +107,7 @@
     },
     "tabs": {
       "application": "Application",
+      "statistics": "Statistics",
       "candidate": "Candidate",
       "vacancy": "Vacancy",
       "interviews": "Interview",

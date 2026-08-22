@@ -27,13 +27,6 @@ vi.mock('@/lib/datetime', () => ({
   useLocale: () => 'nl-NL',
 }))
 
-// CompetitionBlock (added 25-07) resolves funnel labels/colours through the tenant
-// lookup — stub the context so this file keeps testing ApplicationTab's own wiring
-// instead of needing the whole provider tree.
-vi.mock('@/context/LookupsContext', () => ({
-  useLookups: () => ({ funnelTypes: [], funnelMeta: (v?: string) => ({ value: v, label: v ?? '', color: 'var(--text-muted)' }) }),
-}))
-
 // The vacancy-link edit mode (useVacancyLinkOptions) fetches /vacancies; S31's CvBlock fetches the linked
 // candidate's documents via React Query — stub the client so this file only
 // tests ApplicationTab's own wiring, not any dependency's internals.
@@ -81,12 +74,20 @@ describe('ApplicationTab · one flat scroll (PDF-SOLLICITATIES point 9)', () => 
 
 // DD-FE-9 (08-08 drill-down audit): the match-score criteria breakdown
 // (per-criterion sliders) sits directly under the score cell.
+// COLLAPSE-1 (Danny 22-08): the card is now collapsed by default — the title
+// (and overall score) is always visible, but the criteria breakdown lives in
+// the collapsed body, so every test below opens the card first.
 describe('ApplicationTab · match-score breakdown placement (DD-FE-9, 08-08 drill-down audit)', () => {
   const scored = { score: 75, matchCriteria: [{ key: 'c1', label: 'Skills', score: 80, weight: 1 }] }
 
-  it('renders the match-score breakdown', () => {
+  it('renders the match-score breakdown once expanded', async () => {
+    const user = userEvent.setup()
     renderTab(<ApplicationTab application={app(scored)} />)
-    expect(screen.getByText('matchScore.title')).toBeInTheDocument()
+    const toggle = screen.getByRole('button', { name: /matchScore\.title/ })
+    expect(toggle).toHaveAttribute('aria-expanded', 'false')
+    expect(screen.queryByText('Skills')).toBeNull()
+    await user.click(toggle)
+    expect(toggle).toHaveAttribute('aria-expanded', 'true')
     expect(screen.getByText('Skills')).toBeInTheDocument()
   })
 
@@ -94,6 +95,7 @@ describe('ApplicationTab · match-score breakdown placement (DD-FE-9, 08-08 dril
     const onAdjustScore = vi.fn()
     const user = userEvent.setup()
     renderTab(<ApplicationTab application={app({ id: 3, ...scored })} onAdjustScore={onAdjustScore} />)
+    await user.click(screen.getByRole('button', { name: /matchScore\.title/ }))
     await user.click(screen.getByTitle('matchScore.edit'))
     await user.click(screen.getByTitle('matchScore.save'))
     // Same PATCH-shaped payload MatchScoreBlock always emitted — only WHERE
@@ -325,10 +327,11 @@ describe('ApplicationTab', () => {
 
 // Danny 21-08 ("Heel deze tab is anders dan de kandidaten of klant"): the tab's
 // block order now follows the DRILLDOWN-VOLGORDE-CANON — information cards
-// first, then the Match score block, then Andere sollicitanten, then the
-// Koios AI block, then Vestiging LAST.
+// first, then the Match score block, then the Koios AI block, then Vestiging
+// LAST. Andere sollicitanten (CompetitionBlock) moved off this tab entirely
+// on 22-08 — see StatisticsTab.test.tsx for its own placement guard.
 describe('ApplicationTab · drilldown-canon block order (Danny 21-08 ruling 4)', () => {
-  it('orders details card -> match score -> competition -> vestiging LAST', async () => {
+  it('orders details card -> match score -> vestiging LAST', async () => {
     // The linked vacancy carries a branch (vestiging) — the ONLY source
     // ApplicationBranchSection can derive one from (see its own doc comment).
     mockGet.mockImplementation((url: string) => String(url).includes('/vacancies/v9')
@@ -338,13 +341,18 @@ describe('ApplicationTab · drilldown-canon block order (Danny 21-08 ruling 4)',
 
     const detailsTitle = screen.getByText('drawer.detailsTitle')
     const matchScoreTitle = screen.getByText('matchScore.title')
-    // Both depend on the async vacancy fetch (React Query) to render at all.
-    const competitionTitle = await screen.findByText('competition.title')
+    // Depends on the async vacancy fetch (React Query) to render at all.
     const branchLabel = await screen.findByText('matchesView.branch')
 
     expect(detailsTitle.compareDocumentPosition(matchScoreTitle) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
-    expect(matchScoreTitle.compareDocumentPosition(competitionTitle) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
-    expect(competitionTitle.compareDocumentPosition(branchLabel) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    expect(matchScoreTitle.compareDocumentPosition(branchLabel) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+  })
+
+  // Andere sollicitanten (competition.title) no longer renders on THIS tab at
+  // all — Danny 22-08 moved it to its own Statistieken tab.
+  it('no longer renders Andere sollicitanten on this tab', () => {
+    renderTab(<ApplicationTab application={app({ vacancyId: 'v9', vacancyTitle: 'Chirurg' })} />)
+    expect(screen.queryByText('competition.title')).toBeNull()
   })
 
   // Ruling 4 / ApplicationBranchSection: an application with no linked vacancy

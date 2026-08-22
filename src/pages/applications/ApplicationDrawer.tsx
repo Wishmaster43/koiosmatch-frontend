@@ -13,6 +13,7 @@ import ChangelogTab from './drawer/ChangelogTab'
 import ApplicationHeaderTitle from './drawer/ApplicationHeaderTitle'
 import ArchivedBanner from '@/components/drawer/ArchivedBanner'
 import ApplicationTab from './drawer/ApplicationTab'
+import StatisticsTab from './drawer/StatisticsTab'
 import CandidateTab from './drawer/CandidateTab'
 import VacancyTab from './drawer/VacancyTab'
 import InterviewsTab from './drawer/InterviewsTab'
@@ -34,9 +35,11 @@ import type { Criterion } from '@/components/match/MatchScoreBlock'
 import type { Id } from '@/types/common'
 import EntityLink from '@/components/ui/EntityLink'
 
-// The tab order (matches the screenshots). 'extra' (§3A(f)) is appended below
-// only when the tenant has ≥1 active application custom field.
-const TAB_IDS = ['application', 'candidate', 'vacancy', 'interviews', 'appointments', 'timeline', 'notes']
+// The tab order (matches the screenshots). Statistieken sits SECOND, right
+// after Sollicitatie (Danny 22-08 — mirrors MatchDrawer's own statistics tab
+// placement, pages/matches/MatchDrawer.tsx). 'extra' (§3A(f)) is appended
+// below only when the tenant has ≥1 active application custom field.
+const TAB_IDS = ['application', 'statistics', 'candidate', 'vacancy', 'interviews', 'appointments', 'timeline', 'notes']
 
 interface ApplicationDrawerProps {
   application: ApplicationDetail | null
@@ -141,6 +144,9 @@ export default function ApplicationDrawer({ application: a, onClose, expanded, o
   const renderTab = (id: string, setActiveTab?: (id: string) => void): ReactNode => {
     switch (id) {
       case 'application':  return <ApplicationTab application={a} onAdjustScore={onAdjustScore} onLinkVacancy={onLinkVacancy} onUpdateSource={onUpdateSource} onNavigateTab={setActiveTab} />
+      // Danny 22-08: Andere sollicitanten (CompetitionBlock) moved off Sollicitatie
+      // onto its own Statistieken tab — same component, same behaviour.
+      case 'statistics':   return <StatisticsTab application={a} />
       case 'candidate':    return <CandidateTab application={a} />
       case 'vacancy':      return <VacancyTab application={a} onLinkVacancy={onLinkVacancy} />
       case 'interviews':   return <InterviewsTab application={a} />

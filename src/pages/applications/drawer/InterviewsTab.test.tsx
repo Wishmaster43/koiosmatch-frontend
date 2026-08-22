@@ -182,8 +182,16 @@ describe('InterviewsTab · start-interview action (Flow B)', () => {
 // These pin the REAL shape: { status: completed|failed|running, started_at, finished_at,
 // transcript: [{direction, body, sent_at}] }.
 describe('InterviewsTab · interview history (real BE contract, W7)', () => {
-  it('renders the empty state when there are no historical interview sessions', () => {
+  // ONE nothing-message at a time (Danny 22-08): with NO live session either,
+  // the status card already says "none" — the history's own empty state only
+  // shows once a live session exists without finished history behind it.
+  it('suppresses the history empty state while there is no live session either', () => {
     renderTab(app())
+    expect(screen.queryByText('interview.empty')).not.toBeInTheDocument()
+  })
+
+  it('renders the history empty state once a live session exists without finished sessions', () => {
+    renderTab(app({ interview: { category: 'busy', currentStatus: null, step: null, total: 0, id: 'iv-live', agent: null, flowName: null, turn: 'agent', startedAt: null, lastMessageAt: null, endedAt: null, durationSeconds: null, pausedAt: null, pausedBy: null } }))
     expect(screen.getByText('interview.empty')).toBeInTheDocument()
   })
 

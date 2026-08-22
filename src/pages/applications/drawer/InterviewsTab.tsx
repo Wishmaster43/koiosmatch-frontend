@@ -256,7 +256,11 @@ export default function InterviewsTab({ application: a }: { application: Applica
         </div>
       )}
 
-      {!interviews.length ? (
+      {/* ONE "nothing yet" message, never two (Danny 22-08, screenshot): while no
+          live session exists either, the status card above already says so — the
+          history's own empty state only adds noise then. It still shows once a
+          live session exists without any FINISHED history behind it. */}
+      {!interviews.length ? (interview != null && (
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: 64, textAlign: 'center', color: 'var(--text-muted)' }}>
           <span style={{ width: 56, height: 56, borderRadius: '50%', border: '1px solid var(--border)',
             display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 14 }}>
@@ -264,7 +268,7 @@ export default function InterviewsTab({ application: a }: { application: Applica
           </span>
           <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)' }}>{t('interview.empty')}</div>
         </div>
-      ) : interviews.map(iv => (
+      )) : interviews.map(iv => (
         <div key={iv.id} style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           {/* Header — WhatsApp affordance in the success token (F6: mirrors ProfileTab's
               waDigits() hover colour) rather than the brand's literal hex green. */}

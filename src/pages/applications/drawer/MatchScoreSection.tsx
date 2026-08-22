@@ -3,9 +3,11 @@ import { useTranslation } from 'react-i18next'
 import { Pencil, RefreshCw, Save, X } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import Button from '@/components/ui/Button'
-import SectionCard from '@/components/ui/SectionCard'
+import CollapsedCard from '@/components/ui/CollapsedCard'
 import MatchScoreBlock from '@/components/match/MatchScoreBlock'
 import type { Criterion } from '@/components/match/MatchScoreBlock'
+import { scoreColor } from '@/components/match/scoreColor'
+import { sectionBlock } from '@/components/ui/SectionCard'
 import { useMatchScoreOverride } from '../hooks/useMatchScoreOverride'
 import type { ApplicationDetail } from '@/types/application'
 import type { Id } from '@/types/common'
@@ -36,6 +38,19 @@ interface MatchScoreSectionProps {
  * affordance). showOverall is back to true: V17's suppression only ever
  * existed to avoid duplicating the now-retired strip cell, so the bar Danny
  * liked in his screenshot renders here.
+ *
+ * COLLAPSE-1 (Danny 22-08: "Match score moet je kunnen openklappen en
+ * dichtklappen, standaard dichtgeklapt"): the card now rides the shared
+ * `components/ui/CollapsedCard` atom, default CLOSED (`defaultOpen` omitted).
+ * The header keeps showing the section title AND the overall score (the
+ * SAME scoreColor threshold MatchScoreBlock's own overall row uses) so a
+ * collapsed card still tells you the number at a glance; the quick pencil/
+ * recalculate pair rides CollapsedCard's `action` slot — a sibling of the
+ * toggle button, always reachable regardless of open/closed state, never
+ * lost behind a collapse (§3 no lost affordance, mirrors the FilterGroupBlock
+ * header convention CollapsedCard's own doc comment cites). Only the FULL
+ * detail — the bar, the criteria breakdown, the manual-override note —
+ * mounts inside the collapsed body, exactly as it rendered before this move.
  *
  * MatchScoreBlock itself (components/match/, a shared cross-entity component,
  * out of this cluster's ownership) keeps its OWN separate criteria-slider edit
@@ -80,11 +95,28 @@ export default function MatchScoreSection({ application: a, onAdjustScore }: Mat
     </div>
   ) : undefined
 
+  // COLLAPSE-1: title + overall score, always visible in the header (part of
+  // the toggle button's own label — plain text/number, never an interactive
+  // element, so it is safe inside the button unlike the pencil/refresh pair).
+  const title = (
+    <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+      <span>{t('matchScore.title')}</span>
+      {o.score != null && (
+        <span style={{ fontSize: 12, fontWeight: 700, color: scoreColor(o.score) }}>{o.score}%</span>
+      )}
+    </span>
+  )
+
   return (
-    <SectionCard title={t('matchScore.title')} action={action}>
-      <MatchScoreBlock score={o.score} criteria={a.matchCriteria as Criterion[]} summary={a.matchSummary}
-        source={o.scoreSource} aiScore={o.aiScoreValue} showOverall
-        onSave={onAdjustScore ? payload => onAdjustScore(a.id, payload) : undefined} />
-    </SectionCard>
+    <CollapsedCard title={title} filled={o.score != null} action={action}>
+      {/* CollapsedCard's body is deliberately frameless ("children own their own
+          box") — the card frame every sibling on this tab wears comes from
+          sectionBlock, exactly what SectionCard used to provide here. */}
+      <div style={sectionBlock}>
+        <MatchScoreBlock score={o.score} criteria={a.matchCriteria as Criterion[]} summary={a.matchSummary}
+          source={o.scoreSource} aiScore={o.aiScoreValue} showOverall
+          onSave={onAdjustScore ? payload => onAdjustScore(a.id, payload) : undefined} />
+      </div>
+    </CollapsedCard>
   )
 }

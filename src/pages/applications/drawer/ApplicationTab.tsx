@@ -2,7 +2,6 @@ import StatusSubTab from './applicationTab/StatusSubTab'
 import DetailsSubTab from './applicationTab/DetailsSubTab'
 import CvSubTab from './applicationTab/CvSubTab'
 import MatchScoreSection from './MatchScoreSection'
-import CompetitionBlock from './CompetitionBlock'
 import ContextSubTab from './applicationTab/ContextSubTab'
 import ApplicationBranchSection from './ApplicationBranchSection'
 import type { Criterion } from '@/components/match/MatchScoreBlock'
@@ -35,13 +34,17 @@ interface ApplicationTabProps {
  * every other entity drilldown uses: INFORMATION cards first (the outcome +
  * status strip, the editable details card, the CV blocks), then the Match
  * score block (ruling 1: the strip's own score cell is retired, this titled
- * card is the ONE score surface left), then Andere sollicitanten (ruling 3,
- * now an expandable list of the vacancy's other applicants), then the Koios
- * AI block (the motivation letter, interview-consent evidence and the
- * advisory itself), and finally VESTIGING LAST (ruling 4 — renders nothing
- * when the application has no linked vacancy to derive a branch from, see
- * ApplicationBranchSection's own doc comment). No behaviour change per
- * section beyond ruling 1/3 above — same props, same PATCH bodies.
+ * card is the ONE score surface left), then the Koios AI block (the
+ * motivation letter, interview-consent evidence and the advisory itself),
+ * and finally VESTIGING LAST (ruling 4 — renders nothing when the
+ * application has no linked vacancy to derive a branch from, see
+ * ApplicationBranchSection's own doc comment).
+ *
+ * Danny 22-08 ("Andere sollicitanten moet hier weg"): Andere sollicitanten
+ * (CompetitionBlock, ruling 3's expandable list of the vacancy's other
+ * applicants) MOVED off this tab onto its own Statistieken tab (see
+ * ./StatisticsTab.tsx and ApplicationDrawer's tab list) — same component,
+ * same behaviour, only its position in the drawer changed.
  */
 export default function ApplicationTab({ application: a, onAdjustScore, onLinkVacancy, onUpdateSource, onNavigateTab }: ApplicationTabProps) {
   return (
@@ -50,7 +53,6 @@ export default function ApplicationTab({ application: a, onAdjustScore, onLinkVa
       <DetailsSubTab application={a} onLinkVacancy={onLinkVacancy} onUpdateSource={onUpdateSource} />
       <CvSubTab application={a} />
       <MatchScoreSection application={a} onAdjustScore={onAdjustScore} />
-      <CompetitionBlock application={a} />
       <ContextSubTab application={a} />
       <ApplicationBranchSection application={a} />
     </div>
