@@ -62,7 +62,7 @@
   },
   "bulk": {
     "selected": "{{count}} geselecteerd",
-    "actions": "Massa-acties",
+    "actions": "Massa mutaties",
     "deselect": "Deselecteren",
     "changeStatus": "Status wijzigen",
     "changePriority": "Prioriteit wijzigen",

@@ -191,7 +191,7 @@
   },
   "bulk": {
     "selected": "{{count}} ausgewählt",
-    "actions": "Massenaktionen",
+    "actions": "Massenmutationen",
     "deselect": "Abwählen",
     "mutateError": "Änderung konnte nicht angewendet werden.",
     "couple": "Mit Backoffice koppeln",

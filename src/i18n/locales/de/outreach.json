@@ -49,7 +49,7 @@
   },
   "bulk": {
     "selected": "{{count}} ausgewählt",
-    "actions": "Massenaktionen",
+    "actions": "Massenmutationen",
     "deselect": "Auswahl aufheben",
     "changeStatus": "Status ändern",
     "searchStatus": "Status suchen…",

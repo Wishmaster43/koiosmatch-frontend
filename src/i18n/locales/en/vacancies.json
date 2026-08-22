@@ -512,6 +512,14 @@
     "empty": "No appointments for this vacancy yet.",
     "overdue": "Overdue",
     "noCandidate": "No candidate",
-    "pageOf": "Page {{page}} of {{lastPage}}"
+    "pageOf": "Page {{page}} of {{lastPage}}",
+    "new": "New appointment",
+    "pickCandidate": {
+      "title": "Choose candidate",
+      "label": "Candidate",
+      "placeholder": "Search for a candidate…",
+      "error": "Could not load candidates.",
+      "noAccess": "No access to candidates."
+    }
   }
 }

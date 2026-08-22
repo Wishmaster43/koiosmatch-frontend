@@ -165,7 +165,7 @@
   },
   "bulk": {
     "selected": "{{count}} ausgewählt",
-    "actions": "Massenaktionen",
+    "actions": "Massenmutationen",
     "deselect": "Abwählen",
     "changeStatus": "Status ändern",
     "changePriority": "Priorität ändern",

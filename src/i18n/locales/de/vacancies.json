@@ -81,7 +81,7 @@
   },
   "bulk": {
     "selected": "{{count}} ausgewählt",
-    "actions": "Massenaktionen",
+    "actions": "Massenmutationen",
     "deselect": "Abwählen",
     "searchCandidates": "Kandidaten suchen",
     "searchVacancy": "Stelle suchen",
@@ -512,6 +512,14 @@
     "empty": "Noch keine Termine für diese Stelle.",
     "overdue": "Überfällig",
     "noCandidate": "Kein Kandidat",
-    "pageOf": "Seite {{page}} von {{lastPage}}"
+    "pageOf": "Seite {{page}} von {{lastPage}}",
+    "new": "Neuer Termin",
+    "pickCandidate": {
+      "title": "Kandidat auswählen",
+      "label": "Kandidat",
+      "placeholder": "Kandidat suchen…",
+      "error": "Kandidaten konnten nicht geladen werden.",
+      "noAccess": "Kein Zugriff auf Kandidaten."
+    }
   }
 }

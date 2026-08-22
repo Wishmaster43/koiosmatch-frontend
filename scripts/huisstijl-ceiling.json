@@ -578,6 +578,7 @@
   "src/pages/vacancies/drawer/AdditionalSkillsSection.tsx": 1,
   "src/pages/vacancies/drawer/AppointmentsTab.tsx": 2,
   "src/pages/vacancies/drawer/CandidateSearchTab.tsx": 3,
+  "src/pages/vacancies/drawer/PickCandidateForAppointmentModal.tsx": 1,
   "src/pages/vacancies/drawer/ChangelogTab.tsx": 4,
   "src/pages/vacancies/drawer/DetailsGeneralTab.tsx": 1,
   "src/pages/vacancies/drawer/DocumentsTab.test.tsx": 3,

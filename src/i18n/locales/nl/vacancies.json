@@ -81,7 +81,7 @@
   },
   "bulk": {
     "selected": "{{count}} geselecteerd",
-    "actions": "Massa-acties",
+    "actions": "Massa mutaties",
     "deselect": "Deselecteren",
     "searchCandidates": "Kandidaten zoeken",
     "searchVacancy": "Vacature zoeken",
@@ -512,6 +512,14 @@
     "empty": "Nog geen afspraken voor deze vacature.",
     "overdue": "Verlopen",
     "noCandidate": "Geen kandidaat",
-    "pageOf": "Pagina {{page}} van {{lastPage}}"
+    "pageOf": "Pagina {{page}} van {{lastPage}}",
+    "new": "Nieuwe afspraak",
+    "pickCandidate": {
+      "title": "Kandidaat kiezen",
+      "label": "Kandidaat",
+      "placeholder": "Zoek een kandidaat…",
+      "error": "Kandidaten konden niet worden geladen.",
+      "noAccess": "Geen toegang tot kandidaten."
+    }
   }
 }

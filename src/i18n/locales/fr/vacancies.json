@@ -512,6 +512,14 @@
     "empty": "Pas encore de rendez-vous pour cette offre d'emploi.",
     "overdue": "En retard",
     "noCandidate": "Aucun candidat",
-    "pageOf": "Page {{page}} sur {{lastPage}}"
+    "pageOf": "Page {{page}} sur {{lastPage}}",
+    "new": "Nouveau rendez-vous",
+    "pickCandidate": {
+      "title": "Choisir un candidat",
+      "label": "Candidat",
+      "placeholder": "Rechercher un candidat…",
+      "error": "Impossible de charger les candidats.",
+      "noAccess": "Pas d'accès aux candidats."
+    }
   }
 }

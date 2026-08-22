@@ -512,6 +512,14 @@
     "empty": "Todavía no hay citas para esta vacante.",
     "overdue": "Vencida",
     "noCandidate": "Sin candidato",
-    "pageOf": "Página {{page}} de {{lastPage}}"
+    "pageOf": "Página {{page}} de {{lastPage}}",
+    "new": "Nueva cita",
+    "pickCandidate": {
+      "title": "Elegir candidato",
+      "label": "Candidato",
+      "placeholder": "Buscar un candidato…",
+      "error": "No se pudieron cargar los candidatos.",
+      "noAccess": "Sin acceso a candidatos."
+    }
   }
 }

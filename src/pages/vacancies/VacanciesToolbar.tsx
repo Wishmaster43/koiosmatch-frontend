@@ -42,7 +42,10 @@ export default function VacanciesToolbar({
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap',
       padding: '0 24px 12px', minHeight: 36, flexShrink: 0 }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+      {/* flex:1 so the selection bar stretches to the toggles (Danny 22-08: "de bar
+          bij geselecteerde vacatures loopt niet door") — idle-mode children keep
+          their intrinsic widths, so the + Nieuw/search row is unchanged. */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, flex: 1, minWidth: 0 }}>
         {selectedCount > 0 ? bulkBar : (
           <>
             {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
