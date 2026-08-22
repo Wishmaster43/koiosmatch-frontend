@@ -14,7 +14,8 @@
     "owner": "Eigenaar",
     "date": "Aangemaakt",
     "status": "Status",
-    "contractForm": "Contractvorm"
+    "contractForm": "Contractvorm",
+    "type": "Type"
   },
   "insights": {
     "stage": "Fase",
@@ -31,7 +32,8 @@
     "closed": "Afgesloten",
     "newThisMonth": "Nieuw deze maand",
     "unscored": "Zonder score",
-    "scored": "Gescoord"
+    "scored": "Gescoord",
+    "pendingApproval": "Te beoordelen"
   },
   "drawer": {
     "label": "Match",
@@ -50,6 +52,7 @@
     },
     "tabs": {
       "overview": "Overzicht",
+      "statistics": "Statistieken",
       "relations": "Relaties",
       "changelog": "Wijzigingen",
       "extra": "Extra"
@@ -146,6 +149,11 @@
       "location": "Match {{position}} van {{total}} op deze locatie",
       "department": "Match {{position}} van {{total}} bij deze afdeling"
     },
+    "statistics": {
+      "empty": "Nog geen matchstatistieken beschikbaar.",
+      "onlyMatch": "Geen andere matches gevonden.",
+      "openMatch": "Match openen"
+    },
     "matchText": {
       "title": "Matchtekst",
       "saved": "Matchtekst opgeslagen.",
@@ -227,6 +235,9 @@
     "board": "Board",
     "archived": "Gearchiveerd"
   },
+  "quickView": {
+    "pendingApproval": "Te beoordelen"
+  },
   "board": {
     "empty": "Geen matches"
   },
@@ -236,6 +247,10 @@
   },
   "add": {
     "button": "Nieuwe match"
+  },
+  "type": {
+    "application": "Via sollicitatie",
+    "direct": "Direct"
   },
   "notes": {
     "title": "Notities",

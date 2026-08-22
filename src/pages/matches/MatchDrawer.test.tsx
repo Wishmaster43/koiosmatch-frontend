@@ -60,6 +60,7 @@ vi.mock('@/lib/queries', async importOriginal => ({
 // Every other tab body pulls in its own API/react-query dependencies, irrelevant
 // to this tab-bar guard — stub them (mirrors VacancyDrawer.test.tsx).
 vi.mock('./drawer/OverviewTab', () => ({ default: () => null }))
+vi.mock('./drawer/StatisticsTab', () => ({ default: () => null }))
 vi.mock('./drawer/MatchContractSection', () => ({ default: () => null }))
 vi.mock('./drawer/ChangelogTab', () => ({ default: () => null }))
 vi.mock('./drawer/NotesTab', () => ({ default: () => null }))
@@ -245,6 +246,25 @@ describe('MatchDrawer · owner picker (MATCH-OWNER-1)', () => {
     render(<MatchDrawer match={owned({ archived: true })} onClose={vi.fn()} onSetOwner={vi.fn()} />)
     expect(screen.getByText('Nina Bakker')).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /Nina Bakker/ })).not.toBeInTheDocument()
+  })
+})
+
+/**
+ * MOVED-FROM-OVERVIEW-1 (Danny 22-08): the new Statistieken tab sits right
+ * after Overzicht (the ordinal footnote it replaces used to live there) and
+ * before Contract & financieel.
+ */
+describe('MatchDrawer · Statistieken tab (MOVED-FROM-OVERVIEW-1)', () => {
+  it('lists Statistieken between Overzicht and Contract & financieel', () => {
+    render(<MatchDrawer match={match} onClose={vi.fn()} allRows={[match]} />)
+    const labels = screen.getAllByRole('tab').map(b => b.textContent)
+    const statsLabel = i18n.t('matches:drawer.tabs.statistics')
+    const overviewIdx = labels.indexOf(i18n.t('matches:drawer.tabs.overview'))
+    const statsIdx = labels.indexOf(statsLabel)
+    const contractIdx = labels.indexOf('Contract & financieel')
+    expect(overviewIdx).toBeGreaterThan(-1)
+    expect(statsIdx).toBeGreaterThan(overviewIdx)
+    expect(statsIdx).toBeLessThan(contractIdx)
   })
 })
 

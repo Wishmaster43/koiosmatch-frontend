@@ -96,6 +96,32 @@ describe('useMatches', () => {
   })
 })
 
+// MATCH-ORIGIN-1: ONTSTAANSTYPE (direct vs via sollicitatie), OFFERED-IFF-READ —
+// the backend doesn't ship `application_id` on the list resource yet, so the
+// mapper gates on KEY PRESENCE, never a value read off an absent key.
+describe('useMatches · origin field (MATCH-ORIGIN-1, OFFERED-IFF-READ)', () => {
+  it('leaves origin undefined when the payload carries no application_id key at all', async () => {
+    mockedGet.mockResolvedValue({ data: { data: [{ id: 'm1' }], meta: { last_page: 1 } } })
+    const { result } = renderHook(() => useMatches())
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    expect(result.current.rows[0].origin).toBeUndefined()
+  })
+
+  it('maps origin to "direct" when the key is present but null (a real direct match)', async () => {
+    mockedGet.mockResolvedValue({ data: { data: [{ id: 'm1', application_id: null }], meta: { last_page: 1 } } })
+    const { result } = renderHook(() => useMatches())
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    expect(result.current.rows[0].origin).toBe('direct')
+  })
+
+  it('maps origin to "application" when application_id carries a value', async () => {
+    mockedGet.mockResolvedValue({ data: { data: [{ id: 'm1', application_id: 'a-9' }], meta: { last_page: 1 } } })
+    const { result } = renderHook(() => useMatches())
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    expect(result.current.rows[0].origin).toBe('application')
+  })
+})
+
 describe('useMatches · MATCH-ARCHIVED-LIST-1', () => {
   it('maps archived + deleted_at onto the row', async () => {
     mockedGet.mockResolvedValue({

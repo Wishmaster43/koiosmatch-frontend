@@ -104,6 +104,13 @@ export function mapMatch(m: RawMatch): MatchRow {
     // MATCH-SOORT-1: Contractvorm chip — resolved {value,label,color} straight
     // off the list resource, or null when unset.
     contractForm: m.contract_form ?? null,
+    // MATCH-ORIGIN-1: ONTSTAANSTYPE (direct vs via sollicitatie), OFFERED-IFF-READ
+    // — the backend doesn't ship `application_id` on the list resource yet
+    // (CMBE briefed), so this gates on KEY PRESENCE, never a value read off an
+    // absent key: key missing → undefined (column renders a plain dash, never
+    // claims "Direct"); key present + null → a genuine direct match; key
+    // present + a value → grew out of that application.
+    origin: 'application_id' in m ? (m.application_id != null ? 'application' : 'direct') : undefined,
   }
 }
 

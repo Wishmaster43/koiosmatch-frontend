@@ -1,11 +1,12 @@
 import { useState, useEffect, useMemo, useRef } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Plus, LayoutList, Kanban, Archive, Trash2 } from 'lucide-react'
+import { Plus, LayoutList, Kanban, Archive, Trash2, ClipboardCheck } from 'lucide-react'
 import ViewModeToggle from '@/components/ui/ViewModeToggle'
 import { useAuth } from '@/context/AuthContext'
 import { useRightPanel } from '@/context/RightPanelContext'
 import { useMatchStatuses } from '@/lib/useMatchStatuses'
+import { useMatchApprovalMode } from './hooks/useMatchApprovalMode'
 import api, { unwrap } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 import { isReferenceQuery } from '@/lib/referenceNumber'
@@ -82,6 +83,16 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
   const [branchFilter, setBranchFilter] = usePageMemory<string[]>('matches.branch', [])
   // Unscored complements kpiScored: both live in the right panel's one "score state" group.
   const [kpiUnscored, setKpiUnscored] = usePageMemory('matches.unscored', false)
+  // MATCH-APPROVAL-QUEUE-1 (Danny: "geen lijst van te beoordelen matches" — the
+  // manager review queue): client-side toggle over the already-loaded rows,
+  // exactly like kpiScored/kpiUnscored above. The tenant's approval_mode gates
+  // whether the affordance renders at all (see approvalReviewVisible below).
+  const [pendingApprovalOnly, setPendingApprovalOnly] = usePageMemory('matches.pendingApproval', false)
+  // goedkeuring-badge-eerlijk (08-08, same honesty gate MatchApprovalBadge uses):
+  // with approval_mode 'uit' every match auto-approves and NOTHING can ever move
+  // it into 'pending', so a permanent "Te beoordelen" 0-tile would be noise.
+  const { approvalMode } = useMatchApprovalMode()
+  const approvalReviewVisible = approvalMode !== 'uit'
   // Match-date window (a single removable range, not multi-value).
   const [dateRange, setDateRange] = usePageMemory<MatchDateRange | null>('matches.dateRange', null)
   // Start of the current month, captured once (purity — feeds the "Nieuw" KPI).
@@ -143,11 +154,15 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
     stageFilter, setStageFilter, ownerFilter, setOwnerFilter, clientFilter, setClientFilter,
     branchFilter, setBranchFilter, kpiScored, setKpiScored, kpiUnscored, setKpiUnscored,
     dateRange, setDateRange, showArchived, setShowArchived,
+    ...(approvalReviewVisible ? { pendingApprovalOnly, setPendingApprovalOnly } : {}),
     stageData: stageData.map(d => ({ value: d.key, label: d.name, count: d.value })),
     ownerData: ownerData.map(d => ({ value: d.key, label: d.name, count: d.value })),
     clientData: clientData.map(d => ({ value: d.key, label: d.name, count: d.value })),
     branchOptions: branchData,
-  }), [t, stageFilter, ownerFilter, clientFilter, branchFilter, kpiScored, kpiUnscored, dateRange, showArchived,
+  }), [t, stageFilter, setStageFilter, ownerFilter, setOwnerFilter, clientFilter, setClientFilter,
+       branchFilter, setBranchFilter, kpiScored, setKpiScored, kpiUnscored, setKpiUnscored,
+       dateRange, setDateRange, showArchived, setShowArchived,
+       approvalReviewVisible, pendingApprovalOnly, setPendingApprovalOnly,
        stageData, ownerData, clientData, branchData])
 
   // Register/unregister the filters in the right panel.
@@ -159,7 +174,7 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
   // Reset to the first page and clear the selection whenever a filter changes
   // (kept out of the memo — setting state during render can loop).
   useEffect(() => { setPage(1); setSelectedIds(new Set()) },
-    [stageFilter, ownerFilter, clientFilter, branchFilter, kpiScored, kpiUnscored, dateRange, query, showArchived, showTrash])
+    [stageFilter, ownerFilter, clientFilter, branchFilter, kpiScored, kpiUnscored, pendingApprovalOnly, dateRange, query, showArchived, showTrash])
 
   // Filter the visible rows by donut selection. A reference-number query already
   // narrowed `rows` server-side (exact `?ref=` lookup) — skip the free-text
@@ -175,6 +190,11 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
       if (stageFilter.length && !stageFilter.includes(r.status)) return false
       if (kpiScored && typeof r.score !== 'number') return false
       if (kpiUnscored && typeof r.score === 'number') return false
+      // MATCH-APPROVAL-QUEUE-1: client-side over the loaded rows, same mechanism
+      // as kpiScored/kpiUnscored above (approval_status already rides on every row).
+      // Gated like its toggle/KPI (approvalReviewVisible): with approval 'uit'
+      // a page-memory-remembered toggle must never keep filtering invisibly.
+      if (approvalReviewVisible && pendingApprovalOnly && r.approval_status !== 'pending') return false
       if (ownerFilter.length && !ownerFilter.includes(r.owner)) return false
       if (clientFilter.length && !clientFilter.includes(r.client)) return false
       if (branchFilter.length && !branchFilter.includes(r.branchName ?? '')) return false
@@ -183,7 +203,7 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
       if (q && ![r.candidate, r.vacancy, r.client].some(v => String(v ?? '').toLowerCase().includes(q))) return false
       return true
     })
-  }, [rows, stageFilter, ownerFilter, clientFilter, branchFilter, kpiScored, kpiUnscored, dateRange, query, refQuery, showArchived, showTrash])
+  }, [rows, stageFilter, ownerFilter, clientFilter, branchFilter, kpiScored, kpiUnscored, pendingApprovalOnly, approvalReviewVisible, dateRange, query, refQuery, showArchived, showTrash])
 
   // Board rows never include archived matches: dragging one to a new status would
   // PATCH /matches/{id}, which 404s once soft-deleted (MatchController::update has
@@ -203,6 +223,9 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
   // New this month + matches still lacking a score (both derived from the rows).
   const newThisMonthCount = rows.filter(r => r.date && new Date(r.date).getTime() >= monthStart).length
   const unscoredCount     = rows.filter(r => typeof r.score !== 'number').length
+  // MATCH-APPROVAL-QUEUE-1: counted off the full server-wide row set, same as
+  // every other KPI above — never the paged/filtered slice.
+  const pendingApprovalCount = rows.filter(r => r.approval_status === 'pending').length
 
   // Donuts drive the stage/owner filters; each clears its own selection.
   const insightDonuts: DonutSpec[] = [
@@ -215,11 +238,11 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
   ]
 
   // Shared clear-all (page memory keeps filters sticky).
-  const anyFilterActive = Boolean(query.trim() || kpiScored || kpiUnscored || stageFilter.length || ownerFilter.length
+  const anyFilterActive = Boolean(query.trim() || kpiScored || kpiUnscored || (approvalReviewVisible && pendingApprovalOnly) || stageFilter.length || ownerFilter.length
     || clientFilter.length || branchFilter.length || dateRange || showArchived || showTrash)
   const [searchEpoch, setSearchEpoch] = useState(0)
   const clearAllFilters = () => {
-    setSearchEpoch(e => e + 1); setQuery(''); setKpiScored(false); setKpiUnscored(false)
+    setSearchEpoch(e => e + 1); setQuery(''); setKpiScored(false); setKpiUnscored(false); setPendingApprovalOnly(false)
     setStageFilter([]); setOwnerFilter([]); setClientFilter([]); setBranchFilter([]); setDateRange(null); setShowArchived(false); setShowTrash(false)
   }
 
@@ -244,6 +267,12 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
       onClick: () => setKpiScored(false) },
     { key: 'avgScore', label: t('kpi.avgScore'), value: avgScore != null ? `${avgScore}%` : '—', color: 'var(--color-primary-text)',
       onClick: () => setKpiScored(v => !v), active: kpiScored },
+    // MATCH-APPROVAL-QUEUE-1: honesty-gated (goedkeuring-badge-eerlijk) — absent
+    // entirely once the tenant's approval_mode is 'uit', never a permanent 0-tile.
+    ...(approvalReviewVisible ? [{
+      key: 'pendingApproval', label: t('kpi.pendingApproval'), value: pendingApprovalCount, color: 'var(--color-warning)',
+      onClick: () => setPendingApprovalOnly(v => !v), active: pendingApprovalOnly,
+    }] : []),
   ]
 
   // Direct-match creation modal (§3B "direct match" path).
@@ -269,7 +298,7 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
       .then(r => { setSelected(mapMatch(unwrap(r))); setPendingOpenId(null) })
       .catch(() => { notifyError(t('page.openNotFound')); setPendingOpenId(null) })
       .finally(() => { fetchingOpenRef.current = null })
-  }, [pendingOpenId, rows, loading])
+  }, [pendingOpenId, rows, loading, t])
   // Mirror the open drawer in the URL (?open=<id>): browser back/forward walks
   // through it and a copied link reopens the same match (NAV-BACK-1). Reuses the
   // existing pendingOpenId deferral above instead of a second lookup mechanism.
@@ -371,6 +400,13 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
 
         {/* Right — archived toggle + icon-only view toggle (mirror vacancies/opportunities). */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          {/* MATCH-APPROVAL-QUEUE-1: shared quick-view toggle (§4) — honesty-gated,
+              absent entirely once the tenant's approval_mode is 'uit' (mirrors the
+              KPI tile's own gate above). */}
+          {approvalReviewVisible && (
+            <QuickViewToggle active={pendingApprovalOnly} onToggle={() => setPendingApprovalOnly(v => !v)}
+              label={t('quickView.pendingApproval')} color="var(--color-warning)" icon={ClipboardCheck} />
+          )}
           {/* Archived (soft-deleted) — shared quick-view toggle (§4); exclusive with
               the trash view below (TRASH-OVERAL-2, mirrors candidates). */}
           <QuickViewToggle active={showArchived} onToggle={() => { setShowArchived(v => !v); setShowTrash(false) }}

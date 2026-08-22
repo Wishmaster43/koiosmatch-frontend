@@ -14,7 +14,8 @@
     "owner": "Owner",
     "date": "Created",
     "status": "Status",
-    "contractForm": "Contract form"
+    "contractForm": "Contract form",
+    "type": "Type"
   },
   "insights": {
     "stage": "Stage",
@@ -31,7 +32,8 @@
     "closed": "Closed",
     "newThisMonth": "New this month",
     "unscored": "Unscored",
-    "scored": "Scored"
+    "scored": "Scored",
+    "pendingApproval": "Pending review"
   },
   "drawer": {
     "label": "Match",
@@ -50,6 +52,7 @@
     },
     "tabs": {
       "overview": "Overview",
+      "statistics": "Statistics",
       "relations": "Relations",
       "changelog": "Changelog",
       "extra": "Extra"
@@ -146,6 +149,11 @@
       "location": "Match {{position}} of {{total}} at this location",
       "department": "Match {{position}} of {{total}} in this department"
     },
+    "statistics": {
+      "empty": "No match statistics available yet.",
+      "onlyMatch": "No other matches found.",
+      "openMatch": "Open match"
+    },
     "matchText": {
       "title": "Match text",
       "saved": "Match text saved.",
@@ -227,6 +235,9 @@
     "board": "Board",
     "archived": "Archived"
   },
+  "quickView": {
+    "pendingApproval": "Pending review"
+  },
   "board": {
     "empty": "No matches"
   },
@@ -236,6 +247,10 @@
   },
   "add": {
     "button": "New match"
+  },
+  "type": {
+    "application": "Via application",
+    "direct": "Direct"
   },
   "notes": {
     "title": "Notes",

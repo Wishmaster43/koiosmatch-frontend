@@ -117,6 +117,58 @@ describe('MatchesTable · backoffice coupling indicator (JOB2)', () => {
   })
 })
 
+// MATCH-ORIGIN-1: the ONTSTAANSTYPE column — a neutral soft chip when origin is
+// known, and the house em-dash (never a guessed "Direct") when the backend
+// payload doesn't carry the application_id key yet (OFFERED-IFF-READ).
+describe('MatchesTable · type column (MATCH-ORIGIN-1)', () => {
+  it('renders "Via sollicitatie" / "Direct" chips and a dash for an unknown origin', () => {
+    const viaApplication = { ...baseRow, id: 70, origin: 'application' as const }
+    const direct = { ...baseRow, id: 71, origin: 'direct' as const }
+    const unknown = { ...baseRow, id: 72 }
+    render(<MatchesTable rows={[viaApplication, direct, unknown]} />)
+
+    expect(screen.getByText('Via sollicitatie')).toBeInTheDocument()
+    expect(screen.getByText('Direct')).toBeInTheDocument()
+    const headerCell = screen.getByText('Type').closest('th') as HTMLElement
+    const colIndex = Array.from(headerCell.parentElement?.children ?? []).indexOf(headerCell)
+    const rows = document.querySelectorAll('tbody tr')
+    expect(rows[2].children[colIndex].textContent).toBe('—')
+  })
+
+  it('sorts by the resolved type label when the column header is clicked', async () => {
+    const user = userEvent.setup()
+    const direct = { ...baseRow, id: 80, origin: 'direct' as const }
+    const viaApplication = { ...baseRow, id: 81, origin: 'application' as const }
+    const { container } = render(<MatchesTable rows={[direct, viaApplication]} />)
+
+    const headerCell = screen.getByText('Type').closest('th') as HTMLElement
+    const colIndex = Array.from(headerCell.parentElement?.children ?? []).indexOf(headerCell)
+    await user.click(within(headerCell).getByRole('button'))
+
+    const rows = container.querySelectorAll('tbody tr')
+    const values = Array.from(rows).map(r => r.children[colIndex].textContent)
+    // "Direct" sorts before "Via sollicitatie" alphabetically.
+    expect(values).toEqual(['Direct', 'Via sollicitatie'])
+  })
+
+  // Eindcontrole 22-08 (finding 6): the undefined-origin branch sorts as '' and
+  // the shared DataTable pushes empty sort values LAST — pin that deliberately.
+  it('sorts unknown-origin rows (dash) after the labelled ones', async () => {
+    const user = userEvent.setup()
+    const unknown = { ...baseRow, id: 82 }
+    const direct = { ...baseRow, id: 83, origin: 'direct' as const }
+    const { container } = render(<MatchesTable rows={[direct, unknown]} />)
+
+    const headerCell = screen.getByText('Type').closest('th') as HTMLElement
+    const colIndex = Array.from(headerCell.parentElement?.children ?? []).indexOf(headerCell)
+    await user.click(within(headerCell).getByRole('button'))
+
+    const rows = container.querySelectorAll('tbody tr')
+    const values = Array.from(rows).map(r => r.children[colIndex].textContent)
+    expect(values).toEqual(['Direct', '—'])
+  })
+})
+
 // Danny 05-08: the "Koios" column now rolls out to every entity table — this is
 // the smoke test proving the header renders here too (the honest per-row rule
 // lives in matchAdvice.test.ts).

@@ -20,6 +20,10 @@ vi.mock('@/context/AuthContext', () => ({
 }))
 vi.mock('@/context/RightPanelContext', () => ({ useRightPanel: () => ({ registerFilters: vi.fn(), unregisterFilters: vi.fn() }) }))
 vi.mock('@/lib/useMatchStatuses', () => ({ useMatchStatuses: () => ({ statuses: [], metaOf: () => undefined }) }))
+// MATCH-APPROVAL-QUEUE-1: MatchesPage now reads this directly (not just via the
+// drawer), so a bare render needs it stubbed — this test isn't about approval
+// mode, so a "real" mode keeps the toggle/KPI wiring out of its way.
+vi.mock('./hooks/useMatchApprovalMode', () => ({ useMatchApprovalMode: () => ({ approvalMode: 'altijd' }) }))
 
 // The real GET /matches call under test — only the transport is mocked.
 vi.mock('@/lib/api', async () => {

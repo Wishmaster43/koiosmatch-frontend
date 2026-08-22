@@ -14,7 +14,8 @@
     "owner": "Inhaber",
     "date": "Erstellt",
     "status": "Status",
-    "contractForm": "Vertragsform"
+    "contractForm": "Vertragsform",
+    "type": "Typ"
   },
   "insights": {
     "stage": "Phase",
@@ -31,7 +32,8 @@
     "closed": "Abgeschlossen",
     "newThisMonth": "Neu diesen Monat",
     "unscored": "Ohne Score",
-    "scored": "Bewertet"
+    "scored": "Bewertet",
+    "pendingApproval": "Zu prüfen"
   },
   "drawer": {
     "label": "Match",
@@ -50,6 +52,7 @@
     },
     "tabs": {
       "overview": "Übersicht",
+      "statistics": "Statistiken",
       "relations": "Beziehungen",
       "changelog": "Änderungen",
       "extra": "Extra"
@@ -146,6 +149,11 @@
       "location": "Match {{position}} von {{total}} an diesem Standort",
       "department": "Match {{position}} von {{total}} in dieser Abteilung"
     },
+    "statistics": {
+      "empty": "Noch keine Match-Statistiken verfügbar.",
+      "onlyMatch": "Keine weiteren Matches gefunden.",
+      "openMatch": "Match öffnen"
+    },
     "matchText": {
       "title": "Matchtext",
       "saved": "Matchtext gespeichert.",
@@ -227,6 +235,9 @@
     "board": "Board",
     "archived": "Archiviert"
   },
+  "quickView": {
+    "pendingApproval": "Zu prüfen"
+  },
   "board": {
     "empty": "Keine Matches"
   },
@@ -236,6 +247,10 @@
   },
   "add": {
     "button": "Neuer Match"
+  },
+  "type": {
+    "application": "Über Bewerbung",
+    "direct": "Direkt"
   },
   "notes": {
     "title": "Notizen",

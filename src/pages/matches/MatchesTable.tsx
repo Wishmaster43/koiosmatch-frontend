@@ -13,6 +13,7 @@ import { useMatchStatuses } from '@/lib/useMatchStatuses'
 import { useApps } from '@/context/AppsContext'
 import { useAllSettings, getBoolSetting } from '@/lib/settings/useAllSettings'
 import { useMatchAdvice } from '@/lib/useMatchAdvice'
+import { Mono } from '@/components/ui/typography'
 import ScorePill from './ScorePill'
 import ContractFormChip from './ContractFormChip'
 import type { MatchRow } from '@/types/match'
@@ -87,8 +88,11 @@ export default function MatchesTable({
       // click-to-open would either double-fire or need stopPropagation contortions;
       // the drawer chip already copies.
       key: 'referenceNumber', header: t('cols.referenceNumber'), nowrap: true,
-      cellStyle: { color: 'var(--text-muted)', fontSize: 12, fontFamily: 'JetBrains Mono, monospace', fontVariantNumeric: 'tabular-nums' },
-      sortable: true, sortValue: r => r.referenceNumber ?? '', render: r => r.referenceNumber || '—',
+      // HUISSTIJL-1: the mono font identity comes from the shared <Mono> atom
+      // (§4 typography), never a per-column fontFamily literal — cellStyle keeps
+      // only the layout/colour concerns a style object can carry.
+      cellStyle: { color: 'var(--text-muted)', fontSize: 12, fontVariantNumeric: 'tabular-nums' },
+      sortable: true, sortValue: r => r.referenceNumber ?? '', render: r => <Mono>{r.referenceNumber || '—'}</Mono>,
     },
     // SWEEP-TABLES: explicit em-dash fallback — without a render fn, DataTable's
     // default cell (`field(row, col.key)`) prints a blank string for an empty
@@ -102,6 +106,16 @@ export default function MatchesTable({
     // (mirrors the stage column's own lookup-driven soft chip).
     { key: 'contractForm', header: t('cols.contractForm'), sortable: true, sortValue: r => r.contractForm?.label ?? '',
       render: r => r.contractForm ? <ContractFormChip contractForm={r.contractForm} /> : <span style={{ color: 'var(--text-muted)' }}>—</span> },
+    // MATCH-ORIGIN-1: ONTSTAANSTYPE (direct vs via sollicitatie) — a neutral soft
+    // chip (no colour token passed: this axis carries no state meaning, §4 calm
+    // rule). OFFERED-IFF-READ: origin stays undefined until the backend ships
+    // `application_id` (see useMatches' mapMatch comment) — an honest dash then,
+    // never a guessed "Direct".
+    { key: 'origin', header: t('cols.type'), sortable: true,
+      sortValue: r => r.origin === 'application' ? t('type.application') : r.origin === 'direct' ? t('type.direct') : '',
+      render: r => r.origin === undefined
+        ? <span style={{ color: 'var(--text-muted)' }}>—</span>
+        : <SoftChip label={r.origin === 'application' ? t('type.application') : t('type.direct')} /> },
     { key: 'score',   header: t('cols.score'), align: 'right', sortable: true,
       sortValue: r => r.score ?? -1, render: r => <ScorePill value={r.score} /> },
     { key: 'stage',   header: t('cols.status'),

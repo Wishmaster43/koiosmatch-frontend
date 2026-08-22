@@ -66,6 +66,13 @@ export interface RawMatch {
   // MATCH-SOORT-1: contract FORM (Contractvorm) — distinct axis from
   // contract_type above; resolved {value,label,color} on list + detail rows.
   contract_form?: MatchContractForm | null
+  // MATCH-ORIGIN-1: ONTSTAANSTYPE — whether this match grew out of an
+  // application (Hired) or was created directly (§3B "two paths to a
+  // placement"). Not shipped by the backend yet (CMBE briefed) — the mapper
+  // gates on KEY PRESENCE (OFFERED-IFF-READ), never assuming a value from an
+  // absent key. `[k: string]: unknown` already lets an absent key read as
+  // `undefined` via `in`, so no extra optionality marker changes that.
+  application_id?: string | number | null
   // MATCH-SOORT-1: CONTRACTREGELS — detail-only (echoed with id on GET /matches/{id}).
   contract_lines?: Array<{ id?: Id; function_title?: string | null; rate?: number | string | null; sort_order?: number | null }> | null
   start_date?: string | null
@@ -150,5 +157,10 @@ export interface MatchRow {
   contractType?: string | null
   // MATCH-SOORT-1: the resolved Contractvorm chip value — null when unset.
   contractForm?: MatchContractForm | null
+  // MATCH-ORIGIN-1: ONTSTAANSTYPE — 'application' (grew out of a Hired
+  // application) or 'direct' (created without one). undefined (never a
+  // fabricated value) until the raw payload actually carries the
+  // `application_id` key — see mapMatch's OFFERED-IFF-READ comment.
+  origin?: 'application' | 'direct'
   [k: string]: unknown
 }

@@ -26,6 +26,9 @@ interface BuildArgs {
   kpiUnscored: boolean; setKpiUnscored: (fn: (v: boolean) => boolean) => void
   dateRange: MatchDateRange | null; setDateRange: (v: MatchDateRange | null) => void
   showArchived: boolean; setShowArchived: (fn: (v: boolean) => boolean) => void
+  // Optional: only registered while the tenant's approval mode is on (§4: one
+  // filtering surface — the quick toggle and this panel entry stay in sync).
+  pendingApprovalOnly?: boolean; setPendingApprovalOnly?: (fn: (v: boolean) => boolean) => void
   stageData: Opt[]; ownerData: Opt[]; clientData: Opt[]; branchOptions: Opt[]
 }
 
@@ -33,7 +36,7 @@ export function buildMatchFilterGroups({
   t, tog, stageFilter, setStageFilter, ownerFilter, setOwnerFilter,
   clientFilter, setClientFilter, branchFilter, setBranchFilter,
   kpiScored, setKpiScored, kpiUnscored, setKpiUnscored,
-  dateRange, setDateRange, showArchived, setShowArchived,
+  dateRange, setDateRange, showArchived, setShowArchived, pendingApprovalOnly, setPendingApprovalOnly,
   stageData, ownerData, clientData, branchOptions,
 }: BuildArgs) {
   const catMatch        = t('filters.categories.match')
@@ -61,5 +64,6 @@ export function buildMatchFilterGroups({
       onToChange:   (v: string) => setDateRange({ from: dateRange?.from ?? '', to: v }),
     },
     { key: 'archived', type: 'checkbox', category: catDisplay, label: t('filters.archived'), selected: showArchived ? ['archived'] : [], options: [{ value: 'archived', label: t('filters.archived') }], onToggle: () => setShowArchived(v => !v) },
+    ...(setPendingApprovalOnly ? [{ key: 'pendingApproval', type: 'checkbox' as const, category: catDisplay, label: t('quickView.pendingApproval'), selected: pendingApprovalOnly ? ['pendingApproval'] : [], options: [{ value: 'pendingApproval', label: t('quickView.pendingApproval') }], onToggle: () => setPendingApprovalOnly(v => !v) }] : []),
   ]
 }

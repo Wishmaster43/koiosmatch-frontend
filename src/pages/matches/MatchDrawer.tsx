@@ -4,10 +4,12 @@
  * score/stage) stay read-only — a match is the continuation of a Hired
  * application (§3B) and those are derived — but the match's contract/financial
  * layer IS editable in-place. Content tabs: Overzicht (facts/score/status,
- * PLUS the candidate/vacancy/klant relation hyperlinks and the MATCH-ORDINAL-1
- * footnote that used to live on their own Relaties tab — M9 of the
- * overzicht-layout cluster folded that tab's whole content into Overview and
- * removed it, so ALL match information now lives on one tab), Contract &
+ * PLUS the candidate/vacancy/klant relation hyperlinks that used to live on
+ * their own Relaties tab — M9 of the overzicht-layout cluster folded that
+ * tab's whole content into Overview and removed it), Statistieken
+ * (MOVED-FROM-OVERVIEW-1, Danny 22-08: the MATCH-ORDINAL-1 ordinal footnote
+ * that used to sit under Overview's Matchgegevens card now lives here, WITH
+ * who/what the other matches on each axis are — StatisticsTab), Contract &
  * financieel (MatchContractSection, moved as-is) and
  * Notities (NT-MATCH-1, 2026-08-04 — MatchNoteController now exists, so the
  * placeholder note above about "no /matches/{id}/notes route yet" no longer
@@ -49,6 +51,7 @@ import { useCustomFields } from '@/lib/useCustomFields'
 import { useUsers } from '@/lib/queries'
 import { initialsOf } from '@/lib/initials'
 import OverviewTab from './drawer/OverviewTab'
+import StatisticsTab from './drawer/StatisticsTab'
 import MatchContractSection from './drawer/MatchContractSection'
 import NotesTab from './drawer/NotesTab'
 import TerminateMatchModal from './drawer/TerminateMatchModal'
@@ -68,9 +71,10 @@ import EntityLink from '@/components/ui/EntityLink'
 
 interface MatchDrawerProps {
   match: MatchRow | null
-  // MATCH-ORDINAL-1 (M14/M15): the full tenant match set (useMatches' `rows`),
-  // used only to compute this match's ordinal position per axis — never rendered
-  // as a list. Omitting it just hides the ordinal footnote (now on OverviewTab, M9).
+  // MATCH-ORDINAL-1 (M14/M15): the full tenant match set (useMatches' `rows`) —
+  // this match's ordinal position per axis AND (MOVED-FROM-OVERVIEW-1) the
+  // Statistieken tab's "other matches on this axis" rows are both derived from
+  // it. Omitting it just hides the ordinal/statistics content, never a crash.
   allRows?: MatchRow[]
   onClose: () => void
   expanded?: boolean
@@ -193,11 +197,14 @@ export default function MatchDrawer({
   // (never a tab) — see titleActions below. Contract/financial reuses drawer.contract.title
   // as its tab label (already translated ×5) instead of a duplicate key.
   const tabs: EntityTab[] = [
-    // M9 (overzicht-layout): Overview now carries the relation hyperlinks + the
-    // ordinal footnote too — the whole match, one tab.
-    // REMARKS-INTO-NOTES-1: the shell hands each tab its own setActiveTab, so the
-    // retired Opmerkingen block can jump to Notes right after moving its text there.
-    { id: 'overview',  label: t('drawer.tabs.overview'), render: setTab => <OverviewTab match={match} onUpdate={onUpdate} ordinals={ordinals} onOpenNotes={() => setTab?.('notes')} /> },
+    // M9 (overzicht-layout): Overview carries the relation hyperlinks — the whole
+    // match's facts, one tab. REMARKS-INTO-NOTES-1: the shell hands each tab its
+    // own setActiveTab, so the retired Opmerkingen block can jump to Notes right
+    // after moving its text there.
+    { id: 'overview',  label: t('drawer.tabs.overview'), render: setTab => <OverviewTab match={match} onUpdate={onUpdate} onOpenNotes={() => setTab?.('notes')} /> },
+    // MOVED-FROM-OVERVIEW-1 (Danny 22-08): the ordinal footnote moved off Overview
+    // onto its own tab, now WITH who/what the other matches on each axis are.
+    { id: 'statistics', label: t('drawer.tabs.statistics'), render: () => <StatisticsTab match={match} allRows={allRows} ordinals={ordinals} /> },
     { id: 'contract',  label: t('drawer.contract.title'), render: () => <MatchContractSection matchId={match.id} onUpdate={onUpdate} /> },
     // NT-MATCH-1: notes, after the content tabs above and before Extra/Koppelingen
     // (there is no Changelog TAB — record history stays the icon-popover, §3A(d)).

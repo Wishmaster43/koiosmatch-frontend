@@ -32,6 +32,10 @@ vi.mock('@/lib/useMatchStatuses', () => ({
     metaOf: (v: string) => ({ label: v, color: '#000', is_closed: false }),
   }),
 }))
+// MATCH-APPROVAL-QUEUE-1: MatchesPage now reads this directly (not just via the
+// drawer), so a bare render needs it stubbed — this test isn't about approval
+// mode, so a "real" mode keeps the toggle/KPI wiring out of its way.
+vi.mock('./hooks/useMatchApprovalMode', () => ({ useMatchApprovalMode: () => ({ approvalMode: 'altijd' }) }))
 
 // Two rows with distinct stage/owner/client — enough to prove a stage pick narrows the set.
 const rows = [

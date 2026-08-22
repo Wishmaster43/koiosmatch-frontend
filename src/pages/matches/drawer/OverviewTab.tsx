@@ -2,8 +2,11 @@
  * OverviewTab — M9 of the overzicht-layout cluster: the ONE tab that carries
  * ALL match information, so the Relaties tab can go (its candidate/vacancy/
  * client hyperlinks are folded in below, unchanged in behaviour — EntityLink
- * degrades to plain text when an id is absent), plus the MATCH-ORDINAL-1
- * (M14/M15) ordinal footnote that used to sit under those same relations.
+ * degrades to plain text when an id is absent). MOVED-FROM-OVERVIEW-1
+ * (Danny 22-08, "AKKOORD"): the MATCH-ORDINAL-1 (M14/M15) ordinal footnote
+ * that used to sit under those relations MOVED to its own Statistieken tab
+ * (StatisticsTab), which also shows WHO/WHAT the other matches on each axis
+ * are — a bare "2 van 2" told nobody which other match that was.
  * Stays read-only for the
  * derived facts (a match is the continuation of a Hired application, §3B);
  * the editable contract/financial layer remains its own tab
@@ -37,7 +40,6 @@ import { useTranslation } from 'react-i18next'
 import SectionCard from '@/components/ui/SectionCard'
 import { CANON_LABEL_STYLE } from '@/components/drawer/fieldRowCanon'
 import SharedBranchSection from '@/components/drawer/BranchSection'
-import { Caption } from '@/components/ui/typography'
 import { useDateFormat } from '@/lib/datetime'
 import StatusPill from '@/components/ui/StatusPill'
 import EntityLink from '@/components/ui/EntityLink'
@@ -51,7 +53,6 @@ import MatchDurationBar from './MatchDurationBar'
 import MatchTextBlock from './MatchTextBlock'
 import MatchRemarksBlock from './MatchRemarksBlock'
 import type { MatchRow } from '@/types/match'
-import type { MatchOrdinals } from '../matchOrdinals'
 
 // One read-only field row: label LEFT (canon width), value right — the
 // DRILLDOWN-VOLGORDE-CANON (Danny 21-08 "tekst links waarde rechts") applied:
@@ -75,15 +76,12 @@ const dash = <span style={{ color: 'var(--text-muted)' }}>—</span>
 interface OverviewTabProps {
   match: MatchRow
   onUpdate?: (id: MatchRow['id'], patch: Partial<MatchRow>) => void
-  // MATCH-ORDINAL-1 (M14/M15): this match's position among the tenant's other
-  // matches per axis — omitting it just hides the ordinal footnote.
-  ordinals?: MatchOrdinals
   // REMARKS-INTO-NOTES-1: switches the drawer to the Notes tab after a legacy
   // remark was moved into a note, so the recruiter sees where it landed.
   onOpenNotes?: () => void
 }
 
-export default function OverviewTab({ match, onUpdate, ordinals, onOpenNotes }: OverviewTabProps) {
+export default function OverviewTab({ match, onUpdate, onOpenNotes }: OverviewTabProps) {
   const { t } = useTranslation(['matches', 'candidates'])
   const { formatDate } = useDateFormat()
   // KOIOS-ADVIES-OVERAL-1: the SAME resolver the matches table's Koios column
@@ -98,15 +96,6 @@ export default function OverviewTab({ match, onUpdate, ordinals, onOpenNotes }: 
   // Overview together, so a second hook instance here would be a genuine
   // duplicate fetch, not the "one per tab" pattern the comment above describes.
   const { data: contract, loading: contractLoading, save: saveContract, matchTextPresent } = useMatchContract(match.id, onUpdate)
-
-  // Ordinal footnote lines — one per axis, only when that axis actually has data
-  // (folded in from the old RelationsTab, unchanged — M9).
-  const ordinalLines = ordinals ? [
-    ordinals.candidate  && t('drawer.ordinal.candidate', { position: ordinals.candidate.position, total: ordinals.candidate.total }),
-    ordinals.client     && t('drawer.ordinal.client', { position: ordinals.client.position, total: ordinals.client.total }),
-    ordinals.location   && t('drawer.ordinal.location', { position: ordinals.location.position, total: ordinals.location.total }),
-    ordinals.department && t('drawer.ordinal.department', { position: ordinals.department.position, total: ordinals.department.total }),
-  ].filter(Boolean) as string[] : []
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -152,16 +141,6 @@ export default function OverviewTab({ match, onUpdate, ordinals, onOpenNotes }: 
           <Field label={t('drawer.contract.startDate')}>{match.startDate ? formatDate(match.startDate) : dash}</Field>
           <Field label={t('drawer.contract.endDate')}>{match.endDate ? formatDate(match.endDate) : dash}</Field>
         </div>
-        {/* MATCH-ORDINAL-1 (M14/M15): this match's position among the tenant's
-            other matches sharing the same candidate/client/location/department —
-            an axis with no id on this match stays null, never a fake "1/1". */}
-        {ordinalLines.length > 0 && (
-          <div style={{ marginTop: 14, paddingTop: 12, borderTop: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: 4 }}>
-            {ordinalLines.map((line, i) => (
-              <Caption as="div" key={i}>{line}</Caption>
-            ))}
-          </div>
-        )}
       </SectionCard>
 
       {/* M25/M26: contract window duration + progress — only once both dates are set. */}

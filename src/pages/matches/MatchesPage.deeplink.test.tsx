@@ -15,6 +15,10 @@ import MatchesPage from './MatchesPage'
 vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ user: { default_per_page: 50 }, hasPermission: () => true }) }))
 vi.mock('@/context/RightPanelContext', () => ({ useRightPanel: () => ({ registerFilters: vi.fn(), unregisterFilters: vi.fn() }) }))
 vi.mock('@/lib/useMatchStatuses', () => ({ useMatchStatuses: () => ({ statuses: [], metaOf: () => undefined }) }))
+// MATCH-APPROVAL-QUEUE-1: MatchesPage now reads this directly (not just via the
+// drawer), so a bare render needs it stubbed — this test isn't about approval
+// mode, so a "real" mode keeps the toggle/KPI wiring out of its way.
+vi.mock('./hooks/useMatchApprovalMode', () => ({ useMatchApprovalMode: () => ({ approvalMode: 'altijd' }) }))
 
 // The fixed row set this page's own useMatches hook would normally fetch — the
 // deep-linked id ('m-2') is already present, so the drawer opens WITHOUT the

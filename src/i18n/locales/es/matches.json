@@ -14,7 +14,8 @@
     "owner": "Responsable",
     "date": "Creado",
     "status": "Estado",
-    "contractForm": "Forma de contrato"
+    "contractForm": "Forma de contrato",
+    "type": "Tipo"
   },
   "insights": {
     "stage": "Fase",
@@ -31,7 +32,8 @@
     "closed": "Cerrados",
     "newThisMonth": "Nuevo este mes",
     "unscored": "Sin puntuación",
-    "scored": "Puntuado"
+    "scored": "Puntuado",
+    "pendingApproval": "Por revisar"
   },
   "drawer": {
     "label": "Match",
@@ -50,6 +52,7 @@
     },
     "tabs": {
       "overview": "Resumen",
+      "statistics": "Estadísticas",
       "relations": "Relaciones",
       "changelog": "Historial",
       "extra": "Extra"
@@ -146,6 +149,11 @@
       "location": "Match {{position}} de {{total}} en esta ubicación",
       "department": "Match {{position}} de {{total}} en este departamento"
     },
+    "statistics": {
+      "empty": "Aún no hay estadísticas de match disponibles.",
+      "onlyMatch": "No se han encontrado otras coincidencias.",
+      "openMatch": "Abrir match"
+    },
     "matchText": {
       "title": "Texto del match",
       "saved": "Texto del match guardado.",
@@ -227,6 +235,9 @@
     "board": "Tablero",
     "archived": "Archivado"
   },
+  "quickView": {
+    "pendingApproval": "Por revisar"
+  },
   "board": {
     "empty": "Sin matches"
   },
@@ -236,6 +247,10 @@
   },
   "add": {
     "button": "Nuevo match"
+  },
+  "type": {
+    "application": "Vía solicitud",
+    "direct": "Directo"
   },
   "notes": {
     "title": "Notas",
