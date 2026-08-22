@@ -648,6 +648,23 @@
       "intro": "Importing a file creates this customer (with its locations, departments and contacts) directly. It does not fill in the form below; check the preview before confirming."
     }
   },
+  "duplicate": {
+    "blockedTitle": "This customer already exists",
+    "blockedBody": "Nothing was created: a customer with the same details already exists.",
+    "warningTitle": "Possible existing customer",
+    "warningBody": "These details already appear on an existing customer.",
+    "unnamed": "Unnamed customer",
+    "stateActive": "Active customer",
+    "stateArchived": "Archived customer",
+    "archivedHint": "This customer is archived. Restore it to work with it again.",
+    "open": "Open existing customer",
+    "restoreAndOpen": "Restore and open",
+    "restoring": "Restoring…",
+    "restored": "Customer restored.",
+    "restoreFailed": "Restore failed. Please try again.",
+    "restoreForbidden": "You are not allowed to restore a customer.",
+    "editData": "Edit details"
+  },
   "subModal": {
     "addLocation": "New location",
     "editLocation": "Edit location",

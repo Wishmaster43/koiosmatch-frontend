@@ -17,6 +17,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor, fireEvent, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import i18n from '@/i18n'
+import { NavigationProvider } from '@/context/NavigationContext'
 import AddCustomerModal from './AddCustomerModal'
 // CUSTOMER-IMPORT-1: only the NETWORK calls are mocked — useImportWizard, UploadStep,
 // PreviewStep and ResultStep all run for REAL, so these tests prove the actual wizard
@@ -75,6 +76,13 @@ const { authState } = vi.hoisted(() => ({
 }))
 vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ user: authState.user, hasPermission: authState.hasPermission }) }))
 
+// CUST-DUP-FE-1 (22-08): the duplicate probe + restore hooks talk to the real axios
+// client — mock the seam so these tests can assert the REQUEST, not just a callback
+// (mirrors AddCandidateModal.test.tsx's own getMock/postMock).
+const { getMock, postMock } = vi.hoisted(() => ({ getMock: vi.fn(), postMock: vi.fn() }))
+vi.mock('@/lib/api', () => ({ default: { get: getMock, post: postMock } }))
+vi.mock('@/lib/notify', () => ({ notifyError: vi.fn(), notifySuccess: vi.fn() }))
+
 // Resolve the active locale's own copy so assertions never guess/hardcode a language.
 const ct = (key: string, opts?: Record<string, unknown>) => i18n.t(key, { ns: 'customers', ...opts })
 const cm = (key: string) => i18n.t(key, { ns: 'common' })
@@ -91,6 +99,12 @@ beforeEach(() => {
   authState.hasPermission = () => true
   vi.mocked(dryRunImport).mockReset()
   vi.mocked(runImport).mockReset()
+  getMock.mockReset()
+  postMock.mockReset()
+  // Benign GET default — the duplicate probe itself always POSTs (asserted below);
+  // any incidental GET the modal fires resolves harmlessly to "no match".
+  getMock.mockResolvedValue({ data: { exists: false, match: null } })
+  postMock.mockResolvedValue({ data: {} })
 })
 
 describe('AddCustomerModal · titled cards (Danny 02-08: mirrors AddCandidateModal)', () => {
@@ -540,5 +554,137 @@ describe('AddCustomerModal · import card (Danny 02-08: replaces the italic impo
     render(<AddCustomerModal onClose={() => {}} users={users} statuses={statuses} />)
     expect(screen.queryByLabelText(st('import.selectCsv'))).not.toBeInTheDocument()
     expect(screen.getByRole('button', { name: importCardTitle })).toHaveAttribute('aria-expanded', 'false')
+  })
+})
+
+// CUST-DUP-FE-1 (22-08): the duplicate-check regime AddCandidateModal already had —
+// probe endpoint + create-409 + restore — extended to customers 1:1 (backend contract
+// live, commit e4f4bb1c).
+describe('AddCustomerModal · KvK number field (CUST-DUP-FE-1)', () => {
+  it('renders an optional KvK/CoC number field and hands it to onCreate', async () => {
+    const onCreate = vi.fn().mockResolvedValue(undefined)
+    const user = userEvent.setup()
+    render(<AddCustomerModal onClose={() => {}} onCreate={onCreate} users={users} statuses={statuses} />)
+    await user.type(screen.getByLabelText(ct('modal.fields.name'), { exact: false }), 'Rivas Zorggroep')
+    await user.type(screen.getByLabelText(ct('overview.coc'), { exact: false }), '12345678')
+    await user.click(screen.getByRole('button', { name: ct('modal.create') }))
+    expect(onCreate).toHaveBeenCalledWith(expect.objectContaining({ cocNumber: '12345678' }))
+  })
+})
+
+describe('AddCustomerModal · duplicate probe (CUST-DUP-FE-1)', () => {
+  it('probes POST /customers/check-duplicate with the exact debounced body', async () => {
+    const user = userEvent.setup()
+    render(<AddCustomerModal onClose={() => {}} users={users} statuses={statuses} />)
+    await user.type(screen.getByLabelText(ct('modal.fields.name'), { exact: false }), 'Rivas Zorggroep')
+    await user.type(screen.getByLabelText(ct('overview.coc'), { exact: false }), '12345678')
+    // Real debounce (500ms) — wait past it rather than faking timers, mirrors
+    // AddCandidateModal.test.tsx's own probe test technique.
+    await new Promise(r => setTimeout(r, 700))
+    await waitFor(() => expect(postMock).toHaveBeenCalledWith(
+      '/customers/check-duplicate',
+      { name: 'Rivas Zorggroep', coc_number: '12345678', billing_email: undefined },
+      expect.objectContaining({ signal: expect.anything() }),
+    ))
+  })
+
+  // PII-REGRESSIE (mirrors the candidate guard): coc/billing details must never
+  // travel as a query string (§7) — the probe only ever calls the POST variant.
+  it('never probes over the GET route', async () => {
+    const user = userEvent.setup()
+    render(<AddCustomerModal onClose={() => {}} users={users} statuses={statuses} />)
+    await user.type(screen.getByLabelText(ct('modal.fields.name'), { exact: false }), 'Rivas Zorggroep')
+    await new Promise(r => setTimeout(r, 700))
+    const probedViaGet = getMock.mock.calls.some(([url]) => String(url).includes('check-duplicate'))
+    expect(probedViaGet).toBe(false)
+  })
+})
+
+// C-29-equivalent: the 409 used to dump the server's Dutch sentence into the error
+// banner and throw the `existing` payload away. It must now render a translated
+// panel with real actions built from that payload — mirrors AddCandidateModal 1:1.
+describe('AddCustomerModal · duplicate 409 panel (CUST-DUP-FE-1)', () => {
+  const mountWithNav = (onCreate: ReturnType<typeof vi.fn>, onClose = vi.fn()) => {
+    const goTo = vi.fn()
+    render(
+      <NavigationProvider goTo={goTo}>
+        <AddCustomerModal onClose={onClose} onCreate={onCreate} users={users} statuses={statuses} />
+      </NavigationProvider>
+    )
+    return { goTo, onClose }
+  }
+
+  // Fill the one required field and submit.
+  const submit = async (user: ReturnType<typeof userEvent.setup>) => {
+    await user.type(screen.getByLabelText(ct('modal.fields.name'), { exact: false }), 'Zorg Almere B.V.')
+    await user.click(screen.getByRole('button', { name: ct('modal.create') }))
+  }
+
+  const reject409 = (existing: Record<string, unknown> | undefined) =>
+    vi.fn().mockRejectedValue({ response: { status: 409, data: { message: 'Klant bestaat al', existing } } })
+
+  it('renders the translated panel with the duplicate name — never the raw server sentence', async () => {
+    const onCreate = reject409({ id: 'dup-1', name: 'Zorg Gorinchem', archived: false })
+    const user = userEvent.setup()
+    mountWithNav(onCreate)
+    await submit(user)
+    expect(await screen.findByText(ct('duplicate.blockedTitle'))).toBeInTheDocument()
+    expect(screen.getByText('Zorg Gorinchem')).toBeInTheDocument()
+    expect(screen.getByText(ct('duplicate.stateActive'))).toBeInTheDocument()
+    // The regression that matters: the untranslated server message is gone.
+    expect(screen.queryByText('Klant bestaat al')).not.toBeInTheDocument()
+  })
+
+  it('"open existing" navigates to that customer and closes the create form', async () => {
+    const onCreate = reject409({ id: 'dup-1', name: 'Zorg Gorinchem', archived: false })
+    const user = userEvent.setup()
+    const { goTo, onClose } = mountWithNav(onCreate)
+    await submit(user)
+    await user.click(await screen.findByRole('button', { name: ct('duplicate.open') }))
+    expect(goTo).toHaveBeenCalledWith('customers', { open: 'dup-1' })
+    expect(onClose).toHaveBeenCalled()
+  })
+
+  it('an archived duplicate says so and restores via POST /customers/{id}/restore', async () => {
+    const onCreate = reject409({ id: 'dup-2', name: 'Zorg Woerden', archived: true })
+    const user = userEvent.setup()
+    const { goTo } = mountWithNav(onCreate)
+    await submit(user)
+    expect(await screen.findByText(ct('duplicate.stateArchived'))).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: ct('duplicate.restoreAndOpen') }))
+    // Assert the REQUEST (method + route), then the follow-up navigation.
+    await waitFor(() => expect(postMock).toHaveBeenCalledWith('/customers/dup-2/restore'))
+    await waitFor(() => expect(goTo).toHaveBeenCalledWith('customers', { open: 'dup-2' }))
+  })
+
+  it('hides restore (but keeps open) without the customers.update permission', async () => {
+    authState.hasPermission = (perm: string) => perm !== 'customers.update'
+    const onCreate = reject409({ id: 'dup-2', name: 'Zorg Woerden', archived: true })
+    const user = userEvent.setup()
+    mountWithNav(onCreate)
+    await submit(user)
+    expect(await screen.findByRole('button', { name: ct('duplicate.open') })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: ct('duplicate.restoreAndOpen') })).not.toBeInTheDocument()
+    // Assert the RESTORE seam specifically — this submit fills `name`, a probe
+    // field, so a blanket not-called would race the 500ms probe debounce.
+    expect(postMock.mock.calls.some(([url]) => String(url).includes('/restore'))).toBe(false)
+  })
+
+  it('a 409 without an `existing` payload still shows our own translated line', async () => {
+    const onCreate = reject409(undefined)
+    const user = userEvent.setup()
+    mountWithNav(onCreate)
+    await submit(user)
+    expect(await screen.findByText(ct('duplicate.blockedTitle'))).toBeInTheDocument()
+    expect(screen.queryByText('Klant bestaat al')).not.toBeInTheDocument()
+  })
+
+  it('a non-409 rejection still takes the generic error path', async () => {
+    const onCreate = vi.fn().mockRejectedValue({ response: { data: { message: 'Er ging iets mis op de server' } } })
+    const user = userEvent.setup()
+    mountWithNav(onCreate)
+    await submit(user)
+    expect(await screen.findByRole('alert')).toHaveTextContent('Er ging iets mis op de server')
+    expect(screen.queryByText(ct('duplicate.blockedTitle'))).not.toBeInTheDocument()
   })
 })

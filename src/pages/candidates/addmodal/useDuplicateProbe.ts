@@ -20,19 +20,14 @@ import api from '@/lib/api'
 import { queryClient } from '@/lib/queryClient'
 import { notifyError, notifySuccess } from '@/lib/notify'
 import type { Id } from '@/types/common'
+// The duplicate shape lives with the shared DuplicateNotice panel (SHARED-DUP-1);
+// re-exported here so candidate-internal importers keep their existing path.
+import type { DuplicateMatch } from '@/components/forms/DuplicateNotice'
+export type { DuplicateMatch }
 
 // Wait this long after the last keystroke before probing — long enough that a
 // normal typing burst never fires more than one request.
 const PROBE_DEBOUNCE_MS = 500
-
-// What the UI is allowed to know about a duplicate: WHO and WHICH STATE. The 409
-// payload also carries `type` (deployability) — deliberately not read: special-category
-// data, and the name + state is all the notice needs (§8).
-export interface DuplicateMatch {
-  id: Id
-  name?: string | null
-  archived?: boolean
-}
 
 // Debounced live probe: email/mobile/phone in, a possible match out. Every field
 // change (any of the three) clears the previous verdict — an edit means the last

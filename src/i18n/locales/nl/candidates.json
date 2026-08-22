@@ -1219,7 +1219,6 @@
     "blockedBody": "Er is niets aangemaakt: er bestaat al een dossier met dezelfde contactgegevens.",
     "warningTitle": "Mogelijk bestaand dossier",
     "warningBody": "Deze contactgegevens komen al voor in een bestaand dossier.",
-    "checking": "Controleren op dubbele dossiers…",
     "unnamed": "Naamloos dossier",
     "stateActive": "Actief dossier",
     "stateArchived": "Gearchiveerd dossier",

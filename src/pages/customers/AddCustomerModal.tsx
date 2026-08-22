@@ -17,6 +17,12 @@ import CustomerAddressCard from './addmodal/CustomerAddressCard'
 import CustomerBusinessCards from './addmodal/CustomerBusinessCards'
 import CustomerCompanyTextCard from './addmodal/CustomerCompanyTextCard'
 import CustomerBranchesCard from './addmodal/CustomerBranchesCard'
+// CUST-DUP-FE-1 (22-08): the shared duplicate panel (via the candidate barrel, §2)
+// + this entity's own duplicate wiring hook — mirrors AddCandidateModal's C-29
+// handling, kept off this container to stay under the ~400-line split trigger.
+import DuplicateNotice from '@/components/forms/DuplicateNotice'
+import type { DuplicateMatch } from '@/components/forms/DuplicateNotice'
+import { useCustomerDuplicateGuard } from './addmodal/useCustomerDuplicateGuard'
 // EXCEL-VACATURES-1 (2026-08-14): the compact "create from file" card and its
 // wizard/permission wiring generalised out of this page into a shared component —
 // vacancies now reuses the exact same two, never a second copy (CLAUDE.md §11).
@@ -50,6 +56,9 @@ export interface CustomerForm {
   // KLANT-ADRES-1 (Danny 02-08): the customer's own visiting address, mirroring the
   // candidate's home-address fields one-for-one — see addmodal/AddressCard.
   street: string; houseNumber: string; houseNumberSuffix: string; postalCode: string; province: string; country: string
+  // CUST-DUP-FE-1 (22-08): the tenant's own KvK/CoC number — the DEFAULT first
+  // dedupe key (customer_dedupe_keys). Optional; a brand-new prospect may not have one yet.
+  cocNumber: string
 }
 interface ModalUser { id: Id; name: string }
 
@@ -66,6 +75,8 @@ const API_TO_FORM: Record<string, string> = {
   cost_center: 'costCenter', billing_email: 'billingEmail', phase: 'phase',
   street: 'street', house_number: 'houseNumber', house_number_suffix: 'houseNumberSuffix',
   postcode: 'postalCode', province: 'province', country: 'country',
+  // CUST-DUP-FE-1: coc_number is validated by StoreCustomerRequest (string|max:32).
+  coc_number: 'cocNumber',
 }
 
 // VALIDATIE-LIVE-1-rest: billingEmail is the only field here the backend
@@ -172,7 +183,12 @@ export default function AddCustomerModal({ onClose, onCreate, onImported, users 
     phase: defaultPhase,
     branchId: '', website: '', employeeCount: '', toneOfVoice: '', costCenter: '', billingEmail: '',
     street: '', houseNumber: '', houseNumberSuffix: '', postalCode: '', province: '', country: '',
+    cocNumber: '',
   })
+
+  // CUST-DUP-FE-1: live probe + create-409 verdict + restore, bundled in one hook
+  // (mirrors AddCandidateModal's C-29 handling).
+  const dup = useCustomerDuplicateGuard(form.name, form.cocNumber, form.billingEmail, onClose)
 
   // The lookup arrives async (one cached GET), so seed the default phase once it lands —
   // but never overwrite a phase the user already picked.
@@ -211,6 +227,9 @@ export default function AddCustomerModal({ onClose, onCreate, onImported, users 
     setForm(f => ({ ...f, [k]: v }))
     if (errors[k]) setErrors(e => ({ ...e, [k]: false }))
     setCreateError(null)
+    // CUST-DUP-FE-1: editing anything invalidates the refused-create verdict and
+    // the last probe hit — the next submit / debounce re-asks the server.
+    dup.clearOnEdit()
   }
 
   const handleSubmit = async () => {
@@ -225,14 +244,24 @@ export default function AddCustomerModal({ onClose, onCreate, onImported, users 
     } catch (err) {
       // Show field-level errors from 422 validation responses; fall back to the
       // server's message (or a generic one) so the user isn't left guessing.
-      const e = err as { response?: { data?: { errors?: Record<string, unknown>; message?: string } } }
-      const apiErrors = e?.response?.data?.errors
-      if (apiErrors) {
-        const e2: Record<string, boolean> = {}
-        Object.keys(apiErrors).forEach(k => { e2[API_TO_FORM[k] ?? k] = true })
-        setErrors(e2)
+      const e = err as { response?: { status?: number; data?: { errors?: Record<string, unknown>; message?: string; existing?: DuplicateMatch } } }
+      // CUST-DUP-FE-1: the server refused the create (409) — render the `existing`
+      // payload as a real panel instead of the raw server sentence, mirrors the
+      // candidate modal's C-29 handling (AddCandidateModal.tsx) exactly.
+      if (e?.response?.status === 409) {
+        const existing = e.response.data?.existing
+        dup.setDupBlock(existing ?? null)
+        // No payload (older API build): still our own translated line, never the server's.
+        setCreateError(existing ? null : t('duplicate.blockedTitle'))
       } else {
-        setCreateError(e?.response?.data?.message ?? t('common:errorGeneric'))
+        const apiErrors = e?.response?.data?.errors
+        if (apiErrors) {
+          const e2: Record<string, boolean> = {}
+          Object.keys(apiErrors).forEach(k => { e2[API_TO_FORM[k] ?? k] = true })
+          setErrors(e2)
+        } else {
+          setCreateError(e?.response?.data?.message ?? t('common:errorGeneric'))
+        }
       }
     } finally {
       setSaving(false)
@@ -334,6 +363,14 @@ export default function AddCustomerModal({ onClose, onCreate, onImported, users 
           </div>
         </div>
 
+        {/* CUST-DUP-FE-1: the refused create (409) or the live probe hit — one panel,
+            with real actions (open / restore-and-open), same as the candidate modal. */}
+        {dup.notice && (
+          <DuplicateNotice ns="customers" match={dup.notice} variant={dup.blocked ? 'blocked' : 'warning'}
+            canRestore={hasPermission('customers.update')} restoring={dup.restoring}
+            onOpen={() => dup.openExisting(dup.notice!.id)} onRestore={() => dup.restoreAndOpen(dup.notice!.id)}
+            onDismiss={dup.dismiss} />
+        )}
         {/* Server-side rejection (non-field 422 / other failure) — shown in place, modal stays open. */}
         {createError && (
           // Ink is --color-on-danger-bg — the raw danger colour reads only 3.95:1 on

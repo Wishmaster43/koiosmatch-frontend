@@ -648,6 +648,23 @@
       "intro": "Importar un archivo crea este cliente (con sus ubicaciones, departamentos y contactos) de inmediato. No rellena el formulario de abajo; revisa la vista previa antes de confirmar."
     }
   },
+  "duplicate": {
+    "blockedTitle": "Este cliente ya existe",
+    "blockedBody": "No se ha creado nada: ya existe un cliente con los mismos datos.",
+    "warningTitle": "Posible cliente existente",
+    "warningBody": "Estos datos ya aparecen en un cliente existente.",
+    "unnamed": "Cliente sin nombre",
+    "stateActive": "Cliente activo",
+    "stateArchived": "Cliente archivado",
+    "archivedHint": "Este cliente está archivado. Restáuralo para volver a utilizarlo.",
+    "open": "Abrir cliente existente",
+    "restoreAndOpen": "Restaurar y abrir",
+    "restoring": "Restaurando…",
+    "restored": "Cliente restaurado.",
+    "restoreFailed": "No se ha podido restaurar. Inténtalo de nuevo.",
+    "restoreForbidden": "No tienes permisos para restaurar un cliente.",
+    "editData": "Editar datos"
+  },
   "subModal": {
     "addLocation": "Nueva ubicación",
     "editLocation": "Editar ubicación",

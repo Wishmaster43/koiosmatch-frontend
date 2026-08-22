@@ -648,6 +648,23 @@
       "intro": "Der Import einer Datei legt diesen Kunden (mit Standorten, Abteilungen und Ansprechpartnern) sofort an. Das Formular unten wird dabei nicht ausgefüllt; prüfen Sie die Vorschau, bevor Sie bestätigen."
     }
   },
+  "duplicate": {
+    "blockedTitle": "Dieser Kunde existiert bereits",
+    "blockedBody": "Es wurde nichts angelegt: Es gibt bereits einen Kunden mit denselben Daten.",
+    "warningTitle": "Möglicher vorhandener Kunde",
+    "warningBody": "Diese Daten kommen bereits bei einem vorhandenen Kunden vor.",
+    "unnamed": "Kunde ohne Namen",
+    "stateActive": "Aktiver Kunde",
+    "stateArchived": "Archivierter Kunde",
+    "archivedHint": "Dieser Kunde ist archiviert. Stellen Sie ihn wieder her, um damit zu arbeiten.",
+    "open": "Vorhandenen Kunden öffnen",
+    "restoreAndOpen": "Wiederherstellen und öffnen",
+    "restoring": "Wird wiederhergestellt…",
+    "restored": "Kunde wiederhergestellt.",
+    "restoreFailed": "Wiederherstellen fehlgeschlagen. Bitte erneut versuchen.",
+    "restoreForbidden": "Sie haben keine Berechtigung, einen Kunden wiederherzustellen.",
+    "editData": "Daten anpassen"
+  },
   "subModal": {
     "addLocation": "Neuer Standort",
     "editLocation": "Standort bearbeiten",

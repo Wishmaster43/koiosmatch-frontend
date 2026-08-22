@@ -1219,7 +1219,6 @@
     "blockedBody": "Nothing was created: a record with the same contact details already exists.",
     "warningTitle": "Possible existing record",
     "warningBody": "These contact details already appear in an existing record.",
-    "checking": "Checking for duplicate records…",
     "unnamed": "Unnamed record",
     "stateActive": "Active record",
     "stateArchived": "Archived record",

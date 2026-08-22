@@ -51,6 +51,9 @@ interface CreateForm {
   // the create modal's new AddressCard — same optional/nullable rules as the rest.
   street?: string; houseNumber?: string; houseNumberSuffix?: string; postalCode?: string
   province?: string; country?: string
+  // CUST-DUP-FE-1 (22-08): the KvK/CoC number, now collected by the create modal
+  // (the tenant's default primary dedupe key) — optional, same as the rest above.
+  cocNumber?: string
 }
 
 // Optional create fields → their API keys (same mapping the PATCH path uses).
@@ -67,6 +70,9 @@ const OPTIONAL_CREATE_FIELDS: Array<[keyof CreateForm, string]> = [
   ['toneOfVoice', 'description'], ['costCenter', 'cost_center'], ['billingEmail', 'billing_email'],
   ['street', 'street'], ['houseNumber', 'house_number'], ['houseNumberSuffix', 'house_number_suffix'],
   ['postalCode', 'postcode'], ['province', 'province'], ['country', 'country'],
+  // CUST-DUP-FE-1: without this entry the field would be a fake affordance (§3) —
+  // typed in the modal, silently dropped from the POST body.
+  ['cocNumber', 'coc_number'],
 ]
 
 interface Args {

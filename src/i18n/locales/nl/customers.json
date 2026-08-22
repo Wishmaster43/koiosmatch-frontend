@@ -648,6 +648,23 @@
       "intro": "Een bestand importeren maakt deze klant (met vestigingen, afdelingen en contactpersonen) meteen aan. Het vult het formulier hieronder niet in; controleer eerst de voorbeeldweergave voordat je bevestigt."
     }
   },
+  "duplicate": {
+    "blockedTitle": "Deze klant bestaat al",
+    "blockedBody": "Er is niets aangemaakt: er bestaat al een klant met dezelfde gegevens.",
+    "warningTitle": "Mogelijk bestaande klant",
+    "warningBody": "Deze gegevens komen al voor bij een bestaande klant.",
+    "unnamed": "Naamloze klant",
+    "stateActive": "Actieve klant",
+    "stateArchived": "Gearchiveerde klant",
+    "archivedHint": "Deze klant is gearchiveerd. Herstel de klant om er weer mee te werken.",
+    "open": "Bestaande klant openen",
+    "restoreAndOpen": "Herstellen en openen",
+    "restoring": "Herstellen…",
+    "restored": "Klant hersteld.",
+    "restoreFailed": "Herstellen mislukt. Probeer het opnieuw.",
+    "restoreForbidden": "Je hebt geen rechten om een klant te herstellen.",
+    "editData": "Gegevens aanpassen"
+  },
   "subModal": {
     "addLocation": "Nieuwe locatie",
     "editLocation": "Locatie bewerken",

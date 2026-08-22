@@ -34,6 +34,12 @@ export default function CustomerCompanyCard({ form, set, errors, industries }: C
           </FieldRow>
           {errors.name && <div style={{ fontSize: 11, color: 'var(--color-danger-text)', marginTop: 3 }}>{t('modal.required')}</div>}
         </div>
+        {/* CUST-DUP-FE-1 (22-08): KvK number — the tenant's DEFAULT primary dedupe key
+            (customer_dedupe_keys). Optional (a brand-new prospect may not have one
+            yet); reuses the drawer's own "overview.coc" label (ONE label per thing). */}
+        <FieldRow label={t('overview.coc')}>
+          <TextField value={form.cocNumber} onChange={v => set('cocNumber', v)} />
+        </FieldRow>
         {/* DEBITEURNUMMER-1 (Danny 02-08): the debtor number is no longer collected
             here — it is the customer's own accounting number, decided later, and
             stays editable everywhere else (drawer/table/search). Two fields remain. */}

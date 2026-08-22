@@ -1219,7 +1219,6 @@
     "blockedBody": "No se ha creado nada: ya existe un expediente con los mismos datos de contacto.",
     "warningTitle": "Posible expediente existente",
     "warningBody": "Estos datos de contacto ya aparecen en un expediente existente.",
-    "checking": "Buscando expedientes duplicados…",
     "unnamed": "Expediente sin nombre",
     "stateActive": "Expediente activo",
     "stateArchived": "Expediente archivado",

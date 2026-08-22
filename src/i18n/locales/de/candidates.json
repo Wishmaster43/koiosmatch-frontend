@@ -1219,7 +1219,6 @@
     "blockedBody": "Es wurde nichts angelegt: Es gibt bereits einen Datensatz mit denselben Kontaktdaten.",
     "warningTitle": "Möglicher vorhandener Datensatz",
     "warningBody": "Diese Kontaktdaten kommen bereits in einem vorhandenen Datensatz vor.",
-    "checking": "Prüfung auf doppelte Datensätze…",
     "unnamed": "Datensatz ohne Namen",
     "stateActive": "Aktiver Datensatz",
     "stateArchived": "Archivierter Datensatz",

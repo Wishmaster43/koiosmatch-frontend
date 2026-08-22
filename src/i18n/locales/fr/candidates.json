@@ -1219,7 +1219,6 @@
     "blockedBody": "Rien n'a été créé : un dossier avec les mêmes coordonnées existe déjà.",
     "warningTitle": "Dossier existant possible",
     "warningBody": "Ces coordonnées figurent déjà dans un dossier existant.",
-    "checking": "Recherche de doublons…",
     "unnamed": "Dossier sans nom",
     "stateActive": "Dossier actif",
     "stateArchived": "Dossier archivé",

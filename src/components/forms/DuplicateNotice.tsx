@@ -12,14 +12,32 @@
  * records and the create was refused, so nothing exists to merge from — a merge
  * button on this panel would be a fake affordance (§3). Merging stays where two
  * real records exist: the drawer / bulk MergeCandidateModal.
+ *
+ * SHARED-DUP-1 (CUST-DUP-FE-1, 2026-08-22; promoted from pages/candidates/addmodal to
+ * components/forms the same day, Opus review): the panel is pure presentational and
+ * entity-agnostic, so it lives with the shared form kit — every create modal imports
+ * it directly, never through an entity barrel (a value import through the candidates
+ * barrel eager-loaded that whole module into the customers chunk). The `ns` prop picks
+ * which locale namespace's `duplicate.*` keys to read — each consumer keeps its own
+ * wording (a candidate is a "dossier", a customer a "klant").
  */
 import { useTranslation } from 'react-i18next'
 import { AlertTriangle, ExternalLink, RotateCcw } from 'lucide-react'
 import SoftChip from '@/components/ui/SoftChip'
 import Spinner from '@/components/ui/Spinner'
+import Button from '@/components/ui/Button'
+import { tintBg, tintBorder, chipInk } from '@/lib/tint'
 import { BTN_H } from '@/config/buttonMetrics'
-import { SectionTitle } from '@/components/ui/typography'
-import type { DuplicateMatch } from './useDuplicateProbe'
+import { Caption, SectionTitle } from '@/components/ui/typography'
+
+// What the UI is allowed to know about a duplicate: WHO and WHICH STATE. The 409
+// payload also carries more (e.g. a candidate's deployability) — deliberately not
+// typed here: the name + state is all the notice needs (§8 data minimization).
+export interface DuplicateMatch {
+  id: string | number
+  name?: string | null
+  archived?: boolean
+}
 
 interface DuplicateNoticeProps {
   match: DuplicateMatch
@@ -31,30 +49,32 @@ interface DuplicateNoticeProps {
   onOpen: () => void
   onRestore: () => void
   onDismiss: () => void
+  /** SHARED-DUP-1: which locale namespace's `duplicate.*` keys to read. Defaults to
+   * 'candidates', the original owner, so that one call site needs no change. */
+  ns?: string
 }
 
-export default function DuplicateNotice({ match, variant, canRestore, restoring, onOpen, onRestore, onDismiss }: DuplicateNoticeProps) {
-  const { t } = useTranslation('candidates')
+export default function DuplicateNotice({ match, variant, canRestore, restoring, onOpen, onRestore, onDismiss, ns = 'candidates' }: DuplicateNoticeProps) {
+  const { t } = useTranslation(ns)
   const blocked = variant === 'blocked'
   // A refused create is danger; a live probe hit is a warning — tokens only (§4).
   const tone = blocked ? 'var(--color-danger)' : 'var(--color-warning)'
   const archived = match.archived === true
   const name = (match.name ?? '').trim() || t('duplicate.unnamed')
 
-  const actionBtn = (base = false) => ({
+  // Colour-carrying tint actions in the notice's own tone (danger/warning) — the
+  // §4 house tint via lib/tint (active pair: this panel IS a live verdict).
+  const actionBtn = {
     display: 'inline-flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 12px',
     fontSize: 12, fontWeight: 600, borderRadius: 8, cursor: 'pointer',
-    border: base ? '1px solid var(--border)' : `1px solid color-mix(in srgb, ${tone} 45%, transparent)`,
-    background: base ? 'var(--surface)' : `color-mix(in srgb, ${tone} 12%, transparent)`,
-    color: base ? 'var(--text)' : tone,
-  } as const)
+    border: tintBorder(tone, true), background: tintBg(tone, true), color: chipInk(tone),
+  } as const
 
   return (
     // Blocked follows an action the user just took → assertive; the probe is ambient → polite.
     <div role={blocked ? 'alert' : 'status'}
       style={{ margin: '0 24px 8px', padding: '10px 14px', borderRadius: 8,
-        background: `color-mix(in srgb, ${tone} 10%, transparent)`,
-        border: `1px solid color-mix(in srgb, ${tone} 40%, transparent)` }}>
+        background: tintBg(tone), border: tintBorder(tone, true) }}>
 
       {/* Headline: what happened, in the user's language — never the server sentence. */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: tone, fontSize: 12, fontWeight: 600 }}>
@@ -72,24 +92,26 @@ export default function DuplicateNotice({ match, variant, canRestore, restoring,
           label={archived ? t('duplicate.stateArchived') : t('duplicate.stateActive')} />
       </div>
       {archived && (
-        <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>{t('duplicate.archivedHint')}</div>
+        <Caption as="div" style={{ marginTop: 4 }}>{t('duplicate.archivedHint')}</Caption>
       )}
 
       {/* Real actions only — every button below has a route behind it. */}
       <div style={{ display: 'flex', gap: 8, marginTop: 10, flexWrap: 'wrap' }}>
-        <button type="button" onClick={onOpen} style={actionBtn()}>
+        {/* eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- colour-carrying tint action in the notice's own tone (danger OR warning); Button has no warning-soft tone (§14 r7 necessity) */}
+        <button type="button" onClick={onOpen} style={actionBtn}>
           <ExternalLink size={13} aria-hidden="true" /> {t('duplicate.open')}
         </button>
         {archived && canRestore && (
-          <button type="button" onClick={onRestore} disabled={restoring}
-            style={{ ...actionBtn(), cursor: restoring ? 'not-allowed' : 'pointer', opacity: restoring ? 0.6 : 1 }}>
+          // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- colour-carrying tint action in the notice's own tone (danger OR warning); Button has no warning-soft tone (§14 r7 necessity)
+          <button type="button" onClick={onRestore} disabled={restoring} style={{ ...actionBtn, cursor: restoring ? 'not-allowed' : 'pointer', opacity: restoring ? 0.6 : 1 }}>
             {restoring ? <Spinner size={13} /> : <RotateCcw size={13} aria-hidden="true" />}
             {restoring ? t('duplicate.restoring') : t('duplicate.restoreAndOpen')}
           </button>
         )}
-        <button type="button" onClick={onDismiss} style={actionBtn(true)}>
+        {/* Neutral dismiss — plain secondary identity, so the shared Button owns it. */}
+        <Button variant="secondary" size="sm" onClick={onDismiss}>
           {t('duplicate.editData')}
-        </button>
+        </Button>
       </div>
     </div>
   )

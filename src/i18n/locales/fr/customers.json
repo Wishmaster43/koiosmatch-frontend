@@ -648,6 +648,23 @@
       "intro": "L'import d'un fichier crée ce client (avec ses sites, services et contacts) immédiatement. Il ne remplit pas le formulaire ci-dessous ; vérifiez l'aperçu avant de confirmer."
     }
   },
+  "duplicate": {
+    "blockedTitle": "Ce client existe déjà",
+    "blockedBody": "Rien n'a été créé : un client avec les mêmes informations existe déjà.",
+    "warningTitle": "Client existant possible",
+    "warningBody": "Ces informations figurent déjà chez un client existant.",
+    "unnamed": "Client sans nom",
+    "stateActive": "Client actif",
+    "stateArchived": "Client archivé",
+    "archivedHint": "Ce client est archivé. Restaurez-le pour le réutiliser.",
+    "open": "Ouvrir le client existant",
+    "restoreAndOpen": "Restaurer et ouvrir",
+    "restoring": "Restauration…",
+    "restored": "Client restauré.",
+    "restoreFailed": "Échec de la restauration. Veuillez réessayer.",
+    "restoreForbidden": "Vous n'avez pas les droits pour restaurer un client.",
+    "editData": "Modifier les données"
+  },
   "subModal": {
     "addLocation": "Nouveau site",
     "editLocation": "Modifier le site",
