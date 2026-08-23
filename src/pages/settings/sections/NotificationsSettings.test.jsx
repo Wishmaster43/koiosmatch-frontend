@@ -27,7 +27,7 @@ beforeEach(() => {
   api.post.mockResolvedValue({ data: {} })
 })
 
-describe.each(['sollicitaties', 'kandidaten', 'klanten', 'matches', 'taken'])(
+describe.each(['sollicitaties', 'kandidaten', 'klanten', 'matches', 'taken', 'calllists', 'opportunities'])(
   'NotificationsSettings — context=%s',
   context => {
     it('renders BOTH channel switches, in-app defaulting ON and e-mail defaulting OFF (O-27)', async () => {

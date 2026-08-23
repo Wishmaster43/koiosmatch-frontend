@@ -18,6 +18,7 @@ import type { KpiSpec } from '@/components/insights/InsightsRow'
 import DataTable from '@/components/ui/DataTable'
 import type { Column } from '@/components/ui/DataTable'
 import SoftChip from '@/components/ui/SoftChip'
+import { BodyText, Caption, Mono } from '@/components/ui/typography'
 import ReportDrillDrawer from './ReportDrillDrawer'
 import type { DrillSpec } from './ReportDrillDrawer'
 import VacancyReportAxes from './VacancyReportAxes'
@@ -155,20 +156,34 @@ export default function VacanciesReport({ period, filters = EMPTY_REPORT_FILTERS
     // Spares (REPORTS-KPI-SPARE-1): real summary fields the report already
     // fetches but never surfaced as a card (SIGNALEN-VAC-1 family) + the two
     // remaining top-segment picks (function/branch axes, same rule as above).
-    // Both drill via the generic `?signal=<name>` XOR leg (VacanciesReport::
-    // applyDrillFilters, shared with stale_online/zero_applications — the
-    // backend's own SIGNALEN-VAC-1 attention-signal narrowing), never a
-    // bespoke/unsupported param.
-    longConcept: { key: 'longConcept', label: t('vacancies.summary.longConcept'), value: s?.long_concept ?? 0,
-      onClick: gateDrillClick('vacancies', () => openSegment({ label: t('vacancies.summary.longConcept'), count: s?.long_concept ?? 0 }, { signal: 'long_concept' })) },
-    noMatches: { key: 'noMatches', label: t('vacancies.summary.noMatches'), value: s?.no_matches ?? 0,
-      onClick: gateDrillClick('vacancies', () => openSegment({ label: t('vacancies.summary.noMatches'), count: s?.no_matches ?? 0 }, { signal: 'no_matches' })) },
+    // VAC-DRILL-SIGNALS-2: the drill endpoint's XOR whitelist has no `signal`
+    // param (confirmed, SETTINGS-TABS-FIX-1/2 review) — no onClick means no
+    // cursor/role affordance (mirrors customersCount above). Wire these once the
+    // backend adds matching boolean keys, the same way closingSoon got its own.
+    longConcept: { key: 'longConcept', label: t('vacancies.summary.longConcept'), value: s?.long_concept ?? 0 },
+    noMatches: { key: 'noMatches', label: t('vacancies.summary.noMatches'), value: s?.no_matches ?? 0 },
     topFunction: { key: 'topFunction', label: t('vacancies.summary.topFunction'),
       value: topFunction ? `${topFunction.label} · ${topFunction.count}` : '—',
       onClick: topFunction ? gateDrillClick('vacancies', () => openSegment(topFunction, { function: topFunction.value })) : undefined },
     topBranch: { key: 'topBranch', label: t('vacancies.summary.topBranch'),
       value: topBranch ? `${topBranch.label} · ${topBranch.count}` : '—',
       onClick: topBranch ? gateDrillClick('vacancies', () => openSegment(topBranch, { branch: topBranch.value })) : undefined },
+    // KPI-DREMPELS-FE-1: summary.advice_stale mirrors staleOnline's exact predicate
+    // (same underlying set — reuses that card's own stale_online=1 drill rather than
+    // inventing a second signal for the same rows) but now carries its own tenant
+    // threshold as a caption.
+    adviceStale: { key: 'adviceStale', label: t('vacancies.summary.adviceStale'), value: s?.advice_stale ?? 0,
+      sub: s?.advice_stale_days != null ? t('thresholdDays', { n: s.advice_stale_days }) : undefined,
+      active: drill?.rowsParams?.stale_online === 1,
+      onClick: gateDrillClick('vacancies', () => openSegment({ label: t('vacancies.summary.adviceStale'), count: s?.advice_stale ?? 0 }, { stale_online: 1 })) },
+    // summary.closing_soon is a real backend count (open vacancy, application_deadline
+    // within the threshold). VAC-CLOSING-SOON-DRILL-1 (landed, SETTINGS-TABS-FIX-2):
+    // the drill endpoint now accepts `closing_soon` as its own boolean XOR key, exactly
+    // like `stale_online` above — so this card drills the same way, never a `signal` param.
+    closingSoon: { key: 'closingSoon', label: t('vacancies.summary.closingSoon'), value: s?.closing_soon ?? 0,
+      sub: s?.closing_soon_days != null ? t('thresholdDays', { n: s.closing_soon_days }) : undefined,
+      active: drill?.rowsParams?.closing_soon === 1,
+      onClick: gateDrillClick('vacancies', () => openSegment({ label: t('vacancies.summary.closingSoon'), count: s?.closing_soon ?? 0 }, { closing_soon: 1 })) },
   }
   // Which nine keys render, and in what order, is the tenant's Settings → Reports
   // choice (falls back to today's order when nothing is stored, or a stored key
@@ -187,7 +202,7 @@ export default function VacanciesReport({ period, filters = EMPTY_REPORT_FILTERS
       render: v => (
         <>
           {v.label}
-          {v.code && <span style={{ marginLeft: 6, fontSize: 11, fontFamily: "'JetBrains Mono', monospace", color: 'var(--text-muted)' }}>{v.code}</span>}
+          {v.code && <Caption style={{ marginLeft: 6 }}><Mono>{v.code}</Mono></Caption>}
         </>
       ),
     },
@@ -223,9 +238,9 @@ export default function VacanciesReport({ period, filters = EMPTY_REPORT_FILTERS
 
       {/* The report's data window, rendered prominently — DD-MM-YYYY (never ISO, §3B). */}
       {!loading && !error && data?.from && data?.to && (
-        <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)', marginBottom: 12 }}>
+        <BodyText style={{ fontWeight: 500, marginBottom: 12 }}>
           {t('vacancies.window', { from: formatDate(data.from), to: formatDate(data.to) })}
-        </div>
+        </BodyText>
       )}
 
       {/* Four UI states, handled once via the shared block (§3) */}

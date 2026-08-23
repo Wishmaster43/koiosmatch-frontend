@@ -35,7 +35,10 @@ const row = {
 }
 const data: VacanciesReportData = {
   period: 'month', from: '2026-05-14', to: '2026-08-14',
-  summary: { total: 12, open: 8, filled: 4, fill_rate: 0.33, avg_time_to_fill_days: 11.4, stale_online: 2, long_concept: 1, no_matches: 3 },
+  summary: {
+    total: 12, open: 8, filled: 4, fill_rate: 0.33, avg_time_to_fill_days: 11.4, stale_online: 2, long_concept: 1, no_matches: 3,
+    advice_stale: 2, advice_stale_days: 14, closing_soon: 1, closing_soon_days: 7,
+  },
   vacancies: [row],
   total: 12,
   timeseries: { bucket: 'week', series: [
@@ -43,6 +46,7 @@ const data: VacanciesReportData = {
     { date: '2026-08-10', label: 'Wk 33', value: 7 },
   ] },
   by_status: [
+    // eslint-disable-next-line no-restricted-syntax -- API fixture colour (DATA, mirrors the live row)
     { value: 'st-uuid-1', label: 'Gepubliceerd', color: '#16a34a', count: 6 },
     { value: 'none', label: 'Geen status', color: null, count: 3 },
     { value: '9c1d-deleted-status-uuid', label: 'Onbekend (verwijderde status)', color: null, count: 3 },
@@ -330,14 +334,14 @@ describe('VacanciesReport (RAPPORTEN-SUITE-1 portie 4, additive on C-34)', () =>
     expect(lastDrillParams()).toEqual({ industry: 'Zorg', period: 'month' })
   })
 
-  // REPORTS-KPI-SPARE-1: the catalogue now offers four spares beyond the nine
-  // defaults (longConcept/noMatches/topFunction/topBranch), so the settings
-  // screen has something to swap in — a tenant can pick one into the strip.
-  it('offers the four new spare cards to the settings catalogue', async () => {
+  // REPORTS-KPI-SPARE-1 (+KPI-DREMPELS-FE-1): the catalogue now offers six spares
+  // beyond the nine defaults (longConcept/noMatches/topFunction/topBranch, then
+  // adviceStale/closingSoon), so the settings screen has something to swap in.
+  it('offers the six new spare cards to the settings catalogue', async () => {
     const { getReportKpiCatalog, getReportKpiDefaultOrder, reportHasSpareKpiCards } = await import('./kpiCatalog')
     const catalogKeys = getReportKpiCatalog('vacancies').map(c => c.key)
-    expect(catalogKeys).toEqual(expect.arrayContaining(['longConcept', 'noMatches', 'topFunction', 'topBranch']))
-    expect(catalogKeys.length).toBe(getReportKpiDefaultOrder('vacancies').length + 4)
+    expect(catalogKeys).toEqual(expect.arrayContaining(['longConcept', 'noMatches', 'topFunction', 'topBranch', 'adviceStale', 'closingSoon']))
+    expect(catalogKeys.length).toBe(getReportKpiDefaultOrder('vacancies').length + 6)
     expect(reportHasSpareKpiCards('vacancies')).toBe(true)
   })
 
@@ -361,10 +365,11 @@ describe('VacanciesReport (RAPPORTEN-SUITE-1 portie 4, additive on C-34)', () =>
     expect(screen.queryByText(i18n.t('vacancies.kpiOrderFellBack', { ns: 'analytics' }))).not.toBeInTheDocument()
   })
 
-  // longConcept/noMatches drill the shared `signal=<name>` XOR leg the backend's
-  // SIGNALEN-VAC-1 narrowing already exposes for stale_online — never a bespoke,
-  // unsupported param.
-  it('longConcept/noMatches KPI cards drill signal=<name>', async () => {
+  // VAC-DRILL-SIGNALS-2: longConcept/noMatches are real backend counts, but the
+  // drill endpoint's XOR whitelist has no `signal` param — both render as honest,
+  // non-clickable stats (no role="button", no drill request on click) until the
+  // backend adds matching boolean keys.
+  it('longConcept/noMatches KPI cards are honestly non-drillable (no signal param)', async () => {
     const user = userEvent.setup()
     mockSettings.mockReturnValue({
       report_kpis_vacancies: JSON.stringify([
@@ -373,10 +378,50 @@ describe('VacanciesReport (RAPPORTEN-SUITE-1 portie 4, additive on C-34)', () =>
     })
     mockUseVacanciesReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
-    await user.click(screen.getByText(i18n.t('vacancies.summary.longConcept', { ns: 'analytics' })))
-    expect(lastDrillParams()).toEqual({ signal: 'long_concept', period: 'month' })
-    await user.click(screen.getByText(i18n.t('vacancies.summary.noMatches', { ns: 'analytics' })))
-    expect(lastDrillParams()).toEqual({ signal: 'no_matches', period: 'month' })
+
+    const longConceptLabel = screen.getByText(i18n.t('vacancies.summary.longConcept', { ns: 'analytics' }))
+    const longConceptCard = longConceptLabel.parentElement as HTMLElement
+    expect(longConceptCard.closest('div[role="button"]')).toBeNull()
+    await user.click(longConceptLabel)
+    expect(getSpy.mock.calls.some(c => c[0] === '/reports/vacancies/drill')).toBe(false)
+
+    const noMatchesLabel = screen.getByText(i18n.t('vacancies.summary.noMatches', { ns: 'analytics' }))
+    const noMatchesCard = noMatchesLabel.parentElement as HTMLElement
+    expect(noMatchesCard.closest('div[role="button"]')).toBeNull()
+    await user.click(noMatchesLabel)
+    expect(getSpy.mock.calls.some(c => c[0] === '/reports/vacancies/drill')).toBe(false)
+  })
+
+  // KPI-DREMPELS-FE-1: adviceStale/closingSoon render the real backend counts with
+  // their own tenant-threshold caption. adviceStale reuses the existing
+  // stale_online=1 drill (same underlying predicate as staleOnline). closingSoon
+  // drills via its own `closing_soon` boolean XOR key (VAC-CLOSING-SOON-DRILL-1,
+  // mirrors stale_online) — never a `signal` param.
+  it('adviceStale/closingSoon KPI cards render their threshold caption and both drill', async () => {
+    const user = userEvent.setup()
+    mockSettings.mockReturnValue({
+      report_kpis_vacancies: JSON.stringify([
+        'adviceStale', 'closingSoon', 'open', 'filled', 'fillRate', 'ttf', 'staleOnline', 'customersCount', 'total',
+      ]),
+    })
+    mockUseVacanciesReport.mockReturnValue({ data, loading: false, error: false })
+    renderReport()
+
+    const adviceStaleLabel = screen.getByText(i18n.t('vacancies.summary.adviceStale', { ns: 'analytics' }))
+    const adviceStaleCard = adviceStaleLabel.parentElement as HTMLElement
+    expect(within(adviceStaleCard).getByText('2')).toBeInTheDocument()
+    expect(within(adviceStaleCard).getByText(i18n.t('thresholdDays', { ns: 'analytics', n: 14 }))).toBeInTheDocument()
+
+    const closingSoonLabel = screen.getByText(i18n.t('vacancies.summary.closingSoon', { ns: 'analytics' }))
+    const closingSoonCard = closingSoonLabel.parentElement as HTMLElement
+    expect(within(closingSoonCard).getByText('1')).toBeInTheDocument()
+    expect(within(closingSoonCard).getByText(i18n.t('thresholdDays', { ns: 'analytics', n: 7 }))).toBeInTheDocument()
+
+    await user.click(closingSoonLabel)
+    expect(lastDrillParams()).toEqual({ closing_soon: 1, period: 'month' })
+
+    await user.click(adviceStaleLabel)
+    expect(lastDrillParams()).toEqual({ stale_online: 1, period: 'month' })
   })
 
   // RAPPORT-KPI-INSTELBAAR: which nine keys render, and in what order, is the

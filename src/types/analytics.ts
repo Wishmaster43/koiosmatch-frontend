@@ -112,6 +112,17 @@ export interface VacancyReportSummary {
   long_concept: number
   // An actively advertised, still-open vacancy with zero matches.
   no_matches: number
+  // KPI-DREMPELS-FE-1: same predicate as stale_online, now carrying its own tenant
+  // threshold (`vacancy_advice_stale_days`) so the report card needs no separate
+  // settings lookup for its caption.
+  advice_stale: number
+  advice_stale_days: number
+  // The vacancy's application_deadline falls within `closing_soon_days`
+  // (`vacancy_closing_soon_days`) — open vacancies only. Drillable via its own
+  // `closing_soon` boolean XOR key on the VacanciesDrillRequest/VacanciesAdviceRequest
+  // whitelist (VAC-CLOSING-SOON-DRILL-1, mirrors stale_online) — never a `signal` param.
+  closing_soon: number
+  closing_soon_days: number
 }
 
 // Portie-4 additions are ADDITIVE (RAPPORTEN-SUITE-1): the C-34 envelope above
@@ -378,6 +389,15 @@ export interface OpportunityTotals {
   open_value: number
   open_hours: number
   won_value: number
+  // KPI-DREMPELS-FE-1 (additive, distinct from the older top-level `stale` object
+  // below): an open deal with no stage change since `stage_changed_at` for at least
+  // `stale_days` (`opportunity_stale_days`) counts as stale; one nearing its
+  // `expected_close_at` within `closing_soon_days` (`opportunity_closing_soon_days`)
+  // counts as closing soon. Closed deals never count in either.
+  stale: number
+  stale_days: number
+  closing_soon: number
+  closing_soon_days: number
 }
 
 // Open deals per expected-close month — the report's only forward-looking slice.

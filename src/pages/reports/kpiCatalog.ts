@@ -300,6 +300,12 @@ export const REPORT_KPI_FIXED_CATALOG: Partial<Record<ReportKpiScopeId, KpiCatal
     { key: 'noMatches', labelKey: 'vacancies.summary.noMatches' },
     { key: 'topFunction', labelKey: 'vacancies.summary.topFunction' },
     { key: 'topBranch', labelKey: 'vacancies.summary.topBranch' },
+    // KPI-DREMPELS-FE-1: summary.advice_stale / summary.closing_soon, each with its
+    // own tenant day-threshold caption. adviceStale mirrors staleOnline's predicate;
+    // closingSoon drills via its own `closing_soon` boolean XOR key (VAC-CLOSING-
+    // SOON-DRILL-1, mirrors stale_online — never a `signal` param).
+    { key: 'adviceStale', labelKey: 'vacancies.summary.adviceStale' },
+    { key: 'closingSoon', labelKey: 'vacancies.summary.closingSoon' },
   ],
   opportunities: [
     { key: 'total', labelKey: 'opportunities.total' },
@@ -318,6 +324,12 @@ export const REPORT_KPI_FIXED_CATALOG: Partial<Record<ReportKpiScopeId, KpiCatal
     { key: 'wonValue', labelKey: 'opportunities.summary.wonValue' },
     { key: 'topStage', labelKey: 'opportunities.summary.topStage' },
     { key: 'topCustomer', labelKey: 'opportunities.summary.topCustomer' },
+    // KPI-DREMPELS-FE-1: totals.stale / totals.closing_soon (additive, distinct
+    // from the older top-level `stale` object above), each with its own tenant
+    // day-threshold caption — not drillable (no XOR param), same non-clickable
+    // pattern the pipeline five above already use.
+    { key: 'staleDeal', labelKey: 'opportunities.summary.staleDeal' },
+    { key: 'closingSoon', labelKey: 'opportunities.summary.closingSoon' },
   ],
   tasks: [
     { key: 'total', labelKey: 'tasks.total' },

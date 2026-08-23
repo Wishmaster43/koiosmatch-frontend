@@ -1,5 +1,6 @@
 {
   "title": "Berichte",
+  "thresholdDays": "Schwelle: {{n}} Tage",
   "drill": {
     "breakdown": "Aufschlüsselung",
     "records": "Zugrunde liegende Datensätze",
@@ -176,7 +177,9 @@
       "longConcept": "Lange im Konzept",
       "noMatches": "Keine Matches",
       "topFunction": "Top-Funktion",
-      "topBranch": "Top-Niederlassung"
+      "topBranch": "Top-Niederlassung",
+      "adviceStale": "Veraltet (Hinweis)",
+      "closingSoon": "Schließt bald"
     },
     "cols": {
       "vacancy": "Stelle",
@@ -325,7 +328,9 @@
       "openValue": "Offener Wert",
       "wonValue": "Gewonnener Wert",
       "topStage": "Top-Phase",
-      "topCustomer": "Top-Kunde"
+      "topCustomer": "Top-Kunde",
+      "staleDeal": "Stillstehende Chancen",
+      "closingSoon": "Schließt bald"
     },
     "stale": {
       "untouched": "Unberührt",

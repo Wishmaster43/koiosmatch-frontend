@@ -1,5 +1,6 @@
 {
   "title": "Informes",
+  "thresholdDays": "Umbral: {{n}} días",
   "drill": {
     "breakdown": "Desglose",
     "records": "Registros subyacentes",
@@ -176,7 +177,9 @@
       "longConcept": "Mucho tiempo en concepto",
       "noMatches": "Sin matches",
       "topFunction": "Función principal",
-      "topBranch": "Sucursal principal"
+      "topBranch": "Sucursal principal",
+      "adviceStale": "Obsoleta (aviso)",
+      "closingSoon": "Cierre próximo"
     },
     "cols": {
       "vacancy": "Vacante",
@@ -325,7 +328,9 @@
       "openValue": "Valor abierto",
       "wonValue": "Valor ganado",
       "topStage": "Etapa principal",
-      "topCustomer": "Cliente principal"
+      "topCustomer": "Cliente principal",
+      "staleDeal": "Oportunidades estancadas",
+      "closingSoon": "Cierre próximo"
     },
     "stale": {
       "untouched": "Sin actividad",

@@ -1,5 +1,6 @@
 {
   "title": "Rapports",
+  "thresholdDays": "Seuil : {{n}} jours",
   "drill": {
     "breakdown": "Répartition",
     "records": "Enregistrements sous-jacents",
@@ -176,7 +177,9 @@
       "longConcept": "Longtemps en concept",
       "noMatches": "Aucun match",
       "topFunction": "Fonction principale",
-      "topBranch": "Agence principale"
+      "topBranch": "Agence principale",
+      "adviceStale": "Obsolète (conseil)",
+      "closingSoon": "Clôture proche"
     },
     "cols": {
       "vacancy": "Poste",
@@ -325,7 +328,9 @@
       "openValue": "Valeur ouverte",
       "wonValue": "Valeur gagnée",
       "topStage": "Étape principale",
-      "topCustomer": "Client principal"
+      "topCustomer": "Client principal",
+      "staleDeal": "Opportunités stagnantes",
+      "closingSoon": "Clôture proche"
     },
     "stale": {
       "untouched": "Sans activité",

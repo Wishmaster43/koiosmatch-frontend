@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import OpportunitiesReport from './OpportunitiesReport'
@@ -34,8 +34,12 @@ const data: OpportunitiesReportData = {
     { date: '2026-08-03', label: 'Wk 32', value: 5 },
     { date: '2026-08-10', label: 'Wk 33', value: 7 },
   ] },
-  totals: { total: 12, open: 6, won: 4, lost: 2, win_rate: 66.7, open_value: 25000, open_hours: 120, won_value: 18000 },
+  totals: {
+    total: 12, open: 6, won: 4, lost: 2, win_rate: 66.7, open_value: 25000, open_hours: 120, won_value: 18000,
+    stale: 2, stale_days: 30, closing_soon: 3, closing_soon_days: 14,
+  },
   by_stage: [
+    // eslint-disable-next-line no-restricted-syntax -- API fixture colour (DATA, mirrors the live row)
     { key: 'proposal', value: 'proposal', label: 'Voorstel', color: '#2563eb', count: 6, value_sum: 15000 },
     { key: 'none', value: 'none', label: 'Geen fase', color: null, count: 3, value_sum: 0 },
     { key: '9c1d-deleted-stage-uuid', value: '9c1d-deleted-stage-uuid', label: 'Onbekend (verwijderde fase)', color: null, count: 3, value_sum: 2500 },
@@ -102,7 +106,8 @@ describe('OpportunitiesReport (RAPPORTEN-SUITE-1 portie 5, kansen pipeline repor
     mockUseOpportunitiesReport.mockReturnValue({
       data: { ...data, total: 0, by_stage: [], by_owner: [], by_customer: [], by_branch: [],
         timeseries: { bucket: 'week', series: [] },
-        totals: { total: 0, open: 0, won: 0, lost: 0, win_rate: null, open_value: 0, open_hours: 0, won_value: 0 } },
+        totals: { total: 0, open: 0, won: 0, lost: 0, win_rate: null, open_value: 0, open_hours: 0, won_value: 0,
+          stale: 0, stale_days: 30, closing_soon: 0, closing_soon_days: 14 } },
       loading: false, error: false,
     })
     renderReport()
@@ -382,20 +387,46 @@ describe('OpportunitiesReport (nine-card KPI footprint)', () => {
   })
 })
 
-// REPORTS-KPI-SPARE-1: four real spares grow the catalogue so the settings
-// screen has something to swap in.
+// REPORTS-KPI-SPARE-1 (+KPI-DREMPELS-FE-1): six real spares grow the catalogue
+// so the settings screen has something to swap in.
 describe('OpportunitiesReport (spare KPI cards)', () => {
   beforeEach(() => {
     getSpy.mockReset()
     getSpy.mockResolvedValue({ data: { data: [], meta: { total: 0 } } })
   })
 
-  it('offers the four new spare cards to the settings catalogue', async () => {
+  it('offers the six new spare cards to the settings catalogue', async () => {
     const { getReportKpiCatalog, getReportKpiDefaultOrder, reportHasSpareKpiCards } = await import('./kpiCatalog')
     const catalogKeys = getReportKpiCatalog('opportunities').map(c => c.key)
-    expect(catalogKeys).toEqual(expect.arrayContaining(['openValue', 'wonValue', 'topStage', 'topCustomer']))
-    expect(catalogKeys.length).toBe(getReportKpiDefaultOrder('opportunities').length + 4)
+    expect(catalogKeys).toEqual(expect.arrayContaining(['openValue', 'wonValue', 'topStage', 'topCustomer', 'staleDeal', 'closingSoon']))
+    expect(catalogKeys.length).toBe(getReportKpiDefaultOrder('opportunities').length + 6)
     expect(reportHasSpareKpiCards('opportunities')).toBe(true)
+  })
+
+  // KPI-DREMPELS-FE-1: totals.stale / totals.closing_soon render their real
+  // fixture counts with the tenant threshold as a caption, and (like the
+  // pipeline-five stale/forecast tiles above) stay non-clickable — no XOR param
+  // exists for either signal on this report's five-way drill (no fake affordances).
+  it('renders staleDeal/closingSoon with their threshold caption, non-clickable', () => {
+    mockSettings.mockReturnValue({
+      report_kpis_opportunities: JSON.stringify([
+        'staleDeal', 'closingSoon', 'total', 'open', 'won', 'lost', 'winRate', 'openValue', 'wonValue',
+      ]),
+    })
+    mockUseOpportunitiesReport.mockReturnValue({ data, loading: false, error: false })
+    renderReport()
+
+    const staleDealLabel = screen.getByText('Stilstaande kansen')
+    const staleDealCard = staleDealLabel.parentElement as HTMLElement
+    expect(within(staleDealCard).getByText('2')).toBeInTheDocument()
+    expect(within(staleDealCard).getByText('Drempel: 30 dagen')).toBeInTheDocument()
+    expect(staleDealCard.closest('div[role="button"]')).toBeNull()
+
+    const closingSoonLabel = screen.getByText('Sluit binnenkort')
+    const closingSoonCard = closingSoonLabel.parentElement as HTMLElement
+    expect(within(closingSoonCard).getByText('3')).toBeInTheDocument()
+    expect(within(closingSoonCard).getByText('Drempel: 14 dagen')).toBeInTheDocument()
+    expect(closingSoonCard.closest('div[role="button"]')).toBeNull()
   })
 
   it('renders swapped-in spare cards with their real fixture values, strip still exactly nine', async () => {

@@ -114,6 +114,7 @@ import AdminInvoicesSettings from './sections/AdminInvoicesSettings'
 import {
   kpisLeads, kpisCandidates, kpisApplications, kpisCustomers, kpisLocations,
   kpisDepartments, kpisContacts, kpisTasks, kpisCalllists, kpisMatches,
+  kpisOpportunities, kpisVacancies,
 } from './schemas/kpis'
 import candidateDisplay from './schemas/candidateDisplay'
 import customerVacancyDefaults from './schemas/customerVacancyDefaults'
@@ -142,6 +143,9 @@ export const NAV_GROUPS = [
       { id: 'kpis_tasks', icon: ListChecks, schema: kpisTasks },
       { id: 'kpis_calllists', icon: Phone, schema: kpisCalllists },
       { id: 'kpis_matches', icon: Sparkles, schema: kpisMatches },
+      // KPI-DREMPELS-FE-1: pipeline/vacancy day-window thresholds, shared with reports.
+      { id: 'kpis_opportunities', icon: Target, schema: kpisOpportunities },
+      { id: 'kpis_vacancies', icon: Briefcase, schema: kpisVacancies },
     ],
   },
   {
@@ -650,6 +654,12 @@ export const NAV_GROUPS = [
       { id: 'notif_matches', icon: Bell, render: () => <NotificationsSettings context="matches" /> },
       { id: 'notif_taken', icon: Bell, render: () => <NotificationsSettings context="taken" /> },
       { id: 'notif_facturering', icon: Bell, render: () => <NotificationsSettings context="facturering" /> },
+      // NOTIF-CONTEXTEN-FE-1 (CMBE 23-08): new English-slug contexts, backend-context
+      // keys 'calllists'/'opportunities' match 1:1 — no Dutch-slug migration needed.
+      // Icon: Bell, matching every sibling row in this group (SETTINGS-TABS-FIX-1
+      // review) — the notifications menu is one list, not a per-context icon set.
+      { id: 'notif_calllists', icon: Bell, render: () => <NotificationsSettings context="calllists" /> },
+      { id: 'notif_opportunities', icon: Bell, render: () => <NotificationsSettings context="opportunities" /> },
       // 11-escalatie (3b): per stilstand-signaal an optional day-threshold + target (user/role).
       { id: 'notif_escalation', icon: Bell, component: EscalationSettings },
     ],

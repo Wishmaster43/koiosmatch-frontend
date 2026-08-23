@@ -1,5 +1,6 @@
 {
   "title": "Rapporten",
+  "thresholdDays": "Drempel: {{n}} dagen",
   "drill": {
     "breakdown": "Opbouw",
     "records": "Onderliggende records",
@@ -176,7 +177,9 @@
       "longConcept": "Lang in concept",
       "noMatches": "Geen matches",
       "topFunction": "Grootste functie",
-      "topBranch": "Grootste vestiging"
+      "topBranch": "Grootste vestiging",
+      "adviceStale": "Verouderd (advies)",
+      "closingSoon": "Sluit binnenkort"
     },
     "cols": {
       "vacancy": "Vacature",
@@ -325,7 +328,9 @@
       "openValue": "Openstaande waarde",
       "wonValue": "Gewonnen waarde",
       "topStage": "Grootste fase",
-      "topCustomer": "Grootste klant"
+      "topCustomer": "Grootste klant",
+      "staleDeal": "Stilstaande kansen",
+      "closingSoon": "Sluit binnenkort"
     },
     "stale": {
       "untouched": "Onaangeraakt",

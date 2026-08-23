@@ -105,3 +105,26 @@ export const kpisMatches = {
     { key: 'fill_rate_target', type: 'number', default: 85, min: 0, max: 100 },
   ],
 }
+
+// Opportunities — pipeline day-window thresholds (KPI-DREMPELS-FE-1): how long a
+// deal may sit without a stage change before it counts as stale, and how close to
+// its expected close date before it counts as closing soon. Closed deals never count.
+export const kpisOpportunities = {
+  ...base, titleI18n: 'nav.kpis_opportunities',
+  fields: [
+    { key: 'opportunity_stale_days', type: 'number', default: 30, min: 1, max: 365 },
+    { key: 'opportunity_closing_soon_days', type: 'number', default: 14, min: 1, max: 365 },
+  ],
+}
+
+// Vacancies — closing-soon day-window threshold (KPI-DREMPELS-FE-1). The sibling
+// staleness key (`vacancy_advice_stale_days`) is NOT duplicated here: it already has
+// its one write path on the Koios-advice screen (KoiosAdviceSettings.tsx) — ONE
+// SOURCE PER KEY (SETTINGS-TABS-FIX-1 review). `subtitleI18n` overrides the shared
+// `kpis.subtitle` for this one tab so the cross-reference is visible right here.
+export const kpisVacancies = {
+  ...base, titleI18n: 'nav.kpis_vacancies', subtitleI18n: 'kpis.vacanciesSubtitle',
+  fields: [
+    { key: 'vacancy_closing_soon_days', type: 'number', default: 7, min: 1, max: 365 },
+  ],
+}

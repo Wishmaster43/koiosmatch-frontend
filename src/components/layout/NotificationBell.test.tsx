@@ -35,6 +35,39 @@ describe('resolveNotificationTarget', () => {
   it('returns null for an unmapped entity type', () => {
     expect(resolveNotificationTarget({ id: 5, entity_type: 'unknown', entity_id: 1 } as unknown as AppNotification)).toBeNull()
   })
+
+  // NOTIF-CONTEXTEN-FE-1: calllist/opportunity notifications carry a custom
+  // meta shape (campaign_id / opportunity_id), resolved via their own `type`.
+  it('resolves a calllist.target_assigned row to the campaign on the call-lists page', () => {
+    expect(resolveNotificationTarget({ id: 6, type: 'calllist.target_assigned', meta: { campaign_id: 'c1', count: 3 } } as unknown as AppNotification))
+      .toEqual({ page: 'outreach', id: 'c1' })
+  })
+
+  it('resolves an opportunity.won row to the opportunity drawer', () => {
+    expect(resolveNotificationTarget({ id: 7, type: 'opportunity.won', meta: { opportunity_id: 'o1' } } as unknown as AppNotification))
+      .toEqual({ page: 'opportunities', id: 'o1' })
+  })
+
+  it('resolves an opportunity.lost row to the opportunity drawer', () => {
+    expect(resolveNotificationTarget({ id: 8, type: 'opportunity.lost', meta: { opportunity_id: 'o2' } } as unknown as AppNotification))
+      .toEqual({ page: 'opportunities', id: 'o2' })
+  })
+
+  // SETTINGS-TABS-FIX-1 review: a custom-typed row whose meta is missing the
+  // field its resolver needs must degrade honestly (null, no link) rather than
+  // fall through to a half-built target.
+  it('returns null for a custom-typed row with meta missing the expected field (unknown meta degrades honestly)', () => {
+    expect(resolveNotificationTarget({ id: 9, type: 'opportunity.won', meta: {} } as unknown as AppNotification)).toBeNull()
+  })
+
+  // Hardening: CUSTOM_TYPE_TARGETS must never resolve a `type` through
+  // Object.prototype — 'constructor'/'toString' are not real notification types
+  // and must behave exactly like any other unmapped type (null, never a crash or
+  // a fabricated {page: undefined, id: undefined} target).
+  it('treats a "constructor"/"toString" type as unmapped, not as an inherited Object.prototype member', () => {
+    expect(resolveNotificationTarget({ id: 10, type: 'constructor', meta: {} } as unknown as AppNotification)).toBeNull()
+    expect(resolveNotificationTarget({ id: 11, type: 'toString', meta: {} } as unknown as AppNotification)).toBeNull()
+  })
 })
 
 describe('NotificationBell row click-through', () => {

@@ -1,5 +1,6 @@
 {
   "title": "Reports",
+  "thresholdDays": "Threshold: {{n}} days",
   "drill": {
     "breakdown": "Breakdown",
     "records": "Underlying records",
@@ -176,7 +177,9 @@
       "longConcept": "Long in concept",
       "noMatches": "No matches",
       "topFunction": "Top function",
-      "topBranch": "Top branch"
+      "topBranch": "Top branch",
+      "adviceStale": "Stale (advice)",
+      "closingSoon": "Closing soon"
     },
     "cols": {
       "vacancy": "Vacancy",
@@ -325,7 +328,9 @@
       "openValue": "Open value",
       "wonValue": "Won value",
       "topStage": "Top stage",
-      "topCustomer": "Top customer"
+      "topCustomer": "Top customer",
+      "staleDeal": "Stale deals",
+      "closingSoon": "Closing soon"
     },
     "stale": {
       "untouched": "Untouched",

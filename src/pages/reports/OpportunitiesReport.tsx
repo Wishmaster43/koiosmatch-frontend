@@ -14,6 +14,7 @@ import { useTranslation } from 'react-i18next'
 import ReportKpiBand from './ReportKpiBand'
 import { reportCardStyle as card, reportSectionHeadStyle as head } from './ReportSectionCard'
 import ReportStateBlock from './ReportStateBlock'
+import { BodyText } from '@/components/ui/typography'
 import type { KpiSpec } from '@/components/insights/InsightsRow'
 import type { DrillSpec } from './ReportDrillDrawer'
 import { useOpportunitiesReport } from './useOpportunitiesReport'
@@ -156,6 +157,16 @@ export default function OpportunitiesReport({ period }: { period: ReportPeriod }
     topCustomer: { key: 'topCustomer', label: t('opportunities.summary.topCustomer'),
       value: topCustomer ? `${topCustomer.label} · ${topCustomer.count}` : '—',
       onClick: topCustomer ? gateDrillClick('opportunities', () => openSegment('customer', topCustomer, { customer: topCustomer.value })) : undefined },
+    // KPI-DREMPELS-FE-1: totals.stale / totals.closing_soon (additive, distinct from
+    // the older top-level `stale` object above — a different, updated_at-based
+    // contract left untouched), each with its own tenant day-threshold caption. No
+    // XOR param exists for either signal on this report's five-way drill, so both
+    // render as plain, honest, non-clickable stats — the same rule the untouched/
+    // overdue tiles above already follow (no fake affordances).
+    staleDeal: { key: 'staleDeal', label: t('opportunities.summary.staleDeal'), value: s?.stale ?? 0,
+      sub: s?.stale_days != null ? t('thresholdDays', { n: s.stale_days }) : undefined },
+    closingSoon: { key: 'closingSoon', label: t('opportunities.summary.closingSoon'), value: s?.closing_soon ?? 0,
+      sub: s?.closing_soon_days != null ? t('thresholdDays', { n: s.closing_soon_days }) : undefined },
   }
   // Which nine keys render, and in what order, is the tenant's Settings → Reports
   // choice (falls back to today's order when nothing is stored, or a stored key
@@ -176,9 +187,9 @@ export default function OpportunitiesReport({ period }: { period: ReportPeriod }
 
       {/* The report's data window, rendered prominently — DD-MM-YYYY (never ISO, §3B). */}
       {!loading && !error && data && (
-        <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)', marginBottom: 12 }}>
+        <BodyText style={{ fontWeight: 500, marginBottom: 12 }}>
           {t('opportunities.window', { from: formatDate(data.period.from), to: formatDate(data.period.to) })}
-        </div>
+        </BodyText>
       )}
 
       <div style={{ ...card, overflow: 'hidden' }}>

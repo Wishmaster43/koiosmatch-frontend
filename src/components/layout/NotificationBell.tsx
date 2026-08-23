@@ -20,6 +20,7 @@ import { useNotifications } from '@/hooks/useNotifications'
 import type { AppNotification } from '@/hooks/useNotifications'
 // PORTAL-MARKER-1: a click inside an open portalled picker menu is never "outside".
 import { isInsideDropdownPortal } from '@/lib/useDropdownPlacement'
+import { SectionTitle, BodyText, Caption } from '@/components/ui/typography'
 
 // Locale-aware short date-time for a notification row.
 const fmt = (iso?: string) => {
@@ -37,12 +38,33 @@ const ENTITY_PAGE: Record<string, string> = {
 
 export interface NotificationTarget { page: string; id: string }
 
+// NOTIF-CONTEXTEN-FE-1 (CMBE 23-08): calllist/opportunity notifications carry
+// their own `data.type` (not the generic meta.type/meta.id pointer) plus a
+// custom meta shape — campaign_id for a call-list assignment, opportunity_id
+// for a won/lost deal — so each type resolves its own target from meta below,
+// checked before the generic meta.type/entity_type path.
+const CUSTOM_TYPE_TARGETS: Record<string, (meta: Record<string, unknown>) => NotificationTarget | null> = {
+  'calllist.target_assigned': (meta) => (meta.campaign_id != null ? { page: 'outreach', id: String(meta.campaign_id) } : null),
+  'opportunity.won': (meta) => (meta.opportunity_id != null ? { page: 'opportunities', id: String(meta.opportunity_id) } : null),
+  'opportunity.lost': (meta) => (meta.opportunity_id != null ? { page: 'opportunities', id: String(meta.opportunity_id) } : null),
+}
+
 // Pure: resolve a notification into a navigable {page, id}, or null when nothing
 // on the row is a real target (a row with no target must stay non-clickable).
+// eslint-disable-next-line react-refresh/only-export-components -- pure helper co-located with its one caller (BEL-DOORKLIK), unit-tested directly; HMR-nicety warning only
 export function resolveNotificationTarget(n: AppNotification): NotificationTarget | null {
-  const meta = (n as { meta?: { type?: string; id?: string | number } }).meta
-  const type = meta?.type ?? (n as { entity_type?: string }).entity_type
-  const rawId = meta?.id ?? (n as { entity_id?: string | number }).entity_id
+  const meta = (n as { meta?: Record<string, unknown> }).meta ?? {}
+  const dataType = (n as { type?: string }).type
+  // Object.hasOwn (not `in`/bracket lookup alone) so a `type` of 'constructor'/
+  // 'toString' can never resolve through Object.prototype (SETTINGS-TABS-FIX-1
+  // review — a plain object literal let those two names return a truthy
+  // non-target, e.g. navigation to '#undefined?open=undefined').
+  const customTarget = dataType && Object.hasOwn(CUSTOM_TYPE_TARGETS, dataType)
+    ? CUSTOM_TYPE_TARGETS[dataType](meta)
+    : undefined
+  if (customTarget) return customTarget
+  const type = (meta.type as string | undefined) ?? (n as { entity_type?: string }).entity_type
+  const rawId = (meta.id as string | number | undefined) ?? (n as { entity_id?: string | number }).entity_id
   const page = type ? ENTITY_PAGE[type] : undefined
   if (page && rawId != null) return { page, id: String(rawId) }
   // Fall back to a same-app hash link the backend already resolved, e.g. "#tasks?open=42".
@@ -97,6 +119,7 @@ export default function NotificationBell() {
         aria-label={t('notifications.title')}
         aria-expanded={open}
         className="flex items-center justify-center transition-colors rounded-lg"
+        // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- topbar icon toggle with its own open-state colour swap (mirrors ChangelogPopover/VariablePicker), not one of Button's fixed variants
         style={{
           position: 'relative', width: 30, height: 30,
           background: open ? 'var(--color-primary-bg)' : 'var(--hover-bg)',
@@ -128,9 +151,9 @@ export default function NotificationBell() {
           background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12,
           boxShadow: 'var(--shadow-float)',
         }}>
-          <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--border)', fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>
+          <SectionTitle style={{ padding: '12px 16px', borderBottom: '1px solid var(--border)' }}>
             {t('notifications.title')}
-          </div>
+          </SectionTitle>
           {items.length === 0 ? (
             <div style={{ padding: '20px 16px', fontSize: 13, fontStyle: 'italic', color: 'var(--text-muted)', textAlign: 'center' }}>
               {t('notifications.empty')}
@@ -153,9 +176,9 @@ export default function NotificationBell() {
                     cursor: clickable ? 'pointer' : 'default',
                   }}
                 >
-                  <div style={{ fontSize: 13, fontWeight: n.seen ? 400 : 600, color: 'var(--text)' }}>{n.title || '—'}</div>
+                  <BodyText style={{ fontWeight: n.seen ? 400 : 600 }}>{n.title || '—'}</BodyText>
                   {n.body && <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{n.body}</div>}
-                  <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{fmt(n.created_at)}</div>
+                  <Caption>{fmt(n.created_at)}</Caption>
                 </div>
               )
             })

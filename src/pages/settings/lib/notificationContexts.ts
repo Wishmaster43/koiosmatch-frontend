@@ -11,6 +11,10 @@
  *   klanten       -> customer.* fires from five daily stagnation/lifecycle commands
  *   matches       -> match.expiring fires from the daily matches:expiring-alerts cron
  *   taken         -> task.due fires from the tasks:notify-due cron
+ *   calllists     -> calllist.target_assigned fires on manual/round-robin/workflow
+ *                    target assignment (NOTIF-CONTEXTEN-FE-1, CMBE 23-08)
+ *   opportunities -> opportunity.won / opportunity.lost fire on every stage change
+ *                    into an is_won/is_lost stage (NOTIF-CONTEXTEN-FE-1, CMBE 23-08)
  * vacatures (vacancy.*) has NO call site at all. facturering (invoice.*) only ever
  * reaches Notifier::sendToSuperAdmins() (GenerateMonthlyInvoices), which targets
  * super admins outside any tenant context and never consults the tenant's
