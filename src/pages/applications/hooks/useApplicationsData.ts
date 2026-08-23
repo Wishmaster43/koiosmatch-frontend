@@ -24,7 +24,7 @@
  * sample AND say so, instead of silently presenting a partial count as the true
  * total (STATS-OOM-1 pattern).
  */
-import { useCallback, useMemo } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import { useQuery, useQueryClient, keepPreviousData } from '@tanstack/react-query'
 import api, { unwrap, unwrapList } from '@/lib/api'
@@ -170,6 +170,25 @@ export function useApplicationsData({ view, filterParams, bucketParam, page, pag
   const loading  = view === 'table' && listQuery.isLoading
   const error    = view === 'table' && listQuery.isError
 
+  // SELECT-RACE-1, content-aware (REFRESH-FIX-2, Opus F2 + B1): on every SETTLED
+  // render (not mid-fetch — with placeholderData the in-flight render still shows
+  // the previous rows) compare the row-id signature with the last settled one and
+  // bump the epoch only when it differs. The first settled render merely SEEDS
+  // the signature (nothing is selectable before rows land) — so a warm-cache
+  // mount, a same-ids refetch (cache invalidation after a field edit, a window-
+  // focus refetch) and a SAME-IDS local setQueryData write (a bulk field edit)
+  // never wipe the bulk selection; a local write that changes the id set (rows
+  // archived away, a created row prepended) and Danny's race (a filtered
+  // response replacing the rows) do — rows that left the page cannot stay selected.
+  const lastRowIdsRef = useRef<string | null>(null)
+  const [rowsEpoch, setRowsEpoch] = useState(0)
+  useEffect(() => {
+    if (listQuery.isFetching) return
+    const sig = (listQuery.data?.applications ?? []).map(r => String(r.id)).join('|')
+    if (lastRowIdsRef.current !== null && sig !== lastRowIdsRef.current) setRowsEpoch(e => e + 1)
+    lastRowIdsRef.current = sig
+  }, [listQuery.isFetching, listQuery.data])
+
   const wideRows    = wideQuery.data?.applications ?? EMPTY_APPLICATIONS
   const wideTotal   = wideQuery.data?.total ?? 0
   const wideLoading = wideQuery.isLoading
@@ -233,5 +252,9 @@ export function useApplicationsData({ view, filterParams, bucketParam, page, pag
   return {
     applications, setApplications, loading, error, total, setTotal, lastPage,
     wideRows, wideLoading, wideError, wideIsPartial, stats, statsFailed,
+    // SELECT-RACE-1: rowsEpoch is the clear-selection trigger; fetching
+    // (isFetching, not isLoading — a background refetch counts too) drives the
+    // header checkbox's inert state while a new table result is in flight.
+    rowsEpoch, fetching: listQuery.isFetching,
   }
 }

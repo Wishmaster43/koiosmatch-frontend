@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useRef, lazy, Suspense } from 'react'
+import { useState, useEffect, useMemo, useCallback, useRef, lazy, Suspense } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Archive, Map as MapIcon, Trash2 } from 'lucide-react'
@@ -144,16 +144,21 @@ export default function CustomersPage({ intent }: { intent?: unknown } = {}) {
   }, [globalSearch, selectedStatus, selectedPhase, selectedOwner, selectedCity, selectedProvince, selectedIndustry, selectedBranch, showArchived, showTrash, dateRange, view, mapCenter, mapRadius, geoFilter])
   const filterKey = JSON.stringify(filterParams)
 
-  useEffect(() => { setPage(1) }, [filterKey])
-  useEffect(() => { setSelectedIds(new Set()) }, [filterKey, page, pageSize])
+  useEffect(() => { setPage(1) }, [filterKey, setPage])
 
   // Transient feedback for bulk mutations, auto-dismissed.
   const notify = (type: string, text: string) => { setActionMsg({ type, text }); if (msgTimer.current) clearTimeout(msgTimer.current); msgTimer.current = setTimeout(() => setActionMsg(null), 4000) }
   useEffect(() => () => { if (msgTimer.current) clearTimeout(msgTimer.current) }, [])
 
   // ── Data layer (§3): list/stats · record/drawer · bulk actions ──
-  const { customers, setCustomers, loading, error, total, setTotal, lastPage, stats, refresh } =
+  const { customers, setCustomers, loading, error, total, setTotal, lastPage, stats, refresh, rowsEpoch, fetching } =
     useCustomersData({ filterParams, page, pageSize, t })
+
+  // SELECT-RACE-1: rowsEpoch (bumped only when a NEW server result actually
+  // lands, see useCustomersData) closes the race where a select-all made
+  // against the stale rows during a filter/page fetch survived the swap — the
+  // input-triggered clear above fires too early to catch that window on its own.
+  useEffect(() => { setSelectedIds(new Set()) }, [filterKey, page, pageSize, rowsEpoch])
   const {
     selected, detail, drawerExpanded, setDrawerExpanded, drawerTab,
     closeDrawer, selectCustomer, updateCustomer, restoreCustomer, handleCreate, addNote, editNote, deleteNote,
@@ -203,13 +208,15 @@ export default function CustomersPage({ intent }: { intent?: unknown } = {}) {
   const tog = (set: Dispatch<SetStateAction<string[]>>) => (v: string) => set(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v])
 
   // Straal-blok apply: PDOK-geocode; found → filter + map sync, not found → hint.
-  const applyGeo = async (q: string, km: number) => {
+  // Stabilized (useCallback) so the filterGroups useMemo below can safely depend
+  // on it — every captured setter is itself stable, only `t` can genuinely change.
+  const applyGeo = useCallback(async (q: string, km: number) => {
     setGeoHint(null)
     const hit = await geocodeNL(q)
     if (!hit) { setGeoHint(t('common:filters.notFound')); return }
     setGeoFilter({ q, km, lat: hit.lat, lng: hit.lng, label: `${hit.label} · ${km} km` })
     setMapCenter({ lat: hit.lat, lng: hit.lng }); setMapRadius(km)
-  }
+  }, [t, setGeoHint, setGeoFilter, setMapCenter, setMapRadius])
 
   // Filter panel config lives in the data/ builder (mirrors buildCandidateFilterGroups).
   const filterGroups = useMemo(() => buildCustomerFilterGroups({
@@ -223,8 +230,11 @@ export default function CustomersPage({ intent }: { intent?: unknown } = {}) {
       clearGeo: () => { setGeoFilter(null); setGeoHint(null) },
     },
     options: { statusOptions, phaseOptions, industryOptions, cityOptions, provinceOptions, ownerOptions, branchOptions },
-  }), [t, selectedStatus, selectedPhase, selectedIndustry, selectedCity, selectedProvince, selectedOwner, selectedBranch,
-      showArchived, dateRange, geoFilter, geoHint, statusOptions, phaseOptions, industryOptions, cityOptions, provinceOptions, ownerOptions, branchOptions]) // eslint-disable-line react-hooks/exhaustive-deps
+  }), [t, selectedStatus, setSelectedStatus, selectedPhase, setSelectedPhase, selectedIndustry, setSelectedIndustry,
+      selectedCity, setSelectedCity, selectedProvince, setSelectedProvince, selectedOwner, setSelectedOwner,
+      selectedBranch, setSelectedBranch, showArchived, setShowArchived, dateRange, setDateRange,
+      geoFilter, geoHint, applyGeo, setGeoFilter, statusOptions, phaseOptions, industryOptions, cityOptions,
+      provinceOptions, ownerOptions, branchOptions])
 
   useEffect(() => {
     registerFilters('customers-page', filterGroups)
@@ -339,6 +349,7 @@ export default function CustomersPage({ intent }: { intent?: unknown } = {}) {
                     <CustomersTable rows={visibleRows} loading={loading} selectedId={selected?.id} onSelect={selectCustomer}
                       onOpenTab={selectCustomer}
                       statusMeta={statusMeta} selectable selectedIds={selectedIds} onToggleRow={toggleRow} onToggleAll={toggleAll}
+                      selectionBusy={fetching}
                       stickyHeader scrollParentRef={tableScrollRef} />
                   </div>
 

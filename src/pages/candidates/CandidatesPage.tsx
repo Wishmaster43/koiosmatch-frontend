@@ -119,13 +119,12 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
     if (intent.location)      setSelectedLocation([intent.location])
     if (intent.created_between)           setDateRange({ param: 'created_between', from: intent.created_between[0], to: intent.created_between[1] })
     else if (intent.last_contact_between) setDateRange({ param: 'last_contact_between', from: intent.last_contact_between[0], to: intent.last_contact_between[1] })
-  }, [intent])
+  }, [intent, setAttentionFilter, setDateRange, setSelectedFunnel, setSelectedLocation, setSelectedOwner, setSelectedStatus])
 
   const handlePageSizeChange = (newSize: number) => { setPageSize(newSize); setPage(1) }
 
   // Filters changed → back to page 1. Visible rows change → drop the bulk selection.
-  useEffect(() => { setPage(1) }, [filterKey])
-  useEffect(() => { setSelectedIds(new Set()) }, [filterKey, page, pageSize])
+  useEffect(() => { setPage(1) }, [filterKey, setPage])
 
   // Show a transient success/error message; replaces any previous one. `action`
   // is optional (e.g. the "Openen" follow-up after a restore/archive) so this
@@ -150,8 +149,14 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
   }
 
   // ── Data layer ──
-  const { candidates, setCandidates, loading, error, total, setTotal, lastPage, stats, statsFailed, locations } =
+  const { candidates, setCandidates, loading, error, total, setTotal, lastPage, stats, statsFailed, locations, rowsEpoch, fetching } =
     useCandidatesData({ filterParams, page, pageSize, t, setActionMsg })
+
+  // SELECT-RACE-1: rowsEpoch (bumped only when a NEW server result actually lands,
+  // see useCandidatesData) closes the race where a select-all made against the
+  // stale rows during the ~4s a filter/page fetch is in flight survived the swap —
+  // the input-triggered clear above fires too early to catch that window on its own.
+  useEffect(() => { setSelectedIds(new Set()) }, [filterKey, page, pageSize, rowsEpoch])
 
   // ── Derived options + donut data + attention counts ──
   const {
@@ -378,7 +383,7 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
           view={view} onToggleView={() => setView(v => (v === 'map' ? 'table' : 'map'))}
           tableScrollRef={tableScrollRef} error={error} filtered={filtered} loading={loading}
           selectedId={selected?.id} onSelectCandidate={selectCandidate}
-          selectedIds={selectedIds} onToggleRow={toggleRow} onToggleAll={toggleAll}
+          selectedIds={selectedIds} onToggleRow={toggleRow} onToggleAll={toggleAll} selectionBusy={fetching}
           page={page} lastPage={lastPage} pageSize={pageSize} pageSizeOptions={pageSizeOptions}
           onPageChange={setPage} onPageSizeChange={handlePageSizeChange}
           mapCenter={mapCenter} mapRadius={mapRadius} mapStraalActive={mapStraalActive}

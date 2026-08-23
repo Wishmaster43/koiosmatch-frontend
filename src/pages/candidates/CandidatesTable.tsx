@@ -10,7 +10,7 @@ import { CANDIDATE_SORT_KEYS } from './hooks/useCandidatesData'
 import Avatar, { NEUTRAL_AVATAR } from '@/components/ui/Avatar'
 import BackofficeCouplingIndicator from '@/components/ui/BackofficeCouplingIndicator'
 import { makeKoiosColumn } from '@/components/ui/koiosColumn'
-import { Caption } from '@/components/ui/typography'
+import { Caption, monoStyle } from '@/components/ui/typography'
 import { useDateFormat } from '@/lib/datetime'
 import { useLookups } from '@/context/LookupsContext'
 import { useApps } from '@/context/AppsContext'
@@ -57,6 +57,9 @@ interface CandidatesTableProps {
   selectedIds?: Set<Id>
   onToggleRow?: (id: Id) => void
   onToggleAll?: (ids: Id[], allSelected: boolean) => void
+  // SELECT-RACE-1: forwarded to DataTable as-is — inert header checkbox while a
+  // new server result is in flight.
+  selectionBusy?: boolean
   stickyHeader?: boolean
   // Virtualization (audit item 7): the vertical scroll container the table sits in.
   scrollParentRef?: RefObject<HTMLElement | null>
@@ -80,7 +83,7 @@ interface CandidatesTableProps {
  * hits. genderColor/lastContactLabel/lastContactIcon are themselves stabilized
  * (useCallback) in their hooks so they don't force this memo to churn.
  */
-export default function CandidatesTable({ rows, loading, selectedId, onSelect, onOpenTab, selectable, selectedIds, onToggleRow, onToggleAll, stickyHeader = false, scrollParentRef, sort, onSortChange }: CandidatesTableProps) {
+export default function CandidatesTable({ rows, loading, selectedId, onSelect, onOpenTab, selectable, selectedIds, onToggleRow, onToggleAll, selectionBusy, stickyHeader = false, scrollParentRef, sort, onSortChange }: CandidatesTableProps) {
   const { t } = useTranslation('candidates')
   const { formatDate } = useDateFormat()
   // LookupsContext is still untyped JS — cast its API to the meta shapes used here.
@@ -154,7 +157,7 @@ export default function CandidatesTable({ rows, loading, selectedId, onSelect, o
         // row's own click-to-open would either double-fire or need stopPropagation
         // contortions; the copy affordance already lives in the drawer chip.
         key: 'referenceNumber', header: t('columns.referenceNumber'), nowrap: true,
-        cellStyle: { color: 'var(--text-muted)', fontSize: 12, fontFamily: 'JetBrains Mono, monospace', fontVariantNumeric: 'tabular-nums' },
+        cellStyle: { color: 'var(--text-muted)', fontSize: 12, ...monoStyle, fontVariantNumeric: 'tabular-nums' },
         sortable: true, sortValue: c => c.referenceNumber ?? '',
         render: c => c.referenceNumber || '—',
       },
@@ -196,6 +199,7 @@ export default function CandidatesTable({ rows, loading, selectedId, onSelect, o
           const target = c.status ? statusTarget(statusMeta(c.status)) : null
           if (!target) return chip
           const linkLabel = target === TARGET_MATCHES ? t('cellLinks.matches') : t('cellLinks.preferences')
+          // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- cell deep-link rendered AS the cell's own chip content via the shared cellButton reset; Button's fixed sm chrome cannot sit invisibly inside a dense table cell (§14 r7 necessity)
           return <button type="button" onClick={e => { e.stopPropagation(); onOpenTab?.(c, target) }} aria-label={linkLabel} style={cellButton}>{chip}</button>
         },
       },
@@ -224,6 +228,7 @@ export default function CandidatesTable({ rows, loading, selectedId, onSelect, o
           const linkLabel = target === TARGET_CONVERSATIONS ? t('cellLinks.conversations') : t('cellLinks.notes')
           return (
             <button type="button" onClick={e => { e.stopPropagation(); onOpenTab?.(c, target) }} title={tip} aria-label={linkLabel}
+              // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- cell deep-link rendered AS the cell's own date+icon content via the shared cellButton reset; Button's fixed sm chrome cannot sit invisibly inside a dense table cell (§14 r7 necessity)
               style={{ ...cellButton, display: 'inline-flex', alignItems: 'center', gap: 5, color: 'var(--text)', fontSize: 12 }}>
               {formatDate(c.lastContactAt)}
               {lookupIcon && <span style={{ display: 'inline-flex', flexShrink: 0, opacity: 0.6 }}><LookupIcon icon={lookupIcon} size={12} /></span>}
@@ -244,8 +249,10 @@ export default function CandidatesTable({ rows, loading, selectedId, onSelect, o
           const target = funnelTarget(m)
           const linkLabel = target === TARGET_MATCHES ? t('cellLinks.matches') : t('cellLinks.applications')
           const jump = (e: { stopPropagation: () => void }) => { e.stopPropagation(); onOpenTab?.(c, target) }
+          // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- cell deep-link rendered AS the cell's own plain-text content via the shared cellButton reset; Button's fixed sm chrome cannot sit invisibly inside a dense table cell (§14 r7 necessity)
           if (!colorFunnel) return <button type="button" onClick={jump} aria-label={linkLabel} style={{ ...plainCell, ...cellButton }}>{label}</button>
           const color = c.stageColor ?? m.color
+          // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- cell deep-link rendered AS the cell's own chip content via the shared cellButton reset; Button's fixed sm chrome cannot sit invisibly inside a dense table cell (§14 r7 necessity)
           return <button type="button" onClick={jump} aria-label={linkLabel} style={cellButton}><SoftChip label={label} color={color} /></button>
         },
       },
@@ -270,6 +277,7 @@ export default function CandidatesTable({ rows, loading, selectedId, onSelect, o
                   </div>
                 )
               })()
+          // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- cell deep-link rendered AS the cell's own chip/text content via the shared cellButton reset; Button's fixed sm chrome cannot sit invisibly inside a dense table cell (§14 r7 necessity)
           return <button type="button" onClick={jump} aria-label={t('cellLinks.preferences')} style={cellButton}>{content}</button>
         },
       },
@@ -291,6 +299,7 @@ export default function CandidatesTable({ rows, loading, selectedId, onSelect, o
                   </div>
                 )
               })()
+          // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- cell deep-link rendered AS the cell's own chip/text content via the shared cellButton reset; Button's fixed sm chrome cannot sit invisibly inside a dense table cell (§14 r7 necessity)
           return <button type="button" onClick={jump} aria-label={t('cellLinks.pools')} style={cellButton}>{content}</button>
         },
       },
@@ -311,6 +320,7 @@ export default function CandidatesTable({ rows, loading, selectedId, onSelect, o
         // of only being a glance-aid nobody can click through from.
         render: c => (
           <button type="button" onClick={e => { e.stopPropagation(); onOpenTab?.(c, TARGET_INTEGRATIONS) }}
+            // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- cell deep-link rendered AS the cell's own coupling-indicator content via the shared cellButton reset; Button's fixed sm chrome cannot sit invisibly inside a dense table cell (§14 r7 necessity)
             aria-label={t('cellLinks.integrations')} style={cellButton}>
             <BackofficeCouplingIndicator helloflexLink={c.helloflexLink} shiftmanagerLink={c.shiftmanagerLink}
               showHelloflex={showHelloflex} showShiftmanager={showShiftmanager} />
@@ -345,6 +355,7 @@ export default function CandidatesTable({ rows, loading, selectedId, onSelect, o
       selectedIds={selectedIds}
       onToggleRow={onToggleRow}
       onToggleAll={onToggleAll}
+      selectionBusy={selectionBusy}
       loading={loading}
       loadingText={t('page.loading')}
       emptyText={t('page.empty')}

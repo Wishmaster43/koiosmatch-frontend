@@ -8,7 +8,7 @@
  * on the way to the server, AND-combined with the existing pagination params.
  */
 import { describe, it, expect, vi, afterEach } from 'vitest'
-import { renderHook, waitFor } from '@testing-library/react'
+import { act, renderHook, waitFor } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { createElement, type ReactNode } from 'react'
 import api from '@/lib/api'
@@ -210,5 +210,98 @@ describe('useCandidatesData · stats stays server-wide (STATS-SCOPE-1)', () => {
       expect(candidatesCallsAfter).toBe(candidatesCallsBefore + 1) // list refetches on the new dimension value
     })
     expect(heavyGetMock).toHaveBeenCalledTimes(1) // stats does not refetch — statsParams stayed {} both times
+  })
+})
+
+// SELECT-RACE-1 (content-aware, REFRESH-FIX-2): rowsEpoch is the page's
+// clear-selection trigger. It bumps ONLY when a settled list result carries a
+// different row-id set than the previous settled one — never on the first rows
+// (nothing selectable yet), never on a same-ids refetch (cache invalidation
+// after a field edit, a window-focus refetch), never on a warm-cache mount, and
+// never on a local setQueryData write (an optimistic bulk mutation).
+describe('useCandidatesData · rowsEpoch (SELECT-RACE-1)', () => {
+  const listMock = (ids: () => number[]) =>
+    vi.mocked(api.get).mockImplementation((url: string) =>
+      url.endsWith('/stats') ? Promise.resolve({ data: { data: null } }) : Promise.resolve({ data: { data: ids().map(id => ({ id })) } }))
+  const clientWrapper = (qc: QueryClient) => ({ children }: { children: ReactNode }) => createElement(QueryClientProvider, { client: qc }, children)
+
+  it('does NOT bump on the initial load: the first rows only seed the signature', async () => {
+    listMock(() => [1])
+    heavyGetMock.mockResolvedValue({ data: { data: null } })
+    const { result } = renderHook(() => useCandidatesData({ filterParams: {}, page: 1, pageSize: 25, t, setActionMsg: vi.fn() }), { wrapper: clientWrapper(new QueryClient({ defaultOptions: { queries: { retry: false } } })) })
+    await waitFor(() => expect(result.current.candidates.length).toBe(1))
+    await new Promise(r => setTimeout(r, 0))
+    expect(result.current.rowsEpoch).toBe(0)
+  })
+
+  // The invariant bulk actions rely on: a SAME-IDS local write (a field edit on
+  // rows already on the page) never bumps. A write that changes the id set
+  // (archive removes a row, create prepends one) DOES bump — by design, rows
+  // that left the page must not stay selected. Asserted after a flushed act,
+  // never behind a bare setTimeout (Opus: that was a timing-fragile false green).
+  it('CRITICAL GUARD: a same-ids optimistic setCandidates/setTotal write never bumps rowsEpoch', async () => {
+    listMock(() => [1])
+    heavyGetMock.mockResolvedValue({ data: { data: null } })
+    const { result } = renderHook(() => useCandidatesData({ filterParams: {}, page: 1, pageSize: 25, t, setActionMsg: vi.fn() }), { wrapper: clientWrapper(new QueryClient({ defaultOptions: { queries: { retry: false } } })) })
+    await waitFor(() => expect(result.current.candidates.length).toBe(1))
+    // Mirrors a bulk field mutation's optimistic update — same rows, new field values.
+    await act(async () => { result.current.setCandidates(prev => prev.map(r => ({ ...r, touched: true }) as unknown as (typeof prev)[number])) })
+    await act(async () => { result.current.setTotal(prev => prev) })
+    await act(async () => {})
+    expect(result.current.rowsEpoch).toBe(0)
+  })
+
+  it('bumps rowsEpoch when an optimistic write CHANGES the id set (rows leaving the page must not stay selected)', async () => {
+    listMock(() => [1, 2])
+    heavyGetMock.mockResolvedValue({ data: { data: null } })
+    const { result } = renderHook(() => useCandidatesData({ filterParams: {}, page: 1, pageSize: 25, t, setActionMsg: vi.fn() }), { wrapper: clientWrapper(new QueryClient({ defaultOptions: { queries: { retry: false } } })) })
+    await waitFor(() => expect(result.current.candidates.length).toBe(2))
+    // Mirrors a bulk archive's optimistic removal of one row.
+    await act(async () => { result.current.setCandidates(prev => prev.filter(r => String(r.id) !== '2')) })
+    await waitFor(() => expect(result.current.rowsEpoch).toBe(1))
+  })
+
+  it('bumps rowsEpoch when a settled refetch lands a DIFFERENT row set (new filterParams)', async () => {
+    let n = 0
+    listMock(() => [++n])
+    heavyGetMock.mockResolvedValue({ data: { data: null } })
+    const { result, rerender } = renderHook(
+      ({ filterParams }) => useCandidatesData({ filterParams, page: 1, pageSize: 25, t, setActionMsg: vi.fn() }),
+      { wrapper: clientWrapper(new QueryClient({ defaultOptions: { queries: { retry: false } } })), initialProps: { filterParams: { status: ['available'] } as Record<string, unknown> } },
+    )
+    await waitFor(() => expect(result.current.candidates.length).toBe(1))
+    rerender({ filterParams: { status: ['placed'] } })
+    await waitFor(() => expect(result.current.rowsEpoch).toBe(1))
+  })
+
+  it('does NOT bump when a refetch resolves the same row set (invalidate / focus)', async () => {
+    listMock(() => [1])
+    heavyGetMock.mockResolvedValue({ data: { data: null } })
+    const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+    const { result } = renderHook(() => useCandidatesData({ filterParams: {}, page: 1, pageSize: 25, t, setActionMsg: vi.fn() }), { wrapper: clientWrapper(qc) })
+    await waitFor(() => expect(result.current.candidates.length).toBe(1))
+    const calls = vi.mocked(api.get).mock.calls.length
+    await act(async () => { await qc.invalidateQueries() })
+    await waitFor(() => expect(vi.mocked(api.get).mock.calls.length).toBeGreaterThan(calls))
+    await new Promise(r => setTimeout(r, 0))
+    expect(result.current.rowsEpoch).toBe(0)
+  })
+
+  // Opus B1: a WARM-CACHE mount (fresh list in the cache, no mount fetch) must
+  // seed the signature from the cached rows, so the first later refetch with the
+  // same ids does not wipe a selection made in the meantime.
+  it('does NOT bump on the first refetch after a warm-cache mount', async () => {
+    listMock(() => [1])
+    heavyGetMock.mockResolvedValue({ data: { data: null } })
+    const qc = new QueryClient({ defaultOptions: { queries: { retry: false, staleTime: 30_000 } } })
+    qc.setQueryData(['candidates', {}, 1, 25, undefined], { candidates: [{ id: 1 }], total: 1, lastPage: 1 })
+    const { result } = renderHook(() => useCandidatesData({ filterParams: {}, page: 1, pageSize: 25, t, setActionMsg: vi.fn() }), { wrapper: clientWrapper(qc) })
+    await waitFor(() => expect(result.current.candidates.length).toBe(1))
+    await new Promise(r => setTimeout(r, 0))
+    expect(result.current.rowsEpoch).toBe(0)
+    await act(async () => { await qc.invalidateQueries() })
+    await waitFor(() => expect(result.current.candidates.length).toBe(1))
+    await new Promise(r => setTimeout(r, 0))
+    expect(result.current.rowsEpoch).toBe(0)
   })
 })

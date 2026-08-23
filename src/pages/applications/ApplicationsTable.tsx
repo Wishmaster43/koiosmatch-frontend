@@ -9,9 +9,10 @@ import EntityNameCell from '@/components/ui/EntityNameCell'
 import StatusPill from '@/components/ui/StatusPill'
 import CandidateStatusChip from '@/components/ui/CandidateStatusChip'
 import { makeKoiosColumn } from '@/components/ui/koiosColumn'
-// HUISSTIJL-1: the interview step count is JetBrains Mono — exact match for
-// the shared Mono atom (size/colour kept via style since they ride with context).
-import { Mono } from '@/components/ui/typography'
+// HUISSTIJL-1: the interview step count rides the Caption atom's own 11px/muted
+// identity, with the raw monoStyle identity layered on for JetBrains Mono digits;
+// the two plain mono cellStyle objects below reuse the same raw identity.
+import { Caption, monoStyle } from '@/components/ui/typography'
 import type { Application } from '@/types/application'
 import type { Id } from '@/types/common'
 import { useAllSettings, getBoolSetting } from '@/lib/settings/useAllSettings'
@@ -46,6 +47,9 @@ interface ApplicationsTableProps {
   selectedIds?: Set<Id>
   onToggleRow?: (id: Id) => void
   onToggleAll?: (ids: Id[], allSelected: boolean) => void
+  // SELECT-RACE-1: forwarded to DataTable as-is — inert header checkbox while a
+  // new server result is in flight.
+  selectionBusy?: boolean
   // Virtualization (F-7): the vertical scroll container this table lives in —
   // opt-in, forwarded straight to DataTable (mirrors CustomersTable/VacanciesTable).
   scrollParentRef?: RefObject<HTMLElement | null>
@@ -61,7 +65,7 @@ interface ApplicationsTableProps {
  * selection, hover and the loading/empty states. Mirrors MatchesTable.
  */
 export default function ApplicationsTable({ rows, loading, error, selectedId, onSelect, stickyHeader = false,
-  selectable, selectedIds, onToggleRow, onToggleAll, scrollParentRef, sort, onSortChange }: ApplicationsTableProps) {
+  selectable, selectedIds, onToggleRow, onToggleAll, selectionBusy, scrollParentRef, sort, onSortChange }: ApplicationsTableProps) {
   const { t } = useTranslation('applications')
   const { formatDate } = useDateFormat()
   // Tenant display settings (Settings → Applications → Table display). Coloured
@@ -98,7 +102,7 @@ export default function ApplicationsTable({ rows, loading, error, selectedId, on
       // matches/tasks put theirs. Plain mono text, not the click-to-copy chip: a
       // button nested inside this row's own click-to-open would double-fire.
       key: 'referenceNumber', header: t('cols.referenceNumber'), nowrap: true,
-      cellStyle: { color: 'var(--text-muted)', fontSize: 12, fontFamily: 'JetBrains Mono, monospace', fontVariantNumeric: 'tabular-nums' },
+      cellStyle: { color: 'var(--text-muted)', fontSize: 12, ...monoStyle, fontVariantNumeric: 'tabular-nums' },
       sortable: true, sortValue: r => r.referenceNumber ?? '', render: r => r.referenceNumber || '—',
     },
     // Vacancy — single-line clamp so long titles don't blow up the row. PDF
@@ -162,10 +166,10 @@ export default function ApplicationsTable({ rows, loading, error, selectedId, on
           style={{ display: 'inline-flex', alignItems: 'center', gap: 6, whiteSpace: 'nowrap', cursor: 'pointer' }}>
           <StatusPill label={t(`interview.category.${r.interview.category}`)} color={interviewCategoryColor(r.interview.category)} />
           {r.interview.total > 0 && (
-            <Mono style={{ fontSize: 11, color: 'var(--text-muted)' }}
+            <Caption as="span" style={monoStyle}
               title={t('interview.stepOf', { step: r.interview.step ?? '–', total: r.interview.total })}>
               {r.interview.step ?? '–'}/{r.interview.total}
-            </Mono>
+            </Caption>
           )}
         </span>
       ) : <span style={{ color: 'var(--text-muted)' }}>—</span> },
@@ -182,7 +186,7 @@ export default function ApplicationsTable({ rows, loading, error, selectedId, on
     // the threshold on the frontend.
     { key: 'daysInPhase', header: t('cols.daysInPhase'), align: 'right', sortable: true,
       sortValue: r => daysSince(r.currentStageEnteredAt) ?? null,
-      cellStyle: { fontFamily: 'JetBrains Mono, monospace', fontVariantNumeric: 'tabular-nums' },
+      cellStyle: { ...monoStyle, fontVariantNumeric: 'tabular-nums' },
       render: r => {
         const days = daysSince(r.currentStageEnteredAt)
         if (days == null) return <span style={{ color: 'var(--text-muted)' }}>—</span>
@@ -235,6 +239,7 @@ export default function ApplicationsTable({ rows, loading, error, selectedId, on
       selectedIds={selectedIds}
       onToggleRow={onToggleRow}
       onToggleAll={onToggleAll}
+      selectionBusy={selectionBusy}
       scrollParentRef={scrollParentRef}
     />
   )

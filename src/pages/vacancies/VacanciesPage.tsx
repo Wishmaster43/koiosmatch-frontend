@@ -5,7 +5,7 @@
  * + filters, and renders the insights row + status tabs + table + drawer. Page-
  * scoped VacancyLookupsProvider so the table/drawer/modal/bulk share one fetch.
  */
-import { useState, useEffect, useMemo, useRef, lazy, Suspense } from 'react'
+import { useState, useEffect, useMemo, useCallback, useRef, lazy, Suspense } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useRightPanel } from '@/context/RightPanelContext'
@@ -138,10 +138,9 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
   const filterKey = JSON.stringify(filterParams)
 
   // Filters changed → back to page 1; the visible rows change → drop the selection.
-  useEffect(() => { setPage(1) }, [filterKey])
+  useEffect(() => { setPage(1) }, [filterKey, setPage])
   // Column sort item 4: a new sort also resets to page 1 (mirrors ApplicationsPage).
-  useEffect(() => { setPage(1) }, [sort])
-  useEffect(() => { setSelectedIds(new Set()) }, [filterKey, page, pageSize])
+  useEffect(() => { setPage(1) }, [sort, setPage])
 
   const notify = (type: string, text: string) => {
     setActionMsg({ type, text })
@@ -151,9 +150,15 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
   useEffect(() => () => { if (msgTimer.current) clearTimeout(msgTimer.current) }, [])
 
   // ── Data layer ──
-  const { vacancies, setVacancies, loading, error, total, setTotal, lastPage, stats, customers, refresh } =
+  const { vacancies, setVacancies, loading, error, total, setTotal, lastPage, stats, customers, refresh, rowsEpoch, fetching } =
     useVacanciesData({ filterParams, page, pageSize, t, sort })
   const customerList = customers as { id: Id; name: string }[]
+
+  // SELECT-RACE-1: rowsEpoch (bumped only when a NEW server result actually
+  // lands, see useVacanciesData) closes the race where a select-all made
+  // against the stale rows during a filter/page fetch survived the swap — the
+  // input-triggered clear above fires too early to catch that window on its own.
+  useEffect(() => { setSelectedIds(new Set()) }, [filterKey, page, pageSize, rowsEpoch])
 
   // Three lifecycle views (TRASH-OVERAL-2, mirrors candidates): trash = pending_erase,
   // archived = archived only (so pending rows never double-show), default = not
@@ -225,14 +230,16 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
   const pickOne = (set: Dispatch<SetStateAction<string[]>>) => (v: string | undefined) => { if (v != null) toggleOneValue(set, v) }
 
   // FILTER-PARITY-1: PDOK-geocode a place/postcode for the sidebar radius filter
-  // (mirrors CustomersPage's own applyGeo).
-  const applyGeo = async (q: string, km: number) => {
+  // (mirrors CustomersPage's own applyGeo). Stabilized (useCallback) so the
+  // filterGroups useMemo below can safely depend on it — every captured setter
+  // is itself stable, only `t` can genuinely change.
+  const applyGeo = useCallback(async (q: string, km: number) => {
     setGeoHint(null)
     const hit = await geocodeNL(q)
     if (!hit) { setGeoHint(t('common:filters.notFound')); return }
     setGeoFilter({ q, km, lat: hit.lat, lng: hit.lng, label: `${hit.label} · ${km} km` })
-  }
-  const clearGeo = () => { setGeoFilter(null); setGeoHint(null) }
+  }, [t, setGeoHint, setGeoFilter])
+  const clearGeo = useCallback(() => { setGeoFilter(null); setGeoHint(null) }, [setGeoFilter, setGeoHint])
 
   // Register the right-panel filters. Config lives in the data/ builder (mirrors
   // buildCandidateFilterGroups/buildCustomerFilterGroups) — owner/client/functie/
@@ -254,8 +261,11 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
       },
       options: { statusOptions, agentOptions },
     }),
-  ], [t, catOrg, selectedOwner, selectedClient, selectedCategory, selectedBranch, ownerOptions, clientOptions, categoryOptions, branchOptions,
-    statusBucket, publishedBucket, selectedAgentId, showWithoutAgent, hasApplications, showArchived, geoFilter, geoHint, statusOptions, agentOptions]) // eslint-disable-line react-hooks/exhaustive-deps
+  ], [t, catOrg, selectedOwner, setSelectedOwner, selectedClient, setSelectedClient, selectedCategory, setSelectedCategory,
+    selectedBranch, setSelectedBranch, ownerOptions, clientOptions, categoryOptions, branchOptions,
+    statusBucket, setStatusBucket, publishedBucket, setPublishedBucket, selectedAgentId, setSelectedAgentId,
+    showWithoutAgent, setShowWithoutAgent, hasApplications, setHasApplications, showArchived, setShowArchived,
+    geoFilter, geoHint, applyGeo, clearGeo, statusOptions, agentOptions])
 
   useEffect(() => {
     registerFilters('vacancies-page', filterGroups)
@@ -379,6 +389,7 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
                       selectedIds={selectedIds}
                       onToggleRow={toggleRow}
                       onToggleAll={toggleAll}
+                      selectionBusy={fetching}
                       stickyHeader
                       scrollParentRef={tableScrollRef}
                       sort={sort as ControlledSort | null}

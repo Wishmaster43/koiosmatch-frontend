@@ -51,6 +51,9 @@ interface VacanciesTableProps {
   selectedIds?: Set<Id>
   onToggleRow?: (id: Id) => void
   onToggleAll?: (ids: Id[], allSelected: boolean) => void
+  // SELECT-RACE-1: forwarded to DataTable as-is — inert header checkbox while a
+  // new server result is in flight.
+  selectionBusy?: boolean
   stickyHeader?: boolean
   scrollParentRef?: RefObject<HTMLElement | null>
   // SWEEP-TABLES / DATATABLE-SORT-1: controlled-sort escape hatch — forwarded to
@@ -65,7 +68,7 @@ interface VacanciesTableProps {
  * sorting, selection and the loading/empty states live in the shared DataTable.
  * Mirrors CandidatesTable / ApplicationsTable.
  */
-export default function VacanciesTable({ rows, loading, selectedId, onSelect, onOpenCandidateSearch, onOpenApplicants, onOpenMatches, selectable, selectedIds, onToggleRow, onToggleAll, stickyHeader = false, scrollParentRef, sort, onSortChange }: VacanciesTableProps) {
+export default function VacanciesTable({ rows, loading, selectedId, onSelect, onOpenCandidateSearch, onOpenApplicants, onOpenMatches, selectable, selectedIds, onToggleRow, onToggleAll, selectionBusy, stickyHeader = false, scrollParentRef, sort, onSortChange }: VacanciesTableProps) {
   const { t } = useTranslation(['vacancies', 'common'])
   const { formatDate } = useDateFormat()
   const { statuses = [], statusMeta } = useVacancyLookups()
@@ -300,6 +303,7 @@ export default function VacanciesTable({ rows, loading, selectedId, onSelect, on
       selectedIds={selectedIds}
       onToggleRow={onToggleRow}
       onToggleAll={onToggleAll}
+      selectionBusy={selectionBusy}
       loading={loading}
       loadingText={t('page.loading')}
       emptyText={t('page.empty')}

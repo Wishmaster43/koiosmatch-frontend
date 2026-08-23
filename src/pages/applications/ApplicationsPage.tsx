@@ -39,6 +39,7 @@ import { buildApplicationFilterGroups } from './data/applicationFilterGroups'
 import type { Application } from '@/types/application'
 import type { Id } from '@/types/common'
 import Button from '@/components/ui/Button'
+import { tintBg, tintBorder } from '@/lib/tint'
 
 // Right-panel multi-toggle for a filter dimension.
 const tog = (set: Dispatch<SetStateAction<string[]>>) => (v: string) => set(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v])
@@ -106,14 +107,18 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
   // that feeds the board and — only when stats itself failed — the same figures'
   // fallback. See useApplicationsData's header comment for the verified contract.
   const { applications, setApplications, loading, error, total, setTotal, lastPage,
-    wideRows, wideLoading, wideError, wideIsPartial, stats, statsFailed } =
+    wideRows, wideLoading, wideError, wideIsPartial, stats, statsFailed, rowsEpoch, fetching } =
     useApplicationsData({ view, filterParams, bucketParam, page, pageSize, funnelTypes, sort })
   const [selectedIds,    setSelectedIds]    = useState<Set<Id>>(() => new Set())
 
   // Clear the selection whenever the visible set changes (bucket/filters/paging).
+  // SELECT-RACE-1: rowsEpoch (bumped only when a NEW server result actually
+  // lands, see useApplicationsData) closes the race where a select-all made
+  // against the stale rows during a filter/page fetch survived the swap — the
+  // input-triggered clear above fires too early to catch that window on its own.
   useEffect(() => { setSelectedIds(new Set()) },
     [bucket, showArchived, showTrash, interviewBusy, interviewPaused, page, pageSize,
-      selectedPhase, selectedOwner, selectedSource, selectedVac, selectedClient, query])
+      selectedPhase, selectedOwner, selectedSource, selectedVac, selectedClient, query, rowsEpoch])
 
   // Board columns = the funnel lookup, normalised to { key, label, color }.
   const phases = useMemo<BoardPhase[]>(() => funnelTypes.map(f => ({ key: f.value, label: f.label, color: f.color })), [funnelTypes])
@@ -180,8 +185,10 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
       bucketOptions, phaseOptions: asOptions(phaseData), ownerOptions: asOptions(ownerData), sourceOptions: asOptions(sourceData),
       vacOptions, clientOptions, branchOptions,
     },
-  }), [t, bucket, selectedPhase, selectedOwner, selectedSource, selectedVac, selectedClient, selectedBranch,
-    showArchived, showTrash, dateRange, bucketOptions, phaseData, ownerData, sourceData, vacOptions, clientOptions, branchOptions]) // eslint-disable-line react-hooks/exhaustive-deps
+  }), [t, bucket, setBucket, selectedPhase, setSelectedPhase, selectedOwner, setSelectedOwner, selectedSource, setSelectedSource,
+    selectedVac, setSelectedVac, selectedClient, setSelectedClient, selectedBranch, setSelectedBranch,
+    showArchived, setShowArchived, showTrash, setShowTrash, dateRange, setDateRange,
+    bucketOptions, phaseData, ownerData, sourceData, vacOptions, clientOptions, branchOptions])
 
   useEffect(() => {
     registerFilters('applications-page', filterGroups)
@@ -191,7 +198,7 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
   // Reset to the first page whenever the bucket, any filter, or the sort changes
   // (DATATABLE-SORT-1: a new order restarts pagination, same as every filter above).
   useEffect(() => { setPage(1) }, [bucket, attention, selectedPhase, selectedOwner, selectedSource, selectedVac,
-    selectedClient, showArchived, showTrash, dateRange, interviewBusy, interviewPaused, query, selectedCandidateIds, sort])
+    selectedClient, showArchived, showTrash, dateRange, interviewBusy, interviewPaused, query, selectedCandidateIds, sort, setPage])
 
   // TABLE rows: the server's page — W27: now narrowed server-side by every filter
   // (bucket/phase_key/vacancy_id/owner_id/source/customer_id/search-or-ref/
@@ -233,7 +240,7 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
     // D6 dashboard tiles ("too long in stage" / "missing appointment") arrive as a
     // semantic attention intent — activate the matching server-wide filter.
     if (i?.attention) setAttention(i.attention)
-  }, [intent])
+  }, [intent, setAttention, setSelectedCandidateIds, setSelectedPhase, setSelectedVac])
 
   // A freshly created application: prepend to the list, bump the server-total
   // (F-6: total is no longer derived from the loaded array's length) and open its drawer.
@@ -308,15 +315,16 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
                 (independent of the general clear-filters button above). */}
             {selectedCandidateIds.length > 0 && (
               <div style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 10px', borderRadius: 7,
-                background: 'color-mix(in srgb, var(--color-primary) 10%, transparent)',
-                border: '1px solid color-mix(in srgb, var(--color-primary) 30%, transparent)',
+                // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- tintBg/tintBorder ARE the canonical §4 tint helpers; the primary token here is only their argument, not a hand-painted fill
+                background: tintBg('var(--color-primary)'),
+                border: tintBorder('var(--color-primary)'),
                 color: 'var(--color-primary-text)', fontSize: 12, fontWeight: 500 }}>
                 <Users size={13} />
                 {t('page.scopedBySelection', { count: selectedCandidateIds.length })}
-                <button onClick={() => setSelectedCandidateIds([])} aria-label={t('page.clearScope')}
-                  style={{ display: 'flex', border: 'none', background: 'none', color: 'inherit', cursor: 'pointer', padding: 0 }}>
+                <Button variant="ghostAccent" iconOnly size="sm" onClick={() => setSelectedCandidateIds([])}
+                  aria-label={t('page.clearScope')}>
                   <X size={13} />
-                </button>
+                </Button>
               </div>
             )}
           </div>
@@ -365,6 +373,7 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
               <ApplicationsTable rows={tableRows} loading={loading} error={error}
                 selectedId={selected?.id} onSelect={selectApplication} stickyHeader
                 selectable selectedIds={selectedIds} onToggleRow={toggleRow} onToggleAll={toggleAll}
+                selectionBusy={fetching}
                 scrollParentRef={tableScrollRef} sort={sort} onSortChange={setSort} />
             </div>
             <PaginationBar page={page} totalPages={lastPage} totalRows={total}

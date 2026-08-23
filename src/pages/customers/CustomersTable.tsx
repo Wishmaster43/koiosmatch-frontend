@@ -14,6 +14,8 @@ import { useCustomerPhases } from '@/lib/useCustomerPhases'
 import { useCustomerAdvice } from '@/lib/useCustomerAdvice'
 import type { Customer } from '@/types/customer'
 import type { Id } from '@/types/common'
+// Raw mono identity from the typography atom (HUISSTIJL: the font name lives in ONE place).
+import { monoStyle } from '@/components/ui/typography'
 
 const mutedCell: CSSProperties = { color: 'var(--text-muted)', fontSize: 12 }
 const plainCell: CSSProperties = { color: 'var(--text)', fontSize: 12 }
@@ -31,6 +33,9 @@ interface CustomersTableProps {
   selectedIds?: Set<Id>
   onToggleRow?: (id: Id) => void
   onToggleAll?: (ids: Id[], allSelected: boolean) => void
+  // SELECT-RACE-1: forwarded to DataTable as-is — inert header checkbox while a
+  // new server result is in flight.
+  selectionBusy?: boolean
   stickyHeader?: boolean
   scrollParentRef?: RefObject<HTMLElement | null>
 }
@@ -52,7 +57,7 @@ const nameEllipsis: CSSProperties = { overflow: 'hidden', textOverflow: 'ellipsi
  */
 export default function CustomersTable({
   rows, loading, selectedId, onSelect, onOpenTab, statusMeta,
-  selectable = false, selectedIds, onToggleRow, onToggleAll,
+  selectable = false, selectedIds, onToggleRow, onToggleAll, selectionBusy,
   stickyHeader = false, scrollParentRef,
 }: CustomersTableProps) {
   const { t } = useTranslation('customers')
@@ -97,7 +102,7 @@ export default function CustomersTable({
       // a click-to-copy button nested inside this row's own click-to-open would either
       // double-fire or need stopPropagation contortions; the drawer chip already copies.
       key: 'referenceNumber', header: t('cols.referenceNumber'), nowrap: true,
-      cellStyle: { ...mutedCell, fontFamily: 'JetBrains Mono, monospace', fontVariantNumeric: 'tabular-nums' },
+      cellStyle: { ...mutedCell, ...monoStyle, fontVariantNumeric: 'tabular-nums' },
       sortable: true, sortValue: c => c.referenceNumber ?? '', render: c => c.referenceNumber || '—',
     },
     { key: 'industry',    header: t('cols.industry'),    nowrap: true, cellStyle: mutedCell, sortable: true, sortValue: c => c.industry, render: c => c.industry || '—' },
@@ -133,17 +138,22 @@ export default function CustomersTable({
     // Counts deep-link to the matching drawer tab (Danny 2026-07-14) — zero still
     // clicks through (lands on the tab's own empty state + CTA).
     { key: 'locations',   header: t('cols.locations'),   nowrap: true, align: 'right', cellStyle: mutedCell, sortable: true, sortValue: c => c.locationsCount,
+      // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- count deep-link rendered AS the cell's own mono number; Button's fixed sm footprint cannot sit inside a 12px table cell (§14 r7 necessity)
       render: c => <button style={countBtn} onClick={e => { e.stopPropagation(); onOpenTab?.(c, 'locations') }}>{c.locationsCount}</button> },
     { key: 'departments', header: t('cols.departments'), nowrap: true, align: 'right', cellStyle: mutedCell, sortable: true, sortValue: c => c.departmentsCount,
+      // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- count deep-link rendered AS the cell's own mono number; Button's fixed sm footprint cannot sit inside a 12px table cell (§14 r7 necessity)
       render: c => <button style={countBtn} onClick={e => { e.stopPropagation(); onOpenTab?.(c, 'departments') }}>{c.departmentsCount}</button> },
     { key: 'contacts',    header: t('cols.contacts'),    nowrap: true, align: 'right', cellStyle: mutedCell, sortable: true, sortValue: c => c.contactsCount,
+      // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- count deep-link rendered AS the cell's own mono number; Button's fixed sm footprint cannot sit inside a 12px table cell (§14 r7 necessity)
       render: c => <button style={countBtn} onClick={e => { e.stopPropagation(); onOpenTab?.(c, 'contacts') }}>{c.contactsCount}</button> },
     { key: 'openVacancies', header: t('cols.openVacancies'), nowrap: true, align: 'right', cellStyle: mutedCell, sortable: true, sortValue: c => c.openVacanciesCount,
+      // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- count deep-link rendered AS the cell's own mono number; Button's fixed sm footprint cannot sit inside a 12px table cell (§14 r7 necessity)
       render: c => <button style={countBtn} onClick={e => { e.stopPropagation(); onOpenTab?.(c, 'vacancies') }}>{c.openVacanciesCount}</button> },
     // K8b: active-matches count, same ghost-button deep-link as openVacancies —
     // deep-links to the drawer's own "matches" tab (mapCustomer.ts already maps
     // activeMatchesCount, this column was simply missing).
     { key: 'activeMatches', header: t('cols.matches'), nowrap: true, align: 'right', cellStyle: mutedCell, sortable: true, sortValue: c => c.activeMatchesCount,
+      // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- count deep-link rendered AS the cell's own mono number; Button's fixed sm footprint cannot sit inside a 12px table cell (§14 r7 necessity)
       render: c => <button style={countBtn} onClick={e => { e.stopPropagation(); onOpenTab?.(c, 'matches') }}>{c.activeMatchesCount}</button> },
     // Shared Koios column factory (Danny 05-08 consistency pass) — same header,
     // sort and cell as every other entity table; only the resolver differs.
@@ -158,6 +168,7 @@ export default function CustomersTable({
       // Koppelingen tab, so a recruiter never has to open the drawer just to
       // check/fix a coupling.
       render: c => (
+        // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- cell deep-link rendered AS the cell's own coupling-indicator content; Button's fixed sm footprint cannot sit inside a dense table cell (§14 r7 necessity)
         <button type="button" style={countBtn} onClick={e => { e.stopPropagation(); onOpenTab?.(c, 'koppelingen') }}
           aria-label={t('cols.coupling')}>
           <BackofficeCouplingIndicator helloflexLink={c.helloflexLink} shiftmanagerLink={c.shiftmanagerLink}
@@ -189,6 +200,7 @@ export default function CustomersTable({
       selectedIds={selectedIds}
       onToggleRow={onToggleRow}
       onToggleAll={onToggleAll}
+      selectionBusy={selectionBusy}
       stickyHeader={stickyHeader}
       scrollParentRef={scrollParentRef}
       defaultSort={{ key: 'created', dir: 'desc' }}

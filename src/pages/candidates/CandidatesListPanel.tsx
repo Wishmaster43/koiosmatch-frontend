@@ -67,6 +67,9 @@ interface CandidatesListPanelProps {
   selectedIds: Set<Id>
   onToggleRow: (id: Id) => void
   onToggleAll: (ids: Id[], allSelected: boolean) => void
+  // SELECT-RACE-1: true while the list query is fetching a NEW server result —
+  // forwarded to the table's header select-all checkbox to keep it inert then.
+  selectionBusy?: boolean
   page: number
   lastPage: number
   pageSize: number
@@ -91,7 +94,7 @@ export default function CandidatesListPanel({
   anyFilterActive, onClearFilters, blacklistActive, onToggleBlacklist,
   showArchived, onToggleArchived, showTrash, onToggleTrash, view, onToggleView,
   tableScrollRef, error, filtered, loading, selectedId, onSelectCandidate,
-  selectedIds, onToggleRow, onToggleAll, page, lastPage, pageSize, pageSizeOptions, onPageChange, onPageSizeChange,
+  selectedIds, onToggleRow, onToggleAll, selectionBusy, page, lastPage, pageSize, pageSizeOptions, onPageChange, onPageSizeChange,
   mapCenter, mapRadius, mapStraalActive, onMapCenterChange, onMapRadiusChange, onMapClearRadius,
 }: CandidatesListPanelProps) {
   const { t } = useTranslation(['candidates', 'common'])
@@ -147,6 +150,7 @@ export default function CandidatesListPanel({
                   selectedIds={selectedIds}
                   onToggleRow={onToggleRow}
                   onToggleAll={onToggleAll}
+                  selectionBusy={selectionBusy}
                   stickyHeader
                   scrollParentRef={tableScrollRef}
                 />
