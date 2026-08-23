@@ -47,7 +47,9 @@ export default function EntityChangelog({ subjectType, subjectId, logName, endpo
     // /candidates|/vacancies) passes it via `endpoint`; params only apply to the
     // generic /activity-log form.
     api.get(endpoint ?? '/activity-log', endpoint ? { signal: ctrl.signal } : { params, signal: ctrl.signal })
-      .then(res => setItems(unwrapList<ActivityEntry>(res).rows))
+      // Array guard (CHANGELOG-FLAKE-1): a malformed/non-list payload must render
+      // the empty state, never crash items.map in an async window.
+      .then(res => { const rows = unwrapList<ActivityEntry>(res).rows; setItems(Array.isArray(rows) ? rows : []) })
       .catch(() => { if (!ctrl.signal.aborted) setItems([]) })
       .finally(() => { if (!ctrl.signal.aborted) setLoading(false) })
     return () => ctrl.abort()

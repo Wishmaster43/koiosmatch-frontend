@@ -25,6 +25,15 @@ describe('EntityChangelog', () => {
     ))
   })
 
+  // CHANGELOG-FLAKE-1: a malformed payload whose rows are NOT an array must
+  // degrade to the empty state, never crash items.map in an async window (the
+  // uncaught-exception noise the full suite carried).
+  it('renders the empty state when the payload rows are not an array', async () => {
+    vi.mocked(api.get).mockResolvedValue({ data: { data: { unexpected: 'object' } } })
+    render(<EntityChangelog subjectType="Location" subjectId="loc-1" />)
+    await waitFor(() => expect(screen.getByText(/geen entries gevonden|no entries/i)).toBeInTheDocument())
+  })
+
   // F1c: an entity with a dedicated activity route passes it via `endpoint` —
   // the request hits that URL verbatim, without /activity-log params.
   it('requests the dedicated endpoint verbatim when given', async () => {
