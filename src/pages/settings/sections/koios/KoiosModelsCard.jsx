@@ -7,8 +7,9 @@
  *
  * KOIOS-MODEL-UI-1 (Danny 23-08, screenshot: "hoe kan ik nu zien welk model er
  * gekoppeld is? ... de klant kan alleen kiezen VAN het model"): two fixes.
- * (1) the active tier now also carries an explicit check mark (SegmentedControl's
- * showActiveCheck) — the tint-only delta reads too subtly on its own. (2) the raw
+ * (1) the active tier now also carries an explicit check mark — SegmentedControl's
+ * showActiveCheck is on by DEFAULT since SEGMENTED-CHECK-SWEEP-1, so this card no
+ * longer passes it explicitly. (2) the raw
  * vendor model id (claude-sonnet-5, ...) is a PLATFORM config detail, not a tenant
  * fact: it now shows only to a super admin (Danny's own "which model is this"
  * question), never to a normal tenant user.
@@ -88,7 +89,7 @@ export default function KoiosModelsCard({ models, t, onChanged }) {
       {activeUnknown && (
         <div role="status" style={{ fontSize: 12, color: 'var(--color-warning-text)', marginBottom: 8 }}>{t('models.activeUnknown')}</div>
       )}
-      <SegmentedControl commitOnFocus={false} showActiveCheck options={modelOptions} value={active ?? ''} onChange={pick} ariaLabel={t('models.title')} />
+      <SegmentedControl commitOnFocus={false} options={modelOptions} value={active ?? ''} onChange={pick} ariaLabel={t('models.title')} />
 
       {error && <div style={{ fontSize: 12, color: 'var(--color-danger-text)', marginTop: 10 }}>{error}</div>}
     </div>

@@ -105,23 +105,31 @@ it('with commitOnFocus=false, arrows move focus without selecting; Enter commits
 })
 })
 
-// KOIOS-MODEL-UI-1 (Danny 23-08): a plain tint-only delta between active/inactive
-// options can read as "identically tinted" at a glance — showActiveCheck adds an
-// explicit check mark on top, opt-in so every other caller's look is unchanged.
+// KOIOS-MODEL-UI-1 (Danny 23-08) + SEGMENTED-CHECK-SWEEP-1 (Danny GO, 23-08): a
+// plain tint-only delta between active/inactive options can read as "identically
+// tinted" at a glance — showActiveCheck adds an explicit check mark on top, ON by
+// default since the sweep so every caller gets it; opt-out via showActiveCheck={false}
+// stays available for the rare caller that needs the tint-only look.
 describe('SegmentedControl · showActiveCheck', () => {
   const options = [
     { value: 'a', label: 'Option A' },
     { value: 'b', label: 'Option B' },
   ]
 
-  it('renders a check mark on the active option only, when opted in', () => {
-    render(<SegmentedControl options={options} value="b" onChange={vi.fn()} showActiveCheck />)
+  it('renders a check mark on the active option by default', () => {
+    render(<SegmentedControl options={options} value="b" onChange={vi.fn()} />)
     expect(screen.getByRole('radio', { name: /Option B/ }).querySelector('svg.lucide-check')).not.toBeNull()
     expect(screen.getByRole('radio', { name: /Option A/ }).querySelector('svg.lucide-check')).toBeNull()
   })
 
-  it('renders no check mark at all by default (existing callers stay unchanged)', () => {
-    render(<SegmentedControl options={options} value="b" onChange={vi.fn()} />)
+  it('renders no check mark when explicitly opted out', () => {
+    render(<SegmentedControl options={options} value="b" onChange={vi.fn()} showActiveCheck={false} />)
     expect(screen.getByRole('radio', { name: /Option B/ }).querySelector('svg.lucide-check')).toBeNull()
+  })
+
+  it('renders the check mark in the compact pill row too (SEGMENTED-CHECK-SWEEP-1: this branch never rendered it before)', () => {
+    render(<SegmentedControl options={options} value="b" onChange={vi.fn()} size="compact" />)
+    expect(screen.getByRole('radio', { name: /Option B/ }).querySelector('svg.lucide-check')).not.toBeNull()
+    expect(screen.getByRole('radio', { name: /Option A/ }).querySelector('svg.lucide-check')).toBeNull()
   })
 })

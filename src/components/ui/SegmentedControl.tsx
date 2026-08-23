@@ -66,14 +66,16 @@ export interface SegmentedControlProps {
   activeInk?: string
   // Explicit check mark on the active option, on top of the tint — the FOURTH
   // ingredient CHIP-TINT-1 prescribes for every selected choice-chip (tint 16/50
-  // + chipInk + 600 + vinkje). This atom shipped 3 of 4 since 20-08; the default
-  // stays false ONLY pending a deliberate sweep (SEGMENTED-CHECK-SWEEP-1): flipping
-  // it restyles ~27 call sites incl. the frozen candidate/customer drilldown
-  // modals, which needs Danny's eyes — opt-in here is recorded DEBT, not the rule.
+  // + chipInk + 600 + vinkje). Default true since SEGMENTED-CHECK-SWEEP-1
+  // (Danny GO, 23-08): the sweep screenshotted the ~27 adopters incl. the frozen
+  // candidate/customer drilldown modals and confirmed the check reads cleanly
+  // everywhere, so every SegmentedControl now carries it by default. Kept as an
+  // explicit opt-OUT (pass `false`) for the rare caller whose tint alone is
+  // already unambiguous and where a check would be visual noise.
   showActiveCheck?: boolean
 }
 
-export default function SegmentedControl({ options, value, onChange, color = 'var(--color-primary)', ariaLabel, size = 'default', activeOnly = false, activeFill, activeInk = 'var(--color-on-success-bg)', commitOnFocus = true, showActiveCheck = false }: SegmentedControlProps) {
+export default function SegmentedControl({ options, value, onChange, color = 'var(--color-primary)', ariaLabel, size = 'default', activeOnly = false, activeFill, activeInk = 'var(--color-on-success-bg)', commitOnFocus = true, showActiveCheck = true }: SegmentedControlProps) {
   const refs = useRef<Array<HTMLButtonElement | null>>([])
   // Roving-focus index for commitOnFocus=false: arrows park here; Enter/Space
   // (the button's native click) commits. Reset implicitly: tabIndex falls back
@@ -151,16 +153,21 @@ export default function SegmentedControl({ options, value, onChange, color = 'va
                   title (KoiosAiMark) must not double into the radio's name. */}
               {Icon && <span aria-hidden="true" style={{ display: 'inline-flex' }}><Icon size={11} /></span>}
               {opt.label}
+              {/* CHIP-TINT-1's fourth ingredient, sized for the compact pill row —
+                  SEGMENTED-CHECK-SWEEP-1 (23-08) found this branch was the one
+                  place the check never rendered at all, not even opt-in. */}
+              {showActiveCheck && active && <Check size={11} aria-hidden="true" style={{ flexShrink: 0, marginLeft: 2 }} />}
             </>) : (
               <>
                 {Icon && <Icon size={16} />}
-                <span style={{ display: 'flex', flexDirection: 'column', gap: 2, flex: 1 }}>
+                {/* minWidth 0: an unbreakable token in a description must never push the check out of the card. */}
+                <span style={{ display: 'flex', flexDirection: 'column', gap: 2, flex: 1, minWidth: 0 }}>
                   <span style={{ fontSize: 13 }}>{opt.label}</span>
                   {opt.description && <span style={{ fontSize: 11, fontWeight: 400, opacity: 0.8 }}>{opt.description}</span>}
                 </span>
                 {/* CHIP-TINT-1's "vinkje": an explicit check reinforcing the active
-                    tint for a picker whose tint-only delta reads too subtly on its
-                    own (KOIOS-MODEL-UI-1, Danny 23-08) — opt-in via showActiveCheck. */}
+                    tint (KOIOS-MODEL-UI-1, Danny 23-08) — on by default since
+                    SEGMENTED-CHECK-SWEEP-1, opt-out via showActiveCheck={false}. */}
                 {showActiveCheck && active && <Check size={16} aria-hidden="true" style={{ flexShrink: 0, marginLeft: 8 }} />}
               </>
             )}
