@@ -98,6 +98,17 @@ function useSpeechDictation({ onText, lang }: { onText: (text: string) => void; 
   // fired for any other reason means the browser cut us off mid-dictation and
   // we resume, so a pause never silently ends the recording.
   const userStoppedRef = useRef(false)
+  // VOICE-RESUME-1 (Danny 23-08: "opname met pauze overschrijft het eerste
+  // stuk"): the recognition handlers are wired ONCE per session, so calling
+  // `onText` directly froze the HOST's append-closure (and the editor value it
+  // captured) at session start — after the browser's silence-restart the next
+  // chunk appended onto the PRE-PAUSE text, overwriting everything dictated
+  // since. Every emit goes through this ref, which each render points at the
+  // caller's LATEST closure.
+  const onTextRef = useRef(onText)
+  // Re-point after every render (in an effect — react-hooks/refs forbids the
+  // during-render write); recognition events always fire after the effect ran.
+  useEffect(() => { onTextRef.current = onText })
 
   // Feature-detect once — the HONEST GATE. `undefined` means neither
   // constructor exists in this browser, so the caller renders nothing.
@@ -162,7 +173,7 @@ function useSpeechDictation({ onText, lang }: { onText: (text: string) => void; 
       // Guard against a recognizer replaying an already-final segment.
       if (event.resultIndex === lastEmittedRef.current.index && text === lastEmittedRef.current.text) return
       lastEmittedRef.current = { index: event.resultIndex, text }
-      onText(text)
+      onTextRef.current(text)
     }
     // A denied mic gets an honest title instead of a silently-dead button, PLUS
     // a toast per error code so a failure is never silent (Danny 08-08: onerror
@@ -190,6 +201,10 @@ function useSpeechDictation({ onText, lang }: { onText: (text: string) => void; 
     // dictation feeling like one recording.
     recognition.onend = () => {
       if (userStoppedRef.current || recognitionRef.current !== recognition) { setListening(false); return }
+      // The in-place resume starts a FRESH result list (indices restart at 0):
+      // reset the dedup state so repeating the same words after the pause is
+      // never swallowed as a replay of the pre-pause segment (VOICE-RESUME-1).
+      lastEmittedRef.current = { index: -1, text: '' }
       try { recognition.start() } catch { setListening(false) }
     }
 

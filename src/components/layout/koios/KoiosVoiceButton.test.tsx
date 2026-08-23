@@ -8,6 +8,7 @@
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, act } from '@testing-library/react'
+import { useState } from 'react'
 import userEvent from '@testing-library/user-event'
 import KoiosVoiceButton from './KoiosVoiceButton'
 import { notifyError } from '@/lib/notify'
@@ -192,6 +193,59 @@ describe('KoiosVoiceButton', () => {
 
       expect(onText).toHaveBeenNthCalledWith(1, 'hello')
       expect(onText).toHaveBeenNthCalledWith(2, 'goodbye')
+    })
+
+    // VOICE-RESUME-1 (Danny 23-08: "opname met pauze overschrijft het eerste
+    // stuk"): the browser ends a continuous session on a long silence and the
+    // component restarts it in place. The emit must reach the host through its
+    // LATEST render closure — the frozen session-start closure appended onto
+    // the pre-pause editor value and overwrote everything dictated before it.
+    it('keeps the first chunk when dictation resumes after a silence pause', async () => {
+      // Host that appends onto the value captured per RENDER (deliberately NOT
+      // a functional update) — the exact closure shape RichTextAssistBar's
+      // appendVoiceText has, which the stale-closure bug froze.
+      function AppendHost() {
+        const [value, setValue] = useState('')
+        return (
+          <>
+            <KoiosVoiceButton onText={(chunk) => setValue(value ? `${value} ${chunk}` : chunk)} t={t} />
+            <output data-testid="dictated">{value}</output>
+          </>
+        )
+      }
+      const user = userEvent.setup()
+      render(<AppendHost />)
+      await user.click(screen.getByRole('button'))
+      const instance = MockSpeechRecognition.lastInstance
+
+      // First utterance lands.
+      act(() => { instance?.onresult?.({ resultIndex: 0, results: [seg('een')] }) })
+      expect(screen.getByTestId('dictated')).toHaveTextContent('een')
+
+      // Silence pause: the browser ends the session, the component resumes in place.
+      act(() => { instance?.onend?.() })
+      expect(instance?.start).toHaveBeenCalledTimes(2)
+
+      // The post-pause utterance must APPEND — the regression rendered only 'twee'.
+      act(() => { instance?.onresult?.({ resultIndex: 0, results: [seg('twee')] }) })
+      expect(screen.getByTestId('dictated')).toHaveTextContent('een twee')
+    })
+
+    // Companion fix: the in-place resume resets the dedup state — repeating the
+    // SAME words after the pause (result index 0 again) is new speech, not a replay.
+    it('emits an identical utterance again after a silence-restart', async () => {
+      const onText = vi.fn()
+      const user = userEvent.setup()
+      render(<KoiosVoiceButton onText={onText} t={t} />)
+      await user.click(screen.getByRole('button'))
+      const instance = MockSpeechRecognition.lastInstance
+
+      instance?.onresult?.({ resultIndex: 0, results: [seg('test')] })
+      act(() => { instance?.onend?.() })
+      instance?.onresult?.({ resultIndex: 0, results: [seg('test')] })
+
+      expect(onText).toHaveBeenNthCalledWith(1, 'test')
+      expect(onText).toHaveBeenNthCalledWith(2, 'test')
     })
 
     it('stops quietly on a no-speech error, without the denied title or a toast', async () => {
