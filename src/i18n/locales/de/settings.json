@@ -1034,7 +1034,52 @@
       "empty": "Noch keine Webhooks erstellt.",
       "lastTriggered": "Zuletzt",
       "removeConfirm": "Webhook löschen?",
-      "copyUrl": "URL kopieren"
+      "copyUrl": "URL kopieren",
+      "requests": {
+        "viewButton": "Anfragen anzeigen",
+        "title": "Anfragen für {{name}}",
+        "subtitle": "Jede Anfrage, die dieser Webhook erhalten hat, neueste zuerst.",
+        "loading": "Anfragen werden geladen…",
+        "loadError": "Die Anfragen konnten nicht geladen werden.",
+        "empty": "Noch keine Anfragen erhalten. Anfragen werden 30 Tage aufbewahrt.",
+        "retention": "Anfragen werden 30 Tage aufbewahrt.",
+        "noWorkflows": "Keine",
+        "noIp": "Unbekannt",
+        "retry": "Erneut versuchen",
+        "openHistory": "Workflow-Ausführungsverlauf öffnen",
+        "col": {
+          "time": "Empfangen",
+          "method": "Methode",
+          "status": "Status",
+          "ip": "IP-Adresse",
+          "workflows": "Workflows"
+        },
+        "status": {
+          "received": "Empfangen, kein Workflow zugeordnet.",
+          "queued": "Workflow(s) zur Verarbeitung eingereiht.",
+          "rejected": "Signatur abgelehnt.",
+          "other": "HTTP {{code}}"
+        },
+        "detail": {
+          "title": "Anfrage {{id}}",
+          "loading": "Anfrage wird geladen…",
+          "notFound": "Diese Anfrage wurde bei diesem Webhook nicht gefunden.",
+          "loadError": "Diese Anfrage konnte nicht geladen werden.",
+          "receivedAt": "Empfangen am",
+          "workflows": "Zugeordnete Workflows",
+          "headers": "Headers",
+          "noHeaders": "Keine Headers erfasst.",
+          "maskedTooltip": "Aus Sicherheitsgründen maskiert: der ursprüngliche Wert wird nicht gespeichert.",
+          "query": "Query-Parameter",
+          "noQuery": "Keine Query-Parameter.",
+          "body": "Body",
+          "bodyCap": "Request-Bodies sind auf 64 KB begrenzt.",
+          "noBody": "Kein Body erfasst.",
+          "response": "Antwort",
+          "noResponse": "Keine Antwort erfasst.",
+          "copy": "Kopieren"
+        }
+      }
     },
     "outgoing": {
       "title": "Ausgehende Webhooks",

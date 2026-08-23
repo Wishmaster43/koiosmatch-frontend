@@ -3,14 +3,21 @@
  * systems POST to in order to trigger a workflow (used by WorkflowCanvasEditor).
  * Ported unchanged in behaviour from the old WebhooksSettings; only the i18n keys
  * moved under webhooks.incoming.* and the base URL now derives from VITE_API_URL.
+ * WEBHOOK-LOG-FE-1: each row also gets a "Verzoeken" (requests) button opening
+ * the per-webhook request log (WebhookRequestsPanel) — the per-webhook drill-in
+ * Danny asked for ("waar is mijn log wat er binnen zou moeten komen").
  */
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Check, Copy, Plus, Trash2, Edit2, Save, X } from 'lucide-react'
+import { Check, Copy, Inbox, Plus, Trash2, Edit2, Save, X } from 'lucide-react'
 import api, { unwrap, unwrapList } from '@/lib/api'
 import { useConfirm } from '@/hooks/useConfirm'
 import Button from '@/components/ui/Button'
-import { PageTitle, SectionTitle } from '@/components/ui/typography'
+import { PageTitle, SectionTitle, Caption, Mono } from '@/components/ui/typography'
+import { fieldInputStyle } from '@/components/forms/fieldMetrics'
+import WebhookRequestsPanel from './WebhookRequestsPanel'
+// DATUM-1: every user-visible date rides the house formatter, never toLocaleDateString.
+import { useDateFormat } from '@/lib/datetime'
 
 // Inbound webhook URLs hang off the API root's /webhook path, not under /api.
 const API_URL = import.meta.env.VITE_API_URL ?? 'http://koiosmatch-api.test/api'
@@ -18,6 +25,7 @@ const BASE_URL = `${API_URL}/webhook`
 
 export default function IncomingWebhooks() {
   const { t } = useTranslation('settings')
+  const { formatDateTime } = useDateFormat()
   const [webhooks, setWebhooks] = useState([])
   const [loading,  setLoading]  = useState(true)
   const [name,     setName]     = useState('')
@@ -27,6 +35,8 @@ export default function IncomingWebhooks() {
   const [editId,   setEditId]   = useState(null)
   const [editName, setEditName] = useState('')
   const [editDesc, setEditDesc] = useState('')
+  // Which webhook's request log is open ({ id, name }) — the new drill-in.
+  const [requestsFor, setRequestsFor] = useState(null)
   // House confirmation dialog (§0 restschuld) — replaces the native window.confirm() below.
   const { confirm, dialog } = useConfirm()
 
@@ -84,10 +94,10 @@ export default function IncomingWebhooks() {
         <SectionTitle as="div" style={{ marginBottom: 12 }}>{t('webhooks.incoming.newWebhook')}</SectionTitle>
         <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
           <input value={name} onChange={(e) => setName(e.target.value)} placeholder={t('webhooks.incoming.namePlaceholder')}
-            style={{ flex: 1, padding: '8px 12px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, outline: 'none', background: 'var(--surface)', color: 'var(--text)' }}
+            style={{ ...fieldInputStyle, flex: 1 }}
             onKeyDown={(e) => e.key === 'Enter' && create()} />
           <input value={desc} onChange={(e) => setDesc(e.target.value)} placeholder={t('webhooks.incoming.descPlaceholder')}
-            style={{ flex: 1, padding: '8px 12px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, outline: 'none', background: 'var(--surface)', color: 'var(--text)' }} />
+            style={{ ...fieldInputStyle, flex: 1 }} />
         </div>
         <Button variant="primary" onClick={create} disabled={!name.trim() || creating}>
           <Plus size={13} /> {creating ? t('webhooks.incoming.creating') : t('webhooks.incoming.create')}
@@ -96,9 +106,9 @@ export default function IncomingWebhooks() {
 
       {/* List */}
       {loading ? (
-        <div style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t('common.loadingShort')}</div>
+        <Caption>{t('common.loadingShort')}</Caption>
       ) : webhooks.length === 0 ? (
-        <div style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t('webhooks.incoming.empty')}</div>
+        <Caption>{t('webhooks.incoming.empty')}</Caption>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           {webhooks.map((wh) => (
@@ -108,9 +118,9 @@ export default function IncomingWebhooks() {
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 6, flex: 1, minWidth: 0 }}>
                     <input value={editName} onChange={(e) => setEditName(e.target.value)} placeholder={t('webhooks.incoming.namePlaceholder')}
                       onKeyDown={(e) => e.key === 'Enter' && saveEdit(wh.id)}
-                      style={{ padding: '6px 10px', fontSize: 13, fontWeight: 600, border: '1px solid var(--border)', borderRadius: 6, outline: 'none', background: 'var(--surface)', color: 'var(--text)' }} />
+                      style={{ ...fieldInputStyle, height: 32, fontWeight: 600 }} />
                     <input value={editDesc} onChange={(e) => setEditDesc(e.target.value)} placeholder={t('webhooks.incoming.descPlaceholder')}
-                      style={{ padding: '6px 10px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 6, outline: 'none', background: 'var(--surface)', color: 'var(--text)' }} />
+                      style={{ ...fieldInputStyle, height: 30, fontSize: 12 }} />
                   </div>
                 ) : (
                   <div style={{ minWidth: 0 }}>
@@ -120,9 +130,9 @@ export default function IncomingWebhooks() {
                 )}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
                   {wh.last_triggered_at && editId !== wh.id && (
-                    <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>
-                      {t('webhooks.incoming.lastTriggered')}: {new Date(wh.last_triggered_at).toLocaleDateString('nl-NL')}
-                    </span>
+                    <Caption>
+                      {t('webhooks.incoming.lastTriggered')}: {formatDateTime(wh.last_triggered_at)}
+                    </Caption>
                   )}
                   {editId === wh.id ? (
                     <>
@@ -130,37 +140,46 @@ export default function IncomingWebhooks() {
                         style={{ width: 28 }}>
                         <Save size={12} />
                       </Button>
-                      <button onClick={() => setEditId(null)} title={t('common.cancel')}
-                        style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--hover-bg)', border: '1px solid var(--border)', borderRadius: 6, cursor: 'pointer', color: 'var(--text-muted)' }}>
+                      <Button variant="secondary" size="sm" iconOnly onClick={() => setEditId(null)}
+                        aria-label={t('common.cancel')} title={t('common.cancel')}>
                         <X size={12} />
-                      </button>
+                      </Button>
                     </>
                   ) : (
-                    <button onClick={() => startEdit(wh)} title={t('common.edit')}
-                      style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--hover-bg)', border: '1px solid var(--border)', borderRadius: 6, cursor: 'pointer', color: 'var(--text-muted)' }}>
-                      <Edit2 size={12} />
-                    </button>
+                    <>
+                      {/* WEBHOOK-LOG-FE-1: opens the request log drill-in for this webhook. */}
+                      <Button variant="secondary" size="sm" iconOnly onClick={() => setRequestsFor({ id: wh.id, name: wh.name })}
+                        aria-label={t('webhooks.incoming.requests.viewButton')} title={t('webhooks.incoming.requests.viewButton')}>
+                        <Inbox size={12} />
+                      </Button>
+                      <Button variant="secondary" size="sm" iconOnly onClick={() => startEdit(wh)}
+                        aria-label={t('common.edit')} title={t('common.edit')}>
+                        <Edit2 size={12} />
+                      </Button>
+                    </>
                   )}
-                  <button onClick={() => remove(wh.id)} aria-label={t('webhooks.incoming.removeConfirm')}
-                    style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--color-danger-bg)', border: 'none', borderRadius: 6, cursor: 'pointer', color: 'var(--color-on-danger-bg)' }}>
+                  <Button variant="dangerSoft" size="sm" iconOnly onClick={() => remove(wh.id)}
+                    aria-label={t('webhooks.incoming.removeConfirm')} title={t('webhooks.incoming.removeConfirm')}>
                     <Trash2 size={12} />
-                  </button>
+                  </Button>
                 </div>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <code style={{ flex: 1, fontSize: 11, fontFamily: "'JetBrains Mono', monospace", background: 'var(--hover-bg)', border: '1px solid var(--border)', borderRadius: 6, padding: '6px 10px', color: 'var(--text)', wordBreak: 'break-all' }}>
+                <Mono as="code" style={{ flex: 1, fontSize: 11, background: 'var(--hover-bg)', border: '1px solid var(--border)', borderRadius: 6, padding: '6px 10px', color: 'var(--text)', wordBreak: 'break-all' }}>
                   {BASE_URL}/{wh.token}
-                </code>
-                <button onClick={() => copyUrl(wh.token)}
-                  style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '6px 10px', fontSize: 11, fontWeight: 500, background: copied === wh.token ? 'var(--color-success-bg)' : 'var(--hover-bg)', color: copied === wh.token ? 'var(--color-success)' : 'var(--text)', border: 'none', borderRadius: 6, cursor: 'pointer', whiteSpace: 'nowrap' }}>
+                </Mono>
+                <Button variant="secondary" size="sm" onClick={() => copyUrl(wh.token)}>
                   {copied === wh.token ? <Check size={11} /> : <Copy size={11} />} {copied === wh.token ? t('common.copied') : t('webhooks.incoming.copyUrl')}
-                </button>
+                </Button>
               </div>
             </div>
           ))}
         </div>
       )}
       {dialog}
+      {requestsFor && (
+        <WebhookRequestsPanel webhookId={requestsFor.id} webhookName={requestsFor.name} onClose={() => setRequestsFor(null)} />
+      )}
     </div>
   )
 }

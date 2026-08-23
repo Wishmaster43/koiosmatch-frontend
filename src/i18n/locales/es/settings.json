@@ -1034,7 +1034,52 @@
       "empty": "Aún no se han creado webhooks.",
       "lastTriggered": "Último",
       "removeConfirm": "¿Eliminar el webhook?",
-      "copyUrl": "Copiar URL"
+      "copyUrl": "Copiar URL",
+      "requests": {
+        "viewButton": "Ver solicitudes",
+        "title": "Solicitudes de {{name}}",
+        "subtitle": "Cada solicitud que recibió este webhook, más reciente primero.",
+        "loading": "Cargando solicitudes…",
+        "loadError": "No se pudieron cargar las solicitudes.",
+        "empty": "Aún no se han recibido solicitudes. Las solicitudes se conservan 30 días.",
+        "retention": "Las solicitudes se conservan 30 días.",
+        "noWorkflows": "Ninguno",
+        "noIp": "Desconocido",
+        "retry": "Reintentar",
+        "openHistory": "Abrir historial de ejecuciones del workflow",
+        "col": {
+          "time": "Recibida",
+          "method": "Método",
+          "status": "Estado",
+          "ip": "Dirección IP",
+          "workflows": "Workflows"
+        },
+        "status": {
+          "received": "Recibida, ningún workflow coincidió.",
+          "queued": "Workflow(s) en cola para procesar.",
+          "rejected": "Firma rechazada.",
+          "other": "HTTP {{code}}"
+        },
+        "detail": {
+          "title": "Solicitud {{id}}",
+          "loading": "Cargando solicitud…",
+          "notFound": "Esta solicitud no se encontró para este webhook.",
+          "loadError": "No se pudo cargar esta solicitud.",
+          "receivedAt": "Recibida el",
+          "workflows": "Workflows coincidentes",
+          "headers": "Encabezados",
+          "noHeaders": "No se registraron encabezados.",
+          "maskedTooltip": "Enmascarado por seguridad: el valor original no se almacena.",
+          "query": "Parámetros de consulta",
+          "noQuery": "No hay parámetros de consulta.",
+          "body": "Cuerpo",
+          "bodyCap": "El cuerpo de la solicitud está limitado a 64 KB.",
+          "noBody": "No se registró ningún cuerpo.",
+          "response": "Respuesta",
+          "noResponse": "No se registró ninguna respuesta.",
+          "copy": "Copiar"
+        }
+      }
     },
     "outgoing": {
       "title": "Webhooks salientes",

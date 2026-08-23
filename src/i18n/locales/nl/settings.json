@@ -1280,7 +1280,52 @@
       "empty": "Nog geen webhooks aangemaakt.",
       "lastTriggered": "Laatst",
       "removeConfirm": "Webhook verwijderen?",
-      "copyUrl": "Kopieer URL"
+      "copyUrl": "Kopieer URL",
+      "requests": {
+        "viewButton": "Verzoeken bekijken",
+        "title": "Verzoeken van {{name}}",
+        "subtitle": "Elk verzoek dat deze webhook ontving, nieuwste eerst.",
+        "loading": "Verzoeken laden…",
+        "loadError": "De verzoeken konden niet worden geladen.",
+        "empty": "Nog geen verzoeken ontvangen. Verzoeken blijven 30 dagen bewaard.",
+        "retention": "Verzoeken blijven 30 dagen bewaard.",
+        "noWorkflows": "Geen",
+        "noIp": "Onbekend",
+        "retry": "Opnieuw proberen",
+        "openHistory": "Open workflow-runhistorie",
+        "col": {
+          "time": "Ontvangen",
+          "method": "Methode",
+          "status": "Status",
+          "ip": "IP-adres",
+          "workflows": "Workflows"
+        },
+        "status": {
+          "received": "Ontvangen, geen workflow gematcht.",
+          "queued": "Workflow(s) in de wachtrij voor verwerking.",
+          "rejected": "Handtekening geweigerd.",
+          "other": "HTTP {{code}}"
+        },
+        "detail": {
+          "title": "Verzoek {{id}}",
+          "loading": "Verzoek laden…",
+          "notFound": "Dit verzoek is niet gevonden bij deze webhook.",
+          "loadError": "Dit verzoek kon niet worden geladen.",
+          "receivedAt": "Ontvangen op",
+          "workflows": "Gematchte workflows",
+          "headers": "Headers",
+          "noHeaders": "Geen headers vastgelegd.",
+          "maskedTooltip": "Gemaskeerd om veiligheidsredenen: de oorspronkelijke waarde is niet opgeslagen.",
+          "query": "Queryparameters",
+          "noQuery": "Geen queryparameters.",
+          "body": "Body",
+          "bodyCap": "Request-bodies worden begrensd op 64 KB.",
+          "noBody": "Geen body vastgelegd.",
+          "response": "Response",
+          "noResponse": "Geen response vastgelegd.",
+          "copy": "Kopiëren"
+        }
+      }
     },
     "outgoing": {
       "title": "Uitgaande webhooks",

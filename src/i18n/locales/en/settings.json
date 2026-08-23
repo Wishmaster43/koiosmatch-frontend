@@ -1280,7 +1280,52 @@
       "empty": "No webhooks created yet.",
       "lastTriggered": "Last",
       "removeConfirm": "Delete webhook?",
-      "copyUrl": "Copy URL"
+      "copyUrl": "Copy URL",
+      "requests": {
+        "viewButton": "View requests",
+        "title": "Requests for {{name}}",
+        "subtitle": "Every request this webhook received, newest first.",
+        "loading": "Loading requests…",
+        "loadError": "Could not load the requests.",
+        "empty": "No requests received yet. Requests are kept for 30 days.",
+        "retention": "Requests are kept for 30 days.",
+        "noWorkflows": "None",
+        "noIp": "Unknown",
+        "retry": "Retry",
+        "openHistory": "Open workflow run history",
+        "col": {
+          "time": "Received",
+          "method": "Method",
+          "status": "Status",
+          "ip": "IP address",
+          "workflows": "Workflows"
+        },
+        "status": {
+          "received": "Received, no workflow matched.",
+          "queued": "Workflow(s) queued for processing.",
+          "rejected": "Signature rejected.",
+          "other": "HTTP {{code}}"
+        },
+        "detail": {
+          "title": "Request {{id}}",
+          "loading": "Loading request…",
+          "notFound": "This request could not be found for this webhook.",
+          "loadError": "Could not load this request.",
+          "receivedAt": "Received at",
+          "workflows": "Matched workflows",
+          "headers": "Headers",
+          "noHeaders": "No headers recorded.",
+          "maskedTooltip": "Masked for security: the original value is not stored.",
+          "query": "Query parameters",
+          "noQuery": "No query parameters.",
+          "body": "Body",
+          "bodyCap": "Request bodies are capped at 64 KB.",
+          "noBody": "No body recorded.",
+          "response": "Response",
+          "noResponse": "No response recorded.",
+          "copy": "Copy"
+        }
+      }
     },
     "outgoing": {
       "title": "Outgoing webhooks",

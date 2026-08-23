@@ -1034,7 +1034,52 @@
       "empty": "Aucun webhook créé pour le moment.",
       "lastTriggered": "Dernier",
       "removeConfirm": "Supprimer le webhook ?",
-      "copyUrl": "Copier l'URL"
+      "copyUrl": "Copier l'URL",
+      "requests": {
+        "viewButton": "Voir les requêtes",
+        "title": "Requêtes de {{name}}",
+        "subtitle": "Chaque requête reçue par ce webhook, la plus récente en premier.",
+        "loading": "Chargement des requêtes…",
+        "loadError": "Impossible de charger les requêtes.",
+        "empty": "Aucune requête reçue pour l'instant. Les requêtes sont conservées 30 jours.",
+        "retention": "Les requêtes sont conservées 30 jours.",
+        "noWorkflows": "Aucun",
+        "noIp": "Inconnu",
+        "retry": "Réessayer",
+        "openHistory": "Ouvrir l'historique d'exécution du workflow",
+        "col": {
+          "time": "Reçue",
+          "method": "Méthode",
+          "status": "Statut",
+          "ip": "Adresse IP",
+          "workflows": "Workflows"
+        },
+        "status": {
+          "received": "Reçue, aucun workflow associé.",
+          "queued": "Workflow(s) en file d'attente pour traitement.",
+          "rejected": "Signature refusée.",
+          "other": "HTTP {{code}}"
+        },
+        "detail": {
+          "title": "Requête {{id}}",
+          "loading": "Chargement de la requête…",
+          "notFound": "Cette requête est introuvable pour ce webhook.",
+          "loadError": "Impossible de charger cette requête.",
+          "receivedAt": "Reçue le",
+          "workflows": "Workflows associés",
+          "headers": "En-têtes",
+          "noHeaders": "Aucun en-tête enregistré.",
+          "maskedTooltip": "Masqué pour des raisons de sécurité : la valeur d'origine n'est pas conservée.",
+          "query": "Paramètres de requête",
+          "noQuery": "Aucun paramètre de requête.",
+          "body": "Corps",
+          "bodyCap": "Le corps des requêtes est limité à 64 Ko.",
+          "noBody": "Aucun corps enregistré.",
+          "response": "Réponse",
+          "noResponse": "Aucune réponse enregistrée.",
+          "copy": "Copier"
+        }
+      }
     },
     "outgoing": {
       "title": "Webhooks sortants",
