@@ -181,6 +181,8 @@
     "kpis_tasks": "Tareas",
     "kpis_calllists": "Listas de llamadas",
     "kpis_matches": "Coincidencias",
+    "kpis_opportunities": "Oportunidades",
+    "kpis_vacancies": "Vacantes",
     "email_log": "Registro de correo",
     "whatsapp_log": "Registro de mensajes",
     "appointment_types": "Tipos de cita",
@@ -236,6 +238,8 @@
     "notif_klanten": "Clientes",
     "notif_matches": "Coincidencias",
     "notif_taken": "Tareas",
+    "notif_calllists": "Listas de llamadas",
+    "notif_opportunities": "Oportunidades",
     "notif_escalation": "Escalada",
     "koios_advice": "Umbrales de aviso",
     "notif_my": "Mis notificaciones",
@@ -247,6 +251,7 @@
   "kpis": {
     "title": "Configuración de KPI",
     "subtitle": "Objetivos para paneles e informes",
+    "vacanciesSubtitle": "Objetivos para paneles e informes. La antigüedad de las vacantes se gestiona en Koios AI → Umbrales de aviso.",
     "fields": {
       "new_candidates_target": {
         "label": "Objetivo nuevos candidatos / mes",
@@ -322,6 +327,21 @@
         "label": "Sin seguimiento tras N días laborables",
         "description": "Tras esos días laborables sin tarea abierta, cita o contacto, un candidato cuenta como 'sin seguimiento'",
         "unit": "días laborables"
+      },
+      "opportunity_stale_days": {
+        "label": "Umbral de oportunidad estancada",
+        "description": "Número de días sin cambio de etapa antes de que una oportunidad abierta cuente como estancada",
+        "unit": "días"
+      },
+      "opportunity_closing_soon_days": {
+        "label": "Umbral de cierre próximo",
+        "description": "Número de días antes de la fecha de cierre prevista a partir del cual una oportunidad abierta cuenta como próxima a cerrarse",
+        "unit": "días"
+      },
+      "vacancy_closing_soon_days": {
+        "label": "Umbral de cierre próximo de la vacante",
+        "description": "Número de días antes del plazo de solicitud de una vacante a partir del cual cuenta como próxima a cerrarse",
+        "unit": "días"
       }
     }
   },
@@ -767,6 +787,14 @@
       "taken": {
         "title": "Tareas",
         "desc": "Notificaciones sobre tareas nuevas y actualizadas."
+      },
+      "calllists": {
+        "title": "Listas de llamadas",
+        "desc": "Notificaciones sobre objetivos asignados en listas de llamadas."
+      },
+      "opportunities": {
+        "title": "Oportunidades",
+        "desc": "Notificaciones sobre oportunidades ganadas y perdidas."
       }
     },
     "my": {
@@ -876,7 +904,14 @@
         "colAiAmount": "Importe de IA",
         "colTotalAmount": "Importe total",
         "loadError": "No se pudo cargar el uso diario.",
-        "empty": "Aún no hay uso en este periodo."
+        "empty": "Aún no hay uso en este periodo.",
+        "granularityLabel": "Vista",
+        "granularityDay": "Día",
+        "granularityWeek": "Semana",
+        "weekLabel": "Sem {{n}}",
+        "clickHint": "Haz clic en una barra de día o una fila de la tabla para ver los detalles.",
+        "drilldownTitle": "Detalles de {{date}}",
+        "drilldownClose": "Cerrar detalles"
       },
       "koios": {
         "title": "Facturación de Koios IA",
@@ -900,20 +935,20 @@
         "total": "Total"
       },
       "credits": {
-        "title": "Créditos",
-        "subtitle": "Precio de venta del uso de workflow e IA para este período.",
         "periodPrevMonth": "Mes anterior",
-        "loadError": "No se pudo cargar el uso de créditos.",
-        "unavailable": "No tienes permiso para ver esto.",
-        "empty": "Aún no hay uso de créditos en este período.",
-        "workflowTitle": "Créditos de workflow",
-        "totalCredits": "Créditos totales",
-        "creditPrice": "Precio por crédito",
-        "amount": "Importe",
-        "aiTitle": "Uso de IA"
+        "unavailable": "No tienes permiso para ver esto."
       },
       "exportXlsx": "Exportar Excel",
-      "exportFailed": "Error al exportar."
+      "exportFailed": "Error al exportar.",
+      "kpi": {
+        "totalLabel": "Total de este periodo",
+        "workflowLabel": "Workflow",
+        "workflowNote": "{{n}} créditos · {{price}}/crédito",
+        "koiosLabel": "Koios AI",
+        "koiosNote": "{{n}} tokens",
+        "whatsappLabel": "WhatsApp",
+        "whatsappNote": "{{n}} mensajes"
+      }
     },
     "invoices": {
       "title": "Facturas",
@@ -1047,6 +1082,7 @@
         "noIp": "Desconocido",
         "retry": "Reintentar",
         "openHistory": "Abrir historial de ejecuciones del workflow",
+        "openWorkflowRuns": "Abrir el historial de ejecuciones de {{name}}",
         "col": {
           "time": "Recibida",
           "method": "Método",
@@ -2646,7 +2682,8 @@
       "colModule": "Módulo",
       "colRuns": "Ejecuciones",
       "footer_one": "{{count}} mes",
-      "footer_other": "{{count}} meses"
+      "footer_other": "{{count}} meses",
+      "totalsLabel": "Total"
     },
     "breakdown": {
       "title": "Desglose de uso",
@@ -2676,9 +2713,20 @@
       "footerWithTotals_other": "{{count}} filas · {{requests}} solicitudes · {{tokens}} tokens",
       "chartTitle": "Compra por {{axis}}",
       "chartOther_one": "Otro ({{count}})",
-      "chartOther_other": "Otros ({{count}})"
+      "chartOther_other": "Otros ({{count}})",
+      "filterActive": "Filtrado por {{value}}",
+      "clearFilter": "Borrar filtro",
+      "totalsLabel": "Total"
     },
-    "nothingUsed": "No se ha registrado consumo en este mes. Por eso las tablas de abajo están a cero."
+    "nothingUsed": "No se ha registrado consumo en este mes. Por eso las tablas de abajo están a cero.",
+    "kpi": {
+      "aiLabel": "IA (venta)",
+      "aiNote": "Compra {{purchase}} · Margen {{margin}} · {{tokens}} tokens",
+      "workflowLabel": "Workflow",
+      "workflowNote": "{{n}} ejecuciones",
+      "whatsappLabel": "WhatsApp Business",
+      "planningLabel": "Horas procesadas"
+    }
   },
   "jobs": {
     "title": "Gestión de tareas",

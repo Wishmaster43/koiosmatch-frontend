@@ -149,3 +149,34 @@ export interface AdminUsageDetailsResponse {
   groups: AdminUsageDetailsRow[]
   totals?: AdminUsageDetailsTotals
 }
+
+// GET /admin/tenants/{id}/usage?month=YYYY-MM — the selected-month summary for
+// one tenant (AdminUsageController@show), superadmin-only. The `billing` block
+// is additive (CONTRACT-CHANGELOG 13-08 "CREDITS-1 fase 1" §4): purchase/margin
+// are super-admin-only insight (MARGEGEHEIM) and never leave this screen. The
+// legacy K0-D fields (ai.tokens/requests, whatsapp, planning, connectors,
+// workflow_tokens) stay unchanged alongside it. `history` carries the same
+// per-month shape (see AdminUsageMonth), oldest constraints unchanged.
+export interface AdminUsageMonth {
+  month: string
+  ai?: { tokens?: number; requests?: number; cost?: number }
+  workflow_tokens?: { total_module_runs?: number; per_module?: Record<string, number> }
+  // history[].billing carries month totals ONLY — the ai purchase/sale/margin
+  // block exists solely on the SELECTED month (AdminTenantUsage.billing below).
+  billing?: { total_amount?: number }
+  connectors?: Array<{ key: string; usage?: number }>
+}
+export interface AdminTenantUsage {
+  ai?: { tokens?: number; requests?: number }
+  whatsapp?: { business_numbers?: number }
+  planning?: { processed_hours?: number }
+  connectors?: Array<{ key: string; usage?: number }>
+  workflow_tokens?: { total_module_runs?: number; per_module?: Record<string, number> }
+  // Additive superadmin billing block for the SELECTED month (purchase/margin
+  // never render on the tenant-facing screen — that is `GebruikSettings`).
+  billing?: {
+    ai?: { purchase?: number; sale?: number; margin?: number }
+    workflow?: { credits?: number; amount?: number }
+  }
+  history?: AdminUsageMonth[]
+}

@@ -1,27 +1,28 @@
 /**
- * GebruikSettings (billing_usage, USAGE-LIMITS-1 + CREDITS-1) — cross-domain usage
- * & limits overview. Gated on the `billing.view` permission at the registry level
- * (SettingsPage) — settings.view alone never surfaces this screen (§3). Sections,
- * all REAL data verified against koiosmatch-api:
- *   - Credits (workflow + AI, sale-price) — GET /billing/usage?period=month|prev_month
- *     (CREDITS-1 fase 1, the new headline block; credit_price renders UNROUNDED)
- *   - AI usage (Koios)   — GET /ai/koios/usage?period=today|month
- *   - WhatsApp usage     — GET /settings/messaging-costs (always "this month")
+ * GebruikSettings (billing_usage, BILLING-USAGE-REDESIGN-1, was USAGE-LIMITS-1 +
+ * CREDITS-1) — cross-domain usage & limits overview. Gated on the `billing.view`
+ * permission at the registry level (SettingsPage) — settings.view alone never
+ * surfaces this screen (§3). Thin container; the real work lives in its
+ * subcomponents, all REAL data verified against koiosmatch-api:
+ *   - Usage overview (KPI row + day/week chart + drill-down + table), own folder
+ *     `usage/` — GET /billing/usage?period=month|prev_month (workflow+AI, sale-
+ *     price, per-day series) + GET /settings/messaging-costs (WhatsApp KPI tile
+ *     only, month-only). See usage/UsageOverviewSection.tsx for the full contract.
+ *   - AI usage (Koios) per-activity table — GET /ai/koios/usage?period=today|month
+ *   - WhatsApp usage table — GET /settings/messaging-costs (always "this month")
  *   - Koios AI billing   — GET /ai/koios/usage/billing?month=YYYY-MM (K0, invoice-
  *     ready Claude + workflow-token totals; see the block below for detail)
  * CREDITS-1 §9-reparatie: the AI usage/billing shapes are SALE-PRICE only now
  * (totals.amount, per_activity[].amount, billable_cost) — claude.cost/margin_pct
  * are gone from the billing endpoint; never render a purchase price here, that
  * inkoop view lives on the superadmin tenant-usage screen only.
- * Two pieces of the reference screenshot have NO backend behind them at all yet
- * — (1) current plan + credit progress bar + reset date, and (3) credit balance
- * need a plan/credit model that does not exist (Tenant only has package/add-on
- * gating, no credits ledger); (2) the daily usage graph needs a per-day×category
- * aggregate, but both usage endpoints only return period TOTALS, never a daily
- * series. Both render as calm "not built yet" notices instead of fake numbers
- * (§3 — no fake affordances). Auto top-up is intentionally NOT built here — it
- * was deliberately dropped (billing_pay, R-1) and needs Danny's confirmation
- * before it comes back (see WORKLIST USAGE-LIMITS-1).
+ * One piece of the reference screenshot has NO backend behind it at all yet —
+ * current plan + credit progress bar + reset date + credit balance need a
+ * plan/credit model that does not exist (Tenant only has package/add-on gating,
+ * no credits ledger). Renders as a calm "not built yet" notice instead of fake
+ * numbers (§3 — no fake affordances). Auto top-up is intentionally NOT built
+ * here — it was deliberately dropped (billing_pay, R-1) and needs Danny's
+ * confirmation before it comes back (see WORKLIST USAGE-LIMITS-1).
  */
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -33,8 +34,7 @@ import { extractApiError } from '@/lib/extractApiError'
 import QuickViewToggle from '@/components/ui/QuickViewToggle'
 import Spinner from '@/components/ui/Spinner'
 import { card, sub, th, td, numCell, notice, Tile } from './usageCardStyles'
-import CreditsUsageCard from './CreditsUsageCard'
-import UsageDailySection from './UsageDailySection'
+import UsageOverviewSection from './usage/UsageOverviewSection'
 import Button from '@/components/ui/Button'
 import { PageTitle, SectionTitle, Caption } from '@/components/ui/typography'
 
@@ -140,11 +140,15 @@ export default function GebruikSettings() {
     return () => { alive = false }
   }, [month])
 
+  // Billing period lives HERE (not in UsageOverviewSection) so the xlsx export
+  // always follows the period the user picked in the right panel — it used to
+  // send the AI block's today|month state to a month|prev_month contract (Opus).
+  const [billingPeriod, setBillingPeriod] = useState('month')
   const [exporting, setExporting] = useState(false)
   const handleExport = async () => {
     setExporting(true)
     try {
-      await downloadUsageXlsx(period)
+      await downloadUsageXlsx(billingPeriod)
     } catch (err) {
       notifyError(extractApiError(err, t('billing.usage.exportFailed')))
     } finally {
@@ -153,7 +157,9 @@ export default function GebruikSettings() {
   }
 
   return (
-    <div style={{ maxWidth: 680 }}>
+    // Full width (Danny 23-08: "waarom zo smal, kijk hoeveel ruimte je nog hebt") —
+    // the chart/table block earns the room; the settings shell provides the padding.
+    <div>
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, marginBottom: 20 }}>
         <div>
           <PageTitle>{t('billing.usage.title')}</PageTitle>
@@ -170,9 +176,10 @@ export default function GebruikSettings() {
       {/* Blocked: no plan/credit model exists in the backend yet. */}
       <ComingSoonNotice title={t('billing.usage.plan.title')} text={t('billing.usage.plan.notice')} />
 
-      {/* Credits (CREDITS-1) — sale-price workflow + AI usage, own file (§3 size
-          discipline). credit_price renders UNROUNDED, see CreditsUsageCard. */}
-      <CreditsUsageCard />
+      {/* BILLING-USAGE-REDESIGN-1 — KPI row + day/week chart + drill-down + table,
+          own folder (§3 size discipline). Replaces the old CreditsUsageCard +
+          UsageDailySection pair (same /billing/usage source, one coherent block). */}
+      <UsageOverviewSection period={billingPeriod} onPeriodChange={setBillingPeriod} wa={wa} waLoading={waPhase === 'loading'} />
 
       {/* AI usage (Koios) — real data, period-scoped via the shared QuickViewToggle. */}
       <div style={card}>
@@ -319,6 +326,7 @@ export default function GebruikSettings() {
             )}
 
             {/* Grand total — Claude billable cost + workflow-token amount, invoice-ready. */}
+            {/* eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- flex ROW wrapper holding two <span> children (label + Mono amount), not a text atom itself; BodyText can't host a space-between layout */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: 10,
                          borderTop: '1px solid var(--border)', fontSize: 13, fontWeight: 700, color: 'var(--text)' }}>
               <span>{t('billing.usage.koios.total')}</span>
@@ -369,11 +377,6 @@ export default function GebruikSettings() {
           </>
         )}
       </div>
-
-      {/* Daily usage — chart + table + right-panel filters (USAGE-DAILY-1). Real
-          per-day series (workflow credits, AI amount); Leads/Phone-calls/WhatsApp
-          have no per-day backend data yet, see UsageDailySection's header comment. */}
-      <UsageDailySection />
     </div>
   )
 }

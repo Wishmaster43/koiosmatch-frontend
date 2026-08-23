@@ -26,10 +26,15 @@ vi.mock('@/lib/api', async () => {
 // The chart beside the table is stubbed down to the props it receives: it renders
 // the same group labels in its own legend, which would otherwise make every
 // getByText below ambiguous, and it has its own test file for its own behaviour.
-// The stub still proves the composition — which axis and how many rows it is fed.
+// The stub still proves the composition — which axis and how many rows it is fed
+// — plus a button that fires `onSelectKey` with the first row's key, so the
+// drill-down wiring (chart click → table filter) can be proven without the real
+// PieChartCard/WeeklyBarChartCard (recharts needs real layout jsdom has none of).
 vi.mock('./TenantUsageBreakdownChart', () => ({
-  default: ({ axis, rows }: { axis: string; rows: unknown[] }) => (
-    <div data-testid="breakdown-chart" data-axis={axis} data-rows={rows.length} />
+  default: ({ axis, rows, onSelectKey }: { axis: string; rows: { key: string }[]; onSelectKey?: (k: string) => void }) => (
+    <div data-testid="breakdown-chart" data-axis={axis} data-rows={rows.length}>
+      {onSelectKey && rows[0] && <button onClick={() => onSelectKey(rows[0].key)}>select-first</button>}
+    </div>
   ),
 }))
 
@@ -165,5 +170,36 @@ describe('TenantUsageBreakdownTable', () => {
     vi.mocked(api.get).mockRejectedValue(new Error('network'))
     render(<TenantUsageBreakdownTable tenantId="t1" month="2026-08" />)
     await waitFor(() => expect(screen.getByText(t('usage.breakdown.loadError'))).toBeInTheDocument())
+  })
+
+  it('a chart click filters the table to that row, and the chip clears it back to the full list', async () => {
+    vi.mocked(api.get).mockResolvedValue({ data: activityGroups })
+    render(<TenantUsageBreakdownTable tenantId="t1" month="2026-08" />)
+    await screen.findByText('interview')
+    expect(screen.getByText('chat')).toBeInTheDocument()
+
+    // The chart's first row is 'chat' (server order, unfiltered) — click it.
+    await userEvent.click(screen.getByText('select-first'))
+    expect(screen.getByText('chat')).toBeInTheDocument()
+    expect(screen.queryByText('interview')).not.toBeInTheDocument()
+    expect(screen.getByText(t('usage.breakdown.filterActive', { value: 'chat' }))).toBeInTheDocument()
+
+    // The wisknop (clear button) resets the filter — both rows come back.
+    await userEvent.click(screen.getByRole('button', { name: t('usage.breakdown.clearFilter') }))
+    expect(screen.getByText('chat')).toBeInTheDocument()
+    expect(screen.getByText('interview')).toBeInTheDocument()
+    expect(screen.queryByText(t('usage.breakdown.filterActive', { value: 'chat' }))).not.toBeInTheDocument()
+  })
+
+  it('switching the axis clears a stale drill-down filter', async () => {
+    vi.mocked(api.get).mockResolvedValue({ data: activityGroups })
+    render(<TenantUsageBreakdownTable tenantId="t1" month="2026-08" />)
+    await screen.findByText('interview')
+    await userEvent.click(screen.getByText('select-first'))
+    expect(screen.getByText(t('usage.breakdown.filterActive', { value: 'chat' }))).toBeInTheDocument()
+
+    const userButton = await screen.findByRole('radio', { name: t('usage.breakdown.axis.user') })
+    await userEvent.click(userButton)
+    await waitFor(() => expect(screen.queryByText(t('usage.breakdown.filterActive', { value: 'chat' }))).not.toBeInTheDocument())
   })
 })

@@ -12,23 +12,33 @@
  */
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import type { ChartDatum } from '@/components/charts/chartTypes'
 import TenantUsageBreakdownChart from './TenantUsageBreakdownChart'
 import type { AdminUsageDetailsRow } from '@/types/billingUsage'
 
-// Stub both cards down to the data contract, as a "name=value,…" line. The
-// factory is declared through vi.hoisted rather than a plain const: vi.mock is
-// hoisted above every module-scope binding, so a shared helper referenced inside
-// it throws "Cannot access before initialization" and the WHOLE FILE collects
-// zero tests — which reads in the summary as a passing run of the sibling file.
-const stub = vi.hoisted(() => (type: string) => ({ title, data }: { title?: React.ReactNode; data?: ChartDatum[] }) => (
+// Stub both cards down to the data contract, as a "name=value,…" line, plus a
+// button that fires the click handler with the first datum — proves the click
+// wiring (onItemClick/onBarClick → onSelectKey) without needing real recharts
+// layout. The factory is declared through vi.hoisted rather than a plain const:
+// vi.mock is hoisted above every module-scope binding, so a shared helper
+// referenced inside it throws "Cannot access before initialization" and the
+// WHOLE FILE collects zero tests — which reads in the summary as a passing run
+// of the sibling file.
+const stub = vi.hoisted(() => (type: string) => ({ title, data, onItemClick, onBarClick }: {
+  title?: React.ReactNode; data?: ChartDatum[]
+  onItemClick?: (d: unknown) => void; onBarClick?: (d: unknown) => void
+}) => (
   <div data-testid={type}>
     <span data-testid={`${type}-title`}>{title}</span>
     <span data-testid={`${type}-data`}>{(data ?? []).map(d => `${d.name}=${d.value}`).join(',')}</span>
+    {(onItemClick || onBarClick) && (
+      <button onClick={() => (onItemClick ?? onBarClick)?.(data?.[0])}>{`click-${type}`}</button>
+    )}
   </div>
 ))
 vi.mock('@/components/charts/PieChartCard', () => ({ default: stub('pie') }))
-vi.mock('@/components/charts/LineChartCard', () => ({ default: stub('line') }))
+vi.mock('@/components/charts/WeeklyBarChartCard', () => ({ default: stub('bar') }))
 
 const row = (key: string, purchase: number, label?: string): AdminUsageDetailsRow => ({
   key, label, requests: 1, input_tokens: 1, output_tokens: 1,
@@ -41,7 +51,7 @@ describe('TenantUsageBreakdownChart', () => {
       row('2026-08-03', 5), row('2026-08-01', 50), row('2026-08-02', 20),
     ]} />)
     // Dates in date order (and rendered DD-MM-YYYY, never ISO — DATUM-1).
-    expect(screen.getByTestId('line-data').textContent)
+    expect(screen.getByTestId('bar-data').textContent)
       .toBe('01-08-2026=50,02-08-2026=20,03-08-2026=5')
     expect(screen.queryByTestId('pie')).not.toBeInTheDocument()
   })
@@ -80,5 +90,19 @@ describe('TenantUsageBreakdownChart', () => {
       { key: 'chat', cost: 7 }, { key: 'parse', cost: 11 },
     ]} />)
     expect(screen.getByTestId('pie-data').textContent).toBe('parse=11,chat=7')
+  })
+
+  it('reports the clicked slice key back via onSelectKey (categorical axis)', async () => {
+    const onSelectKey = vi.fn()
+    render(<TenantUsageBreakdownChart axis="activity" rows={[row('interview', 30), row('chat', 3)]} onSelectKey={onSelectKey} />)
+    await userEvent.click(screen.getByText('click-pie'))
+    expect(onSelectKey).toHaveBeenCalledWith('interview')
+  })
+
+  it('reports the clicked bar key back via onSelectKey (day axis)', async () => {
+    const onSelectKey = vi.fn()
+    render(<TenantUsageBreakdownChart axis="day" rows={[row('2026-08-01', 50)]} onSelectKey={onSelectKey} />)
+    await userEvent.click(screen.getByText('click-bar'))
+    expect(onSelectKey).toHaveBeenCalledWith('2026-08-01')
   })
 })

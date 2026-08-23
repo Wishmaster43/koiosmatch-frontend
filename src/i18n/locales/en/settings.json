@@ -181,6 +181,8 @@
     "kpis_tasks": "Tasks",
     "kpis_calllists": "Call lists",
     "kpis_matches": "Matches",
+    "kpis_opportunities": "Opportunities",
+    "kpis_vacancies": "Vacancies",
     "email_log": "Email log",
     "whatsapp_log": "Message log",
     "appointment_types": "Appointment types",
@@ -236,6 +238,8 @@
     "notif_klanten": "Customers",
     "notif_matches": "Matches",
     "notif_taken": "Tasks",
+    "notif_calllists": "Call lists",
+    "notif_opportunities": "Opportunities",
     "notif_escalation": "Escalation",
     "koios_advice": "Advice thresholds",
     "notif_my": "My notifications",
@@ -247,6 +251,7 @@
   "kpis": {
     "title": "KPI settings",
     "subtitle": "Targets for dashboards and reports",
+    "vacanciesSubtitle": "Targets for dashboards and reports. Vacancy staleness is managed under Koios AI → Advice thresholds.",
     "fields": {
       "new_candidates_target": {
         "label": "New candidates target / month",
@@ -322,6 +327,21 @@
         "label": "No follow-up after N workdays",
         "description": "After this many workdays without an open task, appointment or contact moment a candidate counts as 'no follow-up'",
         "unit": "workdays"
+      },
+      "opportunity_stale_days": {
+        "label": "Stale deal threshold",
+        "description": "Number of days without a stage change before an open deal counts as stale",
+        "unit": "days"
+      },
+      "opportunity_closing_soon_days": {
+        "label": "Closing soon threshold",
+        "description": "Number of days before the expected close date at which an open deal counts as closing soon",
+        "unit": "days"
+      },
+      "vacancy_closing_soon_days": {
+        "label": "Vacancy closing soon threshold",
+        "description": "Number of days before a vacancy's application deadline at which it counts as closing soon",
+        "unit": "days"
       }
     }
   },
@@ -1013,6 +1033,14 @@
       "taken": {
         "title": "Tasks",
         "desc": "Notifications about new and updated tasks."
+      },
+      "calllists": {
+        "title": "Call lists",
+        "desc": "Notifications about call-list target assignments."
+      },
+      "opportunities": {
+        "title": "Opportunities",
+        "desc": "Notifications about opportunities won and lost."
       }
     },
     "my": {
@@ -1122,7 +1150,14 @@
         "colAiAmount": "AI amount",
         "colTotalAmount": "Total amount",
         "loadError": "Failed to load daily usage.",
-        "empty": "No usage yet in this period."
+        "empty": "No usage yet in this period.",
+        "granularityLabel": "View",
+        "granularityDay": "Day",
+        "granularityWeek": "Week",
+        "weekLabel": "Wk {{n}}",
+        "clickHint": "Click a day bar or table row to see its details.",
+        "drilldownTitle": "Details for {{date}}",
+        "drilldownClose": "Close details"
       },
       "koios": {
         "title": "Koios AI billing",
@@ -1146,20 +1181,20 @@
         "total": "Total"
       },
       "credits": {
-        "title": "Credits",
-        "subtitle": "Sale-price workflow and AI usage for this period.",
         "periodPrevMonth": "Previous month",
-        "loadError": "Failed to load credits usage.",
-        "unavailable": "You don't have permission to view this.",
-        "empty": "No credits usage yet in this period.",
-        "workflowTitle": "Workflow credits",
-        "totalCredits": "Total credits",
-        "creditPrice": "Price per credit",
-        "amount": "Amount",
-        "aiTitle": "AI usage"
+        "unavailable": "You don't have permission to view this."
       },
       "exportXlsx": "Export Excel",
-      "exportFailed": "Export failed."
+      "exportFailed": "Export failed.",
+      "kpi": {
+        "totalLabel": "Total this period",
+        "workflowLabel": "Workflow",
+        "workflowNote": "{{n}} credits · {{price}}/credit",
+        "koiosLabel": "Koios AI",
+        "koiosNote": "{{n}} tokens",
+        "whatsappLabel": "WhatsApp",
+        "whatsappNote": "{{n}} messages"
+      }
     },
     "invoices": {
       "title": "Invoices",
@@ -1293,6 +1328,7 @@
         "noIp": "Unknown",
         "retry": "Retry",
         "openHistory": "Open workflow run history",
+        "openWorkflowRuns": "Open the run history for {{name}}",
         "col": {
           "time": "Received",
           "method": "Method",
@@ -2646,7 +2682,8 @@
       "colModule": "Module",
       "colRuns": "Runs",
       "footer_one": "{{count}} month",
-      "footer_other": "{{count}} months"
+      "footer_other": "{{count}} months",
+      "totalsLabel": "Total"
     },
     "breakdown": {
       "title": "Usage breakdown",
@@ -2676,9 +2713,20 @@
       "footerWithTotals_other": "{{count}} rows · {{requests}} requests · {{tokens}} tokens",
       "chartTitle": "Purchase per {{axis}}",
       "chartOther_one": "Other ({{count}})",
-      "chartOther_other": "Other ({{count}})"
+      "chartOther_other": "Other ({{count}})",
+      "filterActive": "Filtered by {{value}}",
+      "clearFilter": "Clear filter",
+      "totalsLabel": "Total"
     },
-    "nothingUsed": "No usage recorded for this month, which is why the tables below are all zero."
+    "nothingUsed": "No usage recorded for this month, which is why the tables below are all zero.",
+    "kpi": {
+      "aiLabel": "AI (sale)",
+      "aiNote": "Purchase {{purchase}} · Margin {{margin}} · {{tokens}} tokens",
+      "workflowLabel": "Workflow",
+      "workflowNote": "{{n}} runs",
+      "whatsappLabel": "WhatsApp Business",
+      "planningLabel": "Processed hours"
+    }
   },
   "jobs": {
     "title": "Task manager",

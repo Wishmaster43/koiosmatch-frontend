@@ -9,13 +9,13 @@ import { useTranslation } from 'react-i18next'
 import api, { unwrap } from '@/lib/api'
 import { useAuth } from '@/context/AuthContext'
 import SearchSelect from '@/components/ui/SearchSelect'
+import TenantUsageKpiRow from './TenantUsageKpiRow'
 import TenantUsageDetailsTable from './TenantUsageDetailsTable'
 import TenantUsageBreakdownTable from './TenantUsageBreakdownTable'
-import { Mono, GroupLabel, BodyText } from '@/components/ui/typography'
-import StatTile from '@/components/ui/StatTile'
+import { Mono, GroupLabel, SectionTitle, BodyText } from '@/components/ui/typography'
+import { useNumberFormat } from '@/lib/formatters'
+import { card } from './usageCardStyles'
 import { fieldSelectStyle } from '@/components/forms/fieldMetrics'
-
-const num = (v) => (v == null ? '—' : Number(v).toLocaleString('nl-NL'))
 
 // Connector key → brand label (proper nouns, not translatable).
 const CONNECTOR_LABELS = { sm: 'Shiftmanager', hf: 'HelloFlex', intus: 'Intus', elanza: 'Elanza', aelio: 'Aelio' }
@@ -32,13 +32,9 @@ function buildMonths() {
   })
 }
 
-// Small metric tile — the shared StatTile atom (klus c), usage face.
-function Tile({ label, value }) {
-  return <StatTile label={label} value={value} size="sm" labelFirst />
-}
-
 export default function TenantUsageSettings() {
   const { t } = useTranslation('settings')
+  const { formatNumber } = useNumberFormat()
   const { activeTenant } = useAuth()
   const months = useMemo(() => buildMonths(), [])
   const [month, setMonth] = useState(months[0].value) // current month by default
@@ -97,6 +93,9 @@ export default function TenantUsageSettings() {
         </label>
       </div>
 
+      {/* KPI strip renders through the load too — its own skeleton state keeps
+          the layout stable instead of popping in after the fetch. */}
+      {phase !== 'error' && <TenantUsageKpiRow usage={usage} loading={phase === 'loading'} />}
       {phase === 'loading' && <p style={{ fontSize: 13, color: 'var(--text-muted)', padding: 8 }}>{t('common.loadingShort', { defaultValue: 'Laden…' })}</p>}
       {phase === 'error'   && <p style={{ fontSize: 13, color: 'var(--text-muted)', padding: 8 }}>{t('usage.loadError')}</p>}
 
@@ -109,27 +108,17 @@ export default function TenantUsageSettings() {
             </p>
           )}
 
-          {/* Metric tiles */}
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginBottom: 22 }}>
-            <Tile label={t('usage.col.aiTokens')}   value={num(usage?.ai?.tokens)} />
-            <Tile label={t('usage.col.aiCalls')}     value={num(usage?.ai?.requests)} />
-            <Tile label={t('usage.col.waBusiness')} value={num(usage?.whatsapp?.business_numbers)} />
-            <Tile label={t('usage.col.hours')}  value={num(usage?.planning?.processed_hours)} />
-          </div>
-
-          {/* Connectors (per connector — for invoicing) */}
-          <GroupLabel style={{ marginBottom: 10 }}>
-            {t('usage.col.connectors')}
-          </GroupLabel>
-          <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10, overflow: 'hidden' }}>
+          {/* Connectors (per connector — for invoicing), a real card. */}
+          <div style={card}>
+            <SectionTitle style={{ marginBottom: 10 }}>{t('usage.col.connectors')}</SectionTitle>
             {connectors.length === 0
               // Muted override: empty-state placeholder, secondary by design (§4 typografie).
-              ? <BodyText as="div" style={{ padding: '11px 16px', color: 'var(--text-muted)' }}>—</BodyText>
+              ? <BodyText as="div" style={{ color: 'var(--text-muted)' }}>—</BodyText>
               : connectors.map((c, i) => (
                 <div key={c.key ?? i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                  padding: '10px 16px', borderTop: i ? '1px solid var(--border)' : 'none' }}>
+                  padding: '9px 0', borderTop: i ? '1px solid var(--border)' : 'none' }}>
                   <BodyText as="span">{CONNECTOR_LABELS[c.key] ?? c.key}</BodyText>
-                  <Mono style={{ fontSize: 13 }}>{num(c.usage)}</Mono>
+                  <Mono style={{ fontSize: 13 }}>{formatNumber(c.usage)}</Mono>
                 </div>
               ))}
           </div>

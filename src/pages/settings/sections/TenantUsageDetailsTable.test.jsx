@@ -5,7 +5,7 @@
  * data instead of a fabricated zero.
  */
 import { describe, it, expect } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import TenantUsageDetailsTable from './TenantUsageDetailsTable'
 
@@ -16,14 +16,14 @@ const history = [
     month: '2026-08',
     ai: { tokens: 12000, requests: 40, cost: 1.2 },
     workflow_tokens: { total_module_runs: 5, per_module: { send_email: 3, ai_generate: 2 } },
-    billing: { total_amount: 4.5, ai: { purchase: 1.2, sale: 1.5, margin: 0.3 } },
+    billing: { total_amount: 4.5 },
     connectors: [{ key: 'sm', usage: 10 }, { key: 'hf', usage: 0 }],
   },
   {
     month: '2026-07',
     ai: { tokens: 0, requests: 0, cost: 0 },
     workflow_tokens: { total_module_runs: 0, per_module: {} },
-    billing: { total_amount: 0, ai: { purchase: 0, sale: 0, margin: 0 } },
+    billing: { total_amount: 0 },
     connectors: [],
   },
 ]
@@ -33,7 +33,19 @@ describe('TenantUsageDetailsTable', () => {
     render(<TenantUsageDetailsTable history={history} />)
     expect(screen.getByText(/augustus 2026/i)).toBeInTheDocument()
     expect(screen.getByText(/juli 2026/i)).toBeInTheDocument()
-    expect(screen.getByText('12.000')).toBeInTheDocument() // AI tokens for August
+    const augustusRow = screen.getByText(/augustus 2026/i).closest('tr')
+    expect(within(augustusRow).getByText('12.000')).toBeInTheDocument() // AI tokens for August
+  })
+
+  it('adds a totals row summing every month in the history', () => {
+    render(<TenantUsageDetailsTable history={history} />)
+    // 12000+0 tokens, 40+0 calls, 5+0 runs, 4.5+0 total amount.
+    expect(screen.getByText('Totaal')).toBeInTheDocument()
+    const totalsRow = screen.getByText('Totaal').closest('div')
+    expect(within(totalsRow).getByText('12.000')).toBeInTheDocument()
+    expect(within(totalsRow).getByText('40')).toBeInTheDocument()
+    expect(within(totalsRow).getByText('5')).toBeInTheDocument()
+    expect(within(totalsRow).getByText('€ 4,50')).toBeInTheDocument()
   })
 
   it('expands a row to show its real detail sections (purchase/sale/margin, per-module, connectors)', async () => {

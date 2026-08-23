@@ -181,6 +181,8 @@
     "kpis_tasks": "Aufgaben",
     "kpis_calllists": "Anruflisten",
     "kpis_matches": "Matches",
+    "kpis_opportunities": "Chancen",
+    "kpis_vacancies": "Stellen",
     "email_log": "E-Mail-Protokoll",
     "whatsapp_log": "Nachrichtenprotokoll",
     "appointment_types": "Terminarten",
@@ -236,6 +238,8 @@
     "notif_klanten": "Kunden",
     "notif_matches": "Matches",
     "notif_taken": "Aufgaben",
+    "notif_calllists": "Anruflisten",
+    "notif_opportunities": "Chancen",
     "notif_escalation": "Eskalation",
     "koios_advice": "Hinweis-Schwellenwerte",
     "notif_my": "Meine Benachrichtigungen",
@@ -247,6 +251,7 @@
   "kpis": {
     "title": "KPI-Einstellungen",
     "subtitle": "Zielwerte für Dashboards und Berichte",
+    "vacanciesSubtitle": "Zielwerte für Dashboards und Berichte. Die Veralterung von Stellen wird unter Koios AI → Hinweis-Schwellenwerte verwaltet.",
     "fields": {
       "new_candidates_target": {
         "label": "Ziel neue Kandidaten / Monat",
@@ -322,6 +327,21 @@
         "label": "Keine Nachverfolgung nach N Werktagen",
         "description": "Nach so vielen Werktagen ohne offene Aufgabe, Termin oder Kontaktmoment zählt ein Kandidat als 'keine Nachverfolgung'",
         "unit": "Werktage"
+      },
+      "opportunity_stale_days": {
+        "label": "Schwelle stillstehende Chance",
+        "description": "Anzahl der Tage ohne Phasenwechsel, ab denen eine offene Chance als stillstehend zählt",
+        "unit": "Tage"
+      },
+      "opportunity_closing_soon_days": {
+        "label": "Schwelle bald abschließend",
+        "description": "Anzahl der Tage vor dem erwarteten Abschlussdatum, ab denen eine offene Chance als 'bald abschließend' zählt",
+        "unit": "Tage"
+      },
+      "vacancy_closing_soon_days": {
+        "label": "Schwelle Stelle schließt bald",
+        "description": "Anzahl der Tage vor der Bewerbungsfrist einer Stelle, ab denen sie als 'schließt bald' zählt",
+        "unit": "Tage"
       }
     }
   },
@@ -767,6 +787,14 @@
       "taken": {
         "title": "Aufgaben",
         "desc": "Benachrichtigungen über neue und aktualisierte Aufgaben."
+      },
+      "calllists": {
+        "title": "Anruflisten",
+        "desc": "Benachrichtigungen über zugewiesene Anruflisten-Ziele."
+      },
+      "opportunities": {
+        "title": "Chancen",
+        "desc": "Benachrichtigungen über gewonnene und verlorene Chancen."
       }
     },
     "my": {
@@ -876,7 +904,14 @@
         "colAiAmount": "KI-Betrag",
         "colTotalAmount": "Gesamtbetrag",
         "loadError": "Tägliche Nutzung konnte nicht geladen werden.",
-        "empty": "Noch keine Nutzung in diesem Zeitraum."
+        "empty": "Noch keine Nutzung in diesem Zeitraum.",
+        "granularityLabel": "Ansicht",
+        "granularityDay": "Tag",
+        "granularityWeek": "Woche",
+        "weekLabel": "Wo {{n}}",
+        "clickHint": "Klicken Sie auf einen Tagesbalken oder eine Tabellenzeile für die Details.",
+        "drilldownTitle": "Details für {{date}}",
+        "drilldownClose": "Details schließen"
       },
       "koios": {
         "title": "Koios-KI-Abrechnung",
@@ -900,20 +935,20 @@
         "total": "Gesamt"
       },
       "credits": {
-        "title": "Credits",
-        "subtitle": "Verkaufspreis für Workflow- und KI-Verbrauch in diesem Zeitraum.",
         "periodPrevMonth": "Vorheriger Monat",
-        "loadError": "Credits-Verbrauch konnte nicht geladen werden.",
-        "unavailable": "Sie haben keine Berechtigung, dies anzuzeigen.",
-        "empty": "Noch kein Credits-Verbrauch in diesem Zeitraum.",
-        "workflowTitle": "Workflow-Credits",
-        "totalCredits": "Credits insgesamt",
-        "creditPrice": "Preis pro Credit",
-        "amount": "Betrag",
-        "aiTitle": "KI-Verbrauch"
+        "unavailable": "Sie haben keine Berechtigung, dies anzuzeigen."
       },
       "exportXlsx": "Excel exportieren",
-      "exportFailed": "Export fehlgeschlagen."
+      "exportFailed": "Export fehlgeschlagen.",
+      "kpi": {
+        "totalLabel": "Gesamt in diesem Zeitraum",
+        "workflowLabel": "Workflow",
+        "workflowNote": "{{n}} Credits · {{price}}/Credit",
+        "koiosLabel": "Koios AI",
+        "koiosNote": "{{n}} Tokens",
+        "whatsappLabel": "WhatsApp",
+        "whatsappNote": "{{n}} Nachrichten"
+      }
     },
     "invoices": {
       "title": "Rechnungen",
@@ -1047,6 +1082,7 @@
         "noIp": "Unbekannt",
         "retry": "Erneut versuchen",
         "openHistory": "Workflow-Ausführungsverlauf öffnen",
+        "openWorkflowRuns": "Ausführungsverlauf von {{name}} öffnen",
         "col": {
           "time": "Empfangen",
           "method": "Methode",
@@ -2646,7 +2682,8 @@
       "colModule": "Modul",
       "colRuns": "Ausführungen",
       "footer_one": "{{count}} Monat",
-      "footer_other": "{{count}} Monate"
+      "footer_other": "{{count}} Monate",
+      "totalsLabel": "Gesamt"
     },
     "breakdown": {
       "title": "Nutzungsaufschlüsselung",
@@ -2676,9 +2713,20 @@
       "footerWithTotals_other": "{{count}} Zeilen · {{requests}} Anfragen · {{tokens}} Tokens",
       "chartTitle": "Einkauf pro {{axis}}",
       "chartOther_one": "Sonstige ({{count}})",
-      "chartOther_other": "Sonstige ({{count}})"
+      "chartOther_other": "Sonstige ({{count}})",
+      "filterActive": "Gefiltert nach {{value}}",
+      "clearFilter": "Filter löschen",
+      "totalsLabel": "Gesamt"
     },
-    "nothingUsed": "Für diesen Monat wurde keine Nutzung erfasst. Deshalb stehen die Tabellen unten auf null."
+    "nothingUsed": "Für diesen Monat wurde keine Nutzung erfasst. Deshalb stehen die Tabellen unten auf null.",
+    "kpi": {
+      "aiLabel": "KI (Verkauf)",
+      "aiNote": "Einkauf {{purchase}} · Marge {{margin}} · {{tokens}} Token",
+      "workflowLabel": "Workflow",
+      "workflowNote": "{{n}} Ausführungen",
+      "whatsappLabel": "WhatsApp Business",
+      "planningLabel": "Verarbeitete Stunden"
+    }
   },
   "jobs": {
     "title": "Aufgabenverwaltung",

@@ -181,6 +181,8 @@
     "kpis_tasks": "Tâches",
     "kpis_calllists": "Listes d'appels",
     "kpis_matches": "Matchs",
+    "kpis_opportunities": "Opportunités",
+    "kpis_vacancies": "Postes",
     "email_log": "Journal e-mail",
     "whatsapp_log": "Journal des messages",
     "appointment_types": "Types de rendez-vous",
@@ -236,6 +238,8 @@
     "notif_klanten": "Clients",
     "notif_matches": "Matchs",
     "notif_taken": "Tâches",
+    "notif_calllists": "Listes d'appels",
+    "notif_opportunities": "Opportunités",
     "notif_escalation": "Escalade",
     "koios_advice": "Seuils de conseils",
     "notif_my": "Mes notifications",
@@ -247,6 +251,7 @@
   "kpis": {
     "title": "Paramètres KPI",
     "subtitle": "Objectifs pour les tableaux de bord et les rapports",
+    "vacanciesSubtitle": "Objectifs pour les tableaux de bord et les rapports. L'ancienneté des postes est gérée sous Koios AI → Seuils de conseils.",
     "fields": {
       "new_candidates_target": {
         "label": "Objectif nouveaux candidats / mois",
@@ -322,6 +327,21 @@
         "label": "Aucun suivi après N jours ouvrés",
         "description": "Après ce nombre de jours ouvrés sans tâche ouverte, rendez-vous ou contact, un candidat compte comme 'sans suivi'",
         "unit": "jours ouvrés"
+      },
+      "opportunity_stale_days": {
+        "label": "Seuil d'opportunité stagnante",
+        "description": "Nombre de jours sans changement d'étape avant qu'une opportunité ouverte compte comme stagnante",
+        "unit": "jours"
+      },
+      "opportunity_closing_soon_days": {
+        "label": "Seuil de clôture proche",
+        "description": "Nombre de jours avant la date de clôture prévue à partir duquel une opportunité ouverte compte comme proche de la clôture",
+        "unit": "jours"
+      },
+      "vacancy_closing_soon_days": {
+        "label": "Seuil de clôture proche du poste",
+        "description": "Nombre de jours avant la date limite de candidature d'un poste à partir duquel il compte comme proche de la clôture",
+        "unit": "jours"
       }
     }
   },
@@ -767,6 +787,14 @@
       "taken": {
         "title": "Tâches",
         "desc": "Notifications sur les tâches nouvelles et mises à jour."
+      },
+      "calllists": {
+        "title": "Listes d'appels",
+        "desc": "Notifications sur les cibles assignées des listes d'appels."
+      },
+      "opportunities": {
+        "title": "Opportunités",
+        "desc": "Notifications sur les opportunités gagnées et perdues."
       }
     },
     "my": {
@@ -876,7 +904,14 @@
         "colAiAmount": "Montant IA",
         "colTotalAmount": "Montant total",
         "loadError": "Échec du chargement de l'utilisation quotidienne.",
-        "empty": "Aucune utilisation pour cette période."
+        "empty": "Aucune utilisation pour cette période.",
+        "granularityLabel": "Affichage",
+        "granularityDay": "Jour",
+        "granularityWeek": "Semaine",
+        "weekLabel": "Sem {{n}}",
+        "clickHint": "Cliquez sur une barre de jour ou une ligne du tableau pour voir les détails.",
+        "drilldownTitle": "Détails pour {{date}}",
+        "drilldownClose": "Fermer les détails"
       },
       "koios": {
         "title": "Facturation Koios IA",
@@ -900,20 +935,20 @@
         "total": "Total"
       },
       "credits": {
-        "title": "Crédits",
-        "subtitle": "Prix de vente de l'utilisation workflow et IA pour cette période.",
         "periodPrevMonth": "Mois précédent",
-        "loadError": "Échec du chargement de l'utilisation des crédits.",
-        "unavailable": "Vous n'avez pas la permission de voir ceci.",
-        "empty": "Aucune utilisation de crédits pour cette période.",
-        "workflowTitle": "Crédits workflow",
-        "totalCredits": "Total des crédits",
-        "creditPrice": "Prix par crédit",
-        "amount": "Montant",
-        "aiTitle": "Utilisation IA"
+        "unavailable": "Vous n'avez pas la permission de voir ceci."
       },
       "exportXlsx": "Exporter Excel",
-      "exportFailed": "L'exportation a échoué."
+      "exportFailed": "L'exportation a échoué.",
+      "kpi": {
+        "totalLabel": "Total sur la période",
+        "workflowLabel": "Workflow",
+        "workflowNote": "{{n}} crédits · {{price}}/crédit",
+        "koiosLabel": "Koios AI",
+        "koiosNote": "{{n}} jetons",
+        "whatsappLabel": "WhatsApp",
+        "whatsappNote": "{{n}} messages"
+      }
     },
     "invoices": {
       "title": "Factures",
@@ -1047,6 +1082,7 @@
         "noIp": "Inconnu",
         "retry": "Réessayer",
         "openHistory": "Ouvrir l'historique d'exécution du workflow",
+        "openWorkflowRuns": "Ouvrir l'historique d'exécution de {{name}}",
         "col": {
           "time": "Reçue",
           "method": "Méthode",
@@ -2646,7 +2682,8 @@
       "colModule": "Module",
       "colRuns": "Exécutions",
       "footer_one": "{{count}} mois",
-      "footer_other": "{{count}} mois"
+      "footer_other": "{{count}} mois",
+      "totalsLabel": "Total"
     },
     "breakdown": {
       "title": "Répartition de l'utilisation",
@@ -2676,9 +2713,20 @@
       "footerWithTotals_other": "{{count}} lignes · {{requests}} requêtes · {{tokens}} tokens",
       "chartTitle": "Achat par {{axis}}",
       "chartOther_one": "Autre ({{count}})",
-      "chartOther_other": "Autres ({{count}})"
+      "chartOther_other": "Autres ({{count}})",
+      "filterActive": "Filtré sur {{value}}",
+      "clearFilter": "Effacer le filtre",
+      "totalsLabel": "Total"
     },
-    "nothingUsed": "Aucune consommation enregistrée pour ce mois. C'est pourquoi les tableaux ci-dessous sont à zéro."
+    "nothingUsed": "Aucune consommation enregistrée pour ce mois. C'est pourquoi les tableaux ci-dessous sont à zéro.",
+    "kpi": {
+      "aiLabel": "IA (vente)",
+      "aiNote": "Achat {{purchase}} · Marge {{margin}} · {{tokens}} jetons",
+      "workflowLabel": "Workflow",
+      "workflowNote": "{{n}} exécutions",
+      "whatsappLabel": "WhatsApp Business",
+      "planningLabel": "Heures traitées"
+    }
   },
   "jobs": {
     "title": "Gestion des tâches",

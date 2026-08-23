@@ -8,9 +8,11 @@
  * a field the backend omits stays a dash, never a guess (§3 no fake affordances).
  */
 import { useTranslation } from 'react-i18next'
+import UsageTotalsRow from './UsageTotalsRow'
 import DataTable from '@/components/ui/DataTable'
 import TableScrollFrame from '@/components/ui/TableScrollFrame'
 import { useNumberFormat } from '@/lib/formatters'
+import { GroupLabel } from '@/components/ui/typography'
 import { th, td, numCell } from './usageCardStyles'
 
 // Connector key -> brand label (proper nouns, not translatable), mirrors TenantUsageSettings.
@@ -30,6 +32,15 @@ export default function TenantUsageDetailsTable({ history }) {
   const { formatNumber, formatCurrency } = useNumberFormat()
   const rows = Array.isArray(history) ? history : []
 
+  // Totals across every month in the history — sums exactly what the columns
+  // above show, so the strip below the table can never disagree with a row.
+  const totals = rows.reduce((acc, r) => ({
+    aiTokens: acc.aiTokens + (r.ai?.tokens ?? 0),
+    aiCalls: acc.aiCalls + (r.ai?.requests ?? 0),
+    workflowRuns: acc.workflowRuns + (r.workflow_tokens?.total_module_runs ?? 0),
+    totalAmount: acc.totalAmount + (r.billing?.total_amount ?? 0),
+  }), { aiTokens: 0, aiCalls: 0, workflowRuns: 0, totalAmount: 0 })
+
   // Columns show only the always-present monthly summary fields; the rest
   // (per-connector, per-module, purchase/sale/margin) lives in the expanded panel.
   const columns = [
@@ -43,43 +54,20 @@ export default function TenantUsageDetailsTable({ history }) {
   // Per-month detail panel — every value here is read straight off the row's
   // own server payload, no derivation. An empty sub-section shows an honest
   // "no data" line rather than a zero it did not actually measure.
+  // No per-month margin panel here: AdminUsageController builds history[].billing
+  // from billingForMonth() only — the ai {purchase,sale,margin} block exists solely
+  // on the SELECTED month (rendered by TenantUsageKpiRow). Rendering it per history
+  // row was dead against the real server (Opus round, USAGE-GROUPS-1 lesson).
   function renderExpanded(row) {
     const connectors = Array.isArray(row.connectors) ? row.connectors.filter((c) => c.usage > 0) : []
     const perModule = Object.entries(row.workflow_tokens?.per_module ?? {})
-    const hasMargin = row.billing?.ai != null
 
     return (
       <div style={{ padding: '12px 16px 16px', display: 'flex', flexDirection: 'column', gap: 14 }}>
-        {/* AI cost detail — raw purchase vs. platform sale price vs. margin. */}
-        {hasMargin && (
-          <div>
-            <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>
-              {t('usage.details.aiCost')}
-            </div>
-            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-              <tbody>
-                <tr>
-                  <td style={td}>{t('usage.details.purchase')}</td>
-                  <td style={numCell}>{formatCurrency(row.billing.ai.purchase)}</td>
-                </tr>
-                <tr>
-                  <td style={td}>{t('usage.details.sale')}</td>
-                  <td style={numCell}>{formatCurrency(row.billing.ai.sale)}</td>
-                </tr>
-                <tr>
-                  <td style={{ ...td, borderBottom: 'none' }}>{t('usage.details.margin')}</td>
-                  <td style={{ ...numCell, borderBottom: 'none' }}>{formatCurrency(row.billing.ai.margin)}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        )}
 
         {/* Workflow runs per module. */}
         <div>
-          <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>
-            {t('usage.details.workflowPerModule')}
-          </div>
+          <GroupLabel style={{ marginBottom: 6 }}>{t('usage.details.workflowPerModule')}</GroupLabel>
           {perModule.length === 0
             ? <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: 0 }}>{t('usage.details.noData')}</p>
             : (
@@ -104,9 +92,7 @@ export default function TenantUsageDetailsTable({ history }) {
 
         {/* Connector calls, this month. */}
         <div>
-          <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>
-            {t('usage.col.connectors')}
-          </div>
+          <GroupLabel style={{ marginBottom: 6 }}>{t('usage.col.connectors')}</GroupLabel>
           {connectors.length === 0
             ? <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: 0 }}>{t('usage.details.noData')}</p>
             : (
@@ -136,20 +122,29 @@ export default function TenantUsageDetailsTable({ history }) {
   // whole panel on top of that. Nothing is dropped: the footer states the real
   // number of months, and every one of them stays in the scroll area.
   return (
-    <TableScrollFrame
-      label={t('usage.details.title')}
-      maxHeight={380}
-      footer={t('usage.details.footer', { count: rows.length })}
-    >
-      <DataTable
-        columns={columns}
-        rows={rows}
-        getRowId={(r) => r.month}
-        stickyHeader
-        renderExpanded={renderExpanded}
-        expandLabel={t('usage.details.expandLabel')}
-        emptyText={t('usage.details.empty')}
-      />
-    </TableScrollFrame>
+    <>
+      <TableScrollFrame
+        label={t('usage.details.title')}
+        maxHeight={380}
+        footer={t('usage.details.footer', { count: rows.length })}
+      >
+        <DataTable
+          columns={columns}
+          rows={rows}
+          getRowId={(r) => r.month}
+          stickyHeader
+          renderExpanded={renderExpanded}
+          expandLabel={t('usage.details.expandLabel')}
+          emptyText={t('usage.details.empty')}
+        />
+      </TableScrollFrame>
+      {/* Totals row across every month in the history — never rescrolled away. */}
+      <UsageTotalsRow label={t('usage.details.totalsLabel')} values={[
+        formatNumber(totals.aiTokens),
+        formatNumber(totals.aiCalls),
+        formatNumber(totals.workflowRuns),
+        formatCurrency(totals.totalAmount),
+      ]} />
+    </>
   )
 }

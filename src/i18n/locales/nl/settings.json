@@ -181,6 +181,8 @@
     "kpis_tasks": "Taken",
     "kpis_calllists": "Bellijsten",
     "kpis_matches": "Matches",
+    "kpis_opportunities": "Kansen",
+    "kpis_vacancies": "Vacatures",
     "email_log": "E-mail-log",
     "whatsapp_log": "Berichtenlog",
     "appointment_types": "Afspraaktypes",
@@ -236,6 +238,8 @@
     "notif_klanten": "Klanten",
     "notif_matches": "Matches",
     "notif_taken": "Taken",
+    "notif_calllists": "Bellijsten",
+    "notif_opportunities": "Kansen",
     "notif_escalation": "Escalatie",
     "koios_advice": "Advies-drempels",
     "notif_my": "Mijn meldingen",
@@ -247,6 +251,7 @@
   "kpis": {
     "title": "KPI-instellingen",
     "subtitle": "Streefwaarden voor dashboards en rapportages",
+    "vacanciesSubtitle": "Streefwaarden voor dashboards en rapportages. Vacature-veroudering wordt beheerd onder Koios AI → Advies-drempels.",
     "fields": {
       "new_candidates_target": {
         "label": "Doel nieuwe kandidaten / maand",
@@ -322,6 +327,21 @@
         "label": "Geen opvolging na N werkdagen",
         "description": "Na zoveel werkdagen zonder open taak, afspraak of contactmoment telt een kandidaat als 'geen opvolging'",
         "unit": "werkdagen"
+      },
+      "opportunity_stale_days": {
+        "label": "Drempel stilstaande kans",
+        "description": "Aantal dagen zonder fasewissel voordat een open kans als stilstaand telt",
+        "unit": "dagen"
+      },
+      "opportunity_closing_soon_days": {
+        "label": "Drempel sluit binnenkort",
+        "description": "Aantal dagen vóór de verwachte sluitingsdatum waarop een open kans als 'sluit binnenkort' telt",
+        "unit": "dagen"
+      },
+      "vacancy_closing_soon_days": {
+        "label": "Drempel vacature sluit binnenkort",
+        "description": "Aantal dagen vóór de sollicitatietermijn van een vacature waarop deze als 'sluit binnenkort' telt",
+        "unit": "dagen"
       }
     }
   },
@@ -1013,6 +1033,14 @@
       "taken": {
         "title": "Taken",
         "desc": "Meldingen over nieuwe en bijgewerkte taken."
+      },
+      "calllists": {
+        "title": "Bellijsten",
+        "desc": "Meldingen over toegewezen bellijst-doelen."
+      },
+      "opportunities": {
+        "title": "Kansen",
+        "desc": "Meldingen over gewonnen en verloren kansen."
       }
     },
     "my": {
@@ -1122,7 +1150,14 @@
         "colAiAmount": "AI-bedrag",
         "colTotalAmount": "Totaalbedrag",
         "loadError": "Laden van dagelijks verbruik mislukt.",
-        "empty": "Nog geen verbruik in deze periode."
+        "empty": "Nog geen verbruik in deze periode.",
+        "granularityLabel": "Weergave",
+        "granularityDay": "Dag",
+        "granularityWeek": "Week",
+        "weekLabel": "Wk {{n}}",
+        "clickHint": "Klik op een dag-staaf of tabelrij voor de details.",
+        "drilldownTitle": "Details voor {{date}}",
+        "drilldownClose": "Details sluiten"
       },
       "koios": {
         "title": "Koios AI-facturatie",
@@ -1146,20 +1181,20 @@
         "total": "Totaal"
       },
       "credits": {
-        "title": "Credits",
-        "subtitle": "Verkoopprijs workflow- en AI-verbruik voor deze periode.",
         "periodPrevMonth": "Vorige maand",
-        "loadError": "Credits-verbruik laden is mislukt.",
-        "unavailable": "Je hebt geen rechten om dit te bekijken.",
-        "empty": "Nog geen credits-verbruik in deze periode.",
-        "workflowTitle": "Workflow-credits",
-        "totalCredits": "Credits totaal",
-        "creditPrice": "Prijs per credit",
-        "amount": "Bedrag",
-        "aiTitle": "AI-verbruik"
+        "unavailable": "Je hebt geen rechten om dit te bekijken."
       },
       "exportXlsx": "Exporteer Excel",
-      "exportFailed": "Exporteren is mislukt."
+      "exportFailed": "Exporteren is mislukt.",
+      "kpi": {
+        "totalLabel": "Totaal deze periode",
+        "workflowLabel": "Workflow",
+        "workflowNote": "{{n}} credits · {{price}}/credit",
+        "koiosLabel": "Koios AI",
+        "koiosNote": "{{n}} tokens",
+        "whatsappLabel": "WhatsApp",
+        "whatsappNote": "{{n}} berichten"
+      }
     },
     "invoices": {
       "title": "Facturen",
@@ -1293,6 +1328,7 @@
         "noIp": "Onbekend",
         "retry": "Opnieuw proberen",
         "openHistory": "Open workflow-runhistorie",
+        "openWorkflowRuns": "Open de runhistorie van {{name}}",
         "col": {
           "time": "Ontvangen",
           "method": "Methode",
@@ -2646,7 +2682,8 @@
       "colModule": "Module",
       "colRuns": "Runs",
       "footer_one": "{{count}} maand",
-      "footer_other": "{{count}} maanden"
+      "footer_other": "{{count}} maanden",
+      "totalsLabel": "Totaal"
     },
     "breakdown": {
       "title": "Verbruik uitgesplitst",
@@ -2676,9 +2713,20 @@
       "footerWithTotals_other": "{{count}} regels · {{requests}} verzoeken · {{tokens}} tokens",
       "chartTitle": "Inkoop per {{axis}}",
       "chartOther_one": "Overig ({{count}})",
-      "chartOther_other": "Overig ({{count}})"
+      "chartOther_other": "Overig ({{count}})",
+      "filterActive": "Gefilterd op {{value}}",
+      "clearFilter": "Filter wissen",
+      "totalsLabel": "Totaal"
     },
-    "nothingUsed": "Geen verbruik geregistreerd in deze maand. Daarom staan de tabellen hieronder op nul."
+    "nothingUsed": "Geen verbruik geregistreerd in deze maand. Daarom staan de tabellen hieronder op nul.",
+    "kpi": {
+      "aiLabel": "AI (verkoop)",
+      "aiNote": "Inkoop {{purchase}} · Marge {{margin}} · {{tokens}} tokens",
+      "workflowLabel": "Workflow",
+      "workflowNote": "{{n}} runs",
+      "whatsappLabel": "WhatsApp Business",
+      "planningLabel": "Verwerkte uren"
+    }
   },
   "jobs": {
     "title": "Taakbeheer",
