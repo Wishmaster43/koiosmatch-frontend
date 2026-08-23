@@ -16,15 +16,19 @@ import { useWhatsAppConnections } from './whatsapp/useWhatsAppConnections'
 import WhatsAppConnectionsList from './whatsapp/WhatsAppConnectionsList'
 import SubTabBar, { type SubTab } from '@/components/drawer/SubTabBar'
 import Button from '@/components/ui/Button'
+import SoftChip from '@/components/ui/SoftChip'
 import { BodyText, Caption, GroupLabel, Mono } from '@/components/ui/typography'
 
 // One phone number under a connection (GET /whatsapp/{id}'s phone_numbers).
+// `active` (WhatsappPhoneNumber::$casts) turns false when a WABA switch on the
+// connection deactivates it server-side (WA-WABA-EDIT-1) — surfaced as a chip below.
 interface PhoneNumberRow {
   id?: string
   name?: string
   display_number?: string
   quality_rating?: string
   code_verification_status?: string
+  active?: boolean
 }
 // One synced Meta template component (BODY/HEADER/…), and one template row.
 interface TemplateComponent { type?: string; text?: string }
@@ -84,7 +88,12 @@ export default function WhatsAppSettings() {
   }, [connections, selectedConnId])
 
   // Entity-keyed load: an alive guard drops a stale response after a fast switch
-  // between connections (§9).
+  // between connections (§9). F2: also re-fires on `connections` — ANY list reload
+  // (a save incl. a WABA switch that deactivates numbers server-side, a status
+  // check, a promote, a local remove) hands out a fresh `connections` reference,
+  // and that reference is the signal that this connection's own detail
+  // (phone_numbers/templates) may have changed too, so refetch it here. One
+  // bounded, user-initiated GET per reload; no polling feeds this dep.
   useEffect(() => {
     if (!selectedConnId) { setPhones([]); setTemplates([]); return }
     let alive = true
@@ -95,7 +104,7 @@ export default function WhatsAppSettings() {
       setTemplates(Array.isArray(full?.templates) ? full.templates : [])
     }).catch(() => { if (alive) { setPhones([]); setTemplates([]) } })
     return () => { alive = false }
-  }, [selectedConnId])
+  }, [selectedConnId, connections])
 
   // Re-fetch the selected connection's numbers/templates after a sync action.
   const reloadDetail = async () => {
@@ -209,6 +218,11 @@ export default function WhatsAppSettings() {
                       </div>
                     )}
                   </div>
+                  {/* F2: a WABA switch deactivates every linked number server-side
+                      (WA-WABA-EDIT-1) — the row must say so, not just a one-time toast. */}
+                  {p.active === false && (
+                    <SoftChip label={t('whatsapp.numberInactive')} color="var(--color-danger)" />
+                  )}
                   {p.quality_rating && (
                     <span style={{ fontSize: 11, fontWeight: 600, color: q.color, background: q.bg,
                                    borderRadius: 999, padding: '2px 10px', flexShrink: 0 }}>

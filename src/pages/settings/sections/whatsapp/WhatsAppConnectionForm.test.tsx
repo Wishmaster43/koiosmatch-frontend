@@ -131,6 +131,30 @@ describe('WhatsAppConnectionForm · WA-VESTIGING-FE-1 · create', () => {
     expect(screen.getByText('whatsapp.addConnectionRequired')).toBeInTheDocument()
   })
 
+  // F3: the create route has no server-side max on waba_id at all, so the client
+  // cap (mirroring the update route's own max:64) is the only gate on this path.
+  it('blocks submit when the waba id exceeds the 64-char cap (F3), no request fires', async () => {
+    const user = userEvent.setup()
+    render(<WhatsAppConnectionForm connection={null} onSaved={noop} onCancel={noop} />)
+    await user.type(screen.getByLabelText(/whatsapp\.wabaId/), '1'.repeat(65))
+    await user.type(screen.getByLabelText(/whatsapp\.accessToken/), 'EAAG-secret-token')
+    await user.click(screen.getByRole('button', { name: 'whatsapp.addConnection' }))
+    expect(api.post).not.toHaveBeenCalled()
+    expect(screen.getByText('whatsapp.wabaIdTooLong')).toBeInTheDocument()
+  })
+
+  // Boundary pin (Opus F1): exactly 64 chars must PASS — a `>=` slip at the cap
+  // would block a legal id and ship green without this.
+  it('accepts a waba id of exactly 64 chars (F3 boundary), the request fires', async () => {
+    const user = userEvent.setup()
+    render(<WhatsAppConnectionForm connection={null} onSaved={noop} onCancel={noop} />)
+    await user.type(screen.getByLabelText(/whatsapp\.wabaId/), '1'.repeat(64))
+    await user.type(screen.getByLabelText(/whatsapp\.accessToken/), 'EAAG-secret-token')
+    await user.click(screen.getByRole('button', { name: 'whatsapp.addConnection' }))
+    await waitFor(() => expect(api.post).toHaveBeenCalled())
+    expect(screen.queryByText('whatsapp.wabaIdTooLong')).not.toBeInTheDocument()
+  })
+
   it('blocks submit when a scope value is chosen but no branch/role is picked', async () => {
     const user = userEvent.setup()
     render(<WhatsAppConnectionForm connection={null} onSaved={noop} onCancel={noop} />)
@@ -200,6 +224,70 @@ describe('WhatsAppConnectionForm · WA-VESTIGING-FE-1 · edit', () => {
     // No real switch happened — no confirmation dialog, no deactivation notice.
     expect(screen.queryByText('whatsapp.wabaSwitchConfirmMessage')).not.toBeInTheDocument()
     expect(notify).not.toHaveBeenCalled()
+    // F4: no switch and no rotated token means no extra re-verify call either.
+    expect(api.post).not.toHaveBeenCalled()
+  })
+
+  // F1: the compare (and the send) both happen on the TRIMMED value — padding
+  // around an otherwise-identical id must never read as a real WABA switch.
+  it('a padded-but-equal waba value is not a switch (F1): no confirm, no waba_id in the body', async () => {
+    const user = userEvent.setup()
+    render(<WhatsAppConnectionForm connection={EXISTING} onSaved={noop} onCancel={noop} />)
+    const wabaField = screen.getByLabelText(/whatsapp\.wabaId/)
+    await user.clear(wabaField)
+    await user.type(wabaField, '  10229012934  ')
+    await user.click(screen.getByRole('button', { name: 'common.save' }))
+
+    expect(screen.queryByText('whatsapp.wabaSwitchConfirmMessage')).not.toBeInTheDocument()
+    await waitFor(() => expect(api.patch).toHaveBeenCalled())
+    const [, body] = vi.mocked(api.patch).mock.calls[0] as [string, Record<string, unknown>]
+    expect(body).not.toHaveProperty('waba_id')
+  })
+
+  // F1's other half: a padded value that IS a real change sends the TRIMMED form.
+  it('a padded changed waba value sends the trimmed value (F1)', async () => {
+    const user = userEvent.setup()
+    render(<WhatsAppConnectionForm connection={EXISTING} onSaved={noop} onCancel={noop} />)
+    const wabaField = screen.getByLabelText(/whatsapp\.wabaId/)
+    await user.clear(wabaField)
+    await user.type(wabaField, '  999888777  ')
+    await user.click(screen.getByRole('button', { name: 'common.save' }))
+    await screen.findByText('whatsapp.wabaSwitchConfirmMessage')
+    await user.click(screen.getByRole('button', { name: 'whatsapp.wabaSwitchConfirmButton' }))
+
+    await waitFor(() => expect(api.patch).toHaveBeenCalledWith('/whatsapp/conn-1',
+      expect.objectContaining({ waba_id: '999888777' })))
+  })
+
+  // F3: an over-length id must never reach the danger confirm dialog at all.
+  it('blocks submit when the waba id exceeds the 64-char cap (F3), no confirm and no request', async () => {
+    const user = userEvent.setup()
+    render(<WhatsAppConnectionForm connection={EXISTING} onSaved={noop} onCancel={noop} />)
+    const wabaField = screen.getByLabelText(/whatsapp\.wabaId/)
+    await user.clear(wabaField)
+    await user.type(wabaField, '9'.repeat(65))
+    await user.click(screen.getByRole('button', { name: 'common.save' }))
+
+    expect(screen.queryByText('whatsapp.wabaSwitchConfirmMessage')).not.toBeInTheDocument()
+    expect(api.patch).not.toHaveBeenCalled()
+    expect(screen.getByText('whatsapp.wabaIdTooLong')).toBeInTheDocument()
+  })
+
+  // F4: a real WABA switch re-verifies the connection even without a rotated
+  // token — previously only a rotated token triggered this call.
+  it('a WABA switch without a rotated token still re-verifies via check-status (F4)', async () => {
+    const user = userEvent.setup()
+    render(<WhatsAppConnectionForm connection={EXISTING} onSaved={noop} onCancel={noop} />)
+    const wabaField = screen.getByLabelText(/whatsapp\.wabaId/)
+    await user.clear(wabaField)
+    await user.type(wabaField, '999888777')
+    await user.click(screen.getByRole('button', { name: 'common.save' }))
+    await screen.findByText('whatsapp.wabaSwitchConfirmMessage')
+    await user.click(screen.getByRole('button', { name: 'whatsapp.wabaSwitchConfirmButton' }))
+
+    await waitFor(() => expect(api.patch).toHaveBeenCalledWith('/whatsapp/conn-1',
+      expect.objectContaining({ waba_id: '999888777' })))
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/whatsapp/conn-1/check-status'))
   })
 
   it('changing waba_id shows the ConfirmDialog before sending anything, and cancelling sends no request', async () => {

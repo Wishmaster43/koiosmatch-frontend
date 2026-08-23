@@ -23,6 +23,16 @@
  * create's CONSIST-2 convention. label/provider/location_id/role_name are always sent
  * explicitly (incl. null) so switching scope back to "everyone" actually clears the old
  * value — omitting them would leave the previous scope untouched.
+ *
+ * WA-WABA-POLISH-1 (Opus review, 4 minors closed): (1) the trimmed-compare/trimmed-send
+ * semantics are pinned by a regression test — a padded-but-equal value never counts as
+ * a switch, a padded-changed value sends the trimmed one. (2) a client-side length cap
+ * mirrors the update route's own `max:64` (WhatsappController::update) so an over-length
+ * id can no longer pass the danger confirm and only then die on the server's 422 — the
+ * create route has no server-side max at all, so the same cap applies there too, for the
+ * same reason. (3) a WABA switch re-verifies the connection via check-status even when no
+ * token was rotated — previously only a rotated token triggered that call, leaving the
+ * status stale after a switch until the row's own manual re-check ran.
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -48,6 +58,11 @@ const PROVIDERS = [
   { value: 'meta', label: 'Meta' },
   { value: '360dialog', label: '360dialog' },
 ]
+
+// F3: mirrors the update route's `waba_id => 'sometimes|string|max:64'` — TextField
+// has no maxLength passthrough (checked in forms/fields.tsx), so this is enforced as
+// honest inline validation (block submit + a visible message), never a silent truncation.
+const WABA_ID_MAX_LENGTH = 64
 
 type Scope = 'everyone' | 'location' | 'role'
 
@@ -88,9 +103,13 @@ export default function WhatsAppConnectionForm({ connection, onSaved, onCancel }
   const missingWaba = tried && !wabaId.trim()
   const missingToken = !isEdit && tried && !accessToken.trim()
   const missingScope = tried && ((scope === 'location' && !locationId) || (scope === 'role' && !roleName))
-  // A real WABA switch — the value the server would actually act on.
+  // A real WABA switch — the value the server would actually act on. Compared and
+  // sent TRIMMED on both sides: a padded-but-equal value (e.g. '  123  ' vs stored
+  // '123') is never a switch, and a padded-changed value sends the trimmed form.
   const trimmedWaba = wabaId.trim()
   const wabaChanged = Boolean(isEdit && connection && trimmedWaba !== connection.waba_id)
+  // F3: block an over-length id before it can reach the danger confirm or the request.
+  const wabaTooLong = tried && trimmedWaba.length > WABA_ID_MAX_LENGTH
 
   const SCOPE_OPTIONS = [
     { value: 'everyone', label: t('whatsapp.scopeEveryone'), description: t('whatsapp.scopeEveryoneDesc') },
@@ -125,8 +144,10 @@ export default function WhatsAppConnectionForm({ connection, onSaved, onCancel }
         const updated = unwrap<WhatsappUpdateResponse>(res)
         const deactivated = updated?.phone_numbers_deactivated ?? 0
         if (deactivated > 0) notify('info', t('whatsapp.wabaSwitchDeactivatedNotice', { count: deactivated }))
-        // A rotated token is worth re-verifying immediately, same as on create.
-        if (accessToken) { try { await api.post(`/whatsapp/${connection.id}/check-status`) } catch { /* tolerated — the row's own check-status action takes over */ } }
+        // F4: a rotated token OR a real WABA switch is worth re-verifying immediately —
+        // a switch alone used to skip this call, leaving status stale until the row's
+        // own manual re-check ran. Same endpoint the manual button uses, never a second client.
+        if (accessToken || wabaChanged) { try { await api.post(`/whatsapp/${connection.id}/check-status`) } catch { /* tolerated — the row's own check-status action takes over */ } }
       } else {
         // Create-path: optional empty fields are OMITTED, never sent as '' (CONSIST-2).
         const body: Record<string, unknown> = { waba_id: trimmedWaba, access_token: accessToken, provider }
@@ -152,6 +173,8 @@ export default function WhatsAppConnectionForm({ connection, onSaved, onCancel }
   const submit = () => {
     setTried(true)
     if (!wabaId.trim()) return
+    // F3: an over-length id is rejected here, before the danger confirm ever opens.
+    if (trimmedWaba.length > WABA_ID_MAX_LENGTH) return
     if (!isEdit && !accessToken.trim()) return
     if (scope === 'location' && !locationId) return
     if (scope === 'role' && !roleName) return
@@ -179,7 +202,7 @@ export default function WhatsAppConnectionForm({ connection, onSaved, onCancel }
         {/* WA-WABA-EDIT-1: editable in both modes now — a real change is confirmed
             (see submit()) since the server deactivates every linked phone number. */}
         <Field label={t('whatsapp.wabaId')} required>
-          <TextField value={wabaId} onChange={setWabaId} error={missingWaba} placeholder={t('whatsapp.wabaIdPlaceholder')} />
+          <TextField value={wabaId} onChange={setWabaId} error={missingWaba || wabaTooLong} placeholder={t('whatsapp.wabaIdPlaceholder')} />
         </Field>
 
         {/* Password type + new-password: never rendered back, never autofilled. */}
@@ -226,6 +249,12 @@ export default function WhatsAppConnectionForm({ connection, onSaved, onCancel }
       {(missingWaba || missingToken) && (
         <div style={{ fontSize: 12, color: 'var(--color-danger-text)', marginTop: 10 }}>
           {t(isEdit ? 'whatsapp.wabaIdRequired' : 'whatsapp.addConnectionRequired')}
+        </div>
+      )}
+      {/* F3: an honest, visible cap message — never a silent truncation. */}
+      {wabaTooLong && (
+        <div style={{ fontSize: 12, color: 'var(--color-danger-text)', marginTop: 10 }}>
+          {t('whatsapp.wabaIdTooLong', { max: WABA_ID_MAX_LENGTH })}
         </div>
       )}
       {missingScope && (
