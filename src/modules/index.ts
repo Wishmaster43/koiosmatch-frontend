@@ -47,7 +47,6 @@ import set_variable      from './set_variable'
 import set_variables     from './set_variables'
 import get_variable      from './get_variable'
 import get_variables     from './get_variables'
-import sleep             from './sleep'
 import error_ignore      from './error_ignore'
 import error_break       from './error_break'
 import error_resume      from './error_resume'
@@ -61,7 +60,6 @@ import router            from './router'
 import filter            from './filter'
 import email_send        from './email_send'
 import notification_send from './notification_send'
-import delay             from './delay'
 import html_parser       from './html_parser'
 import html_to_text      from './html_to_text'
 import html_table_parser from './html_table_parser'
@@ -150,7 +148,6 @@ const MODULES: ModuleDef[] = [
   set_variables,
   get_variable,
   get_variables,
-  sleep,
   error_ignore,
   error_break,
   error_resume,
@@ -164,7 +161,6 @@ const MODULES: ModuleDef[] = [
   filter,
   email_send,
   notification_send,
-  delay,
   html_parser,
   html_to_text,
   html_table_parser,

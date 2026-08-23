@@ -1,5 +1,13 @@
-// ai_agent module — AI agent block in the workflow builder
+// ai_agent module — WF-AI-AGENT-NODE-FE-1: one turn of the WhatsApp AI interview
+// loop (WA-INTERVIEW-1). The former FE card was a generic 13-field instruction
+// builder with no engine counterpart behind it ("generic agent" stays a later
+// product idea, not a node); this registers exactly the six fields of
+// App\Workflow\Modules\AiAgentModule::configSchema(). Sources decided CMBE 23-08
+// (WORKLIST.md): `agent` reads GET /ai/agents (a plain CRUD list, never an AI
+// call itself — id becomes the stored value, name the label); `phone_number_id`
+// reads the SAME /whatsapp-phone-numbers lookup the whatsapp_send step uses.
 import { Bot } from 'lucide-react'
+import { tint } from '@/lib/tint'
 
 export default {
   type:     'ai_agent',
@@ -9,123 +17,22 @@ export default {
   Icon:     Bot,
   color:    'var(--color-violet)',
   // Lighter mix than --color-violet-bg (~14%) so the AI category visually separates from the parser family.
-  bg:       'color-mix(in srgb, var(--color-violet) 6%, transparent)',
-
+  bg:       tint('var(--color-violet)', 6),
   schema: [
-    // ── Standaard tab ────────────────────────────────────────────────────────
-    {
-      key:         'naam',
-      label:       'Naam',
-      type:        'text',
-      tab:         'standaard',
-      placeholder: 'Bijv. Yessy AI',
-      hint:        'Geef dit agent-blok een herkenbare naam in de workflow.',
-    },
-    // MODEL-1 (2026-07-20): the backend no longer accepts/returns a per-step
-    // model — one company-wide model (Settings → Policy::defaultModel) runs
-    // every AI step. A workflow saved before this change may still carry a
-    // stale `model` key in its config; that key is simply never read/written
-    // here anymore, so it stays inert instead of crashing (defensive-ignore).
-    {
-      key:         'instructions',
-      label:       'Instructies',
-      type:        'textarea',
-      tab:         'standaard',
-      placeholder: 'Je bent een agent gespecialiseerd in...',
-      hint:        'Beschrijf de rol en het gedrag van de agent.',
-    },
-    {
-      key:         'input',
-      label:       'Input',
-      type:        'textarea',
-      tab:         'standaard',
-      required:    true,
-      placeholder: 'Taken of informatie voor de agent om te verwerken...',
-      hint:        'De inkomende data of taak. Gebruik {{module.veld}} om waarden uit eerdere stappen te koppelen.',
-    },
-    {
-      key:   'faq_ids',
-      label: "FAQ's koppelen",
-      type:  'faq_select',
-      tab:   'standaard',
-      hint:  'Koppel FAQ-bronnen die de agent mag raadplegen.',
-    },
-    {
-      key:   'use_knowledge',
-      label: 'Kennisbank gebruiken',
-      type:  'boolean',
-      tab:   'standaard',
-      hint:  'Geef de agent toegang tot de gekoppelde kennisbank.',
-    },
-    {
-      key:      'response_format',
-      label:    'Responsformaat',
-      type:     'select',
-      tab:      'standaard',
-      required: true,
-      default:  'text',
-      options: [
-        { value: 'text',           label: 'Tekst' },
-        { value: 'data_structure', label: 'Datastructuur' },
-      ],
-    },
-    {
-      key:    'response_structure',
-      label:  'Responsstructuur',
-      type:   'response_structure',
-      tab:    'standaard',
-      showIf: { key: 'response_format', value: 'data_structure' },
-      hint:   'Definieer de velden die de agent teruggeeft.',
-    },
-
-    // ── Geavanceerd tab ──────────────────────────────────────────────────────
-    {
-      key:         'system_prefix',
-      label:       'Systeem-prefix',
-      type:        'textarea',
-      tab:         'geavanceerd',
-      placeholder: 'Extra systeeminstructies die vóór alle andere instructies worden geplaatst...',
-      hint:        'Wordt voor de instructies ingevoegd. Gebruik dit voor tenant-brede regels.',
-    },
-    {
-      key:         'conversation_id',
-      label:       'Conversatie ID',
-      type:        'text',
-      tab:         'geavanceerd',
-      placeholder: '{{trigger.session_id}}',
-      hint:        'Hiermee kan de agent conversatiegeschiedenis bijhouden over meerdere runs.',
-    },
-    {
-      key:     'max_history',
-      label:   'Max. conversatiegeschiedenis',
-      type:    'number',
-      tab:     'geavanceerd',
-      default: 10,
-      hint:    'Maximaal aantal berichten dat als context meegegeven wordt.',
-    },
-    {
-      key:     'temperature',
-      label:   'Temperature',
-      type:    'number',
-      tab:     'geavanceerd',
-      default: 0.7,
-      hint:    '0 = deterministisch · 1 = creatief. Standaard 0.7.',
-    },
-    {
-      key:     'max_tokens',
-      label:   'Max. output tokens',
-      type:    'number',
-      tab:     'geavanceerd',
-      default: 1024,
-      hint:    'Maximaal aantal tokens in het antwoord van de agent.',
-    },
-    {
-      key:     'step_timeout',
-      label:   'Timeout (seconden)',
-      type:    'number',
-      tab:     'geavanceerd',
-      default: 60,
-      hint:    'Na hoeveel seconden de stap als mislukt wordt beschouwd.',
-    },
+    // Stored value = the agent NAME: AiAgentModule resolves `AiAgent::where('name', …)`
+    // and its own schema offers pluck('name') (Opus-measured) — an id would match nobody.
+    { key: 'agent', label: 'AI-agent', type: 'lookup_select', endpoint: '/ai/agents', valueKey: 'name', tab: 'standaard' },
+    { key: 'channel', label: 'Kanaal', type: 'select', tab: 'standaard', default: 'whatsapp',
+      options: ['whatsapp'] },
+    { key: 'instruction', label: 'Instructietekst (agent-prompt)', type: 'textarea', tab: 'standaard', required: true,
+      hint: 'De volledige, tenant-bewerkbare instructie voor de AI-agent: persona, staps-state-machine, harde regels. Het runtime-antwoordcontract wordt automatisch toegevoegd.' },
+    // REQUIRED, like the engine's own schema: AiAgentModule::sendReply throws on an
+    // empty phone_number_id before any send-path selection runs (Opus-measured) —
+    // the WA-SCOPE-2 fallback lives in the WhatsApp send path this module never
+    // reaches, so a "leave empty" promise here would be a fake affordance.
+    { key: 'phone_number_id', label: 'Verzendnummer (voor de sessieantwoorden)', type: 'lookup_select', endpoint: '/whatsapp-phone-numbers', tab: 'standaard', required: true },
+    { key: 'reply_timeout_hours', label: 'Terugvaltijd zonder reactie (uren)', type: 'number', tab: 'geavanceerd', default: 48,
+      hint: 'Reageert de kandidaat niet, dan valt de run na dit aantal uren terug (workflows:resume-due watchdog).' },
+    { key: 'max_attempts', label: 'Max. pogingen per beurt (bij een tijdelijke API-fout)', type: 'number', tab: 'geavanceerd', default: 3 },
   ],
 }

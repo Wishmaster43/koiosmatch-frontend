@@ -10,7 +10,7 @@ const baseWorkflow: Workflow = {
   name: 'Welcome flow',
   status: 'active',
   trigger_type: 'scheduled',
-  steps: [{ type: 'webhook' }, { type: 'candidates' }, { type: 'email_send' }, { type: 'delay' }],
+  steps: [{ type: 'webhook' }, { type: 'candidates' }, { type: 'email_send' }, { type: 'wait' }],
   last_run: { time: '2026-07-08T10:00:00Z', ok: true },
   updated_at: '2026-07-08T09:00:00Z',
 }

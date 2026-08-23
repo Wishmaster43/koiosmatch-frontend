@@ -19,7 +19,7 @@ import { useTranslation } from 'react-i18next'
 import { useConfirm } from '@/hooks/useConfirm'
 import { MODULE_META } from '@/modules/index'
 import { ScheduleModal } from './workflow/ScheduleModal'
-import { EdgeAddContext, EdgeDeleteContext, EdgeFilterContext, NodeRunContext, StartContext } from './workflow/contexts'
+import { EdgeAddContext, EdgeDeleteContext, EdgeFilterContext, NodeRunContext, StartContext, CurrentWorkflowContext } from './workflow/contexts'
 import { OutputPanel, NODE_TYPES, EDGE_TYPES } from './workflow/canvas'
 import { EdgeFilterPanel } from './workflow/EdgeFilterPanel'
 import ModulePicker from './workflow/ModulePicker'
@@ -83,6 +83,10 @@ function EditorInner({ workflow, onClose, onSave, initialRunId }: {
   const filterEdge = edges.find(e => e.id === filterState?.edgeId)
 
   return (
+    // WF-PICKER-SELF-1: exposes this workflow's own id so a picker (e.g.
+    // workflow_call's workflow_id field) can exclude self-reference without a
+    // 3-hop prop drill through ConfigPanel -> FieldInput -> the field control.
+    <CurrentWorkflowContext.Provider value={workflow.id ?? null}>
     <StartContext.Provider value={{ startNodeId: firstNodeId ?? null, setStartNodeId }}>
     <EdgeAddContext.Provider value={handleEdgeAdd}>
     <EdgeDeleteContext.Provider value={handleEdgeDelete}>
@@ -228,6 +232,7 @@ function EditorInner({ workflow, onClose, onSave, initialRunId }: {
     </EdgeDeleteContext.Provider>
     </EdgeAddContext.Provider>
     </StartContext.Provider>
+    </CurrentWorkflowContext.Provider>
   )
 }
 

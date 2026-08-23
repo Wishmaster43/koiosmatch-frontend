@@ -29,9 +29,10 @@ export default {
       help: 'Laat leeg voor alle pools' },
     { key: 'positions', label: 'Functies', type: 'multiselect',
       help: 'Laat leeg voor alle functies' },
-    // No display default: the engine applies NO status filter when the key is
-    // absent (`! empty(...)`), so a painted 'actief' would lie (see DEFAULT-PERSIST-1).
-    { key: 'status', label: 'Status', type: 'select', options: ['actief', 'nietactief'] },
+    // default 'actief' mirrors CandidateFilterModule::configSchema; since DEFAULT-PERSIST-1
+    // a schema default is SEEDED into the node config (and the engine merges its own),
+    // so the card shows exactly what the engine filters on.
+    { key: 'status', label: 'Status', type: 'select', options: ['actief', 'nietactief'], default: 'actief' },
     { key: 'last_contact_days', label: 'Niet gecontacteerd in (dagen)', type: 'number' },
     { key: 'last_worked_days',  label: 'Laatste dienst minstens X dagen geleden', type: 'number', placeholder: '30' },
     { key: 'no_show_max',       label: 'Maximaal aantal no-shows', type: 'number', placeholder: '3' },

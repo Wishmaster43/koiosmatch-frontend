@@ -73,6 +73,10 @@ const EXPECTED_SCHEMA_KEYS: Record<string, string[]> = {
   // effective_from deliberately absent: declared by the engine schema but never read by execute() (fake affordance).
   status_set: ['status', 'reason'],
   pdok_geocode: ['entity', 'candidate_id', 'only_missing', 'all_records'],
+  // WF-WAIT-NODE-FE-1: the ONE merged 'wait' node — mirrors WaitModule::configSchema.
+  wait: ['until_field', 'days', 'hours', 'skip_weekends'],
+  // WF-AI-AGENT-NODE-FE-1: the reduced node — mirrors AiAgentModule::configSchema.
+  ai_agent: ['agent', 'channel', 'instruction', 'phone_number_id', 'reply_timeout_hours', 'max_attempts'],
 }
 
 describe('WF-BUILDER-VELDEN-1 · registry config-schema mirrors the engine exactly', () => {
@@ -93,5 +97,47 @@ describe('WF-BUILDER-VELDEN-1 · registry config-schema mirrors the engine exact
   it("notification_send's recipients options include 'users' (required for user_ids to be reachable)", () => {
     const recipients = (MODULE_SCHEMAS.notification_send ?? []).find(f => f.key === 'recipients')
     expect(recipients?.options).toContain('users')
+  })
+})
+
+/**
+ * WF-WAIT-NODE-FE-1 — the engine NEVER knew the FE 'delay'/'sleep' types (both
+ * always rendered "Onbekende module", 0 stored steps across every tenant): both
+ * are deleted outright, never migrated/aliased, and every use folds into the ONE
+ * 'wait' node, mirroring WaitModule::configSchema exactly (no extra key beyond it).
+ */
+describe('WF-WAIT-NODE-FE-1 · delay/sleep deleted, wait mirrors WaitModule::configSchema exactly', () => {
+  it('delay and sleep have no MODULE_META entry and are not in the MODULES array', () => {
+    expect(MODULE_META.delay).toBeUndefined()
+    expect(MODULE_META.sleep).toBeUndefined()
+    expect(MODULES.some(m => m.type === 'delay')).toBe(false)
+    expect(MODULES.some(m => m.type === 'sleep')).toBe(false)
+  })
+
+  it("wait's schema has EXACTLY the engine's four keys, nothing more", () => {
+    const keys = (MODULE_SCHEMAS.wait ?? []).map(f => f.key).sort()
+    expect(keys).toEqual(['days', 'hours', 'skip_weekends', 'until_field'])
+  })
+})
+
+/**
+ * WF-AI-AGENT-NODE-FE-1 — the generic 13-field instruction builder had no engine
+ * counterpart ("generic agent" stays a later product idea, not a node); ai_agent
+ * mirrors AiAgentModule::configSchema exactly, six keys, nothing more.
+ */
+describe('WF-AI-AGENT-NODE-FE-1 · the 13-field builder is gone, ai_agent mirrors AiAgentModule::configSchema exactly', () => {
+  it("ai_agent's schema has EXACTLY the engine's six keys, nothing more", () => {
+    const keys = (MODULE_SCHEMAS.ai_agent ?? []).map(f => f.key).sort()
+    expect(keys).toEqual(['agent', 'channel', 'instruction', 'max_attempts', 'phone_number_id', 'reply_timeout_hours'])
+  })
+
+  it('none of the old 13-field builder keys survive', () => {
+    const keys = (MODULE_SCHEMAS.ai_agent ?? []).map(f => f.key)
+    const dead = [
+      'naam', 'instructions', 'input', 'faq_ids', 'use_knowledge', 'response_format',
+      'response_structure', 'system_prefix', 'conversation_id', 'max_history',
+      'temperature', 'max_tokens', 'step_timeout',
+    ]
+    for (const key of dead) expect(keys).not.toContain(key)
   })
 })

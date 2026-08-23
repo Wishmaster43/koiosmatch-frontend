@@ -4,13 +4,14 @@
  * builder and the response-structure builder. The plain inputs + the dispatcher
  * live in `fields.tsx`, which delegates the field types below to these.
  */
-import { useState, useEffect, useId } from 'react'
+import { useState, useEffect, useId, useContext, useCallback } from 'react'
 import { Plus, X, Check, Copy } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { VALUELESS_OPERATORS, normalizeOperator } from './constants'
 import { fieldLabel } from './moduleI18n'
 import { FilterFieldPicker } from './FilterFieldPicker'
 import { OperatorSelect } from './OperatorSelect'
+import { CurrentWorkflowContext } from './contexts'
 import type { WorkflowField, EdgeFilters, FilterCondition } from '@/types/workflow'
 import { unwrap, unwrapList } from '@/lib/api'
 // Danny 08-08 (§4): the house searchable combobox replaces every bare native
@@ -21,6 +22,7 @@ import SegmentedControl from '@/components/ui/SegmentedControl'
 import { Caption, Mono } from '@/components/ui/typography'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 import Spinner from '@/components/ui/Spinner'
+import ErrorBanner from '@/components/ui/ErrorBanner'
 
 // Shared change handler: writes one field's value into the node config.
 export type OnChange = (key: string, value: unknown) => void
@@ -232,33 +234,49 @@ export function LookupSelectField({ value, onChange, fieldKey, endpoint, valueKe
 // list of this tenant's OWN workflows, fed by the same GET /workflows the
 // workflows page list uses (useWorkflowsData) — never a hardcoded/static option
 // list (§3A: every choice list is searchable). Archived workflows are excluded
-// (a soft-deleted child can never actually run); self-call/cycle/depth are the
-// backend's own guard at run time (WorkflowCallModule), not re-implemented here.
+// (a soft-deleted child can never actually run); a self-referencing workflow is
+// excluded too (WF-PICKER-SELF-1 — the engine hard-fails on it at run time, §3 no
+// fake affordance); depth/cycle-through-a-third-workflow stays the backend's own
+// guard (WorkflowCallModule), not re-implemented here.
 export function WorkflowSelectField({ value, onChange, fieldKey }: { value?: unknown; onChange: OnChange; fieldKey: string }) {
   const { t } = useTranslation('workflows')
+  const currentWorkflowId = useContext(CurrentWorkflowContext)
   const [workflows, setWorkflows] = useState<Array<{ value: string; label: string }>>([])
   const [loading,   setLoading]   = useState(true)
+  // WF-PICKER-ERROR-1: a failed GET /workflows must read as an honest ERROR, never
+  // silently degrade into the "no workflows yet" empty-state copy (§3 four UI states).
+  const [error,     setError]     = useState(false)
+  const [retryTick, setRetryTick] = useState(0)
   // CreatableSelect's trigger is a <button>, which a plain aria-label cannot
   // name — a sr-only span + aria-labelledby names it instead (§4).
   const workflowLabelId = useId()
 
   useEffect(() => {
     let alive = true
+    setLoading(true)
+    setError(false)
     import('@/lib/api').then(m => m.default.get('/workflows'))
       .then(r => {
         const rows = unwrapList<Record<string, unknown>>(r).rows
         if (!alive) return
         setWorkflows(rows
           .filter(w => !w.archived && !w.deleted_at)
+          .filter(w => currentWorkflowId == null || String(w.id) !== String(currentWorkflowId))
           .map(w => ({ value: String(w.id ?? ''), label: String(w.name ?? w.id ?? '') }))
           .filter(o => o.value))
       })
-      .catch(() => {})
+      .catch(() => { if (alive) setError(true) })
       .finally(() => { if (alive) setLoading(false) })
     return () => { alive = false }
-  }, [])
+  }, [currentWorkflowId, retryTick])
+
+  const retry = useCallback(() => setRetryTick(n => n + 1), [])
 
   if (loading) return <div style={{ fontSize: 12, color: 'var(--text-muted)', padding: '4px 0' }}>{t('fields.workflowLoading')}</div>
+
+  if (error) {
+    return <ErrorBanner onRetry={retry}>{t('fields.workflowError')}</ErrorBanner>
+  }
 
   return (
     <>

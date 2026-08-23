@@ -55,6 +55,17 @@ describe('useWorkflowEditor · initial load', () => {
     expect(result.current.nodesWithFirst.map(n => n.id)).toEqual(['n1', 'n2'])
     expect(result.current.edges[0]).toMatchObject({ source: 'n1', target: 'n2' })
   })
+
+  // DEFAULT-PERSIST-1: loading NEVER retro-migrates a saved node — a config saved
+  // before `skip_weekends` existed (or before it had a default) stays exactly as
+  // persisted, defaults are seeded only at node CREATION (insertModule above).
+  it('leaves an EXISTING node\'s config untouched — no retro-seeded defaults on load', async () => {
+    const { result } = setup([
+      { id: 'n1', type: 'wait', config: { days: 2 }, position: { x: 0, y: 180 } },
+    ])
+    await waitFor(() => expect(result.current.nodesWithFirst).toHaveLength(1))
+    expect(result.current.nodesWithFirst[0].data.config).toEqual({ days: 2 })
+  })
 })
 
 describe('useWorkflowEditor · onConnect', () => {
@@ -120,6 +131,23 @@ describe('useWorkflowEditor · insertModule', () => {
     expect(result.current.edges.some(e => e.source === newNode.id && e.target === 'n3')).toBe(true)
     expect(newNode.position).toEqual({ x: 330, y: 60 }) // midpoint of n2/n3, raised
     expect(result.current.nodesWithFirst.find(n => n.id === 'n3')?.position.x).toBe(660) // shifted +220
+  })
+
+  // DEFAULT-PERSIST-1: a dropped node's config carries its schema defaults from the
+  // moment it is created — the ENGINE reads this, not just what the panel displays.
+  it('seeds a newly created node with its schema defaults (append path)', async () => {
+    const { result } = setup(steps())
+    await waitFor(() => expect(result.current.edges).toHaveLength(1))
+    act(() => result.current.insertModule('wait', null))
+    expect(result.current.selectedNode!.data.config).toEqual({ skip_weekends: false })
+  })
+
+  it('seeds a newly created node with its schema defaults (edge-split path)', async () => {
+    const { result } = setup(steps())
+    await waitFor(() => expect(result.current.edges).toHaveLength(1))
+    const edgeId = result.current.edges[0].id
+    act(() => result.current.insertModule('wait', edgeId))
+    expect(result.current.selectedNode!.data.config).toEqual({ skip_weekends: false })
   })
 })
 

@@ -12,6 +12,7 @@ import api, { unwrap } from '@/lib/api'
 import Button from '@/components/ui/Button'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 import Spinner from '@/components/ui/Spinner'
+import { Caption } from '@/components/ui/typography'
 
 interface Message {
   role: 'user' | 'assistant'
@@ -62,7 +63,11 @@ export default function AgentTestPanel({ config }: {
         message: userMsg.content,
         variables: vars,
         conversation_history: messages,
-        config,
+        // The test service (AgentChatService::buildSystemPrompt) still reads the
+        // LEGACY plural key `instructions`; the schema key is `instruction` (engine
+        // AiAgentModule). Send both so the tenant's own text is used — never the
+        // platform default persona on a paid test (Opus, 23-08; CMBE asked to align).
+        config: { ...config, instructions: (config?.instruction ?? config?.instructions) as unknown },
       })
       const data = unwrap<{
         response?: string; message?: string; tokens_used?: number
@@ -103,9 +108,7 @@ export default function AgentTestPanel({ config }: {
           <DrawerAddButton onClick={addVariable} label={t('agentTest.add')} />
         </div>
         {variables.length === 0 && (
-          <p style={{ fontSize: 11, color: 'var(--text-muted)', margin: 0 }}>
-            {t('agentTest.empty')}
-          </p>
+          <Caption as="p" style={{ margin: 0 }}>{t('agentTest.empty')}</Caption>
         )}
         {variables.map((v, i) => (
           <div key={i} style={{ display: 'flex', gap: 6, marginBottom: 4, alignItems: 'center' }}>
@@ -115,7 +118,8 @@ export default function AgentTestPanel({ config }: {
             <input value={v.value} onChange={e => updateVariable(i, 'value', e.target.value)}
               placeholder={t('agentTest.value')}
               style={{ flex: 2, padding: '4px 8px', fontSize: 11, border: '1px solid var(--border)', borderRadius: 6, outline: 'none', background: 'var(--surface)', color: 'var(--text)' }} />
-            <button onClick={() => removeVariable(i)} aria-label={t('agentTest.removeVariable')}
+            <button type="button" onClick={() => removeVariable(i)} aria-label={t('agentTest.removeVariable')}
+              // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- dense inline row-remove inside a ~26px input row; Button sm's fixed 28px footprint breaks the row height (§14 r7 necessity, mirrors fields.tsx)
               style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 2, display: 'flex' }}>
               <X size={11} />
             </button>
@@ -149,8 +153,10 @@ export default function AgentTestPanel({ config }: {
             {/* Bubble */}
             <div style={{
               maxWidth: '88%', padding: '8px 11px', borderRadius: msg.role === 'user' ? '12px 12px 2px 12px' : '12px 12px 12px 2px',
-              background: msg.role === 'user' ? 'var(--color-primary)' : 'var(--hover-bg)',
-              color: msg.role === 'user' ? 'var(--color-on-accent)' : 'var(--text)',
+              // User bubble rides the accent triple, never the raw --color-primary as a
+              // background value in a component (§4 PRIMAIR-VLAK-1, 2b).
+              background: msg.role === 'user' ? 'var(--button-fill)' : 'var(--hover-bg)',
+              color: msg.role === 'user' ? 'var(--button-ink)' : 'var(--text)',
               fontSize: 12, lineHeight: 1.55, whiteSpace: 'pre-wrap', wordBreak: 'break-word',
             }}>
               {msg.content}
@@ -179,12 +185,9 @@ export default function AgentTestPanel({ config }: {
           <span style={{ fontSize: 10, color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 4 }}>
             <Zap size={9} /> {t('agentTest.tokensTotal', { count: totalTokens })}
           </span>
-          <button onClick={clearChat}
-            style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 10, color: 'var(--text-muted)', background: 'none', border: 'none', cursor: 'pointer' }}
-            onMouseEnter={e => (e.currentTarget.style.color = 'var(--color-danger)')}
-            onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-muted)')}>
+          <Button variant="ghost" size="sm" onClick={clearChat} style={{ gap: 4 }}>
             <Trash2 size={10} /> {t('agentTest.clear')}
-          </button>
+          </Button>
         </div>
       )}
 

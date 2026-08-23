@@ -9,6 +9,7 @@ import { useState, useCallback, useEffect, useMemo, useRef } from 'react'
 import { addEdge, useNodesState, useEdgesState } from '@xyflow/react'
 import type { Connection } from '@xyflow/react'
 import { uid, mkEdge, NODE_W, NODE_H, stepsToFlow, flowToSteps } from './serialization'
+import { defaultConfigFor } from './moduleDefaults'
 import { useWorkflowRunControl } from './useWorkflowRunControl'
 import { TERMINAL } from './useWorkflowRun'
 import { useOutputSeeding } from './useOutputSeeding'
@@ -203,10 +204,12 @@ export function useWorkflowEditor({ workflow, onSave, initialRunId = null }: {
         const sourceNode = nds.find(n => n.id === params.source)
         const x = targetNode ? targetNode.position.x - 220 : (sourceNode?.position.x ?? 300) + 220
         const y = targetNode ? targetNode.position.y : (sourceNode?.position.y ?? 180)
+        // DEFAULT-PERSIST-1: same seeding as insertModule (router's own schema is
+        // empty today, so this is a no-op — kept for consistency, not behaviour).
         const routerNode: FlowNode = {
           id: routerId, type: 'module',
           position: { x, y },
-          data: { type: 'router', config: {} },
+          data: { type: 'router', config: defaultConfigFor('router') },
           width: NODE_W, height: NODE_H,
         }
         return [...nds, routerNode]
@@ -227,7 +230,9 @@ export function useWorkflowEditor({ workflow, onSave, initialRunId = null }: {
       }
       const x = lastNode ? lastNode.position.x + 220 : 80
       const y = lastNode ? lastNode.position.y : 180
-      return [...nds, { id: newId, type: 'module', position: { x, y }, width: NODE_W, height: NODE_H, data: { type, config: {} } }]
+      // DEFAULT-PERSIST-1: a freshly created node starts with its schema defaults
+      // already IN the config, not just shown by the panel (see moduleDefaults.ts).
+      return [...nds, { id: newId, type: 'module', position: { x, y }, width: NODE_W, height: NODE_H, data: { type, config: defaultConfigFor(type) } }]
     })
 
     if (edgeId) {
@@ -254,7 +259,8 @@ export function useWorkflowEditor({ workflow, onSave, initialRunId = null }: {
               ? { ...n, position: { ...n.position, x: n.position.x + 220 } }
               : n
           ),
-          { id: newId, type: 'module', position: { x: midX, y: midY - 120 }, width: NODE_W, height: NODE_H, data: { type, config: {} } },
+          // DEFAULT-PERSIST-1: same seeding as the append path above.
+          { id: newId, type: 'module', position: { x: midX, y: midY - 120 }, width: NODE_W, height: NODE_H, data: { type, config: defaultConfigFor(type) } },
         ]
       })
     } else {

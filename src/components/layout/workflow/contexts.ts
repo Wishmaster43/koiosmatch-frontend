@@ -21,3 +21,8 @@ export const NodeRunContext    = createContext<NodeRunFn | null>(null)
 // Provides { startNodeId, setStartNodeId } so the START badge and nodes can
 // negotiate which node is the workflow entry point via drag-and-drop.
 export const StartContext      = createContext<StartCtxValue | null>(null)
+// WF-PICKER-SELF-1: the id of the workflow currently open in the editor — read by
+// pickers that must exclude self-reference (workflow_call's own workflow_id field).
+// A plain value, never mutated inside the editor, so a single context beats
+// threading it as a prop through ConfigPanel -> FieldInput -> the field control.
+export const CurrentWorkflowContext = createContext<string | number | null>(null)
