@@ -43,10 +43,15 @@ export interface NotificationTarget { page: string; id: string }
 // custom meta shape — campaign_id for a call-list assignment, opportunity_id
 // for a won/lost deal — so each type resolves its own target from meta below,
 // checked before the generic meta.type/entity_type path.
+// BEL-ACTIE-VANDAAG-1 (CMBE K-156): appointment.today carries { appointment_id,
+// candidate_id, at } — no agenda/appointments page exists yet (grepped
+// appPages/registry), so the deep-link goes to the candidate's drawer, same as
+// every other candidate-anchored notification.
 const CUSTOM_TYPE_TARGETS: Record<string, (meta: Record<string, unknown>) => NotificationTarget | null> = {
   'calllist.target_assigned': (meta) => (meta.campaign_id != null ? { page: 'outreach', id: String(meta.campaign_id) } : null),
   'opportunity.won': (meta) => (meta.opportunity_id != null ? { page: 'opportunities', id: String(meta.opportunity_id) } : null),
   'opportunity.lost': (meta) => (meta.opportunity_id != null ? { page: 'opportunities', id: String(meta.opportunity_id) } : null),
+  'appointment.today': (meta) => (meta.candidate_id != null ? { page: 'candidates', id: String(meta.candidate_id) } : null),
 }
 
 // Pure: resolve a notification into a navigable {page, id}, or null when nothing

@@ -100,8 +100,28 @@ export interface BillingUsageAi {
   per_day?: Array<{ date: string; input_tokens?: number; output_tokens?: number; amount?: number }>
   per_user?: BillingUsageAiPerUser[]
 }
+// CREDITS-2 (Danny's package budgets) — the tenant's subscription snapshot,
+// additive on the same /billing/usage response (no second fetch, GebruikSettings
+// lifts this out of UsageOverviewSection's existing call via onSubscriptionChange).
+export interface BillingUsageSubscriptionMeter {
+  budget?: number
+  used?: number
+  // COUNT above budget (tokens/credits), not a flag — the server sends
+  // max(0, used - budget); 0 means within budget (Opus round, golf 4).
+  over?: number
+  over_amount?: number
+}
+export interface BillingUsageSubscription {
+  package_key?: string
+  package_label?: string
+  // ISO datetime — render only through useDateFormat/humanizeIsoDates (CLAUDE.md DATUM-1), never raw.
+  resets_at?: string
+  ai?: BillingUsageSubscriptionMeter
+  workflow?: BillingUsageSubscriptionMeter
+}
+
 export interface BillingUsageResponse {
-  data: { workflow: BillingUsageWorkflow; ai: BillingUsageAi }
+  data: { workflow: BillingUsageWorkflow; ai: BillingUsageAi; subscription?: BillingUsageSubscription }
 }
 
 // GET/PUT /admin/platform-pricing — superadmin-only platform pricing knobs.
@@ -174,9 +194,48 @@ export interface AdminTenantUsage {
   workflow_tokens?: { total_module_runs?: number; per_module?: Record<string, number> }
   // Additive superadmin billing block for the SELECTED month (purchase/margin
   // never render on the tenant-facing screen — that is `GebruikSettings`).
+  // CREDITS-2: the budget/reset fields live INSIDE billing — the controller
+  // merges billingForMonth() under this key (Opus round, golf 4).
   billing?: {
+    workflow_credit_budget?: number
+    resets_at?: string
     ai?: { purchase?: number; sale?: number; margin?: number }
-    workflow?: { credits?: number; amount?: number }
+    // CREDITS-2 — `credits` stays the raw consumed count (unchanged); the three
+    // new fields carry the package-budget split: how many of those credits are
+    // billable vs already included in the package, and the resulting EUR amount.
+    workflow?: { credits?: number; included_budget?: number; billable_credits?: number; amount?: number }
   }
   history?: AdminUsageMonth[]
+}
+
+// GET/PUT /admin/billing-budgets — CREDITS-2, superadmin monthly package budgets
+// (Danny: "vul beiden en toon ze hier"), ModulesSettings' "Maandbudgetten" card.
+// HAND-WRITTEN: no 2xx schema yet for this route (CLAUDE.md §10).
+export type BillingPackageKey = 'core' | 'pro' | 'enterprise'
+export interface BillingBudgetValue {
+  // EUR purchase/sale cost per unit — Caption-only display next to the two
+  // editable budget fields, never itself editable here (MARGEGEHEIM stays
+  // superadmin-only insight, same convention as the tenant-usage screen).
+  ai_cogs?: number
+  ai_sale?: number
+  basis?: string
+}
+export interface BillingBudgetEntry {
+  ai_token_budget?: number
+  workflow_credit_budget?: number
+  value?: BillingBudgetValue
+}
+export interface AdminBillingBudgetsResponse {
+  packages: Record<BillingPackageKey, BillingBudgetEntry>
+  // Per-tenant override — an entry present here replaces its package default;
+  // absence (or a PUT with null fields) falls back to the package budget.
+  tenants: Record<string, BillingBudgetEntry>
+  resets_at?: string
+}
+// PUT body — either block is optional so a package-only or tenant-only save
+// never has to resend the other; a null field on a tenant entry clears that
+// one override field back to the package default (never the whole entry).
+export interface AdminBillingBudgetsUpdate {
+  packages?: Partial<Record<BillingPackageKey, { ai_token_budget?: number; workflow_credit_budget?: number }>>
+  tenants?: Record<string, { ai_token_budget?: number | null; workflow_credit_budget?: number | null }>
 }

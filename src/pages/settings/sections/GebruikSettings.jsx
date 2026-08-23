@@ -24,9 +24,9 @@
  * here — it was deliberately dropped (billing_pay, R-1) and needs Danny's
  * confirmation before it comes back (see WORKLIST USAGE-LIMITS-1).
  */
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Clock, ChevronDown, ChevronRight, FileSpreadsheet } from 'lucide-react'
+import { ChevronDown, ChevronRight, FileSpreadsheet } from 'lucide-react'
 import api, { unwrap } from '@/lib/api'
 import { useNumberFormat } from '@/lib/formatters'
 import { notifyError } from '@/lib/notify'
@@ -35,6 +35,7 @@ import QuickViewToggle from '@/components/ui/QuickViewToggle'
 import Spinner from '@/components/ui/Spinner'
 import { card, sub, th, td, numCell, notice, Tile } from './usageCardStyles'
 import UsageOverviewSection from './usage/UsageOverviewSection'
+import SubscriptionCard from './usage/SubscriptionCard'
 import Button from '@/components/ui/Button'
 import { PageTitle, SectionTitle, Caption } from '@/components/ui/typography'
 
@@ -59,24 +60,20 @@ function currentMonthKey() {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
 }
 
-// A calm "not built yet" notice — never a fake number (§3 no fake affordances).
-function ComingSoonNotice({ title, text }) {
-  return (
-    <div style={card}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-        <Clock size={14} style={{ color: 'var(--text-muted)' }} aria-hidden="true" />
-        <SectionTitle style={{ marginBottom: 4 }}>{title}</SectionTitle>
-      </div>
-      <p style={notice}>{text}</p>
-    </div>
-  )
-}
-
 export default function GebruikSettings() {
   const { t } = useTranslation('settings')
   const { formatNumber, formatCurrency } = useNumberFormat()
   // Period toggle — matches the AI usage endpoint's own `period` param exactly.
   const [period, setPeriod] = useState('month')
+
+  // CREDITS-2-FE deel 1 — subscription snapshot lifted out of UsageOverviewSection's
+  // own /billing/usage fetch (no second request), rendered in SubscriptionCard.
+  const [subscription, setSubscription] = useState(null)
+  const [subscriptionPhase, setSubscriptionPhase] = useState('loading')
+  const handleSubscriptionChange = useCallback((sub, phase) => {
+    setSubscription(sub)
+    setSubscriptionPhase(phase)
+  }, [])
 
   const [ai, setAi] = useState(null)
   const [aiPhase, setAiPhase] = useState('loading') // loading | ready | empty | error | unavailable
@@ -173,13 +170,14 @@ export default function GebruikSettings() {
         </Button>
       </div>
 
-      {/* Blocked: no plan/credit model exists in the backend yet. */}
-      <ComingSoonNotice title={t('billing.usage.plan.title')} text={t('billing.usage.plan.notice')} />
+      {/* CREDITS-2-FE deel 1 — real package/budget snapshot, fed by the fetch below. */}
+      <SubscriptionCard subscription={subscription} phase={subscriptionPhase} />
 
       {/* BILLING-USAGE-REDESIGN-1 — KPI row + day/week chart + drill-down + table,
           own folder (§3 size discipline). Replaces the old CreditsUsageCard +
           UsageDailySection pair (same /billing/usage source, one coherent block). */}
-      <UsageOverviewSection period={billingPeriod} onPeriodChange={setBillingPeriod} wa={wa} waLoading={waPhase === 'loading'} />
+      <UsageOverviewSection period={billingPeriod} onPeriodChange={setBillingPeriod} wa={wa} waLoading={waPhase === 'loading'}
+        onSubscriptionChange={handleSubscriptionChange} />
 
       {/* AI usage (Koios) — real data, period-scoped via the shared QuickViewToggle. */}
       <div style={card}>

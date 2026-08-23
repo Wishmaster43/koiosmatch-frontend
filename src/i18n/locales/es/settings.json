@@ -119,6 +119,7 @@
     "automatch": "Reglas de coincidencia",
     "planning_board": "Tablero de planificación",
     "koios": "Resumen",
+    "koios_models": "Modelos de IA Koios",
     "facebook_leads": "Facebook Leads",
     "numbering": "Numeración",
     "mod_shiftmanager": "Shiftmanager",
@@ -240,13 +241,15 @@
     "notif_taken": "Tareas",
     "notif_calllists": "Listas de llamadas",
     "notif_opportunities": "Oportunidades",
+    "notif_appointments": "Citas",
     "notif_escalation": "Escalada",
     "koios_advice": "Umbrales de aviso",
     "notif_my": "Mis notificaciones",
     "customer_identifier_validation": "Validación de números",
     "automations": "Automatizaciones",
     "hf_contract_map": "Correspondencia de contratos de HelloFlex",
-    "report_kpis": "Tarjetas de informe"
+    "report_kpis": "Tarjetas de informe",
+    "jargon": "Jerga profesional"
   },
   "kpis": {
     "title": "Configuración de KPI",
@@ -795,6 +798,10 @@
       "opportunities": {
         "title": "Oportunidades",
         "desc": "Notificaciones sobre oportunidades ganadas y perdidas."
+      },
+      "appointments": {
+        "title": "Citas",
+        "desc": "Notificaciones sobre citas programadas para hoy."
       }
     },
     "my": {
@@ -859,7 +866,13 @@
       "periodMonth": "Este mes",
       "plan": {
         "title": "Plan y créditos",
-        "notice": "El plan actual, la barra de progreso de créditos, la fecha de reinicio y el saldo de créditos aún no están disponibles. Todavía no existe un modelo de backend para planes o créditos."
+        "notice": "El plan actual, la barra de progreso de créditos, la fecha de reinicio y el saldo de créditos aún no están disponibles. Todavía no existe un modelo de backend para planes o créditos.",
+        "loadError": "No se pudo cargar tu suscripción.",
+        "unavailable": "No tienes permiso para ver esto.",
+        "resetsOn": "Se reinicia el {{date}}",
+        "aiMeter": "Tokens de Koios AI",
+        "workflowMeter": "Tokens de Koios",
+        "overBudget": "{{meter}}: {{n}} por encima del presupuesto → {{amount}}"
       },
       "ai": {
         "title": "Uso de IA (Koios)",
@@ -2725,7 +2738,8 @@
       "workflowLabel": "Workflow",
       "workflowNote": "{{n}} ejecuciones",
       "whatsappLabel": "WhatsApp Business",
-      "planningLabel": "Horas procesadas"
+      "planningLabel": "Horas procesadas",
+      "workflowBillableNote": "{{billable}} facturables (de {{credits}}, {{included}} incluidos)"
     }
   },
   "jobs": {
@@ -3153,6 +3167,62 @@
     "applicationStaleLabel": "Días (1-365)",
     "applicationStaleSaveFailed": "No se pudo guardar la ventana de fase de la solicitud."
   },
+  "koiosModelsAdmin": {
+    "title": "Modelos de IA Koios",
+    "subtitle": "Enrutamiento de modelos a nivel de plataforma: variantes, enrutamiento por tipo de solicitud, límites de paquete y excepciones por cliente.",
+    "refresh": "Actualizar",
+    "loading": "Cargando el registro de modelos...",
+    "loadFailed": "No se pudo cargar el registro de modelos.",
+    "refreshFailed": "No se pudo actualizar la lista de modelos.",
+    "saveFailed": "Error al guardar.",
+    "empty": "Todavía no hay modelos disponibles. Intenta actualizar.",
+    "save": "Guardar",
+    "flavorLabel": {
+      "snel": "Rápido",
+      "slim": "Inteligente",
+      "max": "Máx"
+    },
+    "effortLevel": {
+      "low": "Bajo",
+      "medium": "Medio",
+      "high": "Alto",
+      "xhigh": "Muy alto",
+      "max": "Máx"
+    },
+    "requestType": {
+      "note_assist": "Asistencia de notas",
+      "generate": "Generar",
+      "conversation_assist": "Asistencia de conversación",
+      "report_advice": "Consejo de informe"
+    },
+    "flavors": {
+      "title": "Variantes",
+      "subtitle": "Qué modelo del proveedor respalda cada variante visible para el cliente.",
+      "pickPlaceholder": "Elegir un modelo",
+      "noEffort": "Este modelo no tiene niveles de esfuerzo."
+    },
+    "routing": {
+      "title": "Enrutamiento por tipo de solicitud",
+      "subtitle": "Qué variante y nivel de esfuerzo maneja cada tipo de solicitud.",
+      "chatNote": "El chat no aparece aquí: siempre sigue la elección de variante propia del cliente.",
+      "effortDefault": "Predeterminado"
+    },
+    "packages": {
+      "title": "Paquetes",
+      "subtitle": "Qué variantes puede elegir un cliente en este paquete, y el límite de esfuerzo.",
+      "maxEffort": "Esfuerzo máx."
+    },
+    "tenantOverrides": {
+      "title": "Excepciones por cliente",
+      "subtitle": "Excepciones por cliente a las reglas de paquete anteriores.",
+      "pickTenant": "Elegir un cliente",
+      "minFlavor": "Variante mínima",
+      "minFlavorHint": "Un piso: eleva todas las solicitudes de este cliente al menos a esta variante.",
+      "noFloor": "Sin piso",
+      "allowedFlavors": "Variantes permitidas",
+      "allowedFlavorsHint": "Dejar vacío para recurrir a las variantes permitidas del paquete."
+    }
+  },
   "modShiftmanager": {
     "reportingOff": "La generación de informes de Shiftmanager aún no está activada. Active el módulo para configurar los objetivos de KPI y los límites de visualización."
   },
@@ -3286,5 +3356,31 @@
     "blockedIntro": "Todavía hay registros con un valor que no está en la lista. Haga la lista estricta solo después de corregir estos valores o añadirlos como valores de lista:",
     "blockedHint": "Corrija los registros o añada el valor a la lista y desactive después la entrada libre. Los datos nunca se pierden en silencio.",
     "blockedClose": "Entendido"
+  },
+  "jargonSettings": {
+    "title": "Jerga profesional",
+    "subtitle": "Corrija la jerga y las abreviaturas que la IA utiliza en los resultados de dictado y mejora, por ejemplo bfv se convierte en BHV.",
+    "add": "Añadir término"
+  },
+  "billingBudgets": {
+    "title": "Presupuestos mensuales",
+    "subtitle": "Presupuestos de tokens de AI y de tokens Koios por paquete, y excepciones por cliente.",
+    "packagesHeading": "Paquetes",
+    "package": {
+      "core": "Koios Core",
+      "pro": "Koios Pro",
+      "enterprise": "Koios Enterprise"
+    },
+    "aiBudgetLabel": "Tokens de AI",
+    "workflowBudgetLabel": "Tokens de Koios",
+    "valueCaption": "compra {{cogs}} · venta {{sale}} · {{basis}}",
+    "tenantHeading": "Excepción de cliente",
+    "tenantPickerLabel": "Cliente",
+    "tenantPickerPlaceholder": "Buscar un cliente…",
+    "tenantClearPlaceholder": "valor predeterminado del paquete",
+    "tenantClearHint": "Vacío = borrar esta excepción.",
+    "loadError": "No se pudieron cargar los presupuestos mensuales.",
+    "saveFailed": "No se pudieron guardar los presupuestos.",
+    "saved": "Presupuestos guardados."
   }
 }

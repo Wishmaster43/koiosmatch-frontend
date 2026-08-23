@@ -15,6 +15,8 @@
  *                    target assignment (NOTIF-CONTEXTEN-FE-1, CMBE 23-08)
  *   opportunities -> opportunity.won / opportunity.lost fire on every stage change
  *                    into an is_won/is_lost stage (NOTIF-CONTEXTEN-FE-1, CMBE 23-08)
+ *   appointments  -> appointment.today fires from the daily appointments-due-today
+ *                    cron (BEL-ACTIE-VANDAAG-1, CMBE K-156, 23-08)
  * vacatures (vacancy.*) has NO call site at all. facturering (invoice.*) only ever
  * reaches Notifier::sendToSuperAdmins() (GenerateMonthlyInvoices), which targets
  * super admins outside any tenant context and never consults the tenant's

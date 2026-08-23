@@ -21,6 +21,7 @@ import Toggle from '@/components/ui/Toggle'
 import SaveButton from '@/components/ui/SaveButton'
 import { GroupLabel } from '@/components/ui/typography'
 import PlatformPricingCard from './PlatformPricingCard'
+import BillingBudgetsCard from './BillingBudgetsCard'
 
 // Base tiers (the "size bar"). `desc` lists what each tier adds over the previous one.
 const TIERS = [
@@ -129,6 +130,9 @@ export default function ModulesSettings() {
       {/* Platform pricing (CREDITS-1) — the AI markup % and the workflow credit
           price knobs; superadmin-only, same screen as package/add-on config. */}
       <PlatformPricingCard />
+
+      {/* CREDITS-2-FE deel 2 — package + per-tenant monthly budgets (Danny: "vul beiden en toon ze hier"). */}
+      <BillingBudgetsCard />
 
       {/* Base package (one of three) */}
       <GroupLabel style={{ marginBottom: 10 }}>

@@ -14,6 +14,7 @@ const mockGet = vi.fn()
 const mockPut = vi.fn()
 vi.mock('@/lib/api', () => ({ default: { get: (...a) => mockGet(...a), put: (...a) => mockPut(...a) } }))
 vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k) => k }) }))
+vi.mock('@/i18n', () => ({ LOCALE_BY_LANG: { nl: 'nl-NL', en: 'en-GB' } }))
 const mockRefreshUser = vi.fn()
 vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ activeTenant: { id: 't1' }, refreshUser: mockRefreshUser }) }))
 

@@ -60,6 +60,18 @@ describe('resolveNotificationTarget', () => {
     expect(resolveNotificationTarget({ id: 9, type: 'opportunity.won', meta: {} } as unknown as AppNotification)).toBeNull()
   })
 
+  // BEL-ACTIE-VANDAAG-1: appointment.today has no agenda page yet, so it
+  // deep-links to the candidate drawer via meta.candidate_id.
+  it('resolves an appointment.today row to the candidate drawer', () => {
+    expect(resolveNotificationTarget({
+      id: 12, type: 'appointment.today', meta: { appointment_id: 'a1', candidate_id: 'c9', at: '2026-08-23T10:00:00Z' },
+    } as unknown as AppNotification)).toEqual({ page: 'candidates', id: 'c9' })
+  })
+
+  it('returns null for an appointment.today row with meta missing candidate_id (no crash, no link)', () => {
+    expect(resolveNotificationTarget({ id: 13, type: 'appointment.today', meta: { appointment_id: 'a1' } } as unknown as AppNotification)).toBeNull()
+  })
+
   // Hardening: CUSTOM_TYPE_TARGETS must never resolve a `type` through
   // Object.prototype — 'constructor'/'toString' are not real notification types
   // and must behave exactly like any other unmapped type (null, never a crash or

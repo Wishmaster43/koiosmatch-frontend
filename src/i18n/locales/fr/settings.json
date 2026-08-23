@@ -119,6 +119,7 @@
     "automatch": "Règles de correspondance",
     "planning_board": "Tableau de planification",
     "koios": "Aperçu",
+    "koios_models": "Modèles IA Koios",
     "facebook_leads": "Facebook Leads",
     "numbering": "Numérotation",
     "mod_shiftmanager": "Shiftmanager",
@@ -240,13 +241,15 @@
     "notif_taken": "Tâches",
     "notif_calllists": "Listes d'appels",
     "notif_opportunities": "Opportunités",
+    "notif_appointments": "Rendez-vous",
     "notif_escalation": "Escalade",
     "koios_advice": "Seuils de conseils",
     "notif_my": "Mes notifications",
     "customer_identifier_validation": "Validation des numéros",
     "automations": "Automatisations",
     "hf_contract_map": "Correspondance des contrats HelloFlex",
-    "report_kpis": "Cartes de rapport"
+    "report_kpis": "Cartes de rapport",
+    "jargon": "Jargon métier"
   },
   "kpis": {
     "title": "Paramètres KPI",
@@ -795,6 +798,10 @@
       "opportunities": {
         "title": "Opportunités",
         "desc": "Notifications sur les opportunités gagnées et perdues."
+      },
+      "appointments": {
+        "title": "Rendez-vous",
+        "desc": "Notifications concernant les rendez-vous prévus aujourd'hui."
       }
     },
     "my": {
@@ -859,7 +866,13 @@
       "periodMonth": "Ce mois-ci",
       "plan": {
         "title": "Forfait & crédits",
-        "notice": "Le forfait actuel, la barre de progression des crédits, la date de réinitialisation et le solde de crédits ne sont pas encore disponibles. Il n'existe pas encore de modèle backend pour les forfaits ou les crédits."
+        "notice": "Le forfait actuel, la barre de progression des crédits, la date de réinitialisation et le solde de crédits ne sont pas encore disponibles. Il n'existe pas encore de modèle backend pour les forfaits ou les crédits.",
+        "loadError": "Impossible de charger votre abonnement.",
+        "unavailable": "Vous n'avez pas les droits pour voir ceci.",
+        "resetsOn": "Réinitialisation le {{date}}",
+        "aiMeter": "Jetons Koios AI",
+        "workflowMeter": "Jetons Koios",
+        "overBudget": "{{meter}} : {{n}} au-delà du budget → {{amount}}"
       },
       "ai": {
         "title": "Utilisation IA (Koios)",
@@ -2725,7 +2738,8 @@
       "workflowLabel": "Workflow",
       "workflowNote": "{{n}} exécutions",
       "whatsappLabel": "WhatsApp Business",
-      "planningLabel": "Heures traitées"
+      "planningLabel": "Heures traitées",
+      "workflowBillableNote": "{{billable}} facturables (sur {{credits}}, {{included}} inclus)"
     }
   },
   "jobs": {
@@ -3153,6 +3167,62 @@
     "applicationStaleLabel": "Jours (1-365)",
     "applicationStaleSaveFailed": "Échec de l'enregistrement de la fenêtre de phase de la candidature."
   },
+  "koiosModelsAdmin": {
+    "title": "Modèles IA Koios",
+    "subtitle": "Routage des modèles à l'échelle de la plateforme : variantes, routage par type de requête, plafonds de forfait et exceptions par client.",
+    "refresh": "Actualiser",
+    "loading": "Chargement du registre des modèles...",
+    "loadFailed": "Le chargement du registre des modèles a échoué.",
+    "refreshFailed": "L'actualisation de la liste des modèles a échoué.",
+    "saveFailed": "L'enregistrement a échoué.",
+    "empty": "Aucun modèle disponible pour l'instant. Essayez d'actualiser.",
+    "save": "Enregistrer",
+    "flavorLabel": {
+      "snel": "Rapide",
+      "slim": "Intelligent",
+      "max": "Max"
+    },
+    "effortLevel": {
+      "low": "Faible",
+      "medium": "Moyen",
+      "high": "Élevé",
+      "xhigh": "Très élevé",
+      "max": "Max"
+    },
+    "requestType": {
+      "note_assist": "Assistance note",
+      "generate": "Génération",
+      "conversation_assist": "Assistance conversation",
+      "report_advice": "Conseil de rapport"
+    },
+    "flavors": {
+      "title": "Variantes",
+      "subtitle": "Quel modèle fournisseur se trouve derrière chaque variante visible du client.",
+      "pickPlaceholder": "Choisir un modèle",
+      "noEffort": "Ce modèle n'a pas de niveaux d'effort."
+    },
+    "routing": {
+      "title": "Routage par type de requête",
+      "subtitle": "Quelle variante et quel niveau d'effort traitent chaque type de requête.",
+      "chatNote": "Le chat n'est pas listé ici : il suit toujours le choix de variante propre au client.",
+      "effortDefault": "Par défaut"
+    },
+    "packages": {
+      "title": "Forfaits",
+      "subtitle": "Quelles variantes un client de ce forfait peut choisir, et le plafond d'effort.",
+      "maxEffort": "Effort max"
+    },
+    "tenantOverrides": {
+      "title": "Exceptions par client",
+      "subtitle": "Exceptions par client aux règles de forfait ci-dessus.",
+      "pickTenant": "Choisir un client",
+      "minFlavor": "Variante minimale",
+      "minFlavorHint": "Un plancher : relève toutes les requêtes de ce client à au moins cette variante.",
+      "noFloor": "Aucun plancher",
+      "allowedFlavors": "Variantes autorisées",
+      "allowedFlavorsHint": "Laisser vide pour revenir aux variantes autorisées du forfait."
+    }
+  },
   "modShiftmanager": {
     "reportingOff": "Le reporting Shiftmanager n'est pas encore activé. Activez le module pour configurer les objectifs KPI et les limites d'affichage."
   },
@@ -3286,5 +3356,31 @@
     "blockedIntro": "Des enregistrements portent encore une valeur absente de la liste. Ne rendez la liste stricte qu’après avoir corrigé ces valeurs ou les avoir ajoutées à la liste :",
     "blockedHint": "Corrigez les enregistrements ou ajoutez la valeur à la liste, puis désactivez la saisie libre. Aucune donnée n’est perdue en silence.",
     "blockedClose": "Compris"
+  },
+  "jargonSettings": {
+    "title": "Jargon métier",
+    "subtitle": "Corrigez le jargon métier et les abréviations que l'IA utilise dans les résultats de dictée et d'amélioration, par exemple bfv devient BHV.",
+    "add": "Ajouter un terme"
+  },
+  "billingBudgets": {
+    "title": "Budgets mensuels",
+    "subtitle": "Budgets de jetons AI et de jetons Koios par pack, et exceptions par client.",
+    "packagesHeading": "Packs",
+    "package": {
+      "core": "Koios Core",
+      "pro": "Koios Pro",
+      "enterprise": "Koios Enterprise"
+    },
+    "aiBudgetLabel": "Jetons AI",
+    "workflowBudgetLabel": "Jetons Koios",
+    "valueCaption": "achat {{cogs}} · vente {{sale}} · {{basis}}",
+    "tenantHeading": "Exception client",
+    "tenantPickerLabel": "Client",
+    "tenantPickerPlaceholder": "Rechercher un client…",
+    "tenantClearPlaceholder": "valeur par défaut du pack",
+    "tenantClearHint": "Vide = supprimer cette exception.",
+    "loadError": "Impossible de charger les budgets mensuels.",
+    "saveFailed": "Échec de l'enregistrement des budgets.",
+    "saved": "Budgets enregistrés."
   }
 }

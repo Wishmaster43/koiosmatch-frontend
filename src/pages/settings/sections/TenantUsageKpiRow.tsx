@@ -11,7 +11,9 @@
 import { Sparkles, Workflow, MessageCircle, Clock } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useNumberFormat } from '@/lib/formatters'
+import { useDateFormat } from '@/lib/datetime'
 import KpiCard from '@/components/ui/KpiCard'
+import { Caption } from '@/components/ui/typography'
 import type { AdminTenantUsage } from '@/types/billingUsage'
 
 interface Props {
@@ -22,16 +24,24 @@ interface Props {
 export default function TenantUsageKpiRow({ usage, loading }: Props) {
   const { t } = useTranslation('settings')
   const { formatNumber, formatCurrency } = useNumberFormat()
+  const { formatDate } = useDateFormat()
 
   const aiPurchase = usage?.billing?.ai?.purchase
   const aiSale = usage?.billing?.ai?.sale
   const aiMargin = usage?.billing?.ai?.margin
   const aiTokens = usage?.ai?.tokens
-  const workflowRuns = usage?.workflow_tokens?.total_module_runs
   const workflowAmount = usage?.billing?.workflow?.amount
+  // CREDITS-2-FE deel 3 — the package-budget split alongside the raw credits.
+  const workflowCredits = usage?.billing?.workflow?.credits
+  const workflowIncluded = usage?.billing?.workflow?.included_budget
+  const workflowBillable = usage?.billing?.workflow?.billable_credits
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))', gap: 10, marginBottom: 18 }}>
+    <div>
+      {usage?.billing?.resets_at && (
+        <Caption style={{ marginBottom: 6 }}>{t('billing.usage.plan.resetsOn', { date: formatDate(usage.billing.resets_at) })}</Caption>
+      )}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))', gap: 10, marginBottom: 18 }}>
       <KpiCard
         loading={loading}
         icon={Sparkles} iconBg="var(--color-primary-bg)" iconColor="var(--color-primary)"
@@ -48,7 +58,11 @@ export default function TenantUsageKpiRow({ usage, loading }: Props) {
         icon={Workflow} iconBg="var(--color-primary-bg)" iconColor="var(--color-primary)"
         label={t('usage.kpi.workflowLabel')}
         value={workflowAmount != null ? formatCurrency(workflowAmount) : '—'}
-        note={t('usage.kpi.workflowNote', { n: formatNumber(workflowRuns ?? 0) })}
+        note={workflowBillable != null ? t('usage.kpi.workflowBillableNote', {
+          billable: formatNumber(workflowBillable),
+          credits: formatNumber(workflowCredits ?? 0),
+          included: formatNumber(workflowIncluded ?? 0),
+        }) : undefined}
       />
       <KpiCard
         loading={loading}
@@ -62,6 +76,7 @@ export default function TenantUsageKpiRow({ usage, loading }: Props) {
         label={t('usage.kpi.planningLabel')}
         value={formatNumber(usage?.planning?.processed_hours ?? 0)}
       />
+      </div>
     </div>
   )
 }

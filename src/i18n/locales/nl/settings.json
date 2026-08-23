@@ -128,6 +128,7 @@
     "automatch": "Automatch-regels",
     "planning_board": "Planbord-weergave",
     "koios": "Overzicht",
+    "koios_models": "Koios AI-modellen",
     "facebook_leads": "Facebook Leads",
     "numbering": "Nummering",
     "mod_shiftmanager": "Shiftmanager",
@@ -240,13 +241,15 @@
     "notif_taken": "Taken",
     "notif_calllists": "Bellijsten",
     "notif_opportunities": "Kansen",
+    "notif_appointments": "Afspraken",
     "notif_escalation": "Escalatie",
     "koios_advice": "Advies-drempels",
     "notif_my": "Mijn meldingen",
     "customer_identifier_validation": "Nummervalidatie",
     "automations": "Automatiseringen",
     "hf_contract_map": "HelloFlex contractmap",
-    "report_kpis": "Rapportkaarten"
+    "report_kpis": "Rapportkaarten",
+    "jargon": "Vakjargon"
   },
   "kpis": {
     "title": "KPI-instellingen",
@@ -1041,6 +1044,10 @@
       "opportunities": {
         "title": "Kansen",
         "desc": "Meldingen over gewonnen en verloren kansen."
+      },
+      "appointments": {
+        "title": "Afspraken",
+        "desc": "Notificaties over afspraken die vandaag gepland staan."
       }
     },
     "my": {
@@ -1105,7 +1112,13 @@
       "periodMonth": "Deze maand",
       "plan": {
         "title": "Abonnement & credits",
-        "notice": "Huidig plan, credit-voortgangsbalk, resetdatum en kredietsaldo zijn nog niet beschikbaar. Er bestaat nog geen backend-model voor abonnementen of credits."
+        "notice": "Huidig plan, credit-voortgangsbalk, resetdatum en kredietsaldo zijn nog niet beschikbaar. Er bestaat nog geen backend-model voor abonnementen of credits.",
+        "loadError": "Je abonnement kon niet worden geladen.",
+        "unavailable": "Je hebt geen rechten om dit te bekijken.",
+        "resetsOn": "Reset op {{date}}",
+        "aiMeter": "Koios AI-tokens",
+        "workflowMeter": "Koios Tokens",
+        "overBudget": "{{meter}}: {{n}} boven budget → {{amount}}"
       },
       "ai": {
         "title": "AI-verbruik (Koios)",
@@ -2725,7 +2738,8 @@
       "workflowLabel": "Workflow",
       "workflowNote": "{{n}} runs",
       "whatsappLabel": "WhatsApp Business",
-      "planningLabel": "Verwerkte uren"
+      "planningLabel": "Verwerkte uren",
+      "workflowBillableNote": "{{billable}} factureerbaar (van {{credits}}, {{included}} inbegrepen)"
     }
   },
   "jobs": {
@@ -3153,6 +3167,62 @@
     "applicationStaleLabel": "Dagen (1-365)",
     "applicationStaleSaveFailed": "Opslaan van het sollicitatie-fasevenster is mislukt."
   },
+  "koiosModelsAdmin": {
+    "title": "Koios AI-modellen",
+    "subtitle": "Platformbrede modelroutering: smaken, routering per verzoektype, pakketplafonds en tenant-overrides.",
+    "refresh": "Verversen",
+    "loading": "Modelregister laden...",
+    "loadFailed": "Het modelregister laden is mislukt.",
+    "refreshFailed": "De modellenlijst verversen is mislukt.",
+    "saveFailed": "Opslaan is mislukt.",
+    "empty": "Nog geen modellen beschikbaar. Probeer te verversen.",
+    "save": "Opslaan",
+    "flavorLabel": {
+      "snel": "Snel",
+      "slim": "Slim",
+      "max": "Max"
+    },
+    "effortLevel": {
+      "low": "Laag",
+      "medium": "Gemiddeld",
+      "high": "Hoog",
+      "xhigh": "Extra hoog",
+      "max": "Max"
+    },
+    "requestType": {
+      "note_assist": "Notitie-assist",
+      "generate": "Genereren",
+      "conversation_assist": "Gesprek-assist",
+      "report_advice": "Rapport-advies"
+    },
+    "flavors": {
+      "title": "Smaken",
+      "subtitle": "Welk leveranciersmodel achter elke tenant-zichtbare smaak zit.",
+      "pickPlaceholder": "Kies een model",
+      "noEffort": "Dit model kent geen inspanningsniveaus."
+    },
+    "routing": {
+      "title": "Routering per verzoektype",
+      "subtitle": "Welke smaak en welk inspanningsniveau elk verzoektype afhandelt.",
+      "chatNote": "Chat staat hier niet bij: die volgt altijd de eigen smaakkeuze van de tenant.",
+      "effortDefault": "Standaard"
+    },
+    "packages": {
+      "title": "Pakketten",
+      "subtitle": "Welke smaken een tenant op dit pakket mag kiezen, en het inspanningsplafond.",
+      "maxEffort": "Max inspanning"
+    },
+    "tenantOverrides": {
+      "title": "Tenant-overrides",
+      "subtitle": "Per-tenant uitzonderingen op de pakketregels hierboven.",
+      "pickTenant": "Kies een tenant",
+      "minFlavor": "Minimale smaak",
+      "minFlavorHint": "Een vloer: tilt alle verzoeken voor deze tenant op naar minimaal deze smaak.",
+      "noFloor": "Geen vloer",
+      "allowedFlavors": "Toegestane smaken",
+      "allowedFlavorsHint": "Laat leeg om terug te vallen op de toegestane smaken van het pakket."
+    }
+  },
   "modShiftmanager": {
     "reportingOff": "Shiftmanager-rapportage staat nog niet aan. Zet de module aan om KPI-doelen en weergavelimieten in te stellen."
   },
@@ -3286,5 +3356,31 @@
     "blockedIntro": "Er bestaan nog records met een waarde die niet in de lijst staat. Zet de lijst pas op strikt nadat deze waarden zijn aangepast of als lijstwaarde zijn toegevoegd:",
     "blockedHint": "Pas de records aan of voeg de waarde toe aan de lijst, en zet daarna vrije invoer uit. Er gaat nooit stilletjes data verloren.",
     "blockedClose": "Begrepen"
+  },
+  "jargonSettings": {
+    "title": "Vakjargon",
+    "subtitle": "Corrigeer vaktaal en afkortingen die de AI gebruikt bij dicteer- en verbeterresultaten, bijvoorbeeld bfv wordt BHV.",
+    "add": "Term toevoegen"
+  },
+  "billingBudgets": {
+    "title": "Maandbudgetten",
+    "subtitle": "AI-tokens- en Koios Tokens-budgetten per pakket, en uitzonderingen per tenant.",
+    "packagesHeading": "Pakketten",
+    "package": {
+      "core": "Koios Core",
+      "pro": "Koios Pro",
+      "enterprise": "Koios Enterprise"
+    },
+    "aiBudgetLabel": "AI-tokens",
+    "workflowBudgetLabel": "Koios Tokens",
+    "valueCaption": "inkoop {{cogs}} · verkoop {{sale}} · {{basis}}",
+    "tenantHeading": "Tenant-uitzondering",
+    "tenantPickerLabel": "Tenant",
+    "tenantPickerPlaceholder": "Zoek een tenant…",
+    "tenantClearPlaceholder": "pakketstandaard",
+    "tenantClearHint": "Leeg = deze uitzondering wissen.",
+    "loadError": "Maandbudgetten konden niet worden geladen.",
+    "saveFailed": "Budgetten opslaan is mislukt.",
+    "saved": "Budgetten opgeslagen."
   }
 }

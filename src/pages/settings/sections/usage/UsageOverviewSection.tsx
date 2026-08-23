@@ -51,9 +51,13 @@ interface UsageOverviewSectionProps {
   onPeriodChange: (p: 'month' | 'prev_month') => void
   wa: WhatsAppUsage | null
   waLoading: boolean
+  // CREDITS-2-FE deel 1 — lifts data.subscription out of this section's own
+  // /billing/usage fetch so GebruikSettings can render SubscriptionCard from
+  // it without a second request. Fires with the same phase this section uses.
+  onSubscriptionChange?: (subscription: BillingUsageResponse['data']['subscription'] | null, phase: 'loading' | 'ready' | 'empty' | 'error' | 'unavailable') => void
 }
 
-export default function UsageOverviewSection({ period, onPeriodChange, wa, waLoading }: UsageOverviewSectionProps) {
+export default function UsageOverviewSection({ period, onPeriodChange, wa, waLoading, onSubscriptionChange }: UsageOverviewSectionProps) {
   const { t } = useTranslation('settings')
   const { registerFilters, unregisterFilters } = useRightPanel()
 
@@ -68,13 +72,16 @@ export default function UsageOverviewSection({ period, onPeriodChange, wa, waLoa
   useEffect(() => {
     const ctrl = new AbortController()
     setPhase('loading')
+    onSubscriptionChange?.(null, 'loading')
     api.get('/billing/usage', { params: { period }, signal: ctrl.signal })
       .then((res) => {
         const body = unwrap<BillingUsageResponse['data']>(res)
         setData(body)
         const hasActivity = (body?.workflow?.total_credits ?? 0) > 0
           || (body?.ai?.input_tokens ?? 0) > 0 || (body?.ai?.output_tokens ?? 0) > 0
-        setPhase(hasActivity ? 'ready' : 'empty')
+        const nextPhase = hasActivity ? 'ready' : 'empty'
+        setPhase(nextPhase)
+        onSubscriptionChange?.(body?.subscription ?? null, nextPhase)
       })
       .catch((err) => {
         // An ABORTED request is not a failure: the cleanup fires on every period
@@ -83,10 +90,12 @@ export default function UsageOverviewSection({ period, onPeriodChange, wa, waLoa
         // normally-loading screen (Opus, reproduced). 403 keeps its own honest
         // state (defence in depth under the registry's billing.view gate).
         if (ctrl.signal.aborted) return
-        setPhase((err as { response?: { status?: number } })?.response?.status === 403 ? 'unavailable' : 'error')
+        const nextPhase = (err as { response?: { status?: number } })?.response?.status === 403 ? 'unavailable' : 'error'
+        setPhase(nextPhase)
+        onSubscriptionChange?.(null, nextPhase)
       })
     return () => ctrl.abort()
-  }, [period])
+  }, [period, onSubscriptionChange])
 
   const rows = useMemo(() => mergeDailyRows(data), [data])
   const weekRows = useMemo(() => aggregateToWeeks(rows), [rows])

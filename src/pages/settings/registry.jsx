@@ -25,6 +25,7 @@ import {
 import CustomFieldsSettings from './sections/CustomFieldsSettings'
 import VacancyGenerationSettings from './sections/VacancyGenerationSettings'
 import KoiosAdviceSettings from './sections/KoiosAdviceSettings'
+import JargonSettings from './sections/JargonSettings'
 
 import UsersPage from '../users/UsersPage'
 import ViewConfigEditor from '@/components/settings/ViewConfigEditor'
@@ -91,6 +92,7 @@ import WebhooksSettings from './sections/webhooks'
 import AppsSettings from './sections/AppsSettings'
 import ModulesSettings from './sections/ModulesSettings'
 import TenantUsageSettings from './sections/TenantUsageSettings'
+import KoiosModelsAdminSettings from './sections/KoiosModelsAdminSettings'
 import JobQueueSettings from './sections/jobs'
 import WhatsAppSettings from './sections/WhatsAppSettings'
 import ImporterenSettings from './sections/ImporterenSettings'
@@ -176,6 +178,9 @@ export const NAV_GROUPS = [
       // vacancies/matches tables — cross-entity Koios-rule config, so it sits
       // here rather than forcing a fit into either entity's display schema.
       { id: 'koios_advice', icon: Clock, component: KoiosAdviceSettings },
+      // Tenant jargon list (K-155): terms the AI correction prompt uses to fix
+      // dictated abbreviations (e.g. "bfv" -> "BHV") in notes/assist results.
+      { id: 'jargon', icon: Languages, component: JargonSettings },
     ],
   },
   {
@@ -660,6 +665,7 @@ export const NAV_GROUPS = [
       // review) — the notifications menu is one list, not a per-context icon set.
       { id: 'notif_calllists', icon: Bell, render: () => <NotificationsSettings context="calllists" /> },
       { id: 'notif_opportunities', icon: Bell, render: () => <NotificationsSettings context="opportunities" /> },
+      { id: 'notif_appointments', icon: Bell, render: () => <NotificationsSettings context="appointments" /> },
       // 11-escalatie (3b): per stilstand-signaal an optional day-threshold + target (user/role).
       { id: 'notif_escalation', icon: Bell, component: EscalationSettings },
     ],
@@ -715,6 +721,9 @@ export const NAV_GROUPS = [
       { id: 'modules', icon: Package, component: ModulesSettings, superAdminOnly: true },
       { id: 'apps', icon: AppWindow, component: AppsSettings, superAdminOnly: true },
       { id: 'usage', icon: BarChart2, component: TenantUsageSettings, superAdminOnly: true },
+      // K-147 L1+L2: platform-wide Koios model registry — flavour→model map,
+      // per-request-type routing, package flavour ceilings, tenant overrides.
+      { id: 'koios_models', icon: Sparkles, component: KoiosModelsAdminSettings, superAdminOnly: true },
       // Taakbeheer (T4.1, extended QUEUE-VIEW-1) — queue/job health, backlog list, failure log.
       { id: 'admin_jobs', icon: ListChecks, component: JobQueueSettings, superAdminOnly: true },
       // INVOICE-1 (14-08): platform invoicing — seller details + numbering knobs,

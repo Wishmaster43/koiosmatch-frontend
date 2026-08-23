@@ -36,6 +36,21 @@ describe('TenantUsageKpiRow', () => {
     expect(notes).toMatch(/19,75|19.75/)   // sale as the tile value
   })
 
+  it('renders the billable-of-credits workflow note and the resets_at caption (CREDITS-2-FE deel 3)', () => {
+    render(<TenantUsageKpiRow loading={false} usage={{
+      ai: { tokens: 100 },
+      workflow_tokens: { total_module_runs: 4 },
+      // Real shape: the controller merges billingForMonth() under `billing`,
+      // so resets_at lives INSIDE it (Opus round, golf 4).
+      billing: { workflow: { credits: 620, included_budget: 500, billable_credits: 120, amount: 60 }, resets_at: '2026-09-01T00:00:00Z' },
+    }} />)
+    const notes = document.body.textContent ?? ''
+    expect(notes).toMatch(/120/)
+    expect(notes).toMatch(/620/)
+    expect(notes).toMatch(/500/)
+    expect(notes).toMatch(/01-09-2026/)
+  })
+
   it('renders a dash for missing money values, never a fabricated zero', () => {
     render(<TenantUsageKpiRow loading={false} usage={{ ai: { tokens: 100 } }} />)
     expect(screen.getAllByText('—').length).toBeGreaterThan(0)

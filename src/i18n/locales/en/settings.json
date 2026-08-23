@@ -128,6 +128,7 @@
     "automatch": "Auto-match rules",
     "planning_board": "Planning board",
     "koios": "Overview",
+    "koios_models": "Koios AI models",
     "facebook_leads": "Facebook Leads",
     "numbering": "Numbering",
     "mod_shiftmanager": "Shiftmanager",
@@ -240,13 +241,15 @@
     "notif_taken": "Tasks",
     "notif_calllists": "Call lists",
     "notif_opportunities": "Opportunities",
+    "notif_appointments": "Appointments",
     "notif_escalation": "Escalation",
     "koios_advice": "Advice thresholds",
     "notif_my": "My notifications",
     "customer_identifier_validation": "Number validation",
     "automations": "Automations",
     "hf_contract_map": "HelloFlex contract map",
-    "report_kpis": "Report cards"
+    "report_kpis": "Report cards",
+    "jargon": "Jargon terms"
   },
   "kpis": {
     "title": "KPI settings",
@@ -1041,6 +1044,10 @@
       "opportunities": {
         "title": "Opportunities",
         "desc": "Notifications about opportunities won and lost."
+      },
+      "appointments": {
+        "title": "Appointments",
+        "desc": "Notifications about appointments scheduled for today."
       }
     },
     "my": {
@@ -1105,7 +1112,13 @@
       "periodMonth": "This month",
       "plan": {
         "title": "Plan & credits",
-        "notice": "Current plan, credit progress bar, reset date and credit balance are not available yet. There is no backend model for plans or credits yet."
+        "notice": "Current plan, credit progress bar, reset date and credit balance are not available yet. There is no backend model for plans or credits yet.",
+        "loadError": "Could not load your subscription.",
+        "unavailable": "You don't have permission to view this.",
+        "resetsOn": "Resets on {{date}}",
+        "aiMeter": "Koios AI-tokens",
+        "workflowMeter": "Koios Tokens",
+        "overBudget": "{{meter}}: {{n}} over budget → {{amount}}"
       },
       "ai": {
         "title": "AI usage (Koios)",
@@ -2725,7 +2738,8 @@
       "workflowLabel": "Workflow",
       "workflowNote": "{{n}} runs",
       "whatsappLabel": "WhatsApp Business",
-      "planningLabel": "Processed hours"
+      "planningLabel": "Processed hours",
+      "workflowBillableNote": "{{billable}} billable (of {{credits}}, {{included}} included)"
     }
   },
   "jobs": {
@@ -3153,6 +3167,62 @@
     "applicationStaleLabel": "Days (1-365)",
     "applicationStaleSaveFailed": "Saving the application stage staleness window failed."
   },
+  "koiosModelsAdmin": {
+    "title": "Koios AI models",
+    "subtitle": "Platform-wide model routing: flavours, per-request-type routing, package ceilings and tenant overrides.",
+    "refresh": "Refresh",
+    "loading": "Loading model registry...",
+    "loadFailed": "Loading the model registry failed.",
+    "refreshFailed": "Refreshing the model list failed.",
+    "saveFailed": "Saving failed.",
+    "empty": "No models available yet. Try refreshing.",
+    "save": "Save",
+    "flavorLabel": {
+      "snel": "Fast",
+      "slim": "Smart",
+      "max": "Max"
+    },
+    "effortLevel": {
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High",
+      "xhigh": "Extra high",
+      "max": "Max"
+    },
+    "requestType": {
+      "note_assist": "Note assist",
+      "generate": "Generate",
+      "conversation_assist": "Conversation assist",
+      "report_advice": "Report advice"
+    },
+    "flavors": {
+      "title": "Flavours",
+      "subtitle": "Which vendor model backs each tenant-facing flavour.",
+      "pickPlaceholder": "Pick a model",
+      "noEffort": "This model has no effort levels."
+    },
+    "routing": {
+      "title": "Routing per request type",
+      "subtitle": "Which flavour and effort level handles each request type.",
+      "chatNote": "Chat isn't listed here: it always follows the tenant's own flavour choice.",
+      "effortDefault": "Default"
+    },
+    "packages": {
+      "title": "Packages",
+      "subtitle": "Which flavours a tenant on this package may choose, and the effort ceiling.",
+      "maxEffort": "Max effort"
+    },
+    "tenantOverrides": {
+      "title": "Tenant overrides",
+      "subtitle": "Per-tenant exceptions to the package rules above.",
+      "pickTenant": "Pick a tenant",
+      "minFlavor": "Minimum flavour",
+      "minFlavorHint": "A floor: lifts every request for this tenant to at least this flavour.",
+      "noFloor": "No floor",
+      "allowedFlavors": "Allowed flavours",
+      "allowedFlavorsHint": "Leave empty to fall back to the package's allowed flavours."
+    }
+  },
   "modShiftmanager": {
     "reportingOff": "Shiftmanager reporting isn't enabled yet. Turn on the module to configure KPI targets and display limits."
   },
@@ -3286,5 +3356,31 @@
     "blockedIntro": "Records still carry a value that is not in the list. Make the list strict only after these values are fixed or added as list values:",
     "blockedHint": "Fix the records or add the value to the list, then turn free entry off. Data is never silently dropped.",
     "blockedClose": "Got it"
+  },
+  "jargonSettings": {
+    "title": "Jargon terms",
+    "subtitle": "Correct trade jargon and abbreviations the AI uses in dictation and improvement results, for example bfv becomes BHV.",
+    "add": "Add term"
+  },
+  "billingBudgets": {
+    "title": "Monthly budgets",
+    "subtitle": "AI-token and Koios Tokens budgets per package, and per-tenant exceptions.",
+    "packagesHeading": "Packages",
+    "package": {
+      "core": "Koios Core",
+      "pro": "Koios Pro",
+      "enterprise": "Koios Enterprise"
+    },
+    "aiBudgetLabel": "AI-tokens",
+    "workflowBudgetLabel": "Koios Tokens",
+    "valueCaption": "purchase {{cogs}} · sale {{sale}} · {{basis}}",
+    "tenantHeading": "Tenant exception",
+    "tenantPickerLabel": "Tenant",
+    "tenantPickerPlaceholder": "Search a tenant…",
+    "tenantClearPlaceholder": "package default",
+    "tenantClearHint": "Empty = clear this override.",
+    "loadError": "Failed to load monthly budgets.",
+    "saveFailed": "Failed to save the budgets.",
+    "saved": "Budgets saved."
   }
 }

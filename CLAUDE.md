@@ -95,6 +95,42 @@ compliant alternative.
 
 ---
 
+## 0B. Koios AI is THE assistant (Danny 2026-08-23, verbatim: "KOIOS AI MOET DE
+## ASSISTENT ZIJN VOOR ELKE RECRUITER EN ACCOUNTMANAGER")
+
+Koios AI is not a feature bolted onto screens — it is the product's assistant
+for every recruiter and account manager, **in three dimensions at once: search,
+automation, and user-friendliness**. When building or reviewing ANY Koios
+surface, hold it against this bar:
+
+- **An assistant finishes the loop.** A suggestion the user cannot execute,
+  edit, or trace is half an assistant. Every AI-suggested action carries: a
+  human-readable date (DD-MM-YYYY, computed by the AI from a date anchor —
+  "volgende week donderdag" resolves to a real date), a status the user can see
+  at a glance (suggested · executed ✓ · failed), a link to the record it
+  created, and a way to adjust it before running. Execution runs through
+  workflows underneath (§0.11) — the workflow is the engine, Koios is the face.
+- **Extracted once, never repeated.** Action points already in the text or
+  already executed are known to the next AI call (known_items) — an assistant
+  that re-suggests what it already did erodes trust instantly.
+- **Wizard and Auto are the SAME machinery**, differing only in who pulls the
+  trigger: Wizard = per-item confirm, Auto = direct execution (messages stay
+  opt-in). If a path works in Wizard it must work in Auto, and vice versa — a
+  mode that errors is a broken assistant, not a partial feature.
+- **The assistant is proactive**: planned actions surface as notifications
+  (bell, with deep links to that day's actions), not only inside the popup
+  where they were born.
+- **Readable by default, expandable on demand**: assistant surfaces render
+  calm and legible without user effort (real typography, room to read, old↔new
+  comparison for rewrites), with an explicit expand/fullscreen affordance on
+  the popup.
+
+The reference implementation of this vision is the note popup's action-panel
+redesign (KOIOS-ASSIST-VISIE-1 in WORKLIST — the 11-point spec of 23-08).
+Mirror its idiom on every entity where Koios assists.
+
+---
+
 ## 1. Stack (authoritative)
 
 - React 18 + Vite, **Tailwind CSS** (utility-first, design tokens via CSS vars).
