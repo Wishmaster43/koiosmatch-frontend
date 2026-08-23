@@ -139,22 +139,22 @@ export default function CustomersTable({
     // clicks through (lands on the tab's own empty state + CTA).
     { key: 'locations',   header: t('cols.locations'),   nowrap: true, align: 'right', cellStyle: mutedCell, sortable: true, sortValue: c => c.locationsCount,
       // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- count deep-link rendered AS the cell's own mono number; Button's fixed sm footprint cannot sit inside a 12px table cell (§14 r7 necessity)
-      render: c => <button style={countBtn} onClick={e => { e.stopPropagation(); onOpenTab?.(c, 'locations') }}>{c.locationsCount}</button> },
+      render: c => <button type="button" style={countBtn} aria-label={t('cols.locationsOpen')} onClick={e => { e.stopPropagation(); onOpenTab?.(c, 'locations') }}>{c.locationsCount}</button> },
     { key: 'departments', header: t('cols.departments'), nowrap: true, align: 'right', cellStyle: mutedCell, sortable: true, sortValue: c => c.departmentsCount,
       // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- count deep-link rendered AS the cell's own mono number; Button's fixed sm footprint cannot sit inside a 12px table cell (§14 r7 necessity)
-      render: c => <button style={countBtn} onClick={e => { e.stopPropagation(); onOpenTab?.(c, 'departments') }}>{c.departmentsCount}</button> },
+      render: c => <button type="button" style={countBtn} aria-label={t('cols.departmentsOpen')} onClick={e => { e.stopPropagation(); onOpenTab?.(c, 'departments') }}>{c.departmentsCount}</button> },
     { key: 'contacts',    header: t('cols.contacts'),    nowrap: true, align: 'right', cellStyle: mutedCell, sortable: true, sortValue: c => c.contactsCount,
       // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- count deep-link rendered AS the cell's own mono number; Button's fixed sm footprint cannot sit inside a 12px table cell (§14 r7 necessity)
-      render: c => <button style={countBtn} onClick={e => { e.stopPropagation(); onOpenTab?.(c, 'contacts') }}>{c.contactsCount}</button> },
+      render: c => <button type="button" style={countBtn} aria-label={t('cols.contactsOpen')} onClick={e => { e.stopPropagation(); onOpenTab?.(c, 'contacts') }}>{c.contactsCount}</button> },
     { key: 'openVacancies', header: t('cols.openVacancies'), nowrap: true, align: 'right', cellStyle: mutedCell, sortable: true, sortValue: c => c.openVacanciesCount,
       // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- count deep-link rendered AS the cell's own mono number; Button's fixed sm footprint cannot sit inside a 12px table cell (§14 r7 necessity)
-      render: c => <button style={countBtn} onClick={e => { e.stopPropagation(); onOpenTab?.(c, 'vacancies') }}>{c.openVacanciesCount}</button> },
+      render: c => <button type="button" style={countBtn} aria-label={t('cols.openVacanciesOpen')} onClick={e => { e.stopPropagation(); onOpenTab?.(c, 'vacancies') }}>{c.openVacanciesCount}</button> },
     // K8b: active-matches count, same ghost-button deep-link as openVacancies —
     // deep-links to the drawer's own "matches" tab (mapCustomer.ts already maps
     // activeMatchesCount, this column was simply missing).
     { key: 'activeMatches', header: t('cols.matches'), nowrap: true, align: 'right', cellStyle: mutedCell, sortable: true, sortValue: c => c.activeMatchesCount,
       // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- count deep-link rendered AS the cell's own mono number; Button's fixed sm footprint cannot sit inside a 12px table cell (§14 r7 necessity)
-      render: c => <button style={countBtn} onClick={e => { e.stopPropagation(); onOpenTab?.(c, 'matches') }}>{c.activeMatchesCount}</button> },
+      render: c => <button type="button" style={countBtn} aria-label={t('cols.activeMatchesOpen')} onClick={e => { e.stopPropagation(); onOpenTab?.(c, 'matches') }}>{c.activeMatchesCount}</button> },
     // Shared Koios column factory (Danny 05-08 consistency pass) — same header,
     // sort and cell as every other entity table; only the resolver differs.
     makeKoiosColumn({ adviceOf, colored: colorKoios, label: t('cols.koios') }),

@@ -5,7 +5,7 @@
  * derived filterParams/filterKey, and the shared clear-all. The page passes the
  * map state in so the straal-blok and the map share one circle.
  */
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useCallback } from 'react'
 import { usePageMemory } from '@/lib/usePageMemory'
 import { geocodeNL } from '@/lib/geocode'
 import { isReferenceQuery } from '@/lib/referenceNumber'
@@ -63,14 +63,17 @@ export function useCandidateFilters({ t, staleMonths, view, mapCenter, mapRadius
   const [geoHint, setGeoHint] = useState<string | null>(null)
 
   // Straal-blok apply: geocode the input; not found → hint, found → filter + map sync.
-  const applyGeo = async (q: string, km: number) => {
+  // Stabilized (useCallback) so the page's filterGroups useMemo can safely depend on
+  // it — every captured setter is itself stable (usePageMemory/useState), only `t`
+  // can genuinely change (mirrors CustomersPage/VacanciesPage's own applyGeo).
+  const applyGeo = useCallback(async (q: string, km: number) => {
     setGeoHint(null)
     const hit = await geocodeNL(q)
     if (!hit) { setGeoHint(t('common:filters.notFound')); return }
     setGeoFilter({ q, km, lat: hit.lat, lng: hit.lng, label: `${hit.label} · ${km} km` })
     setMapCenter({ lat: hit.lat, lng: hit.lng }); setMapRadius(km)
-  }
-  const clearGeo = () => { setGeoFilter(null); setGeoHint(null) }
+  }, [t, setGeoHint, setGeoFilter, setMapCenter, setMapRadius])
+  const clearGeo = useCallback(() => { setGeoFilter(null); setGeoHint(null) }, [setGeoFilter, setGeoHint])
 
   // Anything narrowing the default view → the shared clear-button shows; one click resets.
   const anyFilterActive = Boolean(globalSearch.trim() || attentionFilter || dateRange || showArchived || showTrash || geoFilter

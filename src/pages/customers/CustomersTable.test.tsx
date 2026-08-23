@@ -151,9 +151,46 @@ describe('CustomersTable · matches column deep-link (K8b)', () => {
     const onSelect = vi.fn()
     render(<CustomersTable rows={[row]} statusMeta={statusMeta} onOpenTab={onOpenTab} onSelect={onSelect} />)
 
-    await user.click(screen.getByRole('button', { name: '7' }))
+    // CUST-COUNTLINK-A11Y-1: the aria-label ("Matches openen") is now the button's
+    // accessible name, so a bare digit no longer matches it (see the a11y describe
+    // block below for the full five-button accessible-name pin).
+    await user.click(screen.getByRole('button', { name: 'Matches openen' }))
     expect(onOpenTab).toHaveBeenCalledWith(row, 'matches')
     expect(onSelect).not.toHaveBeenCalled()
+  })
+})
+
+describe('CustomersTable · count deep-link accessible names (CUST-COUNTLINK-A11Y-1)', () => {
+  it('gives every count deep-link a real accessible name — never a bare digit (§6)', () => {
+    const row = {
+      ...baseCustomer, id: 46,
+      locationsCount: 3, departmentsCount: 2, contactsCount: 5, openVacanciesCount: 1, activeMatchesCount: 7,
+    }
+    render(<CustomersTable rows={[row]} statusMeta={statusMeta} />)
+
+    // Each button's accessible name is the dedicated `<x>Open` i18n key — the
+    // visible digit alone (a bare "3", "2", …) is never a legal accessible name.
+    expect(screen.getByRole('button', { name: 'Locaties openen' })).toHaveTextContent('3')
+    expect(screen.getByRole('button', { name: 'Afdelingen openen' })).toHaveTextContent('2')
+    expect(screen.getByRole('button', { name: 'Contactpersonen openen' })).toHaveTextContent('5')
+    expect(screen.getByRole('button', { name: 'Open vacatures openen' })).toHaveTextContent('1')
+    expect(screen.getByRole('button', { name: 'Matches openen' })).toHaveTextContent('7')
+  })
+
+  it('renders type="button" on every count deep-link, so it never submits an enclosing form', () => {
+    const row = {
+      ...baseCustomer, id: 47,
+      locationsCount: 0, departmentsCount: 0, contactsCount: 0, openVacanciesCount: 0, activeMatchesCount: 0,
+    }
+    const { container } = render(<CustomersTable rows={[row]} statusMeta={statusMeta} />)
+
+    const labels = ['Locaties openen', 'Afdelingen openen', 'Contactpersonen openen', 'Open vacatures openen', 'Matches openen']
+    labels.forEach(name => {
+      expect(screen.getByRole('button', { name })).toHaveAttribute('type', 'button')
+    })
+    // Sanity: at least the five count deep-link buttons exist in this row (plus the
+    // pre-existing coupling button, which the coupling describe block covers).
+    expect(container.querySelectorAll('button[type="button"]').length).toBeGreaterThanOrEqual(5)
   })
 })
 

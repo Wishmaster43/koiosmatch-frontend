@@ -205,10 +205,19 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
     options: { statusOptions, phaseOptions, funnelOptions, typeOptions, titleOptions, poolOptions, cityOptions,
       provinceOptions, genderOptions, ownerOptions, locationOptions, sourceOptions },
   }),
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  [t, showArchived, missingAppointmentFilter, dateRange, geoFilter, geoHint,
-   selectedStatus, selectedPhase, selectedFunnel, selectedType, selectedTitle, selectedGeslacht, selectedProvince, selectedOwner, selectedLocation,
-   selectedPool, selectedCity, selectedSource, poolOptions, cityOptions, sourceOptions,
+  // Complete dep array (CANDPAGE-DISABLE-REASON-1, mirrors CustomersPage/VacanciesPage):
+  // every setSelectedX/setShowArchived/setDateRange/… is a usePageMemory/useState
+  // setter — React-stable for the component's lifetime — and applyGeo/clearGeo are
+  // now useCallback-wrapped in useCandidateFilters, so none of these ever change
+  // identity; only the actual selections/options/`t` drive a recompute. `tog` is
+  // intentionally omitted — it closes over nothing from render scope (same as the
+  // customers/vacancies `tog`), so its identity is irrelevant to the memo's output.
+  [t, showArchived, setShowArchived, missingAppointmentFilter, setMissingAppointmentFilter, dateRange, setDateRange, geoFilter, geoHint, applyGeo, clearGeo,
+   selectedStatus, setSelectedStatus, selectedPhase, setSelectedPhase, selectedFunnel, setSelectedFunnel,
+   selectedType, setSelectedType, selectedTitle, setSelectedTitle, selectedGeslacht, setSelectedGeslacht,
+   selectedProvince, setSelectedProvince, selectedOwner, setSelectedOwner, selectedLocation, setSelectedLocation,
+   selectedPool, setSelectedPool, selectedCity, setSelectedCity, selectedSource, setSelectedSource,
+   poolOptions, cityOptions, sourceOptions,
    statusOptions, phaseOptions, funnelOptions, typeOptions, titleOptions, genderOptions, provinceOptions, ownerOptions, locationOptions])
 
   useEffect(() => {

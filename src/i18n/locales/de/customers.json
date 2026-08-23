@@ -30,7 +30,12 @@
     "industry": "Branche",
     "createdAt": "Erstellt am",
     "koios": "Koios AI",
-    "matches": "Matches"
+    "matches": "Matches",
+    "locationsOpen": "Standorte öffnen",
+    "departmentsOpen": "Abteilungen öffnen",
+    "contactsOpen": "Kontakte öffnen",
+    "openVacanciesOpen": "Offene Stellen öffnen",
+    "activeMatchesOpen": "Matches öffnen"
   },
   "filters": {
     "search": "Suchen",
