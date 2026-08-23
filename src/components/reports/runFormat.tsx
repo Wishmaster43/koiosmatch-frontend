@@ -7,6 +7,8 @@ import type { ComponentType } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Ban, CheckCircle, XCircle, RotateCcw, Clock } from 'lucide-react'
 import { formatDateTimeStr } from '@/lib/localDate'
+import SoftChip from '@/components/ui/SoftChip'
+import CalloutBox from '@/components/ui/CalloutBox'
 
 // Short readable date + time — delegates to the ONE shared formatter (heraudit
 // I18N-2: this file, messageParts and ordersTableParts each hand-built the same
@@ -52,5 +54,29 @@ export function StatusBadge({ status }: { status?: string }) {
       <Icon size={10} />
       {status ? t(`runs.status.${status}`, { defaultValue: status }) : '—'}
     </span>
+  )
+}
+
+// WF-DRYRUN-FE-1: a dry-run "skipped" step (a send module blocked in a dry run)
+// reads as a DISTINCT soft chip, never as a real outcome — StatusBadge's own
+// fallback treatment would blur it into "just another unknown status". Every
+// other step status still renders via the shared StatusBadge above.
+export function StepStatusBadge({ status, ok }: { status?: string; ok?: boolean }) {
+  const { t } = useTranslation('reports')
+  if (status === 'skipped') {
+    return <SoftChip label={t('runs.status.skipped', { defaultValue: 'Skipped' })} color="var(--color-info)" round size={11} />
+  }
+  return <StatusBadge status={status ?? (ok ? 'success' : 'failed')} />
+}
+
+// WF-DRYRUN-FE-1: the ONE dry-run banner, shown wherever a run's own detail
+// renders (RunDetailDrawer / WorkflowHistoryView's inline expand / LogsPanel) —
+// one canonical message so it never drifts into three re-worded copies.
+export function DryRunBanner() {
+  const { t } = useTranslation('reports')
+  return (
+    <CalloutBox variant="info">
+      {t('runs.dryRun.banner', { defaultValue: 'Dry run: send steps skipped' })}
+    </CalloutBox>
   )
 }

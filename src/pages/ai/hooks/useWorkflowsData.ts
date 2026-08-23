@@ -1,9 +1,11 @@
 /**
  * Workflow list data + mutations. Loads workflows/folders from the API, merges
  * the localStorage graph cache (C-27 — the backend doesn't persist step
- * connections yet), and exposes save/run/toggle-status/folder CRUD. Extracted
- * from WorkflowsPage so the page stays a thin container (§3A); this hook owns
- * everything that talks to the backend or localStorage for this page.
+ * connections yet), and exposes save/run/toggle-status/folder CRUD, plus
+ * WF-EDITOR-DEEPLINK-1's `openEditorById`/`notFoundId` (open by id alone,
+ * resolved against the loaded list — honest not-found if it never resolves).
+ * Extracted from WorkflowsPage so the page stays a thin container (§3A); this
+ * hook owns everything that talks to the backend or localStorage for this page.
  */
 import { useState, useEffect, useRef } from 'react'
 import { notify, notifyError } from '@/lib/notify'
@@ -37,6 +39,11 @@ export function useWorkflowsData(showArchived: boolean) {
   const [editingWorkflow, setEditingWorkflow] = useState<Workflow | null>(null)
   // RUN-CONTROL-1: after a 409 "already running", open the editor focused on that run.
   const [focusRunId, setFocusRunId] = useState<string | number | null>(null)
+  // WF-EDITOR-DEEPLINK-1: an id the URL/a cross-page link asked to open that the
+  // loaded list doesn't (yet) have — resolved once the list finishes loading (see
+  // the effect below); still unresolved after that is the honest not-found state.
+  const [pendingOpenId, setPendingOpenId] = useState<string | null>(null)
+  const [notFoundId,    setNotFoundId]    = useState<string | null>(null)
   // Folder navigation (sidebar selection + drag target) lives alongside the folder
   // CRUD below, since deleteFolder needs to clear the selection when it's the deleted one.
   const [selectedFolder, setSelectedFolder] = useState<FolderId>(null)   // null = alle, 'unassigned' = geen folder, uuid = folder
@@ -83,15 +90,39 @@ export function useWorkflowsData(showArchived: boolean) {
 
   // Open the editor; a normal edit clears any lingering 409 run focus.
   const openEditor = (wf: Workflow, runId: string | number | null = null) => {
+    setNotFoundId(null)
     setFocusRunId(runId)
     setEditingWorkflow(wf)
   }
 
-  // Closes the canvas editor and clears the 409 run focus with it; refetches the
-  // list (existing fetchTick) so the last-run/updated columns show what just ran
-  // inside the builder (LIST-FRESH-1, Danny 24-07 "sync gedaan maar staat er niet").
+  // WF-EDITOR-DEEPLINK-1: open by id alone (F5/back/forward/new-tab landing on
+  // `#aiagents?open=<id>`, or a cross-page EntityLink) — resolves against the
+  // already-loaded list; while the list is still loading, remember the target
+  // and resolve it in the effect below instead of guessing "not found" too soon.
+  const openEditorById = (id: string | number) => {
+    const wf = workflows.find(w => String(w.id) === String(id))
+    if (wf) { openEditor(wf); return }
+    if (loading) { setPendingOpenId(String(id)); return }
+    setNotFoundId(String(id)) // list is loaded and the id truly doesn't exist
+  }
+
+  // Resolves a pending deep-link id once the list finishes loading (mount-time
+  // deep link raced the fetch) — found → open it; still missing → honest 404.
+  useEffect(() => {
+    if (pendingOpenId == null || loading) return
+    const wf = workflows.find(w => String(w.id) === pendingOpenId)
+    setPendingOpenId(null)
+    if (wf) openEditor(wf)
+    else setNotFoundId(pendingOpenId)
+  }, [loading, pendingOpenId, workflows])
+
+  // Closes the canvas editor (or dismisses the not-found state) and clears the
+  // 409 run focus with it; refetches the list (existing fetchTick) so the
+  // last-run/updated columns show what just ran inside the builder (LIST-FRESH-1,
+  // Danny 24-07 "sync gedaan maar staat er niet").
   const closeEditor = () => {
     setEditingWorkflow(null)
+    setNotFoundId(null)
     setFocusRunId(null)
     setFetchTick(v => v + 1)
   }
@@ -226,9 +257,9 @@ export function useWorkflowsData(showArchived: boolean) {
 
   return {
     workflows, folders, loading, error, canManageFolders,
-    editingWorkflow, focusRunId,
+    editingWorkflow, focusRunId, notFoundId,
     selectedFolder, setSelectedFolder, dragOverFolder, setDragOverFolder, dragWf,
-    retryLoad, openEditor, closeEditor,
+    retryLoad, openEditor, openEditorById, closeEditor,
     handleRun, handleToggleStatus, handleSave,
     handleArchive, handleRestore,
     createFolder, deleteFolder, moveToFolder,

@@ -44,6 +44,23 @@ describe('useWorkflowRunControl', () => {
     expect(onRunStarted).toHaveBeenCalledTimes(1)
   })
 
+  // WF-DRYRUN-FE-1: the dry-run action posts the SAME route with {dry_run:true}
+  // pinned in the body — never a different endpoint or param name.
+  it('dry run: POSTs {dry_run:true} on the same route/port', async () => {
+    mockedPost.mockResolvedValue({ data: { run: { id: 'r3' } } })
+    mockedGet.mockResolvedValue({ data: { id: 'r3', status: 'success', dry_run: true } })
+    const onRunStarted = vi.fn()
+    const { result } = renderHook(
+      () => useWorkflowRunControl({ workflowId: 'w1', onRunStarted }),
+      { wrapper },
+    )
+
+    await act(async () => { await result.current.handleRun({ dryRun: true }) })
+
+    expect(mockedPost).toHaveBeenCalledWith('/workflows/w1/run', { dry_run: true }, { quietStatuses: [409] })
+    expect(result.current.activeRunId).toBe('r3')
+  })
+
   it('409 "already running": points activeRunId at the EXISTING run, flags runConflict, still opens the viewer', async () => {
     mockedPost.mockRejectedValue({ response: { status: 409, data: { message: 'loopt al', run_id: 'r-existing' } } })
     const onRunStarted = vi.fn()

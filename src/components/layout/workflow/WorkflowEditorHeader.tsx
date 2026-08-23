@@ -9,7 +9,7 @@
  * Everything it shows arrives as props and every control reports upward, so the
  * editor keeps all state in `useWorkflowEditor` and this file stays presentational.
  */
-import { X, Save, Play, Zap, List, Clock, Workflow as WorkflowIcon, History } from 'lucide-react'
+import { X, Save, Play, Zap, List, Clock, Workflow as WorkflowIcon, History, FlaskConical, GitBranch } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { scheduleLabel } from './ScheduleModal'
 import { StopRunButton } from './runControl'
@@ -18,10 +18,13 @@ import ChangelogPopover from '@/components/drawer/ChangelogPopover'
 import EntityChangelog from '@/components/drawer/EntityChangelog'
 import type { Id } from '@/types/common'
 import Button from '@/components/ui/Button'
+import SaveButton from '@/components/ui/SaveButton'
+import QuickViewToggle from '@/components/ui/QuickViewToggle'
 import Spinner from '@/components/ui/Spinner'
 
-// Top-level editor view: the node diagram, or this workflow's run history.
-export type EditorView = 'diagram' | 'history'
+// Top-level editor view: the node diagram, this workflow's run history, or its
+// parent/child relations (WF-RELATIONS-FE-1).
+export type EditorView = 'diagram' | 'history' | 'relations'
 
 export default function WorkflowEditorHeader({
   workflowId,
@@ -32,7 +35,7 @@ export default function WorkflowEditorHeader({
   showLogs, onToggleLogs,
   runError, onRunError, runConflict,
   liveRunActive, activeRunId, onStopped,
-  running, onRun,
+  running, onRun, onRunDryRun,
   saved, onSave, onSaveClose,
   onClose,
 }: {
@@ -61,12 +64,24 @@ export default function WorkflowEditorHeader({
   onStopped: () => void
   running: boolean
   onRun: () => void
+  // WF-DRYRUN-FE-1: the "Proefdraaien" action next to Run — stages the honest
+  // confirm dialog before actually starting the dry run (the confirm itself
+  // lives in the editor composer, which owns `useConfirm`).
+  onRunDryRun: () => void
   saved: boolean
   onSave: () => void
   onSaveClose: () => void
   onClose: () => void
 }) {
   const { t, i18n } = useTranslation('workflows')
+
+  // View tabs — node diagram / run history / relations (Make-style). Relations
+  // only for a SAVED workflow (mirrors the changelog icon's own guard below).
+  const viewTabs: Array<{ id: EditorView; label: string; Icon: typeof WorkflowIcon }> = [
+    { id: 'diagram', label: t('editor.tabDiagram'), Icon: WorkflowIcon },
+    { id: 'history', label: t('editor.tabHistory'), Icon: History },
+    ...(workflowId !== undefined ? [{ id: 'relations' as const, label: t('editor.tabRelations'), Icon: GitBranch }] : []),
+  ]
 
   return (
     <div style={{
@@ -98,10 +113,14 @@ export default function WorkflowEditorHeader({
 
       {/* View tabs — node diagram vs. run history (Make-style) */}
       <div style={{ display: 'flex', gap: 2, background: 'var(--hover-bg)', borderRadius: 8, padding: 2, flexShrink: 0 }}>
-        {([
-          { id: 'diagram', label: t('editor.tabDiagram'), Icon: WorkflowIcon },
-          { id: 'history', label: t('editor.tabHistory'), Icon: History },
-        ] as const).map(v => (
+        {/* Make-style elevated-pill tab (active = resting-card lift via boxShadow),
+            a TAB not an action: neither Button (no shadow-lift face) nor the
+            shared DrawerTabs (underline style, no per-tab icon) model this look
+            — genuine necessity, not scope. Block form: the flagged `style` prop
+            sits several lines into this multi-line opening tag, past where
+            eslint-disable-next-line reaches. */}
+        {/* eslint-disable huisstijlLegacy/no-restricted-syntax */}
+        {viewTabs.map(v => (
           <button key={v.id} onClick={() => onViewChange(v.id)}
             aria-pressed={view === v.id}
             style={{
@@ -116,26 +135,27 @@ export default function WorkflowEditorHeader({
             {v.label}
           </button>
         ))}
+        {/* eslint-enable huisstijlLegacy/no-restricted-syntax */}
       </div>
 
       <div style={{ width: 1, height: 20, background: 'var(--border)', flexShrink: 0 }} />
 
-      <button onClick={onOpenSchedule}
-        style={{
-          display: 'flex', alignItems: 'center', gap: 6, padding: '5px 10px', borderRadius: 8,
-          border: '1px solid var(--border)', background: 'var(--hover-bg)', cursor: 'pointer',
-          fontSize: 12, color: 'var(--text)', fontWeight: 500,
-        }}
-        onMouseEnter={e => (e.currentTarget.style.background = 'var(--border)')}
-        onMouseLeave={e => (e.currentTarget.style.background = 'var(--hover-bg)')}>
+      <Button variant="secondary" size="sm" onClick={onOpenSchedule}>
         <Clock size={13} color="var(--text-muted)" />
         {scheduleLabel(t, i18n.language, trigger, scheduleConfig)}
-      </button>
+      </Button>
 
       <div style={{ width: 1, height: 20, background: 'var(--border)', flexShrink: 0 }} />
 
       {/* BUG 5: the view tabs beside this already carry aria-pressed — this toggle
           didn't, so a screen reader announced it as a plain button with no on/off state. */}
+      {/* A colour-carrying status BADGE (dot + Actief/Inactief), not a Button-tone
+          action — the exact "kleurdragende tint-actie zonder Button-tone" exception
+          (§4); Toggle's switch semantics would also break this test's own
+          aria-pressed contract (BUG 5), which is the deliberate a11y fix here.
+          Block form: the flagged `style` prop sits several lines into this
+          multi-line opening tag, past where eslint-disable-next-line reaches. */}
+      {/* eslint-disable huisstijlLegacy/no-restricted-syntax */}
       <button onClick={onToggleStatus} aria-pressed={status === 'active'}
         style={{
           display: 'flex', alignItems: 'center', gap: 6, padding: '4px 10px', borderRadius: 999,
@@ -147,22 +167,15 @@ export default function WorkflowEditorHeader({
         <span style={{ width: 6, height: 6, borderRadius: '50%', background: status === 'active' ? 'var(--color-success)' : 'var(--border)' }} />
         {status === 'active' ? t('status.active') : t('status.inactive')}
       </button>
+      {/* eslint-enable huisstijlLegacy/no-restricted-syntax */}
 
       <div style={{ flex: 1 }} />
 
+      {/* PRIMAIR-VLAK-1: a plain-accent toolbar toggle (no distinct semantic
+          colour) reads the house trio while ON — QuickViewToggle's default
+          `color` branch does exactly that. */}
       {view === 'diagram' && (
-        <button onClick={onToggleLogs}
-          style={{
-            display: 'flex', alignItems: 'center', gap: 6, padding: '6px 12px', borderRadius: 8, fontSize: 12, fontWeight: 500,
-            background: showLogs ? 'var(--color-primary-bg)' : 'var(--hover-bg)',
-            // Text-colour accent uses the AA-contrast text token, not the raw brand primary.
-            color:      showLogs ? 'var(--color-primary-text)'    : 'var(--text-muted)',
-            border:     `1px solid ${showLogs ? 'var(--color-primary)' : 'var(--border)'}`,
-            cursor: 'pointer',
-          }}>
-          <List size={13} />
-          {t('editor.logs')}
-        </button>
+        <QuickViewToggle active={showLogs} onToggle={onToggleLogs} label={t('editor.logs')} icon={List} />
       )}
 
       {/* Run feedback: the backend reason (e.g. a draft can't run) or generic.
@@ -192,30 +205,25 @@ export default function WorkflowEditorHeader({
         <StopRunButton runId={activeRunId} onStopped={onStopped} onError={onRunError} />
       )}
 
-      <button onClick={onRun} disabled={running}
-        style={{
-          display: 'flex', alignItems: 'center', gap: 6, padding: '6px 14px', borderRadius: 8, fontSize: 12, fontWeight: 500,
-          background: running ? 'var(--border)' : 'var(--color-primary-bg)',
-          // Text-colour accent uses the AA-contrast text token, not the raw brand primary.
-          color:      running ? 'var(--text-muted)' : 'var(--color-primary-text)',
-          border: 'none', cursor: running ? 'not-allowed' : 'pointer',
-        }}>
+      {/* WF-DRYRUN-FE-1: "Proefdraaien" — same single-flight `running` guard as the
+          real Run button (only one run at a time regardless of which triggered it);
+          the honest confirm before it actually fires lives in the composer. */}
+      <Button variant="secondary" size="sm" onClick={onRunDryRun} disabled={running} title={t('editor.dryRunTitle')}>
+        {running ? <Spinner size={13} /> : <FlaskConical size={13} />}
+        {running ? t('editor.dryRunning') : t('editor.dryRun')}
+      </Button>
+
+      <Button variant="primary" size="sm" onClick={onRun} disabled={running}>
         {running ? <Spinner size={13} /> : <Play size={13} />}
         {running ? t('editor.running') : t('editor.run')}
-      </button>
+      </Button>
 
-      {/* Opslaan — blijft in editor */}
-      <button onClick={onSave}
-        style={{
-          display: 'flex', alignItems: 'center', gap: 6, padding: '6px 14px', borderRadius: 8, fontSize: 12, fontWeight: 500,
-          background: saved ? 'var(--color-success-bg)' : 'var(--hover-bg)',
-          color: saved ? 'var(--color-success)' : 'var(--text)',
-          border: `1px solid ${saved ? 'var(--color-success)' : 'var(--border)'}`,
-          cursor: 'pointer', transition: 'background 0.2s',
-        }}>
+      {/* Opslaan — blijft in editor. §4's "aan/gelukt" token pair (never
+          re-approximated per screen) lives in the shared SaveButton. */}
+      <SaveButton variant="secondary" size="sm" saved={saved} onClick={onSave}>
         <Save size={13} />
         {saved ? t('editor.saved') : t('editor.save')}
-      </button>
+      </SaveButton>
 
       {/* Opslaan & sluiten — terug naar overzicht (live-run guard eerst) */}
       <Button variant="primary" size="sm" onClick={onSaveClose}>
@@ -223,13 +231,10 @@ export default function WorkflowEditorHeader({
         {t('editor.saveClose')}
       </Button>
 
-      <button onClick={onClose} aria-label={t('common:close')}
-        style={{ width: 30, height: 30, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'none', border: '1px solid var(--border)', cursor: 'pointer', color: 'var(--text-muted)' }}
-        onMouseEnter={e => (e.currentTarget.style.background = 'var(--hover-bg)')}
-        onMouseLeave={e => (e.currentTarget.style.background = 'none')}
-        title={t('editor.closeTitle')}>
+      <Button variant="secondary" size="sm" iconOnly onClick={onClose}
+        aria-label={t('common:close')} title={t('editor.closeTitle')}>
         <X size={15} />
-      </button>
+      </Button>
     </div>
   )
 }

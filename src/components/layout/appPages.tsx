@@ -48,6 +48,14 @@ const OutreachPage           = lazy(() => import('@/pages/outreach/OutreachPage'
 const ImportWizardPage       = lazy(() => import('@/pages/import/ImportWizardPage'))
 
 // Route key → breadcrumb label.
+// NECESSITY, not scope: extracting PlaceholderPage (this file's only component
+// export) into its own file was TRIED and reverted — it does not fix this, it
+// multiplies it (2 warnings -> 35, one per unexported `const XPage = lazy(...)`
+// route import, since the rule then treats every capitalized lazy() binding in
+// this JSX-returning dispatcher as an unexported component). A real fix needs
+// PAGE_TITLES/renderPage split off this file's 30+ lazy imports — out of reach
+// for this change.
+// eslint-disable-next-line react-refresh/only-export-components
 export const PAGE_TITLES: Record<string, string> = {
   // Core
   dashboard:                    'Dashboard',
@@ -153,7 +161,7 @@ export function PlaceholderPage({ title }: { title?: ReactNode }) {
 // the layout (a page can navigate with a filter intent; plain nav clears it).
 // navIntent is a dynamic payload fanned out to differently-typed page `intent`
 // props, so it's typed loosely here on purpose.
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+// eslint-disable-next-line @typescript-eslint/no-explicit-any, react-refresh/only-export-components -- see PAGE_TITLES above for the react-refresh reason (same file, same necessity)
 export function renderPage(activePage: string, { navIntent, goTo, dashView }: { navIntent?: any; goTo: (page: string, intent?: unknown) => void; dashView?: string }) {
   switch (activePage) {
 
@@ -248,8 +256,11 @@ export function renderPage(activePage: string, { navIntent, goTo, dashView }: { 
     case 'helloflex.dashboard': return <PlaceholderPage title="HelloFlex Dashboard" />
 
     // ── AI & Workflow module ──────────────────────────────────────────────
+    // WF-EDITOR-DEEPLINK-1: forward the nav intent so a cross-entity
+    // openEntity('aiagents', id) jump (WorkflowRefs/result cards) opens that
+    // workflow's editor, same contract as every other entity page above.
     case 'aiagents':
-    case 'workflows':           return <WorkflowsPage />
+    case 'workflows':           return <WorkflowsPage intent={navIntent} />
     case 'whatsapp':            return <WhatsAppPage intent={navIntent} />
 
     // AI & Workflow drill-down detail routes

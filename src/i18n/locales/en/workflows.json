@@ -23,7 +23,13 @@
     "closeTitle": "Close without saving",
     "unsavedConfirm": "You have unsaved changes. Are you sure you want to close? Your changes will be lost.",
     "liveRunConfirm": "A run is still in progress. It keeps running in the background if you close. Use the Stop button to stop it. Close anyway?",
-    "nameAriaLabel": "Workflow name"
+    "nameAriaLabel": "Workflow name",
+    "tabRelations": "Relations",
+    "dryRun": "Dry run",
+    "dryRunning": "Dry run running…",
+    "dryRunTitle": "Run this workflow as a dry run, without sending anything for real",
+    "dryRunConfirmTitle": "Dry run?",
+    "dryRunConfirmMessage": "Send steps (WhatsApp, email, Facebook, webhooks and Shiftmanager links) are skipped. Every other step still runs for real, exactly like a normal run."
   },
   "fields": {
     "boolOn": "On",
@@ -1125,5 +1131,22 @@
     "fieldAvailableAgain": "Candidate available-again date",
     "fieldMatchEnd": "Match end date"
   },
-  "unassigned": "Unassigned"
+  "unassigned": "Unassigned",
+  "relations": {
+    "title": "Relations",
+    "parents": "Parents",
+    "children": "Children",
+    "noParents": "No parent workflows",
+    "noChildren": "No child workflows",
+    "loading": "Loading relations…",
+    "loadFailed": "Failed to load relations",
+    "runsCount_one": "{{count}} run",
+    "runsCount_other": "{{count}} runs",
+    "lastRun": "Last run: {{date}} {{time}}"
+  },
+  "notFound": {
+    "title": "Workflow not found",
+    "message": "This workflow does not (or no longer) exist, or you do not have access to it.",
+    "backToList": "Back to the list"
+  }
 }

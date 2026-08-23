@@ -26,6 +26,7 @@ import ModulePicker from './workflow/ModulePicker'
 import ConfigPanel, { MANAGE_TABS } from './workflow/ConfigPanel'
 import LogsPanel from './workflow/LogsPanel'
 import WorkflowHistoryView from './workflow/WorkflowHistoryView'
+import WorkflowRelationsView from './workflow/WorkflowRelationsView'
 import WorkflowEditorHeader from './workflow/WorkflowEditorHeader'
 import type { EditorView } from './workflow/WorkflowEditorHeader'
 import { useWorkflowEditor } from './workflow/useWorkflowEditor'
@@ -56,6 +57,12 @@ function EditorInner({ workflow, onClose, onSave, initialRunId }: {
   const { t } = useTranslation('workflows')
   const { confirm, dialog } = useConfirm()
 
+  // WF-DRYRUN-FE-1: an HONEST confirm before the dry run actually fires — it
+  // names exactly which modules are skipped (the send modules) and states
+  // plainly that everything else really mutates, same as a normal run.
+  const handleRunDryRun = () =>
+    confirm(t('editor.dryRunConfirmMessage'), () => handleRun({ dryRun: true }), { title: t('editor.dryRunConfirmTitle') })
+
   // Leaving the editor (X, browser-back, tab close) runs one guarded action —
   // unsaved-changes + live-run confirms live in the hook.
   const confirmClose = useEditorExitGuards({ isDirty, liveRunActive, onClose, confirm })
@@ -68,7 +75,8 @@ function EditorInner({ workflow, onClose, onSave, initialRunId }: {
     return () => document.removeEventListener('keydown', h)
   }, [confirmClose])
 
-  // Top-level editor view: the node diagram, or this workflow's run history.
+  // Top-level editor view: the node diagram, this workflow's run history, or
+  // its parent/child relations (WF-RELATIONS-FE-1).
   const [view, setView] = useState<EditorView>('diagram')
   // LOGS-DRILL-1 (Danny 23-07): jumping from a Logs-panel row lands on the
   // Geschiedenis tab with that run's detail drawer already open. A FRESH wrapper
@@ -105,7 +113,7 @@ function EditorInner({ workflow, onClose, onSave, initialRunId }: {
           showLogs={showLogs} onToggleLogs={() => setShowLogs(s => !s)}
           runError={runError} onRunError={setRunError} runConflict={runConflict}
           liveRunActive={liveRunActive} activeRunId={activeRunId} onStopped={handleStopped}
-          running={running} onRun={handleRun}
+          running={running} onRun={handleRun} onRunDryRun={handleRunDryRun}
           saved={saved} onSave={() => handleSave(false)}
           // Opslaan & sluiten — terug naar overzicht (live-run guard eerst)
           onSaveClose={() => (liveRunActive ? confirm(t('editor.liveRunConfirm'), () => handleSave(true)) : handleSave(true))}
@@ -116,6 +124,10 @@ function EditorInner({ workflow, onClose, onSave, initialRunId }: {
         {view === 'history' ? (
           <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
             <WorkflowHistoryView workflowId={workflow.id} initialRun={historyRun} />
+          </div>
+        ) : view === 'relations' ? (
+          <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
+            <WorkflowRelationsView workflowId={workflow.id} />
           </div>
         ) : (
         <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>

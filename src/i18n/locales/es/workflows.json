@@ -19,7 +19,13 @@
     "closeTitle": "Cerrar sin guardar",
     "unsavedConfirm": "Tienes cambios sin guardar. ¿Seguro que quieres cerrar? Se perderán los cambios.",
     "liveRunConfirm": "Todavía hay una ejecución en curso. Seguirá ejecutándose en segundo plano si cierras. Puedes detenerla con el botón Detener. ¿Cerrar de todos modos?",
-    "nameAriaLabel": "Nombre del workflow"
+    "nameAriaLabel": "Nombre del workflow",
+    "tabRelations": "Relaciones",
+    "dryRun": "Simulación",
+    "dryRunning": "Simulación en curso…",
+    "dryRunTitle": "Ejecutar esta workflow como simulación, sin enviar nada de verdad",
+    "dryRunConfirmTitle": "¿Iniciar simulación?",
+    "dryRunConfirmMessage": "Los pasos de envío (WhatsApp, correo electrónico, Facebook, webhooks y vínculos de Shiftmanager) se omiten. El resto de los pasos se ejecutan de verdad, igual que en una ejecución normal."
   },
   "fields": {
     "boolOn": "Activado",
@@ -1125,5 +1131,22 @@
     "fieldAvailableAgain": "Fecha de disponibilidad del candidato",
     "fieldMatchEnd": "Fecha de fin del match"
   },
-  "unassigned": "Sin asignar"
+  "unassigned": "Sin asignar",
+  "relations": {
+    "title": "Relaciones",
+    "parents": "Superiores",
+    "children": "Inferiores",
+    "noParents": "Sin workflows superiores",
+    "noChildren": "Sin workflows inferiores",
+    "loading": "Cargando relaciones…",
+    "loadFailed": "Error al cargar las relaciones",
+    "runsCount_one": "{{count}} ejecución",
+    "runsCount_other": "{{count}} ejecuciones",
+    "lastRun": "Última ejecución: {{date}} {{time}}"
+  },
+  "notFound": {
+    "title": "Workflow no encontrada",
+    "message": "Esta workflow no existe (ya), o no tienes acceso a ella.",
+    "backToList": "Volver a la lista"
+  }
 }

@@ -6,6 +6,9 @@
  * event, then one old → new row per changed field — via the SAME buildFieldDiff
  * helper the audit table/drawer already use, so the render rules never drift.
  * `subjectId` is optional: omitting it (settings screens) filters by type only.
+ * CHANGELOG-ACTOR-LABEL: the "who" reads `actor_label` first — a Koios-performed
+ * action logs `"<name>-KoiosAI"` there, next to the human `causer_name` its own
+ * account ran under — falling back to `causer_name`, then the system label.
  */
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -21,6 +24,10 @@ interface ActivityEntry {
   description?: string
   event?: string
   causer_name?: string
+  // CHANGELOG-ACTOR-LABEL: set for every Koios-performed action ("<name>-KoiosAI"),
+  // alongside causer_name — takes priority so an automated change reads as Koios,
+  // not as the human whose account the automation ran under.
+  actor_label?: string
   created_at?: string
   changes?: { attributes?: Record<string, unknown>; old?: Record<string, unknown> }
 }
@@ -66,7 +73,7 @@ export default function EntityChangelog({ subjectType, subjectId, logName, endpo
           <div key={entry.id ?? i} style={{ border: '1px solid var(--border)', borderRadius: 8, background: 'var(--bg)', padding: '9px 12px', marginBottom: 8 }}>
             <Caption as="div">
               {entry.created_at ? formatDateTime(entry.created_at) : '—'}
-              {' · '}{entry.causer_name ?? t('audit.system')}{' · '}{entry.description ?? entry.event ?? '—'}
+              {' · '}{entry.actor_label ?? entry.causer_name ?? t('audit.system')}{' · '}{entry.description ?? entry.event ?? '—'}
             </Caption>
             {rows.length > 0 ? (
               rows.map(row => (

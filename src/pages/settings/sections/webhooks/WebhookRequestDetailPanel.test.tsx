@@ -40,6 +40,43 @@ describe('WebhookRequestDetailPanel — request seam', () => {
   })
 })
 
+// WEBHOOK-RUN-CORRELATION-1: named workflows link into the runs view pre-filtered
+// on that workflow; older rows carrying only bare ids keep the honest fallback.
+describe('WebhookRequestDetailPanel — workflow references', () => {
+  // CONTRACT-PENDING (WEBHOOK-DETAIL-WORKFLOWS-1): the detail read does not
+  // attach workflows[] yet (raw model, no $appends) — this pins the tolerant
+  // FE behaviour for the moment CMBE adds it; today production always takes
+  // the ids-only fallback below.
+  it('renders a named workflow as a link into its own filtered run history', async () => {
+    vi.mocked(api.get).mockResolvedValue({ data: { data: detail({
+      workflow_ids: ['wf-1'], workflows: [{ id: 'wf-1', name: 'Vacancy Reminder Flow' }],
+    }) } })
+    render(<WebhookRequestDetailPanel webhookId="wh-1" requestId="req-1" onClose={() => {}} />)
+
+    const link = await screen.findByRole('link', { name: 'Vacancy Reminder Flow' })
+    expect(link).toHaveAttribute('href', '#details.runs?workflow_id=wf-1')
+  })
+
+  it('falls back to the ids-only reference when the row carries no named workflows', async () => {
+    vi.mocked(api.get).mockResolvedValue({ data: { data: detail({ workflow_ids: ['wf-9'] }) } })
+    render(<WebhookRequestDetailPanel webhookId="wh-1" requestId="req-1" onClose={() => {}} />)
+
+    await screen.findByText('#wf-9')
+    expect(screen.getByRole('link', { name: t('webhooks.incoming.requests.openHistory') })).toHaveAttribute('href', '#details.runs')
+  })
+
+  // Opus round 2 crash guard: the recorder stores workflow_ids as NULL for a
+  // request that matched no workflow (401 signature-rejected, bare 200) — the
+  // panel must render the detail, simply without a workflows section.
+  it('renders a detail whose workflow_ids is null without crashing', async () => {
+    vi.mocked(api.get).mockResolvedValue({ data: { data: detail({ workflow_ids: null }) } })
+    render(<WebhookRequestDetailPanel webhookId="wh-1" requestId="req-1" onClose={() => {}} />)
+
+    await screen.findByText('{"foo":"bar"}')
+    expect(screen.queryByText(t('webhooks.incoming.requests.detail.workflows'))).toBeNull()
+  })
+})
+
 describe('WebhookRequestDetailPanel — masked headers', () => {
   it('renders a masked header value as its own chip, not the raw text', async () => {
     vi.mocked(api.get).mockResolvedValue({ data: { data: detail() } })

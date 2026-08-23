@@ -10,9 +10,9 @@ import { useTranslation } from 'react-i18next'
 import { History, Play, Clock as ClockIcon, ChevronRight, ChevronDown, Users, Clock } from 'lucide-react'
 import { useReportList } from '@/components/reports/useReportList'
 import { useDateFormat } from '@/lib/datetime'
-import { formatDuration, StatusBadge } from '@/components/reports/runFormat'
+import { formatDuration, StatusBadge, DryRunBanner } from '@/components/reports/runFormat'
 import RunDetailDrawer from '@/components/reports/RunDetailDrawer'
-import { PageTitle } from '@/components/ui/typography'
+import { PageTitle, Caption, GroupLabel, captionStyle, bodyTextStyle } from '@/components/ui/typography'
 import Button from '@/components/ui/Button'
 // RUN-HIST-EXPAND-1 (batch 4, P39): the chevron opens an inline row reusing the
 // drawer's own step viewer — no forked step-rendering, no extra fetch.
@@ -20,10 +20,13 @@ import RunStepList from '@/components/reports/RunStepList'
 import type { RunRow } from '@/types/reports'
 import Spinner from '@/components/ui/Spinner'
 
-const TH: CSSProperties = { padding: '10px 16px', textAlign: 'left', fontSize: 11, fontWeight: 600,
-  color: 'var(--text-muted)', background: 'var(--hover-bg)', borderBottom: '1px solid var(--border)',
+// Table cells need the raw style IDENTITY (captionStyle/bodyTextStyle), not the
+// <Caption>/<BodyText> components — a <th>/<td> must stay a real table cell
+// (§4 style-factory exception: layout here, identity still from the atom).
+const TH: CSSProperties = { ...captionStyle, padding: '10px 16px', textAlign: 'left', fontWeight: 600,
+  background: 'var(--hover-bg)', borderBottom: '1px solid var(--border)',
   whiteSpace: 'nowrap', userSelect: 'none' }
-const TD: CSSProperties = { padding: '12px 16px', fontSize: 13, color: 'var(--text)',
+const TD: CSSProperties = { ...bodyTextStyle, padding: '12px 16px',
   borderBottom: '1px solid var(--hover-bg)' }
 
 export default function WorkflowHistoryView({ workflowId, initialRun }: {
@@ -128,7 +131,7 @@ export default function WorkflowHistoryView({ workflowId, initialRun }: {
                     </td>
                     <td style={{ ...TD, whiteSpace: 'nowrap' }}>
                       <div style={{ fontWeight: 500 }}>{formatDate(r.started_at)}</div>
-                      <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{formatTime(r.started_at)}</div>
+                      <Caption as="div">{formatTime(r.started_at)}</Caption>
                     </td>
                     <td style={{ ...TD, fontSize: 12, color: 'var(--text-muted)' }}>
                       <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}>
@@ -164,12 +167,14 @@ export default function WorkflowHistoryView({ workflowId, initialRun }: {
                             </div>
                           ))}
                         </div>
+                        {/* WF-DRYRUN-FE-1: run-level dry-run banner (never derived from
+                            per-step data — see the run-level `dry_run` boolean contract). */}
+                        {r.dry_run && <div style={{ marginBottom: 12 }}><DryRunBanner /></div>}
                         {steps.length > 0 ? (
                           <>
-                            <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase',
-                                          letterSpacing: '0.05em', marginBottom: 8 }}>
+                            <GroupLabel style={{ marginBottom: 8 }}>
                               {t('runs.drawer.stepResults')} ({steps.length})
-                            </div>
+                            </GroupLabel>
                             <RunStepList steps={steps} />
                           </>
                         ) : (

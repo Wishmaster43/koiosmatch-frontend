@@ -346,7 +346,8 @@
       "running": "En curso",
       "pending": "En cola",
       "cancelled": "Cancelada",
-      "waiting": "En espera"
+      "waiting": "En espera",
+      "skipped": "Omitido"
     },
     "filters": {
       "status": "Estado",
@@ -373,9 +374,14 @@
       "nextAttempt": "Próximo intento a las {{time}}",
       "runId": "ID de ejecución",
       "copyId": "Haz clic para copiar el ID",
-      "processed": "Procesado"
+      "processed": "Procesado",
+      "lineage": "Origen",
+      "parentRunId": "ID de la ejecución superior"
     },
-    "openHistory": "Ver en el historial"
+    "openHistory": "Ver en el historial",
+    "dryRun": {
+      "banner": "Simulación: pasos de envío omitidos"
+    }
   },
   "messageDetail": "Detalle del mensaje"
 }

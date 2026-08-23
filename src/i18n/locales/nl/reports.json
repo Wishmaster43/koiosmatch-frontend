@@ -346,7 +346,8 @@
       "running": "Bezig",
       "pending": "In wachtrij",
       "cancelled": "Gestopt",
-      "waiting": "Wachten"
+      "waiting": "Wachten",
+      "skipped": "Overgeslagen"
     },
     "filters": {
       "status": "Status",
@@ -373,9 +374,14 @@
       "nextAttempt": "Volgende poging om {{time}}",
       "runId": "Run-ID",
       "copyId": "Klik om het ID te kopiëren",
-      "processed": "Verwerkt"
+      "processed": "Verwerkt",
+      "lineage": "Herkomst",
+      "parentRunId": "Ouder-run-ID"
     },
-    "openHistory": "Bekijk in geschiedenis"
+    "openHistory": "Bekijk in geschiedenis",
+    "dryRun": {
+      "banner": "Proefrun: verzendstappen overgeslagen"
+    }
   },
   "messageDetail": "Berichtdetail"
 }

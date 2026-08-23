@@ -346,7 +346,8 @@
       "running": "Running",
       "pending": "Queued",
       "cancelled": "Cancelled",
-      "waiting": "Waiting"
+      "waiting": "Waiting",
+      "skipped": "Skipped"
     },
     "filters": {
       "status": "Status",
@@ -373,9 +374,14 @@
       "nextAttempt": "Next attempt at {{time}}",
       "runId": "Run ID",
       "copyId": "Click to copy the ID",
-      "processed": "Processed"
+      "processed": "Processed",
+      "lineage": "Lineage",
+      "parentRunId": "Parent run ID"
     },
-    "openHistory": "View in history"
+    "openHistory": "View in history",
+    "dryRun": {
+      "banner": "Dry run: send steps skipped"
+    }
   },
   "messageDetail": "Message detail"
 }

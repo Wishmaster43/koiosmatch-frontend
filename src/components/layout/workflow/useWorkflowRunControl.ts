@@ -54,7 +54,7 @@ export function useWorkflowRunControl({ workflowId, initialRunId = null, onRunSt
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [workflowId])
 
-  const handleRun = useCallback(async () => {
+  const handleRun = useCallback(async (opts?: { dryRun?: boolean }) => {
     setRunning(true)
     setRunError(null)
     setRunConflict(false)
@@ -62,10 +62,14 @@ export function useWorkflowRunControl({ workflowId, initialRunId = null, onRunSt
       // Actually execute the SAVED workflow server-side (the engine runs the
       // steps on the queue). This button used to only animate — never ran.
       const { default: api } = await import('@/lib/api')
+      // WF-DRYRUN-FE-1: {dry_run:true} on the SAME route/port/single-flight —
+      // undefined body (a real run) is unchanged, so the existing contract test
+      // pinning `undefined` here still holds.
+      const body = opts?.dryRun ? { dry_run: true } : undefined
       // Start the queued run and keep its id so we can poll the REAL per-step status
       // (WF-R3) — replaces the old fixed 800ms fake walk. Shape: { run: { id } }.
       // 409 (already running) gets its own inline feedback — keep the generic dev toast out.
-      const res = await api.post(`/workflows/${workflowId}/run`, undefined, { quietStatuses: [409] })
+      const res = await api.post(`/workflows/${workflowId}/run`, body, { quietStatuses: [409] })
       const runId = (res.data?.run?.id ?? res.data?.data?.id ?? res.data?.id) as string | number | undefined
       if (runId != null) setActiveRunId(runId)
 

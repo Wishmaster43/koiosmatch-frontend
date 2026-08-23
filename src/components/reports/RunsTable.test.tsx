@@ -5,11 +5,12 @@
  * sortable header a real, keyboard-operable button whose aria-sort reflects
  * the current sort — asserted end-to-end through this table's own columns.
  */
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, afterEach } from 'vitest'
 import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import '@/i18n'
-import RunsTable from './RunsTable'
+import RunsTable, { getWorkflowIdFromHash } from './RunsTable'
+import { useReportList } from './useReportList'
 import type { RunRow } from '@/types/reports'
 
 const runs: RunRow[] = [
@@ -17,10 +18,13 @@ const runs: RunRow[] = [
   { id: 'r2', workflow_name: 'Herinneringsflow', status: 'failed', started_at: '2026-07-02T10:00:00Z', duration_ms: 800, candidates_count: 2 },
 ]
 
-// Data layer under test control (mirrors the other report-table tests).
+// Data layer under test control (mirrors the other report-table tests) — a spy
+// so WEBHOOK-RUN-CORRELATION-1's request-url assertions can inspect its call args.
 vi.mock('./useReportList', () => ({
-  useReportList: () => ({ rows: runs, loading: false }),
+  useReportList: vi.fn(() => ({ rows: runs, loading: false })),
 }))
+
+afterEach(() => { window.location.hash = '' })
 
 describe('RunsTable — keyboard-accessible sort headers (DataTable conversion)', () => {
   it('renders both runs through the shared DataTable', () => {
@@ -47,5 +51,35 @@ describe('RunsTable — keyboard-accessible sort headers (DataTable conversion)'
     // Ascending by workflow name: "Herinneringsflow" sorts before "Welkomstflow".
     const bodyRows = screen.getAllByRole('row').slice(1)
     expect(within(bodyRows[0]).getByText('Herinneringsflow')).toBeInTheDocument()
+  })
+})
+
+describe('getWorkflowIdFromHash — pure helper', () => {
+  it('reads workflow_id out of the hash query string', () => {
+    expect(getWorkflowIdFromHash('#details.runs?workflow_id=42')).toBe('42')
+  })
+
+  it('returns null when there is no query string', () => {
+    expect(getWorkflowIdFromHash('#details.runs')).toBeNull()
+  })
+
+  it('returns null when workflow_id is absent from the query string', () => {
+    expect(getWorkflowIdFromHash('#details.runs?view=list')).toBeNull()
+  })
+})
+
+describe('RunsTable — WEBHOOK-RUN-CORRELATION-1 workflow_id filter', () => {
+  // A WorkflowRefs link lands here as `#details.runs?workflow_id=<id>` — the
+  // request must carry that id as the server-side query param.
+  it('requests /workflow-runs?workflow_id=<id> when the hash carries a filter', () => {
+    window.location.hash = '#details.runs?workflow_id=42'
+    render(<RunsTable />)
+    expect(vi.mocked(useReportList)).toHaveBeenCalledWith('/workflow-runs?workflow_id=42')
+  })
+
+  // No filter in the hash: the plain, unfiltered endpoint (unchanged behaviour).
+  it('requests the plain /workflow-runs endpoint when the hash carries no filter', () => {
+    render(<RunsTable />)
+    expect(vi.mocked(useReportList)).toHaveBeenCalledWith('/workflow-runs')
   })
 })

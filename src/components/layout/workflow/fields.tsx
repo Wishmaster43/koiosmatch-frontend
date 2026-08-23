@@ -2,8 +2,8 @@
  * FieldInput — the workflow config-panel field dispatcher: one form control per
  * schema `field.type`. The plain inline controls (boolean/multiselect/select/
  * textarea/keyvalue/text/number/date) live here; the data-fetching + nested
- * builders (agent/faq/webhook pickers, filters, response-structure) are delegated
- * to `./fieldControls`. Extracted from WorkflowCanvasEditor.
+ * builders (agent/faq/webhook pickers, filters) are delegated to `./fieldControls`.
+ * Extracted from WorkflowCanvasEditor.
  */
 import { useId } from 'react'
 import { X } from 'lucide-react'
@@ -11,7 +11,7 @@ import { useTranslation } from 'react-i18next'
 import type { WorkflowField, EdgeFilters, WorkflowVarGroup } from '@/types/workflow'
 import {
   FaqSelectField, WebhookSelectField, LookupSelectField, WorkflowSelectField,
-  FiltersField, ResponseStructureField, type OnChange,
+  FiltersField, type OnChange,
 } from './fieldControls'
 import { TextFieldWithVars } from './VariablePicker'
 import { fieldLabel, fieldPlaceholder, optionLabel } from './moduleI18n'
@@ -51,9 +51,6 @@ export function FieldInput({ field, value, onChange, variables, config }: {
     // workflow_call's workflow_id picker (WF-RELATIONS-1): a searchable list of
     // this tenant's own workflows, fed by GET /workflows.
     return <WorkflowSelectField value={value} onChange={onChange} fieldKey={field.key} />
-  }
-  if (field.type === 'response_structure') {
-    return <ResponseStructureField value={value} onChange={onChange} fieldKey={field.key} />
   }
   if (field.type === 'whatsapp_template') {
     // Needs the full node config (not just this field's own value) to read the

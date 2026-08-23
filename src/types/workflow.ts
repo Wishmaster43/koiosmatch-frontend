@@ -21,6 +21,17 @@ export interface WorkflowStep {
 // The last-run summary shown on a workflow card.
 export interface WorkflowLastRun { time?: string; ok?: boolean; candidates?: number; error?: string; [k: string]: unknown }
 
+// One row of a workflow's parent/child tree (WF-RELATIONS-FE-1,
+// GET /workflows/{id}/relations → { parents: [...], children: [...] }).
+export interface WorkflowRelation {
+  id: string | number
+  name?: string
+  status?: string
+  runs_count?: number
+  last_run_at?: string | null
+  last_run_status?: string | null
+}
+
 // A normalized workflow (editor/UI shape).
 export interface Workflow {
   id?: string | number

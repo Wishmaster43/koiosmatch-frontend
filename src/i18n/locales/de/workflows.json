@@ -19,7 +19,13 @@
     "closeTitle": "Ohne Speichern schließen",
     "unsavedConfirm": "Sie haben ungespeicherte Änderungen. Möchten Sie wirklich schließen? Ihre Änderungen gehen dann verloren.",
     "liveRunConfirm": "Es läuft noch eine Ausführung. Sie läuft im Hintergrund weiter, wenn Sie schließen. Stoppen können Sie sie mit der Stopp-Taste. Trotzdem schließen?",
-    "nameAriaLabel": "Workflow-Name"
+    "nameAriaLabel": "Workflow-Name",
+    "tabRelations": "Beziehungen",
+    "dryRun": "Testlauf",
+    "dryRunning": "Testlauf läuft…",
+    "dryRunTitle": "Diese Workflow als Testlauf ausführen, ohne wirklich zu versenden",
+    "dryRunConfirmTitle": "Testlauf starten?",
+    "dryRunConfirmMessage": "Versandschritte (WhatsApp, E-Mail, Facebook, Webhooks und Shiftmanager-Kopplungen) werden übersprungen. Alle anderen Schritte führen wie bei einer normalen Ausführung wirklich Änderungen durch."
   },
   "fields": {
     "boolOn": "An",
@@ -1125,5 +1131,22 @@
     "fieldAvailableAgain": "Wieder-verfügbar-Datum Kandidat",
     "fieldMatchEnd": "Enddatum Match"
   },
-  "unassigned": "Nicht zugewiesen"
+  "unassigned": "Nicht zugewiesen",
+  "relations": {
+    "title": "Beziehungen",
+    "parents": "Übergeordnet",
+    "children": "Untergeordnet",
+    "noParents": "Keine übergeordneten Workflows",
+    "noChildren": "Keine untergeordneten Workflows",
+    "loading": "Beziehungen werden geladen…",
+    "loadFailed": "Beziehungen konnten nicht geladen werden",
+    "runsCount_one": "{{count}} Ausführung",
+    "runsCount_other": "{{count}} Ausführungen",
+    "lastRun": "Letzter Lauf: {{date}} {{time}}"
+  },
+  "notFound": {
+    "title": "Workflow nicht gefunden",
+    "message": "Diese Workflow existiert nicht (mehr), oder Sie haben keinen Zugriff darauf.",
+    "backToList": "Zurück zur Liste"
+  }
 }

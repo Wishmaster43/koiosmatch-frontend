@@ -346,7 +346,8 @@
       "running": "Läuft",
       "pending": "In Warteschlange",
       "cancelled": "Abgebrochen",
-      "waiting": "Wartet"
+      "waiting": "Wartet",
+      "skipped": "Übersprungen"
     },
     "filters": {
       "status": "Status",
@@ -373,9 +374,14 @@
       "nextAttempt": "Nächster Versuch um {{time}}",
       "runId": "Run-ID",
       "copyId": "Zum Kopieren der ID klicken",
-      "processed": "Verarbeitet"
+      "processed": "Verarbeitet",
+      "lineage": "Herkunft",
+      "parentRunId": "Übergeordnete Run-ID"
     },
-    "openHistory": "In Verlauf anzeigen"
+    "openHistory": "In Verlauf anzeigen",
+    "dryRun": {
+      "banner": "Testlauf: Versandschritte übersprungen"
+    }
   },
   "messageDetail": "Nachrichtendetail"
 }

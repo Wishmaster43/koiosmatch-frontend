@@ -114,6 +114,23 @@ export interface RunRow {
   error_message?: string
   step_results?: RunStep[]
   steps?: RunStep[]
+  // WF-DRYRUN-FE-1: run-level boolean (never read from context — K-116's lesson:
+  // context mutates step-to-step, this column can't). Drives the dry-run banner.
+  dry_run?: boolean
+  // WF-RELATIONS-FE-1: this run's lineage when a parent workflow started it via
+  // workflow_call — read tolerantly from either the run's own context object or
+  // promoted top-level fields (the exact read shape isn't pinned by the contract
+  // doc), root-first. Absent/empty on a root-level run (no parent) — the honest
+  // empty case, see RunLineage.
+  context?: {
+    parent_run_id?: string | number | null
+    parent_workflow_id?: string | number | null
+    call_chain?: Array<{ id?: string | number; name?: string } | string | number>
+    [key: string]: unknown
+  } | null
+  parent_run_id?: string | number | null
+  parent_workflow_id?: string | number | null
+  call_chain?: Array<{ id?: string | number; name?: string } | string | number>
   [key: string]: unknown
 }
 

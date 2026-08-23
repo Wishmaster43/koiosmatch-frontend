@@ -37,3 +37,23 @@ describe('RunStepList', () => {
     expect(screen.getByText('runs.drawer.noData')).toBeInTheDocument()
   })
 })
+
+// WF-DRYRUN-FE-1: a dry-run-skipped step (whatsapp_send etc.) reads as a
+// DISTINCT chip, never the generic StatusBadge fallback a plain unknown status
+// would get — and its "Dry-run: niet verzonden" message renders per the
+// existing generic step.message treatment.
+describe('RunStepList · WF-DRYRUN-FE-1 skipped rows', () => {
+  it('renders a skipped step from step_results with its dry-run message', () => {
+    const skipped = [
+      { label: 'WhatsApp versturen', status: 'skipped', message: 'Dry-run: niet verzonden' },
+      { label: 'Kandidaat bijwerken', status: 'success' },
+    ]
+    render(<RunStepList steps={skipped} />)
+    // No real i18next instance runs in this file (mirrors the rest of this
+    // suite) — t()'s own `defaultValue` option resolves instead of the raw key.
+    expect(screen.getByText('Skipped')).toBeInTheDocument()
+    expect(screen.getByText('Dry-run: niet verzonden')).toBeInTheDocument()
+    // The real outcome next to it still reads as a normal success badge.
+    expect(screen.getByText('success')).toBeInTheDocument()
+  })
+})

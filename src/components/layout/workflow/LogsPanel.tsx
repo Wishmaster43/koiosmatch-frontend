@@ -9,11 +9,11 @@ import { useState, useEffect } from 'react'
 import { X, List, ChevronDown, History } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import api, { unwrapList } from '@/lib/api'
-import { StatusBadge, formatDT, formatDuration } from '@/components/reports/runFormat'
+import { StatusBadge, StepStatusBadge, DryRunBanner, formatDT, formatDuration } from '@/components/reports/runFormat'
 import { CANCELLABLE, StopRunButton } from './runControl'
 import { useModuleCatalog } from './useModuleCatalog'
 import StepOutputSlice from './StepOutputSlice'
-import { SectionTitle } from '@/components/ui/typography'
+import { SectionTitle, Caption } from '@/components/ui/typography'
 import Button from '@/components/ui/Button'
 import type { RunRow, RunStep } from '@/types/reports'
 
@@ -110,7 +110,12 @@ export default function LogsPanel({ workflowId, liveRun, onClose, onOpenHistory 
           const isOpen = expanded === id
           // Prefer the enriched live-state rows (duration/summary/items); the legacy
           // step_results shape (label+status only) is a fallback for old runs.
-          const steps = (run.steps?.length ? run.steps : run.step_results) ?? []
+          // EXCEPT on a dry-run: the engine settles a BLOCKED send step as success
+          // in steps[] and writes the honest 'skipped' only to the log rows, so
+          // steps[] would badge a not-sent WhatsApp green (K-111, Opus round).
+          const steps = (run.dry_run
+            ? (run.step_results?.length ? run.step_results : run.steps)
+            : (run.steps?.length ? run.steps : run.step_results)) ?? []
           const stoppable = run.id != null && CANCELLABLE.has(String(run.status))
           return (
             <div key={id} style={{ borderBottom: '1px solid var(--border)' }}>
@@ -126,7 +131,7 @@ export default function LogsPanel({ workflowId, liveRun, onClose, onOpenHistory 
                     <div style={{ fontSize: 12.5, fontWeight: 600, color: 'var(--text)' }}>
                       {formatDT(run.started_at ?? run.created_at)}
                     </div>
-                    <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>
+                    <Caption as="div" style={{ marginTop: 2 }}>
                       {/* SYNC-PROGRESS-1: a BUSY run shows a live ticking elapsed (the 1s
                           poll re-renders this) instead of "—" until it finishes. */}
                       {/* "Verwerkt" (neutral — a shifts sync has no candidates; Danny 25-07):
@@ -141,7 +146,7 @@ export default function LogsPanel({ workflowId, liveRun, onClose, onOpenHistory 
                       {/* WF-LOG-WHO-1 (Danny 22-07): who requested it + which candidate it ran for. */}
                       {run.triggered_by ? ` · ${run.triggered_by}` : ''}
                       {run.candidate?.name ? ` · ${run.candidate.name}${run.candidate.reference_number ? ` (${run.candidate.reference_number})` : ''}` : ''}
-                    </div>
+                    </Caption>
                     {run.error_message && (
                       <div style={{ fontSize: 11, color: 'var(--color-danger-text)', marginTop: 2 }}>{run.error_message}</div>
                     )}
@@ -172,6 +177,8 @@ export default function LogsPanel({ workflowId, liveRun, onClose, onOpenHistory 
               {/* Expanded step results — timestamp + duration + the step's OWN output slice */}
               {isOpen && steps.length > 0 && (
                 <div style={{ padding: '0 16px 12px 16px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  {/* WF-DRYRUN-FE-1: run-level dry-run banner, live view included. */}
+                  {run.dry_run && <DryRunBanner />}
                   {steps.map((step, i) => {
                     const time = stepTime(step)
                     return (
@@ -182,9 +189,9 @@ export default function LogsPanel({ workflowId, liveRun, onClose, onOpenHistory 
                           </span>
                           <span style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
                             {step.duration_ms != null && (
-                              <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{formatDuration(step.duration_ms)}</span>
+                              <Caption>{formatDuration(step.duration_ms)}</Caption>
                             )}
-                            <StatusBadge status={step.status ?? (step.ok ? 'success' : 'failed')} />
+                            <StepStatusBadge status={step.status} ok={step.ok} />
                           </span>
                         </div>
                         {/* WHEN this step ran — prominent on every card (RUN-CONTROL-1). */}
@@ -202,9 +209,9 @@ export default function LogsPanel({ workflowId, liveRun, onClose, onOpenHistory 
                         {Array.isArray(step.routing) && step.routing.length > 0 && (
                           <div style={{ display: 'flex', flexDirection: 'column', gap: 2, marginTop: 6 }}>
                             {step.routing.map((r, ri) => (
-                              <div key={ri} style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+                              <Caption as="div" key={ri}>
                                 → <span style={{ fontWeight: 600, color: 'var(--text)' }}>{r.to_label ?? '—'}</span>: {r.matched ?? 0}/{r.total ?? 0}
-                              </div>
+                              </Caption>
                             ))}
                           </div>
                         )}

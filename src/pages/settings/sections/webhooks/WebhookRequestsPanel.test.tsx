@@ -84,6 +84,37 @@ describe('WebhookRequestsPanel — status semantics', () => {
   })
 })
 
+// WEBHOOK-RUN-CORRELATION-1: named workflows link into the runs view pre-filtered
+// on that workflow; older rows carrying only bare ids keep the honest fallback.
+describe('WebhookRequestsPanel — workflow references', () => {
+  it('renders a named workflow as a link into its own filtered run history', async () => {
+    mockList([row({ workflow_ids: ['wf-1'], workflows: [{ id: 'wf-1', name: 'Vacancy Reminder Flow' }] })])
+    render(<WebhookRequestsPanel webhookId="wh-1" webhookName="ATS intake" onClose={() => {}} />)
+
+    const link = await screen.findByRole('link', { name: 'Vacancy Reminder Flow' })
+    expect(link).toHaveAttribute('href', '#details.runs?workflow_id=wf-1')
+  })
+
+  it('falls back to the ids-only reference when the row carries no named workflows', async () => {
+    mockList([row({ workflow_ids: ['wf-9'], workflows: undefined })])
+    render(<WebhookRequestsPanel webhookId="wh-1" webhookName="ATS intake" onClose={() => {}} />)
+
+    await screen.findByText('#wf-9')
+    expect(screen.getByRole('link', { name: t('webhooks.incoming.requests.openHistory') })).toHaveAttribute('href', '#details.runs')
+  })
+
+  // Opus round 2: the list endpoint attaches workflows for EVERY row, with
+  // name null once the workflow was hard-erased (requests outlive workflows).
+  // A null name must fall back to the honest #id — never a nameless empty link.
+  it('renders the honest #id for a workflow whose name is null (erased workflow)', async () => {
+    mockList([row({ workflow_ids: ['wf-3'], workflows: [{ id: 'wf-3', name: null }] })])
+    render(<WebhookRequestsPanel webhookId="wh-1" webhookName="ATS intake" onClose={() => {}} />)
+
+    await screen.findByText('#wf-3')
+    expect(screen.queryByRole('link', { name: /wf-3/ })).toBeNull()
+  })
+})
+
 describe('WebhookRequestsPanel — four UI states', () => {
   it('shows the empty state when no requests exist', async () => {
     mockList([])

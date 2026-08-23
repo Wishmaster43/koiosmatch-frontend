@@ -1,8 +1,8 @@
 /**
  * Workflow field controls — the "special" config-panel inputs that fetch data or
- * build nested structures: the agent/FAQ/webhook pickers, the inline filter
- * builder and the response-structure builder. The plain inputs + the dispatcher
- * live in `fields.tsx`, which delegates the field types below to these.
+ * build nested structures: the agent/FAQ/webhook pickers and the inline filter
+ * builder. The plain inputs + the dispatcher live in `fields.tsx`, which
+ * delegates the field types below to these.
  */
 import { useState, useEffect, useId, useContext, useCallback } from 'react'
 import { Plus, X, Check, Copy } from 'lucide-react'
@@ -354,59 +354,6 @@ export function FiltersField({ field, value, onChange }: { field: WorkflowField;
       })}
       {/* HUISSTIJL-1: the ONE "+ add" affordance, app-wide (§3A). */}
       <DrawerAddButton onClick={add} label={t('fields.addCondition')} />
-    </div>
-  )
-}
-
-// ── Response structure builder ─────────────────────────────────────────────────
-
-const RS_TYPES = ['Text', 'Number', 'Boolean', 'Date', 'Array', 'Collection', 'Any']
-
-export function ResponseStructureField({ value, onChange, fieldKey }: { value?: unknown; onChange: OnChange; fieldKey: string }) {
-  const { t } = useTranslation('workflows')
-  const items = (Array.isArray(value) ? value : []) as Array<{ name?: string; type?: string }>
-  // Base id for each row's own sr-only label (repeated row — every instance
-  // needs its OWN accessible name, mirrors DocumentsTab's per-row picker).
-  const typeLabelBaseId = useId()
-
-  const add    = ()                                       => onChange(fieldKey, [...items, { name: '', type: 'Text' }])
-  const remove = (i: number)                              => onChange(fieldKey, items.filter((_, j) => j !== i))
-  const update = (i: number, k: 'name' | 'type', v: string) => onChange(fieldKey, items.map((item, j) => j === i ? { ...item, [k]: v } : item))
-
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-      {items.length > 0 && (
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 90px 22px', gap: 4, padding: '0 2px', marginBottom: 2 }}>
-          <div style={{ fontSize: 10, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>{t('fields.itemName')}</div>
-          <div style={{ fontSize: 10, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>{t('fields.typeLabel')}</div>
-          <div />
-        </div>
-      )}
-      {items.map((item, i) => (
-        <div key={i} style={{ display: 'grid', gridTemplateColumns: '1fr 90px 22px', gap: 4, alignItems: 'center' }}>
-          <input value={item.name} onChange={e => update(i, 'name', e.target.value)}
-            placeholder={t('fields.itemNamePlaceholder')} aria-label={t('fields.itemName')}
-            style={{ padding: '5px 7px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 6, outline: 'none', minWidth: 0 }}
-            onFocus={e => (e.target.style.borderColor = 'var(--color-primary)')}
-            onBlur={e  => (e.target.style.borderColor = 'var(--border)')} />
-          <span id={`${typeLabelBaseId}-${i}`} className="sr-only">{t('fields.typeLabel')}</span>
-          <CreatableSelect value={item.type} onChange={v => update(i, 'type', v)}
-            aria-labelledby={`${typeLabelBaseId}-${i}`} allowCreate={false}
-            options={RS_TYPES.map(rt => ({ value: rt, label: rt }))} menuWidth={110}
-            style={{ padding: '5px 5px', fontSize: 12 }} />
-          <button type="button" onClick={() => remove(i)} aria-label={t('fields.removeCondition')} title={t('fields.removeCondition')}
-            // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- dense inline row-remove with imperative hover swap (EntityHeader menu-row precedent); a 28px Button breaks the row height
-            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--border)', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-            onMouseEnter={e => (e.currentTarget.style.color = 'var(--color-danger)')}
-            onMouseLeave={e => (e.currentTarget.style.color = 'var(--border)')}>
-            <X size={13} />
-          </button>
-        </div>
-      ))}
-      {/* HUISSTIJL-1: the ONE "+ add" affordance, app-wide (§3A). */}
-      <div style={{ marginTop: 2 }}>
-        <DrawerAddButton onClick={add} label={t('fields.addItem')} />
-      </div>
     </div>
   )
 }

@@ -53,12 +53,12 @@ export default function WebhookRequestsPanel({ webhookId, webhookName, onClose }
     { key: 'workflow_ids', header: t('webhooks.incoming.requests.col.workflows'),
       render: r => {
         const ids = r.workflow_ids ?? []
-        if (ids.length === 0) return <Caption>{t('webhooks.incoming.requests.noWorkflows')}</Caption>
-        // Honest reference, not a deep-link: the run starts async so there is no
-        // run id on receipt, and the runs page cannot filter by workflow id yet
-        // (WEBHOOK-RUN-CORRELATION-1) — a '?open=<workflow_id>' link would promise
-        // a record that never opens (Opus F).
-        return <WorkflowRefs ids={ids} />
+        const workflows = r.workflows ?? []
+        if (ids.length === 0 && workflows.length === 0) return <Caption>{t('webhooks.incoming.requests.noWorkflows')}</Caption>
+        // Named workflows (WEBHOOK-RUN-CORRELATION-1) render as real per-workflow
+        // links; WorkflowRefs falls back to the honest ids-only reference for
+        // older rows that carry no name.
+        return <WorkflowRefs ids={ids} workflows={workflows} />
       } },
   ]
 

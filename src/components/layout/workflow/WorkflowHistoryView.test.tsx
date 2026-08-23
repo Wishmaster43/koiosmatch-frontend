@@ -94,4 +94,25 @@ describe('WorkflowHistoryView', () => {
     fireEvent.click(triggerCell)
     expect(await screen.findByText('runs.drawer.timeline')).toBeInTheDocument()
   })
+
+  // WF-DRYRUN-FE-1: the banner rides the RUN-LEVEL `dry_run` boolean — never a
+  // per-step guess — and renders ONLY when it is actually true.
+  it('shows the dry-run banner only when dry_run is true on the expanded row', async () => {
+    const dryRun = { ...run, dry_run: true, step_results: [{ label: 'WhatsApp versturen', status: 'skipped' }] }
+    vi.mocked(api.get).mockResolvedValue({ data: [dryRun] })
+    render(<WorkflowHistoryView workflowId={1} />)
+    await screen.findByText('manual')
+    fireEvent.click(screen.getByRole('button', { name: 'runs.cols.expand' }))
+    expect(await screen.findByText('runs.dryRun.banner')).toBeInTheDocument()
+  })
+
+  it('renders no dry-run banner for a normal (non-dry) run', async () => {
+    const normalRun = { ...run, step_results: [{ label: 'Sync candidates', status: 'success' }] }
+    vi.mocked(api.get).mockResolvedValue({ data: [normalRun] })
+    render(<WorkflowHistoryView workflowId={1} />)
+    await screen.findByText('manual')
+    fireEvent.click(screen.getByRole('button', { name: 'runs.cols.expand' }))
+    await screen.findByText('Sync candidates')
+    expect(screen.queryByText('runs.dryRun.banner')).not.toBeInTheDocument()
+  })
 })

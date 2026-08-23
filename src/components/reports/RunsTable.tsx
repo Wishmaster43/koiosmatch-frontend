@@ -19,12 +19,30 @@ import type { Column } from '../ui/DataTable'
 import { useReportList } from './useReportList'
 import { formatDuration, StatusBadge } from './runFormat'
 import RunDetailDrawer from './RunDetailDrawer'
+import { Caption, bodyTextStyle } from '@/components/ui/typography'
 import type { RunRow, ReportFilterGroup } from '@/types/reports'
+
+// Pure: read the `workflow_id` param out of a hash string (no window access —
+// testable, mirrors useReportSwitch's getViewFromHash). WEBHOOK-RUN-CORRELATION-1:
+// a WorkflowRefs link lands here as `#details.runs?workflow_id=<id>`.
+// eslint-disable-next-line react-refresh/only-export-components -- a pure helper shared for direct unit testing (mirrors EntityLink's buildEntityDeepLink); HMR-nicety warning only
+export function getWorkflowIdFromHash(hash: string): string | null {
+  const raw = hash.replace(/^#/, '')
+  const qIdx = raw.indexOf('?')
+  if (qIdx === -1) return null
+  return new URLSearchParams(raw.slice(qIdx + 1)).get('workflow_id')
+}
 
 export default function RunsTable() {
   const { t } = useTranslation('reports')
+  // WEBHOOK-RUN-CORRELATION-1: a workflow_id arriving via this page's own hash
+  // (e.g. a WorkflowRefs link) narrows the request to that workflow's runs. Read
+  // once at mount — a fresh navigation here always remounts this table (a page
+  // switch, never an in-place hash edit), so a later effect isn't needed.
+  const [workflowIdFilter] = useState(() => getWorkflowIdFromHash(window.location.hash))
+  const runsUrl = workflowIdFilter ? `/workflow-runs?workflow_id=${encodeURIComponent(workflowIdFilter)}` : '/workflow-runs'
   // Data (fetch) lives in the shared hook (§3); this component only derives + renders.
-  const { rows, loading } = useReportList<RunRow>('/workflow-runs')
+  const { rows, loading } = useReportList<RunRow>(runsUrl)
   // App-wide active locale (§5) — never a hardcoded 'nl-NL' toLocale*String call.
   const { formatDate, formatTime } = useDateFormat()
   const [search,  setSearch]  = useState('')
@@ -70,7 +88,7 @@ export default function RunsTable() {
       render: r => (
         <div>
           <div style={{ fontWeight: 500, color: 'var(--text)' }}>{formatDate(r.started_at)}</div>
-          <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{formatTime(r.started_at)}</div>
+          <Caption as="div">{formatTime(r.started_at)}</Caption>
         </div>
       ),
     },
@@ -152,10 +170,13 @@ export default function RunsTable() {
         <div className="relative">
           <Search size={14} style={{ position: 'absolute', left: 10, top: '50%',
                                      transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+          {/* bodyTextStyle spread (not a hand-picked fontSize/color pair): a native
+              <input> can't wrap the BodyText atom, so its typography rides the same
+              raw identity via spread — see typography.tsx's own style-object note. */}
           <input value={search} onChange={e => setSearch(e.target.value)}
             placeholder={t('runs.search')} aria-label={t('runs.search')}
-            style={{ height: 34, width: 260, paddingLeft: 32, paddingRight: 12, fontSize: 13,
-                     border: '1px solid var(--border)', borderRadius: 8, outline: 'none', color: 'var(--text)' }} />
+            style={{ ...bodyTextStyle, height: 34, width: 260, paddingLeft: 32, paddingRight: 12,
+                     border: '1px solid var(--border)', borderRadius: 8, outline: 'none' }} />
         </div>
       </div>
 

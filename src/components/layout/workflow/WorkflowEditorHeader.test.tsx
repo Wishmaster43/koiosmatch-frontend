@@ -34,6 +34,7 @@ const baseProps = {
   onStopped: vi.fn(),
   running: false,
   onRun: vi.fn(),
+  onRunDryRun: vi.fn(),
   saved: false,
   onSave: vi.fn(),
   onSaveClose: vi.fn(),

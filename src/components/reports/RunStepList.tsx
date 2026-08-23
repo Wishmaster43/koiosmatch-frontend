@@ -7,11 +7,12 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ChevronRight, ChevronDown, Zap, Clock } from 'lucide-react'
-import { formatDuration, StatusBadge } from './runFormat'
+import { formatDuration, StepStatusBadge } from './runFormat'
 // HIST-DETAIL-1 (Danny 24-07 "je kan niet zien welke kandidaten"): the history
 // drawer reuses the Logs panel's Make-style output table — one implementation.
 import StepOutputSlice from '@/components/layout/workflow/StepOutputSlice'
 import { useModuleCatalog } from '@/components/layout/workflow/useModuleCatalog'
+import { Caption, BodyText } from '@/components/ui/typography'
 import type { RunStep } from '@/types/reports'
 
 // Pretty-print a data bundle as JSON, or null when there is nothing to show.
@@ -33,7 +34,7 @@ function BundleBlock({ label, value }: { label: string; value: unknown }) {
         {label}
       </div>
       {text == null
-        ? <div style={{ fontSize: 11, color: 'var(--text-muted)', fontStyle: 'italic' }}>{t('runs.drawer.noData')}</div>
+        ? <Caption as="div" style={{ fontStyle: 'italic' }}>{t('runs.drawer.noData')}</Caption>
         // eslint-disable-next-line no-restricted-syntax -- DATA: intentional fixed dark terminal-style output block (matches the config-panel execution output styling per the file comment above), not a themeable UI colour
         : <pre style={{ fontSize: 11, lineHeight: 1.6, color: '#E2E8F0', background: '#1E293B', borderRadius: 8,
                         padding: 10, overflowX: 'auto', whiteSpace: 'pre-wrap', wordBreak: 'break-word', margin: 0 }}>
@@ -64,27 +65,27 @@ function StepCard({ step, index, catalog }: { step: RunStep; index: number; cata
         {hasIO
           ? (open ? <ChevronDown size={13} color="var(--text-muted)" /> : <ChevronRight size={13} color="var(--text-muted)" />)
           : <span style={{ width: 13, flexShrink: 0 }} />}
-        <span style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)', flex: 1, minWidth: 0,
+        <BodyText as="span" style={{ fontWeight: 500, flex: 1, minWidth: 0,
                        overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           {title}
-        </span>
+        </BodyText>
         {/* Per-step meta: operations + duration */}
         {step.operations != null && (
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, fontSize: 11, color: 'var(--text-muted)' }}>
+          <Caption style={{ display: 'inline-flex', alignItems: 'center', gap: 3 }}>
             <Zap size={10} />{step.operations}
-          </span>
+          </Caption>
         )}
         {step.duration_ms != null && (
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, fontSize: 11, color: 'var(--text-muted)' }}>
+          <Caption style={{ display: 'inline-flex', alignItems: 'center', gap: 3 }}>
             <Clock size={10} />{formatDuration(step.duration_ms)}
-          </span>
+          </Caption>
         )}
-        <StatusBadge status={step.status ?? (step.ok ? 'success' : 'failed')} />
+        <StepStatusBadge status={step.status} ok={step.ok} />
       </div>
 
       {/* Message (always visible when present) */}
       {step.message && (
-        <div style={{ fontSize: 11, color: 'var(--text-muted)', padding: '0 12px 10px 33px' }}>{step.message}</div>
+        <Caption as="div" style={{ padding: '0 12px 10px 33px' }}>{step.message}</Caption>
       )}
 
       {/* HIST-DETAIL-1: the one-line outcome ("466 gesynct") always visible. */}

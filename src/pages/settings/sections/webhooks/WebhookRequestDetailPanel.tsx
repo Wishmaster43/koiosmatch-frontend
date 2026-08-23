@@ -121,14 +121,13 @@ export default function WebhookRequestDetailPanel({ webhookId, requestId, onClos
             <Caption>{t('webhooks.incoming.requests.detail.receivedAt')}: {formatDateTime(detail.created_at)}</Caption>
           </div>
 
-          {/* Matched workflows — honest reference (WorkflowRefs): no run_id exists
-              yet on receipt (the run starts async), so the ids render as text with
-              ONE link to the run history in general; the received-at timestamp
-              above is the user's correlation key until WEBHOOK-RUN-CORRELATION-1. */}
-          {detail.workflow_ids.length > 0 && (
+          {/* Matched workflows (WorkflowRefs): WEBHOOK-RUN-CORRELATION-1 named
+              workflows link straight to their own filtered run history; older
+              rows without names fall back to the honest ids-only reference. */}
+          {((detail.workflow_ids ?? []).length > 0 || (detail.workflows?.length ?? 0) > 0) && (
             <div style={{ marginBottom: 16 }}>
               <GroupLabel style={{ marginBottom: 6 }}>{t('webhooks.incoming.requests.detail.workflows')}</GroupLabel>
-              <WorkflowRefs ids={detail.workflow_ids} />
+              <WorkflowRefs ids={detail.workflow_ids ?? []} workflows={detail.workflows} />
             </div>
           )}
 

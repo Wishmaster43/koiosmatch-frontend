@@ -58,7 +58,13 @@
     "closeTitle": "Sluiten zonder opslaan",
     "unsavedConfirm": "Je hebt niet-opgeslagen wijzigingen. Weet je zeker dat je wilt sluiten? Je wijzigingen gaan dan verloren.",
     "liveRunConfirm": "Er loopt nog een uitvoering. Die loopt op de achtergrond gewoon door als je sluit. Stoppen kan met de Stoppen-knop. Toch sluiten?",
-    "nameAriaLabel": "Naam workflow"
+    "nameAriaLabel": "Naam workflow",
+    "tabRelations": "Relaties",
+    "dryRun": "Proefdraaien",
+    "dryRunning": "Proefrun bezig…",
+    "dryRunTitle": "Draai deze workflow proef, zonder echt te verzenden",
+    "dryRunConfirmTitle": "Proefdraaien?",
+    "dryRunConfirmMessage": "Verzendstappen (WhatsApp, e-mail, Facebook, webhooks en Shiftmanager-koppelingen) worden overgeslagen. Alle andere stappen voeren écht wijzigingen door, net als bij een normale uitvoering."
   },
   "fields": {
     "boolOn": "Aan",
@@ -1125,5 +1131,22 @@
     "fieldAvailableAgain": "Weer-beschikbaar-datum kandidaat",
     "fieldMatchEnd": "Einddatum match"
   },
-  "unassigned": "Niet toegewezen"
+  "unassigned": "Niet toegewezen",
+  "relations": {
+    "title": "Relaties",
+    "parents": "Ouders",
+    "children": "Kinderen",
+    "noParents": "Geen bovenliggende workflows",
+    "noChildren": "Geen onderliggende workflows",
+    "loading": "Relaties ophalen…",
+    "loadFailed": "Relaties laden mislukt",
+    "runsCount_one": "{{count}} uitvoering",
+    "runsCount_other": "{{count}} uitvoeringen",
+    "lastRun": "Laatste run: {{date}} {{time}}"
+  },
+  "notFound": {
+    "title": "Workflow niet gevonden",
+    "message": "Deze workflow bestaat niet (meer), of je hebt er geen toegang toe.",
+    "backToList": "Terug naar de lijst"
+  }
 }

@@ -73,4 +73,29 @@ describe('EntityChangelog', () => {
     await waitFor(() => expect(api.get).toHaveBeenCalledWith('/activity-log',
       expect.objectContaining({ params: { log_name: 'settings' } })))
   })
+
+  // CHANGELOG-ACTOR-LABEL: a Koios-performed action carries actor_label
+  // ("<name>-KoiosAI") next to causer_name — it must win over the human name.
+  // ACTORLABEL-ENDPOINT-1 shipped (CMBE, 23-08): /activity-log's formatEntry
+  // now emits the field too, so this fixture models the real envelope.
+  it('renders actor_label instead of causer_name when both are present', async () => {
+    vi.mocked(api.get).mockResolvedValue({
+      data: [{
+        id: 1, description: 'updated', causer_name: 'Jane', actor_label: 'Vacature Flow-KoiosAI',
+        created_at: '2026-08-01T10:00:00Z',
+      }],
+    })
+    render(<EntityChangelog subjectType="Location" subjectId="loc-1" />)
+    expect(await screen.findByText(/Vacature Flow-KoiosAI/)).toBeInTheDocument()
+    expect(screen.queryByText(/Jane/)).not.toBeInTheDocument()
+  })
+
+  // Row without actor_label falls back to causer_name, unaffected by the new field.
+  it('falls back to causer_name when actor_label is absent', async () => {
+    vi.mocked(api.get).mockResolvedValue({
+      data: [{ id: 1, description: 'updated', causer_name: 'Jane', created_at: '2026-08-01T10:00:00Z' }],
+    })
+    render(<EntityChangelog subjectType="Location" subjectId="loc-1" />)
+    expect(await screen.findByText(/Jane/)).toBeInTheDocument()
+  })
 })

@@ -9,10 +9,11 @@ import api from '@/lib/api'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { useTranslation } from 'react-i18next'
 import { Zap, Clock, Users, X, AlertTriangle } from 'lucide-react'
-import { formatDT, formatDuration, StatusBadge } from './runFormat'
+import { formatDT, formatDuration, StatusBadge, DryRunBanner } from './runFormat'
 import RunStepList from './RunStepList'
+import RunLineage from './RunLineage'
 import { StopRunButton, CANCELLABLE } from '@/components/layout/workflow/runControl'
-import { PageTitle } from '@/components/ui/typography'
+import { PageTitle, Caption, GroupLabel } from '@/components/ui/typography'
 import type { RunRow } from '@/types/reports'
 
 export default function RunDetailDrawer({ run, onClose, zIndex = 50 }: {
@@ -124,7 +125,7 @@ export default function RunDetailDrawer({ run, onClose, zIndex = 50 }: {
                 <b.Icon size={12} color="var(--text-muted)" />
                 <span style={{ fontSize: 18, fontWeight: 700, color: 'var(--text)' }}>{b.value}</span>
               </div>
-              <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 1 }}>{b.label}</div>
+              <Caption as="div" style={{ marginTop: 1 }}>{b.label}</Caption>
             </div>
           ))}
         </div>
@@ -132,11 +133,14 @@ export default function RunDetailDrawer({ run, onClose, zIndex = 50 }: {
         {/* Body */}
         <div style={{ flex: 1, overflowY: 'auto', padding: '16px 20px' }}>
 
+          {/* WF-DRYRUN-FE-1: dry-run banner — only when the RUN-LEVEL flag says so
+              (never derived from context, which mutates step-to-step). */}
+          {shown.dry_run && <div style={{ marginBottom: 16 }}><DryRunBanner /></div>}
+
           {/* Timeline */}
-          <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase',
-                        letterSpacing: '0.05em', marginBottom: 10 }}>
+          <GroupLabel style={{ marginBottom: 10 }}>
             {t('runs.drawer.timeline')}
-          </div>
+          </GroupLabel>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginBottom: 20 }}>
             {[
               { label: t('runs.drawer.started'),   value: formatDT(shown.started_at  ?? shown.created_at) },
@@ -172,13 +176,16 @@ export default function RunDetailDrawer({ run, onClose, zIndex = 50 }: {
             ))}
           </div>
 
+          {/* WF-RELATIONS-FE-1: the call-chain lineage — renders nothing for a
+              root-level run (no parent), the honest empty case. */}
+          <RunLineage run={shown} />
+
           {/* Step results with expandable INPUT/OUTPUT */}
           {steps.length > 0 && (
             <>
-              <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase',
-                            letterSpacing: '0.05em', marginBottom: 10 }}>
+              <GroupLabel style={{ marginBottom: 10 }}>
                 {t('runs.drawer.stepResults')} ({steps.length})
-              </div>
+              </GroupLabel>
               <div style={{ marginBottom: 20 }}>
                 <RunStepList steps={steps} />
               </div>
