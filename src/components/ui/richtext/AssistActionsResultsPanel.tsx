@@ -9,10 +9,9 @@
  * item's `run_id` — the shared RunDetailDrawer (fetched fresh; the execute
  * response only carries the id, not the full run row the drawer needs).
  */
-import { useState } from 'react'
-import type { CSSProperties } from 'react'
+import { useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Play, FileText, X } from 'lucide-react'
+import { Play, X } from 'lucide-react'
 import RunDetailDrawer from '@/components/reports/RunDetailDrawer'
 import { Z } from '@/lib/zIndexScale'
 import { fetchWorkflowRun } from './assistActionsExecuteApi'
@@ -22,12 +21,11 @@ import AssistActionItemCard from './AssistActionItemCard'
 import { ACTION_TYPE_LABEL_NL } from './richTextAssistApi'
 import type { RichTextAssistActionItem } from './richTextAssistApi'
 import type { RunRow } from '@/types/reports'
+import { humanizeIsoDates } from '@/lib/localDate'
 import Spinner from '../Spinner'
+import Button from '../Button'
+import { Caption } from '../typography'
 
-const primaryBtn: CSSProperties = { display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 600,
-  padding: '5px 11px', borderRadius: 7, cursor: 'pointer', background: 'var(--color-primary)', color: 'var(--color-on-accent)', border: 'none' }
-const ghostBtn: CSSProperties = { display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 500,
-  padding: '5px 11px', borderRadius: 7, cursor: 'pointer', background: 'none', color: 'var(--text-muted)', border: '1px solid var(--border)' }
 
 interface AssistActionsResultsPanelProps {
   // The suggested items from the assist 'actions' result.
@@ -45,6 +43,8 @@ interface AssistActionsResultsPanelProps {
 export default function AssistActionsResultsPanel({ items, source, onApplyAsText, onDiscard }: AssistActionsResultsPanelProps) {
   const { t } = useTranslation('common')
   const exec = useAssistActionsExecute(source)
+  // Guards the ONE-time text append (idempotent across re-clicks/re-renders).
+  const appliedRef = useRef(false)
   // The run being inspected (fetched fresh from its id) — null = drawer closed.
   const [viewingRun, setViewingRun] = useState<RunRow | null>(null)
   const [runLoading, setRunLoading] = useState(false)
@@ -74,7 +74,7 @@ export default function AssistActionsResultsPanel({ items, source, onApplyAsText
             <li key={i}>
               <strong>{it.title}</strong>{' '}
               <span style={{ color: 'var(--text-muted)' }}>
-                ({t(`notesAssist.actionTypes.${it.type}`, { defaultValue: ACTION_TYPE_LABEL_NL[it.type] })}{it.due_date ? ` · ${it.due_date}` : ''})
+                ({t(`notesAssist.actionTypes.${it.type}`, { defaultValue: ACTION_TYPE_LABEL_NL[it.type] })}{it.due_date ? ` · ${humanizeIsoDates(it.due_date)}` : ''})
               </span>
             </li>
           ))}
@@ -83,16 +83,22 @@ export default function AssistActionsResultsPanel({ items, source, onApplyAsText
           <div style={{ fontSize: 11, color: 'var(--color-danger-text)' }}>{exec.errorMessage}</div>
         )}
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-          <button type="button" onClick={() => exec.preview(items)} disabled={exec.status === 'loading'} style={{ ...primaryBtn, opacity: exec.status === 'loading' ? 0.7 : 1 }}>
+          {/* ONE button (Danny 23-08 punt 3: "toevoegen aan tekst en uitvoeren
+              moet samen een knop zijn"): starting the wizard ALSO appends the
+              list into the field — EXACTLY once, ref-guarded, so a double click
+              can never stack the list into the text again (Danny: "6 keer op de
+              knop en alles komt 6 keer in de tekst — moet niet kunnen"). */}
+          <Button variant="primary" size="sm" disabled={exec.status === 'loading'}
+            onClick={() => {
+              if (!appliedRef.current) { appliedRef.current = true; onApplyAsText() }
+              exec.preview(items)
+            }}>
             {exec.status === 'loading' ? <Spinner size={13} /> : <Play size={13} />}
             {t('notesAssist.execute.run', { defaultValue: 'Uitvoeren' })}
-          </button>
-          <button type="button" onClick={onApplyAsText} style={ghostBtn}>
-            <FileText size={13} /> {t('notesAssist.execute.applyAsText', { defaultValue: 'Als tekst toevoegen' })}
-          </button>
-          <button type="button" onClick={onDiscard} style={ghostBtn}>
+          </Button>
+          <Button variant="secondary" size="sm" onClick={onDiscard}>
             <X size={13} /> {t('notesAssist.discard', { defaultValue: 'Verwerpen' })}
-          </button>
+          </Button>
         </div>
       </div>
     )
@@ -106,11 +112,11 @@ export default function AssistActionsResultsPanel({ items, source, onApplyAsText
           onConfirm={() => exec.confirm(i)}
           onViewRun={it.status === 'executed' && it.run_id ? () => viewRun(it.run_id as string) : undefined} />
       ))}
-      {runLoading && <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('notesAssist.execute.loadingRun', { defaultValue: 'Run laden…' })}</div>}
+      {runLoading && <Caption as="div">{t('notesAssist.execute.loadingRun', { defaultValue: 'Run laden…' })}</Caption>}
       <div>
-        <button type="button" onClick={exec.reset} style={ghostBtn}>
+        <Button variant="secondary" size="sm" onClick={exec.reset}>
           <X size={13} /> {t('notesAssist.execute.done', { defaultValue: 'Klaar' })}
-        </button>
+        </Button>
       </div>
       {/* HUISSTIJL-1: RunDetailDrawer (src/components/reports, out of scope) types
           `zIndex?: number` — Z.confirm can't become a CSS var string without touching

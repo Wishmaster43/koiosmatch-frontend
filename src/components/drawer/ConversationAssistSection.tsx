@@ -12,6 +12,9 @@
  * is mirrored here rather than shared/forked.
  */
 import { useTranslation } from 'react-i18next'
+import { humanizeIsoDates } from '@/lib/localDate'
+import AssistTextPreview from '@/components/ui/richtext/AssistTextPreview'
+import { Caption } from '@/components/ui/typography'
 import { AlignLeft, ListChecks, Check, X } from 'lucide-react'
 import KoiosAiMark from '@/components/ui/KoiosAiMark'
 import Spinner from '@/components/ui/Spinner'
@@ -74,9 +77,9 @@ export default function ConversationAssistSection({ conversationId, hasMessages,
       </div>
       {/* Honest, VISIBLE reason the buttons are disabled — never a hover-only title (§3). */}
       {!hasMessages && (
-        <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 6 }}>
+        <Caption as="div" style={{ marginBottom: 6 }}>
           {t('conversations.assist.needsMessages', { defaultValue: 'Dit gesprek heeft nog geen berichten' })}
-        </div>
+        </Caption>
       )}
 
       {/* Failure — the server's own message (budget/unavailable read calm via
@@ -92,8 +95,12 @@ export default function ConversationAssistSection({ conversationId, hasMessages,
         <div style={{ border: '1px solid var(--border)', borderRadius: 8, padding: '8px 10px', background: 'var(--surface)', display: 'flex', flexDirection: 'column', gap: 8 }}>
           {result.kind === 'text' ? (
             // Plain prose preview (never dangerouslySetInnerHTML — the model's
-            // reply is rendered as TEXT content, §7).
-            <div style={{ whiteSpace: 'pre-wrap', fontSize: 12, color: 'var(--text)', lineHeight: 1.5, maxHeight: 140, overflow: 'auto' }}>{result.text}</div>
+            // reply is rendered as TEXT content, §7). No `compareWith` here
+            // (ASSIST-COMPARE-1, Danny 23-08): a conversation summary is not
+            // a REWRITE of existing text — there is no "old version" of the
+            // draft to diff against — so this call site is deliberately
+            // excluded from the old-vs-new comparison view.
+            <AssistTextPreview text={result.text} />
           ) : result.items.length > 0 ? (
             // Actions with items: a compact review list — title + type + due date.
             <ul style={{ margin: 0, paddingLeft: 16, display: 'flex', flexDirection: 'column', gap: 4 }}>
@@ -103,7 +110,7 @@ export default function ConversationAssistSection({ conversationId, hasMessages,
                   {' '}
                   <span style={{ color: 'var(--text-muted)' }}>
                     ({t(`conversations.assist.actionTypes.${it.type}`, { defaultValue: ACTION_TYPE_LABEL_NL[it.type] })}
-                    {it.due_date ? ` · ${it.due_date}` : ''})
+                    {it.due_date ? ` · ${humanizeIsoDates(it.due_date)}` : ''})
                   </span>
                 </li>
               ))}

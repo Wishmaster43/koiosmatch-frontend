@@ -198,6 +198,11 @@
     "offline": "Nicht verbunden",
     "offlineConnect": "Koios ist nicht verbunden. Klicken Sie, um zu verbinden.",
     "contextPending": "Dieser Datensatz kann noch nicht als KI-Kontext verknüpft werden. Nur zur Referenz angeheftet.",
+    "contextRecordFallback": "{{entity}} #{{id}}",
+    "selection": {
+      "chip": "{{count}} {{entity}} ausgewählt",
+      "moreCount": "+{{count}} weitere"
+    },
     "radar": {
       "title": "Koios-Empfehlungen",
       "empty": "Gerade braucht nichts Ihre Aufmerksamkeit. Fragen Sie mich gern etwas."
@@ -208,7 +213,18 @@
       "departments": "Abteilungen",
       "contacts": "Kontakte",
       "total": "gesamt",
-      "searchUnsupported": "Livesuche ist für diese Kategorie noch nicht verfügbar."
+      "searchError": "Diese Kategorie konnte nicht geladen werden.",
+      "searchUnsupported": "Livesuche ist für diese Kategorie noch nicht verfügbar.",
+      "singular": {
+        "candidate": "Kandidat",
+        "vacancy": "Stelle",
+        "customer": "Kunde",
+        "application": "Bewerbung",
+        "match": "Match",
+        "opportunity": "Chance",
+        "task": "Aufgabe",
+        "outreach_campaign": "Anrufliste"
+      }
     },
     "pendingAction": {
       "owner": "Eigentümer: {{name}}",
@@ -403,7 +419,14 @@
       "wizardHint": "Jede Aktion zuerst bestätigen",
       "autoHint": "Aktionen sofort ausführen (Nachrichten warten weiterhin auf Bestätigung, sofern nicht im Profil aktiviert)"
     },
-    "generate": "Mit Koios generieren"
+    "generate": "Mit Koios generieren",
+    "showAll": "Alles anzeigen",
+    "showLess": "Weniger anzeigen",
+    "viewNew": "Neu",
+    "viewCompare": "Vergleichen",
+    "diffAdded": "Hinzugefügt",
+    "diffRemoved": "Entfernt",
+    "viewLabel": "Ansicht"
   },
   "ai": {
     "title": "Koios AI empfiehlt",

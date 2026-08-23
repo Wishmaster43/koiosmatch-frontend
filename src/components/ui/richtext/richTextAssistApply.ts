@@ -12,6 +12,7 @@
  * untrusted input.
  */
 import type { RichTextAssistActionItem, RichTextAssistMode, RichTextAssistResult } from './richTextAssistApi'
+import { humanizeIsoDates } from '@/lib/localDate'
 
 // Escape the handful of characters that would otherwise be parsed as markup.
 export function escapeHtml(s: string): string {
@@ -30,10 +31,25 @@ export function hasPlainText(html: string): boolean {
   return html.replace(/<[^>]*>/g, '').trim().length > 0
 }
 
+// Editor HTML → comparable plain text: strip tags AND decode the entities our
+// own escapeHtml wrote back in ('&' last, or '&amp;lt;' would double-decode).
+// The ONE strip both assist hosts use for `compareWith` — a bare tag-strip left
+// '&amp;' in the old text and the diff painted a false removed/added pair on
+// every ampersand (Opus round, measured on "Zorg & Welzijn").
+export function toPlainText(html: string): string {
+  return html.replace(/<[^>]*>/g, '')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&lt;/g, '<').replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"').replace(/&#0?39;/g, "'")
+    .replace(/&amp;/g, '&')
+    .trim()
+}
+
 // Action items → a bullet list: title (bold) + type/due-date meta, one <li> each.
 function actionsToHtml(items: RichTextAssistActionItem[], typeLabel: (type: string) => string): string {
   const rows = items.map(it => {
-    const meta = [typeLabel(it.type), it.due_date].filter(Boolean).join(' · ')
+    // DATUM-1: a due date must never reach the note as raw ISO — humanize to DD-MM-YYYY.
+    const meta = [typeLabel(it.type), humanizeIsoDates(it.due_date)].filter(Boolean).join(' · ')
     return `<li><strong>${escapeHtml(it.title)}</strong>${meta ? ` (${escapeHtml(meta)})` : ''}</li>`
   }).join('')
   return `<ul>${rows}</ul>`

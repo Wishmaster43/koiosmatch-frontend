@@ -198,6 +198,11 @@
     "offline": "Not connected",
     "offlineConnect": "Koios is not connected. Click to connect.",
     "contextPending": "This record can't be linked as AI context yet. Pinned for reference only.",
+    "contextRecordFallback": "{{entity}} #{{id}}",
+    "selection": {
+      "chip": "{{count}} {{entity}} selected",
+      "moreCount": "+{{count}} more"
+    },
     "radar": {
       "title": "Koios Advice",
       "empty": "Nothing needs your attention right now. Feel free to ask me anything."
@@ -208,7 +213,18 @@
       "departments": "Departments",
       "contacts": "Contacts",
       "total": "total",
-      "searchUnsupported": "Live search isn't available for this category yet."
+      "searchError": "Couldn't load this category.",
+      "searchUnsupported": "Live search isn't available for this category yet.",
+      "singular": {
+        "candidate": "Candidate",
+        "vacancy": "Vacancy",
+        "customer": "Customer",
+        "application": "Application",
+        "match": "Match",
+        "opportunity": "Opportunity",
+        "task": "Task",
+        "outreach_campaign": "Call list"
+      }
     },
     "pendingAction": {
       "owner": "owner: {{name}}",
@@ -403,7 +419,14 @@
       "wizardHint": "Confirm every action first",
       "autoHint": "Run actions immediately (messages still wait for confirmation unless enabled in your profile)"
     },
-    "generate": "Generate with Koios"
+    "generate": "Generate with Koios",
+    "showAll": "Show all",
+    "showLess": "Show less",
+    "viewNew": "New",
+    "viewCompare": "Compare",
+    "diffAdded": "Added",
+    "diffRemoved": "Removed",
+    "viewLabel": "View"
   },
   "ai": {
     "title": "Koios AI advises",

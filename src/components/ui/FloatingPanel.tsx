@@ -62,9 +62,13 @@ export interface FloatingPanelProps {
    * (the point of a draggable reference window). Default true = the classic modal.
    */
   overlay?: boolean
+  // Default true (house modal semantics). Set false for a panel holding UNSAVED
+  // WORK (note composer): a stray click next to the window must never discard
+  // what the user typed/dictated (Danny 23-08: "ernaast klikken en alles weg").
+  closeOnBackdrop?: boolean
 }
 
-function Panel({ onClose, ariaLabel, title, header, children, width, maxWidth, persistKey, resizable, zIndex, bodyStyle, hideClose, scrollBody = true, onPopOut, overlay = true }: Omit<FloatingPanelProps, 'open'>) {
+function Panel({ onClose, ariaLabel, title, header, children, width, maxWidth, persistKey, resizable, zIndex, bodyStyle, hideClose, scrollBody = true, onPopOut, overlay = true, closeOnBackdrop = true }: Omit<FloatingPanelProps, 'open'>) {
   const { t } = useTranslation('common')
   const panelTrapRef = useFocusTrap<HTMLDivElement>(onClose)
   const { panelRef, placement, dragging, onDragPointerDown, onResizePointerDown, onDragHandleDoubleClick } = useDraggablePanel(persistKey, resizable !== false)
@@ -99,7 +103,7 @@ function Panel({ onClose, ariaLabel, title, header, children, width, maxWidth, p
       // Modeless: no scrim and clicks fall through to the page behind it.
       background: overlay ? 'rgba(0,0,0,0.45)' : 'none',
       pointerEvents: overlay ? undefined : 'none' }}
-      onMouseDown={e => { if (overlay && e.target === e.currentTarget) onClose() }}>
+      onMouseDown={e => { if (overlay && closeOnBackdrop && e.target === e.currentTarget) onClose() }}>
       <div
         // Two refs on one node: the focus trap + the drag geometry. The merged
         // callback MUST be render-stable (useCallback []): an inline function is a

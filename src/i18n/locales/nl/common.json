@@ -198,6 +198,11 @@
     "offline": "Niet gekoppeld",
     "offlineConnect": "Koios is niet gekoppeld. Klik om te koppelen.",
     "contextPending": "Dit record kan nog niet als AI-context worden gekoppeld. Alleen ter referentie vastgepind.",
+    "contextRecordFallback": "{{entity}} #{{id}}",
+    "selection": {
+      "chip": "{{count}} {{entity}} geselecteerd",
+      "moreCount": "+{{count}} meer"
+    },
     "radar": {
       "title": "Koios Advies",
       "empty": "Niets dat nu je aandacht vraagt. Vraag me gerust iets."
@@ -208,7 +213,18 @@
       "departments": "Afdelingen",
       "contacts": "Contactpersonen",
       "total": "totaal",
-      "searchUnsupported": "Live zoeken is voor deze categorie nog niet beschikbaar."
+      "searchError": "Deze categorie kon niet worden geladen.",
+      "searchUnsupported": "Live zoeken is voor deze categorie nog niet beschikbaar.",
+      "singular": {
+        "candidate": "Kandidaat",
+        "vacancy": "Vacature",
+        "customer": "Klant",
+        "application": "Sollicitatie",
+        "match": "Match",
+        "opportunity": "Kans",
+        "task": "Taak",
+        "outreach_campaign": "Bellijst"
+      }
     },
     "pendingAction": {
       "owner": "eigenaar: {{name}}",
@@ -403,7 +419,14 @@
       "wizardHint": "Elke actie eerst bevestigen",
       "autoHint": "Acties direct uitvoeren (berichten blijven wachten op bevestiging tenzij aangezet in je profiel)"
     },
-    "generate": "Genereer met Koios"
+    "generate": "Genereer met Koios",
+    "showAll": "Toon alles",
+    "showLess": "Toon minder",
+    "viewNew": "Nieuw",
+    "viewCompare": "Vergelijk",
+    "diffAdded": "Toegevoegd",
+    "diffRemoved": "Verwijderd",
+    "viewLabel": "Weergave"
   },
   "ai": {
     "title": "Koios AI adviseert",

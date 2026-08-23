@@ -83,9 +83,10 @@ import { Wand2, AlignLeft, ListChecks, Sparkles, Check, X } from 'lucide-react'
 import KoiosAiMark from './KoiosAiMark'
 import CalloutBox from './CalloutBox'
 import Button from './Button'
+import AssistTextPreview from '@/components/ui/richtext/AssistTextPreview'
 import KoiosVoiceButton from '@/components/layout/koios/KoiosVoiceButton'
 import { useRichTextAssist } from './richtext/useRichTextAssist'
-import { appendDictatedText, applyRichTextAssist, hasPlainText } from './richtext/richTextAssistApply'
+import { appendDictatedText, applyRichTextAssist, hasPlainText, toPlainText } from './richtext/richTextAssistApply'
 import type { GenerateEntity, RichTextAssistMode } from './richtext/richTextAssistApi'
 import Spinner from './Spinner'
 import { Caption } from './typography'
@@ -137,6 +138,10 @@ export default function RichTextAssistBar({ value, onChange, plainText = false, 
   const offersAssist = hasModes || Boolean(generate)
   const loading = status === 'loading'
   const hasText = hasPlainText(value)
+  // Plain-text form of the field's CURRENT value, handed to AssistTextPreview
+  // as `compareWith` so a rewritten reply can show an old-vs-new diff
+  // (ASSIST-COMPARE-1) — tag-stripped, mirroring hasPlainText's own pattern.
+  const plainValue = toPlainText(value)
   const assistLabel = t('notesAssist.title')
 
   // Append one recognised dictation chunk — escaped, continuing the last
@@ -151,6 +156,13 @@ export default function RichTextAssistBar({ value, onChange, plainText = false, 
     if (!mode || !result) return
     onChange(applyRichTextAssist(value, mode, result, (type) => t(`notesAssist.actionTypes.${type}`)))
     discard()
+  }
+
+  // Als-tekst for ACTION results: apply without discarding, so the execute
+  // wizard stays available after the text lands (Danny 23-08).
+  const handleApplyKeep = () => {
+    if (!mode || !result) return
+    onChange(applyRichTextAssist(value, mode, result, (type) => t(`notesAssist.actionTypes.${type}`)))
   }
 
   return (
@@ -217,7 +229,9 @@ export default function RichTextAssistBar({ value, onChange, plainText = false, 
               unsaved note — an already-proven no-linkage path). */}
           {status === 'success' && result && result.kind === 'actions' && result.items.length > 0 && (
             <Suspense fallback={null}>
-              <AssistActionsResultsPanel items={result.items} onApplyAsText={handleApply} onDiscard={discard} />
+              {/* Als-tekst KEEPS the items: Danny 23-08 — appending the list must
+                  never take the Uitvoeren wizard away. Verwerpen is the exit. */}
+              <AssistActionsResultsPanel items={result.items} onApplyAsText={handleApplyKeep} onDiscard={discard} />
             </Suspense>
           )}
 
@@ -227,8 +241,11 @@ export default function RichTextAssistBar({ value, onChange, plainText = false, 
               {/* Plain-prose preview — rendered as TEXT, never
                   dangerouslySetInnerHTML (§7); the model's reply is untrusted. */}
               {result.kind === 'text' ? (
-                <div data-testid="rte-assist-preview"
-                  style={{ whiteSpace: 'pre-wrap', fontSize: 12, color: 'var(--text)', lineHeight: 1.5, maxHeight: 180, overflow: 'auto' }}>{result.text}</div>
+                <div data-testid="rte-assist-preview">
+                  {/* 'generate' is NOT a rewrite of the current text — comparing
+                      against it paints the whole reply as added (Opus round). */}
+                  <AssistTextPreview text={result.text} compareWith={mode === 'generate' ? undefined : plainValue} />
+                </div>
               ) : (
                 // actions with zero items — nothing to run, calm empty notice.
                 <div style={{ fontSize: 12, color: 'var(--text-muted)', fontStyle: 'italic' }}>{t('notesAssist.noItems')}</div>

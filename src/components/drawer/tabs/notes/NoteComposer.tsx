@@ -122,8 +122,10 @@ export default function NoteComposer({ open, initialNote, noteTypes, channels, l
   // No `onPopOut` on the panel any more (NOTITIE-POPOUT-HANDOFF-1): the
   // second-screen icon moved out of the window's title bar into the note block.
   return (
+    // closeOnBackdrop={false}: this window holds UNSAVED typed/dictated work —
+    // only the explicit close/cancel buttons may discard it (Danny 23-08).
     <FloatingPanel open={open} onClose={onCancel} title={panelTitle} ariaLabel={panelTitle}
-      persistKey="notes-composer" width={640} maxWidth="92vw" scrollBody={false}>
+      persistKey="notes-composer" width={640} maxWidth="92vw" scrollBody={false} closeOnBackdrop={false}>
       {/* Scrollable content — RichTextEditor (fill) is the ONE growing item, so
           dragging the panel bigger grows the WRITING space, never empty
           whitespace below a stuck-size editor. `overflow: auto` is the safety

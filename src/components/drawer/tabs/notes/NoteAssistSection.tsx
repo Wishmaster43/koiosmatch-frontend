@@ -38,9 +38,11 @@ import Spinner from '@/components/ui/Spinner'
 import CalloutBox from '@/components/ui/CalloutBox'
 import Button from '@/components/ui/Button'
 import { useNoteAssist } from './useNoteAssist'
-import { applyAssistResult } from './noteAssistApply'
+import { applyAssistResult, toPlainText } from './noteAssistApply'
 import AssistActionsResultsPanel from '@/components/ui/richtext/AssistActionsResultsPanel'
+import AssistTextPreview from '@/components/ui/richtext/AssistTextPreview'
 import NoteKoiosModeToggle from './NoteKoiosModeToggle'
+import { Caption, GroupLabel } from '@/components/ui/typography'
 import { ACTION_TYPE_LABEL_NL } from './noteAssistApi'
 import type { AssistMode, AssistActionType } from './noteAssistApi'
 
@@ -78,6 +80,10 @@ export default function NoteAssistSection({ body, onApply, language, noteId }: N
   // The moment the recruiter types ANYTHING, `hasText` flips and every button is
   // a real, enabled, wired click straight into `run` below — nothing further gates it.
   const hasText = body.replace(/<[^>]*>/g, '').trim().length > 0
+  // Plain-text form of the note's CURRENT body, handed to AssistTextPreview
+  // as `compareWith` so a rewritten reply can show an old-vs-new diff
+  // (ASSIST-COMPARE-1) — reuses the same strip pattern as `hasText` above.
+  const plainBody = toPlainText(body)
 
   // "Overnemen" — apply per-mode semantics (replace/append), then clear the
   // suggestion so a stale result can never be applied twice.
@@ -87,13 +93,18 @@ export default function NoteAssistSection({ body, onApply, language, noteId }: N
     discard()
   }
 
+  // Als-tekst for ACTION results: apply without discarding, so Uitvoeren stays
+  // available after the text lands (Danny 23-08).
+  const handleApplyKeep = () => {
+    if (!result || !mode) return
+    onApply(applyAssistResult(body, mode, result, (type) => t(`notesAssist.actionTypes.${type}`, { defaultValue: ACTION_TYPE_LABEL_NL[type as AssistActionType] ?? type })))
+  }
+
   return (
     <div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
         <KoiosAiMark size={15} />
-        <span style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)' }}>
-          {t('notesAssist.title', { defaultValue: 'Koios AI' })}
-        </span>
+        <GroupLabel>{t('notesAssist.title', { defaultValue: 'Koios AI' })}</GroupLabel>
         <div style={{ flex: 1 }} />
         {/* K0: the compact Wizard/Auto switch — "near the assist section" (same
             setting as the profile "Weergave" tab, see NoteKoiosModeToggle). */}
@@ -112,9 +123,9 @@ export default function NoteAssistSection({ body, onApply, language, noteId }: N
           hover-only title tooltip alone (Danny 07-08: "disabled... but then
           with the honest needsText hint, not silently"). */}
       {!hasText && (
-        <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 8 }}>
+        <Caption as="div" style={{ marginBottom: 8 }}>
           {t('notesAssist.needsText', { defaultValue: 'Schrijf eerst tekst in de notitie' })}
-        </div>
+        </Caption>
       )}
 
       {/* Failure — the server's own pointable message (budget/unavailable read calm
@@ -129,17 +140,19 @@ export default function NoteAssistSection({ body, onApply, language, noteId }: N
       {/* K0-B (F4): a non-empty 'actions' result hands off to the execute flow
           (Uitvoeren → real per-item execute/confirm cards) — the plain
           Overnemen/Verwerpen idiom below stays for improve/summarize/an EMPTY
-          actions result (nothing to execute). */}
+          actions result (nothing to execute). Als-tekst KEEPS the items
+          (Danny 23-08): appending the list must never take the Uitvoeren
+          wizard away — Verwerpen is the exit. */}
       {status === 'success' && result && result.kind === 'actions' && result.items.length > 0 && (
-        <AssistActionsResultsPanel items={result.items} source={noteId ? { note_id: noteId } : undefined} onApplyAsText={handleApply} onDiscard={discard} />
+        <AssistActionsResultsPanel items={result.items} source={noteId ? { note_id: noteId } : undefined} onApplyAsText={handleApplyKeep} onDiscard={discard} />
       )}
 
       {status === 'success' && result && !(result.kind === 'actions' && result.items.length > 0) && (
         <div style={{ border: '1px solid var(--border)', borderRadius: 8, padding: '8px 10px', background: 'var(--bg)', display: 'flex', flexDirection: 'column', gap: 8 }}>
-          {/* improve/summarize: plain prose preview (never dangerouslySetInnerHTML — the
-              model's reply is rendered as TEXT content, §7, same as GenerateDescriptionFlow). */}
+          {/* improve/summarize: readable prose preview (shared AssistTextPreview —
+              renders TEXT only, never dangerouslySetInnerHTML, §7). */}
           {result.kind === 'text' ? (
-            <div style={{ whiteSpace: 'pre-wrap', fontSize: 12, color: 'var(--text)', lineHeight: 1.5, maxHeight: 180, overflow: 'auto' }}>{result.text}</div>
+            <AssistTextPreview text={result.text} compareWith={plainBody} />
           ) : (
             // actions with zero items — nothing to run, calm empty notice.
             <div style={{ fontSize: 12, color: 'var(--text-muted)', fontStyle: 'italic' }}>{t('notesAssist.noItems', { defaultValue: 'Geen actiepunten gevonden' })}</div>

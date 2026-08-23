@@ -198,6 +198,11 @@
     "offline": "No conectado",
     "offlineConnect": "Koios no está conectado. Haga clic para conectar.",
     "contextPending": "Este registro aún no se puede vincular como contexto de IA. Fijado solo como referencia.",
+    "contextRecordFallback": "{{entity}} #{{id}}",
+    "selection": {
+      "chip": "{{count}} {{entity}} seleccionados",
+      "moreCount": "+{{count}} más"
+    },
     "radar": {
       "title": "Consejos de Koios",
       "empty": "Nada requiere tu atención ahora mismo. Pregúntame lo que quieras."
@@ -208,7 +213,18 @@
       "departments": "Departamentos",
       "contacts": "Contactos",
       "total": "en total",
-      "searchUnsupported": "La búsqueda en vivo aún no está disponible para esta categoría."
+      "searchError": "No se pudo cargar esta categoría.",
+      "searchUnsupported": "La búsqueda en vivo aún no está disponible para esta categoría.",
+      "singular": {
+        "candidate": "Candidato",
+        "vacancy": "Vacante",
+        "customer": "Cliente",
+        "application": "Solicitud",
+        "match": "Match",
+        "opportunity": "Oportunidad",
+        "task": "Tarea",
+        "outreach_campaign": "Lista de llamadas"
+      }
     },
     "pendingAction": {
       "owner": "propietario: {{name}}",
@@ -403,7 +419,14 @@
       "wizardHint": "Confirmar cada acción primero",
       "autoHint": "Ejecutar acciones de inmediato (los mensajes siguen esperando confirmación salvo que lo actives en tu perfil)"
     },
-    "generate": "Generar con Koios"
+    "generate": "Generar con Koios",
+    "showAll": "Mostrar todo",
+    "showLess": "Mostrar menos",
+    "viewNew": "Nuevo",
+    "viewCompare": "Comparar",
+    "diffAdded": "Añadido",
+    "diffRemoved": "Eliminado",
+    "viewLabel": "Vista"
   },
   "ai": {
     "title": "Koios AI aconseja",

@@ -53,13 +53,16 @@ describe('AssistActionsResultsPanel · before Uitvoeren', () => {
     expect(executeRichTextActions).not.toHaveBeenCalled()
   })
 
-  it('"Als tekst toevoegen" calls onApplyAsText — no execute call at all', async () => {
+  // Danny 23-08 punt 3: ONE button — starting the wizard also appends the
+  // items into the field text, once (the separate als-tekst button is gone).
+  it('Uitvoeren appends as text AND starts the execute preview', async () => {
     const user = userEvent.setup()
     const onApplyAsText = vi.fn()
-    render(<AssistActionsResultsPanel items={items} source={source} onApplyAsText={onApplyAsText} onDiscard={vi.fn()} />)
-    await user.click(screen.getByText('Als tekst toevoegen'))
+    vi.mocked(executeRichTextActions).mockResolvedValue([])
+    render(<AssistActionsResultsPanel items={items} onApplyAsText={onApplyAsText} onDiscard={vi.fn()} />)
+    await user.click(screen.getByRole('button', { name: /uitvoeren/i }))
     expect(onApplyAsText).toHaveBeenCalledTimes(1)
-    expect(executeRichTextActions).not.toHaveBeenCalled()
+    expect(executeRichTextActions).toHaveBeenCalled()
   })
 
   it('"Verwerpen" calls onDiscard — no execute call at all', async () => {

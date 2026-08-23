@@ -6,4 +6,4 @@
  * note domain's existing `applyAssistResult` / `escapeHtml` names stable for
  * its own importers (NoteAssistSection and this file's own test).
  */
-export { applyRichTextAssist as applyAssistResult, escapeHtml } from '@/components/ui/richtext/richTextAssistApply'
+export { applyRichTextAssist as applyAssistResult, escapeHtml, toPlainText } from '@/components/ui/richtext/richTextAssistApply'

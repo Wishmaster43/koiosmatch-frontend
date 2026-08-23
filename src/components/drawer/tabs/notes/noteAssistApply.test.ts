@@ -40,7 +40,7 @@ describe('applyAssistResult · summarize', () => {
 })
 
 describe('applyAssistResult · actions', () => {
-  it('APPENDS a bullet list of title + type + due date', () => {
+  it('APPENDS a bullet list of title + type + due date (DD-MM-YYYY, DATUM-1)', () => {
     const result: AssistResult = {
       kind: 'actions',
       items: [
@@ -50,7 +50,7 @@ describe('applyAssistResult · actions', () => {
     }
     const next = applyAssistResult('<p>Note</p>', 'actions', result, typeLabel)
     expect(next).toBe(
-      '<p>Note</p><ul><li><strong>Bel terug</strong> (TASK · 2026-08-10)</li>'
+      '<p>Note</p><ul><li><strong>Bel terug</strong> (TASK · 10-08-2026)</li>'
       + '<li><strong>Stuur WhatsApp</strong> (WHATSAPP)</li></ul>',
     )
   })

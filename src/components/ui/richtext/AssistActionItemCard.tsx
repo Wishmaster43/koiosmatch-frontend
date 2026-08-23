@@ -18,6 +18,9 @@
  * is visually truncated).
  */
 import type { CSSProperties } from 'react'
+import Button from '../Button'
+import { Caption } from '../typography'
+import { humanizeIsoDates } from '@/lib/localDate'
 import { useTranslation } from 'react-i18next'
 import { CheckSquare, MessageCircle, Mail, CalendarClock, Bell, Check, Clock, ShieldAlert, HelpCircle, ExternalLink } from 'lucide-react'
 import { useDateFormat } from '@/lib/datetime'
@@ -46,11 +49,6 @@ const FORBIDDEN_REASON_NL: Record<RichTextAssistActionType, string> = {
 const cardStyle: CSSProperties = {
   display: 'flex', alignItems: 'center', gap: 8, padding: '7px 10px', borderRadius: 8,
   border: '1px solid var(--border)', background: 'var(--bg)', fontSize: 12,
-}
-const confirmBtn: CSSProperties = {
-  display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 600,
-  padding: '4px 9px', borderRadius: 6, cursor: 'pointer', border: 'none',
-  background: 'var(--color-primary)', color: 'var(--color-on-accent)', flexShrink: 0,
 }
 // One-line collapsed draft preview (whatsapp/email message) — never italic,
 // this is real data (§4), not placeholder text.
@@ -85,7 +83,7 @@ export default function AssistActionItemCard({ item, onConfirm, onViewRun }: Ass
           {item.title}
         </div>
         <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>
-          {typeLabel}{item.due_date ? ` · ${item.due_date}` : ''}
+          {typeLabel}{item.due_date ? ` · ${humanizeIsoDates(item.due_date)}` : ''}
           {item.type === 'appointment' && item.start ? ` · ${proposedTimeLabel}: ${formatDateTime(item.start)}` : ''}
         </div>
         {isMessageType && item.message && (
@@ -98,7 +96,10 @@ export default function AssistActionItemCard({ item, onConfirm, onViewRun }: Ass
       {/* Executed — success + a real link to the run this action started. */}
       {item.status === 'executed' && (
         onViewRun ? (
+          // Success-coloured STATUS text (state colour, not button identity) with
+          // the run link on the whole affordance.
           <button type="button" onClick={onViewRun} title={t('notesAssist.execute.viewRun', { defaultValue: 'Bekijk workflow-run' })}
+            // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- status-coloured inline link-chip: success ink is the state signal (§4), Button's tones have no success ink variant
             style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 500,
               color: 'var(--color-success-text)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
             <Check size={13} /> {t('notesAssist.execute.executed', { defaultValue: 'Uitgevoerd' })} <ExternalLink size={11} />
@@ -124,10 +125,10 @@ export default function AssistActionItemCard({ item, onConfirm, onViewRun }: Ass
               {t('notesAssist.execute.confirmFailed', { defaultValue: 'Bevestigen mislukt' })}
             </span>
           )}
-          <button type="button" onClick={onConfirm} disabled={item.confirming} style={{ ...confirmBtn, opacity: item.confirming ? 0.6 : 1 }}>
+          <Button variant="primary" size="sm" onClick={onConfirm} disabled={item.confirming} style={{ flexShrink: 0 }}>
             {item.confirming ? <Spinner size={12} /> : <Clock size={12} />}
             {t('notesAssist.execute.confirm', { defaultValue: 'Bevestigen' })}
-          </button>
+          </Button>
         </span>
       )}
 
@@ -147,10 +148,10 @@ export default function AssistActionItemCard({ item, onConfirm, onViewRun }: Ass
           server reason as a tooltip when present (no static fallback exists
           for this status — there was never a reason to show before now). */}
       {item.status === 'unsupported' && (
-        <span title={item.reason}
-          style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, color: 'var(--text-muted)', fontStyle: 'italic' }}>
+        <Caption as="span" title={item.reason}
+          style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontStyle: 'italic' }}>
           <HelpCircle size={13} /> {t('notesAssist.execute.unsupported', { defaultValue: 'Nog niet ondersteund' })}
-        </span>
+        </Caption>
       )}
     </div>
   )
