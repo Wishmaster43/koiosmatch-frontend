@@ -320,6 +320,10 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
   // filtered-scope bulk mutation — rows outside the loaded page changed, so a
   // refetch (not an optimistic patch) is the only honest way to reflect it.
   const queryClient = useQueryClient()
+  // CAND-IMPORT-FE-1: a real file import can create/update many candidates at
+  // once — the same invalidate as above (list + stats share the 'candidates'
+  // query-key prefix), never an optimistic prepend for a whole file's worth of rows.
+  const handleImported = () => { queryClient.invalidateQueries({ queryKey: ['candidates'] }) }
   const {
     toggleRow, toggleAll, bulkAddToPool, bulkRemoveFromPool,
     bulkSetOwner, bulkSetStage, bulkSetTypes, bulkSetConsent, bulkConvertPhase, bulkSetStatus, bulkAddTag,
@@ -353,7 +357,7 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
 
   return (
     <>
-      {addOpen && <AddCandidateModal onClose={() => setAddOpen(false)} onCreated={handleCreated} />}
+      {addOpen && <AddCandidateModal onClose={() => setAddOpen(false)} onCreated={handleCreated} onImported={handleImported} />}
       <div style={{ display: 'flex', height: '100%', overflow: 'hidden' }}>
 
         {/* Table area — insights row, action banner, toolbar and the table⇄map

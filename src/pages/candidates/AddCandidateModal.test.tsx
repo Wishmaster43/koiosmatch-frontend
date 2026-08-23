@@ -13,6 +13,16 @@ import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { NavigationProvider } from '@/context/NavigationContext'
 import AddCandidateModal from './AddCandidateModal'
+// CAND-IMPORT-FE-1: only the NETWORK calls are mocked — useImportWizard,
+// EntityImportCard, PreviewStep and ResultStep all run for REAL, so the import
+// tests below prove the actual wizard wiring (dry-run-before-real-run, close +
+// refresh on success), not a stub of it (mirrors AddVacancyModal.test.tsx).
+import { dryRunImport, runImport, type ImportRunResult } from '@/pages/settings/sections/importeren/importApi'
+
+vi.mock('@/pages/settings/sections/importeren/importApi', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/pages/settings/sections/importeren/importApi')>()
+  return { ...actual, dryRunImport: vi.fn(), runImport: vi.fn(), downloadImportTemplate: vi.fn() }
+})
 
 // Hoisted mutable test state: per-test settings blob + permissions, plus the
 // create spy the component's mocked mutation hook hands back.
@@ -76,6 +86,8 @@ beforeEach(() => {
   getMock.mockResolvedValue({ data: { exists: false, match: null } })
   postMock.mockReset()
   postMock.mockResolvedValue({ data: {} })
+  vi.mocked(dryRunImport).mockReset()
+  vi.mocked(runImport).mockReset()
 })
 
 describe('AddCandidateModal · Optie A card layout', () => {
@@ -492,5 +504,111 @@ describe('AddCandidateModal · geen PII in de URL', () => {
     await new Promise(r => setTimeout(r, 900))
     const probed = getMock.mock.calls.some(([url]) => String(url).includes('check-duplicate'))
     expect(probed).toBe(false)
+  })
+})
+
+// CAND-IMPORT-FE-1 (23-08): the Excel/CSV import affordance in the header —
+// mirrors AddVacancyModal's own import describe block 1:1, pointed at the
+// 'candidates' template (koiosmatch-api CandidateImporter).
+describe('AddCandidateModal · Excel/CSV import in the header (CAND-IMPORT-FE-1)', () => {
+  const csvFile = new File(['achternaam\nJansen'], 'kandidaten.csv', { type: 'text/csv' })
+  // A dry run that would land one row — enough to unlock the real-import confirm.
+  const cleanResult: ImportRunResult = {
+    entity: 'candidates', dry_run: true,
+    summary: { rows: 1, create: 1, update: 0, skip: 0, error: 0 },
+    unknown_columns: [],
+    rows: [{ row: 1, action: 'create', reference: 'Jansen', id: null, messages: [] }],
+  }
+
+  it('never renders the header import toggle without candidates.create — no fake affordance', () => {
+    // state.permissions defaults to ['candidates.update'] in beforeEach.
+    render(<AddCandidateModal onClose={noop} />)
+    expect(screen.queryByRole('button', { name: 'modal.import.title' })).not.toBeInTheDocument()
+  })
+
+  it('renders the header import toggle once candidates.create is granted, collapsed by default', () => {
+    state.permissions = ['candidates.update', 'candidates.create']
+    render(<AddCandidateModal onClose={noop} />)
+    expect(screen.getByRole('button', { name: 'modal.import.title' })).toHaveAttribute('aria-expanded', 'false')
+    // No upload control until the toggle is opened.
+    expect(screen.queryByLabelText('import.selectCsv')).not.toBeInTheDocument()
+  })
+
+  it('opening the toggle reveals the import card as the first card in the body', async () => {
+    state.permissions = ['candidates.update', 'candidates.create']
+    const user = userEvent.setup()
+    render(<AddCandidateModal onClose={noop} />)
+    await user.click(screen.getByRole('button', { name: 'modal.import.title' }))
+    expect(screen.getByRole('button', { name: 'modal.import.title' })).toHaveAttribute('aria-expanded', 'true')
+    expect(screen.getByText('modal.import.intro')).toBeInTheDocument()
+    expect(screen.getByLabelText('import.selectCsv')).toBeInTheDocument()
+  })
+
+  it('the upload input advertises .csv, .txt AND .xlsx (backend: ImportUploadRequest mimes:csv,txt,xlsx)', async () => {
+    state.permissions = ['candidates.update', 'candidates.create']
+    const user = userEvent.setup()
+    render(<AddCandidateModal onClose={noop} />)
+    await user.click(screen.getByRole('button', { name: 'modal.import.title' }))
+    const input = screen.getByLabelText('import.selectCsv') as HTMLInputElement
+    expect(input.accept).toBe('.csv,.txt,.xlsx')
+  })
+
+  it('a dry run fires the REAL request against the candidate template, never the real import', async () => {
+    state.permissions = ['candidates.update', 'candidates.create']
+    vi.mocked(dryRunImport).mockResolvedValue(cleanResult)
+    const user = userEvent.setup()
+    render(<AddCandidateModal onClose={noop} />)
+    await user.click(screen.getByRole('button', { name: 'modal.import.title' }))
+
+    // Before any file is picked, no confirm/real-import control exists at all.
+    expect(screen.queryByRole('button', { name: 'import.preview.confirm' })).not.toBeInTheDocument()
+
+    await user.upload(screen.getByLabelText('import.selectCsv'), csvFile)
+    await user.click(screen.getByRole('button', { name: 'import.runPreview' }))
+
+    expect(dryRunImport).toHaveBeenCalledTimes(1)
+    expect(dryRunImport).toHaveBeenCalledWith('candidates', expect.any(File))
+    expect(runImport).not.toHaveBeenCalled()
+    // ONLY once the dry run has resolved does the real-import control appear.
+    expect(await screen.findByRole('button', { name: 'import.preview.confirm' })).toBeInTheDocument()
+  })
+
+  it('closes the modal and refreshes the list once a real import lands something', async () => {
+    state.permissions = ['candidates.update', 'candidates.create']
+    vi.mocked(dryRunImport).mockResolvedValue(cleanResult)
+    vi.mocked(runImport).mockResolvedValue({
+      ...cleanResult, dry_run: false, rows: [{ ...cleanResult.rows[0], id: 'c1' }],
+    })
+    const onClose = vi.fn()
+    const onImported = vi.fn()
+    const user = userEvent.setup()
+    render(<AddCandidateModal onClose={onClose} onImported={onImported} />)
+    await user.click(screen.getByRole('button', { name: 'modal.import.title' }))
+
+    await user.upload(screen.getByLabelText('import.selectCsv'), csvFile)
+    await user.click(screen.getByRole('button', { name: 'import.runPreview' }))
+    await user.click(await screen.findByRole('button', { name: 'import.preview.confirm' }))
+
+    // The auto-close effect fires once the run RESULT lands something — never
+    // leaving the untouched manual form open behind a candidate that now exists.
+    await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1))
+    expect(onImported).toHaveBeenCalledTimes(1)
+    expect(runImport).toHaveBeenCalledWith('candidates', expect.any(File))
+  })
+
+  it('blocks the manual Create button while the import is past its upload step — never two creation paths armed at once', async () => {
+    state.permissions = ['candidates.update', 'candidates.create']
+    vi.mocked(dryRunImport).mockResolvedValue(cleanResult)
+    const user = userEvent.setup()
+    render(<AddCandidateModal onClose={noop} onCreated={noop} />)
+    await user.type(screen.getByPlaceholderText('common:placeholders.firstName'), 'Jan')
+    await user.type(screen.getByPlaceholderText('common:placeholders.lastName'), 'Jansen')
+    await user.click(screen.getByRole('button', { name: 'modal.import.title' }))
+    await user.upload(screen.getByLabelText('import.selectCsv'), csvFile)
+    await user.click(screen.getByRole('button', { name: 'import.runPreview' }))
+    await screen.findByRole('button', { name: 'import.preview.confirm' })
+
+    expect(screen.getByRole('button', { name: 'modal.create' })).toBeDisabled()
+    expect(createCandidate).not.toHaveBeenCalled()
   })
 })

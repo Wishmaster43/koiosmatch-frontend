@@ -193,6 +193,10 @@
     "chooseType": "Elige un tipo a la izquierda para empezar",
     "create": "Crear {{type}}",
     "createGeneric": "Crear",
+    "import": {
+      "title": "Candidato desde archivo",
+      "intro": "Importar un archivo crea estos candidatos de inmediato. No rellena el formulario de abajo; revisa la vista previa antes de confirmar."
+    },
     "fields": {
       "firstName": "Nombre",
       "lastName": "Apellido",

@@ -6,7 +6,7 @@
  * teaching a four-step import order for a file that has no order at all.
  */
 import { describe, it, expect } from 'vitest'
-import { groupTemplates, isWholeTreeTemplate, orderedTemplates } from './importTemplateShape'
+import { groupTemplates, importPermissionsFor, isWholeTreeTemplate, orderedTemplates } from './importTemplateShape'
 import type { ImportTemplateSummary } from './importApi'
 
 // ImportTemplateController::TEMPLATES, verbatim.
@@ -66,5 +66,23 @@ describe('grouping', () => {
     const four = all.slice(0, 4)
     expect(groupTemplates(four).wholeTree).toEqual([])
     expect(orderedTemplates(four).map((x) => x.entity)).toEqual(['customers', 'locations', 'departments', 'contacts'])
+  })
+})
+
+// CAND-IMPORT-FE-1: candidates carries its OWN permission pair, same least-
+// privilege shape as vacancies — never the customer-tree fallback.
+describe('importPermissionsFor', () => {
+  it('resolves the vacancy pair for vacancies', () => {
+    expect(importPermissionsFor('vacancies')).toEqual({ view: 'vacancies.view', create: 'vacancies.create' })
+  })
+
+  it('resolves the candidate pair for candidates', () => {
+    expect(importPermissionsFor('candidates')).toEqual({ view: 'candidates.view', create: 'candidates.create' })
+  })
+
+  it('falls back to the customer-tree pair for every other entity', () => {
+    expect(importPermissionsFor('customer_tree')).toEqual({ view: 'customers.view', create: 'customers.create' })
+    expect(importPermissionsFor('contacts')).toEqual({ view: 'customers.view', create: 'customers.create' })
+    expect(importPermissionsFor(undefined)).toEqual({ view: 'customers.view', create: 'customers.create' })
   })
 })

@@ -28,9 +28,14 @@ import { useFunctions } from '@/lib/useFunctions'
 import { useProvinces } from '@/hooks/useProvinces'
 import { WIDE_MODAL } from '@/components/ui/modalMetrics'
 import FloatingPanel from '@/components/ui/FloatingPanel'
-import { modalColumns } from '@/components/ui/modalCards'
+import { cardBox, cardHead, modalColumns } from '@/components/ui/modalCards'
 import { toLinkedinSlug } from '@/components/drawer/contactLinks'
 import { canonicalPhone } from '@/lib/phoneNumber'
+// CAND-IMPORT-FE-1 (23-08): the compact "create these from file" card and its
+// wizard/permission wiring, shared verbatim with AddVacancyModal/AddCustomerModal
+// (CLAUDE.md §4 import canon + §11 — never a second import client).
+import EntityImportCard from '@/components/import/EntityImportCard'
+import { useEntityImportCard } from '@/components/import/useEntityImportCard'
 import type { Candidate } from '@/types/candidate'
 import type { Id, LookupOption } from '@/types/common'
 import ModalHeader from './addmodal/ModalHeader'
@@ -52,6 +57,12 @@ import { useCvPrefill } from './addmodal/useCvPrefill'
 import { usePasteCvPrefill } from './addmodal/usePasteCvPrefill'
 import { useLiveFieldValidation } from './addmodal/useLiveFieldValidation'
 import { useRequiredFields } from './addmodal/useRequiredFields'
+
+// The backend importer key for a candidate file — verified against
+// koiosmatch-api's ImportRegistry::IMPORTERS ('candidates' => CandidateImporter::class)
+// and importTemplateShape.ts's importPermissionsFor (candidates.view/candidates.create),
+// never guessed from the entity's display name.
+const CANDIDATE_IMPORT_ENTITY = 'candidates'
 
 // 422 field-error keys are snake_case; map them back to this form's field names.
 const API_TO_FORM: Record<string, string> = {
@@ -88,9 +99,11 @@ export interface FormState {
 interface AddCandidateModalProps {
   onClose: () => void
   onCreated?: (candidate: Candidate) => void
+  /** CAND-IMPORT-FE-1: called once a real file import lands at least one record — the parent refreshes its list. */
+  onImported?: () => void
 }
 
-export default function AddCandidateModal({ onClose, onCreated }: AddCandidateModalProps) {
+export default function AddCandidateModal({ onClose, onCreated, onImported }: AddCandidateModalProps) {
   const { t } = useTranslation(['candidates', 'common'])
   const { phases } = useLookups() as unknown as { phases: LookupOption[] }
   const { data: users = [] } = useUsers() as { data?: AppUser[] }
@@ -120,6 +133,16 @@ export default function AddCandidateModal({ onClose, onCreated }: AddCandidateMo
   const [status,    setStatus]    = useState(defaultStatus)
   const [errors,    setErrors]    = useState<Record<string, boolean>>({})
   const [submitErr, setSubmitErr] = useState<string | null>(null)
+  // CAND-IMPORT-FE-1: the import flow opens from the header button (closed on
+  // open, mirrors AddVacancyModal/AddCustomerModal's importOpen). The
+  // wizard/permission/auto-close wiring lives in the shared useEntityImportCard.
+  const [importOpen, setImportOpen] = useState(false)
+  const { wizard: importWizard, canView: canViewImportTemplate, canImport: canRunImport } =
+    useEntityImportCard({
+      entity: CANDIDATE_IMPORT_ENTITY,
+      hasPermission: (perm: string) => hasPermission?.(perm) ?? false,
+      onImported, onClose,
+    })
   // C-29: the duplicate the server REFUSED the create on (409 `existing`), kept so
   // the user gets a real panel instead of the raw server sentence.
   const [dupBlock,  setDupBlock]  = useState<DuplicateMatch | null>(null)
@@ -314,7 +337,11 @@ export default function AddCandidateModal({ onClose, onCreated }: AddCandidateMo
   }
 
   const selectedStatus = phases.find(s => s.value === status)
+  // CAND-IMPORT-FE-1: blocked while an import is past its upload step (preview or
+  // result) — never let the manual form fire a SECOND create while the import is
+  // mid-decision or has just written its own records (mirrors AddVacancyModal).
   const canSubmit       = !!status && requiredForm.every(k => String(form[k] ?? '').trim()) && !hasFormatError
+    && importWizard.step === 'upload'
   const statusLabel     = selectedStatus?.label ?? ''
   // RECHTEN-DETAIL-1: both parse routes gate on candidates.create now
   // (routes/api/tenant/candidates.php:60-61, re-measured 06-08).
@@ -344,11 +371,24 @@ export default function AddCandidateModal({ onClose, onCreated }: AddCandidateMo
         <div style={{ flex: '1 1 100%', margin: '-12px -16px -13px' }}>
           <ModalHeader status={status} pickStatuses={pickStatuses} selectedStatus={selectedStatus} statusLabel={statusLabel}
             onSelectStatus={v => { setStatus(v); setErrors({}) }} onClose={onClose}
-            canParseCv={canParseCv} onCvFile={cv.start} onCvText={pasteCv.startText} />
+            canParseCv={canParseCv} onCvFile={cv.start} onCvText={pasteCv.startText}
+            canImport={canRunImport} importOpen={importOpen} onToggleImport={() => setImportOpen(v => !v)}
+            hasFile={!!importWizard.file} />
         </div>
       }>
 
           <div style={{ flex: 1, overflowY: 'auto', padding: '20px 24px' }}>
+            {/* CAND-IMPORT-FE-1: the import flow opens from the header toggle and
+                renders as the FIRST card only while open — a rare, optional path
+                stays out of the way until deliberately summoned (KLANT-LAYOUT-3
+                mirror), regardless of whether a phase is picked yet. */}
+            {importOpen && (
+              <div style={{ ...cardBox, padding: 16, marginBottom: 16 }}>
+                <div style={cardHead}>{t('modal.import.title')}</div>
+                <EntityImportCard wizard={importWizard} canView={canViewImportTemplate} canImport={canRunImport}
+                  entity={CANDIDATE_IMPORT_ENTITY} intro={t('modal.import.intro')} />
+              </div>
+            )}
             {!status ? (
               <NoStatusNotice />
             ) : (

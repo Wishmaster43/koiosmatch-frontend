@@ -216,6 +216,10 @@
     "chooseType": "Choose a type on the left to begin",
     "create": "Create {{type}}",
     "createGeneric": "Create",
+    "import": {
+      "title": "Candidate from file",
+      "intro": "Importing a file creates these candidates directly. It does not fill in the form below; check the preview before confirming."
+    },
     "fields": {
       "firstName": "First name",
       "lastName": "Last name",

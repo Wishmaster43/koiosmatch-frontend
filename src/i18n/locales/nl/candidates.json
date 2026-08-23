@@ -216,6 +216,10 @@
     "chooseType": "Kies links een type om te beginnen",
     "create": "{{type}} aanmaken",
     "createGeneric": "Aanmaken",
+    "import": {
+      "title": "Kandidaat uit bestand",
+      "intro": "Een bestand importeren maakt deze kandidaten meteen aan. Het vult het formulier hieronder niet in; controleer eerst de voorbeeldweergave voordat je bevestigt."
+    },
     "fields": {
       "firstName": "Voornaam",
       "lastName": "Achternaam",
