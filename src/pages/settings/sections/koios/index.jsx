@@ -12,6 +12,9 @@ import KoiosStatusCard from './KoiosStatusCard'
 import KoiosModelsCard from './KoiosModelsCard'
 import KoiosPricingCard from './KoiosPricingCard'
 import { PageTitle } from '@/components/ui/typography'
+// KOIOS-DEFAULT-SYNC-1: the floating panel reads the same settings from the
+// shared query cache — invalidate it so its picker follows a new default.
+import { invalidateKoiosSettings } from '@/components/layout/koios/useKoiosSettings'
 
 const notice = { fontSize: 13, color: 'var(--text-muted)' }
 
@@ -45,7 +48,7 @@ export default function KoiosSettings() {
         <>
           <KoiosStatusCard status={settings?.status} t={t} />
           <KoiosModelsCard models={settings?.models} t={t}
-            onChanged={(model) => setSettings((s) => ({ ...s, models: { ...s.models, active: model } }))} />
+            onChanged={(model) => { setSettings((s) => ({ ...s, models: { ...s.models, active: model } })); invalidateKoiosSettings() }} />
           <KoiosPricingCard pricing={settings?.pricing} currency={settings?.currency} locale={locale} t={t} />
         </>
       )}
