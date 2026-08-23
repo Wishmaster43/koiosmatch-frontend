@@ -6,7 +6,7 @@
  */
 import { describe, it, expect } from 'vitest'
 import { buildDashboardKpis } from './dashboardKpis'
-import { KPI_ROWS, DASHBOARD_TEMPLATES, BLOCK_LABEL_KEY, switcherTypes, resolveDashboardType } from './templates'
+import { KPI_ROWS, DASHBOARD_TEMPLATES, BLOCK_LABEL_KEY, KPI_LABEL_KEY, switcherTypes, resolveDashboardType, visibleBlock, kpiRow } from './templates'
 
 describe('dashboard KPI row guard', () => {
   // Minimal stub args — only the shape matters, not the values, for id resolution.
@@ -36,7 +36,16 @@ describe('dashboard KPI row guard', () => {
   // 'recruitment_manager' is registered in every role table (DASHBOARD-KIEZER-1).
   it('recruitment_manager is registered in KPI_ROWS and DASHBOARD_TEMPLATES', () => {
     expect(KPI_ROWS.recruitment_manager.length).toBeGreaterThan(0)
-    expect(DASHBOARD_TEMPLATES.recruitment_manager).toContain('chart.recruiter')
+    expect(DASHBOARD_TEMPLATES.recruitment_manager).toContain('*')
+  })
+
+  // DASHBOARD-OPRUIMING-1 (Danny 23-08, verbatim: "recruiter management dashboard
+  // moet nu zelfde zijn als management omdat alles ruk is"): recruitment_manager
+  // no longer carries its own trimmed KPI/block vocabulary — it mirrors management
+  // exactly, on both maps.
+  it('recruitment_manager mirrors management verbatim (KPI_ROWS and DASHBOARD_TEMPLATES)', () => {
+    expect(KPI_ROWS.recruitment_manager).toEqual(KPI_ROWS.management)
+    expect(DASHBOARD_TEMPLATES.recruitment_manager).toEqual(DASHBOARD_TEMPLATES.management)
   })
 
   // Regression guard: a block id present in some template but absent from
@@ -47,6 +56,48 @@ describe('dashboard KPI row guard', () => {
     const allBlockIds = new Set(Object.values(DASHBOARD_TEMPLATES).flat().filter(id => id !== '*'))
     const missing = [...allBlockIds].filter(id => !BLOCK_LABEL_KEY[id])
     expect(missing, `template block ids with no translated label: ${missing.join(', ')}`).toEqual([])
+  })
+})
+
+// DASHBOARD-OPRUIMING-1 (Danny 23-08): "Werk af" · "Stilstaande leads" · "Vandaag"
+// and the vacancy closingSoon/staleStatusVac KPIs are removed ENTIRELY, not just from
+// the per-role templates — admin/management use the '*' wildcard, so a leftover
+// catalog entry (KPI_LABEL_KEY/BLOCK_LABEL_KEY) would still surface in Settings →
+// Dashboards even after the per-role arrays were pruned.
+describe('dashboard cleanup (DASHBOARD-OPRUIMING-1)', () => {
+  it('recruitment and recruitment_manager KPI rows contain neither closingSoon nor staleStatusVac', () => {
+    for (const role of ['recruitment', 'recruitment_manager'] as const) {
+      expect(KPI_ROWS[role]).not.toContain('closingSoon')
+      expect(KPI_ROWS[role]).not.toContain('staleStatusVac')
+    }
+  })
+
+  it('no template references the removed block ids', () => {
+    const allBlockIds = new Set(Object.values(DASHBOARD_TEMPLATES).flat())
+    expect(allBlockIds.has('block.touchpoints')).toBe(false)
+    expect(allBlockIds.has('block.attention')).toBe(false)
+    expect(allBlockIds.has('block.staleLeads')).toBe(false)
+  })
+
+  it('the removed ids have no catalog entry left (the admin/management "*" wildcard case)', () => {
+    expect(KPI_LABEL_KEY.closingSoon).toBeUndefined()
+    expect(KPI_LABEL_KEY.staleStatusVac).toBeUndefined()
+    expect(BLOCK_LABEL_KEY['block.touchpoints']).toBeUndefined()
+    expect(BLOCK_LABEL_KEY['block.attention']).toBeUndefined()
+    expect(BLOCK_LABEL_KEY['block.staleLeads']).toBeUndefined()
+  })
+
+  // RESILIENCE (step 7): a tenant's saved dashboard_hidden config, or a stale
+  // client cache, may still name a removed id — visibleBlock/kpiRow must stay
+  // tolerant (never throw). For a non-wildcard role the removed id is simply
+  // not visible; the '*' wildcard case (admin/management) is covered where the
+  // renderer actually lives — DashboardFeedGrid.test.tsx — since visibleBlock's
+  // '*' match is by design (any id), it is the JSX call site that had to go.
+  it('visibleBlock/kpiRow never throw on a removed id, and a non-wildcard role hides it', () => {
+    expect(() => visibleBlock('accountmanager', 'block.staleLeads')).not.toThrow()
+    expect(visibleBlock('accountmanager', 'block.staleLeads')).toBe(false)
+    expect(() => kpiRow('recruitment')).not.toThrow()
+    expect(kpiRow('recruitment')).not.toContain('closingSoon')
   })
 })
 

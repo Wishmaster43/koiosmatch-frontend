@@ -57,28 +57,25 @@ describe('useDashboardData · critical-feed error signalling', () => {
   it('stays fail-soft (no error) when only the best-effort feeds fail', async () => {
     resolveMeta()
     heavyGetMock.mockImplementation((url: string) =>
-      (url === '/opportunities/stats' || url === '/dashboard/charts' || url === '/applications/stats' || url === '/vacancies/stats')
+      (url === '/opportunities/stats' || url === '/dashboard/charts' || url === '/applications/stats')
         ? Promise.reject(new Error('boom'))
         : Promise.resolve({ data: { data: {} } }))
     const { result } = renderHook(() => useDashboardData({ filterParams: {} }))
     await waitFor(() => expect(result.current.loading).toBe(false))
     expect(result.current.error).toBe(false)
     expect(result.current.appStats).toBeNull()
-    expect(result.current.vacStats).toBeNull()
   })
 
   // D6/D1(a) — the new attention feeds resolve alongside the existing best-effort ones.
-  it('resolves /applications/stats and /vacancies/stats attention payloads', async () => {
+  it('resolves the /applications/stats attention payload', async () => {
     resolveMeta()
     heavyGetMock.mockImplementation((url: string) => {
       if (url === '/applications/stats') return Promise.resolve({ data: { data: { attention: { too_long_in_stage: 3, missing_appointment: 2 } } } })
-      if (url === '/vacancies/stats')    return Promise.resolve({ data: { data: { attention: { closing_soon: 5, stale_status: 1 } } } })
       return Promise.resolve({ data: { data: {} } })
     })
     const { result } = renderHook(() => useDashboardData({ filterParams: {} }))
     await waitFor(() => expect(result.current.loading).toBe(false))
     expect(result.current.appStats).toEqual({ attention: { too_long_in_stage: 3, missing_appointment: 2 } })
-    expect(result.current.vacStats).toEqual({ attention: { closing_soon: 5, stale_status: 1 } })
   })
 
   it('retry() re-issues the critical fetches', async () => {

@@ -33,12 +33,6 @@ export interface DashAppStats {
   [k: string]: unknown
 }
 
-// /vacancies/stats (D1a) — only the attention block is read here.
-export interface DashVacStats {
-  attention?: Record<string, number | null | undefined>
-  [k: string]: unknown
-}
-
 // /opportunities/stats
 export interface DashOpp {
   by_stage?: StatItem[]
@@ -51,7 +45,6 @@ export interface DashOpp {
 // Present only for the matching view-permission; absent entirely (not `[]`)
 // means the block is not shown for this role, mirroring the attention keys.
 export interface ExpiringMatch { id?: string | number; candidate_id?: string | number; candidate_name?: string | null; customer_id?: string | number; customer_name?: string; end_date?: string; [k: string]: unknown }
-export interface StaleLead { id?: string | number; name?: string; phase_changed_at?: string; [k: string]: unknown }
 export interface StaleVacancy { id?: string | number; title?: string; published_at?: string; [k: string]: unknown }
 export interface KoiosSuggestion { vacancy_id?: string | number; vacancy_title?: string; suggestions_count?: number; [k: string]: unknown }
 // sales_manager only — the tenant-wide "where does business come from" breakdown.
@@ -60,13 +53,6 @@ export interface CustomerByOwner { owner_id?: string | number; name?: string; co
 export interface RecentCandidate { name?: string; status_value?: string; role?: string; last_activity_at?: string; [k: string]: unknown }
 export interface RecentApplication { candidate_name?: string; vacancy_title?: string; stage_value?: string; created_at?: string; [k: string]: unknown }
 export interface RecentLead { name?: string; contact_name?: string; status_value?: string; created_at?: string; [k: string]: unknown }
-// Recruitment candidate-focus feeds (owner-scoped by the backend; B-27).
-export interface Touchpoint { candidate_id?: string | number; name?: string; type?: string; date?: string; [k: string]: unknown }
-export interface AttentionCandidate { id?: string | number; name?: string; status_value?: string; last_contact_at?: string; [k: string]: unknown }
-// An attention group carries its own total (server-side count) alongside the
-// capped, longest-waiting-first row sample — total/rows come from one query so
-// they never disagree; a "see all" link only makes sense when total > rows.length.
-export interface AttentionGroup { total: number; rows: AttentionCandidate[] }
 export interface AiRun { name?: string; ran_at?: string; ok?: boolean; processed?: number; error?: string; [k: string]: unknown }
 export interface Conversation { name?: string; last_message?: string; at?: string; [k: string]: unknown }
 export interface TimeseriesPoint { name: string; value?: number; [k: string]: unknown }
@@ -78,9 +64,6 @@ export interface TrendRow { name: string; [k: string]: number | string }
 export interface DashData {
   charts?: { by_funnel?: StatItem[]; timeseries?: Record<string, TimeseriesPoint[] | undefined> }
   recent?: { candidates?: RecentCandidate[]; applications?: RecentApplication[]; leads?: RecentLead[] }
-  // Recruitment feeds (owner-scoped): today's touchpoints + candidates to work.
-  touchpoints?: Touchpoint[]
-  attention_candidates?: { stale6m?: AttentionGroup; never_contacted?: AttentionGroup; no_followup?: AttentionGroup }
   ai_runs?: AiRun[]
   conversations?: Conversation[]
   filters?: { locations?: Array<{ id: string | number; name: string }>; statuses?: Array<{ value: string; label: string }> }
@@ -89,7 +72,6 @@ export interface DashData {
   // KD11 (DASHP36) — sales/account-manager widget feeds (see above); absent
   // (not `[]`) when the viewer lacks the matching view-permission.
   expiring_matches?: ExpiringMatch[]
-  stale_leads?: StaleLead[]
   stale_vacancies?: StaleVacancy[]
   koios_suggestions?: KoiosSuggestion[]
   customers_by_owner?: CustomerByOwner[]

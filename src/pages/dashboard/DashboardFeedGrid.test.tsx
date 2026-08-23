@@ -3,13 +3,20 @@
  * itself never leaves a hole beside its neighbour.
  *
  * The defect this pins (Danny 17-08, measured on his own dashboard before the
- * fix): "Werk af" sat alone at y=1358 with its right half empty, and
- * "Stilstaande leads" sat alone at y=2020 with its right half empty, because the
- * six tiles lived in TWO hardcoded two-column grids with other sections between
- * them and every tile `return null`s on empty data. Adjacency is therefore a
- * property of the DOM structure, not of styling, and that is what is asserted:
- * same parent, and the two work-lists first so they pair up in row one no matter
- * which of the tiles below them have data.
+ * fix): two tiles each sat alone in their own row with a hole beside them,
+ * because they lived in TWO hardcoded two-column grids with other sections
+ * between them and every tile `return null`s on empty data. Adjacency is
+ * therefore a property of the DOM structure, not of styling, and that is what
+ * is asserted: same parent, cells pack in declaration order.
+ *
+ * DASHBOARD-OPRUIMING-1 (Danny 23-08): "Werk af" (AttentionCandidates),
+ * "Stilstaande leads" and "Vandaag" (TouchpointsFeed) are removed entirely —
+ * their components are deleted and their JSX render call sites are gone from
+ * Dashboard.tsx. `vis` is mocked to always return true below (the same shape
+ * admin/management's '*' wildcard produces) specifically to prove that even
+ * under a wildcard visibility predicate, the three removed titles never
+ * render — the resilience has to live at the JSX call site, since the '*'
+ * wildcard by design matches ANY id (§ measured map step 7).
  */
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
@@ -38,18 +45,20 @@ vi.mock('./hooks/useDashboardFilterState', () => ({
 }))
 vi.mock('./hooks/useDashboardFilterPanel', () => ({ useDashboardFilterPanel: () => {} }))
 
-// Every tile is visible per the template; which ones actually RENDER is decided
-// by their own empty-check, exactly as in the app.
+// Every block is "visible" per the template (the '*' wildcard shape); which ones
+// actually RENDER is decided by their own empty-check / by whether a JSX call
+// site still exists for their id, exactly as in the app.
 vi.mock('./hooks/useDashboardViewModel', () => ({
   useDashboardViewModel: () => ({
     vis: () => true, statusData: [], recruiterData: [], funnelData: [], oppStageData: [],
     recentCandidates: [], recentApplications: [], recentLeads: [], runs: [], conversations: [],
     showRuns: false, showConv: false, trendData: [], trendSeries: [], att: {}, kpis: [],
-    // Only the stale-leads feed has data — the other three widget feeds are empty
-    // and self-hide, which is the situation that used to leave the holes.
-    expiringMatchesRows: [], staleVacanciesRows: [], koiosSuggestionsRows: [],
+    // Only two of the three remaining widget feeds have data — koiosSuggestions
+    // stays empty and self-hides, which is the situation that used to leave holes.
+    expiringMatchesRows: [{ key: 'm1', primary: 'Aflopende match', meta: '01-09' }],
+    staleVacanciesRows: [{ key: 'v1', primary: 'Stilstaande vacature', meta: '12 dagen' }],
+    koiosSuggestionsRows: [],
     customersByOwnerRows: [],
-    staleLeadsRows: [{ id: 'l1', title: 'Lead zonder opvolging', sub: '12 dagen' }],
   }),
 }))
 vi.mock('./blocks/DistributionCharts', () => ({ default: () => null }))
@@ -57,11 +66,7 @@ vi.mock('./blocks/TrendsRow', () => ({ default: () => null }))
 vi.mock('./blocks/RecentListsRow', () => ({ default: () => null }))
 vi.mock('./blocks/ActivityListsRow', () => ({ default: () => null }))
 vi.mock('./blocks/ShiftsSummary', () => ({ default: () => null }))
-vi.mock('./blocks/TouchpointsFeed', () => ({ default: () => null }))
 vi.mock('./KoiosForYouCard', () => ({ default: () => null }))
-// The real WidgetListBlock keeps its own empty-hiding, which is the behaviour
-// under test; only "Werk af" is stubbed, since it needs live group data.
-vi.mock('./blocks/AttentionCandidates', () => ({ default: () => <div data-testid="attention">block.attentionTitle</div> }))
 
 vi.mock('./hooks/useDashboardData', () => ({
   useDashboardData: () => ({
@@ -71,21 +76,30 @@ vi.mock('./hooks/useDashboardData', () => ({
 }))
 
 describe('Dashboard work-feed grid (DASH-FEEDS-PACK-1)', () => {
-  it('makes Stilstaande leads the cell right after Werk af, with no hole between them', () => {
+  it('packs the two tiles that have data into the same grid, with no hole between them', () => {
     render(<Dashboard />)
-    const attention = screen.getByTestId('attention')
-    const grid = attention.parentElement!
+    const expiring = screen.getByText('Aflopende match')
+    // DOM path: primary-text div → row div → WidgetListBlock's Block-outer div → grid.
+    const grid = expiring.parentElement!.parentElement!.parentElement!.parentElement!
     // Two-column grid …
     expect(grid.style.display).toBe('grid')
     expect(grid.style.gridTemplateColumns).toBe('1fr 1fr')
-    // … whose cells are exactly the two tiles that HAVE data, in that order.
-    // The other four self-hid, and before this change that left the right half
-    // of Werk af's row empty and pushed Stilstaande leads into its own grid two
-    // sections lower. Comparing the children list is the honest assertion here:
-    // jsdom computes no layout, so a coordinate check would pass on anything.
-    const cells = Array.from(grid.children)
-    expect(cells).toHaveLength(2)
-    expect(cells[0]).toBe(attention)
-    expect(cells[1].textContent).toContain('block.staleLeads')
+    // … whose cells are exactly the two tiles that HAVE data. koiosSuggestions
+    // self-hid (empty rows), so before this change that would have left the
+    // second half of the row empty instead of packing.
+    expect(grid.children).toHaveLength(2)
+    expect(grid.textContent).toContain('Aflopende match')
+    expect(grid.textContent).toContain('Stilstaande vacature')
+  })
+
+  // DASHBOARD-OPRUIMING-1 resilience pin (measured map step 7): `vis` above always
+  // returns true — the exact shape admin/management's '*' wildcard produces — so
+  // if a removed block's JSX call site had survived, it would render here. It
+  // must not: the titles are gone from Dashboard.tsx, not merely hidden.
+  it('never renders the three removed blocks, even under a wildcard-true visibility predicate', () => {
+    render(<Dashboard />)
+    expect(screen.queryByText('block.attentionTitle')).not.toBeInTheDocument()
+    expect(screen.queryByText('block.staleLeads')).not.toBeInTheDocument()
+    expect(screen.queryByText('block.touchpoints')).not.toBeInTheDocument()
   })
 })

@@ -51,11 +51,7 @@
     "tooLongInStage": "Te lang in fase",
     "tooLongInStageSub": "geen fasewissel",
     "missingApptApps": "Geen afspraak",
-    "missingApptAppsSub": "fase vereist een afspraak",
-    "closingSoon": "Sluit binnenkort",
-    "closingSoonSub": "vacature loopt af",
-    "staleStatusVac": "Verouderde status",
-    "staleStatusVacSub": "lang geen wijziging"
+    "missingApptAppsSub": "fase vereist een afspraak"
   },
   "chart": {
     "byStatus": "Kandidaten per status",
@@ -87,14 +83,10 @@
     "shiftsFilled": "Ingevuld",
     "shiftsUnfilled": "Onvervuld",
     "shiftsOccupancy": "Bezetting",
-    "touchpoints": "Vandaag",
-    "attentionTitle": "Werk af",
     "expiringMatches": "Aflopende matches",
-    "staleLeads": "Stilstaande leads",
     "staleVacancies": "Stilstaande vacatures",
     "koiosSuggestions": "Koios-suggesties",
-    "customersByOwner": "Klanten per accountmanager",
-    "seeAll": "Bekijk alle {{count}}"
+    "customersByOwner": "Klanten per accountmanager"
   },
   "action": {
     "allCandidates": "Alle kandidaten",
@@ -119,17 +111,6 @@
     "sales_manager": "Salesmanager",
     "planning": "Planning",
     "readonly": "Alleen-lezen"
-  },
-  "touchpointType": {
-    "birthday": "Verjaardag",
-    "firstWorkday": "Eerste werkdag",
-    "backAvailable": "Weer beschikbaar",
-    "followupDue": "Opvolging vervalt"
-  },
-  "attentionGroup": {
-    "stale6m": "Niet gecontacteerd >6m",
-    "neverContacted": "Nooit gecontacteerd",
-    "noFollowup": "Geen opvolging"
   },
   "lastSync": "Laatste sync {{source}}",
   "neverSynced": "nog nooit",

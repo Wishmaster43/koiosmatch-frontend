@@ -1,9 +1,10 @@
 /**
- * dashboardKpis — D6/D1(a) tile→intent mapping (the seam, per CLAUDE.md §13):
- * the tiles emit a SEMANTIC intent ({ attention: '<name>' }), the house
+ * dashboardKpis — D6 tile→intent mapping (the seam, per CLAUDE.md §13): the
+ * tiles emit a SEMANTIC intent ({ attention: '<name>' }), the house
  * convention (onNavigate('candidates', { attention: 'stale6m' }), CandidatesPage:113)
  * — never a raw server filter param. The destination page's own consumption of
- * that intent is asserted separately (ApplicationsPage.test.tsx / VacanciesPage.test.tsx).
+ * that intent is asserted separately (ApplicationsPage.test.tsx). closingSoon/
+ * staleStatusVac (formerly D1(a)) are removed entirely (DASHBOARD-OPRUIMING-1).
  */
 import { describe, it, expect, vi } from 'vitest'
 import { buildDashboardKpis } from './dashboardKpis'
@@ -24,7 +25,7 @@ const baseArgs = (att: Record<string, number | null | undefined>, onNavigate: Re
   onNavigate,
 })
 
-describe('buildDashboardKpis · D6/D1(a) attention tiles', () => {
+describe('buildDashboardKpis · D6 attention tiles', () => {
   it('tooLongInStage navigates to /applications with the tooLongInStage intent', () => {
     const onNavigate = vi.fn()
     const kpis = buildDashboardKpis(baseArgs({ app_too_long_in_stage: 3 }, onNavigate))
@@ -39,17 +40,12 @@ describe('buildDashboardKpis · D6/D1(a) attention tiles', () => {
     expect(onNavigate).toHaveBeenCalledWith('applications', { attention: 'missingAppointment' })
   })
 
-  it('closingSoon navigates to /vacancies with the closingSoon intent', () => {
+  // DASHBOARD-OPRUIMING-1 (Danny 23-08): closingSoon/staleStatusVac (the vacancy
+  // KPI tiles) are removed entirely — pin their absence, not their behaviour.
+  it('no longer builds the removed closingSoon/staleStatusVac KPI tiles', () => {
     const onNavigate = vi.fn()
-    const kpis = buildDashboardKpis(baseArgs({ vac_closing_soon: 5 }, onNavigate))
-    kpis.closingSoon.onClick?.()
-    expect(onNavigate).toHaveBeenCalledWith('vacancies', { attention: 'closingSoon' })
-  })
-
-  it('staleStatusVac navigates to /vacancies with the staleStatus intent', () => {
-    const onNavigate = vi.fn()
-    const kpis = buildDashboardKpis(baseArgs({ vac_stale_status: 1 }, onNavigate))
-    kpis.staleStatusVac.onClick?.()
-    expect(onNavigate).toHaveBeenCalledWith('vacancies', { attention: 'staleStatus' })
+    const kpis = buildDashboardKpis(baseArgs({ vac_closing_soon: 5, vac_stale_status: 1 }, onNavigate))
+    expect(kpis.closingSoon).toBeUndefined()
+    expect(kpis.staleStatusVac).toBeUndefined()
   })
 })

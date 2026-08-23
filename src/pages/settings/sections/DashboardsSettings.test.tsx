@@ -68,8 +68,8 @@ describe('DashboardsSettings — loading state (§3)', () => {
   })
 })
 
-// DASHBOARD-KIEZER-1 chain audit: 'chart.recruiter' (recruitment_manager's own
-// per-recruiter breakdown chart) was missing from BLOCK_LABEL_KEY, so its row
+// DASHBOARD-KIEZER-1 chain audit: 'chart.recruiter' (the per-recruiter breakdown
+// chart, wildcard-rendered via BLOCK_LABEL_KEY) was missing from that catalog, so its row
 // rendered the raw id "chart.recruiter" instead of a translated label — the exact
 // class of bug KPI_LABEL_KEY.openVacancies hit before (see this file's header).
 describe('DashboardsSettings — every block row carries a real translated label', () => {

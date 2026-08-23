@@ -1,7 +1,8 @@
 /**
- * useDashboardViewModel — D6/D1(a) tile visibility (no zero-tile invention, §3):
- * the recruitment KPI row includes tooLongInStage/missingApptApps/closingSoon/
- * staleStatusVac only when the backend actually returned that attention key.
+ * useDashboardViewModel — D6 tile visibility (no zero-tile invention, §3): the
+ * recruitment KPI row includes tooLongInStage/missingApptApps only when the
+ * backend actually returned that attention key. (The D1(a) vacancy tiles,
+ * closingSoon/staleStatusVac, are removed entirely — DASHBOARD-OPRUIMING-1.)
  */
 import { describe, it, expect, vi } from 'vitest'
 import { renderHook } from '@testing-library/react'
@@ -29,23 +30,20 @@ const baseArgs = (overrides: Record<string, unknown> = {}) => ({
   ...overrides,
 })
 
-describe('useDashboardViewModel · D6/D1(a) tile visibility', () => {
-  it('omits the four new tiles when appStats/vacStats are absent', () => {
+describe('useDashboardViewModel · D6 tile visibility', () => {
+  it('omits the two tiles when appStats is absent', () => {
     const { result } = renderHook(() => useDashboardViewModel(baseArgs()))
     const ids = result.current.kpis.map(k => k.id)
     expect(ids).not.toContain('tooLongInStage')
     expect(ids).not.toContain('missingApptApps')
-    expect(ids).not.toContain('closingSoon')
-    expect(ids).not.toContain('staleStatusVac')
   })
 
   it('renders each tile once its backend key is present', () => {
     const { result } = renderHook(() => useDashboardViewModel(baseArgs({
       appStats: { attention: { too_long_in_stage: 3, missing_appointment: 2 } },
-      vacStats: { attention: { closing_soon: 5, stale_status: 1 } },
     })))
     const ids = result.current.kpis.map(k => k.id)
-    expect(ids).toEqual(expect.arrayContaining(['tooLongInStage', 'missingApptApps', 'closingSoon', 'staleStatusVac']))
+    expect(ids).toEqual(expect.arrayContaining(['tooLongInStage', 'missingApptApps']))
   })
 })
 
@@ -68,13 +66,12 @@ describe('useDashboardViewModel · KD11 (DASHP36) missing-documents null-hide', 
 })
 
 describe('useDashboardViewModel · KD11 (DASHP36) widget-feed rows', () => {
-  it('maps expiring_matches/stale_leads/stale_vacancies/koios_suggestions to click-through rows', () => {
+  it('maps expiring_matches/stale_vacancies/koios_suggestions to click-through rows', () => {
     const onNavigate = vi.fn()
     const { result } = renderHook(() => useDashboardViewModel(baseArgs({
       activeType: 'sales_manager' as const,
       dash: {
         expiring_matches: [{ id: 1, candidate_name: 'Jan Jansen', customer_name: 'Acme', end_date: '2026-09-01' }],
-        stale_leads: [{ id: 2, name: 'Piet Pos', phase_changed_at: '2026-07-01' }],
         stale_vacancies: [{ id: 3, title: 'Verpleegkundige', published_at: '2026-06-01' }],
         koios_suggestions: [{ vacancy_id: 4, vacancy_title: 'Chauffeur', suggestions_count: 7 }],
         customers_by_owner: [{ owner_id: 5, name: 'Team A', count: 12 }],
@@ -85,9 +82,6 @@ describe('useDashboardViewModel · KD11 (DASHP36) widget-feed rows', () => {
     expect(result.current.expiringMatchesRows[0].primary).toBe('Jan Jansen')
     result.current.expiringMatchesRows[0].onClick?.()
     expect(onNavigate).toHaveBeenCalledWith('matches', { open: 1 })
-
-    result.current.staleLeadsRows[0].onClick?.()
-    expect(onNavigate).toHaveBeenCalledWith('candidates', { open: 2 })
 
     result.current.staleVacanciesRows[0].onClick?.()
     expect(onNavigate).toHaveBeenCalledWith('vacancies', { open: 3 })
@@ -100,6 +94,16 @@ describe('useDashboardViewModel · KD11 (DASHP36) widget-feed rows', () => {
     expect(result.current.customersByOwnerRows[0].primary).toBe('Team A')
   })
 
+  // Resilience pin (measured map step 7): staleLeadsRows was removed from the
+  // hook's return entirely — a stale caller/test destructuring it must not see
+  // a crash, only `undefined` (never a raw/rendered id).
+  it('no longer returns staleLeadsRows', () => {
+    const { result } = renderHook(() => useDashboardViewModel(baseArgs({
+      dash: { stale_leads: [{ id: 2, name: 'Piet Pos', phase_changed_at: '2026-07-01' }] },
+    })))
+    expect((result.current as Record<string, unknown>).staleLeadsRows).toBeUndefined()
+  })
+
   it('falls back to the customer name when candidate_name is PII-redacted (null, no candidates.view)', () => {
     const { result } = renderHook(() => useDashboardViewModel(baseArgs({
       dash: { expiring_matches: [{ id: 1, candidate_name: null, customer_name: 'Acme', end_date: '2026-09-01' }] },
@@ -109,32 +113,52 @@ describe('useDashboardViewModel · KD11 (DASHP36) widget-feed rows', () => {
   })
 })
 
-// DASHBOARD-KIEZER-1 chain audit: the manager dashboard must actually render its
-// declared blocks/KPIs (the reachability check does not stop at "the role can be
-// set" — the dashboard itself has to come up with real content).
-describe('useDashboardViewModel · recruitment_manager renders its own blocks', () => {
-  it('shows every block its template declares, including the extra per-recruiter chart', () => {
+// DASHBOARD-OPRUIMING-1 (Danny 23-08, verbatim: "recruiter management dashboard
+// moet nu zelfde zijn als management omdat alles ruk is, maar nu heb ik een leeg
+// gat — dus maak hetzelfde"): recruitment_manager mirrors management verbatim —
+// the '*' wildcard, so every block is visible, and management's own KPI row.
+describe('useDashboardViewModel · recruitment_manager mirrors management', () => {
+  it('shows every block under the "*" wildcard, exactly like management', () => {
     const { result } = renderHook(() => useDashboardViewModel(baseArgs({ activeType: 'recruitment_manager' as const })))
-    // Every block the recruitment_manager template lists (DASHBOARD_TEMPLATES).
-    for (const id of ['block.touchpoints', 'block.attention', 'chart.status', 'chart.recruiter', 'chart.funnel', 'chart.funnelConversion', 'chart.weekly', 'list.candidates', 'list.applications', 'list.conversations', 'list.runs']) {
+    for (const id of ['chart.status', 'chart.recruiter', 'chart.funnel', 'chart.funnelConversion', 'chart.weekly', 'list.candidates', 'list.applications', 'list.conversations', 'list.runs']) {
       expect(result.current.vis(id), `${id} should be visible for recruitment_manager`).toBe(true)
     }
-    // A block only 'recruitment' has too (never gated off for the manager view).
-    expect(result.current.vis('block.touchpoints')).toBe(true)
   })
 
-  it('renders the full KPI row, tenant-wide data included (chart.recruiter/by_owner) — not just the plain recruitment set', () => {
+  it('renders the same KPI row as management, tenant-wide data included (chart.recruiter/by_owner)', () => {
     const { result } = renderHook(() => useDashboardViewModel(baseArgs({
       activeType: 'recruitment_manager' as const,
       stats: { by_owner: [{ id: 'u1', name: 'Anna', count: 4 }, { id: 'u2', name: 'Bram', count: 6 }] },
     })))
     // The per-recruiter breakdown chart's data — genuinely team-wide (every
-    // recruiter's count), not filtered to one owner (verified against the real
-    // backend, see templates.ts BLOCK_LABEL_KEY/KPI_ROWS comments).
+    // recruiter's count), not filtered to one owner.
     expect(result.current.recruiterData).toEqual([
       { name: 'Anna', value: 4, filterValue: 'u1' },
       { name: 'Bram', value: 6, filterValue: 'u2' },
     ])
+    const managementResult = renderHook(() => useDashboardViewModel(baseArgs({ activeType: 'management' as const }))).result
+    expect(result.current.kpis.map(k => k.id)).toEqual(managementResult.current.kpis.map(k => k.id))
+  })
+})
+
+// RESILIENCE (measured map step 7): a tenant's saved dashboard_hidden config may
+// still name a removed id (closingSoon/staleStatusVac/block.touchpoints/block.
+// attention/block.staleLeads) from before DASHBOARD-OPRUIMING-1 — the hook must
+// not crash, and must simply carry on rendering everything else.
+describe('useDashboardViewModel · tolerates a saved hidden-config referencing removed ids', () => {
+  it('does not throw and renders the KPI row normally when hiddenKpis names a removed id', () => {
+    expect(() => renderHook(() => useDashboardViewModel(baseArgs({
+      hiddenKpis: ['closingSoon', 'staleStatusVac'],
+    })))).not.toThrow()
+    const { result } = renderHook(() => useDashboardViewModel(baseArgs({ hiddenKpis: ['closingSoon', 'staleStatusVac'] })))
     expect(result.current.kpis.length).toBeGreaterThan(0)
+  })
+
+  it('does not throw and vis() stays a plain boolean when hiddenBlocks names a removed id', () => {
+    expect(() => renderHook(() => useDashboardViewModel(baseArgs({
+      hiddenBlocks: ['block.touchpoints', 'block.attention', 'block.staleLeads'],
+    })))).not.toThrow()
+    const { result } = renderHook(() => useDashboardViewModel(baseArgs({ hiddenBlocks: ['block.touchpoints'] })))
+    expect(result.current.vis('chart.status')).toBe(true)
   })
 })

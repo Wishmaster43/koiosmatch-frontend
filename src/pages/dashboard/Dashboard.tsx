@@ -9,16 +9,15 @@ import { useDashboardFilterState } from './hooks/useDashboardFilterState'
 import { useDashboardFilterPanel } from './hooks/useDashboardFilterPanel'
 import { useDashboardViewModel } from './hooks/useDashboardViewModel'
 import { KpiCard } from './DashboardPrimitives'
+import { Caption } from '@/components/ui/typography'
 import DistributionCharts from './blocks/DistributionCharts'
 import TrendsRow from './blocks/TrendsRow'
 import RecentListsRow from './blocks/RecentListsRow'
 import ActivityListsRow from './blocks/ActivityListsRow'
 import ShiftsSummary from './blocks/ShiftsSummary'
-import TouchpointsFeed from './blocks/TouchpointsFeed'
-import AttentionCandidates from './blocks/AttentionCandidates'
 import WidgetListBlock from './blocks/WidgetListBlock'
 import KoiosForYouCard from './KoiosForYouCard'
-import type { DashStats, DashOpp, DashData, DashAppStats, DashVacStats } from '@/types/dashboard'
+import type { DashStats, DashOpp, DashData, DashAppStats } from '@/types/dashboard'
 import { useAllSettings, getJsonSetting, getBoolSetting } from '@/lib/settings/useAllSettings'
 import { useNumberFormat } from '@/lib/formatters'
 import { useDateFormat } from '@/lib/datetime'
@@ -68,8 +67,8 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
   // `loading`/`error` cover the two CRITICAL feeds (/candidates/stats + /dashboard) —
   // a failure there must render an explicit error notice, never a KPI strip full of
   // "—" that reads as real zeros (audit finding).
-  const { stats, opp, dash, dashCharts, matchesTotal, vacanciesTotal, appStats, vacStats, loading, error, retry } =
-    useDashboardData<DashStats, DashOpp, DashData, { timeseries?: Record<string, unknown>; net?: unknown }, DashAppStats, DashVacStats>({
+  const { stats, opp, dash, dashCharts, matchesTotal, vacanciesTotal, appStats, loading, error, retry } =
+    useDashboardData<DashStats, DashOpp, DashData, { timeseries?: Record<string, unknown>; net?: unknown }, DashAppStats>({
       tenantId: activeTenant?.id, filterParams: dashFilterParams,
     })
 
@@ -82,11 +81,11 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
     vis, statusData, recruiterData, funnelData, oppStageData,
     recentCandidates, recentApplications, recentLeads, runs, conversations,
     showRuns, showConv, trendData, trendSeries, att, kpis,
-    expiringMatchesRows, staleLeadsRows, staleVacanciesRows, koiosSuggestionsRows, customersByOwnerRows,
+    expiringMatchesRows, staleVacanciesRows, koiosSuggestionsRows, customersByOwnerRows,
   } = useDashboardViewModel({
     t, formatNumber, stats, opp, dash, dashCharts, statusMeta, funnelMeta, funnelTypes,
     activeType, hiddenBlocks, hiddenKpis, hasPlanning, valueInHours, candidateTotalLabel,
-    matchesTotal, vacanciesTotal, appStats, vacStats, onNavigate,
+    matchesTotal, vacanciesTotal, appStats, onNavigate,
   })
 
   // Registers this page's right-panel filter groups (period/location/status options).
@@ -125,11 +124,11 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
           {(dash?.sync_sources ?? []).filter(s => s.system !== 'shiftmanager').length > 0 && (
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 16, marginBottom: 8, flexWrap: 'wrap' }}>
               {(dash?.sync_sources ?? []).filter(s => s.system !== 'shiftmanager').map(s => (
-                <span key={s.system} style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+                <Caption key={s.system} as="span">
                   {t('lastSync', { source: s.label })}: {s.last_synced_at
                     ? formatDate(s.last_synced_at, { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
                     : t('neverSynced')}
-                </span>
+                </Caption>
               ))}
             </div>
           )}
@@ -147,24 +146,14 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
 
           <TrendsRow vis={vis} trendData={trendData} trendSeries={trendSeries} funnelData={funnelData} onNavigate={onNavigate} />
 
-          {/* ONE grid for every work-feed tile (DASH-FEEDS-PACK-1, Danny 17-08:
-              "Stilstaande leads naast Werk af").
-              These used to be TWO grids with a hardcoded '1fr 1fr' and other
-              sections between them. Each tile self-hides when its data is empty
-              (all of them `return null`), so whenever a neighbour hid itself its
-              half of the row stayed blank — which is what Danny saw: "Werk af"
-              alone in one row and "Stilstaande leads" alone two sections lower,
-              with dead space beside both. In one grid the cells simply pack.
-              ORDER: the two work-lists lead, because both answer "what must I
-              pick up now?" — so they land side by side in row one no matter how
-              many of the tiles below them have data. "Vandaag" (today's contact
-              moments) is a different question and follows them. */}
-          {(vis('block.touchpoints') || vis('block.attention') || vis('block.expiringMatches')
-            || vis('block.staleLeads') || vis('block.staleVacancies') || vis('block.koiosSuggestions')) && (
+          {/* ONE grid for every work-feed tile (DASH-FEEDS-PACK-1). Each tile self-hides
+              when its data is empty, so whenever a neighbour hid itself its half of the
+              row stayed blank in a hardcoded two-grid layout — in one grid the cells
+              simply pack. DASHBOARD-OPRUIMING-1 (Danny 23-08): "Werk af" (attention
+              candidates), "Stilstaande leads" and "Vandaag" (touchpoints) are removed
+              entirely, leaving the three KD11 sales-widget feeds here. */}
+          {(vis('block.expiringMatches') || vis('block.staleVacancies') || vis('block.koiosSuggestions')) && (
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
-            {vis('block.attention') && <AttentionCandidates groups={dash?.attention_candidates} onOpen={(id) => onNavigate?.('candidates', { open: id })} onNavigate={onNavigate} />}
-            {vis('block.staleLeads') && <WidgetListBlock title={t('block.staleLeads')} rows={staleLeadsRows} />}
-            {vis('block.touchpoints') && <TouchpointsFeed items={dash?.touchpoints ?? []} onOpen={(id) => onNavigate?.('candidates', { open: id })} />}
             {vis('block.expiringMatches') && <WidgetListBlock title={t('block.expiringMatches')} rows={expiringMatchesRows} />}
             {vis('block.staleVacancies') && <WidgetListBlock title={t('block.staleVacancies')} rows={staleVacanciesRows} />}
             {vis('block.koiosSuggestions') && <WidgetListBlock title={t('block.koiosSuggestions')} rows={koiosSuggestionsRows} />}
@@ -178,7 +167,7 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
           </div>
           )}
 
-          {/* KD11 (DASHP36) — the four sales-widget feeds moved INTO the packed
+          {/* KD11 (DASHP36) — the three sales-widget feeds moved INTO the packed
               grid above (DASH-FEEDS-PACK-1); only the full-width tenant-wide
               breakdown stays on its own row, since it is not a half-width tile. */}
           {vis('block.customersByOwner') && (

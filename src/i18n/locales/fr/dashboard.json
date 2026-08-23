@@ -51,11 +51,7 @@
     "tooLongInStage": "Trop longtemps en phase",
     "tooLongInStageSub": "pas de changement",
     "missingApptApps": "Rendez-vous manquant",
-    "missingApptAppsSub": "requis à cette phase",
-    "closingSoon": "Clôture proche",
-    "closingSoonSub": "échéance approche",
-    "staleStatusVac": "Statut obsolète",
-    "staleStatusVacSub": "aucun changement récent"
+    "missingApptAppsSub": "requis à cette phase"
   },
   "chart": {
     "byStatus": "Candidats par statut",
@@ -87,14 +83,10 @@
     "shiftsFilled": "Pourvus",
     "shiftsUnfilled": "Non pourvus",
     "shiftsOccupancy": "Occupation",
-    "touchpoints": "Aujourd’hui",
-    "attentionTitle": "À traiter",
     "expiringMatches": "Matchs expirant",
-    "staleLeads": "Leads stagnants",
     "staleVacancies": "Offres stagnantes",
     "koiosSuggestions": "Suggestions Koios",
-    "customersByOwner": "Clients par responsable",
-    "seeAll": "Voir les {{count}}"
+    "customersByOwner": "Clients par responsable"
   },
   "action": {
     "allCandidates": "Tous les candidats",
@@ -119,17 +111,6 @@
     "sales_manager": "Directeur des ventes",
     "planning": "Planification",
     "readonly": "Lecture seule"
-  },
-  "touchpointType": {
-    "birthday": "Anniversaire",
-    "firstWorkday": "Premier jour",
-    "backAvailable": "À nouveau dispo.",
-    "followupDue": "Relance due"
-  },
-  "attentionGroup": {
-    "stale6m": "Sans contact >6m",
-    "neverContacted": "Jamais contacté",
-    "noFollowup": "Sans relance"
   },
   "lastSync": "Dernière synchro {{source}}",
   "neverSynced": "jamais",

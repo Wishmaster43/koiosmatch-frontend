@@ -10,7 +10,7 @@ import type { ReactNode } from 'react'
 import { initialsOf } from '@/lib/initials'
 import type { ChartDatum } from '@/components/charts/chartTypes'
 import type { BarSeries } from '@/components/charts/WeeklyBarChartCard'
-import type { DashStats, DashOpp, DashData, DashAppStats, DashVacStats, TimeseriesPoint, TrendRow } from '@/types/dashboard'
+import type { DashStats, DashOpp, DashData, DashAppStats, TimeseriesPoint, TrendRow } from '@/types/dashboard'
 import type { LookupItem } from '@/context/LookupsContext'
 import { buildDashboardKpis, type DashboardKpi } from '../dashboardKpis'
 import { visibleBlock, kpiRow } from '../templates'
@@ -24,9 +24,8 @@ interface UseDashboardViewModelArgs {
   opp: DashOpp | null
   dash: DashData | null
   dashCharts: { timeseries?: Record<string, unknown>; net?: unknown } | null
-  // D6/D1(a) — best-effort attention feeds not previously wired into the dashboard.
+  // D6 — best-effort attention feed not previously wired into the dashboard.
   appStats?: DashAppStats | null
-  vacStats?: DashVacStats | null
   statusMeta: (v?: string | null) => LookupItem
   funnelMeta: (v?: string | null) => LookupItem
   funnelTypes: LookupItem[]
@@ -44,7 +43,7 @@ interface UseDashboardViewModelArgs {
 export function useDashboardViewModel({
   t, formatNumber, stats, opp, dash, dashCharts, statusMeta, funnelMeta, funnelTypes,
   activeType, hiddenBlocks, hiddenKpis, hasPlanning, valueInHours, candidateTotalLabel,
-  matchesTotal, vacanciesTotal, appStats, vacStats, onNavigate,
+  matchesTotal, vacanciesTotal, appStats, onNavigate,
 }: UseDashboardViewModelArgs) {
   // Is a chart/list block visible for the active role, and not switched off in Settings?
   const vis = (id: string) => visibleBlock(activeType, id) && !hiddenBlocks.includes(id) && (id !== 'block.shifts' || hasPlanning)
@@ -79,7 +78,7 @@ export function useDashboardViewModel({
       status: m.label, statusColor: m.color, time: fmtWhen(a.created_at) }
   }), [dash, funnelMeta])
 
-  // KD11 (DASHP36) — the four sales-dashboard widget feeds, mapped to the shared
+  // KD11 (DASHP36) — the three sales-dashboard widget feeds, mapped to the shared
   // WidgetListBlock row shape. Each self-hides via WidgetListBlock when empty; the
   // feed itself is absent (not `[]`) for a role without the view-permission, so
   // `?? []` here just means "nothing to show", never a fabricated zero-state.
@@ -91,13 +90,6 @@ export function useDashboardViewModel({
     secondary: m.candidate_name ? m.customer_name : undefined,
     meta: fmtWhen(m.end_date),
     onClick: m.id != null ? () => onNavigate?.('matches', { open: m.id }) : undefined,
-  })), [dash, onNavigate])
-
-  const staleLeadsRows = useMemo(() => (dash?.stale_leads ?? []).map((l, i) => ({
-    key: l.id ?? l.name ?? `row-${i}`,
-    primary: l.name || '—',
-    meta: fmtWhen(l.phase_changed_at),
-    onClick: l.id != null ? () => onNavigate?.('candidates', { open: l.id }) : undefined,
   })), [dash, onNavigate])
 
   const staleVacanciesRows = useMemo(() => (dash?.stale_vacancies ?? []).map((v, i) => ({
@@ -196,12 +188,10 @@ export function useDashboardViewModel({
     ...(stats?.attention ?? {}),
     ...((dash?.attention as Record<string, number | null | undefined>) ?? {}),
     ...Object.fromEntries(Object.entries(dash ?? {}).filter(([, v]) => typeof v === 'number')) as Record<string, number>,
-    // D6/D1(a) — applications/vacancies attention, prefixed so they never collide with
-    // the candidates/stats `missing_appointment` key already merged above.
+    // D6 — applications attention, prefixed so it never collides with the
+    // candidates/stats `missing_appointment` key already merged above.
     app_too_long_in_stage: appStats?.attention?.too_long_in_stage,
     app_missing_appointment: appStats?.attention?.missing_appointment,
-    vac_closing_soon: vacStats?.attention?.closing_soon,
-    vac_stale_status: vacStats?.attention?.stale_status,
   }
   const num = (v?: number | null) => (v == null ? '—' : formatNumber(v))
 
@@ -213,13 +203,11 @@ export function useDashboardViewModel({
     t, att, num, eur, opp, valueInHours, candidateTotalLabel,
     matchesTotal, vacanciesTotal, incompleteRuns, conversationsCount: conversations.length, onNavigate,
   })
-  // D6/D1(a) tiles render NOTHING when their backend key is absent — no zero-tile
+  // D6 tiles render NOTHING when their backend key is absent — no zero-tile
   // invention (§3). Maps kpi id → the att key that must be present to show it.
   const REQUIRES_ATT_KEY: Record<string, keyof typeof att> = {
     tooLongInStage: 'app_too_long_in_stage',
     missingApptApps: 'app_missing_appointment',
-    closingSoon: 'vac_closing_soon',
-    staleStatusVac: 'vac_stale_status',
     // DASHP36: `null` until the tenant has flagged an `is_cv` document type —
     // the tile must not render a fake "0" in the meantime.
     missingDocs: 'missing_documents',
@@ -237,7 +225,7 @@ export function useDashboardViewModel({
     recentCandidates, recentApplications, recentLeads, runs, conversations,
     showRuns, showConv, trendData, trendSeries, att, kpis,
     // KD11 widget feeds (DASHP36).
-    expiringMatchesRows, staleLeadsRows, staleVacanciesRows, koiosSuggestionsRows, customersByOwnerRows,
+    expiringMatchesRows, staleVacanciesRows, koiosSuggestionsRows, customersByOwnerRows,
   }
 }
 

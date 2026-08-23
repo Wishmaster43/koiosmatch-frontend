@@ -48,8 +48,6 @@ vi.mock('./blocks/TrendsRow', () => ({ default: () => null }))
 vi.mock('./blocks/RecentListsRow', () => ({ default: () => null }))
 vi.mock('./blocks/ActivityListsRow', () => ({ default: () => null }))
 vi.mock('./blocks/ShiftsSummary', () => ({ default: () => null }))
-vi.mock('./blocks/TouchpointsFeed', () => ({ default: () => null }))
-vi.mock('./blocks/AttentionCandidates', () => ({ default: () => null }))
 // Own useQuery call (own test file) — mocked here so this container test never
 // needs a QueryClientProvider in the tree.
 vi.mock('./KoiosForYouCard', () => ({ default: () => null }))

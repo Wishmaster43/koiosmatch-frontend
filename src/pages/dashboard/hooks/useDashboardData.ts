@@ -21,28 +21,27 @@ import { isAbortError } from '@/lib/mocks'
 import type { Id } from '@/types/common'
 
 // Loose server shapes — the dashboard reads defensively (mirrors the old inline types).
-export interface DashboardServerState<Stats, Opp, Dash, Charts, AppStats, VacStats> {
+export interface DashboardServerState<Stats, Opp, Dash, Charts, AppStats> {
   stats: Stats | null
   opp: Opp | null
   dash: Dash | null
   dashCharts: Charts | null
   matchesTotal: number | null
   vacanciesTotal: number | null
-  // D6/D1(a) — best-effort attention feeds for the applications/vacancies tiles
-  // the recruitment dashboard did not render yet (P36 fase 1).
+  // D6/D1(a) — best-effort attention feed for the applications tiles
+  // (the vacancies twin left with the removed dashboard KPIs, DASHBOARD-OPRUIMING-1).
   appStats: AppStats | null
-  vacStats: VacStats | null
   loading: boolean
   error: boolean
   retry: () => void
 }
 
-export function useDashboardData<Stats, Opp, Dash, Charts, AppStats = unknown, VacStats = unknown>({ tenantId, filterParams }: {
+export function useDashboardData<Stats, Opp, Dash, Charts, AppStats = unknown>({ tenantId, filterParams }: {
   tenantId?: Id | null
   // Single-value dashboard filters (period/status/location_id) — a NEW OBJECT per
   // change is fine: the effect keys on its serialised form to avoid loops.
   filterParams: Record<string, unknown>
-}): DashboardServerState<Stats, Opp, Dash, Charts, AppStats, VacStats> {
+}): DashboardServerState<Stats, Opp, Dash, Charts, AppStats> {
   const [stats, setStats] = useState<Stats | null>(null)
   const [opp,   setOpp]   = useState<Opp | null>(null)
   const [dash,  setDash]  = useState<Dash | null>(null)
@@ -50,7 +49,6 @@ export function useDashboardData<Stats, Opp, Dash, Charts, AppStats = unknown, V
   const [matchesTotal,   setMatchesTotal]   = useState<number | null>(null)
   const [vacanciesTotal, setVacanciesTotal] = useState<number | null>(null)
   const [appStats, setAppStats] = useState<AppStats | null>(null)
-  const [vacStats, setVacStats] = useState<VacStats | null>(null)
   // Per-feed loading/error for the two critical requests, combined below.
   const [statsLoading, setStatsLoading] = useState(true)
   const [statsError,   setStatsError]   = useState(false)
@@ -71,12 +69,12 @@ export function useDashboardData<Stats, Opp, Dash, Charts, AppStats = unknown, V
       .finally(() => { if (!ctrl.signal.aborted) setStatsLoading(false) })
     heavyGet('/opportunities/stats', { signal: ctrl.signal })
       .then(r => setOpp((unwrap<Opp>(r)) ?? null)).catch(() => setOpp(null))
-    // D6/D1(a) — applications/vacancies attention feeds, best-effort like /opportunities/stats
-    // (the attention tiles they carry are optional enrichments, never gate the page).
+    // D6/D1(a) — applications attention feed, best-effort like /opportunities/stats
+    // (an optional enrichment, never gating the page). The /vacancies/stats twin
+    // was dropped with its last consumers (DASHBOARD-OPRUIMING-1) — never fetch
+    // data nothing renders (§8 data minimisation).
     heavyGet('/applications/stats', { signal: ctrl.signal })
       .then(r => setAppStats((unwrap<AppStats>(r)) ?? null)).catch(() => setAppStats(null))
-    heavyGet('/vacancies/stats', { signal: ctrl.signal })
-      .then(r => setVacStats((unwrap<VacStats>(r)) ?? null)).catch(() => setVacStats(null))
     return () => ctrl.abort()
   }, [tenantId, retryKey])
 
@@ -111,7 +109,7 @@ export function useDashboardData<Stats, Opp, Dash, Charts, AppStats = unknown, V
   }, [tenantId, retryKey])
 
   return {
-    stats, opp, dash, dashCharts, matchesTotal, vacanciesTotal, appStats, vacStats,
+    stats, opp, dash, dashCharts, matchesTotal, vacanciesTotal, appStats,
     loading: statsLoading || dashLoading, error: statsError || dashError, retry,
   }
 }

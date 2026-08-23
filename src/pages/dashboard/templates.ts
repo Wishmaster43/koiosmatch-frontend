@@ -39,15 +39,11 @@ export const KPI_ROWS: Record<DashboardType, string[]> = {
   // vacatures · Taken over tijd · Actieve gesprekken (alle drie live) = 9 blokjes.
   admin:       ['candidates', 'opps', 'pipeline', 'expiringOpps', 'placements', 'intakes', 'openVacancies', 'tasksOverdue', 'activeConv'],
   management:  ['candidates', 'opps', 'pipeline', 'expiringOpps', 'placements', 'intakes', 'openVacancies', 'tasksOverdue', 'activeConv'],
-  recruitment: ['candidates', 'never', 'stale', 'tasksOverdue', 'failedWf', 'uncalledCallist', 'intakes', 'tooLongInStage', 'missingApptApps', 'closingSoon', 'staleStatusVac'],
-  // DASHBOARD-KIEZER-1 — team-wide manager view: same KPI vocabulary as `recruitment`
-  // (same ids/labels), but genuinely TEAM-WIDE data — VERIFIED against the real backend
-  // (DASHP-RM-1, RoleController::DASHBOARD_TYPES + DashboardController::hasRecruiterDashboard):
-  // the controller's owner-scope check is an exact match on 'recruitment', so
-  // 'recruitment_manager' falls through to the tenant-wide branch by construction, exactly
-  // like management/sales_manager — no BE follow-up or dedicated endpoint needed. Backend
-  // test: DashboardP36Test::test_recruitment_manager_type_is_tenant_wide_not_narrowed_to_own.
-  recruitment_manager: ['candidates', 'never', 'stale', 'tasksOverdue', 'failedWf', 'uncalledCallist', 'intakes', 'tooLongInStage', 'missingApptApps', 'closingSoon', 'staleStatusVac'],
+  recruitment: ['candidates', 'never', 'stale', 'tasksOverdue', 'failedWf', 'uncalledCallist', 'intakes', 'tooLongInStage', 'missingApptApps'],
+  // DASHBOARD-OPRUIMING-1 (Danny 23-08): "recruitment_manager mirrors management
+  // verbatim" — the trimmed recruiter-flavoured KPI set left it "leeg"/empty, so
+  // it now shares management's exact KPI row instead of its own vocabulary.
+  recruitment_manager: ['candidates', 'opps', 'pipeline', 'expiringOpps', 'placements', 'intakes', 'openVacancies', 'tasksOverdue', 'activeConv'],
   backoffice:  ['tasks', 'placements', 'missingDocs', 'expiringContracts', 'couplingErrors', 'incompleteRuns'],
   sales:       ['opps', 'pipeline', 'expiringOpps', 'fillRate', 'placements', 'activeConv'],
   // KD11 — own-customer scope (server-resolved); same KPI vocabulary as `sales`,
@@ -63,19 +59,19 @@ export const KPI_ROWS: Record<DashboardType, string[]> = {
 export const DASHBOARD_TEMPLATES: Record<DashboardType, string[]> = {
   admin: ['*'],
   management: ['*'],
-  recruitment: ['block.touchpoints', 'block.attention', 'chart.status', 'chart.funnel', 'chart.funnelConversion', 'chart.weekly', 'list.candidates', 'list.applications', 'list.conversations', 'list.runs'],
-  // DASHBOARD-KIEZER-1 — the manager view keeps the full recruitment surface AND
-  // adds the per-recruiter breakdown chart (chart.recruiter, existing recruiterData/
-  // by_owner feed — the one block a manager needs that an individual recruiter doesn't).
-  recruitment_manager: ['block.touchpoints', 'block.attention', 'chart.status', 'chart.recruiter', 'chart.funnel', 'chart.funnelConversion', 'chart.weekly', 'list.candidates', 'list.applications', 'list.conversations', 'list.runs'],
+  recruitment: ['chart.status', 'chart.funnel', 'chart.funnelConversion', 'chart.weekly', 'list.candidates', 'list.applications', 'list.conversations', 'list.runs'],
+  // DASHBOARD-OPRUIMING-1 (Danny 23-08): "recruitment_manager mirrors management
+  // verbatim" — same '*' wildcard, same full dashboard, instead of its own trimmed
+  // block list.
+  recruitment_manager: ['*'],
   backoffice: ['chart.status', 'chart.funnel', 'list.applications', 'list.runs'],
   sales: ['chart.oppStage', 'chart.status', 'list.leads'],
   // KD11 — the two sales-dashboard TEMPLATES on the DASHP36 widget-feed keys
-  // (expiring_matches/stale_leads/stale_vacancies/koios_suggestions), equal
-  // footprint via the shared WidgetListBlock (config-driven, §3A). `sales_manager`
-  // additionally gets the tenant-wide `customers_by_owner` breakdown.
-  accountmanager: ['chart.oppStage', 'chart.status', 'list.leads', 'block.expiringMatches', 'block.staleLeads', 'block.staleVacancies', 'block.koiosSuggestions'],
-  sales_manager:  ['chart.oppStage', 'chart.status', 'list.leads', 'block.expiringMatches', 'block.staleLeads', 'block.staleVacancies', 'block.koiosSuggestions', 'block.customersByOwner'],
+  // (expiring_matches/stale_vacancies/koios_suggestions), equal footprint via the
+  // shared WidgetListBlock (config-driven, §3A). `sales_manager` additionally
+  // gets the tenant-wide `customers_by_owner` breakdown.
+  accountmanager: ['chart.oppStage', 'chart.status', 'list.leads', 'block.expiringMatches', 'block.staleVacancies', 'block.koiosSuggestions'],
+  sales_manager:  ['chart.oppStage', 'chart.status', 'list.leads', 'block.expiringMatches', 'block.staleVacancies', 'block.koiosSuggestions', 'block.customersByOwner'],
   planning: ['block.shifts', 'chart.weekly', 'list.runs', 'list.conversations'],
   readonly: ['chart.status', 'chart.funnel'],
 }
@@ -94,23 +90,22 @@ export const KPI_LABEL_KEY: Record<string, string> = {
   // Was missing — Settings → Dashboards fell back to the raw id ("openVacancies")
   // instead of the translated label used by the live dashboard (dashboardKpis.tsx).
   openVacancies: 'kpi.openVacancies',
-  // D6/D1(a) — new attention tiles (P36 fase 1).
+  // D6 — new attention tiles (P36 fase 1).
   tooLongInStage: 'kpi.tooLongInStage', missingApptApps: 'kpi.missingApptApps',
-  closingSoon: 'kpi.closingSoon', staleStatusVac: 'kpi.staleStatusVac',
 }
 export const BLOCK_LABEL_KEY: Record<string, string> = {
   'chart.status': 'chart.byStatus', 'chart.funnel': 'chart.funnel', 'chart.funnelConversion': 'chart.funnelConversion',
-  // Was missing — recruitment_manager (DASHBOARD-KIEZER-1) is the only template that
-  // carries 'chart.recruiter', and its raw id leaked as the row label in the Settings →
-  // Dashboards "Charts & lists" matrix (the exact class of bug openVacancies hit before).
+  // Was missing (DASHBOARD-KIEZER-1) — since recruitment_manager went '*' no
+  // template lists 'chart.recruiter' explicitly; it lives on via this catalog
+  // (wildcard renders Object.keys here), so its label entry must stay or the raw
+  // id leaks as the row label (the exact class of bug openVacancies hit before).
   'chart.recruiter': 'chart.byRecruiter',
   'chart.weekly': 'chart.intakeWeekly', 'chart.oppStage': 'chart.byStage',
   'list.candidates': 'block.recentCandidates', 'list.applications': 'block.recentApplications',
   'list.conversations': 'block.recentConversations', 'list.runs': 'block.recentRuns', 'list.leads': 'block.leadsPipeline',
-  'block.touchpoints': 'block.touchpoints', 'block.attention': 'block.attentionTitle',
   'block.shifts': 'block.shifts',
   // KD11 widget feeds (DASHP36).
-  'block.expiringMatches': 'block.expiringMatches', 'block.staleLeads': 'block.staleLeads',
+  'block.expiringMatches': 'block.expiringMatches',
   'block.staleVacancies': 'block.staleVacancies', 'block.koiosSuggestions': 'block.koiosSuggestions',
   'block.customersByOwner': 'block.customersByOwner',
 }

@@ -65,8 +65,5 @@ export function buildDashboardKpis({ t, att, num, eur, opp, valueInHours, candid
     // onNavigate('candidates', { attention: 'stale6m' }) / ('tasks', { kpi: 'overdue' }).
     tooLongInStage:    { id: 'tooLongInStage', label: t('kpi.tooLongInStage'), value: num(att.app_too_long_in_stage), sub: t('kpi.tooLongInStageSub'), color: 'var(--color-warning)', bg: 'var(--color-warning-bg)', Icon: Hourglass, onClick: () => onNavigate?.('applications', { attention: 'tooLongInStage' }) },
     missingApptApps:   { id: 'missingApptApps', label: t('kpi.missingApptApps'), value: num(att.app_missing_appointment), sub: t('kpi.missingApptAppsSub'), color: 'var(--color-warning)', bg: 'var(--color-warning-bg)', Icon: CalendarX2, onClick: () => onNavigate?.('applications', { attention: 'missingAppointment' }) },
-    // D1(a) — /vacancies/stats attention.closing_soon / attention.stale_status, same intent pattern.
-    closingSoon:       { id: 'closingSoon', label: t('kpi.closingSoon'), value: num(att.vac_closing_soon), sub: t('kpi.closingSoonSub'), color: 'var(--color-warning)', bg: 'var(--color-warning-bg)', Icon: CalendarClock, onClick: () => onNavigate?.('vacancies', { attention: 'closingSoon' }) },
-    staleStatusVac:    { id: 'staleStatusVac', label: t('kpi.staleStatusVac'), value: num(att.vac_stale_status), sub: t('kpi.staleStatusVacSub'), color: 'var(--color-danger-text)', bg: 'var(--color-danger-bg)', Icon: AlertTriangle, onClick: () => onNavigate?.('vacancies', { attention: 'staleStatus' }) },
   }
 }
