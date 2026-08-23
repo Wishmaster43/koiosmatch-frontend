@@ -57,7 +57,8 @@
     "removeCondition": "Bedingung entfernen",
     "workflowLoading": "Workflows werden geladen…",
     "workflowSelect": "Workflow auswählen…",
-    "workflowEmpty": "Noch keine Workflows"
+    "workflowEmpty": "Noch keine Workflows",
+    "multiselectLoading": "Optionen werden geladen…"
   },
   "scheduleModal": {
     "title": "Zeitplan festlegen",
@@ -771,7 +772,23 @@
     "Archiefreden": "Archivierungsgrund",
     "Welke vacatures": "Welche Stellen",
     "Positie in CV": "Position im Lebenslauf",
-    "Workflow": "Workflow"
+    "Workflow": "Workflow",
+    "Berichtdoel": "Nachrichtenzweck",
+    "Categorie (voor logging)": "Kategorie (für Protokollierung)",
+    "Niet opnieuw sturen binnen (uren)": "Nicht erneut senden innerhalb (Stunden)",
+    "Vereist toestemmingsveld (fail-closed)": "Erforderliches Einwilligungsfeld (fail-closed)",
+    "Afzender-context": "Absenderkontext",
+    "Overslaan bij toestemmingsveld (XOR)": "Überspringen bei Einwilligungsfeld (XOR)",
+    "Ontvanger-rol (backoffice)": "Empfängerrolle (Backoffice)",
+    "Gebruikers": "Benutzer",
+    "Hyperlink-entiteit": "Hyperlink-Entität",
+    "Alleen AI-enabled kandidaten": "Nur KI-fähige Kandidaten",
+    "Functies": "Funktionen",
+    "Niet gecontacteerd in (dagen)": "Nicht kontaktiert seit (Tagen)",
+    "Laatste dienst minstens X dagen geleden": "Letzter Dienst mindestens X Tage her",
+    "Maximaal aantal no-shows": "Maximale Anzahl No-Shows",
+    "Soort record": "Datensatztyp",
+    "Alle records van dit soort": "Alle Datensätze dieses Typs"
   },
   "fieldOptions": {
     "Array (meerdere bundles)": "Array (mehrere Bundles)",
@@ -884,6 +901,8 @@
     "all": "alle",
     "role": "Rolle",
     "candidate_owner": "Kandidateneigentümer",
+    "customer_owner": "Kundeneigentümer",
+    "vacancy_owner": "Stelleneigentümer",
     "Alleen gewijzigde (aanbevolen)": "Nur geänderte (empfohlen)",
     "Alle vacatures": "Alle Stellen",
     "owner": "Eigentümer",
@@ -903,7 +922,17 @@
     "workflowcustom": "benutzerdefiniert (Workflow)",
     "customer_owner": "Kundeneigentümer",
     "vacancy_owner": "Stelleneigentümer",
-    "top": "oben"
+    "top": "oben",
+    "shift_offer": "Dienstangebot",
+    "reminder": "Erinnerung",
+    "no_response": "Keine Antwort",
+    "general": "Allgemein",
+    "kandidaten": "Kandidaten",
+    "algemeen": "allgemein",
+    "candidate": "Kandidat",
+    "customer": "Kunde",
+    "customer_location": "Kundenstandort",
+    "users": "Benutzer"
   },
   "agentTest": {
     "title": "Testvariablen",
@@ -1060,7 +1089,16 @@
     "De workflow die als kind wordt gestart (async, via de wachtrij) Zelf-aanroep en kringlopen worden geweigerd; maximaal 5 niveaus diep": "Der Workflow, der als Kind gestartet wird (asynchron, über die Warteschlange). Selbstaufrufe und Kreisläufe werden abgelehnt; maximal 5 Ebenen tief.",
     "Eerst proefdraaien rapporteert WIE er aangemaakt zou worden (incl payload), schrijft niets Zet expliciet uit om echt in Shiftmanager aan te maken": "Erst testen: meldet, WER angelegt werden würde (inkl. Payload), schreibt nichts. Explizit ausschalten, um wirklich in Shiftmanager anzulegen.",
     "De voorwaarden volgen altijd de matchcriteria van de vacature zelf wie ze wil wijzigen, wijzigt de matchcriteria of de wegingstemplates Deze stap kiest alleen de set": "Die Bedingungen folgen immer den Matchkriterien der Stelle selbst: wer sie ändern will, ändert die Matchkriterien oder die Gewichtungsvorlagen. Dieser Schritt wählt nur die Menge.",
-    "Datum en tijd (bv 10-08-2026 1400) of een variabele": "Datum und Uhrzeit (z. B. 10-08-2026 14:00) oder eine Variable."
+    "Datum en tijd (bv 10-08-2026 1400) of een variabele": "Datum und Uhrzeit (z. B. 10-08-2026 14:00) oder eine Variable.",
+    "Idempotentie dezelfde template gaat binnen dit venster niet nogmaals naar dezelfde kandidaat (0 = altijd sturen)": "Idempotenz: Dieselbe Vorlage wird innerhalb dieses Zeitfensters nicht erneut an denselben Kandidaten gesendet (0 = immer senden).",
+    "Optioneel Bijv whatsapp_consent verstuur ALLEEN als dit veld op de kandidaatrij aanwezig én waar is (ontbrekend veld = geen verzending)": "Optional. Z. B. whatsapp_consent: nur senden, wenn dieses Feld in der Kandidatenzeile vorhanden und wahr ist (fehlendes Feld = kein Versand).",
+    "Optioneel Bijv whatsapp_consent sla deze e-mail over als de kandidaat dat veld op waar heeft staan (voorkomt dubbele verzending naast een WhatsApp-stap)": "Optional. Z. B. whatsapp_consent: Diese E-Mail überspringen, wenn das Feld beim Kandidaten auf wahr steht (verhindert einen doppelten Versand neben einem WhatsApp-Schritt).",
+    "Optioneel Zet een rolnaam (bv backoffice) om deze stap naar iedereen met die rol te sturen in plaats van naar de kandidaat-bundel": "Optional. Rollennamen festlegen (z. B. backoffice), um diesen Schritt an alle mit dieser Rolle zu senden statt an das Kandidatenbündel.",
+    "Optioneel Bijvoorbeeld \"conversation\" de melding linkt dan naar het bijbehorende \"conversation_id\"-veld uit de trigger, zodat de melding doorklikbaar is": "Optional. Zum Beispiel \"conversation\": Die Meldung verlinkt dann zum passenden \"conversation_id\"-Feld aus dem Trigger, sodass sie anklickbar wird.",
+    "candidate = kandidaat, customer = klant, customer_location = klantlocatie, vacancy = vacature": "candidate = Kandidat, customer = Kunde, customer_location = Kundenstandort, vacancy = Stelle.",
+    "Selecteert alle klanten / klantlocaties / vacatures (max 10000, gearchiveerde niet) Werkt niet voor kandidaten die selecteer je met de stap \"Kandidaten ophalen\"": "Wählt alle Kunden / Kundenstandorte / Stellen aus (max. 10.000, archivierte ausgeschlossen). Funktioniert nicht für Kandidaten: dafür den Schritt \"Kandidaten abrufen\" verwenden.",
+    "Laat leeg voor alle pools": "Leer lassen für alle Pools",
+    "Laat leeg voor alle functies": "Leer lassen für alle Funktionen"
   },
   "triggers": {
     "events": {

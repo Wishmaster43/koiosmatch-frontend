@@ -1,5 +1,8 @@
 // whatsapp_send module — send a WhatsApp message to a candidate (requires the WhatsApp app).
 import { MessageCircle } from 'lucide-react'
+// HUISSTIJL-1: the §4 soft-tint formula lives in lib/tint, never a hand-rolled
+// color-mix literal per module (herhaal-slotaudit r3).
+import { tint } from '@/lib/tint'
 
 export default {
   type:  'whatsapp_send',
@@ -8,8 +11,12 @@ export default {
   label: 'WhatsApp Sturen',
   Icon:  MessageCircle,
   color: 'var(--module-green)',
-  bg:    'color-mix(in srgb, var(--module-green) 12%, transparent)',
+  bg:    tint('var(--module-green)', 12),
   schema: [
+    // WF-BUILDER-VELDEN-1: WhatsAppSendModule::configSchema()'s tenant-lookup-driven
+    // message purpose (message_purposes, same lookup as email_send's `purpose`) — the
+    // badge/filter label on the sent message, never a hardcoded option list.
+    { key: 'purpose',              label: 'Berichtdoel',           type: 'lookup_select', endpoint: '/message-purposes', default: 'manual' },
     // WhatsApp send FORMAT; key stays as the BE contract expects.
     // 'session' = free-form text, only delivered inside Meta's 24h customer-service
     // window (the BE gates on the conversation's last inbound message).
@@ -35,6 +42,17 @@ export default {
     // Danny's own message classification (NOT the send format above) — drives queue
     // order in the WABA batch (Wachtrij tab). Tenant lookup, CRUD'd via Settings.
     { key: 'priority_type',       label: 'Berichttype (classificatie)', type: 'lookup_select', endpoint: '/whatsapp-message-types' },
+    // WF-BUILDER-VELDEN-1: a static, closed logging category (WhatsAppSendModule's own
+    // fixed option set — never a tenant lookup, unlike `purpose` above).
+    { key: 'message_category',    label: 'Categorie (voor logging)', type: 'select', options: ['shift_offer','reminder','no_response','general'], default: 'general' },
+    // WF-BUILDER-VELDEN-1: idempotency window — the same template is not re-sent to the
+    // same candidate inside this many hours (0 = always send).
+    { key: 'dedup_hours',         label: 'Niet opnieuw sturen binnen (uren)', type: 'number', default: 24,
+      help: 'Idempotentie: dezelfde template gaat binnen dit venster niet nogmaals naar dezelfde kandidaat (0 = altijd sturen).' },
     { key: 'throttle_per_minute', label: 'Max. per minuut',        type: 'number',  placeholder: '30' },
+    // WF-BUILDER-VELDEN-1: P11-FASE4 fail-closed consent gate — sends ONLY when this
+    // bundle field is present AND truthy on the candidate row (missing = no send).
+    { key: 'require_consent_field', label: 'Vereist toestemmingsveld (fail-closed)', type: 'text',
+      help: 'Optioneel. Bijv. whatsapp_consent: verstuur ALLEEN als dit veld op de kandidaatrij aanwezig én waar is (ontbrekend veld = geen verzending).' },
   ],
 }

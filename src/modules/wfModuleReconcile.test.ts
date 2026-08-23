@@ -8,7 +8,7 @@
  * is the engine-internal counter-case: it must stay off MODULE_META entirely.
  */
 import { describe, it, expect } from 'vitest'
-import MODULES, { MODULE_META, ENGINE_INTERNAL_TYPES } from '@/modules/index'
+import MODULES, { MODULE_META, MODULE_SCHEMAS, ENGINE_INTERNAL_TYPES } from '@/modules/index'
 
 // Every shipped locale's workflows.json, loaded the same way registryI18n.test.ts does.
 const files = import.meta.glob('../i18n/locales/*/workflows.json', { eager: true, import: 'default' }) as Record<string, {
@@ -47,5 +47,51 @@ describe('WF-MODULE-RECONCILE-FE-1 · the eight engine modules get a registry ca
     expect(ENGINE_INTERNAL_TYPES).toContain('trigger')
     expect(MODULE_META.trigger).toBeUndefined()
     expect(MODULES.some(m => m.type === 'trigger')).toBe(false)
+  })
+})
+
+/**
+ * WF-BUILDER-VELDEN-1 — config-schema KEY pins. Six modules' FE picker cards were
+ * missing fields their engine `configSchema()` already defines (BE is the source of
+ * truth, koiosmatch-api/app/Workflow/Modules/<Name>Module.php). Pinning every key
+ * here means a future regression (a field dropped while refactoring a registry file)
+ * fails loudly instead of silently reopening the gap.
+ */
+const EXPECTED_SCHEMA_KEYS: Record<string, string[]> = {
+  // body_parameters (ordered_list) and after_send_updates (group of key_value) are
+  // engine keys deliberately NOT pinned: the FE field kit has no control for
+  // those shapes yet (WA-SEND-FIELDS-2); header_variables/variables are written
+  // by the composite WhatsappTemplateField.
+  whatsapp_send: [
+    'purpose', 'message_type', 'phone_number_id', 'template_name', 'language',
+    'message_category', 'priority_type', 'dedup_hours', 'require_consent_field',
+    'throttle_per_minute', 'recipient_field', 'session_text',
+  ],
+  email_send: ['subject', 'body', 'sender_context', 'purpose', 'skip_if_consent_field', 'recipient_role'],
+  notification_send: ['title', 'body', 'recipients', 'role', 'user_ids', 'type', 'link_entity'],
+  candidate_filter: ['ai_enabled', 'pools', 'positions', 'status', 'last_contact_days', 'last_worked_days', 'no_show_max'],
+  // effective_from deliberately absent: declared by the engine schema but never read by execute() (fake affordance).
+  status_set: ['status', 'reason'],
+  pdok_geocode: ['entity', 'candidate_id', 'only_missing', 'all_records'],
+}
+
+describe('WF-BUILDER-VELDEN-1 · registry config-schema mirrors the engine exactly', () => {
+  for (const [type, keys] of Object.entries(EXPECTED_SCHEMA_KEYS)) {
+    it.each(keys)(`${type} schema has a '%s' field`, (key) => {
+      const schema = MODULE_SCHEMAS[type]
+      expect(schema, `${type} has no MODULE_SCHEMAS entry`).toBeDefined()
+      expect(schema?.some(f => f.key === key), `${type} is missing config-schema key '${key}'`).toBe(true)
+    })
+  }
+
+  it('email_send no longer carries the obsolete to/template fields (never read by EmailSendModule::execute)', () => {
+    const keys = (MODULE_SCHEMAS.email_send ?? []).map(f => f.key)
+    expect(keys).not.toContain('to')
+    expect(keys).not.toContain('template')
+  })
+
+  it("notification_send's recipients options include 'users' (required for user_ids to be reachable)", () => {
+    const recipients = (MODULE_SCHEMAS.notification_send ?? []).find(f => f.key === 'recipients')
+    expect(recipients?.options).toContain('users')
   })
 })

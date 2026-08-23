@@ -45,7 +45,7 @@ export function FieldInput({ field, value, onChange, variables, config }: {
     return <FaqSelectField value={value} onChange={onChange} fieldKey={field.key} />
   }
   if (field.type === 'lookup_select') {
-    return <LookupSelectField value={value} onChange={onChange} fieldKey={field.key} endpoint={String(field.endpoint ?? '')} valueKey={typeof field.valueKey === 'string' ? field.valueKey : undefined} />
+    return <LookupSelectField value={value} onChange={onChange} fieldKey={field.key} endpoint={String(field.endpoint ?? '')} valueKey={typeof field.valueKey === 'string' ? field.valueKey : undefined} responseKey={typeof field.responseKey === 'string' ? field.responseKey : undefined} />
   }
   if (field.type === 'workflow') {
     // workflow_call's workflow_id picker (WF-RELATIONS-1): a searchable list of

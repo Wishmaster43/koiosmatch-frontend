@@ -19,12 +19,16 @@ const LOCS = ['nl', 'en', 'de', 'fr', 'es']
 // Language-neutral registry literals — identical in every language, so they
 // deliberately have NO key and render via the defaultValue fallback.
 const NEUTRAL = new Set([
-  '0', '1', '5', '10', '24', '30', '35', '50', '100', '500', '10000',
+  '0', '1', '3', '5', '10', '24', '30', '35', '50', '100', '500', '10000',
   'nl', 'tr', 'status', 'available_again_date', 'shifts_offered',
   '{"key": "value"}', '<html>...</html>', '<table>...</table>', '(\\d+)',
   'https://api.intus.example/candidates', 'https://api.intus.example/shifts',
   '{{trigger.session_id}}', '{{trigger.candidate_id}}', '6', 'flex@yesway.nu',
   '{{1.bedrag}}', '{{1.inhoud}}', '{{1.naam}}', '{{1.waarde}}',
+  // WF-BUILDER-VELDEN-1: notification_send's link_entity placeholder — a technical
+  // bundle-field-name example (matches the "<entity>_id" the engine resolves against),
+  // never a translatable word.
+  'conversation',
 ])
 
 // Collect every placeholder/hint/help string from the registry schemas.

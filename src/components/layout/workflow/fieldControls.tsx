@@ -181,11 +181,14 @@ export function WebhookSelectField({ value, onChange, fieldKey }: { value?: unkn
 // Options come from a tenant lookup endpoint (e.g. /whatsapp-message-types) instead of
 // a hardcoded list (§10: no hardcoded vocabularies in workflow nodes). Lazy api import,
 // mirroring WebhookSelectField. Fail-soft to an empty list.
-export function LookupSelectField({ value, onChange, fieldKey, endpoint, valueKey }: {
+export function LookupSelectField({ value, onChange, fieldKey, endpoint, valueKey, responseKey }: {
   // valueKey: which row property becomes the STORED value. Roles resolve server-side
   // by roles.name (NotificationSendModule::resolveRecipients), so the role field
   // stores the name — a numeric Spatie id would silently match nobody (§3).
-  value?: unknown; onChange: OnChange; fieldKey: string; endpoint: string; valueKey?: string
+  // responseKey: for endpoints that return an OBJECT of collections (GET
+  // /settings/candidate-lookups → {statuses, phases, …}) — the collection to read;
+  // omitted = the response is a plain list (WF-BUILDER-VELDEN-1 Opus fix).
+  value?: unknown; onChange: OnChange; fieldKey: string; endpoint: string; valueKey?: string; responseKey?: string
 }) {
   const { t } = useTranslation('workflows')
   const [opts, setOpts] = useState<Array<{ value: string; label: string }>>([])
@@ -199,14 +202,16 @@ export function LookupSelectField({ value, onChange, fieldKey, endpoint, valueKe
     let alive = true
     import('@/lib/api').then(m => m.default.get(endpoint))
       .then(r => {
-        const rows = (unwrapList(r).rows) as Array<Record<string, unknown>>
+        const rows = (responseKey
+          ? ((unwrap(r) as Record<string, unknown> | null)?.[responseKey] ?? [])
+          : unwrapList(r).rows) as Array<Record<string, unknown>>
         if (alive) setOpts(rows
           .map(o => ({ value: String((valueKey ? o[valueKey] : undefined) ?? o.value ?? o.id ?? ''), label: String(o.label ?? o.name ?? o.value ?? '') }))
           .filter(o => o.value))
       })
       .catch(() => {})
     return () => { alive = false }
-  }, [endpoint, valueKey])
+  }, [endpoint, valueKey, responseKey])
 
   return (
     <>

@@ -1,19 +1,23 @@
 /**
  * MultiSelectField (WF-MULTISELECT-1, Danny 23-07) — the searchable multi-select for
- * workflow config fields. Three option sources:
- *   1. `field.source` — a tenant lookup (candidate_statuses / candidate_phases /
+ * workflow config fields. Four option sources, in priority order:
+ *   1. `field.endpoint` — a live API lookup (WF-BUILDER-VELDEN-1, e.g. notification_send's
+ *      user_ids → GET /users) resolved the same way LookupSelectField resolves a single
+ *      lookup_select, just rendered through this multi-value chip UI instead;
+ *   2. `field.source` — a tenant lookup (candidate_statuses / candidate_phases /
  *      candidate_types) resolved live from LookupsContext, so the choices are the
  *      tenant's OWN configured lists;
- *   2. `field.options` — a static list from the module schema;
- *   3. neither (e.g. Plaats) — free entry: type a value + Enter adds it as a chip.
+ *   3. `field.options` — a static list from the module schema;
+ *   4. none of the above (e.g. Plaats) — free entry: type a value + Enter adds it as a chip.
  * Selected values render as removable chips; the dropdown filters as you type.
  */
-import { useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ChevronDown, X } from 'lucide-react'
 import { useLookups } from '@/context/LookupsContext'
 import SelectAllRow from '@/components/ui/SelectAllRow'
 import { optionLabel } from './moduleI18n'
+import { unwrapList } from '@/lib/api'
 import type { WorkflowField } from '@/types/workflow'
 import type { OnChange } from './fieldControls'
 
@@ -27,11 +31,34 @@ export default function MultiSelectField({ field, value, onChange }: {
   const [open, setOpen] = useState(false)
   const [search, setSearch] = useState('')
   const boxRef = useRef<HTMLDivElement>(null)
+  const endpoint = typeof field.endpoint === 'string' ? field.endpoint : undefined
+  const valueKey = typeof field.valueKey === 'string' ? field.valueKey : undefined
+  // Endpoint-backed options (fetched once per endpoint) — mirrors LookupSelectField's
+  // own fetch, fail-soft to an empty list on error (fieldControls.tsx precedent).
+  const [remoteOpts, setRemoteOpts] = useState<Opt[]>([])
+  const [remoteLoading, setRemoteLoading] = useState(!!endpoint)
+
+  useEffect(() => {
+    if (!endpoint) { setRemoteLoading(false); return }
+    let alive = true
+    setRemoteLoading(true)
+    import('@/lib/api').then(m => m.default.get(endpoint))
+      .then(r => {
+        const rows = (unwrapList(r).rows) as Array<Record<string, unknown>>
+        if (alive) setRemoteOpts(rows
+          .map(o => ({ value: String((valueKey ? o[valueKey] : undefined) ?? o.value ?? o.id ?? ''), label: String(o.label ?? o.name ?? o.value ?? '') }))
+          .filter(o => o.value))
+      })
+      .catch(() => {})
+      .finally(() => { if (alive) setRemoteLoading(false) })
+    return () => { alive = false }
+  }, [endpoint, valueKey])
 
   const selected: string[] = Array.isArray(value) ? (value as string[]) : []
 
-  // Resolve the option list: tenant lookup (by source) → static schema options → none (free entry).
+  // Resolve the option list: endpoint → tenant lookup (by source) → static schema options → none (free entry).
   const options: Opt[] = useMemo(() => {
+    if (endpoint) return remoteOpts
     const bySource: Record<string, { value: string; label: string }[]> = {
       candidate_statuses: lookups.statuses,
       candidate_phases: lookups.phases,
@@ -41,9 +68,11 @@ export default function MultiSelectField({ field, value, onChange }: {
       return bySource[field.source].map(o => ({ value: o.value, label: o.label }))
     }
     return ((field.options ?? []) as string[]).map(o => ({ value: o, label: optionLabel(t, o) }))
-  }, [field.source, field.options, lookups, t])
+  }, [endpoint, remoteOpts, field.source, field.options, lookups, t])
 
-  const freeEntry = options.length === 0
+  // An endpoint field is never free-entry (an unmatched value would never resolve to a
+  // real record); it just shows the loading/no-results states below instead.
+  const freeEntry = options.length === 0 && !endpoint
   const labelFor = (v: string) => options.find(o => o.value === v)?.label ?? v
   const filtered = options.filter(o =>
     !search || o.label.toLowerCase().includes(search.toLowerCase()) || o.value.toLowerCase().includes(search.toLowerCase()))
@@ -74,6 +103,7 @@ export default function MultiSelectField({ field, value, onChange }: {
             {labelFor(v)}
             <button type="button" aria-label={t('common:remove', { defaultValue: 'Verwijderen' })}
               onClick={e => { e.stopPropagation(); remove(v) }}
+              // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- dense inline chip-remove icon inside a 2px/8px pill (fieldControls.tsx row-remove precedent); a 28px Button breaks the chip height
               style={{ display: 'flex', background: 'none', border: 'none', cursor: 'pointer', color: 'inherit', padding: 0 }}>
               <X size={11} />
             </button>
@@ -86,6 +116,7 @@ export default function MultiSelectField({ field, value, onChange }: {
             if (freeEntry && e.key === 'Enter') { e.preventDefault(); add(search.trim()) }
             if (e.key === 'Escape') setOpen(false)
           }}
+          // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- the dropdown's own search INPUT size/colour (fields.tsx SettingsSearch precedent), not a BodyText paragraph render
           style={{ flex: 1, minWidth: 90, border: 'none', outline: 'none', background: 'transparent',
                    fontSize: 13, color: 'var(--text)', padding: '3px 2px' }} />
         <ChevronDown size={13} style={{ position: 'absolute', right: 9, top: 10, color: 'var(--text-muted)' }} />
@@ -97,15 +128,19 @@ export default function MultiSelectField({ field, value, onChange }: {
         <div style={{ position: 'absolute', zIndex: 'var(--z-popover)', top: '100%', left: 0, right: 0, marginTop: 4,
                       maxHeight: 220, overflowY: 'auto', borderRadius: 8, border: '1px solid var(--border)',
                       background: 'var(--surface)', boxShadow: 'var(--shadow-float)' }}>
-          {/* Select-all pinned above the list (free entry has no list to select).
-              HUISSTIJL-1: zIndex:1 orders this sticky row above its own sibling list
-              items WITHIN this dropdown — internal layering, exempt from the z-ladder. */}
-          {!freeEntry && filtered.length > 0 && (
+          {/* Select-all pinned above the list (free entry / still loading has no list to
+              select). HUISSTIJL-1: zIndex:1 orders this sticky row above its own sibling
+              list items WITHIN this dropdown — internal layering, exempt from the z-ladder. */}
+          {!freeEntry && !(endpoint && remoteLoading) && filtered.length > 0 && (
             <div style={{ position: 'sticky', top: 0, zIndex: 1, background: 'var(--surface)', padding: '6px 8px 0' }}>
               <SelectAllRow dense visibleValues={filtered.map(o => o.value)} selectedValues={selected} onApply={applyAll} />
             </div>
           )}
-          {freeEntry ? (
+          {endpoint && remoteLoading ? (
+            <div style={{ padding: '9px 12px', fontSize: 12, color: 'var(--text-muted)' }}>
+              {t('fields.multiselectLoading', { defaultValue: 'Opties laden…' })}
+            </div>
+          ) : freeEntry ? (
             <div style={{ padding: '9px 12px', fontSize: 12, color: 'var(--text-muted)' }}>
               {t('fields.multiselectFreeEntry', { defaultValue: 'Typ een waarde en druk op Enter om toe te voegen.' })}
             </div>
@@ -119,6 +154,7 @@ export default function MultiSelectField({ field, value, onChange }: {
               <button key={o.value} type="button"
                 onMouseDown={e => e.preventDefault() /* keep focus so blur doesn't close first */}
                 onClick={() => (active ? remove(o.value) : add(o.value))}
+                // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- full-width dropdown OPTION ROW (a selection row, not a discrete action) inside this custom searchable multi-select; a Button atom would break the row's own 8px/12px hit-target
                 style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', textAlign: 'left',
                          padding: '8px 12px', border: 'none', cursor: 'pointer', fontSize: 13,
                          background: active ? 'var(--color-primary-bg)' : 'transparent',
@@ -126,6 +162,7 @@ export default function MultiSelectField({ field, value, onChange }: {
                          color: active ? 'var(--color-primary-text)' : 'var(--text)' }}>
                 <span style={{ width: 14, height: 14, borderRadius: 4, flexShrink: 0,
                                border: `1.5px solid ${active ? 'var(--color-primary)' : 'var(--border)'}`,
+                               // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- a 14px checkbox-indicator fill (selection state), not a Button/accent surface
                                background: active ? 'var(--color-primary)' : 'transparent' }} />
                 {o.label}
               </button>

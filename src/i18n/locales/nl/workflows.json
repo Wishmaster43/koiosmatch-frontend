@@ -96,7 +96,8 @@
     "removeCondition": "Voorwaarde verwijderen",
     "workflowLoading": "Workflows ophalen…",
     "workflowSelect": "Selecteer een workflow…",
-    "workflowEmpty": "Nog geen workflows"
+    "workflowEmpty": "Nog geen workflows",
+    "multiselectLoading": "Opties laden…"
   },
   "scheduleModal": {
     "title": "Planning instellen",
@@ -806,7 +807,23 @@
     "Archiefreden": "Archiefreden",
     "Welke vacatures": "Welke vacatures",
     "Positie in CV": "Positie in CV",
-    "Workflow": "Workflow"
+    "Workflow": "Workflow",
+    "Berichtdoel": "Berichtdoel",
+    "Categorie (voor logging)": "Categorie (voor logging)",
+    "Niet opnieuw sturen binnen (uren)": "Niet opnieuw sturen binnen (uren)",
+    "Vereist toestemmingsveld (fail-closed)": "Vereist toestemmingsveld (fail-closed)",
+    "Afzender-context": "Afzender-context",
+    "Overslaan bij toestemmingsveld (XOR)": "Overslaan bij toestemmingsveld (XOR)",
+    "Ontvanger-rol (backoffice)": "Ontvanger-rol (backoffice)",
+    "Gebruikers": "Gebruikers",
+    "Hyperlink-entiteit": "Hyperlink-entiteit",
+    "Alleen AI-enabled kandidaten": "Alleen AI-enabled kandidaten",
+    "Functies": "Functies",
+    "Niet gecontacteerd in (dagen)": "Niet gecontacteerd in (dagen)",
+    "Laatste dienst minstens X dagen geleden": "Laatste dienst minstens X dagen geleden",
+    "Maximaal aantal no-shows": "Maximaal aantal no-shows",
+    "Soort record": "Soort record",
+    "Alle records van dit soort": "Alle records van dit soort"
   },
   "fieldOptions": {
     "Array (meerdere bundles)": "Array (meerdere bundles)",
@@ -912,13 +929,15 @@
     "shift_summary": "shift_summary",
     "template": "template",
     "uitgeschreven": "uitgeschreven",
-    "vacancy": "vacancy",
+    "vacancy": "vacature",
     "verwijderd": "verwijderd",
     "Gemini 25 Flash": "Gemini 2.5 Flash",
     "Gemini 25 Pro": "Gemini 2.5 Pro",
     "all": "alle",
     "role": "rol",
     "candidate_owner": "eigenaar kandidaat",
+    "customer_owner": "eigenaar klant",
+    "vacancy_owner": "eigenaar vacature",
     "Alleen gewijzigde (aanbevolen)": "Alleen gewijzigde (aanbevolen)",
     "Alle vacatures": "Alle vacatures",
     "owner": "eigenaar",
@@ -938,7 +957,17 @@
     "workflowcustom": "aangepast (workflow)",
     "customer_owner": "eigenaar klant",
     "vacancy_owner": "eigenaar vacature",
-    "top": "bovenaan"
+    "top": "bovenaan",
+    "shift_offer": "Dienstaanbod",
+    "reminder": "Herinnering",
+    "no_response": "Geen reactie",
+    "general": "Algemeen",
+    "kandidaten": "kandidaten",
+    "algemeen": "algemeen",
+    "candidate": "Kandidaat",
+    "customer": "Klant",
+    "customer_location": "Klantlocatie",
+    "users": "gebruikers"
   },
   "agentTest": {
     "title": "Test-variabelen",
@@ -1060,7 +1089,16 @@
     "De workflow die als kind wordt gestart (async, via de wachtrij) Zelf-aanroep en kringlopen worden geweigerd; maximaal 5 niveaus diep": "De workflow die als kind wordt gestart (async, via de wachtrij). Zelf-aanroep en kringlopen worden geweigerd; maximaal 5 niveaus diep.",
     "Eerst proefdraaien rapporteert WIE er aangemaakt zou worden (incl payload), schrijft niets Zet expliciet uit om echt in Shiftmanager aan te maken": "Eerst proefdraaien: rapporteert WIE er aangemaakt zou worden (incl. payload), schrijft niets. Zet expliciet uit om echt in Shiftmanager aan te maken.",
     "De voorwaarden volgen altijd de matchcriteria van de vacature zelf wie ze wil wijzigen, wijzigt de matchcriteria of de wegingstemplates Deze stap kiest alleen de set": "De voorwaarden volgen altijd de matchcriteria van de vacature zelf: wie ze wil wijzigen, wijzigt de matchcriteria of de wegingstemplates. Deze stap kiest alleen de set.",
-    "Datum en tijd (bv 10-08-2026 1400) of een variabele": "Datum en tijd (bv. 10-08-2026 14:00) of een variabele."
+    "Datum en tijd (bv 10-08-2026 1400) of een variabele": "Datum en tijd (bv. 10-08-2026 14:00) of een variabele.",
+    "Idempotentie dezelfde template gaat binnen dit venster niet nogmaals naar dezelfde kandidaat (0 = altijd sturen)": "Idempotentie: dezelfde template gaat binnen dit venster niet nogmaals naar dezelfde kandidaat (0 = altijd sturen).",
+    "Optioneel Bijv whatsapp_consent verstuur ALLEEN als dit veld op de kandidaatrij aanwezig én waar is (ontbrekend veld = geen verzending)": "Optioneel. Bijv. whatsapp_consent: verstuur ALLEEN als dit veld op de kandidaatrij aanwezig én waar is (ontbrekend veld = geen verzending).",
+    "Optioneel Bijv whatsapp_consent sla deze e-mail over als de kandidaat dat veld op waar heeft staan (voorkomt dubbele verzending naast een WhatsApp-stap)": "Optioneel. Bijv. whatsapp_consent: sla deze e-mail over als de kandidaat dat veld op waar heeft staan (voorkomt dubbele verzending naast een WhatsApp-stap).",
+    "Optioneel Zet een rolnaam (bv backoffice) om deze stap naar iedereen met die rol te sturen in plaats van naar de kandidaat-bundel": "Optioneel. Zet een rolnaam (bv. backoffice) om deze stap naar iedereen met die rol te sturen in plaats van naar de kandidaat-bundel.",
+    "Optioneel Bijvoorbeeld \"conversation\" de melding linkt dan naar het bijbehorende \"conversation_id\"-veld uit de trigger, zodat de melding doorklikbaar is": "Optioneel. Bijvoorbeeld \"conversation\": de melding linkt dan naar het bijbehorende \"conversation_id\"-veld uit de trigger, zodat de melding doorklikbaar is.",
+    "candidate = kandidaat, customer = klant, customer_location = klantlocatie, vacancy = vacature": "candidate = kandidaat, customer = klant, customer_location = klantlocatie, vacancy = vacature.",
+    "Selecteert alle klanten / klantlocaties / vacatures (max 10000, gearchiveerde niet) Werkt niet voor kandidaten die selecteer je met de stap \"Kandidaten ophalen\"": "Selecteert alle klanten / klantlocaties / vacatures (max. 10.000, gearchiveerde niet). Werkt niet voor kandidaten: die selecteer je met de stap \"Kandidaten ophalen\".",
+    "Laat leeg voor alle pools": "Laat leeg voor alle pools",
+    "Laat leeg voor alle functies": "Laat leeg voor alle functies"
   },
   "triggers": {
     "events": {
