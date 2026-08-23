@@ -63,11 +63,11 @@ export default function AgentTestPanel({ config }: {
         message: userMsg.content,
         variables: vars,
         conversation_history: messages,
-        // The test service (AgentChatService::buildSystemPrompt) still reads the
-        // LEGACY plural key `instructions`; the schema key is `instruction` (engine
-        // AiAgentModule). Send both so the tenant's own text is used — never the
-        // platform default persona on a paid test (Opus, 23-08; CMBE asked to align).
-        config: { ...config, instructions: (config?.instruction ?? config?.instructions) as unknown },
+        // The schema key is `instruction` (engine AiAgentModule); the test service
+        // reads that key since 23-08 (legacy plural as fallback server-side), so
+        // the config travels verbatim — the tenant's own text, never the platform
+        // persona on a paid test.
+        config,
       })
       const data = unwrap<{
         response?: string; message?: string; tokens_used?: number
