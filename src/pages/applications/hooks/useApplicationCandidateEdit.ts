@@ -12,9 +12,11 @@
  */
 import { useState, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useQueryClient } from '@tanstack/react-query'
 import api, { unwrap } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
+import { invalidateCandidate } from '@/lib/invalidateEntity'
 import type { Id } from '@/types/common'
 
 /** The header-edit form's controlled fields — kept as separate name parts so
@@ -26,13 +28,17 @@ export interface ApplicationCandidateForm {
   functionTitle: string
 }
 
-/** Raw GET /candidates/{id} shape read directly — mapCandidate() does not
- * carry the separate name parts, only the already-joined display name. */
+/** Raw GET/PATCH /candidates/{id} shape read directly — mapCandidate() does
+ * not carry the separate name parts, only the already-joined display name.
+ * `name` is the server-COMPOSED, infix-aware display name (CandidateListResource
+ * `full_name`) — present on the PATCH response too, so saveEdit can prefer it
+ * over a local join. */
 interface RawCandidateNameParts {
   first_name?: string | null
   middle_name?: string | null
   last_name?: string | null
   function_title?: string | null
+  name?: string | null
 }
 
 const EMPTY_FORM: ApplicationCandidateForm = { firstName: '', middleName: '', lastName: '', functionTitle: '' }
@@ -42,6 +48,7 @@ export function useApplicationCandidateEdit(
   onSaved?: (candidateId: Id, patch: { candidateName: string; candidateFunction: string }) => void,
 ) {
   const { t } = useTranslation('applications')
+  const queryClient = useQueryClient()
   const [editing, setEditing] = useState(false)
   const [loading, setLoading] = useState(false)
   const [saving,  setSaving]  = useState(false)
@@ -99,9 +106,17 @@ export function useApplicationCandidateEdit(
       function_title: form.functionTitle,
     }
     return api.patch(`/candidates/${candidateId}`, body)
-      .then(() => {
-        const candidateName = [form.firstName, form.middleName, form.lastName].filter(Boolean).join(' ')
+      .then(res => {
+        // Prefer the server-composed, infix-aware name (CandidateListResource's
+        // `full_name`) over a local join — the join here is a plain space-filter,
+        // which can disagree with the server's own tussenvoegsel formatting. Fall
+        // back to the local join only when the response carries no name at all.
+        const serverName = unwrap<RawCandidateNameParts>(res).name
+        const candidateName = serverName || [form.firstName, form.middleName, form.lastName].filter(Boolean).join(' ')
         onSaved?.(candidateId, { candidateName, candidateFunction: form.functionTitle })
+        // REFRESH-FIX-2: reconcile the candidate + applications caches — the
+        // optimistic onSaved merge above only updates THIS drawer's own view.
+        invalidateCandidate(queryClient)
         setEditing(false)
       })
       .catch(err => {

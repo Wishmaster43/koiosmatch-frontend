@@ -24,9 +24,12 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { renderHook, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { createElement, type ReactNode } from 'react'
 import BankAccountCard from './BankAccountCard'
 import { buildCandidatePatch } from '../data/candidatesShared'
 import { formatIban, normalizeIban } from '@/lib/iban'
+import { monoStyle } from '@/components/ui/typography'
 
 // FINANCIAL-GATE-1: the card is permission-gated now, so every existing test
 // renders as a viewer who HAS the permission. The gate itself is proven by its
@@ -59,6 +62,15 @@ const apiPatch = api.patch as unknown as ReturnType<typeof vi.fn>
 // (verified: the server refuses it), so it must never be used as a fixture here.
 const VALID = 'NL91ABNA0417164300'
 
+// useCandidateRecord now reads useQueryClient() to invalidate on save
+// (REFRESH-FIX-2) — the two renderHook(() => useCandidateRecord()) calls below
+// need a provider.
+// One client per test run, hoisted out of the wrapper body (Opus F6): a client
+// constructed INSIDE the wrapper is swapped on every re-render.
+const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+const qcWrapper = ({ children }: { children: ReactNode }) =>
+  createElement(QueryClientProvider, { client: queryClient }, children)
+
 describe('lib/iban · display vs wire form', () => {
   it('formats an IBAN in readable groups of four and strips them again for the wire', () => {
     expect(formatIban(VALID)).toBe('NL91 ABNA 0417 1643 00')
@@ -76,7 +88,7 @@ describe('BankAccountCard · private (salary) account', () => {
     expect(screen.getByText('preferences.groupBankAccount')).toBeInTheDocument()
     const shown = screen.getByText('NL91 ABNA 0417 1643 00')
     expect(shown).toBeInTheDocument()
-    expect(shown).toHaveStyle({ fontFamily: 'JetBrains Mono, monospace' })
+    expect(shown).toHaveStyle({ fontFamily: monoStyle.fontFamily })
     expect(screen.getByText('Jan Jansen')).toBeInTheDocument()
     expect(screen.getByTitle('edit')).toBeInTheDocument()
   })
@@ -149,7 +161,7 @@ describe('BANK-1 · the server owns the IBAN verdict', () => {
       message: 'Het IBAN-controlegetal klopt niet.',
       errors: { iban: ['Het IBAN-controlegetal klopt niet.'] },
     } } })
-    const { result } = renderHook(() => useCandidateRecord())
+    const { result } = renderHook(() => useCandidateRecord(), { wrapper: qcWrapper })
     result.current.patchCandidate('c1', { iban: 'NL00INGB0000000000' })
     expect(apiPatch).toHaveBeenCalledWith('/candidates/c1', { iban: 'NL00INGB0000000000' })
     // Readable server text, not a code and not a generic fallback (§10).
@@ -161,7 +173,7 @@ describe('BANK-1 · the server owns the IBAN verdict', () => {
       message: 'Het IBAN-controlegetal klopt niet.',
       errors: { 'freelance.iban': ['Het IBAN-controlegetal klopt niet.'] },
     } } })
-    const { result } = renderHook(() => useCandidateRecord())
+    const { result } = renderHook(() => useCandidateRecord(), { wrapper: qcWrapper })
     result.current.patchCandidate('c1', { zzp: { iban: 'NL00INGB0000000000', account_holder_name: 'Zorg B.V.' } })
     expect(apiPatch).toHaveBeenCalledWith('/candidates/c1', { freelance: { iban: 'NL00INGB0000000000', account_holder_name: 'Zorg B.V.' } })
     await waitFor(() => expect(notifyError).toHaveBeenCalledWith('Het IBAN-controlegetal klopt niet.'))

@@ -8,9 +8,11 @@
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useQueryClient } from '@tanstack/react-query'
 import api, { unwrap } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
+import { invalidateCandidate } from '@/lib/invalidateEntity'
 import { mapCandidate } from '../data/mapCandidate'
 import { buildCandidatePatch } from '../data/candidatesShared'
 import type { Candidate } from '@/types/candidate'
@@ -35,6 +37,7 @@ export function useCreateCandidate() {
 // Full-record load + edit persistence for the candidate drawer.
 export function useCandidateRecord() {
   const { t } = useTranslation('candidates')
+  const queryClient = useQueryClient()
 
   // GET the full detail record. 404 → 'gone' (a stale row: the record no longer exists,
   // e.g. after a reseed or another user's delete) so the page can drop the row + tell the
@@ -62,7 +65,13 @@ export function useCandidateRecord() {
     const body = buildCandidatePatch(patch)
     if (!Object.keys(body).length) return Promise.resolve(true)
     return api.patch(`/candidates/${id}`, body)
-      .then(() => true)
+      .then(() => {
+        // REFRESH-FIX-2: reconcile the applications cache — application rows
+        // embed this candidate's joined name/function, which the caller's own
+        // optimistic merge above never reaches.
+        invalidateCandidate(queryClient)
+        return true
+      })
       .catch(err => {
         revert?.()
         notifyError(extractApiError(err, t('common:actionFailed')))

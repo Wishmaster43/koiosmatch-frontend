@@ -8,11 +8,21 @@
  */
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import type { ComponentProps } from 'react'
 // Real i18n (nl) side-effect init so t() resolves genuine Dutch text — the
 // removed badge rendered the literal "Actief" copy this test asserts against.
 import '@/i18n'
 import ApplicationDrawer from './ApplicationDrawer'
 import type { ApplicationDetail } from '@/types/application'
+
+// ApplicationDrawer wires useApplicationCandidateEdit directly (the header
+// pencil) — it reads useQueryClient() to invalidate on save (REFRESH-FIX-2),
+// so even with CandidateTab mocked below, a provider is required.
+const renderDrawer = (props: ComponentProps<typeof ApplicationDrawer>) => {
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+  return render(<QueryClientProvider client={client}><ApplicationDrawer {...props} /></QueryClientProvider>)
+}
 
 // Lookups/custom-fields arrive via mocked hooks — no providers needed.
 vi.mock('@/context/LookupsContext', () => ({
@@ -43,7 +53,7 @@ const application = (over: Partial<ApplicationDetail> = {}) => ({
 
 describe('ApplicationDrawer — header bucket badge removed (S21, Danny 21-07)', () => {
   it('does not render the outcome bucket badge, but keeps the candidate name, Fase picker and changelog icon', () => {
-    render(<ApplicationDrawer application={application()} onClose={vi.fn()} />)
+    renderDrawer({ application: application(), onClose: vi.fn() })
     // The badge used to render this exact translated bucket label — Danny's
     // literal complaint ("ACTIEF???"). It must be entirely absent now.
     expect(screen.queryByText('Actief')).not.toBeInTheDocument()
@@ -61,7 +71,7 @@ describe('ApplicationDrawer — header bucket badge removed (S21, Danny 21-07)',
     // Regression net: whichever bucket value the application carries, no chip
     // with its translated label appears in the header — the removal is
     // unconditional, not just for 'active'.
-    render(<ApplicationDrawer application={application({ bucket: 'rejected' })} onClose={vi.fn()} />)
+    renderDrawer({ application: application({ bucket: 'rejected' }), onClose: vi.fn() })
     expect(screen.queryByText('Afgewezen')).not.toBeInTheDocument()
   })
 })

@@ -8,8 +8,16 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import CandidateSummaryPopout from './CandidateSummaryPopout'
 import api from '@/lib/api'
+
+// useCandidateRecord (the real save path here) reads useQueryClient() to
+// invalidate on save (REFRESH-FIX-2) — every render needs a provider.
+const renderPopout = (id: string) => {
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+  return render(<QueryClientProvider client={client}><CandidateSummaryPopout id={id} /></QueryClientProvider>)
+}
 
 // TipTap's editor is out of scope here (its own tests cover it) — a plain
 // textarea keeps this a focused test of THIS page's wiring. assistModes/
@@ -53,21 +61,21 @@ describe('CandidateSummaryPopout', () => {
 
   it('shows a loading skeleton while the candidate loads', () => {
     liteState.loading = true
-    render(<CandidateSummaryPopout id="c1" />)
+    renderPopout('c1')
     expect(document.querySelector('[aria-busy="true"]')).not.toBeNull()
   })
 
   it('shows an error with a retry that re-runs the fetch', async () => {
     const user = userEvent.setup()
     liteState.error = true
-    render(<CandidateSummaryPopout id="c1" />)
+    renderPopout('c1')
     await user.click(screen.getByRole('button'))
     expect(liteState.reload).toHaveBeenCalled()
   })
 
   it('loads the stored profile text into the editor and starts clean', () => {
     liteState.candidate = { id: 'c1', name: 'Lieke Blom', initials: 'LB', summary: '<p>Ervaren</p>' }
-    render(<CandidateSummaryPopout id="c1" />)
+    renderPopout('c1')
     expect(screen.getByText('Lieke Blom')).toBeInTheDocument()
     expect(screen.getByLabelText('editor')).toHaveValue('<p>Ervaren</p>')
     expect(screen.getByTestId('text-popout-save')).toBeDisabled()
@@ -80,7 +88,7 @@ describe('CandidateSummaryPopout', () => {
   // inherit RichTextAssistBar's own improve+summarize-only default.
   it('passes no explicit assistModes override (same shared default as the drill-down) + generate entity/id', () => {
     liteState.candidate = { id: 'c1', name: 'Lieke Blom', initials: 'LB', summary: '<p>Ervaren</p>' }
-    render(<CandidateSummaryPopout id="c1" />)
+    renderPopout('c1')
     const meta = screen.getByTestId('summary-rte-meta')
     expect(meta.dataset.modes).toBe('')
     expect(meta.dataset.generate).toBe('candidate:c1')
@@ -93,7 +101,7 @@ describe('CandidateSummaryPopout', () => {
     const user = userEvent.setup()
     const close = vi.spyOn(window, 'close').mockImplementation(() => {})
     liteState.candidate = { id: 'c1', name: 'Lieke Blom', initials: 'LB', summary: 'a' }
-    render(<CandidateSummaryPopout id="c1" />)
+    renderPopout('c1')
     await user.type(screen.getByLabelText('editor'), 'b')
     expect(screen.getByTestId('text-popout-save')).toBeEnabled()
     await user.click(screen.getByTestId('text-popout-save'))
@@ -109,7 +117,7 @@ describe('CandidateSummaryPopout', () => {
     const close = vi.spyOn(window, 'close').mockImplementation(() => {})
     vi.mocked(api.patch).mockRejectedValueOnce({ response: { status: 422 } })
     liteState.candidate = { id: 'c1', name: 'Lieke Blom', initials: 'LB', summary: 'a' }
-    render(<CandidateSummaryPopout id="c1" />)
+    renderPopout('c1')
     await user.type(screen.getByLabelText('editor'), 'b')
     await user.click(screen.getByTestId('text-popout-save'))
     expect(api.patch).toHaveBeenCalled()

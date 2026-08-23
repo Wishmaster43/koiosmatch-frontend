@@ -13,7 +13,13 @@ export const queryClient = new QueryClient({
     queries: {
       staleTime: 30_000,        // treat data as fresh for 30s (cuts refetch storms)
       gcTime: 5 * 60_000,
-      refetchOnWindowFocus: false,
+      // REFRESH-FIX-2 (manager advice 23-08, after Danny's "kan je alles nakijken"):
+      // ON, not off — a query only actually refetches on focus once it is stale
+      // (staleTime above still guards that), so this only closes the "edited
+      // elsewhere, still shows old here" class app-wide (e.g. tab-switch back to
+      // a drawer after editing the same record in another tab). One-line revert
+      // to `false` if this ever proves too chatty in practice.
+      refetchOnWindowFocus: true,
       retry: (failureCount, error) => {
         // axios errors carry the HTTP status under response.status (not on Error).
         const status = (error as { response?: { status?: number } })?.response?.status

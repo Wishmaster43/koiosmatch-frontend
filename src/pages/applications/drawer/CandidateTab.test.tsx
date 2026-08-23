@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor, act } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import CandidateTab from './CandidateTab'
 import { peekReturnTab } from './constants'
 // CandidateTab statically imports the full candidate tab set, several of which
@@ -56,6 +57,13 @@ const app = (over: Partial<ApplicationDetail> = {}) => ({
   ...over,
 } as unknown as ApplicationDetail)
 
+// CandidateTab now fetches the candidate via useQuery (REFRESH-FIX-2) — every
+// render needs a QueryClientProvider. `queryClient` is exposed so a test can
+// drive/observe cache invalidation directly.
+let queryClient: QueryClient
+const renderTab = (app_: ApplicationDetail) =>
+  render(<QueryClientProvider client={queryClient}><CandidateTab application={app_} /></QueryClientProvider>)
+
 describe('CandidateTab', () => {
   // Default: the nested candidate fetch never resolves — most tests here only
   // assert the header, which renders before it settles. Tests that need the
@@ -64,10 +72,11 @@ describe('CandidateTab', () => {
     mockGet.mockReset(); mockGet.mockReturnValue(new Promise(() => {}))
     mockPatch.mockReset(); mockPatch.mockResolvedValue({ data: { data: {} } })
     vi.mocked(notifyError).mockReset()
+    queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   })
 
   it('shows the candidate name WITHOUT a status chip (Danny 21-07: the drawer header already carries the application status)', () => {
-    render(<CandidateTab application={app()} />)
+    renderTab(app())
     expect(screen.getByText('Jan Jansen')).toBeInTheDocument()
     // No second (candidate-deployability) status chip here — that read as "two statuses".
     expect(screen.queryByTestId('status-chip')).not.toBeInTheDocument()
@@ -79,7 +88,7 @@ describe('CandidateTab', () => {
   // Danny 21-07: "Open candidate" must be a REAL new-tab anchor (href + target=_blank),
   // not the in-app EntityLink button it used to be wrapped in.
   it('links to the full candidate record via a real new-tab anchor', () => {
-    render(<CandidateTab application={app()} />)
+    renderTab(app())
     const openLink = screen.getByTitle(i18n.t('applications:drawer.openCandidate'))
     expect(openLink.tagName).toBe('A')
     expect(openLink.getAttribute('href')).toContain('?open=7')
@@ -91,7 +100,7 @@ describe('CandidateTab', () => {
   // return tab, so browser BACK reopens this application's drawer on Kandidaat.
   it('stashes the return tab before navigating to the full candidate', async () => {
     const user = userEvent.setup()
-    render(<CandidateTab application={app({ id: 42 })} />)
+    renderTab(app({ id: 42 }))
     await user.click(screen.getByTitle(i18n.t('applications:drawer.openCandidate')))
     expect(peekReturnTab(42)).toBe('candidate')
   })
@@ -105,7 +114,7 @@ describe('CandidateTab', () => {
   it('persists a ProfilePanel edit via buildCandidatePatch (place_of_birth / freelance), not the raw camelCase patch', async () => {
     mockGet.mockResolvedValue({ id: 7, name: 'Jan Jansen' }) // this file's unwrap mock is identity (no axios envelope)
     const user = userEvent.setup()
-    render(<CandidateTab application={app()} />)
+    renderTab(app())
     await user.click(await screen.findByText('save-edit'))
     expect(mockPatch).toHaveBeenCalledWith('/candidates/7', {
       place_of_birth: 'Rotterdam',
@@ -117,7 +126,7 @@ describe('CandidateTab', () => {
   // all — mirrors useCandidateRecord().patchCandidate's same skip-if-empty guard.
   it('skips the PATCH entirely when the mapped body is empty', async () => {
     mockGet.mockResolvedValue({ id: 7, name: 'Jan Jansen' }) // this file's unwrap mock is identity (no axios envelope)
-    render(<CandidateTab application={app()} />)
+    renderTab(app())
     await screen.findByText('profile-panel')
     expect(mockPatch).not.toHaveBeenCalled()
   })
@@ -135,7 +144,7 @@ describe('CandidateTab', () => {
     let rejectPatch!: (err: unknown) => void
     mockPatch.mockReturnValue(new Promise((_resolve, reject) => { rejectPatch = reject }))
     const user = userEvent.setup()
-    render(<CandidateTab application={app()} />)
+    renderTab(app())
     // Before the edit — the fetched candidate carries no place of birth.
     expect((await screen.findByTestId('place-of-birth')).textContent).toBe('none')
     await user.click(screen.getByText('save-edit'))
@@ -146,5 +155,36 @@ describe('CandidateTab', () => {
     await act(async () => { rejectPatch({ response: { data: { message: 'Ongeldige geboorteplaats' } } }) })
     await waitFor(() => expect(screen.getByTestId('place-of-birth').textContent).toBe('none'))
     expect(notifyError).toHaveBeenCalledWith('Ongeldige geboorteplaats')
+  })
+
+  // REFRESH-FIX-2: a successful onUpdate PATCH reconciles the candidates +
+  // applications caches — a field edited here must not leave the application
+  // drawer's OTHER surfaces (list rows, header pencil) showing the stale value.
+  it('invalidates the candidates and applications caches after a successful onUpdate PATCH', async () => {
+    mockGet.mockResolvedValue({ id: 7, name: 'Jan Jansen' })
+    const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries')
+    const user = userEvent.setup()
+    renderTab(app())
+    await user.click(await screen.findByText('save-edit'))
+    await waitFor(() => expect(invalidateSpy).toHaveBeenCalledTimes(1))
+    const predicate = (invalidateSpy.mock.calls[0][0] as unknown as { predicate: (q: { queryKey: unknown[] }) => boolean }).predicate
+    expect(predicate({ queryKey: ['candidates', 7] })).toBe(true)
+    expect(predicate({ queryKey: ['candidates', 'stats', {}] })).toBe(false)
+  })
+
+  // REFRESH-FIX-2: CandidateTab's own fetch is a real useQuery keyed
+  // ['candidates', candidateId] — invalidating the ['candidates'] prefix (as
+  // the candidate drawer's own save site now does) must refetch it, so an edit
+  // made on the OTHER surface shows up here without an F5.
+  it('refetches the candidate once the candidates cache is invalidated, and the tab title follows the NEW name', async () => {
+    mockGet.mockResolvedValueOnce({ id: 7, name: 'Jan Jansen' }).mockResolvedValueOnce({ id: 7, name: 'Jan van Jansen' })
+    renderTab(app())
+    await screen.findByText('profile-panel')
+    expect(mockGet).toHaveBeenCalledTimes(1)
+    await act(async () => { await queryClient.invalidateQueries({ queryKey: ['candidates'] }) })
+    await waitFor(() => expect(mockGet).toHaveBeenCalledTimes(2))
+    // Opus F1: the title must read the query result — the application's own
+    // candidate.name snapshot (fixture: 'Jan Jansen') is never renamed by a pencil save.
+    await waitFor(() => expect(screen.getByText('Jan van Jansen')).toBeInTheDocument())
   })
 })

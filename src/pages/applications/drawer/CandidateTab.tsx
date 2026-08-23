@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { ExternalLink } from 'lucide-react'
 import api, { unwrap } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
+import { invalidateCandidate } from '@/lib/invalidateEntity'
 import { buildEntityDeepLink } from '@/components/ui/EntityLink'
 import DrawerTabs from '@/components/drawer/DrawerTabs'
 import { mapCandidate } from '@/pages/candidates/shared'
@@ -33,24 +35,27 @@ const muted = { fontSize: 12, color: 'var(--text-muted)', padding: '8px 0' }
  */
 export default function CandidateTab({ application: a }: { application: ApplicationDetail }) {
   const { t } = useTranslation('candidates')
-  const [cand, setCand]       = useState<Candidate | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError]     = useState(false)
+  const queryClient = useQueryClient()
   const [edits, setEdits]     = useState<Record<string, unknown>>({})
   const [tab, setTab]         = useState('profile')
 
-  // Load the full candidate for the linked application.
-  useEffect(() => {
-    const id = a.candidateId
-    if (!id) { setLoading(false); return }
-    let alive = true
-    setLoading(true); setError(false); setEdits({})
-    api.get(`/candidates/${id}`)
-      .then(r => { if (alive) setCand(mapCandidate(unwrap(r))) })
-      .catch(() => { if (alive) setError(true) })
-      .finally(() => { if (alive) setLoading(false) })
-    return () => { alive = false }
-  }, [a.candidateId])
+  // Full candidate for the linked application, keyed ['candidates', candidateId] —
+  // the SAME key shape the candidate drawer's own edit/save path invalidates on a
+  // PATCH (REFRESH-FIX-2), so an edit made from EITHER surface refetches this tab
+  // too, instead of leaving it showing the pre-edit record until an F5.
+  const candidateId = a.candidateId
+  const candQuery = useQuery({
+    queryKey: ['candidates', candidateId],
+    enabled: candidateId != null,
+    queryFn: async ({ signal }): Promise<Candidate> => mapCandidate(unwrap(await api.get(`/candidates/${candidateId}`, { signal }))),
+  })
+  const cand    = candQuery.data ?? null
+  const loading = candidateId != null && candQuery.isLoading
+  const error   = candQuery.isError
+
+  // A different linked candidate: drop the local edit overlay so it never leaks
+  // onto the newly loaded record (the query itself refetches via its own key).
+  useEffect(() => { setEdits({}) }, [candidateId])
 
   // Optimistic local edit (camelCase UI merge) + persist via the SAME UI-patch →
   // API-body mapping as the real candidate drawer (buildCandidatePatch, used by
@@ -78,14 +83,18 @@ export default function CandidateTab({ application: a }: { application: Applicat
     })
     const body = buildCandidatePatch(patch)
     if (!Object.keys(body).length) return
-    api.patch(`/candidates/${id}`, body).catch(err => {
-      setEdits(e => {
-        const next = { ...e }
-        touchedKeys.forEach(k => { if (hadKey[k]) next[k] = before[k]; else delete next[k] })
-        return next
+    api.patch(`/candidates/${id}`, body)
+      // REFRESH-FIX-2: reconcile the candidate + applications caches — the
+      // optimistic `edits` overlay above only updates THIS tab's own view.
+      .then(() => invalidateCandidate(queryClient))
+      .catch(err => {
+        setEdits(e => {
+          const next = { ...e }
+          touchedKeys.forEach(k => { if (hadKey[k]) next[k] = before[k]; else delete next[k] })
+          return next
+        })
+        notifyError(extractApiError(err, t('common:actionFailed')))
       })
-      notifyError(extractApiError(err, t('common:actionFailed')))
-    })
   }
 
   // Merge local edits over the fetched record for the tab components (undefined
@@ -132,7 +141,9 @@ export default function CandidateTab({ application: a }: { application: Applicat
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 8 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
           <SectionTitle as="span" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-            {a.candidate?.name ?? a.candidateName}
+            {/* The query result first (Opus F1): the application's own `candidate.name`
+                is a plain-state snapshot handleCandidateUpdated never renames. */}
+            {c?.name ?? a.candidate?.name ?? a.candidateName}
           </SectionTitle>
         </div>
         {/* S14/S22: stash the current subtab so browser BACK from the full candidate
@@ -142,11 +153,16 @@ export default function CandidateTab({ application: a }: { application: Applicat
             rather than EntityLink's in-app button wrapped around the icon+label. */}
         <span onClickCapture={() => { if (a.id != null) rememberReturnTab(a.id, 'candidate') }}>
           {a.candidateId != null ? (
+            // A TRUE text link (accent ink, no chrome) — V7 covers button-lookalikes
+            // only. Block form: the style attribute sits inside the opening tag
+            // (mirrors VacancyTab's identical "Open vacancy" anchor).
+            /* eslint-disable huisstijlLegacy/no-restricted-syntax -- deliberate calm text-link, not a button-lookalike (V7 scope) */
             <a href={buildEntityDeepLink('candidates', a.candidateId)} target="_blank" rel="noopener noreferrer"
               title={t('applications:drawer.openCandidate')} aria-label={t('applications:drawer.openCandidate')}
               style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 12, flexShrink: 0, color: 'var(--color-primary-text)', textDecoration: 'none' }}>
               <ExternalLink size={13} /> {t('applications:drawer.openCandidate')}
             </a>
+            /* eslint-enable huisstijlLegacy/no-restricted-syntax */
           ) : (
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 12, flexShrink: 0, color: 'var(--text-muted)' }}>
               <ExternalLink size={13} /> {t('applications:drawer.openCandidate')}
