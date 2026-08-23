@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { LayoutList, Kanban, Archive, Trash2 } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import { useRightPanel } from '@/context/RightPanelContext'
+import { usePublishSelection } from '@/context/SelectionContext'
 import { useAllSettings, getBoolSetting } from '@/lib/settings/useAllSettings'
 import { useBranchOptions } from '@/lib/useBranchOptions'
 import OpportunitiesInsightsRow from './OpportunitiesInsightsRow'
@@ -77,6 +78,8 @@ export default function OpportunitiesPage({ intent }: { intent?: unknown } = {})
     selectedIds, toggleRow, toggleAll, clearSelection,
     selectOpportunity, closeDrawer, handleCreated, handleMove, updateOpportunity, reload,
   } = useOpportunitiesData(showArchived || showTrash, selectedBranch, refQuery)
+  // KOIOS-SELECTIE-CONTEXT-1: mirror the selection into Koios AI's context chip.
+  usePublishSelection('opportunities', selectedIds)
 
   // ARCHIVE-1: per-id archive/restore (routes pre-date this sweep; see the hook's
   // own comment). Gated on the SAME permission each route requires server-side —

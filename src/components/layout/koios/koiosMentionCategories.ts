@@ -32,11 +32,12 @@
  *     with no lifecycle status yet, PHASE-FILTER-1).
  *   - `present`: maps one list row to { id, name, subtitle } — the subtitle is
  *     whatever the list payload already carries cheaply (no extra request).
- * `locations` (customer sites) has NO global, tenant-wide list/search endpoint
- * today — only nested under a customer (`/customers/{id}/locations`) — so
- * `search` is omitted; the category still shows (plain "@Locaties " insert,
- * unchanged legacy behaviour) but never attempts a live list (MEASURED gap,
- * see the fase-1 report).
+ * `locations` (customer sites, KOIOS-MENTION-BREED-1 22-08) now HAS a flat,
+ * tenant-wide, searchable list endpoint — `/customer-locations?q=` (LOC-LIST-1,
+ * shared with the tasks "koppel aan locatie" picker; MENTION-LOCATIES-1 added
+ * the name-OR-city match on the backend for this exact use). MEASURED against
+ * routes/api/tenant/customers.php: gated on `customers.view`, same tier as
+ * departments/contacts below — no separate `page.locations` route exists.
  */
 type Row = Record<string, unknown>
 const str = (r: Row, key: string): string => (typeof r[key] === 'string' ? (r[key] as string) : '')
@@ -103,7 +104,10 @@ export const MENTION_CATEGORIES: MentionCategoryConfig[] = [
     endpoint: '/customers', param: 'search', permission: 'customers.view', refType: 'customer',
     present: (r) => ({ id: id(r), name: str(r, 'name') || '?', subtitle: str(r, 'city') }),
   } },
-  { id: 'locations', labelKey: 'koios.mention.locations' }, // MEASURED: no global list endpoint yet.
+  { id: 'locations', labelKey: 'koios.mention.locations', countKey: 'locations', search: {
+    endpoint: '/customer-locations', param: 'q', permission: 'customers.view', refType: 'location',
+    present: (r) => ({ id: id(r), name: str(r, 'name') || '?', subtitle: str(r, 'customer_name') || str(r, 'city') }),
+  } },
   { id: 'departments', labelKey: 'koios.mention.departments', countKey: 'departments', search: {
     endpoint: '/departments', param: 'q', permission: 'customers.view', refType: 'department',
     present: (r) => ({ id: id(r), name: str(r, 'name') || '?', subtitle: str(r, 'customer_name') }),

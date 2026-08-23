@@ -1,35 +1,31 @@
 import { useState, useRef, useEffect } from 'react'
 import type { ChangeEvent, KeyboardEvent } from 'react'
 import { useTranslation } from 'react-i18next'
-import { X, Bot, AtSign, Paperclip, ArrowUp } from 'lucide-react'
+import { Bot, AtSign, Paperclip, ArrowUp } from 'lucide-react'
 import { useLocale } from '@/lib/datetime'
-import { tint, tintBg, TINT_BORDER } from '@/lib/tint'
+import { tint, TINT_BORDER } from '@/lib/tint'
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion'
 import { useKoiosChat } from './koios/useKoiosChat'
 import { useKoiosSettings } from './koios/useKoiosSettings'
 import { useKoiosPanelWidth } from './koios/useKoiosPanelWidth'
 import { useKoiosMentionCounts } from './koios/useKoiosMentionCounts'
-import { matchMentionQuery } from './koios/mentionMatch'
-import { resolveScopedQuery } from './koios/mentionScope'
+import { useKoiosContextChips } from './koios/useKoiosContextChips'
+import { useKoiosComposerKeys } from './koios/useKoiosComposerKeys'
 import { addContextRef, removeContextRef } from './koios/contextRefs'
-import { isContextResolvable } from './koios/koiosContextTypes'
-import { MENTION_CATEGORIES } from './koios/koiosMentionCategories'
-import type { MentionCategoryConfig } from './koios/koiosMentionCategories'
 import KoiosSteps from './koios/KoiosSteps'
 import KoiosUsage from './koios/KoiosUsage'
 import KoiosModelPicker from './koios/KoiosModelPicker'
 import KoiosMentionMenu from './koios/KoiosMentionMenu'
+import KoiosContextChips from './koios/KoiosContextChips'
+import type { KoiosContextChipRow } from './koios/KoiosContextChips'
 import KoiosHeader from './koios/KoiosHeader'
 import KoiosResizeHandle from './koios/KoiosResizeHandle'
 import KoiosPendingActionCard from './koios/KoiosPendingActionCard'
 import KoiosResultCards from './koios/KoiosResultCards'
 import KoiosRadar from './koios/KoiosRadar'
 import KoiosVoiceButton from './koios/KoiosVoiceButton'
-import type { KoiosEntityHit } from './koios/useKoiosEntitySearch'
 import type { KoiosResultRef } from './koios/koiosTypes'
 import type { KoiosChatMessage, KoiosContextRef, TFn } from '@/types/koios'
-// PORTAL-MARKER-1: a click inside an open portalled picker menu is never "outside".
-import { isInsideDropdownPortal } from '@/lib/useDropdownPlacement'
 
 // gradient used for the assistant avatar + user bubble.
 const GRADIENT = 'linear-gradient(135deg,var(--color-primary),var(--color-violet))'
@@ -135,27 +131,33 @@ export default function KoiosPanel({ open, onClose, onNavigate }: { open?: boole
   // `api_ok` is the backend's live probe — it also catches credit exhaustion, not
   // just a missing key, so a tenant with an empty balance no longer shows "online".
   const connected = settings?.status?.claude_configured !== false && settings?.status?.api_ok !== false
-  const [input,       setInput]       = useState('')
-  const [focused,     setFocused]     = useState(false)
-  const [showMention, setShowMention] = useState(false)
-  const [mentionQ,    setMentionQ]    = useState('')
-  // The category the user drilled into ("@Vacatures ") for a scoped search
-  // (KOIOS-SEARCH-1) — null while showing the default candidate-quick-search +
-  // category list. `label` is the exact text inserted, used to detect the
-  // scoped query's prefix (mentionScope.resolveScopedQuery).
-  const [activeCategory, setActiveCategory] = useState<{ id: string; label: string } | null>(null)
+  const [input,   setInput]   = useState('')
+  const [focused, setFocused] = useState(false)
   // @-mentioned records for the outgoing turn (KOIOS-CTX-1) — shown as removable
   // chips above the composer; cleared on send and on "Nieuwe chat".
   const [contextRefs, setContextRefs] = useState<KoiosContextRef[]>([])
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const bottomRef   = useRef<HTMLDivElement>(null)
-  const mentionRef  = useRef<HTMLDivElement>(null)
+  // The "@" mention picker's open/query/category state, roving-highlight wiring
+  // and keydown forwarding all live in one hook (§0.3 size split, KOIOS-SEARCH-FIX-2).
+  const {
+    showMention, mentionQ, activeCategory, activeOptionId, setActiveOptionId, menuRendered, setMenuRendered,
+    mentionRef, mentionMenuRef, handleMentionInput, handleKeyDown, insertCategoryMention, insertEntityMention,
+    openMentionTrigger, closeMentionMenu,
+  } = useKoiosComposerKeys({
+    input, setInput,
+    addMentionRef: (ref) => setContextRefs(prev => addContextRef(prev, ref)),
+    textareaRef,
+  })
   // prefers-reduced-motion (§6) — now the shared hook (§11: the drag layer needed the
   // same signal, so this inline copy was promoted instead of duplicated).
   const reduceMotion = usePrefersReducedMotion()
   // Real tenant counts for the mention categories — fetched once, lazily, the
   // first time the menu opens (never blocks the menu's first paint).
   const mentionCounts = useKoiosMentionCounts(showMention)
+  // KOIOS-SELECTIE-CONTEXT-1: the two AMBIENT context chips (open drilldown +
+  // table selection) — derived, not user-added, see the hook's own comment.
+  const { ambientRef, selectionChip, dismissAmbient, dismissSelection } = useKoiosContextChips()
 
   // Keep the latest message in view.
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [messages, loading])
@@ -168,81 +170,69 @@ export default function KoiosPanel({ open, onClose, onNavigate }: { open?: boole
     ta.style.height = Math.min(ta.scrollHeight, 100) + 'px'
   }, [input])
 
-  // Close the mention picker on an outside click.
-  useEffect(() => {
-    const handler = (e: MouseEvent) => {
-      if (isInsideDropdownPortal(e.target as Node)) return
-      if (mentionRef.current && !mentionRef.current.contains(e.target as Node)) { setShowMention(false); setActiveCategory(null) }
-    }
-    document.addEventListener('mousedown', handler)
-    return () => document.removeEventListener('mousedown', handler)
-  }, [])
-
-  // Submit the composer: hand the text + context refs to the hook, then clear + refocus.
+  // Submit the composer: hand the text + ALL context refs (ambient + selection +
+  // manual @-mentions, see chipRows below) to the hook, then clear + refocus.
+  // Ambient/selection are ongoing page state, not a per-turn pick, so only the
+  // manual list resets on send.
   const submit = (text?: string) => {
     const trimmed = (text ?? '').trim()
     if (!trimmed || loading) return
-    send(trimmed, contextRefs)
+    send(trimmed, outgoingContextRefs)
     setInput('')
     setContextRefs([])
     if (textareaRef.current) textareaRef.current.style.height = 'auto'
-    setShowMention(false)
-    setActiveCategory(null)
+    closeMentionMenu()
     setTimeout(() => textareaRef.current?.focus(), 50)
   }
 
-  // Track the "@" mention trigger. matchMentionQuery is unicode-safe and allows
-  // spaces (e.g. "@ahmed vos") — see mentionMatch.ts for the space-handling fix.
-  // A scoped category (KOIOS-SEARCH-1) is dropped the moment the typed tail no
-  // longer starts with its label — the user backspaced past it or started a
-  // fresh "@" elsewhere (mentionScope.resolveScopedQuery is the single source
-  // of truth KoiosMentionMenu itself uses for the same decision).
+  // Composer onChange: update the draft text, then let the mention hook decide
+  // whether the "@" picker should open/update from the new value.
   const handleInput = (e: ChangeEvent<HTMLTextAreaElement>) => {
     const val = e.target.value
     setInput(val)
-    const q = matchMentionQuery(val)
-    if (q === null) { setShowMention(false); setActiveCategory(null); return }
-    setShowMention(true)
-    setMentionQ(q)
-    if (activeCategory && resolveScopedQuery(q, activeCategory.label) === null) setActiveCategory(null)
+    handleMentionInput(val)
   }
 
-  const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
+  // Composer onKeyDown: the mention hook gets first refusal (arrow-nav, a
+  // mention pick, Escape) — a plain Enter it does NOT consume falls through to
+  // the real submit here, so "Enter picks a highlighted row" and "Enter sends
+  // the message" can never both fire for the same keystroke.
+  const onComposerKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
+    if (handleKeyDown(e)) return
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submit(input) }
-    if (e.key === 'Escape') { setShowMention(false); setActiveCategory(null) }
   }
 
-  // Picking a category inserts "@Label " as before. A category WITH search
-  // wiring (koiosMentionCategories) enters scoped mode — the menu stays open
-  // and switches to a live search within that category; one WITHOUT (today:
-  // `locations`, no global list endpoint) keeps the legacy text-only insert.
-  const insertCategoryMention = (category: MentionCategoryConfig, label: string) => {
-    const lastAt = input.lastIndexOf('@')
-    const before = lastAt !== -1 ? input.slice(0, lastAt) : input
-    setInput(before + '@' + label + ' ')
-    if (category.search) {
-      setActiveCategory({ id: category.id, label })
-    } else {
-      setShowMention(false)
-      setActiveCategory(null)
-    }
-    textareaRef.current?.focus()
-  }
+  // KOIOS-SELECTIE-CONTEXT-1: the ambient chips display FIRST, then the manual
+  // @-mentions. Deduped by id, but the LAST entry for a given id wins the
+  // rendered content (a Map.set on an existing key updates the value without
+  // moving its position) — so a manual @-mention of the record that's ALSO the
+  // open drilldown keeps its real name (hit.name) instead of the ambient
+  // chip's generic "<entity> #<id>" fallback, while still showing in the
+  // ambient slot's FIRST position.
+  // The selection chip is ONE display pill (its own synthetic key, never sent
+  // as-is) — its REAL per-record refs are folded into outgoingContextRefs below.
+  const chipSource: KoiosContextChipRow[] = [
+    ...(ambientRef ? [{ ref: ambientRef, onRemove: dismissAmbient }] : []),
+    ...(selectionChip ? [{
+      ref: { type: selectionChip.refs[0]?.type ?? selectionChip.id, id: selectionChip.id, label: selectionChip.label },
+      onRemove: dismissSelection,
+    }] : []),
+    ...contextRefs.map((ref) => ({ ref, onRemove: () => removeContext(ref.id) })),
+  ]
+  const chipsById = new Map<string, KoiosContextChipRow>()
+  for (const row of chipSource) chipsById.set(row.ref.id, row)
+  const chipRows = Array.from(chipsById.values())
 
-  // Picking a real record (default candidate quick-search OR a scoped category
-  // search) ALSO records a context ref (deduped by id) so the outgoing turn
-  // carries { type, id } alongside the mention text — resolvable types only are
-  // ever sent to the backend (koiosApi.sendChat), the rest stay a UI-only pin.
-  const insertEntityMention = (hit: KoiosEntityHit, categoryId: string) => {
-    const refType = MENTION_CATEGORIES.find((c) => c.id === categoryId)?.search?.refType ?? categoryId
-    const lastAt = input.lastIndexOf('@')
-    const before = lastAt !== -1 ? input.slice(0, lastAt) : input
-    setInput(before + '@' + hit.name + ' ')
-    setContextRefs(prev => addContextRef(prev, { type: refType, id: hit.id, label: hit.name }))
-    setShowMention(false)
-    setActiveCategory(null)
-    textareaRef.current?.focus()
-  }
+  // The OUTGOING turn carries the REAL refs — ambient + every selected record
+  // (singular ref type, capped) + manual mentions — deduped by id so a record
+  // that is both open AND selected/mentioned is only ever sent once.
+  const outgoingSource: KoiosContextRef[] = [
+    ...(ambientRef ? [ambientRef] : []),
+    ...(selectionChip ? selectionChip.refs : []),
+    ...contextRefs,
+  ]
+  const seenOutgoingIds = new Set<string>()
+  const outgoingContextRefs = outgoingSource.filter((ref) => (seenOutgoingIds.has(ref.id) ? false : (seenOutgoingIds.add(ref.id), true)))
 
   const removeContext = (id: string) => setContextRefs(prev => removeContextRef(prev, id))
 
@@ -256,7 +246,7 @@ export default function KoiosPanel({ open, onClose, onNavigate }: { open?: boole
     textareaRef.current?.focus()
   }
 
-  const newChat = () => { reset(); setInput(''); setShowMention(false); setActiveCategory(null); setContextRefs([]) }
+  const newChat = () => { reset(); setInput(''); closeMentionMenu(); setContextRefs([]) }
 
   // CONNECT-1 (Danny 22-08): the header's disconnected indicator jumps straight
   // to the screen that configures this connection (Settings → AI → Koios,
@@ -311,6 +301,7 @@ export default function KoiosPanel({ open, onClose, onNavigate }: { open?: boole
         {/* Mention picker — scoped per-category search + candidate quick-search + category list */}
         {showMention && (
           <KoiosMentionMenu
+            ref={mentionMenuRef}
             query={mentionQ}
             counts={mentionCounts}
             activeCategoryId={activeCategory?.id ?? null}
@@ -320,38 +311,14 @@ export default function KoiosPanel({ open, onClose, onNavigate }: { open?: boole
             t={t}
             locale={locale}
             menuRef={mentionRef}
+            onActiveOptionChange={setActiveOptionId}
+            onOpenChange={setMenuRendered}
           />
         )}
 
-        {/* Active @-mention context refs — removable chips (cleared on send/newChat).
-            A type the backend can't resolve yet (koiosContextTypes) still shows as a
-            chip (so the pin is visible) but is dashed + tooltipped — it is pinned
-            client-side ONLY and never sent in the outgoing context[]. */}
-        {contextRefs.length > 0 && (
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 8 }}>
-            {contextRefs.map(ref => {
-              const pending = !isContextResolvable(ref.type)
-              return (
-                <span key={ref.id} title={pending ? t('koios.contextPending') : undefined} style={{
-                  display: 'inline-flex', alignItems: 'center', gap: 4, padding: '3px 8px', borderRadius: 999,
-                  fontSize: 11, fontWeight: 500,
-                  // §4 tint formula via lib/tint, not an ad-hoc color-mix percentage.
-                  // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- tintBg/tintBorder ARE the canonical §4 tint helpers; the primary token here is only their argument, not a hand-painted fill
-                  background: tintBg('var(--color-primary)'),
-                  color: 'var(--color-primary-text)',
-                  border: `1px ${pending ? 'dashed' : 'solid'} ${tint('var(--color-primary)', TINT_BORDER)}`,
-                }}>
-                  {ref.label}
-                  <button onClick={() => removeContext(ref.id)} aria-label={`${t('remove')} ${ref.label}`}
-                    // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- bare × INSIDE a chip: a nested Button would paint a second face inside the chip (BranchSection/PoolsSection precedent)
-                    style={{ display: 'flex', border: 'none', background: 'none', cursor: 'pointer', color: 'inherit', padding: 0 }}>
-                    <X size={10} />
-                  </button>
-                </span>
-              )
-            })}
-          </div>
-        )}
+        {/* Context chips: ambient (open drilldown + table selection) + manual
+            @-mentions — one removable row, see KoiosContextChips + chipRows above. */}
+        <KoiosContextChips chips={chipRows} t={t} />
 
         {/* Input box */}
         <div style={{
@@ -367,11 +334,20 @@ export default function KoiosPanel({ open, onClose, onNavigate }: { open?: boole
             ref={textareaRef}
             value={input}
             onChange={handleInput}
-            onKeyDown={handleKeyDown}
+            onKeyDown={onComposerKeyDown}
             onFocus={() => setFocused(true)}
             onBlur={() => setFocused(false)}
             placeholder={t('koios.taskPlaceholder')}
             rows={1}
+            role="combobox"
+            // aria-expanded/aria-controls/aria-activedescendant only describe the
+            // menu while it is ACTUALLY rendered (menuRendered, reported by
+            // KoiosMentionMenu's own onOpenChange) — showMention alone can be true
+            // while the menu itself paints nothing (below the char threshold).
+            aria-expanded={showMention && menuRendered}
+            aria-controls={showMention && menuRendered ? 'koios-mention-menu' : undefined}
+            aria-activedescendant={showMention && menuRendered && activeOptionId ? activeOptionId : undefined}
+            aria-autocomplete="list"
             // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- the composer's own <textarea> control, not a text-display atom; BodyText renders a <p>/<span> and cannot back a form control
             style={{
               width: '100%', background: 'none', border: 'none', outline: 'none',
@@ -385,7 +361,7 @@ export default function KoiosPanel({ open, onClose, onNavigate }: { open?: boole
 
             {/* @ mention */}
             <button
-              onClick={() => { setInput(v => v + '@'); setShowMention(true); setMentionQ(''); setActiveCategory(null); textareaRef.current?.focus() }}
+              onClick={openMentionTrigger}
               title={t('koios.addContext')}
               // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- imperative two-property hover swap (background AND ink together); not a static Button variant
               style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px 5px',

@@ -24,6 +24,7 @@ export interface KoiosMentionCounts {
   outreach?: number
   departments?: number
   contacts?: number
+  locations?: number
 }
 
 // One cheap `per_page=1` list call → its `meta.total` (unwrapList already falls
@@ -73,8 +74,9 @@ function loadCounts(): Promise<KoiosMentionCounts> {
     fetchTotal('/outreach-campaigns'),
     fetchTotal('/departments'),
     fetchTotal('/contacts'),
-  ]).then(([candidates, leads, applications, vacancies, matches, opportunities, tasks, customers, outreach, departments, contacts]) => ({
-    candidates, leads, applications, vacancies, matches, opportunities, tasks, customers, outreach, departments, contacts,
+    fetchTotal('/customer-locations'),
+  ]).then(([candidates, leads, applications, vacancies, matches, opportunities, tasks, customers, outreach, departments, contacts, locations]) => ({
+    candidates, leads, applications, vacancies, matches, opportunities, tasks, customers, outreach, departments, contacts, locations,
   }))
 }
 

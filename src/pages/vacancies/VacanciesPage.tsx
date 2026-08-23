@@ -10,6 +10,7 @@ import type { Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useRightPanel } from '@/context/RightPanelContext'
 import { useAuth } from '@/context/AuthContext'
+import { usePublishSelection } from '@/context/SelectionContext'
 import { useUsers } from '@/lib/queries'
 import { useBranchOptions } from '@/lib/useBranchOptions'
 import ErrorBanner from '@/components/ui/ErrorBanner'
@@ -78,6 +79,8 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
   const { pageSize, setPageSize, options: pageSizeOptions } = useListPageSize('vac', VACANCIES_MAX_PER_PAGE)
   const [addOpen,        setAddOpen]        = useState(false)
   const [selectedIds,    setSelectedIds]    = useState<Set<Id>>(() => new Set())
+  // KOIOS-SELECTIE-CONTEXT-1: mirror the selection into Koios AI's context chip.
+  usePublishSelection('vacancies', selectedIds)
   const [actionMsg,      setActionMsg]      = useState<{ type: string; text: string } | null>(null)
   const msgTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 

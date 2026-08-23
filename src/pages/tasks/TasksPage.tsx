@@ -7,6 +7,7 @@ import { useUsers } from '@/lib/queries'
 import { useRightPanel } from '@/context/RightPanelContext'
 import { TaskLookupsProvider, useTaskLookups } from '@/context/TaskLookupsContext'
 import { useAuth } from '@/context/AuthContext'
+import { usePublishSelection } from '@/context/SelectionContext'
 import InsightsRow from '@/components/insights/InsightsRow'
 import HeaderSearch from '@/components/ui/HeaderSearch'
 import ClearFiltersButton from '@/components/ui/ClearFiltersButton'
@@ -72,6 +73,8 @@ function TasksPageInner({ intent }: { intent?: unknown }) {
   const [addOpen,  setAddOpen]  = useState(false)
   // Bulk-selection (checkboxes) — id-set, cleared on filter/page change.
   const [selectedIds, setSelectedIds] = useState<Set<Id>>(() => new Set())
+  // KOIOS-SELECTIE-CONTEXT-1: mirror the selection into Koios AI's context chip.
+  usePublishSelection('tasks', selectedIds)
   // ALL filter state + the row predicate live in one hook (§0.3 size split).
   const {
     showArchived, setShowArchived, showTrash, setShowTrash, query, setQuery, refQuery,
@@ -92,7 +95,7 @@ function TasksPageInner({ intent }: { intent?: unknown }) {
     if (i.priority) setSelectedPriority([i.priority])
     if (i.type)     setSelectedType([i.type])
     if (i.assignee) setSelectedAssignee([i.assignee])
-  }, [intent])
+  }, [intent, setKpiFilter, setSelectedAssignee, setSelectedPriority, setSelectedStatus, setSelectedType])
 
   // Board columns = the status lookup, normalised to { key, label, color }.
   const columns = useMemo<BoardColumn[]>(() => statuses.map(s => ({ key: s.value, label: s.label, color: s.color })), [statuses])
@@ -119,8 +122,10 @@ function TasksPageInner({ intent }: { intent?: unknown }) {
     selectedTeam, setSelectedTeam, selectedLinkType, setSelectedLinkType,
     dueRange, setDueRange, showArchived, setShowArchived,
     statusData, priorityData, typeData, assigneeOptions, teamOptions, linkTypeOptions,
-  }), [t, selectedStatus, selectedPriority, selectedType, selectedAssignee, selectedTeam, selectedLinkType,
-       dueRange, showArchived, statusData, priorityData, typeData, assigneeOptions, teamOptions, linkTypeOptions])
+  }), [t, selectedStatus, setSelectedStatus, selectedPriority, setSelectedPriority, selectedType, setSelectedType,
+       selectedAssignee, setSelectedAssignee, selectedTeam, setSelectedTeam, selectedLinkType, setSelectedLinkType,
+       dueRange, setDueRange, showArchived, setShowArchived,
+       statusData, priorityData, typeData, assigneeOptions, teamOptions, linkTypeOptions])
 
   useEffect(() => {
     registerFilters('tasks-page', filterGroups)
@@ -128,7 +133,7 @@ function TasksPageInner({ intent }: { intent?: unknown }) {
   }, [filterGroups, registerFilters, unregisterFilters])
 
   // Reset to the first page + clear the selection whenever a filter/KPI tile changes.
-  useEffect(() => { setPage(1); setSelectedIds(new Set()) }, [selectedStatus, selectedPriority, selectedType, selectedAssignee, selectedTeam, selectedLinkType, dueRange, kpiFilter, showArchived, showTrash, query])
+  useEffect(() => { setPage(1); setSelectedIds(new Set()) }, [selectedStatus, selectedPriority, selectedType, selectedAssignee, selectedTeam, selectedLinkType, dueRange, kpiFilter, showArchived, showTrash, query, setPage])
 
   // The visible rows: the hook predicate (panel filters + search + KPI tile) +
   // the lifecycle view split (TRASH-OVERAL-2, mirrors candidates): trash =

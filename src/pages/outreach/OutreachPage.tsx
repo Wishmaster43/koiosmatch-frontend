@@ -5,12 +5,13 @@
  * and an archived text-toggle + table/board view toggle on the RIGHT, a bulk bar
  * over the table, and a kanban board. The per-bellijst call-list detail is step 2.
  */
-import { useState, useEffect, useMemo, type Dispatch, type SetStateAction } from 'react'
+import { useState, useEffect, useMemo, useCallback, type Dispatch, type SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
 import { LayoutList, Kanban, Archive, Plus, Trash2 } from 'lucide-react'
 import { notifyError, notifySuccess } from '@/lib/notify'
 import { useAuth } from '@/context/AuthContext'
 import { useRightPanel } from '@/context/RightPanelContext'
+import { usePublishSelection } from '@/context/SelectionContext'
 import InsightsRow from '@/components/insights/InsightsRow'
 import { buildOutreachFilterGroups } from './data/outreachFilterGroups'
 import HeaderSearch from '@/components/ui/HeaderSearch'
@@ -103,6 +104,8 @@ export default function OutreachPage() {
   const [selectedOwner, setSelectedOwner] = useState<string[]>([])
   const [selectedTargetGroup, setSelectedTargetGroup] = useState<string[]>([])
   const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set())
+  // KOIOS-SELECTIE-CONTEXT-1: mirror the selection into Koios AI's context chip.
+  usePublishSelection('outreach', selectedIds)
   const [query, setQuery] = useState('')  // shared header search (client-side, R-5)
 
   // Archived campaigns are fetched lazily (only while the archived toggle is on).
@@ -147,14 +150,16 @@ export default function OutreachPage() {
   const channelData = useMemo(() => donutBy(CHANNELS, 'channel', channelKey), [campaigns, t]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Right-panel-only options: owner + target group (source pool), derived from
-  // the loaded rows — never a hardcoded list.
-  const optionsFrom = (nameOf: (c: Campaign) => string): { value: string; label: string; count: number }[] => {
+  // the loaded rows — never a hardcoded list. useCallback-wrapped (stable-setter
+  // recipe, mirrors CandidatesPage/CustomersPage/VacanciesPage) so the two memos
+  // below can list the real dependency (`optionsFrom`) instead of dropping it.
+  const optionsFrom = useCallback((nameOf: (c: Campaign) => string): { value: string; label: string; count: number }[] => {
     const m = new Map<string, number>()
     campaigns.forEach((c) => { const n = nameOf(c); if (n) m.set(n, (m.get(n) ?? 0) + 1) })
     return [...m.entries()].map(([value, count]) => ({ value, label: value, count }))
-  }
-  const ownerOptions = useMemo(() => optionsFrom(ownerNameOf), [campaigns])
-  const targetGroupOptions = useMemo(() => optionsFrom(targetGroupNameOf), [campaigns])
+  }, [campaigns])
+  const ownerOptions = useMemo(() => optionsFrom(ownerNameOf), [optionsFrom])
+  const targetGroupOptions = useMemo(() => optionsFrom(targetGroupNameOf), [optionsFrom])
 
   // Register the right-panel filters (status/channel/owner/target-group/archived).
   const filterGroups = useMemo(() => buildOutreachFilterGroups({

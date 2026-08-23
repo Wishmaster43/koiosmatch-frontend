@@ -9,6 +9,7 @@ import type { ComponentType } from 'react'
 import { SlidersHorizontal, PanelLeftClose, PanelLeftOpen } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import { useRightPanel } from '@/context/RightPanelContext'
+import { SelectionProvider } from '@/context/SelectionContext'
 import { canAccessPage, PACKAGE_DEFAULT_PAGE } from '@/lib/access'
 import Sidebar from './Sidebar'
 import KoiosPanel from './KoiosPanel'
@@ -112,6 +113,9 @@ export default function DashboardLayout() {
   const activeFilters = filterGroups.reduce((sum, g) => sum + ((g.selected as unknown[] | undefined)?.length ?? 0), 0)
 
   return (
+    // KOIOS-SELECTIE-CONTEXT-1: one shared selection slot for BOTH the routed
+    // page (below, publishes) and KoiosPanel (sibling, reads) — see SelectionContext.
+    <SelectionProvider>
     <div className="flex h-screen overflow-hidden">
 
       {/* ── Left navigation ── */}
@@ -333,5 +337,6 @@ export default function DashboardLayout() {
         </div>
       </div>
     </div>
+    </SelectionProvider>
   )
 }

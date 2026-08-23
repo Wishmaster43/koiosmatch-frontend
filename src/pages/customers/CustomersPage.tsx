@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { Archive, Map as MapIcon, Trash2 } from 'lucide-react'
 import { useRightPanel } from '@/context/RightPanelContext'
 import { useAuth } from '@/context/AuthContext'
+import { usePublishSelection } from '@/context/SelectionContext'
 import { useOpenFromIntent } from '@/context/NavigationContext'
 import { useDrawerUrl } from '@/hooks/useDrawerUrl'
 import { usePageMemory } from '@/lib/usePageMemory'
@@ -93,6 +94,8 @@ export default function CustomersPage({ intent }: { intent?: unknown } = {}) {
   const [geoFilter, setGeoFilter] = usePageMemory<{ q: string; km: number; lat: number; lng: number; label: string } | null>('cust.geo', null)
   const [geoHint, setGeoHint] = useState<string | null>(null)
   const [selectedIds, setSelectedIds] = useState<Set<Id>>(() => new Set())
+  // KOIOS-SELECTIE-CONTEXT-1: mirror the selection into Koios AI's context chip.
+  usePublishSelection('customers', selectedIds)
   const [actionMsg, setActionMsg] = useState<{ type: string; text: string } | null>(null)
   const msgTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const tableScrollRef = useRef<HTMLDivElement>(null)

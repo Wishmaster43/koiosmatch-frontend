@@ -1,7 +1,10 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, fireEvent } from '@testing-library/react'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { render, screen, fireEvent, waitFor, within } from '@testing-library/react'
+import { useMemo } from 'react'
 import KoiosPanel from './KoiosPanel'
 import { sendChat } from './koios/koiosApi'
+import api from '@/lib/api'
+import { SelectionProvider, usePublishSelection } from '@/context/SelectionContext'
 
 // jsdom has no scrollIntoView implementation; KoiosPanel calls it to keep the
 // latest message in view on every messages/loading change.
@@ -12,7 +15,8 @@ Element.prototype.scrollIntoView = vi.fn()
 // component tests, every t() in this tree would then return actual Dutch copy
 // instead of echoing the key. Stub useLocale directly so that import — and the
 // real i18n init behind it — never happens; every useTranslation() falls back
-// to its normal uninitialised-instance behaviour (t returns the key).
+// to its normal uninitialised-instance behaviour (t returns the key, and drops
+// interpolation options entirely since there is no template to fill them into).
 vi.mock('@/lib/datetime', () => ({ useLocale: () => 'nl-NL' }))
 
 // KoiosPanel's own hooks call these on open — stub them so the test never hits
@@ -25,6 +29,20 @@ vi.mock('./koios/koiosApi', () => ({
 }))
 // KoiosRadar's own stats fetch (candidates/stats) via the shared heavyGet wrapper.
 vi.mock('@/lib/heavyGet', () => ({ heavyGet: () => Promise.resolve({ data: { data: { attention: {} } } }) }))
+// The mention menu's own fan-out/scoped search (KoiosMentionMenu) hits the real
+// list endpoints via this client — mocked with a safe empty-results default so
+// opening "@" never reaches a real network call; per-test overrides below give
+// exactly one pickable row where a test needs to insert a manual mention.
+vi.mock('@/lib/api', async () => {
+  const actual = await vi.importActual<typeof import('@/lib/api')>('@/lib/api')
+  return { ...actual, default: { get: vi.fn(() => Promise.resolve({ data: { data: [] } })) } }
+})
+const mockGet = api.get as unknown as ReturnType<typeof vi.fn>
+// No AuthProvider wraps this test tree, and useAuth()'s default context value
+// is `null` — koiosMentionAccess.isCategoryVisible would then hide EVERY
+// permission-gated category, leaving the mention menu empty. Full access, same
+// stub shape as KoiosMentionMenu.test.tsx's own auth stub.
+vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ hasPermission: () => true }) }))
 
 // Landing state (Danny 21/7): the radar REPLACES the generic welcome bubble, it
 // never sits alongside it, and only while no real conversation has started yet.
@@ -92,5 +110,181 @@ describe('KoiosPanel — known backend error codes', () => {
     vi.mocked(sendChat).mockRejectedValueOnce(new Error('network down'))
     await submitMessage('hello')
     expect(await screen.findByText('koios.errorReply')).toBeInTheDocument()
+  })
+})
+
+// KOIOS-SEARCH-FIX-1 blocker (2): the panel SEAM — ambient/selection chips,
+// dismiss, the outgoing sendChat context array, and the new-chat reset — was
+// entirely untested before this fix. `sendChat` stays the mocked module-level
+// stub (API-CREDITS-1: never a live /ai/koios/* call); only the chat TRANSPORT
+// is mocked here, the chip/context wiring itself runs for real.
+describe('KoiosPanel — context chips (seam)', () => {
+  // Publishes a real SelectionContext selection — a memoized Set (not rebuilt
+  // inline on every render) so this consumer's own context subscription can
+  // never fight usePublishSelection's effect into a render loop (mirrors the
+  // same guard useKoiosContextChips.test.tsx documents).
+  function SelectionSeed({ ids }: { ids: string[] }) {
+    const idsKey = ids.join(',')
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentionally NOT depending on `ids` (a fresh array every render); idsKey already captures every real change
+    const idSet = useMemo(() => new Set(ids), [idsKey])
+    usePublishSelection('candidates', idSet)
+    return null
+  }
+  function renderPanel({ hash, selectionIds }: { hash?: string; selectionIds?: string[] } = {}) {
+    if (hash !== undefined) window.location.hash = hash
+    return render(
+      <SelectionProvider>
+        {selectionIds && <SelectionSeed ids={selectionIds} />}
+        <KoiosPanel open onClose={() => {}} onNavigate={() => {}} />
+      </SelectionProvider>,
+    )
+  }
+
+  beforeEach(() => { mockGet.mockReset(); mockGet.mockImplementation(() => Promise.resolve({ data: { data: [] } })) })
+  afterEach(() => { window.location.hash = '' })
+
+  // (a) an ambient chip renders from a drilldown hash.
+  it('renders an ambient chip from a drilldown hash', async () => {
+    renderPanel({ hash: '#candidates?open=c-1' })
+    await screen.findByText('common:koios.radar.empty')
+    // No real name source exists client-side (useKoiosContextChips banner) — the
+    // honest fallback label is the koios.contextRecordFallback key; in this
+    // file's uninitialised-i18n environment that key renders bare (see the
+    // useLocale mock comment above), so its own remove control is the reliable
+    // handle to assert the chip actually rendered.
+    expect(screen.getByRole('button', { name: 'remove koios.contextRecordFallback' })).toBeInTheDocument()
+  })
+
+  // (b) a selection chip renders from SelectionContext with the count label.
+  it('renders a selection chip from SelectionContext, via the count-label key', async () => {
+    renderPanel({ selectionIds: ['1', '2'] })
+    await screen.findByText('common:koios.radar.empty')
+    // koios.selection.chip IS the count-carrying template ("{{count}} {{entity}}
+    // selected"); the uninitialised i18n instance in this file drops the actual
+    // numbers (no resource to interpolate into), so the KEY itself is what
+    // proves this is the count label, not some other chip.
+    expect(screen.getByRole('button', { name: 'remove koios.selection.chip' })).toBeInTheDocument()
+  })
+
+  // (c) dismissing a chip removes it.
+  it('dismissing a chip removes it', async () => {
+    renderPanel({ hash: '#candidates?open=c-1' })
+    await screen.findByText('common:koios.radar.empty')
+    const removeBtn = screen.getByRole('button', { name: 'remove koios.contextRecordFallback' })
+    fireEvent.click(removeBtn)
+    expect(screen.queryByRole('button', { name: 'remove koios.contextRecordFallback' })).toBeNull()
+  })
+
+  // (d) sending a message calls the mocked sendChat with a context array
+  // carrying the real refs — ambient AND selection, deduped, singular types.
+  it('sending a message calls sendChat with a context array carrying the refs', async () => {
+    renderPanel({ hash: '#candidates?open=c-1', selectionIds: ['9'] })
+    await screen.findByText('common:koios.radar.empty')
+    const textarea = screen.getByPlaceholderText('koios.taskPlaceholder')
+    fireEvent.change(textarea, { target: { value: 'hello' } })
+    fireEvent.click(screen.getByRole('button', { name: 'koios.taskPlaceholder' }))
+    // waitFor (rather than a bare assertion) lets useKoiosChat's own pending
+    // async tail (setLoading/setMessages after the mocked sendChat resolves)
+    // settle inside act() before the test ends.
+    await waitFor(() => expect(sendChat).toHaveBeenCalledWith('hello', null, expect.arrayContaining([
+      expect.objectContaining({ type: 'candidate', id: 'c-1' }),
+      expect.objectContaining({ type: 'candidate', id: '9' }),
+    ])))
+  })
+
+  // (e) chips clear on new chat — the MANUAL @-mention list only (ambient/
+  // selection are ongoing page state, not a per-turn pick, and correctly
+  // survive a new chat — see the file's own `newChat` comment).
+  it('clears a manual @-mention chip on new chat', async () => {
+    mockGet.mockImplementation((url: string) => url === '/candidates'
+      ? Promise.resolve({ data: { data: [{ id: '99', name: 'Test Kandidaat' }] } })
+      : Promise.resolve({ data: { data: [] } }))
+    renderPanel()
+    await screen.findByText('common:koios.radar.empty')
+    const textarea = screen.getByPlaceholderText('koios.taskPlaceholder')
+    fireEvent.change(textarea, { target: { value: '@ahmed' } })
+    // '/candidates' backs BOTH the 'candidates' and 'leads' categories, so the
+    // same fake row renders twice (once per group) — pick the first occurrence.
+    await waitFor(() => expect(screen.getAllByText('Test Kandidaat').length).toBeGreaterThan(0))
+    fireEvent.click(screen.getAllByText('Test Kandidaat')[0])
+    expect(screen.getByRole('button', { name: 'remove Test Kandidaat' })).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'koios.newChatShort' }))
+    expect(screen.queryByRole('button', { name: 'remove Test Kandidaat' })).toBeNull()
+  })
+
+  // Enter without an open mention menu still submits — the keyboard-forwarding
+  // fix must never swallow a plain Enter on a normal message.
+  it('Enter without an open mention menu still submits', async () => {
+    renderPanel()
+    await screen.findByText('common:koios.radar.empty')
+    const textarea = screen.getByPlaceholderText('koios.taskPlaceholder')
+    fireEvent.change(textarea, { target: { value: 'hello' } })
+    fireEvent.keyDown(textarea, { key: 'Enter' })
+    await waitFor(() => expect(sendChat).toHaveBeenCalledWith('hello', null, []))
+  })
+})
+
+// KOIOS-SEARCH-FIX-2 (Opus blocker): the composer→menu keyboard seam. The menu
+// half lives in KoiosMentionMenu.test.tsx; THESE tests drive the real textarea
+// so the forwarding (ArrowUp/Down), the Enter-picks-not-submits early return,
+// Escape, and the aria-activedescendant wiring are pinned on the panel itself.
+describe('KoiosPanel — mention menu keyboard seam', () => {
+  // Same minimal render as the chips describe (its helper is scoped there).
+  function renderPanel() {
+    return render(
+      <SelectionProvider>
+        <KoiosPanel open onClose={() => {}} onNavigate={() => {}} />
+      </SelectionProvider>,
+    )
+  }
+  afterEach(() => { window.location.hash = '' })
+
+  beforeEach(() => {
+    // Earlier describes exercise sendChat — clear it so not-called stays honest.
+    vi.mocked(sendChat).mockClear()
+    // One pickable row in EVERY category list the fan-out queries — so the menu
+    // renders at least two groups and the highlight can cross a group boundary.
+    mockGet.mockImplementation((url: string) => Promise.resolve({ data: { data: [
+      { id: `${String(url).replace(/\W/g, '')}-1`, name: `Rij ${String(url).slice(1, 4)}`, first_name: 'Rij', last_name: String(url).slice(1, 4) },
+    ] } }))
+  })
+
+  async function openMenu() {
+    renderPanel()
+    await screen.findByText('common:koios.radar.empty')
+    const textarea = screen.getByPlaceholderText('koios.taskPlaceholder')
+    fireEvent.change(textarea, { target: { value: '@ri' } })
+    const listbox = await screen.findByRole('listbox')
+    await waitFor(() => expect(within(listbox).getAllByRole('option').length).toBeGreaterThan(1))
+    return { textarea, listbox }
+  }
+
+  it('ArrowDown moves the highlight across rows and aria-activedescendant follows', async () => {
+    const { textarea, listbox } = await openMenu()
+    fireEvent.keyDown(textarea, { key: 'ArrowDown' })
+    const first = textarea.getAttribute('aria-activedescendant')
+    expect(first).toBeTruthy()
+    expect(within(listbox).getAllByRole('option').some(o => o.id === first)).toBe(true)
+    // Crossing into the next row (next group when the first group has one row).
+    fireEvent.keyDown(textarea, { key: 'ArrowDown' })
+    const second = textarea.getAttribute('aria-activedescendant')
+    expect(second).toBeTruthy()
+    expect(second).not.toBe(first)
+  })
+
+  it('Enter with a highlighted row PICKS it and never submits the chat', async () => {
+    const { textarea } = await openMenu()
+    fireEvent.keyDown(textarea, { key: 'ArrowDown' })
+    fireEvent.keyDown(textarea, { key: 'Enter' })
+    // The pick inserts a mention/chip; the chat transport must not fire.
+    expect(sendChat).not.toHaveBeenCalled()
+  })
+
+  it('Escape closes the menu and aria-expanded goes false', async () => {
+    const { textarea } = await openMenu()
+    expect(textarea.getAttribute('aria-expanded')).toBe('true')
+    fireEvent.keyDown(textarea, { key: 'Escape' })
+    await waitFor(() => expect(screen.queryByRole('listbox')).not.toBeInTheDocument())
+    expect(textarea.getAttribute('aria-expanded')).toBe('false')
   })
 })

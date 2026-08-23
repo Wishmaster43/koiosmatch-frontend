@@ -6,6 +6,7 @@ import ViewModeToggle from '@/components/ui/ViewModeToggle'
 import { useRightPanel } from '@/context/RightPanelContext'
 import { useLookups } from '@/context/LookupsContext'
 import { useAuth } from '@/context/AuthContext'
+import { usePublishSelection } from '@/context/SelectionContext'
 import { useUsers } from '@/lib/queries'
 import { useBranchOptions } from '@/lib/useBranchOptions'
 import { useOpenFromIntent } from '@/context/NavigationContext'
@@ -110,6 +111,8 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
     wideRows, wideLoading, wideError, wideIsPartial, stats, statsFailed, rowsEpoch, fetching } =
     useApplicationsData({ view, filterParams, bucketParam, page, pageSize, funnelTypes, sort })
   const [selectedIds,    setSelectedIds]    = useState<Set<Id>>(() => new Set())
+  // KOIOS-SELECTIE-CONTEXT-1: mirror the selection into Koios AI's context chip.
+  usePublishSelection('applications', selectedIds)
 
   // Clear the selection whenever the visible set changes (bucket/filters/paging).
   // SELECT-RACE-1: rowsEpoch (bumped only when a NEW server result actually

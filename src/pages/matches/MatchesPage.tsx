@@ -5,6 +5,7 @@ import { Plus, LayoutList, Kanban, Archive, Trash2, ClipboardCheck } from 'lucid
 import ViewModeToggle from '@/components/ui/ViewModeToggle'
 import { useAuth } from '@/context/AuthContext'
 import { useRightPanel } from '@/context/RightPanelContext'
+import { usePublishSelection } from '@/context/SelectionContext'
 import { useMatchStatuses } from '@/lib/useMatchStatuses'
 import { useMatchApprovalMode } from './hooks/useMatchApprovalMode'
 import api, { unwrap } from '@/lib/api'
@@ -99,6 +100,8 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
   const [monthStart] = useState(() => { const d = new Date(); d.setDate(1); d.setHours(0, 0, 0, 0); return d.getTime() })
   // Bulk selection (checkboxes); accumulates across pages, clears on filter change.
   const [selectedIds, setSelectedIds] = useState<Set<Id>>(() => new Set())
+  // KOIOS-SELECTIE-CONTEXT-1: mirror the selection into Koios AI's context chip.
+  usePublishSelection('matches', selectedIds)
   const { toggleRow, toggleAll, bulkCoupleHelloFlex, bulkCoupleShiftmanager } =
     useMatchesBulkActions({ selectedIds, setSelectedIds, t })
 

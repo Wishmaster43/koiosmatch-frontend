@@ -12,6 +12,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useRightPanel } from '@/context/RightPanelContext'
 import { useAuth } from '@/context/AuthContext'
 import { useLookups } from '@/context/LookupsContext'
+import { usePublishSelection } from '@/context/SelectionContext'
 import { useGenders } from '@/lib/useGenders'
 import { useUsers } from '@/lib/queries'
 import CandidateDrawerJs from './CandidateDrawer'
@@ -82,6 +83,8 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
 
   // Bulk-selectie (checkboxes) — id-set; gewist bij filter/pagina-wissel.
   const [selectedIds,      setSelectedIds]      = useState<Set<Id>>(() => new Set())
+  // KOIOS-SELECTIE-CONTEXT-1: mirror the selection into Koios AI's context chip.
+  usePublishSelection('candidates', selectedIds)
   // Transient feedback for bulk mutations (success/error), auto-dismissed.
   const [actionMsg,        setActionMsg]        = useState<ActionMessage | null>(null)
   const msgTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
