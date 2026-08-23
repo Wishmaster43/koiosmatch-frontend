@@ -67,6 +67,20 @@ describe('ChangelogTab · bellijst change log', () => {
     expect(screen.getAllByText(new RegExp(nlOutreach.changelog.actions.updated))).toHaveLength(3)
   })
 
+  // ACTORLABEL-SWEEP-1: actor_label ("<name>-KoiosAI") wins over causer_name when present.
+  it('shows actor_label instead of causer_name when both are present', async () => {
+    getMock.mockResolvedValue({ data: { data: [{ ...entry, actor_label: 'Danny Polak-KoiosAI' }] } })
+    render(<ChangelogTab campaignId="c1" />)
+    expect(await screen.findAllByText(/Danny Polak-KoiosAI/)).toHaveLength(3)
+    expect(screen.queryByText(/^Danny Polak(?!-KoiosAI)/)).toBeNull()
+  })
+
+  it('falls back to causer_name when actor_label is absent', async () => {
+    getMock.mockResolvedValue({ data: { data: [entry] } })
+    render(<ChangelogTab campaignId="c1" />)
+    expect(await screen.findAllByText(/Danny Polak/)).toHaveLength(3)
+  })
+
   it('shows the calm empty state for a fresh campaign, not an error', async () => {
     getMock.mockResolvedValue({ data: { data: [] } })
     render(<ChangelogTab campaignId="c1" />)

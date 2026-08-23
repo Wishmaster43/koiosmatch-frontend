@@ -46,6 +46,20 @@ afterEach(async () => {
 })
 
 describe('AuditLog — request seam', () => {
+  // K-139 / ACTORLABEL-SWEEP-1: a Koios-performed action carries actor_label
+  // ("<name>-KoiosAI") on the REAL /activity-log envelope — it must win over
+  // the human causer_name on the central audit surface.
+  it('renders actor_label instead of causer_name when the feed carries both', async () => {
+    api.get.mockResolvedValue({ data: { data: [{
+      id: 1, description: 'updated', log_name: 'candidate',
+      causer_name: 'Danny Polak', actor_label: 'Vacature Flow-KoiosAI',
+      created_at: '2026-08-01T10:00:00Z',
+    }] } })
+    renderAuditLog()
+    expect(await screen.findByText(/Vacature Flow-KoiosAI/)).toBeInTheDocument()
+    expect(screen.queryByText(/Danny Polak/)).not.toBeInTheDocument()
+  })
+
   it('GETs the exact tenant-wide activity-log route (§13: pins the seam, not just that a call fired)', async () => {
     api.get.mockResolvedValue({ data: [] })
     await act(async () => { renderAuditLog() })

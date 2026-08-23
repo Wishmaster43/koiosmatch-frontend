@@ -12,9 +12,10 @@ import { buildDiffCells } from './auditDiffCells'
 // Cells go through the shared escapeCsvCell, which also guards against formula
 // injection (a leading =+-@ opened as a live formula in Excel/Sheets — C-14).
 export function exportAuditCsv(entries, t) {
+  // actor_label ("<name>-KoiosAI") wins over the human causer_name when present.
   const who = (e) => e.causer_email
-    ? `${e.causer_name ?? t('audit.system')} (${e.causer_email})`
-    : (e.causer_name ?? t('audit.system'))
+    ? `${e.actor_label ?? e.causer_name ?? t('audit.system')} (${e.causer_email})`
+    : (e.actor_label ?? e.causer_name ?? t('audit.system'))
   const header = [t('audit.colDate'), t('audit.colTime'), t('audit.colWho'), t('audit.colType'), t('audit.colEntity'), t('audit.colAction'), t('audit.colOldValue'), t('audit.colNewValue')]
   const rows = entries.map(e => {
     const { beforeCell, afterCell } = buildDiffCells(e, t)

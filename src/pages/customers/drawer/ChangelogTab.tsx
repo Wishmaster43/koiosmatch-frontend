@@ -35,6 +35,8 @@ interface ActivityEntry {
   event?: string
   author?: string
   causer_name?: string
+  // Koios-performed action label ("<name>-KoiosAI") — wins over causer_name when present.
+  actor_label?: string
   created_at?: string
   time?: string
   subject_type?: string
@@ -126,7 +128,7 @@ export default function ChangelogTab({ customerId, endpoint }: { customerId?: Id
 
   const cards: LogCard[] = items.map(ev => ({
     when: ev.created_at ?? ev.time,
-    who: ev.causer_name || ev.author || t('changelog.system'),
+    who: ev.actor_label ?? ev.causer_name ?? ev.author ?? t('changelog.system'),
     action: actionOf(ev),
     subject: subjectOf(ev),
     rows: changesOf(ev),

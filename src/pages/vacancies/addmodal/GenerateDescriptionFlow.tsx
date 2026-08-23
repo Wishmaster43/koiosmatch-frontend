@@ -6,8 +6,9 @@ import Spinner from '@/components/ui/Spinner'
 import AiGeneratedLabel from '@/components/ui/AiGeneratedLabel'
 import CalloutBox from '@/components/ui/CalloutBox'
 import Button from '@/components/ui/Button'
+import AssistTextPreview from '@/components/ui/richtext/AssistTextPreview'
 // HUISSTIJL-1: the status chip line (11px/muted) is the shared Caption atom.
-import { Caption } from '@/components/ui/typography'
+import { Caption, GroupLabel } from '@/components/ui/typography'
 import { useGenerateDescription } from './useGenerateDescription'
 import type { GenerateFormFields } from './useGenerateDescription'
 
@@ -19,7 +20,7 @@ interface GenerateDescriptionFlowProps {
 }
 
 // HUISSTIJL-1: a genuine text link (underlined, no chrome) — not a Button variant.
-const linkBtn: CSSProperties = { background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontSize: 11, fontWeight: 600, color: 'var(--color-primary-text)', textDecoration: 'underline' }
+const linkBtn: CSSProperties = { height: 'auto', padding: 0, fontSize: 11, fontWeight: 600, color: 'var(--color-primary-text)', textDecoration: 'underline' }
 
 /**
  * GenerateDescriptionFlow — punt 17: "Genereer met Koios" on the CREATE form's
@@ -84,7 +85,7 @@ export default function GenerateDescriptionFlow({ fields, onApply }: GenerateDes
         <CalloutBox variant="warning">
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <span>{t('common:errors.koiosUnavailable')}</span>
-            <button type="button" onClick={generate} style={linkBtn}>{t('common:error.retry')}</button>
+            <Button variant="ghost" size="sm" type="button" onClick={generate} style={linkBtn}>{t('common:error.retry')}</Button>
           </div>
         </CalloutBox>
       )}
@@ -94,7 +95,7 @@ export default function GenerateDescriptionFlow({ fields, onApply }: GenerateDes
         <CalloutBox variant="warning">
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <span>{t('common:errors.koiosCreditExhausted')}</span>
-            <button type="button" onClick={generate} style={linkBtn}>{t('common:error.retry')}</button>
+            <Button variant="ghost" size="sm" type="button" onClick={generate} style={linkBtn}>{t('common:error.retry')}</Button>
           </div>
         </CalloutBox>
       )}
@@ -106,22 +107,23 @@ export default function GenerateDescriptionFlow({ fields, onApply }: GenerateDes
       {status === 'error' && (
         <div aria-live="polite" style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 12, color: 'var(--color-danger-text)' }}>
           <span>{t('generate.error')}</span>
-          <button type="button" onClick={generate} style={linkBtn}>{t('common:error.retry')}</button>
+          <Button variant="ghost" size="sm" type="button" onClick={generate} style={linkBtn}>{t('common:error.retry')}</Button>
         </div>
       )}
 
       {status === 'success' && (
         <>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, flexWrap: 'wrap' }}>
-            <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)' }}>{t('generate.previewLabel')}</span>
+            <GroupLabel as="span">{t('generate.previewLabel')}</GroupLabel>
             {/* AI-Act disclosure (AI-ACT-1): the concept below is Koios-generated content. */}
             <AiGeneratedLabel />
           </div>
           {/* Plain text (the backend returns prose, not HTML) — rendered as text
               content, never dangerouslySetInnerHTML (§7). */}
-          <div style={{ whiteSpace: 'pre-wrap', fontSize: 12, color: 'var(--text)', lineHeight: 1.5, maxHeight: 200, overflow: 'auto',
-            border: '1px solid var(--border)', borderRadius: 6, padding: '8px 10px', background: 'var(--bg)' }}>
-            {concept}
+          {/* Shared readable preview (ASSIST-LEESBAAR-1) — no compareWith: a
+              generated concept is not a rewrite of existing text. */}
+          <div style={{ border: '1px solid var(--border)', borderRadius: 6, padding: '8px 10px', background: 'var(--bg)' }}>
+            <AssistTextPreview text={concept} />
           </div>
           <div style={{ display: 'flex', gap: 8 }}>
             <Button variant="primary" size="sm" onClick={() => { onApply(concept); closeFlow() }}>

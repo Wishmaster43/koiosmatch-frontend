@@ -12,6 +12,7 @@ import { useTranslation } from 'react-i18next'
 import { LogBadge, isAccessEvent, entityLabel } from './auditShared'
 import { buildDiffCells } from './auditDiffCells'
 import { Caption } from '@/components/ui/typography'
+import Button from '@/components/ui/Button'
 
 // Sort chevron indicator for a column header.
 function SortIcon({ col, sortCol, sortDir }) {
@@ -52,11 +53,11 @@ export default function AuditLogTable({ rows, sortCol, sortDir, onSort, onRowCli
     const { padding: thPadding, ...thStyleRest } = TH(col)
     return (
       <th key={col} style={{ ...thStyleRest, width }} aria-sort={ariaSort}>
-        <button type="button" onClick={() => onSort(col)} title={tCommon('sort')}
-          style={{ all: 'unset', boxSizing: 'border-box', display: 'inline-flex', width: '100%',
-            padding: thPadding, cursor: 'pointer', userSelect: 'none', alignItems: 'center', font: 'inherit', color: 'inherit' }}>
+        <Button variant="ghost" size="sm" type="button" onClick={() => onSort(col)} title={tCommon('sort')}
+          style={{ width: '100%', height: 'auto', padding: thPadding, justifyContent: 'flex-start',
+            userSelect: 'none', font: 'inherit', color: 'inherit', fontWeight: 'inherit' }}>
           {label}<SortIcon col={col} sortCol={sortCol} sortDir={sortDir} />
-        </button>
+        </Button>
       </th>
     )
   }
@@ -100,11 +101,12 @@ export default function AuditLogTable({ rows, sortCol, sortDir, onSort, onRowCli
                 <td style={{ ...TD, whiteSpace: 'nowrap', fontSize: 11, fontWeight: 500 }}>
                   {new Date(entry.created_at).toLocaleDateString('nl-NL', { day: '2-digit', month: '2-digit', year: 'numeric' })}
                 </td>
-                <td style={{ ...TD, whiteSpace: 'nowrap', fontSize: 11, color: 'var(--text-muted)' }}>
-                  {new Date(entry.created_at).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' })}
+                <td style={{ ...TD, whiteSpace: 'nowrap' }}>
+                  <Caption>{new Date(entry.created_at).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' })}</Caption>
                 </td>
                 <td style={TD}>
-                  <div style={{ fontWeight: 500, color: 'var(--text)' }}>{entry.causer_name ?? t('audit.system')}</div>
+                  {/* actor_label ("<name>-KoiosAI") wins over the human causer_name when present. */}
+                  <div style={{ fontWeight: 500, color: 'var(--text)' }}>{entry.actor_label ?? entry.causer_name ?? t('audit.system')}</div>
                 </td>
                 <td style={TD}><LogBadge logName={entry.log_name} /></td>
                 <td style={TD}>

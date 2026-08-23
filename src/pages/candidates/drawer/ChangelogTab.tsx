@@ -7,6 +7,7 @@ import { useCandidateActivity, type ActivityEvent } from '../hooks/useCandidateD
 import { useLookups } from '@/context/LookupsContext'
 import { escapeCsvCell } from '@/lib/csv'
 import { Caption } from '@/components/ui/typography'
+import Button from '@/components/ui/Button'
 import type { Candidate } from '@/types/candidate'
 import { isUuid } from '@/lib/uuid'
 
@@ -108,7 +109,7 @@ export default function ChangelogTab({ c, bare = false }: { c: Candidate; bare?:
   // then apply the date-range filter.
   const cards = useMemo<LogCard[]>(() => {
     const all = items.flatMap((ev): LogCard[] => {
-      const base = { when: ev.created_at, who: ev.causer_name || t('changelog.system'), action: actionOf(ev) }
+      const base = { when: ev.created_at, who: ev.actor_label ?? ev.causer_name ?? t('changelog.system'), action: actionOf(ev) }
       const h2 = h2Line(ev)
       if (h2) return [{ ...base, field: t('changelog.fields.status'), line: h2 }]
       const diffs = changesOf(ev)
@@ -157,23 +158,21 @@ export default function ChangelogTab({ c, bare = false }: { c: Candidate; bare?:
       {/* Date-range filter + search + export (also in the wide popover modal). */}
       {(
         <div style={{ display: 'flex', alignItems: 'flex-end', gap: 10, marginBottom: 12, flexWrap: 'wrap' }}>
-          <label style={{ display: 'flex', flexDirection: 'column', gap: 3, fontSize: 11, color: 'var(--text-muted)' }}>
+          <Caption as="label" style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
             {t('changelog.dateFrom')}
             <input type="date" value={from} onChange={e => setFrom(e.target.value)} style={inputStyle} />
-          </label>
-          <label style={{ display: 'flex', flexDirection: 'column', gap: 3, fontSize: 11, color: 'var(--text-muted)' }}>
+          </Caption>
+          <Caption as="label" style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
             {t('changelog.dateUntil')}
             <input type="date" value={until} onChange={e => setUntil(e.target.value)} style={inputStyle} />
-          </label>
-          <label style={{ display: 'flex', flexDirection: 'column', gap: 3, fontSize: 11, color: 'var(--text-muted)', flex: 1, minWidth: 160 }}>
+          </Caption>
+          <Caption as="label" style={{ display: 'flex', flexDirection: 'column', gap: 3, flex: 1, minWidth: 160 }}>
             {t('changelog.search')}
             <input type="search" value={q} onChange={e => setQ(e.target.value)} placeholder={t('changelog.searchPlaceholder')} style={{ ...inputStyle, width: '100%', boxSizing: 'border-box' }} />
-          </label>
-          <button onClick={exportCsv} title={t('changelog.export')} aria-label={t('changelog.export')}
-            style={{ width: 30, height: 30, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', borderRadius: 7,
-              border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text-muted)', cursor: 'pointer' }}>
+          </Caption>
+          <Button variant="secondary" size="sm" iconOnly onClick={exportCsv} title={t('changelog.export')} aria-label={t('changelog.export')}>
             <Download size={14} />
-          </button>
+          </Button>
         </div>
       )}
 

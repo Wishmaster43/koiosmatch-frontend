@@ -9,6 +9,7 @@ import { useVacancyActivity, type VacancyActivityEvent } from '../hooks/useVacan
 import { useAiAgents } from '../hooks/useAiAgents'
 // HUISSTIJL-1: the "when · who · action" meta line (11px/muted) is the shared Caption atom.
 import { Caption } from '@/components/ui/typography'
+import Button from '@/components/ui/Button'
 import type { VacancyDetail } from '@/types/vacancy'
 import { isUuid } from '@/lib/uuid'
 
@@ -109,7 +110,7 @@ export default function ChangelogTab({ vacancy: v, bare = false }: { vacancy: Va
   // then apply the date-range + search filter.
   const cards = useMemo<LogCard[]>(() => {
     const all = items.flatMap((ev): LogCard[] => {
-      const base = { when: ev.created_at, who: ev.causer_name || t('changelog.system'), action: actionOf(ev) }
+      const base = { when: ev.created_at, who: ev.actor_label ?? ev.causer_name ?? t('changelog.system'), action: actionOf(ev) }
       const diffs = changesOf(ev)
       if (!diffs.length) return [base]
       const isCreate = (ev.event ?? ev.description) === 'created'
@@ -152,23 +153,21 @@ export default function ChangelogTab({ vacancy: v, bare = false }: { vacancy: Va
     <>
       {/* Date-range filter + search + export (also in the wide popover modal). */}
       <div style={{ display: 'flex', alignItems: 'flex-end', gap: 10, marginBottom: 12, flexWrap: 'wrap' }}>
-        <label style={{ display: 'flex', flexDirection: 'column', gap: 3, fontSize: 11, color: 'var(--text-muted)' }}>
+        <Caption as="label" style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
           {t('changelog.dateFrom')}
           <input type="date" value={from} onChange={e => setFrom(e.target.value)} style={inputStyle} />
-        </label>
-        <label style={{ display: 'flex', flexDirection: 'column', gap: 3, fontSize: 11, color: 'var(--text-muted)' }}>
+        </Caption>
+        <Caption as="label" style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
           {t('changelog.dateUntil')}
           <input type="date" value={until} onChange={e => setUntil(e.target.value)} style={inputStyle} />
-        </label>
-        <label style={{ display: 'flex', flexDirection: 'column', gap: 3, fontSize: 11, color: 'var(--text-muted)', flex: 1, minWidth: 160 }}>
+        </Caption>
+        <Caption as="label" style={{ display: 'flex', flexDirection: 'column', gap: 3, flex: 1, minWidth: 160 }}>
           {t('changelog.search')}
           <input type="search" value={q} onChange={e => setQ(e.target.value)} placeholder={t('changelog.searchPlaceholder')} style={{ ...inputStyle, width: '100%', boxSizing: 'border-box' }} />
-        </label>
-        <button onClick={exportCsv} title={t('changelog.export')} aria-label={t('changelog.export')}
-          style={{ width: 30, height: 30, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', borderRadius: 7,
-            border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text-muted)', cursor: 'pointer' }}>
+        </Caption>
+        <Button variant="secondary" size="sm" iconOnly onClick={exportCsv} title={t('changelog.export')} aria-label={t('changelog.export')}>
           <Download size={14} />
-        </button>
+        </Button>
       </div>
 
       {loading && <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('changelog.loading')}</div>}

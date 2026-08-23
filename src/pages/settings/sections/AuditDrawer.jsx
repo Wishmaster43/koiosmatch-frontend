@@ -7,6 +7,8 @@ import { useTranslation } from 'react-i18next'
 import { X, Eye } from 'lucide-react'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { KPI_KEYS, LogBadge, isAccessEvent, buildFieldDiff, entityLabel } from './auditShared'
+import { BodyText, GroupLabel, Caption, PageTitle } from '@/components/ui/typography'
+import Button from '@/components/ui/Button'
 
 function DiffRow({ label, before, after }) {
   const { t } = useTranslation('settings')
@@ -57,8 +59,7 @@ export function AuditDrawer({ entry, onClose }) {
             <div key={row.label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                                            background: 'var(--hover-bg)', borderRadius: 8, padding: '10px 14px' }}>
               <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>{row.label}</span>
-              <span style={{ fontSize: 13, color: 'var(--text)', maxWidth: 240,
-                              overflow: 'hidden', textOverflow: 'ellipsis', textAlign: 'right' }}>{row.value}</span>
+              <BodyText style={{ maxWidth: 240, overflow: 'hidden', textOverflow: 'ellipsis', textAlign: 'right' }} as="span">{row.value}</BodyText>
             </div>
           ))}
         </div>
@@ -96,7 +97,7 @@ export function AuditDrawer({ entry, onClose }) {
           </div>
           {p.payload && Object.keys(p.payload).length > 0 && (
             <div>
-              <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', marginBottom: 6 }}>{t('audit.http.payload')}</div>
+              <GroupLabel style={{ marginBottom: 6 }}>{t('audit.http.payload')}</GroupLabel>
               {/* eslint-disable-next-line no-restricted-syntax -- fixed dark code-block theme for the JSON payload preview, intentionally independent of the app's light/dark tokens */}
               <pre style={{ fontSize: 11, fontFamily: 'monospace', background: '#1E1E2E', color: '#A8E6CF',
                              borderRadius: 8, padding: '10px 14px', overflow: 'auto', maxHeight: 200,
@@ -120,8 +121,7 @@ export function AuditDrawer({ entry, onClose }) {
             <div key={row.label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                                            background: 'var(--hover-bg)', borderRadius: 8, padding: '10px 14px' }}>
               <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>{row.label}</span>
-              <span style={{ fontSize: 13, color: 'var(--text)', maxWidth: 240,
-                              overflow: 'hidden', textOverflow: 'ellipsis', textAlign: 'right' }}>{row.value}</span>
+              <BodyText style={{ maxWidth: 240, overflow: 'hidden', textOverflow: 'ellipsis', textAlign: 'right' }} as="span">{row.value}</BodyText>
             </div>
           ))}
         </div>
@@ -158,8 +158,8 @@ export function AuditDrawer({ entry, onClose }) {
           <div style={{ display: 'grid', gridTemplateColumns: '140px 1fr 1fr', gap: 8,
                         padding: '6px 0', marginBottom: 4 }}>
             <span />
-            <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)' }}>{t('audit.before')}</span>
-            <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)' }}>{t('audit.after')}</span>
+            <GroupLabel as="span">{t('audit.before')}</GroupLabel>
+            <GroupLabel as="span">{t('audit.after')}</GroupLabel>
           </div>
           {allPerms.map(perm => (
             <DiffRow key={perm} label={perm}
@@ -214,9 +214,9 @@ export function AuditDrawer({ entry, onClose }) {
             )}
             {unchanged.length > 0 && (
               <details style={{ marginTop: 14 }}>
-                <summary style={{ fontSize: 11, color: 'var(--text-muted)', cursor: 'pointer' }}>
+                <Caption as="summary" style={{ cursor: 'pointer' }}>
                   {t('audit.unchangedCount', { count: unchanged.length })}
-                </summary>
+                </Caption>
                 <div style={{ marginTop: 8 }}>
                   {unchanged.map(k => (
                     <DiffRow key={k} label={kpiLabel(k)} before={p.before[k]} after={p.after[k]} />
@@ -284,7 +284,7 @@ export function AuditDrawer({ entry, onClose }) {
       <div className="fixed inset-0 z-40" style={{ background: 'rgba(0,0,0,0.2)' }} onClick={onClose} />
       <div ref={panelRef} role="dialog" aria-modal="true" aria-label={entry.description} tabIndex={-1}
         className="fixed top-0 bottom-0 right-0 z-50 flex flex-col bg-[var(--surface)]"
-        style={{ width: 480, boxShadow: '-4px 0 30px rgba(0,0,0,0.1)' }}>
+        style={{ width: 480, boxShadow: 'var(--shadow-modal)' }}>
 
         {/* Header */}
         <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
@@ -292,23 +292,20 @@ export function AuditDrawer({ entry, onClose }) {
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
                 <LogBadge logName={entry.log_name} />
-                <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{entry.description}</span>
+                <PageTitle as="span">{entry.description}</PageTitle>
               </div>
               <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
-                <strong style={{ color: 'var(--text)' }}>{entry.causer_name ?? t('audit.system')}</strong>
+                {/* actor_label ("<name>-KoiosAI") wins over the human causer_name when present. */}
+                <strong style={{ color: 'var(--text)' }}>{entry.actor_label ?? entry.causer_name ?? t('audit.system')}</strong>
                 {entry.causer_email && <span> · {entry.causer_email}</span>}
                 <span> · {new Date(entry.created_at).toLocaleString(undefined, {
                   day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
                 })}</span>
               </div>
             </div>
-            <button onClick={onClose} aria-label={t('common.close')}
-              style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                       background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', borderRadius: 6 }}
-              onMouseEnter={e => (e.currentTarget.style.background = 'var(--hover-bg)')}
-              onMouseLeave={e => (e.currentTarget.style.background = 'none')}>
+            <Button variant="ghost" size="sm" iconOnly onClick={onClose} aria-label={t('common.close')}>
               <X size={15} />
-            </button>
+            </Button>
           </div>
         </div>
 

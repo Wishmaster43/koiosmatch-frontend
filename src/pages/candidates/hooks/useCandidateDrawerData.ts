@@ -17,6 +17,8 @@ import type { Id } from '@/types/common'
 export interface ActivityEvent {
   id?: Id
   causer_name?: string
+  // Koios-performed action label ("<name>-KoiosAI") — wins over causer_name when present.
+  actor_label?: string
   created_at?: string
   description?: string
   log_name?: string

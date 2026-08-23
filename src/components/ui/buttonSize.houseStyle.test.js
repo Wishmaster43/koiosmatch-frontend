@@ -117,7 +117,6 @@ const OFF_STANDARD_HEIGHT_ALLOWLIST = {
   'src/pages/users/usersParts.tsx': 2,
   'src/pages/users/UsersTable.tsx': 2,
   'src/pages/vacancies/drawer/AppointmentsTab.tsx': 2,
-  'src/pages/vacancies/drawer/ChangelogTab.tsx': 1,
 }
 
 describe('raw <button> height ratchet (maatwet)', () => {

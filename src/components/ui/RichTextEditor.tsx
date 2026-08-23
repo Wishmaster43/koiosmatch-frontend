@@ -15,6 +15,7 @@ import { Bold, Italic, List, ListOrdered, Heading2, AlignLeft, AlignCenter, Alig
 import SelectMenu from './SelectMenu'
 import RichTextAssistBar from './RichTextAssistBar'
 import type { GenerateEntity, RichTextAssistMode } from './richtext/richTextAssistApi'
+import { bodyTextStyle, monoStyle, captionStyle } from './typography'
 
 // Toolbar-tooltip keys (common:editor.*) — the component translates its own
 // defaults (audit R2: four features each shipped a hardcoded-English copy of
@@ -134,29 +135,42 @@ export default function RichTextEditor({ value, onChange, expanded, onToggleExpa
     padding: '4px 7px', fontSize: 12, borderRadius: 5, cursor: 'pointer',
     // Active toolbar buttons fill with the accent — the glyph follows the tenant's
     // on-accent contrast token instead of a hardcoded white (2026-08-08).
-    background: active ? 'var(--color-primary)' : 'none', color: active ? 'var(--color-on-accent)' : 'var(--text-muted)',
+    background: active ? 'var(--button-fill)' : 'none', color: active ? 'var(--button-ink)' : 'var(--text-muted)',
     border: 'none', display: 'flex', alignItems: 'center',
   })
 
   return (
     // `fill` makes the editor grow to fill a flex parent (e.g. a stretched card column).
     <div style={{ border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden', background: 'var(--surface)',
-      ...(fill ? { flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' } : null) }}>
+      // The fill floor: flex may shrink the editor, but never below a readable
+      // body — the assist/execute panel squeezed it to a bare toolbar strip
+      // (Danny 23-08: "pop-up is niet meer leesbaar").
+      ...(fill ? { flex: 1, minHeight: 220, display: 'flex', flexDirection: 'column' } : null) }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 2, padding: '6px 8px', borderBottom: '1px solid var(--border)', flexWrap: 'wrap' }}>
         {/* Formatting controls — hidden in HTML source mode (they act on the WYSIWYG editor) */}
         {!htmlMode && (
           <>
+            {/* eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- compact tiptap-toolbar-toggle-cluster, bewust geen Button-chroom (vgl. kalendercel-precedent) */}
             <button style={btn(editor.isActive('bold'))} onClick={() => editor.chain().focus().toggleBold().run()} title={lab.bold}><Bold size={13} /></button>
+            {/* eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- compact tiptap-toolbar-toggle-cluster, bewust geen Button-chroom (vgl. kalendercel-precedent) */}
             <button style={btn(editor.isActive('italic'))} onClick={() => editor.chain().focus().toggleItalic().run()} title={lab.italic}><Italic size={13} /></button>
+            {/* eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- compact tiptap-toolbar-toggle-cluster, bewust geen Button-chroom (vgl. kalendercel-precedent) */}
             <button style={btn(editor.isActive('bulletList'))} onClick={() => editor.chain().focus().toggleBulletList().run()} title={lab.bulletList}><List size={13} /></button>
+            {/* eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- compact tiptap-toolbar-toggle-cluster, bewust geen Button-chroom (vgl. kalendercel-precedent) */}
             <button style={btn(editor.isActive('orderedList'))} onClick={() => editor.chain().focus().toggleOrderedList().run()} title={lab.orderedList}><ListOrdered size={13} /></button>
+            {/* eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- compact tiptap-toolbar-toggle-cluster, bewust geen Button-chroom (vgl. kalendercel-precedent) */}
             <button style={btn(editor.isActive('heading', { level: 2 }))} onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()} title={lab.heading}><Heading2 size={13} /></button>
             <div style={{ width: 1, height: 16, background: 'var(--border)', margin: '0 4px' }} />
+            {/* eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- compact tiptap-toolbar-toggle-cluster, bewust geen Button-chroom (vgl. kalendercel-precedent) */}
             <button style={btn(editor.isActive({ textAlign: 'left' }))} onClick={() => editor.chain().focus().setTextAlign('left').run()} title={lab.alignLeft}><AlignLeft size={13} /></button>
+            {/* eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- compact tiptap-toolbar-toggle-cluster, bewust geen Button-chroom (vgl. kalendercel-precedent) */}
             <button style={btn(editor.isActive({ textAlign: 'center' }))} onClick={() => editor.chain().focus().setTextAlign('center').run()} title={lab.alignCenter}><AlignCenter size={13} /></button>
+            {/* eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- compact tiptap-toolbar-toggle-cluster, bewust geen Button-chroom (vgl. kalendercel-precedent) */}
             <button style={btn(editor.isActive({ textAlign: 'right' }))} onClick={() => editor.chain().focus().setTextAlign('right').run()} title={lab.alignRight}><AlignRight size={13} /></button>
             <div style={{ width: 1, height: 16, background: 'var(--border)', margin: '0 4px' }} />
+            {/* eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- compact tiptap-toolbar-toggle-cluster, bewust geen Button-chroom (vgl. kalendercel-precedent) */}
             <button style={btn(false)} onClick={() => editor.chain().focus().undo().run()} title={lab.undo}><Undo2 size={13} /></button>
+            {/* eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- compact tiptap-toolbar-toggle-cluster, bewust geen Button-chroom (vgl. kalendercel-precedent) */}
             <button style={btn(false)} onClick={() => editor.chain().focus().redo().run()} title={lab.redo}><Redo2 size={13} /></button>
           </>
         )}
@@ -178,12 +192,14 @@ export default function RichTextEditor({ value, onChange, expanded, onToggleExpa
             <SelectMenu aria-labelledby={langLabelId} value={lang} onChange={pickLang}
               options={EDITOR_LANGS.map(l => ({ value: l, label: l.toUpperCase() }))}
               menuWidth={70}
-              style={{ fontSize: 11, padding: '2px 4px', width: 'auto', background: 'var(--surface)', color: 'var(--text-muted)' }} />
+              style={{ ...captionStyle, padding: '2px 4px', width: 'auto', background: 'var(--surface)' }} />
           </span>
         )}
         {/* HTML source toggle */}
+        {/* eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- compact tiptap-toolbar-toggle-cluster, bewust geen Button-chroom (vgl. kalendercel-precedent) */}
         <button style={btn(htmlMode)} onClick={toggleHtml} title={lab.html ?? 'HTML'}><Code size={13} /></button>
         {onToggleExpand && (
+          // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- compact tiptap-toolbar-toggle-cluster, bewust geen Button-chroom (vgl. kalendercel-precedent)
           <button style={{ ...btn(false), marginLeft: 4 }} onClick={onToggleExpand} title={expanded ? lab.collapse : lab.expand}>
             {expanded ? <Minimize2 size={13} /> : <Maximize2 size={13} />}
           </button>
@@ -192,18 +208,18 @@ export default function RichTextEditor({ value, onChange, expanded, onToggleExpa
       {htmlMode ? (
         <textarea value={value || ''} onChange={e => onChange(e.target.value)} spellCheck={false}
           style={{ width: '100%', boxSizing: 'border-box', minHeight: expanded ? 320 : minHeight, padding: '10px 12px',
-            fontSize: 12, fontFamily: 'JetBrains Mono, monospace', color: 'var(--text)', background: 'var(--surface)',
+            fontSize: 12, ...monoStyle, color: 'var(--text)', background: 'var(--surface)',
             border: 'none', outline: 'none', resize: 'vertical', ...(fill ? { flex: 1 } : null) }} />
       ) : resizable ? (
         // Drag-to-grow: CSS resize needs an overflow container — the editor itself
         // then fills whatever height the user drags this wrapper to.
         <div style={{ resize: 'vertical', overflow: 'auto', minHeight: expanded ? 320 : minHeight }}>
           <EditorContent editor={editor}
-            style={{ minHeight: '100%', padding: '10px 12px', fontSize: 13, color: 'var(--text)', cursor: 'text' }} />
+            style={{ ...bodyTextStyle, minHeight: '100%', padding: '10px 12px', cursor: 'text' }} />
         </div>
       ) : (
         <EditorContent editor={editor} className={fill ? 'km-editor-fill' : undefined}
-          style={{ minHeight: expanded ? 320 : minHeight, padding: '10px 12px', fontSize: 13, color: 'var(--text)', cursor: 'text',
+          style={{ ...bodyTextStyle, minHeight: expanded ? 320 : minHeight, padding: '10px 12px', cursor: 'text',
             ...(fill ? { flex: 1 } : null) }} />
       )}
     </div>

@@ -81,6 +81,26 @@ describe('ChangelogTab · isStageOnlyChange dedupe', () => {
     expect(screen.getByText('Ann')).toBeInTheDocument()
   })
 
+  // ACTORLABEL-SWEEP-1: actor_label ("<name>-KoiosAI") wins over causer_name when present.
+  it('shows actor_label instead of causer_name when both are present', () => {
+    setItems([
+      { id: 'e6', causer_name: 'Ann', actor_label: 'Ann-KoiosAI', created_at: '2026-07-10', description: 'Notes changed',
+        changes: { attributes: { notes: 'y' } } },
+    ] as unknown as ApplicationActivityEvent[])
+    render(<ChangelogTab application={app} />)
+    expect(screen.getByText('Ann-KoiosAI')).toBeInTheDocument()
+    expect(screen.queryByText('Ann')).toBeNull()
+  })
+
+  it('falls back to causer_name when actor_label is absent', () => {
+    setItems([
+      { id: 'e7', causer_name: 'Ann', created_at: '2026-07-10', description: 'Notes changed',
+        changes: { attributes: { notes: 'y' } } },
+    ])
+    render(<ChangelogTab application={app} />)
+    expect(screen.getByText('Ann')).toBeInTheDocument()
+  })
+
   it('renders the empty state when every entry is stage-only', () => {
     setItems([
       { id: 'e1', causer_name: 'Jill', created_at: '2026-07-10', description: 'a', changes: { attributes: { application_stage_id: 'x' } } },

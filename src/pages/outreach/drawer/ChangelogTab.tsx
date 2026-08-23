@@ -23,6 +23,7 @@ import { useDateFormat } from '@/lib/datetime'
 import { isUuid } from '@/lib/uuid'
 import { useOutreachActivity, type OutreachActivityEvent } from '../hooks/useOutreachActivity'
 import type { Id } from '@/types/common'
+import { Caption } from '@/components/ui/typography'
 
 // One rendered card: a header line (when · who · action · field) plus an old → new row.
 interface LogCard { when?: string; who: string; action: string; field?: string; oldVal?: string | null; newVal?: string | null }
@@ -83,7 +84,7 @@ export default function ChangelogTab({ campaignId }: { campaignId?: Id | null })
 
   // Flatten entries → one card per changed field (newest first, as the API returns them).
   const cards = useMemo<LogCard[]>(() => items.flatMap((ev): LogCard[] => {
-    const base = { when: ev.created_at, who: ev.causer_name || t('changelog.system'), action: actionOf(ev) }
+    const base = { when: ev.created_at, who: ev.actor_label ?? ev.causer_name ?? t('changelog.system'), action: actionOf(ev) }
     const diffs = changesOf(ev)
     if (!diffs.length) return [base]
     const isCreate = (ev.event ?? ev.description) === 'created'
@@ -120,11 +121,11 @@ export default function ChangelogTab({ campaignId }: { campaignId?: Id | null })
       {/* One card per change: "when · who · action · Field" + "old → new". */}
       {cards.map((cd, i) => (
         <div key={i} style={{ border: '1px solid var(--border)', borderRadius: 8, background: 'var(--bg)', padding: '9px 12px', marginBottom: 8 }}>
-          <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+          <Caption>
             {cd.when ? formatDate(cd.when, { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—'}
             {' · '}{cd.who}{' · '}{cd.action}
             {cd.field && <> {' · '}<span style={{ fontWeight: 600, color: 'var(--text)' }}>{cd.field}</span></>}
-          </div>
+          </Caption>
           {cd.field && (
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 5, fontSize: 12 }}>
               {(cd.oldVal === null || cd.newVal === null) ? (

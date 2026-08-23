@@ -96,7 +96,7 @@ export default function ChangelogTab({ application: a }: { application: Applicat
     return rawItems
       .filter(ev => !isStageOnlyChange(ev))
       .flatMap((ev): LogCard[] => {
-        const base = { when: ev.created_at, who: ev.causer_name || t('changelog.system'), action: actionOf(ev) }
+        const base = { when: ev.created_at, who: ev.actor_label ?? ev.causer_name ?? t('changelog.system'), action: actionOf(ev) }
         const diffs = changesOf(ev)
         if (!diffs.length) return [base]
         const isCreate = ev.description === 'created'

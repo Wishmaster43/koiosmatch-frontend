@@ -69,6 +69,28 @@ describe('ChangelogTab · per-field diff cards (CHANGELOG-3 shape)', () => {
   })
 })
 
+// ACTORLABEL-SWEEP-1: actor_label ("<name>-KoiosAI") wins over causer_name when present.
+describe('ChangelogTab · actor_label precedence', () => {
+  it('shows actor_label instead of causer_name when both are present', () => {
+    mockItems = [
+      { id: 'a3', event: 'updated', description: 'updated', causer_name: 'Danny Polak', actor_label: 'Danny Polak-KoiosAI', created_at: '2026-08-20T09:00:00Z',
+        changes: { attributes: { title: 'New title' }, old: { title: 'Old title' } } },
+    ]
+    render(<ChangelogTab vacancy={vacancy} bare />)
+    expect(screen.getByText(/Danny Polak-KoiosAI/)).toBeInTheDocument()
+    expect(screen.queryByText(/Danny Polak(?!-KoiosAI)/)).toBeNull()
+  })
+
+  it('falls back to causer_name when actor_label is absent', () => {
+    mockItems = [
+      { id: 'a4', event: 'updated', description: 'updated', causer_name: 'Danny Polak', created_at: '2026-08-20T09:00:00Z',
+        changes: { attributes: { title: 'New title' }, old: { title: 'Old title' } } },
+    ]
+    render(<ChangelogTab vacancy={vacancy} bare />)
+    expect(screen.getByText(/Danny Polak/)).toBeInTheDocument()
+  })
+})
+
 // V30: Danny's exact complaint — "ai agent id — bijgewerkt" told nobody WHICH
 // agent changed. The diff now resolves ai_agent_id against the tenant's agents.
 describe('ChangelogTab · V30 AI-agent name resolution', () => {

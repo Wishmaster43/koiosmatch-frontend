@@ -40,6 +40,21 @@ describe('ChangelogTab (customer) · K20 per-field old → new diffs', () => {
     expect(container.textContent).toContain('Danny Polak')
   })
 
+  // ACTORLABEL-SWEEP-1: actor_label ("<name>-KoiosAI") wins over causer_name when present.
+  it('shows actor_label instead of causer_name when both are present', async () => {
+    get.mockResolvedValueOnce({
+      data: {
+        data: [{
+          id: 'ev-4', causer_name: 'Danny Polak', actor_label: 'Danny Polak-KoiosAI', created_at: '2026-08-13T10:00:00Z',
+          event: 'updated',
+          changes: { attributes: { name: 'Nieuwe naam' }, old: { name: 'Oude naam' } },
+        }],
+      },
+    })
+    const { container } = render(<ChangelogTab customerId="cust-1" />)
+    await waitFor(() => expect(container.textContent).toContain('Danny Polak-KoiosAI'))
+  })
+
   it('labels a sub-entity entry via subject_type', async () => {
     get.mockResolvedValueOnce({
       data: {
