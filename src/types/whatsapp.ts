@@ -11,6 +11,9 @@ export interface WaMessage {
   id?: string | number
   candidate?: WaCandidate
   direction?: string
+  // 'smb_app_echo' = the business typed this in the WhatsApp app itself; the
+  // webhook echoed it into the thread (K-160) — rendered with a 'via app' badge.
+  purpose?: string
   status?: string
   body?: string
   sent_at?: string
@@ -43,8 +46,12 @@ export interface WhatsappConnectionRow {
   role_name?: string | null
   is_default: boolean
   has_verify_token: boolean
-  provider?: 'meta' | '360dialog'
+  // 'embedded' = linked through the coexistence wizard (K-160) — its token
+  // lives server-side only and disconnecting happens in the WhatsApp app.
+  provider?: 'meta' | '360dialog' | 'embedded'
   status?: 'active' | 'inactive' | 'expired'
+  // Set when PARTNER_REMOVED disconnected a coexistence link (K-160).
+  down_since?: string | null
   last_checked_at?: string | null
   [k: string]: unknown
 }

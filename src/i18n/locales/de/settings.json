@@ -1601,7 +1601,30 @@
     "confirmDelete": "Möchten Sie dieses Token wirklich entfernen?",
     "deleteFailed": "Entfernen fehlgeschlagen.",
     "promoteFailed": "Als Standard festlegen fehlgeschlagen.",
-    "selectConnection": "Token"
+    "selectConnection": "Token",
+    "embedded": {
+      "title": "Mit WhatsApp verbinden (empfohlen)",
+      "subtitle": "Verknüpfe eine Nummer aus der WhatsApp-Business-App: Sie bleibt in der App nutzbar und wird mit der Cloud API für Workflows und Koios AI verbunden.",
+      "notReady": "Die geführte Anmeldung ist noch nicht verfügbar: Die Plattform wartet auf die Meta-Freigabe. Bis dahin kannst du unten manuell einen Token verknüpfen.",
+      "configError": "Der Status der geführten Anmeldung konnte nicht geladen werden.",
+      "step1": "Starte die Verknüpfung: Ein Meta-Fenster öffnet sich, in dem du dich anmeldest und die Nummer wählst.",
+      "step2": "Bestätige in der WhatsApp-Business-App auf deinem Telefon (du erhältst dort eine Nachricht).",
+      "step3": "Fertig: Die Nummer funktioniert in der App und über die Plattform.",
+      "start": "Verknüpfung starten",
+      "exchanging": "Verknüpfung wird abgeschlossen…",
+      "popupClosed": "Die Verknüpfung wurde abgebrochen. Starte erneut, wenn du bereit bist.",
+      "exchangeFailed": "Die Verknüpfung konnte nicht abgeschlossen werden. Versuche es erneut oder verknüpfe manuell mit einem Token.",
+      "sdkFailed": "Das Meta-Skript konnte nicht geladen werden. Prüfe deine Verbindung und versuche es erneut.",
+      "noRights": "Du hast keine Berechtigung, WhatsApp-Verbindungen zu verwalten.",
+      "linked": "Verknüpft: {{waba}}. Die Nummer funktioniert weiterhin auch in der WhatsApp-Business-App.",
+      "syncStart": "Chatverlauf synchronisieren",
+      "syncFailed": "Die Synchronisierungsanfrage ist fehlgeschlagen. Versuche es innerhalb von 24 Stunden nach der Verknüpfung erneut.",
+      "syncDone": "Angefragt: Verlauf {{history}} · Kontakte {{contacts}}.",
+      "syncYes": "ja",
+      "syncNo": "nein",
+      "chip": "Coexistence",
+      "disconnected": "Am {{date}} über die App getrennt. Neu verknüpfen geht nur über den Assistenten oben; das Trennen erfolgt immer in der WhatsApp-Business-App."
+    }
   },
   "roles": {
     "loading": "Rollen werden geladen…",
@@ -2525,7 +2548,8 @@
     "memoryDaysSaveFailed": "Speichern des Gesprächsgedächtnisses fehlgeschlagen.",
     "conversationUnknown": "Unbekannter Kontakt",
     "conversationCount_one": "{{count}} Nachricht in diesem Protokoll",
-    "conversationCount_other": "{{count}} Nachrichten in diesem Protokoll"
+    "conversationCount_other": "{{count}} Nachrichten in diesem Protokoll",
+    "viaApp": "via App"
   },
   "appointmentTypes": {
     "title": "Terminarten",

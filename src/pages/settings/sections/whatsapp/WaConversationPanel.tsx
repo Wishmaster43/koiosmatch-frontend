@@ -8,6 +8,8 @@
  * log stays an audit view.
  */
 import { useMemo } from 'react'
+import { Caption, bodyTextStyle } from '@/components/ui/typography'
+import { tintBg, tintBorder } from '@/lib/tint'
 import { useTranslation } from 'react-i18next'
 import FloatingPanel from '@/components/ui/FloatingPanel'
 import { StatusPill, isInbound } from '@/components/ui/logChips'
@@ -42,9 +44,9 @@ export default function WaConversationPanel({ message, messages, onClose }: WaCo
     <FloatingPanel open onClose={onClose} title={title} ariaLabel={title}
       persistKey="wa-log-conversation" width={560} maxWidth="92vw" bodyStyle={{ padding: 16 }}>
       {/* Message count — honest scope: this is what the log currently holds. */}
-      <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 12 }}>
+      <Caption as="div" style={{ marginBottom: 12 }}>
         {t('waLog.conversationCount', { count: thread.length })}
-      </div>
+      </Caption>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         {thread.map((m, i) => {
           const inbound = isInbound(m.direction)
@@ -52,14 +54,19 @@ export default function WaConversationPanel({ message, messages, onClose }: WaCo
             <div key={m.id ?? i} style={{ display: 'flex', justifyContent: inbound ? 'flex-start' : 'flex-end' }}>
               {/* Bubble — inbound on the surface token, outbound on a primary tint;
                   13px + wrapping so long messages read comfortably (the point). */}
-              <div style={{ maxWidth: '82%', padding: '9px 12px', borderRadius: 12, fontSize: 13, lineHeight: 1.5,
-                background: inbound ? 'var(--hover-bg)' : 'color-mix(in srgb, var(--color-primary) 12%, transparent)',
-                border: `1px solid ${inbound ? 'var(--border)' : 'color-mix(in srgb, var(--color-primary) 30%, transparent)'}`,
-                color: 'var(--text)', whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}>
+              <div style={{ ...bodyTextStyle, maxWidth: '82%', padding: '9px 12px', borderRadius: 12, lineHeight: 1.5,
+                background: inbound ? 'var(--hover-bg)' : tintBg('var(--button-fill)'),
+                border: `1px solid ${inbound ? 'var(--border)' : tintBorder('var(--button-fill)')}`,
+                whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}>
                 {m.body ?? '—'}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 6 }}>
                   <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>{formatDateTime(m.sent_at)}</span>
                   {m.status && <StatusPill status={m.status} />}
+                  {/* K-160: the business typed this in the WhatsApp APP itself —
+                      the webhook echoed it here (coexistence). */}
+                  {m.purpose === 'smb_app_echo' && (
+                    <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>{t('waLog.viaApp')}</span>
+                  )}
                 </div>
               </div>
             </div>

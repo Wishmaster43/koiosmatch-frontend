@@ -1847,7 +1847,30 @@
     "confirmDelete": "Weet je zeker dat je dit token wilt verwijderen?",
     "deleteFailed": "Verwijderen is niet gelukt.",
     "promoteFailed": "Instellen als standaard is niet gelukt.",
-    "selectConnection": "Token"
+    "selectConnection": "Token",
+    "embedded": {
+      "title": "Koppelen met WhatsApp (aanbevolen)",
+      "subtitle": "Koppel een nummer dat al in de WhatsApp Business-app werkt: het blijft in de app bruikbaar én wordt verbonden met de Cloud API voor workflows en Koios AI.",
+      "notReady": "De gekoppelde aanmelding is nog niet beschikbaar: het platform wacht op goedkeuring van Meta. Tot die tijd kun je hieronder handmatig een token koppelen.",
+      "configError": "De status van de gekoppelde aanmelding kon niet worden geladen.",
+      "step1": "Start de koppeling: er opent een Meta-venster waarin je inlogt en het nummer kiest.",
+      "step2": "Bevestig in de WhatsApp Business-app op je telefoon (je ontvangt daar een bericht).",
+      "step3": "Klaar: het nummer werkt in de app én via het platform.",
+      "start": "Koppeling starten",
+      "exchanging": "Koppeling verwerken…",
+      "popupClosed": "De koppeling is afgebroken. Start opnieuw wanneer je er klaar voor bent.",
+      "exchangeFailed": "De koppeling kon niet worden afgerond. Probeer het opnieuw of koppel handmatig met een token.",
+      "sdkFailed": "Het Meta-script kon niet worden geladen. Controleer je verbinding en probeer opnieuw.",
+      "noRights": "Je hebt geen rechten om WhatsApp-koppelingen te beheren.",
+      "linked": "Gekoppeld: {{waba}}. Het nummer blijft ook in de WhatsApp Business-app werken.",
+      "syncStart": "Chatgeschiedenis synchroniseren",
+      "syncFailed": "De synchronisatie-aanvraag is mislukt. Probeer het binnen 24 uur na de koppeling opnieuw.",
+      "syncDone": "Aangevraagd: geschiedenis {{history}} · contacten {{contacts}}.",
+      "syncYes": "ja",
+      "syncNo": "nee",
+      "chip": "Coexistence",
+      "disconnected": "Ontkoppeld via de app op {{date}}. Opnieuw koppelen kan alleen via de wizard hierboven; ontkoppelen gebeurt altijd in de WhatsApp Business-app."
+    }
   },
   "roles": {
     "loading": "Rollen ophalen…",
@@ -2525,7 +2548,8 @@
     "memoryDaysSaveFailed": "Opslaan van het gespreksgeheugen is mislukt.",
     "conversationUnknown": "Onbekend contact",
     "conversationCount_one": "{{count}} bericht in dit log",
-    "conversationCount_other": "{{count}} berichten in dit log"
+    "conversationCount_other": "{{count}} berichten in dit log",
+    "viaApp": "via app"
   },
   "appointmentTypes": {
     "title": "Afspraaktypes",

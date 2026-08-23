@@ -166,6 +166,15 @@ export default function WhatsAppConnectionsList({
                 {/* WA-SCOPE-2: role-scoped accounts are never auto-picked by
                     workflows (no acting user) — manual sending only. */}
                 {row.role_name && <SoftChip label={t('whatsapp.manualOnly')} color={null} />}
+                {/* K-160: coexistence link — the app-side stays live; a
+                    PARTNER_REMOVED disconnect can only be re-linked through the
+                    wizard, and unlinking happens in the WhatsApp app itself. */}
+                {row.provider === 'embedded' && <SoftChip label={t('whatsapp.embedded.chip')} color="var(--color-info)" />}
+                {row.provider === 'embedded' && row.status === 'inactive' && (
+                  <Caption as="div" style={{ flexBasis: '100%' }}>
+                    {t('whatsapp.embedded.disconnected', { date: row.down_since ? formatDateTime(row.down_since) : '—' })}
+                  </Caption>
+                )}
                 <SoftChip label={row.has_verify_token ? t('whatsapp.verifyTokenSet') : t('whatsapp.verifyTokenUnset')}
                   color={row.has_verify_token ? 'var(--color-success)' : null} />
                 {canManage && (

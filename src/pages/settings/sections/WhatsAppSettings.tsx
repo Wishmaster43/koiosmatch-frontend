@@ -14,6 +14,7 @@ import { useAuth } from '@/context/AuthContext'
 import { Field, SelectField } from '@/components/forms/fields'
 import { useWhatsAppConnections } from './whatsapp/useWhatsAppConnections'
 import WhatsAppConnectionsList from './whatsapp/WhatsAppConnectionsList'
+import EmbeddedSignupCard from './whatsapp/EmbeddedSignupCard'
 import SubTabBar, { type SubTab } from '@/components/drawer/SubTabBar'
 import Button from '@/components/ui/Button'
 import SoftChip from '@/components/ui/SoftChip'
@@ -160,7 +161,14 @@ export default function WhatsAppSettings() {
       </div>
 
       {/* ── Connection: the token list (create/edit/scope/default) ── */}
-      {tab === 'connection' && <WhatsAppConnectionsList {...conn} canManage={canManage} />}
+      {tab === 'connection' && (
+        <>
+          {/* Coexistence koppel-wizard (K-160) — the guided path; the manual
+              token list below stays the second path, never replaced. */}
+          <EmbeddedSignupCard onLinked={conn.reload} canManage={canManage} />
+          <WhatsAppConnectionsList {...conn} canManage={canManage} />
+        </>
+      )}
 
       {/* ── Phone numbers ── */}
       {tab === 'numbers' && (

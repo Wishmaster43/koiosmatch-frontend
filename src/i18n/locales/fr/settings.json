@@ -1601,7 +1601,30 @@
     "confirmDelete": "Voulez-vous vraiment supprimer ce jeton ?",
     "deleteFailed": "La suppression a échoué.",
     "promoteFailed": "La définition par défaut a échoué.",
-    "selectConnection": "Jeton"
+    "selectConnection": "Jeton",
+    "embedded": {
+      "title": "Connecter avec WhatsApp (recommandé)",
+      "subtitle": "Reliez un numéro déjà présent dans l'application WhatsApp Business : il reste utilisable dans l'application et se connecte à la Cloud API pour les workflows et Koios AI.",
+      "notReady": "L'inscription guidée n'est pas encore disponible : la plateforme attend l'approbation de Meta. En attendant, vous pouvez lier un jeton manuellement ci-dessous.",
+      "configError": "Le statut de l'inscription guidée n'a pas pu être chargé.",
+      "step1": "Démarrez la liaison : une fenêtre Meta s'ouvre pour vous connecter et choisir le numéro.",
+      "step2": "Confirmez dans l'application WhatsApp Business sur votre téléphone (vous y recevrez un message).",
+      "step3": "Terminé : le numéro fonctionne dans l'application et via la plateforme.",
+      "start": "Démarrer la liaison",
+      "exchanging": "Finalisation de la liaison…",
+      "popupClosed": "La liaison a été interrompue. Recommencez quand vous êtes prêt.",
+      "exchangeFailed": "La liaison n'a pas pu être finalisée. Réessayez ou liez manuellement avec un jeton.",
+      "sdkFailed": "Le script Meta n'a pas pu être chargé. Vérifiez votre connexion et réessayez.",
+      "noRights": "Vous n'avez pas les droits pour gérer les connexions WhatsApp.",
+      "linked": "Lié : {{waba}}. Le numéro continue de fonctionner aussi dans l'application WhatsApp Business.",
+      "syncStart": "Synchroniser l'historique des discussions",
+      "syncFailed": "La demande de synchronisation a échoué. Réessayez dans les 24 heures suivant la liaison.",
+      "syncDone": "Demandé : historique {{history}} · contacts {{contacts}}.",
+      "syncYes": "oui",
+      "syncNo": "non",
+      "chip": "Coexistence",
+      "disconnected": "Déconnecté via l'application le {{date}}. La reliaison passe par l'assistant ci-dessus ; la déconnexion se fait toujours dans l'application WhatsApp Business."
+    }
   },
   "roles": {
     "loading": "Chargement des rôles…",
@@ -2525,7 +2548,8 @@
     "memoryDaysSaveFailed": "Échec de l’enregistrement de la mémoire de conversation.",
     "conversationUnknown": "Contact inconnu",
     "conversationCount_one": "{{count}} message dans ce journal",
-    "conversationCount_other": "{{count}} messages dans ce journal"
+    "conversationCount_other": "{{count}} messages dans ce journal",
+    "viaApp": "via l'app"
   },
   "appointmentTypes": {
     "title": "Types de rendez-vous",

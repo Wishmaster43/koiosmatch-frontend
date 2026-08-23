@@ -1601,7 +1601,30 @@
     "confirmDelete": "¿Seguro que quieres eliminar este token?",
     "deleteFailed": "No se pudo eliminar.",
     "promoteFailed": "No se pudo establecer como predeterminado.",
-    "selectConnection": "Token"
+    "selectConnection": "Token",
+    "embedded": {
+      "title": "Conectar con WhatsApp (recomendado)",
+      "subtitle": "Vincula un número que ya está en la aplicación WhatsApp Business: sigue funcionando en la aplicación y se conecta a la Cloud API para workflows y Koios AI.",
+      "notReady": "El registro guiado aún no está disponible: la plataforma espera la aprobación de Meta. Mientras tanto puedes vincular un token manualmente abajo.",
+      "configError": "No se pudo cargar el estado del registro guiado.",
+      "step1": "Inicia la vinculación: se abre una ventana de Meta donde inicias sesión y eliges el número.",
+      "step2": "Confirma en la aplicación WhatsApp Business de tu teléfono (recibirás un mensaje allí).",
+      "step3": "Listo: el número funciona en la aplicación y a través de la plataforma.",
+      "start": "Iniciar vinculación",
+      "exchanging": "Completando la vinculación…",
+      "popupClosed": "La vinculación se canceló. Empieza de nuevo cuando estés listo.",
+      "exchangeFailed": "No se pudo completar la vinculación. Inténtalo de nuevo o vincula manualmente con un token.",
+      "sdkFailed": "No se pudo cargar el script de Meta. Comprueba tu conexión e inténtalo de nuevo.",
+      "noRights": "No tienes permisos para gestionar las conexiones de WhatsApp.",
+      "linked": "Vinculado: {{waba}}. El número sigue funcionando también en la aplicación WhatsApp Business.",
+      "syncStart": "Sincronizar historial de chat",
+      "syncFailed": "La solicitud de sincronización falló. Inténtalo de nuevo dentro de las 24 horas posteriores a la vinculación.",
+      "syncDone": "Solicitado: historial {{history}} · contactos {{contacts}}.",
+      "syncYes": "sí",
+      "syncNo": "no",
+      "chip": "Coexistence",
+      "disconnected": "Desconectado desde la aplicación el {{date}}. Volver a vincular solo es posible con el asistente de arriba; la desconexión siempre se hace en la aplicación WhatsApp Business."
+    }
   },
   "roles": {
     "loading": "Cargando roles…",
@@ -2525,7 +2548,8 @@
     "memoryDaysSaveFailed": "No se pudo guardar la memoria de conversación.",
     "conversationUnknown": "Contacto desconocido",
     "conversationCount_one": "{{count}} mensaje en este registro",
-    "conversationCount_other": "{{count}} mensajes en este registro"
+    "conversationCount_other": "{{count}} mensajes en este registro",
+    "viaApp": "vía app"
   },
   "appointmentTypes": {
     "title": "Tipos de cita",

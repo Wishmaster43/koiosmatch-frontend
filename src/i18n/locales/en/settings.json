@@ -1847,7 +1847,30 @@
     "confirmDelete": "Are you sure you want to remove this token?",
     "deleteFailed": "Removing failed.",
     "promoteFailed": "Setting as default failed.",
-    "selectConnection": "Token"
+    "selectConnection": "Token",
+    "embedded": {
+      "title": "Connect with WhatsApp (recommended)",
+      "subtitle": "Link a number that already lives in the WhatsApp Business app: it keeps working in the app and connects to the Cloud API for workflows and Koios AI.",
+      "notReady": "Guided signup is not available yet: the platform is waiting for Meta approval. Until then you can link a token manually below.",
+      "configError": "The guided-signup status could not be loaded.",
+      "step1": "Start the link: a Meta window opens where you sign in and pick the number.",
+      "step2": "Confirm in the WhatsApp Business app on your phone (you will receive a message there).",
+      "step3": "Done: the number works in the app and through the platform.",
+      "start": "Start linking",
+      "exchanging": "Completing the link…",
+      "popupClosed": "The linking was cancelled. Start again whenever you are ready.",
+      "exchangeFailed": "The link could not be completed. Try again or link manually with a token.",
+      "sdkFailed": "The Meta script could not be loaded. Check your connection and try again.",
+      "noRights": "You do not have permission to manage WhatsApp connections.",
+      "linked": "Linked: {{waba}}. The number keeps working in the WhatsApp Business app too.",
+      "syncStart": "Sync chat history",
+      "syncFailed": "The sync request failed. Try again within 24 hours of linking.",
+      "syncDone": "Requested: history {{history}} · contacts {{contacts}}.",
+      "syncYes": "yes",
+      "syncNo": "no",
+      "chip": "Coexistence",
+      "disconnected": "Disconnected from the app on {{date}}. Re-linking happens through the wizard above; unlinking always happens in the WhatsApp Business app."
+    }
   },
   "roles": {
     "loading": "Loading roles…",
@@ -2525,7 +2548,8 @@
     "memoryDaysSaveFailed": "Saving the conversation memory failed.",
     "conversationUnknown": "Unknown contact",
     "conversationCount_one": "{{count}} message in this log",
-    "conversationCount_other": "{{count}} messages in this log"
+    "conversationCount_other": "{{count}} messages in this log",
+    "viaApp": "via app"
   },
   "appointmentTypes": {
     "title": "Appointment types",
