@@ -51,15 +51,20 @@
  * (hooks/useNotesPopout) instead of opening an empty sheet. This composer closes
  * only once that window confirms it holds the draft — never on the click itself.
  */
-import type { ReactNode } from 'react'
+import { type ReactNode, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ExternalLink, Save, X } from 'lucide-react'
 import FloatingPanel from '@/components/ui/FloatingPanel'
 import Button from '@/components/ui/Button'
 import NoteFields from './NoteFields'
 import { useNoteFields } from './useNoteFields'
+import NoteActionsPanel from './NoteActionsPanel'
+import type { NoteActionPanelItem } from './NoteActionsPanel'
+import { mergeNoteActionItems, toKnownItems } from './noteActionsPanelHelpers'
+import { useMyKoiosMode } from '@/pages/auth/shared'
 import type { NoteDraft } from '@/hooks/useNotesPopout'
 import type { NoteItem, NoteType, NotePayload, NotesLabels } from '../NotesTab'
+import type { AssistActionItem } from './noteAssistApi'
 
 interface NoteComposerProps {
   open: boolean
@@ -83,11 +88,16 @@ interface NoteComposerProps {
   // A draft handed over BY another window. Seeds exactly the fields `initialNote`
   // seeds, but the note stays a NEW one (a draft carries no note id).
   initialDraft?: NoteDraft | null
+  // ASSIST-SIDEPANEEL-1: the candidate this note belongs to — the fallback
+  // deep-link target for an executed appointment item in the side panel
+  // (no dedicated appointments page exists yet). Omitted on a non-candidate
+  // host: appointment items simply render without a link there.
+  candidateId?: string
   onSave: (payload: NotePayload) => void
   onCancel: () => void
 }
 
-export default function NoteComposer({ open, initialNote, noteTypes, channels, labels, editorLabels, composerExtra, onPopOutDraft, popOutPending, initialDraft, onSave, onCancel }: NoteComposerProps) {
+export default function NoteComposer({ open, initialNote, noteTypes, channels, labels, editorLabels, composerExtra, onPopOutDraft, popOutPending, initialDraft, candidateId, onSave, onCancel }: NoteComposerProps) {
   const { t } = useTranslation('common')
   const isNew = initialNote == null
   // Existing note's own id (K0-B execute source) — a NoteItem's index signature
@@ -103,6 +113,15 @@ export default function NoteComposer({ open, initialNote, noteTypes, channels, l
     ? { type: initialDraft.type, channel: initialDraft.channel, title: initialDraft.title, body: initialDraft.body, language: initialDraft.language }
     : { type: initialNote?.type ?? '', channel: initialNote?.channel ?? '', title: initialNote?.title ?? '', body: initialNote?.text ?? initialNote?.body ?? '', language: initialNote?.language }
   const fields = useNoteFields(seed, noteTypes)
+
+  // ASSIST-SIDEPANEEL-1: the side panel's own item state — lives in the
+  // composer so it survives multiple Verwerken/Samenvatten runs for as long
+  // as the popup stays open (Danny punt 6/7: results merge, never reset).
+  const [panelItems, setPanelItems] = useState<NoteActionPanelItem[]>([])
+  const koios = useMyKoiosMode()
+  const onAssistItems = (fresh: AssistActionItem[]) =>
+    setPanelItems(prev => mergeNoteActionItems(prev, fresh))
+  const knownItems = useMemo(() => toKnownItems(panelItems), [panelItems])
 
   const save = () => onSave(fields.payload)
   // Only a NEW note is handed over from HERE: a draft carries no note id, so a
@@ -125,27 +144,40 @@ export default function NoteComposer({ open, initialNote, noteTypes, channels, l
     // closeOnBackdrop={false}: this window holds UNSAVED typed/dictated work —
     // only the explicit close/cancel buttons may discard it (Danny 23-08).
     <FloatingPanel open={open} onClose={onCancel} title={panelTitle} ariaLabel={panelTitle}
-      persistKey="notes-composer" width={640} maxWidth="92vw" scrollBody={false} closeOnBackdrop={false}>
-      {/* Scrollable content — RichTextEditor (fill) is the ONE growing item, so
-          dragging the panel bigger grows the WRITING space, never empty
-          whitespace below a stuck-size editor. `overflow: auto` is the safety
-          net the other way: if the panel is smaller than everything put
-          together, this scrolls instead of clipping. */}
-      <div style={{ flex: 1, minHeight: 0, overflow: 'auto', padding: 16, display: 'flex', flexDirection: 'column', gap: 10 }}>
-        {/* Host-supplied composer row (e.g. the customer tab's link-level picker) —
-            sits ABOVE the type row because the picked scope drives the type list. */}
-        {isNew && composerExtra}
-        {/* The five shared fields (type · channel · title · editor · assist) — the
-            SAME NoteFields the per-note popout window renders. The pop-out icon
-            rides the title row via titleExtra, NEW notes only (see canHandOff). */}
-        <NoteFields fields={fields} noteTypes={noteTypes} channels={channels} labels={labels}
-          editorLabels={editorLabels} noteId={noteId} editorMinHeight={160}
-          titleExtra={canHandOff ? (
-            <Button variant="secondary" size="sm" iconOnly onClick={popOut} disabled={popOutPending} aria-busy={popOutPending}
-              title={t('openSecondScreen')} aria-label={t('openSecondScreen')}>
-              <ExternalLink size={13} />
-            </Button>
-          ) : undefined} />
+      persistKey="notes-composer" width={panelItems.length > 0 ? 960 : 640} maxWidth="92vw"
+      scrollBody={false} closeOnBackdrop={false} maximizable>
+      {/* Two-column body once the side panel has items (ASSIST-SIDEPANEEL-1
+          punt 4): the existing content stays flex:1, the panel is a fixed
+          300px column that never shrinks the writing space below it. */}
+      <div style={{ flex: 1, minHeight: 0, display: 'flex', overflow: 'hidden' }}>
+        {/* Scrollable content — RichTextEditor (fill) is the ONE growing item, so
+            dragging the panel bigger grows the WRITING space, never empty
+            whitespace below a stuck-size editor. `overflow: auto` is the safety
+            net the other way: if the panel is smaller than everything put
+            together, this scrolls instead of clipping. */}
+        <div style={{ flex: 1, minWidth: 0, overflow: 'auto', padding: 16, display: 'flex', flexDirection: 'column', gap: 10 }}>
+          {/* Host-supplied composer row (e.g. the customer tab's link-level picker) —
+              sits ABOVE the type row because the picked scope drives the type list. */}
+          {isNew && composerExtra}
+          {/* The five shared fields (type · channel · title · editor · assist) — the
+              SAME NoteFields the per-note popout window renders. The pop-out icon
+              rides the title row via titleExtra, NEW notes only (see canHandOff). */}
+          <NoteFields fields={fields} noteTypes={noteTypes} channels={channels} labels={labels}
+            editorLabels={editorLabels} noteId={noteId} editorMinHeight={160}
+            onItems={onAssistItems} knownItems={knownItems}
+            titleExtra={canHandOff ? (
+              <Button variant="secondary" size="sm" iconOnly onClick={popOut} disabled={popOutPending} aria-busy={popOutPending}
+                title={t('openSecondScreen')} aria-label={t('openSecondScreen')}>
+                <ExternalLink size={13} />
+              </Button>
+            ) : undefined} />
+        </div>
+        {/* Right-hand action-items panel (Danny punt 4) — mounts only once there
+            is at least one item, so an unassisted note keeps its original width. */}
+        {panelItems.length > 0 && (
+          <NoteActionsPanel items={panelItems} onItemsChange={setPanelItems} noteId={noteId}
+            candidateId={candidateId} autoRun={koios.mode === 'auto'} />
+        )}
       </div>
 
       {/* Pinned footer — OUTSIDE the scroll area (mirrors AddTaskModal's

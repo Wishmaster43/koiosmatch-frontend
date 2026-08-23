@@ -11,7 +11,7 @@
  * HTML, §7). The same escaper handles dictated speech, which is equally
  * untrusted input.
  */
-import type { RichTextAssistActionItem, RichTextAssistMode, RichTextAssistResult } from './richTextAssistApi'
+import type { RichTextAssistActionItem, RichTextAssistCombinedMode, RichTextAssistMode, RichTextAssistResult } from './richTextAssistApi'
 import { humanizeIsoDates } from '@/lib/localDate'
 
 // Escape the handful of characters that would otherwise be parsed as markup.
@@ -64,10 +64,19 @@ function actionsToHtml(items: RichTextAssistActionItem[], typeLabel: (type: stri
  * `type` enum into display text — the caller owns i18n (this file stays
  * pure/testable).
  */
-export function applyRichTextAssist(currentHtml: string, mode: RichTextAssistMode | 'generate', result: RichTextAssistResult, typeLabel: (type: string) => string): string {
+// ASSIST-SIDEPANEEL-1: a 'combined' result's TEXT half follows the same
+// replace/append split as its single-mode counterpart — 'process' mirrors
+// 'improve' (replace), 'summarize_process' mirrors 'summarize' (append). The
+// items half is never appended as text here — it lands in the side panel
+// (NoteActionsPanel) instead, via the caller's own onItems handling.
+export function applyRichTextAssist(currentHtml: string, mode: RichTextAssistMode | RichTextAssistCombinedMode | 'generate', result: RichTextAssistResult, typeLabel: (type: string) => string): string {
   if (result.kind === 'text') {
     const html = textToHtml(result.text)
     return mode === 'improve' ? html : `${currentHtml}${html}`
+  }
+  if (result.kind === 'combined') {
+    const html = textToHtml(result.text)
+    return mode === 'process' ? html : `${currentHtml}${html}`
   }
   return `${currentHtml}${actionsToHtml(result.items, typeLabel)}`
 }

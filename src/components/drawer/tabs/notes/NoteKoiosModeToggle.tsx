@@ -33,6 +33,7 @@ export default function NoteKoiosModeToggle() {
           : t('notesAssist.koiosMode.autoHint')
         return (
           <button key={m} type="button" onClick={() => koios.setMode(m)} aria-pressed={active} title={hint}
+            // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- K0 compact two-state mode pill in the assist header: 22px joined pair, Button's sm chrome (28px + padding) breaks the pill geometry; identity stays on the house trio tokens below
             style={{
               padding: '3px 10px', fontSize: 11.5, fontWeight: active ? 600 : 500, cursor: 'pointer', border: 'none',
               // HUISSTIJL-1: the SELECTED mode pill reads the house trio, solid.

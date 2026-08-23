@@ -379,6 +379,8 @@
     "improve": "Mejorar",
     "summarize": "Resumir",
     "actions": "Puntos de acción",
+    "process": "Procesar",
+    "summarizeProcess": "Resumir",
     "noItems": "No se encontraron puntos de acción",
     "apply": "Aplicar",
     "discard": "Descartar",
@@ -426,7 +428,22 @@
     "viewCompare": "Comparar",
     "diffAdded": "Añadido",
     "diffRemoved": "Eliminado",
-    "viewLabel": "Vista"
+    "viewLabel": "Vista",
+    "panel": {
+      "title": "Puntos de acción",
+      "edit": "Editar",
+      "statusProposed": "Propuesto",
+      "statusPending": "Esperando confirmación",
+      "statusExecuted": "Ejecutado",
+      "statusFailed": "Fallido",
+      "confirm": "Confirmar",
+      "run": "Ejecutar",
+      "openNew": "Abrir en pestaña nueva",
+      "editTitle": "Título",
+      "editDate": "Fecha",
+      "save": "Guardar",
+      "cancel": "Cancelar"
+    }
   },
   "ai": {
     "title": "Koios AI aconseja",
@@ -434,6 +451,8 @@
     "refresh": "Actualizar",
     "analyzing": "Analizando…"
   },
+  "maximizeWindow": "Maximizar ventana",
+  "restoreWindow": "Restaurar ventana",
   "openSecondScreen": "Abrir en la segunda pantalla",
   "popupBlocked": "Tu navegador bloqueó la ventana emergente. Permite las ventanas emergentes para este sitio.",
   "popout": {

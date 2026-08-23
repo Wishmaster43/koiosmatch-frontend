@@ -16,13 +16,14 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { apiErrorKey, extractApiError } from '@/lib/extractApiError'
 import { assistRichText, generateEntityText } from './richTextAssistApi'
-import type { GenerateEntity, RichTextAssistMode, RichTextAssistResult } from './richTextAssistApi'
+import type { GenerateEntity, RichTextAssistCombinedMode, RichTextAssistKnownItem, RichTextAssistMode, RichTextAssistResult } from './richTextAssistApi'
 
 export type RichTextAssistTone = 'warning' | 'danger'
 export type RichTextAssistStatus = 'idle' | 'loading' | 'success' | 'error'
-// The bar tracks which control is active/loading — the three text modes plus
-// 'generate', which runs a differently-shaped call (see the file header).
-export type RichTextAssistActiveMode = RichTextAssistMode | 'generate'
+// The bar tracks which control is active/loading — the three text modes, the
+// two combined modes (ASSIST-SIDEPANEEL-1), plus 'generate', which runs a
+// differently-shaped call (see the file header).
+export type RichTextAssistActiveMode = RichTextAssistMode | RichTextAssistCombinedMode | 'generate'
 
 // Expected/handled outcomes (budget exhausted, unusable answer, no API key
 // configured) read as a calm notice; anything else — network, 500, or a 403
@@ -66,13 +67,13 @@ export function useRichTextAssist(language?: string) {
   // the button's own disabled state, so this never fires a guaranteed-422 call.
   // One request at a time — the buttons disable while loading, but the abort
   // still guards a rapid double-invoke.
-  const run = useCallback((m: RichTextAssistMode, html: string) => {
+  const run = useCallback((m: RichTextAssistMode | RichTextAssistCombinedMode, html: string, knownItems?: RichTextAssistKnownItem[]) => {
     if (!html.trim()) return
     abortRef.current?.abort()
     const controller = new AbortController()
     abortRef.current = controller
     setMode(m); setStatus('loading'); setResult(null); setErrorMessage('')
-    assistRichText({ text: html, language, mode: m }, controller.signal)
+    assistRichText({ text: html, language, mode: m, knownItems }, controller.signal)
       .then(res => { if (aliveRef.current) { setResult(res); setStatus('success') } })
       .catch(err => {
         if (!aliveRef.current || err?.code === 'ERR_CANCELED') return

@@ -26,6 +26,9 @@ export interface ExecItem extends RichTextAssistActionItem {
   status?: ExecuteItemStatus
   run_id?: string
   template_key?: string
+  // K-157: the record the sync run created (only linkable id) — null for
+  // whatsapp/email/notification items; spread in from the execute response.
+  created?: { type: 'appointment' | 'task' | 'calllist'; id: string } | null
   // Server-supplied explanation for a non-executed status (CMBE 5961c673) —
   // spread in from the execute response, rendered by AssistActionItemCard.
   reason?: string

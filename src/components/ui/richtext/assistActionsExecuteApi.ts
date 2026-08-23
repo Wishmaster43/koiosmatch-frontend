@@ -44,7 +44,9 @@ import api from '@/lib/api'
 import type { RichTextAssistActionItem, RichTextAssistActionType } from './richTextAssistApi'
 import type { RunRow } from '@/types/reports'
 
-export type ExecuteItemStatus = 'executed' | 'pending' | 'wizard_required' | 'forbidden' | 'unsupported'
+// K-153: a synchronously failed run reports 'failed' + reason — never a green
+// 'executed' over a broken run.
+export type ExecuteItemStatus = 'executed' | 'failed' | 'pending' | 'wizard_required' | 'forbidden' | 'unsupported'
 
 // One item sent to the execute endpoint — the assist-suggested item shape
 // plus the per-item confirm flag (omit/false = preview, true = run it now).
@@ -64,6 +66,9 @@ export interface ExecuteResultItem {
   title: string
   type: RichTextAssistActionType
   status: ExecuteItemStatus
+  // K-157: the record the sync run actually created — the ONLY linkable id
+  // (run_id opens nothing in a drawer). Null for whatsapp/email/notification.
+  created?: { type: 'appointment' | 'task' | 'calllist'; id: string } | null
   run_id?: string
   template_key?: string
   // Present on every non-'executed' status (pending/wizard_required/forbidden);

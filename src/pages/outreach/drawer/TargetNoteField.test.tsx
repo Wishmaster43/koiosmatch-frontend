@@ -4,7 +4,7 @@
  * assist modes), saved through the SAME (id, note) shape the PATCH wrapper
  * already expected. RichTextEditor is stubbed (mirrors NoteFields.test.tsx —
  * Tiptap itself is out of scope here); NoteAssistSection is real, so this
- * suite is the one place proving Verbeteren/Samenvatten/Actiepunten actually
+ * suite is the one place proving the shared assist modes actually
  * render on this field.
  *
  * The second-screen pop-out (BELLIJST-NOTE-POPOUT-1) has its own test files —
@@ -27,15 +27,17 @@ vi.mock('@/components/ui/RichTextEditor', () => ({
 }))
 
 describe('TargetNoteField · rich-note parity with the candidate note (NOTE-RICH-PARITY-1)', () => {
-  it('shows the Koios assist modes (Verbeteren/Samenvatten/Actiepunten) once editing', async () => {
+  // ASSIST-SIDEPANEEL-1: the shared section's modes are now Verwerken
+  // (verbeteren + actiepunten in one call) and Samenvatten — same parity, new
+  // buttons; the items half renders through the shared execute wizard here.
+  it('shows the Koios assist modes (Verwerken/Samenvatten) once editing', async () => {
     const user = userEvent.setup()
     render(<TargetNoteField note={null} onSave={vi.fn().mockResolvedValue(undefined)} targetId="t1" campaignId="camp-1" />)
 
     await user.click(screen.getByRole('button', { name: 'Bewerken' }))
 
-    expect(screen.getByRole('button', { name: /Verbeteren/ })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Verwerken/ })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /Samenvatten/ })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /Actiepunten/ })).toBeInTheDocument()
   })
 
   it('saves through the exact same (trimmed note string) shape the caller already expects', async () => {

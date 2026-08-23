@@ -37,6 +37,10 @@ vi.mock('@/components/ui/RichTextEditor', () => ({
 // NoteAssistSection makes its own real POST-capable calls — stub it out here,
 // it has its own dedicated test file.
 vi.mock('./NoteAssistSection', () => ({ default: () => <div data-testid="assist-stub" /> }))
+// useMyKoiosMode (ASSIST-SIDEPANEEL-1's autoRun gate) hits a real GET — this
+// file only needs a stable wizard-mode default (API-CREDITS-1: no real calls
+// from a test); the side panel's own auto/wizard behaviour has its own file.
+vi.mock('@/pages/auth/shared', () => ({ useMyKoiosMode: () => ({ mode: 'wizard', autoMessages: false, loading: false, error: false, setMode: vi.fn(), setAutoMessages: vi.fn() }) }))
 
 const labels = { newNote: 'Nieuwe notitie', edit: 'Bewerken', type: 'Type', channel: 'Kanaal', save: 'Save', cancel: 'Cancel' }
 const noteTypes = [{ value: 'general', label: 'Algemeen' }, { value: 'call', label: 'Bellen' }]
@@ -301,6 +305,23 @@ describe('NoteComposer · channel picker shows the selection (CHANNEL-PICKER-CON
     const btn = chip('Email')
     expect(btn).toHaveAttribute('aria-pressed', 'false')
     expect(btn).toHaveStyle({ background: 'var(--surface)' })
+  })
+})
+
+/**
+ * ASSIST-SIDEPANEEL-1: the FloatingPanel's maximize toggle (punt 1) — a plain
+ * structural assertion since NoteAssistSection (and thus any real items) is
+ * stubbed in this file; the side panel's own item behaviour has its own tests.
+ */
+describe('NoteComposer · maximize toggle (ASSIST-SIDEPANEEL-1 punt 1)', () => {
+  it('renders a maximize button that flips to a restore button on click', async () => {
+    const user = userEvent.setup()
+    render(<NoteComposer open initialNote={null} noteTypes={noteTypes} channels={[]} labels={labels} onSave={vi.fn()} onCancel={vi.fn()} />)
+    const maxBtn = screen.getByRole('button', { name: 'maximizeWindow' })
+    expect(maxBtn).toBeInTheDocument()
+    await user.click(maxBtn)
+    expect(screen.getByRole('button', { name: 'restoreWindow' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'maximizeWindow' })).toBeNull()
   })
 })
 

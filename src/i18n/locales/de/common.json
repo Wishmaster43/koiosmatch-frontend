@@ -379,6 +379,8 @@
     "improve": "Verbessern",
     "summarize": "Zusammenfassen",
     "actions": "Aktionspunkte",
+    "process": "Verarbeiten",
+    "summarizeProcess": "Zusammenfassen",
     "noItems": "Keine Aktionspunkte gefunden",
     "apply": "Übernehmen",
     "discard": "Verwerfen",
@@ -426,7 +428,22 @@
     "viewCompare": "Vergleichen",
     "diffAdded": "Hinzugefügt",
     "diffRemoved": "Entfernt",
-    "viewLabel": "Ansicht"
+    "viewLabel": "Ansicht",
+    "panel": {
+      "title": "Aktionspunkte",
+      "edit": "Bearbeiten",
+      "statusProposed": "Vorgeschlagen",
+      "statusPending": "Wartet auf Bestätigung",
+      "statusExecuted": "Ausgeführt",
+      "statusFailed": "Fehlgeschlagen",
+      "confirm": "Bestätigen",
+      "run": "Ausführen",
+      "openNew": "In neuem Tab öffnen",
+      "editTitle": "Titel",
+      "editDate": "Datum",
+      "save": "Speichern",
+      "cancel": "Abbrechen"
+    }
   },
   "ai": {
     "title": "Koios AI empfiehlt",
@@ -434,6 +451,8 @@
     "refresh": "Aktualisieren",
     "analyzing": "Analysieren…"
   },
+  "maximizeWindow": "Fenster maximieren",
+  "restoreWindow": "Fenster wiederherstellen",
   "openSecondScreen": "Auf zweitem Bildschirm öffnen",
   "popupBlocked": "Ihr Browser hat das Pop-out-Fenster blockiert. Bitte lassen Sie Pop-ups für diese Website zu.",
   "popout": {

@@ -379,6 +379,8 @@
     "improve": "Improve",
     "summarize": "Summarize",
     "actions": "Action items",
+    "process": "Process",
+    "summarizeProcess": "Summarize",
     "noItems": "No action items found",
     "apply": "Apply",
     "discard": "Discard",
@@ -426,7 +428,22 @@
     "viewCompare": "Compare",
     "diffAdded": "Added",
     "diffRemoved": "Removed",
-    "viewLabel": "View"
+    "viewLabel": "View",
+    "panel": {
+      "title": "Action items",
+      "edit": "Edit",
+      "statusProposed": "Proposed",
+      "statusPending": "Awaiting confirmation",
+      "statusExecuted": "Executed",
+      "statusFailed": "Failed",
+      "confirm": "Confirm",
+      "run": "Run",
+      "openNew": "Open in new tab",
+      "editTitle": "Title",
+      "editDate": "Date",
+      "save": "Save",
+      "cancel": "Cancel"
+    }
   },
   "ai": {
     "title": "Koios AI advises",
@@ -434,6 +451,8 @@
     "refresh": "Refresh",
     "analyzing": "Analysing…"
   },
+  "maximizeWindow": "Maximize window",
+  "restoreWindow": "Restore window",
   "openSecondScreen": "Open on second screen",
   "popupBlocked": "Your browser blocked the pop-out window. Please allow pop-ups for this site.",
   "popout": {

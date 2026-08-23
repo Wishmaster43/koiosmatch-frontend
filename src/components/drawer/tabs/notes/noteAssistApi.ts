@@ -11,7 +11,9 @@
 export { assistRichText as assistNote, ACTION_TYPE_LABEL_NL } from '@/components/ui/richtext/richTextAssistApi'
 export type {
   RichTextAssistMode as AssistMode,
+  RichTextAssistCombinedMode as AssistCombinedMode,
   RichTextAssistActionType as AssistActionType,
   RichTextAssistActionItem as AssistActionItem,
+  RichTextAssistKnownItem as AssistKnownItem,
   RichTextAssistResult as AssistResult,
 } from '@/components/ui/richtext/richTextAssistApi'

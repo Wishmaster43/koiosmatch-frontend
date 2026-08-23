@@ -18,6 +18,7 @@
  */
 import type { ReactNode } from 'react'
 import RichTextEditor from '@/components/ui/RichTextEditor'
+import { Caption, bodyTextStyle } from '@/components/ui/typography'
 import RichTextAssistBar from '@/components/ui/RichTextAssistBar'
 import NoteAssistSection from './NoteAssistSection'
 import { CHANNEL_ICON } from './channelIcons'
@@ -28,6 +29,7 @@ const ACCENT = 'var(--color-primary)'
 import type { NoteFieldsState } from './useNoteFields'
 import type { NoteType, NotesLabels } from '../NotesTab'
 import { tintBg, tintBorder, chipInk } from '@/lib/tint'
+import type { AssistActionItem, AssistKnownItem } from './noteAssistApi'
 
 interface NoteFieldsProps {
   // The field state — one `useNoteFields(...)` return, passed whole.
@@ -45,9 +47,14 @@ interface NoteFieldsProps {
   // Minimum editor height — the drill-down popup and the full window want a
   // different floor for the same component.
   editorMinHeight?: number
+  // ASSIST-SIDEPANEEL-1: a combined assist result's items, forwarded up to
+  // the host's side panel; the host's current panel items, sent back down as
+  // `known_items` so a re-run dedupes against them.
+  onItems?: (items: AssistActionItem[]) => void
+  knownItems?: AssistKnownItem[]
 }
 
-export default function NoteFields({ fields, noteTypes, channels, labels, editorLabels, noteId, titleExtra, editorMinHeight = 160 }: NoteFieldsProps) {
+export default function NoteFields({ fields, noteTypes, channels, labels, editorLabels, noteId, titleExtra, editorMinHeight = 160, onItems, knownItems }: NoteFieldsProps) {
   const { type, setType, channel, setChannel, title, setTitle, body, setBody, language, setLanguage } = fields
   const typeLabel = noteTypes.find(n => n.value === type)?.label ?? ''
 
@@ -55,7 +62,7 @@ export default function NoteFields({ fields, noteTypes, channels, labels, editor
     <>
       {/* Note type — §4 soft-tint: active is tinted (never a solid fill), inactive uses the surface token. */}
       <div>
-        <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 6 }}>{labels.type}</div>
+        <Caption as="div" style={{ marginBottom: 6 }}>{labels.type}</Caption>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
           {/* HUISSTIJL-1: a generic (non-data-coloured) single-select pill — the
               SELECTED state reads the house trio, solid, same as every other
@@ -84,7 +91,7 @@ export default function NoteFields({ fields, noteTypes, channels, labels, editor
           No "internal" button: no channel selected = internal note (that's the note TYPE). */}
       {channels.length > 0 && (
         <div>
-          <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 6 }}>{labels.channel}</div>
+          <Caption as="div" style={{ marginBottom: 6 }}>{labels.channel}</Caption>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
             {/* PICKER contrast: only the SELECTED chip wears its channel colour; the rest
                 sit neutral on --surface/--border — the exact treatment the Type row above
@@ -121,8 +128,10 @@ export default function NoteFields({ fields, noteTypes, channels, labels, editor
           the profile text's own title row (Danny 09/10-08). `titleExtra` is the slot
           the host fills (the composer's pop-out icon). */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+        {/* Native input: typography identity via the bodyTextStyle spread (the
+            documented escape for native form controls). */}
         <input value={title} onChange={e => setTitle(e.target.value)} placeholder={labels.notePlaceholder?.(typeLabel)}
-          style={{ flex: 1, minWidth: 0, padding: '8px 12px', fontSize: 13, fontWeight: 500, borderRadius: 8, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)', boxSizing: 'border-box', outline: 'none' }} />
+          style={{ ...bodyTextStyle, flex: 1, minWidth: 0, padding: '8px 12px', fontWeight: 500, borderRadius: 8, border: '1px solid var(--border)', background: 'var(--surface)', boxSizing: 'border-box', outline: 'none' }} />
         {titleExtra}
       </div>
 
@@ -135,7 +144,7 @@ export default function NoteFields({ fields, noteTypes, channels, labels, editor
         labels={editorLabels} language={language} onLanguageChange={setLanguage} fill minHeight={editorMinHeight} />
 
       {/* NOTE-ASSIST-1: Koios AI assist — always visible under the editor. */}
-      <NoteAssistSection body={body} onApply={setBody} language={language} noteId={noteId} />
+      <NoteAssistSection body={body} onApply={setBody} language={language} noteId={noteId} onItems={onItems} knownItems={knownItems} />
     </>
   )
 }

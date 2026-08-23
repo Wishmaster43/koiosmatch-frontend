@@ -15,7 +15,7 @@
  */
 import { type CSSProperties, type ReactNode, useCallback, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ExternalLink, X } from 'lucide-react'
+import { ExternalLink, Maximize2, Minimize2, X } from 'lucide-react'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { useDraggablePanel } from '@/hooks/useDraggablePanel'
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion'
@@ -66,12 +66,21 @@ export interface FloatingPanelProps {
   // WORK (note composer): a stray click next to the window must never discard
   // what the user typed/dictated (Danny 23-08: "ernaast klikken en alles weg").
   closeOnBackdrop?: boolean
+  // ASSIST-SIDEPANEEL-1 (Danny's punt 1): renders an extra header icon that
+  // toggles the panel between its normal size and 95vw×92vh — local state,
+  // independent of `persistKey`'s remembered drag/resize geometry (a maximize
+  // is a temporary view, not a new remembered size).
+  maximizable?: boolean
 }
 
-function Panel({ onClose, ariaLabel, title, header, children, width, maxWidth, persistKey, resizable, zIndex, bodyStyle, hideClose, scrollBody = true, onPopOut, overlay = true, closeOnBackdrop = true }: Omit<FloatingPanelProps, 'open'>) {
+function Panel({ onClose, ariaLabel, title, header, children, width, maxWidth, persistKey, resizable, zIndex, bodyStyle, hideClose, scrollBody = true, onPopOut, overlay = true, closeOnBackdrop = true, maximizable = false }: Omit<FloatingPanelProps, 'open'>) {
   const { t } = useTranslation('common')
   const panelTrapRef = useFocusTrap<HTMLDivElement>(onClose)
   const { panelRef, placement, dragging, onDragPointerDown, onResizePointerDown, onDragHandleDoubleClick } = useDraggablePanel(persistKey, resizable !== false)
+  // Maximize toggle — a temporary view, never persisted (mirrors no persistKey
+  // involvement); the drag/resize geometry underneath stays intact for when the
+  // user shrinks it back.
+  const [maximized, setMaximized] = useState(false)
   // See the ref comment below: stable merged ref, or the trap re-arms per render.
   const mergedPanelRef = useCallback((node: HTMLDivElement | null) => {
     panelTrapRef.current = node
@@ -84,7 +93,11 @@ function Panel({ onClose, ariaLabel, title, header, children, width, maxWidth, p
   const [z, setZ] = useState(() => zIndex ?? nextFloatingZ())
 
   // Before any drag: CSS-centered exactly like every modal today. After: absolute.
-  const positioned: CSSProperties = placement
+  // Maximized wins over both — a fixed, centered near-fullscreen size regardless
+  // of whatever the user previously dragged/resized to.
+  const positioned: CSSProperties = maximized
+    ? { position: 'relative', width: '95vw', height: '92vh' }
+    : placement
     ? (placement.x != null && placement.y != null
 
         ? { position: 'fixed' as const, left: placement.x, top: placement.y, ...(placement.w ? { width: placement.w } : { width }), ...(placement.h ? { height: placement.h } : {}) }
@@ -114,7 +127,7 @@ function Panel({ onClose, ariaLabel, title, header, children, width, maxWidth, p
         ref={mergedPanelRef}
         role="dialog" aria-modal={overlay ? true : undefined} aria-label={ariaLabel ?? title ?? 'dialog'} tabIndex={-1}
         onPointerDown={() => { if (!zIndex) setZ(nextFloatingZ()) }}
-        style={{ ...positioned, maxWidth: maxWidth ?? 'min(94vw, 1100px)', maxHeight: '92vh',
+        style={{ ...positioned, maxWidth: maximized ? '95vw' : (maxWidth ?? 'min(94vw, 1100px)'), maxHeight: '92vh',
           display: 'flex', flexDirection: 'column', background: 'var(--surface)',
           borderRadius: 14, border: '1px solid var(--border)', pointerEvents: 'auto',
           // The window lifts while it is being dragged; that lift never animates
@@ -131,6 +144,15 @@ function Panel({ onClose, ariaLabel, title, header, children, width, maxWidth, p
             cursor: 'move', userSelect: 'none', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
           {header ?? <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)', flex: 1 }}>{title}</div>}
           {header && <div style={{ flex: 1 }} />}
+          {/* ASSIST-SIDEPANEEL-1: maximize/restore — same icon-button footprint,
+              sits before the pop-out/close buttons. */}
+          {maximizable && (
+            <Button variant="secondary" iconOnly type="button" onClick={() => setMaximized(m => !m)}
+              aria-label={maximized ? t('restoreWindow') : t('maximizeWindow')}
+              title={maximized ? t('restoreWindow') : t('maximizeWindow')} style={{ flexShrink: 0 }}>
+              {maximized ? <Minimize2 size={13} /> : <Maximize2 size={13} />}
+            </Button>
+          )}
           {/* Pop-out to a second browser window (NOTITIE-POPOUT-1 F5) — sits before the
               close X, same 26x26 bordered icon-button footprint as the other header buttons. */}
           {onPopOut && (

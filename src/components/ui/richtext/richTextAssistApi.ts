@@ -45,6 +45,14 @@ import api from '@/lib/api'
 // generalised it, matching what noteAssistApi.ts already ran.
 export type RichTextAssistMode = 'improve' | 'summarize' | 'actions'
 
+// ASSIST-SIDEPANEEL-1 (K-155/K-157, Danny 23-08): two COMBINED modes — one
+// call returns BOTH the improved/summarized text AND the action items in one
+// round-trip (replaces the note popup's old three-button improve/summarize/
+// actions idiom with Verwerken/Samenvatten). 'process' rewrites the text
+// (mirrors 'improve''s replace semantics); 'summarize_process' condenses it
+// (mirrors 'summarize''s append semantics) — both always extract items too.
+export type RichTextAssistCombinedMode = 'process' | 'summarize_process'
+
 // The action-item types the backend can extract (NoteAssistPrompt::ACTION_TYPES) —
 // anything else is dropped server-side before it ever reaches the FE.
 export type RichTextAssistActionType = 'task' | 'whatsapp' | 'email' | 'appointment' | 'notification'
@@ -67,14 +75,23 @@ export interface RichTextAssistActionItem {
 export const ACTION_TYPE_LABEL_NL: Record<RichTextAssistActionType, string> = {
   task: 'Taak', whatsapp: 'WhatsApp', email: 'E-mail', appointment: 'Afspraak', notification: 'Melding',
 }
-// improve/summarize return prose; actions returns structured items — one
-// discriminated result so the caller never has to guess the shape by mode alone.
+// improve/summarize return prose; actions returns structured items; the two
+// combined modes return BOTH in one response — one discriminated result so
+// the caller never has to guess the shape by mode alone.
 export type RichTextAssistResult =
   | { kind: 'text'; text: string }
   | { kind: 'actions'; items: RichTextAssistActionItem[] }
+  | { kind: 'combined'; text: string; items: RichTextAssistActionItem[] }
 
 interface ApiTextResponse { text: string }
 interface ApiActionsResponse { items: RichTextAssistActionItem[] }
+interface ApiCombinedResponse { text: string; items: RichTextAssistActionItem[] }
+
+// A previously-suggested/known action item, sent back so the model can dedupe
+// against it instead of re-suggesting the same appointment/task twice (Danny's
+// "dubbele punten"-klacht). `type` is optional — the panel's own items always
+// carry one, but the shape stays defensive for a caller with only titles.
+export interface RichTextAssistKnownItem { title: string; type?: string }
 
 /**
  * One assist call over the field's CURRENT html (the backend strips it to plain
@@ -86,15 +103,20 @@ interface ApiActionsResponse { items: RichTextAssistActionItem[] }
  * round-trip, not a CRUD call.
  */
 export async function assistRichText(
-  { text, language, mode }: { text: string; language?: string; mode: RichTextAssistMode },
+  { text, language, mode, knownItems }: { text: string; language?: string; mode: RichTextAssistMode | RichTextAssistCombinedMode; knownItems?: RichTextAssistKnownItem[] },
   signal?: AbortSignal,
 ): Promise<RichTextAssistResult> {
-  const res = await api.post<ApiTextResponse | ApiActionsResponse>('/ai/koios/notes/assist',
-    { text, language, mode },
+  const res = await api.post<ApiTextResponse | ApiActionsResponse | ApiCombinedResponse>('/ai/koios/notes/assist',
+    // known_items only sent when the caller actually has some (max 50 per the
+    // K-155 contract — the panel's own item count never approaches that).
+    { text, language, mode, ...(knownItems && knownItems.length > 0 ? { known_items: knownItems } : {}) },
     { signal, timeout: 60000, quietStatuses: [402, 422, 503] })
-  return mode === 'actions'
-    ? { kind: 'actions', items: (res.data as ApiActionsResponse).items ?? [] }
-    : { kind: 'text', text: (res.data as ApiTextResponse).text ?? '' }
+  if (mode === 'actions') return { kind: 'actions', items: (res.data as ApiActionsResponse).items ?? [] }
+  if (mode === 'process' || mode === 'summarize_process') {
+    const combined = res.data as ApiCombinedResponse
+    return { kind: 'combined', text: combined.text ?? '', items: combined.items ?? [] }
+  }
+  return { kind: 'text', text: (res.data as ApiTextResponse).text ?? '' }
 }
 
 // Entities KoiosEntityGenerateController can write a suggestion for — mirrors its

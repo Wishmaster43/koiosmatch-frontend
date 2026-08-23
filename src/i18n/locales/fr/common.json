@@ -379,6 +379,8 @@
     "improve": "Améliorer",
     "summarize": "Résumer",
     "actions": "Actions à mener",
+    "process": "Traiter",
+    "summarizeProcess": "Résumer",
     "noItems": "Aucune action trouvée",
     "apply": "Appliquer",
     "discard": "Rejeter",
@@ -426,7 +428,22 @@
     "viewCompare": "Comparer",
     "diffAdded": "Ajouté",
     "diffRemoved": "Supprimé",
-    "viewLabel": "Affichage"
+    "viewLabel": "Affichage",
+    "panel": {
+      "title": "Points d'action",
+      "edit": "Modifier",
+      "statusProposed": "Proposé",
+      "statusPending": "En attente de confirmation",
+      "statusExecuted": "Exécuté",
+      "statusFailed": "Échoué",
+      "confirm": "Confirmer",
+      "run": "Exécuter",
+      "openNew": "Ouvrir dans un nouvel onglet",
+      "editTitle": "Titre",
+      "editDate": "Date",
+      "save": "Enregistrer",
+      "cancel": "Annuler"
+    }
   },
   "ai": {
     "title": "Koios AI conseille",
@@ -434,6 +451,8 @@
     "refresh": "Actualiser",
     "analyzing": "Analyse…"
   },
+  "maximizeWindow": "Agrandir la fenêtre",
+  "restoreWindow": "Restaurer la fenêtre",
   "openSecondScreen": "Ouvrir sur un second écran",
   "popupBlocked": "Votre navigateur a bloqué la fenêtre détachée. Veuillez autoriser les fenêtres pop-up pour ce site.",
   "popout": {

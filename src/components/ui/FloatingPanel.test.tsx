@@ -114,3 +114,20 @@ describe('FloatingPanel · onPopOut (NOTITIE-POPOUT-1 F5)', () => {
     expect(onClose).not.toHaveBeenCalled()
   })
 })
+
+// ASSIST-SIDEPANEEL-1 (Danny's punt 1): the maximize/restore toggle.
+describe('FloatingPanel · maximizable', () => {
+  it('renders no maximize button when the prop is omitted', () => {
+    render(<FloatingPanel open onClose={vi.fn()} title="Test">body</FloatingPanel>)
+    expect(screen.queryByLabelText('maximizeWindow')).toBeNull()
+  })
+
+  it('toggles between maximizeWindow and restoreWindow aria-labels on click', async () => {
+    const user = userEvent.setup()
+    render(<FloatingPanel open onClose={vi.fn()} title="Test" maximizable>body</FloatingPanel>)
+    const maxBtn = screen.getByLabelText('maximizeWindow')
+    await user.click(maxBtn)
+    expect(screen.getByLabelText('restoreWindow')).toBeInTheDocument()
+    expect(screen.queryByLabelText('maximizeWindow')).toBeNull()
+  })
+})

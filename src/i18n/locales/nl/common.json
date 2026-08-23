@@ -379,6 +379,8 @@
     "improve": "Verbeteren",
     "summarize": "Samenvatten",
     "actions": "Actiepunten",
+    "process": "Verwerken",
+    "summarizeProcess": "Samenvatten",
     "noItems": "Geen actiepunten gevonden",
     "apply": "Overnemen",
     "discard": "Verwerpen",
@@ -426,7 +428,22 @@
     "viewCompare": "Vergelijk",
     "diffAdded": "Toegevoegd",
     "diffRemoved": "Verwijderd",
-    "viewLabel": "Weergave"
+    "viewLabel": "Weergave",
+    "panel": {
+      "title": "Actiepunten",
+      "edit": "Bewerken",
+      "statusProposed": "Voorgesteld",
+      "statusPending": "Wacht op bevestiging",
+      "statusExecuted": "Uitgevoerd",
+      "statusFailed": "Mislukt",
+      "confirm": "Bevestigen",
+      "run": "Uitvoeren",
+      "openNew": "Open in nieuw scherm",
+      "editTitle": "Titel",
+      "editDate": "Datum",
+      "save": "Opslaan",
+      "cancel": "Annuleren"
+    }
   },
   "ai": {
     "title": "Koios AI adviseert",
@@ -434,6 +451,8 @@
     "refresh": "Vernieuwen",
     "analyzing": "Analyseren…"
   },
+  "maximizeWindow": "Venster maximaliseren",
+  "restoreWindow": "Venster herstellen",
   "openSecondScreen": "Open op tweede scherm",
   "popupBlocked": "Je browser heeft het pop-outvenster geblokkeerd. Sta pop-ups toe voor deze site.",
   "popout": {
