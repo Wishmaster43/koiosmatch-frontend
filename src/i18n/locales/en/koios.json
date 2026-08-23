@@ -31,7 +31,9 @@
       "slim": "The default: strong quality at an average rate.",
       "max": "Best quality for the hardest work. Highest rate."
     },
-    "saveError": "Changing the model failed. Please try again."
+    "saveError": "Changing the model failed. Please try again.",
+    "unknownTier": "Unknown model",
+    "activeUnknown": "No active flavour known. Pick one below."
   },
   "pricing": {
     "title": "Rates",

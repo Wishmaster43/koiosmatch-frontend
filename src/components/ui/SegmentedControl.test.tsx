@@ -104,3 +104,24 @@ it('with commitOnFocus=false, arrows move focus without selecting; Enter commits
   expect(onChange).toHaveBeenCalledWith('c')
 })
 })
+
+// KOIOS-MODEL-UI-1 (Danny 23-08): a plain tint-only delta between active/inactive
+// options can read as "identically tinted" at a glance — showActiveCheck adds an
+// explicit check mark on top, opt-in so every other caller's look is unchanged.
+describe('SegmentedControl · showActiveCheck', () => {
+  const options = [
+    { value: 'a', label: 'Option A' },
+    { value: 'b', label: 'Option B' },
+  ]
+
+  it('renders a check mark on the active option only, when opted in', () => {
+    render(<SegmentedControl options={options} value="b" onChange={vi.fn()} showActiveCheck />)
+    expect(screen.getByRole('radio', { name: /Option B/ }).querySelector('svg.lucide-check')).not.toBeNull()
+    expect(screen.getByRole('radio', { name: /Option A/ }).querySelector('svg.lucide-check')).toBeNull()
+  })
+
+  it('renders no check mark at all by default (existing callers stay unchanged)', () => {
+    render(<SegmentedControl options={options} value="b" onChange={vi.fn()} />)
+    expect(screen.getByRole('radio', { name: /Option B/ }).querySelector('svg.lucide-check')).toBeNull()
+  })
+})

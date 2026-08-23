@@ -31,7 +31,9 @@
       "slim": "Le standard : grande qualité à tarif moyen.",
       "max": "La meilleure qualité pour le plus difficile. Tarif le plus élevé."
     },
-    "saveError": "Le changement de modèle a échoué. Réessayez."
+    "saveError": "Le changement de modèle a échoué. Réessayez.",
+    "unknownTier": "Modèle inconnu",
+    "activeUnknown": "Aucune variante active connue. Choisissez-en une ci-dessous."
   },
   "pricing": {
     "title": "Tarifs",

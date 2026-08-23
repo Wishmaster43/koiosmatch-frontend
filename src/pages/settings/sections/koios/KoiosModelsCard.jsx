@@ -4,13 +4,22 @@
  * language — Snel (Haiku) / Slim (Sonnet) / Max (Opus) — within the platform
  * whitelist. The backend endpoint validates + audits; a model outside the
  * whitelist can never be set. Rates live in the pricing card below this one.
+ *
+ * KOIOS-MODEL-UI-1 (Danny 23-08, screenshot: "hoe kan ik nu zien welk model er
+ * gekoppeld is? ... de klant kan alleen kiezen VAN het model"): two fixes.
+ * (1) the active tier now also carries an explicit check mark (SegmentedControl's
+ * showActiveCheck) — the tint-only delta reads too subtly on its own. (2) the raw
+ * vendor model id (claude-sonnet-5, ...) is a PLATFORM config detail, not a tenant
+ * fact: it now shows only to a super admin (Danny's own "which model is this"
+ * question), never to a normal tenant user.
  */
 import { useState } from 'react'
 import { Zap, Sparkles, Crown } from 'lucide-react'
 import { updateKoiosModel } from './koiosApi'
 import { tierKeyForModel } from '@/lib/koiosModelTiers'
+import { useAuth } from '@/context/AuthContext'
 import SegmentedControl from '@/components/ui/SegmentedControl'
-import { SectionTitle } from '@/components/ui/typography'
+import { SectionTitle, Mono } from '@/components/ui/typography'
 
 const card = { border: '1px solid var(--border)', borderRadius: 10, padding: 16, marginBottom: 14, background: 'var(--surface)' }
 
@@ -30,8 +39,18 @@ const tierFor = (id) => {
 export default function KoiosModelsCard({ models, t, onChanged }) {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState(null)
+  // MODEL-IDS PLATFORM-ONLY: only a super admin sees the raw vendor id — Danny's
+  // own platform config, never a tenant fact (mirrors the SettingsPage/AppsSettings
+  // isSuperAdmin() gate).
+  const auth = useAuth()
+  const isSuperAdmin = auth?.isSuperAdmin?.() ?? false
   const active = models?.active
   const selectable = models?.selectable ?? []
+  // Honest state (§10 tolerant-by-contract, Opus F2): the backend's Policy keeps
+  // `active` inside `selectable` today, but that is a config invariant, not a code
+  // one — if it ever breaks, three unmarked radios would silently reproduce the
+  // exact "which model is linked?" confusion this card exists to end.
+  const activeUnknown = selectable.length > 0 && (active == null || !selectable.includes(active))
 
   // Pick a tier — no optimism: wait for the server (it validates the whitelist).
   const pick = async (model) => {
@@ -46,18 +65,19 @@ export default function KoiosModelsCard({ models, t, onChanged }) {
     setSaving(false)
   }
 
-  // One radio option per selectable model — label is the tier name (raw model id
-  // when it falls outside the known tiers), description folds in the tier blurb
-  // AND the raw model id (monospace styling isn't part of the shared description
-  // slot, so it rides along in the same line instead of silently disappearing).
+  // One radio option per selectable model — label is the tier name (a generic
+  // fallback for a normal user when an id falls outside the known tiers; the raw
+  // id itself never reaches the label for a non-super-admin). Description folds
+  // in the tier blurb, and the raw model id in Mono style, ONLY for a super
+  // admin — the id is platform config, never a tenant-visible fact.
   const modelOptions = selectable.map((m) => {
     const { key, Icon } = tierFor(m)
-    return {
-      value: m,
-      label: key ? t(`models.tier.${key}`) : m,
-      description: key ? `${t(`models.tierDesc.${key}`)} · ${m}` : undefined,
-      icon: Icon,
-    }
+    const label = key ? t(`models.tier.${key}`) : (isSuperAdmin ? m : t('models.unknownTier'))
+    const tierDesc = key ? t(`models.tierDesc.${key}`) : null
+    const description = isSuperAdmin
+      ? (tierDesc ? <>{tierDesc} · <Mono>{m}</Mono></> : <Mono>{m}</Mono>)
+      : tierDesc
+    return { value: m, label, description, icon: Icon }
   })
 
   return (
@@ -65,7 +85,10 @@ export default function KoiosModelsCard({ models, t, onChanged }) {
       <SectionTitle style={{ marginBottom: 4 }}>{t('models.title')}</SectionTitle>
       <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 12 }}>{t('models.pickHint')}</div>
 
-      <SegmentedControl commitOnFocus={false} options={modelOptions} value={active ?? ''} onChange={pick} ariaLabel={t('models.title')} />
+      {activeUnknown && (
+        <div role="status" style={{ fontSize: 12, color: 'var(--color-warning-text)', marginBottom: 8 }}>{t('models.activeUnknown')}</div>
+      )}
+      <SegmentedControl commitOnFocus={false} showActiveCheck options={modelOptions} value={active ?? ''} onChange={pick} ariaLabel={t('models.title')} />
 
       {error && <div style={{ fontSize: 12, color: 'var(--color-danger-text)', marginTop: 10 }}>{error}</div>}
     </div>

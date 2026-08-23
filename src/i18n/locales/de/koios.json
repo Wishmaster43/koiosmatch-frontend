@@ -31,7 +31,9 @@
       "slim": "Der Standard: starke Qualität zum mittleren Tarif.",
       "max": "Beste Qualität für die schwierigste Arbeit. Höchster Tarif."
     },
-    "saveError": "Modellwechsel fehlgeschlagen. Bitte erneut versuchen."
+    "saveError": "Modellwechsel fehlgeschlagen. Bitte erneut versuchen.",
+    "unknownTier": "Unbekanntes Modell",
+    "activeUnknown": "Keine aktive Variante bekannt. Wählen Sie unten eine aus."
   },
   "pricing": {
     "title": "Tarife",

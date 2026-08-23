@@ -31,7 +31,9 @@
       "slim": "De standaard: sterke kwaliteit tegen een gemiddeld tarief.",
       "max": "Beste kwaliteit voor het moeilijkste werk. Hoogste tarief."
     },
-    "saveError": "Model wijzigen is niet gelukt. Probeer het opnieuw."
+    "saveError": "Model wijzigen is niet gelukt. Probeer het opnieuw.",
+    "unknownTier": "Onbekend model",
+    "activeUnknown": "Geen actieve smaak bekend. Kies hieronder een smaak."
   },
   "pricing": {
     "title": "Tarieven",

@@ -31,7 +31,9 @@
       "slim": "El estándar: gran calidad a tarifa media.",
       "max": "La mejor calidad para el trabajo más difícil. Tarifa más alta."
     },
-    "saveError": "No se pudo cambiar el modelo. Inténtalo de nuevo."
+    "saveError": "No se pudo cambiar el modelo. Inténtalo de nuevo.",
+    "unknownTier": "Modelo desconocido",
+    "activeUnknown": "No hay ninguna variante activa conocida. Elige una abajo."
   },
   "pricing": {
     "title": "Tarifas",
