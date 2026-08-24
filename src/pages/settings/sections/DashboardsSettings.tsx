@@ -26,7 +26,18 @@ import type { LucideIcon } from 'lucide-react'
 import { useAllSettings, useSettingsLoaded, getJsonSetting, saveSettingsKeys } from '@/lib/settings/useAllSettings'
 import SubTabBar from '@/components/drawer/SubTabBar'
 import SectionCard from '@/components/ui/SectionCard'
+import CreatableSelect from '@/components/ui/CreatableSelect'
+import { DragList } from '../components/SettingsControls'
+import { Caption, BodyText, GroupLabel, groupLabelStyle } from '@/components/ui/typography'
+import { tintBg, tintBorder, chipInk } from '@/lib/tint'
+
+// The chosen-cell tint source — indirected like ChipMultiSelect's `tint` so the
+// accent token never appears as a raw background value in a component (§4).
+const cellTint = 'var(--color-primary)'
 import { DASHBOARD_TYPES, KPI_ROWS, DASHBOARD_TEMPLATES, KPI_LABEL_KEY, BLOCK_LABEL_KEY, canSwitchViews, type DashboardType } from '@/pages/dashboard/shared'
+// DASH-VOLGORDE-1: reuse the reports domain's pure order-resolver (§2 public
+// surface) instead of a second copy of its unknown-id-drop/backfill logic.
+import { resolveReportKpiOrder } from '@/pages/reports/shared'
 
 // Per-type icon (calm, one accent). Labels/descriptions come from i18n, never hardcoded.
 const TYPE_ICON: Record<DashboardType, LucideIcon> = {
@@ -46,6 +57,13 @@ type HiddenMap = Record<string, { kpis?: string[]; blocks?: string[] }>
 // literal, this is only the settings-editor's write side.
 export const DASHBOARD_HIDDEN_KEY = 'dashboard_hidden'
 const KEY = DASHBOARD_HIDDEN_KEY
+
+// DASH-VOLGORDE-1 — per-role KPI tile order, { [dashboardType]: string[] of kpi
+// ids }. Exported for the same reason as DASHBOARD_HIDDEN_KEY: the request-body
+// test asserts the exact key, and Dashboard.tsx (the live reader) keeps its own
+// literal (documented there).
+export const DASHBOARD_KPI_ORDER_KEY = 'dashboard_kpi_order'
+type OrderMap = Record<string, string[]>
 
 // The block ids a type shows: '*' (admin/management) = every known block, else the template list.
 const blocksFor = (type: DashboardType): string[] => {
@@ -85,15 +103,18 @@ function Cell({ applies, on, onToggle, t }: CellProps) {
     <td style={cell}>
       {/* Icon-only control: aria-label is the accessible name (§6) — title alone
           is an unreliable fallback for assistive tech. */}
+      {/* CHIP-TINT-1: a chosen matrix cell is a choice marker — the active tint
+          pair (mirrors ChipMultiSelect's chosen convention), never a solid accent. */}
       <button type="button" onClick={onToggle}
         title={on ? t('dashboardsToggleOff') : t('dashboardsToggleOn')}
         aria-label={on ? t('dashboardsToggleOff') : t('dashboardsToggleOn')}
         aria-pressed={on}
+        // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- NECESSITY: round matrix-cell toggle (ChipMultiSelect chosen/unchosen convention in a table grid), not an action button — Button has no circular cell face
         style={{ width: 24, height: 24, borderRadius: '50%', cursor: 'pointer', display: 'inline-flex',
           alignItems: 'center', justifyContent: 'center',
-          border: `1.5px solid ${on ? 'var(--color-primary)' : 'var(--border)'}`,
-          background: on ? 'color-mix(in srgb, var(--color-primary) 14%, transparent)' : 'transparent' }}>
-        {on && <Check size={13} color="var(--color-primary)" />}
+          border: `1.5px solid ${on ? tintBorder(cellTint, true) : 'var(--border)'}`,
+          background: on ? tintBg(cellTint, true) : 'transparent' }}>
+        {on && <Check size={13} color={chipInk(cellTint)} />}
       </button>
     </td>
   )
@@ -139,7 +160,7 @@ function Matrix({ kind, rows, title, labelKey, isHidden, onToggle, t, td }: Matr
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
               <tr>
-                <th style={{ ...stickyCell, fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', borderBottom: '1px solid var(--border)' }}>
+                <th style={{ ...stickyCell, ...groupLabelStyle, borderBottom: '1px solid var(--border)' }}>
                   {t('dashboardsItem')}
                 </th>
                 {DASHBOARD_TYPES.map(type => {
@@ -163,7 +184,19 @@ function Matrix({ kind, rows, title, labelKey, isHidden, onToggle, t, td }: Matr
             <tbody>
               {rows.map(id => (
                 <tr key={id}>
-                  <td style={stickyCell}>{labelKey[id] ? td(labelKey[id]) : id}</td>
+                  <td style={stickyCell}>
+                    {labelKey[id] ? td(labelKey[id]) : id}
+                    {/* DASH-VOLGORDE-1 (Danny "zorg dat via instellingen duidelijk is
+                        wat je aan het doen bent") — a self-explaining line per KPI row:
+                        what it counts + where a click on the live tile navigates. Only
+                        the KPI matrix has this catalogue (dashboardsExplain); blocks
+                        (charts/lists) have no click-through target to describe. */}
+                    {kind === 'kpis' && (
+                      <div style={{ fontSize: 10.5, color: 'var(--text-muted)', fontWeight: 400, whiteSpace: 'normal', marginTop: 2, maxWidth: 220 }}>
+                        {t(`dashboardsExplain.${id}.what`)} {t(`dashboardsExplain.${id}.goesTo`)}
+                      </div>
+                    )}
+                  </td>
                   {DASHBOARD_TYPES.map(type => {
                     const applies = kind === 'kpis' ? (KPI_ROWS[type] ?? []).includes(id) : blocksFor(type).includes(id)
                     return (
@@ -200,6 +233,22 @@ export default function DashboardsSettings() {
   const [prevKey, setPrevKey] = useState(savedKey)
   if (savedKey !== prevKey) { setPrevKey(savedKey); setHidden(saved) }
 
+  // DASH-VOLGORDE-1 — same re-sync pattern as `hidden` above, for the per-role order.
+  const savedOrder = getJsonSetting<OrderMap>(settings, DASHBOARD_KPI_ORDER_KEY, {})
+  const [order, setOrder] = useState<OrderMap>(savedOrder)
+  const savedOrderKey = JSON.stringify(savedOrder)
+  const [prevOrderKey, setPrevOrderKey] = useState(savedOrderKey)
+  if (savedOrderKey !== prevOrderKey) { setPrevOrderKey(savedOrderKey); setOrder(savedOrder) }
+
+  // Persist a role's full KPI order (optimistic; the live dashboard reads the same key).
+  const saveOrder = (type: string, nextIds: string[]) => {
+    setOrder(prev => {
+      const next = { ...prev, [type]: nextIds }
+      saveSettingsKeys({ [DASHBOARD_KPI_ORDER_KEY]: next }).catch(() => {})
+      return next
+    })
+  }
+
   // Is this KPI/block switched off for the role?
   const isHidden = (type: string, kind: 'kpis' | 'blocks', id: string) => (hidden[type]?.[kind] ?? []).includes(id)
 
@@ -218,7 +267,7 @@ export default function DashboardsSettings() {
   // DASH-SUBTABS-1 (Danny 04-08 "lijst is te lang met 2 tabellen dus moet
   // Grafieken & lijsten subtabje worden"): the two stacked matrices become two
   // sub-tabs — one table on screen at a time, same shared underline SubTabBar.
-  const [activeTab, setActiveTab] = useState<'kpis' | 'blocks'>('kpis')
+  const [activeTab, setActiveTab] = useState<'kpis' | 'blocks' | 'order'>('kpis')
 
   // Loading state (§3) — all hooks above have already run, so this early return keeps
   // hook order stable across renders while still avoiding the on-then-off toggle flash.
@@ -238,9 +287,10 @@ export default function DashboardsSettings() {
         tabs={[
           { id: 'kpis', label: t('dashboards.tabs.kpis') },
           { id: 'blocks', label: t('dashboards.tabs.blocks') },
+          { id: 'order', label: t('dashboards.tabs.order') },
         ]}
         active={activeTab}
-        onChange={(id) => setActiveTab(id as 'kpis' | 'blocks')}
+        onChange={(id) => setActiveTab(id as 'kpis' | 'blocks' | 'order')}
       />
 
       {activeTab === 'kpis' && (
@@ -251,6 +301,85 @@ export default function DashboardsSettings() {
         <Matrix kind="blocks" rows={allBlocks} title={t('dashboardsBlocks')} labelKey={BLOCK_LABEL_KEY}
           isHidden={isHidden} onToggle={toggle} t={t} td={td} />
       )}
+      {activeTab === 'order' && (
+        <OrderPanel isHidden={isHidden} order={order} onSaveOrder={saveOrder} t={t} td={td} />
+      )}
     </div>
+  )
+}
+
+// Props for the per-role KPI order editor — hoisted to module level (same
+// react-hooks/static-components reason as Cell/Matrix above).
+interface OrderPanelProps {
+  isHidden: (type: string, kind: 'kpis' | 'blocks', id: string) => boolean
+  order: OrderMap
+  onSaveOrder: (type: string, nextIds: string[]) => void
+  t: TFunction
+  td: TFunction
+}
+
+// DASH-VOLGORDE-1 — one role at a time: pick a role (searchable, §3A no native
+// <select>), see a HONEST preview strip (labels + order, never real numbers,
+// §0 no fake affordances) and reorder via the shared DragList (arrows are the
+// required path, §6 keyboard; drag comes along for free from the same component).
+function OrderPanel({ isHidden, order, onSaveOrder, t, td }: OrderPanelProps) {
+  const [role, setRole] = useState<DashboardType>(DASHBOARD_TYPES[0])
+
+  // Visible KPI ids for this role today (mirrors useDashboardViewModel's filter,
+  // minus the module/right gates that only the live dashboard can evaluate).
+  const visibleIds = (KPI_ROWS[role] ?? []).filter(id => !isHidden(role, 'kpis', id))
+  const { order: resolvedIds } = resolveReportKpiOrder(order[role], visibleIds, visibleIds)
+  const items = resolvedIds.map((id, i) => ({ id: `${id}-${i}`, kpiId: id, index: i }))
+
+  return (
+    <section aria-label={t('dashboards.tabs.order')}>
+      <p style={{ fontSize: 12.5, color: 'var(--text-muted)', margin: '0 0 10px' }}>{t('dashboardsOrderHint')}</p>
+
+      <div style={{ maxWidth: 320, marginBottom: 14 }}>
+        <GroupLabel as="label" style={{ display: 'block', marginBottom: 4 }}>
+          {t('dashboardsOrderRoleLabel')}
+        </GroupLabel>
+        <CreatableSelect
+          value={role}
+          allowCreate={false}
+          options={DASHBOARD_TYPES.map(id => ({ value: id, label: td(`types.${id}`) }))}
+          onChange={val => setRole(val as DashboardType)}
+        />
+      </div>
+
+      {/* Honest preview strip — labels + order only, never fabricated numbers. */}
+      <SectionCard title={t('dashboardsPreviewTitle')} style={{ marginBottom: 14 }}>
+        <Caption as="p" style={{ margin: '0 0 8px' }}>{t('dashboardsPreviewHint')}</Caption>
+        {resolvedIds.length === 0 ? (
+          <p style={{ fontSize: 12.5, color: 'var(--text-muted)', margin: 0 }}>{t('dashboardsOrderEmpty')}</p>
+        ) : (
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            {resolvedIds.map(id => (
+              <div key={id} style={{ border: '1px solid var(--border)', borderRadius: 8, padding: '8px 12px', minWidth: 96 }}>
+                <Caption as="div">{KPI_LABEL_KEY[id] ? td(KPI_LABEL_KEY[id]) : id}</Caption>
+                <div style={{ fontSize: 16, fontWeight: 600, color: 'var(--text)' }}>—</div>
+              </div>
+            ))}
+          </div>
+        )}
+      </SectionCard>
+
+      {resolvedIds.length > 0 && (
+        <SectionCard title={t('dashboardsOrderRoleLabel') + ': ' + td(`types.${role}`)}>
+          <DragList
+            items={items}
+            onReorder={(next: { kpiId: string; index: number }[]) => onSaveOrder(role, next.map(it => it.kpiId))}
+            renderItem={(item: { kpiId: string; index: number }) => (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, flex: 1 }}>
+                <Caption style={{ width: 20, textAlign: 'right' }}>{item.index + 1}</Caption>
+                <BodyText as="span">
+                  {KPI_LABEL_KEY[item.kpiId] ? td(KPI_LABEL_KEY[item.kpiId]) : item.kpiId}
+                </BodyText>
+              </div>
+            )}
+          />
+        </SectionCard>
+      )}
+    </section>
   )
 }

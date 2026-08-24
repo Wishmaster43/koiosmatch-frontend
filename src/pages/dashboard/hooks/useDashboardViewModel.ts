@@ -15,6 +15,9 @@ import { buildDashboardKpis, type DashboardKpi } from '../dashboardKpis'
 import { visibleBlock, kpiRow } from '../templates'
 import type { DashboardType } from '../templates'
 import { humanize, fmtWhen, eur } from '../dashboardFormat'
+// DASH-VOLGORDE-1: reuse the reports domain's pure order-resolver (§2 public surface)
+// instead of duplicating its unknown-id-drops/backfill logic for the KPI row.
+import { resolveReportKpiOrder } from '@/pages/reports/shared'
 
 interface UseDashboardViewModelArgs {
   t: (key: string) => string
@@ -29,6 +32,11 @@ interface UseDashboardViewModelArgs {
   activeType: DashboardType
   hiddenBlocks: string[]
   hiddenKpis: string[]
+  // DASH-VOLGORDE-1 — per-role KPI tile order (Settings → Dashboards → Volgorde),
+  // { [dashboardType]: string[] of kpi ids }. Absent/unknown ids are dropped by
+  // the resolver, never rendered as a blank tile. Optional (defaults to {} =
+  // today's default order) so existing test/call sites keep compiling.
+  kpiOrder?: Record<string, string[]>
   hasPlanning: boolean
   valueInHours: boolean
   onNavigate?: (page: string, params?: Record<string, unknown>) => void
@@ -36,7 +44,7 @@ interface UseDashboardViewModelArgs {
 
 export function useDashboardViewModel({
   t, formatNumber, stats, opp, dash, dashCharts, statusMeta, funnelMeta, funnelTypes,
-  activeType, hiddenBlocks, hiddenKpis, hasPlanning, valueInHours,
+  activeType, hiddenBlocks, hiddenKpis, kpiOrder = {}, hasPlanning, valueInHours,
   onNavigate,
 }: UseDashboardViewModelArgs) {
   // Is a chart/list block visible for the active role, and not switched off in Settings?
@@ -196,13 +204,17 @@ export function useDashboardViewModel({
     openShifts: 'open_shifts',
     occupancy: 'occupancy',
   }
-  // Every role ALWAYS gets its own full KPI row (never hidden).
-  const kpiCards: DashboardKpi[] = kpiRow(activeType)
+  // Every role ALWAYS gets its own full KPI row (never hidden), just possibly reordered.
+  const visibleKpiIds = kpiRow(activeType)
     .filter(id => !hiddenKpis.includes(id))
     // Open-diensten is a Planning-module KPI — hide it when the tenant lacks the module.
     .filter(id => id !== 'openShifts' || hasPlanning)
     .filter(id => !(id in REQUIRES_KPI_KEY) || REQUIRES_KPI_KEY[id] in kpis)
-    .map(id => kpiById[id]).filter(Boolean)
+  // DASH-VOLGORDE-1 — apply the role's stored tile order on top of the visible set;
+  // catalogue AND default are the visible ids themselves, so the resolver only ever
+  // reorders what is currently shown (a hidden/removed id just falls out silently).
+  const { order: orderedKpiIds } = resolveReportKpiOrder(kpiOrder[activeType], visibleKpiIds, visibleKpiIds)
+  const kpiCards: DashboardKpi[] = orderedKpiIds.map(id => kpiById[id]).filter(Boolean)
 
   // Shifts block values (K-168 module keys) — handed out here so the page has
   // ONE read path for server KPI values (§3: logic in hooks, not in JSX).

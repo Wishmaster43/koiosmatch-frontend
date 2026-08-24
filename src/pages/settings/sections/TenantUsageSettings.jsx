@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next'
 import api, { unwrap } from '@/lib/api'
 import { useAuth } from '@/context/AuthContext'
 import SearchSelect from '@/components/ui/SearchSelect'
+import SubTabBar from '@/components/drawer/SubTabBar'
 import TenantUsageKpiRow from './TenantUsageKpiRow'
 import TenantUsageDetailsTable from './TenantUsageDetailsTable'
 import TenantUsageBreakdownTable from './TenantUsageBreakdownTable'
@@ -40,6 +41,9 @@ export default function TenantUsageSettings() {
   const [month, setMonth] = useState(months[0].value) // current month by default
   const [usage, setUsage] = useState(null)
   const [phase, setPhase] = useState('loading') // loading | ready | error
+  // SA-USAGE-SUBTABS-1: which of the three groups is on screen. Shared state
+  // (tenant/month) stays above the tabs, so switching tabs resets nothing.
+  const [subTab, setSubTab] = useState('kpis')
 
   // Fetch the ACTIVE tenant's usage for the selected month — refetch on tenant or month change.
   useEffect(() => {
@@ -93,47 +97,75 @@ export default function TenantUsageSettings() {
         </label>
       </div>
 
-      {/* KPI strip renders through the load too — its own skeleton state keeps
-          the layout stable instead of popping in after the fetch. */}
-      {phase !== 'error' && <TenantUsageKpiRow usage={usage} loading={phase === 'loading'} />}
-      {phase === 'loading' && <p style={{ fontSize: 13, color: 'var(--text-muted)', padding: 8 }}>{t('common.loadingShort', { defaultValue: 'Laden…' })}</p>}
-      {phase === 'error'   && <p style={{ fontSize: 13, color: 'var(--text-muted)', padding: 8 }}>{t('usage.loadError')}</p>}
+      {/* SA-USAGE-SUBTABS-1 (Danny 24-08): kpis / monthly / breakdown, same
+          SubTabBar idiom as ModulesSettings (MODULES-SUBTABS-1). Tenant/month
+          selection stays above the tabs, so switching tabs resets nothing. */}
+      <div style={{ marginBottom: 20 }}>
+        <SubTabBar active={subTab} onChange={setSubTab} tabs={[
+          { id: 'kpis', label: t('usage.tabs.kpis') },
+          { id: 'monthly', label: t('usage.tabs.monthly') },
+          { id: 'breakdown', label: t('usage.tabs.breakdown') },
+        ]} />
+      </div>
 
-      {phase === 'ready' && (
+      {subTab === 'kpis' && (<>
+        {/* KPI strip renders through the load too — its own skeleton state keeps
+            the layout stable instead of popping in after the fetch. */}
+        {phase !== 'error' && <TenantUsageKpiRow usage={usage} loading={phase === 'loading'} />}
+        {phase === 'loading' && <p style={{ fontSize: 13, color: 'var(--text-muted)', padding: 8 }}>{t('common.loadingShort', { defaultValue: 'Laden…' })}</p>}
+        {phase === 'error'   && <p style={{ fontSize: 13, color: 'var(--text-muted)', padding: 8 }}>{t('usage.loadError')}</p>}
+
+        {phase === 'ready' && (
+          <>
+            {nothingUsed && (
+              <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: '0 0 14px', padding: '9px 12px',
+                background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 8 }}>
+                {t('usage.nothingUsed')}
+              </p>
+            )}
+
+            {/* Connectors (per connector — for invoicing), a real card. */}
+            <div style={card}>
+              <SectionTitle style={{ marginBottom: 10 }}>{t('usage.col.connectors')}</SectionTitle>
+              {connectors.length === 0
+                // Muted override: empty-state placeholder, secondary by design (§4 typografie).
+                ? <BodyText as="div" style={{ color: 'var(--text-muted)' }}>—</BodyText>
+                : connectors.map((c, i) => (
+                  <div key={c.key ?? i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    padding: '9px 0', borderTop: i ? '1px solid var(--border)' : 'none' }}>
+                    <BodyText as="span">{CONNECTOR_LABELS[c.key] ?? c.key}</BodyText>
+                    <Mono style={{ fontSize: 13 }}>{formatNumber(c.usage)}</Mono>
+                  </div>
+                ))}
+            </div>
+          </>
+        )}
+      </>)}
+
+      {subTab === 'monthly' && (
+        // Per-month detail — the 12-month history the endpoint already returns,
+        // expandable per row into AI cost / workflow-per-module / connector
+        // breakdowns (§ usage details, 14-08). Same four-state handling as the
+        // kpis tab: an error must never render as an innocent empty table (§3).
         <>
-          {nothingUsed && (
-            <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: '0 0 14px', padding: '9px 12px',
-              background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 8 }}>
-              {t('usage.nothingUsed')}
-            </p>
+          {phase === 'loading' && <p style={{ fontSize: 13, color: 'var(--text-muted)', padding: 8 }}>{t('common.loadingShort', { defaultValue: 'Laden…' })}</p>}
+          {phase === 'error'   && <p style={{ fontSize: 13, color: 'var(--text-muted)', padding: 8 }}>{t('usage.loadError')}</p>}
+          {phase === 'ready' && (
+            <>
+              <GroupLabel style={{ marginBottom: 10 }}>
+                {t('usage.details.title')}
+              </GroupLabel>
+              <TenantUsageDetailsTable history={usage?.history} />
+            </>
           )}
+        </>
+      )}
 
-          {/* Connectors (per connector — for invoicing), a real card. */}
-          <div style={card}>
-            <SectionTitle style={{ marginBottom: 10 }}>{t('usage.col.connectors')}</SectionTitle>
-            {connectors.length === 0
-              // Muted override: empty-state placeholder, secondary by design (§4 typografie).
-              ? <BodyText as="div" style={{ color: 'var(--text-muted)' }}>—</BodyText>
-              : connectors.map((c, i) => (
-                <div key={c.key ?? i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                  padding: '9px 0', borderTop: i ? '1px solid var(--border)' : 'none' }}>
-                  <BodyText as="span">{CONNECTOR_LABELS[c.key] ?? c.key}</BodyText>
-                  <Mono style={{ fontSize: 13 }}>{formatNumber(c.usage)}</Mono>
-                </div>
-              ))}
-          </div>
-
-          {/* Per-month detail — the 12-month history the endpoint already returns,
-              expandable per row into AI cost / workflow-per-module / connector
-              breakdowns (§ usage details, 14-08). */}
-          <GroupLabel style={{ marginTop: 24, marginBottom: 10 }}>
-            {t('usage.details.title')}
-          </GroupLabel>
-          <TenantUsageDetailsTable history={usage?.history} />
-
-          {/* Selected-month breakdown by activity/model/user/day — sums to the
-              total above by server contract (CMBE, 14-08). */}
-          <GroupLabel style={{ marginTop: 24, marginBottom: 10 }}>
+      {subTab === 'breakdown' && (
+        // Selected-month breakdown by activity/model/user/day — sums to the
+        // total above by server contract (CMBE, 14-08).
+        <>
+          <GroupLabel style={{ marginBottom: 10 }}>
             {t('usage.breakdown.title')}
           </GroupLabel>
           <TenantUsageBreakdownTable tenantId={activeTenant?.id} month={month} />

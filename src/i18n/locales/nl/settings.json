@@ -2696,6 +2696,11 @@
     }
   },
   "usage": {
+    "tabs": {
+      "kpis": "KPI’s",
+      "monthly": "Verbruik per maand",
+      "breakdown": "Verbruik uitgesplitst"
+    },
     "subtitleTenant": "Verbruik van {{name}}. Alleen hoeveelheden voor je facturatie.",
     "month": "Maand",
     "loadError": "Verbruik laden is mislukt.",
@@ -3162,7 +3167,8 @@
   "dashboards": {
     "tabs": {
       "kpis": "KPI's",
-      "blocks": "Grafieken & lijsten"
+      "blocks": "Grafieken & lijsten",
+      "order": "Volgorde"
     }
   },
   "workflowRunHistory": {
@@ -3402,5 +3408,108 @@
     "loadError": "Maandbudgetten konden niet worden geladen.",
     "saveFailed": "Budgetten opslaan is mislukt.",
     "saved": "Budgetten opgeslagen."
+  },
+  "dashboardsOrderRoleLabel": "Rol",
+  "dashboardsOrderHint": "Bepaal de volgorde waarin de KPI-tegels voor deze rol op het dashboard verschijnen. Alleen ingeschakelde KPI's (tabblad KPI's) staan in de lijst.",
+  "dashboardsPreviewTitle": "Voorbeeld",
+  "dashboardsPreviewHint": "Toont alleen de labels en volgorde, niet de echte cijfers van deze tenant.",
+  "dashboardsOrderEmpty": "Geen KPI's ingeschakeld voor deze rol.",
+  "dashboardsExplain": {
+    "candidates": {
+      "what": "Totaal aantal kandidaten in het ATS.",
+      "goesTo": "Klikken opent Kandidaten."
+    },
+    "stale": {
+      "what": "Kandidaten die de laatste 6 maanden niet zijn gecontacteerd.",
+      "goesTo": "Klikken opent Kandidaten."
+    },
+    "never": {
+      "what": "Kandidaten die nog nooit zijn gecontacteerd.",
+      "goesTo": "Klikken opent Kandidaten."
+    },
+    "tasks": {
+      "what": "Openstaande taken gekoppeld aan kandidaten.",
+      "goesTo": "Klikken opent Taken."
+    },
+    "opps": {
+      "what": "Aantal openstaande kansen.",
+      "goesTo": "Klikken opent Kansen."
+    },
+    "pipeline": {
+      "what": "Som van de waarde van openstaande kansen.",
+      "goesTo": "Klikken opent Kansen."
+    },
+    "placements": {
+      "what": "Aantal geplaatste matches.",
+      "goesTo": "Klikken opent Matches."
+    },
+    "intakes": {
+      "what": "Aantal geplande intakes.",
+      "goesTo": "Klikken opent Kandidaten."
+    },
+    "fillRate": {
+      "what": "Percentage vacatures dat is ingevuld.",
+      "goesTo": "Klikken opent Vacatures."
+    },
+    "openVacancies": {
+      "what": "Aantal openstaande (niet-gearchiveerde) vacatures.",
+      "goesTo": "Klikken opent Vacatures."
+    },
+    "incompleteRuns": {
+      "what": "Aantal AI-workflow-runs die niet volledig zijn afgerond.",
+      "goesTo": "Klikken opent AI-agents."
+    },
+    "activeConv": {
+      "what": "Aantal actieve WhatsApp-gesprekken.",
+      "goesTo": "Klikken opent WhatsApp."
+    },
+    "missingDocs": {
+      "what": "Kandidaten met ontbrekende documenten.",
+      "goesTo": "Klikken opent Kandidaten."
+    },
+    "expiringContracts": {
+      "what": "Matches met een contract dat binnenkort afloopt.",
+      "goesTo": "Klikken opent Matches."
+    },
+    "couplingErrors": {
+      "what": "Kandidaten met een mislukte koppeling naar de backoffice.",
+      "goesTo": "Klikken opent Kandidaten."
+    },
+    "openShifts": {
+      "what": "Aantal openstaande diensten (Planning-module).",
+      "goesTo": "Klikken opent Planning."
+    },
+    "occupancy": {
+      "what": "Bezettingsgraad van geplande diensten.",
+      "goesTo": "Klikken opent Planning."
+    },
+    "escalations": {
+      "what": "Aantal WhatsApp-gesprekken dat is geëscaleerd.",
+      "goesTo": "Klikken opent WhatsApp."
+    },
+    "failedWf": {
+      "what": "Aantal workflows dat is mislukt.",
+      "goesTo": "Klikken opent Workflows."
+    },
+    "tasksOverdue": {
+      "what": "Aantal taken dat de deadline heeft overschreden.",
+      "goesTo": "Klikken opent Taken."
+    },
+    "uncalledCallist": {
+      "what": "Kandidaten op een bellijst die nog niet zijn gebeld.",
+      "goesTo": "Klikken opent Bellijsten."
+    },
+    "expiringOpps": {
+      "what": "Kansen die binnenkort verlopen.",
+      "goesTo": "Klikken opent Kansen."
+    },
+    "tooLongInStage": {
+      "what": "Sollicitaties die te lang in dezelfde fase staan.",
+      "goesTo": "Klikken opent Sollicitaties."
+    },
+    "missingApptApps": {
+      "what": "Sollicitaties in een fase die een afspraak vereist, zonder geplande afspraak.",
+      "goesTo": "Klikken opent Sollicitaties."
+    }
   }
 }

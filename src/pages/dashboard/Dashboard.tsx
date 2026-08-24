@@ -46,6 +46,10 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
   const hidden = getJsonSetting<Record<string, { kpis?: string[]; blocks?: string[] }>>(settings, 'dashboard_hidden', {})
   const hiddenBlocks = hidden[activeType]?.blocks ?? []
   const hiddenKpis = hidden[activeType]?.kpis ?? []
+  // DASH-VOLGORDE-1 (Settings → Dashboards → Volgorde) — per-role KPI tile order.
+  // Same settings-blob pattern as `dashboard_hidden` above; the settings-editor
+  // keeps its own literal for this key too (DASHBOARD_KPI_ORDER_KEY there).
+  const kpiOrder = getJsonSetting<Record<string, string[]>>(settings, 'dashboard_kpi_order', {})
   // Planning-gated surfaces (Diensten-blok + open-diensten-KPI) only exist when the
   // tenant has the module (Danny 2026-07-04: "Planning staat uit en ik zie DIENSTEN??").
   const hasPlanning = (auth?.hasModule ?? (() => false))('plan')
@@ -79,7 +83,7 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
     expiringMatchesRows, staleVacanciesRows, koiosSuggestionsRows, customersByOwnerRows,
   } = useDashboardViewModel({
     t, formatNumber, stats, opp, dash, dashCharts, statusMeta, funnelMeta, funnelTypes,
-    activeType, hiddenBlocks, hiddenKpis, hasPlanning, valueInHours,
+    activeType, hiddenBlocks, hiddenKpis, kpiOrder, hasPlanning, valueInHours,
     onNavigate,
   })
 

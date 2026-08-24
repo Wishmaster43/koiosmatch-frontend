@@ -10,10 +10,11 @@ import { describe, it, expect, vi, afterEach } from 'vitest'
 import { render, screen, within, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import i18n from '@/i18n'
-import DashboardsSettings, { DASHBOARD_HIDDEN_KEY } from './DashboardsSettings'
+import DashboardsSettings, { DASHBOARD_HIDDEN_KEY, DASHBOARD_KPI_ORDER_KEY } from './DashboardsSettings'
 
 const st = (key: string) => i18n.t(key, { ns: 'settings' })
 const dt = (key: string) => i18n.t(key, { ns: 'dashboard' })
+const ct = (key: string) => i18n.t(key, { ns: 'common' })
 
 // Controllable settings blob + loaded flag + a spy on the save path (mirrors
 // KoiosAdviceSettings.test.tsx's mocking pattern). vi.hoisted: factories run
@@ -113,6 +114,46 @@ describe('DashboardsSettings — toggle save path (§13, request body)', () => {
     await waitFor(() => {
       expect(saveSettingsKeys).toHaveBeenLastCalledWith({
         [DASHBOARD_HIDDEN_KEY]: { planning: { kpis: [] } },
+      })
+    })
+  })
+})
+
+// DASH-VOLGORDE-1 (Danny: "JA is goed maar moet ook werken dus test het") — the
+// Volgorde sub-tab: role defaults to the first dashboard type ('admin'), the
+// preview strip is honest (labels + order, never a real number), and the
+// keyboard-natural move-down arrow persists the exact reordered id array.
+describe('DashboardsSettings — Volgorde sub-tab (§13, request body)', () => {
+  const openOrderTab = async () => {
+    render(<DashboardsSettings />)
+    await userEvent.click(screen.getByRole('tab', { name: st('dashboards.tabs.order') }))
+  }
+
+  it('shows the KPI matrix and the blocks matrix hidden, the order region visible, with an honest "—" preview', async () => {
+    await openOrderTab()
+
+    expect(screen.getByRole('region', { name: st('dashboards.tabs.order') })).toBeInTheDocument()
+    expect(screen.queryByRole('region', { name: st('dashboardsKpis') })).not.toBeInTheDocument()
+    // Preview strip: the admin role's first KPI label appears, with a placeholder
+    // value — never a fabricated number (§0 no fake affordances).
+    expect(screen.getAllByText(dt('kpi.candidatesTotal')).length).toBeGreaterThan(0)
+    expect(screen.getAllByText('—').length).toBeGreaterThan(0)
+  })
+
+  it('clicking "move down" on the first KPI row persists the exact reordered id array for that role', async () => {
+    await openOrderTab()
+
+    // The default role is DASHBOARD_TYPES[0] = 'admin'; templates.ts KPI_ROWS.admin
+    // starts ['candidates', 'opps', 'pipeline', ...] — swapping the first two rows
+    // is a deterministic, order-catalogue-independent assertion.
+    const moveDownButtons = screen.getAllByRole('button', { name: ct('dragList.moveDown') })
+    await userEvent.click(moveDownButtons[0])
+
+    await waitFor(() => {
+      expect(saveSettingsKeys).toHaveBeenCalledWith({
+        [DASHBOARD_KPI_ORDER_KEY]: {
+          admin: ['opps', 'candidates', 'pipeline', 'expiringOpps', 'placements', 'intakes', 'openVacancies', 'tasksOverdue', 'activeConv'],
+        },
       })
     })
   })

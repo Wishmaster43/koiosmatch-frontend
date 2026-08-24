@@ -2696,6 +2696,11 @@
     }
   },
   "usage": {
+    "tabs": {
+      "kpis": "KPIs",
+      "monthly": "Monthly detail",
+      "breakdown": "Breakdown"
+    },
     "subtitleTenant": "Usage for {{name}}. Quantities for your billing only.",
     "month": "Month",
     "loadError": "Failed to load usage.",
@@ -3162,7 +3167,8 @@
   "dashboards": {
     "tabs": {
       "kpis": "KPIs",
-      "blocks": "Charts & lists"
+      "blocks": "Charts & lists",
+      "order": "Order"
     }
   },
   "workflowRunHistory": {
@@ -3402,5 +3408,108 @@
     "loadError": "Failed to load monthly budgets.",
     "saveFailed": "Failed to save the budgets.",
     "saved": "Budgets saved."
+  },
+  "dashboardsOrderRoleLabel": "Role",
+  "dashboardsOrderHint": "Choose the order in which the KPI tiles appear on the dashboard for this role. Only enabled KPIs (KPIs tab) are listed.",
+  "dashboardsPreviewTitle": "Preview",
+  "dashboardsPreviewHint": "Shows only the labels and order, not this tenant's real figures.",
+  "dashboardsOrderEmpty": "No KPIs enabled for this role.",
+  "dashboardsExplain": {
+    "candidates": {
+      "what": "Total number of candidates in the ATS.",
+      "goesTo": "Opens Candidates."
+    },
+    "stale": {
+      "what": "Candidates not contacted in the last 6 months.",
+      "goesTo": "Opens Candidates."
+    },
+    "never": {
+      "what": "Candidates who have never been contacted.",
+      "goesTo": "Opens Candidates."
+    },
+    "tasks": {
+      "what": "Open tasks linked to candidates.",
+      "goesTo": "Opens Tasks."
+    },
+    "opps": {
+      "what": "Number of open opportunities.",
+      "goesTo": "Opens Opportunities."
+    },
+    "pipeline": {
+      "what": "Sum of the value of open opportunities.",
+      "goesTo": "Opens Opportunities."
+    },
+    "placements": {
+      "what": "Number of placed matches.",
+      "goesTo": "Opens Matches."
+    },
+    "intakes": {
+      "what": "Number of planned intakes.",
+      "goesTo": "Opens Candidates."
+    },
+    "fillRate": {
+      "what": "Percentage of vacancies that has been filled.",
+      "goesTo": "Opens Vacancies."
+    },
+    "openVacancies": {
+      "what": "Number of open (non-archived) vacancies.",
+      "goesTo": "Opens Vacancies."
+    },
+    "incompleteRuns": {
+      "what": "Number of AI workflow runs that did not complete fully.",
+      "goesTo": "Opens AI agents."
+    },
+    "activeConv": {
+      "what": "Number of active WhatsApp conversations.",
+      "goesTo": "Opens WhatsApp."
+    },
+    "missingDocs": {
+      "what": "Candidates with missing documents.",
+      "goesTo": "Opens Candidates."
+    },
+    "expiringContracts": {
+      "what": "Matches with a contract ending soon.",
+      "goesTo": "Opens Matches."
+    },
+    "couplingErrors": {
+      "what": "Candidates with a failed backoffice coupling.",
+      "goesTo": "Opens Candidates."
+    },
+    "openShifts": {
+      "what": "Number of open shifts (Planning module).",
+      "goesTo": "Opens Planning."
+    },
+    "occupancy": {
+      "what": "Occupancy rate of scheduled shifts.",
+      "goesTo": "Opens Planning."
+    },
+    "escalations": {
+      "what": "Number of WhatsApp conversations that were escalated.",
+      "goesTo": "Opens WhatsApp."
+    },
+    "failedWf": {
+      "what": "Number of workflows that failed.",
+      "goesTo": "Opens Workflows."
+    },
+    "tasksOverdue": {
+      "what": "Number of tasks past their due date.",
+      "goesTo": "Opens Tasks."
+    },
+    "uncalledCallist": {
+      "what": "Candidates on a call list who have not been called yet.",
+      "goesTo": "Opens Call lists."
+    },
+    "expiringOpps": {
+      "what": "Opportunities expiring soon.",
+      "goesTo": "Opens Opportunities."
+    },
+    "tooLongInStage": {
+      "what": "Applications stuck too long in the same stage.",
+      "goesTo": "Opens Applications."
+    },
+    "missingApptApps": {
+      "what": "Applications in a stage that requires an appointment, without one planned.",
+      "goesTo": "Opens Applications."
+    }
   }
 }

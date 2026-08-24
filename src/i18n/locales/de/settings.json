@@ -2696,6 +2696,11 @@
     }
   },
   "usage": {
+    "tabs": {
+      "kpis": "KPIs",
+      "monthly": "Nutzung pro Monat",
+      "breakdown": "Nutzung aufgeschlüsselt"
+    },
     "subtitleTenant": "Verbrauch von {{name}}. Nur Mengen für Ihre Abrechnung.",
     "month": "Monat",
     "loadError": "Verbrauch konnte nicht geladen werden.",
@@ -3162,7 +3167,8 @@
   "dashboards": {
     "tabs": {
       "kpis": "KPIs",
-      "blocks": "Diagramme & Listen"
+      "blocks": "Diagramme & Listen",
+      "order": "Reihenfolge"
     }
   },
   "workflowRunHistory": {
@@ -3402,5 +3408,108 @@
     "loadError": "Monatsbudgets konnten nicht geladen werden.",
     "saveFailed": "Budgets konnten nicht gespeichert werden.",
     "saved": "Budgets gespeichert."
+  },
+  "dashboardsOrderRoleLabel": "Rolle",
+  "dashboardsOrderHint": "Legt die Reihenfolge fest, in der die KPI-Kacheln für diese Rolle im Dashboard erscheinen. Nur aktivierte KPIs (Tab KPIs) stehen in der Liste.",
+  "dashboardsPreviewTitle": "Vorschau",
+  "dashboardsPreviewHint": "Zeigt nur die Beschriftungen und Reihenfolge, nicht die echten Zahlen dieses Mandanten.",
+  "dashboardsOrderEmpty": "Keine KPIs für diese Rolle aktiviert.",
+  "dashboardsExplain": {
+    "candidates": {
+      "what": "Gesamtzahl der Kandidaten im ATS.",
+      "goesTo": "Öffnet Kandidaten."
+    },
+    "stale": {
+      "what": "Kandidaten, die in den letzten 6 Monaten nicht kontaktiert wurden.",
+      "goesTo": "Öffnet Kandidaten."
+    },
+    "never": {
+      "what": "Kandidaten, die noch nie kontaktiert wurden.",
+      "goesTo": "Öffnet Kandidaten."
+    },
+    "tasks": {
+      "what": "Offene Aufgaben, verknüpft mit Kandidaten.",
+      "goesTo": "Öffnet Aufgaben."
+    },
+    "opps": {
+      "what": "Anzahl offener Chancen.",
+      "goesTo": "Öffnet Chancen."
+    },
+    "pipeline": {
+      "what": "Summe des Werts offener Chancen.",
+      "goesTo": "Öffnet Chancen."
+    },
+    "placements": {
+      "what": "Anzahl platzierter Matches.",
+      "goesTo": "Öffnet Matches."
+    },
+    "intakes": {
+      "what": "Anzahl geplanter Intakes.",
+      "goesTo": "Öffnet Kandidaten."
+    },
+    "fillRate": {
+      "what": "Prozentsatz besetzter Stellen.",
+      "goesTo": "Öffnet Vakanzen."
+    },
+    "openVacancies": {
+      "what": "Anzahl offener (nicht archivierter) Vakanzen.",
+      "goesTo": "Öffnet Vakanzen."
+    },
+    "incompleteRuns": {
+      "what": "Anzahl der KI-Workflow-Läufe, die nicht vollständig abgeschlossen wurden.",
+      "goesTo": "Öffnet KI-Agenten."
+    },
+    "activeConv": {
+      "what": "Anzahl aktiver WhatsApp-Gespräche.",
+      "goesTo": "Öffnet WhatsApp."
+    },
+    "missingDocs": {
+      "what": "Kandidaten mit fehlenden Dokumenten.",
+      "goesTo": "Öffnet Kandidaten."
+    },
+    "expiringContracts": {
+      "what": "Matches mit bald endendem Vertrag.",
+      "goesTo": "Öffnet Matches."
+    },
+    "couplingErrors": {
+      "what": "Kandidaten mit fehlgeschlagener Backoffice-Kopplung.",
+      "goesTo": "Öffnet Kandidaten."
+    },
+    "openShifts": {
+      "what": "Anzahl offener Schichten (Planungsmodul).",
+      "goesTo": "Öffnet Planung."
+    },
+    "occupancy": {
+      "what": "Belegungsgrad geplanter Schichten.",
+      "goesTo": "Öffnet Planung."
+    },
+    "escalations": {
+      "what": "Anzahl eskalierter WhatsApp-Gespräche.",
+      "goesTo": "Öffnet WhatsApp."
+    },
+    "failedWf": {
+      "what": "Anzahl fehlgeschlagener Workflows.",
+      "goesTo": "Öffnet Workflows."
+    },
+    "tasksOverdue": {
+      "what": "Anzahl überfälliger Aufgaben.",
+      "goesTo": "Öffnet Aufgaben."
+    },
+    "uncalledCallist": {
+      "what": "Kandidaten auf einer Anrufliste, die noch nicht angerufen wurden.",
+      "goesTo": "Öffnet Anruflisten."
+    },
+    "expiringOpps": {
+      "what": "Chancen, die bald ablaufen.",
+      "goesTo": "Öffnet Chancen."
+    },
+    "tooLongInStage": {
+      "what": "Bewerbungen, die zu lange in derselben Phase stehen.",
+      "goesTo": "Öffnet Bewerbungen."
+    },
+    "missingApptApps": {
+      "what": "Bewerbungen in einer Phase, die einen Termin erfordert, ohne geplanten Termin.",
+      "goesTo": "Öffnet Bewerbungen."
+    }
   }
 }

@@ -254,3 +254,50 @@ describe('useDashboardViewModel · tolerates a saved hidden-config referencing r
     expect(result.current.vis('chart.status')).toBe(true)
   })
 })
+
+// DASH-VOLGORDE-1 (Settings → Dashboards → Volgorde) — the KPI tile ORDER a
+// tenant saved (dashboard_kpi_order, per role) must survive an opslaan→herladen
+// cycle: the view model reorders the visible KPI row to match, an unknown/
+// removed id in the stored order is dropped (never a blank tile, §0), and a
+// role with no stored order at all keeps today's default order unchanged.
+describe('useDashboardViewModel · DASH-VOLGORDE-1 per-role KPI tile order', () => {
+  it('reorders the visible KPI row to match the stored kpiOrder for the active role', () => {
+    const { result } = renderHook(() => useDashboardViewModel(baseArgs({
+      activeType: 'recruitment' as const,
+      kpiOrder: {
+        recruitment: ['stale', 'candidates', 'never', 'tasksOverdue', 'failedWf', 'uncalledCallist', 'intakes', 'tooLongInStage', 'missingApptApps'],
+      },
+    })))
+    expect(result.current.kpis.map(k => k.id)).toEqual([
+      'stale', 'candidates', 'never', 'tasksOverdue', 'failedWf', 'uncalledCallist', 'intakes', 'tooLongInStage', 'missingApptApps',
+    ])
+  })
+
+  it('keeps the default KPI_ROWS order when the role has no stored order', () => {
+    const { result } = renderHook(() => useDashboardViewModel(baseArgs({ activeType: 'recruitment' as const })))
+    expect(result.current.kpis.map(k => k.id)).toEqual([
+      'candidates', 'never', 'stale', 'tasksOverdue', 'failedWf', 'uncalledCallist', 'intakes', 'tooLongInStage', 'missingApptApps',
+    ])
+  })
+
+  it('drops an unknown/removed id from a stored order instead of rendering a blank tile', () => {
+    const { result } = renderHook(() => useDashboardViewModel(baseArgs({
+      activeType: 'recruitment' as const,
+      kpiOrder: { recruitment: ['stale', 'removedLegacyId', 'candidates'] },
+    })))
+    const ids = result.current.kpis.map(k => k.id)
+    expect(ids).not.toContain('removedLegacyId')
+    expect(ids[0]).toBe('stale')
+    expect(ids).toHaveLength(9)
+  })
+
+  it('another role\'s stored order never leaks into this role\'s tile order', () => {
+    const { result } = renderHook(() => useDashboardViewModel(baseArgs({
+      activeType: 'recruitment' as const,
+      kpiOrder: { management: ['activeConv', 'candidates'] },
+    })))
+    expect(result.current.kpis.map(k => k.id)).toEqual([
+      'candidates', 'never', 'stale', 'tasksOverdue', 'failedWf', 'uncalledCallist', 'intakes', 'tooLongInStage', 'missingApptApps',
+    ])
+  })
+})
