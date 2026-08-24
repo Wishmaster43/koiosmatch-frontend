@@ -23,6 +23,7 @@
     "matches": "Matches",
     "intakes": "Intakes",
     "outreach": "Outreach",
+    "whatsapp": "WhatsApp",
     "usage": "Verbruik"
   },
   "candidates": {
@@ -260,6 +261,34 @@
       "campaignsCount": "Aantal bellijsten",
       "channelsUsed": "Gebruikte kanalen",
       "assigneesCount": "Aantal toegewezen recruiters"
+    },
+    "kpiOrderFellBack": "Een in Instellingen ingestelde KPI-kaart bestaat niet meer en is teruggezet naar de standaard."
+  },
+  "whatsapp": {
+    "loading": "WhatsApp laden…",
+    "error": "Kon WhatsApp niet laden",
+    "empty": "Geen WhatsApp-gesprekken in deze periode",
+    "series": "Berichten over tijd",
+    "inbound": "Inkomend",
+    "outbound": "Uitgaand",
+    "window": "WhatsApp-gesprekken {{from}} t/m {{to}}",
+    "topConversations": "Drukste gesprekken",
+    "axes": {
+      "direction": "Richting",
+      "type": "Berichttype",
+      "escalated": "Geëscaleerd"
+    },
+    "kpi": {
+      "conversationsTotal": "Totaal gesprekken",
+      "active7d": "Actief (7 dagen)",
+      "newInPeriod": "Nieuw in periode",
+      "inboundInPeriod": "Inkomend in periode",
+      "outboundInPeriod": "Uitgaand in periode",
+      "appEchoesInPeriod": "Via app in periode",
+      "escalationsOpen": "Open escalaties",
+      "unansweredOverWindow": "Onbeantwoord over drempel",
+      "avgFirstResponseMinutes": "Gem. eerste reactietijd",
+      "minutesUnit": "minuten"
     },
     "kpiOrderFellBack": "Een in Instellingen ingestelde KPI-kaart bestaat niet meer en is teruggezet naar de standaard."
   },

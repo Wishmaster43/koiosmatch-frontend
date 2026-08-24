@@ -13,6 +13,7 @@ import { useTranslation } from 'react-i18next'
 import ReportKpiBand from './ReportKpiBand'
 import type { KpiSpec } from '@/components/insights/InsightsRow'
 import { useNavigation } from '@/context/NavigationContext'
+import { useAuth } from '@/context/AuthContext'
 import { useCandidatesReport } from './useCandidatesReport'
 import { useApplicationsReport } from './useApplicationsReport'
 import { useCustomersReport } from './useCustomersReport'
@@ -21,6 +22,7 @@ import { useMatchesReport } from './useMatchesReport'
 import { useTasksReport } from './useTasksReport'
 import { useOpportunitiesReport } from './useOpportunitiesReport'
 import { useOutreachReport } from './useOutreachReport'
+import { useWhatsappReport } from './useWhatsappReport'
 import type { ReportId } from './reportIds'
 import type { ReportPeriod } from '@/types/analytics'
 
@@ -42,9 +44,16 @@ export default function ReportsDashboard({ period }: { period: ReportPeriod }) {
   const matches       = useMatchesReport(period)
   const tasks         = useTasksReport(period)
   const opportunities = useOpportunitiesReport(period)
-  // RAPPORTEN-DANNY10-1: the flow tile retired with its page; outreach (one of
-  // Danny's ten) takes the ninth card so the row stays at nine real numbers.
+  // RAPPORTEN-DANNY10-1: the flow tile retired with its page; outreach and
+  // whatsapp (RAPPORTEN-WHATSAPP-FE-1) fill the eighth and ninth cards so the
+  // row stays at nine real numbers.
   const outreach      = useOutreachReport(period)
+  // The whatsapp report sits behind module:whatsapp — without the module the
+  // tile hides AND the fetch never fires (it would only 403). Hook still called
+  // unconditionally (Rules of Hooks); `enabled` guards the request.
+  const auth = useAuth()
+  const hasWhatsapp = (auth?.hasModule ?? (() => false))('whatsapp')
+  const whatsapp      = useWhatsappReport(period, hasWhatsapp)
 
   // Danny 24-08: the hub tiles carry the SIDEBAR names (tabs.*) in the SIDEBAR
   // order (REPORT_IDS) — a tile is the entity's entry card, so it wears the
@@ -58,6 +67,7 @@ export default function ReportsDashboard({ period }: { period: ReportPeriod }) {
     { key: 'tasks',         label: t('tabs.tasks'),         page: 'tasks',         loading: tasks.loading,         error: tasks.error,         total: tasks.data?.total ?? null },
     { key: 'matches',       label: t('tabs.matches'),       page: 'matches',       loading: matches.loading,       error: matches.error,       total: matches.data?.total ?? null },
     { key: 'outreach',      label: t('tabs.outreach'),      page: 'outreach',      loading: outreach.loading,      error: outreach.error,      total: outreach.data?.total ?? null },
+    ...(hasWhatsapp ? [{ key: 'whatsapp',   label: t('tabs.whatsapp'),      page: 'whatsapp' as ReportId,   loading: whatsapp.loading,      error: whatsapp.error,      total: whatsapp.data?.meta.total ?? null }] : []),
   ]
 
   const kpis: KpiSpec[] = rows.map(r => ({

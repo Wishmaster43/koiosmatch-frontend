@@ -8,6 +8,7 @@
 import { useTranslation } from 'react-i18next'
 import { useReportDrill } from './useReportDrill'
 import RightDrawer from '@/components/ui/RightDrawer'
+import { GroupLabel, BodyText } from '@/components/ui/typography'
 import KoiosAiMark from '@/components/ui/KoiosAiMark'
 import { formatNumber } from '@/lib/formatters'
 
@@ -28,11 +29,15 @@ export interface DrillSpec {
 // ReportChartWithDrillList (the inline right-hand list) renders rows identically
 // instead of re-typing this field-guessing logic a second time.
 export type DrillRow = Record<string, unknown>
+// eslint-disable-next-line react-refresh/only-export-components -- NECESSITY: single source for drill-row rendering, shared with ReportChartWithDrillList (see comment above); HMR-nicety warning only
 export const rowTitle = (r: DrillRow) => String(r.name ?? r.label ?? r.title ?? r.full_name ?? r.id ?? '—')
+// eslint-disable-next-line react-refresh/only-export-components -- NECESSITY: same single-source pair as rowTitle above
 export const rowSub   = (r: DrillRow) => {
   // `customer` = the opportunities drill's customer-name field (portie 5);
-  // `assignee` = the tasks drill's assignee-name field (portie 6).
-  const bits = [r.status, r.status_label, r.stage, r.funnel_label, r.client, r.function_title, r.city, r.customer, r.owner, r.assignee]
+  // `assignee` = the tasks drill's assignee-name field (portie 6);
+  // `wa_number` = the whatsapp KPI-drill's SERVER-MASKED number (§8/§9 — rendered
+  // verbatim, the server decides how much of it anyone sees).
+  const bits = [r.status, r.status_label, r.stage, r.funnel_label, r.client, r.function_title, r.city, r.customer, r.owner, r.assignee, r.wa_number]
     .filter((v): v is string => typeof v === 'string' && v.length > 0)
   return bits.slice(0, 2).join(' · ')
 }
@@ -58,8 +63,7 @@ export default function ReportDrillDrawer({ drill, onClose }: { drill: DrillSpec
       {/* Breakdown — how the number adds up (explains it from loaded data) */}
       {drill.breakdown && drill.breakdown.length > 0 && (
         <section style={{ marginBottom: 20 }}>
-          <h4 style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase',
-                       letterSpacing: '0.05em', marginBottom: 8 }}>{t('drill.breakdown')}</h4>
+          <GroupLabel as="h4" style={{ marginBottom: 8 }}>{t('drill.breakdown')}</GroupLabel>
           <div style={{ border: '1px solid var(--border)', borderRadius: 10, overflow: 'hidden' }}>
             {drill.breakdown.map((b, i) => (
               <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center',
@@ -79,10 +83,9 @@ export default function ReportDrillDrawer({ drill, onClose }: { drill: DrillSpec
           report itself rendered fine — no error banner, the advice section still shows. */}
       {drill.rowsEndpoint && !rowsForbidden && (
         <section style={{ marginBottom: 20 }}>
-          <h4 style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase',
-                       letterSpacing: '0.05em', marginBottom: 8 }}>
+          <GroupLabel as="h4" style={{ marginBottom: 8 }}>
             {drill.entityLabel ?? t('drill.records')}
-          </h4>
+          </GroupLabel>
           {rowsLoading && <div style={{ fontSize: 13, color: 'var(--text-muted)', padding: '8px 0' }}>{t('drill.loading')}</div>}
           {!rowsLoading && rows.length === 0 && (
             <div style={{ fontSize: 13, color: 'var(--text-muted)', padding: '8px 0' }}>{t('drill.noRecords')}</div>
@@ -92,7 +95,7 @@ export default function ReportDrillDrawer({ drill, onClose }: { drill: DrillSpec
               <div style={{ border: '1px solid var(--border)', borderRadius: 10, overflow: 'hidden' }}>
                 {rows.map((r, i) => (
                   <div key={i} style={{ padding: '9px 12px', borderTop: i ? '1px solid var(--border)' : 'none' }}>
-                    <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)' }}>{rowTitle(r)}</div>
+                    <BodyText as="div" style={{ fontWeight: 500 }}>{rowTitle(r)}</BodyText>
                     {rowSub(r) && <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 1 }}>{rowSub(r)}</div>}
                   </div>
                 ))}
@@ -117,12 +120,11 @@ export default function ReportDrillDrawer({ drill, onClose }: { drill: DrillSpec
           <KoiosAiMark size={22} title={t('common:aiGeneratedHint', { defaultValue: 'Door Koios AI gegenereerd — controleer voor gebruik.' })} />
           <h4 style={{ fontSize: 12, fontWeight: 700, color: 'var(--text)' }}>{t('drill.koios')}</h4>
         </div>
-        <div style={{ background: 'var(--color-primary-bg)', borderRadius: 10, padding: '12px 14px',
-                      fontSize: 13, color: 'var(--text)', lineHeight: 1.5 }}>
+        <BodyText as="div" style={{ background: 'var(--color-primary-bg)', borderRadius: 10, padding: '12px 14px', lineHeight: 1.5 }}>
           {adviceLoading
             ? t('drill.loading')
             : advice ?? t('drill.noAdvice')}
-        </div>
+        </BodyText>
       </section>
     </RightDrawer>
   )

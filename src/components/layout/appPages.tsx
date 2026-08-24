@@ -92,6 +92,7 @@ export const PAGE_TITLES: Record<string, string> = {
   'reports.tasks':              'Reports — Tasks',
   'reports.matches':            'Reports — Matches',
   'reports.outreach':           'Reports — Outreach',
+  'reports.whatsapp':           'Reports — WhatsApp',
   // Legacy (retired as their own route — RAPPORTEN-CONSOLIDATIE-1)
   'reports.leads':              'Reports — Leads',
   'reports.sources':            'Reports — Sources',
@@ -191,6 +192,7 @@ export function renderPage(activePage: string, { navIntent, goTo, dashView }: { 
     case 'reports.tasks':          return <ReportsPage reportId="tasks" />
     case 'reports.matches':        return <ReportsPage reportId="matches" />
     case 'reports.outreach':       return <ReportsPage reportId="outreach" />
+    case 'reports.whatsapp':       return <ReportsPage reportId="whatsapp" />
     // Legacy routes with a surviving host page — resolve to the merged page +
     // switch position via the ONE map reportIds.ts documents
     // (LEGACY_REPORT_ROUTE_ALIASES), never a second hand-copied list.

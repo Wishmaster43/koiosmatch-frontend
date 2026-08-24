@@ -58,6 +58,7 @@ import OpportunitiesReport from './OpportunitiesReport'
 import TasksReport from './TasksReport'
 import MatchesReport from './MatchesReport'
 import OutreachReport from './OutreachReport'
+import WhatsappReport from './WhatsappReport'
 import ReportsDashboard from './ReportsDashboard'
 import { REPORT_IDS } from './reportIds'
 import type { ReportId } from './reportIds'
@@ -86,6 +87,7 @@ const REPORTS: Record<ReportId, ReportComponent> = {
   tasks:         TasksReport,
   matches:       MatchesReport,
   outreach:      OutreachReport,
+  whatsapp:      WhatsappReport,
 }
 
 export default function ReportsPage({ reportId, initialView }: { reportId?: string; initialView?: string }) {

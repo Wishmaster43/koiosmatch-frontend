@@ -23,6 +23,7 @@
     "matches": "Matches",
     "intakes": "Intakes",
     "outreach": "Outreach",
+    "whatsapp": "WhatsApp",
     "usage": "Uso"
   },
   "candidates": {
@@ -260,6 +261,34 @@
       "campaignsCount": "Numero de listas de llamadas",
       "channelsUsed": "Canales utilizados",
       "assigneesCount": "Reclutadores asignados"
+    },
+    "kpiOrderFellBack": "Una tarjeta KPI configurada en Ajustes ya no existe y se restableció al valor predeterminado."
+  },
+  "whatsapp": {
+    "loading": "Cargando WhatsApp…",
+    "error": "No se ha podido cargar WhatsApp",
+    "empty": "Sin conversaciones de WhatsApp en este periodo",
+    "series": "Mensajes a lo largo del tiempo",
+    "inbound": "Entrante",
+    "outbound": "Saliente",
+    "window": "Conversaciones de WhatsApp del {{from}} al {{to}}",
+    "topConversations": "Conversaciones más activas",
+    "axes": {
+      "direction": "Dirección",
+      "type": "Tipo de mensaje",
+      "escalated": "Escalado"
+    },
+    "kpi": {
+      "conversationsTotal": "Total de conversaciones",
+      "active7d": "Activas (7 días)",
+      "newInPeriod": "Nuevas en el periodo",
+      "inboundInPeriod": "Entrantes en el periodo",
+      "outboundInPeriod": "Salientes en el periodo",
+      "appEchoesInPeriod": "Vía app en el periodo",
+      "escalationsOpen": "Escaladas abiertas",
+      "unansweredOverWindow": "Sin responder tras el umbral",
+      "avgFirstResponseMinutes": "Tiempo medio 1ª respuesta",
+      "minutesUnit": "minutos"
     },
     "kpiOrderFellBack": "Una tarjeta KPI configurada en Ajustes ya no existe y se restableció al valor predeterminado."
   },

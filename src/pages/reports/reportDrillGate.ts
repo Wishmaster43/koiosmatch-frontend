@@ -35,7 +35,7 @@
  * so there is no longer any caller passing 'sources' here; removed rather than
  * left as dead vocabulary.
  */
-export type DrillableReport = 'flow' | 'matches' | 'recruiters' | 'vacancies' | 'intakes' | 'outreach' | 'candidates' | 'applications' | 'customers' | 'opportunities' | 'tasks' | 'contacts' | 'locations' | 'departments' | 'ai' | 'workflows' | 'usage'
+export type DrillableReport = 'flow' | 'matches' | 'recruiters' | 'vacancies' | 'intakes' | 'outreach' | 'whatsapp' | 'candidates' | 'applications' | 'customers' | 'opportunities' | 'tasks' | 'contacts' | 'locations' | 'departments' | 'ai' | 'workflows' | 'usage'
 
 export const REPORT_DRILL_AVAILABLE: Record<DrillableReport, boolean> = {
   flow: true,
@@ -48,6 +48,12 @@ export const REPORT_DRILL_AVAILABLE: Record<DrillableReport, boolean> = {
   opportunities: true,
   tasks: true,
   outreach: true,
+  // RAPPORTEN-WHATSAPP-FE-1: whatsapp's ONE drill is per KPI CARD —
+  // GET /reports/whatsapp/kpis/drill?kpi=<key> (ReportDrillController::whatsappKpi,
+  // registered live in CMBE f7a2c6f8 and measured against the route file by the
+  // Opus review). There is NO axis/bucket drill and NO advice route; rows carry
+  // masked wa_numbers only (§8/§9), gated behind module:whatsapp.
+  whatsapp: true,
   // RAPPORTEN-SUITE-2: the thin reports ship with their own drill/advice pair.
   contacts: true,
   locations: true,

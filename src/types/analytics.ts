@@ -259,6 +259,35 @@ export interface OutreachReportData {
   by_channel: ApplicationTopSegment[]
 }
 
+// ── WhatsApp report (GET /reports/whatsapp, RAPPORTEN-WHATSAPP-FE-1) ────────────
+// Hand-written AGAINST THE LIVE BACKEND (CMBE f7a2c6f8; no 2xx schema in the
+// generated spec yet, §10). Unlike outreach's flat envelope, whatsapp NESTS its
+// window under `meta` — measured in WhatsappReport::run(), not assumed.
+// `by_direction`/`by_type`/`by_escalated` are plain value/label/count segments.
+export interface WhatsappSegment { value: string; label: string; count: number }
+
+// One of the ten busiest threads in the period. Carries the candidate name
+// (server-gated, PII-minimised) — NOT a wa_number: the masked number exists only
+// in the per-KPI drill rows (§8/§9).
+export interface WhatsappTopConversation {
+  conversation_id: string | number
+  candidate: string | null
+  message_count: number
+  last_message_at: string | null
+}
+
+export interface WhatsappReportData {
+  meta: { period: string | null; from: string; to: string; total: number }
+  // Server sends a `label` per card too — deliberately ignored (§5: labels come
+  // from i18n, never server-composed).
+  kpis: { key: string; label?: string; count: number | null }[]
+  timeseries: { bucket: 'day' | 'week'; series: { date: string; inbound: number; outbound: number }[] }
+  by_direction: WhatsappSegment[]
+  by_type: WhatsappSegment[]
+  by_escalated: WhatsappSegment[]
+  top_conversations: WhatsappTopConversation[]
+}
+
 // ── Candidates/leads inflow report (GET /reports/candidates, RAPPORTEN-SUITE-1) ─
 // Hand-written from the backend Service (no 2xx schema in the generated spec yet,
 // §10) — mirrors the CONTRACT-CHANGELOG "portie 1" entry exactly.

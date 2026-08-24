@@ -44,6 +44,7 @@ export const REPORT_IDS = [
   'tasks',
   'matches',
   'outreach',
+  'whatsapp',
 ] as const
 
 export type ReportId = (typeof REPORT_IDS)[number]

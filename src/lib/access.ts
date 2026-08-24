@@ -109,6 +109,10 @@ const SUB_PAGE_GATES: Record<string, string> = {
   // page (shiftmanager.details, now WhatsApp-only) needs whatsapp.
   'shiftmanager.runs-table': 'aiagents',
   'shiftmanager.details':    'whatsapp',
+  // RAPPORTEN-WHATSAPP-FE-1: the whatsapp report route sits behind
+  // module:whatsapp server-side; gate the page (and thus the sidebar entry —
+  // Sidebar filters children through canAccessPage) the same way.
+  'reports.whatsapp': 'whatsapp',
 }
 
 // Pages that can additionally be restricted at the user/role level via page.*

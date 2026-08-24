@@ -103,7 +103,7 @@ export const REPORT_KPI_SCOPE_IDS: ReportKpiScopeId[] = [
   'candidates', 'leads',
   'applications',
   'customers', 'prospects',
-  'vacancies', 'opportunities', 'tasks', 'matches', 'outreach',
+  'vacancies', 'opportunities', 'tasks', 'matches', 'outreach', 'whatsapp',
 ]
 
 // Reports with no configurable KPI strip at all (e.g. no ReportKpiBand, or a
@@ -124,6 +124,7 @@ export const REPORT_KPI_FAMILY: Partial<Record<ReportKpiScopeId, ReportKpiFamily
   matches: 'fixed',
   intakes: 'fixed',
   outreach: 'fixed',
+  whatsapp: 'fixed',
   contacts: 'fixed',
   locations: 'fixed',
   departments: 'fixed',
@@ -404,6 +405,17 @@ export const REPORT_KPI_FIXED_CATALOG: Partial<Record<ReportKpiScopeId, KpiCatal
     { key: 'campaignsCount', labelKey: 'outreach.summary.campaignsCount' },
     { key: 'channelsUsed', labelKey: 'outreach.summary.channelsUsed' },
     { key: 'assigneesCount', labelKey: 'outreach.summary.assigneesCount' },
+  ],
+  whatsapp: [
+    { key: 'conversationsTotal', labelKey: 'whatsapp.kpi.conversationsTotal' },
+    { key: 'active7d', labelKey: 'whatsapp.kpi.active7d' },
+    { key: 'newInPeriod', labelKey: 'whatsapp.kpi.newInPeriod' },
+    { key: 'inboundInPeriod', labelKey: 'whatsapp.kpi.inboundInPeriod' },
+    { key: 'outboundInPeriod', labelKey: 'whatsapp.kpi.outboundInPeriod' },
+    { key: 'appEchoesInPeriod', labelKey: 'whatsapp.kpi.appEchoesInPeriod' },
+    { key: 'escalationsOpen', labelKey: 'whatsapp.kpi.escalationsOpen' },
+    { key: 'unansweredOverWindow', labelKey: 'whatsapp.kpi.unansweredOverWindow' },
+    { key: 'avgFirstResponseMinutes', labelKey: 'whatsapp.kpi.avgFirstResponseMinutes' },
   ],
   contacts: [
     { key: 'total', labelKey: 'contacts.total' },
