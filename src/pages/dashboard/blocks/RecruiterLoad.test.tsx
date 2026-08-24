@@ -21,7 +21,20 @@ describe('RecruiterLoad', () => {
     ]} />)
     const rows = screen.getAllByText(/Anna|Bram/)
     expect(rows.map(r => r.textContent)).toEqual(['Anna', 'Bram'])
+    // New face (Danny: "mooier"): open-task count in Mono next to the name,
+    // intakes as a caption, too-long as a warning chip ONLY when non-zero.
     expect(screen.getByText('5')).toBeInTheDocument()
-    expect(screen.getByText('4')).toBeInTheDocument()
+    expect(screen.getByText('3')).toBeInTheDocument()
+    expect(screen.getAllByText('recruiterLoad.intakesCount')).toHaveLength(2)
+    expect(screen.getAllByText('recruiterLoad.tooLongCount')).toHaveLength(1)
+  })
+
+  it('the load bar scales against the busiest recruiter', () => {
+    const { container } = render(<RecruiterLoad rows={[
+      { user_id: 'u1', name: 'Anna', open_tasks: 2, intakes_planned: 0, too_long_in_stage: 0 },
+      { user_id: 'u2', name: 'Bram', open_tasks: 4, intakes_planned: 0, too_long_in_stage: 0 },
+    ]} />)
+    const bars = [...container.querySelectorAll('div')].filter(d => d.style.width.endsWith('%'))
+    expect(bars.map(b => b.style.width)).toEqual(['50%', '100%'])
   })
 })

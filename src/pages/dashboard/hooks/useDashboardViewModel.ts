@@ -12,7 +12,7 @@ import type { BarSeries } from '@/components/charts/WeeklyBarChartCard'
 import type { DashStats, DashOpp, DashData, TimeseriesPoint, TrendRow } from '@/types/dashboard'
 import type { LookupItem } from '@/context/LookupsContext'
 import { buildDashboardKpis, type DashboardKpi } from '../dashboardKpis'
-import { serverKeysToLocal } from '../kpiKeyMap'
+import { serverKeysToLocal, apiRoleForType } from '../kpiKeyMap'
 import { visibleBlock, kpiRow } from '../templates'
 import type { DashboardType } from '../templates'
 import { humanize, fmtWhen, eur } from '../dashboardFormat'
@@ -206,6 +206,8 @@ export function useDashboardViewModel({
     incompleteRuns: 'incomplete_runs',
     openShifts: 'open_shifts',
     occupancy: 'occupancy',
+    messagesSent: 'messages_sent',
+    shiftsPlanned: 'shifts_planned',
   }
   // Every role ALWAYS gets its own full KPI row (never hidden), just possibly reordered.
   // K-173 kpi_row (714eae01): when the server sends the viewer-effective ordered
@@ -214,11 +216,18 @@ export function useDashboardViewModel({
   // settings-blob hidden/order path only serves older servers without it. The
   // module gates still apply on top — a stored row must never resurrect a tile
   // whose module key is absent.
-  const serverRow = dash?.kpi_row ? serverKeysToLocal(dash.kpi_row) : null
+  // The server row describes the VIEWER's role. When a super-view user switches
+  // the dashboard to another type (Danny: badge said Admin while viewing
+  // Management), a row for a different api-role must not masquerade as that
+  // view's row — fall back to the type's template then (or the preview_role
+  // response, whose scope.role mirrors the viewed role).
+  const serverRole = dash?.scope?.role != null ? apiRoleForType(String(dash.scope.role)) : null
+  const serverRowApplies = serverRole == null || serverRole === apiRoleForType(activeType)
+  const serverRow = serverRowApplies && dash?.kpi_row ? serverKeysToLocal(dash.kpi_row) : null
   const baseKpiIds = serverRow ?? kpiRow(activeType).filter(id => !hiddenKpis.includes(id))
   const visibleKpiIds = baseKpiIds
     // Open-diensten is a Planning-module KPI — hide it when the tenant lacks the module.
-    .filter(id => id !== 'openShifts' || hasPlanning)
+    .filter(id => (id !== 'openShifts' && id !== 'shiftsPlanned') || hasPlanning)
     .filter(id => !(id in REQUIRES_KPI_KEY) || REQUIRES_KPI_KEY[id] in kpis)
   // DASH-VOLGORDE-1 — legacy path only: apply the blob's stored order on top of
   // the visible set (the server row is already ordered).

@@ -43,6 +43,9 @@ export function buildDashboardKpis({ t, kpis, drills = {}, num, eur, opp, valueI
   // cell); an ABSENT key (older server, no K-173 yet) keeps the tile's own
   // hardcoded intent as fallback.
   const resolveClick = (serverKey: string, fallback: () => void): (() => void) | undefined => {
+    // null value = the viewer lacks the right for this number — an honest '—'
+    // must not click through into a 403 list (Opus lane-3 minor).
+    if (serverKey in kpis && kpis[serverKey] === null) return undefined
     if (serverKey in drills) {
       const d = drills[serverKey]
       if (!d) return undefined
@@ -92,5 +95,15 @@ export function buildDashboardKpis({ t, kpis, drills = {}, num, eur, opp, valueI
     // onNavigate('candidates', { attention: 'stale6m' }) / ('tasks', { kpi: 'overdue' }).
     tooLongInStage:    { id: 'tooLongInStage', label: t('kpi.tooLongInStage'), value: num(kpis.app_too_long_in_stage), sub: t('kpi.tooLongInStageSub'), color: 'var(--color-warning)', bg: 'var(--color-warning-bg)', Icon: Hourglass, onClick: resolveClick('app_too_long_in_stage', () => onNavigate?.('applications', { attention: 'tooLongInStage' })) },
     missingApptApps:   { id: 'missingApptApps', label: t('kpi.missingApptApps'), value: num(kpis.app_missing_appointment), sub: t('kpi.missingApptAppsSub'), color: 'var(--color-warning)', bg: 'var(--color-warning-bg)', Icon: CalendarX2, onClick: resolveClick('app_missing_appointment', () => onNavigate?.('applications', { attention: 'missingAppointment' })) },
+    // Full-vocabulary tiles (kpiKeyMap completion): every server kpi_row key can
+    // now render — a stored row must never lose tiles to a missing mapping.
+    candidatesNew:     { id: 'candidatesNew', label: t('kpi.candidatesNew'), value: num(kpis.candidates_new), sub: t('kpi.inPeriod'), color: 'var(--color-primary-text)', bg: 'var(--color-primary-bg)', Icon: Users, onClick: resolveClick('candidates_new', () => onNavigate?.('candidates', {})) },
+    noFollowup:        { id: 'noFollowup', label: t('kpi.noFollowup'), value: num(kpis.no_followup), sub: t('kpi.attentionNeeded'), color: 'var(--color-warning)', bg: 'var(--color-warning-bg)', Icon: AlertCircle, onClick: resolveClick('no_followup', () => onNavigate?.('candidates', { attention: 'noFollowup' })) },
+    leadsPipeline:     { id: 'leadsPipeline', label: t('kpi.leadsPipeline'), value: num(kpis.leads_pipeline), sub: t('kpi.openOpportunities'), color: 'var(--color-secondary)', bg: 'var(--color-secondary-bg)', Icon: Target, onClick: resolveClick('leads_pipeline', () => onNavigate?.('opportunities', {})) },
+    vacanciesActive:   { id: 'vacanciesActive', label: t('kpi.vacanciesActive'), value: num(kpis.vacancies_active), sub: t('kpi.vacanciesActiveSub'), color: 'var(--color-primary-text)', bg: 'var(--color-primary-bg)', Icon: Briefcase, onClick: resolveClick('vacancies_active', () => onNavigate?.('vacancies', {})) },
+    intakesDone:       { id: 'intakesDone', label: t('kpi.intakesDone'), value: num(kpis.intakes), sub: t('kpi.inPeriod'), color: 'var(--color-primary-text)', bg: 'var(--color-primary-bg)', Icon: CalendarCheck, onClick: resolveClick('intakes', () => onNavigate?.('candidates', {})) },
+    matchesTotal:      { id: 'matchesTotal', label: t('kpi.matchesTotal'), value: num(kpis.matches_total ?? kpis.matches), sub: t('kpi.matchesTotalSub'), color: 'var(--color-success-text)', bg: 'var(--color-success-bg)', Icon: Briefcase, onClick: resolveClick('matches_total', () => onNavigate?.('matches', {})) },
+    messagesSent:      { id: 'messagesSent', label: t('kpi.messagesSent'), value: num(kpis.messages_sent), sub: t('kpi.inPeriod'), color: 'var(--color-primary-text)', bg: 'var(--color-primary-bg)', Icon: MessageSquare, onClick: resolveClick('messages_sent', () => onNavigate?.('whatsapp', { tab: 'messages' })) },
+    shiftsPlanned:     { id: 'shiftsPlanned', label: t('kpi.shiftsPlanned'), value: num(kpis.shifts_planned), sub: t('kpi.inPeriod'), color: 'var(--color-primary-text)', bg: 'var(--color-primary-bg)', Icon: CalendarClock, onClick: resolveClick('shifts_planned', () => onNavigate?.('planning', {})) },
   }
 }

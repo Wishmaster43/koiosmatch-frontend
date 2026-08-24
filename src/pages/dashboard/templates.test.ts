@@ -38,9 +38,21 @@ describe('dashboard KPI row guard', () => {
   // moet nu zelfde zijn als management omdat alles ruk is"): recruitment_manager
   // no longer carries its own trimmed KPI/block vocabulary — it mirrors management
   // exactly, on both maps.
-  it('recruitment_manager mirrors management verbatim (KPI_ROWS and DASHBOARD_TEMPLATES)', () => {
-    expect(KPI_ROWS.recruitment_manager).toEqual(KPI_ROWS.management)
+  // Danny 24-08 ("9 KPI rows met relevante KPI's" per rol) supersedes the 23-08
+  // verbatim KPI mirror: the manager keeps management's full BLOCK set but
+  // carries its own recruitment-oversight nine.
+  it('recruitment_manager mirrors management BLOCKS and carries its own nine KPIs', () => {
     expect(DASHBOARD_TEMPLATES.recruitment_manager).toEqual(DASHBOARD_TEMPLATES.management)
+    expect(KPI_ROWS.recruitment_manager).toHaveLength(9)
+    expect(KPI_ROWS.recruitment_manager).not.toEqual(KPI_ROWS.management)
+  })
+
+  // Danny 24-08, definitief: ELKE rol heeft exact negen relevante KPI's.
+  it('every role carries exactly nine KPIs', () => {
+    for (const [role, row] of Object.entries(KPI_ROWS)) {
+      expect(row, `${role} must carry nine KPIs`).toHaveLength(9)
+      expect(new Set(row).size, `${role} row must not repeat a KPI`).toBe(9)
+    }
   })
 
   // Regression guard: a block id present in some template but absent from

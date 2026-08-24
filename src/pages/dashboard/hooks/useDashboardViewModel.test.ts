@@ -31,7 +31,8 @@ const baseArgs = (overrides: Record<string, unknown> = {}) => ({
 describe('useDashboardViewModel · K-168 rights-gated tiles always render (null → dash)', () => {
   it('renders the D6 tiles with an honest dash when their key is null (viewer lacks the right)', () => {
     const { result } = renderHook(() => useDashboardViewModel(baseArgs({
-      dash: { kpis: { app_too_long_in_stage: null, app_missing_appointment: null } },
+      dash: { kpis: { app_too_long_in_stage: null, app_missing_appointment: null },
+        kpi_row: ['app_too_long_in_stage', 'app_missing_appointment'] },
     })))
     const byId = Object.fromEntries(result.current.kpis.map(k => [k.id, k.value]))
     expect(byId.tooLongInStage).toBe('—')
@@ -40,7 +41,8 @@ describe('useDashboardViewModel · K-168 rights-gated tiles always render (null 
 
   it('renders each D6 tile with its real count when the server sends one', () => {
     const { result } = renderHook(() => useDashboardViewModel(baseArgs({
-      dash: { kpis: { app_too_long_in_stage: 3, app_missing_appointment: 2 } },
+      dash: { kpis: { app_too_long_in_stage: 3, app_missing_appointment: 2 },
+        kpi_row: ['app_too_long_in_stage', 'app_missing_appointment'] },
     })))
     const byId = Object.fromEntries(result.current.kpis.map(k => [k.id, k.value]))
     expect(byId.tooLongInStage).toBe('3')
@@ -228,8 +230,9 @@ describe('useDashboardViewModel · recruitment_manager mirrors management', () =
       { name: 'Anna', value: 4, filterValue: 'u1' },
       { name: 'Bram', value: 6, filterValue: 'u2' },
     ])
-    const managementResult = renderHook(() => useDashboardViewModel(baseArgs({ activeType: 'management' as const }))).result
-    expect(result.current.kpis.map(k => k.id)).toEqual(managementResult.current.kpis.map(k => k.id))
+    // Danny 24-08: the manager carries his OWN oversight nine now — only the
+    // BLOCK set still mirrors management (asserted above via vis()).
+    expect(result.current.kpis).toHaveLength(9)
   })
 })
 
@@ -265,18 +268,18 @@ describe('useDashboardViewModel · DASH-VOLGORDE-1 per-role KPI tile order', () 
     const { result } = renderHook(() => useDashboardViewModel(baseArgs({
       activeType: 'recruitment' as const,
       kpiOrder: {
-        recruitment: ['stale', 'candidates', 'never', 'tasksOverdue', 'failedWf', 'uncalledCallist', 'intakes', 'tooLongInStage', 'missingApptApps'],
+        recruitment: ['stale', 'candidates', 'candidatesNew', 'never', 'noFollowup', 'intakes', 'tooLongInStage', 'tasks', 'placements'],
       },
     })))
     expect(result.current.kpis.map(k => k.id)).toEqual([
-      'stale', 'candidates', 'never', 'tasksOverdue', 'failedWf', 'uncalledCallist', 'intakes', 'tooLongInStage', 'missingApptApps',
+      'stale', 'candidates', 'candidatesNew', 'never', 'noFollowup', 'intakes', 'tooLongInStage', 'tasks', 'placements',
     ])
   })
 
   it('keeps the default KPI_ROWS order when the role has no stored order', () => {
     const { result } = renderHook(() => useDashboardViewModel(baseArgs({ activeType: 'recruitment' as const })))
     expect(result.current.kpis.map(k => k.id)).toEqual([
-      'candidates', 'never', 'stale', 'tasksOverdue', 'failedWf', 'uncalledCallist', 'intakes', 'tooLongInStage', 'missingApptApps',
+      'candidates', 'candidatesNew', 'stale', 'never', 'noFollowup', 'intakes', 'tooLongInStage', 'tasks', 'placements',
     ])
   })
 
@@ -297,7 +300,7 @@ describe('useDashboardViewModel · DASH-VOLGORDE-1 per-role KPI tile order', () 
       kpiOrder: { management: ['activeConv', 'candidates'] },
     })))
     expect(result.current.kpis.map(k => k.id)).toEqual([
-      'candidates', 'never', 'stale', 'tasksOverdue', 'failedWf', 'uncalledCallist', 'intakes', 'tooLongInStage', 'missingApptApps',
+      'candidates', 'candidatesNew', 'stale', 'never', 'noFollowup', 'intakes', 'tooLongInStage', 'tasks', 'placements',
     ])
   })
 })
@@ -363,5 +366,29 @@ describe('useDashboardViewModel · kpi_row is the one live source', () => {
       dash: { kpis: {}, kpi_row: ['incomplete_runs', 'placements'] },
     })))
     expect(result.current.kpis.map(k => k.id)).toEqual(['placements'])
+  })
+})
+
+// Danny (live, Management-wisselaar toonde drie 'default'-tegels): a server row
+// for a DIFFERENT api-role than the viewed type falls back to the type's
+// template — and the full server vocabulary renders (no silent tile loss).
+describe('useDashboardViewModel · switched views + full vocabulary', () => {
+  it('ignores kpi_row when its scope role maps to another api-role than the viewed type', () => {
+    const { result } = renderHook(() => useDashboardViewModel(baseArgs({
+      activeType: 'recruitment' as const,
+      dash: { kpis: { placements: 7 }, kpi_row: ['placements'], scope: { role: 'admin' } },
+    })))
+    // recruitment template row renders, not the one-tile admin/default row.
+    expect(result.current.kpis.length).toBeGreaterThan(1)
+  })
+
+  it('renders every key of a full server row — including the newly mapped vocabulary', () => {
+    const { result } = renderHook(() => useDashboardViewModel(baseArgs({
+      activeType: 'admin' as const,
+      dash: { kpis: {}, kpi_row: ['candidates_total', 'candidates_new', 'no_followup', 'leads_pipeline', 'vacancies_active', 'intakes', 'matches', 'fill_rate', 'placements'], scope: { role: 'admin' } },
+    })))
+    expect(result.current.kpis.map(k => k.id)).toEqual([
+      'candidates', 'candidatesNew', 'noFollowup', 'leadsPipeline', 'vacanciesActive', 'intakesDone', 'matchesTotal', 'fillRate', 'placements',
+    ])
   })
 })

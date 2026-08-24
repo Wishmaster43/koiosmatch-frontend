@@ -21,8 +21,8 @@
     "placementsSub": "Alle Matches",
     "fillRate": "Besetzungsquote",
     "fillRateSub": "Besetzte Stellen",
-    "incompleteRuns": "Unvollständige Runs",
-    "incompleteRunsSub": "Fehlgeschl./ausstehend",
+    "incompleteRuns": "Festgefahrene Läufe",
+    "incompleteRunsSub": "Länger als 24 Stunden aktiv",
     "activeConv": "Aktive Gespräche",
     "activeConvSub": "Offene Chats",
     "missingDocs": "Fehlende Dokumente",
@@ -51,7 +51,18 @@
     "tooLongInStage": "Zu lange in Phase",
     "tooLongInStageSub": "kein Phasenwechsel",
     "missingApptApps": "Kein Termin",
-    "missingApptAppsSub": "Phase erfordert einen"
+    "missingApptAppsSub": "Phase erfordert einen",
+    "candidatesNew": "Neue Kandidaten",
+    "noFollowup": "Keine Nachverfolgung",
+    "leadsPipeline": "Leads in der Pipeline",
+    "vacanciesActive": "Aktive Stellen",
+    "vacanciesActiveSub": "Online",
+    "intakesDone": "Intakes",
+    "matchesTotal": "Matches gesamt",
+    "matchesTotalSub": "Im System",
+    "messagesSent": "Nachrichten gesendet",
+    "shiftsPlanned": "Dienste geplant",
+    "inPeriod": "Im Zeitraum"
   },
   "chart": {
     "byStatus": "Kandidaten nach Status",
@@ -191,7 +202,9 @@
     "recruiter": "Recruiter",
     "openTasks": "Offene Aufgaben",
     "intakes": "Intakes",
-    "tooLong": "Zu lange"
+    "tooLong": "Zu lange",
+    "intakesCount": "{{count}} Intakes geplant",
+    "tooLongCount": "{{count}} zu lange in Phase"
   },
   "oppAging": {
     "sub": "Tage offen",

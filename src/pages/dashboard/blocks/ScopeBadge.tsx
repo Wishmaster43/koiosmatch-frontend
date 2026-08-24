@@ -19,21 +19,26 @@ export default function ScopeBadge({ scope }: { scope: DashScope | null }) {
   // customers; DashboardController sets owner_dimension accordingly). Otherwise
   // the role label, with an explicit membership check so an unknown
   // dashboard_type never renders a raw i18n key.
-  const KNOWN_ROLES = ['admin', 'management', 'recruitment', 'recruitment_manager', 'backoffice', 'sales', 'accountmanager', 'sales_manager', 'planning', 'readonly']
   const label = scope.owner_dimension === 'candidate'
     ? t('scope.mineCandidates')
     : scope.owner_dimension === 'customer'
       ? t('scope.mineCustomers')
       : scope.owner_dimension
         ? t('scope.mine')
-        : t(`types.${KNOWN_ROLES.includes(scope.role ?? '') ? scope.role : 'readonly'}`)
+        : null
+  // Nothing narrowed and nothing folded in → the badge would only repeat the
+  // viewer's role (Danny: "die titel slaat nergens op") — render nothing.
+  const footnote = scope.includes_unassigned && (scope.unassigned_count ?? 0) > 0
+  if (!label && !footnote) return null
 
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-      <Caption as="span" style={{ padding: '2px 8px', borderRadius: 99, background: 'var(--surface-muted)', border: '1px solid var(--border)' }}>
-        {label}
-      </Caption>
-      {scope.includes_unassigned && (scope.unassigned_count ?? 0) > 0 && (
+      {label && (
+        <Caption as="span" style={{ padding: '2px 8px', borderRadius: 99, background: 'var(--surface-muted)', border: '1px solid var(--border)' }}>
+          {label}
+        </Caption>
+      )}
+      {footnote && (
         <Caption as="span">{t('scope.includesUnassigned', { count: scope.unassigned_count })}</Caption>
       )}
     </div>

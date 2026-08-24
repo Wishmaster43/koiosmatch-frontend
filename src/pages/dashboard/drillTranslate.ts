@@ -39,8 +39,7 @@ const ENTITY_PAGES: Record<string, { page: string; params: Record<string, ParamT
       intake_planned:       one({ attention: 'intakePlanned' }),
       has_open_tasks:       one({ attention: 'hasTasks' }),
       active_conversations: one({ attention: 'activeConv' }),
-      // missing_documents is a NEW server list filter (K-173) with no page
-      // intent yet — deliberately absent, so that descriptor falls back.
+      missing_documents:    one({ attention: 'missingDocs' }),
       owner_id:    v => ({ owner: v }),
       location_id: v => ({ location: v }),
       branch_id:   v => ({ location: v }),
@@ -59,7 +58,9 @@ const ENTITY_PAGES: Record<string, { page: string; params: Record<string, ParamT
     params: {
       too_long_in_stage:   one({ attention: 'tooLongInStage' }),
       missing_appointment: one({ attention: 'missingAppointment' }),
-      // candidate_owner_id has no ApplicationsPage intent — untranslatable.
+      // RAPPORT-APPS-VERDIEPING-1: candidate_owner_id now has a real
+      // ApplicationsPage intent (useApplicationFilters' selectedCandidateOwnerId).
+      candidate_owner_id: v => ({ candidate_owner_id: v }),
     },
   },
   opportunities: {
@@ -74,8 +75,11 @@ const ENTITY_PAGES: Record<string, { page: string; params: Record<string, ParamT
   // an empty set: matches/vacancies drills with params translate only when empty.
   matches:   { page: 'matches',   params: {} },
   vacancies: { page: 'vacancies', params: {} },
-  // workflow-runs / external-id-mapping-failures have no FE page (yet) — absent
-  // here on purpose: their tiles keep the legacy intent, never a PlaceholderPage.
+  // external-id-mapping-failures → CouplingErrorsPage (K-173 fase 5), a
+  // deep-link-only page (no sidebar entry, no filterable params of its own).
+  'external-id-mapping-failures': { page: 'coupling-errors', params: {} },
+  // workflow-runs has no FE page (yet) — absent on purpose: its tile keeps the
+  // legacy intent, never a PlaceholderPage.
 }
 
 /**

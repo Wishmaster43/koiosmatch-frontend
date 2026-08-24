@@ -91,16 +91,15 @@ describe('buildDashboardKpis · K-173 drill descriptors (REAL server payloads)',
     expect(onNavigate).toHaveBeenCalledWith('tasks', { kpi: 'open', assignee: 'u-1' })
   })
 
-  it('an untranslatable param falls back to the legacy intent — never a silently unfiltered list', () => {
+  it('translates the missing_documents drill into the candidates missingDocs intent', () => {
     const onNavigate = vi.fn()
-    // missing_documents is a server list filter with no candidates-page intent.
     const args = { ...baseArgs({ missing_documents: 2 }, onNavigate), drills: { missing_documents: { entity: 'candidates', params: { missing_documents: 1 } } } }
     const kpis = buildDashboardKpis(args)
     kpis.missingDocs.onClick?.()
-    expect(onNavigate).toHaveBeenCalledWith('candidates', {})
+    expect(onNavigate).toHaveBeenCalledWith('candidates', { attention: 'missingDocs' })
   })
 
-  it('a server entity without an FE page falls back to the legacy intent — never a PlaceholderPage', () => {
+  it('translates the coupling_errors drill into the coupling-errors page; an untranslated entity still falls back', () => {
     const onNavigate = vi.fn()
     const args = { ...baseArgs({ coupling_errors: 3, failed_workflows: 1 }, onNavigate), drills: {
       coupling_errors: { entity: 'external-id-mapping-failures', params: {} },
@@ -108,7 +107,8 @@ describe('buildDashboardKpis · K-173 drill descriptors (REAL server payloads)',
     } }
     const kpis = buildDashboardKpis(args)
     kpis.couplingErrors.onClick?.()
-    expect(onNavigate).toHaveBeenLastCalledWith('candidates', {})
+    expect(onNavigate).toHaveBeenLastCalledWith('coupling-errors', {})
+    // workflow-runs still has no FE page — the tile keeps its legacy fallback intent.
     kpis.failedWf.onClick?.()
     expect(onNavigate).toHaveBeenLastCalledWith('workflows', {})
   })

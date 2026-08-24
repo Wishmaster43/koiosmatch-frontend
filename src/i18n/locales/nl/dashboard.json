@@ -21,8 +21,8 @@
     "placementsSub": "Alle matches",
     "fillRate": "Invulgraad",
     "fillRateSub": "Vervulde vacatures",
-    "incompleteRuns": "Incomplete runs",
-    "incompleteRunsSub": "Gefaald/pending",
+    "incompleteRuns": "Vastgelopen runs",
+    "incompleteRunsSub": "Langer dan 24 uur bezig",
     "activeConv": "Actieve gesprekken",
     "activeConvSub": "Lopende chats",
     "missingDocs": "Ontbrekende documenten",
@@ -51,7 +51,18 @@
     "tooLongInStage": "Te lang in fase",
     "tooLongInStageSub": "geen fasewissel",
     "missingApptApps": "Geen afspraak",
-    "missingApptAppsSub": "fase vereist een afspraak"
+    "missingApptAppsSub": "fase vereist een afspraak",
+    "candidatesNew": "Nieuwe kandidaten",
+    "noFollowup": "Geen opvolging",
+    "leadsPipeline": "Leads in pijplijn",
+    "vacanciesActive": "Actieve vacatures",
+    "vacanciesActiveSub": "Online",
+    "intakesDone": "Intakes",
+    "matchesTotal": "Totaal matches",
+    "matchesTotalSub": "In het systeem",
+    "messagesSent": "Berichten verstuurd",
+    "shiftsPlanned": "Diensten gepland",
+    "inPeriod": "In periode"
   },
   "chart": {
     "byStatus": "Kandidaten per status",
@@ -191,7 +202,9 @@
     "recruiter": "Recruiter",
     "openTasks": "Open taken",
     "intakes": "Intakes",
-    "tooLong": "Te lang"
+    "tooLong": "Te lang",
+    "intakesCount": "{{count}} intakes gepland",
+    "tooLongCount": "{{count}} te lang in fase"
   },
   "oppAging": {
     "sub": "dagen open",

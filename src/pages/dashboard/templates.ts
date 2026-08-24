@@ -34,25 +34,34 @@ export const switcherTypes = (hasPlanning: boolean): DashboardType[] =>
 // ── KPI row per role — bare KPI ids resolved in Dashboard.tsx (kpiById). Every role
 // shows a full, role-specific row (never hidden). 🟡 metrics render "—" until the
 // backend feed lands (see docs/plans/DASHBOARD-PLAN.md).
+// NEGEN-PER-ROL (Danny 24-08, herhaald en definitief: "9 KPI rows met
+// relevante KPI's" voor ÁLLE rollen — gemeten stand ervoor: backoffice 6,
+// sales 6, accountmanager 5, planning 4, readonly 3). Rows follow the decided
+// role plan (PLAN-DASHBOARD-PER-ROL-V2 §2) using the full K-168/K-173 tile
+// vocabulary; the same nine per role go to CMBE as the server role-defaults so
+// kpi_row and this fallback can never disagree.
 export const KPI_ROWS: Record<DashboardType, string[]> = {
-  // Invulgraad/Escalaties vervangen (Danny 2026-07-06): geen feed/actie — nu Open
-  // vacatures · Taken over tijd · Actieve gesprekken (alle drie live) = 9 blokjes.
   admin:       ['candidates', 'opps', 'pipeline', 'expiringOpps', 'placements', 'intakes', 'openVacancies', 'tasksOverdue', 'activeConv'],
   management:  ['candidates', 'opps', 'pipeline', 'expiringOpps', 'placements', 'intakes', 'openVacancies', 'tasksOverdue', 'activeConv'],
-  recruitment: ['candidates', 'never', 'stale', 'tasksOverdue', 'failedWf', 'uncalledCallist', 'intakes', 'tooLongInStage', 'missingApptApps'],
-  // DASHBOARD-OPRUIMING-1 (Danny 23-08): "recruitment_manager mirrors management
-  // verbatim" — the trimmed recruiter-flavoured KPI set left it "leeg"/empty, so
-  // it now shares management's exact KPI row instead of its own vocabulary.
-  recruitment_manager: ['candidates', 'opps', 'pipeline', 'expiringOpps', 'placements', 'intakes', 'openVacancies', 'tasksOverdue', 'activeConv'],
-  backoffice:  ['tasks', 'placements', 'missingDocs', 'expiringContracts', 'couplingErrors', 'incompleteRuns'],
-  sales:       ['opps', 'pipeline', 'expiringOpps', 'fillRate', 'placements', 'activeConv'],
-  // KD11 — own-customer scope (server-resolved); same KPI vocabulary as `sales`,
-  // the backend narrows the underlying query to the account manager's customers.
-  accountmanager: ['opps', 'pipeline', 'expiringOpps', 'placements', 'activeConv'],
+  // Recruiter: own book (server-scoped) — inflow, attention, intakes, pipeline-to-placement.
+  recruitment: ['candidates', 'candidatesNew', 'stale', 'never', 'noFollowup', 'intakes', 'tooLongInStage', 'tasks', 'placements'],
+  // Team-wide recruitment oversight: the same axes as the recruiter, plus the
+  // escalation/fill signals a manager steers on (plan §2).
+  recruitment_manager: ['candidates', 'candidatesNew', 'intakes', 'tooLongInStage', 'escalations', 'fillRate', 'openVacancies', 'tasksOverdue', 'placements'],
+  // Backoffice (Danny 24-08: "gaat over de uitvoeringen"): the EXECUTION nine —
+  // running placements + new placements, contract/document administration,
+  // coupling health and the workflow runs; call lists left (recruiter work).
+  backoffice:  ['matchesTotal', 'placements', 'expiringContracts', 'missingDocs', 'couplingErrors', 'incompleteRuns', 'failedWf', 'tasks', 'tasksOverdue'],
+  sales:       ['leadsPipeline', 'opps', 'pipeline', 'expiringOpps', 'fillRate', 'expiringContracts', 'vacanciesActive', 'activeConv', 'placements'],
+  // KD11 — own-customer scope (server-resolved); the customer-portfolio nine.
+  accountmanager: ['leadsPipeline', 'opps', 'pipeline', 'expiringOpps', 'fillRate', 'expiringContracts', 'vacanciesActive', 'placements', 'tasks'],
   // KD11 — tenant-wide over the customer dimension (richest sales view).
-  sales_manager:  ['opps', 'pipeline', 'expiringOpps', 'fillRate', 'placements', 'activeConv'],
-  planning:    ['failedWf', 'incompleteRuns', 'openShifts', 'occupancy'],
-  readonly:    ['candidates', 'tasks', 'stale'],
+  sales_manager:  ['leadsPipeline', 'opps', 'pipeline', 'expiringOpps', 'fillRate', 'expiringContracts', 'vacanciesActive', 'escalations', 'placements'],
+  // Planning: the shifts operation — coverage first, then the automation health
+  // that feeds it. (Server-side this type still shares the 'default' row; the
+  // dedicated 'planning' role default is requested at CMBE.)
+  planning:    ['shiftsPlanned', 'openShifts', 'occupancy', 'incompleteRuns', 'failedWf', 'tasks', 'tasksOverdue', 'matchesTotal', 'expiringContracts'],
+  readonly:    ['candidates', 'opps', 'pipeline', 'expiringOpps', 'placements', 'intakes', 'openVacancies', 'tasksOverdue', 'activeConv'],
 }
 
 // ── Charts/lists per role. '*' = everything (admin/management = full dashboard).

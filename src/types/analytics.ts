@@ -260,6 +260,26 @@ export interface ApplicationTopSegment { value: string; label: string; count: nu
 // a different axis (longest-hanging rows, not just "in this stage").
 export interface ApplicationStageDurationSegment { value: string; label: string; count: number; avg_days_in_phase: number | null }
 
+// RAPPORT-APPS-VERDIEPING-1 (CMFE 24-08): the nine-card KPI strip, now riding in
+// THIS envelope (one-envelope migration — ApplicationKpisReport::kpis(), the
+// sibling GET /reports/applications/kpis stays alive during the migration
+// window). Server sends a `label` per card too — deliberately ignored (§5:
+// labels come from i18n, mirrors WhatsappReportData). `count` is an integer row
+// count for seven cards, a rounded float|null for conversion_pct/avg_days_to_match.
+export interface ApplicationKpiCard { key: string; label?: string; count: number | null }
+
+// INTAKE-IN-APPS-1 (Danny via CMFE 24-08): the intake-appointment numbers land
+// HERE, not on a separate reports.intakes endpoint. Windowed on scheduled_at
+// (is_intake-flagged appointment types), cancelled never counted.
+// `by_recruiter` is the CandidateOwnerSegment shape (appointment owner_id/name);
+// `by_branch` is the ApplicationTopSegment shape (value/label/count, 'none' = no vestiging).
+export interface ApplicationIntakesBlock {
+  planned: number
+  done_in_period: number
+  by_recruiter: CandidateOwnerSegment[]
+  by_branch: ApplicationTopSegment[]
+}
+
 export interface ApplicationsReportData {
   period: string
   from: string
@@ -273,6 +293,8 @@ export interface ApplicationsReportData {
   by_customer: ApplicationTopSegment[]
   by_vacancy: ApplicationTopSegment[]
   by_stage_duration: ApplicationStageDurationSegment[]
+  kpis: ApplicationKpiCard[]
+  intakes: ApplicationIntakesBlock
 }
 
 // ── Customers report (GET /reports/customers, RAPPORTEN-SUITE-1 "portie 3") ──

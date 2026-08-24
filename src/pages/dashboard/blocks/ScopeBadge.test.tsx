@@ -40,14 +40,16 @@ describe('ScopeBadge', () => {
     expect(screen.queryByText('My candidates')).not.toBeInTheDocument()
   })
 
-  it('an unknown dashboard_type never renders a raw i18n key', () => {
-    render(<ScopeBadge scope={{ role: 'some_future_role' }} />)
-    expect(screen.getByText('readonly')).toBeInTheDocument()
+  it('an unknown dashboard_type renders nothing rather than a raw i18n key', () => {
+    const { container } = render(<ScopeBadge scope={{ role: 'some_future_role' }} />)
+    expect(container).toBeEmptyDOMElement()
   })
 
-  it('shows the plain role label when the scope is not narrowed to "own"', () => {
-    render(<ScopeBadge scope={{ role: 'management' }} />)
-    expect(screen.getByText('management')).toBeInTheDocument()
+  // Danny (live): a badge that only repeats the viewer's role ("Admin") says
+  // nothing — an un-narrowed scope without an unassigned footnote renders nothing.
+  it('renders nothing when the scope is not narrowed and nothing was folded in', () => {
+    const { container } = render(<ScopeBadge scope={{ role: 'management' }} />)
+    expect(container).toBeEmptyDOMElement()
   })
 
   it('shows the unassigned footnote only when includes_unassigned is true with a real count', () => {

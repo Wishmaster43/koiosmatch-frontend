@@ -5,6 +5,7 @@ import ErrorBanner from '@/components/ui/ErrorBanner'
 import Spinner from '@/components/ui/Spinner'
 import { useDashboardData } from './hooks/useDashboardData'
 import { useDashboardFilterState } from './hooks/useDashboardFilterState'
+import { apiRoleForType } from './kpiKeyMap'
 import { useDashboardFilterPanel } from './hooks/useDashboardFilterPanel'
 import { useDashboardViewModel } from './hooks/useDashboardViewModel'
 import { KpiCard } from './DashboardPrimitives'
@@ -63,6 +64,17 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
     selPeriode, setSelPeriode, selVestiging, setSelVestiging, selStatus, setSelStatus, dashFilterParams,
   } = useDashboardFilterState()
 
+  // K-173 ?preview_role: a super-view user switching the dashboard to another
+  // type would otherwise get the server row of their OWN role (Danny saw three
+  // 'default'-row tiles under the Management switcher). Gated on settings.update
+  // — the same gate the server applies; without it the viewmodel simply falls
+  // back to the switched type's template row instead.
+  const viewerType = auth?.dashboardType?.() ?? null
+  const previewRole = viewType && viewerType && apiRoleForType(viewType) !== apiRoleForType(viewerType)
+    && auth?.hasPermission?.('settings.update')
+    ? apiRoleForType(viewType) : null
+  const dashParams = previewRole ? { ...dashFilterParams, preview_role: previewRole } : dashFilterParams
+
   // Live distributions/counts. /candidates/stats is live; /opportunities/stats
   // is best-effort (renders only if it returns). Defensive field readers mirror
   // the Candidates page (by_status→status, by_funnel→funnel_type, by_owner→owner_id).
@@ -71,7 +83,7 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
   // "—" that reads as real zeros (audit finding).
   const { stats, opp, dash, dashCharts, loading, error, retry } =
     useDashboardData<DashStats, DashOpp, DashData, { timeseries?: Record<string, unknown>; net?: unknown }>({
-      tenantId: activeTenant?.id, filterParams: dashFilterParams,
+      tenantId: activeTenant?.id, filterParams: dashParams,
     })
 
   // Status/funnel labels + colours come from the tenant lookups (NL, configurable)
