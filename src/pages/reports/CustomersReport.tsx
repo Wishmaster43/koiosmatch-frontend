@@ -56,6 +56,19 @@ import type { ReportCompareMode } from './reportCompareMode'
 // Deliberately no 'source' — see the header comment.
 type Axis = 'status' | 'phase' | 'industry' | 'branch'
 
+// KPIS-DRILL-1: the nine standing `kpis[]` signal keys that now have their own
+// GET /reports/customers/kpi-drill endpoint (measured, api-generated.ts::
+// getReportsCustomersKpiDrill) — exactly CUSTOMERS_SIGNAL_LABEL_KEYS's key set.
+// A separate GET /reports/customers/kpi-signal-drill endpoint also landed for
+// customers_active/customers_prospect/customers_at_risk (getReportsCustomersKpiSignalDrill),
+// but this page renders no cards for those three keys, so that endpoint is left
+// unwired here — nothing to wire it to.
+const CUSTOMERS_KPI_DRILL_KEYS = new Set<string>([
+  'contract_ending', 'no_contact', 'task_overdue', 'price_agreement_ending', 'vacancy_stale',
+  'departments_without_placement', 'customers_without_vacancies', 'customers_without_applications',
+  'matches_stopped_early',
+])
+
 // The two switch positions — also the KPI-catalog/settings-scope id and the
 // i18n namespace-prefix for the population-facing strings. Kept as plain
 // `string` on the wire (see CandidatesReport's identical note) so this
@@ -137,6 +150,17 @@ export default function CustomersReport({ period, filters = EMPTY_REPORT_FILTERS
       items={segs.map(s => ({ key: s.owner_id, label: s.name, count: s.count, color: null }))} />
   }
 
+  // KPIS-DRILL-1: a signal card whose key is one of the nine kpi-drill enum
+  // values opens the same shared drawer, but sourced from the dedicated
+  // kpi-drill endpoint (a standing count, not an axis segment — no breakdown).
+  // Contract (getReportsCustomersKpiDrill): the endpoint accepts ONLY `kpi` —
+  // these are STANDING signals over the live base, so no window params ride
+  // along and the subtitle says "live snapshot", never the report window.
+  const openSignalKpiDrill = (label: string, count: number, kpi: string) => setDrill({
+    title: label, value: count, subtitle: t('customers.signalSnapshot'),
+    rowsEndpoint: '/reports/customers/kpi-drill', rowsParams: { kpi },
+  })
+
   const onSeriesPick = gateDrillClick('customers', (dateKey: string) => {
     const pt = data?.timeseries.series.find(p => p.date === dateKey)
     if (pt) openBucket(pt)
@@ -178,19 +202,41 @@ export default function CustomersReport({ period, filters = EMPTY_REPORT_FILTERS
     .map(axis => allAxisConfigs[axis as Axis | 'owner'] ?? signalAxisConfigs[axis])
     .filter(Boolean)
   // A KPI card for an axis segment opens the page's ONE shared drill drawer on
-  // that segment, exactly like clicking the bar itself. A "signal" pseudo-axis has
-  // no matching drill section (it is a standing count, not a chart on this page),
-  // so its card renders informational-only — same as every non-clickable KPI
-  // card elsewhere (e.g. departments.customersCount) — never a fake affordance.
+  // that segment, exactly like clicking the bar itself. A "signal" pseudo-axis
+  // whose key is one of the nine kpi-drill enum values now drills via
+  // openSignalKpiDrill; a signal key OUTSIDE both enums still has no matching
+  // drill (a standing count, not an axis segment) — display-only, same as
+  // every other non-clickable KPI card (e.g. departments.customersCount).
   const onAxisKpiPick = gateDrillClick('customers', (axis: string, key: string) => {
-    if (axis.startsWith('signal:')) return
+    if (axis.startsWith('signal:')) {
+      const signalKey = axis.slice('signal:'.length)
+      if (!CUSTOMERS_KPI_DRILL_KEYS.has(signalKey)) return
+      const cfg = axisConfigs.find(c => c.axis === axis)
+      const seg = cfg?.segs.find(s => s.key === key)
+      if (seg) openSignalKpiDrill(cfg!.axisLabel, seg.count, signalKey)
+      return
+    }
     const cfg = axisConfigs.find(c => c.axis === axis)
     const seg = cfg?.segs.find(s => s.key === key)
     if (seg) openSegment({ label: seg.label, count: seg.count }, { [axis]: key })
   })
-  const axisKpis = buildAxisKpis(axisConfigs, 8,
+  const axisKpisRaw = buildAxisKpis(axisConfigs, 8,
     (axis, key) => onAxisKpiPick?.(axis, key),
-    (axis, key) => (drill?.rowsParams as Record<string, unknown> | undefined)?.[axis] === key)
+    (axis, key) => {
+      const params = drill?.rowsParams as Record<string, unknown> | undefined
+      // A signal pseudo-axis drills via `kpi`, a real axis via its own XOR key.
+      if (axis.startsWith('signal:')) return params?.kpi === axis.slice('signal:'.length)
+      return params?.[axis] === key
+    })
+  // buildAxisKpis always attaches an onClick; strip it back off for signal cards
+  // outside the kpi-drill enum so they render with no clickable affordance (§0
+  // no fake affordances) instead of a dead click.
+  const axisKpis: KpiSpec[] = axisKpisRaw.map(k => {
+    const [axisPart] = k.key.split(':')
+    if (axisPart !== 'signal') return k
+    const signalKey = k.key.slice('signal:'.length).replace(/:count$/, '')
+    return CUSTOMERS_KPI_DRILL_KEYS.has(signalKey) ? k : { ...k, onClick: undefined }
+  })
 
   // Card 1's label/window/loading/empty/error text is scoped to the active
   // position — Klanten keeps today's exact wording (a byte-identical default,

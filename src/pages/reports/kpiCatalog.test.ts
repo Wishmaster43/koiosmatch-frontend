@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import {
   getReportKpiCatalog, getReportKpiDefaultOrder, reportHasSpareKpiCards,
-  REPORT_KPI_SCOPE_IDS,
+  REPORT_KPI_SCOPE_IDS, CUSTOMERS_SIGNAL_LABEL_KEYS,
 } from './kpiCatalog'
 
 // REPORTS-KPI-SPARES coverage on the SURVIVING scopes (RAPPORTEN-DANNY10-1
@@ -9,6 +9,19 @@ import {
 // carry a real catalogue — the settings screen picker (ReportKpiSettings) reads
 // these functions directly, so covering them here proves the picker works
 // without mounting the whole settings screen.
+// The customers kpi-drill wire enum (CustomersReport.tsx) and the signal label
+// map here describe the SAME nine keys — a future divergence must fail loudly
+// instead of silently rendering an undrillable or unlabeled card.
+describe('kpiCatalog — customers signal keys stay in lockstep with the drill enum', () => {
+  it('CUSTOMERS_SIGNAL_LABEL_KEYS covers exactly the nine kpi-drill enum keys', () => {
+    expect(Object.keys(CUSTOMERS_SIGNAL_LABEL_KEYS).sort()).toEqual([
+      'contract_ending', 'customers_without_applications', 'customers_without_vacancies',
+      'departments_without_placement', 'matches_stopped_early', 'no_contact',
+      'price_agreement_ending', 'task_overdue', 'vacancy_stale',
+    ])
+  })
+})
+
 describe('kpiCatalog — spare cards on surviving scopes', () => {
   it('outreach catalogue offers its spare keys', () => {
     const catalogKeys = getReportKpiCatalog('outreach').map(c => c.key)

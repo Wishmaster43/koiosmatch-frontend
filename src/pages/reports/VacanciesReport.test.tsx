@@ -153,7 +153,7 @@ describe('VacanciesReport (RAPPORTEN-SUITE-1 portie 4, additive on C-34)', () =>
     mockUseVacanciesReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
     expect(screen.getByText('Totaal')).toBeInTheDocument()
-    expect(screen.getByText('Vervullingsgraad')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('vacancies.summary.fillRate', { ns: 'analytics' }))).toBeInTheDocument()
     expect(screen.getByText('Verpleegkundige IC')).toBeInTheDocument()
     expect(screen.getByText('Rivas Zorggroep')).toBeInTheDocument()
     expect(screen.getByText('VAC-1')).toBeInTheDocument()
@@ -369,7 +369,10 @@ describe('VacanciesReport (RAPPORTEN-SUITE-1 portie 4, additive on C-34)', () =>
   // drill endpoint's XOR whitelist has no `signal` param — both render as honest,
   // non-clickable stats (no role="button", no drill request on click) until the
   // backend adds matching boolean keys.
-  it('longConcept/noMatches KPI cards are honestly non-drillable (no signal param)', async () => {
+  // KPIS-DRILL-1: superseded — longConcept/noMatches now drill via the backend's
+  // own kpis/drill endpoint (kpi=long_concept / kpi=no_matches), never the plain
+  // /reports/vacancies/drill route (which indeed has no `signal` XOR key).
+  it('longConcept/noMatches KPI cards drill via kpis/drill, never the plain drill endpoint', async () => {
     const user = userEvent.setup()
     mockSettings.mockReturnValue({
       report_kpis_vacancies: JSON.stringify([
@@ -380,16 +383,16 @@ describe('VacanciesReport (RAPPORTEN-SUITE-1 portie 4, additive on C-34)', () =>
     renderReport()
 
     const longConceptLabel = screen.getByText(i18n.t('vacancies.summary.longConcept', { ns: 'analytics' }))
-    const longConceptCard = longConceptLabel.parentElement as HTMLElement
-    expect(longConceptCard.closest('div[role="button"]')).toBeNull()
     await user.click(longConceptLabel)
     expect(getSpy.mock.calls.some(c => c[0] === '/reports/vacancies/drill')).toBe(false)
+    expect(getSpy).toHaveBeenCalledWith('/reports/vacancies/kpis/drill',
+      expect.objectContaining({ params: { kpi: 'long_concept', period: 'month' } }))
 
     const noMatchesLabel = screen.getByText(i18n.t('vacancies.summary.noMatches', { ns: 'analytics' }))
-    const noMatchesCard = noMatchesLabel.parentElement as HTMLElement
-    expect(noMatchesCard.closest('div[role="button"]')).toBeNull()
     await user.click(noMatchesLabel)
     expect(getSpy.mock.calls.some(c => c[0] === '/reports/vacancies/drill')).toBe(false)
+    expect(getSpy).toHaveBeenCalledWith('/reports/vacancies/kpis/drill',
+      expect.objectContaining({ params: { kpi: 'no_matches', period: 'month' } }))
   })
 
   // KPI-DREMPELS-FE-1: adviceStale/closingSoon render the real backend counts with
@@ -422,6 +425,31 @@ describe('VacanciesReport (RAPPORTEN-SUITE-1 portie 4, additive on C-34)', () =>
 
     await user.click(adviceStaleLabel)
     expect(lastDrillParams()).toEqual({ stale_online: 1, period: 'month' })
+  })
+
+  // KPIS-DRILL-1: fillRate drills via kpis/drill with kpi=fill_rate (rate-style).
+  it('clicking the fillRate card drills via /reports/vacancies/kpis/drill with kpi=fill_rate', async () => {
+    const user = userEvent.setup()
+    mockUseVacanciesReport.mockReturnValue({ data, loading: false, error: false })
+    renderReport()
+    await user.click(screen.getByText(i18n.t('vacancies.summary.fillRate', { ns: 'analytics' })))
+    expect(getSpy).toHaveBeenCalledWith('/reports/vacancies/kpis/drill',
+      expect.objectContaining({ params: { kpi: 'fill_rate', period: 'month' } }))
+  })
+
+  // KPIS-DRILL-1: longConcept drills via kpis/drill with kpi=long_concept (count-style).
+  it('clicking the longConcept card drills via /reports/vacancies/kpis/drill with kpi=long_concept', async () => {
+    const user = userEvent.setup()
+    mockSettings.mockReturnValue({
+      report_kpis_vacancies: JSON.stringify([
+        'longConcept', 'noMatches', 'open', 'filled', 'fillRate', 'ttf', 'staleOnline', 'customersCount', 'total',
+      ]),
+    })
+    mockUseVacanciesReport.mockReturnValue({ data, loading: false, error: false })
+    renderReport()
+    await user.click(screen.getByText(i18n.t('vacancies.summary.longConcept', { ns: 'analytics' })))
+    expect(getSpy).toHaveBeenCalledWith('/reports/vacancies/kpis/drill',
+      expect.objectContaining({ params: { kpi: 'long_concept', period: 'month' } }))
   })
 
   // RAPPORT-KPI-INSTELBAAR: which nine keys render, and in what order, is the

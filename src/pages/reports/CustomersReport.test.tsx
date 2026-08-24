@@ -309,6 +309,93 @@ describe('CustomersReport (RAPPORTEN-SUITE-1 portie 3, customers inflow report)'
     expect(screen.queryByText(i18n.t('customers.kpis.noContact', { ns: 'analytics' }))).not.toBeInTheDocument()
   })
 
+  // KPIS-DRILL-1: a signal card whose key is one of the nine kpi-drill enum
+  // values now drills via the dedicated endpoint, not the plain drill route.
+  it('clicking the contract_ending signal card drills via /reports/customers/kpi-drill with kpi=contract_ending', async () => {
+    const user = userEvent.setup()
+    mockSettings.mockReturnValue({
+      report_kpis_customers: JSON.stringify(['signal:contract_ending', 'status', 'phase', 'industry', 'owner', 'branch']),
+    })
+    mockUseCustomersReport.mockReturnValue({
+      data: { ...data, kpis: [{ key: 'contract_ending', label: 'Overeenkomst loopt af', count: 7 }] },
+      loading: false, error: false,
+    })
+    renderReport()
+    await user.click(screen.getByText(i18n.t('customers.kpis.contractEnding', { ns: 'analytics' })))
+    // Contract: the kpi-drill endpoint accepts ONLY `kpi` (standing signal, no
+    // window) — the request must not smuggle period/filter params along.
+    expect(getSpy).toHaveBeenCalledWith('/reports/customers/kpi-drill',
+      expect.objectContaining({ params: { kpi: 'contract_ending' } }))
+    expect(getSpy.mock.calls.some(c => c[0] === '/reports/customers/drill')).toBe(false)
+  })
+
+  // Negative pin: a signal key outside both the kpi-drill and kpi-signal-drill
+  // enums (e.g. a future backend key CUSTOMERS_SIGNAL_LABEL_KEYS doesn't yet
+  // list) stays display-only — no clickable affordance, no drill call. The real
+  // catalogue today has no such entry (its nine signal spares ARE the kpi-drill
+  // enum 1:1), so this pins the code path with one extra catalogue entry mocked
+  // in — proves the strip-back-onClick logic, not just today's data shape.
+  it('a signal card whose key is outside both enums renders without an onClick', async () => {
+    vi.resetModules()
+    // resetModules() drops hoisted vi.mock registrations for the fresh import
+    // graph — re-declare the ones CustomersReport needs via vi.doMock so the
+    // dynamically re-imported page still runs against controlled test doubles.
+    vi.doMock('./useCustomersReport', () => ({ useCustomersReport: (...args: unknown[]) => mockUseCustomersReport(...args) }))
+    vi.doMock('@/lib/useCustomerPhases', () => ({
+      useCustomerPhases: () => ({ phases: [
+        { value: 'lead', label: 'Lead', isCustomer: false, isDefault: true },
+        { value: 'customer', label: 'Klant', isCustomer: true, isDefault: false },
+      ] }),
+    }))
+    vi.doMock('@/lib/api', () => ({
+      default: { get: (...args: unknown[]) => getSpy(...args) },
+      unwrapList: (r: { data: { data?: unknown[]; meta?: { total?: number } } }) => ({ rows: r.data?.data ?? [], total: r.data?.meta?.total ?? 0 }),
+      getActiveTenantId: () => 'test-tenant',
+    }))
+    vi.doMock('@/lib/settings/useAllSettings', async () => {
+      const actual = await vi.importActual('@/lib/settings/useAllSettings')
+      return { ...actual, useAllSettings: () => mockSettings() }
+    })
+    vi.doMock('./kpiCatalog', async () => {
+      const actual = await vi.importActual<typeof import('./kpiCatalog')>('./kpiCatalog')
+      const customersCatalog = [...actual.getReportKpiCatalog('customers'), { key: 'signal:some_future_signal', labelKey: 'customers.kpis.someFutureSignal' }]
+      return {
+        ...actual,
+        getReportKpiCatalog: (scope: string) => scope === 'customers' ? customersCatalog : actual.getReportKpiCatalog(scope as never),
+      }
+    })
+    // try/finally: an assertion throw must never leave the five doMock
+    // registrations armed for later tests — resetModules() clears them all.
+    try {
+    const { default: CustomersReportFresh } = await import('./CustomersReport')
+    const user = userEvent.setup()
+    mockSettings.mockReturnValue({
+      report_kpis_customers: JSON.stringify(['signal:some_future_signal', 'status', 'phase', 'industry', 'owner', 'branch']),
+    })
+    mockUseCustomersReport.mockReturnValue({
+      data: { ...data, kpis: [{ key: 'some_future_signal', label: 'Toekomstig signaal', count: 4 }] },
+      loading: false, error: false,
+    })
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <CustomersReportFresh period="month" />
+      </QueryClientProvider>,
+    )
+    // No `customers.kpis.some_future_signal` translation key exists in any
+    // locale (test-only catalogue entry, never shipped) — i18next renders the
+    // raw dotted key, which is good enough to locate the card.
+    const label = screen.getByText('customers.kpis.some_future_signal')
+    const card = label.closest('div[role="button"]')
+    expect(card).toBeNull()
+    await user.click(label)
+    expect(getSpy.mock.calls.some(c => c[0] === '/reports/customers/kpi-drill')).toBe(false)
+    expect(getSpy.mock.calls.some(c => c[0] === '/reports/customers/drill')).toBe(false)
+    } finally {
+      vi.doUnmock('./kpiCatalog')
+      vi.resetModules()
+    }
+  })
+
   // The catalog knowingly excludes these signal spares from Prospects (they
   // describe an existing client relationship a lead can't have) — swapping one
   // into a Prospects slot must not silently render there.

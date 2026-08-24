@@ -92,6 +92,15 @@ export default function VacanciesReport({ period, filters = EMPTY_REPORT_FILTERS
     rowsEndpoint: '/reports/vacancies/drill', rowsParams: { ...baseParams, ...xorParam },
     adviceEndpoint: '/reports/vacancies/advice', adviceParams: { ...baseParams, ...xorParam },
   })
+  // KPIS-DRILL-1: the five backend-built kpi-drill cards (fillRate/ttf/
+  // customersCount/longConcept/noMatches) route through GET
+  // /reports/vacancies/kpis/drill with the exact `kpi` enum key (measured in
+  // api-generated.ts::getReportsVacanciesKpisDrill) layered on the same window
+  // params every other drill uses.
+  const openKpiDrill = (label: string, value: number | string, kpi: 'fill_rate' | 'ttf' | 'customers_count' | 'long_concept' | 'no_matches') => setDrill({
+    title: label, value, subtitle: windowSub(),
+    rowsEndpoint: '/reports/vacancies/kpis/drill', rowsParams: { ...baseParams, kpi },
+  })
   const openBucket = (pt: CandidateTimeseriesPoint) => setDrill({
     title: pt.label, value: pt.value, subtitle: windowSub(),
     // A week bar's `date` is the point's own key; the drawer then counts the WHOLE
@@ -148,9 +157,13 @@ export default function VacanciesReport({ period, filters = EMPTY_REPORT_FILTERS
       active: drill?.rowsParams?.status === 'filled',
       onClick: gateDrillClick('vacancies', () => openVacancies(t('vacancies.summary.filled'), s?.filled ?? 0, 'filled')) },
     fillRate: { key: 'fillRate', label: t('vacancies.summary.fillRate'),
-      value: s ? formatRatio(s.fill_rate) : '—' },
+      value: s ? formatRatio(s.fill_rate) : '—',
+      active: drill?.rowsParams?.kpi === 'fill_rate',
+      onClick: gateDrillClick('vacancies', () => openKpiDrill(t('vacancies.summary.fillRate'), s ? formatRatio(s.fill_rate) : '—', 'fill_rate')) },
     ttf: { key: 'ttf', label: t('vacancies.summary.avgTimeToFill'),
-      value: s?.avg_time_to_fill_days != null ? t('vacancies.daysValue', { days: Math.round(s.avg_time_to_fill_days) }) : '—' },
+      value: s?.avg_time_to_fill_days != null ? t('vacancies.daysValue', { days: Math.round(s.avg_time_to_fill_days) }) : '—',
+      active: drill?.rowsParams?.kpi === 'ttf',
+      onClick: gateDrillClick('vacancies', () => openKpiDrill(t('vacancies.summary.avgTimeToFill'), s?.avg_time_to_fill_days != null ? t('vacancies.daysValue', { days: Math.round(s.avg_time_to_fill_days) }) : '—', 'ttf')) },
     // PDF-VACATURES point 31: "vacature staat online maar geen kandidaten na X
     // dagen" — the real, tenant-threshold-driven backend count (VacanciesReport
     // ::applySignal SIGNAL_STALE_ONLINE), the SAME predicate the row-level
@@ -160,8 +173,11 @@ export default function VacanciesReport({ period, filters = EMPTY_REPORT_FILTERS
     staleOnline: { key: 'staleOnline', label: t('vacancies.summary.staleOnline'), value: s?.stale_online ?? 0,
       active: drill?.rowsParams?.stale_online === 1,
       onClick: gateDrillClick('vacancies', () => openSegment({ label: t('vacancies.summary.staleOnline'), count: s?.stale_online ?? 0 }, { stale_online: 1 })) },
-    // Plain stat — no single XOR value represents "distinct customers", so not clickable.
-    customersCount: { key: 'customersCount', label: t('vacancies.summary.customersCount'), value: customersCount },
+    // KPIS-DRILL-1: `customers_count` now has its own kpi-drill endpoint, so the
+    // card drills too (was: "no single XOR value represents this, not clickable").
+    customersCount: { key: 'customersCount', label: t('vacancies.summary.customersCount'), value: customersCount,
+      active: drill?.rowsParams?.kpi === 'customers_count',
+      onClick: gateDrillClick('vacancies', () => openKpiDrill(t('vacancies.summary.customersCount'), customersCount, 'customers_count')) },
     topIndustry: { key: 'topIndustry', label: t('vacancies.summary.topIndustry'),
       value: topIndustry ? `${topIndustry.label} · ${topIndustry.count}` : '—',
       onClick: topIndustry ? gateDrillClick('vacancies', () => openSegment(topIndustry, { industry: topIndustry.value })) : undefined },
@@ -171,12 +187,14 @@ export default function VacanciesReport({ period, filters = EMPTY_REPORT_FILTERS
     // Spares (REPORTS-KPI-SPARE-1): real summary fields the report already
     // fetches but never surfaced as a card (SIGNALEN-VAC-1 family) + the two
     // remaining top-segment picks (function/branch axes, same rule as above).
-    // VAC-DRILL-SIGNALS-2: the drill endpoint's XOR whitelist has no `signal`
-    // param (confirmed, SETTINGS-TABS-FIX-1/2 review) — no onClick means no
-    // cursor/role affordance (mirrors customersCount above). Wire these once the
-    // backend adds matching boolean keys, the same way closingSoon got its own.
-    longConcept: { key: 'longConcept', label: t('vacancies.summary.longConcept'), value: s?.long_concept ?? 0 },
-    noMatches: { key: 'noMatches', label: t('vacancies.summary.noMatches'), value: s?.no_matches ?? 0 },
+    // KPIS-DRILL-1: `long_concept`/`no_matches` now drill via kpis/drill (was:
+    // no `signal` XOR param on the plain drill endpoint, so left display-only).
+    longConcept: { key: 'longConcept', label: t('vacancies.summary.longConcept'), value: s?.long_concept ?? 0,
+      active: drill?.rowsParams?.kpi === 'long_concept',
+      onClick: gateDrillClick('vacancies', () => openKpiDrill(t('vacancies.summary.longConcept'), s?.long_concept ?? 0, 'long_concept')) },
+    noMatches: { key: 'noMatches', label: t('vacancies.summary.noMatches'), value: s?.no_matches ?? 0,
+      active: drill?.rowsParams?.kpi === 'no_matches',
+      onClick: gateDrillClick('vacancies', () => openKpiDrill(t('vacancies.summary.noMatches'), s?.no_matches ?? 0, 'no_matches')) },
     topFunction: { key: 'topFunction', label: t('vacancies.summary.topFunction'),
       value: topFunction ? `${topFunction.label} · ${topFunction.count}` : '—',
       onClick: topFunction ? gateDrillClick('vacancies', () => openSegment(topFunction, { function: topFunction.value })) : undefined },
