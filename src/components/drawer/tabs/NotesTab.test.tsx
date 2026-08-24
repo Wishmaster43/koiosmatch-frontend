@@ -6,7 +6,7 @@
  * search narrows what is rendered (openEdit/onEditNote key off that index).
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { render, screen, act } from '@testing-library/react'
+import { render, screen, act, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import NotesTab from './NotesTab'
 import { noteDraftTopic } from '@/lib/secondScreen'
@@ -68,6 +68,12 @@ vi.mock('@/lib/datetime', () => ({
 // regardless of what this mock returns.
 const mockUseAuth = vi.fn()
 vi.mock('@/context/AuthContext', () => ({ useAuth: () => mockUseAuth() }))
+// CONCEPT-NOTE-2: the durable-draft seam, mocked per test.
+vi.mock('./notes/noteDraftApi', () => ({
+  getNoteDraft: vi.fn().mockResolvedValue(null),
+  putNoteDraft: vi.fn().mockResolvedValue(true),
+  deleteNoteDraft: vi.fn().mockResolvedValue(undefined),
+}))
 beforeEach(() => { mockUseAuth.mockReturnValue(null) })
 
 const labels = {
@@ -699,3 +705,44 @@ describe('NotesTab · pop-out from the composer hands the text over', () => {
     expect(screen.getByLabelText('body')).toHaveValue('Eigen tekst')
   })
 })
+
+// CONCEPT-NOTE-2 (K-161): the durable layer — load on mount, PUT on a
+// content-carrying cancel, DELETE on save; hosts without draftEntity never
+// touch the endpoint.
+describe('NotesTab · durable concept (K-161)', () => {
+  it('loads the stored draft for the named dossier on mount', async () => {
+    const { getNoteDraft } = await import('./notes/noteDraftApi')
+    render(<NotesTab notes={[]} labels={labels} showTimeline={false} showConversations={false}
+      draftEntity={{ type: 'candidate', id: 'c-1' }} />)
+    await waitFor(() => expect(getNoteDraft).toHaveBeenCalledWith('candidate', 'c-1', expect.anything()))
+  })
+
+  it('never calls the endpoint without a draftEntity', async () => {
+    const { getNoteDraft } = await import('./notes/noteDraftApi')
+    vi.mocked(getNoteDraft).mockClear()
+    render(<NotesTab notes={[]} labels={labels} showTimeline={false} showConversations={false} />)
+    await new Promise(r => setTimeout(r, 0))
+    expect(getNoteDraft).not.toHaveBeenCalled()
+  })
+
+  it('PUTs the concept on a content-carrying cancel and DELETEs it on save', async () => {
+    const { putNoteDraft, deleteNoteDraft } = await import('./notes/noteDraftApi')
+    const user = userEvent.setup()
+    render(<NotesTab notes={[]} onAddNote={vi.fn()} labels={labels} showTimeline={false} showConversations={false}
+      draftEntity={{ type: 'customer', id: 'k-9' }} />)
+
+    // Open the composer, type a title, cancel — the draft must persist.
+    await user.click(screen.getByRole('button', { name: 'Nieuwe notitie' }))
+    // The harness stubs RichTextEditor as an aria-label="body" textarea — type
+    // the BODY (the search box's placeholder also matches /notitie/, a trap).
+    await user.type(screen.getByLabelText('body'), 'Bel Bas terug')
+    await user.click(screen.getByTitle('Cancel'))
+    await waitFor(() => expect(putNoteDraft).toHaveBeenCalledWith('customer', 'k-9', expect.objectContaining({ body: expect.stringContaining('Bel Bas terug') })))
+
+    // Reopen (concept restores) and save — the stored draft must clear.
+    await user.click(screen.getByRole('button', { name: 'Nieuwe notitie' }))
+    await user.click(screen.getByTitle('Save'))
+    await waitFor(() => expect(deleteNoteDraft).toHaveBeenCalledWith('customer', 'k-9'))
+  })
+})
+

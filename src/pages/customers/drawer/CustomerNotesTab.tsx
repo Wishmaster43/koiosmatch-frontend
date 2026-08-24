@@ -40,6 +40,7 @@
  * customer actually HAS a record at it (no dead-end options, §3).
  */
 import { useState, useEffect, useCallback } from 'react'
+import { tintBg, tintBorder } from '@/lib/tint'
 import type { ComponentType, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import api, { unwrapList } from '@/lib/api'
@@ -198,8 +199,8 @@ export default function CustomerNotesTab({ customerId, customerName, customerIni
   const linkChip = (name: string) => (
     <span style={{ display: 'inline-flex', alignItems: 'center', fontSize: 10, fontWeight: 600,
       padding: '1px 6px', borderRadius: 99, marginRight: 6,
-      background: 'color-mix(in srgb, var(--color-info) 12%, transparent)', color: 'var(--color-info)',
-      border: '1px solid color-mix(in srgb, var(--color-info) 40%, transparent)' }}>
+      background: tintBg('var(--color-info)'), color: 'var(--color-info)',
+      border: `1px solid ${tintBorder('var(--color-info)')}` }}>
       {t('notes.linkedTo', { name })}
     </span>
   )
@@ -225,6 +226,9 @@ export default function CustomerNotesTab({ customerId, customerName, customerIni
 
   // Shared NotesTab props — each sub-tab renders exactly one of its sections.
   const notesProps = {
+    // CONCEPT-NOTE-2: durable concepts live per customer dossier (only with a
+    // real id — a still-loading drawer stays session-only).
+    ...(customerId ? { draftEntity: { type: 'customer' as const, id: String(customerId) } } : null),
     notes: notesWithChip, onAddNote: handleAddNote,
     // K15NOTES: only offer edit/delete once the host actually wires them (mirrors
     // the candidate tab) — NotesTab itself re-gates per note via author_id/managePermission.

@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { BodyText, Caption } from '@/components/ui/typography'
 import type { ComponentType } from 'react'
 import { useTranslation } from 'react-i18next'
 import { MessageCircle, Briefcase } from 'lucide-react'
@@ -128,7 +129,7 @@ export default function CommunicationTab({ c, onSave, onEditStatusEvent, initial
           <div>
             <div>{ev.text as string}</div>
             {typeof ev.meta === 'string' && ev.meta && (
-              <div style={{ marginTop: 2, fontSize: 11, color: 'var(--text-muted)' }}>{ev.meta}</div>
+              <Caption as="div" style={{ marginTop: 2 }}>{ev.meta}</Caption>
             )}
           </div>
         </div>
@@ -154,7 +155,7 @@ export default function CommunicationTab({ c, onSave, onEditStatusEvent, initial
     return (
       <>
         <div>{title}</div>
-        {meta && <div style={{ marginTop: 2, fontSize: 11, color: 'var(--text-muted)' }}>{meta}</div>}
+        {meta && <Caption as="div" style={{ marginTop: 2 }}>{meta}</Caption>}
       </>
     )
   }
@@ -192,6 +193,8 @@ export default function CommunicationTab({ c, onSave, onEditStatusEvent, initial
 
   // Shared NotesTab props — each sub-tab renders exactly one of its sections.
   const notesProps = {
+    // CONCEPT-NOTE-2: durable concepts live per candidate dossier.
+    draftEntity: { type: 'candidate' as const, id: String(c.id) },
     notes: userNotes, onAddNote: addNote, onEditNote: editUserNote, onDeleteNote: deleteUserNote,
     timeline: mergedTimeline, systemNotes,
     noteTypes: writableTypes, chipTypes: allNoteTypes, channels, authorInitials: c.ownerInitials, timelineName: c.name,
@@ -259,8 +262,8 @@ export default function CommunicationTab({ c, onSave, onEditStatusEvent, initial
                 // toggles!!" — a raw checkbox is never the house control, §0/§4).
                 <div key={ch.key} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                   <Toggle checked={!!on} onChange={v => setConsent(ch.key, v)} ariaLabel={ch.label} />
-                  <span style={{ fontSize: 13, color: 'var(--text)', flex: 1 }}>{ch.label}</span>
-                  {on && at && <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('communication.consentGivenAt', { date: formatDate(at) })}</span>}
+                  <BodyText as="span" style={{ flex: 1 }}>{ch.label}</BodyText>
+                  {on && at && <Caption as="span">{t('communication.consentGivenAt', { date: formatDate(at) })}</Caption>}
                 </div>
               )
             })}
@@ -286,7 +289,9 @@ export default function CommunicationTab({ c, onSave, onEditStatusEvent, initial
       {subTab === 'notes' && notesError && (
         <p style={{ fontSize: 12, color: 'var(--color-danger-text)', marginBottom: 8 }}>
           {t('communication.notesLoadError')}{' '}
-          <button type="button" onClick={reloadNotes} style={{ color: 'var(--color-primary)', textDecoration: 'underline', background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}>
+          <button type="button" onClick={reloadNotes}
+            // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- inline retry LINK inside a running error sentence (frozen candidate screen): Button chrome would break the prose; underline+primary-text is the link identity
+            style={{ color: 'var(--color-primary-text)', textDecoration: 'underline', background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}>
             {t('common:error.retry')}
           </button>
         </p>

@@ -85,6 +85,7 @@ import { Caption } from '@/components/ui/typography'
 import Button from '@/components/ui/Button'
 import NoteComposer from './notes/NoteComposer'
 import type { NoteDraft } from '@/hooks/useNotesPopout'
+import { getNoteDraft, putNoteDraft, deleteNoteDraft } from './notes/noteDraftApi'
 import { NoteTypeChip, NoteChannelChip } from './notes/NoteChips'
 // Rights + system-note rule — the SAME module the per-note popout window applies
 // (noteRights, §11: one rule, two surfaces — they must never disagree).
@@ -138,6 +139,10 @@ export interface NotesLabels {
 export interface NotePayload { type: string; title: string; body: string; channel?: string; language?: string }
 
 interface NotesTabProps {
+  // CONCEPT-NOTE-2 (K-161): when the host names its dossier, a cancelled
+  // concept also persists server-side (survives refresh/another workplace) —
+  // without it the concept stays session-only.
+  draftEntity?: { type: import('./notes/noteDraftApi').NoteDraftEntityType; id: string }
   notes?: NoteItem[]
   // System events (status/phase changes, BE-written) — rendered in the TIMELINE
   // section, not the notes thread (Danny 2026-07-13: events are not notes).
@@ -216,6 +221,7 @@ interface NotesTabProps {
 }
 
 export default function NotesTab({
+  draftEntity,
   notes = [], systemNotes = [], timeline = [], noteTypes = [], chipTypes, channels = [], labels = {}, editorLabels,
   authorInitials, timelineName, onAddNote, onEditNote, onDeleteNote,
   managePermission = 'candidates.notes.manage_all',
@@ -356,6 +362,19 @@ export default function NotesTab({
   // scope is deliberate — note text is special-category data (§8), so it never
   // touches localStorage; durable concepts are the CMBE follow-up.
   const [concept, setConcept] = useState<NoteDraft | null>(null)
+  // Durable layer on top of the session concept (K-161): load once per dossier;
+  // a cancel PUTs, a save/empty-cancel DELETEs — all fire-and-forget, the
+  // session concept keeps working when the server call fails.
+  const draftType = draftEntity?.type
+  const draftId = draftEntity?.id
+  useEffect(() => {
+    if (!draftType || !draftId) return
+    const ctrl = new AbortController()
+    getNoteDraft(draftType, draftId, ctrl.signal)
+      .then(stored => { if (stored) setConcept(prev => prev ?? stored) })
+      .catch(() => { /* honest degrade: session-only */ })
+    return () => ctrl.abort()
+  }, [draftType, draftId])
   // POPOUT-HANDOFF-1 (Danny 09-08: "moet bestaand venster sluiten en de pop-out
   // direct openen in het versleepbare scherm, zoals bij profieltekst"). Popping out
   // is a HANDOFF, not a second copy: two editors for one thread means whichever you
@@ -366,9 +385,15 @@ export default function NotesTab({
   const openEdit = (i: number) => { setEditingIdx(i); setAdding(true) }
   // NoteComposer hands back the finished payload; this is the only place that
   // still decides add-vs-edit (the index into the FULL `notes` array).
-  const handleSaveConcept = (draft: NoteDraft | null) => setConcept(draft)
+  const handleSaveConcept = (draft: NoteDraft | null) => {
+    setConcept(draft)
+    if (!draftEntity) return
+    if (draft) putNoteDraft(draftEntity.type, draftEntity.id, draft).catch(() => { /* session concept still holds */ })
+    else deleteNoteDraft(draftEntity.type, draftEntity.id).catch(() => { /* stale server draft is cleaned up server-side after 30 days */ })
+  }
   const handleSave = (payload: NotePayload) => {
     setConcept(null)
+    if (draftEntity) deleteNoteDraft(draftEntity.type, draftEntity.id).catch(() => { /* server cleanup catches strays */ })
     if (editingIdx == null) onAddNote?.(payload)
     else onEditNote?.(editingIdx, payload)
     closeComposer()
