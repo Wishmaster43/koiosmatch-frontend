@@ -557,11 +557,9 @@ describe('VacanciesReport (RAPPORTEN-SUITE-1 portie 4, additive on C-34)', () =>
     expect(header).toHaveAttribute('aria-sort', 'ascending')
   })
 
-  // REPORTGRID-1 item 4: vacancies has a real backend compare slug
-  // (reportCompareSupport.ts), so the shared ReportCompareControl renders.
-  it('renders the ReportCompareControl (backend-registered compare slug)', () => {
-    mockUseVacanciesReport.mockReturnValue({ data, loading: false, error: false })
-    renderReport()
-    expect(screen.getByText('Vergelijk met')).toBeInTheDocument()
+  // RAPPORT-COMPARE-2 (§4): the compare window lives in the right-hand filter
+  // panel (ReportsPage) — the page itself renders NO inline compare control.
+  it('renders no inline compare control (moved to the right filter panel)', () => {
+    expect(screen.queryByText('Vergelijk met')).not.toBeInTheDocument()
   })
 })

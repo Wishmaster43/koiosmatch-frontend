@@ -8,7 +8,8 @@
     "noRecords": "Sin registros subyacentes.",
     "koios": "Consejo de Koios AI",
     "noAdvice": "Koios aún no tiene consejo para este número.",
-    "truncated": "Mostrando {{shown}} de {{total}}"
+    "search": "Buscar…",
+    "shownOf": "{{shown}} de {{total}} mostrados"
   },
   "tabs": {
     "candidates": "Candidatos",
@@ -44,6 +45,17 @@
       "ariaLabel": "Población",
       "candidates": "Candidatos",
       "leads": "Leads"
+    },
+    "kpi": {
+      "inflow": "Entradas",
+      "outflow": "Salidas",
+      "noFollowup": "Sin seguimiento",
+      "statusStale": "Demasiado tiempo en el mismo estado",
+      "noCv": "Sin CV",
+      "documentExpiring": "Documentos por vencer",
+      "availabilityDue": "Disponibilidad por revisar",
+      "noContact": "Sin contacto reciente",
+      "activeConversations": "Conversaciones activas"
     }
   },
   "intakes": {
@@ -374,8 +386,6 @@
       "previous_year": "Ano anterior",
       "custom": "Rango personalizado"
     },
-    "customFrom": "Comparar desde",
-    "customTo": "Comparar hasta",
     "rangeSeparator": "hasta",
     "previousValue": "anterior: {{value}}"
   }

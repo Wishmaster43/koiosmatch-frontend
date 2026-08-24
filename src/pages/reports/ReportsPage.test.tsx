@@ -107,10 +107,12 @@ function renderPage() {
 }
 
 describe('ReportsPage — right filter panel', () => {
-  it('registers period + status/owner/branch for candidates (RAPPORT-FILTERS-1 — one of the two wired reports)', () => {
+  it('registers period + compare + status/owner/branch for candidates (RAPPORT-FILTERS-1 + RAPPORT-COMPARE-2)', () => {
     const { getGroups } = renderPage()
     const groups = getGroups()
-    expect(groups.map(g => g.key)).toEqual(['period', 'status', 'owner', 'branch'])
+    // 'compare' joined the panel in RAPPORT-COMPARE-2 (Danny 24-08: every
+    // filter lives in the right panel — the toolbar control is gone).
+    expect(groups.map(g => g.key)).toEqual(['period', 'compare', 'status', 'owner', 'branch'])
   })
 
   it('a report the backend has NOT wired yet (outreach filters aside — outreach is period-only here) still registers ONLY the period — no field the server would silently drop', () => {
@@ -121,8 +123,9 @@ describe('ReportsPage — right filter panel', () => {
         <ReportsPage reportId="outreach" />
       </RightPanelProvider>,
     )
-    expect(latest).toHaveLength(1)
-    expect(latest[0].key).toBe('period')
+    // RAPPORT-COMPARE-2: 'compare' registers for every compare-supporting
+    // report — outreach's DIMENSION groups stay unwired (period only).
+    expect(latest.map(g => g.key)).toEqual(['period', 'compare'])
     expect(screen.getByTestId('outreach-period').textContent).toBe('month')
   })
 
@@ -174,7 +177,7 @@ describe('ReportsPage — right filter panel', () => {
         <ReportsPage reportId="vacancies" />
       </RightPanelProvider>,
     )
-    expect(latest.map(g => g.key)).toEqual(['period', 'status', 'owner', 'branch', 'customer'])
+    expect(latest.map(g => g.key)).toEqual(['period', 'compare', 'status', 'owner', 'branch', 'customer'])
     unmount()
 
     render(
@@ -183,7 +186,7 @@ describe('ReportsPage — right filter panel', () => {
         <ReportsPage reportId="applications" />
       </RightPanelProvider>,
     )
-    expect(latest.map(g => g.key)).toEqual(['period', 'status', 'owner', 'branch', 'customer'])
+    expect(latest.map(g => g.key)).toEqual(['period', 'compare', 'status', 'owner', 'branch', 'customer'])
   })
 
   it('registers period + status/owner/branch for matches — never a customer group (the singular key is already overloaded)', () => {
@@ -194,7 +197,7 @@ describe('ReportsPage — right filter panel', () => {
         <ReportsPage reportId="matches" />
       </RightPanelProvider>,
     )
-    expect(latest.map(g => g.key)).toEqual(['period', 'status', 'owner', 'branch'])
+    expect(latest.map(g => g.key)).toEqual(['period', 'compare', 'status', 'owner', 'branch'])
   })
 
   it('registers period + status/owner/branch for tasks — never a customer group (no customer column on tasks)', () => {
@@ -205,7 +208,7 @@ describe('ReportsPage — right filter panel', () => {
         <ReportsPage reportId="tasks" />
       </RightPanelProvider>,
     )
-    expect(latest.map(g => g.key)).toEqual(['period', 'status', 'owner', 'branch'])
+    expect(latest.map(g => g.key)).toEqual(['period', 'compare', 'status', 'owner', 'branch'])
   })
 
   it('sends the active vacancies panel filters to the report AS its filters prop (bar and lade share one state)', () => {

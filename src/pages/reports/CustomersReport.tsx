@@ -47,7 +47,6 @@ import type { ReportKpiScopeId } from './kpiCatalog'
 import { resolveReportKpiOrder } from './resolveReportKpiOrder'
 import { getCompareSlug } from './reportCompareSupport'
 import { useReportCompare } from './useReportCompare'
-import ReportCompareControl from './ReportCompareControl'
 import ReportCompareMetric from './ReportCompareMetric'
 import { COMPARE_OFF } from './reportCompareMode'
 import type { ReportCompareMode } from './reportCompareMode'
@@ -75,10 +74,11 @@ const CUSTOMERS_KPI_DRILL_KEYS = new Set<string>([
 // component satisfies ReportsPage's one shared `ReportComponent` contract.
 const VIEWS = ['customers', 'prospects'] as const
 
-export default function CustomersReport({ period, filters = EMPTY_REPORT_FILTERS, initialView = 'customers' }: {
+export default function CustomersReport({ period, filters = EMPTY_REPORT_FILTERS, initialView = 'customers', compare = COMPARE_OFF }: {
   period: ReportPeriod
   filters?: ReportFilterState
   initialView?: string
+  compare?: ReportCompareMode
 }) {
   const { t } = useTranslation('analytics')
   const { formatDate } = useDateFormat()
@@ -99,10 +99,9 @@ export default function CustomersReport({ period, filters = EMPTY_REPORT_FILTERS
 
   // RAPPORT-COMPARE-1: mirrors CandidatesReport's hosting exactly.
   const compareSlug = getCompareSlug('customers', view)
-  const [compareMode, setCompareMode] = useState<ReportCompareMode>(COMPARE_OFF)
   const compareBaseParams = { ...buildReportQueryParams(period, 'customers', filters), ...(phaseFilter ? { phase: phaseFilter } : {}) }
-  const { data: compareData } = useReportCompare(compareSlug, data?.from, data?.to, compareMode, compareBaseParams)
-  const totalCompare = compareMode.kind !== 'off' ? (compareData?.total as { current: number; previous: number; delta: number; delta_pct: number | null } | undefined) : undefined
+  const { data: compareData } = useReportCompare(compareSlug, data?.from, data?.to, compare, compareBaseParams)
+  const totalCompare = compare.kind !== 'off' ? (compareData?.total as { current: number; previous: number; delta: number; delta_pct: number | null } | undefined) : undefined
 
   // Drill-down: one shared drawer for the whole page — a segment/bucket click
   // opens it fresh, replacing whatever was open before. Exactly one XOR param
@@ -254,13 +253,6 @@ export default function CustomersReport({ period, filters = EMPTY_REPORT_FILTERS
           { value: 'customers', label: t('customers.viewSwitch.customers') },
           { value: 'prospects', label: t('customers.viewSwitch.prospects') },
         ]} />
-
-      {/* RAPPORT-COMPARE-1: mirrors CandidatesReport's hosting exactly. */}
-      {hasData && compareSlug && (
-        <div style={{ marginBottom: 10 }}>
-          <ReportCompareControl mode={compareMode} onChange={setCompareMode} />
-        </div>
-      )}
 
       {/* KPI strip — total inflow, above the tabs (candidate-page order) */}
       {hasData && (

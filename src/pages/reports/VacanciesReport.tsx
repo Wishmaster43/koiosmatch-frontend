@@ -34,7 +34,6 @@ import { getReportKpiCatalog, getReportKpiDefaultOrder, reportKpiSettingsKey } f
 import { resolveReportKpiOrder } from './resolveReportKpiOrder'
 import { getCompareSlug } from './reportCompareSupport'
 import { useReportCompare } from './useReportCompare'
-import ReportCompareControl from './ReportCompareControl'
 import ReportCompareMetric from './ReportCompareMetric'
 import { COMPARE_OFF } from './reportCompareMode'
 import type { ReportCompareMode } from './reportCompareMode'
@@ -44,7 +43,7 @@ const numCell = (n: number) => (
   <span style={{ fontWeight: n > 0 ? 600 : 400, color: n > 0 ? 'var(--text)' : 'var(--text-muted)' }}>{n}</span>
 )
 
-export default function VacanciesReport({ period, filters = EMPTY_REPORT_FILTERS }: { period: ReportPeriod; filters?: ReportFilterState }) {
+export default function VacanciesReport({ period, filters = EMPTY_REPORT_FILTERS, compare = COMPARE_OFF }: { period: ReportPeriod; filters?: ReportFilterState; compare?: ReportCompareMode }) {
   const { t } = useTranslation('analytics')
   const { formatDate } = useDateFormat()
   const { data, loading, error, refetch } = useVacanciesReport(period, filters)
@@ -54,10 +53,9 @@ export default function VacanciesReport({ period, filters = EMPTY_REPORT_FILTERS
 
   // RAPPORT-COMPARE-1: mirrors CandidatesReport's hosting exactly.
   const compareSlug = getCompareSlug('vacancies')
-  const [compareMode, setCompareMode] = useState<ReportCompareMode>(COMPARE_OFF)
   const compareBaseParams = { ...buildReportQueryParams(period, 'vacancies', filters) }
-  const { data: compareData } = useReportCompare(compareSlug, data?.from, data?.to, compareMode, compareBaseParams)
-  const totalCompare = compareMode.kind !== 'off' ? (compareData?.total as { current: number; previous: number; delta: number; delta_pct: number | null } | undefined) : undefined
+  const { data: compareData } = useReportCompare(compareSlug, data?.from, data?.to, compare, compareBaseParams)
+  const totalCompare = compare.kind !== 'off' ? (compareData?.total as { current: number; previous: number; delta: number; delta_pct: number | null } | undefined) : undefined
 
   // One drawer for every drill source: KPI tiles, table rows, axis bars, buckets —
   // ALWAYS layered on top of the report's own active panel filters (`baseParams`),
@@ -264,13 +262,6 @@ export default function VacanciesReport({ period, filters = EMPTY_REPORT_FILTERS
 
   return (
     <div>
-      {/* RAPPORT-COMPARE-1: mirrors CandidatesReport's hosting exactly. */}
-      {hasData && rows.length > 0 && compareSlug && (
-        <div style={{ marginBottom: 10 }}>
-          <ReportCompareControl mode={compareMode} onChange={setCompareMode} />
-        </div>
-      )}
-
       {/* KPI strip — above the tabs (candidate-page order: KPIs first) */}
       {hasData && rows.length > 0 && (
         <ReportKpiBand kpis={kpis} notice={fellBack ? t('vacancies.kpiOrderFellBack') : undefined} />

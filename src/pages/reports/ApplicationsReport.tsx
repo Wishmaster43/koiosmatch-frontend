@@ -35,7 +35,6 @@ import { getReportKpiCatalog, getReportKpiDefaultOrder, reportKpiSettingsKey } f
 import { resolveReportKpiOrder } from './resolveReportKpiOrder'
 import { getCompareSlug } from './reportCompareSupport'
 import { useReportCompare } from './useReportCompare'
-import ReportCompareControl from './ReportCompareControl'
 import ReportCompareMetric from './ReportCompareMetric'
 import { COMPARE_OFF } from './reportCompareMode'
 import type { ReportCompareMode } from './reportCompareMode'
@@ -70,7 +69,7 @@ const BUCKET_COLOR: Record<keyof ApplicationBucketCounts, string> = {
   rejected: 'var(--color-danger)', placed: 'var(--color-success)',
 }
 
-export default function ApplicationsReport({ period, filters = EMPTY_REPORT_FILTERS }: { period: ReportPeriod; filters?: ReportFilterState }) {
+export default function ApplicationsReport({ period, filters = EMPTY_REPORT_FILTERS, compare = COMPARE_OFF }: { period: ReportPeriod; filters?: ReportFilterState; compare?: ReportCompareMode }) {
   const { t } = useTranslation('analytics')
   const { formatDate } = useDateFormat()
   const { formatNumber } = useNumberFormat()
@@ -82,10 +81,9 @@ export default function ApplicationsReport({ period, filters = EMPTY_REPORT_FILT
   // RAPPORT-COMPARE-1: year-on-year / period-on-period, reference adoption
   // (§reportCompareSupport.ts) — mirrors CandidatesReport's hosting exactly.
   const compareSlug = getCompareSlug('applications')
-  const [compareMode, setCompareMode] = useState<ReportCompareMode>(COMPARE_OFF)
   const compareBaseParams = { ...buildReportQueryParams(period, 'applications', filters) }
-  const { data: compareData } = useReportCompare(compareSlug, data?.from, data?.to, compareMode, compareBaseParams)
-  const totalCompare = compareMode.kind !== 'off' ? (compareData?.total as { current: number; previous: number; delta: number; delta_pct: number | null } | undefined) : undefined
+  const { data: compareData } = useReportCompare(compareSlug, data?.from, data?.to, compare, compareBaseParams)
+  const totalCompare = compare.kind !== 'off' ? (compareData?.total as { current: number; previous: number; delta: number; delta_pct: number | null } | undefined) : undefined
 
   // One shared drawer for the whole page — a KPI-card click and an axis/bucket/
   // timeseries click both open the SAME drawer (replacing whatever was open
@@ -224,14 +222,6 @@ export default function ApplicationsReport({ period, filters = EMPTY_REPORT_FILT
 
   return (
     <div>
-      {/* RAPPORT-COMPARE-1: only rendered when the backend actually registered this
-          slug (getCompareSlug) — mirrors CandidatesReport's hosting exactly. */}
-      {hasData && compareSlug && (
-        <div style={{ marginBottom: 10 }}>
-          <ReportCompareControl mode={compareMode} onChange={setCompareMode} />
-        </div>
-      )}
-
       {/* KPI strip — total inflow, above the tabs (candidate-page order) */}
       {hasData && (
         <ReportKpiBand kpis={kpis} notice={fellBack ? t('applications.kpiOrderFellBack') : undefined} />

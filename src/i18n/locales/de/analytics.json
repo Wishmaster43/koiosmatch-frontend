@@ -8,7 +8,8 @@
     "noRecords": "Keine zugrunde liegenden Datensätze.",
     "koios": "Koios KI-Rat",
     "noAdvice": "Koios hat noch keinen Rat zu dieser Zahl.",
-    "truncated": "Zeigt {{shown}} von {{total}}"
+    "search": "Suchen…",
+    "shownOf": "{{shown}} von {{total}} angezeigt"
   },
   "tabs": {
     "candidates": "Kandidaten",
@@ -44,6 +45,17 @@
       "ariaLabel": "Zielgruppe",
       "candidates": "Kandidaten",
       "leads": "Leads"
+    },
+    "kpi": {
+      "inflow": "Zulauf",
+      "outflow": "Abgang",
+      "noFollowup": "Ohne Follow-up",
+      "statusStale": "Zu lange im selben Status",
+      "noCv": "Ohne Lebenslauf",
+      "documentExpiring": "Ablaufende Dokumente",
+      "availabilityDue": "Verfügbarkeit fällig",
+      "noContact": "Lange kein Kontakt",
+      "activeConversations": "Aktive Gespräche"
     }
   },
   "intakes": {
@@ -374,8 +386,6 @@
       "previous_year": "Vorjahr",
       "custom": "Benutzerdefinierter Zeitraum"
     },
-    "customFrom": "Vergleich ab",
-    "customTo": "Vergleich bis",
     "rangeSeparator": "bis",
     "previousValue": "vorher: {{value}}"
   }

@@ -33,7 +33,6 @@ import { getReportKpiCatalog, getReportKpiDefaultOrder, reportKpiSettingsKey } f
 import { resolveReportKpiOrder } from './resolveReportKpiOrder'
 import { getCompareSlug } from './reportCompareSupport'
 import { useReportCompare } from './useReportCompare'
-import ReportCompareControl from './ReportCompareControl'
 import ReportCompareMetric from './ReportCompareMetric'
 import { COMPARE_OFF } from './reportCompareMode'
 import type { ReportCompareMode } from './reportCompareMode'
@@ -45,7 +44,7 @@ type Axis = 'status' | 'type' | 'priority' | 'team' | 'branch'
 // colour, the other axes do not (SegmentBars falls back to the primary tint).
 type AxisSeg = { value: string; label: string; count: number; color?: string | null }
 
-export default function TasksReport({ period, filters = EMPTY_REPORT_FILTERS }: { period: ReportPeriod; filters?: ReportFilterState }) {
+export default function TasksReport({ period, filters = EMPTY_REPORT_FILTERS, compare = COMPARE_OFF }: { period: ReportPeriod; filters?: ReportFilterState; compare?: ReportCompareMode }) {
   const { t } = useTranslation('analytics')
   const { formatDate } = useDateFormat()
   const { data, loading, error, refetch } = useTasksReport(period, filters)
@@ -55,10 +54,9 @@ export default function TasksReport({ period, filters = EMPTY_REPORT_FILTERS }: 
 
   // RAPPORT-COMPARE-1: mirrors CandidatesReport's hosting exactly.
   const compareSlug = getCompareSlug('tasks')
-  const [compareMode, setCompareMode] = useState<ReportCompareMode>(COMPARE_OFF)
   const compareBaseParams = { ...buildReportQueryParams(period, 'tasks', filters) }
-  const { data: compareData } = useReportCompare(compareSlug, data?.from, data?.to, compareMode, compareBaseParams)
-  const totalCompare = compareMode.kind !== 'off' ? (compareData?.total as { current: number; previous: number; delta: number; delta_pct: number | null } | undefined) : undefined
+  const { data: compareData } = useReportCompare(compareSlug, data?.from, data?.to, compare, compareBaseParams)
+  const totalCompare = compare.kind !== 'off' ? (compareData?.total as { current: number; previous: number; delta: number; delta_pct: number | null } | undefined) : undefined
 
   // One shared drawer for the whole page — a KPI-card click and an axis/bucket
   // click both open the SAME drawer (replacing whatever was open before). Exactly
@@ -173,13 +171,6 @@ export default function TasksReport({ period, filters = EMPTY_REPORT_FILTERS }: 
 
   return (
     <div>
-      {/* RAPPORT-COMPARE-1: mirrors CandidatesReport's hosting exactly. */}
-      {hasData && compareSlug && (
-        <div style={{ marginBottom: 10 }}>
-          <ReportCompareControl mode={compareMode} onChange={setCompareMode} />
-        </div>
-      )}
-
       {/* KPI strip — workload health, above the tabs (candidate-page order) */}
       {hasData && (
         <ReportKpiBand kpis={kpis} notice={fellBack ? t('tasks.kpiOrderFellBack') : undefined} />

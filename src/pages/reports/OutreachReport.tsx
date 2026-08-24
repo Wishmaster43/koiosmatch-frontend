@@ -34,7 +34,6 @@ import { getReportKpiCatalog, getReportKpiDefaultOrder, reportKpiSettingsKey } f
 import { resolveReportKpiOrder } from './resolveReportKpiOrder'
 import { getCompareSlug } from './reportCompareSupport'
 import { useReportCompare } from './useReportCompare'
-import ReportCompareControl from './ReportCompareControl'
 import ReportCompareMetric from './ReportCompareMetric'
 import { COMPARE_OFF } from './reportCompareMode'
 import type { ReportCompareMode } from './reportCompareMode'
@@ -46,7 +45,7 @@ type Axis = 'campaign' | 'channel' | 'status' | 'outcome'
 // colour (SegmentBars falls back to the primary tint).
 type AxisSeg = { value: string; label: string; count: number }
 
-export default function OutreachReport({ period }: { period: ReportPeriod }) {
+export default function OutreachReport({ period, compare = COMPARE_OFF }: { period: ReportPeriod; compare?: ReportCompareMode }) {
   const { t } = useTranslation('analytics')
   const { formatDate } = useDateFormat()
   const { data, loading, error, refetch } = useOutreachReport(period)
@@ -56,9 +55,8 @@ export default function OutreachReport({ period }: { period: ReportPeriod }) {
 
   // RAPPORT-COMPARE-1: mirrors CandidatesReport's hosting exactly.
   const compareSlug = getCompareSlug('outreach')
-  const [compareMode, setCompareMode] = useState<ReportCompareMode>(COMPARE_OFF)
-  const { data: compareData } = useReportCompare(compareSlug, data?.from, data?.to, compareMode, { period })
-  const totalCompare = compareMode.kind !== 'off' ? (compareData?.total as { current: number; previous: number; delta: number; delta_pct: number | null } | undefined) : undefined
+  const { data: compareData } = useReportCompare(compareSlug, data?.from, data?.to, compare, { period })
+  const totalCompare = compare.kind !== 'off' ? (compareData?.total as { current: number; previous: number; delta: number; delta_pct: number | null } | undefined) : undefined
 
   // One shared drawer for the whole page — a KPI-card click and an axis/bucket
   // click both open the SAME drawer (replacing whatever was open before). Exactly
@@ -200,13 +198,6 @@ export default function OutreachReport({ period }: { period: ReportPeriod }) {
 
   return (
     <div>
-      {/* RAPPORT-COMPARE-1: mirrors CandidatesReport's hosting exactly. */}
-      {hasData && compareSlug && (
-        <div style={{ marginBottom: 10 }}>
-          <ReportCompareControl mode={compareMode} onChange={setCompareMode} />
-        </div>
-      )}
-
       {/* KPI strip — above the tabs (candidate-page order: KPIs first) */}
       {hasData && (
         <ReportKpiBand kpis={kpis} notice={fellBack ? t('outreach.kpiOrderFellBack') : undefined} />

@@ -439,11 +439,9 @@ describe('OutreachReport (RAPPORTEN-SUITE-1 portie 6, bellijsten report)', () =>
       && (c[1] as { params: Record<string, unknown> }).params.channel === 'phone')).toBe(false)
   })
 
-  // REPORTGRID-1 item 4: outreach has a real backend compare slug
-  // (reportCompareSupport.ts), so the shared ReportCompareControl renders.
-  it('renders the ReportCompareControl (backend-registered compare slug)', () => {
-    mockUseOutreachReport.mockReturnValue({ data, loading: false, error: false })
-    renderReport()
-    expect(screen.getByText('Vergelijk met')).toBeInTheDocument()
+  // RAPPORT-COMPARE-2 (§4): the compare window lives in the right-hand filter
+  // panel (ReportsPage) — the page itself renders NO inline compare control.
+  it('renders no inline compare control (moved to the right filter panel)', () => {
+    expect(screen.queryByText('Vergelijk met')).not.toBeInTheDocument()
   })
 })

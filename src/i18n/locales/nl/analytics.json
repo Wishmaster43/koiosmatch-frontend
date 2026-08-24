@@ -8,7 +8,8 @@
     "noRecords": "Geen onderliggende records.",
     "koios": "Koios AI-advies",
     "noAdvice": "Koios heeft nog geen advies voor dit getal.",
-    "truncated": "Toont {{shown}} van {{total}}"
+    "search": "Zoeken…",
+    "shownOf": "{{shown}} van {{total}} getoond"
   },
   "tabs": {
     "candidates": "Kandidaten",
@@ -44,6 +45,17 @@
       "ariaLabel": "Populatie",
       "candidates": "Kandidaten",
       "leads": "Leads"
+    },
+    "kpi": {
+      "inflow": "Instroom",
+      "outflow": "Uitstroom",
+      "noFollowup": "Zonder opvolging",
+      "statusStale": "Te lang op dezelfde status",
+      "noCv": "Zonder CV",
+      "documentExpiring": "Documenten die verlopen",
+      "availabilityDue": "Beschikbaarheid nadert",
+      "noContact": "Lang geen contact",
+      "activeConversations": "Actieve gesprekken"
     }
   },
   "intakes": {
@@ -374,8 +386,6 @@
       "previous_year": "Vorig jaar",
       "custom": "Aangepaste periode"
     },
-    "customFrom": "Vergelijk vanaf",
-    "customTo": "Vergelijk tot",
     "rangeSeparator": "tot en met",
     "previousValue": "vorige: {{value}}"
   }

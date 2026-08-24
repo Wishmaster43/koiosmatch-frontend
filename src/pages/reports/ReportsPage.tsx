@@ -48,6 +48,9 @@ import { useMatchStatuses } from '@/lib/useMatchStatuses'
 import { useCustomerOptions } from '@/pages/vacancies/shared'
 import { useVacancyStatusIdOptions, useTaskStatusIdOptions } from './reportStatusLookups'
 import { isFilterableReport, CUSTOMER_FILTERABLE_REPORT_IDS } from './reportFilterParams'
+import { reportSupportsCompare } from './reportCompareSupport'
+import { COMPARE_OFF } from './reportCompareMode'
+import type { ReportCompareMode } from './reportCompareMode'
 import type { ReportFilterState } from './reportFilterParams'
 import type { ReportFilterGroup } from '@/types/reports'
 import CandidatesReport from './CandidatesReport'
@@ -70,7 +73,11 @@ import type { ReportPeriod } from '@/types/analytics'
 // other report ignores the prop. `initialView` (RAPPORTEN-CONSOLIDATIE-1) seeds a
 // merged page's switch position — read by the two merged pages
 // (candidates/customers), ignored by the rest.
-type ReportComponent = ComponentType<{ period: ReportPeriod; filters?: ReportFilterState; initialView?: string }>
+// `compare` (RAPPORT-COMPARE-2): the compare window now lives in the right-hand
+// filter panel (Danny 24-08: EVERY filter lives there — the toolbar control was
+// the exact §4 violation). ReportsPage owns the state; a page consumes the prop
+// the moment its toolbar control is removed (COMPARE_IN_PANEL below).
+type ReportComponent = ComponentType<{ period: ReportPeriod; filters?: ReportFilterState; initialView?: string; compare?: ReportCompareMode }>
 
 // Registry: report id → component. Ids and their order live in reportIds.ts
 // (shared with the sidebar submenu); an id here without a REPORT_IDS entry — or
@@ -107,6 +114,14 @@ export default function ReportsPage({ reportId, initialView }: { reportId?: stri
       : REPORT_IDS[0]
   const Report = REPORTS[active]
   const filterable = isFilterableReport(active)
+
+  // RAPPORT-COMPARE-2: compare lives in the right panel for EVERY supporting
+  // report (the per-page toolbar controls are deleted — §4: one filtering
+  // surface). The mode resets when the user switches reports, so one page's
+  // comparison never leaks into the next page's numbers.
+  const [compareMode, setCompareMode] = useState<ReportCompareMode>(COMPARE_OFF)
+  useEffect(() => { setCompareMode(COMPARE_OFF) }, [active])
+  const compareInPanel = !isRoot && reportSupportsCompare(active)
 
   // RAPPORT-FILTERS-1/2: status/owner/branch(+customer), wired for every report on
   // FILTERABLE_REPORT_IDS. Kept here, not per-report, so the panel and both hooks
@@ -179,6 +194,38 @@ export default function ReportsPage({ reportId, initialView }: { reportId?: stri
         { value: 'month', label: t('period.month') },
       ],
     }]
+    // Compare group (RAPPORT-COMPARE-2) — radio like the period group; a custom
+    // window adds the shared date-range group underneath. noChip mirrors period:
+    // "off" is the empty state, the radio itself is the one honest control.
+    if (compareInPanel) {
+      groups.push({
+        key: 'compare',
+        label: t('compare.label'),
+        type: 'radio',
+        noChip: true,
+        selected: [compareMode.kind],
+        onToggle: (v: string | number) => {
+          const kind = String(v)
+          if (kind === 'previous_period') setCompareMode({ kind: 'previous_period' })
+          else if (kind === 'previous_year') setCompareMode({ kind: 'previous_year' })
+          else if (kind === 'custom') setCompareMode({ kind: 'custom', from: '', to: '' })
+          else setCompareMode(COMPARE_OFF)
+        },
+        options: (['off', 'previous_period', 'previous_year', 'custom'] as const)
+          .map(value => ({ value, label: t(`compare.mode.${value}`) })),
+      })
+      if (compareMode.kind === 'custom') {
+        groups.push({
+          key: 'compareRange',
+          label: t('compare.mode.custom'),
+          type: 'date-range',
+          from: compareMode.from,
+          to: compareMode.to,
+          onFromChange: (v: string) => setCompareMode({ kind: 'custom', from: v, to: compareMode.kind === 'custom' ? compareMode.to : '' }),
+          onToChange: (v: string) => setCompareMode({ kind: 'custom', from: compareMode.kind === 'custom' ? compareMode.from : '', to: v }),
+        })
+      }
+    }
     if (filterable) {
       // Each report's own axis vocabulary for the status/owner labels — candidates/
       // customers keep their existing `<ns>.axes.*` pair; applications/tasks have
@@ -225,7 +272,7 @@ export default function ReportsPage({ reportId, initialView }: { reportId?: stri
     }
     return groups
   }, [t, period, filterable, active, status, ownerId, locationId, customerId, acceptsCustomer,
-    statusOptions, ownerOptions, branchOptions, customerOptions])
+    statusOptions, ownerOptions, branchOptions, customerOptions, compareInPanel, compareMode])
 
   useEffect(() => {
     registerFilters('reports-page', panelGroups)
@@ -239,7 +286,7 @@ export default function ReportsPage({ reportId, initialView }: { reportId?: stri
           panel above (registerFilters), never from an inline toolbar control. */}
       {isRoot
         ? <ReportsDashboard period={period} />
-        : <Report period={period} filters={filterable ? filters : undefined} initialView={initialView} />}
+        : <Report period={period} filters={filterable ? filters : undefined} initialView={initialView} compare={compareInPanel ? compareMode : undefined} />}
     </div>
   )
 }

@@ -32,7 +32,6 @@ import { getReportKpiCatalog, getReportKpiDefaultOrder, reportKpiSettingsKey } f
 import { resolveReportKpiOrder } from './resolveReportKpiOrder'
 import { getCompareSlug } from './reportCompareSupport'
 import { useReportCompare } from './useReportCompare'
-import ReportCompareControl from './ReportCompareControl'
 import ReportCompareMetric from './ReportCompareMetric'
 import { COMPARE_OFF } from './reportCompareMode'
 import type { ReportCompareMode } from './reportCompareMode'
@@ -44,7 +43,7 @@ type Axis = 'stage' | 'customer' | 'branch'
 // colour, customer/branch rows do not (SegmentBars falls back to the primary tint).
 type AxisSeg = { value: string; label: string; count: number; color?: string | null }
 
-export default function OpportunitiesReport({ period }: { period: ReportPeriod }) {
+export default function OpportunitiesReport({ period, compare = COMPARE_OFF }: { period: ReportPeriod; compare?: ReportCompareMode }) {
   const { t } = useTranslation('analytics')
   const { formatDate } = useDateFormat()
   const { formatCurrency } = useNumberFormat()
@@ -55,9 +54,8 @@ export default function OpportunitiesReport({ period }: { period: ReportPeriod }
 
   // RAPPORT-COMPARE-1: mirrors CandidatesReport's hosting exactly.
   const compareSlug = getCompareSlug('opportunities')
-  const [compareMode, setCompareMode] = useState<ReportCompareMode>(COMPARE_OFF)
-  const { data: compareData } = useReportCompare(compareSlug, data?.period.from, data?.period.to, compareMode, { period })
-  const totalCompare = compareMode.kind !== 'off' ? (compareData?.total as { current: number; previous: number; delta: number; delta_pct: number | null } | undefined) : undefined
+  const { data: compareData } = useReportCompare(compareSlug, data?.period.from, data?.period.to, compare, { period })
+  const totalCompare = compare.kind !== 'off' ? (compareData?.total as { current: number; previous: number; delta: number; delta_pct: number | null } | undefined) : undefined
 
   // Drill-down: one shared drawer for the whole page — a segment/bucket click
   // opens it fresh, replacing whatever was open before. Exactly one XOR param
@@ -173,13 +171,6 @@ export default function OpportunitiesReport({ period }: { period: ReportPeriod }
 
   return (
     <div>
-      {/* RAPPORT-COMPARE-1: mirrors CandidatesReport's hosting exactly. */}
-      {hasData && compareSlug && (
-        <div style={{ marginBottom: 10 }}>
-          <ReportCompareControl mode={compareMode} onChange={setCompareMode} />
-        </div>
-      )}
-
       {/* KPI strip — pipeline health, above the tabs (candidate-page order) */}
       {hasData && (
         <ReportKpiBand kpis={kpis} notice={fellBack ? t('opportunities.kpiOrderFellBack') : undefined} />

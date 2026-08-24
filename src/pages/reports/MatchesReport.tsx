@@ -32,7 +32,6 @@ import { getReportKpiCatalog, getReportKpiDefaultOrder, reportKpiSettingsKey } f
 import { resolveReportKpiOrder } from './resolveReportKpiOrder'
 import { getCompareSlug } from './reportCompareSupport'
 import { useReportCompare } from './useReportCompare'
-import ReportCompareControl from './ReportCompareControl'
 import ReportCompareMetric from './ReportCompareMetric'
 import { COMPARE_OFF } from './reportCompareMode'
 import type { ReportCompareMode } from './reportCompareMode'
@@ -49,7 +48,7 @@ function StatTile({ label, value, accent, onClick }: { label: string; value: num
 // The under_contract tile keys — each drills contract_status=<key> (portie 7 XOR).
 const CONTRACT_STATUS_TILES = ['sent', 'active', 'ended', 'none'] as const
 
-export default function MatchesReport({ period, filters = EMPTY_REPORT_FILTERS }: { period: ReportPeriod; filters?: ReportFilterState }) {
+export default function MatchesReport({ period, filters = EMPTY_REPORT_FILTERS, compare = COMPARE_OFF }: { period: ReportPeriod; filters?: ReportFilterState; compare?: ReportCompareMode }) {
   const { t } = useTranslation('analytics')
   const { formatDate } = useDateFormat()
   const { data, loading, error, refetch } = useMatchesReport(period, filters)
@@ -57,10 +56,9 @@ export default function MatchesReport({ period, filters = EMPTY_REPORT_FILTERS }
 
   // RAPPORT-COMPARE-1: mirrors CandidatesReport's hosting exactly.
   const compareSlug = getCompareSlug('matches')
-  const [compareMode, setCompareMode] = useState<ReportCompareMode>(COMPARE_OFF)
   const compareBaseParams = { ...buildReportQueryParams(period, 'matches', filters) }
-  const { data: compareData } = useReportCompare(compareSlug, data?.from, data?.to, compareMode, compareBaseParams)
-  const totalCompare = compareMode.kind !== 'off' ? (compareData?.total as { current: number; previous: number; delta: number; delta_pct: number | null } | undefined) : undefined
+  const { data: compareData } = useReportCompare(compareSlug, data?.from, data?.to, compare, compareBaseParams)
+  const totalCompare = compare.kind !== 'off' ? (compareData?.total as { current: number; previous: number; delta: number; delta_pct: number | null } | undefined) : undefined
 
   // Drill-down: clicking a KPI/segment/tile/bucket explains it (breakdown + the
   // matches behind it + Koios advice). Exactly one XOR param per open drill —
@@ -248,13 +246,6 @@ export default function MatchesReport({ period, filters = EMPTY_REPORT_FILTERS }
 
   return (
     <div>
-      {/* RAPPORT-COMPARE-1: mirrors CandidatesReport's hosting exactly. */}
-      {!loading && !error && !isEmpty && compareSlug && (
-        <div style={{ marginBottom: 10 }}>
-          <ReportCompareControl mode={compareMode} onChange={setCompareMode} />
-        </div>
-      )}
-
       {/* KPI strip — above the tabs (candidate-page order: KPIs first) */}
       {!loading && !error && !isEmpty && data && (
         <ReportKpiBand kpis={kpis} notice={fellBack ? t('matches.kpiOrderFellBack') : undefined} />

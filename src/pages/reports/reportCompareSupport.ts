@@ -39,6 +39,11 @@ const COMPARE_SLUG_BY_REPORT_VIEW: Partial<Record<ReportId, Partial<Record<strin
   outreach: 'outreach',
 }
 
+/** Page-level support: does this report id carry ANY compare slug (any view)? */
+export function reportSupportsCompare(reportId: ReportId | string): boolean {
+  return COMPARE_SLUG_BY_REPORT_VIEW[reportId as ReportId] != null
+}
+
 /** Resolves the compare slug for a report id + optional switch position, or null when unsupported. */
 export function getCompareSlug(reportId: ReportId | string, view?: string): CompareSlug | null {
   const entry = COMPARE_SLUG_BY_REPORT_VIEW[reportId as ReportId]

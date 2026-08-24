@@ -474,11 +474,11 @@ describe('CustomersReport — Klanten/Prospects switch (RAPPORTEN-CONSOLIDATIE-1
     expect(window.location.hash).toBe('#reports.customers?view=prospects')
   })
 
-  // REPORTGRID-1 item 4: customers has a real backend compare slug on both
-  // switch positions (reportCompareSupport.ts), so the control renders.
-  it('renders the ReportCompareControl on both switch positions', () => {
+  // RAPPORT-COMPARE-2 (§4): the compare window lives in the right-hand filter
+  // panel (ReportsPage) — the page itself renders NO inline compare control.
+  it('renders no inline compare control (moved to the right filter panel)', () => {
     mockUseCustomersReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
-    expect(screen.getByText('Vergelijk met')).toBeInTheDocument()
+    expect(screen.queryByText('Vergelijk met')).not.toBeInTheDocument()
   })
 })
