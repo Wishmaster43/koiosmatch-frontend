@@ -1,14 +1,16 @@
 /**
  * KoiosForYouCard — §13 coverage for the "Koios deed dit voor jou" dashboard
- * card: GET /ai/koios/for-you fires with the active `days` param, the 7/30
- * toggle refetches with the new param, the four UI states (loading/error/
- * empty/success) render distinctly, and KOIOS-KAART-COMPACT-1's compact/expand
- * behaviour (category counts by default, per-run rows only once expanded, an
- * unknown action type falling into 'overig'). NL-label pinning lives in the
- * sibling KoiosForYouCard.i18n.test.tsx, which uses the real i18n runtime.
+ * card (KOIOS-KAART-COMPACT-2, backend contract K-174): the default "this
+ * week" range fires with from/to, the period presets recompute the range, the
+ * four UI states (loading/error/empty/success) render distinctly, a KPI tile
+ * click reveals that category's action table, a row with a mapped entity_type
+ * links to its record + opens a new tab via the deep link, an unmapped
+ * entity_type renders plain text, and actions_truncated shows the honest
+ * "first 200 shown" notice. NL-label pinning lives in the sibling
+ * KoiosForYouCard.i18n.test.tsx, which uses the real i18n runtime.
  */
-import { describe, it, expect, vi, afterEach } from 'vitest'
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest'
+import { render, screen, fireEvent, waitFor, within } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import type { ReactNode } from 'react'
 import KoiosForYouCard from './KoiosForYouCard'
@@ -40,29 +42,37 @@ function renderCard() {
   return render(<KoiosForYouCard />, { wrapper })
 }
 
-const emptyReport = { period: '7d', actions_total: 0, per_type: {}, per_source: {}, latest: [] }
+const emptyReport = { from: '2026-08-24', to: '2026-08-24', period: 'range', actions_total: 0, per_type: {}, per_source: {}, actions: [], actions_truncated: false }
+
+// Pin "now" to a Monday-anchored week for a deterministic default range.
+// 2026-08-24 is a Monday.
+beforeEach(() => {
+  vi.useFakeTimers({ shouldAdvanceTime: true })
+  vi.setSystemTime(new Date('2026-08-26T10:00:00Z')) // Wednesday
+})
 
 afterEach(() => {
   vi.clearAllMocks()
+  vi.useRealTimers()
 })
 
 describe('KoiosForYouCard', () => {
-  it('fetches the report with days=7 by default', async () => {
+  it('defaults to "this week" (Monday through today) and fetches from/to', async () => {
     apiGet.mockResolvedValue({ data: emptyReport })
     renderCard()
     await waitFor(() => expect(apiGet).toHaveBeenCalledTimes(1))
-    expect(apiGet).toHaveBeenCalledWith('/ai/koios/for-you', expect.objectContaining({ params: { days: 7 } }))
+    expect(apiGet).toHaveBeenCalledWith('/ai/koios/for-you', expect.objectContaining({ params: { from: '2026-08-24', to: '2026-08-26' } }))
   })
 
-  it('switches to days=30 via the period toggle', async () => {
+  it('switches to the 30-day preset via the period picker', async () => {
     apiGet.mockResolvedValue({ data: emptyReport })
     renderCard()
     await waitFor(() => expect(apiGet).toHaveBeenCalledTimes(1))
 
-    fireEvent.click(screen.getByRole('radio', { name: 'koiosForYou.period.30' }))
+    fireEvent.click(screen.getByRole('radio', { name: 'koiosForYou.periodPreset.last30' }))
 
     await waitFor(() => expect(apiGet).toHaveBeenCalledTimes(2))
-    expect(apiGet).toHaveBeenLastCalledWith('/ai/koios/for-you', expect.objectContaining({ params: { days: 30 } }))
+    expect(apiGet).toHaveBeenLastCalledWith('/ai/koios/for-you', expect.objectContaining({ params: { from: '2026-07-28', to: '2026-08-26' } }))
   })
 
   it('shows the loading state while the request is in flight', async () => {
@@ -91,71 +101,134 @@ describe('KoiosForYouCard', () => {
     await waitFor(() => expect(screen.getByText('koiosForYou.empty')).toBeInTheDocument())
   })
 
-  it('renders compact by default — category counts, never individual run rows', async () => {
-    apiGet.mockResolvedValue({
-      data: {
-        period: '7d',
-        actions_total: 3,
-        per_type: { koios_create_task: 2, koios_send_whatsapp: 1 },
-        per_source: { note: 2, chat: 1 },
-        latest: [
-          { run_id: 'r1', template_key: 'koios_create_task', source: 'note:abc', created_at: '2026-08-01T10:00:00Z', status: 'completed' },
-          { run_id: 'r2', template_key: 'koios_send_whatsapp', source: 'chat', created_at: '2026-08-02T10:00:00Z', status: 'failed' },
-        ],
-      },
-    })
+  const reportWithActions = {
+    from: '2026-08-24', to: '2026-08-26', period: 'range',
+    actions_total: 3,
+    per_type: { koios_create_task: 2, koios_send_whatsapp: 1 },
+    per_source: { note: 2, chat: 1 },
+    actions: [
+      { id: 'a1', type: 'koios_create_task', source: 'note:abc', executed_at: '2026-08-24T10:00:00Z', status: 'completed', created: { entity_type: 'task', entity_id: 42, label: 'Follow up' } },
+      { id: 'a2', type: 'koios_create_task', source: 'note:abc', executed_at: '2026-08-25T10:00:00Z', status: 'failed', created: null },
+      { id: 'a3', type: 'koios_send_whatsapp', source: 'chat', executed_at: '2026-08-26T10:00:00Z', status: 'completed', created: { entity_type: 'appointment', entity_id: 7, label: 'Intake' } },
+    ],
+    actions_truncated: false,
+  }
+
+  it('renders KPI tiles by default — no table until a tile is selected', async () => {
+    apiGet.mockResolvedValue({ data: reportWithActions })
     renderCard()
     await waitFor(() => expect(screen.getByText('3')).toBeInTheDocument())
-    // Category buckets (identity-mocked t returns the raw key) — counts only.
-    expect(screen.getByText('koiosForYou.category.tasks · 2')).toBeInTheDocument()
-    expect(screen.getByText('koiosForYou.category.whatsapp · 1')).toBeInTheDocument()
-    // Never the raw per-run rows while collapsed.
-    expect(screen.queryByText('koiosForYou.actionType.create_task')).not.toBeInTheDocument()
-    expect(screen.queryByText('koiosForYou.actionType.send_whatsapp')).not.toBeInTheDocument()
+    expect(screen.getByText('koiosForYou.category.tasks')).toBeInTheDocument()
+    expect(screen.getByText('2')).toBeInTheDocument()
+    // No table (no column headers) while nothing is selected.
+    expect(screen.queryByText('koiosForYou.col.action')).not.toBeInTheDocument()
   })
 
-  it('expands into the per-category run list on demand', async () => {
-    apiGet.mockResolvedValue({
-      data: {
-        period: '7d',
-        actions_total: 3,
-        per_type: { koios_create_task: 2, koios_send_whatsapp: 1 },
-        per_source: { note: 2, chat: 1 },
-        latest: [
-          { run_id: 'r1', template_key: 'koios_create_task', source: 'note:abc', created_at: '2026-08-01T10:00:00Z', status: 'completed' },
-          { run_id: 'r2', template_key: 'koios_send_whatsapp', source: 'chat', created_at: '2026-08-02T10:00:00Z', status: 'failed' },
-        ],
-      },
-    })
+  it('selecting a category tile reveals its action table with the mapped record link', async () => {
+    apiGet.mockResolvedValue({ data: reportWithActions })
     renderCard()
     await waitFor(() => expect(screen.getByText('3')).toBeInTheDocument())
 
-    fireEvent.click(screen.getByRole('button', { name: 'koiosForYou.expand' }))
+    fireEvent.click(screen.getByText('koiosForYou.category.tasks'))
 
-    expect(screen.getByText('koiosForYou.actionType.create_task')).toBeInTheDocument()
-    expect(screen.getByText('koiosForYou.actionType.send_whatsapp')).toBeInTheDocument()
-    // Grouped under their category headings.
-    expect(screen.getAllByText('koiosForYou.category.tasks').length).toBeGreaterThan(0)
-    expect(screen.getAllByText('koiosForYou.category.whatsapp').length).toBeGreaterThan(0)
+    expect(screen.getByText('koiosForYou.col.action')).toBeInTheDocument()
+    expect(screen.getByText('Follow up')).toBeInTheDocument()
+    // The task row's new-tab icon button links to the tasks deep link.
+    const link = screen.getByRole('link', { name: 'common:openInNewTab' })
+    expect(link).toHaveAttribute('href', expect.stringContaining('#tasks?open=42'))
+    expect(link).toHaveAttribute('target', '_blank')
+    expect(link).toHaveAttribute('rel', expect.stringContaining('noopener'))
+    // Row with created: null renders a plain dash, no link.
+    expect(screen.queryAllByRole('link')).toHaveLength(1)
+  })
+
+  it('an unknown/unmapped entity_type (e.g. appointment) renders plain text, no link', async () => {
+    apiGet.mockResolvedValue({ data: reportWithActions })
+    renderCard()
+    await waitFor(() => expect(screen.getByText('3')).toBeInTheDocument())
+
+    fireEvent.click(screen.getByText('koiosForYou.category.whatsapp'))
+
+    const row = screen.getByText('Intake')
+    expect(row).toBeInTheDocument()
+    expect(within(row.closest('tr') as HTMLElement).queryByRole('link')).not.toBeInTheDocument()
+  })
+
+  it('shows the truncated notice when actions_truncated is true', async () => {
+    apiGet.mockResolvedValue({ data: { ...reportWithActions, actions_truncated: true } })
+    renderCard()
+    await waitFor(() => expect(screen.getByText('3')).toBeInTheDocument())
+
+    fireEvent.click(screen.getByText('koiosForYou.category.tasks'))
+    expect(screen.getByText('koiosForYou.truncated')).toBeInTheDocument()
   })
 
   it('buckets an unknown action type into "other" with a humanized label', async () => {
     apiGet.mockResolvedValue({
       data: {
-        period: '7d',
+        from: '2026-08-24', to: '2026-08-26', period: 'range',
         actions_total: 1,
         per_type: { koios_future_thing: 1 },
         per_source: { note: 1 },
-        latest: [
-          { run_id: 'r1', template_key: 'koios_future_thing', source: 'note:abc', created_at: '2026-08-01T10:00:00Z', status: 'completed' },
+        actions: [
+          { id: 'a1', type: 'koios_future_thing', source: 'note:abc', executed_at: '2026-08-24T10:00:00Z', status: 'completed', created: null },
         ],
+        actions_truncated: false,
       },
     })
     renderCard()
-    await waitFor(() => expect(screen.getByText('1')).toBeInTheDocument())
-    expect(screen.getByText('koiosForYou.category.other · 1')).toBeInTheDocument()
+    await waitFor(() => expect(screen.getByText('koiosForYou.category.other')).toBeInTheDocument())
 
-    fireEvent.click(screen.getByRole('button', { name: 'koiosForYou.expand' }))
+    fireEvent.click(screen.getByText('koiosForYou.category.other'))
     expect(screen.getByText('Future Thing')).toBeInTheDocument()
+  })
+})
+
+// Fix-round pins (Opus B1-B4): translated status text, deleted-record fallback,
+// pressed tile state, payload-level truncated notice at the tile row.
+describe('KoiosForYouCard — v2 fix-round pins', () => {
+  const base = {
+    from: '2026-08-24', to: '2026-08-26', period: 'range',
+    actions_total: 1,
+    per_type: { koios_create_task: 1 }, per_source: { chat: 1 },
+    actions: [{ id: 'a1', type: 'koios_create_task', source: 'chat', executed_at: '2026-08-24T10:00:00Z', status: 'completed', created: null }],
+    actions_truncated: false,
+  }
+  const openTasksTile = async () => {
+    await waitFor(() => expect(screen.getByText('koiosForYou.category.tasks')).toBeInTheDocument())
+    const tile = screen.getByText('koiosForYou.category.tasks').closest('[role="button"]')!
+    fireEvent.click(tile)
+    return tile
+  }
+
+  it('renders a translated status TEXT next to the icon — never the raw wire value as a name', async () => {
+    apiGet.mockResolvedValue({ data: base })
+    renderCard()
+    await openTasksTile()
+    // identity t(): the KEY renders — proves the label runs through i18n.
+    expect(await screen.findByText('koiosForYou.status.completed')).toBeInTheDocument()
+    expect(screen.queryByLabelText('completed')).not.toBeInTheDocument()
+  })
+
+  it('a created ref whose label was deleted server-side renders the fallback, never an empty link', async () => {
+    apiGet.mockResolvedValue({ data: { ...base,
+      actions: [{ ...base.actions[0], created: { entity_type: 'task', entity_id: 42, label: null } }] } })
+    renderCard()
+    await openTasksTile()
+    expect(await screen.findByText('koiosForYou.recordGone')).toBeInTheDocument()
+    expect(screen.queryByRole('link')).not.toBeInTheDocument()
+  })
+
+  it('the selected category tile carries aria-pressed', async () => {
+    apiGet.mockResolvedValue({ data: base })
+    renderCard()
+    const tile = await openTasksTile()
+    await waitFor(() => expect(tile.getAttribute('aria-pressed')).toBe('true'))
+  })
+
+  it('the truncated notice renders at the tile row, without a category open', async () => {
+    apiGet.mockResolvedValue({ data: { ...base, actions_truncated: true } })
+    renderCard()
+    expect(await screen.findByText('koiosForYou.truncated')).toBeInTheDocument()
   })
 })

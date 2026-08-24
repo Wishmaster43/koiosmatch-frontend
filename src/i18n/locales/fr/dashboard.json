@@ -129,23 +129,11 @@
   "koiosForYou": {
     "title": "Ce que Koios a fait pour vous",
     "periodLabel": "Période",
-    "period": {
-      "7": "7 jours",
-      "30": "30 jours"
-    },
     "heroLabel": "Actions",
     "breakdownTitle": "Par action",
-    "latestTitle": "Dernières actions",
     "empty": "Koios n'a encore rien fait pour vous",
     "emptySub": "Les actions que Koios effectue pour vous apparaîtront ici.",
     "loadError": "Impossible de charger l'activité de Koios.",
-    "source": {
-      "note": "Depuis une note",
-      "conversation": "Depuis une conversation",
-      "chat": "Depuis le chat"
-    },
-    "expand": "Afficher les détails",
-    "collapse": "Masquer les détails",
     "category": {
       "tasks": "Tâches",
       "whatsapp": "WhatsApp",
@@ -163,7 +151,30 @@
       "send_email": "E-mail envoyé",
       "send_notification": "Notification envoyée",
       "add_to_calllist": "Ajouté à la liste d'appels"
-    }
+    },
+    "periodPreset": {
+      "thisWeek": "Cette semaine",
+      "lastWeek": "Semaine dernière",
+      "last30": "30 jours",
+      "custom": "Personnalisé"
+    },
+    "rangeFrom": "Du",
+    "rangeTo": "Au",
+    "pickRange": "Choisissez une date de début et de fin.",
+    "col": {
+      "action": "Action",
+      "record": "Enregistrement lié",
+      "executedAt": "Exécuté le",
+      "status": "Statut"
+    },
+    "noActionsInCategory": "Aucune action dans cette catégorie.",
+    "truncated": "Seules les 200 premières actions de cette période sont chargées : les listes ci-dessous peuvent être incomplètes.",
+    "status": {
+      "completed": "Exécutée",
+      "failed": "Échouée",
+      "running": "En cours"
+    },
+    "recordGone": "Enregistrement supprimé"
   },
   "widget": {
     "unknown": "Inconnu"

@@ -129,23 +129,11 @@
   "koiosForYou": {
     "title": "Koios did this for you",
     "periodLabel": "Period",
-    "period": {
-      "7": "7 days",
-      "30": "30 days"
-    },
     "heroLabel": "Actions",
     "breakdownTitle": "By action",
-    "latestTitle": "Latest actions",
     "empty": "Koios hasn't done anything for you yet",
     "emptySub": "Actions Koios takes on your behalf will show up here.",
     "loadError": "Couldn't load Koios activity.",
-    "source": {
-      "note": "From a note",
-      "conversation": "From a conversation",
-      "chat": "From chat"
-    },
-    "expand": "Show details",
-    "collapse": "Hide details",
     "category": {
       "tasks": "Tasks",
       "whatsapp": "WhatsApp",
@@ -163,7 +151,30 @@
       "send_email": "Email sent",
       "send_notification": "Notification sent",
       "add_to_calllist": "Added to call list"
-    }
+    },
+    "periodPreset": {
+      "thisWeek": "This week",
+      "lastWeek": "Last week",
+      "last30": "30 days",
+      "custom": "Custom"
+    },
+    "rangeFrom": "From",
+    "rangeTo": "To",
+    "pickRange": "Pick a start and end date.",
+    "col": {
+      "action": "Action",
+      "record": "Record",
+      "executedAt": "Executed at",
+      "status": "Status"
+    },
+    "noActionsInCategory": "No actions in this category.",
+    "truncated": "Only the first 200 actions of this period are loaded: the lists below may be incomplete.",
+    "status": {
+      "completed": "Executed",
+      "failed": "Failed",
+      "running": "Running"
+    },
+    "recordGone": "Record deleted"
   },
   "widget": {
     "unknown": "Unknown"

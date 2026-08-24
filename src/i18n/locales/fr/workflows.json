@@ -258,7 +258,8 @@
     "deleteFolderInUse": "Ce dossier contient encore des workflows actifs et ne peut pas être supprimé.",
     "archiveConfirm": "Archiver le workflow \"{{name}}\" ? Les exécutions en cours seront fermées immédiatement.",
     "archiveSuccess": "Workflow archivé.",
-    "restoreSuccess": "Workflow restauré."
+    "restoreSuccess": "Workflow restauré.",
+    "viewWorkflows": "Workflows"
   },
   "ai": {
     "saved": "Enregistré",
@@ -1148,5 +1149,51 @@
     "title": "Workflow introuvable",
     "message": "Cette workflow n'existe pas (plus), ou vous n'y avez pas accès.",
     "backToList": "Retour à la liste"
+  },
+  "queue": {
+    "tabLabel": "File d’attente",
+    "switchLabel": "Changer de vue : workflows ou file d’attente",
+    "unknownWorkflow": "Workflow inconnu",
+    "openRuns": "Ouvrir les exécutions",
+    "relationBadge": "{{count}} en file d’attente",
+    "loading": "Chargement de la file d’attente…",
+    "loadFailed": "Échec du chargement de la file d’attente",
+    "noAccess": "Vous n’avez pas accès à la file d’attente (permissions → voir les paramètres).",
+    "empty": "La file d'attente est vide : aucune exécution en attente, planifiée ou à réessayer.",
+    "counts": {
+      "pending": "En attente",
+      "waiting": "En pause",
+      "scheduledToday": "Planifié aujourd’hui",
+      "retrying": "Nouvelle tentative"
+    },
+    "pending": {
+      "title": "En attente",
+      "empty": "Rien en attente.",
+      "queuedAt": "En file depuis {{date}}"
+    },
+    "waiting": {
+      "title": "En pause",
+      "empty": "Rien en pause.",
+      "resumeAt": "Reprend à {{date}}"
+    },
+    "scheduled": {
+      "title": "Planifié",
+      "empty": "Rien de planifié.",
+      "nextRunAt": "Prochaine exécution à {{date}}"
+    },
+    "retrying": {
+      "title": "Nouvelle tentative",
+      "empty": "Aucune nouvelle tentative en cours.",
+      "attempts_one": "{{count}} tentative",
+      "attempts_other": "{{count}} tentatives",
+      "nextAttemptApprox": "prochaine tentative ± {{date}}"
+    },
+    "trigger": {
+      "event": "Événement",
+      "manual": "Manuel",
+      "scheduled": "Planifié",
+      "scheduler": "Planificateur",
+      "webhook": "Webhook"
+    }
   }
 }

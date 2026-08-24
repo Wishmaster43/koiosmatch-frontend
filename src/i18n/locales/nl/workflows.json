@@ -318,7 +318,8 @@
     "deleteFolderInUse": "Deze map heeft nog actieve workflows en kan niet worden verwijderd.",
     "archiveConfirm": "Workflow \"{{name}}\" archiveren? Openstaande runs worden direct gesloten.",
     "archiveSuccess": "Workflow gearchiveerd.",
-    "restoreSuccess": "Workflow hersteld."
+    "restoreSuccess": "Workflow hersteld.",
+    "viewWorkflows": "Workflows"
   },
   "ai": {
     "saved": "Opgeslagen",
@@ -1148,5 +1149,51 @@
     "title": "Workflow niet gevonden",
     "message": "Deze workflow bestaat niet (meer), of je hebt er geen toegang toe.",
     "backToList": "Terug naar de lijst"
+  },
+  "queue": {
+    "tabLabel": "Wachtrij",
+    "switchLabel": "Weergave wisselen: workflows of wachtrij",
+    "unknownWorkflow": "Onbekende workflow",
+    "openRuns": "Open uitvoeringen",
+    "relationBadge": "{{count}} in wachtrij",
+    "loading": "Wachtrij ophalen…",
+    "loadFailed": "Wachtrij laden mislukt",
+    "noAccess": "Je hebt geen toegang tot de wachtrij (rechtenbeheer → instellingen bekijken).",
+    "empty": "De wachtrij is leeg: geen wachtende, geplande of te herhalen uitvoeringen.",
+    "counts": {
+      "pending": "Wachtend",
+      "waiting": "Wacht bewust",
+      "scheduledToday": "Gepland vandaag",
+      "retrying": "Opnieuw proberen"
+    },
+    "pending": {
+      "title": "Wachtend",
+      "empty": "Niets wachtend.",
+      "queuedAt": "In wachtrij sinds {{date}}"
+    },
+    "waiting": {
+      "title": "Wacht bewust",
+      "empty": "Niets wacht bewust.",
+      "resumeAt": "Hervat op {{date}}"
+    },
+    "scheduled": {
+      "title": "Gepland",
+      "empty": "Niets gepland.",
+      "nextRunAt": "Volgende run op {{date}}"
+    },
+    "retrying": {
+      "title": "Opnieuw proberen",
+      "empty": "Niets wordt opnieuw geprobeerd.",
+      "attempts_one": "{{count}} poging",
+      "attempts_other": "{{count}} pogingen",
+      "nextAttemptApprox": "volgende poging ± {{date}}"
+    },
+    "trigger": {
+      "event": "Event",
+      "manual": "Handmatig",
+      "scheduled": "Gepland",
+      "scheduler": "Planner",
+      "webhook": "Webhook"
+    }
   }
 }

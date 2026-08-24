@@ -262,7 +262,8 @@
     "deleteFolderInUse": "This folder still has active workflows and can't be deleted.",
     "archiveConfirm": "Archive workflow \"{{name}}\"? Any open runs are closed immediately.",
     "archiveSuccess": "Workflow archived.",
-    "restoreSuccess": "Workflow restored."
+    "restoreSuccess": "Workflow restored.",
+    "viewWorkflows": "Workflows"
   },
   "ai": {
     "saved": "Saved",
@@ -1148,5 +1149,51 @@
     "title": "Workflow not found",
     "message": "This workflow does not (or no longer) exist, or you do not have access to it.",
     "backToList": "Back to the list"
+  },
+  "queue": {
+    "tabLabel": "Queue",
+    "switchLabel": "Switch view: workflows or queue",
+    "unknownWorkflow": "Unknown workflow",
+    "openRuns": "Open runs",
+    "relationBadge": "{{count}} in queue",
+    "loading": "Loading queue…",
+    "loadFailed": "Failed to load the queue",
+    "noAccess": "You do not have access to the queue (permissions → view settings).",
+    "empty": "The queue is empty: no pending, scheduled or retrying runs.",
+    "counts": {
+      "pending": "Pending",
+      "waiting": "Waiting",
+      "scheduledToday": "Scheduled today",
+      "retrying": "Retrying"
+    },
+    "pending": {
+      "title": "Pending",
+      "empty": "Nothing pending.",
+      "queuedAt": "Queued since {{date}}"
+    },
+    "waiting": {
+      "title": "Waiting",
+      "empty": "Nothing waiting.",
+      "resumeAt": "Resumes at {{date}}"
+    },
+    "scheduled": {
+      "title": "Scheduled",
+      "empty": "Nothing scheduled.",
+      "nextRunAt": "Next run at {{date}}"
+    },
+    "retrying": {
+      "title": "Retrying",
+      "empty": "Nothing is retrying.",
+      "attempts_one": "{{count}} attempt",
+      "attempts_other": "{{count}} attempts",
+      "nextAttemptApprox": "next attempt ± {{date}}"
+    },
+    "trigger": {
+      "event": "Event",
+      "manual": "Manual",
+      "scheduled": "Scheduled",
+      "scheduler": "Scheduler",
+      "webhook": "Webhook"
+    }
   }
 }

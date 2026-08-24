@@ -258,7 +258,8 @@
     "deleteFolderInUse": "Dieser Ordner hat noch aktive Workflows und kann nicht gelöscht werden.",
     "archiveConfirm": "Workflow \"{{name}}\" archivieren? Laufende Ausführungen werden sofort geschlossen.",
     "archiveSuccess": "Workflow archiviert.",
-    "restoreSuccess": "Workflow wiederhergestellt."
+    "restoreSuccess": "Workflow wiederhergestellt.",
+    "viewWorkflows": "Workflows"
   },
   "ai": {
     "saved": "Gespeichert",
@@ -1148,5 +1149,51 @@
     "title": "Workflow nicht gefunden",
     "message": "Diese Workflow existiert nicht (mehr), oder Sie haben keinen Zugriff darauf.",
     "backToList": "Zurück zur Liste"
+  },
+  "queue": {
+    "tabLabel": "Warteschlange",
+    "switchLabel": "Ansicht wechseln: Workflows oder Warteschlange",
+    "unknownWorkflow": "Unbekannter Workflow",
+    "openRuns": "Ausführungen öffnen",
+    "relationBadge": "{{count}} in Warteschlange",
+    "loading": "Warteschlange wird geladen…",
+    "loadFailed": "Warteschlange konnte nicht geladen werden",
+    "noAccess": "Kein Zugriff auf die Warteschlange (Berechtigungen → Einstellungen ansehen).",
+    "empty": "Die Warteschlange ist leer: keine wartenden, geplanten oder zu wiederholenden Ausführungen.",
+    "counts": {
+      "pending": "Wartend",
+      "waiting": "Pausiert",
+      "scheduledToday": "Heute geplant",
+      "retrying": "Wird wiederholt"
+    },
+    "pending": {
+      "title": "Wartend",
+      "empty": "Nichts wartend.",
+      "queuedAt": "In Warteschlange seit {{date}}"
+    },
+    "waiting": {
+      "title": "Pausiert",
+      "empty": "Nichts pausiert.",
+      "resumeAt": "Fortsetzung um {{date}}"
+    },
+    "scheduled": {
+      "title": "Geplant",
+      "empty": "Nichts geplant.",
+      "nextRunAt": "Nächste Ausführung um {{date}}"
+    },
+    "retrying": {
+      "title": "Wird wiederholt",
+      "empty": "Nichts wird wiederholt.",
+      "attempts_one": "{{count}} Versuch",
+      "attempts_other": "{{count}} Versuche",
+      "nextAttemptApprox": "nächster Versuch ± {{date}}"
+    },
+    "trigger": {
+      "event": "Ereignis",
+      "manual": "Manuell",
+      "scheduled": "Geplant",
+      "scheduler": "Planer",
+      "webhook": "Webhook"
+    }
   }
 }

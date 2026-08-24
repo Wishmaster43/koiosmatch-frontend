@@ -63,3 +63,36 @@ describe('WorkflowRelationsView', () => {
     await waitFor(() => expect(api.put).toHaveBeenCalledWith('/workflows/p1', { status: 'inactive', active: false }))
   })
 })
+
+// WF-WACHTRIJ-FE-1: the queue badge per related workflow (K-171) — only ever
+// renders when there is something in the queue, never a noisy "0".
+describe('WorkflowRelationsView · queue badge', () => {
+  it('renders the queue badge when the related workflow has entries', async () => {
+    mockedGet.mockImplementation((url: string) => {
+      if (url === '/workflows/wf-1/relations') return Promise.resolve({ data: {
+        parents: [{ id: 'p1', name: 'Ouderflow', status: 'active' }], children: [],
+      } })
+      if (url === '/workflows/queue?workflow_id=p1') return Promise.resolve({ data: {
+        pending: [{}], waiting: [], scheduled: [], retrying: [], counts: { pending: 1, waiting: 0, scheduled_today: 0, retrying: 0 },
+      } })
+      return Promise.resolve({ data: {} })
+    })
+    render(<WorkflowRelationsView workflowId="wf-1" />)
+    expect(await screen.findByText('1 in wachtrij')).toBeInTheDocument()
+  })
+
+  it('renders NO badge when the related workflow has an empty queue', async () => {
+    mockedGet.mockImplementation((url: string) => {
+      if (url === '/workflows/wf-1/relations') return Promise.resolve({ data: {
+        parents: [{ id: 'p1', name: 'Ouderflow', status: 'active' }], children: [],
+      } })
+      if (url === '/workflows/queue?workflow_id=p1') return Promise.resolve({ data: {
+        pending: [], waiting: [], scheduled: [], retrying: [], counts: { pending: 0, waiting: 0, scheduled_today: 0, retrying: 0 },
+      } })
+      return Promise.resolve({ data: {} })
+    })
+    render(<WorkflowRelationsView workflowId="wf-1" />)
+    await screen.findByText('Ouderflow')
+    expect(screen.queryByText(/in wachtrij/)).not.toBeInTheDocument()
+  })
+})

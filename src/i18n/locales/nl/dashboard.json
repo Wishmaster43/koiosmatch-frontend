@@ -129,23 +129,11 @@
   "koiosForYou": {
     "title": "Koios deed dit voor jou",
     "periodLabel": "Periode",
-    "period": {
-      "7": "7 dagen",
-      "30": "30 dagen"
-    },
     "heroLabel": "Acties",
     "breakdownTitle": "Per actie",
-    "latestTitle": "Laatste acties",
     "empty": "Koios heeft nog niets voor je gedaan",
     "emptySub": "Acties die Koios voor je uitvoert, verschijnen hier.",
     "loadError": "Kon Koios-activiteit niet laden.",
-    "source": {
-      "note": "Vanuit een notitie",
-      "conversation": "Vanuit een gesprek",
-      "chat": "Vanuit chat"
-    },
-    "expand": "Toon details",
-    "collapse": "Verberg details",
     "category": {
       "tasks": "Taken",
       "whatsapp": "WhatsApp",
@@ -163,7 +151,30 @@
       "send_email": "E-mail verstuurd",
       "send_notification": "Melding verstuurd",
       "add_to_calllist": "Toegevoegd aan bellijst"
-    }
+    },
+    "periodPreset": {
+      "thisWeek": "Deze week",
+      "lastWeek": "Vorige week",
+      "last30": "30 dagen",
+      "custom": "Aangepast"
+    },
+    "rangeFrom": "Van",
+    "rangeTo": "Tot",
+    "pickRange": "Kies een start- en einddatum.",
+    "col": {
+      "action": "Actie",
+      "record": "Gekoppeld record",
+      "executedAt": "Uitgevoerd op",
+      "status": "Status"
+    },
+    "noActionsInCategory": "Geen acties in deze categorie.",
+    "truncated": "Alleen de eerste 200 acties van deze periode zijn geladen: de lijsten hieronder kunnen onvolledig zijn.",
+    "status": {
+      "completed": "Uitgevoerd",
+      "failed": "Mislukt",
+      "running": "Bezig"
+    },
+    "recordGone": "Record verwijderd"
   },
   "widget": {
     "unknown": "Onbekend"

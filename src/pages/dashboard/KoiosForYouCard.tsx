@@ -1,55 +1,71 @@
 /**
  * KoiosForYouCard — "Koios deed dit voor jou" (K0-D noordster report): the
- * tenant's Koios-TRIGGERED workflow runs over the last 7/30 days. GET
- * /ai/koios/for-you?days=7|30 → { period, actions_total, per_type, per_source,
- * latest[<=10] } — same telbron as the invoice's workflow-token ledger, so this
- * card and the billing screen always agree. A manual/event run never counts.
+ * tenant's Koios-TRIGGERED workflow runs over a chosen period. GET
+ * /ai/koios/for-you?from=&to= (Y-m-d, wins over days) → { from, to, period,
+ * actions_total, per_type, per_source, latest[], actions[<=200],
+ * actions_truncated } — same telbron as the invoice's workflow-token ledger,
+ * so this card and the billing screen always agree. A manual/event run never
+ * counts.
  *
- * KOIOS-KAART-COMPACT-1 (Danny 24-08): the card defaults to COMPACT — hero
- * total + a category KPI row (≤9 chips) — and only expands into the raw
- * per-run list on demand, with translated (never raw-English) action labels.
+ * KOIOS-KAART-COMPACT-2 (Danny 24-08, backend contract K-174): the category
+ * chips become real KPI tiles (StatTile, click-to-select); the selected tile
+ * opens a DataTable of that category's actions[] with a deep link + new-tab
+ * icon per row (EntityLink); the 7/30-day toggle becomes a period picker
+ * (this week default / last week / 30 days / custom range) driving from/to.
  */
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
-import { CheckCircle, AlertCircle, Clock, ChevronDown } from 'lucide-react'
+import { CheckCircle, AlertCircle, Clock, ExternalLink } from 'lucide-react'
 import api, { unwrap } from '@/lib/api'
 import { useDateFormat } from '@/lib/datetime'
 import { useNumberFormat } from '@/lib/formatters'
 import KoiosAiMark from '@/components/ui/KoiosAiMark'
 import Spinner from '@/components/ui/Spinner'
-import SoftChip from '@/components/ui/SoftChip'
+import StatTile from '@/components/ui/StatTile'
 import SegmentedControl from '@/components/ui/SegmentedControl'
 import ErrorBanner from '@/components/ui/ErrorBanner'
 import Button from '@/components/ui/Button'
+import DataTable from '@/components/ui/DataTable'
+import EntityLink, { buildEntityDeepLink } from '@/components/ui/EntityLink'
 import { GroupLabel, SectionTitle, Caption } from '@/components/ui/typography'
 
-type PeriodDays = 7 | 30
+// Preset period keys driving the from/to computation — 'thisWeek' is the
+// default (Monday through today), 'custom' opens the two date inputs.
+type PeriodPreset = 'thisWeek' | 'lastWeek' | 'last30' | 'custom'
 
-// One Koios-triggered workflow run, as returned in the `latest` array.
-interface KoiosForYouRun {
-  run_id: string | number
-  template_key: string | null
+// One created record referenced by an action row (K-174: `created`), or null
+// when the action created nothing resolvable.
+interface KoiosForYouCreated {
+  entity_type: string
+  entity_id: string | number
+  // Nullable on the wire: the linked record may be deleted after creation
+  // (the backend plucks labels via whereIn — a miss stays null).
+  label: string | null
+}
+
+// One Koios-triggered action row, as returned in the `actions` array (K-174).
+interface KoiosForYouAction {
+  id: string | number
+  type: string
   source: string
-  created_at: string | null
+  executed_at: string | null
   status: string
+  created: KoiosForYouCreated | null
 }
 
 // The full report shape — hand-written (§10: no api-generated.ts entry for this
 // route yet; type what the spec gives, hand-write the rest).
 interface KoiosForYouReport {
+  from?: string
+  to?: string
   period: string
   actions_total: number
   per_type: Record<string, number>
   per_source: Record<string, number>
-  latest: KoiosForYouRun[]
+  actions: KoiosForYouAction[]
+  actions_truncated: boolean
 }
-
-// Backend "source" buckets are a small, code-driven set (note/conversation/chat,
-// see BillingReport::forYou) — translated when known; anything else (a future
-// K-phase source) falls back to a humanized version of the raw bucket, never a
-// raw i18n key.
-const KNOWN_SOURCES = ['note', 'conversation', 'chat']
 
 // Turn a workflow template_key ("koios_create_task") into a readable label —
 // these are backend workflow identifiers, not app copy, so a display transform
@@ -59,21 +75,22 @@ function humanizeKey(key: string | null | undefined): string {
   return key.replace(/^koios_/, '').replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
 }
 
-// KOIOS-KAART-COMPACT-1: bucket every action type into one of eight display
+// KOIOS-KAART-COMPACT-1/2: bucket every action type into one of eight display
 // categories. Measured real template_key values (BE Workflow model / seeded
 // native templates, koiosmatch-api database/): koios_create_task,
 // koios_send_whatsapp, koios_plan_appointment, koios_send_email,
 // koios_send_notification, koios_add_to_calllist. Rejection/application/
 // birthday automations don't have template keys yet but keep their own bucket
 // so a future one lands correctly without a code change; anything matching no
-// keyword (today: send_notification, add_to_calllist) falls into 'other' —
-// an unknown type is NEVER dropped.
+// keyword falls into 'other' — an unknown type is NEVER dropped. (Source
+// buckets — note/conversation/chat — no longer render as their own column in
+// COMPACT-2's table; the action type + created record carry the row.)
 const CATEGORY_ORDER = ['tasks', 'whatsapp', 'appointments', 'emails', 'rejections', 'applications', 'birthdays', 'other'] as const
 type Category = (typeof CATEGORY_ORDER)[number]
 
 // Raw action-type keys (koios_ prefix stripped) that have a translated label —
 // anything outside this set gets the humanized fallback, never a raw i18n key
-// (mirrors the KNOWN_SOURCES/sourceLabel split above).
+// (never a raw i18n key rendered straight from the backend key).
 const KNOWN_ACTION_TYPES = ['create_task', 'send_whatsapp', 'plan_appointment', 'send_email', 'send_notification', 'add_to_calllist']
 
 // Keyword match on the normalized (prefix-stripped) key → category bucket.
@@ -89,29 +106,79 @@ function categoryOf(rawKey: string | null | undefined): Category {
   return 'other'
 }
 
+// K-174 `created.entity_type` → app-shell page key (mirrors NotificationBell's
+// ENTITY_PAGE, K-157 vocabulary). 'appointment' has NO dedicated page yet
+// (grepped components/layout/appPages.tsx — no agenda/appointments route
+// exists), so it stays unmapped on purpose: the row renders as plain text
+// rather than a link to nowhere. Extend this table, never invent a route.
+const CREATED_ENTITY_PAGE: Record<string, string> = {
+  task: 'tasks',
+  calllist: 'outreach',
+}
+
+// Local calendar-day 'YYYY-MM-DD' — never toISOString().slice(0,10), see
+// lib/datetime's own docblock on the UTC-rollback bug.
+function toIsoDay(d: Date): string {
+  const y = d.getFullYear()
+  const m = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${y}-${m}-${day}`
+}
+
+// Monday of the week containing `d` (ISO week start).
+function mondayOf(d: Date): Date {
+  const copy = new Date(d)
+  const dow = copy.getDay() // 0=Sun..6=Sat
+  const diff = dow === 0 ? -6 : 1 - dow
+  copy.setDate(copy.getDate() + diff)
+  return copy
+}
+
+// Resolve a preset into a concrete { from, to } pair, given "now" (injectable
+// for tests). 'custom' resolves from the caller-supplied inputs.
+function resolveRange(preset: PeriodPreset, now: Date, customFrom: string, customTo: string): { from: string; to: string } {
+  if (preset === 'custom') return { from: customFrom, to: customTo }
+  if (preset === 'last30') {
+    const to = new Date(now)
+    const from = new Date(now)
+    from.setDate(from.getDate() - 29)
+    return { from: toIsoDay(from), to: toIsoDay(to) }
+  }
+  const thisMonday = mondayOf(now)
+  if (preset === 'lastWeek') {
+    const from = new Date(thisMonday)
+    from.setDate(from.getDate() - 7)
+    const to = new Date(thisMonday)
+    to.setDate(to.getDate() - 1)
+    return { from: toIsoDay(from), to: toIsoDay(to) }
+  }
+  // 'thisWeek' — default: Monday through today.
+  return { from: toIsoDay(thisMonday), to: toIsoDay(now) }
+}
+
 export default function KoiosForYouCard() {
   const { t } = useTranslation(['dashboard', 'common'])
   const { formatDate } = useDateFormat()
   const { formatNumber } = useNumberFormat()
-  // 7 vs 30 days — local UI state; the query key includes it so the toggle
-  // refetches (and caches) each period independently.
-  const [days, setDays] = useState<PeriodDays>(7)
-  // Compact by default (no localStorage — a per-session UI choice, not a
-  // persisted preference); the arrow affordance below toggles the raw list.
-  const [expanded, setExpanded] = useState(false)
+  // Period preset — 'thisWeek' is the default (KOIOS-KAART-COMPACT-2 spec).
+  const [preset, setPreset] = useState<PeriodPreset>('thisWeek')
+  const [customFrom, setCustomFrom] = useState('')
+  const [customTo, setCustomTo] = useState('')
+  // Which category tile is selected — null = none, table stays hidden.
+  const [selectedCategory, setSelectedCategory] = useState<Category | null>(null)
+
+  const { from, to } = useMemo(() => resolveRange(preset, new Date(), customFrom, customTo), [preset, customFrom, customTo])
+  // A custom range is only "ready" once both ends are filled and ordered.
+  const customReady = preset !== 'custom' || (!!customFrom && !!customTo && customFrom <= customTo)
 
   // Koios-triggered workflow runs only (never a manual/event run) — the query
   // itself IS the data-fetching hook (§3), no separate wrapper needed for one call.
   const { data, isLoading, isError, refetch } = useQuery({
-    queryKey: ['koios', 'for-you', days],
+    queryKey: ['koios', 'for-you', from, to],
+    enabled: customReady,
     queryFn: async ({ signal }) =>
-      unwrap<KoiosForYouReport>(await api.get('/ai/koios/for-you', { params: { days }, signal })),
+      unwrap<KoiosForYouReport>(await api.get('/ai/koios/for-you', { params: { from, to }, signal })),
   })
-
-  // Known source bucket → translated label; unknown buckets get a humanized
-  // fallback instead of a raw i18n key.
-  const sourceLabel = (bucket: string) =>
-    KNOWN_SOURCES.includes(bucket) ? t(`koiosForYou.source.${bucket}`) : humanizeKey(bucket)
 
   // Known action type → translated label; unknown types (a future automation)
   // get the humanized fallback, so the DOM never shows a raw English key.
@@ -120,7 +187,7 @@ export default function KoiosForYouCard() {
     return KNOWN_ACTION_TYPES.includes(norm) ? t(`koiosForYou.actionType.${norm}`) : humanizeKey(rawKey)
   }
 
-  // Category → total count, from per_type — drives the compact KPI row.
+  // Category → total count, from per_type — drives the KPI tile row.
   const categoryCounts: Record<Category, number> = data
     ? CATEGORY_ORDER.reduce((acc, c) => {
         acc[c] = 0
@@ -136,38 +203,129 @@ export default function KoiosForYouCard() {
     ? CATEGORY_ORDER.filter((c) => categoryCounts[c] > 0).sort((a, b) => categoryCounts[b] - categoryCounts[a])
     : []
 
-  // Latest runs grouped per category — only used in the expanded view.
-  const groupedLatest = data
-    ? CATEGORY_ORDER.map((cat) => ({ cat, runs: data.latest.filter((r) => categoryOf(r.template_key) === cat) })).filter(
-        (g) => g.runs.length > 0,
-      )
+  // Actions of the selected category, newest first (actions[] already arrives
+  // newest-first per K-174 — filtering preserves that order).
+  const selectedActions = data && selectedCategory
+    ? data.actions.filter((a) => categoryOf(a.type) === selectedCategory)
     : []
+
+  // Table columns for the selected category's action list.
+  const columns = [
+    {
+      key: 'type',
+      header: t('koiosForYou.col.action'),
+      render: (row: KoiosForYouAction) => actionLabel(row.type),
+    },
+    {
+      key: 'created',
+      header: t('koiosForYou.col.record'),
+      render: (row: KoiosForYouAction) => {
+        if (!row.created) return <span style={{ color: 'var(--text-muted)' }}>—</span>
+        // label is nullable on the wire: the record was deleted after Koios
+        // created it (BillingReport plucks labels via whereIn — a miss stays
+        // null). No label = nothing to link to; honest fallback, never an
+        // empty link to a dead record.
+        if (!row.created.label) return <Caption>{t('koiosForYou.recordGone')}</Caption>
+        const page = CREATED_ENTITY_PAGE[row.created.entity_type]
+        // Unknown/unmapped entity_type (incl. 'appointment', no page yet):
+        // plain text, never a link to nowhere.
+        if (!page) return <span>{row.created.label}</span>
+        const deepLink = buildEntityDeepLink(page, row.created.entity_id)
+        return (
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+            <EntityLink page={page} id={row.created.entity_id} hideIcon>{row.created.label}</EntityLink>
+            <Button
+              iconOnly
+              size="sm"
+              variant="ghost"
+              aria-label={t('common:openInNewTab')}
+              href={deepLink}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <ExternalLink size={13} />
+            </Button>
+          </span>
+        )
+      },
+    },
+    {
+      key: 'executed_at',
+      header: t('koiosForYou.col.executedAt'),
+      render: (row: KoiosForYouAction) => formatDate(row.executed_at, { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
+      nowrap: true,
+    },
+    {
+      key: 'status',
+      header: t('koiosForYou.col.status'),
+      render: (row: KoiosForYouAction) => {
+        const ok = row.status === 'completed'
+        const failed = row.status === 'failed'
+        const Icon = ok ? CheckCircle : failed ? AlertCircle : Clock
+        const color = ok ? 'var(--color-success)' : failed ? 'var(--color-danger)' : 'var(--text-muted)'
+        // Translated status with a visible text twin — colour/icon is never the
+        // only signal (§6) and a raw wire value never reaches the a11y tree (§5).
+        const statusLabel = t(`koiosForYou.status.${row.status}`, { defaultValue: humanizeKey(row.status) })
+        return (
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+            <Icon size={14} color={color} aria-hidden="true" />
+            <Caption>{statusLabel}</Caption>
+          </span>
+        )
+      },
+      nowrap: true,
+    },
+  ]
 
   return (
     <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 16 }}>
       {/* Header — Koios mark carries the AI-Act disclosure hint as a tooltip
           (mirrors KoiosAdviceBlock: the title already names Koios explicitly, so
-          this isn't a bare icon), title, and the 7/30-day period toggle. */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+          this isn't a bare icon), title, and the period picker. */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12, flexWrap: 'wrap' }}>
         <KoiosAiMark size={18} title={t('common:aiGeneratedHint')} />
         <SectionTitle style={{ flex: 1 }}>{t('koiosForYou.title')}</SectionTitle>
         <SegmentedControl
           size="compact"
           ariaLabel={t('koiosForYou.periodLabel')}
-          value={String(days)}
-          onChange={(v) => setDays(Number(v) as PeriodDays)}
+          value={preset}
+          onChange={(v) => setPreset(v as PeriodPreset)}
           options={[
-            { value: '7', label: t('koiosForYou.period.7') },
-            { value: '30', label: t('koiosForYou.period.30') },
+            { value: 'thisWeek', label: t('koiosForYou.periodPreset.thisWeek') },
+            { value: 'lastWeek', label: t('koiosForYou.periodPreset.lastWeek') },
+            { value: 'last30', label: t('koiosForYou.periodPreset.last30') },
+            { value: 'custom', label: t('koiosForYou.periodPreset.custom') },
           ]}
         />
+        {preset === 'custom' && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <label>
+              <span className="sr-only">{t('koiosForYou.rangeFrom')}</span>
+              <input type="date" value={customFrom} onChange={(e) => setCustomFrom(e.target.value)}
+                style={{ height: 28, fontSize: 12, border: '1px solid var(--border)', borderRadius: 6, padding: '0 8px' }} />
+            </label>
+            <span style={{ color: 'var(--text-muted)', fontSize: 12 }}>–</span>
+            <label>
+              <span className="sr-only">{t('koiosForYou.rangeTo')}</span>
+              <input type="date" value={customTo} onChange={(e) => setCustomTo(e.target.value)}
+                style={{ height: 28, fontSize: 12, border: '1px solid var(--border)', borderRadius: 6, padding: '0 8px' }} />
+            </label>
+          </div>
+        )}
       </div>
 
       {/* Loading — the report for the active period is in flight. */}
-      {isLoading && (
+      {isLoading && customReady && (
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '24px 0', color: 'var(--text-muted)' }}>
           <Spinner size={16} />
           <span style={{ fontSize: 12 }}>{t('common:loading')}</span>
+        </div>
+      )}
+
+      {/* Waiting on a custom range — neither loading nor an error, just an honest prompt. */}
+      {!customReady && (
+        <div style={{ textAlign: 'center', padding: '20px 8px', color: 'var(--text-muted)', fontSize: 12 }}>
+          {t('koiosForYou.pickRange')}
         </div>
       )}
 
@@ -185,7 +343,7 @@ export default function KoiosForYouCard() {
         </div>
       )}
 
-      {/* Success — hero total, compact category breakdown, expandable per-run list. */}
+      {/* Success — hero total, KPI-tile category row, per-category table on select. */}
       {!isLoading && !isError && data && data.actions_total > 0 && (
         <>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 14 }}>
@@ -193,63 +351,46 @@ export default function KoiosForYouCard() {
             <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('koiosForYou.heroLabel')}</span>
           </div>
 
-          {/* Category KPI row — compact by default: category label + count only,
-              never the raw per-run list. The arrow expands into the grouped list. */}
+          {/* KPI tile row — one equal-footprint StatTile per active category;
+              clicking a tile selects it (toggles off on a second click), which
+              reveals the per-category action table below. */}
           {activeCategories.length > 0 && (
             <div style={{ marginBottom: 14 }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-                <GroupLabel>{t('koiosForYou.breakdownTitle')}</GroupLabel>
-                <Button
-                  iconOnly
-                  size="sm"
-                  variant="ghost"
-                  aria-label={t(expanded ? 'koiosForYou.collapse' : 'koiosForYou.expand')}
-                  aria-expanded={expanded}
-                  onClick={() => setExpanded((e) => !e)}
-                  style={{ transform: expanded ? 'rotate(180deg)' : undefined }}
-                >
-                  <ChevronDown size={14} />
-                </Button>
-              </div>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+              <GroupLabel style={{ marginBottom: 6 }}>{t('koiosForYou.breakdownTitle')}</GroupLabel>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                 {activeCategories.map((c) => (
-                  <SoftChip key={c} color="var(--color-primary)" label={`${t(`koiosForYou.category.${c}`)} · ${formatNumber(categoryCounts[c])}`} />
+                  <StatTile
+                    key={c}
+                    label={t(`koiosForYou.category.${c}`)}
+                    value={formatNumber(categoryCounts[c])}
+                    size="sm"
+                    accent={selectedCategory === c}
+                    pressed={selectedCategory === c}
+                    onClick={() => setSelectedCategory((cur) => (cur === c ? null : c))}
+                    style={selectedCategory === c ? { borderColor: 'var(--color-primary)' } : undefined}
+                  />
                 ))}
               </div>
+              {/* Payload-level truncation: the server caps actions[] at 200 for
+                  the WHOLE period — say so at the row that shows the totals,
+                  not inside one category's table (§3 honesty). */}
+              {data.actions_truncated && (
+                <Caption style={{ display: 'block', marginTop: 6 }}>{t('koiosForYou.truncated')}</Caption>
+              )}
             </div>
           )}
 
-          {/* Expanded — the raw per-run list, subdivided per category with a
-              GroupLabel category heading, translated action labels per row. */}
-          {expanded && groupedLatest.length > 0 && (
+          {/* Selected category's action table — the per-run detail, filtered to
+              the chosen category, deep-linking to the created record. */}
+          {selectedCategory && (
             <div>
-              <GroupLabel style={{ marginBottom: 6 }}>{t('koiosForYou.latestTitle')}</GroupLabel>
-              {groupedLatest.map(({ cat, runs }) => (
-                <div key={cat} style={{ marginBottom: 10 }}>
-                  <GroupLabel style={{ marginBottom: 4 }}>{t(`koiosForYou.category.${cat}`)}</GroupLabel>
-                  {runs.map((run, i) => {
-                    const ok = run.status === 'completed'
-                    const failed = run.status === 'failed'
-                    const Icon = ok ? CheckCircle : failed ? AlertCircle : Clock
-                    const color = ok ? 'var(--color-success)' : failed ? 'var(--color-danger)' : 'var(--text-muted)'
-                    return (
-                      <div key={run.run_id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '7px 0',
-                        borderBottom: i < runs.length - 1 ? '1px solid var(--border)' : 'none' }}>
-                        <Icon size={14} color={color} style={{ flexShrink: 0 }} />
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                          <div style={{ fontSize: 12.5, fontWeight: 500, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                            {actionLabel(run.template_key)}
-                          </div>
-                          <Caption>{sourceLabel(run.source.split(':')[0])}</Caption>
-                        </div>
-                        <Caption style={{ flexShrink: 0 }}>
-                          {formatDate(run.created_at, { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
-                        </Caption>
-                      </div>
-                    )
-                  })}
-                </div>
-              ))}
+              <GroupLabel style={{ marginBottom: 6 }}>{t(`koiosForYou.category.${selectedCategory}`)}</GroupLabel>
+              <DataTable<KoiosForYouAction>
+                columns={columns}
+                rows={selectedActions}
+                getRowId={(row) => row.id}
+                emptyText={t('koiosForYou.noActionsInCategory')}
+              />
             </div>
           )}
         </>

@@ -1,4 +1,5 @@
 import type { CSSProperties, ReactNode } from 'react'
+import { Check } from 'lucide-react'
 import { interactive } from '@/lib/a11y'
 import { Caption, Mono } from '@/components/ui/typography'
 
@@ -21,16 +22,21 @@ interface StatTileProps {
   dotColor?: string
   // Value in the accent TEXT token (contrast-safe twin, never the raw brand).
   accent?: boolean
+  // Toggle-selected state (clickable tiles only): emits aria-pressed AND a
+  // visible check marker — colour is never the only signal (§6; mirrors
+  // QuickViewToggle/ChipMultiSelect's chosen convention).
+  pressed?: boolean
   onClick?: () => void
   style?: CSSProperties
 }
 
-export default function StatTile({ label, value, size = 'md', labelFirst = false, dotColor, accent, onClick, style }: StatTileProps) {
+export default function StatTile({ label, value, size = 'md', labelFirst = false, dotColor, accent, pressed, onClick, style }: StatTileProps) {
   // Label row — Caption identity; the optional dot is a data marker, not decoration.
   const labelRow = (
     <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
       {dotColor && <span aria-hidden="true" style={{ width: 7, height: 7, borderRadius: '50%', background: dotColor, flexShrink: 0 }} />}
       <Caption>{label}</Caption>
+      {pressed && <Check size={12} aria-hidden="true" style={{ color: 'var(--color-primary-text)', flexShrink: 0 }} />}
     </span>
   )
   // Value — Mono 700; accent rides the contrast-safe text twin.
@@ -48,6 +54,7 @@ export default function StatTile({ label, value, size = 'md', labelFirst = false
         borderRadius: 10, padding: '12px 14px', cursor: onClick ? 'pointer' : undefined,
         transition: 'background 0.1s', ...style }}
       {...interactive(onClick)}
+      {...(onClick && pressed != null ? { 'aria-pressed': pressed } : {})}
       onMouseEnter={onClick ? e => (e.currentTarget.style.background = 'var(--hover-bg)') : undefined}
       onMouseLeave={onClick ? e => (e.currentTarget.style.background = 'var(--surface)') : undefined}
     >

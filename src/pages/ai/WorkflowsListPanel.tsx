@@ -5,13 +5,16 @@
  * purely presentational, all data/mutations come from useWorkflowsData /
  * useWorkflowsFilters.
  */
-import type { MutableRefObject } from 'react'
+import { useState, type MutableRefObject } from 'react'
+import ViewModeToggle from '@/components/ui/ViewModeToggle'
 import { useTranslation } from 'react-i18next'
 import { Plus, LayoutGrid, List, Archive, Trash2 } from 'lucide-react'
 import WorkflowCard from './WorkflowCard'
 import WorkflowListRow from './WorkflowListRow'
+import WorkflowQueueView from './WorkflowQueueView'
 import QuickViewToggle from '@/components/ui/QuickViewToggle'
 import Spinner from '@/components/ui/Spinner'
+import SegmentedControl from '@/components/ui/SegmentedControl'
 import type { Workflow } from '@/types/workflow'
 import type { WorkflowFolder, FolderId } from './hooks/useWorkflowsData'
 import type { ViewMode } from './hooks/useWorkflowsFilters'
@@ -53,49 +56,60 @@ export default function WorkflowsListPanel({
   canManageFolders, handleArchive, handleRestore, onMarkDeletion, onUnmark, graceDays = null,
 }: WorkflowsListPanelProps) {
   const { t } = useTranslation(['workflows', 'common'])
+  // WF-WACHTRIJ-FE-1: the page's own list⇄queue switch — mirrors the app-wide
+  // SegmentedControl view switch (ReportSwitchBar's "compact + activeOnly"
+  // idiom), since this page had no existing tab bar to reuse.
+  const [mainView, setMainView] = useState<'list' | 'queue'>('list')
   return (
     <div style={{ flex: 1, padding: 24, overflowY: 'auto' }}>
       {/* Toolbar — add on the LEFT, count + archived + view toggle on the RIGHT (mirror Kansen). */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 20 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 20, flexWrap: 'wrap' }}>
         <Button variant="primary"
           onClick={() => openEditor({ name: t('page.newWorkflow'), trigger: 'Dagelijks 08:00', status: 'draft', last_run: null, steps: [], folder_id: selectedFolder === 'unassigned' ? null : (selectedFolder ?? null) })}
         >
           <Plus size={14} /> {t('page.newWorkflow')}
         </Button>
 
+        <SegmentedControl size="compact" activeOnly ariaLabel={t('queue.switchLabel')}
+          value={mainView} onChange={v => setMainView(v as 'list' | 'queue')}
+          options={[
+            { value: 'list', label: t('page.viewWorkflows') },
+            { value: 'queue', label: t('queue.tabLabel') },
+          ]} />
+
         <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 10 }}>
-          {/* Visible count */}
-          <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t('page.countWorkflows', { n: visibleWorkflows.length })}</span>
+          {mainView === 'list' && (<>
+            {/* Visible count */}
+            <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t('page.countWorkflows', { n: visibleWorkflows.length })}</span>
 
-          {/* Archived (soft-deleted) view — shared quick-view toggle (§4), never
-              hand-rolled; exclusive with the trash view (TRASH-OVERAL-2). */}
-          <QuickViewToggle active={showArchived} onToggle={onToggleArchived}
-            label={t('page.archived')} title={t('page.archivedView')} icon={Archive} />
-          {/* Prullenbak (pending erase) — same shared toggle, candidates' trash colour. */}
-          <QuickViewToggle active={showTrash} onToggle={onToggleTrash}
-            label={t('common:trash.view')} color="var(--color-trash)" icon={Trash2} />
+            {/* Archived (soft-deleted) view — shared quick-view toggle (§4), never
+                hand-rolled; exclusive with the trash view (TRASH-OVERAL-2). */}
+            <QuickViewToggle active={showArchived} onToggle={onToggleArchived}
+              label={t('page.archived')} title={t('page.archivedView')} icon={Archive} />
+            {/* Prullenbak (pending erase) — same shared toggle, candidates' trash colour. */}
+            <QuickViewToggle active={showTrash} onToggle={onToggleTrash}
+              label={t('common:trash.view')} color="var(--color-trash)" icon={Trash2} />
 
-          {/* View mode toggle — icon-pair, persisted (list is the Make.com-style default) */}
-          <div style={{ display: 'flex', border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden' }}>
-            {([{ mode: 'list', Icon: List, label: t('page.viewList') }, { mode: 'grid', Icon: LayoutGrid, label: t('page.viewGrid') }] as const).map(({ mode, Icon, label }) => (
-              <button key={mode} onClick={() => setViewMode(mode)} title={label} aria-label={label} aria-pressed={viewMode === mode}
-                style={{ padding: '6px 10px', background: viewMode === mode ? 'var(--color-primary-bg)' : 'var(--surface)', color: viewMode === mode ? 'var(--color-primary)' : 'var(--text-muted)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
-                <Icon size={14} />
-              </button>
-            ))}
-          </div>
+            {/* View mode toggle — THE shared icon-only switcher (§4: never a
+                hand-rolled pair); list is the Make.com-style default. */}
+            <ViewModeToggle value={viewMode} onChange={setViewMode} options={[
+              { id: 'list', icon: List, label: t('page.viewList') },
+              { id: 'grid', icon: LayoutGrid, label: t('page.viewGrid') },
+            ]} />
+          </>)}
         </div>
       </div>
 
-      {loading ? (
+      {mainView === 'queue' ? (
+        <WorkflowQueueView />
+      ) : loading ? (
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--text-muted)', fontSize: 13 }}>
           <Spinner size={14} /> {t('page.loading')}
         </div>
       ) : error ? (
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, color: 'var(--color-danger-text)', fontSize: 13, padding: '24px 0' }}>
           <span>{t('page.error')}</span>
-          <button onClick={retryLoad} style={{ background: 'none', border: '1px solid var(--border)', borderRadius: 6,
-            padding: '4px 10px', cursor: 'pointer', color: 'var(--text)', fontSize: 12 }}>{t('common:error.retry')}</button>
+          <Button variant="secondary" onClick={retryLoad}>{t('common:error.retry')}</Button>
         </div>
       ) : viewMode === 'grid' ? (
         <div style={{ display: 'grid', gap: 16, gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))' }}>

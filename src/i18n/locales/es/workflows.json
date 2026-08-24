@@ -258,7 +258,8 @@
     "deleteFolderInUse": "Esta carpeta todavía tiene workflows activos y no se puede eliminar.",
     "archiveConfirm": "¿Archivar el flujo de trabajo \"{{name}}\"? Las ejecuciones abiertas se cierran de inmediato.",
     "archiveSuccess": "Flujo de trabajo archivado.",
-    "restoreSuccess": "Flujo de trabajo restaurado."
+    "restoreSuccess": "Flujo de trabajo restaurado.",
+    "viewWorkflows": "Flujos de trabajo"
   },
   "ai": {
     "saved": "Guardado",
@@ -1148,5 +1149,51 @@
     "title": "Workflow no encontrada",
     "message": "Esta workflow no existe (ya), o no tienes acceso a ella.",
     "backToList": "Volver a la lista"
+  },
+  "queue": {
+    "tabLabel": "Cola",
+    "switchLabel": "Cambiar vista: flujos de trabajo o cola",
+    "unknownWorkflow": "Flujo de trabajo desconocido",
+    "openRuns": "Abrir ejecuciones",
+    "relationBadge": "{{count}} en cola",
+    "loading": "Cargando cola…",
+    "loadFailed": "No se pudo cargar la cola",
+    "noAccess": "No tienes acceso a la cola (permisos → ver configuración).",
+    "empty": "La cola está vacía: no hay ejecuciones pendientes, programadas o por reintentar.",
+    "counts": {
+      "pending": "Pendiente",
+      "waiting": "En pausa",
+      "scheduledToday": "Programado hoy",
+      "retrying": "Reintentando"
+    },
+    "pending": {
+      "title": "Pendiente",
+      "empty": "Nada pendiente.",
+      "queuedAt": "En cola desde {{date}}"
+    },
+    "waiting": {
+      "title": "En pausa",
+      "empty": "Nada en pausa.",
+      "resumeAt": "Se reanuda a las {{date}}"
+    },
+    "scheduled": {
+      "title": "Programado",
+      "empty": "Nada programado.",
+      "nextRunAt": "Próxima ejecución a las {{date}}"
+    },
+    "retrying": {
+      "title": "Reintentando",
+      "empty": "Nada en reintento.",
+      "attempts_one": "{{count}} intento",
+      "attempts_other": "{{count}} intentos",
+      "nextAttemptApprox": "próximo intento ± {{date}}"
+    },
+    "trigger": {
+      "event": "Evento",
+      "manual": "Manual",
+      "scheduled": "Programado",
+      "scheduler": "Planificador",
+      "webhook": "Webhook"
+    }
   }
 }

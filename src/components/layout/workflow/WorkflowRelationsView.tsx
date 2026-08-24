@@ -6,18 +6,36 @@
  * workflow's own editor. Four UI states; each list renders independently since
  * a workflow can have parents with no children or vice versa.
  */
-import { GitBranch, ArrowDownToLine, ArrowUpFromLine } from 'lucide-react'
+import { GitBranch, ArrowDownToLine, ArrowUpFromLine, ListOrdered } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useWorkflowRelations } from './useWorkflowRelations'
 import { PageTitle, SectionTitle, Caption } from '@/components/ui/typography'
 import EntityLink from '@/components/ui/EntityLink'
 import StatusPill from '@/components/ui/StatusPill'
+import SoftChip from '@/components/ui/SoftChip'
 import { StatusBadge } from '@/components/reports/runFormat'
 import Toggle from '@/components/ui/Toggle'
 import ErrorBanner from '@/components/ui/ErrorBanner'
 import Spinner from '@/components/ui/Spinner'
 import { useDateFormat } from '@/lib/datetime'
+import { useWorkflowQueueBadge } from '@/pages/ai/shared'
 import type { WorkflowRelation } from '@/types/workflow'
+
+// WF-WACHTRIJ-FE-1: how many queue entries this related workflow currently has
+// (K-171). Renders NOTHING at 0/null — a badge that always shows "0" is noise,
+// not information (the same rule QuickViewToggle counts already follow).
+function QueueBadge({ workflowId }: { workflowId?: string | number }) {
+  const { t } = useTranslation('workflows')
+  // The queue endpoint validates workflow_id as uuid — coerce, never a number.
+  const count = useWorkflowQueueBadge(workflowId != null ? String(workflowId) : undefined)
+  if (!count) return null
+  return (
+    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3 }}>
+      <ListOrdered size={10} color="var(--color-info)" />
+      <SoftChip label={t('queue.relationBadge', { count })} color="var(--color-info)" round size={11} />
+    </span>
+  )
+}
 
 // A related workflow's OWN status (active/inactive/draft) — success tint when
 // active, neutral otherwise; mirrors the editor header's own status colours.
@@ -43,6 +61,7 @@ function RelationRow({ row, onToggle }: { row: WorkflowRelation; onToggle: () =>
             <Caption>{t('relations.lastRun', { date: formatDate(row.last_run_at), time: formatTime(row.last_run_at) })}</Caption>
           )}
           {row.last_run_status && <StatusBadge status={row.last_run_status} />}
+          <QueueBadge workflowId={row.id} />
         </div>
       </div>
       {/* §4: the active workflow toggle is a success surface. */}
