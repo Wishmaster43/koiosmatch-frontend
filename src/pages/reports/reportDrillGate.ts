@@ -46,10 +46,10 @@ export const REPORT_DRILL_AVAILABLE: Record<DrillableReport, boolean> = {
   opportunities: true,
   tasks: true,
   outreach: true,
-  // RAPPORTEN-WHATSAPP-FE-1: whatsapp's ONE drill is per KPI CARD —
-  // GET /reports/whatsapp/kpis/drill?kpi=<key> (ReportDrillController::whatsappKpi,
-  // registered live in CMBE f7a2c6f8 and measured against the route file by the
-  // Opus review). There is NO axis/bucket drill and NO advice route; rows carry
+  // RAPPORTEN-WHATSAPP-FE-1: whatsapp drills per KPI CARD
+  // (GET /reports/whatsapp/kpis/drill?kpi=<key>) and per CHART segment/bucket
+  // (GET /reports/whatsapp/axes/drill — K-180, wired in the v3 wave 1b).
+  // There is NO advice route for this report; rows carry
   // masked wa_numbers only (§8/§9), gated behind module:whatsapp.
   whatsapp: true,
 }

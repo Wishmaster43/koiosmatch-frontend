@@ -3,10 +3,11 @@
  * CMBE f7a2c6f8; RAPPORTEN-WHATSAPP-FE-1). Nine KPI cards through ReportKpiBand +
  * kpiCatalog ('whatsapp' fixed family), dashboard-style chart blocks (inbound/
  * outbound over time, direction/type/escalated breakdowns, a top-conversations
- * list) and a drill-down PER KPI CARD — the backend's one whatsapp drill is
- * GET /reports/whatsapp/kpis/drill?kpi=<key> (ReportDrillController::whatsappKpi);
- * there is NO axis/bucket drill and NO advice route for this report, so the axis
- * bars deliberately carry no click (§3: no affordance without a real path).
+ * list). Two drills exist: per KPI card (GET /reports/whatsapp/kpis/drill?kpi=<key>,
+ * ReportDrillController::whatsappKpi) and a per-axis drill (GET
+ * /reports/whatsapp/axes/drill, operation getReportsWhatsappAxesDrill in
+ * api-generated.ts) covering direction/type/escalated/conversation/timeseries.
+ * There is still NO advice route for this report.
  *
  * PRIVACY (§8/§9): the DRILL rows carry a wa_number the SERVER already masked —
  * rendered verbatim through the shared drill drawer, never un-masked or
@@ -70,10 +71,35 @@ export default function WhatsappReport({ period }: { period: ReportPeriod }) {
       rowsEndpoint: '/reports/whatsapp/kpis/drill', rowsParams: { kpi: serverKey, period },
     }))
 
-  // Plain axis bars — informative, not clickable (no axis drill exists, §3).
-  const bars = (segs: WhatsappSegment[]) => {
+  // The one axis drill (GET /reports/whatsapp/axes/drill) reuses the same drawer
+  // state as the KPI drill — a segment/row click replaces whatever was open.
+  // Gating happens at the CALL SITE (mirrors bars()/openSegment split elsewhere),
+  // so this itself always performs the update once invoked.
+  const openAxisDrill = (axis: 'direction' | 'type' | 'escalated' | 'conversation', label: string, value: string | number, rawValue: string) =>
+    setKpiDrill({
+      title: label, value, subtitle: windowSub(),
+      rowsEndpoint: '/reports/whatsapp/axes/drill', rowsParams: { axis, value: rawValue, period },
+    })
+  // Timeseries bucket drill — value = the clicked point's own count, title =
+  // chart label + DD-MM-YYYY date (DATUM-1), and the server bucket granularity
+  // forwarded so a week bar's drawer counts the whole week.
+  const openBucketDrill = (chartLabel: string, count: number, dateKey: string) =>
+    setKpiDrill({
+      title: `${chartLabel} · ${formatDate(dateKey)}`, value: count, subtitle: windowSub(),
+      rowsEndpoint: '/reports/whatsapp/axes/drill',
+      rowsParams: { axis: 'timeseries', value: dateKey, period,
+        ...(data?.timeseries.bucket === 'week' ? { bucket: 'week' } : {}) },
+    })
+
+  // Axis bars, clickable into the per-axis drill — each segment drills on its own
+  // RAW server `value`, never the translated label (§ contract discipline).
+  const bars = (axis: 'direction' | 'type' | 'escalated', segs: WhatsappSegment[]) => {
     const max = segs.reduce((m, s) => Math.max(m, s.count), 0)
-    return <SegmentBars max={max} items={segs.map(s => ({ key: s.value, label: s.label, count: s.count, color: null }))} />
+    const onPick = gateDrillClick('whatsapp', (value: string) => {
+      const seg = segs.find(s => s.value === value)
+      if (seg) openAxisDrill(axis, seg.label, seg.count, seg.value)
+    })
+    return <SegmentBars max={max} onPick={onPick} items={segs.map(s => ({ key: s.value, label: s.label, count: s.count, color: null }))} />
   }
 
   // The nine fixed cards straight off the server's kpis[] array — each label from
@@ -132,35 +158,56 @@ export default function WhatsappReport({ period }: { period: ReportPeriod }) {
               timeseries chart OutreachReport uses. */}
           <ReportChartCard span={2} title={t('whatsapp.series')} chart={
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              {/* A point drill explains that BUCKET: the drawer value is the point's
+                  own count, the title carries the chart + house-formatted date, and
+                  the week granularity rides along (mirrors ApplicationsReport's
+                  openBucket) — the contract has no direction+date pair, so the
+                  drawer's rows span BOTH directions of the bucket; each chart's
+                  title says which number the user clicked. */}
               <div>
                 <Caption style={{ fontWeight: 600, marginBottom: 4, display: 'block' }}>{t('whatsapp.inbound')}</Caption>
-                <ReportTimeseriesChart series={data.timeseries.series.map(p => ({ date: p.date, label: p.date, value: p.inbound }))} />
+                <ReportTimeseriesChart series={data.timeseries.series.map(p => ({ date: p.date, label: p.date, value: p.inbound }))}
+                  onPick={gateDrillClick('whatsapp', (dateKey: string) => {
+                    const pt = data.timeseries.series.find(p => p.date === dateKey)
+                    if (pt) openBucketDrill(t('whatsapp.inbound'), pt.inbound, dateKey)
+                  })} />
               </div>
               <div>
                 <Caption style={{ fontWeight: 600, marginBottom: 4, display: 'block' }}>{t('whatsapp.outbound')}</Caption>
-                <ReportTimeseriesChart series={data.timeseries.series.map(p => ({ date: p.date, label: p.date, value: p.outbound }))} />
+                <ReportTimeseriesChart series={data.timeseries.series.map(p => ({ date: p.date, label: p.date, value: p.outbound }))}
+                  onPick={gateDrillClick('whatsapp', (dateKey: string) => {
+                    const pt = data.timeseries.series.find(p => p.date === dateKey)
+                    if (pt) openBucketDrill(t('whatsapp.outbound'), pt.outbound, dateKey)
+                  })} />
               </div>
             </div>
           } />
 
-          <ReportChartCard title={t('whatsapp.axes.direction')} chart={bars(data.by_direction)} />
-          <ReportChartCard title={t('whatsapp.axes.type')} chart={bars(data.by_type)} />
-          <ReportChartCard title={t('whatsapp.axes.escalated')} chart={bars(data.by_escalated)} />
+          <ReportChartCard title={t('whatsapp.axes.direction')} chart={bars('direction', data.by_direction)} />
+          <ReportChartCard title={t('whatsapp.axes.type')} chart={bars('type', data.by_type)} />
+          <ReportChartCard title={t('whatsapp.axes.escalated')} chart={bars('escalated', data.by_escalated)} />
 
           {/* Top-10 busiest threads — candidate name (server-gated) + volume;
               no numbers, no message content here (§8/§9). */}
           <ReportChartCard span={2} title={t('whatsapp.topConversations')} chart={
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-              {data.top_conversations.map(c => (
-                <div key={String(c.conversation_id)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                  gap: 10, padding: '6px 10px', borderRadius: 8, background: 'var(--hover-bg)' }}>
-                  <BodyText style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                    {c.candidate || '—'}
-                  </BodyText>
-                  {c.last_message_at && <Caption style={{ whiteSpace: 'nowrap' }}>{formatDate(c.last_message_at)}</Caption>}
-                  <Mono style={{ fontWeight: 600 }}>{c.message_count}</Mono>
-                </div>
-              ))}
+              {data.top_conversations.map(c => {
+                const onPick = gateDrillClick('whatsapp', () =>
+                  openAxisDrill('conversation', c.candidate || '—', c.message_count, String(c.conversation_id)))
+                return (
+                  <div key={String(c.conversation_id)} onClick={onPick} role={onPick ? 'button' : undefined}
+                    tabIndex={onPick ? 0 : undefined}
+                    onKeyDown={onPick ? (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onPick() } } : undefined}
+                    style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                      gap: 10, padding: '6px 10px', borderRadius: 8, background: 'var(--hover-bg)', cursor: onPick ? 'pointer' : 'default' }}>
+                    <BodyText style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {c.candidate || '—'}
+                    </BodyText>
+                    {c.last_message_at && <Caption style={{ whiteSpace: 'nowrap' }}>{formatDate(c.last_message_at)}</Caption>}
+                    <Mono style={{ fontWeight: 600 }}>{c.message_count}</Mono>
+                  </div>
+                )
+              })}
             </div>
           } />
         </ReportGrid>

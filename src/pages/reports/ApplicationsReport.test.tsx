@@ -318,8 +318,9 @@ describe('ApplicationsReport (RAPPORTEN-SUITE-1 portie 2)', () => {
       expect.objectContaining({ params: { kpi: 'too_long_in_stage', period: 'month' } }))
   })
 
-  // INTAKE-IN-APPS-1: the new intake block — two tiles + two non-clickable
-  // distribution axes, straight off the envelope's `intakes` field.
+  // INTAKE-IN-APPS-1: the intake block — two display-only tiles + two clickable
+  // distribution axes (see the intakes/drill tests below), straight off the
+  // envelope's `intakes` field.
   it('renders the intake block from the fixture', () => {
     mockUseApplicationsReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
@@ -333,14 +334,40 @@ describe('ApplicationsReport (RAPPORTEN-SUITE-1 portie 2)', () => {
     expect(screen.getByText('Amsterdam')).toBeInTheDocument()
   })
 
-  // No fake affordance (§3): the intake block never fires a request — there is
-  // no backend intake-drill endpoint to click through to.
-  it('never fires a request when clicking inside the intake block', async () => {
+  // INTAKE-IN-APPS-1: the by_recruiter bar drills via the new intakes/drill
+  // endpoint (operation getReportsApplicationsIntakesDrill), axis=recruiter,
+  // value=owner_id — never the displayed name.
+  it('clicking a by-recruiter intake bar drills via /reports/applications/intakes/drill with axis=recruiter', async () => {
+    const user = userEvent.setup()
+    mockUseApplicationsReport.mockReturnValue({ data, loading: false, error: false })
+    renderReport()
+    getSpy.mockClear()
+    await user.click(screen.getByText('Bram Smit'))
+    expect(getSpy).toHaveBeenCalledWith('/reports/applications/intakes/drill',
+      expect.objectContaining({ params: { axis: 'recruiter', value: 'u2', period: 'month' } }))
+  })
+
+  // Same endpoint, axis=branch — value is the segment's own `value` field, never
+  // the rendered branch label.
+  it('clicking a by-branch intake bar drills via /reports/applications/intakes/drill with axis=branch', async () => {
     const user = userEvent.setup()
     mockUseApplicationsReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
     getSpy.mockClear()
     await user.click(screen.getByText('Amsterdam'))
+    expect(getSpy).toHaveBeenCalledWith('/reports/applications/intakes/drill',
+      expect.objectContaining({ params: { axis: 'branch', value: 'b1', period: 'month' } }))
+  })
+
+  // The planned/done tiles stay display-only: axis=state's value vocabulary is
+  // unconfirmed, so no request may fire from clicking them (§3 no fake affordance).
+  it('never fires a request when clicking the planned/done intake tiles', async () => {
+    const user = userEvent.setup()
+    mockUseApplicationsReport.mockReturnValue({ data, loading: false, error: false })
+    renderReport()
+    getSpy.mockClear()
+    await user.click(screen.getByText('Gepland'))
+    await user.click(screen.getByText('13'))
     expect(getSpy).not.toHaveBeenCalled()
   })
 

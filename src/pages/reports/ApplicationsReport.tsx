@@ -121,6 +121,25 @@ export default function ApplicationsReport({ period, filters = EMPTY_REPORT_FILT
     adviceParams: { ...baseParams, date: pt.date, ...(data?.timeseries.bucket === 'week' ? { bucket: 'week' } : {}) },
   })
 
+  // INTAKE-IN-APPS-1: the intake axis drill (GET /reports/applications/intakes/drill,
+  // operation getReportsApplicationsIntakesDrill) — its documented request body only
+  // carries axis/value/period/from/to (no status/owner/location/customer filters), so
+  // only those fields are sent here, never the full `baseParams` filter set.
+  // CONSEQUENCE: the intake bars come from the filter-scoped envelope while this
+  // drill cannot be filter-scoped — with an active panel filter the drawer would
+  // count a DIFFERENT population than the bar shows, so the bars render without
+  // a click while any filter is active (contract gap filed with CMBE:
+  // WAVE-1B-CONTRACTVRAGEN-CMBE).
+  const openIntakeDrill = (axis: 'state' | 'recruiter' | 'branch', label: string, value: string | number, rawValue: string) =>
+    setDrill({
+      title: label, value, subtitle: windowSub(),
+      rowsEndpoint: '/reports/applications/intakes/drill', rowsParams: { axis, value: rawValue, period },
+    })
+  // See the CONSEQUENCE note above: intake drills are honest only when no panel
+  // filter narrows the envelope this block was drawn from.
+  const intakeDrillable = [filters.status, filters.ownerId, filters.locationId, filters.customerId]
+    .every(a => a.length === 0)
+
   const bars = (axis: Axis, segs: (CandidateSegment | ApplicationTopSegment)[]) => {
     const max = segs.reduce((m, s) => Math.max(m, s.count), 0)
     const onPick = gateDrillClick('applications', (value: string) => {
@@ -250,9 +269,11 @@ export default function ApplicationsReport({ period, filters = EMPTY_REPORT_FILT
           <ReportChartCard title={t('applications.axes.vacancy')} chart={bars('vacancy', data.by_vacancy)} />
 
           {/* INTAKE-IN-APPS-1: appointment numbers for the window — two small
-              tiles + two distribution axes. Not clickable: the backend offers no
-              intake drill (only /reports/applications/kpis/drill exists), so no
-              affordance is drawn on top of these (§3 no fake affordances). */}
+              tiles + two distribution axes. GET /reports/applications/intakes/drill
+              (operation getReportsApplicationsIntakesDrill) now covers axis
+              recruiter|branch|state — the recruiter/branch bars below drill on it.
+              The planned/done tiles stay display-only: axis=state's value
+              vocabulary is unconfirmed (asked CMBE) — no guessing 'planned'/'done'. */}
           <ReportGridItem span={2}>
             <ReportSectionCard>
               <ReportSectionCardBody>
@@ -267,6 +288,10 @@ export default function ApplicationsReport({ period, filters = EMPTY_REPORT_FILT
                       <SegmentBars
                         max={data.intakes.by_recruiter.reduce((m, s) => Math.max(m, s.count), 0)}
                         items={data.intakes.by_recruiter.map(s => ({ key: s.owner_id, label: s.name, count: s.count, color: null }))}
+                        onPick={intakeDrillable ? gateDrillClick('applications', (value: string) => {
+                          const seg = data.intakes.by_recruiter.find(s => s.owner_id === value)
+                          if (seg) openIntakeDrill('recruiter', seg.name, seg.count, seg.owner_id)
+                        }) : undefined}
                       />
                     </div>
                     <div>
@@ -274,6 +299,10 @@ export default function ApplicationsReport({ period, filters = EMPTY_REPORT_FILT
                       <SegmentBars
                         max={data.intakes.by_branch.reduce((m, s) => Math.max(m, s.count), 0)}
                         items={data.intakes.by_branch.map(s => ({ key: s.value, label: s.label, count: s.count, color: null }))}
+                        onPick={intakeDrillable ? gateDrillClick('applications', (value: string) => {
+                          const seg = data.intakes.by_branch.find(s => s.value === value)
+                          if (seg) openIntakeDrill('branch', seg.label, seg.count, seg.value)
+                        }) : undefined}
                       />
                     </div>
                   </div>

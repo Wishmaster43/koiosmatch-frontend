@@ -1,7 +1,8 @@
 /**
  * WhatsappReport — fixtures mirror the LIVE backend envelope (CMBE f7a2c6f8:
  * window nested under `meta`, top_conversations carrying candidate names, the
- * one drill per KPI card on /reports/whatsapp/kpis/drill?kpi=<key>). The drill
+ * per-KPI drill on /reports/whatsapp/kpis/drill?kpi=<key> plus the axis/bucket
+ * drill on /reports/whatsapp/axes/drill). The drill
  * tests assert the REQUEST (route + params), never only that a callback fired
  * (§13) — the previous round proved a green suite against an imagined contract
  * is worthless.
@@ -88,8 +89,11 @@ function renderReport() {
 // The house LineChartCard needs real layout (jsdom has none) so the timeseries
 // wrapper is mocked exactly like OutreachReport.test.tsx: one span per point.
 vi.mock('./ReportTimeseriesChart', () => ({
-  default: ({ series }: { series: { date: string; label: string; value: number }[] }) => (
-    <>{series.map(p => <span key={`${p.date}-${p.value}`}>{p.label}-{p.value}</span>)}</>
+  default: ({ series, onPick }: { series: { date: string; label: string; value: number }[]; onPick?: (dateKey: string) => void }) => (
+    <>{series.map(p => (
+      <span key={`${p.date}-${p.value}`} role={onPick ? 'button' : undefined}
+        onClick={onPick ? () => onPick(p.date) : undefined}>{p.label}-{p.value}</span>
+    ))}</>
   ),
 }))
 
@@ -128,15 +132,57 @@ describe('WhatsappReport (RAPPORTEN-WHATSAPP-FE-1)', () => {
     for (const count of [40, 18, 9, 25, 21, 5, 3, 2, 12]) expect(screen.getAllByText(String(count)).length).toBeGreaterThan(0)
   })
 
-  it('renders every axis with every segment — informative, without a drill affordance (no axis drill exists)', () => {
+  it('renders every axis with every segment — nothing auto-drills on mount', () => {
     mockUseWhatsappReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
     for (const label of ['Inkomend', 'Uitgaand', 'Tekst', 'Via app', 'Geëscaleerd', 'Niet geëscaleerd']) {
       expect(screen.getAllByText(label).length).toBeGreaterThan(0)
     }
-    // No request fires on mount: whatsapp has no axis drill, and nothing may
-    // auto-open one (§3 — an affordance without a real path was the round-1 bug).
+    // No request fires on mount — rendering the segments never itself drills.
     expect(getSpy).not.toHaveBeenCalled()
+  })
+
+  // The axis drill (REPORTS-WHATSAPP-AXES-DRILL-1): a direction-segment click
+  // hits GET /reports/whatsapp/axes/drill with axis + the segment's OWN raw value.
+  // Timeseries bucket drill: value = the point's own count, the week bucket
+  // rides along (a week bar's drawer must count the whole week), and the title
+  // goes through the house date formatter — asserted on the REQUEST (§13).
+  it('clicking a timeseries point drills with axis=timeseries + bucket=week', async () => {
+    const user = userEvent.setup()
+    mockUseWhatsappReport.mockReturnValue({ data, loading: false, error: false })
+    renderReport()
+    getSpy.mockClear()
+    const firstDate = data.timeseries.series[0].date
+    // The mock renders one clickable span per point (role=button) — two charts
+    // (inbound + outbound) render the same dates; the first hit is inbound's.
+    const point = screen.getAllByText(`${firstDate}-${data.timeseries.series[0].inbound}`, { exact: false })
+      .map(el => el.closest('[role="button"]') ?? el).find(Boolean)
+    await user.click(point!)
+    expect(getSpy).toHaveBeenCalledWith('/reports/whatsapp/axes/drill',
+      expect.objectContaining({ params: { axis: 'timeseries', value: firstDate, period: 'month', bucket: 'week' } }))
+  })
+
+  it('clicking a direction segment drills via /reports/whatsapp/axes/drill with axis=direction', async () => {
+    const user = userEvent.setup()
+    mockUseWhatsappReport.mockReturnValue({ data, loading: false, error: false })
+    renderReport()
+    // The segment bar's own clickable row (role=button) — 'Inkomend' also labels
+    // the KPI card and the timeseries caption, neither of which is a segment row.
+    const segmentRow = screen.getAllByText('Inkomend').map(el => el.closest('[role="button"]')).find(Boolean)
+    await user.click(segmentRow!)
+    expect(getSpy).toHaveBeenCalledWith('/reports/whatsapp/axes/drill',
+      expect.objectContaining({ params: { axis: 'direction', value: 'inbound', period: 'month' } }))
+  })
+
+  // Same drill, different axis: a top-conversation row drills on axis=conversation
+  // with the raw conversation_id, never the rendered candidate name.
+  it('clicking a top-conversation row drills via /reports/whatsapp/axes/drill with axis=conversation', async () => {
+    const user = userEvent.setup()
+    mockUseWhatsappReport.mockReturnValue({ data, loading: false, error: false })
+    renderReport()
+    await user.click(screen.getByText('Jan Jansen'))
+    expect(getSpy).toHaveBeenCalledWith('/reports/whatsapp/axes/drill',
+      expect.objectContaining({ params: { axis: 'conversation', value: 'conv-1', period: 'month' } }))
   })
 
   it('renders top_conversations with candidate names and volumes — never a number, never message content', () => {
