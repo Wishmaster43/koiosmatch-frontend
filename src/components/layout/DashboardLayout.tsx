@@ -177,7 +177,7 @@ export default function DashboardLayout() {
 
           {/* Breadcrumb separator + page title — PAGE_TITLES keys index the
               'pageTitles' namespace; keySeparator is off since some keys carry a
-              literal dot ('reports.flow'). The map value is the English fallback
+              literal dot ('reports.candidates'). The map value is the English fallback
               if a translation is ever missing. */}
           {/* Purely a visual divider between two labels, so it is marked decorative
               rather than darkened: it carries no meaning, a screen reader should skip

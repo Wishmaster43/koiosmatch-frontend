@@ -40,6 +40,20 @@ describe('appPages — reports routing', () => {
     expect(props.reportId).toBeUndefined()
   })
 
+  // RAPPORTEN-DANNY10-1: routes retired by the ten-page decision (and old
+  // aliases whose merged host page retired with it) must resolve to the hub
+  // root — never a placeholder or a dead screen (§0.1: a removed route never
+  // breaks a deep link).
+  it('every reports.<id> route retired by the ten-page decision falls back to the hub root', () => {
+    for (const retired of ['flow', 'people', 'customerstructure', 'usage', 'recruiters', 'accountmanagers', 'contacts', 'locations', 'departments', 'ai', 'workflows']) {
+      const el = renderPage(`reports.${retired}`, { goTo: noop }) as ReactElement<Record<string, unknown>>
+      // The fallback hands out the bare hub: a ReportsPage element without a
+      // reportId — the same element the #reports root renders.
+      expect(el.type).toBe((renderPage('reports', { goTo: noop }) as ReactElement).type)
+      expect(el.props.reportId).toBeUndefined()
+    }
+  })
+
   it('PAGE_TITLES keeps a breadcrumb title for every canonical AND every legacy route — a boot-from-hash / back-forward check depends on this key existing', () => {
     for (const id of REPORT_IDS) {
       expect(PAGE_TITLES[`reports.${id}`]).toBeTruthy()

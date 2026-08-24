@@ -32,7 +32,7 @@ describe('pageTitles ↔ PAGE_TITLES parity', () => {
   it.each(LOCALES)('%s translates every page title in the map', (locale) => {
     const bundle = byLocale[locale]
     expect(bundle, `no pageTitles.json for ${locale}`).toBeDefined()
-    // Note the flat lookup: these keys carry a literal dot ('reports.flow'), and
+    // Note the flat lookup: these keys carry a literal dot ('reports.candidates'), and
     // the breadcrumb reads them with keySeparator: false for exactly that reason.
     const missing = Object.keys(PAGE_TITLES).filter(key => typeof bundle[key] !== 'string' || bundle[key].trim() === '')
     expect(missing, `untranslated in ${locale}: ${missing.join(', ')}`).toEqual([])

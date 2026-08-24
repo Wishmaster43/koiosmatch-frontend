@@ -23,7 +23,7 @@ const mockMatches       = vi.fn()
 const mockTasks         = vi.fn()
 const mockOpportunities = vi.fn()
 const mockIntakes       = vi.fn()
-const mockFlow          = vi.fn()
+const mockOutreach      = vi.fn()
 vi.mock('./useCandidatesReport',    () => ({ useCandidatesReport:    () => mockCandidates() }))
 vi.mock('./useApplicationsReport',  () => ({ useApplicationsReport:  () => mockApplications() }))
 vi.mock('./useCustomersReport',     () => ({ useCustomersReport:     () => mockCustomers() }))
@@ -32,13 +32,13 @@ vi.mock('./useMatchesReport',       () => ({ useMatchesReport:       () => mockM
 vi.mock('./useTasksReport',         () => ({ useTasksReport:         () => mockTasks() }))
 vi.mock('./useOpportunitiesReport', () => ({ useOpportunitiesReport: () => mockOpportunities() }))
 vi.mock('./useIntakesReport',       () => ({ useIntakesReport:       () => mockIntakes() }))
-vi.mock('./useFlowReport',          () => ({ useFlowReport:          () => mockFlow() }))
+vi.mock('./useOutreachReport',      () => ({ useOutreachReport:      () => mockOutreach() }))
 
 // Fixture totals — nine distinct numbers so a mixed-up card/route pairing
 // would fail a value assertion, not just a count assertion.
 const FIXTURES: Record<string, number> = {
   candidates: 11, applications: 22, customers: 33, vacancies: 44, matches: 55,
-  tasks: 66, opportunities: 77, intakes: 88, flow: 99,
+  tasks: 66, opportunities: 77, intakes: 88, outreach: 99,
 }
 
 function setSuccess() {
@@ -50,7 +50,7 @@ function setSuccess() {
   mockTasks.mockReturnValue({ data: { total: FIXTURES.tasks }, loading: false, error: false })
   mockOpportunities.mockReturnValue({ data: { total: FIXTURES.opportunities }, loading: false, error: false })
   mockIntakes.mockReturnValue({ data: { total: FIXTURES.intakes }, loading: false, error: false })
-  mockFlow.mockReturnValue({ data: { total: FIXTURES.flow }, loading: false, error: false })
+  mockOutreach.mockReturnValue({ data: { total: FIXTURES.outreach }, loading: false, error: false })
 }
 
 function renderDashboard() {
@@ -74,9 +74,9 @@ describe('ReportsDashboard (RAPPORTEN-DASHBOARD-1)', () => {
 
   it('an errored hook shows an honest dash, never a fabricated number', () => {
     setSuccess()
-    mockFlow.mockReturnValue({ data: null, loading: false, error: true })
+    mockOutreach.mockReturnValue({ data: null, loading: false, error: true })
     renderDashboard()
-    expect(screen.queryByText(String(FIXTURES.flow))).not.toBeInTheDocument()
+    expect(screen.queryByText(String(FIXTURES.outreach))).not.toBeInTheDocument()
     expect(screen.getByText('—')).toBeInTheDocument()
   })
 
@@ -97,11 +97,13 @@ describe('ReportsDashboard (RAPPORTEN-DASHBOARD-1)', () => {
     expect(mockNavigate).toHaveBeenCalledWith('reports.candidates')
   })
 
-  it('clicking the flow card navigates to the flow sub-report', async () => {
+  // RAPPORTEN-DANNY10-1: the flow tile retired with its page; outreach holds
+  // the ninth card and must drill into its own sub-report.
+  it('clicking the outreach card navigates to the outreach sub-report', async () => {
     setSuccess()
     renderDashboard()
-    await userEvent.click(screen.getByText(String(FIXTURES.flow)))
-    expect(mockNavigate).toHaveBeenCalledWith('reports.flow')
+    await userEvent.click(screen.getByText(String(FIXTURES.outreach)))
+    expect(mockNavigate).toHaveBeenCalledWith('reports.outreach')
   })
 
   it('clicking the vacancies card navigates to the vacancies sub-report', async () => {

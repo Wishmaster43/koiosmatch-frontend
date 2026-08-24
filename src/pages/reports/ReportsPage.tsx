@@ -53,16 +53,12 @@ import type { ReportFilterGroup } from '@/types/reports'
 import CandidatesReport from './CandidatesReport'
 import ApplicationsReport from './ApplicationsReport'
 import CustomersReport from './CustomersReport'
-import CustomerStructureReport from './CustomerStructureReport'
-import FlowReport from './FlowReport'
-import PeopleReport from './PeopleReport'
 import VacanciesReport from './VacanciesReport'
 import OpportunitiesReport from './OpportunitiesReport'
 import TasksReport from './TasksReport'
 import MatchesReport from './MatchesReport'
 import IntakesReport from './IntakesReport'
 import OutreachReport from './OutreachReport'
-import UsageReport from './UsageReport'
 import ReportsDashboard from './ReportsDashboard'
 import { REPORT_IDS } from './reportIds'
 import type { ReportId } from './reportIds'
@@ -72,30 +68,26 @@ import type { ReportPeriod } from '@/types/analytics'
 // the optional initial switch position. `filters` is optional and only READ by the
 // two reports on FILTERABLE_REPORT_IDS (CandidatesReport/CustomersReport) — every
 // other report ignores the prop. `initialView` (RAPPORTEN-CONSOLIDATIE-1) seeds a
-// merged page's switch position — read by the five merged pages
-// (candidates/customers/customerstructure/people/usage), ignored by the rest.
+// merged page's switch position — read by the two merged pages
+// (candidates/customers), ignored by the rest.
 type ReportComponent = ComponentType<{ period: ReportPeriod; filters?: ReportFilterState; initialView?: string }>
 
 // Registry: report id → component. Ids and their order live in reportIds.ts
 // (shared with the sidebar submenu); an id here without a REPORT_IDS entry — or
 // vice versa — is a wiring bug the exhaustive Record type surfaces at compile time.
-// Five entries now render a merged page with its own top-right switch
-// (RAPPORTEN-CONSOLIDATIE-1) — see each component's own doc comment for which
-// retired sidebar entries folded in and why.
+// Two entries (candidates/customers) render a merged page with a top-right
+// population switch (RAPPORTEN-CONSOLIDATIE-1); the other merged pages retired
+// with Danny's ten-page decision (RAPPORTEN-DANNY10-1, see reportIds.ts).
 const REPORTS: Record<ReportId, ReportComponent> = {
   candidates:    CandidatesReport,
   applications:  ApplicationsReport,
   customers:     CustomersReport,
-  customerstructure: CustomerStructureReport,
-  flow:          FlowReport,
-  people:        PeopleReport,
   vacancies:     VacanciesReport,
   opportunities: OpportunitiesReport,
   tasks:         TasksReport,
   matches:       MatchesReport,
   intakes:       IntakesReport,
   outreach:      OutreachReport,
-  usage:         UsageReport,
 }
 
 export default function ReportsPage({ reportId, initialView }: { reportId?: string; initialView?: string }) {

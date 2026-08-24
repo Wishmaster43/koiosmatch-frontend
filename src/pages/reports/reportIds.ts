@@ -27,28 +27,33 @@
  * 'customers' itself also grew a Klanten/Prospects switch (no id merge — Prospects
  * never had its own route, this is new capability on an existing page).
  */
+// RAPPORTEN-DANNY10-1 (Danny 24-08, via CMBE-afstemming: exactly ten report
+// pages — hub + candidates/applications/customers/vacancies/opportunities/
+// tasks/matches/outreach/whatsapp — "DE REST MOET WEG"). The retired route ids
+// (customerstructure/flow/people/usage + their legacy aliases) resolve to the
+// hub root via appPages' stale-reports fallback, never a dead screen. 'intakes'
+// stays until Danny answers whether the §3B intake-reporting spec retires or
+// moves into the applications report; 'whatsapp' joins once its backend
+// contract is registered (K-169 in WORKLIST).
 export const REPORT_IDS = [
   'candidates',
   'applications',
   'customers',
-  // RAPPORTEN-CONSOLIDATIE-1: Contacts/Locations/Departments, three DIFFERENT
-  // customer sub-entities, share one switch page — placed right after Klanten.
-  'customerstructure',
-  'flow',
-  // RAPPORTEN-CONSOLIDATIE-1: Recruiters/Accountmanagers ("Mensen" — how are my
-  // people doing, against a different entity each) share one switch page.
-  'people',
   'vacancies',
   'opportunities',
   'tasks',
   'matches',
   'intakes',
   'outreach',
-  // RAPPORTEN-CONSOLIDATIE-1: AI usage/Workflow runs ("Verbruik") share one switch page.
-  'usage',
 ] as const
 
 export type ReportId = (typeof REPORT_IDS)[number]
+
+// RAPPORTEN-DANNY10-1: route ids retired by Danny's ten-page decision. Their
+// PAGES still exist on disk pending the explicit file-cleanup round (they are
+// unreachable — no route, no sidebar entry, no hub tile) and keep compiling
+// through this type; the cleanup round removes the files and this alias.
+export type RetiredReportRouteId = 'customerstructure' | 'flow' | 'people' | 'usage'
 
 // A retired top-level route id → the merged page + switch position it now lands
 // on. Every id that used to be its own `reports.<id>` route stays resolvable
@@ -57,14 +62,11 @@ export type ReportId = (typeof REPORT_IDS)[number]
 // switch position instead of a 404/fallback. 'sources' has no position of its
 // own (see the file-top comment) — it lands on Instroom's default Kandidaten
 // view, where the Source axis it used to be a whole page for already lives.
+// RAPPORTEN-DANNY10-1: aliases whose merged host page retired with Danny's
+// ten-page decision (recruiters/accountmanagers/contacts/locations/departments/
+// ai/workflows) fell out of this map — those deep links now resolve through
+// appPages' stale-reports fallback to the hub root instead.
 export const LEGACY_REPORT_ROUTE_ALIASES: Record<string, { reportId: ReportId; view: string }> = {
   leads: { reportId: 'candidates', view: 'leads' },
   sources: { reportId: 'candidates', view: 'candidates' },
-  recruiters: { reportId: 'people', view: 'recruiters' },
-  accountmanagers: { reportId: 'people', view: 'accountmanagers' },
-  contacts: { reportId: 'customerstructure', view: 'contacts' },
-  locations: { reportId: 'customerstructure', view: 'locations' },
-  departments: { reportId: 'customerstructure', view: 'departments' },
-  ai: { reportId: 'usage', view: 'ai' },
-  workflows: { reportId: 'usage', view: 'workflows' },
 }

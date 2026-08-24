@@ -3,12 +3,12 @@
  * the REQUEST (route key + full nine-key body), not just that a callback fired
  * (§13). Also covers the vanished-key fallback notice.
  *
- * REPORTS-KPI-SPARE-2: `recruiters` grew real spare cards (kpiCatalog.ts), so the
- * "no spares yet" honesty case now uses `prospects` — the one remaining scope
- * whose catalogue still equals its default order 1:1 (its 'axis'-family sibling
- * `customers` grew signal spares, but those are deliberately NOT mirrored onto
- * Prospects — see kpiCatalog.ts's own note on why). Reorder + fallback-notice
- * coverage stays on `recruiters` unchanged.
+ * RAPPORTEN-DANNY10-1: the workhorse scope moved from `recruiters` (retired with
+ * its report page) to `matches` — a surviving fixed-family scope with nine
+ * defaults plus real spares (REPORTS-KPI-SPARE-1). `prospects` stays the
+ * "still no spares" honesty control (its 'axis'-family sibling `customers` grew
+ * signal spares that are deliberately NOT mirrored onto Prospects — see
+ * kpiCatalog.ts's own note on why).
  */
 import { describe, it, expect, vi, afterEach } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
@@ -20,10 +20,10 @@ import { getReportKpiCatalog, getReportKpiDefaultOrder, reportKpiSettingsKey } f
 const t = (key: string) => i18n.t(key, { ns: 'analytics' })
 const st = (key: string) => i18n.t(key, { ns: 'settings' })
 
-// Recruiters is not the first sub-tab (candidates is) — switch to it explicitly.
-async function openRecruitersTab() {
+// Matches is not the first sub-tab (candidates is) — switch to it explicitly.
+async function openMatchesTab() {
   const user = userEvent.setup()
-  await user.click(screen.getByRole('tab', { name: st('reportKpis.reportNames.recruiters') }))
+  await user.click(screen.getByRole('tab', { name: st('reportKpis.reportNames.matches') }))
 }
 
 // Prospects is the "still no spares" control case (see file-top note).
@@ -53,13 +53,13 @@ vi.mock('@/lib/settings/useAllSettings', async () => {
 afterEach(() => vi.clearAllMocks())
 
 describe('ReportKpiSettings', () => {
-  it('renders the recruiters report default nine-slot order when its tab is selected', async () => {
+  it('renders the matches report default nine-slot order when its tab is selected', async () => {
     render(<ReportKpiSettings />)
-    await openRecruitersTab()
-    const defaultOrder = getReportKpiDefaultOrder('recruiters')
-    expect(screen.getAllByText(t('recruiters.summary.recruiters')).length).toBeGreaterThan(0)
+    await openMatchesTab()
+    const defaultOrder = getReportKpiDefaultOrder('matches')
+    expect(screen.getAllByText(t('matches.total')).length).toBeGreaterThan(0)
     expect(defaultOrder).toHaveLength(9)
-    expect(defaultOrder[0]).toBe('recruiters')
+    expect(defaultOrder[0]).toBe('total')
   })
 
   it('says there are no spare axes yet for an axis-family report with none (honest, not decorative)', async () => {
@@ -68,16 +68,16 @@ describe('ReportKpiSettings', () => {
     expect(screen.getByText(st('reportKpis.noSpareAxes'))).toBeTruthy()
   })
 
-  it('offers real spare cards for recruiters now that the catalogue grew beyond its nine defaults (REPORTS-KPI-SPARE-2)', async () => {
+  it('offers real spare cards for matches now that the catalogue grew beyond its nine defaults (REPORTS-KPI-SPARE-1)', async () => {
     render(<ReportKpiSettings />)
-    await openRecruitersTab()
+    await openMatchesTab()
     expect(screen.queryByText(st('reportKpis.noSpareCards'))).toBeNull()
-    const catalog = getReportKpiCatalog('recruiters')
-    const defaultOrder = getReportKpiDefaultOrder('recruiters')
+    const catalog = getReportKpiCatalog('matches')
+    const defaultOrder = getReportKpiDefaultOrder('matches')
     expect(catalog.length).toBeGreaterThan(defaultOrder.length)
-    // The four new spare keys are real catalogue entries with real i18n labels
+    // The four spare keys are real catalogue entries with real i18n labels
     // (not raw keys falling back to themselves).
-    for (const key of ['avgCandidatesPerRecruiter', 'topRecruiter', 'intakeCompletionRate', 'taskOverdueRate']) {
+    for (const key of ['noContract', 'topContractForm', 'topTerminationReason', 'funnelRate']) {
       const entry = catalog.find(c => c.key === key)
       expect(entry).toBeDefined()
       expect(i18n.t(entry!.labelKey, { ns: 'analytics' })).not.toBe(entry!.labelKey)
@@ -86,30 +86,30 @@ describe('ReportKpiSettings', () => {
 
   it('reordering PUTs the exact settings key with the same nine keys in the new order', async () => {
     const { container } = render(<ReportKpiSettings />)
-    await openRecruitersTab()
+    await openMatchesTab()
     const rows = container.querySelectorAll('[draggable="true"]')
     expect(rows).toHaveLength(9)
 
-    // Drag row 0 ("recruiters") onto row 1 ("candidates") — swaps their positions.
+    // Drag row 0 ("total") onto row 1 ("funnel") — swaps their positions.
     fireEvent.dragStart(rows[0])
     fireEvent.dragOver(rows[1])
     fireEvent.drop(rows[1])
 
     await waitFor(() => expect(saveSettingsKeys).toHaveBeenCalled())
     const body = saveSettingsKeys.mock.calls.at(-1)?.[0] as Record<string, string[]>
-    const key = reportKpiSettingsKey('recruiters')
+    const key = reportKpiSettingsKey('matches')
     expect(body[key]).toHaveLength(9)
-    expect(body[key][0]).toBe('candidates')
-    expect(body[key][1]).toBe('recruiters')
+    expect(body[key][0]).toBe('funnel')
+    expect(body[key][1]).toBe('total')
     expect(new Set(body[key]).size).toBe(9) // still every card exactly once
   })
 
   it('shows a visible fallback notice when a stored key no longer exists', async () => {
     mockSettings.mockReturnValue({
-      [reportKpiSettingsKey('recruiters')]: JSON.stringify(['ghost', ...getReportKpiDefaultOrder('recruiters').slice(1)]),
+      [reportKpiSettingsKey('matches')]: JSON.stringify(['ghost', ...getReportKpiDefaultOrder('matches').slice(1)]),
     })
     render(<ReportKpiSettings />)
-    await openRecruitersTab()
+    await openMatchesTab()
     expect(screen.getByText(st('reportKpis.fellBackNotice'))).toBeTruthy()
   })
 })

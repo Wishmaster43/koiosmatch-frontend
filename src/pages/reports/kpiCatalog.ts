@@ -53,7 +53,7 @@
  * verbatim from the report that owns it) — no new translation work for the
  * catalogue itself; only the new Settings screen chrome needs fresh keys.
  */
-import type { ReportId } from './reportIds'
+import type { ReportId, RetiredReportRouteId } from './reportIds'
 
 export interface KpiCatalogEntry {
   key: string
@@ -83,7 +83,9 @@ export const CUSTOMERS_SIGNAL_LABEL_KEYS: Record<string, string> = {
 // switch positions that used to be their own route (see the file-top comment).
 // 'leads'/'prospects' are population filters on the candidates/customers table;
 // the rest are switch positions on the customerstructure/people/usage routes.
-export type ReportKpiScopeId = ReportId
+// RetiredReportRouteId keeps the detached pages' own catalog calls compiling
+// until the RAPPORTEN-DANNY10-1 file-cleanup round removes them for good.
+export type ReportKpiScopeId = ReportId | RetiredReportRouteId
   | 'leads' | 'prospects'
   | 'recruiters' | 'accountmanagers'
   | 'contacts' | 'locations' | 'departments'
@@ -93,15 +95,15 @@ export type ReportKpiScopeId = ReportId
 // mirrors the pre-consolidation REPORT_IDS order with 'leads'/'prospects' next
 // to their host axis and the three merged pages' positions grouped together.
 // 'sources' is deliberately absent (see the file-top comment).
+// RAPPORTEN-DANNY10-1: the retired scopes (flow, recruiters/accountmanagers,
+// contacts/locations/departments, usage/ai/workflows) left this list, so the
+// settings screen only offers the surviving reports; their catalog blocks below
+// stay until the file-cleanup round deletes the detached pages that read them.
 export const REPORT_KPI_SCOPE_IDS: ReportKpiScopeId[] = [
   'candidates', 'leads',
   'applications',
   'customers', 'prospects',
-  'contacts', 'locations', 'departments',
-  'flow',
-  'recruiters', 'accountmanagers',
   'vacancies', 'opportunities', 'tasks', 'matches', 'intakes', 'outreach',
-  'usage', 'ai', 'workflows',
 ]
 
 // Reports with no configurable KPI strip at all (e.g. no ReportKpiBand, or a

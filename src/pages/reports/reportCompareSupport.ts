@@ -10,7 +10,7 @@
  * A report/view absent here (or mapped to `null`) gets NO compare control — the
  * house rule is "the control simply is not there", never a disabled picker.
  */
-import type { ReportId } from './reportIds'
+import type { ReportId, RetiredReportRouteId } from './reportIds'
 
 // Backend slugs the compare endpoint accepts today (ReportCompareController::REGISTRY).
 export const COMPARE_SUPPORTED_SLUGS = [
@@ -25,7 +25,9 @@ export type CompareSlug = (typeof COMPARE_SUPPORTED_SLUGS)[number]
 // when that position has no compare wiring. Positions not listed at all (e.g.
 // 'intakes', which has no matching report-service registry entry) fall through
 // to `getCompareSlug`'s default `null`.
-const COMPARE_SLUG_BY_REPORT_VIEW: Partial<Record<ReportId, Partial<Record<string, CompareSlug>> | CompareSlug>> = {
+// Retired route ids stay mapped only so the detached pages' own tests keep
+// passing until the RAPPORTEN-DANNY10-1 cleanup round deletes them.
+const COMPARE_SLUG_BY_REPORT_VIEW: Partial<Record<ReportId | RetiredReportRouteId, Partial<Record<string, CompareSlug>> | CompareSlug>> = {
   candidates: { candidates: 'candidates', leads: 'candidates' },
   applications: 'applications',
   customers: { customers: 'customers', prospects: 'customers' },
@@ -45,7 +47,7 @@ const COMPARE_SLUG_BY_REPORT_VIEW: Partial<Record<ReportId, Partial<Record<strin
 
 /** Resolves the compare slug for a report id + optional switch position, or null when unsupported. */
 export function getCompareSlug(reportId: ReportId | string, view?: string): CompareSlug | null {
-  const entry = COMPARE_SLUG_BY_REPORT_VIEW[reportId as ReportId]
+  const entry = COMPARE_SLUG_BY_REPORT_VIEW[reportId as ReportId | RetiredReportRouteId]
   if (!entry) return null
   if (typeof entry === 'string') return entry
   return (view ? entry[view] : undefined) ?? null

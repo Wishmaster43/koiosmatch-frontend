@@ -74,36 +74,28 @@ export const PAGE_TITLES: Record<string, string> = {
   customers:                    'Customers',
   'import-wizard':              'Import wizard',
 
-  // Reports hub (analytical) — one key per report sub-page (RAPPORTEN-OMBOUW-1,
-  // consolidated RAPPORTEN-CONSOLIDATIE-1 2026-08-14). The thirteen CANONICAL
-  // routes come first; the legacy ids below them are RETIRED routes kept
-  // resolvable forever (house rule: a rename must never break a deep link) —
-  // renderPage() maps each to the merged page + its right switch position via
-  // reportIds.ts's LEGACY_REPORT_ROUTE_ALIASES.
+  // Reports hub (analytical) — one key per report sub-page (RAPPORTEN-OMBOUW-1;
+  // RAPPORTEN-DANNY10-1 24-08 trimmed the set to Danny's ten-page design). The
+  // nine CANONICAL routes come first; the two legacy ids below them are RETIRED
+  // routes kept resolvable forever (house rule: a rename must never break a deep
+  // link) — renderPage() maps each to the merged page + its right switch position
+  // via reportIds.ts's LEGACY_REPORT_ROUTE_ALIASES. Every OTHER stale reports.*
+  // id (the retired flow/people/customerstructure/usage pages and their old
+  // aliases) resolves to the hub root through renderPage()'s stale-reports
+  // fallback and carries the plain hub title here.
   reports:                      'Reports',
   'reports.candidates':         'Reports — Inflow',
   'reports.applications':       'Reports — Applications',
   'reports.customers':          'Reports — Customers',
-  'reports.customerstructure':  'Reports — Customer structure',
-  'reports.flow':               'Reports — Flow',
-  'reports.people':             'Reports — People',
   'reports.vacancies':          'Reports — Vacancies',
   'reports.opportunities':      'Reports — Opportunities',
   'reports.tasks':              'Reports — Tasks',
   'reports.matches':            'Reports — Matches',
   'reports.intakes':            'Reports — Intakes',
   'reports.outreach':           'Reports — Outreach',
-  'reports.usage':              'Reports — Usage',
   // Legacy (retired as their own route — RAPPORTEN-CONSOLIDATIE-1)
   'reports.leads':              'Reports — Leads',
   'reports.sources':            'Reports — Sources',
-  'reports.recruiters':         'Reports — Recruiters',
-  'reports.accountmanagers':    'Reports — Account managers',
-  'reports.contacts':           'Reports — Contacts',
-  'reports.locations':          'Reports — Locations',
-  'reports.departments':        'Reports — Departments',
-  'reports.ai':                 'Reports — AI usage',
-  'reports.workflows':          'Reports — Workflow runs',
   'customers.locations':        'Customers — Locations',
   'customers.departments':      'Customers — Departments',
   'customers.contacts':         'Customers — Contacts',
@@ -190,34 +182,22 @@ export function renderPage(activePage: string, { navIntent, goTo, dashView }: { 
     // Danny 14-08) — it no longer forwards to the first sub-report, so it gets NO
     // reportId prop and ReportsPage renders the dashboard branch.
     case 'reports':                return <ReportsPage />
-    // Thirteen CANONICAL routes (RAPPORTEN-CONSOLIDATIE-1) — each lands on that
-    // page's own default switch position (no initialView needed).
+    // Nine CANONICAL routes (RAPPORTEN-DANNY10-1) — each lands on that page's
+    // own default switch position (no initialView needed).
     case 'reports.candidates':     return <ReportsPage reportId="candidates" />
     case 'reports.applications':   return <ReportsPage reportId="applications" />
     case 'reports.customers':      return <ReportsPage reportId="customers" />
-    case 'reports.customerstructure': return <ReportsPage reportId="customerstructure" />
-    case 'reports.flow':           return <ReportsPage reportId="flow" />
-    case 'reports.people':         return <ReportsPage reportId="people" />
     case 'reports.vacancies':      return <ReportsPage reportId="vacancies" />
     case 'reports.opportunities':  return <ReportsPage reportId="opportunities" />
     case 'reports.tasks':          return <ReportsPage reportId="tasks" />
     case 'reports.matches':        return <ReportsPage reportId="matches" />
     case 'reports.intakes':        return <ReportsPage reportId="intakes" />
     case 'reports.outreach':       return <ReportsPage reportId="outreach" />
-    case 'reports.usage':          return <ReportsPage reportId="usage" />
-    // Legacy routes — nine sidebar entries retired into the pages above
-    // (RAPPORTEN-CONSOLIDATIE-1); every one keeps resolving, landing on the
-    // merged page with the right switch position via the SAME map reportIds.ts
-    // documents (LEGACY_REPORT_ROUTE_ALIASES) — never a second, hand-copied list.
+    // Legacy routes with a surviving host page — resolve to the merged page +
+    // switch position via the ONE map reportIds.ts documents
+    // (LEGACY_REPORT_ROUTE_ALIASES), never a second hand-copied list.
     case 'reports.leads':
-    case 'reports.sources':
-    case 'reports.recruiters':
-    case 'reports.accountmanagers':
-    case 'reports.contacts':
-    case 'reports.locations':
-    case 'reports.departments':
-    case 'reports.ai':
-    case 'reports.workflows': {
+    case 'reports.sources': {
       const legacyId = activePage.slice('reports.'.length)
       const alias = LEGACY_REPORT_ROUTE_ALIASES[legacyId]
       return <ReportsPage reportId={alias.reportId} initialView={alias.view} />
@@ -267,6 +247,11 @@ export function renderPage(activePage: string, { navIntent, goTo, dashView }: { 
     case 'details.runs':        return <RunsDetailPage />
     case 'details.messages':    return <MessagesDetailPage />
 
-    default: return <PlaceholderPage title={PAGE_TITLES[activePage] || activePage} />
+    default:
+      // RAPPORTEN-DANNY10-1: any stale reports.* id (a retired page from before
+      // the ten-page decision, or an old alias whose host retired) resolves to
+      // the hub root — house rule: a removed route never breaks a deep link.
+      if (activePage.startsWith('reports.')) return <ReportsPage />
+      return <PlaceholderPage title={PAGE_TITLES[activePage] || activePage} />
   }
 }

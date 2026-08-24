@@ -21,7 +21,7 @@ import { useMatchesReport } from './useMatchesReport'
 import { useTasksReport } from './useTasksReport'
 import { useOpportunitiesReport } from './useOpportunitiesReport'
 import { useIntakesReport } from './useIntakesReport'
-import { useFlowReport } from './useFlowReport'
+import { useOutreachReport } from './useOutreachReport'
 import type { ReportId } from './reportIds'
 import type { ReportPeriod } from '@/types/analytics'
 
@@ -44,7 +44,9 @@ export default function ReportsDashboard({ period }: { period: ReportPeriod }) {
   const tasks         = useTasksReport(period)
   const opportunities = useOpportunitiesReport(period)
   const intakes       = useIntakesReport(period)
-  const flow          = useFlowReport(period)
+  // RAPPORTEN-DANNY10-1: the flow tile retired with its page; outreach (one of
+  // Danny's ten) takes the ninth card so the row stays at nine real numbers.
+  const outreach      = useOutreachReport(period)
 
   const rows: Row[] = [
     { key: 'candidates',    label: t('candidates.total'),    page: 'candidates',    loading: candidates.loading,    error: candidates.error,    total: candidates.data?.total ?? null },
@@ -55,7 +57,7 @@ export default function ReportsDashboard({ period }: { period: ReportPeriod }) {
     { key: 'tasks',         label: t('tasks.total'),         page: 'tasks',         loading: tasks.loading,         error: tasks.error,         total: tasks.data?.total ?? null },
     { key: 'opportunities', label: t('opportunities.total'), page: 'opportunities', loading: opportunities.loading, error: opportunities.error, total: opportunities.data?.total ?? null },
     { key: 'intakes',       label: t('intakes.total'),       page: 'intakes',       loading: intakes.loading,       error: intakes.error,       total: intakes.data?.total ?? null },
-    { key: 'flow',          label: t('flow.total'),          page: 'flow',          loading: flow.loading,          error: flow.error,          total: flow.data?.total ?? null },
+    { key: 'outreach',      label: t('outreach.total'),      page: 'outreach',      loading: outreach.loading,      error: outreach.error,      total: outreach.data?.total ?? null },
   ]
 
   const kpis: KpiSpec[] = rows.map(r => ({
