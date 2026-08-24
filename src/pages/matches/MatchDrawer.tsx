@@ -204,7 +204,6 @@ export default function MatchDrawer({
     { id: 'overview',  label: t('drawer.tabs.overview'), render: setTab => <OverviewTab match={match} onUpdate={onUpdate} onOpenNotes={() => setTab?.('notes')} /> },
     // MOVED-FROM-OVERVIEW-1 (Danny 22-08): the ordinal footnote moved off Overview
     // onto its own tab, now WITH who/what the other matches on each axis are.
-    { id: 'statistics', label: t('drawer.tabs.statistics'), render: () => <StatisticsTab match={match} allRows={allRows} ordinals={ordinals} /> },
     { id: 'contract',  label: t('drawer.contract.title'), render: () => <MatchContractSection matchId={match.id} onUpdate={onUpdate} archived={match.archived} /> },
     // NT-MATCH-1: notes, after the content tabs above and before Extra/Koppelingen
     // (there is no Changelog TAB — record history stays the icon-popover, §3A(d)).
@@ -220,6 +219,8 @@ export default function MatchDrawer({
     ...(showKoppelingen ? [{ id: 'koppelingen', label: t('common:backofficeLinks.tabLabel'), render: () => (
       <BackofficeLinksTab entity="matches" id={match.id as Id} helloflexLink={match.helloflexLink} shiftmanagerLink={match.shiftmanagerLink} canLink={canLinkBackoffice} />
     ) }] : []),
+    // Statistieken LAST, app-wide (Danny 24-08: "statistieken is laatste tabje").
+    { id: 'statistics', label: t('drawer.tabs.statistics'), render: () => <StatisticsTab match={match} allRows={allRows} ordinals={ordinals} /> },
   ]
 
   return (

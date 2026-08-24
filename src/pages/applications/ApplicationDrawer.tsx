@@ -39,7 +39,9 @@ import EntityLink from '@/components/ui/EntityLink'
 // after Sollicitatie (Danny 22-08 — mirrors MatchDrawer's own statistics tab
 // placement, pages/matches/MatchDrawer.tsx). 'extra' (§3A(f)) is appended
 // below only when the tenant has ≥1 active application custom field.
-const TAB_IDS = ['application', 'statistics', 'candidate', 'vacancy', 'interviews', 'appointments', 'timeline', 'notes']
+// Statistieken LAST, app-wide (Danny 24-08 — supersedes the 22-08 after-
+// Sollicitatie placement): a read-only summary, never a working tab.
+const TAB_IDS = ['application', 'candidate', 'vacancy', 'interviews', 'appointments', 'timeline', 'notes', 'statistics']
 
 interface ApplicationDrawerProps {
   application: ApplicationDetail | null

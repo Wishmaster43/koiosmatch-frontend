@@ -146,8 +146,8 @@ describe('VacanciesTable · match count state caveats (VACANCY-LEADS-COUNT-1)', 
         matchCountState: { computedAt: '2026-07-20', isStale: true, geoMissing: false, partial: false } },
     ] as unknown as Vacancy[]
     render(<VacanciesTable rows={staleRows} />)
-    // The caveat must be visible without hovering — an aria-label-carrying dot, not tooltip-only.
-    expect(screen.getByLabelText(nlVacancies.columns.leadsStale.replace('{{date}}', '2026-07-20'))).toBeInTheDocument()
+    // Danny 24-08: NO dot, ever — the caveat rides as the cell's hover title.
+    expect(screen.getByTitle(nlVacancies.columns.leadsStale.replace('{{date}}', '2026-07-20'))).toBeInTheDocument()
   })
 
   it('renders the plain number with no caveat dot when the count carries no state', () => {
@@ -185,7 +185,7 @@ describe('VacanciesTable · match count state caveats (VACANCY-LEADS-COUNT-1)', 
         matchCountState: { computedAt: '2026-07-20', isStale: false, geoMissing: true, partial: false } },
     ] as unknown as Vacancy[]
     render(<VacanciesTable rows={geoRows} />)
-    expect(screen.getByLabelText(nlVacancies.columns.leadsGeoMissing)).toBeInTheDocument()
+    expect(screen.getByTitle(nlVacancies.columns.leadsGeoMissing)).toBeInTheDocument()
   })
 
   it('shows the partial caveat when a limit was hit', () => {
@@ -194,7 +194,7 @@ describe('VacanciesTable · match count state caveats (VACANCY-LEADS-COUNT-1)', 
         matchCountState: { computedAt: '2026-07-20', isStale: false, geoMissing: false, partial: true } },
     ] as unknown as Vacancy[]
     render(<VacanciesTable rows={partialRows} />)
-    expect(screen.getByLabelText(nlVacancies.columns.leadsPartial)).toBeInTheDocument()
+    expect(screen.getByTitle(nlVacancies.columns.leadsPartial)).toBeInTheDocument()
   })
 })
 

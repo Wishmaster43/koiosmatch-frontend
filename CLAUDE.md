@@ -1083,6 +1083,36 @@ Be honest. If something is not done, say so — do not pretend.
   staged-lint-stap blokkeerde de commit die hem introduceerde (70 warnings in de
   eigen bestanden). Acceptatiecriterium bij elke nieuwe gate: "de gate passeert
   op deze delivery", expliciet in de worker-brief én in de Opus-check.
+- **SCHERMWAARHEID-1 (Danny 24-08, na een middag "fout op fout op fout": "je zegt
+  klaar, je zegt alles goed, en ik zie fout op fout" + "jij moet beter controleren
+  en betere opdrachten maken").** Groene suites zijn een POORT, geen bewijs van
+  klaar. "Klaar" mag alleen gezegd worden over wat tegen de CANONS gecontroleerd
+  is op de aangeraakte SCHERMEN; al het andere heet "gebouwd, nog niet
+  schermgecontroleerd" — rapporteer dat onderscheid expliciet, elke keer. Drie
+  verplichtingen: (1) elke worker-brief bevat de CANON-CHECKLIST hieronder voor de
+  aangeraakte schermen, en de Opus-verifier loopt die checklist na op de RENDER
+  (test-render of gemeten JSX), niet alleen op de diff; (2) wie een scherm
+  aanraakt, checkt de staande canons op dat HELE scherm (de bestaande
+  raak-regel van §3/§4, veralgemeend); (3) elke nieuwe Danny-uitspraak over hoe
+  iets eruit moet zien landt DEZELFDE DAG in dit blok — de lijst is cumulatief
+  en bindend. CANON-CHECKLIST (24-08-stand):
+  · **Statistieken is in élke drilldown het LAATSTE tabje** (ook sub-drilldowns).
+  · **Geen chips in drilldown-veldkaarten** — waarden zijn platte tekst; chips
+    zijn een TABEL-gezicht (kleurinstellingen gelden de tabel).
+  · **Geen enkele knop buiten `Button`** — voor "gelukt/afronden"-acties bestaat
+    nu `variant="success"` (§4-paar als echte variant); nooit meer handgeschilderd.
+  · **Een tellerbadge rendert nooit "0"** — leeg = geen badge.
+  · **Geen decoratie-/caveat-stippen in tabellen** — een voorbehoud rijdt als
+    hover-title/aria, nooit als bolletje.
+  · **Een teller-cel en zijn doorklikdoel tonen dezelfde populatie** — 293 leads
+    die op 10 rijen landen is een bug, geen detail (kaartdrill-invariant, ook
+    voor cellen).
+  · **Zoekbalk vult de rij, de filterknop staat rechts** in drawer-toolbars.
+  · **Elke entiteit met berichten heeft een start-affordance** — een lege
+    conversatietab zonder startknop is een half scherm (kandidaat = referentie).
+  · Rapporten: KPI-rij = echte server-KPI's met semantische kleur; grafieken =
+    mix (donut/staaf/lijn/tabel naar datavorm); "Vergelijk met" en élk filter in
+    het rechterpaneel; drill-lade = SM-idioom met record-doorklik.
 - **Subagent model policy (Danny 2026-07-22 — supersedes 2026-07-08/15/17; fallback updated 2026-07-24):**
   The MANAGER runs **Fable 5 at reasoning effort high**; when Fable's budget is
   exhausted, **Opus 5 (`claude-opus-5`) at high** takes over as the TEMPORARY

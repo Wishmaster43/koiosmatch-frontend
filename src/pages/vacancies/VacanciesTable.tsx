@@ -177,12 +177,10 @@ export default function VacanciesTable({ rows, loading, selectedId, onSelect, on
           else if (state.computedAt) title = t('columns.leadsComputedAt', { date: formatDate(state.computedAt) })
         }
         if (caveat) title = caveat
-        // The caveat must ALSO be visible without hovering — a small muted dot
-        // carries the same message via aria-label, never tooltip-only (a11y).
-        const dot = caveat ? (
-          <span role="img" aria-label={caveat} title={caveat}
-            style={{ display: 'inline-block', width: 6, height: 6, borderRadius: '50%', background: 'var(--text-muted)', marginLeft: 5 }} />
-        ) : null
+        // NO dot, ever (Danny 24-08 — "die stomme balen waren toch weg", the
+        // 22-08 fresh-only removal was not enough): the caveat rides as the
+        // hover title/aria-label on the cell itself, never as a visual marker.
+        const dot = null
         return onOpenCandidateSearch ? (
           // A not-yet-computed count stays muted: the dash is genuinely less
           // certain than a real number, which is a meaning worth colouring.

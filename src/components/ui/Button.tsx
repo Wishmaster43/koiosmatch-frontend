@@ -27,7 +27,7 @@ import type { AnchorHTMLAttributes, ButtonHTMLAttributes, CSSProperties, Ref } f
 import { BTN_H } from '@/config/buttonMetrics'
 import { tintBg, tintBorder, chipInk } from '@/lib/tint'
 
-export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'ghostAccent' | 'soft' | 'danger' | 'dangerSoft'
+export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'ghostAccent' | 'soft' | 'success' | 'danger' | 'dangerSoft'
 export type ButtonSize = 'md' | 'sm'
 
 // iconOnly REQUIRES an accessible name at the TYPE level (herhaal-audit r6
@@ -75,6 +75,10 @@ const VARIANTS: Record<ButtonVariant, CSSProperties> = {
   // sites don't churn. Tints remain the language of CHIPS/toggles/filters
   // (status meaning), never of primary actions.
   soft:       { background: 'var(--button-fill)', color: 'var(--button-ink)', border: '1px solid var(--button-border)', fontWeight: 600 },
+  // Positive completion action ("markeer afgerond") — the §4 "aan/gelukt"
+  // success token pair as a REAL house variant, so no screen ever hand-paints
+  // the green again (Danny 24-08: "moet huisstijl knop zijn").
+  success:    { background: 'var(--color-success)', color: 'var(--color-on-success)', border: '1px solid var(--color-success)', fontWeight: 600 },
   // Destructive main action. --color-on-danger is fixed white (4.83:1, audited).
   danger:     { background: 'var(--color-danger)', color: 'var(--color-on-danger)', border: 'none', fontWeight: 600 },
   // Destructive but not the primary action of the surface (row deletes, etc.).

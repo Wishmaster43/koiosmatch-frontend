@@ -19,6 +19,7 @@ import { AlertTriangle, Search } from 'lucide-react'
 // knopje zijn!!! zoals in kandidaat drill down") — replaces the bare text button below.
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 import Spinner from '@/components/ui/Spinner'
+import Button from '@/components/ui/Button'
 // TOOLBAR-4 (Danny, live 04-08: "ook zoek venster en status!!") — the same shared
 // filter trigger every other sub-entity list uses (see its own docblock).
 import StatusFilterSelect, { useStatusFilter, STATUS_FILTER_ALL } from '@/components/drawer/StatusFilterSelect'
@@ -139,7 +140,8 @@ export default function PriceAgreementsTab({ customerId, c, onSave }: { customer
           // used to repeat "PRIJSAFSPRAKEN <count>" as a second uppercase
           // heading right below this same tab, a dead duplicate of the label
           // above it (same fix pattern as DocumentsTab 05-08).
-          { id: 'prices',  label: <>{t('drawer.tabs.priceAgreements')} <span style={{ opacity: 0.6 }}>{agreements.length}</span></> },
+          // Count only when there IS something to count (Danny 24-08: "die 0 moet weg").
+          { id: 'prices',  label: agreements.length > 0 ? <>{t('drawer.tabs.priceAgreements')} <span style={{ opacity: 0.6 }}>{agreements.length}</span></> : t('drawer.tabs.priceAgreements') },
           { id: 'billing', label: t('drawer.tabs.billing') },
         ]}
         active={subTab}
@@ -186,9 +188,9 @@ export default function PriceAgreementsTab({ customerId, c, onSave }: { customer
             {editingBillingAddress && (
               // K13a — horizontal padding matches the card rows' '7px 12px' (EditableFieldTable
               // .106/.358) so the hint's left edge lines up with the field labels above it.
-              <p style={{ fontSize: 11, color: 'var(--text-muted)', margin: '4px 0 0', padding: '0 12px' }}>
+              <Caption as="p" style={{ margin: '4px 0 0', padding: '0 12px' }}>
                 {t('overview.billingAddress.hint')}
-              </p>
+              </Caption>
             )}
           </div>
         </div>
@@ -236,7 +238,7 @@ export default function PriceAgreementsTab({ customerId, c, onSave }: { customer
           <span>{t('priceAgreements.loadError')}</span>
           {/* Arrow-wrap: reload now takes an optional AbortSignal (audit r4) — the
               click event must never flow into that parameter. */}
-          <button onClick={() => reload()} style={{ marginLeft: 'auto', fontSize: 11, fontWeight: 600, color: 'var(--color-primary-text)', background: 'none', border: 'none', cursor: 'pointer' }}>{t('priceAgreements.retry')}</button>
+          <Button variant="ghostAccent" size="sm" style={{ marginLeft: 'auto' }} onClick={() => reload()}>{t('priceAgreements.retry')}</Button>
         </div>
       )}
 

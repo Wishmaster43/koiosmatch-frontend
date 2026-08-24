@@ -7,7 +7,6 @@ import { render, screen, fireEvent, renderHook } from '@testing-library/react'
 import i18n from '@/i18n'
 import DetailsTab from './DetailsTab'
 import { useTaskAdvice } from '@/lib/useTaskAdvice'
-import { chipInk } from '@/lib/tint'
 import type { TaskDetail } from '@/types/task'
 
 // Controllable tenant task lookups (mirrors EntityTasksTab.test.tsx's statusesRef/
@@ -387,29 +386,22 @@ describe('tasks DetailsTab — chips read the LIVE lookup, not a baked snapshot 
     // eslint-disable-next-line no-restricted-syntax -- test fixture colour (DATA, not UI styling)
     const stale: TaskDetail = { ...task, statusLabel: 'Oude naam', statusColor: '#000000' }
     render(<DetailsTab task={stale} onUpdate={vi.fn()} />)
-    // The live lookup ('todo' → 'Te doen' / '#888888') wins, never the stale bake.
+    // The live lookup ('todo' → 'Te doen') wins, never the stale bake. The value
+    // renders as PLAIN TEXT (Danny 24-08: no chips in drilldown field cards).
     expect(screen.getByText('Te doen')).toBeInTheDocument()
-    // eslint-disable-next-line no-restricted-syntax -- asserting chipInk() output for the test fixture colour, not a UI colour choice
-    expect(screen.getByText('Te doen')).toHaveStyle({ color: chipInk('#888888') })
     expect(screen.queryByText('Oude naam')).not.toBeInTheDocument()
   })
 
-  it('updates the chip colour on rerender once the tenant lookup colour changes (live reactivity)', () => {
+  it('updates the label on rerender once the tenant lookup changes (live reactivity)', () => {
     const { rerender } = render(<DetailsTab task={task} onUpdate={vi.fn()} />)
-    // eslint-disable-next-line no-restricted-syntax -- asserting chipInk() output for the test fixture colour, not a UI colour choice
-    expect(screen.getByText('Te doen')).toHaveStyle({ color: chipInk('#888888') })
-
-    // Simulate a tenant Settings colour edit landing in the SAME TaskLookupsContext
-    // — mutate the lookup row IN PLACE and rerender the SAME task prop. A drawer
-    // that still reads task.statusColor would show no change at all here; the fix
-    // must re-resolve statusMeta('todo') on every render.
-    // eslint-disable-next-line no-restricted-syntax -- test fixture lookup colour (DATA, not UI styling)
-    statusesRef.current[0].color = '#123456'
+    expect(screen.getByText('Te doen')).toBeInTheDocument()
+    // Simulate a tenant Settings edit landing in the SAME TaskLookupsContext —
+    // mutate the lookup row IN PLACE and rerender the SAME task prop; the field
+    // must re-resolve statusMeta('todo') at render.
+    statusesRef.current[0].label = 'Nieuwe naam'
     rerender(<DetailsTab task={task} onUpdate={vi.fn()} />)
-    // eslint-disable-next-line no-restricted-syntax -- asserting chipInk() output for the test fixture colour, not a UI colour choice
-    expect(screen.getByText('Te doen')).toHaveStyle({ color: chipInk('#123456') })
-    // eslint-disable-next-line no-restricted-syntax -- restore the fixture colour for tests running after this one
-    statusesRef.current[0].color = '#888888'
+    expect(screen.getByText('Nieuwe naam')).toBeInTheDocument()
+    statusesRef.current[0].label = 'Te doen'
   })
 
   it('renders a DEACTIVATED value exactly like the table\'s fallback: raw key label, neutral grey', () => {
@@ -418,41 +410,26 @@ describe('tasks DetailsTab — chips read the LIVE lookup, not a baked snapshot 
     // rows before useTaskLookups() ever returns them, in the table AND the drawer.
     const deactivated: TaskDetail = { ...task, typeKey: 'retired_type' }
     render(<DetailsTab task={deactivated} onUpdate={vi.fn()} />)
-    // Same fallback shape as makeMetaResolver/the table's decorate(): the raw key
-    // as the label, the neutral grey fallback as the colour — never blank.
-    const chip = screen.getByText('retired_type')
-    // Lowercase: jsdom lowercases hex inside a color-mix() string on serialization
-    // (mirrors EntityTasksTab.test.tsx's own documented convention).
-    // eslint-disable-next-line no-restricted-syntax -- asserting chipInk() output for the real makeMetaResolver fallback colour, not a UI colour choice
-    expect(chip).toHaveStyle({ color: chipInk('#9ca3af') })
+    // Same fallback shape as makeMetaResolver/the table's decorate(): the raw
+    // key as the label — rendered as plain text, never blank, never a chip.
+    expect(screen.getByText('retired_type')).toBeInTheDocument()
   })
 })
 
 // TASK-DISPLAY-DRILL-1 (Danny 24-08): "alleen de tabel wordt gekleurd en daar
 // hebben we instellingen voor" — the drill-down chips follow the table toggles,
 // never a second setting. Off = plain text, exactly like the table cells.
-describe('tasks DetailsTab — chips follow the table colour toggles', () => {
+// Danny 24-08 ("geen chips in drill down, hebben we nergens" — supersedes the
+// table-toggle coupling of TASK-DISPLAY-DRILL-1): drilldown field cards render
+// PLAIN VALUES, whatever the table toggles say. Chips stay a TABLE face.
+describe('tasks DetailsTab — field values are plain text, never chips', () => {
   beforeEach(() => { displaySettingsRecord.current = {} })
 
-  it('renders coloured chips by default (toggles on)', () => {
-    render(<DetailsTab task={task} onUpdate={vi.fn()} />)
-    // SoftChip renders an inline-flex span; the plain-text variant is a bare span.
-    const statusEl = screen.getByText('Te doen')
-    expect(statusEl.style.display).toBe('inline-flex')
-  })
-
-  it('renders plain text when the table toggles are off — consistent with the table', () => {
-    displaySettingsRecord.current = {
-      task_table_color_status: false,
-      task_table_color_priority: false,
-      task_table_color_type: false,
-      task_table_color_assignee: false,
-    }
+  it('renders plain text even with the table colour toggles on (default)', () => {
     render(<DetailsTab task={task} onUpdate={vi.fn()} />)
     const statusEl = screen.getByText('Te doen')
     expect(statusEl.style.display).not.toBe('inline-flex')
     expect(statusEl.style.color).toBe('var(--text)')
-    // Type and priority read as plain text too.
     expect(screen.getByText('Belafspraak').style.display).not.toBe('inline-flex')
     expect(screen.getByText('Normaal').style.display).not.toBe('inline-flex')
   })

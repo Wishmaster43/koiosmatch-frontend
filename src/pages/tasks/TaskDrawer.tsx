@@ -152,17 +152,11 @@ export default function TaskDrawer({ task, onClose, expanded, onToggleExpand, on
   const doneValue = doneStatusValues[0]
   const markDone = doneValue != null && !doneStatusValues.includes(String(task.statusKey)) && !task.archived
     ? (
-      // HUISSTIJL-1: left hand-styled — the success token PAIR (--color-success
-      // fill + --color-on-success text) is deliberate (§4 "aan/gelukt" green),
-      // not a Button variant (Button has no success variant).
-      <button onClick={() => onUpdate(task.id, { statusKey: doneValue })}
-        // 28px/r6: matches its sm icon-button neighbours in this actions row (Opus batch B R6);
-        // the success token pair itself stays — §4 names this exact surface.
-        // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- deliberate §4 "aan/gelukt" success token pair, not a Button variant (see comment above)
-        style={{ display: 'flex', alignItems: 'center', gap: 5, height: 28, padding: '0 10px', fontSize: 11, fontWeight: 600,
-          borderRadius: 6, cursor: 'pointer', border: '1px solid var(--color-success)', background: 'var(--color-success)', color: 'var(--color-on-success)' }}>
+      // The house button in its success variant (§4 "aan/gelukt" pair, now a
+      // real Button variant — Danny 24-08: "moet huisstijl knop zijn").
+      <Button variant="success" size="sm" onClick={() => onUpdate(task.id, { statusKey: doneValue })}>
         <CheckCircle2 size={12} /> {t('drawer.markDone')}
-      </button>
+      </Button>
     ) : null
 
   return (

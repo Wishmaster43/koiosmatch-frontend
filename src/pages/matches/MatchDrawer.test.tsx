@@ -255,16 +255,13 @@ describe('MatchDrawer · owner picker (MATCH-OWNER-1)', () => {
  * before Contract & financieel.
  */
 describe('MatchDrawer · Statistieken tab (MOVED-FROM-OVERVIEW-1)', () => {
-  it('lists Statistieken between Overzicht and Contract & financieel', () => {
+  // Danny 24-08: Statistieken is the LAST tab, app-wide (supersedes the
+  // 22-08 after-Overzicht placement).
+  it('lists Statistieken as the very last tab', () => {
     render(<MatchDrawer match={match} onClose={vi.fn()} allRows={[match]} />)
     const labels = screen.getAllByRole('tab').map(b => b.textContent)
     const statsLabel = i18n.t('matches:drawer.tabs.statistics')
-    const overviewIdx = labels.indexOf(i18n.t('matches:drawer.tabs.overview'))
-    const statsIdx = labels.indexOf(statsLabel)
-    const contractIdx = labels.indexOf('Contract & financieel')
-    expect(overviewIdx).toBeGreaterThan(-1)
-    expect(statsIdx).toBeGreaterThan(overviewIdx)
-    expect(statsIdx).toBeLessThan(contractIdx)
+    expect(labels.indexOf(statsLabel)).toBe(labels.length - 1)
   })
 })
 

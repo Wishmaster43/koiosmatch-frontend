@@ -152,8 +152,11 @@ export default function RelatedTasks({ task }: { task: TaskDetail }) {
 
       {/* Search + filter menu — behaves like the tasks page (T5). TASK-FILTER-MENU-1:
           status/type/priority now live behind the one Filter button. */}
+      {/* Search stretches, the filter sits flush right (Danny 24-08). */}
       <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 8, marginBottom: 10 }}>
-        <HeaderSearch onSearch={setQuery} placeholder={t('related.searchPlaceholder')} width={200} />
+        <div style={{ flex: 1, minWidth: 180 }}>
+          <HeaderSearch onSearch={setQuery} placeholder={t('related.searchPlaceholder')} width="100%" />
+        </div>
         <DrawerFilterMenu filters={filterRows}
           label={t('common:filters.button', { defaultValue: 'Filter' })}
           title={t('common:filters.title')} clearAllLabel={t('common:filters.clearAll')} />

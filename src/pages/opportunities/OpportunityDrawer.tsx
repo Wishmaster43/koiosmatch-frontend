@@ -96,7 +96,6 @@ export default function OpportunityDrawer({
   const tabs = [
     { id: 'details', label: t('drawer.tabs.details'), render: () => <DetailsTab opportunity={o} onUpdate={onUpdate} stages={stages} /> },
     // KANSEN-A-3: this customer's OTHER opportunities (mirrors matches/drawer/StatisticsTab).
-    { id: 'statistics', label: t('drawer.tabs.statistics'), render: () => <StatisticsTab opportunity={o} allRows={allRows} valueInHours={valueInHours} /> },
     { id: 'customer', label: t('drawer.tabs.customer'), render: () => <CustomerRelationTab opportunity={o} customers={customers} onUpdate={onUpdate} /> },
     { id: 'notes',   label: t('drawer.tabs.notes'),   render: () => <NotesTab opportunity={o} /> },
     // KANSEN-VERDIEPING-PLAN DEEL 2 fase A item 5: e-mail history, e-mail-only sub-tab.
@@ -106,6 +105,9 @@ export default function OpportunityDrawer({
       <CustomFieldsTab entityType="opportunity" values={o.customFieldValues ?? {}}
         onSave={patch => onUpdate?.(o.id, { customFieldValues: { ...o.customFieldValues, ...patch } })} />
     ) }] : []),
+    // Statistieken LAST, app-wide (Danny 24-08: "statistieken is laatste tabje,
+    // HUISSTIJL") — a read-only summary, never a working tab.
+    { id: 'statistics', label: t('drawer.tabs.statistics'), render: () => <StatisticsTab opportunity={o} allRows={allRows} valueInHours={valueInHours} /> },
   ]
 
   const renderTitle = () => editing ? (

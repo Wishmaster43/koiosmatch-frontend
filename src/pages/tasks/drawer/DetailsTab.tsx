@@ -85,16 +85,17 @@ export default function DetailsTab({ task, onUpdate, onSubtaskCreated }: {
   const resolveAdvice = useTaskAdvice()
   const { formatDate, formatDateTime } = useDateFormat()
   // TASK-DISPLAY-DRILL-1 (Danny 24-08: "alleen de tabel wordt gekleurd en daar
-  // hebben we instellingen voor — consistent"): the drill-down chips follow the
-  // SAME task_table_color_* toggles as the table — never a second setting.
+  // hebben we instellingen voor" + 24-08: "geen chips in drill down, hebben we
+  // nergens"): field cards render PLAIN VALUES — colour and chips are a TABLE
+  // face, driven by the task_table_color_* toggles over there; the drilldown
+  // reads none of them.
   const displaySettings = useAllSettings()
-  const colorStatus   = getBoolSetting(displaySettings, 'task_table_color_status', true)
-  const colorPriority = getBoolSetting(displaySettings, 'task_table_color_priority', true)
-  const colorType     = getBoolSetting(displaySettings, 'task_table_color_type', true)
   const colorAssignee = getBoolSetting(displaySettings, 'task_table_color_assignee', true)
-  // Chip vs. plain text, mirroring TasksTable's own chip() helper exactly.
-  const chipOrText = (label: string, color: string | null | undefined, on: boolean, dot = false): ReactNode =>
-    on ? <SoftChip label={label} color={color ?? null} dot={dot} /> : <span style={{ color: 'var(--text)', fontSize: 12 }}>{label}</span>
+  // Drilldown field cards carry PLAIN values — chips live in the TABLE only
+  // (Danny 24-08: "geen chips in drill down, hebben we nergens"; colour stays a
+  // table-setting). The old colour-toggle chip render is retired.
+  const plainValue = (label: string): ReactNode =>
+    <span style={{ color: 'var(--text)', fontSize: 12 }}>{label}</span>
   const { statuses, types, priorities, statusMeta, typeMeta, priorityMeta } = useTaskLookups()
   const { data: users = [] } = useUsers() as { data?: UserLike[] }
   // TEAM-1: the tenant's internal departments, same shared hook the create modal uses.
@@ -237,9 +238,9 @@ export default function DetailsTab({ task, onUpdate, onSubtaskCreated }: {
           </div>
         ) : (
           <div style={{ borderRadius: 10, overflow: 'hidden', border: '1px solid var(--border)', background: 'var(--surface)', padding: '6px 12px', display: 'flex', flexDirection: 'column', gap: 2 }}>
-            <Row label={t('details.type')}>{typeInfo.label ? chipOrText(typeInfo.label, typeInfo.color, colorType) : <span style={{ color: 'var(--text-muted)' }}>—</span>}</Row>
-            <Row label={t('details.status')}>{statusInfo.label ? chipOrText(statusInfo.label, statusInfo.color, colorStatus) : <span style={{ color: 'var(--text-muted)' }}>—</span>}</Row>
-            <Row label={t('details.priority')}>{priorityInfo.label ? chipOrText(priorityInfo.label, priorityInfo.color, colorPriority, true) : <span style={{ color: 'var(--text-muted)' }}>—</span>}</Row>
+            <Row label={t('details.type')}>{typeInfo.label ? plainValue(typeInfo.label) : <span style={{ color: 'var(--text-muted)' }}>—</span>}</Row>
+            <Row label={t('details.status')}>{statusInfo.label ? plainValue(statusInfo.label) : <span style={{ color: 'var(--text-muted)' }}>—</span>}</Row>
+            <Row label={t('details.priority')}>{priorityInfo.label ? plainValue(priorityInfo.label) : <span style={{ color: 'var(--text-muted)' }}>—</span>}</Row>
             <Row label={t('details.due')}>
               <span style={{ fontSize: 12, color: task.due ? (isTaskOverdue(task) ? 'var(--color-danger)' : 'var(--text)') : 'var(--text-muted)', fontWeight: isTaskOverdue(task) ? 600 : 400 }}>
                 {/* TASK-DUE-TIME-1: DD-MM-YYYY HH:mm when a time is set, date-only otherwise. */}
