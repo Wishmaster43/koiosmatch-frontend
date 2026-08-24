@@ -2303,8 +2303,6 @@
       "functionMatchExact": "Exact",
       "functionMatchExactDesc": "Alleen kandidaten met exact dezelfde functie tellen mee.",
       "functionMatchCategory": "Categorie",
-      "functionMatchCategoryDesc": "Kandidaten met dezelfde functiecategorie tellen mee.",
-      "functionMatchCategoryNote": "Werkt momenteel hetzelfde als 'Exact'. Vacatures hebben nog geen functiecategorie.",
       "functionMatchAll": "Alles",
       "functionMatchAllDesc": "Elke functie telt mee; functie speelt geen rol bij leads.",
       "excludeAlreadyAppliedLabel": "Kandidaten met een lopende sollicitatie uitsluiten",

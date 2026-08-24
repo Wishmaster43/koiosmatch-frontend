@@ -121,7 +121,8 @@
     "branch": "Niederlassung",
     "branchExcludesUnassigned": "Ein Niederlassungsfilter blendet Datensätze ohne verknüpfte Niederlassung aus.",
     "button": "Filter",
-    "toggleActive": "Filter ein-/ausblenden ({{count}} aktiv)"
+    "toggleActive": "Filter ein-/ausblenden ({{count}} aktiv)",
+    "noBranch": "Ohne Niederlassung"
   },
   "nav": {
     "dashboard": "Dashboard",

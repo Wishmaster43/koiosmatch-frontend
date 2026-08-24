@@ -2281,8 +2281,6 @@
       "functionMatchExact": "Exakt",
       "functionMatchExactDesc": "Nur Kandidaten mit genau derselben Funktion zählen.",
       "functionMatchCategory": "Kategorie",
-      "functionMatchCategoryDesc": "Kandidaten mit derselben Funktionskategorie zählen.",
-      "functionMatchCategoryNote": "Verhält sich derzeit genauso wie „Exakt“. Stellen haben noch keine Funktionskategorie.",
       "functionMatchAll": "Alle",
       "functionMatchAllDesc": "Jede Funktion zählt; die Funktion spielt bei Leads keine Rolle.",
       "excludeAlreadyAppliedLabel": "Kandidaten mit laufender Bewerbung ausschließen",

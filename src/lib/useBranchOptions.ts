@@ -16,12 +16,18 @@
  * (§11).
  */
 import { useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useAuth } from '@/context/AuthContext'
 import { useLocations } from '@/lib/useLocations'
 
 export interface BranchOption { value: string; label: string }
 
+// BRANCH-FILTER-NO-BRANCH-1: the sentinel the backend understands as "rows
+// without a branch" (?branch_id[]=none) — combinable with real ids as a union.
+export const NO_BRANCH_VALUE = 'none'
+
 export function useBranchOptions(): BranchOption[] {
+  const { t } = useTranslation('common')
   const auth = useAuth()
   // Read defensively: the auth payload is shared with several other consumers and this
   // field is optional there, so it is cast at the edge rather than assumed.
@@ -31,6 +37,10 @@ export function useBranchOptions(): BranchOption[] {
   return useMemo(() => {
     const ids = (me?.branch_ids ?? []).map(String)
     const all = locations.map(l => ({ value: String(l.value), label: l.label }))
-    return ids.length ? all.filter(o => ids.includes(o.value)) : all
-  }, [locations, me?.branch_ids])
+    const scoped = ids.length ? all.filter(o => ids.includes(o.value)) : all
+    // FILTER options only (this hook's whole purpose) — "Zonder vestiging" is a
+    // real server token, never an assignable branch, so no form may reuse this
+    // hook for assignment pickers.
+    return [...scoped, { value: NO_BRANCH_VALUE, label: t('filters.noBranch') }]
+  }, [locations, me?.branch_ids, t])
 }

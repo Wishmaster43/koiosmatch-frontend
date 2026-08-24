@@ -2281,8 +2281,6 @@
       "functionMatchExact": "Exacte",
       "functionMatchExactDesc": "Seuls les candidats ayant exactement la même fonction comptent.",
       "functionMatchCategory": "Catégorie",
-      "functionMatchCategoryDesc": "Les candidats ayant la même catégorie de fonction comptent.",
-      "functionMatchCategoryNote": "Se comporte actuellement comme « Exacte ». Les postes n'ont pas encore de catégorie de fonction.",
       "functionMatchAll": "Toutes",
       "functionMatchAllDesc": "Chaque fonction compte ; la fonction n'a aucun rôle dans les leads.",
       "excludeAlreadyAppliedLabel": "Exclure les candidats ayant une candidature en cours",

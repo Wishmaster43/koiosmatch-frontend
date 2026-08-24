@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Caption } from '@/components/ui/typography'
 import { useTranslation } from 'react-i18next'
 import { useAllSettings, getJsonSetting, saveSettingsKeys } from '@/lib/settings/useAllSettings'
 import { useLookups } from '@/context/LookupsContext'
@@ -36,12 +37,12 @@ import SegmentedControl from '@/components/ui/SegmentedControl'
  */
 const KEY = 'vacancy_candidate_tab'
 
-// Function-match strictness options for the leads-criteria block — 'category' is
-// flagged with an honest note because vacancies have no category column yet (the
-// backend MatchCriteriaResolver treats it exactly like 'exact' until that lands).
+// Function-match strictness options — 'category' is GONE (FUNCTION-MATCH-CATEGORY-1:
+// it never really existed, behaved as 'exact', and the settings write now 422s on
+// it); a previously STORED 'category' keeps working server-side via the exact
+// fallback and displays here as exact until the next save writes 'exact'.
 const FUNCTION_MATCH_OPTIONS = [
   { value: 'exact', labelKey: 'functionMatchExact', descKey: 'functionMatchExactDesc' },
-  { value: 'category', labelKey: 'functionMatchCategory', descKey: 'functionMatchCategoryDesc' },
   { value: 'all', labelKey: 'functionMatchAll', descKey: 'functionMatchAllDesc' },
 ]
 
@@ -178,7 +179,7 @@ function VacancyCandidateTabSettingsInner() {
                 <label htmlFor="vacancy-candidate-tab-radius" style={{ fontSize: 12, fontWeight: 500, color: 'var(--text)', display: 'block', marginBottom: 2 }}>
                   {t('candidateTab.defaultRadiusLabel')}
                 </label>
-                <p style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 6 }}>{t('candidateTab.defaultRadiusHint')}</p>
+                <Caption as="p" style={{ marginBottom: 6 }}>{t('candidateTab.defaultRadiusHint')}</Caption>
                 <input id="vacancy-candidate-tab-radius" type="number" min={1} max={500} value={cfg.default_radius_km}
                   disabled={!cfg.apply_radius}
                   onChange={e => setRadius(e.target.value)}
@@ -195,10 +196,10 @@ function VacancyCandidateTabSettingsInner() {
               <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)', display: 'block', marginBottom: 2 }}>
                 {t('candidateTab.leadsCriteria.functionMatchTitle')}
               </label>
-              <p style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 6 }}>{t('candidateTab.leadsCriteria.functionMatchHint')}</p>
+              <Caption as="p" style={{ marginBottom: 6 }}>{t('candidateTab.leadsCriteria.functionMatchHint')}</Caption>
               <SegmentedControl
                 ariaLabel={t('candidateTab.leadsCriteria.functionMatchTitle')}
-                value={cfg.function_match}
+                value={cfg.function_match === 'category' ? 'exact' : cfg.function_match}
                 onChange={value => persist({ function_match: value })}
                 options={FUNCTION_MATCH_OPTIONS.map(opt => ({
                   value: opt.value,
@@ -206,11 +207,6 @@ function VacancyCandidateTabSettingsInner() {
                   description: t(`candidateTab.leadsCriteria.${opt.descKey}`),
                 }))}
               />
-              {/* Honest backend caveat, always shown — 'category' must never present
-                  itself as doing more than 'exact' does today (no vacancy category column yet). */}
-              <span style={{ display: 'block', fontSize: 11, fontStyle: 'italic', color: 'var(--text-muted)', marginTop: 6 }}>
-                {t('candidateTab.leadsCriteria.functionMatchCategoryNote')}
-              </span>
             </div>
           </div>
         )}
@@ -235,7 +231,7 @@ function VacancyCandidateTabSettingsInner() {
                 <label htmlFor="vacancy-candidate-tab-expiring-days" style={{ fontSize: 12, fontWeight: 500, color: 'var(--text)', display: 'block', marginBottom: 2 }}>
                   {t('candidateTab.leadsCriteria.expiringWithinDaysLabel')}
                 </label>
-                <p style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 6 }}>{t('candidateTab.leadsCriteria.expiringWithinDaysHint')}</p>
+                <Caption as="p" style={{ marginBottom: 6 }}>{t('candidateTab.leadsCriteria.expiringWithinDaysHint')}</Caption>
                 <input id="vacancy-candidate-tab-expiring-days" type="number" min={1} max={365} value={cfg.expiring_within_days}
                   disabled={!cfg.include_expiring_placements}
                   onChange={e => setExpiringDays(e.target.value)}

@@ -108,11 +108,14 @@ describe('VacancyCandidateTabSettings — leads criteria', () => {
     expect(screen.getByLabelText(t('candidateTab.defaultRadiusLabel'))).toBeDisabled()
   })
 
-  it('renders the honest caveat note on the function_match "category" option', async () => {
-    blobRef.current = { vacancy_candidate_tab: JSON.stringify(STORED) }
+  // FUNCTION-MATCH-CATEGORY-1: 'category' left the UI (the write 422s on it);
+  // a STORED category value must display as exact — never an optionless control.
+  it('offers only exact/all, and a stored "category" value displays as exact', async () => {
+    blobRef.current = { vacancy_candidate_tab: JSON.stringify({ ...STORED, function_match: 'category' }) }
     const user = userEvent.setup()
     render(<VacancyCandidateTabSettings />)
     await user.click(screen.getByRole('tab', { name: t('candidateTab.leadsCriteria.title') }))
-    expect(screen.getByText(t('candidateTab.leadsCriteria.functionMatchCategoryNote'))).toBeInTheDocument()
+    expect(screen.queryByText(t('candidateTab.leadsCriteria.functionMatchCategory'))).toBeNull()
+    expect(screen.getByRole('radio', { name: new RegExp(t('candidateTab.leadsCriteria.functionMatchExact')) })).toBeChecked()
   })
 })

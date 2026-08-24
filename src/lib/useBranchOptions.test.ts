@@ -4,6 +4,8 @@
  * non-empty one narrows to exactly that set.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+// The hook renders the none-sentinel's label through t() — key passthrough here.
+vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string) => k }) }))
 import { renderHook } from '@testing-library/react'
 import { useBranchOptions } from './useBranchOptions'
 
@@ -27,20 +29,20 @@ describe('useBranchOptions', () => {
   it('offers every establishment when the user carries no branch scope', () => {
     authUser.current = { branch_ids: [] }
     const { result } = renderHook(() => useBranchOptions())
-    expect(result.current.map(o => o.value)).toEqual(['b1', 'b2', 'b3'])
+    expect(result.current.map(o => o.value)).toEqual(['b1', 'b2', 'b3', 'none'])
   })
 
   it('offers every establishment when branch_ids is absent altogether', () => {
     authUser.current = {}
     const { result } = renderHook(() => useBranchOptions())
-    expect(result.current).toHaveLength(3)
+    expect(result.current).toHaveLength(4)
   })
 
   // The narrowing case: only the user's own branches, never one outside the scope.
   it('narrows to the user own branches, and drops the rest', () => {
     authUser.current = { branch_ids: ['b2'] }
     const { result } = renderHook(() => useBranchOptions())
-    expect(result.current).toEqual([{ value: 'b2', label: 'Rotterdam' }])
+    expect(result.current).toEqual([{ value: 'b2', label: 'Rotterdam' }, { value: 'none', label: 'filters.noBranch' }])
   })
 
   // The backend serialises ids as numbers in some payloads and strings in others, so
@@ -49,7 +51,7 @@ describe('useBranchOptions', () => {
     locationRows.current = [{ value: '7', label: 'Den Haag' }, { value: '8', label: 'Breda' }]
     authUser.current = { branch_ids: [7] }
     const { result } = renderHook(() => useBranchOptions())
-    expect(result.current).toEqual([{ value: '7', label: 'Den Haag' }])
+    expect(result.current).toEqual([{ value: '7', label: 'Den Haag' }, { value: 'none', label: 'filters.noBranch' }])
     locationRows.current = [
       { value: 'b1', label: 'Amsterdam' },
       { value: 'b2', label: 'Rotterdam' },

@@ -121,7 +121,8 @@
     "branch": "Vestiging",
     "branchExcludesUnassigned": "Een vestigingsfilter verbergt records zonder gekoppelde vestiging.",
     "button": "Filter",
-    "toggleActive": "Filters tonen/verbergen ({{count}} actief)"
+    "toggleActive": "Filters tonen/verbergen ({{count}} actief)",
+    "noBranch": "Zonder vestiging"
   },
   "nav": {
     "dashboard": "Dashboard",

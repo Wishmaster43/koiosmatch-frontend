@@ -2303,8 +2303,6 @@
       "functionMatchExact": "Exact",
       "functionMatchExactDesc": "Only candidates with the exact same function count.",
       "functionMatchCategory": "Category",
-      "functionMatchCategoryDesc": "Candidates with the same function category count.",
-      "functionMatchCategoryNote": "Currently behaves the same as 'Exact'. Vacancies don't have a function category yet.",
       "functionMatchAll": "All",
       "functionMatchAllDesc": "Every function counts; function plays no role in leads.",
       "excludeAlreadyAppliedLabel": "Exclude candidates with a live application",

@@ -121,7 +121,8 @@
     "branch": "Filiale",
     "branchExcludesUnassigned": "Un filtre par filiale masque les enregistrements sans filiale liée.",
     "button": "Filtrer",
-    "toggleActive": "Afficher/masquer les filtres ({{count}} actifs)"
+    "toggleActive": "Afficher/masquer les filtres ({{count}} actifs)",
+    "noBranch": "Sans agence"
   },
   "nav": {
     "dashboard": "Tableau de bord",

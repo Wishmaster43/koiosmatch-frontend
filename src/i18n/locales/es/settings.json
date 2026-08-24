@@ -2281,8 +2281,6 @@
       "functionMatchExact": "Exacta",
       "functionMatchExactDesc": "Solo cuentan los candidatos con exactamente la misma función.",
       "functionMatchCategory": "Categoría",
-      "functionMatchCategoryDesc": "Cuentan los candidatos con la misma categoría de función.",
-      "functionMatchCategoryNote": "Actualmente funciona igual que «Exacta». Las vacantes aún no tienen categoría de función.",
       "functionMatchAll": "Todas",
       "functionMatchAllDesc": "Cuenta cualquier función; la función no influye en los leads.",
       "excludeAlreadyAppliedLabel": "Excluir candidatos con una solicitud activa",
