@@ -7,6 +7,7 @@
  * toggle the addon back off in the same click).
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+import userEvent from '@testing-library/user-event'
 import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import ModulesSettings from './ModulesSettings'
 
@@ -24,6 +25,8 @@ describe('ModulesSettings', () => {
   it('renders the seeded tier as the checked SegmentedControl radio', async () => {
     mockGet.mockResolvedValue({ data: { package: 'pro', addons: ['reports'] } })
     render(<ModulesSettings />)
+    // MODULES-SUBTABS-1: the package group sits behind its own sub-tab now.
+    await userEvent.click(await screen.findByRole('tab', { name: 'modules.tabs.package' }))
 
     const proRadio = await screen.findByRole('radio', { name: /Koios Pro/ })
     expect(proRadio).toHaveAttribute('aria-checked', 'true')
@@ -34,6 +37,8 @@ describe('ModulesSettings', () => {
     mockGet.mockResolvedValue({ data: { package: 'core', addons: [] } })
     mockPut.mockResolvedValue({ data: {} })
     render(<ModulesSettings />)
+    // MODULES-SUBTABS-1: the package group sits behind its own sub-tab now.
+    await userEvent.click(await screen.findByRole('tab', { name: 'modules.tabs.package' }))
 
     await screen.findByRole('radio', { name: /Koios Core/ })
     fireEvent.click(screen.getByRole('radio', { name: /Koios Enterprise/ }))
@@ -50,6 +55,8 @@ describe('ModulesSettings', () => {
     mockGet.mockResolvedValue({ data: { package: 'core', addons: [] } })
     mockPut.mockResolvedValue({ data: {} })
     render(<ModulesSettings />)
+    // MODULES-SUBTABS-1: the package group sits behind its own sub-tab now.
+    await userEvent.click(await screen.findByRole('tab', { name: 'modules.tabs.package' }))
 
     const reportsToggle = await screen.findByRole('switch', { name: 'modules.addon.reports' })
     fireEvent.click(reportsToggle)

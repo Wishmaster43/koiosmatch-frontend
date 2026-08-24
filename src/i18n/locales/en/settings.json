@@ -1767,7 +1767,12 @@
       "ats_crm_ai_planning": "Koios Suite"
     },
     "smKpiTitle": "Shiftmanager KPIs",
-    "smKpiDesc": "Separate KPI targets for the Shiftmanager dashboard (distinct from the main Dashboard KPIs). Configuration coming."
+    "smKpiDesc": "Separate KPI targets for the Shiftmanager dashboard (distinct from the main Dashboard KPIs). Configuration coming.",
+    "tabs": {
+      "pricing": "Platform pricing",
+      "budgets": "Monthly budgets",
+      "package": "Package"
+    }
   },
   "whatsapp": {
     "loading": "Loading WhatsApp data…",

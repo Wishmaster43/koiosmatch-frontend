@@ -1521,6 +1521,11 @@
       "hf": "Rapports HelloFlex",
       "sm_ai": "Shiftmanager AI Planner",
       "plan": "Planning"
+    },
+    "tabs": {
+      "pricing": "Tarifs de la plateforme",
+      "budgets": "Budgets mensuels",
+      "package": "Forfait"
     }
   },
   "whatsapp": {

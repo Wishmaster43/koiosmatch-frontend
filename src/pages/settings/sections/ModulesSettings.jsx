@@ -8,6 +8,7 @@
  * are normalised to the new tier for display until the backend sends {package, addons}.
  */
 import { useState, useEffect, useRef } from 'react'
+import SubTabBar from '@/components/drawer/SubTabBar'
 import { useTranslation } from 'react-i18next'
 import { Check, Save, Package, Rocket, Crown, BarChart2, CalendarDays } from 'lucide-react'
 // Real brand logos for the reporting add-ons (local assets, §7 CSP).
@@ -63,6 +64,8 @@ export default function ModulesSettings() {
   const [pkg,     setPkg]     = useState('core')
   const [addons,  setAddons]  = useState([])
   const [savedAt, setSavedAt] = useState({ pkg: 'core', addons: [] }) // last-saved snapshot
+  // MODULES-SUBTABS-1: which of the three groups is on screen.
+  const [subTab, setSubTab] = useState('pricing')
   const [loading, setLoading] = useState(true)
   const [saving,  setSaving]  = useState(false)
   const [savedOk, setSavedOk] = useState(false)
@@ -127,13 +130,25 @@ export default function ModulesSettings() {
 
   return (
     <div style={{ maxWidth: 720 }}>
+      {/* MODULES-SUBTABS-1 (Danny 24-08: "3 subtabjes aub") — the three stacked
+          cards become sub-tabs in his named order; SubTabBar is the one shared
+          switcher (roving tabindex, §6). */}
+      <div style={{ marginBottom: 20 }}>
+        <SubTabBar active={subTab} onChange={setSubTab} tabs={[
+          { id: 'pricing', label: t('modules.tabs.pricing') },
+          { id: 'budgets', label: t('modules.tabs.budgets') },
+          { id: 'package', label: t('modules.tabs.package') },
+        ]} />
+      </div>
+
       {/* Platform pricing (CREDITS-1) — the AI markup % and the workflow credit
-          price knobs; superadmin-only, same screen as package/add-on config. */}
-      <PlatformPricingCard />
+          price knobs; superadmin-only. */}
+      {subTab === 'pricing' && <PlatformPricingCard />}
 
       {/* CREDITS-2-FE deel 2 — package + per-tenant monthly budgets (Danny: "vul beiden en toon ze hier"). */}
-      <BillingBudgetsCard />
+      {subTab === 'budgets' && <BillingBudgetsCard />}
 
+      {subTab === 'package' && (<>
       {/* Base package (one of three) */}
       <GroupLabel style={{ marginBottom: 10 }}>
         {t('modules.tierHeading')}
@@ -216,6 +231,7 @@ export default function ModulesSettings() {
           :           <><Save size={13} /> {t('modules.activate')}</>}
         </SaveButton>
       </div>
+      </>)}
     </div>
   )
 }
