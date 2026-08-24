@@ -224,7 +224,26 @@
       "rejected": "Rechazado",
       "placed": "Colocado"
     },
-    "kpiOrderFellBack": "Una tarjeta KPI configurada en Ajustes ya no existe y se restableció al valor predeterminado."
+    "kpiOrderFellBack": "Una tarjeta KPI configurada en Ajustes ya no existe y se restableció al valor predeterminado.",
+    "kpi": {
+      "total": "Total de solicitudes",
+      "new": "Nuevas",
+      "active": "Activas",
+      "matched": "Emparejadas",
+      "rejected": "Rechazadas",
+      "conversionPct": "Conversión",
+      "avgDaysToMatch": "Días prom. hasta match",
+      "tooLongInStage": "Demasiado tiempo en fase",
+      "missingAppointment": "Falta cita",
+      "daysUnit": "días"
+    },
+    "intakes": {
+      "title": "Entrevistas",
+      "planned": "Planificadas",
+      "doneInPeriod": "Realizadas en el periodo",
+      "byRecruiter": "Por reclutador",
+      "byBranch": "Por sucursal"
+    }
   },
   "opportunities": {
     "loading": "Cargando oportunidades…",

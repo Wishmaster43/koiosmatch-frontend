@@ -224,7 +224,26 @@
       "rejected": "Abgelehnt",
       "placed": "Platziert"
     },
-    "kpiOrderFellBack": "Eine in den Einstellungen konfigurierte KPI-Karte existiert nicht mehr und wurde auf den Standard zurückgesetzt."
+    "kpiOrderFellBack": "Eine in den Einstellungen konfigurierte KPI-Karte existiert nicht mehr und wurde auf den Standard zurückgesetzt.",
+    "kpi": {
+      "total": "Bewerbungen gesamt",
+      "new": "Neu",
+      "active": "Aktiv",
+      "matched": "Vermittelt",
+      "rejected": "Abgelehnt",
+      "conversionPct": "Konversion",
+      "avgDaysToMatch": "Ø Tage bis Match",
+      "tooLongInStage": "Zu lange in Phase",
+      "missingAppointment": "Termin fehlt",
+      "daysUnit": "Tage"
+    },
+    "intakes": {
+      "title": "Intakes",
+      "planned": "Geplant",
+      "doneInPeriod": "Abgeschlossen im Zeitraum",
+      "byRecruiter": "Nach Recruiter",
+      "byBranch": "Nach Standort"
+    }
   },
   "opportunities": {
     "loading": "Chancen werden geladen…",

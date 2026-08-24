@@ -98,6 +98,16 @@ describe('ApplicationsPage · D6 dashboard intent seam', () => {
     expect(last.too_long_in_stage).toBeUndefined()
     expect(last.missing_appointment).toBeUndefined()
   })
+
+  // RAPPORT-APPS-VERDIEPING-1 (tile↔list parity): a candidate_owner_id intent —
+  // the dashboard's own candidate-owner drill param, translated 1:1 by
+  // drillTranslate.ts — reaches the server as its own candidate_owner_id filter.
+  it('a candidate_owner_id intent produces a candidate_owner_id request param', () => {
+    dataHookCalls.length = 0
+    render(<ApplicationsPage intent={{ candidate_owner_id: 'u1' }} />)
+    const last = dataHookCalls[dataHookCalls.length - 1]
+    expect(last.candidate_owner_id).toBe('u1')
+  })
 })
 
 // D6-KAART-2: the "too long in stage" KPI card — click sets the attention

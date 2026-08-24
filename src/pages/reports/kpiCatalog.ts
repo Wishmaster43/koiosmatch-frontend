@@ -105,9 +105,11 @@ export const REPORT_KPI_SCOPE_IDS: ReportKpiScopeId[] = [
 export const REPORT_KPI_FAMILY: Partial<Record<ReportKpiScopeId, ReportKpiFamily>> = {
   candidates: 'axis',
   leads: 'axis',
-  applications: 'axis',
   customers: 'axis',
   prospects: 'axis',
+  // RAPPORT-APPS-VERDIEPING-1: 'applications' moved from 'axis' to 'fixed' —
+  // the strip is now the server's own nine-card kpis[] (see REPORT_KPI_FIXED_CATALOG).
+  applications: 'fixed',
   vacancies: 'fixed',
   opportunities: 'fixed',
   tasks: 'fixed',
@@ -153,23 +155,6 @@ export const REPORT_KPI_AXIS_CATALOG: Partial<Record<ReportKpiScopeId, KpiCatalo
     { key: 'owner_none', labelKey: 'candidates.axes.ownerNone' },
     { key: 'branch_none', labelKey: 'candidates.axes.branchNone' },
     { key: 'source_none', labelKey: 'candidates.axes.sourceNone' },
-  ],
-  // 'applications' spares (REPORTS-KPI-SPARE-3): `vacancy`/`stageDuration` are
-  // real full axes GET /reports/applications already returns (by_vacancy,
-  // by_stage_duration) but the strip never offered as swap-in options (the
-  // component's own doc note: "vacancy stays out of the strip" — now a CHOICE,
-  // not a hard exclusion). `customer_none`/`stage_none` are single-segment
-  // pseudo-axes over the report's own real 'none' sentinel rows
-  // (ApplicationsReport::CUSTOMER_NONE/STAGE_NONE).
-  applications: [
-    { key: 'stage', labelKey: 'applications.axes.stage' },
-    { key: 'source', labelKey: 'applications.axes.source' },
-    { key: 'owner', labelKey: 'applications.axes.owner' },
-    { key: 'customer', labelKey: 'applications.axes.customer' },
-    { key: 'vacancy', labelKey: 'applications.axes.vacancy' },
-    { key: 'stage_duration', labelKey: 'applications.axes.stageDuration' },
-    { key: 'customer_none', labelKey: 'applications.axes.customerNone' },
-    { key: 'stage_none', labelKey: 'applications.axes.stageNone' },
   ],
   // 'customers' spares (KPI-SPARE-1): nine pseudo-axes built from the report's own
   // `kpis[]` STANDING-signal array (GET /reports/customers, CustomersReport::signalKpis) —
@@ -310,6 +295,28 @@ export const REPORT_KPI_FIXED_CATALOG: Partial<Record<ReportKpiScopeId, KpiCatal
     { key: 'channelsUsed', labelKey: 'outreach.summary.channelsUsed' },
     { key: 'assigneesCount', labelKey: 'outreach.summary.assigneesCount' },
   ],
+  // RAPPORT-APPS-VERDIEPING-1 (CMFE 24-08): the nine backend cards now ride in
+  // the /reports/applications ENVELOPE's own `kpis[]` (one-envelope migration —
+  // the sibling /reports/applications/kpis endpoint stays alive during the
+  // migration window). Same nine-key vocabulary the drill's
+  // ApplicationsKpiDrillRequest enum pins (measured in api-generated.ts):
+  // total/new/active/matched/rejected/conversion_pct/avg_days_to_match/
+  // too_long_in_stage/missing_appointment. `applications` moved here from the
+  // axis catalogue (was 'axis' family) since the strip is now the server's
+  // fixed nine, mirroring whatsapp's pattern exactly — the axis BAR SECTIONS
+  // below the strip (stage/source/owner/customer/vacancy/stage_duration/bucket)
+  // are unaffected, they still drill through /reports/applications/drill.
+  applications: [
+    { key: 'total', labelKey: 'applications.kpi.total' },
+    { key: 'new', labelKey: 'applications.kpi.new' },
+    { key: 'active', labelKey: 'applications.kpi.active' },
+    { key: 'matched', labelKey: 'applications.kpi.matched' },
+    { key: 'rejected', labelKey: 'applications.kpi.rejected' },
+    { key: 'conversionPct', labelKey: 'applications.kpi.conversionPct' },
+    { key: 'avgDaysToMatch', labelKey: 'applications.kpi.avgDaysToMatch' },
+    { key: 'tooLongInStage', labelKey: 'applications.kpi.tooLongInStage' },
+    { key: 'missingAppointment', labelKey: 'applications.kpi.missingAppointment' },
+  ],
   whatsapp: [
     { key: 'conversationsTotal', labelKey: 'whatsapp.kpi.conversationsTotal' },
     { key: 'active7d', labelKey: 'whatsapp.kpi.active7d' },
@@ -329,9 +336,10 @@ export const REPORT_KPI_FIXED_CATALOG: Partial<Record<ReportKpiScopeId, KpiCatal
 export const REPORT_KPI_PINNED_FIRST: Partial<Record<ReportKpiScopeId, string>> = {
   candidates: 'total',
   leads: 'total',
-  applications: 'total',
   customers: 'total',
   prospects: 'total',
+  // 'applications' no longer pins 'total' outside the catalogue — it is now a
+  // fixed-family scope and 'total' is just kpis[0], reorderable like whatsapp's.
 }
 
 // The scope's catalogue, regardless of family — what the editor's picker offers.
@@ -357,7 +365,6 @@ const REPORT_KPI_AXIS_DEFAULT_LENGTH: Partial<Record<ReportKpiScopeId, number>> 
   customers: 5,
   candidates: 5,
   leads: 5,
-  applications: 4,
 }
 
 // Today's default order — identical to what the report renders when nothing is

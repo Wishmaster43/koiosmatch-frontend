@@ -224,7 +224,26 @@
       "rejected": "Afgewezen",
       "placed": "Geplaatst"
     },
-    "kpiOrderFellBack": "Een in Instellingen ingestelde KPI-kaart bestaat niet meer en is teruggezet naar de standaard."
+    "kpiOrderFellBack": "Een in Instellingen ingestelde KPI-kaart bestaat niet meer en is teruggezet naar de standaard.",
+    "kpi": {
+      "total": "Totaal sollicitaties",
+      "new": "Nieuw",
+      "active": "Actief",
+      "matched": "Gematcht",
+      "rejected": "Afgewezen",
+      "conversionPct": "Conversie",
+      "avgDaysToMatch": "Gem. dagen tot match",
+      "tooLongInStage": "Te lang in fase",
+      "missingAppointment": "Afspraak ontbreekt",
+      "daysUnit": "dagen"
+    },
+    "intakes": {
+      "title": "Intakes",
+      "planned": "Gepland",
+      "doneInPeriod": "Afgerond in periode",
+      "byRecruiter": "Per recruiter",
+      "byBranch": "Per vestiging"
+    }
   },
   "opportunities": {
     "loading": "Kansen laden…",

@@ -10,11 +10,13 @@
  * affordances — a stat without a real drill path never looks clickable).
  */
 import { useEffect, useState } from 'react'
+import { BodyText } from '@/components/ui/typography'
 import { useTranslation } from 'react-i18next'
 import ReportKpiBand from './ReportKpiBand'
 import { reportCardStyle as card, reportSectionHeadStyle as head } from './ReportSectionCard'
 import ReportStateBlock from './ReportStateBlock'
 import type { KpiSpec } from '@/components/insights/InsightsRow'
+import ReportDrillDrawer from './ReportDrillDrawer'
 import type { DrillSpec } from './ReportDrillDrawer'
 import { useTasksReport } from './useTasksReport'
 import { gateDrillClick } from './reportDrillGate'
@@ -52,6 +54,10 @@ export default function TasksReport({ period, filters = EMPTY_REPORT_FILTERS }: 
   // ALWAYS layered on top of the report's own active filters (`baseParams`), never
   // just `period`, so the lade counts the exact same set the bar was drawn from.
   const [drills, setDrills] = useState<Partial<Record<DrillKey, DrillSpec>>>({})
+  // Floating drawer for a KPI-card click (RAPPORT-KAARTDRILLS-1) — separate from
+  // the inline per-axis `drills` above, since a KPI card is not tied to any one
+  // chart section (mirrors WhatsappReport's kpiDrill).
+  const [kpiDrill, setKpiDrill] = useState<DrillSpec | null>(null)
   const windowSub = () => `${formatDate(data?.from)} – ${formatDate(data?.to)}`
   const baseParams = buildReportQueryParams(period, 'tasks', filters)
   const openSegment = (key: DrillKey, seg: { label: string; count: number }, xorParam: Record<string, unknown>) =>
@@ -101,6 +107,23 @@ export default function TasksReport({ period, filters = EMPTY_REPORT_FILTERS }: 
     if (pt) openBucket(pt)
   })
 
+  // RAPPORT-KAARTDRILLS-1 → Opus-REJECT gemeten: alle vier de eerder bedrade
+  // koppels paren een GEWINDOWD kaartgetal (envelope/summary) aan een
+  // ONGEWINDOWDE of anders-gedefinieerde server-kpi (total=all-time, open=
+  // ongewindowd, done/overdue idem — TasksReport.php documenteert de splitsing
+  // zelf). Tot dit rapport zijn kaartWAARDEN uit de server-kpis[]-strip leest
+  // (rapportenplan-uitrol, het whatsapp/applications-patroon) blijft deze map
+  // LEEG: liever geen kaartdrill dan een lade met andere rijen dan het getal.
+  const KPI_DRILL_KEY: Partial<Record<string, string>> = {}
+  const openKpiDrill = (localKey: string, label: string, value: string | number) => {
+    const serverKey = KPI_DRILL_KEY[localKey]
+    if (!serverKey) return undefined
+    return gateDrillClick('tasks', () => setKpiDrill({
+      title: label, value, subtitle: windowSub(),
+      rowsEndpoint: '/reports/tasks/kpis/drill', rowsParams: { ...baseParams, kpi: serverKey },
+    }))
+  }
+
   // Default each section's list to its own top segment on mount so no panel is
   // ever blank — mirrors clicking that segment's own bar, never a client-side guess.
   useEffect(() => {
@@ -122,14 +145,10 @@ export default function TasksReport({ period, filters = EMPTY_REPORT_FILTERS }: 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data?.from, data?.to])
 
-  // Workload KPI strip from the envelope's flag-driven summary. Display-only:
-  // the seven-way XOR carries no open/done/overdue param (no fake affordances) —
-  // without onClick the card renders as a plain stat, never a dead button.
-  // done_rate is null while nothing is countable — placeholder, never a fabricated 0%.
-  // Nine-card footprint (Danny — same as the dashboard). The workload five stay
-  // as-is; unassigned/no-team/no-branch are the existing 'none' row of a
-  // drillable axis (real data, real drill — no fabrication), and overdueRate is
-  // an honest ratio of two real fields (never a fabricated 0%).
+  // Workload KPI strip from the envelope's flag-driven summary. Display-only
+  // today: the card→kpi drill map above is deliberately EMPTY (windowed card
+  // numbers vs unwindowed server keys — see the map's own comment); the cards
+  // regain their drill when the strip migrates onto the server kpis[] values.
   const s = data?.summary
   const unassigned = data?.by_assignee.find(seg => seg.owner_id === 'none')
   const noTeam = data?.by_team.find(seg => seg.value === 'none')
@@ -146,10 +165,14 @@ export default function TasksReport({ period, filters = EMPTY_REPORT_FILTERS }: 
   const topPriority = topRealSeg(data?.by_priority ?? [])
   const topAssignee = (data?.by_assignee ?? []).filter(a => a.owner_id !== 'none').sort((a, b) => b.count - a.count)[0]
   const kpiByKey: Record<string, KpiSpec> = {
-    total:    { key: 'total',    label: t('tasks.total'),            value: total },
-    open:     { key: 'open',     label: t('tasks.summary.open'),     value: s?.open ?? 0 },
-    done:     { key: 'done',     label: t('tasks.summary.done'),     value: s?.done ?? 0 },
-    overdue:  { key: 'overdue',  label: t('tasks.summary.overdue'),  value: s?.overdue ?? 0 },
+    total:    { key: 'total',    label: t('tasks.total'),            value: total,
+      onClick: openKpiDrill('total', t('tasks.total'), total) },
+    open:     { key: 'open',     label: t('tasks.summary.open'),     value: s?.open ?? 0,
+      onClick: openKpiDrill('open', t('tasks.summary.open'), s?.open ?? 0) },
+    done:     { key: 'done',     label: t('tasks.summary.done'),     value: s?.done ?? 0,
+      onClick: openKpiDrill('done', t('tasks.summary.done'), s?.done ?? 0) },
+    overdue:  { key: 'overdue',  label: t('tasks.summary.overdue'),  value: s?.overdue ?? 0,
+      onClick: openKpiDrill('overdue', t('tasks.summary.overdue'), s?.overdue ?? 0) },
     doneRate: { key: 'doneRate', label: t('tasks.summary.doneRate'),
       value: formatPercent(s?.done_rate) },
     unassigned: { key: 'unassigned', label: t('tasks.unassigned'), value: unassigned?.count ?? 0,
@@ -197,9 +220,9 @@ export default function TasksReport({ period, filters = EMPTY_REPORT_FILTERS }: 
       {/* The report's data window, rendered prominently from the RESPONSE —
           DD-MM-YYYY (never ISO, §3B DATUM-1). */}
       {!loading && !error && data && (
-        <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)', marginBottom: 12 }}>
+        <BodyText as="div" style={{ fontWeight: 500, marginBottom: 12 }}>
           {t('tasks.window', { from: formatDate(data.from), to: formatDate(data.to) })}
-        </div>
+        </BodyText>
       )}
 
       <div style={{ ...card, overflow: 'hidden' }}>
@@ -258,6 +281,9 @@ export default function TasksReport({ period, filters = EMPTY_REPORT_FILTERS }: 
           </div>
         )}
       </div>
+
+      {/* Floating drawer for a KPI-card click (RAPPORT-KAARTDRILLS-1). */}
+      <ReportDrillDrawer drill={kpiDrill} onClose={() => setKpiDrill(null)} />
     </div>
   )
 }

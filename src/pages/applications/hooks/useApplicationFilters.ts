@@ -93,18 +93,24 @@ export function useApplicationFilters() {
   // action — transient (not usePageMemory), cleared via clearAllFilters or its
   // own dedicated chip (see ApplicationsPage).
   const [selectedCandidateIds, setSelectedCandidateIds] = useState<Id[]>([])
+  // RAPPORT-APPS-VERDIEPING-1: candidate-owner deep-link scope from a dashboard
+  // drill (`candidate_owner_id`, drillTranslate.ts) — the candidate's OWN
+  // owner, distinct from `selectedOwner` (the application's owner_id filter).
+  // Transient like selectedCandidateIds above, same reasoning.
+  const [selectedCandidateOwnerId, setSelectedCandidateOwnerId] = useState<Id | null>(null)
 
   // Anything narrowing the default view → the shared clear-button shows.
   const anyFilterActive = Boolean(query.trim() || attention || showArchived || showTrash || dateRange || interviewBusy || interviewPaused
     || (bucket !== 'active' && bucket !== 'allActive')
     || selectedPhase.length || selectedOwner.length || selectedSource.length || selectedVac.length
-    || selectedClient.length || selectedBranch.length || selectedCandidateIds.length)
+    || selectedClient.length || selectedBranch.length || selectedCandidateIds.length || selectedCandidateOwnerId)
   // Remount the (self-stateful) search input on clear so the visible text resets too.
   const [searchEpoch, setSearchEpoch] = useState(0)
   const clearAllFilters = () => {
     setSearchEpoch(e => e + 1); setQuery(''); setAttention(null); setShowArchived(false); setShowTrash(false); setBucket('active')
     setSelectedPhase([]); setSelectedOwner([]); setSelectedSource([]); setSelectedVac([]); setInterviewBusy(false)
     setInterviewPaused(false); setSelectedClient([]); setSelectedBranch([]); setSelectedCandidateIds([]); setDateRange(null)
+    setSelectedCandidateOwnerId(null)
   }
 
   // NUMMER-1: is the CURRENT search text a well-formed reference number? Drives
@@ -198,6 +204,10 @@ export function useApplicationFilters() {
     else if (interviewPaused) p.interview_status = 'paused'
     // 11.1: the candidates-bulk deep-link scope — a real, working server filter.
     if (selectedCandidateIds.length) p.candidate_ids = selectedCandidateIds
+    // RAPPORT-APPS-VERDIEPING-1: dashboard candidate-owner drill — the
+    // CANDIDATE's owner, sent as its own server filter (never merged into
+    // owner_id, which narrows on the application's owner).
+    if (selectedCandidateOwnerId) p.candidate_owner_id = selectedCandidateOwnerId
     // VESTIGING-2: server-side ?branch_id[]= — a narrowing only, gated behind the
     // tenant's own branch_authz_enabled axis on the backend (off = no effect).
     if (selectedBranch.length) p.branch_id = selectedBranch
@@ -207,7 +217,7 @@ export function useApplicationFilters() {
     if (!showArchived && !showTrash && bucket === 'placed') p.has_match = 1
     return p
   }, [selectedPhase, selectedVac, selectedClient, selectedSource, selectedOwner, query, showArchived, showTrash,
-    interviewBusy, interviewPaused, selectedCandidateIds, selectedBranch, attention, dateRange, bucket])
+    interviewBusy, interviewPaused, selectedCandidateIds, selectedCandidateOwnerId, selectedBranch, attention, dateRange, bucket])
 
   // Bucket param — TABLE query only (never board/stats): 'allActive' has no server
   // equivalent (spans two buckets) and showArchived's/showTrash's reveal must not be
@@ -226,6 +236,7 @@ export function useApplicationFilters() {
     interviewBusy, setInterviewBusy, interviewPaused, setInterviewPaused, refMode,
     selectedBranch, setSelectedBranch,
     selectedCandidateIds, setSelectedCandidateIds,
+    selectedCandidateOwnerId, setSelectedCandidateOwnerId,
     dateRange, setDateRange,
     anyFilterActive, clearAllFilters, searchEpoch, matchesFilters,
     filterParams, bucketParam, filterKey,

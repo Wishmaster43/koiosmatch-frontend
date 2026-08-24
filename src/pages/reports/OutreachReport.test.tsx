@@ -144,6 +144,49 @@ describe('OutreachReport (RAPPORTEN-SUITE-1 portie 6, bellijsten report)', () =>
     expect(screen.getByText('63%')).toBeInTheDocument()
   })
 
+  // RAPPORT-KAARTDRILLS-1: total/reached/notReached/rate drill via the new
+  // per-KPI-card endpoint GET /reports/outreach/kpis/drill?kpi=<key>.
+  it('clicking the "Totaal targets" KPI card drills via /reports/outreach/kpis/drill?kpi=total_targets', async () => {
+    const user = userEvent.setup()
+    mockUseOutreachReport.mockReturnValue({ data, loading: false, error: false })
+    renderReport()
+    getSpy.mockClear()
+    await user.click(screen.getByText('Totaal targets'))
+    expect(getSpy).toHaveBeenCalledWith('/reports/outreach/kpis/drill',
+      expect.objectContaining({ params: { kpi: 'total_targets', period: 'month' } }))
+  })
+
+  it('clicking the "Bereikt" KPI card drills with kpi=reached', async () => {
+    const user = userEvent.setup()
+    mockUseOutreachReport.mockReturnValue({ data, loading: false, error: false })
+    renderReport()
+    getSpy.mockClear()
+    await user.click(screen.getByText('Bereikt'))
+    expect(getSpy).toHaveBeenCalledWith('/reports/outreach/kpis/drill',
+      expect.objectContaining({ params: { kpi: 'reached', period: 'month' } }))
+  })
+
+  // Opus-REJECT: de kaart toont reach_rate (reached/total) terwijl de sleutel
+  // conversion_pct een andere noemer draagt — ontkoppeld tot de strip de
+  // server-kpis[] leest; total/reached blijven wél drillen (hard bevestigd).
+  it('the rate card carries no drill; total still drills via kpi=total_targets', async () => {
+    const user = userEvent.setup()
+    renderReport()
+    await user.click(await screen.findByText('63%'))
+    expect(getSpy.mock.calls.map(c => String(c[0])).some(u => u.includes('/kpis/drill'))).toBe(false)
+    await user.click(screen.getByText('Totaal targets'))
+    expect(getSpy).toHaveBeenCalledWith('/reports/outreach/kpis/drill',
+      expect.objectContaining({ params: expect.objectContaining({ kpi: 'total_targets' }) }))
+  })
+
+  // A null/missing reach_rate must never crash and must never fabricate a
+  // clickable card for a value that doesn't exist.
+  it('does not crash and keeps the rate card non-clickable when reach_rate is null', () => {
+    mockUseOutreachReport.mockReturnValue({ data: { ...data, reach_rate: null }, loading: false, error: false })
+    expect(() => renderReport()).not.toThrow()
+    expect(screen.getByText('Bereikpercentage').closest('[role="button"]')).toBeNull()
+  })
+
   // Nine-card footprint (Danny's "negen KPI rows"): the fase-1 three plus two
   // derived complements (not-reached/assigned) and four real axis-derived cards
   // (unassigned, no-outcome, top campaign, top channel) — never a fabricated ninth.

@@ -13,6 +13,10 @@ import WebhookRequestsPanel from './WebhookRequestsPanel'
 
 // Partial mock: fake the HTTP verb, keep the real unwrap/unwrapList (they read
 // res.data.data / res.data.meta), mirroring UsageDailySection.test.tsx.
+// Recursive page-gate (Opus lane-3 B2): canAccessPage now walks the full parent
+// gate incl. the tenant MODULE check — a test without auth reads as "no modules"
+// and hides the runs-link. Grant the module the link's parent page needs.
+vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ activeTenant: { modules: ['ats', 'aiagents'] } }) }))
 vi.mock('@/lib/api', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@/lib/api')>()
   return { ...actual, default: { ...actual.default, get: vi.fn() } }

@@ -12,17 +12,19 @@ import ReportKpiBand from './ReportKpiBand'
 import { reportCardStyle as card, reportSectionHeadStyle as head } from './ReportSectionCard'
 import ReportStateBlock from './ReportStateBlock'
 import type { KpiSpec } from '@/components/insights/InsightsRow'
+import ReportDrillDrawer from './ReportDrillDrawer'
 import type { DrillSpec } from './ReportDrillDrawer'
 import { useApplicationsReport } from './useApplicationsReport'
 import { gateDrillClick } from './reportDrillGate'
-import { buildAxisKpis } from './buildAxisKpis'
-import type { AxisKpiConfig } from './buildAxisKpis'
 import { EMPTY_REPORT_FILTERS, buildReportQueryParams } from './reportFilterParams'
 import type { ReportFilterState } from './reportFilterParams'
 import SegmentBars from './SegmentBars'
+import StatTile from '@/components/ui/StatTile'
 import ReportChartWithDrillList from './ReportChartWithDrillList'
 import ReportTimeseriesChart from './ReportTimeseriesChart'
 import { useDateFormat } from '@/lib/datetime'
+import { useNumberFormat } from '@/lib/formatters'
+import { Caption, BodyText } from '@/components/ui/typography'
 import type {
   ReportPeriod, CandidateSegment, CandidateOwnerSegment, CandidateTimeseriesPoint,
   ApplicationTopSegment, ApplicationBucketCounts, ApplicationStageDurationSegment,
@@ -30,6 +32,22 @@ import type {
 import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
 import { getReportKpiCatalog, getReportKpiDefaultOrder, reportKpiSettingsKey } from './kpiCatalog'
 import { resolveReportKpiOrder } from './resolveReportKpiOrder'
+
+// The nine fixed KPI keys the live backend returns (ApplicationKpisReport::CARDS,
+// RAPPORT-APPS-VERDIEPING-1) in camelCase label form (applications.kpi.*) — the
+// server's own `label` is intentionally ignored (§5). Mirrors WhatsappReport's
+// KPI_LABEL_KEYS exactly.
+const KPI_LABEL_KEYS: Record<string, string> = {
+  total: 'applications.kpi.total',
+  new: 'applications.kpi.new',
+  active: 'applications.kpi.active',
+  matched: 'applications.kpi.matched',
+  rejected: 'applications.kpi.rejected',
+  conversion_pct: 'applications.kpi.conversionPct',
+  avg_days_to_match: 'applications.kpi.avgDaysToMatch',
+  too_long_in_stage: 'applications.kpi.tooLongInStage',
+  missing_appointment: 'applications.kpi.missingAppointment',
+}
 
 // The plain axes (single-value XOR param, same shape as CandidatesReport). The
 // funnel-bucket axis is handled separately below — its param name ('bucket')
@@ -55,10 +73,22 @@ const BUCKET_COLOR: Record<keyof ApplicationBucketCounts, string> = {
 export default function ApplicationsReport({ period, filters = EMPTY_REPORT_FILTERS }: { period: ReportPeriod; filters?: ReportFilterState }) {
   const { t } = useTranslation('analytics')
   const { formatDate } = useDateFormat()
+  const { formatNumber } = useNumberFormat()
   const { data, loading, error, refetch } = useApplicationsReport(period, filters)
 
   const total   = data?.total ?? 0
   const hasData = !loading && !error && total > 0
+
+  // Per-KPI drill (whatsapp pattern, RAPPORT-APPS-VERDIEPING-1): clicking a strip
+  // card opens the shared drawer on GET /reports/applications/kpis/drill?kpi=<key>,
+  // layered on top of the report's own active panel filters — never just `period`.
+  const [kpiDrill, setKpiDrill] = useState<DrillSpec | null>(null)
+  const windowSub = () => `${formatDate(data?.from)} – ${formatDate(data?.to)}`
+  const openKpiDrill = (serverKey: string, label: string, value: string | number) =>
+    gateDrillClick('applications', () => setKpiDrill({
+      title: label, value, subtitle: windowSub(),
+      rowsEndpoint: '/reports/applications/kpis/drill', rowsParams: { ...baseParams, kpi: serverKey },
+    }))
 
   // Drill-down: every axis section, the bucket section and the timeseries own an
   // ALWAYS-VISIBLE list beside their chart (ReportChartWithDrillList) instead of a
@@ -162,59 +192,33 @@ export default function ApplicationsReport({ period, filters = EMPTY_REPORT_FILT
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data?.from, data?.to])
 
-  // Nine-card KPI strip (same footprint as the dashboard): total + the four fixed
-  // funnel-bucket counts (real, flag-driven, already on the response) + the top
-  // segment of four more axes (stage/source/owner/customer) — all real counts,
-  // nothing invented (§0 no fake affordances). `vacancy`/`stage_duration` and two
-  // 'none'-bucket pseudo-axes stay out of the DEFAULT four (top-20+others is a
-  // weak default "top KPI" pick) but are real spare catalogue entries a tenant
-  // can swap in (REPORTS-KPI-SPARE-3, kpiCatalog.ts) — `vacancy` is still fully
-  // shown as bars below regardless of the strip's own choice.
-  const bucketKpis: KpiSpec[] = BUCKET_KEYS.map(k => ({
-    key: `bucket:${k}`, label: `${t('applications.axes.bucket')}: ${t(`applications.buckets.${k}`)}`, value: data?.by_bucket[k] ?? 0,
-    active: (drills.bucket?.rowsParams as Record<string, unknown> | undefined)?.bucket === k,
-    onClick: gateDrillClick('applications', () => openSegment('bucket', { label: t(`applications.buckets.${k}`), count: data?.by_bucket[k] ?? 0 }, { bucket: k })),
-  }))
-  const allAxisConfigs: Record<string, AxisKpiConfig> = {
-    stage:    { axis: 'stage',    axisLabel: t('applications.axes.stage'),    segs: (data?.by_stage ?? []).map(s => ({ key: s.value, label: s.label, count: s.count })) },
-    source:   { axis: 'source',   axisLabel: t('applications.axes.source'),   segs: (data?.by_source ?? []).map(s => ({ key: s.value, label: s.label, count: s.count })) },
-    owner:    { axis: 'owner',    axisLabel: t('applications.axes.owner'),    segs: (data?.by_owner ?? []).map(s => ({ key: s.owner_id, label: s.name, count: s.count })) },
-    customer: { axis: 'customer', axisLabel: t('applications.axes.customer'), segs: (data?.by_customer ?? []).map(s => ({ key: s.value, label: s.label, count: s.count })) },
-    // REPORTS-KPI-SPARE-3: two real full axes the strip already computes (the
-    // component's `bars('vacancy', ...)`/`stageDurationBars` sections below) but
-    // never offered as swap-in KPI cards, plus two single-segment pseudo-axes
-    // filtering their parent axis's own real 'none' sentinel row (already
-    // returned by /reports/applications — never invented).
-    vacancy:        { axis: 'vacancy', axisLabel: t('applications.axes.vacancy'), segs: (data?.by_vacancy ?? []).map(s => ({ key: s.value, label: s.label, count: s.count })) },
-    stage_duration: { axis: 'stage_duration', axisLabel: t('applications.axes.stageDuration'), segs: (data?.by_stage_duration ?? []).map(s => ({ key: s.value, label: s.label, count: s.count })) },
-    customer_none:  { axis: 'customer', axisLabel: t('applications.axes.customer'), segs: (data?.by_customer ?? []).filter(s => s.value === 'none').map(s => ({ key: s.value, label: s.label, count: s.count })) },
-    stage_none:     { axis: 'stage',    axisLabel: t('applications.axes.stage'),    segs: (data?.by_stage ?? []).filter(s => s.value === 'none').map(s => ({ key: s.value, label: s.label, count: s.count })) },
-  }
-  // WHICH axes participate, and in what priority order, is the tenant's
-  // Settings → Reports choice (bucket cards stay fixed — not in the axis
-  // catalogue; "total" also stays pinned — RAPPORT-KPI-INSTELBAAR).
+  // Nine-card KPI strip (RAPPORT-APPS-VERDIEPING-1): straight off the envelope's
+  // own `kpis[]` array now — each label from the local i18n catalogue, each card
+  // clickable into its own per-KPI drill (whatsapp pattern, no more client-built
+  // bucket/axis cards — the server's nine keys supersede them, §0 no fake affordances).
+  const kpiByServerKey = new Map((data?.kpis ?? []).map(k => [k.key, k.count]))
+  const kpiByKey: Record<string, KpiSpec> = Object.fromEntries(
+    Object.entries(KPI_LABEL_KEYS).map(([serverKey, labelKey]) => {
+      const camelKey = labelKey.split('.').pop()!
+      const raw = kpiByServerKey.get(serverKey)
+      // conversion_pct carries a percentage unit, avg_days_to_match a days unit —
+      // every other card is a plain count. The house dash renders when NULL
+      // (STATS-HONEST-1: nothing decided/matched yet, never a fake 0).
+      const value = raw == null ? '—' : serverKey === 'conversion_pct' ? `${formatNumber(raw)}%` : formatNumber(raw)
+      const sub = raw != null && serverKey === 'avg_days_to_match' ? t('applications.kpi.daysUnit') : undefined
+      const onClick = openKpiDrill(serverKey, t(labelKey), value)
+      return [camelKey, { key: camelKey, label: t(labelKey), value, sub, ...(onClick ? { onClick } : {}) }]
+    }),
+  )
+
+  // Which nine keys render, and in what order, is the tenant's Settings → Reports
+  // choice (falls back to today's order when nothing is stored) — mirrors whatsapp.
   const settingsValues = useAllSettings()
   const catalogKeys = getReportKpiCatalog('applications').map(c => c.key)
-  const defaultAxisOrder = getReportKpiDefaultOrder('applications')
-  const storedAxisOrder = getJsonSetting<string[] | undefined>(settingsValues, reportKpiSettingsKey('applications'), undefined)
-  const { order: axisOrder, fellBack } = resolveReportKpiOrder(storedAxisOrder, catalogKeys, defaultAxisOrder)
-  const axisConfigs: AxisKpiConfig[] = axisOrder.map(axis => allAxisConfigs[axis]).filter(Boolean)
-  // A KPI card for an axis segment fills THAT axis's own list, exactly like
-  // clicking the bar itself — never a shared overlay.
-  const onAxisKpiPick = gateDrillClick('applications', (axis: string, key: string) => {
-    const cfg = axisConfigs.find(c => c.axis === axis)
-    const seg = cfg?.segs.find(s => s.key === key)
-    if (seg) openSegment(axis as DrillKey, { label: seg.label, count: seg.count }, { [axis]: key })
-  })
-  const axisKpis = buildAxisKpis(axisConfigs, 4,
-    (axis, key) => onAxisKpiPick?.(axis, key),
-    (axis, key) => (drills[axis as DrillKey]?.rowsParams as Record<string, unknown> | undefined)?.[axis] === key)
-
-  const kpis: KpiSpec[] = [
-    { key: 'total', label: t('applications.total'), value: total },
-    ...bucketKpis,
-    ...axisKpis,
-  ]
+  const defaultOrder = getReportKpiDefaultOrder('applications')
+  const stored = getJsonSetting<string[] | undefined>(settingsValues, reportKpiSettingsKey('applications'), undefined)
+  const { order: kpiOrder, fellBack } = resolveReportKpiOrder(stored, catalogKeys, defaultOrder)
+  const kpis: KpiSpec[] = kpiOrder.map(key => kpiByKey[key]).filter((k): k is KpiSpec => k != null)
 
   return (
     <div>
@@ -225,9 +229,9 @@ export default function ApplicationsReport({ period, filters = EMPTY_REPORT_FILT
 
       {/* The report's data window, rendered prominently — DD-MM-YYYY (never ISO, §3B). */}
       {!loading && !error && data && (
-        <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)', marginBottom: 12 }}>
+        <BodyText as="div" style={{ fontWeight: 500, marginBottom: 12 }}>
           {t('applications.window', { from: formatDate(data.from), to: formatDate(data.to) })}
-        </div>
+        </BodyText>
       )}
 
       <div style={{ ...card, overflow: 'hidden' }}>
@@ -287,9 +291,40 @@ export default function ApplicationsReport({ period, filters = EMPTY_REPORT_FILT
               <ReportChartWithDrillList drill={drills.vacancy ?? null} placeholderLabel={t('applications.axes.vacancy')}
                 chart={bars('vacancy', data.by_vacancy)} />
             </section>
+
+            {/* INTAKE-IN-APPS-1: appointment numbers for the window — two small
+                tiles + two distribution axes. Not clickable: the backend offers no
+                intake drill (only /reports/applications/kpis/drill exists), so no
+                affordance is drawn on top of these (§3 no fake affordances). */}
+            <section>
+              <h3 style={{ ...head, marginBottom: 10 }}>{t('applications.intakes.title')}</h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                <div style={{ display: 'flex', gap: 12 }}>
+                  <StatTile label={t('applications.intakes.planned')} value={formatNumber(data.intakes.planned)} />
+                  <StatTile label={t('applications.intakes.doneInPeriod')} value={formatNumber(data.intakes.done_in_period)} />
+                </div>
+                <div>
+                  <Caption style={{ fontWeight: 600, marginBottom: 4, display: 'block' }}>{t('applications.intakes.byRecruiter')}</Caption>
+                  <SegmentBars
+                    max={data.intakes.by_recruiter.reduce((m, s) => Math.max(m, s.count), 0)}
+                    items={data.intakes.by_recruiter.map(s => ({ key: s.owner_id, label: s.name, count: s.count, color: null }))}
+                  />
+                </div>
+                <div>
+                  <Caption style={{ fontWeight: 600, marginBottom: 4, display: 'block' }}>{t('applications.intakes.byBranch')}</Caption>
+                  <SegmentBars
+                    max={data.intakes.by_branch.reduce((m, s) => Math.max(m, s.count), 0)}
+                    items={data.intakes.by_branch.map(s => ({ key: s.value, label: s.label, count: s.count, color: null }))}
+                  />
+                </div>
+              </div>
+            </section>
           </div>
         )}
       </div>
+
+      {/* The per-KPI drill drawer — same shared drawer every report uses. */}
+      <ReportDrillDrawer drill={kpiDrill} onClose={() => setKpiDrill(null)} />
     </div>
   )
 }

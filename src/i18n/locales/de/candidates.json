@@ -181,7 +181,8 @@
       "hoursMaxPlaceholder": "Max",
       "availableFromBefore": "Verfügbar vor"
     },
-    "missingAppointment": "Termin fehlt"
+    "missingAppointment": "Termin fehlt",
+    "missingDocs": "Fehlende Dokumente"
   },
   "modal": {
     "title": "Neuer Kandidat",
@@ -1369,5 +1370,22 @@
     "clear": "Verknüpfung entfernen",
     "close": "Schließen",
     "uploadFailed": "Upload fehlgeschlagen. Bitte erneut versuchen."
+  },
+  "couplingErrors": {
+    "title": "Kopplungsfehler",
+    "subtitle": "Datensätze, deren letzter Synchronisierungsversuch mit einem verknüpften Backoffice-System fehlgeschlagen ist.",
+    "loading": "Kopplungsfehler werden geladen…",
+    "error": "Die Kopplungsfehler konnten nicht geladen werden.",
+    "empty": "Keine Kopplungsfehler. Jede Verknüpfung wurde erfolgreich synchronisiert.",
+    "col": {
+      "entity": "Datensatz",
+      "system": "System",
+      "error": "Grund",
+      "lastAttempt": "Zuletzt versucht"
+    },
+    "system": {
+      "shiftmanager": "Shiftmanager",
+      "helloflex": "HelloFlex"
+    }
   }
 }

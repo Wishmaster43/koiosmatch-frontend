@@ -181,7 +181,8 @@
       "hoursMaxPlaceholder": "Max",
       "availableFromBefore": "Disponible avant"
     },
-    "missingAppointment": "Rendez-vous manquant"
+    "missingAppointment": "Rendez-vous manquant",
+    "missingDocs": "Documents manquants"
   },
   "modal": {
     "title": "Nouveau candidat",
@@ -1369,5 +1370,22 @@
     "clear": "Supprimer le lien",
     "close": "Fermer",
     "uploadFailed": "Échec du téléversement. Veuillez réessayer."
+  },
+  "couplingErrors": {
+    "title": "Erreurs de couplage",
+    "subtitle": "Enregistrements dont la dernière tentative de synchronisation avec un système de back-office lié a échoué.",
+    "loading": "Chargement des erreurs de couplage…",
+    "error": "Impossible de charger les erreurs de couplage.",
+    "empty": "Aucune erreur de couplage. Chaque liaison a été synchronisée avec succès.",
+    "col": {
+      "entity": "Enregistrement",
+      "system": "Système",
+      "error": "Motif",
+      "lastAttempt": "Dernière tentative"
+    },
+    "system": {
+      "shiftmanager": "Shiftmanager",
+      "helloflex": "HelloFlex"
+    }
   }
 }

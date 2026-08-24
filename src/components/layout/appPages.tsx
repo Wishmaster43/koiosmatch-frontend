@@ -14,6 +14,7 @@ const ReportsPage            = lazy(() => import('@/pages/reports/ReportsPage'))
 const WorkflowsPage          = lazy(() => import('@/pages/ai/WorkflowsPage'))
 const CandidatesReport       = lazy(() => import('@/pages/shiftmanager/CandidatesReport'))
 const CandidatesPage         = lazy(() => import('@/pages/candidates/CandidatesPage'))
+const CouplingErrorsPage     = lazy(() => import('@/pages/candidates/CouplingErrorsPage'))
 const CandidatesDetailPage   = lazy(() => import('@/pages/shiftmanager/CandidatesDetailPage'))
 const CustomerReport         = lazy(() => import('@/pages/shiftmanager/CustomersReport'))
 const CustomersDetailPage    = lazy(() => import('@/pages/shiftmanager/CustomersDetailPage'))
@@ -73,6 +74,9 @@ export const PAGE_TITLES: Record<string, string> = {
   outreach:                     'Call lists',
   customers:                    'Customers',
   'import-wizard':              'Import wizard',
+  // Deep-link-only destination behind the dashboard coupling_errors KPI (K-173
+  // fase 5) — no sidebar entry, only reachable via a tile click.
+  'coupling-errors':            'Coupling errors',
 
   // Reports hub (analytical) — one key per report sub-page (RAPPORTEN-OMBOUW-1;
   // RAPPORTEN-DANNY10-1 24-08 trimmed the set to Danny's ten-page design). The
@@ -175,6 +179,7 @@ export function renderPage(activePage: string, { navIntent, goTo, dashView }: { 
     // PDF-VACATURES-2026-08-14 point 7: forward the nav intent so a caller (the
     // vacancies toolbar's Excel-upload button) can preselect an entity on arrival.
     case 'import-wizard':          return <ImportWizardPage intent={navIntent} />
+    case 'coupling-errors':        return <CouplingErrorsPage />
     case 'planning':               return <PlanningPage />
 
     // ── Reports hub (analytical) ──────────────────────────────────────────

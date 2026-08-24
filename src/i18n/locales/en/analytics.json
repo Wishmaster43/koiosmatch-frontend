@@ -224,7 +224,26 @@
       "rejected": "Rejected",
       "placed": "Placed"
     },
-    "kpiOrderFellBack": "A KPI card configured in Settings no longer exists and was reset to the default."
+    "kpiOrderFellBack": "A KPI card configured in Settings no longer exists and was reset to the default.",
+    "kpi": {
+      "total": "Total applications",
+      "new": "New",
+      "active": "Active",
+      "matched": "Matched",
+      "rejected": "Rejected",
+      "conversionPct": "Conversion",
+      "avgDaysToMatch": "Avg. days to match",
+      "tooLongInStage": "Too long in stage",
+      "missingAppointment": "Missing appointment",
+      "daysUnit": "days"
+    },
+    "intakes": {
+      "title": "Intakes",
+      "planned": "Planned",
+      "doneInPeriod": "Done in period",
+      "byRecruiter": "By recruiter",
+      "byBranch": "By branch"
+    }
   },
   "opportunities": {
     "loading": "Loading opportunities…",

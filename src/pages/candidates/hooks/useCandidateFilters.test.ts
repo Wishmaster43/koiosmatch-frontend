@@ -211,6 +211,14 @@ describe('useCandidateFilters — stale6m cutoff uses the LOCAL calendar day, ne
   })
 })
 
+describe('useCandidateFilters — missingDocs attention (K-173 parity)', () => {
+  it('sends missing_documents=1, same shape as no_followup/hasTasks', () => {
+    const { result } = renderHook(() => useCandidateFilters(baseArgs))
+    act(() => { result.current.setAttentionFilter('missingDocs') })
+    expect(result.current.filterParams.missing_documents).toBe(1)
+  })
+})
+
 describe('useCandidateFilters — missingAppointment (V-appdetail-1/2)', () => {
   it('is findable: toggling it flips anyFilterActive and clearAllFilters resets it', () => {
     const { result } = renderHook(() => useCandidateFilters(baseArgs))

@@ -204,7 +204,8 @@
       "hoursMaxPlaceholder": "Max",
       "availableFromBefore": "Available before"
     },
-    "missingAppointment": "Appointment missing"
+    "missingAppointment": "Appointment missing",
+    "missingDocs": "Missing documents"
   },
   "modal": {
     "title": "New candidate",
@@ -1369,5 +1370,22 @@
     "clear": "Remove link",
     "close": "Close",
     "uploadFailed": "Upload failed. Please try again."
+  },
+  "couplingErrors": {
+    "title": "Coupling errors",
+    "subtitle": "Records whose last sync attempt to a linked backoffice system failed.",
+    "loading": "Loading coupling errors…",
+    "error": "Could not load the coupling errors.",
+    "empty": "No coupling errors. Every mapping synced successfully.",
+    "col": {
+      "entity": "Record",
+      "system": "System",
+      "error": "Reason",
+      "lastAttempt": "Last attempted"
+    },
+    "system": {
+      "shiftmanager": "Shiftmanager",
+      "helloflex": "HelloFlex"
+    }
   }
 }

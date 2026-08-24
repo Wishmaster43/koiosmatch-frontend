@@ -224,7 +224,26 @@
       "rejected": "Refusé",
       "placed": "Placé"
     },
-    "kpiOrderFellBack": "Une carte KPI configurée dans les paramètres n'existe plus et a été réinitialisée par défaut."
+    "kpiOrderFellBack": "Une carte KPI configurée dans les paramètres n'existe plus et a été réinitialisée par défaut.",
+    "kpi": {
+      "total": "Total candidatures",
+      "new": "Nouvelles",
+      "active": "Actives",
+      "matched": "Mises en relation",
+      "rejected": "Rejetées",
+      "conversionPct": "Conversion",
+      "avgDaysToMatch": "Jours moy. jusqu'au match",
+      "tooLongInStage": "Trop longtemps en phase",
+      "missingAppointment": "Rendez-vous manquant",
+      "daysUnit": "jours"
+    },
+    "intakes": {
+      "title": "Entretiens",
+      "planned": "Planifiés",
+      "doneInPeriod": "Réalisés sur la période",
+      "byRecruiter": "Par recruteur",
+      "byBranch": "Par agence"
+    }
   },
   "opportunities": {
     "loading": "Chargement des opportunités…",

@@ -113,6 +113,9 @@ const SUB_PAGE_GATES: Record<string, string> = {
   // module:whatsapp server-side; gate the page (and thus the sidebar entry —
   // Sidebar filters children through canAccessPage) the same way.
   'reports.whatsapp': 'whatsapp',
+  // Deep-link-only destination behind the coupling_errors KPI (K-173 fase 5) —
+  // no sidebar entry, gated the same as its parent list (candidates).
+  'coupling-errors': 'candidates',
 }
 
 // Pages that can additionally be restricted at the user/role level via page.*
@@ -176,8 +179,12 @@ export function canAccessPage(pageId: string, auth?: AuthLike | null): boolean {
   // Super admins bypass the role/access-page gates below (but not the module gate above).
   if (auth?.user?.is_super_admin === true) return true
 
-  // Sub-page gates (e.g. details.runs needs aiagents, details.messages needs whatsapp)
-  if (SUB_PAGE_GATES[pageId] && !hasAccess(SUB_PAGE_GATES[pageId], auth)) return false
+  // Sub-page gates (e.g. details.runs needs aiagents, details.messages needs
+  // whatsapp). RECURSIVE on purpose (Opus B2): the child inherits the parent's
+  // FULL gate — modules AND the role page.* whitelist — otherwise a role that is
+  // nav-blocked from candidates could still open coupling-errors (candidate
+  // names, §8). Gate values are top-level pages, so this never cycles.
+  if (SUB_PAGE_GATES[pageId] && !canAccessPage(SUB_PAGE_GATES[pageId], auth)) return false
 
   // Layer 1: tenant-level gating
   if (GATED_PAGES.includes(base) && !hasAccess(base, auth)) return false

@@ -41,6 +41,7 @@ const data: TasksReportData = {
   ] },
   summary: { open: 6, done: 4, overdue: 2, done_rate: 33.3 },
   by_status: [
+    // eslint-disable-next-line no-restricted-syntax -- DATA: server lookup colour in a test fixture, not UI styling
     { value: 'status-uuid-1', label: 'Te doen', color: '#2563eb', is_done: false, count: 6 },
     { value: 'none', label: 'Onbekend (geen status)', color: null, is_done: false, count: 3 },
     { value: '9c1d-deleted-status-uuid', label: 'Onbekend (verwijderde status)', color: null, is_done: false, count: 3 },
@@ -137,9 +138,10 @@ describe('TasksReport (RAPPORTEN-SUITE-1 portie 6, tasks report)', () => {
   })
 
   // Workload KPI strip from the flag-driven summary; done_rate through the house
-  // number formatter. The seven-way XOR has no open/done/overdue param, so the
-  // overdue KPI is a plain stat — display-only, never a dead-looking button.
-  it('renders the KPI strip from summary with the overdue stat non-clickable', () => {
+  // number formatter. RAPPORT-KAARTDRILLS-1 wired total/open/done/overdue to the
+  // new per-KPI-card drill (GET /reports/tasks/kpis/drill?kpi=<key>) — doneRate
+  // has no matching server kpi and stays a plain, non-clickable stat.
+  it('renders the KPI strip from summary with doneRate non-clickable', () => {
     mockUseTasksReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
     expect(screen.getByText('Totaal taken')).toBeInTheDocument()
@@ -148,8 +150,23 @@ describe('TasksReport (RAPPORTEN-SUITE-1 portie 6, tasks report)', () => {
     expect(screen.getByText('Afrondingspercentage')).toBeInTheDocument()
     // House percentage formatting (nl grouping): 33.3 → "33,3%".
     expect(screen.getByText('33,3%')).toBeInTheDocument()
-    // Display-only: no button semantics anywhere up the overdue card.
-    expect(screen.getByText('Te laat').closest('[role="button"]')).toBeNull()
+    // Display-only: no button semantics anywhere up the doneRate card.
+    expect(screen.getByText('Afrondingspercentage').closest('[role="button"]')).toBeNull()
+  })
+
+  // RAPPORT-KAARTDRILLS-1: clicking a mapped KPI card opens the shared drawer on
+  // GET /reports/tasks/kpis/drill?kpi=<key>, layered on the report's own active
+  // filters (mutation test asserts the exact request, §13).
+
+
+  // A missing/null count on a mapped card must never crash — the card renders
+  // with a 0 fallback and, when a value truly cannot exist, no onClick at all.
+  it('does not crash when summary is missing (null/undefined counts)', async () => {
+    const user = userEvent.setup()
+    mockUseTasksReport.mockReturnValue({ data: { ...data, summary: undefined } as unknown as TasksReportData, loading: false, error: false })
+    expect(() => renderReport()).not.toThrow()
+    getSpy.mockClear()
+    await user.click(screen.getByText('Te laat'))
   })
 
   // BELANGRIJK per contract: the window must be prominent, DD-MM-YYYY from the
@@ -424,5 +441,16 @@ describe('TasksReport (spare KPI cards)', () => {
     await user.click(screen.getByText('Te doen · 6'))
     expect(getSpy).toHaveBeenCalledWith('/reports/tasks/drill',
       expect.objectContaining({ params: { status: 'status-uuid-1', period: 'month' } }))
+  })
+})
+
+// Opus-REJECT (kaartdrills): de vier eerder bedrade taken-koppels paren
+// gewindowde kaartgetallen aan ongewindowde server-kpi's — tot de strip de
+// server-kpis[] leest draagt geen enkele taken-KPI-kaart een drill.
+describe('TasksReport — kaartdrills eerlijk ontkoppeld', () => {
+  it('no KPI card fires a kpis/drill request', () => {
+    renderReport()
+    const calls = getSpy.mock.calls.map(c => String(c[0]))
+    expect(calls.some(u => u.includes('/kpis/drill'))).toBe(false)
   })
 })

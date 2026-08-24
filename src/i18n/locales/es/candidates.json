@@ -181,7 +181,8 @@
       "hoursMaxPlaceholder": "Máx",
       "availableFromBefore": "Disponible antes de"
     },
-    "missingAppointment": "Falta cita"
+    "missingAppointment": "Falta cita",
+    "missingDocs": "Documentos faltantes"
   },
   "modal": {
     "title": "Nuevo candidato",
@@ -1369,5 +1370,22 @@
     "clear": "Quitar vínculo",
     "close": "Cerrar",
     "uploadFailed": "Error al subir. Inténtalo de nuevo."
+  },
+  "couplingErrors": {
+    "title": "Errores de vinculación",
+    "subtitle": "Registros cuyo último intento de sincronización con un sistema de backoffice vinculado ha fallado.",
+    "loading": "Cargando errores de vinculación…",
+    "error": "No se pudieron cargar los errores de vinculación.",
+    "empty": "Sin errores de vinculación. Todas las vinculaciones se sincronizaron correctamente.",
+    "col": {
+      "entity": "Registro",
+      "system": "Sistema",
+      "error": "Motivo",
+      "lastAttempt": "Último intento"
+    },
+    "system": {
+      "shiftmanager": "Shiftmanager",
+      "helloflex": "HelloFlex"
+    }
   }
 }

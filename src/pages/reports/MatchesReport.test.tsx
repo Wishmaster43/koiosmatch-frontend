@@ -39,7 +39,9 @@ const data: MatchesReportData = {
     { date: '2026-08-03', label: 'Wk 32', value: 7 },
   ] },
   by_contract_form: [
+    // eslint-disable-next-line no-restricted-syntax -- DATA: server lookup colour in a test fixture, not UI styling
     { value: 'secondment', label: 'Detachering', color: '#16a34a', count: 9 },
+    // eslint-disable-next-line no-restricted-syntax -- DATA: server lookup colour in a test fixture, not UI styling
     { value: 'temp_agency', label: 'Uitzend', color: '#2563eb', count: 4 },
     { value: 'none', label: 'Geen contractvorm', color: null, count: 2 },
     { value: 'zzz-deleted-form', label: 'Onbekend (verwijderde contractvorm)', color: null, count: 1 },
@@ -48,6 +50,7 @@ const data: MatchesReportData = {
   under_contract: { sent: 5, active: 6, ended: 2, none: 3, total: 13 },
   placements: { sent: 5, active: 6, ended: 2, total: 13 },
   terminations: { total: 3, by_reason: [
+    // eslint-disable-next-line no-restricted-syntax -- DATA: server lookup colour in a test fixture, not UI styling
     { key: 'client_stop', value: 'client_stop', label: 'Klant stopt', color: '#dc2626', count: 2 },
     { key: 'own_choice', value: 'own_choice', label: 'Eigen keuze', color: null, count: 1 },
   ] },
@@ -391,6 +394,35 @@ describe('MatchesReport (nine-card KPI footprint)', () => {
     renderReport()
     expect(data.avg_placement_duration_days).toBeNull()
     expect(screen.getAllByText('—').length).toBeGreaterThanOrEqual(1)
+  })
+
+  // RAPPORT-KAARTDRILLS-1: `terminationsTotal` drills via the new per-KPI-card
+  // endpoint GET /reports/matches/kpis/drill?kpi=terminated_in_period.
+  it('clicking the "Totaal beëindigingen" KPI card drills via /reports/matches/kpis/drill?kpi=terminated_in_period', async () => {
+    const user = userEvent.setup()
+    mockUseMatchesReport.mockReturnValue({ data, loading: false, error: false })
+    renderReport()
+    getSpy.mockClear()
+    await user.click(screen.getAllByText('Totaal beëindigingen')[0])
+    expect(getSpy).toHaveBeenCalledWith('/reports/matches/kpis/drill',
+      expect.objectContaining({ params: expect.objectContaining({ kpi: 'terminated_in_period', period: 'month' }) }))
+  })
+
+  // With avg_placement_duration_days null (as above), the dur card carries no
+  // onClick at all — no fake affordance on a fabricated/absent number.
+  it('the avg-duration card is non-clickable while its value is null', () => {
+    mockUseMatchesReport.mockReturnValue({ data, loading: false, error: false })
+    renderReport()
+    expect(screen.getByText('Gem. matchduur').closest('[role="button"]')).toBeNull()
+  })
+
+  // Once HelloFlex fills the field, the same card becomes a real drill
+  // (kpi=avg_duration_days) — never crashes on the transition.
+  // Opus-REJECT: avg_placement_duration_days staat server-side hard op null
+  // (wacht op HelloFlex) — de mapping was onbereikbaar dood en is ontkoppeld.
+  it('the avg-duration card carries no drill while the envelope value is null by contract', () => {
+    renderReport()
+    expect(getSpy.mock.calls.map(c => String(c[0])).some(u => u.includes("kpi': 'avg_duration_days'"))).toBe(false)
   })
 })
 

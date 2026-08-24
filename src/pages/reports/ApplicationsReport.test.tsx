@@ -33,6 +33,7 @@ const data: ApplicationsReportData = {
   timeseries: { bucket: 'week', series: [{ date: '2026-08-03', label: 'Wk 32', value: 8 }, { date: '2026-08-10', label: 'Wk 33', value: 12 }] },
   by_bucket: { active: 10, matched: 4, rejected: 3, placed: 3 },
   by_stage: [
+    // eslint-disable-next-line no-restricted-syntax -- DATA: server lookup colour in a test fixture, not UI styling
     { value: 'applied', label: 'Applied', color: '#16a34a', count: 10 },
     { value: 'none', label: 'Geen fase', color: null, count: 2 },
   ],
@@ -54,6 +55,24 @@ const data: ApplicationsReportData = {
     { value: 'applied', label: 'Applied (duration)', count: 5, avg_days_in_phase: 12.5 },
     { value: 'intake', label: 'Intake (duration)', count: 3, avg_days_in_phase: 4 },
   ],
+  // RAPPORT-APPS-VERDIEPING-1: the nine server-card envelope, ignored server
+  // `label` (§5 — labels come from i18n, mirrors WhatsappReportData fixture).
+  kpis: [
+    { key: 'total', label: 'ignored', count: 20 },
+    { key: 'new', label: 'ignored', count: 5 },
+    { key: 'active', label: 'ignored', count: 10 },
+    { key: 'matched', label: 'ignored', count: 4 },
+    { key: 'rejected', label: 'ignored', count: 3 },
+    { key: 'conversion_pct', label: 'ignored', count: 20 },
+    { key: 'avg_days_to_match', label: 'ignored', count: 6 },
+    { key: 'too_long_in_stage', label: 'ignored', count: 2 },
+    { key: 'missing_appointment', label: 'ignored', count: 1 },
+  ],
+  intakes: {
+    planned: 13, done_in_period: 11,
+    by_recruiter: [{ owner_id: 'u2', name: 'Bram Smit', count: 3 }],
+    by_branch: [{ value: 'b1', label: 'Amsterdam', count: 4 }],
+  },
 }
 
 function renderReport() {
@@ -105,7 +124,8 @@ describe('ApplicationsReport (RAPPORTEN-SUITE-1 portie 2)', () => {
   it('shows the empty state when there are no applications', () => {
     mockUseApplicationsReport.mockReturnValue({
       data: { ...data, total: 0, by_stage: [], by_source: [], by_owner: [], by_customer: [], by_vacancy: [],
-        by_bucket: { active: 0, matched: 0, rejected: 0, placed: 0 }, timeseries: { bucket: 'week', series: [] } },
+        by_bucket: { active: 0, matched: 0, rejected: 0, placed: 0 }, timeseries: { bucket: 'week', series: [] },
+        kpis: [], intakes: { planned: 0, done_in_period: 0, by_recruiter: [], by_branch: [] } },
       loading: false, error: false,
     })
     renderReport()
@@ -263,24 +283,65 @@ describe('ApplicationsReport (RAPPORTEN-SUITE-1 portie 2)', () => {
       expect.objectContaining({ params: { date: '2026-08-03', bucket: 'week', period: 'month' } }))
   })
 
-  // Nine-card KPI strip: total + the four fixed funnel-bucket counts + the top
-  // segment of four more axes, all real counts from the fixture's own axes.
-  it('renders nine KPI cards: total + funnel buckets + top axis segments', () => {
+  // RAPPORT-APPS-VERDIEPING-1: the nine-card strip now reads straight off the
+  // envelope's own `kpis[]` — real counts from the fixture, local i18n labels.
+  it('renders the nine envelope KPI cards with real counts, server label ignored', () => {
     mockUseApplicationsReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
-    expect(screen.getByText('Totaal sollicitaties')).toBeInTheDocument()
-    expect(screen.getByText('Funnel: Geplaatst')).toBeInTheDocument()
-    expect(screen.getByText('Fase: Applied')).toBeInTheDocument()
-    expect(screen.getByText('Klant: Yesway Flex')).toBeInTheDocument()
+    const cardLabels = ['Totaal sollicitaties', 'Nieuw', 'Actief', 'Gematcht', 'Afgewezen', 'Conversie',
+      'Gem. dagen tot match', 'Te lang in fase', 'Afspraak ontbreekt']
+    expect(cardLabels).toHaveLength(9)
+    for (const label of cardLabels) expect(screen.getAllByText(label).length).toBeGreaterThan(0)
+    for (const count of [20, 5, 10, 4, 3, 6]) expect(screen.getAllByText(String(count)).length).toBeGreaterThan(0)
+    expect(screen.queryByText('ignored')).not.toBeInTheDocument()
   })
 
-  it('clicking a funnel-bucket KPI card drills with the same bucket XOR param as its bar', async () => {
+  // The ONE per-KPI drill: kpi=<key>, layered on the report's own baseParams
+  // (whatsapp pattern, §13 — assert the request, never only that it fired).
+  it('clicking a KPI card drills via /reports/applications/kpis/drill with kpi=<key>', async () => {
     const user = userEvent.setup()
     mockUseApplicationsReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
-    await user.click(screen.getByText('Funnel: Geplaatst'))
-    expect(getSpy).toHaveBeenCalledWith('/reports/applications/drill',
-      expect.objectContaining({ params: { bucket: 'placed', period: 'month' } }))
+    await user.click(screen.getByText('Totaal sollicitaties'))
+    expect(getSpy).toHaveBeenCalledWith('/reports/applications/kpis/drill',
+      expect.objectContaining({ params: { kpi: 'total', period: 'month' } }))
+  })
+
+  it('clicking the "too long in stage" KPI card drills with kpi=too_long_in_stage', async () => {
+    const user = userEvent.setup()
+    mockUseApplicationsReport.mockReturnValue({ data, loading: false, error: false })
+    renderReport()
+    // Two DOM matches for the label (the KPI card + the axis section heading
+    // below it) — the KPI strip renders first, so index 0 is the clickable card.
+    await user.click(screen.getAllByText('Te lang in fase')[0])
+    expect(getSpy).toHaveBeenCalledWith('/reports/applications/kpis/drill',
+      expect.objectContaining({ params: { kpi: 'too_long_in_stage', period: 'month' } }))
+  })
+
+  // INTAKE-IN-APPS-1: the new intake block — two tiles + two non-clickable
+  // distribution axes, straight off the envelope's `intakes` field.
+  it('renders the intake block from the fixture', () => {
+    mockUseApplicationsReport.mockReturnValue({ data, loading: false, error: false })
+    renderReport()
+    expect(screen.getByText('Gepland')).toBeInTheDocument()
+    expect(screen.getByText('13')).toBeInTheDocument()
+    expect(screen.getByText('Afgerond in periode')).toBeInTheDocument()
+    expect(screen.getByText('11')).toBeInTheDocument()
+    expect(screen.getByText('Per recruiter')).toBeInTheDocument()
+    expect(screen.getByText('Bram Smit')).toBeInTheDocument()
+    expect(screen.getByText('Per vestiging')).toBeInTheDocument()
+    expect(screen.getByText('Amsterdam')).toBeInTheDocument()
+  })
+
+  // No fake affordance (§3): the intake block never fires a request — there is
+  // no backend intake-drill endpoint to click through to.
+  it('never fires a request when clicking inside the intake block', async () => {
+    const user = userEvent.setup()
+    mockUseApplicationsReport.mockReturnValue({ data, loading: false, error: false })
+    renderReport()
+    getSpy.mockClear()
+    await user.click(screen.getByText('Amsterdam'))
+    expect(getSpy).not.toHaveBeenCalled()
   })
 
   it('omits bucket when the timeseries is day-granular', async () => {
@@ -330,40 +391,11 @@ describe('ApplicationsReport (RAPPORTEN-SUITE-1 portie 2)', () => {
       expect.objectContaining({ params: expect.objectContaining({ stage: expect.anything() }) }))
   })
 
-  // REPORTS-KPI-SPARE-3: the settings catalogue offers real spares beyond the
-  // four default axes — otherwise the picker has nothing new to swap in.
-  it('offers vacancy/stage_duration/customer_none/stage_none spares in the applications catalogue', () => {
+  // RAPPORT-APPS-VERDIEPING-1: 'applications' is now a 'fixed' family scope
+  // (like whatsapp) — the catalogue is exactly the nine server keys, no spares.
+  it('the applications KPI catalogue is exactly the nine fixed server keys', () => {
     const keys = getReportKpiCatalog('applications').map(c => c.key)
-    expect(keys).toEqual(expect.arrayContaining(['vacancy', 'stage_duration', 'customer_none', 'stage_none']))
-  })
-
-  it('swapping in the vacancy spare renders a real top-vacancy KPI card, still nine cards total', () => {
-    mockSettings.mockReturnValue({ report_kpis_applications: JSON.stringify(['vacancy', 'source', 'owner', 'customer']) })
-    mockUseApplicationsReport.mockReturnValue({ data, loading: false, error: false })
-    renderReport()
-    // The fixture's real top vacancy row (count 9) — no fabricated number.
-    expect(screen.getByText('Vacature: Verpleegkundige (gearchiveerd)')).toBeInTheDocument()
-    const cards = screen.getAllByText(/^(Totaal sollicitaties|Funnel:|Fase:|Bron:|Eigenaar:|Klant:|Vacature:|Te lang in fase:)/)
-    expect(cards.length).toBe(9)
-  })
-
-  it('swapping in customer_none/stage_none renders their real none-bucket counts', () => {
-    mockSettings.mockReturnValue({ report_kpis_applications: JSON.stringify(['customer_none', 'stage_none', 'source', 'owner']) })
-    mockUseApplicationsReport.mockReturnValue({ data, loading: false, error: false })
-    renderReport()
-    expect(screen.getByText('Klant: Geen klant')).toBeInTheDocument()
-    expect(screen.getByText('Fase: Geen fase')).toBeInTheDocument()
-  })
-
-  // Clicking the stage_duration spare card drills through the SAME real
-  // `stage_duration` XOR param as its own bar — never the plain `stage` param.
-  it('clicking the stage_duration spare KPI card drills with stage_duration, never stage', async () => {
-    const user = userEvent.setup()
-    mockSettings.mockReturnValue({ report_kpis_applications: JSON.stringify(['stage_duration', 'source', 'owner', 'customer']) })
-    mockUseApplicationsReport.mockReturnValue({ data, loading: false, error: false })
-    renderReport()
-    await user.click(screen.getByText('Te lang in fase: Applied (duration)'))
-    expect(getSpy).toHaveBeenCalledWith('/reports/applications/drill',
-      expect.objectContaining({ params: { stage_duration: 'applied', period: 'month' } }))
+    expect(keys).toEqual(['total', 'new', 'active', 'matched', 'rejected', 'conversionPct',
+      'avgDaysToMatch', 'tooLongInStage', 'missingAppointment'])
   })
 })

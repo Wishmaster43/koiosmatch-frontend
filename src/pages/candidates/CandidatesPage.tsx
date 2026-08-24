@@ -202,7 +202,7 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
       selectedProvince, setSelectedProvince, selectedGeslacht, setSelectedGeslacht,
       selectedOwner, setSelectedOwner, selectedLocation, setSelectedLocation,
       selectedSource, setSelectedSource,
-      showArchived, setShowArchived, missingAppointmentFilter, setMissingAppointmentFilter, dateRange, setDateRange,
+      showArchived, setShowArchived, missingAppointmentFilter, setMissingAppointmentFilter, attentionFilter, setAttentionFilter, dateRange, setDateRange,
       geoFilter, geoHint, applyGeo, clearGeo,
     },
     options: { statusOptions, phaseOptions, funnelOptions, typeOptions, titleOptions, poolOptions, cityOptions,
@@ -215,7 +215,7 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
   // identity; only the actual selections/options/`t` drive a recompute. `tog` is
   // intentionally omitted — it closes over nothing from render scope (same as the
   // customers/vacancies `tog`), so its identity is irrelevant to the memo's output.
-  [t, showArchived, setShowArchived, missingAppointmentFilter, setMissingAppointmentFilter, dateRange, setDateRange, geoFilter, geoHint, applyGeo, clearGeo,
+  [t, showArchived, setShowArchived, missingAppointmentFilter, setMissingAppointmentFilter, attentionFilter, setAttentionFilter, dateRange, setDateRange, geoFilter, geoHint, applyGeo, clearGeo,
    selectedStatus, setSelectedStatus, selectedPhase, setSelectedPhase, selectedFunnel, setSelectedFunnel,
    selectedType, setSelectedType, selectedTitle, setSelectedTitle, selectedGeslacht, setSelectedGeslacht,
    selectedProvince, setSelectedProvince, selectedOwner, setSelectedOwner, selectedLocation, setSelectedLocation,

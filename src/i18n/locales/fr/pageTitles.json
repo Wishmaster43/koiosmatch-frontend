@@ -55,5 +55,6 @@
   "reports.outreach": "Rapports — Listes d’appels",
   "reports.whatsapp": "Rapports — WhatsApp",
   "reports.leads": "Rapports — Leads",
-  "reports.sources": "Rapports — Sources"
+  "reports.sources": "Rapports — Sources",
+  "coupling-errors": "Erreurs de couplage"
 }

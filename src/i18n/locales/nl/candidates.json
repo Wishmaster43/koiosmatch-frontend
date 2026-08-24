@@ -204,7 +204,8 @@
       "hoursMaxPlaceholder": "Max",
       "availableFromBefore": "Beschikbaar vóór"
     },
-    "missingAppointment": "Afspraak ontbreekt"
+    "missingAppointment": "Afspraak ontbreekt",
+    "missingDocs": "Documenten ontbreken"
   },
   "modal": {
     "title": "Nieuwe kandidaat",
@@ -1369,5 +1370,22 @@
     "clear": "Koppeling verwijderen",
     "close": "Sluiten",
     "uploadFailed": "Uploaden is mislukt. Probeer het opnieuw."
+  },
+  "couplingErrors": {
+    "title": "Koppelfouten",
+    "subtitle": "Records waarvan de laatste synchronisatiepoging naar een gekoppeld backofficesysteem is mislukt.",
+    "loading": "Koppelfouten laden…",
+    "error": "De koppelfouten konden niet worden geladen.",
+    "empty": "Geen koppelfouten. Elke koppeling is succesvol gesynchroniseerd.",
+    "col": {
+      "entity": "Record",
+      "system": "Systeem",
+      "error": "Reden",
+      "lastAttempt": "Laatst geprobeerd"
+    },
+    "system": {
+      "shiftmanager": "Shiftmanager",
+      "helloflex": "HelloFlex"
+    }
   }
 }

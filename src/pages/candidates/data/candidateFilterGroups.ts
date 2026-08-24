@@ -33,6 +33,10 @@ interface BuildArgs {
     selectedSource: string[]; setSelectedSource: Dispatch<SetStateAction<string[]>>
     showArchived: boolean; setShowArchived: (fn: (v: boolean) => boolean) => void
     missingAppointmentFilter: boolean; setMissingAppointmentFilter: (fn: (v: boolean) => boolean) => void
+    // NOTE-DOCS-DRILL (Opus lane-3 B3): the dashboard's missingDocs drill sets
+    // attention 'missingDocs' — this checkbox is its VISIBLE panel twin, so the
+    // narrowed list never reads as unfiltered.
+    attentionFilter: string | null; setAttentionFilter: (v: string | null) => void
     dateRange: DateRangeFilter | null; setDateRange: (v: DateRangeFilter | null) => void
     geoFilter: GeoFilter | null; geoHint: string | null
     applyGeo: (q: string, km: number) => void; clearGeo: () => void
@@ -77,6 +81,13 @@ export function buildCandidateFilterGroups({ t, tog, filters: f, options: o }: B
       selected: f.missingAppointmentFilter ? ['missingAppointment'] : [],
       options: [{ value: 'missingAppointment', label: t('filters.missingAppointment') }],
       onToggle: () => f.setMissingAppointmentFilter(v => !v) },
+    // Missing documents — the server-wide missing_documents=1 filter the
+    // dashboard tile drills into; visible AND toggleable here (§3: an active
+    // filter is never invisible).
+    { key: 'missingDocs', type: 'checkbox', category: catLifecycle, label: t('filters.missingDocs'),
+      selected: f.attentionFilter === 'missingDocs' ? ['missingDocs'] : [],
+      options: [{ value: 'missingDocs', label: t('filters.missingDocs') }],
+      onToggle: () => f.setAttentionFilter(f.attentionFilter === 'missingDocs' ? null : 'missingDocs') },
     // Period (date range) from a dashboard bar click — a single removable value.
     ...(f.dateRange ? [{
       key: 'period', type: 'search-select', category: catDisplay,

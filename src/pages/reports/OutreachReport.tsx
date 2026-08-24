@@ -12,12 +12,14 @@
  * candidate names (outreach.view), so a 403 keeps the calm degrade in the drawer.
  */
 import { useEffect, useState } from 'react'
+import { BodyText } from '@/components/ui/typography'
 import { formatRatio } from '@/lib/formatters'
 import { useTranslation } from 'react-i18next'
 import ReportKpiBand from './ReportKpiBand'
 import { reportCardStyle as card, reportSectionHeadStyle as head } from './ReportSectionCard'
 import ReportStateBlock from './ReportStateBlock'
 import type { KpiSpec } from '@/components/insights/InsightsRow'
+import ReportDrillDrawer from './ReportDrillDrawer'
 import type { DrillSpec } from './ReportDrillDrawer'
 import { useOutreachReport } from './useOutreachReport'
 import { gateDrillClick } from './reportDrillGate'
@@ -50,6 +52,9 @@ export default function OutreachReport({ period }: { period: ReportPeriod }) {
   // Drill-down: any axis-segment bar or timeseries bucket explains itself (the
   // call-list targets behind it + Koios advice). Exactly one XOR param per open drill.
   const [drills, setDrills] = useState<Partial<Record<DrillKey, DrillSpec>>>({})
+  // Floating drawer for a KPI-card click (RAPPORT-KAARTDRILLS-1) — separate from
+  // the inline per-axis `drills` above (mirrors WhatsappReport's kpiDrill).
+  const [kpiDrill, setKpiDrill] = useState<DrillSpec | null>(null)
   const windowSub = () => `${formatDate(data?.from)} – ${formatDate(data?.to)}`
   const openSegment = (key: DrillKey, seg: { label: string; count: number }, xorParam: Record<string, unknown>) =>
     setDrills(d => ({ ...d, [key]: {
@@ -91,6 +96,23 @@ export default function OutreachReport({ period }: { period: ReportPeriod }) {
     })
     return <SegmentBars max={max} onPick={onPick}
       items={segs.map(s => ({ key: s.owner_id, label: s.name, count: s.count, color: null }))} />
+  }
+
+  // RAPPORT-KAARTDRILLS-1 → Opus-REJECT gemeten: alleen total/reached zijn
+  // hard bevestigd identiek aan hun server-kpi; notReached (kaart = rekenkundig
+  // complement, server = uitkomst-subset) en rate (kaart = reach_rate, sleutel
+  // = conversion_pct met andere noemer) divergeren en zijn ontkoppeld tot de
+  // kaartwaarden uit de server-kpis[]-strip komen (rapportenplan-uitrol).
+  const KPI_DRILL_KEY: Partial<Record<string, string>> = {
+    total: 'total_targets', reached: 'reached',
+  }
+  const openKpiDrill = (localKey: string, label: string, value: string | number) => {
+    const serverKey = KPI_DRILL_KEY[localKey]
+    if (!serverKey) return undefined
+    return gateDrillClick('outreach', () => setKpiDrill({
+      title: label, value, subtitle: windowSub(),
+      rowsEndpoint: '/reports/outreach/kpis/drill', rowsParams: { kpi: serverKey, period },
+    }))
   }
 
   const onSeriesPick = gateDrillClick('outreach', (dateKey: string) => {
@@ -143,14 +165,18 @@ export default function OutreachReport({ period }: { period: ReportPeriod }) {
   const channelsUsedCount = data?.by_channel.filter(s => s.value !== 'none' && s.count > 0).length ?? 0
   const assigneesCount  = data?.by_assignee.filter(s => s.owner_id !== 'none' && s.count > 0).length ?? 0
   const kpiByKey: Record<string, KpiSpec> = {
-    total:   { key: 'total',   label: t('outreach.total'),   value: targets },
-    reached: { key: 'reached', label: t('outreach.reached'), value: reached },
+    total:   { key: 'total',   label: t('outreach.total'),   value: targets,
+      onClick: openKpiDrill('total', t('outreach.total'), targets) },
+    reached: { key: 'reached', label: t('outreach.reached'), value: reached,
+      onClick: openKpiDrill('reached', t('outreach.reached'), reached) },
     rate:    { key: 'rate',    label: t('outreach.reachRate'),
-      value: formatRatio(data?.reach_rate) },
+      value: formatRatio(data?.reach_rate),
+      onClick: data?.reach_rate != null ? openKpiDrill('rate', t('outreach.reachRate'), formatRatio(data.reach_rate)) : undefined },
     // Derived complements — real subtraction over fields the endpoint returns,
-    // never a fabricated number. Not clickable: no single-value axis backs a
-    // "not reached"/"assigned" drill.
-    notReached: { key: 'notReached', label: t('outreach.summary.notReached'), value: targets - reached },
+    // never a fabricated number. `assigned` stays non-clickable: no single-value
+    // axis or kpi backs an "assigned" drill.
+    notReached: { key: 'notReached', label: t('outreach.summary.notReached'), value: targets - reached,
+      onClick: openKpiDrill('notReached', t('outreach.summary.notReached'), targets - reached) },
     assigned:   { key: 'assigned',   label: t('outreach.summary.assigned'),   value: targets - unassignedCount },
     unassigned: { key: 'unassigned', label: t('outreach.summary.unassigned'), value: unassignedCount,
       onClick: unassignedSeg ? gateDrillClick('outreach', () => openSegment('assignee', { label: unassignedSeg.name, count: unassignedSeg.count }, { assignee: 'none' })) : undefined },
@@ -191,9 +217,9 @@ export default function OutreachReport({ period }: { period: ReportPeriod }) {
       {/* The report's data window, rendered prominently from the RESPONSE —
           DD-MM-YYYY (never ISO, §3B DATUM-1). */}
       {!loading && !error && data && (
-        <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)', marginBottom: 12 }}>
+        <BodyText as="div" style={{ fontWeight: 500, marginBottom: 12 }}>
           {t('outreach.window', { from: formatDate(data.from), to: formatDate(data.to) })}
-        </div>
+        </BodyText>
       )}
 
       <div style={{ ...card, overflow: 'hidden' }}>
@@ -250,6 +276,9 @@ export default function OutreachReport({ period }: { period: ReportPeriod }) {
           </div>
         )}
       </div>
+
+      {/* Floating drawer for a KPI-card click (RAPPORT-KAARTDRILLS-1). */}
+      <ReportDrillDrawer drill={kpiDrill} onClose={() => setKpiDrill(null)} />
     </div>
   )
 }

@@ -99,6 +99,7 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
     interviewBusy, setInterviewBusy, interviewPaused, setInterviewPaused, refMode,
     selectedBranch, setSelectedBranch,
     selectedCandidateIds, setSelectedCandidateIds,
+    selectedCandidateOwnerId, setSelectedCandidateOwnerId,
     dateRange, setDateRange,
     anyFilterActive, clearAllFilters, searchEpoch, matchesFilters,
     filterParams, bucketParam,
@@ -201,7 +202,8 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
   // Reset to the first page whenever the bucket, any filter, or the sort changes
   // (DATATABLE-SORT-1: a new order restarts pagination, same as every filter above).
   useEffect(() => { setPage(1) }, [bucket, attention, selectedPhase, selectedOwner, selectedSource, selectedVac,
-    selectedClient, showArchived, showTrash, dateRange, interviewBusy, interviewPaused, query, selectedCandidateIds, sort, setPage])
+    selectedClient, showArchived, showTrash, dateRange, interviewBusy, interviewPaused, query, selectedCandidateIds,
+    selectedCandidateOwnerId, sort, setPage])
 
   // TABLE rows: the server's page — W27: now narrowed server-side by every filter
   // (bucket/phase_key/vacancy_id/owner_id/source/customer_id/search-or-ref/
@@ -235,7 +237,7 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
   // `candidate_ids` — seeded into the (transient, not sticky) selectedCandidateIds
   // scope, see useApplicationFilters' header comment for the honest-gate reasoning.
   useEffect(() => {
-    const i = intent as { stage?: string; vacancy?: string; candidate_ids?: Id[]; attention?: string } | undefined
+    const i = intent as { stage?: string; vacancy?: string; candidate_ids?: Id[]; attention?: string; candidate_owner_id?: Id } | undefined
     if (i?.stage) setSelectedPhase([i.stage])
     // A vacancy statistics-bar click carries the vacancy too — scope the list to it.
     if (i?.vacancy) setSelectedVac([String(i.vacancy)])
@@ -243,7 +245,9 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
     // D6 dashboard tiles ("too long in stage" / "missing appointment") arrive as a
     // semantic attention intent — activate the matching server-wide filter.
     if (i?.attention) setAttention(i.attention)
-  }, [intent, setAttention, setSelectedCandidateIds, setSelectedPhase, setSelectedVac])
+    // RAPPORT-APPS-VERDIEPING-1: dashboard candidate-owner drill (tile↔list parity).
+    if (i?.candidate_owner_id) setSelectedCandidateOwnerId(i.candidate_owner_id)
+  }, [intent, setAttention, setSelectedCandidateIds, setSelectedPhase, setSelectedVac, setSelectedCandidateOwnerId])
 
   // A freshly created application: prepend to the list, bump the server-total
   // (F-6: total is no longer derived from the loaded array's length) and open its drawer.

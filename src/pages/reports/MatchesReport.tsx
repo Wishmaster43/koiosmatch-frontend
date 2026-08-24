@@ -111,6 +111,29 @@ export default function MatchesReport({ period, filters = EMPTY_REPORT_FILTERS }
   // the matches whose termination fell in the window: drawer == bar, always.
   const terminationSegs = data?.terminations.by_reason ?? []
   const terminationsMax = terminationSegs.reduce((m, s) => Math.max(m, s.count), 0)
+  // RAPPORT-KAARTDRILLS-1: per-KPI-card drill via GET /reports/matches/kpis/drill?kpi=<key>
+  // (MatchesKpiDrillRequest, measured in api-generated.ts). Only the pairs that
+  // measurably mean the same thing are mapped (never guessed) — `total` and
+  // `active` already open a real XOR drill above and stay untouched (as-drills
+  // blijven onaangeraakt); `funnel`/`direct`/`sent`/`ended`/`terminationRate` have
+  // no matching server kpi (new_in_period/expiring_soon/renewals_in_period/
+  // without_end_date/reach_rate mean something else) so they keep no onClick.
+  const KPI_DRILL_KEY: Partial<Record<string, string>> = {
+    // terminated_in_period is het enige hard-bevestigde identieke koppel
+    // (BuildsMatchKpis hergebruikt terminationRows() verbatim). dur is
+    // ontkoppeld: de envelope zet avg_placement_duration_days hard op null
+    // (wacht op de HelloFlex-koppeling), dus die mapping was onbereikbaar dood.
+    terminationsTotal: 'terminated_in_period',
+  }
+  const openKpiDrill = (localKey: string, label: string, value: string | number) => {
+    const serverKey = KPI_DRILL_KEY[localKey]
+    if (!serverKey) return undefined
+    return gateDrillClick('matches', () => setDrill({
+      title: label, value, subtitle: windowSub(),
+      rowsEndpoint: '/reports/matches/kpis/drill', rowsParams: { ...baseParams, kpi: serverKey },
+    }))
+  }
+
   const openReason = gateDrillClick('matches', (value: string) => {
     const seg = terminationSegs.find(s => s.value === value)
     setDrill({
@@ -158,9 +181,13 @@ export default function MatchesReport({ period, filters = EMPTY_REPORT_FILTERS }
     ended:  { key: 'ended',  label: t('matches.placements.ended'),  value: tileValue('ended'),
       active: openParams?.contract_status === 'ended',
       onClick: gateDrillClick('matches', () => openContractStatus(t('matches.placements.ended'), tileValue('ended'), 'ended')) },
-    terminationsTotal: { key: 'terminationsTotal', label: t('matches.terminations.total'), value: data?.terminations.total ?? 0 },
+    terminationsTotal: { key: 'terminationsTotal', label: t('matches.terminations.total'), value: data?.terminations.total ?? 0,
+      onClick: openKpiDrill('terminationsTotal', t('matches.terminations.total'), data?.terminations.total ?? 0) },
     dur:    { key: 'dur',    label: t('matches.avgDuration'),
-      value: data?.avg_placement_duration_days != null ? t('matches.daysValue', { days: Math.round(data.avg_placement_duration_days) }) : '—' },
+      value: data?.avg_placement_duration_days != null ? t('matches.daysValue', { days: Math.round(data.avg_placement_duration_days) }) : '—',
+      onClick: data?.avg_placement_duration_days != null
+        ? openKpiDrill('dur', t('matches.avgDuration'), t('matches.daysValue', { days: Math.round(data.avg_placement_duration_days) }))
+        : undefined },
     terminationRate: { key: 'terminationRate', label: t('matches.terminations.rate'),
       value: formatPercent(terminationRate) },
     // Spares (REPORTS-KPI-SPARE-1): see the derivations above.
