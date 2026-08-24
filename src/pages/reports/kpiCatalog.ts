@@ -53,7 +53,7 @@
  * verbatim from the report that owns it) — no new translation work for the
  * catalogue itself; only the new Settings screen chrome needs fresh keys.
  */
-import type { ReportId, RetiredReportRouteId } from './reportIds'
+import type { ReportId } from './reportIds'
 
 export interface KpiCatalogEntry {
   key: string
@@ -83,22 +83,15 @@ export const CUSTOMERS_SIGNAL_LABEL_KEYS: Record<string, string> = {
 // switch positions that used to be their own route (see the file-top comment).
 // 'leads'/'prospects' are population filters on the candidates/customers table;
 // the rest are switch positions on the customerstructure/people/usage routes.
-// RetiredReportRouteId keeps the detached pages' own catalog calls compiling
-// until the RAPPORTEN-DANNY10-1 file-cleanup round removes them for good.
-export type ReportKpiScopeId = ReportId | RetiredReportRouteId
-  | 'leads' | 'prospects'
-  | 'recruiters' | 'accountmanagers'
-  | 'contacts' | 'locations' | 'departments'
-  | 'ai' | 'workflows'
+export type ReportKpiScopeId = ReportId | 'leads' | 'prospects'
 
 // Every configurable scope, in the order the settings screen lists them —
 // mirrors the pre-consolidation REPORT_IDS order with 'leads'/'prospects' next
 // to their host axis and the three merged pages' positions grouped together.
 // 'sources' is deliberately absent (see the file-top comment).
-// RAPPORTEN-DANNY10-1: the retired scopes (flow, recruiters/accountmanagers,
-// contacts/locations/departments, usage/ai/workflows) left this list, so the
-// settings screen only offers the surviving reports; their catalog blocks below
-// stay until the file-cleanup round deletes the detached pages that read them.
+// RAPPORTEN-DANNY10-1: only the surviving reports (Danny's ten-page design)
+// are configurable scopes; the retired scopes and their catalog blocks were
+// removed with their pages in the explicit cleanup round.
 export const REPORT_KPI_SCOPE_IDS: ReportKpiScopeId[] = [
   'candidates', 'leads',
   'applications',
@@ -115,22 +108,12 @@ export const REPORT_KPI_FAMILY: Partial<Record<ReportKpiScopeId, ReportKpiFamily
   applications: 'axis',
   customers: 'axis',
   prospects: 'axis',
-  flow: 'fixed',
-  recruiters: 'fixed',
-  accountmanagers: 'fixed',
   vacancies: 'fixed',
   opportunities: 'fixed',
   tasks: 'fixed',
   matches: 'fixed',
-  intakes: 'fixed',
   outreach: 'fixed',
   whatsapp: 'fixed',
-  contacts: 'fixed',
-  locations: 'fixed',
-  departments: 'fixed',
-  usage: 'fixed',
-  ai: 'fixed',
-  workflows: 'fixed',
 }
 
 // Axis-family catalogues: the report's own fixed axis list (today's hardcoded
@@ -223,68 +206,6 @@ export const REPORT_KPI_AXIS_CATALOG: Partial<Record<ReportKpiScopeId, KpiCatalo
 // which slices to that fixed length) — a spare is only ever appended, never
 // inserted before position nine, so the default strip never silently changes.
 export const REPORT_KPI_FIXED_CATALOG: Partial<Record<ReportKpiScopeId, KpiCatalogEntry[]>> = {
-  flow: [
-    { key: 'total', labelKey: 'flow.total' },
-    { key: 'firstPhase', labelKey: 'flow.firstPhase' },
-    { key: 'lastPhase', labelKey: 'flow.lastPhase' },
-    { key: 'conv', labelKey: 'flow.overallConversion' },
-    { key: 'dropOff', labelKey: 'flow.dropOff' },
-    { key: 'avgDaysOverall', labelKey: 'flow.avgDaysOverall' },
-    { key: 'maxDropPhase', labelKey: 'flow.maxDropPhase' },
-    { key: 'stagesReached', labelKey: 'flow.stagesReached' },
-    { key: 'stagesTotal', labelKey: 'flow.stagesTotal' },
-    // Spares (REPORTS-KPI-SPARE-3): honest derivations over the report's own
-    // `phases[]` array (GET /reports/flow) — a per-phase conversion/avg-days
-    // extremum (mirrors maxDropPhase's "biggest real value" pattern, a
-    // different axis than the absolute-drop one), a rate over the two counts
-    // `dropOff` already derives from, and the honest complement of
-    // `stagesReached`/`stagesTotal`. No new backend field.
-    { key: 'worstConversionPhase', labelKey: 'flow.worstConversionPhase' },
-    { key: 'slowestPhase', labelKey: 'flow.slowestPhase' },
-    { key: 'dropOffRate', labelKey: 'flow.dropOffRate' },
-    { key: 'stagesEmpty', labelKey: 'flow.stagesEmpty' },
-  ],
-  recruiters: [
-    { key: 'recruiters', labelKey: 'recruiters.summary.recruiters' },
-    { key: 'candidates', labelKey: 'recruiters.summary.candidates' },
-    { key: 'applications', labelKey: 'recruiters.summary.applications' },
-    { key: 'matches', labelKey: 'recruiters.summary.matches' },
-    { key: 'notContacted', labelKey: 'recruiters.summary.notContacted' },
-    { key: 'intakesPlanned', labelKey: 'recruiters.summary.intakesPlanned' },
-    { key: 'intakesDone', labelKey: 'recruiters.summary.intakesDone' },
-    { key: 'tasksOpen', labelKey: 'recruiters.summary.tasksOpen' },
-    { key: 'tasksOverdue', labelKey: 'recruiters.summary.tasksOverdue' },
-    // Spares (REPORTS-KPI-SPARE-1): honest derivations over the report's own
-    // per-recruiter rows (RecruitersReport::run) — average book size, the
-    // recruiter with the biggest book (mirrors accountmanagers.topManager), and
-    // two rates over counts already summed for the strip. No new backend field.
-    { key: 'avgCandidatesPerRecruiter', labelKey: 'recruiters.summary.avgCandidatesPerRecruiter' },
-    { key: 'topRecruiter', labelKey: 'recruiters.summary.topRecruiter' },
-    { key: 'intakeCompletionRate', labelKey: 'recruiters.summary.intakeCompletionRate' },
-    { key: 'taskOverdueRate', labelKey: 'recruiters.summary.taskOverdueRate' },
-  ],
-  // REPORTS-ACCTMGR-1 follow-up: all nine now real (GET /reports/accountmanagers),
-  // replacing the three placeholder dashes the customers-report-reuse stand-in
-  // never could back (openOpportunities/activeMatches/revenue) with the report's
-  // own real fields — never a permanent hardcoded dash once the data exists (§0).
-  accountmanagers: [
-    { key: 'accountManagers', labelKey: 'accountmanagers.summary.accountManagers' },
-    { key: 'customers', labelKey: 'accountmanagers.summary.customersInWindow' },
-    { key: 'avgPerManager', labelKey: 'accountmanagers.summary.avgPerManager' },
-    { key: 'topManager', labelKey: 'accountmanagers.summary.topManager' },
-    { key: 'openVacancies', labelKey: 'accountmanagers.summary.openVacancies' },
-    { key: 'filledPositions', labelKey: 'accountmanagers.summary.filledPositions' },
-    { key: 'opportunities', labelKey: 'accountmanagers.summary.opportunities' },
-    { key: 'renewalsDue', labelKey: 'accountmanagers.summary.renewalsDue' },
-    { key: 'notContacted', labelKey: 'accountmanagers.summary.notContacted' },
-    // Spares (REPORTS-KPI-SPARE-1): honest derivations over the report's own
-    // per-manager rows (AccountManagersReport::run) — two "per manager" averages
-    // (mirrors avgPerManager) and two rates over counts already in the strip.
-    { key: 'avgOpportunitiesPerManager', labelKey: 'accountmanagers.summary.avgOpportunitiesPerManager' },
-    { key: 'avgVacanciesPerManager', labelKey: 'accountmanagers.summary.avgVacanciesPerManager' },
-    { key: 'notContactedRate', labelKey: 'accountmanagers.summary.notContactedRate' },
-    { key: 'renewalsDueRate', labelKey: 'accountmanagers.summary.renewalsDueRate' },
-  ],
   vacancies: [
     { key: 'total', labelKey: 'vacancies.summary.total' },
     { key: 'open', labelKey: 'vacancies.summary.open' },
@@ -371,23 +292,6 @@ export const REPORT_KPI_FIXED_CATALOG: Partial<Record<ReportKpiScopeId, KpiCatal
     { key: 'topTerminationReason', labelKey: 'matches.terminations.topReason' },
     { key: 'funnelRate', labelKey: 'matches.summary.funnelRate' },
   ],
-  intakes: [
-    { key: 'total', labelKey: 'intakes.total' },
-    { key: 'recruitersCount', labelKey: 'intakes.summary.recruitersCount' },
-    { key: 'locationsCount', labelKey: 'intakes.summary.locationsCount' },
-    { key: 'sourcesCount', labelKey: 'intakes.summary.sourcesCount' },
-    { key: 'functionsCount', labelKey: 'intakes.summary.functionsCount' },
-    { key: 'regionsCount', labelKey: 'intakes.summary.regionsCount' },
-    { key: 'topRecruiter', labelKey: 'intakes.summary.topRecruiter' },
-    { key: 'topSource', labelKey: 'intakes.summary.topSource' },
-    { key: 'topFunction', labelKey: 'intakes.summary.topFunction' },
-    // Spares (REPORTS-KPI-SPARES-1) — all four read off fields the endpoint
-    // already returns (by_recruiter/by_location/by_region/total), no new field.
-    { key: 'unassignedRecruiter', labelKey: 'intakes.summary.unassignedRecruiter' },
-    { key: 'topLocation', labelKey: 'intakes.summary.topLocation' },
-    { key: 'topRegion', labelKey: 'intakes.summary.topRegion' },
-    { key: 'avgPerRecruiter', labelKey: 'intakes.summary.avgPerRecruiter' },
-  ],
   outreach: [
     { key: 'total', labelKey: 'outreach.total' },
     { key: 'reached', labelKey: 'outreach.reached' },
@@ -416,116 +320,6 @@ export const REPORT_KPI_FIXED_CATALOG: Partial<Record<ReportKpiScopeId, KpiCatal
     { key: 'escalationsOpen', labelKey: 'whatsapp.kpi.escalationsOpen' },
     { key: 'unansweredOverWindow', labelKey: 'whatsapp.kpi.unansweredOverWindow' },
     { key: 'avgFirstResponseMinutes', labelKey: 'whatsapp.kpi.avgFirstResponseMinutes' },
-  ],
-  contacts: [
-    { key: 'total', labelKey: 'contacts.total' },
-    { key: 'primary', labelKey: 'contacts.summary.primary' },
-    { key: 'withRecentContact', labelKey: 'contacts.summary.withRecentContact' },
-    { key: 'neverContacted', labelKey: 'contacts.summary.neverContacted' },
-    { key: 'contactedRate', labelKey: 'contacts.summary.contactedRate' },
-    { key: 'withoutFunction', labelKey: 'contacts.summary.withoutFunction' },
-    { key: 'withoutLocation', labelKey: 'contacts.summary.withoutLocation' },
-    { key: 'withoutDepartment', labelKey: 'contacts.summary.withoutDepartment' },
-    { key: 'withoutCustomer', labelKey: 'contacts.summary.withoutCustomer' },
-    // Spares (REPORTS-KPI-SPARE-1): the top real ('none'-excluded) segment of
-    // each existing axis — mirrors the topCity/topProvince pattern already used
-    // by LocationsReport/DepartmentsReport. No new backend field.
-    { key: 'topCustomer', labelKey: 'contacts.summary.topCustomer' },
-    { key: 'topFunction', labelKey: 'contacts.summary.topFunction' },
-    { key: 'topLocation', labelKey: 'contacts.summary.topLocation' },
-    { key: 'topDepartment', labelKey: 'contacts.summary.topDepartment' },
-  ],
-  locations: [
-    { key: 'total', labelKey: 'locations.total' },
-    { key: 'withCustomer', labelKey: 'locations.summary.withCustomer' },
-    { key: 'withoutCustomer', labelKey: 'locations.summary.withoutCustomer' },
-    { key: 'withoutCity', labelKey: 'locations.summary.withoutCity' },
-    { key: 'topCity', labelKey: 'locations.summary.topCity' },
-    { key: 'withoutProvince', labelKey: 'locations.summary.withoutProvince' },
-    { key: 'topProvince', labelKey: 'locations.summary.topProvince' },
-    { key: 'withDepartments', labelKey: 'locations.summary.withDepartments' },
-    { key: 'withoutDepartments', labelKey: 'locations.summary.withoutDepartments' },
-    // Spares (REPORTS-KPI-SPARE-1): `summary.with_contacts`/`without_contacts`
-    // are real fields GET /reports/locations already returns (LocationsReport::
-    // summary()) but the strip never surfaced — plus two honest coverage ratios
-    // over counts already in the strip.
-    { key: 'withContacts', labelKey: 'locations.summary.withContacts' },
-    { key: 'withoutContacts', labelKey: 'locations.summary.withoutContacts' },
-    { key: 'departmentCoverageRate', labelKey: 'locations.summary.departmentCoverageRate' },
-    { key: 'contactCoverageRate', labelKey: 'locations.summary.contactCoverageRate' },
-  ],
-  departments: [
-    { key: 'total', labelKey: 'departments.total' },
-    { key: 'withLocation', labelKey: 'departments.summary.withLocation' },
-    { key: 'withoutLocation', labelKey: 'departments.summary.withoutLocation' },
-    { key: 'withoutCustomer', labelKey: 'departments.summary.withoutCustomer' },
-    { key: 'topCustomer', labelKey: 'departments.summary.topCustomer' },
-    { key: 'topLocation', labelKey: 'departments.summary.topLocation' },
-    { key: 'customersCount', labelKey: 'departments.summary.customersCount' },
-    { key: 'withContacts', labelKey: 'departments.summary.withContacts' },
-    { key: 'withoutContacts', labelKey: 'departments.summary.withoutContacts' },
-    // Spares (REPORTS-KPI-SPARE-1): `withCustomer` is the honest complement of
-    // the existing `withoutCustomer` card (never shown on its own); the two
-    // rates are honest ratios over counts already in the strip; `othersCustomer`
-    // is the by_customer axis's own real 'others' rollup bucket (top-20 + rest).
-    { key: 'withCustomer', labelKey: 'departments.summary.withCustomer' },
-    { key: 'locationCoverageRate', labelKey: 'departments.summary.locationCoverageRate' },
-    { key: 'contactCoverageRate', labelKey: 'departments.summary.contactCoverageRate' },
-    { key: 'othersCustomer', labelKey: 'departments.summary.othersCustomer' },
-  ],
-  // The merged Verbruik overview. Every entry is read off (or derived from) the
-  // single GET /reports/usage envelope — no card here needs a number the reader
-  // cannot also see on the page itself.
-  usage: [
-    { key: 'total', labelKey: 'usage.summary.total' },
-    { key: 'workflowCredits', labelKey: 'usage.summary.workflowCredits' },
-    { key: 'aiCredits', labelKey: 'usage.summary.aiCredits' },
-    { key: 'aiAmount', labelKey: 'usage.summary.aiAmount' },
-    { key: 'modules', labelKey: 'usage.summary.modules' },
-    { key: 'topModule', labelKey: 'usage.summary.topModule' },
-    { key: 'busiestDay', labelKey: 'usage.summary.busiestDay' },
-    { key: 'activeDays', labelKey: 'usage.summary.activeDays' },
-    { key: 'avgPerDay', labelKey: 'usage.summary.avgPerDay' },
-    // Spares (REPORTS-KPI-SPARES-1) — three shares over figures already on the
-    // page plus the amount per consuming day; all ratios of two visible numbers.
-    { key: 'aiShare', labelKey: 'usage.summary.aiShare' },
-    { key: 'workflowShare', labelKey: 'usage.summary.workflowShare' },
-    { key: 'topModuleShare', labelKey: 'usage.summary.topModuleShare' },
-    { key: 'amountPerDay', labelKey: 'usage.summary.amountPerDay' },
-  ],
-  ai: [
-    { key: 'total', labelKey: 'ai.total' },
-    { key: 'tokens', labelKey: 'ai.summary.tokens' },
-    { key: 'amount', labelKey: 'ai.summary.amount' },
-    { key: 'avgTokens', labelKey: 'ai.summary.avgTokens' },
-    { key: 'avgAmount', labelKey: 'ai.summary.avgAmount' },
-    { key: 'activityTypes', labelKey: 'ai.summary.activityTypes' },
-    { key: 'modelsUsed', labelKey: 'ai.summary.modelsUsed' },
-    { key: 'activeUsers', labelKey: 'ai.summary.activeUsers' },
-    { key: 'topActivity', labelKey: 'ai.summary.topActivity' },
-    // Spares (REPORTS-KPI-SPARES-1) — all four read off by_model/by_user/total,
-    // already in the GET /reports/ai envelope; no cost/margin figure is ever added.
-    { key: 'topModel', labelKey: 'ai.summary.topModel' },
-    { key: 'topUser', labelKey: 'ai.summary.topUser' },
-    { key: 'avgPerUser', labelKey: 'ai.summary.avgPerUser' },
-    { key: 'avgPerActivityType', labelKey: 'ai.summary.avgPerActivityType' },
-  ],
-  workflows: [
-    { key: 'runs', labelKey: 'workflows.summary.runs' },
-    { key: 'completed', labelKey: 'workflows.summary.completed' },
-    { key: 'failed', labelKey: 'workflows.summary.failed' },
-    { key: 'cancelled', labelKey: 'workflows.summary.cancelled' },
-    { key: 'running', labelKey: 'workflows.summary.running' },
-    { key: 'successRate', labelKey: 'workflows.summary.successRate' },
-    { key: 'avgDuration', labelKey: 'workflows.summary.avgDuration' },
-    { key: 'workflowsCount', labelKey: 'workflows.summary.workflowsCount' },
-    { key: 'triggersCount', labelKey: 'workflows.summary.triggersCount' },
-    // Spares (REPORTS-KPI-SPARES-1) — all four read off by_workflow/by_trigger/
-    // summary.runs/summary.failed, already in the GET /reports/workflows envelope.
-    { key: 'topWorkflow', labelKey: 'workflows.summary.topWorkflow' },
-    { key: 'topTrigger', labelKey: 'workflows.summary.topTrigger' },
-    { key: 'failureRate', labelKey: 'workflows.summary.failureRate' },
-    { key: 'avgRunsPerWorkflow', labelKey: 'workflows.summary.avgRunsPerWorkflow' },
   ],
 }
 

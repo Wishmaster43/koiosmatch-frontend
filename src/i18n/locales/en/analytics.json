@@ -14,17 +14,12 @@
     "candidates": "Candidates",
     "applications": "Applications",
     "customers": "Customers",
-    "customerstructure": "Customer structure",
-    "flow": "Flow",
-    "people": "People",
     "vacancies": "Vacancies",
     "opportunities": "Opportunities",
     "tasks": "Tasks",
     "matches": "Matches",
-    "intakes": "Intakes",
     "outreach": "Outreach",
-    "whatsapp": "WhatsApp",
-    "usage": "Usage"
+    "whatsapp": "WhatsApp"
   },
   "candidates": {
     "loading": "Loading candidates…",
@@ -52,34 +47,9 @@
     }
   },
   "intakes": {
-    "loading": "Loading intakes…",
-    "error": "Could not load intakes",
-    "empty": "No intakes in this period",
-    "total": "Total intakes",
-    "series": "Intakes over time",
-    "groupBy": "Breakdown",
     "by": {
-      "recruiter": "Recruiter",
-      "location": "Location",
-      "source": "Source",
-      "function": "Job function",
-      "region": "Region"
-    },
-    "summary": {
-      "recruitersCount": "Recruiters",
-      "locationsCount": "Locations",
-      "sourcesCount": "Sources",
-      "functionsCount": "Job functions",
-      "regionsCount": "Regions",
-      "topRecruiter": "Most active recruiter",
-      "topSource": "Top source",
-      "topFunction": "Most common function",
-      "unassignedRecruiter": "Unassigned recruiter",
-      "topLocation": "Top location",
-      "topRegion": "Top region",
-      "avgPerRecruiter": "Avg intakes per recruiter"
-    },
-    "kpiOrderFellBack": "A KPI card configured in Settings no longer exists and was reset to the default."
+      "function": "Job function"
+    }
   },
   "comingSoon": "{{label}}. Coming soon",
   "period": {
@@ -90,68 +60,6 @@
   },
   "dashboard": {
     "vacancies": "Total vacancies"
-  },
-  "flow": {
-    "title": "Application flow",
-    "subtitle": "Funnel per stage",
-    "loading": "Loading flow…",
-    "error": "Could not load the flow",
-    "empty": "No applications in this period",
-    "phase": "Stage",
-    "total": "Total applications",
-    "overallConversion": "Overall conversion",
-    "cohortNote": "Cohort is still filling. Showing pipeline occupancy until there is enough history.",
-    "conversion": "Conversion",
-    "reached": "Reached",
-    "current": "Currently in stage",
-    "avgDays": "avg. {{days}} days",
-    "dropOff": "Drop-off (count)",
-    "avgDaysOverall": "Avg days per stage",
-    "firstPhase": "Entry stage",
-    "lastPhase": "Final stage",
-    "maxDropPhase": "Biggest drop-off",
-    "stagesReached": "Stages reached",
-    "stagesTotal": "Stages in funnel",
-    "kpiOrderFellBack": "A KPI card configured in Settings no longer exists and was reset to the default.",
-    "worstConversionPhase": "Weakest conversion",
-    "slowestPhase": "Slowest stage",
-    "dropOffRate": "Drop-off (rate)",
-    "stagesEmpty": "Stages with no activity"
-  },
-  "recruiters": {
-    "title": "Recruiters",
-    "subtitle": "Productivity per recruiter",
-    "loading": "Loading recruiters…",
-    "error": "Could not load the recruiters",
-    "empty": "No recruiters in this period",
-    "summary": {
-      "recruiters": "Recruiters",
-      "candidates": "Candidates",
-      "applications": "Applications",
-      "matches": "Matches",
-      "notContacted": "Not contacted",
-      "intakesPlanned": "Intakes planned",
-      "intakesDone": "Intakes done",
-      "tasksOpen": "Tasks open",
-      "tasksOverdue": "Tasks overdue",
-      "avgCandidatesPerRecruiter": "Avg. candidates per recruiter",
-      "topRecruiter": "Top recruiter",
-      "intakeCompletionRate": "Intake completion rate",
-      "taskOverdueRate": "Task overdue rate"
-    },
-    "cols": {
-      "recruiter": "Recruiter",
-      "candidates": "Candidates",
-      "applications": "Applications",
-      "intakes": "Intakes",
-      "matches": "Matches",
-      "tasks": "Tasks",
-      "notContacted": "Not contacted"
-    },
-    "intakesValue": "{{planned}} planned · {{done}} done",
-    "tasksValue": "{{open}} open · {{overdue}} overdue",
-    "notContactedHint": "> {{months}} mo",
-    "kpiOrderFellBack": "A KPI card configured in Settings no longer exists and was reset to the default."
   },
   "vacancies": {
     "title": "Vacancies",
@@ -292,30 +200,6 @@
     },
     "kpiOrderFellBack": "A KPI card configured in Settings no longer exists and was reset to the default."
   },
-  "sources": {
-    "loading": "Loading sources…",
-    "error": "Could not load the sources",
-    "empty": "No candidates in this period",
-    "summary": {
-      "sources": "Sources",
-      "candidates": "Candidates",
-      "applications": "Applications",
-      "matches": "Matches",
-      "matchRate": "Match rate",
-      "applicationRate": "Applications per candidate",
-      "topSourceCandidates": "Top source (candidates)",
-      "topSourceMatches": "Top source (matches)",
-      "sourcesNoMatches": "Sources without matches"
-    },
-    "cols": {
-      "source": "Source",
-      "candidates": "Candidates",
-      "applications": "Applications",
-      "matches": "Matches",
-      "matchRate": "Match rate"
-    },
-    "kpiOrderFellBack": "A KPI card configured in Settings no longer exists and was reset to the default."
-  },
   "applications": {
     "loading": "Loading applications…",
     "error": "Could not load the applications",
@@ -432,150 +316,6 @@
       "matchesStoppedEarly": "Matches stopped early"
     }
   },
-  "contacts": {
-    "total": "Total contacts",
-    "window": "Contacts {{from}} to {{to}}",
-    "series": "Contacts over time",
-    "loading": "Loading…",
-    "error": "The report could not be loaded.",
-    "empty": "No data in this period yet.",
-    "axes": {
-      "customer": "By customer",
-      "location": "By location",
-      "department": "By department",
-      "function": "By function",
-      "status": "By status"
-    },
-    "summary": {
-      "primary": "Primary contact",
-      "withRecentContact": "Recently contacted",
-      "neverContacted": "Never contacted",
-      "contactedRate": "Recently contacted rate",
-      "withoutFunction": "Without function",
-      "withoutLocation": "Without location",
-      "withoutDepartment": "Without department",
-      "withoutCustomer": "Without customer",
-      "topCustomer": "Top customer",
-      "topFunction": "Top function",
-      "topLocation": "Top location",
-      "topDepartment": "Top department"
-    },
-    "kpiOrderFellBack": "A KPI card configured in Settings no longer exists and was reset to the default."
-  },
-  "locations": {
-    "total": "Total locations",
-    "window": "Locations {{from}} to {{to}}",
-    "series": "Locations over time",
-    "loading": "Loading…",
-    "error": "The report could not be loaded.",
-    "empty": "No data in this period yet.",
-    "axes": {
-      "customer": "By customer",
-      "city": "By city",
-      "province": "By province",
-      "status": "By status"
-    },
-    "summary": {
-      "withCustomer": "With customer",
-      "withoutCustomer": "Without customer",
-      "withDepartments": "With departments",
-      "withoutDepartments": "Without departments",
-      "withoutCity": "Without city",
-      "topCity": "Top city",
-      "withoutProvince": "Without province",
-      "topProvince": "Top province",
-      "withContacts": "With direct contacts",
-      "withoutContacts": "Without direct contacts",
-      "departmentCoverageRate": "Department coverage rate",
-      "contactCoverageRate": "Contact coverage rate"
-    },
-    "kpiOrderFellBack": "A KPI card configured in Settings no longer exists and was reset to the default."
-  },
-  "departments": {
-    "total": "Total departments",
-    "window": "Departments {{from}} to {{to}}",
-    "series": "Departments over time",
-    "loading": "Loading…",
-    "error": "The report could not be loaded.",
-    "empty": "No data in this period yet.",
-    "axes": {
-      "customer": "By customer",
-      "location": "By location",
-      "status": "By status"
-    },
-    "summary": {
-      "withLocation": "With location",
-      "withoutLocation": "Without location",
-      "withContacts": "With contacts",
-      "withoutContacts": "Without contacts",
-      "withoutCustomer": "Without customer",
-      "topCustomer": "Top customer",
-      "topLocation": "Top location",
-      "customersCount": "Customers represented",
-      "withCustomer": "With customer",
-      "locationCoverageRate": "Location coverage rate",
-      "contactCoverageRate": "Contact coverage rate",
-      "othersCustomer": "Other customers"
-    },
-    "kpiOrderFellBack": "A KPI card configured in Settings no longer exists and was reset to the default."
-  },
-  "ai": {
-    "total": "Total AI activity",
-    "window": "AI usage {{from}} to {{to}}",
-    "series": "Usage over time",
-    "loading": "Loading…",
-    "error": "The report could not be loaded.",
-    "empty": "No data in this period yet.",
-    "axes": {
-      "activity": "By activity",
-      "model": "By model",
-      "user": "By user"
-    },
-    "summary": {
-      "tokens": "Tokens",
-      "amount": "Sales amount",
-      "avgTokens": "Avg tokens per run",
-      "avgAmount": "Avg sales amount per run",
-      "activityTypes": "Activity types",
-      "modelsUsed": "Models used",
-      "activeUsers": "Active users",
-      "topActivity": "Most used activity",
-      "topModel": "Most used model",
-      "topUser": "Most active user",
-      "avgPerUser": "Avg activity per user",
-      "avgPerActivityType": "Avg activity per type"
-    },
-    "kpiOrderFellBack": "A KPI card configured in Settings no longer exists and was reset to the default."
-  },
-  "workflows": {
-    "total": "Total workflow runs",
-    "window": "Runs {{from}} to {{to}}",
-    "series": "Runs over time",
-    "loading": "Loading…",
-    "error": "The report could not be loaded.",
-    "empty": "No data in this period yet.",
-    "axes": {
-      "workflow": "By workflow",
-      "trigger": "By trigger",
-      "status": "By status"
-    },
-    "summary": {
-      "runs": "Runs",
-      "completed": "Completed",
-      "failed": "Failed",
-      "cancelled": "Cancelled",
-      "running": "Running",
-      "successRate": "Success rate",
-      "avgDuration": "Avg duration",
-      "workflowsCount": "Workflows",
-      "triggersCount": "Triggers",
-      "topWorkflow": "Most active workflow",
-      "topTrigger": "Most active trigger",
-      "failureRate": "Failure rate",
-      "avgRunsPerWorkflow": "Avg runs per workflow"
-    },
-    "kpiOrderFellBack": "A KPI card configured in Settings no longer exists and was reset to the default."
-  },
   "leads": {
     "loading": "Loading leads…",
     "error": "Could not load the leads",
@@ -583,43 +323,6 @@
     "total": "Total leads",
     "series": "Leads over time",
     "window": "Leads {{from}} through {{to}}",
-    "kpiOrderFellBack": "A KPI card configured in Settings no longer exists and was reset to the default."
-  },
-  "accountmanagers": {
-    "loading": "Loading account managers…",
-    "error": "Could not load the account managers",
-    "empty": "No account managers in this period",
-    "summary": {
-      "accountManagers": "Account managers",
-      "customersInWindow": "Customers in window",
-      "avgPerManager": "Avg. customers per manager",
-      "topManager": "Top manager",
-      "openVacancies": "Open vacancies",
-      "filledPositions": "Filled positions",
-      "opportunities": "Opportunities",
-      "renewalsDue": "Renewals due",
-      "notContacted": "Not contacted",
-      "avgOpportunitiesPerManager": "Avg. opportunities per manager",
-      "avgVacanciesPerManager": "Avg. open vacancies per manager",
-      "notContactedRate": "Not-contacted rate",
-      "renewalsDueRate": "Renewals-due rate"
-    },
-    "cols": {
-      "manager": "Account manager",
-      "customers": "Customers",
-      "openVacancies": "Open vacancies",
-      "filledPositions": "Filled positions",
-      "opportunities": "Opportunities",
-      "contractEnding": "Contract ending",
-      "notContacted": "Not contacted"
-    },
-    "notContactedHint": "> {{days}} d",
-    "contractEndingHint": "≤ {{days}} d",
-    "compareThresholds": "Both windows compare against the same thresholds: not contacted after {{notContactedDays}} days, contract ending within {{contractEndingDays}} days.",
-    "overrides": {
-      "notContactedMonths": "Not contacted after (months)",
-      "contractEndingDays": "Contract ending within (days)"
-    },
     "kpiOrderFellBack": "A KPI card configured in Settings no longer exists and was reset to the default."
   },
   "prospects": {
@@ -630,54 +333,6 @@
     "series": "Prospects over time",
     "window": "Prospects {{from}} through {{to}}",
     "kpiOrderFellBack": "A KPI card configured in Settings no longer exists and was reset to the default."
-  },
-  "customerstructure": {
-    "viewSwitch": {
-      "ariaLabel": "Customer structure",
-      "contacts": "Contacts",
-      "locations": "Locations",
-      "departments": "Departments"
-    }
-  },
-  "people": {
-    "viewSwitch": {
-      "ariaLabel": "Team",
-      "recruiters": "Recruiters",
-      "accountmanagers": "Account managers"
-    }
-  },
-  "usage": {
-    "viewSwitch": {
-      "ariaLabel": "Usage type",
-      "ai": "Koios AI",
-      "workflows": "Workflows",
-      "total": "Total"
-    },
-    "window": "Usage {{from}} to {{to}}",
-    "loading": "Loading usage…",
-    "error": "Could not load usage",
-    "empty": "No usage in this period",
-    "series": "Usage over time",
-    "axes": {
-      "module": "Per module"
-    },
-    "moduleNote": "Workflow executions only. AI usage carries no module, so no AI rows appear here.",
-    "kpiOrderFellBack": "A KPI card configured in Settings no longer exists and was reset to the default.",
-    "summary": {
-      "total": "Total usage",
-      "workflowCredits": "Koios Tokens",
-      "aiCredits": "AI calls",
-      "aiAmount": "AI amount",
-      "modules": "Modules with usage",
-      "topModule": "Busiest module",
-      "busiestDay": "Busiest day",
-      "activeDays": "Days with usage",
-      "avgPerDay": "Average per active day",
-      "aiShare": "AI share",
-      "workflowShare": "Workflow share",
-      "topModuleShare": "Busiest module share",
-      "amountPerDay": "AI amount per active day"
-    }
   },
   "compare": {
     "label": "Compare with",

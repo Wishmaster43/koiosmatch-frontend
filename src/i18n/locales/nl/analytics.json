@@ -14,17 +14,12 @@
     "candidates": "Kandidaten",
     "applications": "Sollicitaties",
     "customers": "Klanten",
-    "customerstructure": "Klantstructuur",
-    "flow": "Flow",
-    "people": "Mensen",
     "vacancies": "Vacatures",
     "opportunities": "Kansen",
     "tasks": "Taken",
     "matches": "Matches",
-    "intakes": "Intakes",
     "outreach": "Outreach",
-    "whatsapp": "WhatsApp",
-    "usage": "Verbruik"
+    "whatsapp": "WhatsApp"
   },
   "candidates": {
     "loading": "Kandidaten laden…",
@@ -52,34 +47,9 @@
     }
   },
   "intakes": {
-    "loading": "Intakes laden…",
-    "error": "Kon de intakes niet laden",
-    "empty": "Geen intakes in deze periode",
-    "total": "Totaal intakes",
-    "series": "Intakes over tijd",
-    "groupBy": "Verdeling",
     "by": {
-      "recruiter": "Recruiter",
-      "location": "Locatie",
-      "source": "Bron",
-      "function": "Functie",
-      "region": "Regio"
-    },
-    "summary": {
-      "recruitersCount": "Aantal recruiters",
-      "locationsCount": "Aantal locaties",
-      "sourcesCount": "Aantal bronnen",
-      "functionsCount": "Aantal functies",
-      "regionsCount": "Aantal regio’s",
-      "topRecruiter": "Meest actieve recruiter",
-      "topSource": "Grootste bron",
-      "topFunction": "Meest voorkomende functie",
-      "unassignedRecruiter": "Niet toegewezen recruiter",
-      "topLocation": "Grootste locatie",
-      "topRegion": "Grootste regio",
-      "avgPerRecruiter": "Gem. intakes per recruiter"
-    },
-    "kpiOrderFellBack": "Een in Instellingen ingestelde KPI-kaart bestaat niet meer en is teruggezet naar de standaard."
+      "function": "Functie"
+    }
   },
   "comingSoon": "{{label}}. Komt eraan",
   "period": {
@@ -90,68 +60,6 @@
   },
   "dashboard": {
     "vacancies": "Totaal vacatures"
-  },
-  "flow": {
-    "title": "Sollicitatie-flow",
-    "subtitle": "Trechter per fase",
-    "loading": "Flow laden…",
-    "error": "Kon de flow niet laden",
-    "empty": "Geen sollicitaties in deze periode",
-    "phase": "Fase",
-    "total": "Totaal sollicitaties",
-    "overallConversion": "Totale conversie",
-    "cohortNote": "Cohort vult zich nog. Pipeline-bezetting getoond tot er genoeg historie is.",
-    "conversion": "Conversie",
-    "reached": "Bereikt",
-    "current": "Nu in fase",
-    "avgDays": "gem. {{days}} dagen",
-    "dropOff": "Uitval (aantal)",
-    "avgDaysOverall": "Gem. dagen per fase",
-    "firstPhase": "Instapfase",
-    "lastPhase": "Eindfase",
-    "maxDropPhase": "Grootste uitval",
-    "stagesReached": "Bereikte fasen",
-    "stagesTotal": "Fasen in trechter",
-    "kpiOrderFellBack": "Een in Instellingen ingestelde KPI-kaart bestaat niet meer en is teruggezet naar de standaard.",
-    "worstConversionPhase": "Zwakste conversie",
-    "slowestPhase": "Traagste fase",
-    "dropOffRate": "Uitval (percentage)",
-    "stagesEmpty": "Fasen zonder activiteit"
-  },
-  "recruiters": {
-    "title": "Recruiters",
-    "subtitle": "Productiviteit per recruiter",
-    "loading": "Recruiters laden…",
-    "error": "Kon de recruiters niet laden",
-    "empty": "Geen recruiters in deze periode",
-    "summary": {
-      "recruiters": "Recruiters",
-      "candidates": "Kandidaten",
-      "applications": "Sollicitaties",
-      "matches": "Matches",
-      "notContacted": "Niet gecontacteerd",
-      "intakesPlanned": "Intakes gepland",
-      "intakesDone": "Intakes gedaan",
-      "tasksOpen": "Taken open",
-      "tasksOverdue": "Taken te laat",
-      "avgCandidatesPerRecruiter": "Gem. kandidaten per recruiter",
-      "topRecruiter": "Top recruiter",
-      "intakeCompletionRate": "Percentage intakes gedaan",
-      "taskOverdueRate": "Percentage taken te laat"
-    },
-    "cols": {
-      "recruiter": "Recruiter",
-      "candidates": "Kandidaten",
-      "applications": "Sollicitaties",
-      "intakes": "Intakes",
-      "matches": "Matches",
-      "tasks": "Taken",
-      "notContacted": "Niet gecontacteerd"
-    },
-    "intakesValue": "{{planned}} gepland · {{done}} gedaan",
-    "tasksValue": "{{open}} open · {{overdue}} te laat",
-    "notContactedHint": "> {{months}} mnd",
-    "kpiOrderFellBack": "Een in Instellingen ingestelde KPI-kaart bestaat niet meer en is teruggezet naar de standaard."
   },
   "vacancies": {
     "title": "Vacatures",
@@ -292,30 +200,6 @@
     },
     "kpiOrderFellBack": "Een in Instellingen ingestelde KPI-kaart bestaat niet meer en is teruggezet naar de standaard."
   },
-  "sources": {
-    "loading": "Bronnen laden…",
-    "error": "Kon de bronnen niet laden",
-    "empty": "Geen kandidaten in deze periode",
-    "summary": {
-      "sources": "Bronnen",
-      "candidates": "Kandidaten",
-      "applications": "Sollicitaties",
-      "matches": "Matches",
-      "matchRate": "Matchpercentage",
-      "applicationRate": "Sollicitaties per kandidaat",
-      "topSourceCandidates": "Grootste bron (kandidaten)",
-      "topSourceMatches": "Grootste bron (matches)",
-      "sourcesNoMatches": "Bronnen zonder matches"
-    },
-    "cols": {
-      "source": "Bron",
-      "candidates": "Kandidaten",
-      "applications": "Sollicitaties",
-      "matches": "Matches",
-      "matchRate": "Matchpercentage"
-    },
-    "kpiOrderFellBack": "Een in Instellingen ingestelde KPI-kaart bestaat niet meer en is teruggezet naar de standaard."
-  },
   "applications": {
     "loading": "Sollicitaties laden…",
     "error": "Kon de sollicitaties niet laden",
@@ -432,150 +316,6 @@
       "matchesStoppedEarly": "Matches voortijdig gestopt"
     }
   },
-  "contacts": {
-    "total": "Totaal contactpersonen",
-    "window": "Contactpersonen {{from}} t/m {{to}}",
-    "series": "Contactpersonen over tijd",
-    "loading": "Contactpersonen laden…",
-    "error": "Kon de contactpersonen niet laden",
-    "empty": "Geen contactpersonen in deze periode",
-    "axes": {
-      "customer": "Per klant",
-      "location": "Per locatie",
-      "department": "Per afdeling",
-      "function": "Per functie",
-      "status": "Per status"
-    },
-    "summary": {
-      "primary": "Primair contact",
-      "withRecentContact": "Recent contact gehad",
-      "neverContacted": "Nooit contact gehad",
-      "contactedRate": "Percentage recent benaderd",
-      "withoutFunction": "Zonder functie",
-      "withoutLocation": "Zonder locatie",
-      "withoutDepartment": "Zonder afdeling",
-      "withoutCustomer": "Zonder klant",
-      "topCustomer": "Grootste klant",
-      "topFunction": "Grootste functie",
-      "topLocation": "Grootste locatie",
-      "topDepartment": "Grootste afdeling"
-    },
-    "kpiOrderFellBack": "Een in Instellingen ingestelde KPI-kaart bestaat niet meer en is teruggezet naar de standaard."
-  },
-  "locations": {
-    "total": "Totaal locaties",
-    "window": "Locaties {{from}} t/m {{to}}",
-    "series": "Locaties over tijd",
-    "loading": "Locaties laden…",
-    "error": "Kon de locaties niet laden",
-    "empty": "Geen locaties in deze periode",
-    "axes": {
-      "customer": "Per klant",
-      "city": "Per plaats",
-      "province": "Per provincie",
-      "status": "Per status"
-    },
-    "summary": {
-      "withCustomer": "Gekoppeld aan klant",
-      "withoutCustomer": "Niet gekoppeld aan klant",
-      "withDepartments": "Met afdelingen",
-      "withoutDepartments": "Zonder afdelingen",
-      "withoutCity": "Zonder plaats",
-      "topCity": "Grootste plaats",
-      "withoutProvince": "Zonder provincie",
-      "topProvince": "Grootste provincie",
-      "withContacts": "Met directe contacten",
-      "withoutContacts": "Zonder directe contacten",
-      "departmentCoverageRate": "Dekking afdelingen",
-      "contactCoverageRate": "Dekking contacten"
-    },
-    "kpiOrderFellBack": "Een in Instellingen ingestelde KPI-kaart bestaat niet meer en is teruggezet naar de standaard."
-  },
-  "departments": {
-    "total": "Totaal afdelingen",
-    "window": "Afdelingen {{from}} t/m {{to}}",
-    "series": "Afdelingen over tijd",
-    "loading": "Afdelingen laden…",
-    "error": "Kon de afdelingen niet laden",
-    "empty": "Geen afdelingen in deze periode",
-    "axes": {
-      "customer": "Per klant",
-      "location": "Per locatie",
-      "status": "Per status"
-    },
-    "summary": {
-      "withLocation": "Gekoppeld aan locatie",
-      "withoutLocation": "Niet gekoppeld aan locatie",
-      "withContacts": "Met contacten",
-      "withoutContacts": "Zonder contacten",
-      "withoutCustomer": "Zonder klant",
-      "topCustomer": "Grootste klant",
-      "topLocation": "Grootste locatie",
-      "customersCount": "Aantal klanten",
-      "withCustomer": "Gekoppeld aan klant",
-      "locationCoverageRate": "Dekking locatie",
-      "contactCoverageRate": "Dekking contacten",
-      "othersCustomer": "Overige klanten"
-    },
-    "kpiOrderFellBack": "Een in Instellingen ingestelde KPI-kaart bestaat niet meer en is teruggezet naar de standaard."
-  },
-  "ai": {
-    "total": "Totaal AI-activiteit",
-    "window": "AI-activiteit {{from}} t/m {{to}}",
-    "series": "Verbruik over tijd",
-    "loading": "AI-activiteit laden…",
-    "error": "Kon de AI-activiteit niet laden",
-    "empty": "Geen AI-activiteit in deze periode",
-    "axes": {
-      "activity": "Per activiteit",
-      "model": "Per model",
-      "user": "Per gebruiker"
-    },
-    "summary": {
-      "tokens": "Gebruikte tokens",
-      "amount": "Verkoopbedrag",
-      "avgTokens": "Gem. tokens per run",
-      "avgAmount": "Gem. verkoopbedrag per run",
-      "activityTypes": "Soorten activiteit",
-      "modelsUsed": "Gebruikte modellen",
-      "activeUsers": "Actieve gebruikers",
-      "topActivity": "Meest gebruikte activiteit",
-      "topModel": "Meest gebruikte model",
-      "topUser": "Meest actieve gebruiker",
-      "avgPerUser": "Gem. activiteit per gebruiker",
-      "avgPerActivityType": "Gem. activiteit per soort"
-    },
-    "kpiOrderFellBack": "Een in Instellingen ingestelde KPI-kaart bestaat niet meer en is teruggezet naar de standaard."
-  },
-  "workflows": {
-    "total": "Totaal workflow-runs",
-    "window": "Workflow-runs {{from}} t/m {{to}}",
-    "series": "Uitvoeringen over tijd",
-    "loading": "Workflow-runs laden…",
-    "error": "Kon de workflow-runs niet laden",
-    "empty": "Geen workflow-runs in deze periode",
-    "axes": {
-      "workflow": "Per workflow",
-      "trigger": "Per trigger",
-      "status": "Per status"
-    },
-    "summary": {
-      "runs": "Uitvoeringen",
-      "completed": "Voltooid",
-      "failed": "Mislukt",
-      "cancelled": "Geannuleerd",
-      "running": "Bezig",
-      "successRate": "Slaagpercentage",
-      "avgDuration": "Gem. duur",
-      "workflowsCount": "Aantal workflows",
-      "triggersCount": "Aantal triggers",
-      "topWorkflow": "Meest actieve workflow",
-      "topTrigger": "Meest actieve trigger",
-      "failureRate": "Mislukpercentage",
-      "avgRunsPerWorkflow": "Gem. uitvoeringen per workflow"
-    },
-    "kpiOrderFellBack": "Een in Instellingen ingestelde KPI-kaart bestaat niet meer en is teruggezet naar de standaard."
-  },
   "leads": {
     "loading": "Leads laden…",
     "error": "Kon de leads niet laden",
@@ -583,43 +323,6 @@
     "total": "Totaal leads",
     "series": "Leads over tijd",
     "window": "Leads {{from}} tot {{to}}",
-    "kpiOrderFellBack": "Een in Instellingen ingestelde KPI-kaart bestaat niet meer en is teruggezet naar de standaard."
-  },
-  "accountmanagers": {
-    "loading": "Accountmanagers laden…",
-    "error": "Kon de accountmanagers niet laden",
-    "empty": "Geen accountmanagers in deze periode",
-    "summary": {
-      "accountManagers": "Accountmanagers",
-      "customersInWindow": "Klanten in periode",
-      "avgPerManager": "Gem. klanten per manager",
-      "topManager": "Top manager",
-      "openVacancies": "Open vacatures",
-      "filledPositions": "Vervulde plaatsingen",
-      "opportunities": "Kansen",
-      "renewalsDue": "Verlengingen te doen",
-      "notContacted": "Niet benaderd",
-      "avgOpportunitiesPerManager": "Gem. kansen per manager",
-      "avgVacanciesPerManager": "Gem. open vacatures per manager",
-      "notContactedRate": "Percentage niet benaderd",
-      "renewalsDueRate": "Percentage verlengingen te doen"
-    },
-    "cols": {
-      "manager": "Accountmanager",
-      "customers": "Klanten",
-      "openVacancies": "Open vacatures",
-      "filledPositions": "Vervulde plaatsingen",
-      "opportunities": "Kansen",
-      "contractEnding": "Contract eindigt",
-      "notContacted": "Niet benaderd"
-    },
-    "notContactedHint": "> {{days}} d",
-    "contractEndingHint": "≤ {{days}} d",
-    "compareThresholds": "Beide periodes vergelijken met dezelfde drempels: niet benaderd na {{notContactedDays}} dagen, contract eindigt binnen {{contractEndingDays}} dagen.",
-    "overrides": {
-      "notContactedMonths": "Niet benaderd na (maanden)",
-      "contractEndingDays": "Contract eindigt binnen (dagen)"
-    },
     "kpiOrderFellBack": "Een in Instellingen ingestelde KPI-kaart bestaat niet meer en is teruggezet naar de standaard."
   },
   "prospects": {
@@ -630,54 +333,6 @@
     "series": "Prospects over tijd",
     "window": "Prospects {{from}} t/m {{to}}",
     "kpiOrderFellBack": "Een in Instellingen ingestelde KPI-kaart bestaat niet meer en is teruggezet naar de standaard."
-  },
-  "customerstructure": {
-    "viewSwitch": {
-      "ariaLabel": "Klantstructuur",
-      "contacts": "Contactpersonen",
-      "locations": "Locaties",
-      "departments": "Afdelingen"
-    }
-  },
-  "people": {
-    "viewSwitch": {
-      "ariaLabel": "Team",
-      "recruiters": "Recruiters",
-      "accountmanagers": "Accountmanagers"
-    }
-  },
-  "usage": {
-    "viewSwitch": {
-      "ariaLabel": "Verbruikstype",
-      "ai": "Koios AI",
-      "workflows": "Workflows",
-      "total": "Totaal"
-    },
-    "window": "Verbruik {{from}} t/m {{to}}",
-    "loading": "Verbruik laden…",
-    "error": "Kon het verbruik niet laden",
-    "empty": "Geen verbruik in deze periode",
-    "series": "Verbruik over tijd",
-    "axes": {
-      "module": "Per module"
-    },
-    "moduleNote": "Alleen workflow-uitvoeringen. AI-verbruik draagt geen module, dus daar staan geen AI-regels in.",
-    "kpiOrderFellBack": "Een in Instellingen ingestelde KPI-kaart bestaat niet meer en is teruggezet naar de standaard.",
-    "summary": {
-      "total": "Totaal verbruik",
-      "workflowCredits": "Koios Tokens",
-      "aiCredits": "AI-calls",
-      "aiAmount": "AI-bedrag",
-      "modules": "Modules met verbruik",
-      "topModule": "Drukste module",
-      "busiestDay": "Drukste dag",
-      "activeDays": "Dagen met verbruik",
-      "avgPerDay": "Gemiddeld per actieve dag",
-      "aiShare": "Aandeel AI",
-      "workflowShare": "Aandeel workflows",
-      "topModuleShare": "Aandeel drukste module",
-      "amountPerDay": "AI-bedrag per actieve dag"
-    }
   },
   "compare": {
     "label": "Vergelijk met",

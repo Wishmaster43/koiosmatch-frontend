@@ -35,12 +35,10 @@
  * so there is no longer any caller passing 'sources' here; removed rather than
  * left as dead vocabulary.
  */
-export type DrillableReport = 'flow' | 'matches' | 'recruiters' | 'vacancies' | 'intakes' | 'outreach' | 'whatsapp' | 'candidates' | 'applications' | 'customers' | 'opportunities' | 'tasks' | 'contacts' | 'locations' | 'departments' | 'ai' | 'workflows' | 'usage'
+export type DrillableReport = 'matches' | 'vacancies' | 'outreach' | 'whatsapp' | 'candidates' | 'applications' | 'customers' | 'opportunities' | 'tasks'
 
 export const REPORT_DRILL_AVAILABLE: Record<DrillableReport, boolean> = {
-  flow: true,
   matches: true,
-  recruiters: true,
   vacancies: true,
   candidates: true,
   applications: true,
@@ -54,28 +52,6 @@ export const REPORT_DRILL_AVAILABLE: Record<DrillableReport, boolean> = {
   // Opus review). There is NO axis/bucket drill and NO advice route; rows carry
   // masked wa_numbers only (§8/§9), gated behind module:whatsapp.
   whatsapp: true,
-  // RAPPORTEN-SUITE-2: the thin reports ship with their own drill/advice pair.
-  contacts: true,
-  locations: true,
-  departments: true,
-  workflows: true,
-  // REPORTS-DRILL-2: verified against ReportDrillController::intakes() — the route
-  // exists AND accepts the validated params (was the "reported landed but 422s"
-  // trap once before; re-checked this time).
-  intakes: true,
-  // AI usage rows are consumption lines, not entity records: the backend ships NO
-  // /reports/ai/drill on purpose, so its bars stay non-clickable (§3 no fake affordances).
-  ai: false,
-  // The merged Verbruik overview has its OWN pair, because it may NOT borrow the
-  // workflows drill: its day bars carry workflow + AI credits together, so a
-  // workflows-backed list would structurally miss the AI half and disagree with
-  // the bar above it — a mismatch built in at birth.
-  // Flipped 17-08 only after measuring BOTH axes through the real app, logged in,
-  // with the client's own X-Tenant header: `?date=` → 200 and `?module=` → 200
-  // (the module axis answered 500 four hours earlier — a TypeError in
-  // UsageReport::drillRows — so "the route exists" was never the test; "the route
-  // accepts AND answers both params" is, per the intakes lesson above).
-  usage: true,
 }
 
 // Gates a drill-down click handler behind the per-report capability flag: while a

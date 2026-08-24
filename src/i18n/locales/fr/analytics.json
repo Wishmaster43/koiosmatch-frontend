@@ -14,17 +14,12 @@
     "candidates": "Candidats",
     "applications": "Candidatures",
     "customers": "Clients",
-    "customerstructure": "Structure client",
-    "flow": "Flux",
-    "people": "Équipe",
     "vacancies": "Postes",
     "opportunities": "Opportunités",
     "tasks": "Tâches",
     "matches": "Matchs",
-    "intakes": "Intakes",
     "outreach": "Outreach",
-    "whatsapp": "WhatsApp",
-    "usage": "Utilisation"
+    "whatsapp": "WhatsApp"
   },
   "candidates": {
     "loading": "Chargement des candidats…",
@@ -52,34 +47,9 @@
     }
   },
   "intakes": {
-    "loading": "Chargement des intakes…",
-    "error": "Impossible de charger les intakes",
-    "empty": "Aucun intake sur cette période",
-    "total": "Total des intakes",
-    "series": "Intakes dans le temps",
-    "groupBy": "Répartition",
     "by": {
-      "recruiter": "Recruteur",
-      "location": "Lieu",
-      "source": "Source",
-      "function": "Fonction",
-      "region": "Région"
-    },
-    "summary": {
-      "recruitersCount": "Recruteurs",
-      "locationsCount": "Lieux",
-      "sourcesCount": "Sources",
-      "functionsCount": "Fonctions",
-      "regionsCount": "Régions",
-      "topRecruiter": "Recruteur le plus actif",
-      "topSource": "Source principale",
-      "topFunction": "Fonction la plus fréquente",
-      "unassignedRecruiter": "Recruteur non assigne",
-      "topLocation": "Site principal",
-      "topRegion": "Region principale",
-      "avgPerRecruiter": "Moy. intakes par recruteur"
-    },
-    "kpiOrderFellBack": "Une carte KPI configurée dans les paramètres n'existe plus et a été réinitialisée par défaut."
+      "function": "Fonction"
+    }
   },
   "comingSoon": "{{label}}. Bientôt disponible",
   "period": {
@@ -90,68 +60,6 @@
   },
   "dashboard": {
     "vacancies": "Total des offres"
-  },
-  "flow": {
-    "title": "Flux de candidatures",
-    "subtitle": "Entonnoir par étape",
-    "loading": "Chargement du flux…",
-    "error": "Impossible de charger le flux",
-    "empty": "Aucune candidature sur cette période",
-    "phase": "Étape",
-    "total": "Total des candidatures",
-    "overallConversion": "Conversion globale",
-    "cohortNote": "La cohorte se remplit encore. Occupation du pipeline affichée jusqu'à un historique suffisant.",
-    "conversion": "Conversion",
-    "reached": "Atteint",
-    "current": "Actuellement à l'étape",
-    "avgDays": "moy. {{days}} jours",
-    "dropOff": "Abandons (nombre)",
-    "avgDaysOverall": "Jours moy. par étape",
-    "firstPhase": "Étape d'entrée",
-    "lastPhase": "Étape finale",
-    "maxDropPhase": "Plus grand abandon",
-    "stagesReached": "Étapes atteintes",
-    "stagesTotal": "Étapes de l'entonnoir",
-    "kpiOrderFellBack": "Une carte KPI configurée dans les paramètres n'existe plus et a été réinitialisée par défaut.",
-    "worstConversionPhase": "Conversion la plus faible",
-    "slowestPhase": "Étape la plus lente",
-    "dropOffRate": "Attrition (taux)",
-    "stagesEmpty": "Étapes sans activité"
-  },
-  "recruiters": {
-    "title": "Recruteurs",
-    "subtitle": "Productivité par recruteur",
-    "loading": "Chargement des recruteurs…",
-    "error": "Impossible de charger les recruteurs",
-    "empty": "Aucun recruteur sur cette période",
-    "summary": {
-      "recruiters": "Recruteurs",
-      "candidates": "Candidats",
-      "applications": "Candidatures",
-      "matches": "Matchs",
-      "notContacted": "Non contactés",
-      "intakesPlanned": "Entretiens prévus",
-      "intakesDone": "Entretiens réalisés",
-      "tasksOpen": "Tâches ouvertes",
-      "tasksOverdue": "Tâches en retard",
-      "avgCandidatesPerRecruiter": "Moy. candidats par recruteur",
-      "topRecruiter": "Meilleur recruteur",
-      "intakeCompletionRate": "Taux d'entretiens réalisés",
-      "taskOverdueRate": "Taux de tâches en retard"
-    },
-    "cols": {
-      "recruiter": "Recruteur",
-      "candidates": "Candidats",
-      "applications": "Candidatures",
-      "intakes": "Entretiens",
-      "matches": "Matchs",
-      "tasks": "Tâches",
-      "notContacted": "Non contactés"
-    },
-    "intakesValue": "{{planned}} prévus · {{done}} réalisés",
-    "tasksValue": "{{open}} ouvertes · {{overdue}} en retard",
-    "notContactedHint": "> {{months}} mois",
-    "kpiOrderFellBack": "Une carte KPI configurée dans les paramètres n'existe plus et a été réinitialisée par défaut."
   },
   "vacancies": {
     "title": "Postes",
@@ -292,30 +200,6 @@
     },
     "kpiOrderFellBack": "Une carte KPI configurée dans les paramètres n'existe plus et a été réinitialisée par défaut."
   },
-  "sources": {
-    "loading": "Chargement des sources…",
-    "error": "Impossible de charger les sources",
-    "empty": "Aucun candidat sur cette période",
-    "summary": {
-      "sources": "Sources",
-      "candidates": "Candidats",
-      "applications": "Candidatures",
-      "matches": "Matchs",
-      "matchRate": "Taux de correspondance",
-      "applicationRate": "Candidatures par candidat",
-      "topSourceCandidates": "Meilleure source (candidats)",
-      "topSourceMatches": "Meilleure source (matchs)",
-      "sourcesNoMatches": "Sources sans match"
-    },
-    "cols": {
-      "source": "Source",
-      "candidates": "Candidats",
-      "applications": "Candidatures",
-      "matches": "Matchs",
-      "matchRate": "Taux de match"
-    },
-    "kpiOrderFellBack": "Une carte KPI configurée dans les paramètres n'existe plus et a été réinitialisée par défaut."
-  },
   "applications": {
     "loading": "Chargement des candidatures…",
     "error": "Impossible de charger les candidatures",
@@ -432,150 +316,6 @@
       "matchesStoppedEarly": "Matchs arrêtés prématurément"
     }
   },
-  "contacts": {
-    "total": "Total contacts",
-    "window": "Contacts du {{from}} au {{to}}",
-    "series": "Contacts dans le temps",
-    "loading": "Chargement…",
-    "error": "Le rapport n'a pas pu être chargé.",
-    "empty": "Aucune donnée sur cette période.",
-    "axes": {
-      "customer": "Par client",
-      "location": "Par site",
-      "department": "Par service",
-      "function": "Par fonction",
-      "status": "Par statut"
-    },
-    "summary": {
-      "primary": "Contact principal",
-      "withRecentContact": "Contacté récemment",
-      "neverContacted": "Jamais contacté",
-      "contactedRate": "Taux de contact récent",
-      "withoutFunction": "Sans fonction",
-      "withoutLocation": "Sans site",
-      "withoutDepartment": "Sans département",
-      "withoutCustomer": "Sans client",
-      "topCustomer": "Client principal",
-      "topFunction": "Fonction principale",
-      "topLocation": "Site principal",
-      "topDepartment": "Service principal"
-    },
-    "kpiOrderFellBack": "Une carte KPI configurée dans les paramètres n'existe plus et a été réinitialisée par défaut."
-  },
-  "locations": {
-    "total": "Total sites",
-    "window": "Sites du {{from}} au {{to}}",
-    "series": "Sites dans le temps",
-    "loading": "Chargement…",
-    "error": "Le rapport n'a pas pu être chargé.",
-    "empty": "Aucune donnée sur cette période.",
-    "axes": {
-      "customer": "Par client",
-      "city": "Par ville",
-      "province": "Par province",
-      "status": "Par statut"
-    },
-    "summary": {
-      "withCustomer": "Avec client",
-      "withoutCustomer": "Sans client",
-      "withDepartments": "Avec départements",
-      "withoutDepartments": "Sans département",
-      "withoutCity": "Sans ville",
-      "topCity": "Ville principale",
-      "withoutProvince": "Sans province",
-      "topProvince": "Province principale",
-      "withContacts": "Avec contacts directs",
-      "withoutContacts": "Sans contact direct",
-      "departmentCoverageRate": "Taux de couverture services",
-      "contactCoverageRate": "Taux de couverture contacts"
-    },
-    "kpiOrderFellBack": "Une carte KPI configurée dans les paramètres n'existe plus et a été réinitialisée par défaut."
-  },
-  "departments": {
-    "total": "Total services",
-    "window": "Services du {{from}} au {{to}}",
-    "series": "Services dans le temps",
-    "loading": "Chargement…",
-    "error": "Le rapport n'a pas pu être chargé.",
-    "empty": "Aucune donnée sur cette période.",
-    "axes": {
-      "customer": "Par client",
-      "location": "Par site",
-      "status": "Par statut"
-    },
-    "summary": {
-      "withLocation": "Avec site",
-      "withoutLocation": "Sans site",
-      "withContacts": "Avec contacts",
-      "withoutContacts": "Sans contact",
-      "withoutCustomer": "Sans client",
-      "topCustomer": "Client principal",
-      "topLocation": "Site principal",
-      "customersCount": "Clients représentés",
-      "withCustomer": "Avec client",
-      "locationCoverageRate": "Taux de couverture site",
-      "contactCoverageRate": "Taux de couverture contacts",
-      "othersCustomer": "Autres clients"
-    },
-    "kpiOrderFellBack": "Une carte KPI configurée dans les paramètres n'existe plus et a été réinitialisée par défaut."
-  },
-  "ai": {
-    "total": "Total activité IA",
-    "window": "Utilisation de l'IA du {{from}} au {{to}}",
-    "series": "Utilisation dans le temps",
-    "loading": "Chargement…",
-    "error": "Le rapport n'a pas pu être chargé.",
-    "empty": "Aucune donnée sur cette période.",
-    "axes": {
-      "activity": "Par activité",
-      "model": "Par modèle",
-      "user": "Par utilisateur"
-    },
-    "summary": {
-      "tokens": "Jetons",
-      "amount": "Montant des ventes",
-      "avgTokens": "Jetons moy. par exécution",
-      "avgAmount": "Montant moy. des ventes par exécution",
-      "activityTypes": "Types d'activité",
-      "modelsUsed": "Modèles utilisés",
-      "activeUsers": "Utilisateurs actifs",
-      "topActivity": "Activité la plus utilisée",
-      "topModel": "Modele le plus utilise",
-      "topUser": "Utilisateur le plus actif",
-      "avgPerUser": "Moy. activite par utilisateur",
-      "avgPerActivityType": "Moy. activite par type"
-    },
-    "kpiOrderFellBack": "Une carte KPI configurée dans les paramètres n'existe plus et a été réinitialisée par défaut."
-  },
-  "workflows": {
-    "total": "Total exécutions",
-    "window": "Exécutions du {{from}} au {{to}}",
-    "series": "Exécutions dans le temps",
-    "loading": "Chargement…",
-    "error": "Le rapport n'a pas pu être chargé.",
-    "empty": "Aucune donnée sur cette période.",
-    "axes": {
-      "workflow": "Par workflow",
-      "trigger": "Par déclencheur",
-      "status": "Par statut"
-    },
-    "summary": {
-      "runs": "Exécutions",
-      "completed": "Terminées",
-      "failed": "Échouées",
-      "cancelled": "Annulées",
-      "running": "En cours",
-      "successRate": "Taux de réussite",
-      "avgDuration": "Durée moyenne",
-      "workflowsCount": "Workflows",
-      "triggersCount": "Déclencheurs",
-      "topWorkflow": "Workflow le plus actif",
-      "topTrigger": "Declencheur le plus actif",
-      "failureRate": "Taux d'echec",
-      "avgRunsPerWorkflow": "Moy. executions par workflow"
-    },
-    "kpiOrderFellBack": "Une carte KPI configurée dans les paramètres n'existe plus et a été réinitialisée par défaut."
-  },
   "leads": {
     "loading": "Chargement des leads…",
     "error": "Impossible de charger les leads",
@@ -583,43 +323,6 @@
     "total": "Total des leads",
     "series": "Leads dans le temps",
     "window": "Leads du {{from}} au {{to}}",
-    "kpiOrderFellBack": "Une carte KPI configurée dans les paramètres n'existe plus et a été réinitialisée par défaut."
-  },
-  "accountmanagers": {
-    "loading": "Chargement des comptes clients…",
-    "error": "Impossible de charger les comptes clients",
-    "empty": "Aucun compte client sur cette période",
-    "summary": {
-      "accountManagers": "Comptes clients",
-      "customersInWindow": "Clients sur la période",
-      "avgPerManager": "Clients moyens par gestionnaire",
-      "topManager": "Meilleur gestionnaire",
-      "openVacancies": "Postes ouverts",
-      "filledPositions": "Postes pourvus",
-      "opportunities": "Opportunités",
-      "renewalsDue": "Renouvellements à faire",
-      "notContacted": "Non contacté",
-      "avgOpportunitiesPerManager": "Moy. opportunités par gestionnaire",
-      "avgVacanciesPerManager": "Moy. postes ouverts par gestionnaire",
-      "notContactedRate": "Taux de non-contactés",
-      "renewalsDueRate": "Taux de renouvellements à faire"
-    },
-    "cols": {
-      "manager": "Gestionnaire de compte",
-      "customers": "Clients",
-      "openVacancies": "Postes ouverts",
-      "filledPositions": "Postes pourvus",
-      "opportunities": "Opportunités",
-      "contractEnding": "Fin de contrat",
-      "notContacted": "Non contacté"
-    },
-    "notContactedHint": "> {{days}} j",
-    "contractEndingHint": "≤ {{days}} j",
-    "compareThresholds": "Les deux périodes utilisent les mêmes seuils : non contacté après {{notContactedDays}} jours, fin de contrat dans les {{contractEndingDays}} jours.",
-    "overrides": {
-      "notContactedMonths": "Non contacté après (mois)",
-      "contractEndingDays": "Fin de contrat dans (jours)"
-    },
     "kpiOrderFellBack": "Une carte KPI configurée dans les paramètres n'existe plus et a été réinitialisée par défaut."
   },
   "prospects": {
@@ -630,54 +333,6 @@
     "series": "Prospects dans le temps",
     "window": "Prospects du {{from}} au {{to}}",
     "kpiOrderFellBack": "Une carte KPI configurée dans les paramètres n'existe plus et a été réinitialisée par défaut."
-  },
-  "customerstructure": {
-    "viewSwitch": {
-      "ariaLabel": "Structure client",
-      "contacts": "Contacts",
-      "locations": "Sites",
-      "departments": "Services"
-    }
-  },
-  "people": {
-    "viewSwitch": {
-      "ariaLabel": "Équipe",
-      "recruiters": "Recruteurs",
-      "accountmanagers": "Chargés de compte"
-    }
-  },
-  "usage": {
-    "viewSwitch": {
-      "ariaLabel": "Type d'utilisation",
-      "ai": "Koios AI",
-      "workflows": "Workflows",
-      "total": "Total"
-    },
-    "window": "Consommation du {{from}} au {{to}}",
-    "loading": "Chargement de la consommation…",
-    "error": "Impossible de charger la consommation",
-    "empty": "Aucune consommation sur cette période",
-    "series": "Consommation dans le temps",
-    "axes": {
-      "module": "Par module"
-    },
-    "moduleNote": "Uniquement les exécutions de workflow. La consommation IA ne porte pas de module, aucune ligne IA n'y figure donc.",
-    "kpiOrderFellBack": "Une carte KPI configurée dans les Réglages n'existe plus et a été réinitialisée.",
-    "summary": {
-      "total": "Consommation totale",
-      "workflowCredits": "Koios Tokens",
-      "aiCredits": "Appels IA",
-      "aiAmount": "Montant IA",
-      "modules": "Modules consommateurs",
-      "topModule": "Module le plus actif",
-      "busiestDay": "Jour le plus actif",
-      "activeDays": "Jours avec consommation",
-      "avgPerDay": "Moyenne par jour actif",
-      "aiShare": "Part IA",
-      "workflowShare": "Part workflows",
-      "topModuleShare": "Part du module le plus actif",
-      "amountPerDay": "Montant IA par jour actif"
-    }
   },
   "compare": {
     "label": "Comparer avec",

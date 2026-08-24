@@ -3362,23 +3362,13 @@
       "leads": "Leads",
       "applications": "Sollicitaties",
       "customers": "Klanten",
-      "flow": "Flow",
-      "recruiters": "Recruiters",
-      "accountmanagers": "Accountmanagers",
       "vacancies": "Vacatures",
       "opportunities": "Kansen",
       "tasks": "Taken",
       "matches": "Matches",
-      "intakes": "Intakes",
       "outreach": "Belllijsten",
       "whatsapp": "WhatsApp",
-      "contacts": "Contacten",
-      "locations": "Locaties",
-      "departments": "Afdelingen",
-      "ai": "Koios AI",
-      "workflows": "Workflows",
-      "prospects": "Prospects",
-      "usage": "Verbruik (totaal)"
+      "prospects": "Prospects"
     }
   },
   "freeEntry": {

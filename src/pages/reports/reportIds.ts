@@ -49,12 +49,6 @@ export const REPORT_IDS = [
 
 export type ReportId = (typeof REPORT_IDS)[number]
 
-// RAPPORTEN-DANNY10-1: route ids retired by Danny's ten-page decision. Their
-// PAGES still exist on disk pending the explicit file-cleanup round (they are
-// unreachable — no route, no sidebar entry, no hub tile) and keep compiling
-// through this type; the cleanup round removes the files and this alias.
-export type RetiredReportRouteId = 'customerstructure' | 'flow' | 'people' | 'usage' | 'intakes'
-
 // A retired top-level route id → the merged page + switch position it now lands
 // on. Every id that used to be its own `reports.<id>` route stays resolvable
 // forever (house rule: a rename must never break a deep link) — appPages.tsx

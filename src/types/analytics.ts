@@ -17,66 +17,8 @@ export interface FlowPhase {
   avg_days_in_phase: number | null
 }
 
-// GET /reports/flow response.
-export interface FlowReportData {
-  period: string
-  from?: string
-  to?: string
-  total: number
-  phases: FlowPhase[]
-}
-
 // One stage tally for a recruiter (key matches FlowPhase.key — shared map).
 export interface RecruiterPhaseCount { key: string; label: string; count: number }
-
-// One recruiter row in the recruiters report.
-export interface RecruiterRow {
-  key: string
-  label: string
-  candidates: number
-  intakes: { planned: number; done: number }
-  applications_by_phase: RecruiterPhaseCount[]
-  matches: number
-  tasks: { open: number; overdue: number }
-  not_contacted: number
-}
-
-// GET /reports/recruiters response.
-export interface RecruitersReportData {
-  period: string
-  from?: string
-  to?: string
-  compliance_months: number
-  recruiters: RecruiterRow[]
-}
-
-// ── Account managers report (GET /reports/accountmanagers) ───────────────────
-// Mirror-image of RecruitersReport on the customer side (Customer.owner_id).
-// `customers` is the manager's own book SNAPSHOT (no created_at window); the
-// other five fields are windowed/snapshot per the backend service's own docs.
-export interface AccountManagerRow {
-  key: string
-  label: string
-  customers: number
-  open_vacancies: number
-  filled_positions: number
-  opportunities: number
-  contract_ending: number
-  not_contacted: number
-}
-
-// GET /reports/accountmanagers response. `compliance_days`/`contract_ending_days`
-// are the ACTUAL thresholds applied (either the `months`/`contract_ending_days`
-// request override, or the tenant's own setting) — echoed back so the UI can show
-// what was measured, never a client-guessed number.
-export interface AccountManagersReportData {
-  period: string
-  from?: string
-  to?: string
-  compliance_days: number
-  contract_ending_days: number
-  account_managers: AccountManagerRow[]
-}
 
 // ── Vacancies report (GET /reports/vacancies) ────────────────────────────────
 
@@ -199,22 +141,6 @@ export interface MatchesReportData {
 }
 
 // ── Intakes report (GET /reports/intakes, C-22) ──────────────────────────────
-
-// One bucket in the intake series or a breakdown dimension. `key` is null/’office’
-// for the unassigned bucket; `count` = number of intake appointments.
-export interface IntakeBucket { key: string | null; label: string; count: number }
-
-// GET /reports/intakes response. `series` = intakes over time (the `bucket`
-// granularity); the `by_*` arrays break the same total down per dimension.
-export interface IntakesReportData {
-  series: IntakeBucket[]
-  by_recruiter: IntakeBucket[]
-  by_location: IntakeBucket[]
-  by_source: IntakeBucket[]
-  by_function: IntakeBucket[]
-  by_region: IntakeBucket[]
-  total: number
-}
 
 // Selectable aggregation period (mirrors the endpoint's ?period=).
 export type ReportPeriod = 'day' | 'week' | 'month'
@@ -485,24 +411,6 @@ export interface TasksReportData {
 // Hand-written from the backend Service (no 2xx schema in the generated spec yet,
 // §10) — mirrors App\Services\Report\SourcesReport::run() exactly.
 
-// One candidate source's intake cohort + yield. `match_rate` is null for a
-// zero-candidate source (never divide by zero into a fabricated 0%).
-export interface SourceRow {
-  source: string
-  candidates: number
-  applications: number
-  matches: number
-  match_rate: number | null
-}
-
-// GET /reports/sources response. Windowed on `from`/`to` (defaults to the last 3
-// months) — this endpoint has no `period` bucket either.
-export interface SourcesReportData {
-  from: string
-  to: string
-  sources: SourceRow[]
-}
-
 // ── Thin reports (RAPPORTEN-SUITE-2) ─────────────────────────────────────────
 // Hand-written from the backend contract entry (the generated spec carries request
 // shapes + 401 only, no 2xx schema — §10). All five follow the shared portie recipe:
@@ -512,77 +420,3 @@ export interface SourcesReportData {
 // One axis bar, shared by the five thin reports.
 export interface ThinSegment { value: string; label: string; count: number; color?: string | null }
 
-// GET /reports/contacts — summary counts primary contacts and contact recency.
-export interface ContactsReportData {
-  period: string; from: string; to: string; total: number
-  summary: { total: number; primary: number; with_recent_contact: number; never_contacted: number }
-  timeseries: { bucket: 'day' | 'week'; series: CandidateTimeseriesPoint[] }
-  by_customer: ThinSegment[]; by_location: ThinSegment[]; by_department: ThinSegment[]
-  by_function: ThinSegment[]; by_status: ThinSegment[]
-}
-
-// GET /reports/locations — `summary` splits locations with/without departments AND
-// (REPORTS-KPI-SPARE-2) with/without direct contacts (LocationsReport::summary(),
-// already sent by the backend — previously typed as only the first pair).
-export interface LocationsReportData {
-  period: string; from: string; to: string; total: number
-  summary?: { with_departments: number; without_departments: number; with_contacts: number; without_contacts: number }
-  timeseries: { bucket: 'day' | 'week'; series: CandidateTimeseriesPoint[] }
-  by_customer: ThinSegment[]; by_city: ThinSegment[]; by_province: ThinSegment[]; by_status: ThinSegment[]
-}
-
-// GET /reports/departments — `summary` splits departments with and without contacts.
-export interface DepartmentsReportData {
-  period: string; from: string; to: string; total: number
-  summary?: { with_contacts: number; without_contacts: number }
-  timeseries: { bucket: 'day' | 'week'; series: CandidateTimeseriesPoint[] }
-  by_customer: ThinSegment[]; by_location: ThinSegment[]; by_status: ThinSegment[]
-}
-
-// One AI usage bar: `value` is the RAW slug/model id (stable key), `label` the Dutch
-// wording where the backend knows it and the raw value otherwise — never an empty bar.
-// `amount` is a SALES figure only: the envelope carries no cost or margin, and the FE
-// must never render or derive one (privacy line, RAPPORTEN-SUITE-2).
-export interface AiActivitySegment { value: string; label: string; count: number
-  color?: string | null; amount?: number | null; tokens?: number | null }
-
-// GET /reports/ai — NO drill endpoint exists, so these bars stay non-clickable.
-export interface AiReportData {
-  period: string; from: string; to: string; total: number
-  summary: { total: number; tokens: number; amount: number | null }
-  timeseries: { bucket: 'day' | 'week'; series: CandidateTimeseriesPoint[] }
-  by_activity: AiActivitySegment[]; by_model: AiActivitySegment[]; by_user: AiActivitySegment[]
-}
-
-// GET /reports/workflows — run outcomes; `avg_duration_seconds` is null while nothing ran.
-export interface WorkflowsReportData {
-  period: string; from: string; to: string; total: number
-  summary: {
-    runs: number; completed: number; failed: number; cancelled: number; running: number
-    success_rate: number | null; avg_duration_seconds: number | null
-  }
-  timeseries: { bucket: 'day' | 'week'; series: CandidateTimeseriesPoint[] }
-  by_workflow: ThinSegment[]; by_trigger: ThinSegment[]; by_status: ThinSegment[]
-}
-
-// GET /reports/usage — the two consumption sources merged into one picture, because
-// the bureau gets ONE bill (App\Services\Report\UsageReport). Pure aggregation over
-// the AI and workflow reports, never a second count of the same thing.
-//
-// `ai_credits` is AiReport's own CALL count — the codebase has no separate AI-credit
-// ledger, and a call count is the honest symmetric proxy for "1 credit = 1 module
-// execution". Because a twenty-turn conversation and a one-line prompt are both "one
-// call" and are not the same bill, `ai_amount` travels alongside it: AiReport's SALE
-// figure, echoed and never recomputed, so the margin stays invisible (§9).
-//
-// `by_module` is WORKFLOW-ONLY by nature, not by omission — AI usage carries no
-// module_type, so there is nothing to bucket it into. The UI says so out loud rather
-// than leaving the reader to wonder which rows went missing. The day series IS merged
-// and carries both halves.
-export interface UsageOverviewDay { day: string; workflow_credits: number; ai_credits: number }
-export interface UsageOverviewReportData {
-  period: string; from: string; to: string
-  totals: { workflow_credits: number; ai_credits: number; total: number; ai_amount: number }
-  by_module: ThinSegment[]
-  timeseries: UsageOverviewDay[]
-}

@@ -14,17 +14,12 @@
     "candidates": "Candidatos",
     "applications": "Solicitudes",
     "customers": "Clientes",
-    "customerstructure": "Estructura de cliente",
-    "flow": "Flujo",
-    "people": "Equipo",
     "vacancies": "Vacantes",
     "opportunities": "Oportunidades",
     "tasks": "Tareas",
     "matches": "Matches",
-    "intakes": "Intakes",
     "outreach": "Outreach",
-    "whatsapp": "WhatsApp",
-    "usage": "Uso"
+    "whatsapp": "WhatsApp"
   },
   "candidates": {
     "loading": "Cargando candidatos…",
@@ -52,34 +47,9 @@
     }
   },
   "intakes": {
-    "loading": "Cargando intakes…",
-    "error": "No se pudieron cargar los intakes",
-    "empty": "No hay intakes en este período",
-    "total": "Total de intakes",
-    "series": "Intakes a lo largo del tiempo",
-    "groupBy": "Desglose",
     "by": {
-      "recruiter": "Reclutador",
-      "location": "Ubicación",
-      "source": "Fuente",
-      "function": "Función",
-      "region": "Región"
-    },
-    "summary": {
-      "recruitersCount": "Reclutadores",
-      "locationsCount": "Ubicaciones",
-      "sourcesCount": "Fuentes",
-      "functionsCount": "Funciones",
-      "regionsCount": "Regiones",
-      "topRecruiter": "Reclutador más activo",
-      "topSource": "Fuente principal",
-      "topFunction": "Función más común",
-      "unassignedRecruiter": "Reclutador sin asignar",
-      "topLocation": "Ubicacion principal",
-      "topRegion": "Region principal",
-      "avgPerRecruiter": "Prom. intakes por reclutador"
-    },
-    "kpiOrderFellBack": "Una tarjeta KPI configurada en Ajustes ya no existe y se restableció al valor predeterminado."
+      "function": "Función"
+    }
   },
   "comingSoon": "{{label}}. Próximamente",
   "period": {
@@ -90,68 +60,6 @@
   },
   "dashboard": {
     "vacancies": "Total de vacantes"
-  },
-  "flow": {
-    "title": "Flujo de candidaturas",
-    "subtitle": "Embudo por fase",
-    "loading": "Cargando flujo…",
-    "error": "No se pudo cargar el flujo",
-    "empty": "No hay candidaturas en este período",
-    "phase": "Fase",
-    "total": "Candidaturas totales",
-    "overallConversion": "Conversión total",
-    "cohortNote": "El cohorte aún se está llenando. Se muestra la ocupación del pipeline hasta tener suficiente historial.",
-    "conversion": "Conversión",
-    "reached": "Alcanzado",
-    "current": "Actualmente en fase",
-    "avgDays": "med. {{days}} días",
-    "dropOff": "Abandonos (número)",
-    "avgDaysOverall": "Días medios por fase",
-    "firstPhase": "Etapa de entrada",
-    "lastPhase": "Etapa final",
-    "maxDropPhase": "Mayor abandono",
-    "stagesReached": "Etapas alcanzadas",
-    "stagesTotal": "Etapas del embudo",
-    "kpiOrderFellBack": "Una tarjeta KPI configurada en Ajustes ya no existe y se restableció al valor predeterminado.",
-    "worstConversionPhase": "Conversión más débil",
-    "slowestPhase": "Etapa más lenta",
-    "dropOffRate": "Abandono (tasa)",
-    "stagesEmpty": "Etapas sin actividad"
-  },
-  "recruiters": {
-    "title": "Reclutadores",
-    "subtitle": "Productividad por reclutador",
-    "loading": "Cargando reclutadores…",
-    "error": "No se pudieron cargar los reclutadores",
-    "empty": "No hay reclutadores en este período",
-    "summary": {
-      "recruiters": "Reclutadores",
-      "candidates": "Candidatos",
-      "applications": "Candidaturas",
-      "matches": "Matches",
-      "notContacted": "Sin contactar",
-      "intakesPlanned": "Entrevistas previstas",
-      "intakesDone": "Entrevistas realizadas",
-      "tasksOpen": "Tareas abiertas",
-      "tasksOverdue": "Tareas atrasadas",
-      "avgCandidatesPerRecruiter": "Prom. candidatos por reclutador",
-      "topRecruiter": "Mejor reclutador",
-      "intakeCompletionRate": "Tasa de entrevistas realizadas",
-      "taskOverdueRate": "Tasa de tareas atrasadas"
-    },
-    "cols": {
-      "recruiter": "Reclutador",
-      "candidates": "Candidatos",
-      "applications": "Candidaturas",
-      "intakes": "Entrevistas",
-      "matches": "Matches",
-      "tasks": "Tareas",
-      "notContacted": "Sin contactar"
-    },
-    "intakesValue": "{{planned}} previstas · {{done}} realizadas",
-    "tasksValue": "{{open}} abiertas · {{overdue}} atrasadas",
-    "notContactedHint": "> {{months}} meses",
-    "kpiOrderFellBack": "Una tarjeta KPI configurada en Ajustes ya no existe y se restableció al valor predeterminado."
   },
   "vacancies": {
     "title": "Vacantes",
@@ -292,30 +200,6 @@
     },
     "kpiOrderFellBack": "Una tarjeta KPI configurada en Ajustes ya no existe y se restableció al valor predeterminado."
   },
-  "sources": {
-    "loading": "Cargando fuentes…",
-    "error": "No se pudieron cargar las fuentes",
-    "empty": "Sin candidatos en este periodo",
-    "summary": {
-      "sources": "Fuentes",
-      "candidates": "Candidatos",
-      "applications": "Solicitudes",
-      "matches": "Matches",
-      "matchRate": "Tasa de coincidencia",
-      "applicationRate": "Solicitudes por candidato",
-      "topSourceCandidates": "Mejor fuente (candidatos)",
-      "topSourceMatches": "Mejor fuente (matches)",
-      "sourcesNoMatches": "Fuentes sin coincidencias"
-    },
-    "cols": {
-      "source": "Fuente",
-      "candidates": "Candidatos",
-      "applications": "Solicitudes",
-      "matches": "Matches",
-      "matchRate": "Tasa de match"
-    },
-    "kpiOrderFellBack": "Una tarjeta KPI configurada en Ajustes ya no existe y se restableció al valor predeterminado."
-  },
   "applications": {
     "loading": "Cargando solicitudes…",
     "error": "No se pudieron cargar las solicitudes",
@@ -432,150 +316,6 @@
       "matchesStoppedEarly": "Matches finalizados antes de tiempo"
     }
   },
-  "contacts": {
-    "total": "Total contactos",
-    "window": "Contactos del {{from}} al {{to}}",
-    "series": "Contactos a lo largo del tiempo",
-    "loading": "Cargando…",
-    "error": "No se pudo cargar el informe.",
-    "empty": "Aún no hay datos en este periodo.",
-    "axes": {
-      "customer": "Por cliente",
-      "location": "Por ubicación",
-      "department": "Por departamento",
-      "function": "Por función",
-      "status": "Por estado"
-    },
-    "summary": {
-      "primary": "Contacto principal",
-      "withRecentContact": "Contactado recientemente",
-      "neverContacted": "Nunca contactado",
-      "contactedRate": "Tasa de contacto reciente",
-      "withoutFunction": "Sin función",
-      "withoutLocation": "Sin ubicación",
-      "withoutDepartment": "Sin departamento",
-      "withoutCustomer": "Sin cliente",
-      "topCustomer": "Cliente principal",
-      "topFunction": "Función principal",
-      "topLocation": "Ubicación principal",
-      "topDepartment": "Departamento principal"
-    },
-    "kpiOrderFellBack": "Una tarjeta KPI configurada en Ajustes ya no existe y se restableció al valor predeterminado."
-  },
-  "locations": {
-    "total": "Total ubicaciones",
-    "window": "Ubicaciones del {{from}} al {{to}}",
-    "series": "Ubicaciones a lo largo del tiempo",
-    "loading": "Cargando…",
-    "error": "No se pudo cargar el informe.",
-    "empty": "Aún no hay datos en este periodo.",
-    "axes": {
-      "customer": "Por cliente",
-      "city": "Por ciudad",
-      "province": "Por provincia",
-      "status": "Por estado"
-    },
-    "summary": {
-      "withCustomer": "Con cliente",
-      "withoutCustomer": "Sin cliente",
-      "withDepartments": "Con departamentos",
-      "withoutDepartments": "Sin departamentos",
-      "withoutCity": "Sin ciudad",
-      "topCity": "Ciudad principal",
-      "withoutProvince": "Sin provincia",
-      "topProvince": "Provincia principal",
-      "withContacts": "Con contactos directos",
-      "withoutContacts": "Sin contactos directos",
-      "departmentCoverageRate": "Tasa de cobertura de departamentos",
-      "contactCoverageRate": "Tasa de cobertura de contactos"
-    },
-    "kpiOrderFellBack": "Una tarjeta KPI configurada en Ajustes ya no existe y se restableció al valor predeterminado."
-  },
-  "departments": {
-    "total": "Total departamentos",
-    "window": "Departamentos del {{from}} al {{to}}",
-    "series": "Departamentos a lo largo del tiempo",
-    "loading": "Cargando…",
-    "error": "No se pudo cargar el informe.",
-    "empty": "Aún no hay datos en este periodo.",
-    "axes": {
-      "customer": "Por cliente",
-      "location": "Por ubicación",
-      "status": "Por estado"
-    },
-    "summary": {
-      "withLocation": "Con ubicación",
-      "withoutLocation": "Sin ubicación",
-      "withContacts": "Con contactos",
-      "withoutContacts": "Sin contactos",
-      "withoutCustomer": "Sin cliente",
-      "topCustomer": "Cliente principal",
-      "topLocation": "Ubicación principal",
-      "customersCount": "Clientes representados",
-      "withCustomer": "Con cliente",
-      "locationCoverageRate": "Tasa de cobertura de ubicación",
-      "contactCoverageRate": "Tasa de cobertura de contactos",
-      "othersCustomer": "Otros clientes"
-    },
-    "kpiOrderFellBack": "Una tarjeta KPI configurada en Ajustes ya no existe y se restableció al valor predeterminado."
-  },
-  "ai": {
-    "total": "Total actividad IA",
-    "window": "Uso de IA del {{from}} al {{to}}",
-    "series": "Uso a lo largo del tiempo",
-    "loading": "Cargando…",
-    "error": "No se pudo cargar el informe.",
-    "empty": "Aún no hay datos en este periodo.",
-    "axes": {
-      "activity": "Por actividad",
-      "model": "Por modelo",
-      "user": "Por usuario"
-    },
-    "summary": {
-      "tokens": "Tokens",
-      "amount": "Importe de ventas",
-      "avgTokens": "Tokens medios por ejecución",
-      "avgAmount": "Importe medio de ventas por ejecución",
-      "activityTypes": "Tipos de actividad",
-      "modelsUsed": "Modelos usados",
-      "activeUsers": "Usuarios activos",
-      "topActivity": "Actividad más usada",
-      "topModel": "Modelo mas usado",
-      "topUser": "Usuario mas activo",
-      "avgPerUser": "Prom. actividad por usuario",
-      "avgPerActivityType": "Prom. actividad por tipo"
-    },
-    "kpiOrderFellBack": "Una tarjeta KPI configurada en Ajustes ya no existe y se restableció al valor predeterminado."
-  },
-  "workflows": {
-    "total": "Total ejecuciones",
-    "window": "Ejecuciones del {{from}} al {{to}}",
-    "series": "Ejecuciones a lo largo del tiempo",
-    "loading": "Cargando…",
-    "error": "No se pudo cargar el informe.",
-    "empty": "Aún no hay datos en este periodo.",
-    "axes": {
-      "workflow": "Por workflow",
-      "trigger": "Por disparador",
-      "status": "Por estado"
-    },
-    "summary": {
-      "runs": "Ejecuciones",
-      "completed": "Completadas",
-      "failed": "Fallidas",
-      "cancelled": "Canceladas",
-      "running": "En curso",
-      "successRate": "Tasa de éxito",
-      "avgDuration": "Duración media",
-      "workflowsCount": "Workflows",
-      "triggersCount": "Disparadores",
-      "topWorkflow": "Workflow mas activo",
-      "topTrigger": "Disparador mas activo",
-      "failureRate": "Tasa de fallos",
-      "avgRunsPerWorkflow": "Prom. ejecuciones por workflow"
-    },
-    "kpiOrderFellBack": "Una tarjeta KPI configurada en Ajustes ya no existe y se restableció al valor predeterminado."
-  },
   "leads": {
     "loading": "Cargando leads…",
     "error": "No se pudieron cargar los leads",
@@ -583,43 +323,6 @@
     "total": "Total de leads",
     "series": "Leads a lo largo del tiempo",
     "window": "Leads del {{from}} al {{to}}",
-    "kpiOrderFellBack": "Una tarjeta KPI configurada en Ajustes ya no existe y se restableció al valor predeterminado."
-  },
-  "accountmanagers": {
-    "loading": "Cargando gestores de cuentas…",
-    "error": "No se pudieron cargar los gestores de cuentas",
-    "empty": "Sin gestores de cuentas en este período",
-    "summary": {
-      "accountManagers": "Gestores de cuentas",
-      "customersInWindow": "Clientes en el período",
-      "avgPerManager": "Clientes medios por gestor",
-      "topManager": "Mejor gestor",
-      "openVacancies": "Vacantes abiertas",
-      "filledPositions": "Puestos cubiertos",
-      "opportunities": "Oportunidades",
-      "renewalsDue": "Renovaciones pendientes",
-      "notContacted": "Sin contactar",
-      "avgOpportunitiesPerManager": "Prom. oportunidades por gestor",
-      "avgVacanciesPerManager": "Prom. vacantes abiertas por gestor",
-      "notContactedRate": "Tasa de sin contactar",
-      "renewalsDueRate": "Tasa de renovaciones pendientes"
-    },
-    "cols": {
-      "manager": "Gestor de cuenta",
-      "customers": "Clientes",
-      "openVacancies": "Vacantes abiertas",
-      "filledPositions": "Puestos cubiertos",
-      "opportunities": "Oportunidades",
-      "contractEnding": "Fin de contrato",
-      "notContacted": "Sin contactar"
-    },
-    "notContactedHint": "> {{days}} d",
-    "contractEndingHint": "≤ {{days}} d",
-    "compareThresholds": "Ambos períodos usan los mismos umbrales: sin contactar después de {{notContactedDays}} días, el contrato finaliza en {{contractEndingDays}} días.",
-    "overrides": {
-      "notContactedMonths": "Sin contactar después de (meses)",
-      "contractEndingDays": "El contrato finaliza en (días)"
-    },
     "kpiOrderFellBack": "Una tarjeta KPI configurada en Ajustes ya no existe y se restableció al valor predeterminado."
   },
   "prospects": {
@@ -630,54 +333,6 @@
     "series": "Prospectos a lo largo del tiempo",
     "window": "Prospectos {{from}} a {{to}}",
     "kpiOrderFellBack": "Una tarjeta KPI configurada en Ajustes ya no existe y se restableció al valor predeterminado."
-  },
-  "customerstructure": {
-    "viewSwitch": {
-      "ariaLabel": "Estructura de cliente",
-      "contacts": "Contactos",
-      "locations": "Ubicaciones",
-      "departments": "Departamentos"
-    }
-  },
-  "people": {
-    "viewSwitch": {
-      "ariaLabel": "Equipo",
-      "recruiters": "Reclutadores",
-      "accountmanagers": "Gestores de cuentas"
-    }
-  },
-  "usage": {
-    "viewSwitch": {
-      "ariaLabel": "Tipo de uso",
-      "ai": "Koios AI",
-      "workflows": "Workflows",
-      "total": "Total"
-    },
-    "window": "Consumo del {{from}} al {{to}}",
-    "loading": "Cargando consumo…",
-    "error": "No se ha podido cargar el consumo",
-    "empty": "Sin consumo en este periodo",
-    "series": "Consumo a lo largo del tiempo",
-    "axes": {
-      "module": "Por módulo"
-    },
-    "moduleNote": "Solo ejecuciones de workflow. El consumo de IA no lleva módulo, por eso aquí no aparecen filas de IA.",
-    "kpiOrderFellBack": "Una tarjeta KPI configurada en Ajustes ya no existe y se ha restablecido.",
-    "summary": {
-      "total": "Consumo total",
-      "workflowCredits": "Koios Tokens",
-      "aiCredits": "Llamadas de IA",
-      "aiAmount": "Importe de IA",
-      "modules": "Módulos con consumo",
-      "topModule": "Módulo más activo",
-      "busiestDay": "Día más activo",
-      "activeDays": "Días con consumo",
-      "avgPerDay": "Media por día activo",
-      "aiShare": "Cuota de IA",
-      "workflowShare": "Cuota de workflows",
-      "topModuleShare": "Cuota del módulo más activo",
-      "amountPerDay": "Importe de IA por día activo"
-    }
   },
   "compare": {
     "label": "Comparar con",

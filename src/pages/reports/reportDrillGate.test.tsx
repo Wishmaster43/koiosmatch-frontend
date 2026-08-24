@@ -1,40 +1,31 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, afterEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { gateDrillClick, REPORT_DRILL_AVAILABLE } from './reportDrillGate'
+import type { DrillableReport } from './reportDrillGate'
 
 // gateDrillClick — the one place every report reads to decide whether a KPI/bar/row
-// gets a click affordance. Regression for REPORTS-DRILL-1 (2026-08-13): flow/matches/
-// recruiters/vacancies now have a live /reports/{r}/drill|advice contract and must be
-// clickable; RAPPORTEN-SUITE-1 (2026-08-14) added candidates and later flipped
-// outreach ("portie 6"); REPORTS-DRILL-2 (2026-08-15) flipped intakes after
-// re-verifying the real controller (was previously reported landed while the route
-// 422'd — checked the validation rules this time, not just the route list).
+// gets a click affordance. RAPPORTEN-DANNY10-1 shrank the vocabulary to the nine
+// surviving reports; every one of them ships with a live, verified drill contract
+// (axis drills for the fase-1 reports, the per-KPI drill for whatsapp), so today
+// the whole map reads true — the gate mechanism itself stays covered below for
+// the day a new report lands before its drill route does.
 describe('reportDrillGate', () => {
-  it('is on for the reports with a shipped drill contract', () => {
-    expect(REPORT_DRILL_AVAILABLE.flow).toBe(true)
-    expect(REPORT_DRILL_AVAILABLE.matches).toBe(true)
-    expect(REPORT_DRILL_AVAILABLE.recruiters).toBe(true)
-    expect(REPORT_DRILL_AVAILABLE.vacancies).toBe(true)
-    expect(REPORT_DRILL_AVAILABLE.candidates).toBe(true)
-    expect(REPORT_DRILL_AVAILABLE.applications).toBe(true)
-    expect(REPORT_DRILL_AVAILABLE.customers).toBe(true)
-    expect(REPORT_DRILL_AVAILABLE.outreach).toBe(true)
-    expect(REPORT_DRILL_AVAILABLE.intakes).toBe(true)
+  it('every surviving report has its drill flag on', () => {
+    for (const [report, on] of Object.entries(REPORT_DRILL_AVAILABLE)) {
+      expect(on, `${report} must carry a live drill contract`).toBe(true)
+    }
   })
 
-  it('stays off for the reports without a drill endpoint', () => {
-    expect(REPORT_DRILL_AVAILABLE.ai).toBe(false)
+  it('carries no retired report id', () => {
+    for (const retired of ['flow', 'recruiters', 'intakes', 'ai', 'workflows', 'usage', 'contacts', 'locations', 'departments']) {
+      expect(retired in REPORT_DRILL_AVAILABLE).toBe(false)
+    }
   })
 
   it('gateDrillClick returns the handler unchanged for an available report', () => {
     const handler = vi.fn()
-    expect(gateDrillClick('flow', handler)).toBe(handler)
-    expect(gateDrillClick('intakes', handler)).toBe(handler)
-  })
-
-  it('gateDrillClick returns undefined for a report without a drill endpoint', () => {
-    const handler = vi.fn()
-    expect(gateDrillClick('ai', handler)).toBeUndefined()
+    expect(gateDrillClick('matches', handler)).toBe(handler)
+    expect(gateDrillClick('whatsapp', handler)).toBe(handler)
   })
 })
 
@@ -50,6 +41,10 @@ function FakeKpiCard({ onClick }: { onClick?: () => void }) {
 }
 
 describe('reportDrillGate — wired into a click affordance', () => {
+  // The false branch has no natural member today (see above) — flip one flag for
+  // the duration of the test and restore it, so the mechanism stays pinned.
+  afterEach(() => { REPORT_DRILL_AVAILABLE.whatsapp = true })
+
   it('an available report gets a real onClick + pointer cursor and the handler fires', async () => {
     const handler = vi.fn()
     render(<FakeKpiCard onClick={gateDrillClick('vacancies', handler)} />)
@@ -61,7 +56,8 @@ describe('reportDrillGate — wired into a click affordance', () => {
 
   it('a gated report gets no onClick and no pointer cursor', () => {
     const handler = vi.fn()
-    render(<FakeKpiCard onClick={gateDrillClick('ai', handler)} />)
+    ;(REPORT_DRILL_AVAILABLE as Record<DrillableReport, boolean>).whatsapp = false
+    render(<FakeKpiCard onClick={gateDrillClick('whatsapp', handler)} />)
     const kpi = screen.getByTestId('kpi')
     expect(kpi).toHaveStyle({ cursor: 'default' })
     kpi.click()

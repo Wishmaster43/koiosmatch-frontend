@@ -62,12 +62,14 @@ describe('useReportCompare — request shape', () => {
     expect(getSpy).not.toHaveBeenCalled()
   })
 
-  it('routes ai/workflows through their own slug the same way as every other report', async () => {
+  // RAPPORTEN-DANNY10-1: ai/workflows retired with their pages — matches now
+  // proves the same "own slug" routing for a surviving report.
+  it('routes matches through its own slug the same way as every other report', async () => {
     const { result } = renderHook(
-      () => useReportCompare('ai', '2026-01-01', '2026-01-31', { kind: 'previous_period' }),
+      () => useReportCompare('matches', '2026-01-01', '2026-01-31', { kind: 'previous_period' }),
       { wrapper },
     )
     await waitFor(() => expect(result.current.loading).toBe(false))
-    expect(getSpy).toHaveBeenCalledWith('/reports/ai/compare', expect.anything())
+    expect(getSpy).toHaveBeenCalledWith('/reports/matches/compare', expect.anything())
   })
 })

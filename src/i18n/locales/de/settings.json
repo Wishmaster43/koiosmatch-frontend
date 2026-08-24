@@ -1665,7 +1665,6 @@
       "opportunities": "Chancen",
       "tasks": "Aufgaben",
       "outreach": "Anruflisten",
-      "whatsapp": "WhatsApp",
       "planning": "Planung",
       "shifts": "Schichten",
       "audit": "Audit-Protokoll",
@@ -3363,23 +3362,13 @@
       "leads": "Leads",
       "applications": "Bewerbungen",
       "customers": "Kunden",
-      "flow": "Flow",
-      "recruiters": "Recruiter",
-      "accountmanagers": "Kundenbetreuer",
       "vacancies": "Vakanzen",
       "opportunities": "Chancen",
       "tasks": "Aufgaben",
       "matches": "Matches",
-      "intakes": "Intakes",
       "outreach": "Anruflisten",
       "whatsapp": "WhatsApp",
-      "contacts": "Kontakte",
-      "locations": "Standorte",
-      "departments": "Abteilungen",
-      "ai": "Koios AI",
-      "workflows": "Workflows",
-      "prospects": "Interessenten",
-      "usage": "Verbrauch (gesamt)"
+      "prospects": "Interessenten"
     }
   },
   "freeEntry": {
