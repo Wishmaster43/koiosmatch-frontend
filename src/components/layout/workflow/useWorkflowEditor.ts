@@ -240,9 +240,13 @@ export function useWorkflowEditor({ workflow, onSave, initialRunId = null }: {
       setEdges(eds => {
         const edge = eds.find(e => e.id === edgeId)
         if (!edge) return eds
+        // CONSENT-BEHOUD-1: the split's BRANCH side keeps the original edge's
+        // data (filters like whatsapp_consent, label, raw route handles) — a
+        // bare mkEdge here silently destroyed the seeded consent condition the
+        // moment the branch became visible (Opus wave-B1 finding).
         return [
           ...eds.filter(e => e.id !== edgeId),
-          mkEdge(edge.source, newId),
+          { ...mkEdge(edge.source, newId), data: edge.data },
           mkEdge(newId, edge.target),
         ]
       })
@@ -287,7 +291,10 @@ export function useWorkflowEditor({ workflow, onSave, initialRunId = null }: {
       const outEdge = eds.find(e => e.source === nodeId)
       const without = eds.filter(e => e.source !== nodeId && e.target !== nodeId)
       if (inEdge && outEdge) {
-        return [...without, mkEdge(inEdge.source, outEdge.target)]
+        // CONSENT-BEHOUD-1: re-linking keeps the INCOMING edge's data (filters/
+        // label/raw handles) so deleting a mid-branch node never silently drops
+        // the branch condition.
+        return [...without, { ...mkEdge(inEdge.source, outEdge.target), data: inEdge.data }]
       }
       return without
     })

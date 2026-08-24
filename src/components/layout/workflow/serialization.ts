@@ -39,11 +39,36 @@ export function stepsToFlow(steps: WorkflowStep[]): { nodes: FlowNode[]; edges: 
     height:   NODE_H,
   }))
   const hasGraph = steps.some(s => Array.isArray(s.next) && s.next.length)
+  // ModuleNode only renders <Handle id="in"> / <Handle id="out"> (canvas.tsx:155/281) —
+  // ReactFlow silently DROPS any edge whose sourceHandle/targetHandle doesn't match a
+  // handle on the node. Seeded router branches carry 'route-1'/'route-2'/'route-3' as
+  // source_handle (BE NativeWorkflowTemplates.php), which would vanish on render even
+  // though both endpoint nodes exist. Normalize to the node's actual handle id here, but
+  // keep the raw value on the edge's data so a future multi-handle router node can
+  // restore the real port.
   const edges: FlowEdge[] = hasGraph
-    ? steps.flatMap(s => (s.next ?? []).map(n => ({
-        ...mkEdge(s.id, n.target, n.source_handle ?? 'out', n.target_handle ?? 'in'),
-        data: (n.filters || n.label) ? { filters: n.filters, label: n.label ?? undefined } : undefined,
-      })))
+    ? steps.flatMap(s => (s.next ?? []).map(n => {
+        const rawSource = n.source_handle ?? 'out'
+        const rawTarget = n.target_handle ?? 'in'
+        const hasData = n.filters || n.label || rawSource !== 'out' || rawTarget !== 'in'
+        return {
+          // ModuleNode has no port other than 'out'/'in', so every rendered edge
+          // uses those regardless of the raw handle (preserved below in data).
+          ...mkEdge(s.id, n.target, 'out', 'in'),
+          // The edge ID keeps the RAW handle: two branches from one router to
+          // the SAME target must never collapse into one React key (they would
+          // render as a single edge and silently hide the second condition).
+          id: `e_${s.id}_${rawSource}_${n.target}`,
+          data: hasData
+            ? {
+                filters: n.filters,
+                label: n.label ?? undefined,
+                ...(rawSource !== 'out' ? { sourceHandleRaw: rawSource } : {}),
+                ...(rawTarget !== 'in' ? { targetHandleRaw: rawTarget } : {}),
+              }
+            : undefined,
+        }
+      }))
     : steps.slice(0, -1).map((s, i) => mkEdge(s.id, steps[i + 1].id))
   // Drop dangling edges (an endpoint that isn't a node — e.g. a stale client id
   // saved in `next`): ReactFlow spams error#008 for every unresolvable edge.
@@ -77,8 +102,10 @@ export function flowToSteps(nodes: FlowNode[], edges: FlowEdge[]): WorkflowStep[
       target:        e.target,
       filters:       e.data?.filters ?? null,
       label:         e.data?.label ?? null,
-      source_handle: (e.sourceHandle as string | undefined) ?? 'out',
-      target_handle: (e.targetHandle as string | undefined) ?? 'in',
+      // Restore the original seeded port (e.g. 'route-1') from the preserved raw
+      // value when present, so a save doesn't collapse a router branch to 'out'.
+      source_handle: e.data?.sourceHandleRaw ?? (e.sourceHandle as string | undefined) ?? 'out',
+      target_handle: e.data?.targetHandleRaw ?? (e.targetHandle as string | undefined) ?? 'in',
     })),
   }))
 }

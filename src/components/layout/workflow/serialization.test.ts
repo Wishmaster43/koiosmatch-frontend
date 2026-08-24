@@ -107,7 +107,10 @@ describe('stepsToFlow', () => {
     expect(edges).toEqual([mkEdge('a', 'b'), mkEdge('b', 'c')])
   })
 
-  it('prefers explicit `next` connections over the linear fallback, preserving Router branches (source_handle)', () => {
+  it('prefers explicit `next` connections over the linear fallback, rendering both Router branches (normalized to the node\'s "out" port)', () => {
+    // ModuleNode only exposes a single 'out' handle, so both branches render on it —
+    // the original branch id is kept on edge.data.sourceHandleRaw (see the
+    // WF-ROUTER-DROP-1 test below), not on the rendered sourceHandle itself.
     const steps: WorkflowStep[] = [
       { id: 'a', type: 'router', next: [{ target: 'b', source_handle: 'branch-1' }, { target: 'c', source_handle: 'branch-2' }] },
       { id: 'b', type: 'email' },
@@ -115,8 +118,10 @@ describe('stepsToFlow', () => {
     ]
     const { edges } = stepsToFlow(steps)
     expect(edges).toHaveLength(2)
-    expect(edges.find(e => e.target === 'b')?.sourceHandle).toBe('branch-1')
-    expect(edges.find(e => e.target === 'c')?.sourceHandle).toBe('branch-2')
+    expect(edges.find(e => e.target === 'b')?.sourceHandle).toBe('out')
+    expect(edges.find(e => e.target === 'c')?.sourceHandle).toBe('out')
+    expect(edges.find(e => e.target === 'b')?.data).toMatchObject({ sourceHandleRaw: 'branch-1' })
+    expect(edges.find(e => e.target === 'c')?.data).toMatchObject({ sourceHandleRaw: 'branch-2' })
   })
 
   it('carries a connection\'s filters + label onto the edge data when present', () => {
@@ -131,6 +136,33 @@ describe('stepsToFlow', () => {
   it('omits edge.data entirely when a connection has neither filters nor a label', () => {
     const steps: WorkflowStep[] = [{ id: 'a', type: 'router', next: [{ target: 'b' }] }, { id: 'b', type: 'email' }]
     expect(stepsToFlow(steps).edges[0].data).toBeUndefined()
+  })
+
+  // WF-ROUTER-DROP-1: ModuleNode only renders <Handle id="in">/<Handle id="out">
+  // (canvas.tsx:155/281) — ReactFlow silently drops any edge whose handle id doesn't
+  // match a node handle. Seeded router templates carry 'route-1'/'route-2'/'route-3' as
+  // source_handle (BE NativeWorkflowTemplates.php), so those edges must render on the
+  // node's real 'out'/'in' ports while the raw seeded id is preserved for later restore.
+  it('normalizes a seeded route-N source_handle to the node\'s real "out" port so the edge renders', () => {
+    const steps: WorkflowStep[] = [
+      { id: 'a', type: 'router', next: [
+        { target: 'b', source_handle: 'route-1', label: 'WhatsApp-toestemming', filters: { conditions: [c('x')], logic: 'AND' } },
+        { target: 'c', source_handle: 'route-2' },
+        { target: 'd', source_handle: 'route-3' },
+      ] },
+      { id: 'b', type: 'email' }, { id: 'c', type: 'whatsapp' }, { id: 'd', type: 'sms' },
+    ]
+    const { edges } = stepsToFlow(steps)
+    expect(edges).toHaveLength(3)
+    edges.forEach(e => { expect(e.sourceHandle).toBe('out'); expect(e.targetHandle).toBe('in') })
+    // The raw seeded handle is preserved on edge data for a future multi-port node,
+    // and the filter/label survive so the edge's violet filter indicator still shows.
+    const routed = edges.find(e => e.target === 'b')!
+    expect(routed.data).toMatchObject({
+      sourceHandleRaw: 'route-1', label: 'WhatsApp-toestemming',
+      filters: { conditions: [c('x')], logic: 'AND' },
+    })
+    expect(edges.find(e => e.target === 'c')?.data).toMatchObject({ sourceHandleRaw: 'route-2' })
   })
 
   it('drops a dangling edge whose target step no longer exists (a stale saved client id)', () => {
@@ -163,6 +195,12 @@ describe('flowToSteps', () => {
     expect(steps.find(s => s.id === 'a')?.next).toEqual([{ target: 'b', filters: null, label: null, source_handle: 'out', target_handle: 'in' }])
   })
 
+  it('restores the raw seeded source_handle from edge.data.sourceHandleRaw on save, instead of the normalized "out"', () => {
+    const edges: FlowEdge[] = [{ id: 'e', source: 'a', target: 'b', sourceHandle: 'out', targetHandle: 'in', type: 'addable', data: { sourceHandleRaw: 'route-1' } }]
+    const steps = flowToSteps([node('a', 0), node('b', 220)], edges)
+    expect(steps.find(s => s.id === 'a')?.next).toEqual([{ target: 'b', filters: null, label: null, source_handle: 'route-1', target_handle: 'in' }])
+  })
+
   it('never persists a connection to a node id that no longer exists', () => {
     const edges: FlowEdge[] = [{ id: 'e', source: 'a', target: 'ghost', type: 'addable' }]
     expect(flowToSteps([node('a', 0)], edges)[0].next).toEqual([])
@@ -182,6 +220,40 @@ describe('flowToSteps', () => {
 // ── round-trip: steps -> flow -> steps ────────────────────────────────────────
 // This is the C-27 backend contract: step ids must stay stable across a save/reload
 // cycle, or a Router's branches collapse to a straight line on the next open.
+// The violet filter indicator on a rendered edge is driven by ONE function:
+// countEdgeFilterConditions (canvas.tsx:335-337 sets stroke/width off its > 0).
+// Pin it on the REAL seeded shape (NativeWorkflowTemplates: a FLAT filter array),
+// so the now-visible router branches provably carry their indicator. A full
+// AddableEdge render needs a live ReactFlow viewport (e2e territory) — the
+// function-level pin covers the decision the render reads.
+describe('edge filter indicator source (countEdgeFilterConditions)', () => {
+  it('counts the seeded flat-array consent filter as > 0 (drives the violet edge)', () => {
+    expect(countEdgeFilterConditions([{ field: 'whatsapp_consent', operator: '=', value: true }])).toBeGreaterThan(0)
+  })
+  it('counts empty/absent filters as 0 (plain edge)', () => {
+    expect(countEdgeFilterConditions(undefined)).toBe(0)
+    expect(countEdgeFilterConditions([])).toBe(0)
+  })
+})
+
+// Two branches from ONE router to the SAME target must keep distinct edge ids —
+// with both normalized to the 'out' handle they would otherwise collapse into
+// one React key and silently hide the second condition.
+describe('router branches to the same target keep distinct ids', () => {
+  it('renders two edges with different ids for route-1/route-2 to one target', () => {
+    const { edges } = stepsToFlow([
+      { id: 'r', type: 'candidates', config: {}, position: { x: 0, y: 0 }, next: [
+        { target: 'w', source_handle: 'route-1', filters: [{ field: 'a', operator: '=', value: 1 }] },
+        { target: 'w', source_handle: 'route-2', filters: [{ field: 'b', operator: '=', value: 2 }] },
+      ] },
+      { id: 'w', type: 'whatsapp', config: {}, position: { x: 200, y: 0 } },
+    ])
+    const toW = edges.filter(e => e.target === 'w')
+    expect(toW).toHaveLength(2)
+    expect(new Set(toW.map(e => e.id)).size).toBe(2)
+  })
+})
+
 describe('round-trip: steps -> flow -> steps', () => {
   it('preserves ids, positions and a Router\'s multiple branches (incl. per-branch filters)', () => {
     const original: WorkflowStep[] = [
@@ -202,6 +274,18 @@ describe('round-trip: steps -> flow -> steps', () => {
     expect(a.next?.find(n => n.target === 'c')).toMatchObject({ source_handle: 'branch-2' })
     expect(roundTripped.find(s => s.id === 'b')?.position).toEqual({ x: 220, y: -80 })
     expect(roundTripped.find(s => s.id === 'b')?.config).toEqual({ subject: 'Hi' })
+  })
+
+  it('a seeded route-N branch survives a full load -> render -> save round-trip byte-identical', () => {
+    const original: WorkflowStep[] = [
+      { id: 'a', type: 'router', next: [
+        { target: 'b', source_handle: 'route-1', target_handle: 'in', label: 'WhatsApp-toestemming', filters: { conditions: [c('x')], logic: 'AND' } },
+      ] },
+      { id: 'b', type: 'email' },
+    ]
+    const { nodes, edges } = stepsToFlow(original)
+    const roundTripped = flowToSteps(nodes, edges)
+    expect(roundTripped.find(s => s.id === 'a')?.next).toEqual(original[0].next)
   })
 
   it('a second round-trip (flow -> steps -> flow) is idempotent — no drift across repeated save/reload', () => {

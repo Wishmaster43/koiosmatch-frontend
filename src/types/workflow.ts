@@ -105,7 +105,10 @@ export interface FlowEdge {
   targetHandle?: string
   type?: string
   // filters = the route condition; label = the route name (Router, Make-style).
-  data?: { filters?: unknown; label?: string }
+  // sourceHandleRaw/targetHandleRaw preserve the ORIGINAL seeded handle id (e.g.
+  // 'route-1') when it was normalized to 'out'/'in' for rendering, so a future
+  // multi-handle router node can restore the real port on load.
+  data?: { filters?: unknown; label?: string; sourceHandleRaw?: string; targetHandleRaw?: string }
   [k: string]: unknown
 }
 

@@ -97,8 +97,18 @@ export function denormalizeWorkflow(wf: Workflow) {
       label:       s.label ?? null,
       order:       i,
       position:    s.position ?? null,
-      // Outgoing connections (graph): target = step id, optional edge filter.
-      connections: (s.next ?? []).map(n => ({ target: n.target, filters: n.filters ?? null })),
+      // Outgoing connections (graph): target = step id, edge filter, label, and the
+      // ORIGINAL handle ids. Dropping label/handles here (as before) collapsed every
+      // Router branch to the default 'out' port and lost its name on save — the API
+      // stores these verbatim (WorkflowWriter.php:102) and emits them back unchanged
+      // (app/Http/Resources/Workflow/WorkflowResource.php:56-64), so the round-trip must be lossless on our side too.
+      connections: (s.next ?? []).map(n => ({
+        target:        n.target,
+        filters:       n.filters ?? null,
+        label:         n.label ?? null,
+        source_handle: n.source_handle ?? 'out',
+        target_handle: n.target_handle ?? 'in',
+      })),
     })),
   }
 }

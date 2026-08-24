@@ -133,6 +133,46 @@ describe('useWorkflowEditor · insertModule', () => {
     expect(result.current.nodesWithFirst.find(n => n.id === 'n3')?.position.x).toBe(660) // shifted +220
   })
 
+  // CONSENT-BEHOUD-1: splitting a BRANCH edge keeps the branch's own data —
+  // the seeded consent filter, label and raw route handle must survive an
+  // insert-on-edge, or one click destroys the condition and the next save
+  // persists an unconditional send (Opus wave-B1 finding).
+  it('keeps the edge data (filters/label/raw handle) on the branch side of a split', async () => {
+    const branchSteps: WorkflowStep[] = [
+      { id: 'r1', type: 'candidates', config: {}, position: { x: 0, y: 180 }, next: [
+        { target: 'w1', source_handle: 'route-1', label: 'WhatsApp-toestemming',
+          filters: [{ field: 'whatsapp_consent', operator: '=', value: true }] },
+      ] },
+      { id: 'w1', type: 'whatsapp', config: {}, position: { x: 440, y: 180 } },
+    ]
+    const { result } = setup(branchSteps)
+    await waitFor(() => expect(result.current.edges).toHaveLength(1))
+    const edge = result.current.edges[0]
+    expect(edge.data?.filters).toEqual([{ field: 'whatsapp_consent', operator: '=', value: true }])
+    act(() => result.current.insertModule('email', edge.id))
+    const branchSide = result.current.edges.find(e => e.source === 'r1')!
+    expect(branchSide.data?.filters).toEqual([{ field: 'whatsapp_consent', operator: '=', value: true }])
+    expect(branchSide.data?.label).toBe('WhatsApp-toestemming')
+    expect(branchSide.data?.sourceHandleRaw).toBe('route-1')
+  })
+
+  it('keeps the incoming edge data when deleting a mid-branch node re-links around it', async () => {
+    const branchSteps: WorkflowStep[] = [
+      { id: 'r1', type: 'candidates', config: {}, position: { x: 0, y: 180 }, next: [
+        { target: 'm1', source_handle: 'route-2', label: 'E-mail-tak',
+          filters: [{ field: 'email_consent', operator: '=', value: true }] },
+      ] },
+      { id: 'm1', type: 'email', config: {}, position: { x: 220, y: 180 }, next: [{ target: 'w1' }] },
+      { id: 'w1', type: 'whatsapp', config: {}, position: { x: 440, y: 180 } },
+    ]
+    const { result } = setup(branchSteps)
+    await waitFor(() => expect(result.current.edges).toHaveLength(2))
+    act(() => result.current.deleteNode('m1'))
+    const relinked = result.current.edges.find(e => e.source === 'r1' && e.target === 'w1')!
+    expect(relinked.data?.filters).toEqual([{ field: 'email_consent', operator: '=', value: true }])
+    expect(relinked.data?.sourceHandleRaw).toBe('route-2')
+  })
+
   // DEFAULT-PERSIST-1: a dropped node's config carries its schema defaults from the
   // moment it is created — the ENGINE reads this, not just what the panel displays.
   it('seeds a newly created node with its schema defaults (append path)', async () => {

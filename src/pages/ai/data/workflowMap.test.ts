@@ -134,9 +134,23 @@ describe('denormalizeWorkflow', () => {
     expect(payload.steps).toEqual([
       {
         id: 'a', module_type: 'candidates', config: { limit: 5 }, label: null, order: 0, position: { x: 0, y: 0 },
-        connections: [{ target: 'b', filters: { conditions: [], logic: 'AND' } }],
+        connections: [{ target: 'b', filters: { conditions: [], logic: 'AND' }, label: null, source_handle: 'out', target_handle: 'in' }],
       },
       { id: null, module_type: 'email', config: {}, label: null, order: 1, position: null, connections: [] },
+    ])
+  })
+
+  // Router branch contract: a connection's label/source_handle/target_handle must
+  // survive denormalize verbatim — the previous mapper dropped them, which collapsed
+  // every seeded Router branch to the default 'out'/'in' port on the very next save.
+  it('preserves a connection\'s label/source_handle/target_handle (Router branch round-trip)', () => {
+    const payload = denormalizeWorkflow(base({
+      steps: [{ id: 'a', type: 'router', next: [
+        { target: 'b', filters: null, label: 'WhatsApp-toestemming', source_handle: 'route-1', target_handle: 'in' },
+      ] }],
+    }))
+    expect(payload.steps[0].connections).toEqual([
+      { target: 'b', filters: null, label: 'WhatsApp-toestemming', source_handle: 'route-1', target_handle: 'in' },
     ])
   })
 
