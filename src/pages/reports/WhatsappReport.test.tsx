@@ -194,4 +194,12 @@ describe('WhatsappReport (RAPPORTEN-WHATSAPP-FE-1)', () => {
     expect(screen.getByText('Actief (7 dagen)')).toBeInTheDocument()
     expect(screen.getByText('Totaal gesprekken')).toBeInTheDocument()
   })
+
+  // REPORTGRID-1 item 4: whatsapp has NO backend compare slug
+  // (reportCompareSupport.ts deliberately omits it), so the control never renders.
+  it('never renders the ReportCompareControl (no backend compare support)', () => {
+    mockUseWhatsappReport.mockReturnValue({ data, loading: false, error: false })
+    renderReport()
+    expect(screen.queryByText('Vergelijk met')).not.toBeInTheDocument()
+  })
 })

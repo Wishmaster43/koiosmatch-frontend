@@ -412,17 +412,12 @@ describe('OutreachReport (RAPPORTEN-SUITE-1 portie 6, bellijsten report)', () =>
     expect(screen.getAllByText('1').length).toBeGreaterThan(0)
   })
 
-  // RAPPORTEN-DRILLLIST-1: every axis section shows its own always-visible list
-  // beside the chart, seeded with a real request on mount — never a blank panel.
-  it('renders a drill list beside each axis chart, defaulted on mount', () => {
+  // REPORTGRID-1: the shared drill drawer opens only on click, never
+  // auto-defaulted on mount.
+  it('never fires a drill request before any segment is clicked', () => {
     mockUseOutreachReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
-    // The campaign axis's top segment (camp-1, 20) seeds its own list on mount.
-    expect(getSpy).toHaveBeenCalledWith('/reports/outreach/drill',
-      expect.objectContaining({ params: { campaign: 'camp-1', period: 'month' } }))
-    // The channel axis independently seeds its own list with its own top segment.
-    expect(getSpy).toHaveBeenCalledWith('/reports/outreach/drill',
-      expect.objectContaining({ params: { channel: 'phone', period: 'month' } }))
+    expect(getSpy).not.toHaveBeenCalled()
   })
 
   // Clicking a segment in one chart must never change another chart's list — each
@@ -442,5 +437,13 @@ describe('OutreachReport (RAPPORTEN-SUITE-1 portie 6, bellijsten report)', () =>
     // it stayed exactly as mount left it.
     expect(getSpy.mock.calls.some(c => c[0] === '/reports/outreach/drill'
       && (c[1] as { params: Record<string, unknown> }).params.channel === 'phone')).toBe(false)
+  })
+
+  // REPORTGRID-1 item 4: outreach has a real backend compare slug
+  // (reportCompareSupport.ts), so the shared ReportCompareControl renders.
+  it('renders the ReportCompareControl (backend-registered compare slug)', () => {
+    mockUseOutreachReport.mockReturnValue({ data, loading: false, error: false })
+    renderReport()
+    expect(screen.getByText('Vergelijk met')).toBeInTheDocument()
   })
 })

@@ -12,7 +12,9 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import ReportKpiBand from './ReportKpiBand'
 import ReportStateBlock from './ReportStateBlock'
-import { ReportSectionCard, ReportSectionCardBody, ReportSection } from './ReportSectionCard'
+import { reportCardStyle as card } from './ReportSectionCard'
+import ReportGrid from './ReportGrid'
+import ReportChartCard from './ReportChartCard'
 import type { KpiSpec } from '@/components/insights/InsightsRow'
 import ReportDrillDrawer from './ReportDrillDrawer'
 import type { DrillSpec } from './ReportDrillDrawer'
@@ -28,6 +30,12 @@ import type { ReportPeriod, CandidateTimeseriesPoint } from '@/types/analytics'
 import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
 import { getReportKpiCatalog, getReportKpiDefaultOrder, reportKpiSettingsKey } from './kpiCatalog'
 import { resolveReportKpiOrder } from './resolveReportKpiOrder'
+import { getCompareSlug } from './reportCompareSupport'
+import { useReportCompare } from './useReportCompare'
+import ReportCompareControl from './ReportCompareControl'
+import ReportCompareMetric from './ReportCompareMetric'
+import { COMPARE_OFF } from './reportCompareMode'
+import type { ReportCompareMode } from './reportCompareMode'
 import SharedStatTile from '@/components/ui/StatTile'
 import { BodyText } from '@/components/ui/typography'
 
@@ -46,6 +54,13 @@ export default function MatchesReport({ period, filters = EMPTY_REPORT_FILTERS }
   const { formatDate } = useDateFormat()
   const { data, loading, error, refetch } = useMatchesReport(period, filters)
   const isEmpty = !loading && !error && (!data || data.total === 0)
+
+  // RAPPORT-COMPARE-1: mirrors CandidatesReport's hosting exactly.
+  const compareSlug = getCompareSlug('matches')
+  const [compareMode, setCompareMode] = useState<ReportCompareMode>(COMPARE_OFF)
+  const compareBaseParams = { ...buildReportQueryParams(period, 'matches', filters) }
+  const { data: compareData } = useReportCompare(compareSlug, data?.from, data?.to, compareMode, compareBaseParams)
+  const totalCompare = compareMode.kind !== 'off' ? (compareData?.total as { current: number; previous: number; delta: number; delta_pct: number | null } | undefined) : undefined
 
   // Drill-down: clicking a KPI/segment/tile/bucket explains it (breakdown + the
   // matches behind it + Koios advice). Exactly one XOR param per open drill —
@@ -165,6 +180,7 @@ export default function MatchesReport({ period, filters = EMPTY_REPORT_FILTERS }
   const kpiByKey: Record<string, KpiSpec> = {
     total:  { key: 'total',  label: t('matches.total'),     value: data?.total ?? 0,
       active: drill != null && openAxis == null,
+      sub: totalCompare ? <ReportCompareMetric metric={totalCompare} polarity="up-good" /> : undefined,
       onClick: gateDrillClick('matches', () => openMatches(t('matches.total'), data?.total ?? 0)) },
     funnel: { key: 'funnel', label: t('matches.viaFunnel'), value: data?.by_origin.funnel ?? 0,
       active: openParams?.origin === 'funnel',
@@ -219,6 +235,13 @@ export default function MatchesReport({ period, filters = EMPTY_REPORT_FILTERS }
 
   return (
     <div>
+      {/* RAPPORT-COMPARE-1: mirrors CandidatesReport's hosting exactly. */}
+      {!loading && !error && !isEmpty && compareSlug && (
+        <div style={{ marginBottom: 10 }}>
+          <ReportCompareControl mode={compareMode} onChange={setCompareMode} />
+        </div>
+      )}
+
       {/* KPI strip — above the tabs (candidate-page order: KPIs first) */}
       {!loading && !error && !isEmpty && data && (
         <ReportKpiBand kpis={kpis} notice={fellBack ? t('matches.kpiOrderFellBack') : undefined} />
@@ -233,35 +256,34 @@ export default function MatchesReport({ period, filters = EMPTY_REPORT_FILTERS }
         </BodyText>
       )}
 
-      {/* One outer section-card holding the state block and, on success, the
-          gap:24 stack of sections — same shape as every other report page. */}
-      <ReportSectionCard>
-        {(loading || error || isEmpty) && (
+      {(loading || error || isEmpty) && (
+        <div style={{ ...card, overflow: 'hidden' }}>
           <ReportStateBlock
             loading={loading} error={error} empty={isEmpty}
             loadingLabel={t('matches.loading')} errorLabel={t('matches.error')} emptyLabel={t('matches.empty')}
             onRetry={() => refetch()}
           />
-        )}
+        </div>
+      )}
 
-        {!loading && !error && !isEmpty && data && (
-          <ReportSectionCardBody>
-            {/* Matches over time — week/day timeseries, bucket set server-side;
-                every bar drills on its own date key (portie 7). */}
-            <ReportSection title={t('matches.series')}>
-              <ReportTimeseriesChart series={data.timeseries.series} onPick={onSeriesPick} />
-            </ReportSection>
+      {!loading && !error && !isEmpty && data && (
+        <ReportGrid>
+          {/* Matches over time — week/day timeseries, bucket set server-side;
+              every bar drills on its own date key (portie 7). */}
+          <ReportChartCard span={2} title={t('matches.series')}
+            chart={<ReportTimeseriesChart series={data.timeseries.series} onPick={onSeriesPick} />} />
 
-            {/* Soort-as (MATCH-SOORT-1): by_contract_form bars, sums to total incl. the
-                'none' sentinel and any orphaned slug — SegmentBars needs no special-casing. */}
-            <ReportSection title={t('matches.axes.contractForm')}>
-              <SegmentBars max={contractFormMax} onPick={onContractFormPick}
-                items={contractFormSegs.map(s => ({ key: s.value, label: s.label, count: s.count, color: s.color }))} />
-            </ReportSection>
+          {/* Soort-as (MATCH-SOORT-1): by_contract_form bars, sums to total incl. the
+              'none' sentinel and any orphaned slug — SegmentBars needs no special-casing. */}
+          <ReportChartCard title={t('matches.axes.contractForm')} chart={
+            <SegmentBars max={contractFormMax} onPick={onContractFormPick}
+              items={contractFormSegs.map(s => ({ key: s.value, label: s.label, count: s.count, color: s.color }))} />
+          } />
 
-            {/* Contract-status tiles (under_contract, MATCH-VOCABULAIRE-1): the four
-                tiles sum to the report total and each drills contract_status=<key>. */}
-            <ReportSection title={t('matches.placements.title')}>
+          {/* Contract-status tiles (under_contract, MATCH-VOCABULAIRE-1): the four
+              tiles sum to the report total and each drills contract_status=<key>. */}
+          <ReportChartCard title={t('matches.placements.title')} chart={
+            <>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12 }}>
                 {CONTRACT_STATUS_TILES.map(key => (
                   <StatTile key={key} label={t(`matches.placements.${key}`)} value={tileValue(key)} accent={key === 'active'}
@@ -271,17 +293,17 @@ export default function MatchesReport({ period, filters = EMPTY_REPORT_FILTERS }
               {data.avg_placement_duration_days == null && (
                 <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 14 }}>{t('matches.durationNote')}</p>
               )}
-            </ReportSection>
+            </>
+          } />
 
-            {/* Terminations by stop reason — zero-filled over every active reason;
-                each bar drills stop_reason=<value> (fifth XOR leg, 7925ce15). */}
-            <ReportSection title={t('matches.terminations.title')}>
-              <SegmentBars max={terminationsMax} onPick={openReason}
-                items={terminationSegs.map(s => ({ key: s.value, label: s.label, count: s.count, color: s.color }))} />
-            </ReportSection>
-          </ReportSectionCardBody>
-        )}
-      </ReportSectionCard>
+          {/* Terminations by stop reason — zero-filled over every active reason;
+              each bar drills stop_reason=<value> (fifth XOR leg, 7925ce15). */}
+          <ReportChartCard title={t('matches.terminations.title')} chart={
+            <SegmentBars max={terminationsMax} onPick={openReason}
+              items={terminationSegs.map(s => ({ key: s.value, label: s.label, count: s.count, color: s.color }))} />
+          } />
+        </ReportGrid>
+      )}
 
       {/* Dynamic drill-down: explains the clicked number + Koios AI advice */}
       <ReportDrillDrawer drill={drill} onClose={() => setDrill(null)} />

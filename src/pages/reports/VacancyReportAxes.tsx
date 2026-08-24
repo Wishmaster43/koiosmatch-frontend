@@ -4,19 +4,19 @@
  * shared SegmentBars (never forked). Extracted from VacanciesReport to keep the
  * container thin (§3): the parent owns the DrillSpec + drawer, this component
  * only reports which segment was picked together with its XOR param.
+ * REPORTGRID-1: each block is its own ReportChartCard, laid out by the caller's
+ * ReportGrid — this component renders a React fragment of grid items, not its
+ * own outer card, so the caller controls the grid.
  */
-import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import SegmentBars from './SegmentBars'
 import ReportTimeseriesChart from './ReportTimeseriesChart'
+import ReportChartCard from './ReportChartCard'
 import { gateDrillClick } from './reportDrillGate'
 import type {
   VacanciesReportData, CandidateSegment, CandidateOwnerSegment,
   ApplicationTopSegment, CandidateTimeseriesPoint,
 } from '@/types/analytics'
-
-const head: CSSProperties = { fontSize: 12, fontWeight: 600, textTransform: 'uppercase',
-  letterSpacing: '0.04em', color: 'var(--text-muted)', margin: 0 }
 
 // The plain single-value XOR axes; the key doubles as the drill/advice query param.
 type Axis = 'status' | 'customer' | 'function' | 'industry' | 'branch'
@@ -58,46 +58,21 @@ export default function VacancyReportAxes({ data, onSegment, onBucket }: {
   })
 
   return (
-    <div style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 24 }}>
+    <>
       {/* Created over time — week/day timeseries, bucket set server-side. */}
-      <section>
-        <h3 style={{ ...head, marginBottom: 10 }}>{t('vacancies.series')}</h3>
-        <ReportTimeseriesChart series={data.timeseries.series} onPick={onSeriesPick} />
-      </section>
+      <ReportChartCard span={2} title={t('vacancies.series')}
+        chart={<ReportTimeseriesChart series={data.timeseries.series} onPick={onSeriesPick} />} />
 
-      <section>
-        <h3 style={{ ...head, marginBottom: 10 }}>{t('customers.axes.status')}</h3>
-        {bars('status', data.by_status)}
-      </section>
-
-      <section>
-        <h3 style={{ ...head, marginBottom: 10 }}>{t('applications.axes.customer')}</h3>
-        {bars('customer', data.by_customer)}
-      </section>
-
+      <ReportChartCard title={t('customers.axes.status')} chart={bars('status', data.by_status)} />
+      <ReportChartCard title={t('applications.axes.customer')} chart={bars('customer', data.by_customer)} />
       {/* Function is a raw-string axis: the string is drill value AND label. */}
-      <section>
-        <h3 style={{ ...head, marginBottom: 10 }}>{t('intakes.by.function')}</h3>
-        {bars('function', data.by_function)}
-      </section>
-
-      <section>
-        <h3 style={{ ...head, marginBottom: 10 }}>{t('customers.axes.industry')}</h3>
-        {bars('industry', data.by_industry)}
-      </section>
-
-      <section>
-        <h3 style={{ ...head, marginBottom: 10 }}>{t('customers.axes.owner')}</h3>
-        {ownerBars(data.by_owner)}
-      </section>
-
+      <ReportChartCard title={t('intakes.by.function')} chart={bars('function', data.by_function)} />
+      <ReportChartCard title={t('customers.axes.industry')} chart={bars('industry', data.by_industry)} />
+      <ReportChartCard title={t('customers.axes.owner')} chart={ownerBars(data.by_owner)} />
       {/* VESTIGING-2: by_branch groups via the CUSTOMER's mirrored branch (not any
           vacancy field) and drills through the REPORT drill's `branch` param — never
           the /vacancies list filter. */}
-      <section>
-        <h3 style={{ ...head, marginBottom: 10 }}>{t('customers.axes.branch')}</h3>
-        {bars('branch', data.by_branch)}
-      </section>
-    </div>
+      <ReportChartCard title={t('customers.axes.branch')} chart={bars('branch', data.by_branch)} />
+    </>
   )
 }

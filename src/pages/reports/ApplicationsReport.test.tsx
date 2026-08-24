@@ -358,37 +358,25 @@ describe('ApplicationsReport (RAPPORTEN-SUITE-1 portie 2)', () => {
     expect(call?.[1].params).not.toHaveProperty('bucket')
   })
 
-  // RAPPORTEN-DRILLLIST-1: every axis section shows its own always-visible list
-  // beside the chart, seeded with a real request on mount — never a blank panel.
-  it('renders a drill list beside each axis chart, defaulted on mount', () => {
+  // REPORTGRID-1: the shared drill drawer opens only on click, never
+  // auto-defaulted on mount.
+  it('never fires a drill request before any segment is clicked', () => {
     mockUseApplicationsReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
-    // The stage axis's top segment (Applied, 10) seeds its own list on mount.
-    expect(getSpy).toHaveBeenCalledWith('/reports/applications/drill',
-      expect.objectContaining({ params: { stage: 'applied', period: 'month' } }))
-    // The customer axis independently seeds its own list with its own top segment.
-    expect(getSpy).toHaveBeenCalledWith('/reports/applications/drill',
-      expect.objectContaining({ params: { customer: 'c1', period: 'month' } }))
-    // The funnel-bucket section seeds its own list with its own top segment.
-    expect(getSpy).toHaveBeenCalledWith('/reports/applications/drill',
-      expect.objectContaining({ params: { bucket: 'active', period: 'month' } }))
+    expect(getSpy).not.toHaveBeenCalled()
   })
 
-  // Clicking a segment in ONE chart never changes another chart's list — each
-  // section keeps its own independent drill state.
-  it('clicking a segment in one chart never changes another chart\'s list', async () => {
+  // Clicking a segment in a different chart REPLACES the shared drawer's
+  // content — one drawer for the whole page, not one list per section.
+  it('clicking a segment in a different chart replaces the shared drawer', async () => {
     const user = userEvent.setup()
     mockUseApplicationsReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
-    getSpy.mockClear()
-    // "Geen klant" is not the top customer segment (Yesway Flex is), so it is
-    // guaranteed to differ from the mount default and fire a fresh request.
     await user.click(screen.getByText('Geen klant'))
+    getSpy.mockClear()
+    await user.click(screen.getByText('Applied'))
     expect(getSpy).toHaveBeenCalledWith('/reports/applications/drill',
-      expect.objectContaining({ params: { customer: 'none', period: 'month' } }))
-    // The stage section was never re-fetched by the customer click.
-    expect(getSpy).not.toHaveBeenCalledWith('/reports/applications/drill',
-      expect.objectContaining({ params: expect.objectContaining({ stage: expect.anything() }) }))
+      expect.objectContaining({ params: { stage: 'applied', period: 'month' } }))
   })
 
   // RAPPORT-APPS-VERDIEPING-1: 'applications' is now a 'fixed' family scope
@@ -397,5 +385,13 @@ describe('ApplicationsReport (RAPPORTEN-SUITE-1 portie 2)', () => {
     const keys = getReportKpiCatalog('applications').map(c => c.key)
     expect(keys).toEqual(['total', 'new', 'active', 'matched', 'rejected', 'conversionPct',
       'avgDaysToMatch', 'tooLongInStage', 'missingAppointment'])
+  })
+
+  // REPORTGRID-1 item 4: applications has a real backend compare slug
+  // (reportCompareSupport.ts), so the shared ReportCompareControl renders.
+  it('renders the ReportCompareControl (backend-registered compare slug)', () => {
+    mockUseApplicationsReport.mockReturnValue({ data, loading: false, error: false })
+    renderReport()
+    expect(screen.getByText('Vergelijk met')).toBeInTheDocument()
   })
 })

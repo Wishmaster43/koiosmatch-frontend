@@ -11,31 +11,36 @@
  * The fase-1 KPI strip (targets/reached/reach rate) stays as-is; drill rows carry
  * candidate names (outreach.view), so a 403 keeps the calm degrade in the drawer.
  */
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { BodyText } from '@/components/ui/typography'
 import { formatRatio } from '@/lib/formatters'
 import { useTranslation } from 'react-i18next'
 import ReportKpiBand from './ReportKpiBand'
-import { reportCardStyle as card, reportSectionHeadStyle as head } from './ReportSectionCard'
+import { reportCardStyle as card } from './ReportSectionCard'
 import ReportStateBlock from './ReportStateBlock'
+import ReportGrid from './ReportGrid'
+import ReportChartCard from './ReportChartCard'
 import type { KpiSpec } from '@/components/insights/InsightsRow'
 import ReportDrillDrawer from './ReportDrillDrawer'
 import type { DrillSpec } from './ReportDrillDrawer'
 import { useOutreachReport } from './useOutreachReport'
 import { gateDrillClick } from './reportDrillGate'
 import SegmentBars from './SegmentBars'
-import ReportChartWithDrillList from './ReportChartWithDrillList'
 import ReportTimeseriesChart from './ReportTimeseriesChart'
 import { useDateFormat } from '@/lib/datetime'
 import type { ReportPeriod, CandidateOwnerSegment, CandidateTimeseriesPoint } from '@/types/analytics'
 import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
 import { getReportKpiCatalog, getReportKpiDefaultOrder, reportKpiSettingsKey } from './kpiCatalog'
 import { resolveReportKpiOrder } from './resolveReportKpiOrder'
+import { getCompareSlug } from './reportCompareSupport'
+import { useReportCompare } from './useReportCompare'
+import ReportCompareControl from './ReportCompareControl'
+import ReportCompareMetric from './ReportCompareMetric'
+import { COMPARE_OFF } from './reportCompareMode'
+import type { ReportCompareMode } from './reportCompareMode'
 
 // The plain single-value XOR axes; `assignee` has its own D2 shape below.
 type Axis = 'campaign' | 'channel' | 'status' | 'outcome'
-// The assignee axis shares the drill-key record with the four plain axes plus the timeseries.
-type DrillKey = Axis | 'assignee' | 'series'
 
 // Minimal surface the generic bar renderer needs — outreach axes carry no lookup
 // colour (SegmentBars falls back to the primary tint).
@@ -49,28 +54,32 @@ export default function OutreachReport({ period }: { period: ReportPeriod }) {
   const total   = data?.total ?? data?.total_targets ?? 0
   const hasData = !loading && !error && total > 0
 
-  // Drill-down: any axis-segment bar or timeseries bucket explains itself (the
-  // call-list targets behind it + Koios advice). Exactly one XOR param per open drill.
-  const [drills, setDrills] = useState<Partial<Record<DrillKey, DrillSpec>>>({})
-  // Floating drawer for a KPI-card click (RAPPORT-KAARTDRILLS-1) — separate from
-  // the inline per-axis `drills` above (mirrors WhatsappReport's kpiDrill).
-  const [kpiDrill, setKpiDrill] = useState<DrillSpec | null>(null)
+  // RAPPORT-COMPARE-1: mirrors CandidatesReport's hosting exactly.
+  const compareSlug = getCompareSlug('outreach')
+  const [compareMode, setCompareMode] = useState<ReportCompareMode>(COMPARE_OFF)
+  const { data: compareData } = useReportCompare(compareSlug, data?.from, data?.to, compareMode, { period })
+  const totalCompare = compareMode.kind !== 'off' ? (compareData?.total as { current: number; previous: number; delta: number; delta_pct: number | null } | undefined) : undefined
+
+  // One shared drawer for the whole page — a KPI-card click and an axis/bucket
+  // click both open the SAME drawer (replacing whatever was open before). Exactly
+  // one XOR param per open drill.
+  const [drill, setDrill] = useState<DrillSpec | null>(null)
   const windowSub = () => `${formatDate(data?.from)} – ${formatDate(data?.to)}`
-  const openSegment = (key: DrillKey, seg: { label: string; count: number }, xorParam: Record<string, unknown>) =>
-    setDrills(d => ({ ...d, [key]: {
+  const openSegment = (seg: { label: string; count: number }, xorParam: Record<string, unknown>) =>
+    setDrill({
       title: seg.label, value: seg.count, subtitle: windowSub(),
       rowsEndpoint: '/reports/outreach/drill', rowsParams: { ...xorParam, period },
       adviceEndpoint: '/reports/outreach/advice', adviceParams: { ...xorParam, period },
-    } }))
-  const openBucket = (pt: CandidateTimeseriesPoint) => setDrills(d => ({ ...d, series: {
+    })
+  const openBucket = (pt: CandidateTimeseriesPoint) => setDrill({
     title: pt.label, value: pt.value, subtitle: windowSub(),
-    // A week bar's `date` is the point's own key; the list then counts the WHOLE
-    // week (bucket=week) so bar and list total always agree.
+    // A week bar's `date` is the point's own key; the drawer then counts the WHOLE
+    // week (bucket=week) so bar and drawer total always agree.
     rowsEndpoint: '/reports/outreach/drill',
     rowsParams: { date: pt.date, ...(data?.timeseries.bucket === 'week' ? { bucket: 'week' } : {}), period },
     adviceEndpoint: '/reports/outreach/advice',
     adviceParams: { date: pt.date, ...(data?.timeseries.bucket === 'week' ? { bucket: 'week' } : {}), period },
-  } }))
+  })
 
   // Generic axis-bar renderer: 'none'/'others' sentinels, "Onbekend"/"Geen
   // uitkomst" rows and orphan strings are all normal array entries — each drills
@@ -80,7 +89,7 @@ export default function OutreachReport({ period }: { period: ReportPeriod }) {
     const max = segs.reduce((m, s) => Math.max(m, s.count), 0)
     const onPick = gateDrillClick('outreach', (value: string) => {
       const seg = segs.find(s => s.value === value)
-      if (seg) openSegment(axis, seg, { [axis]: value })
+      if (seg) openSegment(seg, { [axis]: value })
     })
     return <SegmentBars max={max} onPick={onPick}
       items={segs.map(s => ({ key: s.value, label: s.label, count: s.count, color: null }))} />
@@ -92,7 +101,7 @@ export default function OutreachReport({ period }: { period: ReportPeriod }) {
     const max = segs.reduce((m, s) => Math.max(m, s.count), 0)
     const onPick = gateDrillClick('outreach', (value: string) => {
       const seg = segs.find(s => s.owner_id === value)
-      if (seg) openSegment('assignee', { label: seg.name, count: seg.count }, { assignee: value })
+      if (seg) openSegment({ label: seg.name, count: seg.count }, { assignee: value })
     })
     return <SegmentBars max={max} onPick={onPick}
       items={segs.map(s => ({ key: s.owner_id, label: s.name, count: s.count, color: null }))} />
@@ -109,7 +118,7 @@ export default function OutreachReport({ period }: { period: ReportPeriod }) {
   const openKpiDrill = (localKey: string, label: string, value: string | number) => {
     const serverKey = KPI_DRILL_KEY[localKey]
     if (!serverKey) return undefined
-    return gateDrillClick('outreach', () => setKpiDrill({
+    return gateDrillClick('outreach', () => setDrill({
       title: label, value, subtitle: windowSub(),
       rowsEndpoint: '/reports/outreach/kpis/drill', rowsParams: { kpi: serverKey, period },
     }))
@@ -119,25 +128,6 @@ export default function OutreachReport({ period }: { period: ReportPeriod }) {
     const pt = data?.timeseries.series.find(p => p.date === dateKey)
     if (pt) openBucket(pt)
   })
-
-  // Default each section's list to its own top segment on mount so no panel is
-  // ever blank — mirrors clicking that segment's own bar, never a client-side guess.
-  useEffect(() => {
-    if (!data) return
-    const top = <T,>(segs: T[], count: (s: T) => number) => segs.length ? segs.reduce((a, b) => (count(b) > count(a) ? b : a)) : null
-    const topCampaign = top(data.by_campaign.filter(s => s.value !== 'others'), s => s.count)
-    const topChannel = top(data.by_channel, s => s.count)
-    const topStatus = top(data.by_status, s => s.count)
-    const topOutcome = top(data.by_outcome, s => s.count)
-    const topAssignee = top(data.by_assignee, s => s.count)
-    if (topCampaign) openSegment('campaign', topCampaign, { campaign: topCampaign.value })
-    if (topChannel) openSegment('channel', topChannel, { channel: topChannel.value })
-    if (topStatus) openSegment('status', topStatus, { status: topStatus.value })
-    if (topOutcome) openSegment('outcome', topOutcome, { outcome: topOutcome.value })
-    if (topAssignee) openSegment('assignee', { label: topAssignee.name, count: topAssignee.count }, { assignee: topAssignee.owner_id })
-    if (data.timeseries.series.length) openBucket(data.timeseries.series[data.timeseries.series.length - 1])
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data?.from, data?.to])
 
   // Fase-1 KPI strip, unchanged (regression): reach_rate is null while nothing
   // was reached — placeholder, never a fabricated 0%. Display-only: the six-way
@@ -166,6 +156,7 @@ export default function OutreachReport({ period }: { period: ReportPeriod }) {
   const assigneesCount  = data?.by_assignee.filter(s => s.owner_id !== 'none' && s.count > 0).length ?? 0
   const kpiByKey: Record<string, KpiSpec> = {
     total:   { key: 'total',   label: t('outreach.total'),   value: targets,
+      sub: totalCompare ? <ReportCompareMetric metric={totalCompare} polarity="up-good" /> : undefined,
       onClick: openKpiDrill('total', t('outreach.total'), targets) },
     reached: { key: 'reached', label: t('outreach.reached'), value: reached,
       onClick: openKpiDrill('reached', t('outreach.reached'), reached) },
@@ -179,20 +170,20 @@ export default function OutreachReport({ period }: { period: ReportPeriod }) {
       onClick: openKpiDrill('notReached', t('outreach.summary.notReached'), targets - reached) },
     assigned:   { key: 'assigned',   label: t('outreach.summary.assigned'),   value: targets - unassignedCount },
     unassigned: { key: 'unassigned', label: t('outreach.summary.unassigned'), value: unassignedCount,
-      onClick: unassignedSeg ? gateDrillClick('outreach', () => openSegment('assignee', { label: unassignedSeg.name, count: unassignedSeg.count }, { assignee: 'none' })) : undefined },
+      onClick: unassignedSeg ? gateDrillClick('outreach', () => openSegment({ label: unassignedSeg.name, count: unassignedSeg.count }, { assignee: 'none' })) : undefined },
     noOutcome: { key: 'noOutcome', label: t('outreach.summary.noOutcome'), value: noOutcomeSeg?.count ?? 0,
-      onClick: noOutcomeSeg ? gateDrillClick('outreach', () => openSegment('outcome', noOutcomeSeg, { outcome: 'none' })) : undefined },
+      onClick: noOutcomeSeg ? gateDrillClick('outreach', () => openSegment(noOutcomeSeg, { outcome: 'none' })) : undefined },
     // Permanent slots (Danny — nine cards, always): while there is no real top
     // campaign/channel yet, the card still renders with the house dash instead
     // of shrinking the strip.
     topCampaign: { key: 'topCampaign', label: t('outreach.summary.topCampaign'), value: topCampaign?.count ?? '—', sub: topCampaign?.label,
-      onClick: topCampaign ? gateDrillClick('outreach', () => openSegment('campaign', topCampaign, { campaign: topCampaign.value })) : undefined },
+      onClick: topCampaign ? gateDrillClick('outreach', () => openSegment(topCampaign, { campaign: topCampaign.value })) : undefined },
     topChannel: { key: 'topChannel', label: t('outreach.summary.topChannel'), value: topChannel?.count ?? '—', sub: topChannel?.label,
-      onClick: topChannel ? gateDrillClick('outreach', () => openSegment('channel', topChannel, { channel: topChannel.value })) : undefined },
+      onClick: topChannel ? gateDrillClick('outreach', () => openSegment(topChannel, { channel: topChannel.value })) : undefined },
     topStatus: { key: 'topStatus', label: t('outreach.summary.topStatus'), value: topStatus?.count ?? '—', sub: topStatus?.label,
-      onClick: topStatus ? gateDrillClick('outreach', () => openSegment('status', topStatus, { status: topStatus.value })) : undefined },
+      onClick: topStatus ? gateDrillClick('outreach', () => openSegment(topStatus, { status: topStatus.value })) : undefined },
     topOutcome: { key: 'topOutcome', label: t('outreach.summary.topOutcome'), value: topOutcome?.count ?? '—', sub: topOutcome?.label,
-      onClick: topOutcome ? gateDrillClick('outreach', () => openSegment('outcome', topOutcome, { outcome: topOutcome.value })) : undefined },
+      onClick: topOutcome ? gateDrillClick('outreach', () => openSegment(topOutcome, { outcome: topOutcome.value })) : undefined },
     campaignsCount: { key: 'campaignsCount', label: t('outreach.summary.campaignsCount'), value: campaignsCount },
     channelsUsed: { key: 'channelsUsed', label: t('outreach.summary.channelsUsed'), value: channelsUsedCount },
     assigneesCount: { key: 'assigneesCount', label: t('outreach.summary.assigneesCount'), value: assigneesCount },
@@ -209,6 +200,13 @@ export default function OutreachReport({ period }: { period: ReportPeriod }) {
 
   return (
     <div>
+      {/* RAPPORT-COMPARE-1: mirrors CandidatesReport's hosting exactly. */}
+      {hasData && compareSlug && (
+        <div style={{ marginBottom: 10 }}>
+          <ReportCompareControl mode={compareMode} onChange={setCompareMode} />
+        </div>
+      )}
+
       {/* KPI strip — above the tabs (candidate-page order: KPIs first) */}
       {hasData && (
         <ReportKpiBand kpis={kpis} notice={fellBack ? t('outreach.kpiOrderFellBack') : undefined} />
@@ -222,63 +220,41 @@ export default function OutreachReport({ period }: { period: ReportPeriod }) {
         </BodyText>
       )}
 
-      <div style={{ ...card, overflow: 'hidden' }}>
-        <ReportStateBlock
-          loading={loading} error={error} empty={!loading && !error && total === 0}
-          loadingLabel={t('outreach.loading')} errorLabel={t('outreach.error')} emptyLabel={t('outreach.empty')}
-          onRetry={() => refetch()}
-        />
-        {hasData && data && (
-          <div style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 24 }}>
-            {/* Targets over time — week/day timeseries, bucket set server-side. Its own
-                always-visible list sits beside it, never a shared overlay. */}
-            <section>
-              <h3 style={{ ...head, marginBottom: 10 }}>{t('outreach.series')}</h3>
-              <ReportChartWithDrillList drill={drills.series ?? null} placeholderLabel={t('outreach.series')}
-                chart={<ReportTimeseriesChart series={data.timeseries.series} onPick={onSeriesPick} />} />
-            </section>
+      {(!hasData || !data) && (
+        <div style={{ ...card, overflow: 'hidden' }}>
+          <ReportStateBlock
+            loading={loading} error={error} empty={!loading && !error && total === 0}
+            loadingLabel={t('outreach.loading')} errorLabel={t('outreach.error')} emptyLabel={t('outreach.empty')}
+            onRetry={() => refetch()}
+          />
+        </div>
+      )}
 
-            {/* Top-20 call lists + 'others' (the exact complement, a real row);
-                an archived campaign keeps its name and drills on its uuid. */}
-            <section>
-              <h3 style={{ ...head, marginBottom: 10 }}>{t('outreach.axes.campaign')}</h3>
-              <ReportChartWithDrillList drill={drills.campaign ?? null} placeholderLabel={t('outreach.axes.campaign')}
-                chart={bars('campaign', data.by_campaign)} />
-            </section>
+      {hasData && data && (
+        <ReportGrid>
+          {/* Targets over time — week/day timeseries, bucket set server-side. */}
+          <ReportChartCard span={2} title={t('outreach.series')}
+            chart={<ReportTimeseriesChart series={data.timeseries.series} onPick={onSeriesPick} />} />
 
-            <section>
-              <h3 style={{ ...head, marginBottom: 10 }}>{t('tasks.axes.assignee')}</h3>
-              <ReportChartWithDrillList drill={drills.assignee ?? null} placeholderLabel={t('tasks.axes.assignee')}
-                chart={assigneeBars(data.by_assignee)} />
-            </section>
+          {/* Top-20 call lists + 'others' (the exact complement, a real row);
+              an archived campaign keeps its name and drills on its uuid. */}
+          <ReportChartCard title={t('outreach.axes.campaign')} chart={bars('campaign', data.by_campaign)} />
+          <ReportChartCard title={t('tasks.axes.assignee')} chart={assigneeBars(data.by_assignee)} />
 
-            {/* Channel axis, zero-filled over the tenant channels + 'none'. */}
-            <section>
-              <h3 style={{ ...head, marginBottom: 10 }}>{t('outreach.axes.channel')}</h3>
-              <ReportChartWithDrillList drill={drills.channel ?? null} placeholderLabel={t('outreach.axes.channel')}
-                chart={bars('channel', data.by_channel)} />
-            </section>
+          {/* Channel axis, zero-filled over the tenant channels + 'none'. */}
+          <ReportChartCard title={t('outreach.axes.channel')} chart={bars('channel', data.by_channel)} />
 
-            {/* Status axis — the fase-1 breakdown, now summing to total with
-                value/label pairs ("Onbekend" orphan bars included). */}
-            <section>
-              <h3 style={{ ...head, marginBottom: 10 }}>{t('customers.axes.status')}</h3>
-              <ReportChartWithDrillList drill={drills.status ?? null} placeholderLabel={t('customers.axes.status')}
-                chart={bars('status', data.by_status)} />
-            </section>
+          {/* Status axis — the fase-1 breakdown, now summing to total with
+              value/label pairs ("Onbekend" orphan bars included). */}
+          <ReportChartCard title={t('customers.axes.status')} chart={bars('status', data.by_status)} />
 
-            {/* Outcome axis — incl. the "Geen uitkomst" sentinel so it sums to total. */}
-            <section>
-              <h3 style={{ ...head, marginBottom: 10 }}>{t('outreach.axes.outcome')}</h3>
-              <ReportChartWithDrillList drill={drills.outcome ?? null} placeholderLabel={t('outreach.axes.outcome')}
-                chart={bars('outcome', data.by_outcome)} />
-            </section>
-          </div>
-        )}
-      </div>
+          {/* Outcome axis — incl. the "Geen uitkomst" sentinel so it sums to total. */}
+          <ReportChartCard title={t('outreach.axes.outcome')} chart={bars('outcome', data.by_outcome)} />
+        </ReportGrid>
+      )}
 
-      {/* Floating drawer for a KPI-card click (RAPPORT-KAARTDRILLS-1). */}
-      <ReportDrillDrawer drill={kpiDrill} onClose={() => setKpiDrill(null)} />
+      {/* One shared drill drawer for the whole page. */}
+      <ReportDrillDrawer drill={drill} onClose={() => setDrill(null)} />
     </div>
   )
 }

@@ -280,11 +280,10 @@ describe('OpportunitiesReport (RAPPORTEN-SUITE-1 portie 5, kansen pipeline repor
   })
 
   // Calm 403 degrade: the drill rows need opportunities.view on top of reports.view —
-  // ReportChartWithDrillList hides the rows section calmly (its own "no records"
-  // copy), never an error banner. Koios advice no longer has a display surface on
-  // this page — the shared list replaces the drawer (§ ReportChartWithDrillList),
-  // so this only proves the rows section degrades quietly.
-  it('degrades the rows list calmly (no error banner) when the rows request is 403-forbidden', async () => {
+  // the shared ReportDrillDrawer hides the rows section entirely on a 403 (own
+  // rule: "the segment's own data permission was denied … no error banner, the
+  // advice section still shows"), never an error banner.
+  it('degrades calmly (no error banner) when the rows request is 403-forbidden', async () => {
     const user = userEvent.setup()
     getSpy.mockImplementation((url: unknown) => String(url).endsWith('/drill')
       ? Promise.reject({ response: { status: 403 } })
@@ -292,7 +291,7 @@ describe('OpportunitiesReport (RAPPORTEN-SUITE-1 portie 5, kansen pipeline repor
     mockUseOpportunitiesReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
     await user.click(screen.getByText('Voorstel'))
-    await waitFor(() => expect(screen.getAllByText('Geen onderliggende records.').length).toBeGreaterThan(0))
+    await waitFor(() => expect(screen.getByText('Bel deze klant deze week nog.')).toBeInTheDocument())
     expect(screen.queryByText(/fout|mislukt|error|forbidden/i)).not.toBeInTheDocument()
   })
 
@@ -316,17 +315,12 @@ describe('OpportunitiesReport (RAPPORTEN-SUITE-1 portie 5, kansen pipeline repor
     expect(screen.queryByText(/fout|mislukt|error/i)).not.toBeInTheDocument()
   })
 
-  // RAPPORTEN-DRILLLIST-1: every axis section shows its own always-visible list
-  // beside the chart, seeded with a real request on mount — never a blank panel.
-  it('renders a drill list beside each axis chart, defaulted on mount', () => {
+  // REPORTGRID-1: the shared drill drawer opens only on click, never
+  // auto-defaulted on mount.
+  it('never fires a drill request before any segment is clicked', () => {
     mockUseOpportunitiesReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
-    // The stage axis's top segment (Voorstel, 6) seeds its own list on mount.
-    expect(getSpy).toHaveBeenCalledWith('/reports/opportunities/drill',
-      expect.objectContaining({ params: { stage: 'proposal', period: 'month' } }))
-    // The branch axis independently seeds its own list with its own top segment.
-    expect(getSpy).toHaveBeenCalledWith('/reports/opportunities/drill',
-      expect.objectContaining({ params: { branch: 'loc-1', period: 'month' } }))
+    expect(getSpy).not.toHaveBeenCalled()
   })
 
   // Clicking a segment in ONE chart never changes another chart's list — each
@@ -455,5 +449,13 @@ describe('OpportunitiesReport (spare KPI cards)', () => {
     await user.click(screen.getByText('Careyn · 5'))
     await waitFor(() => expect(getSpy).toHaveBeenCalledWith('/reports/opportunities/drill',
       expect.objectContaining({ params: expect.objectContaining({ customer: 'cust-1' }) })))
+  })
+
+  // REPORTGRID-1 item 4: opportunities has a real backend compare slug
+  // (reportCompareSupport.ts), so the shared ReportCompareControl renders.
+  it('renders the ReportCompareControl (backend-registered compare slug)', () => {
+    mockUseOpportunitiesReport.mockReturnValue({ data, loading: false, error: false })
+    renderReport()
+    expect(screen.getByText('Vergelijk met')).toBeInTheDocument()
   })
 })

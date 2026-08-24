@@ -14,6 +14,7 @@ import { useTranslation } from 'react-i18next'
 import ReportKpiBand from './ReportKpiBand'
 import ReportStateBlock from './ReportStateBlock'
 import { reportCardStyle as card, reportSectionHeadStyle } from './ReportSectionCard'
+import ReportGrid, { ReportGridItem } from './ReportGrid'
 import type { KpiSpec } from '@/components/insights/InsightsRow'
 import DataTable from '@/components/ui/DataTable'
 import type { Column } from '@/components/ui/DataTable'
@@ -31,6 +32,12 @@ import type { ReportPeriod, VacancyReportRow, CandidateTimeseriesPoint } from '@
 import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
 import { getReportKpiCatalog, getReportKpiDefaultOrder, reportKpiSettingsKey } from './kpiCatalog'
 import { resolveReportKpiOrder } from './resolveReportKpiOrder'
+import { getCompareSlug } from './reportCompareSupport'
+import { useReportCompare } from './useReportCompare'
+import ReportCompareControl from './ReportCompareControl'
+import ReportCompareMetric from './ReportCompareMetric'
+import { COMPARE_OFF } from './reportCompareMode'
+import type { ReportCompareMode } from './reportCompareMode'
 
 // Number cell: emphasised when > 0, muted when zero (mirrors the SM entity tables).
 const numCell = (n: number) => (
@@ -44,6 +51,13 @@ export default function VacanciesReport({ period, filters = EMPTY_REPORT_FILTERS
   const rows    = data?.vacancies ?? []
   const s       = data?.summary
   const hasData = !loading && !error && (data?.total ?? 0) > 0
+
+  // RAPPORT-COMPARE-1: mirrors CandidatesReport's hosting exactly.
+  const compareSlug = getCompareSlug('vacancies')
+  const [compareMode, setCompareMode] = useState<ReportCompareMode>(COMPARE_OFF)
+  const compareBaseParams = { ...buildReportQueryParams(period, 'vacancies', filters) }
+  const { data: compareData } = useReportCompare(compareSlug, data?.from, data?.to, compareMode, compareBaseParams)
+  const totalCompare = compareMode.kind !== 'off' ? (compareData?.total as { current: number; previous: number; delta: number; delta_pct: number | null } | undefined) : undefined
 
   // One drawer for every drill source: KPI tiles, table rows, axis bars, buckets —
   // ALWAYS layered on top of the report's own active panel filters (`baseParams`),
@@ -125,6 +139,7 @@ export default function VacanciesReport({ period, filters = EMPTY_REPORT_FILTERS
   const kpiByKey: Record<string, KpiSpec> = {
     total: { key: 'total',  label: t('vacancies.summary.total'),  value: s?.total ?? 0,
       active: drill != null && drill.rowsParams?.status == null,
+      sub: totalCompare ? <ReportCompareMetric metric={totalCompare} polarity="up-good" /> : undefined,
       onClick: gateDrillClick('vacancies', () => openVacancies(t('vacancies.summary.total'), s?.total ?? 0)) },
     open: { key: 'open',   label: t('vacancies.summary.open'),   value: s?.open ?? 0,
       active: drill?.rowsParams?.status === 'open',
@@ -231,6 +246,13 @@ export default function VacanciesReport({ period, filters = EMPTY_REPORT_FILTERS
 
   return (
     <div>
+      {/* RAPPORT-COMPARE-1: mirrors CandidatesReport's hosting exactly. */}
+      {hasData && rows.length > 0 && compareSlug && (
+        <div style={{ marginBottom: 10 }}>
+          <ReportCompareControl mode={compareMode} onChange={setCompareMode} />
+        </div>
+      )}
+
       {/* KPI strip — above the tabs (candidate-page order: KPIs first) */}
       {hasData && rows.length > 0 && (
         <ReportKpiBand kpis={kpis} notice={fellBack ? t('vacancies.kpiOrderFellBack') : undefined} />
@@ -255,23 +277,23 @@ export default function VacanciesReport({ period, filters = EMPTY_REPORT_FILTERS
       )}
 
       {hasData && data && (
-        <>
+        <ReportGrid>
           {/* Timeseries + the six segment axes (portie pattern) */}
-          <div style={{ ...card, overflow: 'hidden', marginBottom: 16 }}>
-            <VacancyReportAxes data={data} onSegment={openSegment} onBucket={openBucket} />
-          </div>
+          <VacancyReportAxes data={data} onSegment={openSegment} onBucket={openBucket} />
 
           {/* Per-vacancy table (unchanged C-34 behaviour) — row click drills into
-              that vacancy's own applications. */}
-          <div style={{ ...card, overflow: 'hidden' }}>
-            <DataTable
-              columns={columns}
-              rows={rows}
-              getRowId={v => v.key}
-              onRowClick={gateDrillClick('vacancies', openVacancyRow)}
-              emptyText={t('vacancies.empty')}
-            />
-          </div>
+              that vacancy's own applications. Wide table, full row. */}
+          <ReportGridItem span={2}>
+            <div style={{ ...card, overflow: 'hidden' }}>
+              <DataTable
+                columns={columns}
+                rows={rows}
+                getRowId={v => v.key}
+                onRowClick={gateDrillClick('vacancies', openVacancyRow)}
+                emptyText={t('vacancies.empty')}
+              />
+            </div>
+          </ReportGridItem>
 
           {/* PDF notification signal: vacancies with zero applications this window.
               The table rows are real, not fabricated — see zeroApplicantRows above
@@ -285,28 +307,30 @@ export default function VacanciesReport({ period, filters = EMPTY_REPORT_FILTERS
               list has something to show (an all-zero-row empty state here would just
               duplicate the table's own empty text above it). */}
           {zeroApplicantRows.length > 0 && (
-            <div style={{ ...card, overflow: 'hidden', marginTop: 16 }}>
-              <div style={{ padding: '16px 20px 0' }}>
-                <h3 style={{ ...reportSectionHeadStyle, ...(zeroApplicationsDrillHandler ? { cursor: 'pointer' } : {}) }}
-                  role={zeroApplicationsDrillHandler ? 'button' : undefined}
-                  tabIndex={zeroApplicationsDrillHandler ? 0 : undefined}
-                  onClick={zeroApplicationsDrillHandler}>
-                  {t('vacancies.noApplicants.title', { count: zeroApplicantRows.length })}
-                </h3>
-                <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: '4px 0 12px' }}>
-                  {t('vacancies.noApplicants.subtitle')}
-                </p>
+            <ReportGridItem span={2}>
+              <div style={{ ...card, overflow: 'hidden' }}>
+                <div style={{ padding: '16px 20px 0' }}>
+                  <h3 style={{ ...reportSectionHeadStyle, ...(zeroApplicationsDrillHandler ? { cursor: 'pointer' } : {}) }}
+                    role={zeroApplicationsDrillHandler ? 'button' : undefined}
+                    tabIndex={zeroApplicationsDrillHandler ? 0 : undefined}
+                    onClick={zeroApplicationsDrillHandler}>
+                    {t('vacancies.noApplicants.title', { count: zeroApplicantRows.length })}
+                  </h3>
+                  <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: '4px 0 12px' }}>
+                    {t('vacancies.noApplicants.subtitle')}
+                  </p>
+                </div>
+                <DataTable
+                  columns={columns.filter(c => c.key !== 'applications' && c.key !== 'matched' && c.key !== 'filled')}
+                  rows={zeroApplicantRows}
+                  getRowId={v => v.key}
+                  onRowClick={gateDrillClick('vacancies', openVacancyRow)}
+                  emptyText={t('vacancies.noApplicants.empty')}
+                />
               </div>
-              <DataTable
-                columns={columns.filter(c => c.key !== 'applications' && c.key !== 'matched' && c.key !== 'filled')}
-                rows={zeroApplicantRows}
-                getRowId={v => v.key}
-                onRowClick={gateDrillClick('vacancies', openVacancyRow)}
-                emptyText={t('vacancies.noApplicants.empty')}
-              />
-            </div>
+            </ReportGridItem>
           )}
-        </>
+        </ReportGrid>
       )}
 
       {/* Dynamic drill-down: explains the clicked number + Koios AI advice */}

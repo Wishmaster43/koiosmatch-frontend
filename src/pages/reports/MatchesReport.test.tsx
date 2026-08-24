@@ -223,19 +223,21 @@ describe('MatchesReport (RAPPORTEN-SUITE-1 portie 7, closing enrichment)', () =>
     expect(data.timeseries.series.reduce((s, p) => s + p.value, 0)).toBe(data.total)
   })
 
-  // Structural regression: the four sections (series, contract form, tiles,
-  // terminations) share ONE outer ReportSectionCard, not four hand-typed card divs —
-  // the exact drift the report-suite audit flagged for this page.
-  it('renders every section inside one shared section-card, not four separate cards', () => {
+  // REPORTGRID-1: the four sections (series, contract form, tiles, terminations)
+  // each render as their own ReportChartCard inside the shared two-column
+  // ReportGrid — mirrors every other report page's grid layout, not a single
+  // outer card (the old, now-retired hand-typed shape).
+  it('renders every section inside the shared ReportGrid, each in its own card', () => {
     mockUseMatchesReport.mockReturnValue({ data, loading: false, error: false })
     const { container } = renderReport()
     const seriesHeading = screen.getByText('Matches over tijd')
     const terminationsHeading = screen.getByText('Beëindigingsredenen')
-    // Both section headings share the same nearest ancestor with the card border —
-    // i.e. one outer card, not one card per section.
-    const cardOf = (el: HTMLElement) => el.closest('[style*="border-radius: 12px"]')
-    expect(cardOf(seriesHeading)).toBe(cardOf(terminationsHeading))
-    expect(container.querySelectorAll('[style*="border-radius: 12px"]').length).toBe(1)
+    const grid = container.querySelector('.report-grid')
+    expect(grid).not.toBeNull()
+    expect(grid?.contains(seriesHeading)).toBe(true)
+    expect(grid?.contains(terminationsHeading)).toBe(true)
+    // Each section is its own card — four cards, not one shared outer card.
+    expect(container.querySelectorAll('[style*="border-radius: 12px"]').length).toBe(4)
   })
 
   // WEEK-FLOOR contract: a week bar drills date=<its own Monday key> + bucket=week —
@@ -466,5 +468,13 @@ describe('MatchesReport (spare KPI cards)', () => {
     expect(lastDrillParams()).toEqual({ contract_form: 'secondment', period: 'month' })
     await user.click(screen.getByText('Klant stopt · 2'))
     expect(lastDrillParams()).toEqual({ stop_reason: 'client_stop', period: 'month' })
+  })
+
+  // REPORTGRID-1 item 4: matches has a real backend compare slug
+  // (reportCompareSupport.ts), so the shared ReportCompareControl renders.
+  it('renders the ReportCompareControl (backend-registered compare slug)', () => {
+    mockUseMatchesReport.mockReturnValue({ data, loading: false, error: false })
+    renderReport()
+    expect(screen.getByText('Vergelijk met')).toBeInTheDocument()
   })
 })

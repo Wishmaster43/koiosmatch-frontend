@@ -16,8 +16,10 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import ReportKpiBand from './ReportKpiBand'
-import { reportCardStyle as card, reportSectionHeadStyle as head } from './ReportSectionCard'
+import { reportCardStyle as card } from './ReportSectionCard'
 import ReportStateBlock from './ReportStateBlock'
+import ReportGrid from './ReportGrid'
+import ReportChartCard from './ReportChartCard'
 import type { KpiSpec } from '@/components/insights/InsightsRow'
 import ReportDrillDrawer from './ReportDrillDrawer'
 import type { DrillSpec } from './ReportDrillDrawer'
@@ -114,68 +116,55 @@ export default function WhatsappReport({ period }: { period: ReportPeriod }) {
         </BodyText>
       )}
 
-      <div style={{ ...card, overflow: 'hidden' }}>
-        <ReportStateBlock
-          loading={loading} error={error} empty={!loading && !error && total === 0}
-          loadingLabel={t('whatsapp.loading')} errorLabel={t('whatsapp.error')} emptyLabel={t('whatsapp.empty')}
-          onRetry={() => refetch()}
-        />
-        {hasData && data && (
-          <div style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 24 }}>
-            {/* Inbound/outbound over time — two lines through the same shared
-                timeseries chart OutreachReport uses. */}
-            <section>
-              <h3 style={{ ...head, marginBottom: 10 }}>{t('whatsapp.series')}</h3>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                <div>
-                  <Caption style={{ fontWeight: 600, marginBottom: 4, display: 'block' }}>{t('whatsapp.inbound')}</Caption>
-                  <ReportTimeseriesChart series={data.timeseries.series.map(p => ({ date: p.date, label: p.date, value: p.inbound }))} />
-                </div>
-                <div>
-                  <Caption style={{ fontWeight: 600, marginBottom: 4, display: 'block' }}>{t('whatsapp.outbound')}</Caption>
-                  <ReportTimeseriesChart series={data.timeseries.series.map(p => ({ date: p.date, label: p.date, value: p.outbound }))} />
-                </div>
+      {(!hasData || !data) && (
+        <div style={{ ...card, overflow: 'hidden' }}>
+          <ReportStateBlock
+            loading={loading} error={error} empty={!loading && !error && total === 0}
+            loadingLabel={t('whatsapp.loading')} errorLabel={t('whatsapp.error')} emptyLabel={t('whatsapp.empty')}
+            onRetry={() => refetch()}
+          />
+        </div>
+      )}
+
+      {hasData && data && (
+        <ReportGrid>
+          {/* Inbound/outbound over time — two lines through the same shared
+              timeseries chart OutreachReport uses. */}
+          <ReportChartCard span={2} title={t('whatsapp.series')} chart={
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <div>
+                <Caption style={{ fontWeight: 600, marginBottom: 4, display: 'block' }}>{t('whatsapp.inbound')}</Caption>
+                <ReportTimeseriesChart series={data.timeseries.series.map(p => ({ date: p.date, label: p.date, value: p.inbound }))} />
               </div>
-            </section>
-
-            {/* Direction axis. */}
-            <section>
-              <h3 style={{ ...head, marginBottom: 10 }}>{t('whatsapp.axes.direction')}</h3>
-              {bars(data.by_direction)}
-            </section>
-
-            {/* Message type axis. */}
-            <section>
-              <h3 style={{ ...head, marginBottom: 10 }}>{t('whatsapp.axes.type')}</h3>
-              {bars(data.by_type)}
-            </section>
-
-            {/* Escalated axis. */}
-            <section>
-              <h3 style={{ ...head, marginBottom: 10 }}>{t('whatsapp.axes.escalated')}</h3>
-              {bars(data.by_escalated)}
-            </section>
-
-            {/* Top-10 busiest threads — candidate name (server-gated) + volume;
-                no numbers, no message content here (§8/§9). */}
-            <section>
-              <h3 style={{ ...head, marginBottom: 10 }}>{t('whatsapp.topConversations')}</h3>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                {data.top_conversations.map(c => (
-                  <div key={String(c.conversation_id)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                    gap: 10, padding: '6px 10px', borderRadius: 8, background: 'var(--hover-bg)' }}>
-                    <BodyText style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      {c.candidate || '—'}
-                    </BodyText>
-                    {c.last_message_at && <Caption style={{ whiteSpace: 'nowrap' }}>{formatDate(c.last_message_at)}</Caption>}
-                    <Mono style={{ fontWeight: 600 }}>{c.message_count}</Mono>
-                  </div>
-                ))}
+              <div>
+                <Caption style={{ fontWeight: 600, marginBottom: 4, display: 'block' }}>{t('whatsapp.outbound')}</Caption>
+                <ReportTimeseriesChart series={data.timeseries.series.map(p => ({ date: p.date, label: p.date, value: p.outbound }))} />
               </div>
-            </section>
-          </div>
-        )}
-      </div>
+            </div>
+          } />
+
+          <ReportChartCard title={t('whatsapp.axes.direction')} chart={bars(data.by_direction)} />
+          <ReportChartCard title={t('whatsapp.axes.type')} chart={bars(data.by_type)} />
+          <ReportChartCard title={t('whatsapp.axes.escalated')} chart={bars(data.by_escalated)} />
+
+          {/* Top-10 busiest threads — candidate name (server-gated) + volume;
+              no numbers, no message content here (§8/§9). */}
+          <ReportChartCard span={2} title={t('whatsapp.topConversations')} chart={
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              {data.top_conversations.map(c => (
+                <div key={String(c.conversation_id)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                  gap: 10, padding: '6px 10px', borderRadius: 8, background: 'var(--hover-bg)' }}>
+                  <BodyText style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {c.candidate || '—'}
+                  </BodyText>
+                  {c.last_message_at && <Caption style={{ whiteSpace: 'nowrap' }}>{formatDate(c.last_message_at)}</Caption>}
+                  <Mono style={{ fontWeight: 600 }}>{c.message_count}</Mono>
+                </div>
+              ))}
+            </div>
+          } />
+        </ReportGrid>
+      )}
 
       {/* The per-KPI drill drawer — same shared drawer every report uses. */}
       <ReportDrillDrawer drill={kpiDrill} onClose={() => setKpiDrill(null)} />

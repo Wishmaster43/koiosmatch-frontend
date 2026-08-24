@@ -41,6 +41,7 @@ vi.mock('@/lib/settings/useAllSettings', async () => {
 const data: CandidatesReportData = {
   period: 'month', from: '2026-08-01', to: '2026-08-31', total: 12,
   timeseries: { bucket: 'week', series: [{ date: '2026-08-03', label: 'Wk 32', value: 5 }, { date: '2026-08-10', label: 'Wk 33', value: 7 }] },
+  // eslint-disable-next-line no-restricted-syntax -- NECESSITY: fixture seed data, not a component style
   by_status:  [{ value: 'available', label: 'Beschikbaar', color: '#16a34a', count: 8 }, { value: 'placed', label: 'Geplaatst', color: '#2563eb', count: 4 }],
   by_phase:   [{ value: 'lead', label: 'Lead', color: null, count: 3 }, { value: 'candidate', label: 'Kandidaat', color: null, count: 9 }],
   by_source:  [{ value: 'referral', label: 'Referral', color: null, count: 6 }],
@@ -220,15 +221,23 @@ describe('CandidatesReport (RAPPORTEN-SUITE-1 inflow report)', () => {
       expect.objectContaining({ params: { status: 'available', period: 'month' } }))
   })
 
-  // RAPPORTEN-DRILLLIST-1: every axis section shows its own always-visible list
-  // beside the chart, seeded with a real request on mount — never a blank panel.
-  it('renders a drill list beside each axis chart, defaulted on mount', async () => {
+  // REPORTGRID-1: the drill drawer opens ONLY on click, never auto-defaulted on
+  // mount — a drill drawer that shoots open by itself is ruse, per the brief.
+  it('never fires a drill request before any segment is clicked', () => {
     mockUseCandidatesReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
-    // The status axis's top segment (Beschikbaar, 8) seeds its own list on mount.
-    expect(getSpy).toHaveBeenCalledWith('/reports/candidates/drill',
-      expect.objectContaining({ params: { status: 'available', period: 'month' } }))
-    // The owner axis independently seeds its own list with its own top segment.
+    expect(getSpy).not.toHaveBeenCalled()
+  })
+
+  // Clicking a second axis segment replaces whatever the shared drawer had open —
+  // one drawer for the whole page, not one list per section.
+  it('clicking a different axis segment replaces the open drawer with the new drill', async () => {
+    const user = userEvent.setup()
+    mockUseCandidatesReport.mockReturnValue({ data, loading: false, error: false })
+    renderReport()
+    await user.click(screen.getByText('Beschikbaar'))
+    getSpy.mockClear()
+    await user.click(screen.getByText('Anna de Vries'))
     expect(getSpy).toHaveBeenCalledWith('/reports/candidates/drill',
       expect.objectContaining({ params: { owner: 'u1', period: 'month' } }))
   })
@@ -336,8 +345,7 @@ describe('CandidatesReport — Kandidaten/Leads switch (RAPPORTEN-CONSOLIDATIE-1
       </QueryClientProvider>,
     )
     getSpy.mockClear()
-    // "Geplaatst" is not the top status segment (Beschikbaar is, already
-    // auto-opened on mount) — clicking it guarantees a genuinely fresh request.
+    // Clicking a status bar opens the shared drawer fresh — a genuinely new request.
     await user.click(screen.getByText('Geplaatst'))
     expect(getSpy).toHaveBeenCalledWith('/reports/candidates/drill',
       expect.objectContaining({ params: { status: 'placed', period: 'month', phase: 'lead' } }))

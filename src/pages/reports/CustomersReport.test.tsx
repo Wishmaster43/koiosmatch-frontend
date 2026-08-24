@@ -43,6 +43,7 @@ vi.mock('@/lib/settings/useAllSettings', async () => {
 const data: CustomersReportData = {
   period: 'month', from: '2026-08-01', to: '2026-08-31', total: 13,
   timeseries: { bucket: 'week', series: [{ date: '2026-08-03', label: 'Wk 32', value: 5 }, { date: '2026-08-10', label: 'Wk 33', value: 8 }] },
+  // eslint-disable-next-line no-restricted-syntax -- NECESSITY: fixture seed data, not a component style
   by_status:  [{ value: 'active', label: 'Actief', color: '#16a34a', count: 9 }, { value: 'inactive', label: 'Inactief', color: '#dc2626', count: 3 },
                { value: 'zzz-deleted-status', label: 'Onbekend (verwijderde status)', color: null, count: 1 }],
   by_phase:   [{ value: 'lead', label: 'Lead', color: null, count: 4 }, { value: 'customer', label: 'Klant', color: null, count: 9 }],
@@ -259,17 +260,12 @@ describe('CustomersReport (RAPPORTEN-SUITE-1 portie 3, customers inflow report)'
     expect(call?.[1].params).not.toHaveProperty('bucket')
   })
 
-  // RAPPORTEN-DRILLLIST-1: every axis section shows its own always-visible list
-  // beside the chart, seeded with a real request on mount — never a blank panel.
-  it('renders a drill list beside each axis chart, defaulted on mount', () => {
+  // REPORTGRID-1: the shared drill drawer opens only on click, never
+  // auto-defaulted on mount.
+  it('never fires a drill request before any segment is clicked', () => {
     mockUseCustomersReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
-    // The status axis's top segment (Actief, 9) seeds its own list on mount.
-    expect(getSpy).toHaveBeenCalledWith('/reports/customers/drill',
-      expect.objectContaining({ params: { status: 'active', period: 'month' } }))
-    // The industry axis independently seeds its own list with its own top segment.
-    expect(getSpy).toHaveBeenCalledWith('/reports/customers/drill',
-      expect.objectContaining({ params: { industry: 'healthcare', period: 'month' } }))
+    expect(getSpy).not.toHaveBeenCalled()
   })
 
   // Clicking a segment in ONE chart never changes another chart's list — each
@@ -389,5 +385,13 @@ describe('CustomersReport — Klanten/Prospects switch (RAPPORTEN-CONSOLIDATIE-1
     renderReport()
     await user.click(screen.getByRole('radio', { name: 'Prospects' }))
     expect(window.location.hash).toBe('#reports.customers?view=prospects')
+  })
+
+  // REPORTGRID-1 item 4: customers has a real backend compare slug on both
+  // switch positions (reportCompareSupport.ts), so the control renders.
+  it('renders the ReportCompareControl on both switch positions', () => {
+    mockUseCustomersReport.mockReturnValue({ data, loading: false, error: false })
+    renderReport()
+    expect(screen.getByText('Vergelijk met')).toBeInTheDocument()
   })
 })

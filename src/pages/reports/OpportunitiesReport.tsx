@@ -9,18 +9,20 @@
  * bars. Forecast/stale from the envelope are deliberately not rendered yet (own
  * design round) — nothing hidden is interactive, so no fake affordances.
  */
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import ReportKpiBand from './ReportKpiBand'
-import { reportCardStyle as card, reportSectionHeadStyle as head } from './ReportSectionCard'
+import { reportCardStyle as card } from './ReportSectionCard'
 import ReportStateBlock from './ReportStateBlock'
+import ReportGrid from './ReportGrid'
+import ReportChartCard from './ReportChartCard'
+import ReportDrillDrawer from './ReportDrillDrawer'
 import { BodyText } from '@/components/ui/typography'
 import type { KpiSpec } from '@/components/insights/InsightsRow'
 import type { DrillSpec } from './ReportDrillDrawer'
 import { useOpportunitiesReport } from './useOpportunitiesReport'
 import { gateDrillClick } from './reportDrillGate'
 import SegmentBars from './SegmentBars'
-import ReportChartWithDrillList from './ReportChartWithDrillList'
 import ReportTimeseriesChart from './ReportTimeseriesChart'
 import { useDateFormat } from '@/lib/datetime'
 import { useNumberFormat, formatPercent } from '@/lib/formatters'
@@ -28,13 +30,15 @@ import type { ReportPeriod, CandidateOwnerSegment, CandidateTimeseriesPoint } fr
 import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
 import { getReportKpiCatalog, getReportKpiDefaultOrder, reportKpiSettingsKey } from './kpiCatalog'
 import { resolveReportKpiOrder } from './resolveReportKpiOrder'
+import { getCompareSlug } from './reportCompareSupport'
+import { useReportCompare } from './useReportCompare'
+import ReportCompareControl from './ReportCompareControl'
+import ReportCompareMetric from './ReportCompareMetric'
+import { COMPARE_OFF } from './reportCompareMode'
+import type { ReportCompareMode } from './reportCompareMode'
 
 // The three plain single-value XOR axes; `owner` has its own D2 shape below.
 type Axis = 'stage' | 'customer' | 'branch'
-
-// Every drillable section on this page, each owning its OWN always-visible list
-// (ReportChartWithDrillList) — one key per section, never a single global `drill`.
-type DrillKey = Axis | 'owner' | 'series'
 
 // Minimal surface the generic bar renderer needs — stage rows carry a lookup
 // colour, customer/branch rows do not (SegmentBars falls back to the primary tint).
@@ -49,27 +53,32 @@ export default function OpportunitiesReport({ period }: { period: ReportPeriod }
   const total   = data?.total ?? 0
   const hasData = !loading && !error && total > 0
 
-  // Drill-down: every axis section and the timeseries own an ALWAYS-VISIBLE list
-  // beside their chart (ReportChartWithDrillList) instead of a shared overlay — so
-  // one key per section, never a single global `drill`. Exactly one XOR param per
-  // open drill.
-  const [drills, setDrills] = useState<Partial<Record<DrillKey, DrillSpec>>>({})
+  // RAPPORT-COMPARE-1: mirrors CandidatesReport's hosting exactly.
+  const compareSlug = getCompareSlug('opportunities')
+  const [compareMode, setCompareMode] = useState<ReportCompareMode>(COMPARE_OFF)
+  const { data: compareData } = useReportCompare(compareSlug, data?.period.from, data?.period.to, compareMode, { period })
+  const totalCompare = compareMode.kind !== 'off' ? (compareData?.total as { current: number; previous: number; delta: number; delta_pct: number | null } | undefined) : undefined
+
+  // Drill-down: one shared drawer for the whole page — a segment/bucket click
+  // opens it fresh, replacing whatever was open before. Exactly one XOR param
+  // per open drill.
+  const [drill, setDrill] = useState<DrillSpec | null>(null)
   const windowSub = () => `${formatDate(data?.period.from)} – ${formatDate(data?.period.to)}`
-  const openSegment = (key: DrillKey, seg: { label: string; count: number }, xorParam: Record<string, unknown>) =>
-    setDrills(d => ({ ...d, [key]: {
+  const openSegment = (seg: { label: string; count: number }, xorParam: Record<string, unknown>) =>
+    setDrill({
       title: seg.label, value: seg.count, subtitle: windowSub(),
       rowsEndpoint: '/reports/opportunities/drill', rowsParams: { ...xorParam, period },
       adviceEndpoint: '/reports/opportunities/advice', adviceParams: { ...xorParam, period },
-    } }))
-  const openBucket = (pt: CandidateTimeseriesPoint) => setDrills(d => ({ ...d, series: {
+    })
+  const openBucket = (pt: CandidateTimeseriesPoint) => setDrill({
     title: pt.label, value: pt.value, subtitle: windowSub(),
-    // A week bar's `date` is the point's own key; the list then counts the WHOLE
-    // week (bucket=week) so bar and list total always agree.
+    // A week bar's `date` is the point's own key; the drawer then counts the WHOLE
+    // week (bucket=week) so bar and drawer total always agree.
     rowsEndpoint: '/reports/opportunities/drill',
     rowsParams: { date: pt.date, ...(data?.timeseries.bucket === 'week' ? { bucket: 'week' } : {}), period },
     adviceEndpoint: '/reports/opportunities/advice',
     adviceParams: { date: pt.date, ...(data?.timeseries.bucket === 'week' ? { bucket: 'week' } : {}), period },
-  } }))
+  })
 
   // Generic axis-bar renderer: 'none'/'others' sentinels and orphaned (deleted-
   // lookup) values are all normal array entries — each drills on its RAW value,
@@ -78,7 +87,7 @@ export default function OpportunitiesReport({ period }: { period: ReportPeriod }
     const max = segs.reduce((m, s) => Math.max(m, s.count), 0)
     const onPick = gateDrillClick('opportunities', (value: string) => {
       const seg = segs.find(s => s.value === value)
-      if (seg) openSegment(axis, seg, { [axis]: value })
+      if (seg) openSegment(seg, { [axis]: value })
     })
     return <SegmentBars max={max} onPick={onPick}
       items={segs.map(s => ({ key: s.value, label: s.label, count: s.count, color: s.color ?? null }))} />
@@ -89,7 +98,7 @@ export default function OpportunitiesReport({ period }: { period: ReportPeriod }
     const max = segs.reduce((m, s) => Math.max(m, s.count), 0)
     const onPick = gateDrillClick('opportunities', (value: string) => {
       const seg = segs.find(s => s.owner_id === value)
-      if (seg) openSegment('owner', { label: seg.name, count: seg.count }, { owner: value })
+      if (seg) openSegment({ label: seg.name, count: seg.count }, { owner: value })
     })
     return <SegmentBars max={max} onPick={onPick}
       items={segs.map(s => ({ key: s.owner_id, label: s.name, count: s.count, color: null }))} />
@@ -99,23 +108,6 @@ export default function OpportunitiesReport({ period }: { period: ReportPeriod }
     const pt = data?.timeseries.series.find(p => p.date === dateKey)
     if (pt) openBucket(pt)
   })
-
-  // Default each section's list to its own top segment on mount so no panel is
-  // ever blank — mirrors clicking that segment's own bar, never a client-side guess.
-  useEffect(() => {
-    if (!data) return
-    const top = <T,>(segs: T[], count: (s: T) => number) => segs.length ? segs.reduce((a, b) => (count(b) > count(a) ? b : a)) : null
-    const topStage = top(data.by_stage, s => s.count)
-    const topCustomer = top(data.by_customer, s => s.count)
-    const topOwner = top(data.by_owner, s => s.count)
-    const topBranch = top(data.by_branch, s => s.count)
-    if (topStage) openSegment('stage', topStage, { stage: topStage.value })
-    if (topCustomer) openSegment('customer', topCustomer, { customer: topCustomer.value })
-    if (topOwner) openSegment('owner', { label: topOwner.name, count: topOwner.count }, { owner: topOwner.owner_id })
-    if (topBranch) openSegment('branch', topBranch, { branch: topBranch.value })
-    if (data.timeseries.series.length) openBucket(data.timeseries.series[data.timeseries.series.length - 1])
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data?.period.from, data?.period.to])
 
   // Pipeline-health KPI strip from the envelope's totals. Not drillable: the
   // five-way XOR carries no open/won/lost segment (no fake affordances). win_rate
@@ -137,7 +129,8 @@ export default function OpportunitiesReport({ period }: { period: ReportPeriod }
   const topStage = topReal(data?.by_stage ?? [])
   const topCustomer = topReal(data?.by_customer ?? [])
   const kpiByKey: Record<string, KpiSpec> = {
-    total:   { key: 'total',   label: t('opportunities.total'),           value: total },
+    total:   { key: 'total',   label: t('opportunities.total'),           value: total,
+      sub: totalCompare ? <ReportCompareMetric metric={totalCompare} polarity="up-good" /> : undefined },
     open:    { key: 'open',    label: t('opportunities.summary.open'),    value: s?.open ?? 0 },
     won:     { key: 'won',     label: t('opportunities.summary.won'),     value: s?.won ?? 0 },
     lost:    { key: 'lost',    label: t('opportunities.summary.lost'),    value: s?.lost ?? 0 },
@@ -153,10 +146,10 @@ export default function OpportunitiesReport({ period }: { period: ReportPeriod }
     wonValue:  { key: 'wonValue',  label: t('opportunities.summary.wonValue'),  value: formatCurrency(s?.won_value ?? 0, 'EUR', 0) },
     topStage: { key: 'topStage', label: t('opportunities.summary.topStage'),
       value: topStage ? `${topStage.label} · ${topStage.count}` : '—',
-      onClick: topStage ? gateDrillClick('opportunities', () => openSegment('stage', topStage, { stage: topStage.value })) : undefined },
+      onClick: topStage ? gateDrillClick('opportunities', () => openSegment(topStage, { stage: topStage.value })) : undefined },
     topCustomer: { key: 'topCustomer', label: t('opportunities.summary.topCustomer'),
       value: topCustomer ? `${topCustomer.label} · ${topCustomer.count}` : '—',
-      onClick: topCustomer ? gateDrillClick('opportunities', () => openSegment('customer', topCustomer, { customer: topCustomer.value })) : undefined },
+      onClick: topCustomer ? gateDrillClick('opportunities', () => openSegment(topCustomer, { customer: topCustomer.value })) : undefined },
     // KPI-DREMPELS-FE-1: totals.stale / totals.closing_soon (additive, distinct from
     // the older top-level `stale` object above — a different, updated_at-based
     // contract left untouched), each with its own tenant day-threshold caption. No
@@ -180,6 +173,13 @@ export default function OpportunitiesReport({ period }: { period: ReportPeriod }
 
   return (
     <div>
+      {/* RAPPORT-COMPARE-1: mirrors CandidatesReport's hosting exactly. */}
+      {hasData && compareSlug && (
+        <div style={{ marginBottom: 10 }}>
+          <ReportCompareControl mode={compareMode} onChange={setCompareMode} />
+        </div>
+      )}
+
       {/* KPI strip — pipeline health, above the tabs (candidate-page order) */}
       {hasData && (
         <ReportKpiBand kpis={kpis} notice={fellBack ? t('opportunities.kpiOrderFellBack') : undefined} />
@@ -192,53 +192,39 @@ export default function OpportunitiesReport({ period }: { period: ReportPeriod }
         </BodyText>
       )}
 
-      <div style={{ ...card, overflow: 'hidden' }}>
-        <ReportStateBlock
-          loading={loading} error={error} empty={!loading && !error && total === 0}
-          loadingLabel={t('opportunities.loading')} errorLabel={t('opportunities.error')} emptyLabel={t('opportunities.empty')}
-          onRetry={() => refetch()}
-        />
-        {hasData && data && (
-          <div style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 24 }}>
-            {/* Created over time — week/day timeseries, bucket set server-side. Its
-                own always-visible list sits beside it, never a shared overlay. */}
-            <section>
-              <h3 style={{ ...head, marginBottom: 10 }}>{t('opportunities.series')}</h3>
-              <ReportChartWithDrillList drill={drills.series ?? null} placeholderLabel={t('opportunities.series')}
-                chart={<ReportTimeseriesChart series={data.timeseries.series} onPick={onSeriesPick} />} />
-            </section>
+      {(!hasData || !data) && (
+        <div style={{ ...card, overflow: 'hidden' }}>
+          <ReportStateBlock
+            loading={loading} error={error} empty={!loading && !error && total === 0}
+            loadingLabel={t('opportunities.loading')} errorLabel={t('opportunities.error')} emptyLabel={t('opportunities.empty')}
+            onRetry={() => refetch()}
+          />
+        </div>
+      )}
 
-            {/* Stage axis — always sums to total ('none' + orphan-uuid rows included). */}
-            <section>
-              <h3 style={{ ...head, marginBottom: 10 }}>{t('applications.axes.stage')}</h3>
-              <ReportChartWithDrillList drill={drills.stage ?? null} placeholderLabel={t('applications.axes.stage')}
-                chart={bars('stage', data.by_stage)} />
-            </section>
+      {hasData && data && (
+        <ReportGrid>
+          {/* Created over time — week/day timeseries, bucket set server-side. */}
+          <ReportChartCard span={2} title={t('opportunities.series')}
+            chart={<ReportTimeseriesChart series={data.timeseries.series} onPick={onSeriesPick} />} />
 
-            {/* Top-20 customers + 'others' + 'none'; a hard-deleted customer's
-                "Onbekend" bar still drills on its raw uuid. */}
-            <section>
-              <h3 style={{ ...head, marginBottom: 10 }}>{t('applications.axes.customer')}</h3>
-              <ReportChartWithDrillList drill={drills.customer ?? null} placeholderLabel={t('applications.axes.customer')}
-                chart={bars('customer', data.by_customer)} />
-            </section>
+          {/* Stage axis — always sums to total ('none' + orphan-uuid rows included). */}
+          <ReportChartCard title={t('applications.axes.stage')} chart={bars('stage', data.by_stage)} />
 
-            <section>
-              <h3 style={{ ...head, marginBottom: 10 }}>{t('customers.axes.owner')}</h3>
-              <ReportChartWithDrillList drill={drills.owner ?? null} placeholderLabel={t('customers.axes.owner')}
-                chart={ownerBars(data.by_owner)} />
-            </section>
+          {/* Top-20 customers + 'others' + 'none'; a hard-deleted customer's
+              "Onbekend" bar still drills on its raw uuid. */}
+          <ReportChartCard title={t('applications.axes.customer')} chart={bars('customer', data.by_customer)} />
 
-            {/* Branch axis on the deal's OWN location_id column (unlike vacancies,
-                no customer detour) — drills via the report `branch` param. */}
-            <section>
-              <h3 style={{ ...head, marginBottom: 10 }}>{t('customers.axes.branch')}</h3>
-              <ReportChartWithDrillList drill={drills.branch ?? null} placeholderLabel={t('customers.axes.branch')}
-                chart={bars('branch', data.by_branch)} />
-            </section>
-          </div>
-        )}
-      </div>
+          <ReportChartCard title={t('customers.axes.owner')} chart={ownerBars(data.by_owner)} />
+
+          {/* Branch axis on the deal's OWN location_id column (unlike vacancies,
+              no customer detour) — drills via the report `branch` param. */}
+          <ReportChartCard title={t('customers.axes.branch')} chart={bars('branch', data.by_branch)} />
+        </ReportGrid>
+      )}
+
+      {/* One shared drill drawer for the whole page. */}
+      <ReportDrillDrawer drill={drill} onClose={() => setDrill(null)} />
     </div>
   )
 }

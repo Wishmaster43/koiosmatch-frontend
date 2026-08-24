@@ -25,14 +25,12 @@ export interface DrillSpec {
   adviceParams?: Record<string, unknown>          // query params for adviceEndpoint
 }
 
-// One underlying record — shape varies per report, read defensively. Exported so
-// ReportChartWithDrillList (the inline right-hand list) renders rows identically
-// instead of re-typing this field-guessing logic a second time.
-export type DrillRow = Record<string, unknown>
-// eslint-disable-next-line react-refresh/only-export-components -- NECESSITY: single source for drill-row rendering, shared with ReportChartWithDrillList (see comment above); HMR-nicety warning only
-export const rowTitle = (r: DrillRow) => String(r.name ?? r.label ?? r.title ?? r.full_name ?? r.id ?? '—')
-// eslint-disable-next-line react-refresh/only-export-components -- NECESSITY: same single-source pair as rowTitle above
-export const rowSub   = (r: DrillRow) => {
+// One underlying record — shape varies per report, read defensively. Module-
+// private since REPORTGRID-1 removed the inline list (ReportChartWithDrillList);
+// the drawer is the only row renderer left.
+type DrillRow = Record<string, unknown>
+const rowTitle = (r: DrillRow) => String(r.name ?? r.label ?? r.title ?? r.full_name ?? r.id ?? '—')
+const rowSub = (r: DrillRow) => {
   // `customer` = the opportunities drill's customer-name field (portie 5);
   // `assignee` = the tasks drill's assignee-name field (portie 6);
   // `wa_number` = the whatsapp KPI-drill's SERVER-MASKED number (§8/§9 — rendered

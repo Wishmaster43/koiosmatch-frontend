@@ -347,3 +347,11 @@ a:not([class]):hover { text-decoration: underline; }
    under the tabs (Danny 23-07: "tabel-lijntje" achter (sub)tabjes hoort nergens). */
 .no-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
 .no-scrollbar::-webkit-scrollbar { display: none; }
+
+/* REPORTGRID-1: the one two-column grid every report page's sections lay into
+   (ReportGrid.tsx). Collapses to one column under ~900px in pure CSS — no JS
+   resize listener, so the grid never causes a layout thrash on resize. */
+.report-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); }
+@media (max-width: 900px) {
+  .report-grid { grid-template-columns: 1fr; }
+}

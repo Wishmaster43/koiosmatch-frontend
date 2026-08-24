@@ -528,4 +528,12 @@ describe('VacanciesReport (RAPPORTEN-SUITE-1 portie 4, additive on C-34)', () =>
     await user.keyboard('{Enter}')
     expect(header).toHaveAttribute('aria-sort', 'ascending')
   })
+
+  // REPORTGRID-1 item 4: vacancies has a real backend compare slug
+  // (reportCompareSupport.ts), so the shared ReportCompareControl renders.
+  it('renders the ReportCompareControl (backend-registered compare slug)', () => {
+    mockUseVacanciesReport.mockReturnValue({ data, loading: false, error: false })
+    renderReport()
+    expect(screen.getByText('Vergelijk met')).toBeInTheDocument()
+  })
 })
