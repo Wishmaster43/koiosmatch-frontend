@@ -143,6 +143,26 @@
       "note": "From a note",
       "conversation": "From a conversation",
       "chat": "From chat"
+    },
+    "expand": "Show details",
+    "collapse": "Hide details",
+    "category": {
+      "tasks": "Tasks",
+      "whatsapp": "WhatsApp",
+      "appointments": "Appointments",
+      "emails": "Emails",
+      "rejections": "Rejections",
+      "applications": "Applications",
+      "birthdays": "Birthdays",
+      "other": "Other"
+    },
+    "actionType": {
+      "create_task": "Task created",
+      "send_whatsapp": "WhatsApp sent",
+      "plan_appointment": "Appointment planned",
+      "send_email": "Email sent",
+      "send_notification": "Notification sent",
+      "add_to_calllist": "Added to call list"
     }
   },
   "widget": {

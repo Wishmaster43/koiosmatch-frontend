@@ -1,8 +1,11 @@
 /**
  * KoiosForYouCard — §13 coverage for the "Koios deed dit voor jou" dashboard
  * card: GET /ai/koios/for-you fires with the active `days` param, the 7/30
- * toggle refetches with the new param, and the four UI states (loading/error/
- * empty/success) render distinctly.
+ * toggle refetches with the new param, the four UI states (loading/error/
+ * empty/success) render distinctly, and KOIOS-KAART-COMPACT-1's compact/expand
+ * behaviour (category counts by default, per-run rows only once expanded, an
+ * unknown action type falling into 'overig'). NL-label pinning lives in the
+ * sibling KoiosForYouCard.i18n.test.tsx, which uses the real i18n runtime.
  */
 import { describe, it, expect, vi, afterEach } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
@@ -88,7 +91,7 @@ describe('KoiosForYouCard', () => {
     await waitFor(() => expect(screen.getByText('koiosForYou.empty')).toBeInTheDocument())
   })
 
-  it('renders the hero total, per-type chips and latest runs on success', async () => {
+  it('renders compact by default — category counts, never individual run rows', async () => {
     apiGet.mockResolvedValue({
       data: {
         period: '7d',
@@ -103,7 +106,56 @@ describe('KoiosForYouCard', () => {
     })
     renderCard()
     await waitFor(() => expect(screen.getByText('3')).toBeInTheDocument())
-    expect(screen.getByText('Create Task · 2')).toBeInTheDocument()
-    expect(screen.getByText('Send Whatsapp · 1')).toBeInTheDocument()
+    // Category buckets (identity-mocked t returns the raw key) — counts only.
+    expect(screen.getByText('koiosForYou.category.tasks · 2')).toBeInTheDocument()
+    expect(screen.getByText('koiosForYou.category.whatsapp · 1')).toBeInTheDocument()
+    // Never the raw per-run rows while collapsed.
+    expect(screen.queryByText('koiosForYou.actionType.create_task')).not.toBeInTheDocument()
+    expect(screen.queryByText('koiosForYou.actionType.send_whatsapp')).not.toBeInTheDocument()
+  })
+
+  it('expands into the per-category run list on demand', async () => {
+    apiGet.mockResolvedValue({
+      data: {
+        period: '7d',
+        actions_total: 3,
+        per_type: { koios_create_task: 2, koios_send_whatsapp: 1 },
+        per_source: { note: 2, chat: 1 },
+        latest: [
+          { run_id: 'r1', template_key: 'koios_create_task', source: 'note:abc', created_at: '2026-08-01T10:00:00Z', status: 'completed' },
+          { run_id: 'r2', template_key: 'koios_send_whatsapp', source: 'chat', created_at: '2026-08-02T10:00:00Z', status: 'failed' },
+        ],
+      },
+    })
+    renderCard()
+    await waitFor(() => expect(screen.getByText('3')).toBeInTheDocument())
+
+    fireEvent.click(screen.getByRole('button', { name: 'koiosForYou.expand' }))
+
+    expect(screen.getByText('koiosForYou.actionType.create_task')).toBeInTheDocument()
+    expect(screen.getByText('koiosForYou.actionType.send_whatsapp')).toBeInTheDocument()
+    // Grouped under their category headings.
+    expect(screen.getAllByText('koiosForYou.category.tasks').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('koiosForYou.category.whatsapp').length).toBeGreaterThan(0)
+  })
+
+  it('buckets an unknown action type into "other" with a humanized label', async () => {
+    apiGet.mockResolvedValue({
+      data: {
+        period: '7d',
+        actions_total: 1,
+        per_type: { koios_future_thing: 1 },
+        per_source: { note: 1 },
+        latest: [
+          { run_id: 'r1', template_key: 'koios_future_thing', source: 'note:abc', created_at: '2026-08-01T10:00:00Z', status: 'completed' },
+        ],
+      },
+    })
+    renderCard()
+    await waitFor(() => expect(screen.getByText('1')).toBeInTheDocument())
+    expect(screen.getByText('koiosForYou.category.other · 1')).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: 'koiosForYou.expand' }))
+    expect(screen.getByText('Future Thing')).toBeInTheDocument()
   })
 })

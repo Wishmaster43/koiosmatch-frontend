@@ -4,11 +4,15 @@
  * /ai/koios/for-you?days=7|30 → { period, actions_total, per_type, per_source,
  * latest[<=10] } — same telbron as the invoice's workflow-token ledger, so this
  * card and the billing screen always agree. A manual/event run never counts.
+ *
+ * KOIOS-KAART-COMPACT-1 (Danny 24-08): the card defaults to COMPACT — hero
+ * total + a category KPI row (≤9 chips) — and only expands into the raw
+ * per-run list on demand, with translated (never raw-English) action labels.
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
-import { CheckCircle, AlertCircle, Clock } from 'lucide-react'
+import { CheckCircle, AlertCircle, Clock, ChevronDown } from 'lucide-react'
 import api, { unwrap } from '@/lib/api'
 import { useDateFormat } from '@/lib/datetime'
 import { useNumberFormat } from '@/lib/formatters'
@@ -17,6 +21,8 @@ import Spinner from '@/components/ui/Spinner'
 import SoftChip from '@/components/ui/SoftChip'
 import SegmentedControl from '@/components/ui/SegmentedControl'
 import ErrorBanner from '@/components/ui/ErrorBanner'
+import Button from '@/components/ui/Button'
+import { GroupLabel, SectionTitle, Caption } from '@/components/ui/typography'
 
 type PeriodDays = 7 | 30
 
@@ -53,6 +59,36 @@ function humanizeKey(key: string | null | undefined): string {
   return key.replace(/^koios_/, '').replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
 }
 
+// KOIOS-KAART-COMPACT-1: bucket every action type into one of eight display
+// categories. Measured real template_key values (BE Workflow model / seeded
+// native templates, koiosmatch-api database/): koios_create_task,
+// koios_send_whatsapp, koios_plan_appointment, koios_send_email,
+// koios_send_notification, koios_add_to_calllist. Rejection/application/
+// birthday automations don't have template keys yet but keep their own bucket
+// so a future one lands correctly without a code change; anything matching no
+// keyword (today: send_notification, add_to_calllist) falls into 'other' —
+// an unknown type is NEVER dropped.
+const CATEGORY_ORDER = ['tasks', 'whatsapp', 'appointments', 'emails', 'rejections', 'applications', 'birthdays', 'other'] as const
+type Category = (typeof CATEGORY_ORDER)[number]
+
+// Raw action-type keys (koios_ prefix stripped) that have a translated label —
+// anything outside this set gets the humanized fallback, never a raw i18n key
+// (mirrors the KNOWN_SOURCES/sourceLabel split above).
+const KNOWN_ACTION_TYPES = ['create_task', 'send_whatsapp', 'plan_appointment', 'send_email', 'send_notification', 'add_to_calllist']
+
+// Keyword match on the normalized (prefix-stripped) key → category bucket.
+function categoryOf(rawKey: string | null | undefined): Category {
+  const k = (rawKey || '').replace(/^koios_/, '')
+  if (/task/.test(k)) return 'tasks'
+  if (/whatsapp/.test(k)) return 'whatsapp'
+  if (/appointment/.test(k)) return 'appointments'
+  if (/email/.test(k)) return 'emails'
+  if (/reject/.test(k)) return 'rejections'
+  if (/application|apply/.test(k)) return 'applications'
+  if (/birthday/.test(k)) return 'birthdays'
+  return 'other'
+}
+
 export default function KoiosForYouCard() {
   const { t } = useTranslation(['dashboard', 'common'])
   const { formatDate } = useDateFormat()
@@ -60,6 +96,9 @@ export default function KoiosForYouCard() {
   // 7 vs 30 days — local UI state; the query key includes it so the toggle
   // refetches (and caches) each period independently.
   const [days, setDays] = useState<PeriodDays>(7)
+  // Compact by default (no localStorage — a per-session UI choice, not a
+  // persisted preference); the arrow affordance below toggles the raw list.
+  const [expanded, setExpanded] = useState(false)
 
   // Koios-triggered workflow runs only (never a manual/event run) — the query
   // itself IS the data-fetching hook (§3), no separate wrapper needed for one call.
@@ -74,6 +113,36 @@ export default function KoiosForYouCard() {
   const sourceLabel = (bucket: string) =>
     KNOWN_SOURCES.includes(bucket) ? t(`koiosForYou.source.${bucket}`) : humanizeKey(bucket)
 
+  // Known action type → translated label; unknown types (a future automation)
+  // get the humanized fallback, so the DOM never shows a raw English key.
+  const actionLabel = (rawKey: string | null | undefined) => {
+    const norm = (rawKey || '').replace(/^koios_/, '')
+    return KNOWN_ACTION_TYPES.includes(norm) ? t(`koiosForYou.actionType.${norm}`) : humanizeKey(rawKey)
+  }
+
+  // Category → total count, from per_type — drives the compact KPI row.
+  const categoryCounts: Record<Category, number> = data
+    ? CATEGORY_ORDER.reduce((acc, c) => {
+        acc[c] = 0
+        return acc
+      }, {} as Record<Category, number>)
+    : ({} as Record<Category, number>)
+  if (data) {
+    Object.entries(data.per_type).forEach(([key, count]) => {
+      categoryCounts[categoryOf(key)] += count
+    })
+  }
+  const activeCategories = data
+    ? CATEGORY_ORDER.filter((c) => categoryCounts[c] > 0).sort((a, b) => categoryCounts[b] - categoryCounts[a])
+    : []
+
+  // Latest runs grouped per category — only used in the expanded view.
+  const groupedLatest = data
+    ? CATEGORY_ORDER.map((cat) => ({ cat, runs: data.latest.filter((r) => categoryOf(r.template_key) === cat) })).filter(
+        (g) => g.runs.length > 0,
+      )
+    : []
+
   return (
     <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 16 }}>
       {/* Header — Koios mark carries the AI-Act disclosure hint as a tooltip
@@ -81,7 +150,7 @@ export default function KoiosForYouCard() {
           this isn't a bare icon), title, and the 7/30-day period toggle. */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
         <KoiosAiMark size={18} title={t('common:aiGeneratedHint')} />
-        <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', flex: 1 }}>{t('koiosForYou.title')}</span>
+        <SectionTitle style={{ flex: 1 }}>{t('koiosForYou.title')}</SectionTitle>
         <SegmentedControl
           size="compact"
           ariaLabel={t('koiosForYou.periodLabel')}
@@ -116,7 +185,7 @@ export default function KoiosForYouCard() {
         </div>
       )}
 
-      {/* Success — hero total, per-type breakdown, latest runs. */}
+      {/* Success — hero total, compact category breakdown, expandable per-run list. */}
       {!isLoading && !isError && data && data.actions_total > 0 && (
         <>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 14 }}>
@@ -124,49 +193,63 @@ export default function KoiosForYouCard() {
             <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('koiosForYou.heroLabel')}</span>
           </div>
 
-          {/* Per-type breakdown — one soft chip per template_key, most-used first. */}
-          {Object.keys(data.per_type).length > 0 && (
+          {/* Category KPI row — compact by default: category label + count only,
+              never the raw per-run list. The arrow expands into the grouped list. */}
+          {activeCategories.length > 0 && (
             <div style={{ marginBottom: 14 }}>
-              <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: 6 }}>
-                {t('koiosForYou.breakdownTitle')}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+                <GroupLabel>{t('koiosForYou.breakdownTitle')}</GroupLabel>
+                <Button
+                  iconOnly
+                  size="sm"
+                  variant="ghost"
+                  aria-label={t(expanded ? 'koiosForYou.collapse' : 'koiosForYou.expand')}
+                  aria-expanded={expanded}
+                  onClick={() => setExpanded((e) => !e)}
+                  style={{ transform: expanded ? 'rotate(180deg)' : undefined }}
+                >
+                  <ChevronDown size={14} />
+                </Button>
               </div>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                {Object.entries(data.per_type)
-                  .sort(([, a], [, b]) => b - a)
-                  .map(([key, count]) => (
-                    <SoftChip key={key} color="var(--color-primary)" label={`${humanizeKey(key)} · ${formatNumber(count)}`} />
-                  ))}
+                {activeCategories.map((c) => (
+                  <SoftChip key={c} color="var(--color-primary)" label={`${t(`koiosForYou.category.${c}`)} · ${formatNumber(categoryCounts[c])}`} />
+                ))}
               </div>
             </div>
           )}
 
-          {/* Latest runs — up to 10, what (template) + when (formatted date/time). */}
-          {data.latest.length > 0 && (
+          {/* Expanded — the raw per-run list, subdivided per category with a
+              GroupLabel category heading, translated action labels per row. */}
+          {expanded && groupedLatest.length > 0 && (
             <div>
-              <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: 6 }}>
-                {t('koiosForYou.latestTitle')}
-              </div>
-              {data.latest.map((run, i) => {
-                const ok = run.status === 'completed'
-                const failed = run.status === 'failed'
-                const Icon = ok ? CheckCircle : failed ? AlertCircle : Clock
-                const color = ok ? 'var(--color-success)' : failed ? 'var(--color-danger)' : 'var(--text-muted)'
-                return (
-                  <div key={run.run_id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '7px 0',
-                    borderBottom: i < data.latest.length - 1 ? '1px solid var(--border)' : 'none' }}>
-                    <Icon size={14} color={color} style={{ flexShrink: 0 }} />
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontSize: 12.5, fontWeight: 500, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        {humanizeKey(run.template_key)}
+              <GroupLabel style={{ marginBottom: 6 }}>{t('koiosForYou.latestTitle')}</GroupLabel>
+              {groupedLatest.map(({ cat, runs }) => (
+                <div key={cat} style={{ marginBottom: 10 }}>
+                  <GroupLabel style={{ marginBottom: 4 }}>{t(`koiosForYou.category.${cat}`)}</GroupLabel>
+                  {runs.map((run, i) => {
+                    const ok = run.status === 'completed'
+                    const failed = run.status === 'failed'
+                    const Icon = ok ? CheckCircle : failed ? AlertCircle : Clock
+                    const color = ok ? 'var(--color-success)' : failed ? 'var(--color-danger)' : 'var(--text-muted)'
+                    return (
+                      <div key={run.run_id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '7px 0',
+                        borderBottom: i < runs.length - 1 ? '1px solid var(--border)' : 'none' }}>
+                        <Icon size={14} color={color} style={{ flexShrink: 0 }} />
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ fontSize: 12.5, fontWeight: 500, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            {actionLabel(run.template_key)}
+                          </div>
+                          <Caption>{sourceLabel(run.source.split(':')[0])}</Caption>
+                        </div>
+                        <Caption style={{ flexShrink: 0 }}>
+                          {formatDate(run.created_at, { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
+                        </Caption>
                       </div>
-                      <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{sourceLabel(run.source.split(':')[0])}</div>
-                    </div>
-                    <span style={{ fontSize: 11, color: 'var(--text-muted)', flexShrink: 0 }}>
-                      {formatDate(run.created_at, { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
-                    </span>
-                  </div>
-                )
-              })}
+                    )
+                  })}
+                </div>
+              ))}
             </div>
           )}
         </>

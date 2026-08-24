@@ -143,6 +143,26 @@
       "note": "Aus einer Notiz",
       "conversation": "Aus einer Konversation",
       "chat": "Aus dem Chat"
+    },
+    "expand": "Details anzeigen",
+    "collapse": "Details ausblenden",
+    "category": {
+      "tasks": "Aufgaben",
+      "whatsapp": "WhatsApp",
+      "appointments": "Termine",
+      "emails": "E-Mails",
+      "rejections": "Absagen",
+      "applications": "Bewerbungen",
+      "birthdays": "Geburtstage",
+      "other": "Sonstiges"
+    },
+    "actionType": {
+      "create_task": "Aufgabe erstellt",
+      "send_whatsapp": "WhatsApp gesendet",
+      "plan_appointment": "Termin geplant",
+      "send_email": "E-Mail gesendet",
+      "send_notification": "Benachrichtigung gesendet",
+      "add_to_calllist": "Zur Anrufliste hinzugefügt"
     }
   },
   "widget": {

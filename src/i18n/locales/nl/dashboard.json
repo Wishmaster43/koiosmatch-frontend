@@ -143,6 +143,26 @@
       "note": "Vanuit een notitie",
       "conversation": "Vanuit een gesprek",
       "chat": "Vanuit chat"
+    },
+    "expand": "Toon details",
+    "collapse": "Verberg details",
+    "category": {
+      "tasks": "Taken",
+      "whatsapp": "WhatsApp",
+      "appointments": "Afspraken",
+      "emails": "E-mails",
+      "rejections": "Afwijzingen",
+      "applications": "Sollicitaties",
+      "birthdays": "Verjaardagen",
+      "other": "Overig"
+    },
+    "actionType": {
+      "create_task": "Taak aangemaakt",
+      "send_whatsapp": "WhatsApp verstuurd",
+      "plan_appointment": "Afspraak gepland",
+      "send_email": "E-mail verstuurd",
+      "send_notification": "Melding verstuurd",
+      "add_to_calllist": "Toegevoegd aan bellijst"
     }
   },
   "widget": {

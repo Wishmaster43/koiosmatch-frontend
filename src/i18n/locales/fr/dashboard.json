@@ -143,6 +143,26 @@
       "note": "Depuis une note",
       "conversation": "Depuis une conversation",
       "chat": "Depuis le chat"
+    },
+    "expand": "Afficher les détails",
+    "collapse": "Masquer les détails",
+    "category": {
+      "tasks": "Tâches",
+      "whatsapp": "WhatsApp",
+      "appointments": "Rendez-vous",
+      "emails": "E-mails",
+      "rejections": "Refus",
+      "applications": "Candidatures",
+      "birthdays": "Anniversaires",
+      "other": "Autre"
+    },
+    "actionType": {
+      "create_task": "Tâche créée",
+      "send_whatsapp": "WhatsApp envoyé",
+      "plan_appointment": "Rendez-vous planifié",
+      "send_email": "E-mail envoyé",
+      "send_notification": "Notification envoyée",
+      "add_to_calllist": "Ajouté à la liste d'appels"
     }
   },
   "widget": {
