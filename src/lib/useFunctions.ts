@@ -25,10 +25,12 @@ import type { AxiosResponse } from 'axios'
 import { useCachedLookup } from './useCachedLookup'
 import { lookupNames } from './lookupUtils'
 
-export const DEFAULT_FUNCTIONS = [
-  'Helpende', 'Helpende Plus', 'Verzorgende', 'Verzorgende IG', "EVV'er",
-  'Verpleegkundige N4', 'Verpleegkundige N5', 'Wijkverpleegkundige', 'Doktersassistent',
-]
+// ONTZORGING (K-178, Danny 24-08: the product is GENERAL staffing — care is one
+// segment, never the default): the server seeds the functions lookup EMPTY
+// (creatable combobox, bureaus fill their own list), so the FE fallback follows.
+// The old care-specific emergency list would resurface sector defaults the
+// platform deliberately no longer ships.
+export const DEFAULT_FUNCTIONS: string[] = []
 
 // Both pieces of state (names + the API's free-entry flag) come from the same
 // response, so they're cached together as one value. The backend's own default

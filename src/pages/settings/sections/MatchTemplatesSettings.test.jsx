@@ -10,7 +10,12 @@ import userEvent from '@testing-library/user-event'
 import i18n from '@/i18n'
 import api from '@/lib/api'
 import { DEFAULT_CONTRACT_TYPES } from '@/lib/useContractTypes'
-import { DEFAULT_FUNCTIONS } from '@/lib/useFunctions'
+// ONTZORGING (K-178): DEFAULT_FUNCTIONS seeds EMPTY now (bureaus fill their
+// own list) — the test provides its own known function list via a hook mock.
+const TEST_FUNCTIONS = ['Consultant', 'Projectleider']
+vi.mock('@/lib/useFunctions', () => ({
+  useFunctions: () => ({ functions: TEST_FUNCTIONS, allowFreeEntry: true, invalidate: () => {} }),
+}))
 import MatchTemplatesSettings from './MatchTemplatesSettings'
 
 // Keep the real unwrap/unwrapList (importActual) — only the default client is stubbed.
@@ -183,7 +188,7 @@ describe('MatchTemplatesSettings', () => {
     // Functie — searchable single-select (CreatableSelect); its trigger shows the
     // placeholder text until a value is picked.
     await user.click(screen.getByRole('button', { name: st('matchTemplatesSettings.functionTitlePlaceholder') }))
-    await user.click(screen.getByRole('button', { name: DEFAULT_FUNCTIONS[0] }))
+    await user.click(screen.getByRole('button', { name: TEST_FUNCTIONS[0] }))
 
     await user.click(screen.getByRole('button', { name: st('matchTemplatesSettings.add') }))
 
@@ -194,7 +199,7 @@ describe('MatchTemplatesSettings', () => {
       name: 'Zorg profiel',
       weights: { qualifications: 3, technical_fit: 3, soft_skills: 3, cultural_alignment: 3, career_aspirations: 3, location: 3 },
       contract_types: [DEFAULT_CONTRACT_TYPES[0], DEFAULT_CONTRACT_TYPES[1]],
-      function_title: DEFAULT_FUNCTIONS[0],
+      function_title: TEST_FUNCTIONS[0],
     }))
   })
 })

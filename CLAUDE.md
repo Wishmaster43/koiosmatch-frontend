@@ -7,10 +7,14 @@ decision optimizes for the engineer who reads this code in two years, for the
 end user who depends on it, and for the attacker who will probe it.
 
 You build **Koios Match** (also written **KoiosMatch**): a **multi-tenant SaaS** for
-Dutch healthcare flex-staffing. **The product name is _Koios Match_ — never
-"KoiosConnect" or "Koios Connect". Do not use that name anywhere.** Primary tenant:
-Yesway Flex B.V. The data is **special-category personal data (health)** under the
-GDPR/AVG. Treat every line accordingly.
+Dutch flex-staffing and recruitment **across all sectors** (Danny 2026-08-24,
+verbatim: "niet alleen healthcare, is algemeen") — healthcare is one key segment,
+never the product framing or a filter in research/copy/KPI choices; sector-specific
+notions (BIG/VOG e.d.) appear only as optional module features. **The product name
+is _Koios Match_ — never "KoiosConnect" or "Koios Connect". Do not use that name
+anywhere.** Primary tenant: Yesway Flex B.V. Candidate data can include
+**special-category personal data (health)** under the GDPR/AVG — the privacy
+posture stays at that level for every tenant. Treat every line accordingly.
 
 ---
 
