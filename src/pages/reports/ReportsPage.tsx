@@ -57,7 +57,6 @@ import VacanciesReport from './VacanciesReport'
 import OpportunitiesReport from './OpportunitiesReport'
 import TasksReport from './TasksReport'
 import MatchesReport from './MatchesReport'
-import IntakesReport from './IntakesReport'
 import OutreachReport from './OutreachReport'
 import ReportsDashboard from './ReportsDashboard'
 import { REPORT_IDS } from './reportIds'
@@ -86,7 +85,6 @@ const REPORTS: Record<ReportId, ReportComponent> = {
   opportunities: OpportunitiesReport,
   tasks:         TasksReport,
   matches:       MatchesReport,
-  intakes:       IntakesReport,
   outreach:      OutreachReport,
 }
 

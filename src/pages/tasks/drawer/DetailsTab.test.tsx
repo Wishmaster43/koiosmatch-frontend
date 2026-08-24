@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, renderHook } from '@testing-library/react'
 // Real i18n (nl) instance — kept as a binding (not just the side-effect import) so
 // the T4 advice-block test below can read the SAME resolved string the component
@@ -38,6 +38,14 @@ vi.mock('@/context/TaskLookupsContext', () => ({
   },
 }))
 vi.mock('@/lib/queries', () => ({ useUsers: () => ({ data: [{ id: 'u1', name: 'Anna' }] }) }))
+// TASK-DISPLAY-DRILL-1: controllable display settings — the drill-down must
+// follow the SAME task_table_color_* toggles as the table.
+const displaySettingsRecord = vi.hoisted(() => ({ current: {} as Record<string, unknown> }))
+vi.mock('@/lib/settings/useAllSettings', () => ({
+  useAllSettings: () => displaySettingsRecord.current,
+  getBoolSetting: (s: Record<string, unknown>, key: string, fallback: boolean) =>
+    key in s ? s[key] === true || s[key] === 'true' || s[key] === '1' : fallback,
+}))
 // TASK-LOCATION-READ-1: the tenant's own establishments, same mock shape as every
 // other entity's branch-picker test (e.g. AddCandidateModal.test.tsx).
 vi.mock('@/lib/useLocations', () => ({
@@ -417,5 +425,35 @@ describe('tasks DetailsTab — chips read the LIVE lookup, not a baked snapshot 
     // (mirrors EntityTasksTab.test.tsx's own documented convention).
     // eslint-disable-next-line no-restricted-syntax -- asserting chipInk() output for the real makeMetaResolver fallback colour, not a UI colour choice
     expect(chip).toHaveStyle({ color: chipInk('#9ca3af') })
+  })
+})
+
+// TASK-DISPLAY-DRILL-1 (Danny 24-08): "alleen de tabel wordt gekleurd en daar
+// hebben we instellingen voor" — the drill-down chips follow the table toggles,
+// never a second setting. Off = plain text, exactly like the table cells.
+describe('tasks DetailsTab — chips follow the table colour toggles', () => {
+  beforeEach(() => { displaySettingsRecord.current = {} })
+
+  it('renders coloured chips by default (toggles on)', () => {
+    render(<DetailsTab task={task} onUpdate={vi.fn()} />)
+    // SoftChip renders an inline-flex span; the plain-text variant is a bare span.
+    const statusEl = screen.getByText('Te doen')
+    expect(statusEl.style.display).toBe('inline-flex')
+  })
+
+  it('renders plain text when the table toggles are off — consistent with the table', () => {
+    displaySettingsRecord.current = {
+      task_table_color_status: false,
+      task_table_color_priority: false,
+      task_table_color_type: false,
+      task_table_color_assignee: false,
+    }
+    render(<DetailsTab task={task} onUpdate={vi.fn()} />)
+    const statusEl = screen.getByText('Te doen')
+    expect(statusEl.style.display).not.toBe('inline-flex')
+    expect(statusEl.style.color).toBe('var(--text)')
+    // Type and priority read as plain text too.
+    expect(screen.getByText('Belafspraak').style.display).not.toBe('inline-flex')
+    expect(screen.getByText('Normaal').style.display).not.toBe('inline-flex')
   })
 })

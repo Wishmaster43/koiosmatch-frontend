@@ -2,6 +2,13 @@ import { describe, it, expect, vi } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import RelatedTasks from './RelatedTasks'
+// TASK-DISPLAY-DRILL-1: flat settings mock — defaults on, so existing
+// assertions keep seeing coloured chips.
+vi.mock('@/lib/settings/useAllSettings', () => ({
+  useAllSettings: () => ({}),
+  getBoolSetting: (_s: unknown, _key: string, fallback: boolean) => fallback,
+}))
+
 import type { TaskDetail, TaskLink } from '@/types/task'
 
 // Keep the real unwrap/unwrapList (importActual) — only the default client is

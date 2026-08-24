@@ -72,11 +72,11 @@ vi.mock('./MatchesReport', () => ({
     <div data-testid="report-period" data-filters={JSON.stringify(filters ?? null)}>{period}</div>
   ),
 }))
-// A non-filterable report (intakes) proves the hard requirement: the reports
+// A non-filterable report (outreach) proves the hard requirement: the reports
 // off FILTERABLE_REPORT_IDS keep getting a period-only panel — no field the
-// server would drop. (flow held this role until RAPPORTEN-DANNY10-1 retired it.)
-vi.mock('./IntakesReport', () => ({ default: ({ period }: { period: string }) => <div data-testid="intakes-period">{period}</div> }))
-vi.mock('./OutreachReport', () => ({ default: () => null }))
+// server would drop. (flow, then intakes, held this role until
+// RAPPORTEN-DANNY10-1 retired their pages.)
+vi.mock('./OutreachReport', () => ({ default: ({ period }: { period: string }) => <div data-testid="outreach-period">{period}</div> }))
 vi.mock('./ReportsDashboard', () => ({ default: ({ period }: { period: string }) => <div data-testid="dashboard-period">{period}</div> }))
 
 interface RadioGroup {
@@ -113,17 +113,17 @@ describe('ReportsPage — right filter panel', () => {
     expect(groups.map(g => g.key)).toEqual(['period', 'status', 'owner', 'branch'])
   })
 
-  it('a report the backend has NOT wired yet (intakes) still registers ONLY the period — no field the server would silently drop', () => {
+  it('a report the backend has NOT wired yet (outreach filters aside — outreach is period-only here) still registers ONLY the period — no field the server would silently drop', () => {
     let latest: RadioGroup[] = []
     render(
       <RightPanelProvider>
         <Capture onGroups={g => { latest = g }} />
-        <ReportsPage reportId="intakes" />
+        <ReportsPage reportId="outreach" />
       </RightPanelProvider>,
     )
     expect(latest).toHaveLength(1)
     expect(latest[0].key).toBe('period')
-    expect(screen.getByTestId('intakes-period').textContent).toBe('month')
+    expect(screen.getByTestId('outreach-period').textContent).toBe('month')
   })
 
   it('unregisters its groups on unmount (panel closes with nothing stale behind it)', () => {
@@ -221,13 +221,13 @@ describe('ReportsPage — right filter panel', () => {
   it('a non-filterable report never receives a filters prop, even with stale selections', () => {
     render(
       <RightPanelProvider>
-        <ReportsPage reportId="intakes" />
+        <ReportsPage reportId="outreach" />
       </RightPanelProvider>,
     )
     // FlowReport's own stub never reads `filters` — asserting on its absence would
     // require exposing it; the period-only panel group assertion above already
     // proves nothing beyond period is registered for this report.
-    expect(screen.getByTestId('intakes-period')).toBeInTheDocument()
+    expect(screen.getByTestId('outreach-period')).toBeInTheDocument()
   })
 
   // RIGHTPANEL-FILTERS-1 (Danny 2026-08-14, "rode filters moeten naar rechts
@@ -240,7 +240,7 @@ describe('ReportsPage — right filter panel', () => {
   it('renders no inline period picker of its own — period is chosen ONLY via the right panel now', () => {
     const { container } = render(
       <RightPanelProvider>
-        <ReportsPage reportId="intakes" />
+        <ReportsPage reportId="outreach" />
       </RightPanelProvider>,
     )
     expect(container.querySelectorAll('button')).toHaveLength(0)
@@ -251,11 +251,11 @@ describe('ReportsPage — right filter panel', () => {
     render(
       <RightPanelProvider>
         <Capture onGroups={g => { latest = g }} />
-        <ReportsPage reportId="intakes" />
+        <ReportsPage reportId="outreach" />
       </RightPanelProvider>,
     )
     const periodGroup = latest[0]
-    const params = buildReportQueryParams((periodGroup.selected?.[0] as 'day' | 'week' | 'month') ?? 'month', 'intakes')
+    const params = buildReportQueryParams((periodGroup.selected?.[0] as 'day' | 'week' | 'month') ?? 'month', 'outreach')
     expect(params).toEqual({ period: 'month' })
   })
 })

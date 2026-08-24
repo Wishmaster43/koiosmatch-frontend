@@ -6,6 +6,7 @@ import EntityDrawer from '@/components/drawer/EntityDrawer'
 import EntityHeader from '@/components/drawer/EntityHeader'
 import type { MetaPicker } from '@/components/drawer/EntityHeader'
 import TitleBadge from '@/components/drawer/TitleBadge'
+import { useAllSettings, getBoolSetting } from '@/lib/settings/useAllSettings'
 import ReferenceNumberChip from '@/components/ui/ReferenceNumberChip'
 import CustomFieldsTab from '@/components/drawer/CustomFieldsTab'
 import { useDateFormat } from '@/lib/datetime'
@@ -79,6 +80,8 @@ export default function TaskDrawer({ task, onClose, expanded, onToggleExpand, on
   const [titleDraft, setTitleDraft] = useState('')
   const [prevId, setPrevId] = useState<Id | undefined>(task?.id)
   if (task?.id !== prevId) { setPrevId(task?.id); setEditingTitle(false); setTitleDraft('') }
+  // TASK-DISPLAY-DRILL-1: settings read BEFORE the early return (rules of hooks).
+  const displaySettings = useAllSettings()
   if (!task) return null
 
   const startTitleEdit = () => { setTitleDraft(task.title); setEditingTitle(true) }
@@ -92,6 +95,10 @@ export default function TaskDrawer({ task, onClose, expanded, onToggleExpand, on
   // String(): typeKey/statusKey are `string | number` (Task type), the resolvers
   // take `string | null` — same coercion useTasksData's decorate() uses.
   const statusInfo = statusMeta(String(task.statusKey))
+  // TASK-DISPLAY-DRILL-1: the header badge/avatar follow the same table toggle —
+  // colours off in the table means a neutral drill-down header too.
+  const colorStatus = getBoolSetting(displaySettings, 'task_table_color_status', true)
+  const statusColor = colorStatus ? statusInfo.color : null
   const typeInfo = typeMeta(String(task.typeKey))
 
   // Map a tab id to its content component.
@@ -176,9 +183,9 @@ export default function TaskDrawer({ task, onClose, expanded, onToggleExpand, on
         <EntityHeader
           // TITEL-CHIP-1 (Danny 19-08): the status badge IS the title — the static
           // entity word doubled with the badge beside the name.
-          label={<TitleBadge label={statusInfo.label} color={statusInfo.color} />}
+          label={<TitleBadge label={statusInfo.label} color={statusColor} />}
           expanded={expanded} onToggleExpand={onToggleExpand} onClose={onClose}
-          avatar={{ initials: initialsOf(task.title, 'T'), soft: true, color: statusInfo.color }}
+          avatar={{ initials: initialsOf(task.title, 'T'), soft: true, color: statusColor }}
           renderTitle={() => editingTitle ? (
             // T1: inline title edit — mirror VacancyDrawer's renderTitle swap.
             <input autoFocus value={titleDraft} onChange={e => setTitleDraft(e.target.value)}

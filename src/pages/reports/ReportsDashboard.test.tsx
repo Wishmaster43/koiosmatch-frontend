@@ -22,7 +22,6 @@ const mockVacancies     = vi.fn()
 const mockMatches       = vi.fn()
 const mockTasks         = vi.fn()
 const mockOpportunities = vi.fn()
-const mockIntakes       = vi.fn()
 const mockOutreach      = vi.fn()
 vi.mock('./useCandidatesReport',    () => ({ useCandidatesReport:    () => mockCandidates() }))
 vi.mock('./useApplicationsReport',  () => ({ useApplicationsReport:  () => mockApplications() }))
@@ -31,14 +30,13 @@ vi.mock('./useVacanciesReport',     () => ({ useVacanciesReport:     () => mockV
 vi.mock('./useMatchesReport',       () => ({ useMatchesReport:       () => mockMatches() }))
 vi.mock('./useTasksReport',         () => ({ useTasksReport:         () => mockTasks() }))
 vi.mock('./useOpportunitiesReport', () => ({ useOpportunitiesReport: () => mockOpportunities() }))
-vi.mock('./useIntakesReport',       () => ({ useIntakesReport:       () => mockIntakes() }))
 vi.mock('./useOutreachReport',      () => ({ useOutreachReport:      () => mockOutreach() }))
 
 // Fixture totals — nine distinct numbers so a mixed-up card/route pairing
 // would fail a value assertion, not just a count assertion.
 const FIXTURES: Record<string, number> = {
   candidates: 11, applications: 22, customers: 33, vacancies: 44, matches: 55,
-  tasks: 66, opportunities: 77, intakes: 88, outreach: 99,
+  tasks: 66, opportunities: 77, outreach: 99,
 }
 
 function setSuccess() {
@@ -49,7 +47,6 @@ function setSuccess() {
   mockMatches.mockReturnValue({ data: { total: FIXTURES.matches }, loading: false, error: false })
   mockTasks.mockReturnValue({ data: { total: FIXTURES.tasks }, loading: false, error: false })
   mockOpportunities.mockReturnValue({ data: { total: FIXTURES.opportunities }, loading: false, error: false })
-  mockIntakes.mockReturnValue({ data: { total: FIXTURES.intakes }, loading: false, error: false })
   mockOutreach.mockReturnValue({ data: { total: FIXTURES.outreach }, loading: false, error: false })
 }
 
@@ -58,7 +55,7 @@ function renderDashboard() {
 }
 
 describe('ReportsDashboard (RAPPORTEN-DASHBOARD-1)', () => {
-  it('renders exactly nine KPI cards, one number per existing report endpoint', () => {
+  it('renders one KPI card per surviving report endpoint (whatsapp joins with its page)', () => {
     setSuccess()
     renderDashboard()
     Object.values(FIXTURES).forEach(v => expect(screen.getByText(String(v))).toBeInTheDocument())
@@ -111,5 +108,16 @@ describe('ReportsDashboard (RAPPORTEN-DASHBOARD-1)', () => {
     renderDashboard()
     await userEvent.click(screen.getByText(String(FIXTURES.vacancies)))
     expect(mockNavigate).toHaveBeenCalledWith('reports.vacancies')
+  })
+})
+
+// Danny 24-08: tiles wear the sidebar names in the sidebar (REPORT_IDS) order.
+describe('ReportsDashboard · sidebar parity', () => {
+  it('renders the nine tiles in REPORT_IDS order with the tabs.* labels', () => {
+    setSuccess()
+    renderDashboard()
+    const values = ['11', '22', '33', '44', '77', '66', '55', '99']
+    const rendered = screen.getAllByText(/^(11|22|33|44|55|66|77|99)$/).map(el => el.textContent)
+    expect(rendered).toEqual(values)
   })
 })

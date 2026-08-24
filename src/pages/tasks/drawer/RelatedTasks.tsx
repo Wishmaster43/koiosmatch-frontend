@@ -24,6 +24,9 @@ import { ListChecks } from 'lucide-react'
 import api, { unwrapList } from '@/lib/api'
 import HeaderSearch from '@/components/ui/HeaderSearch'
 import SoftChip from '@/components/ui/SoftChip'
+import Button from '@/components/ui/Button'
+import { SectionTitle, Caption } from '@/components/ui/typography'
+import { useAllSettings, getBoolSetting } from '@/lib/settings/useAllSettings'
 import DrawerFilterMenu from '@/components/drawer/DrawerFilterMenu'
 import type { DrawerFilterConfig } from '@/components/drawer/DrawerFilterMenu'
 import { useNavigation } from '@/context/NavigationContext'
@@ -65,6 +68,7 @@ function resolveSubject(task: TaskDetail): Subject | null {
 // read-only list), so an unconditional tab would show a blank pane. Single
 // source of truth for "does this task have a qualifying subject" — never
 // duplicate the ENTITY_LINK_TYPES walk in the drawer.
+// eslint-disable-next-line react-refresh/only-export-components -- NECESSITY: single source of truth for the drawer's tab gate (see comment above); a separate module would split the subject-resolution logic from its only consumer pair
 export function hasRelatedSubject(task: TaskDetail): boolean {
   return resolveSubject(task) !== null
 }
@@ -72,6 +76,8 @@ export function hasRelatedSubject(task: TaskDetail): boolean {
 export default function RelatedTasks({ task }: { task: TaskDetail }) {
   const { t } = useTranslation(['tasks', 'common'])
   const { formatDate } = useDateFormat()
+  // TASK-DISPLAY-DRILL-1: the status chip follows the table's colour toggle.
+  const colorStatus = getBoolSetting(useAllSettings(), 'task_table_color_status', true)
   const { openEntity } = useNavigation()
   const { statuses, types, priorities } = useTaskLookups()
   const [rows, setRows] = useState<Row[]>([])
@@ -140,9 +146,9 @@ export default function RelatedTasks({ task }: { task: TaskDetail }) {
     <div>
       {/* The right title per entity type (T5) — a fixed, per-type phrase (avoids
           de/het gender-agreement issues a single interpolated template would hit). */}
-      <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)', marginBottom: 10 }}>
+      <SectionTitle as="div" style={{ marginBottom: 10 }}>
         {t(`related.titles.${subject.type}`)}
-      </div>
+      </SectionTitle>
 
       {/* Search + filter menu — behaves like the tasks page (T5). TASK-FILTER-MENU-1:
           status/type/priority now live behind the one Filter button. */}
@@ -159,8 +165,7 @@ export default function RelatedTasks({ task }: { task: TaskDetail }) {
       ) : error ? (
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 12, color: 'var(--color-danger-text)' }}>
           <span>{t('related.error')}</span>
-          <button onClick={fetchRelated} style={{ background: 'none', border: '1px solid var(--border)', borderRadius: 6,
-            padding: '3px 9px', cursor: 'pointer', color: 'var(--text)' }}>{t('common:error.retry')}</button>
+          <Button variant="secondary" onClick={fetchRelated}>{t('common:error.retry')}</Button>
         </div>
       ) : rows.length === 0 ? (
         <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('related.empty')}</div>
@@ -170,6 +175,7 @@ export default function RelatedTasks({ task }: { task: TaskDetail }) {
         const color = (typeof st === 'object' ? st?.color : null) ?? 'var(--text-muted)'
         return (
           <button key={String(r.id)} onClick={() => openEntity('tasks', r.id)}
+            // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- NECESSITY: clickable record-row card (list gateway), not an action button — Button's face would mislabel it
             style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', textAlign: 'left', padding: '7px 10px', marginBottom: 6,
               border: '1px solid var(--border)', borderRadius: 8, background: 'var(--bg)', cursor: 'pointer' }}>
             <ListChecks size={13} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
@@ -177,9 +183,9 @@ export default function RelatedTasks({ task }: { task: TaskDetail }) {
               {r.title ?? '—'}
             </span>
             {(r.completed_at || r.due_date) && (
-              <span style={{ fontSize: 11, color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>{formatDate(r.completed_at ?? r.due_date ?? undefined)}</span>
+              <Caption style={{ whiteSpace: 'nowrap' }}>{formatDate(r.completed_at ?? r.due_date ?? undefined)}</Caption>
             )}
-            {label && <SoftChip label={label} color={color} />}
+            {label && (colorStatus ? <SoftChip label={label} color={color} /> : <span style={{ color: 'var(--text)', fontSize: 12 }}>{label}</span>)}
           </button>
         )
       })}

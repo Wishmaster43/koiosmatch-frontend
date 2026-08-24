@@ -45,7 +45,7 @@ describe('appPages — reports routing', () => {
   // root — never a placeholder or a dead screen (§0.1: a removed route never
   // breaks a deep link).
   it('every reports.<id> route retired by the ten-page decision falls back to the hub root', () => {
-    for (const retired of ['flow', 'people', 'customerstructure', 'usage', 'recruiters', 'accountmanagers', 'contacts', 'locations', 'departments', 'ai', 'workflows']) {
+    for (const retired of ['flow', 'people', 'customerstructure', 'usage', 'intakes', 'recruiters', 'accountmanagers', 'contacts', 'locations', 'departments', 'ai', 'workflows']) {
       const el = renderPage(`reports.${retired}`, { goTo: noop }) as ReactElement<Record<string, unknown>>
       // The fallback hands out the bare hub: a ReportsPage element without a
       // reportId — the same element the #reports root renders.

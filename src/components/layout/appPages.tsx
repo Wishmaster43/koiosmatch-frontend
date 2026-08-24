@@ -91,7 +91,6 @@ export const PAGE_TITLES: Record<string, string> = {
   'reports.opportunities':      'Reports — Opportunities',
   'reports.tasks':              'Reports — Tasks',
   'reports.matches':            'Reports — Matches',
-  'reports.intakes':            'Reports — Intakes',
   'reports.outreach':           'Reports — Outreach',
   // Legacy (retired as their own route — RAPPORTEN-CONSOLIDATIE-1)
   'reports.leads':              'Reports — Leads',
@@ -182,7 +181,7 @@ export function renderPage(activePage: string, { navIntent, goTo, dashView }: { 
     // Danny 14-08) — it no longer forwards to the first sub-report, so it gets NO
     // reportId prop and ReportsPage renders the dashboard branch.
     case 'reports':                return <ReportsPage />
-    // Nine CANONICAL routes (RAPPORTEN-DANNY10-1) — each lands on that page's
+    // The CANONICAL routes (RAPPORTEN-DANNY10-1) — each lands on that page's
     // own default switch position (no initialView needed).
     case 'reports.candidates':     return <ReportsPage reportId="candidates" />
     case 'reports.applications':   return <ReportsPage reportId="applications" />
@@ -191,7 +190,6 @@ export function renderPage(activePage: string, { navIntent, goTo, dashView }: { 
     case 'reports.opportunities':  return <ReportsPage reportId="opportunities" />
     case 'reports.tasks':          return <ReportsPage reportId="tasks" />
     case 'reports.matches':        return <ReportsPage reportId="matches" />
-    case 'reports.intakes':        return <ReportsPage reportId="intakes" />
     case 'reports.outreach':       return <ReportsPage reportId="outreach" />
     // Legacy routes with a surviving host page — resolve to the merged page +
     // switch position via the ONE map reportIds.ts documents

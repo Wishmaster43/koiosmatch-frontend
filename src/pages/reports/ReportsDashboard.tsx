@@ -20,7 +20,6 @@ import { useVacanciesReport } from './useVacanciesReport'
 import { useMatchesReport } from './useMatchesReport'
 import { useTasksReport } from './useTasksReport'
 import { useOpportunitiesReport } from './useOpportunitiesReport'
-import { useIntakesReport } from './useIntakesReport'
 import { useOutreachReport } from './useOutreachReport'
 import type { ReportId } from './reportIds'
 import type { ReportPeriod } from '@/types/analytics'
@@ -43,21 +42,22 @@ export default function ReportsDashboard({ period }: { period: ReportPeriod }) {
   const matches       = useMatchesReport(period)
   const tasks         = useTasksReport(period)
   const opportunities = useOpportunitiesReport(period)
-  const intakes       = useIntakesReport(period)
   // RAPPORTEN-DANNY10-1: the flow tile retired with its page; outreach (one of
   // Danny's ten) takes the ninth card so the row stays at nine real numbers.
   const outreach      = useOutreachReport(period)
 
+  // Danny 24-08: the hub tiles carry the SIDEBAR names (tabs.*) in the SIDEBAR
+  // order (REPORT_IDS) — a tile is the entity's entry card, so it wears the
+  // entity's name, never its report's own total-label wording.
   const rows: Row[] = [
-    { key: 'candidates',    label: t('candidates.total'),    page: 'candidates',    loading: candidates.loading,    error: candidates.error,    total: candidates.data?.total ?? null },
-    { key: 'applications',  label: t('applications.total'),  page: 'applications',  loading: applications.loading,  error: applications.error,  total: applications.data?.total ?? null },
-    { key: 'customers',     label: t('customers.total'),     page: 'customers',     loading: customers.loading,     error: customers.error,     total: customers.data?.total ?? null },
-    { key: 'vacancies',     label: t('dashboard.vacancies'), page: 'vacancies',     loading: vacancies.loading,     error: vacancies.error,     total: vacancies.data?.total ?? null },
-    { key: 'matches',       label: t('matches.total'),       page: 'matches',       loading: matches.loading,       error: matches.error,       total: matches.data?.total ?? null },
-    { key: 'tasks',         label: t('tasks.total'),         page: 'tasks',         loading: tasks.loading,         error: tasks.error,         total: tasks.data?.total ?? null },
-    { key: 'opportunities', label: t('opportunities.total'), page: 'opportunities', loading: opportunities.loading, error: opportunities.error, total: opportunities.data?.total ?? null },
-    { key: 'intakes',       label: t('intakes.total'),       page: 'intakes',       loading: intakes.loading,       error: intakes.error,       total: intakes.data?.total ?? null },
-    { key: 'outreach',      label: t('outreach.total'),      page: 'outreach',      loading: outreach.loading,      error: outreach.error,      total: outreach.data?.total ?? null },
+    { key: 'candidates',    label: t('tabs.candidates'),    page: 'candidates',    loading: candidates.loading,    error: candidates.error,    total: candidates.data?.total ?? null },
+    { key: 'applications',  label: t('tabs.applications'),  page: 'applications',  loading: applications.loading,  error: applications.error,  total: applications.data?.total ?? null },
+    { key: 'customers',     label: t('tabs.customers'),     page: 'customers',     loading: customers.loading,     error: customers.error,     total: customers.data?.total ?? null },
+    { key: 'vacancies',     label: t('tabs.vacancies'),     page: 'vacancies',     loading: vacancies.loading,     error: vacancies.error,     total: vacancies.data?.total ?? null },
+    { key: 'opportunities', label: t('tabs.opportunities'), page: 'opportunities', loading: opportunities.loading, error: opportunities.error, total: opportunities.data?.total ?? null },
+    { key: 'tasks',         label: t('tabs.tasks'),         page: 'tasks',         loading: tasks.loading,         error: tasks.error,         total: tasks.data?.total ?? null },
+    { key: 'matches',       label: t('tabs.matches'),       page: 'matches',       loading: matches.loading,       error: matches.error,       total: matches.data?.total ?? null },
+    { key: 'outreach',      label: t('tabs.outreach'),      page: 'outreach',      loading: outreach.loading,      error: outreach.error,      total: outreach.data?.total ?? null },
   ]
 
   const kpis: KpiSpec[] = rows.map(r => ({

@@ -13,6 +13,7 @@ import { useTaskAdvice } from '@/lib/useTaskAdvice'
 import { adviceInsightRows } from '@/lib/koiosAdviceInsight'
 import { buildTaskAdviceInsights } from './taskAiInsights'
 import { useTaskLookups } from '@/context/TaskLookupsContext'
+import { useAllSettings, getBoolSetting } from '@/lib/settings/useAllSettings'
 import type { TaskLookupItem } from '@/context/TaskLookupsContext'
 import { useUsers } from '@/lib/queries'
 import { useTeams } from '@/lib/useTeams'
@@ -83,6 +84,17 @@ export default function DetailsTab({ task, onUpdate, onSubtaskCreated }: {
   // uses — the advisory block below prepends its advice so the two never disagree.
   const resolveAdvice = useTaskAdvice()
   const { formatDate, formatDateTime } = useDateFormat()
+  // TASK-DISPLAY-DRILL-1 (Danny 24-08: "alleen de tabel wordt gekleurd en daar
+  // hebben we instellingen voor — consistent"): the drill-down chips follow the
+  // SAME task_table_color_* toggles as the table — never a second setting.
+  const displaySettings = useAllSettings()
+  const colorStatus   = getBoolSetting(displaySettings, 'task_table_color_status', true)
+  const colorPriority = getBoolSetting(displaySettings, 'task_table_color_priority', true)
+  const colorType     = getBoolSetting(displaySettings, 'task_table_color_type', true)
+  const colorAssignee = getBoolSetting(displaySettings, 'task_table_color_assignee', true)
+  // Chip vs. plain text, mirroring TasksTable's own chip() helper exactly.
+  const chipOrText = (label: string, color: string | null | undefined, on: boolean, dot = false): ReactNode =>
+    on ? <SoftChip label={label} color={color ?? null} dot={dot} /> : <span style={{ color: 'var(--text)', fontSize: 12 }}>{label}</span>
   const { statuses, types, priorities, statusMeta, typeMeta, priorityMeta } = useTaskLookups()
   const { data: users = [] } = useUsers() as { data?: UserLike[] }
   // TEAM-1: the tenant's internal departments, same shared hook the create modal uses.
@@ -225,9 +237,9 @@ export default function DetailsTab({ task, onUpdate, onSubtaskCreated }: {
           </div>
         ) : (
           <div style={{ borderRadius: 10, overflow: 'hidden', border: '1px solid var(--border)', background: 'var(--surface)', padding: '6px 12px', display: 'flex', flexDirection: 'column', gap: 2 }}>
-            <Row label={t('details.type')}>{typeInfo.label ? <SoftChip label={typeInfo.label} color={typeInfo.color} /> : <span style={{ color: 'var(--text-muted)' }}>—</span>}</Row>
-            <Row label={t('details.status')}>{statusInfo.label ? <SoftChip label={statusInfo.label} color={statusInfo.color} /> : <span style={{ color: 'var(--text-muted)' }}>—</span>}</Row>
-            <Row label={t('details.priority')}>{priorityInfo.label ? <SoftChip label={priorityInfo.label} color={priorityInfo.color} dot /> : <span style={{ color: 'var(--text-muted)' }}>—</span>}</Row>
+            <Row label={t('details.type')}>{typeInfo.label ? chipOrText(typeInfo.label, typeInfo.color, colorType) : <span style={{ color: 'var(--text-muted)' }}>—</span>}</Row>
+            <Row label={t('details.status')}>{statusInfo.label ? chipOrText(statusInfo.label, statusInfo.color, colorStatus) : <span style={{ color: 'var(--text-muted)' }}>—</span>}</Row>
+            <Row label={t('details.priority')}>{priorityInfo.label ? chipOrText(priorityInfo.label, priorityInfo.color, colorPriority, true) : <span style={{ color: 'var(--text-muted)' }}>—</span>}</Row>
             <Row label={t('details.due')}>
               <span style={{ fontSize: 12, color: task.due ? (isTaskOverdue(task) ? 'var(--color-danger)' : 'var(--text)') : 'var(--text-muted)', fontWeight: isTaskOverdue(task) ? 600 : 400 }}>
                 {/* TASK-DUE-TIME-1: DD-MM-YYYY HH:mm when a time is set, date-only otherwise. */}
@@ -237,7 +249,7 @@ export default function DetailsTab({ task, onUpdate, onSubtaskCreated }: {
             <Row label={t('details.assignee')}>
               {task.assignee ? (
                 <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <Avatar initials={task.assignee.initials} size={20} color={task.assignee.color} />
+                  <Avatar initials={task.assignee.initials} size={20} color={colorAssignee ? task.assignee.color : null} />
                   <span style={{ fontSize: 12, color: 'var(--text)' }}>{task.assignee.name}</span>
                 </span>
               ) : <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('bureau')}</span>}

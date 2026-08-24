@@ -103,7 +103,7 @@ export const REPORT_KPI_SCOPE_IDS: ReportKpiScopeId[] = [
   'candidates', 'leads',
   'applications',
   'customers', 'prospects',
-  'vacancies', 'opportunities', 'tasks', 'matches', 'intakes', 'outreach',
+  'vacancies', 'opportunities', 'tasks', 'matches', 'outreach',
 ]
 
 // Reports with no configurable KPI strip at all (e.g. no ReportKpiBand, or a

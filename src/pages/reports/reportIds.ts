@@ -30,11 +30,11 @@
 // RAPPORTEN-DANNY10-1 (Danny 24-08, via CMBE-afstemming: exactly ten report
 // pages — hub + candidates/applications/customers/vacancies/opportunities/
 // tasks/matches/outreach/whatsapp — "DE REST MOET WEG"). The retired route ids
-// (customerstructure/flow/people/usage + their legacy aliases) resolve to the
-// hub root via appPages' stale-reports fallback, never a dead screen. 'intakes'
-// stays until Danny answers whether the §3B intake-reporting spec retires or
-// moves into the applications report; 'whatsapp' joins once its backend
-// contract is registered (K-169 in WORKLIST).
+// (customerstructure/flow/people/usage/intakes + their legacy aliases) resolve
+// to the hub root via appPages' stale-reports fallback, never a dead screen.
+// Danny 24-08 settled intakes: no own report page ("#reports.intakes hebben we
+// niet") — its numbers land as KPI's inside the applications report (CMBE);
+// 'whatsapp' joins once its backend contract is registered.
 export const REPORT_IDS = [
   'candidates',
   'applications',
@@ -43,7 +43,6 @@ export const REPORT_IDS = [
   'opportunities',
   'tasks',
   'matches',
-  'intakes',
   'outreach',
 ] as const
 
@@ -53,7 +52,7 @@ export type ReportId = (typeof REPORT_IDS)[number]
 // PAGES still exist on disk pending the explicit file-cleanup round (they are
 // unreachable — no route, no sidebar entry, no hub tile) and keep compiling
 // through this type; the cleanup round removes the files and this alias.
-export type RetiredReportRouteId = 'customerstructure' | 'flow' | 'people' | 'usage'
+export type RetiredReportRouteId = 'customerstructure' | 'flow' | 'people' | 'usage' | 'intakes'
 
 // A retired top-level route id → the merged page + switch position it now lands
 // on. Every id that used to be its own `reports.<id>` route stays resolvable

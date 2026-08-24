@@ -18,6 +18,13 @@ import i18n from '@/i18n'
 import api from '@/lib/api'
 import { chipInk } from '@/lib/tint'
 import TaskDrawer from './TaskDrawer'
+// TASK-DISPLAY-DRILL-1: flat settings mock — defaults on, so existing
+// assertions keep seeing coloured chips.
+vi.mock('@/lib/settings/useAllSettings', () => ({
+  useAllSettings: () => ({}),
+  getBoolSetting: (_s: unknown, _key: string, fallback: boolean) => fallback,
+}))
+
 import type { TaskDetail } from '@/types/task'
 
 // Controllable tenant task lookups (vi.hoisted ref, mirrors EntityTasksTab.test.tsx's
