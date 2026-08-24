@@ -15,7 +15,7 @@ vi.mock('@/lib/api', async (importOriginal) => {
 })
 vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string) => k }) }))
 vi.mock('@/i18n', () => ({ LOCALE_BY_LANG: { nl: 'nl-NL', en: 'en-GB' } }))
-vi.mock('@/lib/useDocumentTypes', () => ({ useDocumentTypes: () => ({ types: [{ value: 'ID-bewijs', label: 'ID-bewijs' }, { value: 'Overig', label: 'Overig' }] }) }))
+vi.mock('@/lib/useDocumentTypes', () => ({ useDocumentTypes: () => ({ types: [{ value: 'ID-bewijs', label: 'ID-bewijs' }, { value: 'Bankpas privé', label: 'Bankpas privé' }, { value: 'Overig', label: 'Overig' }] }) }))
 vi.mock('@/components/drawer/DocPreviewModal', () => ({ default: () => <div data-testid="preview-modal" /> }))
 vi.mock('@/lib/downloadFiles', () => ({ downloadFilesSequentially: vi.fn() }))
 
@@ -52,6 +52,19 @@ describe('IbanDocumentSlot', () => {
     await user.click(screen.getByRole('button', { name: 'bankDoc.change' }))
     await user.click(screen.getByRole('button', { name: /bankDoc\.clear/ }))
     expect(onLink).toHaveBeenCalledWith(null)
+  })
+
+  // The seeded per-slot type wins as upload default — when the tenant lookup
+  // actually carries it (else the first type; user can always repick).
+  it('defaults the upload type to the preferredType when available', async () => {
+    const user = userEvent.setup()
+    vi.mocked(api.post).mockResolvedValue({ data: { data: { id: 'd9', name: 'pas.pdf' } } })
+    render(<IbanDocumentSlot candidateId="c1" documents={docs} linkedDocumentId={null} onLink={vi.fn()} preferredType="Bankpas privé" />)
+    await user.click(screen.getByRole('button', { name: /bankDoc\.link/ }))
+    const input = screen.getByLabelText('bankDoc.uploadNew', { selector: 'input' })
+    await user.upload(input as HTMLInputElement, new File(['x'], 'pas.pdf', { type: 'application/pdf' }))
+    await waitFor(() => expect(api.post).toHaveBeenCalled())
+    expect((vi.mocked(api.post).mock.calls[0][1] as FormData).get('type')).toBe('Bankpas privé')
   })
 
   it('uploads inline through the one multipart route and links the fresh id', async () => {

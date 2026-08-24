@@ -31,7 +31,7 @@ type Loose = Record<string, unknown>
 type AnyProps = Record<string, unknown>
 const SearchSelect = SearchSelectJs as unknown as ComponentType<AnyProps>
 
-export default function IbanDocumentSlot({ candidateId, documents = [], linkedDocumentId, onLink }: {
+export default function IbanDocumentSlot({ candidateId, documents = [], linkedDocumentId, onLink, preferredType }: {
   candidateId: string | number
   documents?: Loose[]
   // undefined = the server omitted the field (no financial permission) — the
@@ -39,6 +39,10 @@ export default function IbanDocumentSlot({ candidateId, documents = [], linkedDo
   linkedDocumentId?: string | number | null
   // Persists the link (id) or clears it (null) — the host owns the PATCH shape.
   onLink: (documentId: string | null) => void
+  // Default document type for the inline upload (seeded per slot: "Bankpas
+  // privé" / "Bankpas zakelijk") — used only when the tenant's lookup actually
+  // carries it, else the first type; the user can always pick another.
+  preferredType?: string
 }) {
   const { t } = useTranslation('candidates')
   const [picking, setPicking] = useState(false)
@@ -49,6 +53,8 @@ export default function IbanDocumentSlot({ candidateId, documents = [], linkedDo
   const [uploadError, setUploadError] = useState(false)
   const { types } = useDocumentTypes('candidate')
   const [uploadType, setUploadType] = useState('')
+  const preferredAvailable = preferredType && types.some((tp: { value: string }) => String(tp.value) === preferredType)
+  const defaultType = preferredAvailable ? String(preferredType) : String(types[0]?.value ?? '')
   const fileRef = useRef<HTMLInputElement | null>(null)
 
   if (linkedDocumentId === undefined) return null
@@ -65,7 +71,7 @@ export default function IbanDocumentSlot({ candidateId, documents = [], linkedDo
     setUploading(true); setUploadError(false)
     const fd = new FormData()
     fd.append('file', file)
-    fd.append('type', uploadType || String(types[0]?.value ?? ''))
+    fd.append('type', uploadType || defaultType)
     fd.append('name', file.name)
     api.post(`/candidates/${candidateId}/documents`, fd, { headers: { 'Content-Type': 'multipart/form-data' } })
       .then(res => {
@@ -112,9 +118,9 @@ export default function IbanDocumentSlot({ candidateId, documents = [], linkedDo
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
             {/* Inline upload: type first (lookup-driven), then the file. */}
-            <SearchSelect triggerLabel={uploadType || String(types[0]?.value ?? '')} selectAll={false}
+            <SearchSelect triggerLabel={uploadType || defaultType} selectAll={false}
               options={types.map((tp: { value: string; label: string }) => ({ value: String(tp.value), label: tp.label }))}
-              selected={[uploadType || String(types[0]?.value ?? '')]}
+              selected={[uploadType || defaultType]}
               onToggle={(v: string) => setUploadType(v)} />
             <Button variant="secondary" size="sm" onClick={() => fileRef.current?.click()} disabled={uploading}>
               {uploading ? <Spinner size={13} /> : <Upload size={13} />} {t('bankDoc.uploadNew')}

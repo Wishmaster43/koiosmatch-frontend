@@ -295,13 +295,15 @@ export function ZzpTab({ c, onSave }: { c: Candidate; onSave?: (v: Record<string
       {/* DOC-BANK-2: proof document for the BUSINESS account — same slot as the
           private card, writing freelance.bank_document_id (explicit null clears;
           an omitted key changes nothing — CMBE-measured `sometimes|nullable`).
-          Row only renders when the server sent the field (permission-gated). */}
-      {zzp?.bank_document_id !== undefined && (
+          Always rendered: a candidate WITHOUT a freelance profile yet must
+          still be able to link (the PATCH updateOrCreates the profile). */}
+      {(
         <div style={{ borderRadius: 10, overflow: 'hidden', border: '1px solid var(--border)', background: 'var(--surface)',
           padding: '6px 12px', display: 'flex', alignItems: 'center', gap: 12, minHeight: 26 }}>
           <Caption style={{ width: WIDE_LABEL_WIDTH, flexShrink: 0 }}>{t('zzp.bankDocument')}</Caption>
           <IbanDocumentSlot candidateId={c.id} documents={(c as { documents?: Record<string, unknown>[] }).documents ?? []}
             linkedDocumentId={(zzp?.bank_document_id as string | number | null | undefined) ?? null}
+            preferredType="Bankpas zakelijk"
             onLink={(id) => onSave?.({ bank_document_id: id })} />
         </div>
       )}

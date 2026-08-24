@@ -117,6 +117,9 @@ export const buildCandidatePatch = (patch: Record<string, unknown>): Record<stri
   // convention). The IBAN arrives here already normalised (lib/iban).
   if ('iban'              in patch) body.iban                = patch.iban === '' ? null : patch.iban
   if ('accountHolderName' in patch) body.account_holder_name = patch.accountHolderName === '' ? null : patch.accountHolderName
+  // DOC-BANK-2: the private account's proof document — explicit null unlinks
+  // (CMBE-measured `sometimes|nullable`); an absent key changes nothing.
+  if ('bankDocumentId'    in patch) body.bank_document_id   = patch.bankDocumentId
   // Tenant custom fields (Extra tab): both spellings map to the API key — this
   // was MISSING, so every eigen-velden save silently vanished (Danny 16-07).
   if ('customFields'      in patch) body.custom_fields     = patch.customFields

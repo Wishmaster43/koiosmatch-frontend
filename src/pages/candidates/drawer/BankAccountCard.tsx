@@ -135,7 +135,7 @@ export default function BankAccountCard({ value, onSave, candidateId, bankDocume
         {bankDocumentId !== undefined && (
           <FieldRow label={t('preferences.bankDocument')}>
             <IbanDocumentSlot candidateId={candidateId} documents={documents}
-              linkedDocumentId={bankDocumentId}
+              linkedDocumentId={bankDocumentId} preferredType="Bankpas privé"
               onLink={(id) => onSave({ bank_document_id: id })} />
           </FieldRow>
         )}

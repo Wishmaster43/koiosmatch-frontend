@@ -202,12 +202,17 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
           // RATE-WISH-1 + BANK-1: desired_rate_* and the private bank account
           // (iban / account_holder_name) are ROOT candidate fields — split them
           // out of the preferences blob so everything lands in ONE PATCH.
-          const { desired_rate_min, desired_rate_max, iban, account_holder_name, ...prefs } = p as Record<string, unknown>
+          const { desired_rate_min, desired_rate_max, iban, account_holder_name, bank_document_id, ...prefs } = p as Record<string, unknown>
           onUpdate?.(c.id, { preferences: { ...(c.preferences ?? {}), ...prefs },
             ...(desired_rate_min !== undefined ? { desiredRateMin: desired_rate_min } : {}),
             ...(desired_rate_max !== undefined ? { desiredRateMax: desired_rate_max } : {}),
             ...(iban !== undefined ? { iban } : {}),
-            ...(account_holder_name !== undefined ? { accountHolderName: account_holder_name } : {}) })
+            ...(account_holder_name !== undefined ? { accountHolderName: account_holder_name } : {}),
+            // DOC-BANK-2: the proof-document link is a ROOT field too — it fell
+            // into the preferences blob and never reached the real column
+            // (Danny 24-08 "werkt nog niet"). `!== undefined` keeps explicit
+            // null (unlink) flowing through.
+            ...(bank_document_id !== undefined ? { bankDocumentId: bank_document_id } : {}) })
         }}
         onTypesChange={(types: string[]) => onUpdate?.(c.id, { candidateTypes: types })}
         // "Potlood op de statuswissel" (Danny 2026-07-20): reopen the status modal

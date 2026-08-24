@@ -131,3 +131,17 @@ describe('buildCandidatePatch', () => {
     expect(buildCandidatePatch({ source: null })).toEqual({ source: null })
   })
 })
+
+// DOC-BANK-2: the proof-document link is a ROOT field — and explicit null
+// (unlink) must survive to the body, never be dropped as falsy.
+describe('toApiPatch · bank_document_id', () => {
+  it('maps bankDocumentId to root bank_document_id', () => {
+    expect(buildCandidatePatch({ bankDocumentId: 'doc-9' })).toMatchObject({ bank_document_id: 'doc-9' })
+  })
+  it('keeps an explicit null (unlink) in the body', () => {
+    const body = buildCandidatePatch({ bankDocumentId: null })
+    expect('bank_document_id' in body).toBe(true)
+    expect(body.bank_document_id).toBeNull()
+  })
+})
+
