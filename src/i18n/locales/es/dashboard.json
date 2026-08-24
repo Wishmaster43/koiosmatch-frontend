@@ -62,7 +62,43 @@
     "matchesTotalSub": "En el sistema",
     "messagesSent": "Mensajes enviados",
     "shiftsPlanned": "Turnos planificados",
-    "inPeriod": "En el período"
+    "inPeriod": "En el período",
+    "daysValue": "{{count}} días",
+    "matchesActive": "Colocaciones en curso",
+    "matchesActiveSub": "Sin fecha de fin o posterior",
+    "applicationsActive": "Solicitudes abiertas",
+    "applicationsActiveSub": "No en una fase final",
+    "vacanciesStale": "Vacantes abiertas demasiado tiempo",
+    "vacanciesStaleSub": "Sin presentación reciente",
+    "redeployDue": "Redespliegue en 14 días",
+    "redeployDueSub": "Match finaliza, sin continuación",
+    "timeToSubmit": "Tiempo hasta presentación",
+    "timeToSubmitSub": "Mediana, 30 días móviles",
+    "oppsNew": "Nuevas oportunidades",
+    "oppsStalled": "Oportunidades estancadas",
+    "oppsStalledSub": "Sin actividad",
+    "oppsWinRate": "Tasa de éxito",
+    "oppsWinRateSub": "30 días móviles",
+    "customersActive": "Clientes activos",
+    "customersActiveSub": "Con vacante o colocación activa",
+    "customersProspect": "Prospectos",
+    "customersProspectSub": "Aún no promovidos a cliente",
+    "customersAtRisk": "Clientes con contacto decreciente",
+    "customersAtRiskSub": "Sin contacto ni vacante nueva",
+    "placementsIncomplete": "Colocación con expediente incompleto",
+    "placementsIncompleteSub": "Falta contrato, documento o vínculo",
+    "documentsExpiring": "Documentos por vencer",
+    "documentsExpiringSub": "En 30 días",
+    "openShifts48h": "Turnos abiertos (48h)",
+    "openShifts48hSub": "Sin cubrir, inicio próximo",
+    "shiftsUnconfirmed": "Turnos sin confirmar",
+    "shiftsUnconfirmedSub": "En 48 horas",
+    "shiftsNoshowToday": "Ausencias hoy",
+    "shiftsCancelledToday": "Cancelaciones hoy",
+    "candidatesAvailable": "Candidatos disponibles",
+    "candidatesAvailableSub": "Disponibilidad: disponible",
+    "shiftsNoshowTodaySub": "Ausencias de hoy",
+    "shiftsCancelledTodaySub": "Canceladas hoy"
   },
   "chart": {
     "byStatus": "Candidatos por estado",
@@ -99,7 +135,8 @@
     "koiosSuggestions": "Sugerencias de Koios",
     "customersByOwner": "Clientes por gestor",
     "recruiterLoad": "Carga por reclutador",
-    "oppAging": "Antigüedad de oportunidades"
+    "oppAging": "Antigüedad de oportunidades",
+    "koiosPerformance": "Rendimiento de Koios IA"
   },
   "action": {
     "allCandidates": "Todos los candidatos",
@@ -214,5 +251,17 @@
       "31-90": "31-90 días",
       "90+": "90+ días"
     }
+  },
+  "koiosPerformance": {
+    "title": "Koios AI performance",
+    "stripTitle": "Rendimiento",
+    "expand": "Mostrar rendimiento",
+    "collapse": "Ocultar rendimiento",
+    "completed": "Completadas",
+    "failed": "Fallidas",
+    "other": "Otras",
+    "topUsers": "Top 5 usuarios",
+    "trend": "Tendencia diaria",
+    "noTrend": "Aún no hay datos de tendencia en este período."
   }
 }

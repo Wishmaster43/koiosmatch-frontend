@@ -146,3 +146,26 @@ describe('switcherTypes (DASHBOARD-KIEZER-1)', () => {
     expect(list).toEqual(expect.arrayContaining(['management', 'recruitment', 'recruitment_manager', 'backoffice', 'accountmanager', 'sales_manager']))
   })
 })
+
+// Opus wave-1a M5: cardinality alone let the rows drift from the server seeds
+// unnoticed — pin the v3 rows verbatim (they mirror config/dashboard_kpis.php
+// defaults; a change here is a deliberate, coordinated re-seed, never drift)
+// and require a translated label for every id any row references.
+describe('KPI rows — verbatim v3 pin + label coverage', () => {
+  it('every id in every row carries a KPI_LABEL_KEY entry', () => {
+    const allIds = new Set(Object.values(KPI_ROWS).flat())
+    for (const id of allIds) {
+      expect(KPI_LABEL_KEY[id], `${id} must have a translated label key`).toBeTruthy()
+    }
+  })
+
+  it('admin/management/sales mirror the server default row verbatim', () => {
+    const defaultRow = ['matchesActive', 'placements', 'expiringContracts', 'fillRate', 'openVacancies', 'vacanciesStale', 'applicationsActive', 'pipeline', 'oppsWinRate']
+    expect(KPI_ROWS.admin).toEqual(defaultRow)
+    expect(KPI_ROWS.management).toEqual(defaultRow)
+    expect(KPI_ROWS.sales).toEqual(defaultRow)
+    // readonly is the v3 management-LIGHT variant: the two commercial tiles
+    // (pipeline value, win rate) swap for candidates total + planned intakes.
+    expect(KPI_ROWS.readonly).toEqual(['matchesActive', 'placements', 'expiringContracts', 'fillRate', 'openVacancies', 'vacanciesStale', 'applicationsActive', 'candidates', 'intakes'])
+  })
+})

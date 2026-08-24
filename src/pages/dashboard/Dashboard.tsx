@@ -20,6 +20,7 @@ import ScopeBadge from './blocks/ScopeBadge'
 import RecruiterLoad from './blocks/RecruiterLoad'
 import OppAging from './blocks/OppAging'
 import KoiosForYouCard from './KoiosForYouCard'
+import KoiosPerformanceCard from './blocks/KoiosPerformanceCard'
 import type { DashStats, DashOpp, DashData } from '@/types/dashboard'
 import { useAllSettings, getJsonSetting, getBoolSetting } from '@/lib/settings/useAllSettings'
 import { useNumberFormat } from '@/lib/formatters'
@@ -162,6 +163,13 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
 
           {/* K-173 fase 6 — sales_manager/accountmanager opportunity-ageing buckets. */}
           {vis('block.oppAging') && <OppAging rows={oppAgingRows} />}
+
+          {/* DASH-V3-UITROL-1 (K-181) — tenant-wide "Koios AI performance", only for
+              management/admin (their '*' template lets any block id through). */}
+          {/* Tenant-wide Koios performance is a MANAGEMENT surface (plan v3);
+              recruitment_manager's '*' template must not inherit it — that role
+              gets "Koios deed dit voor jou" with the team scope instead. */}
+          {vis('block.koiosPerformance') && (activeType === 'admin' || activeType === 'management') && <KoiosPerformanceCard />}
 
           {/* "Koios deed dit voor jou" (K0-D noordster) — self-contained card, own
               loading/error/empty/success handling; fetches its own 7/30-day report. */}

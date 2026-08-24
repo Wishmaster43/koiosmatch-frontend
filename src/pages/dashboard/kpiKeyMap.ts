@@ -44,6 +44,25 @@ export const LOCAL_TO_SERVER: Record<string, string> = {
   matchesTotal:      'matches_total',
   messagesSent:      'messages_sent',
   shiftsPlanned:     'shifts_planned',
+  // DASH-V3-UITROL-1 — the 18 v3 KPI keys (K-179, 2bf6418f), verbatim server names.
+  matchesActive:      'matches_active',
+  applicationsActive: 'applications_active',
+  vacanciesStale:     'vacancies_stale',
+  redeployDue:        'redeploy_due_14d',
+  timeToSubmit:       'time_to_submit_avg',
+  oppsNew:            'opps_new',
+  oppsStalled:        'opps_stalled',
+  oppsWinRate:        'opps_win_rate',
+  customersActive:    'customers_active',
+  customersProspect:  'customers_prospect',
+  customersAtRisk:    'customers_at_risk',
+  placementsIncomplete: 'placements_incomplete',
+  documentsExpiring:  'documents_expiring_30d',
+  openShifts48h:      'open_shifts_48h',
+  shiftsUnconfirmed:  'shifts_unconfirmed',
+  shiftsNoshowToday:  'shifts_noshow_today',
+  shiftsCancelledToday: 'shifts_cancelled_today',
+  candidatesAvailable: 'candidates_available',
 }
 
 export const SERVER_TO_LOCAL: Record<string, string> = {
@@ -61,10 +80,13 @@ export const serverKeysToLocal = (keys: string[]): string[] =>
 export const localIdsToServer = (ids: string[]): string[] =>
   ids.map(id => LOCAL_TO_SERVER[id]).filter((k): k is string => k != null)
 
-// The six roles the K-173 per-role endpoints know; every other dashboard_type
-// shares the literal 'default' row (CMBE: "de default-rol heet letterlijk
-// 'default'"). One shared resolver — the settings screen and the live
-// dashboard must never disagree on this mapping.
-const SPECIFIC_API_ROLES = ['recruitment', 'recruitment_manager', 'accountmanager', 'sales_manager', 'backoffice']
+// The eight roles the K-173/K-179 per-role endpoints know; every other
+// dashboard_type shares the literal 'default' row (CMBE: "de default-rol heet
+// letterlijk 'default'"). One shared resolver — the settings screen and the
+// live dashboard must never disagree on this mapping.
+// DASH-V3-UITROL-1 — 'planning' and 'readonly' got their own server-side role
+// defaults (config/dashboard_kpis.php) alongside the v3 tranche; they must no
+// longer fall back to 'default'.
+const SPECIFIC_API_ROLES = ['recruitment', 'recruitment_manager', 'accountmanager', 'sales_manager', 'backoffice', 'planning', 'readonly']
 export const apiRoleForType = (type: string): string =>
   SPECIFIC_API_ROLES.includes(type) ? type : 'default'

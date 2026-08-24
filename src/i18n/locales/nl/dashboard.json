@@ -62,7 +62,43 @@
     "matchesTotalSub": "In het systeem",
     "messagesSent": "Berichten verstuurd",
     "shiftsPlanned": "Diensten gepland",
-    "inPeriod": "In periode"
+    "inPeriod": "In periode",
+    "daysValue": "{{count}} dagen",
+    "matchesActive": "Lopende plaatsingen",
+    "matchesActiveSub": "Geen einddatum of later",
+    "applicationsActive": "Openstaande sollicitaties",
+    "applicationsActiveSub": "Niet in een eindfase",
+    "vacanciesStale": "Te lang open vacatures",
+    "vacanciesStaleSub": "Geen recente voordracht",
+    "redeployDue": "Herplaatsing binnen 14 dagen",
+    "redeployDueSub": "Match loopt af, geen vervolg",
+    "timeToSubmit": "Tijd tot voordracht",
+    "timeToSubmitSub": "Mediaan, rollend 30 dagen",
+    "oppsNew": "Nieuwe kansen",
+    "oppsStalled": "Stilstaande kansen",
+    "oppsStalledSub": "Geen activiteit",
+    "oppsWinRate": "Win rate",
+    "oppsWinRateSub": "Rollend 30 dagen",
+    "customersActive": "Actieve klanten",
+    "customersActiveSub": "Met lopende vacature of plaatsing",
+    "customersProspect": "Prospects",
+    "customersProspectSub": "Nog niet gepromoveerd tot klant",
+    "customersAtRisk": "Klanten met afnemend contact",
+    "customersAtRiskSub": "Geen contact of nieuwe vacature",
+    "placementsIncomplete": "Plaatsing zonder compleet dossier",
+    "placementsIncompleteSub": "Ontbrekend contract, document of koppeling",
+    "documentsExpiring": "Documenten verlopen binnenkort",
+    "documentsExpiringSub": "Binnen 30 dagen",
+    "openShifts48h": "Open diensten (48u)",
+    "openShifts48hSub": "Ongevuld, starten binnenkort",
+    "shiftsUnconfirmed": "Onbevestigde diensten",
+    "shiftsUnconfirmedSub": "Binnen 48 uur",
+    "shiftsNoshowToday": "No-shows vandaag",
+    "shiftsCancelledToday": "Annuleringen vandaag",
+    "candidatesAvailable": "Beschikbare kandidaten",
+    "candidatesAvailableSub": "Inzetbaarheid: beschikbaar",
+    "shiftsNoshowTodaySub": "Vandaag niet verschenen",
+    "shiftsCancelledTodaySub": "Vandaag geannuleerd"
   },
   "chart": {
     "byStatus": "Kandidaten per status",
@@ -99,7 +135,8 @@
     "koiosSuggestions": "Koios-suggesties",
     "customersByOwner": "Klanten per accountmanager",
     "recruiterLoad": "Belasting per recruiter",
-    "oppAging": "Ouderdom kansen"
+    "oppAging": "Ouderdom kansen",
+    "koiosPerformance": "Koios AI performance"
   },
   "action": {
     "allCandidates": "Alle kandidaten",
@@ -214,5 +251,17 @@
       "31-90": "31-90 dagen",
       "90+": "90+ dagen"
     }
+  },
+  "koiosPerformance": {
+    "title": "Koios AI performance",
+    "stripTitle": "Prestaties",
+    "expand": "Prestaties tonen",
+    "collapse": "Prestaties verbergen",
+    "completed": "Voltooid",
+    "failed": "Mislukt",
+    "other": "Overig",
+    "topUsers": "Top 5 gebruikers",
+    "trend": "Dagtrend",
+    "noTrend": "Nog geen trendgegevens in deze periode."
   }
 }

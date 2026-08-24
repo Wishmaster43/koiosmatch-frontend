@@ -57,6 +57,11 @@ function fileNamespaces(source: string): string[] {
   for (const m of source.matchAll(/useTranslation\(\s*(\[[^\]]*\]|['"][\w-]+['"])/g)) {
     for (const q of m[1].matchAll(/['"]([\w-]+)['"]/g)) out.push(q[1])
   }
+  // Pure builders receive `t` as a PARAMETER and never call useTranslation —
+  // their ~40 t('kpi.*') literals were invisible here, which is exactly how two
+  // missing planning-row subs shipped ×5 (Opus wave-1a B1). Such a file declares
+  // its namespace with a pragma: `// i18n-scan: dashboard`.
+  for (const m of source.matchAll(/\/\/ i18n-scan: ([\w-]+)/g)) out.push(m[1])
   return out
 }
 

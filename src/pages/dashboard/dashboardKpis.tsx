@@ -8,7 +8,7 @@
  * client-side att-merge fallbacks, opp/meta-total derivations or local counts.
  */
 import type { ReactNode } from 'react'
-import { Users, CheckCircle, AlertCircle, AlertTriangle, Target, Euro, Briefcase, CalendarCheck, TrendingUp, MessageSquare, Zap, FileText, CalendarClock, Link2, PhoneOff, Hourglass, CalendarX2 } from 'lucide-react'
+import { Users, CheckCircle, AlertCircle, AlertTriangle, Target, Euro, Briefcase, CalendarCheck, TrendingUp, MessageSquare, Zap, FileText, CalendarClock, Link2, PhoneOff, Hourglass, CalendarX2, Building2, ShieldAlert, Repeat, Timer, Ban, UserCheck } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { translateDrill } from './drillTranslate'
 import type { DashDrillDescriptor } from '@/types/dashboard'
@@ -36,6 +36,8 @@ interface BuildArgs {
   onNavigate?: (page: string, intent?: Record<string, unknown>) => void
 }
 
+// i18n-scan: dashboard — pure builder: `t` is a parameter, so the keysExist
+// scanner needs this pragma to see the ~40 t('kpi.*') literals below.
 export function buildDashboardKpis({ t, kpis, drills = {}, num, eur, opp, valueInHours, onNavigate }: BuildArgs): Record<string, DashboardKpi> {
   // K-173 fase 2 — resolve a tile's onClick: a present drill descriptor navigates
   // via entity+params (the exact filters that reproduce this tile's own number);
@@ -105,5 +107,28 @@ export function buildDashboardKpis({ t, kpis, drills = {}, num, eur, opp, valueI
     matchesTotal:      { id: 'matchesTotal', label: t('kpi.matchesTotal'), value: num(kpis.matches_total ?? kpis.matches), sub: t('kpi.matchesTotalSub'), color: 'var(--color-success-text)', bg: 'var(--color-success-bg)', Icon: Briefcase, onClick: resolveClick('matches_total', () => onNavigate?.('matches', {})) },
     messagesSent:      { id: 'messagesSent', label: t('kpi.messagesSent'), value: num(kpis.messages_sent), sub: t('kpi.inPeriod'), color: 'var(--color-primary-text)', bg: 'var(--color-primary-bg)', Icon: MessageSquare, onClick: resolveClick('messages_sent', () => onNavigate?.('whatsapp', { tab: 'messages' })) },
     shiftsPlanned:     { id: 'shiftsPlanned', label: t('kpi.shiftsPlanned'), value: num(kpis.shifts_planned), sub: t('kpi.inPeriod'), color: 'var(--color-primary-text)', bg: 'var(--color-primary-bg)', Icon: CalendarClock, onClick: resolveClick('shifts_planned', () => onNavigate?.('planning', {})) },
+    // DASH-V3-UITROL-1 (K-179) — the 18 v3 KPI tiles. Fallback intents per the
+    // brief's mapping; opps_win_rate/time_to_submit_avg are percentage/day-count
+    // tiles (no num() count formatting).
+    matchesActive:       { id: 'matchesActive', label: t('kpi.matchesActive'), value: num(kpis.matches_active), sub: t('kpi.matchesActiveSub'), color: 'var(--color-success-text)', bg: 'var(--color-success-bg)', Icon: Briefcase, onClick: resolveClick('matches_active', () => onNavigate?.('matches', {})) },
+    applicationsActive:  { id: 'applicationsActive', label: t('kpi.applicationsActive'), value: num(kpis.applications_active), sub: t('kpi.applicationsActiveSub'), color: 'var(--color-secondary)', bg: 'var(--color-secondary-bg)', Icon: Users, onClick: resolveClick('applications_active', () => onNavigate?.('applications', {})) },
+    vacanciesStale:      { id: 'vacanciesStale', label: t('kpi.vacanciesStale'), value: num(kpis.vacancies_stale), sub: t('kpi.vacanciesStaleSub'), color: 'var(--color-warning)', bg: 'var(--color-warning-bg)', Icon: Hourglass, onClick: resolveClick('vacancies_stale', () => onNavigate?.('vacancies', {})) },
+    redeployDue:         { id: 'redeployDue', label: t('kpi.redeployDue'), value: num(kpis.redeploy_due_14d), sub: t('kpi.redeployDueSub'), color: 'var(--color-warning)', bg: 'var(--color-warning-bg)', Icon: Repeat, onClick: resolveClick('redeploy_due_14d', () => onNavigate?.('matches', {})) },
+    // days-count tile: no i18n interpolation available on this builder's plain
+    // `t(key)` signature, so the unit ("days") lives in the SUB label instead.
+    timeToSubmit:        { id: 'timeToSubmit', label: t('kpi.timeToSubmit'), value: num(kpis.time_to_submit_avg), sub: t('kpi.timeToSubmitSub'), color: 'var(--color-primary-text)', bg: 'var(--color-primary-bg)', Icon: Timer, onClick: resolveClick('time_to_submit_avg', () => onNavigate?.('applications', {})) },
+    oppsNew:             { id: 'oppsNew', label: t('kpi.oppsNew'), value: num(kpis.opps_new), sub: t('kpi.inPeriod'), color: 'var(--color-secondary)', bg: 'var(--color-secondary-bg)', Icon: Target, onClick: resolveClick('opps_new', () => onNavigate?.('opportunities', {})) },
+    oppsStalled:         { id: 'oppsStalled', label: t('kpi.oppsStalled'), value: num(kpis.opps_stalled), sub: t('kpi.oppsStalledSub'), color: 'var(--color-warning)', bg: 'var(--color-warning-bg)', Icon: Hourglass, onClick: resolveClick('opps_stalled', () => onNavigate?.('opportunities', {})) },
+    oppsWinRate:         { id: 'oppsWinRate', label: t('kpi.oppsWinRate'), value: kpis.opps_win_rate != null ? `${num(kpis.opps_win_rate)}%` : '—', sub: t('kpi.oppsWinRateSub'), color: 'var(--color-success-text)', bg: 'var(--color-success-bg)', Icon: TrendingUp, onClick: resolveClick('opps_win_rate', () => onNavigate?.('opportunities', {})) },
+    customersActive:     { id: 'customersActive', label: t('kpi.customersActive'), value: num(kpis.customers_active), sub: t('kpi.customersActiveSub'), color: 'var(--color-primary-text)', bg: 'var(--color-primary-bg)', Icon: Building2, onClick: resolveClick('customers_active', () => onNavigate?.('customers', {})) },
+    customersProspect:   { id: 'customersProspect', label: t('kpi.customersProspect'), value: num(kpis.customers_prospect), sub: t('kpi.customersProspectSub'), color: 'var(--color-secondary)', bg: 'var(--color-secondary-bg)', Icon: Building2, onClick: resolveClick('customers_prospect', () => onNavigate?.('customers', {})) },
+    customersAtRisk:     { id: 'customersAtRisk', label: t('kpi.customersAtRisk'), value: num(kpis.customers_at_risk), sub: t('kpi.customersAtRiskSub'), color: 'var(--color-danger-text)', bg: 'var(--color-danger-bg)', Icon: ShieldAlert, onClick: resolveClick('customers_at_risk', () => onNavigate?.('customers', {})) },
+    placementsIncomplete: { id: 'placementsIncomplete', label: t('kpi.placementsIncomplete'), value: num(kpis.placements_incomplete), sub: t('kpi.placementsIncompleteSub'), color: 'var(--color-danger-text)', bg: 'var(--color-danger-bg)', Icon: AlertTriangle, onClick: resolveClick('placements_incomplete', () => onNavigate?.('matches', {})) },
+    documentsExpiring:   { id: 'documentsExpiring', label: t('kpi.documentsExpiring'), value: num(kpis.documents_expiring_30d), sub: t('kpi.documentsExpiringSub'), color: 'var(--color-warning)', bg: 'var(--color-warning-bg)', Icon: FileText, onClick: resolveClick('documents_expiring_30d', () => onNavigate?.('candidates', {})) },
+    openShifts48h:       { id: 'openShifts48h', label: t('kpi.openShifts48h'), value: num(kpis.open_shifts_48h), sub: t('kpi.openShifts48hSub'), color: 'var(--color-warning)', bg: 'var(--color-warning-bg)', Icon: CalendarClock, onClick: resolveClick('open_shifts_48h', () => onNavigate?.('planning', {})) },
+    shiftsUnconfirmed:   { id: 'shiftsUnconfirmed', label: t('kpi.shiftsUnconfirmed'), value: num(kpis.shifts_unconfirmed), sub: t('kpi.shiftsUnconfirmedSub'), color: 'var(--color-warning)', bg: 'var(--color-warning-bg)', Icon: AlertCircle, onClick: resolveClick('shifts_unconfirmed', () => onNavigate?.('planning', {})) },
+    shiftsNoshowToday:   { id: 'shiftsNoshowToday', label: t('kpi.shiftsNoshowToday'), value: num(kpis.shifts_noshow_today), sub: t('kpi.shiftsNoshowTodaySub'), color: 'var(--color-danger-text)', bg: 'var(--color-danger-bg)', Icon: Ban, onClick: resolveClick('shifts_noshow_today', () => onNavigate?.('planning', {})) },
+    shiftsCancelledToday: { id: 'shiftsCancelledToday', label: t('kpi.shiftsCancelledToday'), value: num(kpis.shifts_cancelled_today), sub: t('kpi.shiftsCancelledTodaySub'), color: 'var(--color-danger-text)', bg: 'var(--color-danger-bg)', Icon: Ban, onClick: resolveClick('shifts_cancelled_today', () => onNavigate?.('planning', {})) },
+    candidatesAvailable: { id: 'candidatesAvailable', label: t('kpi.candidatesAvailable'), value: num(kpis.candidates_available), sub: t('kpi.candidatesAvailableSub'), color: 'var(--color-success-text)', bg: 'var(--color-success-bg)', Icon: UserCheck, onClick: resolveClick('candidates_available', () => onNavigate?.('candidates', {})) },
   }
 }

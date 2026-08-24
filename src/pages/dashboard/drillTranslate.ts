@@ -30,6 +30,10 @@ const one = (fragment: Record<string, unknown>): ParamTranslator =>
   v => (v === 1 || v === '1' || v === true ? fragment : null)
 
 const ENTITY_PAGES: Record<string, { page: string; params: Record<string, ParamTranslator> }> = {
+  // DASH-V3-UITROL-1 — documents_expiring_30d's descriptor ({document_expiring:1})
+  // stays UNtranslatable on purpose: CandidatesPage's intent has no
+  // document_expiring field (measured against CandidateIntent in CandidatesPage.tsx)
+  // — no translator below for it, so the tile falls back to its legacy intent.
   candidates: {
     page: 'candidates',
     params: {
@@ -43,6 +47,9 @@ const ENTITY_PAGES: Record<string, { page: string; params: Record<string, ParamT
       owner_id:    v => ({ owner: v }),
       location_id: v => ({ location: v }),
       branch_id:   v => ({ location: v }),
+      // DASH-V3-UITROL-1 — candidates_available's descriptor ({status:'available'}):
+      // CandidatesPage already reads intent.status verbatim (setSelectedStatus).
+      status: v => ({ status: v }),
     },
   },
   tasks: {
@@ -53,6 +60,11 @@ const ENTITY_PAGES: Record<string, { page: string; params: Record<string, ParamT
       assignee_id: v => ({ assignee: v }),
     },
   },
+  // DASH-V3-UITROL-1 — measured: ApplicationsPage's intent has no `bucket` field
+  // (only stage/vacancy/attention/candidate_owner_id/candidate_ids), so
+  // applications_active's {bucket:'active'} descriptor stays UNtranslatable on
+  // purpose (no `bucket` translator below) — the tile falls back to its legacy
+  // intent (`{}` → the plain applications list) rather than a silently wrong filter.
   applications: {
     page: 'applications',
     params: {
@@ -75,6 +87,12 @@ const ENTITY_PAGES: Record<string, { page: string; params: Record<string, ParamT
   // an empty set: matches/vacancies drills with params translate only when empty.
   matches:   { page: 'matches',   params: {} },
   vacancies: { page: 'vacancies', params: {} },
+  // customers is DELIBERATELY param-less: the customers_active descriptor
+  // carries { status: 'active' } but CustomersPage reads no intent vocabulary
+  // yet — the tile falls back to the plain customers list until the customers
+  // intent lands (wave 1c, with the filter dimensions). Third documented
+  // untranslatable next to applications.bucket and candidates.document_expiring.
+  customers: { page: 'customers', params: {} },
   // external-id-mapping-failures → CouplingErrorsPage (K-173 fase 5), a
   // deep-link-only page (no sidebar entry, no filterable params of its own).
   'external-id-mapping-failures': { page: 'coupling-errors', params: {} },

@@ -40,28 +40,29 @@ export const switcherTypes = (hasPlanning: boolean): DashboardType[] =>
 // role plan (PLAN-DASHBOARD-PER-ROL-V2 §2) using the full K-168/K-173 tile
 // vocabulary; the same nine per role go to CMBE as the server role-defaults so
 // kpi_row and this fallback can never disagree.
+// DASH-V3-UITROL-1 (K-179, PLAN-DASHBOARD-PER-ROL-V3, Danny's dubbele GO) — every
+// row below is the v3 NINE verbatim (local ids for the server keys in
+// config/dashboard_kpis.php `defaults`), so kpi_row (server) and this fallback
+// can never disagree. sales/accountmanager/admin share management's/sales_manager's
+// row where the plan gives them no dedicated one (accountmanager and sales keep
+// their own; admin mirrors management, the plan's "MANAGEMENT" row).
 export const KPI_ROWS: Record<DashboardType, string[]> = {
-  admin:       ['candidates', 'opps', 'pipeline', 'expiringOpps', 'placements', 'intakes', 'openVacancies', 'tasksOverdue', 'activeConv'],
-  management:  ['candidates', 'opps', 'pipeline', 'expiringOpps', 'placements', 'intakes', 'openVacancies', 'tasksOverdue', 'activeConv'],
-  // Recruiter: own book (server-scoped) — inflow, attention, intakes, pipeline-to-placement.
-  recruitment: ['candidates', 'candidatesNew', 'stale', 'never', 'noFollowup', 'intakes', 'tooLongInStage', 'tasks', 'placements'],
-  // Team-wide recruitment oversight: the same axes as the recruiter, plus the
-  // escalation/fill signals a manager steers on (plan §2).
-  recruitment_manager: ['candidates', 'candidatesNew', 'intakes', 'tooLongInStage', 'escalations', 'fillRate', 'openVacancies', 'tasksOverdue', 'placements'],
-  // Backoffice (Danny 24-08: "gaat over de uitvoeringen"): the EXECUTION nine —
-  // running placements + new placements, contract/document administration,
-  // coupling health and the workflow runs; call lists left (recruiter work).
-  backoffice:  ['matchesTotal', 'placements', 'expiringContracts', 'missingDocs', 'couplingErrors', 'incompleteRuns', 'failedWf', 'tasks', 'tasksOverdue'],
-  sales:       ['leadsPipeline', 'opps', 'pipeline', 'expiringOpps', 'fillRate', 'expiringContracts', 'vacanciesActive', 'activeConv', 'placements'],
-  // KD11 — own-customer scope (server-resolved); the customer-portfolio nine.
-  accountmanager: ['leadsPipeline', 'opps', 'pipeline', 'expiringOpps', 'fillRate', 'expiringContracts', 'vacanciesActive', 'placements', 'tasks'],
-  // KD11 — tenant-wide over the customer dimension (richest sales view).
-  sales_manager:  ['leadsPipeline', 'opps', 'pipeline', 'expiringOpps', 'fillRate', 'expiringContracts', 'vacanciesActive', 'escalations', 'placements'],
-  // Planning: the shifts operation — coverage first, then the automation health
-  // that feeds it. (Server-side this type still shares the 'default' row; the
-  // dedicated 'planning' role default is requested at CMBE.)
-  planning:    ['shiftsPlanned', 'openShifts', 'occupancy', 'incompleteRuns', 'failedWf', 'tasks', 'tasksOverdue', 'matchesTotal', 'expiringContracts'],
-  readonly:    ['candidates', 'opps', 'pipeline', 'expiringOpps', 'placements', 'intakes', 'openVacancies', 'tasksOverdue', 'activeConv'],
+  admin:       ['matchesActive', 'placements', 'expiringContracts', 'fillRate', 'openVacancies', 'vacanciesStale', 'applicationsActive', 'pipeline', 'oppsWinRate'],
+  management:  ['matchesActive', 'placements', 'expiringContracts', 'fillRate', 'openVacancies', 'vacanciesStale', 'applicationsActive', 'pipeline', 'oppsWinRate'],
+  recruitment: ['tasks', 'tasksOverdue', 'candidatesNew', 'never', 'intakes', 'tooLongInStage', 'missingApptApps', 'redeployDue', 'placements'],
+  recruitment_manager: ['fillRate', 'openVacancies', 'vacanciesStale', 'tooLongInStage', 'missingApptApps', 'intakes', 'placements', 'timeToSubmit', 'tasksOverdue'],
+  // Backoffice (Danny 24-08: "gaat over de uitvoeringen"): the EXECUTION nine.
+  backoffice:  ['matchesActive', 'placements', 'placementsIncomplete', 'expiringContracts', 'missingDocs', 'documentsExpiring', 'couplingErrors', 'incompleteRuns', 'failedWf'],
+  // 'sales' shares the server's 'default' row (apiRoleForType) — mirror it
+  // verbatim so the fallback and kpi_row can never disagree.
+  sales:       ['matchesActive', 'placements', 'expiringContracts', 'fillRate', 'openVacancies', 'vacanciesStale', 'applicationsActive', 'pipeline', 'oppsWinRate'],
+  // AM without pipeline_value (Danny's explicit "open keuze 1") — the prospect/active split instead.
+  accountmanager: ['openVacancies', 'vacanciesStale', 'applicationsActive', 'tooLongInStage', 'opps', 'expiringOpps', 'customersActive', 'customersProspect', 'tasks'],
+  sales_manager:  ['pipeline', 'opps', 'oppsNew', 'oppsStalled', 'expiringOpps', 'oppsWinRate', 'customersActive', 'customersProspect', 'fillRate'],
+  planning:    ['openShifts48h', 'occupancy', 'shiftsPlanned', 'shiftsUnconfirmed', 'shiftsNoshowToday', 'shiftsCancelledToday', 'candidatesAvailable', 'expiringContracts', 'incompleteRuns'],
+  // Management-light (v3 §READONLY): same nine as management, minus the two
+  // commercially sensitive tiles, plus candidatesTotal + intakes.
+  readonly:    ['matchesActive', 'placements', 'expiringContracts', 'fillRate', 'openVacancies', 'vacanciesStale', 'applicationsActive', 'candidates', 'intakes'],
 }
 
 // ── Charts/lists per role. '*' = everything (admin/management = full dashboard).
@@ -102,6 +103,20 @@ export const KPI_LABEL_KEY: Record<string, string> = {
   openVacancies: 'kpi.openVacancies',
   // D6 — new attention tiles (P36 fase 1).
   tooLongInStage: 'kpi.tooLongInStage', missingApptApps: 'kpi.missingApptApps',
+  // DASH-V3-UITROL-1 — the 18 v3 tiles.
+  matchesActive: 'kpi.matchesActive', applicationsActive: 'kpi.applicationsActive',
+  vacanciesStale: 'kpi.vacanciesStale', redeployDue: 'kpi.redeployDue', timeToSubmit: 'kpi.timeToSubmit',
+  oppsNew: 'kpi.oppsNew', oppsStalled: 'kpi.oppsStalled', oppsWinRate: 'kpi.oppsWinRate',
+  customersActive: 'kpi.customersActive', customersProspect: 'kpi.customersProspect', customersAtRisk: 'kpi.customersAtRisk',
+  placementsIncomplete: 'kpi.placementsIncomplete', documentsExpiring: 'kpi.documentsExpiring',
+  openShifts48h: 'kpi.openShifts48h', shiftsUnconfirmed: 'kpi.shiftsUnconfirmed',
+  shiftsNoshowToday: 'kpi.shiftsNoshowToday', shiftsCancelledToday: 'kpi.shiftsCancelledToday',
+  candidatesAvailable: 'kpi.candidatesAvailable',
+  // Full-vocabulary tiles (the pre-v3 completion round) — without these the
+  // Settings matrix falls back to raw ids (the exact openVacancies bug above).
+  candidatesNew: 'kpi.candidatesNew', noFollowup: 'kpi.noFollowup', leadsPipeline: 'kpi.leadsPipeline',
+  vacanciesActive: 'kpi.vacanciesActive', intakesDone: 'kpi.intakesDone', matchesTotal: 'kpi.matchesTotal',
+  messagesSent: 'kpi.messagesSent', shiftsPlanned: 'kpi.shiftsPlanned',
 }
 export const BLOCK_LABEL_KEY: Record<string, string> = {
   'chart.status': 'chart.byStatus', 'chart.funnel': 'chart.funnel', 'chart.funnelConversion': 'chart.funnelConversion',
@@ -121,6 +136,9 @@ export const BLOCK_LABEL_KEY: Record<string, string> = {
   // K-173 fase 6 — recruitment_manager team load + sales ageing buckets.
   'block.recruiterLoad': 'block.recruiterLoad',
   'block.oppAging': 'block.oppAging',
+  // DASH-V3-UITROL-1 (K-181) — the tenant-wide Koios performance block
+  // (management/admin only, via their '*' wildcard template — see Dashboard.tsx).
+  'block.koiosPerformance': 'block.koiosPerformance',
 }
 
 // Is a chart/list block visible for the active dashboard type?

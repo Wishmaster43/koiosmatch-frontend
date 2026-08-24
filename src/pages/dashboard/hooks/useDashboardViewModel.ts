@@ -208,6 +208,12 @@ export function useDashboardViewModel({
     occupancy: 'occupancy',
     messagesSent: 'messages_sent',
     shiftsPlanned: 'shifts_planned',
+    // DASH-V3-UITROL-1 — the four shift keys + open_shifts_48h are ABSENT
+    // (not null) without the planning module, per K-179's contract.
+    openShifts48h:     'open_shifts_48h',
+    shiftsUnconfirmed: 'shifts_unconfirmed',
+    shiftsNoshowToday: 'shifts_noshow_today',
+    shiftsCancelledToday: 'shifts_cancelled_today',
   }
   // Every role ALWAYS gets its own full KPI row (never hidden), just possibly reordered.
   // K-173 kpi_row (714eae01): when the server sends the viewer-effective ordered

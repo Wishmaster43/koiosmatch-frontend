@@ -160,7 +160,7 @@ describe('DashboardsSettings — Volgorde sub-tab (§13, request body)', () => {
     expect(screen.queryByRole('region', { name: st('dashboardsKpis') })).not.toBeInTheDocument()
     // Preview strip: the admin role's first KPI label appears, with a placeholder
     // value — never a fabricated number (§0 no fake affordances).
-    expect(screen.getAllByText(dt('kpi.candidatesTotal')).length).toBeGreaterThan(0)
+    expect(screen.getAllByText(dt('kpi.matchesActive')).length).toBeGreaterThan(0)
     expect(screen.getAllByText('—').length).toBeGreaterThan(0)
   })
 
@@ -176,7 +176,7 @@ describe('DashboardsSettings — Volgorde sub-tab (§13, request body)', () => {
     await waitFor(() => {
       expect(saveSettingsKeys).toHaveBeenCalledWith({
         [DASHBOARD_KPI_ORDER_KEY]: {
-          admin: ['opps', 'candidates', 'pipeline', 'expiringOpps', 'placements', 'intakes', 'openVacancies', 'tasksOverdue', 'activeConv'],
+          admin: ['placements', 'matchesActive', 'expiringContracts', 'fillRate', 'openVacancies', 'vacanciesStale', 'applicationsActive', 'pipeline', 'oppsWinRate'],
         },
       })
     })

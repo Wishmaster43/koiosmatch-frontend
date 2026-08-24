@@ -62,7 +62,43 @@
     "matchesTotalSub": "Im System",
     "messagesSent": "Nachrichten gesendet",
     "shiftsPlanned": "Dienste geplant",
-    "inPeriod": "Im Zeitraum"
+    "inPeriod": "Im Zeitraum",
+    "daysValue": "{{count}} Tage",
+    "matchesActive": "Laufende Platzierungen",
+    "matchesActiveSub": "Kein Enddatum oder später",
+    "applicationsActive": "Offene Bewerbungen",
+    "applicationsActiveSub": "Nicht in einer Endphase",
+    "vacanciesStale": "Zu lange offene Stellen",
+    "vacanciesStaleSub": "Keine aktuelle Vorstellung",
+    "redeployDue": "Wiedereinsatz binnen 14 Tagen",
+    "redeployDueSub": "Match endet, keine Anschlussvermittlung",
+    "timeToSubmit": "Zeit bis Vorstellung",
+    "timeToSubmitSub": "Median, gleitend 30 Tage",
+    "oppsNew": "Neue Chancen",
+    "oppsStalled": "Stillstehende Chancen",
+    "oppsStalledSub": "Keine Aktivität",
+    "oppsWinRate": "Gewinnrate",
+    "oppsWinRateSub": "Gleitend 30 Tage",
+    "customersActive": "Aktive Kunden",
+    "customersActiveSub": "Mit laufender Stelle oder Platzierung",
+    "customersProspect": "Interessenten",
+    "customersProspectSub": "Noch nicht zum Kunden befördert",
+    "customersAtRisk": "Kunden mit abnehmendem Kontakt",
+    "customersAtRiskSub": "Kein Kontakt oder neue Stelle",
+    "placementsIncomplete": "Platzierung ohne vollständige Akte",
+    "placementsIncompleteSub": "Fehlender Vertrag, Dokument oder Kopplung",
+    "documentsExpiring": "Dokumente laufen bald ab",
+    "documentsExpiringSub": "Innerhalb von 30 Tagen",
+    "openShifts48h": "Offene Schichten (48h)",
+    "openShifts48hSub": "Unbesetzt, baldiger Beginn",
+    "shiftsUnconfirmed": "Unbestätigte Schichten",
+    "shiftsUnconfirmedSub": "Innerhalb von 48 Stunden",
+    "shiftsNoshowToday": "No-Shows heute",
+    "shiftsCancelledToday": "Stornierungen heute",
+    "candidatesAvailable": "Verfügbare Kandidaten",
+    "candidatesAvailableSub": "Einsatzfähigkeit: verfügbar",
+    "shiftsNoshowTodaySub": "Heute nicht erschienen",
+    "shiftsCancelledTodaySub": "Heute storniert"
   },
   "chart": {
     "byStatus": "Kandidaten nach Status",
@@ -99,7 +135,8 @@
     "koiosSuggestions": "Koios-Vorschläge",
     "customersByOwner": "Kunden nach Kundenbetreuer",
     "recruiterLoad": "Recruiter-Auslastung",
-    "oppAging": "Chancen-Alterung"
+    "oppAging": "Chancen-Alterung",
+    "koiosPerformance": "Koios KI Performance"
   },
   "action": {
     "allCandidates": "Alle Kandidaten",
@@ -214,5 +251,17 @@
       "31-90": "31-90 Tage",
       "90+": "90+ Tage"
     }
+  },
+  "koiosPerformance": {
+    "title": "Koios AI performance",
+    "stripTitle": "Leistung",
+    "expand": "Leistung anzeigen",
+    "collapse": "Leistung ausblenden",
+    "completed": "Abgeschlossen",
+    "failed": "Fehlgeschlagen",
+    "other": "Sonstige",
+    "topUsers": "Top 5 Nutzer",
+    "trend": "Tagestrend",
+    "noTrend": "Noch keine Trenddaten in diesem Zeitraum."
   }
 }

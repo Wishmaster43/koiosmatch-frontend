@@ -14,6 +14,7 @@
  * (this week default / last week / 30 days / custom range) driving from/to.
  */
 import { useMemo, useState } from 'react'
+import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
 import { CheckCircle, AlertCircle, Clock, ExternalLink } from 'lucide-react'
@@ -156,7 +157,17 @@ function resolveRange(preset: PeriodPreset, now: Date, customFrom: string, custo
   return { from: toIsoDay(thisMonday), to: toIsoDay(now) }
 }
 
-export default function KoiosForYouCard() {
+interface KoiosForYouCardProps {
+  // Header title override — the management performance face reuses this exact
+  // card (Danny 24-08: same tiles, same expand, never a second idiom).
+  title?: string
+  // K-182 scope: 'me' = own actions, 'team'/undefined = tenant-wide.
+  scope?: 'me' | 'team'
+  // Compact extra strip rendered at the card's bottom (performance numbers).
+  footer?: ReactNode
+}
+
+export default function KoiosForYouCard({ title, scope, footer }: KoiosForYouCardProps = {}) {
   const { t } = useTranslation(['dashboard', 'common'])
   const { formatDate } = useDateFormat()
   const { formatNumber } = useNumberFormat()
@@ -174,10 +185,10 @@ export default function KoiosForYouCard() {
   // Koios-triggered workflow runs only (never a manual/event run) — the query
   // itself IS the data-fetching hook (§3), no separate wrapper needed for one call.
   const { data, isLoading, isError, refetch } = useQuery({
-    queryKey: ['koios', 'for-you', from, to],
+    queryKey: ['koios', 'for-you', from, to, scope ?? 'all'],
     enabled: customReady,
     queryFn: async ({ signal }) =>
-      unwrap<KoiosForYouReport>(await api.get('/ai/koios/for-you', { params: { from, to }, signal })),
+      unwrap<KoiosForYouReport>(await api.get('/ai/koios/for-you', { params: { from, to, ...(scope ? { scope } : {}) }, signal })),
   })
 
   // Known action type → translated label; unknown types (a future automation)
@@ -284,7 +295,7 @@ export default function KoiosForYouCard() {
           this isn't a bare icon), title, and the period picker. */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12, flexWrap: 'wrap' }}>
         <KoiosAiMark size={18} title={t('common:aiGeneratedHint')} />
-        <SectionTitle style={{ flex: 1 }}>{t('koiosForYou.title')}</SectionTitle>
+        <SectionTitle style={{ flex: 1 }}>{title ?? t('koiosForYou.title')}</SectionTitle>
         <SegmentedControl
           size="compact"
           ariaLabel={t('koiosForYou.periodLabel')}
@@ -395,6 +406,9 @@ export default function KoiosForYouCard() {
           )}
         </>
       )}
+
+      {/* Compact extra strip (performance face) — same card, one idiom. */}
+      {footer}
     </div>
   )
 }

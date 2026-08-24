@@ -88,19 +88,17 @@ describe('useDashboardViewModel · module-gated tiles hide on key absence', () =
     expect(nullPresent.current.kpis.find(k => k.id === 'incompleteRuns')?.value).toBe('—')
   })
 
-  it('omits openShifts/occupancy without their keys and renders them once present (planning module on)', () => {
+  it('omits occupancy without its key and renders it once present (planning module on)', () => {
     const absent = renderHook(() => useDashboardViewModel(baseArgs({
       activeType: 'planning' as const, hasPlanning: true,
       dash: { kpis: {} },
     }))).result
-    expect(absent.current.kpis.map(k => k.id)).not.toContain('openShifts')
     expect(absent.current.kpis.map(k => k.id)).not.toContain('occupancy')
     const present = renderHook(() => useDashboardViewModel(baseArgs({
       activeType: 'planning' as const, hasPlanning: true,
-      dash: { kpis: { open_shifts: 6, occupancy: 80 } },
+      dash: { kpis: { occupancy: 80 } },
     }))).result
     const byId = Object.fromEntries(present.current.kpis.map(k => [k.id, k.value]))
-    expect(byId.openShifts).toBe('6')
     expect(byId.occupancy).toBe('80%')
   })
 })
@@ -111,13 +109,14 @@ describe('useDashboardViewModel · K1 server-computed KPI values', () => {
     const { result } = renderHook(() => useDashboardViewModel(baseArgs({
       activeType: 'admin' as const,
       // Deliberately conflicting values on the OLD locations vs the NEW dash.kpis
-      // location — the new server block must win.
+      // location — the new server block must win. admin's v3 row carries
+      // matches_active/placements/open_vacancies, not opps_total.
       opp: { total: 999, pipeline_value: 999999 },
       stats: { attention: { placements: 999 } },
-      dash: { kpis: { opps_total: 5, pipeline_value: 1234, placements: 7, open_vacancies: 3 } },
+      dash: { kpis: { matches_active: 5, pipeline_value: 1234, placements: 7, open_vacancies: 3 } },
     })))
     const byId = Object.fromEntries(result.current.kpis.map(k => [k.id, k.value]))
-    expect(byId.opps).toBe('5')
+    expect(byId.matchesActive).toBe('5')
     expect(byId.placements).toBe('7')
     expect(byId.openVacancies).toBe('3')
   })
@@ -132,6 +131,9 @@ describe('useDashboardViewModel · K1 server-computed KPI values', () => {
 
   it('the candidates tile reads kpis.candidates_total — never a local list-total probe', () => {
     const { result } = renderHook(() => useDashboardViewModel(baseArgs({
+      // 'readonly' carries 'candidates' on its v3 row; the default 'recruitment'
+      // row no longer does (plan: candidates_total left the recruiter's row).
+      activeType: 'readonly' as const,
       dash: { kpis: { candidates_total: 42 } },
     })))
     expect(result.current.kpis.find(k => k.id === 'candidates')?.value).toBe('42')
@@ -154,7 +156,7 @@ describe('useDashboardViewModel · K1 server-computed KPI values', () => {
     })))
     expect(() => result.current.kpis).not.toThrow()
     const byId = Object.fromEntries(result.current.kpis.map(k => [k.id, k.value]))
-    expect(byId.opps).toBe('—')
+    expect(byId.matchesActive).toBe('—')
     expect(byId.placements).toBe('—')
   })
 })
@@ -268,29 +270,29 @@ describe('useDashboardViewModel · DASH-VOLGORDE-1 per-role KPI tile order', () 
     const { result } = renderHook(() => useDashboardViewModel(baseArgs({
       activeType: 'recruitment' as const,
       kpiOrder: {
-        recruitment: ['stale', 'candidates', 'candidatesNew', 'never', 'noFollowup', 'intakes', 'tooLongInStage', 'tasks', 'placements'],
+        recruitment: ['never', 'tasks', 'candidatesNew', 'tasksOverdue', 'intakes', 'tooLongInStage', 'missingApptApps', 'redeployDue', 'placements'],
       },
     })))
     expect(result.current.kpis.map(k => k.id)).toEqual([
-      'stale', 'candidates', 'candidatesNew', 'never', 'noFollowup', 'intakes', 'tooLongInStage', 'tasks', 'placements',
+      'never', 'tasks', 'candidatesNew', 'tasksOverdue', 'intakes', 'tooLongInStage', 'missingApptApps', 'redeployDue', 'placements',
     ])
   })
 
   it('keeps the default KPI_ROWS order when the role has no stored order', () => {
     const { result } = renderHook(() => useDashboardViewModel(baseArgs({ activeType: 'recruitment' as const })))
     expect(result.current.kpis.map(k => k.id)).toEqual([
-      'candidates', 'candidatesNew', 'stale', 'never', 'noFollowup', 'intakes', 'tooLongInStage', 'tasks', 'placements',
+      'tasks', 'tasksOverdue', 'candidatesNew', 'never', 'intakes', 'tooLongInStage', 'missingApptApps', 'redeployDue', 'placements',
     ])
   })
 
   it('drops an unknown/removed id from a stored order instead of rendering a blank tile', () => {
     const { result } = renderHook(() => useDashboardViewModel(baseArgs({
       activeType: 'recruitment' as const,
-      kpiOrder: { recruitment: ['stale', 'removedLegacyId', 'candidates'] },
+      kpiOrder: { recruitment: ['never', 'removedLegacyId', 'tasks'] },
     })))
     const ids = result.current.kpis.map(k => k.id)
     expect(ids).not.toContain('removedLegacyId')
-    expect(ids[0]).toBe('stale')
+    expect(ids[0]).toBe('never')
     expect(ids).toHaveLength(9)
   })
 
@@ -300,7 +302,7 @@ describe('useDashboardViewModel · DASH-VOLGORDE-1 per-role KPI tile order', () 
       kpiOrder: { management: ['activeConv', 'candidates'] },
     })))
     expect(result.current.kpis.map(k => k.id)).toEqual([
-      'candidates', 'candidatesNew', 'stale', 'never', 'noFollowup', 'intakes', 'tooLongInStage', 'tasks', 'placements',
+      'tasks', 'tasksOverdue', 'candidatesNew', 'never', 'intakes', 'tooLongInStage', 'missingApptApps', 'redeployDue', 'placements',
     ])
   })
 })
@@ -320,12 +322,13 @@ describe('useDashboardViewModel · K-173 scope + drills + recruiter_load/opp_agi
     const onNavigate = vi.fn()
     const { result } = renderHook(() => useDashboardViewModel(baseArgs({
       // REAL server vocabulary (DashboardService::drills) — the translator turns
-      // it into the page's intent; raw params never pass through.
-      dash: { kpis: { stale_6m: 4 }, drills: { stale_6m: { entity: 'candidates', params: { stale_6m: 1, owner_id: 'u-1' } } } },
+      // it into the page's intent; raw params never pass through. 'never' (never
+      // contacted) is on the default 'recruitment' row this suite uses.
+      dash: { kpis: { never_contacted: 4 }, drills: { never_contacted: { entity: 'candidates', params: { never_contacted: 1, owner_id: 'u-1' } } } },
       onNavigate,
     })))
-    result.current.kpis.find(k => k.id === 'stale')?.onClick?.()
-    expect(onNavigate).toHaveBeenCalledWith('candidates', { attention: 'stale6m', owner: 'u-1' })
+    result.current.kpis.find(k => k.id === 'never')?.onClick?.()
+    expect(onNavigate).toHaveBeenCalledWith('candidates', { attention: 'neverContacted', owner: 'u-1' })
   })
 
   it('defaults recruiterLoadRows/oppAgingRows to [] when the feed is absent', () => {
@@ -390,5 +393,34 @@ describe('useDashboardViewModel · switched views + full vocabulary', () => {
     expect(result.current.kpis.map(k => k.id)).toEqual([
       'candidates', 'candidatesNew', 'noFollowup', 'leadsPipeline', 'vacanciesActive', 'intakesDone', 'matchesTotal', 'fillRate', 'placements',
     ])
+  })
+})
+
+// DASH-V3-UITROL-1 — the four shift keys + open_shifts_48h are ABSENT (not
+// null) without the planning module (K-179 contract); their tiles must hide
+// entirely rather than show a permanent '—'.
+describe('useDashboardViewModel · v3 shift keys hide on module absence', () => {
+  it('omits the four shift KPIs + openShifts48h when their keys are absent from dash.kpis', () => {
+    const { result } = renderHook(() => useDashboardViewModel(baseArgs({
+      activeType: 'planning' as const, hasPlanning: true,
+      dash: { kpis: {} },
+    })))
+    const ids = result.current.kpis.map(k => k.id)
+    expect(ids).not.toContain('openShifts48h')
+    expect(ids).not.toContain('shiftsUnconfirmed')
+    expect(ids).not.toContain('shiftsNoshowToday')
+    expect(ids).not.toContain('shiftsCancelledToday')
+  })
+
+  it('renders the four shift KPIs once their keys are present, including an honest null', () => {
+    const { result } = renderHook(() => useDashboardViewModel(baseArgs({
+      activeType: 'planning' as const, hasPlanning: true,
+      dash: { kpis: { open_shifts_48h: 3, shifts_unconfirmed: 1, shifts_noshow_today: null, shifts_cancelled_today: 0 } },
+    })))
+    const byId = Object.fromEntries(result.current.kpis.map(k => [k.id, k.value]))
+    expect(byId.openShifts48h).toBe('3')
+    expect(byId.shiftsUnconfirmed).toBe('1')
+    expect(byId.shiftsNoshowToday).toBe('—')
+    expect(byId.shiftsCancelledToday).toBe('0')
   })
 })

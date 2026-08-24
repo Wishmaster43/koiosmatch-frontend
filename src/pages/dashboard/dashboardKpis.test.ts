@@ -127,3 +127,54 @@ describe('buildDashboardKpis · K-173 drill descriptors (REAL server payloads)',
     expect(onNavigate).toHaveBeenCalledWith('candidates', { attention: 'stale6m' })
   })
 })
+
+// DASH-V3-UITROL-1 (K-179) — the 18 v3 tiles: percentage/day-count formatting
+// and the honest null → '—' contract (customers_prospect is null pre-fresh).
+describe('buildDashboardKpis · DASH-V3-UITROL-1 tiles', () => {
+  it('formats opps_win_rate as a percentage, and "—" when null', () => {
+    const onNavigate = vi.fn()
+    const withValue = buildDashboardKpis(baseArgs({ opps_win_rate: 42 }, onNavigate))
+    expect(withValue.oppsWinRate.value).toBe('42%')
+    const withNull = buildDashboardKpis(baseArgs({ opps_win_rate: null }, onNavigate))
+    expect(withNull.oppsWinRate.value).toBe('—')
+  })
+
+  it('time_to_submit_avg renders as a plain day count (no interpolation on this builder)', () => {
+    const onNavigate = vi.fn()
+    const kpis = buildDashboardKpis(baseArgs({ time_to_submit_avg: 5 }, onNavigate))
+    expect(kpis.timeToSubmit.value).toBe('5')
+  })
+
+  it('customers_prospect renders "—" for a fresh tenant (null, no right/not-yet-computed)', () => {
+    const onNavigate = vi.fn()
+    const kpis = buildDashboardKpis(baseArgs({ customers_prospect: null }, onNavigate))
+    expect(kpis.customersProspect.value).toBe('—')
+  })
+
+  it('every v3 tile id exists and reads its own server key', () => {
+    const onNavigate = vi.fn()
+    const kpis = buildDashboardKpis(baseArgs({
+      matches_active: 1, applications_active: 2, vacancies_stale: 3, redeploy_due_14d: 4,
+      time_to_submit_avg: 5, opps_new: 6, opps_stalled: 7, opps_win_rate: 8,
+      customers_active: 9, customers_prospect: 10, customers_at_risk: 11,
+      placements_incomplete: 12, documents_expiring_30d: 13, open_shifts_48h: 14,
+      shifts_unconfirmed: 15, shifts_noshow_today: 16, shifts_cancelled_today: 17,
+      candidates_available: 18,
+    }, onNavigate))
+    expect(kpis.matchesActive.value).toBe('1')
+    expect(kpis.applicationsActive.value).toBe('2')
+    expect(kpis.vacanciesStale.value).toBe('3')
+    expect(kpis.redeployDue.value).toBe('4')
+    expect(kpis.oppsNew.value).toBe('6')
+    expect(kpis.oppsStalled.value).toBe('7')
+    expect(kpis.customersActive.value).toBe('9')
+    expect(kpis.customersAtRisk.value).toBe('11')
+    expect(kpis.placementsIncomplete.value).toBe('12')
+    expect(kpis.documentsExpiring.value).toBe('13')
+    expect(kpis.openShifts48h.value).toBe('14')
+    expect(kpis.shiftsUnconfirmed.value).toBe('15')
+    expect(kpis.shiftsNoshowToday.value).toBe('16')
+    expect(kpis.shiftsCancelledToday.value).toBe('17')
+    expect(kpis.candidatesAvailable.value).toBe('18')
+  })
+})

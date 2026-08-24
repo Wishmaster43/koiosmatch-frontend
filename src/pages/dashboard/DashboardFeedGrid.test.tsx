@@ -66,6 +66,7 @@ vi.mock('./blocks/RecentListsRow', () => ({ default: () => null }))
 vi.mock('./blocks/ActivityListsRow', () => ({ default: () => null }))
 vi.mock('./blocks/ShiftsSummary', () => ({ default: () => null }))
 vi.mock('./KoiosForYouCard', () => ({ default: () => null }))
+vi.mock('./blocks/KoiosPerformanceCard', () => ({ default: () => null }))
 
 vi.mock('./hooks/useDashboardData', () => ({
   useDashboardData: () => ({
