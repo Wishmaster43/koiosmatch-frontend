@@ -2,6 +2,7 @@
 import type { ReactNode } from 'react'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, Cell, ResponsiveContainer, ReferenceLine } from 'recharts'
 import { useTranslation } from 'react-i18next'
+import { Caption } from '@/components/ui/typography'
 import type { ChartDatum, TipProps } from './chartTypes'
 import ErrorBoundary from '../ui/ErrorBoundary'
 import { useNumberFormat } from '@/lib/formatters'
@@ -14,7 +15,7 @@ function BarTooltip({ active, payload, label, total, showPercent, formatNumber }
   const pct   = total ? ((value / total) * 100).toFixed(1) : '0'
   return (
     <div className="px-3 py-2 text-sm bg-white rounded-xl"
-      style={{ border: '1px solid var(--border)', boxShadow: '0 4px 16px rgba(0,0,0,0.08)' }}>
+      style={{ border: '1px solid var(--border)', boxShadow: 'var(--shadow-float)' }}>
       <div className="mb-0.5 font-medium text-gray-800" style={{ fontSize: 12 }}>{label}</div>
       <div style={{ color: payload[0].fill, fontSize: 13, fontWeight: 500 }}>
         {showPercent ? `${pct}%` : formatNumber(value)}
@@ -99,12 +100,25 @@ export default function BarChartCard({ title, data = [], colors = [], showPercen
           </Bar>
         </BarChart>
       </ResponsiveContainer>
+      {/* Keyboard path for the SVG bars (§6): hidden until focused, one real
+          button per bar, firing the exact same click payload. */}
+      {onBarClick && (
+        <div>
+          {data.map(d => (
+            <button key={d.key ?? d.name} type="button"
+              className="sr-only focus:not-sr-only"
+              onClick={() => onBarClick(d)}>
+              {d.name}: {formatNumber(d.value)}
+            </button>
+          ))}
+        </div>
+      )}
       </ErrorBoundary>
 
       <div className="flex justify-center mt-2">
-        <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+        <Caption as="span">
           {t('total')}: <strong style={{ color: 'var(--text)' }}>{formatNumber(rawTotal)}</strong>
-        </span>
+        </Caption>
       </div>
     </div>
   )

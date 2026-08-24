@@ -92,11 +92,17 @@ export default function PieChartCard({ title, data = [], colors = DEFAULT_COLORS
         <div className="flex flex-col flex-1 min-w-0 gap-2">
           {data.map((entry, i) => {
             const pct = total ? ((entry.value / total) * 100).toFixed(1) : '0'
+            // Keyboard operability (§6): a clickable legend row is a REAL control
+            // — role/tabIndex/Enter+Space, mirroring the SegmentBars rows these
+            // donuts replaced on the report pages (wave-2 Opus finding).
             return (
               <div
                 key={entry.name}
                 className="flex items-center justify-between gap-2 rounded px-1 py-0.5"
+                role={onItemClick ? 'button' : undefined}
+                tabIndex={onItemClick ? 0 : undefined}
                 onClick={() => onItemClick?.(entry)}
+                onKeyDown={onItemClick ? e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onItemClick(entry) } } : undefined}
                 style={{ cursor: onItemClick ? 'pointer' : 'default' }}
                 onMouseEnter={e => { if (onItemClick) e.currentTarget.style.background = 'var(--hover-bg)' }}
                 onMouseLeave={e => { if (onItemClick) e.currentTarget.style.background = 'none' }}
