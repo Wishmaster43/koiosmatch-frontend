@@ -68,6 +68,9 @@ export function mapInterview(raw?: ApiApplication['interview']): ApplicationInte
     id: raw.id ?? null,
     agent: raw.agent?.id != null ? { id: raw.agent.id, name: raw.agent.name ?? '' } : null,
     flowName: raw.flow_name ?? null,
+    // Detail-only, like agent/turn (InterviewSessionResource.php:81) — drives
+    // the settings deep-link on the flow name.
+    flowId: raw.flow_id ?? null,
     turn: mapTurn(raw.turn),
     startedAt: raw.started_at ?? null,
     // The UI names stay `lastMessageAt`/`endedAt`, but the COLUMNS behind them are

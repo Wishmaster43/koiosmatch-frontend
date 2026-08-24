@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
+import Button from '@/components/ui/Button'
+import { resolveDurationSeconds, splitDuration } from '../data/interviewDuration'
 import { Hand, PlayCircle } from 'lucide-react'
 import Avatar from '@/components/ui/Avatar'
 import SoftChip from '@/components/ui/SoftChip'
@@ -12,7 +14,7 @@ import { useAuth } from '@/context/AuthContext'
 import api, { unwrap } from '@/lib/api'
 import { notifySuccess, notifyError } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
-import { humanizeInterviewStatus, translateInterviewStatus } from '@/lib/interviewStatus'
+import { translateInterviewStatus } from '@/lib/interviewStatus'
 import { interviewCategoryColor } from '../data/applicationsShared'
 import { mapInterview } from '../data/mapApplication'
 import type { ApiApplication, ApplicationInterview } from '@/types/application'
@@ -29,71 +31,17 @@ const TURN_COLOR: Record<string, string> = {
   recruiter: 'var(--color-success)',
 }
 
-/**
- * resolveDurationSeconds — ELAPSED seconds since the session started, NOT how
- * long the conversation took: the backend measures created_at → completed_at ??
- * now(), so an overnight WhatsApp thread legitimately reads as days. Prefer that
- * explicit field (detail contract); otherwise derive the same span from
- * started_at → (endedAt ?? lastMessageAt), which is all a list payload could
- * offer. Null when no timing signal exists — never a guessed number. Pure/
- * exported so the derivation is unit-testable without rendering.
- */
-export function resolveDurationSeconds(iv: ApplicationInterview): number | null {
-  if (iv.durationSeconds != null) return iv.durationSeconds
-  const end = iv.endedAt ?? iv.lastMessageAt
-  if (!iv.startedAt || !end) return null
-  const start = new Date(iv.startedAt).getTime()
-  const stop = new Date(end).getTime()
-  if (Number.isNaN(start) || Number.isNaN(stop)) return null
-  return Math.max(0, Math.round((stop - start) / 1000))
-}
 
-/**
- * splitDuration — whole seconds → {days, hours, minutes}. Days exist because this
- * is wall-clock elapsed time: a thread answered the next morning is ~14 hours and
- * one answered after a weekend is days, and "96u 15min" is unreadable. `hours` is
- * the remainder within the day, so days+hours+minutes always describe one span.
- */
-export function splitDuration(totalSeconds: number): { days: number; hours: number; minutes: number } {
-  const totalMinutes = Math.max(0, Math.round(totalSeconds / 60))
-  const totalHours = Math.floor(totalMinutes / 60)
-  return { days: Math.floor(totalHours / 24), hours: totalHours % 24, minutes: totalMinutes % 60 }
-}
 
 const cardStyle: CSSProperties = {
   display: 'flex', flexDirection: 'column', gap: 10, padding: '10px 12px',
   background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10,
 }
 
-// Re-exported for compat: existing importers (ApplicationStatusStrip, this
-// file's own tests) still pull humanizeInterviewStatus from here. The real
-// definition + its i18n-first sibling `translateInterviewStatus` now live in
-// `@/lib/interviewStatus`, shared with every other render site (RAW-ENUM-LEAK
-// fix, HUISSTIJL-1 batch G — InterviewFlowSection was rendering the raw value).
-export { humanizeInterviewStatus }
-
 // Decorative separator between the meta line's segments — hidden from assistive
 // tech since every segment around it already carries its own accessible text.
 const MetaDot = () => <span aria-hidden="true" style={{ color: 'var(--text-muted)', fontSize: 12 }}>·</span>
 
-// BUTTON-SOFT-TINT-1 (Danny 05-08): the active state was a white/transparent
-// outline button — now the house soft-tint recipe (§4, mirrors DrawerAddButton/
-// QuickViewToggle). The inactive/disabled state stays a neutral, unfilled ghost
-// (§3 honest gate — it carries no colour meaning while disabled).
-// PRIMAIR-VLAK-1 + maatwet (Danny 19/20-08): accent action = the solid trio at
-// the sm drill-down height; danger keeps its red tint (his reconfirmed rule).
-const actionBtnStyle = (active: boolean, danger: boolean): CSSProperties => ({
-  display: 'inline-flex', alignItems: 'center', gap: 5,
-  fontSize: 12, fontWeight: danger ? 500 : 600, height: 28, padding: '0 10px', borderRadius: 6,
-  border: !active ? '1px solid var(--border)'
-    : danger ? '1px solid color-mix(in srgb, var(--color-danger) 33%, transparent)'
-    : '1px solid var(--button-border)',
-  background: !active ? 'none'
-    : danger ? 'color-mix(in srgb, var(--color-danger) 10%, transparent)'
-    : 'var(--button-fill)',
-  color: !active ? 'var(--text-muted)' : danger ? 'var(--color-danger)' : 'var(--button-ink)',
-  cursor: active ? 'pointer' : 'not-allowed', opacity: active ? 1 : 0.6,
-})
 
 /**
  * InterviewStatusCard — the compact "who's talking to whom, right now" summary
@@ -162,7 +110,15 @@ export default function InterviewStatusCard({ interview, applicationId }: { inte
   const category = live.category
   const turn = live.turn
   const durationSeconds = resolveDurationSeconds(live)
-  const duration = durationSeconds != null ? splitDuration(durationSeconds) : null
+  // ONE-STATUS-STORY-1: a terminal session (completed/disqualified) is done — no
+  // "whose turn" and no step position left to report, so the render below
+  // collapses to ONE status chip instead of three axes that all read "Afgerond".
+  const isTerminal = category === 'completed' || category === 'disqualified'
+  // The negative branch is a real backend signal (see the duration span's own
+  // comment below), never a fabricated zero — kept separate from "no timing
+  // data at all" (null) so the render can tell the two apart.
+  const duration = durationSeconds != null && durationSeconds >= 0 ? splitDuration(durationSeconds) : null
+  const negativeDuration = durationSeconds != null && durationSeconds < 0
   // True when this payload carries ANY of the visibility fields. The detail
   // contract always does, so in the drawer this is effectively always true; a
   // block reduced to category/step (a list-shaped object handed in) gets ONE calm
@@ -265,7 +221,12 @@ export default function InterviewStatusCard({ interview, applicationId }: { inte
           {live.agent?.name || t('interview.status.noAgent')}
         </span>
         {/* The flow's own name (interview_flows.name) — tenant-authored, so it may
-            already read e.g. "Zorgintake (9 stappen)" on its own. */}
+            already read e.g. "Zorgintake (9 stappen)" on its own. Rendered as
+            PLAIN TEXT: no in-app surface shows a single interview flow today
+            (#settings/ai/koios is connection/models/rates only — measured), and
+            a link to a screen that cannot show the flow is a fake affordance
+            (§3). `flowId` stays mapped (InterviewSessionResource.php:81) for the
+            day a flow screen exists. */}
         {live.flowName && (
           <>
             <MetaDot />
@@ -273,31 +234,49 @@ export default function InterviewStatusCard({ interview, applicationId }: { inte
           </>
         )}
 
-        {/* Turn — soft chip, colour + TEXT (never colour-only, §6 a11y). */}
-        {turn && <SoftChip label={t(`interview.status.turn.${turn}`)} color={TURN_COLOR[turn]} round />}
+        {/* ONE-STATUS-STORY-1: a finished session shows exactly ONE status chip —
+            the current-status label (or the category label when the flow never
+            reported one) — never the turn chip + category chip + plain-text
+            current-status trio that all collapsed to "Afgerond" together. A
+            running session drops the category chip (duplicate of the turn chip's
+            own activity signal) and keeps the turn chip + step readout instead. */}
+        {isTerminal ? (
+          <StatusPill
+            // The terminal WORD leads: use the current-status label only when it
+            // is itself terminal (COMPLETED/DISQUALIFIED) — a terminal session
+            // whose current_status is a mid-flow step must never carry that step
+            // name as the only status text with "finished" left to colour alone (§6).
+            label={live.currentStatus && ['COMPLETED', 'DISQUALIFIED'].includes(live.currentStatus)
+              ? translateInterviewStatus(t, live.currentStatus)
+              : t(`interview.category.${category}`)}
+            color={interviewCategoryColor(category)}
+          />
+        ) : (
+          <>
+            {/* Turn — soft chip, colour + TEXT (never colour-only, §6 a11y). */}
+            {turn && <SoftChip label={t(`interview.status.turn.${turn}`)} color={TURN_COLOR[turn]} round />}
 
-        {/* Category (INTERVIEW-PHASE-1 — already real today). */}
-        <StatusPill label={t(`interview.category.${category}`)} color={interviewCategoryColor(category)} />
-
-        {/* DD-FE-11 (08-08 drill-down audit, "Stap 2 van 12" read as the ONLY
-            signal): the flow's own current-step NAME is now the PRIMARY
-            progress readout — see @/lib/interviewStatus for why an
-            unknown flow-authored value is never shown raw. The numeric
-            position is kept, but demoted to a small muted suffix right after
-            the name (never dropped) — mirrors the equally-ordered interview
-            cell in ApplicationStatusStrip (name main, step count muted after).
-            ONE dot introduces the whole progress unit; the row's own `gap`
-            already spaces the name/count pair inside it. */}
-        {(live.currentStatus || live.total > 0) && <MetaDot />}
-        {live.currentStatus && (
-          <span style={{ fontSize: 12, color: 'var(--text)' }}>
-            {translateInterviewStatus(t, live.currentStatus)}
-          </span>
-        )}
-        {live.total > 0 && (
-          <Caption>
-            {t('interview.stepOf', { step: live.step ?? '–', total: live.total })}
-          </Caption>
+            {/* DD-FE-11 (08-08 drill-down audit, "Stap 2 van 12" read as the ONLY
+                signal): the flow's own current-step NAME is now the PRIMARY
+                progress readout — see @/lib/interviewStatus for why an
+                unknown flow-authored value is never shown raw. The numeric
+                position is kept, but demoted to a small muted suffix right after
+                the name (never dropped) — mirrors the equally-ordered interview
+                cell in ApplicationStatusStrip (name main, step count muted after).
+                ONE dot introduces the whole progress unit; the row's own `gap`
+                already spaces the name/count pair inside it. */}
+            {(live.currentStatus || live.total > 0) && <MetaDot />}
+            {live.currentStatus && (
+              <span style={{ fontSize: 12, color: 'var(--text)' }}>
+                {translateInterviewStatus(t, live.currentStatus)}
+              </span>
+            )}
+            {live.total > 0 && (
+              <Caption>
+                {t('interview.stepOf', { step: live.step ?? '–', total: live.total })}
+              </Caption>
+            )}
+          </>
         )}
       </div>
 
@@ -315,6 +294,12 @@ export default function InterviewStatusCard({ interview, applicationId }: { inte
               : duration.hours > 0
                 ? t('interview.status.durationHours', duration)
                 : t('interview.status.durationMinutes', { count: duration.minutes })
+          ) : negativeDuration ? (
+            // A negative raw span is a real backend signal, not "no data": Carbon's
+            // signed diffInSeconds(completed_at ?? now()) can go negative on seeded
+            // rows where completed_at predates created_at — the house dash, never a
+            // fabricated "0 min" (§3 no fake affordance).
+            '—'
           ) : t('interview.status.durationUnknown')}
         </span>
       </span>
@@ -331,19 +316,19 @@ export default function InterviewStatusCard({ interview, applicationId }: { inte
           mirroring the original single-button precedent. */}
       {canManage && (
         <div style={{ display: 'flex', gap: 8 }}>
-          <button type="button" onClick={onStop} disabled={!canStop || busy}
-            aria-label={t('interview.status.takeover')} title={stopDisabledReason ?? undefined}
-            style={actionBtnStyle(canStop, true)}>
+          {/* House buttons (HUISSTIJL-1): the stop/takeover action keeps its danger
+              tint, resume is the accent action — identity from Button, never local. */}
+          <Button variant="dangerSoft" size="sm" onClick={onStop} disabled={!canStop || busy}
+            aria-label={t('interview.status.takeover')} title={stopDisabledReason ?? undefined}>
             <Hand size={12} />
             {busy ? t('interview.status.takeoverBusy') : t('interview.status.takeover')}
-          </button>
+          </Button>
           {category === 'paused' && (
-            <button type="button" onClick={onResume} disabled={!canResume || busy}
-              aria-label={t('interview.resume')} title={resumeDisabledReason ?? undefined}
-              style={actionBtnStyle(canResume, false)}>
+            <Button variant="primary" size="sm" onClick={onResume} disabled={!canResume || busy}
+              aria-label={t('interview.resume')} title={resumeDisabledReason ?? undefined}>
               <PlayCircle size={12} />
               {busy ? t('interview.status.resumeBusy') : t('interview.resume')}
-            </button>
+            </Button>
           )}
         </div>
       )}

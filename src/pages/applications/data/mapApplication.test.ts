@@ -93,7 +93,7 @@ describe('mapApplication', () => {
       const mapped = mapApplication({ id: 17, interview: { category: 'busy', current_status: 'ACTIVE_IN_CARE', step: 2, total: 12 } })
       expect(mapped.interview).toEqual({
         category: 'busy', currentStatus: 'ACTIVE_IN_CARE', step: 2, total: 12,
-        id: null, agent: null, flowName: null, turn: null, startedAt: null, lastMessageAt: null, endedAt: null, durationSeconds: null,
+        id: null, agent: null, flowName: null, flowId: null, turn: null, startedAt: null, lastMessageAt: null, endedAt: null, durationSeconds: null,
         pausedAt: null, pausedBy: null,
       })
     })
@@ -117,7 +117,7 @@ describe('mapApplication', () => {
       const mapped = mapApplication({ id: 21, interview: { category: 'busy' } })
       expect(mapped.interview).toEqual({
         category: 'busy', currentStatus: null, step: null, total: 0,
-        id: null, agent: null, flowName: null, turn: null, startedAt: null, lastMessageAt: null, endedAt: null, durationSeconds: null,
+        id: null, agent: null, flowName: null, flowId: null, turn: null, startedAt: null, lastMessageAt: null, endedAt: null, durationSeconds: null,
         pausedAt: null, pausedBy: null,
       })
     })
@@ -461,6 +461,7 @@ describe('mapInterview · the real InterviewSessionResource payload', () => {
       id: 'sess-1',
       agent: { id: 'agent-1', name: 'Yesway Zorg-agent' },
       flowName: 'Verpleegkundige intake',
+      flowId: 'flow-1',
       turn: 'completed',
       startedAt: '2026-07-28T09:00:00Z',
       lastMessageAt: '2026-08-01T11:25:00Z',

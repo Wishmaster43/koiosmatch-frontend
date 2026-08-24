@@ -326,7 +326,9 @@
         "running": "Bezig"
       },
       "startedAt": "Gestart {{date}}",
-      "period": "{{start}} – {{end}}"
+      "period": "{{start}} – {{end}}",
+      "finishedOnly": "Afgerond {{date}}",
+      "reversedDatesHint": "De einddatum van deze sessie ligt vóór de startdatum in de brondata. Alleen de einddatum wordt getoond."
     },
     "currentStatus": {
       "INTRO_SENT": "Intro verzonden",

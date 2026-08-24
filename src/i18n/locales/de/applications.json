@@ -326,7 +326,9 @@
         "running": "Läuft"
       },
       "startedAt": "Gestartet {{date}}",
-      "period": "{{start}} – {{end}}"
+      "period": "{{start}} – {{end}}",
+      "finishedOnly": "Beendet {{date}}",
+      "reversedDatesHint": "Das Enddatum dieser Sitzung liegt in den Quelldaten vor dem Startdatum. Es wird nur das Enddatum angezeigt."
     },
     "currentStatus": {
       "INTRO_SENT": "Intro gesendet",

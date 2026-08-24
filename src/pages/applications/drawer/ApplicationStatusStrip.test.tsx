@@ -132,7 +132,7 @@ describe('ApplicationStatusStrip', () => {
 
   it('shows the interview status and step progress when a session exists', () => {
     render(<ApplicationStatusStrip application={app({
-      interview: { category: 'busy', currentStatus: 'Question 3', step: 3, total: 5, id: null, agent: null, flowName: null, turn: null, startedAt: null, lastMessageAt: null, endedAt: null, durationSeconds: null, pausedAt: null, pausedBy: null },
+      interview: { category: 'busy', currentStatus: 'Question 3', step: 3, total: 5, id: null, agent: null, flowName: null, flowId: null, turn: null, startedAt: null, lastMessageAt: null, endedAt: null, durationSeconds: null, pausedAt: null, pausedBy: null },
     })} />)
     expect(screen.getByText('Question 3')).toBeInTheDocument()
     expect(screen.getByText(/interview\.stepOf/)).toBeInTheDocument()
@@ -145,7 +145,7 @@ describe('ApplicationStatusStrip', () => {
   // INLINE after the step name now — same reading order, one line.
   it('renders the step name before the muted inline step-count, never the reverse', () => {
     render(<ApplicationStatusStrip application={app({
-      interview: { category: 'busy', currentStatus: 'Question 3', step: 3, total: 5, id: null, agent: null, flowName: null, turn: null, startedAt: null, lastMessageAt: null, endedAt: null, durationSeconds: null, pausedAt: null, pausedBy: null },
+      interview: { category: 'busy', currentStatus: 'Question 3', step: 3, total: 5, id: null, agent: null, flowName: null, flowId: null, turn: null, startedAt: null, lastMessageAt: null, endedAt: null, durationSeconds: null, pausedAt: null, pausedBy: null },
     })} />)
     const name = screen.getByText('Question 3')
     const count = screen.getByText(/interview\.stepOf/)
@@ -171,7 +171,7 @@ describe('ApplicationStatusStrip', () => {
     const user = userEvent.setup()
     const onNavigateTab = vi.fn()
     render(<ApplicationStatusStrip onNavigateTab={onNavigateTab} application={app({
-      interview: { category: 'busy', currentStatus: 'Question 3', step: 3, total: 5, id: null, agent: null, flowName: null, turn: null, startedAt: null, lastMessageAt: null, endedAt: null, durationSeconds: null, pausedAt: null, pausedBy: null },
+      interview: { category: 'busy', currentStatus: 'Question 3', step: 3, total: 5, id: null, agent: null, flowName: null, flowId: null, turn: null, startedAt: null, lastMessageAt: null, endedAt: null, durationSeconds: null, pausedAt: null, pausedBy: null },
     })} />)
     await user.click(screen.getByText('Question 3'))
     expect(onNavigateTab).toHaveBeenCalledWith('interviews')

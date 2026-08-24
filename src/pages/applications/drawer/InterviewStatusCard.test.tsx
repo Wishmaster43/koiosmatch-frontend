@@ -12,7 +12,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import InterviewStatusCard, { resolveDurationSeconds, splitDuration, humanizeInterviewStatus } from './InterviewStatusCard'
+import InterviewStatusCard from './InterviewStatusCard'
+import { resolveDurationSeconds, splitDuration } from '../data/interviewDuration'
+import { humanizeInterviewStatus } from '@/lib/interviewStatus'
 import type { ApplicationInterview } from '@/types/application'
 
 // Deterministic key-echo (repo-wide precedent, e.g. ApplicationTab.test.tsx) —
@@ -44,7 +46,7 @@ vi.mock('@/lib/notify', () => ({ notifySuccess: (...a: unknown[]) => mockNotifyS
 // A fully-populated interview — every INTERVIEW-VISIBILITY-1 field present.
 const fullInterview = (overrides: Partial<ApplicationInterview> = {}): ApplicationInterview => ({
   category: 'busy', currentStatus: 'ACTIVE_IN_CARE', step: 2, total: 5,
-  id: 'iv-1', agent: { id: 'a-1', name: 'Verpleegkundige-agent' }, flowName: 'Verpleegkundige intake',
+  id: 'iv-1', agent: { id: 'a-1', name: 'Verpleegkundige-agent' }, flowName: 'Verpleegkundige intake', flowId: 'flow-1',
   turn: 'agent', startedAt: '2026-07-21T09:00:00Z', lastMessageAt: '2026-07-21T09:07:00Z', endedAt: null, durationSeconds: null,
   pausedAt: null, pausedBy: null,
   ...overrides,
@@ -54,7 +56,7 @@ const fullInterview = (overrides: Partial<ApplicationInterview> = {}): Applicati
 // category/current_status/step/total — no session id, no visibility fields.
 const bareInterview: ApplicationInterview = {
   category: 'busy', currentStatus: 'X', step: 1, total: 3,
-  id: null, agent: null, flowName: null, turn: null, startedAt: null, lastMessageAt: null, endedAt: null, durationSeconds: null,
+  id: null, agent: null, flowName: null, flowId: null, turn: null, startedAt: null, lastMessageAt: null, endedAt: null, durationSeconds: null,
   pausedAt: null, pausedBy: null,
 }
 
@@ -180,9 +182,8 @@ describe("InterviewStatusCard · honest gate (list payload without visibility fi
     expect(screen.getByText('interview.status.durationUnknown')).toBeInTheDocument()
   })
 
-  it('still renders the category + step, which already works today (INTERVIEW-PHASE-1)', () => {
+  it('still renders the step, which already works today (INTERVIEW-PHASE-1)', () => {
     render(<InterviewStatusCard interview={bareInterview} applicationId="app-1" />)
-    expect(screen.getByText('interview.category.busy')).toBeInTheDocument()
     expect(screen.getByText('interview.stepOf')).toBeInTheDocument()
   })
 })
@@ -208,18 +209,16 @@ describe('humanizeInterviewStatus (pure)', () => {
 // instead of one row. These assert the STRUCTURE (siblings in one flex container),
 // since jsdom does not compute real wrapped layout.
 describe('InterviewStatusCard · one-line meta composition (I1, 08-08)', () => {
-  it('renders name, flow, turn chip, status chip and step as siblings in ONE row', () => {
+  it('renders name, flow, turn chip and step as siblings in ONE row', () => {
     render(<InterviewStatusCard interview={fullInterview()} applicationId="app-1" />)
     const name = screen.getByText('Verpleegkundige-agent')
     const flow = screen.getByText('Verpleegkundige intake')
     const turnChip = screen.getByText('interview.status.turn.agent')
-    const statusChip = screen.getByText('interview.category.busy')
     const stepText = screen.getByText('interview.stepOf')
     const row = name.parentElement
     expect(row).not.toBeNull()
     expect(flow.parentElement).toBe(row)
     expect(turnChip.parentElement).toBe(row)
-    expect(statusChip.parentElement).toBe(row)
     expect(stepText.parentElement).toBe(row)
     // The row itself is a wrapping flex line — a group wrap, not per-item stacking.
     expect(row).toHaveStyle({ display: 'flex', flexWrap: 'wrap' })
@@ -274,6 +273,60 @@ describe('InterviewStatusCard · step name leads, count is a muted suffix (DD-FE
   })
 })
 
+// ONE-STATUS-STORY-1: a terminal session used to show THREE "Afgerond" chips
+// (turn, category, current-status text) plus a step counter beyond the flow's
+// own step count. A finished flow now tells ONE story.
+describe('InterviewStatusCard · terminal collapse (ONE-STATUS-STORY-1)', () => {
+  it('renders exactly ONE status chip for a completed session — the current-status label', () => {
+    render(<InterviewStatusCard interview={fullInterview({ category: 'completed', currentStatus: 'COMPLETED', turn: 'completed' })} applicationId="app-1" />)
+    expect(screen.getAllByText('interview.currentStatus.COMPLETED')).toHaveLength(1)
+    expect(screen.queryByText('interview.category.completed')).toBeNull()
+    expect(screen.queryByText('interview.status.turn.completed')).toBeNull()
+  })
+
+  it('hides the step counter once the session is terminal', () => {
+    render(<InterviewStatusCard interview={fullInterview({ category: 'completed', currentStatus: 'COMPLETED', turn: 'completed' })} applicationId="app-1" />)
+    expect(screen.queryByText('interview.stepOf')).toBeNull()
+  })
+
+  it('falls back to the category label when a disqualified session carries no current-status', () => {
+    render(<InterviewStatusCard interview={fullInterview({ category: 'disqualified', currentStatus: null, turn: 'completed' })} applicationId="app-1" />)
+    expect(screen.getByText('interview.category.disqualified')).toBeInTheDocument()
+    expect(screen.queryByText('interview.status.turn.completed')).toBeNull()
+  })
+
+  it('keeps step counter + the turn chip while the session is still running (busy)', () => {
+    render(<InterviewStatusCard interview={fullInterview()} applicationId="app-1" />)
+    expect(screen.getByText('interview.status.turn.agent')).toBeInTheDocument()
+    expect(screen.getByText('interview.stepOf')).toBeInTheDocument()
+    expect(screen.queryByText('interview.category.busy')).toBeNull()
+  })
+})
+
+// Detail-only `flowId` (InterviewSessionResource.php:81) turns the flow name into
+// a settings deep link; without it (list-shaped payload) it stays plain text.
+// Naronde-besluit (Opus wave-B1): no in-app surface shows a single interview
+// flow today — a link to #settings/ai/koios (connection/models/rates) was a
+// fake affordance. The flow name is plain text until a real flow screen exists.
+describe('InterviewStatusCard · flow name is honest plain text', () => {
+  it('renders the flow name without any link, flowId present or not', () => {
+    render(<InterviewStatusCard interview={fullInterview()} applicationId="app-1" />)
+    expect(screen.queryByRole('link', { name: 'Verpleegkundige intake' })).toBeNull()
+    expect(screen.getByText('Verpleegkundige intake')).toBeInTheDocument()
+  })
+})
+
+// A negative wall-clock span is a real backend signal (Carbon's signed
+// diffInSeconds on seeded rows), never "no data" — must never fabricate "0 min".
+describe('InterviewStatusCard · negative duration span', () => {
+  it('renders the house dash instead of a fabricated "0 min" for a negative duration', () => {
+    render(<InterviewStatusCard interview={fullInterview({ durationSeconds: -120 })} applicationId="app-1" />)
+    expect(screen.getByText('—')).toBeInTheDocument()
+    expect(screen.queryByText('interview.status.durationMinutes')).toBeNull()
+    expect(screen.queryByText('interview.status.durationUnknown')).toBeNull()
+  })
+})
+
 describe('InterviewStatusCard · authorization gate', () => {
   it('hides the takeover button entirely for a user without applications.update', () => {
     mockUseAuth.mockReturnValue({ hasPermission: () => false })
@@ -319,7 +372,6 @@ describe('InterviewStatusCard · takeover (stop) button', () => {
     await userEvent.click(screen.getByRole('button', { name: 'interview.status.takeover' }))
     expect(mockPost).toHaveBeenCalledWith('/applications/app-1/stop-interview')
     await waitFor(() => expect(screen.getByText('interview.status.turn.recruiter')).toBeInTheDocument())
-    expect(screen.getByText('interview.category.paused')).toBeInTheDocument()
     expect(mockNotifySuccess).toHaveBeenCalledWith('interview.status.takeoverSuccess')
   })
 
@@ -336,7 +388,7 @@ describe('InterviewStatusCard · takeover (stop) button', () => {
     // This agent name exists ONLY in the refetched body — proof the card re-read
     // the server instead of keeping its own optimistic copy.
     await waitFor(() => expect(screen.getByText('Overgenomen-agent')).toBeInTheDocument())
-    expect(screen.getByText('interview.category.paused')).toBeInTheDocument()
+    expect(screen.getByText('interview.status.turn.recruiter')).toBeInTheDocument()
   })
 
   it('treats a 404 as "no running interview" and keeps the button retryable (it is a business reply, not a missing route)', async () => {
@@ -399,7 +451,6 @@ describe('InterviewStatusCard · resume button (paused category)', () => {
     expect(mockPost).toHaveBeenCalledWith('/applications/app-1/resume-interview')
     await waitFor(() => expect(mockGet).toHaveBeenCalledWith('/applications/app-1', { params: { include_archived: 1 } }))
     await waitFor(() => expect(screen.getByText('interview.status.turn.candidate')).toBeInTheDocument())
-    expect(screen.getByText('interview.category.busy')).toBeInTheDocument()
     expect(mockNotifySuccess).toHaveBeenCalledWith('interview.status.resumeSuccess')
   })
 
@@ -408,7 +459,10 @@ describe('InterviewStatusCard · resume button (paused category)', () => {
     mockGet.mockRejectedValueOnce({ response: { status: 500 } })
     render(<InterviewStatusCard interview={fullInterview({ category: 'paused', turn: 'recruiter' })} applicationId="app-1" />)
     await userEvent.click(screen.getByRole('button', { name: 'interview.resume' }))
-    await waitFor(() => expect(screen.getByText('interview.category.busy')).toBeInTheDocument())
+    // The optimistic update flips category back to 'busy' (turn: null) even though
+    // the reconciling refetch failed — the takeover button re-enabling is the only
+    // visible signal now that there is no category chip to read the state off.
+    await waitFor(() => expect(screen.getByRole('button', { name: 'interview.status.takeover' })).not.toBeDisabled())
     expect(screen.queryByText('interview.status.turn.agent')).toBeNull()
     expect(screen.queryByText('interview.status.turn.recruiter')).toBeNull()
   })
@@ -442,9 +496,17 @@ describe('InterviewStatusCard · fresh prop wins', () => {
     mockPost.mockResolvedValueOnce({ data: { status: 'paused', paused_at: '2026-07-31T10:00:00+02:00' } })
     const { rerender } = render(<InterviewStatusCard interview={fullInterview()} applicationId="app-1" />)
     await userEvent.click(screen.getByRole('button', { name: 'interview.status.takeover' }))
-    await waitFor(() => expect(screen.getByText('interview.category.paused')).toBeInTheDocument())
-    // A newer prop (drawer refetch) is the fresher truth and must not be shadowed.
+    await waitFor(() => expect(screen.getByText('interview.status.turn.recruiter')).toBeInTheDocument())
+    // A newer prop (drawer refetch) is the fresher truth and must not be shadowed —
+    // now a TERMINAL category, which collapses the whole meta row down to the
+    // single current-status chip (ONE-STATUS-STORY-1) and drops the turn chip.
     rerender(<InterviewStatusCard interview={fullInterview({ category: 'completed', turn: 'completed' })} applicationId="app-1" />)
+    // ONE-STATUS-STORY-1 (naronde): the terminal chip carries the TERMINAL word —
+    // a mid-flow current_status (ACTIVE_IN_CARE) must never be the only status
+    // text with "finished" left to colour alone (§6).
     await waitFor(() => expect(screen.getByText('interview.category.completed')).toBeInTheDocument())
+    expect(screen.queryByText('interview.currentStatus.ACTIVE_IN_CARE')).toBeNull()
+    expect(screen.queryByText('interview.status.turn.recruiter')).toBeNull()
+    expect(screen.queryByText('interview.status.turn.completed')).toBeNull()
   })
 })

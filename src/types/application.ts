@@ -73,6 +73,9 @@ export interface ApplicationInterview {
   agent: { id: Id; name: string } | null
   // The interview flow's own name (interview_flows.name), via the relation.
   flowName: string | null
+  // The flow's own id (interview_sessions.interview_flow_id) — detail-only, like
+  // agent/turn (InterviewSessionResource.php:81); drives the settings deep-link.
+  flowId: Id | null
   // 'completed' is the backend's 'afgerond': nobody is on turn any more because the
   // interview is finished. Normalised in mapInterview — see the alias table there.
   turn: 'agent' | 'candidate' | 'completed' | 'pending' | 'recruiter' | null
@@ -353,6 +356,8 @@ export interface ApiApplication {
     last_sent_at?: string | null
     disqualified_reason?: string | null
     agent?: { id?: Id; name?: string } | null
+    // The flow's own id (InterviewSessionResource.php:81) — detail-only.
+    flow_id?: Id | null
     flow_name?: string | null
     turn?: string | null
     started_at?: string | null

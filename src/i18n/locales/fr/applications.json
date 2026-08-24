@@ -326,7 +326,9 @@
         "running": "En cours"
       },
       "startedAt": "Démarré {{date}}",
-      "period": "{{start}} – {{end}}"
+      "period": "{{start}} – {{end}}",
+      "finishedOnly": "Terminé le {{date}}",
+      "reversedDatesHint": "La date de fin de cette session précède sa date de début dans les données source. Seule la date de fin est affichée."
     },
     "currentStatus": {
       "INTRO_SENT": "Intro envoyée",

@@ -92,7 +92,7 @@ describe('InterviewsTab · start-interview action (Flow B)', () => {
   })
 
   it('hides the action when a session already exists', () => {
-    renderTab(app({ interview: { category: 'busy', currentStatus: null, step: null, total: 0, id: 'iv-1', agent: null, flowName: null, turn: 'agent', startedAt: null, lastMessageAt: null, endedAt: null, durationSeconds: null, pausedAt: null, pausedBy: null } }))
+    renderTab(app({ interview: { category: 'busy', currentStatus: null, step: null, total: 0, id: 'iv-1', agent: null, flowName: null, flowId: null, turn: 'agent', startedAt: null, lastMessageAt: null, endedAt: null, durationSeconds: null, pausedAt: null, pausedBy: null } }))
     expect(screen.queryByRole('button', { name: 'interview.start.label' })).toBeNull()
   })
 
@@ -191,7 +191,7 @@ describe('InterviewsTab · interview history (real BE contract, W7)', () => {
   })
 
   it('renders the history empty state once a live session exists without finished sessions', () => {
-    renderTab(app({ interview: { category: 'busy', currentStatus: null, step: null, total: 0, id: 'iv-live', agent: null, flowName: null, turn: 'agent', startedAt: null, lastMessageAt: null, endedAt: null, durationSeconds: null, pausedAt: null, pausedBy: null } }))
+    renderTab(app({ interview: { category: 'busy', currentStatus: null, step: null, total: 0, id: 'iv-live', agent: null, flowName: null, flowId: null, turn: 'agent', startedAt: null, lastMessageAt: null, endedAt: null, durationSeconds: null, pausedAt: null, pausedBy: null } }))
     expect(screen.getByText('interview.empty')).toBeInTheDocument()
   })
 
@@ -223,6 +223,19 @@ describe('InterviewsTab · interview history (real BE contract, W7)', () => {
       interviews: [{ id: 'iv-1', status: 'completed', startedAt: '2026-08-01T09:00:00Z', finishedAt: '2026-08-01T09:20:00Z', transcript: [] }],
     }))
     expect(screen.getByText('interview.history.period')).toBeInTheDocument()
+    expect(screen.queryByText('interview.history.startedAt')).toBeNull()
+  })
+
+  // Seeded data can carry a finished_at that predates its own started_at
+  // (isReversedInterviewRange's own doc comment). A reversed range must never
+  // render — only the honest finished-only label, with the caveat in the tooltip.
+  it('shows only the finished date, with a caveat tooltip, when finished precedes started', () => {
+    renderTab(app({
+      interviews: [{ id: 'iv-1', status: 'completed', startedAt: '2026-08-01T10:00:00Z', finishedAt: '2026-08-01T09:00:00Z', transcript: [] }],
+    }))
+    const label = screen.getByText('interview.history.finishedOnly')
+    expect(label).toHaveAttribute('title', 'interview.history.reversedDatesHint')
+    expect(screen.queryByText('interview.history.period')).toBeNull()
     expect(screen.queryByText('interview.history.startedAt')).toBeNull()
   })
 
@@ -276,7 +289,7 @@ describe('InterviewsTab · interview history (real BE contract, W7)', () => {
 describe('InterviewsTab · live conversation panel (CONV-APPLICATION-ID-1, 08-08)', () => {
   const runningInterview: ApplicationInterview = {
     category: 'busy', currentStatus: 'ACTIVE_IN_CARE', step: 2, total: 12, id: 'iv-9',
-    agent: { id: 'a1', name: 'Kelly' }, flowName: 'Zorgintake', turn: 'candidate',
+    agent: { id: 'a1', name: 'Kelly' }, flowName: 'Zorgintake', flowId: null, turn: 'candidate',
     startedAt: null, lastMessageAt: null, endedAt: null, durationSeconds: null, pausedAt: null, pausedBy: null,
   }
 

@@ -10,6 +10,7 @@ import api, { unwrap, unwrapList } from '@/lib/api'
 import { notifySuccess, notifyError } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
 import { useDateFormat } from '@/lib/datetime'
+import { isReversedInterviewRange } from '../data/interviewRange'
 import Button from '@/components/ui/Button'
 import { tintBg, tintBorder } from '@/lib/tint'
 import { Caption } from '@/components/ui/typography'
@@ -148,6 +149,7 @@ function StartInterviewAction({ applicationId, onStarted }: { applicationId: Id 
   )
 }
 
+
 // Which /conversations query the live panel below should render — never both at
 // once, so the panel below stays a single, unambiguous ConversationsSection call.
 type ConversationScope = { params: Record<string, Id> } | null
@@ -283,11 +285,24 @@ export default function InterviewsTab({ application: a }: { application: Applica
               <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)' }}>{t('interview.title')}</div>
               {/* W7: started/finished from the real session columns — a range once
                   finished, "Started …" while still running (mirrors the drawer.placementPeriod
-                  en-dash convention). */}
-              <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
-                {iv.finishedAt
-                  ? t('interview.history.period', { start: formatDateTime(iv.startedAt), end: formatDateTime(iv.finishedAt) })
-                  : t('interview.history.startedAt', { date: formatDateTime(iv.startedAt) })}
+                  en-dash convention). A finished-before-started row (seeded data, see
+                  isReversedInterviewRange's own doc comment) shows ONLY the finished
+                  date rather than a reversed range that lies about event order — the
+                  title tooltip names the data caveat honestly. */}
+              <div style={{ fontSize: 12, color: 'var(--text-muted)' }}
+                title={isReversedInterviewRange(iv.startedAt, iv.finishedAt) ? t('interview.history.reversedDatesHint') : undefined}>
+                {isReversedInterviewRange(iv.startedAt, iv.finishedAt)
+                  ? (
+                    <>
+                      {t('interview.history.finishedOnly', { date: formatDateTime(iv.finishedAt) })}
+                      {/* §6: the caveat must reach assistive tech too — a title
+                          on a non-interactive div is mouse-only. */}
+                      <span className="sr-only">{t('interview.history.reversedDatesHint')}</span>
+                    </>
+                  )
+                  : iv.finishedAt
+                    ? t('interview.history.period', { start: formatDateTime(iv.startedAt), end: formatDateTime(iv.finishedAt) })
+                    : t('interview.history.startedAt', { date: formatDateTime(iv.startedAt) })}
               </div>
             </div>
             {/* W7: the session OUTCOME as a soft chip in its own colour — never a plain

@@ -326,7 +326,9 @@
         "running": "Running"
       },
       "startedAt": "Started {{date}}",
-      "period": "{{start}} – {{end}}"
+      "period": "{{start}} – {{end}}",
+      "finishedOnly": "Finished {{date}}",
+      "reversedDatesHint": "This session's finished date is earlier than its started date in the source data. Showing the finished date only."
     },
     "currentStatus": {
       "INTRO_SENT": "Intro sent",
