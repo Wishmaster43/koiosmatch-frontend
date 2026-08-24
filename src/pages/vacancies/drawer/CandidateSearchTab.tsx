@@ -53,7 +53,7 @@ export default function CandidateSearchTab({ vacancy }: { vacancy: VacancyDetail
     functions: selectedFunctions, setFunctions,
     statuses: selectedStatuses, setStatuses,
     contractForms: selectedContractForms, setContractForms,
-    noLocation, refreshAdvice,
+    noLocation, refreshAdvice, eligibleTotal,
   } = useCandidateSearch(vacancy)
 
   // A row/marker pick SELECTS a candidate (summary card) instead of navigating
@@ -347,7 +347,17 @@ export default function CandidateSearchTab({ vacancy }: { vacancy: VacancyDetail
     <Caption as="div" style={{ marginBottom: 10 }}>{caveat}</Caption>
   )
 
-  const listPane = <div>{caveatLine}{summaryCard}{listBody}</div>
+  // SHOWN-OF-1: only when the endpoint scored more candidates than it shows
+  // (cap.eligible_total present AND greater than the shown row count) — equal
+  // means every eligible candidate is already on screen, so no line (calm,
+  // §3A rest). Renders after loading so `rows.length` reflects the real result.
+  const shownOfLine = (!loading && eligibleTotal != null && eligibleTotal > rows.length) ? (
+    <Caption as="div" style={{ marginBottom: 10 }}>
+      {t('candidateSearch.shownOf', { shown: rows.length, total: eligibleTotal })}
+    </Caption>
+  ) : null
+
+  const listPane = <div>{caveatLine}{shownOfLine}{summaryCard}{listBody}</div>
 
   return (
     <>

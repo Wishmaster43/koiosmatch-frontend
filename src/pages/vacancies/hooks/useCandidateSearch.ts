@@ -80,8 +80,18 @@ export function useCandidateSearch(vacancy: VacancyDetail) {
   // match, and that is a separate backend-side ticket, not a radius fix.
   const defaultRadiusKm = candidateTabCfg?.default_radius_km ?? 30
 
+  // FUNCTION-TITLE-1 (naronde, measured truth): the vacancy payload's `function`
+  // key IS the raw function_title column (VacancyDetailResource.php:87 emits
+  // 'function' => $this->function_title, "a free name string") and mapVacancy.ts
+  // carries it verbatim into `category` (labelOf returns a scalar unchanged) —
+  // so `vacancy.category` equals the exact value VacancyLeadCounter.php:66-68
+  // matches on. Reading a fabricated `function_title` field here (which the
+  // mapper never produces) silently dropped the function filter and WIDENED the
+  // tab past the leads count.
+  const vacancyFunctionTitle = vacancy.category ?? ''
+
   const [radiusKm, setRadiusKm]           = useState(defaultRadiusKm)
-  const [functions, setFunctions]         = useState<string[]>(vacancy.category ? [vacancy.category] : [])
+  const [functions, setFunctions]         = useState<string[]>(vacancyFunctionTitle ? [vacancyFunctionTitle] : [])
   const [statusSel, setStatusSel]         = useState<string[]>(defaultStatusValues)
   const [contractForms, setContractForms] = useState<string[]>(defaultContractForms)
 
@@ -94,7 +104,7 @@ export function useCandidateSearch(vacancy: VacancyDetail) {
   if (vacancy.id !== prevId) {
     setPrevId(vacancy.id)
     setRadiusKm(defaultRadiusKm)
-    setFunctions(vacancy.category ? [vacancy.category] : [])
+    setFunctions(vacancyFunctionTitle ? [vacancyFunctionTitle] : [])
     setStatusSel(defaultStatusValues)
     setContractForms(defaultContractForms)
   }
@@ -111,6 +121,10 @@ export function useCandidateSearch(vacancy: VacancyDetail) {
   const [loading, setLoading] = useState(false)
   const [error, setError]     = useState(false)
   const [reloadKey, setReloadKey] = useState(0)
+  // SHOWN-OF-1: the eligible pool the endpoint scored against (MatchExplorerService's
+  // capInfo, MatchExplorerController.php:32-35: "scoring is capped, the teller is
+  // not") — null until a response has landed, so the tab never renders "of 0".
+  const [eligibleTotal, setEligibleTotal] = useState<number | null>(null)
 
   const lat = toCoord(vacancy.lat)
   const lng = toCoord(vacancy.lng)
@@ -142,7 +156,19 @@ export function useCandidateSearch(vacancy: VacancyDetail) {
     })
       .then(res => {
         // Tolerant envelope unwrap (the endpoint serves a standard paginator).
-        const list = unwrapList<RawMatchRow>(res).rows
+        const { rows: list, total } = unwrapList<RawMatchRow>(res)
+        // SHOWN-OF-1: cap.eligible_total rides alongside the paginator body
+        // (MatchExplorerController.php:35, `$page->toArray() + ['cap' => …]`),
+        // read tolerantly since it sits outside the standard list envelope.
+        const rawCap = (res as { data?: { cap?: { eligible_total?: unknown } } })?.data?.cap
+        // Tolerant numeric read (no || coercion: a real "0" must stay 0); when
+        // the cap block is absent, fall back to the paginator total unwrapList
+        // already returns — both are honest population totals.
+        const capNum = Number(rawCap?.eligible_total)
+        const eligible = rawCap?.eligible_total != null && Number.isFinite(capNum)
+          ? capNum
+          : (Number.isFinite(Number(total)) && total > 0 ? total : null)
+        setEligibleTotal(eligible)
         const mapped: CandidateSearchRow[] = list.map(m => {
           const c = m.candidate ?? {}
           return {
@@ -203,5 +229,6 @@ export function useCandidateSearch(vacancy: VacancyDetail) {
     contractForms, setContractForms,
     noLocation,
     refreshAdvice,
+    eligibleTotal,
   }
 }

@@ -342,6 +342,7 @@
     "removeFilter": "Filter '{{label}}' entfernen",
     "onMap": "{{count}} Kandidaten auf der Karte",
     "empty": "Keine Kandidaten innerhalb dieser Filter gefunden.",
+    "shownOf": "Zeigt die {{shown}} besten Treffer von {{total}} Kandidaten",
     "centerVacancy": "Standort der Stelle",
     "refreshAdvice": "Koios-Empfehlung aktualisieren",
     "adviceQueued": "Die Empfehlung wird berechnet. Die Liste aktualisiert sich gleich.",

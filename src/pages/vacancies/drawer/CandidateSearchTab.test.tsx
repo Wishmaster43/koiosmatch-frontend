@@ -93,7 +93,11 @@ vi.mock('@/pages/candidates/drawer/AddApplicationModal', () => ({
   ),
 }))
 
-const vacancyWithLocation = mapVacancyDetail({ id: 'v1', title: 'Verpleegkundige | Utrecht', lat: 52.09, lng: 5.12, category: 'Verzorgende IG' })
+// FUNCTION-TITLE-1 (measured truth): the REAL payload key is `function` —
+// VacancyDetailResource.php:87 emits 'function' => $this->function_title (the
+// raw free name string) and mapVacancy carries it verbatim into `category`.
+// The fixture therefore uses the real wire key, never a fabricated field.
+const vacancyWithLocation = mapVacancyDetail({ id: 'v1', title: 'Verpleegkundige | Utrecht', lat: 52.09, lng: 5.12, function: 'Verzorgende IG' })
 const vacancyNoLocation = mapVacancyDetail({ id: 'v2', title: 'Nog niet geocodeerd' })
 
 // Deliberately NOT distance-sorted: Alice scores higher but is farther away,
@@ -129,6 +133,24 @@ describe('CandidateSearchTab · fetch + defaults', () => {
     expect(screen.getByText('92%')).toBeInTheDocument()
     expect(screen.getByText('60%')).toBeInTheDocument()
     expect(screen.getByTestId('radius-map')).toHaveAttribute('data-points', '2')
+  })
+})
+
+// FUNCTION-TITLE-1 (measured truth): `vacancy.category` IS the raw
+// function_title (wire key `function`, VacancyDetailResource.php:87) — exactly
+// what VacancyLeadCounter.php:66-68 matches on, so the default filter SENDS it;
+// a vacancy without a function sends no function filter at all.
+describe('CandidateSearchTab · function default is the raw function_title carried in category (FUNCTION-TITLE-1)', () => {
+  it('omits function_title entirely when the vacancy carries no function', async () => {
+    mockGet.mockResolvedValueOnce({ data: { data: [] } })
+    const vacancyNoFunction = mapVacancyDetail({ id: 'v4', title: 'Zonder functietitel', lat: 52.09, lng: 5.12 })
+    render(<CandidateSearchTab vacancy={vacancyNoFunction} />)
+
+    await waitFor(() => expect(mockGet).toHaveBeenCalled())
+    expect(mockGet).toHaveBeenCalledWith('/vacancies/v4/candidate-matches', {
+      params: { radius: 30, status: ['available'], per_page: 100 },
+      signal: expect.anything(),
+    })
   })
 })
 
@@ -417,6 +439,35 @@ describe('CandidateSearchTab · lead-count honesty caveat (points 3+5)', () => {
     await waitFor(() => expect(screen.getByText('Alice')).toBeInTheDocument())
 
     expect(screen.queryByText(/Wordt opnieuw berekend|Zonder coördinaten|Gedeeltelijk geteld|Bijgewerkt op/)).toBeNull()
+  })
+})
+
+// SHOWN-OF-1: the endpoint's cap.eligible_total (MatchExplorerController.php:35)
+// rides alongside the paginator body — surfaced as an honest "shown of total"
+// line so a 10-row list next to a 293 lead badge is explained, not silently odd.
+describe('CandidateSearchTab · shown-of-total honesty line (SHOWN-OF-1)', () => {
+  it('renders the shown-of line when cap.eligible_total exceeds the shown rows', async () => {
+    mockGet.mockResolvedValueOnce({ data: { data: rawRows, cap: { eligible_total: 293, scored_cap: 500, capped: false } } })
+    render(<CandidateSearchTab vacancy={vacancyWithLocation} />)
+    await waitFor(() => expect(screen.getByText('Alice')).toBeInTheDocument())
+
+    expect(screen.getByText(nl.candidateSearch.shownOf.replace('{{shown}}', '2').replace('{{total}}', '293'))).toBeInTheDocument()
+  })
+
+  it('shows no line when cap.eligible_total equals the shown rows (calm, nothing to explain)', async () => {
+    mockGet.mockResolvedValueOnce({ data: { data: rawRows, cap: { eligible_total: 2, scored_cap: 500, capped: false } } })
+    render(<CandidateSearchTab vacancy={vacancyWithLocation} />)
+    await waitFor(() => expect(screen.getByText('Alice')).toBeInTheDocument())
+
+    expect(screen.queryByText(/best passenden van/)).toBeNull()
+  })
+
+  it('shows no line when the response carries no cap at all', async () => {
+    mockGet.mockResolvedValueOnce({ data: { data: rawRows } })
+    render(<CandidateSearchTab vacancy={vacancyWithLocation} />)
+    await waitFor(() => expect(screen.getByText('Alice')).toBeInTheDocument())
+
+    expect(screen.queryByText(/best passenden van/)).toBeNull()
   })
 })
 
