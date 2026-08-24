@@ -1,54 +1,50 @@
 /**
  * useDashboardData — the dashboard's server state in one hook (audit item 21):
- * the two stats aggregates, the main /dashboard summary + /dashboard/charts
- * (refetched when the topbar filters change), and the two light meta.total
- * counts. Extracted from Dashboard.tsx so the component stays declarative (§3);
- * behaviour is identical — heavyGet dedup/cooldown (PERF-DASH-1), fail-soft
- * catches, and abort on tenant/filter change all preserved verbatim.
+ * the two stats aggregates and the main /dashboard summary + /dashboard/charts
+ * (refetched when the topbar filters change). Extracted from Dashboard.tsx so
+ * the component stays declarative (§3); behaviour is identical — heavyGet
+ * dedup/cooldown (PERF-DASH-1), fail-soft catches, and abort on tenant/filter
+ * change all preserved verbatim.
  *
  * /candidates/stats and /dashboard are the two CRITICAL feeds the KPI strip and
  * charts render from — a failure there must surface as a real error, not a
  * dashboard full of "—" that reads as genuine zeros (audit finding). Their own
  * loading/error is tracked and combined into the returned `loading`/`error`.
- * /opportunities/stats, /dashboard/charts and the matches/vacancies totals stay
- * best-effort/fail-soft, unchanged — they are optional enrichments, not the
- * page's core data.
+ * /opportunities/stats stays best-effort/fail-soft, unchanged — it is an
+ * optional enrichment (pipeline_hours), not the page's core data.
+ *
+ * K1 (DASH-KPI-SERVER-FE-1, BE K-168): the /dashboard payload now carries a
+ * server-computed `kpis` block, so the matches/vacancies meta.total probe
+ * fetches and the /applications/stats attention feed were dropped — nothing
+ * renders from them any more (§8 never fetch what nothing renders).
  */
 import { useEffect, useState, useCallback } from 'react'
-import api, { unwrap } from '@/lib/api'
+import { unwrap } from '@/lib/api'
 import { heavyGet } from '@/lib/heavyGet'
 import { isAbortError } from '@/lib/mocks'
 import type { Id } from '@/types/common'
 
 // Loose server shapes — the dashboard reads defensively (mirrors the old inline types).
-export interface DashboardServerState<Stats, Opp, Dash, Charts, AppStats> {
+export interface DashboardServerState<Stats, Opp, Dash, Charts> {
   stats: Stats | null
   opp: Opp | null
   dash: Dash | null
   dashCharts: Charts | null
-  matchesTotal: number | null
-  vacanciesTotal: number | null
-  // D6/D1(a) — best-effort attention feed for the applications tiles
-  // (the vacancies twin left with the removed dashboard KPIs, DASHBOARD-OPRUIMING-1).
-  appStats: AppStats | null
   loading: boolean
   error: boolean
   retry: () => void
 }
 
-export function useDashboardData<Stats, Opp, Dash, Charts, AppStats = unknown>({ tenantId, filterParams }: {
+export function useDashboardData<Stats, Opp, Dash, Charts>({ tenantId, filterParams }: {
   tenantId?: Id | null
   // Single-value dashboard filters (period/status/location_id) — a NEW OBJECT per
   // change is fine: the effect keys on its serialised form to avoid loops.
   filterParams: Record<string, unknown>
-}): DashboardServerState<Stats, Opp, Dash, Charts, AppStats> {
+}): DashboardServerState<Stats, Opp, Dash, Charts> {
   const [stats, setStats] = useState<Stats | null>(null)
   const [opp,   setOpp]   = useState<Opp | null>(null)
   const [dash,  setDash]  = useState<Dash | null>(null)
   const [dashCharts, setDashCharts] = useState<Charts | null>(null)
-  const [matchesTotal,   setMatchesTotal]   = useState<number | null>(null)
-  const [vacanciesTotal, setVacanciesTotal] = useState<number | null>(null)
-  const [appStats, setAppStats] = useState<AppStats | null>(null)
   // Per-feed loading/error for the two critical requests, combined below.
   const [statsLoading, setStatsLoading] = useState(true)
   const [statsError,   setStatsError]   = useState(false)
@@ -69,18 +65,13 @@ export function useDashboardData<Stats, Opp, Dash, Charts, AppStats = unknown>({
       .finally(() => { if (!ctrl.signal.aborted) setStatsLoading(false) })
     heavyGet('/opportunities/stats', { signal: ctrl.signal })
       .then(r => setOpp((unwrap<Opp>(r)) ?? null)).catch(() => setOpp(null))
-    // D6/D1(a) — applications attention feed, best-effort like /opportunities/stats
-    // (an optional enrichment, never gating the page). The /vacancies/stats twin
-    // was dropped with its last consumers (DASHBOARD-OPRUIMING-1) — never fetch
-    // data nothing renders (§8 data minimisation).
-    heavyGet('/applications/stats', { signal: ctrl.signal })
-      .then(r => setAppStats((unwrap<AppStats>(r)) ?? null)).catch(() => setAppStats(null))
     return () => ctrl.abort()
   }, [tenantId, retryKey])
 
   // Summary + charts — refetched whenever a topbar filter changes (serialised key).
-  // /dashboard is critical (tracked loading/error); /dashboard/charts (dedicated
-  // out-timeseries + net feed) stays fail-soft when absent.
+  // /dashboard is critical (tracked loading/error) and now carries the server-
+  // computed `kpis` block (K-168); /dashboard/charts (dedicated out-timeseries +
+  // net feed) stays fail-soft when absent.
   const filterKey = JSON.stringify(filterParams)
   useEffect(() => {
     const ctrl = new AbortController()
@@ -95,21 +86,8 @@ export function useDashboardData<Stats, Opp, Dash, Charts, AppStats = unknown>({
     return () => ctrl.abort()
   }, [tenantId, filterKey, retryKey])
 
-  // Matches/vacatures = light meta.total fetches (Danny 2026-07-06) until
-  // dedicated backend feeds land.
-  useEffect(() => {
-    let alive = true
-    api.get('/matches', { params: { per_page: 1 }, quiet404: true })
-      .then(r => { if (alive) setMatchesTotal(r.data?.meta?.total ?? (Array.isArray(r.data?.data) ? r.data.data.length : null)) })
-      .catch(() => {})
-    api.get('/vacancies', { params: { per_page: 1 }, quiet404: true })
-      .then(r => { if (alive) setVacanciesTotal(r.data?.meta?.total ?? null) })
-      .catch(() => {})
-    return () => { alive = false }
-  }, [tenantId, retryKey])
-
   return {
-    stats, opp, dash, dashCharts, matchesTotal, vacanciesTotal, appStats,
+    stats, opp, dash, dashCharts,
     loading: statsLoading || dashLoading, error: statsError || dashError, retry,
   }
 }

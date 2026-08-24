@@ -23,21 +23,15 @@ export interface StatItem {
 export interface DashStats {
   by_status?: StatItem[]
   by_owner?: StatItem[]
-  attention?: Record<string, number | null | undefined>
-  [k: string]: unknown
-}
-
-// /applications/stats (D6) — only the attention block is read here.
-export interface DashAppStats {
-  attention?: Record<string, number | null | undefined>
   [k: string]: unknown
 }
 
 // /opportunities/stats
 export interface DashOpp {
   by_stage?: StatItem[]
-  total?: number
-  pipeline_value?: number | null
+  // Hours-mode pipeline sum (tenant setting) — not (yet) a pinned dash.kpis key;
+  // the euro pipeline KPI reads dash.kpis.pipeline_value (K-168).
+  pipeline_hours?: number | null
   [k: string]: unknown
 }
 
@@ -75,5 +69,10 @@ export interface DashData {
   stale_vacancies?: StaleVacancy[]
   koios_suggestions?: KoiosSuggestion[]
   customers_by_owner?: CustomerByOwner[]
+  // K1 (DASH-KPI-SERVER-FE-1, BE K-168) — server-computed KPI values, pinned
+  // key set. null = no right/module for this key (UI renders '—'); 0 = a real
+  // zero; a module-gated key is ABSENT (not a key at all, not `null`) when the
+  // tenant lacks the module — that absence is what hides the tile.
+  kpis?: Record<string, number | null>
   [k: string]: unknown
 }

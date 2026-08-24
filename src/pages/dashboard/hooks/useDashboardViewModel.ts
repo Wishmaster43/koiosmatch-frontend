@@ -6,11 +6,10 @@
  * original inline useMemo blocks — no behaviour change.
  */
 import { useMemo } from 'react'
-import type { ReactNode } from 'react'
 import { initialsOf } from '@/lib/initials'
 import type { ChartDatum } from '@/components/charts/chartTypes'
 import type { BarSeries } from '@/components/charts/WeeklyBarChartCard'
-import type { DashStats, DashOpp, DashData, DashAppStats, TimeseriesPoint, TrendRow } from '@/types/dashboard'
+import type { DashStats, DashOpp, DashData, TimeseriesPoint, TrendRow } from '@/types/dashboard'
 import type { LookupItem } from '@/context/LookupsContext'
 import { buildDashboardKpis, type DashboardKpi } from '../dashboardKpis'
 import { visibleBlock, kpiRow } from '../templates'
@@ -24,8 +23,6 @@ interface UseDashboardViewModelArgs {
   opp: DashOpp | null
   dash: DashData | null
   dashCharts: { timeseries?: Record<string, unknown>; net?: unknown } | null
-  // D6 — best-effort attention feed not previously wired into the dashboard.
-  appStats?: DashAppStats | null
   statusMeta: (v?: string | null) => LookupItem
   funnelMeta: (v?: string | null) => LookupItem
   funnelTypes: LookupItem[]
@@ -34,16 +31,13 @@ interface UseDashboardViewModelArgs {
   hiddenKpis: string[]
   hasPlanning: boolean
   valueInHours: boolean
-  candidateTotalLabel: ReactNode
-  matchesTotal: number | null
-  vacanciesTotal: number | null
   onNavigate?: (page: string, params?: Record<string, unknown>) => void
 }
 
 export function useDashboardViewModel({
   t, formatNumber, stats, opp, dash, dashCharts, statusMeta, funnelMeta, funnelTypes,
-  activeType, hiddenBlocks, hiddenKpis, hasPlanning, valueInHours, candidateTotalLabel,
-  matchesTotal, vacanciesTotal, appStats, onNavigate,
+  activeType, hiddenBlocks, hiddenKpis, hasPlanning, valueInHours,
+  onNavigate,
 }: UseDashboardViewModelArgs) {
   // Is a chart/list block visible for the active role, and not switched off in Settings?
   const vis = (id: string) => visibleBlock(activeType, id) && !hiddenBlocks.includes(id) && (id !== 'block.shifts' || hasPlanning)
@@ -180,50 +174,44 @@ export function useDashboardViewModel({
     ].filter(s => present.has(s.key))
   }, [trendData, t])
 
-  // Attention/metrics merged from every source the backend may use: /candidates/stats
-  // `attention`, plus the /dashboard payload (nested `attention` or numeric top-level fields
-  // like matches/intakes/wa_queue/incomplete_runs). So delivered metrics light up
-  // regardless of exact nesting — no waiting on a path confirmation.
-  const att: Record<string, number | null | undefined> = {
-    ...(stats?.attention ?? {}),
-    ...((dash?.attention as Record<string, number | null | undefined>) ?? {}),
-    ...Object.fromEntries(Object.entries(dash ?? {}).filter(([, v]) => typeof v === 'number')) as Record<string, number>,
-    // D6 — applications attention, prefixed so it never collides with the
-    // candidates/stats `missing_appointment` key already merged above.
-    app_too_long_in_stage: appStats?.attention?.too_long_in_stage,
-    app_missing_appointment: appStats?.attention?.missing_appointment,
-  }
   const num = (v?: number | null) => (v == null ? '—' : formatNumber(v))
 
-  // WhatsApp backlog + failed (planner/recruiter KPIs); fail-soft 0 without access.
-  const incompleteRuns = runs.filter(r => !r.ok).length
+  // K1 (DASH-KPI-SERVER-FE-1) — the server-computed KPI block (K-168). Falls
+  // back to {} for an old server response without `kpis` so every tile just
+  // renders '—' instead of crashing.
+  const kpis = dash?.kpis ?? {}
 
   // KPI blocks come from the pure builder (§0.3 size split); KPI_ROWS picks per role.
   const kpiById = buildDashboardKpis({
-    t, att, num, eur, opp, valueInHours, candidateTotalLabel,
-    matchesTotal, vacanciesTotal, incompleteRuns, conversationsCount: conversations.length, onNavigate,
+    t, kpis, num, eur, opp, valueInHours, onNavigate,
   })
-  // D6 tiles render NOTHING when their backend key is absent — no zero-tile
-  // invention (§3). Maps kpi id → the att key that must be present to show it.
-  const REQUIRES_ATT_KEY: Record<string, keyof typeof att> = {
-    tooLongInStage: 'app_too_long_in_stage',
-    missingApptApps: 'app_missing_appointment',
-    // DASHP36: `null` until the tenant has flagged an `is_cv` document type —
-    // the tile must not render a fake "0" in the meantime.
-    missingDocs: 'missing_documents',
+  // MODULE-gated tiles render NOTHING when their server key is ABSENT: K-168
+  // only omits a key when the tenant lacks the module behind it (workflows /
+  // planning) — every rights-gated key is always present and carries null
+  // ("geen recht" → '—' via num()), so presence-gating those would never fire.
+  // The old D6 hide-on-absent tiles (tooLongInStage/missingApptApps/missingDocs)
+  // therefore now show an honest '—' for a viewer without the right.
+  const REQUIRES_KPI_KEY: Record<string, string> = {
+    incompleteRuns: 'incomplete_runs',
+    openShifts: 'open_shifts',
+    occupancy: 'occupancy',
   }
   // Every role ALWAYS gets its own full KPI row (never hidden).
-  const kpis: DashboardKpi[] = kpiRow(activeType)
+  const kpiCards: DashboardKpi[] = kpiRow(activeType)
     .filter(id => !hiddenKpis.includes(id))
     // Open-diensten is a Planning-module KPI — hide it when the tenant lacks the module.
     .filter(id => id !== 'openShifts' || hasPlanning)
-    .filter(id => !(id in REQUIRES_ATT_KEY) || att[REQUIRES_ATT_KEY[id]] != null)
+    .filter(id => !(id in REQUIRES_KPI_KEY) || REQUIRES_KPI_KEY[id] in kpis)
     .map(id => kpiById[id]).filter(Boolean)
+
+  // Shifts block values (K-168 module keys) — handed out here so the page has
+  // ONE read path for server KPI values (§3: logic in hooks, not in JSX).
+  const shifts = { open: kpis.open_shifts ?? null, occupancy: kpis.occupancy ?? null }
 
   return {
     vis, statusData, recruiterData, funnelData, oppStageData,
     recentCandidates, recentApplications, recentLeads, runs, conversations,
-    showRuns, showConv, trendData, trendSeries, att, kpis,
+    showRuns, showConv, trendData, trendSeries, shifts, kpis: kpiCards,
     // KD11 widget feeds (DASHP36).
     expiringMatchesRows, staleVacanciesRows, koiosSuggestionsRows, customersByOwnerRows,
   }

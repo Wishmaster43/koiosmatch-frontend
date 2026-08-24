@@ -21,7 +21,7 @@ const EMPTY_USERS: unknown[] = []
  * mid-session could get served the PREVIOUS tenant's user list from cache in
  * every owner/recruiter picker (setActiveTenant already clears+reloads, but the
  * key itself must be tenant-scoped so this holds even if that safety net ever
- * changes — same reasoning as useCandidateCount below).
+ * changes).
  */
 export function useUsers() {
   const tenantId = getActiveTenantId() ?? 'none'
@@ -29,17 +29,5 @@ export function useUsers() {
     queryKey: ['users', tenantId],
     queryFn: async ({ signal }) => unwrapList(await api.get('/users', { signal })).rows,
     placeholderData: EMPTY_USERS,
-  })
-}
-
-/**
- * Total candidate count — the same source the Candidates table paginates over
- * (/candidates meta.total). per_page:1 keeps it cheap. Tenant-scoped: the cache
- * is cleared on a bureau switch (see AuthContext.setActiveTenant).
- */
-export function useCandidateCount() {
-  return useQuery({
-    queryKey: ['candidates', 'count'],
-    queryFn: async ({ signal }) => unwrapList(await api.get('/candidates', { params: { per_page: 1 }, signal })).total,
   })
 }

@@ -26,7 +26,6 @@ vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string) => k }
 vi.mock('@/context/AuthContext', () => ({
   useAuth: () => ({ activeTenant: { id: 't1' }, dashboardType: () => 'management', hasModule: () => false }),
 }))
-vi.mock('@/lib/queries', () => ({ useCandidateCount: () => ({ data: 10, isLoading: false }) }))
 vi.mock('@/context/LookupsContext', () => ({
   useLookups: () => ({ statusMeta: () => ({ label: '', color: '#000' }), funnelMeta: () => ({ label: '', color: '#000' }), funnelTypes: [] }),
 }))
@@ -52,7 +51,7 @@ vi.mock('./hooks/useDashboardViewModel', () => ({
   useDashboardViewModel: () => ({
     vis: () => true, statusData: [], recruiterData: [], funnelData: [], oppStageData: [],
     recentCandidates: [], recentApplications: [], recentLeads: [], runs: [], conversations: [],
-    showRuns: false, showConv: false, trendData: [], trendSeries: [], att: {}, kpis: [],
+    showRuns: false, showConv: false, trendData: [], trendSeries: [], shifts: { open: null, occupancy: null }, kpis: [],
     // Only two of the three remaining widget feeds have data — koiosSuggestions
     // stays empty and self-hides, which is the situation that used to leave holes.
     expiringMatchesRows: [{ key: 'm1', primary: 'Aflopende match', meta: '01-09' }],
@@ -70,7 +69,7 @@ vi.mock('./KoiosForYouCard', () => ({ default: () => null }))
 
 vi.mock('./hooks/useDashboardData', () => ({
   useDashboardData: () => ({
-    stats: null, opp: null, dash: null, dashCharts: null, matchesTotal: null, vacanciesTotal: null,
+    stats: null, opp: null, dash: null, dashCharts: null,
     loading: false, error: false, retry: vi.fn(),
   }),
 }))

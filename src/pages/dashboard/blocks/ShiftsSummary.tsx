@@ -1,7 +1,9 @@
 /**
- * ShiftsSummary — a planning dashboard block: open / filled / unfilled shifts
- * ("diensten") + the occupancy bar, so a planner sees coverage at a glance.
- * Values come from the backend dashboard feed (🟡 render "—" until it lands).
+ * ShiftsSummary — a planning dashboard block: open shifts ("diensten") + the
+ * occupancy bar, so a planner sees coverage at a glance. Values come from the
+ * server KPI block (K-168: open_shifts/occupancy). filled/unfilled have NO
+ * pinned server key yet — those tiles render only when a value actually
+ * arrives, never a permanent "—" (§3: no fake affordances).
  * Click → the planning screen.
  */
 import { useTranslation } from 'react-i18next'
@@ -32,9 +34,9 @@ export default function ShiftsSummary({ open, filled, unfilled, occupancy, onOpe
       style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, cursor: onOpen ? 'pointer' : 'default' }}>
       <SectionTitle as="div" style={{ marginBottom: 12 }}>{t('block.shifts')}</SectionTitle>
       <div style={{ display: 'flex', gap: 12, marginBottom: pct != null ? 14 : 0 }}>
-        <Tile label={t('block.shiftsOpen')}     value={n(open)}     color="var(--color-warning)" />
-        <Tile label={t('block.shiftsFilled')}   value={n(filled)}   color="var(--color-success)" />
-        <Tile label={t('block.shiftsUnfilled')} value={n(unfilled)} color="var(--color-danger)" />
+        <Tile label={t('block.shiftsOpen')} value={n(open)} color="var(--color-warning)" />
+        {filled != null && <Tile label={t('block.shiftsFilled')} value={n(filled)} color="var(--color-success)" />}
+        {unfilled != null && <Tile label={t('block.shiftsUnfilled')} value={n(unfilled)} color="var(--color-danger)" />}
       </div>
       {pct != null && (
         <div>

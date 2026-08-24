@@ -1,8 +1,9 @@
 /**
- * useDashboardViewModel — D6 tile visibility (no zero-tile invention, §3): the
- * recruitment KPI row includes tooLongInStage/missingApptApps only when the
- * backend actually returned that attention key. (The D1(a) vacancy tiles,
- * closingSoon/staleStatusVac, are removed entirely — DASHBOARD-OPRUIMING-1.)
+ * useDashboardViewModel — K-168 tile semantics: a rights-gated key is ALWAYS
+ * present (null = viewer lacks the right → honest '—'), so the D6 tiles render
+ * a dash rather than hiding; only a MODULE-gated key (incomplete_runs/
+ * open_shifts/occupancy) is genuinely absent without the module, and that
+ * absence hides its tile (no zero-tile invention, §3).
  */
 import { describe, it, expect, vi } from 'vitest'
 import { renderHook } from '@testing-library/react'
@@ -24,44 +25,135 @@ const baseArgs = (overrides: Record<string, unknown> = {}) => ({
   hiddenKpis: [],
   hasPlanning: false,
   valueInHours: false,
-  candidateTotalLabel: '0',
-  matchesTotal: null,
-  vacanciesTotal: null,
   ...overrides,
 })
 
-describe('useDashboardViewModel · D6 tile visibility', () => {
-  it('omits the two tiles when appStats is absent', () => {
-    const { result } = renderHook(() => useDashboardViewModel(baseArgs()))
-    const ids = result.current.kpis.map(k => k.id)
-    expect(ids).not.toContain('tooLongInStage')
-    expect(ids).not.toContain('missingApptApps')
+describe('useDashboardViewModel · K-168 rights-gated tiles always render (null → dash)', () => {
+  it('renders the D6 tiles with an honest dash when their key is null (viewer lacks the right)', () => {
+    const { result } = renderHook(() => useDashboardViewModel(baseArgs({
+      dash: { kpis: { app_too_long_in_stage: null, app_missing_appointment: null } },
+    })))
+    const byId = Object.fromEntries(result.current.kpis.map(k => [k.id, k.value]))
+    expect(byId.tooLongInStage).toBe('—')
+    expect(byId.missingApptApps).toBe('—')
   })
 
-  it('renders each tile once its backend key is present', () => {
+  it('renders each D6 tile with its real count when the server sends one', () => {
     const { result } = renderHook(() => useDashboardViewModel(baseArgs({
-      appStats: { attention: { too_long_in_stage: 3, missing_appointment: 2 } },
+      dash: { kpis: { app_too_long_in_stage: 3, app_missing_appointment: 2 } },
     })))
-    const ids = result.current.kpis.map(k => k.id)
-    expect(ids).toEqual(expect.arrayContaining(['tooLongInStage', 'missingApptApps']))
+    const byId = Object.fromEntries(result.current.kpis.map(k => [k.id, k.value]))
+    expect(byId.tooLongInStage).toBe('3')
+    expect(byId.missingApptApps).toBe('2')
+  })
+
+  it('renders missingDocs with a dash on null and the real count when sent', () => {
+    const nullRes = renderHook(() => useDashboardViewModel(baseArgs({
+      activeType: 'backoffice' as const,
+      dash: { kpis: { missing_documents: null } },
+    }))).result
+    expect(nullRes.current.kpis.find(k => k.id === 'missingDocs')?.value).toBe('—')
+    const numRes = renderHook(() => useDashboardViewModel(baseArgs({
+      activeType: 'backoffice' as const,
+      dash: { kpis: { missing_documents: 4 } },
+    }))).result
+    expect(numRes.current.kpis.find(k => k.id === 'missingDocs')?.value).toBe('4')
   })
 })
 
-describe('useDashboardViewModel · KD11 (DASHP36) missing-documents null-hide', () => {
-  it('omits the missingDocs tile when attention.missing_documents is null (no CV-type flagged)', () => {
+// MODULE-gated keys are the only ones K-168 actually omits: no workflows module →
+// no incomplete_runs key → no tile (never a permanent '—' for a module the
+// tenant does not have).
+describe('useDashboardViewModel · module-gated tiles hide on key absence', () => {
+  it('omits incompleteRuns when incomplete_runs is absent from dash.kpis', () => {
     const { result } = renderHook(() => useDashboardViewModel(baseArgs({
       activeType: 'backoffice' as const,
-      stats: { attention: { missing_documents: null } },
+      dash: { kpis: {} },
     })))
-    expect(result.current.kpis.map(k => k.id)).not.toContain('missingDocs')
+    expect(result.current.kpis.map(k => k.id)).not.toContain('incompleteRuns')
   })
 
-  it('renders the missingDocs tile once the backend returns a real count', () => {
+  it('renders incompleteRuns once the key is present — including null (right-gated inside the module)', () => {
+    const present = renderHook(() => useDashboardViewModel(baseArgs({
+      activeType: 'backoffice' as const,
+      dash: { kpis: { incomplete_runs: 2 } },
+    }))).result
+    expect(present.current.kpis.find(k => k.id === 'incompleteRuns')?.value).toBe('2')
+    const nullPresent = renderHook(() => useDashboardViewModel(baseArgs({
+      activeType: 'backoffice' as const,
+      dash: { kpis: { incomplete_runs: null } },
+    }))).result
+    expect(nullPresent.current.kpis.find(k => k.id === 'incompleteRuns')?.value).toBe('—')
+  })
+
+  it('omits openShifts/occupancy without their keys and renders them once present (planning module on)', () => {
+    const absent = renderHook(() => useDashboardViewModel(baseArgs({
+      activeType: 'planning' as const, hasPlanning: true,
+      dash: { kpis: {} },
+    }))).result
+    expect(absent.current.kpis.map(k => k.id)).not.toContain('openShifts')
+    expect(absent.current.kpis.map(k => k.id)).not.toContain('occupancy')
+    const present = renderHook(() => useDashboardViewModel(baseArgs({
+      activeType: 'planning' as const, hasPlanning: true,
+      dash: { kpis: { open_shifts: 6, occupancy: 80 } },
+    }))).result
+    const byId = Object.fromEntries(present.current.kpis.map(k => [k.id, k.value]))
+    expect(byId.openShifts).toBe('6')
+    expect(byId.occupancy).toBe('80%')
+  })
+})
+
+// K1 (DASH-KPI-SERVER-FE-1, BE K-168) — KPI values come ONLY from dash.kpis now.
+describe('useDashboardViewModel · K1 server-computed KPI values', () => {
+  it('a KPI value comes from dash.kpis, never from opp/meta-total/attention (new wins)', () => {
+    const { result } = renderHook(() => useDashboardViewModel(baseArgs({
+      activeType: 'admin' as const,
+      // Deliberately conflicting values on the OLD locations vs the NEW dash.kpis
+      // location — the new server block must win.
+      opp: { total: 999, pipeline_value: 999999 },
+      stats: { attention: { placements: 999 } },
+      dash: { kpis: { opps_total: 5, pipeline_value: 1234, placements: 7, open_vacancies: 3 } },
+    })))
+    const byId = Object.fromEntries(result.current.kpis.map(k => [k.id, k.value]))
+    expect(byId.opps).toBe('5')
+    expect(byId.placements).toBe('7')
+    expect(byId.openVacancies).toBe('3')
+  })
+
+  it('null in dash.kpis renders the dash placeholder, not a fallback', () => {
     const { result } = renderHook(() => useDashboardViewModel(baseArgs({
       activeType: 'backoffice' as const,
-      stats: { attention: { missing_documents: 4 } },
+      dash: { kpis: { placements: null } },
     })))
-    expect(result.current.kpis.map(k => k.id)).toContain('missingDocs')
+    expect(result.current.kpis.find(k => k.id === 'placements')?.value).toBe('—')
+  })
+
+  it('the candidates tile reads kpis.candidates_total — never a local list-total probe', () => {
+    const { result } = renderHook(() => useDashboardViewModel(baseArgs({
+      dash: { kpis: { candidates_total: 42 } },
+    })))
+    expect(result.current.kpis.find(k => k.id === 'candidates')?.value).toBe('42')
+  })
+
+  it('a real zero renders "0" (and 0% for rate tiles) — zero is data, only null is a dash', () => {
+    const { result } = renderHook(() => useDashboardViewModel(baseArgs({
+      activeType: 'sales' as const,
+      dash: { kpis: { placements: 0, fill_rate: 0 } },
+    })))
+    const byId = Object.fromEntries(result.current.kpis.map(k => [k.id, k.value]))
+    expect(byId.placements).toBe('0')
+    expect(byId.fillRate).toBe('0%')
+  })
+
+  it('a response without dash.kpis at all (old server) never crashes and shows placeholders', () => {
+    const { result } = renderHook(() => useDashboardViewModel(baseArgs({
+      activeType: 'admin' as const,
+      dash: {},
+    })))
+    expect(() => result.current.kpis).not.toThrow()
+    const byId = Object.fromEntries(result.current.kpis.map(k => [k.id, k.value]))
+    expect(byId.opps).toBe('—')
+    expect(byId.placements).toBe('—')
   })
 })
 

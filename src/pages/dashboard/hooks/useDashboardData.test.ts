@@ -3,32 +3,26 @@
  * and /dashboard used to catch(()=>{}), so a failed fetch left `stats`/`dash` at
  * null with no loading/error signal — Dashboard.tsx then rendered a KPI strip full
  * of "—" that read as real zeros. The two critical feeds now drive `loading`/
- * `error`; the best-effort feeds (opportunities stats, dashboard charts) stay
- * fail-soft and must NOT flip `error`.
+ * `error`; the best-effort feed (opportunities stats) stays fail-soft and must
+ * NOT flip `error`.
+ *
+ * K1 (DASH-KPI-SERVER-FE-1, BE K-168): the matches/vacancies meta.total probe
+ * fetches and the /applications/stats attention feed are gone — dash.kpis now
+ * carries everything they used to feed.
  */
 import { describe, it, expect, vi, afterEach } from 'vitest'
 import { renderHook, act, waitFor } from '@testing-library/react'
 import { useDashboardData } from './useDashboardData'
-import api from '@/lib/api'
 
 // heavyGet is the shared guarded-GET wrapper (dedup + cooldown) — the hook only
 // cares about the resolved/rejected axios-shaped promise, so a route dispatch is enough.
 const heavyGetMock = vi.fn()
 vi.mock('@/lib/heavyGet', () => ({ heavyGet: (...args: unknown[]) => heavyGetMock(...args) }))
-vi.mock('@/lib/api', async () => {
-  const actual = await vi.importActual<typeof import('@/lib/api')>('@/lib/api')
-  return { ...actual, default: { get: vi.fn() } }
-})
-const mockedGet = vi.mocked(api.get)
 
 afterEach(() => vi.clearAllMocks())
 
-// Resolves the light matches/vacancies meta.total fetches so those effects settle quietly.
-const resolveMeta = () => mockedGet.mockResolvedValue({ data: { meta: { total: 0 } } })
-
 describe('useDashboardData · critical-feed error signalling', () => {
   it('starts loading and clears once both critical feeds resolve', async () => {
-    resolveMeta()
     heavyGetMock.mockResolvedValue({ data: { data: {} } })
     const { result } = renderHook(() => useDashboardData({ filterParams: {} }))
     expect(result.current.loading).toBe(true)
@@ -37,7 +31,6 @@ describe('useDashboardData · critical-feed error signalling', () => {
   })
 
   it('sets error when /candidates/stats fails with no response object (network/timeout)', async () => {
-    resolveMeta()
     heavyGetMock.mockImplementation((url: string) =>
       url === '/candidates/stats' ? Promise.reject(new Error('Network Error')) : Promise.resolve({ data: { data: {} } }))
     const { result } = renderHook(() => useDashboardData({ filterParams: {} }))
@@ -46,7 +39,6 @@ describe('useDashboardData · critical-feed error signalling', () => {
   })
 
   it('sets error when /dashboard fails', async () => {
-    resolveMeta()
     heavyGetMock.mockImplementation((url: string) =>
       url === '/dashboard' ? Promise.reject({ response: { status: 500 } }) : Promise.resolve({ data: { data: {} } }))
     const { result } = renderHook(() => useDashboardData({ filterParams: {} }))
@@ -54,32 +46,44 @@ describe('useDashboardData · critical-feed error signalling', () => {
     expect(result.current.error).toBe(true)
   })
 
-  it('stays fail-soft (no error) when only the best-effort feeds fail', async () => {
-    resolveMeta()
+  it('stays fail-soft (no error) when only the best-effort feed fails', async () => {
     heavyGetMock.mockImplementation((url: string) =>
-      (url === '/opportunities/stats' || url === '/dashboard/charts' || url === '/applications/stats')
+      url === '/opportunities/stats'
         ? Promise.reject(new Error('boom'))
         : Promise.resolve({ data: { data: {} } }))
     const { result } = renderHook(() => useDashboardData({ filterParams: {} }))
     await waitFor(() => expect(result.current.loading).toBe(false))
     expect(result.current.error).toBe(false)
-    expect(result.current.appStats).toBeNull()
+    expect(result.current.opp).toBeNull()
   })
 
-  // D6/D1(a) — the new attention feeds resolve alongside the existing best-effort ones.
-  it('resolves the /applications/stats attention payload', async () => {
-    resolveMeta()
+  // K1 — the server-computed kpis block passes through /dashboard untouched.
+  // K1 negative pin: the retired count probes must never come back — not via
+  // heavyGet and not via a quiet api.get reintroduction (the removed calls used
+  // api.get, which this mock would not catch on its own).
+  it('never fetches /matches, /vacancies or /applications/stats — the server KPI block replaced them', async () => {
+    heavyGetMock.mockResolvedValue({ data: { data: {} } })
+    const apiGetSpy = vi.spyOn((await import('@/lib/api')).default, 'get').mockResolvedValue({ data: { data: {} } })
+    const { result } = renderHook(() => useDashboardData({ filterParams: {} }))
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    const urls = [...heavyGetMock.mock.calls, ...apiGetSpy.mock.calls].map(c => String(c[0]))
+    for (const gone of ['/matches', '/vacancies', '/applications/stats']) {
+      expect(urls.some(u => u === gone || u.startsWith(`${gone}?`)), `${gone} must stay removed`).toBe(false)
+    }
+    apiGetSpy.mockRestore()
+  })
+
+  it('carries dash.kpis through from the /dashboard response', async () => {
     heavyGetMock.mockImplementation((url: string) => {
-      if (url === '/applications/stats') return Promise.resolve({ data: { data: { attention: { too_long_in_stage: 3, missing_appointment: 2 } } } })
+      if (url === '/dashboard') return Promise.resolve({ data: { kpis: { open_vacancies: 3, placements: null } } })
       return Promise.resolve({ data: { data: {} } })
     })
     const { result } = renderHook(() => useDashboardData({ filterParams: {} }))
     await waitFor(() => expect(result.current.loading).toBe(false))
-    expect(result.current.appStats).toEqual({ attention: { too_long_in_stage: 3, missing_appointment: 2 } })
+    expect(result.current.dash).toEqual({ kpis: { open_vacancies: 3, placements: null } })
   })
 
   it('retry() re-issues the critical fetches', async () => {
-    resolveMeta()
     heavyGetMock.mockImplementation((url: string) =>
       url === '/dashboard' ? Promise.reject({ response: { status: 500 } }) : Promise.resolve({ data: { data: {} } }))
     const { result } = renderHook(() => useDashboardData({ filterParams: {} }))

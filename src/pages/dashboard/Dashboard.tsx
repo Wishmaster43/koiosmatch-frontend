@@ -1,6 +1,5 @@
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '@/context/AuthContext'
-import { useCandidateCount } from '@/lib/queries'
 import { useLookups } from '@/context/LookupsContext'
 import ErrorBanner from '@/components/ui/ErrorBanner'
 import Spinner from '@/components/ui/Spinner'
@@ -17,7 +16,7 @@ import ActivityListsRow from './blocks/ActivityListsRow'
 import ShiftsSummary from './blocks/ShiftsSummary'
 import WidgetListBlock from './blocks/WidgetListBlock'
 import KoiosForYouCard from './KoiosForYouCard'
-import type { DashStats, DashOpp, DashData, DashAppStats } from '@/types/dashboard'
+import type { DashStats, DashOpp, DashData } from '@/types/dashboard'
 import { useAllSettings, getJsonSetting, getBoolSetting } from '@/lib/settings/useAllSettings'
 import { useNumberFormat } from '@/lib/formatters'
 import { useDateFormat } from '@/lib/datetime'
@@ -51,10 +50,6 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
   // tenant has the module (Danny 2026-07-04: "Planning staat uit en ik zie DIENSTEN??").
   const hasPlanning = (auth?.hasModule ?? (() => false))('plan')
 
-  // Live total — same source as the Candidates table (/candidates meta.total).
-  const { data: candidateTotal, isLoading: countLoading } = useCandidateCount()
-  const candidateTotalLabel = countLoading ? '…' : formatNumber(candidateTotal ?? 0)
-
   // Topbar filter selections (single-value per dimension server-side) — UI state
   // stays here; ALL server state lives in useDashboardData (audit item 21).
   const {
@@ -67,8 +62,8 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
   // `loading`/`error` cover the two CRITICAL feeds (/candidates/stats + /dashboard) —
   // a failure there must render an explicit error notice, never a KPI strip full of
   // "—" that reads as real zeros (audit finding).
-  const { stats, opp, dash, dashCharts, matchesTotal, vacanciesTotal, appStats, loading, error, retry } =
-    useDashboardData<DashStats, DashOpp, DashData, { timeseries?: Record<string, unknown>; net?: unknown }, DashAppStats>({
+  const { stats, opp, dash, dashCharts, loading, error, retry } =
+    useDashboardData<DashStats, DashOpp, DashData, { timeseries?: Record<string, unknown>; net?: unknown }>({
       tenantId: activeTenant?.id, filterParams: dashFilterParams,
     })
 
@@ -80,12 +75,12 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
   const {
     vis, statusData, recruiterData, funnelData, oppStageData,
     recentCandidates, recentApplications, recentLeads, runs, conversations,
-    showRuns, showConv, trendData, trendSeries, att, kpis,
+    showRuns, showConv, trendData, trendSeries, shifts, kpis,
     expiringMatchesRows, staleVacanciesRows, koiosSuggestionsRows, customersByOwnerRows,
   } = useDashboardViewModel({
     t, formatNumber, stats, opp, dash, dashCharts, statusMeta, funnelMeta, funnelTypes,
-    activeType, hiddenBlocks, hiddenKpis, hasPlanning, valueInHours, candidateTotalLabel,
-    matchesTotal, vacanciesTotal, appStats, onNavigate,
+    activeType, hiddenBlocks, hiddenKpis, hasPlanning, valueInHours,
+    onNavigate,
   })
 
   // Registers this page's right-panel filter groups (period/location/status options).
@@ -163,7 +158,7 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
           {/* Planning-blokken — WhatsApp-wachtrij (🟢) + diensten-overzicht (🟡 tot de feed). */}
           {vis('block.shifts') && (
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
-            {vis('block.shifts') && <ShiftsSummary open={att.open_shifts} filled={att.filled_shifts} unfilled={att.unfilled_shifts} occupancy={att.occupancy} onOpen={() => onNavigate?.('planning')} />}
+            {vis('block.shifts') && <ShiftsSummary open={shifts.open} occupancy={shifts.occupancy} onOpen={() => onNavigate?.('planning')} />}
           </div>
           )}
 

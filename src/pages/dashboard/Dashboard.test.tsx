@@ -14,7 +14,6 @@ vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string) => k }
 vi.mock('@/context/AuthContext', () => ({
   useAuth: () => ({ activeTenant: { id: 't1' }, dashboardType: () => 'management', hasModule: () => false }),
 }))
-vi.mock('@/lib/queries', () => ({ useCandidateCount: () => ({ data: 10, isLoading: false }) }))
 vi.mock('@/context/LookupsContext', () => ({
   useLookups: () => ({ statusMeta: () => ({ label: '', color: '#000' }), funnelMeta: () => ({ label: '', color: '#000' }), funnelTypes: [] }),
 }))
@@ -39,7 +38,7 @@ vi.mock('./hooks/useDashboardViewModel', () => ({
   useDashboardViewModel: () => ({
     vis: () => false, statusData: [], recruiterData: [], funnelData: [], oppStageData: [],
     recentCandidates: [], recentApplications: [], recentLeads: [], runs: [], conversations: [],
-    showRuns: false, showConv: false, trendData: [], trendSeries: [], att: {}, kpis: [],
+    showRuns: false, showConv: false, trendData: [], trendSeries: [], shifts: { open: null, occupancy: null }, kpis: [],
   }),
 }))
 // Child blocks are out of scope for this container test (own components/tests).
@@ -56,7 +55,7 @@ const dashboardDataMock = vi.fn()
 vi.mock('./hooks/useDashboardData', () => ({ useDashboardData: (...args: unknown[]) => dashboardDataMock(...args) }))
 
 // The non-critical fields the hook also returns — held constant across the three states.
-const baseData = { stats: null, opp: null, dash: null, dashCharts: null, matchesTotal: null, vacanciesTotal: null }
+const baseData = { stats: null, opp: null, dash: null, dashCharts: null }
 
 describe('Dashboard · four UI states (re-audit finding)', () => {
   it('renders the loading notice while the critical feeds are in flight', () => {
