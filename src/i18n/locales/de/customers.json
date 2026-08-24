@@ -393,7 +393,8 @@
       "subtabs": {
         "data": "Details",
         "tasks": "Aufgaben",
-        "conversations": "Gespräch"
+        "conversations": "Gespräch",
+        "notes": "Notizen"
       },
       "linkLocation": "Standort verknüpfen",
       "linkDepartment": "Abteilung verknüpfen",
@@ -807,7 +808,8 @@
     "vacanciesEmpty": "Noch keine Stellen.",
     "matchesEmpty": "Noch keine Matches.",
     "loadError": "Laden fehlgeschlagen. Möglicherweise haben Sie keinen Zugriff auf diesen Standort.",
-    "opportunitiesEmpty": "Noch keine Chancen."
+    "opportunitiesEmpty": "Noch keine Chancen.",
+    "loadErrorGeneric": "Laden fehlgeschlagen."
   },
   "inUse": {
     "title": "Noch in Verwendung",

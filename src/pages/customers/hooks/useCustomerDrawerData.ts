@@ -280,3 +280,33 @@ export function useScopedCustomerNotes(customerId: Id | undefined, scope: 'locat
   // see ScopedNotesTab) invalidates this query so the scoped list picks it up too.
   return { notes: data, loading, error, reload: () => queryClient.invalidateQueries({ queryKey }) }
 }
+
+/**
+ * CONTACT-NOTITIES-2 — a contactpersoon's own Notities sub-tab. There is no
+ * dedicated scoped-notes endpoint for a contact (unlike location/department
+ * above), so this reads the customer's own GET /customers/{id}/notes (WITHOUT
+ * ?rollup — CustomerController::notes only nulls out location_id/department_id
+ * there, never customer_contact_id, so a plain call already returns both
+ * company-level AND contact-level notes) and filters client-side on
+ * customer_contact_id === this contact's id (CustomerNoteResource.php:31 puts
+ * that field on the wire). Same shared row mapper as every other notes source (§11).
+ */
+export function useContactNotes(customerId: Id | undefined, contactId: Id | undefined) {
+  const queryClient = useQueryClient()
+  const queryKey = ['customers', customerId, 'contact', contactId, 'notes']
+  const { data = [], isLoading: loading, isError: error } = useQuery({
+    queryKey,
+    enabled: !!customerId && !!contactId,
+    queryFn: async ({ signal }): Promise<CustomerNote[]> =>
+      // rollup=1: without it the server filters out any note that ALSO carries a
+      // location/department link, so such a row could never reach this contact
+      // tab (Opus wave-B1) — the client-side contactId filter below narrows the
+      // rolled-up superset to exactly this contact's notes.
+      unwrapList<ApiCustomerNoteRow>(await api.get(`/customers/${customerId}/notes`, { params: { rollup: 1 }, signal }))
+        .rows.map(mapCustomerNoteRow)
+        .filter(n => String(n.contactId ?? '') === String(contactId)),
+  })
+  // A freshly-added note POSTs to the same /customers/{id}/notes route this reads —
+  // invalidate so the filtered list picks it up (mirrors useScopedCustomerNotes).
+  return { notes: data, loading, error, reload: () => queryClient.invalidateQueries({ queryKey }) }
+}

@@ -14,6 +14,8 @@ import type {
 export interface ApiCustomerNoteRow {
   id?: Id; type?: string; title?: string; text?: string; body?: string
   created_at?: string; ago?: string
+  // CustomerNoteResource sends the author display name alongside author_id.
+  author?: string
   customer_contact_id?: Id | null; contact_name?: string | null
   customer_location_id?: Id | null; location_name?: string | null
   customer_department_id?: Id | null; department_name?: string | null
@@ -30,6 +32,12 @@ export interface ApiCustomerNoteRow {
 export function mapCustomerNoteRow(n: ApiCustomerNoteRow = {}): CustomerNote {
   return {
     id: n.id, type: n.type ?? '', title: n.title ?? '', text: n.text ?? n.body ?? '', ago: n.created_at ?? n.ago ?? '',
+    // DATUM-1 + attribution (Opus wave-B1): the shared NotesTab formats
+    // `created_at` through the house date formatter and prints `author` in the
+    // meta line — without these two fields it fell back to raw ISO text and to
+    // the VIEWER's own avatar on a colleague's note.
+    created_at: n.created_at ?? '',
+    author: n.author ?? '',
     contactId: n.customer_contact_id ?? null, contactName: n.contact_name ?? '',
     locationId: n.customer_location_id ?? null, locationName: n.location_name ?? '',
     departmentId: n.customer_department_id ?? null, departmentName: n.department_name ?? '',

@@ -54,6 +54,9 @@ import ScopedOpportunitiesTab from './ScopedOpportunitiesTab'
 // GESPREK-CONTACT-1: this contact's own Conversaties sub-tab — thin wrapper over the
 // shared components/drawer/ConversationsSection, pointed at the nested contact route.
 import ContactConversationsSection from './ContactConversationsSection'
+// CONTACT-NOTITIES-2: this contact's own Notities sub-tab, mirrors ScopedNotesTab's
+// identical wiring (§3A — shared notes-tab family, never a forked composer/list).
+import ContactNotesTab from './ContactNotesTab'
 import { useCustomFields } from '@/lib/useCustomFields'
 import { useContactFunctions } from '@/lib/useContactFunctions'
 import { useGenders } from '@/lib/useGenders'
@@ -105,7 +108,8 @@ export default function ContactDetail({ contact, locations, departments, statuse
   const showKoppelingen = useBackofficeLinksVisible()
   // SCOPED-LIST-TAB-1/GESPREK-CONTACT-1 added 'kansen'/'conversations', right after
   // Gegevens and Taken respectively (§3A — same shared tabs Location/DepartmentDetail carry).
-  const [subTab, setSubTab] = useState<'data' | 'kansen' | 'tasks' | 'conversations' | 'extra' | 'koppelingen'>('data')
+  // CONTACT-NOTITIES-2: 'notes' joins right before 'koppelingen' (tab-order canon, §3A).
+  const [subTab, setSubTab] = useState<'data' | 'kansen' | 'tasks' | 'conversations' | 'extra' | 'notes' | 'koppelingen'>('data')
   // Contact function (job title) is a lookup combobox, split from the candidate
   // function list (FUNCTIONS-SPLIT-1) — never a plain free-text field.
   const { contactFunctions, allowFreeEntry } = useContactFunctions()
@@ -331,6 +335,9 @@ export default function ContactDetail({ contact, locations, departments, statuse
           // GESPREK-CONTACT-1: local-only label, mirrors the 'data'/'tasks' siblings above.
           { id: 'conversations', label: t('contacts.detail.subtabs.conversations') },
           ...(customFieldDefs.length > 0 ? [{ id: 'extra', label: t('drawer.tabs.extra') }] : []),
+          // CONTACT-NOTITIES-2: always visible (mirrors the 'data'/'tasks' siblings,
+          // never gated on data presence) and BEFORE 'koppelingen', per tab-order canon.
+          { id: 'notes', label: t('contacts.detail.subtabs.notes') },
           ...(showKoppelingen ? [{ id: 'koppelingen', label: t('common:backofficeLinks.tabLabel') }] : []),
         ]}
         active={subTab}
@@ -396,6 +403,13 @@ export default function ContactDetail({ contact, locations, departments, statuse
       {subTab === 'extra' && customFieldDefs.length > 0 && (
         <CustomFieldsTab entityType="customer_contact" values={contact.customFields ?? {}}
           onSave={patch => onSave(contact.id as Id, { customFields: { ...contact.customFields, ...patch } })} />
+      )}
+      {/* CONTACT-NOTITIES-2: this contact's own notes, filtered client-side against
+          the customer's own notes list (no dedicated scoped endpoint exists yet —
+          see useContactNotes' docblock). customerId can be null on legacy/edge data
+          (mirrors the conversations/changelog gating above). */}
+      {subTab === 'notes' && contact.customerId != null && (
+        <ContactNotesTab contactId={contact.id as Id} customerId={contact.customerId} />
       )}
       {subTab === 'koppelingen' && showKoppelingen && (
         <BackofficeLinksTab entity="contacts" id={contact.id as Id} helloflexLink={contact.helloflexLink} shiftmanagerLink={contact.shiftmanagerLink} canLink={canLinkBackoffice} />

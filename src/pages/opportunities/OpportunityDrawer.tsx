@@ -17,7 +17,7 @@ import DetailsTab from './drawer/DetailsTab'
 import StatisticsTab from './drawer/StatisticsTab'
 import CustomerRelationTab from './drawer/CustomerRelationTab'
 import NotesTab from './drawer/NotesTab'
-import EmailTab from './drawer/EmailTab'
+import ConversationTab from './drawer/ConversationTab'
 import TasksTab from './drawer/TasksTab'
 import ChangelogPopover from '@/components/drawer/ChangelogPopover'
 import ChangelogTab from './drawer/ChangelogTab'
@@ -98,8 +98,9 @@ export default function OpportunityDrawer({
     // KANSEN-A-3: this customer's OTHER opportunities (mirrors matches/drawer/StatisticsTab).
     { id: 'customer', label: t('drawer.tabs.customer'), render: () => <CustomerRelationTab opportunity={o} customers={customers} onUpdate={onUpdate} /> },
     { id: 'notes',   label: t('drawer.tabs.notes'),   render: () => <NotesTab opportunity={o} /> },
-    // KANSEN-VERDIEPING-PLAN DEEL 2 fase A item 5: e-mail history, e-mail-only sub-tab.
-    { id: 'emails',  label: t('drawer.tabs.emails'),  render: () => <EmailTab opportunity={o} /> },
+    // Danny 24-08: "EMAIL MOET ZIJN CONVERSATIE!!" — the WhatsApp thread panel with
+    // the e-mail log kept below it (ConversationTab), replacing the e-mail-only tab.
+    { id: 'conversation', label: t('drawer.tabs.conversation'), render: () => <ConversationTab opportunity={o} /> },
     { id: 'tasks',   label: t('drawer.tabs.tasks'),   render: () => <TasksTab opportunity={o} /> },
     ...(customFieldDefs.length > 0 ? [{ id: 'extra', label: t('drawer.tabs.extra'), render: () => (
       <CustomFieldsTab entityType="opportunity" values={o.customFieldValues ?? {}}

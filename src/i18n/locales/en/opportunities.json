@@ -68,10 +68,10 @@
       "statistics": "Statistics",
       "notes": "Notes",
       "tasks": "Tasks",
-      "emails": "Emails",
       "changelog": "Changelog",
       "extra": "Extra",
-      "customer": "Client"
+      "customer": "Client",
+      "conversation": "Conversation"
     },
     "tags": "Tags",
     "ordinal": {
@@ -219,5 +219,10 @@
   "popout": {
     "textWindowTitle": "Opportunity text — {{name}}",
     "loadError": "This opportunity could not be loaded."
+  },
+  "conversation": {
+    "noContact": "Link a contact to this opportunity first to see the conversation.",
+    "emailSectionLabel": "E-mails",
+    "noCustomer": "This opportunity has a contact person but no linked customer. Link the customer first to see the conversation."
   }
 }

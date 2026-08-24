@@ -66,9 +66,9 @@
       "changelog": "Änderungen",
       "notes": "Notizen",
       "tasks": "Aufgaben",
-      "emails": "E-Mails",
       "extra": "Extra",
-      "customer": "Kunde"
+      "customer": "Kunde",
+      "conversation": "Konversation"
     },
     "markWon": "Gewonnen",
     "markLost": "Verloren",
@@ -219,5 +219,10 @@
   "popout": {
     "textWindowTitle": "Chancentext — {{name}}",
     "loadError": "Diese Chance konnte nicht geladen werden."
+  },
+  "conversation": {
+    "noContact": "Verknüpfen Sie zuerst eine Kontaktperson mit dieser Chance, um die Konversation zu sehen.",
+    "emailSectionLabel": "E-Mails",
+    "noCustomer": "Diese Chance hat eine Kontaktperson, aber keinen verknüpften Kunden. Verknüpfen Sie zuerst den Kunden, um das Gespräch zu sehen."
   }
 }

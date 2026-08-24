@@ -393,7 +393,8 @@
       "subtabs": {
         "data": "Details",
         "tasks": "Tasks",
-        "conversations": "Conversation"
+        "conversations": "Conversation",
+        "notes": "Notes"
       },
       "linkLocation": "Link location",
       "linkDepartment": "Link department",
@@ -807,7 +808,8 @@
     "vacanciesEmpty": "No vacancies yet.",
     "matchesEmpty": "No matches yet.",
     "loadError": "Loading failed. You may not have access to this branch.",
-    "opportunitiesEmpty": "No opportunities yet."
+    "opportunitiesEmpty": "No opportunities yet.",
+    "loadErrorGeneric": "Loading failed."
   },
   "inUse": {
     "title": "Still in use",

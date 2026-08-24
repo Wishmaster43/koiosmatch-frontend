@@ -66,9 +66,9 @@
       "changelog": "Modifications",
       "notes": "Notes",
       "tasks": "Tâches",
-      "emails": "E-mails",
       "extra": "Extra",
-      "customer": "Client"
+      "customer": "Client",
+      "conversation": "Conversation"
     },
     "markWon": "Gagné",
     "markLost": "Perdu",
@@ -219,5 +219,10 @@
   "popout": {
     "textWindowTitle": "Texte de l'opportunité — {{name}}",
     "loadError": "Cette opportunité n'a pas pu être chargée."
+  },
+  "conversation": {
+    "noContact": "Associez d'abord un contact à cette opportunité pour voir la conversation.",
+    "emailSectionLabel": "E-mails",
+    "noCustomer": "Cette opportunité a un contact mais aucun client associé. Associez d'abord le client pour voir la conversation."
   }
 }

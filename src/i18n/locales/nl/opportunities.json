@@ -68,10 +68,10 @@
       "statistics": "Statistieken",
       "notes": "Notities",
       "tasks": "Taken",
-      "emails": "E-mails",
       "changelog": "Wijzigingen",
       "extra": "Extra",
-      "customer": "Klant"
+      "customer": "Klant",
+      "conversation": "Conversatie"
     },
     "tags": "Tags",
     "ordinal": {
@@ -219,5 +219,10 @@
   "popout": {
     "textWindowTitle": "Kanstekst — {{name}}",
     "loadError": "Deze kans kon niet worden geladen."
+  },
+  "conversation": {
+    "noContact": "Koppel eerst een contactpersoon aan deze kans om de conversatie te zien.",
+    "emailSectionLabel": "E-mails",
+    "noCustomer": "Deze kans heeft een contactpersoon maar geen gekoppelde klant. Koppel eerst de klant om de conversatie te zien."
   }
 }

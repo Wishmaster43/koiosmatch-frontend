@@ -35,6 +35,7 @@ vi.mock('./drawer/DetailsTab', () => ({ default: () => null }))
 vi.mock('./drawer/CustomerRelationTab', () => ({ default: () => null }))
 vi.mock('./drawer/NotesTab', () => ({ default: () => null }))
 vi.mock('./drawer/TasksTab', () => ({ default: () => null }))
+vi.mock('./drawer/ConversationTab', () => ({ default: () => null }))
 vi.mock('@/lib/useCustomFields', () => ({ useCustomFields: () => ({ fields: [] }) }))
 
 const noop = () => {}
@@ -50,6 +51,17 @@ describe('OpportunityDrawer — reference number chip', () => {
     const o = mapOpportunity({ id: 'o2', title: 'Deal B' })
     render(<OpportunityDrawer opportunity={o} onClose={noop} />)
     expect(screen.queryByText(/^D-/)).toBeNull()
+  })
+})
+
+// Danny 24-08: the Conversatie tab sits where E-mails used to, and Statistieken
+// stays last (§3A canon) — pin the whole order so a future edit can't drift it.
+describe('OpportunityDrawer — tab order (conversation replaces e-mails)', () => {
+  it('shows Conversatie where E-mails used to sit, with Statistieken last', () => {
+    const o = mapOpportunity({ id: 'o3', title: 'Deal C' })
+    render(<OpportunityDrawer opportunity={o} onClose={noop} />)
+    const tabLabels = screen.getAllByRole('tab').map(t => t.textContent)
+    expect(tabLabels).toEqual(['Details', 'Klant', 'Notities', 'Conversatie', 'Taken', 'Statistieken'])
   })
 })
 

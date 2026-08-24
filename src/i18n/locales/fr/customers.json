@@ -393,7 +393,8 @@
       "subtabs": {
         "data": "Détails",
         "tasks": "Tâches",
-        "conversations": "Conversation"
+        "conversations": "Conversation",
+        "notes": "Notes"
       },
       "linkLocation": "Lier un site",
       "linkDepartment": "Lier un service",
@@ -807,7 +808,8 @@
     "vacanciesEmpty": "Aucun poste pour le moment.",
     "matchesEmpty": "Aucun match pour le moment.",
     "loadError": "Le chargement a échoué. Vous n'avez peut-être pas accès à ce site.",
-    "opportunitiesEmpty": "Aucune opportunité pour le moment."
+    "opportunitiesEmpty": "Aucune opportunité pour le moment.",
+    "loadErrorGeneric": "Échec du chargement."
   },
   "inUse": {
     "title": "Encore utilisé",

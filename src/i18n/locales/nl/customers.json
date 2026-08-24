@@ -393,7 +393,8 @@
       "subtabs": {
         "data": "Gegevens",
         "tasks": "Taken",
-        "conversations": "Conversatie"
+        "conversations": "Conversatie",
+        "notes": "Notities"
       },
       "linkLocation": "Locatie koppelen",
       "linkDepartment": "Afdeling koppelen",
@@ -807,7 +808,8 @@
     "vacanciesEmpty": "Nog geen vacatures.",
     "matchesEmpty": "Nog geen matches.",
     "loadError": "Laden is mislukt. Mogelijk heb je geen toegang tot deze vestiging.",
-    "opportunitiesEmpty": "Nog geen kansen."
+    "opportunitiesEmpty": "Nog geen kansen.",
+    "loadErrorGeneric": "Laden mislukt."
   },
   "inUse": {
     "title": "Nog in gebruik",

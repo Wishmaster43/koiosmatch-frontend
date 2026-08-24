@@ -168,6 +168,10 @@ export interface CustomerNote {
   title: string
   text: string
   ago: string
+  // DATUM-1: raw timestamp for the shared NotesTab's house date formatting.
+  created_at?: string
+  // Author display name (CustomerNoteResource) — the meta line's "by whom".
+  author?: string
   // CONTACT-NOTITIES-1: the contactpersoon this note is filed against (null = a
   // company-level note) — both read straight off CustomerDetailResource.
   contactId: Id | null
