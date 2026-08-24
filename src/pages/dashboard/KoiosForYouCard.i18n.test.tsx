@@ -29,6 +29,14 @@ function renderCard() {
   return render(<KoiosForYouCard />, { wrapper })
 }
 
+function renderCardWithToggle() {
+  const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+  const wrapper = ({ children }: { children: ReactNode }) => (
+    <QueryClientProvider client={qc}>{children}</QueryClientProvider>
+  )
+  return render(<KoiosForYouCard scopeToggle />, { wrapper })
+}
+
 beforeEach(() => {
   vi.useFakeTimers({ shouldAdvanceTime: true })
   vi.setSystemTime(new Date('2026-08-26T10:00:00Z'))
@@ -68,4 +76,19 @@ describe('KoiosForYouCard (real i18n — NL default)', () => {
     expect(screen.getByText('Taak aangemaakt')).toBeInTheDocument()
     expect(screen.queryByText('Create Task')).not.toBeInTheDocument()
   })
+  // K-182 scope toggle: the manager control renders the REAL NL labels through
+  // the live i18n runtime — a raw `koiosForYou.` key leaking into the DOM (the
+  // exact bug the first delivery shipped: keys filed under `filters`) fails here.
+  it('renders the scope toggle with real NL labels, never raw keys', async () => {
+    apiGet.mockResolvedValue({
+      data: { from: '2026-08-24', to: '2026-08-26', period: 'range', actions_total: 0,
+        per_type: {}, per_source: {}, actions: [], actions_truncated: false },
+    })
+    renderCardWithToggle()
+    await waitFor(() => expect(screen.getByText('Mij')).toBeInTheDocument())
+    expect(screen.getByText('Mijn team')).toBeInTheDocument()
+    // No element renders a raw dotted key from this namespace.
+    expect(document.body.textContent).not.toMatch(/koiosForYou\./)
+  })
+
 })

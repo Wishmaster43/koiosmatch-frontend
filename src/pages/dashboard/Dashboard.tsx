@@ -173,7 +173,7 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
 
           {/* "Koios deed dit voor jou" (K0-D noordster) — self-contained card, own
               loading/error/empty/success handling; fetches its own 7/30-day report. */}
-          <KoiosForYouCard />
+          <KoiosForYouCard scopeToggle={activeType === 'recruitment_manager' || activeType === 'sales_manager'} />
 
           <DistributionCharts vis={vis} statusData={statusData} funnelData={funnelData} recruiterData={recruiterData} oppStageData={oppStageData} opp={opp} onNavigate={onNavigate} />
 

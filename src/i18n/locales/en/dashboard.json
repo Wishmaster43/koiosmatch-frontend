@@ -236,7 +236,12 @@
       "failed": "Failed",
       "running": "Running"
     },
-    "recordGone": "Record deleted"
+    "recordGone": "Record deleted",
+    "scopeLabel": "Scope",
+    "scope": {
+      "me": "Me",
+      "team": "My team"
+    }
   },
   "widget": {
     "unknown": "Unknown"

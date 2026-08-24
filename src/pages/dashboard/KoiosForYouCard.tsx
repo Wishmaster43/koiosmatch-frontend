@@ -108,13 +108,17 @@ function categoryOf(rawKey: string | null | undefined): Category {
 }
 
 // K-174 `created.entity_type` → app-shell page key (mirrors NotificationBell's
-// ENTITY_PAGE, K-157 vocabulary). 'appointment' has NO dedicated page yet
-// (grepped components/layout/appPages.tsx — no agenda/appointments route
-// exists), so it stays unmapped on purpose: the row renders as plain text
-// rather than a link to nowhere. Extend this table, never invent a route.
+// ENTITY_PAGE, K-157 vocabulary — 'application': 'applications', 'candidate':
+// 'candidates' verified there). 'appointment' and 'whatsapp' have NO dedicated
+// page yet (grepped components/layout/appPages.tsx — no agenda/appointments or
+// whatsapp-thread route exists), so they stay unmapped on purpose: the row
+// renders as plain text rather than a link to nowhere. Extend this table,
+// never invent a route.
 const CREATED_ENTITY_PAGE: Record<string, string> = {
   task: 'tasks',
   calllist: 'outreach',
+  application: 'applications',
+  candidate: 'candidates',
 }
 
 // Local calendar-day 'YYYY-MM-DD' — never toISOString().slice(0,10), see
@@ -161,13 +165,17 @@ interface KoiosForYouCardProps {
   // Header title override — the management performance face reuses this exact
   // card (Danny 24-08: same tiles, same expand, never a second idiom).
   title?: string
-  // K-182 scope: 'me' = own actions, 'team'/undefined = tenant-wide.
+  // K-182 scope: 'me' = own actions, 'team'/undefined = tenant-wide. Ignored
+  // when scopeToggle is true — the internal toggle state then wins.
   scope?: 'me' | 'team'
+  // K-182 PLAN-DASHBOARD-PER-ROL-V3: only recruitment_manager/sales_manager get
+  // the "mij / mijn team" toggle in the header. Default false = today's behavior.
+  scopeToggle?: boolean
   // Compact extra strip rendered at the card's bottom (performance numbers).
   footer?: ReactNode
 }
 
-export default function KoiosForYouCard({ title, scope, footer }: KoiosForYouCardProps = {}) {
+export default function KoiosForYouCard({ title, scope, scopeToggle = false, footer }: KoiosForYouCardProps = {}) {
   const { t } = useTranslation(['dashboard', 'common'])
   const { formatDate } = useDateFormat()
   const { formatNumber } = useNumberFormat()
@@ -177,6 +185,10 @@ export default function KoiosForYouCard({ title, scope, footer }: KoiosForYouCar
   const [customTo, setCustomTo] = useState('')
   // Which category tile is selected — null = none, table stays hidden.
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null)
+  // K-182: manager-scope toggle, own actions by default — only rendered/used
+  // when scopeToggle is true; otherwise the `scope` prop (or none) governs.
+  const [toggledScope, setToggledScope] = useState<'me' | 'team'>('me')
+  const effectiveScope = scopeToggle ? toggledScope : scope
 
   const { from, to } = useMemo(() => resolveRange(preset, new Date(), customFrom, customTo), [preset, customFrom, customTo])
   // A custom range is only "ready" once both ends are filled and ordered.
@@ -185,10 +197,10 @@ export default function KoiosForYouCard({ title, scope, footer }: KoiosForYouCar
   // Koios-triggered workflow runs only (never a manual/event run) — the query
   // itself IS the data-fetching hook (§3), no separate wrapper needed for one call.
   const { data, isLoading, isError, refetch } = useQuery({
-    queryKey: ['koios', 'for-you', from, to, scope ?? 'all'],
+    queryKey: ['koios', 'for-you', from, to, effectiveScope ?? 'all'],
     enabled: customReady,
     queryFn: async ({ signal }) =>
-      unwrap<KoiosForYouReport>(await api.get('/ai/koios/for-you', { params: { from, to, ...(scope ? { scope } : {}) }, signal })),
+      unwrap<KoiosForYouReport>(await api.get('/ai/koios/for-you', { params: { from, to, ...(effectiveScope ? { scope: effectiveScope } : {}) }, signal })),
   })
 
   // Known action type → translated label; unknown types (a future automation)
@@ -296,6 +308,20 @@ export default function KoiosForYouCard({ title, scope, footer }: KoiosForYouCar
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12, flexWrap: 'wrap' }}>
         <KoiosAiMark size={18} title={t('common:aiGeneratedHint')} />
         <SectionTitle style={{ flex: 1 }}>{title ?? t('koiosForYou.title')}</SectionTitle>
+        {/* K-182 manager scope toggle — only the two manager roles get this
+            (PLAN-DASHBOARD-PER-ROL-V3); default 'me', switch to 'team'. */}
+        {scopeToggle && (
+          <SegmentedControl
+            size="compact"
+            ariaLabel={t('koiosForYou.scopeLabel')}
+            value={toggledScope}
+            onChange={(v) => setToggledScope(v as 'me' | 'team')}
+            options={[
+              { value: 'me', label: t('koiosForYou.scope.me') },
+              { value: 'team', label: t('koiosForYou.scope.team') },
+            ]}
+          />
+        )}
         <SegmentedControl
           size="compact"
           ariaLabel={t('koiosForYou.periodLabel')}

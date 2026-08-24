@@ -224,7 +224,12 @@
       "failed": "Fehlgeschlagen",
       "running": "Läuft"
     },
-    "recordGone": "Datensatz gelöscht"
+    "recordGone": "Datensatz gelöscht",
+    "scopeLabel": "Bereich",
+    "scope": {
+      "me": "Ich",
+      "team": "Mein Team"
+    }
   },
   "widget": {
     "unknown": "Unbekannt"

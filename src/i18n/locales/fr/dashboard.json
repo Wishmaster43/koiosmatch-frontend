@@ -224,7 +224,12 @@
       "failed": "Échouée",
       "running": "En cours"
     },
-    "recordGone": "Enregistrement supprimé"
+    "recordGone": "Enregistrement supprimé",
+    "scopeLabel": "Portée",
+    "scope": {
+      "me": "Moi",
+      "team": "Mon équipe"
+    }
   },
   "widget": {
     "unknown": "Inconnu"

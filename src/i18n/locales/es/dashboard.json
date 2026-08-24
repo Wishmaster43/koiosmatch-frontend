@@ -224,7 +224,12 @@
       "failed": "Fallida",
       "running": "En curso"
     },
-    "recordGone": "Registro eliminado"
+    "recordGone": "Registro eliminado",
+    "scopeLabel": "Alcance",
+    "scope": {
+      "me": "Yo",
+      "team": "Mi equipo"
+    }
   },
   "widget": {
     "unknown": "Desconocido"

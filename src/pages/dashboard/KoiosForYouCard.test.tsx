@@ -12,7 +12,7 @@
 import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest'
 import { render, screen, fireEvent, waitFor, within } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import type { ReactNode } from 'react'
+import type { ComponentProps, ReactNode } from 'react'
 import KoiosForYouCard from './KoiosForYouCard'
 
 // Identity translations — this test asserts on state/structure, not copy
@@ -34,12 +34,12 @@ const apiGet = api.get as unknown as ReturnType<typeof vi.fn>
 
 // One fresh QueryClient per render — no cross-test cache leakage; retry:false
 // keeps a rejected fetch fast.
-function renderCard() {
+function renderCard(props: Partial<ComponentProps<typeof KoiosForYouCard>> = {}) {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   const wrapper = ({ children }: { children: ReactNode }) => (
     <QueryClientProvider client={qc}>{children}</QueryClientProvider>
   )
-  return render(<KoiosForYouCard />, { wrapper })
+  return render(<KoiosForYouCard {...props} />, { wrapper })
 }
 
 const emptyReport = { from: '2026-08-24', to: '2026-08-24', period: 'range', actions_total: 0, per_type: {}, per_source: {}, actions: [], actions_truncated: false }
@@ -230,5 +230,59 @@ describe('KoiosForYouCard — v2 fix-round pins', () => {
     apiGet.mockResolvedValue({ data: { ...base, actions_truncated: true } })
     renderCard()
     expect(await screen.findByText('koiosForYou.truncated')).toBeInTheDocument()
+  })
+})
+
+// K-182 manager scope toggle (recruitment_manager/sales_manager only, wired
+// by Dashboard.tsx's `scopeToggle` prop) — pins the request params, not just
+// that the control renders.
+describe('KoiosForYouCard — K-182 scope toggle', () => {
+  it('without scopeToggle, no scope param is sent (pins today\'s behavior)', async () => {
+    apiGet.mockResolvedValue({ data: emptyReport })
+    renderCard()
+    await waitFor(() => expect(apiGet).toHaveBeenCalledTimes(1))
+    const [, config] = apiGet.mock.calls[0]
+    expect(config.params).not.toHaveProperty('scope')
+    expect(screen.queryByRole('radio', { name: 'koiosForYou.scope.me' })).not.toBeInTheDocument()
+  })
+
+  it('with scopeToggle, defaults to scope=me and switching fetches scope=team', async () => {
+    apiGet.mockResolvedValue({ data: emptyReport })
+    renderCard({ scopeToggle: true })
+    await waitFor(() => expect(apiGet).toHaveBeenCalledTimes(1))
+    expect(apiGet).toHaveBeenCalledWith('/ai/koios/for-you', expect.objectContaining({
+      params: expect.objectContaining({ scope: 'me' }),
+    }))
+
+    fireEvent.click(screen.getByRole('radio', { name: 'koiosForYou.scope.team' }))
+
+    await waitFor(() => expect(apiGet).toHaveBeenCalledTimes(2))
+    expect(apiGet).toHaveBeenLastCalledWith('/ai/koios/for-you', expect.objectContaining({
+      params: expect.objectContaining({ scope: 'team' }),
+    }))
+  })
+})
+
+// K-182 deep-link map extension: application/candidate entity_types now link.
+describe('KoiosForYouCard — deep-link map extension', () => {
+  const reportWithApplication = {
+    from: '2026-08-24', to: '2026-08-26', period: 'range',
+    actions_total: 1,
+    per_type: { koios_send_email: 1 }, per_source: { note: 1 },
+    actions: [
+      { id: 'a1', type: 'koios_send_email', source: 'note:abc', executed_at: '2026-08-24T10:00:00Z', status: 'completed', created: { entity_type: 'application', entity_id: 99, label: 'Application #99' } },
+    ],
+    actions_truncated: false,
+  }
+
+  it('an action row created.entity_type "application" links to the applications deep link', async () => {
+    apiGet.mockResolvedValue({ data: reportWithApplication })
+    renderCard()
+    await waitFor(() => expect(screen.getByText('koiosForYou.category.emails')).toBeInTheDocument())
+
+    fireEvent.click(screen.getByText('koiosForYou.category.emails'))
+
+    const link = screen.getByRole('link', { name: 'common:openInNewTab' })
+    expect(link).toHaveAttribute('href', expect.stringContaining('#applications?open=99'))
   })
 })

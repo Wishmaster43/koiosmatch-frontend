@@ -224,7 +224,12 @@
       "failed": "Mislukt",
       "running": "Bezig"
     },
-    "recordGone": "Record verwijderd"
+    "recordGone": "Record verwijderd",
+    "scopeLabel": "Scope",
+    "scope": {
+      "me": "Mij",
+      "team": "Mijn team"
+    }
   },
   "widget": {
     "unknown": "Onbekend"
