@@ -872,7 +872,9 @@
         "resetsOn": "Zurücksetzung am {{date}}",
         "aiMeter": "Koios AI-Tokens",
         "workflowMeter": "Koios Tokens",
-        "overBudget": "{{meter}}: {{n}} über Budget → {{amount}}"
+        "overBudget": "{{meter}}: {{n}} über Budget → {{amount}}",
+        "meterUsage": "{{used}} verbraucht · {{remaining}} übrig",
+        "meterDrill": "Tagesverbrauch dieses Zählers ansehen"
       },
       "ai": {
         "title": "KI-Nutzung (Koios)",

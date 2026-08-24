@@ -838,7 +838,8 @@
     "creditorAutoHint": "Se asigna automáticamente si se deja vacío.",
     "creditorAutoLocked": "Numerado automáticamente mediante Configuración → Numeración.",
     "identifierNlOnly": "Nota: para autónomos el servidor solo acepta todavía un número de registro/IVA neerlandés. Un número extranjero se rechaza al guardar.",
-    "accountHolderName": "Titular de la cuenta"
+    "accountHolderName": "Titular de la cuenta",
+    "bankDocument": "Documento justificativo"
   },
   "certified": {
     "issued": "Emitido",
@@ -1359,5 +1360,14 @@
     "apply": "Aplicar",
     "discard": "Descartar",
     "needsFieldsFirst": "Complete primero un nombre o un cargo para generar un borrador."
+  },
+  "bankDoc": {
+    "link": "Vincular documento",
+    "change": "Cambiar documento",
+    "chooseExisting": "Elegir documento existente",
+    "uploadNew": "Subir archivo nuevo",
+    "clear": "Quitar vínculo",
+    "close": "Cerrar",
+    "uploadFailed": "Error al subir. Inténtalo de nuevo."
   }
 }

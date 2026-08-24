@@ -27,7 +27,7 @@
  * surface Danny flagged on the matches page (§4 "EVERY filter lives in the
  * right-hand filter panel"); they change no request, so they don't belong there.
  */
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import api, { unwrap } from '@/lib/api'
 import { useRightPanel } from '@/context/RightPanelContext'
@@ -49,6 +49,9 @@ interface UsageOverviewSectionProps {
   // this section only renders it and registers it in the right panel.
   period: 'month' | 'prev_month'
   onPeriodChange: (p: 'month' | 'prev_month') => void
+  // Subscription-meter drill (Danny 24-08): switches the chart to that meter's
+  // series and scrolls it into view; nonce distinguishes repeated clicks.
+  drillRequest?: { category: 'workflow' | 'ai'; nonce: number } | null
   wa: WhatsAppUsage | null
   waLoading: boolean
   // CREDITS-2-FE deel 1 — lifts data.subscription out of this section's own
@@ -57,11 +60,22 @@ interface UsageOverviewSectionProps {
   onSubscriptionChange?: (subscription: BillingUsageResponse['data']['subscription'] | null, phase: 'loading' | 'ready' | 'empty' | 'error' | 'unavailable') => void
 }
 
-export default function UsageOverviewSection({ period, onPeriodChange, wa, waLoading, onSubscriptionChange }: UsageOverviewSectionProps) {
+export default function UsageOverviewSection({ period, onPeriodChange, drillRequest, wa, waLoading, onSubscriptionChange }: UsageOverviewSectionProps) {
   const { t } = useTranslation('settings')
   const { registerFilters, unregisterFilters } = useRightPanel()
 
   const [category, setCategory] = useState<UsageCategory>('total')
+  const chartRef = useRef<HTMLDivElement | null>(null)
+  // Apply a meter drill: pick the series and bring the chart into view.
+  useEffect(() => {
+    if (!drillRequest) return
+    setCategory(drillRequest.category)
+    chartRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    // Keyed on the nonce alone on purpose: the request object is rebuilt per
+    // click and category rides inside it — depending on the object would refire
+    // on unrelated renders.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [drillRequest?.nonce])
   const [granularity, setGranularity] = useState<UsageGranularity>('day')
   const [selectedDate, setSelectedDate] = useState<string | null>(null)
 
@@ -126,6 +140,7 @@ export default function UsageOverviewSection({ period, onPeriodChange, wa, waLoa
 
       {phase === 'ready' && (
         <>
+          <div ref={chartRef}>
           <UsageDayChart
             rows={rows} weekRows={weekRows}
             category={category} onCategoryChange={setCategory}
@@ -138,6 +153,7 @@ export default function UsageOverviewSection({ period, onPeriodChange, wa, waLoa
             }}
             onSelectDate={setSelectedDate}
           />
+          </div>
 
           {selectedRow && <UsageDrilldownCard row={selectedRow} onClose={() => setSelectedDate(null)} />}
 

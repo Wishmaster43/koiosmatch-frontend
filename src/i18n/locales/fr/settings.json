@@ -872,7 +872,9 @@
         "resetsOn": "Réinitialisation le {{date}}",
         "aiMeter": "Jetons Koios AI",
         "workflowMeter": "Jetons Koios",
-        "overBudget": "{{meter}} : {{n}} au-delà du budget → {{amount}}"
+        "overBudget": "{{meter}} : {{n}} au-delà du budget → {{amount}}",
+        "meterUsage": "{{used}} utilisés · {{remaining}} restants",
+        "meterDrill": "Voir la consommation quotidienne de ce compteur"
       },
       "ai": {
         "title": "Utilisation IA (Koios)",

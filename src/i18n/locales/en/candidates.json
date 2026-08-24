@@ -861,7 +861,8 @@
     "creditorAutoHint": "Automatically assigned if left empty.",
     "creditorAutoLocked": "Automatically numbered via Settings → Numbering.",
     "identifierNlOnly": "Note: for freelancers the server still only accepts a Dutch company register/VAT number. A foreign number is rejected on save.",
-    "accountHolderName": "Account holder"
+    "accountHolderName": "Account holder",
+    "bankDocument": "Proof document"
   },
   "certified": {
     "issued": "Issued",
@@ -1359,5 +1360,14 @@
     "apply": "Apply",
     "discard": "Discard",
     "needsFieldsFirst": "Fill in a name or function title first to generate a concept."
+  },
+  "bankDoc": {
+    "link": "Link document",
+    "change": "Change document",
+    "chooseExisting": "Choose existing document",
+    "uploadNew": "Upload new file",
+    "clear": "Remove link",
+    "close": "Close",
+    "uploadFailed": "Upload failed. Please try again."
   }
 }

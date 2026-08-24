@@ -22,25 +22,32 @@ type Phase = 'loading' | 'ready' | 'empty' | 'error' | 'unavailable'
 interface SubscriptionCardProps {
   subscription: BillingUsageSubscription | null
   phase: Phase
+  // Drill into the daily usage chart, pre-filtered on the clicked meter.
+  onDrillAi?: () => void
+  onDrillWorkflow?: () => void
 }
 
 // One meter bar — used for both the AI-token and the workflow (Koios Tokens)
 // budget; the fill is the tint recipe (§4), never a hardcoded color.
-function MeterBar({ label, used, budget }: { label: string; used?: number; budget?: number }) {
+function MeterBar({ label, used, budget, onDrill }: { label: string; used?: number; budget?: number; onDrill?: () => void }) {
+  const { t } = useTranslation('settings')
   const { formatNumber } = useNumberFormat()
   const total = budget ?? 0
   const consumed = used ?? 0
   const pct = total > 0 ? Math.min(100, Math.round((consumed / total) * 100)) : 0
+  const remaining = Math.max(0, total - consumed)
   // The track tint, computed OUTSIDE the style object — the §4 tintBg recipe,
   // never a hand-painted fill (the huisstijl lint scans object literals, not
   // this assignment, which is the house way to keep the tint call legible).
   const trackBg = tintBg('var(--color-primary)')
-  return (
-    <div style={{ marginBottom: 14 }}>
-      <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 4 }}>
+  const body = (
+    <>
+      <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 4, gap: 10 }}>
         <Caption>{label}</Caption>
+        {/* Danny 24-08: "verbruikt en wat nog over moet er mooi staan" — the
+            plain words, not only the fraction. */}
         <Mono style={{ fontSize: 12, color: 'var(--text)' }}>
-          {formatNumber(consumed)} / {formatNumber(total)}
+          {t('billing.usage.plan.meterUsage', { used: formatNumber(consumed), remaining: formatNumber(remaining) })}
         </Mono>
       </div>
       <div style={{ height: 6, borderRadius: 999, overflow: 'hidden', background: trackBg }}>
@@ -49,11 +56,22 @@ function MeterBar({ label, used, budget }: { label: string; used?: number; budge
           background: 'var(--button-fill)', transition: 'width var(--motion-fast, 150ms) ease',
         }} />
       </div>
-    </div>
+    </>
+  )
+  // Drill-down: the whole meter is a real button into the daily chart filtered
+  // on this meter's own series — a gateway, never a dead cell (§3A).
+  return onDrill ? (
+    <button type="button" onClick={onDrill} title={t('billing.usage.plan.meterDrill')}
+      // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- the meter IS the drill affordance: a full-width unstyled button wrapper around the bar; Button chrome would repaint the meter
+      style={{ display: 'block', width: '100%', textAlign: 'inherit', background: 'none', border: 'none', padding: 0, marginBottom: 14, cursor: 'pointer' }}>
+      {body}
+    </button>
+  ) : (
+    <div style={{ marginBottom: 14 }}>{body}</div>
   )
 }
 
-export default function SubscriptionCard({ subscription, phase }: SubscriptionCardProps) {
+export default function SubscriptionCard({ subscription, phase, onDrillAi, onDrillWorkflow }: SubscriptionCardProps) {
   const { t } = useTranslation('settings')
   const { formatCurrency, formatNumber } = useNumberFormat()
   const { formatDate } = useDateFormat()
@@ -81,8 +99,8 @@ export default function SubscriptionCard({ subscription, phase }: SubscriptionCa
             )}
           </div>
 
-          <MeterBar label={t('billing.usage.plan.aiMeter')} used={subscription.ai?.used} budget={subscription.ai?.budget} />
-          <MeterBar label={t('billing.usage.plan.workflowMeter')} used={subscription.workflow?.used} budget={subscription.workflow?.budget} />
+          <MeterBar label={t('billing.usage.plan.aiMeter')} used={subscription.ai?.used} budget={subscription.ai?.budget} onDrill={onDrillAi} />
+          <MeterBar label={t('billing.usage.plan.workflowMeter')} used={subscription.workflow?.used} budget={subscription.workflow?.budget} onDrill={onDrillWorkflow} />
 
           {/* `over` is a COUNT — `> 0` guard, never truthiness (a bare 0 leaked
               onto the billing screen for every tenant within budget). The count

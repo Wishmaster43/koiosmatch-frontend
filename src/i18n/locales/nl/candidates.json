@@ -861,7 +861,8 @@
     "creditorAutoHint": "Wordt automatisch toegekend indien leeg.",
     "creditorAutoLocked": "Wordt automatisch genummerd via Instellingen → Nummering.",
     "identifierNlOnly": "Let op: de server accepteert voor ZZP'ers nog uitsluitend een Nederlands KvK-/btw-nummer. Een buitenlands nummer wordt bij opslaan geweigerd.",
-    "accountHolderName": "Tenaamstelling"
+    "accountHolderName": "Tenaamstelling",
+    "bankDocument": "Bewijsdocument"
   },
   "certified": {
     "issued": "Uitgegeven",
@@ -1359,5 +1360,14 @@
     "apply": "Toepassen",
     "discard": "Verwerpen",
     "needsFieldsFirst": "Vul eerst een naam of functietitel in om een concept te genereren."
+  },
+  "bankDoc": {
+    "link": "Document koppelen",
+    "change": "Document wijzigen",
+    "chooseExisting": "Kies bestaand document",
+    "uploadNew": "Nieuw bestand uploaden",
+    "clear": "Koppeling verwijderen",
+    "close": "Sluiten",
+    "uploadFailed": "Uploaden is mislukt. Probeer het opnieuw."
   }
 }

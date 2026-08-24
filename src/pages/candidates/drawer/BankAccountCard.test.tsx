@@ -35,6 +35,10 @@ import { monoStyle } from '@/components/ui/typography'
 // renders as a viewer who HAS the permission. The gate itself is proven by its
 // own describe block at the bottom of this file.
 const mockHasPermission = vi.fn()
+// DOC-BANK-2: the slot has its own suite — a marker stub keeps this one on the card's wiring.
+vi.mock('./IbanDocumentSlot', () => ({ default: ({ onLink }: { onLink: (id: string | null) => void }) => (
+  <div data-testid="iban-doc-slot"><button type="button" data-testid="iban-doc-slot-link" onClick={() => onLink('stub-id')}>link</button></div>
+) }))
 vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ hasPermission: mockHasPermission }) }))
 beforeEach(() => { mockHasPermission.mockImplementation(() => true) })
 
@@ -53,7 +57,6 @@ vi.mock('@/components/drawer/DocPreviewModal', () => ({
 vi.mock('@/lib/downloadFiles', () => ({ downloadFilesSequentially: vi.fn() }))
 import api from '@/lib/api'
 import { notifyError } from '@/lib/notify'
-import { downloadFilesSequentially } from '@/lib/downloadFiles'
 import { useCandidateRecord } from '../hooks/useCandidateMutations'
 
 const apiPatch = api.patch as unknown as ReturnType<typeof vi.fn>
@@ -84,7 +87,7 @@ describe('lib/iban · display vs wire form', () => {
 
 describe('BankAccountCard · private (salary) account', () => {
   it('shows the stored IBAN grouped in fours, in mono, with its own pencil', () => {
-    render(<BankAccountCard value={{ iban: VALID, accountHolderName: 'Jan Jansen' }} onSave={vi.fn()} />)
+    render(<BankAccountCard candidateId="cand-1" value={{ iban: VALID, accountHolderName: 'Jan Jansen' }} onSave={vi.fn()} />)
     expect(screen.getByText('preferences.groupBankAccount')).toBeInTheDocument()
     const shown = screen.getByText('NL91 ABNA 0417 1643 00')
     expect(shown).toBeInTheDocument()
@@ -94,14 +97,14 @@ describe('BankAccountCard · private (salary) account', () => {
   })
 
   it('renders an honest empty state instead of a blank row', () => {
-    render(<BankAccountCard value={{ iban: '', accountHolderName: '' }} onSave={vi.fn()} />)
+    render(<BankAccountCard candidateId="cand-1" value={{ iban: '', accountHolderName: '' }} onSave={vi.fn()} />)
     expect(screen.getAllByText('-')).toHaveLength(2)
   })
 
   it('sends the IBAN WITHOUT spaces and uppercased, however it was typed', async () => {
     const user = userEvent.setup()
     const onSave = vi.fn()
-    render(<BankAccountCard value={{ iban: '', accountHolderName: '' }} onSave={onSave} />)
+    render(<BankAccountCard candidateId="cand-1" value={{ iban: '', accountHolderName: '' }} onSave={onSave} />)
     await user.click(screen.getByTitle('edit'))
     await user.type(screen.getByLabelText('preferences.iban'), 'nl91 abna 0417 1643 00')
     await user.type(screen.getByLabelText('preferences.accountHolderName'), '  Jan Jansen  ')
@@ -112,7 +115,7 @@ describe('BankAccountCard · private (salary) account', () => {
 
   it('tidies the typed IBAN into readable groups on blur (a display hint only — no mod-97 check here)', async () => {
     const user = userEvent.setup()
-    render(<BankAccountCard value={{ iban: '', accountHolderName: '' }} onSave={vi.fn()} />)
+    render(<BankAccountCard candidateId="cand-1" value={{ iban: '', accountHolderName: '' }} onSave={vi.fn()} />)
     await user.click(screen.getByTitle('edit'))
     const input = screen.getByLabelText('preferences.iban') as HTMLInputElement
     // A check digit the server WILL reject: the front-end still only reformats,
@@ -126,7 +129,7 @@ describe('BankAccountCard · private (salary) account', () => {
   it('seeds the edit field from the stored value in its readable form and restores it on cancel', async () => {
     const user = userEvent.setup()
     const onSave = vi.fn()
-    render(<BankAccountCard value={{ iban: VALID, accountHolderName: 'Jan Jansen' }} onSave={onSave} />)
+    render(<BankAccountCard candidateId="cand-1" value={{ iban: VALID, accountHolderName: 'Jan Jansen' }} onSave={onSave} />)
     await user.click(screen.getByTitle('edit'))
     expect((screen.getByLabelText('preferences.iban') as HTMLInputElement).value).toBe('NL91 ABNA 0417 1643 00')
     await user.clear(screen.getByLabelText('preferences.accountHolderName'))
@@ -188,13 +191,13 @@ describe('BankAccountCard · permission gate', () => {
   it('renders nothing without candidates.financial.view', () => {
     mockHasPermission.mockImplementation(() => false)
     const { container } = render(
-      <BankAccountCard value={{ iban: 'NL91ABNA0417164300', accountHolderName: 'N. Blom' }} onSave={vi.fn()} />,
+      <BankAccountCard candidateId="cand-1" value={{ iban: 'NL91ABNA0417164300', accountHolderName: 'N. Blom' }} onSave={vi.fn()} />,
     )
     expect(container).toBeEmptyDOMElement()
   })
 
   it('asks for exactly that permission, not a neighbouring one', () => {
-    render(<BankAccountCard value={{ iban: '', accountHolderName: '' }} onSave={vi.fn()} />)
+    render(<BankAccountCard candidateId="cand-1" value={{ iban: '', accountHolderName: '' }} onSave={vi.fn()} />)
     expect(mockHasPermission).toHaveBeenCalledWith('candidates.financial.view')
   })
 })
@@ -205,41 +208,29 @@ describe('BankAccountCard · permission gate', () => {
  * `undefined` when the server's financial.view gate omitted the key entirely)
  * AND resolves to a real document in `documents`.
  */
-describe('BankAccountCard · DOC-BANK-1 proof-of-bank-account slot', () => {
+describe('BankAccountCard · DOC-BANK-2 proof-of-bank slot', () => {
   const documents = [
     { id: 'doc1', name: 'bankafschrift.pdf', url: '/api/candidates/c1/documents/doc1/download' },
   ]
   const value = { iban: 'NL91ABNA0417164300', accountHolderName: 'Jan Jansen' }
 
-  it('renders no slot when bankDocumentId is undefined (server omitted the field — gate closed)', () => {
-    render(<BankAccountCard value={value} onSave={vi.fn()} documents={documents} />)
-    expect(screen.queryByTitle('documents.preview')).toBeNull()
+  // The slot's own behaviour (link/preview/download/change/clear/upload) is
+  // pinned in IbanDocumentSlot.test.tsx — here only the card's gate + wiring.
+  it('renders no slot row when bankDocumentId is undefined (server omitted the field — gate closed)', () => {
+    render(<BankAccountCard candidateId="cand-1" value={value} onSave={vi.fn()} documents={documents} />)
+    expect(screen.queryByTestId('iban-doc-slot')).toBeNull()
   })
 
-  it('renders no slot when bankDocumentId is present but null (gate open, nothing linked)', () => {
-    render(<BankAccountCard value={value} onSave={vi.fn()} bankDocumentId={null} documents={documents} />)
-    expect(screen.queryByTitle('documents.preview')).toBeNull()
+  it('mounts the slot once the field is present — even when nothing is linked yet (the link offer must exist)', () => {
+    render(<BankAccountCard candidateId="cand-1" value={value} onSave={vi.fn()} bankDocumentId={null} documents={documents} />)
+    expect(screen.getByTestId('iban-doc-slot')).toBeInTheDocument()
   })
 
-  it('renders preview + download icons once bankDocumentId resolves to a real document', () => {
-    render(<BankAccountCard value={value} onSave={vi.fn()} bankDocumentId="doc1" documents={documents} />)
-    expect(screen.getByTitle('documents.preview')).toBeInTheDocument()
-    expect(screen.getByTitle('documents.download')).toBeInTheDocument()
-  })
-
-  it('preview opens the shared DocPreviewModal with the resolved document', async () => {
+  it("wires the slot's onLink straight into this card's own save shape", async () => {
     const user = userEvent.setup()
-    render(<BankAccountCard value={value} onSave={vi.fn()} bankDocumentId="doc1" documents={documents} />)
-    expect(screen.queryByTestId('preview-modal')).toBeNull()
-    await user.click(screen.getByTitle('documents.preview'))
-    expect(screen.getByTestId('preview-modal')).toHaveTextContent('bankafschrift.pdf')
-  })
-
-  it('download calls the shared downloadFilesSequentially helper with the resolved document\'s own url + name', async () => {
-    const user = userEvent.setup()
-    vi.mocked(downloadFilesSequentially).mockClear()
-    render(<BankAccountCard value={value} onSave={vi.fn()} bankDocumentId="doc1" documents={documents} />)
-    await user.click(screen.getByTitle('documents.download'))
-    expect(downloadFilesSequentially).toHaveBeenCalledWith([{ url: documents[0].url, name: documents[0].name }])
+    const onSave = vi.fn()
+    render(<BankAccountCard candidateId="cand-1" value={value} onSave={onSave} bankDocumentId="doc1" documents={documents} />)
+    await user.click(screen.getByTestId('iban-doc-slot-link'))
+    expect(onSave).toHaveBeenCalledWith({ bank_document_id: 'stub-id' })
   })
 })

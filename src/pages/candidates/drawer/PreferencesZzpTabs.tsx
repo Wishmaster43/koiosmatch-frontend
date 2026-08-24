@@ -20,6 +20,7 @@
  * not as one shared full-payload save.
  */
 import { useState } from 'react'
+import { chipInk, tintBg, tintBorder } from '@/lib/tint'
 import type { ComponentType } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Edit2 } from 'lucide-react'
@@ -189,6 +190,7 @@ export function PreferencesTab({ c, onSave, onTypesChange, onEditStatus }: { c: 
     // keeps the generic ChipMultiSelect) — each chip gets its tenant-set icon
     // (lucide slug or emoji) in front of the label, same pattern as the candidate
     // table's last-contact icon.
+    // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- licence DATA-chips render inside this entry's renderValue: 11px pills on the primary bg/text pair, not muted caption text
     { key: 'rijbewijs',       label: t('preferences.license'),       group: t('preferences.groupTravel'), type: 'chips', chipOptions: licenseOptions,
       renderValue: (v: unknown) => {
         const arr = (Array.isArray(v) ? v : []).map(String)
@@ -198,7 +200,8 @@ export function PreferencesTab({ c, onSave, onTypesChange, onEditStatus }: { c: 
             {arr.map(x => {
               const icon = licenseIconOf(x)
               return (
-                <span key={x} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '2px 9px', borderRadius: 999, fontSize: 11, fontWeight: 500,
+                <span key={x}
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '2px 9px', borderRadius: 999, fontSize: 11, fontWeight: 500,
                   background: 'var(--color-primary-bg)', color: 'var(--color-primary-text)', border: '1px solid var(--color-primary)' }}>
                   {icon && <LookupIcon icon={icon} size={11} />}
                   {x}
@@ -325,14 +328,15 @@ export function PreferencesTab({ c, onSave, onTypesChange, onEditStatus }: { c: 
     <>
       {statusWindow && (
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10, padding: '7px 11px', fontSize: 12,
-          borderRadius: 8, color: statusMeta(c.status).color,
-          background: `color-mix(in srgb, ${statusMeta(c.status).color} 10%, transparent)`,
-          border: `1px solid color-mix(in srgb, ${statusMeta(c.status).color} 30%, transparent)` }}>
+          borderRadius: 8, color: chipInk(statusMeta(c.status).color),
+          background: tintBg(statusMeta(c.status).color),
+          border: `1px solid ${tintBorder(statusMeta(c.status).color)}` }}>
           <span style={{ flex: 1 }}>{statusWindow}</span>
           {/* Edit pencil (Danny 2026-07-20): reopen the status modal PREFILLED to fix
               a sick-note reason or change the return date — the status itself is untouched. */}
           {onEditStatus && (
             <button onClick={onEditStatus} title={t('drawer.editStatusReason')} aria-label={t('drawer.editStatusReason')}
+              // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- inline pencil INSIDE the status-tinted banner, ink inherits the status colour: Button chrome would break the banner's one-line composition
               style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 2, display: 'flex', color: 'inherit', opacity: 0.85, flexShrink: 0 }}>
               <Edit2 size={13} />
             </button>
@@ -369,7 +373,7 @@ export function PreferencesTab({ c, onSave, onTypesChange, onEditStatus }: { c: 
           {/* DOC-BANK-1: bankDocumentId stays `undefined` (renders no slot) unless
               the server's financial.view gate actually returned the field. */}
           <BankAccountCard    key={`${c.id}-bank`}    value={bankAccountValue} onSave={handleSaveBankAccount}
-            bankDocumentId={c.bankDocumentId} documents={c.documents ?? []} />
+            candidateId={c.id} bankDocumentId={c.bankDocumentId} documents={c.documents ?? []} />
           <EditableFieldTable key={`${c.id}-rate`}    title={t('preferences.groupDesiredRate')} fields={desiredRateFields} value={value} labelWidth={WIDE_LABEL_WIDTH} onSave={handleSaveDesiredRate} />
         </div>
       )}

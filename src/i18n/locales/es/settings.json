@@ -872,7 +872,9 @@
         "resetsOn": "Se reinicia el {{date}}",
         "aiMeter": "Tokens de Koios AI",
         "workflowMeter": "Tokens de Koios",
-        "overBudget": "{{meter}}: {{n}} por encima del presupuesto → {{amount}}"
+        "overBudget": "{{meter}}: {{n}} por encima del presupuesto → {{amount}}",
+        "meterUsage": "{{used}} usados · {{remaining}} restantes",
+        "meterDrill": "Ver el consumo diario de este contador"
       },
       "ai": {
         "title": "Uso de IA (Koios)",

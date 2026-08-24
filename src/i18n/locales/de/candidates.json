@@ -838,7 +838,8 @@
     "creditorAutoHint": "Wird automatisch vergeben, wenn leer gelassen.",
     "creditorAutoLocked": "Wird automatisch nummeriert über Einstellungen → Nummerierung.",
     "identifierNlOnly": "Hinweis: Für Freelancer akzeptiert der Server bisher nur eine niederländische Handelsregister-/USt-Nummer. Eine ausländische Nummer wird beim Speichern abgelehnt.",
-    "accountHolderName": "Kontoinhaber"
+    "accountHolderName": "Kontoinhaber",
+    "bankDocument": "Nachweisdokument"
   },
   "certified": {
     "issued": "Ausgestellt",
@@ -1359,5 +1360,14 @@
     "apply": "Übernehmen",
     "discard": "Verwerfen",
     "needsFieldsFirst": "Geben Sie zuerst einen Namen oder eine Funktionsbezeichnung ein, um einen Entwurf zu generieren."
+  },
+  "bankDoc": {
+    "link": "Dokument verknüpfen",
+    "change": "Dokument ändern",
+    "chooseExisting": "Vorhandenes Dokument wählen",
+    "uploadNew": "Neue Datei hochladen",
+    "clear": "Verknüpfung entfernen",
+    "close": "Schließen",
+    "uploadFailed": "Upload fehlgeschlagen. Bitte erneut versuchen."
   }
 }

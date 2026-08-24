@@ -27,13 +27,13 @@
  * iban/account_holder_name at all), never logged and never put in a URL.
  */
 import { useState } from 'react'
+import IbanDocumentSlot from './IbanDocumentSlot'
 import { useTranslation } from 'react-i18next'
-import { Edit2, Save, X, Eye, Download } from 'lucide-react'
+import { Edit2, Save, X } from 'lucide-react'
 import { GroupCard, GroupHeader, FieldRow, inputStyle } from './profileFieldShared'
+import { monoStyle } from '@/components/ui/typography'
 import { formatIban, normalizeIban } from '@/lib/iban'
 import { useAuth } from '@/context/AuthContext'
-import DocPreviewModal from '@/components/drawer/DocPreviewModal'
-import { downloadFilesSequentially } from '@/lib/downloadFiles'
 import Button from '@/components/ui/Button'
 import type { Loose } from '@/types/candidate'
 
@@ -45,13 +45,14 @@ export interface BankAccountValues {
 
 const EMPTY: BankAccountValues = { iban: '', accountHolderName: '' }
 
-// An identifying number renders in JetBrains Mono (§4) — same treatment as the
-// ZZP creditor number and the desired-rate fields on this tab.
-const MONO = { fontFamily: 'JetBrains Mono, monospace' }
+// An identifying number renders in JetBrains Mono (§4) — the atom's raw style
+// object, spread into native inputs (the documented escape for form controls).
 
-export default function BankAccountCard({ value, onSave, bankDocumentId, documents = [] }: {
+export default function BankAccountCard({ value, onSave, candidateId, bankDocumentId, documents = [] }: {
   value: BankAccountValues
   onSave: (v: Record<string, unknown>) => void
+  // DOC-BANK-2: the slot's inline upload posts to this candidate's documents.
+  candidateId: string | number
   // DOC-BANK-1: `undefined` when the server omitted `bank_document_id`
   // entirely (no financial permission — render no slot at all); a real id/null
   // once the field is present. `documents` resolves the id to the actual proof
@@ -76,8 +77,6 @@ export default function BankAccountCard({ value, onSave, bankDocumentId, documen
 
   const [editing, setEditing] = useState(false)
   const [form, setForm] = useState<BankAccountValues>({ ...EMPTY, ...value })
-  // DOC-BANK-1: preview overlay state — declared before any early return (hooks rule).
-  const [previewDoc, setPreviewDoc] = useState<Loose | null>(null)
 
   // Enter edit mode with the READABLE (grouped) form in the input, so the value
   // is checked the way it is printed on a bank card.
@@ -102,14 +101,6 @@ export default function BankAccountCard({ value, onSave, bankDocumentId, documen
   // Hidden entirely without the permission — see FINANCIAL-GATE-1 above.
   if (!auth?.hasPermission?.('candidates.financial.view')) return null
 
-  // DOC-BANK-1: resolve the linked proof-of-bank document, if any. The icon
-  // renders ONLY when the field is present (not `undefined`) AND it resolves
-  // to a real document — a present-but-null id, or an id with nothing in
-  // `documents`, both render nothing (no fake affordance, §3).
-  const linkedDoc = bankDocumentId != null
-    ? documents.find(d => String(d.id) === String(bankDocumentId))
-    : undefined
-  const download = () => linkedDoc && downloadFilesSequentially([{ url: (linkedDoc.url as string) ?? (linkedDoc.download_url as string), name: (linkedDoc.name as string) ?? '' }])
 
   return (
     <div>
@@ -128,8 +119,8 @@ export default function BankAccountCard({ value, onSave, bankDocumentId, documen
           {editing
             ? <input value={form.iban} onChange={e => setField('iban', e.target.value)} onBlur={tidyIban}
                 aria-label={t('preferences.iban')} autoComplete="off" spellCheck={false}
-                style={{ ...inputStyle, ...MONO }} />
-            : <span style={{ fontSize: 12, color: shownIban ? 'var(--text)' : 'var(--text-muted)', ...(shownIban ? MONO : {}) }}>{shownIban || '-'}</span>}
+                style={{ ...inputStyle, ...monoStyle }} />
+            : <span style={{ fontSize: 12, color: shownIban ? 'var(--text)' : 'var(--text-muted)', ...(shownIban ? monoStyle : {}) }}>{shownIban || '-'}</span>}
         </FieldRow>
         <FieldRow label={t('preferences.accountHolderName')}>
           {editing
@@ -137,18 +128,18 @@ export default function BankAccountCard({ value, onSave, bankDocumentId, documen
                 aria-label={t('preferences.accountHolderName')} autoComplete="off" style={inputStyle} />
             : <span style={{ fontSize: 12, color: value.accountHolderName ? 'var(--text)' : 'var(--text-muted)' }}>{value.accountHolderName || '-'}</span>}
         </FieldRow>
-        {/* DOC-BANK-1: the proof-of-bank-account slot — only mounted once a
-            linked document actually resolved (calm by default, no fake affordance). */}
-        {linkedDoc && (
+        {/* DOC-BANK-2: the FULL proof-of-bank slot — link/preview/download/
+            change/clear; renders only when the server sent the field at all
+            (permission-gated upstream). candidateId rides in for the inline
+            upload; the PATCH shape stays this card's own onSave. */}
+        {bankDocumentId !== undefined && (
           <FieldRow label={t('preferences.bankDocument')}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-              <Button variant="ghost" iconOnly size="sm" aria-label={t('documents.preview')} title={t('documents.preview')} onClick={() => setPreviewDoc(linkedDoc)}><Eye size={13} /></Button>
-              <Button variant="ghost" iconOnly size="sm" aria-label={t('documents.download')} title={t('documents.download')} onClick={download}><Download size={13} /></Button>
-            </div>
+            <IbanDocumentSlot candidateId={candidateId} documents={documents}
+              linkedDocumentId={bankDocumentId}
+              onLink={(id) => onSave({ bank_document_id: id })} />
           </FieldRow>
         )}
       </GroupCard>
-      {previewDoc && <DocPreviewModal doc={previewDoc} onClose={() => setPreviewDoc(null)} />}
     </div>
   )
 }

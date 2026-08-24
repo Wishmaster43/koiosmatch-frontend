@@ -838,7 +838,8 @@
     "creditorAutoHint": "Attribué automatiquement si laissé vide.",
     "creditorAutoLocked": "Numéroté automatiquement via Paramètres → Numérotation.",
     "identifierNlOnly": "Remarque : pour les indépendants, le serveur n'accepte encore qu'un numéro de registre/TVA néerlandais. Un numéro étranger est refusé à l'enregistrement.",
-    "accountHolderName": "Titulaire du compte"
+    "accountHolderName": "Titulaire du compte",
+    "bankDocument": "Document justificatif"
   },
   "certified": {
     "issued": "Délivré",
@@ -1359,5 +1360,14 @@
     "apply": "Appliquer",
     "discard": "Rejeter",
     "needsFieldsFirst": "Renseignez d'abord un nom ou un intitulé de poste pour générer un brouillon."
+  },
+  "bankDoc": {
+    "link": "Lier un document",
+    "change": "Changer le document",
+    "chooseExisting": "Choisir un document existant",
+    "uploadNew": "Téléverser un nouveau fichier",
+    "clear": "Supprimer le lien",
+    "close": "Fermer",
+    "uploadFailed": "Échec du téléversement. Veuillez réessayer."
   }
 }

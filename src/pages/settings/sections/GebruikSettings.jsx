@@ -141,6 +141,8 @@ export default function GebruikSettings() {
   // always follows the period the user picked in the right panel — it used to
   // send the AI block's today|month state to a month|prev_month contract (Opus).
   const [billingPeriod, setBillingPeriod] = useState('month')
+  // Meter drill from the subscription card into the daily chart (Danny 24-08).
+  const [meterDrill, setMeterDrill] = useState(null)
   const [exporting, setExporting] = useState(false)
   const handleExport = async () => {
     setExporting(true)
@@ -171,12 +173,14 @@ export default function GebruikSettings() {
       </div>
 
       {/* CREDITS-2-FE deel 1 — real package/budget snapshot, fed by the fetch below. */}
-      <SubscriptionCard subscription={subscription} phase={subscriptionPhase} />
+      <SubscriptionCard subscription={subscription} phase={subscriptionPhase}
+        onDrillAi={() => setMeterDrill({ category: 'ai', nonce: Date.now() })}
+        onDrillWorkflow={() => setMeterDrill({ category: 'workflow', nonce: Date.now() })} />
 
       {/* BILLING-USAGE-REDESIGN-1 — KPI row + day/week chart + drill-down + table,
           own folder (§3 size discipline). Replaces the old CreditsUsageCard +
           UsageDailySection pair (same /billing/usage source, one coherent block). */}
-      <UsageOverviewSection period={billingPeriod} onPeriodChange={setBillingPeriod} wa={wa} waLoading={waPhase === 'loading'}
+      <UsageOverviewSection period={billingPeriod} drillRequest={meterDrill} onPeriodChange={setBillingPeriod} wa={wa} waLoading={waPhase === 'loading'}
         onSubscriptionChange={handleSubscriptionChange} />
 
       {/* AI usage (Koios) — real data, period-scoped via the shared QuickViewToggle. */}

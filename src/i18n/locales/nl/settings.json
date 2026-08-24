@@ -1118,7 +1118,9 @@
         "resetsOn": "Reset op {{date}}",
         "aiMeter": "Koios AI-tokens",
         "workflowMeter": "Koios Tokens",
-        "overBudget": "{{meter}}: {{n}} boven budget → {{amount}}"
+        "overBudget": "{{meter}}: {{n}} boven budget → {{amount}}",
+        "meterUsage": "{{used}} verbruikt · {{remaining}} over",
+        "meterDrill": "Bekijk het dagverbruik van deze meter"
       },
       "ai": {
         "title": "AI-verbruik (Koios)",
