@@ -60,7 +60,13 @@ export function useAssistActionsExecute(source: ExecuteSource = {}) {
     try {
       const results = await executeRichTextActions(suggested.map(it => toExecuteItem(it)), source)
       if (!aliveRef.current) return
-      setItems(suggested.map((it, i) => ({ ...it, ...results[i] })))
+      setItems(suggested.map((it, i) => ({
+        ...it, ...results[i],
+        // K-159: the edit-before-execute fields belong to the USER's item —
+        // a server row echoing them empty must never clobber the edit.
+        assignee_user_id: it.assignee_user_id, assignee_label: it.assignee_label,
+        link_type: it.link_type, link_id: it.link_id, link_label: it.link_label,
+      })))
       setStatus('success')
     } catch (err) {
       if (!aliveRef.current) return

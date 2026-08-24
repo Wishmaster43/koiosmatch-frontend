@@ -8,3 +8,7 @@
 export { default as AddTaskModal } from './AddTaskModal'
 export { isTaskOverdue } from './data/mapTask'
 export { default as TaskDescriptionPopout } from './popout/TaskDescriptionPopout'
+// ASSIST-SIDEPANEEL-2: the note popup's action panel couples a task item to an
+// entity through the SAME picker + vocabulary the task drawer/create use.
+export { default as AddLinkRow } from './links/AddLinkRow'
+export type { NewLink } from './links/AddLinkRow'

@@ -14,6 +14,7 @@
  * composer only has to hand it items and read the merged result back.
  */
 import { useEffect, useRef, useState } from 'react'
+import NoteActionTaskExtras from './NoteActionTaskExtras'
 import { useTranslation } from 'react-i18next'
 import { Bell, Calendar, ListChecks, Mail, MessageCircle, Pencil, Play } from 'lucide-react'
 import Button from '@/components/ui/Button'
@@ -38,6 +39,13 @@ export interface NoteActionPanelItem {
   reason?: string
   run_id?: string
   created?: { type: 'appointment' | 'task' | 'calllist'; id: string } | null
+  // K-159 task extras (edit-before-execute): who the task is for and one
+  // optional entity link — executed verbatim; labels are display-only.
+  assignee_user_id?: string
+  assignee_label?: string
+  link_type?: string
+  link_id?: string
+  link_label?: string
 }
 
 interface NoteActionsPanelProps {
@@ -145,6 +153,16 @@ function ActionItemCard({ item, index, onEdit, onConfirm, candidateId }: {
             )
           ) : (
             dateField && <Caption as="div">{humanizeIsoDates(dateField)}</Caption>
+          )}
+          {/* K-159: WHO + WHAT — task items only (the bridge ignores these on
+              other types), and only while editing keeps the card calm. */}
+          {editing && item.type === 'task' && (
+            <NoteActionTaskExtras item={item} index={index} onEdit={onEdit} />
+          )}
+          {!editing && item.type === 'task' && (item.assignee_label || item.link_label) && (
+            <Caption as="div">
+              {[item.assignee_label, item.link_label].filter(Boolean).join(' · ')}
+            </Caption>
           )}
         </div>
         {item.status === 'proposed' && (

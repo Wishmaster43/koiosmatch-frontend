@@ -21,6 +21,9 @@ function Controlled({ initial, noteId, candidateId, autoRun }: { initial: NoteAc
   return <NoteActionsPanel items={items} onItemsChange={setItems} noteId={noteId} candidateId={candidateId} autoRun={autoRun} />
 }
 
+// K-159 extras mount in edit mode — stub the users query (no QueryClient here).
+vi.mock('@/lib/queries', () => ({ useUsers: () => ({ data: [] }) }))
+vi.mock('@/pages/tasks/shared', () => ({ AddLinkRow: () => null }))
 vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string, opts?: { defaultValue?: string }) => opts?.defaultValue ?? k }) }))
 vi.mock('@/components/ui/richtext/assistActionsExecuteApi', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@/components/ui/richtext/assistActionsExecuteApi')>()

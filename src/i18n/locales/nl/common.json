@@ -442,7 +442,12 @@
       "editTitle": "Titel",
       "editDate": "Datum",
       "save": "Opslaan",
-      "cancel": "Annuleren"
+      "cancel": "Annuleren",
+      "assignee": "Toewijzen aan",
+      "assigneeSelf": "Ikzelf (standaard)",
+      "assigneeClear": "Terug naar mijzelf",
+      "linkAdd": "Koppelen aan…",
+      "linkClear": "Koppeling verwijderen"
     }
   },
   "ai": {

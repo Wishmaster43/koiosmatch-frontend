@@ -67,7 +67,13 @@ export interface RichTextAssistActionItem {
   // OPTIONAL here (never required) so older fixtures that predate this field
   // keep compiling unchanged.
   message?: string | null
-  start?: string | null
+  start?: string | null  // K-159 edit-before-execute extras (task items): set in the note panel's
+  // item editor, executed verbatim.
+  assignee_user_id?: string
+  assignee_label?: string
+  link_type?: string
+  link_id?: string
+  link_label?: string
 }
 // Dutch fallback label per action-item type — the common:notesAssist.actionTypes.*
 // keys are already shipped in all five locales; this map only backstops an

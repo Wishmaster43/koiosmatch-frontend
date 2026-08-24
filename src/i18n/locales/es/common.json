@@ -442,7 +442,12 @@
       "editTitle": "Título",
       "editDate": "Fecha",
       "save": "Guardar",
-      "cancel": "Cancelar"
+      "cancel": "Cancelar",
+      "assignee": "Asignar a",
+      "assigneeSelf": "Yo mismo (predeterminado)",
+      "assigneeClear": "Volver a mí",
+      "linkAdd": "Vincular a…",
+      "linkClear": "Quitar vínculo"
     }
   },
   "ai": {

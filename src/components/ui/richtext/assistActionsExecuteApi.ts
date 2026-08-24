@@ -52,6 +52,12 @@ export type ExecuteItemStatus = 'executed' | 'failed' | 'pending' | 'wizard_requ
 // plus the per-item confirm flag (omit/false = preview, true = run it now).
 export interface ExecuteRequestItem {
   title: string
+  // K-159 (task items): who the task is for (omitted = the requester) and an
+  // optional entity link from the full task-link vocabulary — all executed
+  // verbatim by the bridge.
+  assignee_user_id?: string
+  link_type?: string
+  link_id?: string
   type: RichTextAssistActionType
   due_date: string | null
   note_excerpt: string | null
@@ -90,6 +96,10 @@ export function toExecuteItem(item: RichTextAssistActionItem, confirmed?: boolea
   return {
     title: item.title, type: item.type, due_date: item.due_date, note_excerpt: item.note_excerpt,
     message: item.message ?? null, start: item.start ?? null, confirmed,
+    // K-159: only when set — an omitted assignee falls back to the requester
+    // server-side, and an absent link simply links nothing.
+    ...(item.assignee_user_id ? { assignee_user_id: item.assignee_user_id } : null),
+    ...(item.link_type && item.link_id ? { link_type: item.link_type, link_id: item.link_id } : null),
   }
 }
 

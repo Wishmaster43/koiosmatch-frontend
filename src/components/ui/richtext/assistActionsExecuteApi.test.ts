@@ -112,3 +112,22 @@ describe('fetchWorkflowRun', () => {
     expect(row).toEqual({ id: 'r1', workflow_id: 'w1', status: 'running' })
   })
 })
+
+// K-159: the edit-before-execute task fields ride the request verbatim — and
+// stay OMITTED when unset (the server's requester-fallback must keep working).
+describe('toExecuteItem · K-159 task fields', () => {
+  it('carries assignee_user_id and link_type/link_id when set', () => {
+    const body = toExecuteItem({
+      title: 'BHV beoordelen', type: 'task', due_date: '2026-09-01', note_excerpt: null,
+      assignee_user_id: 'u1', link_type: 'vacancy', link_id: 'v9',
+    } as never, true)
+    expect(body).toMatchObject({ assignee_user_id: 'u1', link_type: 'vacancy', link_id: 'v9', confirmed: true })
+  })
+
+  it('omits them entirely when unset', () => {
+    const body = toExecuteItem({ title: 'Bel terug', type: 'task', due_date: null, note_excerpt: null } as never)
+    expect('assignee_user_id' in body).toBe(false)
+    expect('link_type' in body).toBe(false)
+  })
+})
+

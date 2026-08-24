@@ -442,7 +442,12 @@
       "editTitle": "Title",
       "editDate": "Date",
       "save": "Save",
-      "cancel": "Cancel"
+      "cancel": "Cancel",
+      "assignee": "Assign to",
+      "assigneeSelf": "Myself (default)",
+      "assigneeClear": "Back to myself",
+      "linkAdd": "Link to…",
+      "linkClear": "Remove link"
     }
   },
   "ai": {
