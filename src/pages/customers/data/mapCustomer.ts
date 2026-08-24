@@ -21,6 +21,9 @@ export interface ApiCustomerNoteRow {
   // K15NOTES: sent by BOTH CustomerNoteResource and the embedded
   // CustomerDetailResource list (parity regression-locked server-side, 13-08).
   author_id?: Id | null; updated_by?: string | null
+  // NOTE-UNDO-FE-1 (K-172): the one-slot previous version exists — gates the
+  // "restore previous" affordance; sent by both resources.
+  has_previous_version?: boolean
 }
 
 /** mapCustomerNoteRow — raw API note row → flat UI shape (CONTACT-NOTITIES-1 + NOTES-LOC-DEPT-1). */
@@ -34,6 +37,8 @@ export function mapCustomerNoteRow(n: ApiCustomerNoteRow = {}): CustomerNote {
     // K15NOTES: pass through the ownership/provenance fields (CustomerNoteResource /
     // CustomerDetailResource) so the shared NotesTab can gate edit/delete per note.
     author_id: n.author_id ?? null, updated_by: n.updated_by ?? null,
+    // NOTE-UNDO-FE-1: the restore-affordance gate must survive the mapper.
+    has_previous_version: n.has_previous_version ?? false,
   }
 }
 

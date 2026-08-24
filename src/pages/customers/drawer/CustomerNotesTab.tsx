@@ -89,13 +89,17 @@ interface Props {
   // resolves the customer id, so this tab only needs the note's own id + payload.
   onEditNote?: (noteId: Id | undefined, payload: { type: string; title: string; body: string; language?: string }) => void
   onDeleteNote?: (noteId: Id | undefined) => void
+  // NOTE-UNDO-FE-1 (K-172): peek + execute the one-slot undo — same (noteId)
+  // shape as onEditNote/onDeleteNote, resolved by CustomerDrawer.
+  onFetchPreviousVersion?: (noteId: Id | undefined) => Promise<{ previous_body: string | null; previous_saved_at: string | null } | null>
+  onRestorePreviousNote?: (noteId: Id | undefined) => Promise<boolean>
   // The record itself + its save path, for the Vacature-zichtbaarheid sub-tab (it edits
   // three customer fields through the drawer's own optimistic PATCH).
   c: Customer
   onSave?: (values: Record<string, unknown>) => void
 }
 
-export default function CustomerNotesTab({ customerId, customerName, customerInitials, authorInitials, notes, onAddNote, onEditNote, onDeleteNote, c, onSave }: Props) {
+export default function CustomerNotesTab({ customerId, customerName, customerInitials, authorInitials, notes, onAddNote, onEditNote, onDeleteNote, onFetchPreviousVersion, onRestorePreviousNote, c, onSave }: Props) {
   const { t } = useTranslation('customers')
   // Note categories from the tenant lookup (NOTE-TYPES-2/3). CustomerController::
   // addNote validates `type` against entity=contact when customer_contact_id is
@@ -219,6 +223,9 @@ export default function CustomerNotesTab({ customerId, customerName, customerIni
   const handleEditNote = (index: number, payload: { type: string; title: string; body: string; language?: string }) =>
     onEditNote?.(notesWithChip[index]?.id as Id | undefined, payload)
   const handleDeleteNote = (index: number) => onDeleteNote?.(notesWithChip[index]?.id as Id | undefined)
+  // NOTE-UNDO-FE-1: same index→id resolve as edit/delete above.
+  const handleFetchPreviousVersion = (index: number) => onFetchPreviousVersion?.(notesWithChip[index]?.id as Id | undefined) ?? Promise.resolve(null)
+  const handleRestorePreviousNote = (index: number) => onRestorePreviousNote?.(notesWithChip[index]?.id as Id | undefined) ?? Promise.resolve(false)
 
   // Manual retry for the fallback fetch above (embed-present path never errors
   // here — the record is already loaded).
@@ -234,6 +241,8 @@ export default function CustomerNotesTab({ customerId, customerName, customerIni
     // the candidate tab) — NotesTab itself re-gates per note via author_id/managePermission.
     onEditNote: onEditNote ? handleEditNote : undefined,
     onDeleteNote: onDeleteNote ? handleDeleteNote : undefined,
+    onFetchPreviousVersion: onFetchPreviousVersion ? handleFetchPreviousVersion : undefined,
+    onRestorePreviousNote: onRestorePreviousNote ? handleRestorePreviousNote : undefined,
     managePermission: 'customers.notes.manage_all',
     timeline, noteTypes, chipTypes,
     authorInitials, timelineName: customerName, timelineInitials: customerInitials,
@@ -254,6 +263,9 @@ export default function CustomerNotesTab({ customerId, customerName, customerIni
       // TAKEN-TOOLBAR/NOTES-SEARCH-1 (Danny 03-08): supplies the shared NotesTab's
       // search placeholder.
       searchPlaceholder: t('notes.searchPlaceholder'),
+      // NOTE-UNDO-FE-1 (K-172) — shared common:notes.* namespace, see NotesTab.
+      restorePrevious: t('common:notes.restorePrevious'),
+      restoreConfirmTitle: t('common:notes.restoreConfirmTitle'),
     },
   }
 

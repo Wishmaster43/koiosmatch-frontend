@@ -1771,7 +1771,8 @@
     "tabs": {
       "pricing": "Platformprijzen",
       "budgets": "Maandbudgetten",
-      "package": "Pakket"
+      "package": "Pakket",
+      "users": "Gebruikers"
     }
   },
   "whatsapp": {
@@ -2554,7 +2555,11 @@
     "conversationUnknown": "Onbekend contact",
     "conversationCount_one": "{{count}} bericht in dit log",
     "conversationCount_other": "{{count}} berichten in dit log",
-    "viaApp": "via app"
+    "viaApp": "via app",
+    "loadMore": "Meer laden",
+    "loadingMore": "Laden…",
+    "loadMoreExhausted": "Er is niets ouders meer om te laden.",
+    "retentionHint": "De eerste 90 dagen laden meteen; alles daarvoor blijft bewaard en laad je hierboven bij."
   },
   "appointmentTypes": {
     "title": "Afspraaktypes",
@@ -3409,107 +3414,33 @@
     "saveFailed": "Budgetten opslaan is mislukt.",
     "saved": "Budgetten opgeslagen."
   },
+  "billingUsers": {
+    "title": "Gebruikers",
+    "subtitle": "Inbegrepen gebruikers en prijs per extra gebruiker per pakket, en de actuele bezetting per tenant.",
+    "packagesHeading": "Pakketten",
+    "includedUsersLabel": "Inbegrepen gebruikers",
+    "extraPriceLabel": "Prijs per extra gebruiker (cent)",
+    "extraPriceCaption": "= {{amount}} per extra gebruiker",
+    "loadError": "Gebruikersgegevens konden niet worden geladen.",
+    "saveFailed": "Opslaan is mislukt.",
+    "saved": "Opgeslagen.",
+    "tenantsHeading": "Gebruikers per tenant",
+    "tenantsEmpty": "Nog geen tenants met gebruikersgegevens.",
+    "colTenant": "Tenant",
+    "colPackage": "Pakket",
+    "colActive": "Actieve gebruikers",
+    "colIncluded": "Inbegrepen",
+    "colExtra": "Extra",
+    "unlimited": "Onbeperkt",
+    "extraValue": "{{count}} extra · {{amount}}"
+  },
   "dashboardsOrderRoleLabel": "Rol",
   "dashboardsOrderHint": "Bepaal de volgorde waarin de KPI-tegels voor deze rol op het dashboard verschijnen. Alleen ingeschakelde KPI's (tabblad KPI's) staan in de lijst.",
   "dashboardsPreviewTitle": "Voorbeeld",
   "dashboardsPreviewHint": "Toont alleen de labels en volgorde, niet de echte cijfers van deze tenant.",
   "dashboardsOrderEmpty": "Geen KPI's ingeschakeld voor deze rol.",
-  "dashboardsExplain": {
-    "candidates": {
-      "what": "Totaal aantal kandidaten in het ATS.",
-      "goesTo": "Klikken opent Kandidaten."
-    },
-    "stale": {
-      "what": "Kandidaten die de laatste 6 maanden niet zijn gecontacteerd.",
-      "goesTo": "Klikken opent Kandidaten."
-    },
-    "never": {
-      "what": "Kandidaten die nog nooit zijn gecontacteerd.",
-      "goesTo": "Klikken opent Kandidaten."
-    },
-    "tasks": {
-      "what": "Openstaande taken gekoppeld aan kandidaten.",
-      "goesTo": "Klikken opent Taken."
-    },
-    "opps": {
-      "what": "Aantal openstaande kansen.",
-      "goesTo": "Klikken opent Kansen."
-    },
-    "pipeline": {
-      "what": "Som van de waarde van openstaande kansen.",
-      "goesTo": "Klikken opent Kansen."
-    },
-    "placements": {
-      "what": "Aantal geplaatste matches.",
-      "goesTo": "Klikken opent Matches."
-    },
-    "intakes": {
-      "what": "Aantal geplande intakes.",
-      "goesTo": "Klikken opent Kandidaten."
-    },
-    "fillRate": {
-      "what": "Percentage vacatures dat is ingevuld.",
-      "goesTo": "Klikken opent Vacatures."
-    },
-    "openVacancies": {
-      "what": "Aantal openstaande (niet-gearchiveerde) vacatures.",
-      "goesTo": "Klikken opent Vacatures."
-    },
-    "incompleteRuns": {
-      "what": "Aantal AI-workflow-runs die niet volledig zijn afgerond.",
-      "goesTo": "Klikken opent AI-agents."
-    },
-    "activeConv": {
-      "what": "Aantal actieve WhatsApp-gesprekken.",
-      "goesTo": "Klikken opent WhatsApp."
-    },
-    "missingDocs": {
-      "what": "Kandidaten met ontbrekende documenten.",
-      "goesTo": "Klikken opent Kandidaten."
-    },
-    "expiringContracts": {
-      "what": "Matches met een contract dat binnenkort afloopt.",
-      "goesTo": "Klikken opent Matches."
-    },
-    "couplingErrors": {
-      "what": "Kandidaten met een mislukte koppeling naar de backoffice.",
-      "goesTo": "Klikken opent Kandidaten."
-    },
-    "openShifts": {
-      "what": "Aantal openstaande diensten (Planning-module).",
-      "goesTo": "Klikken opent Planning."
-    },
-    "occupancy": {
-      "what": "Bezettingsgraad van geplande diensten.",
-      "goesTo": "Klikken opent Planning."
-    },
-    "escalations": {
-      "what": "Aantal WhatsApp-gesprekken dat is geëscaleerd.",
-      "goesTo": "Klikken opent WhatsApp."
-    },
-    "failedWf": {
-      "what": "Aantal workflows dat is mislukt.",
-      "goesTo": "Klikken opent Workflows."
-    },
-    "tasksOverdue": {
-      "what": "Aantal taken dat de deadline heeft overschreden.",
-      "goesTo": "Klikken opent Taken."
-    },
-    "uncalledCallist": {
-      "what": "Kandidaten op een bellijst die nog niet zijn gebeld.",
-      "goesTo": "Klikken opent Bellijsten."
-    },
-    "expiringOpps": {
-      "what": "Kansen die binnenkort verlopen.",
-      "goesTo": "Klikken opent Kansen."
-    },
-    "tooLongInStage": {
-      "what": "Sollicitaties die te lang in dezelfde fase staan.",
-      "goesTo": "Klikken opent Sollicitaties."
-    },
-    "missingApptApps": {
-      "what": "Sollicitaties in een fase die een afspraak vereist, zonder geplande afspraak.",
-      "goesTo": "Klikken opent Sollicitaties."
-    }
-  }
+  "dashboardsGoesTo": "Opent {{target}}.",
+  "dashboardsCatalogUnavailable": "Uitleg is nu niet beschikbaar.",
+  "dashboardsSaveError": "Opslaan van de KPI-instelling is mislukt: de wijziging is teruggedraaid. Probeer het opnieuw.",
+  "dashboardsSharedDefault": "gedeeld (Standaard)"
 }

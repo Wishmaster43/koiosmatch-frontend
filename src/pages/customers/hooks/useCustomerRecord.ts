@@ -15,7 +15,8 @@ import api, { unwrap } from '@/lib/api'
 import { notifyError, notifySuccess } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
 import { mergePatch } from '@/lib/mergePatch'
-import { mapCustomer } from '../data/mapCustomer'
+import { mapCustomer, mapCustomerNoteRow } from '../data/mapCustomer'
+import type { ApiCustomerNoteRow } from '../data/mapCustomer'
 import { mapCustomerBilling, BILLING_API_FIELDS } from './customerBillingAddress'
 import type { Customer, ApiCustomer } from '@/types/customer'
 import type { Id } from '@/types/common'
@@ -285,6 +286,34 @@ export function useCustomerRecord({ setCustomers, setTotal, users, t }: Args) {
       })
   }
 
+  // NOTE-UNDO-FE-1 (K-172): peek the one-slot undo — GET /customers/{id}/notes/{note}/previous-version
+  // → { data: { previous_body, previous_saved_at } }, nulls when there is no slot yet.
+  const fetchPreviousVersion = (id: Id | undefined, noteId: Id | undefined) => {
+    if (!id || noteId == null) return Promise.resolve(null)
+    return api.get(`/customers/${id}/notes/${noteId}/previous-version`)
+      .then(res => (res.data as { data?: { previous_body: string | null; previous_saved_at: string | null } })?.data ?? null)
+      .catch(() => null)
+  }
+
+  // NOTE-UNDO-FE-1 (K-172): execute the undo — POST /customers/{id}/notes/{note}/restore-previous
+  // → the note in this family's own shape. A 422 (no slot / guard failed, mirrors
+  // update()'s own guards) resolves false so NotesTab degrades calmly.
+  const restorePreviousVersion = (id: Id | undefined, noteId: Id | undefined): Promise<boolean> => {
+    if (!id || noteId == null) return Promise.resolve(false)
+    return api.post(`/customers/${id}/notes/${noteId}/restore-previous`)
+      .then(res => {
+        // The route answers CustomerNoteResource (snake_case, `body`) — run it
+        // through the family mapper so the UI row really carries the restored
+        // text; a raw spread over the flat shape leaves the OLD `text` standing.
+        const restored = mapCustomerNoteRow(unwrap<ApiCustomerNoteRow>(res))
+        setDetail(prev => (prev && prev.id === id
+          ? ({ ...prev, notes: (prev.notes ?? []).map(n => (n.id === noteId ? { ...n, ...restored } : n)) } as Customer)
+          : prev))
+        return true
+      })
+      .catch(() => false)
+  }
+
   // K15NOTES: delete a single note (optimistic remove + DELETE), reverting on failure.
   const deleteNote = (id: Id | undefined, noteId: Id | undefined) => {
     const snapshot = detail
@@ -301,5 +330,6 @@ export function useCustomerRecord({ setCustomers, setTotal, users, t }: Args) {
   return {
     selected, detail, drawerExpanded, setDrawerExpanded, drawerTab,
     closeDrawer, selectCustomer, updateCustomer, restoreCustomer, handleCreate, addNote, editNote, deleteNote,
+    fetchPreviousVersion, restorePreviousVersion,
   }
 }

@@ -15,6 +15,9 @@ import RecentListsRow from './blocks/RecentListsRow'
 import ActivityListsRow from './blocks/ActivityListsRow'
 import ShiftsSummary from './blocks/ShiftsSummary'
 import WidgetListBlock from './blocks/WidgetListBlock'
+import ScopeBadge from './blocks/ScopeBadge'
+import RecruiterLoad from './blocks/RecruiterLoad'
+import OppAging from './blocks/OppAging'
 import KoiosForYouCard from './KoiosForYouCard'
 import type { DashStats, DashOpp, DashData } from '@/types/dashboard'
 import { useAllSettings, getJsonSetting, getBoolSetting } from '@/lib/settings/useAllSettings'
@@ -79,8 +82,9 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
   const {
     vis, statusData, recruiterData, funnelData, oppStageData,
     recentCandidates, recentApplications, recentLeads, runs, conversations,
-    showRuns, showConv, trendData, trendSeries, shifts, kpis,
+    showRuns, showConv, trendData, trendSeries, shifts, kpis, scope = null,
     expiringMatchesRows, staleVacanciesRows, koiosSuggestionsRows, customersByOwnerRows,
+    recruiterLoadRows = [], oppAgingRows = [],
   } = useDashboardViewModel({
     t, formatNumber, stats, opp, dash, dashCharts, statusMeta, funnelMeta, funnelTypes,
     activeType, hiddenBlocks, hiddenKpis, kpiOrder, hasPlanning, valueInHours,
@@ -132,10 +136,20 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
             </div>
           )}
 
+          {/* K-173 fase 1 — the honest scope this response was actually computed
+              under ("Mijn kandidaten" / role label + unassigned-branch footnote). */}
+          <ScopeBadge scope={scope} />
+
           {/* KPI-strip — live data */}
           <div style={{ display: 'flex', gap: 12, marginBottom: 16, flexWrap: 'wrap' }}>
             {kpis.map(k => <KpiCard key={k.label} {...k} />)}
           </div>
+
+          {/* K-173 fase 6 — recruitment_manager's team-load table. */}
+          {vis('block.recruiterLoad') && <div style={{ marginBottom: 16 }}><RecruiterLoad rows={recruiterLoadRows} /></div>}
+
+          {/* K-173 fase 6 — sales_manager/accountmanager opportunity-ageing buckets. */}
+          {vis('block.oppAging') && <OppAging rows={oppAgingRows} />}
 
           {/* "Koios deed dit voor jou" (K0-D noordster) — self-contained card, own
               loading/error/empty/success handling; fetches its own 7/30-day report. */}

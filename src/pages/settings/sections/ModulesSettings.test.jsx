@@ -65,4 +65,14 @@ describe('ModulesSettings', () => {
     await waitFor(() => expect(mockPut).toHaveBeenCalledWith(
       '/tenant-modules', expect.objectContaining({ addons: ['reports'] })))
   })
+
+  // MODULES-USERS-SUBTAB-1: the fourth sub-tab sits right after "package", in
+  // Danny's named order (pricing, budgets, package, users).
+  it('renders the users sub-tab after package', async () => {
+    mockGet.mockResolvedValue({ data: { package: 'core', addons: [] } })
+    render(<ModulesSettings />)
+    const tabs = await screen.findAllByRole('tab')
+    const labels = tabs.map((tab) => tab.textContent)
+    expect(labels).toEqual(['modules.tabs.pricing', 'modules.tabs.budgets', 'modules.tabs.package', 'modules.tabs.users'])
+  })
 })

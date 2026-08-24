@@ -101,6 +101,10 @@ interface CustomerDrawerProps {
   // shape, plus the note's own id so the host can resolve which note changed.
   onEditNote?: (id: Id | undefined, noteId: Id | undefined, payload: NotePayload) => void
   onDeleteNote?: (id: Id | undefined, noteId: Id | undefined) => void
+  // NOTE-UNDO-FE-1 (K-172): peek + execute the one-slot undo — mirrors onEditNote's
+  // (id, noteId) shape, resolved by the host (useCustomerRecord).
+  onFetchPreviousVersion?: (id: Id | undefined, noteId: Id | undefined) => Promise<{ previous_body: string | null; previous_saved_at: string | null } | null>
+  onRestorePreviousNote?: (id: Id | undefined, noteId: Id | undefined) => Promise<boolean>
   users?: DrawerUser[]
   statuses?: LookupOption[]
   // SUB-STATUS-1: the three sub-entity status lookups (one API call, lifted from
@@ -119,6 +123,7 @@ interface CustomerDrawerProps {
 
 export default function CustomerDrawer({
   customer: c, onClose, expanded, onToggleExpand, onUpdate, onAddNote, onEditNote, onDeleteNote,
+  onFetchPreviousVersion, onRestorePreviousNote,
   users = [], statuses = [], locationStatuses = [], departmentStatuses = [], contactStatuses = [], initialTab,
   onRestore, trash,
 }: CustomerDrawerProps) {
@@ -335,6 +340,8 @@ export default function CustomerDrawer({
           onAddNote={payload => onAddNote?.(c.id, payload)}
           onEditNote={(noteId, payload) => onEditNote?.(c.id, noteId, payload)}
           onDeleteNote={noteId => onDeleteNote?.(c.id, noteId)}
+          onFetchPreviousVersion={onFetchPreviousVersion ? (noteId: Id | undefined) => onFetchPreviousVersion(c.id, noteId) : undefined}
+          onRestorePreviousNote={onRestorePreviousNote ? (noteId: Id | undefined) => onRestorePreviousNote(c.id, noteId) : undefined}
           c={c} onSave={v => onUpdate?.(c.id, v)}
         />
       )

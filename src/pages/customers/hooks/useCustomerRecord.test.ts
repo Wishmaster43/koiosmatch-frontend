@@ -375,6 +375,54 @@ describe('useCustomerRecord · editNote/deleteNote (K15NOTES)', () => {
   })
 })
 
+/**
+ * NOTE-UNDO-FE-1 (K-172) — the one-slot undo. Asserts the REQUEST (§13): the
+ * exact GET/POST route, never only that a callback fired.
+ */
+describe('useCustomerRecord · previous-version undo (NOTE-UNDO-FE-1)', () => {
+  const withNote = customer({
+    id: 1,
+    notes: [{ id: 'n-1', type: 'general', title: '', text: 'Origineel', ago: '', contactId: null, contactName: '', locationId: null, locationName: '', departmentId: null, departmentName: '' }],
+  })
+
+  it('GETs the note\'s own previous-version route', async () => {
+    vi.mocked(api.get).mockResolvedValueOnce({ data: { data: { previous_body: '<p>Oud</p>', previous_saved_at: '2026-08-20T10:00:00Z' } } })
+    const r = harness([withNote])
+    const preview = await act(() => r.result.current.record.fetchPreviousVersion(1, 'n-1'))
+    expect(vi.mocked(api.get)).toHaveBeenCalledWith('/customers/1/notes/n-1/previous-version')
+    expect(preview).toEqual({ previous_body: '<p>Oud</p>', previous_saved_at: '2026-08-20T10:00:00Z' })
+  })
+
+  it('resolves null (never throws) when the peek 422s', async () => {
+    vi.mocked(api.get).mockRejectedValueOnce({ response: { status: 422 } })
+    const r = harness([withNote])
+    const preview = await act(() => r.result.current.record.fetchPreviousVersion(1, 'n-1'))
+    expect(preview).toBeNull()
+  })
+
+  it('POSTs restore-previous to the note\'s own route and updates the note in place on success', async () => {
+    mockedGet.mockResolvedValue({ data: withNote })
+    // The REAL CustomerNoteResource shape: snake_case with `body` — never `text`.
+    vi.mocked(api.post).mockResolvedValueOnce({ data: { data: { id: 'n-1', type: 'general', body: '<p>Restored</p>', created_at: '2026-08-24', has_previous_version: true } } })
+    const r = harness([withNote])
+    act(() => { r.result.current.record.selectCustomer(withNote) })
+    await waitFor(() => expect(r.result.current.record.detail?.id).toBe(1))
+
+    const landed = await act(() => r.result.current.record.restorePreviousVersion(1, 'n-1'))
+
+    expect(vi.mocked(api.post)).toHaveBeenCalledWith('/customers/1/notes/n-1/restore-previous')
+    expect(landed).toBe(true)
+    expect(r.result.current.record.detail?.notes?.[0]).toMatchObject({ id: 'n-1', text: '<p>Restored</p>', has_previous_version: true })
+  })
+
+  it('resolves false (never throws) when the restore 422s', async () => {
+    vi.mocked(api.post).mockRejectedValueOnce({ response: { status: 422 } })
+    const r = harness([withNote])
+    const landed = await act(() => r.result.current.record.restorePreviousVersion(1, 'n-1'))
+    expect(landed).toBe(false)
+  })
+})
+
 // TRASH-OVERAL-2: restore-to-active stays the separate per-id /restore route —
 // REQUEST-asserting (§13), plus the local lifecycle reconcile across the slices.
 describe('useCustomerRecord · restoreCustomer (TRASH-OVERAL-2)', () => {

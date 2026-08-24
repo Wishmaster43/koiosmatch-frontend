@@ -148,3 +148,50 @@ describe('useCandidateNotes · GET failure vs. genuine empty (Class B)', () => {
     expect(api.get).toHaveBeenCalledTimes(2)
   })
 })
+
+// NOTE-UNDO-FE-1 (K-172): the one-slot undo — pin the REQUEST (method + route),
+// never only that a callback fired (§13).
+describe('useCandidateNotes · previous-version undo (NOTE-UNDO-FE-1)', () => {
+  it('GETs the note\'s own previous-version route, keyed off the list index', async () => {
+    vi.mocked(api.get)
+      .mockResolvedValueOnce({ data: { data: [{ id: 'n1', body: 'First' }, { id: 'n2', body: 'Second' }] } })
+      .mockResolvedValueOnce({ data: { data: { previous_body: '<p>Oud</p>', previous_saved_at: '2026-08-20T10:00:00Z' } } })
+    const { result } = renderHook(() => useCandidateNotes('c1'))
+    await waitFor(() => expect(result.current.notes).toHaveLength(2))
+    const preview = await act(() => result.current.fetchPreviousVersion(1))
+    expect(api.get).toHaveBeenCalledWith('/candidates/c1/notes/n2/previous-version')
+    expect(preview).toEqual({ previous_body: '<p>Oud</p>', previous_saved_at: '2026-08-20T10:00:00Z' })
+  })
+
+  it('resolves null (never throws) when the peek 422s — no slot yet', async () => {
+    vi.mocked(api.get)
+      .mockResolvedValueOnce({ data: { data: [{ id: 'n1', body: 'First' }] } })
+      .mockRejectedValueOnce({ response: { status: 422 } })
+    const { result } = renderHook(() => useCandidateNotes('c1'))
+    await waitFor(() => expect(result.current.notes).toHaveLength(1))
+    const preview = await act(() => result.current.fetchPreviousVersion(0))
+    expect(preview).toBeNull()
+  })
+
+  it('POSTs restore-previous to the note\'s own route and reloads the thread on success', async () => {
+    vi.mocked(api.get)
+      .mockResolvedValueOnce({ data: { data: [{ id: 'n1', body: 'First' }] } })
+      .mockResolvedValueOnce({ data: { data: [{ id: 'n1', body: 'Restored' }] } })
+    vi.mocked(api.post).mockResolvedValueOnce({ data: { data: { id: 'n1', body: 'Restored' } } })
+    const { result } = renderHook(() => useCandidateNotes('c1'))
+    await waitFor(() => expect(result.current.notes).toHaveLength(1))
+    const landed = await act(() => result.current.restorePreviousVersion(0))
+    expect(api.post).toHaveBeenCalledWith('/candidates/c1/notes/n1/restore-previous')
+    expect(landed).toBe(true)
+    await waitFor(() => expect(result.current.notes[0].body).toBe('Restored'))
+  })
+
+  it('resolves false (never throws) when the restore 422s — the guard rejected it', async () => {
+    vi.mocked(api.get).mockResolvedValueOnce({ data: { data: [{ id: 'n1', body: 'First' }] } })
+    vi.mocked(api.post).mockRejectedValueOnce({ response: { status: 422 } })
+    const { result } = renderHook(() => useCandidateNotes('c1'))
+    await waitFor(() => expect(result.current.notes).toHaveLength(1))
+    const landed = await act(() => result.current.restorePreviousVersion(0))
+    expect(landed).toBe(false)
+  })
+})

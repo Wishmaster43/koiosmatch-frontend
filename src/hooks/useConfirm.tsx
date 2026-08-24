@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react'
+import type { ReactNode } from 'react'
 import ConfirmDialog from '@/components/ui/ConfirmDialog'
 
 // Options for one staged confirmation (all optional — ConfirmDialog has sane defaults).
@@ -14,6 +15,9 @@ interface ConfirmOptions {
    * closes the dialog and nothing happens, as before.
    */
   onCancel?: () => void
+  // Optional rich content under the message (mirrors ConfirmDialog's own
+  // `children` — NOTE-UNDO-FE-1 uses it for the previous-version preview).
+  children?: ReactNode
 }
 
 interface ConfirmState extends ConfirmOptions {
@@ -46,7 +50,9 @@ export function useConfirm() {
       cancelLabel={state?.cancelLabel}
       onConfirm={() => { state?.onConfirm(); setState(null) }}
       onCancel={() => { state?.onCancel?.(); setState(null) }}
-    />
+    >
+      {state?.children}
+    </ConfirmDialog>
   )
 
   return { confirm, dialog }

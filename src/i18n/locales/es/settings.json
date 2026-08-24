@@ -1525,7 +1525,8 @@
     "tabs": {
       "pricing": "Precios de la plataforma",
       "budgets": "Presupuestos mensuales",
-      "package": "Paquete"
+      "package": "Paquete",
+      "users": "Usuarios"
     }
   },
   "whatsapp": {
@@ -2554,7 +2555,11 @@
     "conversationUnknown": "Contacto desconocido",
     "conversationCount_one": "{{count}} mensaje en este registro",
     "conversationCount_other": "{{count}} mensajes en este registro",
-    "viaApp": "vía app"
+    "viaApp": "vía app",
+    "loadMore": "Cargar más",
+    "loadingMore": "Cargando…",
+    "loadMoreExhausted": "No queda nada más antiguo para cargar.",
+    "retentionHint": "Los primeros 90 días se cargan de inmediato; todo lo anterior se conserva y se carga bajo demanda arriba."
   },
   "appointmentTypes": {
     "title": "Tipos de cita",
@@ -3409,107 +3414,33 @@
     "saveFailed": "No se pudieron guardar los presupuestos.",
     "saved": "Presupuestos guardados."
   },
+  "billingUsers": {
+    "title": "Usuarios",
+    "subtitle": "Usuarios incluidos y el precio por usuario adicional por paquete, y la ocupación actual por cliente.",
+    "packagesHeading": "Paquetes",
+    "includedUsersLabel": "Usuarios incluidos",
+    "extraPriceLabel": "Precio por usuario adicional (céntimos)",
+    "extraPriceCaption": "= {{amount}} por usuario adicional",
+    "loadError": "No se pudieron cargar los datos de usuarios.",
+    "saveFailed": "No se pudo guardar.",
+    "saved": "Guardado.",
+    "tenantsHeading": "Usuarios por cliente",
+    "tenantsEmpty": "Todavía no hay clientes con datos de usuarios.",
+    "colTenant": "Cliente",
+    "colPackage": "Paquete",
+    "colActive": "Usuarios activos",
+    "colIncluded": "Incluidos",
+    "colExtra": "Adicionales",
+    "unlimited": "Ilimitado",
+    "extraValue": "{{count}} adicionales · {{amount}}"
+  },
   "dashboardsOrderRoleLabel": "Rol",
   "dashboardsOrderHint": "Define el orden en que las tarjetas de KPI aparecen en el panel para este rol. Solo se listan los KPI habilitados (pestaña KPI).",
   "dashboardsPreviewTitle": "Vista previa",
   "dashboardsPreviewHint": "Muestra solo las etiquetas y el orden, no las cifras reales de este tenant.",
   "dashboardsOrderEmpty": "No hay KPI habilitados para este rol.",
-  "dashboardsExplain": {
-    "candidates": {
-      "what": "Número total de candidatos en el ATS.",
-      "goesTo": "Abre Candidatos."
-    },
-    "stale": {
-      "what": "Candidatos no contactados en los últimos 6 meses.",
-      "goesTo": "Abre Candidatos."
-    },
-    "never": {
-      "what": "Candidatos que nunca han sido contactados.",
-      "goesTo": "Abre Candidatos."
-    },
-    "tasks": {
-      "what": "Tareas abiertas vinculadas a candidatos.",
-      "goesTo": "Abre Tareas."
-    },
-    "opps": {
-      "what": "Número de oportunidades abiertas.",
-      "goesTo": "Abre Oportunidades."
-    },
-    "pipeline": {
-      "what": "Suma del valor de las oportunidades abiertas.",
-      "goesTo": "Abre Oportunidades."
-    },
-    "placements": {
-      "what": "Número de colocaciones realizadas.",
-      "goesTo": "Abre Matches."
-    },
-    "intakes": {
-      "what": "Número de entrevistas planificadas.",
-      "goesTo": "Abre Candidatos."
-    },
-    "fillRate": {
-      "what": "Porcentaje de vacantes cubiertas.",
-      "goesTo": "Abre Vacantes."
-    },
-    "openVacancies": {
-      "what": "Número de vacantes abiertas (no archivadas).",
-      "goesTo": "Abre Vacantes."
-    },
-    "incompleteRuns": {
-      "what": "Número de ejecuciones de flujo de IA que no se completaron.",
-      "goesTo": "Abre Agentes IA."
-    },
-    "activeConv": {
-      "what": "Número de conversaciones de WhatsApp activas.",
-      "goesTo": "Abre WhatsApp."
-    },
-    "missingDocs": {
-      "what": "Candidatos con documentos faltantes.",
-      "goesTo": "Abre Candidatos."
-    },
-    "expiringContracts": {
-      "what": "Matches con un contrato que finaliza pronto.",
-      "goesTo": "Abre Matches."
-    },
-    "couplingErrors": {
-      "what": "Candidatos con un acoplamiento de backoffice fallido.",
-      "goesTo": "Abre Candidatos."
-    },
-    "openShifts": {
-      "what": "Número de turnos abiertos (módulo Planning).",
-      "goesTo": "Abre Planning."
-    },
-    "occupancy": {
-      "what": "Tasa de ocupación de los turnos planificados.",
-      "goesTo": "Abre Planning."
-    },
-    "escalations": {
-      "what": "Número de conversaciones de WhatsApp escaladas.",
-      "goesTo": "Abre WhatsApp."
-    },
-    "failedWf": {
-      "what": "Número de flujos de trabajo fallidos.",
-      "goesTo": "Abre Flujos de trabajo."
-    },
-    "tasksOverdue": {
-      "what": "Número de tareas vencidas.",
-      "goesTo": "Abre Tareas."
-    },
-    "uncalledCallist": {
-      "what": "Candidatos en una lista de llamadas aún no llamados.",
-      "goesTo": "Abre Listas de llamadas."
-    },
-    "expiringOpps": {
-      "what": "Oportunidades que expiran pronto.",
-      "goesTo": "Abre Oportunidades."
-    },
-    "tooLongInStage": {
-      "what": "Solicitudes estancadas demasiado tiempo en la misma etapa.",
-      "goesTo": "Abre Solicitudes."
-    },
-    "missingApptApps": {
-      "what": "Solicitudes en una etapa que requiere una cita, sin cita planificada.",
-      "goesTo": "Abre Solicitudes."
-    }
-  }
+  "dashboardsGoesTo": "Abre {{target}}.",
+  "dashboardsCatalogUnavailable": "Las explicaciones no están disponibles ahora mismo.",
+  "dashboardsSaveError": "No se pudo guardar el ajuste de KPI: el cambio se ha revertido. Inténtalo de nuevo.",
+  "dashboardsSharedDefault": "compartido (Predeterminado)"
 }

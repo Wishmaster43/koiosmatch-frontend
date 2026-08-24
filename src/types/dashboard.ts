@@ -51,6 +51,36 @@ export interface AiRun { name?: string; ran_at?: string; ok?: boolean; processed
 export interface Conversation { name?: string; last_message?: string; at?: string; [k: string]: unknown }
 export interface TimeseriesPoint { name: string; value?: number; [k: string]: unknown }
 
+// K-173 fase 1 — the honest scope the server actually queried (never inferred
+// client-side): which role resolved, whether it narrowed to "my own" records,
+// which branches, and whether unassigned rows were folded in.
+export interface DashScope {
+  role?: string
+  owner_dimension?: string | null
+  owner_id?: string | number | null
+  branch_ids?: Array<string | number>
+  includes_unassigned?: boolean
+  unassigned_count?: number
+  computed_at?: string
+}
+
+// K-173 fase 2 — per-KPI drill descriptor: the exact list filters that reproduce
+// the tile's own number. `null` = this KPI has no drill (tile renders inert).
+export interface DashDrillDescriptor { entity: string; params: Record<string, unknown> }
+
+// K-173 fase 6 — recruitment_manager team load feed.
+export interface RecruiterLoadRow {
+  user_id: string | number
+  name: string
+  open_tasks: number
+  intakes_planned: number
+  too_long_in_stage: number
+  [k: string]: unknown
+}
+
+// K-173 fase 6 — sales_manager / accountmanager opportunity-ageing buckets.
+export interface OppAgingBucket { bucket: '0-7' | '8-30' | '31-90' | '90+'; count: number }
+
 // One merged row of the weekly trend chart (a value per series key + the bucket name).
 export interface TrendRow { name: string; [k: string]: number | string }
 
@@ -74,5 +104,19 @@ export interface DashData {
   // zero; a module-gated key is ABSENT (not a key at all, not `null`) when the
   // tenant lacks the module — that absence is what hides the tile.
   kpis?: Record<string, number | null>
+  // K-173 (714eae01): the viewer-effective ordered KPI row in SERVER keys —
+  // presence = visible, position = order (saved via PUT /dashboard/kpis/{role},
+  // role-default otherwise). When present this replaces the settings-blob
+  // hidden/order path entirely.
+  kpi_row?: string[]
+  // K-173 fase 1 — the resolved scope this response was computed under.
+  scope?: DashScope
+  // K-173 fase 2 — per-KPI-id drill descriptor (key mirrors the `kpis` key,
+  // e.g. `candidates_total`); an explicit `null` value means "no drill", so a
+  // tile renders without onClick rather than falling back silently.
+  drills?: Record<string, DashDrillDescriptor | null>
+  // K-173 fase 6 — recruitment_manager / sales_manager+accountmanager feeds.
+  recruiter_load?: RecruiterLoadRow[]
+  opp_aging?: OppAgingBucket[]
   [k: string]: unknown
 }

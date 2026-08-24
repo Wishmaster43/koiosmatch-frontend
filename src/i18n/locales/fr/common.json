@@ -472,7 +472,13 @@
   "notes": {
     "editedBy": "modifié par {{name}}",
     "allTypes": "Tous les types",
-    "allChannels": "Tous les canaux"
+    "allChannels": "Tous les canaux",
+    "restorePrevious": "Restaurer la version précédente",
+    "restoreConfirmTitle": "Restaurer la version précédente",
+    "restoreConfirm": "Restaurer la version du {{date}} ?",
+    "restoreConfirmNoDate": "Restaurer la version précédente ?",
+    "restoreNotice": "Restauré. Vous pouvez encore annuler cette action une fois.",
+    "restoreUnavailable": "Il n'y a pas de version précédente à restaurer."
   },
   "errors": {
     "koiosCreditExhausted": "Le crédit Koios de cette organisation est épuisé ou pas encore activé. Rechargez le solde ou contactez votre administrateur.",

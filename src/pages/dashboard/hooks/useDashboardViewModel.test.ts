@@ -301,3 +301,67 @@ describe('useDashboardViewModel · DASH-VOLGORDE-1 per-role KPI tile order', () 
     ])
   })
 })
+
+// K-173 fase 1/2/6 — scope, drills-driven KPI clicks, and the two new feed rows.
+describe('useDashboardViewModel · K-173 scope + drills + recruiter_load/opp_aging', () => {
+  it('passes dash.scope through verbatim, and null when absent (older server)', () => {
+    const withScope = renderHook(() => useDashboardViewModel(baseArgs({
+      dash: { scope: { role: 'recruitment', owner_dimension: 'own', unassigned_count: 3, includes_unassigned: true } },
+    }))).result
+    expect(withScope.current.scope).toEqual({ role: 'recruitment', owner_dimension: 'own', unassigned_count: 3, includes_unassigned: true })
+    const noScope = renderHook(() => useDashboardViewModel(baseArgs({ dash: {} }))).result
+    expect(noScope.current.scope).toBeNull()
+  })
+
+  it('a KPI tile navigates via its drill descriptor when dash.drills carries one', () => {
+    const onNavigate = vi.fn()
+    const { result } = renderHook(() => useDashboardViewModel(baseArgs({
+      // REAL server vocabulary (DashboardService::drills) — the translator turns
+      // it into the page's intent; raw params never pass through.
+      dash: { kpis: { stale_6m: 4 }, drills: { stale_6m: { entity: 'candidates', params: { stale_6m: 1, owner_id: 'u-1' } } } },
+      onNavigate,
+    })))
+    result.current.kpis.find(k => k.id === 'stale')?.onClick?.()
+    expect(onNavigate).toHaveBeenCalledWith('candidates', { attention: 'stale6m', owner: 'u-1' })
+  })
+
+  it('defaults recruiterLoadRows/oppAgingRows to [] when the feed is absent', () => {
+    const { result } = renderHook(() => useDashboardViewModel(baseArgs({ dash: {} })))
+    expect(result.current.recruiterLoadRows).toEqual([])
+    expect(result.current.oppAgingRows).toEqual([])
+  })
+
+  it('passes recruiter_load/opp_aging rows through unchanged, server order preserved', () => {
+    const { result } = renderHook(() => useDashboardViewModel(baseArgs({
+      activeType: 'recruitment_manager' as const,
+      dash: {
+        recruiter_load: [{ user_id: 'u2', name: 'Bram', open_tasks: 5, intakes_planned: 1, too_long_in_stage: 2 }],
+        opp_aging: [{ bucket: '0-7', count: 3 }, { bucket: '90+', count: 1 }],
+      },
+    })))
+    expect(result.current.recruiterLoadRows).toEqual([{ user_id: 'u2', name: 'Bram', open_tasks: 5, intakes_planned: 1, too_long_in_stage: 2 }])
+    expect(result.current.oppAgingRows).toEqual([{ bucket: '0-7', count: 3 }, { bucket: '90+', count: 1 }])
+  })
+})
+
+// K-173 kpi_row (714eae01): the server's viewer-effective ordered row IS the
+// live truth — blob hidden/order and the role template lose to it.
+describe('useDashboardViewModel · kpi_row is the one live source', () => {
+  it('renders exactly the kpi_row tiles, in server order, ignoring the blob', () => {
+    const { result } = renderHook(() => useDashboardViewModel(baseArgs({
+      activeType: 'admin' as const,
+      hiddenKpis: ['opps'],
+      dash: { kpis: { opps_total: 5, placements: 7, candidates_total: 3 }, kpi_row: ['placements', 'opps_total', 'candidates_total'] },
+    })))
+    // opps renders DESPITE the blob hiding it (server row wins), in server order.
+    expect(result.current.kpis.map(k => k.id)).toEqual(['placements', 'opps', 'candidates'])
+  })
+
+  it('module gates still apply on top of kpi_row — an absent module key never resurrects', () => {
+    const { result } = renderHook(() => useDashboardViewModel(baseArgs({
+      activeType: 'backoffice' as const,
+      dash: { kpis: {}, kpi_row: ['incomplete_runs', 'placements'] },
+    })))
+    expect(result.current.kpis.map(k => k.id)).toEqual(['placements'])
+  })
+})

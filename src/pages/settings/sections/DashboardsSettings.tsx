@@ -2,34 +2,48 @@
  * DashboardsSettings — Settings → Dashboards. Per dashboard_type you see the KPI row
  * and the charts/lists that role gets (from the dashboard config, templates.ts), and
  * you can switch any of them ON/OFF for that role. Everything is on by default; toggling
- * only hides. Persisted tenant-wide via the shared settings store (`dashboard_hidden`),
- * which the live dashboards read — no page reload needed. The live preview stays the
- * topbar switcher; the role→type coupling is managed under Roles.
+ * only hides. The role→type coupling is managed under Roles.
  *
- * DASH-SET-UI-1 (Danny "ziet er niet uit"): the original chip-brij (two mixed chip
- * styles, no visible on/off state, the raw `openVacancies` id leaking as a label) was
- * already replaced by the DASH-MATRIX-1/DASH-SUBTABS-1 matrix rework — verified against
- * git history, kept as-is here since it's Danny's more recent, explicit direction ("een
- * tabel of iets?"). This pass finishes what was still open on THIS file: each matrix now
- * sits in the shared SectionCard (§11 reuse, was hand-rolled), the toggle explicitly
- * mirrors ChipMultiSelect's chosen/unchosen convention (§4), loading/empty/success are
- * handled explicitly (§3), and the toggle→save request body is covered by a test (§13).
- * The `openVacancies` label-key fix itself lives in templates.ts (out of scope here,
- * confirmed already fixed there — KPI_LABEL_KEY.openVacancies → 'kpi.openVacancies',
- * present in all 5 locale files).
+ * K3-REFIT-1 (K-173 phase 4, LIVE): the KPI matrix + Volgorde tab now read/write the
+ * dedicated catalog endpoints instead of the generic settings blob —
+ *   - GET /dashboard/kpi-catalog → { available: [{key,label,counts,scope,drills_to}], defaults }
+ *     is the ONE source for the per-KPI uitleg line (the five local `dashboardsExplain`
+ *     copies are gone).
+ *   - GET/PUT /dashboard/kpis/{role} carries ONE ordered list per role: presence = on,
+ *     position = order, omission = hidden. This is now the write path for KPI
+ *     visibility/order; the old `dashboard_hidden`/`dashboard_kpi_order` settings keys
+ *     stay as a READ-ONLY fallback per role only while that role's new GET comes back
+ *     empty (migration window — remove the fallback once CMBE backfills every role).
+ * The BLOCKS matrix (charts/lists) has no equivalent catalog yet, so it keeps the
+ * original settings-blob path untouched.
+ *
+ * ROLE MAPPING: the new endpoints only know six roles — 'default', 'recruitment',
+ * 'recruitment_manager', 'accountmanager', 'sales_manager', 'backoffice' — while this
+ * screen's matrix has ten DASHBOARD_TYPES columns. Five DashboardType ids are exact
+ * string matches for a specific API role; every other type (admin, management, sales,
+ * planning, readonly) has no dedicated role in the contract, so it shares the literal
+ * 'default' row (brief: "de default-rol heet letterlijk 'default'"). Concretely: those
+ * five types' KPI on/off + order all point at the SAME server-side list — toggling one
+ * of them changes it for the others too. That is an intrinsic property of the six-role
+ * contract, not a bug introduced here; flag it to CMBE if that turns out unwanted.
  */
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { TFunction } from 'i18next'
 import { Shield, BarChart2, Users, ClipboardList, Target, UserCog, Building2, Clock, Eye, Check } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { useAllSettings, useSettingsLoaded, getJsonSetting, saveSettingsKeys } from '@/lib/settings/useAllSettings'
+import { useAuth } from '@/context/AuthContext'
 import SubTabBar from '@/components/drawer/SubTabBar'
 import SectionCard from '@/components/ui/SectionCard'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import { DragList } from '../components/SettingsControls'
 import { Caption, BodyText, GroupLabel, groupLabelStyle } from '@/components/ui/typography'
 import { tintBg, tintBorder, chipInk } from '@/lib/tint'
+import {
+  fetchDashboardKpiCatalog, fetchDashboardKpisRole, putDashboardKpisRole,
+  type DashboardKpiCatalogEntry,
+} from './dashboardsKpiApi'
 
 // The chosen-cell tint source — indirected like ChipMultiSelect's `tint` so the
 // accent token never appears as a raw background value in a component (§4).
@@ -50,7 +64,16 @@ const TYPE_ICON: Record<DashboardType, LucideIcon> = {
   planning: Clock, readonly: Eye,
 }
 
-// Shape of the persisted override: hidden KPI/block ids per dashboard type.
+// The six roles the new KPI-catalog endpoints know (K3-REFIT-1 header). Five match a
+// DashboardType string exactly; anything else falls back to the literal 'default' row.
+const SPECIFIC_API_ROLES = ['recruitment', 'recruitment_manager', 'accountmanager', 'sales_manager', 'backoffice'] as const
+const API_ROLES = ['default', ...SPECIFIC_API_ROLES] as const
+type ApiRole = typeof API_ROLES[number]
+const toApiRole = (type: DashboardType): ApiRole =>
+  (SPECIFIC_API_ROLES as readonly string[]).includes(type) ? (type as ApiRole) : 'default'
+
+// Shape of the persisted override: hidden KPI/block ids per dashboard type. Only
+// still used for BLOCKS (no catalog yet) and as the per-role KPI read fallback.
 type HiddenMap = Record<string, { kpis?: string[]; blocks?: string[] }>
 // Exported so the test asserts the exact save-request body (§13) without a
 // duplicated string literal — Dashboard.tsx (the live reader) keeps its own
@@ -59,9 +82,9 @@ export const DASHBOARD_HIDDEN_KEY = 'dashboard_hidden'
 const KEY = DASHBOARD_HIDDEN_KEY
 
 // DASH-VOLGORDE-1 — per-role KPI tile order, { [dashboardType]: string[] of kpi
-// ids }. Exported for the same reason as DASHBOARD_HIDDEN_KEY: the request-body
-// test asserts the exact key, and Dashboard.tsx (the live reader) keeps its own
-// literal (documented there).
+// ids }. Exported for the same reason as DASHBOARD_HIDDEN_KEY: kept as the
+// migration-window read fallback (see file header); Dashboard.tsx keeps its
+// own literal (documented there).
 export const DASHBOARD_KPI_ORDER_KEY = 'dashboard_kpi_order'
 type OrderMap = Record<string, string[]>
 
@@ -132,11 +155,13 @@ interface MatrixProps {
   onToggle: (type: string, kind: 'kpis' | 'blocks', id: string) => void
   t: TFunction
   td: TFunction
+  // K3-REFIT-1: catalog uitleg per KPI key (undefined while loading/unavailable).
+  catalogByKey: Record<string, DashboardKpiCatalogEntry> | null
 }
 
 // aria-label makes each matrix a named region (§6) — disambiguating it from the
 // identically-labelled sub-tab for assistive tech and the tests.
-function Matrix({ kind, rows, title, labelKey, isHidden, onToggle, t, td }: MatrixProps) {
+function Matrix({ kind, rows, title, labelKey, isHidden, onToggle, t, td, catalogByKey }: MatrixProps) {
   // Empty state (§3): defensive — `rows` comes from a static catalog (templates.ts) so
   // this is unreachable today, but a settings card must never silently render a blank
   // table if that ever changes.
@@ -175,6 +200,12 @@ function Matrix({ kind, rows, title, labelKey, isHidden, onToggle, t, td }: Matr
                           {/* Super views (admin/management) may switch dashboards live. */}
                           {canSwitchViews(type) && <span title={t('dashboardsCanSwitch')} style={{ color: 'var(--color-success-text)' }}> ●</span>}
                         </span>
+                        {/* Five types share the server's ONE 'default' KPI row —
+                            say so instead of letting a toggle surprise four
+                            sibling columns (Opus B6). */}
+                        {kind === 'kpis' && toApiRole(type) === 'default' && (
+                          <Caption style={{ fontSize: 10 }}>{t('dashboardsSharedDefault')}</Caption>
+                        )}
                       </div>
                     </th>
                   )
@@ -182,18 +213,19 @@ function Matrix({ kind, rows, title, labelKey, isHidden, onToggle, t, td }: Matr
               </tr>
             </thead>
             <tbody>
-              {rows.map(id => (
+              {rows.map(id => {
+                // K3-REFIT-1: the uitleg line now comes from the kpi-catalog (counts +
+                // drills_to), replacing the five local `dashboardsExplain.*` copies.
+                const catalogEntry = kind === 'kpis' ? catalogByKey?.[id] : undefined
+                return (
                 <tr key={id}>
                   <td style={stickyCell}>
                     {labelKey[id] ? td(labelKey[id]) : id}
-                    {/* DASH-VOLGORDE-1 (Danny "zorg dat via instellingen duidelijk is
-                        wat je aan het doen bent") — a self-explaining line per KPI row:
-                        what it counts + where a click on the live tile navigates. Only
-                        the KPI matrix has this catalogue (dashboardsExplain); blocks
-                        (charts/lists) have no click-through target to describe. */}
                     {kind === 'kpis' && (
                       <div style={{ fontSize: 10.5, color: 'var(--text-muted)', fontWeight: 400, whiteSpace: 'normal', marginTop: 2, maxWidth: 220 }}>
-                        {t(`dashboardsExplain.${id}.what`)} {t(`dashboardsExplain.${id}.goesTo`)}
+                        {catalogEntry
+                          ? `${catalogEntry.counts} ${t('dashboardsGoesTo', { target: catalogEntry.drills_to })}`
+                          : (catalogByKey === null ? t('dashboardsCatalogUnavailable') : null)}
                       </div>
                     )}
                   </td>
@@ -205,7 +237,8 @@ function Matrix({ kind, rows, title, labelKey, isHidden, onToggle, t, td }: Matr
                     )
                   })}
                 </tr>
-              ))}
+                )
+              })}
             </tbody>
           </table>
         </div>
@@ -217,8 +250,10 @@ function Matrix({ kind, rows, title, labelKey, isHidden, onToggle, t, td }: Matr
 export default function DashboardsSettings() {
   const { t } = useTranslation('settings')
   const { t: td } = useTranslation('dashboard')
+  const auth = useAuth()
 
   // Local mirror of the saved overrides; re-syncs when the settings blob changes.
+  // Still the source for BLOCKS (no catalog yet) and the KPI read-fallback (see header).
   const settings = useAllSettings()
   // Has the tenant blob resolved at least once? Without this, `saved` reads as `{}`
   // (nothing hidden) before the fetch lands — every toggle would flash ON, then some
@@ -233,15 +268,77 @@ export default function DashboardsSettings() {
   const [prevKey, setPrevKey] = useState(savedKey)
   if (savedKey !== prevKey) { setPrevKey(savedKey); setHidden(saved) }
 
-  // DASH-VOLGORDE-1 — same re-sync pattern as `hidden` above, for the per-role order.
+  // DASH-VOLGORDE-1 — same re-sync pattern as `hidden` above, for the per-role order
+  // (KPI read-fallback only now; BLOCKS have no order editor).
   const savedOrder = getJsonSetting<OrderMap>(settings, DASHBOARD_KPI_ORDER_KEY, {})
   const [order, setOrder] = useState<OrderMap>(savedOrder)
   const savedOrderKey = JSON.stringify(savedOrder)
   const [prevOrderKey, setPrevOrderKey] = useState(savedOrderKey)
   if (savedOrderKey !== prevOrderKey) { setPrevOrderKey(savedOrderKey); setOrder(savedOrder) }
 
+  // K3-REFIT-1 — the kpi-catalog (uitleg per key) and the six per-role ordered+visible
+  // lists from GET /dashboard/kpis/{role}. `null` = not loaded/unavailable yet; an
+  // empty array for a role (after a resolved fetch) is the migration-window signal to
+  // keep reading that role from the old settings blob (file header).
+  const [catalogByKey, setCatalogByKey] = useState<Record<string, DashboardKpiCatalogEntry> | null>(null)
+  const [roleKpis, setRoleKpis] = useState<Partial<Record<ApiRole, string[]>>>({})
+  const [roleKpisStatus, setRoleKpisStatus] = useState<Partial<Record<ApiRole, 'ok' | 'error'>>>({})
+  const mountedRef = useRef(true)
+  useEffect(() => {
+    // StrictMode re-arms this in setup, not cleanup-only (§9 mount-ref lesson).
+    mountedRef.current = true
+    const controller = new AbortController()
+    fetchDashboardKpiCatalog(controller.signal)
+      .then(catalog => {
+        if (!mountedRef.current) return
+        const byKey: Record<string, DashboardKpiCatalogEntry> = {}
+        catalog.available.forEach(entry => { byKey[entry.key] = entry })
+        setCatalogByKey(byKey)
+      })
+      .catch(() => { if (mountedRef.current) setCatalogByKey(null) })
+    API_ROLES.forEach(role => {
+      fetchDashboardKpisRole(role, controller.signal)
+        .then(kpis => {
+          if (!mountedRef.current) return
+          setRoleKpis(prev => ({ ...prev, [role]: kpis }))
+          setRoleKpisStatus(prev => ({ ...prev, [role]: 'ok' }))
+        })
+        .catch(() => {
+          if (!mountedRef.current) return
+          setRoleKpisStatus(prev => ({ ...prev, [role]: 'error' }))
+        })
+    })
+    return () => { mountedRef.current = false; controller.abort() }
+  }, [])
+
+  // A role is "migrated" the moment its GET resolved — an EMPTY list is a real
+  // configuration ("every tile off"), not a signal to fall back to the blob
+  // (Opus B4: the length check made the last toggle-off snap everything back on).
+  const isRoleMigrated = (role: ApiRole) => roleKpisStatus[role] === 'ok'
+
+  // A failed per-role PUT must be SEEN and undone — an optimistic list that
+  // silently survives a 403/422 shows a configuration the server never accepted
+  // (Opus B2). One error lane for both write paths below.
+  const [saveError, setSaveError] = useState(false)
+  const putRoleList = (apiRole: ApiRole, nextIds: string[]) => {
+    const previous = roleKpis[apiRole] ?? []
+    setSaveError(false)
+    setRoleKpis(prev => ({ ...prev, [apiRole]: nextIds }))
+    putDashboardKpisRole(apiRole, nextIds).catch(() => {
+      setRoleKpis(prev => ({ ...prev, [apiRole]: previous }))
+      setSaveError(true)
+    })
+  }
+
   // Persist a role's full KPI order (optimistic; the live dashboard reads the same key).
+  // KPIs on a migrated role now write straight to the new endpoint (K3-REFIT-1);
+  // everything else keeps the old settings-blob path (migration-window fallback).
   const saveOrder = (type: string, nextIds: string[]) => {
+    const apiRole = toApiRole(type as DashboardType)
+    if (isRoleMigrated(apiRole)) {
+      putRoleList(apiRole, nextIds)
+      return
+    }
     setOrder(prev => {
       const next = { ...prev, [type]: nextIds }
       saveSettingsKeys({ [DASHBOARD_KPI_ORDER_KEY]: next }).catch(() => {})
@@ -249,11 +346,27 @@ export default function DashboardsSettings() {
     })
   }
 
-  // Is this KPI/block switched off for the role?
-  const isHidden = (type: string, kind: 'kpis' | 'blocks', id: string) => (hidden[type]?.[kind] ?? []).includes(id)
+  // Is this KPI/block switched off for the role? KPIs on a migrated role read the
+  // new per-role list; blocks (and un-migrated KPI roles) read the old blob.
+  const isHidden = (type: string, kind: 'kpis' | 'blocks', id: string) => {
+    if (kind === 'kpis') {
+      const apiRole = toApiRole(type as DashboardType)
+      if (isRoleMigrated(apiRole)) return !(roleKpis[apiRole] ?? []).includes(id)
+    }
+    return (hidden[type]?.[kind] ?? []).includes(id)
+  }
 
   // Toggle one item on/off for a role and persist (optimistic; dashboards update live).
   const toggle = (type: string, kind: 'kpis' | 'blocks', id: string) => {
+    if (kind === 'kpis') {
+      const apiRole = toApiRole(type as DashboardType)
+      if (isRoleMigrated(apiRole)) {
+        const list = roleKpis[apiRole] ?? []
+        const next = list.includes(id) ? list.filter(x => x !== id) : [...list, id]
+        putRoleList(apiRole, next)
+        return
+      }
+    }
     setHidden(prev => {
       const forType = prev[type] ?? {}
       const list = forType[kind] ?? []
@@ -293,16 +406,22 @@ export default function DashboardsSettings() {
         onChange={(id) => setActiveTab(id as 'kpis' | 'blocks' | 'order')}
       />
 
+      {saveError && (
+        <p role="alert" style={{ margin: 0, fontSize: 12.5, color: 'var(--color-danger-text)' }}>{t('dashboardsSaveError')}</p>
+      )}
+
       {activeTab === 'kpis' && (
         <Matrix kind="kpis" rows={allKpis} title={t('dashboardsKpis')} labelKey={KPI_LABEL_KEY}
-          isHidden={isHidden} onToggle={toggle} t={t} td={td} />
+          isHidden={isHidden} onToggle={toggle} t={t} td={td} catalogByKey={catalogByKey} />
       )}
       {activeTab === 'blocks' && (
         <Matrix kind="blocks" rows={allBlocks} title={t('dashboardsBlocks')} labelKey={BLOCK_LABEL_KEY}
-          isHidden={isHidden} onToggle={toggle} t={t} td={td} />
+          isHidden={isHidden} onToggle={toggle} t={t} td={td} catalogByKey={catalogByKey} />
       )}
       {activeTab === 'order' && (
-        <OrderPanel isHidden={isHidden} order={order} onSaveOrder={saveOrder} t={t} td={td} />
+        <OrderPanel isHidden={isHidden} order={order} onSaveOrder={saveOrder} t={t} td={td}
+          roleKpis={roleKpis} isRoleMigrated={isRoleMigrated}
+          canPreviewOtherRole={Boolean(auth?.hasPermission?.('settings.update'))} />
       )}
     </div>
   )
@@ -316,19 +435,46 @@ interface OrderPanelProps {
   onSaveOrder: (type: string, nextIds: string[]) => void
   t: TFunction
   td: TFunction
+  roleKpis: Partial<Record<ApiRole, string[]>>
+  isRoleMigrated: (role: ApiRole) => boolean
+  // K3-REFIT-1 point 3: a `?preview_role=` deep link is only honoured for a viewer
+  // who holds settings.update — anyone else keeps the plain default-role preview.
+  canPreviewOtherRole: boolean
+}
+
+// Read an optional `?preview_role=` from the current URL — used only to preselect
+// the role tab below, gated on settings.update by the caller.
+const readPreviewRoleParam = (): string | null => {
+  if (typeof window === 'undefined') return null
+  return new URLSearchParams(window.location.search).get('preview_role')
 }
 
 // DASH-VOLGORDE-1 — one role at a time: pick a role (searchable, §3A no native
 // <select>), see a HONEST preview strip (labels + order, never real numbers,
 // §0 no fake affordances) and reorder via the shared DragList (arrows are the
 // required path, §6 keyboard; drag comes along for free from the same component).
-function OrderPanel({ isHidden, order, onSaveOrder, t, td }: OrderPanelProps) {
-  const [role, setRole] = useState<DashboardType>(DASHBOARD_TYPES[0])
+function OrderPanel({ isHidden, order, onSaveOrder, t, td, roleKpis, isRoleMigrated, canPreviewOtherRole }: OrderPanelProps) {
+  // K3-REFIT-1 point 3: preselect the role from ?preview_role= when the viewer may
+  // preview another role's settings and the param names a real DashboardType;
+  // otherwise fall back to the original default-first-type behaviour.
+  const previewParam = readPreviewRoleParam()
+  const initialRole = (canPreviewOtherRole && previewParam && (DASHBOARD_TYPES as readonly string[]).includes(previewParam))
+    ? (previewParam as DashboardType)
+    : DASHBOARD_TYPES[0]
+  const [role, setRole] = useState<DashboardType>(initialRole)
 
-  // Visible KPI ids for this role today (mirrors useDashboardViewModel's filter,
-  // minus the module/right gates that only the live dashboard can evaluate).
+  // Visible+ordered KPI ids for this role today: a migrated apiRole reads its new
+  // ordered list directly (already visible-only); otherwise the old blob path
+  // (hidden filter + resolveReportKpiOrder) exactly as before.
+  const apiRole = toApiRole(role)
+  const migrated = isRoleMigrated(apiRole)
   const visibleIds = (KPI_ROWS[role] ?? []).filter(id => !isHidden(role, 'kpis', id))
-  const { order: resolvedIds } = resolveReportKpiOrder(order[role], visibleIds, visibleIds)
+  // Migrated role: the FULL server list, unfiltered — omission means hidden, so
+  // PUTting a type-template subset would silently hide everything outside it
+  // (Opus B3: one arrow click on 'sales' hid four sibling types' tiles).
+  const resolvedIds = migrated
+    ? (roleKpis[apiRole] ?? [])
+    : resolveReportKpiOrder(order[role], visibleIds, visibleIds).order
   const items = resolvedIds.map((id, i) => ({ id: `${id}-${i}`, kpiId: id, index: i }))
 
   return (

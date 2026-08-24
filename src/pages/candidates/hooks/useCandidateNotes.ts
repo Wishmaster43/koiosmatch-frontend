@@ -106,6 +106,29 @@ export function useCandidateNotes(candidateId: string | number | undefined, opts
       .catch(() => { setNotes(snapshot); notifyError(t('common:actionFailed')); return false })
   }, [candidateId, notes, load, t])
 
+  // NOTE-UNDO-FE-1 (K-172): peek the one-slot undo — GET /candidates/{id}/notes/{note}/previous-version
+  // → { data: { previous_body, previous_saved_at } }, nulls when there is no slot yet.
+  const fetchPreviousVersion = useCallback((index: number) => {
+    if (!candidateId) return Promise.resolve(null)
+    const target = notes[index]
+    if (!target) return Promise.resolve(null)
+    return api.get(`/candidates/${candidateId}/notes/${target.id}/previous-version`)
+      .then(res => (res.data as { data?: { previous_body: string | null; previous_saved_at: string | null } })?.data ?? null)
+      .catch(() => null)
+  }, [candidateId, notes])
+
+  // NOTE-UNDO-FE-1 (K-172): execute the undo — POST /candidates/{id}/notes/{note}/restore-previous
+  // → the note in this family's own shape. A 422 (no slot / guard failed, mirrors update()'s
+  // own guards) resolves false so NotesTab degrades calmly instead of throwing.
+  const restorePreviousVersion = useCallback((index: number): Promise<boolean> => {
+    if (!candidateId) return Promise.resolve(false)
+    const target = notes[index]
+    if (!target) return Promise.resolve(false)
+    return api.post(`/candidates/${candidateId}/notes/${target.id}/restore-previous`)
+      .then(() => { load(); return true })
+      .catch(() => false)
+  }, [candidateId, notes, load])
+
   // Delete — optimistic remove with revert. NotesTab now has the gated delete
   // button (RECHTEN-DETAIL-1); the host still needs to pass this as onDeleteNote
   // (mirrors editUserNote's index-remapping past the filtered system notes) for
@@ -120,5 +143,5 @@ export function useCandidateNotes(candidateId: string | number | undefined, opts
       .catch(() => { setNotes(snapshot); notifyError(t('common:actionFailed')) })
   }, [candidateId, notes, t])
 
-  return { notes, loaded, error, addNote, editNote, deleteNote, reload: load }
+  return { notes, loaded, error, addNote, editNote, deleteNote, reload: load, fetchPreviousVersion, restorePreviousVersion }
 }

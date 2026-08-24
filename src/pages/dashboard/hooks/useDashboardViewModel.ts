@@ -12,6 +12,7 @@ import type { BarSeries } from '@/components/charts/WeeklyBarChartCard'
 import type { DashStats, DashOpp, DashData, TimeseriesPoint, TrendRow } from '@/types/dashboard'
 import type { LookupItem } from '@/context/LookupsContext'
 import { buildDashboardKpis, type DashboardKpi } from '../dashboardKpis'
+import { serverKeysToLocal } from '../kpiKeyMap'
 import { visibleBlock, kpiRow } from '../templates'
 import type { DashboardType } from '../templates'
 import { humanize, fmtWhen, eur } from '../dashboardFormat'
@@ -190,8 +191,10 @@ export function useDashboardViewModel({
   const kpis = dash?.kpis ?? {}
 
   // KPI blocks come from the pure builder (§0.3 size split); KPI_ROWS picks per role.
+  // K-173 fase 2 — dash.drills flows straight through so each tile can resolve its
+  // own onClick against the server's exact list filters (see buildDashboardKpis).
   const kpiById = buildDashboardKpis({
-    t, kpis, num, eur, opp, valueInHours, onNavigate,
+    t, kpis, drills: dash?.drills, num, eur, opp, valueInHours, onNavigate,
   })
   // MODULE-gated tiles render NOTHING when their server key is ABSENT: K-168
   // only omits a key when the tenant lacks the module behind it (workflows /
@@ -205,27 +208,47 @@ export function useDashboardViewModel({
     occupancy: 'occupancy',
   }
   // Every role ALWAYS gets its own full KPI row (never hidden), just possibly reordered.
-  const visibleKpiIds = kpiRow(activeType)
-    .filter(id => !hiddenKpis.includes(id))
+  // K-173 kpi_row (714eae01): when the server sends the viewer-effective ordered
+  // row (server keys; presence = visible, position = order — fed by Settings →
+  // Dashboards through PUT /dashboard/kpis/{role}), THAT is the one truth: the
+  // settings-blob hidden/order path only serves older servers without it. The
+  // module gates still apply on top — a stored row must never resurrect a tile
+  // whose module key is absent.
+  const serverRow = dash?.kpi_row ? serverKeysToLocal(dash.kpi_row) : null
+  const baseKpiIds = serverRow ?? kpiRow(activeType).filter(id => !hiddenKpis.includes(id))
+  const visibleKpiIds = baseKpiIds
     // Open-diensten is a Planning-module KPI — hide it when the tenant lacks the module.
     .filter(id => id !== 'openShifts' || hasPlanning)
     .filter(id => !(id in REQUIRES_KPI_KEY) || REQUIRES_KPI_KEY[id] in kpis)
-  // DASH-VOLGORDE-1 — apply the role's stored tile order on top of the visible set;
-  // catalogue AND default are the visible ids themselves, so the resolver only ever
-  // reorders what is currently shown (a hidden/removed id just falls out silently).
-  const { order: orderedKpiIds } = resolveReportKpiOrder(kpiOrder[activeType], visibleKpiIds, visibleKpiIds)
+  // DASH-VOLGORDE-1 — legacy path only: apply the blob's stored order on top of
+  // the visible set (the server row is already ordered).
+  const { order: orderedKpiIds } = serverRow
+    ? { order: visibleKpiIds }
+    : resolveReportKpiOrder(kpiOrder[activeType], visibleKpiIds, visibleKpiIds)
   const kpiCards: DashboardKpi[] = orderedKpiIds.map(id => kpiById[id]).filter(Boolean)
 
   // Shifts block values (K-168 module keys) — handed out here so the page has
   // ONE read path for server KPI values (§3: logic in hooks, not in JSX).
   const shifts = { open: kpis.open_shifts ?? null, occupancy: kpis.occupancy ?? null }
 
+  // K-173 fase 1 — the resolved scope, passed through verbatim; the badge/footnote
+  // render only when it is present (older server = no badge, never a fake one).
+  const scope = dash?.scope ?? null
+
+  // K-173 fase 6 — recruitment_manager team-load rows, aflopend zoals geleverd
+  // (server already sorts; no client re-sort so its order stays authoritative).
+  const recruiterLoadRows = dash?.recruiter_load ?? []
+  // K-173 fase 6 — sales_manager/accountmanager opportunity-ageing buckets.
+  const oppAgingRows = dash?.opp_aging ?? []
+
   return {
     vis, statusData, recruiterData, funnelData, oppStageData,
     recentCandidates, recentApplications, recentLeads, runs, conversations,
-    showRuns, showConv, trendData, trendSeries, shifts, kpis: kpiCards,
+    showRuns, showConv, trendData, trendSeries, shifts, kpis: kpiCards, scope,
     // KD11 widget feeds (DASHP36).
     expiringMatchesRows, staleVacanciesRows, koiosSuggestionsRows, customersByOwnerRows,
+    // K-173 fase 6 feeds.
+    recruiterLoadRows, oppAgingRows,
   }
 }
 

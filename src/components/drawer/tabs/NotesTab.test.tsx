@@ -746,3 +746,61 @@ describe('NotesTab · durable concept (K-161)', () => {
   })
 })
 
+/**
+ * NOTE-UNDO-FE-1 (K-172): the shared "restore previous version" action — this
+ * suite is entity-agnostic (NotesTab itself), the family-specific REQUEST shape
+ * (method/route) is pinned separately on the candidates + customers hooks.
+ */
+describe('NotesTab · restore previous version (NOTE-UNDO-FE-1)', () => {
+  const undoLabels = { ...labels, restorePrevious: 'Vorige versie terug', restoreConfirmTitle: 'Vorige versie terugzetten' }
+
+  it('renders no action at all when has_previous_version is false, even with both callbacks wired', () => {
+    render(<NotesTab notes={[note({ has_previous_version: false })]} labels={undoLabels}
+      onFetchPreviousVersion={vi.fn()} onRestorePreviousNote={vi.fn()} showTimeline={false} showConversations={false} />)
+    expect(screen.queryByTitle('Vorige versie terug')).toBeNull()
+  })
+
+  it('renders no action when the host has not wired the restore callbacks (no fake affordance)', () => {
+    render(<NotesTab notes={[note({ has_previous_version: true })]} labels={undoLabels}
+      showTimeline={false} showConversations={false} />)
+    expect(screen.queryByTitle('Vorige versie terug')).toBeNull()
+  })
+
+  it('peeks the previous version, shows a confirm dialog with the previous text via SafeHtml, and restores on confirm', async () => {
+    const user = userEvent.setup()
+    const onFetchPreviousVersion = vi.fn().mockResolvedValue({ previous_body: '<p>Oude tekst</p>', previous_saved_at: '2026-08-20T10:00:00Z' })
+    const onRestorePreviousNote = vi.fn().mockResolvedValue(true)
+    render(<NotesTab notes={[note({ has_previous_version: true })]} labels={undoLabels}
+      onFetchPreviousVersion={onFetchPreviousVersion} onRestorePreviousNote={onRestorePreviousNote}
+      showTimeline={false} showConversations={false} />)
+
+    await user.click(screen.getByTitle('Vorige versie terug'))
+    expect(onFetchPreviousVersion).toHaveBeenCalledWith(0)
+    // The preview renders the PREVIOUS body (raw HTML stripped by SafeHtml's own
+    // sanitizer, never dangerouslySetInnerHTML'd straight from the response).
+    await waitFor(() => expect(screen.getByText('Oude tekst')).toBeInTheDocument())
+    expect(screen.getByText('Vorige versie terugzetten')).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'confirm' }))
+    expect(onRestorePreviousNote).toHaveBeenCalledWith(0)
+  })
+
+  it('degrades calmly (an info toast, no red error) when the peek finds no slot (422)', async () => {
+    const user = userEvent.setup()
+    const onFetchPreviousVersion = vi.fn().mockResolvedValue(null)
+    const onRestorePreviousNote = vi.fn()
+    const toasts: Array<{ type: string; message: string }> = []
+    const onToast = (e: Event) => toasts.push((e as CustomEvent).detail)
+    window.addEventListener('km:toast', onToast)
+    render(<NotesTab notes={[note({ has_previous_version: true })]} labels={undoLabels}
+      onFetchPreviousVersion={onFetchPreviousVersion} onRestorePreviousNote={onRestorePreviousNote}
+      showTimeline={false} showConversations={false} />)
+
+    await user.click(screen.getByTitle('Vorige versie terug'))
+    await waitFor(() => expect(toasts.length).toBeGreaterThan(0))
+    expect(toasts[0].type).toBe('info')
+    expect(onRestorePreviousNote).not.toHaveBeenCalled()
+    window.removeEventListener('km:toast', onToast)
+  })
+})
+

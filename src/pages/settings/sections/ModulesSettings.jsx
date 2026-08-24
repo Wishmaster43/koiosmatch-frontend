@@ -23,6 +23,7 @@ import SaveButton from '@/components/ui/SaveButton'
 import { GroupLabel } from '@/components/ui/typography'
 import PlatformPricingCard from './PlatformPricingCard'
 import BillingBudgetsCard from './BillingBudgetsCard'
+import BillingUsersCard from './BillingUsersCard'
 
 // Base tiers (the "size bar"). `desc` lists what each tier adds over the previous one.
 const TIERS = [
@@ -138,6 +139,7 @@ export default function ModulesSettings() {
           { id: 'pricing', label: t('modules.tabs.pricing') },
           { id: 'budgets', label: t('modules.tabs.budgets') },
           { id: 'package', label: t('modules.tabs.package') },
+          { id: 'users', label: t('modules.tabs.users') },
         ]} />
       </div>
 
@@ -147,6 +149,10 @@ export default function ModulesSettings() {
 
       {/* CREDITS-2-FE deel 2 — package + per-tenant monthly budgets (Danny: "vul beiden en toon ze hier"). */}
       {subTab === 'budgets' && <BillingBudgetsCard />}
+
+      {/* MODULES-USERS-SUBTAB-1 (K-167/K-175) — per-package included users + extra
+          user price, plus the live per-tenant seat table. */}
+      {subTab === 'users' && <BillingUsersCard />}
 
       {subTab === 'package' && (<>
       {/* Base package (one of three) */}

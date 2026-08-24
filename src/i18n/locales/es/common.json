@@ -472,7 +472,13 @@
   "notes": {
     "editedBy": "editado por {{name}}",
     "allTypes": "Todos los tipos",
-    "allChannels": "Todos los canales"
+    "allChannels": "Todos los canales",
+    "restorePrevious": "Restaurar versión anterior",
+    "restoreConfirmTitle": "Restaurar versión anterior",
+    "restoreConfirm": "¿Restaurar la versión del {{date}}?",
+    "restoreConfirmNoDate": "¿Restaurar la versión anterior?",
+    "restoreNotice": "Restaurado. Puedes deshacer esto una vez más.",
+    "restoreUnavailable": "No hay una versión anterior para restaurar."
   },
   "errors": {
     "koiosCreditExhausted": "El crédito de Koios de esta organización se ha agotado o aún no está activado. Recarga el saldo o contacta con tu administrador.",

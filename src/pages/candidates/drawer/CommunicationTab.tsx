@@ -59,7 +59,7 @@ export default function CommunicationTab({ c, onSave, onEditStatusEvent, initial
   // Contact channels (last_contact_types) — picking one on a note stamps last_contact_at/_type/_by.
   const { types: channels } = useLastContactTypes()
   // Notes persist via the API (G-1) — add/edit/delete hit /candidates/{id}/notes.
-  const { notes, error: notesError, addNote, editNote, deleteNote, reload: reloadNotes } = useCandidateNotes(c.id, { onContactStamped: () => onRefresh?.(c.id) })
+  const { notes, error: notesError, addNote, editNote, deleteNote, reload: reloadNotes, fetchPreviousVersion, restorePreviousVersion } = useCandidateNotes(c.id, { onContactStamped: () => onRefresh?.(c.id) })
 
   // SYSTEM notes (status/phase changes, BE-written) are EVENTS, not notes (Danny
   // 2026-07-13): they render in the Tijdlijn, never in the Notities thread. Keep the
@@ -73,6 +73,9 @@ export default function CommunicationTab({ c, onSave, onEditStatusEvent, initial
   // RECHTEN-NOTES-1: same filtered-index remap as edit — NotesTab hands the USER-list
   // index, the hook wants the full-thread index.
   const deleteUserNote = (fi: number) => deleteNote(userNotes[fi].__idx)
+  // NOTE-UNDO-FE-1: same filtered-index remap as edit/delete above.
+  const fetchUserPreviousVersion = (fi: number) => fetchPreviousVersion(userNotes[fi].__idx)
+  const restoreUserPreviousVersion = (fi: number) => restorePreviousVersion(userNotes[fi].__idx)
   // Active sub-tab — notes is the daily surface, consent/tasks/timeline one click away.
   // Deep-link default: an unknown/stale target falls back to Notities rather than
   // blanking the tab — this component is the sub-tab validator.
@@ -196,6 +199,7 @@ export default function CommunicationTab({ c, onSave, onEditStatusEvent, initial
     // CONCEPT-NOTE-2: durable concepts live per candidate dossier.
     draftEntity: { type: 'candidate' as const, id: String(c.id) },
     notes: userNotes, onAddNote: addNote, onEditNote: editUserNote, onDeleteNote: deleteUserNote,
+    onFetchPreviousVersion: fetchUserPreviousVersion, onRestorePreviousNote: restoreUserPreviousVersion,
     timeline: mergedTimeline, systemNotes,
     noteTypes: writableTypes, chipTypes: allNoteTypes, channels, authorInitials: c.ownerInitials, timelineName: c.name,
     timelineInitials: c.initials,
@@ -231,6 +235,9 @@ export default function CommunicationTab({ c, onSave, onEditStatusEvent, initial
       openChangelog: t('drawer.changelog'),
       editStatusEvent: t('drawer.editStatusReason'),
       searchPlaceholder: t('communication.searchPlaceholder'),
+      // NOTE-UNDO-FE-1 (K-172) — shared common:notes.* namespace, see NotesTab.
+      restorePrevious: t('common:notes.restorePrevious'),
+      restoreConfirmTitle: t('common:notes.restoreConfirmTitle'),
     },
   }
 

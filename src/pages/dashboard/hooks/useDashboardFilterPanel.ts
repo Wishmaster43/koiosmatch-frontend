@@ -8,6 +8,7 @@
 import { useEffect, useMemo } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import { useRightPanel } from '@/context/RightPanelContext'
+import { useBranchOptions } from '@/lib/useBranchOptions'
 import type { DashData } from '@/types/dashboard'
 
 // Period filter slugs — stable values sent to the backend as `period`. Labels are
@@ -29,13 +30,16 @@ export function useDashboardFilterPanel({
   // Translate the stable period slugs into labels here (hook scope has t()).
   const periodOptions = useMemo(() =>
     PERIOD_VALUES.map(value => ({ value, label: t(`filters.period.${value}`) })), [t])
+  // K-173 fase 3 — branch options come from the shared useBranchOptions hook (the
+  // user's own scope, incl. the 'none' unassigned sentinel), never dash.filters.locations.
+  const branchOptions = useBranchOptions()
 
   const filterGroups = useMemo(() => [
     { key: 'periode', label: t('filters.periodLabel'), selected: selPeriode,
       options: periodOptions,
       onToggle: (v: string) => setSelPeriode(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]) },
     { key: 'vestiging', label: t('filters.locationLabel'), selected: selVestiging,
-      options: (dash?.filters?.locations ?? []).map(l => ({ value: l.id, label: l.name })),
+      options: branchOptions,
       onToggle: (v: string | number) => setSelVestiging(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]) },
     { key: 'kandidaatstatus', label: t('filters.statusLabel'), selected: selStatus,
       options: (dash?.filters?.statuses ?? []).map(s => ({ value: s.value, label: s.label })),
@@ -43,7 +47,7 @@ export function useDashboardFilterPanel({
     // Setters are stable (useState identity) but are now received as params rather than
     // declared locally, so React's exhaustive-deps can no longer infer that — list them
     // explicitly; harmless since their identity never changes across renders.
-  ], [selPeriode, selVestiging, selStatus, dash, periodOptions, t, setSelPeriode, setSelVestiging, setSelStatus])
+  ], [selPeriode, selVestiging, selStatus, dash, periodOptions, branchOptions, t, setSelPeriode, setSelVestiging, setSelStatus])
 
   // Register this page's filter groups with the shared right panel; clean up on unmount.
   const { registerFilters, unregisterFilters } = useRightPanel()

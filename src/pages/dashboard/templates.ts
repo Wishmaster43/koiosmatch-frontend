@@ -70,8 +70,9 @@ export const DASHBOARD_TEMPLATES: Record<DashboardType, string[]> = {
   // (expiring_matches/stale_vacancies/koios_suggestions), equal footprint via the
   // shared WidgetListBlock (config-driven, §3A). `sales_manager` additionally
   // gets the tenant-wide `customers_by_owner` breakdown.
-  accountmanager: ['chart.oppStage', 'chart.status', 'list.leads', 'block.expiringMatches', 'block.staleVacancies', 'block.koiosSuggestions'],
-  sales_manager:  ['chart.oppStage', 'chart.status', 'list.leads', 'block.expiringMatches', 'block.staleVacancies', 'block.koiosSuggestions', 'block.customersByOwner'],
+  // K-173 fase 6 — block.oppAging (ageing buckets) on both sales views.
+  accountmanager: ['chart.oppStage', 'chart.status', 'list.leads', 'block.expiringMatches', 'block.staleVacancies', 'block.koiosSuggestions', 'block.oppAging'],
+  sales_manager:  ['chart.oppStage', 'chart.status', 'list.leads', 'block.expiringMatches', 'block.staleVacancies', 'block.koiosSuggestions', 'block.customersByOwner', 'block.oppAging'],
   planning: ['block.shifts', 'chart.weekly', 'list.runs', 'list.conversations'],
   readonly: ['chart.status', 'chart.funnel'],
 }
@@ -108,6 +109,9 @@ export const BLOCK_LABEL_KEY: Record<string, string> = {
   'block.expiringMatches': 'block.expiringMatches',
   'block.staleVacancies': 'block.staleVacancies', 'block.koiosSuggestions': 'block.koiosSuggestions',
   'block.customersByOwner': 'block.customersByOwner',
+  // K-173 fase 6 — recruitment_manager team load + sales ageing buckets.
+  'block.recruiterLoad': 'block.recruiterLoad',
+  'block.oppAging': 'block.oppAging',
 }
 
 // Is a chart/list block visible for the active dashboard type?

@@ -1,9 +1,13 @@
 /**
- * useDashboardFilterState — topbar filter selections (period/location/status) and the
- * single-value params sent to the backend. UI-only state; extracted from Dashboard.tsx
- * (§0.3 size split) so `useDashboardData` can consume `dashFilterParams` while the
- * options/registration (right-panel UI) live in `useDashboardFilterPanel`. Behaviour
- * identical to the original inline state.
+ * useDashboardFilterState — topbar filter selections (period/branch/status) and the
+ * params sent to the backend. UI-only state; extracted from Dashboard.tsx (§0.3 size
+ * split) so `useDashboardData` can consume `dashFilterParams` while the options/
+ * registration (right-panel UI) live in `useDashboardFilterPanel`.
+ *
+ * K-173 fase 3 — the branch filter went MULTI and switched to `branch_id[]` (the
+ * VESTIGING-2 convention shared with customers/candidates, incl. the NO_BRANCH_VALUE
+ * 'none' sentinel for unassigned rows) — legacy single-value `location_id` is gone
+ * from the call entirely, never sent alongside the new param.
  */
 import { useMemo, useState } from 'react'
 
@@ -11,12 +15,12 @@ export function useDashboardFilterState() {
   const [selPeriode,   setSelPeriode]   = useState<string[]>([])
   const [selVestiging, setSelVestiging] = useState<Array<string | number>>([])
   const [selStatus,    setSelStatus]    = useState<string[]>([])
-  // Single-value filters (server-side one value per dimension) sent as query params.
+  // Period/status stay single-value server-side; branch is now a real multi-select.
   const dashFilterParams = useMemo(() => {
     const params: Record<string, unknown> = {}
-    if (selPeriode[0])   params.period = selPeriode[0]
-    if (selStatus[0])    params.status = selStatus[0]
-    if (selVestiging[0]) params.location_id = selVestiging[0]
+    if (selPeriode[0])      params.period = selPeriode[0]
+    if (selStatus[0])       params.status = selStatus[0]
+    if (selVestiging.length) params.branch_id = selVestiging
     return params
   }, [selPeriode, selStatus, selVestiging])
 

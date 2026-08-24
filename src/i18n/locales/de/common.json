@@ -472,7 +472,13 @@
   "notes": {
     "editedBy": "bearbeitet von {{name}}",
     "allTypes": "Alle Typen",
-    "allChannels": "Alle Kanäle"
+    "allChannels": "Alle Kanäle",
+    "restorePrevious": "Vorherige Version wiederherstellen",
+    "restoreConfirmTitle": "Vorherige Version wiederherstellen",
+    "restoreConfirm": "Die Version vom {{date}} wiederherstellen?",
+    "restoreConfirmNoDate": "Die vorherige Version wiederherstellen?",
+    "restoreNotice": "Wiederhergestellt. Du kannst dies noch einmal rückgängig machen.",
+    "restoreUnavailable": "Es gibt keine vorherige Version zum Wiederherstellen."
   },
   "errors": {
     "koiosCreditExhausted": "Das Koios-Guthaben dieser Organisation ist aufgebraucht oder noch nicht aktiviert. Bitte aufladen oder den Administrator kontaktieren.",

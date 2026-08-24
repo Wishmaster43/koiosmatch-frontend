@@ -224,18 +224,41 @@ export interface BillingBudgetEntry {
   ai_token_budget?: number
   workflow_credit_budget?: number
   value?: BillingBudgetValue
+  // PRIJSMODEL-B (K-167/K-175, LIVE per worker brief 24-08): included users in
+  // the package + the price per user above that, in EUR cents (never euros —
+  // the field name says cents, keep it that unit end to end).
+  included_users?: number
+  extra_user_price_cents?: number
+}
+// K-175 — per-tenant seat snapshot, additive on the same GET (worker brief
+// 24-08, cited verbatim: "tenant_users: {<tenant_id>: {package, active_users}}").
+// No generated 2xx schema exists yet for this route (CLAUDE.md §10) so this is
+// hand-written from the brief, same convention as the rest of this file.
+export interface BillingTenantUsers {
+  package?: BillingPackageKey
+  active_users?: number
 }
 export interface AdminBillingBudgetsResponse {
   packages: Record<BillingPackageKey, BillingBudgetEntry>
   // Per-tenant override — an entry present here replaces its package default;
   // absence (or a PUT with null fields) falls back to the package budget.
   tenants: Record<string, BillingBudgetEntry>
+  // K-175 — the live per-tenant seat counts driving the users sub-tab table.
+  tenant_users?: Record<string, BillingTenantUsers>
   resets_at?: string
 }
 // PUT body — either block is optional so a package-only or tenant-only save
 // never has to resend the other; a null field on a tenant entry clears that
 // one override field back to the package default (never the whole entry).
 export interface AdminBillingBudgetsUpdate {
-  packages?: Partial<Record<BillingPackageKey, { ai_token_budget?: number; workflow_credit_budget?: number }>>
-  tenants?: Record<string, { ai_token_budget?: number | null; workflow_credit_budget?: number | null }>
+  packages?: Partial<Record<BillingPackageKey, {
+    ai_token_budget?: number; workflow_credit_budget?: number
+    // null = clear to "no package value" (unlimited) — the controller writes
+    // per-knob (array_key_exists), so an omitted knob stays untouched.
+    included_users?: number | null; extra_user_price_cents?: number | null
+  }>>
+  tenants?: Record<string, {
+    ai_token_budget?: number | null; workflow_credit_budget?: number | null
+    included_users?: number | null; extra_user_price_cents?: number | null
+  }>
 }

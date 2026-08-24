@@ -67,7 +67,7 @@ import { useTranslation } from 'react-i18next'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 import DrawerFilterMenu from '@/components/drawer/DrawerFilterMenu'
 import type { DrawerFilterConfig } from '@/components/drawer/DrawerFilterMenu'
-import { Edit2, ExternalLink, History, Search, Trash2 } from 'lucide-react'
+import { Edit2, ExternalLink, History, RotateCcw, Search, Trash2 } from 'lucide-react'
 import Avatar from '@/components/ui/Avatar'
 import EventTimeline from '@/components/ui/EventTimeline'
 import type { TimelineEvent as TimelineEventInput } from '@/components/ui/EventTimeline'
@@ -87,6 +87,7 @@ import NoteComposer from './notes/NoteComposer'
 import type { NoteDraft } from '@/hooks/useNotesPopout'
 import { getNoteDraft, putNoteDraft, deleteNoteDraft } from './notes/noteDraftApi'
 import { NoteTypeChip, NoteChannelChip } from './notes/NoteChips'
+import { useNoteRestorePrevious } from './notes/useNoteRestorePrevious'
 // Rights + system-note rule — the SAME module the per-note popout window applies
 // (noteRights, §11: one rule, two surfaces — they must never disagree).
 import { canManageNote as canManageNoteRule, isSystemNote } from './notes/noteRights'
@@ -108,7 +109,12 @@ export interface NoteType { value: string; label: string; color?: string }
 // implement the rights model — undefined (key absent) vs. explicit null are DIFFERENT
 // states, see the RIGHTS comment above. `language` (NOTE-TAAL-1): the note's own
 // spellcheck/output language, optional — null/absent = tenant default.
-export interface NoteItem { type?: string; channel?: string; title?: string; author?: string; author_name?: string; author_id?: string | number | null; created_by?: string | { name?: string }; updated_by?: string | { name?: string }; edited_by?: string; text?: string; body?: string; ago?: string; created_at?: string; updated_at?: string; language?: string; [k: string]: unknown }
+// has_previous_version (NOTE-UNDO-FE-1, K-172): true once the note carries an
+// undo slot (one previous body, filled by the update that most recently
+// overwrote it) — drives the row's "restore previous version" action below.
+export interface NoteItem { type?: string; channel?: string; title?: string; author?: string; author_name?: string; author_id?: string | number | null; created_by?: string | { name?: string }; updated_by?: string | { name?: string }; edited_by?: string; text?: string; body?: string; ago?: string; created_at?: string; updated_at?: string; language?: string; has_previous_version?: boolean; [k: string]: unknown }
+// K-172: the previous-version peek — nulls when the note has no undo slot yet.
+export interface NotePreviousVersion { previous_body: string | null; previous_saved_at: string | null }
 interface TimelineItem { time?: string; created_at?: string; text?: string; description?: string; [k: string]: unknown }
 export interface NotesLabels {
   notes?: ReactNode; newNote?: ReactNode; type?: ReactNode; channel?: ReactNode; channelNone?: ReactNode; save?: string; cancel?: string; edit?: string; openChangelog?: string
@@ -132,6 +138,12 @@ export interface NotesLabels {
   // existing `common:error.retry` key, mirrors MatchContractSection).
   loadError?: ReactNode
   retry?: ReactNode
+  // Restore-previous-version affordance (NOTE-UNDO-FE-1, K-172). Icon title/
+  // aria-label + the confirm dialog's title; the message itself is built here
+  // from the shared `common:notes.*` keys (previous_saved_at formatting needs
+  // useDateFormat, which only this component has).
+  restorePrevious?: string
+  restoreConfirmTitle?: string
 }
 // NOTE-TAAL-1: `language` rides along on save/edit — optional, undefined means
 // "let the backend default to the tenant language" (never force a value the
@@ -169,6 +181,18 @@ interface NotesTabProps {
   // affordance (§3). RECHTEN-DETAIL-1 gating (see canManageNote) applies to it
   // exactly like the edit pencil.
   onDeleteNote?: (i: number) => void
+  // NOTE-UNDO-FE-1 (K-172): peek the one-slot undo (GET previous-version) and
+  // execute it (POST restore-previous). Both key off the note's index in the
+  // FULL `notes` array, mirroring onEditNote/onDeleteNote — the host resolves
+  // the note's own id from that index the same way it already does for edit/
+  // delete. Omitted (a host that hasn't wired the family's routes yet) → no
+  // action renders at all, no fake affordance (§3), regardless of
+  // has_previous_version on any note.
+  onFetchPreviousVersion?: (i: number) => Promise<NotePreviousVersion | null>
+  // Resolves true once the restore actually landed (mirrors editNote's return
+  // contract) — the caller re-fetches/reconciles the note in its own family
+  // shape; this tab never assumes the response shape itself.
+  onRestorePreviousNote?: (i: number) => Promise<boolean>
   // Permission key checked when a note isn't the current user's own (RECHTEN-
   // DETAIL-1). Defaults to the one manage-all permission that exists today
   // (candidates); a future entity that ships its own author_id + rights model
@@ -224,6 +248,7 @@ export default function NotesTab({
   draftEntity,
   notes = [], systemNotes = [], timeline = [], noteTypes = [], chipTypes, channels = [], labels = {}, editorLabels,
   authorInitials, timelineName, onAddNote, onEditNote, onDeleteNote,
+  onFetchPreviousVersion, onRestorePreviousNote,
   managePermission = 'candidates.notes.manage_all',
   showNotes = true, showTimeline = true, showConversations = true, onEditStatusEvent, renderTimelineContent,
   error, onRetry, composerExtra, popout,
@@ -400,6 +425,15 @@ export default function NotesTab({
   }
   // Delete — staged behind the shared confirm dialog; index mirrors openEdit/onEditNote.
   const requestDelete = (i: number) => confirm(labels.deleteConfirm ?? '', () => onDeleteNote?.(i), { danger: true })
+
+  // NOTE-UNDO-FE-1 (K-172): peek + stage the restore — logic lives in the
+  // extracted hook (§3, this file's own 400-line split trigger) so this stays a
+  // thin renderer; the preview panel is still built HERE via SafeHtml.
+  const { restoringIdx, requestRestorePrevious } = useNoteRestorePrevious({
+    onFetchPreviousVersion, onRestorePreviousNote, confirm, formatDate, t,
+    restoreConfirmTitle: labels.restoreConfirmTitle,
+    renderPreview: html => <SafeHtml style={{ fontSize: 12, color: 'var(--text-muted)', display: 'block', marginTop: 4 }} html={html} />,
+  })
 
   // Note-type chip: resolves value→label against ALL types (chipTypes) — the
   // composer list excludes system types, which made the chip fall back to the
@@ -606,6 +640,20 @@ export default function NotesTab({
                           color: 'var(--text-muted)', padding: '0 0 0 6px', display: 'flex' }}>
                         <ExternalLink size={13} />
                       </button>
+                    )}
+                    {/* NOTE-UNDO-FE-1 (K-172): fourth icon of the same borderless
+                        muted group — only where the host wired the family's
+                        undo routes AND this exact note carries a filled slot. */}
+                    {onFetchPreviousVersion && onRestorePreviousNote && n.has_previous_version && canManageNote(n) && (
+                      // Shared Button (ghost, iconOnly) — new debt never re-uses the
+                      // sibling icons' pre-existing raw-button exception (HUISSTIJL-1
+                      // ceiling: a fresh eslint-disable here would raise the file's
+                      // frozen count, which the gate refuses without --force).
+                      <Button variant="ghost" iconOnly size="sm" onClick={() => requestRestorePrevious(i)} disabled={restoringIdx === i}
+                        title={labels.restorePrevious} aria-label={labels.restorePrevious ?? ''}
+                        style={{ marginLeft: 6, flexShrink: 0 }}>
+                        <RotateCcw size={13} />
+                      </Button>
                     )}
                   </div>
                   <SafeHtml style={{ fontSize: 12, color: 'var(--text)', lineHeight: 1.5 }} html={n.text ?? n.body ?? ''} />

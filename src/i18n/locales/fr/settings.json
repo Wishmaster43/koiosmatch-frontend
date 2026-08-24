@@ -1525,7 +1525,8 @@
     "tabs": {
       "pricing": "Tarifs de la plateforme",
       "budgets": "Budgets mensuels",
-      "package": "Forfait"
+      "package": "Forfait",
+      "users": "Utilisateurs"
     }
   },
   "whatsapp": {
@@ -2554,7 +2555,11 @@
     "conversationUnknown": "Contact inconnu",
     "conversationCount_one": "{{count}} message dans ce journal",
     "conversationCount_other": "{{count}} messages dans ce journal",
-    "viaApp": "via l'app"
+    "viaApp": "via l'app",
+    "loadMore": "Charger plus",
+    "loadingMore": "Chargement…",
+    "loadMoreExhausted": "Il n'y a plus rien de plus ancien à charger.",
+    "retentionHint": "Les 90 premiers jours se chargent immédiatement ; tout ce qui est plus ancien reste conservé et se charge à la demande ci-dessus."
   },
   "appointmentTypes": {
     "title": "Types de rendez-vous",
@@ -3409,107 +3414,33 @@
     "saveFailed": "Échec de l'enregistrement des budgets.",
     "saved": "Budgets enregistrés."
   },
+  "billingUsers": {
+    "title": "Utilisateurs",
+    "subtitle": "Utilisateurs inclus et prix par utilisateur supplémentaire par pack, et l'occupation actuelle par client.",
+    "packagesHeading": "Packs",
+    "includedUsersLabel": "Utilisateurs inclus",
+    "extraPriceLabel": "Prix par utilisateur supplémentaire (centimes)",
+    "extraPriceCaption": "= {{amount}} par utilisateur supplémentaire",
+    "loadError": "Impossible de charger les données utilisateurs.",
+    "saveFailed": "L'enregistrement a échoué.",
+    "saved": "Enregistré.",
+    "tenantsHeading": "Utilisateurs par client",
+    "tenantsEmpty": "Aucun client avec des données utilisateurs pour l'instant.",
+    "colTenant": "Client",
+    "colPackage": "Forfait",
+    "colActive": "Utilisateurs actifs",
+    "colIncluded": "Inclus",
+    "colExtra": "Supplémentaires",
+    "unlimited": "Illimité",
+    "extraValue": "{{count}} supplémentaires · {{amount}}"
+  },
   "dashboardsOrderRoleLabel": "Rôle",
   "dashboardsOrderHint": "Définit l'ordre dans lequel les tuiles KPI apparaissent sur le tableau de bord pour ce rôle. Seuls les KPI activés (onglet KPI) sont listés.",
   "dashboardsPreviewTitle": "Aperçu",
   "dashboardsPreviewHint": "Affiche uniquement les libellés et l'ordre, pas les vrais chiffres de ce tenant.",
   "dashboardsOrderEmpty": "Aucun KPI activé pour ce rôle.",
-  "dashboardsExplain": {
-    "candidates": {
-      "what": "Nombre total de candidats dans l'ATS.",
-      "goesTo": "Ouvre Candidats."
-    },
-    "stale": {
-      "what": "Candidats non contactés depuis 6 mois.",
-      "goesTo": "Ouvre Candidats."
-    },
-    "never": {
-      "what": "Candidats jamais contactés.",
-      "goesTo": "Ouvre Candidats."
-    },
-    "tasks": {
-      "what": "Tâches ouvertes liées aux candidats.",
-      "goesTo": "Ouvre Tâches."
-    },
-    "opps": {
-      "what": "Nombre d'opportunités ouvertes.",
-      "goesTo": "Ouvre Opportunités."
-    },
-    "pipeline": {
-      "what": "Somme de la valeur des opportunités ouvertes.",
-      "goesTo": "Ouvre Opportunités."
-    },
-    "placements": {
-      "what": "Nombre de placements réalisés.",
-      "goesTo": "Ouvre Matches."
-    },
-    "intakes": {
-      "what": "Nombre d'entretiens planifiés.",
-      "goesTo": "Ouvre Candidats."
-    },
-    "fillRate": {
-      "what": "Pourcentage de postes pourvus.",
-      "goesTo": "Ouvre Postes vacants."
-    },
-    "openVacancies": {
-      "what": "Nombre de postes vacants ouverts (non archivés).",
-      "goesTo": "Ouvre Postes vacants."
-    },
-    "incompleteRuns": {
-      "what": "Nombre d'exécutions de workflow IA non terminées.",
-      "goesTo": "Ouvre Agents IA."
-    },
-    "activeConv": {
-      "what": "Nombre de conversations WhatsApp actives.",
-      "goesTo": "Ouvre WhatsApp."
-    },
-    "missingDocs": {
-      "what": "Candidats avec des documents manquants.",
-      "goesTo": "Ouvre Candidats."
-    },
-    "expiringContracts": {
-      "what": "Matches dont le contrat se termine bientôt.",
-      "goesTo": "Ouvre Matches."
-    },
-    "couplingErrors": {
-      "what": "Candidats avec un couplage back-office en échec.",
-      "goesTo": "Ouvre Candidats."
-    },
-    "openShifts": {
-      "what": "Nombre de shifts ouverts (module Planning).",
-      "goesTo": "Ouvre Planning."
-    },
-    "occupancy": {
-      "what": "Taux d'occupation des shifts planifiés.",
-      "goesTo": "Ouvre Planning."
-    },
-    "escalations": {
-      "what": "Nombre de conversations WhatsApp escaladées.",
-      "goesTo": "Ouvre WhatsApp."
-    },
-    "failedWf": {
-      "what": "Nombre de workflows échoués.",
-      "goesTo": "Ouvre Workflows."
-    },
-    "tasksOverdue": {
-      "what": "Nombre de tâches en retard.",
-      "goesTo": "Ouvre Tâches."
-    },
-    "uncalledCallist": {
-      "what": "Candidats sur une liste d'appels pas encore appelés.",
-      "goesTo": "Ouvre Listes d'appels."
-    },
-    "expiringOpps": {
-      "what": "Opportunités expirant bientôt.",
-      "goesTo": "Ouvre Opportunités."
-    },
-    "tooLongInStage": {
-      "what": "Candidatures bloquées trop longtemps dans la même étape.",
-      "goesTo": "Ouvre Candidatures."
-    },
-    "missingApptApps": {
-      "what": "Candidatures dans une étape nécessitant un rendez-vous, sans rendez-vous planifié.",
-      "goesTo": "Ouvre Candidatures."
-    }
-  }
+  "dashboardsGoesTo": "Ouvre {{target}}.",
+  "dashboardsCatalogUnavailable": "Les explications ne sont pas disponibles pour le moment.",
+  "dashboardsSaveError": "L'enregistrement du réglage KPI a échoué : la modification a été annulée. Veuillez réessayer.",
+  "dashboardsSharedDefault": "partagé (Défaut)"
 }

@@ -70,3 +70,60 @@ describe('buildDashboardKpis · K1 server-computed values', () => {
     expect(kpis.activeConv.value).toBe('—')
   })
 })
+
+// K-173 fase 2 — a tile with a drill descriptor navigates via entity+params
+// (the server's exact list filters), not the tile's own hardcoded intent.
+describe('buildDashboardKpis · K-173 drill descriptors (REAL server payloads)', () => {
+  it('translates the server filter vocabulary into the page intent — params never pass raw', () => {
+    const onNavigate = vi.fn()
+    // Exactly what DashboardService::drills emits for a recruiter's stale tile.
+    const args = { ...baseArgs({ stale_6m: 4 }, onNavigate), drills: { stale_6m: { entity: 'candidates', params: { stale_6m: 1, owner_id: 'u-1', location_id: 'l-1' } } } }
+    const kpis = buildDashboardKpis(args)
+    kpis.stale.onClick?.()
+    expect(onNavigate).toHaveBeenCalledWith('candidates', { attention: 'stale6m', owner: 'u-1', location: 'l-1' })
+  })
+
+  it('translates the tasks drill (open + assignee scope) into the tasks intent', () => {
+    const onNavigate = vi.fn()
+    const args = { ...baseArgs({ tasks: 7 }, onNavigate), drills: { tasks: { entity: 'tasks', params: { open: 1, assignee_id: 'u-1' } } } }
+    const kpis = buildDashboardKpis(args)
+    kpis.tasks.onClick?.()
+    expect(onNavigate).toHaveBeenCalledWith('tasks', { kpi: 'open', assignee: 'u-1' })
+  })
+
+  it('an untranslatable param falls back to the legacy intent — never a silently unfiltered list', () => {
+    const onNavigate = vi.fn()
+    // missing_documents is a server list filter with no candidates-page intent.
+    const args = { ...baseArgs({ missing_documents: 2 }, onNavigate), drills: { missing_documents: { entity: 'candidates', params: { missing_documents: 1 } } } }
+    const kpis = buildDashboardKpis(args)
+    kpis.missingDocs.onClick?.()
+    expect(onNavigate).toHaveBeenCalledWith('candidates', {})
+  })
+
+  it('a server entity without an FE page falls back to the legacy intent — never a PlaceholderPage', () => {
+    const onNavigate = vi.fn()
+    const args = { ...baseArgs({ coupling_errors: 3, failed_workflows: 1 }, onNavigate), drills: {
+      coupling_errors: { entity: 'external-id-mapping-failures', params: {} },
+      failed_workflows: { entity: 'workflow-runs', params: { status: 'failed' } },
+    } }
+    const kpis = buildDashboardKpis(args)
+    kpis.couplingErrors.onClick?.()
+    expect(onNavigate).toHaveBeenLastCalledWith('candidates', {})
+    kpis.failedWf.onClick?.()
+    expect(onNavigate).toHaveBeenLastCalledWith('workflows', {})
+  })
+
+  it('an explicit null descriptor renders the tile WITHOUT onClick (no dead cell, no fallback)', () => {
+    const onNavigate = vi.fn()
+    const args = { ...baseArgs({ stale_6m: 4 }, onNavigate), drills: { stale_6m: null } }
+    const kpis = buildDashboardKpis(args)
+    expect(kpis.stale.onClick).toBeUndefined()
+  })
+
+  it('an absent drills key falls back to the tile own hardcoded intent (pre-K-173 server)', () => {
+    const onNavigate = vi.fn()
+    const kpis = buildDashboardKpis(baseArgs({ stale_6m: 4 }, onNavigate))
+    kpis.stale.onClick?.()
+    expect(onNavigate).toHaveBeenCalledWith('candidates', { attention: 'stale6m' })
+  })
+})

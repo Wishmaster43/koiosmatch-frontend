@@ -25,7 +25,9 @@ import { useAllSettings, saveSettingsKeys, invalidateAllSettingsCache, getNumber
 import { notifyError } from '@/lib/notify'
 // WA-LOG-LEESBAAR-1: row click opens the candidate's whole thread, readable.
 import WaConversationPanel from './whatsapp/WaConversationPanel'
-import { SectionTitle } from '@/components/ui/typography'
+import { SectionTitle, Caption, GroupLabel } from '@/components/ui/typography'
+import Button from '@/components/ui/Button'
+import Spinner from '@/components/ui/Spinner'
 
 // Tenant-setting key — the generic /settings key/value store (no dedicated column).
 export const KOIOS_MEMORY_DAYS_KEY = 'koios_conversation_memory_days'
@@ -59,9 +61,9 @@ function ConversationMemoryField() {
     <div style={{ marginBottom: 16, paddingBottom: 16, borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
       <SectionTitle as="div" style={{ marginBottom: 4 }}>{t('waLog.memoryDaysTitle')}</SectionTitle>
       <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 8, maxWidth: 460 }}>{t('waLog.memoryDaysHint')}</div>
-      <label htmlFor="koios-conversation-memory-days" style={{ fontSize: 11, fontWeight: 500, color: 'var(--text-muted)', display: 'block', marginBottom: 4 }}>
+      <GroupLabel as="label" htmlFor="koios-conversation-memory-days" style={{ display: 'block', marginBottom: 4 }}>
         {t('waLog.memoryDaysLabel')}
-      </label>
+      </GroupLabel>
       <input id="koios-conversation-memory-days" type="number" min={MEMORY_DAYS_MIN} max={MEMORY_DAYS_MAX}
         value={value}
         onChange={e => setValue(Number(e.target.value))}
@@ -76,7 +78,9 @@ const contactOf = (m: WaMessage) => [m.candidate?.first_name, m.candidate?.last_
 
 export default function WhatsAppLog() {
   const { t } = useTranslation('settings')
-  const { messages, loading } = useWhatsAppData()
+  // K-176 — retention is unlimited; the first page is only the 90-day window,
+  // loadMoreMessages pages older ones in on cursor `before=<oldest sent_at>`.
+  const { messages, loading, loadMoreMessages, loadingMoreMessages, messagesExhausted } = useWhatsAppData()
   // App-wide active locale (§5) — formatDateTime replaces the old hardcoded 'nl-NL' fmt().
   const { formatDateTime } = useDateFormat()
   const [search, setSearch] = useState('')
@@ -141,6 +145,20 @@ export default function WhatsAppLog() {
           onRowClick={setOpenThread}
           exportColumns={exportColumns} totalCount={messages.length} emptyText={t('waLog.empty')} />
       </div>
+      {/* K-176 — honest retention copy: the first 90 days load immediately,
+          everything older is still there and loads on demand, never "gone". */}
+      {!loading.messages && messages.length > 0 && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 0 0', flexShrink: 0 }}>
+          {messagesExhausted ? (
+            <Caption>{t('waLog.loadMoreExhausted')}</Caption>
+          ) : (
+            <Button variant="secondary" size="sm" onClick={loadMoreMessages} disabled={loadingMoreMessages}>
+              {loadingMoreMessages ? <><Spinner size={13} /> {t('waLog.loadingMore')}</> : t('waLog.loadMore')}
+            </Button>
+          )}
+          <Caption>{t('waLog.retentionHint')}</Caption>
+        </div>
+      )}
       {/* WA-LOG-LEESBAAR-1: the clicked row's whole conversation, full-size. */}
       {openThread && <WaConversationPanel message={openThread} messages={messages} onClose={() => setOpenThread(null)} />}
     </div>

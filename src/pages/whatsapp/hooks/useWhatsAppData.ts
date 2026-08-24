@@ -29,6 +29,11 @@ export function useWhatsAppData() {
   const [errors,        setErrors]        = useState<WaErrors>({ messages: false, escalations: false, activity: false })
   const [lastRefresh,   setLastRefresh]   = useState(new Date())
   const [noConnection,  setNoConnection]  = useState(false)
+  // WHATSAPP-LOG-MEERLADEN-1 (K-176, LIVE) — retention is unlimited; the first
+  // page is only the 90-day window. `loadingMore` drives the button state,
+  // `exhausted` renders the "no more" notice once a page comes back empty.
+  const [loadingMoreMessages, setLoadingMoreMessages] = useState(false)
+  const [messagesExhausted,   setMessagesExhausted]   = useState(false)
 
   // Refresh all four sources; a 404 on stats flags "no connection". The other
   // three still degrade to an empty list for the feed/list UI, but now also flag
@@ -44,6 +49,7 @@ export function useWhatsAppData() {
       .catch(err => { if (err.response?.status === 404) setNoConnection(true) })
       .finally(() => setLoading(p => ({ ...p, stats: false })))
 
+    setMessagesExhausted(false)
     api.get('/whatsapp/messages', { params: { per_page: 50 } })
       .then(r => setMessages(unwrapList<WaMessage>(r).rows))
       .catch(() => setErrors(p => ({ ...p, messages: true })))
@@ -64,5 +70,34 @@ export function useWhatsAppData() {
 
   useEffect(() => { reload() }, [])
 
-  return { stats, messages, escalations, activity, loading, errors, lastRefresh, noConnection, reload }
+  // K-176 (live: f9cf1a64) — cursor page back from the oldest currently loaded
+  // `sent_at`, dedup on id. End-of-archive comes from the server's own
+  // `has_older` signal — NEVER from page size or an empty page (a filter slice
+  // can be short while older rows still exist).
+  const loadMoreMessages = () => {
+    if (loadingMoreMessages || messagesExhausted || messages.length === 0) return
+    const oldest = messages.reduce((min, m) => (m.sent_at && (!min || m.sent_at < min) ? m.sent_at : min), '' as string)
+    if (!oldest) return
+    setLoadingMoreMessages(true)
+    api.get('/whatsapp/messages', { params: { per_page: 50, before: oldest } })
+      .then(r => {
+        const older = unwrapList<WaMessage>(r).rows
+        // has_older sits next to data/meta in the response body.
+        const hasOlder = (r?.data as { has_older?: boolean } | undefined)?.has_older
+        if (hasOlder === false) setMessagesExhausted(true)
+        if (older.length) {
+          setMessages(prev => {
+            const knownIds = new Set(prev.map(m => m.id))
+            return [...prev, ...older.filter(m => !knownIds.has(m.id))]
+          })
+        }
+      })
+      .catch(() => setErrors(p => ({ ...p, messages: true })))
+      .finally(() => setLoadingMoreMessages(false))
+  }
+
+  return {
+    stats, messages, escalations, activity, loading, errors, lastRefresh, noConnection, reload,
+    loadMoreMessages, loadingMoreMessages, messagesExhausted,
+  }
 }

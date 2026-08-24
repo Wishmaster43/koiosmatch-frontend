@@ -472,7 +472,13 @@
   "notes": {
     "editedBy": "bewerkt door {{name}}",
     "allTypes": "Alle types",
-    "allChannels": "Alle kanalen"
+    "allChannels": "Alle kanalen",
+    "restorePrevious": "Vorige versie terugzetten",
+    "restoreConfirmTitle": "Vorige versie terugzetten",
+    "restoreConfirm": "De versie van {{date}} terugzetten?",
+    "restoreConfirmNoDate": "De vorige versie terugzetten?",
+    "restoreNotice": "Teruggezet. Je kunt dit nog één keer ongedaan maken.",
+    "restoreUnavailable": "Er is geen vorige versie om terug te zetten."
   },
   "errors": {
     "koiosCreditExhausted": "Het Koios-tegoed van deze organisatie is op of nog niet geactiveerd. Vul het tegoed aan of neem contact op met de beheerder.",
