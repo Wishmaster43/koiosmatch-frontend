@@ -301,7 +301,19 @@
     "noTeam": "Keine Abteilung",
     "noBranch": "Keine Niederlassung",
     "overdueRate": "Überfälligkeitsquote",
-    "kpiOrderFellBack": "Eine in den Einstellungen konfigurierte KPI-Karte existiert nicht mehr und wurde auf den Standard zurückgesetzt."
+    "kpiOrderFellBack": "Eine in den Einstellungen konfigurierte KPI-Karte existiert nicht mehr und wurde auf den Standard zurückgesetzt.",
+    "kpi": {
+      "total": "Aufgaben gesamt",
+      "open": "Offen",
+      "overdue": "Überfällig",
+      "doneInPeriod": "Erledigt im Zeitraum",
+      "createdInPeriod": "Erstellt im Zeitraum",
+      "dueToday": "Fällig heute",
+      "dueThisWeek": "Fällig diese Woche",
+      "withoutAssignee": "Ohne Bearbeiter",
+      "avgCompletionDays": "Ø Durchlaufzeit",
+      "daysValue": "{{days}} Tage"
+    }
   },
   "customers": {
     "loading": "Kunden werden geladen…",
@@ -333,7 +345,8 @@
       "customersWithoutVacancies": "Kunden ohne Stellen",
       "customersWithoutApplications": "Kunden ohne Bewerbungen",
       "matchesStoppedEarly": "Vorzeitig beendete Matches"
-    }
+    },
+    "signalSnapshot": "Aktueller Stand"
   },
   "leads": {
     "loading": "Leads werden geladen…",

@@ -138,6 +138,10 @@ export interface MatchesReportData {
   terminations: { total: number; by_reason: MatchTerminationReasonSegment[] }
   // Deliberately null until the HelloFlex coupling fills match start/end.
   avg_placement_duration_days: number | null
+  // RAPPORT-KAARTDRILLS-2: the full KPI suite (GET /reports/matches/kpis/drill's
+  // enum). Optional so a cached pre-update response still parses. Server sends a
+  // `label` per card too — deliberately ignored (§5: labels come from i18n).
+  kpis?: { key: string; label?: string; count: number | null }[]
 }
 
 // ── Intakes report (GET /reports/intakes, C-22) ──────────────────────────────
@@ -173,6 +177,10 @@ export interface OutreachReportData {
   reach_rate: number | null
   total: number
   timeseries: { bucket: 'day' | 'week'; series: CandidateTimeseriesPoint[] }
+  // NOTE: outreach ships NO kpis[] block in its envelope today (measured in
+  // OutreachReport::run() during the wave-1b naronde). The kpis/drill enum DOES
+  // exist server-side, but a strip must never read values a contract does not
+  // promise — asked CMBE for the envelope block (WAVE-1B-CONTRACTVRAGEN-CMBE).
   by_status: OutreachStatusCount[]
   by_outcome: OutreachOutcomeCount[]
   // Top-20 + 'others' (the exact complement — a real, drillable row); an archived
@@ -427,6 +435,10 @@ export interface TasksReportData {
   by_assignee: CandidateOwnerSegment[]
   by_team: ApplicationTopSegment[]
   by_branch: ApplicationTopSegment[]
+  // RAPPORT-KAARTDRILLS-2: the full KPI suite (GET /reports/tasks/kpis/drill's
+  // enum). Optional so a cached pre-update response still parses. Server sends a
+  // `label` per card too — deliberately ignored (§5: labels come from i18n).
+  kpis?: { key: string; label?: string; count: number | null }[]
 }
 
 // ── Sources report (GET /reports/sources, REPORTS-2 fase 2) ──────────────────

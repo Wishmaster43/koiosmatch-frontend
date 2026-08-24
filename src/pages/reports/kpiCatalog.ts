@@ -240,23 +240,19 @@ export const REPORT_KPI_FIXED_CATALOG: Partial<Record<ReportKpiScopeId, KpiCatal
     { key: 'staleDeal', labelKey: 'opportunities.summary.staleDeal' },
     { key: 'closingSoon', labelKey: 'opportunities.summary.closingSoon' },
   ],
+  // KPI-TAKEN-1 (naronde wave 1b): the tasks strip reads the server kpis[]
+  // suite — the catalogue is that suite's own nine keys, replacing the old
+  // summary/derived/top-spare cards (value and drill now share one predicate).
   tasks: [
-    { key: 'total', labelKey: 'tasks.total' },
-    { key: 'open', labelKey: 'tasks.summary.open' },
-    { key: 'done', labelKey: 'tasks.summary.done' },
-    { key: 'overdue', labelKey: 'tasks.summary.overdue' },
-    { key: 'doneRate', labelKey: 'tasks.summary.doneRate' },
-    { key: 'unassigned', labelKey: 'tasks.unassigned' },
-    { key: 'noTeam', labelKey: 'tasks.noTeam' },
-    { key: 'noBranch', labelKey: 'tasks.noBranch' },
-    { key: 'overdueRate', labelKey: 'tasks.overdueRate' },
-    // Spares (REPORTS-KPI-SPARE-1): the top real segment of each existing axis
-    // (by_status/by_type/by_priority/by_assignee), same "biggest real value"
-    // pattern as vacancies' topIndustry/topOwner — no new backend field needed.
-    { key: 'topStatus', labelKey: 'tasks.summary.topStatus' },
-    { key: 'topType', labelKey: 'tasks.summary.topType' },
-    { key: 'topPriority', labelKey: 'tasks.summary.topPriority' },
-    { key: 'topAssignee', labelKey: 'tasks.summary.topAssignee' },
+    { key: 'total', labelKey: 'tasks.kpi.total' },
+    { key: 'open', labelKey: 'tasks.kpi.open' },
+    { key: 'overdue', labelKey: 'tasks.kpi.overdue' },
+    { key: 'done_in_period', labelKey: 'tasks.kpi.doneInPeriod' },
+    { key: 'created_in_period', labelKey: 'tasks.kpi.createdInPeriod' },
+    { key: 'due_today', labelKey: 'tasks.kpi.dueToday' },
+    { key: 'due_this_week', labelKey: 'tasks.kpi.dueThisWeek' },
+    { key: 'without_assignee', labelKey: 'tasks.kpi.withoutAssignee' },
+    { key: 'avg_completion_days', labelKey: 'tasks.kpi.avgCompletionDays' },
   ],
   matches: [
     { key: 'total', labelKey: 'matches.total' },

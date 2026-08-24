@@ -27,7 +27,6 @@ import type { ReportFilterState } from './reportFilterParams'
 import SegmentBars from './SegmentBars'
 import ReportTimeseriesChart from './ReportTimeseriesChart'
 import { useDateFormat } from '@/lib/datetime'
-import { formatPercent } from '@/lib/formatters'
 import type { ReportPeriod, CandidateOwnerSegment, CandidateTimeseriesPoint } from '@/types/analytics'
 import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
 import { getReportKpiCatalog, getReportKpiDefaultOrder, reportKpiSettingsKey } from './kpiCatalog'
@@ -116,79 +115,52 @@ export default function TasksReport({ period, filters = EMPTY_REPORT_FILTERS }: 
     if (pt) openBucket(pt)
   })
 
-  // RAPPORT-KAARTDRILLS-1 → Opus-REJECT gemeten: alle vier de eerder bedrade
-  // koppels paren een GEWINDOWD kaartgetal (envelope/summary) aan een
-  // ONGEWINDOWDE of anders-gedefinieerde server-kpi (total=all-time, open=
-  // ongewindowd, done/overdue idem — TasksReport.php documenteert de splitsing
-  // zelf). Tot dit rapport zijn kaartWAARDEN uit de server-kpis[]-strip leest
-  // (rapportenplan-uitrol, het whatsapp/applications-patroon) blijft deze map
-  // LEEG: liever geen kaartdrill dan een lade met andere rijen dan het getal.
-  const KPI_DRILL_KEY: Partial<Record<string, string>> = {}
-  const openKpiDrill = (localKey: string, label: string, value: string | number) => {
-    const serverKey = KPI_DRILL_KEY[localKey]
-    if (!serverKey) return undefined
-    return gateDrillClick('tasks', () => setDrill({
+  // KPI-TAKEN-1 (naronde wave 1b): the nine-card strip reads the server's own
+  // kpis[] suite verbatim — value and drawer share ONE backend predicate per key
+  // (BuildsTaskKpis/kpiSegmentQuery), so a card's number and its drill rows can
+  // never diverge. A key the server omitted (or a pre-suite cached envelope)
+  // renders the house dash with no drill — never a value from another
+  // population (the old summary-based cards paired the is_done flag with
+  // completed_at drills, the exact mismatch that got this strip rejected).
+  // The drill accepts the full panel-filter vocabulary (measured:
+  // getReportsTasksKpisDrill), so baseParams rides along like the axis drills.
+  const kpiByServerKey = new Map((data?.kpis ?? []).map(k => [k.key, k.count]))
+  const openKpiDrill = (kpi: string, label: string, value: string | number) =>
+    gateDrillClick('tasks', () => setDrill({
       title: label, value, subtitle: windowSub(),
-      rowsEndpoint: '/reports/tasks/kpis/drill', rowsParams: { ...baseParams, kpi: serverKey },
+      rowsEndpoint: '/reports/tasks/kpis/drill', rowsParams: { ...baseParams, kpi },
     }))
+  // Semantic colour only where the number is a SIGNAL and non-zero (§4: colour
+  // carries meaning; a calm zero stays uncoloured).
+  const KPI_COLOR: Partial<Record<string, string>> = {
+    overdue: 'var(--color-danger)', due_today: 'var(--color-warning)',
+    due_this_week: 'var(--color-warning)', without_assignee: 'var(--color-warning)',
+    done_in_period: 'var(--color-success)',
   }
-
-  // Workload KPI strip from the envelope's flag-driven summary. Display-only
-  // today: the card→kpi drill map above is deliberately EMPTY (windowed card
-  // numbers vs unwindowed server keys — see the map's own comment); the cards
-  // regain their drill when the strip migrates onto the server kpis[] values.
-  const s = data?.summary
-  const unassigned = data?.by_assignee.find(seg => seg.owner_id === 'none')
-  const noTeam = data?.by_team.find(seg => seg.value === 'none')
-  const noBranch = data?.by_branch.find(seg => seg.value === 'none')
-  const overdueRate = data && total > 0 && s ? (s.overdue / total) * 100 : null
-  // Spare-card sources (REPORTS-KPI-SPARE-1): the top real segment of each axis
-  // already rendered below, excluding the 'none' bucket (that is its own card
-  // already — unassigned/noTeam/noBranch) — same "biggest real value" rule as
-  // vacancies' topIndustry/topOwner. Clicking reuses the page's own openSegment.
-  const topRealSeg = <T extends { value: string; count: number; label: string }>(segs: T[]) =>
-    segs.filter(x => x.value !== 'none').sort((a, b) => b.count - a.count)[0]
-  const topStatus = topRealSeg(data?.by_status ?? [])
-  const topType = topRealSeg(data?.by_type ?? [])
-  const topPriority = topRealSeg(data?.by_priority ?? [])
-  const topAssignee = (data?.by_assignee ?? []).filter(a => a.owner_id !== 'none').sort((a, b) => b.count - a.count)[0]
-  const kpiByKey: Record<string, KpiSpec> = {
-    total:    { key: 'total',    label: t('tasks.total'),            value: total,
-      sub: totalCompare ? <ReportCompareMetric metric={totalCompare} polarity="up-good" /> : undefined,
-      onClick: openKpiDrill('total', t('tasks.total'), total) },
-    open:     { key: 'open',     label: t('tasks.summary.open'),     value: s?.open ?? 0,
-      onClick: openKpiDrill('open', t('tasks.summary.open'), s?.open ?? 0) },
-    done:     { key: 'done',     label: t('tasks.summary.done'),     value: s?.done ?? 0,
-      onClick: openKpiDrill('done', t('tasks.summary.done'), s?.done ?? 0) },
-    overdue:  { key: 'overdue',  label: t('tasks.summary.overdue'),  value: s?.overdue ?? 0,
-      onClick: openKpiDrill('overdue', t('tasks.summary.overdue'), s?.overdue ?? 0) },
-    doneRate: { key: 'doneRate', label: t('tasks.summary.doneRate'),
-      value: formatPercent(s?.done_rate) },
-    unassigned: { key: 'unassigned', label: t('tasks.unassigned'), value: unassigned?.count ?? 0,
-      active: (drill?.rowsParams as Record<string, unknown> | undefined)?.assignee === 'none',
-      onClick: unassigned ? gateDrillClick('tasks', () => openSegment({ label: unassigned.name, count: unassigned.count }, { assignee: 'none' })) : undefined },
-    noTeam: { key: 'noTeam', label: t('tasks.noTeam'), value: noTeam?.count ?? 0,
-      active: (drill?.rowsParams as Record<string, unknown> | undefined)?.team === 'none',
-      onClick: noTeam ? gateDrillClick('tasks', () => openSegment(noTeam, { team: 'none' })) : undefined },
-    noBranch: { key: 'noBranch', label: t('tasks.noBranch'), value: noBranch?.count ?? 0,
-      active: (drill?.rowsParams as Record<string, unknown> | undefined)?.branch === 'none',
-      onClick: noBranch ? gateDrillClick('tasks', () => openSegment(noBranch, { branch: 'none' })) : undefined },
-    overdueRate: { key: 'overdueRate', label: t('tasks.overdueRate'),
-      value: formatPercent(overdueRate) },
-    // Spares (REPORTS-KPI-SPARE-1): see topRealSeg above.
-    topStatus: { key: 'topStatus', label: t('tasks.summary.topStatus'),
-      value: topStatus ? `${topStatus.label} · ${topStatus.count}` : '—',
-      onClick: topStatus ? gateDrillClick('tasks', () => openSegment(topStatus, { status: topStatus.value })) : undefined },
-    topType: { key: 'topType', label: t('tasks.summary.topType'),
-      value: topType ? `${topType.label} · ${topType.count}` : '—',
-      onClick: topType ? gateDrillClick('tasks', () => openSegment(topType, { type: topType.value })) : undefined },
-    topPriority: { key: 'topPriority', label: t('tasks.summary.topPriority'),
-      value: topPriority ? `${topPriority.label} · ${topPriority.count}` : '—',
-      onClick: topPriority ? gateDrillClick('tasks', () => openSegment(topPriority, { priority: topPriority.value })) : undefined },
-    topAssignee: { key: 'topAssignee', label: t('tasks.summary.topAssignee'),
-      value: topAssignee ? `${topAssignee.name} · ${topAssignee.count}` : '—',
-      onClick: topAssignee ? gateDrillClick('tasks', () => openSegment({ label: topAssignee.name, count: topAssignee.count }, { assignee: topAssignee.owner_id })) : undefined },
+  const SUITE_LABEL_KEY: Record<string, string> = {
+    total: 'tasks.kpi.total', open: 'tasks.kpi.open', overdue: 'tasks.kpi.overdue',
+    done_in_period: 'tasks.kpi.doneInPeriod', created_in_period: 'tasks.kpi.createdInPeriod',
+    due_today: 'tasks.kpi.dueToday', due_this_week: 'tasks.kpi.dueThisWeek',
+    without_assignee: 'tasks.kpi.withoutAssignee', avg_completion_days: 'tasks.kpi.avgCompletionDays',
   }
+  const openKpiParams = drill?.rowsParams as Record<string, unknown> | undefined
+  const kpiByKey: Record<string, KpiSpec> = Object.fromEntries(
+    Object.entries(SUITE_LABEL_KEY).map(([key, labelKey]) => {
+      const label = t(labelKey)
+      const raw = kpiByServerKey.get(key)
+      const has = raw != null
+      // avg_completion_days is a computed average in days, not a row count.
+      const value = !has ? '—'
+        : key === 'avg_completion_days' ? t('tasks.kpi.daysValue', { days: Math.round(raw as number) })
+        : raw
+      return [key, {
+        key, label, value,
+        color: has && raw !== 0 ? KPI_COLOR[key] : undefined,
+        active: openKpiParams?.kpi === key,
+        sub: key === 'total' && totalCompare ? <ReportCompareMetric metric={totalCompare} polarity="up-good" /> : undefined,
+        onClick: has ? openKpiDrill(key, label, value) : undefined,
+      } satisfies KpiSpec]
+    }))
   // Which nine keys render, and in what order, is the tenant's Settings → Reports
   // choice (falls back to today's order when nothing is stored, or a stored key
   // has vanished — RAPPORT-KPI-INSTELBAAR).

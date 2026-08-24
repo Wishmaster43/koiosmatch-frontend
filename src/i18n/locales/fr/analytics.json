@@ -301,7 +301,19 @@
     "noTeam": "Sans service",
     "noBranch": "Sans agence",
     "overdueRate": "Taux de retard",
-    "kpiOrderFellBack": "Une carte KPI configurée dans les paramètres n'existe plus et a été réinitialisée par défaut."
+    "kpiOrderFellBack": "Une carte KPI configurée dans les paramètres n'existe plus et a été réinitialisée par défaut.",
+    "kpi": {
+      "total": "Total des tâches",
+      "open": "Ouvertes",
+      "overdue": "En retard",
+      "doneInPeriod": "Terminées sur la période",
+      "createdInPeriod": "Créées sur la période",
+      "dueToday": "Échéance aujourd'hui",
+      "dueThisWeek": "Échéance cette semaine",
+      "withoutAssignee": "Sans responsable",
+      "avgCompletionDays": "Durée moyenne",
+      "daysValue": "{{days}} jours"
+    }
   },
   "customers": {
     "loading": "Chargement des clients…",
@@ -333,7 +345,8 @@
       "customersWithoutVacancies": "Clients sans postes",
       "customersWithoutApplications": "Clients sans candidatures",
       "matchesStoppedEarly": "Matchs arrêtés prématurément"
-    }
+    },
+    "signalSnapshot": "État actuel"
   },
   "leads": {
     "loading": "Chargement des leads…",

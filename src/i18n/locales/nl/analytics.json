@@ -301,7 +301,19 @@
     "noTeam": "Geen afdeling",
     "noBranch": "Geen vestiging",
     "overdueRate": "Te-laat-percentage",
-    "kpiOrderFellBack": "Een in Instellingen ingestelde KPI-kaart bestaat niet meer en is teruggezet naar de standaard."
+    "kpiOrderFellBack": "Een in Instellingen ingestelde KPI-kaart bestaat niet meer en is teruggezet naar de standaard.",
+    "kpi": {
+      "total": "Totaal taken",
+      "open": "Open",
+      "overdue": "Te laat",
+      "doneInPeriod": "Afgerond in periode",
+      "createdInPeriod": "Aangemaakt in periode",
+      "dueToday": "Vervalt vandaag",
+      "dueThisWeek": "Vervalt deze week",
+      "withoutAssignee": "Zonder behandelaar",
+      "avgCompletionDays": "Gem. doorlooptijd",
+      "daysValue": "{{days}} dagen"
+    }
   },
   "customers": {
     "loading": "Klanten laden…",
@@ -333,7 +345,8 @@
       "customersWithoutVacancies": "Klanten zonder vacatures",
       "customersWithoutApplications": "Klanten zonder sollicitaties",
       "matchesStoppedEarly": "Matches voortijdig gestopt"
-    }
+    },
+    "signalSnapshot": "Actuele stand"
   },
   "leads": {
     "loading": "Leads laden…",

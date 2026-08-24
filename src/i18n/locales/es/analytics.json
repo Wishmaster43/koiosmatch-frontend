@@ -301,7 +301,19 @@
     "noTeam": "Sin departamento",
     "noBranch": "Sin sucursal",
     "overdueRate": "Tasa de vencidas",
-    "kpiOrderFellBack": "Una tarjeta KPI configurada en Ajustes ya no existe y se restableció al valor predeterminado."
+    "kpiOrderFellBack": "Una tarjeta KPI configurada en Ajustes ya no existe y se restableció al valor predeterminado.",
+    "kpi": {
+      "total": "Total de tareas",
+      "open": "Abiertas",
+      "overdue": "Atrasadas",
+      "doneInPeriod": "Completadas en el período",
+      "createdInPeriod": "Creadas en el período",
+      "dueToday": "Vencen hoy",
+      "dueThisWeek": "Vencen esta semana",
+      "withoutAssignee": "Sin responsable",
+      "avgCompletionDays": "Tiempo medio",
+      "daysValue": "{{days}} días"
+    }
   },
   "customers": {
     "loading": "Cargando clientes…",
@@ -333,7 +345,8 @@
       "customersWithoutVacancies": "Clientes sin vacantes",
       "customersWithoutApplications": "Clientes sin candidaturas",
       "matchesStoppedEarly": "Matches finalizados antes de tiempo"
-    }
+    },
+    "signalSnapshot": "Estado actual"
   },
   "leads": {
     "loading": "Cargando leads…",

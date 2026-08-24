@@ -398,16 +398,34 @@ describe('MatchesReport (nine-card KPI footprint)', () => {
     expect(screen.getAllByText('—').length).toBeGreaterThanOrEqual(1)
   })
 
-  // RAPPORT-KAARTDRILLS-1: `terminationsTotal` drills via the new per-KPI-card
-  // endpoint GET /reports/matches/kpis/drill?kpi=terminated_in_period.
-  it('clicking the "Totaal beëindigingen" KPI card drills via /reports/matches/kpis/drill?kpi=terminated_in_period', async () => {
+  // RAPPORT-KAARTDRILLS-2: with a kpis[] strip, `terminationsTotal` reads its
+  // VALUE from kpis[] and drills via GET /reports/matches/kpis/drill?kpi=
+  // terminated_in_period (mutation test asserts the exact request, §13).
+  it('reads terminationsTotal from kpis[] and drills via kpi=terminated_in_period', async () => {
+    const user = userEvent.setup()
+    const withKpis: MatchesReportData = { ...data, kpis: [{ key: 'terminated_in_period', count: 5 }] }
+    mockUseMatchesReport.mockReturnValue({ data: withKpis, loading: false, error: false })
+    renderReport()
+    getSpy.mockClear()
+    // The server kpi value (5), not the legacy envelope terminations.total (3),
+    // rendered under the same label.
+    const card = screen.getAllByText('Totaal beëindigingen')[0].closest('[role="button"]')!
+    expect(card).toHaveTextContent('5')
+    await user.click(screen.getAllByText('Totaal beëindigingen')[0])
+    expect(getSpy).toHaveBeenCalledWith('/reports/matches/kpis/drill',
+      expect.objectContaining({ params: expect.objectContaining({ kpi: 'terminated_in_period', period: 'month' }) }))
+  })
+
+  // Tolerant fallback (RAPPORT-KAARTDRILLS-2): with no kpis[] strip at all, the
+  // card pins the legacy envelope value and renders WITHOUT a drill — no
+  // kpis/drill request fires on click.
+  it('falls back to the legacy terminationsTotal value with no drill when kpis[] is absent', async () => {
     const user = userEvent.setup()
     mockUseMatchesReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
     getSpy.mockClear()
     await user.click(screen.getAllByText('Totaal beëindigingen')[0])
-    expect(getSpy).toHaveBeenCalledWith('/reports/matches/kpis/drill',
-      expect.objectContaining({ params: expect.objectContaining({ kpi: 'terminated_in_period', period: 'month' }) }))
+    expect(getSpy).not.toHaveBeenCalledWith('/reports/matches/kpis/drill', expect.anything())
   })
 
   // With avg_placement_duration_days null (as above), the dur card carries no

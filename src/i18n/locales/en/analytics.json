@@ -301,7 +301,19 @@
     "noTeam": "No department",
     "noBranch": "No branch",
     "overdueRate": "Overdue rate",
-    "kpiOrderFellBack": "A KPI card configured in Settings no longer exists and was reset to the default."
+    "kpiOrderFellBack": "A KPI card configured in Settings no longer exists and was reset to the default.",
+    "kpi": {
+      "total": "Total tasks",
+      "open": "Open",
+      "overdue": "Overdue",
+      "doneInPeriod": "Done in period",
+      "createdInPeriod": "Created in period",
+      "dueToday": "Due today",
+      "dueThisWeek": "Due this week",
+      "withoutAssignee": "Without assignee",
+      "avgCompletionDays": "Avg. completion time",
+      "daysValue": "{{days}} days"
+    }
   },
   "customers": {
     "loading": "Loading customers…",
@@ -333,7 +345,8 @@
       "customersWithoutVacancies": "Customers without vacancies",
       "customersWithoutApplications": "Customers without applications",
       "matchesStoppedEarly": "Matches stopped early"
-    }
+    },
+    "signalSnapshot": "Current snapshot"
   },
   "leads": {
     "loading": "Loading leads…",

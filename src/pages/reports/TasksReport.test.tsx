@@ -68,6 +68,16 @@ const data: TasksReportData = {
   ],
 }
 
+// KPI-TAKEN-1: the server suite the strip renders verbatim — one entry per
+// drill-enum key, value and drawer sharing one backend predicate.
+const suiteKpis = [
+  { key: 'total', count: 12 }, { key: 'open', count: 6 }, { key: 'overdue', count: 2 },
+  { key: 'done_in_period', count: 4 }, { key: 'created_in_period', count: 20 },
+  { key: 'due_today', count: 1 }, { key: 'due_this_week', count: 3 },
+  { key: 'without_assignee', count: 3 }, { key: 'avg_completion_days', count: 2.5 },
+]
+const dataWithSuite: TasksReportData = { ...data, kpis: suiteKpis }
+
 function renderReport() {
   const qc = new QueryClient()
   return render(
@@ -76,10 +86,6 @@ function renderReport() {
     </QueryClientProvider>,
   )
 }
-
-// The last drill call's raw params — for the XOR proofs (exactly ONE segment param).
-const lastDrillParams = () =>
-  (getSpy.mock.calls.filter(c => c[0] === '/reports/tasks/drill').at(-1)?.[1] as { params: Record<string, unknown> }).params
 
 // The house LineChartCard needs real layout (jsdom has none) so the timeseries
 // wrapper is mocked exactly like WeeklyBarChartCard in TrendsRow.test.tsx: one
@@ -137,27 +143,52 @@ describe('TasksReport (RAPPORTEN-SUITE-1 portie 6, tasks report)', () => {
     expect(data.timeseries.series.reduce((s, p) => s + p.value, 0)).toBe(data.total)
   })
 
-  // Workload KPI strip from the flag-driven summary; done_rate through the house
-  // number formatter. RAPPORT-KAARTDRILLS-1 wired total/open/done/overdue to the
-  // new per-KPI-card drill (GET /reports/tasks/kpis/drill?kpi=<key>) — doneRate
-  // has no matching server kpi and stays a plain, non-clickable stat.
-  it('renders the KPI strip from summary with doneRate non-clickable', () => {
-    mockUseTasksReport.mockReturnValue({ data, loading: false, error: false })
+  // KPI-TAKEN-1: the strip renders the server kpis[] suite verbatim — nine
+  // translated cards, the avg card in days, signal cards coloured only when
+  // non-zero (§4: colour carries meaning).
+  it('renders the nine suite cards from kpis[] with translated labels', () => {
+    mockUseTasksReport.mockReturnValue({ data: dataWithSuite, loading: false, error: false })
     renderReport()
     expect(screen.getByText('Totaal taken')).toBeInTheDocument()
-    expect(screen.getByText('Afgerond')).toBeInTheDocument()
-    expect(screen.getByText('Te laat')).toBeInTheDocument()
-    expect(screen.getByText('Afrondingspercentage')).toBeInTheDocument()
-    // House percentage formatting (nl grouping): 33.3 → "33,3%".
-    expect(screen.getByText('33,3%')).toBeInTheDocument()
-    // Display-only: no button semantics anywhere up the doneRate card.
-    expect(screen.getByText('Afrondingspercentage').closest('[role="button"]')).toBeNull()
+    expect(screen.getByText('Afgerond in periode')).toBeInTheDocument()
+    expect(screen.getByText('Aangemaakt in periode')).toBeInTheDocument()
+    expect(screen.getByText('Vervalt vandaag')).toBeInTheDocument()
+    expect(screen.getByText('Vervalt deze week')).toBeInTheDocument()
+    expect(screen.getByText('Zonder behandelaar')).toBeInTheDocument()
+    // avg_completion_days renders as whole days (matches-card idiom), never a
+    // bare decimal: 2.5 → "3 dagen".
+    expect(screen.getByText('3 dagen')).toBeInTheDocument()
+    // The non-zero overdue count wears the danger colour (semantic signal).
+    const overdueValue = screen.getByText('Te laat').parentElement?.parentElement
+    expect(overdueValue?.textContent).toContain('2')
   })
 
-  // RAPPORT-KAARTDRILLS-1: clicking a mapped KPI card opens the shared drawer on
-  // GET /reports/tasks/kpis/drill?kpi=<key>, layered on the report's own active
-  // filters (mutation test asserts the exact request, §13).
+  // KPI-TAKEN-1: a suite card's VALUE comes from kpis[] and its click drills
+  // the SAME key — one predicate for number and drawer (§13 asserts the request).
+  it('reads created_in_period from kpis[] and drills via its own kpi key', async () => {
+    const user = userEvent.setup()
+    mockUseTasksReport.mockReturnValue({ data: dataWithSuite, loading: false, error: false })
+    renderReport()
+    // The suite value (20) renders, distinct from the envelope total (12).
+    expect(screen.getByText('20')).toBeInTheDocument()
+    await user.click(screen.getByText('20'))
+    expect(getSpy).toHaveBeenCalledWith('/reports/tasks/kpis/drill',
+      expect.objectContaining({ params: expect.objectContaining({ kpi: 'created_in_period', period: 'month' }) }))
+  })
 
+  // Tolerant fallback (RAPPORT-KAARTDRILLS-2): with no kpis[] strip at all, the
+  // total/done cards pin the legacy envelope/summary value and render WITHOUT a
+  // drill — no kpis/drill request fires on click.
+  // Honest fallback: a pre-suite envelope (no kpis[]) renders the house dash on
+  // every card, with no drill affordance — never a value from another population.
+  it('renders dashes with no drill when kpis[] is absent', async () => {
+    const user = userEvent.setup()
+    mockUseTasksReport.mockReturnValue({ data, loading: false, error: false })
+    renderReport()
+    expect(screen.getAllByText('—').length).toBeGreaterThanOrEqual(9)
+    await user.click(screen.getByText('Totaal taken'))
+    expect(getSpy).not.toHaveBeenCalledWith('/reports/tasks/kpis/drill', expect.anything())
+  })
 
   // A missing/null count on a mapped card must never crash — the card renders
   // with a 0 fallback and, when a value truly cannot exist, no onClick at all.
@@ -366,82 +397,69 @@ describe('TasksReport (RAPPORTEN-SUITE-1 portie 6, tasks report)', () => {
 describe('TasksReport (nine-card KPI footprint)', () => {
   afterEach(() => { getSpy.mockClear() })
 
-  it('renders exactly nine KPI cards from the fixture', () => {
-    mockUseTasksReport.mockReturnValue({ data, loading: false, error: false })
+  it('renders exactly nine KPI cards, one per suite key', () => {
+    mockUseTasksReport.mockReturnValue({ data: dataWithSuite, loading: false, error: false })
     renderReport()
-    expect(screen.getByText('Totaal taken')).toBeInTheDocument()
-    expect(screen.getByText('Afgerond')).toBeInTheDocument()
-    expect(screen.getByText('Afrondingspercentage')).toBeInTheDocument()
-    // Each also renders as an axis bar below, so assert the count, not uniqueness.
-    expect(screen.getAllByText('Niet toegewezen').length).toBeGreaterThanOrEqual(2)
-    expect(screen.getAllByText('Geen afdeling').length).toBeGreaterThanOrEqual(2)
-    expect(screen.getAllByText('Geen vestiging').length).toBeGreaterThanOrEqual(2)
-    expect(screen.getByText('Te-laat-percentage')).toBeInTheDocument()
-    // overdueRate: 2 / 12 * 100 = 16,667% via the house number formatter.
-    expect(screen.getByText('16,7%')).toBeInTheDocument()  // FMT-PROCENT-1: at most one decimal
+    for (const label of ['Totaal taken', 'Open', 'Te laat', 'Afgerond in periode', 'Aangemaakt in periode',
+      'Vervalt vandaag', 'Vervalt deze week', 'Gem. doorlooptijd']) {
+      expect(screen.getAllByText(label).length).toBeGreaterThanOrEqual(1)
+    }
+    // 'Zonder behandelaar' may also appear as an axis bar row — count, not unique.
+    expect(screen.getAllByText('Zonder behandelaar').length).toBeGreaterThanOrEqual(1)
   })
 
-  it('clicking the "unassigned" KPI card drills with assignee=none, same as the bar', async () => {
+  it('clicking the without_assignee card drills via its own kpi key', async () => {
     const user = userEvent.setup()
-    mockUseTasksReport.mockReturnValue({ data, loading: false, error: false })
+    mockUseTasksReport.mockReturnValue({ data: dataWithSuite, loading: false, error: false })
     renderReport()
     getSpy.mockClear()
-    await user.click(screen.getAllByText('Niet toegewezen')[0])
-    expect(lastDrillParams()).toEqual({ assignee: 'none', period: 'month' })
+    await user.click(screen.getAllByText('Zonder behandelaar')[0])
+    expect(getSpy).toHaveBeenCalledWith('/reports/tasks/kpis/drill',
+      expect.objectContaining({ params: expect.objectContaining({ kpi: 'without_assignee' }) }))
   })
 
-  // overdueRate carries no drillable XOR axis — it must render as a plain stat,
-  // never a dead-looking button (no fake affordances).
-  it('the overdueRate KPI card is a non-clickable stat', () => {
-    mockUseTasksReport.mockReturnValue({ data, loading: false, error: false })
+  // A key the server omitted renders the dash with no clickable affordance
+  // (§0 no fake affordances) — pinned with a suite missing one key.
+  it('a card whose suite key is missing renders a dash and no button', () => {
+    const partial = { ...data, kpis: suiteKpis.filter(k => k.key !== 'due_today') }
+    mockUseTasksReport.mockReturnValue({ data: partial, loading: false, error: false })
     renderReport()
-    const card = screen.getByText('Te-laat-percentage').closest('div[role="button"]')
+    const card = screen.getByText('Vervalt vandaag').closest('[role="button"]')
     expect(card).toBeNull()
   })
 })
 
-// REPORTS-KPI-SPARE-1: four real spares grow the catalogue so the settings
-// screen has something to swap in.
-describe('TasksReport (spare KPI cards)', () => {
+// KPI-TAKEN-1: the catalogue IS the nine-key suite — reorderable, no spares
+// (the old summary/derived/top cards left the strip with the suite migration).
+describe('TasksReport (suite KPI catalogue)', () => {
   afterEach(() => { getSpy.mockClear(); mockSettings.mockReturnValue({}) })
 
-  it('offers the four new spare cards to the settings catalogue', async () => {
+  it('offers exactly the nine suite keys, in the suite order, with no spares', async () => {
     const { getReportKpiCatalog, getReportKpiDefaultOrder, reportHasSpareKpiCards } = await import('./kpiCatalog')
     const catalogKeys = getReportKpiCatalog('tasks').map(c => c.key)
-    expect(catalogKeys).toEqual(expect.arrayContaining(['topStatus', 'topType', 'topPriority', 'topAssignee']))
-    expect(catalogKeys.length).toBe(getReportKpiDefaultOrder('tasks').length + 4)
-    expect(reportHasSpareKpiCards('tasks')).toBe(true)
+    expect(catalogKeys).toEqual([
+      'total', 'open', 'overdue', 'done_in_period', 'created_in_period',
+      'due_today', 'due_this_week', 'without_assignee', 'avg_completion_days',
+    ])
+    expect(getReportKpiDefaultOrder('tasks')).toEqual(catalogKeys)
+    expect(reportHasSpareKpiCards('tasks')).toBe(false)
   })
 
-  it('renders swapped-in spare cards with their real fixture values, strip still exactly nine', async () => {
-    const user = userEvent.setup()
+  it('renders a stored reorder of the suite keys, strip still exactly nine', () => {
     mockSettings.mockReturnValue({
       report_kpis_tasks: JSON.stringify([
-        'topStatus', 'topType', 'topPriority', 'topAssignee',
-        'total', 'open', 'done', 'overdue', 'doneRate',
+        'overdue', 'due_today', 'due_this_week', 'without_assignee', 'open',
+        'total', 'created_in_period', 'done_in_period', 'avg_completion_days',
       ]),
     })
-    mockUseTasksReport.mockReturnValue({ data, loading: false, error: false })
+    mockUseTasksReport.mockReturnValue({ data: dataWithSuite, loading: false, error: false })
     renderReport()
-    // Each: the largest real (non-'none') segment of its axis.
-    expect(screen.getByText('Te doen · 6')).toBeInTheDocument()
-    expect(screen.getByText('Bellen · 8')).toBeInTheDocument()
-    expect(screen.getByText('Hoog · 9')).toBeInTheDocument()
-    expect(screen.getByText('Anna de Vries · 9')).toBeInTheDocument()
-
-    // Clicking a spare card drills the same real XOR param its axis bar uses.
-    // (The status axis already defaults to this exact top segment on mount, and
-    // React Query dedupes the identical rowsParams — so assert the request was
-    // sent with the real value rather than relying on a fresh network call.)
-    await user.click(screen.getByText('Te doen · 6'))
-    expect(getSpy).toHaveBeenCalledWith('/reports/tasks/drill',
-      expect.objectContaining({ params: { status: 'status-uuid-1', period: 'month' } }))
+    // The reordered strip still renders every suite label exactly once as a card.
+    expect(screen.getByText('Totaal taken')).toBeInTheDocument()
+    expect(screen.getByText('Vervalt vandaag')).toBeInTheDocument()
   })
 })
 
-// Opus-REJECT (kaartdrills): de vier eerder bedrade taken-koppels paren
-// gewindowde kaartgetallen aan ongewindowde server-kpi's — tot de strip de
-// server-kpis[] leest draagt geen enkele taken-KPI-kaart een drill.
 describe('TasksReport — kaartdrills eerlijk ontkoppeld', () => {
   it('no KPI card fires a kpis/drill request', () => {
     renderReport()
