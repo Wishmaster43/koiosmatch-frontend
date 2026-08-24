@@ -81,7 +81,10 @@ import { useDateFormat } from '@/lib/datetime'
 import { initialsOf } from '@/lib/initials'
 import { notifyError } from '@/lib/notify'
 import { openNoteEditPopout } from '@/lib/secondScreen'
+import { Caption } from '@/components/ui/typography'
+import Button from '@/components/ui/Button'
 import NoteComposer from './notes/NoteComposer'
+import type { NoteDraft } from '@/hooks/useNotesPopout'
 import { NoteTypeChip, NoteChannelChip } from './notes/NoteChips'
 // Rights + system-note rule — the SAME module the per-note popout window applies
 // (noteRights, §11: one rule, two surfaces — they must never disagree).
@@ -347,6 +350,12 @@ export default function NotesTab({
   // composing anything" again (mirrors the previous reset(), minus the field resets).
   // Dropping a received draft too, so a next note never re-seeds from it.
   const closeComposer = () => { setAdding(false); setEditingIdx(null); clearIncoming() }
+  // CONCEPT-NOTE-1 (Danny 24-08: "wegklikken en de tekst is weg is niet goed —
+  // als concept opslaan"): a cancelled NEW note survives as a session concept
+  // and seeds the next new-note open; a successful save clears it. Session
+  // scope is deliberate — note text is special-category data (§8), so it never
+  // touches localStorage; durable concepts are the CMBE follow-up.
+  const [concept, setConcept] = useState<NoteDraft | null>(null)
   // POPOUT-HANDOFF-1 (Danny 09-08: "moet bestaand venster sluiten en de pop-out
   // direct openen in het versleepbare scherm, zoals bij profieltekst"). Popping out
   // is a HANDOFF, not a second copy: two editors for one thread means whichever you
@@ -357,7 +366,9 @@ export default function NotesTab({
   const openEdit = (i: number) => { setEditingIdx(i); setAdding(true) }
   // NoteComposer hands back the finished payload; this is the only place that
   // still decides add-vs-edit (the index into the FULL `notes` array).
+  const handleSaveConcept = (draft: NoteDraft | null) => setConcept(draft)
   const handleSave = (payload: NotePayload) => {
+    setConcept(null)
     if (editingIdx == null) onAddNote?.(payload)
     else onEditNote?.(editingIdx, payload)
     closeComposer()
@@ -381,16 +392,18 @@ export default function NotesTab({
       <div key={key} style={{ display: 'flex', gap: 8, marginBottom: 10, alignItems: 'center' }}>
         <button onClick={() => window.dispatchEvent(new CustomEvent('km:open-changelog'))}
           title={labels.openChangelog} aria-label={labels.openChangelog}
+          // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- 26px ROUND timeline marker-button: Button's 28px r6 geometry breaks the circular marker; identity stays on hover-bg/muted tokens
           style={{ width: 26, height: 26, borderRadius: '50%', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--hover-bg)', color: 'var(--text-muted)', border: 'none', cursor: 'pointer' }}>
           <History size={13} />
         </button>
         <div style={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 8, padding: '6px 10px' }}>
           {n.type && <NoteTypeChip value={n.type} types={chipTypes ?? noteTypes} />}
           <SafeHtml style={{ fontSize: 12, color: 'var(--text)', flex: 1, minWidth: 0 }} html={n.text ?? n.body ?? ''} />
-          <span style={{ fontSize: 11, color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>{who ? `${who} · ` : ''}{noteWhen(n)}</span>
+          <Caption as="span" style={{ whiteSpace: 'nowrap' }}>{who ? `${who} · ` : ''}{noteWhen(n)}</Caption>
         </div>
         {canEditStatus && (
           <button onClick={onEditStatusEvent} title={labels.editStatusEvent} aria-label={labels.editStatusEvent}
+            // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- compact inline icon cluster in the note row (13px icons, 6px step): Button's 28px box would widen every row; identity stays muted ink on none
             style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 4, display: 'flex', flexShrink: 0 }}>
             <Edit2 size={13} />
           </button>
@@ -421,6 +434,7 @@ export default function NotesTab({
         meta: noteAuthor(n) || undefined,
         trailing: canEditStatus
           ? <button onClick={onEditStatusEvent} title={labels.editStatusEvent} aria-label={labels.editStatusEvent}
+              // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- compact inline icon cluster in the note row (13px icons, 6px step): Button's 28px box would widen every row; identity stays muted ink on none
               style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 4, display: 'flex', flexShrink: 0 }}>
               <Edit2 size={13} />
             </button>
@@ -447,8 +461,7 @@ export default function NotesTab({
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 12, color: 'var(--color-danger-text)', padding: '10px 2px' }}>
         <span>{labels.loadError}</span>
         {onRetry && (
-          <button onClick={onRetry} style={{ background: 'none', border: '1px solid var(--border)', borderRadius: 6,
-            padding: '3px 9px', cursor: 'pointer', color: 'var(--text)' }}>{labels.retry}</button>
+          <Button variant="secondary" size="sm" onClick={onRetry}>{labels.retry}</Button>
         )}
       </div>
     )
@@ -496,12 +509,15 @@ export default function NotesTab({
             compose target (new vs edit-i), so the fields always seed from the
             note actually being edited. */}
         <NoteComposer
-          key={incomingDraft ? 'handoff' : editingIdx != null ? `edit-${editingIdx}` : adding ? 'new' : 'idle'}
+          key={incomingDraft ? 'handoff' : editingIdx != null ? `edit-${editingIdx}` : adding ? (concept ? 'concept' : 'new') : 'idle'}
           open={composerOpen}
           initialNote={editingIdx != null ? notes[editingIdx] : null}
           // Second screen: seeded FROM a handed-over draft in the popout window,
           // and the source OF one in the drill-down (never both in one render).
-          initialDraft={incomingDraft}
+          // A NEW open with a kept concept restores that concept instead.
+          initialDraft={incomingDraft ?? (adding && editingIdx == null ? concept : null)}
+          conceptRestored={Boolean(!incomingDraft && adding && editingIdx == null && concept)}
+          onDraft={handleSaveConcept}
           noteTypes={noteTypes} channels={channels} labels={labels} editorLabels={editorLabels}
           composerExtra={composerExtra}
           onPopOutDraft={popout && !isPopoutWindow ? handOff : undefined} popOutPending={handoffPending}
@@ -525,7 +541,7 @@ export default function NotesTab({
                       <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>{n.title ?? who}</span>
                     </div>
                     {/* "By whom · when" (always) + "edited by X" once the backend logs it (NOTES-2b). */}
-                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
+                    <Caption as="span" style={{ display: 'inline-flex', alignItems: 'center', gap: 4, whiteSpace: 'nowrap' }}>
                       {who ? `${who} · ` : ''}{noteWhen(n)}
                       {/* EDIT-MARKER-1 (Danny 08-08 "2 keer een potloodje"): plain italic
                           meta text, no icon — a pencil here read as a second edit BUTTON. */}
@@ -534,16 +550,18 @@ export default function NotesTab({
                           · {t('notes.editedBy', { name: noteEditor(n), defaultValue: 'bewerkt door {{name}}' })}
                         </span>
                       )}
-                    </span>
+                    </Caption>
                     {/* RECHTEN-DETAIL-1: own note or manage_all — never a button the BE will 403. */}
                     {onEditNote && canManageNote(n) && (
                       <button onClick={() => openEdit(i)} title={labels.edit} aria-label={labels.edit}
+                        // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- compact inline icon cluster in the note row (13px icons, 6px step): Button's 28px box would widen every row; identity stays muted ink on none
                         style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '0 0 0 6px', display: 'flex' }}>
                         <Edit2 size={13} />
                       </button>
                     )}
                     {onDeleteNote && canManageNote(n) && (
                       <button onClick={() => requestDelete(i)} title={labels.deleteNote} aria-label={labels.deleteNote}
+                        // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- compact inline icon cluster in the note row (13px icons, 6px step): Button's 28px box would widen every row; identity stays muted ink on none
                         style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '0 0 0 6px', display: 'flex' }}>
                         <Trash2 size={13} />
                       </button>
@@ -558,6 +576,7 @@ export default function NotesTab({
                     {canPopOutNote && canManageNote(n) && noteIdOf(n) && (
                       <button type="button" onClick={() => openNoteWindow(noteIdOf(n) as string)}
                         title={t('openSecondScreen')} aria-label={t('openSecondScreen')}
+                        // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- compact inline icon cluster in the note row (13px icons, 6px step): Button's 28px box would widen every row; identity stays muted ink on none
                         style={{ background: 'none', border: 'none', cursor: 'pointer',
                           color: 'var(--text-muted)', padding: '0 0 0 6px', display: 'flex' }}>
                         <ExternalLink size={13} />

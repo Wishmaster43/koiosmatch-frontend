@@ -513,5 +513,8 @@
     "streetExample": "Hoofdstraat 12",
     "cityExample": "Amsterdam",
     "companyNameExample": "Jansen Zorggroep B.V."
+  },
+  "noteConcept": {
+    "restored": "Concept hersteld. Nog niet opgeslagen."
   }
 }

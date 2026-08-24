@@ -513,5 +513,8 @@
     "streetExample": "Hauptstraße 12",
     "cityExample": "Berlin",
     "companyNameExample": "Jansen Pflegegruppe GmbH"
+  },
+  "noteConcept": {
+    "restored": "Entwurf wiederhergestellt. Noch nicht gespeichert."
   }
 }

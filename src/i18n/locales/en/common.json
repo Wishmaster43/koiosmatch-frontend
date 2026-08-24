@@ -513,5 +513,8 @@
     "streetExample": "Main Street 12",
     "cityExample": "Amsterdam",
     "companyNameExample": "Jansen Care Group Ltd"
+  },
+  "noteConcept": {
+    "restored": "Draft restored. Not saved yet."
   }
 }

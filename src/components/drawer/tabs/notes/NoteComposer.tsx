@@ -57,6 +57,7 @@ import { ExternalLink, Save, X } from 'lucide-react'
 import FloatingPanel from '@/components/ui/FloatingPanel'
 import Button from '@/components/ui/Button'
 import NoteFields from './NoteFields'
+import { Caption } from '@/components/ui/typography'
 import { useNoteFields } from './useNoteFields'
 import NoteActionsPanel from './NoteActionsPanel'
 import type { NoteActionPanelItem } from './NoteActionsPanel'
@@ -88,6 +89,13 @@ interface NoteComposerProps {
   // A draft handed over BY another window. Seeds exactly the fields `initialNote`
   // seeds, but the note stays a NEW one (a draft carries no note id).
   initialDraft?: NoteDraft | null
+  // CONCEPT-NOTE-1: called on cancel with the current draft (new notes with any
+  // content) so the host can keep it as a session concept — or null when there
+  // is nothing worth keeping. Closing must never silently destroy typed work.
+  onDraft?: (draft: NoteDraft | null) => void
+  // True when initialDraft is a RESTORED concept (not a popout handoff) — the
+  // composer then shows the honest "hersteld, nog niet opgeslagen" line.
+  conceptRestored?: boolean
   // ASSIST-SIDEPANEEL-1: the candidate this note belongs to — the fallback
   // deep-link target for an executed appointment item in the side panel
   // (no dedicated appointments page exists yet). Omitted on a non-candidate
@@ -97,7 +105,7 @@ interface NoteComposerProps {
   onCancel: () => void
 }
 
-export default function NoteComposer({ open, initialNote, noteTypes, channels, labels, editorLabels, composerExtra, onPopOutDraft, popOutPending, initialDraft, candidateId, onSave, onCancel }: NoteComposerProps) {
+export default function NoteComposer({ open, initialNote, noteTypes, channels, labels, editorLabels, composerExtra, onPopOutDraft, popOutPending, initialDraft, candidateId, onSave, onCancel, onDraft, conceptRestored }: NoteComposerProps) {
   const { t } = useTranslation('common')
   const isNew = initialNote == null
   // Existing note's own id (K0-B execute source) — a NoteItem's index signature
@@ -117,13 +125,26 @@ export default function NoteComposer({ open, initialNote, noteTypes, channels, l
   // ASSIST-SIDEPANEEL-1: the side panel's own item state — lives in the
   // composer so it survives multiple Verwerken/Samenvatten runs for as long
   // as the popup stays open (Danny punt 6/7: results merge, never reset).
-  const [panelItems, setPanelItems] = useState<NoteActionPanelItem[]>([])
+  const [panelItems, setPanelItems] = useState<NoteActionPanelItem[]>(() => (initialDraft?.items as NoteActionPanelItem[] | undefined) ?? [])
   const koios = useMyKoiosMode()
   const onAssistItems = (fresh: AssistActionItem[]) =>
     setPanelItems(prev => mergeNoteActionItems(prev, fresh))
   const knownItems = useMemo(() => toKnownItems(panelItems), [panelItems])
 
   const save = () => onSave(fields.payload)
+  // Cancel = hand the draft back first (CONCEPT-NOTE-1): a NEW note with any
+  // typed/dictated content or live action items becomes the host's session
+  // concept; an empty composer clears a stale one. Editing an existing note
+  // keeps the old semantics (cancel discards the edit).
+  const cancel = () => {
+    if (onDraft && isNew) {
+      const hasContent = Boolean(fields.title.trim()) || fields.body.replace(/<[^>]*>/g, '').trim().length > 0 || panelItems.length > 0
+      onDraft(hasContent
+        ? { type: fields.type, channel: fields.channel, title: fields.title, body: fields.body, language: fields.language, items: panelItems }
+        : null)
+    }
+    onCancel()
+  }
   // Only a NEW note is handed over from HERE: a draft carries no note id, so a
   // window receiving one saves it as a new note. An existing note has its own,
   // id-based route to the second screen since NOTITIE-POPOUT-EDIT-1 — the pop-out
@@ -143,7 +164,7 @@ export default function NoteComposer({ open, initialNote, noteTypes, channels, l
   return (
     // closeOnBackdrop={false}: this window holds UNSAVED typed/dictated work —
     // only the explicit close/cancel buttons may discard it (Danny 23-08).
-    <FloatingPanel open={open} onClose={onCancel} title={panelTitle} ariaLabel={panelTitle}
+    <FloatingPanel open={open} onClose={cancel} title={panelTitle} ariaLabel={panelTitle}
       persistKey="notes-composer" width={panelItems.length > 0 ? 960 : 640} maxWidth="92vw"
       scrollBody={false} closeOnBackdrop={false} maximizable>
       {/* Two-column body once the side panel has items (ASSIST-SIDEPANEEL-1
@@ -159,6 +180,11 @@ export default function NoteComposer({ open, initialNote, noteTypes, channels, l
           {/* Host-supplied composer row (e.g. the customer tab's link-level picker) —
               sits ABOVE the type row because the picked scope drives the type list. */}
           {isNew && composerExtra}
+          {/* CONCEPT-NOTE-1: an earlier cancelled draft came back — say so
+              honestly (it is restored, not saved). */}
+          {conceptRestored && (
+            <Caption as="div">{t('noteConcept.restored', { defaultValue: 'Concept hersteld. Nog niet opgeslagen.' })}</Caption>
+          )}
           {/* The five shared fields (type · channel · title · editor · assist) — the
               SAME NoteFields the per-note popout window renders. The pop-out icon
               rides the title row via titleExtra, NEW notes only (see canHandOff). */}
@@ -188,7 +214,7 @@ export default function NoteComposer({ open, initialNote, noteTypes, channels, l
         {/* aria-label is TOTAL (the Button type demands it): labels.save/cancel are
             optional host overrides, so the common keys are the guaranteed floor. */}
         <Button variant="primary" iconOnly onClick={save} title={labels.save ?? t('save')} aria-label={labels.save ?? t('save')}><Save size={14} /></Button>
-        <Button variant="secondary" iconOnly onClick={onCancel} title={labels.cancel ?? t('cancel')} aria-label={labels.cancel ?? t('cancel')}><X size={14} /></Button>
+        <Button variant="secondary" iconOnly onClick={cancel} title={labels.cancel ?? t('cancel')} aria-label={labels.cancel ?? t('cancel')}><X size={14} /></Button>
       </div>
     </FloatingPanel>
   )

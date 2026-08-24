@@ -54,6 +54,10 @@ export interface NoteDraft {
   title: string
   body: string
   language?: string
+  // CONCEPT-NOTE-1 (Danny 24-08): a cancelled composer hands its draft back as
+  // a session concept — including the action panel's items, so the wizard
+  // state survives a close/reopen too. The popout handoff simply omits it.
+  items?: unknown[]
 }
 
 // The handoff vocabulary — mirroring the text popout's own, plus `edit` for an

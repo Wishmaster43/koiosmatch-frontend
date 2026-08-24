@@ -513,5 +513,8 @@
     "streetExample": "Calle Mayor 12",
     "cityExample": "Madrid",
     "companyNameExample": "Grupo Sanitario Jansen"
+  },
+  "noteConcept": {
+    "restored": "Borrador restaurado. Aún no guardado."
   }
 }

@@ -513,5 +513,8 @@
     "streetExample": "Rue Principale 12",
     "cityExample": "Paris",
     "companyNameExample": "Groupe de soins Jansen"
+  },
+  "noteConcept": {
+    "restored": "Brouillon restauré. Pas encore enregistré."
   }
 }

@@ -88,6 +88,38 @@ describe('NoteComposer · popup lifecycle', () => {
     await user.click(screen.getByTitle('Cancel'))
     expect(onCancel).toHaveBeenCalledTimes(1)
   })
+
+  // CONCEPT-NOTE-1 (Danny 24-08): cancelling a NEW note with typed content hands
+  // the draft back as a session concept — closing must never destroy work; an
+  // empty composer hands back null so a stale concept clears.
+  it('hands the draft to onDraft on cancel when a new note carries content', async () => {
+    const user = userEvent.setup()
+    const onDraft = vi.fn()
+    render(<NoteComposer open initialNote={null}
+      initialDraft={{ type: 'general', channel: '', title: 'Bel Bas', body: '<p>concept</p>' }}
+      noteTypes={noteTypes} channels={[]} labels={labels} onSave={vi.fn()} onCancel={vi.fn()} onDraft={onDraft} />)
+    await user.click(screen.getByTitle('Cancel'))
+    expect(onDraft).toHaveBeenCalledWith(expect.objectContaining({ title: 'Bel Bas', body: '<p>concept</p>' }))
+  })
+
+  it('hands null to onDraft on cancel when the composer is empty', async () => {
+    const user = userEvent.setup()
+    const onDraft = vi.fn()
+    render(<NoteComposer open initialNote={null} noteTypes={noteTypes} channels={[]} labels={labels} onSave={vi.fn()} onCancel={vi.fn()} onDraft={onDraft} />)
+    await user.click(screen.getByTitle('Cancel'))
+    expect(onDraft).toHaveBeenCalledWith(null)
+  })
+
+  it('shows the honest restored-concept line only when conceptRestored is set', () => {
+    const { rerender } = render(<NoteComposer open initialNote={null}
+      initialDraft={{ type: 'general', channel: '', title: 'x', body: '<p>y</p>' }} conceptRestored
+      noteTypes={noteTypes} channels={[]} labels={labels} onSave={vi.fn()} onCancel={vi.fn()} />)
+    expect(screen.getByText('Concept hersteld. Nog niet opgeslagen.')).toBeInTheDocument()
+    rerender(<NoteComposer open initialNote={null}
+      initialDraft={{ type: 'general', channel: '', title: 'x', body: '<p>y</p>' }}
+      noteTypes={noteTypes} channels={[]} labels={labels} onSave={vi.fn()} onCancel={vi.fn()} />)
+    expect(screen.queryByText('Concept hersteld. Nog niet opgeslagen.')).toBeNull()
+  })
 })
 
 describe('NoteComposer · resize grows the editor (RESIZE-GROWS-EDITOR)', () => {
