@@ -12,89 +12,40 @@
  * `?open=<id>`) via `window.history.pushState` + a synthetic `popstate`, since
  * this component sits above `NavigationProvider` in the tree and has no direct
  * access to `goTo`/`openEntity`.
+ *
+ * NOTIF-ATTENTION-V1: the target-resolution logic now lives in the shared
+ * `./notificationTarget` module (useNotifications' attention toasts use the
+ * SAME mapping) — re-exported here so existing imports/tests are unaffected.
+ * A row that resolves to a target also renders the EntityLink-style trailing
+ * new-tab icon, opening that record's deep link in a new tab.
  */
 import { useState, useRef, useEffect } from 'react'
+import type { MouseEvent as ReactMouseEvent } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Bell } from 'lucide-react'
+import { useDateFormat } from '@/lib/datetime'
+import { Bell, ExternalLink } from 'lucide-react'
 import { useNotifications } from '@/hooks/useNotifications'
-import type { AppNotification } from '@/hooks/useNotifications'
 // PORTAL-MARKER-1: a click inside an open portalled picker menu is never "outside".
 import { isInsideDropdownPortal } from '@/lib/useDropdownPlacement'
 import { SectionTitle, BodyText, Caption } from '@/components/ui/typography'
+import Button from '@/components/ui/Button'
+import {
+  resolveNotificationTarget, navigateToNotificationTarget, buildNotificationDeepLink,
+} from './notificationTarget'
+import type { NotificationTarget } from './notificationTarget'
 
-// Locale-aware short date-time for a notification row.
-const fmt = (iso?: string) => {
-  if (!iso) return ''
-  const d = new Date(iso)
-  return isNaN(d.getTime()) ? '' : d.toLocaleString('nl-NL', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
-}
-
-// Backend entity-type slug → the app shell's page key (appPages.tsx PAGE_TITLES).
-const ENTITY_PAGE: Record<string, string> = {
-  candidate: 'candidates', lead: 'candidates', application: 'applications',
-  vacancy: 'vacancies', match: 'matches', task: 'tasks',
-  opportunity: 'opportunities', customer: 'customers',
-}
-
-export interface NotificationTarget { page: string; id: string }
-
-// NOTIF-CONTEXTEN-FE-1 (CMBE 23-08): calllist/opportunity notifications carry
-// their own `data.type` (not the generic meta.type/meta.id pointer) plus a
-// custom meta shape — campaign_id for a call-list assignment, opportunity_id
-// for a won/lost deal — so each type resolves its own target from meta below,
-// checked before the generic meta.type/entity_type path.
-// BEL-ACTIE-VANDAAG-1 (CMBE K-156): appointment.today carries { appointment_id,
-// candidate_id, at } — no agenda/appointments page exists yet (grepped
-// appPages/registry), so the deep-link goes to the candidate's drawer, same as
-// every other candidate-anchored notification.
-const CUSTOM_TYPE_TARGETS: Record<string, (meta: Record<string, unknown>) => NotificationTarget | null> = {
-  'calllist.target_assigned': (meta) => (meta.campaign_id != null ? { page: 'outreach', id: String(meta.campaign_id) } : null),
-  'opportunity.won': (meta) => (meta.opportunity_id != null ? { page: 'opportunities', id: String(meta.opportunity_id) } : null),
-  'opportunity.lost': (meta) => (meta.opportunity_id != null ? { page: 'opportunities', id: String(meta.opportunity_id) } : null),
-  'appointment.today': (meta) => (meta.candidate_id != null ? { page: 'candidates', id: String(meta.candidate_id) } : null),
-}
-
-// Pure: resolve a notification into a navigable {page, id}, or null when nothing
-// on the row is a real target (a row with no target must stay non-clickable).
-// eslint-disable-next-line react-refresh/only-export-components -- pure helper co-located with its one caller (BEL-DOORKLIK), unit-tested directly; HMR-nicety warning only
-export function resolveNotificationTarget(n: AppNotification): NotificationTarget | null {
-  const meta = (n as { meta?: Record<string, unknown> }).meta ?? {}
-  const dataType = (n as { type?: string }).type
-  // Object.hasOwn (not `in`/bracket lookup alone) so a `type` of 'constructor'/
-  // 'toString' can never resolve through Object.prototype (SETTINGS-TABS-FIX-1
-  // review — a plain object literal let those two names return a truthy
-  // non-target, e.g. navigation to '#undefined?open=undefined').
-  const customTarget = dataType && Object.hasOwn(CUSTOM_TYPE_TARGETS, dataType)
-    ? CUSTOM_TYPE_TARGETS[dataType](meta)
-    : undefined
-  if (customTarget) return customTarget
-  const type = (meta.type as string | undefined) ?? (n as { entity_type?: string }).entity_type
-  const rawId = (meta.id as string | number | undefined) ?? (n as { entity_id?: string | number }).entity_id
-  const page = type ? ENTITY_PAGE[type] : undefined
-  if (page && rawId != null) return { page, id: String(rawId) }
-  // Fall back to a same-app hash link the backend already resolved, e.g. "#tasks?open=42".
-  const link = n.link
-  if (link && link.startsWith('#')) {
-    const raw = link.replace(/^#/, '')
-    const [p, q] = raw.split('?')
-    const id = q ? new URLSearchParams(q).get('open') : null
-    if (p && id) return { page: p, id }
-  }
-  return null
-}
-
-// Impure: navigate to a resolved target via the shell's own hash-history
-// contract (mirrors DashboardLayout's goTo + useDrawerUrl's writeOpenId), so the
-// target page's own drawer-open effect (`?open=<id>`) picks it up unchanged.
-function navigateToTarget(target: NotificationTarget) {
-  const hash = `#${target.page}?open=${encodeURIComponent(target.id)}`
-  const state = { kmPage: target.page, drawerOpen: target.id }
-  window.history.pushState(state, '', hash)
-  window.dispatchEvent(new PopStateEvent('popstate', { state }))
-}
+// Re-exported for backward compatibility (existing imports/tests reach these
+// through NotificationBell); the single source of truth is ./notificationTarget.
+// eslint-disable-next-line react-refresh/only-export-components -- pure helper re-export co-located with its one caller; HMR-nicety warning only
+export { resolveNotificationTarget }
+export type { NotificationTarget }
 
 export default function NotificationBell() {
   const { t } = useTranslation('common')
+  // DATUM-1: rows read DD-MM-YYYY HH:mm through the house formatter — never a
+  // hand-built toLocaleString (naronde wave-B1; the local fmt helper is gone).
+  const { formatDateTime } = useDateFormat()
+  const fmt = (iso?: string) => (iso ? formatDateTime(iso) : '')
   const { items, unseen, markAllSeen } = useNotifications()
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
@@ -173,17 +124,29 @@ export default function NotificationBell() {
                   key={n.id ?? i}
                   role="menuitem"
                   tabIndex={clickable ? 0 : -1}
-                  onClick={clickable ? () => { navigateToTarget(target!); setOpen(false) } : undefined}
-                  onKeyDown={clickable ? (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); navigateToTarget(target!); setOpen(false) } } : undefined}
+                  onClick={clickable ? () => { navigateToNotificationTarget(target!); setOpen(false) } : undefined}
+                  onKeyDown={clickable ? (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); navigateToNotificationTarget(target!); setOpen(false) } } : undefined}
                   style={{
                     padding: '10px 16px', borderBottom: i < items.length - 1 ? '1px solid var(--border)' : 'none',
-                    display: 'flex', flexDirection: 'column', gap: 2,
+                    display: 'flex', alignItems: 'flex-start', gap: 8,
                     cursor: clickable ? 'pointer' : 'default',
                   }}
                 >
-                  <BodyText style={{ fontWeight: n.seen ? 400 : 600 }}>{n.title || '—'}</BodyText>
-                  {n.body && <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{n.body}</div>}
-                  <Caption>{fmt(n.created_at)}</Caption>
+                  <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 2 }}>
+                    <BodyText style={{ fontWeight: n.seen ? 400 : 600 }}>{n.title || '—'}</BodyText>
+                    {n.body && <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{n.body}</div>}
+                    <Caption>{fmt(n.created_at)}</Caption>
+                  </div>
+                  {/* EntityLink idiom: the row name navigates in-app, this icon opens
+                      the same record's deep link in a new browser tab. */}
+                  {clickable && (
+                    <Button href={buildNotificationDeepLink(target!)} target="_blank" rel="noopener noreferrer"
+                      onClick={(e: ReactMouseEvent) => e.stopPropagation()} variant="ghost" iconOnly size="sm"
+                      title={t('openInNewTab')} aria-label={t('openInNewTab')}
+                      style={{ flexShrink: 0, opacity: 0.65, marginTop: 2 }}>
+                      <ExternalLink size={12} />
+                    </Button>
+                  )}
                 </div>
               )
             })

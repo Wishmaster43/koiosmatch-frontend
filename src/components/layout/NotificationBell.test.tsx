@@ -98,6 +98,20 @@ describe('NotificationBell row click-through', () => {
     window.removeEventListener('popstate', onPopState)
   })
 
+  // NOTIF-ATTENTION-V1: a resolvable row also carries a trailing new-tab icon
+  // anchor (EntityLink idiom), independent of the in-app name click.
+  it('renders a new-tab anchor for a resolvable row, pointing at its deep link', () => {
+    vi.spyOn(useNotificationsModule, 'useNotifications').mockReturnValue({
+      items: [{ id: 1, title: 'Match verloopt', entity_type: 'match', entity_id: '55', seen: false }],
+      unseen: 1, markAllSeen: vi.fn(), reload: vi.fn(),
+    } as unknown as ReturnType<typeof useNotificationsModule.useNotifications>)
+    render(<NotificationBell />)
+    fireEvent.click(screen.getByRole('button', { name: /notificat/i }))
+    const link = screen.getByRole('link')
+    expect(link).toHaveAttribute('href', expect.stringContaining('matches?open=55'))
+    expect(link).toHaveAttribute('target', '_blank')
+  })
+
   it('does not navigate when a row has no resolvable target', () => {
     vi.spyOn(useNotificationsModule, 'useNotifications').mockReturnValue({
       items: [{ id: 2, title: 'System message', seen: false }],

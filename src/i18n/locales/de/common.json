@@ -268,7 +268,9 @@
   "remove": "Entfernen",
   "notifications": {
     "title": "Benachrichtigungen",
-    "empty": "Keine Benachrichtigungen"
+    "empty": "Keine Benachrichtigungen",
+    "moreNew_one": "{{count}} weitere neue Benachrichtigung",
+    "moreNew_other": "{{count}} weitere neue Benachrichtigungen"
   },
   "activeFilters": "Aktive Filter",
   "clearAll": "Alle löschen",

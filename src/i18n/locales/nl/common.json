@@ -268,7 +268,9 @@
   "remove": "Verwijderen",
   "notifications": {
     "title": "Notificaties",
-    "empty": "Geen notificaties"
+    "empty": "Geen notificaties",
+    "moreNew_one": "{{count}} nieuwe notificatie meer",
+    "moreNew_other": "{{count}} nieuwe notificaties meer"
   },
   "activeFilters": "Actieve filters",
   "clearAll": "Alles wissen",

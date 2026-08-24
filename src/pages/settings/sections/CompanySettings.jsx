@@ -21,7 +21,11 @@ import { fieldSelectStyle, fieldInputStyle } from '@/components/forms/fieldMetri
 // Option lists (data — kept as-is; only labels are translated). Industries and
 // countries are now backend-sourced (Settings → Personalisation → Industries;
 // GET /countries, COUNTRY-LOOKUP-1) — never a hardcoded list of either.
-const LANGUAGES = APP_LANGUAGES.map(l => l.label)
+// Value = locale CODE (what the setting stores and i18n understands), label =
+// the language NAME (Danny 25-08: "Taal moet Nederlands zijn, niet nl").
+const LANGUAGES = APP_LANGUAGES.map(l => ({ value: l.value, label: l.label }))
+// Legacy rows stored the NAME; normalize either shape to the code.
+const toLanguageCode = v => APP_LANGUAGES.find(l => l.value === v || l.label === v)?.value ?? 'nl'
 const CURRENCIES = ['Euro (€)','Dollar ($)','Pond (£)']
 const TIMEZONES  = ['Europa/Amsterdam','Europa/Brussel','Europa/Londen','UTC']
 
@@ -100,7 +104,7 @@ const EMPTY = {
   company_industry: '', company_country: 'NL',
   company_street: '', company_house_number: '', company_house_number_suffix: '',
   company_postcode: '', company_city: '', company_province: '',
-  company_language: 'Nederlands', company_currency: 'Euro (€)', company_timezone: 'Europa/Amsterdam',
+  company_language: 'nl', company_currency: 'Euro (€)', company_timezone: 'Europa/Amsterdam',
 }
 
 export default function CompanySettings() {
@@ -134,7 +138,7 @@ export default function CompanySettings() {
         company_postcode: s.company_postcode ?? '',
         company_city:     s.company_city     ?? '',
         company_province: s.company_province ?? '',
-        company_language: s.company_language ?? 'Nederlands',
+        company_language: toLanguageCode(s.company_language),
         company_currency: s.company_currency ?? 'Euro (€)',
         company_timezone: s.company_timezone ?? 'Europa/Amsterdam',
       }))

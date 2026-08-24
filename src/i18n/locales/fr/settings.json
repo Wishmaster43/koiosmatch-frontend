@@ -823,6 +823,10 @@
       "subscribeFailed": "L'inscription aux notifications du navigateur a échoué.",
       "unsubscribeFailed": "La désinscription des notifications du navigateur a échoué."
     },
+    "sound": {
+      "title": "Son pour une nouvelle notification",
+      "desc": "Joue un léger carillon lorsqu’une nouvelle notification arrive."
+    },
     "channels": {
       "label": "Notifier via",
       "desc": "Choisissez par canal si ces notifications arrivent : dans l’application, par e-mail ou les deux."

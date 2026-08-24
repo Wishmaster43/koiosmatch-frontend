@@ -1069,6 +1069,10 @@
       "subscribeFailed": "Inschrijven voor browsermeldingen is mislukt.",
       "unsubscribeFailed": "Uitschrijven voor browsermeldingen is mislukt."
     },
+    "sound": {
+      "title": "Geluid bij nieuwe notificatie",
+      "desc": "Speel een zachte melding af wanneer er een nieuwe notificatie binnenkomt."
+    },
     "channels": {
       "label": "Melden via",
       "desc": "Kies per kanaal of deze meldingen aankomen: in de app, per e-mail of allebei."

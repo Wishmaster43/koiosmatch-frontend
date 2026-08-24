@@ -42,6 +42,7 @@
 import { useEffect, useState } from 'react'
 import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useUserPreference } from '@/hooks/useUserPreference'
 import { AlertTriangle } from 'lucide-react'
 import api, { unwrap } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
@@ -141,10 +142,21 @@ const captionStyle: CSSProperties = {
   textTransform: 'uppercase', letterSpacing: 0.4, textAlign: 'center',
 }
 
+/** The chime is a PERSONAL choice: it lives in the logged-in user's own
+ * ui_preferences (PUT /auth/me, the documented mechanism for exactly this) —
+ * NEVER the tenant-wide settings blob, where one recruiter muting the sound
+ * would silence every colleague and a non-settings.update user would get a
+ * silently-swallowed 403 (Opus wave-B1 BLOCKER). Default ON. */
+function useSoundSetting() {
+  const [enabled, setEnabled] = useUserPreference<boolean>('notif_sound_enabled', true)
+  return { enabled, toggle: setEnabled }
+}
+
 export default function MyNotificationsSettings() {
   const { t } = useTranslation('settings')
   const { contexts, loading, error, setContext } = useMyNotifications()
   const push = useBrowserPush()
+  const sound = useSoundSetting()
   const known = Object.keys(contexts)
 
   // Inherit clears the override (null), On/Off force the context for the
@@ -175,6 +187,11 @@ export default function MyNotificationsSettings() {
           <Toggle checked={push.subscribed} onChange={push.toggle}
             disabled={!push.supported || push.permission === 'denied' || push.busy}
             ariaLabel={t('notifications.push.title')} />
+        </SettingRow>
+        {/* NOTIF-ATTENTION-V1: whether the new-notification attention toast also
+            plays a soft chime. Default ON — a per-user ui_preferences choice. */}
+        <SettingRow label={t('notifications.sound.title')} description={t('notifications.sound.desc')}>
+          <Toggle checked={sound.enabled} onChange={sound.toggle} ariaLabel={t('notifications.sound.title')} />
         </SettingRow>
       </SettingCardList>
 

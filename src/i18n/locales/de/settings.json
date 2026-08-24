@@ -823,6 +823,10 @@
       "subscribeFailed": "Das Abonnieren von Browserbenachrichtigungen ist fehlgeschlagen.",
       "unsubscribeFailed": "Das Abbestellen von Browserbenachrichtigungen ist fehlgeschlagen."
     },
+    "sound": {
+      "title": "Ton bei neuer Benachrichtigung",
+      "desc": "Spielt einen sanften Ton ab, wenn eine neue Benachrichtigung eintrifft."
+    },
     "channels": {
       "label": "Benachrichtigen über",
       "desc": "Wählen Sie pro Kanal, ob diese Benachrichtigungen ankommen: in der App, per E-Mail oder beides."

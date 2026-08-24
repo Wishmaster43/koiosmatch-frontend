@@ -1069,6 +1069,10 @@
       "subscribeFailed": "Subscribing to browser notifications failed.",
       "unsubscribeFailed": "Unsubscribing from browser notifications failed."
     },
+    "sound": {
+      "title": "Sound on new notification",
+      "desc": "Play a soft chime when a new notification arrives."
+    },
     "channels": {
       "label": "Notify via",
       "desc": "Choose per channel whether these notifications arrive: in the app, by email, or both."

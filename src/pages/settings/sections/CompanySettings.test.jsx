@@ -89,6 +89,26 @@ describe('CompanySettings — banner upload (BANNER-UPLOAD-1)', () => {
 const rowOf = (label) => screen.getByText(label).parentElement
 const precedes = (a, b) => Boolean(a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING)
 
+// TAAL-NAAM-1 (Danny 25-08: "bij Taal moet Nederlands staan en niet nl"): the
+// setting stores the locale CODE; the field always shows the language NAME, and
+// a legacy row that stored the name normalizes to the code (never a raw 'nl').
+describe('CompanySettings — language shows its name, stores its code (TAAL-NAAM-1)', () => {
+  it('renders "Nederlands" for a stored code and never the raw code', async () => {
+    loadSettings.mockResolvedValue({ company_language: 'nl' })
+    saveSettings.mockResolvedValue(undefined)
+    render(<CompanySettings />)
+    expect(await screen.findByText('Nederlands')).toBeInTheDocument()
+    expect(screen.queryByText(/^nl$/)).not.toBeInTheDocument()
+  })
+
+  it('normalizes a legacy stored NAME to its code and still renders the name', async () => {
+    loadSettings.mockResolvedValue({ company_language: 'Deutsch' })
+    saveSettings.mockResolvedValue(undefined)
+    render(<CompanySettings />)
+    expect(await screen.findByText('Deutsch')).toBeInTheDocument()
+  })
+})
+
 describe('CompanySettings — field order & grouping (COMPANY-ORDER-1)', () => {
   it('renders identity → address (street…country) → preferences, each under its own heading', async () => {
     loadSettings.mockResolvedValue({})

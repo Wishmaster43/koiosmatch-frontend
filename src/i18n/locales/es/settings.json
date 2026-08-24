@@ -823,6 +823,10 @@
       "subscribeFailed": "No se pudo suscribir a las notificaciones del navegador.",
       "unsubscribeFailed": "No se pudo cancelar la suscripción a las notificaciones del navegador."
     },
+    "sound": {
+      "title": "Sonido con nueva notificación",
+      "desc": "Reproduce un suave sonido cuando llega una nueva notificación."
+    },
     "channels": {
       "label": "Notificar mediante",
       "desc": "Elige por canal si estas notificaciones llegan: en la aplicación, por correo electrónico o ambos."
