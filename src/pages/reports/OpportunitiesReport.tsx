@@ -22,7 +22,10 @@ import type { KpiSpec } from '@/components/insights/InsightsRow'
 import type { DrillSpec } from './ReportDrillDrawer'
 import { useOpportunitiesReport } from './useOpportunitiesReport'
 import { gateDrillClick } from './reportDrillGate'
-import SegmentBars from './SegmentBars'
+import PieChartCard from '@/components/charts/PieChartCard'
+import BarChartCard from '@/components/charts/BarChartCard'
+import { CHART_SERIES_COLORS } from '@/components/charts/chartTypes'
+import type { ChartDatum } from '@/components/charts/chartTypes'
 import ReportTimeseriesChart from './ReportTimeseriesChart'
 import { useDateFormat } from '@/lib/datetime'
 import { useNumberFormat, formatPercent } from '@/lib/formatters'
@@ -42,6 +45,14 @@ type Axis = 'stage' | 'customer' | 'branch'
 // Minimal surface the generic bar renderer needs — stage rows carry a lookup
 // colour, customer/branch rows do not (SegmentBars falls back to the primary tint).
 type AxisSeg = { value: string; label: string; count: number; color?: string | null }
+
+// Semantic colour per signal card, non-zero only (§4) — one map, mirroring the
+// reference's SUITE_COLOR idiom (wave-2 Opus minor: no per-card ternary paint).
+const OPP_COLOR: Record<string, string> = {
+  won: 'var(--color-success)', lost: 'var(--color-danger)',
+  untouched: 'var(--color-warning)', overdue: 'var(--color-danger)',
+  staleDeal: 'var(--color-warning)', closingSoon: 'var(--color-warning)',
+}
 
 export default function OpportunitiesReport({ period, compare = COMPARE_OFF }: { period: ReportPeriod; compare?: ReportCompareMode }) {
   const { t } = useTranslation('analytics')
@@ -65,6 +76,7 @@ export default function OpportunitiesReport({ period, compare = COMPARE_OFF }: {
   const openSegment = (seg: { label: string; count: number }, xorParam: Record<string, unknown>) =>
     setDrill({
       title: seg.label, value: seg.count, subtitle: windowSub(),
+      entityPage: 'opportunities',
       rowsEndpoint: '/reports/opportunities/drill', rowsParams: { ...xorParam, period },
       adviceEndpoint: '/reports/opportunities/advice', adviceParams: { ...xorParam, period },
     })
@@ -78,28 +90,40 @@ export default function OpportunitiesReport({ period, compare = COMPARE_OFF }: {
     adviceParams: { date: pt.date, ...(data?.timeseries.bucket === 'week' ? { bucket: 'week' } : {}), period },
   })
 
-  // Generic axis-bar renderer: 'none'/'others' sentinels and orphaned (deleted-
-  // lookup) values are all normal array entries — each drills on its RAW value,
-  // exactly like any other segment (no special-casing, see SegmentBars).
-  const bars = (axis: Axis, segs: AxisSeg[]) => {
-    const max = segs.reduce((m, s) => Math.max(m, s.count), 0)
-    const onPick = gateDrillClick('opportunities', (value: string) => {
-      const seg = segs.find(s => s.value === value)
-      if (seg) openSegment(seg, { [axis]: value })
+  // Stage axis: a lookup axis with its own colour per value (CHART-TYPE RULE) →
+  // donut. 'none'/'others' sentinels and orphaned (deleted-lookup) values are
+  // all normal array entries — each slice drills on its RAW value.
+  const stageDonut = (segs: AxisSeg[]) => {
+    const donutData = {
+      data: segs.map(s => ({ name: s.label, value: s.count, key: s.value })),
+      colors: segs.map((s, i) => s.color ?? CHART_SERIES_COLORS[i % CHART_SERIES_COLORS.length]),
+    }
+    const onPick = gateDrillClick('opportunities', (d: unknown) => {
+      const key = (d as { key?: string })?.key ?? (d as { payload?: { key?: string } })?.payload?.key
+      const seg = segs.find(s => s.value === key)
+      if (seg) openSegment(seg, { stage: key })
     })
-    return <SegmentBars max={max} onPick={onPick}
-      items={segs.map(s => ({ key: s.value, label: s.label, count: s.count, color: s.color ?? null }))} />
+    return <PieChartCard {...donutData} onItemClick={onPick} />
   }
 
-  // Owner axis (D2 shape: owner_id/name → the `owner` param).
-  const ownerBars = (segs: CandidateOwnerSegment[]) => {
-    const max = segs.reduce((m, s) => Math.max(m, s.count), 0)
-    const onPick = gateDrillClick('opportunities', (value: string) => {
-      const seg = segs.find(s => s.owner_id === value)
-      if (seg) openSegment({ label: seg.name, count: seg.count }, { owner: value })
+  // Ranking axes (customer/branch: people/orgs, no lookup colour) → bar chart.
+  const bars = (axis: Exclude<Axis, 'stage'>, segs: AxisSeg[]) => {
+    const data: ChartDatum[] = segs.map(s => ({ name: s.label, value: s.count, key: s.value }))
+    const onPick = gateDrillClick('opportunities', (d: ChartDatum) => {
+      const seg = segs.find(s => s.value === d.key)
+      if (seg) openSegment(seg, { [axis]: d.key })
     })
-    return <SegmentBars max={max} onPick={onPick}
-      items={segs.map(s => ({ key: s.owner_id, label: s.name, count: s.count, color: null }))} />
+    return <BarChartCard data={data} onBarClick={onPick} />
+  }
+
+  // Owner axis (D2 shape: owner_id/name → the `owner` param) → bar chart.
+  const ownerBars = (segs: CandidateOwnerSegment[]) => {
+    const data: ChartDatum[] = segs.map(s => ({ name: s.name, value: s.count, key: s.owner_id }))
+    const onPick = gateDrillClick('opportunities', (d: ChartDatum) => {
+      const seg = segs.find(s => s.owner_id === d.key)
+      if (seg) openSegment({ label: seg.name, count: seg.count }, { owner: d.key })
+    })
+    return <BarChartCard data={data} onBarClick={onPick} />
   }
 
   const onSeriesPick = gateDrillClick('opportunities', (dateKey: string) => {
@@ -130,12 +154,16 @@ export default function OpportunitiesReport({ period, compare = COMPARE_OFF }: {
     total:   { key: 'total',   label: t('opportunities.total'),           value: total,
       sub: totalCompare ? <ReportCompareMetric metric={totalCompare} polarity="up-good" /> : undefined },
     open:    { key: 'open',    label: t('opportunities.summary.open'),    value: s?.open ?? 0 },
-    won:     { key: 'won',     label: t('opportunities.summary.won'),     value: s?.won ?? 0 },
-    lost:    { key: 'lost',    label: t('opportunities.summary.lost'),    value: s?.lost ?? 0 },
+    won:     { key: 'won',     label: t('opportunities.summary.won'),     value: s?.won ?? 0,
+      color: s?.won ? OPP_COLOR.won : undefined },
+    lost:    { key: 'lost',    label: t('opportunities.summary.lost'),    value: s?.lost ?? 0,
+      color: s?.lost ? OPP_COLOR.lost : undefined },
     winRate: { key: 'winRate', label: t('opportunities.summary.winRate'),
       value: formatPercent(s?.win_rate) },
-    untouched: { key: 'untouched', label: t('opportunities.stale.untouched'), value: data?.stale.untouched ?? 0 },
-    overdue:   { key: 'overdue',   label: t('opportunities.stale.overdue'),   value: data?.stale.overdue ?? 0 },
+    untouched: { key: 'untouched', label: t('opportunities.stale.untouched'), value: data?.stale.untouched ?? 0,
+      color: data?.stale.untouched ? OPP_COLOR.untouched : undefined },
+    overdue:   { key: 'overdue',   label: t('opportunities.stale.overdue'),   value: data?.stale.overdue ?? 0,
+      color: data?.stale.overdue ? OPP_COLOR.overdue : undefined },
     forecastCount: { key: 'forecastCount', label: t('opportunities.forecastCount'), value: forecastCount },
     forecastValue: { key: 'forecastValue', label: t('opportunities.forecastValue'), value: formatCurrency(forecastValue, 'EUR', 0) },
     // Spares: real money fields already in `totals` (money via formatCurrency,
@@ -155,8 +183,10 @@ export default function OpportunitiesReport({ period, compare = COMPARE_OFF }: {
     // render as plain, honest, non-clickable stats — the same rule the untouched/
     // overdue tiles above already follow (no fake affordances).
     staleDeal: { key: 'staleDeal', label: t('opportunities.summary.staleDeal'), value: s?.stale ?? 0,
+      color: s?.stale ? OPP_COLOR.staleDeal : undefined,
       sub: s?.stale_days != null ? t('thresholdDays', { n: s.stale_days }) : undefined },
     closingSoon: { key: 'closingSoon', label: t('opportunities.summary.closingSoon'), value: s?.closing_soon ?? 0,
+      color: s?.closing_soon ? OPP_COLOR.closingSoon : undefined,
       sub: s?.closing_soon_days != null ? t('thresholdDays', { n: s.closing_soon_days }) : undefined },
   }
   // Which nine keys render, and in what order, is the tenant's Settings → Reports
@@ -199,17 +229,19 @@ export default function OpportunitiesReport({ period, compare = COMPARE_OFF }: {
           <ReportChartCard span={2} title={t('opportunities.series')}
             chart={<ReportTimeseriesChart series={data.timeseries.series} onPick={onSeriesPick} />} />
 
-          {/* Stage axis — always sums to total ('none' + orphan-uuid rows included). */}
-          <ReportChartCard title={t('applications.axes.stage')} chart={bars('stage', data.by_stage)} />
+          {/* Stage axis — a lookup axis with its own colour per value → donut,
+              always sums to total ('none' + orphan-uuid rows included). */}
+          <ReportChartCard title={t('applications.axes.stage')} chart={stageDonut(data.by_stage)} />
 
-          {/* Top-20 customers + 'others' + 'none'; a hard-deleted customer's
-              "Onbekend" bar still drills on its raw uuid. */}
+          {/* Top-20 customers + 'others' + 'none' — a ranking axis → bar; a
+              hard-deleted customer's "Onbekend" bar still drills on its raw uuid. */}
           <ReportChartCard title={t('applications.axes.customer')} chart={bars('customer', data.by_customer)} />
 
           <ReportChartCard title={t('customers.axes.owner')} chart={ownerBars(data.by_owner)} />
 
           {/* Branch axis on the deal's OWN location_id column (unlike vacancies,
-              no customer detour) — drills via the report `branch` param. */}
+              no customer detour) — a ranking axis → bar; drills via the report
+              `branch` param. */}
           <ReportChartCard title={t('customers.axes.branch')} chart={bars('branch', data.by_branch)} />
         </ReportGrid>
       )}

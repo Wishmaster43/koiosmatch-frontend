@@ -82,6 +82,16 @@ vi.mock('./ReportTimeseriesChart', () => ({
   ),
 }))
 
+// RAPPORT-GEZICHT-WAVE2: the house donut needs real layout (jsdom has none) —
+// stub exposes the exact click contract the real component delivers (the
+// datum incl. `key`, mirroring CandidatesReport's stub).
+type StubDatum = { name: string; value: number; key?: string }
+vi.mock('@/components/charts/PieChartCard', () => ({
+  default: ({ data, onItemClick }: { data?: StubDatum[]; onItemClick?: (d: unknown) => void }) => (
+    <>{(data ?? []).map(d => <button key={d.key} onClick={() => onItemClick?.(d)}>{d.name}</button>)}</>
+  ),
+}))
+
 describe('MatchesReport (MATCH-SOORT-1, by_contract_form axis)', () => {
   beforeEach(() => {
     getSpy.mockReset()

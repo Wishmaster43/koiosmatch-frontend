@@ -22,11 +22,13 @@ import { useMatchesReport } from './useMatchesReport'
 import { gateDrillClick } from './reportDrillGate'
 import { EMPTY_REPORT_FILTERS, buildReportQueryParams } from './reportFilterParams'
 import type { ReportFilterState } from './reportFilterParams'
-import SegmentBars from './SegmentBars'
+import PieChartCard from '@/components/charts/PieChartCard'
+import { CHART_SERIES_COLORS } from '@/components/charts/chartTypes'
+import type { ChartDatum } from '@/components/charts/chartTypes'
 import ReportTimeseriesChart from './ReportTimeseriesChart'
 import { useDateFormat } from '@/lib/datetime'
 import { formatPercent } from '@/lib/formatters'
-import type { ReportPeriod, CandidateTimeseriesPoint } from '@/types/analytics'
+import type { ReportPeriod, CandidateTimeseriesPoint, CandidateSegment, MatchTerminationReasonSegment } from '@/types/analytics'
 import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
 import { getReportKpiCatalog, getReportKpiDefaultOrder, reportKpiSettingsKey } from './kpiCatalog'
 import { resolveReportKpiOrder } from './resolveReportKpiOrder'
@@ -74,28 +76,37 @@ export default function MatchesReport({ period, filters = EMPTY_REPORT_FILTERS, 
       { label: t('matches.viaFunnel'), value: data?.by_origin.funnel ?? 0 },
       { label: t('matches.direct'),    value: data?.by_origin.direct ?? 0 },
     ],
+    entityPage: 'matches',
     rowsEndpoint: '/reports/matches/drill', rowsParams: { ...baseParams, origin },
     adviceEndpoint: '/reports/matches/advice', adviceParams: { ...baseParams, origin },
   })
 
-  // Soort-as (MATCH-SOORT-1): by_contract_form bars — `contract_form` is one leg
+  // Soort-as (MATCH-SOORT-1): by_contract_form — a lookup axis with its own
+  // colour per value (CHART-TYPE RULE) → donut, `contract_form` is one leg
   // of the four-way XOR; drill AND advice both carry it (the advice gap the
   // backend closed in portie 7 — labels read "Contractvorm: …" server-side).
   const openContractForm = (label: string, value: number, slug: string) => setDrill({
     title: label, value, subtitle: windowSub(),
+    entityPage: 'matches',
     rowsEndpoint: '/reports/matches/drill', rowsParams: { ...baseParams, contract_form: slug },
     adviceEndpoint: '/reports/matches/advice', adviceParams: { ...baseParams, contract_form: slug },
   })
   const contractFormSegs = data?.by_contract_form ?? []
-  const contractFormMax = contractFormSegs.reduce((m, s) => Math.max(m, s.count), 0)
-  const onContractFormPick = gateDrillClick('matches', (value: string) => {
-    const seg = contractFormSegs.find(s => s.value === value)
+  // Donut data builder — each lookup value wears its OWN colour, house series as fallback.
+  const donutData = (segs: CandidateSegment[]): { data: ChartDatum[]; colors: string[] } => ({
+    data: segs.map(s => ({ name: s.label, value: s.count, key: s.value })),
+    colors: segs.map((s, i) => s.color ?? CHART_SERIES_COLORS[i % CHART_SERIES_COLORS.length]),
+  })
+  const onContractFormPick = gateDrillClick('matches', (d: unknown) => {
+    const key = (d as { key?: string })?.key ?? (d as { payload?: { key?: string } })?.payload?.key
+    const seg = contractFormSegs.find(s => s.value === key)
     if (seg) openContractForm(seg.label, seg.count, seg.value)
   })
 
   // Under-contract tile drill: `contract_status` is the third XOR leg (portie 7).
   const openContractStatus = (label: string, value: number, key: (typeof CONTRACT_STATUS_TILES)[number]) => setDrill({
     title: label, value, subtitle: windowSub(),
+    entityPage: 'matches',
     rowsEndpoint: '/reports/matches/drill', rowsParams: { ...baseParams, contract_status: key },
     adviceEndpoint: '/reports/matches/advice', adviceParams: { ...baseParams, contract_status: key },
   })
@@ -123,7 +134,6 @@ export default function MatchesReport({ period, filters = EMPTY_REPORT_FILTERS, 
   // The axis is windowed on the termination EVENT server-side, so the drawer shows
   // the matches whose termination fell in the window: drawer == bar, always.
   const terminationSegs = data?.terminations.by_reason ?? []
-  const terminationsMax = terminationSegs.reduce((m, s) => Math.max(m, s.count), 0)
   // RAPPORT-KAARTDRILLS-2: per-KPI-card drill via GET /reports/matches/kpis/drill?kpi=<key>
   // (MatchesKpiDrillRequest enum: total|new_in_period|active|expiring_soon|
   // terminated_in_period|renewals_in_period|without_end_date|avg_duration_days|
@@ -163,12 +173,16 @@ export default function MatchesReport({ period, filters = EMPTY_REPORT_FILTERS, 
   const durRaw = durWired ? kpiByServerKey.get('avg_duration_days') : data?.avg_placement_duration_days
   const durValue = durRaw != null ? t('matches.daysValue', { days: Math.round(durRaw) }) : '—'
 
-  const openReason = gateDrillClick('matches', (value: string) => {
-    const seg = terminationSegs.find(s => s.value === value)
+  const openReason = gateDrillClick('matches', (d: unknown) => {
+    const value = (d as { key?: string })?.key ?? (d as { payload?: { key?: string } })?.payload?.key
+    const seg = terminationSegs.find((s: MatchTerminationReasonSegment) => s.value === value)
+    // Reference guard: an unresolved datum never opens a drill on a raw key.
+    if (!seg) return
     setDrill({
-      title: seg?.label ?? value, value: seg?.count ?? 0, subtitle: windowSub(),
-      rowsEndpoint: '/reports/matches/drill', rowsParams: { ...baseParams, stop_reason: value },
-      adviceEndpoint: '/reports/matches/advice', adviceParams: { ...baseParams, stop_reason: value },
+      title: seg.label, value: seg.count, subtitle: windowSub(),
+      entityPage: 'matches',
+      rowsEndpoint: '/reports/matches/drill', rowsParams: { ...baseParams, stop_reason: seg.value },
+      adviceEndpoint: '/reports/matches/advice', adviceParams: { ...baseParams, stop_reason: seg.value },
     })
   })
 
@@ -206,12 +220,15 @@ export default function MatchesReport({ period, filters = EMPTY_REPORT_FILTERS, 
       active: openParams?.contract_status === 'sent',
       onClick: gateDrillClick('matches', () => openContractStatus(t('matches.placements.sent'), tileValue('sent'), 'sent')) },
     active: { key: 'active', label: t('matches.placements.active'), value: tileValue('active'),
+      color: tileValue('active') !== 0 ? 'var(--color-success)' : undefined,
       active: openParams?.contract_status === 'active',
       onClick: gateDrillClick('matches', () => openContractStatus(t('matches.placements.active'), tileValue('active'), 'active')) },
     ended:  { key: 'ended',  label: t('matches.placements.ended'),  value: tileValue('ended'),
       active: openParams?.contract_status === 'ended',
       onClick: gateDrillClick('matches', () => openContractStatus(t('matches.placements.ended'), tileValue('ended'), 'ended')) },
     terminationsTotal: { key: 'terminationsTotal', label: t('matches.terminations.total'), value: terminationsValue,
+      // Colour follows the VALUE (real in both branches); only the drill needs wiring.
+      color: terminationsValue !== 0 ? 'var(--color-danger)' : undefined,
       onClick: terminationsWired ? openKpiDrill('terminationsTotal', t('matches.terminations.total'), terminationsValue) : undefined },
     dur:    { key: 'dur',    label: t('matches.avgDuration'), value: durValue,
       onClick: durWired && durRaw != null ? openKpiDrill('dur', t('matches.avgDuration'), durValue) : undefined },
@@ -228,6 +245,7 @@ export default function MatchesReport({ period, filters = EMPTY_REPORT_FILTERS, 
       value: topTerminationReason ? `${topTerminationReason.label} · ${topTerminationReason.count}` : '—',
       onClick: topTerminationReason ? gateDrillClick('matches', () => setDrill({
         title: topTerminationReason.label, value: topTerminationReason.count, subtitle: windowSub(),
+        entityPage: 'matches',
         rowsEndpoint: '/reports/matches/drill', rowsParams: { ...baseParams, stop_reason: topTerminationReason.value },
         adviceEndpoint: '/reports/matches/advice', adviceParams: { ...baseParams, stop_reason: topTerminationReason.value },
       })) : undefined },
@@ -277,11 +295,11 @@ export default function MatchesReport({ period, filters = EMPTY_REPORT_FILTERS, 
           <ReportChartCard span={2} title={t('matches.series')}
             chart={<ReportTimeseriesChart series={data.timeseries.series} onPick={onSeriesPick} />} />
 
-          {/* Soort-as (MATCH-SOORT-1): by_contract_form bars, sums to total incl. the
-              'none' sentinel and any orphaned slug — SegmentBars needs no special-casing. */}
+          {/* Soort-as (MATCH-SOORT-1): a lookup axis with its own colour per value
+              (CHART-TYPE RULE) → donut, sums to total incl. the 'none' sentinel
+              and any orphaned slug. */}
           <ReportChartCard title={t('matches.axes.contractForm')} chart={
-            <SegmentBars max={contractFormMax} onPick={onContractFormPick}
-              items={contractFormSegs.map(s => ({ key: s.value, label: s.label, count: s.count, color: s.color }))} />
+            <PieChartCard {...donutData(contractFormSegs)} onItemClick={onContractFormPick} />
           } />
 
           {/* Contract-status tiles (under_contract, MATCH-VOCABULAIRE-1): the four
@@ -300,11 +318,13 @@ export default function MatchesReport({ period, filters = EMPTY_REPORT_FILTERS, 
             </>
           } />
 
-          {/* Terminations by stop reason — zero-filled over every active reason;
-              each bar drills stop_reason=<value> (fifth XOR leg, 7925ce15). */}
-          <ReportChartCard title={t('matches.terminations.title')} chart={
-            <SegmentBars max={terminationsMax} onPick={openReason}
-              items={terminationSegs.map(s => ({ key: s.value, label: s.label, count: s.count, color: s.color }))} />
+          {/* Terminations by stop reason — a lookup axis with its own colour per
+              value (CHART-TYPE RULE) → donut, zero-filled over every active
+              reason; each slice drills stop_reason=<value> (fifth XOR leg,
+              7925ce15). Last card of an odd tail spans the full row. */}
+          <ReportChartCard span={2} title={t('matches.terminations.title')} chart={
+            <PieChartCard {...donutData(terminationSegs.map(s => ({ value: s.value, label: s.label, color: s.color, count: s.count })))}
+              onItemClick={openReason} />
           } />
         </ReportGrid>
       )}

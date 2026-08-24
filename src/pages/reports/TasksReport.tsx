@@ -1,11 +1,13 @@
 /**
  * TasksReport — tasks report (GET /reports/tasks, RAPPORTEN-SUITE-1 "portie 6").
- * Mirrors OpportunitiesReport 1:1: same envelope family, same calm bars via the
- * shared SegmentBars, the window rendered prominently from the RESPONSE. Drill
- * XOR params follow the seven-way tasks contract: status|type|priority|assignee|
- * team|branch|date (+bucket=week next to a week bar's date). Every axis sums to
- * `total`; status/type/priority key on the LOOKUP ID (never the slug) and their
- * 'none' sentinels + orphan-uuid rows are normal, drillable bars. The KPI strip
+ * Mirrors CandidatesReport 1:1 since RAPPORT-GEZICHT-WAVE2: a chart MIX instead
+ * of uniform segment bars — donuts for the coloured/few-value axes (status,
+ * priority), bar charts for the rankings (type/assignee/team/branch), the
+ * window rendered prominently from the RESPONSE. Drill XOR params follow the
+ * seven-way tasks contract: status|type|priority|assignee|team|branch|date
+ * (+bucket=week next to a week bar's date). Every axis sums to `total`;
+ * status/type/priority key on the LOOKUP ID (never the slug) and their 'none'
+ * sentinels + orphan-uuid rows are normal, drillable segments. The KPI strip
  * is display-only: the XOR carries no open/done/overdue segment (no fake
  * affordances — a stat without a real drill path never looks clickable).
  */
@@ -24,8 +26,11 @@ import { useTasksReport } from './useTasksReport'
 import { gateDrillClick } from './reportDrillGate'
 import { EMPTY_REPORT_FILTERS, buildReportQueryParams } from './reportFilterParams'
 import type { ReportFilterState } from './reportFilterParams'
-import SegmentBars from './SegmentBars'
 import ReportTimeseriesChart from './ReportTimeseriesChart'
+import PieChartCard from '@/components/charts/PieChartCard'
+import BarChartCard from '@/components/charts/BarChartCard'
+import { CHART_SERIES_COLORS } from '@/components/charts/chartTypes'
+import type { ChartDatum } from '@/components/charts/chartTypes'
 import { useDateFormat } from '@/lib/datetime'
 import type { ReportPeriod, CandidateOwnerSegment, CandidateTimeseriesPoint } from '@/types/analytics'
 import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
@@ -66,14 +71,16 @@ export default function TasksReport({ period, filters = EMPTY_REPORT_FILTERS, co
   const [drill, setDrill] = useState<DrillSpec | null>(null)
   const windowSub = () => `${formatDate(data?.from)} – ${formatDate(data?.to)}`
   const baseParams = buildReportQueryParams(period, 'tasks', filters)
+  // Rows are tasks with an id, so the drawer deep-links to the task drilldown
+  // (§3A entityPage).
   const openSegment = (seg: { label: string; count: number }, xorParam: Record<string, unknown>) =>
     setDrill({
-      title: seg.label, value: seg.count, subtitle: windowSub(),
+      title: seg.label, value: seg.count, subtitle: windowSub(), entityPage: 'tasks',
       rowsEndpoint: '/reports/tasks/drill', rowsParams: { ...baseParams, ...xorParam },
       adviceEndpoint: '/reports/tasks/advice', adviceParams: { ...baseParams, ...xorParam },
     })
   const openBucket = (pt: CandidateTimeseriesPoint) => setDrill({
-    title: pt.label, value: pt.value, subtitle: windowSub(),
+    title: pt.label, value: pt.value, subtitle: windowSub(), entityPage: 'tasks',
     // A week bar's `date` is the point's own key; the drawer then counts the WHOLE
     // week (bucket=week) so bar and drawer total always agree.
     rowsEndpoint: '/reports/tasks/drill',
@@ -82,31 +89,39 @@ export default function TasksReport({ period, filters = EMPTY_REPORT_FILTERS, co
     adviceParams: { ...baseParams, date: pt.date, ...(data?.timeseries.bucket === 'week' ? { bucket: 'week' } : {}) },
   })
 
-  // Generic axis-bar renderer: 'none' sentinels and orphaned (deleted-lookup)
-  // values are all normal array entries — each drills on its RAW value (the
-  // lookup ID for status/type/priority, never a slug), exactly like any other
-  // segment (no special-casing, see SegmentBars).
-  const bars = (axis: Axis, segs: AxisSeg[]) => {
-    const max = segs.reduce((m, s) => Math.max(m, s.count), 0)
-    const onPick = gateDrillClick('tasks', (value: string) => {
-      const seg = segs.find(s => s.value === value)
-      if (seg) openSegment(seg, { [axis]: value })
+  // Donut data for a coloured/few-value axis (§chart-type-rule): each slice
+  // wears its own tenant colour, falling back to the house series. 'none'
+  // sentinels and orphaned (deleted-lookup) values are normal entries — each
+  // drills on its RAW value (the lookup ID for status/priority, never a slug).
+  const donutData = (segs: AxisSeg[]): { data: ChartDatum[]; colors: string[] } => ({
+    data: segs.map(s => ({ name: s.label, value: s.count, key: s.value })),
+    colors: segs.map((s, i) => s.color ?? CHART_SERIES_COLORS[i % CHART_SERIES_COLORS.length]),
+  })
+  const pickSegment = (axis: Axis, segs: AxisSeg[]) =>
+    gateDrillClick('tasks', (d: unknown) => {
+      const key = (d as { key?: string })?.key ?? (d as { payload?: { key?: string } })?.payload?.key
+      const seg = segs.find(s => s.value === key)
+      if (seg) openSegment(seg, { [axis]: seg.value })
     })
-    return <SegmentBars max={max} onPick={onPick}
-      items={segs.map(s => ({ key: s.value, label: s.label, count: s.count, color: s.color ?? null }))} />
-  }
+
+  // Bar data for a ranking axis (open vocabulary / people / orgs).
+  const barData = (segs: AxisSeg[]): ChartDatum[] =>
+    segs.map(s => ({ name: s.label, value: s.count, key: s.value }))
+  const pickBar = (axis: Axis, segs: AxisSeg[]) =>
+    gateDrillClick('tasks', (d: ChartDatum) => {
+      const seg = segs.find(s => s.value === d.key)
+      if (seg) openSegment(seg, { [axis]: d.key })
+    })
 
   // Assignee axis (D2 shape: owner_id/name → the `assignee` param; a NULL
   // assignee arrives as the 'none' row, "Niet toegewezen").
-  const assigneeBars = (segs: CandidateOwnerSegment[]) => {
-    const max = segs.reduce((m, s) => Math.max(m, s.count), 0)
-    const onPick = gateDrillClick('tasks', (value: string) => {
-      const seg = segs.find(s => s.owner_id === value)
-      if (seg) openSegment({ label: seg.name, count: seg.count }, { assignee: value })
+  const assigneeBarData = (segs: CandidateOwnerSegment[]): ChartDatum[] =>
+    segs.map(s => ({ name: s.name, value: s.count, key: s.owner_id }))
+  const pickAssigneeBar = (segs: CandidateOwnerSegment[]) =>
+    gateDrillClick('tasks', (d: ChartDatum) => {
+      const seg = segs.find(s => s.owner_id === d.key)
+      if (seg) openSegment({ label: seg.name, count: seg.count }, { assignee: d.key })
     })
-    return <SegmentBars max={max} onPick={onPick}
-      items={segs.map(s => ({ key: s.owner_id, label: s.name, count: s.count, color: null }))} />
-  }
 
   const onSeriesPick = gateDrillClick('tasks', (dateKey: string) => {
     const pt = data?.timeseries.series.find(p => p.date === dateKey)
@@ -125,7 +140,7 @@ export default function TasksReport({ period, filters = EMPTY_REPORT_FILTERS, co
   const kpiByServerKey = new Map((data?.kpis ?? []).map(k => [k.key, k.count]))
   const openKpiDrill = (kpi: string, label: string, value: string | number) =>
     gateDrillClick('tasks', () => setDrill({
-      title: label, value, subtitle: windowSub(),
+      title: label, value, subtitle: windowSub(), entityPage: 'tasks',
       rowsEndpoint: '/reports/tasks/kpis/drill', rowsParams: { ...baseParams, kpi },
     }))
   // Semantic colour only where the number is a SIGNAL and non-zero (§4: colour
@@ -200,14 +215,25 @@ export default function TasksReport({ period, filters = EMPTY_REPORT_FILTERS, co
           <ReportChartCard span={2} title={t('tasks.series')}
             chart={<ReportTimeseriesChart series={data.timeseries.series} onPick={onSeriesPick} />} />
 
-          {/* Status axis — ID-keyed (slug is not unique-protected); always sums
-              to total ('none' folding + orphan-uuid rows included). */}
-          <ReportChartCard title={t('tasks.axes.status')} chart={bars('status', data.by_status)} />
-          <ReportChartCard title={t('tasks.axes.type')} chart={bars('type', data.by_type)} />
-          <ReportChartCard title={t('tasks.axes.priority')} chart={bars('priority', data.by_priority)} />
-          <ReportChartCard title={t('tasks.axes.assignee')} chart={assigneeBars(data.by_assignee)} />
-          <ReportChartCard title={t('tasks.axes.team')} chart={bars('team', data.by_team)} />
-          <ReportChartCard title={t('tasks.axes.branch')} chart={bars('branch', data.by_branch)} />
+          {/* Status carries a tenant lookup colour, ID-keyed (slug is not
+              unique-protected); always sums to total ('none' folding +
+              orphan-uuid rows included) → donut. */}
+          <ReportChartCard title={t('tasks.axes.status')} chart={
+            <PieChartCard {...donutData(data.by_status)} onItemClick={pickSegment('status', data.by_status)} />} />
+          {/* Priority is a small, closed vocabulary → donut (fallback series,
+              no lookup colour field). */}
+          <ReportChartCard title={t('tasks.axes.priority')} chart={
+            <PieChartCard {...donutData(data.by_priority)} onItemClick={pickSegment('priority', data.by_priority)} />} />
+
+          {/* Rankings (type/assignee/team/branch) → bar charts. */}
+          <ReportChartCard title={t('tasks.axes.type')} chart={
+            <BarChartCard data={barData(data.by_type)} onBarClick={pickBar('type', data.by_type)} />} />
+          <ReportChartCard title={t('tasks.axes.assignee')} chart={
+            <BarChartCard data={assigneeBarData(data.by_assignee)} onBarClick={pickAssigneeBar(data.by_assignee)} />} />
+          <ReportChartCard title={t('tasks.axes.team')} chart={
+            <BarChartCard data={barData(data.by_team)} onBarClick={pickBar('team', data.by_team)} />} />
+          <ReportChartCard title={t('tasks.axes.branch')} chart={
+            <BarChartCard data={barData(data.by_branch)} onBarClick={pickBar('branch', data.by_branch)} />} />
         </ReportGrid>
       )}
 

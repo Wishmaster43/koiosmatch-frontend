@@ -93,6 +93,22 @@ vi.mock('./ReportTimeseriesChart', () => ({
   ),
 }))
 
+// RAPPORT-GEZICHT-WAVE2: the Recharts house charts need real layout (jsdom has
+// none) — stubs expose the exact click contract the real components deliver
+// (donut: the datum incl. `key`; bar: the original ChartDatum). Mirrors
+// CandidatesReport.test.tsx exactly.
+type StubDatum = { name: string; value: number; key?: string }
+vi.mock('@/components/charts/PieChartCard', () => ({
+  default: ({ data, onItemClick }: { data?: StubDatum[]; onItemClick?: (d: unknown) => void }) => (
+    <>{(data ?? []).map(d => <button key={d.key} onClick={() => onItemClick?.(d)}>{d.name}</button>)}</>
+  ),
+}))
+vi.mock('@/components/charts/BarChartCard', () => ({
+  default: ({ data, onBarClick }: { data?: StubDatum[]; onBarClick?: (d: StubDatum) => void }) => (
+    <>{(data ?? []).map(d => <button key={d.key} onClick={() => onBarClick?.(d)}>{d.name}</button>)}</>
+  ),
+}))
+
 describe('ApplicationsReport (RAPPORTEN-SUITE-1 portie 2)', () => {
   // Every section now defaults its own list on mount, firing extra drill/advice
   // requests — clear the shared spy between tests so a later assertion never

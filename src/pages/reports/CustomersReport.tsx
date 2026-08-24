@@ -1,7 +1,8 @@
 /**
  * CustomersReport — customers INFLOW report (GET /reports/customers, RAPPORTEN-SUITE-1
  * "portie 3"). Mirrors CandidatesReport/ApplicationsReport 1:1 (same envelope family,
- * same calm hand-rolled bars via the shared SegmentBars, no Recharts §3B): the window
+ * wave-2 chart mix: status/phase as donuts in their lookup colours, rankings as
+ * bar charts, the timeseries line full width — every click keeps its drill): the window
  * is rendered PROMINENTLY since this report is windowed on customers.created_at while
  * the customers LIST is not. Leads live on `by_phase` (flag-driven is_customer, NOT a
  * 'prospect' status string — PROSPECT-DEDUP-1 retired that) — never assume a status
@@ -37,7 +38,10 @@ import { buildAxisKpis } from './buildAxisKpis'
 import type { AxisKpiConfig } from './buildAxisKpis'
 import { EMPTY_REPORT_FILTERS, buildReportQueryParams } from './reportFilterParams'
 import type { ReportFilterState } from './reportFilterParams'
-import SegmentBars from './SegmentBars'
+import PieChartCard from '@/components/charts/PieChartCard'
+import BarChartCard from '@/components/charts/BarChartCard'
+import { CHART_SERIES_COLORS } from '@/components/charts/chartTypes'
+import type { ChartDatum } from '@/components/charts/chartTypes'
 import ReportTimeseriesChart from './ReportTimeseriesChart'
 import { useDateFormat } from '@/lib/datetime'
 import type { ReportPeriod, CandidateSegment, CandidateOwnerSegment, CandidateTimeseriesPoint } from '@/types/analytics'
@@ -67,6 +71,17 @@ const CUSTOMERS_KPI_DRILL_KEYS = new Set<string>([
   'departments_without_placement', 'customers_without_vacancies', 'customers_without_applications',
   'matches_stopped_early',
 ])
+
+// Semantic colour per signal key, applied only when the count is non-zero
+// (§4: colour carries meaning — a calm zero stays uncoloured). Mirrors
+// CandidatesReport's SUITE_COLOR idiom.
+const SIGNAL_COLOR: Partial<Record<string, string>> = {
+  contract_ending: 'var(--color-warning)', price_agreement_ending: 'var(--color-warning)',
+  vacancy_stale: 'var(--color-warning)', no_contact: 'var(--color-warning)',
+  task_overdue: 'var(--color-danger)', matches_stopped_early: 'var(--color-danger)',
+  departments_without_placement: 'var(--color-warning)', customers_without_vacancies: 'var(--color-warning)',
+  customers_without_applications: 'var(--color-warning)',
+}
 
 // The two switch positions — also the KPI-catalog/settings-scope id and the
 // i18n namespace-prefix for the population-facing strings. Kept as plain
@@ -113,6 +128,7 @@ export default function CustomersReport({ period, filters = EMPTY_REPORT_FILTERS
   const openSegment = (seg: { label: string; count: number }, xorParam: Record<string, unknown>) =>
     setDrill({
       title: seg.label, value: seg.count, subtitle: `${formatDate(data?.from)} – ${formatDate(data?.to)}`,
+      entityPage: 'customers',
       rowsEndpoint: '/reports/customers/drill', rowsParams: { ...baseParams, ...xorParam },
       adviceEndpoint: '/reports/customers/advice', adviceParams: { ...baseParams, ...xorParam },
     })
@@ -126,28 +142,33 @@ export default function CustomersReport({ period, filters = EMPTY_REPORT_FILTERS
     adviceParams: { ...baseParams, date: pt.date, ...(data?.timeseries.bucket === 'week' ? { bucket: 'week' } : {}) },
   })
 
-  // Generic axis-bar renderer: a segment whose lookup row was deleted still arrives
-  // here as a normal array entry (its own "Onbekend (…)" label, summed into total) —
-  // no special-casing needed, it drills on the raw value like any other segment.
-  const bars = (axis: Axis, segs: CandidateSegment[]) => {
-    const max = segs.reduce((m, s) => Math.max(m, s.count), 0)
-    const onPick = gateDrillClick('customers', (value: string) => {
-      const seg = segs.find(s => s.value === value)
-      if (seg) openSegment(seg, { [axis]: value })
+  // Chart datum builders — the donut wears each lookup value's OWN colour with
+  // the shared series as fallback; rankings get the plain house series
+  // (CandidatesReport idiom, §chart-type-rule).
+  const donutData = (segs: CandidateSegment[]): { data: ChartDatum[]; colors: string[] } => ({
+    data: segs.map(s => ({ name: s.label, value: s.count, key: s.value })),
+    colors: segs.map((s, i) => s.color ?? CHART_SERIES_COLORS[i % CHART_SERIES_COLORS.length]),
+  })
+  const pickSegment = (axis: Axis, segs: CandidateSegment[]) =>
+    gateDrillClick('customers', (d: unknown) => {
+      const key = (d as { key?: string })?.key ?? (d as { payload?: { key?: string } })?.payload?.key
+      const seg = segs.find(s => s.value === key)
+      if (seg) openSegment(seg, { [axis]: seg.value })
     })
-    return <SegmentBars max={max} onPick={onPick}
-      items={segs.map(s => ({ key: s.value, label: s.label, count: s.count, color: s.color }))} />
-  }
-
-  const ownerBars = (segs: CandidateOwnerSegment[]) => {
-    const max = segs.reduce((m, s) => Math.max(m, s.count), 0)
-    const onPick = gateDrillClick('customers', (value: string) => {
-      const seg = segs.find(s => s.owner_id === value)
-      if (seg) openSegment({ label: seg.name, count: seg.count }, { owner: value })
+  const barData = (segs: CandidateSegment[]): ChartDatum[] =>
+    segs.map(s => ({ name: s.label, value: s.count, key: s.value }))
+  const pickBar = (axis: Axis, segs: CandidateSegment[]) =>
+    gateDrillClick('customers', (d: ChartDatum) => {
+      const seg = segs.find(s => s.value === d.key)
+      if (seg) openSegment(seg, { [axis]: seg.value })
     })
-    return <SegmentBars max={max} onPick={onPick}
-      items={segs.map(s => ({ key: s.owner_id, label: s.name, count: s.count, color: null }))} />
-  }
+  const ownerBarData = (segs: CandidateOwnerSegment[]): ChartDatum[] =>
+    segs.map(s => ({ name: s.name, value: s.count, key: s.owner_id }))
+  const pickOwnerBar = (segs: CandidateOwnerSegment[]) =>
+    gateDrillClick('customers', (d: ChartDatum) => {
+      const seg = segs.find(s => s.owner_id === d.key)
+      if (seg) openSegment({ label: seg.name, count: seg.count }, { owner: seg.owner_id })
+    })
 
   // KPIS-DRILL-1: a signal card whose key is one of the nine kpi-drill enum
   // values opens the same shared drawer, but sourced from the dedicated
@@ -157,6 +178,7 @@ export default function CustomersReport({ period, filters = EMPTY_REPORT_FILTERS
   // along and the subtitle says "live snapshot", never the report window.
   const openSignalKpiDrill = (label: string, count: number, kpi: string) => setDrill({
     title: label, value: count, subtitle: t('customers.signalSnapshot'),
+    entityPage: 'customers',
     rowsEndpoint: '/reports/customers/kpi-drill', rowsParams: { kpi },
   })
 
@@ -229,12 +251,14 @@ export default function CustomersReport({ period, filters = EMPTY_REPORT_FILTERS
     })
   // buildAxisKpis always attaches an onClick; strip it back off for signal cards
   // outside the kpi-drill enum so they render with no clickable affordance (§0
-  // no fake affordances) instead of a dead click.
+  // no fake affordances) instead of a dead click. A signal card also picks up
+  // its semantic colour here, only when the count is non-zero (SIGNAL_COLOR).
   const axisKpis: KpiSpec[] = axisKpisRaw.map(k => {
     const [axisPart] = k.key.split(':')
     if (axisPart !== 'signal') return k
     const signalKey = k.key.slice('signal:'.length).replace(/:count$/, '')
-    return CUSTOMERS_KPI_DRILL_KEYS.has(signalKey) ? k : { ...k, onClick: undefined }
+    const withColor = typeof k.value === 'number' && k.value !== 0 ? { ...k, color: SIGNAL_COLOR[signalKey] } : k
+    return CUSTOMERS_KPI_DRILL_KEYS.has(signalKey) ? withColor : { ...withColor, onClick: undefined }
   })
 
   // Card 1's label/window/loading/empty/error text is scoped to the active
@@ -284,15 +308,25 @@ export default function CustomersReport({ period, filters = EMPTY_REPORT_FILTERS
           <ReportChartCard span={2} title={t(isProspects ? 'prospects.series' : 'customers.series')}
             chart={<ReportTimeseriesChart series={data.timeseries.series} onPick={onSeriesPick} />} />
 
-          <ReportChartCard title={t('customers.axes.status')} chart={bars('status', data.by_status)} />
+          {/* Coloured lookup axes → donuts (each slice wears its tenant colour). */}
+          <ReportChartCard title={t('customers.axes.status')} chart={
+            <PieChartCard {...donutData(data.by_status)} onItemClick={pickSegment('status', data.by_status)} />} />
 
           {/* Leads surface HERE, not on a status value (PROSPECT-DEDUP-1 retired
               the old 'prospect' status) — flag-driven, same principle as the
               dashboard leads KPI. */}
-          <ReportChartCard title={t('customers.axes.phase')} chart={bars('phase', data.by_phase)} />
-          <ReportChartCard title={t('customers.axes.industry')} chart={bars('industry', data.by_industry)} />
-          <ReportChartCard title={t('customers.axes.owner')} chart={ownerBars(data.by_owner)} />
-          <ReportChartCard title={t('customers.axes.branch')} chart={bars('branch', data.by_branch)} />
+          <ReportChartCard title={t('customers.axes.phase')} chart={
+            <PieChartCard {...donutData(data.by_phase)} onItemClick={pickSegment('phase', data.by_phase)} />} />
+
+          {/* Rankings → bar charts. */}
+          <ReportChartCard title={t('customers.axes.industry')} chart={
+            <BarChartCard data={barData(data.by_industry)} onBarClick={pickBar('industry', data.by_industry)} />} />
+          <ReportChartCard title={t('customers.axes.owner')} chart={
+            <BarChartCard data={ownerBarData(data.by_owner)} onBarClick={pickOwnerBar(data.by_owner)} />} />
+
+          {/* Last odd card spans the full row — no empty grid hole (uitlijning). */}
+          <ReportChartCard span={2} title={t('customers.axes.branch')} chart={
+            <BarChartCard data={barData(data.by_branch)} onBarClick={pickBar('branch', data.by_branch)} />} />
         </ReportGrid>
       )}
 

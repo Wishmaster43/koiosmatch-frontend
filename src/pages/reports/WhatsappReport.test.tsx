@@ -97,6 +97,17 @@ vi.mock('./ReportTimeseriesChart', () => ({
   ),
 }))
 
+// RAPPORT-GEZICHT-WAVE2: the Recharts house donut needs real layout (jsdom has
+// none) — the stub carries an explicit role="button" (a segment's own label can
+// collide with a KPI card / caption elsewhere, so tests locate the segment row
+// via closest('[role="button"]') exactly as the old SegmentBars row did).
+type StubDatum = { name: string; value: number; key?: string }
+vi.mock('@/components/charts/PieChartCard', () => ({
+  default: ({ data, onItemClick }: { data?: StubDatum[]; onItemClick?: (d: unknown) => void }) => (
+    <>{(data ?? []).map(d => <button key={d.key} role="button" onClick={() => onItemClick?.(d)}>{d.name}</button>)}</>
+  ),
+}))
+
 describe('WhatsappReport (RAPPORTEN-WHATSAPP-FE-1)', () => {
   afterEach(() => { getSpy.mockClear(); mockSettings.mockReturnValue({}) })
 
@@ -247,5 +258,17 @@ describe('WhatsappReport (RAPPORTEN-WHATSAPP-FE-1)', () => {
     mockUseWhatsappReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
     expect(screen.queryByText('Vergelijk met')).not.toBeInTheDocument()
+  })
+
+  // RAPPORT-GEZICHT-WAVE2: the type axis is now a donut too; its click still
+  // drills exactly like the old SegmentBars did.
+  it('renders the type axis as a donut whose click drills axis=type', async () => {
+    const user = userEvent.setup()
+    mockUseWhatsappReport.mockReturnValue({ data, loading: false, error: false })
+    renderReport()
+    const segmentRow = screen.getAllByText('Tekst').map(el => el.closest('[role="button"]')).find(Boolean)
+    await user.click(segmentRow!)
+    expect(getSpy).toHaveBeenCalledWith('/reports/whatsapp/axes/drill',
+      expect.objectContaining({ params: { axis: 'type', value: 'text', period: 'month' } }))
   })
 })

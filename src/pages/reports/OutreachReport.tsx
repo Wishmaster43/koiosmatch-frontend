@@ -1,15 +1,19 @@
 /**
  * OutreachReport — call-list outreach report (GET /reports/outreach, REPORTS-2
- * fase 1 upgraded by RAPPORTEN-SUITE-1 "portie 6"). Mirrors OpportunitiesReport /
- * TasksReport 1:1: calm bars via the shared SegmentBars (the fase-1 hand-rolled
- * `Bars` is gone), the window rendered prominently from the RESPONSE. Drill XOR
- * params follow the six-way outreach contract: campaign|assignee|channel|status|
- * outcome|date (+bucket=week next to a week bar's date). Every axis sums to
- * `total`; 'none'/'others' sentinels, "Onbekend"/"Geen uitkomst" rows and orphan
- * strings are normal, drillable bars — campaign accepts any uuid (an archived
- * campaign keeps its real name) and 'others' drills the exact top-20 complement.
- * The fase-1 KPI strip (targets/reached/reach rate) stays as-is; drill rows carry
- * candidate names (outreach.view), so a 403 keeps the calm degrade in the drawer.
+ * fase 1, chart mix landed with RAPPORT-GEZICHT-WAVE2). Chart-type rule: ranking
+ * axes (campaign, assignee) → bar charts; the few-value categorical axes
+ * (channel, status, outcome — none carry a lookup colour, so donuts fall back to
+ * the house series) → donuts; the window rendered prominently from the RESPONSE.
+ * Drill XOR params follow the six-way outreach contract: campaign|assignee|
+ * channel|status|outcome|date (+bucket=week next to a week bar's date). Every
+ * axis sums to `total`; 'none'/'others' sentinels, "Onbekend"/"Geen uitkomst"
+ * rows and orphan strings are normal, drillable entries — campaign accepts any
+ * uuid (an archived campaign keeps its real name) and 'others' drills the exact
+ * top-20 complement. The fase-1 KPI strip (targets/reached/reach rate) stays
+ * as-is; drill rows carry candidate names (outreach.view), so a 403 keeps the
+ * calm degrade in the drawer. entityPage is deliberately NOT set on any drill
+ * here: outreach drill rows are call-list targets, not a single unambiguous
+ * entity record page.
  */
 import { useState } from 'react'
 import { BodyText } from '@/components/ui/typography'
@@ -25,7 +29,10 @@ import ReportDrillDrawer from './ReportDrillDrawer'
 import type { DrillSpec } from './ReportDrillDrawer'
 import { useOutreachReport } from './useOutreachReport'
 import { gateDrillClick } from './reportDrillGate'
-import SegmentBars from './SegmentBars'
+import PieChartCard from '@/components/charts/PieChartCard'
+import BarChartCard from '@/components/charts/BarChartCard'
+import { CHART_SERIES_COLORS } from '@/components/charts/chartTypes'
+import type { ChartDatum } from '@/components/charts/chartTypes'
 import ReportTimeseriesChart from './ReportTimeseriesChart'
 import { useDateFormat } from '@/lib/datetime'
 import type { ReportPeriod, CandidateOwnerSegment, CandidateTimeseriesPoint } from '@/types/analytics'
@@ -41,9 +48,13 @@ import type { ReportCompareMode } from './reportCompareMode'
 // The plain single-value XOR axes; `assignee` has its own D2 shape below.
 type Axis = 'campaign' | 'channel' | 'status' | 'outcome'
 
-// Minimal surface the generic bar renderer needs — outreach axes carry no lookup
-// colour (SegmentBars falls back to the primary tint).
+// Minimal surface the chart datum builders need — outreach axes carry no lookup
+// colour, so donuts fall back to the house series.
 type AxisSeg = { value: string; label: string; count: number }
+
+// Semantic colour per signal card, non-zero only (§4) — the reference's
+// SUITE_COLOR idiom, one map instead of inline ternary paint.
+const OUTREACH_COLOR: Record<string, string> = { reached: 'var(--color-success)' }
 
 export default function OutreachReport({ period, compare = COMPARE_OFF }: { period: ReportPeriod; compare?: ReportCompareMode }) {
   const { t } = useTranslation('analytics')
@@ -79,31 +90,37 @@ export default function OutreachReport({ period, compare = COMPARE_OFF }: { peri
     adviceParams: { date: pt.date, ...(data?.timeseries.bucket === 'week' ? { bucket: 'week' } : {}), period },
   })
 
-  // Generic axis-bar renderer: 'none'/'others' sentinels, "Onbekend"/"Geen
-  // uitkomst" rows and orphan strings are all normal array entries — each drills
-  // on its RAW value, exactly like any other segment (no special-casing, see
-  // SegmentBars). An archived campaign keeps its name and drills on its uuid.
-  const bars = (axis: Axis, segs: AxisSeg[]) => {
-    const max = segs.reduce((m, s) => Math.max(m, s.count), 0)
-    const onPick = gateDrillClick('outreach', (value: string) => {
-      const seg = segs.find(s => s.value === value)
-      if (seg) openSegment(seg, { [axis]: value })
+  // Chart datum builders (RAPPORT-GEZICHT-WAVE2 chart-type rule): 'none'/'others'
+  // sentinels, "Onbekend"/"Geen uitkomst" rows and orphan strings are all normal
+  // entries — each drills on its RAW value, exactly like any other segment. An
+  // archived campaign keeps its name and drills on its uuid. Outreach axes carry
+  // no lookup colour field, so donuts fall back to the house series.
+  const donutData = (segs: AxisSeg[]): { data: ChartDatum[]; colors: string[] } => ({
+    data: segs.map(s => ({ name: s.label, value: s.count, key: s.value })),
+    colors: segs.map((_, i) => CHART_SERIES_COLORS[i % CHART_SERIES_COLORS.length]),
+  })
+  const pickSegment = (axis: Axis, segs: AxisSeg[]) =>
+    gateDrillClick('outreach', (d: unknown) => {
+      const key = (d as { key?: string })?.key ?? (d as { payload?: { key?: string } })?.payload?.key
+      const seg = segs.find(s => s.value === key)
+      if (seg) openSegment(seg, { [axis]: seg.value })
     })
-    return <SegmentBars max={max} onPick={onPick}
-      items={segs.map(s => ({ key: s.value, label: s.label, count: s.count, color: null }))} />
-  }
+  const barData = (segs: AxisSeg[]): ChartDatum[] => segs.map(s => ({ name: s.label, value: s.count, key: s.value }))
+  const pickBar = (axis: Axis, segs: AxisSeg[]) =>
+    gateDrillClick('outreach', (d: ChartDatum) => {
+      const seg = segs.find(s => s.value === d.key)
+      if (seg) openSegment(seg, { [axis]: seg.value })
+    })
 
   // Assignee axis (D2 shape: owner_id/name → the `assignee` param; a NULL
-  // assignee arrives as the 'none' row, "Niet toegewezen").
-  const assigneeBars = (segs: CandidateOwnerSegment[]) => {
-    const max = segs.reduce((m, s) => Math.max(m, s.count), 0)
-    const onPick = gateDrillClick('outreach', (value: string) => {
-      const seg = segs.find(s => s.owner_id === value)
-      if (seg) openSegment({ label: seg.name, count: seg.count }, { assignee: value })
+  // assignee arrives as the 'none' row, "Niet toegewezen") → ranking bar.
+  const assigneeBarData = (segs: CandidateOwnerSegment[]): ChartDatum[] =>
+    segs.map(s => ({ name: s.name, value: s.count, key: s.owner_id }))
+  const pickAssigneeBar = (segs: CandidateOwnerSegment[]) =>
+    gateDrillClick('outreach', (d: ChartDatum) => {
+      const seg = segs.find(s => s.owner_id === d.key)
+      if (seg) openSegment({ label: seg.name, count: seg.count }, { assignee: seg.owner_id })
     })
-    return <SegmentBars max={max} onPick={onPick}
-      items={segs.map(s => ({ key: s.owner_id, label: s.name, count: s.count, color: null }))} />
-  }
 
   // RAPPORT-KAARTDRILLS-1 → Opus-REJECT gemeten: alleen total/reached zijn
   // hard bevestigd identiek aan hun server-kpi; notReached (kaart = rekenkundig
@@ -157,6 +174,7 @@ export default function OutreachReport({ period, compare = COMPARE_OFF }: { peri
       sub: totalCompare ? <ReportCompareMetric metric={totalCompare} polarity="up-good" /> : undefined,
       onClick: openKpiDrill('total', t('outreach.total'), targets) },
     reached: { key: 'reached', label: t('outreach.reached'), value: reached,
+      color: reached !== 0 ? OUTREACH_COLOR.reached : undefined,
       onClick: openKpiDrill('reached', t('outreach.reached'), reached) },
     rate:    { key: 'rate',    label: t('outreach.reachRate'),
       value: formatRatio(data?.reach_rate),
@@ -227,20 +245,28 @@ export default function OutreachReport({ period, compare = COMPARE_OFF }: { peri
           <ReportChartCard span={2} title={t('outreach.series')}
             chart={<ReportTimeseriesChart series={data.timeseries.series} onPick={onSeriesPick} />} />
 
-          {/* Top-20 call lists + 'others' (the exact complement, a real row);
-              an archived campaign keeps its name and drills on its uuid. */}
-          <ReportChartCard title={t('outreach.axes.campaign')} chart={bars('campaign', data.by_campaign)} />
-          <ReportChartCard title={t('tasks.axes.assignee')} chart={assigneeBars(data.by_assignee)} />
+          {/* Ranking axes → bar charts. Top-20 call lists + 'others' (the exact
+              complement, a real drillable row); an archived campaign keeps its
+              name and drills on its uuid. */}
+          <ReportChartCard title={t('outreach.axes.campaign')} chart={
+            <BarChartCard data={barData(data.by_campaign)} onBarClick={pickBar('campaign', data.by_campaign)} />} />
+          <ReportChartCard title={t('tasks.axes.assignee')} chart={
+            <BarChartCard data={assigneeBarData(data.by_assignee)} onBarClick={pickAssigneeBar(data.by_assignee)} />} />
 
-          {/* Channel axis, zero-filled over the tenant channels + 'none'. */}
-          <ReportChartCard title={t('outreach.axes.channel')} chart={bars('channel', data.by_channel)} />
+          {/* Channel axis, zero-filled over the tenant channels + 'none' — few
+              categorical values → donut. */}
+          <ReportChartCard title={t('outreach.axes.channel')} chart={
+            <PieChartCard {...donutData(data.by_channel)} onItemClick={pickSegment('channel', data.by_channel)} />} />
 
           {/* Status axis — the fase-1 breakdown, now summing to total with
-              value/label pairs ("Onbekend" orphan bars included). */}
-          <ReportChartCard title={t('customers.axes.status')} chart={bars('status', data.by_status)} />
+              value/label pairs ("Onbekend" orphan bars included) → donut. */}
+          <ReportChartCard title={t('customers.axes.status')} chart={
+            <PieChartCard {...donutData(data.by_status)} onItemClick={pickSegment('status', data.by_status)} />} />
 
-          {/* Outcome axis — incl. the "Geen uitkomst" sentinel so it sums to total. */}
-          <ReportChartCard title={t('outreach.axes.outcome')} chart={bars('outcome', data.by_outcome)} />
+          {/* Outcome axis — incl. the "Geen uitkomst" sentinel so it sums to
+              total → donut. Last odd card spans the full row (no grid hole). */}
+          <ReportChartCard span={2} title={t('outreach.axes.outcome')} chart={
+            <PieChartCard {...donutData(data.by_outcome)} onItemClick={pickSegment('outcome', data.by_outcome)} />} />
         </ReportGrid>
       )}
 

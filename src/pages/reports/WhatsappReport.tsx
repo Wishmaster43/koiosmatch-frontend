@@ -13,6 +13,13 @@
  * rendered verbatim through the shared drill drawer, never un-masked or
  * reformatted. `top_conversations` carries the candidate name (server-gated),
  * never a number and never message content.
+ *
+ * Chart mix (RAPPORT-GEZICHT-WAVE2): direction/type/escalated are all few-value
+ * categorical axes with no lookup colour field → donuts on the house series,
+ * escalated spanning the full row so three half-width donuts never leave a grid
+ * hole. top_conversations stays a table (its own special face, per the brief).
+ * entityPage is deliberately NOT set on any drill here: conversation rows carry
+ * masked numbers, no unambiguous single record page to deep-link into.
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -26,7 +33,9 @@ import ReportDrillDrawer from './ReportDrillDrawer'
 import type { DrillSpec } from './ReportDrillDrawer'
 import { useWhatsappReport } from './useWhatsappReport'
 import { gateDrillClick } from './reportDrillGate'
-import SegmentBars from './SegmentBars'
+import PieChartCard from '@/components/charts/PieChartCard'
+import { CHART_SERIES_COLORS } from '@/components/charts/chartTypes'
+import type { ChartDatum } from '@/components/charts/chartTypes'
 import ReportTimeseriesChart from './ReportTimeseriesChart'
 import { BodyText, Caption, Mono } from '@/components/ui/typography'
 import { useDateFormat } from '@/lib/datetime'
@@ -36,6 +45,13 @@ import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
 import { getReportKpiCatalog, getReportKpiDefaultOrder, reportKpiSettingsKey } from './kpiCatalog'
 import { resolveReportKpiOrder } from './resolveReportKpiOrder'
 
+// Semantic colour per server key, applied only when the count is non-zero (§4:
+// colour carries meaning — a calm zero stays uncoloured). avg_first_response_
+// minutes carries no unambiguous signal direction, so it stays uncoloured.
+const KPI_COLOR: Partial<Record<string, string>> = {
+  escalations_open: 'var(--color-danger)',
+  unanswered_over_window: 'var(--color-warning)',
+}
 // The nine fixed KPI keys the live backend returns (WhatsappReport::CARDS), in
 // camelCase label form (whatsapp.kpi.*) — the server's own `label` is
 // intentionally ignored (§5: every user-facing string goes through i18n).
@@ -91,16 +107,20 @@ export default function WhatsappReport({ period }: { period: ReportPeriod }) {
         ...(data?.timeseries.bucket === 'week' ? { bucket: 'week' } : {}) },
     })
 
-  // Axis bars, clickable into the per-axis drill — each segment drills on its own
-  // RAW server `value`, never the translated label (§ contract discipline).
-  const bars = (axis: 'direction' | 'type' | 'escalated', segs: WhatsappSegment[]) => {
-    const max = segs.reduce((m, s) => Math.max(m, s.count), 0)
-    const onPick = gateDrillClick('whatsapp', (value: string) => {
-      const seg = segs.find(s => s.value === value)
+  // RAPPORT-GEZICHT-WAVE2 chart-type rule: all three axes are few-value
+  // categorical breakdowns (2-4 values, no lookup colour field) → donuts falling
+  // back to the house series. Each slice still drills on its own RAW server
+  // `value`, never the translated label (§ contract discipline).
+  const donutData = (segs: WhatsappSegment[]): { data: ChartDatum[]; colors: string[] } => ({
+    data: segs.map(s => ({ name: s.label, value: s.count, key: s.value })),
+    colors: segs.map((_, i) => CHART_SERIES_COLORS[i % CHART_SERIES_COLORS.length]),
+  })
+  const pickSegment = (axis: 'direction' | 'type' | 'escalated', segs: WhatsappSegment[]) =>
+    gateDrillClick('whatsapp', (d: unknown) => {
+      const key = (d as { key?: string })?.key ?? (d as { payload?: { key?: string } })?.payload?.key
+      const seg = segs.find(s => s.value === key)
       if (seg) openAxisDrill(axis, seg.label, seg.count, seg.value)
     })
-    return <SegmentBars max={max} onPick={onPick} items={segs.map(s => ({ key: s.value, label: s.label, count: s.count, color: null }))} />
-  }
 
   // The nine fixed cards straight off the server's kpis[] array — each label from
   // the local i18n catalogue, each card clickable into its own drill.
@@ -114,7 +134,8 @@ export default function WhatsappReport({ period }: { period: ReportPeriod }) {
       const value = raw == null ? '—' : serverKey === 'avg_first_response_minutes' ? formatNumber(raw) : raw
       const sub = raw != null && serverKey === 'avg_first_response_minutes' ? t('whatsapp.kpi.minutesUnit') : undefined
       const onClick = openKpiDrill(serverKey, t(labelKey), value)
-      return [camelKey, { key: camelKey, label: t(labelKey), value, sub, ...(onClick ? { onClick } : {}) }]
+      const color = raw != null && raw !== 0 ? KPI_COLOR[serverKey] : undefined
+      return [camelKey, { key: camelKey, label: t(labelKey), value, sub, color, ...(onClick ? { onClick } : {}) }]
     }),
   )
 
@@ -183,9 +204,14 @@ export default function WhatsappReport({ period }: { period: ReportPeriod }) {
             </div>
           } />
 
-          <ReportChartCard title={t('whatsapp.axes.direction')} chart={bars('direction', data.by_direction)} />
-          <ReportChartCard title={t('whatsapp.axes.type')} chart={bars('type', data.by_type)} />
-          <ReportChartCard title={t('whatsapp.axes.escalated')} chart={bars('escalated', data.by_escalated)} />
+          {/* Few-value categorical axes → donuts. Escalated (2 values) spans the
+              full row: three half-width donuts would leave a grid hole. */}
+          <ReportChartCard title={t('whatsapp.axes.direction')} chart={
+            <PieChartCard {...donutData(data.by_direction)} onItemClick={pickSegment('direction', data.by_direction)} />} />
+          <ReportChartCard title={t('whatsapp.axes.type')} chart={
+            <PieChartCard {...donutData(data.by_type)} onItemClick={pickSegment('type', data.by_type)} />} />
+          <ReportChartCard span={2} title={t('whatsapp.axes.escalated')} chart={
+            <PieChartCard {...donutData(data.by_escalated)} onItemClick={pickSegment('escalated', data.by_escalated)} />} />
 
           {/* Top-10 busiest threads — candidate name (server-gated) + volume;
               no numbers, no message content here (§8/§9). */}

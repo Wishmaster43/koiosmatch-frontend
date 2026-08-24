@@ -84,6 +84,21 @@ vi.mock('./ReportTimeseriesChart', () => ({
   ),
 }))
 
+// RAPPORT-GEZICHT-WAVE2: the Recharts house charts need real layout (jsdom has
+// none) — stubs expose the exact click contract the real components deliver
+// (donut: the datum incl. `key`; bar: the original ChartDatum).
+type StubDatum = { name: string; value: number; key?: string }
+vi.mock('@/components/charts/PieChartCard', () => ({
+  default: ({ data, onItemClick }: { data?: StubDatum[]; onItemClick?: (d: unknown) => void }) => (
+    <>{(data ?? []).map(d => <button key={d.key} onClick={() => onItemClick?.(d)}>{d.name}</button>)}</>
+  ),
+}))
+vi.mock('@/components/charts/BarChartCard', () => ({
+  default: ({ data, onBarClick }: { data?: StubDatum[]; onBarClick?: (d: StubDatum) => void }) => (
+    <>{(data ?? []).map(d => <button key={d.key} onClick={() => onBarClick?.(d)}>{d.name}</button>)}</>
+  ),
+}))
+
 describe('OpportunitiesReport (RAPPORTEN-SUITE-1 portie 5, kansen pipeline report)', () => {
   beforeEach(() => {
     getSpy.mockReset()

@@ -84,6 +84,21 @@ vi.mock('./ReportTimeseriesChart', () => ({
   ),
 }))
 
+// RAPPORT-GEZICHT-WAVE2: the Recharts house charts need real layout (jsdom has
+// none) — stubs expose the exact click contract the real components deliver
+// (donut: the datum incl. `key`; bar: the original ChartDatum).
+type StubDatum = { name: string; value: number; key?: string }
+vi.mock('@/components/charts/PieChartCard', () => ({
+  default: ({ data, onItemClick }: { data?: StubDatum[]; onItemClick?: (d: unknown) => void }) => (
+    <>{(data ?? []).map(d => <button key={d.key} onClick={() => onItemClick?.(d)}>{d.name}</button>)}</>
+  ),
+}))
+vi.mock('@/components/charts/BarChartCard', () => ({
+  default: ({ data, onBarClick }: { data?: StubDatum[]; onBarClick?: (d: StubDatum) => void }) => (
+    <>{(data ?? []).map(d => <button key={d.key} onClick={() => onBarClick?.(d)}>{d.name}</button>)}</>
+  ),
+}))
+
 describe('OutreachReport (RAPPORTEN-SUITE-1 portie 6, bellijsten report)', () => {
   // Every section now defaults its own list on mount, firing extra drill/advice
   // requests — clear the shared spy between tests so a later assertion never
@@ -443,5 +458,27 @@ describe('OutreachReport (RAPPORTEN-SUITE-1 portie 6, bellijsten report)', () =>
   // panel (ReportsPage) — the page itself renders NO inline compare control.
   it('renders no inline compare control (moved to the right filter panel)', () => {
     expect(screen.queryByText('Vergelijk met')).not.toBeInTheDocument()
+  })
+
+  // RAPPORT-GEZICHT-WAVE2 chart-type rule: campaign is a ranking axis → the
+  // shared BarChartCard; its click still drills exactly like the old SegmentBars.
+  it('renders the campaign axis as a bar chart whose click drills campaign=<uuid>', async () => {
+    const user = userEvent.setup()
+    mockUseOutreachReport.mockReturnValue({ data, loading: false, error: false })
+    renderReport()
+    await user.click(screen.getAllByText('Voorjaarsactie 2026').at(-1)!)
+    expect(getSpy).toHaveBeenCalledWith('/reports/outreach/drill',
+      expect.objectContaining({ params: { campaign: 'camp-archived-uuid', period: 'month' } }))
+  })
+
+  // Outcome is a few-value categorical axis → a donut; its click still drills
+  // exactly like the old SegmentBars.
+  it('renders the outcome axis as a donut whose click drills outcome=<value>', async () => {
+    const user = userEvent.setup()
+    mockUseOutreachReport.mockReturnValue({ data, loading: false, error: false })
+    renderReport()
+    await user.click(screen.getAllByText('Interested').at(-1)!)
+    expect(getSpy).toHaveBeenCalledWith('/reports/outreach/drill',
+      expect.objectContaining({ params: { outcome: 'interested', period: 'month' } }))
   })
 })

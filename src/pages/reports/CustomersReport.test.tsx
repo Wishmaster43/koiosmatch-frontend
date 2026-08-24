@@ -70,6 +70,22 @@ vi.mock('./ReportTimeseriesChart', () => ({
   ),
 }))
 
+// RAPPORT-GEZICHT-WAVE2: the Recharts house charts need real layout (jsdom has
+// none) — stubs expose the exact click contract the real components deliver
+// (donut: the datum incl. `key`; bar: the original ChartDatum). Mirrors
+// CandidatesReport.test.tsx's stub 1:1.
+type StubDatum = { name: string; value: number; key?: string }
+vi.mock('@/components/charts/PieChartCard', () => ({
+  default: ({ data, onItemClick }: { data?: StubDatum[]; onItemClick?: (d: unknown) => void }) => (
+    <>{(data ?? []).map(d => <button key={d.key} onClick={() => onItemClick?.(d)}>{d.name}</button>)}</>
+  ),
+}))
+vi.mock('@/components/charts/BarChartCard', () => ({
+  default: ({ data, onBarClick }: { data?: StubDatum[]; onBarClick?: (d: StubDatum) => void }) => (
+    <>{(data ?? []).map(d => <button key={d.key} onClick={() => onBarClick?.(d)}>{d.name}</button>)}</>
+  ),
+}))
+
 describe('CustomersReport (RAPPORTEN-SUITE-1 portie 3, customers inflow report)', () => {
   // Every section now defaults its own list on mount, firing extra drill/advice
   // requests — clear the shared spy between tests so a later assertion never
@@ -132,6 +148,17 @@ describe('CustomersReport (RAPPORTEN-SUITE-1 portie 3, customers inflow report)'
       expect.objectContaining({ params: { status: 'active', period: 'month' } }))
     expect(getSpy).toHaveBeenCalledWith('/reports/customers/advice',
       expect.objectContaining({ params: { status: 'active', period: 'month' } }))
+  })
+
+  // RAPPORT-GEZICHT-WAVE2: status is a coloured tenant lookup axis, so it now
+  // renders as a donut — the click contract still carries the segment's `key`.
+  it('clicking the phase donut segment drills with the phase XOR param', async () => {
+    const user = userEvent.setup()
+    mockUseCustomersReport.mockReturnValue({ data, loading: false, error: false })
+    renderReport()
+    await user.click(screen.getByText('Klant'))
+    expect(getSpy).toHaveBeenCalledWith('/reports/customers/drill',
+      expect.objectContaining({ params: { phase: 'customer', period: 'month' } }))
   })
 
   it('sends the active panel filters to BOTH the report hook and a drill click (RAPPORT-FILTERS-1 — bar and lade never disagree)', async () => {

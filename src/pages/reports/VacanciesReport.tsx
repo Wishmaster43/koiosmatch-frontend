@@ -2,9 +2,9 @@
  * VacanciesReport — vacancies report (GET /reports/vacancies, RAPPORTEN-SUITE-1
  * "portie 4"). ADDITIVE on the old C-34 screen: the summary tile row (total ·
  * open · filled · fill-rate · avg time-to-fill) and the per-vacancy table keep
- * working unchanged, now joined by the portie-pattern blocks — timeseries + six
- * segment axes through the shared SegmentBars (mirrors CustomersReport /
- * ApplicationsReport). Drill XOR params follow the eight-way vacancies contract:
+ * working unchanged, now joined by the portie-pattern blocks — the wave-2 chart
+ * mix (status donut in lookup colours, ranking axes as bar charts, timeseries
+ * line span-2; see VacancyReportAxes). Drill XOR params follow the eight-way vacancies contract:
  * status|customer|function|industry|owner|branch|date|vacancy. Data lives in the
  * hook; the table uses the shared DataTable (§4 blueprint-conformance).
  */
@@ -42,6 +42,14 @@ import type { ReportCompareMode } from './reportCompareMode'
 const numCell = (n: number) => (
   <span style={{ fontWeight: n > 0 ? 600 : 400, color: n > 0 ? 'var(--text)' : 'var(--text-muted)' }}>{n}</span>
 )
+
+// Semantic colour per summary card, non-zero only (§4) — the reference's
+// SUITE_COLOR idiom (wave-2 Opus minor: one map, no scattered ternary paint).
+const SUMMARY_COLOR: Partial<Record<string, string>> = {
+  filled: 'var(--color-success)', fillRate: 'var(--color-success)',
+  staleOnline: 'var(--color-warning)', longConcept: 'var(--color-warning)',
+  noMatches: 'var(--color-warning)', closingSoon: 'var(--color-warning)',
+}
 
 export default function VacanciesReport({ period, filters = EMPTY_REPORT_FILTERS, compare = COMPARE_OFF }: { period: ReportPeriod; filters?: ReportFilterState; compare?: ReportCompareMode }) {
   const { t } = useTranslation('analytics')
@@ -84,9 +92,11 @@ export default function VacanciesReport({ period, filters = EMPTY_REPORT_FILTERS
     rowsEndpoint: '/reports/vacancies/drill', rowsParams: { ...baseParams, vacancy: v.key },
     adviceEndpoint: '/reports/vacancies/advice', adviceParams: { ...baseParams, vacancy: v.key },
   })
-  // Portie-4 segment drill: exactly one XOR param per open drill (vacancy rows behind it).
+  // Portie-4 segment drill: exactly one XOR param per open drill (vacancy rows
+  // behind it) — entityPage deep-links the drawer's rows to the vacancy drilldown.
   const openSegment = (seg: { label: string; count: number }, xorParam: Record<string, unknown>) => setDrill({
     title: seg.label, value: seg.count, subtitle: windowSub(),
+    entityPage: 'vacancies',
     rowsEndpoint: '/reports/vacancies/drill', rowsParams: { ...baseParams, ...xorParam },
     adviceEndpoint: '/reports/vacancies/advice', adviceParams: { ...baseParams, ...xorParam },
   })
@@ -94,9 +104,10 @@ export default function VacanciesReport({ period, filters = EMPTY_REPORT_FILTERS
   // customersCount/longConcept/noMatches) route through GET
   // /reports/vacancies/kpis/drill with the exact `kpi` enum key (measured in
   // api-generated.ts::getReportsVacanciesKpisDrill) layered on the same window
-  // params every other drill uses.
+  // params every other drill uses; rows are vacancies too.
   const openKpiDrill = (label: string, value: number | string, kpi: 'fill_rate' | 'ttf' | 'customers_count' | 'long_concept' | 'no_matches') => setDrill({
     title: label, value, subtitle: windowSub(),
+    entityPage: 'vacancies',
     rowsEndpoint: '/reports/vacancies/kpis/drill', rowsParams: { ...baseParams, kpi },
   })
   const openBucket = (pt: CandidateTimeseriesPoint) => setDrill({
@@ -152,10 +163,12 @@ export default function VacanciesReport({ period, filters = EMPTY_REPORT_FILTERS
       active: drill?.rowsParams?.status === 'open',
       onClick: gateDrillClick('vacancies', () => openVacancies(t('vacancies.summary.open'), s?.open ?? 0, 'open')) },
     filled: { key: 'filled', label: t('vacancies.summary.filled'), value: s?.filled ?? 0,
+      color: s && s.filled !== 0 ? SUMMARY_COLOR.filled : undefined,
       active: drill?.rowsParams?.status === 'filled',
       onClick: gateDrillClick('vacancies', () => openVacancies(t('vacancies.summary.filled'), s?.filled ?? 0, 'filled')) },
     fillRate: { key: 'fillRate', label: t('vacancies.summary.fillRate'),
       value: s ? formatRatio(s.fill_rate) : '—',
+      color: s && s.fill_rate !== 0 ? SUMMARY_COLOR.fillRate : undefined,
       active: drill?.rowsParams?.kpi === 'fill_rate',
       onClick: gateDrillClick('vacancies', () => openKpiDrill(t('vacancies.summary.fillRate'), s ? formatRatio(s.fill_rate) : '—', 'fill_rate')) },
     ttf: { key: 'ttf', label: t('vacancies.summary.avgTimeToFill'),
@@ -169,6 +182,7 @@ export default function VacanciesReport({ period, filters = EMPTY_REPORT_FILTERS
     // verified live) the drill's own `stale_online=1` XOR param all share — so
     // this card's count and the drawer's rows can never disagree.
     staleOnline: { key: 'staleOnline', label: t('vacancies.summary.staleOnline'), value: s?.stale_online ?? 0,
+      color: s && s.stale_online !== 0 ? SUMMARY_COLOR.staleOnline : undefined,
       active: drill?.rowsParams?.stale_online === 1,
       onClick: gateDrillClick('vacancies', () => openSegment({ label: t('vacancies.summary.staleOnline'), count: s?.stale_online ?? 0 }, { stale_online: 1 })) },
     // KPIS-DRILL-1: `customers_count` now has its own kpi-drill endpoint, so the
@@ -188,9 +202,11 @@ export default function VacanciesReport({ period, filters = EMPTY_REPORT_FILTERS
     // KPIS-DRILL-1: `long_concept`/`no_matches` now drill via kpis/drill (was:
     // no `signal` XOR param on the plain drill endpoint, so left display-only).
     longConcept: { key: 'longConcept', label: t('vacancies.summary.longConcept'), value: s?.long_concept ?? 0,
+      color: s && s.long_concept !== 0 ? SUMMARY_COLOR.longConcept : undefined,
       active: drill?.rowsParams?.kpi === 'long_concept',
       onClick: gateDrillClick('vacancies', () => openKpiDrill(t('vacancies.summary.longConcept'), s?.long_concept ?? 0, 'long_concept')) },
     noMatches: { key: 'noMatches', label: t('vacancies.summary.noMatches'), value: s?.no_matches ?? 0,
+      color: s && s.no_matches !== 0 ? SUMMARY_COLOR.noMatches : undefined,
       active: drill?.rowsParams?.kpi === 'no_matches',
       onClick: gateDrillClick('vacancies', () => openKpiDrill(t('vacancies.summary.noMatches'), s?.no_matches ?? 0, 'no_matches')) },
     topFunction: { key: 'topFunction', label: t('vacancies.summary.topFunction'),
@@ -213,6 +229,7 @@ export default function VacanciesReport({ period, filters = EMPTY_REPORT_FILTERS
     // like `stale_online` above — so this card drills the same way, never a `signal` param.
     closingSoon: { key: 'closingSoon', label: t('vacancies.summary.closingSoon'), value: s?.closing_soon ?? 0,
       sub: s?.closing_soon_days != null ? t('thresholdDays', { n: s.closing_soon_days }) : undefined,
+      color: s && s.closing_soon !== 0 ? SUMMARY_COLOR.closingSoon : undefined,
       active: drill?.rowsParams?.closing_soon === 1,
       onClick: gateDrillClick('vacancies', () => openSegment({ label: t('vacancies.summary.closingSoon'), count: s?.closing_soon ?? 0 }, { closing_soon: 1 })) },
   }
