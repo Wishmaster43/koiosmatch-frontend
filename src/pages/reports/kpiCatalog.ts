@@ -103,7 +103,15 @@ export const REPORT_KPI_SCOPE_IDS: ReportKpiScopeId[] = [
 // strip that isn't nine independent cards) are simply absent from these maps;
 // the settings screen skips them.
 export const REPORT_KPI_FAMILY: Partial<Record<ReportKpiScopeId, ReportKpiFamily>> = {
-  candidates: 'axis',
+  // RAPPORT-GEZICHT-WAVE2: 'candidates' moved from 'axis' to 'fixed' — the strip
+  // is now the server's own nine-card suite (GET /reports/candidates/kpis, the
+  // real attention/flow KPIs), replacing the axis-top-segment filler cards
+  // (Danny 24-08: "KPI row heeft totaal geen KPI"). 'leads' STAYS on the axis
+  // family: the suite endpoint's validation does not yet accept the `phase`
+  // narrowing the Leads position needs (asked CMBE, WAVE-1B-CONTRACTVRAGEN-CMBE
+  // punt 4) — an unnarrowed suite under a Leads heading would show all-candidate
+  // numbers over leads-only charts.
+  candidates: 'fixed',
   leads: 'axis',
   customers: 'axis',
   prospects: 'axis',
@@ -135,17 +143,6 @@ export const REPORT_KPI_AXIS_CATALOG: Partial<Record<ReportKpiScopeId, KpiCatalo
   // (CandidatesReport.tsx's `leadPhaseValue`, never a hardcoded slug) so "still a
   // Lead" is only offered on the Kandidaten position — on Leads every row already
   // IS that phase, making the card always ≈ total and not worth offering there.
-  candidates: [
-    { key: 'status', labelKey: 'candidates.axes.status' },
-    { key: 'phase', labelKey: 'candidates.axes.phase' },
-    { key: 'source', labelKey: 'candidates.axes.source' },
-    { key: 'owner', labelKey: 'candidates.axes.owner' },
-    { key: 'branch', labelKey: 'candidates.axes.branch' },
-    { key: 'owner_none', labelKey: 'candidates.axes.ownerNone' },
-    { key: 'branch_none', labelKey: 'candidates.axes.branchNone' },
-    { key: 'source_none', labelKey: 'candidates.axes.sourceNone' },
-    { key: 'phase_lead', labelKey: 'candidates.axes.phaseLead' },
-  ],
   leads: [
     { key: 'status', labelKey: 'candidates.axes.status' },
     { key: 'phase', labelKey: 'candidates.axes.phase' },
@@ -191,6 +188,19 @@ export const REPORT_KPI_AXIS_CATALOG: Partial<Record<ReportKpiScopeId, KpiCatalo
 // which slices to that fixed length) — a spare is only ever appended, never
 // inserted before position nine, so the default strip never silently changes.
 export const REPORT_KPI_FIXED_CATALOG: Partial<Record<ReportKpiScopeId, KpiCatalogEntry[]>> = {
+  // The candidates suite (CandidatesReport::kpis, K-169 family) — nine real
+  // attention/flow KPIs, each sharing its predicate with its own drill.
+  candidates: [
+    { key: 'inflow', labelKey: 'candidates.kpi.inflow' },
+    { key: 'outflow', labelKey: 'candidates.kpi.outflow' },
+    { key: 'no_followup', labelKey: 'candidates.kpi.noFollowup' },
+    { key: 'status_stale', labelKey: 'candidates.kpi.statusStale' },
+    { key: 'no_cv', labelKey: 'candidates.kpi.noCv' },
+    { key: 'document_expiring', labelKey: 'candidates.kpi.documentExpiring' },
+    { key: 'availability_due', labelKey: 'candidates.kpi.availabilityDue' },
+    { key: 'no_contact', labelKey: 'candidates.kpi.noContact' },
+    { key: 'active_conversations', labelKey: 'candidates.kpi.activeConversations' },
+  ],
   vacancies: [
     { key: 'total', labelKey: 'vacancies.summary.total' },
     { key: 'open', labelKey: 'vacancies.summary.open' },
@@ -330,7 +340,8 @@ export const REPORT_KPI_FIXED_CATALOG: Partial<Record<ReportKpiScopeId, KpiCatal
 // the five axis-family scopes (their "total" is a special inline card, not part
 // of any axis) — proposal from the design doc, technically the simpler path.
 export const REPORT_KPI_PINNED_FIRST: Partial<Record<ReportKpiScopeId, string>> = {
-  candidates: 'total',
+  // 'candidates' unpinned since its move to the fixed family (suite strip is
+  // fully reorderable, like applications/whatsapp).
   leads: 'total',
   customers: 'total',
   prospects: 'total',

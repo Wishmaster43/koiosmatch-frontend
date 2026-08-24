@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import CandidatesReport from './CandidatesReport'
@@ -48,14 +48,6 @@ const data: CandidatesReportData = {
   by_owner:   [{ owner_id: 'u1', name: 'Anna de Vries', count: 8 }, { owner_id: 'none', name: 'Niet toegewezen', count: 4 }],
   by_branch:  [{ value: 'utrecht', label: 'Utrecht', color: null, count: 12 }, { value: 'none', label: 'Geen vestiging', color: null, count: 2 }],
 }
-// A 'none' source row too (mirrors the real endpoint's sentinel, REPORTS-KPI-SPARE-3
-// fixture) — kept in its own object so the vast majority of tests (which never pick
-// the source_none spare) keep the byte-identical `data` fixture above.
-const dataWithSourceNone: CandidatesReportData = {
-  ...data,
-  by_source: [...data.by_source, { value: 'none', label: 'Eigen invoer', color: null, count: 3 }],
-}
-
 function renderReport() {
   const qc = new QueryClient()
   return render(
@@ -74,11 +66,42 @@ vi.mock('./ReportTimeseriesChart', () => ({
   ),
 }))
 
+// RAPPORT-GEZICHT-WAVE2: the Recharts house charts need real layout (jsdom has
+// none) — stubs expose the exact click contract the real components deliver
+// (donut: the datum incl. `key`; bar: the original ChartDatum).
+type StubDatum = { name: string; value: number; key?: string }
+vi.mock('@/components/charts/PieChartCard', () => ({
+  default: ({ data, onItemClick }: { data?: StubDatum[]; onItemClick?: (d: unknown) => void }) => (
+    <>{(data ?? []).map(d => <button key={d.key} onClick={() => onItemClick?.(d)}>{d.name}</button>)}</>
+  ),
+}))
+vi.mock('@/components/charts/BarChartCard', () => ({
+  default: ({ data, onBarClick }: { data?: StubDatum[]; onBarClick?: (d: StubDatum) => void }) => (
+    <>{(data ?? []).map(d => <button key={d.key} onClick={() => onBarClick?.(d)}>{d.name}</button>)}</>
+  ),
+}))
+
+// The real nine-key suite (GET /reports/candidates/kpis) — status_stale 0 pins
+// the calm-zero case, and dropping a key pins the honest dash.
+const suiteCards = [
+  { key: 'inflow', count: 12 }, { key: 'outflow', count: 2 }, { key: 'no_followup', count: 5 },
+  { key: 'status_stale', count: 0 }, { key: 'no_cv', count: 3 }, { key: 'document_expiring', count: 1 },
+  { key: 'availability_due', count: 2 }, { key: 'no_contact', count: 4 }, { key: 'active_conversations', count: 6 },
+]
+const mockSuiteResponse = (cards = suiteCards) => getSpy.mockImplementation((url: unknown) =>
+  Promise.resolve(url === '/reports/candidates/kpis'
+    ? { data: { data: cards } }
+    : { data: { data: [], meta: { total: 0 } } }))
+
 describe('CandidatesReport (RAPPORTEN-SUITE-1 inflow report)', () => {
   // Every section now defaults its own list on mount, firing extra drill/advice
   // requests — clear the shared spy between tests so a later assertion never
   // matches a PRIOR test's leftover call history.
-  afterEach(() => { getSpy.mockClear(); mockSettings.mockReturnValue({}) })
+  afterEach(() => {
+    getSpy.mockReset()
+    getSpy.mockResolvedValue({ data: { data: [], meta: { total: 0 } } })
+    mockSettings.mockReturnValue({})
+  })
 
   it('shows the loading state', () => {
     mockUseCandidatesReport.mockReturnValue({ data: null, loading: true, error: false })
@@ -177,48 +200,67 @@ describe('CandidatesReport (RAPPORTEN-SUITE-1 inflow report)', () => {
       expect.objectContaining({ params: { date: '2026-08-03', bucket: 'week', period: 'month' } }))
   })
 
-  // Nine-card KPI strip (Danny — same footprint as the dashboard): total + eight
-  // axis-derived cards, all real counts from the fixture's own axes.
-  it('renders nine KPI cards derived from the report axes', () => {
+  // RAPPORT-GEZICHT-WAVE2: the strip is the REAL suite (GET /reports/candidates/
+  // kpis) — nine attention/flow KPIs with translated labels, never axis filler.
+  it('renders the real suite cards with translated labels and values', async () => {
+    mockSuiteResponse()
     mockUseCandidatesReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
-    expect(screen.getByText('Totaal ingestroomd')).toBeInTheDocument()
-    expect(screen.getByText('Status: Beschikbaar')).toBeInTheDocument()
-    expect(screen.getByText('Eigenaar: Anna de Vries')).toBeInTheDocument()
-    expect(screen.getByText('Vestiging: Utrecht')).toBeInTheDocument()
+    expect(await screen.findByText('Instroom')).toBeInTheDocument()
+    expect(screen.getByText('Zonder opvolging')).toBeInTheDocument()
+    expect(screen.getByText('Actieve gesprekken')).toBeInTheDocument()
+    // The suite VALUE renders (no_followup 5); the old axis filler never does.
+    expect(await screen.findByText('5')).toBeInTheDocument()
+    expect(screen.queryByText(/^Status: /)).not.toBeInTheDocument()
+    // The suite request carried the report window params.
+    expect(getSpy).toHaveBeenCalledWith('/reports/candidates/kpis',
+      expect.objectContaining({ params: expect.objectContaining({ period: 'month' }) }))
   })
 
   // RAPPORT-KPI-INSTELBAAR: which axes drive cards 2-9, and in what priority
   // order, is the tenant's stored Settings → Reports choice, not the hardcoded
   // status→phase→source→owner→branch order.
-  it('reorders the axis-derived KPI cards to the tenant-stored axis priority', () => {
-    mockSettings.mockReturnValue({ report_kpis_candidates: JSON.stringify(['branch', 'owner', 'source', 'phase', 'status']) })
+  it('reorders the suite cards to the tenant-stored priority', async () => {
+    mockSuiteResponse()
+    mockSettings.mockReturnValue({ report_kpis_candidates: JSON.stringify([
+      'active_conversations', 'no_contact', 'availability_due', 'document_expiring',
+      'no_cv', 'status_stale', 'no_followup', 'outflow', 'inflow']) })
     mockUseCandidatesReport.mockReturnValue({ data, loading: false, error: false })
     const { container } = renderReport()
+    await screen.findByText('Instroom')
     const text = container.textContent ?? ''
-    // "Vestiging" (branch) now leads the axis priority, so its card text appears
-    // before "Status" — the reverse of the hardcoded default order.
-    expect(text.indexOf('Vestiging:')).toBeGreaterThanOrEqual(0)
-    expect(text.indexOf('Vestiging:')).toBeLessThan(text.indexOf('Status:'))
+    expect(text.indexOf('Actieve gesprekken')).toBeLessThan(text.indexOf('Instroom'))
   })
 
   // A vanished stored axis key falls back to the default order silently on the
   // report (still nine real cards, never a crash) but shows a visible notice.
-  it('falls back a vanished stored axis key to the default and shows a notice', () => {
-    mockSettings.mockReturnValue({ report_kpis_candidates: JSON.stringify(['ghost_axis', 'phase', 'source', 'owner', 'branch']) })
+  it('falls back a vanished stored key to the default suite order and shows a notice', async () => {
+    mockSuiteResponse()
+    mockSettings.mockReturnValue({ report_kpis_candidates: JSON.stringify(['ghost_key', 'inflow']) })
     mockUseCandidatesReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
-    expect(screen.getByText('Status: Beschikbaar')).toBeInTheDocument() // backfilled from the default order
+    expect(await screen.findByText('Instroom')).toBeInTheDocument() // backfilled default
     expect(screen.getByText(i18n.t('candidates.kpiOrderFellBack', { ns: 'analytics' }))).toBeInTheDocument()
   })
 
-  it('clicking an axis-derived KPI card drills with the same XOR param as its bar', async () => {
+  // A suite card drills its OWN key — value and drawer share one predicate.
+  it('clicking a suite card drills via /reports/candidates/kpis/drill with its own key', async () => {
     const user = userEvent.setup()
+    mockSuiteResponse()
     mockUseCandidatesReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
-    await user.click(screen.getByText('Status: Beschikbaar'))
-    expect(getSpy).toHaveBeenCalledWith('/reports/candidates/drill',
-      expect.objectContaining({ params: { status: 'available', period: 'month' } }))
+    await user.click(await screen.findByText('Zonder opvolging'))
+    expect(getSpy).toHaveBeenCalledWith('/reports/candidates/kpis/drill',
+      expect.objectContaining({ params: expect.objectContaining({ kpi: 'no_followup', period: 'month' }) }))
+  })
+
+  // STATS-HONEST-1: a key the server omitted renders the house dash, unclickable.
+  it('a card whose suite key is missing renders a dash and no button', async () => {
+    mockSuiteResponse(suiteCards.filter(c => c.key !== 'no_cv'))
+    mockUseCandidatesReport.mockReturnValue({ data, loading: false, error: false })
+    renderReport()
+    await screen.findByText('Instroom')
+    expect(screen.getByText('Zonder CV').closest('[role="button"]')).toBeNull()
   })
 
   // REPORTGRID-1: the drill drawer opens ONLY on click, never auto-defaulted on
@@ -226,7 +268,11 @@ describe('CandidatesReport (RAPPORTEN-SUITE-1 inflow report)', () => {
   it('never fires a drill request before any segment is clicked', () => {
     mockUseCandidatesReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
-    expect(getSpy).not.toHaveBeenCalled()
+    // The suite LIST fetch is the strip's own data load — allowed; the drill/
+    // advice endpoints stay untouched until a real click.
+    for (const url of ['/reports/candidates/drill', '/reports/candidates/advice', '/reports/candidates/kpis/drill']) {
+      expect(getSpy.mock.calls.some(c => c[0] === url)).toBe(false)
+    }
   })
 
   // Clicking a second axis segment replaces whatever the shared drawer had open —
@@ -256,53 +302,28 @@ describe('CandidatesReport (RAPPORTEN-SUITE-1 inflow report)', () => {
     expect(call?.[1].params).not.toHaveProperty('bucket')
   })
 
-  // REPORTS-KPI-SPARE-3: the settings catalogue offers real spare cards beyond
-  // the five default axes — otherwise the picker has nothing new to swap in.
-  it('offers the owner_none/branch_none/source_none/phase_lead spares in the candidates catalogue', () => {
+  // RAPPORT-GEZICHT-WAVE2: the candidates catalogue IS the nine-key suite —
+  // reorderable, no axis spares (those stayed on the Leads position only).
+  it('the candidates catalogue offers exactly the nine suite keys', () => {
     const keys = getReportKpiCatalog('candidates').map(c => c.key)
-    expect(keys).toEqual(expect.arrayContaining(['owner_none', 'branch_none', 'source_none', 'phase_lead']))
-    // Still exactly nine cards by default (five axes, unchanged) — a never-configured
-    // tenant sees the byte-identical strip it always did.
-    expect(screen.queryByText('Zonder eigenaar')).not.toBeInTheDocument()
+    expect(keys).toEqual([
+      'inflow', 'outflow', 'no_followup', 'status_stale', 'no_cv',
+      'document_expiring', 'availability_due', 'no_contact', 'active_conversations',
+    ])
   })
 
-  it('swapping in the owner_none spare renders a real "unassigned owner" card, still nine cards total', () => {
-    mockSettings.mockReturnValue({ report_kpis_candidates: JSON.stringify(['owner_none', 'phase', 'source', 'status', 'branch']) })
+  // RAPPORT-COMPARE-2: the compare control moved to the right-hand filter panel
+  // (§4) — the page renders NO inline control and consumes the prop instead.
+  it('renders no inline compare control; the compare prop drives the request', async () => {
     mockUseCandidatesReport.mockReturnValue({ data, loading: false, error: false })
-    renderReport()
-    // The fixture's real owner='none' row (count 4) — no fabricated number.
-    expect(screen.getByText('Eigenaar: Niet toegewezen')).toBeInTheDocument()
-    const cards = screen.getAllByText(/^(Totaal ingestroomd|Status:|Fase:|Bron:|Eigenaar:|Vestiging:)/)
-    expect(cards.length).toBe(9)
-  })
-
-  it('swapping in branch_none/source_none renders their real none-bucket counts', () => {
-    mockSettings.mockReturnValue({ report_kpis_candidates: JSON.stringify(['branch_none', 'source_none', 'status', 'owner', 'phase']) })
-    mockUseCandidatesReport.mockReturnValue({ data: dataWithSourceNone, loading: false, error: false })
-    renderReport()
-    expect(screen.getByText('Vestiging: Geen vestiging')).toBeInTheDocument()
-    expect(screen.getByText('Bron: Eigen invoer')).toBeInTheDocument()
-  })
-
-  // phase_lead reuses the SAME flag-derived lead-phase value as the Kandidaten/
-  // Leads switch (never a hardcoded slug) — the fixture's `lead` phase row.
-  it('swapping in phase_lead renders the real lead-phase count on the Kandidaten position', () => {
-    mockSettings.mockReturnValue({ report_kpis_candidates: JSON.stringify(['phase_lead', 'status', 'source', 'owner', 'branch']) })
-    mockUseCandidatesReport.mockReturnValue({ data, loading: false, error: false })
-    renderReport()
-    expect(screen.getByText('Fase: Lead')).toBeInTheDocument()
-  })
-
-  // Clicking a spare card drills through the SAME real axis/param as its bar —
-  // never a synthetic 'owner_none' param the backend wouldn't understand.
-  it('clicking the owner_none spare card drills with the real owner=none XOR param', async () => {
-    const user = userEvent.setup()
-    mockSettings.mockReturnValue({ report_kpis_candidates: JSON.stringify(['owner_none', 'phase', 'source', 'status', 'branch']) })
-    mockUseCandidatesReport.mockReturnValue({ data, loading: false, error: false })
-    renderReport()
-    await user.click(screen.getByText('Eigenaar: Niet toegewezen'))
-    expect(getSpy).toHaveBeenCalledWith('/reports/candidates/drill',
-      expect.objectContaining({ params: { owner: 'none', period: 'month' } }))
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <CandidatesReport period="month" compare={{ kind: 'previous_period' }} />
+      </QueryClientProvider>,
+    )
+    expect(screen.queryByText(i18n.t('compare.label', { ns: 'analytics' }))).not.toBeInTheDocument()
+    await waitFor(() => expect(getSpy).toHaveBeenCalledWith('/reports/candidates/compare',
+      expect.objectContaining({ params: expect.objectContaining({ compare: 'previous_period' }) })))
   })
 })
 

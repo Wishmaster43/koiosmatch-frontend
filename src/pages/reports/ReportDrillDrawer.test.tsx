@@ -5,6 +5,7 @@
  * rendering alongside populated rows.
  */
 import { describe, it, expect, vi } from 'vitest'
+import userEvent from '@testing-library/user-event'
 import { render, screen } from '@testing-library/react'
 import ReportDrillDrawer from './ReportDrillDrawer'
 import type { DrillSpec } from './ReportDrillDrawer'
@@ -18,27 +19,69 @@ const baseDrill: DrillSpec = {
   adviceEndpoint: '/reports/flow/advice', adviceParams: { period: 'month' },
 }
 
-describe('ReportDrillDrawer — truncation notice', () => {
-  it('shows "Showing 50 of {total}" when the server capped the rows', () => {
+describe('ReportDrillDrawer — shown-of footer (SM idiom)', () => {
+  it('always shows the shown-of footer, carrying the server cap honestly', () => {
     mockUseReportDrill.mockReturnValue({
       rows: Array.from({ length: 50 }, (_, i) => ({ id: String(i), name: `Row ${i}` })),
       rowsTotal: 137, rowsLoading: false, rowsForbidden: false,
       advice: 'Some advice.', adviceLoading: false,
     })
     render(<ReportDrillDrawer drill={baseDrill} onClose={() => {}} />)
-    // i18n resolves to real nl strings in this test env (not raw keys), mirrors
-    // VacanciesReport.test.tsx — assert the actual copy from analytics.json.
-    expect(screen.getByText('Toont 50 van 137')).toBeInTheDocument()
+    // Real nl copy (analytics.json drill.shownOf).
+    expect(screen.getByText('50 van 137 getoond')).toBeInTheDocument()
   })
 
-  it('shows no truncation notice when every row is present', () => {
+  it('the search field filters the rows client-side and the footer follows', async () => {
+    const user = userEvent.setup()
+    mockUseReportDrill.mockReturnValue({
+      rows: [
+        { id: '1', name: 'Anna de Vries', city: 'Utrecht' },
+        { id: '2', name: 'Bram Bakker', city: 'Zwolle' },
+        ...Array.from({ length: 6 }, (_, i) => ({ id: `x${i}`, name: `Row ${i}` })),
+      ],
+      rowsTotal: 8, rowsLoading: false, rowsForbidden: false,
+      advice: null, adviceLoading: false,
+    })
+    render(<ReportDrillDrawer drill={baseDrill} onClose={() => {}} />)
+    await user.type(screen.getByRole('textbox', { name: 'Zoeken…' }), 'anna')
+    expect(screen.getByText('Anna de Vries')).toBeInTheDocument()
+    expect(screen.queryByText('Bram Bakker')).not.toBeInTheDocument()
+    expect(screen.getByText('1 van 8 getoond')).toBeInTheDocument()
+  })
+
+  it('hides the search field on a short list (calm default)', () => {
     mockUseReportDrill.mockReturnValue({
       rows: [{ id: '1', name: 'Row 1' }],
       rowsTotal: 1, rowsLoading: false, rowsForbidden: false,
       advice: 'Some advice.', adviceLoading: false,
     })
     render(<ReportDrillDrawer drill={baseDrill} onClose={() => {}} />)
-    expect(screen.queryByText(/Toont \d+ van \d+/)).not.toBeInTheDocument()
+    expect(screen.queryByRole('textbox')).not.toBeInTheDocument()
+  })
+
+  // entityPage (SM idiom): rows deep-link to the record — the name is the
+  // in-app button, the trailing icon a real new-tab link (EntityLink).
+  it('rows deep-link to the entity page when the drill carries entityPage', () => {
+    mockUseReportDrill.mockReturnValue({
+      rows: [{ id: 'c-1', name: 'Anna de Vries' }],
+      rowsTotal: 1, rowsLoading: false, rowsForbidden: false,
+      advice: null, adviceLoading: false,
+    })
+    render(<ReportDrillDrawer drill={{ ...baseDrill, entityPage: 'candidates' }} onClose={() => {}} />)
+    const name = screen.getByRole('button', { name: 'Anna de Vries' })
+    expect(name).toBeInTheDocument()
+    const newTab = document.querySelector('a[href*="candidates"][href*="c-1"]')
+    expect(newTab).not.toBeNull()
+  })
+
+  it('rows stay plain text without entityPage (no fake affordance)', () => {
+    mockUseReportDrill.mockReturnValue({
+      rows: [{ id: 'c-1', name: 'Anna de Vries' }],
+      rowsTotal: 1, rowsLoading: false, rowsForbidden: false,
+      advice: null, adviceLoading: false,
+    })
+    render(<ReportDrillDrawer drill={baseDrill} onClose={() => {}} />)
+    expect(screen.queryByRole('button', { name: 'Anna de Vries' })).not.toBeInTheDocument()
   })
 })
 

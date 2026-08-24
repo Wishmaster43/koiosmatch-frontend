@@ -2,16 +2,14 @@
 import type { ReactNode } from 'react'
 import { PieChart, Pie, Cell, Tooltip } from 'recharts'
 import { useTranslation } from 'react-i18next'
+import { CHART_SERIES_COLORS } from './chartTypes'
 import type { ChartDatum, TipProps } from './chartTypes'
 import ErrorBoundary from '../ui/ErrorBoundary'
 import { useNumberFormat } from '@/lib/formatters'
 
-/* eslint-disable no-restricted-syntax -- fixed chart colour series, not UI styling: needs more distinct hues than the semantic token set provides */
-const DEFAULT_COLORS = [
-  'var(--color-primary)','#10B981','#3B8FD4','var(--color-warning)',
-  'var(--color-danger)','#8B5CF6','#06B6D4','#84CC16','#F97316','#EC4899',
-]
-/* eslint-enable no-restricted-syntax */
+// The shared house series (chartTypes.ts) — moved there so report charts can
+// mix tenant lookup colours with the same fallbacks (one palette, §11).
+const DEFAULT_COLORS = CHART_SERIES_COLORS
 
 // `unit` is an optional label appended to the count tooltip (e.g. "12 candidates").
 // `formatNumber` is passed in (the tooltip is a plain function, not a component,
@@ -23,7 +21,7 @@ function ChartTooltip({ active, payload, total, showPercent, unit, formatNumber 
   const pct  = total ? ((val / total) * 100).toFixed(1) : '0'
   return (
     <div className="px-4 py-3 text-sm bg-white rounded-xl"
-      style={{ border: '1px solid var(--border)', boxShadow: '0 4px 16px rgba(0,0,0,0.08)' }}>
+      style={{ border: '1px solid var(--border)', boxShadow: 'var(--shadow-float)' }}>
       <div className="mb-1 font-medium text-gray-800">{item.name}</div>
       <div style={{ color: item.payload?.fill }}>
         {showPercent ? `${pct}%` : `${formatNumber(val)}${unit ? ' ' + unit : ''}`}

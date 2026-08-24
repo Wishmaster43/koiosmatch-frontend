@@ -5,12 +5,17 @@
  * fetched from `rowsEndpoint`, degrades to an empty list), and a Koios AI advice
  * block. Uses the shared RightDrawer shell so drawer chrome isn't re-implemented.
  */
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Search } from 'lucide-react'
 import { useReportDrill } from './useReportDrill'
 import RightDrawer from '@/components/ui/RightDrawer'
-import { GroupLabel, BodyText } from '@/components/ui/typography'
+import Avatar from '@/components/ui/Avatar'
+import EntityLink from '@/components/ui/EntityLink'
+import { GroupLabel, BodyText, Caption } from '@/components/ui/typography'
 import KoiosAiMark from '@/components/ui/KoiosAiMark'
 import { formatNumber } from '@/lib/formatters'
+import { initialsOf } from '@/lib/initials'
 
 // A drill descriptor built by each report for a clicked KPI/segment.
 export interface DrillSpec {
@@ -23,6 +28,10 @@ export interface DrillSpec {
   rowsParams?: Record<string, unknown>            // query params for rowsEndpoint
   adviceEndpoint?: string                         // GET → Koios AI advice
   adviceParams?: Record<string, unknown>          // query params for adviceEndpoint
+  // App-shell page key the rows deep-link to (SM-idiom row click-through:
+  // name opens in-app, icon opens a new tab). Only set where the drill's rows
+  // unambiguously ARE that entity and carry an `id` — else rows stay plain text.
+  entityPage?: string
 }
 
 // One underlying record — shape varies per report, read defensively. Module-
@@ -38,6 +47,61 @@ const rowSub = (r: DrillRow) => {
   const bits = [r.status, r.status_label, r.stage, r.funnel_label, r.client, r.function_title, r.city, r.customer, r.owner, r.assignee, r.wa_number]
     .filter((v): v is string => typeof v === 'string' && v.length > 0)
   return bits.slice(0, 2).join(' · ')
+}
+
+// The record list under a drill — the SM report-drawer idiom (KpiDrillDownDrawer):
+// a search field once the list is worth filtering, avatar rows, a shown-of
+// footer, and (when entityPage is set) the EntityLink click-through: name opens
+// the record in-app, the trailing icon opens it in a new tab. Mounted with a
+// per-drill key so the search resets when a different drill opens.
+function DrillRecordsList({ rows, rowsTotal, entityPage }: { rows: DrillRow[]; rowsTotal: number; entityPage?: string }) {
+  const { t } = useTranslation('analytics')
+  const [search, setSearch] = useState('')
+  const q = search.trim().toLowerCase()
+  const filtered = q ? rows.filter(r => `${rowTitle(r)} ${rowSub(r)}`.toLowerCase().includes(q)) : rows
+
+  return (
+    <>
+      {/* Search — only once the list is long enough to need it (calm default). */}
+      {rows.length > 5 && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '5px 10px', marginBottom: 8,
+          background: 'var(--hover-bg)', border: '1px solid var(--border)', borderRadius: 7 }}>
+          <Search size={13} color="var(--text-muted)" aria-hidden="true" />
+          <input value={search} onChange={e => setSearch(e.target.value)}
+            placeholder={t('drill.search')} aria-label={t('drill.search')}
+            style={{ flex: 1, border: 'none', background: 'transparent', outline: 'none', fontSize: 12, color: 'var(--text)' }} />
+        </div>
+      )}
+      <div style={{ border: '1px solid var(--border)', borderRadius: 10, overflow: 'hidden' }}>
+        {filtered.length === 0 && (
+          <div style={{ fontSize: 13, color: 'var(--text-muted)', padding: '10px 12px' }}>{t('drill.noRecords')}</div>
+        )}
+        {filtered.map((r, i) => {
+          const title = rowTitle(r)
+          const sub = rowSub(r)
+          const id = r.id != null ? String(r.id) : null
+          return (
+            <div key={id ?? i} style={{ padding: '8px 12px', borderTop: i ? '1px solid var(--border)' : 'none',
+              display: 'flex', alignItems: 'center', gap: 10 }}>
+              <Avatar initials={initialsOf(title, '–')} size={26} soft />
+              <div style={{ flex: 1, minWidth: 0 }}>
+                {entityPage && id ? (
+                  <EntityLink page={entityPage} id={id} title={title}>{title}</EntityLink>
+                ) : (
+                  <BodyText as="div" style={{ fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{title}</BodyText>
+                )}
+                {sub && <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{sub}</div>}
+              </div>
+            </div>
+          )
+        })}
+      </div>
+      {/* Shown-of footer (SM idiom) — also carries the server cap honestly. */}
+      <Caption as="div" style={{ marginTop: 6 }}>
+        {t('drill.shownOf', { shown: filtered.length, total: rowsTotal })}
+      </Caption>
+    </>
+  )
 }
 
 export default function ReportDrillDrawer({ drill, onClose }: { drill: DrillSpec | null; onClose: () => void }) {
@@ -89,22 +153,8 @@ export default function ReportDrillDrawer({ drill, onClose }: { drill: DrillSpec
             <div style={{ fontSize: 13, color: 'var(--text-muted)', padding: '8px 0' }}>{t('drill.noRecords')}</div>
           )}
           {!rowsLoading && rows.length > 0 && (
-            <>
-              <div style={{ border: '1px solid var(--border)', borderRadius: 10, overflow: 'hidden' }}>
-                {rows.map((r, i) => (
-                  <div key={i} style={{ padding: '9px 12px', borderTop: i ? '1px solid var(--border)' : 'none' }}>
-                    <BodyText as="div" style={{ fontWeight: 500 }}>{rowTitle(r)}</BodyText>
-                    {rowSub(r) && <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 1 }}>{rowSub(r)}</div>}
-                  </div>
-                ))}
-              </div>
-              {/* Server capped the row list — tell the recruiter how many are hidden. */}
-              {rows.length < rowsTotal && (
-                <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 6 }}>
-                  {t('drill.truncated', { shown: rows.length, total: rowsTotal })}
-                </div>
-              )}
-            </>
+            <DrillRecordsList key={`${drill.title}-${JSON.stringify(drill.rowsParams ?? {})}`}
+              rows={rows} rowsTotal={rowsTotal} entityPage={drill.entityPage} />
           )}
         </section>
       )}
