@@ -88,7 +88,7 @@ export const PAGE_TITLES: Record<string, string> = {
   // aliases) resolves to the hub root through renderPage()'s stale-reports
   // fallback and carries the plain hub title here.
   reports:                      'Reports',
-  'reports.candidates':         'Reports — Inflow',
+  'reports.candidates':         'Reports — Candidates',
   'reports.applications':       'Reports — Applications',
   'reports.customers':          'Reports — Customers',
   'reports.vacancies':          'Reports — Vacancies',
