@@ -143,7 +143,7 @@
     "productivityByRecruiter": "Submissions and placements per recruiter (30 days)",
     "fillRateTimeseries": "Fill rate, last 14 days",
     "fillRateByBranch": "Fill rate by branch",
-    "matchesByContractType": "Placements by contract form",
+    "matchesByContractType": "Placements by contract type",
     "placementsStartedEndedToday": "Started and ended today",
     "documentsAttention": "Documents needing attention",
     "couplingErrorsList": "Failed couplings",

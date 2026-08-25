@@ -16,7 +16,7 @@
  *    whenLoaded, no $hidden to strip them.
  *  - Each row's `value` is an IMMUTABLE SLUG (`bepaalde_tijd`) and `label` is the
  *    tenant's editable wording (`Bepaalde tijd`). A match stores the SLUG:
- *    App\Support\PlacementRules normalises a posted label to its `value` before
+ *    App\Support\MatchRules::normalise normalises a posted label to its `value` before
  *    saving, because the lookup's in-use/DELETE-409 guard JOINs on that column.
  *    Posting either form is accepted; reading one back always yields the slug.
  *

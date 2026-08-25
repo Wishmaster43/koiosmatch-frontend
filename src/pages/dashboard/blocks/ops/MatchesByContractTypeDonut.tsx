@@ -1,13 +1,16 @@
 /**
- * MatchesByContractTypeDonut — ops tile: matches broken down by contract type
- * (dash.matches_by_contract_type). The matches page has no contract-type
- * intent yet, so every slice click is a broad drill to the matches list
- * (OPEN_QUESTIONS: a narrowed click needs that intent added).
+ * MatchesByContractTypeDonut — ops tile: matches broken down by contract TYPE
+ * (dash.matches_by_contract_type, OpsPlanningFeeds.php grouped over the
+ * ContractType lookup). MATCH-AXIS-FIX: a real slice narrows the matches page
+ * via the { contract_type } intent — a distinct axis from contract FORM; the
+ * 'none' slice has no server filter value for "no contract type" so it keeps
+ * the broad drill (see the click handler below).
  */
 import { useTranslation } from 'react-i18next'
 import PieChartCard from '@/components/charts/PieChartCard'
 import { CHART_SERIES_COLORS } from '@/components/charts/chartTypes'
 import { Panel } from '@/pages/dashboard/DashboardPrimitives'
+import { fv } from '@/pages/dashboard/dashboardFormat'
 import type { MatchesByContractTypeRow } from '@/types/dashboard'
 import type { FeedTileContext } from '../feedTileKit'
 
@@ -17,10 +20,12 @@ export default function MatchesByContractTypeDonut({ rows, onNavigate }: {
 }) {
   const { t } = useTranslation('dashboard')
   // Zero-count slices carry no useful drill target — drop them before charting.
+  // `filterValue` carries the raw contract_type (ContractType lookup) value the click needs (§ house convention, name is localised for display).
   const data = rows
     .filter(r => r.count > 0)
     .map((r, i) => ({
       name: r.value === 'none' ? t('widget.unknown') : r.label,
+      filterValue: r.value,
       value: r.count,
       color: r.color ?? CHART_SERIES_COLORS[i % CHART_SERIES_COLORS.length],
     }))
@@ -33,9 +38,16 @@ export default function MatchesByContractTypeDonut({ rows, onNavigate }: {
         title={t('block.matchesByContractType')}
         data={data}
         colors={data.map(d => d.color)}
-        // No contract-type intent exists on the matches page yet: broad drill by design.
+        // A real contract-type value narrows the matches page; 'none' has no server
+        // filter value for "no contract type" so it stays a broad drill (§4 no guess).
         // Only wired when onNavigate is actually provided, so slices don't render clickable for nothing.
-        onItemClick={onNavigate ? () => onNavigate('matches') : undefined}
+        onItemClick={onNavigate
+          ? (d: unknown) => {
+              const v = fv(d)
+              if (v != null && v !== 'none') onNavigate('matches', { contract_type: v })
+              else onNavigate('matches')
+            }
+          : undefined}
       />
     </Panel>
   )

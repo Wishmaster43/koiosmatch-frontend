@@ -6,6 +6,8 @@
  * (2026-08-14): this is now the ONLY place stage/owner/client are filterable —
  * the toolbar's old MatchFilterBar (stage/owner triggers + a "more filters"
  * popover for client) was an exact duplicate and has been deleted.
+ * i18n-scan: matches — pure builder receiving `t` as a param, so the keys-exist
+ * guard needs this pragma to resolve the namespace and check the literals below.
  */
 import type { Dispatch, SetStateAction } from 'react'
 import type { TFunction } from 'i18next'
@@ -22,6 +24,11 @@ interface BuildArgs {
   ownerFilter: string[]; setOwnerFilter: Dispatch<SetStateAction<string[]>>
   clientFilter: string[]; setClientFilter: Dispatch<SetStateAction<string[]>>
   branchFilter: string[]; setBranchFilter: Dispatch<SetStateAction<string[]>>
+  // MATCH-SOORT-1 panel filter (wave 1c): filters by the match's contract form.
+  contractFormFilter: string[]; setContractFormFilter: Dispatch<SetStateAction<string[]>>
+  // MATCH-AXIS-FIX: filters by the match's contract TYPE (distinct axis, see
+  // matchFilterGroups.ts header comment for the lookup-value/label tolerance).
+  contractTypeFilter: string[]; setContractTypeFilter: Dispatch<SetStateAction<string[]>>
   kpiScored: boolean; setKpiScored: (fn: (v: boolean) => boolean) => void
   kpiUnscored: boolean; setKpiUnscored: (fn: (v: boolean) => boolean) => void
   dateRange: MatchDateRange | null; setDateRange: (v: MatchDateRange | null) => void
@@ -29,15 +36,17 @@ interface BuildArgs {
   // Optional: only registered while the tenant's approval mode is on (§4: one
   // filtering surface — the quick toggle and this panel entry stay in sync).
   pendingApprovalOnly?: boolean; setPendingApprovalOnly?: (fn: (v: boolean) => boolean) => void
-  stageData: Opt[]; ownerData: Opt[]; clientData: Opt[]; branchOptions: Opt[]
+  stageData: Opt[]; ownerData: Opt[]; clientData: Opt[]; branchOptions: Opt[]; contractFormOptions?: Opt[]
+  contractTypeOptions?: Opt[]
 }
 
 export function buildMatchFilterGroups({
   t, tog, stageFilter, setStageFilter, ownerFilter, setOwnerFilter,
-  clientFilter, setClientFilter, branchFilter, setBranchFilter,
+  clientFilter, setClientFilter, branchFilter, setBranchFilter, contractFormFilter, setContractFormFilter,
+  contractTypeFilter, setContractTypeFilter,
   kpiScored, setKpiScored, kpiUnscored, setKpiUnscored,
   dateRange, setDateRange, showArchived, setShowArchived, pendingApprovalOnly, setPendingApprovalOnly,
-  stageData, ownerData, clientData, branchOptions,
+  stageData, ownerData, clientData, branchOptions, contractFormOptions = [], contractTypeOptions = [],
 }: BuildArgs) {
   const catMatch        = t('filters.categories.match')
   const catOrganisation = t('filters.categories.organisation')
@@ -56,6 +65,10 @@ export function buildMatchFilterGroups({
     { key: 'owner',  type: 'search-select', category: catOrganisation, label: t('filters.owner'),  selected: ownerFilter,  options: ownerData,  onToggle: tog(setOwnerFilter) },
     { key: 'client', type: 'search-select', category: catOrganisation, label: t('insights.client'), selected: clientFilter, options: clientData, onToggle: tog(setClientFilter) },
     ...(branchOptions.length ? [{ key: 'branch', type: 'search-select', category: catOrganisation, label: t('common:filters.branch'), selected: branchFilter, options: branchOptions, onToggle: tog(setBranchFilter) }] : []),
+    // Contract form (MATCH-SOORT-1) — reuse the existing column label key, mirrors the table (§4 one label per concept).
+    ...(contractFormOptions.length ? [{ key: 'contractForm', type: 'search-select', category: catOrganisation, label: t('cols.contractForm'), selected: contractFormFilter, options: contractFormOptions, onToggle: tog(setContractFormFilter) }] : []),
+    // Contract type (distinct axis from contract form) — reuses the existing column label.
+    ...(contractTypeOptions.length ? [{ key: 'contractType', type: 'search-select', category: catOrganisation, label: t('drawer.contract.contractType'), selected: contractTypeFilter, options: contractTypeOptions, onToggle: tog(setContractTypeFilter) }] : []),
     // ── Weergave: match-date window + archived.
     {
       key: 'dateRange', type: 'date-range', category: catDisplay, label: t('filters.dateRange'),

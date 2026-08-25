@@ -7,6 +7,7 @@ import { useAuth } from '@/context/AuthContext'
 import { useRightPanel } from '@/context/RightPanelContext'
 import { usePublishSelection } from '@/context/SelectionContext'
 import { useMatchStatuses } from '@/lib/useMatchStatuses'
+import { useContractTypes } from '@/lib/useContractTypes'
 import { useMatchApprovalMode } from './hooks/useMatchApprovalMode'
 import api, { unwrap } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
@@ -82,6 +83,14 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
   const [clientFilter, setClientFilter] = usePageMemory<string[]>('matches.client', [])
   // VESTIGING: branch (bureau) filter — narrows to matches run from that branch.
   const [branchFilter, setBranchFilter] = usePageMemory<string[]>('matches.branch', [])
+  // MATCH-SOORT-1 panel filter (wave 1c): narrows by the match's contract form.
+  const [contractFormFilter, setContractFormFilter] = usePageMemory<string[]>('matches.contractForm', [])
+  // MATCH-AXIS-FIX: distinct contract TYPE axis (matches.contract_type / the
+  // ContractType lookup the ops-dashboard donut counts on) — a separate
+  // dimension from the contract FORM above (§ CandidateType lookup). Stores
+  // lookup VALUES.
+  const [contractTypeFilter, setContractTypeFilter] = usePageMemory<string[]>('matches.contractType', [])
+  const { options: contractTypeLookupOptions } = useContractTypes()
   // Unscored complements kpiScored: both live in the right panel's one "score state" group.
   const [kpiUnscored, setKpiUnscored] = usePageMemory('matches.unscored', false)
   // MATCH-APPROVAL-QUEUE-1 (Danny: "geen lijst van te beoordelen matches" — the
@@ -145,6 +154,20 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
     return Object.values(m)
   }, [rows])
 
+  // Contract-form distribution — right-panel-only filter dimension.
+  const contractFormData = useMemo(() => {
+    const m: Record<string, { value: string; label: string; count: number }> = {}
+    rows.forEach(r => { if (r.contractForm) (m[r.contractForm.value] ??= { value: r.contractForm.value, label: r.contractForm.label, count: 0 }).count++ })
+    return Object.values(m)
+  }, [rows])
+
+  // Contract-type filter options come straight from the tenant lookup (not the
+  // loaded rows), since rows may carry either the lookup value or its label
+  // (VOCABULARY CAVEAT — see the predicate below and OPEN_QUESTIONS).
+  const contractTypeData = useMemo(
+    () => contractTypeLookupOptions.map(o => ({ value: o.value, label: o.label })),
+    [contractTypeLookupOptions])
+
   // Multi-select toggle for the right-panel filter groups (add/remove a value).
   const tog = (set: Dispatch<SetStateAction<string[]>>) => (v: string | number) =>
     set(p => p.includes(String(v)) ? p.filter(x => x !== String(v)) : [...p, String(v)])
@@ -155,18 +178,22 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
   const filterGroups = useMemo(() => buildMatchFilterGroups({
     t, tog,
     stageFilter, setStageFilter, ownerFilter, setOwnerFilter, clientFilter, setClientFilter,
-    branchFilter, setBranchFilter, kpiScored, setKpiScored, kpiUnscored, setKpiUnscored,
+    branchFilter, setBranchFilter, contractFormFilter, setContractFormFilter,
+    contractTypeFilter, setContractTypeFilter, kpiScored, setKpiScored, kpiUnscored, setKpiUnscored,
     dateRange, setDateRange, showArchived, setShowArchived,
     ...(approvalReviewVisible ? { pendingApprovalOnly, setPendingApprovalOnly } : {}),
     stageData: stageData.map(d => ({ value: d.key, label: d.name, count: d.value })),
     ownerData: ownerData.map(d => ({ value: d.key, label: d.name, count: d.value })),
     clientData: clientData.map(d => ({ value: d.key, label: d.name, count: d.value })),
     branchOptions: branchData,
+    contractFormOptions: contractFormData,
+    contractTypeOptions: contractTypeData,
   }), [t, stageFilter, setStageFilter, ownerFilter, setOwnerFilter, clientFilter, setClientFilter,
-       branchFilter, setBranchFilter, kpiScored, setKpiScored, kpiUnscored, setKpiUnscored,
+       branchFilter, setBranchFilter, contractFormFilter, setContractFormFilter,
+       contractTypeFilter, setContractTypeFilter, kpiScored, setKpiScored, kpiUnscored, setKpiUnscored,
        dateRange, setDateRange, showArchived, setShowArchived,
        approvalReviewVisible, pendingApprovalOnly, setPendingApprovalOnly,
-       stageData, ownerData, clientData, branchData])
+       stageData, ownerData, clientData, branchData, contractFormData, contractTypeData])
 
   // Register/unregister the filters in the right panel.
   useEffect(() => {
@@ -177,7 +204,7 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
   // Reset to the first page and clear the selection whenever a filter changes
   // (kept out of the memo — setting state during render can loop).
   useEffect(() => { setPage(1); setSelectedIds(new Set()) },
-    [stageFilter, ownerFilter, clientFilter, branchFilter, kpiScored, kpiUnscored, pendingApprovalOnly, dateRange, query, showArchived, showTrash])
+    [stageFilter, ownerFilter, clientFilter, branchFilter, contractFormFilter, contractTypeFilter, kpiScored, kpiUnscored, pendingApprovalOnly, dateRange, query, showArchived, showTrash])
 
   // Filter the visible rows by donut selection. A reference-number query already
   // narrowed `rows` server-side (exact `?ref=` lookup) — skip the free-text
@@ -201,12 +228,25 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
       if (ownerFilter.length && !ownerFilter.includes(r.owner)) return false
       if (clientFilter.length && !clientFilter.includes(r.client)) return false
       if (branchFilter.length && !branchFilter.includes(r.branchName ?? '')) return false
+      if (contractFormFilter.length && !contractFormFilter.includes(r.contractForm?.value ?? '')) return false
+      // Contract-type predicate tolerates BOTH the lookup value and its label:
+      // the drawer's contract-type select writes the LABEL (OverviewTab.tsx
+      // useContractTypes().types), while the dashboard feed counts on the
+      // VALUE — see OPEN_QUESTIONS for the CMBE ask to unify this server-side.
+      if (contractTypeFilter.length) {
+        const selectedLabels = contractTypeLookupOptions
+          .filter(o => contractTypeFilter.includes(o.value))
+          .map(o => o.label)
+        const rowType = r.contractType ?? ''
+        if (!contractTypeFilter.includes(rowType) && !selectedLabels.includes(rowType)) return false
+      }
       if (dateRange?.from && (!r.date || new Date(r.date).getTime() < new Date(dateRange.from).getTime())) return false
       if (dateRange?.to && (!r.date || new Date(r.date).getTime() > new Date(dateRange.to).getTime())) return false
       if (q && ![r.candidate, r.vacancy, r.client].some(v => String(v ?? '').toLowerCase().includes(q))) return false
       return true
     })
-  }, [rows, stageFilter, ownerFilter, clientFilter, branchFilter, kpiScored, kpiUnscored, pendingApprovalOnly, approvalReviewVisible, dateRange, query, refQuery, showArchived, showTrash])
+  }, [rows, stageFilter, ownerFilter, clientFilter, branchFilter, contractFormFilter, contractTypeFilter, contractTypeLookupOptions,
+      kpiScored, kpiUnscored, pendingApprovalOnly, approvalReviewVisible, dateRange, query, refQuery, showArchived, showTrash])
 
   // Board rows never include archived matches: dragging one to a new status would
   // PATCH /matches/{id}, which 404s once soft-deleted (MatchController::update has
@@ -242,11 +282,11 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
 
   // Shared clear-all (page memory keeps filters sticky).
   const anyFilterActive = Boolean(query.trim() || kpiScored || kpiUnscored || (approvalReviewVisible && pendingApprovalOnly) || stageFilter.length || ownerFilter.length
-    || clientFilter.length || branchFilter.length || dateRange || showArchived || showTrash)
+    || clientFilter.length || branchFilter.length || contractFormFilter.length || contractTypeFilter.length || dateRange || showArchived || showTrash)
   const [searchEpoch, setSearchEpoch] = useState(0)
   const clearAllFilters = () => {
     setSearchEpoch(e => e + 1); setQuery(''); setKpiScored(false); setKpiUnscored(false); setPendingApprovalOnly(false)
-    setStageFilter([]); setOwnerFilter([]); setClientFilter([]); setBranchFilter([]); setDateRange(null); setShowArchived(false); setShowTrash(false)
+    setStageFilter([]); setOwnerFilter([]); setClientFilter([]); setBranchFilter([]); setContractFormFilter([]); setContractTypeFilter([]); setDateRange(null); setShowArchived(false); setShowTrash(false)
   }
 
   // KPI clicks drive the existing stage filter (chip + clear come for free);
@@ -287,6 +327,17 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
   const [pendingOpenId, setPendingOpenId] = useState<Id | null>(null)
   // Guards the one-shot direct fetch for a deep-link open (see effect below).
   const fetchingOpenRef = useRef<string | null>(null)
+  // Seed the contract-form filter from a navigation intent (e.g. the ops
+  // dashboard donut's slice click) — mirrors CandidatesPage's intent effect.
+  useEffect(() => {
+    const contractForm = (intent as { contract_form?: unknown } | undefined)?.contract_form
+    if (contractForm != null) setContractFormFilter([String(contractForm)])
+    // MATCH-AXIS-FIX: same seeding for the distinct contract-TYPE intent (e.g.
+    // the ops-dashboard MatchesByContractTypeDonut's slice click).
+    const contractType = (intent as { contract_type?: unknown } | undefined)?.contract_type
+    if (contractType != null) setContractTypeFilter([String(contractType)])
+  }, [intent, setContractFormFilter, setContractTypeFilter])
+
   useOpenFromIntent(intent, (id) => setPendingOpenId(id))
   useEffect(() => {
     if (pendingOpenId == null) return

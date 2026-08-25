@@ -143,7 +143,7 @@
     "productivityByRecruiter": "Vorschläge und Platzierungen pro Recruiter (30 Tage)",
     "fillRateTimeseries": "Fill Rate, letzte 14 Tage",
     "fillRateByBranch": "Fill Rate nach Niederlassung",
-    "matchesByContractType": "Platzierungen nach Vertragsform",
+    "matchesByContractType": "Vermittlungen nach Vertragstyp",
     "placementsStartedEndedToday": "Heute gestartet und beendet",
     "documentsAttention": "Dokumente, die Aufmerksamkeit erfordern",
     "couplingErrorsList": "Fehlgeschlagene Kopplungen",

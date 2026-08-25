@@ -18,6 +18,8 @@ function build(overrides: Partial<Parameters<typeof buildMatchFilterGroups>[0]> 
   const setKpiScored = vi.fn()
   const setKpiUnscored = vi.fn()
   const setDateRange = vi.fn()
+  const setContractFormFilter = vi.fn()
+  const setContractTypeFilter = vi.fn()
   const args = {
     t: i18n.getFixedT('nl', 'matches'),
     tog,
@@ -25,15 +27,19 @@ function build(overrides: Partial<Parameters<typeof buildMatchFilterGroups>[0]> 
     ownerFilter: [], setOwnerFilter: vi.fn(),
     clientFilter: [], setClientFilter: vi.fn(),
     branchFilter: [], setBranchFilter: vi.fn(),
+    contractFormFilter: [], setContractFormFilter,
+    contractTypeFilter: [], setContractTypeFilter,
     kpiScored: false, setKpiScored,
     kpiUnscored: false, setKpiUnscored,
     dateRange: null, setDateRange,
     showArchived: false, setShowArchived,
     stageData: [], ownerData: [], clientData: [],
     branchOptions: [{ value: 'Amsterdam', label: 'Amsterdam', count: 4 }],
+    contractFormOptions: [],
+    contractTypeOptions: [],
     ...overrides,
   } as Parameters<typeof buildMatchFilterGroups>[0]
-  return { groups: buildMatchFilterGroups(args), setShowArchived, setKpiScored, setKpiUnscored, setDateRange }
+  return { groups: buildMatchFilterGroups(args), setShowArchived, setKpiScored, setKpiUnscored, setDateRange, setContractFormFilter, setContractTypeFilter }
 }
 
 describe('buildMatchFilterGroups · parity groups (half 2)', () => {
@@ -66,5 +72,37 @@ describe('buildMatchFilterGroups · parity groups (half 2)', () => {
     const range = groups.find(g => g.key === 'dateRange') as { onFromChange: (v: string) => void }
     range.onFromChange('2026-02-01')
     expect(setDateRange).toHaveBeenCalledWith({ from: '2026-02-01', to: '' })
+  })
+
+  it('omits the contract-form group when no options are loaded (default arg, no crash)', () => {
+    const { groups } = build()
+    expect(groups.find(g => g.key === 'contractForm')).toBeUndefined()
+  })
+
+  it('emits a contract-form group from the loaded options and routes onToggle to its own setter', () => {
+    const { groups, setContractFormFilter } = build({
+      contractFormOptions: [{ value: 'zzp', label: 'ZZP', count: 3 }],
+    })
+    const contractForm = groups.find(g => g.key === 'contractForm') as { label: string; options: { value: string }[]; onToggle: (v: string) => void }
+    expect(contractForm.label).toBe(i18n.getFixedT('nl', 'matches')('cols.contractForm'))
+    expect(contractForm.options.map(o => o.value)).toEqual(['zzp'])
+    contractForm.onToggle('zzp')
+    expect(setContractFormFilter).toHaveBeenCalledTimes(1)
+  })
+
+  it('omits the contract-type group when no options are loaded (default arg, no crash)', () => {
+    const { groups } = build()
+    expect(groups.find(g => g.key === 'contractType')).toBeUndefined()
+  })
+
+  it('emits a contract-type group from the loaded options and routes onToggle to its own setter', () => {
+    const { groups, setContractTypeFilter } = build({
+      contractTypeOptions: [{ value: 'uitzendbeding', label: 'Uitzendbeding', count: 4 }],
+    })
+    const contractType = groups.find(g => g.key === 'contractType') as { label: string; options: { value: string }[]; onToggle: (v: string) => void }
+    expect(contractType.label).toBe('Contractsoort')
+    expect(contractType.options.map(o => o.value)).toEqual(['uitzendbeding'])
+    contractType.onToggle('uitzendbeding')
+    expect(setContractTypeFilter).toHaveBeenCalledTimes(1)
   })
 })
