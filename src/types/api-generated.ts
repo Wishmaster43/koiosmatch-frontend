@@ -98,6 +98,116 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/vacancies/{id}/activity": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the vacancy.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        get: operations["getVacanciesIdActivity"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/applications/{id}/activity": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the application.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        get: operations["getApplicationsIdActivity"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/opportunities/{id}/activity": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the opportunity.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        get: operations["getOpportunitiesIdActivity"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/matches/{id}/activity": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the match.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        get: operations["getMatchesIdActivity"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/planning/shifts/{shift}/activity": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The shift.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                shift: string;
+            };
+            cookie?: never;
+        };
+        get: operations["getPlanningShiftsShiftActivity"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/tenants": {
         parameters: {
             query?: never;
@@ -556,210 +666,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/users/{id}/branches": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The ID of the user.
-                 * @example 01a02ac5-e023-7269-a11e-0d4e6b1a2772
-                 */
-                id: string;
-            };
-            cookie?: never;
-        };
-        /** GET /users/{id}/branches — the user's branch set [{id, name, flags}]. */
-        get: operations["getUsersIdBranches"];
-        /** PUT /users/{id}/branches { location_ids: [] } — replace the user's set. */
-        put: operations["putUsersIdBranches"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/roles/{id}/branches": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The ID of the role.
-                 * @example 564
-                 */
-                id: string;
-            };
-            cookie?: never;
-        };
-        /** GET /roles/{id}/branches — the role's per-tenant TEMPLATE set. */
-        get: operations["getRolesIdBranches"];
-        /** PUT /roles/{id}/branches { location_ids: [] } — replace the template set. */
-        put: operations["putRolesIdBranches"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/customers/{customer}/erase": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The customer.
-                 * @example architecto
-                 */
-                customer: string;
-            };
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** POST /customers/{id}/erase — erase the personal (contact) data in a company dossier. */
-        post: operations["postCustomersCustomerErase"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/vacancies/{id}/activity": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The ID of the vacancy.
-                 * @example architecto
-                 */
-                id: string;
-            };
-            cookie?: never;
-        };
-        get: operations["getVacanciesIdActivity"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/applications/{id}/activity": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The ID of the application.
-                 * @example architecto
-                 */
-                id: string;
-            };
-            cookie?: never;
-        };
-        get: operations["getApplicationsIdActivity"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/opportunities/{id}/activity": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The ID of the opportunity.
-                 * @example architecto
-                 */
-                id: string;
-            };
-            cookie?: never;
-        };
-        get: operations["getOpportunitiesIdActivity"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/matches/{id}/activity": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The ID of the match.
-                 * @example architecto
-                 */
-                id: string;
-            };
-            cookie?: never;
-        };
-        get: operations["getMatchesIdActivity"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/candidates/{candidate}/erase": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The candidate.
-                 * @example architecto
-                 */
-                candidate: string;
-            };
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** POST /candidates/{id}/erase — anonymise a candidate's personal data (right to be forgotten). */
-        post: operations["postCandidatesCandidateErase"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/planning/shifts/{shift}/activity": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The shift.
-                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
-                 */
-                shift: string;
-            };
-            cookie?: never;
-        };
-        get: operations["getPlanningShiftsShiftActivity"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/exports/candidates.csv": {
         parameters: {
             query?: never;
@@ -1144,552 +1050,6 @@ export interface paths {
         put?: never;
         /** POST /imports/{entity} — the real run, transactional per row and idempotent. */
         post: operations["postImportsEntity"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/customers/{id}/deletion-preview": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The ID of the customer.
-                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
-                 */
-                id: string;
-            };
-            cookie?: never;
-        };
-        /**
-         * GET .
-         * @description ../{id}/deletion-preview — live blockers + transfer hint + lifecycle.
-         */
-        get: operations["getCustomersIdDeletionPreview"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/customers/{id}/mark-deletion": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The ID of the customer.
-                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
-                 */
-                id: string;
-            };
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * POST .
-         * @description ../{id}/mark-deletion { transfer_to_owner_id? } — 200 | 409 {code:'in_use', blocking}.
-         */
-        post: operations["postCustomersIdMarkDeletion"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/customers/{id}/unmark-deletion": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The ID of the customer.
-                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
-                 */
-                id: string;
-            };
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * POST .
-         * @description ../{id}/unmark-deletion — back to "Gearchiveerd".
-         */
-        post: operations["postCustomersIdUnmarkDeletion"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/vacancies/{id}/deletion-preview": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The ID of the vacancy.
-                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
-                 */
-                id: string;
-            };
-            cookie?: never;
-        };
-        /**
-         * GET .
-         * @description ../{id}/deletion-preview — live blockers + transfer hint + lifecycle.
-         */
-        get: operations["getVacanciesIdDeletionPreview"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/vacancies/{id}/mark-deletion": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The ID of the vacancy.
-                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
-                 */
-                id: string;
-            };
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * POST .
-         * @description ../{id}/mark-deletion { transfer_to_owner_id? } — 200 | 409 {code:'in_use', blocking}.
-         */
-        post: operations["postVacanciesIdMarkDeletion"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/vacancies/{id}/unmark-deletion": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The ID of the vacancy.
-                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
-                 */
-                id: string;
-            };
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * POST .
-         * @description ../{id}/unmark-deletion — back to "Gearchiveerd".
-         */
-        post: operations["postVacanciesIdUnmarkDeletion"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/opportunities/{id}/deletion-preview": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The ID of the opportunity.
-                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
-                 */
-                id: string;
-            };
-            cookie?: never;
-        };
-        /**
-         * GET .
-         * @description ../{id}/deletion-preview — live blockers + transfer hint + lifecycle.
-         */
-        get: operations["getOpportunitiesIdDeletionPreview"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/opportunities/{id}/mark-deletion": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The ID of the opportunity.
-                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
-                 */
-                id: string;
-            };
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * POST .
-         * @description ../{id}/mark-deletion { transfer_to_owner_id? } — 200 | 409 {code:'in_use', blocking}.
-         */
-        post: operations["postOpportunitiesIdMarkDeletion"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/opportunities/{id}/unmark-deletion": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The ID of the opportunity.
-                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
-                 */
-                id: string;
-            };
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * POST .
-         * @description ../{id}/unmark-deletion — back to "Gearchiveerd".
-         */
-        post: operations["postOpportunitiesIdUnmarkDeletion"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/tasks/{id}/deletion-preview": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The ID of the task.
-                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
-                 */
-                id: string;
-            };
-            cookie?: never;
-        };
-        /**
-         * GET .
-         * @description ../{id}/deletion-preview — live blockers + transfer hint + lifecycle.
-         */
-        get: operations["getTasksIdDeletionPreview"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/tasks/{id}/mark-deletion": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The ID of the task.
-                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
-                 */
-                id: string;
-            };
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * POST .
-         * @description ../{id}/mark-deletion { transfer_to_owner_id? } — 200 | 409 {code:'in_use', blocking}.
-         */
-        post: operations["postTasksIdMarkDeletion"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/tasks/{id}/unmark-deletion": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The ID of the task.
-                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
-                 */
-                id: string;
-            };
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * POST .
-         * @description ../{id}/unmark-deletion — back to "Gearchiveerd".
-         */
-        post: operations["postTasksIdUnmarkDeletion"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/matches/{id}/deletion-preview": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The ID of the match.
-                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
-                 */
-                id: string;
-            };
-            cookie?: never;
-        };
-        /**
-         * GET .
-         * @description ../{id}/deletion-preview — live blockers + transfer hint + lifecycle.
-         */
-        get: operations["getMatchesIdDeletionPreview"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/matches/{id}/mark-deletion": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The ID of the match.
-                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
-                 */
-                id: string;
-            };
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * POST .
-         * @description ../{id}/mark-deletion { transfer_to_owner_id? } — 200 | 409 {code:'in_use', blocking}.
-         */
-        post: operations["postMatchesIdMarkDeletion"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/matches/{id}/unmark-deletion": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The ID of the match.
-                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
-                 */
-                id: string;
-            };
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * POST .
-         * @description ../{id}/unmark-deletion — back to "Gearchiveerd".
-         */
-        post: operations["postMatchesIdUnmarkDeletion"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/outreach-campaigns/{id}/deletion-preview": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The ID of the outreach campaign.
-                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
-                 */
-                id: string;
-            };
-            cookie?: never;
-        };
-        /**
-         * GET .
-         * @description ../{id}/deletion-preview — live blockers + transfer hint + lifecycle.
-         */
-        get: operations["getOutreachCampaignsIdDeletionPreview"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/outreach-campaigns/{id}/mark-deletion": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The ID of the outreach campaign.
-                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
-                 */
-                id: string;
-            };
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * POST .
-         * @description ../{id}/mark-deletion { transfer_to_owner_id? } — 200 | 409 {code:'in_use', blocking}.
-         */
-        post: operations["postOutreachCampaignsIdMarkDeletion"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/outreach-campaigns/{id}/unmark-deletion": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The ID of the outreach campaign.
-                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
-                 */
-                id: string;
-            };
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * POST .
-         * @description ../{id}/unmark-deletion — back to "Gearchiveerd".
-         */
-        post: operations["postOutreachCampaignsIdUnmarkDeletion"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/workflows/{id}/deletion-preview": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The ID of the workflow.
-                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
-                 */
-                id: string;
-            };
-            cookie?: never;
-        };
-        /**
-         * GET .
-         * @description ../{id}/deletion-preview — live blockers + transfer hint + lifecycle.
-         */
-        get: operations["getWorkflowsIdDeletionPreview"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/workflows/{id}/mark-deletion": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The ID of the workflow.
-                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
-                 */
-                id: string;
-            };
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * POST .
-         * @description ../{id}/mark-deletion { transfer_to_owner_id? } — 200 | 409 {code:'in_use', blocking}.
-         */
-        post: operations["postWorkflowsIdMarkDeletion"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/workflows/{id}/unmark-deletion": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The ID of the workflow.
-                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
-                 */
-                id: string;
-            };
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * POST .
-         * @description ../{id}/unmark-deletion — back to "Gearchiveerd".
-         */
-        post: operations["postWorkflowsIdUnmarkDeletion"];
         delete?: never;
         options?: never;
         head?: never;
@@ -2819,6 +2179,107 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/files/tenant-logo/{tenant}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                tenant: string;
+            };
+            cookie?: never;
+        };
+        /**
+         * GET (signed, UNAUTHENTICATED) /files/tenant-logo/{tenant} — stream the tenant logo.
+         * @description `signed` already verified the short-lived signature and `tenant.param` initialised
+         *     the bureau from the signed {tenant} segment, so a plain lookup here is IDOR-safe.
+         */
+        get: operations["getFilesTenantLogoTenant"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/files/tenant-banner/{tenant}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                tenant: string;
+            };
+            cookie?: never;
+        };
+        /** GET (signed) /files/tenant-banner/{tenant} — stream the banner (same CSP hardening). */
+        get: operations["getFilesTenantBannerTenant"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** GET /settings — return all settings as a key=>value map, masking secrets. */
+        get: operations["getSettings"];
+        put?: never;
+        /** POST /settings — upsert one or more settings (encrypting the sensitive ones). */
+        post: operations["postSettings"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/settings/logo": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** POST /settings/logo — replace the tenant logo with an uploaded image. */
+        post: operations["postSettingsLogo"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/settings/banner": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * POST /settings/banner (BANNER-UPLOAD-1) — replace the tenant's company banner.
+         * @description Mirrors the logo flow exactly: private-disk path persisted (`company_banner_path`),
+         *     a short-lived signed URL minted on read — never a static/public path, and never
+         *     the FE's old session-local blob: string (the bug this endpoint replaces).
+         */
+        post: operations["postSettingsBanner"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/whatsapp-web/webhook": {
         parameters: {
             query?: never;
@@ -2830,93 +2291,6 @@ export interface paths {
         put?: never;
         post: operations["postWhatsappWebWebhook"];
         delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/profile/whatsapp-web": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** GET /api/profile/whatsapp-web — the caller's own numbers. */
-        get: operations["getProfileWhatsappWeb"];
-        put?: never;
-        /** POST /api/profile/whatsapp-web — register a new number (status starts disconnected). */
-        post: operations["postProfileWhatsappWeb"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/profile/whatsapp-web/{id}/connect": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The ID of the whatsapp web.
-                 * @example architecto
-                 */
-                id: string;
-            };
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** POST /api/profile/whatsapp-web/{id}/connect — start a WAHA session; QR arrives via webhook. */
-        post: operations["postProfileWhatsappWebIdConnect"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/profile/whatsapp-web/{id}/disconnect": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The ID of the whatsapp web.
-                 * @example architecto
-                 */
-                id: string;
-            };
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** POST /api/profile/whatsapp-web/{id}/disconnect — end the live link (data is kept). */
-        post: operations["postProfileWhatsappWebIdDisconnect"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/profile/whatsapp-web/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The ID of the whatsapp web.
-                 * @example architecto
-                 */
-                id: string;
-            };
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        /** DELETE /api/profile/whatsapp-web/{id} — remove one of the caller's numbers. */
-        delete: operations["deleteProfileWhatsappWebId"];
         options?: never;
         head?: never;
         patch?: never;
@@ -9749,6 +9123,177 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/profile/whatsapp-web": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** GET /api/profile/whatsapp-web — the caller's own numbers. */
+        get: operations["getProfileWhatsappWeb"];
+        put?: never;
+        /** POST /api/profile/whatsapp-web — register a new own number (status starts disconnected). */
+        post: operations["postProfileWhatsappWeb"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/profile/whatsapp-web/{id}/connect": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the whatsapp web.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** POST /api/profile/whatsapp-web/{id}/connect — start the gateway session; QR + connected arrive via the webhook. */
+        post: operations["postProfileWhatsappWebIdConnect"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/profile/whatsapp-web/{id}/disconnect": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the whatsapp web.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** POST /api/profile/whatsapp-web/{id}/disconnect — end the live link (data is kept). */
+        post: operations["postProfileWhatsappWebIdDisconnect"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/profile/whatsapp-web/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the whatsapp web.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** DELETE /api/profile/whatsapp-web/{id} */
+        delete: operations["deleteProfileWhatsappWebId"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/settings/whatsapp-web-numbers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** GET /api/settings/whatsapp-web-numbers — every branch device of the tenant. */
+        get: operations["getSettingsWhatsappWebNumbers"];
+        put?: never;
+        /** POST /api/settings/whatsapp-web-numbers — register a branch device (status starts disconnected). */
+        post: operations["postSettingsWhatsappWebNumbers"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/settings/whatsapp-web-numbers/{id}/connect": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the whatsapp web number.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["postSettingsWhatsappWebNumbersIdConnect"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/settings/whatsapp-web-numbers/{id}/disconnect": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the whatsapp web number.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["postSettingsWhatsappWebNumbersIdDisconnect"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/settings/whatsapp-web-numbers/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the whatsapp web number.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: operations["deleteSettingsWhatsappWebNumbersId"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/settings/whatsapp-queue": {
         parameters: {
             query?: never;
@@ -9883,6 +9428,164 @@ export interface paths {
         post?: never;
         /** DELETE /task-types/{taskType} — 409 while still in use. */
         delete: operations["deleteTaskTypesTaskType"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/users": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** GET /users — list users of the caller's own tenant only. */
+        get: operations["getUsers"];
+        put?: never;
+        /** POST /users — create a user inside the caller's tenant. */
+        post: operations["postUsers"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/users/{user_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the user.
+                 * @example 01a02ac5-e023-7269-a11e-0d4e6b1a2772
+                 */
+                user_id: string;
+            };
+            cookie?: never;
+        };
+        /** GET /users/{user} — show a single user (must belong to the caller's tenant). */
+        get: operations["getUsersUserId"];
+        /** PUT /users/{user} — update a user (must belong to the caller's tenant). */
+        put: operations["putUsersUserId"];
+        post?: never;
+        /**
+         * DELETE /users/{user} — SOFT-delete a user of the caller's tenant.
+         * @description USER-SOFTDELETE-1 (Danny 08-08): a user who still OWNS active objects
+         *     (candidates/vacancies/matches/…) may NEVER be deleted without first handing
+         *     that ownership to a successor — the database must stay intact and no object
+         *     may ever be orphaned. Deletion is always a soft-delete (the row, and every
+         *     historical created_by/author_id reference to it, stays resolvable).
+         */
+        delete: operations["deleteUsersUserId"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/users/{user_id}/roles": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the user.
+                 * @example 01a02ac5-e023-7269-a11e-0d4e6b1a2772
+                 */
+                user_id: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * PUT /users/{user}/roles — change a user's role(s).
+         * @description Body: { roles: [roleId|roleName, ...] }.
+         *
+         *     Hardened: admin-only, same-tenant only, and the platform super_admin role can
+         *     NEVER be assigned through this endpoint (prevents privilege escalation via a
+         *     crafted role id/name). Roles are resolved on the central DB.
+         */
+        put: operations["putUsersUserIdRoles"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/users/{user_id}/mfa/reset": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the user.
+                 * @example 01a02ac5-e023-7269-a11e-0d4e6b1a2772
+                 */
+                user_id: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * POST /users/{user}/mfa/reset (MFA-1) — admin resets a colleague's lost-device
+         *     second factor. This is NEVER a bypass: it only clears the enrollment (secret +
+         *     recovery codes), it never issues a login or disables the tenant/role policy —
+         *     the user is immediately back to `mfa_setup_required` and must enroll fresh next
+         *     login. Own-account reset is refused (self-service would let a hijacked session
+         *     strip its own second factor); the audit entry never carries the secret/codes.
+         */
+        post: operations["postUsersUserIdMfaReset"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/users/{id}/branches": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the user.
+                 * @example 01a02ac5-e023-7269-a11e-0d4e6b1a2772
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        /** GET /users/{id}/branches — the user's branch set [{id, name, flags}]. */
+        get: operations["getUsersIdBranches"];
+        /** PUT /users/{id}/branches { location_ids: [] } — replace the user's set. */
+        put: operations["putUsersIdBranches"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/roles/{id}/branches": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the role.
+                 * @example 564
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        /** GET /roles/{id}/branches — the role's per-tenant TEMPLATE set. */
+        get: operations["getRolesIdBranches"];
+        /** PUT /roles/{id}/branches { location_ids: [] } — replace the template set. */
+        put: operations["putRolesIdBranches"];
+        post?: never;
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -11081,72 +10784,6 @@ export interface paths {
         get: operations["getAiKoiosAdminPrompts"];
         put?: never;
         post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/locations": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** GET /locations — paginated list, ordered by name; optional radius filter. */
-        get: operations["getLocations"];
-        put?: never;
-        /** POST /locations — create one establishment. */
-        post: operations["postLocations"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/locations/{location}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The location.
-                 * @example architecto
-                 */
-                location: string;
-            };
-            cookie?: never;
-        };
-        /** GET /locations/{location} — one establishment. */
-        get: operations["getLocationsLocation"];
-        /** PUT/PATCH /locations/{location} — update one establishment. */
-        put: operations["putLocationsLocation"];
-        post?: never;
-        /** DELETE /locations/{location} — refused (409 + counts) while anything points here. */
-        delete: operations["deleteLocationsLocation"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/locations/{location}/geocode": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The location.
-                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
-                 */
-                location: string;
-            };
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** POST /locations/{location}/geocode — GEO-REGEOCODE-1: re-run PDOK geocoding for this establishment. */
-        post: operations["postLocationsLocationGeocode"];
         delete?: never;
         options?: never;
         head?: never;
@@ -14306,6 +13943,598 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/customers/{customer}/erase": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The customer.
+                 * @example architecto
+                 */
+                customer: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** POST /customers/{id}/erase — erase the personal (contact) data in a company dossier. */
+        post: operations["postCustomersCustomerErase"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/candidates/{candidate}/erase": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The candidate.
+                 * @example architecto
+                 */
+                candidate: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** POST /candidates/{id}/erase — anonymise a candidate's personal data (right to be forgotten). */
+        post: operations["postCandidatesCandidateErase"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/customers/{id}/deletion-preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the customer.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        /**
+         * GET .
+         * @description ../{id}/deletion-preview — live blockers + transfer hint + lifecycle.
+         */
+        get: operations["getCustomersIdDeletionPreview"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/customers/{id}/mark-deletion": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the customer.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * POST .
+         * @description ../{id}/mark-deletion { transfer_to_owner_id? } — 200 | 409 {code:'in_use', blocking}.
+         */
+        post: operations["postCustomersIdMarkDeletion"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/customers/{id}/unmark-deletion": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the customer.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * POST .
+         * @description ../{id}/unmark-deletion — back to "Gearchiveerd".
+         */
+        post: operations["postCustomersIdUnmarkDeletion"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/vacancies/{id}/deletion-preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the vacancy.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        /**
+         * GET .
+         * @description ../{id}/deletion-preview — live blockers + transfer hint + lifecycle.
+         */
+        get: operations["getVacanciesIdDeletionPreview"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/vacancies/{id}/mark-deletion": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the vacancy.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * POST .
+         * @description ../{id}/mark-deletion { transfer_to_owner_id? } — 200 | 409 {code:'in_use', blocking}.
+         */
+        post: operations["postVacanciesIdMarkDeletion"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/vacancies/{id}/unmark-deletion": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the vacancy.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * POST .
+         * @description ../{id}/unmark-deletion — back to "Gearchiveerd".
+         */
+        post: operations["postVacanciesIdUnmarkDeletion"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/opportunities/{id}/deletion-preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the opportunity.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        /**
+         * GET .
+         * @description ../{id}/deletion-preview — live blockers + transfer hint + lifecycle.
+         */
+        get: operations["getOpportunitiesIdDeletionPreview"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/opportunities/{id}/mark-deletion": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the opportunity.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * POST .
+         * @description ../{id}/mark-deletion { transfer_to_owner_id? } — 200 | 409 {code:'in_use', blocking}.
+         */
+        post: operations["postOpportunitiesIdMarkDeletion"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/opportunities/{id}/unmark-deletion": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the opportunity.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * POST .
+         * @description ../{id}/unmark-deletion — back to "Gearchiveerd".
+         */
+        post: operations["postOpportunitiesIdUnmarkDeletion"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/tasks/{id}/deletion-preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the task.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        /**
+         * GET .
+         * @description ../{id}/deletion-preview — live blockers + transfer hint + lifecycle.
+         */
+        get: operations["getTasksIdDeletionPreview"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/tasks/{id}/mark-deletion": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the task.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * POST .
+         * @description ../{id}/mark-deletion { transfer_to_owner_id? } — 200 | 409 {code:'in_use', blocking}.
+         */
+        post: operations["postTasksIdMarkDeletion"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/tasks/{id}/unmark-deletion": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the task.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * POST .
+         * @description ../{id}/unmark-deletion — back to "Gearchiveerd".
+         */
+        post: operations["postTasksIdUnmarkDeletion"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/matches/{id}/deletion-preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the match.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        /**
+         * GET .
+         * @description ../{id}/deletion-preview — live blockers + transfer hint + lifecycle.
+         */
+        get: operations["getMatchesIdDeletionPreview"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/matches/{id}/mark-deletion": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the match.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * POST .
+         * @description ../{id}/mark-deletion { transfer_to_owner_id? } — 200 | 409 {code:'in_use', blocking}.
+         */
+        post: operations["postMatchesIdMarkDeletion"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/matches/{id}/unmark-deletion": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the match.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * POST .
+         * @description ../{id}/unmark-deletion — back to "Gearchiveerd".
+         */
+        post: operations["postMatchesIdUnmarkDeletion"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/outreach-campaigns/{id}/deletion-preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the outreach campaign.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        /**
+         * GET .
+         * @description ../{id}/deletion-preview — live blockers + transfer hint + lifecycle.
+         */
+        get: operations["getOutreachCampaignsIdDeletionPreview"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/outreach-campaigns/{id}/mark-deletion": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the outreach campaign.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * POST .
+         * @description ../{id}/mark-deletion { transfer_to_owner_id? } — 200 | 409 {code:'in_use', blocking}.
+         */
+        post: operations["postOutreachCampaignsIdMarkDeletion"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/outreach-campaigns/{id}/unmark-deletion": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the outreach campaign.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * POST .
+         * @description ../{id}/unmark-deletion — back to "Gearchiveerd".
+         */
+        post: operations["postOutreachCampaignsIdUnmarkDeletion"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/workflows/{id}/deletion-preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the workflow.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        /**
+         * GET .
+         * @description ../{id}/deletion-preview — live blockers + transfer hint + lifecycle.
+         */
+        get: operations["getWorkflowsIdDeletionPreview"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/workflows/{id}/mark-deletion": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the workflow.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * POST .
+         * @description ../{id}/mark-deletion { transfer_to_owner_id? } — 200 | 409 {code:'in_use', blocking}.
+         */
+        post: operations["postWorkflowsIdMarkDeletion"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/workflows/{id}/unmark-deletion": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the workflow.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * POST .
+         * @description ../{id}/unmark-deletion — back to "Gearchiveerd".
+         */
+        post: operations["postWorkflowsIdUnmarkDeletion"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/proposals/{tenant}/{proposal}": {
         parameters: {
             query?: never;
@@ -15334,50 +15563,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/files/tenant-logo/{tenant}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @example architecto */
-                tenant: string;
-            };
-            cookie?: never;
-        };
-        /**
-         * GET (signed, UNAUTHENTICATED) /files/tenant-logo/{tenant} — stream the tenant logo.
-         * @description `signed` already verified the short-lived signature and `tenant.param` initialised
-         *     the bureau from the signed {tenant} segment, so a plain lookup here is IDOR-safe.
-         */
-        get: operations["getFilesTenantLogoTenant"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/files/tenant-banner/{tenant}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @example architecto */
-                tenant: string;
-            };
-            cookie?: never;
-        };
-        /** GET (signed) /files/tenant-banner/{tenant} — stream the banner (same CSP hardening). */
-        get: operations["getFilesTenantBannerTenant"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/billing/usage": {
         parameters: {
             query?: never;
@@ -15460,63 +15645,6 @@ export interface paths {
         get: operations["getBillingInvoicesIdDownload"];
         put?: never;
         post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/settings": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** GET /settings — return all settings as a key=>value map, masking secrets. */
-        get: operations["getSettings"];
-        put?: never;
-        /** POST /settings — upsert one or more settings (encrypting the sensitive ones). */
-        post: operations["postSettings"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/settings/logo": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** POST /settings/logo — replace the tenant logo with an uploaded image. */
-        post: operations["postSettingsLogo"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/settings/banner": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * POST /settings/banner (BANNER-UPLOAD-1) — replace the tenant's company banner.
-         * @description Mirrors the logo flow exactly: private-disk path persisted (`company_banner_path`),
-         *     a short-lived signed URL minted on read — never a static/public path, and never
-         *     the FE's old session-local blob: string (the bug this endpoint replaces).
-         */
-        post: operations["postSettingsBanner"];
         delete?: never;
         options?: never;
         head?: never;
@@ -17096,116 +17224,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/users": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** GET /users — list users of the caller's own tenant only. */
-        get: operations["getUsers"];
-        put?: never;
-        /** POST /users — create a user inside the caller's tenant. */
-        post: operations["postUsers"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/users/{user_id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The ID of the user.
-                 * @example 01a02ac5-e023-7269-a11e-0d4e6b1a2772
-                 */
-                user_id: string;
-            };
-            cookie?: never;
-        };
-        /** GET /users/{user} — show a single user (must belong to the caller's tenant). */
-        get: operations["getUsersUserId"];
-        /** PUT /users/{user} — update a user (must belong to the caller's tenant). */
-        put: operations["putUsersUserId"];
-        post?: never;
-        /**
-         * DELETE /users/{user} — SOFT-delete a user of the caller's tenant.
-         * @description USER-SOFTDELETE-1 (Danny 08-08): a user who still OWNS active objects
-         *     (candidates/vacancies/matches/…) may NEVER be deleted without first handing
-         *     that ownership to a successor — the database must stay intact and no object
-         *     may ever be orphaned. Deletion is always a soft-delete (the row, and every
-         *     historical created_by/author_id reference to it, stays resolvable).
-         */
-        delete: operations["deleteUsersUserId"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/users/{user_id}/roles": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The ID of the user.
-                 * @example 01a02ac5-e023-7269-a11e-0d4e6b1a2772
-                 */
-                user_id: string;
-            };
-            cookie?: never;
-        };
-        get?: never;
-        /**
-         * PUT /users/{user}/roles — change a user's role(s).
-         * @description Body: { roles: [roleId|roleName, ...] }.
-         *
-         *     Hardened: admin-only, same-tenant only, and the platform super_admin role can
-         *     NEVER be assigned through this endpoint (prevents privilege escalation via a
-         *     crafted role id/name). Roles are resolved on the central DB.
-         */
-        put: operations["putUsersUserIdRoles"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/users/{user_id}/mfa/reset": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The ID of the user.
-                 * @example 01a02ac5-e023-7269-a11e-0d4e6b1a2772
-                 */
-                user_id: string;
-            };
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * POST /users/{user}/mfa/reset (MFA-1) — admin resets a colleague's lost-device
-         *     second factor. This is NEVER a bypass: it only clears the enrollment (secret +
-         *     recovery codes), it never issues a login or disables the tenant/role policy —
-         *     the user is immediately back to `mfa_setup_required` and must enroll fresh next
-         *     login. Own-account reset is refused (self-service would let a hijacked session
-         *     strip its own second factor); the audit entry never carries the secret/codes.
-         */
-        post: operations["postUsersUserIdMfaReset"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/files/vacancy-documents/{tenant}/{parent}/{document}": {
         parameters: {
             query?: never;
@@ -18152,6 +18170,72 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/locations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** GET /locations — paginated list, ordered by name; optional radius filter. */
+        get: operations["getLocations"];
+        put?: never;
+        /** POST /locations — create one establishment. */
+        post: operations["postLocations"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/locations/{location}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The location.
+                 * @example architecto
+                 */
+                location: string;
+            };
+            cookie?: never;
+        };
+        /** GET /locations/{location} — one establishment. */
+        get: operations["getLocationsLocation"];
+        /** PUT/PATCH /locations/{location} — update one establishment. */
+        put: operations["putLocationsLocation"];
+        post?: never;
+        /** DELETE /locations/{location} — refused (409 + counts) while anything points here. */
+        delete: operations["deleteLocationsLocation"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/locations/{location}/geocode": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The location.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                location: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** POST /locations/{location}/geocode — GEO-REGEOCODE-1: re-run PDOK geocoding for this establishment. */
+        post: operations["postLocationsLocationGeocode"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/whatsapp/embedded-signup/config": {
         parameters: {
             query?: never;
@@ -18908,6 +18992,146 @@ export interface operations {
         };
         responses: never;
     };
+    getVacanciesIdActivity: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the vacancy.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getApplicationsIdActivity: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the application.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getOpportunitiesIdActivity: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the opportunity.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getMatchesIdActivity: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the match.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getPlanningShiftsShiftActivity: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The shift.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                shift: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
     getTenants: {
         parameters: {
             query?: never;
@@ -18946,7 +19170,7 @@ export interface operations {
                      */
                     name: string;
                     /**
-                     * @example flex
+                     * @example enterprise
                      * @enum {string}
                      */
                     plan: "flex" | "pro" | "enterprise";
@@ -19107,7 +19331,7 @@ export interface operations {
                      */
                     month?: string;
                     /**
-                     * @example model
+                     * @example activity
                      * @enum {string}
                      */
                     group_by: "activity" | "model" | "user" | "day";
@@ -19890,332 +20114,6 @@ export interface operations {
         };
         responses: never;
     };
-    getUsersIdBranches: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The ID of the user.
-                 * @example 01a02ac5-e023-7269-a11e-0d4e6b1a2772
-                 */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    putUsersIdBranches: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The ID of the user.
-                 * @example 01a02ac5-e023-7269-a11e-0d4e6b1a2772
-                 */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: {
-            content: {
-                "application/json": {
-                    /**
-                     * @description Het veld value moet een geldige UUID zijn. Must match an existing stored value.
-                     * @example [
-                     *       "6ff8f7f6-1eb3-3525-be4a-3932c805afed"
-                     *     ]
-                     */
-                    location_ids?: string[];
-                    /**
-                     * @description This field is required when <code>location_ids</code> is not present.
-                     * @example null
-                     */
-                    branches?: {
-                        /**
-                         * @description Het veld value moet een geldige UUID zijn. Must match an existing stored value.
-                         * @example 6b72fe4a-5b40-307c-bc24-f79acf9a1bb9
-                         */
-                        location_id: string;
-                        /** @example false */
-                        can_view?: boolean;
-                        /** @example false */
-                        can_update?: boolean;
-                        /** @example false */
-                        can_delete?: boolean;
-                    }[];
-                };
-            };
-        };
-        responses: never;
-    };
-    getRolesIdBranches: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The ID of the role.
-                 * @example 564
-                 */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    putRolesIdBranches: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The ID of the role.
-                 * @example 564
-                 */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: {
-            content: {
-                "application/json": {
-                    /**
-                     * @description Het veld value moet een geldige UUID zijn. Must match an existing stored value.
-                     * @example [
-                     *       "6ff8f7f6-1eb3-3525-be4a-3932c805afed"
-                     *     ]
-                     */
-                    location_ids?: string[];
-                };
-            };
-        };
-        responses: never;
-    };
-    postCustomersCustomerErase: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The customer.
-                 * @example architecto
-                 */
-                customer: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": {
-                    /** @example |]|{+- */
-                    password: string;
-                };
-            };
-        };
-        responses: never;
-    };
-    getVacanciesIdActivity: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The ID of the vacancy.
-                 * @example architecto
-                 */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    getApplicationsIdActivity: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The ID of the application.
-                 * @example architecto
-                 */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    getOpportunitiesIdActivity: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The ID of the opportunity.
-                 * @example architecto
-                 */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    getMatchesIdActivity: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The ID of the match.
-                 * @example architecto
-                 */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    postCandidatesCandidateErase: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The candidate.
-                 * @example architecto
-                 */
-                candidate: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": {
-                    /** @example |]|{+- */
-                    password: string;
-                    /**
-                     * @description anonymize (default, safe) keeps a non-identifiable shell; delete physically removes.
-                     * @example delete
-                     * @enum {string}
-                     */
-                    mode?: "anonymize" | "delete";
-                    /**
-                     * @description Het veld value mag niet meer dan 120 tekens bevatten.
-                     * @example v
-                     */
-                    reason?: string;
-                };
-            };
-        };
-        responses: never;
-    };
-    getPlanningShiftsShiftActivity: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The shift.
-                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
-                 */
-                shift: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
     getExportsCandidatesCsv: {
         parameters: {
             query?: never;
@@ -20695,496 +20593,6 @@ export interface operations {
                 };
             };
         };
-        responses: never;
-    };
-    getCustomersIdDeletionPreview: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The ID of the customer.
-                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
-                 */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    postCustomersIdMarkDeletion: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The ID of the customer.
-                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
-                 */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: {
-            content: {
-                "application/json": {
-                    /**
-                     * @description Het veld value moet een geldige UUID zijn.
-                     * @example 6ff8f7f6-1eb3-3525-be4a-3932c805afed
-                     */
-                    transfer_to_owner_id?: string | null;
-                };
-            };
-        };
-        responses: never;
-    };
-    postCustomersIdUnmarkDeletion: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The ID of the customer.
-                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
-                 */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: never;
-    };
-    getVacanciesIdDeletionPreview: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The ID of the vacancy.
-                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
-                 */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    postVacanciesIdMarkDeletion: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The ID of the vacancy.
-                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
-                 */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: {
-            content: {
-                "application/json": {
-                    /**
-                     * @description Het veld value moet een geldige UUID zijn.
-                     * @example 6ff8f7f6-1eb3-3525-be4a-3932c805afed
-                     */
-                    transfer_to_owner_id?: string | null;
-                };
-            };
-        };
-        responses: never;
-    };
-    postVacanciesIdUnmarkDeletion: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The ID of the vacancy.
-                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
-                 */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: never;
-    };
-    getOpportunitiesIdDeletionPreview: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The ID of the opportunity.
-                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
-                 */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    postOpportunitiesIdMarkDeletion: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The ID of the opportunity.
-                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
-                 */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: {
-            content: {
-                "application/json": {
-                    /**
-                     * @description Het veld value moet een geldige UUID zijn.
-                     * @example 6ff8f7f6-1eb3-3525-be4a-3932c805afed
-                     */
-                    transfer_to_owner_id?: string | null;
-                };
-            };
-        };
-        responses: never;
-    };
-    postOpportunitiesIdUnmarkDeletion: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The ID of the opportunity.
-                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
-                 */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: never;
-    };
-    getTasksIdDeletionPreview: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The ID of the task.
-                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
-                 */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    postTasksIdMarkDeletion: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The ID of the task.
-                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
-                 */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: {
-            content: {
-                "application/json": {
-                    /**
-                     * @description Het veld value moet een geldige UUID zijn.
-                     * @example 6ff8f7f6-1eb3-3525-be4a-3932c805afed
-                     */
-                    transfer_to_owner_id?: string | null;
-                };
-            };
-        };
-        responses: never;
-    };
-    postTasksIdUnmarkDeletion: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The ID of the task.
-                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
-                 */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: never;
-    };
-    getMatchesIdDeletionPreview: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The ID of the match.
-                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
-                 */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    postMatchesIdMarkDeletion: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The ID of the match.
-                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
-                 */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: {
-            content: {
-                "application/json": {
-                    /**
-                     * @description Het veld value moet een geldige UUID zijn.
-                     * @example 6ff8f7f6-1eb3-3525-be4a-3932c805afed
-                     */
-                    transfer_to_owner_id?: string | null;
-                };
-            };
-        };
-        responses: never;
-    };
-    postMatchesIdUnmarkDeletion: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The ID of the match.
-                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
-                 */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: never;
-    };
-    getOutreachCampaignsIdDeletionPreview: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The ID of the outreach campaign.
-                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
-                 */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    postOutreachCampaignsIdMarkDeletion: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The ID of the outreach campaign.
-                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
-                 */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: {
-            content: {
-                "application/json": {
-                    /**
-                     * @description Het veld value moet een geldige UUID zijn.
-                     * @example 6ff8f7f6-1eb3-3525-be4a-3932c805afed
-                     */
-                    transfer_to_owner_id?: string | null;
-                };
-            };
-        };
-        responses: never;
-    };
-    postOutreachCampaignsIdUnmarkDeletion: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The ID of the outreach campaign.
-                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
-                 */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: never;
-    };
-    getWorkflowsIdDeletionPreview: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The ID of the workflow.
-                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
-                 */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    postWorkflowsIdMarkDeletion: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The ID of the workflow.
-                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
-                 */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: {
-            content: {
-                "application/json": {
-                    /**
-                     * @description Het veld value moet een geldige UUID zijn.
-                     * @example 6ff8f7f6-1eb3-3525-be4a-3932c805afed
-                     */
-                    transfer_to_owner_id?: string | null;
-                };
-            };
-        };
-        responses: never;
-    };
-    postWorkflowsIdUnmarkDeletion: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The ID of the workflow.
-                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
-                 */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
         responses: never;
     };
     getFilesApplicationDocumentsTenantParentDocument: {
@@ -21722,7 +21130,7 @@ export interface operations {
                     /** @example architecto */
                     note?: string | null;
                     /**
-                     * @example whatsapp
+                     * @example email
                      * @enum {string|null}
                      */
                     channel?: "email" | "whatsapp" | null;
@@ -22397,12 +21805,12 @@ export interface operations {
                     location_id?: string;
                     /**
                      * @description Het veld value is geen geldige datum.
-                     * @example 2026-08-25T07:40:28
+                     * @example 2026-08-25T10:13:48
                      */
                     from?: string;
                     /**
                      * @description Het veld value is geen geldige datum.
-                     * @example 2026-08-25T07:40:28
+                     * @example 2026-08-25T10:13:48
                      */
                     to?: string;
                     /**
@@ -22444,7 +21852,7 @@ export interface operations {
                     type?: string;
                     /**
                      * @description Het veld value is geen geldige datum.
-                     * @example 2026-08-25T07:40:28
+                     * @example 2026-08-25T10:13:49
                      */
                     scheduled_at: string;
                     /**
@@ -22453,7 +21861,7 @@ export interface operations {
                      */
                     duration_min?: number | null;
                     /**
-                     * @example phone
+                     * @example remote
                      * @enum {string|null}
                      */
                     modality?: "office" | "remote" | "phone" | null;
@@ -22508,7 +21916,7 @@ export interface operations {
                      */
                     contact_id?: string | null;
                     /**
-                     * @example completed
+                     * @example cancelled
                      * @enum {string}
                      */
                     status?: "planned" | "completed" | "no_show" | "cancelled";
@@ -22592,7 +22000,7 @@ export interface operations {
                     type?: string;
                     /**
                      * @description Het veld value is geen geldige datum.
-                     * @example 2026-08-25T07:40:28
+                     * @example 2026-08-25T10:13:49
                      */
                     scheduled_at: string;
                     /**
@@ -22728,133 +22136,7 @@ export interface operations {
                     type?: string;
                     /**
                      * @description Het veld value is geen geldige datum.
-                     * @example 2026-08-25T07:40:28
-                     */
-                    scheduled_at?: string;
-                    /**
-                     * @description Het veld value moet minimaal 0 zijn. Het veld value mag niet groter zijn dan 1440.
-                     * @example 22
-                     */
-                    duration_min?: number | null;
-                    /**
-                     * @example remote
-                     * @enum {string|null}
-                     */
-                    modality?: "office" | "remote" | "phone" | null;
-                    /**
-                     * @description Het veld value mag niet meer dan 64 tekens bevatten.
-                     * @example g
-                     */
-                    appointment_location?: string | null;
-                    /**
-                     * @description Het veld value moet een geldige UUID zijn. Must match an existing stored value.
-                     * @example c90237e9-ced5-3af6-88ea-84aeaa148878
-                     */
-                    candidate_id?: string | null;
-                    /**
-                     * @description Het veld value moet een geldige UUID zijn. Must match an existing stored value.
-                     * @example a1a0a47d-e8c3-3cf0-8e6e-c1ff9dca5d1f
-                     */
-                    application_id?: string | null;
-                    /**
-                     * @description Het veld value moet een geldige UUID zijn. Must match an existing stored value.
-                     * @example 21c4122b-d554-3723-966c-6d723ea5293f
-                     */
-                    vacancy_id?: string | null;
-                    /**
-                     * @description Het veld value moet een geldige UUID zijn. Must match an existing stored value.
-                     * @example add3503c-ebff-3875-93af-b8c6a695762b
-                     */
-                    opportunity_id?: string | null;
-                    /**
-                     * @description Het veld value moet een geldige UUID zijn. Must match an existing stored value.
-                     * @example c3b6b42e-3a0f-3935-b28d-cb767f8a2a0a
-                     */
-                    location_id?: string | null;
-                    /**
-                     * @description Het veld value moet een geldige UUID zijn. Must match an existing stored value.
-                     * @example 51c7cf5e-fac2-3ac6-8ef8-61e6050503af
-                     */
-                    customer_id?: string | null;
-                    /**
-                     * @description Het veld value moet een geldige UUID zijn. Must match an existing stored value.
-                     * @example d207102d-bce0-31f9-8c36-aa9cf4cfe75a
-                     */
-                    customer_location_id?: string | null;
-                    /**
-                     * @description Het veld value moet een geldige UUID zijn. Must match an existing stored value.
-                     * @example 10b3f4c6-2aaf-32e1-a52d-6bf43d9ddd70
-                     */
-                    customer_department_id?: string | null;
-                    /**
-                     * @description Het veld value moet een geldige UUID zijn. Must match an existing stored value.
-                     * @example 3b33fac5-d303-3ce9-8d1f-c931158d7dad
-                     */
-                    contact_id?: string | null;
-                    /**
-                     * @example planned
-                     * @enum {string}
-                     */
-                    status?: "planned" | "completed" | "no_show" | "cancelled";
-                    /**
-                     * @description Het veld value mag niet meer dan 120 tekens bevatten.
-                     * @example y
-                     */
-                    source?: string | null;
-                    /** @example architecto */
-                    outcome?: string | null;
-                    /** @example architecto */
-                    notes?: string | null;
-                    /**
-                     * @description Het veld value moet een geldige UUID zijn.
-                     * @example a4855dc5-0acb-33c3-b921-f4291f719ca0
-                     */
-                    owner_id?: string | null;
-                };
-            };
-        };
-        responses: never;
-    };
-    deleteAppointmentsAppointment: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The appointment.
-                 * @example architecto
-                 */
-                appointment: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: never;
-    };
-    patchAppointmentsAppointment: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The appointment.
-                 * @example architecto
-                 */
-                appointment: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: {
-            content: {
-                "application/json": {
-                    /**
-                     * @description Het veld value mag niet meer dan 64 tekens bevatten.
-                     * @example b
-                     */
-                    type?: string;
-                    /**
-                     * @description Het veld value is geen geldige datum.
-                     * @example 2026-08-25T07:40:28
+                     * @example 2026-08-25T10:13:49
                      */
                     scheduled_at?: string;
                     /**
@@ -22918,7 +22200,133 @@ export interface operations {
                      */
                     contact_id?: string | null;
                     /**
-                     * @example completed
+                     * @example cancelled
+                     * @enum {string}
+                     */
+                    status?: "planned" | "completed" | "no_show" | "cancelled";
+                    /**
+                     * @description Het veld value mag niet meer dan 120 tekens bevatten.
+                     * @example y
+                     */
+                    source?: string | null;
+                    /** @example architecto */
+                    outcome?: string | null;
+                    /** @example architecto */
+                    notes?: string | null;
+                    /**
+                     * @description Het veld value moet een geldige UUID zijn.
+                     * @example a4855dc5-0acb-33c3-b921-f4291f719ca0
+                     */
+                    owner_id?: string | null;
+                };
+            };
+        };
+        responses: never;
+    };
+    deleteAppointmentsAppointment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The appointment.
+                 * @example architecto
+                 */
+                appointment: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: never;
+    };
+    patchAppointmentsAppointment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The appointment.
+                 * @example architecto
+                 */
+                appointment: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Het veld value mag niet meer dan 64 tekens bevatten.
+                     * @example b
+                     */
+                    type?: string;
+                    /**
+                     * @description Het veld value is geen geldige datum.
+                     * @example 2026-08-25T10:13:49
+                     */
+                    scheduled_at?: string;
+                    /**
+                     * @description Het veld value moet minimaal 0 zijn. Het veld value mag niet groter zijn dan 1440.
+                     * @example 22
+                     */
+                    duration_min?: number | null;
+                    /**
+                     * @example phone
+                     * @enum {string|null}
+                     */
+                    modality?: "office" | "remote" | "phone" | null;
+                    /**
+                     * @description Het veld value mag niet meer dan 64 tekens bevatten.
+                     * @example g
+                     */
+                    appointment_location?: string | null;
+                    /**
+                     * @description Het veld value moet een geldige UUID zijn. Must match an existing stored value.
+                     * @example c90237e9-ced5-3af6-88ea-84aeaa148878
+                     */
+                    candidate_id?: string | null;
+                    /**
+                     * @description Het veld value moet een geldige UUID zijn. Must match an existing stored value.
+                     * @example a1a0a47d-e8c3-3cf0-8e6e-c1ff9dca5d1f
+                     */
+                    application_id?: string | null;
+                    /**
+                     * @description Het veld value moet een geldige UUID zijn. Must match an existing stored value.
+                     * @example 21c4122b-d554-3723-966c-6d723ea5293f
+                     */
+                    vacancy_id?: string | null;
+                    /**
+                     * @description Het veld value moet een geldige UUID zijn. Must match an existing stored value.
+                     * @example add3503c-ebff-3875-93af-b8c6a695762b
+                     */
+                    opportunity_id?: string | null;
+                    /**
+                     * @description Het veld value moet een geldige UUID zijn. Must match an existing stored value.
+                     * @example c3b6b42e-3a0f-3935-b28d-cb767f8a2a0a
+                     */
+                    location_id?: string | null;
+                    /**
+                     * @description Het veld value moet een geldige UUID zijn. Must match an existing stored value.
+                     * @example 51c7cf5e-fac2-3ac6-8ef8-61e6050503af
+                     */
+                    customer_id?: string | null;
+                    /**
+                     * @description Het veld value moet een geldige UUID zijn. Must match an existing stored value.
+                     * @example d207102d-bce0-31f9-8c36-aa9cf4cfe75a
+                     */
+                    customer_location_id?: string | null;
+                    /**
+                     * @description Het veld value moet een geldige UUID zijn. Must match an existing stored value.
+                     * @example 10b3f4c6-2aaf-32e1-a52d-6bf43d9ddd70
+                     */
+                    customer_department_id?: string | null;
+                    /**
+                     * @description Het veld value moet een geldige UUID zijn. Must match an existing stored value.
+                     * @example 3b33fac5-d303-3ce9-8d1f-c931158d7dad
+                     */
+                    contact_id?: string | null;
+                    /**
+                     * @example planned
                      * @enum {string}
                      */
                     status?: "planned" | "completed" | "no_show" | "cancelled";
@@ -23165,24 +22573,64 @@ export interface operations {
                      * @enum {string}
                      */
                     system: "helloflex" | "shiftmanager";
-                    /** @example false */
+                    /** @example true */
                     include_children?: boolean;
                 };
             };
         };
         responses: never;
     };
-    postWhatsappWebWebhook: {
+    getFilesTenantLogoTenant: {
         parameters: {
             query?: never;
             header?: never;
-            path?: never;
+            path: {
+                /** @example architecto */
+                tenant: string;
+            };
             cookie?: never;
         };
         requestBody?: never;
-        responses: never;
+        responses: {
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Invalid signature. */
+                        message?: string;
+                    };
+                };
+            };
+        };
     };
-    getProfileWhatsappWeb: {
+    getFilesTenantBannerTenant: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                tenant: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Invalid signature. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getSettings: {
         parameters: {
             query?: never;
             header?: never;
@@ -23204,7 +22652,7 @@ export interface operations {
             };
         };
     };
-    postProfileWhatsappWeb: {
+    postSettings: {
         parameters: {
             query?: never;
             header?: never;
@@ -23215,68 +22663,72 @@ export interface operations {
             content: {
                 "application/json": {
                     /**
-                     * @description Het veld value mag niet meer dan 255 tekens bevatten.
-                     * @example b
+                     * @description INVOICE-1 review (MED): billing_email is where Koios's monthly invoice
+                     *     for this tenant goes — a typo would silently kill delivery (the mail
+                     *     path is best-effort), so the format is validated at the boundary.
+                     *     Deliberately tenant-writable: it is THEIR receiving address, and the
+                     *     settings audit records who changed it (before/after). Het veld value is geen geldig e-mailadres. Het veld value mag niet meer dan 255 tekens bevatten.
+                     * @example gbailey@example.net
                      */
-                    label?: string | null;
+                    billing_email?: string | null;
                     /**
-                     * @description Het veld value mag niet meer dan 32 tekens bevatten.
-                     * @example n
+                     * @description TARIEF-ZIJDE-1: this key decides whether a match's per-function rate is
+                     *     money the reader may see. A typo must not silently land — the resolver
+                     *     fails safe to the guarded reading, but a stored garbage value would leave
+                     *     the settings screen showing something the system does not honour.
+                     * @example null
                      */
-                    phone_number?: string | null;
-                    /**
-                     * @example waba
-                     * @enum {string}
-                     */
-                    type?: "wa_web" | "waba";
+                    match_contract_line_rate_side?: string | null;
                 };
             };
         };
         responses: never;
     };
-    postProfileWhatsappWebIdConnect: {
+    postSettingsLogo: {
         parameters: {
             query?: never;
             header?: never;
-            path: {
-                /**
-                 * @description The ID of the whatsapp web.
-                 * @example architecto
-                 */
-                id: string;
-            };
+            path?: never;
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "multipart/form-data": {
+                    /**
+                     * Format: binary
+                     * @description Must be a file. Het bestand value mag niet groter zijn dan 2048 kilobytes.
+                     */
+                    logo: string;
+                };
+            };
+        };
         responses: never;
     };
-    postProfileWhatsappWebIdDisconnect: {
+    postSettingsBanner: {
         parameters: {
             query?: never;
             header?: never;
-            path: {
-                /**
-                 * @description The ID of the whatsapp web.
-                 * @example architecto
-                 */
-                id: string;
-            };
+            path?: never;
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "multipart/form-data": {
+                    /**
+                     * Format: binary
+                     * @description Must be a file. Het bestand value mag niet groter zijn dan 4096 kilobytes.
+                     */
+                    banner: string;
+                };
+            };
+        };
         responses: never;
     };
-    deleteProfileWhatsappWebId: {
+    postWhatsappWebWebhook: {
         parameters: {
             query?: never;
             header?: never;
-            path: {
-                /**
-                 * @description The ID of the whatsapp web.
-                 * @example architecto
-                 */
-                id: string;
-            };
+            path?: never;
             cookie?: never;
         };
         requestBody?: never;
@@ -23320,12 +22772,12 @@ export interface operations {
                      */
                     name: string;
                     /**
-                     * @example whatsapp
+                     * @example call
                      * @enum {string}
                      */
                     channel: "call" | "email" | "whatsapp";
                     /**
-                     * @example draft
+                     * @example done
                      * @enum {string}
                      */
                     status?: "draft" | "active" | "done";
@@ -23395,12 +22847,12 @@ export interface operations {
                      */
                     name?: string;
                     /**
-                     * @example call
+                     * @example email
                      * @enum {string}
                      */
                     channel?: "call" | "email" | "whatsapp";
                     /**
-                     * @example active
+                     * @example draft
                      * @enum {string}
                      */
                     status?: "draft" | "active" | "done";
@@ -23672,7 +23124,7 @@ export interface operations {
                          *     ]
                          */
                         outcome?: string[];
-                        /** @example true */
+                        /** @example false */
                         unassigned?: boolean;
                     };
                     /**
@@ -24175,7 +23627,7 @@ export interface operations {
                     color?: string | null;
                     /** @example 16 */
                     order?: number;
-                    /** @example true */
+                    /** @example false */
                     active?: boolean;
                 };
             };
@@ -24236,7 +23688,7 @@ export interface operations {
                     color?: string | null;
                     /** @example 16 */
                     order?: number;
-                    /** @example true */
+                    /** @example false */
                     active?: boolean;
                 };
             };
@@ -24704,7 +24156,7 @@ export interface operations {
                      * @example n
                      */
                     color?: string | null;
-                    /** @example true */
+                    /** @example false */
                     active?: boolean;
                 };
             };
@@ -24858,7 +24310,7 @@ export interface operations {
                     type?: string;
                     /**
                      * @description DOC-EXPIRY-1: optional validity date (VOG/BIG/diploma-style uploads). Het veld value is geen geldige datum.
-                     * @example 2026-08-25T07:40:28
+                     * @example 2026-08-25T10:13:48
                      */
                     expires_at?: string | null;
                 };
@@ -24948,7 +24400,7 @@ export interface operations {
                     name: string;
                     /**
                      * @description Het veld value is geen geldige datum.
-                     * @example 2026-08-25T07:40:28
+                     * @example 2026-08-25T10:13:48
                      */
                     expires_at?: string | null;
                 };
@@ -25120,7 +24572,7 @@ export interface operations {
                     nationality?: string | null;
                     /**
                      * @description Het veld value is geen geldige datum.
-                     * @example 2026-08-25T07:40:28
+                     * @example 2026-08-25T10:13:48
                      */
                     date_of_birth?: string | null;
                     /**
@@ -25229,7 +24681,7 @@ export interface operations {
                     status_reason?: string | null;
                     /**
                      * @description Het veld value is geen geldige datum.
-                     * @example 2026-08-25T07:40:28
+                     * @example 2026-08-25T10:13:48
                      */
                     available_again_date?: string | null;
                     /**
@@ -25246,7 +24698,7 @@ export interface operations {
                     candidate_types?: string[];
                     /** @example null */
                     consent?: {
-                        /** @example false */
+                        /** @example true */
                         whatsapp_opt_in?: boolean;
                         /** @example true */
                         email_opt_in?: boolean;
@@ -25280,14 +24732,14 @@ export interface operations {
                     work_permit_type?: string | null;
                     /**
                      * @description Het veld value is geen geldige datum.
-                     * @example 2026-08-25T07:40:28
+                     * @example 2026-08-25T10:13:48
                      */
                     work_permit_valid_until?: string | null;
                     /** @example null */
                     preferences?: {
                         /**
                          * @description Het veld value is geen geldige datum.
-                         * @example 2026-08-25T07:40:28
+                         * @example 2026-08-25T10:13:48
                          */
                         available_from?: string | null;
                         /**
@@ -25331,7 +24783,7 @@ export interface operations {
                          *     ]
                          */
                         license_categories?: string[];
-                        /** @example true */
+                        /** @example false */
                         own_transport?: boolean | null;
                         /**
                          * @description Het veld value moet minimaal 0 zijn.
@@ -25342,7 +24794,7 @@ export interface operations {
                         wage_tax?: boolean | null;
                         /**
                          * @description Het veld value is geen geldige datum.
-                         * @example 2026-08-25T07:40:28
+                         * @example 2026-08-25T10:13:48
                          */
                         wage_tax_from?: string | null;
                         /** @example 4326.41688 */
@@ -25399,7 +24851,7 @@ export interface operations {
                         vat_number?: string | null;
                         /** @example false */
                         kor?: boolean | null;
-                        /** @example true */
+                        /** @example false */
                         intracommunity?: boolean | null;
                         /**
                          * @description Het veld value mag niet meer dan 255 tekens bevatten.
@@ -25761,7 +25213,7 @@ export interface operations {
                     nationality?: string | null;
                     /**
                      * @description Het veld value is geen geldige datum.
-                     * @example 2026-08-25T07:40:28
+                     * @example 2026-08-25T10:13:48
                      */
                     date_of_birth?: string | null;
                     /**
@@ -25870,7 +25322,7 @@ export interface operations {
                     status_reason?: string | null;
                     /**
                      * @description Het veld value is geen geldige datum.
-                     * @example 2026-08-25T07:40:28
+                     * @example 2026-08-25T10:13:48
                      */
                     available_again_date?: string | null;
                     /**
@@ -25891,9 +25343,9 @@ export interface operations {
                         whatsapp_opt_in?: boolean;
                         /** @example true */
                         email_opt_in?: boolean;
-                        /** @example true */
+                        /** @example false */
                         newsletter_opt_in?: boolean;
-                        /** @example true */
+                        /** @example false */
                         retention_opt_in?: boolean;
                     };
                     /** @example null */
@@ -25921,14 +25373,14 @@ export interface operations {
                     work_permit_type?: string | null;
                     /**
                      * @description Het veld value is geen geldige datum.
-                     * @example 2026-08-25T07:40:28
+                     * @example 2026-08-25T10:13:48
                      */
                     work_permit_valid_until?: string | null;
                     /** @example null */
                     preferences?: {
                         /**
                          * @description Het veld value is geen geldige datum.
-                         * @example 2026-08-25T07:40:28
+                         * @example 2026-08-25T10:13:48
                          */
                         available_from?: string | null;
                         /**
@@ -25972,18 +25424,18 @@ export interface operations {
                          *     ]
                          */
                         license_categories?: string[];
-                        /** @example false */
+                        /** @example true */
                         own_transport?: boolean | null;
                         /**
                          * @description Het veld value moet minimaal 0 zijn.
                          * @example 4
                          */
                         max_travel_km?: number | null;
-                        /** @example false */
+                        /** @example true */
                         wage_tax?: boolean | null;
                         /**
                          * @description Het veld value is geen geldige datum.
-                         * @example 2026-08-25T07:40:28
+                         * @example 2026-08-25T10:13:48
                          */
                         wage_tax_from?: string | null;
                         /** @example 4326.41688 */
@@ -26038,7 +25490,7 @@ export interface operations {
                          * @example NL642559314B23
                          */
                         vat_number?: string | null;
-                        /** @example false */
+                        /** @example true */
                         kor?: boolean | null;
                         /** @example false */
                         intracommunity?: boolean | null;
@@ -26429,11 +25881,11 @@ export interface operations {
                 "application/json": {
                     /** @example [] */
                     consent: {
-                        /** @example true */
+                        /** @example false */
                         whatsapp_opt_in?: boolean;
                         /** @example false */
                         email_opt_in?: boolean;
-                        /** @example true */
+                        /** @example false */
                         newsletter_opt_in?: boolean;
                     };
                 };
@@ -26468,7 +25920,7 @@ export interface operations {
         requestBody?: {
             content: {
                 "application/json": {
-                    /** @example false */
+                    /** @example true */
                     only_missing?: boolean;
                     /**
                      * @description Het veld value moet een geldige UUID zijn.
@@ -26509,7 +25961,7 @@ export interface operations {
                     blacklist_reason?: string | null;
                     /**
                      * @description Het veld value is geen geldige datum.
-                     * @example 2026-08-25T07:40:28
+                     * @example 2026-08-25T10:13:48
                      */
                     available_again_date?: string | null;
                 };
@@ -28529,13 +27981,13 @@ export interface operations {
                     /** @example Eius et animi quos velit et. */
                     description?: string | null;
                     /**
-                     * @example ai
+                     * @example dynamic
                      * @enum {string}
                      */
                     type?: "static" | "dynamic" | "ai";
                     /** @example null */
                     criteria?: Record<string, never> | null;
-                    /** @example false */
+                    /** @example true */
                     active?: boolean;
                     /**
                      * @description ICON-KAND-1: optional icon/emoji for the dropdown display (task-types R-2 mirror). Het veld value mag niet meer dan 64 tekens bevatten.
@@ -29385,7 +28837,7 @@ export interface operations {
                     billing_email?: string | null;
                     /**
                      * @description Het veld value is geen geldige datum.
-                     * @example 2026-08-25T07:40:28
+                     * @example 2026-08-25T10:13:48
                      */
                     contract_end_date?: string | null;
                     /**
@@ -29479,7 +28931,7 @@ export interface operations {
                     hide_company_name?: boolean;
                     /** @example false */
                     has_career_page?: boolean;
-                    /** @example false */
+                    /** @example true */
                     show_in_my_vacancies?: boolean;
                     /** @example true */
                     exclude_from_sourcing?: boolean;
@@ -29778,7 +29230,7 @@ export interface operations {
                     billing_email?: string | null;
                     /**
                      * @description Het veld value is geen geldige datum.
-                     * @example 2026-08-25T07:40:28
+                     * @example 2026-08-25T10:13:48
                      */
                     contract_end_date?: string | null;
                     /**
@@ -29870,11 +29322,11 @@ export interface operations {
                     billing_country?: string | null;
                     /** @example false */
                     hide_company_name?: boolean;
-                    /** @example true */
-                    has_career_page?: boolean;
-                    /** @example true */
-                    show_in_my_vacancies?: boolean;
                     /** @example false */
+                    has_career_page?: boolean;
+                    /** @example false */
+                    show_in_my_vacancies?: boolean;
+                    /** @example true */
                     exclude_from_sourcing?: boolean;
                     /**
                      * @description Het veld value is geen geldig e-mailadres.
@@ -30307,7 +29759,7 @@ export interface operations {
                      * @description FACTURATIE-VOLGT-VESTIGING-1: couple AND make it the billing branch in one
                      *     call — the "new klant, this is where it invoices" flow, so the FE does not
                      *     have to fire two requests and risk landing halfway.
-                     * @example false
+                     * @example true
                      */
                     is_billing?: boolean;
                 };
@@ -31207,15 +30659,15 @@ export interface operations {
                     status_id?: string | null;
                     /** @example true */
                     is_primary?: boolean;
-                    /** @example true */
+                    /** @example false */
                     whatsapp_consent?: boolean;
                     /** @example null */
                     whatsapp_consent_at?: string;
-                    /** @example false */
+                    /** @example true */
                     email_consent?: boolean;
                     /** @example null */
                     email_consent_at?: string;
-                    /** @example true */
+                    /** @example false */
                     newsletter_consent?: boolean;
                     /** @example null */
                     newsletter_consent_at?: string;
@@ -31937,7 +31389,7 @@ export interface operations {
                     email_consent?: boolean;
                     /** @example null */
                     email_consent_at?: string;
-                    /** @example true */
+                    /** @example false */
                     newsletter_consent?: boolean;
                     /** @example null */
                     newsletter_consent_at?: string;
@@ -33113,7 +32565,7 @@ export interface operations {
                     log_name?: string | null;
                     /**
                      * @description Het veld value is geen geldige datum.
-                     * @example 2026-08-25T07:40:27
+                     * @example 2026-08-25T10:13:47
                      */
                     date_from?: string | null;
                     /**
@@ -33558,6 +33010,206 @@ export interface operations {
         };
         responses: never;
     };
+    getProfileWhatsappWeb: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postProfileWhatsappWeb: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Het veld value mag niet meer dan 255 tekens bevatten.
+                     * @example b
+                     */
+                    label?: string | null;
+                    /**
+                     * @description Het veld value mag niet meer dan 32 tekens bevatten.
+                     * @example n
+                     */
+                    phone_number?: string | null;
+                    /**
+                     * @example wa_web
+                     * @enum {string}
+                     */
+                    type?: "wa_web" | "waba";
+                };
+            };
+        };
+        responses: never;
+    };
+    postProfileWhatsappWebIdConnect: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the whatsapp web.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: never;
+    };
+    postProfileWhatsappWebIdDisconnect: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the whatsapp web.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: never;
+    };
+    deleteProfileWhatsappWebId: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the whatsapp web.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: never;
+    };
+    getSettingsWhatsappWebNumbers: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postSettingsWhatsappWebNumbers: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Tenant-scoped existence (§7): the branch must be THIS tenant's. Het veld value moet een geldige UUID zijn. Must match an existing stored value.
+                     * @example 6ff8f7f6-1eb3-3525-be4a-3932c805afed
+                     */
+                    location_id: string;
+                    /**
+                     * @description Het veld value mag niet meer dan 255 tekens bevatten.
+                     * @example g
+                     */
+                    label?: string | null;
+                    /**
+                     * @description Het veld value mag niet meer dan 32 tekens bevatten.
+                     * @example z
+                     */
+                    phone_number?: string | null;
+                };
+            };
+        };
+        responses: never;
+    };
+    postSettingsWhatsappWebNumbersIdConnect: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the whatsapp web number.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: never;
+    };
+    postSettingsWhatsappWebNumbersIdDisconnect: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the whatsapp web number.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: never;
+    };
+    deleteSettingsWhatsappWebNumbersId: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the whatsapp web number.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: never;
+    };
     getSettingsWhatsappQueue: {
         parameters: {
             query?: never;
@@ -33666,7 +33318,7 @@ export interface operations {
                     sort_order?: number;
                     /** @example false */
                     is_done?: boolean;
-                    /** @example true */
+                    /** @example false */
                     active?: boolean;
                 };
             };
@@ -33733,11 +33385,11 @@ export interface operations {
                      * @example true
                      */
                     is_default?: boolean;
-                    /** @example true */
+                    /** @example false */
                     active?: boolean;
                     /**
                      * @description KAND-CONTACT-STEMPELS-1: whether completing a task of this type stamps last_contact_at.
-                     * @example false
+                     * @example true
                      */
                     counts_as_contact?: boolean;
                 };
@@ -33792,9 +33444,9 @@ export interface operations {
                     color?: string | null;
                     /** @example 16 */
                     sort_order?: number;
-                    /** @example true */
+                    /** @example false */
                     is_done?: boolean;
-                    /** @example true */
+                    /** @example false */
                     active?: boolean;
                 };
             };
@@ -33866,13 +33518,13 @@ export interface operations {
                     icon?: string | null;
                     /** @example 16 */
                     sort_order?: number;
-                    /** @example false */
-                    is_default?: boolean;
                     /** @example true */
+                    is_default?: boolean;
+                    /** @example false */
                     active?: boolean;
                     /**
                      * @description KAND-CONTACT-STEMPELS-1: whether completing a task of this type stamps last_contact_at.
-                     * @example true
+                     * @example false
                      */
                     counts_as_contact?: boolean;
                 };
@@ -33891,6 +33543,346 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
+        responses: never;
+    };
+    getUsers: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postUsers: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Het veld value mag niet meer dan 255 tekens bevatten.
+                     * @example b
+                     */
+                    firstname: string;
+                    /**
+                     * @description Het veld value mag niet meer dan 255 tekens bevatten.
+                     * @example n
+                     */
+                    lastname: string;
+                    /**
+                     * @description Het veld value is geen geldig e-mailadres.
+                     * @example ashly64@example.com
+                     */
+                    email: string;
+                    /**
+                     * @description Het veld value moet minimaal 8 tekens bevatten.
+                     * @example pBNvYg
+                     */
+                    password: string;
+                    /** @example architecto */
+                    role: string;
+                    /**
+                     * @description Must match an existing stored value.
+                     * @example architecto
+                     */
+                    tenant_id?: string;
+                    /**
+                     * @description AGENT-META-SETUP (Danny): the FE asks "agent aanmaken?" — default yes.
+                     * @example true
+                     */
+                    create_agent?: boolean;
+                };
+            };
+        };
+        responses: never;
+    };
+    getUsersUserId: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the user.
+                 * @example 01a02ac5-e023-7269-a11e-0d4e6b1a2772
+                 */
+                user_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    putUsersUserId: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the user.
+                 * @example 01a02ac5-e023-7269-a11e-0d4e6b1a2772
+                 */
+                user_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Het veld value mag niet meer dan 255 tekens bevatten.
+                     * @example b
+                     */
+                    firstname?: string;
+                    /**
+                     * @description Het veld value mag niet meer dan 255 tekens bevatten.
+                     * @example n
+                     */
+                    lastname?: string;
+                    /** @example null */
+                    email?: string;
+                    /**
+                     * @description Het veld value mag niet meer dan 32 tekens bevatten.
+                     * @example g
+                     */
+                    phone?: string | null;
+                    /**
+                     * @description Het veld value moet minimaal 8 tekens bevatten.
+                     * @example {+-0pBNvYgx
+                     */
+                    password?: string;
+                    /** @example architecto */
+                    role?: string;
+                    /**
+                     * @description Het veld value mag niet meer dan 32 tekens bevatten.
+                     * @example n
+                     */
+                    avatar_color?: string | null;
+                    /**
+                     * @description C-33: per-user UI state (layout/filters/theme) — a free-form JSON object.
+                     * @example null
+                     */
+                    ui_preferences?: Record<string, never> | null;
+                };
+            };
+        };
+        responses: never;
+    };
+    deleteUsersUserId: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the user.
+                 * @example 01a02ac5-e023-7269-a11e-0d4e6b1a2772
+                 */
+                user_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: never;
+    };
+    putUsersUserIdRoles: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the user.
+                 * @example 01a02ac5-e023-7269-a11e-0d4e6b1a2772
+                 */
+                user_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /**
+                     * @example [
+                     *       "architecto"
+                     *     ]
+                     */
+                    roles: string[];
+                };
+            };
+        };
+        responses: never;
+    };
+    postUsersUserIdMfaReset: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the user.
+                 * @example 01a02ac5-e023-7269-a11e-0d4e6b1a2772
+                 */
+                user_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: never;
+    };
+    getUsersIdBranches: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the user.
+                 * @example 01a02ac5-e023-7269-a11e-0d4e6b1a2772
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    putUsersIdBranches: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the user.
+                 * @example 01a02ac5-e023-7269-a11e-0d4e6b1a2772
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Het veld value moet een geldige UUID zijn. Must match an existing stored value.
+                     * @example [
+                     *       "6ff8f7f6-1eb3-3525-be4a-3932c805afed"
+                     *     ]
+                     */
+                    location_ids?: string[];
+                    /**
+                     * @description This field is required when <code>location_ids</code> is not present.
+                     * @example null
+                     */
+                    branches?: {
+                        /**
+                         * @description Het veld value moet een geldige UUID zijn. Must match an existing stored value.
+                         * @example 6b72fe4a-5b40-307c-bc24-f79acf9a1bb9
+                         */
+                        location_id: string;
+                        /** @example false */
+                        can_view?: boolean;
+                        /** @example true */
+                        can_update?: boolean;
+                        /** @example true */
+                        can_delete?: boolean;
+                    }[];
+                };
+            };
+        };
+        responses: never;
+    };
+    getRolesIdBranches: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the role.
+                 * @example 564
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    putRolesIdBranches: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the role.
+                 * @example 564
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Het veld value moet een geldige UUID zijn. Must match an existing stored value.
+                     * @example [
+                     *       "6ff8f7f6-1eb3-3525-be4a-3932c805afed"
+                     *     ]
+                     */
+                    location_ids?: string[];
+                };
+            };
+        };
         responses: never;
     };
     getHealthConnectors: {
@@ -33947,7 +33939,7 @@ export interface operations {
                      */
                     contract_guid: string;
                     /**
-                     * @example active
+                     * @example sent
                      * @enum {string}
                      */
                     status: "sent" | "active" | "ended";
@@ -33989,7 +33981,7 @@ export interface operations {
             content: {
                 "application/json": {
                     /**
-                     * @example shiftmanager
+                     * @example intus
                      * @enum {string}
                      */
                     system: "shiftmanager" | "intus" | "sdb";
@@ -34004,7 +33996,7 @@ export interface operations {
                      */
                     admin_url?: string | null;
                     /**
-                     * @example bearer_token
+                     * @example company_token
                      * @enum {string}
                      */
                     auth_type: "bearer_token" | "oauth2" | "api_key" | "company_token";
@@ -34081,7 +34073,7 @@ export interface operations {
                     auth_type?: "bearer_token" | "oauth2" | "api_key" | "company_token";
                     /** @example null */
                     credentials?: Record<string, never>;
-                    /** @example true */
+                    /** @example false */
                     active?: boolean;
                 };
             };
@@ -34164,7 +34156,7 @@ export interface operations {
                     description?: string | null;
                     /**
                      * @description Opt-in: when true, callers MUST send a valid HMAC X-Signature header.
-                     * @example false
+                     * @example true
                      */
                     require_signature?: boolean;
                 };
@@ -34345,7 +34337,7 @@ export interface operations {
                     url: string;
                     /**
                      * @example [
-                     *       "candidate.birthday"
+                     *       "candidate.status_changed"
                      *     ]
                      */
                     events?: ("candidate.created" | "candidate.status_changed" | "candidate.reactivated" | "candidate.archived" | "application.created" | "application.stage_changed" | "application.stage_stale" | "match.created" | "match.updated" | "match.deleted" | "match.terminated" | "match.expiring" | "candidate.document_expiring" | "candidate.availability_changed" | "candidate.no_contact" | "candidate.missing_cv" | "candidate.availability_upcoming" | "candidate.availability_overdue" | "candidate.leave_ending_soon" | "candidate.leave_overdue" | "candidate.unavailable_ending_soon" | "candidate.unavailable_overdue" | "vacancy.created" | "vacancy.status_changed" | "vacancy.published" | "vacancy.updated" | "task.created" | "appointment.created" | "message.received" | "message.sent" | "backoffice.link.updated" | "ai_agent.webhook_received" | "candidate.birthday" | "candidate.retention_due" | "appointment.upcoming" | "facebook.lead_received" | "whatsapp.connection_down" | "whatsapp.connection_restored" | "interview.started" | "interview.completed" | "interview.disqualified" | "candidate.status_stale" | "candidate.phase_stale" | "task.overdue" | "conversation.unanswered" | "customer.no_contact" | "customer.contract_ending" | "customer.task_overdue" | "customer.match_ending" | "customer.vacancy_stale" | "vacancy.stale_online" | "vacancy.closing_soon")[];
@@ -34412,11 +34404,11 @@ export interface operations {
                     url?: string;
                     /**
                      * @example [
-                     *       "vacancy.updated"
+                     *       "vacancy.created"
                      *     ]
                      */
                     events?: ("candidate.created" | "candidate.status_changed" | "candidate.reactivated" | "candidate.archived" | "application.created" | "application.stage_changed" | "application.stage_stale" | "match.created" | "match.updated" | "match.deleted" | "match.terminated" | "match.expiring" | "candidate.document_expiring" | "candidate.availability_changed" | "candidate.no_contact" | "candidate.missing_cv" | "candidate.availability_upcoming" | "candidate.availability_overdue" | "candidate.leave_ending_soon" | "candidate.leave_overdue" | "candidate.unavailable_ending_soon" | "candidate.unavailable_overdue" | "vacancy.created" | "vacancy.status_changed" | "vacancy.published" | "vacancy.updated" | "task.created" | "appointment.created" | "message.received" | "message.sent" | "backoffice.link.updated" | "ai_agent.webhook_received" | "candidate.birthday" | "candidate.retention_due" | "appointment.upcoming" | "facebook.lead_received" | "whatsapp.connection_down" | "whatsapp.connection_restored" | "interview.started" | "interview.completed" | "interview.disqualified" | "candidate.status_stale" | "candidate.phase_stale" | "task.overdue" | "conversation.unanswered" | "customer.no_contact" | "customer.contract_ending" | "customer.task_overdue" | "customer.match_ending" | "customer.vacancy_stale" | "vacancy.stale_online" | "vacancy.closing_soon")[];
-                    /** @example false */
+                    /** @example true */
                     active?: boolean;
                 };
             };
@@ -34553,7 +34545,7 @@ export interface operations {
                     allowed_ips?: string[];
                     /**
                      * @example [
-                     *       "read"
+                     *       "read_write"
                      *     ]
                      */
                     scopes?: ("read" | "read_write")[];
@@ -34617,7 +34609,7 @@ export interface operations {
                      */
                     type?: "primary" | "additional";
                     /**
-                     * @example disabled
+                     * @example active
                      * @enum {string}
                      */
                     status?: "active" | "disabled";
@@ -34962,7 +34954,7 @@ export interface operations {
                     /** @example null */
                     conversation_history?: ({
                         /**
-                         * @example assistant
+                         * @example user
                          * @enum {string}
                          */
                         role: "user" | "assistant";
@@ -35206,7 +35198,7 @@ export interface operations {
                      *     ]
                      */
                     faq_ids?: string[];
-                    /** @example false */
+                    /** @example true */
                     use_knowledge?: boolean;
                     /**
                      * @description Het veld value moet minimaal 1 zijn. Het veld value mag niet groter zijn dan 50.
@@ -35519,7 +35511,7 @@ export interface operations {
             content: {
                 "application/json": {
                     /**
-                     * @example summarize
+                     * @example actions
                      * @enum {string}
                      */
                     mode: "summarize" | "actions";
@@ -35563,7 +35555,7 @@ export interface operations {
                          *     K4 (match_*) + K5 (calllist, opportunity_*) joined the closed vocabulary.
                          *     match_terminate is WIZARD_ONLY (ends a placement); the rest are Auto-allowed
                          *     neutral acts. calllist is a template-lane type; the others take the service lane.
-                         * @example notification
+                         * @example whatsapp
                          * @enum {string}
                          */
                         type: "task" | "whatsapp" | "email" | "appointment" | "notification" | "application_reject" | "application_propose" | "application_stage_move" | "interview_start" | "vacancy_publish" | "vacancy_start_interviews" | "vacancy_create_task" | "match_checkin" | "match_extend" | "match_terminate" | "calllist" | "opportunity_next_step" | "opportunity_follow_up";
@@ -35574,12 +35566,12 @@ export interface operations {
                         due_date?: string | null;
                         /**
                          * @description Red-team: per-item confirm (wizard-only NEEDS it) + template params.
-                         * @example true
+                         * @example false
                          */
                         confirmed?: boolean;
                         /**
                          * @description Het veld value is geen geldige datum.
-                         * @example 2026-08-25T07:40:29
+                         * @example 2026-08-25T10:13:49
                          */
                         start?: string | null;
                         /**
@@ -35686,7 +35678,7 @@ export interface operations {
                          */
                         opportunity_id?: string | null;
                     }[];
-                    /** @example false */
+                    /** @example true */
                     confirmed?: boolean;
                     /** @example null */
                     source?: {
@@ -35749,12 +35741,12 @@ export interface operations {
                     surface?: string;
                     /**
                      * @description Het veld value is geen geldige datum.
-                     * @example 2026-08-25T07:40:29
+                     * @example 2026-08-25T10:13:49
                      */
                     from?: string;
                     /**
                      * @description Het veld value is geen geldige datum.
-                     * @example 2026-08-25T07:40:29
+                     * @example 2026-08-25T10:13:49
                      */
                     to?: string;
                     /**
@@ -35828,12 +35820,12 @@ export interface operations {
                 "application/json": {
                     /**
                      * @description Het veld value is geen geldige datum.
-                     * @example 2026-08-25T07:40:29
+                     * @example 2026-08-25T10:13:49
                      */
                     from?: string;
                     /**
                      * @description Het veld value is geen geldige datum.
-                     * @example 2026-08-25T07:40:29
+                     * @example 2026-08-25T10:13:49
                      */
                     to?: string;
                 };
@@ -35929,7 +35921,7 @@ export interface operations {
                 "application/json": {
                     /**
                      * @example [
-                     *       false
+                     *       true
                      *     ]
                      */
                     tools?: (boolean | null)[];
@@ -36235,312 +36227,6 @@ export interface operations {
             };
         };
     };
-    getLocations: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: {
-            content: {
-                "application/json": {
-                    /**
-                     * @description NUMMER-2: exact reference-number lookup (e.g. VE-001) — takes precedence
-                     *     over every other filter when present. Het veld value mag niet meer dan 32 tekens bevatten.
-                     * @example b
-                     */
-                    ref?: string;
-                    /**
-                     * @description Het veld value moet tussen -90 en 90 liggen.
-                     * @example -89
-                     */
-                    lat?: number;
-                    /**
-                     * @description Het veld value moet tussen -180 en 180 liggen.
-                     * @example -180
-                     */
-                    lng?: number;
-                    /**
-                     * @description Het veld value moet tussen 1 en 500 liggen.
-                     * @example 2
-                     */
-                    radius?: number;
-                };
-            };
-        };
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    postLocations: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": {
-                    /**
-                     * @description Het veld value mag niet meer dan 32 tekens bevatten.
-                     * @example b
-                     */
-                    color?: string | null;
-                    /**
-                     * @description Het veld value mag niet meer dan 40 tekens bevatten.
-                     * @example n
-                     */
-                    icon?: string | null;
-                    /**
-                     * @description Het veld value mag niet meer dan 255 tekens bevatten.
-                     * @example g
-                     */
-                    name: string;
-                    /** @example true */
-                    is_default?: boolean;
-                    /**
-                     * @description Het veld value mag niet meer dan 255 tekens bevatten.
-                     * @example z
-                     */
-                    street?: string | null;
-                    /**
-                     * @description Het veld value mag niet meer dan 32 tekens bevatten.
-                     * @example m
-                     */
-                    house_number?: string | null;
-                    /**
-                     * @description Het veld value mag niet meer dan 32 tekens bevatten.
-                     * @example i
-                     */
-                    house_number_suffix?: string | null;
-                    /**
-                     * @description Het veld value mag niet meer dan 16 tekens bevatten.
-                     * @example yvdljnikhwaykcmy
-                     */
-                    postcode?: string | null;
-                    /**
-                     * @description Het veld value mag niet meer dan 16 tekens bevatten.
-                     * @example uwpwlvqwrsitcpsc
-                     */
-                    postal_code?: string | null;
-                    /**
-                     * @description Het veld value mag niet meer dan 120 tekens bevatten.
-                     * @example q
-                     */
-                    city?: string | null;
-                    /**
-                     * @description Het veld value mag niet meer dan 120 tekens bevatten.
-                     * @example l
-                     */
-                    province?: string | null;
-                    /**
-                     * @description Het veld value mag niet meer dan 120 tekens bevatten.
-                     * @example d
-                     */
-                    country?: string | null;
-                    /**
-                     * @description Het veld value mag niet meer dan 32 tekens bevatten.
-                     * @example z
-                     */
-                    coc_number?: string | null;
-                    /**
-                     * @description Het veld value mag niet meer dan 32 tekens bevatten.
-                     * @example s
-                     */
-                    vat_number?: string | null;
-                    /**
-                     * @description Het veld value mag niet meer dan 255 tekens bevatten.
-                     * @example n
-                     */
-                    contact_name?: string | null;
-                    /**
-                     * @description Het veld value mag niet meer dan 64 tekens bevatten.
-                     * @example r
-                     */
-                    phone?: string | null;
-                    /**
-                     * @description Het veld value is geen geldig e-mailadres. Het veld value mag niet meer dan 255 tekens bevatten.
-                     * @example feeney.demarcus@example.com
-                     */
-                    email?: string | null;
-                };
-            };
-        };
-        responses: never;
-    };
-    getLocationsLocation: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The location.
-                 * @example architecto
-                 */
-                location: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    putLocationsLocation: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The location.
-                 * @example architecto
-                 */
-                location: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: {
-            content: {
-                "application/json": {
-                    /**
-                     * @description Het veld value mag niet meer dan 32 tekens bevatten.
-                     * @example b
-                     */
-                    color?: string | null;
-                    /**
-                     * @description Het veld value mag niet meer dan 40 tekens bevatten.
-                     * @example n
-                     */
-                    icon?: string | null;
-                    /**
-                     * @description Het veld value mag niet meer dan 255 tekens bevatten.
-                     * @example g
-                     */
-                    name?: string;
-                    /**
-                     * @description Het veld value mag niet meer dan 255 tekens bevatten.
-                     * @example z
-                     */
-                    street?: string | null;
-                    /**
-                     * @description Het veld value mag niet meer dan 32 tekens bevatten.
-                     * @example m
-                     */
-                    house_number?: string | null;
-                    /**
-                     * @description Het veld value mag niet meer dan 32 tekens bevatten.
-                     * @example i
-                     */
-                    house_number_suffix?: string | null;
-                    /**
-                     * @description Het veld value mag niet meer dan 16 tekens bevatten.
-                     * @example yvdljnikhwaykcmy
-                     */
-                    postcode?: string | null;
-                    /**
-                     * @description Het veld value mag niet meer dan 16 tekens bevatten.
-                     * @example uwpwlvqwrsitcpsc
-                     */
-                    postal_code?: string | null;
-                    /**
-                     * @description Het veld value mag niet meer dan 120 tekens bevatten.
-                     * @example q
-                     */
-                    city?: string | null;
-                    /**
-                     * @description Het veld value mag niet meer dan 120 tekens bevatten.
-                     * @example l
-                     */
-                    province?: string | null;
-                    /**
-                     * @description Het veld value mag niet meer dan 120 tekens bevatten.
-                     * @example d
-                     */
-                    country?: string | null;
-                    /**
-                     * @description Het veld value mag niet meer dan 32 tekens bevatten.
-                     * @example z
-                     */
-                    coc_number?: string | null;
-                    /**
-                     * @description Het veld value mag niet meer dan 32 tekens bevatten.
-                     * @example s
-                     */
-                    vat_number?: string | null;
-                    /**
-                     * @description Het veld value mag niet meer dan 255 tekens bevatten.
-                     * @example n
-                     */
-                    contact_name?: string | null;
-                    /**
-                     * @description Het veld value mag niet meer dan 64 tekens bevatten.
-                     * @example r
-                     */
-                    phone?: string | null;
-                    /**
-                     * @description Het veld value is geen geldig e-mailadres. Het veld value mag niet meer dan 255 tekens bevatten.
-                     * @example feeney.demarcus@example.com
-                     */
-                    email?: string | null;
-                };
-            };
-        };
-        responses: never;
-    };
-    deleteLocationsLocation: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The location.
-                 * @example architecto
-                 */
-                location: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: never;
-    };
-    postLocationsLocationGeocode: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The location.
-                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
-                 */
-                location: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: never;
-    };
     getWhatsappMessageTypes: {
         parameters: {
             query?: never;
@@ -36710,7 +36396,7 @@ export interface operations {
                     hours_per_week_max?: number;
                     /**
                      * @description Het veld value is geen geldige datum.
-                     * @example 2026-08-25T07:40:27
+                     * @example 2026-08-25T10:13:48
                      */
                     available_from_before?: string;
                     /**
@@ -36859,7 +36545,7 @@ export interface operations {
                      *     ]
                      */
                     vacancy_ids?: string[];
-                    /** @example false */
+                    /** @example true */
                     all_linked?: boolean;
                 };
             };
@@ -37505,7 +37191,7 @@ export interface operations {
                     hours_per_week_max?: number;
                     /**
                      * @description Het veld value is geen geldige datum.
-                     * @example 2026-08-25T07:40:28
+                     * @example 2026-08-25T10:13:48
                      */
                     available_from_before?: string;
                     /**
@@ -37948,7 +37634,7 @@ export interface operations {
                     message_id?: string | null;
                     /**
                      * @description Het veld value is geen geldige datum.
-                     * @example 2026-08-25T07:40:26
+                     * @example 2026-08-25T10:13:47
                      */
                     sent_at?: string | null;
                 };
@@ -38107,7 +37793,7 @@ export interface operations {
                 "application/json": {
                     /**
                      * @description Het veld value is geen geldige datum.
-                     * @example 2026-08-25T07:40:27
+                     * @example 2026-08-25T10:13:47
                      */
                     before?: string;
                     /**
@@ -38116,7 +37802,7 @@ export interface operations {
                      */
                     per_page?: number;
                     /**
-                     * @example outbound
+                     * @example inbound
                      * @enum {string}
                      */
                     direction?: "inbound" | "outbound";
@@ -38124,7 +37810,7 @@ export interface operations {
                      * @description Static strings on purpose: Scribe's inline-validator parser documents these as
                      *     query params only when it can read them literally; a test pins them to
                      *     MessageStatus::VALUES / Channel::values() so the two can never drift.
-                     * @example sent
+                     * @example read
                      * @enum {string}
                      */
                     status?: "sent" | "delivered" | "read" | "failed" | "received";
@@ -38135,7 +37821,7 @@ export interface operations {
                      *     ]
                      */
                     type?: string[];
-                    /** @example false */
+                    /** @example true */
                     priority?: boolean;
                     /**
                      * @description Het veld value mag niet meer dan 64 tekens bevatten.
@@ -38173,7 +37859,7 @@ export interface operations {
                     channel?: ("waba" | "waba_coex" | "wa_web")[];
                     /**
                      * @description Het veld value is geen geldige datum.
-                     * @example 2026-08-25T07:40:27
+                     * @example 2026-08-25T10:13:47
                      */
                     from?: string;
                     /**
@@ -38864,7 +38550,7 @@ export interface operations {
                      * @example y
                      */
                     status?: string;
-                    /** @example true */
+                    /** @example false */
                     escalated?: boolean;
                     /**
                      * @description Het veld value mag niet meer dan 120 tekens bevatten.
@@ -38882,7 +38568,7 @@ export interface operations {
                      * @description K-173 fase 2b: tile-click filter for the dashboard 'active_conversations'
                      *     KPI — mirrors DashboardService::attention()'s EXACT predicate (last_message_at
                      *     within 7 days; that KPI carries no escalated condition despite its name).
-                     * @example true
+                     * @example false
                      */
                     active?: boolean;
                     /**
@@ -38992,7 +38678,7 @@ export interface operations {
                     state_ai_flexplanner?: string;
                     /** @example 16 */
                     failed_attempts?: number;
-                    /** @example false */
+                    /** @example true */
                     escalated?: boolean;
                 };
             };
@@ -39017,7 +38703,7 @@ export interface operations {
                 "application/json": {
                     /**
                      * @description Het veld value is geen geldige datum.
-                     * @example 2026-08-25T07:40:29
+                     * @example 2026-08-25T10:13:49
                      */
                     before?: string;
                     /**
@@ -39079,7 +38765,7 @@ export interface operations {
                     message_content?: string;
                     /**
                      * @description Het veld value is geen geldige datum.
-                     * @example 2026-08-25T07:40:29
+                     * @example 2026-08-25T10:13:49
                      */
                     sent_at?: string;
                     /**
@@ -39108,7 +38794,7 @@ export interface operations {
             content: {
                 "application/json": {
                     /**
-                     * @example inbound
+                     * @example outbound
                      * @enum {string}
                      */
                     direction?: "in" | "out" | "inbound" | "outbound";
@@ -39264,7 +38950,7 @@ export interface operations {
             content: {
                 "application/json": {
                     /**
-                     * @example read
+                     * @example delivered
                      * @enum {string}
                      */
                     status: "delivered" | "read";
@@ -39307,7 +38993,7 @@ export interface operations {
                 "application/json": {
                     /**
                      * @description Het veld value is geen geldige datum.
-                     * @example 2026-08-25T07:40:29
+                     * @example 2026-08-25T10:13:49
                      */
                     before?: string;
                 };
@@ -39691,7 +39377,7 @@ export interface operations {
                     currency?: string;
                     /**
                      * @description Het veld value is geen geldige datum.
-                     * @example 2026-08-25T07:40:27
+                     * @example 2026-08-25T10:13:48
                      */
                     expected_close_at?: string | null;
                     /**
@@ -39721,7 +39407,7 @@ export interface operations {
                     hours_period?: "week" | "month" | "total" | null;
                     /**
                      * @description Het veld value is geen geldige datum.
-                     * @example 2026-08-25T07:40:27
+                     * @example 2026-08-25T10:13:48
                      */
                     start_date?: string | null;
                     /**
@@ -39876,7 +39562,7 @@ export interface operations {
                     currency?: string;
                     /**
                      * @description Het veld value is geen geldige datum.
-                     * @example 2026-08-25T07:40:27
+                     * @example 2026-08-25T10:13:48
                      */
                     expected_close_at?: string | null;
                     /**
@@ -39906,7 +39592,7 @@ export interface operations {
                     hours_period?: "week" | "month" | "total" | null;
                     /**
                      * @description Het veld value is geen geldige datum.
-                     * @example 2026-08-25T07:40:27
+                     * @example 2026-08-25T10:13:48
                      */
                     start_date?: string | null;
                     /**
@@ -41186,7 +40872,7 @@ export interface operations {
                 "application/json": {
                     /**
                      * @description Het veld value is geen geldige datum.
-                     * @example 2026-08-25T07:40:28
+                     * @example 2026-08-25T10:13:49
                      */
                     from: string;
                     /**
@@ -41241,12 +40927,12 @@ export interface operations {
                 "application/json": {
                     /**
                      * @description Het veld value is geen geldige datum.
-                     * @example 2026-08-25T07:40:28
+                     * @example 2026-08-25T10:13:49
                      */
                     from?: string;
                     /**
                      * @description Het veld value is geen geldige datum.
-                     * @example 2026-08-25T07:40:28
+                     * @example 2026-08-25T10:13:49
                      */
                     to?: string;
                 };
@@ -41569,7 +41255,7 @@ export interface operations {
                     period?: "day" | "week" | "month";
                     /**
                      * @description Het veld value is geen geldige datum.
-                     * @example 2026-08-25T07:40:28
+                     * @example 2026-08-25T10:13:49
                      */
                     from?: string;
                     /**
@@ -41633,15 +41319,15 @@ export interface operations {
                     function?: string;
                     /**
                      * @description Het veld value is geen geldige datum.
-                     * @example 2026-08-25T07:40:28
+                     * @example 2026-08-25T10:13:49
                      */
                     from?: string;
                     /**
                      * @description Het veld value is geen geldige datum.
-                     * @example 2026-08-25T07:40:28
+                     * @example 2026-08-25T10:13:49
                      */
                     to?: string;
-                    /** @example true */
+                    /** @example false */
                     open_only?: boolean;
                     /**
                      * @description Het veld value moet tussen 1 en 200 liggen.
@@ -41787,12 +41473,12 @@ export interface operations {
                     status?: string;
                     /**
                      * @description Het veld value is geen geldige datum.
-                     * @example 2026-08-25T07:40:28
+                     * @example 2026-08-25T10:13:49
                      */
                     from?: string;
                     /**
                      * @description Het veld value is geen geldige datum.
-                     * @example 2026-08-25T07:40:28
+                     * @example 2026-08-25T10:13:49
                      */
                     to?: string;
                     /**
@@ -41877,7 +41563,7 @@ export interface operations {
                 "application/json": {
                     /**
                      * @description Het veld value is geen geldige datum.
-                     * @example 2026-08-25T07:40:28
+                     * @example 2026-08-25T10:13:49
                      */
                     actual_start_time: string;
                     /**
@@ -41951,12 +41637,12 @@ export interface operations {
                     status?: string;
                     /**
                      * @description Het veld value is geen geldige datum.
-                     * @example 2026-08-25T07:40:29
+                     * @example 2026-08-25T10:13:49
                      */
                     from?: string;
                     /**
                      * @description Het veld value is geen geldige datum.
-                     * @example 2026-08-25T07:40:29
+                     * @example 2026-08-25T10:13:49
                      */
                     to?: string;
                     /**
@@ -42120,13 +41806,13 @@ export interface operations {
             content: {
                 "application/json": {
                     /**
-                     * @example day
+                     * @example month
                      * @enum {string}
                      */
                     period?: "day" | "week" | "month";
                     /**
                      * @description Het veld value is geen geldige datum.
-                     * @example 2026-08-25T07:40:28
+                     * @example 2026-08-25T10:13:49
                      */
                     from?: string;
                     /**
@@ -42150,6 +41836,553 @@ export interface operations {
                 };
             };
         };
+    };
+    postCustomersCustomerErase: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The customer.
+                 * @example architecto
+                 */
+                customer: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @example |]|{+- */
+                    password: string;
+                };
+            };
+        };
+        responses: never;
+    };
+    postCandidatesCandidateErase: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The candidate.
+                 * @example architecto
+                 */
+                candidate: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @example |]|{+- */
+                    password: string;
+                    /**
+                     * @description anonymize (default, safe) keeps a non-identifiable shell; delete physically removes.
+                     * @example anonymize
+                     * @enum {string}
+                     */
+                    mode?: "anonymize" | "delete";
+                    /**
+                     * @description Het veld value mag niet meer dan 120 tekens bevatten.
+                     * @example v
+                     */
+                    reason?: string;
+                };
+            };
+        };
+        responses: never;
+    };
+    getCustomersIdDeletionPreview: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the customer.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postCustomersIdMarkDeletion: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the customer.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Het veld value moet een geldige UUID zijn.
+                     * @example 6ff8f7f6-1eb3-3525-be4a-3932c805afed
+                     */
+                    transfer_to_owner_id?: string | null;
+                };
+            };
+        };
+        responses: never;
+    };
+    postCustomersIdUnmarkDeletion: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the customer.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: never;
+    };
+    getVacanciesIdDeletionPreview: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the vacancy.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postVacanciesIdMarkDeletion: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the vacancy.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Het veld value moet een geldige UUID zijn.
+                     * @example 6ff8f7f6-1eb3-3525-be4a-3932c805afed
+                     */
+                    transfer_to_owner_id?: string | null;
+                };
+            };
+        };
+        responses: never;
+    };
+    postVacanciesIdUnmarkDeletion: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the vacancy.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: never;
+    };
+    getOpportunitiesIdDeletionPreview: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the opportunity.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postOpportunitiesIdMarkDeletion: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the opportunity.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Het veld value moet een geldige UUID zijn.
+                     * @example 6ff8f7f6-1eb3-3525-be4a-3932c805afed
+                     */
+                    transfer_to_owner_id?: string | null;
+                };
+            };
+        };
+        responses: never;
+    };
+    postOpportunitiesIdUnmarkDeletion: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the opportunity.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: never;
+    };
+    getTasksIdDeletionPreview: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the task.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postTasksIdMarkDeletion: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the task.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Het veld value moet een geldige UUID zijn.
+                     * @example 6ff8f7f6-1eb3-3525-be4a-3932c805afed
+                     */
+                    transfer_to_owner_id?: string | null;
+                };
+            };
+        };
+        responses: never;
+    };
+    postTasksIdUnmarkDeletion: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the task.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: never;
+    };
+    getMatchesIdDeletionPreview: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the match.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postMatchesIdMarkDeletion: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the match.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Het veld value moet een geldige UUID zijn.
+                     * @example 6ff8f7f6-1eb3-3525-be4a-3932c805afed
+                     */
+                    transfer_to_owner_id?: string | null;
+                };
+            };
+        };
+        responses: never;
+    };
+    postMatchesIdUnmarkDeletion: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the match.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: never;
+    };
+    getOutreachCampaignsIdDeletionPreview: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the outreach campaign.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postOutreachCampaignsIdMarkDeletion: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the outreach campaign.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Het veld value moet een geldige UUID zijn.
+                     * @example 6ff8f7f6-1eb3-3525-be4a-3932c805afed
+                     */
+                    transfer_to_owner_id?: string | null;
+                };
+            };
+        };
+        responses: never;
+    };
+    postOutreachCampaignsIdUnmarkDeletion: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the outreach campaign.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: never;
+    };
+    getWorkflowsIdDeletionPreview: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the workflow.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postWorkflowsIdMarkDeletion: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the workflow.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Het veld value moet een geldige UUID zijn.
+                     * @example 6ff8f7f6-1eb3-3525-be4a-3932c805afed
+                     */
+                    transfer_to_owner_id?: string | null;
+                };
+            };
+        };
+        responses: never;
+    };
+    postWorkflowsIdUnmarkDeletion: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the workflow.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: never;
     };
     getProposalsTenantProposal: {
         parameters: {
@@ -42354,12 +42587,12 @@ export interface operations {
                         location?: string | null;
                         /**
                          * @description Het veld value is geen geldige datum.
-                         * @example 2026-08-25T07:40:27
+                         * @example 2026-08-25T10:13:47
                          */
                         start_date?: string | null;
                         /**
                          * @description Het veld value is geen geldige datum.
-                         * @example 2026-08-25T07:40:27
+                         * @example 2026-08-25T10:13:47
                          */
                         end_date?: string | null;
                         /**
@@ -42390,7 +42623,7 @@ export interface operations {
                         organisation?: string | null;
                         /**
                          * @description Het veld value is geen geldige datum.
-                         * @example 2026-08-25T07:40:27
+                         * @example 2026-08-25T10:13:47
                          */
                         issued_at?: string | null;
                         /**
@@ -42798,11 +43031,11 @@ export interface operations {
     getReportsMatchesDrill: {
         parameters: {
             query?: {
-                /** @example week */
+                /** @example month */
                 period?: "day" | "week" | "month";
                 /**
                  * @description Het veld value is geen geldige datum.
-                 * @example 2026-08-25T07:40:28
+                 * @example 2026-08-25T10:13:48
                  */
                 from?: string;
                 /**
@@ -42832,7 +43065,7 @@ export interface operations {
                 branch_id?: string;
                 /**
                  * @description This field is required when none of <code>contract_form</code>, <code>contract_status</code>, <code>date</code>, and <code>stop_reason</code> are present.
-                 * @example funnel
+                 * @example direct
                  */
                 origin?: "funnel" | "direct";
                 /**
@@ -42842,12 +43075,12 @@ export interface operations {
                 contract_form?: string;
                 /**
                  * @description This field is required when none of <code>origin</code>, <code>contract_form</code>, <code>date</code>, and <code>stop_reason</code> are present.
-                 * @example sent
+                 * @example ended
                  */
                 contract_status?: "none" | "sent" | "active" | "ended";
                 /**
                  * @description This field is required when none of <code>origin</code>, <code>contract_form</code>, <code>contract_status</code>, and <code>stop_reason</code> are present. Het veld value is geen geldige datum.
-                 * @example 2026-08-25T07:40:28
+                 * @example 2026-08-25T10:13:48
                  */
                 date?: string;
                 /**
@@ -42958,7 +43191,7 @@ export interface operations {
                  *     ]
                  */
                 direction?: ("inbound" | "outbound")[];
-                /** @example true */
+                /** @example false */
                 escalated?: boolean;
                 /**
                  * @description Het veld value moet een geldige UUID zijn.
@@ -42990,11 +43223,11 @@ export interface operations {
     getReportsVacanciesDrill: {
         parameters: {
             query?: {
-                /** @example week */
+                /** @example day */
                 period?: "day" | "week" | "month";
                 /**
                  * @description Het veld value is geen geldige datum.
-                 * @example 2026-08-25T07:40:28
+                 * @example 2026-08-25T10:13:48
                  */
                 from?: string;
                 /**
@@ -43114,7 +43347,7 @@ export interface operations {
                  *     ]
                  */
                 direction?: ("inbound" | "outbound")[];
-                /** @example true */
+                /** @example false */
                 escalated?: boolean;
                 /**
                  * @description Het veld value moet een geldige UUID zijn.
@@ -43125,7 +43358,7 @@ export interface operations {
                 customer_ids?: string[];
                 /**
                  * @example [
-                 *       "direct"
+                 *       "funnel"
                  *     ]
                  */
                 origin?: ("funnel" | "direct")[];
@@ -43158,7 +43391,7 @@ export interface operations {
                 branch?: string;
                 /**
                  * @description This field is required when none of <code>status</code>, <code>customer</code>, <code>function</code>, <code>industry</code>, <code>owner</code>, <code>branch</code>, <code>vacancy</code>, <code>stale_online</code>, <code>zero_applications</code>, and <code>closing_soon</code> are present. Het veld value is geen geldige datum.
-                 * @example 2026-08-25T07:40:28
+                 * @example 2026-08-25T10:13:48
                  */
                 date?: string;
                 /**
@@ -43168,20 +43401,20 @@ export interface operations {
                 vacancy?: string;
                 /**
                  * @description This field is required when none of <code>status</code>, <code>customer</code>, <code>function</code>, <code>industry</code>, <code>owner</code>, <code>branch</code>, <code>date</code>, <code>vacancy</code>, <code>zero_applications</code>, and <code>closing_soon</code> are present.
-                 * @example false
+                 * @example true
                  */
                 stale_online?: boolean;
                 /**
                  * @description This field is required when none of <code>status</code>, <code>customer</code>, <code>function</code>, <code>industry</code>, <code>owner</code>, <code>branch</code>, <code>date</code>, <code>vacancy</code>, <code>stale_online</code>, and <code>closing_soon</code> are present.
-                 * @example true
+                 * @example false
                  */
                 zero_applications?: boolean;
                 /**
                  * @description This field is required when none of <code>status</code>, <code>customer</code>, <code>function</code>, <code>industry</code>, <code>owner</code>, <code>branch</code>, <code>date</code>, <code>vacancy</code>, <code>stale_online</code>, and <code>zero_applications</code> are present.
-                 * @example true
+                 * @example false
                  */
                 closing_soon?: boolean;
-                /** @example day */
+                /** @example week */
                 bucket?: "day" | "week";
             };
             header?: never;
@@ -43210,7 +43443,7 @@ export interface operations {
                 period?: "day" | "week" | "month";
                 /**
                  * @description Het veld value is geen geldige datum.
-                 * @example 2026-08-25T07:40:28
+                 * @example 2026-08-25T10:13:48
                  */
                 from?: string;
                 /**
@@ -43300,7 +43533,7 @@ export interface operations {
                 team_id?: string[];
                 /**
                  * @example [
-                 *       "outbound"
+                 *       "inbound"
                  *     ]
                  */
                 direction?: ("inbound" | "outbound")[];
@@ -43353,7 +43586,7 @@ export interface operations {
                 branch?: string;
                 /**
                  * @description This field is required when none of <code>status</code>, <code>phase</code>, <code>source</code>, <code>owner</code>, and <code>branch</code> are present. Het veld value is geen geldige datum.
-                 * @example 2026-08-25T07:40:28
+                 * @example 2026-08-25T10:13:48
                  */
                 date?: string;
                 /** @example week */
@@ -43381,11 +43614,11 @@ export interface operations {
     getReportsCandidatesKpisDrill: {
         parameters: {
             query: {
-                /** @example week */
+                /** @example day */
                 period?: "day" | "week" | "month";
                 /**
                  * @description Het veld value is geen geldige datum.
-                 * @example 2026-08-25T07:40:28
+                 * @example 2026-08-25T10:13:48
                  */
                 from?: string;
                 /**
@@ -43500,7 +43733,7 @@ export interface operations {
                  *     ]
                  */
                 direction?: ("inbound" | "outbound")[];
-                /** @example false */
+                /** @example true */
                 escalated?: boolean;
                 /**
                  * @description Het veld value moet een geldige UUID zijn.
@@ -43545,11 +43778,11 @@ export interface operations {
     getReportsApplicationsKpisDrill: {
         parameters: {
             query: {
-                /** @example day */
+                /** @example month */
                 period?: "day" | "week" | "month";
                 /**
                  * @description Het veld value is geen geldige datum.
-                 * @example 2026-08-25T07:40:28
+                 * @example 2026-08-25T10:13:48
                  */
                 from?: string;
                 /**
@@ -43557,7 +43790,7 @@ export interface operations {
                  * @example 2052-09-17
                  */
                 to?: string;
-                /** @example missing_appointment */
+                /** @example conversion_pct */
                 kpi: "total" | "new" | "active" | "matched" | "rejected" | "conversion_pct" | "avg_days_to_match" | "too_long_in_stage" | "missing_appointment";
                 /**
                  * @example [
@@ -43661,7 +43894,7 @@ export interface operations {
                 team_id?: string[];
                 /**
                  * @example [
-                 *       "outbound"
+                 *       "inbound"
                  *     ]
                  */
                 direction?: ("inbound" | "outbound")[];
@@ -43710,11 +43943,11 @@ export interface operations {
     getReportsApplicationsIntakesDrill: {
         parameters: {
             query: {
-                /** @example day */
+                /** @example month */
                 period?: "day" | "week" | "month";
                 /**
                  * @description Het veld value is geen geldige datum.
-                 * @example 2026-08-25T07:40:28
+                 * @example 2026-08-25T10:13:48
                  */
                 from?: string;
                 /**
@@ -43755,11 +43988,11 @@ export interface operations {
     getReportsTasksKpisDrill: {
         parameters: {
             query: {
-                /** @example week */
+                /** @example month */
                 period?: "day" | "week" | "month";
                 /**
                  * @description Het veld value is geen geldige datum.
-                 * @example 2026-08-25T07:40:28
+                 * @example 2026-08-25T10:13:48
                  */
                 from?: string;
                 /**
@@ -43767,7 +44000,7 @@ export interface operations {
                  * @example 2052-09-17
                  */
                 to?: string;
-                /** @example total */
+                /** @example overdue */
                 kpi: "total" | "open" | "overdue" | "done_in_period" | "created_in_period" | "due_today" | "due_this_week" | "without_assignee" | "avg_completion_days";
                 /**
                  * @example [
@@ -43887,7 +44120,7 @@ export interface operations {
                 customer_ids?: string[];
                 /**
                  * @example [
-                 *       "direct"
+                 *       "funnel"
                  *     ]
                  */
                 origin?: ("funnel" | "direct")[];
@@ -43925,7 +44158,7 @@ export interface operations {
                 period?: "day" | "week" | "month";
                 /**
                  * @description Het veld value is geen geldige datum.
-                 * @example 2026-08-25T07:40:28
+                 * @example 2026-08-25T10:13:48
                  */
                 from?: string;
                 /**
@@ -43933,7 +44166,7 @@ export interface operations {
                  * @example 2052-09-17
                  */
                 to?: string;
-                /** @example terminated_in_period */
+                /** @example reach_rate */
                 kpi: "total" | "new_in_period" | "active" | "expiring_soon" | "terminated_in_period" | "renewals_in_period" | "without_end_date" | "avg_duration_days" | "reach_rate";
                 /**
                  * @description Het veld value moet minimaal 1 zijn. Het veld value mag niet groter zijn dan 365.
@@ -44073,7 +44306,7 @@ export interface operations {
                 customer_ids?: string[];
                 /**
                  * @example [
-                 *       "funnel"
+                 *       "direct"
                  *     ]
                  */
                 origin?: ("funnel" | "direct")[];
@@ -44111,7 +44344,7 @@ export interface operations {
                 period?: "day" | "week" | "month";
                 /**
                  * @description Het veld value is geen geldige datum.
-                 * @example 2026-08-25T07:40:28
+                 * @example 2026-08-25T10:13:48
                  */
                 from?: string;
                 /**
@@ -44119,7 +44352,7 @@ export interface operations {
                  * @example 2052-09-17
                  */
                 to?: string;
-                /** @example conversion_pct */
+                /** @example called_in_period */
                 kpi: "total_targets" | "open_todo" | "called_in_period" | "reached" | "not_reached" | "conversion_pct" | "campaigns_active" | "campaigns_done_in_period" | "due_today" | "assigned";
                 /**
                  * @example [
@@ -44223,11 +44456,11 @@ export interface operations {
                 team_id?: string[];
                 /**
                  * @example [
-                 *       "inbound"
+                 *       "outbound"
                  *     ]
                  */
                 direction?: ("inbound" | "outbound")[];
-                /** @example true */
+                /** @example false */
                 escalated?: boolean;
                 /**
                  * @description Het veld value moet een geldige UUID zijn.
@@ -44272,11 +44505,11 @@ export interface operations {
     getReportsVacanciesKpisDrill: {
         parameters: {
             query: {
-                /** @example day */
+                /** @example week */
                 period?: "day" | "week" | "month";
                 /**
                  * @description Het veld value is geen geldige datum.
-                 * @example 2026-08-25T07:40:28
+                 * @example 2026-08-25T10:13:48
                  */
                 from?: string;
                 /**
@@ -44284,7 +44517,7 @@ export interface operations {
                  * @example 2052-09-17
                  */
                 to?: string;
-                /** @example no_matches */
+                /** @example fill_rate */
                 kpi: "fill_rate" | "ttf" | "customers_count" | "long_concept" | "no_matches";
                 /**
                  * @example [
@@ -44400,7 +44633,7 @@ export interface operations {
                  *     ]
                  */
                 direction?: ("inbound" | "outbound")[];
-                /** @example true */
+                /** @example false */
                 escalated?: boolean;
                 /**
                  * @description Het veld value moet een geldige UUID zijn.
@@ -44411,7 +44644,7 @@ export interface operations {
                 customer_ids?: string[];
                 /**
                  * @example [
-                 *       "funnel"
+                 *       "direct"
                  *     ]
                  */
                 origin?: ("funnel" | "direct")[];
@@ -44445,11 +44678,11 @@ export interface operations {
     getReportsCustomersKpiSignalDrill: {
         parameters: {
             query: {
-                /** @example week */
+                /** @example month */
                 period?: "day" | "week" | "month";
                 /**
                  * @description Het veld value is geen geldige datum.
-                 * @example 2026-08-25T07:40:28
+                 * @example 2026-08-25T10:13:48
                  */
                 from?: string;
                 /**
@@ -44457,7 +44690,7 @@ export interface operations {
                  * @example 2052-09-17
                  */
                 to?: string;
-                /** @example customers_at_risk */
+                /** @example customers_prospect */
                 kpi: "customers_active" | "customers_prospect" | "customers_at_risk";
                 /**
                  * @example [
@@ -44618,11 +44851,11 @@ export interface operations {
     getReportsWhatsappKpisDrill: {
         parameters: {
             query: {
-                /** @example day */
+                /** @example week */
                 period?: "day" | "week" | "month";
                 /**
                  * @description Het veld value is geen geldige datum.
-                 * @example 2026-08-25T07:40:28
+                 * @example 2026-08-25T10:13:48
                  */
                 from?: string;
                 /**
@@ -44632,166 +44865,6 @@ export interface operations {
                 to?: string;
                 /** @example outbound_in_period */
                 kpi: "conversations_total" | "active_7d" | "new_in_period" | "inbound_in_period" | "outbound_in_period" | "app_echoes_in_period" | "escalations_open" | "unanswered_over_window" | "avg_first_response_minutes";
-                /**
-                 * @example [
-                 *       "architecto"
-                 *     ]
-                 */
-                owner_id?: string[];
-                /**
-                 * @description Het veld value mag niet meer dan 64 tekens bevatten.
-                 * @example [
-                 *       "n"
-                 *     ]
-                 */
-                source?: string[];
-                /**
-                 * @description Must match an existing stored value.
-                 * @example [
-                 *       "architecto"
-                 *     ]
-                 */
-                phase?: string[];
-                /**
-                 * @description Het veld value mag niet meer dan 120 tekens bevatten.
-                 * @example [
-                 *       "n"
-                 *     ]
-                 */
-                function?: string[];
-                /**
-                 * @description Het veld value mag niet meer dan 120 tekens bevatten.
-                 * @example [
-                 *       "g"
-                 *     ]
-                 */
-                industry?: string[];
-                /**
-                 * @example [
-                 *       "architecto"
-                 *     ]
-                 */
-                contract_form?: string[];
-                /**
-                 * @example [
-                 *       "architecto"
-                 *     ]
-                 */
-                stage?: string[];
-                /**
-                 * @example [
-                 *       "architecto"
-                 *     ]
-                 */
-                vacancy_id?: string[];
-                /**
-                 * @description Het veld value moet een geldige UUID zijn. Must match an existing stored value.
-                 * @example [
-                 *       "a4855dc5-0acb-33c3-b921-f4291f719ca0"
-                 *     ]
-                 */
-                rejection_reason?: string[];
-                /**
-                 * @description Het veld value moet minimaal 0 zijn.
-                 * @example 12
-                 */
-                value_min?: number;
-                /**
-                 * @description Het veld value moet minimaal 0 zijn.
-                 * @example 77
-                 */
-                value_max?: number;
-                /**
-                 * @description Het veld value mag niet meer dan 64 tekens bevatten.
-                 * @example [
-                 *       "i"
-                 *     ]
-                 */
-                type?: string[];
-                /**
-                 * @example [
-                 *       "architecto"
-                 *     ]
-                 */
-                priority?: string[];
-                /**
-                 * @example [
-                 *       "architecto"
-                 *     ]
-                 */
-                team_id?: string[];
-                /**
-                 * @example [
-                 *       "inbound"
-                 *     ]
-                 */
-                direction?: ("inbound" | "outbound")[];
-                /** @example true */
-                escalated?: boolean;
-                /**
-                 * @description Het veld value moet een geldige UUID zijn.
-                 * @example [
-                 *       "a4855dc5-0acb-33c3-b921-f4291f719ca0"
-                 *     ]
-                 */
-                customer_ids?: string[];
-                /**
-                 * @example [
-                 *       "direct"
-                 *     ]
-                 */
-                origin?: ("funnel" | "direct")[];
-                /**
-                 * @description Het veld value mag niet meer dan 64 tekens bevatten.
-                 * @example [
-                 *       "z"
-                 *     ]
-                 */
-                stop_reason?: string[];
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    getReportsWhatsappAxesDrill: {
-        parameters: {
-            query: {
-                /** @example week */
-                period?: "day" | "week" | "month";
-                /**
-                 * @description Het veld value is geen geldige datum.
-                 * @example 2026-08-25T07:40:28
-                 */
-                from?: string;
-                /**
-                 * @description Het veld value is geen geldige datum. Het veld value moet een datum na of gelijk aan <code>from</code> zijn.
-                 * @example 2052-09-17
-                 */
-                to?: string;
-                /** @example type */
-                axis: "timeseries" | "direction" | "type" | "escalated" | "conversation" | "channel";
-                /**
-                 * @description Het veld value mag niet meer dan 64 tekens bevatten.
-                 * @example n
-                 */
-                value: string;
-                /** @example week */
-                bucket?: "day" | "week";
                 /**
                  * @example [
                  *       "architecto"
@@ -44897,7 +44970,7 @@ export interface operations {
                 customer_ids?: string[];
                 /**
                  * @example [
-                 *       "direct"
+                 *       "funnel"
                  *     ]
                  */
                 origin?: ("funnel" | "direct")[];
@@ -44928,14 +45001,14 @@ export interface operations {
             };
         };
     };
-    getReportsLeadsDrill: {
+    getReportsWhatsappAxesDrill: {
         parameters: {
-            query?: {
-                /** @example week */
+            query: {
+                /** @example month */
                 period?: "day" | "week" | "month";
                 /**
                  * @description Het veld value is geen geldige datum.
-                 * @example 2026-08-25T07:40:28
+                 * @example 2026-08-25T10:13:48
                  */
                 from?: string;
                 /**
@@ -44943,18 +45016,21 @@ export interface operations {
                  * @example 2052-09-17
                  */
                 to?: string;
+                /** @example channel */
+                axis: "timeseries" | "direction" | "type" | "escalated" | "conversation" | "channel";
+                /**
+                 * @description Het veld value mag niet meer dan 64 tekens bevatten.
+                 * @example n
+                 */
+                value: string;
+                /** @example week */
+                bucket?: "day" | "week";
                 /**
                  * @example [
                  *       "architecto"
                  *     ]
                  */
                 owner_id?: string[];
-                /**
-                 * @example [
-                 *       "architecto"
-                 *     ]
-                 */
-                location_id?: string[];
                 /**
                  * @description Het veld value mag niet meer dan 64 tekens bevatten.
                  * @example [
@@ -45065,6 +45141,163 @@ export interface operations {
                  *     ]
                  */
                 stop_reason?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getReportsLeadsDrill: {
+        parameters: {
+            query?: {
+                /** @example month */
+                period?: "day" | "week" | "month";
+                /**
+                 * @description Het veld value is geen geldige datum.
+                 * @example 2026-08-25T10:13:48
+                 */
+                from?: string;
+                /**
+                 * @description Het veld value is geen geldige datum. Het veld value moet een datum na of gelijk aan <code>from</code> zijn.
+                 * @example 2052-09-17
+                 */
+                to?: string;
+                /**
+                 * @example [
+                 *       "architecto"
+                 *     ]
+                 */
+                owner_id?: string[];
+                /**
+                 * @example [
+                 *       "architecto"
+                 *     ]
+                 */
+                location_id?: string[];
+                /**
+                 * @description Het veld value mag niet meer dan 64 tekens bevatten.
+                 * @example [
+                 *       "n"
+                 *     ]
+                 */
+                source?: string[];
+                /**
+                 * @description Must match an existing stored value.
+                 * @example [
+                 *       "architecto"
+                 *     ]
+                 */
+                phase?: string[];
+                /**
+                 * @description Het veld value mag niet meer dan 120 tekens bevatten.
+                 * @example [
+                 *       "n"
+                 *     ]
+                 */
+                function?: string[];
+                /**
+                 * @description Het veld value mag niet meer dan 120 tekens bevatten.
+                 * @example [
+                 *       "g"
+                 *     ]
+                 */
+                industry?: string[];
+                /**
+                 * @example [
+                 *       "architecto"
+                 *     ]
+                 */
+                contract_form?: string[];
+                /**
+                 * @example [
+                 *       "architecto"
+                 *     ]
+                 */
+                stage?: string[];
+                /**
+                 * @example [
+                 *       "architecto"
+                 *     ]
+                 */
+                vacancy_id?: string[];
+                /**
+                 * @description Het veld value moet een geldige UUID zijn. Must match an existing stored value.
+                 * @example [
+                 *       "a4855dc5-0acb-33c3-b921-f4291f719ca0"
+                 *     ]
+                 */
+                rejection_reason?: string[];
+                /**
+                 * @description Het veld value moet minimaal 0 zijn.
+                 * @example 12
+                 */
+                value_min?: number;
+                /**
+                 * @description Het veld value moet minimaal 0 zijn.
+                 * @example 77
+                 */
+                value_max?: number;
+                /**
+                 * @description Het veld value mag niet meer dan 64 tekens bevatten.
+                 * @example [
+                 *       "i"
+                 *     ]
+                 */
+                type?: string[];
+                /**
+                 * @example [
+                 *       "architecto"
+                 *     ]
+                 */
+                priority?: string[];
+                /**
+                 * @example [
+                 *       "architecto"
+                 *     ]
+                 */
+                team_id?: string[];
+                /**
+                 * @example [
+                 *       "outbound"
+                 *     ]
+                 */
+                direction?: ("inbound" | "outbound")[];
+                /** @example true */
+                escalated?: boolean;
+                /**
+                 * @description Het veld value moet een geldige UUID zijn.
+                 * @example [
+                 *       "a4855dc5-0acb-33c3-b921-f4291f719ca0"
+                 *     ]
+                 */
+                customer_ids?: string[];
+                /**
+                 * @example [
+                 *       "funnel"
+                 *     ]
+                 */
+                origin?: ("funnel" | "direct")[];
+                /**
+                 * @description Het veld value mag niet meer dan 64 tekens bevatten.
+                 * @example [
+                 *       "z"
+                 *     ]
+                 */
+                stop_reason?: string[];
                 /** @example false */
                 stale?: boolean;
                 /** @example architecto */
@@ -45073,7 +45306,7 @@ export interface operations {
                 branch?: string;
                 /**
                  * @description Het veld value is geen geldige datum.
-                 * @example 2026-08-25T07:40:28
+                 * @example 2026-08-25T10:13:48
                  */
                 date?: string;
                 /** @example week */
@@ -45106,11 +45339,11 @@ export interface operations {
     getReportsApplicationsDrill: {
         parameters: {
             query?: {
-                /** @example day */
+                /** @example month */
                 period?: "day" | "week" | "month";
                 /**
                  * @description Het veld value is geen geldige datum.
-                 * @example 2026-08-25T07:40:28
+                 * @example 2026-08-25T10:13:48
                  */
                 from?: string;
                 /**
@@ -45122,7 +45355,7 @@ export interface operations {
                 stage?: string;
                 /** @example architecto */
                 stage_duration?: string;
-                /** @example matched */
+                /** @example placed */
                 bucket?: "active" | "matched" | "rejected" | "placed" | "day" | "week";
                 /**
                  * @description Het veld value mag niet meer dan 64 tekens bevatten.
@@ -45137,7 +45370,7 @@ export interface operations {
                 vacancy?: string;
                 /**
                  * @description Het veld value is geen geldige datum.
-                 * @example 2026-08-25T07:40:28
+                 * @example 2026-08-25T10:13:48
                  */
                 date?: string;
                 /**
@@ -45251,7 +45484,7 @@ export interface operations {
                 customer_ids?: string[];
                 /**
                  * @example [
-                 *       "direct"
+                 *       "funnel"
                  *     ]
                  */
                 origin?: ("funnel" | "direct")[];
@@ -45285,11 +45518,11 @@ export interface operations {
     getReportsCustomersDrill: {
         parameters: {
             query?: {
-                /** @example day */
+                /** @example month */
                 period?: "day" | "week" | "month";
                 /**
                  * @description Het veld value is geen geldige datum.
-                 * @example 2026-08-25T07:40:28
+                 * @example 2026-08-25T10:13:48
                  */
                 from?: string;
                 /**
@@ -45443,7 +45676,7 @@ export interface operations {
                 branch?: string;
                 /**
                  * @description This field is required when none of <code>status</code>, <code>phase</code>, <code>industry</code>, <code>owner</code>, and <code>branch</code> are present. Het veld value is geen geldige datum.
-                 * @example 2026-08-25T07:40:28
+                 * @example 2026-08-25T10:13:48
                  */
                 date?: string;
                 /** @example week */
@@ -45471,7 +45704,7 @@ export interface operations {
     getReportsCustomersKpiDrill: {
         parameters: {
             query: {
-                /** @example customers_without_vacancies */
+                /** @example contract_ending */
                 kpi: "contract_ending" | "no_contact" | "task_overdue" | "price_agreement_ending" | "vacancy_stale" | "departments_without_placement" | "customers_without_vacancies" | "customers_without_applications" | "matches_stopped_early";
             };
             header?: never;
@@ -45496,11 +45729,11 @@ export interface operations {
     getReportsOpportunitiesDrill: {
         parameters: {
             query?: {
-                /** @example day */
+                /** @example month */
                 period?: "day" | "week" | "month";
                 /**
                  * @description Het veld value is geen geldige datum.
-                 * @example 2026-08-25T07:40:28
+                 * @example 2026-08-25T10:13:48
                  */
                 from?: string;
                 /**
@@ -45618,11 +45851,11 @@ export interface operations {
                 team_id?: string[];
                 /**
                  * @example [
-                 *       "inbound"
+                 *       "outbound"
                  *     ]
                  */
                 direction?: ("inbound" | "outbound")[];
-                /** @example true */
+                /** @example false */
                 escalated?: boolean;
                 /**
                  * @description Het veld value moet een geldige UUID zijn.
@@ -45633,7 +45866,7 @@ export interface operations {
                 customer_ids?: string[];
                 /**
                  * @example [
-                 *       "direct"
+                 *       "funnel"
                  *     ]
                  */
                 origin?: ("funnel" | "direct")[];
@@ -45661,10 +45894,10 @@ export interface operations {
                 branch?: string;
                 /**
                  * @description This field is required when none of <code>stage</code>, <code>customer</code>, <code>owner</code>, and <code>branch</code> are present. Het veld value is geen geldige datum.
-                 * @example 2026-08-25T07:40:28
+                 * @example 2026-08-25T10:13:48
                  */
                 date?: string;
-                /** @example day */
+                /** @example week */
                 bucket?: "day" | "week";
             };
             header?: never;
@@ -45689,11 +45922,11 @@ export interface operations {
     getReportsOpportunitiesKpisDrill: {
         parameters: {
             query: {
-                /** @example week */
+                /** @example month */
                 period?: "day" | "week" | "month";
                 /**
                  * @description Het veld value is geen geldige datum.
-                 * @example 2026-08-25T07:40:28
+                 * @example 2026-08-25T10:13:48
                  */
                 from?: string;
                 /**
@@ -45701,7 +45934,7 @@ export interface operations {
                  * @example 2052-09-17
                  */
                 to?: string;
-                /** @example open */
+                /** @example stale */
                 kpi: "total" | "open" | "won" | "lost" | "win_rate" | "open_value" | "stale" | "closing_soon" | "untouched" | "overdue" | "forecast_count" | "forecast_value";
                 /**
                  * @example [
@@ -45813,11 +46046,11 @@ export interface operations {
                 team_id?: string[];
                 /**
                  * @example [
-                 *       "inbound"
+                 *       "outbound"
                  *     ]
                  */
                 direction?: ("inbound" | "outbound")[];
-                /** @example false */
+                /** @example true */
                 escalated?: boolean;
                 /**
                  * @description Het veld value moet een geldige UUID zijn.
@@ -45828,7 +46061,7 @@ export interface operations {
                 customer_ids?: string[];
                 /**
                  * @example [
-                 *       "funnel"
+                 *       "direct"
                  *     ]
                  */
                 origin?: ("funnel" | "direct")[];
@@ -45866,7 +46099,7 @@ export interface operations {
                 period?: "day" | "week" | "month";
                 /**
                  * @description Het veld value is geen geldige datum.
-                 * @example 2026-08-25T07:40:28
+                 * @example 2026-08-25T10:13:48
                  */
                 from?: string;
                 /**
@@ -45957,11 +46190,11 @@ export interface operations {
                 team_id?: string[];
                 /**
                  * @example [
-                 *       "inbound"
+                 *       "outbound"
                  *     ]
                  */
                 direction?: ("inbound" | "outbound")[];
-                /** @example true */
+                /** @example false */
                 escalated?: boolean;
                 /**
                  * @description Het veld value moet een geldige UUID zijn.
@@ -45972,7 +46205,7 @@ export interface operations {
                 customer_ids?: string[];
                 /**
                  * @example [
-                 *       "funnel"
+                 *       "direct"
                  *     ]
                  */
                 origin?: ("funnel" | "direct")[];
@@ -46015,7 +46248,7 @@ export interface operations {
                 branch?: string;
                 /**
                  * @description This field is required when none of <code>status</code>, <code>type</code>, <code>priority</code>, <code>assignee</code>, <code>team</code>, and <code>branch</code> are present. Het veld value is geen geldige datum.
-                 * @example 2026-08-25T07:40:28
+                 * @example 2026-08-25T10:13:48
                  */
                 date?: string;
                 /** @example day */
@@ -46047,7 +46280,7 @@ export interface operations {
                 period?: "day" | "week" | "month";
                 /**
                  * @description Het veld value is geen geldige datum.
-                 * @example 2026-08-25T07:40:28
+                 * @example 2026-08-25T10:13:48
                  */
                 from?: string;
                 /**
@@ -46151,11 +46384,11 @@ export interface operations {
                 team_id?: string[];
                 /**
                  * @example [
-                 *       "inbound"
+                 *       "outbound"
                  *     ]
                  */
                 direction?: ("inbound" | "outbound")[];
-                /** @example true */
+                /** @example false */
                 escalated?: boolean;
                 /**
                  * @description Het veld value moet een geldige UUID zijn.
@@ -46166,7 +46399,7 @@ export interface operations {
                 customer_ids?: string[];
                 /**
                  * @example [
-                 *       "funnel"
+                 *       "direct"
                  *     ]
                  */
                 origin?: ("funnel" | "direct")[];
@@ -46204,10 +46437,10 @@ export interface operations {
                 channel?: string;
                 /**
                  * @description This field is required when none of <code>status</code>, <code>outcome</code>, <code>campaign</code>, <code>assignee</code>, and <code>channel</code> are present. Het veld value is geen geldige datum.
-                 * @example 2026-08-25T07:40:28
+                 * @example 2026-08-25T10:13:48
                  */
                 date?: string;
-                /** @example day */
+                /** @example week */
                 bucket?: "day" | "week";
             };
             header?: never;
@@ -46236,7 +46469,7 @@ export interface operations {
                 period?: "day" | "week" | "month";
                 /**
                  * @description Het veld value is geen geldige datum.
-                 * @example 2026-08-25T07:40:28
+                 * @example 2026-08-25T10:13:48
                  */
                 from?: string;
                 /**
@@ -46276,12 +46509,12 @@ export interface operations {
                 contract_form?: string;
                 /**
                  * @description This field is required when none of <code>origin</code>, <code>contract_form</code>, <code>date</code>, and <code>stop_reason</code> are present.
-                 * @example active
+                 * @example sent
                  */
                 contract_status?: "none" | "sent" | "active" | "ended";
                 /**
                  * @description This field is required when none of <code>origin</code>, <code>contract_form</code>, <code>contract_status</code>, and <code>stop_reason</code> are present. Het veld value is geen geldige datum.
-                 * @example 2026-08-25T07:40:28
+                 * @example 2026-08-25T10:13:48
                  */
                 date?: string;
                 /**
@@ -46388,7 +46621,7 @@ export interface operations {
                 team_id?: string[];
                 /**
                  * @example [
-                 *       "inbound"
+                 *       "outbound"
                  *     ]
                  */
                 direction?: ("inbound" | "outbound")[];
@@ -46428,7 +46661,7 @@ export interface operations {
                 period?: "day" | "week" | "month";
                 /**
                  * @description Het veld value is geen geldige datum.
-                 * @example 2026-08-25T07:40:28
+                 * @example 2026-08-25T10:13:48
                  */
                 from?: string;
                 /**
@@ -46441,6 +46674,569 @@ export interface operations {
                  * @example n
                  */
                 function_title?: string;
+                /**
+                 * @example [
+                 *       "architecto"
+                 *     ]
+                 */
+                owner_id?: string[];
+                /**
+                 * @example [
+                 *       "architecto"
+                 *     ]
+                 */
+                location_id?: string[];
+                /**
+                 * @description Het veld value moet een geldige UUID zijn.
+                 * @example [
+                 *       "a4855dc5-0acb-33c3-b921-f4291f719ca0"
+                 *     ]
+                 */
+                customer_id?: string[];
+                /**
+                 * @description Het veld value mag niet meer dan 64 tekens bevatten.
+                 * @example [
+                 *       "z"
+                 *     ]
+                 */
+                source?: string[];
+                /**
+                 * @description Must match an existing stored value.
+                 * @example [
+                 *       "architecto"
+                 *     ]
+                 */
+                phase?: string[];
+                /**
+                 * @description Het veld value mag niet meer dan 120 tekens bevatten.
+                 * @example [
+                 *       "n"
+                 *     ]
+                 */
+                function?: string[];
+                /**
+                 * @description Het veld value mag niet meer dan 120 tekens bevatten.
+                 * @example [
+                 *       "g"
+                 *     ]
+                 */
+                industry?: string[];
+                /**
+                 * @example [
+                 *       "architecto"
+                 *     ]
+                 */
+                contract_form?: string[];
+                /**
+                 * @example [
+                 *       "architecto"
+                 *     ]
+                 */
+                stage?: string[];
+                /**
+                 * @example [
+                 *       "architecto"
+                 *     ]
+                 */
+                vacancy_id?: string[];
+                /**
+                 * @description Het veld value moet een geldige UUID zijn. Must match an existing stored value.
+                 * @example [
+                 *       "a4855dc5-0acb-33c3-b921-f4291f719ca0"
+                 *     ]
+                 */
+                rejection_reason?: string[];
+                /**
+                 * @description Het veld value moet minimaal 0 zijn.
+                 * @example 12
+                 */
+                value_min?: number;
+                /**
+                 * @description Het veld value moet minimaal 0 zijn.
+                 * @example 77
+                 */
+                value_max?: number;
+                /**
+                 * @description Het veld value mag niet meer dan 64 tekens bevatten.
+                 * @example [
+                 *       "i"
+                 *     ]
+                 */
+                type?: string[];
+                /**
+                 * @example [
+                 *       "architecto"
+                 *     ]
+                 */
+                priority?: string[];
+                /**
+                 * @example [
+                 *       "architecto"
+                 *     ]
+                 */
+                team_id?: string[];
+                /**
+                 * @example [
+                 *       "inbound"
+                 *     ]
+                 */
+                direction?: ("inbound" | "outbound")[];
+                /** @example true */
+                escalated?: boolean;
+                /**
+                 * @description Het veld value moet een geldige UUID zijn.
+                 * @example [
+                 *       "a4855dc5-0acb-33c3-b921-f4291f719ca0"
+                 *     ]
+                 */
+                customer_ids?: string[];
+                /**
+                 * @example [
+                 *       "direct"
+                 *     ]
+                 */
+                origin?: ("funnel" | "direct")[];
+                /**
+                 * @description Het veld value mag niet meer dan 64 tekens bevatten.
+                 * @example [
+                 *       "z"
+                 *     ]
+                 */
+                stop_reason?: string[];
+                /**
+                 * @description This field is required when none of <code>customer</code>, <code>function</code>, <code>industry</code>, <code>owner</code>, <code>branch</code>, <code>date</code>, <code>vacancy</code>, <code>stale_online</code>, <code>zero_applications</code>, and <code>closing_soon</code> are present.
+                 * @example architecto
+                 */
+                status?: string;
+                /**
+                 * @description This field is required when none of <code>status</code>, <code>function</code>, <code>industry</code>, <code>owner</code>, <code>branch</code>, <code>date</code>, <code>vacancy</code>, <code>stale_online</code>, <code>zero_applications</code>, and <code>closing_soon</code> are present.
+                 * @example architecto
+                 */
+                customer?: string;
+                /**
+                 * @description This field is required when none of <code>status</code>, <code>customer</code>, <code>function</code>, <code>industry</code>, <code>branch</code>, <code>date</code>, <code>vacancy</code>, <code>stale_online</code>, <code>zero_applications</code>, and <code>closing_soon</code> are present.
+                 * @example architecto
+                 */
+                owner?: string;
+                /**
+                 * @description This field is required when none of <code>status</code>, <code>customer</code>, <code>function</code>, <code>industry</code>, <code>owner</code>, <code>date</code>, <code>vacancy</code>, <code>stale_online</code>, <code>zero_applications</code>, and <code>closing_soon</code> are present.
+                 * @example architecto
+                 */
+                branch?: string;
+                /**
+                 * @description This field is required when none of <code>status</code>, <code>customer</code>, <code>function</code>, <code>industry</code>, <code>owner</code>, <code>branch</code>, <code>vacancy</code>, <code>stale_online</code>, <code>zero_applications</code>, and <code>closing_soon</code> are present. Het veld value is geen geldige datum.
+                 * @example 2026-08-25T10:13:48
+                 */
+                date?: string;
+                /**
+                 * @description This field is required when none of <code>status</code>, <code>customer</code>, <code>function</code>, <code>industry</code>, <code>owner</code>, <code>branch</code>, <code>date</code>, <code>stale_online</code>, <code>zero_applications</code>, and <code>closing_soon</code> are present. Het veld value moet een geldige UUID zijn. Must match an existing stored value.
+                 * @example a4855dc5-0acb-33c3-b921-f4291f719ca0
+                 */
+                vacancy?: string;
+                /**
+                 * @description This field is required when none of <code>status</code>, <code>customer</code>, <code>function</code>, <code>industry</code>, <code>owner</code>, <code>branch</code>, <code>date</code>, <code>vacancy</code>, <code>zero_applications</code>, and <code>closing_soon</code> are present.
+                 * @example true
+                 */
+                stale_online?: boolean;
+                /**
+                 * @description This field is required when none of <code>status</code>, <code>customer</code>, <code>function</code>, <code>industry</code>, <code>owner</code>, <code>branch</code>, <code>date</code>, <code>vacancy</code>, <code>stale_online</code>, and <code>closing_soon</code> are present.
+                 * @example false
+                 */
+                zero_applications?: boolean;
+                /**
+                 * @description This field is required when none of <code>status</code>, <code>customer</code>, <code>function</code>, <code>industry</code>, <code>owner</code>, <code>branch</code>, <code>date</code>, <code>vacancy</code>, <code>stale_online</code>, and <code>zero_applications</code> are present.
+                 * @example true
+                 */
+                closing_soon?: boolean;
+                /** @example day */
+                bucket?: "day" | "week";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getReportsCandidatesAdvice: {
+        parameters: {
+            query?: {
+                /** @example month */
+                period?: "day" | "week" | "month";
+                /**
+                 * @description Het veld value is geen geldige datum.
+                 * @example 2026-08-25T10:13:48
+                 */
+                from?: string;
+                /**
+                 * @description Het veld value is geen geldige datum. Het veld value moet een datum na of gelijk aan <code>from</code> zijn.
+                 * @example 2052-09-17
+                 */
+                to?: string;
+                /**
+                 * @example [
+                 *       "architecto"
+                 *     ]
+                 */
+                owner_id?: string[];
+                /**
+                 * @example [
+                 *       "architecto"
+                 *     ]
+                 */
+                location_id?: string[];
+                /**
+                 * @description Het veld value mag niet meer dan 120 tekens bevatten.
+                 * @example [
+                 *       "n"
+                 *     ]
+                 */
+                function?: string[];
+                /**
+                 * @description Het veld value mag niet meer dan 120 tekens bevatten.
+                 * @example [
+                 *       "g"
+                 *     ]
+                 */
+                industry?: string[];
+                /**
+                 * @example [
+                 *       "architecto"
+                 *     ]
+                 */
+                contract_form?: string[];
+                /**
+                 * @example [
+                 *       "architecto"
+                 *     ]
+                 */
+                stage?: string[];
+                /**
+                 * @example [
+                 *       "architecto"
+                 *     ]
+                 */
+                vacancy_id?: string[];
+                /**
+                 * @description Het veld value moet een geldige UUID zijn. Must match an existing stored value.
+                 * @example [
+                 *       "a4855dc5-0acb-33c3-b921-f4291f719ca0"
+                 *     ]
+                 */
+                rejection_reason?: string[];
+                /**
+                 * @description Het veld value moet minimaal 0 zijn.
+                 * @example 12
+                 */
+                value_min?: number;
+                /**
+                 * @description Het veld value moet minimaal 0 zijn.
+                 * @example 77
+                 */
+                value_max?: number;
+                /**
+                 * @description Het veld value mag niet meer dan 64 tekens bevatten.
+                 * @example [
+                 *       "i"
+                 *     ]
+                 */
+                type?: string[];
+                /**
+                 * @example [
+                 *       "architecto"
+                 *     ]
+                 */
+                priority?: string[];
+                /**
+                 * @example [
+                 *       "architecto"
+                 *     ]
+                 */
+                team_id?: string[];
+                /**
+                 * @example [
+                 *       "outbound"
+                 *     ]
+                 */
+                direction?: ("inbound" | "outbound")[];
+                /** @example false */
+                escalated?: boolean;
+                /**
+                 * @description Het veld value moet een geldige UUID zijn.
+                 * @example [
+                 *       "a4855dc5-0acb-33c3-b921-f4291f719ca0"
+                 *     ]
+                 */
+                customer_ids?: string[];
+                /**
+                 * @example [
+                 *       "direct"
+                 *     ]
+                 */
+                origin?: ("funnel" | "direct")[];
+                /**
+                 * @description Het veld value mag niet meer dan 64 tekens bevatten.
+                 * @example [
+                 *       "z"
+                 *     ]
+                 */
+                stop_reason?: string[];
+                /**
+                 * @description This field is required when none of <code>phase</code>, <code>source</code>, <code>owner</code>, <code>branch</code>, and <code>date</code> are present. Must match an existing stored value.
+                 * @example architecto
+                 */
+                status?: string;
+                /**
+                 * @description This field is required when none of <code>status</code>, <code>source</code>, <code>owner</code>, <code>branch</code>, and <code>date</code> are present. Must match an existing stored value.
+                 * @example architecto
+                 */
+                phase?: string;
+                /**
+                 * @description This field is required when none of <code>status</code>, <code>phase</code>, <code>owner</code>, <code>branch</code>, and <code>date</code> are present. Het veld value mag niet meer dan 64 tekens bevatten.
+                 * @example n
+                 */
+                source?: string;
+                /**
+                 * @description This field is required when none of <code>status</code>, <code>phase</code>, <code>source</code>, <code>branch</code>, and <code>date</code> are present.
+                 * @example architecto
+                 */
+                owner?: string;
+                /**
+                 * @description This field is required when none of <code>status</code>, <code>phase</code>, <code>source</code>, <code>owner</code>, and <code>date</code> are present.
+                 * @example architecto
+                 */
+                branch?: string;
+                /**
+                 * @description This field is required when none of <code>status</code>, <code>phase</code>, <code>source</code>, <code>owner</code>, and <code>branch</code> are present. Het veld value is geen geldige datum.
+                 * @example 2026-08-25T10:13:48
+                 */
+                date?: string;
+                /** @example day */
+                bucket?: "day" | "week";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getReportsApplicationsAdvice: {
+        parameters: {
+            query?: {
+                /** @example week */
+                period?: "day" | "week" | "month";
+                /**
+                 * @description Het veld value is geen geldige datum.
+                 * @example 2026-08-25T10:13:48
+                 */
+                from?: string;
+                /**
+                 * @description Het veld value is geen geldige datum. Het veld value moet een datum na of gelijk aan <code>from</code> zijn.
+                 * @example 2052-09-17
+                 */
+                to?: string;
+                /** @example architecto */
+                stage?: string;
+                /** @example active */
+                bucket?: "active" | "matched" | "rejected" | "placed" | "day" | "week";
+                /**
+                 * @description Het veld value mag niet meer dan 64 tekens bevatten.
+                 * @example n
+                 */
+                source?: string;
+                /** @example architecto */
+                owner?: string;
+                /** @example architecto */
+                customer?: string;
+                /** @example architecto */
+                vacancy?: string;
+                /**
+                 * @description Het veld value is geen geldige datum.
+                 * @example 2026-08-25T10:13:48
+                 */
+                date?: string;
+                /**
+                 * @example [
+                 *       "architecto"
+                 *     ]
+                 */
+                owner_id?: string[];
+                /**
+                 * @example [
+                 *       "architecto"
+                 *     ]
+                 */
+                location_id?: string[];
+                /**
+                 * @example [
+                 *       "architecto"
+                 *     ]
+                 */
+                status?: string[];
+                /**
+                 * @description Het veld value moet een geldige UUID zijn.
+                 * @example [
+                 *       "a4855dc5-0acb-33c3-b921-f4291f719ca0"
+                 *     ]
+                 */
+                customer_id?: string[];
+                /**
+                 * @description Must match an existing stored value.
+                 * @example [
+                 *       "architecto"
+                 *     ]
+                 */
+                phase?: string[];
+                /**
+                 * @description Het veld value mag niet meer dan 120 tekens bevatten.
+                 * @example [
+                 *       "n"
+                 *     ]
+                 */
+                function?: string[];
+                /**
+                 * @description Het veld value mag niet meer dan 120 tekens bevatten.
+                 * @example [
+                 *       "g"
+                 *     ]
+                 */
+                industry?: string[];
+                /**
+                 * @example [
+                 *       "architecto"
+                 *     ]
+                 */
+                contract_form?: string[];
+                /**
+                 * @example [
+                 *       "architecto"
+                 *     ]
+                 */
+                vacancy_id?: string[];
+                /**
+                 * @description Het veld value moet een geldige UUID zijn. Must match an existing stored value.
+                 * @example [
+                 *       "a4855dc5-0acb-33c3-b921-f4291f719ca0"
+                 *     ]
+                 */
+                rejection_reason?: string[];
+                /**
+                 * @description Het veld value moet minimaal 0 zijn.
+                 * @example 12
+                 */
+                value_min?: number;
+                /**
+                 * @description Het veld value moet minimaal 0 zijn.
+                 * @example 77
+                 */
+                value_max?: number;
+                /**
+                 * @description Het veld value mag niet meer dan 64 tekens bevatten.
+                 * @example [
+                 *       "i"
+                 *     ]
+                 */
+                type?: string[];
+                /**
+                 * @example [
+                 *       "architecto"
+                 *     ]
+                 */
+                priority?: string[];
+                /**
+                 * @example [
+                 *       "architecto"
+                 *     ]
+                 */
+                team_id?: string[];
+                /**
+                 * @example [
+                 *       "inbound"
+                 *     ]
+                 */
+                direction?: ("inbound" | "outbound")[];
+                /** @example false */
+                escalated?: boolean;
+                /**
+                 * @description Het veld value moet een geldige UUID zijn.
+                 * @example [
+                 *       "a4855dc5-0acb-33c3-b921-f4291f719ca0"
+                 *     ]
+                 */
+                customer_ids?: string[];
+                /**
+                 * @example [
+                 *       "funnel"
+                 *     ]
+                 */
+                origin?: ("funnel" | "direct")[];
+                /**
+                 * @description Het veld value mag niet meer dan 64 tekens bevatten.
+                 * @example [
+                 *       "z"
+                 *     ]
+                 */
+                stop_reason?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getReportsCustomersAdvice: {
+        parameters: {
+            query?: {
+                /** @example month */
+                period?: "day" | "week" | "month";
+                /**
+                 * @description Het veld value is geen geldige datum.
+                 * @example 2026-08-25T10:13:49
+                 */
+                from?: string;
+                /**
+                 * @description Het veld value is geen geldige datum. Het veld value moet een datum na of gelijk aan <code>from</code> zijn.
+                 * @example 2052-09-17
+                 */
+                to?: string;
                 /**
                  * @example [
                  *       "architecto"
@@ -46559,569 +47355,6 @@ export interface operations {
                 customer_ids?: string[];
                 /**
                  * @example [
-                 *       "direct"
-                 *     ]
-                 */
-                origin?: ("funnel" | "direct")[];
-                /**
-                 * @description Het veld value mag niet meer dan 64 tekens bevatten.
-                 * @example [
-                 *       "z"
-                 *     ]
-                 */
-                stop_reason?: string[];
-                /**
-                 * @description This field is required when none of <code>customer</code>, <code>function</code>, <code>industry</code>, <code>owner</code>, <code>branch</code>, <code>date</code>, <code>vacancy</code>, <code>stale_online</code>, <code>zero_applications</code>, and <code>closing_soon</code> are present.
-                 * @example architecto
-                 */
-                status?: string;
-                /**
-                 * @description This field is required when none of <code>status</code>, <code>function</code>, <code>industry</code>, <code>owner</code>, <code>branch</code>, <code>date</code>, <code>vacancy</code>, <code>stale_online</code>, <code>zero_applications</code>, and <code>closing_soon</code> are present.
-                 * @example architecto
-                 */
-                customer?: string;
-                /**
-                 * @description This field is required when none of <code>status</code>, <code>customer</code>, <code>function</code>, <code>industry</code>, <code>branch</code>, <code>date</code>, <code>vacancy</code>, <code>stale_online</code>, <code>zero_applications</code>, and <code>closing_soon</code> are present.
-                 * @example architecto
-                 */
-                owner?: string;
-                /**
-                 * @description This field is required when none of <code>status</code>, <code>customer</code>, <code>function</code>, <code>industry</code>, <code>owner</code>, <code>date</code>, <code>vacancy</code>, <code>stale_online</code>, <code>zero_applications</code>, and <code>closing_soon</code> are present.
-                 * @example architecto
-                 */
-                branch?: string;
-                /**
-                 * @description This field is required when none of <code>status</code>, <code>customer</code>, <code>function</code>, <code>industry</code>, <code>owner</code>, <code>branch</code>, <code>vacancy</code>, <code>stale_online</code>, <code>zero_applications</code>, and <code>closing_soon</code> are present. Het veld value is geen geldige datum.
-                 * @example 2026-08-25T07:40:28
-                 */
-                date?: string;
-                /**
-                 * @description This field is required when none of <code>status</code>, <code>customer</code>, <code>function</code>, <code>industry</code>, <code>owner</code>, <code>branch</code>, <code>date</code>, <code>stale_online</code>, <code>zero_applications</code>, and <code>closing_soon</code> are present. Het veld value moet een geldige UUID zijn. Must match an existing stored value.
-                 * @example a4855dc5-0acb-33c3-b921-f4291f719ca0
-                 */
-                vacancy?: string;
-                /**
-                 * @description This field is required when none of <code>status</code>, <code>customer</code>, <code>function</code>, <code>industry</code>, <code>owner</code>, <code>branch</code>, <code>date</code>, <code>vacancy</code>, <code>zero_applications</code>, and <code>closing_soon</code> are present.
-                 * @example false
-                 */
-                stale_online?: boolean;
-                /**
-                 * @description This field is required when none of <code>status</code>, <code>customer</code>, <code>function</code>, <code>industry</code>, <code>owner</code>, <code>branch</code>, <code>date</code>, <code>vacancy</code>, <code>stale_online</code>, and <code>closing_soon</code> are present.
-                 * @example false
-                 */
-                zero_applications?: boolean;
-                /**
-                 * @description This field is required when none of <code>status</code>, <code>customer</code>, <code>function</code>, <code>industry</code>, <code>owner</code>, <code>branch</code>, <code>date</code>, <code>vacancy</code>, <code>stale_online</code>, and <code>zero_applications</code> are present.
-                 * @example false
-                 */
-                closing_soon?: boolean;
-                /** @example day */
-                bucket?: "day" | "week";
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    getReportsCandidatesAdvice: {
-        parameters: {
-            query?: {
-                /** @example day */
-                period?: "day" | "week" | "month";
-                /**
-                 * @description Het veld value is geen geldige datum.
-                 * @example 2026-08-25T07:40:28
-                 */
-                from?: string;
-                /**
-                 * @description Het veld value is geen geldige datum. Het veld value moet een datum na of gelijk aan <code>from</code> zijn.
-                 * @example 2052-09-17
-                 */
-                to?: string;
-                /**
-                 * @example [
-                 *       "architecto"
-                 *     ]
-                 */
-                owner_id?: string[];
-                /**
-                 * @example [
-                 *       "architecto"
-                 *     ]
-                 */
-                location_id?: string[];
-                /**
-                 * @description Het veld value mag niet meer dan 120 tekens bevatten.
-                 * @example [
-                 *       "n"
-                 *     ]
-                 */
-                function?: string[];
-                /**
-                 * @description Het veld value mag niet meer dan 120 tekens bevatten.
-                 * @example [
-                 *       "g"
-                 *     ]
-                 */
-                industry?: string[];
-                /**
-                 * @example [
-                 *       "architecto"
-                 *     ]
-                 */
-                contract_form?: string[];
-                /**
-                 * @example [
-                 *       "architecto"
-                 *     ]
-                 */
-                stage?: string[];
-                /**
-                 * @example [
-                 *       "architecto"
-                 *     ]
-                 */
-                vacancy_id?: string[];
-                /**
-                 * @description Het veld value moet een geldige UUID zijn. Must match an existing stored value.
-                 * @example [
-                 *       "a4855dc5-0acb-33c3-b921-f4291f719ca0"
-                 *     ]
-                 */
-                rejection_reason?: string[];
-                /**
-                 * @description Het veld value moet minimaal 0 zijn.
-                 * @example 12
-                 */
-                value_min?: number;
-                /**
-                 * @description Het veld value moet minimaal 0 zijn.
-                 * @example 77
-                 */
-                value_max?: number;
-                /**
-                 * @description Het veld value mag niet meer dan 64 tekens bevatten.
-                 * @example [
-                 *       "i"
-                 *     ]
-                 */
-                type?: string[];
-                /**
-                 * @example [
-                 *       "architecto"
-                 *     ]
-                 */
-                priority?: string[];
-                /**
-                 * @example [
-                 *       "architecto"
-                 *     ]
-                 */
-                team_id?: string[];
-                /**
-                 * @example [
-                 *       "inbound"
-                 *     ]
-                 */
-                direction?: ("inbound" | "outbound")[];
-                /** @example true */
-                escalated?: boolean;
-                /**
-                 * @description Het veld value moet een geldige UUID zijn.
-                 * @example [
-                 *       "a4855dc5-0acb-33c3-b921-f4291f719ca0"
-                 *     ]
-                 */
-                customer_ids?: string[];
-                /**
-                 * @example [
-                 *       "direct"
-                 *     ]
-                 */
-                origin?: ("funnel" | "direct")[];
-                /**
-                 * @description Het veld value mag niet meer dan 64 tekens bevatten.
-                 * @example [
-                 *       "z"
-                 *     ]
-                 */
-                stop_reason?: string[];
-                /**
-                 * @description This field is required when none of <code>phase</code>, <code>source</code>, <code>owner</code>, <code>branch</code>, and <code>date</code> are present. Must match an existing stored value.
-                 * @example architecto
-                 */
-                status?: string;
-                /**
-                 * @description This field is required when none of <code>status</code>, <code>source</code>, <code>owner</code>, <code>branch</code>, and <code>date</code> are present. Must match an existing stored value.
-                 * @example architecto
-                 */
-                phase?: string;
-                /**
-                 * @description This field is required when none of <code>status</code>, <code>phase</code>, <code>owner</code>, <code>branch</code>, and <code>date</code> are present. Het veld value mag niet meer dan 64 tekens bevatten.
-                 * @example n
-                 */
-                source?: string;
-                /**
-                 * @description This field is required when none of <code>status</code>, <code>phase</code>, <code>source</code>, <code>branch</code>, and <code>date</code> are present.
-                 * @example architecto
-                 */
-                owner?: string;
-                /**
-                 * @description This field is required when none of <code>status</code>, <code>phase</code>, <code>source</code>, <code>owner</code>, and <code>date</code> are present.
-                 * @example architecto
-                 */
-                branch?: string;
-                /**
-                 * @description This field is required when none of <code>status</code>, <code>phase</code>, <code>source</code>, <code>owner</code>, and <code>branch</code> are present. Het veld value is geen geldige datum.
-                 * @example 2026-08-25T07:40:28
-                 */
-                date?: string;
-                /** @example day */
-                bucket?: "day" | "week";
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    getReportsApplicationsAdvice: {
-        parameters: {
-            query?: {
-                /** @example week */
-                period?: "day" | "week" | "month";
-                /**
-                 * @description Het veld value is geen geldige datum.
-                 * @example 2026-08-25T07:40:28
-                 */
-                from?: string;
-                /**
-                 * @description Het veld value is geen geldige datum. Het veld value moet een datum na of gelijk aan <code>from</code> zijn.
-                 * @example 2052-09-17
-                 */
-                to?: string;
-                /** @example architecto */
-                stage?: string;
-                /** @example rejected */
-                bucket?: "active" | "matched" | "rejected" | "placed" | "day" | "week";
-                /**
-                 * @description Het veld value mag niet meer dan 64 tekens bevatten.
-                 * @example n
-                 */
-                source?: string;
-                /** @example architecto */
-                owner?: string;
-                /** @example architecto */
-                customer?: string;
-                /** @example architecto */
-                vacancy?: string;
-                /**
-                 * @description Het veld value is geen geldige datum.
-                 * @example 2026-08-25T07:40:28
-                 */
-                date?: string;
-                /**
-                 * @example [
-                 *       "architecto"
-                 *     ]
-                 */
-                owner_id?: string[];
-                /**
-                 * @example [
-                 *       "architecto"
-                 *     ]
-                 */
-                location_id?: string[];
-                /**
-                 * @example [
-                 *       "architecto"
-                 *     ]
-                 */
-                status?: string[];
-                /**
-                 * @description Het veld value moet een geldige UUID zijn.
-                 * @example [
-                 *       "a4855dc5-0acb-33c3-b921-f4291f719ca0"
-                 *     ]
-                 */
-                customer_id?: string[];
-                /**
-                 * @description Must match an existing stored value.
-                 * @example [
-                 *       "architecto"
-                 *     ]
-                 */
-                phase?: string[];
-                /**
-                 * @description Het veld value mag niet meer dan 120 tekens bevatten.
-                 * @example [
-                 *       "n"
-                 *     ]
-                 */
-                function?: string[];
-                /**
-                 * @description Het veld value mag niet meer dan 120 tekens bevatten.
-                 * @example [
-                 *       "g"
-                 *     ]
-                 */
-                industry?: string[];
-                /**
-                 * @example [
-                 *       "architecto"
-                 *     ]
-                 */
-                contract_form?: string[];
-                /**
-                 * @example [
-                 *       "architecto"
-                 *     ]
-                 */
-                vacancy_id?: string[];
-                /**
-                 * @description Het veld value moet een geldige UUID zijn. Must match an existing stored value.
-                 * @example [
-                 *       "a4855dc5-0acb-33c3-b921-f4291f719ca0"
-                 *     ]
-                 */
-                rejection_reason?: string[];
-                /**
-                 * @description Het veld value moet minimaal 0 zijn.
-                 * @example 12
-                 */
-                value_min?: number;
-                /**
-                 * @description Het veld value moet minimaal 0 zijn.
-                 * @example 77
-                 */
-                value_max?: number;
-                /**
-                 * @description Het veld value mag niet meer dan 64 tekens bevatten.
-                 * @example [
-                 *       "i"
-                 *     ]
-                 */
-                type?: string[];
-                /**
-                 * @example [
-                 *       "architecto"
-                 *     ]
-                 */
-                priority?: string[];
-                /**
-                 * @example [
-                 *       "architecto"
-                 *     ]
-                 */
-                team_id?: string[];
-                /**
-                 * @example [
-                 *       "inbound"
-                 *     ]
-                 */
-                direction?: ("inbound" | "outbound")[];
-                /** @example false */
-                escalated?: boolean;
-                /**
-                 * @description Het veld value moet een geldige UUID zijn.
-                 * @example [
-                 *       "a4855dc5-0acb-33c3-b921-f4291f719ca0"
-                 *     ]
-                 */
-                customer_ids?: string[];
-                /**
-                 * @example [
-                 *       "direct"
-                 *     ]
-                 */
-                origin?: ("funnel" | "direct")[];
-                /**
-                 * @description Het veld value mag niet meer dan 64 tekens bevatten.
-                 * @example [
-                 *       "z"
-                 *     ]
-                 */
-                stop_reason?: string[];
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    getReportsCustomersAdvice: {
-        parameters: {
-            query?: {
-                /** @example week */
-                period?: "day" | "week" | "month";
-                /**
-                 * @description Het veld value is geen geldige datum.
-                 * @example 2026-08-25T07:40:28
-                 */
-                from?: string;
-                /**
-                 * @description Het veld value is geen geldige datum. Het veld value moet een datum na of gelijk aan <code>from</code> zijn.
-                 * @example 2052-09-17
-                 */
-                to?: string;
-                /**
-                 * @example [
-                 *       "architecto"
-                 *     ]
-                 */
-                owner_id?: string[];
-                /**
-                 * @example [
-                 *       "architecto"
-                 *     ]
-                 */
-                location_id?: string[];
-                /**
-                 * @description Het veld value moet een geldige UUID zijn.
-                 * @example [
-                 *       "a4855dc5-0acb-33c3-b921-f4291f719ca0"
-                 *     ]
-                 */
-                customer_id?: string[];
-                /**
-                 * @description Het veld value mag niet meer dan 64 tekens bevatten.
-                 * @example [
-                 *       "z"
-                 *     ]
-                 */
-                source?: string[];
-                /**
-                 * @description Must match an existing stored value.
-                 * @example [
-                 *       "architecto"
-                 *     ]
-                 */
-                phase?: string[];
-                /**
-                 * @description Het veld value mag niet meer dan 120 tekens bevatten.
-                 * @example [
-                 *       "n"
-                 *     ]
-                 */
-                function?: string[];
-                /**
-                 * @description Het veld value mag niet meer dan 120 tekens bevatten.
-                 * @example [
-                 *       "g"
-                 *     ]
-                 */
-                industry?: string[];
-                /**
-                 * @example [
-                 *       "architecto"
-                 *     ]
-                 */
-                contract_form?: string[];
-                /**
-                 * @example [
-                 *       "architecto"
-                 *     ]
-                 */
-                stage?: string[];
-                /**
-                 * @example [
-                 *       "architecto"
-                 *     ]
-                 */
-                vacancy_id?: string[];
-                /**
-                 * @description Het veld value moet een geldige UUID zijn. Must match an existing stored value.
-                 * @example [
-                 *       "a4855dc5-0acb-33c3-b921-f4291f719ca0"
-                 *     ]
-                 */
-                rejection_reason?: string[];
-                /**
-                 * @description Het veld value moet minimaal 0 zijn.
-                 * @example 12
-                 */
-                value_min?: number;
-                /**
-                 * @description Het veld value moet minimaal 0 zijn.
-                 * @example 77
-                 */
-                value_max?: number;
-                /**
-                 * @description Het veld value mag niet meer dan 64 tekens bevatten.
-                 * @example [
-                 *       "i"
-                 *     ]
-                 */
-                type?: string[];
-                /**
-                 * @example [
-                 *       "architecto"
-                 *     ]
-                 */
-                priority?: string[];
-                /**
-                 * @example [
-                 *       "architecto"
-                 *     ]
-                 */
-                team_id?: string[];
-                /**
-                 * @example [
-                 *       "inbound"
-                 *     ]
-                 */
-                direction?: ("inbound" | "outbound")[];
-                /** @example false */
-                escalated?: boolean;
-                /**
-                 * @description Het veld value moet een geldige UUID zijn.
-                 * @example [
-                 *       "a4855dc5-0acb-33c3-b921-f4291f719ca0"
-                 *     ]
-                 */
-                customer_ids?: string[];
-                /**
-                 * @example [
                  *       "funnel"
                  *     ]
                  */
@@ -47150,10 +47383,10 @@ export interface operations {
                 branch?: string;
                 /**
                  * @description This field is required when none of <code>status</code>, <code>phase</code>, <code>industry</code>, <code>owner</code>, and <code>branch</code> are present. Het veld value is geen geldige datum.
-                 * @example 2026-08-25T07:40:28
+                 * @example 2026-08-25T10:13:49
                  */
                 date?: string;
-                /** @example week */
+                /** @example day */
                 bucket?: "day" | "week";
             };
             header?: never;
@@ -47178,11 +47411,11 @@ export interface operations {
     getReportsOpportunitiesAdvice: {
         parameters: {
             query?: {
-                /** @example week */
+                /** @example month */
                 period?: "day" | "week" | "month";
                 /**
                  * @description Het veld value is geen geldige datum.
-                 * @example 2026-08-25T07:40:28
+                 * @example 2026-08-25T10:13:49
                  */
                 from?: string;
                 /**
@@ -47304,7 +47537,7 @@ export interface operations {
                  *     ]
                  */
                 direction?: ("inbound" | "outbound")[];
-                /** @example true */
+                /** @example false */
                 escalated?: boolean;
                 /**
                  * @description Het veld value moet een geldige UUID zijn.
@@ -47315,7 +47548,7 @@ export interface operations {
                 customer_ids?: string[];
                 /**
                  * @example [
-                 *       "funnel"
+                 *       "direct"
                  *     ]
                  */
                 origin?: ("funnel" | "direct")[];
@@ -47343,7 +47576,7 @@ export interface operations {
                 branch?: string;
                 /**
                  * @description This field is required when none of <code>stage</code>, <code>customer</code>, <code>owner</code>, and <code>branch</code> are present. Het veld value is geen geldige datum.
-                 * @example 2026-08-25T07:40:28
+                 * @example 2026-08-25T10:13:49
                  */
                 date?: string;
                 /** @example week */
@@ -47371,11 +47604,11 @@ export interface operations {
     getReportsTasksAdvice: {
         parameters: {
             query?: {
-                /** @example month */
+                /** @example week */
                 period?: "day" | "week" | "month";
                 /**
                  * @description Het veld value is geen geldige datum.
-                 * @example 2026-08-25T07:40:28
+                 * @example 2026-08-25T10:13:49
                  */
                 from?: string;
                 /**
@@ -47466,11 +47699,11 @@ export interface operations {
                 team_id?: string[];
                 /**
                  * @example [
-                 *       "inbound"
+                 *       "outbound"
                  *     ]
                  */
                 direction?: ("inbound" | "outbound")[];
-                /** @example true */
+                /** @example false */
                 escalated?: boolean;
                 /**
                  * @description Het veld value moet een geldige UUID zijn.
@@ -47481,7 +47714,7 @@ export interface operations {
                 customer_ids?: string[];
                 /**
                  * @example [
-                 *       "direct"
+                 *       "funnel"
                  *     ]
                  */
                 origin?: ("funnel" | "direct")[];
@@ -47524,7 +47757,7 @@ export interface operations {
                 branch?: string;
                 /**
                  * @description This field is required when none of <code>status</code>, <code>type</code>, <code>priority</code>, <code>assignee</code>, <code>team</code>, and <code>branch</code> are present. Het veld value is geen geldige datum.
-                 * @example 2026-08-25T07:40:28
+                 * @example 2026-08-25T10:13:49
                  */
                 date?: string;
                 /** @example day */
@@ -47552,11 +47785,11 @@ export interface operations {
     getReportsOutreachAdvice: {
         parameters: {
             query?: {
-                /** @example day */
+                /** @example month */
                 period?: "day" | "week" | "month";
                 /**
                  * @description Het veld value is geen geldige datum.
-                 * @example 2026-08-25T07:40:28
+                 * @example 2026-08-25T10:13:49
                  */
                 from?: string;
                 /**
@@ -47675,7 +47908,7 @@ export interface operations {
                 customer_ids?: string[];
                 /**
                  * @example [
-                 *       "direct"
+                 *       "funnel"
                  *     ]
                  */
                 origin?: ("funnel" | "direct")[];
@@ -47713,7 +47946,7 @@ export interface operations {
                 channel?: string;
                 /**
                  * @description This field is required when none of <code>status</code>, <code>outcome</code>, <code>campaign</code>, <code>assignee</code>, and <code>channel</code> are present. Het veld value is geen geldige datum.
-                 * @example 2026-08-25T07:40:28
+                 * @example 2026-08-25T10:13:49
                  */
                 date?: string;
                 /** @example day */
@@ -47830,56 +48063,6 @@ export interface operations {
                 };
                 content: {
                     "text/plain": string;
-                };
-            };
-        };
-    };
-    getFilesTenantLogoTenant: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @example architecto */
-                tenant: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Invalid signature. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    getFilesTenantBannerTenant: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @example architecto */
-                tenant: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Invalid signature. */
-                        message?: string;
-                    };
                 };
             };
         };
@@ -48012,100 +48195,6 @@ export interface operations {
                 };
             };
         };
-    };
-    getSettings: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    postSettings: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: {
-            content: {
-                "application/json": {
-                    /**
-                     * @description INVOICE-1 review (MED): billing_email is where Koios's monthly invoice
-                     *     for this tenant goes — a typo would silently kill delivery (the mail
-                     *     path is best-effort), so the format is validated at the boundary.
-                     *     Deliberately tenant-writable: it is THEIR receiving address, and the
-                     *     settings audit records who changed it (before/after). Het veld value is geen geldig e-mailadres. Het veld value mag niet meer dan 255 tekens bevatten.
-                     * @example gbailey@example.net
-                     */
-                    billing_email?: string | null;
-                    /**
-                     * @description TARIEF-ZIJDE-1: this key decides whether a match's per-function rate is
-                     *     money the reader may see. A typo must not silently land — the resolver
-                     *     fails safe to the guarded reading, but a stored garbage value would leave
-                     *     the settings screen showing something the system does not honour.
-                     * @example null
-                     */
-                    match_contract_line_rate_side?: string | null;
-                };
-            };
-        };
-        responses: never;
-    };
-    postSettingsLogo: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "multipart/form-data": {
-                    /**
-                     * Format: binary
-                     * @description Must be a file. Het bestand value mag niet groter zijn dan 2048 kilobytes.
-                     */
-                    logo: string;
-                };
-            };
-        };
-        responses: never;
-    };
-    postSettingsBanner: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "multipart/form-data": {
-                    /**
-                     * Format: binary
-                     * @description Must be a file. Het bestand value mag niet groter zijn dan 4096 kilobytes.
-                     */
-                    banner: string;
-                };
-            };
-        };
-        responses: never;
     };
     postSettingsEmailTest: {
         parameters: {
@@ -48381,13 +48470,13 @@ export interface operations {
                 "application/json": {
                     /**
                      * @example [
-                     *       true
+                     *       false
                      *     ]
                      */
                     contexts?: (boolean | null)[];
                     /**
                      * @example [
-                     *       true
+                     *       false
                      *     ]
                      */
                     popup?: (boolean | null)[];
@@ -48706,7 +48795,7 @@ export interface operations {
                      * @example 39
                      */
                     position?: number;
-                    /** @example true */
+                    /** @example false */
                     active?: boolean;
                 };
             };
@@ -49585,7 +49674,7 @@ export interface operations {
                      */
                     email: string;
                     /**
-                     * @example none
+                     * @example ssl
                      * @enum {string|null}
                      */
                     encryption?: "tls" | "ssl" | "none" | null;
@@ -49712,7 +49801,7 @@ export interface operations {
                     sort_order?: number;
                     /** @example true */
                     is_default?: boolean;
-                    /** @example true */
+                    /** @example false */
                     active?: boolean;
                 };
             };
@@ -49860,7 +49949,7 @@ export interface operations {
                     sort_order?: number;
                     /** @example true */
                     is_default?: boolean;
-                    /** @example true */
+                    /** @example false */
                     active?: boolean;
                 };
             };
@@ -49951,7 +50040,7 @@ export interface operations {
                     assignee_role_id?: number | null;
                     /**
                      * @description This field is required when <code>assignee_role_id</code> is present.
-                     * @example one
+                     * @example all
                      * @enum {string|null}
                      */
                     assignee_role_mode?: "all" | "one" | null;
@@ -49962,17 +50051,17 @@ export interface operations {
                     location_id?: string | null;
                     /**
                      * @description Het veld value is geen geldige datum.
-                     * @example 2026-08-25T07:40:27
+                     * @example 2026-08-25T10:13:48
                      */
                     start_date?: string | null;
                     /**
                      * @description Het veld value is geen geldige datum.
-                     * @example 2026-08-25T07:40:27
+                     * @example 2026-08-25T10:13:48
                      */
                     due_date?: string | null;
                     /**
                      * @description Must be a valid date in the format <code>H:i</code>.
-                     * @example 07:40
+                     * @example 10:13
                      */
                     due_time?: string | null;
                     /**
@@ -49990,7 +50079,7 @@ export interface operations {
                     /** @example null */
                     custom_fields?: Record<string, never> | null;
                     /**
-                     * @example fixed
+                     * @example after_complete
                      * @enum {string|null}
                      */
                     recurrence_mode?: "fixed" | "after_complete" | null;
@@ -50000,7 +50089,7 @@ export interface operations {
                      */
                     recurrence_config?: {
                         /**
-                         * @example weekly
+                         * @example yearly
                          * @enum {string|null}
                          */
                         frequency?: "daily" | "weekly" | "monthly" | "quarterly" | "yearly" | null;
@@ -50031,7 +50120,7 @@ export interface operations {
                     links?: {
                         /**
                          * @description This field is required when <code>links</code> is present.
-                         * @example department
+                         * @example match
                          * @enum {string}
                          */
                         type?: "candidate" | "application" | "vacancy" | "match" | "customer" | "opportunity" | "location" | "customer_location" | "department" | "contact" | "workflow" | "outreach_campaign" | "conversation" | "task";
@@ -50162,17 +50251,17 @@ export interface operations {
                     location_id?: string | null;
                     /**
                      * @description Het veld value is geen geldige datum.
-                     * @example 2026-08-25T07:40:27
+                     * @example 2026-08-25T10:13:48
                      */
                     start_date?: string | null;
                     /**
                      * @description Het veld value is geen geldige datum.
-                     * @example 2026-08-25T07:40:27
+                     * @example 2026-08-25T10:13:48
                      */
                     due_date?: string | null;
                     /**
                      * @description Must be a valid date in the format <code>H:i</code>.
-                     * @example 07:40
+                     * @example 10:13
                      */
                     due_time?: string | null;
                     /**
@@ -50193,7 +50282,7 @@ export interface operations {
                     links?: {
                         /**
                          * @description This field is required when <code>links</code> is present.
-                         * @example department
+                         * @example task
                          * @enum {string}
                          */
                         type?: "candidate" | "application" | "vacancy" | "match" | "customer" | "opportunity" | "location" | "customer_location" | "department" | "contact" | "workflow" | "outreach_campaign" | "conversation" | "task";
@@ -50204,14 +50293,14 @@ export interface operations {
                         id?: string;
                     }[];
                     /**
-                     * @example fixed
+                     * @example after_complete
                      * @enum {string|null}
                      */
                     recurrence_mode?: "fixed" | "after_complete" | null;
                     /** @example null */
                     recurrence_config?: {
                         /**
-                         * @example monthly
+                         * @example daily
                          * @enum {string|null}
                          */
                         frequency?: "daily" | "weekly" | "monthly" | "quarterly" | "yearly" | null;
@@ -50815,217 +50904,6 @@ export interface operations {
         requestBody?: never;
         responses: never;
     };
-    getUsers: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    postUsers: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": {
-                    /**
-                     * @description Het veld value mag niet meer dan 255 tekens bevatten.
-                     * @example b
-                     */
-                    firstname: string;
-                    /**
-                     * @description Het veld value mag niet meer dan 255 tekens bevatten.
-                     * @example n
-                     */
-                    lastname: string;
-                    /**
-                     * @description Het veld value is geen geldig e-mailadres.
-                     * @example ashly64@example.com
-                     */
-                    email: string;
-                    /**
-                     * @description Het veld value moet minimaal 8 tekens bevatten.
-                     * @example pBNvYg
-                     */
-                    password: string;
-                    /** @example architecto */
-                    role: string;
-                    /**
-                     * @description Must match an existing stored value.
-                     * @example architecto
-                     */
-                    tenant_id?: string;
-                    /**
-                     * @description AGENT-META-SETUP (Danny): the FE asks "agent aanmaken?" — default yes.
-                     * @example false
-                     */
-                    create_agent?: boolean;
-                };
-            };
-        };
-        responses: never;
-    };
-    getUsersUserId: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The ID of the user.
-                 * @example 01a02ac5-e023-7269-a11e-0d4e6b1a2772
-                 */
-                user_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    putUsersUserId: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The ID of the user.
-                 * @example 01a02ac5-e023-7269-a11e-0d4e6b1a2772
-                 */
-                user_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: {
-            content: {
-                "application/json": {
-                    /**
-                     * @description Het veld value mag niet meer dan 255 tekens bevatten.
-                     * @example b
-                     */
-                    firstname?: string;
-                    /**
-                     * @description Het veld value mag niet meer dan 255 tekens bevatten.
-                     * @example n
-                     */
-                    lastname?: string;
-                    /** @example null */
-                    email?: string;
-                    /**
-                     * @description Het veld value mag niet meer dan 32 tekens bevatten.
-                     * @example g
-                     */
-                    phone?: string | null;
-                    /**
-                     * @description Het veld value moet minimaal 8 tekens bevatten.
-                     * @example {+-0pBNvYgx
-                     */
-                    password?: string;
-                    /** @example architecto */
-                    role?: string;
-                    /**
-                     * @description Het veld value mag niet meer dan 32 tekens bevatten.
-                     * @example n
-                     */
-                    avatar_color?: string | null;
-                    /**
-                     * @description C-33: per-user UI state (layout/filters/theme) — a free-form JSON object.
-                     * @example null
-                     */
-                    ui_preferences?: Record<string, never> | null;
-                };
-            };
-        };
-        responses: never;
-    };
-    deleteUsersUserId: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The ID of the user.
-                 * @example 01a02ac5-e023-7269-a11e-0d4e6b1a2772
-                 */
-                user_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: never;
-    };
-    putUsersUserIdRoles: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The ID of the user.
-                 * @example 01a02ac5-e023-7269-a11e-0d4e6b1a2772
-                 */
-                user_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": {
-                    /**
-                     * @example [
-                     *       "architecto"
-                     *     ]
-                     */
-                    roles: string[];
-                };
-            };
-        };
-        responses: never;
-    };
-    postUsersUserIdMfaReset: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The ID of the user.
-                 * @example 01a02ac5-e023-7269-a11e-0d4e6b1a2772
-                 */
-                user_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: never;
-    };
     getFilesVacancyDocumentsTenantParentDocument: {
         parameters: {
             query?: never;
@@ -51143,7 +51021,7 @@ export interface operations {
                     contact_id?: string | null;
                     /**
                      * @description Het veld value is geen geldige datum.
-                     * @example 2026-08-25T07:40:27
+                     * @example 2026-08-25T10:13:48
                      */
                     start_date?: string | null;
                     /**
@@ -51158,7 +51036,7 @@ export interface operations {
                     positions_needed?: number | null;
                     /**
                      * @description Het veld value is geen geldige datum.
-                     * @example 2026-08-25T07:40:27
+                     * @example 2026-08-25T10:13:48
                      */
                     application_deadline?: string | null;
                     /**
@@ -51572,7 +51450,7 @@ export interface operations {
                     contact_id?: string | null;
                     /**
                      * @description Het veld value is geen geldige datum.
-                     * @example 2026-08-25T07:40:27
+                     * @example 2026-08-25T10:13:48
                      */
                     start_date?: string | null;
                     /**
@@ -51587,7 +51465,7 @@ export interface operations {
                     positions_needed?: number | null;
                     /**
                      * @description Het veld value is geen geldige datum.
-                     * @example 2026-08-25T07:40:27
+                     * @example 2026-08-25T10:13:48
                      */
                     application_deadline?: string | null;
                     /**
@@ -51702,7 +51580,7 @@ export interface operations {
                      * @example 1
                      */
                     experience_max_years?: number | null;
-                    /** @example false */
+                    /** @example true */
                     published?: boolean;
                     /**
                      * @description Het veld value moet een geldige UUID zijn. Must match an existing stored value.
@@ -52759,6 +52637,312 @@ export interface operations {
         requestBody?: never;
         responses: never;
     };
+    getLocations: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description NUMMER-2: exact reference-number lookup (e.g. VE-001) — takes precedence
+                     *     over every other filter when present. Het veld value mag niet meer dan 32 tekens bevatten.
+                     * @example b
+                     */
+                    ref?: string;
+                    /**
+                     * @description Het veld value moet tussen -90 en 90 liggen.
+                     * @example -89
+                     */
+                    lat?: number;
+                    /**
+                     * @description Het veld value moet tussen -180 en 180 liggen.
+                     * @example -180
+                     */
+                    lng?: number;
+                    /**
+                     * @description Het veld value moet tussen 1 en 500 liggen.
+                     * @example 2
+                     */
+                    radius?: number;
+                };
+            };
+        };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postLocations: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Het veld value mag niet meer dan 32 tekens bevatten.
+                     * @example b
+                     */
+                    color?: string | null;
+                    /**
+                     * @description Het veld value mag niet meer dan 40 tekens bevatten.
+                     * @example n
+                     */
+                    icon?: string | null;
+                    /**
+                     * @description Het veld value mag niet meer dan 255 tekens bevatten.
+                     * @example g
+                     */
+                    name: string;
+                    /** @example true */
+                    is_default?: boolean;
+                    /**
+                     * @description Het veld value mag niet meer dan 255 tekens bevatten.
+                     * @example z
+                     */
+                    street?: string | null;
+                    /**
+                     * @description Het veld value mag niet meer dan 32 tekens bevatten.
+                     * @example m
+                     */
+                    house_number?: string | null;
+                    /**
+                     * @description Het veld value mag niet meer dan 32 tekens bevatten.
+                     * @example i
+                     */
+                    house_number_suffix?: string | null;
+                    /**
+                     * @description Het veld value mag niet meer dan 16 tekens bevatten.
+                     * @example yvdljnikhwaykcmy
+                     */
+                    postcode?: string | null;
+                    /**
+                     * @description Het veld value mag niet meer dan 16 tekens bevatten.
+                     * @example uwpwlvqwrsitcpsc
+                     */
+                    postal_code?: string | null;
+                    /**
+                     * @description Het veld value mag niet meer dan 120 tekens bevatten.
+                     * @example q
+                     */
+                    city?: string | null;
+                    /**
+                     * @description Het veld value mag niet meer dan 120 tekens bevatten.
+                     * @example l
+                     */
+                    province?: string | null;
+                    /**
+                     * @description Het veld value mag niet meer dan 120 tekens bevatten.
+                     * @example d
+                     */
+                    country?: string | null;
+                    /**
+                     * @description Het veld value mag niet meer dan 32 tekens bevatten.
+                     * @example z
+                     */
+                    coc_number?: string | null;
+                    /**
+                     * @description Het veld value mag niet meer dan 32 tekens bevatten.
+                     * @example s
+                     */
+                    vat_number?: string | null;
+                    /**
+                     * @description Het veld value mag niet meer dan 255 tekens bevatten.
+                     * @example n
+                     */
+                    contact_name?: string | null;
+                    /**
+                     * @description Het veld value mag niet meer dan 64 tekens bevatten.
+                     * @example r
+                     */
+                    phone?: string | null;
+                    /**
+                     * @description Het veld value is geen geldig e-mailadres. Het veld value mag niet meer dan 255 tekens bevatten.
+                     * @example feeney.demarcus@example.com
+                     */
+                    email?: string | null;
+                };
+            };
+        };
+        responses: never;
+    };
+    getLocationsLocation: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The location.
+                 * @example architecto
+                 */
+                location: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    putLocationsLocation: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The location.
+                 * @example architecto
+                 */
+                location: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Het veld value mag niet meer dan 32 tekens bevatten.
+                     * @example b
+                     */
+                    color?: string | null;
+                    /**
+                     * @description Het veld value mag niet meer dan 40 tekens bevatten.
+                     * @example n
+                     */
+                    icon?: string | null;
+                    /**
+                     * @description Het veld value mag niet meer dan 255 tekens bevatten.
+                     * @example g
+                     */
+                    name?: string;
+                    /**
+                     * @description Het veld value mag niet meer dan 255 tekens bevatten.
+                     * @example z
+                     */
+                    street?: string | null;
+                    /**
+                     * @description Het veld value mag niet meer dan 32 tekens bevatten.
+                     * @example m
+                     */
+                    house_number?: string | null;
+                    /**
+                     * @description Het veld value mag niet meer dan 32 tekens bevatten.
+                     * @example i
+                     */
+                    house_number_suffix?: string | null;
+                    /**
+                     * @description Het veld value mag niet meer dan 16 tekens bevatten.
+                     * @example yvdljnikhwaykcmy
+                     */
+                    postcode?: string | null;
+                    /**
+                     * @description Het veld value mag niet meer dan 16 tekens bevatten.
+                     * @example uwpwlvqwrsitcpsc
+                     */
+                    postal_code?: string | null;
+                    /**
+                     * @description Het veld value mag niet meer dan 120 tekens bevatten.
+                     * @example q
+                     */
+                    city?: string | null;
+                    /**
+                     * @description Het veld value mag niet meer dan 120 tekens bevatten.
+                     * @example l
+                     */
+                    province?: string | null;
+                    /**
+                     * @description Het veld value mag niet meer dan 120 tekens bevatten.
+                     * @example d
+                     */
+                    country?: string | null;
+                    /**
+                     * @description Het veld value mag niet meer dan 32 tekens bevatten.
+                     * @example z
+                     */
+                    coc_number?: string | null;
+                    /**
+                     * @description Het veld value mag niet meer dan 32 tekens bevatten.
+                     * @example s
+                     */
+                    vat_number?: string | null;
+                    /**
+                     * @description Het veld value mag niet meer dan 255 tekens bevatten.
+                     * @example n
+                     */
+                    contact_name?: string | null;
+                    /**
+                     * @description Het veld value mag niet meer dan 64 tekens bevatten.
+                     * @example r
+                     */
+                    phone?: string | null;
+                    /**
+                     * @description Het veld value is geen geldig e-mailadres. Het veld value mag niet meer dan 255 tekens bevatten.
+                     * @example feeney.demarcus@example.com
+                     */
+                    email?: string | null;
+                };
+            };
+        };
+        responses: never;
+    };
+    deleteLocationsLocation: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The location.
+                 * @example architecto
+                 */
+                location: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: never;
+    };
+    postLocationsLocationGeocode: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The location.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                location: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: never;
+    };
     getWhatsappEmbeddedSignupConfig: {
         parameters: {
             query?: never;
@@ -53059,7 +53243,7 @@ export interface operations {
                      */
                     workflow_id?: string;
                     /**
-                     * @example running
+                     * @example completed
                      * @enum {string}
                      */
                     status?: "running" | "waiting" | "completed" | "failed" | "cancelled";
@@ -53292,7 +53476,7 @@ export interface operations {
             content: {
                 "application/json": {
                     /**
-                     * @example 0
+                     * @example true
                      * @enum {string}
                      */
                     include_archived?: "0" | "1" | "true" | "false";
@@ -53475,7 +53659,7 @@ export interface operations {
         requestBody?: {
             content: {
                 "application/json": {
-                    /** @example false */
+                    /** @example true */
                     dry_run?: boolean;
                 };
             };

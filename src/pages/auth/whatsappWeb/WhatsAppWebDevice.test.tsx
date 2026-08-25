@@ -72,6 +72,7 @@ describe('WhatsAppWebDevice', () => {
 // over the bare stage and the cap renders as a caption.
 it('reads the warmup object (stage + daily cap) when the server ships it', () => {
   render(<WhatsAppWebDevice device={{ ...baseDevice, warmup_stage: 0, warmup: { stage: 1, label: 'nieuw nummer', daily_cap: 5 } }} busy={false} notEnabled={false} onConnect={noop} onDisconnect={noop} onRemove={noop} />)
-  expect(screen.getByText('profile.whatsappWeb.warmup.1')).toBeInTheDocument()
-  expect(screen.getByText('profile.whatsappWeb.dailyCap')).toBeInTheDocument()
+  // The test's t() mock appends the options, so match on the key prefix + the server fallback / cap.
+  expect(screen.getByText(/^profile\.whatsappWeb\.warmup\.1:.*nieuw nummer/)).toBeInTheDocument()
+  expect(screen.getByText(/^profile\.whatsappWeb\.dailyCap:.*"cap":5/)).toBeInTheDocument()
 })

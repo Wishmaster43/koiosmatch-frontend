@@ -49,7 +49,7 @@ export default function WhatsAppWebDevice({ device, busy, notEnabled, onConnect,
             {/* Status is never a raw slug — always the mapped SoftChip label. */}
             <SoftChip label={t(`profile.whatsappWeb.${meta.labelKey}`)} color={meta.dot} dot round />
             {warmup !== null && (
-              <SoftChip label={t(`profile.whatsappWeb.warmup.${warmup}`, { defaultValue: device.warmup?.label ?? '' })} color="var(--color-info)" round />
+              <SoftChip label={device.warmup?.label ? t(`profile.whatsappWeb.warmup.${warmup}`, { defaultValue: device.warmup.label }) : t(`profile.whatsappWeb.warmup.${warmup}`)} color="var(--color-info)" round />
             )}
             {warmup !== null && device.warmup?.daily_cap != null && (
               <Caption as="span">{t('profile.whatsappWeb.dailyCap', { cap: device.warmup.daily_cap })}</Caption>
