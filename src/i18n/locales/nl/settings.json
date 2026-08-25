@@ -249,7 +249,8 @@
     "automations": "Automatiseringen",
     "hf_contract_map": "HelloFlex contractmap",
     "report_kpis": "Rapportkaarten",
-    "jargon": "Vakjargon"
+    "jargon": "Vakjargon",
+    "whatsapp_web": "WhatsApp Web-nummers"
   },
   "kpis": {
     "title": "KPI-instellingen",
@@ -1115,16 +1116,17 @@
       "periodToday": "Vandaag",
       "periodMonth": "Deze maand",
       "plan": {
-        "title": "Abonnement & credits",
-        "notice": "Huidig plan, credit-voortgangsbalk, resetdatum en kredietsaldo zijn nog niet beschikbaar. Er bestaat nog geen backend-model voor abonnementen of credits.",
+        "title": "Abonnement & Koios Tokens",
+        "notice": "Huidig plan, Koios Tokens-voortgangsbalk, resetdatum en tegoed zijn nog niet beschikbaar. Er bestaat nog geen backend-model voor abonnementen.",
         "loadError": "Je abonnement kon niet worden geladen.",
         "unavailable": "Je hebt geen rechten om dit te bekijken.",
         "resetsOn": "Reset op {{date}}",
-        "aiMeter": "Koios AI-tokens",
+        "aiMeter": "AI-tokens",
         "workflowMeter": "Koios Tokens",
         "overBudget": "{{meter}}: {{n}} boven budget → {{amount}}",
         "meterUsage": "{{used}} verbruikt · {{remaining}} over",
-        "meterDrill": "Bekijk het dagverbruik van deze meter"
+        "meterDrill": "Bekijk het dagverbruik van deze meter",
+        "whatsappMeter": "WhatsApp Tokens"
       },
       "ai": {
         "title": "AI-verbruik (Koios)",
@@ -1151,7 +1153,11 @@
         "colCost": "Kosten",
         "empty": "Nog geen WhatsApp-verbruik deze maand.",
         "loadError": "WhatsApp-verbruik laden is mislukt.",
-        "unavailable": "Je hebt geen rechten om dit te bekijken."
+        "unavailable": "Je hebt geen rechten om dit te bekijken.",
+        "colChannel": "Kanaal",
+        "colTokens": "WhatsApp Tokens",
+        "tokensMeterLabel": "WhatsApp Tokens deze periode",
+        "fallbackCaption": "Deze maand (per nummer, nog geen kanaalopsplitsing beschikbaar)."
       },
       "daily": {
         "title": "Dagelijks verbruik",
@@ -1163,7 +1169,7 @@
         "categoryWorkflow": "Workflow",
         "categoryAi": "AI",
         "colDate": "Datum",
-        "colWorkflowCredits": "Workflow-credits",
+        "colWorkflowCredits": "Koios Tokens",
         "colWorkflowAmount": "Workflow-bedrag",
         "colAiTokens": "AI-tokens",
         "colAiAmount": "AI-bedrag",
@@ -1178,27 +1184,6 @@
         "drilldownTitle": "Details voor {{date}}",
         "drilldownClose": "Details sluiten"
       },
-      "koios": {
-        "title": "Koios AI-facturatie",
-        "subtitle": "Factuurklare totalen voor Claude-tokens en workflow-tokenruns.",
-        "monthLabel": "Maand",
-        "loadError": "Koios-facturatie laden is mislukt.",
-        "unavailable": "Je hebt geen rechten om dit te bekijken.",
-        "empty": "Nog geen Koios-verbruik in deze maand.",
-        "claude": {
-          "tokensIn": "Tokens in",
-          "tokensOut": "Tokens uit",
-          "freeAllowance": "Gratis voet (tokens)",
-          "billable": "Factureerbare Claude-kosten"
-        },
-        "workflow": {
-          "line": "{{n}} workflow-modulerun(s)",
-          "colModule": "Module",
-          "colRuns": "Runs",
-          "colAmount": "Bedrag"
-        },
-        "total": "Totaal"
-      },
       "credits": {
         "periodPrevMonth": "Vorige maand",
         "unavailable": "Je hebt geen rechten om dit te bekijken."
@@ -1208,11 +1193,79 @@
       "kpi": {
         "totalLabel": "Totaal deze periode",
         "workflowLabel": "Workflow",
-        "workflowNote": "{{n}} credits · {{price}}/credit",
-        "koiosLabel": "Koios AI",
+        "workflowNote": "{{n}} Koios Tokens · {{price}}/token",
+        "koiosLabel": "AI-tokens",
         "koiosNote": "{{n}} tokens",
         "whatsappLabel": "WhatsApp",
         "whatsappNote": "{{n}} berichten"
+      },
+      "tabs": {
+        "overview": "Overzicht",
+        "activity": "Per functie",
+        "workflow": "Per workflow",
+        "user": "Per gebruiker",
+        "whatsapp": "WhatsApp"
+      },
+      "activity": {
+        "title": "Verbruik per functie",
+        "subtitle": "AI-verbruik per functie en Koios Tokens per module, voor de gekozen periode.",
+        "periodCaption": "AI-verbruik per functie ondersteunt geen \"vorige maand\": toont altijd de huidige periode.",
+        "aiSectionTitle": "AI-tokens per functie",
+        "workflowSectionTitle": "Koios Tokens per module",
+        "colActivity": "Functie",
+        "colCalls": "Calls",
+        "colTokens": "Tokens",
+        "colAmount": "Bedrag",
+        "colModule": "Module",
+        "colRuns": "Runs",
+        "empty": "Nog geen verbruik in deze periode.",
+        "loadError": "Verbruik per functie laden is mislukt.",
+        "unavailable": "Je hebt geen rechten om dit te bekijken.",
+        "activityMap": {
+          "chat": "Chat",
+          "workflow": "Workflow",
+          "note_assist": "Notitie-assistent",
+          "conversation_assist": "Gespreksassistent",
+          "entity_generate": "Tekst genereren",
+          "report_advice": "Rapportadvies",
+          "interview": "Interview",
+          "cv_parse": "CV-parser"
+        }
+      },
+      "perWorkflow": {
+        "title": "Verbruik per workflow",
+        "subtitle": "Koios Tokens per workflow, voor de gekozen periode.",
+        "colName": "Workflow",
+        "colRuns": "Runs",
+        "colTokens": "Koios Tokens",
+        "colAmount": "Bedrag",
+        "empty": "Nog geen workflow-verbruik in deze periode.",
+        "loadError": "Verbruik per workflow laden is mislukt.",
+        "unavailable": "Je hebt geen rechten om dit te bekijken.",
+        "rowHint": "Open deze workflow"
+      },
+      "perUser": {
+        "title": "Verbruik per gebruiker",
+        "subtitle": "AI-tokens per gebruiker, voor de gekozen periode.",
+        "colName": "Gebruiker",
+        "colCalls": "Calls",
+        "colTokens": "AI-tokens",
+        "colAmount": "Bedrag",
+        "colSuccessRate": "Slagingspercentage",
+        "empty": "Nog geen AI-verbruik per gebruiker in deze periode.",
+        "loadError": "Verbruik per gebruiker laden is mislukt.",
+        "unavailable": "Je hebt geen rechten om dit te bekijken."
+      },
+      "invoice": {
+        "title": "Factuurvoorschot",
+        "subtitle": "Voorlopig totaal voor deze periode, opgebouwd uit Koios Tokens, AI-tokens en WhatsApp Tokens.",
+        "totalLabel": "Totaal deze periode",
+        "workflowLine": "Koios Tokens",
+        "aiLine": "AI-tokens",
+        "whatsappLine": "WhatsApp Tokens",
+        "freeAllowanceNote": "De gratis voet voor AI-tokens wordt hier nog niet apart getoond. Dat cijfer levert alleen de facturatie-endpoint (buiten deze pagina gehouden, zie de code-comment).",
+        "loadError": "Factuurvoorschot laden is mislukt.",
+        "unavailable": "Je hebt geen rechten om dit te bekijken."
       }
     },
     "invoices": {
@@ -3446,5 +3499,49 @@
   "dashboardsGoesTo": "Opent {{target}}.",
   "dashboardsCatalogUnavailable": "Uitleg is nu niet beschikbaar.",
   "dashboardsSaveError": "Opslaan van de KPI-instelling is mislukt: de wijziging is teruggedraaid. Probeer het opnieuw.",
-  "dashboardsSharedDefault": "gedeeld (Standaard)"
+  "dashboardsSharedDefault": "gedeeld (Standaard)",
+  "whatsappWeb": {
+    "intro": "Koppel een los WhatsApp Web-nummer per vestiging, naast het bedrijfsbrede WhatsApp Business-account.",
+    "loading": "Bezig met laden…",
+    "unavailable": "Deze functie is niet beschikbaar voor jouw tenant.",
+    "error": "Kon de vestigingsnummers niet laden.",
+    "empty": "Nog geen vestigingsnummers gekoppeld.",
+    "noLocation": "Geen vestiging",
+    "contactSyncNote": "Dit nummer synchroniseert alleen contacten van deze vestiging (alleen met WhatsApp-toestemming).",
+    "addTitle": "Vestigingsnummer koppelen",
+    "locationLabel": "Vestiging",
+    "locationPlaceholder": "Selecteer vestiging",
+    "labelField": "Naam",
+    "labelPlaceholder": "Naam (optioneel)",
+    "phoneField": "Telefoonnummer",
+    "phonePlaceholder": "Telefoonnummer (optioneel)",
+    "submit": "Vestigingsnummer koppelen",
+    "createError": "Kon het vestigingsnummer niet koppelen.",
+    "actionError": "De actie is mislukt. Probeer het opnieuw.",
+    "queue": {
+      "title": "Wachtrijlimieten",
+      "intro": "Verzendlimieten voor WhatsApp Web, gesplitst naar bekende en nieuwe ontvangers.",
+      "loading": "Bezig met laden…",
+      "loadError": "Kon de wachtrijlimieten niet laden.",
+      "saveError": "Kon de wachtrijlimieten niet opslaan.",
+      "knownHourly": "Bekend, per uur",
+      "newHourly": "Nieuw, per uur",
+      "newDaily": "Nieuw, per dag",
+      "newWeekly": "Nieuw, per week",
+      "save": "Opslaan",
+      "saved": "Opgeslagen",
+      "readOnlyNote": "Je hebt geen rechten om deze limieten te wijzigen."
+    }
+  },
+  "dashboardsOnOffFilter": "Aan/uit-filter",
+  "dashboardsFilterAll": "Alles",
+  "dashboardsFilterOn": "Aan",
+  "dashboardsFilterOff": "Uit",
+  "dashboardsGroups": {
+    "block": "Werkfeeds",
+    "chart": "Grafieken",
+    "list": "Lijsten"
+  },
+  "dashboardsNoResults": "Geen items gevonden voor deze zoekopdracht of dit filter.",
+  "dashboardsSharedDefaultNote": "Deze rol deelt de KPI-rij van Standaard. Een wijziging geldt ook voor de andere rollen die die rij delen."
 }

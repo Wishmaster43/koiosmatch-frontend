@@ -1,15 +1,21 @@
 /**
- * useWhatsAppWeb — manages the logged-in user's personal WhatsApp Web device
- * links (K-193 fase 1). All logic (loading, polling, mutations) lives here so
- * the components stay presentational.
+ * useWhatsAppWeb — manages a set of WhatsApp Web device links (K-193 fase 1 +
+ * K-195). Generalised over `basePath` so it drives BOTH surfaces from one
+ * implementation (VESTIGING-DEVICE-1, CMBE d88ad05e): the logged-in user's own
+ * devices (Profile) and a tenant's branch devices (Settings). Row shape is
+ * identical on both (`DeviceLifecycle::row`). All logic (loading, polling,
+ * mutations) lives here so the components stay presentational.
  *
- * Contract (module `whatsapp_web`, self-scoped — no extra permission needed):
- *   GET    /profile/whatsapp-web                 -> { data: [ device… ] }
- *   POST   /profile/whatsapp-web {label?,phone_number?} -> create a new device
- *   POST   /profile/whatsapp-web/{id}/connect    -> { status: 'connecting' } (QR arrives via webhook)
- *                                                    501 when the gateway isn't configured
- *   POST   /profile/whatsapp-web/{id}/disconnect -> { status: 'disconnected' }
- *   DELETE /profile/whatsapp-web/{id}            -> removes the device
+ * Contract, `basePath` = `/profile/whatsapp-web` (self-scoped, no extra
+ * permission) or `/settings/whatsapp-web-numbers` (`settings.view`/`.update`):
+ *   GET    {basePath}                 -> { data: [ device… ] }
+ *   POST   {basePath} {body?}         -> create a new device (own devices: no
+ *                                         body; branch devices: {location_id
+ *                                         (required), label?, phone_number?})
+ *   POST   {basePath}/{id}/connect    -> { status: 'connecting' } (QR arrives via webhook)
+ *                                         501 when the gateway isn't configured
+ *   POST   {basePath}/{id}/disconnect -> { status: 'disconnected' }
+ *   DELETE {basePath}/{id}            -> removes the device
  *
  * status ∈ disconnected | connecting | qr_pending | connected. Because connect()
  * only returns 'connecting', the QR and the final status arrive by polling GET
@@ -44,7 +50,8 @@ function readList(res: AxiosResponse | undefined): WhatsAppDevice[] {
   return []
 }
 
-export function useWhatsAppWeb() {
+// Defaults to the profile surface — every existing caller/test stays byte-identical.
+export function useWhatsAppWeb(basePath: string = '/profile/whatsapp-web') {
   // busyId flags the row (or 'new') being mutated — UI state, not part of the cache.
   const [busyId, setBusyId] = useState<DeviceId | null>(null)
   // notEnabled flags the device whose connect() came back 501 (gateway not configured).
@@ -52,9 +59,10 @@ export function useWhatsAppWeb() {
 
   // Device list. refetchInterval polls only while a device is still connecting/awaiting
   // a QR scan, then stops. A 403/404 = module/permission off (calm 'unavailable'), no retry.
+  // Keyed on basePath so the two surfaces never share a cache entry.
   const { data, isLoading, isError, error, refetch } = useQuery({
-    queryKey: ['whatsapp-web'],
-    queryFn: async ({ signal }) => readList(await api.get('/profile/whatsapp-web', { signal })),
+    queryKey: ['whatsapp-web', basePath],
+    queryFn: async ({ signal }) => readList(await api.get(basePath, { signal })),
     refetchInterval: (query) => (query.state.data?.some(isTransient) ? POLL_MS : false),
     retry: false,
   })
@@ -70,15 +78,20 @@ export function useWhatsAppWeb() {
 
   // Run a mutation: flag the row busy, perform it, then refetch so the UI reflects the
   // real server state (connect() in particular only returns 'connecting').
-  const run = useCallback(async (id: DeviceId, fn: () => Promise<unknown>) => {
+  // Resolves true on success, false on failure (after a best-effort reload): the caller
+  // shows the honest notice and keeps the user's input, never a silent "it worked".
+  const run = useCallback(async (id: DeviceId, fn: () => Promise<unknown>): Promise<boolean> => {
     setBusyId(id)
-    try { await fn(); await refetch() }
-    catch { /* the list reload reflects reality; nothing destructive to surface */ }
+    try { await fn(); await refetch(); return true }
+    catch { await refetch().catch(() => undefined); return false }
     finally { setBusyId(null) }
   }, [refetch])
 
-  // Create a new device session; the user then links it from its card.
-  const createDevice = useCallback(() => run('new', () => api.post('/profile/whatsapp-web')), [run])
+  // Create a new device session; the user then links it from its card. `body` is
+  // omitted on the own-device surface (matches the pre-generalisation request
+  // exactly) and carries {location_id, label?, phone_number?} on the branch surface.
+  const createDevice = useCallback((body?: Record<string, unknown>) =>
+    run('new', () => (body ? api.post(basePath, body) : api.post(basePath))), [run, basePath])
 
   // Connect: a 501 means the gateway isn't configured — surface it on the row
   // instead of letting run()'s catch swallow it silently.
@@ -86,17 +99,17 @@ export function useWhatsAppWeb() {
     setNotEnabledId(null)
     setBusyId(id)
     try {
-      await api.post(`/profile/whatsapp-web/${id}/connect`)
+      await api.post(`${basePath}/${id}/connect`)
       await refetch()
     } catch (e) {
       if (statusOf(e) === 501) setNotEnabledId(id)
     } finally {
       setBusyId(null)
     }
-  }, [refetch])
+  }, [refetch, basePath])
 
-  const disconnect = useCallback((id: WhatsAppDevice['id']) => run(id, () => api.post(`/profile/whatsapp-web/${id}/disconnect`)), [run])
-  const remove      = useCallback((id: WhatsAppDevice['id']) => run(id, () => api.delete(`/profile/whatsapp-web/${id}`)), [run])
+  const disconnect = useCallback((id: WhatsAppDevice['id']) => run(id, () => api.post(`${basePath}/${id}/disconnect`)), [run, basePath])
+  const remove      = useCallback((id: WhatsAppDevice['id']) => run(id, () => api.delete(`${basePath}/${id}`)), [run, basePath])
 
   return { devices, phase, busyId, notEnabledId, createDevice, connect, disconnect, remove }
 }

@@ -249,7 +249,8 @@
     "automations": "Automatizaciones",
     "hf_contract_map": "Correspondencia de contratos de HelloFlex",
     "report_kpis": "Tarjetas de informe",
-    "jargon": "Jerga profesional"
+    "jargon": "Jerga profesional",
+    "whatsapp_web": "Números de WhatsApp Web"
   },
   "kpis": {
     "title": "Configuración de KPI",
@@ -869,16 +870,17 @@
       "periodToday": "Hoy",
       "periodMonth": "Este mes",
       "plan": {
-        "title": "Plan y créditos",
-        "notice": "El plan actual, la barra de progreso de créditos, la fecha de reinicio y el saldo de créditos aún no están disponibles. Todavía no existe un modelo de backend para planes o créditos.",
+        "title": "Suscripción y Koios Tokens",
+        "notice": "El plan actual, la barra de progreso de Koios Tokens, la fecha de reinicio y el saldo aún no están disponibles. Todavía no existe un modelo de backend para las suscripciones.",
         "loadError": "No se pudo cargar tu suscripción.",
         "unavailable": "No tienes permiso para ver esto.",
         "resetsOn": "Se reinicia el {{date}}",
-        "aiMeter": "Tokens de Koios AI",
+        "aiMeter": "Tokens de IA",
         "workflowMeter": "Tokens de Koios",
         "overBudget": "{{meter}}: {{n}} por encima del presupuesto → {{amount}}",
         "meterUsage": "{{used}} usados · {{remaining}} restantes",
-        "meterDrill": "Ver el consumo diario de este contador"
+        "meterDrill": "Ver el consumo diario de este contador",
+        "whatsappMeter": "Tokens de WhatsApp"
       },
       "ai": {
         "title": "Uso de IA (Koios)",
@@ -905,7 +907,11 @@
         "colCost": "Coste",
         "empty": "Todavía no hay uso de WhatsApp este mes.",
         "loadError": "Error al cargar el uso de WhatsApp.",
-        "unavailable": "No tienes permiso para ver esto."
+        "unavailable": "No tienes permiso para ver esto.",
+        "colChannel": "Canal",
+        "colTokens": "Tokens de WhatsApp",
+        "tokensMeterLabel": "Tokens de WhatsApp este periodo",
+        "fallbackCaption": "Este mes (por número, el desglose por canal aún no está disponible)."
       },
       "daily": {
         "title": "Uso diario",
@@ -917,7 +923,7 @@
         "categoryWorkflow": "Workflow",
         "categoryAi": "IA",
         "colDate": "Fecha",
-        "colWorkflowCredits": "Créditos de workflow",
+        "colWorkflowCredits": "Tokens Koios",
         "colWorkflowAmount": "Importe de workflow",
         "colAiTokens": "Tokens de IA",
         "colAiAmount": "Importe de IA",
@@ -932,27 +938,6 @@
         "drilldownTitle": "Detalles de {{date}}",
         "drilldownClose": "Cerrar detalles"
       },
-      "koios": {
-        "title": "Facturación de Koios IA",
-        "subtitle": "Totales listos para facturar de los tokens de Claude y las ejecuciones de tokens de flujo de trabajo.",
-        "monthLabel": "Mes",
-        "loadError": "Error al cargar la facturación de Koios.",
-        "unavailable": "No tienes permiso para ver esto.",
-        "empty": "Todavía no hay uso de Koios este mes.",
-        "claude": {
-          "tokensIn": "Tokens de entrada",
-          "tokensOut": "Tokens de salida",
-          "freeAllowance": "Cuota gratuita (tokens)",
-          "billable": "Coste facturable de Claude"
-        },
-        "workflow": {
-          "line": "{{n}} ejecución(es) de módulo de flujo de trabajo",
-          "colModule": "Módulo",
-          "colRuns": "Ejecuciones",
-          "colAmount": "Importe"
-        },
-        "total": "Total"
-      },
       "credits": {
         "periodPrevMonth": "Mes anterior",
         "unavailable": "No tienes permiso para ver esto."
@@ -962,11 +947,79 @@
       "kpi": {
         "totalLabel": "Total de este periodo",
         "workflowLabel": "Workflow",
-        "workflowNote": "{{n}} créditos · {{price}}/crédito",
-        "koiosLabel": "Koios AI",
+        "workflowNote": "{{n}} Tokens Koios · {{price}}/token",
+        "koiosLabel": "Tokens de IA",
         "koiosNote": "{{n}} tokens",
         "whatsappLabel": "WhatsApp",
         "whatsappNote": "{{n}} mensajes"
+      },
+      "tabs": {
+        "overview": "Resumen",
+        "activity": "Por actividad",
+        "workflow": "Por workflow",
+        "user": "Por usuario",
+        "whatsapp": "WhatsApp"
+      },
+      "activity": {
+        "title": "Uso por actividad",
+        "subtitle": "Uso de IA por actividad y Tokens Koios por módulo, para el periodo seleccionado.",
+        "periodCaption": "El uso por actividad no admite \"mes anterior\": siempre muestra el periodo actual.",
+        "aiSectionTitle": "Tokens de IA por actividad",
+        "workflowSectionTitle": "Tokens Koios por módulo",
+        "colActivity": "Actividad",
+        "colCalls": "Llamadas",
+        "colTokens": "Tokens",
+        "colAmount": "Importe",
+        "colModule": "Módulo",
+        "colRuns": "Ejecuciones",
+        "empty": "Todavía no hay uso en este periodo.",
+        "loadError": "No se pudo cargar el uso por actividad.",
+        "unavailable": "No tienes permiso para ver esto.",
+        "activityMap": {
+          "chat": "Chat",
+          "workflow": "Workflow",
+          "note_assist": "Asistente de notas",
+          "conversation_assist": "Asistente de conversación",
+          "entity_generate": "Generación de texto",
+          "report_advice": "Consejo de informe",
+          "interview": "Entrevista",
+          "cv_parse": "Analizador de CV"
+        }
+      },
+      "perWorkflow": {
+        "title": "Uso por workflow",
+        "subtitle": "Tokens Koios por workflow, para el periodo seleccionado.",
+        "colName": "Workflow",
+        "colRuns": "Ejecuciones",
+        "colTokens": "Tokens Koios",
+        "colAmount": "Importe",
+        "empty": "Todavía no hay uso de workflow en este periodo.",
+        "loadError": "No se pudo cargar el uso por workflow.",
+        "unavailable": "No tienes permiso para ver esto.",
+        "rowHint": "Abrir este workflow"
+      },
+      "perUser": {
+        "title": "Uso por usuario",
+        "subtitle": "Tokens de IA por usuario, para el periodo seleccionado.",
+        "colName": "Usuario",
+        "colCalls": "Llamadas",
+        "colTokens": "Tokens de IA",
+        "colAmount": "Importe",
+        "colSuccessRate": "Tasa de éxito",
+        "empty": "Todavía no hay uso de IA por usuario en este periodo.",
+        "loadError": "No se pudo cargar el uso por usuario.",
+        "unavailable": "No tienes permiso para ver esto."
+      },
+      "invoice": {
+        "title": "Anticipo de factura",
+        "subtitle": "Total provisional para este periodo, formado por Tokens Koios, Tokens de IA y Tokens de WhatsApp.",
+        "totalLabel": "Total este periodo",
+        "workflowLine": "Tokens Koios",
+        "aiLine": "Tokens de IA",
+        "whatsappLine": "Tokens de WhatsApp",
+        "freeAllowanceNote": "La franquicia gratuita de Tokens de IA aún no se muestra aquí por separado. Solo el endpoint de facturación devuelve esa cifra (mantenido fuera de esta página, ver el comentario del código).",
+        "loadError": "No se pudo cargar el anticipo de factura.",
+        "unavailable": "No tienes permiso para ver esto."
       }
     },
     "invoices": {
@@ -3446,5 +3499,49 @@
   "dashboardsGoesTo": "Abre {{target}}.",
   "dashboardsCatalogUnavailable": "Las explicaciones no están disponibles ahora mismo.",
   "dashboardsSaveError": "No se pudo guardar el ajuste de KPI: el cambio se ha revertido. Inténtalo de nuevo.",
-  "dashboardsSharedDefault": "compartido (Predeterminado)"
+  "dashboardsSharedDefault": "compartido (Predeterminado)",
+  "whatsappWeb": {
+    "intro": "Vincula un número de WhatsApp Web independiente por sucursal, junto a la cuenta de WhatsApp Business de la empresa.",
+    "loading": "Cargando…",
+    "unavailable": "Esta función no está disponible para tu organización.",
+    "error": "No se pudieron cargar los números de sucursal.",
+    "empty": "Aún no hay números de sucursal vinculados.",
+    "noLocation": "Sin sucursal",
+    "contactSyncNote": "Este número solo sincroniza contactos de esta sucursal (solo con consentimiento de WhatsApp).",
+    "addTitle": "Vincular número de sucursal",
+    "locationLabel": "Sucursal",
+    "locationPlaceholder": "Selecciona una sucursal",
+    "labelField": "Nombre",
+    "labelPlaceholder": "Nombre (opcional)",
+    "phoneField": "Número de teléfono",
+    "phonePlaceholder": "Número de teléfono (opcional)",
+    "submit": "Vincular número de sucursal",
+    "createError": "No se pudo vincular el número de sucursal.",
+    "actionError": "La acción ha fallado. Inténtalo de nuevo.",
+    "queue": {
+      "title": "Límites de cola",
+      "intro": "Límites de envío de WhatsApp Web, separados entre destinatarios conocidos y nuevos.",
+      "loading": "Cargando…",
+      "loadError": "No se pudieron cargar los límites de cola.",
+      "saveError": "No se pudieron guardar los límites de cola.",
+      "knownHourly": "Conocidos, por hora",
+      "newHourly": "Nuevos, por hora",
+      "newDaily": "Nuevos, por día",
+      "newWeekly": "Nuevos, por semana",
+      "save": "Guardar",
+      "saved": "Guardado",
+      "readOnlyNote": "No tienes permiso para cambiar estos límites."
+    }
+  },
+  "dashboardsOnOffFilter": "Filtro activado/desactivado",
+  "dashboardsFilterAll": "Todo",
+  "dashboardsFilterOn": "Activado",
+  "dashboardsFilterOff": "Desactivado",
+  "dashboardsGroups": {
+    "block": "Feeds de trabajo",
+    "chart": "Gráficos",
+    "list": "Listas"
+  },
+  "dashboardsNoResults": "No hay elementos para esta búsqueda o este filtro.",
+  "dashboardsSharedDefaultNote": "Este rol comparte la fila de KPI predeterminada. Un cambio aquí también aplica a los otros roles que la comparten."
 }

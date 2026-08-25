@@ -119,4 +119,63 @@ describe('useWhatsAppWeb', () => {
     await vi.waitFor(() => expect(api.get).toHaveBeenCalledTimes(2))
     vi.useRealTimers()
   })
+
+  // K-195: the settings surface (branch devices) drives the SAME hook via basePath.
+  describe('basePath = /settings/whatsapp-web-numbers (K-195 branch devices)', () => {
+    it('loads the list from the settings route', async () => {
+      vi.mocked(api.get).mockResolvedValue({ data: { data: [{ id: 2, status: 'disconnected' }] } })
+      const { result } = renderHook(() => useWhatsAppWeb('/settings/whatsapp-web-numbers'), { wrapper })
+
+      await waitFor(() => expect(result.current.phase).toBe('ready'))
+
+      expect(api.get).toHaveBeenCalledWith('/settings/whatsapp-web-numbers', expect.objectContaining({}))
+      expect(result.current.devices).toHaveLength(1)
+    })
+
+    it('createDevice(body) posts the location_id/label/phone_number body to the settings route', async () => {
+      vi.mocked(api.get).mockResolvedValue({ data: { data: [] } })
+      vi.mocked(api.post).mockResolvedValue({ data: { id: 9, status: 'disconnected' } })
+      const { result } = renderHook(() => useWhatsAppWeb('/settings/whatsapp-web-numbers'), { wrapper })
+      await waitFor(() => expect(result.current.phase).toBe('ready'))
+
+      await act(async () => {
+        await result.current.createDevice({ location_id: 'loc-1', label: 'Branch A', phone_number: undefined })
+      })
+
+      expect(api.post).toHaveBeenCalledWith('/settings/whatsapp-web-numbers',
+        { location_id: 'loc-1', label: 'Branch A', phone_number: undefined })
+    })
+
+    it('connect/disconnect/remove hit the settings-scoped routes', async () => {
+      vi.mocked(api.get).mockResolvedValue({ data: { data: [{ id: 5, status: 'disconnected' }] } })
+      vi.mocked(api.post).mockResolvedValue({ data: { status: 'connecting' } })
+      vi.mocked(api.delete).mockResolvedValue({ data: {} })
+      const { result } = renderHook(() => useWhatsAppWeb('/settings/whatsapp-web-numbers'), { wrapper })
+      await waitFor(() => expect(result.current.phase).toBe('ready'))
+
+      await act(async () => { await result.current.connect(5) })
+      expect(api.post).toHaveBeenCalledWith('/settings/whatsapp-web-numbers/5/connect')
+
+      await act(async () => { await result.current.disconnect(5) })
+      expect(api.post).toHaveBeenCalledWith('/settings/whatsapp-web-numbers/5/disconnect')
+
+      await act(async () => { await result.current.remove(5) })
+      expect(api.delete).toHaveBeenCalledWith('/settings/whatsapp-web-numbers/5')
+    })
+
+    it('the two surfaces do not share a cache entry (distinct queryKey per basePath)', async () => {
+      vi.mocked(api.get)
+        .mockResolvedValueOnce({ data: { data: [{ id: 1, status: 'connected' }] } })
+        .mockResolvedValueOnce({ data: { data: [{ id: 2, status: 'connected' }] } })
+      const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+      const wrap = ({ children }: { children: ReactNode }) => <QueryClientProvider client={client}>{children}</QueryClientProvider>
+
+      const profile = renderHook(() => useWhatsAppWeb(), { wrapper: wrap })
+      const settings = renderHook(() => useWhatsAppWeb('/settings/whatsapp-web-numbers'), { wrapper: wrap })
+
+      await waitFor(() => expect(profile.result.current.devices[0]?.id).toBe(1))
+      await waitFor(() => expect(settings.result.current.devices[0]?.id).toBe(2))
+      expect(api.get).toHaveBeenCalledTimes(2)
+    })
+  })
 })

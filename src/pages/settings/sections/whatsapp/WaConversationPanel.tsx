@@ -35,6 +35,9 @@ const nameOf = (m: WaMessage) => [m.candidate?.first_name, m.candidate?.last_nam
 
 export default function WaConversationPanel({ message, onClose }: WaConversationPanelProps) {
   const { t } = useTranslation('settings')
+  // Per-namespace hooks (not an { ns } option) so the static key check resolves each key.
+  const { t: tCandidates } = useTranslation('candidates')
+  const { t: tCommon } = useTranslation('common')
   const { formatDateTime } = useDateFormat()
   const [thread, setThread] = useState<MessageRow[]>([])
   const [loading, setLoading] = useState(true)
@@ -71,12 +74,12 @@ export default function WaConversationPanel({ message, onClose }: WaConversation
       persistKey="wa-log-conversation" width={560} maxWidth="92vw" bodyStyle={{ padding: 16 }}>
       {loading ? (
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: 24, color: 'var(--text-muted)', fontSize: 13 }}>
-          <Spinner size={14} /> {t('conversations.loadingMessages', { ns: 'candidates' })}
+          <Spinner size={14} /> {tCandidates('conversations.loadingMessages')}
         </div>
       ) : error ? (
-        <Caption as="div" style={{ padding: 24, textAlign: 'center' }}>{t('error.body', { ns: 'common' })}</Caption>
+        <Caption as="div" style={{ padding: 24, textAlign: 'center' }}>{tCommon('error.body')}</Caption>
       ) : thread.length === 0 ? (
-        <Caption as="div" style={{ padding: 24, textAlign: 'center' }}>{t('conversations.noMessages', { ns: 'candidates' })}</Caption>
+        <Caption as="div" style={{ padding: 24, textAlign: 'center' }}>{tCandidates('conversations.noMessages')}</Caption>
       ) : (
         <>
           {/* Message count — honest scope: this is what the thread currently holds. */}

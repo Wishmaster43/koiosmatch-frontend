@@ -95,6 +95,7 @@ import TenantUsageSettings from './sections/TenantUsageSettings'
 import KoiosModelsAdminSettings from './sections/KoiosModelsAdminSettings'
 import JobQueueSettings from './sections/jobs'
 import WhatsAppSettings from './sections/WhatsAppSettings'
+import WhatsAppWebNumbersSettings from './sections/whatsapp/WhatsAppWebNumbersSettings'
 import ImporterenSettings from './sections/ImporterenSettings'
 import ExportSettings from './sections/ExportSettings'
 import FacebookLeadsSettings from './sections/FacebookLeadsSettings'
@@ -637,6 +638,11 @@ export const NAV_GROUPS = [
     key: 'whatsapp', icon: MessageCircle,
     items: [
       { id: 'whatsapp', icon: MessageCircle, component: WhatsAppSettings, requiresPage: 'whatsapp' },
+      // K-195 (VESTIGING-DEVICE-1, CMBE d88ad05e): branch-level WhatsApp Web
+      // devices, module-gated only — no top-level nav page for whatsapp_web
+      // exists, so requiresModuleOrApp (not requiresPage) is the right gate.
+      { id: 'whatsapp_web', icon: MessageCircle, component: WhatsAppWebNumbersSettings,
+        requiresModuleOrApp: { module: 'whatsapp_web' }, requiresPermission: 'settings.view' },
       { id: 'whatsapp_log', icon: ClipboardList, component: WhatsAppLog },
       // Message-type classification (priority_type on whatsapp_send; queue ordering).
       { id: 'wa_message_types', icon: MessageCircle, component: WaMessageTypeSettings },

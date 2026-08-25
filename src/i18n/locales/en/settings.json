@@ -249,7 +249,8 @@
     "automations": "Automations",
     "hf_contract_map": "HelloFlex contract map",
     "report_kpis": "Report cards",
-    "jargon": "Jargon terms"
+    "jargon": "Jargon terms",
+    "whatsapp_web": "WhatsApp Web numbers"
   },
   "kpis": {
     "title": "KPI settings",
@@ -1115,16 +1116,17 @@
       "periodToday": "Today",
       "periodMonth": "This month",
       "plan": {
-        "title": "Plan & credits",
-        "notice": "Current plan, credit progress bar, reset date and credit balance are not available yet. There is no backend model for plans or credits yet.",
+        "title": "Subscription & Koios Tokens",
+        "notice": "Current plan, Koios Tokens progress bar, reset date and balance are not available yet. There is no backend model for subscriptions yet.",
         "loadError": "Could not load your subscription.",
         "unavailable": "You don't have permission to view this.",
         "resetsOn": "Resets on {{date}}",
-        "aiMeter": "Koios AI-tokens",
+        "aiMeter": "AI tokens",
         "workflowMeter": "Koios Tokens",
         "overBudget": "{{meter}}: {{n}} over budget → {{amount}}",
         "meterUsage": "{{used}} used · {{remaining}} left",
-        "meterDrill": "View this meter’s daily usage"
+        "meterDrill": "View this meter’s daily usage",
+        "whatsappMeter": "WhatsApp Tokens"
       },
       "ai": {
         "title": "AI usage (Koios)",
@@ -1151,7 +1153,11 @@
         "colCost": "Cost",
         "empty": "No WhatsApp usage yet this month.",
         "loadError": "Failed to load WhatsApp usage.",
-        "unavailable": "You don't have permission to view this."
+        "unavailable": "You don't have permission to view this.",
+        "colChannel": "Channel",
+        "colTokens": "WhatsApp Tokens",
+        "tokensMeterLabel": "WhatsApp Tokens this period",
+        "fallbackCaption": "This month (per number, channel breakdown not available yet)."
       },
       "daily": {
         "title": "Daily usage",
@@ -1163,7 +1169,7 @@
         "categoryWorkflow": "Workflow",
         "categoryAi": "AI",
         "colDate": "Date",
-        "colWorkflowCredits": "Workflow credits",
+        "colWorkflowCredits": "Koios Tokens",
         "colWorkflowAmount": "Workflow amount",
         "colAiTokens": "AI tokens",
         "colAiAmount": "AI amount",
@@ -1178,27 +1184,6 @@
         "drilldownTitle": "Details for {{date}}",
         "drilldownClose": "Close details"
       },
-      "koios": {
-        "title": "Koios AI billing",
-        "subtitle": "Invoice-ready totals for Claude tokens and workflow token runs.",
-        "monthLabel": "Month",
-        "loadError": "Failed to load Koios billing.",
-        "unavailable": "You don't have permission to view this.",
-        "empty": "No Koios usage yet in this month.",
-        "claude": {
-          "tokensIn": "Tokens in",
-          "tokensOut": "Tokens out",
-          "freeAllowance": "Free allowance (tokens)",
-          "billable": "Billable Claude cost"
-        },
-        "workflow": {
-          "line": "{{n}} workflow module runs",
-          "colModule": "Module",
-          "colRuns": "Runs",
-          "colAmount": "Amount"
-        },
-        "total": "Total"
-      },
       "credits": {
         "periodPrevMonth": "Previous month",
         "unavailable": "You don't have permission to view this."
@@ -1208,11 +1193,79 @@
       "kpi": {
         "totalLabel": "Total this period",
         "workflowLabel": "Workflow",
-        "workflowNote": "{{n}} credits · {{price}}/credit",
-        "koiosLabel": "Koios AI",
+        "workflowNote": "{{n}} Koios Tokens · {{price}}/token",
+        "koiosLabel": "AI tokens",
         "koiosNote": "{{n}} tokens",
         "whatsappLabel": "WhatsApp",
         "whatsappNote": "{{n}} messages"
+      },
+      "tabs": {
+        "overview": "Overview",
+        "activity": "Per activity",
+        "workflow": "Per workflow",
+        "user": "Per user",
+        "whatsapp": "WhatsApp"
+      },
+      "activity": {
+        "title": "Usage per activity",
+        "subtitle": "AI usage per activity and Koios Tokens per module, for the selected period.",
+        "periodCaption": "Usage per activity does not support \"previous month\": it always shows the current period.",
+        "aiSectionTitle": "AI tokens per activity",
+        "workflowSectionTitle": "Koios Tokens per module",
+        "colActivity": "Activity",
+        "colCalls": "Calls",
+        "colTokens": "Tokens",
+        "colAmount": "Amount",
+        "colModule": "Module",
+        "colRuns": "Runs",
+        "empty": "No usage yet in this period.",
+        "loadError": "Loading usage per activity failed.",
+        "unavailable": "You do not have permission to view this.",
+        "activityMap": {
+          "chat": "Chat",
+          "workflow": "Workflow",
+          "note_assist": "Note assistant",
+          "conversation_assist": "Conversation assistant",
+          "entity_generate": "Text generation",
+          "report_advice": "Report advice",
+          "interview": "Interview",
+          "cv_parse": "CV parser"
+        }
+      },
+      "perWorkflow": {
+        "title": "Usage per workflow",
+        "subtitle": "Koios Tokens per workflow, for the selected period.",
+        "colName": "Workflow",
+        "colRuns": "Runs",
+        "colTokens": "Koios Tokens",
+        "colAmount": "Amount",
+        "empty": "No workflow usage yet in this period.",
+        "loadError": "Loading usage per workflow failed.",
+        "unavailable": "You do not have permission to view this.",
+        "rowHint": "Open this workflow"
+      },
+      "perUser": {
+        "title": "Usage per user",
+        "subtitle": "AI tokens per user, for the selected period.",
+        "colName": "User",
+        "colCalls": "Calls",
+        "colTokens": "AI tokens",
+        "colAmount": "Amount",
+        "colSuccessRate": "Success rate",
+        "empty": "No AI usage per user yet in this period.",
+        "loadError": "Loading usage per user failed.",
+        "unavailable": "You do not have permission to view this."
+      },
+      "invoice": {
+        "title": "Invoice preview",
+        "subtitle": "Provisional total for this period, built from Koios Tokens, AI tokens and WhatsApp Tokens.",
+        "totalLabel": "Total this period",
+        "workflowLine": "Koios Tokens",
+        "aiLine": "AI tokens",
+        "whatsappLine": "WhatsApp Tokens",
+        "freeAllowanceNote": "The free allowance for AI tokens is not shown separately here yet. Only the billing endpoint returns that figure (kept out of this page, see the code comment).",
+        "loadError": "Loading the invoice estimate failed.",
+        "unavailable": "You do not have permission to view this."
       }
     },
     "invoices": {
@@ -3446,5 +3499,49 @@
   "dashboardsGoesTo": "Opens {{target}}.",
   "dashboardsCatalogUnavailable": "Explanations are unavailable right now.",
   "dashboardsSaveError": "Saving the KPI setting failed: the change was reverted. Please try again.",
-  "dashboardsSharedDefault": "shared (Default)"
+  "dashboardsSharedDefault": "shared (Default)",
+  "whatsappWeb": {
+    "intro": "Link a separate WhatsApp Web number per branch, alongside the tenant-wide WhatsApp Business account.",
+    "loading": "Loading…",
+    "unavailable": "This feature is not available for your tenant.",
+    "error": "Could not load the branch numbers.",
+    "empty": "No branch numbers linked yet.",
+    "noLocation": "No branch",
+    "contactSyncNote": "This number only syncs contacts from this branch (only with WhatsApp consent).",
+    "addTitle": "Link a branch number",
+    "locationLabel": "Branch",
+    "locationPlaceholder": "Select a branch",
+    "labelField": "Label",
+    "labelPlaceholder": "Label (optional)",
+    "phoneField": "Phone number",
+    "phonePlaceholder": "Phone number (optional)",
+    "submit": "Link branch number",
+    "createError": "Could not link the branch number.",
+    "actionError": "The action failed. Please try again.",
+    "queue": {
+      "title": "Queue limits",
+      "intro": "WhatsApp Web send limits, split by known and new recipients.",
+      "loading": "Loading…",
+      "loadError": "Could not load the queue limits.",
+      "saveError": "Could not save the queue limits.",
+      "knownHourly": "Known, per hour",
+      "newHourly": "New, per hour",
+      "newDaily": "New, per day",
+      "newWeekly": "New, per week",
+      "save": "Save",
+      "saved": "Saved",
+      "readOnlyNote": "You do not have permission to change these limits."
+    }
+  },
+  "dashboardsOnOffFilter": "On/off filter",
+  "dashboardsFilterAll": "All",
+  "dashboardsFilterOn": "On",
+  "dashboardsFilterOff": "Off",
+  "dashboardsGroups": {
+    "block": "Work feeds",
+    "chart": "Charts",
+    "list": "Lists"
+  },
+  "dashboardsNoResults": "No items match this search or filter.",
+  "dashboardsSharedDefaultNote": "This role shares the Default KPI row. A change here also applies to the other roles sharing that row."
 }

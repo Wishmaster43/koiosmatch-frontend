@@ -4,10 +4,10 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import ProfileWhatsAppWeb from './ProfileWhatsAppWeb'
-import { useWhatsAppWeb } from './whatsappWeb/useWhatsAppWeb'
+import { useWhatsAppWeb } from '@/components/whatsappWeb/useWhatsAppWeb'
 
 vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string) => k }), initReactI18next: { type: '3rdParty', init: () => {} } }))
-vi.mock('./whatsappWeb/useWhatsAppWeb', () => ({ useWhatsAppWeb: vi.fn() }))
+vi.mock('@/components/whatsappWeb/useWhatsAppWeb', () => ({ useWhatsAppWeb: vi.fn() }))
 
 const baseHook = {
   devices: [] as unknown[], phase: 'loading' as string, busyId: null, notEnabledId: null,

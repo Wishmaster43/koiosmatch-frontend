@@ -249,7 +249,8 @@
     "automations": "Automatisierungen",
     "hf_contract_map": "HelloFlex-Vertragszuordnung",
     "report_kpis": "Berichtskarten",
-    "jargon": "Fachjargon"
+    "jargon": "Fachjargon",
+    "whatsapp_web": "WhatsApp Web-Nummern"
   },
   "kpis": {
     "title": "KPI-Einstellungen",
@@ -869,16 +870,17 @@
       "periodToday": "Heute",
       "periodMonth": "Diesen Monat",
       "plan": {
-        "title": "Tarif & Guthaben",
-        "notice": "Aktueller Tarif, Guthaben-Fortschrittsbalken, Reset-Datum und Kreditguthaben sind noch nicht verfügbar. Es gibt noch kein Backend-Modell für Tarife oder Guthaben.",
+        "title": "Abonnement & Koios Tokens",
+        "notice": "Aktueller Plan, Koios Tokens Fortschrittsbalken, Reset-Datum und Guthaben sind noch nicht verfügbar. Es gibt noch kein Backend-Modell für Abonnements.",
         "loadError": "Ihr Abonnement konnte nicht geladen werden.",
         "unavailable": "Sie haben keine Berechtigung, dies anzuzeigen.",
         "resetsOn": "Zurücksetzung am {{date}}",
-        "aiMeter": "Koios AI-Tokens",
+        "aiMeter": "KI-Tokens",
         "workflowMeter": "Koios Tokens",
         "overBudget": "{{meter}}: {{n}} über Budget → {{amount}}",
         "meterUsage": "{{used}} verbraucht · {{remaining}} übrig",
-        "meterDrill": "Tagesverbrauch dieses Zählers ansehen"
+        "meterDrill": "Tagesverbrauch dieses Zählers ansehen",
+        "whatsappMeter": "WhatsApp-Tokens"
       },
       "ai": {
         "title": "KI-Nutzung (Koios)",
@@ -905,7 +907,11 @@
         "colCost": "Kosten",
         "empty": "Noch keine WhatsApp-Nutzung diesen Monat.",
         "loadError": "WhatsApp-Nutzung konnte nicht geladen werden.",
-        "unavailable": "Sie haben keine Berechtigung, dies anzusehen."
+        "unavailable": "Sie haben keine Berechtigung, dies anzusehen.",
+        "colChannel": "Kanal",
+        "colTokens": "WhatsApp-Tokens",
+        "tokensMeterLabel": "WhatsApp-Tokens in diesem Zeitraum",
+        "fallbackCaption": "Diesen Monat (pro Nummer, Kanalaufteilung noch nicht verfügbar)."
       },
       "daily": {
         "title": "Tägliche Nutzung",
@@ -917,7 +923,7 @@
         "categoryWorkflow": "Workflow",
         "categoryAi": "KI",
         "colDate": "Datum",
-        "colWorkflowCredits": "Workflow-Credits",
+        "colWorkflowCredits": "Koios-Tokens",
         "colWorkflowAmount": "Workflow-Betrag",
         "colAiTokens": "KI-Token",
         "colAiAmount": "KI-Betrag",
@@ -932,27 +938,6 @@
         "drilldownTitle": "Details für {{date}}",
         "drilldownClose": "Details schließen"
       },
-      "koios": {
-        "title": "Koios-KI-Abrechnung",
-        "subtitle": "Rechnungsfertige Summen für Claude-Tokens und Workflow-Token-Ausführungen.",
-        "monthLabel": "Monat",
-        "loadError": "Koios-Abrechnung konnte nicht geladen werden.",
-        "unavailable": "Sie haben keine Berechtigung, dies anzusehen.",
-        "empty": "Noch keine Koios-Nutzung in diesem Monat.",
-        "claude": {
-          "tokensIn": "Tokens ein",
-          "tokensOut": "Tokens aus",
-          "freeAllowance": "Freikontingent (Tokens)",
-          "billable": "Abrechenbare Claude-Kosten"
-        },
-        "workflow": {
-          "line": "{{n}} Workflow-Modulausführung(en)",
-          "colModule": "Modul",
-          "colRuns": "Ausführungen",
-          "colAmount": "Betrag"
-        },
-        "total": "Gesamt"
-      },
       "credits": {
         "periodPrevMonth": "Vorheriger Monat",
         "unavailable": "Sie haben keine Berechtigung, dies anzuzeigen."
@@ -962,11 +947,79 @@
       "kpi": {
         "totalLabel": "Gesamt in diesem Zeitraum",
         "workflowLabel": "Workflow",
-        "workflowNote": "{{n}} Credits · {{price}}/Credit",
-        "koiosLabel": "Koios AI",
+        "workflowNote": "{{n}} Koios-Tokens · {{price}}/Token",
+        "koiosLabel": "KI-Tokens",
         "koiosNote": "{{n}} Tokens",
         "whatsappLabel": "WhatsApp",
         "whatsappNote": "{{n}} Nachrichten"
+      },
+      "tabs": {
+        "overview": "Übersicht",
+        "activity": "Nach Funktion",
+        "workflow": "Nach Workflow",
+        "user": "Nach Benutzer",
+        "whatsapp": "WhatsApp"
+      },
+      "activity": {
+        "title": "Verbrauch nach Funktion",
+        "subtitle": "KI-Verbrauch nach Funktion und Koios-Tokens nach Modul, für den gewählten Zeitraum.",
+        "periodCaption": "Verbrauch nach Funktion unterstützt kein \"letzten Monat\": zeigt immer den aktuellen Zeitraum.",
+        "aiSectionTitle": "KI-Tokens nach Funktion",
+        "workflowSectionTitle": "Koios-Tokens nach Modul",
+        "colActivity": "Funktion",
+        "colCalls": "Aufrufe",
+        "colTokens": "Tokens",
+        "colAmount": "Betrag",
+        "colModule": "Modul",
+        "colRuns": "Läufe",
+        "empty": "Noch kein Verbrauch in diesem Zeitraum.",
+        "loadError": "Laden des Verbrauchs nach Funktion fehlgeschlagen.",
+        "unavailable": "Du hast keine Berechtigung, dies anzuzeigen.",
+        "activityMap": {
+          "chat": "Chat",
+          "workflow": "Workflow",
+          "note_assist": "Notiz-Assistent",
+          "conversation_assist": "Gesprächsassistent",
+          "entity_generate": "Textgenerierung",
+          "report_advice": "Berichtsempfehlung",
+          "interview": "Interview",
+          "cv_parse": "Lebenslauf-Parser"
+        }
+      },
+      "perWorkflow": {
+        "title": "Verbrauch nach Workflow",
+        "subtitle": "Koios-Tokens nach Workflow, für den gewählten Zeitraum.",
+        "colName": "Workflow",
+        "colRuns": "Läufe",
+        "colTokens": "Koios-Tokens",
+        "colAmount": "Betrag",
+        "empty": "Noch kein Workflow-Verbrauch in diesem Zeitraum.",
+        "loadError": "Laden des Verbrauchs nach Workflow fehlgeschlagen.",
+        "unavailable": "Du hast keine Berechtigung, dies anzuzeigen.",
+        "rowHint": "Diesen Workflow öffnen"
+      },
+      "perUser": {
+        "title": "Verbrauch nach Benutzer",
+        "subtitle": "KI-Tokens nach Benutzer, für den gewählten Zeitraum.",
+        "colName": "Benutzer",
+        "colCalls": "Aufrufe",
+        "colTokens": "KI-Tokens",
+        "colAmount": "Betrag",
+        "colSuccessRate": "Erfolgsquote",
+        "empty": "Noch kein KI-Verbrauch nach Benutzer in diesem Zeitraum.",
+        "loadError": "Laden des Verbrauchs nach Benutzer fehlgeschlagen.",
+        "unavailable": "Du hast keine Berechtigung, dies anzuzeigen."
+      },
+      "invoice": {
+        "title": "Rechnungsvorschau",
+        "subtitle": "Vorläufige Summe für diesen Zeitraum, aus Koios-Tokens, KI-Tokens und WhatsApp-Tokens.",
+        "totalLabel": "Gesamt in diesem Zeitraum",
+        "workflowLine": "Koios-Tokens",
+        "aiLine": "KI-Tokens",
+        "whatsappLine": "WhatsApp-Tokens",
+        "freeAllowanceNote": "Das Freikontingent für KI-Tokens wird hier noch nicht separat angezeigt. Dieser Wert liefert nur der Abrechnungs-Endpunkt (bewusst außerhalb dieser Seite gehalten, siehe Code-Kommentar).",
+        "loadError": "Der Rechnungsvorschuss konnte nicht geladen werden.",
+        "unavailable": "Du hast keine Berechtigung, dies anzuzeigen."
       }
     },
     "invoices": {
@@ -3446,5 +3499,49 @@
   "dashboardsGoesTo": "Öffnet {{target}}.",
   "dashboardsCatalogUnavailable": "Erklärungen sind derzeit nicht verfügbar.",
   "dashboardsSaveError": "Speichern der KPI-Einstellung fehlgeschlagen: die Änderung wurde zurückgesetzt. Bitte erneut versuchen.",
-  "dashboardsSharedDefault": "geteilt (Standard)"
+  "dashboardsSharedDefault": "geteilt (Standard)",
+  "whatsappWeb": {
+    "intro": "Verknüpfe eine eigene WhatsApp Web-Nummer pro Niederlassung, neben dem unternehmensweiten WhatsApp Business-Konto.",
+    "loading": "Wird geladen…",
+    "unavailable": "Diese Funktion ist für deinen Mandanten nicht verfügbar.",
+    "error": "Die Niederlassungsnummern konnten nicht geladen werden.",
+    "empty": "Noch keine Niederlassungsnummern verknüpft.",
+    "noLocation": "Keine Niederlassung",
+    "contactSyncNote": "Diese Nummer synchronisiert nur Kontakte dieser Niederlassung (nur mit WhatsApp-Zustimmung).",
+    "addTitle": "Niederlassungsnummer verknüpfen",
+    "locationLabel": "Niederlassung",
+    "locationPlaceholder": "Niederlassung wählen",
+    "labelField": "Name",
+    "labelPlaceholder": "Name (optional)",
+    "phoneField": "Telefonnummer",
+    "phonePlaceholder": "Telefonnummer (optional)",
+    "submit": "Niederlassungsnummer verknüpfen",
+    "createError": "Die Niederlassungsnummer konnte nicht verknüpft werden.",
+    "actionError": "Die Aktion ist fehlgeschlagen. Bitte erneut versuchen.",
+    "queue": {
+      "title": "Warteschlangenlimits",
+      "intro": "Sendelimits für WhatsApp Web, getrennt nach bekannten und neuen Empfängern.",
+      "loading": "Wird geladen…",
+      "loadError": "Die Warteschlangenlimits konnten nicht geladen werden.",
+      "saveError": "Die Warteschlangenlimits konnten nicht gespeichert werden.",
+      "knownHourly": "Bekannt, pro Stunde",
+      "newHourly": "Neu, pro Stunde",
+      "newDaily": "Neu, pro Tag",
+      "newWeekly": "Neu, pro Woche",
+      "save": "Speichern",
+      "saved": "Gespeichert",
+      "readOnlyNote": "Du hast keine Berechtigung, diese Limits zu ändern."
+    }
+  },
+  "dashboardsOnOffFilter": "Ein/Aus-Filter",
+  "dashboardsFilterAll": "Alle",
+  "dashboardsFilterOn": "Ein",
+  "dashboardsFilterOff": "Aus",
+  "dashboardsGroups": {
+    "block": "Arbeitsfeeds",
+    "chart": "Diagramme",
+    "list": "Listen"
+  },
+  "dashboardsNoResults": "Keine Einträge für diese Suche oder diesen Filter.",
+  "dashboardsSharedDefaultNote": "Diese Rolle teilt die KPI-Zeile von Standard. Eine Änderung gilt auch für die anderen Rollen mit dieser Zeile."
 }

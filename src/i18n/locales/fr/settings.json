@@ -249,7 +249,8 @@
     "automations": "Automatisations",
     "hf_contract_map": "Correspondance des contrats HelloFlex",
     "report_kpis": "Cartes de rapport",
-    "jargon": "Jargon métier"
+    "jargon": "Jargon métier",
+    "whatsapp_web": "Numéros WhatsApp Web"
   },
   "kpis": {
     "title": "Paramètres KPI",
@@ -869,16 +870,17 @@
       "periodToday": "Aujourd'hui",
       "periodMonth": "Ce mois-ci",
       "plan": {
-        "title": "Forfait & crédits",
-        "notice": "Le forfait actuel, la barre de progression des crédits, la date de réinitialisation et le solde de crédits ne sont pas encore disponibles. Il n'existe pas encore de modèle backend pour les forfaits ou les crédits.",
+        "title": "Abonnement et Koios Tokens",
+        "notice": "Le plan actuel, la barre de progression des Koios Tokens, la date de réinitialisation et le solde ne sont pas encore disponibles. Il n'existe pas encore de modèle backend pour les abonnements.",
         "loadError": "Impossible de charger votre abonnement.",
         "unavailable": "Vous n'avez pas les droits pour voir ceci.",
         "resetsOn": "Réinitialisation le {{date}}",
-        "aiMeter": "Jetons Koios AI",
+        "aiMeter": "Jetons IA",
         "workflowMeter": "Jetons Koios",
         "overBudget": "{{meter}} : {{n}} au-delà du budget → {{amount}}",
         "meterUsage": "{{used}} utilisés · {{remaining}} restants",
-        "meterDrill": "Voir la consommation quotidienne de ce compteur"
+        "meterDrill": "Voir la consommation quotidienne de ce compteur",
+        "whatsappMeter": "Jetons WhatsApp"
       },
       "ai": {
         "title": "Utilisation IA (Koios)",
@@ -905,7 +907,11 @@
         "colCost": "Coût",
         "empty": "Aucune utilisation WhatsApp ce mois-ci.",
         "loadError": "Échec du chargement de l'utilisation WhatsApp.",
-        "unavailable": "Vous n'avez pas les droits pour consulter ceci."
+        "unavailable": "Vous n'avez pas les droits pour consulter ceci.",
+        "colChannel": "Canal",
+        "colTokens": "Jetons WhatsApp",
+        "tokensMeterLabel": "Jetons WhatsApp cette période",
+        "fallbackCaption": "Ce mois-ci (par numéro, répartition par canal pas encore disponible)."
       },
       "daily": {
         "title": "Utilisation quotidienne",
@@ -917,7 +923,7 @@
         "categoryWorkflow": "Workflow",
         "categoryAi": "IA",
         "colDate": "Date",
-        "colWorkflowCredits": "Crédits workflow",
+        "colWorkflowCredits": "Jetons Koios",
         "colWorkflowAmount": "Montant workflow",
         "colAiTokens": "Jetons IA",
         "colAiAmount": "Montant IA",
@@ -932,27 +938,6 @@
         "drilldownTitle": "Détails pour {{date}}",
         "drilldownClose": "Fermer les détails"
       },
-      "koios": {
-        "title": "Facturation Koios IA",
-        "subtitle": "Totaux prêts à facturer pour les jetons Claude et les exécutions de jetons de workflow.",
-        "monthLabel": "Mois",
-        "loadError": "Échec du chargement de la facturation Koios.",
-        "unavailable": "Vous n'avez pas les droits pour consulter ceci.",
-        "empty": "Aucune utilisation Koios ce mois-ci.",
-        "claude": {
-          "tokensIn": "Jetons entrants",
-          "tokensOut": "Jetons sortants",
-          "freeAllowance": "Quota gratuit (jetons)",
-          "billable": "Coût Claude facturable"
-        },
-        "workflow": {
-          "line": "{{n}} exécution(s) de module de workflow",
-          "colModule": "Module",
-          "colRuns": "Exécutions",
-          "colAmount": "Montant"
-        },
-        "total": "Total"
-      },
       "credits": {
         "periodPrevMonth": "Mois précédent",
         "unavailable": "Vous n'avez pas la permission de voir ceci."
@@ -962,11 +947,79 @@
       "kpi": {
         "totalLabel": "Total sur la période",
         "workflowLabel": "Workflow",
-        "workflowNote": "{{n}} crédits · {{price}}/crédit",
-        "koiosLabel": "Koios AI",
+        "workflowNote": "{{n}} jetons Koios · {{price}}/jeton",
+        "koiosLabel": "Jetons IA",
         "koiosNote": "{{n}} jetons",
         "whatsappLabel": "WhatsApp",
         "whatsappNote": "{{n}} messages"
+      },
+      "tabs": {
+        "overview": "Aperçu",
+        "activity": "Par activité",
+        "workflow": "Par workflow",
+        "user": "Par utilisateur",
+        "whatsapp": "WhatsApp"
+      },
+      "activity": {
+        "title": "Utilisation par activité",
+        "subtitle": "Utilisation IA par activité et jetons Koios par module, pour la période choisie.",
+        "periodCaption": "L'utilisation par activité ne prend pas en charge \"mois précédent\": elle affiche toujours la période en cours.",
+        "aiSectionTitle": "Jetons IA par activité",
+        "workflowSectionTitle": "Jetons Koios par module",
+        "colActivity": "Activité",
+        "colCalls": "Appels",
+        "colTokens": "Jetons",
+        "colAmount": "Montant",
+        "colModule": "Module",
+        "colRuns": "Exécutions",
+        "empty": "Pas encore d'utilisation sur cette période.",
+        "loadError": "Le chargement de l'utilisation par activité a échoué.",
+        "unavailable": "Vous n'avez pas l'autorisation de voir ceci.",
+        "activityMap": {
+          "chat": "Chat",
+          "workflow": "Workflow",
+          "note_assist": "Assistant de notes",
+          "conversation_assist": "Assistant de conversation",
+          "entity_generate": "Génération de texte",
+          "report_advice": "Conseil de rapport",
+          "interview": "Entretien",
+          "cv_parse": "Analyse de CV"
+        }
+      },
+      "perWorkflow": {
+        "title": "Utilisation par workflow",
+        "subtitle": "Jetons Koios par workflow, pour la période choisie.",
+        "colName": "Workflow",
+        "colRuns": "Exécutions",
+        "colTokens": "Jetons Koios",
+        "colAmount": "Montant",
+        "empty": "Pas encore d'utilisation de workflow sur cette période.",
+        "loadError": "Le chargement de l'utilisation par workflow a échoué.",
+        "unavailable": "Vous n'avez pas l'autorisation de voir ceci.",
+        "rowHint": "Ouvrir ce workflow"
+      },
+      "perUser": {
+        "title": "Utilisation par utilisateur",
+        "subtitle": "Jetons IA par utilisateur, pour la période choisie.",
+        "colName": "Utilisateur",
+        "colCalls": "Appels",
+        "colTokens": "Jetons IA",
+        "colAmount": "Montant",
+        "colSuccessRate": "Taux de réussite",
+        "empty": "Pas encore d'utilisation IA par utilisateur sur cette période.",
+        "loadError": "Le chargement de l'utilisation par utilisateur a échoué.",
+        "unavailable": "Vous n'avez pas l'autorisation de voir ceci."
+      },
+      "invoice": {
+        "title": "Aperçu de facture",
+        "subtitle": "Total provisoire pour cette période, composé des jetons Koios, des jetons IA et des jetons WhatsApp.",
+        "totalLabel": "Total sur cette période",
+        "workflowLine": "Jetons Koios",
+        "aiLine": "Jetons IA",
+        "whatsappLine": "Jetons WhatsApp",
+        "freeAllowanceNote": "Le forfait gratuit pour les jetons IA n'est pas encore affiché séparément ici. Seul le point de terminaison de facturation renvoie ce chiffre (volontairement exclu de cette page, voir le commentaire de code).",
+        "loadError": "Le chargement de l'estimation de facture a échoué.",
+        "unavailable": "Vous n'avez pas l'autorisation de consulter ceci."
       }
     },
     "invoices": {
@@ -3446,5 +3499,49 @@
   "dashboardsGoesTo": "Ouvre {{target}}.",
   "dashboardsCatalogUnavailable": "Les explications ne sont pas disponibles pour le moment.",
   "dashboardsSaveError": "L'enregistrement du réglage KPI a échoué : la modification a été annulée. Veuillez réessayer.",
-  "dashboardsSharedDefault": "partagé (Défaut)"
+  "dashboardsSharedDefault": "partagé (Défaut)",
+  "whatsappWeb": {
+    "intro": "Associez un numéro WhatsApp Web distinct par agence, en plus du compte WhatsApp Business de l'entreprise.",
+    "loading": "Chargement…",
+    "unavailable": "Cette fonction n'est pas disponible pour votre organisation.",
+    "error": "Impossible de charger les numéros d'agence.",
+    "empty": "Aucun numéro d'agence associé pour l'instant.",
+    "noLocation": "Aucune agence",
+    "contactSyncNote": "Ce numéro ne synchronise que les contacts de cette agence (uniquement avec consentement WhatsApp).",
+    "addTitle": "Associer un numéro d'agence",
+    "locationLabel": "Agence",
+    "locationPlaceholder": "Sélectionner une agence",
+    "labelField": "Nom",
+    "labelPlaceholder": "Nom (facultatif)",
+    "phoneField": "Numéro de téléphone",
+    "phonePlaceholder": "Numéro de téléphone (facultatif)",
+    "submit": "Associer le numéro d'agence",
+    "createError": "Impossible d'associer le numéro d'agence.",
+    "actionError": "L'action a échoué. Veuillez réessayer.",
+    "queue": {
+      "title": "Limites de file d'attente",
+      "intro": "Limites d'envoi WhatsApp Web, séparées entre destinataires connus et nouveaux.",
+      "loading": "Chargement…",
+      "loadError": "Impossible de charger les limites de file d'attente.",
+      "saveError": "Impossible d'enregistrer les limites de file d'attente.",
+      "knownHourly": "Connus, par heure",
+      "newHourly": "Nouveaux, par heure",
+      "newDaily": "Nouveaux, par jour",
+      "newWeekly": "Nouveaux, par semaine",
+      "save": "Enregistrer",
+      "saved": "Enregistré",
+      "readOnlyNote": "Vous n'avez pas le droit de modifier ces limites."
+    }
+  },
+  "dashboardsOnOffFilter": "Filtre activé/désactivé",
+  "dashboardsFilterAll": "Tout",
+  "dashboardsFilterOn": "Activé",
+  "dashboardsFilterOff": "Désactivé",
+  "dashboardsGroups": {
+    "block": "Flux de travail",
+    "chart": "Graphiques",
+    "list": "Listes"
+  },
+  "dashboardsNoResults": "Aucun élément ne correspond à cette recherche ou à ce filtre.",
+  "dashboardsSharedDefaultNote": "Ce rôle partage la ligne KPI par défaut. Une modification s'applique aussi aux autres rôles qui la partagent."
 }
