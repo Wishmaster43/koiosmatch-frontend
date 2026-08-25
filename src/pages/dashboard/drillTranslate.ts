@@ -11,6 +11,7 @@
  *   tasks         → TasksPage intent (kpi/status/priority/type/assignee)
  *   applications  → ApplicationsPage intent (stage/vacancy/attention)
  *   opportunities → OpportunitiesPage intent (stage/kpi)
+ *   customers     → CustomersPage intent (owner/phase) [DASH-FEEDS-V3]
  *   conversations → WhatsAppPage intent (tab)
  * A descriptor with ANY param this table cannot express returns null — the tile
  * then keeps its legacy intent (a working, possibly broader drill) instead of a
@@ -87,12 +88,15 @@ const ENTITY_PAGES: Record<string, { page: string; params: Record<string, ParamT
   // an empty set: matches/vacancies drills with params translate only when empty.
   matches:   { page: 'matches',   params: {} },
   vacancies: { page: 'vacancies', params: {} },
-  // customers is DELIBERATELY param-less: the customers_active descriptor
-  // carries { status: 'active' } but CustomersPage reads no intent vocabulary
-  // yet — the tile falls back to the plain customers list until the customers
-  // intent lands (wave 1c, with the filter dimensions). Third documented
-  // untranslatable next to applications.bucket and candidates.document_expiring.
-  customers: { page: 'customers', params: {} },
+  // DASH-FEEDS-V3: CustomersPage now has an intent vocabulary (owner/phase),
+  // wired via CustomerIntent in CustomersPage.tsx.
+  customers: {
+    page: 'customers',
+    params: {
+      owner_id: v => ({ owner: v }),
+      phase: v => ({ phase: v }),
+    },
+  },
   // external-id-mapping-failures → CouplingErrorsPage (K-173 fase 5), a
   // deep-link-only page (no sidebar entry, no filterable params of its own).
   'external-id-mapping-failures': { page: 'coupling-errors', params: {} },

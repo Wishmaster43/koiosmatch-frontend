@@ -48,10 +48,12 @@ vi.mock('./hooks/useCustomersData', () => ({
   useCustomersData: (...args: unknown[]) => useCustomersDataMock(...args),
   CUSTOMERS_MAX_PER_PAGE: 200,
 }))
+// Hoisted so the intent-seam test below can assert the exact opener call.
+const selectCustomerSpy = vi.hoisted(() => vi.fn())
 vi.mock('./hooks/useCustomerRecord', () => ({
   useCustomerRecord: () => ({
     selected: null, detail: null, drawerExpanded: false, setDrawerExpanded: vi.fn(), drawerTab: undefined,
-    closeDrawer: vi.fn(), selectCustomer: vi.fn(), updateCustomer: vi.fn(), handleCreate: vi.fn(), addNote: vi.fn(),
+    closeDrawer: vi.fn(), selectCustomer: selectCustomerSpy, updateCustomer: vi.fn(), handleCreate: vi.fn(), addNote: vi.fn(),
   }),
 }))
 vi.mock('./hooks/useCustomerBulkActions', () => ({
@@ -221,5 +223,35 @@ describe('CustomersPage · toolbar quick-view toggles (candidate parity, TOOLBAR
     await waitFor(() => expect(screen.getByText(cm('map.loading'))).toBeInTheDocument())
 
     await user.click(mapBtn) // clean up
+  })
+})
+
+// DASH-FEEDS-V3: the dashboard's customers-by-owner donut / by-phase donut
+// deep-link with an intent; the page must seed the SERVER filter from it (the
+// receiving half of the drillTranslate seam — §13: assert the request, not the
+// callback). Kept LAST in this file: usePageMemory is a module-level store and
+// this intent leaves owner/phase picked.
+describe('CustomersPage · dashboard intent seeds the owner/phase filters (DASH-FEEDS-V3)', () => {
+  it('an { owner, phase } intent lands as owner_id[] + phase[] in filterParams', async () => {
+    useCustomersDataMock.mockReturnValue(baseResult)
+    render(<CustomersPage intent={{ owner: 5, phase: 'prospect' }} />)
+    await waitFor(() => {
+      const last = useCustomersDataMock.mock.calls[useCustomersDataMock.mock.calls.length - 1][0].filterParams
+      expect(last.owner_id).toEqual(['5'])
+      expect(last.phase).toEqual(['prospect'])
+    })
+    await waitFor(() => expect(apiGet).toHaveBeenCalled())
+  })
+})
+
+// DASH-FEEDS-V3: a "vacatures per klant" bar deep-links with { open, tab } — the
+// tab must reach the record opener (it used to be dropped, so every cross-page
+// link landed on the default tab).
+describe('CustomersPage · cross-entity intent forwards the drawer tab', () => {
+  it('{ open, tab } reaches selectCustomer with the tab', async () => {
+    useCustomersDataMock.mockReturnValue(baseResult)
+    render(<CustomersPage intent={{ open: 'c-7', tab: 'vacancies' }} />)
+    await waitFor(() => expect(selectCustomerSpy).toHaveBeenCalledWith({ id: 'c-7' }, 'vacancies'))
+    await waitFor(() => expect(apiGet).toHaveBeenCalled())
   })
 })

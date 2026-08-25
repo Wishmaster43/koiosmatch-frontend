@@ -55,7 +55,16 @@ const KPI_PRED: Record<string, (c: Customer) => boolean> = {
   noContact:   c => c.contactsCount === 0,
 }
 
-export default function CustomersPage({ intent }: { intent?: unknown } = {}) {
+// DASH-FEEDS-V3: dashboard donut click-through (customers by owner / by phase).
+interface CustomerIntent {
+  owner?: string | number
+  phase?: string
+  // Cross-entity record link ({ open, tab }) — consumed by useOpenFromIntent.
+  open?: string | number
+  tab?: string
+}
+
+export default function CustomersPage({ intent }: { intent?: CustomerIntent } = {}) {
   const { t } = useTranslation(['customers', 'common'])
   const { registerFilters, unregisterFilters } = useRightPanel()
   const auth = useAuth()
@@ -117,6 +126,13 @@ export default function CustomersPage({ intent }: { intent?: unknown } = {}) {
   // Period (created date range) from a dashboard bar click — mirrors the candidate page.
   const [dateRange, setDateRange] = usePageMemory<CustomerDateRange | null>('cust.dateRange', null)
 
+  // DASH-FEEDS-V3: dashboard donut click-through (customers by owner / by phase).
+  useEffect(() => {
+    if (!intent) return
+    if (intent.owner != null) setSelectedOwner([String(intent.owner)])
+    if (intent.phase)         setSelectedPhase([intent.phase])
+  }, [intent, setSelectedOwner, setSelectedPhase])
+
   const filterParams = useMemo(() => {
     const p: Record<string, unknown> = {}
     // NUMMER-1: a typed reference number (D-4) does an exact server-side `?ref=`
@@ -170,8 +186,10 @@ export default function CustomersPage({ intent }: { intent?: unknown } = {}) {
   const { toggleRow, toggleAll, bulkSetOwner, bulkSetStatus, bulkAddTag, bulkRemoveTag, bulkAddNote, bulkArchive, bulkGeocode, bulkCoupleBackoffice, selectedTags, dialog: bulkConfirmDialog } =
     useCustomerBulkActions({ customers, setCustomers, setTotal, selectedIds, setSelectedIds, notify, statusMeta, t })
 
-  // Open a customer drawer when arriving via a cross-entity link (intent).
-  useOpenFromIntent(intent, (id) => selectCustomer({ id } as Parameters<typeof selectCustomer>[0]))
+  // Open a customer drawer when arriving via a cross-entity link (intent). The
+  // intent may name a drawer tab (a dashboard "vacatures per klant" bar lands on
+  // Vacatures) — forward it, never drop it (DASH-FEEDS-V3).
+  useOpenFromIntent(intent, (id, tab) => selectCustomer({ id } as Parameters<typeof selectCustomer>[0], tab))
 
   // Mirror the open drawer in the URL (?open=<id>): browser back/forward walks
   // through it and a copied link reopens the same customer (NAV-BACK-1;

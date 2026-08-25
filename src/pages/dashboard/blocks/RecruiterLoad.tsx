@@ -8,6 +8,11 @@
  * a load bar relative to the busiest recruiter, and a calm caption line with the
  * planned intakes; too-long-in-stage renders as a warning-tinted chip ONLY when
  * it is non-zero (§4: colour carries meaning, never decoration).
+ *
+ * DASH-FEEDS-V3: an optional `onNavigate` makes each row click through to that
+ * recruiter's candidates (owner filter) — inert (no cursor, no click) when not
+ * given. No server-side "norm" exists for the load bar, so it stays relative to
+ * the busiest recruiter in the row set, as before.
  */
 import { useTranslation } from 'react-i18next'
 import { Block } from '../DashboardPrimitives'
@@ -15,9 +20,13 @@ import Avatar from '@/components/ui/Avatar'
 import SoftChip from '@/components/ui/SoftChip'
 import { BodyText, Caption, Mono } from '@/components/ui/typography'
 import { initialsOf } from '@/lib/initials'
+import { interactive } from '@/lib/a11y'
 import type { RecruiterLoadRow } from '@/types/dashboard'
 
-export default function RecruiterLoad({ rows }: { rows: RecruiterLoadRow[] }) {
+export default function RecruiterLoad({ rows, onNavigate }: {
+  rows: RecruiterLoadRow[]
+  onNavigate?: (page: string, params?: Record<string, unknown>) => void
+}) {
   const { t } = useTranslation('dashboard')
   if (!rows.length) return null
 
@@ -30,7 +39,11 @@ export default function RecruiterLoad({ rows }: { rows: RecruiterLoadRow[] }) {
         {rows.map(r => {
           const pct = top > 0 ? Math.round((r.open_tasks / top) * 100) : 0
           return (
-            <div key={r.user_id}>
+            <div
+              key={r.user_id}
+              {...interactive(onNavigate ? () => onNavigate('candidates', { owner: r.user_id }) : undefined)}
+              style={onNavigate ? { cursor: 'pointer' } : undefined}
+            >
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
                 <Avatar initials={initialsOf(r.name, '–')} size={22} soft />
                 <BodyText as="span" style={{ flex: 1, minWidth: 0, fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>

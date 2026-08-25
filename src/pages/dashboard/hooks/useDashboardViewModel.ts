@@ -13,7 +13,7 @@ import type { DashStats, DashOpp, DashData, TimeseriesPoint, TrendRow } from '@/
 import type { LookupItem } from '@/context/LookupsContext'
 import { buildDashboardKpis, type DashboardKpi } from '../dashboardKpis'
 import { serverKeysToLocal, apiRoleForType } from '../kpiKeyMap'
-import { visibleBlock, kpiRow } from '../templates'
+import { visibleBlock, kpiRow, PLANNING_BLOCKS } from '../templates'
 import type { DashboardType } from '../templates'
 import { humanize, fmtWhen, eur } from '../dashboardFormat'
 // DASH-VOLGORDE-1: reuse the reports domain's pure order-resolver (§2 public surface)
@@ -49,7 +49,9 @@ export function useDashboardViewModel({
   onNavigate,
 }: UseDashboardViewModelArgs) {
   // Is a chart/list block visible for the active role, and not switched off in Settings?
-  const vis = (id: string) => visibleBlock(activeType, id) && !hiddenBlocks.includes(id) && (id !== 'block.shifts' || hasPlanning)
+  // K-173 fase 6 — every planning-gated block (shifts + the five v3 planning
+  // feeds) shares one gate (PLANNING_BLOCKS), not a single 'block.shifts' literal.
+  const vis = (id: string) => visibleBlock(activeType, id) && !hiddenBlocks.includes(id) && (!PLANNING_BLOCKS.has(id) || hasPlanning)
 
   // Chart data: [{ name, value, color }] for the shared chart cards.
   const statusData = useMemo(() =>
@@ -109,16 +111,8 @@ export function useDashboardViewModel({
     onClick: s.vacancy_id != null ? () => onNavigate?.('vacancies', { open: s.vacancy_id }) : undefined,
   })), [dash, onNavigate, formatNumber])
 
-  // sales_manager only — a breakdown, not a record list, so it never navigates.
-  const customersByOwnerRows = useMemo(() => (dash?.customers_by_owner ?? []).map((c, i) => ({
-    // Index fallback (stable per render), never Math.random (a fresh key per
-    // render would remount the row). Aggregates carry no onClick — the explicit
-    // undefined keeps every widget row the same shape (test relies on it).
-    key: c.owner_id ?? c.name ?? `row-${i}`,
-    primary: c.name || '—',
-    meta: c.count != null ? formatNumber(c.count) : undefined,
-    onClick: undefined as (() => void) | undefined,
-  })), [dash, formatNumber])
+  // customersByOwnerRows moved to blocks/sales/CustomersByOwnerDonut.tsx
+  // (DASH-FEEDS-PACK-1 / feedRegistry), which reads dash.customers_by_owner directly.
 
   const recentLeads = useMemo(() => (dash?.recent?.leads ?? []).map(l => ({
     id: l.id, name: l.name, contact: l.contact_name || '—',
@@ -261,7 +255,7 @@ export function useDashboardViewModel({
     recentCandidates, recentApplications, recentLeads, runs, conversations,
     showRuns, showConv, trendData, trendSeries, shifts, kpis: kpiCards, scope,
     // KD11 widget feeds (DASHP36).
-    expiringMatchesRows, staleVacanciesRows, koiosSuggestionsRows, customersByOwnerRows,
+    expiringMatchesRows, staleVacanciesRows, koiosSuggestionsRows,
     // K-173 fase 6 feeds.
     recruiterLoadRows, oppAgingRows,
   }

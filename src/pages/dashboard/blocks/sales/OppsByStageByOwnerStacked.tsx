@@ -1,0 +1,64 @@
+/**
+ * OppsByStageByOwnerStacked — sales_manager tile: opportunities grouped by
+ * stage, stacked per owner, from dash.opps_by_stage_by_owner. One bar per
+ * stage, one stacked series per owner (union across all stages, keyed on
+ * owner_id ?? 'none'). Clicking a bar segment filters the opportunities page
+ * on that stage only — the opportunities page has no owner intent (measured:
+ * it filters by owner NAME strings, not an id param).
+ */
+import { useTranslation } from 'react-i18next'
+import WeeklyBarChartCard from '@/components/charts/WeeklyBarChartCard'
+import type { BarSeries } from '@/components/charts/WeeklyBarChartCard'
+import { CHART_SERIES_COLORS } from '@/components/charts/chartTypes'
+import type { ChartDatum } from '@/components/charts/chartTypes'
+import { Panel } from '@/pages/dashboard/DashboardPrimitives'
+import type { OppsByStageByOwnerRow } from '@/types/dashboard'
+import type { FeedTileContext } from '../feedTileKit'
+
+export default function OppsByStageByOwnerStacked({ rows, onNavigate }: {
+  rows: OppsByStageByOwnerRow[]
+  onNavigate?: FeedTileContext['onNavigate']
+}) {
+  const { t } = useTranslation('dashboard')
+
+  // Union of owners across every stage, in first-seen order, so series stay
+  // stable regardless of which stage lists them first.
+  const ownerKeys: string[] = []
+  const ownerLabels: Record<string, string> = {}
+  rows.forEach(stage => stage.by_owner.forEach(o => {
+    const key = o.owner_id ?? 'none'
+    if (!ownerKeys.includes(key)) {
+      ownerKeys.push(key)
+      ownerLabels[key] = o.owner_id == null ? t('feed.unassigned') : (o.name || t('widget.unknown'))
+    }
+  }))
+
+  const series: BarSeries[] = ownerKeys.map((key, i) => ({
+    key, label: ownerLabels[key], color: CHART_SERIES_COLORS[i % CHART_SERIES_COLORS.length],
+  }))
+
+  // One row per stage; each owner's count lands in its own series field.
+  const data = rows.map(stage => {
+    // `value` is unused by the grouped/stacked bars (each series reads its own
+    // owner key) but is required by the shared ChartDatum shape.
+    const row: Record<string, unknown> = { name: stage.stage_label, value: 0, stageId: stage.stage_id }
+    ownerKeys.forEach(key => { row[key] = 0 })
+    stage.by_owner.forEach(o => { row[o.owner_id ?? 'none'] = o.count })
+    return row
+  }) as ChartDatum[]
+
+  return (
+    <Panel>
+      <WeeklyBarChartCard
+        title={t('block.oppsByStageByOwner')}
+        data={data}
+        series={series}
+        stacked
+        onBarClick={(row) => {
+          const stageId = (row as { stageId?: string }).stageId
+          if (stageId != null) onNavigate?.('opportunities', { stage: stageId })
+        }}
+      />
+    </Panel>
+  )
+}

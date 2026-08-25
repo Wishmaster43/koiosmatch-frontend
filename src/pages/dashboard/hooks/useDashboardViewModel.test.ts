@@ -170,7 +170,6 @@ describe('useDashboardViewModel · KD11 (DASHP36) widget-feed rows', () => {
         expiring_matches: [{ id: 1, candidate_name: 'Jan Jansen', customer_name: 'Acme', end_date: '2026-09-01' }],
         stale_vacancies: [{ id: 3, title: 'Verpleegkundige', published_at: '2026-06-01' }],
         koios_suggestions: [{ vacancy_id: 4, vacancy_title: 'Chauffeur', suggestions_count: 7 }],
-        customers_by_owner: [{ owner_id: 5, name: 'Team A', count: 12 }],
       },
       onNavigate,
     })))
@@ -184,10 +183,16 @@ describe('useDashboardViewModel · KD11 (DASHP36) widget-feed rows', () => {
 
     result.current.koiosSuggestionsRows[0].onClick?.()
     expect(onNavigate).toHaveBeenCalledWith('vacancies', { open: 4 })
+  })
 
-    // The sales_manager breakdown never navigates — it's an aggregate, not a record.
-    expect(result.current.customersByOwnerRows[0].onClick).toBeUndefined()
-    expect(result.current.customersByOwnerRows[0].primary).toBe('Team A')
+  // customersByOwnerRows moved to blocks/sales/CustomersByOwnerDonut.tsx — the
+  // hook no longer returns it (mirrors the staleLeadsRows resilience pin below).
+  it('no longer returns customersByOwnerRows', () => {
+    const { result } = renderHook(() => useDashboardViewModel(baseArgs({
+      activeType: 'sales_manager' as const,
+      dash: { customers_by_owner: [{ owner_id: 5, name: 'Team A', count: 12 }] },
+    })))
+    expect(result.current).not.toHaveProperty('customersByOwnerRows')
   })
 
   // Resilience pin (measured map step 7): staleLeadsRows was removed from the
@@ -422,5 +427,29 @@ describe('useDashboardViewModel · v3 shift keys hide on module absence', () => 
     expect(byId.shiftsUnconfirmed).toBe('1')
     expect(byId.shiftsNoshowToday).toBe('—')
     expect(byId.shiftsCancelledToday).toBe('0')
+  })
+})
+
+// PLANNING_BLOCKS gate — vis() must hide every planning-feed block id (not just
+// the legacy 'block.shifts') when the tenant lacks the planning module, and show
+// them all once it has it.
+describe('useDashboardViewModel · vis() gates on PLANNING_BLOCKS, not a single literal', () => {
+  const planningIds = [
+    'block.shifts', 'block.shiftCoverageHeatmap', 'block.openShiftsList',
+    'block.occupancyByCustomer', 'block.shiftStatusToday', 'block.shiftsUnconfirmedList',
+  ]
+
+  it('hides every planning block id when hasPlanning is false', () => {
+    const { result } = renderHook(() => useDashboardViewModel(baseArgs({
+      activeType: 'planning' as const, hasPlanning: false, dash: { kpis: {} },
+    })))
+    for (const id of planningIds) expect(result.current.vis(id)).toBe(false)
+  })
+
+  it('shows every planning block id when hasPlanning is true', () => {
+    const { result } = renderHook(() => useDashboardViewModel(baseArgs({
+      activeType: 'planning' as const, hasPlanning: true, dash: { kpis: {} },
+    })))
+    for (const id of planningIds) expect(result.current.vis(id)).toBe(true)
   })
 })

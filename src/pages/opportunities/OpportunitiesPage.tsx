@@ -21,6 +21,7 @@ import PaginationBar from '@/components/ui/PaginationBar'
 import { useOpportunitiesData, OPPORTUNITIES_MAX_PER_PAGE } from './hooks/useOpportunitiesData'
 import { useOpportunityArchive } from './hooks/useOpportunityArchive'
 import { useDrawerUrl } from '@/hooks/useDrawerUrl'
+import { useOpenFromIntent } from '@/context/NavigationContext'
 import { usePageMemory } from '@/lib/usePageMemory'
 import { useListPageSize } from '@/hooks/useListPageSize'
 import { isReferenceQuery } from '@/lib/referenceNumber'
@@ -90,6 +91,11 @@ export default function OpportunitiesPage({ intent }: { intent?: unknown } = {})
   // through it and a copied link reopens the same opportunity (NAV-BACK-1 —
   // Danny: "back knop vanuit kans → taak en dan back kom ik niet terug waar ik was").
   useDrawerUrl({ selectedId: selected?.id, openById: (id) => selectOpportunity({ id } as Parameters<typeof selectOpportunity>[0]), close: closeDrawer, intent })
+  // Open an opportunity drawer when arriving via a cross-entity link ({ open: id }):
+  // the dashboard's stalled-opportunities rows and task links land here. Was the
+  // one list page without this seam (DASH-FEEDS-V3 naronde), so such links
+  // switched pages without opening the record.
+  useOpenFromIntent(intent, (id) => selectOpportunity({ id } as Parameters<typeof selectOpportunity>[0]))
 
   const [view,     setView]     = usePageMemory('opps.view', 'table')  // 'table' | 'board'
   const [page,     setPage]     = usePageMemory('opps.page', 1)
@@ -122,8 +128,12 @@ export default function OpportunitiesPage({ intent }: { intent?: unknown } = {})
     if (!intent) return
     const i = intent as { stage?: string; kpi?: string }
     if (i.stage != null) {
-      const s = stages.find(x => String(x.value) === String(i.stage))
-      setStage([s ? s.label : String(i.stage)])
+      // A stage arrives as the lookup slug (donut click) OR as the stage's uuid
+      // (dashboard feeds send opportunity_stage_id) — resolve both to the label
+      // the client-side filter keys on, never leave a raw id as the "label".
+      const key = String(i.stage)
+      const s = stages.find(x => String(x.value) === key || String((x as { id?: string | number }).id ?? '') === key)
+      setStage([s ? s.label : key])
     }
     if (i.kpi === 'expiring') setExpiringOnly(true)
     // setStage is usePageMemory's own useState setter (stable identity, never

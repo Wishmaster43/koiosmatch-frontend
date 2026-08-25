@@ -57,11 +57,13 @@ vi.mock('./hooks/useDashboardViewModel', () => ({
     expiringMatchesRows: [{ key: 'm1', primary: 'Aflopende match', meta: '01-09' }],
     staleVacanciesRows: [{ key: 'v1', primary: 'Stilstaande vacature', meta: '12 dagen' }],
     koiosSuggestionsRows: [],
-    customersByOwnerRows: [],
   }),
 }))
 vi.mock('./blocks/DistributionCharts', () => ({ default: () => null }))
 vi.mock('./blocks/TrendsRow', () => ({ default: () => null }))
+// The v3 FeedTileGrid (DASH-FEEDS-V3) has its own dedicated test — stub it here
+// so this legacy-grid packing assertion stays unaffected by its presence.
+vi.mock('./blocks/FeedTileGrid', () => ({ default: () => null }))
 vi.mock('./blocks/RecentListsRow', () => ({ default: () => null }))
 vi.mock('./blocks/ActivityListsRow', () => ({ default: () => null }))
 vi.mock('./blocks/ShiftsSummary', () => ({ default: () => null }))

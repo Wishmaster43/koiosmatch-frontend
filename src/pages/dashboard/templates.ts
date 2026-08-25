@@ -66,26 +66,41 @@ export const KPI_ROWS: Record<DashboardType, string[]> = {
 }
 
 // ── Charts/lists per role. '*' = everything (admin/management = full dashboard).
+// DASH-FEEDS-V3 (PLAN-DASHBOARD-PER-ROL-V3, feeds landed by CMBE): block ids for
+// the 24 widget feeds; presence-based rendering via blocks/feedRegistry.ts.
 export const DASHBOARD_TEMPLATES: Record<DashboardType, string[]> = {
   admin: ['*'],
   management: ['*'],
-  recruitment: ['chart.status', 'chart.funnel', 'chart.funnelConversion', 'chart.weekly', 'list.candidates', 'list.applications', 'list.conversations', 'list.runs'],
+  recruitment: ['chart.status', 'chart.funnel', 'chart.funnelConversion', 'chart.weekly', 'list.candidates', 'list.applications', 'list.conversations', 'list.runs',
+    'block.tasksDueToday', 'block.appointmentsNext48h', 'block.redeployRadar'],
   // DASHBOARD-OPRUIMING-1 (Danny 23-08): "recruitment_manager mirrors management
   // verbatim" — same '*' wildcard, same full dashboard, instead of its own trimmed
   // block list.
   recruitment_manager: ['*'],
-  backoffice: ['chart.status', 'chart.funnel', 'list.applications', 'list.runs'],
+  backoffice: ['chart.status', 'chart.funnel', 'list.applications', 'list.runs',
+    'block.matchesByContractType', 'block.placementsStartedEndedToday', 'block.documentsAttention', 'block.couplingErrorsList', 'block.placementsStartedToday'],
   sales: ['chart.oppStage', 'chart.status', 'list.leads'],
   // KD11 — the two sales-dashboard TEMPLATES on the DASHP36 widget-feed keys
   // (expiring_matches/stale_vacancies/koios_suggestions), equal footprint via the
   // shared WidgetListBlock (config-driven, §3A). `sales_manager` additionally
   // gets the tenant-wide `customers_by_owner` breakdown.
   // K-173 fase 6 — block.oppAging (ageing buckets) on both sales views.
-  accountmanager: ['chart.oppStage', 'chart.status', 'list.leads', 'block.expiringMatches', 'block.staleVacancies', 'block.koiosSuggestions', 'block.oppAging'],
-  sales_manager:  ['chart.oppStage', 'chart.status', 'list.leads', 'block.expiringMatches', 'block.staleVacancies', 'block.koiosSuggestions', 'block.customersByOwner', 'block.oppAging'],
-  planning: ['block.shifts', 'chart.weekly', 'list.runs', 'list.conversations'],
+  accountmanager: ['chart.oppStage', 'chart.status', 'list.leads', 'block.expiringMatches', 'block.staleVacancies', 'block.koiosSuggestions', 'block.oppAging',
+    'block.vacanciesAttentionByCustomer', 'block.vacanciesByCustomer', 'block.customersByPhase', 'block.tasksDueToday'],
+  sales_manager:  ['chart.oppStage', 'chart.status', 'list.leads', 'block.expiringMatches', 'block.staleVacancies', 'block.koiosSuggestions', 'block.customersByOwner', 'block.oppAging',
+    'block.oppsByStageByOwner', 'block.oppsStalledList', 'block.activityByOwner', 'block.pipelineValueTimeseries', 'block.customersAtRiskList'],
+  planning: ['block.shifts', 'chart.weekly', 'list.runs', 'list.conversations',
+    'block.shiftCoverageHeatmap', 'block.openShiftsList', 'block.occupancyByCustomer', 'block.shiftStatusToday', 'block.shiftsUnconfirmedList'],
   readonly: ['chart.status', 'chart.funnel'],
 }
+
+// K-173 fase 6 — planning-gated block ids (§ hasPlanning): the shifts block plus
+// the five v3 planning feeds, so useDashboardViewModel's `vis()` gates the whole
+// set on one Set instead of a single 'block.shifts' literal.
+export const PLANNING_BLOCKS: ReadonlySet<string> = new Set([
+  'block.shifts',
+  'block.shiftCoverageHeatmap', 'block.openShiftsList', 'block.occupancyByCustomer', 'block.shiftStatusToday', 'block.shiftsUnconfirmedList',
+])
 
 // ── Id → i18n label key (namespace `dashboard`). Single source shared by the
 // Settings → Dashboards preview so it never re-hardcodes labels.
@@ -139,6 +154,31 @@ export const BLOCK_LABEL_KEY: Record<string, string> = {
   // DASH-V3-UITROL-1 (K-181) — the tenant-wide Koios performance block
   // (management/admin only, via their '*' wildcard template — see Dashboard.tsx).
   'block.koiosPerformance': 'block.koiosPerformance',
+  // DASH-FEEDS-V3 — the 24 widget-feed tile ids (blocks/feedRegistry.ts).
+  'block.tasksDueToday': 'block.tasksDueToday',
+  'block.appointmentsNext48h': 'block.appointmentsNext48h',
+  'block.redeployRadar': 'block.redeployRadar',
+  'block.productivityByRecruiter': 'block.productivityByRecruiter',
+  'block.fillRateTimeseries': 'block.fillRateTimeseries',
+  'block.fillRateByBranch': 'block.fillRateByBranch',
+  'block.matchesByContractType': 'block.matchesByContractType',
+  'block.placementsStartedEndedToday': 'block.placementsStartedEndedToday',
+  'block.documentsAttention': 'block.documentsAttention',
+  'block.couplingErrorsList': 'block.couplingErrorsList',
+  'block.placementsStartedToday': 'block.placementsStartedToday',
+  'block.vacanciesAttentionByCustomer': 'block.vacanciesAttentionByCustomer',
+  'block.vacanciesByCustomer': 'block.vacanciesByCustomer',
+  'block.customersByPhase': 'block.customersByPhase',
+  'block.oppsByStageByOwner': 'block.oppsByStageByOwner',
+  'block.oppsStalledList': 'block.oppsStalledList',
+  'block.activityByOwner': 'block.activityByOwner',
+  'block.pipelineValueTimeseries': 'block.pipelineValueTimeseries',
+  'block.customersAtRiskList': 'block.customersAtRiskList',
+  'block.shiftCoverageHeatmap': 'block.shiftCoverageHeatmap',
+  'block.openShiftsList': 'block.openShiftsList',
+  'block.occupancyByCustomer': 'block.occupancyByCustomer',
+  'block.shiftStatusToday': 'block.shiftStatusToday',
+  'block.shiftsUnconfirmedList': 'block.shiftsUnconfirmedList',
 }
 
 // Is a chart/list block visible for the active dashboard type?

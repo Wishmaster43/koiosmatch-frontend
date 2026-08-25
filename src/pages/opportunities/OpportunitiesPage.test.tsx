@@ -225,3 +225,32 @@ describe('OpportunitiesPage · reference-number search (NUMMER-1)', () => {
     }
   })
 })
+
+// DASH-FEEDS-V3 naronde: the dashboard's stalled-opportunities rows and the
+// stage×owner bars deep-link here. §13: assert the DESTINATION (the record
+// opener is called, the stage filter carries the resolved LABEL), never only
+// that a callback fired.
+describe('OpportunitiesPage · cross-entity intent seam (DASH-FEEDS-V3)', () => {
+  it('an { open } intent opens the record through selectOpportunity', async () => {
+    const selectOpportunity = vi.fn()
+    useOpportunitiesDataMock.mockReturnValue({ ...baseResult, selectOpportunity })
+    render(<OpportunitiesPage intent={{ open: 'o-1' }} />)
+    await waitFor(() => expect(selectOpportunity).toHaveBeenCalledWith({ id: 'o-1' }))
+    await waitFor(() => expect(apiGet).toHaveBeenCalled())
+  })
+
+  it('a { stage } intent carrying the stage UUID resolves to the lookup label, not a raw id', async () => {
+    useOpportunitiesDataMock.mockReturnValue({
+      ...baseResult,
+      stages: [{ id: 'uuid-lead', value: 'lead', label: 'Lead' }, { id: 'uuid-won', value: 'won', label: 'Gewonnen' }],
+    })
+    render(<OpportunitiesPage intent={{ stage: 'uuid-won' }} />)
+    await waitFor(() => {
+      const stageGroup = capturedGroups.find(g => g.key === 'stage')
+      expect(stageGroup?.selected).toEqual(['Gewonnen'])
+    })
+    await waitFor(() => expect(apiGet).toHaveBeenCalled())
+    // Clean up the module-level usePageMemory store for later tests.
+    await act(async () => { capturedGroups.find(g => g.key === 'stage')?.onToggle('Gewonnen') })
+  })
+})

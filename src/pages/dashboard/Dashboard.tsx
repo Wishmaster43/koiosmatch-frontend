@@ -19,6 +19,7 @@ import WidgetListBlock from './blocks/WidgetListBlock'
 import ScopeBadge from './blocks/ScopeBadge'
 import RecruiterLoad from './blocks/RecruiterLoad'
 import OppAging from './blocks/OppAging'
+import FeedTileGrid from './blocks/FeedTileGrid'
 import KoiosForYouCard from './KoiosForYouCard'
 import KoiosPerformanceCard from './blocks/KoiosPerformanceCard'
 import type { DashStats, DashOpp, DashData } from '@/types/dashboard'
@@ -96,7 +97,7 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
     vis, statusData, recruiterData, funnelData, oppStageData,
     recentCandidates, recentApplications, recentLeads, runs, conversations,
     showRuns, showConv, trendData, trendSeries, shifts, kpis, scope = null,
-    expiringMatchesRows, staleVacanciesRows, koiosSuggestionsRows, customersByOwnerRows,
+    expiringMatchesRows, staleVacanciesRows, koiosSuggestionsRows,
     recruiterLoadRows = [], oppAgingRows = [],
   } = useDashboardViewModel({
     t, formatNumber, stats, opp, dash, dashCharts, statusMeta, funnelMeta, funnelTypes,
@@ -159,7 +160,7 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
           </div>
 
           {/* K-173 fase 6 — recruitment_manager's team-load table. */}
-          {vis('block.recruiterLoad') && <div style={{ marginBottom: 16 }}><RecruiterLoad rows={recruiterLoadRows} /></div>}
+          {vis('block.recruiterLoad') && <div style={{ marginBottom: 16 }}><RecruiterLoad rows={recruiterLoadRows} onNavigate={onNavigate} /></div>}
 
           {/* K-173 fase 6 — sales_manager/accountmanager opportunity-ageing buckets. */}
           {vis('block.oppAging') && <OppAging rows={oppAgingRows} />}
@@ -179,6 +180,11 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
 
           <TrendsRow vis={vis} trendData={trendData} trendSeries={trendSeries} funnelData={funnelData} onNavigate={onNavigate} />
 
+          {/* DASH-FEEDS-V3 — the 24 v3 widget-feed tiles, one packed grid via the
+              blocks/feedRegistry.ts registry (own grid, separate from the KD11
+              grid below which still owns its own three legacy widget feeds). */}
+          <FeedTileGrid dash={dash} vis={vis} onNavigate={onNavigate} hasPlanning={hasPlanning} />
+
           {/* ONE grid for every work-feed tile (DASH-FEEDS-PACK-1). Each tile self-hides
               when its data is empty, so whenever a neighbour hid itself its half of the
               row stayed blank in a hardcoded two-grid layout — in one grid the cells
@@ -197,15 +203,6 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
           {vis('block.shifts') && (
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
             {vis('block.shifts') && <ShiftsSummary open={shifts.open} occupancy={shifts.occupancy} onOpen={() => onNavigate?.('planning')} />}
-          </div>
-          )}
-
-          {/* KD11 (DASHP36) — the three sales-widget feeds moved INTO the packed
-              grid above (DASH-FEEDS-PACK-1); only the full-width tenant-wide
-              breakdown stays on its own row, since it is not a half-width tile. */}
-          {vis('block.customersByOwner') && (
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 16, marginBottom: 16 }}>
-            <WidgetListBlock title={t('block.customersByOwner')} rows={customersByOwnerRows} />
           </div>
           )}
 

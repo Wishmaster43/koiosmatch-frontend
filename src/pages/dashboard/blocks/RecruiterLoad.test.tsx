@@ -3,7 +3,7 @@
  * WidgetListBlock convention), otherwise one row per recruiter in server order.
  */
 import { describe, it, expect, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
 import RecruiterLoad from './RecruiterLoad'
 
 vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string) => k }) }))
@@ -36,5 +36,35 @@ describe('RecruiterLoad', () => {
     ]} />)
     const bars = [...container.querySelectorAll('div')].filter(d => d.style.width.endsWith('%'))
     expect(bars.map(b => b.style.width)).toEqual(['50%', '100%'])
+  })
+
+  it('clicking a row navigates to that recruiter\'s candidates when onNavigate is given', () => {
+    const onNavigate = vi.fn()
+    render(<RecruiterLoad onNavigate={onNavigate} rows={[
+      { user_id: 'u1', name: 'Anna', open_tasks: 3, intakes_planned: 1, too_long_in_stage: 0 },
+      { user_id: 'u2', name: 'Bram', open_tasks: 5, intakes_planned: 2, too_long_in_stage: 4 },
+    ]} />)
+    const rows = screen.getAllByRole('button')
+    fireEvent.click(rows[1])
+    expect(onNavigate).toHaveBeenCalledWith('candidates', { owner: 'u2' })
+  })
+
+  it('the row is keyboard-operable (role=button, Enter activates) when onNavigate is given', () => {
+    const onNavigate = vi.fn()
+    render(<RecruiterLoad onNavigate={onNavigate} rows={[
+      { user_id: 'u1', name: 'Anna', open_tasks: 3, intakes_planned: 1, too_long_in_stage: 0 },
+      { user_id: 'u2', name: 'Bram', open_tasks: 5, intakes_planned: 2, too_long_in_stage: 4 },
+    ]} />)
+    const rows = screen.getAllByRole('button')
+    expect(rows).toHaveLength(2)
+    fireEvent.keyDown(rows[1], { key: 'Enter' })
+    expect(onNavigate).toHaveBeenCalledWith('candidates', { owner: 'u2' })
+  })
+
+  it('rows are inert (no role=button) when onNavigate is not given', () => {
+    render(<RecruiterLoad rows={[
+      { user_id: 'u1', name: 'Anna', open_tasks: 3, intakes_planned: 1, too_long_in_stage: 0 },
+    ]} />)
+    expect(screen.queryAllByRole('button')).toHaveLength(0)
   })
 })
