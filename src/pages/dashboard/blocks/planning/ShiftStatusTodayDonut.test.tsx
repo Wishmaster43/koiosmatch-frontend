@@ -1,11 +1,15 @@
 /**
  * ShiftStatusTodayDonut — drops zero slices, labels known statuses, falls back
- * to widget.unknown for an unmapped status, and navigates to planning on click.
+ * to widget.unknown for an unmapped status, and navigates to planning with
+ * today's date on click (PLANNING-INTENT-1).
  */
 import { describe, it, expect, vi } from 'vitest'
 import { render } from '@testing-library/react'
 import ShiftStatusTodayDonut from './ShiftStatusTodayDonut'
 import { CHART_SERIES_COLORS } from '@/components/charts/chartTypes'
+
+// Mocked so the test asserts a stable literal, not the live calendar day.
+vi.mock('@/lib/datetime', () => ({ toLocalIsoDate: () => '2026-08-25' }))
 
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
@@ -40,10 +44,10 @@ describe('ShiftStatusTodayDonut', () => {
     ])
   })
 
-  it('navigates to planning on click', () => {
+  it('navigates to planning with today\'s date on click', () => {
     const onNavigate = vi.fn()
     render(<ShiftStatusTodayDonut rows={[{ status: 'planned', count: 1 }]} onNavigate={onNavigate} />)
     capturedOnItemClick?.({})
-    expect(onNavigate).toHaveBeenCalledWith('planning')
+    expect(onNavigate).toHaveBeenCalledWith('planning', { date: '2026-08-25' })
   })
 })

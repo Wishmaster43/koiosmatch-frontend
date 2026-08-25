@@ -113,5 +113,8 @@
     "unassignError": "Could not unassign this candidate.",
     "cancelError": "Could not cancel this assignment.",
     "checkoutError": "Could not save the check-out."
-  }
+  },
+  "prevPeriod": "Previous period",
+  "nextPeriod": "Next period",
+  "viewSwitcher": "View"
 }

@@ -3,8 +3,10 @@
  * stage, stacked per owner, from dash.opps_by_stage_by_owner. One bar per
  * stage, one stacked series per owner (union across all stages, keyed on
  * owner_id ?? 'none'). Clicking a bar segment filters the opportunities page
- * on that stage only — the opportunities page has no owner intent (measured:
- * it filters by owner NAME strings, not an id param).
+ * on that stage AND that owner id — the opportunities page's owner filter now
+ * keys on owner id, so a real owner series narrows both axes; the synthetic
+ * 'none' (unassigned) series has no owner id to filter on, so it narrows on
+ * stage only.
  */
 import { useTranslation } from 'react-i18next'
 import WeeklyBarChartCard from '@/components/charts/WeeklyBarChartCard'
@@ -54,9 +56,13 @@ export default function OppsByStageByOwnerStacked({ rows, onNavigate }: {
         data={data}
         series={series}
         stacked
-        onBarClick={(row) => {
+        onBarClick={(row, series) => {
           const stageId = (row as { stageId?: string }).stageId
-          if (stageId != null) onNavigate?.('opportunities', { stage: stageId })
+          if (stageId == null) return
+          // The synthetic 'none' series (unassigned) has no owner id to filter
+          // on — narrow by stage only; a real owner series narrows both.
+          if (series.key === 'none') onNavigate?.('opportunities', { stage: stageId })
+          else onNavigate?.('opportunities', { stage: stageId, owner: series.key })
         }}
       />
     </Panel>

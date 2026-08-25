@@ -10,15 +10,20 @@ import type { FillRateByBranchRow } from '@/types/dashboard'
 
 vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string) => k }) }))
 
+// Captures onBarClick so tests can invoke it with a chosen datum.
+let capturedOnBarClick: ((d: { branchId?: string | null }) => void) | undefined
 vi.mock('@/components/charts/BarChartCard', () => ({
-  default: (props: { data: { name: string; value: number }[]; percentValues?: boolean; showPercent?: boolean }) => (
-    <div
-      data-testid="bar"
-      data-data={JSON.stringify(props.data)}
-      data-percent-values={String(props.percentValues)}
-      data-show-percent={String(props.showPercent)}
-    />
-  ),
+  default: (props: { data: { name: string; value: number }[]; percentValues?: boolean; showPercent?: boolean; onBarClick?: (d: { branchId?: string | null }) => void }) => {
+    capturedOnBarClick = props.onBarClick
+    return (
+      <div
+        data-testid="bar"
+        data-data={JSON.stringify(props.data)}
+        data-percent-values={String(props.percentValues)}
+        data-show-percent={String(props.showPercent)}
+      />
+    )
+  },
 }))
 
 const rows: FillRateByBranchRow[] = [
@@ -33,8 +38,8 @@ describe('FillRateByBranchBar', () => {
     const bar = getByTestId('bar')
     const data = JSON.parse(bar.dataset.data!)
     expect(data).toEqual([
-      { name: 'Rotterdam', value: 80 },
-      { name: 'feed.noBranch', value: 0 },
+      { name: 'Rotterdam', value: 80, branchId: 'b1' },
+      { name: 'feed.noBranch', value: 0, branchId: null },
     ])
   })
 
@@ -53,5 +58,24 @@ describe('FillRateByBranchBar', () => {
   it('self-hides when every row has a null rate', () => {
     const { container } = render(<FillRateByBranchBar rows={[{ branch_id: 'b1', branch: 'X', total: 0, filled: 0, rate: null }]} />)
     expect(container).toBeEmptyDOMElement()
+  })
+
+  it('a bar click with a non-null branch drills into vacancies filtered on that branch', () => {
+    const onNavigate = vi.fn()
+    render(<FillRateByBranchBar rows={rows} onNavigate={onNavigate} />)
+    capturedOnBarClick?.({ branchId: 'b1' })
+    expect(onNavigate).toHaveBeenCalledWith('vacancies', { branch: 'b1' })
+  })
+
+  it('a bar click on the no-branch bar (branchId null) stays inert', () => {
+    const onNavigate = vi.fn()
+    render(<FillRateByBranchBar rows={rows} onNavigate={onNavigate} />)
+    capturedOnBarClick?.({ branchId: null })
+    expect(onNavigate).not.toHaveBeenCalled()
+  })
+
+  it('renders without a click handler when onNavigate is not provided', () => {
+    render(<FillRateByBranchBar rows={rows} />)
+    expect(capturedOnBarClick).toBeUndefined()
   })
 })

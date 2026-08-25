@@ -1,7 +1,8 @@
 /**
  * ShiftCoverageHeatmap — renders the fixed grid from server-shaped cells,
  * defaults a missing cell to 0/0, keeps morning/afternoon/evening order,
- * tints an empty cell with the muted token, and stays inert without onNavigate.
+ * tints an empty cell with the muted token, navigates with that cell's own
+ * date (PLANNING-INTENT-1), and stays inert without onNavigate.
  */
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
@@ -17,13 +18,13 @@ const rows = [
 ]
 
 describe('ShiftCoverageHeatmap', () => {
-  it('renders filled/shifts counts and navigates on cell click', () => {
+  it('renders filled/shifts counts and navigates with that cell\'s own date on click', () => {
     const onNavigate = vi.fn()
     render(<ShiftCoverageHeatmap rows={rows} onNavigate={onNavigate} />)
     expect(screen.getByText('4/4')).toBeInTheDocument()
     expect(screen.getByText('1/4')).toBeInTheDocument()
     screen.getByText('4/4').closest('[role="button"]')?.dispatchEvent(new MouseEvent('click', { bubbles: true }))
-    expect(onNavigate).toHaveBeenCalledWith('planning')
+    expect(onNavigate).toHaveBeenCalledWith('planning', { date: '2026-08-24' })
   })
 
   it('defaults a missing cell to 0/0', () => {

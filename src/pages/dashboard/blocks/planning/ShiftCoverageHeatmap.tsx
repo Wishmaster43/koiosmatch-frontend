@@ -1,7 +1,9 @@
 /**
  * ShiftCoverageHeatmap — planning work-feed tile: a fixed 7x3 grid (dates x
  * morning/afternoon/evening) showing filled/shifts per cell, tinted by fill
- * ratio. Numbers stay visible so colour is never the only signal (§6).
+ * ratio. Numbers stay visible so colour is never the only signal (§6). A cell
+ * click carries `{ date: cell.date }` so the planning page opens on that day
+ * (PLANNING-INTENT-1).
  */
 import { Fragment } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -46,10 +48,12 @@ export default function ShiftCoverageHeatmap({ rows, onNavigate }: {
                     : cell.filled >= cell.shifts / 2
                       ? 'var(--color-warning)'
                       : 'var(--color-danger)'
+                // Cell click jumps the board window to this exact day.
+                const goToDay = () => onNavigate?.('planning', { date: d })
                 return (
                   <div key={`${d}|${part}`}
                     // Only wired when onNavigate is actually provided, mirroring OpenShiftsList.
-                    {...(onNavigate ? interactive(goToPlanning) : {})}
+                    {...(onNavigate ? interactive(goToDay) : {})}
                     title={t('feed.coverage', { filled: cell.filled, shifts: cell.shifts })}
                     style={{ background: tintBg(token, true), borderRadius: 6, padding: '8px 4px',
                       textAlign: 'center', cursor: onNavigate ? 'pointer' : 'default' }}>

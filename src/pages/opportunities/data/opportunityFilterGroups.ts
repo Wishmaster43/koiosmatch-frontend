@@ -36,6 +36,8 @@ export function buildOpportunityFilterGroups({
     // ── Lifecycle: where the deal stands.
     { key: 'stage', type: 'search-select', category: catLifecycle, label: t('insights.stage'), selected: stage, options: optionsFrom('stage'), onToggle: tog(setStage) },
     // ── Organisatie: who owns it, at which client/branch.
+    // Owner option values are owner IDs (optionsFrom('owner')); labels stay the
+    // display name — `owner`/`setOwner` hold IDs too (mirrors the page's filter).
     { key: 'owner',  type: 'search-select', category: catOrganisation, label: t('insights.owner'), selected: owner,  options: optionsFrom('owner'),  onToggle: tog(setOwner) },
     { key: 'client', type: 'search-select', category: catOrganisation, label: t('cols.client'),    selected: client, options: optionsFrom('client'), onToggle: tog(setClient) },
     // VESTIGING-2: inherited from the customer; values limited to the user's own

@@ -113,5 +113,8 @@
     "unassignError": "No se pudo desasignar a este candidato.",
     "cancelError": "No se pudo cancelar esta asignación.",
     "checkoutError": "No se pudo guardar el registro de salida."
-  }
+  },
+  "prevPeriod": "Período anterior",
+  "nextPeriod": "Período siguiente",
+  "viewSwitcher": "Vista"
 }

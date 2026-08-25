@@ -1,6 +1,7 @@
 /**
  * OppsByStageByOwnerStacked — asserts the stacked series union, the unassigned
- * label mapping and the stage-only navigation on a bar click.
+ * label mapping, and that a bar click navigates by stage + owner id (stage
+ * only for the synthetic 'none'/unassigned series).
  */
 import { describe, it, expect, vi } from 'vitest'
 import { render } from '@testing-library/react'
@@ -33,10 +34,17 @@ describe('OppsByStageByOwnerStacked', () => {
     expect(labels).toContain('widget.unknown')
   })
 
-  it('navigates to opportunities filtered by stage only on bar click', () => {
+  it('navigates to opportunities filtered by stage AND owner id for a real owner series', () => {
     const onNavigate = vi.fn()
     render(<OppsByStageByOwnerStacked rows={rows} onNavigate={onNavigate} />)
-    captured.onBarClick?.({ stageId: 's2' }, {})
+    captured.onBarClick?.({ stageId: 's2' }, { key: '7' })
+    expect(onNavigate).toHaveBeenCalledWith('opportunities', { stage: 's2', owner: '7' })
+  })
+
+  it('navigates by stage only for the unassigned (none) series', () => {
+    const onNavigate = vi.fn()
+    render(<OppsByStageByOwnerStacked rows={rows} onNavigate={onNavigate} />)
+    captured.onBarClick?.({ stageId: 's2' }, { key: 'none' })
     expect(onNavigate).toHaveBeenCalledWith('opportunities', { stage: 's2' })
   })
 })

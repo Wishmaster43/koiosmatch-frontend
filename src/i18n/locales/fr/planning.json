@@ -113,5 +113,8 @@
     "unassignError": "Impossible de désaffecter ce candidat.",
     "cancelError": "Impossible d'annuler cette affectation.",
     "checkoutError": "Impossible d'enregistrer la sortie."
-  }
+  },
+  "prevPeriod": "Période précédente",
+  "nextPeriod": "Période suivante",
+  "viewSwitcher": "Affichage"
 }

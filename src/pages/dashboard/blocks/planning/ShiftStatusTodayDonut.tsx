@@ -1,12 +1,15 @@
 /**
  * ShiftStatusTodayDonut — planning work-feed tile: today's shift statuses as a
  * donut, each slice tinted by its own status colour; an unmapped status falls
- * back to the shared chart series palette so it never renders uncoloured.
+ * back to the shared chart series palette so it never renders uncoloured. A
+ * slice click carries `{ date: today }` (no status filter exists on the
+ * planning page yet — this only lands on today's window, PLANNING-INTENT-1).
  */
 import { useTranslation } from 'react-i18next'
 import PieChartCard from '@/components/charts/PieChartCard'
 import { CHART_SERIES_COLORS } from '@/components/charts/chartTypes'
 import { Panel } from '@/pages/dashboard/DashboardPrimitives'
+import { toLocalIsoDate } from '@/lib/datetime'
 import type { ShiftStatusTodayRow } from '@/types/dashboard'
 
 // One fixed colour per status token (§4: colour carries meaning, not decoration).
@@ -36,7 +39,8 @@ export default function ShiftStatusTodayDonut({ rows, onNavigate }: {
         title={t('block.shiftStatusToday')}
         data={data}
         colors={data.map(d => d.color)}
-        onItemClick={() => onNavigate?.('planning')}
+        // No navigator → no click affordance (PieChartCard gates hint/cursor/legend controls on this prop).
+        onItemClick={onNavigate ? () => onNavigate('planning', { date: toLocalIsoDate(new Date()) }) : undefined}
       />
     </Panel>
   )

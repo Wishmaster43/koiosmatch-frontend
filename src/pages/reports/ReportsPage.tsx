@@ -90,18 +90,28 @@ const REPORTS: Record<ReportId, ReportComponent> = {
   whatsapp:      WhatsappReport,
 }
 
-export default function ReportsPage({ reportId, initialView }: { reportId?: string; initialView?: string }) {
+// A dashboard chart's click intent — the SAME `report` id vocabulary the
+// reports.<id> hash route uses (reportIds.ts), so a tile navigating with
+// onNavigate('reports', { report: 'vacancies' }) selects that report exactly
+// as a click on the reports sidebar submenu would (DASH-REPORT-DEEPLINK-1).
+export interface ReportsPageIntent { report?: string }
+
+export default function ReportsPage({ reportId, initialView, intent }: { reportId?: string; initialView?: string; intent?: ReportsPageIntent }) {
   const [period, setPeriod] = useState<ReportPeriod>('month')
 
-  // A bare #reports (no reportId) is now its own KPI overview dashboard
+  // The explicit route id (from the reports.<id> hash route) wins; a bare
+  // #reports arriving with an intent { report } falls back to that instead
+  // of the dashboard, so a chart click lands on the right sub-report.
+  const requestedId = reportId ?? intent?.report
+  // A bare #reports (no reportId/intent) is now its own KPI overview dashboard
   // (RAPPORTEN-DASHBOARD-1) — it no longer forwards to the first sub-report.
   // Only an UNKNOWN id (a genuinely stale deep-link) still falls back to the
   // first report; the root itself renders the dashboard branch below.
-  const isRoot = reportId == null
+  const isRoot = requestedId == null
   const active: ReportId = isRoot
     ? REPORT_IDS[0]
-    : (REPORT_IDS as readonly string[]).includes(reportId)
-      ? (reportId as ReportId)
+    : (REPORT_IDS as readonly string[]).includes(requestedId)
+      ? (requestedId as ReportId)
       : REPORT_IDS[0]
   const Report = REPORTS[active]
 

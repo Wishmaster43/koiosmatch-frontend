@@ -202,10 +202,12 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
 
   // D1(a): seed the closing-soon / stale-status filter from a dashboard tile's
   // semantic attention intent (mirrors ApplicationsPage/CandidatesPage's own intent seam).
+  // Also seeds the branch filter (VESTIGING-2: ops's fill-rate-by-branch tile).
   useEffect(() => {
-    const i = intent as { attention?: string } | undefined
+    const i = intent as { attention?: string; branch?: string } | undefined
     if (i?.attention) setAttention(i.attention)
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- setAttention is a stable usePageMemory setter; seeding fires per new intent only (house pattern, see AddApplicationModal:198)
+    if (i?.branch) setSelectedBranch([String(i.branch)])
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- setAttention/setSelectedBranch are stable usePageMemory setters; seeding fires per new intent only (house pattern, see AddApplicationModal:198)
   }, [intent])
 
   // Mirror the open drawer in the URL (?open=<id>): browser back/forward walks

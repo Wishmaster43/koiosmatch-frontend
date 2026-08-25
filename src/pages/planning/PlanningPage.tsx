@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useRightPanel } from '@/context/RightPanelContext'
 import { ChevronLeft, ChevronRight, Plus, Info, AlertCircle } from 'lucide-react'
@@ -11,6 +11,9 @@ import { MonthView, WeekView, DayView, ListView } from './views'
 import type { Shift } from '@/types/planning'
 import type { PlanningBoardShift } from './hooks/usePlanningBoard'
 import Button from '@/components/ui/Button'
+import SegmentedControl from '@/components/ui/SegmentedControl'
+import { PageTitle, Caption } from '@/components/ui/typography'
+import { tintBg } from '@/lib/tint'
 
 // ── Real shifts (PLANNING-PERSIST-1 follow-up — read side) ────────────────────
 // This calendar used to render six hardcoded, always-the-same demo rows,
@@ -46,11 +49,21 @@ function mapBoardShift(s: PlanningBoardShift, formatTime: (v: string | null | un
 // ── Main planning page ────────────────────────────────────────────────────────
 const VIEW_IDS = ['month', 'week', 'day', 'list']
 
-export default function PlanningPage() {
+// Navigation intent this page honours (dashboard tile → planning jump):
+// `date` moves the board window to that day; `open` (with `date`) also opens
+// the staffing drawer for that shift, once the board actually contains it.
+export interface PlanningIntent {
+  date?: string
+  open?: Shift['id']
+}
+
+export default function PlanningPage({ intent }: { intent?: PlanningIntent | null } = {}) {
   const { t } = useTranslation('planning')
   const { formatTime } = useDateFormat()
   const [view,       setView]       = useState('month')
-  const [current,    setCurrent]    = useState(new Date())
+  // Lazy init from a `{ date }` intent so a tile click fetches the intent's
+  // window directly, instead of today's window first and the intent's second.
+  const [current,    setCurrent]    = useState(() => intent?.date ? new Date(`${intent.date}T00:00:00`) : new Date())
   const [modal,      setModal]      = useState<Date | null>(null) // date to add shift for
   // SHIFT-STAFF-1: the shift id whose staffing drawer is open (assign/unassign/
   // cancel/checkout on the real API) — separate from `modal` (still-gated add).
@@ -62,6 +75,28 @@ export default function PlanningPage() {
   const { from, to } = useMemo(() => getViewRange(view, current), [view, current])
   const { shifts: boardShifts, loading: shiftsLoading, error: shiftsError } = usePlanningBoard(from, to)
   const shifts = useMemo(() => boardShifts.map(s => mapBoardShift(s, formatTime)), [boardShifts, formatTime])
+
+  // PLANNING-INTENT-1: seed the window from a `{ date }` nav intent (dashboard
+  // tile click). Guarded on intent object identity, mirroring useOpenFromIntent
+  // (NavigationContext) — fires once per fresh intent, not on every re-render.
+  const dateIntentDone = useRef<unknown>(intent ?? null)
+  useEffect(() => {
+    if (!intent?.date || dateIntentDone.current === intent) return
+    dateIntentDone.current = intent
+    setCurrent(new Date(`${intent.date}T00:00:00`))
+  }, [intent])
+
+  // PLANNING-INTENT-1: open the staffing drawer for `{ open }` once the board
+  // window actually contains that shift — never on an id the current fetch
+  // hasn't returned yet, which would otherwise pop an empty drawer.
+  const openIntentDone = useRef<unknown>(null)
+  useEffect(() => {
+    if (!intent?.open || openIntentDone.current === intent) return
+    const found = boardShifts.find(s => s.id === intent.open)
+    if (!found) return
+    openIntentDone.current = intent
+    setStaffingId(found.id)
+  }, [intent, boardShifts])
 
   // Right-panel filters (shift type + location). Registering them makes the shared
   // topbar filter button appear and feeds the ReportFilterSidebar — same as the
@@ -137,35 +172,21 @@ export default function PlanningPage() {
           {t('today')}
         </Button>
 
-        {/* Prev / Next */}
-        <button onClick={() => navigate(-1)}
-          style={{ display: 'flex', padding: 6, border: '1px solid var(--border)', borderRadius: 8,
-            background: 'var(--surface)', cursor: 'pointer', color: 'var(--text)' }}>
+        {/* Prev / Next — house Button (HUISSTIJL-1), named for the screen reader. */}
+        <Button variant="secondary" size="sm" iconOnly aria-label={t('prevPeriod')} onClick={() => navigate(-1)}>
           <ChevronLeft size={15} />
-        </button>
-        <button onClick={() => navigate(1)}
-          style={{ display: 'flex', padding: 6, border: '1px solid var(--border)', borderRadius: 8,
-            background: 'var(--surface)', cursor: 'pointer', color: 'var(--text)' }}>
+        </Button>
+        <Button variant="secondary" size="sm" iconOnly aria-label={t('nextPeriod')} onClick={() => navigate(1)}>
           <ChevronRight size={15} />
-        </button>
+        </Button>
 
         {/* Period label */}
-        <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)', flex: 1 }}>
-          {headerLabel()}
-        </span>
+        <PageTitle as="span" style={{ flex: 1 }}>{headerLabel()}</PageTitle>
 
-        {/* View switcher */}
-        <div style={{ display: 'flex', border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden' }}>
-          {VIEW_IDS.map((v, i) => (
-            <button key={v} onClick={() => setView(v)}
-              style={{ padding: '6px 14px', fontSize: 12, fontWeight: view === v ? 600 : 400,
-                border: 'none', borderRight: i < VIEW_IDS.length - 1 ? '1px solid var(--border)' : 'none',
-                background: view === v ? 'var(--color-primary)' : 'var(--surface)',
-                color:      view === v ? 'var(--color-on-accent)' : 'var(--text)', cursor: 'pointer' }}>
-              {t(`views.${v}`)}
-            </button>
-          ))}
-        </div>
+        {/* View switcher — the shared segmented control (CHIP-TINT-1: a choice is tinted, never a solid fill). */}
+        <SegmentedControl size="compact" ariaLabel={t('viewSwitcher')} value={view}
+          onChange={v => setView(v as typeof view)}
+          options={VIEW_IDS.map(v => ({ value: v, label: t(`views.${v}`) }))} />
 
         {/* Add button */}
         <Button variant="primary" size="sm" onClick={() => setModal(new Date())}>
@@ -177,16 +198,16 @@ export default function PlanningPage() {
           still fake (AddShiftModal's Save stays disabled); the shifts below are
           this tenant's real schedule now (usePlanningBoard). */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 20px',
-        background: 'color-mix(in srgb, var(--text-muted) 8%, transparent)', flexShrink: 0 }}>
+        background: tintBg('var(--text-muted)'), flexShrink: 0 }}>
         <Info size={12} style={{ color: 'var(--text-muted)', flexShrink: 0 }} aria-hidden="true" />
-        <span style={{ fontSize: 11, fontStyle: 'italic', color: 'var(--text-muted)' }}>{t('previewNotice')}</span>
+        <Caption as="span" style={{ fontStyle: 'italic' }}>{t('previewNotice')}</Caption>
       </div>
 
       {/* Load-error state (§3: four honest states) — the board fetch failed;
           never silently show a stale/empty calendar without saying why. */}
       {shiftsError && (
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 20px',
-          background: 'color-mix(in srgb, var(--color-danger) 8%, transparent)', flexShrink: 0 }}>
+          background: tintBg('var(--color-danger)'), flexShrink: 0 }}>
           <AlertCircle size={12} style={{ color: 'var(--color-danger-text)', flexShrink: 0 }} aria-hidden="true" />
           <span style={{ fontSize: 12, color: 'var(--color-danger-text)' }}>{t('loadErrorShifts')}</span>
         </div>

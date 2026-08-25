@@ -94,6 +94,15 @@ describe('VacanciesPage · D1(a) dashboard intent seam', () => {
     expect(last.closing_soon).toBeUndefined()
     expect(last.stale_status).toBeUndefined()
   })
+
+  // VESTIGING-2: the ops fill-rate-by-branch tile's { branch } intent seeds
+  // the selectedBranch filter, which reaches the request as branch_id[].
+  it('a branch intent produces a branch_id request', () => {
+    dataHookCalls.length = 0
+    render(<VacanciesPage intent={{ branch: 'b1' }} />)
+    const last = dataHookCalls[dataHookCalls.length - 1]
+    expect(last.branch_id).toEqual(['b1'])
+  })
 })
 
 // FILTER-PARITY-1: status/published/agent/has-applications/archived filter groups

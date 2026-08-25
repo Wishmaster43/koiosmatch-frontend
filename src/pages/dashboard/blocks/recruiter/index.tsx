@@ -24,7 +24,7 @@ export const fillRateTimeseriesTile: FeedTileEntry = {
   // Custom predicate: the feed can be a non-empty array of all-null-rate points
   // (no cohort on any day), which renders nothing useful — require ≥1 real rate.
   hasData: (dash) => (dash.fill_rate_timeseries ?? []).some(p => p.rate != null),
-  render: (dash) => <FillRateTimeseriesLine rows={dash.fill_rate_timeseries!} />,
+  render: (dash, ctx) => <FillRateTimeseriesLine rows={dash.fill_rate_timeseries!} onNavigate={ctx.onNavigate} />,
 }
 
 export const RECRUITER_TILES: FeedTileEntry[] = [

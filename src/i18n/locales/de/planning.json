@@ -113,5 +113,8 @@
     "unassignError": "Dieser Kandidat konnte nicht ausgeplant werden.",
     "cancelError": "Diese Einplanung konnte nicht storniert werden.",
     "checkoutError": "Auschecken konnte nicht gespeichert werden."
-  }
+  },
+  "prevPeriod": "Vorheriger Zeitraum",
+  "nextPeriod": "Nächster Zeitraum",
+  "viewSwitcher": "Ansicht"
 }

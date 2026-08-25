@@ -19,6 +19,20 @@ function groupBy<T>(rows: T[], getLabel: (r: T) => string, getColor?: (r: T) => 
   return Object.values(m)
 }
 
+// Owner donut is keyed on ownerId (matches the id-based owner filter) while the
+// display name stays the segment's `name` — a dashboard owner_id intent, a panel
+// pick and a donut click all now agree on the same id (OPP-OWNER-ID-1).
+function groupByOwner(rows: Opportunity[]): Aggregate[] {
+  const m: Record<string, Aggregate> = {}
+  rows.forEach(r => {
+    if (r.ownerId == null || !r.owner) return
+    const id = String(r.ownerId)
+    m[id] ??= { name: r.owner, key: id, value: 0 }
+    m[id].value++
+  })
+  return Object.values(m)
+}
+
 interface OpportunitiesInsightsRowProps {
   rows: Opportunity[]
   stages: LookupOption[]
@@ -72,7 +86,7 @@ export default function OpportunitiesInsightsRow({
     const lostCount = rows.filter(isLostRow).length
     return {
       stageData:  groupBy(rows, r => r.stage, r => r.stageColor),
-      ownerData:  groupBy(rows, r => r.owner),
+      ownerData:  groupByOwner(rows),
       clientData: groupBy(rows, r => r.client),
       open:     rows.filter(r => !isWonRow(r) && !isLostRow(r)).length,
       pipeline: Math.round(sum),
@@ -83,10 +97,14 @@ export default function OpportunitiesInsightsRow({
     }
   }, [rows, stages, valueInHours])
 
-  // `picked` doubles as the visible filter-chip label (on this page labels ARE the keys).
+  // `picked` doubles as the visible filter-chip label (on this page labels ARE the keys) —
+  // EXCEPT owner, which now filters on id: resolve the picked id back to its display
+  // name here so the chip/aria-label never leaks a raw uuid (MiniDonut still matches
+  // the segment by its `key`, which is the same id, via the segment lookup below).
+  const pickedOwnerLabel = owner[0] ? (ownerData.find(o => o.key === owner[0])?.name ?? owner[0]) : null
   const donuts: DonutSpec[] = [
     { key: 'stage',  title: t('insights.stage'),  data: stageData,  onPick: onPickStage,  active: stage.length > 0,  onClear: onClearStage,  picked: stage[0] ?? null },
-    { key: 'owner',  title: t('insights.owner'),  data: ownerData,  onPick: onPickOwner,  active: owner.length > 0,  onClear: onClearOwner,  picked: owner[0] ?? null },
+    { key: 'owner',  title: t('insights.owner'),  data: ownerData,  onPick: onPickOwner,  active: owner.length > 0,  onClear: onClearOwner,  picked: pickedOwnerLabel },
     { key: 'client', title: t('insights.client'), data: clientData, onPick: onPickClient, active: client.length > 0, onClear: onClearClient, picked: client[0] ?? null },
   ]
   // KPI clicks drive the stage filter (Danny: every card must DO something):

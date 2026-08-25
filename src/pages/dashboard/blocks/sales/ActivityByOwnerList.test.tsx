@@ -1,9 +1,10 @@
 /**
  * ActivityByOwnerList — asserts rows render including zero-activity owners,
- * unassigned label mapping, and that rows are inert (no click).
+ * unassigned label mapping, and that a real-owner row navigates by owner id
+ * while the null-owner (unassigned) row stays inert.
  */
 import { describe, it, expect, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
 import ActivityByOwnerList from './ActivityByOwnerList'
 import type { ActivityByOwnerRow } from '@/types/dashboard'
 
@@ -26,8 +27,22 @@ describe('ActivityByOwnerList', () => {
     expect(container).toBeEmptyDOMElement()
   })
 
-  it('rows carry no role=button (inert)', () => {
-    const { container } = render(<ActivityByOwnerList rows={rows} />)
-    expect(container.querySelectorAll('[role="button"]').length).toBe(0)
+  it('only one row (the real owner) carries role=button — the unassigned row stays inert', () => {
+    const { container } = render(<ActivityByOwnerList rows={rows} onNavigate={vi.fn()} />)
+    expect(container.querySelectorAll('[role="button"]').length).toBe(1)
+  })
+
+  it('clicking the owner row navigates to opportunities filtered by owner id', () => {
+    const onNavigate = vi.fn()
+    render(<ActivityByOwnerList rows={rows} onNavigate={onNavigate} />)
+    fireEvent.click(screen.getByText('Alice').closest('[role="button"]')!)
+    expect(onNavigate).toHaveBeenCalledWith('opportunities', { owner: '1' })
+  })
+
+  it('the unassigned row does not navigate on click (no handler)', () => {
+    const onNavigate = vi.fn()
+    render(<ActivityByOwnerList rows={rows} onNavigate={onNavigate} />)
+    fireEvent.click(screen.getByText('feed.unassigned'))
+    expect(onNavigate).not.toHaveBeenCalled()
   })
 })

@@ -113,5 +113,8 @@
     "unassignError": "Kon deze kandidaat niet uitplannen.",
     "cancelError": "Kon deze inplanning niet annuleren.",
     "checkoutError": "Kon het uitchecken niet opslaan."
-  }
+  },
+  "prevPeriod": "Vorige periode",
+  "nextPeriod": "Volgende periode",
+  "viewSwitcher": "Weergave"
 }

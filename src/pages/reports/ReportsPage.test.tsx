@@ -332,3 +332,41 @@ describe('ReportsPage — root vs. sub-report (RAPPORTEN-DASHBOARD-1)', () => {
     expect(screen.queryByTestId('dashboard-period')).not.toBeInTheDocument()
   })
 })
+
+// DASH-REPORT-DEEPLINK-1: a dashboard chart click lands on #reports with an
+// intent (goTo only pushes the base page), so ReportsPage falls back to
+// intent.report instead of the dashboard branch — same vocabulary as reportId.
+describe('ReportsPage — dashboard intent deep link (DASH-REPORT-DEEPLINK-1)', () => {
+  it('an intent { report: "vacancies" } selects the vacancies report, not the dashboard or the default report', () => {
+    let latest: RadioGroup[] = []
+    render(
+      <RightPanelProvider>
+        <Capture onGroups={g => { latest = g }} />
+        <ReportsPage intent={{ report: 'vacancies' }} />
+      </RightPanelProvider>,
+    )
+    expect(screen.getByTestId('report-period')).toBeInTheDocument()
+    expect(screen.queryByTestId('dashboard-period')).not.toBeInTheDocument()
+    // The report-period stub is shared by every filterable report, so it alone
+    // cannot distinguish vacancies from the candidates fallback (REPORT_IDS[0]).
+    // Vacancies registers a `customer` group and no source/phase/contractForm —
+    // asserting the panel groups proves the vacancies report, not just "not the dashboard".
+    expect(latest.map(g => g.key)).toEqual(['period', 'compare', 'status', 'owner', 'branch', 'customer'])
+  })
+
+  it('an explicit reportId route still wins over a stray intent', () => {
+    const groups = (() => {
+      let latest: RadioGroup[] = []
+      return { capture: (g: RadioGroup[]) => { latest = g }, get: () => latest }
+    })()
+    // Candidates registers its own dimension trio (source/phase/contractForm);
+    // vacancies registers `customer` instead — proves reportId, not the intent, won.
+    render(
+      <RightPanelProvider>
+        <Capture onGroups={groups.capture} />
+        <ReportsPage reportId="candidates" intent={{ report: 'vacancies' }} />
+      </RightPanelProvider>,
+    )
+    expect(groups.get().map(g => g.key)).toEqual(['period', 'compare', 'status', 'owner', 'branch', 'source', 'phase', 'contractForm'])
+  })
+})

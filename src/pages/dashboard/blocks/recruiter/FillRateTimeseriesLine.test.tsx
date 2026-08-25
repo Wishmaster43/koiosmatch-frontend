@@ -11,8 +11,13 @@ vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string) => k }
 vi.mock('@/lib/datetime', () => ({ useDateFormat: () => ({ formatDate: (d: string) => d }) }))
 
 let capturedData: unknown
+let capturedOnItemClick: (() => void) | undefined
 vi.mock('@/components/charts/LineChartCard', () => ({
-  default: (props: { data: unknown }) => { capturedData = props.data; return <div data-testid="line" /> },
+  default: (props: { data: unknown; onItemClick?: () => void }) => {
+    capturedData = props.data
+    capturedOnItemClick = props.onItemClick
+    return <div data-testid="line" />
+  },
 }))
 
 const points: FillRatePoint[] = [
@@ -29,5 +34,12 @@ describe('FillRateTimeseriesLine', () => {
   it('skips null-rate points and renders the real ones', () => {
     render(<FillRateTimeseriesLine rows={points} />)
     expect(capturedData).toEqual([{ name: '2026-08-24', value: 80 }])
+  })
+
+  it('point click opens the vacancies report via the shared report intent key', () => {
+    const onNavigate = vi.fn()
+    render(<FillRateTimeseriesLine rows={points} onNavigate={onNavigate} />)
+    capturedOnItemClick?.()
+    expect(onNavigate).toHaveBeenCalledWith('reports', { report: 'vacancies' })
   })
 })

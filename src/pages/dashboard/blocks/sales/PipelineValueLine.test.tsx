@@ -24,9 +24,16 @@ describe('PipelineValueLine', () => {
     expect(captured.data).toEqual([{ name: '01-06', value: 12000 }])
   })
 
-  it('is inert: no onItemClick handed to the chart (no reports-page intent measured)', () => {
+  it('is inert with no onNavigate prop', () => {
     render(<PipelineValueLine rows={rows} />)
     expect(captured.onItemClick).toBeUndefined()
+  })
+
+  it('a point click navigates to the opportunities analytical report', () => {
+    const onNavigate = vi.fn()
+    render(<PipelineValueLine rows={rows} onNavigate={onNavigate} />)
+    ;(captured.onItemClick as () => void)()
+    expect(onNavigate).toHaveBeenCalledWith('reports', { report: 'opportunities' })
   })
 
   it('passes the shared eur() formatter as formatValue', () => {

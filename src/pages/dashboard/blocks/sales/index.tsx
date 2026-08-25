@@ -36,7 +36,7 @@ export const SALES_TILES: FeedTileEntry[] = [
     blockId: 'block.activityByOwner',
     feedKey: 'activity_by_owner',
     hasData: arrayFeed('activity_by_owner'),
-    render: (dash) => <ActivityByOwnerList rows={dash.activity_by_owner!} />,
+    render: (dash, ctx) => <ActivityByOwnerList rows={dash.activity_by_owner!} onNavigate={ctx.onNavigate} />,
   },
   // DASH-PAIRS-1 (Danny 25-08): pipeline value and the leads pipeline side by side.
   pairTiles('pair.pipelineValueLeads', [
@@ -44,7 +44,7 @@ export const SALES_TILES: FeedTileEntry[] = [
       blockId: 'block.pipelineValueTimeseries',
       feedKey: 'pipeline_value_timeseries',
       hasData: arrayFeed('pipeline_value_timeseries'),
-      render: (dash) => <PipelineValueLine rows={dash.pipeline_value_timeseries!} />,
+      render: (dash, ctx) => <PipelineValueLine rows={dash.pipeline_value_timeseries!} onNavigate={ctx.onNavigate} />,
     },
     leadsPipelineTile,
   ]),

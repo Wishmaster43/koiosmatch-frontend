@@ -253,4 +253,31 @@ describe('OpportunitiesPage · cross-entity intent seam (DASH-FEEDS-V3)', () => 
     // Clean up the module-level usePageMemory store for later tests.
     await act(async () => { capturedGroups.find(g => g.key === 'stage')?.onToggle('Gewonnen') })
   })
+
+  // OWNER-ID-1: the dashboard's activity/stacked-bar tiles send the owner ID
+  // (not the display name) — the filter now keys on ownerId directly, so a
+  // matching row survives and a non-matching one is dropped client-side.
+  it('an { owner } intent filters rows down to that owner id', async () => {
+    useOpportunitiesDataMock.mockReturnValue({
+      ...baseResult,
+      rows: [
+        { id: 'o1', title: 'Deal A', client: 'Klant A', owner: 'Alice', ownerId: 'u1' },
+        { id: 'o2', title: 'Deal B', client: 'Klant B', owner: 'Bob', ownerId: 'u2' },
+      ],
+    })
+    render(<OpportunitiesPage intent={{ owner: 'u1' }} />)
+    await waitFor(() => {
+      const ownerGroup = capturedGroups.find(g => g.key === 'owner')
+      expect(ownerGroup?.selected).toEqual(['u1'])
+    })
+    // Bob's deal (a different owner id) is filtered out; only Alice's survives —
+    // read off the PaginationBar (same driving array as row rendering, and
+    // virtualization-safe, mirrors the NUMMER-1 tests above). A whole-node text
+    // matcher, since the range text sits alongside the page-of-pages indicator.
+    const expectedRange = i18n.t('rangeOf', { ns: 'common', from: 1, to: 1, total: 1 })
+    await waitFor(() => expect(screen.getAllByText((_, node) => node?.textContent === expectedRange).length).toBeGreaterThan(0))
+    await waitFor(() => expect(apiGet).toHaveBeenCalled())
+    // Clean up the module-level usePageMemory store for later tests.
+    await act(async () => { capturedGroups.find(g => g.key === 'owner')?.onToggle('u1') })
+  })
 })

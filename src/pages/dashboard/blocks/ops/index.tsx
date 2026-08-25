@@ -30,7 +30,7 @@ export const OPS_TILES: FeedTileEntry[] = [
     // Custom predicate: the tile skips rows with a null rate, so hasData
     // must mirror that or an all-null feed leaves an empty grid cell.
     hasData: (dash) => (dash.fill_rate_by_branch ?? []).some(r => r.rate != null),
-    render: (dash) => <FillRateByBranchBar rows={dash.fill_rate_by_branch!} />,
+    render: (dash, ctx) => <FillRateByBranchBar rows={dash.fill_rate_by_branch!} onNavigate={ctx.onNavigate} />,
   },
   {
     blockId: 'block.documentsAttention',

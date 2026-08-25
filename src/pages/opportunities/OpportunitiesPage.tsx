@@ -104,7 +104,11 @@ export default function OpportunitiesPage({ intent }: { intent?: unknown } = {})
   // across the shell's unmount-on-navigate — mirrors every other list page.
   const { pageSize, setPageSize, options: pageSizeOptions } = useListPageSize('opps', OPPORTUNITIES_MAX_PER_PAGE)
   const [stage,    setStage]    = usePageMemory<string[]>('opps.stage', []) // selected stage labels (donut + panel)
-  const [owner,    setOwner]    = usePageMemory<string[]>('opps.owner', []) // selected owner names (donut + panel)
+  // Owner filter keys on the owner ID (not the display name) so a dashboard
+  // click (owner_id) can narrow the list — a name-based filter cannot express
+  // that. Key renamed from 'opps.owner' to 'opps.ownerId' so old stored NAME
+  // values never leak in as a bogus id filter.
+  const [owner,    setOwner]    = usePageMemory<string[]>('opps.ownerId', [])
   const [client,   setClient]   = usePageMemory<string[]>('opps.client', []) // selected client names (panel)
   const [addOpen,  setAddOpen]  = useState(false)
 
@@ -126,7 +130,7 @@ export default function OpportunitiesPage({ intent }: { intent?: unknown } = {})
   // maps to its label via the lookup; { kpi: 'expiring' } switches the aflopend-filter on.
   useEffect(() => {
     if (!intent) return
-    const i = intent as { stage?: string; kpi?: string }
+    const i = intent as { stage?: string; owner?: string; kpi?: string }
     if (i.stage != null) {
       // A stage arrives as the lookup slug (donut click) OR as the stage's uuid
       // (dashboard feeds send opportunity_stage_id) — resolve both to the label
@@ -135,18 +139,33 @@ export default function OpportunitiesPage({ intent }: { intent?: unknown } = {})
       const s = stages.find(x => String(x.value) === key || String((x as { id?: string | number }).id ?? '') === key)
       setStage([s ? s.label : key])
     }
+    // Owner arrives as the owner id (dashboard's activity/stacked-bar tiles) —
+    // the filter now keys on ownerId directly, no lookup needed.
+    if (i.owner != null) setOwner([String(i.owner)])
     if (i.kpi === 'expiring') setExpiringOnly(true)
     // setStage is usePageMemory's own useState setter (stable identity, never
     // actually changes) — listed to satisfy exhaustive-deps, not because this
     // effect should re-run on it.
-  }, [intent, stages, setStage])
+  }, [intent, stages, setStage, setOwner])
 
   // Reset to the first page + drop the selection whenever a filter changes.
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { setPage(1); clearSelection() }, [stage, owner, client, selectedBranch, query, showArchived, showTrash])
 
   // Right-panel filters (stage · owner · client) — options derived from the loaded rows.
+  // Owner is keyed on ownerId (value) with the owner name (label) shown to the
+  // user — matches the id-based filter state above.
   const optionsFrom = (key: 'stage' | 'owner' | 'client') => {
+    if (key === 'owner') {
+      const m = new Map<string, { label: string; count: number }>()
+      rows.forEach(r => {
+        if (r.ownerId == null) return
+        const id = String(r.ownerId)
+        const cur = m.get(id)
+        m.set(id, { label: r.owner || cur?.label || '', count: (cur?.count ?? 0) + 1 })
+      })
+      return [...m.entries()].map(([value, v]) => ({ value, label: v.label, count: v.count }))
+    }
     const m = new Map<string, number>()
     rows.forEach(r => { const v = r[key]; if (v) m.set(v, (m.get(v) ?? 0) + 1) })
     return [...m.entries()].map(([value, count]) => ({ value, label: value, count }))
@@ -173,7 +192,8 @@ export default function OpportunitiesPage({ intent }: { intent?: unknown } = {})
       else if (showArchived) { if (r.lifecycle !== 'archived') return false }
       else if (r.archived) return false
       if (stage.length  && !stage.includes(r.stage))   return false
-      if (owner.length  && !owner.includes(r.owner))   return false
+      // Owner filter compares IDs, not names (a dashboard click narrows by id).
+      if (owner.length  && !owner.includes(String(r.ownerId ?? '')))   return false
       if (client.length && !client.includes(r.client)) return false
       // A reference-number query already narrowed `rows` server-side (exact `?ref=`) —
       // skip the free-text re-filter so the single matched deal isn't filtered back out.

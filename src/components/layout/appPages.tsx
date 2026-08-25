@@ -180,13 +180,16 @@ export function renderPage(activePage: string, { navIntent, goTo, dashView }: { 
     // vacancies toolbar's Excel-upload button) can preselect an entity on arrival.
     case 'import-wizard':          return <ImportWizardPage intent={navIntent} />
     case 'coupling-errors':        return <CouplingErrorsPage />
-    case 'planning':               return <PlanningPage />
+    case 'planning':               return <PlanningPage intent={navIntent} />
 
     // ── Reports hub (analytical) ──────────────────────────────────────────
     // Bare #reports is now its own KPI overview dashboard (RAPPORTEN-DASHBOARD-1,
     // Danny 14-08) — it no longer forwards to the first sub-report, so it gets NO
-    // reportId prop and ReportsPage renders the dashboard branch.
-    case 'reports':                return <ReportsPage />
+    // reportId prop and ReportsPage renders the dashboard branch. A dashboard
+    // chart click still lands #reports (goTo only pushes the base page), so the
+    // nav intent's `report` id is forwarded (DASH-REPORT-DEEPLINK-1) — ReportsPage
+    // falls back to it instead of the dashboard branch.
+    case 'reports':                return <ReportsPage intent={navIntent} />
     // The CANONICAL routes (RAPPORTEN-DANNY10-1) — each lands on that page's
     // own default switch position (no initialView needed).
     case 'reports.candidates':     return <ReportsPage reportId="candidates" />
