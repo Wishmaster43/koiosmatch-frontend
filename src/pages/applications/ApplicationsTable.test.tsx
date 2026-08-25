@@ -8,6 +8,10 @@ import { render, screen, within, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import ApplicationsTable from './ApplicationsTable'
 import type { Application } from '@/types/application'
+// Real i18n instance (initialised transitively via the component's own
+// '@/lib/datetime' import) — imported directly here so the seeded-label test
+// below can switch languages (mirrors Sidebar.test.jsx's changeLanguage convention).
+import i18n from '@/i18n'
 
 // The status column's CandidateStatusChip resolves its own tenant lookup via
 // this context (mirrors ApplicationTab.test.tsx's identical stub).
@@ -110,6 +114,31 @@ describe('ApplicationsTable · source column em-dash (SWEEP-TABLES)', () => {
     expect(values).toContain('Website')
     expect(values).toContain('—')
     expect(values).not.toContain('')
+  })
+})
+
+// LOOKUP-I18N-1: the row's embedded `source` is a flat seed label (no separate
+// value) — render it in the user's language; a tenant rename stays as typed.
+describe('ApplicationsTable · seeded source label i18n (LOOKUP-I18N-1)', () => {
+  it('renders the seeded source in English when the UI language is English', async () => {
+    await i18n.changeLanguage('en')
+    const row = { ...baseRow, id: 8, source: 'referral' }
+    const { unmount } = render(<ApplicationsTable rows={[row]} />)
+    expect(screen.getByText('Referral')).toBeInTheDocument()
+    expect(screen.queryByText('referral')).not.toBeInTheDocument()
+    // Unmount before switching back — resetting the language on a still-mounted
+    // component would fire a state update outside act().
+    unmount()
+    await i18n.changeLanguage('nl')
+  })
+
+  it('leaves a tenant-renamed source label untouched under English', async () => {
+    await i18n.changeLanguage('en')
+    const row = { ...baseRow, id: 9, source: 'Personeelsfeestje' }
+    const { unmount } = render(<ApplicationsTable rows={[row]} />)
+    expect(screen.getByText('Personeelsfeestje')).toBeInTheDocument()
+    unmount()
+    await i18n.changeLanguage('nl')
   })
 })
 

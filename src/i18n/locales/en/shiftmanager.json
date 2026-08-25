@@ -179,6 +179,7 @@
     "byFunctionTitle": "Open shifts by role",
     "inHours": "In hours",
     "inShifts": "In shifts",
+    "unitToggleLabel": "Unit: hours or shifts",
     "colHours": "Hours",
     "colShifts": "Shifts",
     "lastSync": "Last sync: {{time}}",

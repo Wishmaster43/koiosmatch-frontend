@@ -13,6 +13,7 @@ import { useTranslation } from 'react-i18next'
 import type { AxiosResponse } from 'axios'
 import { useCachedLookup } from './useCachedLookup'
 import { unwrapList } from '@/lib/api'
+import { translateSeedList } from './lookupSeedI18n'
 
 // Index signature added (TAKEN-TOOLBAR-2/MATCHES-TOOLBAR-1): lets this list feed
 // straight into the shared StatusFilterSelect/useStatusFilter, which takes
@@ -43,15 +44,11 @@ const mapMatchStatuses = (res: AxiosResponse): MatchStatus[] | null => {
 }
 
 export function useMatchStatuses() {
-  const { t } = useTranslation('matches')
+  const { t } = useTranslation('common')
   // The endpoint now exists (item 11) — a real 404 should surface in the dev log again.
   const { data: rawStatuses } = useCachedLookup('/match-statuses', mapMatchStatuses, DEFAULT_MATCH_STATUSES)
-  // Translate labels only while still on the SEED fallback (reference-equal to the
-  // DEFAULT_MATCH_STATUSES const) — real tenant-configured API labels pass through
-  // untouched; the literal Dutch seed text is the defaultValue.
-  const statuses = useMemo(() => rawStatuses === DEFAULT_MATCH_STATUSES
-    ? rawStatuses.map(s => ({ ...s, label: t(`lookupSeeds.statuses.${s.value}`, { defaultValue: s.label }) }))
-    : rawStatuses, [rawStatuses, t])
+  // Seeded defaults render in the user language; a tenant value stays as typed (LOOKUP-I18N-1).
+  const statuses = useMemo(() => translateSeedList(t, 'matchStatuses', rawStatuses), [rawStatuses, t])
 
   // Resolve a stored slug to its meta; tolerant of label-stored values.
   // useCallback: consumers hang this in memo/effect deps — it must be stable.

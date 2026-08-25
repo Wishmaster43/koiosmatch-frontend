@@ -11,6 +11,7 @@ import { CHART_SERIES_COLORS } from '@/components/charts/chartTypes'
 import { Panel } from '@/pages/dashboard/DashboardPrimitives'
 import { fv } from '@/pages/dashboard/dashboardFormat'
 import { useCustomerPhases } from '@/lib/useCustomerPhases'
+import { useSeedLabel } from '@/lib/useSeedLabel'
 import type { CustomerByPhaseRow } from '@/types/dashboard'
 import type { FeedTileContext } from '../feedTileKit'
 
@@ -20,11 +21,13 @@ export default function CustomersByPhaseDonut({ rows, onNavigate }: {
 }) {
   const { t } = useTranslation('dashboard')
   const { phases } = useCustomerPhases()
+  // LOOKUP-I18N-1: the seeded phase label renders in the user's language.
+  const seedLabel = useSeedLabel()
 
   // Drop zero-count phases; colour from the tenant lookup match, else the house series.
   const nonEmpty = rows.filter(r => r.count > 0)
   const data = nonEmpty.map((r, i) => ({
-    name: r.label, value: r.count, filterValue: r.value,
+    name: seedLabel('customerPhases', { value: r.value, label: r.label }), value: r.count, filterValue: r.value,
     color: phases.find(p => p.value === r.value)?.color ?? CHART_SERIES_COLORS[i % CHART_SERIES_COLORS.length],
   }))
 

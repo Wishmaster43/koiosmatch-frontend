@@ -11,10 +11,10 @@
  * session, shared across every mounted consumer.
  */
 import { useTranslation } from 'react-i18next'
-import type { TFunction } from 'i18next'
 import type { AxiosResponse } from 'axios'
 import { useCachedLookup } from './useCachedLookup'
 import { normalizeOptions } from './lookupUtils'
+import { translateSeedList } from './lookupSeedI18n'
 import type { LookupOption } from '@/types/common'
 import { unwrap } from '@/lib/api'
 import { useMemo } from 'react'
@@ -77,23 +77,16 @@ const mapCustomerLookups = (res: AxiosResponse): CustomerLookupsData => {
   }
 }
 
-// Translate a seed lookup's labels through i18n, keyed by lookup name + value; the
-// literal Dutch seed text is the defaultValue so a missing key degrades gracefully.
-// Only ever applied to the SEED fallback (never tenant-configured API labels).
-const translateSeed = (t: TFunction, lookupName: string, items: LookupOption[]): LookupOption[] =>
-  items.map(it => ({ ...it, label: t(`lookupSeeds.${lookupName}.${it.value}`, { defaultValue: it.label }) }))
-
 export function useCustomerLookups() {
-  const { t } = useTranslation('customers')
+  const { t } = useTranslation('common')
   const { data, loading } = useCachedLookup('/settings/customer-lookups', mapCustomerLookups, FALLBACK)
 
-  // Each field falls back independently (mapCustomerLookups), so each is checked
-  // against its OWN seed default before translating — never the tenant's own labels.
+  // Seeded defaults render in the user language; a tenant value stays as typed (LOOKUP-I18N-1).
   // Memoised: consumers put these arrays in dependency arrays (§9 stable reference).
-  const statuses           = useMemo(() => data.statuses === DEFAULT_CUSTOMER_STATUSES ? translateSeed(t, 'statuses', data.statuses) : data.statuses, [data.statuses, t])
-  const locationStatuses   = useMemo(() => data.locationStatuses === DEFAULT_SUB_STATUSES ? translateSeed(t, 'subStatuses', data.locationStatuses) : data.locationStatuses, [data.locationStatuses, t])
-  const departmentStatuses = useMemo(() => data.departmentStatuses === DEFAULT_SUB_STATUSES ? translateSeed(t, 'subStatuses', data.departmentStatuses) : data.departmentStatuses, [data.departmentStatuses, t])
-  const contactStatuses    = useMemo(() => data.contactStatuses === DEFAULT_SUB_STATUSES ? translateSeed(t, 'subStatuses', data.contactStatuses) : data.contactStatuses, [data.contactStatuses, t])
+  const statuses           = useMemo(() => translateSeedList(t, 'customerStatuses', data.statuses), [data.statuses, t])
+  const locationStatuses   = useMemo(() => translateSeedList(t, 'subStatuses', data.locationStatuses), [data.locationStatuses, t])
+  const departmentStatuses = useMemo(() => translateSeedList(t, 'subStatuses', data.departmentStatuses), [data.departmentStatuses, t])
+  const contactStatuses    = useMemo(() => translateSeedList(t, 'subStatuses', data.contactStatuses), [data.contactStatuses, t])
 
   // value → item helper with a neutral fallback so the UI never crashes.
   // eslint-disable-next-line no-restricted-syntax -- DATA fallback, not a UI colour choice

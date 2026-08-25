@@ -110,7 +110,8 @@ const EMPTY = {
 export default function CompanySettings() {
   const { t } = useTranslation('settings')
   // Tenant-configurable industry options for the dropdown below.
-  const { industries } = useIndustries()
+  // Options pair the STORED industry name with a translated label (LOOKUP-I18N-1).
+  const { industryOptions: industries } = useIndustries()
   // Backend-sourced operating-country codes, labelled in the current UI language.
   const { options: countryOptions } = useCountriesLookup()
   const [form,       setForm]       = useState(EMPTY)

@@ -55,8 +55,12 @@ import ScopedListTab from './ScopedListTab'
 import type { ApiOpportunity, Opportunity } from '@/types/opportunity'
 import type { Id, LookupOption } from '@/types/common'
 import type { Column } from '@/components/ui/DataTable'
+import { monoStyle } from '@/components/ui/typography'
 
-// Locale-aware EUR formatter — mirrors OpportunitiesTab's own (not exported there).
+// EUR formatter deliberately locked to 'nl-NL' — the domain's canonical currency
+// locale (§5), never the tenant UI locale, so the decimal/grouping convention
+// stays fixed regardless of app language (mirrors OpportunitiesTable's own
+// opportunityValueOf/formatOpportunityValue comment; not exported there).
 const money = new Intl.NumberFormat('nl-NL', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 })
 
 // Reuse the customer-level Kansen tab's own mapper verbatim — never a forked shape.
@@ -94,7 +98,10 @@ export default function ScopedOpportunitiesTab({ scope, id, customerId, customer
     { key: 'stage', header: t('opportunities.col.stage'), sortable: true, sortValue: o => o.stage,
       render: o => o.stage ? <SoftChip label={o.stage} color={o.stageColor} /> : '—' },
     { key: 'value', header: t('opportunities.col.value'), align: 'right', sortable: true, sortValue: o => o.value ?? -1,
-      cellStyle: { color: 'var(--text)', fontSize: 12, fontFamily: 'JetBrains Mono, monospace' },
+      // cellStyle is a raw CSSProperties object DataTable applies to the <td>
+      // directly (no JSX slot for the <Mono> atom here) — the font-family comes
+      // from the atom's own canonical style identity instead of a local literal.
+      cellStyle: { color: 'var(--text)', fontSize: 12, ...monoStyle },
       render: o => o.value != null ? money.format(o.value) : '—' },
   ]
 

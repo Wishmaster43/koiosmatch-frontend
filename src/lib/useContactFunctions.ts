@@ -18,10 +18,27 @@
  * `PUT /contact-functions/free-entry`. Wiring the underscored key here reproduced
  * the exact gap found on the sources lookup — see ContactFunctionsSettings.jsx,
  * which now persists through the real dedicated route (mirrors useApplicationSources.ts).
+ *
+ * LOOKUP-I18N-1 (25-08, fix round): `contactFunctions` is `{ value, label }[]`,
+ * never a bare string[]. A seeded default's LABEL renders in the user's language,
+ * but its VALUE stays the exact name the backend sent — that untranslated name is
+ * what a picker's onChange emits and what gets written to `customer_contacts.function`
+ * (a write gated against the tenant lookup via the dotted `contact_functions.
+ * allow_free_entry` key, mirrors useApplicationSources.ts's own reasoning). Every
+ * consumer already accepts `Array<string | { value; label }>` (CreatableSelect) or
+ * reads `.value`/`.label` directly, so this is a drop-in, not a breaking change.
  */
+import { useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { AxiosResponse } from 'axios'
 import { useCachedLookup } from './useCachedLookup'
+import { translateSeedList } from './lookupSeedI18n'
 import { lookupNames } from './lookupUtils'
+
+// A picker option: `value` is the untranslated name the backend recognises;
+// `label` is what the user sees (translated for a seeded default, unchanged for
+// a tenant-typed one). Matches the shared CreatableSelect option shape 1:1.
+export interface ContactFunctionOption { value: string; label: string }
 
 export const DEFAULT_CONTACT_FUNCTIONS = [
   'Locatiemanager', 'Teamleider', 'HR-adviseur', 'Roosterplanner', 'Zorgcoördinator', 'Directeur',
@@ -48,6 +65,15 @@ const mapContactFunctions = (res: AxiosResponse): ContactFunctionsLookupData => 
 }
 
 export function useContactFunctions() {
+  const { t } = useTranslation('common')
   const { data, invalidate } = useCachedLookup('/contact-functions', mapContactFunctions, FALLBACK)
-  return { contactFunctions: data.contactFunctions, allowFreeEntry: data.apiFreeEntry, invalidate }
+  // Seeded defaults render in the user language; a tenant value stays as typed
+  // (LOOKUP-I18N-1). VALUE stays the raw backend name (never translated) so the
+  // submitted `function` is always what the backend recognises; only LABEL is
+  // translated for display.
+  const contactFunctions = useMemo(
+    () => translateSeedList(t, 'contactFunctions', data.contactFunctions.map(name => ({ value: name, label: name }))),
+    [data.contactFunctions, t],
+  )
+  return { contactFunctions, allowFreeEntry: data.apiFreeEntry, invalidate }
 }

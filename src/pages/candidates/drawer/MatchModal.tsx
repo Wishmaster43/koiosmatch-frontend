@@ -194,7 +194,7 @@ export default function MatchModal({
             <div style={cardBox}>
               <ContractSection
                 t={t} errors={form.errors}
-                contractType={form.contractType} setContractType={form.setContractType} contractTypes={form.contractTypes}
+                contractType={form.contractType} setContractType={form.setContractType} contractTypeOptions={form.contractTypeOptions}
                 cao={form.cao} setCao={form.setCao} caoOptions={form.caoOptions}
                 startDate={form.startDate} setStartDate={form.setStartDate}
                 endDate={form.endDate} setEndDate={form.setEndDate} setEndDateDirty={form.setEndDateDirty}

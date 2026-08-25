@@ -13,6 +13,7 @@ import Button from '@/components/ui/Button'
 import { PageTitle, Caption } from '@/components/ui/typography'
 import { useDateFormat } from '@/lib/datetime'
 import { useCustomFields } from '@/lib/useCustomFields'
+import { useSeedLabel } from '@/lib/useSeedLabel'
 import DetailsTab from './drawer/DetailsTab'
 import StatisticsTab from './drawer/StatisticsTab'
 import CustomerRelationTab from './drawer/CustomerRelationTab'
@@ -68,6 +69,9 @@ export default function OpportunityDrawer({
   const { formatDate, formatDateTime } = useDateFormat()
   // The Extra tab only shows when the tenant has defined opportunity custom fields (§3A(f)).
   const { fields: customFieldDefs } = useCustomFields('opportunity')
+  // LOOKUP-I18N-1: the seeded stage label renders in the user's language; a
+  // tenant rename/creation passes through untouched.
+  const seedLabel = useSeedLabel()
 
   // Inline title edit — reset when a different opportunity is shown (render-time pattern).
   const [editing,    setEditing]    = useState(false)
@@ -88,7 +92,7 @@ export default function OpportunityDrawer({
     ...(users.some(u => String(u.id) === String(o.ownerId)) || !o.owner ? [] : [{ value: o.ownerId, label: o.owner }]),
     ...users.map(u => ({ value: u.id, label: u.name })),
   ]
-  const stageOptions = stages.map(s => ({ value: s.value, label: s.label }))
+  const stageOptions = stages.map(s => ({ value: s.value, label: seedLabel('opportunityStages', { value: s.value, label: s.label }) }))
 
   const startEdit = () => { setTitleDraft(o.title); setEditing(true) }
   const saveEdit  = () => { const v = titleDraft.trim(); if (v && v !== o.title) onUpdate?.(o.id, { title: v }); setEditing(false) }
@@ -160,7 +164,7 @@ export default function OpportunityDrawer({
       header={() => (
         <EntityHeader
           // TITEL-CHIP-1 (Danny 19-08): the stage badge IS the title.
-          label={<TitleBadge label={o.stage} color={o.stageColor} />}
+          label={<TitleBadge label={seedLabel('opportunityStages', { label: o.stage })} color={o.stageColor} />}
           expanded={expanded} onToggleExpand={onToggleExpand} onClose={onClose}
           // eslint-disable-next-line no-restricted-syntax -- DATA fallback, not a UI colour choice (mirrors the shared Avatar.tsx NEUTRAL_AVATAR constant)
           avatar={{ initials: o.initials, soft: true, color: '#9CA3AF' }}

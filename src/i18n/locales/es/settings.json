@@ -3468,6 +3468,7 @@
     },
     "aiBudgetLabel": "Tokens de AI",
     "workflowBudgetLabel": "Tokens de Koios",
+    "whatsappBudgetLabel": "Tokens de WhatsApp al mes",
     "valueCaption": "compra {{cogs}} · venta {{sale}} · {{basis}}",
     "tenantHeading": "Excepción de cliente",
     "tenantPickerLabel": "Cliente",
@@ -3550,5 +3551,28 @@
     "list": "Listas"
   },
   "dashboardsNoResults": "No hay elementos para esta búsqueda o este filtro.",
-  "dashboardsSharedDefaultNote": "Este rol comparte la fila de KPI predeterminada. Un cambio aquí también aplica a los otros roles que la comparten."
+  "dashboardsSharedDefaultNote": "Este rol comparte la fila de KPI predeterminada. Un cambio aquí también aplica a los otros roles que la comparten.",
+  "appsCatalog": {
+    "aelio": "Conexión con Aelio para la gestión de turnos y la planificación de personal.",
+    "afas": "Conexión de back office con AFAS (RR. HH., nóminas y facturación).",
+    "ai_planner": "Planificador con IA: ofrecer turnos, recordatorios, turnos trabajados y cambios de estado. Muestra la carpeta \"AI Planner\" en Workflows.",
+    "ai_recruiter": "Reclutador con IA: primer contacto y respuestas automáticas a los mensajes de candidatos. Muestra la carpeta \"AI Recruiter\" en Workflows.",
+    "aircall": "Telefonía en la nube para equipos de selección: llamadas, grabaciones y sincronización de expedientes.",
+    "clevergig": "Conexión de planificación con Clevergig (turnos flexibles y bolsas en sanidad).",
+    "easyflex": "Conexión de back office con EasyFlex (nóminas y facturación).",
+    "elanza": "Conexión con Elanza para turnos y gestión de candidatos.",
+    "fleks": "Conexión de planificación con Fleks para bolsas flexibles y gestión de turnos.",
+    "hf": "Conexión de back office con HelloFlex (nóminas, facturación, contratos).",
+    "intus": "Conexión con la planificación de Intus para obtener turnos y candidatos.",
+    "kvk": "Consulta al registro mercantil: el número KvK devuelve nombre, dirección y estado.",
+    "nocore": "Conexión de back office con Nocore Flex (nóminas y facturación).",
+    "ons": "Conexión con ONS (Nedap) para planificación y cuadrantes.",
+    "pivoton": "Conexión de back office con Pivoton (administración flexible y nóminas).",
+    "sdb": "Conexión con la planificación de SDB para turnos y cuadrantes.",
+    "shiftmanager": "Conexión con Shiftmanager para turnos, planificación y candidatos.",
+    "teams": "Llamar con Teams Phone y guardar las notas de llamada en el expediente.",
+    "threecx": "Conexión de telefonía con 3CX: clic para llamar y registro de llamadas en el expediente del candidato.",
+    "vat": "Validar un número de IVA a través del servicio européen VIES.",
+    "voys": "Centralita VoIP neerlandesa (VoIPGRID): clic para llamar e historial de llamadas."
+  }
 }

@@ -14,6 +14,7 @@ import api, { unwrap, unwrapList } from '@/lib/api'
 import { useAuth } from '@/context/AuthContext'
 import { useConfirm } from '@/hooks/useConfirm'
 import { extractApiError } from '@/lib/extractApiError'
+import { useSeedLabel } from '@/lib/useSeedLabel'
 import { normalizeWorkflow, denormalizeWorkflow } from '../data/workflowMap'
 import type { Workflow, RawWorkflow } from '@/types/workflow'
 
@@ -25,6 +26,9 @@ export type FolderId = string | number | null
 // `showArchived` drives the fetch (soft-deleted rows, C-27-workflow).
 export function useWorkflowsData(showArchived: boolean) {
   const { t } = useTranslation(['workflows', 'common'])
+  // LOOKUP-I18N-1: a seeded folder/workflow name renders in the user language in the
+  // confirm dialogs too, so the name they see there matches the row they clicked.
+  const seedLabel = useSeedLabel()
   // Folder create/delete is settings.update-gated on the backend (R-3); mirror it in the UI.
   const canManageFolders = useAuth()?.hasPermission('settings.update') ?? false
   const [workflows, setWorkflows] = useState<Workflow[]>([])
@@ -201,7 +205,7 @@ export function useWorkflowsData(showArchived: boolean) {
 
   const deleteFolder = (folder: WorkflowFolder) => {
     if (!canManageFolders) return
-    confirm(t('page.deleteFolderConfirm', { name: folder.name }), async () => {
+    confirm(t('page.deleteFolderConfirm', { name: seedLabel('workflowFolders', { label: folder.name }) }), async () => {
       try {
         await api.delete(`/workflow-folders/${folder.id}`)
         setFolders(prev => prev.filter(f => f.id !== folder.id))
@@ -220,7 +224,7 @@ export function useWorkflowsData(showArchived: boolean) {
   // (workflows:reap-stale), then refetches so the archived view picks it up.
   const handleArchive = (wf: Workflow) => {
     if (!canManageFolders) return
-    confirm(t('page.archiveConfirm', { name: wf.name }), async () => {
+    confirm(t('page.archiveConfirm', { name: seedLabel('workflowNames', { label: wf.name ?? null }) }), async () => {
       try {
         await api.delete(`/workflows/${wf.id}`)
         notify('success', t('page.archiveSuccess'))

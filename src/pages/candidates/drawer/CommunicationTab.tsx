@@ -15,6 +15,7 @@ import DrawerAddButton from './DrawerAddButton'
 import StartConversationModal from './StartConversationModal'
 import { useNoteTypes, SYSTEM_NOTE_TYPES } from '@/lib/useNoteTypes'
 import { useLastContactTypes } from '@/lib/useLastContactTypes'
+import { useSeedLabel } from '@/lib/useSeedLabel'
 import { useCandidateNotes } from '@/pages/candidates/hooks/useCandidateNotes'
 import { mergeTimelineEvents } from './mergeTimelineEvents'
 import type { Candidate } from '@/types/candidate'
@@ -54,6 +55,9 @@ export default function CommunicationTab({ c, onSave, onEditStatusEvent, initial
   initialSubTab?: string }) {
   const { t } = useTranslation('candidates')
   const { formatDate } = useDateFormat()
+  // LOOKUP-I18N-1: seeded lookup labels (funnel stage on application events below)
+  // render in the user's language while unchanged; a tenant rename stays as typed.
+  const seedLabel = useSeedLabel()
   // Note categories from the tenant lookup, scoped to 'candidate' (NOTE-TYPES-2/3).
   const { types: allNoteTypes, writableTypes } = useNoteTypes('candidate')
   // Contact channels (last_contact_types) — picking one on a note stamps last_contact_at/_type/_by.
@@ -174,8 +178,13 @@ export default function CommunicationTab({ c, onSave, onEditStatusEvent, initial
     const title = (typeof a.vacancy_title === 'string' && a.vacancy_title)
       || (typeof vacancy?.title === 'string' ? vacancy.title : undefined)
       || (typeof a.function_title === 'string' ? a.function_title : undefined)
-    const stage = typeof a.funnel_stage_label === 'string' ? a.funnel_stage_label
-      : (typeof a.stage === 'string' ? a.stage : undefined)
+    // LOOKUP-I18N-1: the embedded application carries `stageLabel`/`stageKey`
+    // (Candidate/ApplicationResource.php — the previous `funnel_stage_label`/`stage`
+    // read here matched no field the backend ever sends, so this caption never
+    // rendered at all). `stageLabel` is a seeded funnel default when the tenant
+    // hasn't renamed it, so it renders in the user's language, not the raw NL seed.
+    const rawStage = typeof a.stageLabel === 'string' ? a.stageLabel : undefined
+    const stage = rawStage ? seedLabel('funnelTypes', { value: typeof a.stageKey === 'string' ? a.stageKey : undefined, label: rawStage }) : undefined
     return {
       id: `app-${(a.id as string | number | undefined) ?? i}`,
       kind: 'application' as const,

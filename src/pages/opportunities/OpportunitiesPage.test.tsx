@@ -228,7 +228,7 @@ describe('OpportunitiesPage · reference-number search (NUMMER-1)', () => {
 
 // DASH-FEEDS-V3 naronde: the dashboard's stalled-opportunities rows and the
 // stage×owner bars deep-link here. §13: assert the DESTINATION (the record
-// opener is called, the stage filter carries the resolved LABEL), never only
+// opener is called, the stage filter carries the resolved VALUE), never only
 // that a callback fired.
 describe('OpportunitiesPage · cross-entity intent seam (DASH-FEEDS-V3)', () => {
   it('an { open } intent opens the record through selectOpportunity', async () => {
@@ -239,7 +239,10 @@ describe('OpportunitiesPage · cross-entity intent seam (DASH-FEEDS-V3)', () => 
     await waitFor(() => expect(apiGet).toHaveBeenCalled())
   })
 
-  it('a { stage } intent carrying the stage UUID resolves to the lookup label, not a raw id', async () => {
+  // LOOKUP-I18N-1: the filter compares Opportunity.stageValue (the raw slug),
+  // never a label — a translated label reaching this state would mismatch every
+  // row's (untranslated, seed-language) `stage` field on a non-NL tenant.
+  it('a { stage } intent carrying the stage UUID resolves to the lookup value, not a raw id or a translated label', async () => {
     useOpportunitiesDataMock.mockReturnValue({
       ...baseResult,
       stages: [{ id: 'uuid-lead', value: 'lead', label: 'Lead' }, { id: 'uuid-won', value: 'won', label: 'Gewonnen' }],
@@ -247,11 +250,11 @@ describe('OpportunitiesPage · cross-entity intent seam (DASH-FEEDS-V3)', () => 
     render(<OpportunitiesPage intent={{ stage: 'uuid-won' }} />)
     await waitFor(() => {
       const stageGroup = capturedGroups.find(g => g.key === 'stage')
-      expect(stageGroup?.selected).toEqual(['Gewonnen'])
+      expect(stageGroup?.selected).toEqual(['won'])
     })
     await waitFor(() => expect(apiGet).toHaveBeenCalled())
     // Clean up the module-level usePageMemory store for later tests.
-    await act(async () => { capturedGroups.find(g => g.key === 'stage')?.onToggle('Gewonnen') })
+    await act(async () => { capturedGroups.find(g => g.key === 'stage')?.onToggle('won') })
   })
 
   // OWNER-ID-1: the dashboard's activity/stacked-bar tiles send the owner ID

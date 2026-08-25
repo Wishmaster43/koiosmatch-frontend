@@ -17,10 +17,13 @@
  * writing ONE cache entry for '/nationalities' (useCachedLookup keys purely by
  * URL, so a second differently-shaped hook on the same endpoint would race it).
  */
+import { useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { AxiosResponse } from 'axios'
 import { useCachedLookup } from './useCachedLookup'
 import { unwrapList } from '@/lib/api'
 import { getFlagEmoji } from './countries'
+import { translateSeedLabel } from './lookupSeedI18n'
 
 export const DEFAULT_NATIONALITIES = [
   'Nederlands', 'Belgisch', 'Duits', 'Frans', 'Brits', 'Pools', 'Turks',
@@ -51,6 +54,23 @@ const mapNationalities = (res: AxiosResponse): NationalitiesData | null => {
 }
 
 export function useNationalities() {
+  const { t } = useTranslation('common')
   const { data } = useCachedLookup('/nationalities', mapNationalities, DEFAULT_DATA)
-  return { nationalities: data.names, flags: data.flags }
+  // Seeded defaults render in the user language; a tenant value stays as typed (LOOKUP-I18N-1).
+  // Flags are re-keyed onto the translated name so `flags[name]` still resolves for callers
+  // that look the flag up by the (possibly translated) name coming back from this hook.
+  const translated = useMemo(() => {
+    // LOOKUP-I18N-1 SAFETY: the picker saves the string it shows, so the stored names stay
+    // raw and only `options` carries a translated label (display sites use useSeedLabel).
+    const names = data.names
+    const options = data.names.map(name => ({ value: name, label: translateSeedLabel(t, 'nationalities', { label: name }) }))
+    const flags: Record<string, string> = {}
+    data.names.forEach((name, i) => {
+      const flag = data.flags[name]
+      if (flag) flags[names[i]] = flag
+    })
+    return { names, options, flags }
+  }, [data, t])
+
+  return { nationalities: translated.names, nationalityOptions: translated.options, flags: translated.flags }
 }

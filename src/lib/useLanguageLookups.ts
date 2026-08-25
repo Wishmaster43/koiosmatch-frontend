@@ -8,9 +8,12 @@
  * Fetch/cache/dedupe lives in useCachedLookup (audit item 8) — one GET per URL
  * per session, shared across every mounted consumer.
  */
+import { useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { AxiosResponse } from 'axios'
 import { useCachedLookup } from './useCachedLookup'
 import { lookupNames } from './lookupUtils'
+import { translateSeedLabel } from './lookupSeedI18n'
 
 export const DEFAULT_LANGUAGES = [
   'Nederlands', 'Engels', 'Duits', 'Frans', 'Spaans', 'Pools', 'Turks',
@@ -27,7 +30,17 @@ const mapNames = (res: AxiosResponse): string[] | null => {
 }
 
 export function useLanguageLookups() {
-  const { data: languages } = useCachedLookup('/languages', mapNames, DEFAULT_LANGUAGES)
-  const { data: levels }    = useCachedLookup('/language-levels', mapNames, DEFAULT_LANGUAGE_LEVELS)
+  const { t } = useTranslation('common')
+  const { data: rawLanguages } = useCachedLookup('/languages', mapNames, DEFAULT_LANGUAGES)
+  const { data: rawLevels }    = useCachedLookup('/language-levels', mapNames, DEFAULT_LANGUAGE_LEVELS)
+  // Seeded defaults render in the user language; a tenant value stays as typed (LOOKUP-I18N-1).
+  const languages = useMemo(
+    () => rawLanguages.map(name => translateSeedLabel(t, 'languages', { label: name })),
+    [rawLanguages, t],
+  )
+  const levels = useMemo(
+    () => rawLevels.map(name => translateSeedLabel(t, 'languageLevels', { label: name })),
+    [rawLevels, t],
+  )
   return { languages, levels }
 }

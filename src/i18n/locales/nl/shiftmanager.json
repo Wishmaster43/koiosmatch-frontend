@@ -179,6 +179,7 @@
     "byFunctionTitle": "Open diensten per functie",
     "inHours": "In uren",
     "inShifts": "In diensten",
+    "unitToggleLabel": "Eenheid: uren of diensten",
     "colHours": "Uren",
     "colShifts": "Diensten",
     "lastSync": "Laatste sync: {{time}}",

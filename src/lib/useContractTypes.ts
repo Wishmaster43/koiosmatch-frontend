@@ -32,9 +32,28 @@
  *
  * Fetch/cache/dedupe lives in useCachedLookup (audit item 8) — one GET per
  * session, shared across every mounted consumer.
+ *
+ * LOOKUP-I18N-1 (25-08, fix round): `options.label` IS translated (a seeded
+ * default renders in the user's language; `options.value` — the immutable slug —
+ * never is). `types`, deliberately, is NOT: every `types` consumer treats the
+ * string as BOTH the picker's value and its label (value === label), and this
+ * hook's own contract above states a match stores that string directly — the
+ * backend's `MatchRules::normalise` recognises the SLUG or the DUTCH label, never
+ * a translated one. `types` therefore stays sourced from the untranslated rows so
+ * a non-NL recruiter's pick still normalises. KNOWN RESIDUAL RISK, out of this
+ * lane (useMatchForm.ts/ContractSection.tsx are match-creation logic, not a
+ * lookup hook): useMatchForm.ts's own default-proposal and canonicalise effects
+ * read `options.label` directly (not `types`) and store THAT in the submitted
+ * `contractType` state — for a non-NL locale this still posts a translated label.
+ * Closing that needs `contractType` to hold `options.value` end-to-end (Contract
+ * Section binding `options` instead of `types`), a match-creation change flagged
+ * for a dedicated follow-up rather than made here.
  */
+import { useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { AxiosResponse } from 'axios'
 import { useCachedLookup } from './useCachedLookup'
+import { translateSeedList } from './lookupSeedI18n'
 import { unwrapList } from '@/lib/api'
 
 // Seed defaults mirror Danny's spec (ABU + ZZP + W&S); labels tenant-facing.
@@ -69,9 +88,15 @@ const mapContractTypeOptions = (res: AxiosResponse): ContractTypeOption[] | null
 }
 
 export function useContractTypes() {
+  const { t } = useTranslation('common')
   // One cached GET /contract-types per session; the seed list stands in only while
   // that request is in flight or if it returns nothing usable (mapper → null).
-  const { data: options } = useCachedLookup('/contract-types', mapContractTypeOptions, DEFAULT_CONTRACT_TYPE_OPTIONS)
-  const types = options.map(o => o.label)
+  const { data: rawOptions } = useCachedLookup('/contract-types', mapContractTypeOptions, DEFAULT_CONTRACT_TYPE_OPTIONS)
+  // Seeded defaults render in the user language; a tenant value stays as typed (LOOKUP-I18N-1).
+  const options = useMemo(() => translateSeedList(t, 'contractTypes', rawOptions), [rawOptions, t])
+  // `types` stays UNTRANSLATED on purpose (see the doc comment above) — every
+  // consumer submits this exact string as `contract_type`, and only the raw
+  // backend label/slug normalises server-side regardless of the user's locale.
+  const types = useMemo(() => rawOptions.map(o => o.label), [rawOptions])
   return { types, options }
 }

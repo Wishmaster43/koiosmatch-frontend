@@ -39,6 +39,7 @@ interface CvDocumentProps {
  * screen's live preview call, so they can never disagree on layout (CvTemplateSettings
  * imports it from here rather than re-deriving its own copy).
  */
+// eslint-disable-next-line react-refresh/only-export-components -- pre-existing: CvTemplateSettings deliberately imports this pure layout helper from the PDF module itself (see the docblock above) so the two can never disagree; splitting it into a new file is a structural change outside this lane's scope
 export function groupCvSections(
   sections: Array<{ id: string; enabled?: boolean; placement?: string }>,
 ): { sidebar: string[]; main: string[] } {
@@ -53,6 +54,9 @@ export function groupCvSections(
   }
 }
 
+// `locale` (DATUM-1/LANE-B): the drawer passes the active language's locale
+// explicitly (mirrors ./cv/cvLabels' fmtDate default) so a generated CV matches
+// the user's language; 'nl-NL' here is only the fallback for a caller that omits it.
 export function CvDocument({ c, settings = {}, locale = 'nl-NL', t, redactContact = false }: CvDocumentProps) {
   // Fallback brand colours (mirror --color-primary/--color-info) for tenants with
   // no CV theme configured — react-pdf cannot resolve var(--color-*) CSS tokens.

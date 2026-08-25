@@ -14,6 +14,7 @@ import { useAllSettings, getBoolSetting } from '@/lib/settings/useAllSettings'
 import { useOpportunityAdvice } from '@/lib/useOpportunityAdvice'
 import { isExpectedCloseOverdue } from './data/opportunityAdvice'
 import { opportunityValueOf, formatOpportunityValue } from './data/opportunityValue'
+import { useSeedLabel } from '@/lib/useSeedLabel'
 import type { Opportunity } from '@/types/opportunity'
 import type { Id, LookupOption } from '@/types/common'
 
@@ -55,6 +56,9 @@ export default function OpportunitiesTable({ rows, loading, error, onRowClick, s
   // calls the same hook, so table and drill-down can never disagree. Same
   // overdue check the expectedClose cell below uses for its red/bold styling.
   const adviceOf = useOpportunityAdvice(stages)
+  // LOOKUP-I18N-1: the seeded stage label renders in the user's language; a
+  // tenant rename/creation passes through untouched.
+  const seedLabel = useSeedLabel()
 
   const columns: Column<Opportunity>[] = [
     { key: 'title', header: t('cols.title'), sortable: true, sticky: true, width: 300, nowrap: true,
@@ -89,7 +93,8 @@ export default function OpportunitiesTable({ rows, loading, error, onRowClick, s
         if (r.lifecycle === 'pending_erase') return <SoftChip label={t('common:trash.view')} color="var(--color-trash)" round />
         if (r.archived) return <SoftChip label={t('view.archived')} color="var(--text-muted)" round />
         if (!r.stage) return <span style={{ color: 'var(--text-muted)' }}>—</span>
-        return colorStage ? <StatusPill label={r.stage} color={r.stageColor} /> : <span style={{ color: 'var(--text)', fontSize: 12 }}>{r.stage}</span>
+        const stageLabel = seedLabel('opportunityStages', { label: r.stage })
+        return colorStage ? <StatusPill label={stageLabel} color={r.stageColor} /> : <span style={{ color: 'var(--text)', fontSize: 12 }}>{stageLabel}</span>
       } },
     // Value column follows the tenant setting: euro amount or hours. Regular weight,
     // same as the other plain-text columns (§4: bold is emphasis/active only, never

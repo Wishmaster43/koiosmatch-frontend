@@ -19,8 +19,11 @@ import type { VacancyDetail } from '@/types/vacancy'
 
 // Key-echo (repo-wide precedent, e.g. ApplicationTab.test.tsx) — avoids the real
 // i18n instance's async-init timing flipping assertions between raw keys and
-// translated NL copy depending on run order.
-vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string) => k }) }))
+// translated NL copy depending on run order. Falls back to `opts.defaultValue`
+// (repo-wide precedent, e.g. NoteKoiosModeToggle.test.tsx) so a LOOKUP-I18N-1
+// seed-translation call (`t(key, { defaultValue })`) still echoes the untranslated
+// seed name instead of the raw i18n key.
+vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string, opts?: { defaultValue?: string }) => opts?.defaultValue ?? k }) }))
 // useDateFormat imports @/i18n, which needs a REAL react-i18next to initialise —
 // stub the whole module (mirrors ApplicationStatusStrip.test.tsx) so nothing
 // here touches the real singleton.

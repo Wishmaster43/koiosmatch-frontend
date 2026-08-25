@@ -357,6 +357,19 @@ describe('CommunicationTab · merged timeline with application events (B24-TAB)'
     await goToTimeline(user)
     expect(screen.getByText('communication.timelineApplicationGeneric')).toBeInTheDocument()
   })
+
+  // LOOKUP-I18N-1 regression: the application's funnel stage caption reads
+  // `stageLabel`/`stageKey` — the real Candidate/ApplicationResource.php field
+  // names — not the `funnel_stage_label`/`stage` keys the backend never sends;
+  // that mismatch used to leave the caption blank on every real payload.
+  it('shows the application funnel-stage caption from stageLabel/stageKey', async () => {
+    const user = userEvent.setup()
+    render(<CommunicationTab c={candidate({}, {
+      applications: [{ id: 'a1', vacancy_title: 'Verpleegkundige', stageLabel: 'Gesolliciteerd', stageKey: 'applied', created_at: '2026-08-05T09:00:00.000Z' }],
+    })} />)
+    await goToTimeline(user)
+    expect(screen.getByText('Gesolliciteerd')).toBeInTheDocument()
+  })
 })
 
 // WHATSAPP-COMPOSE-1 (Danny 06-08): the "Conversatie starten" trigger next to the

@@ -44,7 +44,7 @@ export default function ProfilePersonalTab({ c, onSave, autoEditSignal }: {
   // LOOKUP-ICON-1 (decision 22-30-vlaggen "emoji passthrough"): `flags` maps a
   // nationality name to its ISO-2 flag emoji (derived from country_code) — fed to
   // the shared LookupIcon, which renders emoji/free-text as-is.
-  const { nationalities, flags } = useNationalities()
+  const { nationalityOptions, flags } = useNationalities()
   const requiredKeys = useProfileRequiredKeys(c.phase)
   const isReq = (key: PersonalKey) => { const bk = REQ_MAP[key]; return !!bk && requiredKeys.includes(bk) }
 
@@ -80,7 +80,7 @@ export default function ProfilePersonalTab({ c, onSave, autoEditSignal }: {
     if (key === 'nationality') return (
       <CreatableSelect value={form.nationality || null} onChange={(v: string) => setF('nationality', v)} allowCreate={false}
         placeholder={t('common:select')} style={inputStyle}
-        options={nationalities.map(n => ({ value: n, label: flags[n] ? `${flags[n]} ${n}` : n }))} />
+        options={nationalityOptions.map(o => ({ value: o.value, label: flags[o.value] ? `${flags[o.value]} ${o.label}` : o.label }))} />
     )
     if (key === 'dob') return (
       <DatePicker

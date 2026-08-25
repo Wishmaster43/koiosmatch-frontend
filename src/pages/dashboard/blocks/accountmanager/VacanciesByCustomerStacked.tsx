@@ -12,6 +12,7 @@ import type { BarSeries } from '@/components/charts/WeeklyBarChartCard'
 import { CHART_SERIES_COLORS } from '@/components/charts/chartTypes'
 import type { ChartDatum } from '@/components/charts/chartTypes'
 import { Panel } from '@/pages/dashboard/DashboardPrimitives'
+import { useSeedLabel } from '@/lib/useSeedLabel'
 import type { VacanciesByCustomerRow } from '@/types/dashboard'
 import type { FeedTileContext } from '../feedTileKit'
 
@@ -20,6 +21,8 @@ export default function VacanciesByCustomerStacked({ rows, onNavigate }: {
   onNavigate?: FeedTileContext['onNavigate']
 }) {
   const { t } = useTranslation('dashboard')
+  // LOOKUP-I18N-1: the seeded vacancy-status label renders in the user's language.
+  const seedLabel = useSeedLabel()
 
   // Derive the series (one per distinct status_id) and the chart rows (one
   // numeric field per series key) in one pass over the customer rows.
@@ -34,10 +37,10 @@ export default function VacanciesByCustomerStacked({ rows, onNavigate }: {
       return point
     })
     const barSeries: BarSeries[] = Array.from(statusLabels.entries()).map(([id, label], i) => ({
-      key: id, label, color: CHART_SERIES_COLORS[i % CHART_SERIES_COLORS.length],
+      key: id, label: seedLabel('vacancyStatuses', { value: id, label }), color: CHART_SERIES_COLORS[i % CHART_SERIES_COLORS.length],
     }))
     return { data: chartRows, series: barSeries }
-  }, [rows])
+  }, [rows, seedLabel])
 
   // Click any segment → the customer's vacancies tab. `row` is the chart
   // datum (carries the customer_id under `customerId`); recharts sometimes

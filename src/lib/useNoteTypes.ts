@@ -21,6 +21,7 @@ import type { AxiosResponse } from 'axios'
 import { useCachedLookup } from './useCachedLookup'
 import type { LookupOption } from '@/types/common'
 import { unwrapList } from '@/lib/api'
+import { translateSeedList } from './lookupSeedI18n'
 
 // Mirrors the backend NoteType::ENTITIES whitelist (koiosmatch-api NoteType.php) —
 // the only entities a note type can be scoped to. 'vacancy' added 2026-08-02
@@ -79,12 +80,8 @@ export function useNoteTypes(entity: NoteTypeEntity) {
   // 'common' namespace is its shared home, mirroring common.json's own 'notes' keys.
   const { t } = useTranslation('common')
   const { data: rawTypes } = useCachedLookup(`/note-types?entity=${entity}`, mapNoteTypes, DEFAULT_NOTE_TYPES)
-  // Translate labels only while still on the SEED fallback (reference-equal to the
-  // DEFAULT_NOTE_TYPES const) — real tenant-configured API labels pass through
-  // untouched; the literal Dutch seed text is the defaultValue.
-  const types = useMemo(() => rawTypes === DEFAULT_NOTE_TYPES
-    ? rawTypes.map(nt => ({ ...nt, label: t(`lookupSeeds.noteTypes.${nt.value}`, { defaultValue: nt.label }) }))
-    : rawTypes, [rawTypes, t])
+  // Seeded defaults render in the user language; a tenant value stays as typed (LOOKUP-I18N-1).
+  const types = useMemo(() => translateSeedList(t, 'noteTypes', rawTypes), [rawTypes, t])
 
   // Resolve a stored value/slug to its label/colour; fall back to the raw value.
   const find = (value?: string | null) => {

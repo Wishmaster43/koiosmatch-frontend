@@ -250,7 +250,10 @@ function VacancySearchTabInner({ candidate }: { candidate: Candidate }) {
         )}
       </div>
       {/* P8-result-cards: the lazily-fetched detail line (salary/experience) +
-          education/seniority soft-chips — summary card ONLY, list rows stay calm. */}
+          education/seniority soft-chips — summary card ONLY, list rows stay calm.
+          The three formatCurrency(…, 'EUR', 'nl-NL', 0) calls below all format the
+          same salary range; 'nl-NL' is deliberate (§5's canonical currency locale,
+          not the tenant UI locale — mirrors OpportunitiesTable's own comment). */}
       {detail && (formatRange(detail.salaryMin, detail.salaryMax, n => formatCurrency(n, 'EUR', 'nl-NL', 0)) || formatRange(detail.experienceMin, detail.experienceMax, n => String(n)) || detail.education || detail.seniority) && (
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
           {/* HUISSTIJL-1: Caption owns the 11/muted identity; Mono only adds the font-family. */}

@@ -12,7 +12,7 @@
  *
  * Main blocks below:
  *   - helpers           → date/time formatting (PAD, time-ago, etc.)
- *   - ActivityChart     → recharts area chart of inbound/outbound volume
+ *   - ActivityChart     → recharts area chart of inbound/outbound volume (own file, ./ActivityChart)
  *   - MessagesTable      → messages table (recipient/conversation gateways)
  *   - EscalationList    → conversations flagged for human follow-up
  */
@@ -40,7 +40,8 @@ import type { KpiSpec } from '@/components/insights/InsightsRow'
 import RightDrawer from '@/components/ui/RightDrawer'
 import PieChartCard from '@/components/charts/PieChartCard'
 import BarChartCard from '@/components/charts/BarChartCard'
-import { EscalationList, ActivityChart } from './components'
+import { EscalationList } from './components'
+import ActivityChart from './ActivityChart'
 import ChannelActivityChart from './ChannelActivityChart'
 import { CHANNEL_COLORS } from '@/components/drawer/channelColors'
 import MessagesTable from './messagesTable/MessagesTable'

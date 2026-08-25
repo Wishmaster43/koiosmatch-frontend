@@ -9,6 +9,7 @@ import type { ReactNode, DragEvent, MutableRefObject } from 'react'
 import { useTranslation } from 'react-i18next'
 import { interactive } from '@/lib/a11y'
 import { Zap, Folder, FolderPlus, Trash2 } from 'lucide-react'
+import { useSeedLabel } from '@/lib/useSeedLabel'
 import type { WorkflowFolder, FolderId } from './hooks/useWorkflowsData'
 
 // One row in the folder sidebar (built-in "All"/"Unassigned" or a tenant folder).
@@ -70,6 +71,9 @@ export default function WorkflowFolderSidebar({
   dragOverFolder, setDragOverFolder, dragWf, createFolder, deleteFolder, moveToFolder,
 }: WorkflowFolderSidebarProps) {
   const { t } = useTranslation(['workflows', 'common'])
+  // LOOKUP-I18N-1: a folder still carrying its seeded Dutch name renders in the user
+  // language; a tenant rename/creation stays exactly as typed.
+  const seedLabel = useSeedLabel()
   return (
     <div style={{ width: 220, flexShrink: 0, borderRight: '1px solid var(--border)', display: 'flex', flexDirection: 'column', background: 'var(--surface)' }}>
       <div style={{ padding: '16px 16px 8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -100,7 +104,7 @@ export default function WorkflowFolderSidebar({
         ))}
         <div style={{ height: 1, background: 'var(--border)', margin: '4px 12px' }} />
         {[...folders].sort((a, b) => a.name.localeCompare(b.name, 'nl')).map(f => (
-          <SidebarRow key={f.id} label={f.name} icon={<Folder size={13} />}
+          <SidebarRow key={f.id} label={seedLabel('workflowFolders', { label: f.name })} icon={<Folder size={13} />}
             active={selectedFolder === f.id}
             isDragOver={dragOverFolder === f.id}
             onClick={() => setSelectedFolder(f.id)}

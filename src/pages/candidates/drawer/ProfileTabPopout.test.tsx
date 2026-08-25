@@ -20,7 +20,7 @@ import type { Candidate } from '@/types/candidate'
 vi.mock('@/lib/api', () => ({
   getActiveTenantId: () => 'demo', default: { get: vi.fn(() => Promise.reject({ response: { status: 404 } })) } }))
 vi.mock('@/lib/useGenders', () => ({ useGenders: () => ({ genders: [] }) }))
-vi.mock('@/lib/useNationalities', () => ({ useNationalities: () => ({ nationalities: [] }) }))
+vi.mock('@/lib/useNationalities', () => ({ useNationalities: () => ({ nationalities: [], nationalityOptions: [].map(n => ({ value: n, label: n })) }) }))
 vi.mock('@/hooks/useProvinces', () => ({ useProvinces: () => ({ provinces: [] }) }))
 vi.mock('@/components/ui/RichTextEditor', () => ({ default: () => <div data-testid="summary-editor" /> }))
 vi.mock('@/components/ui/SafeHtml', () => ({ default: () => null }))

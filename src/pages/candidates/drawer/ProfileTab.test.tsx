@@ -8,7 +8,7 @@ import type { Candidate } from '@/types/candidate'
 vi.mock('@/lib/api', () => ({
   getActiveTenantId: () => 'demo', default: { get: vi.fn(() => Promise.reject({ response: { status: 404 } })) } }))
 vi.mock('@/lib/useGenders', () => ({ useGenders: () => ({ genders: [{ value: 'male', label: 'Man' }, { value: 'female', label: 'Vrouw' }] }) }))
-vi.mock('@/lib/useNationalities', () => ({ useNationalities: () => ({ nationalities: ['Nederlands', 'Belgisch'], flags: { Nederlands: '🇳🇱', Belgisch: '🇧🇪' } }) }))
+vi.mock('@/lib/useNationalities', () => ({ useNationalities: () => ({ nationalities: ['Nederlands', 'Belgisch'], nationalityOptions: ['Nederlands', 'Belgisch'].map(n => ({ value: n, label: n })), flags: { Nederlands: '🇳🇱', Belgisch: '🇧🇪' } }) }))
 vi.mock('@/hooks/useProvinces', () => ({ useProvinces: () => ({ provinces: ['Utrecht', 'Zuid-Holland'] }) }))
 // KOIOS-GENERATE-1: a bare stub would hide whether ProfileTab wires the right
 // assist modes/entity through — expose the two props this suite cares about as

@@ -3468,6 +3468,7 @@
     },
     "aiBudgetLabel": "AI-tokens",
     "workflowBudgetLabel": "Koios Tokens",
+    "whatsappBudgetLabel": "WhatsApp Tokens per maand",
     "valueCaption": "inkoop {{cogs}} · verkoop {{sale}} · {{basis}}",
     "tenantHeading": "Tenant-uitzondering",
     "tenantPickerLabel": "Tenant",
@@ -3550,5 +3551,28 @@
     "list": "Lijsten"
   },
   "dashboardsNoResults": "Geen items gevonden voor deze zoekopdracht of dit filter.",
-  "dashboardsSharedDefaultNote": "Deze rol deelt de KPI-rij van Standaard. Een wijziging geldt ook voor de andere rollen die die rij delen."
+  "dashboardsSharedDefaultNote": "Deze rol deelt de KPI-rij van Standaard. Een wijziging geldt ook voor de andere rollen die die rij delen.",
+  "appsCatalog": {
+    "aelio": "Koppeling met Aelio voor dienstenbeheer en personeelsplanning.",
+    "afas": "Backoffice-koppeling met AFAS (HRM, verloning en facturatie).",
+    "ai_planner": "AI-planner: diensten aanbieden, reminders, gewerkte diensten en statuswijzigingen. Toont de map \"AI Planner\" in Workflows.",
+    "ai_recruiter": "AI-recruiter: kennismaking en automatische reacties op kandidaat-berichten. Toont de map \"AI Recruiter\" in Workflows.",
+    "aircall": "Cloud-telefonie voor recruitmentteams: bellen, opnames en dossier-sync.",
+    "clevergig": "Planning-koppeling met Clevergig (zorg-flex diensten en pools).",
+    "easyflex": "Backoffice-koppeling met EasyFlex (verloning en facturatie).",
+    "elanza": "Koppeling met Elanza voor diensten en kandidaatbeheer.",
+    "fleks": "Planning-koppeling met Fleks voor flexpools en dienstenbeheer.",
+    "hf": "Backoffice-koppeling met HelloFlex (verloning, facturatie, contracten).",
+    "intus": "Koppeling met Intus planning voor het ophalen van diensten en kandidaten.",
+    "kvk": "Handelsregister-opzoeking: KvK-nummer geeft naam, adres en status terug.",
+    "nocore": "Backoffice-koppeling met Nocore Flex (verloning en facturatie).",
+    "ons": "Koppeling met ONS (Nedap) voor planning en roosters.",
+    "pivoton": "Backoffice-koppeling met Pivoton (flex-administratie en verloning).",
+    "sdb": "Koppeling met SDB planning voor diensten en roosters.",
+    "shiftmanager": "Koppeling met Shiftmanager voor diensten, planning en kandidaten.",
+    "teams": "Bellen via Teams Phone en gespreksnotities terug op het dossier.",
+    "threecx": "Telefonie-koppeling met 3CX: klikken-om-te-bellen en gesprekslog op het kandidaatdossier.",
+    "vat": "BTW-nummer valideren via de Europese VIES-dienst.",
+    "voys": "Nederlandse VoIP-centrale (VoIPGRID): klikken-om-te-bellen en gesprekshistorie."
+  }
 }

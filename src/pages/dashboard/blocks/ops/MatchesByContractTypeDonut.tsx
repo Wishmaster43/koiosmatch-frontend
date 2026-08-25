@@ -11,6 +11,7 @@ import PieChartCard from '@/components/charts/PieChartCard'
 import { CHART_SERIES_COLORS } from '@/components/charts/chartTypes'
 import { Panel } from '@/pages/dashboard/DashboardPrimitives'
 import { fv } from '@/pages/dashboard/dashboardFormat'
+import { useSeedLabel } from '@/lib/useSeedLabel'
 import type { MatchesByContractTypeRow } from '@/types/dashboard'
 import type { FeedTileContext } from '../feedTileKit'
 
@@ -19,12 +20,14 @@ export default function MatchesByContractTypeDonut({ rows, onNavigate }: {
   onNavigate?: FeedTileContext['onNavigate']
 }) {
   const { t } = useTranslation('dashboard')
+  // LOOKUP-I18N-1: the seeded contract-type label renders in the user's language.
+  const seedLabel = useSeedLabel()
   // Zero-count slices carry no useful drill target — drop them before charting.
   // `filterValue` carries the raw contract_type (ContractType lookup) value the click needs (§ house convention, name is localised for display).
   const data = rows
     .filter(r => r.count > 0)
     .map((r, i) => ({
-      name: r.value === 'none' ? t('widget.unknown') : r.label,
+      name: r.value === 'none' ? t('widget.unknown') : seedLabel('contractTypes', { value: r.value, label: r.label }),
       filterValue: r.value,
       value: r.count,
       color: r.color ?? CHART_SERIES_COLORS[i % CHART_SERIES_COLORS.length],

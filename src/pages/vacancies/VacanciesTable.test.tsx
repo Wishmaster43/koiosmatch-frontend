@@ -2,8 +2,9 @@ import { describe, it, expect, vi } from 'vitest'
 import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 // Real i18n (nl) side-effect init so the "AI-agent" column header resolves genuine
-// Dutch text (mirrors VacancyDrawer.test.tsx's convention).
-import '@/i18n'
+// Dutch text (mirrors VacancyDrawer.test.tsx's convention). Default-exported so the
+// seeded-label test below can switch languages (mirrors Sidebar.test.jsx).
+import i18n from '@/i18n'
 import VacanciesTable from './VacanciesTable'
 import type { Vacancy } from '@/types/vacancy'
 import nlVacancies from '@/i18n/locales/nl/vacancies.json'
@@ -373,6 +374,36 @@ describe('VacanciesTable · Status sort follows tenant order (V1)', () => {
 
     const titles = Array.from(container.querySelectorAll('tbody tr')).map(tr => tr.children[0].textContent)
     expect(titles).toEqual(['B', 'A'])
+  })
+})
+
+// LOOKUP-I18N-1: the row's embedded `statusLabel` is the seed default while
+// untouched — render it in the user's language; a tenant rename stays as typed.
+// Mirrors Sidebar.test.jsx's changeLanguage convention.
+describe('VacanciesTable · seeded status label i18n (LOOKUP-I18N-1)', () => {
+  it('renders the seeded status in English when the UI language is English', async () => {
+    await i18n.changeLanguage('en')
+    const seededRows = [
+      { id: 'v1', title: 'A', statusValue: 'concept', statusLabel: 'Concept', published: true, created: '2024-01-01', createdSort: '2024-01-01' },
+    ] as unknown as Vacancy[]
+    const { unmount } = render(<VacanciesTable rows={seededRows} />)
+    expect(screen.getByText('Draft')).toBeInTheDocument()
+    expect(screen.queryByText('Concept')).not.toBeInTheDocument()
+    // Unmount before switching back — resetting the language on a still-mounted
+    // component would fire a state update outside act().
+    unmount()
+    await i18n.changeLanguage('nl')
+  })
+
+  it('leaves a tenant-renamed status label untouched under English', async () => {
+    await i18n.changeLanguage('en')
+    const renamedRows = [
+      { id: 'v1', title: 'A', statusValue: 'concept', statusLabel: 'Werving gepauzeerd', published: true, created: '2024-01-01', createdSort: '2024-01-01' },
+    ] as unknown as Vacancy[]
+    const { unmount } = render(<VacanciesTable rows={renamedRows} />)
+    expect(screen.getByText('Werving gepauzeerd')).toBeInTheDocument()
+    unmount()
+    await i18n.changeLanguage('nl')
   })
 })
 

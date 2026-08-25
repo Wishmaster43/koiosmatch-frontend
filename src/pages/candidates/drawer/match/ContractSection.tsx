@@ -16,12 +16,14 @@ import { input, pairRow, pickerMenuWidth } from './styles'
 
 export default function ContractSection({
   t, errors,
-  contractType, setContractType, contractTypes,
+  contractType, setContractType, contractTypeOptions,
   cao, setCao, caoOptions,
   startDate, setStartDate, endDate, setEndDate, setEndDateDirty, hours, setHours,
 }: {
   t: TFunction; errors: Record<string, boolean>
-  contractType: string; setContractType: (v: string) => void; contractTypes: string[]
+  contractType: string; setContractType: (v: string) => void
+  // Slug value + translated label: the form holds the VALUE, never the displayed text.
+  contractTypeOptions: { value: string; label: string }[]
   cao: string; setCao: (v: string) => void; caoOptions: Array<{ value: string; label: string }>
   startDate: string; setStartDate: (v: string) => void
   // endDate PROPOSES from the picked contract type's default duration (7.1) —
@@ -42,7 +44,7 @@ export default function ContractSection({
             <CreatableSelect value={contractType || null} onChange={setContractType} allowCreate={false}
               placeholder={t('placement.pickContractType')} menuWidth={pickerMenuWidth}
               aria-labelledby={labelId}
-              options={contractTypes.map(c => ({ value: c, label: c }))} />
+              options={contractTypeOptions.map(o => ({ value: o.value, label: o.label }))} />
           )}
         </F>
         {/* CAO — searchable tenant lookup (useCao, Settings → Klanten → CAO), was a

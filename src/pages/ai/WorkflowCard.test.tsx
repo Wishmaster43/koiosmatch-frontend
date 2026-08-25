@@ -2,8 +2,9 @@ import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent, act } from '@testing-library/react'
 // Real i18n runtime (mirrors WorkflowListRow.test.tsx) — WorkflowCard has no other
 // module in its import graph that pulls it in; assertions below check the actual
-// translated nl copy, not raw keys.
-import '@/i18n'
+// translated nl copy, not raw keys. Default-exported so the seeded-name test below
+// can switch languages (LOOKUP-I18N-1).
+import i18n from '@/i18n'
 import WorkflowCard from './WorkflowCard'
 import type { Workflow } from '@/types/workflow'
 
@@ -67,5 +68,30 @@ describe('WorkflowCard · archived (TRASH-OVERAL-1b)', () => {
     fireEvent.click(screen.getByLabelText('Workflow archiveren'))
     expect(onArchive).toHaveBeenCalledTimes(1)
     expect(onEdit).not.toHaveBeenCalled()
+  })
+})
+
+// LOOKUP-I18N-1 (round 2 pin): a workflow that still carries its seeded Dutch name
+// renders in the user language; a tenant rename/creation stays exactly as typed.
+describe('WorkflowCard · seeded workflow name i18n (LOOKUP-I18N-1)', () => {
+  it('renders a seeded workflow name in English when the UI language is English', async () => {
+    await i18n.changeLanguage('en')
+    const seededWorkflow: Workflow = { ...baseWorkflow, name: 'Heractivering' }
+    const { unmount } = render(<WorkflowCard workflow={seededWorkflow} onRun={vi.fn()} onEdit={vi.fn()} />)
+    expect(screen.getByText('Reactivation')).toBeInTheDocument()
+    expect(screen.queryByText('Heractivering')).not.toBeInTheDocument()
+    // Unmount before switching back — resetting the language on a still-mounted
+    // component would fire a state update outside act().
+    unmount()
+    await i18n.changeLanguage('nl')
+  })
+
+  it('leaves a tenant-renamed workflow name untouched under English', async () => {
+    await i18n.changeLanguage('en')
+    const tenantWorkflow: Workflow = { ...baseWorkflow, name: 'Welcome flow' }
+    const { unmount } = render(<WorkflowCard workflow={tenantWorkflow} onRun={vi.fn()} onEdit={vi.fn()} />)
+    expect(screen.getByText('Welcome flow')).toBeInTheDocument()
+    unmount()
+    await i18n.changeLanguage('nl')
   })
 })

@@ -16,8 +16,11 @@
  * call-site that only needs label text (e.g. a bare CreatableSelect `options`
  * prop expecting strings) keeps working without touching it.
  */
+import { useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { AxiosResponse } from 'axios'
 import { useCachedLookup } from './useCachedLookup'
+import { translateSeedList } from './lookupSeedI18n'
 import { unwrapList } from '@/lib/api'
 
 export interface SkillLevelItem {
@@ -49,8 +52,11 @@ const mapSkillLevels = (res: AxiosResponse): SkillLevelItem[] | null => {
 }
 
 export function useSkillLevels() {
+  const { t } = useTranslation('common')
   // The endpoint now exists (item 11) — a real 404 should surface in the dev log again.
-  const { data: levelItems } = useCachedLookup('/skill-levels', mapSkillLevels, DEFAULT_SKILL_LEVEL_ITEMS)
+  const { data: rawLevels } = useCachedLookup('/skill-levels', mapSkillLevels, DEFAULT_SKILL_LEVEL_ITEMS)
+  // Seeded defaults render in the user language; a tenant value stays as typed (LOOKUP-I18N-1).
+  const levelItems = useMemo(() => translateSeedList(t, 'skillLevels', rawLevels), [rawLevels, t])
   // `levels` stays the full-object shape (icon/color intact); `names` is the
   // backward-compatible plain-string list for any old string[]-only call-site.
   return { levels: levelItems, names: levelItems.map(l => l.label) }

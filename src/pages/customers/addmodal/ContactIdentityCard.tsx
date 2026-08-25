@@ -21,9 +21,10 @@ interface ContactIdentityCardProps {
   middleName: string; onMiddleNameChange: (v: string) => void
   lastName: string; onLastNameChange: (v: string) => void; lastNameError?: boolean
   role: string; onRoleChange: (v: string) => void
-  // useContactFunctions() returns a plain string list (tenant function names),
-  // not a {value,label} lookup — matches the original inline CreatableSelect usage.
-  contactFunctions: string[]
+  // useContactFunctions() returns { value, label } rows (LOOKUP-I18N-1): value is
+  // the raw name written to customer_contacts.function, label is the translated
+  // display text — passed straight through to CreatableSelect's options prop.
+  contactFunctions: OptionRow[]
   allowFreeEntry: boolean
   gender: string; onGenderChange: (v: string) => void
   genders: OptionRow[]

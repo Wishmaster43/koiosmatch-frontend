@@ -24,6 +24,13 @@ const mockedGet = vi.mocked(api.get)
 const mockedTenantId = vi.mocked(getActiveTenantId)
 let tenantSeq = 0
 
+// LOOKUP-I18N-1: `sources` is `{ value, label }[]`, not a bare string[] — value is
+// the untranslated backend name, label the (possibly translated) display text. This
+// test suite never initialises react-i18next, so `t(key, { defaultValue })` falls
+// back to `defaultValue` verbatim, i.e. label === value here (real-locale translation
+// is covered by lookupSeedI18n.test.ts, the pure helper's own suite).
+const asOptions = (names: string[]) => names.map(name => ({ value: name, label: name }))
+
 // A fresh tenant id per test isolates useCachedLookup's module-scope cache.
 const nextTenant = () => `t${tenantSeq++}`
 
@@ -46,7 +53,7 @@ describe('useApplicationSources', () => {
     mockedTenantId.mockReturnValue(nextTenant())
     mockedGet.mockReturnValue(new Promise(() => {}))
     const { result } = renderHook(() => useApplicationSources())
-    expect(result.current.sources).toEqual(DEFAULT_APPLICATION_SOURCES)
+    expect(result.current.sources).toEqual(asOptions(DEFAULT_APPLICATION_SOURCES))
     expect(result.current.allowFreeEntry).toBe(true)
   })
 
@@ -55,7 +62,7 @@ describe('useApplicationSources', () => {
     mockedTenantId.mockReturnValue(nextTenant())
     mockedGet.mockRejectedValue(new Error('network'))
     const { result } = renderHook(() => useApplicationSources())
-    await waitFor(() => expect(result.current.sources).toEqual(DEFAULT_APPLICATION_SOURCES))
+    await waitFor(() => expect(result.current.sources).toEqual(asOptions(DEFAULT_APPLICATION_SOURCES)))
     expect(result.current.allowFreeEntry).toBe(true)
   })
 
@@ -65,7 +72,7 @@ describe('useApplicationSources', () => {
       data: { data: [{ id: 's1', name: 'Indeed' }, { id: 's2', name: 'LinkedIn' }], allow_free_entry: false },
     })
     const { result } = renderHook(() => useApplicationSources())
-    await waitFor(() => expect(result.current.sources).toEqual(['Indeed', 'LinkedIn']))
+    await waitFor(() => expect(result.current.sources).toEqual(asOptions(['Indeed', 'LinkedIn'])))
   })
 
   it('keeps the seed when the lookup is empty (nothing usable in the response)', async () => {
@@ -73,7 +80,7 @@ describe('useApplicationSources', () => {
     mockedGet.mockResolvedValue({ data: { data: [], allow_free_entry: false } })
     const { result } = renderHook(() => useApplicationSources())
     await waitFor(() => expect(mockedGet).toHaveBeenCalled())
-    expect(result.current.sources).toEqual(DEFAULT_APPLICATION_SOURCES)
+    expect(result.current.sources).toEqual(asOptions(DEFAULT_APPLICATION_SOURCES))
   })
 
   it('keeps the seed when the endpoint is unavailable (network/404)', async () => {
@@ -81,7 +88,7 @@ describe('useApplicationSources', () => {
     mockedGet.mockRejectedValue(new Error('404'))
     const { result } = renderHook(() => useApplicationSources())
     await waitFor(() => expect(mockedGet).toHaveBeenCalled())
-    expect(result.current.sources).toEqual(DEFAULT_APPLICATION_SOURCES)
+    expect(result.current.sources).toEqual(asOptions(DEFAULT_APPLICATION_SOURCES))
   })
 
   it('honours a false allow_free_entry from the API (the backend default: strict, clean data for the Sources report)', async () => {

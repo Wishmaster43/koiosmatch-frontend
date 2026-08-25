@@ -179,6 +179,7 @@
     "byFunctionTitle": "Offene Dienste nach Funktion",
     "inHours": "In Stunden",
     "inShifts": "In Diensten",
+    "unitToggleLabel": "Einheit: Stunden oder Dienste",
     "colHours": "Stunden",
     "colShifts": "Dienste",
     "lastSync": "Letzte Sync: {{time}}",

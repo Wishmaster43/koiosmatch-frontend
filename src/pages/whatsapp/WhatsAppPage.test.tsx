@@ -35,8 +35,10 @@ vi.mock('./hooks/useWhatsAppQueue', async (importOriginal) => {
 vi.mock('./components', () => ({
   EscalationList: ({ escalations, loading }: { escalations: WaEscalation[]; loading?: boolean }) =>
     <div data-testid="escalation-list">{loading ? 'loading' : escalations.length}</div>,
-  ActivityChart: () => <div data-testid="activity-chart" />,
 }))
+// ActivityChart moved to its own file (LANE-B, 25-08) — mocked separately, same
+// default-export shape as ChannelActivityChart below.
+vi.mock('./ActivityChart', () => ({ default: () => <div data-testid="activity-chart" /> }))
 vi.mock('./ChannelActivityChart', () => ({ default: () => <div data-testid="channel-activity-chart" /> }))
 vi.mock('./messagesTable/MessagesTable', () => ({
   default: ({ messages, loading, exhausted }: { messages: WaMessage[]; loading?: boolean; exhausted?: boolean }) =>

@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next'
 import type { TFunction } from 'i18next'
 import api from '../lib/api'
 import { sortActiveRows, makeMetaResolver } from '../lib/lookupUtils'
+import { translateSeedList } from '../lib/lookupSeedI18n'
 import { useAuth } from './AuthContext'
 
 /**
@@ -175,12 +176,10 @@ function normalize(raw: unknown, fallback: LookupItem[]): LookupItem[] {
       is_default: flag(it, 'is_default') }))
 }
 
-// Translate a seed lookup's labels through i18n, keyed by lookup name + value; the
-// literal Dutch seed text is the defaultValue so a missing key degrades gracefully
-// instead of ever showing a raw i18n key. Only ever applied to the SEED fallback
-// (never tenant-configured API labels, which are real user data, not app copy) —
-// computed on every render (not baked into state) so a live language switch
-// (ThemeContext.setLanguage) retranslates it too.
+// Translate the AVAILABILITY seed's labels through i18n — this axis has no
+// lookupSeedCatalogue entry (C-39: folded into the status axis, kept here only
+// as a frozen seed that never fetches), so it stays on its own local key lookup
+// rather than the shared translateSeedList helper.
 function translateSeedLabels(t: TFunction, lookupName: string, items: LookupItem[]): LookupItem[] {
   return items.map(it => ({ ...it, label: t(`lookupSeeds.${lookupName}.${it.value}`, { defaultValue: it.label }) }))
 }
@@ -218,13 +217,13 @@ export function LookupsProvider({ children }: { children: ReactNode }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps -- refetch per login/tenant-switch
   }, [user?.id])
 
-  // Translate labels only while still on the SEED fallback (reference-equal to the
-  // DEFAULT_* const) — real tenant-configured API labels pass through untouched.
-  const candidateTypes = useMemo(() => candidateTypesRaw === DEFAULT_CANDIDATE_TYPES ? translateSeedLabels(t, 'candidateTypes', candidateTypesRaw) : candidateTypesRaw, [candidateTypesRaw, t])
-  const phases         = useMemo(() => phasesRaw === DEFAULT_PHASES ? translateSeedLabels(t, 'phases', phasesRaw) : phasesRaw, [phasesRaw, t])
-  const funnelTypes    = useMemo(() => funnelTypesRaw === DEFAULT_FUNNEL_TYPES ? translateSeedLabels(t, 'funnelTypes', funnelTypesRaw) : funnelTypesRaw, [funnelTypesRaw, t])
-  const statuses       = useMemo(() => statusesRaw === DEFAULT_STATUSES ? translateSeedLabels(t, 'statuses', statusesRaw) : statusesRaw, [statusesRaw, t])
-  // Availability never fetches (C-39 below) — always the seed, always translated.
+  // Seeded defaults render in the user language; a tenant value stays as typed (LOOKUP-I18N-1).
+  const candidateTypes = useMemo(() => translateSeedList(t, 'candidateTypes', candidateTypesRaw), [candidateTypesRaw, t])
+  const phases         = useMemo(() => translateSeedList(t, 'phases', phasesRaw), [phasesRaw, t])
+  const funnelTypes    = useMemo(() => translateSeedList(t, 'funnelTypes', funnelTypesRaw), [funnelTypesRaw, t])
+  const statuses       = useMemo(() => translateSeedList(t, 'statuses', statusesRaw), [statusesRaw, t])
+  // Availability never fetches (C-39 below) and has no seed-catalogue entry — always the
+  // seed, always translated through its own local key lookup.
   const availability   = useMemo(() => translateSeedLabels(t, 'availability', availabilityRaw), [availabilityRaw, t])
 
   // value → item helpers (with a neutral fallback so the UI never crashes).

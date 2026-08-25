@@ -15,13 +15,13 @@ import { useModuleCatalog } from './useModuleCatalog'
 import StepOutputSlice from './StepOutputSlice'
 import { SectionTitle, Caption } from '@/components/ui/typography'
 import Button from '@/components/ui/Button'
+import { hhmmss } from '@/lib/localDate'
 import type { RunRow, RunStep } from '@/types/reports'
 
 // Step time range, e.g. "14:03:11 → 14:03:14" (seconds matter inside one run).
+// House numeric shape (DATUM-1): digits only, so no locale is needed here.
 function stepTime(step: RunStep): string | null {
-  const fmt = (v?: string | null) => v
-    ? new Date(v).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit', second: '2-digit' })
-    : null
+  const fmt = (v?: string | null) => v ? hhmmss(new Date(v)) : null
   const from = fmt(step.started_at)
   const to = fmt(step.finished_at)
   if (!from) return null

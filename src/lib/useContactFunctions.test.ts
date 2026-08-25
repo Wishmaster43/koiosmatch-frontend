@@ -14,6 +14,13 @@ vi.mock('@/lib/api', async () => {
 
 afterEach(() => vi.clearAllMocks())
 
+// LOOKUP-I18N-1: `contactFunctions` is `{ value, label }[]`, not a bare string[] —
+// value is the untranslated backend name, label the (possibly translated) display
+// text. This suite never initialises react-i18next, so `t(key, { defaultValue })`
+// falls back to `defaultValue` verbatim, i.e. label === value here (real-locale
+// translation is covered by lookupSeedI18n.test.ts, the pure helper's own suite).
+const asOptions = (names: string[]) => names.map(name => ({ value: name, label: name }))
+
 // useCachedLookup caches per URL at module scope (one fetch per session), so each
 // case needs its own fresh module graph — otherwise a later test would just see an
 // earlier test's cached response (mirrors FunctionsSettings.test.jsx's own reset).
@@ -41,7 +48,7 @@ describe('useContactFunctions', () => {
     const { mockedGet, useContactFunctions, DEFAULT_CONTACT_FUNCTIONS } = await freshHook()
     mockedGet.mockReturnValue(new Promise(() => {})) // never resolves in this test
     const { result } = renderHook(() => useContactFunctions())
-    expect(result.current.contactFunctions).toEqual(DEFAULT_CONTACT_FUNCTIONS)
+    expect(result.current.contactFunctions).toEqual(asOptions(DEFAULT_CONTACT_FUNCTIONS))
     expect(result.current.allowFreeEntry).toBe(true)
   })
 
@@ -49,7 +56,7 @@ describe('useContactFunctions', () => {
     const { mockedGet, useContactFunctions } = await freshHook()
     mockedGet.mockResolvedValue({ data: { data: ['Locatiemanager', 'Teamleider'], allow_free_entry: false } })
     const { result } = renderHook(() => useContactFunctions())
-    await waitFor(() => expect(result.current.contactFunctions).toEqual(['Locatiemanager', 'Teamleider']))
+    await waitFor(() => expect(result.current.contactFunctions).toEqual(asOptions(['Locatiemanager', 'Teamleider'])))
     expect(result.current.allowFreeEntry).toBe(false)
   })
 

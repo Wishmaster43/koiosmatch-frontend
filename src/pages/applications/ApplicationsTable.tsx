@@ -1,5 +1,6 @@
 import type { RefObject } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useSeedLabel } from '@/lib/useSeedLabel'
 import { Clock, CheckCircle2 } from 'lucide-react'
 import DataTable from '@/components/ui/DataTable'
 import type { Column, ControlledSort } from '@/components/ui/DataTable'
@@ -67,6 +68,8 @@ interface ApplicationsTableProps {
 export default function ApplicationsTable({ rows, loading, error, selectedId, onSelect, stickyHeader = false,
   selectable, selectedIds, onToggleRow, onToggleAll, selectionBusy, scrollParentRef, sort, onSortChange }: ApplicationsTableProps) {
   const { t } = useTranslation('applications')
+  // Seeded lookup labels the server embedded in the row render in the user language.
+  const seedLabel = useSeedLabel()
   const { formatDate } = useDateFormat()
   // Tenant display settings (Settings → Applications → Table display). Coloured
   // chips/score vs. plain text — one flag PER meaning-carrying column; all ON by default.
@@ -131,8 +134,8 @@ export default function ApplicationsTable({ rows, loading, error, selectedId, on
       render: r => (
         <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
           {colorPhase
-            ? <StatusPill label={r.phaseLabel} color={r.phaseColor} />
-            : <span style={plainCell}>{r.phaseLabel || '—'}</span>}
+            ? <StatusPill label={seedLabel('funnelTypes', { value: r.phaseKey, label: r.phaseLabel })} color={r.phaseColor} />
+            : <span style={plainCell}>{seedLabel('funnelTypes', { value: r.phaseKey, label: r.phaseLabel }) || '—'}</span>}
           {/* D6-KAART-2: subtle per-row flag — colour never the only signal, the
               icon shape + tooltip text carry the meaning on their own. */}
           {r.tooLongInStage && (
@@ -200,8 +203,10 @@ export default function ApplicationsTable({ rows, loading, error, selectedId, on
     // SWEEP-TABLES: explicit em-dash fallback — without a render fn, DataTable's
     // default cell (`field(row, col.key)`) prints a blank string for an empty
     // source, the only column left inconsistent with the house convention.
+    // LOOKUP-I18N-1: the row embeds a flat source label (no separate value) — the
+    // seed default renders in the user's language, a tenant rename stays as typed.
     { key: 'source', header: t('cols.source'), sortable: true, cellStyle: { color: 'var(--text-muted)', fontSize: 12 },
-      render: r => r.source || '—' },
+      render: r => seedLabel('candidateSources', { label: r.source }) || '—' },
     // Shared Koios column factory (Danny 05-08 consistency pass) — was a
     // hand-rolled mark+text cell (no dash/sort/colour-toggle support); now the
     // same header/sort/cell as every other entity table. `cols.task` already

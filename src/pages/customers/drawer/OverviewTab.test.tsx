@@ -28,7 +28,7 @@ import OverviewTab from './OverviewTab'
 import { useCustomerAdvice } from '@/lib/useCustomerAdvice'
 import type { Customer } from '@/types/customer'
 
-vi.mock('@/lib/useIndustries', () => ({ useIndustries: () => ({ industries: ['Zorg', 'IT'] }) }))
+vi.mock('@/lib/useIndustries', () => ({ useIndustries: () => ({ industries: ['Zorg', 'IT'], industryOptions: ['Zorg', 'IT'].map(n => ({ value: n, label: n })) }) }))
 // useLocations is react-query-backed — mocked directly so this test doesn't need
 // a QueryClientProvider ancestor (mirrors AddCustomerModal.test.tsx).
 vi.mock('@/lib/useLocations', () => ({

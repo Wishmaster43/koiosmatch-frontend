@@ -10,8 +10,11 @@
  * across mounts). No seed fallback — an unknown reason set is rendered empty,
  * never faked (mirrors useMatchStopReasons, a brand-new tenant vocabulary).
  */
+import { useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { AxiosResponse } from 'axios'
 import { useCachedLookup } from '@/lib/useCachedLookup'
+import { translateSeedList } from '@/lib/lookupSeedI18n'
 import { unwrapList } from '@/lib/api'
 import type { LookupOption } from '@/types/common'
 
@@ -33,6 +36,9 @@ const mapRejectionReasons = (res: AxiosResponse): LookupOption[] | null => {
 }
 
 export function useRejectionReasons() {
-  const { data: reasons, loading } = useCachedLookup('/candidate-rejection-reasons', mapRejectionReasons, NO_REJECTION_REASONS)
+  const { t } = useTranslation('common')
+  const { data: rawReasons, loading } = useCachedLookup('/candidate-rejection-reasons', mapRejectionReasons, NO_REJECTION_REASONS)
+  // Seeded defaults render in the user language; a tenant value stays as typed (LOOKUP-I18N-1).
+  const reasons = useMemo(() => translateSeedList(t, 'rejectionReasons', rawReasons), [rawReasons, t])
   return { reasons, loading }
 }

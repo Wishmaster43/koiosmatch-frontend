@@ -11,7 +11,7 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import PriceAgreementForm, { emptyDraft, isDraftValid } from './PriceAgreementForm'
 
-vi.mock('@/lib/useFunctions', () => ({ useFunctions: () => ({ functions: [] }) }))
+vi.mock('@/lib/useFunctions', () => ({ useFunctions: () => ({ functions: [], functionOptions: [].map(n => ({ value: n, label: n })) }) }))
 vi.mock('@/lib/useCao', () => ({ useCao: () => ({ types: [] }) }))
 // MATCH-FIN-GATE-1: purchase rate is gated on matches.financial.view; every
 // existing test in this file renders as a permitted viewer.

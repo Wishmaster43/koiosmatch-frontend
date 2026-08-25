@@ -2,9 +2,9 @@
 import { createContext, useContext, useState, useEffect, useMemo } from 'react'
 import type { Dispatch, ReactNode, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
-import type { TFunction } from 'i18next'
 import api, { unwrap } from '../lib/api'
 import { sortActiveRows, makeMetaResolver } from '../lib/lookupUtils'
+import { translateSeedList } from '../lib/lookupSeedI18n'
 
 /**
  * TaskLookupsContext — the tenant-configurable task (activity) lookups.
@@ -40,7 +40,7 @@ interface TaskLookupsValue {
 
 /* eslint-disable no-restricted-syntax -- seed DATA hex mirroring the backend seed, not UI styling */
 const DEFAULT_TASK_STATUSES: TaskLookupItem[] = [
-  { value: 'todo',        label: 'TeDoen',         color: '#D98A8A', is_done: false },
+  { value: 'todo',        label: 'Te doen',        color: '#D98A8A', is_done: false },
   { value: 'in_progress', label: 'In behandeling', color: '#DDA071', is_done: false },
   { value: 'done',        label: 'Afgerond',       color: '#79B58E', is_done: true },
 ]
@@ -84,15 +84,6 @@ function normalize(raw: unknown, fallback: TaskLookupItem[]): TaskLookupItem[] {
     }))
 }
 
-// Translate a seed lookup's labels through i18n, keyed by lookup name + value; the
-// literal Dutch seed text is the defaultValue so a missing key degrades gracefully.
-// Only ever applied to the SEED fallback (never tenant-configured API labels) —
-// computed on every render (not baked into state) so a live language switch
-// retranslates it too.
-function translateSeedLabels(t: TFunction, lookupName: string, items: TaskLookupItem[]): TaskLookupItem[] {
-  return items.map(it => ({ ...it, label: t(`lookupSeeds.${lookupName}.${it.value}`, { defaultValue: it.label }) }))
-}
-
 const TaskLookupsContext = createContext<TaskLookupsValue | null>(null)
 
 export function TaskLookupsProvider({ children }: { children: ReactNode }) {
@@ -113,11 +104,10 @@ export function TaskLookupsProvider({ children }: { children: ReactNode }) {
     ]).finally(() => setLoading(false))
   }, [])
 
-  // Translate labels only while still on the SEED fallback (reference-equal to the
-  // DEFAULT_TASK_* const) — real tenant-configured API labels pass through untouched.
-  const statuses   = useMemo(() => statusesRaw === DEFAULT_TASK_STATUSES ? translateSeedLabels(t, 'taskStatuses', statusesRaw) : statusesRaw, [statusesRaw, t])
-  const types      = useMemo(() => typesRaw === DEFAULT_TASK_TYPES ? translateSeedLabels(t, 'taskTypes', typesRaw) : typesRaw, [typesRaw, t])
-  const priorities = useMemo(() => prioritiesRaw === DEFAULT_TASK_PRIORITIES ? translateSeedLabels(t, 'taskPriorities', prioritiesRaw) : prioritiesRaw, [prioritiesRaw, t])
+  // Seeded defaults render in the user language; a tenant value stays as typed (LOOKUP-I18N-1).
+  const statuses   = useMemo(() => translateSeedList(t, 'taskStatuses', statusesRaw), [statusesRaw, t])
+  const types      = useMemo(() => translateSeedList(t, 'taskTypes', typesRaw), [typesRaw, t])
+  const priorities = useMemo(() => translateSeedList(t, 'taskPriorities', prioritiesRaw), [prioritiesRaw, t])
 
   // The set of status keys that count as "completed" (for open/overdue/done KPIs).
   const doneStatusValues = statuses.filter(s => s.is_done).map(s => s.value)

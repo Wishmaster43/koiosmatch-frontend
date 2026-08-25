@@ -16,6 +16,7 @@ import StatusPill from '@/components/ui/StatusPill'
 import { BodyText, Caption, Mono } from '@/components/ui/typography'
 import { useDateFormat } from '@/lib/datetime'
 import { useNavigation } from '@/context/NavigationContext'
+import { useSeedLabel } from '@/lib/useSeedLabel'
 import { computeOpportunityOrdinal, otherOpportunitiesForClient } from '../opportunityOrdinals'
 import { opportunityValueOf, formatOpportunityValue } from '../data/opportunityValue'
 import type { Opportunity } from '@/types/opportunity'
@@ -33,6 +34,8 @@ export default function StatisticsTab({ opportunity, allRows, valueInHours = fal
   const { t } = useTranslation('opportunities')
   const { formatDate } = useDateFormat()
   const { openEntity } = useNavigation()
+  // LOOKUP-I18N-1: the seeded stage label renders in the user's language.
+  const seedLabel = useSeedLabel()
 
   // This deal's position among the customer's other deals + the peer list —
   // computed once per (allRows, opportunity) change, mirroring MatchDrawer's own memo.
@@ -73,7 +76,7 @@ export default function StatisticsTab({ opportunity, allRows, valueInHours = fal
                     <Mono as="span">{v == null ? '—' : formatOpportunityValue(row, valueInHours, t)}</Mono>
                   </Caption>
                   {row.stage ? (
-                    <span style={{ flexShrink: 0 }}><StatusPill label={row.stage} color={row.stageColor} /></span>
+                    <span style={{ flexShrink: 0 }}><StatusPill label={seedLabel('opportunityStages', { label: row.stage })} color={row.stageColor} /></span>
                   ) : (
                     <Caption as="span" style={{ flexShrink: 0 }}>—</Caption>
                   )}

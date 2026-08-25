@@ -11,11 +11,13 @@
  * Fetch/cache/dedupe lives in useCachedLookup (audit item 8) — one GET per
  * session, shared across every mounted consumer (the drawer-open "5× /genders" case).
  */
-import { useCallback } from 'react'
+import { useCallback, useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { AxiosResponse } from 'axios'
 import { useCachedLookup } from './useCachedLookup'
 import type { LookupOption } from '@/types/common'
 import { unwrapList } from '@/lib/api'
+import { translateSeedList } from './lookupSeedI18n'
 
 // Soft palette — matches the calm light/dark scheme used across lookups.
 /* eslint-disable no-restricted-syntax -- seed DATA hex mirroring the backend seed, not UI styling */
@@ -35,7 +37,10 @@ const mapGenders = (res: AxiosResponse): LookupOption[] | null => {
 }
 
 export function useGenders() {
-  const { data: genders } = useCachedLookup('/genders', mapGenders, DEFAULT_GENDERS)
+  const { t } = useTranslation('common')
+  const { data: rawGenders } = useCachedLookup('/genders', mapGenders, DEFAULT_GENDERS)
+  // Seeded defaults render in the user language; a tenant value stays as typed (LOOKUP-I18N-1).
+  const genders = useMemo(() => translateSeedList(t, 'genders', rawGenders), [rawGenders, t])
 
   // value/label → colour (case-insensitive); null when unknown so callers can skip.
   // useCallback: CandidatesTable hangs this in its columns useMemo deps (audit item

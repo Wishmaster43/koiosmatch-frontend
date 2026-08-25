@@ -14,7 +14,7 @@ declare const process: { env: Record<string, string | undefined> }
 vi.mock('@/lib/useGenders', () => ({ useGenders: () => ({ genders: [{ value: 'male', label: 'Man' }, { value: 'female', label: 'Vrouw' }] }) }))
 // LOOKUP-ICON-1: `flags` (name → emoji) rides alongside `nationalities` now — an
 // empty map here exercises the "no flag" fallback path (plain name, no icon).
-vi.mock('@/lib/useNationalities', () => ({ useNationalities: () => ({ nationalities: ['Nederlands', 'Belgisch'], flags: { Nederlands: '🇳🇱' } }) }))
+vi.mock('@/lib/useNationalities', () => ({ useNationalities: () => ({ nationalities: ['Nederlands', 'Belgisch'], nationalityOptions: ['Nederlands', 'Belgisch'].map(n => ({ value: n, label: n })), flags: { Nederlands: '🇳🇱' } }) }))
 // Required-fields lookup mocked directly (own hook, own test) — no need to touch
 // the underlying settings/api plumbing that hook already covers separately.
 vi.mock('./useProfileRequiredKeys', () => ({ useProfileRequiredKeys: vi.fn(() => []) }))

@@ -147,7 +147,7 @@ export function useMatchForm({
   }, [fixedCandidateId])
   const candidateId = fixedCandidateId ?? (pickedCandidateId || '')
   const { functions } = useFunctions()
-  const { types: contractTypes, options: contractTypeOptions } = useContractTypes()
+  const { options: contractTypeOptions } = useContractTypes()
   // CAO (Danny 24-07 point 5) — the same tenant lookup every other CAO field in
   // the app already reads (customer price agreements, the match drawer's own
   // contract edit); this form's CAO field used to be a bare free-text input.
@@ -241,19 +241,14 @@ export function useMatchForm({
     const def = contractTypeOptions.find(o => o.is_default)
     if (!def) return
     contractTypeProposedRef.current = true
-    setContractTypeRaw(def.label)
+    setContractTypeRaw(def.value)
     // eslint-disable-next-line react-hooks/exhaustive-deps -- only react to the options list resolving, never to the recruiter's own pick
   }, [contractTypeOptions])
-  // Show the tenant's wording, not the stored slug. A match reads back
-  // `contract_type` as the immutable slug (the backend normalises a posted label to
-  // `value` before saving), while the picker lists labels — so canonicalise once the
-  // options resolve, otherwise an edit form shows a raw `bepaalde_tijd` in the field.
-  // Anything unknown (an unconfigured lookup's free text) is left untouched, never blanked.
-  useEffect(() => {
-    if (!contractType) return
-    const label = contractTypeOptions.find(o => o.value === contractType)?.label
-    if (label && label !== contractType) setContractTypeRaw(label)
-  }, [contractTypeOptions, contractType])
+  // No label canonicalisation any more (LOOKUP-I18N-1): the field holds the lookup
+  // VALUE and the picker resolves the display text from the options itself. Storing the
+  // label here used to be harmless while every label was Dutch; once seeded labels are
+  // translated, the translated text reached `contract_type` on the wire and the backend
+  // (MatchRules::resolve matches value or the Dutch seed label) rejected the save.
   // Proposal, not a hard default — the recruiter can freely change it (job 19).
   const [startDate, setStartDateRaw] = useState(todayISO)
   // End-date PROPOSAL (7.1): from the picked contract type's default duration —
@@ -396,7 +391,7 @@ export function useMatchForm({
   return {
     t, editing,
     fixedCandidateId, pickedCandidateId, setPickedCandidateId, candidateOptions,
-    users, customerOptions, vacancyOptions, functions, contractTypes, caoOptions,
+    users, customerOptions, vacancyOptions, functions, contractTypeOptions, caoOptions,
     contactFunctions, contactFunctionsAllowFreeEntry,
     matchRuleDecision,
     customerId, setCustomerId, detail, locations, departments, contacts,

@@ -6,6 +6,9 @@
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
+// Default-exported so the seeded-name test below can switch languages
+// (LOOKUP-I18N-1, mirrors WorkflowListRow.test.tsx / WorkflowCard.test.tsx).
+import i18n from '@/i18n'
 import WorkflowQueueView from './WorkflowQueueView'
 import api from '@/lib/api'
 
@@ -105,5 +108,39 @@ describe('WorkflowQueueView — fix-round pins', () => {
     await screen.findByText('Wekelijkse mail')
     expect(screen.queryByRole('link', { name: 'queue.openRuns' })).not.toBeInTheDocument()
     mockCanAccess.mockReturnValue(true)
+  })
+})
+
+// LOOKUP-I18N-1 (round 2 pin): a queue row's workflow_name is the same seeded
+// default a seeded workflow carries in the list/card views — the exact defect
+// measured live 25-08 ('Leads-telling vacatures' rendering raw under Scheduled).
+describe('WorkflowQueueView · seeded workflow name i18n (LOOKUP-I18N-1)', () => {
+  it('renders a seeded workflow name in English when the UI language is English', async () => {
+    await i18n.changeLanguage('en')
+    mockedGet.mockResolvedValue({ data: {
+      pending: [], waiting: [],
+      scheduled: [{ workflow_id: 'wf-5', workflow_name: 'Leads-telling vacatures', next_run_at: '2026-08-26T08:00:00Z' }],
+      retrying: [], counts: { scheduled_today: 1 },
+    } })
+    const { unmount } = render(<WorkflowQueueView />)
+    expect(await screen.findByText('Vacancy lead count')).toBeInTheDocument()
+    expect(screen.queryByText('Leads-telling vacatures')).not.toBeInTheDocument()
+    // Unmount before switching back — resetting the language on a still-mounted
+    // component would fire a state update outside act().
+    unmount()
+    await i18n.changeLanguage('nl')
+  })
+
+  it('leaves a tenant-renamed workflow name untouched under English', async () => {
+    await i18n.changeLanguage('en')
+    mockedGet.mockResolvedValue({ data: {
+      pending: [], waiting: [],
+      scheduled: [{ workflow_id: 'wf-6', workflow_name: 'Weekly customer digest', next_run_at: '2026-08-26T08:00:00Z' }],
+      retrying: [], counts: { scheduled_today: 1 },
+    } })
+    const { unmount } = render(<WorkflowQueueView />)
+    expect(await screen.findByText('Weekly customer digest')).toBeInTheDocument()
+    unmount()
+    await i18n.changeLanguage('nl')
   })
 })

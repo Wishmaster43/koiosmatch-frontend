@@ -3468,6 +3468,7 @@
     },
     "aiBudgetLabel": "AI-tokens",
     "workflowBudgetLabel": "Koios Tokens",
+    "whatsappBudgetLabel": "WhatsApp Tokens per month",
     "valueCaption": "purchase {{cogs}} · sale {{sale}} · {{basis}}",
     "tenantHeading": "Tenant exception",
     "tenantPickerLabel": "Tenant",
@@ -3550,5 +3551,28 @@
     "list": "Lists"
   },
   "dashboardsNoResults": "No items match this search or filter.",
-  "dashboardsSharedDefaultNote": "This role shares the Default KPI row. A change here also applies to the other roles sharing that row."
+  "dashboardsSharedDefaultNote": "This role shares the Default KPI row. A change here also applies to the other roles sharing that row.",
+  "appsCatalog": {
+    "aelio": "Connects Aelio for shift management and workforce planning.",
+    "afas": "Back-office connection to AFAS (HR, payroll and invoicing).",
+    "ai_planner": "AI planner: offering shifts, reminders, worked shifts and status changes. Shows the \"AI Planner\" folder in Workflows.",
+    "ai_recruiter": "AI recruiter: introductions and automatic replies to candidate messages. Shows the \"AI Recruiter\" folder in Workflows.",
+    "aircall": "Cloud telephony for recruitment teams: calling, recordings and file sync.",
+    "clevergig": "Planning connection to Clevergig (healthcare flex shifts and pools).",
+    "easyflex": "Back-office connection to EasyFlex (payroll and invoicing).",
+    "elanza": "Connects Elanza for shifts and candidate management.",
+    "fleks": "Planning connection to Fleks for flex pools and shift management.",
+    "hf": "Back-office connection to HelloFlex (payroll, invoicing, contracts).",
+    "intus": "Connects Intus planning to pull in shifts and candidates.",
+    "kvk": "Company register lookup: a KvK number returns name, address and status.",
+    "nocore": "Back-office connection to Nocore Flex (payroll and invoicing).",
+    "ons": "Connects ONS (Nedap) for planning and rosters.",
+    "pivoton": "Back-office connection to Pivoton (flex administration and payroll).",
+    "sdb": "Connects SDB planning for shifts and rosters.",
+    "shiftmanager": "Connects Shiftmanager for shifts, planning and candidates.",
+    "teams": "Call through Teams Phone and write call notes back to the file.",
+    "threecx": "Telephony connection to 3CX: click to call and a call log on the candidate file.",
+    "vat": "Validate a VAT number through the European VIES service.",
+    "voys": "Dutch VoIP exchange (VoIPGRID): click to call and call history."
+  }
 }

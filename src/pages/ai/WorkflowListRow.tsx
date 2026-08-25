@@ -13,6 +13,7 @@ import { useTranslation } from 'react-i18next'
 import { AlertCircle, ArchiveRestore, CheckCircle, Clock, HelpCircle, MoreHorizontal, MousePointerClick, Play, Trash2, Webhook, Zap, Bell } from 'lucide-react'
 import { interactive } from '@/lib/a11y'
 import { useDateFormat } from '@/lib/datetime'
+import { useSeedLabel } from '@/lib/useSeedLabel'
 import { buildTrashNote } from '@/hooks/useTrashFlow'
 import { MODULE_META } from '@/modules/index'
 import Toggle from '@/components/ui/Toggle'
@@ -102,6 +103,7 @@ function triggerMeta(triggerType?: string): { Icon: LucideIcon; key: string } {
 export default function WorkflowListRow({ workflow, folderName, onRun, onEdit, onToggleStatus, canManageFolders, onArchive, onRestore, onMarkDeletion, onUnmark, graceDays = null }: WorkflowListRowProps) {
   const { t } = useTranslation('workflows')
   const { formatDate, formatDateTime } = useDateFormat()
+  const seedLabel = useSeedLabel()
   const [running, setRunning] = useState(false)
   const [restoring, setRestoring] = useState(false)
   const [hover, setHover] = useState(false)
@@ -110,6 +112,9 @@ export default function WorkflowListRow({ workflow, folderName, onRun, onEdit, o
   // TRASH-OVERAL-2: trashed rows swap restore/mark for the erase note + unmark.
   const inTrash = workflow.lifecycle === 'pending_erase'
   const trig = triggerMeta(workflow.trigger_type)
+  // LOOKUP-I18N-1: a workflow that still carries its seeded Dutch name renders in the
+  // user language; a tenant rename/creation stays exactly as typed.
+  const displayName = seedLabel('workflowNames', { label: workflow.name ?? null })
 
   // Restore is a distinct async action — keep the row responsive while it lands.
   const handleRestoreClick = async (e: MouseEvent) => {
@@ -142,7 +147,7 @@ export default function WorkflowListRow({ workflow, folderName, onRun, onEdit, o
       <StepIconStack steps={workflow.steps} />
 
       <div className="min-w-0 flex-1">
-        <div className="font-semibold text-[var(--text)] truncate" style={{ fontSize: 13 }}>{workflow.name}</div>
+        <div className="font-semibold text-[var(--text)] truncate" style={{ fontSize: 13 }}>{displayName}</div>
         <div className="flex items-center gap-1 text-xs text-[var(--text-muted)] truncate">
           {workflow.last_run && (workflow.last_run.ok
             ? <CheckCircle size={11} color="var(--color-success)" className="flex-shrink-0" />

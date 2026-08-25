@@ -539,33 +539,17 @@
     "restored": "Borrador restaurado. Aún no guardado."
   },
   "lookupSeeds": {
-    "candidateTypes": {
-      "on_call": "Trabajador a demanda",
-      "freelance": "Autónomo",
-      "payroll": "Payroll",
-      "temp_agency": "Trabajador temporal",
-      "secondment": "Cesión temporal",
-      "flex_services": "Servicios flex",
-      "on_demand": "Bajo demanda"
+    "appointmentLocations": {
+      "bij_klant": "En el cliente",
+      "kantoor": "Oficina",
+      "online": "Online",
+      "telefonisch": "Por teléfono"
     },
-    "phases": {
-      "lead": "Cliente potencial",
-      "candidate": "Candidato"
-    },
-    "funnelTypes": {
-      "applied": "Postulado",
-      "invited": "Invitado/Entrevista inicial",
-      "proposal": "Propuesto",
-      "hired": "Contratado",
-      "rejected": "Rechazado"
-    },
-    "statuses": {
-      "available": "Disponible",
-      "placed": "Colocado",
-      "unavailable": "No disponible",
-      "sick": "Enfermo",
-      "leave": "Permiso",
-      "blacklist": "Lista negra"
+    "appointmentTypes": {
+      "belafspraak": "Llamada telefónica",
+      "intake": "Entrevista inicial",
+      "kennismaking": "Primer contacto",
+      "online": "Conversación online"
     },
     "availability": {
       "available": "Disponible",
@@ -573,31 +557,464 @@
       "sick": "Enfermo",
       "leave": "Permiso"
     },
-    "taskStatuses": {
-      "todo": "Por hacer",
-      "in_progress": "En curso",
-      "done": "Finalizado"
+    "candidateSources": {
+      "careersite": "Careersite",
+      "doorverwijzing": "Recomendación",
+      "facebook": "Facebook",
+      "indeed": "Indeed",
+      "inloop": "Visita sin cita",
+      "linkedin": "LinkedIn",
+      "referral": "Referencia",
+      "walkIn": "Visita sin cita",
+      "website": "Sitio web",
+      "werkzoeken": "Búsqueda de empleo",
+      "werkzoekenNl": "Werkzoeken.nl"
     },
-    "taskTypes": {
-      "task": "Tarea",
-      "call": "Llamada",
+    "candidateTypes": {
+      "flex_services": "Servicios flex",
+      "freelance": "Autónomo",
+      "on_call": "Trabajador de guardia",
+      "on_demand": "Bajo demanda",
+      "payroll": "Payroll",
+      "secondment": "Cesión temporal",
+      "temp_agency": "Trabajador temporal"
+    },
+    "cao": {
+      "abu": "Convenio colectivo ABU",
+      "nbbu": "Convenio colectivo NBBU"
+    },
+    "channels": {
+      "carrierePagina": "Página de empleo",
+      "googleJobs": "Google Jobs",
+      "indeed": "Indeed",
+      "werkzoeken": "Werkzoeken"
+    },
+    "contactFunctions": {
+      "administratie": "Administración",
+      "directeur": "Director",
+      "hrManager": "Responsable de RRHH",
+      "locatiemanager": "Gerente de sede",
+      "operationeelManager": "Gerente de operaciones",
+      "planner": "Planificador",
+      "recruiter": "Reclutador",
+      "teamleider": "Jefe de equipo"
+    },
+    "contractTypes": {
+      "bepaalde_tijd": "Duración determinada",
+      "detachering": "Cesión temporal",
+      "onbepaalde_tijd": "Duración indefinida",
+      "payroll": "Payroll",
+      "uitzendbeding": "Cláusula de cese automático (fase A)",
+      "zzp": "Autónomo"
+    },
+    "customerPhases": {
+      "klant": "Cliente",
+      "prospect": "Prospecto"
+    },
+    "customerStatuses": {
+      "active": "Activo",
+      "blocked": "Bloqueado",
+      "inactive": "Inactivo"
+    },
+    "documentTypes": {
+      "bankpasPrive": "Tarjeta bancaria privada",
+      "bankpasZakelijk": "Tarjeta bancaria empresarial",
+      "certificaat": "Certificado",
+      "contract": "Contrato",
+      "cv": "CV",
+      "diploma": "Diploma",
+      "foto": "Foto",
+      "idBewijs": "Documento de identidad",
+      "overig": "Otro",
+      "vog": "Certificado de conducta (VOG)"
+    },
+    "driverLicenses": {
+      "a": "A",
+      "a1": "A1",
+      "a2": "A2",
+      "am": "AM",
+      "b": "B",
+      "be": "BE",
+      "c": "C",
+      "c1": "C1",
+      "c1e": "C1E",
+      "ce": "CE",
+      "d": "D",
+      "d1": "D1",
+      "d1e": "D1E",
+      "de": "DE",
+      "t": "T"
+    },
+    "educationLevels": {
+      "basisonderwijs": "Educación primaria",
+      "havo": "HAVO",
+      "hbo": "HBO",
+      "hboMaster": "HBO-master",
+      "mbo": "MBO",
+      "mbo1": "MBO-1",
+      "mbo2": "MBO-2",
+      "mbo3": "MBO-3",
+      "mbo4": "MBO-4",
+      "vmbo": "VMBO",
+      "vwo": "VWO",
+      "wo": "WO",
+      "woMaster": "WO-master"
+    },
+    "emergencyRelations": {
+      "anders": "Otro",
+      "broer_zus": "Hermano/a",
+      "familie": "Familiar",
+      "kind": "Hijo/a",
+      "ouder": "Padre/madre",
+      "partner": "Pareja",
+      "vriend": "Amigo/a"
+    },
+    "escalationReasons": {
+      "boos": "Enfadado",
+      "ongeluk": "Accidente",
+      "overig": "Otro",
+      "overlijden": "Fallecimiento",
+      "uitschrijven": "Baja",
+      "ziek": "Enfermo"
+    },
+    "functions": {
+      "barmanBarvrouw": "Camarero/a de barra",
+      "bedieningsmedewerker": "Camarero/a de sala",
+      "cateringmedewerker": "Empleado/a de catering",
+      "gastheerGastvrouw": "Anfitrión/Anfitriona",
+      "kok": "Cocinero/a",
+      "zelfstandigWerkendKok": "Jefe de partida"
+    },
+    "funnelTypes": {
+      "applied": "Postulado",
+      "hired": "Contratado",
+      "intake": "Entrevista inicial",
+      "invited": "Invitado",
+      "proposal": "Propuesto",
+      "rejected": "Rechazado"
+    },
+    "genders": {
+      "female": "Mujer",
+      "male": "Hombre",
+      "other": "Otro"
+    },
+    "industries": {
+      "administratie": "Administración",
+      "bouw": "Construcción",
+      "financien": "Finanzas",
+      "horeca": "Hostelería",
+      "it": "TI",
+      "logistiek": "Logística",
+      "onderwijs": "Educación",
+      "overig": "Otro",
+      "productie": "Producción",
+      "retail": "Comercio minorista",
+      "techniek": "Técnica",
+      "uitzendbureau": "Agencia de trabajo temporal",
+      "werving": "Reclutamiento",
+      "zorg": "Sanidad"
+    },
+    "languageLevels": {
+      "goed": "Bueno",
+      "matig": "Regular",
+      "moedertaal": "Lengua materna",
+      "slecht": "Malo",
+      "zeerGoed": "Muy bueno"
+    },
+    "languages": {
+      "arabisch": "Árabe",
+      "duits": "Alemán",
+      "engels": "Inglés",
+      "frans": "Francés",
+      "italiaans": "Italiano",
+      "nederlands": "Neerlandés",
+      "oekraiens": "Ucraniano",
+      "papiaments": "Papiamento",
+      "pools": "Polaco",
+      "portugees": "Portugués",
+      "roemeens": "Rumano",
+      "spaans": "Español",
+      "turks": "Turco"
+    },
+    "lastContactTypes": {
+      "appointment": "Cita",
+      "call": "Llamada telefónica",
       "email": "Correo electrónico",
-      "note": "Nota"
+      "meet": "Reunión online",
+      "whatsapp": "WhatsApp"
     },
-    "taskPriorities": {
-      "low": "Baja",
-      "normal": "Normal",
-      "high": "Alta"
+    "matchStatuses": {
+      "closed": "Cerrado",
+      "open": "Abierto"
+    },
+    "nationalities": {
+      "antilliaans": "Antillano",
+      "belgisch": "Belga",
+      "brits": "Británico",
+      "bulgaars": "Búlgaro",
+      "duits": "Alemán",
+      "eritrees": "Eritreo",
+      "frans": "Francés",
+      "grieks": "Griego",
+      "hongaars": "Húngaro",
+      "italiaans": "Italiano",
+      "marokkaans": "Marroquí",
+      "nederlands": "Neerlandés",
+      "oekraiens": "Ucraniano",
+      "overig": "Otro",
+      "pools": "Polaco",
+      "portugees": "Portugués",
+      "roemeens": "Rumano",
+      "somalisch": "Somalí",
+      "spaans": "Español",
+      "surinaams": "Surinamés",
+      "syrisch": "Sirio",
+      "turks": "Turco"
     },
     "noteTypes": {
+      "appointment": "Cita",
+      "feedback": "Comentarios",
+      "followup": "Seguimiento",
       "general": "General",
       "intake": "Entrevista inicial",
-      "feedback": "Comentarios",
-      "appointment": "Cita",
-      "followup": "Seguimiento",
-      "warning": "Advertencia",
+      "lifecycle": "Historial del expediente",
       "status_change": "Cambio de estado",
-      "lifecycle": "Historial del expediente"
+      "warning": "Advertencia"
+    },
+    "numberingEntities": {
+      "application": "Solicitud",
+      "candidate": "Candidato",
+      "customer": "Cliente",
+      "customer_contact": "Persona de contacto",
+      "customer_department": "Departamento del cliente",
+      "customer_location": "Sede del cliente",
+      "location": "Sede (propia)",
+      "match": "Match",
+      "opportunity": "Oportunidad",
+      "outreach_campaign": "Campaña de llamadas",
+      "task": "Tarea",
+      "vacancy": "Vacante",
+      "zzp_creditor": "Acreedor autónomo"
+    },
+    "opportunityStages": {
+      "lead": "Lead",
+      "lost": "Perdida",
+      "negotiation": "Negociación",
+      "proposal": "Propuesta",
+      "qualified": "Cualificado",
+      "won": "Ganada"
+    },
+    "outcomes": {
+      "callback": "Volver a llamar",
+      "interested": "Interesado",
+      "no_answer": "Sin respuesta",
+      "not_interested": "No interesado"
+    },
+    "outreachStatuses": {
+      "answered": "Respondido",
+      "contacted": "Contactado",
+      "skipped": "Omitido",
+      "todo": "Por hacer"
+    },
+    "phases": {
+      "candidate": "Candidato",
+      "lead": "Lead"
+    },
+    "pools": {
+      "actieveKandidaten": "Candidatos activos",
+      "interessantLater": "Interesante más adelante",
+      "topKandidaten": "Mejores candidatos",
+      "warmeLeads": "Leads cálidos"
+    },
+    "referenceRelations": {
+      "anders": "Otro",
+      "collega": "Compañero/a",
+      "docent": "Profesor/a",
+      "klant": "Cliente",
+      "manager": "Gerente",
+      "opdrachtgever": "Cliente contratante"
+    },
+    "rejectionReasons": {
+      "andereKandidaatGekozen": "Se eligió a otro candidato",
+      "geenCultureleMatch": "Sin encaje cultural",
+      "nietGekwalificeerd": "No cualificado",
+      "onvoldoendeErvaring": "Experiencia insuficiente",
+      "salariswensTeHoog": "Pretensión salarial demasiado alta",
+      "teGroteReisafstand": "Distancia de desplazamiento excesiva",
+      "teruggetrokkenDoorKandidaat": "Retirado por el candidato"
+    },
+    "seniorityLevels": {
+      "medior": "Intermedio",
+      "professional": "Profesional",
+      "senior": "Sénior",
+      "starter": "Júnior"
+    },
+    "skillLevels": {
+      "basis": "Básico",
+      "expert": "Experto",
+      "gevorderd": "Avanzado"
+    },
+    "statuses": {
+      "available": "Disponible",
+      "blacklist": "Lista negra",
+      "leave": "Permiso",
+      "placed": "Colocado",
+      "sick": "Enfermo",
+      "unavailable": "No disponible"
+    },
+    "subStatuses": {
+      "active": "Activo",
+      "inactive": "Inactivo"
+    },
+    "taskPriorities": {
+      "high": "Alta",
+      "low": "Baja",
+      "normal": "Normal"
+    },
+    "taskStatuses": {
+      "done": "Finalizado",
+      "in_progress": "En curso",
+      "todo": "Por hacer"
+    },
+    "taskTypes": {
+      "call": "Llamada",
+      "email": "Correo electrónico",
+      "note": "Nota",
+      "task": "Tarea"
+    },
+    "vacancyStatuses": {
+      "concept": "Borrador",
+      "gepauzeerd": "Pausado",
+      "gesloten": "Cerrado",
+      "open": "Abierto"
+    },
+    "workflowFolders": {
+      "kandidaten": "Candidatos",
+      "sollicitaties": "Solicitudes",
+      "matches": "Matches",
+      "vacatures": "Vacantes",
+      "kansen": "Oportunidades",
+      "taken": "Tareas",
+      "systeemmeldingen": "Notificaciones del sistema",
+      "klanten": "Clientes",
+      "planning": "Planificación",
+      "avgBewaartermijnen": "RGPD / Plazos de conservación",
+      "rapportage": "Informes",
+      "aiPlanner": "AI Planner",
+      "aiRecruiter": "AI Recruiter",
+      "koiosAI": "Koios AI",
+      "shiftmanagerRapportage": "Shiftmanager Informes",
+      "shiftmanagerAutomaties": "Shiftmanager Automatizaciones",
+      "koppelingElanza": "Conexión Elanza",
+      "koppelingAelio": "Conexión Aelio",
+      "koppelingIntus": "Conexión Intus",
+      "koppelingSDB": "Conexión SDB"
+    },
+    "workflowNames": {
+      "heractivering": "Reactivación",
+      "nietBenaderdXDagen": "No contactado > X días",
+      "verjaardagsfelicitatie": "Felicitación de cumpleaños",
+      "afspraakbevestiging": "Confirmación de cita",
+      "adresGeocoderenPDOK": "Geocodificar dirección (PDOK)",
+      "adressenGeocoderenBulkPDOK": "Geocodificar direcciones — masivo (PDOK)",
+      "helloflexKoppelingPerKandidaat": "Conexión HelloFlex (por candidato)",
+      "helloflexKoppelingBulk": "Conexión HelloFlex — masivo",
+      "shiftmanagerKoppelingPerKandidaat": "Conexión Shiftmanager (por candidato)",
+      "shiftmanagerKoppelingBulk": "Conexión Shiftmanager — masivo",
+      "sollicitatiefaseMatch": "Fase de solicitud → Match",
+      "afwijzingVersturen": "Enviar rechazo",
+      "leadsTellingVacatures": "Recuento de leads de vacantes",
+      "matchWerkervaring": "Match → experiencia laboral",
+      "contractLooptAf": "Contrato por vencer",
+      "matchLooptAfHerinneringKandidaat": "Match por vencer — recordatorio candidato",
+      "matchLooptAfMeldingEigenaarKandidaat": "Match por vencer — notificación al responsable del candidato",
+      "matchLooptAfMeldingEigenaarKlant": "Match por vencer — notificación al responsable del cliente",
+      "taakBijAflopendKlantcontract": "Tarea por contrato de cliente por vencer",
+      "taakBijLangGeenKlantcontact": "Tarea por falta de contacto prolongada con el cliente",
+      "taakBijAflopendeMatchBijKlant": "Tarea por match de cliente por vencer",
+      "taakBijVacatureLangOnlineZonderResultaat": "Tarea por vacante mucho tiempo en línea sin resultado",
+      "meldingBijNaderendeSluitingsdatum": "Notificación por fecha de cierre próxima",
+      "onboardingEvaluatie": "Incorporación y evaluación",
+      "klantadresGeocoderenPDOK": "Geocodificar dirección del cliente (PDOK)",
+      "klantadressenGeocoderenBulkPDOK": "Geocodificar direcciones de clientes — masivo (PDOK)",
+      "locatieadresGeocoderenPDOK": "Geocodificar dirección de sede (PDOK)",
+      "locatieadressenGeocoderenBulkPDOK": "Geocodificar direcciones de sede — masivo (PDOK)",
+      "vacatureadresGeocoderenPDOK": "Geocodificar dirección de la vacante (PDOK)",
+      "vacatureadressenGeocoderenBulkPDOK": "Geocodificar direcciones de vacantes — masivo (PDOK)",
+      "nieuweMatchMelding": "Nuevo match — notificación",
+      "opMatchfaseMelding": "En fase de match — notificación",
+      "whatsappStoringMelding": "Interrupción de WhatsApp — notificación",
+      "whatsappHersteldMelding": "WhatsApp restablecido — notificación",
+      "afwijzingMelding": "Rechazo — notificación",
+      "verlopendDocumentMelding": "Documento por vencer — notificación",
+      "ontbrekendeCVMelding": "CV faltante — notificación",
+      "onbeantwoordGesprekMelding": "Conversación sin responder — notificación",
+      "bijnaWeerBeschikbaarMelding": "Disponible de nuevo pronto — notificación",
+      "bijnaWeerBeschikbaarTaak": "Disponible de nuevo pronto — tarea",
+      "beschikbaarheidsdatumVerstrekenMelding": "Fecha de disponibilidad vencida — notificación",
+      "beschikbaarheidsdatumVerstrekenTaak": "Fecha de disponibilidad vencida — tarea",
+      "verlofLooptBijnaAfMelding": "Permiso por finalizar pronto — notificación",
+      "verlofLooptBijnaAfTaak": "Permiso por finalizar pronto — tarea",
+      "verlofdatumVerstrekenMelding": "Fecha de permiso vencida — notificación",
+      "verlofdatumVerstrekenTaak": "Fecha de permiso vencida — tarea",
+      "nietBeschikbaarPeriodeLooptBijnaAfMelding": "Periodo de no disponibilidad por finalizar pronto — notificación",
+      "nietBeschikbaarPeriodeLooptBijnaAfTaak": "Periodo de no disponibilidad por finalizar pronto — tarea",
+      "nietBeschikbaarDatumVerstrekenMelding": "Fecha de no disponibilidad vencida — notificación",
+      "nietBeschikbaarDatumVerstrekenTaak": "Fecha de no disponibilidad vencida — tarea",
+      "staatStilOpStatusMelding": "Estancado en el estado — notificación",
+      "staatStilOpStatusTaak": "Estancado en el estado — tarea",
+      "leadStaatStilMelding": "Lead estancado — notificación",
+      "leadStaatStilTaak": "Lead estancado — tarea",
+      "langGeenContactBellijst": "Sin contacto prolongado → lista de llamadas",
+      "langGeenContactWhatsAppCheckIn": "Sin contacto prolongado → seguimiento por WhatsApp",
+      "langNietGesprokenMelding": "Mucho tiempo sin hablar — notificación",
+      "vraagBewaartoestemming": "Solicitar consentimiento de conservación",
+      "verloopMeldingBewaartermijn": "Notificación de vencimiento del plazo de conservación",
+      "archiveerBijVerlopenBewaartermijn": "Archivar al vencer el plazo de conservación",
+      "escalatieDossierStaatTeLangGearchiveerd": "Escalamiento: expediente archivado demasiado tiempo",
+      "backofficeMailenBijArchivering": "Enviar correo al backoffice al archivar",
+      "aiPlannerEmployeeStatusChange": "AI Planner - Cambio de estado del empleado",
+      "aiPlannerOfferingShiftsActiefNIEUW": "AI Planner - Offering Shifts - Activo - NUEVO",
+      "aiPlannerOfferingShiftsActief": "AI Planner - Offering Shifts - Activo",
+      "aiPlannerOfferingShiftsNietActief": "AI Planner - Offering Shifts - No activo",
+      "aiPlannerOfferingShiftsIntake": "AI Planner - Offering Shifts - Intake",
+      "aiPlannerShiftReminder": "AI Planner - ShiftReminder",
+      "aiPlannerGeenReactie2472u": "AI Planner - Sin respuesta (24-72 h)",
+      "aiPlannerGeenReactieEscalatie72u": "AI Planner - Escalamiento sin respuesta (>72 h)",
+      "aiPlannerWorkedShifts": "AI Planner - Worked Shifts",
+      "aiPlannerResponse": "AI Planner - Response",
+      "aiRecruiterPaktNieuweSollicitatieOp": "AI-recruiter atiende una nueva solicitud",
+      "syncAlles": "Sincronizar todo",
+      "syncKandidaten": "Sincronizar candidatos",
+      "syncKlanten": "Sincronizar clientes",
+      "syncDiensten": "Sincronizar turnos",
+      "aiPlannerDeEscalate": "AI Planner De-Escalate",
+      "smElanza": "SM → Elanza",
+      "elanzaSM": "Elanza → SM",
+      "aelioSMPRD": "Aelio → SM - PRD",
+      "smAelio": "SM → Aelio",
+      "aelioCheckOutHours": "Aelio - Check-Out Hours",
+      "aelioFLEXDETASM": "Aelio FLEX/DETA → SM",
+      "intusSM": "Intus → SM",
+      "smIntus": "SM → Intus",
+      "intusSMGewerkteDiensttijden": "Intus → SM Horas de turno trabajadas",
+      "sdbBeschikbaarMailhook": "SDB Disponible Mailhook",
+      "sdbVervallenMailhook": "SDB Vencido Mailhook",
+      "smSDBPlanning": "SM → SDB Planning",
+      "nightlyKandidaatVerrijking": "Enriquecimiento nocturno de candidatos",
+      "koiosVerstuurWhatsApp": "Koios: enviar WhatsApp",
+      "koiosVerstuurEMail": "Koios: enviar correo",
+      "koiosMaakTaak": "Koios: crear tarea",
+      "koiosPlanAfspraak": "Koios: programar cita",
+      "koiosStuurNotificatie": "Koios: enviar notificación",
+      "koiosVoegToeAanBellijst": "Koios: añadir a la lista de llamadas"
+    },
+    "workPermitTypes": {
+      "geen_vergunning_nodig": "No requiere permiso (NL/UE)",
+      "gvva": "Permiso combinado (GVVA)",
+      "kennismigrant": "Migrante altamente cualificado",
+      "onbekend": "Desconocido",
+      "twv": "Permiso de trabajo (TWV)"
     }
   }
 }

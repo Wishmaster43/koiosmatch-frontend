@@ -22,8 +22,8 @@ vi.mock('@/lib/notify', () => ({ notifyError: vi.fn(), notifySuccess: vi.fn() })
 // editor form renders without a live backend (each hook's own file is unit-tested).
 vi.mock('@/lib/useLocations', () => ({ useLocations: () => [{ value: 'loc1', label: 'Amsterdam' }] }))
 vi.mock('@/lib/useContractTypes', () => ({ useContractTypes: () => ({ types: ['ZZP Flex'] }) }))
-vi.mock('@/lib/useFunctions', () => ({ useFunctions: () => ({ functions: ['Verzorgende IG'] }) }))
-vi.mock('@/lib/useIndustries', () => ({ useIndustries: () => ({ industries: ['Zorg'] }) }))
+vi.mock('@/lib/useFunctions', () => ({ useFunctions: () => ({ functions: ['Verzorgende IG'], functionOptions: ['Verzorgende IG'].map(n => ({ value: n, label: n })) }) }))
+vi.mock('@/lib/useIndustries', () => ({ useIndustries: () => ({ industries: ['Zorg'], industryOptions: ['Zorg'].map(n => ({ value: n, label: n })) }) }))
 vi.mock('@/lib/useLanguageLookups', () => ({ useLanguageLookups: () => ({ languages: ['Nederlands'], levels: [] }) }))
 // Tiptap's real editor is out of scope here — a plain textarea proves the wiring.
 vi.mock('@/components/ui/RichTextEditor', () => ({

@@ -2,19 +2,39 @@ import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import InsightsRow from '@/components/insights/InsightsRow'
 import type { DonutSpec, KpiSpec } from '@/components/insights/InsightsRow'
+import { useSeedLabel } from '@/lib/useSeedLabel'
 import type { Opportunity } from '@/types/opportunity'
 import type { LookupOption } from '@/types/common'
 
 interface Aggregate { name: string; key: string; value: number; color?: string }
 
 // Group rows into donut segments [{ name, key, value, color? }] by a field accessor.
-function groupBy<T>(rows: T[], getLabel: (r: T) => string, getColor?: (r: T) => string | null): Aggregate[] {
+// `key` stays the RAW field value (this page filters client-only fields like `client`
+// on the text itself) — only `translate` (LOOKUP-I18N-1) may change the display
+// `name`, never the key a click/filter compares against.
+function groupBy<T>(rows: T[], getLabel: (r: T) => string, getColor?: (r: T) => string | null, translate?: (label: string) => string): Aggregate[] {
   const m: Record<string, Aggregate> = {}
   rows.forEach(r => {
     const label = getLabel(r)
     if (!label) return
-    m[label] ??= { name: label, key: label, value: 0, color: getColor?.(r) ?? undefined }
+    m[label] ??= { name: translate ? translate(label) : label, key: label, value: 0, color: getColor?.(r) ?? undefined }
     m[label].value++
+  })
+  return Object.values(m)
+}
+
+// Stage donut: keyed on the STABLE stageValue (the same axis the client-side filter
+// and every mutation use), display name translated via seedLabel — LOOKUP-I18N-1
+// keeps the filter/key axis on the raw value, only `name` (legend/tooltip) is
+// translated, so a donut click still narrows on the value a mixed-locale row set
+// agrees on (fixes the same stage splitting into two segments after a board move).
+function groupByStage(rows: Opportunity[], seedLabel: (family: string, item: { value?: string | null; label?: string | null }) => string): Aggregate[] {
+  const m: Record<string, Aggregate> = {}
+  rows.forEach(r => {
+    if (r.stageValue == null) return
+    const key = String(r.stageValue)
+    m[key] ??= { name: seedLabel('opportunityStages', { value: key, label: r.stage }), key, value: 0, color: r.stageColor ?? undefined }
+    m[key].value++
   })
   return Object.values(m)
 }
@@ -48,7 +68,8 @@ interface OpportunitiesInsightsRowProps {
   onPickClient: (d: unknown) => void
   onClearClient: () => void
   // Direct setter for the stage filter — the KPI cards drive it (won/lost/open/closed).
-  onSetStageFilter: (labels: string[]) => void
+  // LOOKUP-I18N-1: values, never labels — mirrors `stage` above.
+  onSetStageFilter: (values: string[]) => void
   // Honesty notice rendered above the cards (e.g. "a branch filter hides records with
   // no branch"). Forwarded straight to the shared InsightsRow, which already owns that
   // banner — this wrapper adds donut/KPI config, not a second styling of the same thing.
@@ -67,6 +88,9 @@ export default function OpportunitiesInsightsRow({
   onSetStageFilter, notice,
 }: OpportunitiesInsightsRowProps) {
   const { t } = useTranslation('opportunities')
+  // LOOKUP-I18N-1: the seeded stage label renders in the user's language; a
+  // tenant rename/creation passes through untouched.
+  const seedLabel = useSeedLabel()
 
   const { stageData, ownerData, clientData, open, pipeline, avg, won, lost, winRate } = useMemo(() => {
     // Terminal stages from the lookup flags — outcome is never hardcoded.
@@ -85,7 +109,7 @@ export default function OpportunitiesInsightsRow({
     const wonCount  = rows.filter(isWonRow).length
     const lostCount = rows.filter(isLostRow).length
     return {
-      stageData:  groupBy(rows, r => r.stage, r => r.stageColor),
+      stageData:  groupByStage(rows, seedLabel),
       ownerData:  groupByOwner(rows),
       clientData: groupBy(rows, r => r.client),
       open:     rows.filter(r => !isWonRow(r) && !isLostRow(r)).length,
@@ -95,43 +119,45 @@ export default function OpportunitiesInsightsRow({
       lost:     lostCount,
       winRate:  (wonCount + lostCount) ? Math.round((wonCount / (wonCount + lostCount)) * 100) : 0,
     }
-  }, [rows, stages, valueInHours])
+  }, [rows, stages, valueInHours, seedLabel])
 
-  // `picked` doubles as the visible filter-chip label (on this page labels ARE the keys) —
-  // EXCEPT owner, which now filters on id: resolve the picked id back to its display
-  // name here so the chip/aria-label never leaks a raw uuid (MiniDonut still matches
-  // the segment by its `key`, which is the same id, via the segment lookup below).
+  // `picked` is the visible filter-chip TEXT — resolve the picked raw value back to
+  // its translated display label (LOOKUP-I18N-1: `stage`/`owner` filter state holds
+  // ids/values, never a label; the chip/aria-label must never leak a raw slug/uuid).
   const pickedOwnerLabel = owner[0] ? (ownerData.find(o => o.key === owner[0])?.name ?? owner[0]) : null
+  const pickedStageLabel = stage[0] ? (stageData.find(s => s.key === stage[0])?.name ?? stages.find(s => s.value === stage[0])?.label ?? stage[0]) : null
   const donuts: DonutSpec[] = [
-    { key: 'stage',  title: t('insights.stage'),  data: stageData,  onPick: onPickStage,  active: stage.length > 0,  onClear: onClearStage,  picked: stage[0] ?? null },
+    { key: 'stage',  title: t('insights.stage'),  data: stageData,  onPick: onPickStage,  active: stage.length > 0,  onClear: onClearStage,  picked: pickedStageLabel },
     { key: 'owner',  title: t('insights.owner'),  data: ownerData,  onPick: onPickOwner,  active: owner.length > 0,  onClear: onClearOwner,  picked: pickedOwnerLabel },
     { key: 'client', title: t('insights.client'), data: clientData, onPick: onPickClient, active: client.length > 0, onClear: onClearClient, picked: client[0] ?? null },
   ]
   // KPI clicks drive the stage filter (Danny: every card must DO something):
   // won/lost → that terminal stage; open/pipeline/avg → the running stages;
   // winrate → the closed stages. Clicking the active card again clears.
-  const wonLabel   = stages.find(s => s.isWon)?.label
-  const lostLabel  = stages.find(s => s.isLost)?.label
-  const openLabels = stages.filter(s => !s.isWon && !s.isLost).map(s => s.label)
+  // LOOKUP-I18N-1: keyed on stage VALUE, never the (possibly translated) label —
+  // matches the filter state and Opportunity.stageValue everywhere else.
+  const wonValue   = stages.find(s => s.isWon)?.value
+  const lostValue  = stages.find(s => s.isLost)?.value
+  const openValues = stages.filter(s => !s.isWon && !s.isLost).map(s => s.value)
   const eqSet = (a: string[], b: string[]) => a.length === b.length && [...a].sort().join('|') === [...b].sort().join('|')
-  const toggleStages = (labels: (string | undefined)[]) => {
-    const clean = labels.filter((l): l is string => !!l)
+  const toggleStages = (values: (string | undefined)[]) => {
+    const clean = values.filter((v): v is string => !!v)
     if (clean.length) onSetStageFilter(eqSet(stage, clean) ? [] : clean)
   }
-  const activeIs = (labels: (string | undefined)[]) => eqSet(stage, labels.filter((l): l is string => !!l))
+  const activeIs = (values: (string | undefined)[]) => eqSet(stage, values.filter((v): v is string => !!v))
   const kpis: KpiSpec[] = [
     { key: 'open',     label: t('kpi.open'),                                   value: open,     color: 'var(--color-primary-text)',
-      onClick: () => toggleStages(openLabels), active: activeIs(openLabels) },
+      onClick: () => toggleStages(openValues), active: activeIs(openValues) },
     { key: 'pipeline', label: t(valueInHours ? 'kpi.pipelineHours' : 'kpi.pipeline'), value: pipeline, color: 'var(--color-success-text)',
-      onClick: () => toggleStages(openLabels), active: activeIs(openLabels) },
+      onClick: () => toggleStages(openValues), active: activeIs(openValues) },
     { key: 'avg',      label: t(valueInHours ? 'kpi.avgHours' : 'kpi.avg'),    value: avg,      color: 'var(--text)',
-      onClick: () => toggleStages(openLabels), active: activeIs(openLabels) },
+      onClick: () => toggleStages(openValues), active: activeIs(openValues) },
     { key: 'won',      label: t('kpi.won'),                                    value: won,      color: 'var(--color-success-text)',
-      onClick: () => toggleStages([wonLabel]), active: activeIs([wonLabel]) },
+      onClick: () => toggleStages([wonValue]), active: activeIs([wonValue]) },
     { key: 'lost',     label: t('kpi.lost'),                                   value: lost,     color: 'var(--color-danger-text)',
-      onClick: () => toggleStages([lostLabel]), active: activeIs([lostLabel]) },
+      onClick: () => toggleStages([lostValue]), active: activeIs([lostValue]) },
     { key: 'winrate',  label: t('kpi.winRate'),                                value: winRate,  color: 'var(--color-warning)',
-      onClick: () => toggleStages([wonLabel, lostLabel]), active: activeIs([wonLabel, lostLabel]) },
+      onClick: () => toggleStages([wonValue, lostValue]), active: activeIs([wonValue, lostValue]) },
   ]
 
   return <InsightsRow donuts={donuts} kpis={kpis} clearTitle={t('insights.clearFilter')} notice={notice} />

@@ -2,7 +2,7 @@
   "title": "Candidatos",
   "page": {
     "add": "Nuevo candidato",
-    "blacklistView": "Blacklist",
+    "blacklistView": "Lista negra",
     "archivedView": "Archivados",
     "filterUnsupported": "Este filtro (todavía) no es compatible con el servidor.",
     "loadError": "No se pudieron cargar los candidatos.",

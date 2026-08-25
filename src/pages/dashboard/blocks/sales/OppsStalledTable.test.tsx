@@ -7,7 +7,7 @@ import { render, screen, fireEvent } from '@testing-library/react'
 import OppsStalledTable from './OppsStalledTable'
 import type { OppStalledRow } from '@/types/dashboard'
 
-vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string) => k }) }))
+vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string, opts?: { defaultValue?: string }) => opts?.defaultValue ?? k }) }))
 
 const rows: OppStalledRow[] = [
   { id: 'o1', title: 'Deal One', customer: 'Acme', owner: 'Bob', stage_label: 'Proposal', days_still: 14, value: 5000 },

@@ -22,8 +22,8 @@ vi.mock('@/lib/datetime', () => ({ useDateFormat: () => ({ formatDate: (v: strin
 vi.mock('@/context/LookupsContext', () => ({
   useLookups: () => ({ candidateTypes: [], statusMeta: () => ({ label: '', color: '#000' }) }),
 }))
-vi.mock('@/lib/useFunctions', () => ({ useFunctions: () => ({ functions: [], allowFreeEntry: true }) }))
-vi.mock('@/lib/useIndustries', () => ({ useIndustries: () => ({ industries: [] }) }))
+vi.mock('@/lib/useFunctions', () => ({ useFunctions: () => ({ functions: [], functionOptions: [].map(n => ({ value: n, label: n })), allowFreeEntry: true }) }))
+vi.mock('@/lib/useIndustries', () => ({ useIndustries: () => ({ industries: [], industryOptions: [].map(n => ({ value: n, label: n })) }) }))
 vi.mock('@/lib/useDriverLicenses', () => ({ useDriverLicenses: () => ({ licenses: [] }) }))
 // NOODCONTACT-SPLIT-1: EmergencyContactCard's relation dropdown now fetches its
 // own lookup — mocked for isolation, mirrors the other lookup hooks above.

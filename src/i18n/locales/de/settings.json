@@ -3468,6 +3468,7 @@
     },
     "aiBudgetLabel": "AI-Tokens",
     "workflowBudgetLabel": "Koios Tokens",
+    "whatsappBudgetLabel": "WhatsApp Tokens pro Monat",
     "valueCaption": "Einkauf {{cogs}} · Verkauf {{sale}} · {{basis}}",
     "tenantHeading": "Mandanten-Ausnahme",
     "tenantPickerLabel": "Mandant",
@@ -3550,5 +3551,28 @@
     "list": "Listen"
   },
   "dashboardsNoResults": "Keine Einträge für diese Suche oder diesen Filter.",
-  "dashboardsSharedDefaultNote": "Diese Rolle teilt die KPI-Zeile von Standard. Eine Änderung gilt auch für die anderen Rollen mit dieser Zeile."
+  "dashboardsSharedDefaultNote": "Diese Rolle teilt die KPI-Zeile von Standard. Eine Änderung gilt auch für die anderen Rollen mit dieser Zeile.",
+  "appsCatalog": {
+    "aelio": "Anbindung an Aelio für Einsatzverwaltung und Personalplanung.",
+    "afas": "Backoffice-Anbindung an AFAS (HR, Lohnabrechnung und Rechnungen).",
+    "ai_planner": "KI-Planer: Einsätze anbieten, Erinnerungen, geleistete Einsätze und Statusänderungen. Zeigt den Ordner \"AI Planner\" in Workflows.",
+    "ai_recruiter": "KI-Recruiter: Erstkontakt und automatische Antworten auf Kandidatennachrichten. Zeigt den Ordner \"AI Recruiter\" in Workflows.",
+    "aircall": "Cloud-Telefonie für Recruiting-Teams: Anrufe, Aufzeichnungen und Aktenabgleich.",
+    "clevergig": "Planungsanbindung an Clevergig (Flex-Einsätze und Pools im Gesundheitswesen).",
+    "easyflex": "Backoffice-Anbindung an EasyFlex (Lohnabrechnung und Rechnungen).",
+    "elanza": "Anbindung an Elanza für Einsätze und Kandidatenverwaltung.",
+    "fleks": "Planungsanbindung an Fleks für Flex-Pools und Einsatzverwaltung.",
+    "hf": "Backoffice-Anbindung an HelloFlex (Lohnabrechnung, Rechnungen, Verträge).",
+    "intus": "Anbindung an die Intus-Planung, um Einsätze und Kandidaten abzurufen.",
+    "kvk": "Handelsregister-Abfrage: Die KvK-Nummer liefert Name, Adresse und Status.",
+    "nocore": "Backoffice-Anbindung an Nocore Flex (Lohnabrechnung und Rechnungen).",
+    "ons": "Anbindung an ONS (Nedap) für Planung und Dienstpläne.",
+    "pivoton": "Backoffice-Anbindung an Pivoton (Flex-Administration und Lohnabrechnung).",
+    "sdb": "Anbindung an die SDB-Planung für Einsätze und Dienstpläne.",
+    "shiftmanager": "Anbindung an Shiftmanager für Einsätze, Planung und Kandidaten.",
+    "teams": "Anrufe über Teams Phone, Gesprächsnotizen landen in der Akte.",
+    "threecx": "Telefonie-Anbindung an 3CX: Klick-to-Call und Gesprächsprotokoll in der Kandidatenakte.",
+    "vat": "USt-IdNr. über den europäischen VIES-Dienst prüfen.",
+    "voys": "Niederländische VoIP-Telefonanlage (VoIPGRID): Klick-to-Call und Anrufverlauf."
+  }
 }

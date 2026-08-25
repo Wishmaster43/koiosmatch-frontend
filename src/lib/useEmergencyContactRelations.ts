@@ -24,8 +24,11 @@
  * Fetch/cache/dedupe lives in useCachedLookup (audit item 8) — one GET per
  * session, shared across every mounted consumer.
  */
+import { useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { AxiosResponse } from 'axios'
 import { useCachedLookup } from './useCachedLookup'
+import { translateSeedList } from './lookupSeedI18n'
 import type { LookupOption } from '@/types/common'
 import { unwrapList } from '@/lib/api'
 
@@ -57,8 +60,11 @@ const mapEmergencyContactRelations = (res: AxiosResponse): EmergencyContactRelat
 }
 
 export function useEmergencyContactRelations() {
-  const { data: emergencyContactRelations } = useCachedLookup(
+  const { t } = useTranslation('common')
+  const { data: rawRelations } = useCachedLookup(
     '/emergency-contact-relations', mapEmergencyContactRelations, DEFAULT_EMERGENCY_CONTACT_RELATIONS,
   )
+  // Seeded defaults render in the user language; a tenant value stays as typed (LOOKUP-I18N-1).
+  const emergencyContactRelations = useMemo(() => translateSeedList(t, 'emergencyRelations', rawRelations), [rawRelations, t])
   return { emergencyContactRelations }
 }

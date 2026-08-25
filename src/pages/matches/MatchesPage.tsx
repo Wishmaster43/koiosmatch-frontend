@@ -8,6 +8,7 @@ import { useRightPanel } from '@/context/RightPanelContext'
 import { usePublishSelection } from '@/context/SelectionContext'
 import { useMatchStatuses } from '@/lib/useMatchStatuses'
 import { useContractTypes } from '@/lib/useContractTypes'
+import { useSeedLabel } from '@/lib/useSeedLabel'
 import { useMatchApprovalMode } from './hooks/useMatchApprovalMode'
 import api, { unwrap } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
@@ -47,6 +48,9 @@ import Button from '@/components/ui/Button'
 // MatchesPage — loads matches, shows an insights strip and paginates the table.
 export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
   const { t } = useTranslation('matches')
+  // LOOKUP-I18N-1: the seeded match-status label renders in the user's language;
+  // a tenant rename/creation passes through untouched.
+  const seedLabel = useSeedLabel()
   const auth = useAuth()
   // Coupling is authorization-gated in the UI; the backend re-checks (§7).
   const hasPermission = auth?.hasPermission ?? (() => false)
@@ -122,15 +126,17 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
   }
 
   // Aggregate status data for the donut (label/colour from the lookup).
+  // LOOKUP-I18N-1: the seeded status label renders in the user's language; `key`
+  // stays the raw status value so the donut click still filters on it.
   const stageData = useMemo(() => {
     const m: Record<string, { name: string; key: string; color?: string; value: number }> = {}
     rows.forEach(r => {
       if (!r.status) return
       const meta = matchStatusMeta(r.status)
-      ;(m[r.status] ??= { name: meta?.label ?? r.status, key: r.status, color: meta?.color, value: 0 }).value++
+      ;(m[r.status] ??= { name: seedLabel('matchStatuses', { value: r.status, label: meta?.label ?? r.status }), key: r.status, color: meta?.color, value: 0 }).value++
     })
     return Object.values(m)
-  }, [rows, matchStatusMeta])
+  }, [rows, matchStatusMeta, seedLabel])
 
   const ownerData = useMemo(() => {
     // No explicit colour: the donut assigns its palette per owner (one grey for ALL

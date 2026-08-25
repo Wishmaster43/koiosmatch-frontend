@@ -9,11 +9,14 @@
  * Fetch/cache/dedupe lives in useCachedLookup (audit item 8) — one GET per
  * session, shared across every mounted consumer.
  */
+import { useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { AxiosResponse } from 'axios'
 import { useCachedLookup } from './useCachedLookup'
 import { normalizeOptions } from './lookupUtils'
 import type { LookupOption } from '@/types/common'
 import { unwrap } from '@/lib/api'
+import { translateSeedList } from './lookupSeedI18n'
 
 // Seed shipped for new tenants + fallback before the backend responds (worklist C-28).
 /* eslint-disable no-restricted-syntax -- seed DATA hex mirroring the backend seed, not UI styling */
@@ -31,7 +34,10 @@ export const DEFAULT_OPPORTUNITY_STAGES: LookupOption[] = [
 const mapOpportunityStages = (res: AxiosResponse): LookupOption[] | null => normalizeOptions(unwrap(res))
 
 export function useOpportunityStages() {
-  const { data: stages } = useCachedLookup('/opportunity-stages', mapOpportunityStages, DEFAULT_OPPORTUNITY_STAGES)
+  const { t } = useTranslation('common')
+  const { data: rawStages } = useCachedLookup('/opportunity-stages', mapOpportunityStages, DEFAULT_OPPORTUNITY_STAGES)
+  // Seeded defaults render in the user language; a tenant value stays as typed (LOOKUP-I18N-1).
+  const stages = useMemo(() => translateSeedList(t, 'opportunityStages', rawStages), [rawStages, t])
 
   // value(slug) → item, with a neutral fallback so the UI never crashes.
   // eslint-disable-next-line no-restricted-syntax -- DATA fallback, not a UI colour choice

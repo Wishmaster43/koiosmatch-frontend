@@ -7,6 +7,7 @@
  */
 import { describe, it, expect, vi } from 'vitest'
 import { renderHook } from '@testing-library/react'
+import i18n from '@/i18n'
 import { useDashboardViewModel } from './useDashboardViewModel'
 
 // Minimal args — only the fields the recruitment KPI row + attention merge read.
@@ -211,6 +212,36 @@ describe('useDashboardViewModel · KD11 (DASHP36) widget-feed rows', () => {
     })))
     expect(result.current.expiringMatchesRows[0].primary).toBe('Acme')
     expect(result.current.expiringMatchesRows[0].secondary).toBeUndefined()
+  })
+})
+
+// LOOKUP-I18N-1 regression (round 2): the 'Recent runs' feed used to render the
+// seeded workflow name verbatim (r.name || '—'), so an English tenant still saw
+// the Dutch seed text ('Leads-telling vacatures'). Every ai_runs row now routes
+// through seedLabel('workflowNames', …) — a still-seeded name translates, and a
+// tenant-renamed workflow (no catalogue match) passes through untouched.
+describe('useDashboardViewModel · LOOKUP-I18N-1 translates the seeded workflow run name', () => {
+  it('translates a still-seeded ai_runs name to the active UI language', async () => {
+    // Switch BEFORE mounting, unmount BEFORE switching back — resetting the
+    // language on a still-mounted hook fires a state update outside act()
+    // (mirrors CustomersTable.test.tsx's changeLanguage convention).
+    await i18n.changeLanguage('en')
+    const { result, unmount } = renderHook(() => useDashboardViewModel(baseArgs({
+      dash: { ai_runs: [{ name: 'Leads-telling vacatures', ran_at: null, ok: true, processed: 1, error: null }] },
+    })))
+    expect(result.current.runs[0].name).toBe('Vacancy lead count')
+    unmount()
+    await i18n.changeLanguage('nl')
+  })
+
+  it('leaves a tenant-renamed workflow name untouched (no catalogue match)', async () => {
+    await i18n.changeLanguage('en')
+    const { result, unmount } = renderHook(() => useDashboardViewModel(baseArgs({
+      dash: { ai_runs: [{ name: 'Onze eigen automatisering', ran_at: null, ok: true, processed: 1, error: null }] },
+    })))
+    expect(result.current.runs[0].name).toBe('Onze eigen automatisering')
+    unmount()
+    await i18n.changeLanguage('nl')
   })
 })
 

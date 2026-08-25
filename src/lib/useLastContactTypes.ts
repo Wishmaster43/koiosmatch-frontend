@@ -11,11 +11,13 @@
  * Fetch/cache/dedupe lives in useCachedLookup (audit item 8) — one GET per
  * session, shared across every mounted consumer.
  */
-import { useCallback } from 'react'
+import { useCallback, useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { AxiosResponse } from 'axios'
 import { useCachedLookup } from './useCachedLookup'
 import type { LookupOption } from '@/types/common'
 import { unwrapList } from '@/lib/api'
+import { translateSeedList } from './lookupSeedI18n'
 
 // Seed defaults (slugs English/stable; labels per-tenant, normally from the API).
 export const DEFAULT_LAST_CONTACT_TYPES: LookupOption[] = [
@@ -33,7 +35,10 @@ const mapLastContactTypes = (res: AxiosResponse): LookupOption[] | null => {
 }
 
 export function useLastContactTypes() {
-  const { data: types } = useCachedLookup('/last-contact-types', mapLastContactTypes, DEFAULT_LAST_CONTACT_TYPES)
+  const { t } = useTranslation('common')
+  const { data: rawTypes } = useCachedLookup('/last-contact-types', mapLastContactTypes, DEFAULT_LAST_CONTACT_TYPES)
+  // Seeded defaults render in the user language; a tenant value stays as typed (LOOKUP-I18N-1).
+  const types = useMemo(() => translateSeedList(t, 'lastContactTypes', rawTypes), [rawTypes, t])
 
   // Resolve a stored value/slug to its label. NEVER prefix `icon` as text: the
   // backend sends lucide icon NAMES ("building"), which rendered as literal words

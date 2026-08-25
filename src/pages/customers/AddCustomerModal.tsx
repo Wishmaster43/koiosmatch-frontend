@@ -141,7 +141,7 @@ export default function AddCustomerModal({ onClose, onCreate, onImported, users 
   users?: ModalUser[]; statuses?: LookupOption[]
 }) {
   const { t } = useTranslation(['customers', 'common'])
-  const { industries } = useIndustries()
+  const { industryOptions: industries } = useIndustries()
   // KLANT-FASE-1: the lifecycle-phase lookup + the is_default phase a new customer starts in.
   const { phases, defaultPhase } = useCustomerPhases()
   // The tenant's own establishments (GET /locations) — same source as OverviewTab's Vestiging picker.

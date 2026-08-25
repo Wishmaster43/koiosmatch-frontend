@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import type { CSSProperties, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useSeedLabel } from '@/lib/useSeedLabel'
 import SectionCard from '@/components/ui/SectionCard'
 import SoftChip from '@/components/ui/SoftChip'
 import Button from '@/components/ui/Button'
@@ -102,6 +103,8 @@ export default function ApplicationStatusStrip({ application: a, onNavigateTab }
   // Afspraken tab mounts (PlanIntakeModal, mode appointment).
   const [planning, setPlanning] = useState(false)
   const { t } = useTranslation(['applications', 'common'])
+  // Seeded lookup labels the server embedded in the row render in the user language.
+  const seedLabel = useSeedLabel()
   const { formatDate, formatDateTime } = useDateFormat()
   // RAW-KEY-1: flow-authored status first through i18n (the three markers the
   // engine itself sets), else humanized — never the raw SCREAMING_SNAKE value.
@@ -135,9 +138,9 @@ export default function ApplicationStatusStrip({ application: a, onNavigateTab }
           {/* One flowing line (Danny 22-08: "gewoon de breedte gebruiken") —
               chip + facts with middot separators; wraps only when truly narrow. */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', minWidth: 0 }}>
-            <SoftChip label={a.phaseLabel ?? a.phaseKey ?? '—'} color={a.phaseColor} />
+            <SoftChip label={seedLabel('funnelTypes', { value: a.phaseKey, label: a.phaseLabel }) || a.phaseKey || '—'} color={a.phaseColor} />
             {phaseEnteredAt != null ? (
-              <Caption as="span">{t('status.inPhase', { days: daysInPhase ?? 0, phase: a.phaseLabel ?? a.phaseKey ?? '' })} · {t('status.phaseSince', { date: formatDate(phaseEnteredAt) })}</Caption>
+              <Caption as="span">{t('status.inPhase', { days: daysInPhase ?? 0, phase: seedLabel('funnelTypes', { value: a.phaseKey, label: a.phaseLabel }) || a.phaseKey || '' })} · {t('status.phaseSince', { date: formatDate(phaseEnteredAt) })}</Caption>
             ) : daysInProcess !== null ? (
               <Caption as="span">{`${t('status.inProcess')} · ${t('status.days', { count: daysInProcess })}`}</Caption>
             ) : (

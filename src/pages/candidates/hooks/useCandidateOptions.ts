@@ -6,6 +6,7 @@
  */
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useSeedLabel } from '@/lib/useSeedLabel'
 import { metaOf, optsFrom, isStale, isNeverContacted, noFollowupUncomputable } from '../data/candidatesShared'
 import { NL_PROVINCES } from '../drawer/constants'
 import type { Candidate, CandidateStats } from '@/types/candidate'
@@ -27,6 +28,9 @@ interface UseCandidateOptionsParams {
 
 export function useCandidateOptions({ stats, candidates, locations, statuses, funnelTypes, candidateTypes, genders, phases }: UseCandidateOptionsParams) {
   const { t } = useTranslation('candidates')
+  // LOOKUP-I18N-1: the seeded status/funnel label renders in the user's language;
+  // a tenant rename/creation passes through untouched.
+  const seedLabel = useSeedLabel()
   // Status / funnel / owner options come from stats (whole filtered set); fall
   // back to page-based counts when stats is unavailable.
   const statusOptions = useMemo(() =>
@@ -81,13 +85,15 @@ export function useCandidateOptions({ stats, candidates, locations, statuses, fu
   const locationOptions = useMemo(() => (locations ?? []).map(l => ({ value: l.id, label: l.name })).filter(o => o.value != null), [locations])
 
   // Donut-data: reuse the count-options, enriched with the lookup colour per value.
+  // LOOKUP-I18N-1: `name` (display) runs through seedLabel; `filterValue` stays the
+  // raw lookup value so a donut click still filters on it, never the translated text.
   const colorFor = (list: LookupOption[], v: unknown) => list.find(x => x.value === v)?.color
   const statusData = useMemo(() =>
-    statusOptions.map(o => ({ name: o.label, value: o.count, filterValue: o.value, color: o.color ?? colorFor(statuses, o.value) }))
-  , [statusOptions, statuses])
+    statusOptions.map(o => ({ name: seedLabel('statuses', { value: o.value, label: o.label }), value: o.count, filterValue: o.value, color: o.color ?? colorFor(statuses, o.value) }))
+  , [statusOptions, statuses, seedLabel])
   const funnelData = useMemo(() =>
-    funnelOptions.map(o => ({ name: o.label, value: o.count, filterValue: o.value, color: o.color ?? colorFor(funnelTypes, o.value) }))
-  , [funnelOptions, funnelTypes])
+    funnelOptions.map(o => ({ name: seedLabel('funnelTypes', { value: o.value, label: o.label }), value: o.count, filterValue: o.value, color: o.color ?? colorFor(funnelTypes, o.value) }))
+  , [funnelOptions, funnelTypes, seedLabel])
   const rcData = useMemo(() =>
     ownerOptions.map(o => ({ name: o.label, value: o.count, filterValue: o.value }))
   , [ownerOptions])

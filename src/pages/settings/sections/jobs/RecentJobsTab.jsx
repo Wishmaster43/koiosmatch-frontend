@@ -15,13 +15,18 @@ import { formatDuration } from '@/components/reports/runFormat'
 import { BTN_H } from '@/config/buttonMetrics'
 import SearchSelect from '@/components/ui/SearchSelect'
 import Button from '@/components/ui/Button'
+import { Caption, Mono } from '@/components/ui/typography'
+// House numeric shape (DATUM-1): digits only, so no locale is needed here.
+import { hhmmss } from '@/lib/localDate'
 
 const STATUS_COLOR = {
   completed: 'var(--color-success)', failed: 'var(--color-danger)',
   pending: 'var(--text-muted)', reserved: 'var(--color-warning)',
 }
 
-const TH = { padding: '9px 12px', textAlign: 'left', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', borderBottom: '1px solid var(--border)', whiteSpace: 'nowrap' }
+// Layout only — text identity (11px muted / mono) lives in the Caption/Mono
+// atoms rendered inside these cells (HUISSTIJL-1: identity never re-declared locally).
+const TH = { padding: '9px 12px', textAlign: 'left', borderBottom: '1px solid var(--border)', whiteSpace: 'nowrap' }
 const TD = { padding: '9px 12px', fontSize: 12.5, color: 'var(--text)', borderBottom: '1px solid var(--hover-bg)' }
 
 export default function RecentJobsTab() {
@@ -80,7 +85,7 @@ export default function RecentJobsTab() {
           style={{ marginLeft: 'auto' }}>
           <RefreshCw size={12} className={phase === 'loading' ? 'animate-spin' : undefined} /> {t('jobs.refresh')}
         </Button>
-        <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('jobs.recent.window')}</span>
+        <Caption>{t('jobs.recent.window')}</Caption>
       </div>
 
       {phase === 'error' && <p style={{ fontSize: 13, color: 'var(--text-muted)', padding: 8 }}>{t('jobs.loadError')}</p>}
@@ -90,33 +95,33 @@ export default function RecentJobsTab() {
         <div style={{ border: '1px solid var(--border)', borderRadius: 10, overflow: 'auto', background: 'var(--surface)' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead><tr>
-              <th style={TH}>{t('jobs.recent.colTime')}</th>
-              <th style={TH}>{t('jobs.recent.colJob')}</th>
-              <th style={TH}>{t('jobs.recent.colQueue')}</th>
-              <th style={TH}>{t('jobs.recent.colTenant')}</th>
-              <th style={TH}>{t('jobs.recent.colBy')}</th>
-              <th style={TH}>{t('jobs.recent.colSubject')}</th>
-              <th style={TH}>{t('jobs.recent.colWorkflow')}</th>
-              <th style={TH}>{t('jobs.recent.colStatus')}</th>
-              <th style={TH}>{t('jobs.recent.colDuration')}</th>
+              <th style={TH}><Caption style={{ fontWeight: 600 }}>{t('jobs.recent.colTime')}</Caption></th>
+              <th style={TH}><Caption style={{ fontWeight: 600 }}>{t('jobs.recent.colJob')}</Caption></th>
+              <th style={TH}><Caption style={{ fontWeight: 600 }}>{t('jobs.recent.colQueue')}</Caption></th>
+              <th style={TH}><Caption style={{ fontWeight: 600 }}>{t('jobs.recent.colTenant')}</Caption></th>
+              <th style={TH}><Caption style={{ fontWeight: 600 }}>{t('jobs.recent.colBy')}</Caption></th>
+              <th style={TH}><Caption style={{ fontWeight: 600 }}>{t('jobs.recent.colSubject')}</Caption></th>
+              <th style={TH}><Caption style={{ fontWeight: 600 }}>{t('jobs.recent.colWorkflow')}</Caption></th>
+              <th style={TH}><Caption style={{ fontWeight: 600 }}>{t('jobs.recent.colStatus')}</Caption></th>
+              <th style={TH}><Caption style={{ fontWeight: 600 }}>{t('jobs.recent.colDuration')}</Caption></th>
             </tr></thead>
             <tbody>
               {rows.map(r => (
                 <tr key={r.id}>
                   <td style={{ ...TD, whiteSpace: 'nowrap', color: 'var(--text-muted)' }}>
-                    {r.completed_at ? new Date(r.completed_at).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : '—'}
+                    {r.completed_at ? hhmmss(new Date(r.completed_at)) : '—'}
                   </td>
-                  <td style={{ ...TD, fontFamily: "'JetBrains Mono', monospace", fontSize: 12 }}>{r.job}</td>
+                  <td style={TD}><Mono style={{ fontSize: 12 }}>{r.job}</Mono></td>
                   <td style={TD}>{r.queue}</td>
                   <td style={TD}>{r.tenant ?? '—'}</td>
                   {/* JOB-PROVENANCE-1: wie vroeg het aan + over welk record het gaat. */}
                   <td style={TD}>{r.requested_by ?? '—'}</td>
-                  <td style={{ ...TD, fontFamily: "'JetBrains Mono', monospace", fontSize: 12 }}>
-                    {r.subject ? `${r.subject.type} ${r.subject.reference}` : '—'}
+                  <td style={TD}>
+                    <Mono style={{ fontSize: 12 }}>{r.subject ? `${r.subject.type} ${r.subject.reference}` : '—'}</Mono>
                   </td>
                   <td style={TD}>{r.workflow ?? '—'}</td>
                   <td style={TD}><StatusPill label={t(`jobs.recent.status.${r.status}`, r.status)} color={STATUS_COLOR[r.status] ?? 'var(--text-muted)'} /></td>
-                  <td style={{ ...TD, fontFamily: "'JetBrains Mono', monospace", fontSize: 12 }}>{formatDuration(r.runtime_ms)}</td>
+                  <td style={TD}><Mono style={{ fontSize: 12 }}>{formatDuration(r.runtime_ms)}</Mono></td>
                 </tr>
               ))}
             </tbody>

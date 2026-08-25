@@ -8,6 +8,7 @@ import CustomerStatusChip from '@/components/ui/CustomerStatusChip'
 import BackofficeCouplingIndicator from '@/components/ui/BackofficeCouplingIndicator'
 import { makeKoiosColumn } from '@/components/ui/koiosColumn'
 import { useDateFormat } from '@/lib/datetime'
+import { useSeedLabel } from '@/lib/useSeedLabel'
 import { useApps } from '@/context/AppsContext'
 import { useAllSettings, getBoolSetting } from '@/lib/settings/useAllSettings'
 import { useCustomerPhases } from '@/lib/useCustomerPhases'
@@ -62,6 +63,8 @@ export default function CustomersTable({
 }: CustomersTableProps) {
   const { t } = useTranslation('customers')
   const { formatDate } = useDateFormat()
+  // Seeded lookup labels the server embedded in the row render in the user language.
+  const seedLabel = useSeedLabel()
   // Tenant display settings (Settings → Customers → Table display).
   const settings = useAllSettings()
   const colorStatus = getBoolSetting(settings, 'customer_table_color_status', true)
@@ -105,7 +108,12 @@ export default function CustomersTable({
       cellStyle: { ...mutedCell, ...monoStyle, fontVariantNumeric: 'tabular-nums' },
       sortable: true, sortValue: c => c.referenceNumber ?? '', render: c => c.referenceNumber || '—',
     },
-    { key: 'industry',    header: t('cols.industry'),    nowrap: true, cellStyle: mutedCell, sortable: true, sortValue: c => c.industry, render: c => c.industry || '—' },
+    {
+      // LOOKUP-I18N-1: the row embeds a flat industry label (no separate value) —
+      // the seed default renders in the user's language, a tenant rename stays as typed.
+      key: 'industry', header: t('cols.industry'), nowrap: true, cellStyle: mutedCell, sortable: true, sortValue: c => c.industry,
+      render: c => seedLabel('industries', { label: c.industry }) || '—',
+    },
     {
       // KLANT-FASE-1: lifecycle phase (Prospect → Klant) — its own axis, so it sits
       // NEXT TO the status chip: two chips, two questions. Label/colour come from the

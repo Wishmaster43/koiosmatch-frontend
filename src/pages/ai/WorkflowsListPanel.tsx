@@ -15,6 +15,7 @@ import WorkflowQueueView from './WorkflowQueueView'
 import QuickViewToggle from '@/components/ui/QuickViewToggle'
 import Spinner from '@/components/ui/Spinner'
 import SegmentedControl from '@/components/ui/SegmentedControl'
+import { useSeedLabel } from '@/lib/useSeedLabel'
 import type { Workflow } from '@/types/workflow'
 import type { WorkflowFolder, FolderId } from './hooks/useWorkflowsData'
 import type { ViewMode } from './hooks/useWorkflowsFilters'
@@ -60,6 +61,13 @@ export default function WorkflowsListPanel({
   // SegmentedControl view switch (ReportSwitchBar's "compact + activeOnly"
   // idiom), since this page had no existing tab bar to reuse.
   const [mainView, setMainView] = useState<'list' | 'queue'>('list')
+  // LOOKUP-I18N-1: resolve + translate a workflow's folder for the row's meta line —
+  // a seeded folder name renders in the user language, a tenant rename stays as typed.
+  const seedLabel = useSeedLabel()
+  const folderLabel = (folderId: Workflow['folder_id']): string | undefined => {
+    const folder = folders.find(f => f.id === folderId)
+    return folder ? seedLabel('workflowFolders', { label: folder.name }) : undefined
+  }
   return (
     <div style={{ flex: 1, padding: 24, overflowY: 'auto' }}>
       {/* Toolbar — add on the LEFT, count + archived + view toggle on the RIGHT (mirror Kansen). */}
@@ -143,7 +151,7 @@ export default function WorkflowsListPanel({
               onDragStart={() => { dragWf.current = wf.id ?? null }}
               onDragEnd={() => { dragWf.current = null }}>
               <WorkflowListRow workflow={wf}
-                folderName={folders.find(f => f.id === wf.folder_id)?.name}
+                folderName={folderLabel(wf.folder_id)}
                 onRun={handleRun}
                 onEdit={() => openEditor(wf)}
                 onToggleStatus={() => handleToggleStatus(wf)}

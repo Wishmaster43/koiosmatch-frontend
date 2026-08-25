@@ -6,6 +6,7 @@ import type { Opportunity } from '@/types/opportunity'
 import type { Id } from '@/types/common'
 import { useDragAutoScroll } from '@/lib/useDragAutoScroll'
 import { opportunityValueOf, formatOpportunityValue } from './data/opportunityValue'
+import { useSeedLabel } from '@/lib/useSeedLabel'
 
 interface StageCol { value: string | number; label: string; color?: string }
 
@@ -54,13 +55,16 @@ function BoardColumn({ stage, items, onDragStart, onDrop, onDragOver, onSelect, 
   selectedId?: Id | null
   valueInHours: boolean
 }) {
+  // LOOKUP-I18N-1: the seeded stage label renders in the user's language; the
+  // column's own drop/grouping logic still keys on `stage.value`/`.label` raw.
+  const seedLabel = useSeedLabel()
   return (
     <div style={{ width: 260, flexShrink: 0, display: 'flex', flexDirection: 'column' }}
       onDrop={e => onDrop(e, stage.value)} onDragOver={onDragOver}>
       <div style={{ padding: '10px 12px', display: 'flex', alignItems: 'center', gap: 8,
         borderBottom: `2px solid ${stage.color}`, marginBottom: 12 }}>
         <div style={{ width: 10, height: 10, borderRadius: '50%', background: stage.color, flexShrink: 0 }} />
-        <span style={{ fontWeight: 700, fontSize: 12, color: 'var(--text)', flex: 1 }}>{stage.label}</span>
+        <span style={{ fontWeight: 700, fontSize: 12, color: 'var(--text)', flex: 1 }}>{seedLabel('opportunityStages', { value: String(stage.value), label: stage.label })}</span>
         <span style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 500 }}>{items.length}</span>
       </div>
       {items.map(o => (
@@ -94,8 +98,10 @@ export default function OpportunitiesBoard({ rows, stages, onMove, selectedId, o
     <div ref={boardScrollRef} onDragOver={boardAutoScroll} style={{ flex: 1, overflowX: 'auto', overflowY: 'auto', padding: '0 20px 20px',
       display: 'flex', gap: 12, alignItems: 'flex-start' }}>
       {stages.map(s => (
+        // LOOKUP-I18N-1: match on the raw stageValue only — r.stage may be a
+        // translated (or stale-locale) label and must never drive grouping.
         <BoardColumn valueInHours={valueInHours} key={s.value} stage={s}
-          items={rows.filter(r => r.stage === s.label || r.stageValue === s.value)}
+          items={rows.filter(r => r.stageValue === s.value)}
           onDragStart={onDragStart} onDrop={onDrop} onDragOver={onDragOver}
           onSelect={onSelect} selectedId={selectedId} />
       ))}

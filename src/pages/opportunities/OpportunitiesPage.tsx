@@ -27,6 +27,7 @@ import { useListPageSize } from '@/hooks/useListPageSize'
 import { isReferenceQuery } from '@/lib/referenceNumber'
 import { buildOpportunityFilterGroups } from './data/opportunityFilterGroups'
 import Button from '@/components/ui/Button'
+import { useSeedLabel } from '@/lib/useSeedLabel'
 
 // Single-select donut pick: clicking the active segment clears it.
 const pickOne = (set: Dispatch<SetStateAction<string[]>>) => (d: unknown) => {
@@ -43,6 +44,9 @@ const tog = (set: Dispatch<SetStateAction<string[]>>) => (v: string) =>
 // useOpportunitiesData; the page only derives the filtered/paged view and renders.
 export default function OpportunitiesPage({ intent }: { intent?: unknown } = {}) {
   const { t } = useTranslation(['opportunities', 'common'])
+  // LOOKUP-I18N-1: the seeded stage label renders in the user's language; the
+  // filter STATE below still keys on the raw stage value, never this display text.
+  const seedLabel = useSeedLabel()
   // Scroll container for row virtualization (F-11): DataTable virtualizes against it.
   const tableScrollRef = useRef<HTMLDivElement>(null)
   const auth = useAuth()
@@ -103,7 +107,10 @@ export default function OpportunitiesPage({ intent }: { intent?: unknown } = {})
   // clamps to OpportunityQuery's real per_page ceiling (200) and stays sticky
   // across the shell's unmount-on-navigate — mirrors every other list page.
   const { pageSize, setPageSize, options: pageSizeOptions } = useListPageSize('opps', OPPORTUNITIES_MAX_PER_PAGE)
-  const [stage,    setStage]    = usePageMemory<string[]>('opps.stage', []) // selected stage labels (donut + panel)
+  // LOOKUP-I18N-1: selected stage VALUES (donut + panel) — never a label (translated
+  // or raw), so the filter compares against Opportunity.stageValue, the same axis
+  // every mutation/lookup already keys on (stageMeta, handleMove, the drawer picker).
+  const [stage,    setStage]    = usePageMemory<string[]>('opps.stage', [])
   // Owner filter keys on the owner ID (not the display name) so a dashboard
   // click (owner_id) can narrow the list — a name-based filter cannot express
   // that. Key renamed from 'opps.owner' to 'opps.ownerId' so old stored NAME
@@ -127,17 +134,19 @@ export default function OpportunitiesPage({ intent }: { intent?: unknown } = {})
   }
 
   // Seed filters from a navigation intent (dashboard chart/KPI click). The stage key
-  // maps to its label via the lookup; { kpi: 'expiring' } switches the aflopend-filter on.
+  // resolves to its stable VALUE via the lookup (never a label); { kpi: 'expiring' }
+  // switches the aflopend-filter on.
   useEffect(() => {
     if (!intent) return
     const i = intent as { stage?: string; owner?: string; kpi?: string }
     if (i.stage != null) {
       // A stage arrives as the lookup slug (donut click) OR as the stage's uuid
-      // (dashboard feeds send opportunity_stage_id) — resolve both to the label
-      // the client-side filter keys on, never leave a raw id as the "label".
+      // (dashboard feeds send opportunity_stage_id) — resolve both to the stable
+      // VALUE the client-side filter keys on (LOOKUP-I18N-1: never a label, translated
+      // or not — `stages[].label` here is display text and must never reach filter state).
       const key = String(i.stage)
       const s = stages.find(x => String(x.value) === key || String((x as { id?: string | number }).id ?? '') === key)
-      setStage([s ? s.label : key])
+      setStage([s ? String(s.value) : key])
     }
     // Owner arrives as the owner id (dashboard's activity/stacked-bar tiles) —
     // the filter now keys on ownerId directly, no lookup needed.
@@ -166,6 +175,19 @@ export default function OpportunitiesPage({ intent }: { intent?: unknown } = {})
       })
       return [...m.entries()].map(([value, v]) => ({ value, label: v.label, count: v.count }))
     }
+    if (key === 'stage') {
+      // LOOKUP-I18N-1: option VALUE is the raw stageValue (what the filter compares
+      // against); option LABEL runs through seedLabel so the panel never shows the
+      // seeded Dutch text on a non-NL tenant (finding: stage panel Dutch island).
+      const m = new Map<string, { label: string; count: number }>()
+      rows.forEach(r => {
+        if (r.stageValue == null) return
+        const v = String(r.stageValue)
+        const cur = m.get(v)
+        m.set(v, { label: seedLabel('opportunityStages', { value: v, label: r.stage }), count: (cur?.count ?? 0) + 1 })
+      })
+      return [...m.entries()].map(([value, v]) => ({ value, label: v.label, count: v.count }))
+    }
     const m = new Map<string, number>()
     rows.forEach(r => { const v = r[key]; if (v) m.set(v, (m.get(v) ?? 0) + 1) })
     return [...m.entries()].map(([value, count]) => ({ value, label: value, count }))
@@ -175,7 +197,7 @@ export default function OpportunitiesPage({ intent }: { intent?: unknown } = {})
     selectedBranch, setSelectedBranch, showArchived, setShowArchived,
     optionsFrom, branchOptions,
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }), [t, rows, stage, owner, client, selectedBranch, branchOptions, showArchived])
+  }), [t, rows, stage, owner, client, selectedBranch, branchOptions, showArchived, seedLabel])
 
   // Publish/retract the filters for the topbar filter button + right panel.
   useEffect(() => {
@@ -191,7 +213,8 @@ export default function OpportunitiesPage({ intent }: { intent?: unknown } = {})
       if (showTrash) { if (r.lifecycle !== 'pending_erase') return false }
       else if (showArchived) { if (r.lifecycle !== 'archived') return false }
       else if (r.archived) return false
-      if (stage.length  && !stage.includes(r.stage))   return false
+      // LOOKUP-I18N-1: compare on the raw stageValue, never the (possibly translated) label.
+      if (stage.length  && !stage.includes(String(r.stageValue ?? '')))   return false
       // Owner filter compares IDs, not names (a dashboard click narrows by id).
       if (owner.length  && !owner.includes(String(r.ownerId ?? '')))   return false
       if (client.length && !client.includes(r.client)) return false

@@ -2,9 +2,9 @@
 import { createContext, useContext, useState, useEffect, useMemo } from 'react'
 import type { Dispatch, ReactNode, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
-import type { TFunction } from 'i18next'
 import api, { unwrap } from '../lib/api'
 import { sortActiveRows, makeMetaResolver } from '../lib/lookupUtils'
+import { translateSeedList } from '../lib/lookupSeedI18n'
 
 /**
  * VacancyLookupsContext — the tenant-configurable vacancy lookups.
@@ -136,19 +136,11 @@ function normalize(raw: unknown, fallback: VacancyLookupItem[], pinId = false): 
 // that flagged nothing must get no proposal at all (§3 no invented behaviour).
 const defaultValueOf = (list: VacancyLookupItem[]): string => list.find(i => i.is_default)?.value ?? ''
 
-// Translate a seed lookup's labels through i18n, keyed by lookup name + value; the
-// literal Dutch seed text is the defaultValue so a missing key degrades gracefully.
-// Only ever applied to the SEED fallback (never tenant-configured API labels) —
-// computed on every render (not baked into state) so a live language switch
-// retranslates it too.
-function translateSeedLabels(t: TFunction, lookupName: string, items: VacancyLookupItem[]): VacancyLookupItem[] {
-  return items.map(it => ({ ...it, label: t(`lookupSeeds.${lookupName}.${it.value}`, { defaultValue: it.label }) }))
-}
-
 const VacancyLookupsContext = createContext<VacancyLookupsValue | null>(null)
 
 export function VacancyLookupsProvider({ children }: { children: ReactNode }) {
-  const { t } = useTranslation('vacancies')
+  // LOOKUP-I18N-1 catalogue's keys live in the 'common' namespace.
+  const { t: tCommon } = useTranslation('common')
   const [statusesRaw,        setStatuses]        = useState<VacancyLookupItem[]>(DEFAULT_VACANCY_STATUSES)
   const [phasesRaw,          setPhases]          = useState<VacancyLookupItem[]>(DEFAULT_VACANCY_PHASES)
   const [seniorityLevelsRaw, setSeniorityLevels] = useState<VacancyLookupItem[]>(DEFAULT_SENIORITY_LEVELS)
@@ -169,13 +161,13 @@ export function VacancyLookupsProvider({ children }: { children: ReactNode }) {
     ]).finally(() => setLoading(false))
   }, [])
 
-  // Translate labels only while still on the SEED fallback (reference-equal to the
-  // DEFAULT_* const) — real tenant-configured API labels pass through untouched.
-  const statuses        = useMemo(() => statusesRaw === DEFAULT_VACANCY_STATUSES ? translateSeedLabels(t, 'statuses', statusesRaw) : statusesRaw, [statusesRaw, t])
-  const phases          = useMemo(() => phasesRaw === DEFAULT_VACANCY_PHASES ? translateSeedLabels(t, 'phases', phasesRaw) : phasesRaw, [phasesRaw, t])
-  const seniorityLevels = useMemo(() => seniorityLevelsRaw === DEFAULT_SENIORITY_LEVELS ? translateSeedLabels(t, 'seniorityLevels', seniorityLevelsRaw) : seniorityLevelsRaw, [seniorityLevelsRaw, t])
-  const educationLevels = useMemo(() => educationLevelsRaw === DEFAULT_EDUCATION_LEVELS ? translateSeedLabels(t, 'educationLevels', educationLevelsRaw) : educationLevelsRaw, [educationLevelsRaw, t])
-  const channels         = useMemo(() => channelsRaw === DEFAULT_CHANNELS ? translateSeedLabels(t, 'channels', channelsRaw) : channelsRaw, [channelsRaw, t])
+  // Seeded defaults render in the user language; a tenant value stays as typed (LOOKUP-I18N-1).
+  // All five lists route through the shared catalogue (family names below).
+  const statuses        = useMemo(() => translateSeedList(tCommon, 'vacancyStatuses', statusesRaw), [statusesRaw, tCommon])
+  const phases          = useMemo(() => translateSeedList(tCommon, 'funnelTypes', phasesRaw), [phasesRaw, tCommon])
+  const seniorityLevels = useMemo(() => translateSeedList(tCommon, 'seniorityLevels', seniorityLevelsRaw), [seniorityLevelsRaw, tCommon])
+  const educationLevels = useMemo(() => translateSeedList(tCommon, 'educationLevels', educationLevelsRaw), [educationLevelsRaw, tCommon])
+  const channels         = useMemo(() => translateSeedList(tCommon, 'channels', channelsRaw), [channelsRaw, tCommon])
 
   // value → item helper with a neutral fallback so the UI never crashes.
   const value: VacancyLookupsValue = {

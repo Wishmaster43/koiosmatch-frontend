@@ -24,7 +24,7 @@ vi.mock('@/pages/vacancies/hooks/useCustomerOptions', () => ({
   useCustomerOptions: () => [{ value: 'cust-1', label: 'Zorggroep A' }],
 }))
 vi.mock('../hooks/useVacancyOptions', () => ({ useVacancyOptions: () => [] }))
-vi.mock('@/lib/useFunctions', () => ({ useFunctions: () => ({ functions: ['Verzorgende IG'], allowFreeEntry: false }) }))
+vi.mock('@/lib/useFunctions', () => ({ useFunctions: () => ({ functions: ['Verzorgende IG'], functionOptions: ['Verzorgende IG'].map(n => ({ value: n, label: n })), allowFreeEntry: false }) }))
 vi.mock('@/lib/useContractTypes', () => ({ useContractTypes: () => ({ types: [], options: [] }) }))
 vi.mock('@/lib/useCao', () => ({ useCao: () => ({ types: [] }) }))
 vi.mock('@/lib/useContactFunctions', () => ({ useContactFunctions: () => ({ contactFunctions: [], allowFreeEntry: false }) }))

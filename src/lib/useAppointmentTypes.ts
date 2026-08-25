@@ -13,8 +13,11 @@
  * `is_default` (LOOKUP-DEFAULT-1) marks the tenant's chosen plan-modal default
  * (seed: Intake) — pre-selected by PlanIntakeModal instead of just "the first type".
  */
+import { useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { AxiosResponse } from 'axios'
 import { useCachedLookup } from './useCachedLookup'
+import { translateSeedList } from './lookupSeedI18n'
 import { unwrapList } from '@/lib/api'
 
 export type Modality = 'office' | 'remote' | 'phone'
@@ -63,8 +66,11 @@ const mapAppointmentTypes = (res: AxiosResponse): AppointmentType[] | null => {
 }
 
 export function useAppointmentTypes() {
+  const { t } = useTranslation('common')
   // The endpoint now exists (item 11) — a real 404 should surface in the dev log again.
-  const { data: types } = useCachedLookup('/appointment-types', mapAppointmentTypes, DEFAULT_APPOINTMENT_TYPES)
+  const { data: rawTypes } = useCachedLookup('/appointment-types', mapAppointmentTypes, DEFAULT_APPOINTMENT_TYPES)
+  // Seeded defaults render in the user language; a tenant value stays as typed (LOOKUP-I18N-1).
+  const types = useMemo(() => translateSeedList(t, 'appointmentTypes', rawTypes), [rawTypes, t])
 
   // Resolve a stored slug to its meta; tolerant of label-stored values.
   const metaOf = (v?: string | null): AppointmentType | undefined =>

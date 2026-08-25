@@ -1,4 +1,3 @@
-import { useMemo } from 'react'
 /**
  * useNumberingEntities — reads the numbering entity list from the backend
  * (NUMBERING-LOOKUP-1, GET /numbering-entities) instead of a hardcoded six-entity
@@ -10,16 +9,17 @@ import { useMemo } from 'react'
  * niet zes"). Platform data, not tenant-configurable (open read, no write path) —
  * cached for the session via useCachedLookup, same convention as useProvinces.
  *
- * `label` is the backend's own Dutch display name (a display-only fallback, never
- * used for logic). The consuming component resolves the KEY through
- * `t('numbering.entities.<key>', { defaultValue: label })` (mirrors ModulePicker's
- * `t(key, { defaultValue })` convention) so a translated key wins once it lands in
- * every locale, without ever showing a raw i18n key for an entity that has none yet.
+ * `label` is the backend's own Dutch display name. Seeded defaults render in the
+ * user language via the shared lookupSeedI18n helper (family 'numberingEntities');
+ * a tenant-renamed label (or one this catalogue doesn't know) passes through as
+ * typed — mirrors every other lookup hook (LOOKUP-I18N-1).
  */
+import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { AxiosResponse } from 'axios'
 import { useCachedLookup } from '@/lib/useCachedLookup'
 import { unwrapList } from '@/lib/api'
+import { translateSeedLabel } from './lookupSeedI18n'
 
 export interface NumberingEntity {
   key: string
@@ -36,8 +36,8 @@ const FALLBACK: NumberingEntity[] = [
   { key: 'candidate',           prefix: 'K', pad: 5, start: 1, label: 'Kandidaat' },
   { key: 'customer',            prefix: 'D', pad: 5, start: 1, label: 'Klant' },
   { key: 'vacancy',             prefix: 'V', pad: 5, start: 1, label: 'Vacature' },
-  { key: 'customer_location',   prefix: 'L', pad: 3, start: 1, label: 'Locatie' },
-  { key: 'customer_department', prefix: 'A', pad: 3, start: 1, label: 'Afdeling' },
+  { key: 'customer_location',   prefix: 'L', pad: 3, start: 1, label: 'Vestiging klant' },
+  { key: 'customer_department', prefix: 'A', pad: 3, start: 1, label: 'Afdeling klant' },
   { key: 'match',               prefix: 'M', pad: 5, start: 1, label: 'Match' },
 ]
 
@@ -60,14 +60,13 @@ function mapEntities(res: AxiosResponse): NumberingEntity[] | null {
 }
 
 export function useNumberingEntities() {
-  const { t } = useTranslation('settings')
+  const { t } = useTranslation('common')
   const { data: rawEntities, loading } = useCachedLookup('/numbering-entities', mapEntities, FALLBACK)
-  // Translate labels only while still on the pre-endpoint SEED fallback (reference-
-  // equal to FALLBACK) — the backend's own label already resolves through the SAME
-  // key in the consumer (NumberingSettings.jsx), so this only removes the raw Dutch
-  // literal from this hook's own return value, never double-translates real data.
-  const entities = useMemo(() => rawEntities === FALLBACK
-    ? rawEntities.map(e => ({ ...e, label: t(`numbering.entities.${e.key}`, { defaultValue: e.label }) }))
-    : rawEntities, [rawEntities, t])
+  // Seeded defaults render in the user language; a tenant value stays as typed (LOOKUP-I18N-1).
+  // The row's stable `key` (candidate/customer/…) is the family's slug — passed as `value`.
+  const entities = useMemo(
+    () => rawEntities.map(e => ({ ...e, label: translateSeedLabel(t, 'numberingEntities', { value: e.key, label: e.label }) })),
+    [rawEntities, t],
+  )
   return { entities, loading }
 }

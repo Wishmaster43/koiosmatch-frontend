@@ -51,7 +51,7 @@ vi.mock('@/components/map/RadiusMap', () => ({
 
 // Two tenant function options — mirrors useFunctions' shape without the real cache/fetch.
 vi.mock('@/lib/useFunctions', () => ({
-  useFunctions: () => ({ functions: ['Verzorgende IG', 'Verpleegkundige'], allowFreeEntry: false }),
+  useFunctions: () => ({ functions: ['Verzorgende IG', 'Verpleegkundige'], functionOptions: ['Verzorgende IG', 'Verpleegkundige'].map(n => ({ value: n, label: n })), allowFreeEntry: false }),
 }))
 
 // Two tenant status options (mirrors DEFAULT_STATUSES) + two contract-form

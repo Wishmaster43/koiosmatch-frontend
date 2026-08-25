@@ -20,6 +20,7 @@ import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { AxiosResponse } from 'axios'
 import { useCachedLookup } from './useCachedLookup'
+import { translateSeedList } from './lookupSeedI18n'
 import type { LookupOption } from '@/types/common'
 import { unwrapList } from '@/lib/api'
 
@@ -42,13 +43,9 @@ const mapWorkPermitTypes = (res: AxiosResponse): LookupOption[] | null => {
 }
 
 export function useWorkPermitTypes() {
-  const { t } = useTranslation('candidates')
+  const { t } = useTranslation('common')
   const { data: rawTypes } = useCachedLookup('/work-permit-types', mapWorkPermitTypes, DEFAULT_WORK_PERMIT_TYPES)
-  // Translate labels only while still on the SEED fallback (reference-equal to the
-  // DEFAULT_WORK_PERMIT_TYPES const) — real tenant-configured API labels pass
-  // through untouched; the literal Dutch seed text is the defaultValue.
-  const workPermitTypes = useMemo(() => rawTypes === DEFAULT_WORK_PERMIT_TYPES
-    ? rawTypes.map(w => ({ ...w, label: t(`lookupSeeds.workPermitTypes.${w.value}`, { defaultValue: w.label }) }))
-    : rawTypes, [rawTypes, t])
+  // Seeded defaults render in the user language; a tenant value stays as typed (LOOKUP-I18N-1).
+  const workPermitTypes = useMemo(() => translateSeedList(t, 'workPermitTypes', rawTypes), [rawTypes, t])
   return { workPermitTypes }
 }

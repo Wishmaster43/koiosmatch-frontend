@@ -21,6 +21,7 @@ import { SectionTitle, Caption } from '@/components/ui/typography'
 import { canAccessPage } from '@/lib/access'
 import { useAuth } from '@/context/AuthContext'
 import { useDateFormat } from '@/lib/datetime'
+import { useSeedLabel } from '@/lib/useSeedLabel'
 
 // One "go to the runs log, filtered on this workflow" affordance — mirrors
 // WorkflowRefs' own `#details.runs?workflow_id=` link, INCLUDING its gate: a
@@ -44,11 +45,15 @@ function QueueRow({ workflowId, workflowName, children, openRuns = true }: {
   workflowId?: string | number; workflowName?: string; children: ReactNode; openRuns?: boolean
 }) {
   const { t } = useTranslation('workflows')
+  const seedLabel = useSeedLabel()
+  // LOOKUP-I18N-1: a queue row's workflow name is the same seeded default a
+  // seeded workflow carries in the list/card views — translate it the same way.
+  const displayName = workflowName ? seedLabel('workflowNames', { label: workflowName }) : undefined
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 14px',
                   border: '1px solid var(--border)', borderRadius: 10, background: 'var(--surface)' }}>
       <div style={{ flex: 1, minWidth: 0 }}>
-        <EntityLink page="aiagents" id={workflowId}>{workflowName ?? t('queue.unknownWorkflow')}</EntityLink>
+        <EntityLink page="aiagents" id={workflowId}>{displayName ?? t('queue.unknownWorkflow')}</EntityLink>
         <div style={{ marginTop: 4 }}>{children}</div>
       </div>
       {openRuns && <OpenRunsButton workflowId={workflowId} label={t('queue.openRuns')} />}

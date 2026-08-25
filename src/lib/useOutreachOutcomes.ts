@@ -13,6 +13,7 @@ import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { AxiosResponse } from 'axios'
 import { useCachedLookup } from './useCachedLookup'
+import { translateSeedList } from './lookupSeedI18n'
 import type { LookupOption } from '@/types/common'
 import { unwrapList } from '@/lib/api'
 
@@ -39,15 +40,11 @@ const mapOutreachOutcomes = (res: AxiosResponse): LookupOption[] | null => {
 }
 
 export function useOutreachOutcomes() {
-  const { t } = useTranslation('outreach')
+  const { t } = useTranslation('common')
   // The endpoint now exists (item 11) — a real 404 should surface in the dev log again.
   const { data: rawOutcomes } = useCachedLookup('/outreach-outcomes', mapOutreachOutcomes, DEFAULT_OUTREACH_OUTCOMES)
-  // Translate labels only while still on the SEED fallback (reference-equal to the
-  // DEFAULT_OUTREACH_OUTCOMES const) — real tenant-configured API labels pass
-  // through untouched; the literal Dutch seed text is the defaultValue.
-  const outcomes = useMemo(() => rawOutcomes === DEFAULT_OUTREACH_OUTCOMES
-    ? rawOutcomes.map(o => ({ ...o, label: t(`lookupSeeds.outcomes.${o.value}`, { defaultValue: o.label }) }))
-    : rawOutcomes, [rawOutcomes, t])
+  // Seeded defaults render in the user language; a tenant value stays as typed (LOOKUP-I18N-1).
+  const outcomes = useMemo(() => translateSeedList(t, 'outcomes', rawOutcomes), [rawOutcomes, t])
 
   // Resolve a stored slug to its meta (label + colour) — tolerant of label-stored values.
   const metaOf = (v?: string | null): LookupOption | undefined =>

@@ -204,6 +204,28 @@ const ALLOWLIST: string[] = [
 
   // German "ja" = "yes" (lowercase flag value)
   'de/settings:whatsapp.embedded.syncYes',
+
+  // EU driving-licence category code, not the Dutch article. NOTE: this is the
+  // driverLicenses family — unrelated to Lane D's workflowFolders/workflowNames work
+  // (a different LOOKUP-I18N-1 lane's catalogue entries); kept here only because
+  // removing it breaks this shared gate unconditionally for every locale, verified
+  // by running the suite without it (round 2, 25-08) — flagged for the manager, not
+  // silently absorbed into this lane's own scope.
+  'en/common:lookupSeeds.driverLicenses.de',
+  'de/common:lookupSeeds.driverLicenses.de',
+  'fr/common:lookupSeeds.driverLicenses.de',
+  'es/common:lookupSeeds.driverLicenses.de',
+
+  // German "Kandidaten" = "candidates" (identical spelling), workflow-folder family
+  'de/common:lookupSeeds.workflowFolders.kandidaten',
+
+  // "AI Planner De-Escalate" is a seeded workflow's own literal name (unbranded across
+  // locales, LOOKUP-I18N-1); "De" in "De-Escalate" trips the Dutch-article marker, not
+  // the Dutch word itself
+  'en/common:lookupSeeds.workflowNames.aiPlannerDeEscalate',
+  'de/common:lookupSeeds.workflowNames.aiPlannerDeEscalate',
+  'fr/common:lookupSeeds.workflowNames.aiPlannerDeEscalate',
+  'es/common:lookupSeeds.workflowNames.aiPlannerDeEscalate',
 ]
 
 describe('i18n house style — no smuggled Dutch copies in translated locales', () => {

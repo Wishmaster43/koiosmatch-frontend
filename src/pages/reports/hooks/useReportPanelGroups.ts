@@ -138,8 +138,10 @@ export function useReportPanelGroups({ active, period, setPeriod, compareInPanel
   // WAVE 1c per-page vocabulary sources — only fetched behind `filterable` /
   // the exact report(s) that read them, so an unrelated report never fires an
   // extra GET it will never use.
-  const { sources: applicationSourceNames } = useApplicationSources()
-  const sourceOptions = useMemo(() => applicationSourceNames.map(name => ({ value: name, label: name })), [applicationSourceNames])
+  // LOOKUP-I18N-1: useApplicationSources already returns { value, label } rows
+  // (value = raw backend name for the filter param, label = translated display) —
+  // no local remap needed any more.
+  const { sources: sourceOptions } = useApplicationSources()
   const phaseOptions = useMemo(() => tenantPhases.map(p => ({ value: p.value, label: p.label })), [tenantPhases])
   // 'none' sentinel mirrors the backend's own "no contract form" bucket both
   // candidates and matches already draw (AppliesReportFilters.php contract_form.*).

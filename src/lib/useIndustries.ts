@@ -8,9 +8,12 @@
  * Fetch/cache/dedupe lives in useCachedLookup (audit item 8) — one GET per
  * session, shared across every mounted consumer.
  */
+import { useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { AxiosResponse } from 'axios'
 import { useCachedLookup } from './useCachedLookup'
 import { lookupNames } from './lookupUtils'
+import { translateSeedLabel } from './lookupSeedI18n'
 
 export const DEFAULT_INDUSTRIES = [
   'Werving', 'Uitzendbureau', 'Horeca', 'Logistiek', 'Zorg',
@@ -24,6 +27,17 @@ const mapIndustries = (res: AxiosResponse): string[] | null => {
 }
 
 export function useIndustries() {
-  const { data: industries } = useCachedLookup('/industries', mapIndustries, DEFAULT_INDUSTRIES)
-  return { industries }
+  const { t } = useTranslation('common')
+  const { data: rawIndustries } = useCachedLookup('/industries', mapIndustries, DEFAULT_INDUSTRIES)
+  // LOOKUP-I18N-1 SAFETY: this list is VALUE and LABEL at once — the picker stores the
+  // string it shows, so a translated entry would be SAVED and the record would carry
+  // "Healthcare" instead of the seeded "Zorg" forever. The names therefore stay raw;
+  // display sites translate at render through useSeedLabel (see CustomersTable), and
+  // `*Options` below pairs the raw value with a translated label for the pickers.
+  const industries = rawIndustries
+  const industryOptions = useMemo(
+    () => rawIndustries.map(name => ({ value: name, label: translateSeedLabel(t, 'industries', { label: name }) })),
+    [rawIndustries, t],
+  )
+  return { industries, industryOptions }
 }

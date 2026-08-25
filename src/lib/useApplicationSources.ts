@@ -40,10 +40,29 @@
  * renders on its record even once free entry is off again — the picker
  * (CreatableSelect) always falls back to showing the raw stored value when it
  * isn't one of the listed options, so nothing is ever silently dropped.
+ *
+ * LOOKUP-I18N-1 (25-08, fix round): `sources` is `{ value, label }[]`, never a
+ * bare string[]. A seeded default's LABEL renders in the user's language, but its
+ * VALUE stays the exact name the backend sent — that untranslated name is what a
+ * picker's onChange emits and what gets POSTed as `candidates.source` /
+ * `applications.source`. Flattening this back into one translated string (the old
+ * shape) would submit a per-language variant of the same source: `ValidCandidateSource`
+ * validates the posted string against the Dutch lookup list (422 for a translated
+ * value) and every report grouping on the raw string would split by locale. Every
+ * consumer already accepts `Array<string | { value; label }>` (CreatableSelect) or
+ * reads `.value`/`.label` directly, so this is a drop-in, not a breaking change.
  */
+import { useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { AxiosResponse } from 'axios'
 import { useCachedLookup } from './useCachedLookup'
+import { translateSeedList } from './lookupSeedI18n'
 import { lookupNames } from './lookupUtils'
+
+// A picker option: `value` is the untranslated name the backend recognises;
+// `label` is what the user sees (translated for a seeded default, unchanged for
+// a tenant-typed one). Matches the shared CreatableSelect option shape 1:1.
+export interface ApplicationSourceOption { value: string; label: string }
 
 // Small starter seed shown before any real /candidate-sources data has loaded
 // (data values, not UI copy — same treatment as DEFAULT_FUNCTIONS).
@@ -82,6 +101,15 @@ const mapSources = (res: AxiosResponse): SourcesLookupData => {
 }
 
 export function useApplicationSources() {
+  const { t } = useTranslation('common')
   const { data, invalidate } = useCachedLookup('/candidate-sources', mapSources, FALLBACK)
-  return { sources: data.sources, allowFreeEntry: data.apiFreeEntry, invalidate }
+  // Seeded defaults render in the user language; a tenant value stays as typed
+  // (LOOKUP-I18N-1). VALUE stays the raw backend name (never translated) so the
+  // submitted `source` is always what the backend's ValidCandidateSource lookup
+  // recognises; only LABEL is translated for display.
+  const sources = useMemo(
+    () => translateSeedList(t, 'candidateSources', data.sources.map(name => ({ value: name, label: name }))),
+    [data.sources, t],
+  )
+  return { sources, allowFreeEntry: data.apiFreeEntry, invalidate }
 }

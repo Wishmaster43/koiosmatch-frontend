@@ -1,4 +1,9 @@
 /**
+ * LOOKUP-I18N-1 (25-08): the field holds the lookup VALUE, not the displayed label.
+ * It used to hold the label, which was harmless while every label was Dutch — once
+ * seeded labels are translated, a German user posted "Befristet" and the backend
+ * (MatchRules::resolve, value or Dutch seed label) rejected the save.
+ *
  * useMatchForm — contract-type lookup coverage for the two tenant-
  * configurable columns GET /contract-types really returns: `is_default` (the
  * singleton "propose this type" flag) and `default_duration_days` (the end-date
@@ -99,27 +104,27 @@ function harness(editMatchId?: string) {
 describe('useMatchForm · contract-type lookup (is_default + default_duration_days)', () => {
   beforeEach(() => { vi.clearAllMocks(); editRecord = {} })
 
-  it('CREATE: posts the tenant is_default type as its label, which the backend normalises to the slug', async () => {
+  it('CREATE: posts the tenant is_default type as its VALUE, the only form that survives translation', async () => {
     const { result } = harness()
     // The proposal lands as soon as the options resolve — into an empty field only.
-    await waitFor(() => expect(result.current.contractType).toBe('ZZP'))
+    await waitFor(() => expect(result.current.contractType).toBe('zzp'))
 
     act(() => { result.current.setCustomerId('cust-1') })
     act(() => { result.current.setFunc('Verzorgende IG') })
     act(() => { result.current.handleSubmitClick() })
 
     await waitFor(() => expect(apiPost).toHaveBeenCalledWith('/matches', expect.objectContaining({
-      candidate_id: 'cand-1', contract_type: 'ZZP',
+      candidate_id: 'cand-1', contract_type: 'zzp',
     })))
   })
 
   it('CREATE: a type carrying default_duration_days proposes the end date into the POST body', async () => {
     const { result } = harness()
-    await waitFor(() => expect(result.current.contractType).toBe('ZZP'))
+    await waitFor(() => expect(result.current.contractType).toBe('zzp'))
 
     // Pick the 90-day type over the proposed default, with an explicit start date.
     act(() => { result.current.setStartDate('2026-03-01') })
-    act(() => { result.current.setContractType('Bepaalde tijd') })
+    act(() => { result.current.setContractType('bepaalde_tijd') })
     act(() => { result.current.setCustomerId('cust-1') })
     act(() => { result.current.setFunc('Verzorgende IG') })
     await waitFor(() => expect(result.current.endDate).toBe(addDays('2026-03-01', 90)))
@@ -127,21 +132,22 @@ describe('useMatchForm · contract-type lookup (is_default + default_duration_da
     act(() => { result.current.handleSubmitClick() })
 
     await waitFor(() => expect(apiPost).toHaveBeenCalledWith('/matches', expect.objectContaining({
-      contract_type: 'Bepaalde tijd', start_date: '2026-03-01', end_date: '2026-05-30',
+      contract_type: 'bepaalde_tijd', start_date: '2026-03-01', end_date: '2026-05-30',
     })))
   })
 
-  it('EDIT: shows the tenant label for a stored slug instead of the raw slug, and PATCHes a resolvable value', async () => {
+  it('EDIT: keeps the stored slug in state and PATCHes it back unchanged (the picker shows the label)', async () => {
     editRecord = { customer_id: 'cust-1', function_title: 'Verzorgende IG', contract_type: 'bepaalde_tijd' }
     const { result } = harness('match-9')
 
-    // The record stores the slug; the picker lists labels — the field must show the label.
-    await waitFor(() => expect(result.current.contractType).toBe('Bepaalde tijd'))
+    // The record stores the slug and the field keeps it; the picker resolves the label
+    // from its options, so nothing translated ever reaches contract_type.
+    await waitFor(() => expect(result.current.contractType).toBe('bepaalde_tijd'))
 
     act(() => { result.current.handleSubmitClick() })
 
     await waitFor(() => expect(apiPatch).toHaveBeenCalledWith('/matches/match-9', expect.objectContaining({
-      contract_type: 'Bepaalde tijd',
+      contract_type: 'bepaalde_tijd',
     })))
   })
 
@@ -151,7 +157,7 @@ describe('useMatchForm · contract-type lookup (is_default + default_duration_da
 
     // Wait past BOTH async sources: the record prefill and the later lookup resolve.
     await waitFor(() => expect(result.current.customerId).toBe('cust-1'))
-    await waitFor(() => expect(result.current.contractTypes.length).toBe(2))
+    await waitFor(() => expect(result.current.contractTypeOptions.length).toBe(2))
     // The is_default proposal is create-only: an edit form must not silently fill it.
     expect(result.current.contractType).toBe('')
 
@@ -164,7 +170,7 @@ describe('useMatchForm · contract-type lookup (is_default + default_duration_da
 
   it('CREATE: a cleared field stays cleared — the proposal is one-shot, never re-imposed', async () => {
     const { result } = harness()
-    await waitFor(() => expect(result.current.contractType).toBe('ZZP'))
+    await waitFor(() => expect(result.current.contractType).toBe('zzp'))
 
     act(() => { result.current.setContractType('') })
     act(() => { result.current.setCustomerId('cust-1') })

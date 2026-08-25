@@ -14,6 +14,7 @@ import type { BarSeries } from '@/components/charts/WeeklyBarChartCard'
 import { CHART_SERIES_COLORS } from '@/components/charts/chartTypes'
 import type { ChartDatum } from '@/components/charts/chartTypes'
 import { Panel } from '@/pages/dashboard/DashboardPrimitives'
+import { useSeedLabel } from '@/lib/useSeedLabel'
 import type { OppsByStageByOwnerRow } from '@/types/dashboard'
 import type { FeedTileContext } from '../feedTileKit'
 
@@ -22,6 +23,8 @@ export default function OppsByStageByOwnerStacked({ rows, onNavigate }: {
   onNavigate?: FeedTileContext['onNavigate']
 }) {
   const { t } = useTranslation('dashboard')
+  // LOOKUP-I18N-1: the seeded stage label renders in the user's language.
+  const seedLabel = useSeedLabel()
 
   // Union of owners across every stage, in first-seen order, so series stay
   // stable regardless of which stage lists them first.
@@ -43,7 +46,7 @@ export default function OppsByStageByOwnerStacked({ rows, onNavigate }: {
   const data = rows.map(stage => {
     // `value` is unused by the grouped/stacked bars (each series reads its own
     // owner key) but is required by the shared ChartDatum shape.
-    const row: Record<string, unknown> = { name: stage.stage_label, value: 0, stageId: stage.stage_id }
+    const row: Record<string, unknown> = { name: seedLabel('opportunityStages', { value: stage.stage_id, label: stage.stage_label }), value: 0, stageId: stage.stage_id }
     ownerKeys.forEach(key => { row[key] = 0 })
     stage.by_owner.forEach(o => { row[o.owner_id ?? 'none'] = o.count })
     return row

@@ -12,6 +12,7 @@ import { AlertCircle, ArchiveRestore, CheckCircle, MoreHorizontal, Play, Trash2,
 import { MODULE_META } from '@/modules/index'
 import { interactive } from '@/lib/a11y'
 import { useDateFormat } from '@/lib/datetime'
+import { useSeedLabel } from '@/lib/useSeedLabel'
 import { buildTrashNote } from '@/hooks/useTrashFlow'
 import type { Workflow } from '@/types/workflow'
 import Spinner from '@/components/ui/Spinner'
@@ -62,6 +63,7 @@ function StepPill({ type }: { type?: string }) {
 export default function WorkflowCard({ workflow, onRun, onEdit, canManageFolders, onArchive, onRestore, onMarkDeletion, onUnmark, graceDays = null }: WorkflowCardProps) {
   const { t } = useTranslation('workflows')
   const { formatDate, formatDateTime } = useDateFormat()
+  const seedLabel = useSeedLabel()
   const [running, setRunning] = useState(false)
   const [restoring, setRestoring] = useState(false)
   const [hover, setHover] = useState(false)
@@ -69,6 +71,9 @@ export default function WorkflowCard({ workflow, onRun, onEdit, canManageFolders
   const archived = Boolean(workflow.archived)
   // TRASH-OVERAL-2: trashed cards swap restore/mark for the erase note + unmark.
   const inTrash = workflow.lifecycle === 'pending_erase'
+  // LOOKUP-I18N-1: a workflow that still carries its seeded Dutch name renders in the
+  // user language; a tenant rename/creation stays exactly as typed.
+  const displayName = seedLabel('workflowNames', { label: workflow.name ?? null })
 
   // Run is a distinct action — stop propagation so it doesn't also open the editor.
   const handleRun = async (e: MouseEvent) => {
@@ -103,7 +108,7 @@ export default function WorkflowCard({ workflow, onRun, onEdit, canManageFolders
           </div>
           <div className="min-w-0">
             <div className="font-medium text-[var(--text)] truncate" style={{ fontSize: 14 }}>
-              {workflow.name}
+              {displayName}
             </div>
             <div className="text-xs text-[var(--text-muted)] mt-0.5">{workflow.trigger}</div>
           </div>

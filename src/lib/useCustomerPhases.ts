@@ -21,6 +21,7 @@ import { useCallback, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { AxiosResponse } from 'axios'
 import { useCachedLookup } from './useCachedLookup'
+import { translateSeedList } from './lookupSeedI18n'
 import { sortActiveRows } from './lookupUtils'
 import { unwrapList } from '@/lib/api'
 import type { LookupOption } from '@/types/common'
@@ -58,14 +59,10 @@ const mapPhases = (res: AxiosResponse): CustomerPhaseOption[] | null => {
 }
 
 export function useCustomerPhases() {
-  const { t } = useTranslation('customers')
+  const { t } = useTranslation('common')
   const { data: rawPhases, loading } = useCachedLookup('/customer-phases', mapPhases, DEFAULT_CUSTOMER_PHASES)
-  // Translate labels only while still on the SEED fallback (reference-equal to the
-  // DEFAULT_CUSTOMER_PHASES const) — real tenant-configured API labels pass
-  // through untouched; the literal Dutch seed text is the defaultValue.
-  const phases = useMemo(() => rawPhases === DEFAULT_CUSTOMER_PHASES
-    ? rawPhases.map(p => ({ ...p, label: t(`lookupSeeds.phases.${p.value}`, { defaultValue: p.label }) }))
-    : rawPhases, [rawPhases, t])
+  // Seeded defaults render in the user language; a tenant value stays as typed (LOOKUP-I18N-1).
+  const phases = useMemo(() => translateSeedList(t, 'customerPhases', rawPhases), [rawPhases, t])
 
   // slug → row, with a neutral fallback so an unknown/retired phase still renders.
   // useCallback: consumers hang this in memo deps (mirrors useGenders' colorOf).

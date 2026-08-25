@@ -50,7 +50,7 @@ vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({
   hasPermission: (p: string) => state.permissions.includes(p),
 }) }))
 vi.mock('../hooks/useCandidateMutations', () => ({ useCreateCandidate: () => ({ createCandidate, saving: false }) }))
-vi.mock('@/lib/useFunctions', () => ({ useFunctions: () => ({ functions: [], allowFreeEntry: true }) }))
+vi.mock('@/lib/useFunctions', () => ({ useFunctions: () => ({ functions: [], functionOptions: [].map(n => ({ value: n, label: n })), allowFreeEntry: true }) }))
 vi.mock('@/hooks/useProvinces', () => ({ useProvinces: () => ({ provinces: [] }) }))
 vi.mock('@/lib/useLocations', () => ({ useLocations: () => [] }))
 

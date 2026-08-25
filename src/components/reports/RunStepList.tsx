@@ -8,6 +8,8 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ChevronRight, ChevronDown, Zap, Clock } from 'lucide-react'
 import { formatDuration, StepStatusBadge } from './runFormat'
+// House numeric shape (DATUM-1): digits only, so no locale is needed here.
+import { hhmm } from '@/lib/localDate'
 // HIST-DETAIL-1 (Danny 24-07 "je kan niet zien welke kandidaten"): the history
 // drawer reuses the Logs panel's Make-style output table — one implementation.
 import StepOutputSlice from '@/components/layout/workflow/StepOutputSlice'
@@ -103,7 +105,7 @@ function StepCard({ step, index, catalog }: { step: RunStep; index: number; cata
             <span style={{ color: 'var(--color-danger-text)' }}>{String(step.error ?? step.error_message)}</span>
           )}
           {step.next_attempt_at != null && (
-            <span style={{ color: 'var(--text-muted)' }}>{t('runs.drawer.nextAttempt', { time: new Date(String(step.next_attempt_at)).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' }) })}</span>
+            <span style={{ color: 'var(--text-muted)' }}>{t('runs.drawer.nextAttempt', { time: hhmm(new Date(String(step.next_attempt_at))) })}</span>
           )}
         </div>
       )}

@@ -29,7 +29,7 @@ vi.mock('@/pages/settings/sections/importeren/importApi', async (importOriginal)
   return { ...actual, dryRunImport: vi.fn(), runImport: vi.fn(), downloadImportTemplate: vi.fn() }
 })
 
-vi.mock('@/lib/useIndustries', () => ({ useIndustries: () => ({ industries: ['Zorg', 'IT'] }) }))
+vi.mock('@/lib/useIndustries', () => ({ useIndustries: () => ({ industries: ['Zorg', 'IT'], industryOptions: ['Zorg', 'IT'].map(n => ({ value: n, label: n })) }) }))
 // useLocations is react-query-backed (@tanstack/react-query) — mocked directly
 // so this test doesn't need a QueryClientProvider ancestor.
 vi.mock('@/lib/useLocations', () => ({

@@ -54,7 +54,8 @@ vi.mock('@/lib/useCustomerLookups', () => ({
 beforeEach(() => { mockUseApps.mockReturnValue({ isAppEnabled: () => false }) })
 // Real (nl) translations, since mocking '@/lib/datetime' above removes the
 // transitive '@/i18n' side-effect import the production component relies on.
-import '@/i18n'
+// Default-exported so the seeded-label test below can switch languages.
+import i18n from '@/i18n'
 
 const link = (overrides: Partial<BackofficeLink> = {}): BackofficeLink => ({
   status: null, externalId: null, lastError: null, lastSyncedAt: null, linkedAt: null, linkedBy: null, ...overrides,
@@ -273,5 +274,31 @@ describe('CustomersTable · Koios column (Danny 05-08)', () => {
     const headerCell = screen.getByRole('img', { name: 'Koios AI' }).closest('th') as HTMLElement
     const col = Array.from(headerCell.parentElement?.children ?? []).indexOf(headerCell)
     expect(container.querySelectorAll('tbody tr')[0].children[col].textContent).toBe('—')
+  })
+})
+
+// LOOKUP-I18N-1: the row's embedded `industry` is a flat seed label (no separate
+// value) — render it in the user's language; a tenant rename stays as typed.
+// Mirrors Sidebar.test.jsx's changeLanguage convention.
+describe('CustomersTable · seeded industry label i18n (LOOKUP-I18N-1)', () => {
+  it('renders the seeded industry in English when the UI language is English', async () => {
+    await i18n.changeLanguage('en')
+    const row = { ...baseCustomer, id: 70, industry: 'Zorg' } as Customer
+    const { unmount } = render(<CustomersTable rows={[row]} statusMeta={statusMeta} />)
+    expect(screen.getByText('Healthcare')).toBeInTheDocument()
+    expect(screen.queryByText('Zorg')).not.toBeInTheDocument()
+    // Unmount before switching back — resetting the language on a still-mounted
+    // component would fire a state update outside act().
+    unmount()
+    await i18n.changeLanguage('nl')
+  })
+
+  it('leaves a tenant-renamed industry untouched under English', async () => {
+    await i18n.changeLanguage('en')
+    const row = { ...baseCustomer, id: 71, industry: 'Verpleging & Verzorging' } as Customer
+    const { unmount } = render(<CustomersTable rows={[row]} statusMeta={statusMeta} />)
+    expect(screen.getByText('Verpleging & Verzorging')).toBeInTheDocument()
+    unmount()
+    await i18n.changeLanguage('nl')
   })
 })

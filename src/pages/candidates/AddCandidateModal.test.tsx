@@ -61,7 +61,7 @@ vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({
   hasPermission: (p: string) => state.permissions.includes(p),
 }) }))
 vi.mock('./hooks/useCandidateMutations', () => ({ useCreateCandidate: () => ({ createCandidate, saving: false }) }))
-vi.mock('@/lib/useFunctions', () => ({ useFunctions: () => ({ functions: [{ value: 'Verzorgende IG', label: 'Verzorgende IG' }], allowFreeEntry: true }) }))
+vi.mock('@/lib/useFunctions', () => ({ useFunctions: () => ({ functions: [{ value: 'Verzorgende IG', label: 'Verzorgende IG' }], functionOptions: [{ value: 'Verzorgende IG', label: 'Verzorgende IG' }].map(n => ({ value: n, label: n })), allowFreeEntry: true }) }))
 vi.mock('@/hooks/useProvinces', () => ({ useProvinces: () => ({ provinces: [{ value: 'Utrecht', label: 'Utrecht' }] }) }))
 vi.mock('@/lib/useLocations', () => ({ useLocations: () => [{ value: 'b1', label: 'Vestiging Noord' }, { value: 'b2', label: 'Vestiging Zuid' }] }))
 // PROFILE-TEXT-1: Tiptap needs a real browser to mount — stubbed with a plain

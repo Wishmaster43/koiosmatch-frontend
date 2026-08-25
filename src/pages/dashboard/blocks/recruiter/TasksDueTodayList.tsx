@@ -9,6 +9,7 @@ import { Block } from '@/pages/dashboard/DashboardPrimitives'
 import SoftChip from '@/components/ui/SoftChip'
 import { BodyText, Caption, Mono } from '@/components/ui/typography'
 import { interactive } from '@/lib/a11y'
+import { useSeedLabel } from '@/lib/useSeedLabel'
 import type { TaskDueTodayRow } from '@/types/dashboard'
 import type { FeedTileContext } from '../feedTileKit'
 
@@ -17,6 +18,8 @@ export default function TasksDueTodayList({ rows, onNavigate }: {
   onNavigate?: FeedTileContext['onNavigate']
 }) {
   const { t } = useTranslation('dashboard')
+  // LOOKUP-I18N-1: the seeded priority label renders in the user's language.
+  const seedLabel = useSeedLabel()
   if (!rows.length) return null
 
   return (
@@ -34,7 +37,7 @@ export default function TasksDueTodayList({ rows, onNavigate }: {
             )}
           </div>
           {/* Colour carries meaning only — no primary fallback; SoftChip has its own neutral default. */}
-          {r.priority && <SoftChip label={r.priority.label} color={r.priority.color} />}
+          {r.priority && <SoftChip label={seedLabel('taskPriorities', { value: r.priority.value, label: r.priority.label })} color={r.priority.color} />}
           <Mono style={{ flexShrink: 0 }}>{r.due_time || '—'}</Mono>
         </div>
       ))}

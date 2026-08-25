@@ -18,7 +18,8 @@ import { useUsers } from '@/lib/queries'
 import { useCustomerLookups } from '@/lib/useCustomerLookups'
 import { useCustomerPhases } from '@/lib/useCustomerPhases'
 import { useBranchOptions } from '@/lib/useBranchOptions'
-import { buildCustomerStatusOptions } from './data/customerInsights'
+import { buildCustomerStatusOptions, NO_STATUS_KEY } from './data/customerInsights'
+import { useSeedLabel } from '@/lib/useSeedLabel'
 import { buildCustomerInsightsConfig } from './data/customerInsightsConfig'
 import { buildCustomerFilterGroups } from './data/customerFilterGroups'
 import type { CustomerDateRange } from './data/customerFilterGroups'
@@ -66,6 +67,9 @@ interface CustomerIntent {
 
 export default function CustomersPage({ intent }: { intent?: CustomerIntent } = {}) {
   const { t } = useTranslation(['customers', 'common'])
+  // LOOKUP-I18N-1: the seeded status/phase label renders in the user's language;
+  // a tenant rename/creation passes through untouched.
+  const seedLabel = useSeedLabel()
   const { registerFilters, unregisterFilters } = useRightPanel()
   const auth = useAuth()
   const hasPermission = auth?.hasPermission ?? (() => false)
@@ -264,7 +268,13 @@ export default function CustomersPage({ intent }: { intent?: CustomerIntent } = 
   }, [filterGroups, registerFilters, unregisterFilters])
 
   // ── Insights: 2 donuts (status, account manager) + KPI cards ──
-  const statusData = useMemo(() => statusOptions.map(o => ({ name: o.label, value: o.count, key: o.value, color: o.color })), [statusOptions])
+  // LOOKUP-I18N-1: the '__none' bucket is the entry PHASE (Prospect); every other
+  // bucket is a deployability STATUS — each has its own seed catalogue family.
+  // `key` stays the raw value so the click-to-filter axis is untouched.
+  const statusData = useMemo(() => statusOptions.map(o => ({
+    name: seedLabel(o.value === NO_STATUS_KEY ? 'customerPhases' : 'customerStatuses', { value: o.value === NO_STATUS_KEY ? entryPhaseValue : o.value, label: o.label }),
+    value: o.count, key: o.value, color: o.color,
+  })), [statusOptions, seedLabel, entryPhaseValue])
   const ownerData  = useMemo(() => ownerOptions.map(o => ({ name: o.label, value: o.count, key: String(o.value) })), [ownerOptions])
 
 

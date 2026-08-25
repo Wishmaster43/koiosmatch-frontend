@@ -85,7 +85,7 @@ vi.mock('@/pages/vacancies/hooks/useCustomerOptions', () => ({
   useCustomerOptions: () => [{ value: 'cust-1', label: 'Zorggroep A' }, { value: 'cust-2', label: 'Andere Zorg BV' }],
 }))
 vi.mock('../hooks/useVacancyOptions', () => ({ useVacancyOptions: () => [] }))
-vi.mock('@/lib/useFunctions', () => ({ useFunctions: () => ({ functions: ['Verzorgende IG'], allowFreeEntry: false }) }))
+vi.mock('@/lib/useFunctions', () => ({ useFunctions: () => ({ functions: ['Verzorgende IG'], functionOptions: ['Verzorgende IG'].map(n => ({ value: n, label: n })), allowFreeEntry: false }) }))
 // options carries a default_duration_days (7.1) so the end-date proposal has
 // something to compute from; types stays the plain label list other callers use.
 // A second type (ZZP Flex) enables a search/filter test on the now-searchable

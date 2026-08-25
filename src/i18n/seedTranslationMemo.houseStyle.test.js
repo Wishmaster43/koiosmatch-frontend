@@ -22,7 +22,12 @@ const SKIP = new Set(['node_modules', 'dist', 'locales'])
 
 // Only calls that BUILD AN ARRAY carry an identity: the shared helpers, or an inline
 // t() on a seed key inside a .map(). A single t() rendering one string is not at risk.
-const SEED_CALL = /translateSeedLabels\(|translateSeed\(|\.map\([^)]*t\(`(?:lookupSeeds|numbering\.entities)\./
+// FIX ROUND (25-08): the singular translateSeedLabel(...) call (the shared helper's
+// OTHER export, used to translate one row at a time) was unguarded — verified in node
+// that it did not match this pattern, so a `.map(name => translateSeedLabel(...))` call
+// site could ship outside useMemo undetected. `s?` now covers both the plural list
+// helper and the singular label helper.
+const SEED_CALL = /translateSeedLists?\(|translateSeedLabels?\(|translateSeed\(|\.map\([^)]*t\(`(?:lookupSeeds|numbering\.entities)\./
 // The helper definitions are the mappers, not call sites.
 const HELPER_DEF = /^\s*(?:export\s+)?(?:function\s+translateSeed\w*|const\s+translateSeed\w*\s*[:=])/
 
@@ -36,12 +41,25 @@ function walkSourceFiles(dir, out = []) {
   return out
 }
 
-// The statement a line belongs to: walk up to the nearest declaration start.
-function statementStart(lines, i) {
+const DECL = /^(\s*)(?:export\s+)?(?:const|let|var|function)\s/
+const indentOf = (line) => (line.match(/^\s*/) || [''])[0].length
+
+// Every declaration this call sits inside: its own statement head, plus each enclosing
+// one at a lower indent. A translate call can be nested inside a memo body, where the
+// memo lives on an outer line (usePools does exactly that), so one head is not enough.
+function enclosingHeads(lines, i) {
+  const heads = []
+  let limit = Infinity
   for (let j = i; j >= 0; j--) {
-    if (/^\s*(?:export\s+)?(?:const|let|var|function)\s/.test(lines[j])) return j
+    const m = lines[j].match(DECL)
+    if (!m) continue
+    const ind = indentOf(lines[j])
+    if (ind >= limit) continue
+    heads.push(j)
+    limit = ind
+    if (ind === 0) break
   }
-  return i
+  return heads
 }
 
 describe('seed-label translations keep a stable identity (SEED-IDENTITY-1)', () => {
@@ -51,13 +69,23 @@ describe('seed-label translations keep a stable identity (SEED-IDENTITY-1)', () 
       const lines = readFileSync(file, 'utf8').split('\n')
       lines.forEach((line, i) => {
         if (!SEED_CALL.test(line)) return
-        const start = statementStart(lines, i)
-        if (HELPER_DEF.test(lines[start])) return
-        // The declaration head carries the memo; the call may sit lines below it.
-        const head = lines.slice(start, i + 1).join('\n')
-        // A memo, or a lazy useState initialiser (runs once) — both keep one identity.
-        const stable = head.includes('useMemo(') || /useState(?:<[^>]*>)?\(\s*\(\s*\)\s*=>/.test(head)
-        if (!stable) offenders.push(`${file}:${start + 1} ${lines[start].trim().slice(0, 100)}`)
+        const heads = enclosingHeads(lines, i)
+        if (heads.some(h => HELPER_DEF.test(lines[h]))) return
+        // A memo, a lazy useState initialiser (runs once), or a useCallback closure
+        // that returns ONE string per invocation (useSeedLabel: the callback itself
+        // is the stable identity, and each call produces a single string — the same
+        // "no array to keep stable" exemption the module doc comment already grants a
+        // bare t() call) — any of the three keeps one identity, and it counts whether
+        // it sits on this statement or on an enclosing one.
+        const stable = heads.some(h => {
+          const head = lines.slice(h, i + 1).join('\n')
+          return head.includes('useMemo(') || head.includes('useCallback(')
+            || /useState(?:<[^>]*>)?\(\s*\(\s*\)\s*=>/.test(head)
+        })
+        if (!stable) {
+          const at = heads[0] ?? i
+          offenders.push(`${file}:${at + 1} ${lines[at].trim().slice(0, 100)}`)
+        }
       })
     }
     expect(offenders, `seed translation outside useMemo:\n${offenders.join('\n')}`).toEqual([])

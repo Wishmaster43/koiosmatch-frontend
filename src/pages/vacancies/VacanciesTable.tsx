@@ -9,6 +9,7 @@ import SoftChip from '@/components/ui/SoftChip'
 import AiAgentAvatar from '@/components/ui/AiAgentAvatar'
 import { makeKoiosColumn } from '@/components/ui/koiosColumn'
 import { useDateFormat, daysSince } from '@/lib/datetime'
+import { useSeedLabel } from '@/lib/useSeedLabel'
 import { useVacancyLookups } from '@/context/VacancyLookupsContext'
 import { useAllSettings, getBoolSetting } from '@/lib/settings/useAllSettings'
 import { useVacancyAdvice } from '@/lib/useVacancyAdvice'
@@ -71,6 +72,8 @@ interface VacanciesTableProps {
 export default function VacanciesTable({ rows, loading, selectedId, onSelect, onOpenCandidateSearch, onOpenApplicants, onOpenMatches, selectable, selectedIds, onToggleRow, onToggleAll, selectionBusy, stickyHeader = false, scrollParentRef, sort, onSortChange }: VacanciesTableProps) {
   const { t } = useTranslation(['vacancies', 'common'])
   const { formatDate } = useDateFormat()
+  // Seeded lookup labels the server embedded in the row render in the user language.
+  const seedLabel = useSeedLabel()
   const { statuses = [], statusMeta } = useVacancyLookups()
   // V1 (vacatures-tabel-cluster): status sort follows the TENANT's configured
   // lookup order (Settings → sort_order), not an alphabetical label sort — the
@@ -138,7 +141,10 @@ export default function VacanciesTable({ rows, loading, selectedId, onSelect, on
         // Prefer the resolved label/colour from the row; fall back to the lookup.
         const m = r.statusLabel ? { label: r.statusLabel, color: r.statusColor } : statusMeta(r.statusValue != null ? String(r.statusValue) : null)
         if (!m.label) return <span style={{ color: 'var(--text-muted)' }}>—</span>
-        return colorStatus ? <StatusPill label={m.label} color={m.color} /> : <span style={plainCell}>{m.label}</span>
+        // LOOKUP-I18N-1: the row's embedded status label is the seed default while
+        // untouched — render it in the user's language, tenant renames pass through.
+        const label = seedLabel('vacancyStatuses', { label: m.label })
+        return colorStatus ? <StatusPill label={label} color={m.color} /> : <span style={plainCell}>{label}</span>
       },
     },
     {

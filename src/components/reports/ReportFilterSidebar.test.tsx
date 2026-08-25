@@ -3,6 +3,12 @@ import { render, screen, fireEvent, within } from '@testing-library/react'
 import ReportFilterSidebar from './ReportFilterSidebar'
 import type { ReportFilterGroup } from '@/types/reports'
 
+// `@/lib/datetime` (via PeriodGroup's useLocale) transitively boots the real
+// i18n singleton — mocked here so react-i18next stays uninitialised and t()
+// keeps returning the raw key below, exactly as this file's own note describes
+// (LANE-B fix round).
+vi.mock('@/lib/datetime', () => ({ useLocale: () => 'nl-NL' }))
+
 // i18n is not initialised in tests, so t() returns the raw key — assertions
 // check for those keys (e.g. 'filters.expandAll'), same convention as the
 // other reports tests in this folder.

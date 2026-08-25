@@ -7,7 +7,7 @@ import { render, screen, fireEvent } from '@testing-library/react'
 import AppointmentsNext48hList from './AppointmentsNext48hList'
 import type { AppointmentNext48hRow } from '@/types/dashboard'
 
-vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string) => k }) }))
+vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string, opts?: { defaultValue?: string }) => opts?.defaultValue ?? k }) }))
 vi.mock('@/lib/datetime', () => ({ useDateFormat: () => ({ formatDate: () => '25-08 14:00' }) }))
 vi.mock('@/lib/useAppointmentTypes', () => ({
   useAppointmentTypes: () => ({ metaOf: (v: string) => (v === 'intake_flex' ? { value: v, label: 'Intake Flex' } : undefined) }),

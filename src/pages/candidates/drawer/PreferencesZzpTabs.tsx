@@ -68,7 +68,7 @@ export function PreferencesTab({ c, onSave, onTypesChange, onEditStatus }: { c: 
   onEditStatus?: () => void }) {
   const { t } = useTranslation('candidates')
   const { locale, formatDate } = useDateFormat()
-  const { industries } = useIndustries() as { industries: string[] }
+  const { industryOptions } = useIndustries()
   // LOOKUP-ICON-1: useDriverLicenses now returns full {value,label,icon} objects
   // (was string[]) — keep the icon around so licenseOptions/renderValue below can
   // pass it to LookupIcon, mirroring last-contact's icon passthrough.
@@ -81,7 +81,7 @@ export function PreferencesTab({ c, onSave, onTypesChange, onEditStatus }: { c: 
   // Capitalised, locale-aware weekday labels (2024-01-01 is a Monday).
   const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1)
   const dayOptions = DAY_SLUGS.map((value, i) => ({ value, label: cap(new Intl.DateTimeFormat(locale, { weekday: 'long' }).format(new Date(2024, 0, 1 + i))) }))
-  const industryOptions = industries.map(name => ({ value: name, label: name }))
+  // industryOptions already pairs the stored name with a translated label.
   const licenseOptions = licenses.map(l => ({ value: l.value, label: l.label }))
   // Read-mode-only icon lookup by value (the shared ChipMultiSelect/EditableFieldTable
   // chip shape has no icon slot — LOOKUP-ICON-1 renders it via a custom renderValue

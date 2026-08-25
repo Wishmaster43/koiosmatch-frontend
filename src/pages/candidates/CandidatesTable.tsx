@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useSeedLabel } from '@/lib/useSeedLabel'
 import type { ComponentType, CSSProperties, RefObject } from 'react'
 import { Mail, MessageCircle, PhoneCall, Building2, Video, FileText, HelpCircle, CalendarX2 } from 'lucide-react' // HelpCircle = fallback for unknown contact channel; CalendarX2 = missing-appointment attention icon
 import DataTable from '@/components/ui/DataTable'
@@ -85,6 +86,8 @@ interface CandidatesTableProps {
  */
 export default function CandidatesTable({ rows, loading, selectedId, onSelect, onOpenTab, selectable, selectedIds, onToggleRow, onToggleAll, selectionBusy, stickyHeader = false, scrollParentRef, sort, onSortChange }: CandidatesTableProps) {
   const { t } = useTranslation('candidates')
+  // Seeded lookup labels the server embedded in the row render in the user language.
+  const seedLabel = useSeedLabel()
   const { formatDate } = useDateFormat()
   // LookupsContext is still untyped JS — cast its API to the meta shapes used here.
   const { funnelTypes, funnelMeta, statusMeta, phaseMeta, typeMeta } = useLookups() as unknown as {
@@ -245,7 +248,7 @@ export default function CandidatesTable({ rows, loading, selectedId, onSelect, o
           // Chip from the API's flat funnel_label/funnel_color; the lookup is the fallback.
           // is_match (seed: Aangenomen) jumps to Matches, every other stage to Sollicitaties.
           const m = funnelMeta(c.stage)
-          const label = c.stageLabel ?? m.label
+          const label = seedLabel('funnelTypes', { value: c.stage, label: c.stageLabel ?? m.label })
           const target = funnelTarget(m)
           const linkLabel = target === TARGET_MATCHES ? t('cellLinks.matches') : t('cellLinks.applications')
           const jump = (e: { stopPropagation: () => void }) => { e.stopPropagation(); onOpenTab?.(c, target) }
@@ -289,7 +292,7 @@ export default function CandidatesTable({ rows, loading, selectedId, onSelect, o
           // Talentenpool always opens Match > Talentenpools (Danny 25/7 spec, no flag needed).
           const jump = (e: { stopPropagation: () => void }) => { e.stopPropagation(); onOpenTab?.(c, TARGET_POOLS) }
           const content = !colorPool
-            ? <span style={plainCell}>{pools.map(p => p.name).filter(Boolean).join(', ')}</span>
+            ? <span style={plainCell}>{pools.map(p => seedLabel('pools', { label: p.name })).filter(Boolean).join(', ')}</span>
             : (() => {
                 const shown = pools.slice(0, 2)
                 return (
@@ -339,7 +342,7 @@ export default function CandidatesTable({ rows, loading, selectedId, onSelect, o
     ]
   }, [
     t, formatDate, funnelTypes, funnelMeta, statusMeta, phaseMeta, typeMeta,
-    genderColor, lastContactLabel, lastContactIcon, adviceOf,
+    genderColor, lastContactLabel, lastContactIcon, adviceOf, seedLabel,
     colorFunnel, colorType, colorPool, colorKoios, coloredByGender, colorStatus, colorPhase, colorOwner,
     showHelloflex, showShiftmanager,
     onOpenTab,

@@ -18,8 +18,11 @@
  * that keeps today's three diagnostic keys colour-coded until that backend gap
  * closes. Flagged for CMBE, not fixed here (frontend-only task, backend read-only).
  */
+import { useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { AxiosResponse } from 'axios'
 import { useCachedLookup } from '@/lib/useCachedLookup'
+import { translateSeedList } from '@/lib/lookupSeedI18n'
 import { unwrapList } from '@/lib/api'
 import type { LookupOption } from '@/types/common'
 
@@ -52,7 +55,10 @@ const mapEscalationReasons = (res: AxiosResponse): LookupOption[] | null => {
 }
 
 export function useEscalationReasons() {
-  const { data: reasons, loading } = useCachedLookup('/escalation-reasons', mapEscalationReasons, DEFAULT_ESCALATION_REASONS)
+  const { t } = useTranslation('common')
+  const { data: rawReasons, loading } = useCachedLookup('/escalation-reasons', mapEscalationReasons, DEFAULT_ESCALATION_REASONS)
+  // Seeded defaults render in the user language; a tenant value stays as typed (LOOKUP-I18N-1).
+  const reasons = useMemo(() => translateSeedList(t, 'escalationReasons', rawReasons), [rawReasons, t])
 
   // Resolve a stored id/name to its meta (label + colour) — tolerant of either,
   // mirrors useOutreachOutcomes.metaOf. Undefined when nothing matches (the

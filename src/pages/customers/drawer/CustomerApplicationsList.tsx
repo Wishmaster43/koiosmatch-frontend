@@ -58,6 +58,7 @@
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useSeedLabel } from '@/lib/useSeedLabel'
 import { Search, Pencil, ChevronRight, ChevronDown, AlertTriangle } from 'lucide-react'
 import DataTable from '@/components/ui/DataTable'
 import type { Column } from '@/components/ui/DataTable'
@@ -88,6 +89,8 @@ type Props =
 
 export default function CustomerApplicationsList(props: Props) {
   const { t } = useTranslation(['customers', 'applications', 'candidates'])
+  // Seeded lookup labels the server embedded in the row render in the user language.
+  const seedLabel = useSeedLabel()
   const { openEntity } = useNavigation()
   const { formatDate } = useDateFormat()
   // The tenant funnel-stage lookup — global LookupsContext, already mounted app-wide
@@ -169,7 +172,7 @@ export default function CustomerApplicationsList(props: Props) {
       cellStyle: { color: 'var(--text)' }, render: r => r.vacancyTitle },
     // Funnel phase — the applications table's own phase-chip convention (StatusPill).
     { key: 'phase', header: t('applications:cols.phase'), sortable: true, sortValue: r => r.phaseLabel ?? '',
-      render: r => <StatusPill label={r.phaseLabel} color={r.phaseColor} /> },
+      render: r => <StatusPill label={seedLabel('funnelTypes', { value: r.phaseKey, label: r.phaseLabel })} color={r.phaseColor} /> },
     { key: 'score', header: t('applications:cols.score'), align: 'right', sortable: true, sortValue: r => r.score ?? -1,
       render: r => r.score != null ? <span style={{ fontWeight: 600 }}>{r.score}%</span> : <span style={{ color: 'var(--text-muted)' }}>—</span> },
     { key: 'created', header: t('applications:cols.created'), nowrap: true, sortable: true, sortValue: r => r.created ?? '',

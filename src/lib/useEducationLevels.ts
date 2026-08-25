@@ -16,8 +16,11 @@
  * cared about the icon (options built for a dropdown, e.g. `{value, label}`)
  * are unaffected — `icon` is purely additive on the returned object.
  */
+import { useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { AxiosResponse } from 'axios'
 import { useCachedLookup } from './useCachedLookup'
+import { translateSeedList } from './lookupSeedI18n'
 import { unwrapList } from '@/lib/api'
 
 export interface EducationLevelOption {
@@ -54,6 +57,9 @@ const mapLevels = (res: AxiosResponse): EducationLevelOption[] | null => {
 }
 
 export function useEducationLevels() {
-  const { data: levels } = useCachedLookup('/education-levels', mapLevels, DEFAULT_EDUCATION_LEVELS)
+  const { t } = useTranslation('common')
+  const { data: rawLevels } = useCachedLookup('/education-levels', mapLevels, DEFAULT_EDUCATION_LEVELS)
+  // Seeded defaults render in the user language; a tenant value stays as typed (LOOKUP-I18N-1).
+  const levels = useMemo(() => translateSeedList(t, 'educationLevels', rawLevels), [rawLevels, t])
   return { levels }
 }

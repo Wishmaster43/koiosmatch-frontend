@@ -18,6 +18,7 @@ import { useTrashFlow } from '@/hooks/useTrashFlow'
 import DeletionPreviewModal from '@/components/ui/DeletionPreviewModal'
 import { useOpenFromIntent } from '@/context/NavigationContext'
 import { useDrawerUrl } from '@/hooks/useDrawerUrl'
+import { useSeedLabel } from '@/lib/useSeedLabel'
 import { useWorkflowsData } from './hooks/useWorkflowsData'
 import { useWorkflowsFilters } from './hooks/useWorkflowsFilters'
 import WorkflowFolderSidebar from './WorkflowFolderSidebar'
@@ -63,9 +64,11 @@ export default function WorkflowsPage({ intent }: { intent?: WorkflowsIntent } =
     onMarked: () => data.retryLoad(),
     onUnmarked: () => data.retryLoad(),
   })
+  // LOOKUP-I18N-1: the trash preview shows the same (translated) name as the row.
+  const seedLabel = useSeedLabel()
   const openMarkDeletion = (wf: Workflow) => {
     if (wf.id == null) return
-    trash.openFor(String(wf.id), wf.name ?? String(wf.id))
+    trash.openFor(String(wf.id), seedLabel('workflowNames', { label: wf.name ?? null }) || String(wf.id))
   }
 
   return (

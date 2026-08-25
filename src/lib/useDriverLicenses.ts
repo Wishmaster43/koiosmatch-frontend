@@ -14,8 +14,11 @@
  * useLastContactTypes already exposes icon-bearing items. Consumers that only
  * need the name list read `.label` (or `.value` — identical here).
  */
+import { useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { AxiosResponse } from 'axios'
 import { useCachedLookup } from './useCachedLookup'
+import { translateSeedList } from './lookupSeedI18n'
 import { unwrapList } from '@/lib/api'
 
 export interface DriverLicenseItem {
@@ -44,6 +47,9 @@ const mapDriverLicenses = (res: AxiosResponse): DriverLicenseItem[] | null => {
 }
 
 export function useDriverLicenses() {
-  const { data: licenses } = useCachedLookup('/driver-licenses', mapDriverLicenses, DEFAULT_DRIVER_LICENSES)
+  const { t } = useTranslation('common')
+  const { data: rawLicenses } = useCachedLookup('/driver-licenses', mapDriverLicenses, DEFAULT_DRIVER_LICENSES)
+  // Seeded defaults render in the user language; a tenant value stays as typed (LOOKUP-I18N-1).
+  const licenses = useMemo(() => translateSeedList(t, 'driverLicenses', rawLicenses), [rawLicenses, t])
   return { licenses }
 }

@@ -18,7 +18,8 @@ interface CustomerCompanyCardProps {
   errors: Record<string, boolean>
   // useIndustries() returns a plain string list (tenant sector names), not a
   // {value,label} lookup — matches the original inline CreatableSelect usage.
-  industries: string[]
+  // { value: the stored seed name, label: translated for display }
+  industries: Array<{ value: string; label: string }>
 }
 
 export default function CustomerCompanyCard({ form, set, errors, industries }: CustomerCompanyCardProps) {

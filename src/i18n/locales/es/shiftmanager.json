@@ -179,6 +179,7 @@
     "byFunctionTitle": "Turnos abiertos por función",
     "inHours": "En horas",
     "inShifts": "En turnos",
+    "unitToggleLabel": "Unidad: horas o turnos",
     "colHours": "Horas",
     "colShifts": "Turnos",
     "lastSync": "Última sinc.: {{time}}",

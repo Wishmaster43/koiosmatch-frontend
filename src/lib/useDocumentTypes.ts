@@ -26,10 +26,13 @@
  * other entity's consumer (e.g. the candidate screen's fetch would leak into the
  * customer screen) — this is the one lever available here to prevent that.
  */
+import { useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { AxiosResponse } from 'axios'
 import type { LucideIcon } from 'lucide-react'
 import { FileText, IdCard, GraduationCap, FileSignature, ShieldCheck, BadgeCheck, Image, File } from 'lucide-react'
 import { useCachedLookup } from './useCachedLookup'
+import { translateSeedList } from './lookupSeedI18n'
 import type { LookupOption } from '@/types/common'
 import { unwrapList } from '@/lib/api'
 
@@ -92,10 +95,13 @@ const mapDocumentTypes = (res: AxiosResponse): LookupOption[] | null => {
 }
 
 export function useDocumentTypes(entity?: string) {
+  const { t } = useTranslation('common')
   // Bake the optional entity filter into the cache key itself (see file header) —
   // no entity = the exact same request/url as before this axis existed.
   const url = entity ? `/document-types?entity=${encodeURIComponent(entity)}` : '/document-types'
-  const { data: types } = useCachedLookup(url, mapDocumentTypes, DEFAULT_DOCUMENT_TYPES)
+  const { data: rawTypes } = useCachedLookup(url, mapDocumentTypes, DEFAULT_DOCUMENT_TYPES)
+  // Seeded defaults render in the user language; a tenant value stays as typed (LOOKUP-I18N-1).
+  const types = useMemo(() => translateSeedList(t, 'documentTypes', rawTypes), [rawTypes, t])
 
   // Resolve a stored value/slug to its label/colour/icon; fall back to raw value / neutral grey.
   const find = (value?: string | null) => {

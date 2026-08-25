@@ -9,6 +9,11 @@ import { render, screen, fireEvent } from '@testing-library/react'
 import FilterGroupBlock from './FilterGroupBlock'
 import type { ReportFilterGroup } from '@/types/reports'
 
+// `@/lib/datetime` (via PeriodGroup's useLocale) transitively boots the real
+// i18n singleton — mocked here so react-i18next stays uninitialised and t()
+// keeps returning the raw key, per this file's own convention (LANE-B fix round).
+vi.mock('@/lib/datetime', () => ({ useLocale: () => 'nl-NL' }))
+
 describe('FilterGroupBlock — untyped group defaults to search-select', () => {
   it('renders the searchable dropdown trigger, not a bare checkbox list', () => {
     // No `type` field at all — mirrors a group built before the typed sweep.

@@ -7,6 +7,10 @@
 import { escapeCsvCell } from '@/lib/csv'
 import { entityLabel } from './auditShared'
 import { buildDiffCells } from './auditDiffCells'
+// House numeric shapes (DATUM-1) — from lib/localDate, the init-free module, since
+// this is a pure module (no react-i18next hook access) and must not drag in the
+// i18n init that lib/datetime carries for its locale-aware month/weekday names.
+import { ddmmyyyy, hhmm } from '@/lib/localDate'
 
 // Export the currently-filtered log to CSV (UTF-8 BOM for Excel; AVG accountability).
 // Cells go through the shared escapeCsvCell, which also guards against formula
@@ -21,8 +25,8 @@ export function exportAuditCsv(entries, t) {
     const { beforeCell, afterCell } = buildDiffCells(e, t)
     const entityStr = e.subject_type ? entityLabel(e.subject_type, t) + (e.subject_label ? ` · ${e.subject_label}` : '') : ''
     return [
-      new Date(e.created_at).toLocaleDateString('nl-NL', { day: '2-digit', month: '2-digit', year: 'numeric' }),
-      new Date(e.created_at).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' }),
+      ddmmyyyy(new Date(e.created_at)),
+      hhmm(new Date(e.created_at)),
       who(e),
       t(`audit.logName.${e.log_name}`, { defaultValue: e.log_name }),
       entityStr,

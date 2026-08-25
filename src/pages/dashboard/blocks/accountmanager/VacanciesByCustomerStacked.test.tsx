@@ -7,7 +7,7 @@ import { render } from '@testing-library/react'
 import VacanciesByCustomerStacked from './VacanciesByCustomerStacked'
 import type { VacanciesByCustomerRow } from '@/types/dashboard'
 
-vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string) => k }) }))
+vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string, opts?: { defaultValue?: string }) => opts?.defaultValue ?? k }) }))
 
 let captured: { onBarClick?: (row: unknown, series: unknown) => void; data?: unknown[]; series?: unknown[] } = {}
 vi.mock('@/components/charts/WeeklyBarChartCard', () => ({

@@ -17,8 +17,11 @@ import type { ApplicationDetail } from '@/types/application'
 // Deterministic key-echo (repo-wide precedent, e.g. AddShiftModal.test.tsx) —
 // without it, i18n's real (async-initialising) instance can finish loading
 // mid-file once anything here awaits a promise (S31's real QueryClient does),
-// flipping later assertions from raw keys to actual NL copy.
-vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string) => k }) }))
+// flipping later assertions from raw keys to actual NL copy. Falls back to
+// `opts.defaultValue` (repo-wide precedent, e.g. NoteKoiosModeToggle.test.tsx) so
+// a LOOKUP-I18N-1 seed-translation call (`t(key, { defaultValue })`) still echoes
+// the untranslated seed name instead of the raw i18n key.
+vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string, opts?: { defaultValue?: string }) => opts?.defaultValue ?? k }) }))
 // S31: CvBlock's useDateFormat (@/lib/datetime) imports `@/i18n`, which needs a
 // REAL react-i18next (initReactI18next) to initialise — stub the whole module
 // instead so nothing in this file ever imports the real i18n singleton.

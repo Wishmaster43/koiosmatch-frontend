@@ -6,7 +6,7 @@ import { render, screen, fireEvent } from '@testing-library/react'
 import TasksDueTodayList from './TasksDueTodayList'
 import type { TaskDueTodayRow } from '@/types/dashboard'
 
-vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string) => k }) }))
+vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string, opts?: { defaultValue?: string }) => opts?.defaultValue ?? k }) }))
 
 const row: TaskDueTodayRow = {
   task_id: 't1', title: 'Call candidate', priority: { value: 'high', label: 'High', color: 'var(--color-danger-text)' },

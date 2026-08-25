@@ -15,6 +15,7 @@
  */
 import { useMemo } from 'react'
 import type { TFunction } from 'i18next'
+import { useSeedLabel } from '@/lib/useSeedLabel'
 import { resolveStatusSegment } from '../data/vacanciesShared'
 import type { VacancyLookupItem } from '@/context/VacancyLookupsContext'
 import type { Vacancy } from '@/types/vacancy'
@@ -58,6 +59,9 @@ interface Args {
 
 export function useVacancyInsights({ stats, vacancies, statuses, phases, statusMeta, t }: Args) {
   const s = stats as VacancyStatsShape | null
+  // LOOKUP-I18N-1: the seeded status/funnel/function label renders in the user's
+  // language; a tenant rename/creation passes through untouched.
+  const seedLabel = useSeedLabel()
   // ── Donut data (status / owner / client / published) — stats first, page-derived fallback ──
   const statusData = useMemo<Aggregate[]>(() => {
     if (s?.by_status) {
@@ -67,10 +71,13 @@ export function useVacancyInsights({ stats, vacancies, statuses, phases, statusM
       // V27 fix: a real (non-null) status id unresolved by BOTH the lookup and any
       // loaded row used to silently fall back to "Geen status" here, mislabelling
       // real (just-unresolved) statuses as no-status and inflating that bucket.
-      return s.by_status.map(o => resolveStatusSegment(o, statusMeta, rowMeta, t('insights.noStatus'), t('insights.unknownStatus')))
+      return s.by_status.map(o => {
+        const seg = resolveStatusSegment(o, statusMeta, rowMeta, t('insights.noStatus'), t('insights.unknownStatus'))
+        return { ...seg, name: seedLabel('vacancyStatuses', { value: seg.key, label: seg.name }) }
+      })
     }
-    return statuses.map(st => ({ name: st.label, key: st.value, color: st.color, value: vacancies.filter(v => v.statusValue === st.value).length })).filter(d => d.value > 0)
-  }, [s, statuses, vacancies, statusMeta, t])
+    return statuses.map(st => ({ name: seedLabel('vacancyStatuses', { value: st.value, label: st.label }), key: st.value, color: st.color, value: vacancies.filter(v => v.statusValue === st.value).length })).filter(d => d.value > 0)
+  }, [s, statuses, vacancies, statusMeta, t, seedLabel])
 
   // V27 fix: /vacancies/stats now returns a server-wide by_published aggregate
   // (VacancyQuery::stats), so this is a real count honouring every active filter —
@@ -110,8 +117,8 @@ export function useVacancyInsights({ stats, vacancies, statuses, phases, statusM
     if (!s?.by_category) return []
     return s.by_category
       .filter(o => o.value != null && o.value !== '')
-      .map(o => ({ name: o.label || String(o.value), key: String(o.value), value: o.count ?? 0 }))
-  }, [s])
+      .map(o => ({ name: seedLabel('functions', { label: o.label || String(o.value) }), key: String(o.value), value: o.count ?? 0 }))
+  }, [s, seedLabel])
 
   const ownerData = useMemo<Aggregate[]>(() => {
     if (s?.by_owner) return s.by_owner.map(o => ({ name: o.name || '—', key: String(o.id ?? o.owner_id ?? ''), value: o.count ?? 0 })).filter(o => o.key !== '')
@@ -145,8 +152,8 @@ export function useVacancyInsights({ stats, vacancies, statuses, phases, statusM
   // zero-count phase drops out rather than showing a dead ring segment (same
   // stance as publishedData/categoryData above).
   const funnelData = useMemo<Aggregate[]>(() =>
-    phases.map(p => ({ name: p.label, key: p.value, color: p.color, value: phaseCounts[p.value] ?? 0 })).filter(d => d.value > 0)
-  , [phases, phaseCounts])
+    phases.map(p => ({ name: seedLabel('funnelTypes', { value: p.value, label: p.label }), key: p.value, color: p.color, value: phaseCounts[p.value] ?? 0 })).filter(d => d.value > 0)
+  , [phases, phaseCounts, seedLabel])
 
   // VAC-KPI-REDESIGN 22-07: AI-agent donut. PREFERS the server-wide by_agent
   // aggregate (VAC-STATS-BYAGENT-1 — requested from CMBE, not yet delivered);

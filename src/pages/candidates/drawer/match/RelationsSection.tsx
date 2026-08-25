@@ -35,6 +35,7 @@ import type { Id } from '@/types/common'
 import type { LookupItem } from '@/context/LookupsContext'
 import type { MatchContractLine } from '@/types/match'
 import { contactOptionLabel } from '@/lib/contactLabel'
+import { tintBg, tintBorder } from '@/lib/tint'
 import Button from '@/components/ui/Button'
 
 interface UserLike { id?: Id; name?: string }
@@ -90,7 +91,9 @@ export default function RelationsSection({
   // Duplicate-contact preflight result (Danny 24-07) — set by saveContact() when
   // the entered email/phone/mobile already matches a contact on this customer.
   duplicateContact: CascadeOption | null; setDuplicateContact: (v: CascadeOption | null) => void
-  contactFunctions: string[]; contactFunctionsAllowFreeEntry: boolean
+  // useContactFunctions() returns { value, label } rows (LOOKUP-I18N-1): value is
+  // the raw name written to the new contact's `function`, label is translated.
+  contactFunctions: Array<{ value: string; label: string }>; contactFunctionsAllowFreeEntry: boolean
   func: string; setFunc: (v: string) => void; functions: string[]
   ownerId: string; setOwnerId: (v: string) => void; users: UserLike[]
   // Vestiging picker (7.4) — the TENANT's own establishments, distinct from the
@@ -195,7 +198,7 @@ export default function RelationsSection({
                         lookup (Danny 24-07 addendum), mirrors AddContactPersonModal. */}
                     <CreatableSelect value={nc.function || null} onChange={v => setNc(p => ({ ...p, function: v }))}
                       allowCreate={contactFunctionsAllowFreeEntry} placeholder={t('placement.contactFunction')}
-                      options={contactFunctions.map(f => ({ value: f, label: f }))} />
+                      options={contactFunctions} />
                   </div>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
                     <input type="tel" value={nc.phone} onChange={e => setNc(p => ({ ...p, phone: e.target.value }))} placeholder={t('placement.phone')} style={{ ...input, height: 30 }} />
@@ -205,8 +208,8 @@ export default function RelationsSection({
                       existing match — the backend enforces no uniqueness on these fields. */}
                   {duplicateContact && (
                     <div role="alert" style={{ fontSize: 11.5, color: 'var(--color-warning)',
-                      background: 'color-mix(in srgb, var(--color-warning) 10%, transparent)',
-                      border: '1px solid color-mix(in srgb, var(--color-warning) 30%, transparent)', borderRadius: 6, padding: '6px 8px' }}>
+                      background: tintBg('var(--color-warning)'),
+                      border: tintBorder('var(--color-warning)'), borderRadius: 6, padding: '6px 8px' }}>
                       {t('placement.duplicateContact', { name: duplicateContact.name ?? '—' })}
                     </div>
                   )}
@@ -298,8 +301,8 @@ export default function RelationsSection({
       {branchMismatch && (
         <div role="group" aria-label={t('placement.branchMismatch')}
           style={{ display: 'flex', flexDirection: 'column', gap: 6, padding: '9px 11px', borderRadius: 8, fontSize: 12,
-            color: 'var(--color-warning)', background: 'color-mix(in srgb, var(--color-warning) 10%, transparent)',
-            border: '1px solid color-mix(in srgb, var(--color-warning) 35%, transparent)' }}>
+            color: 'var(--color-warning)', background: tintBg('var(--color-warning)'),
+            border: tintBorder('var(--color-warning)') }}>
           <span style={{ fontWeight: 600 }}>
             {t('placement.branchMismatchDesc', { candidate: candBranch?.name || '—', customer: detail?.branch?.name || '—' })}
           </span>

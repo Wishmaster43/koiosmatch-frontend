@@ -60,7 +60,7 @@ export default function OverviewTab({ c, onSave }: { c: Customer; onSave?: (valu
   // KOIOS-ADVIES-OVERAL-1: the SAME resolver the customers table's Koios column
   // uses — the drawer block below prepends its advice so the two never disagree.
   const resolveAdvice = useCustomerAdvice()
-  const { industries } = useIndustries()
+  const { industryOptions } = useIndustries()
   // The tenant's own establishments (GET /locations) — the same source the match
   // form's Vestiging picker uses, so both screens offer exactly one list.
   const branchOptions = useLocations().map(l => ({ value: String(l.value), label: l.label }))
@@ -113,7 +113,8 @@ export default function OverviewTab({ c, onSave }: { c: Customer; onSave?: (valu
   // Vestiging, mirroring the candidate drawer's grouping. Keys match the flat customer
   // shape and are translated to API keys in the page's updateCustomer.
   const fields: FieldRow[] = [
-    { key: 'industry',      label: t('overview.industry'),      type: 'select', options: industries, group: gDetails },
+    // Options carry { value: stored name, label: translated } so saving never writes a translation.
+    { key: 'industry',      label: t('overview.industry'),      type: 'select', options: industryOptions, group: gDetails },
     { key: 'employeeCount', label: t('overview.employeeCount'), inputType: 'number', group: gDetails },
     // KLANT-KVK-1 (backend 28-07): the customer's HEAD registration numbers, linked
     // through to the public registers. A location carries the sub-number under it —

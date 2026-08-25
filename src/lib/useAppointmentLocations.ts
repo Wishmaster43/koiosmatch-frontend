@@ -13,6 +13,7 @@ import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { AxiosResponse } from 'axios'
 import { useCachedLookup } from './useCachedLookup'
+import { translateSeedList } from './lookupSeedI18n'
 import { unwrapList } from '@/lib/api'
 
 export interface AppointmentLocation {
@@ -49,14 +50,10 @@ const mapLocations = (res: AxiosResponse): AppointmentLocation[] | null => {
 }
 
 export function useAppointmentLocations() {
-  const { t } = useTranslation('candidates')
+  const { t } = useTranslation('common')
   const { data: rawLocations } = useCachedLookup('/appointment-locations', mapLocations, DEFAULT_APPOINTMENT_LOCATIONS)
-  // Translate labels only while still on the SEED fallback (reference-equal to the
-  // DEFAULT_APPOINTMENT_LOCATIONS const) — real tenant-configured API labels pass
-  // through untouched; the literal Dutch seed text is the defaultValue.
-  const locations = useMemo(() => rawLocations === DEFAULT_APPOINTMENT_LOCATIONS
-    ? rawLocations.map(l => ({ ...l, label: t(`lookupSeeds.appointmentLocations.${l.value}`, { defaultValue: l.label }) }))
-    : rawLocations, [rawLocations, t])
+  // Seeded defaults render in the user language; a tenant value stays as typed (LOOKUP-I18N-1).
+  const locations = useMemo(() => translateSeedList(t, 'appointmentLocations', rawLocations), [rawLocations, t])
 
   // The tenant's chosen modal default, falling back to the first entry.
   const defaultLocation = locations.find(x => x.is_default) ?? locations[0]

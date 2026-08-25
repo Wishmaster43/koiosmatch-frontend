@@ -8,8 +8,11 @@
  * Fetch/cache/dedupe lives in useCachedLookup (audit item 8) — one GET per
  * session, shared across every mounted consumer.
  */
+import { useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { AxiosResponse } from 'axios'
 import { useCachedLookup } from './useCachedLookup'
+import { translateSeedList } from './lookupSeedI18n'
 import { unwrapList } from '@/lib/api'
 
 export interface PoolItem { id: string; name: string; color?: string | null }
@@ -27,6 +30,14 @@ const mapPools = (res: AxiosResponse): PoolsLookupData | null => {
 }
 
 export function usePools() {
+  const { t } = useTranslation('common')
   const { data } = useCachedLookup('/pools', mapPools, FALLBACK)
-  return { pools: data.pools, poolItems: data.poolItems }
+  // Seeded defaults render in the user language; a tenant value stays as typed (LOOKUP-I18N-1).
+  // PoolItem carries `name` (not `label`), so translate through a {label} shim and zip it back.
+  const poolItems = useMemo(() => {
+    const translated = translateSeedList(t, 'pools', data.poolItems.map(p => ({ label: p.name })))
+    return data.poolItems.map((p, i) => (translated[i].label === p.name ? p : { ...p, name: translated[i].label }))
+  }, [data.poolItems, t])
+  const pools = useMemo(() => poolItems.map(p => p.name), [poolItems])
+  return { pools, poolItems }
 }

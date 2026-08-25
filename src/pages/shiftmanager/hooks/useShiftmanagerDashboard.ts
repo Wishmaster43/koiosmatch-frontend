@@ -8,6 +8,8 @@
 import { useQuery } from '@tanstack/react-query'
 import api, { unwrapList } from '@/lib/api'
 import { normalizeSmCandidate } from '@/components/reports/useReportCandidates'
+// House numeric shape (DATUM-1): digits only, so no locale is needed here.
+import { hhmm as houseHhmm } from '@/lib/localDate'
 
 // Shift KPI stats from /sm_reports/dashboard.
 export interface SmDashStats {
@@ -17,8 +19,9 @@ export interface SmDashStats {
 export interface RunItem { name?: string; ok: boolean; n?: number; err?: string; time: string }
 export interface ConvItem { name: string; msg: string; time: string }
 
-// Locale-aware HH:MM from an ISO timestamp.
-const hhmm = (iso?: string) => iso ? new Date(iso).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' }) : ''
+// House HH:mm numeric shape (DATUM-1) from an ISO timestamp — digits only,
+// identical in every app language, so no locale parameter is needed here.
+const hhmm = (iso?: string) => iso ? houseHhmm(new Date(iso)) : ''
 
 export function useShiftmanagerDashboard(candidatesPerPage: number, hasAI: boolean) {
   // Candidates feed the (real) "new this month" KPI card.

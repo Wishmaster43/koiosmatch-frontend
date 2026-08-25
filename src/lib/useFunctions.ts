@@ -21,9 +21,12 @@
  * Fetch/cache/dedupe lives in useCachedLookup (audit item 8) — one GET per
  * session, shared across every mounted consumer.
  */
+import { useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { AxiosResponse } from 'axios'
 import { useCachedLookup } from './useCachedLookup'
 import { lookupNames } from './lookupUtils'
+import { translateSeedLabel } from './lookupSeedI18n'
 
 // ONTZORGING (K-178, Danny 24-08: the product is GENERAL staffing — care is one
 // segment, never the default): the server seeds the functions lookup EMPTY
@@ -60,6 +63,18 @@ const mapFunctions = (res: AxiosResponse): FunctionsLookupData => {
 }
 
 export function useFunctions() {
+  const { t } = useTranslation('common')
   const { data, invalidate } = useCachedLookup('/functions', mapFunctions, FALLBACK)
-  return { functions: data.functions, allowFreeEntry: data.apiFreeEntry, invalidate }
+  // Seeded defaults render in the user language; a tenant value stays as typed (LOOKUP-I18N-1).
+  // LOOKUP-I18N-1 SAFETY: this list is VALUE and LABEL at once — the picker stores the
+  // string it shows, so a translated entry would be SAVED and the record would carry
+  // "Healthcare" instead of the seeded "Zorg" forever. The names therefore stay raw;
+  // display sites translate at render through useSeedLabel (see the candidate row), and
+  // `*Options` below pairs the raw value with a translated label for the pickers.
+  const functions = data.functions
+  const functionOptions = useMemo(
+    () => data.functions.map(name => ({ value: name, label: translateSeedLabel(t, 'functions', { label: name }) })),
+    [data.functions, t],
+  )
+  return { functions, functionOptions, allowFreeEntry: data.apiFreeEntry, invalidate }
 }

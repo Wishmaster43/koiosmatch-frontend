@@ -9,9 +9,11 @@
  * Fetch/cache/dedupe lives in useCachedLookup (audit item 8) — one GET per
  * session, shared across every mounted consumer.
  */
-import { useCallback } from 'react'
+import { useCallback, useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { AxiosResponse } from 'axios'
 import { useCachedLookup } from './useCachedLookup'
+import { translateSeedList } from './lookupSeedI18n'
 import { unwrapList } from '@/lib/api'
 
 export interface OutreachStatus { value: string; label: string; color?: string; is_reached: boolean }
@@ -40,8 +42,11 @@ const mapOutreachStatuses = (res: AxiosResponse): OutreachStatus[] | null => {
 }
 
 export function useOutreachStatuses() {
+  const { t } = useTranslation('common')
   // The endpoint now exists (item 11) — a real 404 should surface in the dev log again.
-  const { data: statuses } = useCachedLookup('/outreach-statuses', mapOutreachStatuses, DEFAULT_OUTREACH_STATUSES)
+  const { data: rawStatuses } = useCachedLookup('/outreach-statuses', mapOutreachStatuses, DEFAULT_OUTREACH_STATUSES)
+  // Seeded defaults render in the user language; a tenant value stays as typed (LOOKUP-I18N-1).
+  const statuses = useMemo(() => translateSeedList(t, 'outreachStatuses', rawStatuses), [rawStatuses, t])
 
   // Resolve a stored slug to its meta; tolerant of label-stored values.
   // useCallback: consumers hang this in memo/effect deps — it must be stable.

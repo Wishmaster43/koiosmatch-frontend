@@ -12,6 +12,10 @@
 import type { KoiosUsageData, TFn } from '@/types/koios'
 import { tierKeyForModel } from '@/lib/koiosModelTiers'
 
+// `locale` (DATUM-1/LANE-B): the real caller (KoiosPanel) always passes the
+// active app locale explicitly; 'nl-NL' here is only the safe fallback for a
+// caller that omits it (e.g. this component's own tests), mirroring cvLabels'
+// fmtDate default.
 export default function KoiosUsage({ usage, model, t, locale = 'nl-NL' }: {
   usage?: KoiosUsageData | null; model?: string | null; t: TFn; locale?: string
 }) {

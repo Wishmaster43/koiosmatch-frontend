@@ -7,6 +7,11 @@ import { render } from '@testing-library/react'
 import ChannelActivityChart from './ChannelActivityChart'
 
 vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string) => k }) }))
+// `@/lib/datetime` transitively imports the real i18n bootstrap (module-scope
+// `i18n.use(initReactI18next)`) which throws against the flat react-i18next
+// mock above (no `initReactI18next` export) — mocked here so the chart's own
+// `useLocale()` call never loads the real module (LANE-B fix round).
+vi.mock('@/lib/datetime', () => ({ useLocale: () => 'nl-NL' }))
 const captured = vi.fn()
 vi.mock('@/components/charts/WeeklyBarChartCard', () => ({ default: (props: unknown) => { captured(props); return null } }))
 

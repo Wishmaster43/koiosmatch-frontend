@@ -3468,6 +3468,7 @@
     },
     "aiBudgetLabel": "Jetons AI",
     "workflowBudgetLabel": "Jetons Koios",
+    "whatsappBudgetLabel": "Jetons WhatsApp par mois",
     "valueCaption": "achat {{cogs}} · vente {{sale}} · {{basis}}",
     "tenantHeading": "Exception client",
     "tenantPickerLabel": "Client",
@@ -3550,5 +3551,28 @@
     "list": "Listes"
   },
   "dashboardsNoResults": "Aucun élément ne correspond à cette recherche ou à ce filtre.",
-  "dashboardsSharedDefaultNote": "Ce rôle partage la ligne KPI par défaut. Une modification s'applique aussi aux autres rôles qui la partagent."
+  "dashboardsSharedDefaultNote": "Ce rôle partage la ligne KPI par défaut. Une modification s'applique aussi aux autres rôles qui la partagent.",
+  "appsCatalog": {
+    "aelio": "Connexion à Aelio pour la gestion des missions et la planification du personnel.",
+    "afas": "Connexion back-office à AFAS (RH, paie et facturation).",
+    "ai_planner": "Planificateur IA : proposer des missions, rappels, missions effectuées et changements de statut. Affiche le dossier \"AI Planner\" dans Workflows.",
+    "ai_recruiter": "Recruteur IA : prise de contact et réponses automatiques aux messages des candidats. Affiche le dossier \"AI Recruiter\" dans Workflows.",
+    "aircall": "Téléphonie cloud pour équipes de recrutement : appels, enregistrements et synchronisation des dossiers.",
+    "clevergig": "Connexion planification à Clevergig (missions flex et viviers dans la santé).",
+    "easyflex": "Connexion back-office à EasyFlex (paie et facturation).",
+    "elanza": "Connexion à Elanza pour les missions et la gestion des candidats.",
+    "fleks": "Connexion planification à Fleks pour les viviers flex et la gestion des missions.",
+    "hf": "Connexion back-office à HelloFlex (paie, facturation, contrats).",
+    "intus": "Connexion à la planification Intus pour récupérer missions et candidats.",
+    "kvk": "Recherche au registre du commerce : le numéro KvK renvoie nom, adresse et statut.",
+    "nocore": "Connexion back-office à Nocore Flex (paie et facturation).",
+    "ons": "Connexion à ONS (Nedap) pour la planification et les plannings.",
+    "pivoton": "Connexion back-office à Pivoton (administration flex et paie).",
+    "sdb": "Connexion à la planification SDB pour les missions et les plannings.",
+    "shiftmanager": "Connexion à Shiftmanager pour les missions, la planification et les candidats.",
+    "teams": "Appeler via Teams Phone et enregistrer les notes d’appel dans le dossier.",
+    "threecx": "Connexion téléphonie à 3CX : clic pour appeler et journal des appels sur le dossier candidat.",
+    "vat": "Valider un numéro de TVA via le service européen VIES.",
+    "voys": "Standard VoIP néerlandais (VoIPGRID) : clic pour appeler et historique des appels."
+  }
 }

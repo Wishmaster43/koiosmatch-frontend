@@ -1,5 +1,8 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent, act } from '@testing-library/react'
+// Real i18n, default-exported so the seeded-name test below can switch languages
+// (mirrors VacanciesTable.test.tsx's LOOKUP-I18N-1 convention).
+import i18n from '@/i18n'
 import WorkflowListRow from './WorkflowListRow'
 import type { Workflow } from '@/types/workflow'
 
@@ -142,5 +145,30 @@ describe('WorkflowListRow · trash lifecycle (TRASH-OVERAL-2)', () => {
     render(<WorkflowListRow workflow={trashedWorkflow} onRun={vi.fn()} onEdit={vi.fn()} onToggleStatus={vi.fn()}
       canManageFolders={false} />)
     expect(screen.queryByLabelText('Terugzetten naar archief')).not.toBeInTheDocument()
+  })
+})
+
+// LOOKUP-I18N-1 (round 2 pin): a workflow that still carries its seeded Dutch name
+// renders in the user language; a tenant rename/creation stays exactly as typed.
+describe('WorkflowListRow · seeded workflow name i18n (LOOKUP-I18N-1)', () => {
+  it('renders a seeded workflow name in English when the UI language is English', async () => {
+    await i18n.changeLanguage('en')
+    const seededWorkflow: Workflow = { ...baseWorkflow, name: 'Heractivering' }
+    const { unmount } = render(<WorkflowListRow workflow={seededWorkflow} onRun={vi.fn()} onEdit={vi.fn()} onToggleStatus={vi.fn()} />)
+    expect(screen.getByText('Reactivation')).toBeInTheDocument()
+    expect(screen.queryByText('Heractivering')).not.toBeInTheDocument()
+    // Unmount before switching back — resetting the language on a still-mounted
+    // component would fire a state update outside act().
+    unmount()
+    await i18n.changeLanguage('nl')
+  })
+
+  it('leaves a tenant-renamed workflow name untouched under English', async () => {
+    await i18n.changeLanguage('en')
+    const tenantWorkflow: Workflow = { ...baseWorkflow, name: 'Welcome flow' }
+    const { unmount } = render(<WorkflowListRow workflow={tenantWorkflow} onRun={vi.fn()} onEdit={vi.fn()} onToggleStatus={vi.fn()} />)
+    expect(screen.getByText('Welcome flow')).toBeInTheDocument()
+    unmount()
+    await i18n.changeLanguage('nl')
   })
 })
