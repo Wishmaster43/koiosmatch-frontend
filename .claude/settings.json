@@ -298,7 +298,13 @@
       "Bash(php artisan migrate:rollback*)",
       "Bash(nohup php artisan migrate:rollback*)",
       "Bash(php artisan dev:reset*)",
-      "Bash(nohup php artisan dev:reset*)"
+      "Bash(nohup php artisan dev:reset*)",
+      "Bash(git stash*)",
+      "Bash(git reset --hard*)",
+      "Bash(git restore*)",
+      "Bash(git clean*)",
+      "Bash(git checkout -- *)",
+      "Bash(git checkout .*)"
     ]
   }
 }
