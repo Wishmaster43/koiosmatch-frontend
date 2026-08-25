@@ -248,6 +248,9 @@ export interface BillingBudgetValue {
 export interface BillingBudgetEntry {
   ai_token_budget?: number
   workflow_credit_budget?: number
+  // K-196 (Danny 25-08): the WhatsApp Token budget, the third meter next to AI
+  // tokens and Koios Tokens (WhatsApp Web traffic costs real performance).
+  whatsapp_token_budget?: number
   value?: BillingBudgetValue
   // PRIJSMODEL-B (K-167/K-175, LIVE per worker brief 24-08): included users in
   // the package + the price per user above that, in EUR cents (never euros —
@@ -277,13 +280,13 @@ export interface AdminBillingBudgetsResponse {
 // one override field back to the package default (never the whole entry).
 export interface AdminBillingBudgetsUpdate {
   packages?: Partial<Record<BillingPackageKey, {
-    ai_token_budget?: number; workflow_credit_budget?: number
+    ai_token_budget?: number; workflow_credit_budget?: number; whatsapp_token_budget?: number
     // null = clear to "no package value" (unlimited) — the controller writes
     // per-knob (array_key_exists), so an omitted knob stays untouched.
     included_users?: number | null; extra_user_price_cents?: number | null
   }>>
   tenants?: Record<string, {
-    ai_token_budget?: number | null; workflow_credit_budget?: number | null
+    ai_token_budget?: number | null; workflow_credit_budget?: number | null; whatsapp_token_budget?: number | null
     included_users?: number | null; extra_user_price_cents?: number | null
   }>
 }

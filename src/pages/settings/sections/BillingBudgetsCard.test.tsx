@@ -66,7 +66,7 @@ describe('BillingBudgetsCard', () => {
     await userEvent.click(screen.getByRole('button', { name: t('common.save') }))
 
     await waitFor(() => expect(api.put).toHaveBeenCalledWith('/admin/billing-budgets', expect.objectContaining({
-      packages: expect.objectContaining({ core: { ai_token_budget: 1500, workflow_credit_budget: 200 } }),
+      packages: expect.objectContaining({ core: { ai_token_budget: 1500, workflow_credit_budget: 200, whatsapp_token_budget: 0 } }),
     })))
   })
 
@@ -87,7 +87,21 @@ describe('BillingBudgetsCard', () => {
     await userEvent.click(screen.getByRole('button', { name: t('common.save') }))
 
     await waitFor(() => expect(api.put).toHaveBeenCalledWith('/admin/billing-budgets', expect.objectContaining({
-      tenants: { 't-1': { ai_token_budget: null, workflow_credit_budget: 500 } },
+      tenants: { 't-1': { ai_token_budget: null, workflow_credit_budget: 500, whatsapp_token_budget: null } },
+    })))
+  })
+
+  it('PUTs the WhatsApp Token budget as its own package field (K-196)', async () => {
+    mockGet()
+    vi.mocked(api.put).mockResolvedValue({ data: budgets })
+    render(<BillingBudgetsCard />)
+    // Three package rows carry this label; the first one is core, like the sibling tests.
+    const fields = await screen.findAllByLabelText(t('billingBudgets.whatsappBudgetLabel'))
+    await userEvent.clear(fields[0])
+    await userEvent.type(fields[0], '750')
+    await userEvent.click(screen.getByRole('button', { name: t('common.save') }))
+    await waitFor(() => expect(api.put).toHaveBeenCalledWith('/admin/billing-budgets', expect.objectContaining({
+      packages: expect.objectContaining({ core: expect.objectContaining({ whatsapp_token_budget: 750 }) }),
     })))
   })
 })

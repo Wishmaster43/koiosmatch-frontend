@@ -34,11 +34,12 @@ const label = { fontSize: 12, color: 'var(--text-muted)', marginBottom: 4, displ
 const inputWrap = { display: 'flex', alignItems: 'center', gap: 6, border: '1px solid var(--border)', borderRadius: 8, padding: '6px 10px', background: 'var(--input-bg)', color: 'var(--text)' }
 const inputStyle = { border: 'none', outline: 'none', background: 'transparent', fontSize: 13, width: '100%', ...monoStyle }
 
-// A package row's two editable numbers, blank = 0 for an empty field.
-type PackageDraft = { ai_token_budget: string; workflow_credit_budget: string }
+// A package row's three editable numbers, blank = 0 for an empty field.
+type PackageDraft = { ai_token_budget: string; workflow_credit_budget: string; whatsapp_token_budget: string }
 const draftFromEntry = (entry?: BillingBudgetEntry): PackageDraft => ({
   ai_token_budget: entry?.ai_token_budget != null ? String(entry.ai_token_budget) : '',
   workflow_credit_budget: entry?.workflow_credit_budget != null ? String(entry.workflow_credit_budget) : '',
+  whatsapp_token_budget: entry?.whatsapp_token_budget != null ? String(entry.whatsapp_token_budget) : '',
 })
 
 export default function BillingBudgetsCard() {
@@ -56,7 +57,7 @@ export default function BillingBudgetsCard() {
   // Per-tenant override state, owned by the child so this card stays under the
   // §3 400-line split trigger; lifted here only for the shared Save action.
   const [tenantId, setTenantId] = useState<string | null>(null)
-  const [tenantDraft, setTenantDraft] = useState<{ ai_token_budget: string; workflow_credit_budget: string }>({ ai_token_budget: '', workflow_credit_budget: '' })
+  const [tenantDraft, setTenantDraft] = useState<{ ai_token_budget: string; workflow_credit_budget: string; whatsapp_token_budget: string }>({ ai_token_budget: '', workflow_credit_budget: '', whatsapp_token_budget: '' })
   const [tenantDirty, setTenantDirty] = useState(false)
 
   // Load package defaults + existing tenant overrides.
@@ -80,7 +81,9 @@ export default function BillingBudgetsCard() {
 
   const packagesDirty = PACKAGE_KEYS.some((key) => {
     const saved = draftFromEntry(data?.packages?.[key])
-    return saved.ai_token_budget !== drafts[key].ai_token_budget || saved.workflow_credit_budget !== drafts[key].workflow_credit_budget
+    return saved.ai_token_budget !== drafts[key].ai_token_budget
+      || saved.workflow_credit_budget !== drafts[key].workflow_credit_budget
+      || saved.whatsapp_token_budget !== drafts[key].whatsapp_token_budget
   })
   const hasChange = packagesDirty || tenantDirty
 
@@ -94,6 +97,7 @@ export default function BillingBudgetsCard() {
         body.packages[key] = {
           ai_token_budget: Number(drafts[key].ai_token_budget) || 0,
           workflow_credit_budget: Number(drafts[key].workflow_credit_budget) || 0,
+          whatsapp_token_budget: Number(drafts[key].whatsapp_token_budget) || 0,
         }
       }
     }
@@ -102,6 +106,7 @@ export default function BillingBudgetsCard() {
         [tenantId]: {
           ai_token_budget: tenantDraft.ai_token_budget === '' ? null : Number(tenantDraft.ai_token_budget),
           workflow_credit_budget: tenantDraft.workflow_credit_budget === '' ? null : Number(tenantDraft.workflow_credit_budget),
+          whatsapp_token_budget: tenantDraft.whatsapp_token_budget === '' ? null : Number(tenantDraft.whatsapp_token_budget),
         },
       }
     }
@@ -168,6 +173,16 @@ export default function BillingBudgetsCard() {
                     <input id={`billing-budget-wf-${key}`} type="number" min={0} step={1}
                       value={drafts[key].workflow_credit_budget}
                       onChange={(e) => setDrafts((prev) => ({ ...prev, [key]: { ...prev[key], workflow_credit_budget: e.target.value } }))}
+                      style={inputStyle} />
+                  </div>
+                </div>
+                {/* K-196: the WhatsApp Token budget, the meter for WhatsApp Web traffic. */}
+                <div style={{ flex: '1 1 160px', minWidth: 140 }}>
+                  <label style={label} htmlFor={`billing-budget-wa-${key}`}>{t('billingBudgets.whatsappBudgetLabel')}</label>
+                  <div style={inputWrap}>
+                    <input id={`billing-budget-wa-${key}`} type="number" min={0} step={1}
+                      value={drafts[key].whatsapp_token_budget}
+                      onChange={(e) => setDrafts((prev) => ({ ...prev, [key]: { ...prev[key], whatsapp_token_budget: e.target.value } }))}
                       style={inputStyle} />
                   </div>
                 </div>
