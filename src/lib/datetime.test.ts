@@ -29,7 +29,7 @@ describe('useDateFormat · formatDateTime', () => {
   it('formats a date+time as DD-MM-YYYY, HH:mm', () => {
     const { result } = renderHook(() => useDateFormat())
     // Local (no offset) ISO input so the expected wall-clock time is timezone-stable.
-    expect(result.current.formatDateTime('2026-06-30T14:15:00')).toBe('30-06-2026, 14:15')
+    expect(result.current.formatDateTime('2026-06-30T14:15:00')).toBe('30-06-2026 14:15')
   })
 
   it('never renders the raw ISO string verbatim', () => {

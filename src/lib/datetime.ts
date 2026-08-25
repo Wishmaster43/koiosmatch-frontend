@@ -25,6 +25,15 @@ type DateInput = string | number | Date | null | undefined
 // there because this module's i18n import has an initialising side effect.
 export { formatDateOnly, formatDateTimeStr } from './localDate'
 
+// House numeric shapes (DATUM-1): DD-MM-YYYY and HH:mm, built from date parts so no
+// locale can reshape them; only the option set that asks for pure digits takes this path.
+const NUMERIC_DATE: Intl.DateTimeFormatOptions = { day: '2-digit', month: '2-digit', year: 'numeric' }
+const pad2 = (n: number) => String(n).padStart(2, '0')
+export const ddmmyyyy = (d: Date) => `${pad2(d.getDate())}-${pad2(d.getMonth() + 1)}-${d.getFullYear()}`
+export const hhmm = (d: Date) => `${pad2(d.getHours())}:${pad2(d.getMinutes())}`
+const isNumericDate = (o: Intl.DateTimeFormatOptions) =>
+  o.day === '2-digit' && o.month === '2-digit' && o.year === 'numeric' && !o.weekday && !o.hour && !o.minute && !o.era && !o.timeZoneName
+
 export function useLocale(): string {
   const { i18n } = useTranslation()
   // Optional chaining: some tests stub react-i18next with a bare `{ t }` (no
@@ -38,26 +47,29 @@ export function useDateFormat() {
   // Stable identities (audit item 7 fast-follow): these feed column-array memos —
   // a fresh closure per render silently defeated the candidates row memoization.
   // Default to numeric DD-MM-YYYY (the app-wide standard, see CLAUDE.md §3B).
-  const formatDate = useCallback((value: DateInput, opts: Intl.DateTimeFormatOptions = { day: '2-digit', month: '2-digit', year: 'numeric' }): string => {
+  // DATUM-1: the numeric default is DD-MM-YYYY in EVERY language (measured 25-08: en-GB
+  // rendered 25/08/2026, de-DE 25.08.2026). Only a caller asking for month names or a
+  // weekday gets the locale's own wording; digits never change shape per language.
+  const formatDate = useCallback((value: DateInput, opts: Intl.DateTimeFormatOptions = NUMERIC_DATE): string => {
     if (!value) return '—'
     const d = new Date(value)
-    return isNaN(d.getTime()) ? String(value) : d.toLocaleDateString(locale, opts)
+    if (isNaN(d.getTime())) return String(value)
+    return isNumericDate(opts) ? ddmmyyyy(d) : d.toLocaleDateString(locale, opts)
   }, [locale])
   // DD-MM-YYYY HH:mm — the app-wide standard for drill-downs / detail views (never raw ISO).
   const formatDateTime = useCallback((value: DateInput): string => {
     if (!value) return '—'
     const d = new Date(value)
-    return isNaN(d.getTime()) ? String(value)
-      : d.toLocaleString(locale, { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })
-  }, [locale])
+    return isNaN(d.getTime()) ? String(value) : `${ddmmyyyy(d)} ${hhmm(d)}`
+  }, [])
   // HH:mm only — for cells that already show the date separately (e.g. a date/time
   // split across two lines). Empty string (not '—') for missing/unparseable input,
   // matching every call site's own pre-existing fallback (never a visible change).
   const formatTime = useCallback((value: DateInput): string => {
     if (!value) return ''
     const d = new Date(value)
-    return isNaN(d.getTime()) ? '' : d.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' })
-  }, [locale])
+    return isNaN(d.getTime()) ? '' : hhmm(d)
+  }, [])
   return useMemo(() => ({ locale, formatDate, formatDateTime, formatTime }), [locale, formatDate, formatDateTime, formatTime])
 }
 

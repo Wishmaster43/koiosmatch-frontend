@@ -59,7 +59,13 @@ describe('WorkflowHistoryView', () => {
   // FINISH audit (2026-08): the started_at column used to hardcode 'nl-NL' in a
   // toLocaleDateString call — now it reuses useDateFormat().formatDate, so the
   // separator follows the active app language (dd-mm vs dd/mm), never a fixed locale.
-  it('follows the active app locale for the started_at date, not a hardcoded nl-NL', async () => {
+  // DATUM-1 (25-08): the numeric date keeps ONE shape in every language — DD-MM-YYYY.
+  // This test used to assert the locale's own shape (en-GB '23/06/2026'), which is
+  // exactly the notation Danny banned; measured live on #applications with the UI in
+  // English before the house formatter was pinned. It still guards what it was written
+  // for (the date goes through the shared hook, never a hardcoded nl-NL string), but
+  // now against the canonical shape.
+  it('renders started_at as DD-MM-YYYY in every app language (DATUM-1)', async () => {
     vi.mocked(api.get).mockResolvedValue({ data: [run] })
     const { unmount } = render(<WorkflowHistoryView workflowId={1} />)
     expect(await screen.findByText('23-06-2026')).toBeInTheDocument()
@@ -67,7 +73,7 @@ describe('WorkflowHistoryView', () => {
 
     activeI18n.language = 'en'
     render(<WorkflowHistoryView workflowId={1} />)
-    expect(await screen.findByText('23/06/2026')).toBeInTheDocument()
+    expect(await screen.findByText('23-06-2026')).toBeInTheDocument()
   })
 
   // P39: the chevron expands the row inline WITHOUT opening the drawer, reading

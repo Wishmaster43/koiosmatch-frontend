@@ -44,7 +44,7 @@ describe('CandidateOriginCard · the three Herkomst lines', () => {
     expect(screen.getByText('Laura Yesway')).toBeInTheDocument()
     expect(screen.getByText(CREATED_AT_LABEL)).toBeInTheDocument()
     // DD-MM-YYYY + time via the shared lib/datetime formatter — never a hand-built string.
-    expect(screen.getByText(/29-10-2025, 16:03/)).toBeInTheDocument()
+    expect(screen.getByText(/29-10-2025 16:03/)).toBeInTheDocument()
   })
 
   // Danny 09-08: "Herkomst geen potloodje" — the whole block has no edit path at
