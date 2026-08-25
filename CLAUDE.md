@@ -185,7 +185,12 @@ Rules:
   laadt ál zijn modules eager — een unit-test mockt de barrel PLAT met precies
   wat de component eruit gebruikt (pure functies via `vi.importActual` op hun
   eigen diepe module), nooit `importOriginal` op de barrel zelf, anders trekt
-  de test de hele boom (en de i18n-init-bijwerking) binnen.
+  de test de hele boom (en de i18n-init-bijwerking) binnen. **BARREL-DATETIME-LES (25-08, gemeten):** machinerie die TWEE entiteiten
+  delen (het WhatsApp-Web-devicescherm van profiel én instellingen) hoort in
+  `components/` of `hooks/`, nooit als re-export in een entity-barrel — de barrel
+  laadt eager, en zodra één re-export `@/lib/datetime` raakt rijdt de i18n-init mee
+  in elke barrel-consumer; twee ongerelateerde suites braken zo (NoteKoiosModeToggle,
+  AddOpportunityModal). Bij twijfel: check met een HEAD-worktree of de breuk van jou is.
 - Shared UI in `components/ui` is **dumb**: no API calls, no business logic.
 - If a file doesn't clearly belong somewhere, the design is wrong — stop and fix.
 - A `features/`-style layout (per-domain barrels) remains the long-term target if
