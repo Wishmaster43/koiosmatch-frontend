@@ -37,6 +37,7 @@ vi.mock('./components', () => ({
     <div data-testid="escalation-list">{loading ? 'loading' : escalations.length}</div>,
   ActivityChart: () => <div data-testid="activity-chart" />,
 }))
+vi.mock('./ChannelActivityChart', () => ({ default: () => <div data-testid="channel-activity-chart" /> }))
 vi.mock('./messagesTable/MessagesTable', () => ({
   default: ({ messages, loading, exhausted }: { messages: WaMessage[]; loading?: boolean; exhausted?: boolean }) =>
     <div data-testid="messages-table" data-exhausted={String(!!exhausted)}>{loading ? 'loading' : messages.length}</div>,
@@ -288,5 +289,30 @@ describe('WhatsAppPage · K-193 fase 1 tabs (WA-Web queue + Conversations)', () 
     mockUseAuth.mockReturnValue({ hasModule: () => false, hasPermission: () => false })
     render(<WhatsAppPage intent={{ tab: 'conversations', open: 'conv-42' }} />)
     expect(screen.getByTestId('conversations-tab')).toHaveAttribute('data-open', 'conv-42')
+  })
+})
+
+describe('WhatsAppPage · per-channel overview (K-197)', () => {
+  it('with by_channel on stats and activity the overview adds the channel donut and the stacked channel chart', () => {
+    mockUseWhatsAppData.mockReturnValue(dataFixture({
+      stats: { messages_today: 3, candidates_contacted: 1, shifts_filled_via_whatsapp: 0, open_escalations: 0,
+        by_channel: [{ channel: 'waba', sent: 2, received: 1, failed: 0 }, { channel: 'waba_coex', sent: 0, received: 0, failed: 0 }, { channel: 'wa_web', sent: 0, received: 0, failed: 0 }] },
+      activity: [{ date: '2026-08-25', inbound: 1, outbound: 2, by_channel: { waba: { inbound: 1, outbound: 2 } } }],
+    }))
+    mockUseWhatsAppQueue.mockReturnValue(queueFixture({ batches: [] }))
+    render(<WhatsAppPage />)
+    expect(screen.getAllByTestId('pie-chart')).toHaveLength(2)
+    expect(screen.getByTestId('channel-activity-chart')).toBeInTheDocument()
+  })
+
+  it('an older envelope without by_channel keeps the two-card overview and no channel chart', () => {
+    mockUseWhatsAppData.mockReturnValue(dataFixture({
+      stats: { messages_today: 0, candidates_contacted: 0, shifts_filled_via_whatsapp: 0, open_escalations: 0 },
+      activity: [{ date: '2026-08-25', inbound: 0, outbound: 0 }],
+    }))
+    mockUseWhatsAppQueue.mockReturnValue(queueFixture({ batches: [] }))
+    render(<WhatsAppPage />)
+    expect(screen.getAllByTestId('pie-chart')).toHaveLength(1)
+    expect(screen.queryByTestId('channel-activity-chart')).not.toBeInTheDocument()
   })
 })

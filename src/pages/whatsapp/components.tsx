@@ -13,6 +13,7 @@ import SoftChip from '@/components/ui/SoftChip'
 import { SectionTitle, Caption } from '@/components/ui/typography'
 import { useEscalationReasons } from './hooks/useEscalationReasons'
 import type { WaCandidate, WaEscalation, WaActivityDatum } from '@/types/whatsapp'
+import { fmtAxisDate } from './data/axisDate'
 
 
 export const PAD  = (n: number) => String(n).padStart(2, '0')
@@ -118,11 +119,6 @@ export function EscalationList({ escalations, loading }: { escalations: WaEscala
   )
 }
 
-function fmtAxisDate(dateStr: string) {
-  const [, m, d] = dateStr.split('-')
-  const monthAbbr = new Date(2000, parseInt(m) - 1, 1).toLocaleString('nl-NL', { month: 'short' })
-  return `${parseInt(d)} ${monthAbbr}`
-}
 
 export function ActivityChart({ data, loading }: { data: WaActivityDatum[]; loading?: boolean }) {
   const { t } = useTranslation('whatsapp')

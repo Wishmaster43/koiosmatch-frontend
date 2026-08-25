@@ -41,6 +41,8 @@ import RightDrawer from '@/components/ui/RightDrawer'
 import PieChartCard from '@/components/charts/PieChartCard'
 import BarChartCard from '@/components/charts/BarChartCard'
 import { EscalationList, ActivityChart } from './components'
+import ChannelActivityChart from './ChannelActivityChart'
+import { CHANNEL_COLORS } from '@/components/drawer/channelColors'
 import MessagesTable from './messagesTable/MessagesTable'
 import QueueTab from './QueueTab'
 import Button from '@/components/ui/Button'
@@ -61,6 +63,8 @@ const cardValue = (ready: boolean, v: number | undefined | null): number | strin
 
 export default function WhatsAppPage({ intent }: { intent?: unknown } = {}) {
   const { t } = useTranslation('whatsapp')
+  // Channel names live in the candidates namespace (one label per enum value, app-wide).
+  const { t: tCandidates } = useTranslation('candidates')
   // K-193 fase 1: the WA-Web queue + Conversations tabs are module-gated —
   // hasModule stays presence-based (rol-onafhankelijk), mirroring every other
   // whatsapp_web-gated surface (CONTRACT-CHANGELOG 25-08).
@@ -262,6 +266,16 @@ export default function WhatsAppPage({ intent }: { intent?: unknown } = {}) {
     return Object.entries(c).map(([r, value]) => ({ name: t(`reasons.${r}`, { defaultValue: r }), value }))
   }, [escalations, t])
 
+  // K-197: today's messages per channel (sent + received); the server zero-fills all
+  // three channels, an older envelope has no by_channel and hides the card.
+  const channelData = useMemo(() => (stats?.by_channel ?? []).map(c => ({
+    name: tCandidates(`conversations.channel.${c.channel}`, { defaultValue: c.label ?? c.channel }),
+    value: (c.sent ?? 0) + (c.received ?? 0), key: c.channel,
+    color: CHANNEL_COLORS[c.channel] ?? 'var(--color-primary)',
+  })), [stats, tCandidates])
+  const hasChannelSplit = channelData.length > 0
+  const hasChannelSeries = activity.some(d => d.by_channel != null)
+
   // WhatsApp Business connection down — shown inside the tabs that read /whatsapp/*
   // only. The Wachtrij tab queries its own /whatsapp-queue endpoint and handles its
   // own not-available/error states, so it stays reachable independent of this flag.
@@ -343,8 +357,10 @@ export default function WhatsAppPage({ intent }: { intent?: unknown } = {}) {
       {tab === 'overview' && (wabaDown ? NoConn : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           <ActivityChart data={activity} loading={loading.activity} />
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+          {hasChannelSeries && <ChannelActivityChart data={activity} />}
+          <div style={{ display: 'grid', gridTemplateColumns: hasChannelSplit ? '1fr 1fr 1fr' : '1fr 1fr', gap: 16 }}>
             <PieChartCard title={t('overview.statusTitle')} data={statusData} showPercent />
+            {hasChannelSplit && <PieChartCard title={t('overview.channelTitle')} data={channelData} colors={channelData.map(d => d.color)} />}
             <BarChartCard title={t('overview.reasonsTitle')} data={reasonsData} />
           </div>
         </div>

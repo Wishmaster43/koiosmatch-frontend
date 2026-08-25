@@ -10,7 +10,9 @@
   },
   "overview": {
     "statusTitle": "Message status",
-    "reasonsTitle": "Escalation reasons"
+    "reasonsTitle": "Escalation reasons",
+    "channelTitle": "Per channel (today)",
+    "channelActivityTitle": "Messages per channel, last 14 days"
   },
   "filters": {
     "status": "Status",

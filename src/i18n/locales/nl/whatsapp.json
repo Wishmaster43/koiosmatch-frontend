@@ -10,7 +10,9 @@
   },
   "overview": {
     "statusTitle": "Berichtstatus",
-    "reasonsTitle": "Escalatieredenen"
+    "reasonsTitle": "Escalatieredenen",
+    "channelTitle": "Per kanaal (vandaag)",
+    "channelActivityTitle": "Berichten per kanaal, afgelopen 14 dagen"
   },
   "filters": {
     "status": "Status",

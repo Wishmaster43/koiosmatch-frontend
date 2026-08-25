@@ -56,6 +56,28 @@ const failedRow: WaMessage = {
 }
 
 describe('useMessageColumns · wire shape (WA-MSG-TABLE-2)', () => {
+  it('recipient: the full number wins over the masked one when the server sends it (K-197 candidates.view)', () => {
+    render(<Harness messages={[{ ...candidateRow, wa_number: '+31 6 1234 5612' }]} />)
+    expect(screen.getByText('+31 6 1234 5612')).toBeInTheDocument()
+    expect(screen.queryByText('+31 6 **** 12')).not.toBeInTheDocument()
+  })
+
+  it('recipient: without the full number the masked form renders (no candidates.view)', () => {
+    render(<Harness messages={[candidateRow]} />)
+    expect(screen.getByText('+31 6 **** 12')).toBeInTheDocument()
+  })
+
+  it('recipient: the full number wins over the masked one when the server sends it (K-197 candidates.view)', () => {
+    render(<Harness messages={[{ ...candidateRow, wa_number: '+31 6 1234 5612' }]} />)
+    expect(screen.getByText('+31 6 1234 5612')).toBeInTheDocument()
+    expect(screen.queryByText('+31 6 **** 12')).not.toBeInTheDocument()
+  })
+
+  it('recipient: without the full number the masked form renders (no candidates.view)', () => {
+    render(<Harness messages={[candidateRow]} />)
+    expect(screen.getByText('+31 6 **** 12')).toBeInTheDocument()
+  })
+
   it('recipient: candidate-owned row links to the candidate drilldown', async () => {
     const user = userEvent.setup()
     render(<Harness messages={[candidateRow]} />)

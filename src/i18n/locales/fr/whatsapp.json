@@ -10,7 +10,9 @@
   },
   "overview": {
     "statusTitle": "Statut des messages",
-    "reasonsTitle": "Motifs d'escalade"
+    "reasonsTitle": "Motifs d'escalade",
+    "channelTitle": "Par canal (aujourd'hui)",
+    "channelActivityTitle": "Messages par canal, 14 derniers jours"
   },
   "title": "WhatsApp",
   "updatedAt": "Mis à jour à {{time}}",

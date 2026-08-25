@@ -10,7 +10,9 @@
   },
   "overview": {
     "statusTitle": "Nachrichtenstatus",
-    "reasonsTitle": "Eskalationsgründe"
+    "reasonsTitle": "Eskalationsgründe",
+    "channelTitle": "Pro Kanal (heute)",
+    "channelActivityTitle": "Nachrichten pro Kanal, letzte 14 Tage"
   },
   "title": "WhatsApp",
   "updatedAt": "Aktualisiert um {{time}}",

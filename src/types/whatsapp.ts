@@ -63,7 +63,10 @@ export interface WaMessage {
   whatsapp_number_id?: string | null
   channel?: 'waba' | 'waba_coex' | 'wa_web' | string | null
   channel_label?: string | null
-  // §8: the real number never reaches the wire, only this masked form.
+  // §8 as a GATE, not a blindfold (K-197, Danny 25-08 "hele nummer tonen"): the
+  // server sends the full number only to a viewer with candidates.view; everyone
+  // else gets the masked form. Render wa_number ?? wa_number_masked.
+  wa_number?: string | null
   wa_number_masked?: string | null
   [k: string]: unknown
 }
@@ -78,7 +81,14 @@ export interface WaEscalation {
 }
 
 // One point on the inbound/outbound activity chart.
-export interface WaActivityDatum { date: string; inbound?: number; outbound?: number; [k: string]: unknown }
+// K-197: each day may carry a per-channel split for the stacked channel chart
+// (older envelopes omit it; the chart then stays hidden).
+export type WaChannelKey = 'waba' | 'waba_coex' | 'wa_web'
+export interface WaActivityDatum {
+  date: string; inbound?: number; outbound?: number
+  by_channel?: Partial<Record<WaChannelKey, { inbound?: number; outbound?: number }>>
+  [k: string]: unknown
+}
 
 // One WhatsApp Business connection/token (WA-VESTIGING-FE-1, GET/POST/PATCH /whatsapp).
 // A tenant now holds MULTIPLE rows, each scoped to everyone (both null), one branch
@@ -105,11 +115,15 @@ export interface WhatsappConnectionRow {
 }
 
 // The KPI stats block.
+// K-197: today's per-channel counts, all three channels always present, zero-filled.
+export interface WaChannelStat { channel: WaChannelKey | string; label?: string; sent?: number; received?: number; failed?: number }
+
 export interface WaStats {
   messages_today?: number
   candidates_contacted?: number
   shifts_filled_via_whatsapp?: number
   open_escalations?: number
+  by_channel?: WaChannelStat[]
   [k: string]: unknown
 }
 

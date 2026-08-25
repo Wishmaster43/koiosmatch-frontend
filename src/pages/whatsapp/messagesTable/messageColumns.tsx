@@ -59,7 +59,8 @@ function RecipientCell({ message }: { message: WaMessage }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 1, minWidth: 0 }}>
       {nameNode}
-      {message.wa_number_masked && <Caption>{message.wa_number_masked}</Caption>}
+      {/* K-197: the full number arrives only behind candidates.view; otherwise the masked form. */}
+      {(message.wa_number ?? message.wa_number_masked) && <Caption>{message.wa_number ?? message.wa_number_masked}</Caption>}
     </div>
   )
 }
