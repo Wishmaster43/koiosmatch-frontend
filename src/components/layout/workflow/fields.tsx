@@ -11,7 +11,7 @@ import { useTranslation } from 'react-i18next'
 import type { WorkflowField, EdgeFilters, WorkflowVarGroup } from '@/types/workflow'
 import {
   FaqSelectField, WebhookSelectField, LookupSelectField, WorkflowSelectField,
-  FiltersField, type OnChange,
+  WhatsappPhoneNumberField, FiltersField, type OnChange,
 } from './fieldControls'
 import { TextFieldWithVars } from './VariablePicker'
 import { fieldLabel, fieldPlaceholder, optionLabel } from './moduleI18n'
@@ -46,6 +46,11 @@ export function FieldInput({ field, value, onChange, variables, config }: {
   }
   if (field.type === 'lookup_select') {
     return <LookupSelectField value={value} onChange={onChange} fieldKey={field.key} endpoint={String(field.endpoint ?? '')} valueKey={typeof field.valueKey === 'string' ? field.valueKey : undefined} responseKey={typeof field.responseKey === 'string' ? field.responseKey : undefined} />
+  }
+  if (field.type === 'whatsapp_phone_number') {
+    // Reads the sibling `channel` field from the full node config to filter to
+    // Coexistence-only sender numbers (CMBE K-193 fase 0).
+    return <WhatsappPhoneNumberField value={value} onChange={onChange} fieldKey={field.key} endpoint={String(field.endpoint ?? '')} config={config} />
   }
   if (field.type === 'workflow') {
     // workflow_call's workflow_id picker (WF-RELATIONS-1): a searchable list of

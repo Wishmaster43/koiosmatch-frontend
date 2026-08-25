@@ -262,7 +262,8 @@
       "directionValues": {
         "inbound": "Entrant",
         "outbound": "Sortant"
-      }
+      },
+      "channel": "Canal"
     },
     "kpi": {
       "conversationsTotal": "Total conversations",
@@ -276,7 +277,12 @@
       "avgFirstResponseMinutes": "Temps de 1re réponse moy.",
       "minutesUnit": "minutes"
     },
-    "kpiOrderFellBack": "Une carte KPI configurée dans les paramètres n'existe plus et a été réinitialisée par défaut."
+    "kpiOrderFellBack": "Une carte KPI configurée dans les paramètres n'existe plus et a été réinitialisée par défaut.",
+    "channel": {
+      "waba": "WABA",
+      "waba_coex": "WABA · local",
+      "wa_web": "WA Web"
+    }
   },
   "applications": {
     "loading": "Chargement des candidatures…",

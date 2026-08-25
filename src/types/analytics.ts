@@ -239,6 +239,9 @@ export interface WhatsappReportData {
   by_direction: WhatsappSegment[]
   by_type: WhatsappSegment[]
   by_escalated: WhatsappSegment[]
+  // K-193 fase 0 (CMBE 7030fd6f): channel segments across the three channel
+  // enum values, zero-filled — optional so an older envelope keeps rendering.
+  by_channel?: WhatsappSegment[]
   top_conversations: WhatsappTopConversation[]
 }
 

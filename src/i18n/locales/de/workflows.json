@@ -65,7 +65,9 @@
     "workflowSelect": "Workflow auswählen…",
     "workflowEmpty": "Noch keine Workflows",
     "multiselectLoading": "Optionen werden geladen…",
-    "workflowError": "Workflows konnten nicht geladen werden."
+    "workflowError": "Workflows konnten nicht geladen werden.",
+    "requiredHint": "Erforderlich",
+    "coexistenceOnly": "Nur Coexistence-Nummern"
   },
   "scheduleModal": {
     "title": "Zeitplan festlegen",
@@ -923,7 +925,10 @@
     "candidate": "Kandidat",
     "customer": "Kunde",
     "customer_location": "Kundenstandort",
-    "users": "Benutzer"
+    "users": "Benutzer",
+    "waba": "WABA",
+    "waba_coex": "WABA · lokal (Coexistence)",
+    "wa_web": "WA Web (eigene Nummer)"
   },
   "agentTest": {
     "title": "Testvariablen",

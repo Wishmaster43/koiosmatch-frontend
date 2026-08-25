@@ -104,7 +104,9 @@
     "workflowSelect": "Selecteer een workflow…",
     "workflowEmpty": "Nog geen workflows",
     "multiselectLoading": "Opties laden…",
-    "workflowError": "Workflows konden niet worden geladen."
+    "workflowError": "Workflows konden niet worden geladen.",
+    "requiredHint": "Verplicht",
+    "coexistenceOnly": "Alleen Coexistence-nummers"
   },
   "scheduleModal": {
     "title": "Planning instellen",
@@ -958,7 +960,10 @@
     "candidate": "Kandidaat",
     "customer": "Klant",
     "customer_location": "Klantlocatie",
-    "users": "gebruikers"
+    "users": "gebruikers",
+    "waba": "WABA",
+    "waba_coex": "WABA · lokaal (Coexistence)",
+    "wa_web": "WA Web (eigen nummer)"
   },
   "agentTest": {
     "title": "Test-variabelen",

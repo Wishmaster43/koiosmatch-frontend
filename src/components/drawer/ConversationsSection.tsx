@@ -35,6 +35,7 @@ import SoftChip from '@/components/ui/SoftChip'
 import { useDateFormat } from '@/lib/datetime'
 import ConversationAssistSection from './ConversationAssistSection'
 import ConversationMessage, { type MessageRow } from './ConversationMessage'
+import { CHANNEL_COLORS } from './channelColors'
 import TemplateComposer from './TemplateComposer'
 import type { ConversationSubject } from './useWhatsAppTemplateSend'
 import { sessionWindow, windowLeftParts } from './sessionWindow'
@@ -80,6 +81,9 @@ interface ConversationRow {
   is_active?: boolean
   escalated?: boolean
   candidate?: ConversationCandidate | null
+  // K-193: the thread's dominant channel (enum) + server label, badge fallback source.
+  primary_channel?: 'waba' | 'waba_coex' | 'wa_web' | string
+  channel_label?: string | null
 }
 
 // Prefer the candidate's real name over the raw WhatsApp number for the thread heading.
@@ -246,6 +250,15 @@ export default function ConversationsSection({ threadsUrl, threadsParams, header
     // eslint-disable-next-line react-hooks/exhaustive-deps -- same paramsKey rationale as the load effect above
   }, [threadsUrl, paramsKey])
 
+  // K-193 channel chip (thread header): the enum→token map is shared with the
+  // message bubble (ConversationMessage); an unknown channel renders no chip.
+  const channelChip = (channel?: string, channelLabel?: string | null) => {
+    // No badge for an unrecognized/unknown channel — never render a raw enum code.
+    const color = channel ? CHANNEL_COLORS[channel] : undefined
+    if (!color) return null
+    const label = t(`conversations.channel.${channel}`, { defaultValue: channelLabel ?? '' })
+    return <SoftChip label={label} color={color} />
+  }
   // Active-window badge (setting `conversation_active_weeks`) — green when active, muted otherwise.
   const activeBadge = (active?: boolean) => (
     <SoftChip label={active ? t('conversations.active') : t('conversations.inactive')}
@@ -298,6 +311,7 @@ export default function ConversationsSection({ threadsUrl, threadsParams, header
                   </span>
                 )}
               </span>
+              {channelChip(row.primary_channel, row.channel_label)}
               {row.escalated && (
                 <SoftChip label={t('conversations.escalated')} color="var(--color-warning)" />
               )}

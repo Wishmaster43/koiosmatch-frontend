@@ -1259,6 +1259,11 @@
     "loading": "Cargando conversaciones…",
     "error": "No se pudieron cargar las conversaciones",
     "openThread": "Abrir conversación",
+    "channel": {
+      "waba": "WABA",
+      "waba_coex": "WABA · local",
+      "wa_web": "WA Web"
+    },
     "escalated": "Escalado",
     "escalatedHint": "Un chat escalado ha sido asumido por un empleado.",
     "loadingMessages": "Cargando mensajes…",

@@ -170,5 +170,8 @@ export interface WorkflowField {
   source?: string
   default?: unknown
   placeholder?: string
+  // K-193: a field the user must fill before the step can run (the builder marks
+  // it and shows a hint; the backend still fails a missing value visibly).
+  required?: boolean
   [k: string]: unknown
 }

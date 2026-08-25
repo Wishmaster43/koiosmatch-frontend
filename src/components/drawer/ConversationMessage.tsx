@@ -13,6 +13,7 @@ import SoftChip from '@/components/ui/SoftChip'
 import { avatarColor } from '@/lib/avatarColor'
 import { tintBg, tintBorder } from '@/lib/tint'
 import type { Id } from '@/types/common'
+import { CHANNEL_COLORS } from './channelColors'
 
 // The recruiter/agent behind an outbound message (e.g. Ravi, Kelly).
 interface SentBy {
@@ -31,7 +32,11 @@ export interface MessageRow {
   sent_by?: SentBy | null
   delivered_at?: string | null
   read_at?: string | null
+  // K-193: the message's own channel (enum) + server label, badge fallback source.
+  channel?: string
+  channel_label?: string | null
 }
+
 
 // Humanise a purpose slug for tenants whose value has no explicit translation.
 const humanize = (s: string) => s.replace(/[_-]+/g, ' ').replace(/^\w/, c => c.toUpperCase())
@@ -78,6 +83,10 @@ export default function ConversationMessage({ message, formatDateTime }: {
         {message.message_content ?? '—'}
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 2 }}>
+        {message.channel && CHANNEL_COLORS[message.channel] && (
+          <SoftChip label={t(`conversations.channel.${message.channel}`, { defaultValue: message.channel_label ?? '' })}
+            color={CHANNEL_COLORS[message.channel]} />
+        )}
         {message.purpose && (
           <SoftChip label={t(`conversations.purpose.${message.purpose}`, { defaultValue: humanize(message.purpose) })}
             color="var(--color-primary)" />

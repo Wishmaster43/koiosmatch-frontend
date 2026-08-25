@@ -1259,6 +1259,11 @@
     "loading": "Gespräche werden geladen…",
     "error": "Gespräche konnten nicht geladen werden",
     "openThread": "Gespräch öffnen",
+    "channel": {
+      "waba": "WABA",
+      "waba_coex": "WABA · lokal",
+      "wa_web": "WA Web"
+    },
     "escalated": "Eskaliert",
     "escalatedHint": "Ein eskaliertes Gespräch wurde von einem Mitarbeiter übernommen.",
     "loadingMessages": "Nachrichten werden geladen…",

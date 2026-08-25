@@ -262,7 +262,8 @@
       "directionValues": {
         "inbound": "Inkomend",
         "outbound": "Uitgaand"
-      }
+      },
+      "channel": "Kanaal"
     },
     "kpi": {
       "conversationsTotal": "Totaal gesprekken",
@@ -276,7 +277,12 @@
       "avgFirstResponseMinutes": "Gem. eerste reactietijd",
       "minutesUnit": "minuten"
     },
-    "kpiOrderFellBack": "Een in Instellingen ingestelde KPI-kaart bestaat niet meer en is teruggezet naar de standaard."
+    "kpiOrderFellBack": "Een in Instellingen ingestelde KPI-kaart bestaat niet meer en is teruggezet naar de standaard.",
+    "channel": {
+      "waba": "WABA",
+      "waba_coex": "WABA · lokaal",
+      "wa_web": "WA Web"
+    }
   },
   "applications": {
     "loading": "Sollicitaties laden…",

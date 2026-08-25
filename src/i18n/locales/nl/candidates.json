@@ -1259,6 +1259,11 @@
     "loading": "Conversaties laden…",
     "error": "Kon de conversaties niet laden",
     "openThread": "Gesprek openen",
+    "channel": {
+      "waba": "WABA",
+      "waba_coex": "WABA · lokaal",
+      "wa_web": "WA Web"
+    },
     "escalated": "Geëscaleerd",
     "escalatedHint": "Een geëscaleerd gesprek is overgenomen door een medewerker.",
     "loadingMessages": "Berichten laden…",

@@ -1259,6 +1259,11 @@
     "loading": "Loading conversations…",
     "error": "Could not load conversations",
     "openThread": "Open conversation",
+    "channel": {
+      "waba": "WABA",
+      "waba_coex": "WABA · local",
+      "wa_web": "WA Web"
+    },
     "escalated": "Escalated",
     "escalatedHint": "An escalated chat has been taken over by a staff member.",
     "loadingMessages": "Loading messages…",

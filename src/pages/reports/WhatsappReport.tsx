@@ -14,10 +14,12 @@
  * reformatted. `top_conversations` carries the candidate name (server-gated),
  * never a number and never message content.
  *
- * Chart mix (RAPPORT-GEZICHT-WAVE2): direction/type/escalated are all few-value
- * categorical axes with no lookup colour field → donuts on the house series,
- * escalated spanning the full row so three half-width donuts never leave a grid
- * hole. top_conversations stays a table (its own special face, per the brief).
+ * Chart mix (RAPPORT-GEZICHT-WAVE2): direction/type/escalated/channel are all
+ * few-value categorical axes with no lookup colour field → donuts on the house
+ * series. Escalated spans the full row only when the channel donut (K-193
+ * fase 0, optional `by_channel`) is absent — with it present the grid holds
+ * four half-width donuts (even parity); without it three halves would leave a
+ * grid hole. top_conversations stays a table (its own special face, per the brief).
  * entityPage is deliberately NOT set on any drill here: conversation rows carry
  * masked numbers, no unambiguous single record page to deep-link into.
  */
@@ -122,6 +124,16 @@ export default function WhatsappReport({ period, filters }: { period: ReportPeri
       const seg = segs.find(s => s.value === key)
       if (seg) openAxisDrill(axis, seg.label, seg.count, seg.value)
     })
+  // Channel donut labels: per-enum-value translation (nl "WABA" / "WABA · lokaal"
+  // / "WA Web"), falling back to the server's own label only when a locale key
+  // is missing — never the raw server value verbatim (§ contract discipline).
+  const channelDonutData = (segs: WhatsappSegment[]): { data: ChartDatum[]; colors: string[] } => ({
+    data: segs.map(s => ({ name: t(`whatsapp.channel.${s.value}`, { defaultValue: s.label }), value: s.count, key: s.value })),
+    colors: segs.map((_, i) => CHART_SERIES_COLORS[i % CHART_SERIES_COLORS.length]),
+  })
+  // K-193: the channel card exists only when the envelope carries a NON-EMPTY
+  // by_channel (an empty array must not shrink the escalated card or draw an empty donut).
+  const hasChannel = (data?.by_channel?.length ?? 0) > 0
 
   // The nine fixed cards straight off the server's kpis[] array — each label from
   // the local i18n catalogue, each card clickable into its own drill.
@@ -205,14 +217,24 @@ export default function WhatsappReport({ period, filters }: { period: ReportPeri
             </div>
           } />
 
-          {/* Few-value categorical axes → donuts. Escalated (2 values) spans the
-              full row: three half-width donuts would leave a grid hole. */}
+          {/* Few-value categorical axes → donuts. Escalated spans the full row
+              only when the channel donut is absent (older envelope): with the
+              channel card present the grid holds four halves (even parity), so
+              escalated shrinks back to a half card. */}
           <ReportChartCard title={t('whatsapp.axes.direction')} chart={
             <PieChartCard {...donutData(data.by_direction)} onItemClick={pickSegment('direction', data.by_direction)} />} />
           <ReportChartCard title={t('whatsapp.axes.type')} chart={
             <PieChartCard {...donutData(data.by_type)} onItemClick={pickSegment('type', data.by_type)} />} />
-          <ReportChartCard span={2} title={t('whatsapp.axes.escalated')} chart={
+          <ReportChartCard span={hasChannel ? undefined : 2} title={t('whatsapp.axes.escalated')} chart={
             <PieChartCard {...donutData(data.by_escalated)} onItemClick={pickSegment('escalated', data.by_escalated)} />} />
+          {/* Channel donut (K-193 fase 0) — rendered only when the envelope
+              carries it. No onItemClick: the backend axis-drill vocabulary does
+              not yet accept 'channel' (open question below), so the legend rows
+              are deliberately inert until CMBE lands that drill axis. */}
+          {hasChannel && (
+            <ReportChartCard title={t('whatsapp.axes.channel')} chart={
+              <PieChartCard {...channelDonutData(data.by_channel ?? [])} />} />
+          )}
 
           {/* Top-10 busiest threads — candidate name (server-gated) + volume;
               no numbers, no message content here (§8/§9). */}

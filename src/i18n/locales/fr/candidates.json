@@ -1259,6 +1259,11 @@
     "loading": "Chargement des conversations…",
     "error": "Impossible de charger les conversations",
     "openThread": "Ouvrir la conversation",
+    "channel": {
+      "waba": "WABA",
+      "waba_coex": "WABA · local",
+      "wa_web": "WA Web"
+    },
     "escalated": "Escaladé",
     "escalatedHint": "Une conversation escaladée a été reprise par un collaborateur.",
     "loadingMessages": "Chargement des messages…",

@@ -69,7 +69,9 @@
     "workflowSelect": "Select a workflow…",
     "workflowEmpty": "No workflows yet",
     "multiselectLoading": "Loading options…",
-    "workflowError": "Workflows could not be loaded."
+    "workflowError": "Workflows could not be loaded.",
+    "requiredHint": "Required",
+    "coexistenceOnly": "Coexistence numbers only"
   },
   "scheduleModal": {
     "title": "Set schedule",
@@ -923,7 +925,10 @@
     "candidate": "Candidate",
     "customer": "Customer",
     "customer_location": "Customer location",
-    "users": "users"
+    "users": "users",
+    "waba": "WABA",
+    "waba_coex": "WABA · local (Coexistence)",
+    "wa_web": "WA Web (own number)"
   },
   "agentTest": {
     "title": "Test variables",

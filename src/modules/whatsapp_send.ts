@@ -21,10 +21,17 @@ export default {
     // 'session' = free-form text, only delivered inside Meta's 24h customer-service
     // window (the BE gates on the conversation's last inbound message).
     { key: 'message_type',        label: 'Formaat',                type: 'select',  options: ['template','flow','session'] },
+    // CMBE K-193 fase 0 contract: which WhatsApp channel this step sends over.
+    // No `default` on purpose (Danny: no silent fallback to 'waba' in the
+    // builder) — the blank placeholder forces an explicit choice, and it
+    // filters the sender-number list below when Coexistence is picked.
+    { key: 'channel',             label: 'Kanaal',                 type: 'select',  required: true,
+      options: ['waba', 'waba_coex', 'wa_web'] },
     // Live options from the tenant's WABA connection (Make parity): active sender
     // numbers + approved templates (the endpoint also returns each template's
-    // components for the future per-{{n}} mapping UI).
-    { key: 'phone_number_id',     label: 'Afzender',               type: 'lookup_select', endpoint: '/whatsapp-phone-numbers' },
+    // components for the future per-{{n}} mapping UI). Filtered to Coexistence
+    // numbers when `channel` is 'waba_coex'.
+    { key: 'phone_number_id',     label: 'Afzender',               type: 'whatsapp_phone_number', endpoint: '/whatsapp-phone-numbers' },
     // Recipient override: empty = each bundle's own mobile; a literal 06-number
     // redirects EVERY message there (dry-run testing, Danny 2026-07-09).
     { key: 'recipient_field',     label: 'Ontvanger',              type: 'text',

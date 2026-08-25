@@ -65,7 +65,9 @@
     "workflowSelect": "Selecciona un workflow…",
     "workflowEmpty": "Aún no hay workflows",
     "multiselectLoading": "Cargando opciones…",
-    "workflowError": "No se pudieron cargar los workflows."
+    "workflowError": "No se pudieron cargar los workflows.",
+    "requiredHint": "Obligatorio",
+    "coexistenceOnly": "Solo números Coexistence"
   },
   "scheduleModal": {
     "title": "Configurar programación",
@@ -923,7 +925,10 @@
     "candidate": "Candidato",
     "customer": "Cliente",
     "customer_location": "Ubicación del cliente",
-    "users": "usuarios"
+    "users": "usuarios",
+    "waba": "WABA",
+    "waba_coex": "WABA · local (Coexistence)",
+    "wa_web": "WA Web (número propio)"
   },
   "agentTest": {
     "title": "Variables de prueba",

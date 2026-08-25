@@ -229,6 +229,54 @@ export function LookupSelectField({ value, onChange, fieldKey, endpoint, valueKe
   )
 }
 
+// ── WhatsApp phone number field ─────────────────────────────────────────────────
+// CMBE K-193 fase 0: GET /whatsapp-phone-numbers options now carry a `coexistence`
+// flag. When the sibling `channel` field is 'waba_coex' the list is filtered to
+// Coexistence-only numbers; the currently stored value stays visible even if it
+// falls outside that filter (§3 no silent clear of a saved value).
+export function WhatsappPhoneNumberField({ value, onChange, fieldKey, endpoint, config }: {
+  value?: unknown; onChange: OnChange; fieldKey: string; endpoint: string; config?: Record<string, unknown>
+}) {
+  const { t } = useTranslation('workflows')
+  const [opts, setOpts] = useState<Array<{ value: string; label: string; coexistence: boolean }>>([])
+  const phoneLabelId = useId()
+
+  // Load the tenant's WABA sender numbers, keeping the coexistence flag per option.
+  useEffect(() => {
+    if (!endpoint) return
+    let alive = true
+    import('@/lib/api').then(m => m.default.get(endpoint))
+      .then(r => {
+        const rows = unwrapList<Record<string, unknown>>(r).rows
+        if (alive) setOpts(rows
+          .map(o => ({ value: String(o.value ?? o.id ?? ''), label: String(o.label ?? o.name ?? o.value ?? ''), coexistence: !!o.coexistence }))
+          .filter(o => o.value))
+      })
+      .catch(() => {})
+    return () => { alive = false }
+  }, [endpoint])
+
+  const filterActive = config?.channel === 'waba_coex'
+  const filtered = filterActive ? opts.filter(o => o.coexistence) : opts
+  // Keep a stored value visible even when the filter would otherwise drop it.
+  const current = String(value ?? '')
+  const list = current && !filtered.some(o => o.value === current)
+    ? [...filtered, ...opts.filter(o => o.value === current)]
+    : filtered
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+      <span id={phoneLabelId} className="sr-only">{fieldKey}</span>
+      <CreatableSelect value={current} onChange={v => onChange(fieldKey, v)}
+        aria-labelledby={phoneLabelId} allowCreate={false}
+        placeholder={t('fields.selectPlaceholder')}
+        options={[{ value: '', label: t('fields.selectPlaceholder') }, ...list]}
+        style={{ width: '100%', padding: '7px 9px', fontSize: 13 }} />
+      {filterActive && <Caption as="div">{t('fields.coexistenceOnly')}</Caption>}
+    </div>
+  )
+}
+
 // ── Workflow select field ───────────────────────────────────────────────────────
 // The workflow_call module's `workflow_id` picker (WF-RELATIONS-1): a searchable
 // list of this tenant's OWN workflows, fed by the same GET /workflows the

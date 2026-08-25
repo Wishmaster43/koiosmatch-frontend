@@ -526,3 +526,33 @@ describe('ConversationsSection · 24h window state (WA-WINDOW-1)', () => {
     expect(screen.queryByText('conversations.sessionClosedHint')).not.toBeInTheDocument()
   })
 })
+
+// K-193: the thread header shows the conversation's dominant channel, per enum value.
+describe('ConversationsSection · channel badge (K-193)', () => {
+  // No i18next instance in this test file (see other tests asserting raw key text) —
+  // t(key, {defaultValue}) resolves to the defaultValue, so a distinct server label
+  // per channel proves the chip is wired to primary_channel/channel_label per row.
+  it.each(['waba', 'waba_coex', 'wa_web'])('renders a chip for known primary_channel "%s"', async (channel) => {
+    vi.mocked(api.get).mockReset()
+    vi.mocked(api.get).mockImplementation((url: string) => {
+      if (url === '/conversations') {
+        return Promise.resolve({ data: { data: [{ ...THREADS[0], primary_channel: channel, channel_label: `label-${channel}` }] } })
+      }
+      if (url === '/conversations/conv-1/messages') return Promise.resolve({ data: { data: [] } })
+      return Promise.reject(new Error(`unexpected GET ${url}`))
+    })
+    render(<ConversationsSection threadsUrl="/conversations" threadsParams={{ candidate_id: 'cand-1' }} />)
+    expect(await screen.findByText(`label-${channel}`)).toBeInTheDocument()
+  })
+
+  it('renders no channel chip when primary_channel is absent (legacy/unknown thread)', async () => {
+    vi.mocked(api.get).mockImplementation((url: string) => {
+      if (url === '/conversations') return Promise.resolve({ data: { data: THREADS } })
+      if (url === '/conversations/conv-1/messages') return Promise.resolve({ data: { data: [] } })
+      return Promise.reject(new Error(`unexpected GET ${url}`))
+    })
+    render(<ConversationsSection threadsUrl="/conversations" threadsParams={{ candidate_id: 'cand-1' }} />)
+    await screen.findByText('+31612345678')
+    expect(screen.queryByText(/conversations\.channel\./)).not.toBeInTheDocument()
+  })
+})

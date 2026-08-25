@@ -262,7 +262,8 @@
       "directionValues": {
         "inbound": "Entrante",
         "outbound": "Saliente"
-      }
+      },
+      "channel": "Canal"
     },
     "kpi": {
       "conversationsTotal": "Total de conversaciones",
@@ -276,7 +277,12 @@
       "avgFirstResponseMinutes": "Tiempo medio 1ª respuesta",
       "minutesUnit": "minutos"
     },
-    "kpiOrderFellBack": "Una tarjeta KPI configurada en Ajustes ya no existe y se restableció al valor predeterminado."
+    "kpiOrderFellBack": "Una tarjeta KPI configurada en Ajustes ya no existe y se restableció al valor predeterminado.",
+    "channel": {
+      "waba": "WABA",
+      "waba_coex": "WABA · local",
+      "wa_web": "WA Web"
+    }
   },
   "applications": {
     "loading": "Cargando solicitudes…",

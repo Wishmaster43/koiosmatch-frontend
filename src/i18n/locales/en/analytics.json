@@ -262,7 +262,8 @@
       "directionValues": {
         "inbound": "Inbound",
         "outbound": "Outbound"
-      }
+      },
+      "channel": "Channel"
     },
     "kpi": {
       "conversationsTotal": "Total conversations",
@@ -276,7 +277,12 @@
       "avgFirstResponseMinutes": "Avg first response time",
       "minutesUnit": "minutes"
     },
-    "kpiOrderFellBack": "A KPI card configured in Settings no longer exists and was reset to the default."
+    "kpiOrderFellBack": "A KPI card configured in Settings no longer exists and was reset to the default.",
+    "channel": {
+      "waba": "WABA",
+      "waba_coex": "WABA · local",
+      "wa_web": "WA Web"
+    }
   },
   "applications": {
     "loading": "Loading applications…",

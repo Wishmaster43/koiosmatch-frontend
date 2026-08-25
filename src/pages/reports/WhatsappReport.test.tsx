@@ -98,13 +98,16 @@ vi.mock('./ReportTimeseriesChart', () => ({
 }))
 
 // RAPPORT-GEZICHT-WAVE2: the Recharts house donut needs real layout (jsdom has
-// none) — the stub carries an explicit role="button" (a segment's own label can
-// collide with a KPI card / caption elsewhere, so tests locate the segment row
-// via closest('[role="button"]') exactly as the old SegmentBars row did).
+// none) — the stub carries an explicit role="button" only when onItemClick is
+// passed (mirrors the real component's clickable-vs-inert legend row), so
+// tests locate the segment row via closest('[role="button"]') exactly as the
+// old SegmentBars row did, and can assert a K-193 channel donut stays inert.
 type StubDatum = { name: string; value: number; key?: string }
 vi.mock('@/components/charts/PieChartCard', () => ({
   default: ({ data, onItemClick }: { data?: StubDatum[]; onItemClick?: (d: unknown) => void }) => (
-    <>{(data ?? []).map(d => <button key={d.key} role="button" onClick={() => onItemClick?.(d)}>{d.name}</button>)}</>
+    <>{(data ?? []).map(d => onItemClick
+      ? <button key={d.key} role="button" onClick={() => onItemClick(d)}>{d.name}</button>
+      : <span key={d.key}>{d.name}</span>)}</>
   ),
 }))
 
@@ -270,5 +273,60 @@ describe('WhatsappReport (RAPPORTEN-WHATSAPP-FE-1)', () => {
     await user.click(segmentRow!)
     expect(getSpy).toHaveBeenCalledWith('/reports/whatsapp/axes/drill',
       expect.objectContaining({ params: { axis: 'type', value: 'text', period: 'month' } }))
+  })
+
+  // K-193 fase 0: with by_channel present, all four donuts render (the fixed
+  // house KPI-order tests above already prove nothing else regressed), and the
+  // escalated card no longer spans 2 (§ grid-parity: four halves, not 3+1).
+  it('renders a fourth "channel" donut with per-value labels when by_channel is present', () => {
+    mockUseWhatsappReport.mockReturnValue({
+      data: { ...data, by_channel: [
+        { value: 'waba', label: 'server label ignored', count: 20 },
+        { value: 'waba_coex', label: 'server label ignored', count: 15 },
+        { value: 'wa_web', label: 'server label ignored', count: 5 },
+      ] },
+      loading: false, error: false,
+    })
+    renderReport()
+    expect(screen.getByText('Kanaal')).toBeInTheDocument()
+    // The FE translates per enum value — the server's own label is ignored.
+    expect(screen.getByText('WABA')).toBeInTheDocument()
+    expect(screen.getByText('WABA · lokaal')).toBeInTheDocument()
+    expect(screen.getByText('WA Web')).toBeInTheDocument()
+    expect(screen.queryByText('server label ignored')).not.toBeInTheDocument()
+    // The escalated card lost its span=2 — asserted via the grid item wrapper's
+    // gridColumn style (ReportGridItem sets `1 / -1` only when span===2). The
+    // title renders as an <h3>, so it never collides with the donut's own
+    // 'Geëscaleerd' legend row.
+    const escalatedTitle = screen.getByRole('heading', { name: 'Geëscaleerd' })
+    const escalatedCard = escalatedTitle.closest('[style*="grid-column"]')
+    expect(escalatedCard).toBeNull()
+  })
+
+  // Inert legend: the channel donut carries no onItemClick yet (drill axis
+  // pending K-193 fase 1), so its rows render as plain text, not role=button.
+  it('renders the channel donut as inert — no drill click, no request', async () => {
+    const user = userEvent.setup()
+    mockUseWhatsappReport.mockReturnValue({
+      data: { ...data, by_channel: [{ value: 'waba', label: 'ignored', count: 40 }] },
+      loading: false, error: false,
+    })
+    renderReport()
+    const wabaLabel = screen.getByText('WABA')
+    expect(wabaLabel.closest('[role="button"]')).toBeNull()
+    getSpy.mockClear()
+    await user.click(wabaLabel)
+    expect(getSpy).not.toHaveBeenCalled()
+  })
+
+  // Fallback: an older envelope (no by_channel) renders exactly three donuts and
+  // keeps the escalated card at full row span — no grid hole.
+  it('renders no channel donut and keeps escalated spanning 2 when by_channel is absent', () => {
+    mockUseWhatsappReport.mockReturnValue({ data, loading: false, error: false })
+    renderReport()
+    expect(screen.queryByText('Kanaal')).not.toBeInTheDocument()
+    const escalatedTitle = screen.getByRole('heading', { name: 'Geëscaleerd' })
+    const escalatedCard = escalatedTitle.closest('[style*="grid-column"]')
+    expect(escalatedCard).not.toBeNull()
   })
 })

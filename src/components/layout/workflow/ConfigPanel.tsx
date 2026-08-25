@@ -9,7 +9,7 @@ import { useState, useEffect } from 'react'
 import { Zap, Trash2, Play } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import { SectionTitle } from '@/components/ui/typography'
+import { SectionTitle, Caption, BodyText } from '@/components/ui/typography'
 import Button from '@/components/ui/Button'
 import DrawerTabs from '@/components/drawer/DrawerTabs'
 import { MODULE_META, MODULE_SCHEMAS } from '@/modules/index'
@@ -87,18 +87,26 @@ export default function ConfigPanel({ node, onUpdate, onDelete, onTabChange, var
   // Shared field list renderer
   const renderFields = (fields: typeof schema) => (
     <div style={{ flex: 1, overflowY: 'auto', padding: 16, display: 'flex', flexDirection: 'column', gap: 14 }}>
-      {fields.map(field => (
-        <div key={field.key}>
-          <label style={{ display: 'block', fontSize: 10, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>
-            {fieldLabel(t, field.label as string | undefined)}
-            {!!(field as WorkflowField & { required?: boolean }).required && <span style={{ color: 'var(--color-danger-text)', marginLeft: 3 }}>*</span>}
-          </label>
-          <FieldInput field={field as WorkflowField} value={config?.[field.key]} variables={variables} config={config}
-            onChange={(key, val) => onUpdate(node.id, key, val)} />
-          {/* Helper text under the field — registry `hint:`/`help:` through the render-layer i18n (§5). */}
-          {(field.hint ?? field.help) ? <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>{fieldHint(t, (field.hint ?? field.help) as string)}</div> : null}
-        </div>
-      ))}
+      {fields.map(field => {
+        const isRequired = !!(field as WorkflowField & { required?: boolean }).required
+        const isEmpty    = config?.[field.key] == null || config?.[field.key] === ''
+        return (
+          <div key={field.key}>
+            <label style={{ display: 'block', fontSize: 10, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>
+              {fieldLabel(t, field.label as string | undefined)}
+              {isRequired && <span style={{ color: 'var(--color-danger-text)', marginLeft: 3 }}>*</span>}
+            </label>
+            <FieldInput field={field as WorkflowField} value={config?.[field.key]} variables={variables} config={config}
+              onChange={(key, val) => onUpdate(node.id, key, val)} />
+            {/* Helper text under the field — registry `hint:`/`help:` through the render-layer i18n (§5). */}
+            {(field.hint ?? field.help) ? <Caption style={{ display: 'block', marginTop: 4 }}>{fieldHint(t, (field.hint ?? field.help) as string)}</Caption> : null}
+            {/* Required-and-empty hint shows regardless of a registry hint, so a required field with a hint still surfaces it (SCHERMWAARHEID-1). */}
+            {isRequired && isEmpty && (
+              <Caption style={{ display: 'block', marginTop: 4, color: 'var(--color-danger-text)' }}>{t('fields.requiredHint')}</Caption>
+            )}
+          </div>
+        )
+      })}
       {fields.length === 0 && type !== 'router' && <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('config.noConfig')}</p>}
     </div>
   )
@@ -111,8 +119,8 @@ export default function ConfigPanel({ node, onUpdate, onDelete, onTabChange, var
           {Icon && <Icon size={16} color={meta?.color} />}
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t('modules.' + type, { defaultValue: meta?.label ?? type })}</div>
-          <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('categories.' + categorySlug(meta?.category), { defaultValue: meta?.category ?? '' })}</div>
+          <SectionTitle style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t('modules.' + type, { defaultValue: meta?.label ?? type })}</SectionTitle>
+          <Caption>{t('categories.' + categorySlug(meta?.category), { defaultValue: meta?.category ?? '' })}</Caption>
         </div>
         {/* HUISSTIJL-1: icon-action → Button iconOnly ghost; the hover-driven danger
             colour rides along via onMouseEnter/onMouseLeave (Button forwards native
@@ -183,23 +191,36 @@ export default function ConfigPanel({ node, onUpdate, onDelete, onTabChange, var
               const want = showIf.value
               return Array.isArray(want) ? want.includes(cur) : cur === want
             })
-            .map(field => (
-              <div key={field.key}>
-                <label style={{ display: 'block', fontSize: 10, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>
-                  {fieldLabel(t, field.label as string | undefined)}
-                </label>
-                <FieldInput field={field as WorkflowField} value={config?.[field.key]} variables={variables} config={config}
-                  onChange={(key, val) => onUpdate(node.id, key, val)} />
-                {/* Registry `hint:`/`help:` helper text through the render-layer i18n (§5). */}
-                {(field.hint ?? field.help) ? <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>{fieldHint(t, (field.hint ?? field.help) as string)}</div> : null}
-              </div>
-            ))}
+            .map(field => {
+              // SCHERMWAARHEID-1: 'required' was display-only on the ai_agent tab
+              // path — the settings path silently dropped the asterisk. Honest
+              // now on both, plus a hint when a required select is still empty
+              // (no save-blocking: the editor has none, the engine fails visibly).
+              const isRequired = !!(field as WorkflowField & { required?: boolean }).required
+              const isEmpty    = config?.[field.key] == null || config?.[field.key] === ''
+              return (
+                <div key={field.key}>
+                  <label style={{ display: 'block', fontSize: 10, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>
+                    {fieldLabel(t, field.label as string | undefined)}
+                    {isRequired && <span style={{ color: 'var(--color-danger-text)', marginLeft: 3 }}>*</span>}
+                  </label>
+                  <FieldInput field={field as WorkflowField} value={config?.[field.key]} variables={variables} config={config}
+                    onChange={(key, val) => onUpdate(node.id, key, val)} />
+                  {/* Registry `hint:`/`help:` helper text through the render-layer i18n (§5). */}
+                  {(field.hint ?? field.help) ? <Caption style={{ display: 'block', marginTop: 4 }}>{fieldHint(t, (field.hint ?? field.help) as string)}</Caption> : null}
+                  {/* Required-and-empty hint shows regardless of a registry hint, so a required field with a hint still surfaces it (SCHERMWAARHEID-1). */}
+                  {isRequired && isEmpty && (
+                    <Caption style={{ display: 'block', marginTop: 4, color: 'var(--color-danger-text)' }}>{t('fields.requiredHint')}</Caption>
+                  )}
+                </div>
+              )
+            })}
           {schema.length === 0 && (
             type === 'router' ? (
               <div style={{ padding: '12px 0', display: 'flex', flexDirection: 'column', gap: 8 }}>
                 <SectionTitle as="p" style={{ margin: 0 }}>{t('config.routerTitle')}</SectionTitle>
                 <p style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.6, margin: 0 }}>{t('config.routerDesc')}</p>
-                <p style={{ fontSize: 11, color: 'var(--text-muted)', margin: 0 }}>{t('config.routerNote')}</p>
+                <Caption style={{ display: 'block' }}>{t('config.routerNote')}</Caption>
               </div>
             ) : config && Object.keys(config).length > 0 ? (
               // Unknown module type (not in the FE registry): show its stored config
@@ -209,9 +230,9 @@ export default function ConfigPanel({ node, onUpdate, onDelete, onTabChange, var
                 {Object.entries(config).map(([k, v]) => (
                   <div key={k}>
                     <label style={{ display: 'block', fontSize: 10, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>{k}</label>
-                    <div style={{ fontSize: 13, color: 'var(--text)', wordBreak: 'break-word' }}>
+                    <BodyText style={{ wordBreak: 'break-word' }}>
                       {typeof v === 'object' ? JSON.stringify(v) : String(v ?? '—')}
-                    </div>
+                    </BodyText>
                   </div>
                 ))}
               </div>
@@ -230,7 +251,7 @@ export default function ConfigPanel({ node, onUpdate, onDelete, onTabChange, var
               </div>
             : <div style={{ padding: 12 }}>
                 {fanout && <FanoutSummary fanout={fanout} />}
-                {Array.isArray(output) && <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 8, fontWeight: 500 }}>{output.length} {output.length === 1 ? t('config.item') : t('config.items')}</div>}
+                {Array.isArray(output) && <Caption style={{ display: 'block', marginBottom: 8, fontWeight: 500 }}>{output.length} {output.length === 1 ? t('config.item') : t('config.items')}</Caption>}
                 <OutputTree data={output} />
               </div>}
         </div>
