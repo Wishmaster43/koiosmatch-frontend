@@ -405,7 +405,8 @@
       "archiveFailed": "Archiving failed.",
       "restoreFailed": "Restoring failed.",
       "linkedin": "LinkedIn",
-      "openLinkedin": "Open on LinkedIn"
+      "openLinkedin": "Open on LinkedIn",
+      "freeText": "Free text"
     },
     "deleteConfirm": "Delete this contact?",
     "saveFailed": "Saving failed.",
@@ -846,6 +847,7 @@
     "windowTitle": "Notes — {{name}}",
     "loadError": "This customer could not be loaded.",
     "companyTextWindowTitle": "Company text — {{name}}",
-    "departmentTextWindowTitle": "Department text — {{name}}"
+    "departmentTextWindowTitle": "Department text — {{name}}",
+    "contactTextWindowTitle": "Contact text: {{name}}"
   }
 }

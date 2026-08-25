@@ -100,7 +100,11 @@ function VacancyCandidateTabSettingsInner() {
   // Toggle one value in one of the array-valued keys; always persists the FULL
   // current config, never a partial write — immediate-save, no separate save
   // button (mirrors CandidateVacancyTabSettings).
-  const persist = (patch) => saveSettingsKeys({ [KEY]: { ...cfg, ...patch } }).catch(() => {})
+  // Persist only what the tenant actually configured (`stored`) plus this patch —
+  // never the seeded defaults: spreading `cfg` wrote the FE 'available' status seed
+  // into the setting on any unrelated toggle, re-narrowing the candidate tab below
+  // the leads counter (LEADS-PARITY-1, Opus wave-B2).
+  const persist = (patch) => saveSettingsKeys({ [KEY]: { ...(stored ?? {}), ...patch } }).catch(() => {})
   const toggleIn = (key) => (value) =>
     persist({ [key]: cfg[key].includes(value) ? cfg[key].filter(v => v !== value) : [...cfg[key], value] })
   // Flip one boolean leads-criteria key (apply_radius / exclude_already_applied /

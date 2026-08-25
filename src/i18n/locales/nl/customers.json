@@ -405,7 +405,8 @@
       "archiveFailed": "Archiveren is mislukt.",
       "restoreFailed": "Herstellen is mislukt.",
       "linkedin": "LinkedIn",
-      "openLinkedin": "Openen op LinkedIn"
+      "openLinkedin": "Openen op LinkedIn",
+      "freeText": "Vrije tekst"
     },
     "deleteConfirm": "Deze contactpersoon verwijderen?",
     "saveFailed": "Opslaan is mislukt.",
@@ -846,6 +847,7 @@
     "windowTitle": "Notities — {{name}}",
     "loadError": "Deze klant kon niet worden geladen.",
     "companyTextWindowTitle": "Bedrijfstekst — {{name}}",
-    "departmentTextWindowTitle": "Afdelingstekst — {{name}}"
+    "departmentTextWindowTitle": "Afdelingstekst — {{name}}",
+    "contactTextWindowTitle": "Contacttekst: {{name}}"
   }
 }

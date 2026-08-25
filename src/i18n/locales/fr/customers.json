@@ -405,7 +405,8 @@
       "archiveFailed": "L'archivage a échoué.",
       "restoreFailed": "La restauration a échoué.",
       "linkedin": "LinkedIn",
-      "openLinkedin": "Ouvrir sur LinkedIn"
+      "openLinkedin": "Ouvrir sur LinkedIn",
+      "freeText": "Texte libre"
     },
     "deleteConfirm": "Supprimer ce contact ?",
     "saveFailed": "L'enregistrement a échoué.",
@@ -846,6 +847,7 @@
     "windowTitle": "Notes — {{name}}",
     "loadError": "Ce client n'a pas pu être chargé.",
     "companyTextWindowTitle": "Texte entreprise — {{name}}",
-    "departmentTextWindowTitle": "Texte du département — {{name}}"
+    "departmentTextWindowTitle": "Texte du département — {{name}}",
+    "contactTextWindowTitle": "Texte du contact: {{name}}"
   }
 }

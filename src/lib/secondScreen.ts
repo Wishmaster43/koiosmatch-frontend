@@ -162,7 +162,13 @@ export function openNoteEditPopout(entity: PopoutEntity, id: string | number, no
 // 'outreachTarget'; no standalone `GET /outreach-targets/{id}` exists (measured
 // — routes/api/tenant/tasks-outreach.php only wires PATCH), so this field's `id`
 // is the COMPOSITE `outreachTargetPopoutId()` below, mirroring `departmentText`.
-export type PopoutTextField = 'summary' | 'matchRemarks' | 'companyText' | 'departmentText' | 'description' | 'locationText' | 'targetNote' | 'text'
+// `contactText` (CONTACT-DRILLDOWN-GATEN-1 punt 1, CONTACT-TEKST-1): a customer
+// contact's own free-text block, same recipe as `departmentText` — rides under
+// entity 'customer' (no separate PopoutEntity for a contact, it is a sub-record
+// of a customer). A standalone `GET/PATCH /customers/{cid}/contacts/{id}` route
+// DOES exist (unlike departments), but the PATCH still needs the customer id, so
+// this field's `id` is the COMPOSITE `contactPopoutId()` below too.
+export type PopoutTextField = 'summary' | 'matchRemarks' | 'companyText' | 'departmentText' | 'description' | 'locationText' | 'targetNote' | 'text' | 'contactText'
 
 // K5a: encodes/decodes the composite id `departmentText` travels under —
 // `<customerId>:<departmentId>` — so ONE string still fits the existing
@@ -188,6 +194,17 @@ export const parseOutreachTargetPopoutId = (id: string | undefined): { campaignI
   if (!id) return null
   const [campaignId, targetId] = id.split(':')
   return campaignId && targetId ? { campaignId, targetId } : null
+}
+
+// CONTACT-TEKST-1: the same composite-id trick as `departmentPopoutId` — the
+// nested PATCH route requires the customer id too, so `<customerId>:<contactId>`
+// fits the existing `id: string | number` shape every other popout field uses.
+export const contactPopoutId = (customerId: string | number, contactId: string | number): string =>
+  `${customerId}:${contactId}`
+export const parseContactPopoutId = (id: string | undefined): { customerId: string; contactId: string } | null => {
+  if (!id) return null
+  const [customerId, contactId] = id.split(':')
+  return customerId && contactId ? { customerId, contactId } : null
 }
 
 // Identity of ONE popped-out field: the OS window name AND the BroadcastChannel

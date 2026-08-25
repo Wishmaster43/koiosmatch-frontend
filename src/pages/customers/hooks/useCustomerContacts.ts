@@ -59,6 +59,11 @@ export interface ContactPayload {
   isPrimary: boolean
   // Tenant custom-field values (§3B "Eigen velden" — the Extra sub-tab).
   customFields: Record<string, unknown>
+  // CONTACT-TEKST-1: the free-text block, validated `max:20000` by
+  // CustomerContactController::validateContact. Optional — every OTHER call site
+  // building this payload (Add*Modal, LocationContactSection) creates a contact
+  // without touching this field; only ContactTextSection's save sends it.
+  notes?: string
 }
 
 /**
@@ -251,6 +256,8 @@ const toApi = (p: Partial<ContactPayload>) => ({
   ...(p.statusId !== undefined ? { status_id: p.statusId || null } : {}),
   ...(p.isPrimary !== undefined ? { is_primary: p.isPrimary } : {}),
   ...(p.customFields !== undefined ? { custom_fields: p.customFields } : {}),
+  // CONTACT-TEKST-1: empty string → null, mirroring gender/linkedin above.
+  ...(p.notes !== undefined ? { notes: p.notes || null } : {}),
 })
 
 export function useCustomerContacts(customerId: Id | undefined) {

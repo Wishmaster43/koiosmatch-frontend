@@ -32,6 +32,15 @@ vi.mock('@/lib/api', async () => {
 })
 beforeEach(() => { mockPost.mockClear(); mockPost.mockResolvedValue({ data: {} }) })
 
+// CONTACT-TEKST-1: minimal stand-in for the Tiptap editor the free-text block
+// mounts while editing — same stub EditableRichTextField.test.tsx uses; its own
+// ProseMirror internals are out of scope here.
+vi.mock('@/components/ui/RichTextEditor', () => ({
+  default: ({ value, onChange }: { value?: string; onChange: (v: string) => void }) => (
+    <textarea data-testid="rte" value={value ?? ''} onChange={e => onChange(e.target.value)} />
+  ),
+}))
+
 // Merge is permission-gated (customers.update). Default null = no auth context at all,
 // which is what every pre-existing test in this file renders under.
 const mockAuth: { current: { hasPermission: (p: string) => boolean } | null } = { current: null }
@@ -534,5 +543,50 @@ describe('ContactDetail · Koppelingen sub-tab hidden when empty (DD-FE-6)', () 
     render(<ContactDetail contact={baseContact()} locations={locations} departments={departments} statuses={statuses}
       onSave={vi.fn()} onDelete={vi.fn()} close={vi.fn()} />)
     expect(screen.getByRole('tab', { name: cm('backofficeLinks.tabLabel') })).toBeInTheDocument()
+  })
+})
+
+/**
+ * CONTACT-TEKST-1: the free-text block, canon-ordered directly under the field
+ * card and above the Vestiging coupling. Asserts the REQUEST SHAPE (§13) —
+ * onSave is the same update() callback the drawer routes to
+ * `PATCH /customers/{cid}/contacts/{id}`, so proving `{ notes }` here proves
+ * the real save, never only that a callback fired.
+ */
+describe('ContactDetail · free-text block (CONTACT-TEKST-1)', () => {
+  it('renders the saved text through SafeHtml on the Gegevens tab', () => {
+    render(<ContactDetail contact={baseContact({ notes: '<p>Werkt op afspraak</p>' })} locations={locations} departments={departments}
+      statuses={statuses} onSave={vi.fn()} onDelete={vi.fn()} close={vi.fn()} />)
+    expect(screen.getByText('Werkt op afspraak')).toBeInTheDocument()
+  })
+
+  it('shows the calm empty state when no text is stored yet', () => {
+    render(<ContactDetail contact={baseContact()} locations={locations} departments={departments}
+      statuses={statuses} onSave={vi.fn()} onDelete={vi.fn()} close={vi.fn()} />)
+    expect(screen.getByText(ct('richText.empty'))).toBeInTheDocument()
+  })
+
+  it('saves the edited HTML as { notes } through the same onSave the drawer wires to the contact PATCH route', async () => {
+    const user = userEvent.setup()
+    const onSave = vi.fn()
+    render(<ContactDetail contact={baseContact({ notes: '<p>Original</p>' })} locations={locations} departments={departments}
+      statuses={statuses} onSave={onSave} onDelete={vi.fn()} close={vi.fn()} />)
+
+    // The free-text block's own pencil — the LAST "edit"-titled control before
+    // the Vestiging coupling (field table pencil is first, mirrors [0] above).
+    const editButtons = screen.getAllByTitle(cm('edit'))
+    await user.click(editButtons[editButtons.length - 1])
+    const rte = screen.getByTestId('rte')
+    await user.clear(rte)
+    await user.type(rte, '<p>Edited</p>')
+    await user.click(screen.getByTitle(cm('save')))
+
+    expect(onSave).toHaveBeenCalledWith('c1', { notes: '<p>Edited</p>' })
+  })
+
+  it('shows the second-screen popout icon for the free-text block', () => {
+    render(<ContactDetail contact={baseContact()} locations={locations} departments={departments}
+      statuses={statuses} onSave={vi.fn()} onDelete={vi.fn()} close={vi.fn()} />)
+    expect(screen.getByTitle(cm('openSecondScreen'))).toBeInTheDocument()
   })
 })

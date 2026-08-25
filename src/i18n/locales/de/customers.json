@@ -405,7 +405,8 @@
       "archiveFailed": "Archivieren fehlgeschlagen.",
       "restoreFailed": "Wiederherstellen fehlgeschlagen.",
       "linkedin": "LinkedIn",
-      "openLinkedin": "Auf LinkedIn öffnen"
+      "openLinkedin": "Auf LinkedIn öffnen",
+      "freeText": "Freitext"
     },
     "deleteConfirm": "Diesen Kontakt löschen?",
     "saveFailed": "Speichern fehlgeschlagen.",
@@ -846,6 +847,7 @@
     "windowTitle": "Notizen — {{name}}",
     "loadError": "Dieser Kunde konnte nicht geladen werden.",
     "companyTextWindowTitle": "Unternehmenstext — {{name}}",
-    "departmentTextWindowTitle": "Abteilungstext — {{name}}"
+    "departmentTextWindowTitle": "Abteilungstext — {{name}}",
+    "contactTextWindowTitle": "Kontakttext: {{name}}"
   }
 }

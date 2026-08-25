@@ -38,6 +38,8 @@ import Button from '@/components/ui/Button'
 import TitleBadge from '@/components/drawer/TitleBadge'
 import DrillPager, { type DrillPagerProps } from '@/components/drawer/DrillPager'
 import ContactLinkSection from './ContactLinkSection'
+// CONTACT-TEKST-1: the free-text block (canon order: info → text → koios → branch, §3A).
+import ContactTextSection from './ContactTextSection'
 import { emailValue, phoneValue, linkedinValue, LinkedinMark } from '@/components/drawer/contactLinks'
 import SubTabBar from '@/components/drawer/SubTabBar'
 import CustomFieldsTab from '@/components/drawer/CustomFieldsTab'
@@ -351,6 +353,11 @@ export default function ContactDetail({ contact, locations, departments, statuse
           {/* Canon width (fieldRowCanon, 05-08): EditableFieldTable's own default now matches. */}
           <EditableFieldTable key={tableEpoch} title={t('contacts.detail.infoTitle')} fields={fields} value={values} onSave={save}
             editing={editing} onStartEdit={() => setEditing(true)} onCancel={() => setEditing(false)} />
+
+          {/* CONTACT-TEKST-1: the free-text block, canon-ordered directly under the
+              field card and above the Vestiging (location/department) coupling. */}
+          <ContactTextSection contactId={contact.id as Id} customerId={contact.customerId}
+            value={contact.notes ?? ''} onSave={html => onSave(contact.id as Id, { notes: html })} />
 
           {/* Koppeling — same shape and behaviour as "+ Vestiging" (Danny 28-07). */}
           <ContactLinkSection locationIds={linkedLocationIds} departmentIds={linkedDepartmentIds}

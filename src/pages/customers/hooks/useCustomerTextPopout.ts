@@ -23,11 +23,18 @@ import type { Id } from '@/types/common'
 export interface CustomerLite { id: string; name: string; initials: string; description: string }
 export interface DepartmentLite { id: string; customerId: string; name: string; description: string }
 export interface LocationLite { id: string; name: string; description: string }
+// CONTACT-TEKST-1: the popped-out contact window's own light identity shape —
+// `description` reused as the field name every sibling *Lite carries (the
+// popout draft plumbing below is written generically against that key).
+export interface ContactLite { id: string; customerId: string; name: string; description: string }
 
 // The subset of the raw customer/department/location resource these popouts actually read.
 interface RawCustomerLite { id?: Id; name?: string; description?: string | null }
 interface RawDepartmentLite { id?: Id; name?: string; description?: string | null }
 interface RawLocationLite { id?: Id; name?: string; description?: string | null }
+// CONTACT-TEKST-1: the CustomerContactResource subset this popout reads (name is
+// composed server-side; notes is the free-text block, see Contact interface cite).
+interface RawContactLite { id?: Id; name?: string; notes?: string | null }
 
 // Light identity fetch for the popped-out customer bedrijfstekst window.
 export function useCustomerTextLite(id: string | undefined) {
@@ -124,6 +131,39 @@ export function useLocationTextLite(locationId: string | undefined) {
   return { location, loading, error, reload: load }
 }
 
+// CONTACT-TEKST-1: light identity fetch for the popped-out contact window. A
+// the standalone contact GET is FLAT: `GET /contacts/{id}` (CustomerContactController::show(string $id));
+// the nested prefix carries no single-contact GET (measured, Opus wave-B2),
+// so this is a direct single-record fetch, mirroring useLocationTextLite — the
+// nested customer id still has to be threaded through for the matching PATCH.
+export function useContactTextLite(customerId: string | undefined, contactId: string | undefined) {
+  const [contact, setContact] = useState<ContactLite | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(false)
+
+  const load = useCallback((signal?: AbortSignal) => {
+    if (!customerId || !contactId) { setLoading(false); return }
+    setLoading(true); setError(false)
+    api.get(`/contacts/${contactId}`, { signal })
+      .then(r => {
+        const raw = unwrap<RawContactLite>(r)
+        setContact({ id: String(raw.id ?? contactId), customerId, name: raw.name ?? '?', description: raw.notes ?? '' })
+      })
+      .catch((e) => { if (!signal?.aborted && e?.name !== 'CanceledError') setError(true) })
+      .finally(() => setLoading(false))
+  }, [customerId, contactId])
+
+  // §9 abort-guard (heraudit A11Y-2): a fast popout-id switch must never let the
+  // previous id's stale response win — the effect owns a controller; `reload`
+  // (user-initiated) deliberately runs unsignalled.
+  useEffect(() => {
+    const ctrl = new AbortController()
+    load(ctrl.signal)
+    return () => ctrl.abort()
+  }, [load])
+  return { contact, loading, error, reload: load }
+}
+
 // Standalone PATCH /locations/{id} — same field LocationAddressTab's
 // saveDescription writes through useCustomerLocations.update.
 export function patchLocationText(locationId: Id, html: string, t: TFunction, revert: () => void): Promise<boolean> {
@@ -145,6 +185,16 @@ export function patchCustomerText(id: Id, html: string, t: TFunction, revert: ()
 // DepartmentDetail's saveDescription writes through useCustomerDepartments.update.
 export function patchDepartmentText(customerId: Id, departmentId: Id, html: string, t: TFunction, revert: () => void): Promise<boolean> {
   return api.patch(`/customers/${customerId}/departments/${departmentId}`, { description: html })
+    .then(() => true)
+    .catch(err => { revert(); notifyError(extractApiError(err, t('common:actionFailed'))); return false })
+}
+
+// CONTACT-TEKST-1: standalone PATCH /customers/{cid}/contacts/{id} { notes } —
+// same field ContactTextSection's saveText writes through useCustomerContacts.update
+// inside the drawer; the popped-out window has no drawer state to route an
+// optimistic patch through, so it calls the route directly (mirrors the pair above).
+export function patchContactText(customerId: Id, contactId: Id, html: string, t: TFunction, revert: () => void): Promise<boolean> {
+  return api.patch(`/customers/${customerId}/contacts/${contactId}`, { notes: html })
     .then(() => true)
     .catch(err => { revert(); notifyError(extractApiError(err, t('common:actionFailed'))); return false })
 }

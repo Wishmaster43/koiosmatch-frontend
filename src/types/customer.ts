@@ -64,6 +64,12 @@ export interface Contact {
   // The channel slug (a last_contact_types lookup value); label/icon resolve via useLastContactTypes.
   lastContactType: string | null
   customFields: Record<string, unknown>
+  // CONTACT-TEKST-1: the free-text block (rich-text HTML, sanitised on read via
+  // SafeHtml). CustomerContactResource `notes` — cite:
+  // app/Http/Resources/Customer/CustomerContactResource.php ("'notes' => $this->notes,").
+  // Optional (not every existing test fixture across this entity sets it) — read
+  // defensively as `?? ''`, mirroring the other optional flags on this interface.
+  notes?: string
   // ARCHIVE-SUBENTITY-1: soft-delete state (derived from deleted_at) — off by
   // default in every list, restorable from the archived quick-view. Optional
   // (not every existing test fixture sets it) — read defensively as `?? false`.
@@ -324,6 +330,8 @@ export interface ApiContact {
   // CONTACT-LAATSTE-CONTACT-1: both live on CustomerContactResource (ISO-8601 + slug).
   last_contact_at?: string | null; last_contact_type?: string | null
   custom_fields?: Record<string, unknown>
+  // CONTACT-TEKST-1: the free-text block, see the Contact interface above for the source cite.
+  notes?: string | null
   // EXTRACT-1: the shared raw shape (src/lib/backofficeLink).
   backoffice_links?: ApiBackofficeLink[]
   // ARCHIVE-SUBENTITY-1: derived boolean + the raw timestamp (CustomerContactResource).

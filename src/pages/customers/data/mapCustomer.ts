@@ -146,6 +146,8 @@ export function mapContact(p: ApiContact = {}): Contact {
     lastContactAt: p.last_contact_at ?? null,
     lastContactType: p.last_contact_type ?? null,
     customFields: p.custom_fields ?? {},
+    // CONTACT-TEKST-1: the free-text block, sanitised HTML rendered via SafeHtml.
+    notes: p.notes ?? '',
     // ARCHIVE-SUBENTITY-1: same convention as mapVacancy.ts.
     archived: Boolean(p.archived ?? (p.deleted_at != null)),
     archivedAt: p.deleted_at ?? null,

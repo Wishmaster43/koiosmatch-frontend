@@ -13,7 +13,6 @@ import { toCoord } from '@/lib/coords'
 import { canonicalizeToOptions, lookupValue } from '@/lib/lookupUtils'
 import { useLookups } from '@/context/LookupsContext'
 import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
-import { getCandidateTabDefaults } from '../lib/candidateTabVisibility'
 import type { CandidateTabConfig } from '../lib/candidateTabVisibility'
 import type { Criterion } from '@/components/match/MatchScoreBlock'
 import type { VacancyDetail } from '@/types/vacancy'
@@ -68,9 +67,17 @@ export function useCandidateSearch(vacancy: VacancyDetail) {
   const candidateTabCfg = getJsonSetting<(CandidateTabConfig & { default_radius_km?: number }) | null>(
     allSettings, 'vacancy_candidate_tab', null,
   )
-  const tabDefaults = getCandidateTabDefaults([], statuses, candidateTypes)
-  const defaultStatusValues = candidateTabCfg?.candidate_statuses ?? tabDefaults.candidate_statuses
-  const defaultContractForms = candidateTabCfg?.contract_forms ?? tabDefaults.contract_forms
+  // LEADS-PARITY-1 (Danny 25-08): the seed regex in getCandidateTabDefaults
+  // ("available"/"beschikbaar") is a soft FORM default only (mirrors the
+  // settings screen's own pre-save preview) — it must never become a default
+  // FILTER, or the tab's own request silently narrows past the leads counter's
+  // population. A tenant's SAVED `vacancy_candidate_tab.candidate_statuses`
+  // still applies (an explicit tenant choice, not a guess); absent that, the
+  // default is an empty selection — no status[] sent at all.
+  const defaultStatusValues = candidateTabCfg?.candidate_statuses ?? []
+  // contract_forms has no seed vocabulary to begin with (getCandidateTabDefaults
+  // always returns [] here) — the tenant setting still wins when saved.
+  const defaultContractForms = candidateTabCfg?.contract_forms ?? []
   // RADIUS-SETTING-1 (Danny 25-07): the search radius now comes from the SAME
   // tenant setting that already drives this tab's status/contract-form defaults
   // (vacancy_candidate_tab.default_radius_km), not a hardcoded 30 — a tenant with
@@ -90,7 +97,15 @@ export function useCandidateSearch(vacancy: VacancyDetail) {
   // tab past the leads count.
   const vacancyFunctionTitle = vacancy.category ?? ''
 
-  const [radiusKm, setRadiusKm]           = useState(defaultRadiusKm)
+  const [radiusKm, setRadiusKmState]      = useState(defaultRadiusKm)
+  // LEADS-PARITY-1: the radius CONTROL still displays the tenant default so the
+  // recruiter sees the same ring the leads counter used, but the request omits
+  // `radius` until the user actively changes it — the server already applies
+  // its own resolver default when no radius param is sent (CMBE parity fix),
+  // so sending the displayed default here would just re-pin it client-side and
+  // risk drifting from a server-side default change.
+  const [radiusTouched, setRadiusTouched] = useState(false)
+  const setRadiusKm = (km: number) => { setRadiusKmState(km); setRadiusTouched(true) }
   const [functions, setFunctions]         = useState<string[]>(vacancyFunctionTitle ? [vacancyFunctionTitle] : [])
   const [statusSel, setStatusSel]         = useState<string[]>(defaultStatusValues)
   const [contractForms, setContractForms] = useState<string[]>(defaultContractForms)
@@ -103,7 +118,8 @@ export function useCandidateSearch(vacancy: VacancyDetail) {
   const [prevId, setPrevId] = useState<Id | undefined>(vacancy.id)
   if (vacancy.id !== prevId) {
     setPrevId(vacancy.id)
-    setRadiusKm(defaultRadiusKm)
+    setRadiusKmState(defaultRadiusKm)
+    setRadiusTouched(false)
     setFunctions(vacancyFunctionTitle ? [vacancyFunctionTitle] : [])
     setStatusSel(defaultStatusValues)
     setContractForms(defaultContractForms)
@@ -146,7 +162,11 @@ export function useCandidateSearch(vacancy: VacancyDetail) {
         // GEO-DEGRADE-1: a radius needs an origin — without the vacancy's own geocode
         // the server still scores and ranks (measured: 37 rows, distance null), so
         // only the radius is dropped instead of killing the whole tab.
-        ...(noLocation ? {} : { radius: radiusKm }),
+        // LEADS-PARITY-1: send `radius` only once the user actually changed the
+        // control — an untouched default request omits it so the server applies
+        // its own resolver default (CMBE parity fix), matching the leads counter
+        // on the untouched population; an explicit radius still widens/narrows.
+        ...(noLocation || !radiusTouched ? {} : { radius: radiusKm }),
         ...(statusSel.length && { status: statusSel }),
         ...(functions.length && { function_title: functions }),
         ...(contractForms.length && { contract_form: contractForms }),
@@ -202,7 +222,7 @@ export function useCandidateSearch(vacancy: VacancyDetail) {
       // refresh into either.
       if (refreshTimerRef.current) { clearTimeout(refreshTimerRef.current); refreshTimerRef.current = null }
     }
-  }, [noLocation, vacancy.id, radiusKm, functions, statusSel, contractForms, reloadKey])
+  }, [noLocation, vacancy.id, radiusKm, radiusTouched, functions, statusSel, contractForms, reloadKey])
 
   // Queue a batched Koios advice refresh (fase 3) for this vacancy's best
   // matches. Resolves true on the server's 202 ack, false on any failure

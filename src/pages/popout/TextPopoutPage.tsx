@@ -23,6 +23,8 @@ import { CustomerCompanyTextPopout } from '@/pages/customers/shared'
 import { CustomerDepartmentTextPopout } from '@/pages/customers/shared'
 // K3/K4c: a customer location's own description gets the same pop-out.
 import { CustomerLocationTextPopout } from '@/pages/customers/shared'
+// CONTACT-TEKST-1: a customer contact's own free-text popout, same folder scope as its siblings above.
+import { CustomerContactTextPopout } from '@/pages/customers/shared'
 // V-desc-1: the vacancy description popout lives under pages/vacancies/popout
 // (this task's own folder scope), not here — this dispatcher only imports it.
 import { VacancyDescriptionPopout } from '@/pages/vacancies/shared'
@@ -43,6 +45,7 @@ const TEXT_POPOUT_PAGES: Record<string, ComponentType<{ id: string | undefined }
   'customer:companyText': CustomerCompanyTextPopout,
   'customer:departmentText': CustomerDepartmentTextPopout,
   'customer:locationText': CustomerLocationTextPopout,
+  'customer:contactText': CustomerContactTextPopout,
   'vacancy:description': VacancyDescriptionPopout,
   'match:text': MatchTextPopout,
   'task:description': TaskDescriptionPopout,

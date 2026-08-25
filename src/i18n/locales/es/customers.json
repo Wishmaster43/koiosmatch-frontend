@@ -405,7 +405,8 @@
       "archiveFailed": "Error al archivar.",
       "restoreFailed": "Error al restaurar.",
       "linkedin": "LinkedIn",
-      "openLinkedin": "Abrir en LinkedIn"
+      "openLinkedin": "Abrir en LinkedIn",
+      "freeText": "Texto libre"
     },
     "deleteConfirm": "¿Eliminar este contacto?",
     "saveFailed": "Error al guardar.",
@@ -846,6 +847,7 @@
     "windowTitle": "Notas — {{name}}",
     "loadError": "No se pudo cargar este cliente.",
     "companyTextWindowTitle": "Texto de empresa — {{name}}",
-    "departmentTextWindowTitle": "Texto del departamento — {{name}}"
+    "departmentTextWindowTitle": "Texto del departamento — {{name}}",
+    "contactTextWindowTitle": "Texto de contacto: {{name}}"
   }
 }

@@ -13,7 +13,7 @@
  * `unwrapList` stays real so the envelope-unwrap logic is genuinely exercised.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 // Real i18next instance so t() resolves actual locale strings, not raw keys.
 import '@/i18n'
@@ -121,8 +121,12 @@ describe('CandidateSearchTab · fetch + defaults', () => {
 
     await waitFor(() => expect(screen.getByText('Alice')).toBeInTheDocument())
 
+    // LEADS-PARITY-1: an untouched default request sends NO radius and NO
+    // status[] — only what the user actively picked (function_title mirrors
+    // the vacancy's own category) — so the server applies its own resolver
+    // default radius and the untouched list matches the leads counter.
     expect(mockGet).toHaveBeenCalledWith('/vacancies/v1/candidate-matches', {
-      params: { radius: 30, status: ['available'], function_title: ['Verzorgende IG'], per_page: 100 },
+      params: { function_title: ['Verzorgende IG'], per_page: 100 },
       signal: expect.anything(),
     })
 
@@ -148,7 +152,7 @@ describe('CandidateSearchTab · function default is the raw function_title carri
 
     await waitFor(() => expect(mockGet).toHaveBeenCalled())
     expect(mockGet).toHaveBeenCalledWith('/vacancies/v4/candidate-matches', {
-      params: { radius: 30, status: ['available'], per_page: 100 },
+      params: { per_page: 100 },
       signal: expect.anything(),
     })
   })
@@ -209,6 +213,36 @@ describe('CandidateSearchTab · no location (degrades, never dead-ends)', () => 
   })
 })
 
+// LEADS-PARITY-1: the radius CONTROL still displays the tenant default (30, no
+// `default_radius_km` setting stubbed here) so the recruiter sees the same ring
+// the leads counter used, but the request omits `radius` until the control is
+// actively changed — the server applies its own resolver default on an
+// untouched request (CMBE parity fix).
+describe('CandidateSearchTab · radius default vs touched (LEADS-PARITY-1)', () => {
+  it('shows the tenant default in the km input without sending it', async () => {
+    mockGet.mockResolvedValue({ data: { data: rawRows } })
+    render(<CandidateSearchTab vacancy={vacancyWithLocation} />)
+    await waitFor(() => expect(mockGet).toHaveBeenCalledTimes(1))
+
+    expect(screen.getByRole('spinbutton', { name: nlCommon.map.radius })).toHaveValue(30)
+    expect(mockGet.mock.calls[0][1].params).not.toHaveProperty('radius')
+  })
+
+  it('sends the radius once the km input is changed', async () => {
+    mockGet.mockResolvedValue({ data: { data: rawRows } })
+    render(<CandidateSearchTab vacancy={vacancyWithLocation} />)
+    await waitFor(() => expect(mockGet).toHaveBeenCalledTimes(1))
+
+    const kmInput = screen.getByRole('spinbutton', { name: nlCommon.map.radius })
+    fireEvent.change(kmInput, { target: { value: '50' } })
+
+    await waitFor(() => expect(mockGet).toHaveBeenLastCalledWith('/vacancies/v1/candidate-matches', {
+      params: { radius: 50, function_title: ['Verzorgende IG'], per_page: 100 },
+      signal: expect.anything(),
+    }))
+  })
+})
+
 describe('CandidateSearchTab · status toggle via the searchable dropdown', () => {
   it('refires the request with the newly toggled status added', async () => {
     mockGet.mockResolvedValue({ data: { data: [] } })
@@ -217,14 +251,15 @@ describe('CandidateSearchTab · status toggle via the searchable dropdown', () =
 
     // Open the "Inzetbaarheid" SearchSelect — GEOSEARCH-1 (22-08): the trigger's
     // accessible name is now just the field label (FilterTriggerPill shows the
-    // count visually, mirrors candidates/drawer/VacancySearchFilters), then
-    // check the second status option.
-    await userEvent.click(screen.getByRole('button', { name: 'Inzetbaarheid (1)' }))
+    // count visually, mirrors candidates/drawer/VacancySearchFilters). LEADS-
+    // PARITY-1: no status is preselected any more, so the trigger's name carries
+    // no count badge until a status is actively picked.
+    await userEvent.click(screen.getByRole('button', { name: 'Inzetbaarheid' }))
     await userEvent.click(screen.getByRole('button', { name: 'Niet beschikbaar' }))
 
     await waitFor(() => expect(mockGet).toHaveBeenCalledTimes(2))
     expect(mockGet).toHaveBeenLastCalledWith('/vacancies/v1/candidate-matches', {
-      params: { radius: 30, status: ['available', 'unavailable'], function_title: ['Verzorgende IG'], per_page: 100 },
+      params: { status: ['unavailable'], function_title: ['Verzorgende IG'], per_page: 100 },
       signal: expect.anything(),
     })
   })
@@ -241,7 +276,7 @@ describe('CandidateSearchTab · contract-form filter (new third dropdown)', () =
 
     await waitFor(() => expect(mockGet).toHaveBeenCalledTimes(2))
     expect(mockGet).toHaveBeenLastCalledWith('/vacancies/v1/candidate-matches', {
-      params: { radius: 30, status: ['available'], function_title: ['Verzorgende IG'], contract_form: ['freelance'], per_page: 100 },
+      params: { function_title: ['Verzorgende IG'], contract_form: ['freelance'], per_page: 100 },
       signal: expect.anything(),
     })
   })
@@ -252,13 +287,13 @@ describe('CandidateSearchTab · contract-form filter (new third dropdown)', () =
 // SELECTED value across the three visible filters gets its own removable chip
 // (the shared ActiveFilterChip, extracted for both search twins).
 describe('CandidateSearchTab · active-filter chips (GEOSEARCH-1)', () => {
-  it('shows a chip for the default-seeded function AND status, none for the (empty) contract form', async () => {
+  it('shows a chip for the default-seeded function only — LEADS-PARITY-1 leaves status unseeded', async () => {
     mockGet.mockResolvedValue({ data: { data: [] } })
     render(<CandidateSearchTab vacancy={vacancyWithLocation} />)
     await waitFor(() => expect(mockGet).toHaveBeenCalledTimes(1))
 
     expect(screen.getByText('Verzorgende IG')).toBeInTheDocument()
-    expect(screen.getByText('Beschikbaar')).toBeInTheDocument()
+    expect(screen.queryByText('Beschikbaar')).toBeNull()
     expect(screen.queryByText('ZZP')).toBeNull()
     expect(screen.queryByText('Uitzendkracht')).toBeNull()
   })
@@ -272,7 +307,7 @@ describe('CandidateSearchTab · active-filter chips (GEOSEARCH-1)', () => {
 
     await waitFor(() => expect(mockGet).toHaveBeenCalledTimes(2))
     expect(mockGet).toHaveBeenLastCalledWith('/vacancies/v1/candidate-matches', {
-      params: { radius: 30, status: ['available'], per_page: 100 },
+      params: { per_page: 100 },
       signal: expect.anything(),
     })
     expect(screen.queryByText('Verzorgende IG')).toBeNull()
@@ -293,16 +328,15 @@ describe('CandidateSearchTab · active-filter chips (GEOSEARCH-1)', () => {
     expect(screen.getByText('ZZP')).toBeInTheDocument()
   })
 
-  it('keeps only the seeded status chip when nothing else is selected (no function chip without a category)', async () => {
+  it('shows no chips at all when the vacancy carries no category (LEADS-PARITY-1: status is never seeded)', async () => {
     mockGet.mockResolvedValue({ data: { data: [] } })
     render(<CandidateSearchTab vacancy={vacancyNoLocation} />)
     await waitFor(() => expect(mockGet).toHaveBeenCalledTimes(1))
 
-    // vacancyNoLocation carries no category, so no function seeds; the mocked
-    // tenant status/candidateTypes lookups still seed 'available' via the
-    // shared soft-default rule, so only the status chip is expected here.
+    // vacancyNoLocation carries no category, so no function seeds; status/
+    // contract-form are never default-seeded either — no chips render.
     expect(screen.queryByText('Verzorgende IG')).toBeNull()
-    expect(screen.getByText('Beschikbaar')).toBeInTheDocument()
+    expect(screen.queryByText('Beschikbaar')).toBeNull()
   })
 })
 
