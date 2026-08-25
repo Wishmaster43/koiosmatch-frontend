@@ -4,7 +4,7 @@
  * full, role-specific KPI row; `['*']` = show every chart/list (admin/management).
  *
  * The `dashboard_type` enum is OWNED BY THE BACKEND (C-35) and is leading — these
- * are the confirmed values (docs/plans/DASHBOARD-PLAN.md): never diverge. `/auth/me`
+ * are the confirmed values (DECISIONS.md (koiosmatch-api/docs; the dashboard plan folded into it 25-08)): never diverge. `/auth/me`
  * returns roles[].dashboard_type.
  */
 // KD11 (DASHP36, 2026-08-13) — two new sales-dashboard roles: `accountmanager`
@@ -33,7 +33,7 @@ export const switcherTypes = (hasPlanning: boolean): DashboardType[] =>
 
 // ── KPI row per role — bare KPI ids resolved in Dashboard.tsx (kpiById). Every role
 // shows a full, role-specific row (never hidden). 🟡 metrics render "—" until the
-// backend feed lands (see docs/plans/DASHBOARD-PLAN.md).
+// backend feed lands (see DECISIONS.md (koiosmatch-api/docs; the dashboard plan folded into it 25-08)).
 // NEGEN-PER-ROL (Danny 24-08, herhaald en definitief: "9 KPI rows met
 // relevante KPI's" voor ÁLLE rollen — gemeten stand ervoor: backoffice 6,
 // sales 6, accountmanager 5, planning 4, readonly 3). Rows follow the decided
