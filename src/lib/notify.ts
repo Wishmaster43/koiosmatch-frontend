@@ -17,6 +17,9 @@ export interface ToastOptions {
   onOpen?: () => void
   deepLink?: string
   duration?: number
+  // NOTIF-PAYLOAD: an optional calm status line (workflow-run action_status +
+  // next_action), rendered under the message when set.
+  actionLine?: string
 }
 
 export function notify(type: ToastType, message: string, options?: ToastOptions) {

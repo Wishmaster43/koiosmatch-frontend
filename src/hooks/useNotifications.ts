@@ -20,7 +20,9 @@ import { useUserPreference } from '@/hooks/useUserPreference'
 import api, { unwrapList } from '@/lib/api'
 import { notify } from '@/lib/notify'
 import { playNotificationChime } from '@/lib/notificationSound'
-import { resolveNotificationTarget, navigateToNotificationTarget, buildNotificationDeepLink } from '@/components/layout/notificationTarget'
+import {
+  resolveNotificationTarget, navigateToNotificationTarget, buildNotificationDeepLink, resolveActionLine,
+} from '@/components/layout/notificationTarget'
 
 export interface AppNotification {
   id: string | number
@@ -29,6 +31,14 @@ export interface AppNotification {
   created_at?: string
   seen?: boolean
   link?: string
+  // NOTIF-PAYLOAD (CMBE 8f0fcdb8): the backend-resolved click-through target,
+  // stored on every row; action_status/next_action only set for a workflow-run
+  // notification (NotificationController::index).
+  entity_type?: string | null
+  entity_id?: string | null
+  url?: string | null
+  action_status?: string | null
+  next_action?: string | null
   [k: string]: unknown
 }
 
@@ -83,11 +93,20 @@ export function useNotifications(pollMs = 60000) {
             const toShow = freshUnseen.slice(0, MAX_INDIVIDUAL_TOASTS)
             toShow.forEach(n => {
               const target = resolveNotificationTarget(n)
+              // A workflow-run row also carries a calm status line (done/pending/
+              // failed) + the backend's fixed next-step copy — never a raw unknown status.
+              const action = resolveActionLine(n)
+              const actionLine = action
+                // The follow-up copy is keyed off action_status (the BE's next_action is
+                // fixed Dutch prose, 1:1 with the status — never rendered raw, §5).
+                ? `${t(`notifications.actionStatus.${action.status}`)}${t(`notifications.nextAction.${action.status}`, { defaultValue: '' }) ? ` ${t(`notifications.nextAction.${action.status}`, { defaultValue: '' })}` : ''}`
+                : undefined
               notify('info', n.body || '', {
                 title: n.title,
                 duration: ATTENTION_TOAST_DURATION,
                 onOpen: target ? () => navigateToNotificationTarget(target) : undefined,
                 deepLink: target ? buildNotificationDeepLink(target) : undefined,
+                actionLine,
               })
             })
             const remaining = freshUnseen.length - toShow.length

@@ -17,15 +17,21 @@ self.addEventListener('push', (event) => {
   event.waitUntil(self.registration.showNotification(title, options))
 })
 
-// Clicking the notification focuses an already-open app window, or opens one.
+// Clicking the notification focuses an already-open app window on the payload's
+// deep link when present (NOTIF-PAYLOAD, data.url — same hash target the in-app
+// bell/toast use), or opens a new window there; falls back to '/' otherwise.
 self.addEventListener('notificationclick', (event) => {
   event.notification.close()
+  const url = (event.notification.data && event.notification.data.url) || '/'
   event.waitUntil(
     self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clients) => {
       for (const client of clients) {
-        if ('focus' in client) return client.focus()
+        if ('focus' in client) {
+          if ('navigate' in client) client.navigate(url).catch(() => {})
+          return client.focus()
+        }
       }
-      if (self.clients.openWindow) return self.clients.openWindow('/')
+      if (self.clients.openWindow) return self.clients.openWindow(url)
       return undefined
     })
   )

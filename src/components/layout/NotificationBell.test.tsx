@@ -60,6 +60,18 @@ describe('resolveNotificationTarget', () => {
     expect(resolveNotificationTarget({ id: 9, type: 'opportunity.won', meta: {} } as unknown as AppNotification)).toBeNull()
   })
 
+  // NOTIF-PAYLOAD (CMBE 8f0fcdb8): the backend now resolves the click-through url
+  // server-side — prefer it over the local fallbacks below.
+  it('prefers the server-resolved url over the local entity_type fallback', () => {
+    expect(resolveNotificationTarget({
+      id: 10, entity_type: 'candidate', entity_id: '99', url: '/#candidates?open=99',
+    } as unknown as AppNotification)).toEqual({ page: 'candidates', id: '99' })
+  })
+
+  it('stays non-clickable when the server could not resolve a target (url "/", entity_type null)', () => {
+    expect(resolveNotificationTarget({ id: 11, entity_type: null, url: '/' } as unknown as AppNotification)).toBeNull()
+  })
+
   // BEL-ACTIE-VANDAAG-1: appointment.today has no agenda page yet, so it
   // deep-links to the candidate drawer via meta.candidate_id.
   it('resolves an appointment.today row to the candidate drawer', () => {
@@ -127,5 +139,29 @@ describe('NotificationBell row click-through', () => {
     expect(window.location.hash).toBe('')
     expect(onPopState).not.toHaveBeenCalled()
     window.removeEventListener('popstate', onPopState)
+  })
+
+  // NOTIF-PAYLOAD: a workflow-run row renders its action-status line; a plain row does not.
+  it('renders the action-status line for a workflow-run row', () => {
+    vi.spyOn(useNotificationsModule, 'useNotifications').mockReturnValue({
+      items: [{
+        id: 1, title: 'Workflow run', seen: false,
+        action_status: 'failed', next_action: 'Bekijk de aangemaakte vervolgtaak.',
+      }],
+      unseen: 1, markAllSeen: vi.fn(), reload: vi.fn(),
+    } as unknown as ReturnType<typeof useNotificationsModule.useNotifications>)
+    render(<NotificationBell />)
+    fireEvent.click(screen.getByRole('button', { name: /notificat/i }))
+    expect(screen.getByText(/Bekijk de aangemaakte vervolgtaak\./)).toBeInTheDocument()
+  })
+
+  it('renders no action-status line for a plain row', () => {
+    vi.spyOn(useNotificationsModule, 'useNotifications').mockReturnValue({
+      items: [{ id: 2, title: 'Plain row', seen: false }],
+      unseen: 1, markAllSeen: vi.fn(), reload: vi.fn(),
+    } as unknown as ReturnType<typeof useNotificationsModule.useNotifications>)
+    render(<NotificationBell />)
+    fireEvent.click(screen.getByRole('button', { name: /notificat/i }))
+    expect(screen.queryByText(/Bekijk de aangemaakte/)).not.toBeInTheDocument()
   })
 })

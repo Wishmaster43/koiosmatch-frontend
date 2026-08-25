@@ -21,6 +21,9 @@ vi.mock('@/lib/api', async () => {
 })
 // Sound gate: mocked so tests never touch real Web Audio (API-CREDITS-1 — no real
 // side effects — and Web Audio has no meaning under jsdom anyway).
+// Deterministic t: the hook's copy keys are asserted as keys.
+const stableT = vi.hoisted(() => ({ t: (k: string) => k }))
+vi.mock('react-i18next', () => ({ useTranslation: () => stableT }))
 vi.mock('@/lib/notificationSound', () => ({ playNotificationChime: vi.fn() }))
 // The chime gate is a PER-USER preference (ui_preferences via useUserPreference),
 // never the tenant settings blob. Default ON; a test flips it via soundPref.
@@ -140,6 +143,65 @@ describe('useNotifications attention toasts', () => {
     await waitFor(() => expect(result.current.items).toHaveLength(1))
 
     expect(onToast).not.toHaveBeenCalled()
+    window.removeEventListener('km:toast', onToast)
+  })
+
+  // NOTIF-PAYLOAD: the server-resolved url is preferred for the toast's deep link.
+  it('uses the server-resolved url for the toast deep link when present', async () => {
+    const onToast = vi.fn()
+    window.addEventListener('km:toast', onToast)
+    const server = { id: 20, title: 'Candidate row', body: 'body', seen: false, created_at: new Date().toISOString(), entity_type: 'candidate', url: '/#candidates?open=20' }
+    vi.mocked(api.get)
+      .mockResolvedValueOnce({ data: { data: [] } })
+      .mockResolvedValueOnce({ data: { data: [server] } })
+
+    const { result } = renderHook(() => useNotifications(1000))
+    await waitFor(() => expect(result.current.items).toHaveLength(0))
+    await act(async () => { result.current.reload() })
+    await waitFor(() => expect(result.current.items).toHaveLength(1))
+
+    const detail = (onToast.mock.calls[0][0] as CustomEvent).detail
+    expect(detail.deepLink).toContain('candidates?open=20')
+    window.removeEventListener('km:toast', onToast)
+  })
+
+  // A workflow-run row carries an action-status line; a plain row does not.
+  it('adds an actionLine to the toast for a workflow-run row', async () => {
+    const onToast = vi.fn()
+    window.addEventListener('km:toast', onToast)
+    const workflowRow = row(21, false)
+    ;(workflowRow as Record<string, unknown>).action_status = 'pending'
+    // The BE's next_action prose is never rendered raw — the copy is keyed off action_status.
+    ;(workflowRow as Record<string, unknown>).next_action = 'Wordt automatisch verwerkt.'
+    vi.mocked(api.get)
+      .mockResolvedValueOnce({ data: { data: [] } })
+      .mockResolvedValueOnce({ data: { data: [workflowRow] } })
+
+    const { result } = renderHook(() => useNotifications(1000))
+    await waitFor(() => expect(result.current.items).toHaveLength(0))
+    await act(async () => { result.current.reload() })
+    await waitFor(() => expect(result.current.items).toHaveLength(1))
+
+    const detail = (onToast.mock.calls[0][0] as CustomEvent).detail
+    expect(detail.actionLine).toContain('notifications.nextAction.pending')
+    expect(detail.actionLine).not.toContain('Wordt automatisch verwerkt.')
+    window.removeEventListener('km:toast', onToast)
+  })
+
+  it('does not add an actionLine to the toast for a plain row', async () => {
+    const onToast = vi.fn()
+    window.addEventListener('km:toast', onToast)
+    vi.mocked(api.get)
+      .mockResolvedValueOnce({ data: { data: [] } })
+      .mockResolvedValueOnce({ data: { data: [row(22, false)] } })
+
+    const { result } = renderHook(() => useNotifications(1000))
+    await waitFor(() => expect(result.current.items).toHaveLength(0))
+    await act(async () => { result.current.reload() })
+    await waitFor(() => expect(result.current.items).toHaveLength(1))
+
+    const detail = (onToast.mock.calls[0][0] as CustomEvent).detail
+    expect(detail.actionLine).toBeUndefined()
     window.removeEventListener('km:toast', onToast)
   })
 })

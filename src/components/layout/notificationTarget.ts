@@ -16,6 +16,25 @@ export const ENTITY_PAGE: Record<string, string> = {
 
 export interface NotificationTarget { page: string; id: string }
 
+// NOTIF-PAYLOAD (CMBE 8f0fcdb8, app/Support/NotificationActionStatus.php): the only
+// action_status values a workflow-run notification ever carries — 'cancelled'/no-run
+// stay null server-side and never reach the FE. An unknown/unlisted value must render
+// nothing rather than a raw un-translated string.
+export const KNOWN_ACTION_STATUSES = ['done', 'pending', 'failed'] as const
+export type KnownActionStatus = (typeof KNOWN_ACTION_STATUSES)[number]
+
+// Parse the backend-resolved hash deep link ("#candidates?open=42" or
+// "/#candidates?open=42") into {page, id} — mirrors the existing same-app
+// link fallback below, reused so both paths agree on the shape.
+function parseHashTarget(url: string): NotificationTarget | null {
+  const hashIdx = url.indexOf('#')
+  if (hashIdx === -1) return null
+  const raw = url.slice(hashIdx + 1)
+  const [page, query] = raw.split('?')
+  const id = query ? new URLSearchParams(query).get('open') : null
+  return page && id ? { page, id } : null
+}
+
 // NOTIF-CONTEXTEN-FE-1 (CMBE 23-08): calllist/opportunity notifications carry
 // their own `data.type` (not the generic meta.type/meta.id pointer) plus a
 // custom meta shape — campaign_id for a call-list assignment, opportunity_id
@@ -35,6 +54,19 @@ export const CUSTOM_TYPE_TARGETS: Record<string, (meta: Record<string, unknown>)
 // Pure: resolve a notification into a navigable {page, id}, or null when nothing
 // on the row is a real target (a row with no target must stay non-clickable).
 export function resolveNotificationTarget(n: AppNotification): NotificationTarget | null {
+  // NOTIF-PAYLOAD (CMBE 8f0fcdb8, app/Support/NotificationTarget.php +
+  // app/Http/Controllers/NotificationController.php `url`): the backend now
+  // resolves a click-through target for every row server-side, from the SAME
+  // controlled entity vocabulary it already owns — prefer it over the local
+  // fallbacks below so the FE never drifts from the backend's own mapping.
+  // A row the backend could not resolve carries entity_type=null, url='/'
+  // and must stay non-clickable (never parsed as a target).
+  const serverUrl = (n as { url?: string | null }).url
+  const serverEntityType = (n as { entity_type?: string | null }).entity_type
+  if (serverUrl && serverUrl !== '/' && serverEntityType != null) {
+    const parsed = parseHashTarget(serverUrl)
+    if (parsed) return parsed
+  }
   const meta = (n as { meta?: Record<string, unknown> }).meta ?? {}
   const dataType = (n as { type?: string }).type
   // Object.hasOwn (not `in`/bracket lookup alone) so a `type` of 'constructor'/
@@ -74,4 +106,16 @@ export function navigateToNotificationTarget(target: NotificationTarget) {
 // shared here so an attention toast's trailing icon opens the exact same URL.
 export function buildNotificationDeepLink(target: NotificationTarget): string {
   return `${window.location.pathname}#${target.page}?open=${encodeURIComponent(target.id)}`
+}
+
+export interface NotificationActionLine { status: KnownActionStatus; nextAction: string | null }
+
+// Pure: resolve a workflow-run row's {action_status, next_action} into a
+// renderable pair, or null when there is nothing to show (no run behind the
+// row, or an unrecognized status — never render a raw, un-translated value).
+export function resolveActionLine(n: AppNotification): NotificationActionLine | null {
+  const status = (n as { action_status?: string | null }).action_status
+  if (!status || !(KNOWN_ACTION_STATUSES as readonly string[]).includes(status)) return null
+  const nextAction = (n as { next_action?: string | null }).next_action ?? null
+  return { status: status as KnownActionStatus, nextAction }
 }

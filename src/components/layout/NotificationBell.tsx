@@ -30,7 +30,7 @@ import { isInsideDropdownPortal } from '@/lib/useDropdownPlacement'
 import { SectionTitle, BodyText, Caption } from '@/components/ui/typography'
 import Button from '@/components/ui/Button'
 import {
-  resolveNotificationTarget, navigateToNotificationTarget, buildNotificationDeepLink,
+  resolveNotificationTarget, navigateToNotificationTarget, buildNotificationDeepLink, resolveActionLine,
 } from './notificationTarget'
 import type { NotificationTarget } from './notificationTarget'
 
@@ -119,6 +119,8 @@ export default function NotificationBell() {
               // A row navigates only when it carries a real, resolvable target.
               const target = resolveNotificationTarget(n)
               const clickable = target != null
+              // NOTIF-PAYLOAD: a workflow-run row also shows its status + next step.
+              const action = resolveActionLine(n)
               return (
                 <div
                   key={n.id ?? i}
@@ -135,6 +137,11 @@ export default function NotificationBell() {
                   <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 2 }}>
                     <BodyText style={{ fontWeight: n.seen ? 400 : 600 }}>{n.title || '—'}</BodyText>
                     {n.body && <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{n.body}</div>}
+                    {action && (
+                      <Caption>
+                        {t(`notifications.actionStatus.${action.status}`)}{t(`notifications.nextAction.${action.status}`, { defaultValue: '' }) ? ` ${t(`notifications.nextAction.${action.status}`, { defaultValue: '' })}` : ''}
+                      </Caption>
+                    )}
                     <Caption>{fmt(n.created_at)}</Caption>
                   </div>
                   {/* EntityLink idiom: the row name navigates in-app, this icon opens

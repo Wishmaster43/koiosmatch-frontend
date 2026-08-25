@@ -15,9 +15,9 @@ import { X, AlertTriangle, CheckCircle, Info, ExternalLink } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import type { ToastType } from '@/lib/notify'
 import Button from './Button'
-import { SectionTitle } from './typography'
+import { SectionTitle, Caption } from './typography'
 
-interface Toast { id: number; type: ToastType; message: string; title?: string; onOpen?: () => void; deepLink?: string; duration?: number }
+interface Toast { id: number; type: ToastType; message: string; title?: string; onOpen?: () => void; deepLink?: string; duration?: number; actionLine?: string }
 
 const ICON: Record<ToastType, LucideIcon> = { error: AlertTriangle, success: CheckCircle, info: Info }
 const COLOR: Record<ToastType, string> = { error: 'var(--color-danger)', success: 'var(--color-success)', info: 'var(--color-info)' }
@@ -67,11 +67,13 @@ export default function Toaster() {
                 style={{ flex: 1, minWidth: 0, textAlign: 'left', background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: 'inherit', font: 'inherit' }}>
                 {toast.title && <SectionTitle style={{ marginBottom: 2 }}>{toast.title}</SectionTitle>}
                 <span style={{ fontSize: 13 }}>{toast.message}</span>
+                {toast.actionLine && <Caption style={{ marginTop: 2 }}>{toast.actionLine}</Caption>}
               </button>
             ) : (
               <div style={{ flex: 1, minWidth: 0 }}>
                 {toast.title && <SectionTitle style={{ marginBottom: 2 }}>{toast.title}</SectionTitle>}
                 <span style={{ fontSize: 13 }}>{toast.message}</span>
+                {toast.actionLine && <Caption style={{ marginTop: 2 }}>{toast.actionLine}</Caption>}
               </div>
             )}
             {toast.deepLink && (
