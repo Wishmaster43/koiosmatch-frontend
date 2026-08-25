@@ -6,3 +6,7 @@
  * extend this list deliberately, never bypass it with a deep import.
  */
 export { useWhatsAppData } from './hooks/useWhatsAppData'
+export type { WaMessageFilters } from './hooks/useWhatsAppData'
+// The one message-table column config, reused by the settings WhatsApp log
+// (WhatsAppLog.tsx) — never re-derived per screen.
+export { useMessageColumns } from './messagesTable/messageColumns'

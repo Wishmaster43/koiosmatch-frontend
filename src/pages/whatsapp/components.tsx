@@ -1,15 +1,18 @@
 /**
- * WhatsApp dashboard presentational pieces — KPI cards, the activity chart, the
- * message feed and the escalation list (+ date helpers). Extracted from WhatsAppPage.
+ * WhatsApp dashboard presentational pieces — KPI cards, the activity chart and
+ * the escalation list (+ date helpers). Extracted from WhatsAppPage. The
+ * message feed (MessageFeed) moved to messagesTable/MessagesTable.tsx (WA-MSG-
+ * TABLE-1, 25-08) — a real DataTable with drilldown gateways, per CEL-DOORKLIK-
+ * CANON — and was removed from here.
  */
 import { useTranslation } from 'react-i18next'
-import { AlertTriangle, Clock, ArrowDownLeft, ArrowUpRight } from 'lucide-react'
+import { AlertTriangle, Clock } from 'lucide-react'
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts'
 import ErrorBoundary from '@/components/ui/ErrorBoundary'
 import SoftChip from '@/components/ui/SoftChip'
 import { SectionTitle, Caption } from '@/components/ui/typography'
 import { useEscalationReasons } from './hooks/useEscalationReasons'
-import type { WaCandidate, WaMessage, WaEscalation, WaActivityDatum } from '@/types/whatsapp'
+import type { WaCandidate, WaEscalation, WaActivityDatum } from '@/types/whatsapp'
 
 
 export const PAD  = (n: number) => String(n).padStart(2, '0')
@@ -17,16 +20,6 @@ const initials = (c?: WaCandidate) => c
   ? `${(c.first_name ?? '')[0] ?? ''}${(c.last_name ?? '')[0] ?? ''}`.toUpperCase()
   : '?'
 const fullName  = (c?: WaCandidate) => c ? `${c.first_name ?? ''} ${c.last_name ?? ''}`.trim() : '—'
-const timeAgo   = (iso?: string) => {
-  if (!iso) return ''
-  const diff = Math.floor((Date.now() - new Date(iso).getTime()) / 1000)
-  if (diff < 60)   return `${diff}s`
-  if (diff < 3600) return `${Math.floor(diff / 60)}m`
-  if (diff < 86400) return `${Math.floor(diff / 3600)}u`
-  return `${Math.floor(diff / 86400)}d`
-}
-// Tokens only (§4) — 'outbound' reuses the app's blue secondary accent, never an ad-hoc hex.
-const DIRECTION_COLOR: Record<string, string> = { inbound: 'var(--color-success)', outbound: 'var(--color-secondary)' }
 // LOOKUP-GAP-1(c): escalation-reason colour/label used to be this fixed 3-key
 // map, ignoring the real tenant lookup (/escalation-reasons, Settings → WhatsApp
 // → Escalatieredenen). EscalationList below now resolves a reason from that
@@ -54,75 +47,6 @@ function Avatar({ candidate, size = 32 }: { candidate?: WaCandidate; size?: numb
       fontSize: size * 0.35, fontWeight: 700,
     }}>
       {initials(candidate)}
-    </div>
-  )
-}
-
-function StatusDot({ status, direction }: { status?: string; direction?: string }) {
-  const color =
-    status === 'read'      ? 'var(--color-success)' :
-    status === 'delivered' ? 'var(--color-secondary)' :
-    status === 'failed'    ? 'var(--color-danger)' :
-    direction === 'inbound' ? 'var(--color-success)' : 'var(--text-muted)'
-  return <span style={{ width: 6, height: 6, borderRadius: '50%', background: color, flexShrink: 0, display: 'inline-block' }} />
-}
-
-export function MessageFeed({ messages, loading }: { messages: WaMessage[]; loading?: boolean }) {
-  const { t } = useTranslation('whatsapp')
-  return (
-    <div style={{
-      background: 'var(--surface)', borderRadius: 14,
-      border: '1px solid var(--border)', overflow: 'hidden',
-    }}>
-      <div style={{ padding: '14px 16px', borderBottom: '1px solid var(--border)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <SectionTitle as="span">{t('feed.title')}</SectionTitle>
-        <Caption as="span">{t('feed.live')}</Caption>
-      </div>
-      <div style={{ overflowY: 'auto', maxHeight: 420 }}>
-        {loading && (
-          <div style={{ padding: 32, textAlign: 'center', color: 'var(--text-muted)', fontSize: 13 }}>
-            {t('feed.loading')}
-          </div>
-        )}
-        {!loading && messages.length === 0 && (
-          <div style={{ padding: 32, textAlign: 'center', color: 'var(--text-muted)', fontSize: 13 }}>
-            {t('feed.empty')}
-          </div>
-        )}
-        {!loading && messages.map((msg, i) => (
-          <div key={msg.id ?? i} style={{
-            display: 'flex', alignItems: 'flex-start', gap: 10,
-            padding: '10px 16px', borderBottom: '1px solid var(--border)',
-            transition: 'background 0.1s',
-          }}
-            onMouseEnter={e => (e.currentTarget.style.background = 'var(--hover-bg)')}
-            onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
-          >
-            <Avatar candidate={msg.candidate} size={30} />
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
-                <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>
-                  {fullName(msg.candidate)}
-                </span>
-                <span style={{ fontSize: 10, color: DIRECTION_COLOR[msg.direction ?? ''] }}>
-                  {msg.direction === 'inbound'
-                    ? <ArrowDownLeft size={10} />
-                    : <ArrowUpRight size={10} />}
-                </span>
-                <StatusDot status={msg.status} direction={msg.direction} />
-              </div>
-              <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: 0,
-                          overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                {msg.body}
-              </p>
-            </div>
-            <span style={{ fontSize: 10, color: 'var(--text-muted)', flexShrink: 0, marginTop: 2 }}>
-              {timeAgo(msg.sent_at)}
-            </span>
-          </div>
-        ))}
-      </div>
     </div>
   )
 }

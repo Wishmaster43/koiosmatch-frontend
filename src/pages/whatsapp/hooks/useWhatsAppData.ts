@@ -13,14 +13,20 @@
  * fabricated numbers). `errors` exposes which of the three failed so the page can
  * tell "genuinely zero" apart from "we don't know".
  */
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import api, { unwrapList } from '@/lib/api'
 import type { WaStats, WaMessage, WaEscalation, WaActivityDatum } from '@/types/whatsapp'
 
 interface WaLoading { stats: boolean; messages: boolean; escalations: boolean; activity: boolean }
 interface WaErrors { messages: boolean; escalations: boolean; activity: boolean }
 
-export function useWhatsAppData() {
+// Optional server-side message filters (WA-MSG-TABLE-1, 25-08): the right-panel
+// direction/status toggles used to filter the 50 already-loaded rows client-side;
+// they now become real request params so the table reflects the full server-side
+// result, not just a slice of the first page.
+export interface WaMessageFilters { direction?: string[]; status?: string[] }
+
+export function useWhatsAppData(filters: WaMessageFilters = {}) {
   const [stats,         setStats]         = useState<WaStats | null>(null)
   const [messages,      setMessages]      = useState<WaMessage[]>([])
   const [escalations,   setEscalations]   = useState<WaEscalation[]>([])
@@ -34,6 +40,36 @@ export function useWhatsAppData() {
   // `exhausted` renders the "no more" notice once a page comes back empty.
   const [loadingMoreMessages, setLoadingMoreMessages] = useState(false)
   const [messagesExhausted,   setMessagesExhausted]   = useState(false)
+
+  // WA-MSG-TABLE-1 FIX (26-08): WhatsappDashboardController validates direction/
+  // status as SCALARS (`in:inbound,outbound` / `in:sent,delivered,read,failed,
+  // received`), never a comma-joined list — a joined value 422s. The right-panel
+  // groups are therefore `type: 'radio'` (single-select, §3A "every filter in
+  // the right panel" — a radio group is still a filter group, just single-value),
+  // so at most one direction and one status are ever selected; take that single
+  // value, never join.
+  const directionValue = filters.direction?.[0]
+  const statusValue    = filters.status?.[0]
+  const messageParams = () => ({
+    per_page: 50,
+    ...(directionValue ? { direction: directionValue } : {}),
+    ...(statusValue ? { status: statusValue } : {}),
+  })
+
+  // Re-fetch ONLY the messages source, with the current direction/status params.
+  // Split out from `reload()` (WA-MSG-TABLE-1 FIX, 26-08) so a right-panel
+  // filter toggle no longer refetches stats/escalations/activity too — those
+  // three don't depend on these filters, and re-requesting them on every
+  // toggle wasted three calls and flickered the KPI band's loading state.
+  const reloadMessages = () => {
+    setMessagesExhausted(false)
+    setLoading(p => ({ ...p, messages: true }))
+    setErrors(p => ({ ...p, messages: false }))
+    api.get('/whatsapp/messages', { params: messageParams() })
+      .then(r => setMessages(unwrapList<WaMessage>(r).rows))
+      .catch(() => setErrors(p => ({ ...p, messages: true })))
+      .finally(() => setLoading(p => ({ ...p, messages: false })))
+  }
 
   // Refresh all four sources; a 404 on stats flags "no connection". The other
   // three still degrade to an empty list for the feed/list UI, but now also flag
@@ -50,7 +86,7 @@ export function useWhatsAppData() {
       .finally(() => setLoading(p => ({ ...p, stats: false })))
 
     setMessagesExhausted(false)
-    api.get('/whatsapp/messages', { params: { per_page: 50 } })
+    api.get('/whatsapp/messages', { params: messageParams() })
       .then(r => setMessages(unwrapList<WaMessage>(r).rows))
       .catch(() => setErrors(p => ({ ...p, messages: true })))
       .finally(() => setLoading(p => ({ ...p, messages: false })))
@@ -68,7 +104,19 @@ export function useWhatsAppData() {
     setLastRefresh(new Date())
   }
 
+  // Mount: load all four sources once.
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- runs once on mount only, deliberately
   useEffect(() => { reload() }, [])
+
+  // Refetch ONLY messages when the caller's direction/status filters change —
+  // `didMount` skips the redundant call on first render (the mount effect above
+  // already fetched messages once with these same initial filter values).
+  const didMount = useRef(false)
+  useEffect(() => {
+    if (!didMount.current) { didMount.current = true; return }
+    reloadMessages()
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- reloadMessages is redefined every render (not memoized), only the dependency KEYS matter here
+  }, [directionValue, statusValue])
 
   // K-176 (live: f9cf1a64) — cursor page back from the oldest currently loaded
   // `sent_at`, dedup on id. End-of-archive comes from the server's own
@@ -79,7 +127,7 @@ export function useWhatsAppData() {
     const oldest = messages.reduce((min, m) => (m.sent_at && (!min || m.sent_at < min) ? m.sent_at : min), '' as string)
     if (!oldest) return
     setLoadingMoreMessages(true)
-    api.get('/whatsapp/messages', { params: { per_page: 50, before: oldest } })
+    api.get('/whatsapp/messages', { params: { ...messageParams(), before: oldest } })
       .then(r => {
         const older = unwrapList<WaMessage>(r).rows
         // has_older sits next to data/meta in the response body.

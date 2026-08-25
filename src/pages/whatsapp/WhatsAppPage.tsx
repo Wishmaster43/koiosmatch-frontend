@@ -13,7 +13,7 @@
  * Main blocks below:
  *   - helpers           → date/time formatting (PAD, time-ago, etc.)
  *   - ActivityChart     → recharts area chart of inbound/outbound volume
- *   - MessageFeed       → recent messages with direction + status
+ *   - MessagesTable      → messages table (recipient/conversation gateways)
  *   - EscalationList    → conversations flagged for human follow-up
  */
 import { useState, useEffect, useMemo } from 'react'
@@ -31,10 +31,17 @@ import type { KpiSpec } from '@/components/insights/InsightsRow'
 import RightDrawer from '@/components/ui/RightDrawer'
 import PieChartCard from '@/components/charts/PieChartCard'
 import BarChartCard from '@/components/charts/BarChartCard'
-import { MessageFeed, EscalationList, ActivityChart } from './components'
+import { EscalationList, ActivityChart } from './components'
+import MessagesTable from './messagesTable/MessagesTable'
 import QueueTab from './QueueTab'
 import Button from '@/components/ui/Button'
 import { GroupLabel, BodyText } from '@/components/ui/typography'
+
+// Server-validated direction/status vocabulary (WA-MSG-TABLE-1 FIX, 26-08) —
+// mirrors WhatsappDashboardController's `in:` validation rules exactly. This is
+// the SOURCE for the right-panel filter values; i18n only supplies the label.
+const WA_DIRECTION_VALUES = ['inbound', 'outbound'] as const
+const WA_STATUS_VALUES = ['sent', 'delivered', 'read', 'failed', 'received'] as const
 
 // The one house placeholder for "the server did not return this" — never a padded zero.
 const DASH = '—'
@@ -47,27 +54,47 @@ const cardValue = (ready: boolean, v: number | undefined | null): number | strin
 export default function WhatsAppPage({ intent }: { intent?: unknown } = {}) {
   const { t } = useTranslation('whatsapp')
   // Data layer (4 parallel loads + refresh) lives in the hook; the page stays presentational.
-  const { stats, messages, escalations, activity, loading, errors, noConnection, reload } = useWhatsAppData()
+  // Right-panel filters (status + direction) are declared before the data hook
+  // call so their selection can be handed straight in as SERVER params (WA-MSG-
+  // TABLE-1) — replacing the old client-side filter over the first 50 rows.
+  const [selectedStatus,    setSelectedStatus]    = useState<string[]>([])
+  const [selectedDirection, setSelectedDirection] = useState<string[]>([])
+  const {
+    stats, messages, escalations, activity, loading, errors, noConnection, reload,
+    loadMoreMessages, loadingMoreMessages, messagesExhausted,
+  } = useWhatsAppData({ direction: selectedDirection, status: selectedStatus })
   // Today's WABA fan-out batches (WA-KPI9-1) — lifted here from QueueTab so the KPI
   // band has "queued/failed today" on every tab, not just while Queue is active.
   const { batches, loading: queueLoading, error: queueError, notAvailable: queueNotAvailable, reload: reloadQueue } = useWhatsAppQueue()
 
   // Right-panel filters for the message feed (status + direction). Registering them
   // shows the shared topbar filter button — consistent with the other pages.
-  const [selectedStatus,    setSelectedStatus]    = useState<string[]>([])
-  const [selectedDirection, setSelectedDirection] = useState<string[]>([])
   const { registerFilters, unregisterFilters } = useRightPanel()
 
-  const statusOptions = useMemo(() => [...new Set(messages.map(m => m.status))].filter((v): v is string => Boolean(v))
-    .map(v => ({ value: v, label: t(`msgStatus.${v}`, { defaultValue: v }), count: messages.filter(m => m.status === v).length })), [messages, t])
-  const directionOptions = useMemo(() => [...new Set(messages.map(m => m.direction))].filter((v): v is string => Boolean(v))
-    .map(v => ({ value: v, label: t(`msgDirection.${v}`, { defaultValue: v }), count: messages.filter(m => m.direction === v).length })), [messages, t])
+  // Static option lists (WA-MSG-TABLE-1 FIX, 26-08): the value list is pinned to
+  // the SERVER's own validation vocabulary (WhatsappDashboardController: direction
+  // in:inbound,outbound · status in:sent,delivered,read,failed,received), NEVER
+  // derived from the translation file — `Object.keys(t(...))` used to make the
+  // filter vocabulary an accidental artifact of whatsapp.json, and silently
+  // dropped 'received' (MessageStatus::derive returns 'received' for every
+  // inbound message with no read/delivered receipt yet), making that value
+  // unfilterable and rendering as a raw untranslated chip. Labels still come
+  // from i18n; the VALUES come from the contract.
+  const directionOptions = useMemo(() => WA_DIRECTION_VALUES
+    .map(v => ({ value: v, label: t(`msgDirection.${v}`, { defaultValue: v }) })), [t])
+  const statusOptions = useMemo(() => WA_STATUS_VALUES
+    .map(v => ({ value: v, label: t(`msgStatus.${v}`, { defaultValue: v }) })), [t])
 
+  // Single-select toggle: picking a new value REPLACES the current one, picking
+  // the already-selected value clears it. The endpoint validates direction/
+  // status as SCALARS, not a list, so at most one value can ever be selected —
+  // hence `type: 'radio'` below (a right-panel filter group, just single-value,
+  // still living in the ONE panel — never a toolbar control, §3A).
   const filterGroups = useMemo(() => [
-    { key: 'status',    label: t('filters.status'),    selected: selectedStatus,    options: statusOptions,
-      onToggle: (v: string) => setSelectedStatus(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]) },
-    { key: 'direction', label: t('filters.direction'), selected: selectedDirection, options: directionOptions,
-      onToggle: (v: string) => setSelectedDirection(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]) },
+    { key: 'status', label: t('filters.status'), type: 'radio', selected: selectedStatus, options: statusOptions,
+      onToggle: (v: string) => setSelectedStatus(p => p[0] === v ? [] : [v]) },
+    { key: 'direction', label: t('filters.direction'), type: 'radio', selected: selectedDirection, options: directionOptions,
+      onToggle: (v: string) => setSelectedDirection(p => p[0] === v ? [] : [v]) },
   ], [t, selectedStatus, selectedDirection, statusOptions, directionOptions])
 
   // Only register groups that actually have options (none while disconnected/empty).
@@ -75,12 +102,6 @@ export default function WhatsAppPage({ intent }: { intent?: unknown } = {}) {
     registerFilters('whatsapp-page', filterGroups.filter(g => g.options.length > 0))
     return () => unregisterFilters('whatsapp-page')
   }, [filterGroups, registerFilters, unregisterFilters])
-
-  const filteredMessages = useMemo(() => messages.filter(m => {
-    if (selectedStatus.length    && !selectedStatus.includes(m.status as string))       return false
-    if (selectedDirection.length && !selectedDirection.includes(m.direction as string)) return false
-    return true
-  }), [messages, selectedStatus, selectedDirection])
 
   // Active tab (personal-WhatsApp queue removed 2026-07-04 — Business API only;
   // 'queue' below is the WABA/Business batch queue, R3a — a different feature).
@@ -237,7 +258,10 @@ export default function WhatsAppPage({ intent }: { intent?: unknown } = {}) {
       ))}
 
       {/* Berichten — de feed */}
-      {tab === 'messages' && (wabaDown ? NoConn : <MessageFeed messages={filteredMessages} loading={loading.messages} />)}
+      {tab === 'messages' && (wabaDown ? NoConn : (
+        <MessagesTable messages={messages} loading={loading.messages} onLoadMore={loadMoreMessages}
+          loadingMore={loadingMoreMessages} exhausted={messagesExhausted} />
+      ))}
 
       {/* Wachtrij — today's WABA/Business batches (R3a); hook + polling live in the page now (WA-KPI9-1). */}
       {tab === 'queue' && <QueueTab batches={batches} loading={queueLoading} error={queueError} notAvailable={queueNotAvailable} />}
@@ -250,7 +274,7 @@ export default function WhatsAppPage({ intent }: { intent?: unknown } = {}) {
         <RightDrawer
           title={drill === 'today' ? t('kpi.messagesToday') : drill === 'contacted' ? t('kpi.candidatesContacted') : drill === 'filled' ? t('kpi.shiftsFilled') : t('kpi.openEscalations')}
           onClose={() => setDrill(null)}>
-          {drill === 'today' ? <MessageFeed messages={filteredMessages} loading={loading.messages} />
+          {drill === 'today' ? <MessagesTable messages={messages} loading={loading.messages} />
             : drill === 'escal' ? <EscalationList escalations={escalations} loading={loading.escalations} />
             : <p style={{ fontSize: 13, color: 'var(--text-muted)', textAlign: 'center', padding: '40px 8px' }}>{t('drill.noDetail')}</p>}
         </RightDrawer>

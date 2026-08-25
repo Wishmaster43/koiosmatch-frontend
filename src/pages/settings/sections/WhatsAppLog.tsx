@@ -17,9 +17,8 @@ import { useTranslation } from 'react-i18next'
 import { useDateFormat } from '@/lib/datetime'
 import LogView from '@/components/ui/LogView'
 import type { LogExportCol } from '@/components/ui/LogView'
-import { DirectionPill, StatusPill, isInbound } from '@/components/ui/logChips'
-import { useWhatsAppData } from '@/pages/whatsapp/shared'
-import type { Column } from '@/components/ui/DataTable'
+import { isInbound } from '@/components/ui/logChips'
+import { useWhatsAppData, useMessageColumns } from '@/pages/whatsapp/shared'
 import type { WaMessage } from '@/types/whatsapp'
 import { useAllSettings, saveSettingsKeys, invalidateAllSettingsCache, getNumberSetting } from '@/lib/settings/useAllSettings'
 import { notifyError } from '@/lib/notify'
@@ -102,18 +101,12 @@ export default function WhatsAppLog() {
     })
   }, [messages, search, selectedDir, selectedStatus])
 
-  const columns: Column<WaMessage>[] = [
-    { key: 'direction', header: t('log.direction'), width: 120, render: m => <DirectionPill direction={m.direction} /> },
-    { key: 'contact', header: t('waLog.contact'), width: 180, render: m => contactOf(m) },
-    // WA-LOG-LEESBAAR-1 (Danny 13-08): two wrapped lines instead of one ellipsis
-    // line — scannable but no longer misreadable; the row click shows the rest.
-    { key: 'body', header: t('waLog.message'), render: m => (
-      <span style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', maxWidth: 460,
-        overflow: 'hidden', whiteSpace: 'normal', lineHeight: 1.4 }}>{m.body ?? '—'}</span>
-    ) },
-    { key: 'status', header: t('log.status'), width: 120, render: m => <StatusPill status={m.status} /> },
-    { key: 'sent_at', header: t('log.date'), width: 150, nowrap: true, render: m => formatDateTime(m.sent_at) },
-  ]
+  // WA-MSG-TABLE-1: the shared message column set (date/recipient/direction/
+  // status/body/conversation) — the same config the WhatsAppPage Messages tab
+  // uses, so the two surfaces never drift. The row click below still opens the
+  // full-thread WaConversationPanel; the recipient/conversation cells are the
+  // canon CEL-DOORKLIK-CANON gateways straight to the candidate drilldown.
+  const columns = useMessageColumns({ clampBody: true })
 
   const filterGroups = useMemo(() => [
     { key: 'search', label: t('waLog.searchPlaceholder'), type: 'global-search', value: search, onChange: setSearch },
@@ -128,12 +121,18 @@ export default function WhatsAppLog() {
       onToggle: (v: string) => setSelectedStatus(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]) }] : []),
   ], [t, search, selectedDir, selectedStatus, statusOptions, messages])
 
+  // One source per label (§5): the CSV header text for direction/status/body/
+  // date reuses the SAME shared column headers (`whatsapp` namespace) the table
+  // itself renders, instead of a second, independently-translated `settings`
+  // copy that could drift from it. Only the direction VALUE labels (in/out)
+  // stay on the settings namespace — no shared column exists for them.
+  const headerOf = (key: string) => columns.find(c => c.key === key)?.header ?? key
   const exportColumns: LogExportCol<WaMessage>[] = [
-    { header: t('log.direction'), value: m => isInbound(m.direction) ? t('log.in') : t('log.out') },
-    { header: t('waLog.contact'), value: m => contactOf(m) },
-    { header: t('waLog.message'), value: m => m.body ?? '' },
-    { header: t('log.status'), value: m => m.status ?? '' },
-    { header: t('log.date'), value: m => formatDateTime(m.sent_at) },
+    { header: String(headerOf('direction')), value: m => isInbound(m.direction) ? t('log.in') : t('log.out') },
+    { header: String(headerOf('recipient')), value: m => contactOf(m) },
+    { header: String(headerOf('body')), value: m => m.body ?? '' },
+    { header: String(headerOf('status')), value: m => m.status ?? '' },
+    { header: String(headerOf('sent_at')), value: m => formatDateTime(m.sent_at) },
   ]
 
   return (

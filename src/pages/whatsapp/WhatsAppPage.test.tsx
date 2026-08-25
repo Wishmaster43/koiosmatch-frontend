@@ -2,11 +2,10 @@
  * WhatsAppPage — nine-card KPI band (WA-KPI9-1). Covers: exactly nine cards in
  * every data state, the house dash for a value the server didn't (successfully)
  * return — never a padded zero for a genuinely empty-but-successful source, the
- * two new drillable cards wiring the page's OWN client-side direction filter
- * (this page has no server-side drill endpoint, unlike the reports — a click
- * narrows the already-loaded message list, exactly like the existing right-panel
- * status/direction toggles), and the four UI states (loading / no-connection /
- * empty / success).
+ * two new drillable cards wiring the page's own direction filter into the
+ * hook's SERVER params (WA-MSG-TABLE-1 — direction/status now go to the
+ * backend, not a client-side slice), and the four UI states (loading /
+ * no-connection / empty / success).
  */
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen, within } from '@testing-library/react'
@@ -14,10 +13,13 @@ import userEvent from '@testing-library/user-event'
 import '@/i18n'
 import WhatsAppPage from './WhatsAppPage'
 import type { WaStats, WaMessage, WaEscalation, WaActivityDatum, WaQueueBatch } from '@/types/whatsapp'
+import type { WaMessageFilters } from './hooks/useWhatsAppData'
 
 // Data layer under test control (loading/error/empty/success — the four UI states).
+// The mock is called with the page's filters arg so drill/filter tests can assert
+// the WIRING (the clicked KPI's direction reaches the hook call) — see fixtureFor().
 const mockUseWhatsAppData = vi.fn()
-vi.mock('./hooks/useWhatsAppData', () => ({ useWhatsAppData: () => mockUseWhatsAppData() }))
+vi.mock('./hooks/useWhatsAppData', () => ({ useWhatsAppData: (filters?: WaMessageFilters) => mockUseWhatsAppData(filters) }))
 
 // Keep the real sumBatches() (pure aggregation, worth exercising for real) but
 // control the hook's data/loading/error/notAvailable shape.
@@ -31,11 +33,13 @@ vi.mock('./hooks/useWhatsAppQueue', async (importOriginal) => {
 // components.test.tsx / QueueTab's own suite; this file stays focused on the KPI
 // band + tab/filter wiring, and uses these to observe what the page hands down.
 vi.mock('./components', () => ({
-  MessageFeed: ({ messages, loading }: { messages: WaMessage[]; loading?: boolean }) =>
-    <div data-testid="message-feed">{loading ? 'loading' : messages.length}</div>,
   EscalationList: ({ escalations, loading }: { escalations: WaEscalation[]; loading?: boolean }) =>
     <div data-testid="escalation-list">{loading ? 'loading' : escalations.length}</div>,
   ActivityChart: () => <div data-testid="activity-chart" />,
+}))
+vi.mock('./messagesTable/MessagesTable', () => ({
+  default: ({ messages, loading }: { messages: WaMessage[]; loading?: boolean }) =>
+    <div data-testid="messages-table">{loading ? 'loading' : messages.length}</div>,
 }))
 vi.mock('./QueueTab', () => ({ default: () => <div data-testid="queue-tab" /> }))
 vi.mock('@/components/charts/PieChartCard', () => ({ default: () => <div data-testid="pie-chart" /> }))
@@ -60,8 +64,18 @@ function dataFixture(overrides: Partial<{
     loading: { stats: false, messages: false, escalations: false, activity: false },
     errors: { messages: false, escalations: false, activity: false },
     noConnection: false, reload: vi.fn(),
+    loadMoreMessages: vi.fn(), loadingMoreMessages: false, messagesExhausted: false,
     ...overrides,
   }
+}
+
+// Wires the mock hook so a direction filter (drilled from a KPI click) narrows
+// the fixture's own `messages` — mirroring what the real hook now does server-side.
+function respondToDirectionFilter(fixture: ReturnType<typeof dataFixture>) {
+  mockUseWhatsAppData.mockImplementation((filters: WaMessageFilters = {}) =>
+    filters.direction?.length
+      ? { ...fixture, messages: fixture.messages.filter(m => filters.direction!.includes(m.direction as string)) }
+      : fixture)
 }
 function queueFixture(overrides: Partial<{ batches: WaQueueBatch[]; loading: boolean; error: boolean; notAvailable: boolean }> = {}) {
   return { batches: [], loading: false, error: false, notAvailable: false, reload: vi.fn(), ...overrides }
@@ -143,9 +157,9 @@ describe('WhatsAppPage · nine-card KPI band (WA-KPI9-1)', () => {
     expect(cardValue(LABELS.noReply).getByText('2')).toBeInTheDocument()
   })
 
-  it('clicking "Sent today" switches to Messages and narrows the feed to outbound only (the page\'s own filter, no server request)', async () => {
+  it('clicking "Sent today" switches to Messages and asks the hook for outbound only (WA-MSG-TABLE-1: a real server param, not a client-side slice)', async () => {
     const user = userEvent.setup()
-    mockUseWhatsAppData.mockReturnValue(dataFixture({
+    respondToDirectionFilter(dataFixture({
       stats: { messages_today: 2, candidates_contacted: 0, shifts_filled_via_whatsapp: 0, open_escalations: 0 },
       messages: [
         { id: 1, direction: 'outbound', status: 'delivered', sent_at: '2026-08-14T09:00:00Z' },
@@ -158,13 +172,14 @@ describe('WhatsAppPage · nine-card KPI band (WA-KPI9-1)', () => {
     render(<WhatsAppPage />)
     expect(screen.getByTestId('activity-chart')).toBeInTheDocument()
     await user.click(screen.getByText(LABELS.sentToday))
-    expect(screen.getByTestId('message-feed')).toHaveTextContent('2') // 2 outbound of 3
+    expect(mockUseWhatsAppData).toHaveBeenLastCalledWith({ direction: ['outbound'], status: [] })
+    expect(screen.getByTestId('messages-table')).toHaveTextContent('2') // 2 outbound of 3
     expect(screen.getByRole('tab', { name: 'Berichten' })).toHaveAttribute('aria-selected', 'true')
   })
 
-  it('clicking "Received today" switches to Messages and narrows the feed to inbound only', async () => {
+  it('clicking "Received today" switches to Messages and asks the hook for inbound only', async () => {
     const user = userEvent.setup()
-    mockUseWhatsAppData.mockReturnValue(dataFixture({
+    respondToDirectionFilter(dataFixture({
       stats: { messages_today: 2, candidates_contacted: 0, shifts_filled_via_whatsapp: 0, open_escalations: 0 },
       messages: [
         { id: 1, direction: 'outbound', status: 'delivered', sent_at: '2026-08-14T09:00:00Z' },
@@ -175,7 +190,8 @@ describe('WhatsAppPage · nine-card KPI band (WA-KPI9-1)', () => {
     mockUseWhatsAppQueue.mockReturnValue(queueFixture())
     render(<WhatsAppPage />)
     await user.click(screen.getByText(LABELS.receivedToday))
-    expect(screen.getByTestId('message-feed')).toHaveTextContent('1') // 1 inbound of 2
+    expect(mockUseWhatsAppData).toHaveBeenLastCalledWith({ direction: ['inbound'], status: [] })
+    expect(screen.getByTestId('messages-table')).toHaveTextContent('1') // 1 inbound of 2
   })
 
   it('a plain-stat card (no matching filter exists) is not interactive — no fake affordance', async () => {
@@ -203,6 +219,6 @@ describe('WhatsAppPage · nine-card KPI band (WA-KPI9-1)', () => {
     render(<WhatsAppPage />)
     await user.click(screen.getByText(LABELS.today))
     expect(screen.getByRole('dialog')).toBeInTheDocument()
-    expect(within(screen.getByRole('dialog')).getByTestId('message-feed')).toHaveTextContent('1')
+    expect(within(screen.getByRole('dialog')).getByTestId('messages-table')).toHaveTextContent('1')
   })
 })

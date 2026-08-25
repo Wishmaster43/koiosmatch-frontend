@@ -94,3 +94,51 @@ describe('useWhatsAppData · loadMoreMessages', () => {
     expect(result.current.messagesExhausted).toBe(false)
   })
 })
+
+// WA-MSG-TABLE-1 (25-08): direction/status used to filter the loaded 50 rows
+// client-side; they are now real server request params.
+describe('useWhatsAppData · direction/status filters (WA-MSG-TABLE-1)', () => {
+  it('omits direction/status params when no filters are given', async () => {
+    mockGet()
+    renderHook(() => useWhatsAppData())
+    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/whatsapp/messages', { params: { per_page: 50 } }))
+  })
+
+  // WhatsappDashboardController validates direction/status as SCALARS
+  // (`in:inbound,outbound` / `in:sent,delivered,read,failed,received`) — a
+  // comma-joined value 422s. The right-panel groups are single-select
+  // (type: 'radio'), so at most one value each ever reaches the hook; this
+  // asserts the real, server-accepted request, not a joined list.
+  it('sends the single selected direction/status as a scalar request param', async () => {
+    mockGet()
+    renderHook(() => useWhatsAppData({ direction: ['inbound'], status: ['read'] }))
+    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/whatsapp/messages', {
+      params: { per_page: 50, direction: 'inbound', status: 'read' },
+    }))
+  })
+
+  it('refetches when the filters change', async () => {
+    mockGet()
+    const { rerender } = renderHook(({ direction }: { direction?: string[] }) => useWhatsAppData({ direction }), {
+      initialProps: { direction: undefined as string[] | undefined },
+    })
+    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/whatsapp/messages', { params: { per_page: 50 } }))
+    vi.mocked(api.get).mockClear()
+    rerender({ direction: ['outbound'] })
+    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/whatsapp/messages', {
+      params: { per_page: 50, direction: 'outbound' },
+    }))
+  })
+
+  it('load-more carries the same filters as the current page', async () => {
+    mockGet()
+    const { result } = renderHook(() => useWhatsAppData({ status: ['failed'] }))
+    await waitFor(() => expect(result.current.messages).toHaveLength(2))
+    vi.mocked(api.get).mockClear()
+    mockGet()
+    await act(async () => { result.current.loadMoreMessages() })
+    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/whatsapp/messages', {
+      params: { per_page: 50, status: 'failed', before: '2026-07-01T10:00:00Z' },
+    }))
+  })
+})

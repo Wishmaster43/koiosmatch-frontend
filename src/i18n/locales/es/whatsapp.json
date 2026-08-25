@@ -31,9 +31,6 @@
     "noReplyEscalations": "Escalado, sin respuesta"
   },
   "feed": {
-    "title": "Últimos mensajes",
-    "live": "en vivo",
-    "loading": "Cargando mensajes…",
     "empty": "No hay mensajes"
   },
   "escalations": {
@@ -60,7 +57,8 @@
     "read": "Leído",
     "delivered": "Entregado",
     "sent": "Enviado",
-    "failed": "Fallido"
+    "failed": "Fallido",
+    "received": "Recibido"
   },
   "msgDirection": {
     "inbound": "Entrante",
@@ -79,5 +77,17 @@
     "sent": "enviados",
     "skipped": "omitidos",
     "failed": "fallidos"
+  },
+  "messages": {
+    "date": "Fecha",
+    "recipient": "Destinatario",
+    "direction": "Dirección",
+    "status": "Estado",
+    "body": "Mensaje",
+    "unknownRecipient": "Destinatario desconocido",
+    "openConversation": "Abrir conversación",
+    "loadMore": "Cargar más",
+    "loadingMore": "Cargando…",
+    "loadMoreExhausted": "No hay mensajes más antiguos"
   }
 }

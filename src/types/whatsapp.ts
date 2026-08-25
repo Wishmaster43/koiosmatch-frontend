@@ -9,6 +9,11 @@ export interface WaCandidate { first_name?: string; last_name?: string; [k: stri
 // One WhatsApp message in the feed.
 export interface WaMessage {
   id?: string | number
+  // Top-level candidate reference (WhatsappDashboardController::messages) — the
+  // table-cell gateways (recipient name, conversation icon) key off this: it is
+  // set for native AND Shiftmanager-mirrored candidates, while the nested
+  // `candidate` object only carries the native id.
+  candidate_id?: string | number | null
   candidate?: WaCandidate
   direction?: string
   // 'smb_app_echo' = the business typed this in the WhatsApp app itself; the
