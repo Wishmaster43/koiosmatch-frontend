@@ -15,6 +15,8 @@
 export type ModuleKey =
   | 'ats' | 'whatsapp' | 'aiagents' | 'workflows' | 'koios_ai' | 'apps' | 'api'
   | 'insights' | 'sm' | 'hf' | 'plan' | 'reports' | 'sm_ai' | 'ai'
+  // K-193: personal (per-user) WhatsApp Web devices, distinct from the tenant-wide 'whatsapp' (WABA).
+  | 'whatsapp_web'
 
 /** A role or permission can arrive as a bare string or an object with a name. */
 export type Named = string | { name: string }

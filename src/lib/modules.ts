@@ -26,7 +26,8 @@ export const PACKAGE_MODULES: Record<string, ModuleKey[]> = {
   // fallback (no explicit tenant.modules) grants the same pages as the live payload.
   core:                  ['ats'],
   pro:                   ['ats', 'whatsapp', 'aiagents', 'workflows', 'koios_ai'],
-  enterprise:            ['ats', 'whatsapp', 'aiagents', 'workflows', 'koios_ai', 'apps', 'api', 'insights'],
+  // K-193: whatsapp_web (personal WhatsApp Web devices) ships enterprise-only, alongside whatsapp (WABA).
+  enterprise:            ['ats', 'whatsapp', 'whatsapp_web', 'aiagents', 'workflows', 'koios_ai', 'apps', 'api', 'insights'],
   // Legacy 10-package model — kept so existing tenants keep working (backward-compat).
   reporting_sm:          ['sm'],
   reporting_hf:          ['hf'],
