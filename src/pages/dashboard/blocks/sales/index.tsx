@@ -3,7 +3,8 @@
 // happy); tile files export only their component. Never add a sibling index.ts:
 // Vite resolves .ts before .tsx and would silently shadow this file.
 import type { FeedTileEntry } from '../feedTileKit'
-import { arrayFeed } from '../feedTileKit'
+import { arrayFeed, pairTiles } from '../feedTileKit'
+import { leadsPipelineTile } from '../lists'
 import CustomersByOwnerDonut from './CustomersByOwnerDonut'
 import OppsByStageByOwnerStacked from './OppsByStageByOwnerStacked'
 import OppsStalledTable from './OppsStalledTable'
@@ -37,12 +38,16 @@ export const SALES_TILES: FeedTileEntry[] = [
     hasData: arrayFeed('activity_by_owner'),
     render: (dash) => <ActivityByOwnerList rows={dash.activity_by_owner!} />,
   },
-  {
-    blockId: 'block.pipelineValueTimeseries',
-    feedKey: 'pipeline_value_timeseries',
-    hasData: arrayFeed('pipeline_value_timeseries'),
-    render: (dash) => <PipelineValueLine rows={dash.pipeline_value_timeseries!} />,
-  },
+  // DASH-PAIRS-1 (Danny 25-08): pipeline value and the leads pipeline side by side.
+  pairTiles('pair.pipelineValueLeads', [
+    {
+      blockId: 'block.pipelineValueTimeseries',
+      feedKey: 'pipeline_value_timeseries',
+      hasData: arrayFeed('pipeline_value_timeseries'),
+      render: (dash) => <PipelineValueLine rows={dash.pipeline_value_timeseries!} />,
+    },
+    leadsPipelineTile,
+  ]),
   {
     blockId: 'block.customersAtRiskList',
     feedKey: 'customers_at_risk_list',

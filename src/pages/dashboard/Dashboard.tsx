@@ -12,14 +12,13 @@ import { KpiCard } from './DashboardPrimitives'
 import { Caption } from '@/components/ui/typography'
 import DistributionCharts from './blocks/DistributionCharts'
 import TrendsRow from './blocks/TrendsRow'
-import RecentListsRow from './blocks/RecentListsRow'
-import ActivityListsRow from './blocks/ActivityListsRow'
 import ShiftsSummary from './blocks/ShiftsSummary'
-import WidgetListBlock from './blocks/WidgetListBlock'
 import ScopeBadge from './blocks/ScopeBadge'
-import RecruiterLoad from './blocks/RecruiterLoad'
 import OppAging from './blocks/OppAging'
 import FeedTileGrid from './blocks/FeedTileGrid'
+import { renderedTileIds } from './blocks/feedTileKit'
+import { FEED_TILES } from './blocks/feedRegistry'
+import { LIST_TILES } from './blocks/lists'
 import KoiosForYouCard from './KoiosForYouCard'
 import KoiosPerformanceCard from './blocks/KoiosPerformanceCard'
 import type { DashStats, DashOpp, DashData } from '@/types/dashboard'
@@ -96,14 +95,20 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
   const {
     vis, statusData, recruiterData, funnelData, oppStageData,
     recentCandidates, recentApplications, recentLeads, runs, conversations,
-    showRuns, showConv, trendData, trendSeries, shifts, kpis, scope = null,
+    trendData, trendSeries, shifts, kpis, scope = null,
     expiringMatchesRows, staleVacanciesRows, koiosSuggestionsRows,
-    recruiterLoadRows = [], oppAgingRows = [],
+    oppAgingRows = [],
   } = useDashboardViewModel({
     t, formatNumber, stats, opp, dash, dashCharts, statusMeta, funnelMeta, funnelTypes,
     activeType, hiddenBlocks, hiddenKpis, kpiOrder, hasPlanning, valueInHours,
     onNavigate,
   })
+
+  // DASH-PAIRS-1: the recent lists + KD11 widgets are registry tiles too; the
+  // viewmodel-mapped rows reach them through the tile context, and a list a pair
+  // in the top grid already shows is not repeated in the bottom grid.
+  const lists = { recentCandidates, recentApplications, recentLeads, runs, conversations, expiringMatchesRows, staleVacanciesRows, koiosSuggestionsRows }
+  const topTileIds = renderedTileIds(FEED_TILES, dash ?? ({} as DashData), vis, { onNavigate, hasPlanning, lists })
 
   // Registers this page's right-panel filter groups (period/location/status options).
   useDashboardFilterPanel({
@@ -159,8 +164,10 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
             {kpis.map(k => <KpiCard key={k.label} {...k} />)}
           </div>
 
-          {/* K-173 fase 6 — recruitment_manager's team-load table. */}
-          {vis('block.recruiterLoad') && <div style={{ marginBottom: 16 }}><RecruiterLoad rows={recruiterLoadRows} onNavigate={onNavigate} /></div>}
+          {/* DASH-FEEDS-V3 + DASH-PAIRS-1 — every work-feed tile (the 24 v3 feeds,
+              recruiter load, the pairs Danny asked for) in ONE packed grid right
+              under the KPI strip: the day's work first, then Koios and the charts. */}
+          <FeedTileGrid dash={dash} vis={vis} onNavigate={onNavigate} hasPlanning={hasPlanning} lists={lists} />
 
           {/* K-173 fase 6 — sales_manager/accountmanager opportunity-ageing buckets. */}
           {vis('block.oppAging') && <OppAging rows={oppAgingRows} />}
@@ -180,25 +187,6 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
 
           <TrendsRow vis={vis} trendData={trendData} trendSeries={trendSeries} funnelData={funnelData} onNavigate={onNavigate} />
 
-          {/* DASH-FEEDS-V3 — the 24 v3 widget-feed tiles, one packed grid via the
-              blocks/feedRegistry.ts registry (own grid, separate from the KD11
-              grid below which still owns its own three legacy widget feeds). */}
-          <FeedTileGrid dash={dash} vis={vis} onNavigate={onNavigate} hasPlanning={hasPlanning} />
-
-          {/* ONE grid for every work-feed tile (DASH-FEEDS-PACK-1). Each tile self-hides
-              when its data is empty, so whenever a neighbour hid itself its half of the
-              row stayed blank in a hardcoded two-grid layout — in one grid the cells
-              simply pack. DASHBOARD-OPRUIMING-1 (Danny 23-08): "Werk af" (attention
-              candidates), "Stilstaande leads" and "Vandaag" (touchpoints) are removed
-              entirely, leaving the three KD11 sales-widget feeds here. */}
-          {(vis('block.expiringMatches') || vis('block.staleVacancies') || vis('block.koiosSuggestions')) && (
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
-            {vis('block.expiringMatches') && <WidgetListBlock title={t('block.expiringMatches')} rows={expiringMatchesRows} />}
-            {vis('block.staleVacancies') && <WidgetListBlock title={t('block.staleVacancies')} rows={staleVacanciesRows} />}
-            {vis('block.koiosSuggestions') && <WidgetListBlock title={t('block.koiosSuggestions')} rows={koiosSuggestionsRows} />}
-          </div>
-          )}
-
           {/* Planning-blokken — WhatsApp-wachtrij (🟢) + diensten-overzicht (🟡 tot de feed). */}
           {vis('block.shifts') && (
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
@@ -206,9 +194,10 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
           </div>
           )}
 
-          <RecentListsRow vis={vis} recentCandidates={recentCandidates} recentApplications={recentApplications} onNavigate={onNavigate} />
-
-          <ActivityListsRow vis={vis} showRuns={showRuns} showConv={showConv} recentLeads={recentLeads} runs={runs} conversations={conversations} onNavigate={onNavigate} />
+          {/* The recent lists + KD11 widgets, one packed grid (DASH-FEEDS-PACK-1 /
+              DASHBOARD-OPRUIMING-1): "Werk af", "Stilstaande leads" and "Vandaag"
+              stay removed; a list a pair above already shows is not repeated. */}
+          <FeedTileGrid dash={dash} vis={vis} onNavigate={onNavigate} hasPlanning={hasPlanning} entries={LIST_TILES} lists={lists} exclude={topTileIds} />
         </>
       )}
     </div>

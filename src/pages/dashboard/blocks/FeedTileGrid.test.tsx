@@ -8,6 +8,7 @@ import { render } from '@testing-library/react'
 import type { FeedTileEntry } from './feedRegistry'
 import type { DashData } from '@/types/dashboard'
 import FeedTileGrid from './FeedTileGrid'
+import { renderedTileIds } from './feedTileKit'
 
 // vi.mock's factory is hoisted above imports, so the fake tiles are built via
 // vi.hoisted rather than a top-level const the factory would otherwise close over.
@@ -50,10 +51,52 @@ describe('FeedTileGrid', () => {
     expect(container).toBeEmptyDOMElement()
   })
 
-  it('renders nothing when dash is null', () => {
+  it('treats a null dash as "no feed data": a feed tile reading its key hides, nothing renders', () => {
+    const feedTile: FeedTileEntry = { blockId: 'block.g', feedKey: 'tasks_due_today', hasData: d => Array.isArray(d.tasks_due_today), render: () => <div>Tile G</div> }
     const { container } = render(
-      <FeedTileGrid dash={null} vis={() => true} hasPlanning={false} />
+      <FeedTileGrid dash={null} vis={() => true} hasPlanning={false} entries={[feedTile]} />
     )
     expect(container).toBeEmptyDOMElement()
+  })
+})
+
+// DASH-PAIRS-1 — a pair keeps its two tiles side by side whatever else hides.
+describe('FeedTileGrid · pairs and exclusion', () => {
+  const tileD: FeedTileEntry = { blockId: 'block.d', feedKey: 'recruiter_load', hasData: () => true, render: () => <div>Tile D</div> }
+  const tileE = (has: boolean): FeedTileEntry => ({ blockId: 'block.e', feedKey: 'fill_rate_timeseries', hasData: () => has, render: () => <div>Tile E</div> })
+  const pair = (has: boolean): FeedTileEntry => ({ blockId: 'pair.de', feedKey: 'recruiter_load', hasData: () => true, render: () => null, children: [tileD, tileE(has)] })
+  const solo: FeedTileEntry = { blockId: 'block.f', feedKey: 'tasks_due_today', hasData: () => true, render: () => <div>Tile F</div> }
+
+  it('renders both children of a pair in one full-width cell, side by side', () => {
+    const { container } = render(
+      <FeedTileGrid dash={{} as DashData} vis={() => true} hasPlanning={false} entries={[pair(true), solo]} />
+    )
+    const grid = container.firstElementChild as HTMLElement
+    const cell = grid.children[0] as HTMLElement
+    expect(cell.style.gridColumn).toBe('1 / -1')
+    expect(cell.style.gridTemplateColumns).toBe('1fr 1fr')
+    expect(cell.textContent).toBe('Tile DTile E')
+    expect(grid.children).toHaveLength(2)
+  })
+
+  it('a lone pair child takes the whole cell (no hole beside it)', () => {
+    const { container } = render(
+      <FeedTileGrid dash={{} as DashData} vis={() => true} hasPlanning={false} entries={[pair(false)]} />
+    )
+    const cell = (container.firstElementChild as HTMLElement).children[0] as HTMLElement
+    expect(cell.style.gridTemplateColumns).toBe('1fr')
+    expect(cell.textContent).toBe('Tile D')
+  })
+
+  it('hides the pair entirely when neither child qualifies, and honours exclude', () => {
+    const { container } = render(
+      <FeedTileGrid dash={{} as DashData} vis={id => id !== 'block.d'} hasPlanning={false} entries={[pair(false), solo]} exclude={new Set(['block.f'])} />
+    )
+    expect(container).toBeEmptyDOMElement()
+  })
+
+  it('renderedTileIds lists the pair children, not the pair itself', () => {
+    const ids = renderedTileIds([pair(true), solo], {} as DashData, () => true, { hasPlanning: false })
+    expect([...ids]).toEqual(['block.d', 'block.e', 'block.f'])
   })
 })

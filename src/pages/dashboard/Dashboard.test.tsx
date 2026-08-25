@@ -44,8 +44,7 @@ vi.mock('./hooks/useDashboardViewModel', () => ({
 // Child blocks are out of scope for this container test (own components/tests).
 vi.mock('./blocks/DistributionCharts', () => ({ default: () => null }))
 vi.mock('./blocks/TrendsRow', () => ({ default: () => null }))
-vi.mock('./blocks/RecentListsRow', () => ({ default: () => null }))
-vi.mock('./blocks/ActivityListsRow', () => ({ default: () => null }))
+vi.mock('./blocks/FeedTileGrid', () => ({ default: () => null }))
 vi.mock('./blocks/ShiftsSummary', () => ({ default: () => null }))
 // Own useQuery call (own test file) — mocked here so this container test never
 // needs a QueryClientProvider in the tree.
