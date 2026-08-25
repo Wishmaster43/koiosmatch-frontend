@@ -9,16 +9,19 @@
  * axis sums to `total`; 'none'/'others' sentinels, "Onbekend"/"Geen uitkomst"
  * rows and orphan strings are normal, drillable entries — campaign accepts any
  * uuid (an archived campaign keeps its real name) and 'others' drills the exact
- * top-20 complement. The fase-1 KPI strip (targets/reached/reach rate) stays
- * as-is; drill rows carry candidate names (outreach.view), so a 403 keeps the
+ * top-20 complement. KPI-OUTREACH-1 (CMBE K-191, commit 00e72f45): the strip is
+ * now the server's own nine-card kpis[] suite, mirroring TasksReport's
+ * KPI-TAKEN-1 idiom (kpiByServerKey Map, one predicate shared by value and
+ * drill). Drill rows carry candidate names (outreach.view), so a 403 keeps the
  * calm degrade in the drawer. entityPage is deliberately NOT set on any drill
  * here: outreach drill rows are call-list targets, not a single unambiguous
  * entity record page.
  */
 import { useState } from 'react'
 import { BodyText } from '@/components/ui/typography'
-import { formatRatio } from '@/lib/formatters'
+import { formatPercent } from '@/lib/formatters'
 import { useTranslation } from 'react-i18next'
+import { buildReportQueryParams, EMPTY_REPORT_FILTERS } from './reportFilterParams'
 import ReportKpiBand from './ReportKpiBand'
 import { reportCardStyle as card } from './ReportSectionCard'
 import ReportStateBlock from './ReportStateBlock'
@@ -53,14 +56,14 @@ type Axis = 'campaign' | 'channel' | 'status' | 'outcome'
 // colour, so donuts fall back to the house series.
 type AxisSeg = { value: string; label: string; count: number }
 
-// Semantic colour per signal card, non-zero only (§4) — the reference's
-// SUITE_COLOR idiom, one map instead of inline ternary paint.
-const OUTREACH_COLOR: Record<string, string> = { reached: 'var(--color-success)' }
-
 export default function OutreachReport({ period, filters, compare = COMPARE_OFF }: { period: ReportPeriod; filters?: ReportFilterState; compare?: ReportCompareMode }) {
   const { t } = useTranslation('analytics')
   const { formatDate } = useDateFormat()
   const { data, loading, error, refetch } = useOutreachReport(period, filters)
+  // RAPPORT-FILTERS-2: every drill/advice call carries the SAME panel filters the
+  // envelope was drawn with (K-192: the advice routes validate them too) — bar,
+  // card and drawer count one population.
+  const baseParams = buildReportQueryParams(period, 'outreach', filters ?? EMPTY_REPORT_FILTERS)
 
   const total   = data?.total ?? data?.total_targets ?? 0
   const hasData = !loading && !error && total > 0
@@ -78,17 +81,17 @@ export default function OutreachReport({ period, filters, compare = COMPARE_OFF 
   const openSegment = (seg: { label: string; count: number }, xorParam: Record<string, unknown>) =>
     setDrill({
       title: seg.label, value: seg.count, subtitle: windowSub(),
-      rowsEndpoint: '/reports/outreach/drill', rowsParams: { ...xorParam, period },
-      adviceEndpoint: '/reports/outreach/advice', adviceParams: { ...xorParam, period },
+      rowsEndpoint: '/reports/outreach/drill', rowsParams: { ...baseParams, ...xorParam },
+      adviceEndpoint: '/reports/outreach/advice', adviceParams: { ...baseParams, ...xorParam },
     })
   const openBucket = (pt: CandidateTimeseriesPoint) => setDrill({
     title: pt.label, value: pt.value, subtitle: windowSub(),
     // A week bar's `date` is the point's own key; the drawer then counts the WHOLE
     // week (bucket=week) so bar and drawer total always agree.
     rowsEndpoint: '/reports/outreach/drill',
-    rowsParams: { date: pt.date, ...(data?.timeseries.bucket === 'week' ? { bucket: 'week' } : {}), period },
+    rowsParams: { ...baseParams, date: pt.date, ...(data?.timeseries.bucket === 'week' ? { bucket: 'week' } : {}) },
     adviceEndpoint: '/reports/outreach/advice',
-    adviceParams: { date: pt.date, ...(data?.timeseries.bucket === 'week' ? { bucket: 'week' } : {}), period },
+    adviceParams: { ...baseParams, date: pt.date, ...(data?.timeseries.bucket === 'week' ? { bucket: 'week' } : {}) },
   })
 
   // Chart datum builders (RAPPORT-GEZICHT-WAVE2 chart-type rule): 'none'/'others'
@@ -123,88 +126,53 @@ export default function OutreachReport({ period, filters, compare = COMPARE_OFF 
       if (seg) openSegment({ label: seg.name, count: seg.count }, { assignee: seg.owner_id })
     })
 
-  // RAPPORT-KAARTDRILLS-1 → Opus-REJECT gemeten: alleen total/reached zijn
-  // hard bevestigd identiek aan hun server-kpi; notReached (kaart = rekenkundig
-  // complement, server = uitkomst-subset) en rate (kaart = reach_rate, sleutel
-  // = conversion_pct met andere noemer) divergeren en zijn ontkoppeld tot de
-  // kaartwaarden uit de server-kpis[]-strip komen (rapportenplan-uitrol).
-  const KPI_DRILL_KEY: Partial<Record<string, string>> = {
-    total: 'total_targets', reached: 'reached',
-  }
-  const openKpiDrill = (localKey: string, label: string, value: string | number) => {
-    const serverKey = KPI_DRILL_KEY[localKey]
-    if (!serverKey) return undefined
-    return gateDrillClick('outreach', () => setDrill({
-      title: label, value, subtitle: windowSub(),
-      rowsEndpoint: '/reports/outreach/kpis/drill', rowsParams: { kpi: serverKey, period },
-    }))
-  }
-
   const onSeriesPick = gateDrillClick('outreach', (dateKey: string) => {
     const pt = data?.timeseries.series.find(p => p.date === dateKey)
     if (pt) openBucket(pt)
   })
 
-  // Fase-1 KPI strip, unchanged (regression): reach_rate is null while nothing
-  // was reached — placeholder, never a fabricated 0%. Display-only: the six-way
-  // XOR carries no reached/rate segment (no fake affordances).
-  const targets = data?.total_targets ?? 0
-  const reached = data?.reached ?? 0
-  const unassignedSeg   = data?.by_assignee.find(s => s.owner_id === 'none')
-  const unassignedCount = unassignedSeg?.count ?? 0
-  const noOutcomeSeg    = data?.by_outcome.find(s => s.value === 'none')
-  // Top-1 real bar per axis (excl. the structural 'others'/'none' sentinels) —
-  // never a hardcoded outcome/campaign/channel value, just the biggest real one.
-  const topCampaign = data?.by_campaign.filter(s => s.value !== 'others').reduce<{ value: string; label: string; count: number } | null>(
-    (top, s) => (!top || s.count > top.count) ? s : top, null)
-  const topChannel = data?.by_channel.filter(s => s.value !== 'none').reduce<{ value: string; label: string; count: number } | null>(
-    (top, s) => (!top || s.count > top.count) ? s : top, null)
-  // Spares (REPORTS-KPI-SPARES-1): the top real segment of two axes not yet
-  // offered (by_status/by_outcome, excluding the 'none' sentinel already used by
-  // noOutcome above), and three distinct-category counts off axes already in the
-  // response (campaigns/channels/assignees actually used, i.e. count > 0).
-  const topStatus = data?.by_status.reduce<{ value: string; label: string; count: number } | null>(
-    (top, s) => (!top || s.count > top.count) ? s : top, null)
-  const topOutcome = data?.by_outcome.filter(s => s.value !== 'none').reduce<{ value: string; label: string; count: number } | null>(
-    (top, s) => (!top || s.count > top.count) ? s : top, null)
-  const campaignsCount  = data?.by_campaign.filter(s => s.value !== 'others' && s.count > 0).length ?? 0
-  const channelsUsedCount = data?.by_channel.filter(s => s.value !== 'none' && s.count > 0).length ?? 0
-  const assigneesCount  = data?.by_assignee.filter(s => s.owner_id !== 'none' && s.count > 0).length ?? 0
-  const kpiByKey: Record<string, KpiSpec> = {
-    total:   { key: 'total',   label: t('outreach.total'),   value: targets,
-      sub: totalCompare ? <ReportCompareMetric metric={totalCompare} polarity="up-good" /> : undefined,
-      onClick: openKpiDrill('total', t('outreach.total'), targets) },
-    reached: { key: 'reached', label: t('outreach.reached'), value: reached,
-      color: reached !== 0 ? OUTREACH_COLOR.reached : undefined,
-      onClick: openKpiDrill('reached', t('outreach.reached'), reached) },
-    rate:    { key: 'rate',    label: t('outreach.reachRate'),
-      value: formatRatio(data?.reach_rate),
-      onClick: data?.reach_rate != null ? openKpiDrill('rate', t('outreach.reachRate'), formatRatio(data.reach_rate)) : undefined },
-    // Derived complements — real subtraction over fields the endpoint returns,
-    // never a fabricated number. `assigned` stays non-clickable: no single-value
-    // axis or kpi backs an "assigned" drill.
-    notReached: { key: 'notReached', label: t('outreach.summary.notReached'), value: targets - reached,
-      onClick: openKpiDrill('notReached', t('outreach.summary.notReached'), targets - reached) },
-    assigned:   { key: 'assigned',   label: t('outreach.summary.assigned'),   value: targets - unassignedCount },
-    unassigned: { key: 'unassigned', label: t('outreach.summary.unassigned'), value: unassignedCount,
-      onClick: unassignedSeg ? gateDrillClick('outreach', () => openSegment({ label: unassignedSeg.name, count: unassignedSeg.count }, { assignee: 'none' })) : undefined },
-    noOutcome: { key: 'noOutcome', label: t('outreach.summary.noOutcome'), value: noOutcomeSeg?.count ?? 0,
-      onClick: noOutcomeSeg ? gateDrillClick('outreach', () => openSegment(noOutcomeSeg, { outcome: 'none' })) : undefined },
-    // Permanent slots (Danny — nine cards, always): while there is no real top
-    // campaign/channel yet, the card still renders with the house dash instead
-    // of shrinking the strip.
-    topCampaign: { key: 'topCampaign', label: t('outreach.summary.topCampaign'), value: topCampaign?.count ?? '—', sub: topCampaign?.label,
-      onClick: topCampaign ? gateDrillClick('outreach', () => openSegment(topCampaign, { campaign: topCampaign.value })) : undefined },
-    topChannel: { key: 'topChannel', label: t('outreach.summary.topChannel'), value: topChannel?.count ?? '—', sub: topChannel?.label,
-      onClick: topChannel ? gateDrillClick('outreach', () => openSegment(topChannel, { channel: topChannel.value })) : undefined },
-    topStatus: { key: 'topStatus', label: t('outreach.summary.topStatus'), value: topStatus?.count ?? '—', sub: topStatus?.label,
-      onClick: topStatus ? gateDrillClick('outreach', () => openSegment(topStatus, { status: topStatus.value })) : undefined },
-    topOutcome: { key: 'topOutcome', label: t('outreach.summary.topOutcome'), value: topOutcome?.count ?? '—', sub: topOutcome?.label,
-      onClick: topOutcome ? gateDrillClick('outreach', () => openSegment(topOutcome, { outcome: topOutcome.value })) : undefined },
-    campaignsCount: { key: 'campaignsCount', label: t('outreach.summary.campaignsCount'), value: campaignsCount },
-    channelsUsed: { key: 'channelsUsed', label: t('outreach.summary.channelsUsed'), value: channelsUsedCount },
-    assigneesCount: { key: 'assigneesCount', label: t('outreach.summary.assigneesCount'), value: assigneesCount },
+  // KPI-OUTREACH-1 (mirrors TasksReport's KPI-TAKEN-1): the nine-card strip
+  // reads the server's own kpis[] suite verbatim — value and drawer share ONE
+  // backend predicate per key, so a card's number and its drill rows can never
+  // diverge. A key the server omitted (or a pre-suite cached envelope) renders
+  // the house dash with no drill — never a value from another population.
+  const kpiByServerKey = new Map((data?.kpis ?? []).map(k => [k.key, k.count]))
+  const openKpiDrill = (kpi: string, label: string, value: string | number) =>
+    gateDrillClick('outreach', () => setDrill({
+      title: label, value, subtitle: windowSub(),
+      rowsEndpoint: '/reports/outreach/kpis/drill', rowsParams: { ...baseParams, kpi },
+    }))
+  // Semantic colour only where the number is a SIGNAL and non-zero (§4: colour
+  // carries meaning; a calm zero stays uncoloured).
+  const KPI_COLOR: Partial<Record<string, string>> = {
+    reached: 'var(--color-success)', not_reached: 'var(--color-danger)',
+    open_todo: 'var(--color-warning)', due_today: 'var(--color-warning)',
   }
+  const SUITE_LABEL_KEY: Record<string, string> = {
+    total_targets: 'outreach.kpi.totalTargets', open_todo: 'outreach.kpi.openTodo',
+    called_in_period: 'outreach.kpi.calledInPeriod', reached: 'outreach.kpi.reached',
+    not_reached: 'outreach.kpi.notReached', conversion_pct: 'outreach.kpi.conversionPct',
+    campaigns_active: 'outreach.kpi.campaignsActive', campaigns_done_in_period: 'outreach.kpi.campaignsDoneInPeriod',
+    due_today: 'outreach.kpi.dueToday',
+  }
+  const openKpiParams = drill?.rowsParams as Record<string, unknown> | undefined
+  const kpiByKey: Record<string, KpiSpec> = Object.fromEntries(
+    Object.entries(SUITE_LABEL_KEY).map(([key, labelKey]) => {
+      const label = t(labelKey)
+      const raw = kpiByServerKey.get(key)
+      const has = raw != null
+      // conversion_pct is a float percentage, not a row count.
+      const value = !has ? '—'
+        : key === 'conversion_pct' ? formatPercent(raw as number)
+        : raw
+      return [key, {
+        key, label, value,
+        color: has && raw !== 0 ? KPI_COLOR[key] : undefined,
+        active: openKpiParams?.kpi === key,
+        sub: key === 'total_targets' && totalCompare ? <ReportCompareMetric metric={totalCompare} polarity="up-good" /> : undefined,
+        onClick: has ? openKpiDrill(key, label, value) : undefined,
+      } satisfies KpiSpec]
+    }))
   // Which nine keys render, and in what order, is the tenant's Settings → Reports
   // choice (falls back to today's order when nothing is stored, or a stored key
   // has vanished — RAPPORT-KPI-INSTELBAAR).

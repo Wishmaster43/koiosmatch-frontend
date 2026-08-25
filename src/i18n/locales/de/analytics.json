@@ -162,9 +162,6 @@
     "loading": "Outreach wird geladen…",
     "error": "Outreach konnte nicht geladen werden",
     "empty": "Keine Anrufzielpersonen in diesem Zeitraum",
-    "total": "Ziele gesamt",
-    "reached": "Erreicht",
-    "reachRate": "Erreichungsquote",
     "series": "Anrufzielpersonen im Zeitverlauf",
     "window": "Anrufzielpersonen {{from}} bis {{to}}",
     "axes": {
@@ -172,18 +169,16 @@
       "channel": "Kanal",
       "outcome": "Ergebnis"
     },
-    "summary": {
+    "kpi": {
+      "totalTargets": "Ziele gesamt",
+      "openTodo": "Offen",
+      "calledInPeriod": "Angerufen im Zeitraum",
+      "reached": "Erreicht",
       "notReached": "Nicht erreicht",
-      "assigned": "Zugewiesen",
-      "unassigned": "Nicht zugewiesen",
-      "noOutcome": "Kein Ergebnis",
-      "topCampaign": "Größte Anrufliste",
-      "topChannel": "Größter Kanal",
-      "topStatus": "Groesster Status",
-      "topOutcome": "Groesstes Ergebnis",
-      "campaignsCount": "Anzahl Anruflisten",
-      "channelsUsed": "Genutzte Kanaele",
-      "assigneesCount": "Zugewiesene Recruiter"
+      "conversionPct": "Konversion",
+      "campaignsActive": "Aktive Kampagnen",
+      "campaignsDoneInPeriod": "Kampagnen abgeschlossen im Zeitraum",
+      "dueToday": "Fällig heute"
     },
     "kpiOrderFellBack": "Eine in den Einstellungen konfigurierte KPI-Karte existiert nicht mehr und wurde auf den Standard zurückgesetzt."
   },

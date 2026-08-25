@@ -3,11 +3,13 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import OutreachReport from './OutreachReport'
+import i18n from '@/i18n'
+import { EMPTY_REPORT_FILTERS } from './reportFilterParams'
 import type { OutreachReportData } from '@/types/analytics'
 
 // Data layer under test control (loading/error/empty/success — the four UI states).
 const mockUseOutreachReport = vi.fn()
-vi.mock('./useOutreachReport', () => ({ useOutreachReport: () => mockUseOutreachReport() }))
+vi.mock('./useOutreachReport', () => ({ useOutreachReport: (...args: unknown[]) => mockUseOutreachReport(...args) }))
 
 // Spy on the underlying axios client so we can assert the exact request shape
 // (method/route/params) that a bar/bucket click sends — mutation tests must assert
@@ -66,6 +68,17 @@ const data: OutreachReportData = {
   ],
 }
 
+// KPI-OUTREACH-1: the server suite the strip renders verbatim — one entry per
+// drill-enum key, value and drawer sharing one backend predicate.
+const suiteKpis = [
+  { key: 'total_targets', count: 40 }, { key: 'open_todo', count: 12 },
+  { key: 'called_in_period', count: 28 }, { key: 'reached', count: 25 },
+  { key: 'not_reached', count: 15 }, { key: 'conversion_pct', count: 62.5 },
+  { key: 'campaigns_active', count: 3 }, { key: 'campaigns_done_in_period', count: 1 },
+  { key: 'due_today', count: 4 },
+]
+const dataWithSuite: OutreachReportData = { ...data, kpis: suiteKpis }
+
 function renderReport() {
   const qc = new QueryClient()
   return render(
@@ -98,6 +111,22 @@ vi.mock('@/components/charts/BarChartCard', () => ({
     <>{(data ?? []).map(d => <button key={d.key} onClick={() => onBarClick?.(d)}>{d.name}</button>)}</>
   ),
 }))
+
+
+// RAPPORT-FILTERS-2: the panel filters reach the hook AND every drill (kpi card here).
+describe('OutreachReport · panel filters reach hook and drill', () => {
+  it('sends the active panel filters to BOTH the report hook and a kpi drill click', async () => {
+    const user = userEvent.setup()
+    const filters = { ...EMPTY_REPORT_FILTERS, status: ['todo'], ownerId: ['u1'], locationId: ['l1'] }
+    mockUseOutreachReport.mockReturnValue({ data: { ...data, kpis: suiteKpis }, loading: false, error: false })
+    render(<QueryClientProvider client={new QueryClient()}><OutreachReport period="month" filters={filters} /></QueryClientProvider>)
+    expect(mockUseOutreachReport).toHaveBeenCalledWith('month', filters)
+    await user.click(screen.getByText(i18n.t('outreach.kpi.conversionPct', { ns: 'analytics' })))
+    expect(getSpy).toHaveBeenCalledWith('/reports/outreach/kpis/drill', expect.objectContaining({
+      params: expect.objectContaining({ kpi: 'conversion_pct', period: 'month', status: ['todo'], owner_id: ['u1'], location_id: ['l1'] }),
+    }))
+  })
+})
 
 describe('OutreachReport (RAPPORTEN-SUITE-1 portie 6, bellijsten report)', () => {
   // Every section now defaults its own list on mount, firing extra drill/advice
@@ -148,108 +177,55 @@ describe('OutreachReport (RAPPORTEN-SUITE-1 portie 6, bellijsten report)', () =>
     expect(data.timeseries.series.reduce((s, p) => s + p.value, 0)).toBe(data.total)
   })
 
-  // Fase-1 regression: the legacy KPI numbers (targets / reached / reach rate)
-  // still render unchanged next to the new portie-6 axes.
-  it('still renders the fase-1 reach KPI strip (regression)', () => {
-    mockUseOutreachReport.mockReturnValue({ data, loading: false, error: false })
+  // KPI-OUTREACH-1: the strip renders the server kpis[] suite verbatim — nine
+  // translated cards, conversion_pct as a percentage, signal cards coloured
+  // only when non-zero (§4: colour carries meaning).
+  it('renders the nine suite cards from kpis[] with translated labels', () => {
+    mockUseOutreachReport.mockReturnValue({ data: dataWithSuite, loading: false, error: false })
     renderReport()
-    expect(screen.getByText('Totaal targets')).toBeInTheDocument()
+    expect(screen.getByText('Totaal doelen')).toBeInTheDocument()
+    expect(screen.getByText('Open te doen')).toBeInTheDocument()
+    expect(screen.getByText('Gebeld in periode')).toBeInTheDocument()
     expect(screen.getByText('Bereikt')).toBeInTheDocument()
-    expect(screen.getByText('Bereikpercentage')).toBeInTheDocument()
-    expect(screen.getByText('63%')).toBeInTheDocument()
+    expect(screen.getByText('Niet bereikt')).toBeInTheDocument()
+    expect(screen.getByText('Actieve campagnes')).toBeInTheDocument()
+    expect(screen.getByText('Campagnes afgerond in periode')).toBeInTheDocument()
+    expect(screen.getByText('Vervalt vandaag')).toBeInTheDocument()
+    // conversion_pct renders through the house percent formatter.
+    expect(screen.getByText('62,5%')).toBeInTheDocument()
+    // The non-zero reached count wears the success colour (semantic signal).
+    const reachedValue = screen.getAllByText('Bereikt').at(-1)?.parentElement?.parentElement
+    expect(reachedValue?.textContent).toContain('25')
   })
 
-  // RAPPORT-KAARTDRILLS-1: total/reached/notReached/rate drill via the new
-  // per-KPI-card endpoint GET /reports/outreach/kpis/drill?kpi=<key>.
-  it('clicking the "Totaal targets" KPI card drills via /reports/outreach/kpis/drill?kpi=total_targets', async () => {
+  // KPI-OUTREACH-1: a suite card's VALUE comes from kpis[] and its click drills
+  // the SAME key — one predicate for number and drawer (§13 asserts the request).
+  it('reads called_in_period from kpis[] and drills via its own kpi key', async () => {
+    const user = userEvent.setup()
+    mockUseOutreachReport.mockReturnValue({ data: dataWithSuite, loading: false, error: false })
+    renderReport()
+    getSpy.mockClear()
+    await user.click(screen.getByText('28'))
+    expect(getSpy).toHaveBeenCalledWith('/reports/outreach/kpis/drill',
+      expect.objectContaining({ params: expect.objectContaining({ kpi: 'called_in_period', period: 'month' }) }))
+  })
+
+  // Honest fallback: a pre-suite envelope (no kpis[]) renders the house dash on
+  // every card, with no drill affordance — never a value from another population.
+  it('renders dashes with no drill when kpis[] is absent', async () => {
     const user = userEvent.setup()
     mockUseOutreachReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
+    expect(screen.getAllByText('—').length).toBeGreaterThanOrEqual(9)
     getSpy.mockClear()
-    await user.click(screen.getByText('Totaal targets'))
-    expect(getSpy).toHaveBeenCalledWith('/reports/outreach/kpis/drill',
-      expect.objectContaining({ params: { kpi: 'total_targets', period: 'month' } }))
+    await user.click(screen.getByText('Totaal doelen'))
+    expect(getSpy).not.toHaveBeenCalledWith('/reports/outreach/kpis/drill', expect.anything())
   })
 
-  it('clicking the "Bereikt" KPI card drills with kpi=reached', async () => {
-    const user = userEvent.setup()
-    mockUseOutreachReport.mockReturnValue({ data, loading: false, error: false })
-    renderReport()
-    getSpy.mockClear()
-    await user.click(screen.getByText('Bereikt'))
-    expect(getSpy).toHaveBeenCalledWith('/reports/outreach/kpis/drill',
-      expect.objectContaining({ params: { kpi: 'reached', period: 'month' } }))
-  })
-
-  // Opus-REJECT: de kaart toont reach_rate (reached/total) terwijl de sleutel
-  // conversion_pct een andere noemer draagt — ontkoppeld tot de strip de
-  // server-kpis[] leest; total/reached blijven wél drillen (hard bevestigd).
-  it('the rate card carries no drill; total still drills via kpi=total_targets', async () => {
-    const user = userEvent.setup()
-    renderReport()
-    await user.click(await screen.findByText('63%'))
-    expect(getSpy.mock.calls.map(c => String(c[0])).some(u => u.includes('/kpis/drill'))).toBe(false)
-    await user.click(screen.getByText('Totaal targets'))
-    expect(getSpy).toHaveBeenCalledWith('/reports/outreach/kpis/drill',
-      expect.objectContaining({ params: expect.objectContaining({ kpi: 'total_targets' }) }))
-  })
-
-  // A null/missing reach_rate must never crash and must never fabricate a
-  // clickable card for a value that doesn't exist.
-  it('does not crash and keeps the rate card non-clickable when reach_rate is null', () => {
-    mockUseOutreachReport.mockReturnValue({ data: { ...data, reach_rate: null }, loading: false, error: false })
+  // A missing/null kpis[] must never crash the strip.
+  it('does not crash when kpis is missing', () => {
+    mockUseOutreachReport.mockReturnValue({ data: { ...data, kpis: undefined }, loading: false, error: false })
     expect(() => renderReport()).not.toThrow()
-    expect(screen.getByText('Bereikpercentage').closest('[role="button"]')).toBeNull()
-  })
-
-  // Nine-card footprint (Danny's "negen KPI rows"): the fase-1 three plus two
-  // derived complements (not-reached/assigned) and four real axis-derived cards
-  // (unassigned, no-outcome, top campaign, top channel) — never a fabricated ninth.
-  it('renders exactly nine KPI cards, each a real number from the fixture', () => {
-    mockUseOutreachReport.mockReturnValue({ data, loading: false, error: false })
-    renderReport()
-    const cardLabels = ['Totaal targets', 'Bereikt', 'Bereikpercentage', 'Niet bereikt', 'Toegewezen',
-      'Niet toegewezen', 'Geen uitkomst', 'Grootste bellijst', 'Grootste kanaal']
-    expect(cardLabels).toHaveLength(9)
-    // getAllByText: 'Niet toegewezen'/'Geen uitkomst' double as an axis-bar label
-    // below, so at least one instance (not exactly one) is what proves the card.
-    for (const label of cardLabels) expect(screen.getAllByText(label).length).toBeGreaterThan(0)
-    // Values collide with axis-bar counts (15/30 each appear twice) — presence,
-    // not uniqueness, is what these two derived cards need to prove.
-    expect(screen.getAllByText(String(data.total_targets - data.reached)).length).toBeGreaterThan(0) // notReached
-    expect(screen.getAllByText(String(data.total_targets - 10)).length).toBeGreaterThan(0) // assigned
-    // topCampaign sub shows the campaign name (the biggest real one, 'others'
-    // excluded) — it also appears as its own bar below, so at least one instance.
-    expect(screen.getAllByText('Bellijst Q3 wondzorg').length).toBeGreaterThan(0)
-  })
-
-  // Nine-card footprint holds even without a real top campaign/channel (only
-  // 'others'/'none' sentinel rows) — the two slots are PERMANENT and render the
-  // house dash instead of shrinking the strip to seven (Danny — always nine).
-  it('dash-fills topCampaign/topChannel when only sentinel rows exist', () => {
-    mockUseOutreachReport.mockReturnValue({
-      data: { ...data,
-        by_campaign: [{ value: 'others', label: 'Overige bellijsten', count: 40 }],
-        by_channel: [{ value: 'none', label: 'Geen kanaal', count: 40 }],
-      },
-      loading: false, error: false,
-    })
-    renderReport()
-    expect(screen.getByText('Grootste bellijst')).toBeInTheDocument()
-    expect(screen.getByText('Grootste kanaal')).toBeInTheDocument()
-    expect(screen.getAllByText('—').length).toBe(2)
-  })
-
-  // "Grootste bellijst" is also the campaign axis's own mount default (camp-1 is
-  // the biggest real bar) — the request is already in the call history from the
-  // mount-seed effect; asserted here over the FULL history, never "last call".
-  it('clicking the "Grootste bellijst" KPI card drills with campaign=<uuid> (XOR)', async () => {
-    const user = userEvent.setup()
-    mockUseOutreachReport.mockReturnValue({ data, loading: false, error: false })
-    renderReport()
-    await user.click(screen.getByText('Grootste bellijst'))
-    expect(getSpy).toHaveBeenCalledWith('/reports/outreach/drill',
-      expect.objectContaining({ params: { campaign: 'camp-1', period: 'month' } }))
   })
 
   // BELANGRIJK per contract: the window comes from the RESPONSE and must render
@@ -397,34 +373,6 @@ describe('OutreachReport (RAPPORTEN-SUITE-1 portie 6, bellijsten report)', () =>
     expect(getSpy.mock.calls.length).toBeGreaterThan(0)
     expect(getSpy.mock.calls.every(c =>
       c[0] === '/reports/outreach/drill' || c[0] === '/reports/outreach/advice')).toBe(true)
-  })
-
-  // REPORTS-KPI-SPARES-1: the settings-picked spare cards render real values off
-  // fields already in the fixture, and the strip stays exactly nine.
-  it('renders spare KPI cards with real values when picked in settings, strip stays nine', () => {
-    mockSettings.mockReturnValue({
-      report_kpis_outreach: [
-        'topStatus', 'topOutcome', 'campaignsCount', 'channelsUsed', 'assigneesCount',
-        'assigned', 'reached', 'rate', 'total',
-      ],
-    })
-    mockUseOutreachReport.mockReturnValue({ data, loading: false, error: false })
-    renderReport()
-    // topStatus = the biggest by_status segment ('contacted'/'Benaderd', 25).
-    expect(screen.getByText('Grootste status')).toBeInTheDocument()
-    expect(screen.getAllByText('Benaderd').length).toBeGreaterThan(0)
-    // topOutcome excludes the 'none' sentinel, so the biggest real outcome wins
-    // ('not_interested'/'Geen interesse', 15).
-    expect(screen.getByText('Grootste uitkomst')).toBeInTheDocument()
-    expect(screen.getAllByText('Geen interesse').length).toBeGreaterThan(0)
-    // campaignsCount = real campaigns excl. 'others' (camp-1, camp-archived-uuid) = 2.
-    expect(screen.getByText('Aantal bellijsten')).toBeInTheDocument()
-    // channelsUsed = real channels excl. 'none' (phone, whatsapp) = 2.
-    expect(screen.getByText('Gebruikte kanalen')).toBeInTheDocument()
-    // assigneesCount = real assignees excl. 'none' (u1) = 1.
-    expect(screen.getByText('Aantal toegewezen recruiters')).toBeInTheDocument()
-    expect(screen.getAllByText('2').length).toBeGreaterThan(0)
-    expect(screen.getAllByText('1').length).toBeGreaterThan(0)
   })
 
   // REPORTGRID-1: the shared drill drawer opens only on click, never

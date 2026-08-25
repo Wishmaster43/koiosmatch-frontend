@@ -162,9 +162,6 @@
     "loading": "Loading outreach…",
     "error": "Could not load outreach",
     "empty": "No call-list targets in this period",
-    "total": "Total targets",
-    "reached": "Reached",
-    "reachRate": "Reach rate",
     "series": "Call-list targets over time",
     "window": "Call-list targets {{from}} through {{to}}",
     "axes": {
@@ -172,18 +169,16 @@
       "channel": "Channel",
       "outcome": "Outcome"
     },
-    "summary": {
+    "kpi": {
+      "totalTargets": "Total targets",
+      "openTodo": "Open to do",
+      "calledInPeriod": "Called in period",
+      "reached": "Reached",
       "notReached": "Not reached",
-      "assigned": "Assigned",
-      "unassigned": "Unassigned",
-      "noOutcome": "No outcome",
-      "topCampaign": "Top call list",
-      "topChannel": "Top channel",
-      "topStatus": "Top status",
-      "topOutcome": "Top outcome",
-      "campaignsCount": "Call lists",
-      "channelsUsed": "Channels used",
-      "assigneesCount": "Assigned recruiters"
+      "conversionPct": "Conversion",
+      "campaignsActive": "Active campaigns",
+      "campaignsDoneInPeriod": "Campaigns done in period",
+      "dueToday": "Due today"
     },
     "kpiOrderFellBack": "A KPI card configured in Settings no longer exists and was reset to the default."
   },

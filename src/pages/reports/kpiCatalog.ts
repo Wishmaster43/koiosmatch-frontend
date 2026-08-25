@@ -21,7 +21,7 @@
  *   array today. The catalogue entry IS that literal card (key + i18n label ref),
  *   copied here without touching the report's own compute logic. Most scopes still
  *   equal the report's current default order 1:1 (no spares yet); `vacancies`,
- *   `opportunities`, `tasks`, `matches`, `intakes`, `outreach`, `ai`, `workflows`
+ *   `opportunities`, `tasks`, `matches`, `intakes`, `ai`, `workflows`
  *   (REPORTS-KPI-SPARE-1) and `recruiters`, `accountmanagers`, `contacts`, `locations`,
  *   `departments` (REPORTS-KPI-SPARE-2) each grew spare entries beyond their nine
  *   defaults — real fields the endpoint already returns but the strip never surfaced
@@ -283,23 +283,18 @@ export const REPORT_KPI_FIXED_CATALOG: Partial<Record<ReportKpiScopeId, KpiCatal
     { key: 'topTerminationReason', labelKey: 'matches.terminations.topReason' },
     { key: 'funnelRate', labelKey: 'matches.summary.funnelRate' },
   ],
+  // CMBE K-191 (commit 00e72f45): the server's own nine-card kpis[] suite,
+  // in catalog order — replaces the old ad-hoc summary/top-segment cards.
   outreach: [
-    { key: 'total', labelKey: 'outreach.total' },
-    { key: 'reached', labelKey: 'outreach.reached' },
-    { key: 'rate', labelKey: 'outreach.reachRate' },
-    { key: 'notReached', labelKey: 'outreach.summary.notReached' },
-    { key: 'assigned', labelKey: 'outreach.summary.assigned' },
-    { key: 'unassigned', labelKey: 'outreach.summary.unassigned' },
-    { key: 'noOutcome', labelKey: 'outreach.summary.noOutcome' },
-    { key: 'topCampaign', labelKey: 'outreach.summary.topCampaign' },
-    { key: 'topChannel', labelKey: 'outreach.summary.topChannel' },
-    // Spares (REPORTS-KPI-SPARES-1) — all five read off by_status/by_outcome/
-    // by_campaign/by_channel/by_assignee, already in the response.
-    { key: 'topStatus', labelKey: 'outreach.summary.topStatus' },
-    { key: 'topOutcome', labelKey: 'outreach.summary.topOutcome' },
-    { key: 'campaignsCount', labelKey: 'outreach.summary.campaignsCount' },
-    { key: 'channelsUsed', labelKey: 'outreach.summary.channelsUsed' },
-    { key: 'assigneesCount', labelKey: 'outreach.summary.assigneesCount' },
+    { key: 'total_targets', labelKey: 'outreach.kpi.totalTargets' },
+    { key: 'open_todo', labelKey: 'outreach.kpi.openTodo' },
+    { key: 'called_in_period', labelKey: 'outreach.kpi.calledInPeriod' },
+    { key: 'reached', labelKey: 'outreach.kpi.reached' },
+    { key: 'not_reached', labelKey: 'outreach.kpi.notReached' },
+    { key: 'conversion_pct', labelKey: 'outreach.kpi.conversionPct' },
+    { key: 'campaigns_active', labelKey: 'outreach.kpi.campaignsActive' },
+    { key: 'campaigns_done_in_period', labelKey: 'outreach.kpi.campaignsDoneInPeriod' },
+    { key: 'due_today', labelKey: 'outreach.kpi.dueToday' },
   ],
   // RAPPORT-APPS-VERDIEPING-1 (CMFE 24-08): the nine backend cards now ride in
   // the /reports/applications ENVELOPE's own `kpis[]` (one-envelope migration —

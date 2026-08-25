@@ -23,13 +23,6 @@ describe('kpiCatalog — customers signal keys stay in lockstep with the drill e
 })
 
 describe('kpiCatalog — spare cards on surviving scopes', () => {
-  it('outreach catalogue offers its spare keys', () => {
-    const catalogKeys = getReportKpiCatalog('outreach').map(c => c.key)
-    for (const key of ['topStatus', 'topOutcome', 'campaignsCount', 'channelsUsed', 'assigneesCount']) {
-      expect(catalogKeys).toContain(key)
-    }
-  })
-
   it.each(['outreach', 'matches', 'whatsapp'] as const)(
     '%s default order stays exactly nine keys once spares are appended',
     (scopeId) => {
@@ -37,9 +30,18 @@ describe('kpiCatalog — spare cards on surviving scopes', () => {
     },
   )
 
-  it('outreach and matches report real spare cards to the settings screen', () => {
-    expect(reportHasSpareKpiCards('outreach')).toBe(true)
+  it('matches reports real spare cards to the settings screen', () => {
     expect(reportHasSpareKpiCards('matches')).toBe(true)
+  })
+
+  // CMBE K-191: outreach moved to the server's own nine-card kpis[] suite —
+  // no spares, exactly the nine contract keys, in contract order.
+  it('outreach default order is exactly the nine contract keys', () => {
+    expect(getReportKpiDefaultOrder('outreach')).toEqual([
+      'total_targets', 'open_todo', 'called_in_period', 'reached', 'not_reached',
+      'conversion_pct', 'campaigns_active', 'campaigns_done_in_period', 'due_today',
+    ])
+    expect(reportHasSpareKpiCards('outreach')).toBe(false)
   })
 
   // RAPPORTEN-WHATSAPP-FE-1: the whatsapp strip is exactly the nine pinned

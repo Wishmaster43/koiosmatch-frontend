@@ -116,6 +116,20 @@ describe('OpportunitiesReport · panel filters reach hook and drill', () => {
       params: expect.objectContaining({ kpi: 'total', period: 'month', status: ['won'], owner_id: ['u1'], location_id: [7], customer_id: ['c1'], value_min: 1000, value_max: 5000 }),
     }))
   })
+
+  // K-192: advice now validates the panel filters exactly like the drill (see
+  // getReportsOpportunitiesAdvice, api-generated.ts:46593) — a segment click sends
+  // the same panel filters to BOTH endpoints, not just the window.
+  it('sends the active panel filters to advice as well as drill on a segment click', async () => {
+    const user = userEvent.setup()
+    const filters = { ...EMPTY_REPORT_FILTERS, status: ['won'], ownerId: ['u1'], locationId: [7], customerId: ['c1'], valueMin: 1000, valueMax: 5000 }
+    mockUseOpportunitiesReport.mockReturnValue({ data, loading: false, error: false })
+    render(<QueryClientProvider client={new QueryClient()}><OpportunitiesReport period="month" filters={filters} /></QueryClientProvider>)
+    await user.click(screen.getByText('Voorstel'))
+    const wantParams = { stage: 'proposal', period: 'month', status: ['won'], owner_id: ['u1'], location_id: [7], customer_id: ['c1'], value_min: 1000, value_max: 5000 }
+    expect(getSpy).toHaveBeenCalledWith('/reports/opportunities/drill', expect.objectContaining({ params: expect.objectContaining(wantParams) }))
+    expect(getSpy).toHaveBeenCalledWith('/reports/opportunities/advice', expect.objectContaining({ params: expect.objectContaining(wantParams) }))
+  })
 })
 
 describe('OpportunitiesReport (RAPPORTEN-SUITE-1 portie 5, kansen pipeline report)', () => {

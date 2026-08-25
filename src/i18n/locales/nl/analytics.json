@@ -162,9 +162,6 @@
     "loading": "Outreach laden…",
     "error": "Kon de outreach niet laden",
     "empty": "Geen bellijst-targets in deze periode",
-    "total": "Totaal targets",
-    "reached": "Bereikt",
-    "reachRate": "Bereikpercentage",
     "series": "Bellijst-targets over tijd",
     "window": "Bellijst-targets {{from}} t/m {{to}}",
     "axes": {
@@ -172,18 +169,16 @@
       "channel": "Kanaal",
       "outcome": "Uitkomst"
     },
-    "summary": {
+    "kpi": {
+      "totalTargets": "Totaal doelen",
+      "openTodo": "Open te doen",
+      "calledInPeriod": "Gebeld in periode",
+      "reached": "Bereikt",
       "notReached": "Niet bereikt",
-      "assigned": "Toegewezen",
-      "unassigned": "Niet toegewezen",
-      "noOutcome": "Geen uitkomst",
-      "topCampaign": "Grootste bellijst",
-      "topChannel": "Grootste kanaal",
-      "topStatus": "Grootste status",
-      "topOutcome": "Grootste uitkomst",
-      "campaignsCount": "Aantal bellijsten",
-      "channelsUsed": "Gebruikte kanalen",
-      "assigneesCount": "Aantal toegewezen recruiters"
+      "conversionPct": "Conversie",
+      "campaignsActive": "Actieve campagnes",
+      "campaignsDoneInPeriod": "Campagnes afgerond in periode",
+      "dueToday": "Vervalt vandaag"
     },
     "kpiOrderFellBack": "Een in Instellingen ingestelde KPI-kaart bestaat niet meer en is teruggezet naar de standaard."
   },

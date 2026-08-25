@@ -177,10 +177,11 @@ export interface OutreachReportData {
   reach_rate: number | null
   total: number
   timeseries: { bucket: 'day' | 'week'; series: CandidateTimeseriesPoint[] }
-  // NOTE: outreach ships NO kpis[] block in its envelope today (measured in
-  // OutreachReport::run() during the wave-1b naronde). The kpis/drill enum DOES
-  // exist server-side, but a strip must never read values a contract does not
-  // promise — asked CMBE for the envelope block (WAVE-1B-CONTRACTVRAGEN-CMBE).
+  // CMBE K-191 (commit 00e72f45): the envelope now carries the nine-card suite
+  // in catalog order (total_targets/open_todo/called_in_period/reached/
+  // not_reached/conversion_pct/campaigns_active/campaigns_done_in_period/
+  // due_today) — counts identical to the flat fields, one predicate per card.
+  kpis?: { key: string; label?: string; count: number | null }[]
   by_status: OutreachStatusCount[]
   by_outcome: OutreachOutcomeCount[]
   // Top-20 + 'others' (the exact complement — a real, drillable row); an archived

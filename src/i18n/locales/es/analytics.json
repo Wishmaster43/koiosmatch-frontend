@@ -162,9 +162,6 @@
     "loading": "Cargando outreach…",
     "error": "No se pudo cargar el outreach",
     "empty": "Sin objetivos de llamadas en este periodo",
-    "total": "Total de objetivos",
-    "reached": "Contactados",
-    "reachRate": "Tasa de contacto",
     "series": "Objetivos de llamadas en el tiempo",
     "window": "Objetivos de llamadas del {{from}} al {{to}}",
     "axes": {
@@ -172,18 +169,16 @@
       "channel": "Canal",
       "outcome": "Resultado"
     },
-    "summary": {
+    "kpi": {
+      "totalTargets": "Total de objetivos",
+      "openTodo": "Pendientes",
+      "calledInPeriod": "Llamados en el período",
+      "reached": "Contactados",
       "notReached": "No contactados",
-      "assigned": "Asignados",
-      "unassigned": "Sin asignar",
-      "noOutcome": "Sin resultado",
-      "topCampaign": "Lista de llamadas principal",
-      "topChannel": "Canal principal",
-      "topStatus": "Estado principal",
-      "topOutcome": "Resultado principal",
-      "campaignsCount": "Numero de listas de llamadas",
-      "channelsUsed": "Canales utilizados",
-      "assigneesCount": "Reclutadores asignados"
+      "conversionPct": "Conversión",
+      "campaignsActive": "Campañas activas",
+      "campaignsDoneInPeriod": "Campañas finalizadas en el período",
+      "dueToday": "Vencen hoy"
     },
     "kpiOrderFellBack": "Una tarjeta KPI configurada en Ajustes ya no existe y se restableció al valor predeterminado."
   },

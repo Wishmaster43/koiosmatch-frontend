@@ -93,9 +93,11 @@ export default function OpportunitiesReport({ period, filters = EMPTY_REPORT_FIL
       title: seg.label, value: seg.count, subtitle: windowSub(),
       entityPage: 'opportunities',
       rowsEndpoint: '/reports/opportunities/drill', rowsParams: { ...baseParams, ...xorParam },
-      // Advice takes the WINDOW + segment only (OpportunitiesAdviceRequest has no
-      // reportFilterRules — panel filters would be silently dropped, so never sent).
-      adviceEndpoint: '/reports/opportunities/advice', adviceParams: { period, ...xorParam },
+      // K-192: advice now validates the panel filters exactly like the drill (see
+      // getReportsOpportunitiesAdvice, api-generated.ts:46593 — owner_id/location_id/
+      // status/customer_id/value_min/value_max all listed) — so advice and drawer
+      // rows share one population. baseParams already carries period.
+      adviceEndpoint: '/reports/opportunities/advice', adviceParams: { ...baseParams, ...xorParam },
     })
   const openBucket = (pt: CandidateTimeseriesPoint) => setDrill({
     title: pt.label, value: pt.value, subtitle: windowSub(),
@@ -104,7 +106,7 @@ export default function OpportunitiesReport({ period, filters = EMPTY_REPORT_FIL
     rowsEndpoint: '/reports/opportunities/drill',
     rowsParams: { ...baseParams, date: pt.date, ...(data?.timeseries.bucket === 'week' ? { bucket: 'week' } : {}) },
     adviceEndpoint: '/reports/opportunities/advice',
-    adviceParams: { period, date: pt.date, ...(data?.timeseries.bucket === 'week' ? { bucket: 'week' } : {}) },
+    adviceParams: { ...baseParams, date: pt.date, ...(data?.timeseries.bucket === 'week' ? { bucket: 'week' } : {}) },
   })
   // WAVE-1B: per-KPI-card drill via GET /reports/opportunities/kpis/drill?kpi=<key>
   // (measured in api-generated.ts::getReportsOpportunitiesKpisDrill) layered on the
