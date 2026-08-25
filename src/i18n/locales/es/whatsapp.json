@@ -91,7 +91,8 @@
       "high": "Alta",
       "normal": "Normal",
       "low": "Baja"
-    }
+    },
+    "wabaTitle": "Cola de WABA"
   },
   "messages": {
     "date": "Fecha",
@@ -111,5 +112,78 @@
     "sentBy": "Enviado por",
     "automatic": "Automático",
     "priority": "Prioridad"
+  },
+  "waWebQueue": {
+    "title": "Cola de WhatsApp Web",
+    "filterStatus": "Estado",
+    "status": {
+      "queued": "En cola",
+      "sending": "Enviando",
+      "sent": "Enviado",
+      "failed": "Fallido",
+      "paused": "Pausado",
+      "canceled": "Cancelado"
+    },
+    "column": {
+      "number": "Número",
+      "candidate": "Candidato",
+      "type": "Tipo",
+      "priority": "Prioridad",
+      "status": "Estado",
+      "holdReason": "Motivo de espera",
+      "scheduledAt": "Programado para",
+      "attempts": "Intentos",
+      "actions": "Acciones"
+    },
+    "noCandidate": "Sin candidato",
+    "reason": {
+      "scheduled": "Programado en el futuro",
+      "rate_limit": "Límite del número alcanzado",
+      "priority_wait": "Esperando prioridad más alta",
+      "ready": "Listo para enviar",
+      "new_number_hourly": "Límite de calentamiento (por hora)",
+      "new_number_daily": "Límite de calentamiento (diario)",
+      "new_number_weekly": "Límite de calentamiento (semanal)"
+    },
+    "action": {
+      "sendNow": "Enviar ahora",
+      "pause": "Pausar",
+      "retry": "Reintentar",
+      "cancel": "Cancelar"
+    },
+    "statsLoading": "Cargando estadísticas…",
+    "noDevices": "No hay números de WhatsApp Web vinculados.",
+    "statValue": "{{count}} en cola",
+    "estDrain": "± {{hours}} h para vaciarse",
+"rateAndDrain": "{{rate}} por hora · ± {{hours}} h para vaciarse",
+    "rateLimit": "{{rate}} por hora",
+    "loading": "Cargando cola…",
+    "error": "No se pudo cargar la cola.",
+    "empty": "Nada en la cola."
+  },
+  "conversations": {
+    "title": "Conversaciones",
+    "column": {
+      "counterpart": "Contacto",
+      "number": "Número",
+      "channel": "Canal",
+      "lastMessage": "Último mensaje",
+      "flags": "Indicadores"
+    },
+    "flagUnanswered": "Sin responder",
+    "flagEscalated": "Escalado",
+    "loading": "Cargando conversaciones…",
+    "error": "No se pudieron cargar las conversaciones.",
+    "empty": "Aún no hay conversaciones.",
+    "tabThread": "Hilo",
+    "openInDossier": "Abrir en el expediente del candidato",
+    "loadOlder": "Cargar mensajes anteriores",
+    "threadError": "No se pudo cargar el hilo.",
+    "noMessages": "Aún no hay mensajes en este hilo.",
+    "searchLabel": "Buscar",
+    "searchPlaceholder": "Buscar por nombre o número…",
+    "filterEscalated": "Escalado",
+    "filterUnanswered": "Sin responder",
+    "filterActive": "Activo"
   }
 }

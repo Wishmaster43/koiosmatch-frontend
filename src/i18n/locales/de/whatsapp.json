@@ -91,7 +91,8 @@
       "high": "Hoch",
       "normal": "Normal",
       "low": "Niedrig"
-    }
+    },
+    "wabaTitle": "WABA-Warteschlange"
   },
   "messages": {
     "date": "Datum",
@@ -111,5 +112,78 @@
     "sentBy": "Gesendet von",
     "automatic": "Automatisch",
     "priority": "Priorität"
+  },
+  "waWebQueue": {
+    "title": "WhatsApp Web Warteschlange",
+    "filterStatus": "Status",
+    "status": {
+      "queued": "In Warteschlange",
+      "sending": "Wird gesendet",
+      "sent": "Gesendet",
+      "failed": "Fehlgeschlagen",
+      "paused": "Pausiert",
+      "canceled": "Storniert"
+    },
+    "column": {
+      "number": "Nummer",
+      "candidate": "Kandidat",
+      "type": "Typ",
+      "priority": "Priorität",
+      "status": "Status",
+      "holdReason": "Wartegrund",
+      "scheduledAt": "Geplant für",
+      "attempts": "Versuche",
+      "actions": "Aktionen"
+    },
+    "noCandidate": "Kein Kandidat",
+    "reason": {
+      "scheduled": "In der Zukunft geplant",
+      "rate_limit": "Nummernlimit erreicht",
+      "priority_wait": "Wartet auf höhere Priorität",
+      "ready": "Bereit zum Senden",
+      "new_number_hourly": "Aufwärmlimit (stündlich)",
+      "new_number_daily": "Aufwärmlimit (täglich)",
+      "new_number_weekly": "Aufwärmlimit (wöchentlich)"
+    },
+    "action": {
+      "sendNow": "Jetzt senden",
+      "pause": "Pausieren",
+      "retry": "Erneut versuchen",
+      "cancel": "Abbrechen"
+    },
+    "statsLoading": "Statistiken werden geladen…",
+    "noDevices": "Keine WhatsApp Web-Nummern verknüpft.",
+    "statValue": "{{count}} in Warteschlange",
+    "estDrain": "± {{hours}} Std. bis leer",
+"rateAndDrain": "{{rate}} pro Stunde · ± {{hours}} Std. bis leer",
+    "rateLimit": "{{rate}} pro Stunde",
+    "loading": "Warteschlange wird geladen…",
+    "error": "Warteschlange konnte nicht geladen werden.",
+    "empty": "Nichts in der Warteschlange."
+  },
+  "conversations": {
+    "title": "Konversationen",
+    "column": {
+      "counterpart": "Kontakt",
+      "number": "Nummer",
+      "channel": "Kanal",
+      "lastMessage": "Letzte Nachricht",
+      "flags": "Kennzeichen"
+    },
+    "flagUnanswered": "Unbeantwortet",
+    "flagEscalated": "Eskaliert",
+    "loading": "Konversationen werden geladen…",
+    "error": "Konversationen konnten nicht geladen werden.",
+    "empty": "Noch keine Konversationen.",
+    "tabThread": "Verlauf",
+    "openInDossier": "Im Kandidatendossier öffnen",
+    "loadOlder": "Ältere Nachrichten laden",
+    "threadError": "Verlauf konnte nicht geladen werden.",
+    "noMessages": "Noch keine Nachrichten in diesem Verlauf.",
+    "searchLabel": "Suche",
+    "searchPlaceholder": "Nach Name oder Nummer suchen…",
+    "filterEscalated": "Eskaliert",
+    "filterUnanswered": "Unbeantwortet",
+    "filterActive": "Aktiv"
   }
 }

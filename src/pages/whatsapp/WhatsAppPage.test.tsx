@@ -42,6 +42,16 @@ vi.mock('./messagesTable/MessagesTable', () => ({
     <div data-testid="messages-table" data-exhausted={String(!!exhausted)}>{loading ? 'loading' : messages.length}</div>,
 }))
 vi.mock('./QueueTab', () => ({ default: () => <div data-testid="queue-tab" /> }))
+// K-193 fase 1 stand-ins — their own contracts are covered by WaWebQueueTab.test.tsx
+// / ConversationsTab.test.tsx; this file stays focused on tab wiring + module gating.
+vi.mock('./WaWebQueueTab', () => ({ default: () => <div data-testid="wa-web-queue-tab" /> }))
+vi.mock('./ConversationsTab', () => ({ default: ({ openConversationId }: { openConversationId?: string | null }) =>
+  <div data-testid="conversations-tab" data-open={openConversationId ?? ''} /> }))
+// Auth gate: default closed (no whatsapp_web module, no messaging.manage) unless a
+// test overrides it — mirrors the page's own optional-chained fallback.
+const mockUseAuth = vi.fn<() => { hasModule: (m: string) => boolean; hasPermission: (p: string) => boolean }>(
+  () => ({ hasModule: () => false, hasPermission: () => false }))
+vi.mock('@/context/AuthContext', () => ({ useAuth: () => mockUseAuth() }))
 vi.mock('@/components/charts/PieChartCard', () => ({ default: () => <div data-testid="pie-chart" /> }))
 vi.mock('@/components/charts/BarChartCard', () => ({ default: () => <div data-testid="bar-chart" /> }))
 
@@ -231,5 +241,52 @@ describe('WhatsAppPage · nine-card KPI band (WA-KPI9-1)', () => {
     await user.click(screen.getByText(LABELS.today))
     expect(screen.getByRole('dialog')).toBeInTheDocument()
     expect(within(screen.getByRole('dialog')).getByTestId('messages-table')).toHaveTextContent('1')
+  })
+})
+
+describe('WhatsAppPage · K-193 fase 1 tabs (WA-Web queue + Conversations)', () => {
+  it('the WA-Web queue tab is hidden without the whatsapp_web module; Conversations always shows', () => {
+    mockUseWhatsAppData.mockReturnValue(dataFixture())
+    mockUseWhatsAppQueue.mockReturnValue(queueFixture())
+    mockUseAuth.mockReturnValue({ hasModule: () => false, hasPermission: () => false })
+    render(<WhatsAppPage />)
+    expect(screen.queryByRole('tab', { name: /whatsapp web wachtrij/i })).not.toBeInTheDocument()
+    expect(screen.getByRole('tab', { name: /conversaties/i })).toBeInTheDocument()
+  })
+
+  it('the WA-Web queue tab appears with the module enabled and opens its own tab body', async () => {
+    const user = userEvent.setup()
+    mockUseWhatsAppData.mockReturnValue(dataFixture())
+    mockUseWhatsAppQueue.mockReturnValue(queueFixture())
+    mockUseAuth.mockReturnValue({ hasModule: (m: string) => m === 'whatsapp_web', hasPermission: () => false })
+    render(<WhatsAppPage />)
+    await user.click(screen.getByRole('tab', { name: /whatsapp web wachtrij/i }))
+    expect(screen.getByTestId('wa-web-queue-tab')).toBeInTheDocument()
+  })
+
+  it('intent.tab = wa-web-queue opens directly on that tab (dashboard tile deep link)', () => {
+    mockUseWhatsAppData.mockReturnValue(dataFixture())
+    mockUseWhatsAppQueue.mockReturnValue(queueFixture())
+    mockUseAuth.mockReturnValue({ hasModule: () => true, hasPermission: () => false })
+    render(<WhatsAppPage intent={{ tab: 'wa-web-queue' }} />)
+    expect(screen.getByTestId('wa-web-queue-tab')).toBeInTheDocument()
+  })
+
+  it('intent.tab = wa-web-queue with the module OFF falls back to overview instead of a blank tab body', () => {
+    mockUseWhatsAppData.mockReturnValue(dataFixture())
+    mockUseWhatsAppQueue.mockReturnValue(queueFixture())
+    mockUseAuth.mockReturnValue({ hasModule: () => false, hasPermission: () => false })
+    render(<WhatsAppPage intent={{ tab: 'wa-web-queue' }} />)
+    expect(screen.queryByTestId('wa-web-queue-tab')).not.toBeInTheDocument()
+    // The overview tab reads as selected — never a tab bar with nothing active.
+    expect(screen.getByRole('tab', { name: /overzicht/i })).toHaveAttribute('aria-selected', 'true')
+  })
+
+  it('intent.tab = conversations with an open id opens the tab and forwards the id', () => {
+    mockUseWhatsAppData.mockReturnValue(dataFixture())
+    mockUseWhatsAppQueue.mockReturnValue(queueFixture())
+    mockUseAuth.mockReturnValue({ hasModule: () => false, hasPermission: () => false })
+    render(<WhatsAppPage intent={{ tab: 'conversations', open: 'conv-42' }} />)
+    expect(screen.getByTestId('conversations-tab')).toHaveAttribute('data-open', 'conv-42')
   })
 })

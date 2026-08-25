@@ -91,7 +91,8 @@
       "high": "High",
       "normal": "Normal",
       "low": "Low"
-    }
+    },
+    "wabaTitle": "WABA queue"
   },
   "messages": {
     "date": "Date",
@@ -111,5 +112,78 @@
     "sentBy": "Sent by",
     "automatic": "Automatic",
     "priority": "Priority"
+  },
+  "waWebQueue": {
+    "title": "WhatsApp Web queue",
+    "filterStatus": "Status",
+    "status": {
+      "queued": "Queued",
+      "sending": "Sending",
+      "sent": "Sent",
+      "failed": "Failed",
+      "paused": "Paused",
+      "canceled": "Canceled"
+    },
+    "column": {
+      "number": "Number",
+      "candidate": "Candidate",
+      "type": "Type",
+      "priority": "Priority",
+      "status": "Status",
+      "holdReason": "Hold reason",
+      "scheduledAt": "Scheduled at",
+      "attempts": "Attempts",
+      "actions": "Actions"
+    },
+    "noCandidate": "No candidate",
+    "reason": {
+      "scheduled": "Scheduled in the future",
+      "rate_limit": "Number rate limit reached",
+      "priority_wait": "Waiting behind higher priority",
+      "ready": "Ready to send",
+      "new_number_hourly": "Warm-up limit (hourly)",
+      "new_number_daily": "Warm-up limit (daily)",
+      "new_number_weekly": "Warm-up limit (weekly)"
+    },
+    "action": {
+      "sendNow": "Send now",
+      "pause": "Pause",
+      "retry": "Retry",
+      "cancel": "Cancel"
+    },
+    "statsLoading": "Loading stats…",
+    "noDevices": "No WhatsApp Web numbers linked.",
+    "statValue": "{{count}} queued",
+    "estDrain": "± {{hours}}h to drain",
+"rateAndDrain": "{{rate}} per hour · ± {{hours}}h to drain",
+    "rateLimit": "{{rate}} per hour",
+    "loading": "Loading queue…",
+    "error": "Could not load the queue.",
+    "empty": "Nothing queued."
+  },
+  "conversations": {
+    "title": "Conversations",
+    "column": {
+      "counterpart": "Contact",
+      "number": "Number",
+      "channel": "Channel",
+      "lastMessage": "Last message",
+      "flags": "Flags"
+    },
+    "flagUnanswered": "Unanswered",
+    "flagEscalated": "Escalated",
+    "loading": "Loading conversations…",
+    "error": "Could not load the conversations.",
+    "empty": "No conversations yet.",
+    "tabThread": "Thread",
+    "openInDossier": "Open in candidate dossier",
+    "loadOlder": "Load older messages",
+    "threadError": "Could not load the thread.",
+    "noMessages": "No messages in this thread yet.",
+    "searchLabel": "Search",
+    "searchPlaceholder": "Search by name or number…",
+    "filterEscalated": "Escalated",
+    "filterUnanswered": "Unanswered",
+    "filterActive": "Active"
   }
 }

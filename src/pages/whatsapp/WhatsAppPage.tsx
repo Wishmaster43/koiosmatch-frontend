@@ -21,12 +21,16 @@ import type { Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
 import { MessageCircle, RefreshCw } from 'lucide-react'
 import { useRightPanel } from '@/context/RightPanelContext'
+import { useAuth } from '@/context/AuthContext'
 import { useWhatsAppData } from './hooks/useWhatsAppData'
 import { useWhatsAppQueue, sumBatches } from './hooks/useWhatsAppQueue'
 import { useWaMessageTypes, useWaPhoneNumbers, useWaMessagePurposes, useWaTemplates } from './hooks/useWaFilterOptions'
 import { useUsers } from '@/lib/queries'
 import { buildWaMessageFilterGroups } from './data/waMessageFilterGroups'
+import { buildWaWebQueueFilterGroups } from './data/waWebQueueFilterGroups'
 import type { MessageFilterPatch } from './messagesTable/messageColumns'
+import WaWebQueueTab from './WaWebQueueTab'
+import ConversationsTab from './ConversationsTab'
 // Cross-page import, deliberate (WA-KPI9-1): ReportKpiBand is the ONE shared
 // nine-card KPI strip (also used by the dashboard and all 17 reports) — no
 // surface of its own, two-line labels, dev-time nine-card guard. Reusing it here
@@ -57,6 +61,17 @@ const cardValue = (ready: boolean, v: number | undefined | null): number | strin
 
 export default function WhatsAppPage({ intent }: { intent?: unknown } = {}) {
   const { t } = useTranslation('whatsapp')
+  // K-193 fase 1: the WA-Web queue + Conversations tabs are module-gated —
+  // hasModule stays presence-based (rol-onafhankelijk), mirroring every other
+  // whatsapp_web-gated surface (CONTRACT-CHANGELOG 25-08).
+  // Optional-chained: useAuth() is null without a Provider (e.g. a bare unit
+  // test render) — default both gates closed rather than throwing.
+  const auth = useAuth()
+  const waWebEnabled = auth?.hasModule('whatsapp_web') ?? false
+  const canManageQueue = auth?.hasPermission('messaging.manage') ?? false
+  // K-193: right-panel status filter for the WA-Web queue tab (registered only
+  // while that tab is active, same pattern as the message filters below).
+  const [waWebStatus, setWaWebStatus] = useState('')
   // Data layer (4 parallel loads + refresh) lives in the hook; the page stays presentational.
   // Right-panel filters (status + direction) are declared before the data hook
   // call so their selection can be handed straight in as SERVER params (WA-MSG-
@@ -149,13 +164,35 @@ export default function WhatsAppPage({ intent }: { intent?: unknown } = {}) {
   }, [filterGroups, registerFilters, unregisterFilters])
 
   // Active tab (personal-WhatsApp queue removed 2026-07-04 — Business API only;
-  // 'queue' below is the WABA/Business batch queue, R3a — a different feature).
-  const [tab, setTab] = useState<'overview' | 'messages' | 'queue' | 'escalations'>('overview')
-  // Open a specific tab when arriving via a dashboard link (messages / queue / escalations).
+  // 'queue' below is the WABA/Business batch queue, R3a; 'wa-web-queue' + 'conversations'
+  // are K-193 fase 1 — a different feature, module-gated on whatsapp_web).
+  type TabId = 'overview' | 'messages' | 'queue' | 'escalations' | 'wa-web-queue' | 'conversations'
+  const [tab, setTab] = useState<TabId>('overview')
+  // Deep link (dashboard tile, F3): a conversation id to open once the tab is active.
+  const [openConversationId, setOpenConversationId] = useState<string | null>(null)
+  // Open a specific tab when arriving via a dashboard link — includes the new
+  // wa-web-queue/conversations targets (F1A) and an optional conversation to open.
   useEffect(() => {
-    const wanted = (intent as { tab?: string } | undefined)?.tab
-    if (wanted && ['overview', 'messages', 'queue', 'escalations'].includes(wanted)) setTab(wanted as typeof tab)
-  }, [intent])
+    const target = intent as { tab?: string; open?: string } | undefined
+    const wanted = target?.tab
+    // A module-gated target with the module off has no tab button and no body:
+    // fall back to overview instead of leaving the tab bar with nothing selected.
+    if (wanted === 'wa-web-queue' && !waWebEnabled) { setTab('overview'); return }
+    if (wanted && ['overview', 'messages', 'queue', 'escalations', 'wa-web-queue', 'conversations'].includes(wanted)) {
+      setTab(wanted as TabId)
+    }
+    if (wanted === 'conversations' && target?.open) setOpenConversationId(String(target.open))
+  }, [intent, waWebEnabled])
+
+  // K-193: the WA-Web queue's own status filter — registered only while that
+  // tab is the active one, so it never bleeds into the message feed's panel.
+  const waWebFilterGroups = useMemo(() => buildWaWebQueueFilterGroups({ t, status: waWebStatus, setStatus: setWaWebStatus }), [t, waWebStatus])
+  useEffect(() => {
+    if (tab !== 'wa-web-queue') { unregisterFilters('whatsapp-wa-web-queue'); return }
+    registerFilters('whatsapp-wa-web-queue', waWebFilterGroups)
+    return () => unregisterFilters('whatsapp-wa-web-queue')
+  }, [tab, waWebFilterGroups, registerFilters, unregisterFilters])
+
   // Which KPI's right drill-down drawer is open (null = closed).
   const [drill, setDrill] = useState<null | 'today' | 'contacted' | 'filled' | 'escal'>(null)
   // Refresh both data sources; briefly lock the button so it can't be double-clicked.
@@ -258,7 +295,18 @@ export default function WhatsAppPage({ intent }: { intent?: unknown } = {}) {
       {/* Tabs + verversen op één lijn; badge = wachtrij-achterstand */}
       <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', borderBottom: '1px solid var(--border)', marginBottom: 20 }}>
         <div role="tablist" style={{ display: 'flex', gap: 4 }}>
-        {([['overview', t('tabs.overview')], ['messages', t('tabs.messages')], ['queue', t('tabs.queue')], ['escalations', t('tabs.escalations')]] as const).map(([id, label]) => {
+        {([
+          ['overview', t('tabs.overview')], ['messages', t('tabs.messages')],
+          // Distinct label from the new WA-Web queue below (measured page brief) —
+          // both queues share the tab bar, so their names must not read as one thing.
+          ['queue', t('queue.wabaTitle')], ['escalations', t('tabs.escalations')],
+          // K-193 fase 1: the outbox queue is module-gated, presence-based
+          // (rol-onafhankelijk); Conversations reads the general /conversations
+          // endpoint (page.whatsapp only, same as the rest of this page) so it
+          // is NOT gated behind the whatsapp_web module.
+          ...(waWebEnabled ? [['wa-web-queue', t('waWebQueue.title')]] as const : []),
+          ['conversations', t('conversations.title')],
+        ] as const).map(([id, label]) => {
           const active = id === tab
           const badge = id === 'escalations' ? escalations.length : 0
           const badgeDanger = id === 'escalations'
@@ -316,6 +364,12 @@ export default function WhatsAppPage({ intent }: { intent?: unknown } = {}) {
 
       {/* Escalaties */}
       {tab === 'escalations' && (wabaDown ? NoConn : <EscalationList escalations={escalations} loading={loading.escalations} />)}
+
+      {/* K-193 fase 1: WA-Web outbox queue — its own endpoint, reachable independent of the WABA connection state. */}
+      {tab === 'wa-web-queue' && waWebEnabled && <WaWebQueueTab status={waWebStatus} canManage={canManageQueue} />}
+
+      {/* K-193/K-194: the bureau-wide Conversations inbox — also independent of the WABA connection. */}
+      {tab === 'conversations' && <ConversationsTab openConversationId={openConversationId} />}
 
       {/* KPI drill-down (rechter drawer) — berichten + escalaties hebben data; rest wacht op backend */}
       {drill && (

@@ -91,7 +91,8 @@
       "high": "Élevée",
       "normal": "Normale",
       "low": "Faible"
-    }
+    },
+    "wabaTitle": "File d'attente WABA"
   },
   "messages": {
     "date": "Date",
@@ -111,5 +112,78 @@
     "sentBy": "Envoyé par",
     "automatic": "Automatique",
     "priority": "Priorité"
+  },
+  "waWebQueue": {
+    "title": "File d'attente WhatsApp Web",
+    "filterStatus": "Statut",
+    "status": {
+      "queued": "En attente",
+      "sending": "Envoi en cours",
+      "sent": "Envoyé",
+      "failed": "Échoué",
+      "paused": "En pause",
+      "canceled": "Annulé"
+    },
+    "column": {
+      "number": "Numéro",
+      "candidate": "Candidat",
+      "type": "Type",
+      "priority": "Priorité",
+      "status": "Statut",
+      "holdReason": "Raison d'attente",
+      "scheduledAt": "Programmé le",
+      "attempts": "Tentatives",
+      "actions": "Actions"
+    },
+    "noCandidate": "Aucun candidat",
+    "reason": {
+      "scheduled": "Programmé dans le futur",
+      "rate_limit": "Limite du numéro atteinte",
+      "priority_wait": "En attente d'une priorité plus élevée",
+      "ready": "Prêt à l'envoi",
+      "new_number_hourly": "Limite d'échauffement (horaire)",
+      "new_number_daily": "Limite d'échauffement (journalière)",
+      "new_number_weekly": "Limite d'échauffement (hebdomadaire)"
+    },
+    "action": {
+      "sendNow": "Envoyer maintenant",
+      "pause": "Mettre en pause",
+      "retry": "Réessayer",
+      "cancel": "Annuler"
+    },
+    "statsLoading": "Chargement des statistiques…",
+    "noDevices": "Aucun numéro WhatsApp Web lié.",
+    "statValue": "{{count}} en attente",
+    "estDrain": "± {{hours}} h pour vider",
+"rateAndDrain": "{{rate}} par heure · ± {{hours}} h pour se vider",
+    "rateLimit": "{{rate}} par heure",
+    "loading": "Chargement de la file d'attente…",
+    "error": "Impossible de charger la file d'attente.",
+    "empty": "Rien dans la file d'attente."
+  },
+  "conversations": {
+    "title": "Conversations",
+    "column": {
+      "counterpart": "Contact",
+      "number": "Numéro",
+      "channel": "Canal",
+      "lastMessage": "Dernier message",
+      "flags": "Indicateurs"
+    },
+    "flagUnanswered": "Sans réponse",
+    "flagEscalated": "Escaladé",
+    "loading": "Chargement des conversations…",
+    "error": "Impossible de charger les conversations.",
+    "empty": "Aucune conversation pour le moment.",
+    "tabThread": "Fil",
+    "openInDossier": "Ouvrir dans le dossier candidat",
+    "loadOlder": "Charger les messages plus anciens",
+    "threadError": "Impossible de charger le fil.",
+    "noMessages": "Aucun message dans ce fil pour le moment.",
+    "searchLabel": "Rechercher",
+    "searchPlaceholder": "Rechercher par nom ou numéro…",
+    "filterEscalated": "Escaladé",
+    "filterUnanswered": "Sans réponse",
+    "filterActive": "Actif"
   }
 }

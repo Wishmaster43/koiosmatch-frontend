@@ -91,7 +91,8 @@
       "high": "Hoog",
       "normal": "Normaal",
       "low": "Laag"
-    }
+    },
+    "wabaTitle": "WABA-wachtrij"
   },
   "messages": {
     "date": "Datum",
@@ -111,5 +112,78 @@
     "sentBy": "Verzonden door",
     "automatic": "Automatisch",
     "priority": "Prioriteit"
+  },
+  "waWebQueue": {
+    "title": "WhatsApp Web wachtrij",
+    "filterStatus": "Status",
+    "status": {
+      "queued": "In wachtrij",
+      "sending": "Wordt verzonden",
+      "sent": "Verzonden",
+      "failed": "Mislukt",
+      "paused": "Gepauzeerd",
+      "canceled": "Geannuleerd"
+    },
+    "column": {
+      "number": "Nummer",
+      "candidate": "Kandidaat",
+      "type": "Type",
+      "priority": "Prioriteit",
+      "status": "Status",
+      "holdReason": "Reden van wachten",
+      "scheduledAt": "Gepland op",
+      "attempts": "Pogingen",
+      "actions": "Acties"
+    },
+    "noCandidate": "Geen kandidaat",
+    "reason": {
+      "scheduled": "Gepland in de toekomst",
+      "rate_limit": "Nummerlimiet bereikt",
+      "priority_wait": "Wacht op hogere prioriteit",
+      "ready": "Klaar om te verzenden",
+      "new_number_hourly": "Opwarmlimiet (per uur)",
+      "new_number_daily": "Opwarmlimiet (per dag)",
+      "new_number_weekly": "Opwarmlimiet (per week)"
+    },
+    "action": {
+      "sendNow": "Verstuur nu",
+      "pause": "Pauzeren",
+      "retry": "Opnieuw proberen",
+      "cancel": "Annuleren"
+    },
+    "statsLoading": "Statistieken laden…",
+    "noDevices": "Geen WhatsApp Web-nummers gekoppeld.",
+    "statValue": "{{count}} in wachtrij",
+    "estDrain": "± {{hours}} uur om leeg te lopen",
+"rateAndDrain": "{{rate}} per uur · ± {{hours}} uur om leeg te lopen",
+    "rateLimit": "{{rate}} per uur",
+    "loading": "Wachtrij laden…",
+    "error": "Kon de wachtrij niet laden.",
+    "empty": "Niets in de wachtrij."
+  },
+  "conversations": {
+    "title": "Conversaties",
+    "column": {
+      "counterpart": "Contact",
+      "number": "Nummer",
+      "channel": "Kanaal",
+      "lastMessage": "Laatste bericht",
+      "flags": "Signalen"
+    },
+    "flagUnanswered": "Onbeantwoord",
+    "flagEscalated": "Geëscaleerd",
+    "loading": "Conversaties laden…",
+    "error": "Kon de conversaties niet laden.",
+    "empty": "Nog geen conversaties.",
+    "tabThread": "Gesprek",
+    "openInDossier": "Openen in kandidaatdossier",
+    "loadOlder": "Oudere berichten laden",
+    "threadError": "Kon het gesprek niet laden.",
+    "noMessages": "Nog geen berichten in dit gesprek.",
+    "searchLabel": "Zoeken",
+    "searchPlaceholder": "Zoek op naam of nummer…",
+    "filterEscalated": "Geëscaleerd",
+    "filterUnanswered": "Onbeantwoord",
+    "filterActive": "Actief"
   }
 }
