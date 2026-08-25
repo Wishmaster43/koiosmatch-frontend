@@ -217,9 +217,11 @@ export default function InterviewsTab({ application: a }: { application: Applica
   // override for the same class of problem: no refetch plumbing in this tab).
   const [startedOverride, setStartedOverride] = useState<ApplicationInterview | null>(null)
   const interview = startedOverride ?? a.interview
-  // Hide the start action once a session exists, or once the application sits
-  // in a terminal bucket (rejected/matched) — starting a NEW interview there
-  // makes no sense (bucket is the same flag-derived outcome used across the tab).
+  // Hide the start action once a session exists (INCLUDING a borrowed sibling
+  // session — INTERVIEW-SIBLING-1 forbids a second session on the same flow), or
+  // once the application sits in a terminal bucket (rejected/matched) — starting a
+  // NEW interview there makes no sense (bucket is the same flag-derived outcome
+  // used across the tab).
   const canStartNew = !interview && a.bucket !== 'rejected' && a.bucket !== 'matched'
   // I2 (Danny 08-08 screenshot): only offer the live conversation panel once this
   // application has ever run an interview (a live session, or at least one row in

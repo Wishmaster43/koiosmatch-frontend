@@ -94,6 +94,7 @@ describe('mapApplication', () => {
       expect(mapped.interview).toEqual({
         category: 'busy', currentStatus: 'ACTIVE_IN_CARE', step: 2, total: 12,
         id: null, agent: null, flowName: null, flowId: null, turn: null, startedAt: null, lastMessageAt: null, endedAt: null, durationSeconds: null,
+        questionStepIndex: null, questionStepsTotal: 0, sessionScope: 'application',
         pausedAt: null, pausedBy: null,
       })
     })
@@ -118,6 +119,7 @@ describe('mapApplication', () => {
       expect(mapped.interview).toEqual({
         category: 'busy', currentStatus: null, step: null, total: 0,
         id: null, agent: null, flowName: null, flowId: null, turn: null, startedAt: null, lastMessageAt: null, endedAt: null, durationSeconds: null,
+        questionStepIndex: null, questionStepsTotal: 0, sessionScope: 'application',
         pausedAt: null, pausedBy: null,
       })
     })
@@ -467,6 +469,7 @@ describe('mapInterview · the real InterviewSessionResource payload', () => {
       lastMessageAt: '2026-08-01T11:25:00Z',
       endedAt: '2026-08-01T11:30:00Z',
       durationSeconds: 354600,
+        questionStepIndex: null, questionStepsTotal: 0, sessionScope: 'application',
       pausedAt: null,
       pausedBy: null,
     })

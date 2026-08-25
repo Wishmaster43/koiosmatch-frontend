@@ -65,6 +65,13 @@ export function mapInterview(raw?: ApiApplication['interview']): ApplicationInte
     currentStatus: raw.current_status ?? null,
     step: raw.step ?? null,
     total: raw.total ?? 0,
+    // INTERVIEW-STEP-COUNT-1: tolerant fallback — an older cached payload without
+    // these keys reads as "unknown position" rather than a fabricated zero.
+    questionStepIndex: raw.question_step_index ?? null,
+    questionStepsTotal: raw.question_steps_total ?? 0,
+    // INTERVIEW-SIBLING-1: default to 'application' when the server omits the
+    // field (older cached shapes) — the safe, non-alarming assumption.
+    sessionScope: raw.interview_session_scope ?? 'application',
     id: raw.id ?? null,
     agent: raw.agent?.id != null ? { id: raw.agent.id, name: raw.agent.name ?? '' } : null,
     flowName: raw.flow_name ?? null,

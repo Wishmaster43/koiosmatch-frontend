@@ -64,6 +64,17 @@ export interface ApplicationInterview {
   currentStatus: string | null
   step: number | null
   total: number
+  // INTERVIEW-STEP-COUNT-1 (InterviewSessionResource.php:132-140, landed 5f030fb3):
+  // the QUESTION-only step readout, excluding the flow's system boundary statuses
+  // (INTRO_SENT/COMPLETED/DISQUALIFIED). Use these for "stap X van N" instead of
+  // step/total above, which count every status including those boundaries.
+  questionStepIndex?: number | null
+  questionStepsTotal?: number
+  // INTERVIEW-SIBLING-1 (InterviewSessionResource.php:154): 'application' = this
+  // session belongs to THIS application; 'candidate' = borrowed from a sibling
+  // application of the same candidate on the same flow — render an honest note
+  // instead of implying this application's own interview progress.
+  sessionScope?: 'application' | 'candidate'
   // The interview session's own id. Present on both contracts, but the stop/resume
   // routes target the APPLICATION id, so no action gates on it.
   id: Id | null
@@ -352,6 +363,11 @@ export interface ApiApplication {
     statuses?: string[]
     step?: number | null
     total?: number
+    // INTERVIEW-STEP-COUNT-1 / INTERVIEW-SIBLING-1 (InterviewSessionResource.php,
+    // commit 5f030fb3) — optional because older cached shapes may lack them.
+    question_step_index?: number | null
+    question_steps_total?: number
+    interview_session_scope?: 'application' | 'candidate'
     completed_at?: string | null
     last_sent_at?: string | null
     disqualified_reason?: string | null

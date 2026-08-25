@@ -92,7 +92,7 @@ describe('InterviewsTab · start-interview action (Flow B)', () => {
   })
 
   it('hides the action when a session already exists', () => {
-    renderTab(app({ interview: { category: 'busy', currentStatus: null, step: null, total: 0, id: 'iv-1', agent: null, flowName: null, flowId: null, turn: 'agent', startedAt: null, lastMessageAt: null, endedAt: null, durationSeconds: null, pausedAt: null, pausedBy: null } }))
+    renderTab(app({ interview: { category: 'busy', currentStatus: null, step: null, total: 0, questionStepIndex: null, questionStepsTotal: 0, sessionScope: 'application', id: 'iv-1', agent: null, flowName: null, flowId: null, turn: 'agent', startedAt: null, lastMessageAt: null, endedAt: null, durationSeconds: null, pausedAt: null, pausedBy: null } }))
     expect(screen.queryByRole('button', { name: 'interview.start.label' })).toBeNull()
   })
 
@@ -175,6 +175,23 @@ describe('InterviewsTab · start-interview action (Flow B)', () => {
 
     await waitFor(() => expect(mockNotifyError).toHaveBeenCalledWith('common:actionFailed'))
   })
+
+  // INTERVIEW-SIBLING-1: a session borrowed from a sibling application of the same
+  // candidate is a real session (interview truthy), so the start row already hides
+  // via the existing !interview gate — the honest note comes from InterviewStatusCard.
+  it('hides the start row and shows the borrowed-session note when sessionScope is candidate', () => {
+    renderTab(app({
+      interview: {
+        category: 'busy', currentStatus: null, step: null, total: 0,
+        questionStepIndex: null, questionStepsTotal: 0, sessionScope: 'candidate',
+        id: 'iv-sibling', agent: null, flowName: null, flowId: null, turn: 'agent',
+        startedAt: null, lastMessageAt: null, endedAt: null, durationSeconds: null,
+        pausedAt: null, pausedBy: null,
+      },
+    }))
+    expect(screen.getByText('interview.status.borrowedFromSibling')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'interview.start.label' })).toBeNull()
+  })
 })
 
 // W7 (CMBE: the tab read fields the backend never sends — iv.created_at/time/summary,
@@ -191,7 +208,7 @@ describe('InterviewsTab · interview history (real BE contract, W7)', () => {
   })
 
   it('renders the history empty state once a live session exists without finished sessions', () => {
-    renderTab(app({ interview: { category: 'busy', currentStatus: null, step: null, total: 0, id: 'iv-live', agent: null, flowName: null, flowId: null, turn: 'agent', startedAt: null, lastMessageAt: null, endedAt: null, durationSeconds: null, pausedAt: null, pausedBy: null } }))
+    renderTab(app({ interview: { category: 'busy', currentStatus: null, step: null, total: 0, questionStepIndex: null, questionStepsTotal: 0, sessionScope: 'application', id: 'iv-live', agent: null, flowName: null, flowId: null, turn: 'agent', startedAt: null, lastMessageAt: null, endedAt: null, durationSeconds: null, pausedAt: null, pausedBy: null } }))
     expect(screen.getByText('interview.empty')).toBeInTheDocument()
   })
 
@@ -288,7 +305,8 @@ describe('InterviewsTab · interview history (real BE contract, W7)', () => {
 // back to the candidate-wide scope (the previous link) when that read is empty.
 describe('InterviewsTab · live conversation panel (CONV-APPLICATION-ID-1, 08-08)', () => {
   const runningInterview: ApplicationInterview = {
-    category: 'busy', currentStatus: 'ACTIVE_IN_CARE', step: 2, total: 12, id: 'iv-9',
+    category: 'busy', currentStatus: 'ACTIVE_IN_CARE', step: 2, total: 12,
+    questionStepIndex: null, questionStepsTotal: 0, sessionScope: 'application', id: 'iv-9',
     agent: { id: 'a1', name: 'Kelly' }, flowName: 'Zorgintake', flowId: null, turn: 'candidate',
     startedAt: null, lastMessageAt: null, endedAt: null, durationSeconds: null, pausedAt: null, pausedBy: null,
   }

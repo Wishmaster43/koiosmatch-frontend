@@ -106,6 +106,20 @@ export default function InterviewStatusCard({ interview, applicationId }: { inte
     )
   }
 
+  // INTERVIEW-SIBLING-1: this session was borrowed from a sibling application of
+  // the same candidate on the same flow — an honest note instead of implying this
+  // application's own live progress; no stop/resume actions (a second session on
+  // the same flow is blocked server-side).
+  if (interview.sessionScope === 'candidate') {
+    return (
+      <div style={cardStyle}>
+        <span style={{ fontSize: 12, color: 'var(--text-muted)', fontStyle: 'italic' }}>
+          {t('interview.status.borrowedFromSibling')}
+        </span>
+      </div>
+    )
+  }
+
   const live = refreshed ?? interview
   const category = live.category
   const turn = live.turn
@@ -271,9 +285,14 @@ export default function InterviewStatusCard({ interview, applicationId }: { inte
                 {translateInterviewStatus(t, live.currentStatus)}
               </span>
             )}
-            {live.total > 0 && (
+            {/* INTERVIEW-STEP-COUNT-1: prefer the question-only count
+                (questionStepsTotal), falling back to the legacy step/total pair
+                when a payload lacks it (tolerant, §9). */}
+            {((live.questionStepsTotal ?? 0) > 0 || live.total > 0) && (
               <Caption>
-                {t('interview.stepOf', { step: live.step ?? '–', total: live.total })}
+                {(live.questionStepsTotal ?? 0) > 0
+                  ? t('interview.stepOf', { step: live.questionStepIndex ?? '–', total: live.questionStepsTotal ?? 0 })
+                  : t('interview.stepOf', { step: live.step ?? '–', total: live.total })}
               </Caption>
             )}
           </>

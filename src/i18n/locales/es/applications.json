@@ -291,6 +291,7 @@
     },
     "status": {
       "none": "Aún no se ha iniciado ninguna entrevista para esta solicitud.",
+      "borrowedFromSibling": "Entrevista de este candidato realizada a través de otra solicitud.",
       "noAgent": "Agente desconocido",
       "turn": {
         "agent": "Turno del agente",

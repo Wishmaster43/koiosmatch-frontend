@@ -18,8 +18,11 @@ import { humanizeInterviewStatus } from '@/lib/interviewStatus'
 import type { ApplicationInterview } from '@/types/application'
 
 // Deterministic key-echo (repo-wide precedent, e.g. ApplicationTab.test.tsx) —
-// avoids the real async-initialising i18n singleton in a unit test.
-vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string) => k }) }))
+// avoids the real async-initialising i18n singleton in a unit test. `mockT` is a
+// real vi.fn so a specific test can override it (e.g. to assert interpolation
+// options) without disturbing every other test's plain key-echo default.
+const mockT = vi.fn((k: string) => k)
+vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: mockT }) }))
 
 const mockUseAuth = vi.fn()
 const mockPost = vi.fn()
@@ -46,6 +49,7 @@ vi.mock('@/lib/notify', () => ({ notifySuccess: (...a: unknown[]) => mockNotifyS
 // A fully-populated interview — every INTERVIEW-VISIBILITY-1 field present.
 const fullInterview = (overrides: Partial<ApplicationInterview> = {}): ApplicationInterview => ({
   category: 'busy', currentStatus: 'ACTIVE_IN_CARE', step: 2, total: 5,
+  questionStepIndex: null, questionStepsTotal: 0, sessionScope: 'application',
   id: 'iv-1', agent: { id: 'a-1', name: 'Verpleegkundige-agent' }, flowName: 'Verpleegkundige intake', flowId: 'flow-1',
   turn: 'agent', startedAt: '2026-07-21T09:00:00Z', lastMessageAt: '2026-07-21T09:07:00Z', endedAt: null, durationSeconds: null,
   pausedAt: null, pausedBy: null,
@@ -56,6 +60,7 @@ const fullInterview = (overrides: Partial<ApplicationInterview> = {}): Applicati
 // category/current_status/step/total — no session id, no visibility fields.
 const bareInterview: ApplicationInterview = {
   category: 'busy', currentStatus: 'X', step: 1, total: 3,
+  questionStepIndex: null, questionStepsTotal: 0, sessionScope: 'application',
   id: null, agent: null, flowName: null, flowId: null, turn: null, startedAt: null, lastMessageAt: null, endedAt: null, durationSeconds: null,
   pausedAt: null, pausedBy: null,
 }
@@ -67,6 +72,8 @@ beforeEach(() => {
   // resetAllMocks (not clearAllMocks): it also drops leftover `…Once` queues, so a
   // test whose request never fires cannot hand its canned response to the next one.
   vi.resetAllMocks()
+  // resetAllMocks drops mockT's implementation too — restore the default key-echo.
+  mockT.mockImplementation((k: string) => k)
   mockUseAuth.mockReturnValue({ hasPermission: () => true })
   // Default refetch answer; individual tests override it when they assert on it.
   mockGet.mockResolvedValue({ data: { data: {} } })
@@ -185,6 +192,39 @@ describe("InterviewStatusCard · honest gate (list payload without visibility fi
   it('still renders the step, which already works today (INTERVIEW-PHASE-1)', () => {
     render(<InterviewStatusCard interview={bareInterview} applicationId="app-1" />)
     expect(screen.getByText('interview.stepOf')).toBeInTheDocument()
+  })
+})
+
+// INTERVIEW-STEP-COUNT-1: the readout prefers question_step_index/question_steps_total
+// (excludes the flow's system boundary statuses), falling back to the legacy step/total
+// pair only when a payload lacks the new fields (tolerant, §9).
+describe('InterviewStatusCard · question-step readout (INTERVIEW-STEP-COUNT-1)', () => {
+  it('uses questionStepIndex/questionStepsTotal when present, not the legacy step/total', () => {
+    mockT.mockImplementation((k: string, o?: Record<string, unknown>) => (o ? `${k}|${JSON.stringify(o)}` : k))
+    const interview = fullInterview({ step: 11, total: 12, questionStepIndex: 2, questionStepsTotal: 9 })
+    render(<InterviewStatusCard interview={interview} applicationId="app-1" />)
+    expect(screen.getByText('interview.stepOf|{"step":2,"total":9}')).toBeInTheDocument()
+  })
+
+  it('falls back to legacy step/total when questionStepsTotal is absent (0)', () => {
+    mockT.mockImplementation((k: string, o?: Record<string, unknown>) => (o ? `${k}|${JSON.stringify(o)}` : k))
+    const interview = fullInterview({ step: 3, total: 5, questionStepIndex: null, questionStepsTotal: 0 })
+    render(<InterviewStatusCard interview={interview} applicationId="app-1" />)
+    expect(screen.getByText('interview.stepOf|{"step":3,"total":5}')).toBeInTheDocument()
+  })
+})
+
+// INTERVIEW-SIBLING-1: a session borrowed from a sibling application renders an
+// honest note instead of implying this application's own live progress, and never
+// the stop/takeover controls (a second session on the same flow is blocked
+// server-side, so there is nothing to take over here).
+describe('InterviewStatusCard · borrowed sibling session (INTERVIEW-SIBLING-1)', () => {
+  it('shows the borrowed-session note and hides the live card + actions', () => {
+    const interview = fullInterview({ sessionScope: 'candidate' })
+    render(<InterviewStatusCard interview={interview} applicationId="app-1" />)
+    expect(screen.getByText('interview.status.borrowedFromSibling')).toBeInTheDocument()
+    expect(screen.queryByText('Verpleegkundige-agent')).toBeNull()
+    expect(screen.queryByText('interview.status.takeover')).toBeNull()
   })
 })
 

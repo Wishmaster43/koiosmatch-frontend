@@ -291,6 +291,7 @@
     },
     "status": {
       "none": "Aucun entretien n'a encore commencé pour cette candidature.",
+      "borrowedFromSibling": "Entretien de ce candidat effectué via une autre candidature.",
       "noAgent": "Agent inconnu",
       "turn": {
         "agent": "Au tour de l'agent",

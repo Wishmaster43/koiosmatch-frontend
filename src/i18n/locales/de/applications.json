@@ -291,6 +291,7 @@
     },
     "status": {
       "none": "Für diese Bewerbung wurde noch kein Interview gestartet.",
+      "borrowedFromSibling": "Interview für diesen Kandidaten lief über eine andere Bewerbung.",
       "noAgent": "Unbekannter Agent",
       "turn": {
         "agent": "Agent ist am Zug",

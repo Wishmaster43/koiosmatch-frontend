@@ -291,6 +291,7 @@
     },
     "status": {
       "none": "No interview started for this application yet.",
+      "borrowedFromSibling": "Interview for this candidate ran via a different application.",
       "noAgent": "Unknown agent",
       "turn": {
         "agent": "Agent's turn",

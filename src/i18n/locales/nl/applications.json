@@ -291,6 +291,7 @@
     },
     "status": {
       "none": "Nog geen interview gestart voor deze sollicitatie.",
+      "borrowedFromSibling": "Interview van deze kandidaat via een andere sollicitatie.",
       "noAgent": "Onbekende agent",
       "turn": {
         "agent": "Aan de beurt: agent",
