@@ -224,5 +224,8 @@
     "noContact": "Verknüpfen Sie zuerst eine Kontaktperson mit dieser Chance, um die Konversation zu sehen.",
     "emailSectionLabel": "E-Mails",
     "noCustomer": "Diese Chance hat eine Kontaktperson, aber keinen verknüpften Kunden. Verknüpfen Sie zuerst den Kunden, um das Gespräch zu sehen."
+  },
+  "conversations": {
+    "start": "Gespräch starten"
   }
 }

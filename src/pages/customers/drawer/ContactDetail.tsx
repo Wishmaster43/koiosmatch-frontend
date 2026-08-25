@@ -404,7 +404,7 @@ export default function ContactDetail({ contact, locations, departments, statuse
           legacy/edge data), so the tab silently shows nothing rather than firing a
           /customers/undefined/… request. */}
       {subTab === 'conversations' && contact.customerId != null && (
-        <ContactConversationsSection customerId={contact.customerId} contactId={contact.id as Id} />
+        <ContactConversationsSection customerId={contact.customerId} contactId={contact.id as Id} mobile={contact.mobile} />
       )}
 
       {subTab === 'extra' && customFieldDefs.length > 0 && (

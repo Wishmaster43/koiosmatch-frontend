@@ -1279,6 +1279,7 @@
     "start": "Iniciar conversación",
     "startModalTitle": "Iniciar conversación de WhatsApp",
     "startNoMobile": "Este candidato no tiene número de móvil",
+    "startNoMobileContact": "Este contacto no tiene número de móvil",
     "pickTemplate": "Plantilla",
     "templatePlaceholder": "Elegir una plantilla…",
     "templatesEmpty": "No hay plantillas aprobadas disponibles",
@@ -1321,7 +1322,7 @@
     "templateSent": "Plantilla enviada",
     "templateSendFailed": "No se pudo enviar la plantilla",
     "templateLoading": "Cargando plantillas…",
-    "templateNeedsCandidate": "Esta conversación no está vinculada a un candidato; todavía no se puede enviar una plantilla aquí.",
+    "templateNeedsCandidate": "Esta conversación no tiene un propietario conocido; todavía no se puede enviar una plantilla aquí.",
     "templateVarsUnsupported_one": "Esta plantilla tiene {{count}} variable que aún no se puede rellenar aquí. Elige una plantilla sin variables.",
     "templateVarsUnsupported_other": "Esta plantilla tiene {{count}} variables que aún no se pueden rellenar aquí. Elige una plantilla sin variables."
   },

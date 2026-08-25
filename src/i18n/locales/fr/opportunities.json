@@ -224,5 +224,8 @@
     "noContact": "Associez d'abord un contact à cette opportunité pour voir la conversation.",
     "emailSectionLabel": "E-mails",
     "noCustomer": "Cette opportunité a un contact mais aucun client associé. Associez d'abord le client pour voir la conversation."
+  },
+  "conversations": {
+    "start": "Démarrer la conversation"
   }
 }

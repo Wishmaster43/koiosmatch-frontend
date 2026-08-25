@@ -490,11 +490,32 @@ describe('ConversationsSection · 24h window state (WA-WINDOW-1)', () => {
     expect(screen.queryByText('conversations.templateNeedsCandidate')).not.toBeInTheDocument()
   })
 
-  it('a contact thread (no candidate at all) gets an honest notice, never a dead picker', async () => {
+  it('a thread with NO known owner at all gets an honest notice, never a dead picker', async () => {
     mockThreads([{ ...THREADS[0], last_inbound_at: null }])
     render(<ConversationsSection threadsUrl="/conversations" threadsParams={{ candidate_id: 'cand-1' }} />)
     expect(await screen.findByText('conversations.templateNeedsCandidate')).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /conversations\.templatePlaceholder/ })).toBeNull()
+  })
+
+  // CONTACT-CONVERSATION-START: a customer-contact thread now sends a template
+  // through the exact same route as a candidate one — the old "no candidate" dead
+  // end only fires when NEITHER owner is known (the test above).
+  it('a customer-contact thread (customer_contact_id, no candidate) renders the template picker too', async () => {
+    mockThreads([{ ...THREADS[0], last_inbound_at: null, customer_contact_id: 'contact-1' }])
+    render(<ConversationsSection threadsUrl="/conversations" threadsParams={{ candidate_id: 'cand-1' }} />)
+    expect(await screen.findByRole('button', { name: /conversations\.templatePlaceholder/ })).toBeInTheDocument()
+    expect(screen.queryByText('conversations.templateNeedsCandidate')).not.toBeInTheDocument()
+  })
+
+  // CONTACT-CONVERSATION-START: the normalized `owner` block (ConversationResource)
+  // is preferred over the raw candidate_id/customer_contact_id fields, and its name
+  // feeds the thread heading when no nested candidate/wa_number name is present.
+  it('prefers the normalized owner block for both the subject and the thread heading', async () => {
+    mockThreads([{ id: 'conv-1', wa_number: null, last_inbound_at: null, is_active: true,
+      owner: { type: 'customer_contact', id: 'contact-1', name: 'Jamie Vos' } }])
+    render(<ConversationsSection threadsUrl="/conversations" threadsParams={{ candidate_id: 'cand-1' }} />)
+    expect(await screen.findByText('Jamie Vos')).toBeInTheDocument()
+    expect(await screen.findByRole('button', { name: /conversations\.templatePlaceholder/ })).toBeInTheDocument()
   })
 
   it('says the window is UNKNOWN when the payload carries no anchor field at all', async () => {

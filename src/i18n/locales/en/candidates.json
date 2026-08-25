@@ -1279,6 +1279,7 @@
     "start": "Start conversation",
     "startModalTitle": "Start WhatsApp conversation",
     "startNoMobile": "This candidate has no mobile number",
+    "startNoMobileContact": "This contact has no mobile number",
     "pickTemplate": "Template",
     "templatePlaceholder": "Choose a template…",
     "templatesEmpty": "No approved templates available",
@@ -1321,7 +1322,7 @@
     "templateSent": "Template sent",
     "templateSendFailed": "Could not send the template",
     "templateLoading": "Loading templates…",
-    "templateNeedsCandidate": "This conversation is not linked to a candidate; sending a template is not possible here yet.",
+    "templateNeedsCandidate": "This conversation has no known owner; sending a template is not possible here yet.",
     "templateVarsUnsupported_one": "This template has {{count}} variable that cannot be filled in here yet. Pick a template without variables.",
     "templateVarsUnsupported_other": "This template has {{count}} variables that cannot be filled in here yet. Pick a template without variables."
   },

@@ -1279,6 +1279,7 @@
     "start": "Démarrer la conversation",
     "startModalTitle": "Démarrer une conversation WhatsApp",
     "startNoMobile": "Ce candidat n'a pas de numéro de mobile",
+    "startNoMobileContact": "Ce contact n'a pas de numéro de mobile",
     "pickTemplate": "Modèle",
     "templatePlaceholder": "Choisir un modèle…",
     "templatesEmpty": "Aucun modèle approuvé disponible",
@@ -1321,7 +1322,7 @@
     "templateSent": "Modèle envoyé",
     "templateSendFailed": "Impossible d'envoyer le modèle",
     "templateLoading": "Chargement des modèles…",
-    "templateNeedsCandidate": "Cette conversation n'est pas liée à un candidat ; l'envoi d'un modèle n'est pas encore possible ici.",
+    "templateNeedsCandidate": "Cette conversation n'a pas de propriétaire connu ; l'envoi d'un modèle n'est pas encore possible ici.",
     "templateVarsUnsupported_one": "Ce modèle contient {{count}} variable qui ne peut pas encore être remplie ici. Choisissez un modèle sans variables.",
     "templateVarsUnsupported_other": "Ce modèle contient {{count}} variables qui ne peuvent pas encore être remplies ici. Choisissez un modèle sans variables."
   },

@@ -15,7 +15,15 @@
  * 3 sender numbers, and POST /conversations/start validates
  * candidate_id + phone_number_id + template_name, reusing the candidate's
  * EXISTING thread (ConversationStartController → WhatsAppBundleSender::send,
- * read-only verified). It accepts NO variables: the controller passes
+ * read-only verified).
+ *
+ * CONTACT-CONVERSATION-START (K-190, koiosmatch-api commit 01cd7285): the same
+ * endpoint now accepts customer_contact_id as the XOR alternative to candidate_id
+ * (postConversationsStart, src/types/api-generated.ts operation postConversationsStart (CONTACT-CONVERSATION-START strict-XOR block)) — this hook
+ * takes a `subject` ({kind,id}) instead of a bare candidate id so a contact thread
+ * sends the exact same way, never a second code path.
+ *
+ * It accepts NO variables: the controller passes
  * `variables: []` / `headerVariables: []`, and WabaGraphClient then omits the
  * body component entirely — so a template that carries {{n}} slots is rejected
  * by Meta and surfaces as a 502. That is why `variableCount > 0` blocks the
@@ -32,7 +40,13 @@ import type { Id } from '@/types/common'
 // GET /whatsapp-phone-numbers option shape — the tenant's active WhatsApp senders.
 export interface PhoneNumberOption { value: string; label: string }
 
-export function useWhatsAppTemplateSend(candidateId: Id | null | undefined, onSent: () => void) {
+// CONTACT-CONVERSATION-START: the subject a template send targets — one of the two
+// XOR owners POST /conversations/start accepts. Defined here (the base hook) and
+// reused by ConversationsSection/TemplateComposer/StartConversationModal, never
+// redeclared per caller.
+export interface ConversationSubject { kind: 'candidate' | 'customer_contact'; id: Id }
+
+export function useWhatsAppTemplateSend(subject: ConversationSubject | null | undefined, onSent: () => void) {
   const { t } = useTranslation('candidates')
   const [templates, setTemplates] = useState<WaTemplateOption[]>([])
   const [numbers, setNumbers] = useState<PhoneNumberOption[]>([])
@@ -71,19 +85,22 @@ export function useWhatsAppTemplateSend(candidateId: Id | null | undefined, onSe
   )
 
   // Everything the send needs, and nothing the API would silently drop.
-  const canSend = Boolean(candidateId) && Boolean(templateName) && Boolean(phoneNumberId)
+  const canSend = Boolean(subject) && Boolean(templateName) && Boolean(phoneNumberId)
     && variableCount === 0 && !sending
 
-  // Send the template through the one real route. 409 = the sender itself declined
+  // Send the template through the one real route. CONTACT-CONVERSATION-START: the
+  // XOR owner field is chosen from `subject.kind` — candidate_id for a candidate
+  // thread, customer_contact_id for a customer-contact one, never both (postConversationsStart,
+  // src/types/api-generated.ts operation postConversationsStart (CONTACT-CONVERSATION-START strict-XOR block)). 409 = the sender itself declined
   // (governor cap / opt-out / dedup) and carries its own readable reason; 502 = Meta
   // or the gateway is unreachable and NOTHING was sent; both stay inline.
   const submit = useCallback(async () => {
-    if (!canSend) return
+    if (!canSend || !subject) return
     setSending(true)
     setError(null)
     try {
       await api.post('/conversations/start', {
-        candidate_id: candidateId,
+        ...(subject.kind === 'customer_contact' ? { customer_contact_id: subject.id } : { candidate_id: subject.id }),
         phone_number_id: phoneNumberId,
         template_name: templateName,
         ...(selected?.language ? { language: selected.language } : {}),
@@ -99,7 +116,7 @@ export function useWhatsAppTemplateSend(candidateId: Id | null | undefined, onSe
     } finally {
       setSending(false)
     }
-  }, [canSend, candidateId, phoneNumberId, templateName, selected, onSent, t])
+  }, [canSend, subject, phoneNumberId, templateName, selected, onSent, t])
 
   // Picking another template invalidates the previous failure message.
   const pickTemplate = useCallback((value: string) => { setTemplateName(value); setError(null) }, [])

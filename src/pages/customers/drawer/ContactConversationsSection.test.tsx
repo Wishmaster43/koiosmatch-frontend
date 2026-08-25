@@ -10,12 +10,16 @@ import ContactConversationsSection from './ContactConversationsSection'
 import api from '@/lib/api'
 
 vi.mock('@/lib/api', () => ({
-  default: { get: vi.fn() },
+  default: { get: vi.fn(), post: vi.fn() },
   unwrapList: (r: { data?: { data?: unknown[] } }) => ({ rows: r?.data?.data ?? [] }),
 }))
 vi.mock('@/lib/datetime', () => ({
   useDateFormat: () => ({ formatDate: (v: string) => `d(${v})`, formatDateTime: (v: string) => `dt(${v})`, locale: 'nl-NL' }),
 }))
+// CONTACT-CONVERSATION-START: hasPermission drives the PII gate (customers.view) —
+// each test below sets the return explicitly, mirroring CustomersBulkBar.test.jsx.
+const mockUseAuth = vi.fn()
+vi.mock('@/context/AuthContext', () => ({ useAuth: () => mockUseAuth() }))
 
 const THREADS = [{ id: 'conv-1', wa_number: '+31612345678', last_message_at: '2026-07-17T09:00:00Z', is_active: true, escalated: false }]
 
@@ -26,6 +30,8 @@ beforeEach(() => {
     if (url === '/conversations/conv-1/messages') return Promise.resolve({ data: { data: [] } })
     return Promise.reject(new Error(`unexpected GET ${url}`))
   })
+  mockUseAuth.mockReset()
+  mockUseAuth.mockReturnValue({ hasPermission: (p: string) => p === 'customers.view' })
 })
 
 describe('ContactConversationsSection', () => {
@@ -46,5 +52,26 @@ describe('ContactConversationsSection', () => {
     })
     render(<ContactConversationsSection customerId="cust-2" contactId="contact-2" />)
     expect(await screen.findByText('sections.conversationsEmpty')).toBeInTheDocument()
+  })
+})
+
+// CONTACT-CONVERSATION-START: the "Conversatie starten" trigger — PII-gated on
+// customers.view (§8) and disabled without a mobile number (§3, honest affordances).
+describe('ContactConversationsSection · start affordance (CONTACT-CONVERSATION-START)', () => {
+  it('shows an enabled start trigger with customers.view and a mobile number', async () => {
+    render(<ContactConversationsSection customerId="cust-1" contactId="contact-1" mobile="+31612345678" />)
+    expect(await screen.findByRole('button', { name: 'conversations.start' })).not.toBeDisabled()
+  })
+
+  it('disables the trigger with an honest reason when the contact has no mobile number', async () => {
+    render(<ContactConversationsSection customerId="cust-1" contactId="contact-1" mobile={null} />)
+    expect(await screen.findByRole('button', { name: 'conversations.start' })).toBeDisabled()
+  })
+
+  it('hides the start trigger entirely without customers.view — the PII gate', async () => {
+    mockUseAuth.mockReturnValue({ hasPermission: () => false })
+    render(<ContactConversationsSection customerId="cust-1" contactId="contact-1" mobile="+31612345678" />)
+    await screen.findByText('+31612345678')
+    expect(screen.queryByRole('button', { name: 'conversations.start' })).toBeNull()
   })
 })

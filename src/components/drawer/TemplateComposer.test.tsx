@@ -128,7 +128,7 @@ describe('TemplateComposer · honest gates (no button that silently fails)', () 
     expect(api.post).not.toHaveBeenCalled()
   })
 
-  it('a thread without a candidate gets a notice, not a dead picker', async () => {
+  it('a thread with no known owner at all gets a notice, not a dead picker', async () => {
     render(<TemplateComposer candidateId={null} windowKnown onSent={vi.fn()} />)
     expect(await screen.findByText('conversations.templateNeedsCandidate')).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /conversations\.templatePlaceholder/ })).toBeNull()
@@ -155,5 +155,32 @@ describe('TemplateComposer · honest gates (no button that silently fails)', () 
     render(<TemplateComposer candidateId="cand-1" windowKnown onSent={vi.fn()} />)
     expect(await screen.findByText('conversations.pickNumber')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /conversations\.sendTemplate/ })).toBeDisabled()
+  })
+})
+
+// CONTACT-CONVERSATION-START: a customer-contact `subject` sends the exact same
+// route with customer_contact_id instead of candidate_id — never a dead picker.
+describe('TemplateComposer · customer-contact subject (CONTACT-CONVERSATION-START)', () => {
+  it('renders the picker (no "needs candidate" notice) for a customer_contact subject', async () => {
+    render(<TemplateComposer subject={{ kind: 'customer_contact', id: 'contact-1' }} windowKnown onSent={vi.fn()} />)
+    expect(await templateTrigger()).toBeInTheDocument()
+    expect(screen.queryByText('conversations.templateNeedsCandidate')).not.toBeInTheDocument()
+  })
+
+  it('sends customer_contact_id, never candidate_id', async () => {
+    vi.mocked(api.post).mockResolvedValueOnce({ data: { conversation_id: 'conv-1', status: 'sent' } })
+    const onSent = vi.fn()
+    const user = userEvent.setup()
+    render(<TemplateComposer subject={{ kind: 'customer_contact', id: 'contact-1' }} windowKnown onSent={onSent} />)
+
+    await pickTemplate(user, /hello_world/)
+    await user.click(screen.getByRole('button', { name: /conversations\.sendTemplate/ }))
+
+    expect(api.post).toHaveBeenCalledWith('/conversations/start', {
+      customer_contact_id: 'contact-1', phone_number_id: 'PN-1', template_name: 'hello_world', language: 'en_US',
+    })
+    const body = vi.mocked(api.post).mock.calls[0][1] as Record<string, unknown>
+    expect(body).not.toHaveProperty('candidate_id')
+    expect(onSent).toHaveBeenCalledTimes(1)
   })
 })

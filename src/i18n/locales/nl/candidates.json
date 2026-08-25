@@ -1279,6 +1279,7 @@
     "start": "Conversatie starten",
     "startModalTitle": "WhatsApp-conversatie starten",
     "startNoMobile": "Deze kandidaat heeft geen mobiel nummer",
+    "startNoMobileContact": "Deze contactpersoon heeft geen mobiel nummer",
     "pickTemplate": "Template",
     "templatePlaceholder": "Kies een template…",
     "templatesEmpty": "Geen goedgekeurde templates beschikbaar",
@@ -1321,7 +1322,7 @@
     "templateSent": "Template verzonden",
     "templateSendFailed": "Kon de template niet versturen",
     "templateLoading": "Templates laden…",
-    "templateNeedsCandidate": "Dit gesprek hoort niet bij een kandidaat; een template versturen kan hier nog niet.",
+    "templateNeedsCandidate": "Dit gesprek heeft geen bekende eigenaar; een template versturen kan hier nog niet.",
     "templateVarsUnsupported_one": "Deze template heeft {{count}} variabele die hier nog niet ingevuld kan worden. Kies een template zonder variabelen.",
     "templateVarsUnsupported_other": "Deze template heeft {{count}} variabelen die hier nog niet ingevuld kunnen worden. Kies een template zonder variabelen."
   },

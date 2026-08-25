@@ -1279,6 +1279,7 @@
     "start": "Unterhaltung starten",
     "startModalTitle": "WhatsApp-Unterhaltung starten",
     "startNoMobile": "Dieser Kandidat hat keine Mobilnummer",
+    "startNoMobileContact": "Diese Kontaktperson hat keine Mobilnummer",
     "pickTemplate": "Vorlage",
     "templatePlaceholder": "Vorlage wählen…",
     "templatesEmpty": "Keine genehmigten Vorlagen verfügbar",
@@ -1321,7 +1322,7 @@
     "templateSent": "Vorlage gesendet",
     "templateSendFailed": "Vorlage konnte nicht gesendet werden",
     "templateLoading": "Vorlagen werden geladen…",
-    "templateNeedsCandidate": "Dieses Gespräch gehört zu keinem Kandidaten; das Senden einer Vorlage ist hier noch nicht möglich.",
+    "templateNeedsCandidate": "Dieses Gespräch hat keinen bekannten Eigentümer; das Senden einer Vorlage ist hier noch nicht möglich.",
     "templateVarsUnsupported_one": "Diese Vorlage hat {{count}} Variable, die hier noch nicht ausgefüllt werden kann. Wählen Sie eine Vorlage ohne Variablen.",
     "templateVarsUnsupported_other": "Diese Vorlage hat {{count}} Variablen, die hier noch nicht ausgefüllt werden können. Wählen Sie eine Vorlage ohne Variablen."
   },

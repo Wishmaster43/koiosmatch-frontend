@@ -36,9 +36,11 @@ import { useDateFormat } from '@/lib/datetime'
 import ConversationAssistSection from './ConversationAssistSection'
 import ConversationMessage, { type MessageRow } from './ConversationMessage'
 import TemplateComposer from './TemplateComposer'
+import type { ConversationSubject } from './useWhatsAppTemplateSend'
 import { sessionWindow, windowLeftParts } from './sessionWindow'
 import type { Id } from '@/types/common'
 import Button from '@/components/ui/Button'
+import { Caption } from '@/components/ui/typography'
 
 // How often the "time left in the window" line re-reads the clock. One minute is
 // the display resolution, so anything faster would only burn renders.
@@ -51,12 +53,25 @@ interface ConversationCandidate {
   last_name?: string | null
 }
 
+// CONTACT-CONVERSATION-START: the ConversationResource-normalized owner block
+// (ConversationResource::ownerShape, koiosmatch-api) — one shape whichever of the
+// two nullable owner columns is actually populated, so a caller never has to guess.
+interface ConversationOwner {
+  type: 'candidate' | 'customer_contact'
+  id: Id
+  name?: string | null
+}
+
 // One conversation thread as the list endpoint returns it (only the fields the panel shows).
 interface ConversationRow {
   id: Id
   // WA-WINDOW-1: the thread's own candidate — what POST /conversations/start needs
   // to send a template once the window has closed (measured on GET /conversations).
   candidate_id?: Id | null
+  // GESPREK-CONTACT-1: the other possible owner (mutually exclusive with candidate_id).
+  customer_contact_id?: Id | null
+  // CONTACT-CONVERSATION-START: the normalized owner, when the API returns it.
+  owner?: ConversationOwner | null
   wa_number?: string | null
   last_message_at?: string | null
   // WHATSAPP-COMPOSE-1: the 24h session anchor (ConversationResource / Conversation
@@ -70,6 +85,18 @@ interface ConversationRow {
 // Prefer the candidate's real name over the raw WhatsApp number for the thread heading.
 const candidateFullName = (row: ConversationRow) =>
   [row.candidate?.first_name, row.candidate?.last_name].filter(Boolean).join(' ').trim()
+
+// CONTACT-CONVERSATION-START: this thread's owner as {kind,id} for the template
+// composer — prefers the normalized `owner` block, falls back to the older
+// candidate_id/nested-candidate/customer_contact_id fields for a partial API shape.
+// Null only when neither owner is known at all (a genuine dead end).
+const rowSubject = (row: ConversationRow): ConversationSubject | null => {
+  if (row.owner) return { kind: row.owner.type, id: row.owner.id }
+  const candidateId = row.candidate_id ?? row.candidate?.id
+  if (candidateId) return { kind: 'candidate', id: candidateId }
+  if (row.customer_contact_id) return { kind: 'customer_contact', id: row.customer_contact_id }
+  return null
+}
 
 // WA-SEND-TRANSPORT-1 (landed 06-08, verified by reading MessageController::store /
 // sendSessionReply, read-only reference in koiosmatch-api): an outbound POST
@@ -243,7 +270,7 @@ export default function ConversationsSection({ threadsUrl, threadsParams, header
         // Name over number: fall back to the raw wa_number (or an explicit "unknown" label)
         // only when the candidate identity isn't on the row; the number then stays as subtext.
         const name = candidateFullName(row)
-        const heading = name || row.wa_number || t('conversations.unknownContact')
+        const heading = name || row.owner?.name || row.wa_number || t('conversations.unknownContact')
         const showNumberSub = Boolean(name) && Boolean(row.wa_number)
         // WA-WINDOW-1: this thread's 24h state, recomputed each minute tick so the
         // countdown stays true and the composer flips to templates the moment it closes.
@@ -252,8 +279,13 @@ export default function ConversationsSection({ threadsUrl, threadsParams, header
         return (
           <div key={row.id} style={{ border: '1px solid var(--border)', borderRadius: 8, marginBottom: 6, background: 'var(--bg)', overflow: 'hidden' }}>
             {/* Thread header — candidate name (number as subtext), last-activity date, active + escalated badges. */}
+            {/* NECESSITY: full-width accordion thread-header row (icon + name + badges
+                layout), not an action button — Button's fixed footprint cannot host it
+                (block-form disable: the flagged style attribute sits on the tag's 2nd line). */}
+            {/* eslint-disable huisstijlLegacy/no-restricted-syntax */}
             <button onClick={() => toggle(row.id)} title={t('conversations.openThread')}
               style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', textAlign: 'left', padding: '8px 10px', border: 'none', background: 'transparent', cursor: 'pointer' }}>
+            {/* eslint-enable huisstijlLegacy/no-restricted-syntax */}
               {isOpen ? <ChevronDown size={13} style={{ color: 'var(--text-muted)', flexShrink: 0 }} /> : <ChevronRight size={13} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />}
               <MessageCircle size={13} style={{ color: 'var(--color-success-text)', flexShrink: 0 }} />
               <span style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 1 }}>
@@ -270,7 +302,7 @@ export default function ConversationsSection({ threadsUrl, threadsParams, header
                 <SoftChip label={t('conversations.escalated')} color="var(--color-warning)" />
               )}
               {activeBadge(row.is_active)}
-              {row.last_message_at && <span style={{ fontSize: 11, color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>{formatDate(row.last_message_at)}</span>}
+              {row.last_message_at && <Caption as="span" style={{ whiteSpace: 'nowrap' }}>{formatDate(row.last_message_at)}</Caption>}
             </button>
 
             {/* Expanded: the thread's messages as bubbles (inbound left, outbound right). */}
@@ -294,7 +326,7 @@ export default function ConversationsSection({ threadsUrl, threadsParams, header
                     {/* WA-WINDOW-1: how long free text is still allowed, plus the exact
                         closing moment on hover — derived from this row's own
                         last_inbound_at, the very field the backend gates on. */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginTop: 4, fontSize: 11, color: 'var(--text-muted)' }}
+                    <Caption as="div" style={{ display: 'flex', alignItems: 'center', gap: 5, marginTop: 4 }}
                       title={win.expiresAt ? t('conversations.windowClosesAt', { time: formatDateTime(win.expiresAt) }) : undefined}>
                       <Clock size={12} style={{ flexShrink: 0 }} />
                       {/* Under a minute reads as "less than a minute" — "0 minuten left"
@@ -304,7 +336,7 @@ export default function ConversationsSection({ threadsUrl, threadsParams, header
                         : left.minutes > 0
                           ? t('conversations.windowLeftMinutes', { count: left.minutes })
                           : t('conversations.windowLeftSeconds')}</span>
-                    </div>
+                    </Caption>
                     {/* G27: the Koios AI assist affordance — gated on the SAME open-session
                         condition as the composer itself, so "Overnemen" always writes into a
                         visibly rendered draft input (never an invisible/pending state). */}
@@ -334,7 +366,7 @@ export default function ConversationsSection({ threadsUrl, threadsParams, header
                   // WA-WINDOW-1 (Danny punt 12): outside the window Meta only accepts an
                   // approved template — so the answer to "how do I reach them?" is right
                   // here, instead of one muted sentence and a dead end.
-                  <TemplateComposer candidateId={row.candidate_id ?? row.candidate?.id ?? null}
+                  <TemplateComposer subject={rowSubject(row)}
                     windowKnown={win.known} onSent={() => reloadThread(row.id)} />
                 ))}
               </div>
@@ -345,9 +377,9 @@ export default function ConversationsSection({ threadsUrl, threadsParams, header
 
       {/* Escalated-thread hint: a subtle note so the recruiter knows a human took over. */}
       {!loading && !error && rows.some(r => r.escalated) && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 4, fontSize: 11, color: 'var(--text-muted)' }}>
+        <Caption as="div" style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 4 }}>
           <AlertTriangle size={12} style={{ color: 'var(--color-warning)' }} /> {t('conversations.escalatedHint')}
-        </div>
+        </Caption>
       )}
     </SectionCard>
   )

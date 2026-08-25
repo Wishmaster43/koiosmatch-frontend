@@ -14,6 +14,13 @@
  * zero configured numbers disables Send with an honest reason instead of a
  * guaranteed 404.
  *
+ * CONTACT-CONVERSATION-START (K-190, koiosmatch-api commit 01cd7285): the same
+ * endpoint now accepts customer_contact_id as a strict XOR alternative to
+ * candidate_id (postConversationsStart, src/types/api-generated.ts operation postConversationsStart (CONTACT-CONVERSATION-START strict-XOR block)),
+ * so this modal takes a `subject` ({kind,id}) that names WHICH one to send. The
+ * legacy `candidateId` prop still works — it just resolves to a candidate subject —
+ * so the existing candidate call site (CommunicationTab.tsx) stays byte-compatible.
+ *
  * The preview intentionally shows the template's raw header/body/footer text,
  * including any unfilled `{{n}}` slots: ConversationStartController always sends
  * `variables: []` (no substitution UI exists for a cold start), so showing the
@@ -36,6 +43,7 @@ import { extractApiError } from '@/lib/extractApiError'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import FloatingPanel from '@/components/ui/FloatingPanel'
 import { templateTexts, type WaTemplateOption } from '@/components/layout/workflow/whatsappTemplate'
+import type { ConversationSubject } from '@/components/drawer/useWhatsAppTemplateSend'
 import type { Id } from '@/types/common'
 import type { AiAgent } from '@/types/ai'
 import Button from '@/components/ui/Button'
@@ -63,20 +71,28 @@ function ConfigNotice({ text, t, style }: { text: string; t: (k: string, o?: Rec
   return (
     <div style={{ fontSize: 11, color: 'var(--color-danger-text)', marginTop: 3, display: 'flex', flexWrap: 'wrap', gap: 4, ...style }}>
       <span>{text}</span>
-      <a href="#settings/whatsapp/whatsapp" style={{ color: 'var(--color-primary-text)', fontWeight: 600, textDecoration: 'none' }}>
+      <Button href="#settings/whatsapp/whatsapp" variant="ghostAccent" size="sm" style={{ padding: 0, height: 'auto' }}>
         {t('conversations.configureWhatsapp')}
-      </a>
+      </Button>
     </div>
   )
 }
 
-export default function StartConversationModal({ candidateId, onClose, onStarted }: {
-  candidateId: Id
+export default function StartConversationModal({ candidateId, subject, onClose, onStarted }: {
+  // DEPRECATED legacy shape — kept so the existing candidate call site
+  // (CommunicationTab.tsx) stays byte-compatible. Prefer `subject`.
+  candidateId?: Id
+  // CONTACT-CONVERSATION-START: the thread owner to start for — a candidate or a
+  // customer contact.
+  subject?: ConversationSubject
   onClose: () => void
   // Fired after a successful send so the host can refresh its threads list.
   onStarted: () => void
 }) {
   const { t } = useTranslation('candidates')
+  // Prefer the explicit subject; fall back to the legacy bare candidate id.
+  const resolvedSubject: ConversationSubject | null =
+    subject ?? (candidateId ? { kind: 'candidate', id: candidateId } : null)
   const [templates, setTemplates] = useState<WaTemplateOption[]>([])
   const [numbers, setNumbers] = useState<PhoneNumberOption[]>([])
   const [agents, setAgents] = useState<AgentOption[]>([])
@@ -111,18 +127,23 @@ export default function StartConversationModal({ candidateId, onClose, onStarted
   const selected = templates.find(tpl => tpl.value === templateName)
   const texts = templateTexts(selected?.components)
   const hasPreview = Boolean(texts.header || texts.body || texts.footer)
-  const canSend = Boolean(templateName && phoneNumberId) && !sending
+  const canSend = Boolean(resolvedSubject) && Boolean(templateName && phoneNumberId) && !sending
 
   // Send the opening template — the server validates it against the synced+approved
   // set and only writes the thread once the send itself succeeded (CONV-START-1).
   // agent_id rides along only when actually picked (backend field is `sometimes`).
+  // CONTACT-CONVERSATION-START: the XOR owner field follows resolvedSubject.kind —
+  // candidate_id for a candidate, customer_contact_id for a customer contact.
   const submit = async () => {
-    if (!canSend) return
+    if (!canSend || !resolvedSubject) return
     setSending(true)
     setAgentError(null)
     try {
       await api.post('/conversations/start', {
-        candidate_id: candidateId, phone_number_id: phoneNumberId, template_name: templateName,
+        ...(resolvedSubject.kind === 'customer_contact'
+          ? { customer_contact_id: resolvedSubject.id }
+          : { candidate_id: resolvedSubject.id }),
+        phone_number_id: phoneNumberId, template_name: templateName,
         language: selected?.language,
         ...(agentId ? { agent_id: agentId } : {}),
       })

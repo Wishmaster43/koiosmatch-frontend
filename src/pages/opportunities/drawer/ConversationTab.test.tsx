@@ -5,7 +5,7 @@
  * state (and fetches nothing) when there is no contact, and keeps the e-mail log
  * visible below it either way.
  */
-import { describe, it, expect, vi, afterEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import '@/i18n'
@@ -27,6 +27,10 @@ vi.mock('@/lib/datetime', () => ({
     formatDateTime: (v: unknown) => (v == null ? '—' : String(v)),
   }),
 }))
+// CONTACT-CONVERSATION-START: hasPermission drives the customers.view PII gate on
+// the start trigger — each test sets the return explicitly.
+const mockUseAuth = vi.fn()
+vi.mock('@/context/AuthContext', () => ({ useAuth: () => mockUseAuth() }))
 
 afterEach(() => vi.clearAllMocks())
 
@@ -51,6 +55,11 @@ function renderTab(o: Opportunity) {
 }
 
 describe('ConversationTab', () => {
+  beforeEach(() => {
+    mockUseAuth.mockReset()
+    mockUseAuth.mockReturnValue({ hasPermission: (p: string) => p === 'customers.view' })
+  })
+
   it('renders the contact-scoped conversations section with the exact URL and a real thread row', async () => {
     mockedGet.mockImplementation((url: string) => {
       if (url === '/customers/c1/contacts/contact-1/conversations') return Promise.resolve({ data: { data: [
@@ -86,5 +95,29 @@ describe('ConversationTab', () => {
     })
     renderTab(opportunity())
     expect(await screen.findByText('Hi')).toBeInTheDocument()
+  })
+
+  // CONTACT-CONVERSATION-START (K-190): starting a thread is no longer a backend
+  // gap — the header carries a real trigger, PII-gated on customers.view.
+  it('shows the start trigger with customers.view when a contact+customer are known', async () => {
+    mockedGet.mockImplementation((url: string) => {
+      if (url === '/customers/c1/contacts/contact-1/conversations') return Promise.resolve({ data: { data: [] } })
+      if (url === '/email-log') return Promise.resolve({ data: { data: [], meta: { total: 0 } } })
+      return Promise.reject(new Error(`unexpected GET ${url}`))
+    })
+    renderTab(opportunity())
+    expect(await screen.findByRole('button', { name: 'Conversatie starten' })).toBeInTheDocument()
+  })
+
+  it('hides the start trigger without customers.view — the PII gate', async () => {
+    mockUseAuth.mockReturnValue({ hasPermission: () => false })
+    mockedGet.mockImplementation((url: string) => {
+      if (url === '/customers/c1/contacts/contact-1/conversations') return Promise.resolve({ data: { data: [] } })
+      if (url === '/email-log') return Promise.resolve({ data: { data: [], meta: { total: 0 } } })
+      return Promise.reject(new Error(`unexpected GET ${url}`))
+    })
+    renderTab(opportunity())
+    await screen.findByText('Nog geen conversaties.')
+    expect(screen.queryByRole('button', { name: 'Conversatie starten' })).toBeNull()
   })
 })

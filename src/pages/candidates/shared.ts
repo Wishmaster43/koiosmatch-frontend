@@ -25,6 +25,9 @@ export type { ExistingAppointment } from './drawer/PlanIntakeModal'
 export { PreferencesTab, ZzpTab } from './drawer/PreferencesZzpTabs'
 export { default as ProfilePanel } from './drawer/ProfilePanel'
 export { default as StatisticsTab } from './drawer/StatisticsTab'
+// CONTACT-CONVERSATION-START: shared with the customer-contact and opportunity
+// drawers (both now start a WhatsApp thread via the same `subject` prop).
+export { default as StartConversationModal } from './drawer/StartConversationModal'
 export { default as WorkTab } from './drawer/WorkTab'
 export { vacancyLabelOf } from './drawer/applicationRowModel'
 export type { AppRow } from './drawer/applicationRowModel'

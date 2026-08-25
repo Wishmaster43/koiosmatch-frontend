@@ -224,5 +224,8 @@
     "noContact": "Link a contact to this opportunity first to see the conversation.",
     "emailSectionLabel": "E-mails",
     "noCustomer": "This opportunity has a contact person but no linked customer. Link the customer first to see the conversation."
+  },
+  "conversations": {
+    "start": "Start conversation"
   }
 }

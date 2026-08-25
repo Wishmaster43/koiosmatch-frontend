@@ -224,5 +224,8 @@
     "noContact": "Koppel eerst een contactpersoon aan deze kans om de conversatie te zien.",
     "emailSectionLabel": "E-mails",
     "noCustomer": "Deze kans heeft een contactpersoon maar geen gekoppelde klant. Koppel eerst de klant om de conversatie te zien."
+  },
+  "conversations": {
+    "start": "Conversatie starten"
   }
 }

@@ -224,5 +224,8 @@
     "noContact": "Vincule primero un contacto a esta oportunidad para ver la conversación.",
     "emailSectionLabel": "Correos electrónicos",
     "noCustomer": "Esta oportunidad tiene una persona de contacto pero ningún cliente vinculado. Vincule primero el cliente para ver la conversación."
+  },
+  "conversations": {
+    "start": "Iniciar conversación"
   }
 }

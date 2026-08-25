@@ -128,6 +128,41 @@ describe('StartConversationModal · POST /conversations/start', () => {
   })
 })
 
+// CONTACT-CONVERSATION-START: the same modal starts a thread with a customer
+// contact — the POST pins customer_contact_id and NEVER candidate_id (strict XOR,
+// postConversationsStart in api-generated.ts).
+describe('StartConversationModal · customer-contact subject (CONTACT-CONVERSATION-START)', () => {
+  it('sends customer_contact_id, never candidate_id, for a customer_contact subject', async () => {
+    vi.mocked(api.post).mockResolvedValueOnce({ data: { conversation_id: 'conv-1', status: 'sent' } })
+    const onStarted = vi.fn()
+    const user = userEvent.setup()
+    render(<StartConversationModal subject={{ kind: 'customer_contact', id: 'contact-1' }} onClose={noop} onStarted={onStarted} />)
+
+    await user.click(await screen.findByRole('button', { name: 'conversations.templatePlaceholder' }))
+    await user.click(await screen.findByRole('button', { name: /welkom \(nl\)/ }))
+    await user.click(screen.getByRole('button', { name: 'conversations.start' }))
+
+    expect(api.post).toHaveBeenCalledWith('/conversations/start', {
+      customer_contact_id: 'contact-1', phone_number_id: 'PN-1', template_name: 'welkom', language: 'nl',
+    })
+    const body = vi.mocked(api.post).mock.calls[0][1] as Record<string, unknown>
+    expect(body).not.toHaveProperty('candidate_id')
+    expect(onStarted).toHaveBeenCalledTimes(1)
+  })
+
+  it('surfaces a 409 (no whatsapp_consent) and a 422 (no mobile) via notifyError, never a generic string', async () => {
+    vi.mocked(api.post).mockRejectedValueOnce({ response: { status: 409, data: { message: 'Deze contactpersoon heeft geen WhatsApp-toestemming.' } } })
+    const user = userEvent.setup()
+    render(<StartConversationModal subject={{ kind: 'customer_contact', id: 'contact-1' }} onClose={noop} onStarted={noop} />)
+
+    await user.click(await screen.findByRole('button', { name: 'conversations.templatePlaceholder' }))
+    await user.click(await screen.findByRole('button', { name: /welkom \(nl\)/ }))
+    await user.click(screen.getByRole('button', { name: 'conversations.start' }))
+
+    expect(notifyError).toHaveBeenCalledWith('Deze contactpersoon heeft geen WhatsApp-toestemming.')
+  })
+})
+
 // CONV-START-AGENT-1: the optional AI-agent picker — never required to send, its
 // choice rides along as `agent_id` only when actually picked, and an unknown/foreign
 // id (Laravel's exists:ai_agents,id) surfaces as a FIELD error next to the picker,

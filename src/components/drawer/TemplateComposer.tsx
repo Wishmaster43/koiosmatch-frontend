@@ -6,9 +6,14 @@
  * what this offers: the reason, a searchable template picker (§4 — never a native
  * <select>), the message as the candidate will receive it, and a real send button.
  *
+ * CONTACT-CONVERSATION-START (K-190): POST /conversations/start now accepts
+ * customer_contact_id as well as candidate_id (strict XOR, postConversationsStart in
+ * src/types/api-generated.ts operation postConversationsStart (CONTACT-CONVERSATION-START strict-XOR block)), so a customer-contact thread sends a
+ * template through the exact same route — the old "no candidate → dead end" notice
+ * only fires when NEITHER owner is known at all (a genuinely unresolvable thread).
+ *
  * Honest gating, no fake affordances (§3):
- *  - a thread without a candidate (a customer-contact thread) gets a plain notice —
- *    POST /conversations/start is candidate-scoped, so there is nothing to press;
+ *  - a thread whose owner is unknown gets a plain notice — nothing to press;
  *  - zero approved templates / zero sender numbers is a CONFIGURATION state, with a
  *    link straight to Settings → WhatsApp;
  *  - a template carrying {{n}} variables blocks the send with the reason, because
@@ -18,7 +23,7 @@ import { useId } from 'react'
 import { useTranslation } from 'react-i18next'
 import { AlertTriangle, Clock, Send } from 'lucide-react'
 import CreatableSelect from '@/components/ui/CreatableSelect'
-import { useWhatsAppTemplateSend } from './useWhatsAppTemplateSend'
+import { useWhatsAppTemplateSend, type ConversationSubject } from './useWhatsAppTemplateSend'
 import type { Id } from '@/types/common'
 import Button from '@/components/ui/Button'
 import { Caption } from '@/components/ui/typography'
@@ -40,9 +45,13 @@ function ConfigNotice({ text }: { text: string }) {
   )
 }
 
-export default function TemplateComposer({ candidateId, windowKnown, onSent }: {
-  // The thread's candidate — null on a customer-contact thread (see the gate below).
+export default function TemplateComposer({ candidateId, subject, windowKnown, onSent }: {
+  // DEPRECATED legacy shape — kept so existing candidate-only call sites/tests stay
+  // byte-compatible. Prefer `subject`, which also covers a customer-contact thread.
   candidateId?: Id | null
+  // CONTACT-CONVERSATION-START: the thread's owner ({kind,id}) — null only when
+  // neither a candidate nor a customer contact is known for this thread at all.
+  subject?: ConversationSubject | null
   // False when the payload carried no usable 24h anchor: say so, never guess.
   windowKnown: boolean
   // Fired after a real send so the host reloads the thread + list from the server.
@@ -51,11 +60,14 @@ export default function TemplateComposer({ candidateId, windowKnown, onSent }: {
   const { t } = useTranslation('candidates')
   const templateLabelId = useId()
   const numberLabelId = useId()
+  // Prefer the explicit subject; fall back to the legacy bare candidate id.
+  const resolvedSubject: ConversationSubject | null =
+    subject ?? (candidateId ? { kind: 'candidate', id: candidateId } : null)
   const {
     loading, templates, numbers, templateName, pickTemplate,
     phoneNumberId, setPhoneNumberId, texts, variableCount,
     sending, error, canSend, submit,
-  } = useWhatsAppTemplateSend(candidateId, onSent)
+  } = useWhatsAppTemplateSend(resolvedSubject, onSent)
 
   const hasPreview = Boolean(texts.header || texts.body || texts.footer)
 
@@ -67,8 +79,10 @@ export default function TemplateComposer({ candidateId, windowKnown, onSent }: {
         <span>{windowKnown ? t('conversations.sessionClosedHint') : t('conversations.windowUnknown')}</span>
       </Caption>
 
-      {/* A contact thread has no candidate to start from — an honest dead end, not a dead button. */}
-      {!candidateId ? (
+      {/* CONTACT-CONVERSATION-START: only a thread with NO known owner at all (neither
+          candidate nor customer contact) hits this dead end — everything else, contact
+          threads included, sends through the same route below. */}
+      {!resolvedSubject ? (
         <Caption as="div" style={{ marginTop: 6 }}>{t('conversations.templateNeedsCandidate')}</Caption>
       ) : loading ? (
         <Caption as="div" style={{ marginTop: 6 }}>{t('conversations.templateLoading')}</Caption>
