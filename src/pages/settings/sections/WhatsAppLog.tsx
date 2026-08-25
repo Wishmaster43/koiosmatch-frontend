@@ -18,7 +18,7 @@ import { useDateFormat } from '@/lib/datetime'
 import LogView from '@/components/ui/LogView'
 import type { LogExportCol } from '@/components/ui/LogView'
 import { isInbound } from '@/components/ui/logChips'
-import { useWhatsAppData, useMessageColumns } from '@/pages/whatsapp/shared'
+import { useWhatsAppData, useMessageColumns, WA_STATUS_VALUES } from '@/pages/whatsapp/shared'
 import type { WaMessage } from '@/types/whatsapp'
 import { useAllSettings, saveSettingsKeys, invalidateAllSettingsCache, getNumberSetting } from '@/lib/settings/useAllSettings'
 import { notifyError } from '@/lib/notify'
@@ -73,33 +73,50 @@ function ConversationMemoryField() {
   )
 }
 
-const contactOf = (m: WaMessage) => [m.candidate?.first_name, m.candidate?.last_name].filter(Boolean).join(' ') || '—'
+// A row's recipient name, whichever owner it carries (candidate or customer
+// contact) — WA-MSG-TABLE-2 added the contact-owned shape, so this can no
+// longer read the candidate side only (search/CSV export both use this).
+// Server-validated status vocabulary (mirrors WhatsAppPage.tsx's own const) —
+// the SOURCE for the filter values, never derived from loaded rows.
+
+const contactOf = (m: WaMessage) =>
+  [m.candidate?.first_name, m.candidate?.last_name].filter(Boolean).join(' ')
+  || [m.customer_contact?.first_name, m.customer_contact?.last_name].filter(Boolean).join(' ')
+  || '—'
 
 export default function WhatsAppLog() {
   const { t } = useTranslation('settings')
-  // K-176 — retention is unlimited; the first page is only the 90-day window,
-  // loadMoreMessages pages older ones in on cursor `before=<oldest sent_at>`.
-  const { messages, loading, loadMoreMessages, loadingMoreMessages, messagesExhausted } = useWhatsAppData()
-  // App-wide active locale (§5) — formatDateTime replaces the old hardcoded 'nl-NL' fmt().
-  const { formatDateTime } = useDateFormat()
   const [search, setSearch] = useState('')
   const [selectedDir, setSelectedDir] = useState<string[]>([])
   const [selectedStatus, setSelectedStatus] = useState<string[]>([])
   // WA-LOG-LEESBAAR-1: the clicked row whose conversation is open (null = closed).
   const [openThread, setOpenThread] = useState<WaMessage | null>(null)
 
-  const statusOptions = useMemo(() => [...new Set(messages.map(m => m.status).filter(Boolean))] as string[], [messages])
+  // K-176 — retention is unlimited; the first page is only the 90-day window,
+  // loadMoreMessages pages older ones in on cursor `before=<oldest sent_at>` and
+  // carries the same params. WA-MSG-TABLE-1 stage B: direction/status now reach
+  // the request as real server params instead of a client-side sieve; only the
+  // search box stays client-side over the already-loaded page (no server search
+  // param exists on GET /whatsapp/messages).
+  const { messages, loading, loadMoreMessages, loadingMoreMessages, messagesExhausted } = useWhatsAppData({
+    direction: selectedDir.length ? [selectedDir[0] === 'in' ? 'inbound' : 'outbound'] : undefined,
+    status: selectedStatus,
+  })
+  // App-wide active locale (§5) — formatDateTime replaces the old hardcoded 'nl-NL' fmt().
+  const { formatDateTime } = useDateFormat()
 
-  // Client-side filter (search + direction + status).
+  // WA_STATUS_VALUES mirrors the server's own `in:` validation vocabulary
+  // (WhatsappDashboardController) — a FIXED list, not derived from the current
+  // (already status-filtered) page, so a selected status never hides its own
+  // sibling options from the panel.
+  const statusOptions = WA_STATUS_VALUES
+
+  // Client-side search only — direction/status are already applied server-side.
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase()
-    return messages.filter(m => {
-      if (selectedDir.length) { const d = isInbound(m.direction) ? 'in' : 'out'; if (!selectedDir.includes(d)) return false }
-      if (selectedStatus.length && !selectedStatus.includes(m.status ?? '')) return false
-      if (q) return [contactOf(m), m.body].some(v => (v ?? '').toLowerCase().includes(q))
-      return true
-    })
-  }, [messages, search, selectedDir, selectedStatus])
+    if (!q) return messages
+    return messages.filter(m => [contactOf(m), m.body].some(v => (v ?? '').toLowerCase().includes(q)))
+  }, [messages, search])
 
   // WA-MSG-TABLE-1: the shared message column set (date/recipient/direction/
   // status/body/conversation) — the same config the WhatsAppPage Messages tab
@@ -110,28 +127,38 @@ export default function WhatsAppLog() {
 
   const filterGroups = useMemo(() => [
     { key: 'search', label: t('waLog.searchPlaceholder'), type: 'global-search', value: search, onChange: setSearch },
+    // WA-MSG-TABLE-1 stage B: direction/status are now server params (the
+    // endpoint validates both as SCALARS, `in:...`) — single-select toggle
+    // (pick replaces, re-pick clears), no per-option counts: the currently
+    // loaded page is already filtered server-side, so a client-side count
+    // over it would misrepresent the OTHER option's real total.
     { key: 'direction', label: t('log.direction'), type: 'search-select', selected: selectedDir,
-      options: [
-        { value: 'in',  label: t('log.in'),  count: messages.filter(m => isInbound(m.direction)).length },
-        { value: 'out', label: t('log.out'), count: messages.filter(m => !isInbound(m.direction)).length },
-      ],
-      onToggle: (v: string) => setSelectedDir(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]) },
-    ...(statusOptions.length ? [{ key: 'status', label: t('log.status'), type: 'search-select', selected: selectedStatus,
-      options: statusOptions.map(s => ({ value: s, label: s, count: messages.filter(m => m.status === s).length })),
-      onToggle: (v: string) => setSelectedStatus(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]) }] : []),
-  ], [t, search, selectedDir, selectedStatus, statusOptions, messages])
+      options: [{ value: 'in', label: t('log.in') }, { value: 'out', label: t('log.out') }],
+      onToggle: (v: string) => setSelectedDir(p => p[0] === v ? [] : [v]) },
+    { key: 'status', label: t('log.status'), type: 'search-select', selected: selectedStatus,
+      // Same translated label as the status column itself (§5) — never the raw enum slug.
+      options: statusOptions.map(s => ({ value: s, label: t(`whatsapp:msgStatus.${s}`, { defaultValue: s }) })),
+      onToggle: (v: string) => setSelectedStatus(p => p[0] === v ? [] : [v]) },
+  ], [t, search, selectedDir, selectedStatus, statusOptions])
 
-  // One source per label (§5): the CSV header text for direction/status/body/
-  // date reuses the SAME shared column headers (`whatsapp` namespace) the table
-  // itself renders, instead of a second, independently-translated `settings`
-  // copy that could drift from it. Only the direction VALUE labels (in/out)
-  // stay on the settings namespace — no shared column exists for them.
+  // One source per label (§5): the CSV header text for every column reuses the
+  // SAME shared column headers (`whatsapp` namespace) the table itself renders,
+  // instead of a second, independently-translated `settings` copy that could
+  // drift from it. Only the direction VALUE labels (in/out) stay on the
+  // settings namespace — no shared column exists for them.
   const headerOf = (key: string) => columns.find(c => c.key === key)?.header ?? key
+  // Every value goes through the SAME translation the table cell renders — a
+  // server enum/slug (status/purpose) is never exported raw (§5 canon).
   const exportColumns: LogExportCol<WaMessage>[] = [
     { header: String(headerOf('direction')), value: m => isInbound(m.direction) ? t('log.in') : t('log.out') },
     { header: String(headerOf('recipient')), value: m => contactOf(m) },
+    { header: String(headerOf('channel')), value: m => m.channel_label ?? m.channel ?? '' },
+    { header: String(headerOf('type')), value: m => m.message_type?.label ?? '' },
+    { header: String(headerOf('purpose')), value: m => m.purpose ? t(`candidates:conversations.purpose.${m.purpose}`, { defaultValue: m.purpose }) : '' },
+    { header: String(headerOf('template')), value: m => m.template_name ?? '' },
     { header: String(headerOf('body')), value: m => m.body ?? '' },
-    { header: String(headerOf('status')), value: m => m.status ?? '' },
+    { header: String(headerOf('status')), value: m => t(`whatsapp:msgStatus.${m.status}`, { defaultValue: m.status ?? '' }) },
+    { header: String(headerOf('sentBy')), value: m => m.sent_by_user?.name ?? t('whatsapp:messages.automatic') },
     { header: String(headerOf('sent_at')), value: m => formatDateTime(m.sent_at) },
   ]
 
@@ -159,7 +186,8 @@ export default function WhatsAppLog() {
         </div>
       )}
       {/* WA-LOG-LEESBAAR-1: the clicked row's whole conversation, full-size. */}
-      {openThread && <WaConversationPanel message={openThread} messages={messages} onClose={() => setOpenThread(null)} />}
+      {/* WA-MSG-TABLE-2: the panel now fetches its own thread by conversation_id. */}
+      {openThread && <WaConversationPanel message={openThread} onClose={() => setOpenThread(null)} />}
     </div>
   )
 }

@@ -177,7 +177,7 @@ const MODULES: ModuleDef[] = [
 ]
 
 export const MODULE_META = Object.fromEntries(
-  MODULES.map(m => [m.type, { label: m.label, Icon: m.Icon, color: m.color, bg: m.bg, category: m.category ?? 'Overig' }])
+  MODULES.map(m => [m.type, { label: m.label, Icon: m.Icon, color: m.color, bg: m.bg, category: m.category ?? 'Overig', hidden: m.hidden }])
 )
 
 export const MODULE_SCHEMAS = Object.fromEntries(

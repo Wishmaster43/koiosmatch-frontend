@@ -26,7 +26,7 @@ export const PLANNING_TILES: FeedTileEntry[] = [
     blockId: 'block.occupancyByCustomer',
     feedKey: 'occupancy_by_customer',
     hasData: dash => (dash.occupancy_by_customer ?? []).some(r => r.rate != null),
-    render: dash => <OccupancyByCustomerBar rows={dash.occupancy_by_customer!} />,
+    render: (dash, ctx) => <OccupancyByCustomerBar rows={dash.occupancy_by_customer!} onNavigate={ctx.onNavigate} />,
   },
   {
     blockId: 'block.shiftStatusToday',

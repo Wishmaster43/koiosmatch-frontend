@@ -132,7 +132,8 @@
           "vacancy": "Vacante",
           "recruiter": "Reclutador",
           "daysOpen": "Días abiertos",
-          "inProcess": "Candidatos en proceso"
+          "inProcess": "Candidatos en proceso",
+          "applications": "Solicitudes"
         }
       },
       "fillRateSeries": {

@@ -21,6 +21,8 @@ import Button from '@/components/ui/Button'
 
 // A group's own active-selection count (single-group version of the header sum).
 function groupActiveCount(g: ReportFilterGroup): number {
+  // noCount: a group that always carries a value (a sort order) is never "active".
+  if (g.noCount)                   return 0
   if (g.type === 'saved-filters')  return 0
   if (g.type === 'period')         return g.value ? 1 : 0
   if (g.type === 'global-search')  return g.value ? 1 : 0

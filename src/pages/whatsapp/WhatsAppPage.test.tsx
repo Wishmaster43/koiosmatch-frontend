@@ -38,12 +38,23 @@ vi.mock('./components', () => ({
   ActivityChart: () => <div data-testid="activity-chart" />,
 }))
 vi.mock('./messagesTable/MessagesTable', () => ({
-  default: ({ messages, loading }: { messages: WaMessage[]; loading?: boolean }) =>
-    <div data-testid="messages-table">{loading ? 'loading' : messages.length}</div>,
+  default: ({ messages, loading, exhausted }: { messages: WaMessage[]; loading?: boolean; exhausted?: boolean }) =>
+    <div data-testid="messages-table" data-exhausted={String(!!exhausted)}>{loading ? 'loading' : messages.length}</div>,
 }))
 vi.mock('./QueueTab', () => ({ default: () => <div data-testid="queue-tab" /> }))
 vi.mock('@/components/charts/PieChartCard', () => ({ default: () => <div data-testid="pie-chart" /> }))
 vi.mock('@/components/charts/BarChartCard', () => ({ default: () => <div data-testid="bar-chart" /> }))
+
+// Right-panel lookup options (WA-MSG-TABLE-1 stage B) — this file covers the KPI
+// band + tab/filter WIRING, not the type/number/owner lookup fetches themselves
+// (no QueryClientProvider in this render tree; React Query is stubbed out here).
+vi.mock('./hooks/useWaFilterOptions', () => ({
+  useWaMessageTypes: () => ({ data: [] }),
+  useWaMessagePurposes: () => ({ data: [] }),
+  useWaTemplates: () => ({ data: [] }),
+  useWaPhoneNumbers: () => ({ data: [] }),
+}))
+vi.mock('@/lib/queries', () => ({ useUsers: () => ({ data: [] }) }))
 
 // The nine expected labels (real nl/whatsapp.json copy — @/i18n loads real resources).
 const LABELS = {
@@ -172,7 +183,7 @@ describe('WhatsAppPage · nine-card KPI band (WA-KPI9-1)', () => {
     render(<WhatsAppPage />)
     expect(screen.getByTestId('activity-chart')).toBeInTheDocument()
     await user.click(screen.getByText(LABELS.sentToday))
-    expect(mockUseWhatsAppData).toHaveBeenLastCalledWith({ direction: ['outbound'], status: [] })
+    expect(mockUseWhatsAppData).toHaveBeenLastCalledWith({ direction: ['outbound'], status: [], channel: [], type: [], priority: undefined, purpose: [], template: [], owner: [], number: [], from: undefined, to: undefined, sort: 'desc' })
     expect(screen.getByTestId('messages-table')).toHaveTextContent('2') // 2 outbound of 3
     expect(screen.getByRole('tab', { name: 'Berichten' })).toHaveAttribute('aria-selected', 'true')
   })
@@ -190,7 +201,7 @@ describe('WhatsAppPage · nine-card KPI band (WA-KPI9-1)', () => {
     mockUseWhatsAppQueue.mockReturnValue(queueFixture())
     render(<WhatsAppPage />)
     await user.click(screen.getByText(LABELS.receivedToday))
-    expect(mockUseWhatsAppData).toHaveBeenLastCalledWith({ direction: ['inbound'], status: [] })
+    expect(mockUseWhatsAppData).toHaveBeenLastCalledWith({ direction: ['inbound'], status: [], channel: [], type: [], priority: undefined, purpose: [], template: [], owner: [], number: [], from: undefined, to: undefined, sort: 'desc' })
     expect(screen.getByTestId('messages-table')).toHaveTextContent('1') // 1 inbound of 2
   })
 

@@ -110,7 +110,8 @@ export default function DashboardLayout() {
 
   // Only show the filter button when the current page has registered filter groups.
   const hasFilters    = filterGroups.length > 0
-  const activeFilters = filterGroups.reduce((sum, g) => sum + ((g.selected as unknown[] | undefined)?.length ?? 0), 0)
+  // A group flagged noCount (a sort order that always has a value) never counts as active.
+  const activeFilters = filterGroups.reduce((sum, g) => sum + ((g as { noCount?: boolean }).noCount ? 0 : ((g.selected as unknown[] | undefined)?.length ?? 0)), 0)
 
   return (
     // KOIOS-SELECTIE-CONTEXT-1: one shared selection slot for BOTH the routed

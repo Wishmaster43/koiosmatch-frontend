@@ -72,7 +72,10 @@ export default function ModulePicker({ insertAfterEdgeId, onSelect, onClose }: {
     return type in catalog
   }
 
-  const allEntries = Object.entries(MODULE_META).filter(([type, m]) => isModuleEnabled(type) && isExecutable(type, m.category))
+  // Hidden modules (registry `hidden: true` — currently only the applicant_message
+  // FE orphan) never appear as a new-node offer; existing saved nodes still edit
+  // fine since MODULE_SCHEMAS/ConfigPanel are unaffected by this list.
+  const allEntries = Object.entries(MODULE_META).filter(([type, m]) => !m.hidden && isModuleEnabled(type) && isExecutable(type, m.category))
 
   const visible = allEntries.filter(([type, m]) => {
     const matchSearch = !search || modLabel(type, m.label).toLowerCase().includes(search.toLowerCase())

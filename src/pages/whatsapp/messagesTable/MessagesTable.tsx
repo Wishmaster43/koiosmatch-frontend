@@ -11,6 +11,7 @@ import Button from '@/components/ui/Button'
 import Spinner from '@/components/ui/Spinner'
 import { Caption } from '@/components/ui/typography'
 import { useMessageColumns } from './messageColumns'
+import type { MessageFilterPatch } from './messageColumns'
 import type { WaMessage } from '@/types/whatsapp'
 
 interface MessagesTableProps {
@@ -19,11 +20,14 @@ interface MessagesTableProps {
   onLoadMore?: () => void
   loadingMore?: boolean
   exhausted?: boolean
+  // Stage B (WA-MSG-TABLE-1): the type/template chip gateway into the page's
+  // own right-panel filter state — omitted, the chips render inert.
+  onFilter?: (patch: MessageFilterPatch) => void
 }
 
-export default function MessagesTable({ messages, loading, onLoadMore, loadingMore, exhausted }: MessagesTableProps) {
+export default function MessagesTable({ messages, loading, onLoadMore, loadingMore, exhausted, onFilter }: MessagesTableProps) {
   const { t } = useTranslation('whatsapp')
-  const columns = useMessageColumns()
+  const columns = useMessageColumns({ onFilter })
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
       <DataTable<WaMessage> columns={columns} rows={messages} getRowId={m => m.id ?? ''}

@@ -38,8 +38,11 @@ export interface MessageRow {
 }
 
 
-// Humanise a purpose slug for tenants whose value has no explicit translation.
-const humanize = (s: string) => s.replace(/[_-]+/g, ' ').replace(/^\w/, c => c.toUpperCase())
+// Humanise a purpose/priority slug for tenants whose value has no explicit
+// translation — exported so every consumer of a raw server slug (this bubble,
+// the messages table, the queue tab) shares one fallback, never a raw slug (§5).
+// eslint-disable-next-line react-refresh/only-export-components -- shared pure helper, not a component; HMR-nicety warning only
+export const humanize = (s: string) => s.replace(/[_-]+/g, ' ').replace(/^\w/, c => c.toUpperCase())
 
 // Stable colour per sender: the candidate (inbound) gets one fixed colour; each outbound
 // recruiter/agent hashes to its own tint via the shared avatar colour picker — never a

@@ -73,4 +73,17 @@ describe('ModulePicker · PICKER-INTERSECT executability gate', () => {
     // 'webhook' (category 'Triggers') starts a run — it is never an engine action.
     expect(screen.getByTitle(WEBHOOK_LABEL)).toBeInTheDocument()
   })
+
+  // FE orphan (CMBE 25-08): applicant_message has no backend module, so the
+  // registry marks it `hidden` — the picker never offers it as a new node,
+  // regardless of catalog state.
+  it('never offers the hidden applicant_message module, empty or non-empty catalog', () => {
+    const APPLICANT_MESSAGE_LABEL = MODULE_META.applicant_message.label
+    mockCatalog = {}
+    const { rerender } = render(<ModulePicker insertAfterEdgeId={null} onSelect={noop} onClose={noop} />)
+    expect(screen.queryByTitle(APPLICANT_MESSAGE_LABEL)).not.toBeInTheDocument()
+    mockCatalog = realCatalog('applicant_message')
+    rerender(<ModulePicker insertAfterEdgeId={null} onSelect={noop} onClose={noop} />)
+    expect(screen.queryByTitle(APPLICANT_MESSAGE_LABEL)).not.toBeInTheDocument()
+  })
 })

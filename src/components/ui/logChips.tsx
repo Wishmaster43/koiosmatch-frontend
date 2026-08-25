@@ -4,6 +4,7 @@
  * lib/tint house pair; ink via chipInk (the raw colour on its own tint reads
  * 2.4-3.0:1 — herhaal-slotaudit r3.5). Tokens only.
  */
+import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ArrowDownLeft, ArrowUpRight } from 'lucide-react'
 import { tintBg, tintBorder, chipInk } from '@/lib/tint'
@@ -30,7 +31,12 @@ export function DirectionPill({ direction }: { direction?: string }) {
 }
 
 // Soft status chip; colour by common message statuses (delivered/sent/failed/…).
-export function StatusPill({ status }: { status?: string }) {
+// `label` (WA-MSG-TABLE-2, K-194) lets a caller render a TRANSLATED display text
+// while the colour still keys off the raw `status` — a server enum is never
+// rendered raw (house rule §5); every existing caller (no label passed) keeps
+// rendering the raw `status` string byte-identically. `title` adds a tooltip
+// (e.g. delivered/read/failed timestamps) without changing the visible chip.
+export function StatusPill({ status, label, title }: { status?: string; label?: ReactNode; title?: string }) {
   if (!status) return <span style={{ color: 'var(--text-muted)' }}>—</span>
   const s = status.toLowerCase()
   const color = /fail|error|bounce|reject/.test(s) ? 'var(--color-danger)'
@@ -38,10 +44,10 @@ export function StatusPill({ status }: { status?: string }) {
     : /queue|pending|sending/.test(s) ? 'var(--color-warning)'
     : 'var(--text-muted)'
   return (
-    <span style={{ fontSize: 11, fontWeight: 600, padding: '2px 8px', borderRadius: 999, whiteSpace: 'nowrap',
+    <span title={title} style={{ fontSize: 11, fontWeight: 600, padding: '2px 8px', borderRadius: 999, whiteSpace: 'nowrap',
       background: tintBg(color),
       border: tintBorder(color), color: chipInk(color) }}>
-      {status}
+      {label ?? status}
     </span>
   )
 }

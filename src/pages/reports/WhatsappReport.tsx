@@ -94,7 +94,7 @@ export default function WhatsappReport({ period, filters }: { period: ReportPeri
   // state as the KPI drill — a segment/row click replaces whatever was open.
   // Gating happens at the CALL SITE (mirrors bars()/openSegment split elsewhere),
   // so this itself always performs the update once invoked.
-  const openAxisDrill = (axis: 'direction' | 'type' | 'escalated' | 'conversation', label: string, value: string | number, rawValue: string) =>
+  const openAxisDrill = (axis: 'direction' | 'type' | 'escalated' | 'conversation' | 'channel', label: string, value: string | number, rawValue: string) =>
     setKpiDrill({
       title: label, value, subtitle: windowSub(),
       rowsEndpoint: '/reports/whatsapp/axes/drill', rowsParams: { axis, value: rawValue, period },
@@ -118,11 +118,12 @@ export default function WhatsappReport({ period, filters }: { period: ReportPeri
     data: segs.map(s => ({ name: s.label, value: s.count, key: s.value })),
     colors: segs.map((_, i) => CHART_SERIES_COLORS[i % CHART_SERIES_COLORS.length]),
   })
-  const pickSegment = (axis: 'direction' | 'type' | 'escalated', segs: WhatsappSegment[]) =>
+  const pickSegment = (axis: 'direction' | 'type' | 'escalated' | 'channel', segs: WhatsappSegment[]) =>
     gateDrillClick('whatsapp', (d: unknown) => {
       const key = (d as { key?: string })?.key ?? (d as { payload?: { key?: string } })?.payload?.key
       const seg = segs.find(s => s.value === key)
-      if (seg) openAxisDrill(axis, seg.label, seg.count, seg.value)
+      // The channel axis titles its drawer with the same translated label the donut shows.
+      if (seg) openAxisDrill(axis, axis === 'channel' ? t(`whatsapp.channel.${seg.value}`, { defaultValue: seg.label }) : seg.label, seg.count, seg.value)
     })
   // Channel donut labels: per-enum-value translation (nl "WABA" / "WABA · lokaal"
   // / "WA Web"), falling back to the server's own label only when a locale key
@@ -228,12 +229,11 @@ export default function WhatsappReport({ period, filters }: { period: ReportPeri
           <ReportChartCard span={hasChannel ? undefined : 2} title={t('whatsapp.axes.escalated')} chart={
             <PieChartCard {...donutData(data.by_escalated)} onItemClick={pickSegment('escalated', data.by_escalated)} />} />
           {/* Channel donut (K-193 fase 0) — rendered only when the envelope
-              carries it. No onItemClick: the backend axis-drill vocabulary does
-              not yet accept 'channel' (open question below), so the legend rows
-              are deliberately inert until CMBE lands that drill axis. */}
+              carries it. Drills through axis='channel' (CMBE 4878fb76), same
+              window/panel filters as every other axis on this report. */}
           {hasChannel && (
             <ReportChartCard title={t('whatsapp.axes.channel')} chart={
-              <PieChartCard {...channelDonutData(data.by_channel ?? [])} />} />
+              <PieChartCard {...channelDonutData(data.by_channel ?? [])} onItemClick={pickSegment('channel', data.by_channel ?? [])} />} />
           )}
 
           {/* Top-10 busiest threads — candidate name (server-gated) + volume;

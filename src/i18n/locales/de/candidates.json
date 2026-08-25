@@ -1279,7 +1279,10 @@
       "birthday": "Geburtstag",
       "appointment_confirm": "Terminbestätigung",
       "six_month_check": "Halbjahrescheck",
-      "interview": "Interview"
+      "interview": "Interview",
+      "first_workday": "Erster Arbeitstag",
+      "evaluation": "Bewertung",
+      "intake_confirm": "Intake-Bestätigung"
     },
     "start": "Unterhaltung starten",
     "startModalTitle": "WhatsApp-Unterhaltung starten",

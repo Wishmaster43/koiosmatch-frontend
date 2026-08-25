@@ -16,12 +16,17 @@
  *   - MessagesTable      → messages table (recipient/conversation gateways)
  *   - EscalationList    → conversations flagged for human follow-up
  */
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
+import type { Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
 import { MessageCircle, RefreshCw } from 'lucide-react'
 import { useRightPanel } from '@/context/RightPanelContext'
 import { useWhatsAppData } from './hooks/useWhatsAppData'
 import { useWhatsAppQueue, sumBatches } from './hooks/useWhatsAppQueue'
+import { useWaMessageTypes, useWaPhoneNumbers, useWaMessagePurposes, useWaTemplates } from './hooks/useWaFilterOptions'
+import { useUsers } from '@/lib/queries'
+import { buildWaMessageFilterGroups } from './data/waMessageFilterGroups'
+import type { MessageFilterPatch } from './messagesTable/messageColumns'
 // Cross-page import, deliberate (WA-KPI9-1): ReportKpiBand is the ONE shared
 // nine-card KPI strip (also used by the dashboard and all 17 reports) — no
 // surface of its own, two-line labels, dev-time nine-card guard. Reusing it here
@@ -36,12 +41,11 @@ import MessagesTable from './messagesTable/MessagesTable'
 import QueueTab from './QueueTab'
 import Button from '@/components/ui/Button'
 import { GroupLabel, BodyText } from '@/components/ui/typography'
+import { WA_DIRECTION_VALUES, WA_STATUS_VALUES } from './shared'
 
 // Server-validated direction/status vocabulary (WA-MSG-TABLE-1 FIX, 26-08) —
 // mirrors WhatsappDashboardController's `in:` validation rules exactly. This is
 // the SOURCE for the right-panel filter values; i18n only supplies the label.
-const WA_DIRECTION_VALUES = ['inbound', 'outbound'] as const
-const WA_STATUS_VALUES = ['sent', 'delivered', 'read', 'failed', 'received'] as const
 
 // The one house placeholder for "the server did not return this" — never a padded zero.
 const DASH = '—'
@@ -59,10 +63,34 @@ export default function WhatsAppPage({ intent }: { intent?: unknown } = {}) {
   // TABLE-1) — replacing the old client-side filter over the first 50 rows.
   const [selectedStatus,    setSelectedStatus]    = useState<string[]>([])
   const [selectedDirection, setSelectedDirection] = useState<string[]>([])
+  // Full K-194 filter set (WA-MSG-TABLE-1 stage B) — every axis lives in the
+  // right panel (§3A), never a toolbar control.
+  const [selectedChannel,  setSelectedChannel]  = useState<string[]>([])
+  const [selectedType,     setSelectedType]     = useState<string[]>([])
+  const [priorityOnly,     setPriorityOnly]     = useState(false)
+  const [selectedPurpose,  setSelectedPurpose]  = useState<string[]>([])
+  const [selectedTemplate, setSelectedTemplate] = useState<string[]>([])
+  const [selectedOwner,    setSelectedOwner]    = useState<string[]>([])
+  const [selectedNumber,   setSelectedNumber]   = useState<string[]>([])
+  const [dateRange,        setDateRange]        = useState({ from: '', to: '' })
+  const [sort,              setSort]            = useState<'asc' | 'desc'>('desc')
   const {
     stats, messages, escalations, activity, loading, errors, noConnection, reload,
     loadMoreMessages, loadingMoreMessages, messagesExhausted,
-  } = useWhatsAppData({ direction: selectedDirection, status: selectedStatus })
+  } = useWhatsAppData({
+    direction: selectedDirection, status: selectedStatus, channel: selectedChannel,
+    type: selectedType, priority: priorityOnly ? true : undefined,
+    purpose: selectedPurpose, template: selectedTemplate, owner: selectedOwner,
+    number: selectedNumber, from: dateRange.from || undefined, to: dateRange.to || undefined,
+    sort,
+  })
+  // Lookup options for the type/owner/number filters (React Query, cached app-wide).
+  const { data: messageTypes = [] } = useWaMessageTypes()
+  const { data: purposes = [] } = useWaMessagePurposes()
+  const { data: templates = [] } = useWaTemplates()
+  const { data: phoneNumbers = [] } = useWaPhoneNumbers()
+  // useUsers() is untyped (shared cross-page query); narrow to the owner shape this page needs.
+  const { data: users = [] } = useUsers() as { data: { id: string | number; name?: string | null }[] }
   // Today's WABA fan-out batches (WA-KPI9-1) — lifted here from QueueTab so the KPI
   // band has "queued/failed today" on every tab, not just while Queue is active.
   const { batches, loading: queueLoading, error: queueError, notAvailable: queueNotAvailable, reload: reloadQueue } = useWhatsAppQueue()
@@ -85,21 +113,38 @@ export default function WhatsAppPage({ intent }: { intent?: unknown } = {}) {
   const statusOptions = useMemo(() => WA_STATUS_VALUES
     .map(v => ({ value: v, label: t(`msgStatus.${v}`, { defaultValue: v }) })), [t])
 
-  // Single-select toggle: picking a new value REPLACES the current one, picking
-  // the already-selected value clears it. The endpoint validates direction/
-  // status as SCALARS, not a list, so at most one value can ever be selected —
-  // hence `type: 'radio'` below (a right-panel filter group, just single-value,
-  // still living in the ONE panel — never a toolbar control, §3A).
-  const filterGroups = useMemo(() => [
-    { key: 'status', label: t('filters.status'), type: 'radio', selected: selectedStatus, options: statusOptions,
-      onToggle: (v: string) => setSelectedStatus(p => p[0] === v ? [] : [v]) },
-    { key: 'direction', label: t('filters.direction'), type: 'radio', selected: selectedDirection, options: directionOptions,
-      onToggle: (v: string) => setSelectedDirection(p => p[0] === v ? [] : [v]) },
-  ], [t, selectedStatus, selectedDirection, statusOptions, directionOptions])
+  // Generic multi-select toggle (add/remove a value from the array) — shared by
+  // every `search-select` group below (mirrors buildMatchFilterGroups' `tog`).
+  const tog = (set: Dispatch<SetStateAction<string[]>>) => (v: string) =>
+    set(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v])
 
-  // Only register groups that actually have options (none while disconnected/empty).
+  // Full filter-group config (WA-MSG-TABLE-1 stage B) — pure builder, mirrors
+  // buildMatchFilterGroups/buildTaskFilterGroups (§0.3 size split).
+  const filterGroups = useMemo(() => buildWaMessageFilterGroups({
+    t, tog,
+    selectedStatus, setSelectedStatus, selectedDirection, setSelectedDirection,
+    selectedChannel, setSelectedChannel, selectedType, setSelectedType,
+    priorityOnly, setPriorityOnly, selectedPurpose, setSelectedPurpose,
+    selectedTemplate, setSelectedTemplate, selectedOwner, setSelectedOwner,
+    selectedNumber, setSelectedNumber, dateRange, setDateRange, sort, setSort,
+    statusOptions, directionOptions, messageTypes, purposes, templates, phoneNumbers, users,
+  }), [t, selectedStatus, selectedDirection, selectedChannel, selectedType, priorityOnly,
+      selectedPurpose, selectedTemplate, selectedOwner, selectedNumber, dateRange, sort,
+      statusOptions, directionOptions, messageTypes, purposes, templates, phoneNumbers, users])
+
+  // Table chip gateway (messageColumns onFilter, CEL-DOORKLIK-CANON): a type/
+  // template chip click sets the SAME panel filter state this builder reads,
+  // so the chip and the panel can never disagree.
+  const onTableFilter = useCallback((patch: MessageFilterPatch) => {
+    if (patch.type !== undefined) setSelectedType([patch.type])
+    if (patch.template !== undefined) setSelectedTemplate([patch.template])
+  }, [])
+
+  // Only register groups that actually have options (none while disconnected/
+  // empty) — a group with no `options` field at all (date-range, checkbox) is
+  // always kept, it has nothing to be empty of.
   useEffect(() => {
-    registerFilters('whatsapp-page', filterGroups.filter(g => g.options.length > 0))
+    registerFilters('whatsapp-page', filterGroups.filter(g => !Array.isArray(g.options) || g.options.length > 0))
     return () => unregisterFilters('whatsapp-page')
   }, [filterGroups, registerFilters, unregisterFilters])
 
@@ -259,8 +304,11 @@ export default function WhatsAppPage({ intent }: { intent?: unknown } = {}) {
 
       {/* Berichten — de feed */}
       {tab === 'messages' && (wabaDown ? NoConn : (
+        // The server cursor only pages BACKWARD (older than the oldest loaded row),
+        // so "load more" is disabled while sort=asc — appending older rows to the
+        // bottom of an ascending list would read wrong and never reach recent ones.
         <MessagesTable messages={messages} loading={loading.messages} onLoadMore={loadMoreMessages}
-          loadingMore={loadingMoreMessages} exhausted={messagesExhausted} />
+          loadingMore={loadingMoreMessages} exhausted={sort === 'asc' ? true : messagesExhausted} onFilter={onTableFilter} />
       ))}
 
       {/* Wachtrij — today's WABA/Business batches (R3a); hook + polling live in the page now (WA-KPI9-1). */}

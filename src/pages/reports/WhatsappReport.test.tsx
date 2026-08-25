@@ -303,20 +303,20 @@ describe('WhatsappReport (RAPPORTEN-WHATSAPP-FE-1)', () => {
     expect(escalatedCard).toBeNull()
   })
 
-  // Inert legend: the channel donut carries no onItemClick yet (drill axis
-  // pending K-193 fase 1), so its rows render as plain text, not role=button.
-  it('renders the channel donut as inert — no drill click, no request', async () => {
+  // CMBE 4878fb76: the channel donut drills through axis='channel', same as
+  // every other axis on this report — the RAW server value travels, not the
+  // translated label.
+  it('drills the channel donut on axis=channel with the raw server value', async () => {
     const user = userEvent.setup()
     mockUseWhatsappReport.mockReturnValue({
-      data: { ...data, by_channel: [{ value: 'waba', label: 'ignored', count: 40 }] },
+      data: { ...data, by_channel: [{ value: 'waba_coex', label: 'ignored', count: 40 }] },
       loading: false, error: false,
     })
     renderReport()
-    const wabaLabel = screen.getByText('WABA')
-    expect(wabaLabel.closest('[role="button"]')).toBeNull()
-    getSpy.mockClear()
-    await user.click(wabaLabel)
-    expect(getSpy).not.toHaveBeenCalled()
+    const wabaLabel = screen.getByText('WABA · lokaal')
+    await user.click(wabaLabel.closest('[role="button"]')!)
+    expect(getSpy).toHaveBeenCalledWith('/reports/whatsapp/axes/drill',
+      expect.objectContaining({ params: { axis: 'channel', value: 'waba_coex', period: 'month' } }))
   })
 
   // Fallback: an older envelope (no by_channel) renders exactly three donuts and

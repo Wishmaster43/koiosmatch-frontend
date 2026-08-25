@@ -51,7 +51,17 @@
   },
   "filters": {
     "status": "Estado",
-    "direction": "Dirección"
+    "direction": "Dirección",
+    "number": "Número",
+    "dateRange": "Periodo",
+    "sort": "Orden",
+    "sortAsc": "Más antiguos primero",
+    "sortDesc": "Más recientes primero",
+    "categories": {
+      "message": "Mensaje",
+      "organisation": "Organización",
+      "display": "Visualización"
+    }
   },
   "msgStatus": {
     "read": "Leído",
@@ -76,7 +86,12 @@
     "tempo": "Tempo",
     "sent": "enviados",
     "skipped": "omitidos",
-    "failed": "fallidos"
+    "failed": "fallidos",
+    "priorityLevel": {
+      "high": "Alta",
+      "normal": "Normal",
+      "low": "Baja"
+    }
   },
   "messages": {
     "date": "Fecha",
@@ -88,6 +103,13 @@
     "openConversation": "Abrir conversación",
     "loadMore": "Cargar más",
     "loadingMore": "Cargando…",
-    "loadMoreExhausted": "No hay mensajes más antiguos"
+    "loadMoreExhausted": "No hay mensajes más antiguos",
+    "channel": "Canal",
+    "type": "Tipo",
+    "purpose": "Propósito",
+    "template": "Plantilla",
+    "sentBy": "Enviado por",
+    "automatic": "Automático",
+    "priority": "Prioridad"
   }
 }

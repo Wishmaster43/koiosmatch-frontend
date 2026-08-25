@@ -1279,7 +1279,10 @@
       "birthday": "Cumpleaños",
       "appointment_confirm": "Confirmación de cita",
       "six_month_check": "Revisión semestral",
-      "interview": "Entrevista"
+      "interview": "Entrevista",
+      "first_workday": "Primer día laboral",
+      "evaluation": "Evaluación",
+      "intake_confirm": "Confirmación de intake"
     },
     "start": "Iniciar conversación",
     "startModalTitle": "Iniciar conversación de WhatsApp",

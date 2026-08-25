@@ -37,8 +37,8 @@ const fillRateByBranch: NonNullable<VacanciesReportData['fill_rate_by_branch']> 
   { branch_id: null, branch: 'Onbekend', total: 3, filled: 1, rate: 33.3 },
 ]
 const aging: NonNullable<VacanciesReportData['aging']> = [
-  { id: 'v1', title: 'Verpleegkundige IC', days_open: 42, recruiter: 'Danny', candidates_in_process: 2 },
-  { id: 'v2', title: 'Logistiek medewerker', days_open: 30, recruiter: null, candidates_in_process: 0 },
+  { id: 'v1', title: 'Verpleegkundige IC', days_open: 42, recruiter: 'Danny', recruiter_id: 'u1', candidates_in_process: 2, applications: 6 },
+  { id: 'v2', title: 'Logistiek medewerker', days_open: 30, recruiter: null, recruiter_id: null, candidates_in_process: 0, applications: 0 },
 ]
 const fullData: Pick<VacanciesReportData, 'ttf_decomposition' | 'fill_rate_timeseries' | 'fill_rate_by_branch' | 'aging'> = {
   ttf_decomposition: ttfDecomposition,
@@ -71,6 +71,12 @@ describe('VacancyDepthSections', () => {
     const { onAgingRow } = renderSections(fullData as VacanciesReportData)
     await userEvent.click(screen.getByText('Verpleegkundige IC'))
     expect(onAgingRow).toHaveBeenCalledWith(fullData.aging![0])
+  })
+
+  it('renders the applications column (the drill population) alongside candidates_in_process', () => {
+    renderSections(fullData as VacanciesReportData)
+    const row = screen.getByText('Verpleegkundige IC').closest('tr') as HTMLElement
+    expect(row).toHaveTextContent('6')
   })
 
   it('renders an unresolved recruiter dash for a null recruiter', () => {

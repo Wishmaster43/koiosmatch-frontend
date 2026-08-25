@@ -10,3 +10,6 @@ export type { WaMessageFilters } from './hooks/useWhatsAppData'
 // The one message-table column config, reused by the settings WhatsApp log
 // (WhatsAppLog.tsx) — never re-derived per screen.
 export { useMessageColumns } from './messagesTable/messageColumns'
+// K-194: the server's own `in:` vocabularies for the two scalar filters (one source, §11).
+export const WA_DIRECTION_VALUES = ['inbound', 'outbound'] as const
+export const WA_STATUS_VALUES = ['sent', 'delivered', 'read', 'failed', 'received'] as const

@@ -132,7 +132,8 @@
           "vacancy": "Vakanz",
           "recruiter": "Recruiter",
           "daysOpen": "Tage offen",
-          "inProcess": "Kandidaten in Bearbeitung"
+          "inProcess": "Kandidaten in Bearbeitung",
+          "applications": "Bewerbungen"
         }
       },
       "fillRateSeries": {

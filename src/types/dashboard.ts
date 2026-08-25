@@ -109,7 +109,8 @@ export interface PlacementTodayRow { match_id: string; candidate: string | null;
 export interface PlacementsStartedEndedToday { started: PlacementTodayRow[]; ended: PlacementTodayRow[] }
 export interface ShiftCoverageCell { date: string; part: 'morning' | 'afternoon' | 'evening'; shifts: number; filled: number }
 export interface OpenShiftRow { shift_id: string; start_time: string; end_time: string | null; order_title: string | null; status: 'open' }
-export interface OccupancyByCustomerRow { label: string; shifts: number; filled: number; rate: number | null }
+// customer_id: null = no customer on the shift's order (CMBE 0ecd0bf5); bar stays inert for that row.
+export interface OccupancyByCustomerRow { label: string; shifts: number; filled: number; rate: number | null; customer_id: string | null }
 export interface ShiftStatusTodayRow { status: string; count: number }
 export interface ShiftUnconfirmedRow { schedule_id: string; candidate_id: string; candidate: string | null; shift_start: string | null; order_title: string | null }
 

@@ -20,11 +20,25 @@ import type { WaStats, WaMessage, WaEscalation, WaActivityDatum } from '@/types/
 interface WaLoading { stats: boolean; messages: boolean; escalations: boolean; activity: boolean }
 interface WaErrors { messages: boolean; escalations: boolean; activity: boolean }
 
-// Optional server-side message filters (WA-MSG-TABLE-1, 25-08): the right-panel
-// direction/status toggles used to filter the 50 already-loaded rows client-side;
-// they now become real request params so the table reflects the full server-side
-// result, not just a slice of the first page.
-export interface WaMessageFilters { direction?: string[]; status?: string[] }
+// Full K-194 server-side message filter set (WA-MSG-TABLE-1 → stage B, 25-08):
+// the right-panel groups feed this object straight into GET /whatsapp/messages'
+// query params. `direction`/`status` stay single-value (the endpoint validates
+// them as SCALARS, `in:...` — never a list); every other axis is a real array
+// per the contract (getWhatsappMessages in api-generated.ts).
+export interface WaMessageFilters {
+  direction?: string[]
+  status?: string[]
+  type?: string[]
+  priority?: boolean
+  purpose?: string[]
+  template?: string[]
+  owner?: string[]
+  number?: string[]
+  channel?: string[]
+  from?: string
+  to?: string
+  sort?: 'asc' | 'desc'
+}
 
 export function useWhatsAppData(filters: WaMessageFilters = {}) {
   const [stats,         setStats]         = useState<WaStats | null>(null)
@@ -50,10 +64,24 @@ export function useWhatsAppData(filters: WaMessageFilters = {}) {
   // value, never join.
   const directionValue = filters.direction?.[0]
   const statusValue    = filters.status?.[0]
+  // Build the full param object exactly as the contract names each key —
+  // arrays sent as arrays, `priority` as a real boolean, omitted when empty/unset
+  // so an idle filter never appears as `[]`/`undefined` on the wire.
   const messageParams = () => ({
     per_page: 50,
     ...(directionValue ? { direction: directionValue } : {}),
     ...(statusValue ? { status: statusValue } : {}),
+    ...(filters.type?.length ? { type: filters.type } : {}),
+    // Laravel's boolean rule rejects the string "true" a JS boolean serialises to: send 1/0.
+    ...(filters.priority !== undefined ? { priority: filters.priority ? 1 : 0 } : {}),
+    ...(filters.purpose?.length ? { purpose: filters.purpose } : {}),
+    ...(filters.template?.length ? { template: filters.template } : {}),
+    ...(filters.owner?.length ? { owner: filters.owner } : {}),
+    ...(filters.number?.length ? { number: filters.number } : {}),
+    ...(filters.channel?.length ? { channel: filters.channel } : {}),
+    ...(filters.from ? { from: filters.from } : {}),
+    ...(filters.to ? { to: filters.to } : {}),
+    ...(filters.sort ? { sort: filters.sort } : {}),
   })
 
   // Re-fetch ONLY the messages source, with the current direction/status params.
@@ -108,15 +136,18 @@ export function useWhatsAppData(filters: WaMessageFilters = {}) {
   // eslint-disable-next-line react-hooks/exhaustive-deps -- runs once on mount only, deliberately
   useEffect(() => { reload() }, [])
 
-  // Refetch ONLY messages when the caller's direction/status filters change —
-  // `didMount` skips the redundant call on first render (the mount effect above
-  // already fetched messages once with these same initial filter values).
+  // Refetch ONLY messages when the caller's filters change — `didMount` skips the
+  // redundant call on first render (the mount effect above already fetched messages
+  // once with these same initial filter values). A stringified signature covers the
+  // full filter object (arrays included) without re-running on every render for a
+  // fresh-but-equal array/object reference from the caller.
+  const filtersSignature = JSON.stringify(filters)
   const didMount = useRef(false)
   useEffect(() => {
     if (!didMount.current) { didMount.current = true; return }
     reloadMessages()
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- reloadMessages is redefined every render (not memoized), only the dependency KEYS matter here
-  }, [directionValue, statusValue])
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- reloadMessages is redefined every render (not memoized), only the signature matters here
+  }, [filtersSignature])
 
   // K-176 (live: f9cf1a64) — cursor page back from the oldest currently loaded
   // `sent_at`, dedup on id. End-of-archive comes from the server's own

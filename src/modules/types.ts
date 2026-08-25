@@ -30,5 +30,8 @@ export interface ModuleDef {
   // tenant lacks it. Separate axis from `app` (connector-apps via AppsContext).
   module?: string
   makeType?: string | string[]
+  // Hidden from the module picker's new-node list (existing workflow nodes of
+  // this type still render/edit fine — only the "add new" offer is suppressed).
+  hidden?: true
   [k: string]: unknown
 }

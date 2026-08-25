@@ -36,8 +36,8 @@ describe('PLANNING_TILES', () => {
     const entry = PLANNING_TILES.find(t => t.feedKey === 'occupancy_by_customer')!
     expect(entry.hasData({})).toBe(false)
     expect(entry.hasData({ occupancy_by_customer: [] })).toBe(false)
-    expect(entry.hasData({ occupancy_by_customer: [{ label: 'ACME', shifts: 0, filled: 0, rate: null }] })).toBe(false)
-    expect(entry.hasData({ occupancy_by_customer: [{ label: 'ACME', shifts: 1, filled: 1, rate: 100 }] })).toBe(true)
+    expect(entry.hasData({ occupancy_by_customer: [{ label: 'ACME', shifts: 0, filled: 0, rate: null, customer_id: 'c1' }] })).toBe(false)
+    expect(entry.hasData({ occupancy_by_customer: [{ label: 'ACME', shifts: 1, filled: 1, rate: 100, customer_id: 'c1' }] })).toBe(true)
   })
 
   it('shift_status_today hasData is false on absent key / every count 0, true when one is non-zero', () => {

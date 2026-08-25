@@ -112,16 +112,14 @@ export default function VacanciesReport({ period, filters = EMPTY_REPORT_FILTERS
     rowsEndpoint: '/reports/vacancies/kpis/drill', rowsParams: { ...baseParams, kpi },
   })
   // DASH-FEEDS-V3 depth: the aging table's row click, same endpoints/window as
-  // openVacancyRow. The drawer's rows are ALL applications of the vacancy
-  // (rowsEndpoint has no stage filter), so the headline value must be that same
-  // population, not the non-terminal-only candidates_in_process count — the
-  // latter is shown as a labelled breakdown line instead (kaartdrill-invariant).
-  const onAgingRow = (row: { id: string; title: string; days_open: number; candidates_in_process: number }) => setDrill({
-    // The headline number is candidates_in_process (non-terminal only), so the
-    // subtitle NAMES what it counts — the drawer's own rows below it are the
-    // vacancy's full application list, a larger population by design.
-    title: row.title, value: row.candidates_in_process,
-    subtitle: `${t('vacancies.depth.aging.cols.inProcess')} · ${windowSub()}`,
+  // openVacancyRow. The headline value is now row.applications (CMBE 0ecd0bf5) —
+  // the drawer's rows are ALL applications of the vacancy (rowsEndpoint has no
+  // stage filter), so the headline number must match that population
+  // (kaartdrill-invariant). candidates_in_process (non-terminal only) moves to
+  // the breakdown line instead of driving the headline.
+  const onAgingRow = (row: { id: string; title: string; days_open: number; candidates_in_process: number; applications: number }) => setDrill({
+    title: row.title, value: row.applications,
+    subtitle: `${t('vacancies.cols.applications')} · ${windowSub()}`,
     breakdown: [
       { label: t('vacancies.depth.aging.cols.inProcess'), value: row.candidates_in_process },
       { label: t('vacancies.depth.aging.cols.daysOpen'), value: row.days_open },

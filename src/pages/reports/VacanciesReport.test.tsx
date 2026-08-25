@@ -333,7 +333,7 @@ describe('VacanciesReport (RAPPORTEN-SUITE-1 portie 4, additive on C-34)', () =>
       ttf_decomposition: { published_to_first_application: 3, first_application_to_proposal: 2, proposal_to_match: 1 },
       fill_rate_timeseries: [{ date: '2026-08-01', total: 5, filled: 2, rate: 40 }],
       fill_rate_by_branch: [{ branch_id: 'b1', branch: 'Utrecht', total: 5, filled: 2, rate: 40 }],
-      aging: [{ id: 'v9', title: 'Aging vacature', days_open: 42, recruiter: null, candidates_in_process: 2 }],
+      aging: [{ id: 'v9', title: 'Aging vacature', days_open: 42, recruiter: null, recruiter_id: null, candidates_in_process: 2, applications: 5 }],
     }
     mockUseVacanciesReport.mockReturnValue({ data: depthData, loading: false, error: false })
     renderReport()
@@ -345,6 +345,13 @@ describe('VacanciesReport (RAPPORTEN-SUITE-1 portie 4, additive on C-34)', () =>
     expect(lastDrillParams()).toEqual({ vacancy: 'v9', period: 'month' })
     expect(getSpy).toHaveBeenCalledWith('/reports/vacancies/advice',
       expect.objectContaining({ params: { vacancy: 'v9', period: 'month' } }))
+    // CMBE 0ecd0bf5: the drawer headline is row.applications (5), the full
+    // drilled population — candidates_in_process (2) moves to the breakdown.
+    // Scoped to the drill drawer's own dialog to avoid colliding with the
+    // '5'/'Sollicitaties' text already present in the report body.
+    const dialog = await screen.findByRole('dialog')
+    expect(within(dialog).getByText('5')).toBeInTheDocument()
+    expect(within(dialog).getByText(i18n.t('vacancies.cols.applications', { ns: 'analytics' }), { exact: false })).toBeInTheDocument()
   })
 
   // Exactly nine KPI cards (§ report-KPI-9 sweep): the five legacy summary tiles

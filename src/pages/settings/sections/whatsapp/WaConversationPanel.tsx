@@ -1,78 +1,93 @@
 /**
  * WaConversationPanel — the READABLE conversation view behind a WhatsApp-log row
  * (WA-LOG-LEESBAAR-1, Danny 13-08: "de conversaties moeten groter, je wilt dit
- * niet verlezen"). Clicking a log row opens the WHOLE thread with that candidate
- * in a floating panel: chat bubbles (inbound left, outbound right), full text
- * that wraps — never the table's one-line ellipsis — and house-format timestamps.
- * Read-only by design: replying lives in the WhatsApp/candidate surfaces, the
- * log stays an audit view.
+ * niet verlezen"). Clicking a log row opens the WHOLE thread in a floating
+ * panel: chat bubbles (inbound left, outbound right), full text that wraps —
+ * never the table's one-line ellipsis — and house-format timestamps. Read-only
+ * by design: replying lives in the WhatsApp/candidate surfaces, the log stays
+ * an audit view.
+ *
+ * WA-MSG-TABLE-2 (K-194): the panel now fetches the thread through its own
+ * `conversation_id` (`GET /conversations/{id}/messages`, the same endpoint and
+ * row shape ConversationsSection already uses) instead of filtering the ~50
+ * already-loaded log rows client-side — a thread older than the loaded page,
+ * or a contact-owned thread, used to render empty or wrong. It renders bubbles
+ * through the shared `ConversationMessage` atom (extend, never duplicate).
  */
-import { useMemo } from 'react'
-import { Caption, bodyTextStyle } from '@/components/ui/typography'
-import { tintBg, tintBorder } from '@/lib/tint'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import api, { unwrapList } from '@/lib/api'
+import { Caption } from '@/components/ui/typography'
+import Spinner from '@/components/ui/Spinner'
 import FloatingPanel from '@/components/ui/FloatingPanel'
-import { StatusPill, isInbound } from '@/components/ui/logChips'
+import ConversationMessage, { type MessageRow } from '@/components/drawer/ConversationMessage'
 import { useDateFormat } from '@/lib/datetime'
 import type { WaMessage } from '@/types/whatsapp'
 
 interface WaConversationPanelProps {
-  // The clicked row — anchors which candidate's thread this panel shows.
+  // The clicked row — anchors which conversation this panel shows.
   message: WaMessage
-  // The full loaded log; the panel filters it down to this candidate's thread.
-  messages: WaMessage[]
   onClose: () => void
 }
 
 const nameOf = (m: WaMessage) => [m.candidate?.first_name, m.candidate?.last_name].filter(Boolean).join(' ')
+  || [m.customer_contact?.first_name, m.customer_contact?.last_name].filter(Boolean).join(' ')
 
-export default function WaConversationPanel({ message, messages, onClose }: WaConversationPanelProps) {
+export default function WaConversationPanel({ message, onClose }: WaConversationPanelProps) {
   const { t } = useTranslation('settings')
   const { formatDateTime } = useDateFormat()
+  const [thread, setThread] = useState<MessageRow[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(false)
 
-  // The thread: every message with the SAME candidate, oldest first (chat order).
-  // A candidate-less row (system/test message) shows just itself.
-  const thread = useMemo(() => {
-    const cid = message.candidate?.id
-    const mine = cid ? messages.filter(m => m.candidate?.id === cid) : [message]
-    return [...mine].sort((a, b) => String(a.sent_at ?? '').localeCompare(String(b.sent_at ?? '')))
-  }, [message, messages])
+  // Load the thread by its own conversation_id; a row with no conversation_id
+  // (a legacy/system message) shows just itself, unable to fetch a real thread.
+  useEffect(() => {
+    let alive = true
+    setLoading(true); setError(false)
+    if (message.conversation_id == null) {
+      setThread([{ id: message.id ?? 0, direction: message.direction as 'inbound' | 'outbound' | undefined,
+        message_content: message.body, sent_at: message.sent_at, purpose: message.purpose,
+        channel: message.channel ?? undefined, channel_label: message.channel_label }])
+      setLoading(false)
+      return
+    }
+    // Without `before` the server only returns the default retention window; anchored on
+    // now it pages backwards from the newest message. Rows arrive newest-first → reverse.
+    api.get(`/conversations/${message.conversation_id}/messages`, { params: { before: new Date().toISOString(), per_page: 100 } })
+      .then(r => { if (alive) setThread([...unwrapList<MessageRow>(r).rows].reverse()) })
+      .catch(() => { if (alive) setError(true) })
+      .finally(() => { if (alive) setLoading(false) })
+    return () => { alive = false }
+    // Depend on the identifying fields, not `message` object identity — a
+    // caller re-creating the row per render must not re-trigger the fetch.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [message.conversation_id, message.id])
 
   const title = nameOf(message) || t('waLog.conversationUnknown')
 
   return (
     <FloatingPanel open onClose={onClose} title={title} ariaLabel={title}
       persistKey="wa-log-conversation" width={560} maxWidth="92vw" bodyStyle={{ padding: 16 }}>
-      {/* Message count — honest scope: this is what the log currently holds. */}
-      <Caption as="div" style={{ marginBottom: 12 }}>
-        {t('waLog.conversationCount', { count: thread.length })}
-      </Caption>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-        {thread.map((m, i) => {
-          const inbound = isInbound(m.direction)
-          return (
-            <div key={m.id ?? i} style={{ display: 'flex', justifyContent: inbound ? 'flex-start' : 'flex-end' }}>
-              {/* Bubble — inbound on the surface token, outbound on a primary tint;
-                  13px + wrapping so long messages read comfortably (the point). */}
-              <div style={{ ...bodyTextStyle, maxWidth: '82%', padding: '9px 12px', borderRadius: 12, lineHeight: 1.5,
-                background: inbound ? 'var(--hover-bg)' : tintBg('var(--button-fill)'),
-                border: `1px solid ${inbound ? 'var(--border)' : tintBorder('var(--button-fill)')}`,
-                whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}>
-                {m.body ?? '—'}
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 6 }}>
-                  <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>{formatDateTime(m.sent_at)}</span>
-                  {m.status && <StatusPill status={m.status} />}
-                  {/* K-160: the business typed this in the WhatsApp APP itself —
-                      the webhook echoed it here (coexistence). */}
-                  {m.purpose === 'smb_app_echo' && (
-                    <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>{t('waLog.viaApp')}</span>
-                  )}
-                </div>
-              </div>
-            </div>
-          )
-        })}
-      </div>
+      {loading ? (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: 24, color: 'var(--text-muted)', fontSize: 13 }}>
+          <Spinner size={14} /> {t('conversations.loadingMessages', { ns: 'candidates' })}
+        </div>
+      ) : error ? (
+        <Caption as="div" style={{ padding: 24, textAlign: 'center' }}>{t('error.body', { ns: 'common' })}</Caption>
+      ) : thread.length === 0 ? (
+        <Caption as="div" style={{ padding: 24, textAlign: 'center' }}>{t('conversations.noMessages', { ns: 'candidates' })}</Caption>
+      ) : (
+        <>
+          {/* Message count — honest scope: this is what the thread currently holds. */}
+          <Caption as="div" style={{ marginBottom: 12 }}>
+            {t('waLog.conversationCount', { count: thread.length })}
+          </Caption>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {thread.map((m, i) => <ConversationMessage key={m.id ?? i} message={m} formatDateTime={formatDateTime} />)}
+          </div>
+        </>
+      )}
     </FloatingPanel>
   )
 }

@@ -1279,7 +1279,10 @@
       "birthday": "Verjaardag",
       "appointment_confirm": "Afspraakbevestiging",
       "six_month_check": "Halfjaarcheck",
-      "interview": "Interview"
+      "interview": "Interview",
+      "first_workday": "Eerste werkdag",
+      "evaluation": "Evaluatie",
+      "intake_confirm": "Intakebevestiging"
     },
     "start": "Conversatie starten",
     "startModalTitle": "WhatsApp-conversatie starten",

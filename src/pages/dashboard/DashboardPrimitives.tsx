@@ -34,7 +34,9 @@ export function KpiCard({ label, value, sub, color, bg, Icon, onClick }: {
 // Themed container that hosts a (theme-agnostic) chart card.
 export function Panel({ children }: { children: ReactNode }) {
   return (
-    <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16 }}>
+    // height 100%: side-by-side tiles in a grid row stay equally tall (Danny 25-08:
+    // "Plaatsingen naar contracttype even groot in hoogte als Fill rate per vestiging").
+    <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, height: '100%', boxSizing: 'border-box' }}>
       {children}
     </div>
   )
@@ -42,7 +44,7 @@ export function Panel({ children }: { children: ReactNode }) {
 
 export function Block({ title, action, onAction, children }: { title?: ReactNode; action?: ReactNode; onAction?: () => void; children?: ReactNode }) {
   return (
-    <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, overflow: 'hidden' }}>
+    <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, overflow: 'hidden', height: '100%', boxSizing: 'border-box' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         padding: '12px 16px', borderBottom: '1px solid var(--border)' }}>
         <SectionTitle as="span">{title}</SectionTitle>

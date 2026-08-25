@@ -14,7 +14,17 @@
   },
   "filters": {
     "status": "Status",
-    "direction": "Richting"
+    "direction": "Richting",
+    "number": "Nummer",
+    "dateRange": "Periode",
+    "sort": "Sortering",
+    "sortAsc": "Oudste eerst",
+    "sortDesc": "Nieuwste eerst",
+    "categories": {
+      "message": "Bericht",
+      "organisation": "Organisatie",
+      "display": "Weergave"
+    }
   },
   "msgStatus": {
     "read": "Gelezen",
@@ -76,7 +86,12 @@
     "tempo": "Tempo",
     "sent": "verzonden",
     "skipped": "overgeslagen",
-    "failed": "mislukt"
+    "failed": "mislukt",
+    "priorityLevel": {
+      "high": "Hoog",
+      "normal": "Normaal",
+      "low": "Laag"
+    }
   },
   "messages": {
     "date": "Datum",
@@ -88,6 +103,13 @@
     "openConversation": "Gesprek openen",
     "loadMore": "Meer laden",
     "loadingMore": "Laden…",
-    "loadMoreExhausted": "Geen oudere berichten meer"
+    "loadMoreExhausted": "Geen oudere berichten meer",
+    "channel": "Kanaal",
+    "type": "Type",
+    "purpose": "Doel",
+    "template": "Template",
+    "sentBy": "Verzonden door",
+    "automatic": "Automatisch",
+    "priority": "Prioriteit"
   }
 }

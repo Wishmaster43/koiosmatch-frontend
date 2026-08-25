@@ -12,7 +12,9 @@
 import { useTranslation } from 'react-i18next'
 import SoftChip from '@/components/ui/SoftChip'
 import Spinner from '@/components/ui/Spinner'
+import { Mono, Caption, BodyText, GroupLabel } from '@/components/ui/typography'
 import { useDateFormat } from '@/lib/datetime'
+import { humanize } from '@/components/drawer/ConversationMessage'
 import { isBatchActive } from './hooks/useWhatsAppQueue'
 import type { WaQueueBatch } from '@/types/whatsapp'
 
@@ -20,8 +22,8 @@ import type { WaQueueBatch } from '@/types/whatsapp'
 function Count({ label, value, color }: { label: string; value: number; color: string }) {
   return (
     <span style={{ display: 'inline-flex', alignItems: 'baseline', gap: 4, fontSize: 12, whiteSpace: 'nowrap' }}>
-      <b style={{ color, fontFamily: "'JetBrains Mono', monospace" }}>{value}</b>
-      <span style={{ color: 'var(--text-muted)' }}>{label}</span>
+      <Mono as="b" style={{ color, fontWeight: 700 }}>{value}</Mono>
+      <Caption as="span">{label}</Caption>
     </span>
   )
 }
@@ -42,28 +44,30 @@ function BatchRow({ batch, active }: { batch: WaQueueBatch; active: boolean }) {
                   borderBottom: '1px solid var(--border)', opacity: active ? 1 : 0.7 }}>
       {/* Identity row: workflow + classification + meta + timestamps */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+        {/* a status DOT (active/finished), not a button — no Button variant applies */}
         <span aria-hidden style={{ width: 7, height: 7, borderRadius: '50%', flexShrink: 0,
+          // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- see comment above
           background: active ? 'var(--color-primary)' : 'var(--text-muted)' }} />
-        <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>
+        <BodyText as="span" style={{ fontWeight: 600 }}>
           {batch.workflow_name ?? '—'}
-        </span>
+        </BodyText>
         {batch.message_type_label && <SoftChip label={batch.message_type_label} />}
+        {/* K-194 (e): priority arrives as a slug (high|normal|low) — translate it,
+            never render the slug raw (§5). */}
         {batch.priority != null && (
-          <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('queue.priority')}: {batch.priority}</span>
+          <Caption as="span">
+            {t('queue.priority')}: {t(`queue.priorityLevel.${batch.priority}`, { defaultValue: humanize(batch.priority) })}
+          </Caption>
         )}
         {batch.tempo != null && (
-          <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('queue.tempo')}: {batch.tempo}</span>
+          <Caption as="span">{t('queue.tempo')}: {batch.tempo}</Caption>
         )}
-        {batch.phone_number_id && (
-          <span style={{ fontSize: 11, color: 'var(--text-muted)', fontFamily: "'JetBrains Mono', monospace" }}>
-            {batch.phone_number_id}
-          </span>
-        )}
+        {batch.phone_number_id && <Caption as="span"><Mono as="span">{batch.phone_number_id}</Mono></Caption>}
         <div style={{ flex: 1 }} />
-        <span style={{ fontSize: 11, color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
+        <Caption as="span" style={{ whiteSpace: 'nowrap' }}>
           {batch.created_at ? formatDateTime(batch.created_at) : '—'}
           {batch.finished_at ? ` → ${formatDateTime(batch.finished_at)}` : ''}
-        </span>
+        </Caption>
       </div>
 
       {/* Progress row: live bar while active + the three outcome counts */}
@@ -71,16 +75,18 @@ function BatchRow({ batch, active }: { batch: WaQueueBatch; active: boolean }) {
         {active && (
           <div role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100}
             style={{ flex: 1, height: 6, borderRadius: 999, background: 'var(--hover-bg)', overflow: 'hidden' }}>
+            {/* a progress-bar FILL, not a button — no Button variant applies */}
             <div style={{ width: `${pct}%`, height: '100%', borderRadius: 999,
+              // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- see comment above
               background: 'var(--color-primary)', transition: 'width 0.4s ease' }} />
           </div>
         )}
         <Count label={t('queue.sent')}    value={sent}    color="var(--color-success)" />
         <Count label={t('queue.skipped')} value={skipped} color="var(--text-muted)" />
         <Count label={t('queue.failed')}  value={failed}  color="var(--color-danger)" />
-        <span style={{ fontSize: 11, color: 'var(--text-muted)', marginLeft: active ? 0 : 'auto', fontFamily: "'JetBrains Mono', monospace" }}>
-          {processed}/{total}
-        </span>
+        <Caption as="span" style={{ marginLeft: active ? 0 : 'auto' }}>
+          <Mono as="span">{processed}/{total}</Mono>
+        </Caption>
       </div>
     </div>
   )
@@ -112,8 +118,8 @@ export default function QueueTab({ batches, loading, error, notAvailable }: Queu
   if (notAvailable) {
     return (
       <div style={{ padding: '32px 16px', textAlign: 'center' }}>
-        <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{t('queue.notAvailable')}</p>
-        <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4 }}>{t('queue.notAvailableDesc')}</p>
+        <BodyText as="p" style={{ fontWeight: 600 }}>{t('queue.notAvailable')}</BodyText>
+        <Caption as="p" style={{ marginTop: 4 }}>{t('queue.notAvailableDesc')}</Caption>
       </div>
     )
   }
@@ -144,19 +150,17 @@ export default function QueueTab({ batches, loading, error, notAvailable }: Queu
     <div style={{ background: 'var(--surface)', borderRadius: 14, border: '1px solid var(--border)', overflow: 'hidden' }}>
       {active.length > 0 && (
         <div>
-          <div style={{ padding: '10px 16px', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)',
-                        textTransform: 'uppercase', letterSpacing: '0.05em', background: 'var(--hover-bg)' }}>
+          <GroupLabel style={{ padding: '10px 16px', background: 'var(--hover-bg)' }}>
             {t('queue.active')} ({active.length})
-          </div>
+          </GroupLabel>
           {active.map(b => <BatchRow key={b.batch_id} batch={b} active />)}
         </div>
       )}
       {finished.length > 0 && (
         <div>
-          <div style={{ padding: '10px 16px', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)',
-                        textTransform: 'uppercase', letterSpacing: '0.05em', background: 'var(--hover-bg)' }}>
+          <GroupLabel style={{ padding: '10px 16px', background: 'var(--hover-bg)' }}>
             {t('queue.finished')} ({finished.length})
-          </div>
+          </GroupLabel>
           {finished.map(b => <BatchRow key={b.batch_id} batch={b} active={false} />)}
         </div>
       )}

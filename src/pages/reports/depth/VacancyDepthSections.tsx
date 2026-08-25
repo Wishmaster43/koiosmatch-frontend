@@ -68,6 +68,9 @@ export default function VacancyDepthSections({ data, onAgingRow }: {
       render: r => <Mono>{formatNumber(r.days_open)}</Mono> },
     { key: 'inProcess', header: t('vacancies.depth.aging.cols.inProcess'), align: 'right', nowrap: true,
       render: r => <Mono>{formatNumber(r.candidates_in_process)}</Mono> },
+    // applications: the full population (CMBE 0ecd0bf5), what the row click drills into.
+    { key: 'applications', header: t('vacancies.depth.aging.cols.applications'), align: 'right', nowrap: true,
+      render: r => <Mono>{formatNumber(r.applications)}</Mono> },
   ]
 
   return (

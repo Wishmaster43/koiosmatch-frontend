@@ -98,7 +98,9 @@ export interface VacanciesReportData {
   // Top-20 OPEN vacancies of this report's window + panel filters ($base in
   // VacanciesReport::aging), oldest first; days_open counts from created_at.
   // recruiter: null without an owner, the server's own label when unresolved.
-  aging?: { id: string; title: string; days_open: number; recruiter: string | null; candidates_in_process: number }[]
+  // applications = the vacancy's full application count (drill population, kaartdrill-invariant);
+  // recruiter_id = the owner's id for future linking (CMBE 0ecd0bf5); recruiter stays the display label.
+  aging?: { id: string; title: string; days_open: number; recruiter: string | null; recruiter_id: string | null; candidates_in_process: number; applications: number }[]
   // Fixed 14-day window, tenant-wide (ignores this report's period). rate is PERCENT (0..100).
   fill_rate_timeseries?: { date: string; total: number; filled: number; rate: number | null }[]
   // House default window (3 months), by the vacancy's location_id. rate is PERCENT.

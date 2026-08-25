@@ -142,3 +142,56 @@ describe('useWhatsAppData · direction/status filters (WA-MSG-TABLE-1)', () => {
     }))
   })
 })
+
+// WA-MSG-TABLE-1 stage B (K-194, WHATSAPP-BERICHTEN-WIRE-1): the full server
+// filter set reaches GET /whatsapp/messages exactly as the contract names each
+// key — arrays as arrays, `priority` as a real boolean.
+describe('useWhatsAppData · full K-194 filter set (stage B)', () => {
+  it('sends type/purpose/template/owner/number/channel as arrays and priority as 1/0', async () => {
+    mockGet()
+    renderHook(() => useWhatsAppData({
+      type: ['3'], priority: true, purpose: ['birthday'], template: ['tpl_a'],
+      owner: ['none', 'u1'], number: ['pn1'], channel: ['waba_coex'],
+      from: '2026-08-01', to: '2026-08-31', sort: 'asc',
+    }))
+    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/whatsapp/messages', {
+      params: {
+        per_page: 50,
+        type: ['3'], priority: 1, purpose: ['birthday'], template: ['tpl_a'],
+        owner: ['none', 'u1'], number: ['pn1'], channel: ['waba_coex'],
+        from: '2026-08-01', to: '2026-08-31', sort: 'asc',
+      },
+    }))
+  })
+
+  it('omits an empty array/unset filter instead of sending [] or undefined', async () => {
+    mockGet()
+    renderHook(() => useWhatsAppData({ type: [], priority: undefined, from: undefined }))
+    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/whatsapp/messages', { params: { per_page: 50 } }))
+  })
+
+  it('load-more carries the full filter set too', async () => {
+    mockGet()
+    const { result } = renderHook(() => useWhatsAppData({ channel: ['wa_web'], sort: 'asc' }))
+    await waitFor(() => expect(result.current.messages).toHaveLength(2))
+    vi.mocked(api.get).mockClear()
+    mockGet()
+    await act(async () => { result.current.loadMoreMessages() })
+    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/whatsapp/messages', {
+      params: { per_page: 50, channel: ['wa_web'], sort: 'asc', before: '2026-07-01T10:00:00Z' },
+    }))
+  })
+
+  it('refetches messages only when a non-direction/status axis changes', async () => {
+    mockGet()
+    const { rerender } = renderHook(({ channel }: { channel?: string[] }) => useWhatsAppData({ channel }), {
+      initialProps: { channel: undefined as string[] | undefined },
+    })
+    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/whatsapp/messages', { params: { per_page: 50 } }))
+    vi.mocked(api.get).mockClear()
+    rerender({ channel: ['waba'] })
+    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/whatsapp/messages', {
+      params: { per_page: 50, channel: ['waba'] },
+    }))
+  })
+})

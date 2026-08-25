@@ -14,7 +14,17 @@
   },
   "filters": {
     "status": "Status",
-    "direction": "Direction"
+    "direction": "Direction",
+    "number": "Number",
+    "dateRange": "Date range",
+    "sort": "Sort",
+    "sortAsc": "Oldest first",
+    "sortDesc": "Newest first",
+    "categories": {
+      "message": "Message",
+      "organisation": "Organisation",
+      "display": "Display"
+    }
   },
   "msgStatus": {
     "read": "Read",
@@ -76,7 +86,12 @@
     "tempo": "Tempo",
     "sent": "sent",
     "skipped": "skipped",
-    "failed": "failed"
+    "failed": "failed",
+    "priorityLevel": {
+      "high": "High",
+      "normal": "Normal",
+      "low": "Low"
+    }
   },
   "messages": {
     "date": "Date",
@@ -88,6 +103,13 @@
     "openConversation": "Open conversation",
     "loadMore": "Load more",
     "loadingMore": "Loading…",
-    "loadMoreExhausted": "No older messages"
+    "loadMoreExhausted": "No older messages",
+    "channel": "Channel",
+    "type": "Type",
+    "purpose": "Purpose",
+    "template": "Template",
+    "sentBy": "Sent by",
+    "automatic": "Automatic",
+    "priority": "Priority"
   }
 }
