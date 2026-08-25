@@ -5,7 +5,7 @@
  */
 import { X, Search, TrendingUp, Target, Info } from 'lucide-react'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
-import { PageTitle } from '@/components/ui/typography'
+import { PageTitle, BodyText, Caption, GroupLabel } from '@/components/ui/typography'
 import Button from '@/components/ui/Button'
 import { tint, tintBorder } from '@/lib/tint'
 import type { ReactNode } from 'react'
@@ -15,9 +15,12 @@ import { useKpiSettings } from '@/lib/useKpiSettings'
 import CandidateDetailDrawer from './CandidateDetailDrawer'
 import DrillTabs from '@/components/ui/DrillTabs'
 import type { ReportCandidate } from '@/types/reports'
+// App-wide active locale + the house DD-MM-YYYY date formatter (DATUM-1/LANE-B).
+import { useLocale, useDateFormat } from '@/lib/datetime'
 
-// Locale-aware full month name for index 0–11.
-const monthName = (i: number) => new Date(2000, i, 1).toLocaleString('nl-NL', { month: 'long' })
+// Locale-aware full month name for index 0–11; `locale` is required (a pure
+// module-scope helper never hardcodes nl-NL or imports i18n).
+const monthName = (locale: string, i: number) => new Date(2000, i, 1).toLocaleString(locale, { month: 'long' })
 
 function StatusBadge({ status }: { status?: string }) {
   const { t } = useTranslation('reports')
@@ -41,15 +44,12 @@ function StatusBadge({ status }: { status?: string }) {
   )
 }
 
-function formatDate(iso?: string | null) {
-  if (!iso) return '—'
-  return new Date(iso).toLocaleDateString('nl-NL', { day: 'numeric', month: 'short', year: 'numeric' })
-}
-
 // ── Candidate list (New / Deregistered) ───────────────────────────────────────
 
 function CandidateList({ candidates, dateField, dateLabel, onSelect }: { candidates: ReportCandidate[]; dateField: string; dateLabel: string; onSelect?: (c: ReportCandidate) => void }) {
   const { t } = useTranslation('reports')
+  // House DD-MM-YYYY formatter (DATUM-1) — never a locale-shaped date string.
+  const { formatDate } = useDateFormat()
   const [search, setSearch] = useState('')
 
   const filtered = candidates.filter(c => {
@@ -101,14 +101,14 @@ function CandidateList({ candidates, dateField, dateLabel, onSelect }: { candida
               </div>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 2 }}>
-                  <span style={{ fontWeight: 500, fontSize: 13, color: 'var(--text)' }}>{name}</span>
+                  <BodyText as="span" style={{ fontWeight: 500 }}>{name}</BodyText>
                   <StatusBadge status={c.status} />
                 </div>
-                <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+                <Caption as="div">
                   {c.position && <span>{c.position}</span>}
                   {c.position && dateValue && <span> · </span>}
                   {dateValue && <span>{dateLabel}: {formatDate(dateValue)}</span>}
-                </div>
+                </Caption>
                 {/* Activity meta — keer gewerkt + laatst ingelogd (SM candidate fields) */}
                 {(() => {
                   const sm = c as { number_of_times_worked?: number; last_login_at?: string }
@@ -116,11 +116,11 @@ function CandidateList({ candidates, dateField, dateLabel, onSelect }: { candida
                   const login  = sm.last_login_at
                   if (worked == null && !login) return null
                   return (
-                    <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 1 }}>
+                    <Caption as="div" style={{ marginTop: 1 }}>
                       {worked != null && <span>{t('drilldown.timesWorked', { n: worked })}</span>}
                       {worked != null && login && <span> · </span>}
                       {login && <span>{t('drilldown.lastLogin')}: {formatDate(login)}</span>}
-                    </div>
+                    </Caption>
                   )
                 })()}
               </div>
@@ -131,7 +131,7 @@ function CandidateList({ candidates, dateField, dateLabel, onSelect }: { candida
 
       <div style={{ padding: '8px 16px', borderTop: '1px solid var(--border)', background: 'var(--hover-bg)',
                     display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0 }}>
-        <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('drilldown.shownOf', { shown: filtered.length, total: candidates.length })}</span>
+        <Caption as="span">{t('drilldown.shownOf', { shown: filtered.length, total: candidates.length })}</Caption>
       </div>
     </>
   )
@@ -141,6 +141,9 @@ function CandidateList({ candidates, dateField, dateLabel, onSelect }: { candida
 
 function AverageBreakdown({ candidates, KPI_TARGET, onSelect }: { candidates: ReportCandidate[]; KPI_TARGET: number; onSelect?: (c: ReportCandidate) => void }) {
   const { t } = useTranslation('reports')
+  const locale = useLocale()
+  // House DD-MM-YYYY formatter (DATUM-1) — never a locale-shaped date string.
+  const { formatDate } = useDateFormat()
   const now          = new Date()
   const currentMonth = now.getMonth()
   const currentYear  = now.getFullYear()
@@ -159,7 +162,7 @@ function AverageBreakdown({ candidates, KPI_TARGET, onSelect }: { candidates: Re
       const d = new Date(c.registration_date)
       return d.getFullYear() === currentYear && d.getMonth() === i
     }).length
-    return { month: i, label: monthName(i), count, isCurrent: i === currentMonth }
+    return { month: i, label: monthName(locale, i), count, isCurrent: i === currentMonth }
   })
 
   // Average: all months with data (excluding future months without data)
@@ -180,7 +183,7 @@ function AverageBreakdown({ candidates, KPI_TARGET, onSelect }: { candidates: Re
         <Info size={14} color="var(--color-secondary)" style={{ flexShrink: 0, marginTop: 1 }} />
         <div style={{ fontSize: 12, color: 'var(--color-secondary)', lineHeight: 1.5 }}>
           <strong>{t('drilldown.calcLabel')}</strong>{' '}
-          {t('drilldown.calcBody', { year: currentYear, month: monthName(currentMonth).toLowerCase(), total: totalNew, months: monthsWithData.length, avg })}
+          {t('drilldown.calcBody', { year: currentYear, month: monthName(locale, currentMonth).toLowerCase(), total: totalNew, months: monthsWithData.length, avg })}
           <br />{t('drilldown.kpiGoal', { target: KPI_TARGET })}
         </div>
       </div>
@@ -210,10 +213,9 @@ function AverageBreakdown({ candidates, KPI_TARGET, onSelect }: { candidates: Re
       </div>
 
       {/* Month-by-month table */}
-      <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase',
-                    letterSpacing: '0.05em', marginBottom: 8 }}>
+      <GroupLabel style={{ marginBottom: 8 }}>
         {t('drilldown.perMonthYear', { year: currentYear })}
-      </div>
+      </GroupLabel>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
         {perMonth.filter(m => m.month <= currentMonth).map(m => {
           const pct    = Math.round((m.count / maxCount) * 100)
@@ -255,18 +257,16 @@ function AverageBreakdown({ candidates, KPI_TARGET, onSelect }: { candidates: Re
       </div>
 
       {/* KPI line explanation */}
-      <div style={{ marginTop: 12, display: 'flex', alignItems: 'center', gap: 6,
-                    fontSize: 11, color: 'var(--text-muted)' }}>
+      <div style={{ marginTop: 12, display: 'flex', alignItems: 'center', gap: 6 }}>
         <Target size={11} color="var(--color-primary)" />
-        {t('drilldown.kpiGoalFoot', { target: KPI_TARGET })}
+        <Caption as="span">{t('drilldown.kpiGoalFoot', { target: KPI_TARGET })}</Caption>
       </div>
 
       {/* Candidates of the selected month — click a month above to switch */}
       <div style={{ marginTop: 16 }}>
-        <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase',
-                      letterSpacing: '0.05em', marginBottom: 8 }}>
-          {monthName(selMonth)} {currentYear} · {monthCandidates.length}
-        </div>
+        <GroupLabel style={{ marginBottom: 8 }}>
+          {monthName(locale, selMonth)} {currentYear} · {monthCandidates.length}
+        </GroupLabel>
         {monthCandidates.length === 0 ? (
           <div style={{ fontSize: 12, color: 'var(--text-muted)', fontStyle: 'italic', padding: '6px 2px' }}>{t('candidates.empty')}</div>
         ) : (
@@ -287,10 +287,10 @@ function AverageBreakdown({ candidates, KPI_TARGET, onSelect }: { candidates: Re
                     {ini || '?'}
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)' }}>{name}</div>
-                    <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+                    <BodyText as="div" style={{ fontWeight: 500 }}>{name}</BodyText>
+                    <Caption as="div">
                       {c.position}{c.position && c.registration_date && ' · '}{c.registration_date && formatDate(c.registration_date)}
-                    </div>
+                    </Caption>
                   </div>
                 </div>
               )

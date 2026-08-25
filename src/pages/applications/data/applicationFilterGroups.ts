@@ -7,6 +7,7 @@
  */
 import type { Dispatch, SetStateAction } from 'react'
 import type { TFunction } from 'i18next'
+import { ddmmyyyy } from '@/lib/localDate'
 import type { AppDateRangeFilter } from '../hooks/useApplicationFilters'
 
 type SetBucket = Dispatch<SetStateAction<string>>
@@ -14,8 +15,10 @@ type SetBucket = Dispatch<SetStateAction<string>>
 interface Opt { value?: string | number; label?: string; count?: number; color?: string }
 type Tog = (set: Dispatch<SetStateAction<string[]>>) => (v: string) => void
 
-// DD-MM-YYYY (nl) for the period-chip label; echoes the input if unparseable (DATUM-1).
-const fmtD = (s: string) => { const d = new Date(s); return isNaN(d.getTime()) ? s : d.toLocaleDateString('nl-NL') }
+// DD-MM-YYYY (DATUM-1) for the period-chip label; echoes the input if unparseable.
+// `ddmmyyyy` comes from lib/localDate, the init-free module (§0/DATUM-1) — this is a
+// pure module and must not drag in lib/datetime's i18n import.
+const fmtD = (s: string) => { const d = new Date(s); return isNaN(d.getTime()) ? s : ddmmyyyy(d) }
 
 interface BuildArgs {
   t: TFunction

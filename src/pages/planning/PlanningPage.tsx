@@ -59,7 +59,8 @@ export interface PlanningIntent {
 
 export default function PlanningPage({ intent }: { intent?: PlanningIntent | null } = {}) {
   const { t } = useTranslation('planning')
-  const { formatTime } = useDateFormat()
+  // App-wide active locale (DATUM-1/LANE-B) — feeds the month-name header label.
+  const { formatTime, locale } = useDateFormat()
   const [view,       setView]       = useState('month')
   // Lazy init from a `{ date }` intent so a tile click fetches the intent's
   // window directly, instead of today's window first and the intent's second.
@@ -138,14 +139,14 @@ export default function PlanningPage({ intent }: { intent?: PlanningIntent | nul
   const goToday = () => setCurrent(new Date())
 
   const headerLabel = () => {
-    if (view === 'month') return `${monthName(current.getMonth())} ${current.getFullYear()}`
+    if (view === 'month') return `${monthName(locale, current.getMonth())} ${current.getFullYear()}`
     if (view === 'week') {
       const dow = (current.getDay() + 6) % 7
       const start = new Date(current); start.setDate(current.getDate() - dow)
       const end   = new Date(start);   end.setDate(start.getDate() + 6)
-      return `${start.getDate()} ${monthName(start.getMonth())} – ${end.getDate()} ${monthName(end.getMonth())} ${end.getFullYear()}`
+      return `${start.getDate()} ${monthName(locale, start.getMonth())} – ${end.getDate()} ${monthName(locale, end.getMonth())} ${end.getFullYear()}`
     }
-    return formatDate(current)
+    return formatDate(current, locale)
   }
 
   const handleDayClick = (date: Date) => setModal(date)
@@ -222,10 +223,10 @@ export default function PlanningPage({ intent }: { intent?: PlanningIntent | nul
           </div>
         ) : (
           <>
-            {view === 'month' && <MonthView current={current} shifts={filteredShifts} today={todayDate} onDayClick={handleDayClick} onShiftClick={setStaffingId} />}
-            {view === 'week'  && <WeekView  current={current} shifts={filteredShifts} today={todayDate} onDayClick={handleDayClick} onShiftClick={setStaffingId} />}
-            {view === 'day'   && <DayView   current={current} shifts={filteredShifts} today={todayDate} onDayClick={handleDayClick} onShiftClick={setStaffingId} />}
-            {view === 'list'  && <ListView  shifts={filteredShifts} today={todayDate} onDayClick={handleDayClick} onShiftClick={setStaffingId} />}
+            {view === 'month' && <MonthView current={current} shifts={filteredShifts} today={todayDate} locale={locale} onDayClick={handleDayClick} onShiftClick={setStaffingId} />}
+            {view === 'week'  && <WeekView  current={current} shifts={filteredShifts} today={todayDate} locale={locale} onDayClick={handleDayClick} onShiftClick={setStaffingId} />}
+            {view === 'day'   && <DayView   current={current} shifts={filteredShifts} today={todayDate} locale={locale} onDayClick={handleDayClick} onShiftClick={setStaffingId} />}
+            {view === 'list'  && <ListView  shifts={filteredShifts} today={todayDate} locale={locale} onDayClick={handleDayClick} onShiftClick={setStaffingId} />}
           </>
         )}
       </div>

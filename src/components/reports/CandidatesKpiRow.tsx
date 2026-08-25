@@ -8,6 +8,8 @@ import { AlertTriangle, UserCheck, UserX, UserPlus, TrendingUp } from 'lucide-re
 import KpiCard from '../ui/KpiCard'
 import { calcAandacht } from './candidateAttention'
 import type { ReportCandidate } from '@/types/reports'
+// App-wide active locale (DATUM-1/LANE-B) — feeds the "new this month" month name.
+import { useLocale } from '@/lib/datetime'
 
 // Count candidates whose status matches the given value (defaults missing to 'onbekend').
 const count = (candidates: ReportCandidate[], status: string) =>
@@ -54,6 +56,7 @@ export default function CandidatesKpiRow({ candidates = [], loading = false, onD
   onStatusFilter?: (status: string) => void
 }) {
   const { t } = useTranslation('reports')
+  const locale = useLocale()
   const drill = (label: string, filterFn: (c: ReportCandidate[]) => ReportCandidate[]) => {
     if (!onDrillDown) return undefined
     return () => onDrillDown(label, filterFn(candidates))
@@ -68,7 +71,7 @@ export default function CandidatesKpiRow({ candidates = [], loading = false, onD
   const actiefTotal    = count(candidates, 'actief')
   const geplandItems   = calcGepland(candidates)
   const { currentMonthCount, avg, delta } = calcMonthStats(candidates)
-  const currentMonthLabel = new Date().toLocaleString('nl-NL', { month: 'long' })
+  const currentMonthLabel = new Date().toLocaleString(locale, { month: 'long' })
 
   return (
     <div className="grid gap-4 mb-6"

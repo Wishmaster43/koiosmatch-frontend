@@ -30,6 +30,7 @@ const baseArgs = {
   selectedJobTypes: [], selectedCustomers: [], selectedLocations: [],
   fixedCustomers: [], fixedLocationIds: [], fixedDepartmentId: null, fixedCandidateId: null,
   seriesLabel: (key: string) => key,
+  locale: 'nl-NL',
 }
 
 describe('useShiftsChartData — SM-2YR bar count', () => {

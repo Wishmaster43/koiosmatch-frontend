@@ -1,19 +1,18 @@
 /**
- * WhatsApp dashboard presentational pieces — KPI cards, the activity chart and
- * the escalation list (+ date helpers). Extracted from WhatsAppPage. The
- * message feed (MessageFeed) moved to messagesTable/MessagesTable.tsx (WA-MSG-
- * TABLE-1, 25-08) — a real DataTable with drilldown gateways, per CEL-DOORKLIK-
- * CANON — and was removed from here.
+ * WhatsApp dashboard presentational pieces — KPI cards + the escalation list.
+ * Extracted from WhatsAppPage. The message feed (MessageFeed) moved to
+ * messagesTable/MessagesTable.tsx (WA-MSG-TABLE-1, 25-08) — a real DataTable
+ * with drilldown gateways, per CEL-DOORKLIK-CANON — and was removed from here.
+ * ActivityChart moved to its own ActivityChart.tsx (LANE-B, 25-08): it needs
+ * @/lib/datetime for the locale-aware axis label, which this file's own flat
+ * i18n test mock (components.test.tsx) cannot carry — see that file's header.
  */
 import { useTranslation } from 'react-i18next'
 import { AlertTriangle, Clock } from 'lucide-react'
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts'
-import ErrorBoundary from '@/components/ui/ErrorBoundary'
 import SoftChip from '@/components/ui/SoftChip'
 import { SectionTitle, Caption } from '@/components/ui/typography'
 import { useEscalationReasons } from './hooks/useEscalationReasons'
-import type { WaCandidate, WaEscalation, WaActivityDatum } from '@/types/whatsapp'
-import { fmtAxisDate } from './data/axisDate'
+import type { WaCandidate, WaEscalation } from '@/types/whatsapp'
 
 
 export const PAD  = (n: number) => String(n).padStart(2, '0')
@@ -115,62 +114,6 @@ export function EscalationList({ escalations, loading }: { escalations: WaEscala
           )
         })}
       </div>
-    </div>
-  )
-}
-
-
-export function ActivityChart({ data, loading }: { data: WaActivityDatum[]; loading?: boolean }) {
-  const { t } = useTranslation('whatsapp')
-  return (
-    <div style={{
-      background: 'var(--surface)', borderRadius: 14,
-      border: '1px solid var(--border)', padding: '16px 20px 12px',
-    }}>
-      <SectionTitle as="div" style={{ marginBottom: 16 }}>
-        {t('chartTitle')}
-      </SectionTitle>
-      {loading ? (
-        <div style={{ height: 180, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      color: 'var(--text-muted)', fontSize: 13 }}>{t('loading')}</div>
-      ) : (
-        // Local boundary — one broken chart must not take down the WhatsApp page.
-        <ErrorBoundary fallback={() => (
-          <div style={{ height: 180, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)', fontSize: 13 }}>—</div>
-        )}>
-        <ResponsiveContainer width="100%" height={180}>
-          <AreaChart data={data} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
-            <defs>
-              <linearGradient id="gradOut" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%"  stopColor="var(--color-secondary)" stopOpacity={0.25} />
-                <stop offset="95%" stopColor="var(--color-secondary)" stopOpacity={0} />
-              </linearGradient>
-              <linearGradient id="gradIn" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%"  stopColor="var(--color-success)" stopOpacity={0.25} />
-                <stop offset="95%" stopColor="var(--color-success)" stopOpacity={0} />
-              </linearGradient>
-            </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
-            <XAxis dataKey="date" tickFormatter={fmtAxisDate} tick={{ fontSize: 10, fill: 'var(--text-muted)' }}
-                   axisLine={false} tickLine={false} interval={1} />
-            <YAxis tick={{ fontSize: 10, fill: 'var(--text-muted)' }} axisLine={false} tickLine={false} />
-            <Tooltip
-              contentStyle={{ background: 'var(--surface)', border: '1px solid var(--border)',
-                              borderRadius: 8, fontSize: 12 }}
-              labelFormatter={(label) => fmtAxisDate(String(label))}
-            />
-            <Legend iconType="circle" iconSize={7}
-              formatter={v => <Caption as="span">
-                {v === 'outbound' ? t('outbound') : t('inbound')}
-              </Caption>} />
-            <Area type="monotone" dataKey="outbound" name="outbound"
-              stroke="var(--color-secondary)" fill="url(#gradOut)" strokeWidth={2} dot={false} isAnimationActive={false} />
-            <Area type="monotone" dataKey="inbound" name="inbound"
-              stroke="var(--color-success)" fill="url(#gradIn)" strokeWidth={2} dot={false} isAnimationActive={false} />
-          </AreaChart>
-        </ResponsiveContainer>
-        </ErrorBoundary>
-      )}
     </div>
   )
 }

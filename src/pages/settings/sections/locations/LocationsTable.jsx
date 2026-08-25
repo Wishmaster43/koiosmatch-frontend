@@ -10,12 +10,21 @@
  */
 import { useTranslation } from 'react-i18next'
 import { Pencil, Trash2 } from 'lucide-react'
+import { useDateFormat } from '@/lib/datetime'
 import GeocodeButton from '@/components/ui/GeocodeButton'
 import Spinner from '@/components/ui/Spinner'
 import Button from '@/components/ui/Button'
 import LocationBadge from './LocationBadge'
 
+// NECESSITY: these are shared `<th>`/`<td>` cell styles (not standalone text), spread
+// across every column of this table. Migrating them to the Caption/BodyText atoms
+// would mean restructuring every cell to wrap its content in a nested element — a
+// table-wide layout change unrelated to and riskier than this file's DATUM-1 date
+// fix; left as pre-existing debt (mirrors the documented allowlist in
+// typography.houseStyle.test.js for the same Caption/BodyText pattern elsewhere).
+// eslint-disable-next-line huisstijlLegacy/no-restricted-syntax
 const TH = { padding: '8px 14px', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textAlign: 'left', background: 'var(--hover-bg)', borderBottom: '1px solid var(--border)' }
+// eslint-disable-next-line huisstijlLegacy/no-restricted-syntax
 const TD = { padding: '12px 14px', fontSize: 13, color: 'var(--text)', borderBottom: '1px solid var(--hover-bg)' }
 
 // One address line from the structured fields, falling back to a legacy
@@ -32,6 +41,8 @@ function formatAddress(loc) {
 
 export default function LocationsTable({ isLocked, rows, page, totalPages, onPageChange, onEdit, onDelete, deletingId }) {
   const { t } = useTranslation(['settings', 'common'])
+  // DATUM-1: DD-MM-YYYY HH:mm in every app language, never a hardcoded locale.
+  const { formatDateTime } = useDateFormat()
 
   return (
     <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10, overflow: 'hidden' }}>
@@ -64,7 +75,7 @@ export default function LocationsTable({ isLocked, rows, page, totalPages, onPag
                 </td>
                 <td style={TD}>{formatAddress(loc)}</td>
                 <td style={{ ...TD, color: 'var(--text-muted)', fontSize: 12 }}>
-                  {loc.created_at ? new Date(loc.created_at).toLocaleString('nl-NL', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—'}
+                  {formatDateTime(loc.created_at)}
                 </td>
                 <td style={{ ...TD, textAlign: 'right' }}>
                   <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 6 }}>

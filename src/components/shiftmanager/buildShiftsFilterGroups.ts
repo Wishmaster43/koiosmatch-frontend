@@ -8,7 +8,7 @@ import { monthAbbr, SERIES, YEAR_OPTIONS } from "./shiftsChartsConfig"
 import type { BuildShiftsFilterGroupsArgs, ShiftFilterGroup } from '@/types/shiftmanager'
 
 export function buildShiftsFilterGroups({
-  t, seriesLabel, period, selectedYears, selectedMonths, visible,
+  t, locale, seriesLabel, period, selectedYears, selectedMonths, visible,
   selectedJobTypes, selectedCustomers, selectedLocations, filterOptions,
   fixedCustomers, fixedLocationIds,
   setPeriod, toggleYear, toggleMonth, setVisible,
@@ -40,7 +40,7 @@ export function buildShiftsFilterGroups({
       label:    t('charts.filters.months'),
       // selectedMonths is always the real set now (default = all 12), so no empty-means-all fallback.
       selected: selectedMonths.map(String),
-      options:  Array.from({ length: 12 }, (_, i) => ({ value: String(i + 1), label: monthAbbr(i) })),
+      options:  Array.from({ length: 12 }, (_, i) => ({ value: String(i + 1), label: monthAbbr(locale, i) })),
       onToggle: toggleMonth,
     })
   }

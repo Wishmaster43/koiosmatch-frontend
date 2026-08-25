@@ -5,6 +5,7 @@ import { buildShiftsFilterGroups } from './buildShiftsFilterGroups'
 const noop = () => {}
 const baseArgs = {
   t: (k) => k,
+  locale: 'nl-NL',
   seriesLabel: (k) => k,
   period: 'month',
   selectedYears: [2026],

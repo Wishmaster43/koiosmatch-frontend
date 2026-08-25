@@ -17,18 +17,21 @@ import { Mono, GroupLabel, SectionTitle, BodyText } from '@/components/ui/typogr
 import { useNumberFormat } from '@/lib/formatters'
 import { card } from './usageCardStyles'
 import { fieldSelectStyle } from '@/components/forms/fieldMetrics'
+// App-wide active locale (DATUM-1/LANE-B) — feeds the month-picker labels.
+import { useLocale } from '@/lib/datetime'
 
 // Connector key → brand label (proper nouns, not translatable).
 const CONNECTOR_LABELS = { sm: 'Shiftmanager', hf: 'HelloFlex', intus: 'Intus', elanza: 'Elanza', aelio: 'Aelio' }
 
 // Build the last 12 months as { value: 'YYYY-MM', label } — newest first.
-function buildMonths() {
+// `locale` is required (a pure module-scope helper never hardcodes nl-NL).
+function buildMonths(locale) {
   return Array.from({ length: 12 }, (_, i) => {
     const d = new Date()
     d.setDate(1)
     d.setMonth(d.getMonth() - i)
     const value = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
-    const label = d.toLocaleDateString('nl-NL', { month: 'long', year: 'numeric' })
+    const label = d.toLocaleDateString(locale, { month: 'long', year: 'numeric' })
     return { value, label }
   })
 }
@@ -37,7 +40,9 @@ export default function TenantUsageSettings() {
   const { t } = useTranslation('settings')
   const { formatNumber } = useNumberFormat()
   const { activeTenant } = useAuth()
-  const months = useMemo(() => buildMonths(), [])
+  const locale = useLocale()
+  // Rebuilt only when the app locale changes (§9: never a fresh array per render).
+  const months = useMemo(() => buildMonths(locale), [locale])
   const [month, setMonth] = useState(months[0].value) // current month by default
   const [usage, setUsage] = useState(null)
   const [phase, setPhase] = useState('loading') // loading | ready | error

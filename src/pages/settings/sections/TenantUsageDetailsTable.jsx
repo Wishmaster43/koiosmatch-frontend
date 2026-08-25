@@ -14,22 +14,26 @@ import TableScrollFrame from '@/components/ui/TableScrollFrame'
 import { useNumberFormat } from '@/lib/formatters'
 import { GroupLabel } from '@/components/ui/typography'
 import { th, td, numCell } from './usageCardStyles'
+// App-wide active locale (DATUM-1/LANE-B) — feeds the per-month row label.
+import { useLocale } from '@/lib/datetime'
 
 // Connector key -> brand label (proper nouns, not translatable), mirrors TenantUsageSettings.
 const CONNECTOR_LABELS = { sm: 'Shiftmanager', hf: 'HelloFlex', intus: 'Intus', elanza: 'Elanza', aelio: 'Aelio' }
 
 // Month value ('YYYY-MM') rendered as a locale month/year label, house convention
-// (no raw ISO fragments in the UI — DATUM-1).
-function monthLabel(value) {
+// (no raw ISO fragments in the UI — DATUM-1). `locale` is required (a pure
+// module-scope helper never hardcodes nl-NL).
+function monthLabel(value, locale) {
   if (!value) return '—'
   const [y, m] = value.split('-').map(Number)
   if (!y || !m) return value
-  return new Date(y, m - 1, 1).toLocaleDateString('nl-NL', { month: 'long', year: 'numeric' })
+  return new Date(y, m - 1, 1).toLocaleDateString(locale, { month: 'long', year: 'numeric' })
 }
 
 export default function TenantUsageDetailsTable({ history }) {
   const { t } = useTranslation('settings')
   const { formatNumber, formatCurrency } = useNumberFormat()
+  const locale = useLocale()
   const rows = Array.isArray(history) ? history : []
 
   // Totals across every month in the history — sums exactly what the columns
@@ -44,7 +48,7 @@ export default function TenantUsageDetailsTable({ history }) {
   // Columns show only the always-present monthly summary fields; the rest
   // (per-connector, per-module, purchase/sale/margin) lives in the expanded panel.
   const columns = [
-    { key: 'month', header: t('usage.details.colMonth'), render: (r) => <span style={{ textTransform: 'capitalize' }}>{monthLabel(r.month)}</span> },
+    { key: 'month', header: t('usage.details.colMonth'), render: (r) => <span style={{ textTransform: 'capitalize' }}>{monthLabel(r.month, locale)}</span> },
     { key: 'aiTokens', header: t('usage.details.colAiTokens'), align: 'right', render: (r) => formatNumber(r.ai?.tokens) },
     { key: 'aiCalls', header: t('usage.details.colAiCalls'), align: 'right', render: (r) => formatNumber(r.ai?.requests) },
     { key: 'workflowRuns', header: t('usage.details.colWorkflowRuns'), align: 'right', render: (r) => formatNumber(r.workflow_tokens?.total_module_runs) },

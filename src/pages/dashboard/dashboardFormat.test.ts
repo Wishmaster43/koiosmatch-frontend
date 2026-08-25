@@ -15,7 +15,7 @@ describe('fmtWhen · locale param', () => {
 
   it('defaults to nl-NL formatting when no locale is passed (unchanged output)', () => {
     const past = new Date(today.getFullYear() - 1, 0, 12).toISOString()
-    expect(fmtWhen(past)).toBe('12 jan')
+    expect(fmtWhen(past, 'nl-NL')).toBe('12 jan')
   })
 
   it('follows an explicit English locale for a past date', () => {
@@ -24,13 +24,14 @@ describe('fmtWhen · locale param', () => {
   })
 
   it("today's timestamp renders HH:mm regardless of locale (no month/day involved)", () => {
-    expect(fmtWhen(todayIso)).toMatch(/^\d{2}:\d{2}$/)
-    expect(fmtWhen(todayIso, 'en-GB')).toMatch(/^\d{2}:\d{2}$/)
+    // The time half is built from date parts, so it is byte-identical in every language.
+    expect(fmtWhen(todayIso, 'nl-NL')).toMatch(/^\d{2}:\d{2}$/)
+    expect(fmtWhen(todayIso, 'en-GB')).toBe(fmtWhen(todayIso, 'nl-NL'))
   })
 
   it('returns an empty string for missing/unparseable input', () => {
-    expect(fmtWhen(undefined)).toBe('')
-    expect(fmtWhen('not-a-date')).toBe('')
+    expect(fmtWhen(undefined, 'nl-NL')).toBe('')
+    expect(fmtWhen('not-a-date', 'nl-NL')).toBe('')
   })
 })
 

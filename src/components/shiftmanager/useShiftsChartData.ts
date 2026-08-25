@@ -30,7 +30,7 @@ export function useShiftsChartData({
   selectedYears, selectedMonths, period, visible,
   selectedJobTypes, selectedCustomers, selectedLocations,
   fixedCustomers, fixedLocationIds, fixedDepartmentId, fixedCandidateId,
-  seriesLabel, multiYearMetric,
+  seriesLabel, multiYearMetric, locale,
 }: {
   selectedYears: number[]
   selectedMonths: string[]
@@ -44,6 +44,8 @@ export function useShiftsChartData({
   fixedDepartmentId: string | null
   fixedCandidateId: string | null
   seriesLabel: (key: string) => string
+  // Active app locale (DATUM-1/LANE-B) — feeds the chart's month-abbreviation labels.
+  locale: string
   // SM-2YR: which single metric drives the chart/table when 2+ years are selected
   // (null/hidden falls back to the first visible series — see barSeries below).
   multiYearMetric?: string | null
@@ -135,7 +137,7 @@ export function useShiftsChartData({
     }
 
     return monthIndices.map((i) => {
-      const entry: ShiftsChartDatum = { label: monthAbbr(i), _monthIndex: i + 1 }
+      const entry: ShiftsChartDatum = { label: monthAbbr(locale, i), _monthIndex: i + 1 }
       selectedYears.forEach((year) => {
         const key = `${year}-${String(i + 1).padStart(2, "0")}`
         const row = byYearMonth.get(key) ?? ({} as ShiftMonthRow)
@@ -146,7 +148,7 @@ export function useShiftsChartData({
       })
       return entry
     })
-  }, [byYearMonth, selectedYears, selectedMonths, period])
+  }, [byYearMonth, selectedYears, selectedMonths, period, locale])
 
   const activeSeries = useMemo(() => SERIES.filter((s) => visible.includes(s.key)), [visible])
   const multiYear    = selectedYears.length > 1

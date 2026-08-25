@@ -31,6 +31,8 @@ import type { KpiSpec, DonutSpec } from "@/components/insights/InsightsRow"
 import type { ShiftsChartDatum, ShiftBar } from '@/types/shiftmanager'
 import { formatNumber } from '@/lib/formatters'
 import { useDateFormat } from '@/lib/datetime'
+import SegmentedControl from '@/components/ui/SegmentedControl'
+import { Caption } from '@/components/ui/typography'
 
 export default function ShiftsChartsBlock({
   filterKey         = 'shifts-charts',
@@ -52,9 +54,10 @@ export default function ShiftsChartsBlock({
   leadingDonuts?: DonutSpec[]
 }) {
   const { t } = useTranslation('shiftmanager')
-  // App-wide active locale (§5) — feeds the "last sync" timestamp below instead
-  // of a hardcoded 'nl-NL' toLocaleString.
-  const { formatDate } = useDateFormat()
+  // App-wide active locale (§5) — feeds the "last sync" timestamp below and the
+  // month-abbreviation labels in the chart data + filter groups, instead of a
+  // hardcoded 'nl-NL' toLocaleString.
+  const { formatDate, locale } = useDateFormat()
   // Stable series-label resolver (memoised so derived bars don't recompute each render).
   const seriesLabel = useCallback((key: string) => t(`charts.series.${key}`, { defaultValue: key }), [t])
 
@@ -88,7 +91,7 @@ export default function ShiftsChartsBlock({
       selectedYears, selectedMonths, period, visible,
       selectedJobTypes, selectedCustomers, selectedLocations,
       fixedCustomers, fixedLocationIds, fixedDepartmentId, fixedCandidateId,
-      seriesLabel, multiYearMetric: effectiveMultiYearMetric,
+      seriesLabel, multiYearMetric: effectiveMultiYearMetric, locale,
     })
 
   // Shift breakdown (klant/functie) + shift KPI cards (only when this block drives the
@@ -218,14 +221,14 @@ export default function ShiftsChartsBlock({
         value: JSON.stringify(filterState), selected: saved.map(s => s.id),
         saved, onSave: (name: string) => save(name, filterState), onLoad: applyFilterState, onDelete: remove, onSetDefault: setDefault },
       ...buildShiftsFilterGroups({
-        t, seriesLabel, period, selectedYears, selectedMonths, visible,
+        t, locale, seriesLabel, period, selectedYears, selectedMonths, visible,
         selectedJobTypes, selectedCustomers, selectedLocations, filterOptions,
         fixedCustomers, fixedLocationIds,
         setPeriod, toggleYear, toggleMonth, setVisible,
         setSelectedJobTypes, setSelectedCustomers, setSelectedLocations,
       }).map(g => ({ ...g, noChip: true })),
     ]
-  }, [t, seriesLabel, period, selectedYears, selectedMonths, visible, selectedJobTypes,
+  }, [t, locale, seriesLabel, period, selectedYears, selectedMonths, visible, selectedJobTypes,
       selectedCustomers, selectedLocations, filterOptions, fixedCustomers, fixedLocationIds,
       filterKey, saved, save, remove, setDefault, applyFilterState])
 
@@ -245,22 +248,18 @@ export default function ShiftsChartsBlock({
           {/* Data freshness + SYNC-1 sync button (left) · Uren/Diensten toggle (right) */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 0 8px', gap: 12 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+              <Caption as="span">
                 {lastSync && t('charts.lastSync', { time: formatDate(lastSync, { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) })}
-              </span>
+              </Caption>
               <SmSyncButton />
             </div>
-            <div style={{ display: 'inline-flex', border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden' }}>
-              {(['hours', 'count'] as const).map(u => (
-                <button key={u} type="button" onClick={() => setShiftUnit(u)}
-                  style={{ padding: '4px 12px', fontSize: 11, fontWeight: shiftUnit === u ? 600 : 400, border: 'none', cursor: 'pointer',
-                    background: shiftUnit === u ? 'var(--color-primary-bg)' : 'transparent',
-                    // Text-colour accent uses the AA-contrast text token, not the raw brand primary.
-                    color: shiftUnit === u ? 'var(--color-primary-text)' : 'var(--text-muted)' }}>
-                  {u === 'hours' ? t('charts.inHours') : t('charts.inShifts')}
-                </button>
-              ))}
-            </div>
+            {/* Uren/Diensten unit toggle — the shared compact SegmentedControl (§4 CHIP-TINT-1), never a hand-rolled pill button. */}
+            <SegmentedControl size="compact" ariaLabel={t('charts.unitToggleLabel')}
+              value={shiftUnit} onChange={v => setShiftUnit(v as 'hours' | 'count')}
+              options={[
+                { value: 'hours', label: t('charts.inHours') },
+                { value: 'count', label: t('charts.inShifts') },
+              ]} />
           </div>
           <InsightsRow donuts={donutRow} kpis={kpiRow} padding="0 0 16px" />
         </>
@@ -271,7 +270,7 @@ export default function ShiftsChartsBlock({
           visible series (avoids the years × series explosion). */}
       {multiYear && metricTabs.length > 1 && (
         <div className="mb-3 flex items-center gap-2 flex-wrap">
-          <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('charts.multiYearMetric')}</span>
+          <Caption as="span">{t('charts.multiYearMetric')}</Caption>
           <DrillTabs tabs={metricTabs} active={effectiveMultiYearMetric ?? ''} onChange={setMultiYearMetric} />
         </div>
       )}

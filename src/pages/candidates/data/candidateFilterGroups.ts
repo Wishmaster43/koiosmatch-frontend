@@ -5,6 +5,7 @@
  * Small fixed lookups render as OPEN checkbox lists; long lists stay dropdowns.
  */
 import type { Dispatch, SetStateAction } from 'react'
+import { ddmmyyyy } from '@/lib/localDate'
 import type { GeoFilter, DateRangeFilter } from '../hooks/useCandidateFilters'
 
 // Option rows arrive from several stats feeds — value/label may be undefined on
@@ -12,8 +13,10 @@ import type { GeoFilter, DateRangeFilter } from '../hooks/useCandidateFilters'
 interface Opt { value?: string | number; label?: string; count?: number; color?: string }
 type Tog = <T,>(set: Dispatch<SetStateAction<T[]>>) => (v: T) => void
 
-// DD-MM-YYYY (nl) for the period-chip label; echoes the input if unparseable.
-const fmtD = (s: string) => { const d = new Date(s); return isNaN(d.getTime()) ? s : d.toLocaleDateString('nl-NL') }
+// DD-MM-YYYY (DATUM-1) for the period-chip label; echoes the input if unparseable.
+// `ddmmyyyy` comes from lib/localDate, the init-free module (§0/DATUM-1) — this is a
+// pure module and must not drag in lib/datetime's i18n import.
+const fmtD = (s: string) => { const d = new Date(s); return isNaN(d.getTime()) ? s : ddmmyyyy(d) }
 
 interface BuildArgs {
   t: (k: string, o?: Record<string, unknown>) => string

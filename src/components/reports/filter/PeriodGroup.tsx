@@ -9,16 +9,20 @@ import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { ReportFilterGroup } from '@/types/reports'
 import { tintBg, tintBorder, chipInk } from '@/lib/tint'
+// App-wide active locale (DATUM-1/LANE-B) — feeds the month-grid labels.
+import { useLocale } from '@/lib/datetime'
 
 // Hoisted: an inline accent literal under background: false-fires the accent-fill selector.
 const ACCENT = 'var(--color-primary)'
 
-// Locale-aware short month name for index 0–11.
-const monthAbbr = (i: number) => new Date(2000, i, 1).toLocaleString('nl-NL', { month: 'short' })
+// Locale-aware short month name for index 0–11; `locale` is required (a pure
+// module-scope helper never hardcodes nl-NL or imports i18n).
+const monthAbbr = (locale: string, i: number) => new Date(2000, i, 1).toLocaleString(locale, { month: 'short' })
 const QUARTERS  = ['Q1','Q2','Q3','Q4']
 
 export default function PeriodGroup({ group }: { group: ReportFilterGroup }) {
   const { t } = useTranslation('common')
+  const locale = useLocale()
   const val = group.value ?? ''
 
   // Derive current granularity + year from value
@@ -126,7 +130,7 @@ export default function PeriodGroup({ group }: { group: ReportFilterGroup }) {
                          color:      active ? chipInk(ACCENT) : 'var(--text)',
                          border: active ? tintBorder(ACCENT, true) : '1px solid var(--border)',
                          fontWeight: active ? 600 : 400 }}>
-                {monthAbbr(i)}
+                {monthAbbr(locale, i)}
               </button>
             )
           })}

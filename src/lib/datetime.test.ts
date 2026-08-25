@@ -1,6 +1,23 @@
 import { describe, it, expect } from 'vitest'
 import { renderHook } from '@testing-library/react'
-import { useDateFormat, calcAge, daysUntilBirthday, toLocalIsoDate, humanizeIsoDates, daysSince } from './datetime'
+import { useDateFormat, calcAge, daysUntilBirthday, toLocalIsoDate, humanizeIsoDates, daysSince, ddmmyyyy, hhmm, hhmmss } from './datetime'
+
+// Direct guard for the house numeric-shape builders (DATUM-1): every existing
+// case above exercises formatDate/formatDateTime with a DAY ≥ 10 (30-06-2026),
+// which never proves the zero-pad step actually runs. This pins the single-digit
+// day/hour/minute/second case a fix-round audit found unguarded — `5-8-2026`
+// (a raw un-padded toLocaleDateString('nl-NL') output) must never come back.
+describe('ddmmyyyy / hhmm / hhmmss — zero-pad single-digit parts', () => {
+  it('pads a single-digit day and month', () => {
+    expect(ddmmyyyy(new Date(2026, 7, 5))).toBe('05-08-2026')
+  })
+  it('pads a single-digit hour and minute', () => {
+    expect(hhmm(new Date(2026, 7, 5, 3, 7))).toBe('03:07')
+  })
+  it('pads a single-digit hour, minute and second', () => {
+    expect(hhmmss(new Date(2026, 7, 5, 3, 7, 9))).toBe('03:07:09')
+  })
+})
 
 // Note: i18n is not initialised in tests → locale falls back to nl-NL (§3B).
 describe('useDateFormat', () => {

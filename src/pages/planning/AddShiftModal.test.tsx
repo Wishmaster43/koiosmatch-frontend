@@ -22,7 +22,11 @@ import userEvent from '@testing-library/user-event'
 import AddShiftModal from './AddShiftModal'
 
 vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string) => k }) }))
-vi.mock('@/lib/useFunctions', () => ({ useFunctions: () => ({ functions: ['Verzorgende IG', 'Helpende'], allowFreeEntry: false }) }))
+vi.mock('@/lib/useFunctions', () => ({ useFunctions: () => ({ functions: ['Verzorgende IG', 'Helpende'], functionOptions: ['Verzorgende IG', 'Helpende'].map(n => ({ value: n, label: n })), allowFreeEntry: false }) }))
+// `@/lib/datetime` transitively imports the real i18n bootstrap (module-scope
+// side effect) — mocked here so the react-i18next stub above stays effective,
+// mirroring PlanningPage.test.tsx / ShiftStaffingDrawer.test.tsx.
+vi.mock('@/lib/datetime', () => ({ useDateFormat: () => ({ locale: 'nl-NL' }) }))
 
 const mockCustomers   = vi.fn()
 const mockDepartments = vi.fn()

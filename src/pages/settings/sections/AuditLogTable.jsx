@@ -9,6 +9,7 @@
  */
 import { ChevronUp, ChevronDown as ChevronDn, Eye } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import { useDateFormat } from '@/lib/datetime'
 import { LogBadge, isAccessEvent, entityLabel } from './auditShared'
 import { buildDiffCells } from './auditDiffCells'
 import { Caption } from '@/components/ui/typography'
@@ -29,6 +30,8 @@ export default function AuditLogTable({ rows, sortCol, sortDir, onSort, onRowCli
   // Reuses the existing common.sort key for the sortable header's button tooltip
   // (mirrors DataTable's own sortable header — no new i18n keys needed).
   const { t: tCommon } = useTranslation('common')
+  // DATUM-1: DD-MM-YYYY date + HH:mm time in every app language, never a hardcoded locale.
+  const { formatDate, formatTime } = useDateFormat()
 
   // Sticky TH style — header stays visible while scrolling the table.
   const TH = (col) => ({
@@ -99,10 +102,10 @@ export default function AuditLogTable({ rows, sortCol, sortDir, onSort, onRowCli
                 onMouseEnter={e => (e.currentTarget.style.background = 'var(--hover-bg)')}
                 onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
                 <td style={{ ...TD, whiteSpace: 'nowrap', fontSize: 11, fontWeight: 500 }}>
-                  {new Date(entry.created_at).toLocaleDateString('nl-NL', { day: '2-digit', month: '2-digit', year: 'numeric' })}
+                  {formatDate(entry.created_at)}
                 </td>
                 <td style={{ ...TD, whiteSpace: 'nowrap' }}>
-                  <Caption>{new Date(entry.created_at).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' })}</Caption>
+                  <Caption>{formatTime(entry.created_at)}</Caption>
                 </td>
                 <td style={TD}>
                   {/* actor_label ("<name>-KoiosAI") wins over the human causer_name when present. */}

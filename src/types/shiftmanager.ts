@@ -203,6 +203,8 @@ export interface ShiftRow {
 // Arguments for the pure buildShiftsFilterGroups builder.
 export interface BuildShiftsFilterGroupsArgs {
   t: (key: string, opts?: Record<string, unknown>) => string
+  // Active app locale (DATUM-1/LANE-B) — feeds the month-abbreviation options.
+  locale: string
   seriesLabel: (key: string) => string
   period: string
   selectedYears: number[]

@@ -6,6 +6,7 @@ import { Fragment } from 'react'
 import { useTranslation } from 'react-i18next'
 import { X, Eye } from 'lucide-react'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
+import { useDateFormat } from '@/lib/datetime'
 import { KPI_KEYS, LogBadge, isAccessEvent, buildFieldDiff, entityLabel } from './auditShared'
 import { BodyText, GroupLabel, Caption, PageTitle } from '@/components/ui/typography'
 import Button from '@/components/ui/Button'
@@ -33,6 +34,8 @@ function DiffRow({ label, before, after }) {
 
 export function AuditDrawer({ entry, onClose }) {
   const { t } = useTranslation('settings')
+  // DATUM-1: DD-MM-YYYY HH:mm in every app language, never the browser's own locale.
+  const { formatDateTime } = useDateFormat()
   // Focus-trapped dialog (§6, WCAG 2.2 AA): Escape closes it, Tab stays inside,
   // focus returns to the triggering row on close — same behaviour as every other
   // drawer/modal in the app (RightDrawer et al.), which this one had drifted from.
@@ -298,9 +301,7 @@ export function AuditDrawer({ entry, onClose }) {
                 {/* actor_label ("<name>-KoiosAI") wins over the human causer_name when present. */}
                 <strong style={{ color: 'var(--text)' }}>{entry.actor_label ?? entry.causer_name ?? t('audit.system')}</strong>
                 {entry.causer_email && <span> · {entry.causer_email}</span>}
-                <span> · {new Date(entry.created_at).toLocaleString(undefined, {
-                  day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
-                })}</span>
+                <span> · {formatDateTime(entry.created_at)}</span>
               </div>
             </div>
             <Button variant="ghost" size="sm" iconOnly onClick={onClose} aria-label={t('common.close')}>

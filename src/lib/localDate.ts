@@ -28,6 +28,18 @@ export function toLocalIsoDate(d: Date): string {
   return `${year}-${month}-${day}`
 }
 
+// House numeric shapes (DATUM-1): DD-MM-YYYY and HH:mm, built from date parts so
+// no locale can reshape them. Live here, not in datetime.ts, so a PURE module
+// (no hook access) can render the canonical date shape without dragging in that
+// module's i18n import — datetime.ts re-exports these for its own hook formatters.
+const pad2 = (n: number) => String(n).padStart(2, '0')
+export const ddmmyyyy = (d: Date) => `${pad2(d.getDate())}-${pad2(d.getMonth() + 1)}-${d.getFullYear()}`
+export const hhmm = (d: Date) => `${pad2(d.getHours())}:${pad2(d.getMinutes())}`
+// HH:mm:ss — for the few surfaces where seconds matter (a workflow run's own
+// step timing, a jobs-board completion time). Same house-numeric contract as
+// ddmmyyyy/hhmm above: digits only, so no locale parameter is needed.
+export const hhmmss = (d: Date) => `${pad2(d.getHours())}:${pad2(d.getMinutes())}:${pad2(d.getSeconds())}`
+
 // DATUM-1 (Danny 13-08: a user must NEVER see a raw ISO date): rewrites every
 // embedded ISO date/timestamp inside a server-composed sentence to the house
 // DD-MM-YYYY (+ HH:mm) format — e.g. the AXIS preflight "tot 2027-08-08".
@@ -46,15 +58,16 @@ export function humanizeIsoDates(text: string | null | undefined): string {
 // builder for contexts without hook access (table parts, run/message logs).
 // They live HERE, not in datetime.ts, because that module's i18n import has an
 // initialising side effect (raw-key unit tests must stay side-effect-free).
-const DT_DATE = new Intl.DateTimeFormat('nl-NL', { day: '2-digit', month: '2-digit', year: 'numeric' })
-const DT_TIME = new Intl.DateTimeFormat('nl-NL', { hour: '2-digit', minute: '2-digit', hour12: false })
+// Built on ddmmyyyy/hhmm above, so this file states ONE principle: a numeric date is
+// assembled from date parts and no locale can reshape it (an Intl twin pinned to nl-NL
+// used to sit here and quietly disagreed with its own neighbours).
 export function formatDateOnly(dt?: string | number | Date | null): string {
   if (!dt) return '—'
   const d = new Date(dt)
-  return isNaN(d.getTime()) ? '—' : DT_DATE.format(d).replace(/\//g, '-')
+  return isNaN(d.getTime()) ? '—' : ddmmyyyy(d)
 }
 export function formatDateTimeStr(dt?: string | number | Date | null): string {
   if (!dt) return '—'
   const d = new Date(dt)
-  return isNaN(d.getTime()) ? '—' : `${DT_DATE.format(d).replace(/\//g, '-')} ${DT_TIME.format(d)}`
+  return isNaN(d.getTime()) ? '—' : `${ddmmyyyy(d)} ${hhmm(d)}`
 }

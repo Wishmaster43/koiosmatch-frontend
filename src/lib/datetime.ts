@@ -27,10 +27,11 @@ export { formatDateOnly, formatDateTimeStr } from './localDate'
 
 // House numeric shapes (DATUM-1): DD-MM-YYYY and HH:mm, built from date parts so no
 // locale can reshape them; only the option set that asks for pure digits takes this path.
+// Single-sourced from localDate.ts (the init-free module) — re-exported here so existing
+// importers of `ddmmyyyy`/`hhmm` from this module keep working.
+import { ddmmyyyy, hhmm } from './localDate'
+export { ddmmyyyy, hhmm, hhmmss } from './localDate'
 const NUMERIC_DATE: Intl.DateTimeFormatOptions = { day: '2-digit', month: '2-digit', year: 'numeric' }
-const pad2 = (n: number) => String(n).padStart(2, '0')
-export const ddmmyyyy = (d: Date) => `${pad2(d.getDate())}-${pad2(d.getMonth() + 1)}-${d.getFullYear()}`
-export const hhmm = (d: Date) => `${pad2(d.getHours())}:${pad2(d.getMinutes())}`
 const isNumericDate = (o: Intl.DateTimeFormatOptions) =>
   o.day === '2-digit' && o.month === '2-digit' && o.year === 'numeric' && !o.weekday && !o.hour && !o.minute && !o.era && !o.timeZoneName
 

@@ -54,6 +54,7 @@ import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import { X, Save, Search, Info } from 'lucide-react'
 import { formatDate } from './helpers'
+import { useDateFormat } from '@/lib/datetime'
 import { useFunctions } from '@/lib/useFunctions'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import { useShiftCustomers, useShiftDepartments, useShiftCandidateSearch } from './hooks/useShiftLookups'
@@ -70,13 +71,17 @@ import { Caption, SectionTitle } from '@/components/ui/typography'
 
 // ── Field helpers — house footprint (padding '8px 11px', fontSize 13,
 // borderRadius 8, §3A/§4) so this modal's inputs match every other create form,
-// even though its 3-column workspace stays its own (genuinely different) layout. ──
+// even though its 3-column workspace stays its own (genuinely different) layout.
+// eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- shared style OBJECT applied directly to native <input>/<textarea> elements throughout this file; a form field's own text colour must sit on the element itself, not on a wrapping BodyText atom
 const INPUT: CSSProperties = { padding: '8px 11px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8,
   outline: 'none', background: 'var(--bg)', color: 'var(--text)', width: '100%', boxSizing: 'border-box' }
 
 // ── Add Shift Modal ───────────────────────────────────────────────────────────
 export default function AddShiftModal({ date, onClose, onAdd }: { date: Date; onClose: () => void; onAdd: (shift: ShiftInput) => void }) {
   const { t } = useTranslation('planning')
+  // Active app locale (DATUM-1/LANE-B) — this modal is its own useDateFormat()
+  // call site, so the header date follows the tenant's app language, not Dutch.
+  const { locale } = useDateFormat()
   const [title,       setTitle]       = useState('')
   const [start,       setStart]       = useState('07:00')
   const [end,         setEnd]         = useState('15:00')
@@ -133,7 +138,7 @@ export default function AddShiftModal({ date, onClose, onAdd }: { date: Date; on
         <div style={{ display: 'flex', alignItems: 'center', flex: 1 }}>
           <div>
             <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)' }}>{t('addShift')}</span>
-            <span style={{ fontSize: 12, color: 'var(--text-muted)', marginLeft: 10 }}>{formatDate(date)}</span>
+            <span style={{ fontSize: 12, color: 'var(--text-muted)', marginLeft: 10 }}>{formatDate(date, locale)}</span>
           </div>
           <div style={{ marginLeft: 'auto', display: 'flex', gap: 8 }}>
             {/* PLANNING-PERSIST-1 (§3) — disabled + an honest title until a real save

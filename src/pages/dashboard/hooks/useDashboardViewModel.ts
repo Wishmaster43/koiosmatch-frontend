@@ -6,7 +6,9 @@
  * original inline useMemo blocks — no behaviour change.
  */
 import { useMemo } from 'react'
+import { useDateFormat } from '@/lib/datetime'
 import { initialsOf } from '@/lib/initials'
+import { useSeedLabel } from '@/lib/useSeedLabel'
 import type { ChartDatum } from '@/components/charts/chartTypes'
 import type { BarSeries } from '@/components/charts/WeeklyBarChartCard'
 import type { DashStats, DashOpp, DashData, TimeseriesPoint, TrendRow } from '@/types/dashboard'
@@ -48,14 +50,23 @@ export function useDashboardViewModel({
   activeType, hiddenBlocks, hiddenKpis, kpiOrder = {}, hasPlanning, valueInHours,
   onNavigate,
 }: UseDashboardViewModelArgs) {
+  // The feed timestamps carry a month NAME on any day but today, so they follow the
+  // app language (DATUM-1 keeps the numeric halves language-independent by itself).
+  const { locale } = useDateFormat()
+  // LOOKUP-I18N-1: seeded tenant-lookup labels render in the user's language;
+  // a tenant rename/creation passes through untouched.
+  const seedLabel = useSeedLabel()
+
   // Is a chart/list block visible for the active role, and not switched off in Settings?
   // K-173 fase 6 — every planning-gated block (shifts + the five v3 planning
   // feeds) shares one gate (PLANNING_BLOCKS), not a single 'block.shifts' literal.
   const vis = (id: string) => visibleBlock(activeType, id) && !hiddenBlocks.includes(id) && (!PLANNING_BLOCKS.has(id) || hasPlanning)
 
-  // Chart data: [{ name, value, color }] for the shared chart cards.
+  // Chart data: [{ name, value, color }] for the shared chart cards. LOOKUP-I18N-1:
+  // `name` (display) runs through seedLabel; `filterValue` stays the raw lookup
+  // value so a donut click still filters on it, never on the translated text.
   const statusData = useMemo(() =>
-    (stats?.by_status ?? []).map(o => { const v = o.value ?? o.status; const m = statusMeta(v); return { name: m.label, value: o.count ?? 0, color: m.color, filterValue: v } }).filter(d => d.value) as ChartDatum[], [stats, statusMeta])
+    (stats?.by_status ?? []).map(o => { const v = o.value ?? o.status; const m = statusMeta(v); return { name: seedLabel('statuses', { value: v, label: m.label }), value: o.count ?? 0, color: m.color, filterValue: v } }).filter(d => d.value) as ChartDatum[], [stats, statusMeta, seedLabel])
   const recruiterData = useMemo(() =>
     (stats?.by_owner ?? []).map(o => ({ name: o.name || '—', value: o.count ?? 0, filterValue: o.id ?? o.owner_id })).filter(d => d.value) as ChartDatum[], [stats])
   // Funnel bars: EVERY lookup phase shows, also at 0 — the count-only mapping hid
@@ -63,25 +74,26 @@ export function useDashboardViewModel({
   const funnelData = useMemo(() => {
     const counts = new Map((dash?.charts?.by_funnel ?? []).map(o => [String(o.value), o.count ?? 0]))
     return (funnelTypes as Array<{ value: string; label: string; color?: string }>).map(f => ({
-      name: f.label, value: counts.get(String(f.value)) ?? 0, color: f.color, filterValue: f.value,
+      name: seedLabel('funnelTypes', { value: f.value, label: f.label }), value: counts.get(String(f.value)) ?? 0, color: f.color, filterValue: f.value,
     })) as ChartDatum[]
-  }, [dash, funnelTypes])
+  }, [dash, funnelTypes, seedLabel])
   const oppStageData = useMemo(() =>
-    (opp?.by_stage ?? []).map(o => ({ name: o.label ?? humanize(o.key), value: Number(o.value ?? 0), color: o.color, filterValue: o.key })).filter(d => d.value) as ChartDatum[], [opp])
+    (opp?.by_stage ?? []).map(o => { const label = o.label ?? humanize(o.key); return { name: seedLabel('opportunityStages', { value: o.key, label }), value: Number(o.value ?? 0), color: o.color, filterValue: o.key } }).filter(d => d.value) as ChartDatum[], [opp, seedLabel])
 
   // Live feeds from GET /dashboard, mapped to the shapes the lists/charts render.
-  // Status/stage labels + colours come from the tenant lookups (never raw slugs).
+  // Status/stage labels + colours come from the tenant lookups (never raw slugs);
+  // LOOKUP-I18N-1 translates the seeded default, a tenant rename passes through.
   const recentCandidates = useMemo(() => (dash?.recent?.candidates ?? []).map(c => {
     const m = statusMeta(c.status_value)
     return { id: c.id, name: c.name, initials: initialsOf(c.name, '–'), role: c.role || '—',
-      status: m.label, statusColor: m.color, time: fmtWhen(c.last_activity_at) }
-  }), [dash, statusMeta])
+      status: seedLabel('statuses', { value: c.status_value, label: m.label }), statusColor: m.color, time: fmtWhen(c.last_activity_at, locale) }
+  }), [dash, statusMeta, seedLabel, locale])
 
   const recentApplications = useMemo(() => (dash?.recent?.applications ?? []).map(a => {
     const m = funnelMeta(a.stage_value)
     return { id: a.id, candidate: a.candidate_name || '—', vacancy: a.vacancy_title || '—',
-      status: m.label, statusColor: m.color, time: fmtWhen(a.created_at) }
-  }), [dash, funnelMeta])
+      status: seedLabel('funnelTypes', { value: a.stage_value, label: m.label }), statusColor: m.color, time: fmtWhen(a.created_at, locale) }
+  }), [dash, funnelMeta, seedLabel, locale])
 
   // KD11 (DASHP36) — the three sales-dashboard widget feeds, mapped to the shared
   // WidgetListBlock row shape. Each self-hides via WidgetListBlock when empty; the
@@ -93,16 +105,16 @@ export function useDashboardViewModel({
     // back to the customer so the row still means something, never blank.
     primary: m.candidate_name || m.customer_name || '—',
     secondary: m.candidate_name ? m.customer_name : undefined,
-    meta: fmtWhen(m.end_date),
+    meta: fmtWhen(m.end_date, locale),
     onClick: m.id != null ? () => onNavigate?.('matches', { open: m.id }) : undefined,
-  })), [dash, onNavigate])
+  })), [dash, onNavigate, locale])
 
   const staleVacanciesRows = useMemo(() => (dash?.stale_vacancies ?? []).map((v, i) => ({
     key: v.id ?? v.title ?? `row-${i}`,
     primary: v.title || '—',
-    meta: fmtWhen(v.published_at),
+    meta: fmtWhen(v.published_at, locale),
     onClick: v.id != null ? () => onNavigate?.('vacancies', { open: v.id }) : undefined,
-  })), [dash, onNavigate])
+  })), [dash, onNavigate, locale])
 
   const koiosSuggestionsRows = useMemo(() => (dash?.koios_suggestions ?? []).map((s, i) => ({
     key: s.vacancy_id ?? s.vacancy_title ?? `row-${i}`,
@@ -116,16 +128,16 @@ export function useDashboardViewModel({
 
   const recentLeads = useMemo(() => (dash?.recent?.leads ?? []).map(l => ({
     id: l.id, name: l.name, contact: l.contact_name || '—',
-    status: humanize(l.status_value), statusColor: 'var(--color-secondary)', time: fmtWhen(l.created_at),
-  })), [dash])
+    status: humanize(l.status_value), statusColor: 'var(--color-secondary)', time: fmtWhen(l.created_at, locale),
+  })), [dash, locale])
 
   const runs = useMemo(() => (dash?.ai_runs ?? []).map(r => ({
-    name: r.name || '—', time: fmtWhen(r.ran_at), ok: r.ok, n: r.processed, err: r.error,
-  })), [dash])
+    name: r.name ? seedLabel('workflowNames', { label: r.name }) : '—', time: fmtWhen(r.ran_at, locale), ok: r.ok, n: r.processed, err: r.error,
+  })), [dash, seedLabel, locale])
 
   const conversations = useMemo(() => (dash?.conversations ?? []).map(c => ({
-    name: c.name || '—', msg: c.last_message || '', time: fmtWhen(c.at),
-  })), [dash])
+    name: c.name || '—', msg: c.last_message || '', time: fmtWhen(c.at, locale),
+  })), [dash, locale])
 
   // Render the runs/conversations blocks on data presence — the backend already
   // gates these feeds per module (workflows/whatsapp), so this avoids a page-flag

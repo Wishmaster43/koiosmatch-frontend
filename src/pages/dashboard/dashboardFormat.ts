@@ -3,23 +3,23 @@
  * page, its view-model hook and its block components. Extracted from Dashboard.tsx
  * (§0.3 size split); behaviour identical to the original inline helpers.
  */
+import { hhmm } from '@/lib/localDate'
 
 // Turn a backend slug (status/funnel/stage value) into a readable label.
 export const humanize = (s?: unknown): string =>
   typeof s === 'string' && s ? s.charAt(0).toUpperCase() + s.slice(1).replace(/[_-]/g, ' ') : (s == null ? '—' : String(s))
 
-// Compact "when": today → HH:mm, otherwise a short locale-aware date (e.g. "12 jun").
-// `locale` defaults to 'nl-NL' for the current call site (useDashboardViewModel,
-// out of this file's scope) which doesn't yet thread the active locale through —
-// mirrors lib/formatters.ts's own non-React default (§11: house pattern for a
-// pure helper called outside a component). Pass the caller's useLocale()/
-// useDateFormat().locale explicitly once that call site is updated.
-export const fmtWhen = (iso?: string, locale: string = 'nl-NL') => {
+// Compact "when": today → HH:mm, otherwise a short date with the month name ("12 jun").
+// Two halves, two rules: the TIME is numeric, so it is built from date parts and reads
+// the same in every language (DATUM-1); the DATE carries a month NAME, so it follows the
+// app language. `locale` is therefore required — a default would silently render Dutch
+// month names on an English screen, which is exactly what it did before 25-08.
+export const fmtWhen = (iso: string | undefined, locale: string) => {
   if (!iso) return ''
   const d = new Date(iso)
   if (isNaN(d.getTime())) return ''
   return d.toDateString() === new Date().toDateString()
-    ? d.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' })
+    ? hhmm(d)
     : d.toLocaleDateString(locale, { day: 'numeric', month: 'short' })
 }
 

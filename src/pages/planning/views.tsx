@@ -3,10 +3,11 @@
  * calendar. Presentational: each takes props (current/shifts/today/onDayClick) and
  * renders cells via the shared ShiftPill. Extracted from PlanningPage.
  */
+import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { MouseEvent } from 'react'
 import { Clock, MapPin, User } from 'lucide-react'
-import { isSameDay, WEEKDAYS_MON, formatDate } from './helpers'
+import { isSameDay, weekdaysMon, formatDate } from './helpers'
 import { interactive } from '@/lib/a11y'
 import Button from '@/components/ui/Button'
 import type { Shift } from '@/types/planning'
@@ -15,7 +16,11 @@ import { GroupLabel, Caption, SectionTitle } from '@/components/ui/typography'
 
 // onShiftClick (SHIFT-STAFF-1): opens the real staffing drawer for that one
 // shift — optional so every view keeps working before it's wired everywhere.
-interface ViewProps { current: Date; shifts: Shift[]; today: Date; onDayClick: (date: Date) => void; onShiftClick?: (id: Shift['id']) => void }
+// `locale` (DATUM-1/LANE-B) comes from the page's own useDateFormat() — a prop,
+// not a fresh useLocale() import here, so this purely presentational file stays
+// free of @/lib/datetime's i18n-bootstrap side effect (mirrors MatchModal's
+// mocking precedent: the ONE useDateFormat() call site carries the locale).
+interface ViewProps { current: Date; shifts: Shift[]; today: Date; locale: string; onDayClick: (date: Date) => void; onShiftClick?: (id: Shift['id']) => void }
 
 // ── Shift pill ────────────────────────────────────────────────────────────────
 function ShiftPill({ shift, small, onClick }: { shift: Shift; small?: boolean; onClick?: (e: MouseEvent) => void }) {
@@ -45,7 +50,7 @@ function ShiftPill({ shift, small, onClick }: { shift: Shift; small?: boolean; o
 }
 
 // ── Month view ────────────────────────────────────────────────────────────────
-export function MonthView({ current, shifts, today, onDayClick, onShiftClick }: ViewProps) {
+export function MonthView({ current, shifts, today, locale, onDayClick, onShiftClick }: ViewProps) {
   const { t } = useTranslation('planning')
   const year  = current.getFullYear()
   const month = current.getMonth()
@@ -69,7 +74,8 @@ export function MonthView({ current, shifts, today, onDayClick, onShiftClick }: 
 
   const weeks: Array<Array<{ date: Date; outside: boolean }>> = []
   for (let i = 0; i < days.length; i += 7) weeks.push(days.slice(i, i + 7))
-  const WEEK_DAYS = WEEKDAYS_MON
+  // Memoised on [locale] (§9) — never a fresh array every render.
+  const WEEK_DAYS = useMemo(() => weekdaysMon(locale), [locale])
 
   return (
     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
@@ -123,7 +129,7 @@ export function MonthView({ current, shifts, today, onDayClick, onShiftClick }: 
 }
 
 // ── Week view ─────────────────────────────────────────────────────────────────
-export function WeekView({ current, shifts, today, onDayClick, onShiftClick }: ViewProps) {
+export function WeekView({ current, shifts, today, locale, onDayClick, onShiftClick }: ViewProps) {
   const startOfWeek = new Date(current)
   const dow = (current.getDay() + 6) % 7
   startOfWeek.setDate(current.getDate() - dow)
@@ -132,7 +138,8 @@ export function WeekView({ current, shifts, today, onDayClick, onShiftClick }: V
     d.setDate(startOfWeek.getDate() + i)
     return d
   })
-  const WEEK_LABELS = WEEKDAYS_MON
+  // Memoised on [locale] (§9) — never a fresh array every render.
+  const WEEK_LABELS = useMemo(() => weekdaysMon(locale), [locale])
 
   return (
     <div style={{ flex: 1, overflow: 'auto' }}>
@@ -166,7 +173,7 @@ export function WeekView({ current, shifts, today, onDayClick, onShiftClick }: V
 }
 
 // ── Day view ──────────────────────────────────────────────────────────────────
-export function DayView({ current, shifts, today, onDayClick, onShiftClick }: ViewProps) {
+export function DayView({ current, shifts, today, locale, onDayClick, onShiftClick }: ViewProps) {
   const { t } = useTranslation('planning')
   const dayShifts = shifts.filter(s => isSameDay(s.date, current))
   const isToday = isSameDay(current, today)
@@ -176,7 +183,7 @@ export function DayView({ current, shifts, today, onDayClick, onShiftClick }: Vi
       <div style={{ padding: '16px 0', borderBottom: '1px solid var(--border)', marginBottom: 16 }}>
         <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--text)' }}>
           {isToday && <span style={{ color: 'var(--color-primary-text)', marginRight: 8 }}>{t('today')} —</span>}
-          {formatDate(current)}
+          {formatDate(current, locale)}
         </div>
       </div>
 
@@ -235,7 +242,7 @@ export function DayView({ current, shifts, today, onDayClick, onShiftClick }: Vi
 }
 
 // ── List view ─────────────────────────────────────────────────────────────────
-export function ListView({ shifts, today, onDayClick, onShiftClick }: Omit<ViewProps, 'current'>) {
+export function ListView({ shifts, today, locale, onDayClick, onShiftClick }: Omit<ViewProps, 'current'>) {
   const { t } = useTranslation('planning')
   const sorted = [...shifts].sort((a, b) => a.date.getTime() - b.date.getTime())
   const grouped: Record<string, { date: Date; shifts: Shift[] }> = {}
@@ -261,7 +268,7 @@ export function ListView({ shifts, today, onDayClick, onShiftClick }: Omit<ViewP
               <span style={{ fontSize: 13, fontWeight: 700,
                 // Text-colour accent uses the AA-contrast text token, not the raw brand primary.
                 color: isToday ? 'var(--color-primary-text)' : 'var(--text)' }}>
-                {isToday ? `${t('today')} — ` : ''}{formatDate(date)}
+                {isToday ? `${t('today')} — ` : ''}{formatDate(date, locale)}
               </span>
               <Button variant="secondary" size="sm" onClick={() => onDayClick(date)} style={{ marginLeft: 'auto' }}>
                 + {t('add')}

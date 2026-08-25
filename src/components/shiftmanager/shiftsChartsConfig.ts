@@ -4,6 +4,7 @@
  * years with their per-year opacity, and the quarter → months mapping.
  */
 import type { ShiftSeries } from '@/types/shiftmanager'
+import { tint } from '@/lib/tint'
 
 // Series key + colour; labels come from i18n via t('charts.series.<key>').
 // Brand-aligned palette (Danny: black for Totaal is niet mooi): Totaal = brand blue,
@@ -19,7 +20,9 @@ export const SERIES: ShiftSeries[] = [
 /* eslint-enable no-restricted-syntax */
 
 // Locale-aware short month name for index 0–11 (used for chart axis labels).
-export const monthAbbr = (i: number) => new Date(2000, i, 1).toLocaleString('nl-NL', { month: "short" })
+// `locale` is required (DATUM-1/LANE-B): a pure module-scope helper never
+// hardcodes nl-NL or imports i18n — callers pass the active app locale.
+export const monthAbbr = (locale: string, i: number) => new Date(2000, i, 1).toLocaleString(locale, { month: "short" })
 
 export const CURRENT_YEAR = new Date().getFullYear()
 export const YEAR_OPTIONS = [CURRENT_YEAR - 2, CURRENT_YEAR - 1, CURRENT_YEAR]
@@ -34,7 +37,9 @@ export const YEAR_OPACITY = [1, 0.55, 0.3]
 export function yearTint(color: string, rank: number): string {
   if (rank <= 0) return color
   const pct = Math.round((YEAR_OPACITY[rank] ?? 0.3) * 100)
-  return `color-mix(in srgb, ${color} ${pct}%, transparent)`
+  // Arbitrary-percentage tint (lib/tint's own recipe) — an older year's rank
+  // needs a variable opacity, not the fixed §4 chip pair (10/33).
+  return tint(color, pct)
 }
 
 export const QUARTERS = [

@@ -10,6 +10,9 @@ import { useState, useEffect, useMemo, useId } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Search } from 'lucide-react'
 import { useRightPanel } from '@/context/RightPanelContext'
+// App-wide active locale (DATUM-1/LANE-B) — feeds the month-dropdown labels.
+import { useLocale } from '@/lib/datetime'
+import { Caption } from '@/components/ui/typography'
 import PaginationBar     from '../ui/PaginationBar'
 // Searchable combobox replaces the bare native <select> (Danny 08-08, §4) — same
 // fixed-vocabulary picker convention as ReportsPage's period picker.
@@ -24,6 +27,7 @@ import type { EnrichedOrderRow } from '@/types/shiftmanager'
 
 export default function OrdersTable() {
   const { t } = useTranslation('shiftmanager')
+  const locale = useLocale()
   const COLS = COL_KEYS.map(c => ({ ...c, label: t(`orders.cols.${c.tKey}`) }))
 
   // UI filter state (the data hook owns rows + paging).
@@ -76,7 +80,7 @@ export default function OrdersTable() {
   // Locale-aware "mon yyyy" label for the month dropdown.
   const formatMonth = (m: string) => {
     const [y, mo] = m.split('-')
-    return `${new Date(Number(y), Number(mo) - 1, 1).toLocaleString('nl-NL', { month: 'short' })} ${y}`
+    return `${new Date(Number(y), Number(mo) - 1, 1).toLocaleString(locale, { month: 'short' })} ${y}`
   }
 
   return (
@@ -100,6 +104,7 @@ export default function OrdersTable() {
                                        transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
             <input value={search} onChange={e => setSearch(e.target.value)}
               placeholder={t('orders.search')}
+              // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- a native <input>'s own text colour must sit on the element itself (its value has no child node a BodyText atom could wrap); this is field chrome, not prose
               style={{ height: 34, width: 240, paddingLeft: 32, paddingRight: 12, fontSize: 13,
                        border: '1px solid var(--border)', borderRadius: 8, outline: 'none', color: 'var(--text)' }} />
           </div>
@@ -141,8 +146,8 @@ export default function OrdersTable() {
                   style={{ cursor: 'pointer', background: selected?.id === r.id ? 'var(--color-secondary-bg)' : undefined }}
                   onMouseEnter={e => { if (selected?.id !== r.id) e.currentTarget.style.background = 'var(--hover-bg)' }}
                   onMouseLeave={e => { if (selected?.id !== r.id) e.currentTarget.style.background = 'transparent' }}>
-                  <td style={{ ...TD, fontFamily: 'monospace', fontSize: 11, color: 'var(--text-muted)' }}>
-                    {dash(r.external_id)}
+                  <td style={{ ...TD, fontFamily: 'monospace' }}>
+                    <Caption as="span">{dash(r.external_id)}</Caption>
                   </td>
                   <td style={{ ...TD, fontFamily: 'monospace', fontSize: 11 }}>
                     {dash(r.order_ref)}
@@ -163,8 +168,8 @@ export default function OrdersTable() {
                   <td style={{ ...TD, textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>
                     {formatHours(r.worked_hours_customer)}
                   </td>
-                  <td style={{ ...TD, fontSize: 11, color: 'var(--text-muted)' }}>{dash(r.cost_center_candidate)}</td>
-                  <td style={{ ...TD, fontSize: 11, color: 'var(--text-muted)' }}>{dash(r.cost_center_customer)}</td>
+                  <td style={TD}><Caption as="span">{dash(r.cost_center_candidate)}</Caption></td>
+                  <td style={TD}><Caption as="span">{dash(r.cost_center_customer)}</Caption></td>
                 </tr>
               ))}
             </tbody>
