@@ -160,7 +160,8 @@
     "openShiftsList": "Open shifts",
     "occupancyByCustomer": "Occupancy by customer",
     "shiftStatusToday": "Shift status today",
-    "shiftsUnconfirmedList": "Unconfirmed shifts"
+    "shiftsUnconfirmedList": "Unconfirmed shifts",
+    "waWebQueue": "WhatsApp Web queue"
   },
   "koiosPerformance": {
     "title": "Koios AI performance",
@@ -368,6 +369,13 @@
     "coverage": "{{filled}} of {{shifts}} filled",
     "openPlanning": "Go to planning",
     "today": "Today",
-    "noTime": "No time"
+    "noTime": "No time",
+    "waWebQueue": {
+      "inQueue": "In queue",
+      "sending": "Sending",
+      "failed": "Failed",
+      "estDrain": "Estimated drain: {{hours}} hours",
+      "numberRow": "{{inQueue}} in queue (limit {{rateLimit}}/h)"
+    }
   }
 }

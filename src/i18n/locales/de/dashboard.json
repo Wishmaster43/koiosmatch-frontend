@@ -160,7 +160,8 @@
     "openShiftsList": "Offene Schichten",
     "occupancyByCustomer": "Auslastung pro Kunde",
     "shiftStatusToday": "Schichtstatus heute",
-    "shiftsUnconfirmedList": "Unbestätigte Schichten"
+    "shiftsUnconfirmedList": "Unbestätigte Schichten",
+    "waWebQueue": "WhatsApp Web Warteschlange"
   },
   "action": {
     "allCandidates": "Alle Kandidaten",
@@ -368,6 +369,13 @@
     "coverage": "{{filled}} von {{shifts}} besetzt",
     "openPlanning": "Zur Planung",
     "today": "Heute",
-    "noTime": "Keine Zeit"
+    "noTime": "Keine Zeit",
+    "waWebQueue": {
+      "inQueue": "In Warteschlange",
+      "sending": "Wird gesendet",
+      "failed": "Fehlgeschlagen",
+      "estDrain": "Geschätzte Abarbeitungszeit: {{hours}} Std.",
+      "numberRow": "{{inQueue}} in Warteschlange (Limit {{rateLimit}}/Std.)"
+    }
   }
 }

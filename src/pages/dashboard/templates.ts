@@ -78,7 +78,7 @@ export const DASHBOARD_TEMPLATES: Record<DashboardType, string[]> = {
   // block list.
   recruitment_manager: ['*'],
   backoffice: ['chart.status', 'chart.funnel', 'list.applications', 'list.runs',
-    'block.matchesByContractType', 'block.placementsStartedEndedToday', 'block.documentsAttention', 'block.couplingErrorsList', 'block.placementsStartedToday'],
+    'block.matchesByContractType', 'block.placementsStartedEndedToday', 'block.documentsAttention', 'block.couplingErrorsList', 'block.placementsStartedToday', 'block.waWebQueue'],
   sales: ['chart.oppStage', 'chart.status', 'list.leads'],
   // KD11 — the two sales-dashboard TEMPLATES on the DASHP36 widget-feed keys
   // (expiring_matches/stale_vacancies/koios_suggestions), equal footprint via the
@@ -179,6 +179,8 @@ export const BLOCK_LABEL_KEY: Record<string, string> = {
   'block.occupancyByCustomer': 'block.occupancyByCustomer',
   'block.shiftStatusToday': 'block.shiftStatusToday',
   'block.shiftsUnconfirmedList': 'block.shiftsUnconfirmedList',
+  // K-193 fase 2b D — WhatsApp Web queue tile (backoffice template).
+  'block.waWebQueue': 'block.waWebQueue',
 }
 
 // Is a chart/list block visible for the active dashboard type?

@@ -7,6 +7,7 @@ import FillRateByBranchBar from './FillRateByBranchBar'
 import DocumentsAttentionTable from './DocumentsAttentionTable'
 import CouplingErrorsList from './CouplingErrorsList'
 import PlacementsStartedTodayTable from './PlacementsStartedTodayTable'
+import WaWebQueueTile from './WaWebQueueTile'
 
 export const OPS_TILES: FeedTileEntry[] = [
   {
@@ -51,5 +52,16 @@ export const OPS_TILES: FeedTileEntry[] = [
     span: 2,
     hasData: arrayFeed('placements_started_today'),
     render: (dash, ctx) => <PlacementsStartedTodayTable rows={dash.placements_started_today!} onNavigate={ctx.onNavigate} />,
+  },
+  {
+    blockId: 'block.waWebQueue',
+    feedKey: 'wa_web_queue',
+    // Custom predicate: the feed is one object (not an array) — visible when a
+    // device is connected or the queue actually holds/has held activity.
+    hasData: (dash) => {
+      const f = dash.wa_web_queue
+      return !!f && (f.devices > 0 || f.in_queue + f.sending + f.failed > 0)
+    },
+    render: (dash, ctx) => <WaWebQueueTile feed={dash.wa_web_queue!} onNavigate={ctx.onNavigate} />,
   },
 ]

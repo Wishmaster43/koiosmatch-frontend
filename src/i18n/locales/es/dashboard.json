@@ -160,7 +160,8 @@
     "openShiftsList": "Turnos abiertos",
     "occupancyByCustomer": "Ocupación por cliente",
     "shiftStatusToday": "Estado de turnos hoy",
-    "shiftsUnconfirmedList": "Turnos sin confirmar"
+    "shiftsUnconfirmedList": "Turnos sin confirmar",
+    "waWebQueue": "Cola de WhatsApp Web"
   },
   "action": {
     "allCandidates": "Todos los candidatos",
@@ -368,6 +369,13 @@
     "coverage": "{{filled}} de {{shifts}} cubierto",
     "openPlanning": "Ir a planificación",
     "today": "Hoy",
-    "noTime": "Sin hora"
+    "noTime": "Sin hora",
+    "waWebQueue": {
+      "inQueue": "En cola",
+      "sending": "Enviando",
+      "failed": "Fallido",
+      "estDrain": "Tiempo estimado: {{hours}} h",
+      "numberRow": "{{inQueue}} en cola (límite {{rateLimit}}/h)"
+    }
   }
 }

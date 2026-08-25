@@ -11,7 +11,7 @@ vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string) => k }
 vi.mock('@/lib/datetime', () => ({ useDateFormat: () => ({ formatDate: (v: string) => v, formatDateTime: (v: string) => v }) }))
 
 describe('OPS_TILES registry', () => {
-  it('registers all six ops tiles', () => {
+  it('registers all seven ops tiles', () => {
     expect(OPS_TILES.map(e => e.feedKey)).toEqual([
       'matches_by_contract_type',
       'placements_started_ended_today',
@@ -19,6 +19,7 @@ describe('OPS_TILES registry', () => {
       'documents_attention',
       'coupling_errors_list',
       'placements_started_today',
+      'wa_web_queue',
     ])
   })
 
@@ -31,6 +32,7 @@ describe('OPS_TILES registry', () => {
       documents_attention: [{ candidate_id: 'c1', name: 'A', issue: 'missing_cv', expires_at: null, days_left: null }],
       coupling_errors_list: [{ entity_type: 'candidate', entity_id: 'c1', entity_label: 'A', system: 'shiftmanager', error: null, synced_at: null }],
       placements_started_today: [{ match_id: 'm1', candidate: 'A', customer: null, contract_ok: true, document_ok: true, koppeling_ok: true }],
+      wa_web_queue: { in_queue: 1, sending: 0, failed: 0, est_drain_hours: null, devices: 1, numbers: [] },
     }
     const emptyFixtures: Record<string, unknown> = {
       matches_by_contract_type: [],
@@ -39,6 +41,7 @@ describe('OPS_TILES registry', () => {
       documents_attention: [],
       coupling_errors_list: [],
       placements_started_today: [],
+      wa_web_queue: { in_queue: 0, sending: 0, failed: 0, est_drain_hours: null, devices: 0, numbers: [] },
     }
     for (const entry of OPS_TILES) {
       expect(entry.hasData(emptyDash)).toBe(false)

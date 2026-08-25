@@ -160,7 +160,8 @@
     "openShiftsList": "Open diensten",
     "occupancyByCustomer": "Bezettingsgraad per klant",
     "shiftStatusToday": "Status diensten vandaag",
-    "shiftsUnconfirmedList": "Onbevestigde diensten"
+    "shiftsUnconfirmedList": "Onbevestigde diensten",
+    "waWebQueue": "WhatsApp Web wachtrij"
   },
   "action": {
     "allCandidates": "Alle kandidaten",
@@ -368,6 +369,13 @@
     "coverage": "{{filled}} van {{shifts}} gevuld",
     "openPlanning": "Naar planning",
     "today": "Vandaag",
-    "noTime": "Geen tijd"
+    "noTime": "Geen tijd",
+    "waWebQueue": {
+      "inQueue": "In wachtrij",
+      "sending": "Wordt verzonden",
+      "failed": "Mislukt",
+      "estDrain": "Verwachte doorlooptijd: {{hours}} uur",
+      "numberRow": "{{inQueue}} in wachtrij (limiet {{rateLimit}}/u)"
+    }
   }
 }

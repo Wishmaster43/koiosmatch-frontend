@@ -114,6 +114,12 @@ export interface OccupancyByCustomerRow { label: string; shifts: number; filled:
 export interface ShiftStatusTodayRow { status: string; count: number }
 export interface ShiftUnconfirmedRow { schedule_id: string; candidate_id: string; candidate: string | null; shift_start: string | null; order_title: string | null }
 
+// K-193 fase 2b D — WhatsApp Web send-queue feed (CONTRACT f293cfec). Presence-based:
+// only present with module whatsapp_web + page.whatsapp; absent otherwise (not `[]`).
+// est_drain_hours null = no device connected (queue cannot drain).
+export interface WaWebQueueNumberRow { number_id: string; label: string | null; rate_limit: number; in_queue: number; est_drain: number | null }
+export interface WaWebQueueFeed { in_queue: number; sending: number; failed: number; est_drain_hours: number | null; devices: number; numbers: WaWebQueueNumberRow[] }
+
 // GET /dashboard (single summary call).
 export interface DashData {
   charts?: { by_funnel?: StatItem[]; timeseries?: Record<string, TimeseriesPoint[] | undefined> }
@@ -175,5 +181,7 @@ export interface DashData {
   occupancy_by_customer?: OccupancyByCustomerRow[]
   shift_status_today?: ShiftStatusTodayRow[]
   shifts_unconfirmed_list?: ShiftUnconfirmedRow[]
+  // K-193 fase 2b D — WhatsApp Web queue tile (blocks/ops/WaWebQueueTile.tsx).
+  wa_web_queue?: WaWebQueueFeed
   [k: string]: unknown
 }

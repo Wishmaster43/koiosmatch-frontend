@@ -160,7 +160,8 @@
     "openShiftsList": "Postes ouverts",
     "occupancyByCustomer": "Taux d'occupation par client",
     "shiftStatusToday": "Statut des postes aujourd'hui",
-    "shiftsUnconfirmedList": "Postes non confirmés"
+    "shiftsUnconfirmedList": "Postes non confirmés",
+    "waWebQueue": "File WhatsApp Web"
   },
   "action": {
     "allCandidates": "Tous les candidats",
@@ -368,6 +369,13 @@
     "coverage": "{{filled}} sur {{shifts}} pourvu",
     "openPlanning": "Vers la planification",
     "today": "Aujourd'hui",
-    "noTime": "Aucune heure"
+    "noTime": "Aucune heure",
+    "waWebQueue": {
+      "inQueue": "En file",
+      "sending": "Envoi en cours",
+      "failed": "Échoué",
+      "estDrain": "Temps de traitement estimé : {{hours}} h",
+      "numberRow": "{{inQueue}} en file (limite {{rateLimit}}/h)"
+    }
   }
 }
