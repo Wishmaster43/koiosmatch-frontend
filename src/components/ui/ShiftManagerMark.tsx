@@ -1,5 +1,3 @@
-import type { SVGProps } from 'react'
-
 /**
  * ShiftManagerMark — the red hexagon mark used for the native ShiftManager (SM)
  * workflow modules in the builder. Inline SVG so it scales crisply and tints via
@@ -10,6 +8,8 @@ import type { SVGProps } from 'react'
  * Note: hand-traced approximation of the mark — swap the two <path> definitions
  * for the official vector when available; nothing else needs to change.
  */
+import type { SVGProps } from 'react'
+
 // eslint-disable-next-line no-restricted-syntax -- DATA: Shiftmanager brand-mark colour, must match their logo exactly, not a themeable UI colour
 const SM_RED = '#E11D2A'
 

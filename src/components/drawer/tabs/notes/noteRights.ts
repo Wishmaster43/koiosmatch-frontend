@@ -2,7 +2,8 @@
  * noteRights — who may edit ONE note, and what counts as a backend-written event.
  *
  * Lifted out of NotesTab when the per-note second-screen editor
- * (NOTITIE-POPOUT-URL-1, Danny 11-08 "zet het notitie-id in de URL") had to apply
+ * (NOTITIE-POPOUT-URL-1, Danny 11-08: "zet het notitie-id in de URL" — put the
+ * note id in the URL) had to apply
  * the SAME gate on its own route. A URL is pasteable and shareable, so that window
  * decides for itself whether the note it was pointed at may be edited there — and
  * it must decide it exactly like the list does, or one surface offers a pencil the

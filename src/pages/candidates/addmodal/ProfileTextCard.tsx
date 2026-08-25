@@ -1,16 +1,18 @@
 /**
  * ProfileTextCard — the candidate's free-text "profile text" (summary), as a
- * collapsed ghost affordance (Danny 02-08: "bij popup Nieuwe kandidaat ...
- * moet altijd een tekstveld aanwezig zijn zoals we hebben bij + match!!").
- * Reuses the candidate drawer's own `profile.summary` label — never a second
- * "profile text" key — and the shared CollapsibleRichText block (components/ui)
- * so this create form gets the exact same low-height, always-present shape as
- * the +Match "Opmerkingen" card. Sits LEFT on the vestiging row (Danny 05-08:
- * "profiel txt op 1 lijn met vestiging ... profiel txt links zoals we ook
- * hebben bij + match") — no longer full-width; the parent grid (AddCandidateModal,
- * built via the shared `modalColumns` convention) auto-places this card next to
- * BranchesCard, mirroring the +Match modal's own left text column. Own local
- * state (this modal has no form-level hook to own it, unlike the match form).
+ * collapsed ghost affordance (Danny 02-08, verbatim: "…moet altijd…" — a text
+ * field must always be present in the New candidate popup, exactly like we
+ * have it on + Match). Reuses the candidate drawer's own `profile.summary`
+ * label — never a second "profile text" key — and the shared
+ * CollapsibleRichText block (components/ui) so this create form gets the
+ * exact same low-height, always-present shape as the +Match "Opmerkingen"
+ * ("Remarks") card. Sits LEFT on the branch row (Danny 05-08, verbatim:
+ * "…profiel txt links…" — the profile text sits on one line with the
+ * branch, profile text on the left, just like on + Match) — no longer
+ * full-width; the parent grid (AddCandidateModal, built via the shared
+ * `modalColumns` convention) auto-places this card next to BranchesCard,
+ * mirroring the +Match modal's own left text column. Own local state (this
+ * modal has no form-level hook to own it, unlike the match form).
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'

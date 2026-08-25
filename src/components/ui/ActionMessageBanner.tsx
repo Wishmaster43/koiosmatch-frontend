@@ -1,3 +1,9 @@
+/**
+ * ActionMessageBanner — the ONE transient action-feedback banner for every entity
+ * list page (bulk mutation success/error, with an optional inline follow-up
+ * action). Replaces three near-identical copies that used to live inline on
+ * CandidatesPage, CustomersPage and VacanciesPage.
+ */
 import { CheckCircle2, AlertTriangle, X } from 'lucide-react'
 
 // One transient success/error message for a list page (bulk mutation feedback).

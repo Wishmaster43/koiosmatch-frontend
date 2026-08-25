@@ -1,10 +1,3 @@
-import CvBlock from '../CvBlock'
-import CvProposalBlock from '../cvproposal/CvProposalBlock'
-import ProposalsBlock from '../propose/ProposalsBlock'
-import type { ApplicationDetail } from '@/types/application'
-
-interface CvSubTabProps { application: ApplicationDetail }
-
 /**
  * CvSubTab — APP-TAB-SPLIT-1, group (c): every CV-themed block, in the
  * original relative order — the linked candidate's current CV (CvBlock), a CV
@@ -13,6 +6,13 @@ interface CvSubTabProps { application: ApplicationDetail }
  * (ProposalsBlock, PROPOSE-STORE-1). All three already honest-gate their own
  * loading/empty/error states, unchanged here.
  */
+import CvBlock from '../CvBlock'
+import CvProposalBlock from '../cvproposal/CvProposalBlock'
+import ProposalsBlock from '../propose/ProposalsBlock'
+import type { ApplicationDetail } from '@/types/application'
+
+interface CvSubTabProps { application: ApplicationDetail }
+
 export default function CvSubTab({ application: a }: CvSubTabProps) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>

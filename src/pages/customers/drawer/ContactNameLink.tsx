@@ -2,7 +2,8 @@
  * ContactNameLink — a contact person's name rendered as a real link that opens THAT
  * contact's own drill-down on the Contactpersonen tab (Danny 28-07: "ik wil dat ik
  * vanuit de locatie ook door kan klikken op een contactpersoon en dat ik het scherm
- * krijg zoals … contactpersonen").
+ * krijg zoals … contactpersonen" — "I want to be able to click through from the
+ * location to a contact person too, and get the same screen as … contacts").
  *
  * Why a button and not an <a>: a contact has no page or deep link of its own — it lives
  * inside the customer drawer — so this is an in-app jump, not a URL. Styling it as a
@@ -25,7 +26,8 @@ export default function ContactNameLink({ name, id, onOpen, title }: {
     <button type="button" title={title} onClick={e => { e.stopPropagation(); onOpen(id) }}
       style={{ padding: 0, background: 'none', border: 'none', textAlign: 'left',
         display: 'inline-flex', alignItems: 'center', gap: 5,
-        // Explicit type, never `font: inherit` (Danny 28-07: "lettertype is onjuist").
+        // Explicit type, never `font: inherit` (Danny 28-07: "lettertype is onjuist" —
+        // "the font is wrong").
         // Inside EditableFieldTable a button inherits the browser's own font stack and
         // size, so the name rendered in a different face and weight than the e-mail and
         // phone links right under it. These three numbers ARE the drawer's link style —

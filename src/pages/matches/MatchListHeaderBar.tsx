@@ -3,15 +3,19 @@ import { MATCH_COL_STATUS, MATCH_COL_OTHER_PARTY, MATCH_COL_SCORE, MATCH_COL_ACT
 
 /**
  * MatchListHeaderBar — the ONE column-header bar above a flat MatchCard list
- * (KLANTEN 4, Danny 21-08 "Weergeven zoals bij de kandidaat"): promoted from
+ * (KLANTEN 4, Danny 21-08 "Weergeven zoals bij de kandidaat" — "Display it like
+ * on the candidate"): promoted from
  * candidates/drawer/MatchesTab.tsx so the customer and vacancy Matches tabs
  * render the identical bar instead of growing drifting copies (§11 — the
  * helper lands WITH adoption on the existing copy site). Column geometry comes
  * from matchRowColumns.ts, the same source MatchCard's own cells read — never
- * two loose numbers. Column order: Vacature · Status · other party · Match
+ * two loose numbers. Column order: Vacature ("Vacancy") · Status · other party
+ * · Match
  * (score) · actions (empty header — pure click-icons + chevron only). The one
- * per-entity difference is the other-party label (Klant on the candidate side,
- * Kandidaat on the customer/vacancy side), passed in already translated (§5).
+ * per-entity difference is the other-party label (Klant, "Customer", on the
+ * candidate side,
+ * Kandidaat, "Candidate", on the customer/vacancy side), passed in already
+ * translated (§5).
  */
 export default function MatchListHeaderBar({ otherPartyLabel }: { otherPartyLabel: string }) {
   const { t } = useTranslation(['candidates', 'matches'])

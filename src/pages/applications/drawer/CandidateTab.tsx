@@ -1,3 +1,11 @@
+/**
+ * CandidateTab — the FULL candidate drill-down inside the application drawer.
+ * Fetches the complete candidate (GET /candidates/{id}) and reuses the candidate
+ * feature's own tab components + sub-tab bar, so all sub-tabs (Profile / Background
+ * / Match / Preferences / ZZP / Communication / Documents / Statistics) show here.
+ * Edits update locally and best-effort PATCH /candidates/{id}. (A shared
+ * CandidateDetail extraction is the longer-term de-dup; see worklist.)
+ */
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
@@ -25,14 +33,6 @@ import type { ApplicationDetail } from '@/types/application'
 const ZZP_TYPES = ['freelance', 'zzp']
 const muted = { fontSize: 12, color: 'var(--text-muted)', padding: '8px 0' }
 
-/**
- * CandidateTab — the FULL candidate drill-down inside the application drawer.
- * Fetches the complete candidate (GET /candidates/{id}) and reuses the candidate
- * feature's own tab components + sub-tab bar, so all sub-tabs (Profile / Background
- * / Match / Preferences / ZZP / Communication / Documents / Statistics) show here.
- * Edits update locally and best-effort PATCH /candidates/{id}. (A shared
- * CandidateDetail extraction is the longer-term de-dup; see worklist.)
- */
 export default function CandidateTab({ application: a }: { application: ApplicationDetail }) {
   const { t } = useTranslation('candidates')
   const queryClient = useQueryClient()

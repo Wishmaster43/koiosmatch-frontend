@@ -31,8 +31,9 @@ export function cascadeValue(detail: CustomerCascadeDetail | null, locationId: s
 }
 
 // Billing email is ALWAYS the customer's own billing_email, never the picked
-// location's/department's (Danny 2026-07-22: "facturatie blijft het facturatie-
-// adres dat aan de klant gekoppeld zit") — unlike cost-centre this field never
+// location's/department's (Danny 2026-07-22, translated: "billing stays the
+// billing address linked to the customer" — verbatim: "facturatie blijft het
+// facturatie-adres dat aan de klant gekoppeld zit") — unlike cost-centre this field never
 // cascades, regardless of which level the recruiter selected.
 export function customerBillingEmail(detail: CustomerCascadeDetail | null): string {
   return detail?.billing_email || ''

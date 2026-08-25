@@ -1,10 +1,17 @@
+/**
+ * BackgroundTab — experience, education, certifications, skills, languages and
+ * references, each an optimistic local list that also persists to the
+ * candidate's sub-entity routes. See the component docblock below for the
+ * revert-on-failure contract every op() shares.
+ */
 import { useState } from 'react'
 import type { ComponentType, Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
 import api, { unwrap } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
-// §10: one shared server-message extractor — never a bare "actie mislukt" where the
-// backend told us exactly what is wrong (DOC-1-EIGENAAR-1's 422, a validation error, …).
+// §10: one shared server-message extractor — never a bare "actie mislukt"
+// ("action failed") where the backend told us exactly what is wrong
+// (DOC-1-EIGENAAR-1's 422, a validation error, …).
 import { extractApiError } from '@/lib/extractApiError'
 import { ExperienceTab as ExperienceTabJs, EducationTab as EducationTabJs, CertificationsTab as CertificationsTabJs, SkillsTab as SkillsTabJs } from './SectionTabs'
 import LanguagesSection from './LanguagesSection'
@@ -55,7 +62,7 @@ const TO_API: Record<string, (v: RelItem) => Record<string, unknown>> = {
   educations: v => ({
     title: v.title, school: v.school, start_date: v.start,
     end_date: v.end, in_progress: !!v.inProgress, description: v.desc, issue_date: v.inProgress ? null : v.issued,
-    // DOC-EDU-1: the "Koppelen aan" picker's select value — '' (nothing chosen) means unlink.
+    // DOC-EDU-1: the "Koppelen aan" ("Link to") picker's select value — '' (nothing chosen) means unlink.
     document_id: v.document_id || null,
     // NIVEAU-1: the education-level pick (id reference; '' = none) — without this
     // line the picker was a fake affordance (the whitelist dropped it on save).
@@ -81,7 +88,7 @@ const TO_API: Record<string, (v: RelItem) => Record<string, unknown>> = {
     function: v.function, relation_id: v.relation_id || null, employer: v.employer,
     phone: v.phone, mobile: v.mobile, email: v.email, note: v.note,
     document_id: v.document_id || null,
-    // REF-ERVARING-1 (Danny 08-08 punt 4, backend commit d6eb75cb): the work
+    // REF-ERVARING-1 (Danny 08-08 point 4, backend commit d6eb75cb): the work
     // experience this referee vouches for. Measured live 09-08 — PATCH
     // /candidates/{c}/references/{r} persists it (200 + a fresh GET echoes the id
     // AND a nested `work_experience`), a foreign candidate's experience is rejected
@@ -139,7 +146,8 @@ export default function BackgroundTab({ c, onEditSave, onJump }: { c: Candidate;
   // The fieldLabels map extractApiError consults ONLY when the raw server message
   // is Laravel's own untranslated "required" template — never overrides a crafted
   // domain message (DOC-1-EIGENAAR-1's "Dit document is al aan een ander onderdeel
-  // gekoppeld." keeps surfacing exactly as before).
+  // gekoppeld." — "This document is already linked to another item." — keeps
+  // surfacing exactly as before).
   const requiredFieldLabels = (rel: string): Record<string, string> | undefined => {
     const req = REQUIRED_FIELD[rel]
     return req ? { [req.apiField]: t('errors.fieldRequired', { field: t(req.labelKey) }) } : undefined
@@ -154,9 +162,10 @@ export default function BackgroundTab({ c, onEditSave, onJump }: { c: Candidate;
   // restores the exact previous row, onRemove re-inserts the removed row at its
   // ORIGINAL index — never a whole-list snapshot, which would resurrect rows a
   // different in-flight call already removed successfully.
-  // DOC-1-EIGENAAR-1 (Danny 08-08 punt 5): a 422 on these routes is an EXPECTED,
+  // DOC-1-EIGENAAR-1 (Danny 08-08 point 5): a 422 on these routes is an EXPECTED,
   // caller-handled outcome (e.g. "Dit document is al aan een ander onderdeel
-  // gekoppeld.") — quietStatuses suppresses api.ts's generic dev diagnostic toast
+  // gekoppeld." — "This document is already linked to another item.") —
+  // quietStatuses suppresses api.ts's generic dev diagnostic toast
   // ("API PATCH … → 422") so the server's own readable reason is what the user reads.
   const REQUEST_CONFIG = { quietStatuses: [422] }
   const ops = (rel: string, list: RelItem[], set: Dispatch<SetStateAction<RelItem[]>>) => ({
@@ -230,7 +239,7 @@ export default function BackgroundTab({ c, onEditSave, onJump }: { c: Candidate;
       .catch(err => notifyError(extractApiError(err, t('actionFailed'))))
   }
 
-  // House sub-tab bar (Danny kandidaten-ronde-2, punt B): one sub-tab per section
+  // House sub-tab bar (Danny kandidaten-ronde-2 ("candidates round 2"), point B): one sub-tab per section
   // instead of five stacked blocks. Order is ALPHABETICAL BY TRANSLATED LABEL —
   // computed at render time, not hardcoded, so the tab order still reads correctly
   // once another locale reorders Education/Experience relative to each other
@@ -256,13 +265,15 @@ export default function BackgroundTab({ c, onEditSave, onJump }: { c: Candidate;
       {/* DOC-ERV-1: documents/onJumpToDocuments feed the read-only proof-document
           icons on a work-experience row — same pattern as Education below. */}
       {subTab === 'experience'     && <ExperienceTab     items={experiences} documents={c.documents ?? []} onJumpToDocuments={onJump ? () => onJump('documents') : undefined} {...ops('experiences', experiences, setExperiences)} />}
-      {/* DOC-ENTRY-LINK-1: candidate.documents feeds both the "Koppelen aan" edit-form
-          picker and the 3 read-only link icons; onJumpToDocuments switches the drawer
-          to the Documenten tab (thin passthrough — CandidateDrawer owns tab state). */}
+      {/* DOC-ENTRY-LINK-1: candidate.documents feeds both the "Koppelen aan" ("Link
+          to") edit-form picker and the 3 read-only link icons; onJumpToDocuments
+          switches the drawer to the Documenten ("Documents") tab (thin
+          passthrough — CandidateDrawer owns tab state). */}
       {subTab === 'education'      && <EducationTab      items={educations}  documents={c.documents ?? []} onJumpToDocuments={onJump ? () => onJump('documents') : undefined} {...ops('educations', educations, setEducations)} />}
       {subTab === 'certifications' && <CertificationsTab items={certs}       documents={c.documents ?? []} onJumpToDocuments={onJump ? () => onJump('documents') : undefined} {...ops('certifications', certs, setCerts)} />}
-      {/* DOC-LANG-SKILL-LINK-1: Vaardigheden already renders the "gekoppeld document"
-          picker, but never received `documents` — so it always resolved to an empty
+      {/* DOC-LANG-SKILL-LINK-1: Vaardigheden ("Skills") already renders the
+          "gekoppeld document" ("linked document") picker, but never received
+          `documents` — so it always resolved to an empty
           list (a dropdown with nothing in it, and no read-mode link icons). */}
       {subTab === 'skills'         && <SkillsTab         items={skills}      documents={c.documents ?? []} onJumpToDocuments={onJump ? () => onJump('documents') : undefined} {...ops('skills', skills, setSkills)} />}
       {/* KAND-REFERENTIES-1: onVerify is the one action outside the generic add/edit/
@@ -274,8 +285,9 @@ export default function BackgroundTab({ c, onEditSave, onJump }: { c: Candidate;
           experience added this session is instantly linkable, and one just removed
           disappears from the picker. */}
       {subTab === 'references'     && <ReferencesTab      items={references}  documents={c.documents ?? []} experiences={experiences} onJumpToDocuments={onJump ? () => onJump('documents') : undefined} onVerify={verifyReference} {...ops('references', references, setReferences)} />}
-      {/* Talen already lived on this tab (moved here from Profiel earlier) — now its
-          own sub-tab instead of a stacked block; persists via the drawer's onUpdate. */}
+      {/* Talen ("Languages") already lived on this tab (moved here from Profiel,
+          "Profile", earlier) — now its own sub-tab instead of a stacked block;
+          persists via the drawer's onUpdate. */}
       {subTab === 'languages'      && <LanguagesSection c={c} onEditSave={onEditSave} />}
     </div>
   )

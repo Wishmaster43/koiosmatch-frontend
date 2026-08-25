@@ -1,3 +1,7 @@
+// BackofficeCouplingIndicator — the compact per-row scanning aid so a recruiter can
+// see, without opening the drawer, whether a record is linked/failed/not-linked to
+// HelloFlex and/or Shiftmanager (KOPPELINGEN-LIST-1). Full detail stays in the
+// BackofficeLinksTab drawer tab; this is scanning only, never a text status column.
 import type { ComponentType, SVGProps } from 'react'
 import { useTranslation } from 'react-i18next'
 import { CheckCircle2, AlertCircle, Circle } from 'lucide-react'

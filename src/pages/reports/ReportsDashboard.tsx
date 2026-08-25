@@ -1,9 +1,11 @@
 /**
  * ReportsDashboard — the bare #reports overview (RAPPORTEN-DASHBOARD-1, Danny
  * 14-08: "#reports moet hoofddashboard worden met belangrijkste KPI's, wederom
- * negen KPI rows"). Nine cards through the same shared InsightsRow strip every
- * report already uses, each number pulled from an EXISTING report endpoint via
- * its own use*Report hook (no new endpoint, no invented totals) and each card
+ * negen KPI rows", i.e. "#reports must become the main dashboard with the most
+ * important KPIs, again nine KPI rows"). Nine cards through the same shared
+ * InsightsRow strip every report already uses, each number pulled from an
+ * EXISTING report endpoint via its own use*Report hook (no new endpoint, no
+ * invented totals) and each card
  * clicks through to the sub-report the number came from. The shared period
  * lives ONLY in the right-hand filter panel now (RIGHTPANEL-FILTERS-1,
  * 2026-08-14) — `period` still drives every hook below it, ReportsPage just no

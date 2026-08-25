@@ -32,19 +32,19 @@ const slugify = (s) => {
   return base || `item_${Date.now().toString(36)}`
 }
 
-// extraField (optioneel): { key, label, options: [{value,label}], default } —
-// rendert een extra keuzeveld in de aanmaak-modal + een badge in de rij.
+// extraField (optional): { key, label, options: [{value,label}], default } —
+// renders one extra picker in the create modal plus a badge on the row.
 // flagField (optioneel): { key, label, description } — a single boolean behaviour
 // flag (R-1b: is_closed/is_reached); checkbox in the modal + badge in the row. The
 // FLAG drives behaviour, never the slug — so tenant-own statuses work on the write
-// paths. flagFields (optioneel): array of flagField-shaped objects — MULTIPLE
+// paths. flagFields (optional): array of flagField-shaped objects — MULTIPLE
 // independent behaviour flags on the same lookup (back-compat sugar exactly like
 // defaultField → defaultFields below); flagField stays supported as a one-element
 // shorthand for existing callers.
-// defaultField (optioneel): { key, label } — SINGLETON vlag (bv. is_default), model-
-// enforced op de backend (max één per lookup). Geen modal-veld: een losse
-// DefaultToggle per rij "promoveert" die rij en zet alle andere rijen lokaal terug
-// (optimistisch), zodat de UI de server-singleton weerspiegelt zonder een refetch.
+// defaultField (optional): { key, label } — a SINGLETON flag (is_default and the
+// like), enforced by the backend model (at most one per lookup). Deliberately not a
+// modal field: a per-row DefaultToggle promotes that row and optimistically clears
+// every other row, so the UI mirrors the server's singleton without a refetch.
 // The shared DefaultToggle is undoable by default (DEFAULT-UNDO, Danny 04-08:
 // "je kan niet undo doen") — clicking the active pill clears the flag; setDefault
 // below flips true/false on the same per-id PUT route.

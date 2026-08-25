@@ -190,9 +190,10 @@ export default function DepartmentDetail({ department, locations, statuses, cont
 
   // Description lives in its own rich-text block below (EditableRichTextField), and
   // status now lives in the title-row badge (see render below) — neither is a row
-  // in this field-table anymore. Kostenplaats (Danny 2026-07-22) is the
-  // middle cascade level (afdeling > locatie > klant) — no billing email here,
-  // facturatie always comes from the customer (see OverviewTab).
+  // in this field-table anymore. Kostenplaats ("Cost centre", Danny 2026-07-22)
+  // is the middle cascade level — department, then location, then customer —
+  // no billing email here, facturatie ("billing") always comes from the
+  // customer (see OverviewTab).
   const fields: FieldRow[] = [
     { key: 'name', label: t('departments.detail.name'), type: 'text' },
     { key: 'locationId', label: t('departments.detail.location'), type: 'select', options: locations.map(l => ({ value: String(l.id), label: l.name })) },

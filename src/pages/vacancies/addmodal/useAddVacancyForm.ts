@@ -55,9 +55,9 @@ export interface VacancyCreateForm {
   title: string; status: string; ownerId: string; clientId: string; industry: string; category: string
   contractTypes: string[]; startDate: string; endDate: string
   street: string; houseNumber: string; houseNumberSuffix: string; postalCode: string; city: string; province: string; country: string
-  // Vestiging (bureau) — the TENANT'S OWN establishment (`/locations`), POSTed as
+  // Branch (agency) — the TENANT'S OWN establishment (`/locations`), POSTed as
   // `location_id`. Never confuse this with `customerLocationId` below (the
-  // KLANT's own site from the cascade) — two different "location" concepts
+  // CUSTOMER's own site from the cascade) — two different "location" concepts
   // that have collided in this codebase before (see PlacementCard's comment).
   branchId: string
   seniority: string; education: string
@@ -192,7 +192,7 @@ export function useAddVacancyForm({
     // eslint-disable-next-line react-hooks/exhaustive-deps -- only react to the resolved list changing
   }, [provinces])
 
-  // Klant -> locatie -> afdeling -> contactpersoon cascade (punt 6) — seeded from
+  // Customer -> location -> department -> contact cascade (punt 6) — seeded from
   // the landed initial props so a "+ Vacature" opened from a location/department
   // drill-down shows that scope pre-picked, still editable (punt 3).
   const emptyCascade = { customerLocationId: '', customerLocationName: '', customerDepartmentId: '', customerDepartmentName: '', contactId: '', contactName: '' }

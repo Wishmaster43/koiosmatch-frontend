@@ -8,7 +8,7 @@
  * two data-exchange screens share one master-detail format (Danny 21-07).
  *
  * IMPORT-TREE-1: the backend now also serves a COMBINED whole-customer template
- * (CustomerTreeImporter) that builds klant + locatie + afdeling + contactpersoon from
+ * (CustomerTreeImporter) that builds customer + location + department + contact from
  * one flat file. It arrives through the same templates endpoint, so no plumbing was
  * needed — what it needed is the EXPLANATION: which of the two paths a user is on,
  * that the combined file replaces the four-step order rather than adding to it, and

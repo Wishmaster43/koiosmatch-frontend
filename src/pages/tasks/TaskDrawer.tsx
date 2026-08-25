@@ -1,3 +1,9 @@
+/**
+ * TaskDrawer — thin container: declares the header config + tab list and wires them
+ * to the shared EntityDrawer shell. The header carries the primary meta pickers
+ * (status / priority / assignee) + a one-click "mark done" quick action, so the most
+ * common changes need no edit-mode; the full field edit still lives in DetailsTab.
+ */
 import type { ReactNode } from 'react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -59,12 +65,6 @@ interface TaskDrawerProps {
   onSubtaskCreated?: (id: Id | undefined) => void
 }
 
-/**
- * TaskDrawer — thin container: declares the header config + tab list and wires them
- * to the shared EntityDrawer shell. The header carries the primary meta pickers
- * (status / priority / assignee) + a one-click "mark done" quick action, so the most
- * common changes need no edit-mode; the full field edit still lives in DetailsTab.
- */
 export default function TaskDrawer({ task, onClose, expanded, onToggleExpand, onUpdate, onAddLink, onRemoveLink, onRestore, trash, onSubtaskCreated }: TaskDrawerProps) {
   const { t } = useTranslation('tasks')
   const { formatDate, formatDateTime } = useDateFormat()

@@ -1,3 +1,11 @@
+/**
+ * AppointmentsTab — the application's appointments (shared entity, B-17/C-22).
+ * Reuses the SAME PlanIntakeModal as the candidate + vacancy drawers for both
+ * create and edit (Danny 2026-07-13: one appointment experience everywhere — this
+ * used to be a hand-rolled free-text composer showing raw ISO datetimes). Reads
+ * straight from /candidates/{id}/appointments so it always reflects the shared
+ * appointments entity, not a stale copy nested under the application.
+ */
 import { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Calendar, Clock, User, MapPin, Pencil, Search } from 'lucide-react'
@@ -23,14 +31,6 @@ interface RawAppt {
 
 const dateTimeOpts = { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'UTC' } as const
 
-/**
- * AppointmentsTab — the application's appointments (shared entity, B-17/C-22).
- * Reuses the SAME PlanIntakeModal as the candidate + vacancy drawers for both
- * create and edit (Danny 2026-07-13: one appointment experience everywhere — this
- * used to be a hand-rolled free-text composer showing raw ISO datetimes). Reads
- * straight from /candidates/{id}/appointments so it always reflects the shared
- * appointments entity, not a stale copy nested under the application.
- */
 export default function AppointmentsTab({ application: a }: { application: ApplicationDetail }) {
   const { t } = useTranslation(['applications', 'common'])
   const { formatDate } = useDateFormat()

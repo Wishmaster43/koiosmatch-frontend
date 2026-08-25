@@ -1,4 +1,3 @@
-import { useMemo } from 'react'
 /**
  * useWorkPermitTypes — tenant-configurable work-permit-kind lookup
  * (KAND-WERKVERGUNNING-LOOKUP-1). candidates.work_permit_type moved from a
@@ -17,6 +16,7 @@ import { useMemo } from 'react'
  * Fetch/cache/dedupe lives in useCachedLookup (audit item 8) — one GET per
  * session, shared across every mounted consumer.
  */
+import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { AxiosResponse } from 'axios'
 import { useCachedLookup } from './useCachedLookup'

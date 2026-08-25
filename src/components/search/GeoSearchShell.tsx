@@ -1,17 +1,17 @@
+// GeoSearchShell — GEOSEARCH-1 (Danny 22-08, translated: "the filters serve the
+// same purpose, just a different angle" — verbatim: "filters doel is zelfde
+// alleen andere invalshoek"): the candidate→vacancy and vacancy→candidate geo
+// searches are functional TWINS that had drifted into two different faces —
+// labels above the pills vs inside them, a chips row on one side only, radius
+// chrome nested two levels deep so an action button could never sit beside it.
+// This shell is the ONE layout both now mount: trigger pills, an optional
+// active-filter chips row, the radius slider + km input + point count (lifted
+// out of RadiusMapPanel so `actions` can share its row), then the map/results split.
 import RadiusControlRow from '@/components/map/RadiusControlRow'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 // HUISSTIJL-1: the shared muted-caption atom (identity-only swap for the point-count line).
 import { Caption } from '@/components/ui/typography'
-
-// GEOSEARCH-1 (Danny 22-08): the candidate→vacancy and vacancy→candidate geo
-// searches are functional TWINS ("filters doel is zelfde alleen andere
-// invalshoek") that had drifted into two different faces — labels above the
-// pills vs inside them, a chips row on one side only, radius chrome nested two
-// levels deep so an action button could never sit beside it. This shell is the
-// ONE layout both now mount: trigger pills, an optional active-filter chips
-// row, the radius slider + km input + point count (lifted out of
-// RadiusMapPanel so `actions` can share its row), then the map/results split.
 
 export interface GeoSearchRadius {
   value: number

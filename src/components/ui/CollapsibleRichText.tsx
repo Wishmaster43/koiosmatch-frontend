@@ -1,9 +1,10 @@
 /**
  * CollapsibleRichText — a collapsed ghost affordance that only reveals a
- * RichTextEditor once clicked; never auto-opens. Extracted (Danny 02-08: "bij
- * popup Nieuwe kandidaat, nieuwe klant, nieuwe locatie en afdeling moet altijd
- * een tekstveld aanwezig zijn zoals we hebben bij + match") from the candidate
- * match form's RemarksSection so every entity's optional prose field —
+ * RichTextEditor once clicked; never auto-opens. Extracted (Danny 02-08,
+ * verbatim: "…moet altijd…" — a text field must always be present in the
+ * New candidate / New customer / New location / New department popups,
+ * exactly like it already is on + Match) from the candidate match form's
+ * RemarksSection so every entity's optional prose field —
  * candidate profile text, customer company text, location/department
  * description — gets the exact same low-height, always-present shape instead
  * of five near-identical copies. Both properties matter: the field is ALWAYS

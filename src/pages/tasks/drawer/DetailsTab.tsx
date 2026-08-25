@@ -1,3 +1,10 @@
+/**
+ * DetailsTab — the task drawer's field cards: the editable core fields
+ * (status/priority/assignee/dates/description/…), the Koios advice block and
+ * the subtasks section. Field values render PLAIN (colour/chips are a table
+ * face only, see TASK-DISPLAY-DRILL-1 below); the pencil→save/cancel edit
+ * pattern mirrors every other entity drawer (§3A).
+ */
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Edit2, ExternalLink, Save, X } from 'lucide-react'
@@ -85,8 +92,10 @@ export default function DetailsTab({ task, onUpdate, onSubtaskCreated }: {
   const resolveAdvice = useTaskAdvice()
   const { formatDate, formatDateTime } = useDateFormat()
   // TASK-DISPLAY-DRILL-1 (Danny 24-08: "alleen de tabel wordt gekleurd en daar
-  // hebben we instellingen voor" + 24-08: "geen chips in drill down, hebben we
-  // nergens"): field cards render PLAIN VALUES — colour and chips are a TABLE
+  // hebben we instellingen voor", i.e. "only the table gets coloured and we
+  // have settings for that" + 24-08: "geen chips in drill down, hebben we
+  // nergens", i.e. "no chips in the drill-down, we don't have that anywhere"):
+  // field cards render PLAIN VALUES — colour and chips are a TABLE
   // face, driven by the task_table_color_* toggles over there; the drilldown
   // reads none of them.
   const displaySettings = useAllSettings()

@@ -53,7 +53,8 @@ export default function DetailsLocationTab({ vacancy: v, location }: Props) {
         (useProvinces(form.country) in the hook), and an already-filled province
         that no longer exists in the new country's list is cleared automatically.
         Read-mode resolves the country's display name, never the bare ISO code.
-        VAC-CLEAR-1 (Danny: "gekozen waarde weer leegmaken"): both fields are
+        VAC-CLEAR-1 (Danny, translated: "clear the chosen value again" —
+        verbatim: "gekozen waarde weer leegmaken"): both fields are
         optional and both persist an empty value for real (`province`/`country`
         are sometimes|nullable server-side, mapped onto location_province/
         location_country), so both carry the clear affordance. */}

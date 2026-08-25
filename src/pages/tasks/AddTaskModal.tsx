@@ -212,9 +212,9 @@ export default function AddTaskModal({ onClose, onCreated, onSaved, initial, ext
   // The three dedicated relational pickers + their honest load state (§3: a
   // failed list used to be swallowed here and read as "no records" — see the hook).
   const linkOptions = useLinkOptions()
-  // KLANTEN 9-screenshot (21-08): een voorgevulde koppeling buiten de 200-cap
-  // van de optielijst toonde zijn RAUWE uuid als label. Resolve de naam per id
-  // en injecteer hem als optie — de kiezer toont dan altijd de naam.
+  // KLANTEN 9 screenshot (21-08): a pre-filled link that sits outside the option
+  // list's 200-row cap used to render its RAW uuid as the label. Resolve the name by
+  // id and inject it as an option, so the picker always shows a name.
   const [resolvedOpts, setResolvedOpts] = useState<Record<string, { value: string; label: string }[]>>({})
   useEffect(() => {
     if (linkOptions.loading) return

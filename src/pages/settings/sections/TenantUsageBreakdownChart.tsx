@@ -1,7 +1,8 @@
 /**
- * TenantUsageBreakdownChart — the picture beside the uitsplitsing table (Danny
- * 17-08: "kan dat rechts naast de tabel een grafiek?"). It charts the SAME rows
- * the table lists, on the SAME measure the table sorts by (Inkoop), so the
+ * TenantUsageBreakdownChart — the picture beside the breakdown table (Danny
+ * 17-08: "kan dat rechts naast de tabel een grafiek?" — "can we get a chart
+ * next to the table on the right?"). It charts the SAME rows
+ * the table lists, on the SAME measure the table sorts by (Inkoop — cost price), so the
  * chart's biggest slice is always the table's top row — two views that can never
  * disagree.
  *

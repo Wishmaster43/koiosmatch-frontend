@@ -9,7 +9,8 @@ type UpdateFn = (id: Id | undefined, patch: Record<string, unknown>) => void
 /**
  * VacancyBranchBlock — the vacancy's own bureau branch (vestiging, `location_id`),
  * DRILLDOWN-VOLGORDE-CANON's LAST block (Danny 21-08, VACATURES 1/3). LOOK
- * decided by Danny (21-08, "Zoals kandidaat en klant"): the shared BranchSection
+ * decided by Danny (21-08, translated: "like candidate and customer" —
+ * verbatim: "Zoals kandidaat en klant"): the shared BranchSection
  * chips + "+ Vestiging" picker, NOT a dropdown — one vestiging-look everywhere.
  * The vacancy holds ONE `location_id`, so the multi-select surface gets
  * single-value semantics: picking a branch REPLACES the current one, toggling

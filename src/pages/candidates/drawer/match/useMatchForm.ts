@@ -41,8 +41,10 @@
  * silently-dropped edit (§3: no fake affordances).
  *
  * VACANCY-PREFILL-1 (points 1/2/3/4, Danny's ten-point round): picking a vacancy
- * proposes klant/klantlocatie/afdeling/contactpersoon/vestiging/data/uren as
- * EDITABLE values (never a lock), the recruiter/owner defaults from the
+ * proposes seven fields as EDITABLE values (never a lock): klant (customer),
+ * klantlocatie (customer location), afdeling (department),
+ * contactpersoon (contact), vestiging (branch), data (date), uren (hours).
+ * Also defaults the recruiter/owner from the
  * candidate's own owner (RECRUITER-DEFAULT-1, mirrors usePlanIntakeForm), and a
  * client-side duplicate/overlap preflight warns (never blocks) on the candidate's
  * OWN existing matches. All four sit in their own sibling hooks
@@ -126,8 +128,11 @@ export function useMatchForm({
   const setContractForm = (v: string) => setContractFormRaw(v)
   const hasContractLines = Boolean(candidateTypes.find(ct => ct.value === contractForm)?.has_contract_lines)
   // MATCH-KLANTLOOS-1: a Contractvorm flagged `customer_not_applicable` means this
-  // match has no customer — Relaties hides klant/locatie/afdeling/contactpersoon and
-  // requires a branch instead (the server rejects the four fields + requires branch_id).
+  // match has no customer — the Relaties ("Relations") card hides four fields:
+  // klant (customer), locatie (location),
+  // afdeling (department), contactpersoon (contact),
+  // and requires a branch instead (the server rejects
+  // the four fields + requires branch_id).
   const customerNotApplicable = Boolean(candidateTypes.find(ct => ct.value === contractForm)?.customer_not_applicable)
   const [contractLines, setContractLinesRaw] = useState<MatchContractLine[]>([])
   // Switching AWAY from a flagged Contractvorm clears the local draft — the

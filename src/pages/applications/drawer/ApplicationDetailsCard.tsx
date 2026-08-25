@@ -1,3 +1,40 @@
+/**
+ * ApplicationDetailsCard — Danny 25-07 (c): the Bron/Klant/Locatie/Vacature
+ * ("Source/Customer/Location/Vacancy") summary used to float without any card
+ * frame while every other block on the tab (Motivatie/"Motivation",
+ * KoiosAdviceBlock) has one — moved here verbatim into the
+ * shared SectionCard so it reads as a titled block like the rest. Same one
+ * pencil → diskette/✕ edit mode as before (S7/S12/S13): the vacancy link and
+ * Bron are editable in-place, Klant/Locatie stay read-only (Klant derives from
+ * the vacancy, so it is never itself an edit target; phase/recruiter are edited
+ * in the drawer header instead). The Contactpersoon ("contact person") row
+ * (CONTACT-PERSON-1) is
+ * read-only by derivation, not by omission: it comes from the linked vacancy's
+ * contact_id and is editable only on the vacancy — see the comment at that row.
+ *
+ * VAC-CASCADE-MIRROR-1 (Danny 05-08): Klantlocatie/Afdeling/Contactpersoon
+ * ("Customer location/Department/Contact person") are
+ * NOT an application-owned axis — the Application model has no
+ * customer_location_id/customer_department_id/contact_id columns of its own
+ * (verified in koiosmatch-api's Application model), so these three rows are
+ * entirely derived from the LINKED VACANCY's own klant→locatie→afdeling→
+ * contactpersoon ("customer→location→department→contact person") cascade.
+ * ApplicationDetailResource's nested `vacancy`/`contact`
+ * blocks only carry the vacancy's own work-site `city` + a name-only contact —
+ * they never included customer_location/customer_department at all. Rather than
+ * wait on a backend resource change, this block fetches the SAME full vacancy
+ * detail the Vacature tab already reads (useApplicationVacancy — shared React
+ * Query cache entry, §11: no duplicate fetch when both tabs are open across a
+ * session) and sources all three rows from there, mirroring DetailsGeneralTab's
+ * own EntityLink treatment byte-for-byte (customers page — locations/
+ * departments/contacts have no page of their own).
+ *
+ * LABEL-LEFT-1 (Danny 05-08): converted from the label-above grid to the
+ * candidate drawer's label-left row canon (fieldRowCanon) — this was the last
+ * label-above holdout (§3A: the candidate drill-down leads, every other drawer
+ * mirrors it). Content is unchanged, only row anatomy: every field below is now
+ * one `Row`, stacked in the calm card instead of laid out in a 2-column grid.
+ */
 import { useState } from 'react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -51,39 +88,6 @@ interface ApplicationDetailsCardProps {
   onUpdateSource?: (id: Id | undefined, source: string) => void
 }
 
-/**
- * ApplicationDetailsCard — Danny 25-07 (c): the Bron/Klant/Locatie/Vacature
- * summary used to float without any card frame while every other block on the
- * tab (Motivatie, KoiosAdviceBlock) has one — moved here verbatim into the
- * shared SectionCard so it reads as a titled block like the rest. Same one
- * pencil → diskette/✕ edit mode as before (S7/S12/S13): the vacancy link and
- * Bron are editable in-place, Klant/Locatie stay read-only (Klant derives from
- * the vacancy, so it is never itself an edit target; phase/recruiter are edited
- * in the drawer header instead). The Contactpersoon row (CONTACT-PERSON-1) is
- * read-only by derivation, not by omission: it comes from the linked vacancy's
- * contact_id and is editable only on the vacancy — see the comment at that row.
- *
- * VAC-CASCADE-MIRROR-1 (Danny 05-08): Klantlocatie/Afdeling/Contactpersoon are
- * NOT an application-owned axis — the Application model has no
- * customer_location_id/customer_department_id/contact_id columns of its own
- * (verified in koiosmatch-api's Application model), so these three rows are
- * entirely derived from the LINKED VACANCY's own klant→locatie→afdeling→
- * contactpersoon cascade. ApplicationDetailResource's nested `vacancy`/`contact`
- * blocks only carry the vacancy's own work-site `city` + a name-only contact —
- * they never included customer_location/customer_department at all. Rather than
- * wait on a backend resource change, this block fetches the SAME full vacancy
- * detail the Vacature tab already reads (useApplicationVacancy — shared React
- * Query cache entry, §11: no duplicate fetch when both tabs are open across a
- * session) and sources all three rows from there, mirroring DetailsGeneralTab's
- * own EntityLink treatment byte-for-byte (customers page — locations/
- * departments/contacts have no page of their own).
- *
- * LABEL-LEFT-1 (Danny 05-08): converted from the label-above grid to the
- * candidate drawer's label-left row canon (fieldRowCanon) — this was the last
- * label-above holdout (§3A: the candidate drill-down leads, every other drawer
- * mirrors it). Content is unchanged, only row anatomy: every field below is now
- * one `Row`, stacked in the calm card instead of laid out in a 2-column grid.
- */
 export default function ApplicationDetailsCard({ application: a, onLinkVacancy, onUpdateSource }: ApplicationDetailsCardProps) {
   const { t } = useTranslation(['applications', 'common', 'vacancies'])
   const { formatDate } = useDateFormat()
@@ -193,7 +197,7 @@ export default function ApplicationDetailsCard({ application: a, onLinkVacancy, 
           {/* S12/S13: the vacancy is a real linkable entity (id available) —
               EntityLink gives in-app click + new-tab icon; the return-tab
               stash (S14/S22) makes browser BACK land back on this Sollicitatie
-              tab instead of resetting to the drawer's first tab. */}
+              ("Application") tab instead of resetting to the drawer's first tab. */}
           <span onClickCapture={() => { if (a.id != null) rememberReturnTab(a.id, 'application') }}>
             <EntityLink page="vacancies" id={a.vacancyId} title={t('drawer.openVacancy')}>
               {a.vacancyTitle || '—'}

@@ -1,14 +1,3 @@
-import { useState } from 'react'
-import { useTranslation } from 'react-i18next'
-import StatusListEditor from './StatusListEditor'
-import { SettingCard, SettingRow, Toggle } from '../components/SettingsKit'
-import api from '@/lib/api'
-import { extractApiError } from '@/lib/extractApiError'
-import { notifyError } from '@/lib/notify'
-import { useApplicationSources } from '@/lib/useApplicationSources'
-import { useConfirm } from '@/hooks/useConfirm'
-import FreeEntryMismatchDialog, { mismatchesFromError } from '../components/FreeEntryMismatchDialog'
-
 /**
  * ApplicationSourcesSettings — S-SOURCE-1 GRADUATION (2026-08-14): the tenant
  * acquisition-source list (/candidate-sources, e.g. "Indeed", "LinkedIn",
@@ -37,6 +26,17 @@ import FreeEntryMismatchDialog, { mismatchesFromError } from '../components/Free
  * are its only frontend consumers today (the candidate intake has no source
  * field of its own yet).
  */
+import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import StatusListEditor from './StatusListEditor'
+import { SettingCard, SettingRow, Toggle } from '../components/SettingsKit'
+import api from '@/lib/api'
+import { extractApiError } from '@/lib/extractApiError'
+import { notifyError } from '@/lib/notify'
+import { useApplicationSources } from '@/lib/useApplicationSources'
+import { useConfirm } from '@/hooks/useConfirm'
+import FreeEntryMismatchDialog, { mismatchesFromError } from '../components/FreeEntryMismatchDialog'
+
 export default function ApplicationSourcesSettings() {
   const { t } = useTranslation('settings')
   const { allowFreeEntry, invalidate } = useApplicationSources()
@@ -46,7 +46,7 @@ export default function ApplicationSourcesSettings() {
   const [override, setOverride] = useState(null)
   const freeEntry = override ?? allowFreeEntry
   const [busy, setBusy] = useState(false)
-  // §3B preflight (settings-ronde 21-08 punt 1): the 409 mismatches list.
+  // §3B preflight (settings round 21-08 point 1): the 409 mismatches list.
   const [mismatches, setMismatches] = useState(null)
   const { confirm, dialog } = useConfirm()
 
@@ -65,7 +65,7 @@ export default function ApplicationSourcesSettings() {
       } catch (e) {
         setOverride(null)
         // Strict-preflight 409: SHOW the non-conforming values (§3B) — a toast
-        // alone made the toggle look broken (gemeten 21-08).
+        // alone made the toggle look broken (measured 21-08).
         const mm = mismatchesFromError(e)
         if (mm) setMismatches(mm)
         else notifyError(extractApiError(e, t('statusList.saveFailed')))

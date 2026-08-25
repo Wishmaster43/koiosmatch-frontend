@@ -1,3 +1,14 @@
+/**
+ * MatchTemplatesSettings — Settings → Matchprofielen (MATCH-TEMPLATE-1): CRUD for
+ * reusable named match-weight presets consumed by the vacancy Matching tab's picker
+ * (read-only there — see useMatchWeightTemplates). Assigning a template SNAPSHOTS its
+ * weights onto a vacancy; editing a template here never touches an already-snapshotted
+ * vacancy on its own (backend decision A) — after a save, when the template is still
+ * linked to ≥1 vacancy, an explicit follow-up prompt offers to re-apply the new weights
+ * onto every linked vacancy (POST …/apply {all_linked:true}), reporting {applied,
+ * skipped}. Delete is blocked (409) while the template is still linked. Mirrors
+ * CustomFieldsSettings' expand-card CRUD shape.
+ */
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Plus, Trash2, ChevronDown, ChevronUp, AlertTriangle } from 'lucide-react'
@@ -48,17 +59,6 @@ function MiniWeightBars({ weights }) {
   )
 }
 
-/**
- * MatchTemplatesSettings — Settings → Matchprofielen (MATCH-TEMPLATE-1): CRUD for
- * reusable named match-weight presets consumed by the vacancy Matching tab's picker
- * (read-only there — see useMatchWeightTemplates). Assigning a template SNAPSHOTS its
- * weights onto a vacancy; editing a template here never touches an already-snapshotted
- * vacancy on its own (backend decision A) — after a save, when the template is still
- * linked to ≥1 vacancy, an explicit follow-up prompt offers to re-apply the new weights
- * onto every linked vacancy (POST …/apply {all_linked:true}), reporting {applied,
- * skipped}. Delete is blocked (409) while the template is still linked. Mirrors
- * CustomFieldsSettings' expand-card CRUD shape.
- */
 export default function MatchTemplatesSettings() {
   const { t } = useTranslation(['settings', 'vacancies'])
   const dimLabel = (d) => t(`vacancies:matching.dim.${d}`)

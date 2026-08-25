@@ -202,8 +202,9 @@ export const NAV_GROUPS = [
     // Candidate-specific settings (Danny: "Kandidaat").
     key: 'candidate', icon: Users,
     items: [
-      // Candidate function list — moved INTO the candidate group (Danny 24-07:
-      // "moet naar de kandidaat en kan gewoon Functies heten"); contact-person
+      // Candidate function list — moved INTO the candidate group (Danny 24-07,
+      // translated: "must go to the candidate and can just be called Functions"
+      // — verbatim: "moet naar de kandidaat en kan gewoon Functies heten"); contact-person
       // titles stay the separate contact_functions item under `contacts`.
       { id: 'functions', icon: Briefcase, component: FunctionsSettings },
       { id: 'candidate_phases', icon: Target, component: CandidatePhasesSettings },
@@ -216,7 +217,8 @@ export const NAV_GROUPS = [
       // status "Blacklist" (§3B) needs its own reason vocabulary, distinct from the
       // generic status-reason free text; own icon so it reads as a flag, not a status.
       // Candidate half only — the customer vocabulary lives in the customers group
-      // ("klant bij klant, kandidaat bij kandidaat", Danny 2026-08-05).
+      // (translated: "customer with customer, candidate with candidate" —
+      // verbatim: "klant bij klant, kandidaat bij kandidaat", Danny 2026-08-05).
       { id: 'blacklist_reasons', icon: ShieldOff, render: () => <BlacklistReasonsSettings entity="candidate" /> },
       { id: 'pools', icon: Star, component: PoolsSettings },
       { id: 'cv_template', icon: FileText, component: CvTemplateSettings },
@@ -276,7 +278,8 @@ export const NAV_GROUPS = [
       { id: 'customer_phases', icon: Target, component: CustomerPhasesSettings },
       { id: 'customer_statuses', icon: Tags, component: CustomerStatusesSettings },
       // Customer half of the blacklist-reason vocabulary (KLANT-BLACKLIST-1) — lives
-      // HERE, not as a sub-tab under candidates ("klant bij klant", Danny 2026-08-05).
+      // HERE, not as a sub-tab under candidates (translated: "customer with
+      // customer" — verbatim: "klant bij klant", Danny 2026-08-05).
       { id: 'customer_blacklist_reasons', icon: ShieldOff, render: () => <BlacklistReasonsSettings entity="customer" /> },
       // CAO lookup — feeds price agreements + the + Match popup (Danny 24-07).
       { id: 'cao', icon: Scale, component: CaoSettings },
@@ -286,7 +289,7 @@ export const NAV_GROUPS = [
       // customer-table settings and the three drill-down entity tables (+ Vacatures'
       // default filter) each get their own sub-tab — see CustomerDisplaySettings.
       { id: 'customer_display', icon: Palette, component: CustomerDisplaySettings },
-      // KLANT-VERPLICHT-1 (Danny 02-08): required fields per klant-fase + the three
+      // KLANT-VERPLICHT-1 (Danny 02-08): required fields per customer phase + the three
       // sub-entities — same Flag icon as the candidate's own required-fields item.
       { id: 'customer_required_fields', icon: Flag, component: CustomerRequiredFieldsSettings },
       // KVK/BTW-PER-LAND-1 (Danny 08-08, points 10 + 11): warn-vs-block on a KvK/BTW
@@ -441,8 +444,8 @@ export const NAV_GROUPS = [
     //
     // ONLY entities with a real reader get a tab (§3 no fake affordances, 2026-07-31).
     // A sub-tab here is offered iff some screen calls useNoteTypes(<entity>). Re-measured
-    // 2026-08-04 against Danny's full wish list (klant/locatie/afdeling/contactpersoon/
-    // taken/vacatures/sollicitaties/bellijsten/matches) — per-entity result:
+    // 2026-08-04 against Danny's full wish list (customer/location/department/contact
+    // person/tasks/vacancies/applications/call lists/matches) — per-entity result:
     //   • candidate, application, customer, opportunity — unchanged, offered since wave 2.
     //   • contact   — NOW offered. CustomerNotesTab already called useNoteTypes('contact')
     //                 (the composer switches scope the moment a note is linked to a

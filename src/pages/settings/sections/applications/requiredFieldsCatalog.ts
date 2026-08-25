@@ -1,7 +1,8 @@
 /**
  * requiredFieldsCatalog (application) — the whitelist for the "nieuwe sollicitatie"
  * popup's tenant-configurable required fields (APP-REQUIRED-FE-1, Danny: "hoe zorg
- * ik dat BRON bij nieuwe sollicitatie verplicht is? moet bij instellingen komen").
+ * ik dat BRON bij nieuwe sollicitatie verplicht is? moet bij instellingen komen" —
+ * how do I make SOURCE required on a new application? it should be in settings).
  * Mirrors the backend's `FlatRequiredFieldsGuard('application')`, which reads the
  * flat `application_required_fields` array (no phase axis, unlike the candidate/
  * customer required-fields screens) and 422s `ApplicationController::store`.

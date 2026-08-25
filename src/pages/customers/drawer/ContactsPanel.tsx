@@ -2,14 +2,18 @@
  * ContactsPanel — THE contact-person surface of the customer drawer. One component for
  * all three scopes: the customer's own Contactpersonen tab, a location's contact list and
  * a department's. Before this there were three hand-rolled variants (a full table, a
- * bordered row list and a bare SectionCard list) that agreed on nothing — Danny 28-07:
- * "het contactpersonen tabblad op locatie en afdeling komt niet overeen met dat van de
- * hoofdklant". Same columns, same chips, same actions, same drill-down, everywhere.
+ * bordered row list and a bare SectionCard list) that agreed on nothing — Danny 28-07,
+ * translated: "the contact-persons tab on location and department doesn't match the
+ * main customer's" — verbatim: "het contactpersonen tabblad op locatie en afdeling
+ * komt niet overeen met dat van de hoofdklant". Same columns, same chips, same
+ * actions, same drill-down, everywhere.
  *
  * IT NEVER NAVIGATES. Clicking a row swaps THIS panel's body from the list to
  * ContactDetail and shows the shared breadcrumb trail. The host stays mounted, so a
  * location keeps its position, its sub-tab and its in-progress edits — the whole point of
- * Danny's report: "als je dan terug klikt ben je uit de vestiging of afdeling???". The
+ * Danny's report, translated: "if you then click back you're out of the location
+ * or department???" — verbatim: "als je dan terug klikt ben je uit de vestiging
+ * of afdeling???". The
  * old fix routed the click through the drawer's MAIN tab, which unmounted the locations
  * tab and destroyed exactly that state.
  *
@@ -45,8 +49,9 @@ import type { DrillPagerProps } from '@/components/drawer/DrillPager'
 
 const searchWrap = {
   // minWidth 0: a flex child's implicit min-width:auto would keep the input's ~170px
-  // intrinsic width and push the add button off the 548px panel (Danny 03-08:
-  // "+ nieuwe contactpersoon valt nog steeds een beetje weg") — search yields instead.
+  // intrinsic width and push the add button off the 548px panel (Danny 03-08,
+  // translated: "+ new contact person still gets cut off a bit" — verbatim: "+ nieuwe
+  // contactpersoon valt nog steeds een beetje weg") — search yields instead.
   display: 'flex', alignItems: 'center', gap: 8, flex: 1, minWidth: 0, padding: '6px 10px',
   background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 8,
 } as const
@@ -98,7 +103,7 @@ export default function ContactsPanel({
   const { contacts: archivedContacts } = useArchivedCustomerContacts(effectiveCustomerId, showArchived)
   const baseContacts = showArchived ? archivedContacts : contacts
   // Tenant-configured default status filter (TENANT-DEFAULT-1, Danny 02-08) — replaces
-  // the old "active only" guess when Settings → Klanten → Tabelweergave → Contactpersonen
+  // the old "active only" guess when Settings → Customers → Table view → Contact persons
   // has one saved; absent (null) falls back to that original guess unchanged. `settingsLoaded`
   // stops the hook from deciding before /settings has actually answered (see its own docblock).
   const settingsLoaded = useSettingsLoaded()

@@ -1,3 +1,9 @@
+/**
+ * AddApplicationModal (page-level) — create a new application by linking an
+ * existing candidate to a vacancy, from the applications list toolbar. See the
+ * full docblock further below for the field-by-field contract; this top header
+ * only exists so the file opens with one (house rule).
+ */
 import { useState, useEffect, useMemo, useId, useRef } from 'react'
 import type { ComponentType, ReactNode, CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -56,8 +62,9 @@ const requiredMark = <span aria-hidden="true" style={{ color: 'var(--color-dange
 // an `owner` object (CandidateListResource / VacancyListResource) — captured here
 // so the owner-derivation chain below can read it straight off the picked option,
 // no extra fetch for either the candidate or the non-locked vacancy pick.
-// SUBLINE-1 (register PDF-SOLLICITATIES pt.1, Danny 14-08): "vijf keer Blom" is
-// unpickable by name alone — fold function title + city into the label itself,
+// SUBLINE-1 (register PDF-SOLLICITATIES pt.1, Danny 14-08): "vijf keer Blom"
+// (i.e. "five Bloms in the list") is unpickable by name alone — fold function
+// title + city into the label itself,
 // since the shared SearchSelect row only renders a plain string (no sub-line
 // slot). " · " is a value separator here, never sentence punctuation (§5).
 const mapCandidateRow = (c: RawPickRow): PickOption => {
@@ -94,8 +101,9 @@ const API_TO_FORM: Record<string, string> = {
 // (measured live, S2): this form's state starts at '' (empty string, not null/
 // undefined), and CreatableSelect's `value ?? placeholder` only falls through to
 // the placeholder on null/undefined — '' short-circuited it, so every picker
-// showed BLANK instead of "Selecteer een kandidaat/vacature/recruiter". Mirrors
-// MatchModal's own `value={x || null}` pickers (job 17/18).
+// showed BLANK instead of the placeholder text (i.e. "Select a
+// candidate/vacancy/recruiter"). Mirrors MatchModal's own
+// `value={x || null}` pickers (job 17/18).
 function PickField({ label, style, value, ...rest }: { label: ReactNode; style?: CSSProperties; value?: string } & AnyProps) {
   // §6: a <button> trigger cannot be labelled by a bare <div>, so the picker used to
   // announce only its value ("Piet Recruiter") with no field name. CreatableSelect

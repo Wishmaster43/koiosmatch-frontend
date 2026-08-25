@@ -1,5 +1,3 @@
-import { QueryClient } from '@tanstack/react-query'
-
 /**
  * Shared React Query client.
  *
@@ -8,15 +6,18 @@ import { QueryClient } from '@tanstack/react-query'
  * handled centrally in lib/api.js (session expiry + rate-limit backoff), so here
  * we only retry genuinely transient (5xx/network) failures and never 4xx.
  */
+import { QueryClient } from '@tanstack/react-query'
+
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 30_000,        // treat data as fresh for 30s (cuts refetch storms)
       gcTime: 5 * 60_000,
-      // REFRESH-FIX-2 (manager advice 23-08, after Danny's "kan je alles nakijken"):
-      // ON, not off — a query only actually refetches on focus once it is stale
-      // (staleTime above still guards that), so this only closes the "edited
-      // elsewhere, still shows old here" class app-wide (e.g. tab-switch back to
+      // REFRESH-FIX-2 (manager advice 23-08, after Danny's "kan je alles nakijken" —
+      // "can you check everything over"): ON, not off — a query only actually
+      // refetches on focus once it is stale (staleTime above still guards that),
+      // so this only closes the "edited elsewhere, still shows old here" class
+      // app-wide (e.g. tab-switch back to
       // a drawer after editing the same record in another tab). One-line revert
       // to `false` if this ever proves too chatty in practice.
       refetchOnWindowFocus: true,

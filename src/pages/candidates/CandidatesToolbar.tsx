@@ -1,3 +1,6 @@
+// CandidatesToolbar — the toolbar row under the candidates InsightsRow: bulk action
+// bar once rows are selected, otherwise + Add / search / quick-view toggles. See
+// the fuller doc comment on the component below.
 import { useTranslation } from 'react-i18next'
 import { Ban, Archive, Trash2, Map as MapIcon } from 'lucide-react'
 import HeaderSearch from '@/components/ui/HeaderSearch'

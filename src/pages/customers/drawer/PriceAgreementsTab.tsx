@@ -16,7 +16,8 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { AlertTriangle, Search } from 'lucide-react'
 // House "+ action" trigger (Danny 27-07: "+ Prijsafspraak toevoegen moet ook
-// knopje zijn!!! zoals in kandidaat drill down") — replaces the bare text button below.
+// knopje zijn!!! zoals in kandidaat drill down" — + Add price agreement must also
+// be a button!!! like in the candidate drill-down) — replaces the bare text button below.
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 import Spinner from '@/components/ui/Spinner'
 import Button from '@/components/ui/Button'

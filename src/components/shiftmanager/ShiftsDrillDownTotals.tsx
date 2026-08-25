@@ -1,9 +1,10 @@
 /**
  * ShiftsDrillDownTotals — the drill-down as grouped TOTALS instead of an order
- * list (Danny: "geen lijsten van orders maar totalen — per klant, per functie,
- * per locatie"). Aggregates the shifts behind one month/metric into three
- * per-group tables, switchable between number of shifts and worked hours. The
- * customer name is resolved from the location id via `locationMeta` (the detail
+ * list (Danny, verbatim: "…geen lijsten…totalen…" — i.e. "no lists of orders,
+ * only totals — per customer, per function, per location"). Aggregates the
+ * shifts behind one month/metric into three per-group tables, switchable
+ * between number of shifts and worked hours. The customer name is resolved
+ * from the location id via `locationMeta` (the detail
  * rows only carry a customer_external_id).
  */
 import { useMemo, useState } from 'react'
@@ -77,7 +78,8 @@ export default function ShiftsDrillDownTotals({ shifts, locationMeta }: {
   const { t, i18n } = useTranslation('shiftmanager')
   const unknown = t('shiftsDrawer.unknown')
   // Switch the aggregated value between number of shifts and worked hours —
-  // defaults to hours (Danny: "drill down moet altijd op uren tonen").
+  // defaults to hours (Danny, verbatim: "drill down moet altijd op uren
+  // tonen" — i.e. "the drill-down must always show hours").
   const [unit, setUnit] = useState<'count' | 'hours'>('hours')
 
   // Resolve the location id once per row for the customer/location lookups.
@@ -105,7 +107,7 @@ export default function ShiftsDrillDownTotals({ shifts, locationMeta }: {
 
   return (
     <div style={{ padding: '14px 16px' }}>
-      {/* Diensten / Uren switch */}
+      {/* Services / hours switch */}
       <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 12 }}>
         <div style={{ display: 'inline-flex', border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden' }}>
           {(['count', 'hours'] as const).map(u => (

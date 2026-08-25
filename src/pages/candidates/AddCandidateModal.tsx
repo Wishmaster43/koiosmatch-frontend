@@ -112,8 +112,9 @@ export default function AddCandidateModal({ onClose, onCreated, onImported }: Ad
     hasPermission?: (perm: string) => boolean
   }
   const { genders } = useGenders()
-  // Zoekbare comboboxen (Danny r2): functietitel uit de functies-lookup (free-entry-
-  // toggle bepaalt of typen een nieuwe waarde mag opleveren), provincies uit de lookup.
+  // Searchable comboboxes (Danny r2): function title from the functions lookup
+  // (the free-entry toggle decides whether typing may produce a new value),
+  // provinces from the lookup.
   const { functions, allowFreeEntry } = useFunctions() as { functions: Array<string | { value: string; label: string }>; allowFreeEntry: boolean }
   const { createCandidate, saving } = useCreateCandidate()
   // Cross-entity jump (house pattern, same as EntityLink): opens the candidates
@@ -147,10 +148,10 @@ export default function AddCandidateModal({ onClose, onCreated, onImported }: Ad
   // the user gets a real panel instead of the raw server sentence.
   const [dupBlock,  setDupBlock]  = useState<DuplicateMatch | null>(null)
   // Which advisory probe hit the user waved away (so "edit data" really dismisses).
-  // Punt 10: vestiging-chips — voorgevuld met de eigen koppelingen uit /auth/me
-  // (ME-BRANCHES-1). Leeg = veld weglaten → de backend koppelt automatisch de
-  // maker-vestigingen (punt 9); een afwijkende keuze gaat expliciet mee in de
-  // create-body en wint volledig (CREATE-BRANCHES-1).
+  // Point 10: branch chips — pre-filled with the creator's own branch links from
+  // /auth/me (ME-BRANCHES-1). Empty = omit the field → the backend automatically
+  // links the creator's own branches (point 9); a different pick is sent
+  // explicitly in the create body and wins outright (CREATE-BRANCHES-1).
   const locations = useLocations()
   const seedBranchIds = (me?.branch_ids ?? []).map(String)
   const [branchIds, setBranchIds] = useState<string[]>(seedBranchIds)

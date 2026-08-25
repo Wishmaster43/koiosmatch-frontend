@@ -66,7 +66,7 @@ function EditorInner({ workflow, onClose, onSave, initialRunId }: {
   // Leaving the editor (X, browser-back, tab close) runs one guarded action —
   // unsaved-changes + live-run confirms live in the hook.
   const confirmClose = useEditorExitGuards({ isDirty, liveRunActive, onClose, confirm })
-  // Esc = the same guarded exit as the X (blok 1 punt 3.3). Nested panels'
+  // Esc = the same guarded exit as the X (block 1 point 3.3). Nested panels'
   // useFocusTrap stopPropagations their own Escape first, so this only fires
   // when the editor itself has focus.
   useEffect(() => {
@@ -79,7 +79,7 @@ function EditorInner({ workflow, onClose, onSave, initialRunId }: {
   // its parent/child relations (WF-RELATIONS-FE-1).
   const [view, setView] = useState<EditorView>('diagram')
   // LOGS-DRILL-1 (Danny 23-07): jumping from a Logs-panel row lands on the
-  // Geschiedenis tab with that run's detail drawer already open. A FRESH wrapper
+  // History tab with that run's detail drawer already open. A FRESH wrapper
   // per click, so jumping to the same run twice re-opens the drawer too.
   const [historyRun, setHistoryRun] = useState<{ row: RunRow } | null>(null)
   // Output fields of upstream modules the selected node may reference as tokens.
@@ -115,7 +115,7 @@ function EditorInner({ workflow, onClose, onSave, initialRunId }: {
           liveRunActive={liveRunActive} activeRunId={activeRunId} onStopped={handleStopped}
           running={running} onRun={handleRun} onRunDryRun={handleRunDryRun}
           saved={saved} onSave={() => handleSave(false)}
-          // Opslaan & sluiten — terug naar overzicht (live-run guard eerst)
+          // Save & close — back to the overview (live-run guard first)
           onSaveClose={() => (liveRunActive ? confirm(t('editor.liveRunConfirm'), () => handleSave(true)) : handleSave(true))}
           onClose={confirmClose}
         />
@@ -163,12 +163,12 @@ function EditorInner({ workflow, onClose, onSave, initialRunId }: {
             {/* Floating add button */}
             <button
               onClick={() => setPickerState({ append: true })}
-              // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- FAB over het ReactFlow-canvas (rond, zwevend, shadow-float): een face die Button bewust niet modelleert
+              // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- FAB floating over the ReactFlow canvas (round, floating, shadow-float): a face Button deliberately does not model
               style={{
                 position: 'absolute', bottom: 24, right: 24,
                 display: 'flex', alignItems: 'center', gap: 8,
                 padding: '9px 16px', borderRadius: 999,
-                // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- FAB-vlak: de zwevende canvasknop draagt het volle accent bewust (zie de knopreden hierboven)
+                // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- FAB fill: the floating canvas button deliberately carries the full accent (see the button reason above)
                 background: 'var(--color-primary)', color: 'var(--color-on-accent)',
                 border: 'none', cursor: 'pointer', fontSize: 13, fontWeight: 500,
                 boxShadow: 'var(--shadow-float)',

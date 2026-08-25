@@ -1,3 +1,10 @@
+/**
+ * DocumentsSection — the candidate drawer's Documents tab: upload, rename,
+ * search, preview, per-row link-to-entry (education/certification/language/
+ * skill/reference), bulk download/delete. Owns every persistence path against
+ * /candidates/{id}/documents (multipart upload, PATCH rename, DELETE, POST
+ * .../replace); DocumentRow stays a dumb row renderer (§3 size discipline).
+ */
 import { useState, useRef } from 'react'
 import type { ChangeEvent } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -39,11 +46,12 @@ const RELATION_BY_LINK_KIND: Record<string, string> = { education: 'educations',
 const referenceName = (ref: { first_name?: string; middle_name?: string; last_name?: string }): string =>
   [ref.first_name, ref.middle_name, ref.last_name].filter(Boolean).join(' ')
 
-// DOC-1-EIGENAAR-1 (Danny 08-08 punt 5): a 422 on a link PATCH is an EXPECTED,
+// DOC-1-EIGENAAR-1 (Danny 08-08, point 5): a 422 on a link PATCH is an EXPECTED,
 // caller-handled outcome — the backend guard's own readable reason ("Dit document is
-// al aan een ander onderdeel gekoppeld.") is surfaced via extractApiError below.
-// quietStatuses suppresses the generic dev diagnostic toast ("API PATCH … → 422",
-// api.ts) that otherwise fires first and buries that reason.
+// al aan een ander onderdeel gekoppeld." — i.e. "This document is already linked to
+// another item.") is surfaced via extractApiError below. quietStatuses suppresses
+// the generic dev diagnostic toast ("API PATCH … → 422", api.ts) that otherwise
+// fires first and buries that reason.
 const LINK_REQUEST_CONFIG = { quietStatuses: [422] }
 
 /** Documents section — owns its own docs state, upload, rename, search and preview.
@@ -53,8 +61,9 @@ const LINK_REQUEST_CONFIG = { quietStatuses: [422] }
  * this file owns the state + every persistence path.
  * DOC-LIST-LINK-1 (Danny 08-08): the list row also shows + changes the document's
  * link to an education/certification/language/skill/reference (the upload-time
- * "Koppelen aan" pick was write-only before this — no trace of it showed in the
- * list, and there was no way to change or remove it). See resolveDocLink/relinkDocument. */
+ * "Koppelen aan" ("Link to") pick was write-only before this — no trace of it
+ * showed in the list, and there was no way to change or remove it). See
+ * resolveDocLink/relinkDocument. */
 export default function DocumentsSection({ c, onRefresh }: { c: Candidate; onRefresh?: () => void }) {
   const { t } = useTranslation('candidates')
   // Point 4: every MANAGE action (upload/rename/replace/delete) gates on this
@@ -349,11 +358,12 @@ export default function DocumentsSection({ c, onRefresh }: { c: Candidate; onRef
 
   return (
     <div>
-      {/* No "DOCUMENTEN" heading here (Danny 09-08): the tab bar directly above
+      {/* No "DOCUMENTEN" ("DOCUMENTS") heading here (Danny 09-08): the tab bar directly above
           already says it, and the customer + vacancy documents tabs never had one
           — this was the odd one out. The toolbar starts with the search box. */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-        {/* FILTER-WIDTH-1 (Danny 08-08, punt 18 "filter bij documenten is te kort"):
+        {/* FILTER-WIDTH-1 (Danny 08-08, point 18, verbatim: "filter bij documenten
+            is te kort" — i.e. "the filter next to documents is too short"):
             this search box was the only documents toolbar still on a HARDCODED
             width: 110 — barely room for one word, so a file name could not be
             filtered. It now grows with the row (flex, minWidth floor) at the same

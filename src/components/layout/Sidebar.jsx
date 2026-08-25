@@ -71,21 +71,21 @@ const MODULE_NAV_ITEMS = [
   {
     id: 'shiftmanager', label: 'Shiftmanager', icon: BarChart3,
     children: [
-      // Rapporten (analytics)
+      // Reports (analytics)
       { id: 'shiftmanager.dashboard',        label: 'Dashboard' },
       { id: 'shiftmanager.customers',        label: 'Klanten-SM' },
       { id: 'shiftmanager.locations',        label: 'Locaties-SM' },
       { id: 'shiftmanager.departments',      label: 'Afdelingen-SM' },
       { id: 'shiftmanager.candidates',       label: 'Kandidaten-SM' },
       { id: 'shiftmanager.candidate-shifts', label: 'Kandidaten-Shifts' },
-      // Tabellen (operationele data)
+      // Tables (operational data)
       { id: 'shiftmanager.customers-table',   label: 'Klanten' },
       { id: 'shiftmanager.locations-table',   label: 'Locaties' },
       { id: 'shiftmanager.departments-table', label: 'Afdelingen' },
       { id: 'shiftmanager.candidates-table',  label: 'Kandidaten' },
       { id: 'shiftmanager.contacts-table',    label: 'Contactpersonen' },
       { id: 'shiftmanager.orders-table',      label: 'Diensten' },
-      // Communicatie / AI (los, module-gated)
+      // Communication / AI (standalone, module-gated)
       { id: 'shiftmanager.runs-table',        label: 'Uitvoeringen' },
       { id: 'shiftmanager.details',           label: 'WhatsApp' },
     ],
@@ -106,7 +106,7 @@ function SubNavItem({ item, active, onNavigate }) {
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       className="flex items-center w-full rounded-lg mb-0.5 border-none cursor-pointer font-sans transition-all duration-150"
-      // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- app-chrome control (components/layout = chroom, HUISSTIJL-1): nav-rail/topbar place-marker met eigen actieve-staat, geen actieknop; Button-varianten dekken de rail bewust niet
+      // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- app-chrome control (components/layout = chrome, HUISSTIJL-1): nav-rail/topbar place-marker with its own active state, not an action button; Button variants deliberately don't cover the rail
       style={{
         gap: 8, padding: '6px 10px',
         background: active ? 'var(--color-primary-bg)' : hovered ? 'var(--sidebar-hover)' : 'transparent',
@@ -119,7 +119,7 @@ function SubNavItem({ item, active, onNavigate }) {
     >
       <div className="flex-shrink-0 rounded-full"
         style={{ width: 4, height: 4, marginLeft: 2,
-          // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- chrome-accentvlak (actieve nav-marker/merkcirkel, zie de aangrenzende ACCENT-INK/SIDEBAR-CONTRAST-comments), geen actieoppervlak
+          // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- chrome accent surface (active nav marker/brand dot, see the adjacent ACCENT-INK/SIDEBAR-CONTRAST comments), not an action surface
           background: active ? 'var(--color-primary)' : 'currentColor' }} />
       <span style={{ fontSize: 12, fontWeight: active ? 500 : 400 }}>{item.label}</span>
     </button>
@@ -152,7 +152,7 @@ function NavItem({ item, activePage, expanded, openItems, toggleOpen, onNavigate
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
         className="flex items-center w-full rounded-lg mb-0.5 border-none cursor-pointer font-sans transition-all duration-150"
-        // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- app-chrome control (components/layout = chroom, HUISSTIJL-1): nav-rail/topbar place-marker met eigen actieve-staat, geen actieknop; Button-varianten dekken de rail bewust niet
+        // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- app-chrome control (components/layout = chrome, HUISSTIJL-1): nav-rail/topbar place-marker with its own active state, not an action button; Button variants deliberately don't cover the rail
         style={{
           gap:            expanded ? 9 : 0,
           padding:        expanded ? '7px 10px' : '7px',
@@ -186,7 +186,7 @@ function NavItem({ item, activePage, expanded, openItems, toggleOpen, onNavigate
             ) : (
               !item.soon && isActive && (
                 <span className="rounded-full"
-                  // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- chrome-accentvlak (actieve nav-marker/merkcirkel, zie de aangrenzende ACCENT-INK/SIDEBAR-CONTRAST-comments), geen actieoppervlak
+                  // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- chrome accent surface (active nav marker/brand dot, see the adjacent ACCENT-INK/SIDEBAR-CONTRAST comments), not an action surface
                   style={{ width: 5, height: 5, background: 'var(--color-primary)', flexShrink: 0 }} />
               )
             )}
@@ -284,7 +284,7 @@ export default function Sidebar({ expanded, activePage, setActivePage, koiosOpen
 
       {/* Bottom — Koios toggle + Settings */}
       <div style={{ padding: '6px 6px 10px', borderTop: '1px solid var(--sidebar-border)' }}>
-        {/* Koios AI knop — alleen als de tenant de module + permissie heeft */}
+        {/* Koios AI button — only when the tenant has the module + permission */}
         {koiosEntitled && (
         <button
           onClick={onToggleKoios}
@@ -293,7 +293,7 @@ export default function Sidebar({ expanded, activePage, setActivePage, koiosOpen
           aria-label="Koios AI"
           title="Koios AI"
           className="flex items-center w-full rounded-lg mb-1 border-none cursor-pointer font-sans transition-all duration-150"
-          // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- app-chrome control (components/layout = chroom, HUISSTIJL-1): nav-rail/topbar place-marker met eigen actieve-staat, geen actieknop; Button-varianten dekken de rail bewust niet
+          // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- app-chrome control (components/layout = chrome, HUISSTIJL-1): nav-rail/topbar place-marker with its own active state, not an action button; Button variants deliberately don't cover the rail
           style={{
             gap:            expanded ? 9 : 0,
             padding:        expanded ? '7px 10px' : '7px',
@@ -303,7 +303,7 @@ export default function Sidebar({ expanded, activePage, setActivePage, koiosOpen
             // rule (tint = place-marker; a full fill reads as an action button).
             // color-mix — a var() cannot take a hex-alpha suffix ('var(--x)20' is
             // invalid CSS, the declaration was silently dropped; audit-consolidatie 23-07).
-            // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- chrome-/merktint met bewust eigen percentages (Koios-gradiënt rust/actief-paar), predates lib/tint en is geen statuschip
+            // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- chrome/brand tint with deliberately its own percentages (Koios gradient rest/active pair), predates lib/tint and is not a status chip
             background: `linear-gradient(135deg, color-mix(in srgb, var(--color-primary) ${koiosOpen ? 22 : 12}%, transparent), color-mix(in srgb, var(--color-violet) ${koiosOpen ? 22 : 12}%, transparent))`,
             // ACCENT-INK-1: both states are light tint surfaces now, so the ink is
             // always the contrast-safe accent twin (AENF measured the raw accent 1.17:1).
@@ -311,14 +311,14 @@ export default function Sidebar({ expanded, activePage, setActivePage, koiosOpen
           }}
         >
           <div className="flex items-center justify-center rounded-full flex-shrink-0"
-            // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- chrome-accentvlak (actieve nav-marker/merkcirkel, zie de aangrenzende ACCENT-INK/SIDEBAR-CONTRAST-comments), geen actieoppervlak
+            // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- chrome accent surface (active nav marker/brand dot, see the adjacent ACCENT-INK/SIDEBAR-CONTRAST comments), not an action surface
             style={{ width: 18, height: 18, background: 'var(--color-primary)' }}>
             {/* The solid accent brand circle is the one constant across both states;
                 on-accent keeps the icon readable on a light tenant brand. */}
             <BrainCircuit size={11} color="var(--color-on-accent)" />
           </div>
           {expanded && (
-            // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- Koios-merklabel in het chroom met vaste accentinkt; SectionTitle-atoom draagt --text en past hier niet
+            // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- Koios brand label in the chrome with a fixed accent ink; the SectionTitle atom carries --text and doesn't fit here
             <span style={{ fontSize: 13, fontWeight: 600, flex: 1, textAlign: 'left',
               color: 'var(--color-primary-text)' }}>
               Koios
@@ -327,7 +327,7 @@ export default function Sidebar({ expanded, activePage, setActivePage, koiosOpen
           {/* AI badge stays in BOTH states (KOIOS-NAV-TINT-1: one button, two strengths). */}
           {expanded && (
             <span style={{ fontSize: 9, fontWeight: 600, padding: '2px 6px',
-              // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- chrome-accentvlak (actieve nav-marker/merkcirkel, zie de aangrenzende ACCENT-INK/SIDEBAR-CONTRAST-comments), geen actieoppervlak
+              // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- chrome accent surface (active nav marker/brand dot, see the adjacent ACCENT-INK/SIDEBAR-CONTRAST comments), not an action surface
               background: 'var(--color-primary)', color: 'var(--color-on-accent)', borderRadius: 99, letterSpacing: '0.04em' }}>
               AI
             </span>

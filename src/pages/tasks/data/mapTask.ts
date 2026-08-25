@@ -1,3 +1,6 @@
+// mapTask — the tasks data layer's mappers: raw API task/detail records into the
+// flat shapes the table/board/drawer render, plus the due-moment/overdue helpers
+// shared by the table, the drawer and the AI insights. See each export's own comment.
 import { initialsOf } from '@/lib/initials'
 import type { ApiTask, Task, TaskDetail, TaskLink } from '@/types/task'
 

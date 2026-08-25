@@ -1,7 +1,9 @@
+// LanguageSettings — the two Languages sub-tabs: the language list itself and
+// its proficiency levels, each a tenant-maintainable lookup via StatusListEditor.
 import { useTranslation } from 'react-i18next'
 import StatusListEditor from './StatusListEditor'
 
-/** Languages — the language list, its own sub-tab. Feeds the candidate Talen-sectie. */
+/** Languages — the language list, its own sub-tab. Feeds the candidate Languages section. */
 export function LanguageListSettings() {
   const { t } = useTranslation('settings')
   return (

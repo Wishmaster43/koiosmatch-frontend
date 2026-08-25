@@ -1,7 +1,8 @@
 /**
  * AssistTextPreview — the ONE readable preview for a Koios assist text result
  * (ASSIST-LEESBAAR-1, Danny 23-08: "Als het een lange tekst is, is dit niet
- * leesbaar zo"). Renders the model's reply as plain TEXT (never
+ * leesbaar zo" — "if it's a long text, this isn't readable like this").
+ * Renders the model's reply as plain TEXT (never
  * dangerouslySetInnerHTML — the reply is untrusted, §7) in body typography
  * with real paragraph spacing, collapsed to a calm height; a long reply gets
  * an explicit expand/collapse toggle instead of an endless tiny scroll well.
@@ -9,7 +10,8 @@
  * assist (§11 — one source, three call sites).
  *
  * ASSIST-COMPARE-1 (Danny 23-08: "oude en nieuwe tekst kan je nu niet goed
- * vergelijken"): an optional `compareWith` (the field's CURRENT plain text)
+ * vergelijken" — "you can't properly compare the old and new text right now"):
+ * an optional `compareWith` (the field's CURRENT plain text)
  * adds a small New/Compare SegmentedControl above the text. Compare renders
  * the word-level diff (textDiff.ts) as plain text spans — never HTML —
  * added = success-tint + underline, removed = danger-tint + line-through,

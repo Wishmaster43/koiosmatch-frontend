@@ -1,13 +1,13 @@
 /**
  * OperatorSelect — the shared, backend-matching filter operator dropdown, grouped
- * Tekst / Getal / Datum&tijd (Make-style, FILTER-VELD-1). Used by both the
+ * Text / Number / Date&time (Make-style, FILTER-VELD-1). Used by both the
  * edge-filter modal and the in-module FiltersField so "the same filter" means
  * the same UI everywhere (§4 consistency).
  *
  * Danny 08-08 (§4): the house searchable CreatableSelect replaces the former
  * native <select>+<optgroup> — CreatableSelect has no optgroup equivalent, so
  * the three groups are flattened into one list with each option's label
- * prefixed by its group name ("Tekst · bevat"), mirroring the same flattening
+ * prefixed by its group name ("Text · contains"), mirroring the same flattening
  * DocumentLinkPicker already applies to its own grouped picker. Preferred over
  * SelectMenu here specifically because this control is also used inside the
  * edge-filter modal, which is wrapped in useFocusTrap — EventCombobox's own

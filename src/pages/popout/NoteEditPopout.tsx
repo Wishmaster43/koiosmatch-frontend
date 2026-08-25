@@ -1,7 +1,9 @@
 /**
  * NoteEditPopout — ONE existing note in a second-screen window of its own
- * (NOTITIE-POPOUT-URL-1, Danny 11-08 "zet het notitie-id in de URL" + live 13-08
- * "zoals de pop-out van de profieltekst werkt moeten ook de notities werken").
+ * (NOTITIE-POPOUT-URL-1, Danny 11-08: "zet het notitie-id in de URL" — put the
+ * note id in the URL — + live 13-08: "zoals de pop-out van de profieltekst werkt
+ * moeten ook de notities werken" — notes must work the same way the profile-text
+ * pop-out works).
  * Route: /popout/notes/:entity/:id/:noteId — the id in the URL is the whole
  * design: no BroadcastChannel handoff to resolve, no race against a thread
  * window's own loading, and re-opening the same note re-focuses its OS window.

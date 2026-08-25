@@ -1,5 +1,3 @@
-import type { Customer } from '@/types/customer'
-
 /**
  * customerAdvice — the ONE deterministic rule engine behind the customers table's
  * "Koios" column. Mirrors candidateAdvice.ts's reference design: rules may ONLY
@@ -7,6 +5,7 @@ import type { Customer } from '@/types/customer'
  * a drawer-only field, so the table and any future drawer advice block can never
  * disagree the way the candidates table and drawer once did (Danny 25-07).
  */
+import type { Customer } from '@/types/customer'
 
 export type CustomerAdviceAction = 'follow_up' | 'none'
 

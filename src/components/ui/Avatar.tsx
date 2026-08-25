@@ -1,4 +1,3 @@
-import { tint } from '@/lib/tint'
 /**
  * Avatar — round photo or coloured initials bubble.
  *
@@ -6,6 +5,7 @@ import { tint } from '@/lib/tint'
  * `color` (candidate gender lookup, owner avatar_color) wins; otherwise the colour
  * is derived from the initials so the same person always gets the same colour.
  */
+import { tint } from '@/lib/tint'
 // Exported so avatarColor.ts (Shiftmanager department/contact/location avatars)
 // consumes this SAME palette — one hash, one colour, app-wide (was two drifting
 // 6- vs 7-colour arrays).

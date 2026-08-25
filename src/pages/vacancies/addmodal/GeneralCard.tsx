@@ -1,7 +1,7 @@
 /**
- * GeneralCard — Algemeen: titel (required) + functie + branche. Status moved
- * out to the header pill row (punt 7); klant/locatie/afdeling/contactpersoon
- * moved to their own ClientCascadeCard (punt 6) — this card now only answers
+ * GeneralCard — Algemeen (General): title (required) + job function + sector.
+ * Status moved out to the header pill row (punt 7); customer/location/
+ * department/contact moved to their own ClientCascadeCard (punt 6) — this card now only answers
  * "what job is this".
  */
 import { useTranslation } from 'react-i18next'

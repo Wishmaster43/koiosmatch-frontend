@@ -1,3 +1,10 @@
+/**
+ * koiosAdviceMeta — the ONE icon+colour table for every entity table's "Koios"
+ * advice column (KOIOS-ADVIES-OVERAL-1), plus the shared cell renderer that
+ * turns a `KoiosAdvice` into a dash, plain text, or a soft-chip pill. One
+ * source, so candidates/applications/vacancies/matches/opportunities/tasks/
+ * outreach/customers can never drift into eight different looks.
+ */
 import type { ComponentType, CSSProperties, ReactNode } from 'react'
 import { Target, Phone, CalendarPlus, Sparkles, AlertTriangle, RefreshCw, Clock, ClipboardList } from 'lucide-react'
 import SoftChip from '@/components/ui/SoftChip'

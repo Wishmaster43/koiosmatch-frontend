@@ -1,3 +1,8 @@
+/**
+ * Communication tab — sub-tabs (Danny 2026-07-03, mirrors the Planning panel):
+ * Toestemmingen · Taken · Notities · Tijdlijn · Conversaties. Each section renders
+ * on its own; NotesTab is reused per-section via its show* flags (no duplication).
+ */
 import { useMemo, useState } from 'react'
 import { BodyText, Caption } from '@/components/ui/typography'
 import type { ComponentType } from 'react'
@@ -38,11 +43,6 @@ function matchContext(ev: Record<string, unknown>): Record<string, unknown> | nu
 // Known sub-tab ids (deep-link validation lives here, not in the drawer).
 const KNOWN_SUB_TABS = ['conversations', 'notes', 'tasks', 'timeline', 'consent'] as const
 
-/**
- * Communication tab — sub-tabs (Danny 2026-07-03, mirrors the Planning panel):
- * Toestemmingen · Taken · Notities · Tijdlijn · Conversaties. Each section renders
- * on its own; NotesTab is reused per-section via its show* flags (no duplication).
- */
 export default function CommunicationTab({ c, onSave, onEditStatusEvent, initialSubTab, onRefresh }: { c: Candidate; onSave?: (consent: Record<string, unknown>) => void
   // Optional (Danny 2026-07-20, job A): forwarded to the shared NotesTab so the
   // Tijdlijn "Statuswissel" row gets an edit pencil — only when the host (CandidateDrawer)

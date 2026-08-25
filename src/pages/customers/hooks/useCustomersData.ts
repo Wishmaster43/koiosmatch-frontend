@@ -29,8 +29,9 @@ interface ListResult { customers: Customer[]; total: number; lastPage: number }
 const EMPTY_CUSTOMERS: Customer[] = []
 
 // CustomerController::index caps per_page at `between:1,200` — measured 2026-08-05
-// (Danny: "op 500 zetten geeft 'Klanten laden is mislukt'", reproduced as a real
-// 422; per_page=200 succeeds). Exported so CustomersPage can clamp the pageSize
+// (Danny, verbatim: "…mislukt" — i.e. setting it to 500 gives the toast
+// "Loading customers failed"), reproduced as a real
+// 422; per_page=200 succeeds. Exported so CustomersPage can clamp the pageSize
 // picker to the SAME ceiling — mirrors useApplicationsData/useVacanciesData's
 // identical constant + defensive re-clamp below.
 export const CUSTOMERS_MAX_PER_PAGE = 500

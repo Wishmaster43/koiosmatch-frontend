@@ -1,9 +1,11 @@
+/**
+ * Jargon terms — tenant vocabulary the AI corrects in dictate/improve results
+ * (e.g. "bfv" -> "BHV"). Backed by /jargon-terms, same PositionLookup shape as
+ * /industries (§ mirror IndustrySettings): no colour, reorderable, no in-use guard.
+ */
 import { useTranslation } from 'react-i18next'
 import StatusListEditor from './StatusListEditor'
 
-/** Jargon terms — tenant vocabulary the AI corrects in dictate/improve results
- * (e.g. "bfv" -> "BHV"). Backed by /jargon-terms, same PositionLookup shape as
- * /industries (§ mirror IndustrySettings): no colour, reorderable, no in-use guard. */
 export default function JargonSettings() {
   const { t } = useTranslation('settings')
   return (

@@ -1,8 +1,12 @@
 /**
- * WhatsAppLog — WhatsApp → Berichtenlog: inkomende + uitgaande WhatsApp-berichten
- * als audit-stijl log (richting/contact/bericht/status/datum). Built on the shared
+ * WhatsAppLog — WhatsApp → Berichtenlog ("Message log"): inkomende + uitgaande
+ * WhatsApp-berichten
+ * als audit-stijl log (richting/contact/bericht/status/datum) — "incoming +
+ * outgoing WhatsApp messages as an audit-style log (direction/contact/
+ * message/status/date)". Built on the shared
  * LogView, reusing the existing WhatsApp message data (which already carries
- * `direction`). Graceful: leeg tot er berichten zijn.
+ * `direction`). Graceful: leeg tot er berichten zijn — "empty until there are
+ * messages".
  *
  * Also carries the "Koios conversation memory (days)" tenant setting — how many
  * days of WhatsApp conversation history Koios keeps in context when drafting a

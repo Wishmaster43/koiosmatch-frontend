@@ -1,7 +1,9 @@
 /**
  * ImportWizardPage — the full-screen import wizard Danny asked for ("een nieuw
  * scherm... soort wizard: dat je data ziet, velden worden gekoppeld en je kan
- * eventueel nog wat aanpassen"): upload -> match columns -> editable preview ->
+ * eventueel nog wat aanpassen" — "a new screen... a kind of wizard: where you
+ * see the data, fields get matched and you can optionally still adjust
+ * something"): upload -> match columns -> editable preview ->
  * confirm -> result. Reachable at #import-wizard (see appPages.tsx).
  *
  * Thin route page: entity list + permission checks live here; the actual per-step

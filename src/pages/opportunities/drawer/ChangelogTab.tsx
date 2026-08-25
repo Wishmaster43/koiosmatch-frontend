@@ -1,3 +1,8 @@
+/**
+ * ChangelogTab — the opportunity's audit trail. Presentational; the fetch lives in
+ * useOpportunityActivity (§3). Handles the four UI states explicitly and shows a
+ * calm empty state until the backend read endpoint is live (404 → empty).
+ */
 import { useTranslation } from 'react-i18next'
 import { History, AlertTriangle } from 'lucide-react'
 import Avatar from '@/components/ui/Avatar'
@@ -7,11 +12,6 @@ import { Caption } from '@/components/ui/typography'
 import { useOpportunityActivity } from '../hooks/useOpportunityActivity'
 import type { Opportunity } from '@/types/opportunity'
 
-/**
- * ChangelogTab — the opportunity's audit trail. Presentational; the fetch lives in
- * useOpportunityActivity (§3). Handles the four UI states explicitly and shows a
- * calm empty state until the backend read endpoint is live (404 → empty).
- */
 export default function ChangelogTab({ opportunity: o }: { opportunity: Opportunity }) {
   const { t } = useTranslation('opportunities')
   const { formatDate } = useDateFormat()

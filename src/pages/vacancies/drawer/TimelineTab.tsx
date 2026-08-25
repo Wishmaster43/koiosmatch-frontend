@@ -1,3 +1,10 @@
+/**
+ * TimelineTab — read-only merged activity feed for a vacancy. A thin adapter: it
+ * maps the vacancy's events onto the shared EventTimeline (continuous axis, mono
+ * time, per-day headings) and owns only the vacancy's own event vocabulary, so
+ * this tab and the application Tijdlijn are literally the same component. See
+ * the default export's own doc comment below for the full rationale.
+ */
 import { useTranslation } from 'react-i18next'
 import { FilePlus2, Globe, Handshake, MessageSquare, Pencil, UserPlus } from 'lucide-react'
 import AiGeneratedLabel from '@/components/ui/AiGeneratedLabel'

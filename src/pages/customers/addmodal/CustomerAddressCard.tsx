@@ -1,7 +1,8 @@
 /**
  * CustomerAddressCard — the customer's own visiting address (KLANT-ADRES-1), added
  * so the "+ Klant" create form mirrors "+ Kandidaat" 1:1 (Danny 02-08: "de + nieuwe
- * klant popup moet lijken op + nieuwe kandidaat"). Full-width, three rows — street/
+ * klant popup moet lijken op + nieuwe kandidaat" — "the + new customer popup should
+ * look like + new candidate"). Full-width, three rows — street/
  * no/suffix, postcode/city, province/country — exactly like AddCandidateModal's own
  * AddressCard; the country/province cascade is the same shared useProvinces hook.
  * Labels reuse the customers namespace's existing `locations.detail.*` keys (the
@@ -38,7 +39,8 @@ export default function AddressCard({ form, set, provinces }: AddressCardProps) 
           the same concept in the create form and the drawer's address block. */}
       <div style={cardHead}>{t('overview.address')}</div>
       <div style={cardBox}>
-        {/* KLANT-LAYOUT-4 (Danny 14-08 "Straat is veel te klein"): three label-left
+        {/* KLANT-LAYOUT-4 (Danny 14-08 "Straat is veel te klein" — "Street is way
+            too small"): three label-left
             fields on one grid row left each input a stub, since every cell also
             carries the ~120px canon label. Street owns its own row; house number
             and suffix stay paired below it. */}
@@ -53,8 +55,9 @@ export default function AddressCard({ form, set, provinces }: AddressCardProps) 
             <TextField value={form.houseNumberSuffix} onChange={v => set('houseNumberSuffix', v)} />
           </FieldRow>
         </div>
-        {/* KLANTEN 2.3 (walkthrough 21-08): postcode en plaats elk een volle rij —
-            in de 1fr/2fr-split at de canon-labelbreedte het postcodeveld op. */}
+        {/* KLANTEN 2.3 (walkthrough 21-08): postcode and city each get their own
+            full row — in the 1fr/2fr split, the canon label width ate up the
+            postcode field. */}
         <FieldRow label={t('locations.detail.postalCode')}>
           <TextField value={form.postalCode} onChange={v => set('postalCode', v)} />
         </FieldRow>

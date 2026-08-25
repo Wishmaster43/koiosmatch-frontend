@@ -1,3 +1,6 @@
+// vacancyAiInsights — pure FE Koios heuristic insights for the vacancy drawer
+// (field completeness + a days-open/application-count flow reading). See
+// buildVacancyAdviceInsights below for the full field list and reasoning.
 import type { VacancyDetail } from '@/types/vacancy'
 import type { KoiosAdviceInsight } from '@/components/ai/KoiosAdviceBlock'
 

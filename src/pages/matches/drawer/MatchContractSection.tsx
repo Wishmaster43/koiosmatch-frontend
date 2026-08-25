@@ -12,7 +12,8 @@
  * (MatchRemarksBlock) — editing it here too would be two truths for one
  * field (§11). This table no longer carries it.
  *
- * MATCH-EDIT-1 (Danny 22-08, "waar is het potlootje bij een match?"): contract_type,
+ * MATCH-EDIT-1 (Danny 22-08: "waar is het potlootje bij een match?" — where is
+ * the pencil for a match?): contract_type,
  * start_date, end_date, hours_per_week, cost_center and billing_emails moved to
  * OverviewTab's own Contract/Financieel card (that card renders the moment the
  * drawer opens, so it is now the one place to edit them, §3A "no field in two
@@ -48,8 +49,9 @@ export default function MatchContractSection({ matchId, onUpdate, archived }: Pr
   const { types: caoTypes } = useCao()
   const { data, loading, error, unavailable, revertTick, retry, save } = useMatchContract(matchId, onUpdate)
 
-  // MATCH-FIN-GATE-1 (Danny 14-08: "de marge op een plaatsing, autorisatie"):
-  // what the agency PAYS (purchase_rate) and the derived margin are gated behind
+  // MATCH-FIN-GATE-1 (Danny 14-08: "de marge op een plaatsing, autorisatie" — the
+  // margin on a placement, authorization): what the agency PAYS (purchase_rate)
+  // and the derived margin are gated behind
   // the existing `matches.financial.view` permission — mirrors BankAccountCard's
   // FINANCIAL-GATE-1 precedent (hidden, not disabled, §7 is UX-only anyway). The
   // sell rate (what the customer pays) stays visible to every recruiter — it is

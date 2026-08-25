@@ -1,3 +1,11 @@
+/**
+ * StatusSubTab — APP-TAB-SPLIT-1, group (a): the rejection outcome (if any)
+ * above the phase/appointment/interview strip. Danny 21-08 ruling 1: the
+ * match-score criteria breakdown moved OUT of this group into its own
+ * MatchScoreSection — ApplicationTab now composes that directly, after the CV
+ * block (DRILLDOWN-VOLGORDE-CANON's information-cards-first order) — so this
+ * sub-tab is purely the outcome + at-a-glance strip.
+ */
 import RejectionSummary from '../RejectionSummary'
 import ApplicationStatusStrip from '../ApplicationStatusStrip'
 import type { ApplicationDetail } from '@/types/application'
@@ -9,14 +17,6 @@ interface StatusSubTabProps {
   onNavigateTab?: (id: string) => void
 }
 
-/**
- * StatusSubTab — APP-TAB-SPLIT-1, group (a): the rejection outcome (if any)
- * above the phase/appointment/interview strip. Danny 21-08 ruling 1: the
- * match-score criteria breakdown moved OUT of this group into its own
- * MatchScoreSection — ApplicationTab now composes that directly, after the CV
- * block (DRILLDOWN-VOLGORDE-CANON's information-cards-first order) — so this
- * sub-tab is purely the outcome + at-a-glance strip.
- */
 export default function StatusSubTab({ application: a, onNavigateTab }: StatusSubTabProps) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>

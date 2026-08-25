@@ -4,7 +4,8 @@
  * item 1, MUST-SPLIT) so every section imports the SAME tokens instead of each
  * redefining its own — one look, one place to change it.
  *
- * LABEL-LEFT CANON (Danny 13-08, "alles onder elkaar en niet naast elkaar"):
+ * LABEL-LEFT CANON (Danny 13-08, "alles onder elkaar en niet naast elkaar" —
+ * "everything stacked, not side by side"):
  * the old label-ABOVE-field rows (row2/row3/lbl below) read as one long
  * stacked strip. Mirrors PlanIntakeModal's planIntake/styles P33 canon —
  * every field is a full-width row with the label LEFT at the shared
@@ -18,12 +19,12 @@ export const overlay: React.CSSProperties = { position: 'fixed', inset: 0, backg
 export const input: React.CSSProperties = { width: '100%', height: 36, padding: '0 10px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, outline: 'none', boxSizing: 'border-box', background: 'var(--surface)', color: 'var(--text)' }
 export const errMsg: React.CSSProperties = { fontSize: 11, color: 'var(--color-danger-text)', marginTop: 3 }
 // Kept for the rare inline label that isn't a full FormField row (e.g. the
-// Contactpersoon/billing-email "label + add-button" header rows below).
+// Contactpersoon ("Contact person")/billing-email "label + add-button" header rows below).
 export const lbl: React.CSSProperties = { fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)', marginBottom: 5 }
 
 // P33 label-left row: the canon 120px label column, field takes the rest.
 // No own marginBottom: the cardBox's flex gap (modalCards) already spaces rows —
-// a per-row margin ON TOP doubled every gap to 24px (Danny 14-08 "spacing te veel").
+// a per-row margin ON TOP doubled every gap to 24px (Danny 14-08 "spacing te veel" — "too much spacing").
 export const labelLeftRow: React.CSSProperties = { display: 'flex', alignItems: 'flex-start', gap: 10 }
 export const rowLabel = CANON_LABEL_STYLE
 export const rowField: React.CSSProperties = { flex: 1, minWidth: 0 }

@@ -1,6 +1,3 @@
-import { useRef, useCallback } from 'react'
-import type { CSSProperties, ReactNode, PointerEvent as ReactPointerEvent, KeyboardEvent as ReactKeyboardEvent } from 'react'
-
 /**
  * Slider — a calm horizontal slider with a draggable ball (thumb) and three
  * anchor labels (left / center / right). Continuous 0..max. Pointer-draggable
@@ -16,6 +13,9 @@ import type { CSSProperties, ReactNode, PointerEvent as ReactPointerEvent, Keybo
  *
  * labels: [leftLabel, centerLabel, rightLabel]
  */
+import { useRef, useCallback } from 'react'
+import type { CSSProperties, ReactNode, PointerEvent as ReactPointerEvent, KeyboardEvent as ReactKeyboardEvent } from 'react'
+
 interface SliderProps {
   value?: number
   /** Range mode: [lower, upper]. Providing it switches the slider to two thumbs. */
@@ -44,7 +44,7 @@ export default function Slider({
   // A collapsed range (lower === upper) makes "closest thumb" meaningless — both
   // distances are identical by construction, so the down-click can't tell them
   // apart. Remember the down VALUE here; the first move resolves the tie by
-  // DIRECTION instead (Danny 09-08, "verspringt"). Cleared once resolved.
+  // DIRECTION instead (Danny 09-08, "verspringt" — i.e. "jumps"). Cleared once resolved.
   const pendingTieValue = useRef<number | null>(null)
 
   const [lower, upper] = range ?? [0, max]

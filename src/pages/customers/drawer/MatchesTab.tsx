@@ -1,17 +1,3 @@
-import { useState } from 'react'
-import { useTranslation } from 'react-i18next'
-import { Search } from 'lucide-react'
-import SectionCard from '@/components/ui/SectionCard'
-import DrawerAddButton from '@/components/drawer/DrawerAddButton'
-import StatusFilterSelect, { useStatusFilter } from '@/components/drawer/StatusFilterSelect'
-import { useMatchStatuses } from '@/lib/useMatchStatuses'
-import { useApps } from '@/context/AppsContext'
-import { MatchCard, MatchListHeaderBar } from '@/pages/matches/shared'
-import { MatchModal } from '@/pages/candidates/shared'
-import { useCustomerMatches } from '../hooks/useCustomerDrawerData'
-import type { CustomerMatchRow } from '../hooks/useCustomerDrawerData'
-import type { Id } from '@/types/common'
-
 /**
  * MatchesTab — the customer's matches, mirroring the candidate drawer's own
  * MatchesTab 1:1 (§3A/§3B): read-only cards (a match's own FIELDS are opened/
@@ -29,16 +15,32 @@ import type { Id } from '@/types/common'
  * value (a prefill, never a lock — the recruiter can still change it).
  *
  * TOOLBAR (Danny 03-08: "bij Matches wil ik ook een zoekbalk en statussen
- * hebben"): search (vacancy title + candidate name) + the shared
- * StatusFilterSelect keyed on the SAME match-status vocabulary the title's own
- * fase already resolves via useMatchStatuses. House order (Danny, live 04-08:
- * "Nieuwe Match is rechts!!! en status in het midden"): search left, status
- * filter middle, "+ Match" last — same left-to-right reading as every other
- * sub-entity list (Locaties/Afdelingen/Contactpersonen).
+ * hebben", i.e. "on Matches I also want a search bar and statuses"): search
+ * (vacancy title + candidate name) + the shared StatusFilterSelect keyed on
+ * the SAME match-status vocabulary the title's own fase already resolves via
+ * useMatchStatuses. House order (Danny, live 04-08: "Nieuwe Match is
+ * rechts!!! en status in het midden", i.e. "New Match is on the right!!! and
+ * status in the middle"): search left, status filter middle, "+ Match" last —
+ * same left-to-right reading as every other sub-entity list (Locaties/
+ * Afdelingen/Contactpersonen).
  *
  * Lazily fetched (§9): only mounts — and only then fires GET /matches?customer_id=
  * — when this tab is the active one, same as every other customer drawer tab.
  */
+import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import { Search } from 'lucide-react'
+import SectionCard from '@/components/ui/SectionCard'
+import DrawerAddButton from '@/components/drawer/DrawerAddButton'
+import StatusFilterSelect, { useStatusFilter } from '@/components/drawer/StatusFilterSelect'
+import { useMatchStatuses } from '@/lib/useMatchStatuses'
+import { useApps } from '@/context/AppsContext'
+import { MatchCard, MatchListHeaderBar } from '@/pages/matches/shared'
+import { MatchModal } from '@/pages/candidates/shared'
+import { useCustomerMatches } from '../hooks/useCustomerDrawerData'
+import type { CustomerMatchRow } from '../hooks/useCustomerDrawerData'
+import type { Id } from '@/types/common'
+
 export default function MatchesTab({ customerId }: { customerId?: Id }) {
   const { t } = useTranslation(['customers', 'candidates', 'matches'])
   // Match lifecycle lookup (R-1b) — resolves the title's fase from the status

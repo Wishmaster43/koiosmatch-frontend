@@ -1,3 +1,10 @@
+/**
+ * ProposalSettings — Settings → Sollicitaties → Voorstellen. Configures the
+ * subject/body template a recruiter sends when proposing a candidate to a
+ * customer contact, whether recording a proposal auto-advances the funnel phase,
+ * and which CV variant (redacted vs. full) is offered by default. Koios does not
+ * send anything itself yet (PROPOSE-SHARE-LINK-1 open) — the notice above says so.
+ */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Info, Save } from 'lucide-react'
@@ -26,13 +33,6 @@ const DEFAULTS = {
   default_cv_variant: 'proposal',
 }
 
-/**
- * ProposalSettings — Settings → Sollicitaties → Voorstellen. Configures the
- * subject/body template a recruiter sends when proposing a candidate to a
- * customer contact, whether recording a proposal auto-advances the funnel phase,
- * and which CV variant (redacted vs. full) is offered by default. Koios does not
- * send anything itself yet (PROPOSE-SHARE-LINK-1 open) — the notice above says so.
- */
 export default function ProposalSettings() {
   const { t } = useTranslation('settings')
   const values = useAllSettings()

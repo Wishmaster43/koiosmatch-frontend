@@ -1,3 +1,22 @@
+/**
+ * AdditionalSkillsSection — the vacancy's required-skills list, brought onto the
+ * SAME add/edit/remove interaction as the candidate drawer's (frozen canon)
+ * SkillsTab (SectionTabs.tsx): a "+ Toevoegen"-style trigger reveals an inline
+ * add form instead of an always-visible text+button row, and each row gets its
+ * own pencil (edit-in-place, same list position) + trash (remove) — never
+ * bare X-only removal with no way to rename a row. VACANCY-SKILLS-PARITY-1
+ * (Danny 08-08): "Vereiste vaardigheden bij vacature werken anders dan
+ * Vaardigheden bij kandidaten" (i.e. "Required skills on a vacancy work
+ * differently than Skills on candidates") — this reuses the shared
+ * `AddableSection` the candidate side already builds on (§3A: extend, never
+ * duplicate).
+ *
+ * Persisted shape is UNCHANGED: the vacancy PATCH still carries a plain
+ * `skills: string[]` (buildVacancyPatch) — a vacancy skill has no id/level/
+ * document like the candidate's does, so `fields` carries only one free-text
+ * `name`, and `editInitial`/`renderItem` wrap/unwrap the plain string at this
+ * component's boundary rather than changing what gets persisted.
+ */
 import type { ComponentType } from 'react'
 import { useTranslation } from 'react-i18next'
 import { BodyText } from '@/components/ui/typography'
@@ -17,23 +36,6 @@ interface Props {
   onRemoveSkill: (name: string) => void
 }
 
-/**
- * AdditionalSkillsSection — the vacancy's required-skills list, brought onto the
- * SAME add/edit/remove interaction as the candidate drawer's (frozen canon)
- * SkillsTab (SectionTabs.tsx): a "+ Toevoegen"-style trigger reveals an inline
- * add form instead of an always-visible text+button row, and each row gets its
- * own pencil (edit-in-place, same list position) + trash (remove) — never
- * bare X-only removal with no way to rename a row. VACANCY-SKILLS-PARITY-1
- * (Danny 08-08): "Vereiste vaardigheden bij vacature werken anders dan
- * Vaardigheden bij kandidaten" — this reuses the shared `AddableSection` the
- * candidate side already builds on (§3A: extend, never duplicate).
- *
- * Persisted shape is UNCHANGED: the vacancy PATCH still carries a plain
- * `skills: string[]` (buildVacancyPatch) — a vacancy skill has no id/level/
- * document like the candidate's does, so `fields` carries only one free-text
- * `name`, and `editInitial`/`renderItem` wrap/unwrap the plain string at this
- * component's boundary rather than changing what gets persisted.
- */
 export default function AdditionalSkillsSection({ skills, onAddSkill, onEditSkill, onRemoveSkill }: Props) {
   const { t } = useTranslation('vacancies')
   const fields = [{ key: 'name', label: t('details.addSkill') }]

@@ -1,3 +1,9 @@
+/**
+ * CandidatesBulkBar — the selection action bar shown above the table when ≥1
+ * candidate is checked. A single "Massa mutaties" menu (ActionMenu, drill-in)
+ * holds every bulk mutation. Each action is one config node; the data it needs
+ * (users, lookups, tags) comes in via props so this stays a thin assembler.
+ */
 import { useTranslation } from 'react-i18next'
 import { ListChecks, Folder, FolderPlus, FolderMinus, UserCog, Milestone, Briefcase, Tag, Tags, StickyNote, Archive, ShieldCheck, UserCheck, Activity, GitMerge, RefreshCw, X, ExternalLink, Link2, Building2, Layers } from 'lucide-react'
 import ActionMenu from '@/components/ui/ActionMenu'
@@ -63,12 +69,6 @@ interface CandidatesBulkBarProps {
   selectedTags?: string[]
 }
 
-/**
- * CandidatesBulkBar — the selection action bar shown above the table when ≥1
- * candidate is checked. A single "Massa mutaties" menu (ActionMenu, drill-in)
- * holds every bulk mutation. Each action is one config node; the data it needs
- * (users, lookups, tags) comes in via props so this stays a thin assembler.
- */
 export default function CandidatesBulkBar({
   count, onClear, bulkScope, onSetBulkScope, filteredTotal, anyFilterActive,
   onAddToPool, onRemoveFromPool, onSetOwner, onSetStage, onSetTypes, onSetConsent,

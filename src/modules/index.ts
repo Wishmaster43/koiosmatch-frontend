@@ -1,3 +1,10 @@
+/**
+ * modules/index — the module registry barrel. Every workflow building block
+ * (§0.11: workflow tokens, not coded jobs) is imported once here and folded
+ * into the derived lookup maps below (label/icon, config schema, required
+ * app/module, Make.com identifier mapping). The ONE source the canvas editor
+ * and the module picker both read — never a second hand-maintained map.
+ */
 import task_create        from './task_create'
 import appointment_create from './appointment_create'
 import calllist_add       from './calllist_add'

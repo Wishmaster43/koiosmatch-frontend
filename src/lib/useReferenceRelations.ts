@@ -1,4 +1,3 @@
-import { useMemo } from 'react'
 /**
  * useReferenceRelations — tenant-configurable relation lookup for a candidate's
  * third-party REFERENCES (REFERENTIE-VELDEN-1). Feeds candidate_references.relation_id.
@@ -29,6 +28,7 @@ import { useMemo } from 'react'
  * Fetch/cache/dedupe lives in useCachedLookup (audit item 8) — one GET per
  * session, shared across every mounted consumer.
  */
+import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { AxiosResponse } from 'axios'
 import { useCachedLookup } from './useCachedLookup'

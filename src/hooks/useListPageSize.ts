@@ -10,15 +10,17 @@
  *  1. STICKINESS — every other piece of page state (page number, filters, view mode)
  *     already survives the shell's unmount-on-navigate via usePageMemory; pageSize was
  *     the one exception, so a user's explicit pick reverted to the seeded default the
- *     moment they navigated away and back (measured root cause of "Sollicitaties: rows
- *     per page kan niet op 50 gezet worden" — the shell unmounts ApplicationsPage on
- *     every navigation, and pageSize alone wasn't behind usePageMemory).
+ *     moment they navigated away and back (measured root cause of a bug reported,
+ *     verbatim, as "…op 50 gezet worden" — i.e. "Applications: rows per
+ *     page can't be set to 50" — the shell unmounts ApplicationsPage on every
+ *     navigation, and pageSize alone wasn't behind usePageMemory).
  *  2. HONESTY — `serverCap` clamps both the seeded default AND the offered dropdown
  *     options to what the endpoint actually accepts, so picking the tenant's 500
  *     preference on an endpoint capped lower (e.g. Vacancies/Customers at 200) can
- *     never 422 ("vacatures klapt eruit" — VacancyQuery::rules() caps at 200, but the
- *     page sent the raw pageSize straight through). The control shows the honestly-
- *     in-effect state, never a promise the backend can't keep (house style, §4).
+ *     never 422 (the measured bug: "vacatures klapt eruit", i.e. "vacancies crash out"
+ *     — VacancyQuery::rules() caps at 200, but the page sent the raw pageSize straight
+ *     through). The control shows the honestly-in-effect state, never a promise
+ *     the backend can't keep (house style, §4).
  */
 import { usePageMemory } from '@/lib/usePageMemory'
 import { useAuth } from '@/context/AuthContext'

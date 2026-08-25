@@ -1,3 +1,6 @@
+// PendingEraseBanner — the shared danger-tinted "pending erase" notice for any
+// trash-enabled entity drawer, plus its optional unmark-to-archive action. See
+// the fuller doc comment on the component below for the icon/button variants.
 import type { ReactNode, ComponentType } from 'react'
 import { ArchiveRestore } from 'lucide-react'
 import { tintBg, tintBorder, chipInk } from '@/lib/tint'

@@ -1,36 +1,37 @@
 /**
- * popupCommands — HET ene sneltoetsen-bestand voor pop-ups (walkthrough 21-08,
- * POP-UPS 3.2: "een apart TSX voor sneltoetsen"). Elke toets die een popup
- * app-breed verstaat, staat HIER — nergens anders. Consumers:
- *   - useFocusTrap (elke FloatingPanel-modal + de losse getrapte panels) routes
- *     zijn keydown hierdoorheen — Esc-sluiten + Tab-trap.
- *   - WorkflowCanvasEditor's document-level Esc (de bewaakte editor-exit).
- * Een NIEUWE popup-sneltoets (bijv. Cmd+Enter = primaire actie) landt als één
- * case in handlePopupKeydown + één regel in POPUP_COMMANDS, en werkt dan overal.
+ * popupCommands — THE one shortcut-key file for popups (walkthrough 21-08,
+ * POP-UPS 3.2, verbatim: "een apart TSX voor sneltoetsen" — i.e. "a separate
+ * TSX for shortcut keys"). Every key that a popup understands app-wide lives
+ * HERE — nowhere else. Consumers:
+ *   - useFocusTrap (every FloatingPanel modal + the standalone trapped panels)
+ *     routes its keydown through this — Esc-close + Tab-trap.
+ *   - WorkflowCanvasEditor's document-level Esc (the guarded editor-exit).
+ * A NEW popup shortcut (e.g. Cmd+Enter = primary action) lands as one case in
+ * handlePopupKeydown + one line in POPUP_COMMANDS, and then works everywhere.
  */
 
-// Menselijk leesbare commandotabel — de ene bron voor een toekomstig
-// sneltoetsen-overzicht in de UI (labels via i18n op de plek die hem toont).
+// Human-readable command table — the one source for a future shortcuts
+// overview in the UI (labels go through i18n at the place that shows it).
 export const POPUP_COMMANDS = [
   { keys: 'Escape', command: 'close' },
   { keys: 'Tab / Shift+Tab', command: 'cycle-focus (binnen de popup)' },
 ] as const
 
 export interface PopupKeyHandlers {
-  // Sluiten (Esc). De aanroeper bepaalt wat "sluiten" betekent — een bewaakte
-  // editor-exit geeft hier zijn eigen confirm-variant door.
+  // Close (Esc). The caller decides what "close" means — a guarded editor-exit
+  // passes its own confirm variant here.
   onClose?: () => void
-  // Focus-cyclus (Tab): alleen gezet door useFocusTrap, dat de focusables kent.
+  // Focus cycle (Tab): only set by useFocusTrap, which knows the focusables.
   focusables?: () => HTMLElement[]
 }
 
 /**
- * Verwerk één keydown volgens de popup-commandotabel. Retourneert true als de
- * toets een commando was (afgehandeld), false als hij vrij doorloopt.
+ * Handle one keydown against the popup command table. Returns true when the
+ * key was a command (handled), false when it should keep propagating freely.
  */
 export function handlePopupKeydown(e: KeyboardEvent, { onClose, focusables }: PopupKeyHandlers): boolean {
   if (e.key === 'Escape') {
-    // stopPropagation: een geneste popup sluit alléén zichzelf, nooit zijn host.
+    // stopPropagation: a nested popup closes ONLY itself, never its host.
     e.stopPropagation()
     onClose?.()
     return true

@@ -1,3 +1,16 @@
+/**
+ * DetailsRequirementsTab — Eisen ("Requirements") sub-tab (VAC-DETAILS-SPLIT-1):
+ * ervaring, senioriteit, opleiding — "experience, seniority, education". Its OWN
+ * pencil/save/cancel (`requirements.*` from
+ * the hook) — flipping it never touches Algemeen/Locatie/Voorwaarden's
+ * ("General/Location/Conditions") drafts.
+ *
+ * DRILLDOWN-VOLGORDE-CANON (Danny 21-08, VACATURES 4): the required-skills
+ * list that used to render here moved to the Vacaturetekst ("Vacancy text")
+ * tab, directly
+ * under the vacancy text (AdditionalSkillsSection, now wired through its own
+ * useVacancySkills hook) — this card is back to just the three field rows.
+ */
 import { useTranslation } from 'react-i18next'
 import { row, card, controls, dash, pair, makeFieldHelpers } from './detailsFieldKit'
 import type { RequirementsSection } from '../hooks/useVacancyDetailsForm'
@@ -11,16 +24,6 @@ interface Props {
   educationLevels: Level[]
 }
 
-/**
- * DetailsRequirementsTab — Eisen sub-tab (VAC-DETAILS-SPLIT-1): ervaring,
- * senioriteit, opleiding. Its OWN pencil/save/cancel (`requirements.*` from
- * the hook) — flipping it never touches Algemeen/Locatie/Voorwaarden's drafts.
- *
- * DRILLDOWN-VOLGORDE-CANON (Danny 21-08, VACATURES 4): the required-skills
- * list that used to render here moved to the Vacaturetekst tab, directly
- * under the vacancy text (AdditionalSkillsSection, now wired through its own
- * useVacancySkills hook) — this card is back to just the three field rows.
- */
 export default function DetailsRequirementsTab({ vacancy: v, requirements, seniorityLevels, educationLevels }: Props) {
   const { t } = useTranslation('vacancies')
   const { editing, setEditing, form, setF, save, cancel } = requirements

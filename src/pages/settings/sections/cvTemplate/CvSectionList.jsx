@@ -41,7 +41,9 @@ export default function CvSectionList({ sections, onSave }) {
   }
 
   // Move a MOVABLE section to the other CV region (sidebar ⇄ main column,
-  // Danny 28-07: "ik wil ook de locatie van elke sectie kunnen bepalen"); it
+  // Danny 28-07, translated: "I also want to be able to determine the location
+  // of each section" — verbatim: "ik wil ook de locatie van elke sectie kunnen
+  // bepalen"); it
   // lands wherever its stored index puts it in the new region, adjustable
   // afterwards with the up/down arrows.
   const handleSectionPlacement = (id, placement) => {
@@ -74,7 +76,8 @@ export default function CvSectionList({ sections, onSave }) {
             return (
               <div key={sec.id} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 0',
                 borderBottom: idx < arr.length - 1 ? '1px solid var(--border)' : 'none' }}>
-                {/* Shared house Toggle (Danny 28-07: "GEEN VINKJES MAAR TOGGLES!!!") — replaces the
+                {/* Shared house Toggle (Danny 28-07, translated: "NO CHECKBOXES BUT
+                    TOGGLES!!!" — verbatim: "GEEN VINKJES MAAR TOGGLES!!!") — replaces the
                     hand-rolled ToggleLeft/ToggleRight icon button so every on/off control looks the same. */}
                 <Toggle checked={sec.enabled} ariaLabel={label} onChange={() => handleSectionToggle(sec.id)} />
                 <span style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',

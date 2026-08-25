@@ -1,3 +1,9 @@
+/**
+ * VacanciesBulkBar — selection action bar shown above the table when ≥1 vacancy is
+ * checked. A single drill-in ActionMenu holds every bulk mutation; the data each
+ * action needs (users, statuses, customers, tags) comes in via props so this stays
+ * a thin assembler. Mirrors CandidatesBulkBar — extend by adding a node.
+ */
 import { useTranslation } from 'react-i18next'
 import { ListChecks, Search, UserCog, CircleDot, Building2, Globe, GlobeLock, Bot, BotOff, Tag, StickyNote, Archive, X } from 'lucide-react'
 import ActionMenu from '@/components/ui/ActionMenu'
@@ -37,12 +43,6 @@ interface VacanciesBulkBarProps {
   onOpenCandidateSearch?: (id: Id) => void
 }
 
-/**
- * VacanciesBulkBar — selection action bar shown above the table when ≥1 vacancy is
- * checked. A single drill-in ActionMenu holds every bulk mutation; the data each
- * action needs (users, statuses, customers, tags) comes in via props so this stays
- * a thin assembler. Mirrors CandidatesBulkBar — extend by adding a node.
- */
 export default function VacanciesBulkBar({
   count, onClear, onSetOwner, onSetStatus, onSetClient, onPublish, onUnpublish, onSetAiAgent,
   onRemoveTag, onAddNote, onArchive, canArchive = false,

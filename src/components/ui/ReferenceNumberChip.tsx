@@ -1,3 +1,8 @@
+/**
+ * ReferenceNumberChip — the ONE place every entity drawer shows its human-readable
+ * reference number (NUMMER-1): JetBrains Mono, muted, click-to-copy. Shared so the
+ * candidate/customer/vacancy/match drawers stay pixel-identical (§3A "same spot").
+ */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Check, Copy } from 'lucide-react'
@@ -8,11 +13,6 @@ interface ReferenceNumberChipProps {
   value?: string | null
 }
 
-/**
- * ReferenceNumberChip — the ONE place every entity drawer shows its human-readable
- * reference number (NUMMER-1): JetBrains Mono, muted, click-to-copy. Shared so the
- * candidate/customer/vacancy/match drawers stay pixel-identical (§3A "same spot").
- */
 export default function ReferenceNumberChip({ value }: ReferenceNumberChipProps) {
   const { t } = useTranslation('common')
   const [copied, setCopied] = useState(false)

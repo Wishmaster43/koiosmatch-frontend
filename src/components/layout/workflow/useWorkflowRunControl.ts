@@ -27,12 +27,14 @@ export function useWorkflowRunControl({ workflowId, initialRunId = null, onRunSt
   const [activeRunId,    setActiveRunId]    = useState<string | number | null>(initialRunId)
   const liveRun = useWorkflowRun(activeRunId)
   // RUN-CONTROL-1: true after a 409 "already running" — the header shows the
-  // i18n "loopt al" feedback while the logs panel points at that run.
+  // i18n "loopt al" ("already running") feedback while the logs panel points
+  // at that run.
   const [runConflict,    setRunConflict]    = useState(initialRunId != null)
 
   // RUN-VISIBILITY-1 (Danny 24-07 "opnieuw open en je ziet niet dat hij nog bezig
-  // is"): on mount, ADOPT a run that is still live for this workflow — the poll,
-  // node rings, Bezig-status and the stop button resume as if never closed.
+  // is" — "reopen it and you can't see that it's still busy"): on mount, ADOPT a
+  // run that is still live for this workflow — the poll, node rings, "Bezig"
+  // ("busy") status and the stop button resume as if never closed.
   const adopted = useRef(false)
   useEffect(() => {
     if (adopted.current || initialRunId != null || workflowId == null) return
@@ -78,14 +80,16 @@ export function useWorkflowRunControl({ workflowId, initialRunId = null, onRunSt
     } catch (err) {
       const e = err as { response?: { status?: number; data?: { message?: string; run_id?: string | number } } }
       // RUN-CONTROL-1 single-flight: 409 = this workflow already has a live run.
-      // Point the viewer at THAT run (poll + logs panel) and show "loopt al".
+      // Point the viewer at THAT run (poll + logs panel) and show "loopt al"
+      // ("already running").
       if (e.response?.status === 409) {
         if (e.response.data?.run_id != null) setActiveRunId(e.response.data.run_id)
         setRunConflict(true)
         onRunStarted?.()
       } else {
-        // Surface the backend reason (e.g. "Workflow is niet actief" on a draft);
-        // empty string = generic message via i18n in the component.
+        // Surface the backend reason (e.g. "Workflow is niet actief" / "Workflow
+        // is not active" on a draft); empty string = generic message via i18n
+        // in the component.
         setRunError(e.response?.data?.message ?? '')
       }
     } finally {

@@ -1,10 +1,3 @@
-import { useTranslation } from 'react-i18next'
-import SharedNotesTab from '@/components/drawer/tabs/NotesTab'
-import { useNoteTypes } from '@/lib/useNoteTypes'
-import { useOpportunityNotes } from '../hooks/useOpportunityNotes'
-import type { Opportunity } from '@/types/opportunity'
-
-// Rich-text editor tooltips (mirror the candidate/application drawer).
 /**
  * NotesTab — internal notes for an opportunity. Reuses the shared NotesTab so it
  * looks exactly like the candidate drawer; data via /opportunities/{id}/notes (C-41).
@@ -12,6 +5,12 @@ import type { Opportunity } from '@/types/opportunity'
  * /opportunities/{id}/notes/{note} (useOpportunityNotes.editNote) — the candidate
  * wiring (CommunicationTab → useCandidateNotes.editNote) is the reference.
  */
+import { useTranslation } from 'react-i18next'
+import SharedNotesTab from '@/components/drawer/tabs/NotesTab'
+import { useNoteTypes } from '@/lib/useNoteTypes'
+import { useOpportunityNotes } from '../hooks/useOpportunityNotes'
+import type { Opportunity } from '@/types/opportunity'
+
 export default function NotesTab({ opportunity: o }: { opportunity: Opportunity }) {
   const { t } = useTranslation(['opportunities', 'common'])
   // Note categories from the tenant lookup, scoped to 'opportunity' (NOTE-TYPES-2/3).

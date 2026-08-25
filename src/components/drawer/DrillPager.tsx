@@ -1,6 +1,7 @@
 /**
  * DrillPager — prev/next stepper for a drawer drill-down (Danny 02-08: "moeten er
- * pijltjes komen zodat je vanuit één contactpersoon naar de volgende kan en terug").
+ * pijltjes komen zodat je vanuit één contactpersoon naar de volgende kan en terug" —
+ * we need arrows so you can step from one contact to the next and back).
  * ONE shared component for every entity's detail title row — contacts and locations
  * today, departments next (see that panel's own adoption note) — so browsing the
  * list the caller already filtered/sorted never needs a trip back to the list.

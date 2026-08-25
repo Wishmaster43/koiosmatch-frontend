@@ -1,3 +1,15 @@
+/**
+ * DetailsTab — the deal fields (value · hours · term · service/agreement type) as an
+ * in-place editable card (the organisation card was dropped 2026-07-13: customer /
+ * location / department / contact live in the drawer-header pickers per C-42).
+ * Service/agreement types come from tenant lookups (seed fallback until the backend).
+ *
+ * DRILLDOWN-VOLGORDE-CANON (Danny 21-08, §3A): the block order follows the
+ * candidate/match blueprint — (1) INFORMATIE (the deal fields), (2) VRIJE TEKST
+ * with its own second-screen pop-out (OPP-DESCRIPTION-1, "Kansomschrijving"),
+ * (3) KOIOS AI, (4) VESTIGING last, read-only. This corrects the previous
+ * order, which had the description block first, above the deal fields.
+ */
 import { useTranslation } from 'react-i18next'
 import EditableFieldTable from '@/components/forms/EditableFieldTable'
 import type { FieldRow } from '@/components/forms/EditableFieldTable'
@@ -16,18 +28,6 @@ interface DetailsTabProps {
   stages?: LookupOption[]
 }
 
-/**
- * DetailsTab — the deal fields (value · hours · term · service/agreement type) as an
- * in-place editable card (the organisation card was dropped 2026-07-13: customer /
- * location / department / contact live in the drawer-header pickers per C-42).
- * Service/agreement types come from tenant lookups (seed fallback until the backend).
- *
- * DRILLDOWN-VOLGORDE-CANON (Danny 21-08, §3A): the block order follows the
- * candidate/match blueprint — (1) INFORMATIE (the deal fields), (2) VRIJE TEKST
- * with its own second-screen pop-out (OPP-DESCRIPTION-1, "Kansomschrijving"),
- * (3) KOIOS AI, (4) VESTIGING last, read-only. This corrects the previous
- * order, which had the description block first, above the deal fields.
- */
 export default function DetailsTab({ opportunity: o, onUpdate, stages = [] }: DetailsTabProps) {
   const { t } = useTranslation(['opportunities', 'candidates'])
   const { serviceTypes }   = useOpportunityServiceTypes()
@@ -92,7 +92,7 @@ export default function DetailsTab({ opportunity: o, onUpdate, stages = [] }: De
           11px labels (candidate ProfileTab convention). */}
       <EditableFieldTable title={t('details.groups.deal')} fields={dealFields} value={dealValue}
         onSave={onUpdate ? saveDeal : undefined} />
-      {/* Organisation card dropped (Danny 2026-07-13): fase/eigenaar/aangemaakt all live in the drawer header already. */}
+      {/* Organisation card dropped (Danny 2026-07-13): phase/owner/created all live in the drawer header already. */}
       {/* (2) VRIJE TEKST — the "Kansomschrijving" (OPP-DESCRIPTION-1), own pencil/save/✕
           and second-screen pop-out (TEKST-POPOUT-1), independent of the
           EditableFieldTable's own edit state above. A cleared editor still

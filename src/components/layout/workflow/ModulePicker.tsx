@@ -98,7 +98,7 @@ export default function ModulePicker({ insertAfterEdgeId, onSelect, onClose }: {
       <button key={type} type="button"
         onClick={() => { onSelect(type, insertAfterEdgeId); onClose() }}
         title={modLabel(type, meta.label)}
-        // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- module-KEUZETILE (icooncirkel + 2-regel-label, grid): een kaartface die Button-varianten niet modelleren; geen actieknop
+        // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- module CHOICE TILE (icon circle + 2-line label, grid): a card face that Button's variants don't model; not an action button
         style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, padding: '12px 6px', background: 'none', border: '1px solid transparent', borderRadius: 10, cursor: 'pointer' }}
         onMouseEnter={e => { e.currentTarget.style.background = 'var(--hover-bg)'; e.currentTarget.style.borderColor = 'var(--border)' }}
         onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.borderColor = 'transparent' }}>

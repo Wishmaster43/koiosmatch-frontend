@@ -1,6 +1,7 @@
 /**
- * ChannelActivityChart — K-197 (Danny 25-08 "hier moet ik ook WABA, WABA-coex,
- * WhatsApp Web zien"): the 14-day WhatsApp activity stacked per channel
+ * ChannelActivityChart — K-197 (Danny 25-08, translated: "here I also need to
+ * see WABA, WABA-coex, WhatsApp Web" — verbatim: "hier moet ik ook WABA,
+ * WABA-coex, WhatsApp Web zien"): the 14-day WhatsApp activity stacked per channel
  * (inbound + outbound per day) on the shared WeeklyBarChartCard. The page only
  * mounts it when at least one day carries by_channel, so an older envelope
  * keeps the plain activity chart alone. Own file: the chart atom pulls in

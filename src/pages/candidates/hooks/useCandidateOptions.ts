@@ -119,9 +119,9 @@ export function useCandidateOptions({ stats, candidates, locations, statuses, fu
   // Proxy for "active conversations" until WhatsApp/e-mail threads exist: contacted
   // in the last 14 days. Cutoff captured once (lazy init) so the memo stays pure.
   const [convCutoff] = useState(() => Date.now() - 14 * 86400000)
-  // CONV-COUNT-1 geleverd: het ECHTE aantal actieve gesprekken (WhatsApp-conversatie,
-  // laatste bericht ≤14 dgn, niet geëscaleerd) komt server-wide uit /candidates/stats.
-  // De oude page-scope lastContactAt-proxy blijft alleen als fallback.
+  // CONV-COUNT-1 delivered: the REAL count of active conversations (WhatsApp
+  // conversation, last message ≤14 days ago, not escalated) now comes server-wide
+  // from /candidates/stats. The old page-scope lastContactAt proxy stays only as a fallback.
   const activeConvCount = useMemo(() =>
     stats?.attention?.active_conversations
       ?? candidates.filter(c => c.lastContactAt && new Date(c.lastContactAt).getTime() > convCutoff).length

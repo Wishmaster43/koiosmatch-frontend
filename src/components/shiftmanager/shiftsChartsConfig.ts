@@ -7,8 +7,11 @@ import type { ShiftSeries } from '@/types/shiftmanager'
 import { tint } from '@/lib/tint'
 
 // Series key + colour; labels come from i18n via t('charts.series.<key>').
-// Brand-aligned palette (Danny: black for Totaal is niet mooi): Totaal = brand blue,
-// Niet ingevuld = brand gold, Geen kandidaat = red, Prognose = indigo, Werkelijk = green.
+// Brand-aligned palette (Danny: black for the "totaal" (total) series looked bad):
+// totaal (total) = brand blue, niet_ingevuld (not filled) = brand gold,
+// geen_kandidaat (no candidate) = red, prognose (forecast) = indigo,
+// werkelijk (actual) = green. The keys themselves stay Dutch — they are the
+// literal SERIES data values this file defines, not translatable UI copy.
 /* eslint-disable no-restricted-syntax -- fixed chart colour series (DATA), not UI styling: needs more distinct hues than the semantic token set provides */
 export const SERIES: ShiftSeries[] = [
   { key: "totaal",         color: "#1B60A9" },

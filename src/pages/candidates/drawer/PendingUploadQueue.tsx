@@ -1,3 +1,10 @@
+/**
+ * PendingUploadQueue — the staged, not-yet-uploaded file list shown above the
+ * documents table: per-file type + optional "Koppelen aan" ("Link to") link
+ * picker (DOC-ENTRY-LINK-1 / DOC-LANG-SKILL-LINK-1), an "apply to all" type
+ * shortcut, and Add/Cancel. Split out of DocumentsSection (§3 size
+ * discipline) — purely presentational, all state lives in the parent.
+ */
 import { useId } from 'react'
 import { useTranslation } from 'react-i18next'
 import { X } from 'lucide-react'
@@ -17,7 +24,7 @@ const ACCENT = 'var(--color-primary)'
 // 23-07: a multi-file pick used to collapse to a single pending slot, so picking
 // 5 files silently uploaded only 1 — now every picked file gets its own queue entry).
 // DOC-ENTRY-LINK-1: `linkTo` is an OPTIONAL "education:<id>" / "certification:<id>"
-// pick from the "Koppelen aan" grouped select — '' means no link.
+// pick from the "Koppelen aan" ("Link to") grouped select — '' means no link.
 export interface PendingItem { file: File; objectUrl: string; name: string; size: string; type: string; linkTo: string }
 
 interface PendingUploadQueueProps {
@@ -42,13 +49,6 @@ interface PendingUploadQueueProps {
   onCancel: () => void
 }
 
-/**
- * PendingUploadQueue — the staged, not-yet-uploaded file list shown above the
- * documents table: per-file type + optional "Koppelen aan" link picker
- * (DOC-ENTRY-LINK-1 / DOC-LANG-SKILL-LINK-1), an "apply to all" type shortcut,
- * and Add/Cancel. Split out of DocumentsSection (§3 size discipline) — purely
- * presentational, all state lives in the parent.
- */
 export default function PendingUploadQueue({
   pending, docTypes, educations, certifications, languages, skills, references = [], onSetType, onSetAllTypes, onSetLink, onRemove, onUploadAll, onCancel,
 }: PendingUploadQueueProps) {

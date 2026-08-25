@@ -1,9 +1,11 @@
 /**
  * richTextAssistApi — the ONE API layer behind the Koios assist that rides on
  * every rich-text field (Danny 08-08: "alle omschrijvingen moeten ook een mic
- * functionaliteit hebben en Koios AI"), INCLUDING action-item extraction
+ * functionaliteit hebben en Koios AI" — all descriptions must also have a mic
+ * feature and Koios AI), INCLUDING action-item extraction
  * (CMFE-KOIOS-CONSISTENCY-1, Danny 09-08: "Actiepunten auto en wizard
- * ontbreekt" — the note composer's third mode now rides the shared bar too,
+ * ontbreekt" — action items are missing from auto and wizard mode — the note
+ * composer's third mode now rides the shared bar too,
  * §11 one source: notes/noteAssistApi.ts re-exports from here instead of
  * keeping a second implementation).
  *

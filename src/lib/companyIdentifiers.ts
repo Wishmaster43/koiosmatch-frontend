@@ -2,8 +2,10 @@
  * companyIdentifiers — the ONE source of truth for "is this Chamber-of-Commerce
  * number / VAT number shaped correctly?", per COUNTRY (Danny 2026-08-08, points
  * 10 + 11: "KVK nummer check is 8 cijfers --> Check per land want BE, DE, FR is
- * anders" and "BTW nummer voor NL begint met NL, moeten check instellen per
- * klant --> Instellingen").
+ * anders" — "the KvK number check is 8 digits --> check per country because BE,
+ * DE, FR are different" — and "BTW nummer voor NL begint met NL, moeten check
+ * instellen per klant --> Instellingen" — "VAT number for NL starts with NL,
+ * need to configure the check per customer --> Settings").
  *
  * MEASURED before writing (dev API, tenant `yesway`, 2026-08-08):
  *  - `PATCH /candidates/{id}` with `freelance.kvk_number = "0123456789"` →

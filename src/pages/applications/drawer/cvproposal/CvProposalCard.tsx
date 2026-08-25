@@ -1,3 +1,5 @@
+// CvProposalCard — one CV-parse proposal (pending/accepted/rejected), diffed against
+// the candidate's current record, with the accept/reject decision affordance.
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { AlertTriangle, Check, X } from 'lucide-react'

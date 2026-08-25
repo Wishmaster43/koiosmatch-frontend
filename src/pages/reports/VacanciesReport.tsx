@@ -193,7 +193,8 @@ export default function VacanciesReport({ period, filters = EMPTY_REPORT_FILTERS
       active: drill?.rowsParams?.kpi === 'ttf',
       onClick: gateDrillClick('vacancies', () => openKpiDrill(t('vacancies.summary.avgTimeToFill'), s?.avg_time_to_fill_days != null ? t('vacancies.daysValue', { days: Math.round(s.avg_time_to_fill_days) }) : '—', 'ttf')) },
     // PDF-VACATURES point 31: "vacature staat online maar geen kandidaten na X
-    // dagen" — the real, tenant-threshold-driven backend count (VacanciesReport
+    // dagen" — "vacancy is online but no candidates after X days" — the real,
+    // tenant-threshold-driven backend count (VacanciesReport
     // ::applySignal SIGNAL_STALE_ONLINE), the SAME predicate the row-level
     // vacancyAdvice.ts rule, the list's stale_online filter AND (REPORTS-DRILL-2,
     // verified live) the drill's own `stale_online=1` XOR param all share — so

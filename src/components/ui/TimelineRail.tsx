@@ -1,3 +1,5 @@
+// TimelineRail — the vertical axis column (marker + connecting line) shared by every
+// entity's timeline row. See the fuller doc comment on the component below.
 import type { CSSProperties } from 'react'
 import type { LucideIcon } from 'lucide-react'
 import { tintBg, tintBorder, chipInk } from '@/lib/tint'

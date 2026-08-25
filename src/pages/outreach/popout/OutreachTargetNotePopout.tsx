@@ -1,7 +1,8 @@
 /**
  * OutreachTargetNotePopout — BELLIJST-NOTE-POPOUT-1 (Danny 14-08, looking at the
- * call-list target's note editor: "dit moet zeker een pop-out kunnen worden op
- * een popup"). This field is a NOTE, not a description field, so it renders the
+ * call-list target's note editor, translated: "this should definitely be able
+ * to become a pop-out on a popup" — verbatim: "dit moet zeker een pop-out
+ * kunnen worden op een popup"). This field is a NOTE, not a description field, so it renders the
  * exact same editor stack TargetNoteField already composes on the row —
  * RichTextEditor (assist off) + RichTextAssistBar (mic only) + NoteAssistSection
  * (Verbeteren/Samenvatten/Actiepunten) — never popout/TextPopoutEditor's

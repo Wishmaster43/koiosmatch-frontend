@@ -1,3 +1,8 @@
+/**
+ * CandidatesTable — the candidate list's column set (§3A blueprint table): only
+ * declares columns, sort keys and cell deep-links; rendering, selection and the
+ * loading/empty states live in the shared DataTable.
+ */
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSeedLabel } from '@/lib/useSeedLabel'
@@ -38,11 +43,11 @@ type LucideIcon = ComponentType<{ size?: number; title?: string; style?: CSSProp
 // last_contact_types lookup so no channel falls back to the "?" (HelpCircle). Danny 2026-07-03.
 const CONTACT_TYPE_ICON: Record<string, LucideIcon> = {
   email:            Mail,
-  phone:            PhoneCall,   // Telefonisch
+  phone:            PhoneCall,   // Telefonisch (phone)
   call:             PhoneCall,   // Belafspraak (phone appointment)
   whatsapp:         MessageCircle,
   whatsapp_private: MessageCircle,
-  appointment:      Building2,   // Afspraak (fysiek/kantoor)
+  appointment:      Building2,   // Afspraak (physical/office appointment)
   meet:             Video,       // Google Meet (online meeting)
   note:             FileText,
 }
@@ -171,7 +176,7 @@ export default function CandidatesTable({ rows, loading, selectedId, onSelect, o
       },
       { key: 'city', header: t('columns.city'), nowrap: true, cellStyle: plainCell, sortable: true, sortValue: c => c.city, render: c => c.city || '—' },
       {
-        // Phase (lifecycle: Lead/Kandidaat) — model v2 axis.
+        // Phase (lifecycle: Lead/Kandidaat, "Candidate") — model v2 axis.
         key: 'phase', header: t('columns.phase'), sortable: true, sortValue: c => phaseMeta(c.phase).label,
         render: c => { if (!c.phase) return dash; const m = phaseMeta(c.phase)
           if (!colorPhase) return <span style={plainCell}>{m.label}</span>
@@ -179,10 +184,11 @@ export default function CandidatesTable({ rows, loading, selectedId, onSelect, o
           return <SoftChip label={m.label} color={m.color} round /> },
       },
       {
-        // Deployability ("status": Beschikbaar/Geplaatst/…) — model v2 axis.
+        // Deployability ("status": Beschikbaar/Geplaatst/…, "Available/Placed/…") — model v2 axis.
         key: 'status', header: t('columns.deployability'), sortable: true, sortValue: c => c.status ? statusMeta(c.status).label : '',
         // Lifecycle wins in the archived/trash views (ERASE-1): show a Gearchiveerd/
-        // Verwijderd chip instead of the deployability status. Otherwise the shared chip.
+        // Verwijderd ("Archived/Deleted") chip instead of the deployability status.
+        // Otherwise the shared chip.
         render: c => {
           if (c.lifecycle === 'pending_erase') return <SoftChip label={t('lifecycle.pendingErase')} color="var(--color-danger)" round />
           if (c.lifecycle === 'archived') return <SoftChip label={t('lifecycle.archived')} color="var(--text-muted)" round />
@@ -198,7 +204,8 @@ export default function CandidatesTable({ rows, loading, selectedId, onSelect, o
             </span>
           )
           // requires_match -> Matches, requires_reason/expects_return_date/is_blacklist ->
-          // Voorkeuren (where the status window + edit pencil live); no flag -> plain click.
+          // Voorkeuren ("Preferences", where the status window + edit pencil live); no
+          // flag -> plain click.
           const target = c.status ? statusTarget(statusMeta(c.status)) : null
           if (!target) return chip
           const linkLabel = target === TARGET_MATCHES ? t('cellLinks.matches') : t('cellLinks.preferences')
@@ -226,7 +233,8 @@ export default function CandidatesTable({ rows, loading, selectedId, onSelect, o
           const Icon = !lookupIcon && c.lastContactType ? (CONTACT_TYPE_ICON[c.lastContactType] ?? HelpCircle) : null
           // Tooltip + subtle "· by whom" once the backend returns last_contact_by (graceful null).
           const tip = c.lastContactBy ? `${label} · ${c.lastContactBy}` : label
-          // Danny 2026-07-25: WhatsApp opens Conversaties, every other channel opens Notities.
+          // Danny 2026-07-25: WhatsApp opens Conversaties ("Conversations"), every other
+          // channel opens Notities ("Notes").
           const target = contactTarget(c.lastContactType)
           const linkLabel = target === TARGET_CONVERSATIONS ? t('cellLinks.conversations') : t('cellLinks.notes')
           return (
@@ -246,7 +254,8 @@ export default function CandidatesTable({ rows, loading, selectedId, onSelect, o
         render: c => {
           if (!c.stage) return dash
           // Chip from the API's flat funnel_label/funnel_color; the lookup is the fallback.
-          // is_match (seed: Aangenomen) jumps to Matches, every other stage to Sollicitaties.
+          // is_match (seed: Aangenomen, "Hired") jumps to Matches, every other stage to
+          // Sollicitaties ("Applications").
           const m = funnelMeta(c.stage)
           const label = seedLabel('funnelTypes', { value: c.stage, label: c.stageLabel ?? m.label })
           const target = funnelTarget(m)
@@ -265,7 +274,8 @@ export default function CandidatesTable({ rows, loading, selectedId, onSelect, o
         render: c => {
           const list = c.candidateTypes ?? []
           if (list.length === 0) return dash
-          // Contractvorm always opens the Voorkeuren tab (Danny 25/7 spec, no flag needed).
+          // Contractvorm ("Contract form") always opens the Voorkeuren ("Preferences")
+          // tab (Danny 25/7 spec, no flag needed).
           const jump = (e: { stopPropagation: () => void }) => { e.stopPropagation(); onOpenTab?.(c, TARGET_PREFERENCES) }
           const content = !colorType
             ? <span style={plainCell}>{list.map(v => typeMeta(v).label).join(', ')}</span>
@@ -289,7 +299,8 @@ export default function CandidatesTable({ rows, loading, selectedId, onSelect, o
         render: c => {
           const pools = c.pools ?? []
           if (pools.length === 0) return dash
-          // Talentenpool always opens Match > Talentenpools (Danny 25/7 spec, no flag needed).
+          // Talentenpool ("Talent pool") always opens Match > Talentenpools ("Talent
+          // pools") (Danny 25/7 spec, no flag needed).
           const jump = (e: { stopPropagation: () => void }) => { e.stopPropagation(); onOpenTab?.(c, TARGET_POOLS) }
           const content = !colorPool
             ? <span style={plainCell}>{pools.map(p => seedLabel('pools', { label: p.name })).filter(Boolean).join(', ')}</span>
@@ -319,7 +330,7 @@ export default function CandidatesTable({ rows, loading, selectedId, onSelect, o
         // aid, not a data axis a recruiter would want to sort a whole list by.
         key: 'coupling', header: t('columns.coupling'), nowrap: true,
         // KOPPELING-COLUMN-1: a ghost button, exactly like the other deep-link
-        // cells above — opens the drawer straight on the Koppelingen tab instead
+        // cells above — opens the drawer straight on the Koppelingen ("Links") tab instead
         // of only being a glance-aid nobody can click through from.
         render: c => (
           <button type="button" onClick={e => { e.stopPropagation(); onOpenTab?.(c, TARGET_INTEGRATIONS) }}

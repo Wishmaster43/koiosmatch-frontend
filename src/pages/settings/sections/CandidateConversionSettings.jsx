@@ -1,3 +1,11 @@
+/**
+ * CandidateConversionSettings — conversion behaviour: the deployability status
+ * a fresh Kandidaat gets right after Lead → Kandidaat (Danny 2026-07-13,
+ * translated: "status stays empty after conversion" — verbatim: "status
+ * blijft leeg" na conversie). Only plain statuses are offered: flagged ones
+ * (blacklist / requires reason / requires match / return date) need their own
+ * prompt and can't be a default.
+ */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import SearchSelect from '@/components/ui/SearchSelect'
@@ -10,10 +18,6 @@ import { SectionTitle } from '@/components/ui/typography'
 // (DEFAULT-STATUS-1 contract) so both conversion paths behave identically.
 export const CONVERT_DEFAULT_STATUS_KEY = 'candidate_default_status_on_convert'
 
-/** Conversion behaviour — the deployability status a fresh Kandidaat gets right
- * after Lead → Kandidaat (Danny 2026-07-13: "status blijft leeg" na conversie).
- * Only plain statuses are offered: flagged ones (blacklist / requires reason /
- * requires match / return date) need their own prompt and can't be a default. */
 export function CandidateConversionSettings() {
   const { t } = useTranslation('settings')
   const settings = useAllSettings()

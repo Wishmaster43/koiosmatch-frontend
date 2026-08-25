@@ -1,3 +1,7 @@
+/**
+ * ApplicationsBoard — kanban view, one column per funnel phase. Presentational:
+ * the page owns the data and the phase mutation (onMove).
+ */
 import { useRef } from 'react'
 import type { DragEvent } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -115,10 +119,6 @@ function BoardColumn({ phase, items, onDragStart, onDrop, onDragOver, onSelect, 
   )
 }
 
-/**
- * ApplicationsBoard — kanban view, one column per funnel phase. Presentational:
- * the page owns the data and the phase mutation (onMove).
- */
 export default function ApplicationsBoard({ rows, phases, onMove, onSelect, selectedId, loading, error }: {
   rows: Application[]; phases: BoardPhase[]; onMove: (id: Id, phaseKey: string) => void; onSelect: (app: Application) => void; selectedId?: Id | null
   // F3 (audit R1): the board renders off the wide (bucket-less) sample — surface

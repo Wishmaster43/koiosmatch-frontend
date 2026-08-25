@@ -1,16 +1,15 @@
+/**
+ * useCampaignAdvice — the ONE resolver both the outreach (bellijsten, i.e.
+ * call lists) TABLE column and the drawer's Koios block call, so they can
+ * never disagree (KOIOS-ADVIES-OVERAL-1, mirrors useCandidateAdvice).
+ * Composes the shared rule engine (campaignAdvice.ts): an active campaign
+ * with nothing to call/mail/message, or a stale draft that never activated.
+ */
 import { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { deriveCampaignAdvice } from '@/pages/outreach/shared'
 import type { KoiosAdvice } from '@/lib/koiosAdviceMeta'
 import type { Campaign } from '@/pages/outreach/shared'
-
-/**
- * useCampaignAdvice — the ONE resolver both the outreach (bellijsten) TABLE
- * column and the drawer's Koios block call, so they can never disagree
- * (KOIOS-ADVIES-OVERAL-1, mirrors useCandidateAdvice). Composes the shared
- * rule engine (campaignAdvice.ts): an active campaign with nothing to
- * call/mail/message, or a stale draft that never activated.
- */
 export function useCampaignAdvice(): (c: Campaign) => KoiosAdvice | null {
   const { t } = useTranslation('outreach')
 

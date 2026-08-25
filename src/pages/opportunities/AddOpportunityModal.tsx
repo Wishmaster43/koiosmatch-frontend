@@ -1,3 +1,8 @@
+/**
+ * AddOpportunityModal — create/edit modal for an opportunity: general info,
+ * deal-stage cascade (customer → location → department → contact) and the
+ * rich-text description. Mirrors the house create/edit modal pattern (§3A).
+ */
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import api, { unwrap } from '@/lib/api'
@@ -151,7 +156,7 @@ export default function AddOpportunityModal({ onClose, onCreated, users = [], cu
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [stages])
 
-  // Klant → locatie → afdeling → contactpersoon cascade (mirrors MatchModal).
+  // Customer → location → department → contact cascade (mirrors MatchModal).
   // All three stay optional; picking a different client resets the dependent picks.
   // OPP-MODAL-PREFILL-1: `existing` (edit mode) wins over `initial*` (scoped-create
   // mode) — the two never both apply, since `existing` only appears in edit mode.

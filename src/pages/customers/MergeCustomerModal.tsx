@@ -1,6 +1,7 @@
 /**
  * MergeCustomerModal — absorb a duplicate customer into the OPEN drawer record
- * (Danny: "samenvoegen-icoon zoals bij de kandidaat", now backed by a real route —
+ * (Danny: "samenvoegen-icoon zoals bij de kandidaat" — merge icon like with the
+ * candidate, now backed by a real route —
  * KLANT-SAMENVOEGEN-1). Step 1: search the tenant's customers for the duplicate to
  * absorb (excluding the open record). Step 2: confirm with an honest summary of what
  * happens, then fire the merge.

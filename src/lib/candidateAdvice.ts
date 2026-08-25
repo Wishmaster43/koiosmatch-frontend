@@ -1,8 +1,7 @@
-import type { Candidate } from '@/types/candidate'
-
 /**
  * candidateAdvice — the ONE deterministic rule engine behind the "Koios" advice,
- * shared by the candidates TABLE column and the drawer "Koios AI adviseert" block.
+ * shared by the candidates TABLE column and the drawer "Koios AI adviseert"
+ * (Koios AI advises) block.
  *
  * CRITICAL DESIGN CONSTRAINT: rules may ONLY read fields that exist on BOTH the
  * list row and the detail record (phase, status, stage, pools, lastContactAt,
@@ -10,6 +9,7 @@ import type { Candidate } from '@/types/candidate'
  * drive the action — the list row never carries those fields, and that exact
  * asymmetry is what made the table and the drawer disagree (Danny 25-07).
  */
+import type { Candidate } from '@/types/candidate'
 
 export type CandidateAdviceAction = 'contact' | 'plan_intake' | 'add_to_pool' | 'none'
 

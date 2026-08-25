@@ -1,7 +1,8 @@
 /**
  * useNotesPopout — everything the shared NotesTab needs to talk to its own
  * second-screen window (NOTITIE-POPOUT-HANDOFF-1, Danny 09/10-08: "werking
- * hetzelfde als icon profieltekst" — bij de profieltekst REIST DE TEKST MEE).
+ * hetzelfde als icon profieltekst", i.e. "works the same as the profile-text
+ * icon" — with the profile text, THE TEXT TRAVELS ALONG).
  *
  * Two roles, one protocol, one channel — the SAME BroadcastChannel the profile
  * text's pop-out uses (useTextPopoutSync), never a second synchronisation (§11):
@@ -11,7 +12,7 @@
  *   window — the popout itself. Announces itself with `hello` on boot, takes a
  *            draft over, and acks only once its own composer really holds it.
  *
- * NO TEXT LOSS is the whole point (Danny's belangrijkste eis). The composer closes
+ * NO TEXT LOSS is the whole point (Danny's top requirement). The composer closes
  * on `ack` and on nothing else. A blocked popup, a browser without
  * BroadcastChannel, a window whose own composer is already busy — all end the same
  * way: no ack, the composer stays open with the text still in it, and the

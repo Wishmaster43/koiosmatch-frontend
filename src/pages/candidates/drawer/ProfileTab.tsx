@@ -1,3 +1,16 @@
+/** Profile tab — ONE tab (as it has always been), stacking three independently
+ *  editable cards: Persoonlijk / Adres / Contact, each with its own pencil.
+ *
+ *  Danny 28-07: the old single pencil flipped ~15 fields at once ("ruk om te
+ *  onderhouden" — "a hassle to maintain"), so the edit state was split per card.
+ *  A sub-tab strip was tried first and rejected the same day — this drawer is
+ *  the house BLUEPRINT (§3A) and its layout should not change; only the "whole
+ *  form opens at once" behaviour had to go. Keeping all three mounted also means
+ *  switching cards mid-edit can no longer discard a draft, which the sub-tab
+ *  version did.
+ *
+ *  The profile TEXT block keeps its own separate pencil below, exactly as before;
+ *  the Koios AI advice block lives one level up in ProfilePanel.tsx, unaffected. */
 import { useEffect, useRef, useState } from 'react'
 import type { ComponentType, CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -20,18 +33,6 @@ type AnyProps = Record<string, unknown>
 const RichTextEditor = RichTextEditorJs as unknown as ComponentType<AnyProps>
 const SafeHtml = SafeHtmlJs as unknown as ComponentType<AnyProps>
 
-/** Profile tab — ONE tab (as it has always been), stacking three independently
- *  editable cards: Persoonlijk / Adres / Contact, each with its own pencil.
- *
- *  Danny 28-07: the old single pencil flipped ~15 fields at once ("ruk om te
- *  onderhouden"), so the edit state was split per card. A sub-tab strip was tried
- *  first and rejected the same day — this drawer is the house BLUEPRINT (§3A) and
- *  its layout should not change; only the "whole form opens at once" behaviour had
- *  to go. Keeping all three mounted also means switching cards mid-edit can no
- *  longer discard a draft, which the sub-tab version did.
- *
- *  The profile TEXT block keeps its own separate pencil below, exactly as before;
- *  the Koios AI advice block lives one level up in ProfilePanel.tsx, unaffected. */
 export default function ProfileTab({ c, onEditSave, autoEditSignal, onContactMoment }: {
   c: Candidate; onEditSave?: (v: Record<string, unknown>) => void; autoEditSignal?: number
   onContactMoment?: (v: Record<string, unknown>) => void

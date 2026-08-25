@@ -1,3 +1,9 @@
+/**
+ * ProposeCandidateModal — the "propose this candidate to the customer" flow:
+ * downloads the house-style CV, drafts a message from the tenant's templates,
+ * and logs it as an application note. See the fuller docblock below, right
+ * above the component, for the full behaviour and its AXIS-MATRIX guards.
+ */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Check, Copy, Info, Send, TriangleAlert } from 'lucide-react'
@@ -110,7 +116,7 @@ export default function ProposeCandidateModal({ application: a, onClose }: Props
         {decision?.effect === 'warn' && <div style={{ marginBottom: 12 }}><ActionRuleBanner decision={decision} /></div>}
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          {/* 1. Ontvanger — searchable, tenant-lookup style contact picker (no free entry). */}
+          {/* 1. Recipient — searchable, tenant-lookup style contact picker (no free entry). */}
           <div>
             <div style={sectionTitle}>{t('propose.recipient')}</div>
             {form.contactsLoading ? (
@@ -129,7 +135,7 @@ export default function ProposeCandidateModal({ application: a, onClose }: Props
             )}
           </div>
 
-          {/* 2. Documenten — the house-style CV is always included (not unselectable:
+          {/* 2. Documents — the house-style CV is always included (not unselectable:
               without it this isn't a proposal); the motivation letter checkbox only
               shows when the candidate actually submitted one. */}
           <div>
@@ -146,7 +152,7 @@ export default function ProposeCandidateModal({ application: a, onClose }: Props
             )}
           </div>
 
-          {/* 3. CV-variant — the AVG control: which fields the proposal variant hides
+          {/* 3. CV variant — the AVG (Dutch GDPR) control: which fields the proposal variant hides
               is spelled out right here, not buried in a settings page. */}
           <div>
             <div style={sectionTitle}>{t('propose.variantTitle')}</div>
@@ -165,7 +171,7 @@ export default function ProposeCandidateModal({ application: a, onClose }: Props
             </Caption>
           </div>
 
-          {/* 4. Bericht — subject + the shared rich-text body, prefilled from the
+          {/* 4. Message — subject + the shared rich-text body, prefilled from the
               tenant's proposal templates ({kandidaat} {vacature} {klant} {contact}
               {recruiter} tokens filled in by useProposeForm). */}
           <div>
@@ -177,7 +183,7 @@ export default function ProposeCandidateModal({ application: a, onClose }: Props
               expanded={bodyExpanded} onToggleExpand={() => setBodyExpanded(v => !v)} />
           </div>
 
-          {/* 5. AVG-bevestiging — required tick; the primary action stays disabled
+          {/* 5. AVG (GDPR) confirmation — required tick; the primary action stays disabled
               without it (see disabledText above). */}
           <label style={{ display: 'flex', alignItems: 'flex-start', gap: 8, fontSize: 12, color: 'var(--text)' }}>
             <input type="checkbox" checked={form.consentConfirmed} onChange={e => form.setConsentConfirmed(e.target.checked)}

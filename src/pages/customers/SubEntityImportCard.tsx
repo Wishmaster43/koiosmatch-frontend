@@ -1,15 +1,17 @@
 /**
  * SubEntityImportCard — the "create these FROM A FILE" entry at the top of the
- * location/department/contact create modals (Danny 02-08: "+ Nieuwe afdeling, +
- * nieuwe locatie, + nieuwe contactpersoon ... moeten ook een CSV-upload hebben").
- * Reuses the Settings import wizard's dry-run/confirm/result machinery wholesale —
+ * location/department/contact create modals (Danny 02-08, verbatim: "…moeten
+ * ook een CSV-upload hebben" — i.e. "+ New department, + new location, + new
+ * contact person ... must also get a CSV upload"). Reuses the Settings import
+ * wizard's dry-run/confirm/result machinery wholesale —
  * the exact same client + PreviewStep/ResultStep components the shared EntityImportCard
  * uses for the combined customer_tree file, never a second import client or a
  * second result renderer (CLAUDE.md §11).
  *
- * COMPACT-IMPORT-1 (Danny 02-08 live review, second round: "bij nieuwe locatie is
- * ook het download en upload csv-file veel te groot ... zorg dat + locatie net zo
- * groot is als + nieuwe klant"): the upload STEP used to render Settings' own
+ * COMPACT-IMPORT-1 (Danny 02-08 live review, second round, verbatim: "…veel te
+ * groot…" — i.e. "on + new location the download/upload csv file is also far
+ * too big ... make + location the same size as + new customer"): the upload
+ * STEP used to render Settings' own
  * `UploadStep` — a full-page dashed dropzone (160px min-height) right for a
  * standalone Settings screen, wrong stacked above a create form the user came here
  * to fill in. This now hand-rolls the SAME compact one-line affordance
@@ -21,8 +23,10 @@
  *
  * THE PARENT-MISMATCH RISK (measured against the backend — EntityImporter's
  * ResolvesCustomerTree trait): every one of these three importers matches its
- * parent BY NAME — a location row needs `klant_naam`, a department row needs
- * `klant_naam`+`locatie_naam`, a contact row needs all three. A name that matches
+ * parent BY NAME — a location row needs one column, `klant_naam`
+ * (customer_name). A department row needs two, that plus
+ * `locatie_naam` (location_name). A contact row needs all three.
+ * A name that matches
  * NOTHING is a hard row ERROR (ResolvesCustomerTree: "no customer named '…' exists
  * for this bureau" — never a silent create of a new customer). But a name that
  * matches a DIFFERENT REAL customer of this tenant resolves cleanly and writes

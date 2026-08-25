@@ -6,12 +6,13 @@
  * match's own fields are opened/edited in its own drawer (§3B).
  *
  * Point 2 (Danny's ten-point round): the vacancy + stage columns merge into ONE
- * "{vacature} — {fase}" cell (mirrors MatchCard's own title) — no separate Fase
- * column. Point 4: a Periode column (start – end, DD-MM-YYYY) carries the same
- * expiry chip (point 6) MatchCard renders, inline next to the date range — this
- * stays a DataTable (not a card) per SCOPED-LIST-TAB-1, so the chip rides in the
- * date cell rather than a new column. Function/Vestiging/Eigenaar (the rest of
- * point 5) are deliberately NOT added as extra columns here — three more columns
+ * "{vacancy} — {phase}" cell (mirrors MatchCard's own title) — no separate
+ * Phase column. Point 4: a Periode ("Period") column (start – end, DD-MM-YYYY)
+ * carries the same expiry chip (point 6) MatchCard renders, inline next to the
+ * date range — this stays a DataTable (not a card) per SCOPED-LIST-TAB-1, so
+ * the chip rides in the date cell rather than a new column. Function/Branch/
+ * Owner (the rest of point 5) are deliberately NOT added as extra columns here
+ * — three more columns
  * would overflow this narrow drawer panel with no existing precedent (every
  * other scoped list — ScopedVacanciesTab — stays at three columns too); that
  * info is one click away in the match's own drawer.
@@ -24,7 +25,7 @@
  * customer-level MatchesTab filters on (useMatchStatuses, seeded so it is never
  * empty — no `resolved` guard needed, unlike the vacancy status fetch above in
  * ScopedVacanciesTab), keyed on the row's own status slug. No separate "Status"
- * column is added: the vacancy cell already renders "{vacature} — {fase}" in the
+ * column is added: the vacancy cell already renders "{vacancy} — {phase}" in the
  * status's own colour (Point 2 above) — the exact same story the customer-level
  * MatchesTab tells via MatchCard's title, never a StatusPill column there either.
  */
@@ -75,8 +76,8 @@ export default function ScopedMatchesTab({ scope, id, customerId }: {
   const columns: Column<ScopedMatchRow>[] = [
     { key: 'candidate', header: t('matches:cols.candidate'), sortable: true, sortValue: m => m.candidate,
       render: m => <EntityLink tone="neutral" page="candidates" id={m.candidateId}>{m.candidate}</EntityLink> },
-    // Point 2: vacancy + fase on one line, the fase in its own status colour —
-    // mirrors MatchCard's title exactly, no separate Fase column.
+    // Point 2: vacancy + phase on one line, the phase in its own status colour —
+    // mirrors MatchCard's title exactly, no separate Phase column.
     { key: 'vacancy', header: t('matches:cols.vacancy'), sortable: true, sortValue: m => m.vacancy,
       render: m => {
         const meta = matchStatusMeta(m.status ?? undefined)
@@ -87,7 +88,7 @@ export default function ScopedMatchesTab({ scope, id, customerId }: {
             {label && (
               <>
                 {/* Decorative separator, own element — mirrors MatchCard's title
-                    exactly, so the fase label stays its own clean text match. */}
+                    exactly, so the phase label stays its own clean text match. */}
                 <span aria-hidden="true" style={{ color: 'var(--text-muted)' }}> — </span>
                 <span style={{ color: meta?.color ?? m.stageColor ?? 'var(--text-muted)', fontWeight: 600, whiteSpace: 'nowrap' }}>
                   {label}

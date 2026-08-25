@@ -1,3 +1,9 @@
+/**
+ * AddCustomerModal — the "+ Customer" create form (§3A blueprint modal): titled
+ * cards for company/address/business/branch fields, an inline duplicate guard,
+ * and the customer-tree Excel import flow. See the component docblock below
+ * for the full history of decisions this modal encodes.
+ */
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Building2, Upload, CheckCircle2 } from 'lucide-react'
@@ -42,14 +48,15 @@ const CUSTOMER_TREE_ENTITY = 'customer_tree'
 // mirrors AddCandidateModal's exported FormState).
 export interface CustomerForm {
   name: string; status: string; ownerId: string; industry: string; city: string
-  // KLANT-FASE-1: lifecycle phase slug (Prospect → Klant). Pre-selected from the
-  // lookup's is_default FLAG, never from a hardcoded "prospect" slug.
+  // KLANT-FASE-1: lifecycle phase slug (Prospect → Klant, "Customer"). Pre-selected
+  // from the lookup's is_default FLAG, never from a hardcoded "prospect" slug.
   phase: string
   // BRANCH-1 (Danny 27-07): every customer hangs on one of the tenant's own
   // establishments — same /locations source as the drawer's OverviewTab picker,
   // so the create form and the drawer offer exactly one list.
   branchId: string
-  // Danny 27-07 addendum ("+ Klant ... mist heel veel informatie"): the
+  // Danny 27-07 addendum ("+ Klant ... mist heel veel informatie" — "+ Customer
+  // ... is missing a lot of information"): the
   // CustomerRequest::sharedRules fields this create form never collected, even
   // though create+update share the same validator. All optional.
   website: string; employeeCount: string; toneOfVoice: string; costCenter: string; billingEmail: string
@@ -95,7 +102,9 @@ const EMAIL_ERROR_KEYS = { billingEmail: 'validation.emailFormat' }
  *
  * Widened to the house WIDE_MODAL frame and regrouped into titled bordered cards
  * (Danny 27-07: "+ Klant is niet zo groot als + match en + nieuwe kandidaat EN
- * MIST HEEL VEEL INFORMATIE"). Every dropdown is now a searchable CreatableSelect.
+ * MIST HEEL VEEL INFORMATIE" — "+ Customer isn't as big as + match and + new
+ * candidate AND IS MISSING A LOT OF INFORMATION"). Every dropdown is now a
+ * searchable CreatableSelect.
  * Extended with the fields CustomerRequest::sharedRules already accepts on create
  * (branch/website/employeeCount/toneOfVoice/costCenter/billingEmail) — all
  * optional, so a quick "just the name" create still works unchanged. This modal
@@ -104,7 +113,8 @@ const EMAIL_ERROR_KEYS = { billingEmail: 'validation.emailFormat' }
  * the actual POST body.
  *
  * Brought in line with AddCandidateModal (Danny 02-08, "de + nieuwe klant popup
- * moet lijken op + nieuwe kandidaat"): the debtor number is no longer collected
+ * moet lijken op + nieuwe kandidaat" — "the + new customer popup must look like
+ * + new candidate"): the debtor number is no longer collected
  * here (it stays editable everywhere else — the customer's own accounting number,
  * rarely known yet for a new prospect); status is hidden (the phase pills already
  * carry the lifecycle choice, so status just rides along at its lookup default);
@@ -112,7 +122,8 @@ const EMAIL_ERROR_KEYS = { billingEmail: 'validation.emailFormat' }
  * country/province cascade as the candidate); and the account manager defaults to
  * the logged-in user when they are assignable (mirrors AddApplicationModal).
  *
- * CUSTOMER-IMPORT-1 (Danny 02-08: "bovenin ... import cvs of excel file"): the
+ * CUSTOMER-IMPORT-1 (Danny 02-08: "bovenin ... import cvs of excel file" — "at
+ * the top ... import cvs or excel file"): the
  * italic bottom-of-modal hint that only NAMED the Settings import screen is gone;
  * in its place sits CustomerImportCard, which actually RUNS the customer_tree
  * importer here — dry run first, then confirm. Unlike the CV card this does not
@@ -144,10 +155,11 @@ export default function AddCustomerModal({ onClose, onCreate, onImported, users 
   const { industryOptions: industries } = useIndustries()
   // KLANT-FASE-1: the lifecycle-phase lookup + the is_default phase a new customer starts in.
   const { phases, defaultPhase } = useCustomerPhases()
-  // The tenant's own establishments (GET /locations) — same source as OverviewTab's Vestiging picker.
+  // The tenant's own establishments (GET /locations) — same source as OverviewTab's Vestiging ("Branch") picker.
   const branchOptions = useLocations().map(l => ({ value: String(l.value), label: l.label }))
   // ACCOUNTMANAGER-DEFAULT-1 (Danny 02-08: "Accountmanager moet voorstel waarde zijn
-  // van de gebruiker die hem aanmaakt") — mirrors AddApplicationModal's identical
+  // van de gebruiker die hem aanmaakt" — "Account manager should default to the
+  // value of the user creating it") — mirrors AddApplicationModal's identical
   // owner-default guard: only propose the LOGGED-IN user when they actually appear
   // in the tenant's assignable `users` list, never a super-admin or non-tenant
   // account the server would 422 on (owner_id is validated against tenant users).
@@ -176,7 +188,7 @@ export default function AddCustomerModal({ onClose, onCreate, onImported, users 
   const [saving, setSaving] = useState(false)
   // KLANT-LAYOUT-3: the import flow is summoned from the header button (closed on open).
   const [importOpen, setImportOpen] = useState(false)
-  // COLLAPSIBLE-TEXT-1: Bedrijfstekst's own collapsed/editing state now lives
+  // COLLAPSIBLE-TEXT-1: Bedrijfstekst's ("Company text") own collapsed/editing state now lives
   // inside CustomerCompanyTextCard (nothing outside that card ever reads it).
   const [form, setForm] = useState<CustomerForm>({
     name: '', status: defaultStatusValue, ownerId: '', industry: '', city: '',
@@ -290,8 +302,9 @@ export default function AddCustomerModal({ onClose, onCreate, onImported, users 
           </div>
           <div>
             {/* The chosen phase is in the TITLE, exactly as the candidate modal reads
-                "Nieuwe — Lead" (Danny 02-08: "die fase moet zijn zoals + nieuwe
-                kandidaat"). A phase buried in a card is a phase nobody notices. */}
+                "Nieuwe — Lead" ("New — Lead") (Danny 02-08: "die fase moet zijn zoals
+                + nieuwe kandidaat" — "that phase should be like + new candidate").
+                A phase buried in a card is a phase nobody notices. */}
             <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)' }}>
               {selectedPhase ? `${t('modal.title')} — ${selectedPhase.label}` : t('modal.title')}
             </div>
@@ -325,13 +338,15 @@ export default function AddCustomerModal({ onClose, onCreate, onImported, users 
             width and forcing a scroll for what should fit on one screen. Split
             into two responsive columns (falls back to one column below 340px
             per column, same idiom as WorkflowsListPanel): LEFT keeps the
-            required/identity fields (Bedrijf, Adres) the recruiter always
-            fills; RIGHT holds the secondary/optional ones (Eigenaar, Online,
-            Facturatie, Bedrijfstekst, Vestigingen). The import card — rare and
-            fully optional — moves out of the grid entirely to a collapsed
-            section at the bottom (see below). */}
+            required/identity fields (Bedrijf, Adres — "Company, Address") the
+            recruiter always fills; RIGHT holds the secondary/optional ones
+            (Eigenaar, Online, Facturatie, Bedrijfstekst, Vestigingen —
+            "Owner, Online, Billing, Company text, Branches"). The import
+            card — rare and fully optional — moves out of the grid entirely to
+            a collapsed section at the bottom (see below). */}
         <div style={{ flex: 1, overflowY: 'auto', padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: 16 }}>
-          {/* CUSTOMER-IMPORT-1 / KLANT-LAYOUT-3 (Danny 14-08: "knop rechts boven in"):
+          {/* CUSTOMER-IMPORT-1 / KLANT-LAYOUT-3 (Danny 14-08: "knop rechts boven in" —
+              "button top-right"):
               the import flow opens from the header button and renders as the first
               card while open — summoned deliberately, never in the way otherwise. */}
           {importOpen && (
@@ -344,7 +359,8 @@ export default function AddCustomerModal({ onClose, onCreate, onImported, users 
           <div style={modalColumns('repeat(auto-fit, minmax(340px, 1fr))')}>
             {/* LEFT — required identity: name/industry/employeeCount + the full address,
                 plus the company text (KLANT-LAYOUT-3, Danny 14-08 screenshot: "bedrijfstekst
-                links" — it fills the gap under the address instead of stretching the right). */}
+                links" — "company text on the left" — it fills the gap under the
+                address instead of stretching the right). */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
               <CustomerCompanyCard form={form} set={set} errors={errors} industries={industries} />
               {/* KLANT-ADRES-1 (Danny 02-08): the customer's own visiting address, the

@@ -1,13 +1,12 @@
-import type { ReactNode, CSSProperties } from 'react'
-import { useTranslation } from 'react-i18next'
-import { AlertTriangle, RotateCcw, X } from 'lucide-react'
-
 /**
  * ErrorBanner — inline error block, token-styled for light/dark (§4). Replaces the
  * ad-hoc `bg-red-50 / text-red-600` banners duplicated across pages (DUP-2).
  * role="alert" so assistive tech announces it (§6). `onRetry`/`onDismiss` are optional —
  * pass either (or both) to offer a "try again" / close action without hand-rolling a button.
  */
+import type { ReactNode, CSSProperties } from 'react'
+import { useTranslation } from 'react-i18next'
+import { AlertTriangle, RotateCcw, X } from 'lucide-react'
 interface ErrorBannerProps {
   children: ReactNode
   style?: CSSProperties

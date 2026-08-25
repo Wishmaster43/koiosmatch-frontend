@@ -1,3 +1,5 @@
+// PublishingTab — job-board channels, per-vacancy application settings and custom
+// fields. See the fuller doc comment on the component below.
 import { useState, useEffect } from 'react'
 import type { ComponentType } from 'react'
 import { useTranslation } from 'react-i18next'

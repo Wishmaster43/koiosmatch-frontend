@@ -1,3 +1,5 @@
+// ApplicationStatusStrip — the calm phase/appointment/interview summary card at the
+// top of the application's Sollicitatie tab. See the fuller doc comment below.
 import { useState } from 'react'
 import type { CSSProperties, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'

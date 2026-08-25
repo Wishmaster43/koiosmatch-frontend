@@ -38,7 +38,8 @@ export function useEditorExitGuards({ isDirty, liveRunActive, onClose, confirm }
     dirtyGuard()
   }
 
-  // NAV-BACK-BUILDER-1 (Danny 24-07 "browser-terug doet niets in de builder"):
+  // NAV-BACK-BUILDER-1 (Danny 24-07, translated: "browser-back does nothing in
+  // the builder" — verbatim: "browser-terug doet niets in de builder"):
   // the editor is an overlay in page state, so browser-back only popped the
   // router while the overlay stayed. Push our own history entry on open; a pop
   // re-arms the entry and runs the exact same Close action (incl. the unsaved/
@@ -51,7 +52,8 @@ export function useEditorExitGuards({ isDirty, liveRunActive, onClose, confirm }
     // StrictMode-safe (dev double-mount!): only push our entry when it isn't
     // already on top, and NEVER history.back() in cleanup — the async pop there
     // hit the remounted instance and closed the editor the moment it opened
-    // (Danny 24-07 "ik kan geen workflow meer aanklikken"). The one leftover
+    // (Danny 24-07, translated: "I can no longer click a workflow" — verbatim:
+    // "ik kan geen workflow meer aanklikken"). The one leftover
     // entry after a normal close makes the next back a harmless same-page pop.
     if (!(window.history.state as { kmWorkflowEditor?: boolean } | null)?.kmWorkflowEditor) {
       window.history.pushState({ kmWorkflowEditor: true }, '', window.location.href)

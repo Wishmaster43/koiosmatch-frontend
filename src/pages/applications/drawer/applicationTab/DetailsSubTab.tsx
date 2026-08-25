@@ -1,3 +1,9 @@
+/**
+ * DetailsSubTab — APP-TAB-SPLIT-1, group (b): the editable Source/Customer/
+ * Customer location/Department/Contact/Vacancy card, unchanged from the
+ * original tab — same pencil/save/cancel, same PATCH bodies via
+ * onLinkVacancy/onUpdateSource.
+ */
 import ApplicationDetailsCard from '../ApplicationDetailsCard'
 import type { ApplicationDetail } from '@/types/application'
 import type { Id } from '@/types/common'
@@ -12,12 +18,6 @@ interface DetailsSubTabProps {
   onUpdateSource?: (id: Id | undefined, source: string) => void
 }
 
-/**
- * DetailsSubTab — APP-TAB-SPLIT-1, group (b): the editable Bron/Klant/
- * Klantlocatie/Afdeling/Contactpersoon/Vacature card, unchanged from the
- * original tab — same pencil/save/cancel, same PATCH bodies via
- * onLinkVacancy/onUpdateSource.
- */
 export default function DetailsSubTab({ application: a, onLinkVacancy, onUpdateSource }: DetailsSubTabProps) {
   return <ApplicationDetailsCard application={a} onLinkVacancy={onLinkVacancy} onUpdateSource={onUpdateSource} />
 }

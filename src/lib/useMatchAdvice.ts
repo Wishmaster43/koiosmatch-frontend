@@ -1,11 +1,3 @@
-import { useCallback } from 'react'
-import { useTranslation } from 'react-i18next'
-import { useAllSettings, getNumberSetting } from '@/lib/settings/useAllSettings'
-import { useMatchStatuses } from '@/lib/useMatchStatuses'
-import { deriveMatchAdvice } from '@/pages/matches/shared'
-import type { KoiosAdvice } from '@/lib/koiosAdviceMeta'
-import type { MatchRow } from '@/types/match'
-
 /**
  * useMatchAdvice — the ONE resolver both the matches TABLE column and the
  * drawer's Koios block call, so they can never disagree (KOIOS-ADVIES-OVERAL-1,
@@ -13,6 +5,13 @@ import type { MatchRow } from '@/types/match'
  * with the tenant's renew-window threshold and the /match-statuses is_closed
  * flag — both resolved HERE so the logic has exactly one home.
  */
+import { useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
+import { useAllSettings, getNumberSetting } from '@/lib/settings/useAllSettings'
+import { useMatchStatuses } from '@/lib/useMatchStatuses'
+import { deriveMatchAdvice } from '@/pages/matches/shared'
+import type { KoiosAdvice } from '@/lib/koiosAdviceMeta'
+import type { MatchRow } from '@/types/match'
 export function useMatchAdvice(): (m: MatchRow) => KoiosAdvice | null {
   const { t } = useTranslation('matches')
   // Match lifecycle lookup (R-1b) — a closed match has nothing left to renew.

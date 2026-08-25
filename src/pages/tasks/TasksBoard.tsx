@@ -1,3 +1,11 @@
+/**
+ * TasksBoard — kanban view, one column per task STATUS (the lookup, never hardcoded).
+ * Presentational: the page owns the data and the LOCAL status mutation (onMove).
+ * Mirrors ApplicationsBoard. `onMove` both re-groups locally and persists: the
+ * page's chain (useTaskDrawerActions.handleUpdate) resolves the status slug to
+ * the real `status_id` the server validates, so this board needs no write path
+ * of its own (it briefly had one while that chain was silently no-op'ing).
+ */
 import { useRef } from 'react'
 import type { DragEvent, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -101,14 +109,6 @@ function BoardColumnView({ column, items, onDragStart, onDrop, onDragOver, onSel
   )
 }
 
-/**
- * TasksBoard — kanban view, one column per task STATUS (the lookup, never hardcoded).
- * Presentational: the page owns the data and the LOCAL status mutation (onMove).
- * Mirrors ApplicationsBoard. `onMove` both re-groups locally and persists: the
- * page's chain (useTaskDrawerActions.handleUpdate) resolves the status slug to
- * the real `status_id` the server validates, so this board needs no write path
- * of its own (it briefly had one while that chain was silently no-op'ing).
- */
 export default function TasksBoard({ rows, columns, onMove, onSelect, selectedId }: {
   rows: Task[]; columns: BoardColumn[]; onMove: (id: Id, statusKey: string | number) => void; onSelect: (t: Task) => void; selectedId?: Id | null
 }) {

@@ -1,3 +1,6 @@
+// DocPreviewModal — the ONE document-preview dialog shared by every entity that
+// lists documents. See the fuller doc comment below the type/helpers for why it
+// fetches persisted documents as an authenticated blob instead of navigating.
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useDocumentTypes, resolveDocTypeIcon } from '@/lib/useDocumentTypes'

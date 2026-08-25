@@ -3,8 +3,9 @@
  * expand/collapse and close. Split out of KoiosPanel (§0.3 size discipline) —
  * purely presentational, all state/handlers arrive as props.
  *
- * CONNECT-1 (Danny 22-08: "Knopje niet bij Koios AI doet ook niets??" on the
- * "Niet gekoppeld" indicator): `connected` is derived in KoiosPanel from
+ * CONNECT-1 (Danny 22-08: "Knopje niet bij Koios AI doet ook niets??" — the button
+ * next to Koios AI doesn't do anything either?? — on the "Niet gekoppeld" ("Not
+ * connected") indicator): `connected` is derived in KoiosPanel from
  * GET /ai/koios/settings' `status.claude_configured` + `status.api_ok` — the
  * exact surface that configures it is Settings → AI → Koios
  * (pages/settings/sections/koios/KoiosStatusCard.jsx). So the disconnected

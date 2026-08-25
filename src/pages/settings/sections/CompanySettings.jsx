@@ -1,3 +1,9 @@
+/**
+ * CompanySettings — the tenant's company-profile form (identity/address/
+ * preferences), grouped into titled cards. Industries/countries come from
+ * backend lookups; currencies/timezones stay a fixed local list (data, not
+ * comments — see the constants below).
+ */
 import { useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Check, Save } from 'lucide-react'
@@ -22,7 +28,8 @@ import { fieldSelectStyle, fieldInputStyle } from '@/components/forms/fieldMetri
 // countries are now backend-sourced (Settings → Personalisation → Industries;
 // GET /countries, COUNTRY-LOOKUP-1) — never a hardcoded list of either.
 // Value = locale CODE (what the setting stores and i18n understands), label =
-// the language NAME (Danny 25-08: "Taal moet Nederlands zijn, niet nl").
+// the language NAME (Danny 25-08: "Taal moet Nederlands zijn, niet nl" —
+// "Language must be Dutch, not nl").
 const LANGUAGES = APP_LANGUAGES.map(l => ({ value: l.value, label: l.label }))
 // Legacy rows stored the NAME; normalize either shape to the code.
 const toLanguageCode = v => APP_LANGUAGES.find(l => l.value === v || l.label === v)?.value ?? 'nl'
@@ -86,7 +93,7 @@ function Select({ value, onChange, options }) {
       closeOnToggle
       renderTrigger={toggle => (
         // §4 2b: a dropdown TRIGGER is a FORM FIELD — its face comes from
-        // fieldMetrics' select canon, never Button (Opus-controle klus d).
+        // fieldMetrics' select canon, never Button (Opus-controle klus d — "Opus review job d").
         <button type="button" onClick={toggle}
           // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- form-field trigger face (fieldSelectStyle canon), not an action button
           style={{ ...fieldSelectStyle, maxWidth: 360, textAlign: 'left' }}>
@@ -233,7 +240,7 @@ export default function CompanySettings() {
             </Row>
             <Row label={t('company.postcode')}><Input value={form.company_postcode} onChange={v => set('company_postcode', v)} placeholder="1234 AB" /></Row>
             <Row label={t('company.city')}><Input value={form.company_city} onChange={v => set('company_city', v)} placeholder={t('company.cityPlaceholder')} /></Row>
-            {/* Provincie is a searchable dropdown like everywhere else (Danny 08-08,
+            {/* Provincie ("Province") is a searchable dropdown like everywhere else (Danny 08-08,
                 CLAUDE.md §4) — options cascade on the picked country, mirroring the
                 candidate/vacancy address blocks. */}
             <Row label={t('company.province')}>
@@ -252,7 +259,8 @@ export default function CompanySettings() {
         </div>
       )}
       {/* Organisation policies (MFA enforcement, …) live in their OWN sub-menu now:
-          Settings → Bedrijf → Organisatiebeleid (Danny 23-07 — no longer crammed
+          Settings → Bedrijf → Organisatiebeleid ("Company → Organisation policy")
+          (Danny 23-07 — no longer crammed
           under the company-profile form). */}
     </div>
   )

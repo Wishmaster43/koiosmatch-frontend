@@ -1,6 +1,3 @@
-import type { CSSProperties, ReactNode } from 'react'
-import { GroupLabel } from '@/components/ui/typography'
-
 /**
  * SectionCard — bordered surface card with an optional title + action row.
  *
@@ -9,6 +6,9 @@ import { GroupLabel } from '@/components/ui/typography'
  * raw style (e.g. nested layouts). The heading itself is the shared
  * `GroupLabel` atom (§4 typography) — never a locally re-declared style.
  */
+import type { CSSProperties, ReactNode } from 'react'
+import { GroupLabel } from '@/components/ui/typography'
+
 // eslint-disable-next-line react-refresh/only-export-components -- a style constant re-export alongside this file's component; HMR-nicety warning only
 export const sectionBlock: CSSProperties = {
   border: '1px solid var(--border)', borderRadius: 10,

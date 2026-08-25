@@ -1,3 +1,20 @@
+/**
+ * ProposalsBlock — the recorded-proposal history on the Sollicitatie tab
+ * (PROPOSE-STORE-1). Renders NOTHING while loading, on error, or when there
+ * are zero proposals (§3: no empty frame for an optional history block) —
+ * only shows once at least one proposal exists.
+ *
+ * PROPOSE-SHARE-URL-1 shipped on the backend: a sent, non-revoked proposal now
+ * carries a real recipient-facing `share_url` (+ `share_expires_at`) — the API
+ * only attaches these for a viewer who may write, and nulls both once revoked
+ * (ApplicationProposalController::withShareLink / ProposalLink::shareFor). This
+ * block renders a copy-link and an open-in-new-tab action for that link, and
+ * shows the genuine opened/not-opened state now that a customer can actually
+ * open the proposal. A revoked proposal never offers the link — guarded the
+ * same way the revoke button already is (`!p.revoked_at`), never by only
+ * trusting the field to be absent. The raw link is never logged, never put
+ * into an analytics payload, and never rendered anywhere outside this block.
+ */
 import { useEffect, useRef, useState } from 'react'
 import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -29,23 +46,6 @@ const linkButtonStyle: CSSProperties = {
   cursor: 'pointer', textDecoration: 'none',
 }
 
-/**
- * ProposalsBlock — the recorded-proposal history on the Sollicitatie tab
- * (PROPOSE-STORE-1). Renders NOTHING while loading, on error, or when there
- * are zero proposals (§3: no empty frame for an optional history block) —
- * only shows once at least one proposal exists.
- *
- * PROPOSE-SHARE-URL-1 shipped on the backend: a sent, non-revoked proposal now
- * carries a real recipient-facing `share_url` (+ `share_expires_at`) — the API
- * only attaches these for a viewer who may write, and nulls both once revoked
- * (ApplicationProposalController::withShareLink / ProposalLink::shareFor). This
- * block renders a copy-link and an open-in-new-tab action for that link, and
- * shows the genuine opened/not-opened state now that a customer can actually
- * open the proposal. A revoked proposal never offers the link — guarded the
- * same way the revoke button already is (`!p.revoked_at`), never by only
- * trusting the field to be absent. The raw link is never logged, never put
- * into an analytics payload, and never rendered anywhere outside this block.
- */
 export default function ProposalsBlock({ application }: ProposalsBlockProps) {
   const { t } = useTranslation(['applications', 'common'])
   const { formatDate } = useDateFormat()

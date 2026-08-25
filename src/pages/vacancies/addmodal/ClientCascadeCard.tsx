@@ -1,9 +1,9 @@
 /**
- * ClientCascadeCard — Klant: the REAL searchable klant -> locatie -> afdeling ->
- * contactpersoon cascade (punt 6), replacing the old silent id-passthrough +
- * info-line. `lockCustomerId` keeps the customer read-only, but every level
- * below it stays editable and clearable (punt 3: afdeling optioneel) — the
- * pickers themselves come from the shared `useCascadePickers` (mirrors
+ * ClientCascadeCard — Klant (customer): the REAL searchable customer -> location
+ * -> department -> contact cascade (punt 6), replacing the old silent
+ * id-passthrough + info-line. `lockCustomerId` keeps the customer read-only,
+ * but every level below it stays editable and clearable (punt 3: department
+ * optional) — the pickers themselves come from the shared `useCascadePickers` (mirrors
  * MatchModal/DetailsGeneralTab), so this card is purely presentational.
  */
 import { useTranslation } from 'react-i18next'

@@ -1,3 +1,10 @@
+/**
+ * TasksBulkBar — the selection action bar shown above the table when ≥1 task is
+ * checked. A single "Massa-acties" menu (ActionMenu, drill-in) holds every bulk
+ * mutation; each action is one config node fed by props, so this stays a thin
+ * assembler. Mirrors CandidatesBulkBar. Delete is authorization-gated (canDelete);
+ * the backend re-checks.
+ */
 import { useTranslation } from 'react-i18next'
 import { ListChecks, Activity, Flag, UserCog, Archive, X } from 'lucide-react'
 import ActionMenu from '@/components/ui/ActionMenu'
@@ -22,13 +29,6 @@ interface TasksBulkBarProps {
   users?: BulkUser[]
 }
 
-/**
- * TasksBulkBar — the selection action bar shown above the table when ≥1 task is
- * checked. A single "Massa-acties" menu (ActionMenu, drill-in) holds every bulk
- * mutation; each action is one config node fed by props, so this stays a thin
- * assembler. Mirrors CandidatesBulkBar. Delete is authorization-gated (canDelete);
- * the backend re-checks.
- */
 export default function TasksBulkBar({
   count, onClear, onSetStatus, onSetPriority, onSetAssignee, onArchive, canArchive = false,
   statuses = [], priorities = [], users = [],

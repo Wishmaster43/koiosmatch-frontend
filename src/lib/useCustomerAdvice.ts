@@ -1,9 +1,3 @@
-import { useCallback } from 'react'
-import { useTranslation } from 'react-i18next'
-import { deriveCustomerAdvice } from '@/lib/customerAdvice'
-import type { KoiosAdvice } from '@/lib/koiosAdviceMeta'
-import type { Customer } from '@/types/customer'
-
 /**
  * useCustomerAdvice — the customers table's "Koios" column resolver. Mirrors
  * useCandidateAdvice's honest gate: the backend `koios_advice` column is filled
@@ -16,6 +10,12 @@ import type { Customer } from '@/types/customer'
  * consistency pass) — new advice actions (follow_up, attention, renew, overdue)
  * are reused across entities, so they get ONE i18n home instead of one per table.
  */
+import { useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
+import { deriveCustomerAdvice } from '@/lib/customerAdvice'
+import type { KoiosAdvice } from '@/lib/koiosAdviceMeta'
+import type { Customer } from '@/types/customer'
+
 export function useCustomerAdvice(): (c: Customer) => KoiosAdvice | null {
   const { t } = useTranslation('customers')
 

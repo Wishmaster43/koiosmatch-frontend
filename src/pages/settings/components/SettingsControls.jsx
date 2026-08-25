@@ -73,8 +73,9 @@ export function ColorBadge({ label, color }) {
 // Per-row "Standaard" (is_default) singleton toggle — soft-chip convention (§4):
 // tinted primary background/border, never a solid fill. By default the ACTIVE pill
 // stays clickable so clicking it CLEARS the default (DEFAULT-UNDO, Danny 04-08:
-// "je kan niet undo doen") — same soft-tint spec, stronger tint + weight 600 when
-// active; the caller owns the singleton flip/clear PUT (only one row true at a time).
+// "je kan niet undo doen" — you can't undo it) — same soft-tint spec, stronger
+// tint + weight 600 when active; the caller owns the singleton flip/clear PUT
+// (only one row true at a time).
 // `undoable={false}` opts a caller BACK into the old one-way ratchet (active pill
 // hard-disabled) for the rare backend that rejects clearing the flag — see
 // CandidateLookupsSettings.jsx's funnel-types/phases usage for the verified case.

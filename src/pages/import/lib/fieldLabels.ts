@@ -17,10 +17,12 @@ interface FieldLabelRef {
   defaultValue?: string
 }
 
-// `naam` means a different thing per entity (customer / location / department name),
-// so it is the one column resolved with an entity override below; every other column
-// means the same thing wherever it appears, including the klant_/locatie_/afdeling_-
-// prefixed columns of the combined customer_tree file.
+// `naam` ("name") means a different thing per entity (customer / location /
+// department name), so it is the one column resolved with an entity override
+// below; every other column means the same thing wherever it appears,
+// including the three prefixed columns of the combined customer_tree file:
+// klant_ (customer_), locatie_
+// (location_), afdeling_ (department_).
 const DEFAULT_LABELS: Record<string, FieldLabelRef> = {
   naam: { ns: 'customers', key: 'modal.fields.name' },
   email: { ns: 'customers', key: 'overview.email' },

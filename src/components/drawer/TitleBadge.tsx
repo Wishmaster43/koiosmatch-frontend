@@ -1,5 +1,3 @@
-import { tintBg, tintBorder, chipInk } from '@/lib/tint'
-
 /**
  * TitleBadge — the ONE read-only, colour-coded pill shown beside an entity's
  * drawer title (candidate phase, opportunity stage, application phase, task
@@ -9,6 +7,8 @@ import { tintBg, tintBorder, chipInk } from '@/lib/tint'
  * just hex lookup colours; ink via chipInk — the raw colour on its own tint
  * reads 2.4-3.0:1, AA fail (herhaal-slotaudit r3.5), mirrors SoftChip.
  */
+import { tintBg, tintBorder, chipInk } from '@/lib/tint'
+
 interface TitleBadgeProps {
   label?: string | null
   color?: string | null

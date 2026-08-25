@@ -1,5 +1,3 @@
-import { useApps } from '@/context/AppsContext'
-
 /**
  * useBackofficeLinksVisible (DD-FE-6, "no empty tabs" — §3A) — true when the
  * shared "Koppelingen" tab (BackofficeLinksTab) has real content for the
@@ -12,6 +10,8 @@ import { useApps } from '@/context/AppsContext'
  * see CustomerDrawer/LocationDetail/VacancyDrawer) never need this check —
  * their tab body is never empty regardless of the connector apps.
  */
+import { useApps } from '@/context/AppsContext'
+
 export function useBackofficeLinksVisible(): boolean {
   const apps = useApps()
   const isAppEnabled = apps?.isAppEnabled ?? (() => false)

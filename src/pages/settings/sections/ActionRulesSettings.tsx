@@ -8,7 +8,8 @@
  * no-consent gate (P8) are rendered LOCKED — hard system rules the tenant matrix
  * must never be able to loosen (§ catalogMeta.ts for the measured gap this implies).
  *
- * Danny 2026-07-16 ("Kunnen we tabjes maken kandidaat, klant, avg?"): the three
+ * Danny 2026-07-16 ("Kunnen we tabjes maken kandidaat, klant, avg?", i.e. "Can
+ * we make little tabs: candidate, customer, GDPR?"): the three
  * grids live behind Kandidaat/Klant/AVG sub-tabs, via the SAME SubTabBar the
  * drawers use (§3A). Layout only — the Save bar + Legend stay common chrome above
  * the tab strip so staged edits and their dirty-count stay visible on every tab.

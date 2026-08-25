@@ -1,6 +1,7 @@
 /**
  * VacanciesTab — a thin two-sub-tab host (Danny, asked three times: "Tabblad
- * Vacatures moet 2 subtabbladen hebben: Vacatures en Sollicitaties"): Vacatures
+ * Vacatures moet 2 subtabbladen hebben: Vacatures en Sollicitaties" — "the
+ * Vacancies tab needs 2 sub-tabs: Vacancies and Applications"): Vacatures
  * (this customer's vacancies — unchanged below) and Sollicitaties (the
  * application RECORDS on those vacancies, `CustomerApplicationsList`). The
  * Vacatures sub-tab is via useCustomerVacanciesWithPublished → GET /vacancies?
@@ -125,8 +126,9 @@ export default function VacanciesTab({ customerId, customerName, params }: { cus
   const [resolved, setResolved] = useState(false)
 
   // Load the tenant vacancy-status lookup once.
-  // BUG FIX (Danny 28-07: "Open maar staat niet aangevinkt?????" while the table said
-  // "Geen vacatures voor deze klant"): this mapped the option VALUE off `name`, but
+  // BUG FIX (Danny 28-07: "Open maar staat niet aangevinkt?????" — "Open but it isn't
+  // checked??" — while the table said "Geen vacatures voor deze klant" — "No vacancies
+  // for this customer"): this mapped the option VALUE off `name`, but
   // `GET /vacancy-statuses` returns no `value` at all — it returns `id` (a uuid) +
   // `name`. A vacancy row carries that UUID in `status.value`, so the filter compared
   // "Open" against a uuid, matched nothing, and silently hid every vacancy. The option
@@ -159,7 +161,8 @@ export default function VacanciesTab({ customerId, customerName, params }: { cus
   const publishedRows = useMemo(() => showUnpublished ? rows : rows.filter(v => v.published), [rows, showUnpublished])
 
   // The SHARED status filter, same as every other sub-entity list (Danny 28-07:
-  // "vacature status is niet hetzelfde als locatie status???"). Two things make it safe
+  // "vacature status is niet hetzelfde als locatie status???" — "vacancy status
+  // isn't the same as location status???"). Two things make it safe
   // here: it is handed the statuses ONLY once the real lookup resolved — otherwise it
   // would propose a default off the seed list's slugs, the other half of the same bug —
   // and `keyOf` points it at this row's status OBJECT, because comparing a uuid to an

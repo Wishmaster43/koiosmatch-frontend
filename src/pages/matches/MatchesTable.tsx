@@ -1,3 +1,7 @@
+// MatchesTable — the matches list: declares columns only (§3A), hands them to
+// the shared DataTable for sorting/selection/loading-empty-error chrome. Cells
+// reuse the house avatar/chip/pill conventions so a match row reads exactly
+// like every other entity table.
 import type { RefObject } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useDateFormat } from '@/lib/datetime'
@@ -98,7 +102,7 @@ export default function MatchesTable({
     // default cell (`field(row, col.key)`) prints a blank string for an empty
     // vacancy title, the only column left inconsistent with the house convention.
     { key: 'vacancy', header: t('cols.vacancy'), sortable: true, nowrap: false, render: r => r.vacancy || '—' },
-    // Klant — soft avatar + name (AVATAR-CHIP-1: same chip as the candidate identity
+    // Customer — soft avatar + name (AVATAR-CHIP-1: same chip as the candidate identity
     // column), muted text keeps it reading as a secondary reference.
     { key: 'client',  header: t('cols.client'),  sortable: true, nowrap: true,
       render: r => <EntityNameCell name={r.client} textStyle={{ color: 'var(--text-muted)' }} /> },
@@ -106,7 +110,7 @@ export default function MatchesTable({
     // (mirrors the stage column's own lookup-driven soft chip).
     { key: 'contractForm', header: t('cols.contractForm'), sortable: true, sortValue: r => r.contractForm?.label ?? '',
       render: r => r.contractForm ? <ContractFormChip contractForm={r.contractForm} /> : <span style={{ color: 'var(--text-muted)' }}>—</span> },
-    // MATCH-ORIGIN-1: ONTSTAANSTYPE (direct vs via sollicitatie) — a neutral soft
+    // MATCH-ORIGIN-1: ORIGIN TYPE (direct vs via application) — a neutral soft
     // chip (no colour token passed: this axis carries no state meaning, §4 calm
     // rule). OFFERED-IFF-READ: origin stays undefined until the backend ships
     // `application_id` (see useMatches' mapMatch comment) — an honest dash then,
@@ -133,7 +137,8 @@ export default function MatchesTable({
         if (!label) return <span style={{ color: 'var(--text-muted)' }}>—</span>
         return colorStatus ? <StatusPill label={label} color={color} /> : <span style={{ color: 'var(--text)', fontSize: 12 }}>{label}</span>
       } },
-    // Raw ISO from the API → locale format (Danny 2026-07-13: "datum staat raar").
+    // Raw ISO from the API → locale format (Danny 2026-07-13: "datum staat raar" —
+    // "the date looks odd").
     { key: 'date',    header: t('cols.date'),  sortable: true, sortValue: r => r.date,
       cellStyle: { color: 'var(--text-muted)', fontSize: 12 }, render: r => r.date ? formatDate(r.date) : '—' },
     // Shared Koios column factory (Danny 05-08 consistency pass) — same header,

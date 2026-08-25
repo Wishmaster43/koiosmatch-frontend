@@ -46,8 +46,9 @@ export interface FieldDef {
   // hideWhen removes the field entirely, disabledWhen greys it out (read-only).
   hideWhen?: string
   disabledWhen?: string
-  // KAND-ACHTERGROND-VERPLICHT-1 (2026-08-17, Danny: "staat geen sterrentje bij" /
-  // "waarom kan ik opslaan zonder in te vullen?"): this field is required on the
+  // KAND-ACHTERGROND-VERPLICHT-1 (2026-08-17, Danny, verbatim: "…sterrentje bij" /
+  // "…opslaan zonder in te vullen?" — i.e. "there's no asterisk on it" /
+  // "why can I save without filling it in?"): this field is required on the
   // backend (CandidateExperienceController::employer etc.) — render the shared
   // Label's asterisk and block Save while it is empty, instead of letting an
   // incomplete row reach the API and bounce back as a raw 422.
@@ -75,7 +76,8 @@ function FieldInput({ f, value, onChange, values, disabled, invalid }: {
 }) {
   const { t } = useTranslation('common')
   // A field's label can switch based on another field (altLabelWhen) — e.g. an
-  // education end date becomes "Verwachte einddatum" when "Nog in opleiding" is on.
+  // education end date becomes "Verwachte einddatum" ("Expected end date") when
+  // "Nog in opleiding" ("Still studying") is on.
   const label = (f.altLabelWhen && values?.[f.altLabelWhen]) ? f.altLabel : f.label
   const labelText = typeof label === 'string' ? label : undefined
   // Disabled = greyed + non-interactive (e.g. end date on a current job / always-valid cert).
@@ -171,8 +173,9 @@ export default function AddForm({ fields, onSave, onCancel, initial }: {
   // Fields whose hideWhen condition is active drop out entirely (pairing runs on what's left).
   const dis = (f: FieldDef) => !!(f.disabledWhen && values[f.disabledWhen])
   const visibleFields = fields.filter(f => !(f.hideWhen && values[f.hideWhen]))
-  // The checkbox field ("Huidige functie" / "Nog in opleiding" / "Altijd geldig")
-  // shares one line with the save/cancel buttons instead of its own row — wherever
+  // The checkbox field (examples: "Huidige functie" i.e. "Current position",
+  // "Nog in opleiding" i.e. "Still studying", "Altijd geldig" i.e. "Always
+  // valid") shares one line with the save/cancel buttons instead of its own row — wherever
   // it sits in the field list, so every section puts it in the same compact spot
   // (Danny 17-07, punten 1+2). Conditional fields around it (hideWhen/altLabel)
   // keep working: they reference the field by key, not by position.

@@ -1,3 +1,9 @@
+/**
+ * PlanningPage — the shift calendar (month/week/day/list). Reads real shifts
+ * from GET /planning/board; the CREATE side (AddShiftModal) stays disabled
+ * until an order-creation flow exists — see the mapBoardShift comment below
+ * for the honest read/write split.
+ */
 import { useState, useMemo, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useRightPanel } from '@/context/RightPanelContext'

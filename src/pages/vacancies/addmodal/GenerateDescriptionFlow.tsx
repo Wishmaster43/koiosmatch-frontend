@@ -1,3 +1,7 @@
+/**
+ * GenerateDescriptionFlow — see the fuller docblock below, right above the
+ * component, for the "Genereer met Koios" create-form flow it renders.
+ */
 import { useTranslation } from 'react-i18next'
 import type { CSSProperties } from 'react'
 import { Sparkles, X, Check } from 'lucide-react'

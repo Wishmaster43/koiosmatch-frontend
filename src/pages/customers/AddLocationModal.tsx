@@ -2,9 +2,10 @@
  * AddLocationModal — create (or edit, via `initial`) a customer location with the
  * FULL C-6 field set the backend accepts (CustomerLocationController::rules).
  *
- * Widened to the house "wide form" frame (Danny 27-07: "+ vestiging nalopen want
- * klopt van geen kant, te small" — every create modal must match +Match/+Kandidaat's
- * footprint) via the shared WIDE_MODAL constant, and regrouped into titled,
+ * Widened to the house "wide form" frame (Danny 27-07, verbatim: "…te
+ * small" — i.e. "review + branch, it's off in every way, too small" — every
+ * create modal must match +Match/+Kandidaat's footprint) via the shared
+ * WIDE_MODAL constant, and regrouped into titled,
  * bordered cards (Algemeen/Adres/Zakelijk/Contact) stacked full-width — mirrors
  * AddContactPersonModal.tsx (same folder, same 27-07 request) rather than the
  * candidates page's 2-column card grid, so the three "customers" sub-modals read
@@ -157,8 +158,9 @@ export default function AddLocationModal({
   const [createError, setCreateError] = useState<string | null>(null)
   // COLLAPSIBLE-TEXT-1: Omschrijving's collapsed/editing state now lives inside
   // LocationDescriptionCard (nothing outside that card ever reads it).
-  // STATUS-HIDDEN-1 (Danny 02-08, second round: "+ nieuwe locatie ... status moet
-  // weg in de popup"): the picker is hidden by default — LocationDetail's own
+  // STATUS-HIDDEN-1 (Danny 02-08, second round, verbatim: "…status moet weg in
+  // de popup" — i.e. "+ new location ... status must go from the popup"): the
+  // picker is hidden by default — LocationDetail's own
   // title-row status editor already covers create AND edit — and only reappears
   // when the tenant marked status_id required (FlatRequiredFieldsGuard catalog),
   // so a tenant that requires it never hits an un-actionable 422 with no visible

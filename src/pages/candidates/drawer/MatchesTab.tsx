@@ -1,16 +1,3 @@
-import { useState } from 'react'
-import { useTranslation } from 'react-i18next'
-import { Search } from 'lucide-react'
-import SectionCard from '@/components/ui/SectionCard'
-import StatusFilterSelect, { useStatusFilter } from '@/components/drawer/StatusFilterSelect'
-import DrawerAddButton from './DrawerAddButton'
-import { useMatchStatuses } from '@/lib/useMatchStatuses'
-import { MatchCard } from '@/pages/matches/shared'
-import { MatchListHeaderBar } from '@/pages/matches/shared'
-import { rememberReturnTab } from './constants'
-import type { Candidate, CandidateMatch } from '@/types/candidate'
-import type { Id } from '@/types/common'
-
 /**
  * MatchesTab — READ-ONLY view of the candidate's matches (decided model: a Match
  * is its own entity; the contract lives in HelloFlex, we only show its status).
@@ -19,17 +6,18 @@ import type { Id } from '@/types/common'
  * (PATCH /matches/{id}); the lifecycle status itself still isn't touched here.
  *
  * The card BODY is the shared `MatchCard` (Danny's ten-point round, point 2/4/5/6:
- * fase merges into the title, Periode/Functie/Vestiging/Eigenaar rows, expiry
+ * phase merges into the title, Period/Function/Branch/Owner rows, expiry
  * chip) — extracted so this tab, the customer drawer's own MatchesTab and the
  * scoped Matches sub-tab can never again drift into three different card bodies.
- * Vestiging/Eigenaar always read "—" here: the candidate-embedded MatchResource
+ * Branch/Owner always read "—" here: the candidate-embedded MatchResource
  * carries neither (see MatchCard's own docblock) — a real backend gap, not
  * dropped here.
  *
- * TOOLBAR (Danny 03-08, one look on both the customer's and this card — "bij
- * Matches wil ik ook een zoekbalk en statussen hebben"): search (vacancy title +
- * client name) + the shared StatusFilterSelect keyed on the SAME match-status
- * vocabulary the title's own fase resolves via useMatchStatuses().
+ * TOOLBAR (Danny 03-08: "bij Matches wil ik ook een zoekbalk en statussen
+ * hebben" — I also want a search bar and statuses on Matches — one look on
+ * both the customer's and this card): search (vacancy title + client name) +
+ * the shared StatusFilterSelect keyed on the SAME match-status vocabulary the
+ * title's own phase resolves via useMatchStatuses().
  *
  * ONE-LINE TOOLBAR (Danny live review, 04-08: "Zoeken status en + match moet op
  * 1 lijn!!"): the optional `onAdd` renders the house DrawerAddButton at the END
@@ -44,6 +32,19 @@ import type { Id } from '@/types/common'
  * and the list is sorted by `createdAt` descending before render (see the sort
  * comment below for the field's provenance).
  */
+import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import { Search } from 'lucide-react'
+import SectionCard from '@/components/ui/SectionCard'
+import StatusFilterSelect, { useStatusFilter } from '@/components/drawer/StatusFilterSelect'
+import DrawerAddButton from './DrawerAddButton'
+import { useMatchStatuses } from '@/lib/useMatchStatuses'
+import { MatchCard } from '@/pages/matches/shared'
+import { MatchListHeaderBar } from '@/pages/matches/shared'
+import { rememberReturnTab } from './constants'
+import type { Candidate, CandidateMatch } from '@/types/candidate'
+import type { Id } from '@/types/common'
+
 export default function MatchesTab({ c, onEdit, onAdd }: { c: Candidate
   // Opens the match in MatchModal as an edit (WorkTab owns the modal state).
   onEdit?: (matchId: Id) => void

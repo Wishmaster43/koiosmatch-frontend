@@ -1,8 +1,9 @@
 /**
- * ShiftsBreakdownCharts — the two SM-CHARTS2 charts under the tables: open diensten
- * (geen_kandidaat) per klant and per functie. Horizontal ranked bars (not donuts —
- * Danny: "past niet") so long labels like "Stichting Zorgpartners Midden-Holland"
- * and "Verzorgende IG - UZK" read cleanly. Value follows the block's Uren/Diensten
+ * ShiftsBreakdownCharts — the two SM-CHARTS2 charts under the tables: open shifts
+ * ("open diensten", filtered on `geen_kandidaat` — "no candidate") per customer and
+ * per function. Horizontal ranked bars (not donuts — Danny: "past niet" — "doesn't
+ * fit") so long labels like "Stichting Zorgpartners Midden-Holland" and "Verzorgende
+ * IG - UZK" read cleanly. Value follows the block's Hours/Shifts ("Uren/Diensten")
  * unit. Dumb: receives rows + unit, no fetching.
  */
 import { ResponsiveContainer, BarChart, Bar, Cell, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts'
@@ -43,7 +44,7 @@ function HBars({ rows, unit, offset, empty }: { rows: BreakdownRow[]; unit: 'hou
   )
 }
 
-// Small numbers table under a chart: name · uren · diensten (top 8 by hours).
+// Small numbers table under a chart: name · hours · shifts (top 8 by hours).
 function MiniTable({ rows, nameCol }: { rows: BreakdownRow[]; nameCol: string }) {
   const { t } = useTranslation('shiftmanager')
   const fmt = (v: unknown) => formatNumber(Number(v) || 0)

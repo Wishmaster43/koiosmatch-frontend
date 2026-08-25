@@ -1,13 +1,13 @@
-import type { SVGProps } from 'react'
-
 /**
  * PdokMark — an own-design vector mark for the PDOK geocode workflow module
  * (mirrors ShiftManagerMark: the raster PDOK logo pixelates at node size, so the
  * builder gets a crisp inline SVG instead; the real logo stays on the drill-down
  * Koppelingen card). Design: PDOK-navy rounded tile, a white map pin, and a
- * Dutch-orange centre — "adres → punt op de kaart" in one glyph. Props mirror the
- * lucide icon contract (`size`, `color`) so it drops in anywhere an icon fits.
+ * Dutch-orange centre — "adres → punt op de kaart" ("address → point on the
+ * map") in one glyph. Props mirror the lucide icon contract (`size`, `color`)
+ * so it drops in anywhere an icon fits.
  */
+import type { SVGProps } from 'react'
 /* eslint-disable no-restricted-syntax -- DATA: PDOK-navy + Dutch-flag orange brand colours for this own-design vector mark, not a themeable UI colour */
 const PDOK_NAVY = '#1E3A5F'
 const NL_ORANGE = '#FF7700'

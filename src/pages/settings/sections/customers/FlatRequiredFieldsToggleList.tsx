@@ -1,6 +1,6 @@
 /**
  * FlatRequiredFieldsToggleList — one toggle per built-in field for a customer sub-entity
- * that has NO phase axis (Locatie / Afdeling / Contactpersoon), mirroring the backend's
+ * that has NO phase axis (Location / Department / Contact), mirroring the backend's
  * `FlatRequiredFieldsGuard` shape: one parameterised component, three entity tokens.
  * The setting is a flat JSON array of field keys under `{entity}_required_fields` —
  * NOT the phase-keyed map the Klant tab uses (CustomerPhaseRequiredFieldsMatrix).

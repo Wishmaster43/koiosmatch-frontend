@@ -32,7 +32,8 @@ export interface Campaign {
 
 // OutreachCampaignController's filterRules() caps per_page at `between:1,200`. Fixed
 // 2026-08-05 (audit: "Bellijsten heeft niet eens een footer?? ... rows per page niet
-// overal toegepast"): this hook used to call GET /outreach-campaigns with NO per_page/
+// overal toegepast" — "Call lists don't even have a footer?? ... rows per page not
+// applied everywhere"): this hook used to call GET /outreach-campaigns with NO per_page/
 // page at all, so the controller's own default (25) silently capped the whole list —
 // and OutreachPage had no PaginationBar at all to reveal the truncation (mirrors the
 // "84 vs 25" bug useMatches.ts already fixed for matches). Now fetches the FULL set

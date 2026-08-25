@@ -2,7 +2,9 @@
  * PdokCard — the PDOK geocoding card for every entity drawer's Koppelingen tab.
  * Geocoding is a backoffice link like any other, so it belongs in that tab and not as
  * a stray icon in the drawer title row (Danny 28-07: "FRESH PDOK moet tabblad zijn …
- * MOET OOK WEG BIJ KANDIDAAT DRILL DOWN, alleen bij koppelingen"). The candidate keeps
+ * MOET OOK WEG BIJ KANDIDAAT DRILL DOWN, alleen bij koppelingen" — "FRESH PDOK must
+ * be a tab … it must also disappear from the candidate drill-down, only under
+ * Links [Koppelingen]"). The candidate keeps
  * its own richer card (it polls for fresh coordinates after a manual refresh); this is
  * the plain version for entities without that polling, built on the SAME shared
  * GeocodeButton so the request path is identical everywhere (§3A/§11).

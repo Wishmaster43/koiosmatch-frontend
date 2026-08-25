@@ -1,3 +1,9 @@
+/**
+ * MatchScoreSection — the application drawer's ONE match-score surface: an
+ * overall bar, the per-criterion breakdown, and the manual-override/recalculate
+ * controls. See the fuller docblock below, right above the component, for the
+ * history behind why those two affordances live here.
+ */
 import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Pencil, RefreshCw, Save, X } from 'lucide-react'
@@ -27,8 +33,10 @@ interface MatchScoreSectionProps {
 }
 
 /**
- * MatchScoreSection — Danny 21-08 ruling 1 ("Match score met die balk vind ik
- * mooi maar bovenin is dubbel"): the status strip's own match-score CELL is
+ * MatchScoreSection — Danny 21-08 ruling 1 (translated: "I like the match score
+ * with that bar, but having it up top too is a duplicate" — verbatim: "Match
+ * score met die balk vind ik mooi maar bovenin is dubbel"): the status strip's
+ * own match-score CELL is
  * retired; this titled card is now the ONE score surface on the tab. Its title
  * row carries the two affordances the retired cell used to own — the quick
  * manual-override pencil (MATCHSCORE-EDIT-1, PATCH /applications/{id}
@@ -39,8 +47,10 @@ interface MatchScoreSectionProps {
  * existed to avoid duplicating the now-retired strip cell, so the bar Danny
  * liked in his screenshot renders here.
  *
- * COLLAPSE-1 (Danny 22-08: "Match score moet je kunnen openklappen en
- * dichtklappen, standaard dichtgeklapt"): the card now rides the shared
+ * COLLAPSE-1 (Danny 22-08, translated: "you must be able to expand and
+ * collapse the match score, collapsed by default" — verbatim: "Match score
+ * moet je kunnen openklappen en dichtklappen, standaard dichtgeklapt"): the
+ * card now rides the shared
  * `components/ui/CollapsedCard` atom, default CLOSED (`defaultOpen` omitted).
  * The header keeps showing the section title AND the overall score (the
  * SAME scoreColor threshold MatchScoreBlock's own overall row uses) so a

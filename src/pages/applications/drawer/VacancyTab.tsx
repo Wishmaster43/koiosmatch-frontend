@@ -1,3 +1,26 @@
+/**
+ * VacancyTab — the FULL vacancy drill-down inside the application drawer, the
+ * vacancy-side mirror of CandidateTab.tsx (Danny, with emphasis: the Vacature
+ * ("Vacancy") tab must show the real vacancy drill-down). Fetches the linked
+ * vacancy and reuses the vacancy feature's own tab components + a sub-tab bar,
+ * so it looks and BEHAVES identical to the real VacancyDrawer instead of the
+ * old bespoke Details+Description stack with no tab bar.
+ *
+ * Tab set mirrors VacancyDrawer's own TABS 1:1, minus the same THREE categories
+ * CandidateTab already excludes from its own mirror of CandidateDrawer:
+ * autoExpand tabs that need the drawer to widen (candidateSearch, like the
+ * candidate side's vacancySearch), the PDOK/koppelingen tab (like the
+ * candidate side's integrations tab), and the tenant-custom-fields "Extra" tab
+ * (conditional on ≥1 active custom field, like the candidate side's own
+ * "extra" exclusion here). There is no module-gated tab on the vacancy side
+ * (candidate excludes "planning" for hasModule('plan')).
+ *
+ * The empty state (no vacancy linked yet) keeps its OWN "Vacature koppelen"
+ * ("link a vacancy") link flow — unlike CandidateTab's absent-candidate fallback
+ * (which just reuses the loading/error copy, since an application always has a
+ * candidate), an application legitimately has no vacancy yet, and this flow is
+ * the real, tested business path for it (VacancyLinkField, useVacancyLinkOptions).
+ */
 import { useState, useEffect } from 'react'
 import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -43,29 +66,6 @@ interface VacancyTabProps {
   onLinkVacancy?: (id: Id | undefined, vacancyId: Id | null, meta?: { title?: string; client?: string }) => void
 }
 
-/**
- * VacancyTab — the FULL vacancy drill-down inside the application drawer, the
- * vacancy-side mirror of CandidateTab.tsx (Danny, with emphasis: the Vacature
- * tab must show the real vacancy drill-down). Fetches the linked vacancy and
- * reuses the vacancy feature's own tab components + a sub-tab bar, so it looks
- * and BEHAVES identical to the real VacancyDrawer instead of the old bespoke
- * Details+Description stack with no tab bar.
- *
- * Tab set mirrors VacancyDrawer's own TABS 1:1, minus the same THREE categories
- * CandidateTab already excludes from its own mirror of CandidateDrawer:
- * autoExpand tabs that need the drawer to widen (candidateSearch, like the
- * candidate side's vacancySearch), the PDOK/koppelingen tab (like the
- * candidate side's integrations tab), and the tenant-custom-fields "Extra" tab
- * (conditional on ≥1 active custom field, like the candidate side's own
- * "extra" exclusion here). There is no module-gated tab on the vacancy side
- * (candidate excludes "planning" for hasModule('plan')).
- *
- * The empty state (no vacancy linked yet) keeps its OWN "Vacature koppelen"
- * link flow — unlike CandidateTab's absent-candidate fallback (which just
- * reuses the loading/error copy, since an application always has a candidate),
- * an application legitimately has no vacancy yet, and this flow is the real,
- * tested business path for it (VacancyLinkField, useVacancyLinkOptions).
- */
 export default function VacancyTab({ application: a, onLinkVacancy }: VacancyTabProps) {
   const { t } = useTranslation(['applications', 'vacancies', 'common'])
   const queryClient = useQueryClient()
@@ -127,8 +127,8 @@ export default function VacancyTab({ application: a, onLinkVacancy }: VacancyTab
   }
 
   // Sub-tab bar — mirrors VacancyDrawer's own tab list (see the file doc comment
-  // for the three excluded categories). "Beschrijving" reuses the SAME
-  // details.description key the real drawer's tab label does (VAC-TEKST-TAB-1).
+  // for the three excluded categories). "Beschrijving" ("Description") reuses the
+  // SAME details.description key the real drawer's tab label does (VAC-TEKST-TAB-1).
   const tabs = [
     { id: 'details',      label: t('vacancies:drawer.tabs.details') },
     { id: 'description',  label: t('vacancies:details.description') },
@@ -172,14 +172,16 @@ export default function VacancyTab({ application: a, onLinkVacancy }: VacancyTab
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column' }}>
-      {/* Vacancy NAME left + "Open vacature" right on ONE row — mirrors the Kandidaat
-          tab's [name … Open kandidaat] header so both drill-downs read the same
-          (Danny 21-07: "vacature moet zelfde soort worden … naam van de vacature links").
-          Shown whenever a vacancy is linked, independent of the fetch state below
-          (the title/id are denormalised on the application already). Deliberate
-          sibling deviation: CandidateTab still renders a muted non-clickable
-          placeholder without an id — here NOTHING renders instead, because a
-          dead "Open vacature" text is a §3 fake affordance. */}
+      {/* Vacancy NAME left + "Open vacature" ("Open vacancy") right on ONE row —
+          mirrors the Kandidaat ("Candidate") tab's [name … Open kandidaat ("Open
+          candidate")] header so both drill-downs read the same
+          (Danny 21-07: "vacature moet zelfde soort worden … naam van de vacature
+          links" — "vacancy must become the same kind … name of the vacancy on
+          the left"). Shown whenever a vacancy is linked, independent of the
+          fetch state below (the title/id are denormalised on the application
+          already). Deliberate sibling deviation: CandidateTab still renders a
+          muted non-clickable placeholder without an id — here NOTHING renders
+          instead, because a dead "Open vacature" text is a §3 fake affordance. */}
       {a.vacancyId != null && (
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 14, marginBottom: 8 }}>
           <SectionTitle as="span" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0 }}>
@@ -221,7 +223,8 @@ export default function VacancyTab({ application: a, onLinkVacancy }: VacancyTab
               <Button variant="secondary" iconOnly size="sm" onClick={() => setLinking(false)} title={t('common:cancel')} aria-label={t('common:cancel')}><X size={13} /></Button>
             </div>
           ) : (
-            // Primary, not secondary (Danny 20-08, pasted this button: "Huisstijl") —
+            // Primary, not secondary (Danny 20-08, pasted this button: "Huisstijl" —
+            // "house style") —
             // coupling the vacancy is THE action of this empty state.
             <Button variant="primary" size="sm" onClick={() => { setVacancyId(''); setLinking(true) }}>
               <Link2 size={13} /> {t('vacancyDetail.linkButton')}
@@ -231,7 +234,7 @@ export default function VacancyTab({ application: a, onLinkVacancy }: VacancyTab
       ) : (
         // Full reuse: the tabs need the vacancy lookups they render labels from, and
         // each gets the real onUpdate so its edit pencils actually persist. A link
-        // still jumps to the full vacancy record. Ontkoppelen lives ONLY in the drawer
+        // still jumps to the full vacancy record. Ontkoppelen ("Unlink") lives ONLY in the drawer
         // footer (Danny 21-07: no duplicate top link) — that one collects the required
         // reason (S15); the top affordance both duplicated it and skipped that reason.
         <VacancyLookupsProvider>

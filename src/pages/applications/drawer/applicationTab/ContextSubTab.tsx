@@ -1,3 +1,16 @@
+/**
+ * ContextSubTab — APP-TAB-SPLIT-1, group (d): canon step 2 (the motivation
+ * letter — the application's own free text, applicant-authored so read-only;
+ * its TEKST-POPOUT reading affordance is a registered follow-up) followed by
+ * canon step 3 (interview-consent evidence + the Koios AI advisory carrying
+ * the task, if any). CompetitionBlock ("Andere sollicitanten", i.e. "Other
+ * applicants") moved OUT of this group (ruling 3) into its own position on
+ * ApplicationTab, between the Match score block and this one — everything
+ * that stays here keeps its original relative order/behaviour. DD-FE-9
+ * (08-08 drill-down audit): the match-score criteria breakdown moved OUT of
+ * here earlier into the Status sub-tab, directly under the score cell —
+ * adjusting now sits where reading is.
+ */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ShieldCheck } from 'lucide-react'
@@ -27,19 +40,6 @@ const isPlainText = (html: string) => !/<[a-z][\s\S]*?>/i.test(html)
 const COLLAPSE_THRESHOLD = 400
 const collapsedHeight = 160
 
-/**
- * ContextSubTab — APP-TAB-SPLIT-1, group (d): canon step 2 (the motivation
- * letter — the application's own free text, applicant-authored so read-only;
- * its TEKST-POPOUT reading affordance is a registered follow-up) followed by
- * canon step 3 (interview-consent evidence + the Koios AI advisory carrying
- * the task, if any). CompetitionBlock ("Andere
- * sollicitanten") moved OUT of this group (ruling 3) into its own position on
- * ApplicationTab, between the Match score block and this one — everything
- * that stays here keeps its original relative order/behaviour. DD-FE-9
- * (08-08 drill-down audit): the match-score criteria breakdown moved OUT of
- * here earlier into the Status sub-tab, directly under the score cell —
- * adjusting now sits where reading is.
- */
 export default function ContextSubTab({ application: a }: ContextSubTabProps) {
   const { t } = useTranslation(['applications', 'common'])
   const { formatDateTime } = useDateFormat()

@@ -1,3 +1,9 @@
+/**
+ * shiftmanager/CustomersPage — the read-only Shiftmanager mirror of the customer
+ * list (sm_customers): insights row + table + pagination, fed from the
+ * Shiftmanager connector's own `/sm_customers` endpoint, never the native
+ * `/customers` route (§0.10 source-prefix convention).
+ */
 import { useState, useEffect, useMemo } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'

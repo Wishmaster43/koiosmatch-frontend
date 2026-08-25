@@ -1,9 +1,3 @@
-import { useTranslation } from 'react-i18next'
-import FloatingPanel from '@/components/ui/FloatingPanel'
-import ActionRuleBanner from '@/components/actionrules/ActionRuleBanner'
-import { SectionTitle } from '@/components/ui/typography'
-import Button from '@/components/ui/Button'
-
 /**
  * PhaseChangeAppointmentWarning — V-appdetail-2: the warn-not-block confirm for
  * moving an application onto a requires_appointment funnel phase while it has no
@@ -15,6 +9,12 @@ import Button from '@/components/ui/Button'
  * Confirming proceeds with the move exactly as an unintercepted move would;
  * cancelling drops it — the application never left its current phase either way.
  */
+import { useTranslation } from 'react-i18next'
+import FloatingPanel from '@/components/ui/FloatingPanel'
+import ActionRuleBanner from '@/components/actionrules/ActionRuleBanner'
+import { SectionTitle } from '@/components/ui/typography'
+import Button from '@/components/ui/Button'
+
 export default function PhaseChangeAppointmentWarning({ phaseLabel, onConfirm, onCancel }: {
   phaseLabel: string
   onConfirm: () => void

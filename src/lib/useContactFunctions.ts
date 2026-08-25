@@ -58,8 +58,9 @@ const mapContactFunctions = (res: AxiosResponse): ContactFunctionsLookupData => 
   const free = (res?.data as { allow_free_entry?: unknown })?.allow_free_entry
   return {
     contactFunctions: names.length ? names : DEFAULT_CONTACT_FUNCTIONS,
-    // Danny 21-08 (settings-ronde): vrije invoer staat STANDAARD UIT — strikt is
-    // de norm, vrije invoer is de bewuste uitzondering die de tenant zelf aanzet.
+    // Danny 21-08 (settings round), translated: free entry is OFF by default —
+    // strict is the norm, free entry is the deliberate exception a tenant
+    // switches on itself.
     apiFreeEntry: typeof free === 'boolean' ? free : false,
   }
 }

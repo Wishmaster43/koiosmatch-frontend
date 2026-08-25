@@ -1,10 +1,10 @@
-import { useTranslation } from 'react-i18next'
-import StatusListEditor from './StatusListEditor'
-
 /**
  * Skill levels (SKILL-LVL-1) — tenant lookup for the candidate skill "niveau"
  * dropdown (mirrors language levels). Name-only, in-use-protected.
  */
+import { useTranslation } from 'react-i18next'
+import StatusListEditor from './StatusListEditor'
+
 export function SkillLevelSettings() {
   const { t } = useTranslation('settings')
   return (

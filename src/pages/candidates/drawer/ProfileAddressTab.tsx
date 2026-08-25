@@ -1,3 +1,10 @@
+/** Address sub-tab — straat, huisnummer + toevoeging, postcode, plaats,
+ *  provincie, land ("street, house number + suffix, postal code, city,
+ *  province, country"). Own pencil, own draft/error state; cancelling here
+ *  never discards an in-progress edit in the Personal or Contact sub-tab.
+ *  The street/no/suffix/postcode/city cluster keeps its exact composed
+ *  one-line-read + expand-on-edit behaviour (mirrors the shared
+ *  EditableFieldTable `type: 'address'` row — same pattern, same author). */
 import { useState, useEffect } from 'react'
 import type { ComponentType } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -21,12 +28,6 @@ type AddressForm = Record<AddressKey, string>
 // (mirrors the old PROFILE_REQ_MAP — houseNumber/suffix/province/country aren't).
 const REQ_MAP: Partial<Record<AddressKey, string>> = { street: 'street', postalCode: 'postal_code', city: 'city' }
 
-/** Address sub-tab — straat, huisnummer + toevoeging, postcode, plaats,
- *  provincie, land. Own pencil, own draft/error state; cancelling here never
- *  discards an in-progress edit in the Personal or Contact sub-tab.
- *  The street/no/suffix/postcode/city cluster keeps its exact composed
- *  one-line-read + expand-on-edit behaviour (mirrors the shared
- *  EditableFieldTable `type: 'address'` row — same pattern, same author). */
 export default function ProfileAddressTab({ c, onSave, autoEditSignal }: {
   c: Candidate; onSave?: (v: Record<string, unknown>) => void; autoEditSignal?: number
 }) {
@@ -42,7 +43,7 @@ export default function ProfileAddressTab({ c, onSave, autoEditSignal }: {
     postalCode: c.postalCode ?? '', city: c.city ?? '', province: c.province ?? '', country: c.country ?? '',
   })
   const [editing, setEditing] = useState(false)
-  // Open edit mode when the parent bumps the signal (e.g. right after Lead→Kandidaat convert).
+  // Open edit mode when the parent bumps the signal (e.g. right after Lead→Kandidaat, "Candidate", convert).
   const [prevAutoEdit, setPrevAutoEdit] = useState(autoEditSignal ?? 0)
   if ((autoEditSignal ?? 0) !== prevAutoEdit) { setPrevAutoEdit(autoEditSignal ?? 0); setEditing(true) }
   const [form, setForm] = useState<AddressForm>(emptyForm)
@@ -69,7 +70,8 @@ export default function ProfileAddressTab({ c, onSave, autoEditSignal }: {
   const cancel = () => { setForm(emptyForm()); setErrors({}); setEditing(false) }
 
   // Province/country are pick-only (allowCreate=false) type-to-filter dropdowns
-  // (Danny kandidaten-ronde-2, punt A / "moet een zoekbare dropdown") — never a
+  // (Danny kandidaten-ronde-2, point A / "moet een zoekbare dropdown" — "must be
+  // a searchable dropdown") — never a
   // plain <select>: a long lookup list is easier to find by typing than scrolling.
   const renderInput = (key: AddressKey) => {
     if (key === 'province') return (

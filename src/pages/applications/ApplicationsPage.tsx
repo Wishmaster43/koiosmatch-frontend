@@ -1,3 +1,10 @@
+/**
+ * ApplicationsPage — thin container (§0.3 split, mirrors CandidatesPage): owns
+ * the UI/view state (page, view mode, selection) and composes the filters hook,
+ * the data hook, the drawer-actions hook, the bulk-actions hook and the pure
+ * insights builder, then renders the insights row + table/board + drawer. Heavy
+ * logic lives in ./hooks and ./data.
+ */
 import { useState, useEffect, useMemo, useRef } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -45,13 +52,6 @@ import { tintBg, tintBorder } from '@/lib/tint'
 // Right-panel multi-toggle for a filter dimension.
 const tog = (set: Dispatch<SetStateAction<string[]>>) => (v: string) => set(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v])
 
-/**
- * ApplicationsPage — thin container (§0.3 split, mirrors CandidatesPage): owns
- * the UI/view state (page, view mode, selection) and composes the filters hook,
- * the data hook, the drawer-actions hook, the bulk-actions hook and the pure
- * insights builder, then renders the insights row + table/board + drawer. Heavy
- * logic lives in ./hooks and ./data.
- */
 export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) {
   const { t } = useTranslation('applications')
   const auth = useAuth()
@@ -74,7 +74,7 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
   // like every other bit of page state here — this used to be the one `useState`
   // NOT behind usePageMemory, so an explicit pick reverted to the seeded default
   // on the next visit (measured root cause of "rows-per-page kan niet op 50
-  // gezet worden", Danny 2026-08-05).
+  // gezet worden" — "rows-per-page can't be set to 50", Danny 2026-08-05).
   const { pageSize, setPageSize: setPageSizeClamped, options: pageSizeOptions } =
     useListPageSize('apps', APPLICATIONS_MAX_PER_PAGE)
   // DATATABLE-SORT-1 reference adoption: the table's controlled sort, lifted here
@@ -171,7 +171,8 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
   }), [stats, wideRows])
   const bucketData = useMemo(() => buildBucketData(t, bucketCounts), [t, bucketCounts])
   // Bucket options for the right filter panel — one truth with the donut/deep-link
-  // state (Danny 14-08: "en natuurlijk staat alles rechts in het filtermenu").
+  // state (Danny 14-08: "en natuurlijk staat alles rechts in het filtermenu" —
+  // "and naturally everything sits on the right in the filter menu").
   const bucketOptions = useMemo(() => asOptions(bucketData), [bucketData])
 
   // Register the right-panel filters. Config lives in the data/ builder (mirrors

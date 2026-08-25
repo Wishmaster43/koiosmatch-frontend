@@ -1,10 +1,3 @@
-import { memo, Fragment } from 'react'
-import type { CSSProperties, ReactNode } from 'react'
-import { ChevronRight, ChevronDown } from 'lucide-react'
-import type { Column, RowId } from './DataTable'
-import { field, checkboxCol, expandCol, stopPropagation, HIGHLIGHT_BG } from './dataTableUtils'
-import { interactiveRow } from '@/lib/a11y'
-
 /**
  * DataTable's row subcomponent (split out 2026-07-21 from DataTable.tsx, same
  * file the audit split threshold was crossed on). Memoized so a click that only
@@ -16,6 +9,13 @@ import { interactiveRow } from '@/lib/a11y'
  * expanded. Entirely opt-in — a caller that never passes `renderExpanded`
  * gets the exact same two-column-fewer markup as before.
  */
+import { memo, Fragment } from 'react'
+import type { CSSProperties, ReactNode } from 'react'
+import { ChevronRight, ChevronDown } from 'lucide-react'
+import type { Column, RowId } from './DataTable'
+import { field, checkboxCol, expandCol, stopPropagation, HIGHLIGHT_BG } from './dataTableUtils'
+import { interactiveRow } from '@/lib/a11y'
+
 interface TableRowProps<Row> {
   row: Row
   columns: Column<Row>[]

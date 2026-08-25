@@ -1,3 +1,9 @@
+/**
+ * PoolsSection — the talent pools a candidate belongs to (chips), with an add
+ * dropdown sourced from GET /pools. Presentational: the list fetch + optimistic
+ * membership writes live in useCandidatePools (§3). `source: 'koios'` pools get a
+ * subtle AI marker so manual vs AI-suggested membership stays distinguishable.
+ */
 import { useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Check, Sparkles } from 'lucide-react'
@@ -11,12 +17,6 @@ import type { Candidate } from '@/types/candidate'
 import { isInsideDropdownPortal } from '@/lib/useDropdownPlacement'
 import { Z } from '@/lib/zIndexScale'
 
-/**
- * PoolsSection — the talent pools a candidate belongs to (chips), with an add
- * dropdown sourced from GET /pools. Presentational: the list fetch + optimistic
- * membership writes live in useCandidatePools (§3). `source: 'koios'` pools get a
- * subtle AI marker so manual vs AI-suggested membership stays distinguishable.
- */
 export default function PoolsSection({ c }: { c: Candidate }) {
   const { t } = useTranslation('candidates')
   const { pools, allPools, has, toggle } = useCandidatePools(c)

@@ -2,7 +2,9 @@
  * useDrawerUrl — mirrors an entity page's open-drawer id in the URL hash's query
  * string (`?open=<id>`), so browser back/forward walks through drawer open/close
  * states and a copied URL reopens the same record (NAV-BACK-1, Danny: "back knop
- * vanuit kans → taak en dan back in browser kom ik niet terug waar ik was").
+ * vanuit kans → taak en dan back in browser kom ik niet terug waar ik was" —
+ * "back button from opportunity → task and then browser back doesn't get me
+ * back to where I was").
  *
  * The app routes pages via a hand-rolled hash history (DashboardLayout's own
  * goTo/popstate handling — see appPages.tsx), not react-router's <Route>-per-page

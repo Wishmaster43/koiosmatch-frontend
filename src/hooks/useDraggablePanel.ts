@@ -1,8 +1,7 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
-
 /**
  * useDraggablePanel (POPUP-SLEEP-1) — THE one drag/resize engine for every floating
- * popup in the app (Danny 06-08 + punt 19 "elke popup sleepbaar"). Blueprint =
+ * popup in the app (Danny 06-08 + point 19, translated: "every popup must be
+ * draggable" — verbatim: "elke popup sleepbaar"). Blueprint =
  * useKoiosPanelWidth (the house pointer/clamp/persist pattern), extended to two
  * dimensions. The panel starts centered (placement null = CSS centering); the first
  * drag switches to absolute coordinates. Position/size persist per `persistKey` in
@@ -14,6 +13,8 @@ import { useCallback, useEffect, useRef, useState } from 'react'
  * Never a second drag implementation: FloatingPanel is the only consumer and every
  * popup shell goes through FloatingPanel (§11).
  */
+import { useCallback, useEffect, useRef, useState } from 'react'
+
 export interface PanelPlacement {
   // null = CSS-centered (walkthrough 21-08 POP-UPS 3.4: position never survives
   // a close; only size does). Real numbers appear once the user drags.
@@ -54,8 +55,9 @@ export function useDraggablePanel(persistKey?: string, resizable = true) {
   const panelRef = useRef<HTMLDivElement>(null)
   // null = centered via CSS (the pre-drag default every modal has today).
   // POSITION deliberately does NOT survive a close (walkthrough 21-08, POP-UPS
-  // 3.4: "soms opent deze hoog in je scherm en niet in het midden" — a panel
-  // once parked high reopened there forever). Every open starts centered; only
+  // 3.4, translated: "sometimes this opens high on your screen instead of in
+  // the middle" — verbatim: "soms opent deze hoog in je scherm en niet in het
+  // midden" — a panel once parked high reopened there forever). Every open starts centered; only
   // the user's chosen SIZE is restored, dragging works within the open panel.
   const [placement, setPlacement] = useState<PanelPlacement | null>(() => {
     if (!persistKey) return null

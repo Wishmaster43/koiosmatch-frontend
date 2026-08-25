@@ -5,7 +5,8 @@
  * model picker hides and the status falls back to optimistic).
  *
  * KOIOS-DEFAULT-SYNC-1 (Danny 23-08: "de standaard hier moet matchen met de
- * instellingen!!"): the panel used to keep a once-per-session snapshot, so a
+ * instellingen!!" — "the default here must match the settings!!"): the panel
+ * used to keep a once-per-session snapshot, so a
  * default flavour changed in Settings → Koios AI never reached the picker. A
  * tiny module-level bus lets any surface that changes the tenant's Koios
  * defaults call `invalidateKoiosSettings()`; every mounted hook then refetches.

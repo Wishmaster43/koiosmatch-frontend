@@ -1,18 +1,3 @@
-import { useTranslation } from 'react-i18next'
-import SectionCard from '@/components/ui/SectionCard'
-import { notifyError, notifySuccess } from '@/lib/notify'
-import { extractApiError } from '@/lib/extractApiError'
-import { useCvParseProposals } from './useCvParseProposals'
-import CvProposalCard from './CvProposalCard'
-import type { CvProposalDecision } from './useCvParseProposals'
-import type { CvProposal } from '@/pages/applications/data/mapCvProposal'
-import type { Id } from '@/types/common'
-
-interface CvProposalBlockProps {
-  candidateId: Id | null | undefined
-  applicationId: Id | null | undefined
-}
-
 /**
  * CvProposalBlock — the second CV-parser entry point (CV-PARSER-2, entry b): a
  * CV that arrived WITH a careersite/partner application. Because no human is
@@ -28,6 +13,21 @@ interface CvProposalBlockProps {
  *
  * Nothing here is logged — the proposal payload is special-category personal data (§8).
  */
+import { useTranslation } from 'react-i18next'
+import SectionCard from '@/components/ui/SectionCard'
+import { notifyError, notifySuccess } from '@/lib/notify'
+import { extractApiError } from '@/lib/extractApiError'
+import { useCvParseProposals } from './useCvParseProposals'
+import CvProposalCard from './CvProposalCard'
+import type { CvProposalDecision } from './useCvParseProposals'
+import type { CvProposal } from '@/pages/applications/data/mapCvProposal'
+import type { Id } from '@/types/common'
+
+interface CvProposalBlockProps {
+  candidateId: Id | null | undefined
+  applicationId: Id | null | undefined
+}
+
 export default function CvProposalBlock({ candidateId, applicationId }: CvProposalBlockProps) {
   const { t } = useTranslation(['applications', 'common'])
   const {

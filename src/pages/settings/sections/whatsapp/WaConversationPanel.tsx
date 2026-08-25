@@ -1,7 +1,8 @@
 /**
  * WaConversationPanel — the READABLE conversation view behind a WhatsApp-log row
  * (WA-LOG-LEESBAAR-1, Danny 13-08: "de conversaties moeten groter, je wilt dit
- * niet verlezen"). Clicking a log row opens the WHOLE thread in a floating
+ * niet verlezen" — "the conversations must be bigger, you don't want to
+ * misread this"). Clicking a log row opens the WHOLE thread in a floating
  * panel: chat bubbles (inbound left, outbound right), full text that wraps —
  * never the table's one-line ellipsis — and house-format timestamps. Read-only
  * by design: replying lives in the WhatsApp/candidate surfaces, the log stays

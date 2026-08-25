@@ -1,3 +1,7 @@
+// ProfileContactTab — the candidate profile's contact fields (email/mobile/phone/
+// linkedin), split out of the old combined ProfileTab so one pencil edits one
+// group instead of ~15 fields at once. Owns its own live format validation and
+// the contact-moment confirmation banner.
 import { useState } from 'react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'

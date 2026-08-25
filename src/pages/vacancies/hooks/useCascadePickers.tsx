@@ -1,3 +1,7 @@
+/**
+ * useCascadePickers — the location/department/contact dropdowns for the vacancy
+ * Algemeen card. See the hook's own doc comment below for the full rationale.
+ */
 import { useTranslation } from 'react-i18next'
 import { contactOptionLabel } from '@/lib/contactLabel'
 import CreatableSelect from '@/components/ui/CreatableSelect'
@@ -22,7 +26,7 @@ interface Args {
 }
 
 /**
- * useCascadePickers — the locatie/afdeling/contactpersoon dropdowns for the vacancy
+ * useCascadePickers — the location/department/contact dropdowns for the vacancy
  * Algemeen card (V4-V6, VACATURES-100), each a bare CreatableSelect (allowCreate=false)
  * so the caller places them in its own labelled row (mirrors DetailsTab's row()
  * convention — the client field already has its own row). Cascade fetch + reset
@@ -35,7 +39,8 @@ interface Args {
  * so the picks made here are a real save, not a best-effort no-op — see
  * buildVacancyPatch and DetailsTab's seedCascade.
  *
- * VAC-CLEAR-1 (Danny: "gekozen waarde weer leegmaken"): each level is OPTIONAL, so
+ * VAC-CLEAR-1 (Danny: "gekozen waarde weer leegmaken", i.e. "make the chosen
+ * value empty again"): each level is OPTIONAL, so
  * each level is `clearable`. Clearing emits the empty id, which useVacancyDetailsForm
  * saves as `null` → buildVacancyPatch → customer_location_id/customer_department_id/
  * contact_id: null (all three are `sometimes|nullable|uuid` server-side), so an unset

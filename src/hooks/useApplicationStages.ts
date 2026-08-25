@@ -1,4 +1,3 @@
-import { useMemo } from 'react'
 /**
  * useApplicationStages — the candidate application funnel stages (Settings →
  * Sollicitatie-fases), fetched with their real `id` (needed to submit
@@ -11,6 +10,7 @@ import { useMemo } from 'react'
  *
  * Fetch/cache/dedupe lives in useCachedLookup (mirrors useAppointmentTypes/useGenders).
  */
+import { useMemo } from 'react'
 import type { AxiosResponse } from 'axios'
 import { useTranslation } from 'react-i18next'
 import { useCachedLookup } from '@/lib/useCachedLookup'

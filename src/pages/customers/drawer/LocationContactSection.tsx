@@ -1,3 +1,6 @@
+// LocationContactSection — the location's ONE on-site-contact block: a coupled
+// contact record when one exists, else the legacy free-text fallback. See the
+// fuller doc comment on the component below for why the two used to disagree.
 import { useState } from 'react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'

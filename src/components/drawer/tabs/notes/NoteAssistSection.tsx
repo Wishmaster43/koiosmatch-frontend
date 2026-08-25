@@ -1,6 +1,7 @@
 /**
  * NoteAssistSection — the Koios AI assist block under the note editor
- * (NOTE-ASSIST-1 F3, Danny 06-08 "geen vak voor de Koios AI verbeteringen").
+ * (NOTE-ASSIST-1 F3, Danny 06-08, translated: "no separate box for the Koios AI
+ * improvements" — verbatim: "geen vak voor de Koios AI verbeteringen").
  *
  * ASSIST-SIDEPANEEL-1 (Danny's 11-puntenvisie, K-155/K-157 live, 23-08):
  * the old three-button improve/summarize/actions idiom is now TWO buttons —

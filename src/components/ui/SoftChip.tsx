@@ -1,6 +1,3 @@
-import type { ReactNode } from 'react'
-import { tintBg, tintBorder, chipInk } from '@/lib/tint'
-
 /**
  * SoftChip — THE §3A/§4 soft-chip: a tinted label with a matching border, never a
  * solid fill. Tints use color-mix so both hex values and CSS-var tokens work
@@ -8,6 +5,8 @@ import { tintBg, tintBorder, chipInk } from '@/lib/tint'
  * drifted apart). StatusPill and StatusBadge render through this component, so
  * every entity reads the same chip forever (C-CHIP unification, 2026-07-06).
  */
+import type { ReactNode } from 'react'
+import { tintBg, tintBorder, chipInk } from '@/lib/tint'
 interface SoftChipProps {
   label?: ReactNode
   color?: string | null

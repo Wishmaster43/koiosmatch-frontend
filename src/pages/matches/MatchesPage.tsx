@@ -1,3 +1,10 @@
+/**
+ * MatchesPage — the Matches list/board page (§3A blueprint): insights row,
+ * table/board view toggle, bulk bar, drawer and the "+ Match" direct-match
+ * flow. Route-level container — data fetching, filtering, bulk actions and
+ * archive/trash flows each live in their own hook (§3); this file wires them
+ * together and owns the page-level view state.
+ */
 import { useState, useEffect, useMemo, useRef } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'

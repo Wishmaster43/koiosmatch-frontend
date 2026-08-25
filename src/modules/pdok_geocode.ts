@@ -30,7 +30,7 @@ export default {
     { key: 'candidate_id', label: 'Kandidaat', type: 'text', help: '{{kandidaat.id}} = draait per kandidaat uit de vorige stap (bulk; leeg werkt ook). Voor één kandidaat: {{trigger.candidate_id}} (drill-down-knop of adreswijziging).' },
     // Bulk safety: skip candidates that already carry coordinates (protects PDOK).
     { key: 'only_missing', label: 'Alleen zonder coördinaten', type: 'boolean', help: 'Sla kandidaten over die al coördinaten hebben — aan te raden bij bulk.' },
-    // WF-BUILDER-VELDEN-1 (PDOK-ENTITY-1): the bulk source set for klant/locatie/vacature
+    // WF-BUILDER-VELDEN-1 (PDOK-ENTITY-1): the bulk source set for customer/location/vacancy
     // (never candidates — those come from the "Kandidaten ophalen" step instead).
     { key: 'all_records', label: 'Alle records van dit soort', type: 'boolean',
       help: 'Selecteert alle klanten / klantlocaties / vacatures (max. 10.000, gearchiveerde niet). Werkt niet voor kandidaten: die selecteer je met de stap "Kandidaten ophalen".' },

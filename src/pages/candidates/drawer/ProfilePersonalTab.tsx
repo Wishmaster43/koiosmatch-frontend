@@ -1,3 +1,9 @@
+/**
+ * ProfilePersonalTab — the personal sub-tab: gender, nationality, birthdate,
+ * birthplace. Own pencil, own draft/error state; cancelling here never
+ * discards an in-progress edit in the Address or Contact sub-tab (each has
+ * its own).
+ */
 import { useState } from 'react'
 import type { ComponentType } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -20,10 +26,10 @@ const CreatableSelect = CreatableSelectJs as unknown as ComponentType<AnyProps>
 
 // The fields this sub-tab owns — split out of the old combined ProfileTab
 // (Danny 28-07: one pencil flipping ~15 fields was unmaintainable).
-// `source` briefly lived here and moved out again (Danny 09-08, "ik mis de bron"):
-// buried between gender/nationality/birthdate it read as a property of the PERSON,
-// while it describes the DOSSIER. It now sits with its own stamps in
-// CandidateOriginCard ("Herkomst").
+// `source` briefly lived here and moved out again (Danny 09-08, "ik mis de bron",
+// i.e. "I'm missing the source"): buried between gender/nationality/birthdate it
+// read as a property of the PERSON, while it describes the DOSSIER. It now sits
+// with its own stamps in CandidateOriginCard ("Herkomst" — "Origin").
 type PersonalKey = 'gender' | 'nationality' | 'dob' | 'placeOfBirth'
 type PersonalForm = Record<PersonalKey, string>
 
@@ -31,9 +37,6 @@ type PersonalForm = Record<PersonalKey, string>
 // the old PROFILE_REQ_MAP — nationality/placeOfBirth are never required).
 const REQ_MAP: Partial<Record<PersonalKey, string>> = { gender: 'gender', dob: 'date_of_birth' }
 
-/** Personal sub-tab — geslacht, nationaliteit, geboortedatum, geboorteplaats.
- *  Own pencil, own draft/error state; cancelling here never discards an
- *  in-progress edit in the Address or Contact sub-tab (each has its own). */
 export default function ProfilePersonalTab({ c, onSave, autoEditSignal }: {
   c: Candidate; onSave?: (v: Record<string, unknown>) => void; autoEditSignal?: number
 }) {

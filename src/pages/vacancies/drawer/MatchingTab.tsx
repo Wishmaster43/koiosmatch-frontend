@@ -1,3 +1,16 @@
+/**
+ * MatchingTab — the vacancy's per-dimension importance for the AI matcher: an
+ * optional TEMPLATE picker (MATCH-TEMPLATE-1) above one slider per dimension (1..5).
+ * Picking a template SNAPSHOTS its weights onto this vacancy (a copy, never a live
+ * link — later template edits do not update this vacancy); a manual slider edit
+ * afterwards is a normal weight override, same UX as before templates existed.
+ * Templates themselves are managed in Settings (out of scope here; read-only list).
+ * The GLOBAL matcher strictness lives in Settings → Vacancies → Matching
+ * (/settings/matching); this is only the per-vacancy weight set. Saves to
+ * PATCH /vacancies/{id} { match_weights } or { match_weight_template_id } — either
+ * way the response's resolved weights + provenance are the source of truth
+ * (see useVacancyRecord.updateVacancy).
+ */
 import { useState, useEffect } from 'react'
 import type { ComponentType } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -15,19 +28,6 @@ import type { Id } from '@/types/common'
 type AnyProps = Record<string, unknown>
 const Slider = SliderJs as unknown as ComponentType<AnyProps>
 
-/**
- * MatchingTab — the vacancy's per-dimension importance for the AI matcher: an
- * optional TEMPLATE picker (MATCH-TEMPLATE-1) above one slider per dimension (1..5).
- * Picking a template SNAPSHOTS its weights onto this vacancy (a copy, never a live
- * link — later template edits do not update this vacancy); a manual slider edit
- * afterwards is a normal weight override, same UX as before templates existed.
- * Templates themselves are managed in Settings (out of scope here; read-only list).
- * The GLOBAL matcher strictness lives in Settings → Vacancies → Matching
- * (/settings/matching); this is only the per-vacancy weight set. Saves to
- * PATCH /vacancies/{id} { match_weights } or { match_weight_template_id } — either
- * way the response's resolved weights + provenance are the source of truth
- * (see useVacancyRecord.updateVacancy).
- */
 export default function MatchingTab({ vacancy: v, onUpdate }: { vacancy: VacancyDetail; onUpdate?: (id: Id | undefined, patch: Record<string, unknown>) => void | Promise<boolean> }) {
   const { t } = useTranslation('vacancies')
   const { templates, loading: templatesLoading, error: templatesError } = useMatchWeightTemplates()

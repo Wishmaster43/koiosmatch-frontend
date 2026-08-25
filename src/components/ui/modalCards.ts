@@ -1,7 +1,7 @@
 /**
  * modalCards — the shared "titled bordered card" chrome for the app's wide
- * create-modals (+ Kandidaat, + Match, + Klant, + Vestiging, + Afdeling,
- * + Contactpersoon, + Kans, + Vacature, + Taak, + Bellijst, + Dienst, …).
+ * create-modals (+ Candidate, + Match, + Customer, + Branch, + Department,
+ * + Contact, + Opportunity, + Vacancy, + Task, + Call list, + Shift, …).
  * Danny 27-07 audit: every one of these copied the same cardHead/cardBox/row2/
  * row3Even object literals verbatim instead of sharing them, each with a
  * "kept local, CLAUDE.md §2 forbids cross-entity imports" comment — that rule
@@ -26,8 +26,8 @@ export const row2 = row('1fr 1fr')
 export const row3Even = row('1fr 1fr 1fr')
 
 // Two CARDS side by side (distinct from row2/row3Even, which pair FIELDS inside
-// ONE card) — the wide frame's two-column section layout (e.g. Vestiging +
-// Eigenaar&status, Algemeen + Bron, Algemeen + Waarde&fase).
+// ONE card) — the wide frame's two-column section layout (e.g. Branch +
+// Owner&status, General + Source, General + Value&phase).
 export const cardPair = { display: 'grid' as const, gridTemplateColumns: '1fr 1fr', gap: 16, alignItems: 'start' as const }
 
 // Two-column SECTION layout — pairs a stack of CARDS in one column against a

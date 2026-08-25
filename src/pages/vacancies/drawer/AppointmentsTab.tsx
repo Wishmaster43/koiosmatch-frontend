@@ -1,3 +1,8 @@
+/**
+ * AppointmentsTab — see the fuller docblock below, right above the component,
+ * for the vacancy-wide appointments list this tab renders and how its
+ * create/edit flows reuse the shared PlanIntakeModal.
+ */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useQueryClient } from '@tanstack/react-query'

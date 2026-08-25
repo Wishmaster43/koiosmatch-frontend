@@ -1,8 +1,11 @@
 /**
  * OutreachCreate — "new call list" MODAL on the shared wide-form frame (Danny
- * 27-07: "+ Bellijst is geen popup???" / "elk scherm zoals + locatie moet net
- * zo breed en hoog worden als + match of + nieuwe kandidaat. Zoekbare
- * dropdowns en kaders om elk blokje"). Used to be an inline view that swapped
+ * 27-07, translated: "+ Call list isn't a popup???" / "every screen like
+ * + location must become just as wide and tall as + match or + new candidate.
+ * Searchable dropdowns and frames around every block" — verbatim: "+ Bellijst
+ * is geen popup???" / "elk scherm zoals + locatie moet net zo breed en hoog
+ * worden als + match of + nieuwe kandidaat. Zoekbare dropdowns en kaders om
+ * elk blokje"). Used to be an inline view that swapped
  * out the whole list (like the API-key/webhook create screens); now an
  * overlay + centred WIDE_MODAL panel like every other create flow, and the
  * list stays mounted behind it. Name + channel group into an "Algemeen" card,
@@ -102,8 +105,8 @@ export default function OutreachCreate({ onClose, onCreated }: Props) {
           </Button>
         </div>
 
-        {/* Two titled cards side by side: Algemeen (naam + kanaal) and Bron
-            (optionele pool) — the shared cardPair grid (§11), not a stack
+        {/* Two titled cards side by side: Algemeen (name + channel) and Bron
+            (optional pool) — the shared cardPair grid (§11), not a stack
             of lonely inputs. */}
         <div style={cardPair}>
           <div>

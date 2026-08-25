@@ -1,3 +1,6 @@
+// ApplicationsTable — declares the applications list COLUMNS only (§3A); sorting,
+// selection and the loading/empty/success states live in the shared DataTable.
+// Cell rendering reuses Avatar/StatusPill/soft-chip conventions, never custom chrome.
 import type { RefObject } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSeedLabel } from '@/lib/useSeedLabel'

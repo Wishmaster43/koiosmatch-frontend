@@ -1,3 +1,6 @@
+// LineChartCard — the one line-chart shell for trend data (recharts wrapper): title,
+// four UI states (data/empty), locale-aware tick formatting and an optional click-through
+// tooltip. Pages pass data + a unit/formatValue; no chart re-implements this chrome.
 import { useTranslation } from 'react-i18next'
 import type { ReactNode } from 'react'
 import type { TFunction } from 'i18next'

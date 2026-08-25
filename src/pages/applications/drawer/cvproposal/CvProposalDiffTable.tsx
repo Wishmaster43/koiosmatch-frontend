@@ -1,22 +1,3 @@
-import { useTranslation } from 'react-i18next'
-import { useDateFormat } from '@/lib/datetime'
-import SoftChip from '@/components/ui/SoftChip'
-import type { CvProposalDiff } from '@/pages/applications/data/mapCvProposal'
-
-// A bare Y-M-D from the candidate contract (ContractResource::date) is a real
-// date and renders DD-MM-YYYY (§3B); anything else is LITERAL CV text — "maart
-// 2015", "1990" — and stays untouched, because reformatting it would imply a
-// parse we never did and hide exactly the misread we want the recruiter to spot.
-const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/
-
-const cell = { padding: '6px 8px', fontSize: 12, verticalAlign: 'top' as const, textAlign: 'left' as const }
-const headCell = { ...cell, fontSize: 10, fontWeight: 600 as const, textTransform: 'uppercase' as const,
-  letterSpacing: '0.04em', color: 'var(--text-muted)', whiteSpace: 'nowrap' as const }
-
-interface CvProposalDiffTableProps {
-  diff: CvProposalDiff
-}
-
 /**
  * CvProposalDiffTable — the whole point of this feature: per field, what the
  * dossier holds TODAY next to what the CV proposes, and what accepting would
@@ -28,6 +9,26 @@ interface CvProposalDiffTableProps {
  * A real <table> with scoped headers so the comparison is navigable by screen
  * reader; it scrolls inside its own container rather than pushing the drawer.
  */
+import { useTranslation } from 'react-i18next'
+import { useDateFormat } from '@/lib/datetime'
+import SoftChip from '@/components/ui/SoftChip'
+import type { CvProposalDiff } from '@/pages/applications/data/mapCvProposal'
+
+// A bare Y-M-D from the candidate contract (ContractResource::date) is a real
+// date and renders DD-MM-YYYY (§3B); anything else is LITERAL CV text — "maart
+// 2015" (i.e. "March 2015"), "1990" — and stays untouched, because reformatting
+// it would imply a parse we never did and hide exactly the misread we want the
+// recruiter to spot.
+const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/
+
+const cell = { padding: '6px 8px', fontSize: 12, verticalAlign: 'top' as const, textAlign: 'left' as const }
+const headCell = { ...cell, fontSize: 10, fontWeight: 600 as const, textTransform: 'uppercase' as const,
+  letterSpacing: '0.04em', color: 'var(--text-muted)', whiteSpace: 'nowrap' as const }
+
+interface CvProposalDiffTableProps {
+  diff: CvProposalDiff
+}
+
 export default function CvProposalDiffTable({ diff }: CvProposalDiffTableProps) {
   const { t } = useTranslation('applications')
   const { formatDate } = useDateFormat()

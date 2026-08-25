@@ -1,3 +1,9 @@
+/**
+ * AiGeneratedLabel — THE one inline "AI-generated" disclosure label. Required
+ * by the EU AI Act (AI-ACT-1: high-risk recruitment uses require an AI label on
+ * every Koios-produced output) — icon + muted text, always both, so the
+ * disclosure survives for colour-blind users and screen readers alike.
+ */
 import { useTranslation } from 'react-i18next'
 import KoiosAiMark from './KoiosAiMark'
 
@@ -8,19 +14,14 @@ interface AiGeneratedLabelProps {
   size?: number
 }
 
-/**
- * AiGeneratedLabel — THE one inline "AI-generated" disclosure label (EU AI
- * Act, AI-ACT-1: hoog-risico werving vereist AI-labels op elke Koios-uiting).
- * Icon (KoiosAiMark, the shared soft-tint mark, §4) + muted text, always
- * BOTH — never colour/icon-only (§6, colour is never the only signal) — so
- * the disclosure survives for colour-blind users and screen readers alike
- * (the mark's own title/aria-label carries the same hint).
- *
- * Use wherever Koios-generated CONTENT or ADVICE is shown. Where a surface
- * already has an explicit "Koios AI adviseert" heading, don't stack this on
- * top of it — that reads as a double badge; add the hint text to the
- * existing heading's mark instead (see KoiosAdviceBlock).
- */
+// Icon (KoiosAiMark, the shared soft-tint mark, §4) + muted text, always BOTH —
+// never colour/icon-only (§6, colour is never the only signal) — the mark's own
+// title/aria-label carries the same hint.
+//
+// Use wherever Koios-generated CONTENT or ADVICE is shown. Where a surface
+// already has an explicit "Koios AI adviseert" ("Koios AI advises") heading,
+// don't stack this on top of it — that reads as a double badge; add the hint
+// text to the existing heading's mark instead (see KoiosAdviceBlock).
 export default function AiGeneratedLabel({ size = 11 }: AiGeneratedLabelProps) {
   const { t } = useTranslation('common')
   // Both keys ship with a Dutch defaultValue so the label never shows a raw

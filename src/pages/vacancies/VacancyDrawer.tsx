@@ -1,3 +1,8 @@
+/**
+ * VacancyDrawer — thin container (§3A blueprint): wires data (lookups +
+ * onUpdate), declares the tab config (TABS below) and the header. See the
+ * component docblock further down for the header's own decisions.
+ */
 import { useState } from 'react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -45,25 +50,28 @@ interface DrawerUser { id: Id; name: string }
 
 // Tab list — config only; each renders one small component (one per tab/section).
 // Details is the FIRST tab (Danny 2026-07-04 — reverses R-7's pinned-above-the-tabs
-// layout: "Details moet gewoon eerste tabje zijn", the pinned editor crowded the drawer).
+// layout: "Details moet gewoon eerste tabje zijn" — "Details should simply be the
+// first tab", the pinned editor crowded the drawer).
 // V-stats-1: render optionally receives the drawer's own setActiveTab so a tab
 // (Statistics) can deep-link into a sibling tab without route hacks.
 const TABS: { id: string; tKey: string; autoExpand?: boolean; render: (v: VacancyDetail, onUpdate?: UpdateFn, setActiveTab?: (id: string) => void) => ReactNode }[] = [
   { id: 'details',    tKey: 'details',    render: (v, onUpdate) => <DetailsTab vacancy={v} onUpdate={onUpdate} /> },
-  // Beschrijving — its OWN main tab now (Danny 21-07: moved out of Details' sub-tabs,
+  // Beschrijving ("Description") — its OWN main tab now (Danny 21-07: moved out
+  // of Details' sub-tabs,
   // right after Details so the vacancy text still reads next to the field grid).
   { id: 'description', tKey: 'description', render: (v, onUpdate) => <DescriptionTab vacancy={v} onUpdate={onUpdate} /> },
   { id: 'applicants', tKey: 'applicants', render: v => <ApplicantsTab vacancy={v} /> },
   // AFSPRAKEN-VACATURE-1: every appointment tied to this vacancy across ALL
   // candidates (GET /vacancies/{id}/appointments, permission:vacancies.view —
-  // the route CMBE delivered 14-08). Read-only, right after Sollicitanten since
+  // the route CMBE delivered 14-08). Read-only, right after Sollicitanten
+  // ("Applicants") since
   // both surface candidate activity on this vacancy.
   { id: 'appointments', tKey: 'appointments', render: v => <AppointmentsTab vacancy={v} /> },
   { id: 'matching',   tKey: 'matching',   render: (v, onUpdate) => <MatchingTab vacancy={v} onUpdate={onUpdate} /> },
   // V-table-2: read-only Matches tab (mirrors the candidate/customer drawer's
   // own read-only MatchesTab anatomy) — the table's Matches count deep-links here.
   { id: 'matches',    tKey: 'matches',    render: v => <MatchesTab vacancyId={v.id} /> },
-  // Match-zoeker fase 1 (vacancy side, Danny 23-07): candidates matching this
+  // Match-zoeker fase 1 ("Match finder phase 1") (vacancy side, Danny 23-07): candidates matching this
   // vacancy's radius/function/status filters, map + list side by side.
   // autoExpand (Danny 23-07): the map+list layout is unusable in the narrow
   // drawer width, so this tab widens the drawer while active and restores on leave.
@@ -81,18 +89,21 @@ const TABS: { id: string; tKey: string; autoExpand?: boolean; render: (v: Vacanc
   { id: 'extra',      tKey: 'extra',      render: (v, onUpdate) => <CustomFieldsTab entityType="vacancy" values={v.customFieldValues ?? {}}
       onSave={patch => onUpdate?.(v.id, { customFieldValues: { ...(v.customFieldValues ?? {}), ...patch } })} /> },
   { id: 'documents',  tKey: 'documents',  render: v => <DocumentsTab vacancy={v} /> },
-  // Tijdlijn TAB (real lifecycle activity — created/status changes/applications
+  // Tijdlijn ("Timeline") TAB (real lifecycle activity — created/status
+  // changes/applications
   // received) is distinct BY DESIGN from the changelog ICON in the title row (raw
-  // field-change audit, the shared ChangelogPopover) — §3A(d): tab = activiteit,
-  // icon = veldwijzigingen. Live: VacancyDetailResource::timelineFor() feeds note/
+  // field-change audit, the shared ChangelogPopover) — §3A(d): tab = activiteit
+  // ("activity"),
+  // icon = veldwijzigingen ("field changes"). Live: VacancyDetailResource::timelineFor() feeds note/
   // application/match record events with link targets plus created/published/
   // updated lifecycle moments, newest-first.
   { id: 'timeline',   tKey: 'timeline',   render: v => <TimelineTab vacancy={v} /> },
   { id: 'notes',      tKey: 'notes',      render: v => <NotesTab vacancy={v} /> },
-  // V-tasks-1: mirrors the candidate drawer's own Taken tab, via the shared
+  // V-tasks-1: mirrors the candidate drawer's own Taken ("Tasks") tab, via the shared
   // EntityTasksTab shell (see VacancyTasksTab's own header for why).
   { id: 'tasks',      tKey: 'tasks',      render: v => <VacancyTasksTab vacancy={v} /> },
-  // Koppelingen (Danny 28-07): PDOK left the title row, so the vacancy gets the same
+  // Koppelingen ("Links") (Danny 28-07): PDOK left the title row, so the vacancy
+  // gets the same
   // tab as every other entity. Vacancies are NOT in the backoffice sync registry
   // (no HelloFlex/Shiftmanager token), so this tab holds the geocoding card only —
   // showing empty link cards would suggest a coupling that does not exist.
@@ -100,10 +111,12 @@ const TABS: { id: string; tKey: string; autoExpand?: boolean; render: (v: Vacanc
     <PdokCard lat={v.lat} lng={v.lng} endpoint={`/vacancies/${v.id}/geocode`} permission="vacancies.update"
       disabled={!v.city && !v.street && !v.postalCode && !v.location} />
   ) },
-  // Statistieken last (Danny 28-07) — a read-only summary, not a working tab.
+  // Statistieken ("Statistics") last (Danny 28-07) — a read-only summary, not a
+  // working tab.
   // V-stats-1: setActiveTab forwarded so the tab's own counts deep-link into
-  // their source tab (Leads → Kandidaten zoeken, Sollicitaties → applicants,
-  // published channels → Publiceren) instead of a route hack.
+  // their source tab (Leads → Kandidaten zoeken ("Search candidates"),
+  // Sollicitaties ("Applications") → applicants,
+  // published channels → Publiceren ("Publishing")) instead of a route hack.
   { id: 'statistics', tKey: 'statistics', render: (v, _onUpdate, setActiveTab) => <StatisticsTab vacancy={v} onNavigateTab={setActiveTab} /> },
 ]
 
@@ -134,8 +147,10 @@ export default function VacancyDrawer({ vacancy: v, onClose, expanded, onToggleE
   const { formatDate, formatDateTime } = useDateFormat()
   // The Extra tab only shows when the tenant has defined vacancy custom fields.
   const { fields: customFieldDefs } = useVacancyCustomFields()
-  // Kandidaten zoeken-tab visibility gate (Danny 23-07): tenant-configurable per
-  // vacancy status via Settings → Vacatures → Kandidaten zoeken-tabblad (mirrors
+  // Kandidaten zoeken ("Search candidates") tab visibility gate (Danny 23-07):
+  // tenant-configurable per
+  // vacancy status via Settings → Vacatures → Kandidaten zoeken-tabblad ("Vacancies
+  // → Search candidates tab") (mirrors
   // the candidate side's candidate_vacancy_tab / vacancyTabVisibility.ts).
   const settingsValues = useAllSettings()
   const candidateTabCfg = getJsonSetting<CandidateTabConfig | null>(settingsValues, 'vacancy_candidate_tab', null)
@@ -198,7 +213,7 @@ export default function VacancyDrawer({ vacancy: v, onClose, expanded, onToggleE
       // every entity's tab shows the exact same word.
       tabs={visibleTabs.map(tab => ({
         id: tab.id,
-        // VAC-TEKST-TAB-1 (Danny 14-08 punt 10): the Description tab is renamed
+        // VAC-TEKST-TAB-1 (Danny 14-08 point 10): the Description tab is renamed
         // "Vacaturetekst" — reuses the EXISTING details.description key (already
         // "Vacancy text"/"Vacaturetekst" in all five locales, the popout's own
         // subtitle) instead of drawer.tabs.description, so no new locale edits.
@@ -214,7 +229,7 @@ export default function VacancyDrawer({ vacancy: v, onClose, expanded, onToggleE
         <EntityHeader
           // TITEL-CHIP-1 (Danny 19-08): the title slot shows WHERE this vacancy is
           // published (the §4 success token pair per live channel) — or the calm
-          // not-published affordance; both jump to the Publiceren tab.
+          // not-published affordance; both jump to the Publiceren ("Publishing") tab.
           label={<span style={{ display: 'inline-flex', flexWrap: 'wrap', gap: 6, alignItems: 'center' }}>
             {publishedChannels.length > 0 ? (
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>

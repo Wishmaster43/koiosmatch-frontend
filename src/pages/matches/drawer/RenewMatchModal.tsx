@@ -1,3 +1,15 @@
+/**
+ * RenewMatchModal — G04/MATCH-RENEWAL-1: the "Verlengen" confirm form, the mirror
+ * of TerminateMatchModal (same FloatingPanel idiom, same guard/confirm pattern,
+ * same success/refetch handling). POSTs { new_end_date } to /matches/{id}/renew
+ * (MatchController::renew → MatchRenewalService) — no reason/duration in the
+ * contract, unlike terminate: a renewal only ever pushes end_date forward and
+ * records the step in the match's renewal chain. The backend returns the full
+ * updated match, mapped + handed to the drawer's existing onUpdate refresh path.
+ * A 422 (e.g. the picked date is not after the current end_date, re-checked
+ * against the LOCKED row) keeps the modal open with the server's message shown
+ * inline under the field.
+ */
 import { useState } from 'react'
 import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -32,18 +44,6 @@ interface Props {
   onUpdate?: (id: MatchRow['id'], patch: Partial<MatchRow>) => void
 }
 
-/**
- * RenewMatchModal — G04/MATCH-RENEWAL-1: the "Verlengen" confirm form, the mirror
- * of TerminateMatchModal (same FloatingPanel idiom, same guard/confirm pattern,
- * same success/refetch handling). POSTs { new_end_date } to /matches/{id}/renew
- * (MatchController::renew → MatchRenewalService) — no reason/duration in the
- * contract, unlike terminate: a renewal only ever pushes end_date forward and
- * records the step in the match's renewal chain. The backend returns the full
- * updated match, mapped + handed to the drawer's existing onUpdate refresh path.
- * A 422 (e.g. the picked date is not after the current end_date, re-checked
- * against the LOCKED row) keeps the modal open with the server's message shown
- * inline under the field.
- */
 export default function RenewMatchModal({ match, onClose, onUpdate }: Props) {
   const { t } = useTranslation(['matches', 'common'])
   const { formatDate } = useDateFormat()

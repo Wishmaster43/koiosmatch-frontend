@@ -1,7 +1,3 @@
-import { useTranslation } from 'react-i18next'
-import type { ReactNode } from 'react'
-import Slider from '@/components/ui/Slider'
-
 /**
  * RadiusControlRow — the ONE radius row (label + house Slider + exact-km input),
  * lifted out of RadiusMapPanel after the 22-08 eindcontrole found GeoSearchShell
@@ -9,6 +5,10 @@ import Slider from '@/components/ui/Slider'
  * copy sites). Both consumers keep their own count-line and layout around it;
  * this row owns the slider domain and the clamp rules.
  */
+import { useTranslation } from 'react-i18next'
+import type { ReactNode } from 'react'
+import Slider from '@/components/ui/Slider'
+
 // Slider domain: 5km floor (a 0-radius circle is meaningless), 150 ceiling on
 // the slider (the exact input allows up to 300), 5km steps.
 export const RADIUS_SLIDER_MIN = 5

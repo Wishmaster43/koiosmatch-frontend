@@ -1,3 +1,9 @@
+/**
+ * mapOpportunity — the ONE mapper from the raw API opportunity shape to the
+ * flat client shape every opportunities surface (table/insights/drawer) reads,
+ * so a backend field rename or a nested-vs-flat payload quirk is absorbed here
+ * once instead of re-guessed per consumer.
+ */
 import { initialsOf } from '@/lib/initials'
 import type { ApiOpportunity, Opportunity } from '@/types/opportunity'
 

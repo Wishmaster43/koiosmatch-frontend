@@ -1,3 +1,11 @@
+/**
+ * DetachReasonModal — S15: the backend now REQUIRES a reason to detach an
+ * application (`DELETE /applications/{id}` 422s without one) and stores it as a
+ * timeline/notes trail entry, so this is a small, honest confirm step rather
+ * than a silent action. The reason is a plain string (BE validates
+ * `string|max:1000`, not rich content) — a RichTextEditor would be overkill for
+ * a short structured "why", mirroring other reason prompts in this app.
+ */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Unlink } from 'lucide-react'
@@ -14,14 +22,6 @@ interface Props {
   submitting?: boolean
 }
 
-/**
- * DetachReasonModal — S15: the backend now REQUIRES a reason to detach an
- * application (`DELETE /applications/{id}` 422s without one) and stores it as a
- * timeline/notes trail entry, so this is a small, honest confirm step rather
- * than a silent action. The reason is a plain string (BE validates
- * `string|max:1000`, not rich content) — a RichTextEditor would be overkill for
- * a short structured "why", mirroring other reason prompts in this app.
- */
 export default function DetachReasonModal({ onCancel, onConfirm, submitting }: Props) {
   const { t } = useTranslation(['applications', 'common'])
   const [reason, setReason] = useState('')
@@ -41,7 +41,7 @@ export default function DetachReasonModal({ onCancel, onConfirm, submitting }: P
         </span>
       }>
         <Caption as="label" style={{ display: 'block', marginBottom: 5 }}>{t('detach.reasonLabel')}</Caption>
-        {/* POP-UPS 4: de reden krijgt de house-mic (plain-text dictatie). */}
+        {/* POP-UPS 4: the reason field gets the house mic (plain-text dictation). */}
         <DictationTextarea autoFocus value={reason} rows={3} aria-label={t('detach.reasonLabel')}
           onChange={v => setReason(v.slice(0, REASON_MAX))} placeholder={t('detach.reasonPlaceholder')} />
 

@@ -149,7 +149,7 @@ export default function DashboardLayout() {
             aria-label={expanded ? t('sidebarCollapse') : t('sidebarExpand')}
             title={expanded ? t('sidebarCollapse') : t('sidebarExpand')}
             className="flex items-center justify-center flex-shrink-0 rounded-lg transition-colors"
-            // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- app-chrome control (components/layout = chroom, HUISSTIJL-1): nav-rail/topbar place-marker met eigen actieve-staat, geen actieknop; Button-varianten dekken de rail bewust niet
+            // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- app-chrome control (components/layout = chrome, HUISSTIJL-1): nav-rail/topbar place-marker with its own active state, not an action button; Button's variants deliberately don't cover the rail
             style={{
               width: 30, height: 30, border: 'none', cursor: 'pointer',
               background: 'transparent', color: 'var(--text-muted)',
@@ -160,13 +160,13 @@ export default function DashboardLayout() {
             {expanded ? <PanelLeftClose size={17} /> : <PanelLeftOpen size={17} />}
           </button>
 
-          {/* Tenant naam — start van de broodkruimel ("Yesway › Dashboard"). Het logo
-              zelf staat rechts in de balk (LOGO-PLACE-1, Danny 14/7); het KM-merk
-              blijft in de zijbalk. */}
+          {/* Tenant name — the start of the breadcrumb ("Yesway › Dashboard"). The logo
+              itself sits on the right of the bar (LOGO-PLACE-1, Danny 14/7); the KM
+              brand mark stays in the sidebar. */}
           <div className="flex items-center flex-shrink-0 gap-2">
             <div
               className="flex items-center justify-center flex-shrink-0 rounded-md"
-              // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- chrome-accentvlak (actieve nav-marker/merkcirkel, zie de aangrenzende ACCENT-INK/SIDEBAR-CONTRAST-comments), geen actieoppervlak
+              // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- chrome accent surface (active nav marker/brand circle, see the adjacent ACCENT-INK/SIDEBAR-CONTRAST comments), not an action surface
               style={{ width: 22, height: 22, background: 'var(--color-primary)', fontSize: 11, color: 'var(--color-on-accent)', fontWeight: 700 }}
             >
               {(tenant?.name ?? 'K').charAt(0).toUpperCase()}
@@ -191,12 +191,12 @@ export default function DashboardLayout() {
           {/* Back-chip after a cross-entity jump — one click returns to where you came from. */}
           {jumpOrigin && jumpOrigin !== activePage && (
             <button onClick={() => goTo(jumpOrigin)}
-              // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- app-chrome control (components/layout = chroom, HUISSTIJL-1): nav-rail/topbar place-marker met eigen actieve-staat, geen actieknop; Button-varianten dekken de rail bewust niet
+              // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- app-chrome control (components/layout = chrome, HUISSTIJL-1): nav-rail/topbar place-marker with its own active state, not an action button; Button's variants deliberately don't cover the rail
               style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '2px 10px', fontSize: 11, fontWeight: 600,
                 borderRadius: 999, cursor: 'pointer', color: 'var(--color-primary-text)', flexShrink: 0,
-                // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- chrome-/merktint met bewust eigen percentage (Koios-gradiënt zachte staat / sidebar-hover), predates lib/tint en is geen statuschip
+                // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- chrome/brand tint with a deliberately own percentage (Koios gradient soft state / sidebar hover), predates lib/tint and is not a status chip
                 background: 'color-mix(in srgb, var(--color-primary) 10%, transparent)',
-                // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- chrome-/merktint met bewust eigen percentage (Koios-gradiënt zachte staat / sidebar-hover), predates lib/tint en is geen statuschip
+                // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- chrome/brand tint with a deliberately own percentage (Koios gradient soft state / sidebar hover), predates lib/tint and is not a status chip
                 border: '1px solid color-mix(in srgb, var(--color-primary) 30%, transparent)' }}>
               ← {t('back')} · {t(jumpOrigin, { ns: 'pageTitles', keySeparator: false, defaultValue: PAGE_TITLES[jumpOrigin] || jumpOrigin })}
             </button>
@@ -231,10 +231,10 @@ export default function DashboardLayout() {
                 <button
                   onClick={() => goTo('profile')}
                   title={[user?.firstname, user?.lastname].filter(Boolean).join(' ') || user?.name || 'Profiel'}
-                  // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- app-chrome control (components/layout = chroom, HUISSTIJL-1): nav-rail/topbar place-marker met eigen actieve-staat, geen actieknop; Button-varianten dekken de rail bewust niet
+                  // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- app-chrome control (components/layout = chrome, HUISSTIJL-1): nav-rail/topbar place-marker with its own active state, not an action button; Button's variants deliberately don't cover the rail
                   style={{
                     width: 30, height: 30, borderRadius: '50%', flexShrink: 0,
-                    // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- chrome-accentvlak (actieve nav-marker/merkcirkel, zie de aangrenzende ACCENT-INK/SIDEBAR-CONTRAST-comments), geen actieoppervlak
+                    // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- chrome accent surface (active nav marker/brand circle, see the adjacent ACCENT-INK/SIDEBAR-CONTRAST comments), not an action surface
                     background: activePage === 'profile' ? 'var(--color-primary)' : 'var(--color-primary-bg)',
                     // ACCENT-INK-1: resting, the initials sit on --color-primary-bg (a 12% tint
                     // of the brand), so they need the contrast-safe twin (AENF measured 1.14:1).
@@ -260,7 +260,7 @@ export default function DashboardLayout() {
                 aria-label={activeFilters > 0 ? t('filters.toggleActive', { count: activeFilters }) : t('filters.toggle')}
                 title={t('filters.toggle')}
                 className="flex items-center justify-center transition-colors rounded-lg"
-                // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- app-chrome control (components/layout = chroom, HUISSTIJL-1): nav-rail/topbar place-marker met eigen actieve-staat, geen actieknop; Button-varianten dekken de rail bewust niet
+                // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- app-chrome control (components/layout = chrome, HUISSTIJL-1): nav-rail/topbar place-marker with its own active state, not an action button; Button's variants deliberately don't cover the rail
                 style={{
                   position: 'relative',
                   width: 30, height: 30,
@@ -275,7 +275,7 @@ export default function DashboardLayout() {
                 {activeFilters > 0 ? (
                   <span aria-hidden="true" style={{
                     position: 'absolute', top: -5, right: -5,
-                    // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- chrome-accentvlak (actieve nav-marker/merkcirkel, zie de aangrenzende ACCENT-INK/SIDEBAR-CONTRAST-comments), geen actieoppervlak
+                    // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- chrome accent surface (active nav marker/brand circle, see the adjacent ACCENT-INK/SIDEBAR-CONTRAST comments), not an action surface
                     background: 'var(--color-primary)', color: 'var(--color-on-accent)',
                     borderRadius: 999, fontSize: 10, fontWeight: 700,
                     minWidth: 16, height: 16, display: 'flex',
@@ -300,7 +300,7 @@ export default function DashboardLayout() {
             <button
               onClick={logout}
               className="text-xs rounded-md px-3 py-1.5"
-              // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- app-chrome control (components/layout = chroom, HUISSTIJL-1): nav-rail/topbar place-marker met eigen actieve-staat, geen actieknop; Button-varianten dekken de rail bewust niet
+              // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- app-chrome control (components/layout = chrome, HUISSTIJL-1): nav-rail/topbar place-marker with its own active state, not an action button; Button's variants deliberately don't cover the rail
               style={{ background: 'var(--hover-bg)', border: '1px solid var(--border)', cursor: 'pointer', color: 'var(--text-muted)' }}
             >
               {/* §5: reuse the existing auth key — one source per label (audit r4;

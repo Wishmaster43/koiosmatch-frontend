@@ -1,6 +1,7 @@
 /**
  * PreviewEditStep (wizard step 3) — "preview van de data, met de mogelijkheid rijen
- * aan te passen" (Danny): an editable grid of the mapped rows EXACTLY as they will
+ * aan te passen" (Danny) — "preview of the data, with the ability to adjust rows":
+ * an editable grid of the mapped rows EXACTLY as they will
  * be sent, a "Run preview" button that dry-runs that exact data, and — once a
  * validate succeeds against the CURRENT rows — the real per-row report and Confirm
  * button, reused unchanged from the settings import wizard (PreviewStep).

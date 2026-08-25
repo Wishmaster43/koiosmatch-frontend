@@ -1,3 +1,8 @@
+/**
+ * DepartmentsPage — Shiftmanager-mirrored departments list: KPI strip, filter
+ * panel (status/customer/location) and a paginated table + drawer, all reading
+ * the read-only SM mirror via useSmDepartments (never a direct write here).
+ */
 import { useState, useMemo, useEffect } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'

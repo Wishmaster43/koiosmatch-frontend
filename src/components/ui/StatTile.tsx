@@ -1,16 +1,16 @@
-import type { CSSProperties, ReactNode } from 'react'
-import { Check } from 'lucide-react'
-import { interactive } from '@/lib/a11y'
-import { Caption, Mono } from '@/components/ui/typography'
-
 /**
- * StatTile — the ONE small metric tile (klus c, Tile-unificatie): a label plus a
+ * StatTile — the ONE small metric tile (job C, tile unification): a label plus a
  * bold numeric value in a bordered card. Replaces the four hand-rolled copies
  * that had drifted apart (usageCardStyles.Tile, TenantUsageSettings.Tile,
  * ShiftsSummary.Tile, MatchesReport.StatTile). Identity lives here once:
  * surface + border card, Caption label, Mono 700 value (§1: numbers are
  * JetBrains Mono). Layout (flex/minWidth) rides the style prop; identity never.
  */
+import type { CSSProperties, ReactNode } from 'react'
+import { Check } from 'lucide-react'
+import { interactive } from '@/lib/a11y'
+import { Caption, Mono } from '@/components/ui/typography'
+
 interface StatTileProps {
   label: ReactNode
   value: ReactNode

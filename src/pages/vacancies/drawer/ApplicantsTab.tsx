@@ -1,3 +1,12 @@
+/**
+ * ApplicantsTab — mostly read-only: total leads, the per-phase breakdown and the
+ * list of coupled applications (each a real candidate at a funnel phase). A match
+ * is the continuation of an application; editing the phase lives on the
+ * application, not here (decided model — see CLAUDE.md §3B). This tab owns two
+ * actions: "Intake plannen" per row, and "+ Sollicitatie" — create an application
+ * FOR THIS VACANCY, reusing the applications page's own create modal with the
+ * vacancy preselected + locked (Danny, vacancy drawer screenshot).
+ */
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { CalendarPlus, Search, ChevronLeft, ChevronRight } from 'lucide-react'

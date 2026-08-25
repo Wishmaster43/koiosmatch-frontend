@@ -2,9 +2,11 @@
  * EntityImportCard — the "create these FROM A FILE" entry at the TOP of a create
  * modal, in CvUploadCard's exact compact footprint (Danny 02-08 live review: "+
  * nieuwe klant moet net zo groot zijn als + nieuwe kandidaat. Sleep csv import
- * bestand blok is te groot nu"). Settings' own UploadStep has a big dashed drop
- * zone that is right for a full Settings page, wrong above a create form the user
- * came here to fill in — so THIS step-1 row is hand-rolled to CvUploadCard's own
+ * bestand blok is te groot nu" — + new customer must be exactly as big as + new
+ * candidate; the drag-CSV-import-file block is too big right now). Settings' own
+ * UploadStep has a big dashed drop zone that is right for a full Settings page,
+ * wrong above a create form the user came here to fill in — so THIS step-1 row
+ * is hand-rolled to CvUploadCard's own
  * compact shape (one intro line, one button row, one hint line) instead of reusing
  * UploadStep wholesale. That is the ONLY fork in the whole wizard: the state
  * machine, the dry-run/real-run API calls, and the per-row PREVIEW/RESULT panels

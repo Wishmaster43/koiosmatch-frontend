@@ -1,3 +1,8 @@
+/**
+ * InterviewsTab — the AI/WhatsApp interview(s) for an application: one card per
+ * REAL InterviewSession (APP-INTERVIEW-HISTORY-1), with its outcome chip and the
+ * full transcript. Empty state when there are none.
+ */
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { MessageCircle, FileText } from 'lucide-react'
@@ -202,11 +207,6 @@ function useConversationScope(enabled: boolean, applicationId: Id | undefined, c
   return state
 }
 
-/**
- * InterviewsTab — the AI/WhatsApp interview(s) for an application: one card per
- * REAL InterviewSession (APP-INTERVIEW-HISTORY-1), with its outcome chip and the
- * full transcript. Empty state when there are none.
- */
 export default function InterviewsTab({ application: a }: { application: ApplicationDetail }) {
   const { t } = useTranslation('applications')
   const { formatDateTime } = useDateFormat()

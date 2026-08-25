@@ -1,11 +1,3 @@
-import type { Opportunity } from '@/types/opportunity'
-
-// One axis result: 1-based position + the group's total size (mirrors matchOrdinals.ts).
-export interface OpportunityOrdinal {
-  position: number
-  total: number
-}
-
 /**
  * opportunityOrdinals — this opportunity's ordinal position among the tenant's
  * OTHER opportunities at the same customer ("2nd opportunity with this
@@ -16,6 +8,13 @@ export interface OpportunityOrdinal {
  * already fetch-all looped — see that hook's own comment), so this client-side
  * count is accurate for the same reason matches' own ordinal is.
  */
+import type { Opportunity } from '@/types/opportunity'
+
+// One axis result: 1-based position + the group's total size (mirrors matchOrdinals.ts).
+export interface OpportunityOrdinal {
+  position: number
+  total: number
+}
 
 // All rows sharing this opportunity's customer, sorted oldest-first — the one
 // grouping computation both helpers below build on. No clientId on this deal

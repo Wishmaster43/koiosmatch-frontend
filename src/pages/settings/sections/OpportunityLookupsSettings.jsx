@@ -1,8 +1,3 @@
-import { useState } from 'react'
-import { useTranslation } from 'react-i18next'
-import SubTabBar from '@/components/drawer/SubTabBar'
-import StatusListEditor from './StatusListEditor'
-
 /**
  * OpportunityLookupsSettings — the four Kans (opportunity) pipeline lookups, each a
  * separate tenant-configurable list backed by the shared value/label/color/sort_order
@@ -31,6 +26,11 @@ import StatusListEditor from './StatusListEditor'
  * no singleton/exclusivity guard, so both flags toggle freely (modal checkbox + row
  * badge, same as any other flagFields entry — never a DefaultToggle-style singleton).
  */
+import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import SubTabBar from '@/components/drawer/SubTabBar'
+import StatusListEditor from './StatusListEditor'
+
 export default function OpportunityLookupsSettings() {
   const { t } = useTranslation('settings')
   const [activeTab, setActiveTab] = useState('stages')

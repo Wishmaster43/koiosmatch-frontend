@@ -1,3 +1,11 @@
+/**
+ * KoiosPanel — the sliding chat panel that is Koios AI's one conversational
+ * surface app-wide (§0B): message list, composer with @-mention context refs,
+ * voice dictation, model picker and resizable width. Presentational pieces
+ * (message bubble, typing indicator, panel chrome) live here; state and the
+ * actual /ai/koios/chat call are split into the co-located koios/ hooks so
+ * this file stays the composition layer, not the logic.
+ */
 import { useState, useRef, useEffect } from 'react'
 import type { ChangeEvent, KeyboardEvent } from 'react'
 import { useTranslation } from 'react-i18next'

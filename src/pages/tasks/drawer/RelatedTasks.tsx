@@ -12,7 +12,8 @@
  * qualifying subject.
  *
  * TASK-FILTER-MENU-1 (Danny 08-08, "Notities dus zo overal met die filter en ook
- * taken doen"): status + type + priority moved BEHIND the shared DrawerFilterMenu
+ * taken doen" — "So Notes everywhere with that filter, and Tasks too"): status +
+ * type + priority moved BEHIND the shared DrawerFilterMenu
  * (one "Filter" button, badge + panel — never removable chips under the toolbar,
  * see that component's own VISIBILITY CHOICE doc comment). Every row narrows the
  * SAME server-side params EntityTasksTab's client-side rows narrow client-side —

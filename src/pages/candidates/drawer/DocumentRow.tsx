@@ -59,7 +59,7 @@ interface DocumentRowProps {
   docTypeLabel: (type?: string) => string
   docTypeIcon?: (type?: string) => string | null | undefined
   // DOC-LIST-LINK-1: the resolved link chip (null = unlinked, renders no chip — point 1)
-  // + the inline "Koppelen aan" picker's open/value/handlers + its own source lists
+  // + the inline "Koppelen aan" ("Link to") picker's open/value/handlers + its own source lists
   // (point 2). The actual PATCH(es) live in the parent (DocumentsSection) — this
   // component only renders props and fires the callbacks it was given.
   linked: ResolvedDocLink | null

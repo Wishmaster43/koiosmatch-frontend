@@ -20,7 +20,7 @@ export function CustomerStatusesSettings() {
   )
 }
 
-// KLANT-FASE-1 — customer LIFECYCLE PHASE (Prospect → Klant), the counterpart of the
+// KLANT-FASE-1 — customer LIFECYCLE PHASE (Prospect → Customer), the counterpart of the
 // candidate phase axis and a different question than the status above. CRUD + colour +
 // drag-reorder + in-use 409 against /customer-phases (SlugLookupController).
 // `is_customer` is the BEHAVIOUR FLAG the app binds on (the counterpart of the

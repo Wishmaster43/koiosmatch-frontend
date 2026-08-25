@@ -59,8 +59,9 @@ export default function SubEntityStatusTitleRow({
       <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{name}</div>
       <ReferenceNumberChip value={referenceNumber} />
       {editingStatus ? (
-        // Inline picker in the title row (Danny 28-07: "Status van locatie moet hier!!")
-        // — searchable, pick-only (allowCreate off, same as every tenant-lookup select).
+        // Inline picker in the title row (Danny 28-07: "Status van locatie moet hier!!",
+        // i.e. "The location's status must be here!!") — searchable, pick-only
+        // (allowCreate off, same as every tenant-lookup select).
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           <div style={{ width: 170 }}>
             <CreatableSelect value={statusDraft} onChange={setStatusDraft} options={statusOptions}

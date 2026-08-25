@@ -1,3 +1,9 @@
+/**
+ * EntityLink — a clickable reference to a linked record (candidate, vacancy,
+ * customer, application). Two independent affordances live side by side: the
+ * NAME opens the record in-app, the trailing ICON opens it in a new browser
+ * tab via its deep link — see the two docblocks below for the full contract.
+ */
 import type { ReactNode, MouseEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ExternalLink } from 'lucide-react'
@@ -21,8 +27,9 @@ export function buildEntityDeepLink(page: string, id: Id): string {
  * customer, application). Clicking the NAME opens that entity's page + drawer
  * in-app via the navigation context; clicking the trailing ICON opens the same
  * record in a NEW BROWSER TAB via its deep link (#page?open=id — the NAV-BACK-1
- * URL contract), per Danny's punt 16 (16-07): "drukken op icon = nieuw tabblad,
- * drukken op de naam = het item". Renders plain text when there is no target id.
+ * URL contract), per Danny's point 16 (16-07), verbatim: "…icon = nieuw
+ * tabblad…naam = het item" (i.e. "click the icon = new tab, click the name =
+ * the item"). Renders plain text when there is no target id.
  */
 export default function EntityLink({ page, id, children, title, hideIcon = false, tone = 'accent' }: { page: string; id?: Id | null; children: ReactNode; title?: string; hideIcon?: boolean; tone?: 'accent' | 'neutral' }) {
   const { t } = useTranslation('common')

@@ -1,15 +1,16 @@
-import Toggle from '@/components/ui/Toggle'
-
 /**
  * LookupChipSelect — the ONE shared block for "select which lookup values count"
  * (vacancy statuses / deployability statuses / contract forms / phases / …).
  * Renders one ROW per lookup value: the value as a soft-tinted chip in its own
- * colour + a real Toggle switch ("Toggle maken!!", Danny 2026-08-05 — the earlier
+ * colour + a real Toggle switch ("Toggle maken!!" — "Make it a Toggle!!", Danny
+ * 2026-08-05 — the earlier
  * chip-buttons read as static pills, not as controls). Replaces the duplicated
  * raw-checkbox `LookupCheckboxBlock` that used to live inline in
  * VacancyCandidateTabSettings and CandidateVacancyTabSettings. The name stays
  * (both callers + tests import it) even though the control inside is now a toggle.
  */
+import Toggle from '@/components/ui/Toggle'
+
 export default function LookupChipSelect({ label, hint, items, selected, onToggle, emptyText, ariaLabel }) {
   return (
     <div>

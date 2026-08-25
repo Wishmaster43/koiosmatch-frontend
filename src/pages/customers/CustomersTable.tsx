@@ -26,7 +26,8 @@ interface CustomersTableProps {
   loading?: boolean
   selectedId?: Id | null
   onSelect?: (row: Customer) => void
-  // Cell deep-link: the Locaties/Afdelingen/Contactpersonen/Open-vacatures counts
+  // Cell deep-link: the Locaties/Afdelingen/Contactpersonen/Open-vacatures
+  // ("Locations/Departments/Contact persons/Open vacancies") counts
   // open the drawer straight on that tab (mirrors the candidates last-contact cell).
   onOpenTab?: (row: Customer, tab: string) => void
   statusMeta: (v: string) => { label?: string; color?: string }
@@ -115,7 +116,7 @@ export default function CustomersTable({
       render: c => seedLabel('industries', { label: c.industry }) || '—',
     },
     {
-      // KLANT-FASE-1: lifecycle phase (Prospect → Klant) — its own axis, so it sits
+      // KLANT-FASE-1: lifecycle phase (Prospect → Klant, "Customer") — its own axis, so it sits
       // NEXT TO the status chip: two chips, two questions. Label/colour come from the
       // tenant lookup; empty phase renders a dash rather than an empty chip.
       key: 'phase', header: t('cols.phase'), nowrap: true, sortable: true,
@@ -137,7 +138,7 @@ export default function CustomersTable({
       sortValue: c => (c.phase && c.phase === entryPhaseValue) || !c.status ? '' : (statusMeta(String(c.status)).label ?? String(c.status)),
       // Customer.status is typed string|number for legacy/API reasons (mirrors the
       // debtor/reference-number style scalars); the chip only deals in slugs.
-      // TRASH-OVERAL-2: a pending_erase row reads as "Prullenbak" (same chip on every entity table).
+      // TRASH-OVERAL-2: a pending_erase row reads as "Prullenbak" ("Trash") (same chip on every entity table).
       render: c => c.lifecycle === 'pending_erase'
         ? <SoftChip label={t('common:trash.view')} color="var(--color-trash)" round />
         : <CustomerStatusChip status={c.status != null ? String(c.status) : null} phase={c.phase} plain={!colorStatus} round />,

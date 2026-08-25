@@ -1,6 +1,3 @@
-import { useQuery } from '@tanstack/react-query'
-import api, { getActiveTenantId, unwrapList } from './api'
-
 /**
  * Shared query hooks.
  *
@@ -8,6 +5,8 @@ import api, { getActiveTenantId, unwrapList } from './api'
  * across every component that needs them (instead of each page running its own
  * useEffect). Add new hooks here as pages migrate to React Query.
  */
+import { useQuery } from '@tanstack/react-query'
+import api, { getActiveTenantId, unwrapList } from './api'
 
 // Stable empty default. Without it, `data` is undefined while loading, and each
 // `const { data = [] } = useUsers()` call site would create a fresh [] every render —

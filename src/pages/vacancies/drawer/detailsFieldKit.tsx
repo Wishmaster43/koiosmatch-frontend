@@ -1,3 +1,12 @@
+/**
+ * detailsFieldKit — shared row/card/control-button building blocks for the
+ * vacancy Details sub-tabs (Algemeen/Locatie/Eisen/Voorwaarden — "General/
+ * Location/Requirements/Conditions"). Split out of
+ * the old single DetailsTab (VAC-DETAILS-SPLIT-1, Danny 24-07: "een potlood
+ * zet 21 velden tegelijk in edit-mode" — "one pencil puts 21 fields into edit
+ * mode at once") so every sub-tab card looks identical
+ * without repeating the same style constants and JSX four times.
+ */
 import type { CSSProperties, ReactNode } from 'react'
 import type { TFunction } from 'i18next'
 import { Edit2, Save, X } from 'lucide-react'
@@ -7,14 +16,6 @@ import CreatableSelect from '@/components/ui/CreatableSelect'
 import Button from '@/components/ui/Button'
 // HUISSTIJL-1: the card title (11/600/uppercase/muted) is the shared GroupLabel atom.
 import { GroupLabel } from '@/components/ui/typography'
-
-/**
- * detailsFieldKit — shared row/card/control-button building blocks for the
- * vacancy Details sub-tabs (Algemeen/Locatie/Eisen/Voorwaarden). Split out of
- * the old single DetailsTab (VAC-DETAILS-SPLIT-1, Danny 24-07: "een potlood
- * zet 21 velden tegelijk in edit-mode") so every sub-tab card looks identical
- * without repeating the same style constants and JSX four times.
- */
 
 // Style constants — identical across every sub-tab card. inputStyle is the
 // G33/fieldMetrics canon (was its own padding-7/font-12/radius-6 copy).

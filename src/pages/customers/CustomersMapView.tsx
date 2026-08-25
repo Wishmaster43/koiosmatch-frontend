@@ -24,7 +24,8 @@ export default function CustomersMapView({ rows, statusColor, center, radiusKm, 
   const { t } = useTranslation(['customers', 'common'])
 
   // Only rows with geocoded coordinates land on the map (PDOK fills them on save).
-  // PDOK-LATLNG-1 (§10, bit again 14-08 "alle klanten zijn weg"): Laravel serialises
+  // PDOK-LATLNG-1 (§10, bit again 14-08 "alle klanten zijn weg" — "all customers
+  // are gone"): Laravel serialises
   // DECIMAL columns as STRINGS — a `typeof === 'number'` check drops every real
   // coordinate the moment the resource stops float-casting. toCoord coerces both.
   const points: MapPoint[] = rows

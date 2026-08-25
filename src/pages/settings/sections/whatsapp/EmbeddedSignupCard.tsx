@@ -1,6 +1,7 @@
 /**
  * EmbeddedSignupCard — the coexistence koppel-WIZARD on the WhatsApp settings
- * connection tab (WHATSAPP-COEXIST-PREP-1; Danny 23-08: "bij WhatsApp ook de
+ * connection tab (WHATSAPP-COEXIST-PREP-1; Danny 23-08, translated: "also add
+ * the wizard to settings for WhatsApp" — verbatim: "bij WhatsApp ook de
  * wizard toevoegen bij instellingen"). Three honest states:
  *  - not-ready: the platform's Meta app is not configured/approved yet — the
  *    card explains WHAT this will do and that it is waiting on the Meta

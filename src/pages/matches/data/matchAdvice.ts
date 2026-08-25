@@ -1,5 +1,3 @@
-import type { MatchRow } from '@/types/match'
-
 /**
  * matchAdvice — the ONE deterministic rule engine behind the matches table's
  * "Koios" column. Mirrors candidateAdvice.ts's reference design: rules only
@@ -7,6 +5,7 @@ import type { MatchRow } from '@/types/match'
  * caller-resolved `isClosed` flag (from the tenant's /match-statuses lookup,
  * R-1b) — no new fetch, no invented data.
  */
+import type { MatchRow } from '@/types/match'
 
 export type MatchAdviceAction = 'renew' | 'none'
 
@@ -40,7 +39,8 @@ export function deriveMatchAdvice(m: MatchRow, opts: MatchAdviceOptions): MatchA
   if (!m.endDate) return NONE_RULE
 
   // Rule 4: the end date is within the renewal window, or already passed while
-  // still open — Danny's own example rule ("einddatum nadert → Verlengen?").
+  // still open — Danny's own example rule ("einddatum nadert → Verlengen?" —
+  // "end date approaching → Renew?").
   const end = new Date(m.endDate)
   if (Number.isNaN(end.getTime())) return NONE_RULE
   const now = opts.now ?? new Date()

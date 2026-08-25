@@ -1,3 +1,6 @@
+// DataTable — the shared, column-driven list table (§4 HUISSTIJL-1): sorting,
+// selection, virtualization and the loading/empty/error states live here once so
+// no entity page re-implements table chrome; a caller only declares columns.
 import { useState, useMemo, useRef, useCallback } from 'react'
 import type { CSSProperties, ReactNode, RefObject } from 'react'
 import SortCaret from './SortCaret'

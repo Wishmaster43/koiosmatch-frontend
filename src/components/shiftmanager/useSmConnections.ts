@@ -1,8 +1,9 @@
 /**
  * useSmConnections — the tenant's active Shiftmanager planning connections, for the
  * SYNC-1 sync-button picker. Reuses the exact same /planning-connections lookup the
- * workflow sm_* modules already use for their `connection_id` field (Danny 2026-07-14:
- * "zelfde regel als de workflow-modules" — never guess/default a connection). The
+ * workflow sm_* modules already use for their `connection_id` field (Danny 2026-07-14,
+ * translated: "same rule as the workflow modules" — verbatim: "zelfde regel als de
+ * workflow-modules" — never guess/default a connection). The
  * endpoint returns EVERY active planning connection regardless of external system
  * (value/label only, never credentials — see WorkflowController::planningConnections),
  * so a light label filter keeps non-Shiftmanager rows (helloflex/intus/sdb) out of this

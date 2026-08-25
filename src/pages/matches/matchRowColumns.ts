@@ -10,7 +10,8 @@ import type { CSSProperties } from 'react'
  * the client name was short — the "Klant" label then pointed at empty space. A
  * header only means something if the cell below it occupies the same column.
  *
- * SECOND LOOK (Danny 09-08, "Open heeft geen kopje??"): the header only ever
+ * SECOND LOOK (Danny 09-08, translated: "Open has no heading??" — verbatim:
+ * "Open heeft geen kopje??"): the header only ever
  * declared Vacature/Klant/actions, while the row rendered FOUR things — vacancy
  * title, a status pill glued onto the title behind an em-dash, the client name,
  * and a score pill sitting as an unlabeled dash before the icon cluster. Status
@@ -39,7 +40,8 @@ export const MATCH_COLUMN_WIDTH = 140
 export const MATCH_COL_STATUS: CSSProperties = { width: 108, flexShrink: 0 }
 
 // Other party (client on the candidate side) — a real fixed column.
-// SHRINKABLE on purpose (Danny 09-08: "vacature naam niet te lezen"). The
+// SHRINKABLE on purpose (Danny 09-08, translated: "vacancy name not readable" —
+// verbatim: "vacature naam niet te lezen"). The
 // vacancy title is what identifies the row; a client name is context. When the
 // drawer gets narrow SOMETHING has to give, and it should be the context, not the
 // identity. flex-basis 128 with shrink allowed, floored at 72 so it never becomes

@@ -11,23 +11,28 @@
  * Rates propose from a price agreement / conversion factor once customer + function are picked
  * (MATCH-PLACEMENT-2, useRateProposal) — the margin is shown live. The
  * long-list relational pickers (klant/locatie/afdeling/contactpersoon/functie/
- * vacature) are typeable searchable comboboxes via the shared CreatableSelect
+ * vacature — "customer/location/department/contact person/function/vacancy")
+ * are typeable searchable comboboxes via the shared CreatableSelect
  * with `allowCreate={false}` — never a hardcoded free-text create for a
  * relational id (job 18). Cost centre + billing email propose from whichever
- * picked level (afdeling > locatie > klant) carries a value, and freeze the
+ * picked level (afdeling > locatie > klant — "department > location >
+ * customer") carries a value, and freeze the
  * moment the recruiter edits them by hand (job 21/22).
  *
  * CARD-STACK-LABEL-LEFT (Danny 13-08, two live complaints — "alles onder elkaar
- * en niet naast elkaar" + "Match opmerkingen is heel klein"): rebuilt onto the
+ * en niet naast elkaar" — "everything stacked, not side by side" — + "Match
+ * opmerkingen is heel klein" — "Match remarks is very small"): rebuilt onto the
  * PlanIntakeModal/AddApplicationModal canon instead of the old wide two-column
  * frame. Every field is now its own label-LEFT row (P33, `match/styles` +
  * `FormField`) — the label sits at the shared CANON_LABEL_WIDTH, the field
  * takes the rest, so a row reads left-to-right instead of stacking label-above-
  * field. The panel opens WIDE by default (1060px — Danny 14-08 "scherm moet
- * breder, anders past de klantnaam niet eens"; the brief 640px default truncated
- * every picker label) and the four
+ * breder, anders past de klantnaam niet eens" — "screen must be wider,
+ * otherwise the customer name doesn't even fit"; the brief 640px default
+ * truncated every picker label) and the four
  * sections stack as single-column titled cards — Relaties, Contract,
- * Financieel, Opmerkingen — mirroring PlanIntakeModal's own scrollBody={false}
+ * Financieel, Opmerkingen ("Relations, Contract, Financial, Remarks") —
+ * mirroring PlanIntakeModal's own scrollBody={false}
  * + own scroll area (padding 22) + a pinned footer with borderTop, instead of
  * the previous inline-scrolling wide panel.
  *
@@ -157,7 +162,8 @@ export default function MatchModal({
           draftHours={form.hours ? Number(form.hours) : null} />
 
         {/* ── Titled card stack (Danny 13-08, "alles onder elkaar en niet naast
-            elkaar"): Relaties / Contract / Financieel / Opmerkingen, single
+            elkaar" — "everything stacked, not side by side"): Relaties / Contract
+            / Financieel / Opmerkingen, single
             column, each a bordered `cardBox` under an 11px uppercase `cardHead`
             — the addmodal card idiom, now stacked instead of paired columns.
             Every field inside a card is its own label-LEFT row (P33). ── */}
@@ -221,13 +227,14 @@ export default function MatchModal({
             <div style={cardHead}>{t('placement.matchRemarks')}</div>
             {/* GROWING element (RESIZE-GROWS-EDITOR, mirrors NoteComposer.tsx):
                 a taller default footprint than the other cards — "Match
-                opmerkingen is heel klein" (Danny 13-08) — so the rich-text
+                opmerkingen is heel klein" — "Match remarks is very small"
+                (Danny 13-08) — so the rich-text
                 block reads as the form's own note. The collapsed-ghost-start
                 and the pop-out icon are untouched (shared CollapsibleRichText). */}
             <div style={{ ...cardBox, minHeight: 160 }}>
-              {/* ACTIONS-SCOPE-DEFAULT-FLIP: "Match opmerkingen" reads as a
-                  conversation (like a note), not a description — keep all
-                  three Koios modes, including Actiepunten, explicitly.
+              {/* ACTIONS-SCOPE-DEFAULT-FLIP: "Match opmerkingen" ("Match remarks")
+                  reads as a conversation (like a note), not a description — keep all
+                  three Koios modes, including Actiepunten ("action items"), explicitly.
                   onPopout only wires when a candidate id is known — the
                   remarks sync channel is keyed on it (see the hook above). */}
               <CollapsibleRichText
@@ -237,7 +244,7 @@ export default function MatchModal({
                 placeholder={t('placement.remarksAdd')}
                 assistModes={['improve', 'summarize', 'actions']}
                 onPopout={remarksCandidateId ? remarksPopout.open : undefined}
-                // RESIZE-GROWS-EDITOR (Danny 13-08 "heel klein"): the open editor is
+                // RESIZE-GROWS-EDITOR (Danny 13-08 "heel klein" — "very small"): the open editor is
                 // the growing element of the panel, with a real writing floor.
                 fill minHeight={160}
               />
@@ -254,7 +261,7 @@ export default function MatchModal({
           </div>
         )}
 
-        {/* Deviation guard (Danny's "weet je het zeker?"): the entered rates differ from a
+        {/* Deviation guard (Danny's "weet je het zeker?" — "are you sure?"): the entered rates differ from a
             FOUND agreement proposal — calm inline confirm, one extra click, no hard block.
             MATCH-FIN-GATE-1: the banner prints the purchase rate, so it is gated the same
             as FinancialSection's purchase field/margin — never shown without the permission. */}
@@ -266,7 +273,7 @@ export default function MatchModal({
 
       {/* Pinned footer — buttons stay visible whatever the content height (mirrors PlanIntakeModal). */}
       {/* MATCH-KLANTLOOS-1: the relational requirement flips with the picked
-          Contractvorm — a klant-loos form needs branch instead of customer. */}
+          Contractvorm — a klant-loos ("customer-less") form needs branch instead of customer. */}
       {(() => {
         const requiredOk = form.customerNotApplicable ? Boolean(form.branchId) : Boolean(form.customerId)
         const canSubmit = requiredOk && Boolean(form.func)

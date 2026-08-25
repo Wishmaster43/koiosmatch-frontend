@@ -1,7 +1,3 @@
-import { createContext, useContext, useEffect, useRef } from 'react'
-import type { ReactNode } from 'react'
-import type { Id } from '@/types/common'
-
 /**
  * NavigationContext — one place to jump between entity features. Wraps the app
  * shell's `goTo(page, intent)` so any component (drawer tabs, tables, chips) can
@@ -12,6 +8,9 @@ import type { Id } from '@/types/common'
  * lets a cross-page deep link land on a specific drawer tab, not just the
  * record's default view — a page that ignores it simply opens on its default.
  */
+import { createContext, useContext, useEffect, useRef } from 'react'
+import type { ReactNode } from 'react'
+import type { Id } from '@/types/common'
 type OpenEntity = (page: string, id?: Id | null, tab?: string) => void
 type Navigate = (page: string, intent?: unknown) => void
 

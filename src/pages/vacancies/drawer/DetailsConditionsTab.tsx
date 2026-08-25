@@ -1,3 +1,13 @@
+/**
+ * DetailsConditionsTab — Voorwaarden sub-tab (VAC-DETAILS-SPLIT-1): salaris +
+ * uren, plus (VACANCY-CONTRACT-FIELD-1) the vacancy's own SINGULAR contract
+ * type + CAO — the pair the "+Match" modal prefills onto a new match (see
+ * useVacancyPrefill's docblock: same lookup vocabulary as the match's own
+ * `contract_type`/`cao`, `contract_types`/`collective_labour_agreements`,
+ * re-verified live against the running API 2026-08-06). Its OWN pencil/save/
+ * cancel (`conditions.*` from the hook) — flipping it never touches
+ * Algemeen/Locatie/Eisen's drafts.
+ */
 import { useTranslation } from 'react-i18next'
 import { row, card, controls, dash, pair, makeFieldHelpers } from './detailsFieldKit'
 import type { ConditionsSection } from '../hooks/useVacancyDetailsForm'
@@ -15,16 +25,6 @@ interface Props {
   contractTypeOptions: LookupOpt[]; caoOptions: LookupOpt[]
 }
 
-/**
- * DetailsConditionsTab — Voorwaarden sub-tab (VAC-DETAILS-SPLIT-1): salaris +
- * uren, plus (VACANCY-CONTRACT-FIELD-1) the vacancy's own SINGULAR contract
- * type + CAO — the pair the "+Match" modal prefills onto a new match (see
- * useVacancyPrefill's docblock: same lookup vocabulary as the match's own
- * `contract_type`/`cao`, `contract_types`/`collective_labour_agreements`,
- * re-verified live against the running API 2026-08-06). Its OWN pencil/save/
- * cancel (`conditions.*` from the hook) — flipping it never touches
- * Algemeen/Locatie/Eisen's drafts.
- */
 export default function DetailsConditionsTab({ vacancy: v, conditions, contractTypeOptions, caoOptions }: Props) {
   const { t } = useTranslation('vacancies')
   const { editing, setEditing, form, setF, save, cancel } = conditions

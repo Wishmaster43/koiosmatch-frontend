@@ -4,7 +4,7 @@ import ShiftManagerMark from '../components/ui/ShiftManagerMark'
 
 export default {
   type:  'sm_employees',
-  // GET/lees-kant: gate op de rapporten-MODULE 'sm' (Danny 23-07); de connector-app gate alleen de POST/PATCH-koppelkant.
+  // GET/read side: gates on the reports MODULE 'sm' (Danny 23-07); the connector app only gates the POST/PATCH link side.
   module: 'sm',
   category: 'Shiftmanager',
   label: 'SM medewerkers',

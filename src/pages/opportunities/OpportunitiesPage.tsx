@@ -1,3 +1,8 @@
+/**
+ * OpportunitiesPage — thin container: the data layer (load + mutations) lives
+ * in useOpportunitiesData; the page only derives the filtered/paged view and
+ * renders it.
+ */
 import { useState, useEffect, useMemo, useRef } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -40,8 +45,6 @@ const pickOne = (set: Dispatch<SetStateAction<string[]>>) => (d: unknown) => {
 const tog = (set: Dispatch<SetStateAction<string[]>>) => (v: string) =>
   set(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v])
 
-// OpportunitiesPage — thin container: the data layer (load + mutations) lives in
-// useOpportunitiesData; the page only derives the filtered/paged view and renders.
 export default function OpportunitiesPage({ intent }: { intent?: unknown } = {}) {
   const { t } = useTranslation(['opportunities', 'common'])
   // LOOKUP-I18N-1: the seeded stage label renders in the user's language; the
@@ -53,13 +56,13 @@ export default function OpportunitiesPage({ intent }: { intent?: unknown } = {})
   // Archive/restore is authorization-gated in the UI; the backend re-checks (§7).
   const hasPermission = auth?.hasPermission ?? (() => false)
   const { registerFilters, unregisterFilters } = useRightPanel()
-  // Tenant setting: show the deal magnitude in hours instead of euro (Settings → Kansen).
+  // Tenant setting: show the deal magnitude in hours instead of euro (Settings → Kansen, "Opportunities").
   const valueInHours = getBoolSetting(useAllSettings(), 'opportunity_value_in_hours', false)
   // ARCHIVE-1: the archived quick-view (TRASH-OVERAL-2: now an ISOLATED
   // lifecycle==='archived' view — mirrors candidates; include_archived returns
   // only soft-deleted rows since TRASH-OVERAL-1b, so "alongside" is history).
   const [showArchived, setShowArchived] = usePageMemory('opps.archived', false)
-  // TRASH-OVERAL-2: Prullenbak view (lifecycle pending_erase) — same include_archived
+  // TRASH-OVERAL-2: Prullenbak ("Trash") view (lifecycle pending_erase) — same include_archived
   // request, split client-side; mutually exclusive with the archived view.
   const [showTrash, setShowTrash] = usePageMemory('opps.trash', false)
   // VESTIGING-2: explicit branch filter (inherited from the customer) — a
@@ -93,7 +96,9 @@ export default function OpportunitiesPage({ intent }: { intent?: unknown } = {})
 
   // Mirror the open drawer in the URL (?open=<id>): browser back/forward walks
   // through it and a copied link reopens the same opportunity (NAV-BACK-1 —
-  // Danny: "back knop vanuit kans → taak en dan back kom ik niet terug waar ik was").
+  // Danny: "back knop vanuit kans → taak en dan back kom ik niet terug waar ik
+  // was" — "back button from opportunity → task and then back doesn't get me
+  // back to where I was").
   useDrawerUrl({ selectedId: selected?.id, openById: (id) => selectOpportunity({ id } as Parameters<typeof selectOpportunity>[0]), close: closeDrawer, intent })
   // Open an opportunity drawer when arriving via a cross-entity link ({ open: id }):
   // the dashboard's stalled-opportunities rows and task links land here. Was the
@@ -119,9 +124,11 @@ export default function OpportunitiesPage({ intent }: { intent?: unknown } = {})
   const [client,   setClient]   = usePageMemory<string[]>('opps.client', []) // selected client names (panel)
   const [addOpen,  setAddOpen]  = useState(false)
 
-  // "Aflopend" quick-filter (dashboard KPI). Definition MIRRORS the backend's
-  // expiring_opps exactly (DashboardService): close date TODAY t/m +14 dagen,
-  // date-granular — anders wijkt de lijst af van het KPI-getal (Danny: "1 vs 3").
+  // "Aflopend" ("Expiring") quick-filter (dashboard KPI). Definition MIRRORS the
+  // backend's expiring_opps exactly (DashboardService): close date TODAY t/m
+  // ("up to and including") +14 days,
+  // date-granular — anders wijkt de lijst af van het KPI-getal ("otherwise the
+  // list would diverge from the KPI number") (Danny: "1 vs 3").
   // Reference moment captured once per mount (purity rule — mirrors convCutoff).
   const [expiringOnly, setExpiringOnly] = useState(false)
   const [dayStart] = useState(() => new Date(new Date().setHours(0, 0, 0, 0)).getTime())

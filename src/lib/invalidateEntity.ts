@@ -1,3 +1,8 @@
+/**
+ * invalidateEntity — cross-entity react-query cache reconciliation after a write
+ * that other surfaces have already denormalised into their own cached rows, so
+ * a save on one screen doesn't leave a stale copy showing elsewhere until reload.
+ */
 import type { QueryClient } from '@tanstack/react-query'
 
 // Query roots whose rows embed a candidate's denormalised name/function.

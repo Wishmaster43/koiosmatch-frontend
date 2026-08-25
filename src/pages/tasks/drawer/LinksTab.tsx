@@ -1,3 +1,12 @@
+/**
+ * LinksTab — the polymorphic entities a task is linked to. Lists the current links
+ * with a remove (×) per row and an inline "add link" row. Mutations go through the
+ * page (onAddLink / onRemoveLink → POST|DELETE /tasks/{id}/links). The type label
+ * comes from i18n, never hardcoded.
+ *
+ * The vocabulary + the picker row itself now live in `../links/` (shared with the
+ * CREATE form since Danny 08-08 punt 15) — this tab is the list + mutations only.
+ */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link2, X } from 'lucide-react'
@@ -9,15 +18,6 @@ import type { TaskDetail } from '@/types/task'
 import type { Id } from '@/types/common'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 
-/**
- * LinksTab — the polymorphic entities a task is linked to. Lists the current links
- * with a remove (×) per row and an inline "add link" row. Mutations go through the
- * page (onAddLink / onRemoveLink → POST|DELETE /tasks/{id}/links). The type label
- * comes from i18n, never hardcoded.
- *
- * The vocabulary + the picker row itself now live in `../links/` (shared with the
- * CREATE form since Danny 08-08 punt 15) — this tab is the list + mutations only.
- */
 export default function LinksTab({ task, onAddLink, onRemoveLink }: {
   task: TaskDetail; onAddLink: (link: NewLink) => void; onRemoveLink: (link: { type: string; id: Id | null }) => void
 }) {

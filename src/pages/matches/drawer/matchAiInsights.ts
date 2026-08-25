@@ -1,10 +1,3 @@
-import type { MatchRow } from '@/types/match'
-import type { KoiosAdviceInsight } from '@/components/ai/KoiosAdviceBlock'
-import { computeMatchExpiry } from '../matchExpiry'
-
-// A bound-namespace translate function (the caller already resolved the namespace).
-type Tx = (key: string, opts?: Record<string, unknown>) => string
-
 /**
  * buildMatchAdviceInsights — Koios AI insights for the match drawer's Overview
  * tab (M18 of the overzicht-layout cluster): a score reading (the match's own
@@ -13,6 +6,13 @@ type Tx = (key: string, opts?: Record<string, unknown>) => string
  * already uses). Pure FE heuristics over fields the row already carries — no
  * AI/API call, mirrors buildVacancyAdviceInsights.
  */
+import type { MatchRow } from '@/types/match'
+import type { KoiosAdviceInsight } from '@/components/ai/KoiosAdviceBlock'
+import { computeMatchExpiry } from '../matchExpiry'
+
+// A bound-namespace translate function (the caller already resolved the namespace).
+type Tx = (key: string, opts?: Record<string, unknown>) => string
+
 export function buildMatchAdviceInsights(match: MatchRow, t: Tx, now: Date = new Date()): KoiosAdviceInsight[] {
   const score = match.score
   const scoreInsight: KoiosAdviceInsight = score == null

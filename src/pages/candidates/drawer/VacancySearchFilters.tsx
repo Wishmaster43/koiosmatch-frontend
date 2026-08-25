@@ -1,3 +1,6 @@
+// VacancySearchFilters — the fixed trigger-pill row for the candidate's vacancy
+// search (GeoSearchShell's trigger-row slot); VacancySearchActiveFilters below
+// builds the chips-row slot. See the GEOSEARCH-1 comment further down for the split.
 import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import { RotateCcw } from 'lucide-react'

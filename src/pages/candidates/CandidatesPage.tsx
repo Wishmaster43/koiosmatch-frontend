@@ -81,7 +81,7 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
   const [mapCenter,      setMapCenter]      = usePageMemory('cand.mapCenter', { lat: 52.09, lng: 5.12 })
   const [mapRadius,      setMapRadius]      = usePageMemory('cand.mapRadius', 30)
 
-  // Bulk-selectie (checkboxes) — id-set; gewist bij filter/pagina-wissel.
+  // Bulk selection (checkboxes) — id set; cleared on filter/page change.
   const [selectedIds,      setSelectedIds]      = useState<Set<Id>>(() => new Set())
   // KOIOS-SELECTIE-CONTEXT-1: mirror the selection into Koios AI's context chip.
   usePublishSelection('candidates', selectedIds)
@@ -179,7 +179,7 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
 
 
   const tog = <T,>(set: Dispatch<SetStateAction<T[]>>) => (v: T) => set(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v])
-  // Klik-op-chart → zet precies één waarde, of wis bij nogmaals klikken (toggle).
+  // Click-on-chart → sets exactly one value, or clears it on a second click (toggle).
   const pickOne = <T,>(set: Dispatch<SetStateAction<T[]>>) => (v: T | null | undefined) => { if (v != null) toggleOneValue(set, v) }
   const pickStatus = pickOne(setSelectedStatus)
   const pickPhase  = pickOne(setSelectedPhase)
@@ -274,7 +274,8 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
 
   // Mirror the open drawer in the URL (?open=<id>): browser back/forward walks
   // through it and a copied link reopens the same candidate (NAV-BACK-1 — Danny
-  // 2026-07-06: "opent ook niet vorige items"; supersedes the old memory-only remember).
+  // 2026-07-06, translated: "also doesn't reopen previous items" — verbatim:
+  // "opent ook niet vorige items"; supersedes the old memory-only remember).
   const { markNextCloseReplace } = useDrawerUrl({ selectedId: selected?.id, openById: (id) => selectCandidate({ id } as Candidate), close: closeDrawer, intent })
   // Ref assignment in an effect, never during render (react-hooks/refs); the ref is
   // only read asynchronously inside the gone-fetch .then, after mount.

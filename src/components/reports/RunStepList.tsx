@@ -90,7 +90,7 @@ function StepCard({ step, index, catalog }: { step: RunStep; index: number; cata
         <Caption as="div" style={{ padding: '0 12px 10px 33px' }}>{step.message}</Caption>
       )}
 
-      {/* HIST-DETAIL-1: the one-line outcome ("466 gesynct") always visible. */}
+      {/* HIST-DETAIL-1: the one-line outcome (e.g. "466 synced") always visible. */}
       {step.summary != null && step.summary !== '' && (
         <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--color-success-text)', padding: '0 12px 10px 33px' }}>{String(step.summary)}</div>
       )}

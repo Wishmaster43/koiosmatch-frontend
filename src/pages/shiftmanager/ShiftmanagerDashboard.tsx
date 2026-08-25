@@ -1,3 +1,7 @@
+// ShiftmanagerDashboard — the Shiftmanager (SM) reporting home: candidate KPIs
+// (activity buckets, attention candidates) mirrored against the candidates report
+// so both screens agree, plus shift/hours charts and, on AI-enabled packages, the
+// recent runs/conversations panels. Every KPI opens the shared drill-down drawer.
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { CheckCircle, AlertCircle } from 'lucide-react'
@@ -55,11 +59,11 @@ export default function ShiftmanagerDashboard() {
       else bIdle.push(c)
     }
     const inactive = list.filter(c => String(c.status ?? '').toLowerCase() === 'nietactief')
-    // Aandachtskandidaten — dezelfde functie als het kandidaten-rapport (calcAandacht:
-    // actief + nieuw <30d + niet ingepland) zodat de KPI's op beide schermen matchen
-    // (Danny). De "actief maar nooit ingelogd"-regel kán niet: `last_login_at` staat wél
-    // op het model maar NIET in de resource (BE-handoff). De 2 "werkt-minder"-regels
-    // wachten op toekomstige per-kandidaat-uren (shifts-per-candidate).
+    // Aandachtskandidaten ("attention candidates") — the SAME function as the candidates
+    // report (calcAandacht: active + new <30d + not yet scheduled) so the KPIs on both
+    // screens match (Danny). The "active but never logged in" rule CANNOT be added:
+    // `last_login_at` DOES exist on the model but NOT on the resource (BE handoff). The
+    // 2 "works less" rules wait on future per-candidate hours (shifts-per-candidate).
     const attention = calcAandacht(list as unknown as ReportCandidate[])
     return { newList, avg, active, inactive, all: list, bNever, bWorked, bPlanned, bIdle, attention }
   }, [candidates])

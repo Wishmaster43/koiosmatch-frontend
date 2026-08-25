@@ -1,3 +1,7 @@
+/**
+ * EmailTab — see the fuller docblock below, right above the component, for
+ * this opportunity's e-mail history tab: what it fetches and why.
+ */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'

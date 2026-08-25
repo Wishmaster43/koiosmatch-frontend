@@ -1,3 +1,7 @@
+/**
+ * DocumentTypesSettings — see the fuller docblock below, right above the
+ * component, for the entity-scoped document-type CRUD editor this file renders.
+ */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import StatusListEditor from './StatusListEditor'

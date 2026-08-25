@@ -1,3 +1,8 @@
+/**
+ * DetachedCountBadge — the ONE place every drill-down (candidate/vacancy/customer)
+ * shows its currently-detached-applications count. A warning signal, not a KPI:
+ * hidden entirely at zero so an unaffected record shows nothing extra.
+ */
 import { useTranslation } from 'react-i18next'
 import { Unlink } from 'lucide-react'
 import { tint } from '@/lib/tint'

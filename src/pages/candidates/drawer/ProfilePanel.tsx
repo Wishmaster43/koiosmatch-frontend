@@ -1,13 +1,13 @@
+/** Profile tab — profile fields + AI block + branch.
+ * Languages moved to the Background tab; documents to their own tab; talent
+ * pools moved to the Match tab's own Talentenpools ("Talent pools") sub-tab
+ * (Danny, candidates-round-2, point C — same PoolsSection component, new
+ * home). Each block owns its edit state. */
 import ProfileTab from './ProfileTab'
 import KoiosAiBlock from './KoiosAiBlock'
 import BranchSection from './BranchSection'
 import type { Candidate } from '@/types/candidate'
 
-/** Profile tab — profile fields + AI block + branch.
- * Languages moved to the Background tab; documents to their own tab; talent
- * pools moved to the Match tab's own Talentenpools sub-tab (Danny
- * kandidaten-ronde-2, punt C — same PoolsSection component, new home).
- * Each block owns its edit state. */
 export default function ProfilePanel({ c, onEditSave, autoEditSignal, onContactMoment }: {
   c: Candidate; onEditSave?: (v: Record<string, unknown>) => void; autoEditSignal?: number
   // B15-flow: a confirmed contact moment updates local state ONLY (the write

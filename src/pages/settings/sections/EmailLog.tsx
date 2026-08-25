@@ -1,7 +1,8 @@
 /**
- * EmailLog — Communicatie → E-mail-log: inkomende + uitgaande e-mails, gekoppeld aan
- * kandidaat/klant. Built on the shared LogView. Graceful: leeg tot de backend
- * `/email-log` levert (message-log met richting/van-naar/onderwerp/entiteit/status).
+ * EmailLog — Settings → Communicatie → E-mail-log: incoming and outgoing e-mail,
+ * linked to the candidate or customer it belongs to. Built on the shared LogView.
+ * Degrades gracefully: the screen stays empty until the backend serves `/email-log`
+ * (a message log carrying direction, from/to, subject, entity and status).
  */
 import { useState, useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'

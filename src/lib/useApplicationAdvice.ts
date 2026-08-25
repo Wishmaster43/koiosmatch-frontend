@@ -1,7 +1,3 @@
-import { useCallback } from 'react'
-import type { KoiosAdvice } from '@/lib/koiosAdviceMeta'
-import type { Application } from '@/types/application'
-
 /**
  * useApplicationAdvice — the ONE resolver both the applications TABLE column and
  * the drawer's Koios block call, so they can never disagree
@@ -13,6 +9,10 @@ import type { Application } from '@/types/application'
  * the same pill every other entity renders — no raw-text bypass. The label is
  * backend copy, so no t() applies here.
  */
+import { useCallback } from 'react'
+import type { KoiosAdvice } from '@/lib/koiosAdviceMeta'
+import type { Application } from '@/types/application'
+
 export function useApplicationAdvice(): (r: Application) => KoiosAdvice | null {
   // Stable identity: the table's memoized columns depend on this resolver.
   return useCallback((r: Application): KoiosAdvice | null => (

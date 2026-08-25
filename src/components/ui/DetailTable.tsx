@@ -1,6 +1,3 @@
-import type { ReactNode } from 'react'
-import { CANON_LABEL_WIDTH } from '@/components/drawer/fieldRowCanon'
-
 /**
  * DetailTable — read-only list of label/value rows.
  *
@@ -13,6 +10,9 @@ import { CANON_LABEL_WIDTH } from '@/components/drawer/fieldRowCanon'
  * both default to the ORIGINAL values so every existing caller (ApiKeyGeneralTab)
  * stays pixel-identical unless it explicitly opts in.
  */
+import type { ReactNode } from 'react'
+import { CANON_LABEL_WIDTH } from '@/components/drawer/fieldRowCanon'
+
 interface DetailTableProps {
   rows?: Array<[label: string, value: ReactNode]>
   labelWidth?: number

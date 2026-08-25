@@ -1,11 +1,12 @@
 /**
- * CandidateTasks — the candidate's open tasks as a Communicatie sub-tab (Danny
- * 2026-07-03: "door wie, wanneer gemaakt, prio ect alles"). Each row shows title,
+ * CandidateTasks — the candidate's open tasks as a Communicatie ("Communication")
+ * sub-tab (Danny 2026-07-03, verbatim: "door wie, wanneer gemaakt, prio ect
+ * alles" — i.e. "by whom, when created, priority etc., everything"). Each row shows title,
  * status + priority chips, due date, assignee and the created-by/at line; "+ Taak"
  * creates a task that is pre-linked to this candidate. Data via GET
  * /tasks?candidate={id} (TASKS-1).
  *
- * Row actions (Danny 20-07) mirror the Sollicitaties sub-tab pattern exactly: the
+ * Row actions (Danny 20-07) mirror the Sollicitaties ("Applications") sub-tab pattern exactly: the
  * title is the shared `EntityLink` (name = in-app open via the nav context, its
  * trailing icon = the same record in a NEW BROWSER TAB via the #tasks?open={id}
  * deep link — both built into that one component, never hand-rolled here), and a
@@ -20,12 +21,13 @@
  * candidate); a block cell (an archived candidate) additionally disables "+ Taak"
  * itself — the calm explanation replaces opening a modal whose submit would just 422.
  *
- * TOOLBAR (Danny live review, 04-08, revised same day: "taken is nog niet
- * goed" — the search + StatusFilterSelect first landed ALONGSIDE the old
- * Open/Historie toggles, which was double filtering). Final shape: search →
- * StatusFilterSelect → "+ Taak", ONE line, nothing else — byte-identical
- * toolbar shape to the shared `EntityTasksTab` (customer drill-down). The
- * Open/Historie toggles are GONE; their semantics fold into the status filter,
+ * TOOLBAR (Danny live review, 04-08, revised same day, verbatim: "…nog niet
+ * goed" — i.e. "tasks isn't right yet" — the search + StatusFilterSelect first
+ * landed ALONGSIDE the old Open/Historie ("Open/History") toggles, which was
+ * double filtering). Final shape: search → StatusFilterSelect → "+ Taak"
+ * ("+ Task"), ONE line, nothing else — byte-identical toolbar shape to the
+ * shared `EntityTasksTab` (customer drill-down). The Open/Historie toggles
+ * are GONE; their semantics fold into the status filter,
  * exactly like the customer-level tab: `useStatusFilter`'s default-guess only
  * proposes a value when a status's `value` matches 'active'/'actief'/'open'
  * (StatusFilterSelect.tsx's `isActiveValue`) — the REAL tenant seed
@@ -190,7 +192,7 @@ function CandidateTasksBody({ candidateId }: { candidateId: Id }) {
         return (
           // Plain row (not a button, Danny 20-07): the title's own EntityLink handles
           // in-app open + new-tab, and the pencil is a sibling action — mirrors the
-          // Sollicitaties row (WorkTab), never a whole-row click target.
+          // Sollicitaties ("Applications") row (WorkTab), never a whole-row click target.
           <div key={task.id}
             style={{ display: 'flex', flexDirection: 'column', gap: 3, width: '100%', padding: '7px 10px', marginBottom: 6,
               border: '1px solid var(--border)', borderRadius: 8, background: 'var(--bg)' }}>

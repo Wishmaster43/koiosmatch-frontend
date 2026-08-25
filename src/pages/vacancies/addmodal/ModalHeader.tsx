@@ -6,7 +6,8 @@
  * value in, `onSelectStatus`/`onClose` callbacks out.
  *
  * EXCEL-VACATURES-1 (Danny 14-08, screenshot: "Excel importeren moet in de
- * pop-up + nieuwe vacature niet hier boven de tabel!!"): adds the same top-right
+ * pop-up + nieuwe vacature niet hier boven de tabel!!" — Excel import must be in
+ * the popup + new vacancy, not here above the table!!): adds the same top-right
  * import toggle AddCustomerModal already carries (KLANT-LAYOUT-3) — rendered only
  * when `canImport` (vacancies.create, the same right the wizard's confirm step
  * needs), same soft-tint that deepens once a file is picked.

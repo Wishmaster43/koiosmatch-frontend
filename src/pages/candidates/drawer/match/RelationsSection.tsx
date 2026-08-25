@@ -7,10 +7,10 @@
  * R1 item 1, MUST-SPLIT) — pure presentational, all state/handlers via props
  * from useMatchForm.
  *
- * Danny 24-07: Vestiging AND Recruiter are now searchable CreatableSelects
+ * Danny 24-07: Branch AND Recruiter are now searchable CreatableSelects
  * (both were a plain SelectMenu); the contact picker shows "Naam —
- * Functietitel" so same-named contacts stay distinguishable; the inline
- * new-contact form gained a searchable Functie picker + phone/mobile fields
+ * Functietitel" ("Name — Job title") so same-named contacts stay distinguishable; the inline
+ * new-contact form gained a searchable Functie (job title) picker + phone/mobile fields
  * and a duplicate-contact preflight message; the "+ nieuw" affordance is now
  * the shared `DrawerAddButton` (the house soft-tint chip) instead of a bare
  * text link. No plain SelectMenu is left in this section.
@@ -76,8 +76,8 @@ export default function RelationsSection({
   candidateTypes: LookupItem[]
   contractForm: string; setContractForm: (v: string) => void
   hasContractLines: boolean
-  // MATCH-KLANTLOOS-1: the picked Contractvorm's own flag — hides klant/locatie/
-  // afdeling/contactpersoon entirely and makes Vestiging required instead.
+  // MATCH-KLANTLOOS-1: the picked Contractvorm's own flag — hides customer/location/
+  // department/contact entirely and makes Branch required instead.
   customerNotApplicable: boolean
   contractLines: MatchContractLine[]; setContractLines: (v: MatchContractLine[]) => void
   fixedCandidateId?: Id; pickedCandidateId: string; setPickedCandidateId: (v: string) => void
@@ -96,7 +96,7 @@ export default function RelationsSection({
   contactFunctions: Array<{ value: string; label: string }>; contactFunctionsAllowFreeEntry: boolean
   func: string; setFunc: (v: string) => void; functions: string[]
   ownerId: string; setOwnerId: (v: string) => void; users: UserLike[]
-  // Vestiging picker (7.4) — the TENANT's own establishments, distinct from the
+  // Branch picker (7.4) — the TENANT's own establishments, distinct from the
   // customer-cascade `locations` above (a customer's nested address).
   branchId: string; setBranchId: (v: string) => void; setBranchDirty: (v: boolean) => void; branchLocations: LocationOption[]
   vacancyId: string; setVacancyId: (v: string) => void; vacancyOptions: VacancyOption[]
@@ -254,10 +254,10 @@ export default function RelationsSection({
           )}
         </F>
       </div>
-      {/* Vestiging (7.4) — proposes from the customer's own branch, then the
+      {/* Branch (7.4) — proposes from the customer's own branch, then the
           recruiter's, then the tenant default (useBranchDefault); editing it by
           hand freezes the proposal (setBranchDirty), same pattern as cost centre.
-          MATCH-KLANTLOOS-1: REQUIRED (no clear affordance) on a klant-loos
+          MATCH-KLANTLOOS-1: REQUIRED (no clear affordance) on a customer-less
           Contractvorm — the server rejects the match without a branch_id then. */}
       <F label={t('placement.branch')} error={errors.branchId}>
         {(labelId: string) => (
@@ -296,7 +296,7 @@ export default function RelationsSection({
         </F>
       )}
 
-      {/* Vestiging-mismatch (fase 3): candidate branch ≠ customer branch → calm
+      {/* Branch mismatch (phase 3): candidate branch ≠ customer branch → calm
           inline choice. Default: only this match; opt-in: move the candidate. */}
       {branchMismatch && (
         <div role="group" aria-label={t('placement.branchMismatch')}

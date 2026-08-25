@@ -1,6 +1,3 @@
-import { useTranslation } from 'react-i18next'
-import StatusListEditor from './StatusListEditor'
-
 /**
  * EscalationReasonsSettings — the WhatsApp conversation escalation-reason lookup
  * (dropdown for conversations.escalation_reason_id; backend EscalationReasonController
@@ -13,6 +10,9 @@ import StatusListEditor from './StatusListEditor'
  * is back on (was correctly off before that commit; LOOKUP-GAP-1(d) verification
  * 08-08 caught the stale `reorderable={false}`, a capability the backend now serves).
  */
+import { useTranslation } from 'react-i18next'
+import StatusListEditor from './StatusListEditor'
+
 export default function EscalationReasonsSettings() {
   const { t } = useTranslation('settings')
   return (

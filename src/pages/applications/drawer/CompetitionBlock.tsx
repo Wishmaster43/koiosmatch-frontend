@@ -1,3 +1,27 @@
+/**
+ * CompetitionBlock — "hoeveel anderen hebben gesolliciteerd en waar staan ze"
+ * ("how many others have applied and where do they stand") (Danny 25-07 d).
+ * Reuses the shared useApplicationVacancy fetch (the same cache
+ * entry VacancyTab reads) and derives the funnel breakdown already computed by
+ * mapVacancyDetail — no new endpoint.
+ *
+ * SOLLICITANTEN-2 (Danny 21-08 ruling 3, "Andere sollicitanten ik zie geen
+ * lijst??" — "Other applicants, I don't see a list??"): the summary line now
+ * expands into a compact row per OTHER
+ * applicant on the same vacancy (name + phase StatusPill), collapsed by
+ * default. MEASURED data source: `vacancy.applications` — the SAME
+ * GET /vacancies/{id} response the vacancy drawer's own ApplicantsTab reads
+ * (mapVacancyDetail's `applications` array, shared via the useApplicationVacancy
+ * React Query cache this block already used for its counts) — so expanding
+ * fires NO second request; it only reveals rows already in memory, filtered to
+ * exclude this application. Clicking a row opens that application the same way
+ * every other cross-record click in the app does (useNavigation().openEntity).
+ *
+ * PRIVACY (§8): the collapsed summary still shows COUNTS ONLY; the expanded
+ * list shows the SAME data the vacancy's own Applicants tab already exposes to
+ * this recruiter (name + phase), never anything the vacancy tab itself would
+ * withhold.
+ */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ChevronDown, ChevronRight } from 'lucide-react'
@@ -16,28 +40,6 @@ interface CompetitionBlockProps {
   application: ApplicationDetail
 }
 
-/**
- * CompetitionBlock — "hoeveel anderen hebben gesolliciteerd en waar staan ze"
- * (Danny 25-07 d). Reuses the shared useApplicationVacancy fetch (the same cache
- * entry VacancyTab reads) and derives the funnel breakdown already computed by
- * mapVacancyDetail — no new endpoint.
- *
- * SOLLICITANTEN-2 (Danny 21-08 ruling 3, "Andere sollicitanten ik zie geen
- * lijst??"): the summary line now expands into a compact row per OTHER
- * applicant on the same vacancy (name + phase StatusPill), collapsed by
- * default. MEASURED data source: `vacancy.applications` — the SAME
- * GET /vacancies/{id} response the vacancy drawer's own ApplicantsTab reads
- * (mapVacancyDetail's `applications` array, shared via the useApplicationVacancy
- * React Query cache this block already used for its counts) — so expanding
- * fires NO second request; it only reveals rows already in memory, filtered to
- * exclude this application. Clicking a row opens that application the same way
- * every other cross-record click in the app does (useNavigation().openEntity).
- *
- * PRIVACY (§8): the collapsed summary still shows COUNTS ONLY; the expanded
- * list shows the SAME data the vacancy's own Applicants tab already exposes to
- * this recruiter (name + phase), never anything the vacancy tab itself would
- * withhold.
- */
 export default function CompetitionBlock({ application: a }: CompetitionBlockProps) {
   const { t } = useTranslation('applications')
   const { funnelTypes } = useLookups()
@@ -80,7 +82,7 @@ export default function CompetitionBlock({ application: a }: CompetitionBlockPro
             (§8) still holds, this only opens the vacancy itself (which already
             carries its own applicant list + access checks), never the other
             applicants' data inline here. Lands on the vacancy's default tab, not
-            its Sollicitaties sub-tab directly — targeting a specific sub-tab
+            its Sollicitaties ("Applications") sub-tab directly — targeting a specific sub-tab
             needs the cross-entity `{ open, tab }` intent extended on the
             VACANCIES page (out of this cluster's territory, see CLAUDE.md §3A). */}
         {/* Canon (05-08): body text 12px, matching the muted lines below in this card. */}

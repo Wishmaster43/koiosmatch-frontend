@@ -25,7 +25,8 @@
  * refuse is a fake affordance (§3).
  *
  * EXPAND (Danny 09-08: "bij matches heb ik een pijltje om uit te klappen … bij
- * sollicitaties niet. Dat is niet consistent") — the row now carries the SAME
+ * sollicitaties niet. Dat is niet consistent" — "with matches I have an arrow
+ * to expand … not with applications. That's inconsistent") — the row now carries the SAME
  * disclosure MatchCard's `collapsible` mode has: collapsed by default, a trailing
  * chevron (ChevronRight → ChevronDown, no animation, exactly as there), a click on
  * the row's own empty space as the mouse convenience on top of it, and the label/
@@ -60,7 +61,8 @@ import type { Id } from '@/types/common'
 // Row action icon (pencil / unlink) — the MatchCard idiom: bare icon button, muted
 // by default, the danger token only on the destructive one. Tokens only (§4).
 // `boxSizing: 'border-box'` (Danny 09-08: "de knoppen in één rij horen dezelfde
-// afmeting te hebben") — the unlink button below adds a 1px border on TOP of
+// afmeting te hebben" — "the buttons in one row should be the same size") —
+// the unlink button below adds a 1px border on TOP of
 // this same width/height; without border-box that border would grow it to
 // 24x24 while the borderless pencil stayed 22x22, the exact size mismatch Danny
 // flagged next to it. border-box keeps every icon button in this cluster the
@@ -104,7 +106,7 @@ export default function ApplicationRow({ candidateId, row, appointment, canManag
   const { formatDate, locale } = useDateFormat()
 
   // Vacancy-less intake applications have no title → show "Intake" (or "Intake —
-  // <klant>" when the row carries a client_name) instead of a bare dash, so the
+  // <customer>" when the row carries a client_name) instead of a bare dash, so the
   // identity row still reads as an intake for THIS client (batch 14, 4-dash decision).
   const client = clientNameOf(row)
   const label = vacancyLabelOf(row) ?? (client ? t('work.intakeLabelWithClient', { client }) : t('work.intakeLabel'))
@@ -166,7 +168,7 @@ export default function ApplicationRow({ candidateId, row, appointment, canManag
                   <EntityLink page="vacancies" id={vacancyId} title={label}>{label}</EntityLink>
                 </span>
               : <span style={titleCell}>{label}</span>}
-        {/* Klant column (batch 14): the vacancy's customer name, dash when the row
+        {/* Customer column (batch 14): the vacancy's customer name, dash when the row
             carries none — same fixed-width cell WorkTab's header labels. */}
         <span style={APPLICATION_COL_CLIENT}>{client ?? '—'}</span>
         {/* Status column (APPLICATION-COL-1, Danny 09-08): the pill sits inside the

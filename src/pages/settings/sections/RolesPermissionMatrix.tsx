@@ -1,8 +1,9 @@
 /**
  * RolesPermissionMatrix — the rights list shown inside a role's detail view.
- * HelloFlex-style EXPANDABLE ROWS (RECHTEN-UI-1, Danny GO 08-08: "elke groep
- * is een collapsed rij met een x/y-samenvatting, uitklappen toont de losse
- * rechten"): one row per permission group (candidates, customers, …), collapsed
+ * HelloFlex-style EXPANDABLE ROWS (RECHTEN-UI-1, Danny GO 08-08, translated:
+ * "every group is a collapsed row with an x/y summary, expanding shows the
+ * individual rights" — verbatim: "elke groep is een collapsed rij met een
+ * x/y-samenvatting, uitklappen toont de losse rechten"): one row per permission group (candidates, customers, …), collapsed
  * by default and showing only its label + an "x/y allowed" soft chip. Opening a
  * row reveals EVERY permission in that group as its own labelled toggle — CRUD
  * verbs (view/create/update/delete) and non-CRUD actions (archive, manage,

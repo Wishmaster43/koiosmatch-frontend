@@ -1,3 +1,8 @@
+/**
+ * PdfPreview — client-side PDF viewer: renders every page of a tenant-uploaded
+ * PDF into its own <canvas> via a lazily-loaded pdf.js, so previewing a document
+ * never opens an unsandboxed <iframe> (full rationale in the docblock below).
+ */
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 

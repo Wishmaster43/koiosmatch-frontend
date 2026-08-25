@@ -1,12 +1,3 @@
-import { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react'
-import type { ReactNode } from 'react'
-import api, { primeCsrf, unwrapList } from '../lib/api'
-import { hasModule as tenantHasModule } from '../lib/modules'
-import { queryClient } from '../lib/queryClient'
-import { unsubscribe as unsubscribePush } from '../lib/pushSubscription'
-import { resolveDashboardType } from '../pages/dashboard/templates'
-import type { Tenant, User } from '../types/api'
-
 /**
  * AuthContext — global authentication + tenant state.
  *
@@ -28,6 +19,14 @@ import type { Tenant, User } from '../types/api'
  * hasModule, hasPermission, …) only change identity when that value itself
  * changes — which is exactly when consumers SHOULD re-render anyway.
  */
+import { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react'
+import type { ReactNode } from 'react'
+import api, { primeCsrf, unwrapList } from '../lib/api'
+import { hasModule as tenantHasModule } from '../lib/modules'
+import { queryClient } from '../lib/queryClient'
+import { unsubscribe as unsubscribePush } from '../lib/pushSubscription'
+import { resolveDashboardType } from '../pages/dashboard/templates'
+import type { Tenant, User } from '../types/api'
 
 // The auth user, plus the flat tenant_id the backend includes on the profile.
 export type AuthUser = User & { tenant_id?: string | number | null }

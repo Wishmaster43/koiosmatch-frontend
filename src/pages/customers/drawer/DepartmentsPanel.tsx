@@ -4,7 +4,8 @@
  * list. Before this there were two hand-rolled variants (a real DataTable-backed tab and
  * a bordered row list with pencil/bin buttons and NO drill-in) — Danny 28-07: "wat je nu
  * aan het doen bent voor de contactpersonen moet je ook nog doen voor de afdelingen op
- * een locatie". Same columns, same chips, same actions, same drill-down, everywhere.
+ * een locatie", i.e. "what you are doing now for the contacts, you still need to do for
+ * the departments on a location". Same columns, same chips, same actions, same drill-down, everywhere.
  *
  * IT NEVER NAVIGATES. Clicking a row swaps THIS panel's body from the list to
  * DepartmentDetail. The host stays mounted, so a location keeps its position and its
@@ -62,7 +63,8 @@ const plainCell = { color: 'var(--text)', fontSize: 12 }
 const searchWrap = {
   // minWidth 0: a flex child's implicit min-width:auto would keep the input's ~170px
   // intrinsic width and push the add button off the 548px panel (Danny 03-08:
-  // "+ nieuwe contactpersoon valt nog steeds een beetje weg") — search yields instead.
+  // "+ nieuwe contactpersoon valt nog steeds een beetje weg", i.e. "+ new contact
+  // still gets pushed off a bit") — search yields instead.
   display: 'flex', alignItems: 'center', gap: 8, flex: 1, minWidth: 0, padding: '6px 10px',
   background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 8,
 } as const

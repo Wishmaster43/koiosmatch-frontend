@@ -116,7 +116,7 @@ export default function TenantSwitcher({ expanded }: { expanded?: boolean }) {
     return (
       <div className="flex justify-center flex-shrink-0 mt-3">
         <div className="flex items-center justify-center rounded"
-          // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- chrome-merkcirkel: tenant-initialen op het accentvlak (zelfde klasse als de Koios-cirkel in Sidebar), geen actieknop
+          // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- chrome brand circle: tenant initials on the accent surface (same class as the Koios circle in Sidebar), not an action button
           style={{ width: 28, height: 28, background: 'var(--color-primary)', fontSize: 9, color: 'var(--color-on-accent)', fontWeight: 700 }}>
           {initials}
         </div>
@@ -129,13 +129,13 @@ export default function TenantSwitcher({ expanded }: { expanded?: boolean }) {
       <button
         onClick={() => canSwitch && setOpen(o => !o)}
         className="flex items-center w-full transition-colors rounded-lg"
-        // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- app-chrome control (components/layout = chroom, HUISSTIJL-1): switcher-rij met eigen actieve-staat, geen actieknop; Button-varianten dekken de rail bewust niet
+        // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- app-chrome control (components/layout = chrome, HUISSTIJL-1): switcher row with its own active state, not an action button; Button's variants deliberately don't cover the rail
         style={{ gap: 8, padding: '7px 9px', background: 'var(--hover-bg)', border: '1px solid var(--border)', cursor: canSwitch ? 'pointer' : 'default' }}
         onMouseEnter={e => canSwitch && (e.currentTarget.style.background = 'var(--hover-bg)')}
         onMouseLeave={e => (e.currentTarget.style.background = 'var(--hover-bg)')}
       >
         <div className="flex items-center justify-center flex-shrink-0 rounded"
-          // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- chrome-merkcirkel: tenant-initialen op het accentvlak (zelfde klasse als de Koios-cirkel in Sidebar), geen actieknop
+          // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- chrome brand circle: tenant initials on the accent surface (same class as the Koios circle in Sidebar), not an action button
           style={{ width: 22, height: 22, background: 'var(--color-primary)', fontSize: 8, color: 'var(--color-on-accent)', fontWeight: 700 }}>
           {initials}
         </div>
@@ -176,7 +176,7 @@ export default function TenantSwitcher({ expanded }: { expanded?: boolean }) {
               return (
                 <button key={tn.id} onClick={() => pick(tn)} disabled={switching != null}
                   className="flex items-center gap-3 w-full px-2 py-2 rounded-md transition-colors"
-                  // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- app-chrome control (components/layout = chroom, HUISSTIJL-1): switcher-rij met eigen actieve-staat, geen actieknop; Button-varianten dekken de rail bewust niet
+                  // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- app-chrome control (components/layout = chrome, HUISSTIJL-1): switcher row with its own active state, not an action button; Button's variants deliberately don't cover the rail
                   style={{ background: isActive ? 'var(--hover-bg)' : 'none', border: 'none', cursor: switching != null ? 'wait' : 'pointer' }}
                   onMouseEnter={e => !isActive && (e.currentTarget.style.background = 'var(--hover-bg)')}
                   onMouseLeave={e => !isActive && (e.currentTarget.style.background = 'none')}
@@ -203,7 +203,7 @@ export default function TenantSwitcher({ expanded }: { expanded?: boolean }) {
                   </div>
                   {switching === tn.id
                     ? <span style={{ display: 'flex', color: 'var(--text-muted)' }}><Spinner size={13} label={t('loading')} /></span>
-                    // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- actieve-tenant-stip: plaatsmarkering in accentkleur (nav-marker), geen actieoppervlak
+                    // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- active-tenant dot: a placement marker in accent colour (nav marker), not an action surface
                     : isActive && <div className="flex-shrink-0 rounded-full" style={{ width: 6, height: 6, background: 'var(--color-primary)' }} />}
                 </button>
               )

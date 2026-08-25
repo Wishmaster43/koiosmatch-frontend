@@ -21,7 +21,8 @@
  * backend's own ApplicationController::store guard will refuse anyway.
  *
  * OWNER-DEVIATION-1 (Danny: "de recruiter moet default zijn degene die de plus
- * drukt"): the original shape — a Recruiter picker defaulted straight to the
+ * drukt", i.e. "the recruiter should default to whoever presses the plus
+ * [button]"): the original shape — a Recruiter picker defaulted straight to the
  * logged-in user — is now the LAST rung of APP-OWNER-1's derivation chain below.
  * The soft warning (never a block) stays: when the FINAL chosen recruiter still
  * differs from the candidate's own owner (prop from the drawer's already-loaded

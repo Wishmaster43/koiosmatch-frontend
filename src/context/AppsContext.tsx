@@ -1,3 +1,14 @@
+/**
+ * AppsContext — which paid add-on "apps" are enabled for the current tenant.
+ *
+ * Drives two things in the UI:
+ *   1. The Apps section in Settings (toggle on/off).
+ *   2. Module visibility in the workflow builder (a module only shows if its
+ *      required app is enabled — see MODULE_APP_MAP in modules/index.js).
+ *
+ * NOTE: this is UI gating only. The backend must reject calls to disabled apps;
+ * a user can edit the cached list in localStorage.
+ */
 import { createContext, useContext, useState, useEffect } from 'react'
 import type { ReactNode, ComponentType } from 'react'
 import { Sparkles, Landmark, ShieldCheck } from 'lucide-react'
@@ -13,8 +24,8 @@ import elanzaLogo from '@/assets/integrations/elanza.png'
 import onsLogo from '@/assets/integrations/ons.png'
 import easyflexLogo from '@/assets/integrations/easyflex.png'
 import afasLogo from '@/assets/integrations/afas.png'
-// TELEFONIE-TAB-1 (Danny 24-07) + geadviseerde planning/backoffice-aanvullingen —
-// alle logo's lokaal opgeslagen (geen hotlinking, CSP §7).
+// TELEFONIE-TAB-1 (Danny 24-07) + recommended planning/backoffice additions —
+// all logos stored locally (no hotlinking, CSP §7).
 import threecxLogo from '@/assets/integrations/threecx.png'
 import teamsLogo from '@/assets/integrations/teams.png'
 import voysLogo from '@/assets/integrations/voys.png'
@@ -23,18 +34,6 @@ import clevergigLogo from '@/assets/integrations/clevergig.png'
 import fleksLogo from '@/assets/integrations/fleks.png'
 import nocoreLogo from '@/assets/integrations/nocore.png'
 import pivotonLogo from '@/assets/integrations/pivoton.png'
-
-/**
- * AppsContext — which paid add-on "apps" are enabled for the current tenant.
- *
- * Drives two things in the UI:
- *   1. The Apps section in Settings (toggle on/off).
- *   2. Module visibility in the workflow builder (a module only shows if its
- *      required app is enabled — see MODULE_APP_MAP in modules/index.js).
- *
- * NOTE: this is UI gating only. The backend must reject calls to disabled apps;
- * a user can edit the cached list in localStorage.
- */
 
 // One integration connector shown in the Apps settings.
 export interface AppDef {
@@ -80,12 +79,12 @@ const AppsContext = createContext<AppsValue | null>(null)
 
 // Integration connectors (external planning APIs). WhatsApp and AI Agent are
 // NOT here — they are modules managed via the Modules settings tab (accessible_pages).
-// These apps are only available to tenants on package 3 ("Alles").
+// These apps are only available to tenants on package 3 ("Alles" — "Everything").
 // Each connector carries its own distinguishing brand colour (icon/border/bg) —
 // seed DATA mirroring the external system's own palette, not UI styling.
 /* eslint-disable no-restricted-syntax -- seed DATA hex: connector brand palette, not UI styling */
 export const AVAILABLE_APPS: AppDef[] = [
-  // ---- Planning (volgorde Danny 23-07) --------------------------------------
+  // ---- Planning (order set by Danny 23-07) -----------------------------------
   {
     id:          'shiftmanager',
     label:       'Shiftmanager',
@@ -229,8 +228,8 @@ export const AVAILABLE_APPS: AppDef[] = [
     monthly:     true,
     comingSoon:  true,
   },
-  // Geadviseerde backoffice-aanvullingen: de twee grote NL-flex-backoffices naast
-  // HelloFlex/EasyFlex/AFAS.
+  // Recommended backoffice additions: the two big NL flex-backoffice systems
+  // alongside HelloFlex/EasyFlex/AFAS.
   {
     id:          'nocore',
     label:       'Nocore',
@@ -258,9 +257,10 @@ export const AVAILABLE_APPS: AppDef[] = [
     comingSoon:  true,
   },
   // ---- Telefonie (Danny 24-07) ----------------------------------------------
-  // Nog geen koppeling gebouwd — alle vier grijs ("binnenkort") tot de eerste
-  // integratie landt. 3CX + Teams op Danny's verzoek; Voys + Aircall geadviseerd
-  // (NL-VoIP resp. recruitment-telefonie met veel ATS-integraties).
+  // No connector built yet — all four render grey ("binnenkort" — "coming soon")
+  // until the first integration lands. 3CX + Teams at Danny's request; Voys +
+  // Aircall recommended (NL VoIP and recruitment telephony respectively, each
+  // with many ATS integrations).
   {
     id:          'threecx',
     label:       '3CX',

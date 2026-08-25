@@ -1,8 +1,7 @@
-import { useMemo } from 'react'
 /**
  * useNoteTypes — tenant-configurable note-category lookup, scoped per owning entity
- * (NOTE-TYPES-2/3 wave 2, Danny 2026-07-20). A note type created for "Kandidaat" no
- * longer leaks into "Klant" — mirrors the Settings-side split (registry.jsx's
+ * (NOTE-TYPES-2/3 wave 2, Danny 2026-07-20). A note type created for "Candidate" no
+ * longer leaks into "Customer" — mirrors the Settings-side split (registry.jsx's
  * `note_types` group / NoteTypesSettings.jsx).
  *
  * Fed by the API (GET /note-types?entity=X → {value/name,label,color,...}) with a
@@ -16,6 +15,7 @@ import { useMemo } from 'react'
  * per session, shared across every mounted consumer of that entity (the `?entity=`
  * query string is part of the cache key, so entities never share a cache slot).
  */
+import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { AxiosResponse } from 'axios'
 import { useCachedLookup } from './useCachedLookup'

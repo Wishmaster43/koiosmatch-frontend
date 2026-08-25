@@ -1,6 +1,3 @@
-import { useTranslation } from 'react-i18next'
-import { CalendarClock } from 'lucide-react'
-
 // AXIS-MATRIX-2 audit R1 (CMFE 2026-07-17) → fake-affordance sweep (14-08): this
 // tab used to render a whole screen of roles/pools/shift-type/licence pickers, all
 // permanently disabled because no PATCH/PUT endpoint writes
@@ -8,6 +5,8 @@ import { CalendarClock } from 'lucide-react'
 // exists). A page full of dead, greyed-out controls is a worse signal than a plain
 // notice — so this replaces every dead field with ONE calm message. Restore the
 // real editor (git history has it) the moment the planning module ships a save path.
+import { useTranslation } from 'react-i18next'
+import { CalendarClock } from 'lucide-react'
 
 /** Planning tab — the planning module does not exist yet, so this is a single honest notice instead of a screen of disabled controls. */
 // No props while this is a notice: the candidate carried no meaning here. The

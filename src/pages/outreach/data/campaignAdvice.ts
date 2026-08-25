@@ -1,11 +1,10 @@
-import type { Campaign } from '../hooks/useOutreachCampaigns'
-
 /**
  * campaignAdvice — the ONE deterministic rule engine behind the outreach
- * (bellijsten) table's "Koios" column. Mirrors candidateAdvice.ts's reference
- * design: rules only read fields the LIST row already carries (status, target
- * count, created_at, archived) — no new fetch, no invented data.
+ * (bellijsten, "call lists") table's "Koios" column. Mirrors candidateAdvice.ts's
+ * reference design: rules only read fields the LIST row already carries (status,
+ * target count, created_at, archived) — no new fetch, no invented data.
  */
+import type { Campaign } from '../hooks/useOutreachCampaigns'
 
 export type CampaignAdviceAction = 'attention' | 'none'
 

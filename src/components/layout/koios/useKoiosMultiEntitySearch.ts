@@ -1,6 +1,7 @@
 /**
  * useKoiosMultiEntitySearch — the DEFAULT "@" search's fan-out (KOIOS-MENTION-
- * BREED-1, Danny: "@ moet op alle hoofdobjecten zoeken" — the default search
+ * BREED-1, Danny, translated: "@ must search across all main entities" —
+ * verbatim: "@ moet op alle hoofdobjecten zoeken" — the default search
  * used to query candidates only, KoiosMentionMenu.tsx). Once ≥2 characters are
  * typed with no category chosen, this fires ONE request per VISIBLE category
  * with search wiring (koiosMentionCategories.ts + koiosMentionAccess), reusing

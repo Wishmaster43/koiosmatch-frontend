@@ -1,3 +1,13 @@
+/**
+ * NotesTab — internal notes on a task (NT-TASK-1). Mirrors matches' NotesTab
+ * onto the SAME shared NotesTab family (TaskCommentController validates `type`
+ * against the entity=task note_types scope). The Reacties/comments thread tab
+ * was removed 2026-07-14 for being an empty stub; this reinstates the surface
+ * as a proper note-type-aware notes tab instead of the old plain-text thread.
+ * A task's detail model (TaskDetail) carries no preloaded notes array, so this
+ * tab fetches its own list once per task (GET /tasks/{id}/notes) — same
+ * fetch-on-mount shape as the match tab.
+ */
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import api, { unwrapList } from '@/lib/api'
@@ -10,16 +20,6 @@ import type { TaskDetail } from '@/types/task'
 // Structural match for the shared NotesTab's NoteItem (typed fields + open index).
 interface Note { type?: string; title?: string; author?: string; text?: string; body?: string; created_at?: string; [k: string]: unknown }
 
-/**
- * NotesTab — internal notes on a task (NT-TASK-1). Mirrors matches' NotesTab
- * onto the SAME shared NotesTab family (TaskCommentController validates `type`
- * against the entity=task note_types scope). The Reacties/comments thread tab
- * was removed 2026-07-14 for being an empty stub; this reinstates the surface
- * as a proper note-type-aware notes tab instead of the old plain-text thread.
- * A task's detail model (TaskDetail) carries no preloaded notes array, so this
- * tab fetches its own list once per task (GET /tasks/{id}/notes) — same
- * fetch-on-mount shape as the match tab.
- */
 export default function NotesTab({ task }: { task: TaskDetail }) {
   const { t } = useTranslation(['tasks', 'common'])
   // Note categories from the tenant lookup, scoped to 'task' (NOTE-TYPES-2/3).

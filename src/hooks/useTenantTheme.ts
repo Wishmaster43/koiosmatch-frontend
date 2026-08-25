@@ -32,7 +32,8 @@ export function contrastRatio(a: string, b: string): number {
  * actually CONTRASTS MORE, instead of guessing from a luminance threshold.
  * Measured 08-08 why that matters: the Yesway orange (#F97316) sits just under a
  * 0.45 threshold, so the old rule kept WHITE text at ratio 2.8 (unreadable, Danny:
- * "rode vlak is niet te lezen") while near-black scores ~7.4 on the same fill.
+ * "rode vlak is niet te lezen" — "red area is not readable") while near-black
+ * scores ~7.4 on the same fill.
  * Comparing the two real ratios has no threshold to tune and is right for every hue.
  */
 export function readableOn(hex: string): string {
@@ -65,7 +66,8 @@ function mixHex(a: string, b: string, amount: number): string {
  * A fixed ratio cannot work across hues — 75% brand + black clears AA for orange
  * (5.12:1) but leaves yellow at 2.42:1 — which is exactly why this steps instead.
  *
- * Third lesson (09-08, "vacature naam niet te lezen", twice): aiming at exactly 4.5
+ * Third lesson (09-08, "vacature naam niet te lezen" — "vacancy name not
+ * readable", twice): aiming at exactly 4.5
  * landed the vacancy link on 4.58:1 and Danny still could not read it comfortably.
  * 4.5 is the floor for LEGIBLE, not for comfortable, and a link is scanned in a
  * dense list rather than read as prose. The default target is now 5.5 — a
@@ -91,7 +93,8 @@ export function readableAccentText(brand: string, surface: string, target = ACCE
 // WCAG AA floor for the on-accent fill — the button LABEL must clear this
 // against whatever the accent fill actually is (brand, or the CSS default).
 // Two WCAG bars, deliberately (Danny 13-08, "oranje en wit past wel — kijk op
-// yesway.nu"): 4.5:1 is the bar for NORMAL text (1.4.3), but button labels and
+// yesway.nu" — "orange and white does work — look at yesway.nu"): 4.5:1 is the
+// bar for NORMAL text (1.4.3), but button labels and
 // chips on an accent fill are large/bold UI-component text, where WCAG sets the
 // bar at 3:1 (1.4.3 large text / 1.4.11 non-text). White on Yesway orange
 // measures 3.1 — a real, working brand identity that a 4.5 clamp wrongly
@@ -157,8 +160,9 @@ export function useTenantTheme(tenant?: { primary_color?: string | null; text_co
   // The Branding form saves settings.brand_color; some tenant payloads carry
   // primary_color. Read both — the tenant-facing Branding setting wins.
   const brand = (settings?.brand_color as string | undefined) ?? tenant?.primary_color
-  // BRAND-TEXT-COLOR-1 (Danny 08-08 "als ik geel kies moet de txt niet wit zijn"):
-  // the text ON the accent is its own token. Explicit pick wins (Branding form, or
+  // BRAND-TEXT-COLOR-1 (Danny 08-08 "als ik geel kies moet de txt niet wit zijn" —
+  // "if I pick yellow the text shouldn't be white"): the text ON the accent is its
+  // own token. Explicit pick wins (Branding form, or
   // tenant.text_color from /auth/me); otherwise it is derived from real contrast.
   const brandText = (settings?.brand_text_color as string | undefined) ?? tenant?.text_color ?? undefined
 
@@ -166,7 +170,8 @@ export function useTenantTheme(tenant?: { primary_color?: string | null; text_co
     const root = document.documentElement
 
     // THEME-REACTIVE (Danny 08-08 "als ik nu dark of light theme kies moet het ook
-    // nog werken"): the readable accent depends on the SURFACE it sits on, so this
+    // nog werken" — "if I now pick dark or light theme it still has to work"): the
+    // readable accent depends on the SURFACE it sits on, so this
     // recomputes on a theme flip too — not only when the brand changes.
     const apply = () => applyBrandTokens(brand, brandText)
 

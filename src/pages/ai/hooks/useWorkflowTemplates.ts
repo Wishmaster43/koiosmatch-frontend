@@ -3,7 +3,9 @@
  * GET /workflow-templates, filtered server-side via ?category= when a category
  * folder is selected (koiosmatch-api COORDINATION-LOG 2026-08-06: "workflow-
  * templates dragen nu category ('koios_ai' voor de zes actie-templates); de
- * templatelijst filtert op ?category="). Picking a category re-fetches rather
+ * templatelijst filtert op ?category=" — workflow templates now carry a category
+ * ('koios_ai' for the six action templates); the template list filters on
+ * ?category=). Picking a category re-fetches rather
  * than filtering the already-loaded list client-side, so the server contract is
  * exercised for real every time — not just approximated in the browser.
  */

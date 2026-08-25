@@ -1,3 +1,14 @@
+/**
+ * MatchProfileCard — point 18: an optional match-weight TEMPLATE picker
+ * (StoreVacancyRequest/VacancyWriter snapshot it into `match_weights` server-side
+ * on create) plus an optional "aanpassen" ("adjust") expansion with the same
+ * per-dimension
+ * sliders as the drawer's MatchingTab (shared MATCH_DIMENSIONS/buildMatchWeights,
+ * never a second copy). Picking a template alone sends only
+ * `match_weight_template_id`; touching a slider marks the weights an explicit
+ * override — `match_weights` then rides alongside it, and explicit weights
+ * always win server-side (never silently dropped by the template snapshot).
+ */
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import Slider from '@/components/ui/Slider'
@@ -14,16 +25,6 @@ interface Props {
   onWeightsChange: (weights: Record<string, number> | null) => void
 }
 
-/**
- * MatchProfileCard — punt 18: an optional match-weight TEMPLATE picker
- * (StoreVacancyRequest/VacancyWriter snapshot it into `match_weights` server-side
- * on create) plus an optional "aanpassen" expansion with the same per-dimension
- * sliders as the drawer's MatchingTab (shared MATCH_DIMENSIONS/buildMatchWeights,
- * never a second copy). Picking a template alone sends only
- * `match_weight_template_id`; touching a slider marks the weights an explicit
- * override — `match_weights` then rides alongside it, and explicit weights
- * always win server-side (never silently dropped by the template snapshot).
- */
 export default function MatchProfileCard({ templateId, onTemplateChange, onWeightsChange }: Props) {
   const { t } = useTranslation(['vacancies', 'common'])
   const { templates, loading, error } = useMatchWeightTemplates()

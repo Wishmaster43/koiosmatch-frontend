@@ -1,6 +1,8 @@
 /**
- * Button — THE house button (HUISSTIJL-1, Danny 18-08: "geen 427 objecten voor
- * hetzelfde maar één herbruikbaar element, per tenant instelbaar"). Before this
+ * Button — THE house button (HUISSTIJL-1, Danny 18-08, translated: "no 427 objects
+ * for the same thing, but one reusable element, configurable per tenant" —
+ * verbatim: "geen 427 objecten voor hetzelfde maar één herbruikbaar element, per
+ * tenant instelbaar"). Before this
  * component existed the app carried 1138 hand-styled <button> tags across 427
  * files with 565 distinct style signatures; the three variants below are the
  * de-facto styles those buttons already converged on (primary 162×, secondary
@@ -68,8 +70,9 @@ const VARIANTS: Record<ButtonVariant, CSSProperties> = {
   // action next to accent-inked count labels — declared here once, never via a
   // per-call-site style colour (§4: identiteit komt uit Button).
   ghostAccent: { background: 'none', color: 'var(--color-primary-text)', border: 'none', fontWeight: 500 },
-  // PRIMAIR-VLAK-1 (Danny 19-08, on the tinted buttons app-wide: "alle knoppen
-  // die licht rood zijn maken we tenantkleur"): the accent-tinted ACTION button
+  // PRIMAIR-VLAK-1 (Danny 19-08, on the tinted buttons app-wide, translated: "all
+  // buttons that are light red we turn into the tenant colour" — verbatim: "alle
+  // knoppen die licht rood zijn maken we tenantkleur"): the accent-tinted ACTION button
   // is retired — soft now paints the SOLID tenant fill, same as primary; only
   // the caller's chosen size differs. The variant name stays so its ~60 call
   // sites don't churn. Tints remain the language of CHIPS/toggles/filters
@@ -77,7 +80,8 @@ const VARIANTS: Record<ButtonVariant, CSSProperties> = {
   soft:       { background: 'var(--button-fill)', color: 'var(--button-ink)', border: '1px solid var(--button-border)', fontWeight: 600 },
   // Positive completion action ("markeer afgerond") — the §4 "aan/gelukt"
   // success token pair as a REAL house variant, so no screen ever hand-paints
-  // the green again (Danny 24-08: "moet huisstijl knop zijn").
+  // the green again (Danny 24-08, translated: "must be a house-style button" —
+  // verbatim: "moet huisstijl knop zijn").
   success:    { background: 'var(--color-success)', color: 'var(--color-on-success)', border: '1px solid var(--color-success)', fontWeight: 600 },
   // Destructive main action. --color-on-danger is fixed white (4.83:1, audited).
   danger:     { background: 'var(--color-danger)', color: 'var(--color-on-danger)', border: 'none', fontWeight: 600 },
@@ -94,8 +98,9 @@ const SIZES: Record<ButtonSize, { height: number; padding: string; fontSize: num
 }
 
 const Button = forwardRef<HTMLButtonElement | HTMLAnchorElement, ButtonProps | ButtonLinkProps>(function Button(
-  // DEFAULT = sm (Danny 19-08: "drill downs moeten allemaal zelfde zijn — zelfde
-  // geldt voor de instellingen"): ONE height everywhere, width follows the text.
+  // DEFAULT = sm (Danny 19-08, translated: "drill-downs must all be the same —
+  // same goes for settings" — verbatim: "drill downs moeten allemaal zelfde zijn
+  // — zelfde geldt voor de instellingen"): ONE height everywhere, width follows the text.
   // md is the explicit exception for the page toolbar's "+ Nieuw" beside 34px
   // search chrome ("boven elke tabel groot mag").
   { variant = 'secondary', size = 'sm', iconOnly = false, disabled, style, children, ...rest }, ref,

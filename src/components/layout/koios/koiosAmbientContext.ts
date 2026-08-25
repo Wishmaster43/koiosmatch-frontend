@@ -1,7 +1,8 @@
 /**
  * koiosAmbientContext — pure derivation of the AMBIENT @-context ref from the
  * URL hash (KOIOS-SELECTIE-CONTEXT-1, Danny: "als ik een taak of kandidaat
- * selecteer moet ik dit terugzien in Koios AI"). Whichever record is currently
+ * selecteer moet ik dit terugzien in Koios AI" — "when I select a task or
+ * candidate I want to see that reflected in Koios AI"). Whichever record is currently
  * open in an entity page's drawer becomes an implicit context ref for the
  * Koios composer — derived with NO extra fetch and NO page wiring: the hash
  * already carries both the open drawer's id (getOpenIdFromHash, useDrawerUrl.ts)

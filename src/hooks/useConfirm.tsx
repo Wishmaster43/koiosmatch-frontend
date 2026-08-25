@@ -1,3 +1,10 @@
+/**
+ * useConfirm — call-site sugar around the shared ConfirmDialog (§0 tech-debt
+ * cleanup: replaces window.confirm()). `confirm(message, onConfirm, options)`
+ * stages one pending confirmation; render the returned `dialog` element once
+ * per component. Keeps every delete/destructive-action call-site to a single
+ * line instead of duplicating open/pending state across each file.
+ */
 import { useCallback, useState } from 'react'
 import type { ReactNode } from 'react'
 import ConfirmDialog from '@/components/ui/ConfirmDialog'
@@ -25,13 +32,6 @@ interface ConfirmState extends ConfirmOptions {
   onConfirm: () => void
 }
 
-/**
- * useConfirm — call-site sugar around the shared ConfirmDialog (§0 restschuld:
- * replaces window.confirm()). `confirm(message, onConfirm, options)` stages one
- * pending confirmation; render the returned `dialog` element once per component.
- * Keeps every delete/destructive-action call-site to a single line instead of
- * duplicating open/pending state across each file.
- */
 export function useConfirm() {
   const [state, setState] = useState<ConfirmState | null>(null)
 

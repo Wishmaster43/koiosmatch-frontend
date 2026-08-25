@@ -1,3 +1,22 @@
+/**
+ * RejectionSummary — the calm outcome card shown at the top of the Sollicitatie
+ * tab once an application is rejected (Danny 25-07: the outcome belongs on the
+ * first drill-down screen, the ORIGINAL reject form lives in a footer button +
+ * confirm modal, see RejectionModal).
+ *
+ * APP-REJECTION-EDIT-1 (verified live: PATCH /applications/{id}/rejection
+ * exists, ApplicationController::updateRejection): a small pencil reopens
+ * RejectionModal in CORRECTION mode (prefilled reason + note), writing ONLY
+ * rejection_reason_id/rejection_note — never the stage, never rejection_channel/
+ * sent_at, so a correction can NEVER re-notify the candidate. Shown whenever the
+ * application IS rejected (bucket === 'rejected', the same bucketOfPhase derivation
+ * that mirrors the backend's own Application::isRejected() gate on this route) —
+ * including the "no recorded reason" gap below, since the pencil is exactly how a
+ * recruiter fills that in after the fact. Gated on applications.update (the same
+ * permission the route itself requires), self-contained like InterviewStatusCard's
+ * own auth gate — hidden entirely for a user who may not correct it, the backend
+ * re-checks regardless (§7).
+ */
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { XCircle, Edit2 } from 'lucide-react'
@@ -25,25 +44,6 @@ const pencilBtn = {
   borderRadius: 6, cursor: 'pointer', background: 'none', border: 'none', color: 'var(--color-danger-text)', flexShrink: 0,
 } as const
 
-/**
- * RejectionSummary — the calm outcome card shown at the top of the Sollicitatie
- * tab once an application is rejected (Danny 25-07: the outcome belongs on the
- * first drill-down screen, the ORIGINAL reject form lives in a footer button +
- * confirm modal, see RejectionModal).
- *
- * APP-REJECTION-EDIT-1 (verified live: PATCH /applications/{id}/rejection
- * exists, ApplicationController::updateRejection): a small pencil reopens
- * RejectionModal in CORRECTION mode (prefilled reason + note), writing ONLY
- * rejection_reason_id/rejection_note — never the stage, never rejection_channel/
- * sent_at, so a correction can NEVER re-notify the candidate. Shown whenever the
- * application IS rejected (bucket === 'rejected', the same bucketOfPhase derivation
- * that mirrors the backend's own Application::isRejected() gate on this route) —
- * including the "no recorded reason" gap below, since the pencil is exactly how a
- * recruiter fills that in after the fact. Gated on applications.update (the same
- * permission the route itself requires), self-contained like InterviewStatusCard's
- * own auth gate — hidden entirely for a user who may not correct it, the backend
- * re-checks regardless (§7).
- */
 export default function RejectionSummary({ application: a }: { application: ApplicationDetail }) {
   const { t } = useTranslation(['applications', 'common'])
   const { formatDate } = useDateFormat()

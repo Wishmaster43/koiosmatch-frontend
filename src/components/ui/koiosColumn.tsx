@@ -1,3 +1,9 @@
+/**
+ * koiosColumn — builds the ONE "Koios" advice column shared by every entity
+ * table (candidates, applications, vacancies, matches, opportunities, tasks,
+ * outreach, customers). See `makeKoiosColumn`'s own doc comment below for the
+ * full rationale.
+ */
 import type { Column } from '@/components/ui/DataTable'
 import KoiosAiMark from '@/components/ui/KoiosAiMark'
 import { KoiosAdvicePill } from '@/lib/koiosAdviceMeta'

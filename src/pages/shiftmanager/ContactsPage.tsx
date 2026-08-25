@@ -1,3 +1,10 @@
+/**
+ * ContactsPage — the Shiftmanager CONTACTS mirror (sm_ prefix, §10): a read-only list
+ * of the contact people that live in Shiftmanager, not in Koios. Data arrives through
+ * useSmContacts; this file only composes the shared table, the pagination bar and the
+ * contact drawer, and registers its filters in the right-hand panel like every other
+ * list page. Nothing here mutates: the external system owns these records.
+ */
 import { useState, useMemo, useEffect } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'

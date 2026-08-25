@@ -1,14 +1,3 @@
-import { useState } from 'react'
-import { useTranslation } from 'react-i18next'
-import StatusListEditor from './StatusListEditor'
-import { SettingCard, SettingRow, Toggle } from '../components/SettingsKit'
-import api from '@/lib/api'
-import { extractApiError } from '@/lib/extractApiError'
-import { notifyError } from '@/lib/notify'
-import { useFunctions } from '@/lib/useFunctions'
-import { useConfirm } from '@/hooks/useConfirm'
-import FreeEntryMismatchDialog, { mismatchesFromError } from '../components/FreeEntryMismatchDialog'
-
 /**
  * FunctionsSettings — the CANDIDATE job-function list (/functions, e.g. "Verzorgende
  * IG") plus the field-mode toggle (creatable combobox ↔ strict dropdown).
@@ -37,6 +26,17 @@ import FreeEntryMismatchDialog, { mismatchesFromError } from '../components/Free
  * functions`, FUNCTIONS-SPLIT-1, Danny 2026-07-20/22) — the title/subtitle/nav label
  * here spell out "candidate" so the two vocabularies are never confused (Danny 22-07).
  */
+import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import StatusListEditor from './StatusListEditor'
+import { SettingCard, SettingRow, Toggle } from '../components/SettingsKit'
+import api from '@/lib/api'
+import { extractApiError } from '@/lib/extractApiError'
+import { notifyError } from '@/lib/notify'
+import { useFunctions } from '@/lib/useFunctions'
+import { useConfirm } from '@/hooks/useConfirm'
+import FreeEntryMismatchDialog, { mismatchesFromError } from '../components/FreeEntryMismatchDialog'
+
 export default function FunctionsSettings() {
   const { t } = useTranslation('settings')
   const { allowFreeEntry, invalidate } = useFunctions()

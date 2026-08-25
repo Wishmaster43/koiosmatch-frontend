@@ -1,7 +1,8 @@
 /**
  * sessionWindow — pure math for Meta's 24h WhatsApp customer-service window
- * (WA-WINDOW-1, Danny punt 12: "als het venster niet open is, hoe stuur ik dan
- * een bericht?"). The screen must SAY what is possible instead of hiding the
+ * (WA-WINDOW-1, Danny point 12: "als het venster niet open is, hoe stuur ik dan
+ * een bericht?" — "if the window isn't open, how do I send a message then?").
+ * The screen must SAY what is possible instead of hiding the
  * composer without a reason, so the window state is computed once, here, and
  * both the composer and the template fallback read the same answer.
  *
@@ -28,7 +29,7 @@ export interface SessionWindowState {
   open: boolean
   /** Milliseconds left inside the window (0 once closed / unknown). */
   msLeft: number
-  /** ISO moment the window closes, for an exact "sluit om …" line; null when unknown. */
+  /** ISO moment the window closes, for an exact "closes at …" line; null when unknown. */
   expiresAt: string | null
 }
 

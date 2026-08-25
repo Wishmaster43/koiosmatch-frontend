@@ -1,3 +1,9 @@
+/**
+ * CustomersPage — the customer list surface: thin container composing the
+ * insights row, table/map view, bulk-actions bar and the customer drawer,
+ * mirroring the candidate page blueprint (§3A). Heavy logic lives in the
+ * hooks under ./hooks and ./data.
+ */
 import { useState, useEffect, useMemo, useCallback, useRef, lazy, Suspense } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -75,7 +81,8 @@ export default function CustomersPage({ intent }: { intent?: CustomerIntent } = 
   const hasPermission = auth?.hasPermission ?? (() => false)
   const { data: users = [] } = useUsers() as { data?: AppUser[] }
   const { statuses, statusMeta, locationStatuses, departmentStatuses, contactStatuses } = useCustomerLookups()
-  // Danny 02-08: "Prospect heeft geen status" — the entry (default) phase, resolved
+  // Danny 02-08, translated: "Prospect has no status" — verbatim: "Prospect heeft
+  // geen status" — the entry (default) phase, resolved
   // via the is_default FLAG (never an array position). Feeds the status donut's
   // '__none' bucket below (mirrors the candidate Lead-segment, PHASE-FILTER-1).
   const { phases: customerPhases } = useCustomerPhases()

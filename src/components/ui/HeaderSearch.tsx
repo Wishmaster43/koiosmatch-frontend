@@ -1,13 +1,13 @@
-import { useState, useEffect, useRef } from 'react'
-import { useTranslation } from 'react-i18next'
-import { Search, X } from 'lucide-react'
-
 /**
  * HeaderSearch — one shared, dumb page-header search box: controlled internally,
  * debounced, and calls `onSearch` with the trimmed query so each page wires it to
  * its own server-side `?q=`. No data fetching lives here (shared/dumb UI, §2). It
  * mirrors the existing search look so search feels identical on every entity page.
  */
+import { useState, useEffect, useRef } from 'react'
+import { useTranslation } from 'react-i18next'
+import { Search, X } from 'lucide-react'
+
 interface HeaderSearchProps {
   onSearch: (query: string) => void
   placeholder?: string

@@ -3,7 +3,7 @@ import HelloFlexMark from '../components/ui/HelloFlexMark'
 
 export default {
   type:  'hf_customers',
-  // GET/lees-kant: gate op de rapporten-MODULE 'hf' (Danny 23-07); 'helloflex' was bovendien nooit een geldige app-key.
+  // GET/read side: gated on the reports MODULE 'hf' (Danny 23-07); 'helloflex' was moreover never a valid app key.
   module: 'hf',
   category: 'HelloFlex',
   label: 'Klanten',

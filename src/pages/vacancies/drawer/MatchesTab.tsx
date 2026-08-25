@@ -1,3 +1,14 @@
+/**
+ * MatchesTab (vacancy drawer) — V-table-2: READ-ONLY view of this vacancy's
+ * matches (GET /vacancies/{id}/matches). Mirrors the candidate/customer
+ * drawer's own read-only MatchesTab anatomy 1:1 (§3A — "a match is the
+ * continuation of an application → placement"): search + status filter
+ * toolbar, the shared MatchCard body, four explicit UI states. No pencil, no
+ * "+ Match" — a Match is created from the candidate/customer side, never here.
+ * The one swap: the candidate/customer card's "Client"/"Candidate" row becomes
+ * "Candidate" here too, since THIS vacancy is already the fixed side of every
+ * row (mirrors the customer drawer's own swap for its fixed side).
+ */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Search } from 'lucide-react'
@@ -10,17 +21,6 @@ import { useVacancyMatches } from '../hooks/useVacancyMatches'
 import type { MatchRow } from '@/types/match'
 import type { Id } from '@/types/common'
 
-/**
- * MatchesTab (vacancy drawer) — V-table-2: READ-ONLY view of this vacancy's
- * matches (GET /vacancies/{id}/matches). Mirrors the candidate/customer
- * drawer's own read-only MatchesTab anatomy 1:1 (§3A — "a match is the
- * continuation of an application → placement"): search + status filter
- * toolbar, the shared MatchCard body, four explicit UI states. No pencil, no
- * "+ Match" — a Match is created from the candidate/customer side, never here.
- * The one swap: the candidate/customer card's "Client"/"Candidate" row becomes
- * "Candidate" here too, since THIS vacancy is already the fixed side of every
- * row (mirrors the customer drawer's own swap for its fixed side).
- */
 export default function MatchesTab({ vacancyId }: { vacancyId?: Id }) {
   const { t } = useTranslation(['vacancies', 'candidates', 'matches'])
   // Match lifecycle lookup (R-1b) — same source the candidate/customer cards use.

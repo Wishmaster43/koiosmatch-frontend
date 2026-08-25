@@ -1,14 +1,16 @@
 /**
  * ChangelogTab — the application's FIELD-CHANGE audit trail (icon-popover, §3A(d)).
  * Rewritten onto the same per-field diff-card shape as the vacancy ChangelogTab
- * (Danny punt 20: "ver onder de maat van HelloFlex — toont alleen 'Systeem
- * created'"): ONE card per changed field with "when · who · action · field" and
+ * (Danny point 20, translated: "far below HelloFlex's standard — shows only
+ * 'System created'" — verbatim: "ver onder de maat van HelloFlex — toont alleen
+ * 'Systeem created'"): ONE card per changed field with "when · who · action · field" and
  * an old → new row, instead of the old flat description/log_name line that hid
- * every actual change behind a generic "Bijgewerkt". Distinct from the Tijdlijn
+ * every actual change behind a generic "Bijgewerkt" (Dutch for "Updated", the old
+ * literal UI text). Distinct from the Tijdlijn ("Timeline")
  * TAB (Timeline.tsx, fed by `application.timeline`): the tab aggregates real
  * lifecycle activity (funnel transitions, appointments, notes, AI-interviews) in
- * human terms, this icon shows the raw audit diff — tab = activiteit, icon =
- * veldwijzigingen. A pure funnel-stage transition already reads clearly on the
+ * human terms, this icon shows the raw audit diff — tab = activity, icon =
+ * field changes. A pure funnel-stage transition already reads clearly on the
  * Tijdlijn tab ("Fase gewijzigd: A → B"), so it stays filtered out of THIS feed
  * to avoid showing the same transition twice with two different phrasings.
  */

@@ -1,3 +1,10 @@
+/**
+ * Dashboard — the role-aware landing page: KPI cards, distribution/trend
+ * charts, feed tiles and list tiles, assembled from the tenant's dashboard
+ * template for the viewer's role (`viewType`, defaulting to the logged-in
+ * user's own `dashboardType`). Container only — data fetching, filter state
+ * and the view-model mapping each live in their own hook (§3).
+ */
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '@/context/AuthContext'
 import { useLookups } from '@/context/LookupsContext'

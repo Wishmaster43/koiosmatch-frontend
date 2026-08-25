@@ -1,3 +1,14 @@
+/**
+ * CandidateSearchTab — the LIVE scored match search (MATCH-EXPLORER-1 fase
+ * ("phase") 2+3): candidates matching radius/function/status/contract-form
+ * filters,
+ * scored best-first by the backend, plotted on the shared RadiusMap + listed
+ * side by side (§3A blueprint: thin container, all data via the hook, one
+ * small component per tab). GEOSEARCH-1 (Danny 22-08): this tab and
+ * candidates/drawer/VacancySearchTab are functional TWINS — both now mount the
+ * SAME GeoSearchShell (trigger pills, active-filter chips, radius chrome, map,
+ * results) instead of two hand-drifted layouts.
+ */
 import type { CSSProperties } from 'react'
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -16,7 +27,7 @@ import GeocodeButton from '@/components/ui/GeocodeButton'
 import StatusPill from '@/components/ui/StatusPill'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 import ActiveFilterChip from '@/components/search/ActiveFilterChip'
-// Reuse the candidate-anchored "+ Solliciteren" flow (mirrors ApplicantsTab's own
+// Reuse the candidate-anchored "+ Solliciteren" ("+ Apply") flow (mirrors ApplicantsTab's own
 // CandidateAddApplicationModal reuse, §2 sanctioned cross-entity import for this
 // exact shared flow) — never a second apply form.
 import { CandidateAddApplicationModal } from '@/pages/candidates/shared'
@@ -33,16 +44,6 @@ import type { Id } from '@/types/common'
 
 const rowStyle: CSSProperties = { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, padding: '8px 10px', borderRadius: 8, cursor: 'pointer' }
 
-/**
- * CandidateSearchTab — the LIVE scored match search (MATCH-EXPLORER-1 fase
- * 2+3): candidates matching radius/function/status/contract-form filters,
- * scored best-first by the backend, plotted on the shared RadiusMap + listed
- * side by side (§3A blueprint: thin container, all data via the hook, one
- * small component per tab). GEOSEARCH-1 (Danny 22-08): this tab and
- * candidates/drawer/VacancySearchTab are functional TWINS — both now mount the
- * SAME GeoSearchShell (trigger pills, active-filter chips, radius chrome, map,
- * results) instead of two hand-drifted layouts.
- */
 export default function CandidateSearchTab({ vacancy }: { vacancy: VacancyDetail }) {
   const { t } = useTranslation('vacancies')
   const { formatDate } = useDateFormat()

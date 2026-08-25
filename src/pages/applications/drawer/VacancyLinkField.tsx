@@ -10,7 +10,7 @@ const CreatableSelect = CreatableSelectJs as unknown as ComponentType<AnyProps>
  * VacancyLinkField — the shared searchable vacancy picker used by both the
  * application Details block (ApplicationTab) and the Vacature tab's "Vacature
  * koppelen" flow (VacancyTab) — one look, one behaviour, never a per-tab fork
- * (§3A). A leading "no vacancy" option is the ontkoppelen affordance (empty
+ * (§3A). A leading "no vacancy" option is the unlink affordance (empty
  * string = unlinked); allowCreate stays off — a vacancy is picked, never
  * created here. Options read "title · client" (mirrors the candidate direct-
  * match picker, useVacancyOptions). The caller's wrapper must NOT clip

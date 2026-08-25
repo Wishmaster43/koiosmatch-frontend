@@ -20,14 +20,16 @@
  * changelog-icon popover uses (GET /customers/{id}/activity), so nothing breaks
  * before the backend field lands (§10).
  *
- * NO task trigger here (Danny 28-07: "+ nieuwe taak moet weg, hoort hier niet"). It sat
+ * NO task trigger here (Danny 28-07: "+ nieuwe taak moet weg, hoort hier niet" —
+ * the + new task button must go, it doesn't belong here). It sat
  * on this tab only because GET /tasks?customer={id} used to ignore its filter, so a real
  * Taken tab could not be built and a create-only button was the most that was honest.
  * That filter works now (TASKS-LINK-FILTER-1), so tasks belong in their own tab on the
  * customer — not bolted onto Notities.
  *
  * NOTES-LOC-DEPT-1 (Danny: "notities moet buiten de categorie ook gelinkt worden aan
- * klant, locatie, afdeling, contactpersoon"): the CONTACT-NOTITIES-1 contact-only picker
+ * klant, locatie, afdeling, contactpersoon" — besides the category, notes must also
+ * be linkable to customer, location, department, contact person): the CONTACT-NOTITIES-1 contact-only picker
  * below is widened into ONE "gekoppeld aan" picker over all four levels (Klant · Locatie ·
  * Afdeling · Contactpersoon). Shape measured against SelectMenu (components/ui/
  * SelectMenu.tsx) rather than inventing a grouped variant: it already supports a
@@ -298,8 +300,9 @@ export default function CustomerNotesTab({ customerId, customerName, customerIni
           // existing note there would save a duplicate. What still works from here is
           // popping a NEW note out of the composer.
           popout={{ entity: 'customer', id: String(customerId) }}
-          // NOTES-LOC-DEPT-1 → composer (Danny 05-08 "koppelen aan klant weg, dat moet
-          // komen als je doet + notitie"): the four-level link picker (Klant · Locatie ·
+          // NOTES-LOC-DEPT-1 → composer (Danny 05-08: "koppelen aan klant weg, dat moet
+          // komen als je doet + notitie" — remove the link-to-customer control, it should
+          // appear when you do + note): the four-level link picker (Klant · Locatie ·
           // Afdeling · Contactpersoon) lives INSIDE the compose flow now, only when
           // there is anything below Klant to link to.
           composerExtra={hasLinkChoices ? (

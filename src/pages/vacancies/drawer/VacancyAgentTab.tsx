@@ -1,3 +1,6 @@
+// VacancyAgentTab — the vacancy's linked AI interview agent + flow config, plus
+// the INTERVIEW-BACKFILL-1 action that lets that agent pick up EXISTING
+// applicants (never auto-fires, always confirmed first — AVG).
 import { useState } from 'react'
 import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -55,7 +58,7 @@ function BackfillInterviewsAction({ vacancyId, applicationsCount }: { vacancyId:
   const [unavailable, setUnavailable] = useState(false)
 
   // Group skipped rows by reason → "{count} {label}" fragments, comma-joined —
-  // the same shape as the toast body, e.g. "2 geen WhatsApp-toestemming, 1 loopt al".
+  // the same shape as the toast body, e.g. "2 no WhatsApp consent, 1 already running".
   const summarizeSkips = (skipped: BackfillSkip[]): string => {
     const counts = new Map<BackfillReason, number>()
     for (const s of skipped) {

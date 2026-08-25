@@ -90,8 +90,8 @@ export interface Department {
   locationId: Id | null
   locationName: string
   contacts: Contact[]
-  // Kostenplaats — the middle cascade level (afdeling > locatie > klant, Danny
-  // 2026-07-22). No billingEmail here: facturatie is always the customer's own.
+  // Cost centre — the middle cascade level (department > location > customer, Danny
+  // 2026-07-22). No billingEmail here: billing is always the customer's own.
   costCenter: string
   statusId: Id | null
   status: string
@@ -267,8 +267,8 @@ export interface Customer {
   hasCareerPage: boolean
   showInVacancies: boolean
   excludeFromSourcing: boolean
-  // Kostenplaats + facturatie-email at the CUSTOMER level (Danny 2026-07-22):
-  // cost-centre is the top of the afdeling>locatie>klant cascade; billing email
+  // Cost centre + billing email at the CUSTOMER level (Danny 2026-07-22):
+  // cost-centre is the top of the department>location>customer cascade; billing email
   // is the ONE source of truth for invoicing regardless of the picked level.
   costCenter: string
   billingEmail: string

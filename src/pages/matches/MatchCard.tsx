@@ -1,3 +1,7 @@
+/**
+ * MatchCard — see the fuller docblock below, right above the component, for
+ * why this ONE read-only match card body exists and what it must never regress.
+ */
 import { useState } from 'react'
 import { ExternalLink, Link2, Pencil, ChevronRight, ChevronDown } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
@@ -59,15 +63,17 @@ export interface MatchCardProps {
   // Gates the expiry chip (point 6) — a finished match never needs the nag.
   isClosed?: boolean
   archived?: boolean
-  // Opt-in COMPACT mode (Danny live review, 04-08: "meer compact in een tabel
-  // weergegeven met de optie om het open te klappen"): collapses to ONE summary
+  // Opt-in COMPACT mode (Danny live review, 04-08, translated: "shown more
+  // compactly in a table with the option to expand it" — verbatim: "meer compact
+  // in een tabel weergegeven met de optie om het open te klappen"): collapses to ONE summary
   // row per match — title/stage, the other-party value, score, the open/edit
   // icons, and a chevron — expanding in place to the existing detail rows below.
   // Off by default so the customer drawer's own MatchesTab (and, in spirit, the
   // scoped Matches sub-tab) render byte-identical, unchanged.
   collapsible?: boolean
-  // Opt-in FLAT row background (Danny 09-08, candidate drawer consistency sweep:
-  // "achtergrondkleur van Match en sollicitatie kloppen niet" — the collapsed
+  // Opt-in FLAT row background (Danny 09-08, candidate drawer consistency sweep,
+  // translated: "the background colour of Match and application don't match" —
+  // verbatim: "achtergrondkleur van Match en sollicitatie kloppen niet" — the collapsed
   // summary line used the tinted `--bg` header tone while the candidate
   // drawer's own Sollicitaties rows are flat, so the two lists read as two
   // different components). When true, the header/summary line uses the plain
@@ -75,7 +81,8 @@ export interface MatchCardProps {
   // default: every OTHER caller (the customer drawer's own MatchesTab, which
   // never sets `collapsible` either) renders byte-identical.
   //
-  // SECOND LOOK (Danny 09-08, "Open heeft geen kopje??"): flatRow now ALSO
+  // SECOND LOOK (Danny 09-08, translated: "Open has no heading??" — verbatim:
+  // "Open heeft geen kopje??"): flatRow now ALSO
   // splits the stage and the score out of the merged title/icon cluster into
   // their own labeled columns (Status, Match) — see the render below and
   // matchRowColumns.ts. Only flatRow gets the split, since it is the only
@@ -92,7 +99,7 @@ export interface MatchCardProps {
  * (CLAUDE.md §11 — "extract, don't edit three copies in parallel").
  *
  * Danny's ten-point round, points 2/4/5/6:
- * (2) the header reads "{vacature} — {fase}" on one line, the stage's own
+ * (2) the header reads "{vacancy} — {phase}" on one line, the stage's own
  *     colour on the stage half — the separate "Fase" row is gone.
  * (4) a "Periode" row (start – end, DD-MM-YYYY, em-dash when absent).
  * (5) Functie / Vestiging / Eigenaar rows off fields the list API already
@@ -152,13 +159,14 @@ export default function MatchCard({
     { key: 'contractStatus', label: t('matchesView.contract'), value: t(`matchesView.contractStatus.${contractStatus ?? 'none'}`, { defaultValue: contractStatus || t('matchesView.contractStatus.none') }) },
   ]
 
-  // Title block: "{vacature} — {fase}" (point 2) — shared verbatim between the
+  // Title block: "{vacancy} — {phase}" (point 2) — shared verbatim between the
   // default header and the compact summary row, never a second copy.
   const titleBlock = (
     <span style={{ flex: 1, minWidth: 0, fontSize: 12, fontWeight: 600, color: 'var(--text)', display: 'flex', alignItems: 'center', gap: 4, overflow: 'hidden' }}>
       <span onClickCapture={onBeforeOpen} onClick={e => e.stopPropagation()} style={{ minWidth: 0, overflow: 'hidden' }}>
         {/* hideIcon: the explicit "Open match" ⧉ right after this is the ONE
-            open-in-new icon for this row (Danny: "twee keer een icoon met
+            open-in-new icon for this row (Danny, translated: "an icon with
+            open-in-new-window twice" — verbatim: "twee keer een icoon met
             open-in-nieuw-venster"). */}
         <EntityLink page="vacancies" id={vacancyId} title={vacancyTitle || '—'} hideIcon tone="neutral">{vacancyTitle || '—'}</EntityLink>
       </span>
@@ -248,7 +256,7 @@ export default function MatchCard({
 
   return (
     <div style={{ border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden', marginBottom: 8 }}>
-      {/* Header: "{vacature} — {fase}" one-liner (point 2) + score + coupling
+      {/* Header: "{vacancy} — {phase}" one-liner (point 2) + score + coupling
           glyphs. Compact mode (collapsible) additionally shows the other-party
           value inline and a chevron. flatRow order (Danny 09-08 second look,
           own labeled columns replacing the two headerless dashes): vacature,
@@ -259,8 +267,9 @@ export default function MatchCard({
         {flatRow ? titleOnly : titleBlock}
         {collapsible ? (
           <>
-            {/* STATUS COLUMN (Danny 09-08 second look: "de status zit niet eens
-                in een eigen kolom" — it used to ride glued onto the title behind
+            {/* STATUS COLUMN (Danny 09-08 second look, translated: "the status
+                doesn't even have its own column" — verbatim: "de status zit niet
+                eens in een eigen kolom" — it used to ride glued onto the title behind
                 an em-dash, see titleOnly above). flatRow-only, same as the two
                 columns below: no header bar elsewhere to line it up against. */}
             {flatRow && (

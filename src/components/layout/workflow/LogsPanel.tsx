@@ -30,8 +30,9 @@ function stepTime(step: RunStep): string | null {
 
 export default function LogsPanel({ workflowId, liveRun, onClose, onOpenHistory }: {
   workflowId?: string | number; liveRun?: RunRow | null; onClose: () => void
-  // LOGS-DRILL-1 (Danny 23-07 "MEER INFORMATIE of klik naar geschiedenis"): jump
-  // from a run row to the Geschiedenis tab with this run's full detail drawer
+  // LOGS-DRILL-1 (Danny 23-07: "MEER INFORMATIE of klik naar geschiedenis" — MORE
+  // INFORMATION or click through to history): jump from a run row to the
+  // Geschiedenis ("History") tab with this run's full detail drawer
   // open. The WHOLE row travels along, so the drawer opens even when this run
   // falls outside the history list's page (verify finding).
   onOpenHistory?: (run: RunRow) => void

@@ -1,18 +1,19 @@
+/**
+ * useVacancyLinkOptions — vacancy picker options shared by the application
+ * Details block (ApplicationTab) and the Vacature ("Vacancy") tab's own
+ * "Vacature koppelen" ("Link vacancy") flow (VacancyTab), so both surfaces
+ * read the same option shape and never fork (§3A: extend, never duplicate).
+ * Loads /vacancies only while `enabled` (the picker is open) — data
+ * minimisation, §8/§9. Plain useState/useEffect (not React Query) so this
+ * hook renders fine without a QueryClientProvider in unit tests, mirroring
+ * AddApplicationModal's own load.
+ */
 import { useState, useEffect } from 'react'
 import api, { unwrapList } from '@/lib/api'
 import type { Id } from '@/types/common'
 
 export interface VacancyLinkOption { value: Id; label: string; client?: string }
 
-/**
- * useVacancyLinkOptions — vacancy picker options shared by the application
- * Details block (ApplicationTab) and the Vacature tab's "Vacature koppelen"
- * flow (VacancyTab), so both surfaces read the same option shape and never
- * fork (§3A: extend, never duplicate). Loads /vacancies only while `enabled`
- * (the picker is open) — data minimisation, §8/§9. Plain useState/useEffect
- * (not React Query) so this hook renders fine without a QueryClientProvider
- * in unit tests, mirroring AddApplicationModal's own load.
- */
 export function useVacancyLinkOptions(enabled: boolean): VacancyLinkOption[] {
   const [options, setOptions] = useState<VacancyLinkOption[]>([])
 

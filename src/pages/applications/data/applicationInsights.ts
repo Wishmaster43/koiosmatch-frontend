@@ -32,7 +32,8 @@ export const pickOne = (set: Dispatch<SetStateAction<string[]>>) => (d: unknown)
 }
 
 // Bucket donut click → the SAME single-value bucket state the old toolbar tab
-// row drove (Danny 14-08: "de knoppenrij verdwijnt, dit wordt een donut").
+// row drove (Danny 14-08: "de knoppenrij verdwijnt, dit wordt een donut",
+// i.e. "the button row disappears, this becomes a donut").
 // Clicking the currently-active slice returns to the default ('active').
 export const pickBucket = (setBucket: Dispatch<SetStateAction<string>>, setShowArchived: Dispatch<SetStateAction<boolean>>) => (d: unknown) => {
   const o = d as { key?: string; name?: string; payload?: { key?: string } } | null | undefined
@@ -194,8 +195,9 @@ export function buildApplicationInsights({
   ]
   // KPI cards — mirror the candidate strip: count + sub-line, click-to-filter where it maps.
   const kpis: KpiSpec[] = [
-    // TOTAAL ACTIEF spans two buckets — clicking shows BOTH (active + matched), so the
-    // list always matches the number on the card (Danny: "waar zijn ze allemaal?").
+    // "Total active" spans two buckets — clicking shows BOTH (active + matched), so the
+    // list always matches the number on the card (Danny: "waar zijn ze allemaal?",
+    // i.e. "where are they all?").
     { key: 'totalActive', label: t('kpi.totalActive'), value: counts.active + counts.matched,
       sub: t('kpi.totalActiveSub'), color: 'var(--color-primary)',
       onClick: () => { clearAllFilters(); setShowArchived(false); setBucket(bucket === 'allActive' ? 'active' : 'allActive'); setAttention(null) },

@@ -1,3 +1,9 @@
+/**
+ * EventTimeline — the shared chronological activity list used by every entity's
+ * changelog/notes surface: one calm row per event, grouped by day, so a
+ * candidate's history and a match's history read as one consistent app (see
+ * the fuller docblock below, right above the component).
+ */
 import { Fragment, useMemo, type CSSProperties, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { AlertTriangle, History } from 'lucide-react'
@@ -49,7 +55,8 @@ const timeStyle: CSSProperties = {
 }
 
 /**
- * EventTimeline — THE shared chronological activity list (Danny punt 17: "tijdlijn
+ * EventTimeline — THE shared chronological activity list (Danny point 17,
+ * translated: "the timeline doesn't look right yet" — verbatim: "tijdlijn
  * ziet er nog niet uit"). One calm row per event: a soft-tinted marker on a
  * continuous vertical axis, the time in mono, the event text at full contrast and
  * the author demoted to a muted meta line. Events are grouped per day under a

@@ -1,3 +1,5 @@
+// TasksTable — declares the tasks list COLUMNS only (§3A); sorting, selection and
+// the loading/empty/success states live in the shared DataTable.
 import type { RefObject } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Building2 } from 'lucide-react'

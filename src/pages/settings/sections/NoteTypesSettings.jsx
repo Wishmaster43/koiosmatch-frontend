@@ -1,3 +1,10 @@
+/**
+ * NoteTypesSettings — categorisation of notes, scoped per entity (NOTE-TYPES-2/3;
+ * backend NoteType::ENTITIES). One shared StatusListEditor instance per entity
+ * sub-tab, mirroring the "Eigen velden" custom-fields wave — a note type
+ * created for "Kandidaat" no longer leaks into "Klant" (replaces the old flat
+ * cross-entity list).
+ */
 import { useTranslation } from 'react-i18next'
 import StatusListEditor from './StatusListEditor'
 
@@ -11,10 +18,6 @@ const ENTITY_NAV_ID = {
   vacancy: 'cf_vacancy',
 }
 
-/** Note types — categorisation of notes, scoped per entity (NOTE-TYPES-2/3; backend
- * NoteType::ENTITIES). One shared StatusListEditor instance per entity sub-tab, mirroring
- * the "Eigen velden" custom-fields wave — a note type created for "Kandidaat" no longer
- * leaks into "Klant" (replaces the old flat cross-entity list). */
 export default function NoteTypesSettings({ entity }) {
   const { t } = useTranslation('settings')
   const entityLabel = t(`nav.${ENTITY_NAV_ID[entity] ?? entity}`)

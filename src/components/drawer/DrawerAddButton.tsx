@@ -1,3 +1,10 @@
+/**
+ * DrawerAddButton — the ONE "+ add" button style for drawer tabs/sub-tabs APP-WIDE
+ * (promoted from the candidate drawer — measured from the WorkTab "+ Match" /
+ * "+ Solliciteren" buttons, the reference for Danny's consistency sweep, 2026-07).
+ * Mirrors §4's QuickViewToggle lesson: one shared component, never a per-section
+ * restyle. Reuse this everywhere a tab needs a right-aligned add-trigger.
+ */
 import type { ComponentType, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Plus } from 'lucide-react'
@@ -23,21 +30,17 @@ interface DrawerAddButtonProps {
 }
 
 /**
- * Plus ICON + TEXT label (Danny 28-07: "+ nieuwe taak / + nieuwe afdeling … ETC!!").
- * An icon-only variant was tried and rejected the same day — the label must be readable
- * without hovering.
- *
- * DrawerAddButton — the ONE "+ action" button style for drawer tabs/sub-tabs APP-WIDE
- * (promoted from the candidate drawer — measured from the WorkTab "+ Match" / "+ Solliciteren"
- * buttons — the reference for Danny's consistency sweep, 2026-07). Mirrors §4's
- * QuickViewToggle lesson: one shared component, never a per-section restyle.
- * Reuse this everywhere a tab needs a right-aligned add-trigger.
+ * Plus ICON + full TEXT label — every "+ add" action across the app needs its own
+ * readable label (Danny 28-07, verbatim, listing entity examples: "+ nieuwe taak /
+ * + nieuwe afdeling … ETC!!", i.e. "+ new task / + new department … etc.": the rule
+ * covers every entity, not just candidates). An icon-only variant was tried and
+ * rejected the same day — the label must be readable without hovering.
  *
  * DRAWER-ADD-SHORT-1 (Danny 05-08): the 28-07 "always the full label" rule above is
- * SUPERSEDED for drawer SUB-TABS only — there the visible text may shorten to "Nieuw"
- * via `short` (see that prop). A full entity PAGE's own add button keeps the full
- * label, unchanged. Either way "readable text without hovering" still holds — this
- * never goes icon-only for the primary add action.
+ * SUPERSEDED for drawer SUB-TABS only — there the visible text may shorten to the
+ * house word "Nieuw" ("New") via `short` (see that prop). A full entity PAGE's own
+ * add button keeps the full label, unchanged. Either way "readable text without
+ * hovering" still holds — this never goes icon-only for the primary add action.
  */
 export default function DrawerAddButton({ onClick, label, icon: Icon = Plus, disabled, title, iconOnly, short }: DrawerAddButtonProps) {
   const { t } = useTranslation('common')

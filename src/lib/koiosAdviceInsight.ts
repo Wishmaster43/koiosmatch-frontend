@@ -1,6 +1,3 @@
-import type { KoiosAdviceInsight } from '@/components/ai/KoiosAdviceBlock'
-import { ADVICE_META, type KoiosAdvice } from '@/lib/koiosAdviceMeta'
-
 /**
  * adviceInsightRows — KOIOS-ADVIES-OVERAL-1 (Danny): the drawer's Koios block
  * must show EXACTLY the advice the table's "Koios" column shows, resolved by the
@@ -10,6 +7,9 @@ import { ADVICE_META, type KoiosAdvice } from '@/lib/koiosAdviceMeta'
  * ADVICE_META. Returns [] when there is no advice, so callers spread the result
  * and render no empty row (or, for advice-only sections, no block at all).
  */
+import type { KoiosAdviceInsight } from '@/components/ai/KoiosAdviceBlock'
+import { ADVICE_META, type KoiosAdvice } from '@/lib/koiosAdviceMeta'
+
 export function adviceInsightRows(advice: KoiosAdvice | null | undefined): KoiosAdviceInsight[] {
   if (!advice?.action || advice.action === 'none') return []
   const meta = ADVICE_META[advice.action] ?? ADVICE_META.default

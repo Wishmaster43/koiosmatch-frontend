@@ -1,8 +1,3 @@
-import { Building2, Search, Briefcase, Users, Globe } from 'lucide-react'
-import type { ComponentType, CSSProperties } from 'react'
-
-type IconComponent = ComponentType<{ size?: number; style?: CSSProperties }>
-
 /**
  * channelIcon — the exact icon for a merged job-board channel (drawer header's
  * published indicator), resolved from the backend's stable `icon`/`key` fields
@@ -16,6 +11,11 @@ type IconComponent = ComponentType<{ size?: number; style?: CSSProperties }>
  * seeded before the column existed (see VacancyChannelKeyTest's null-key case).
  * A totally unknown channel gets a generic globe — never a blank/broken icon.
  */
+import { Building2, Search, Briefcase, Users, Globe } from 'lucide-react'
+import type { ComponentType, CSSProperties } from 'react'
+
+type IconComponent = ComponentType<{ size?: number; style?: CSSProperties }>
+
 const ICONS_BY_NAME: Record<string, IconComponent> = {
   globe: Globe,
   search: Search,

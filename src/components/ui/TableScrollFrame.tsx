@@ -1,7 +1,8 @@
 /**
  * TableScrollFrame — gives a long table a BOUNDED height instead of letting it
- * push the page down without limit (Danny 17-08 over het verbruikscherm: "hoe
- * lang wordt dit dan wel niet"). Every row stays in the DOM and stays reachable:
+ * push the page down without limit (Danny 17-08, on the usage screen: "hoe
+ * lang wordt dit dan wel niet" — "how long is this going to get"). Every row
+ * stays in the DOM and stays reachable:
  * this frame never truncates to a top-N, because a shortened list that does not
  * say so reads as "this is all there is". It only scrolls, and the footer spells
  * out how big the list actually is so the reader knows without scrolling to find

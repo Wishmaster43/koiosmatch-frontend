@@ -1,3 +1,8 @@
+/**
+ * ApplicationDrawer — thin container: declares the header config + tab list and
+ * wires them to the shared EntityDrawer shell. No heavy JSX, no business logic;
+ * see the default export's own doc comment below for the tab-order rationale.
+ */
 import { useState, useEffect } from 'react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'

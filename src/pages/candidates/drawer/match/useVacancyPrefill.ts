@@ -2,8 +2,8 @@
  * useVacancyPrefill — fetches the full vacancy detail (GET /vacancies/{id}) once a
  * vacancy is picked in the match form, and normalises it down to the REAL fields
  * worth proposing onto the match (point 1, Danny's ten-point round: the vacancy pick
- * prefills klant/klantlocatie/afdeling/contactpersoon/vestiging/dates/uren as
- * EDITABLE proposals, never a lock). Bypasses the shared `mapVacancyDetail` mapper —
+ * prefills customer/customer location/department/contact person/branch/dates/hours
+ * as EDITABLE proposals, never a lock). Bypasses the shared `mapVacancyDetail` mapper —
  * mirrors this hook family's own precedent (useBranchMismatch / useMatchForm's own
  * `editDetail` fetch): a small local interface over the raw response, read directly,
  * not the full drawer mapper (out of scope here, §0.1 stay-in-scope).

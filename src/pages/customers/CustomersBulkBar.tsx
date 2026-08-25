@@ -1,3 +1,9 @@
+/**
+ * CustomersBulkBar — selection action bar shown above the table when ≥1 customer
+ * is checked. One "Bulk actions" menu (ActionMenu, drill-in) holds every bulk
+ * mutation; data per action arrives via props so this stays a thin assembler.
+ * Mirrors CandidatesBulkBar.
+ */
 import { useTranslation } from 'react-i18next'
 import { ListChecks, UserCog, CircleDot, Tag, Tags, StickyNote, Archive, RefreshCw, X, Link2, Building2, Layers } from 'lucide-react'
 import ActionMenu from '@/components/ui/ActionMenu'
@@ -34,12 +40,6 @@ interface CustomersBulkBarProps {
   selectedTags?: string[]
 }
 
-/**
- * CustomersBulkBar — selection action bar shown above the table when ≥1 customer
- * is checked. One "Bulk actions" menu (ActionMenu, drill-in) holds every bulk
- * mutation; data per action arrives via props so this stays a thin assembler.
- * Mirrors CandidatesBulkBar.
- */
 export default function CustomersBulkBar({
   count, onClear, onSetOwner, onSetStatus, onAddTag, onRemoveTag, onAddNote, onArchive,
   canArchive = false, onGeocode, canGeocode = false, onCoupleBackoffice,

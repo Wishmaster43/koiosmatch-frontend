@@ -94,8 +94,8 @@ const mapSources = (res: AxiosResponse): SourcesLookupData => {
   const free = (res?.data as { allow_free_entry?: unknown })?.allow_free_entry
   return {
     sources: names.length ? names : DEFAULT_APPLICATION_SOURCES,
-    // Danny 21-08 (settings-ronde): vrije invoer staat STANDAARD UIT — strikt is
-    // de norm, vrije invoer is de bewuste uitzondering die de tenant zelf aanzet.
+    // Danny 21-08 (settings round): free entry is OFF by default — strict is the
+    // norm, free entry is the deliberate exception the tenant switches on themselves.
     apiFreeEntry: typeof free === 'boolean' ? free : false,
   }
 }

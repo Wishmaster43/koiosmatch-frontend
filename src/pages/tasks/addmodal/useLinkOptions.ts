@@ -1,12 +1,14 @@
 /**
  * addmodal/useLinkOptions — loads the three DEDICATED relational pickers of
- * AddTaskModal's Koppelingen card (candidate · opdrachtgever · contactpersoon)
+ * AddTaskModal's Koppelingen ("Links") card (candidate · opdrachtgever,
+ * "client" · contactpersoon, "contact person")
  * and reports their load state.
  *
  * Lifted out of the container (§3: logic lives in hooks) to fix a real §3 gap
  * found in the 09-08 house-rules pass: the three loads used to end in
  * `.catch(() => {})`, so a failed /candidates left the picker at zero options —
- * indistinguishable from "deze tenant heeft geen kandidaten". The recruiter now
+ * indistinguishable from "deze tenant heeft geen kandidaten" ("this tenant has
+ * no candidates"). The recruiter now
  * gets the SAME honest error+retry line the sibling `links/AddLinkRow` already
  * had (that component is where the pattern comes from — §11, one behaviour).
  *

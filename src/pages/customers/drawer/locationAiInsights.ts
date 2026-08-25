@@ -1,12 +1,7 @@
-import type { Location } from '@/types/customer'
-import type { KoiosAdviceInsight } from '@/components/ai/KoiosAdviceBlock'
-
-// A bound-namespace translate function (the caller already resolved the namespace).
-type Tx = (key: string, opts?: Record<string, unknown>) => string
-
 /**
  * buildLocationAdviceInsights — the Koios advice block on a location's own tab, so a
- * location reads like the customer's Bedrijf tab (Danny 28-07: "zelfde format als klant").
+ * location reads like the customer's Bedrijf ("Company") tab (Danny 28-07: "zelfde
+ * format als klant" — "same format as customer").
  *
  * Pure frontend heuristics over the fields this site actually has — no AI, no API call,
  * exactly like buildCustomerAdviceInsights next to it. It deliberately scores only what
@@ -15,6 +10,12 @@ type Tx = (key: string, opts?: Record<string, unknown>) => string
  *
  * "Findable" means street + city: a postcode alone does not put a nurse at the door.
  */
+import type { Location } from '@/types/customer'
+import type { KoiosAdviceInsight } from '@/components/ai/KoiosAdviceBlock'
+
+// A bound-namespace translate function (the caller already resolved the namespace).
+type Tx = (key: string, opts?: Record<string, unknown>) => string
+
 export function buildLocationAdviceInsights(l: Location, t: Tx): KoiosAdviceInsight[] {
   const coreFields = [
     l.street && l.city,

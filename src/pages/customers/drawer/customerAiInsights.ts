@@ -1,3 +1,8 @@
+/**
+ * customerAiInsights — pure FE heuristics behind the customer drawer's Koios AI
+ * block: field-completeness scoring and a relationship-activity read, both
+ * computed from the detail payload already on screen (no AI/API call).
+ */
 import type { Customer, Location } from '@/types/customer'
 import type { KoiosAdviceInsight } from '@/components/ai/KoiosAdviceBlock'
 

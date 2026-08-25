@@ -1,3 +1,8 @@
+/**
+ * PlanningPanel — thin container: owns all (dummy) planning state and routes
+ * each sub-tab (availability / scheduling / open shifts / roles & pools /
+ * favourite & blacklist) to its own component.
+ */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import SubTabBar from '@/components/drawer/SubTabBar'
@@ -12,9 +17,6 @@ import type { Candidate } from '@/types/candidate'
 import type { Id } from '@/types/common'
 import type { OpenFilters, RosterShift, ScheduleFavorites } from './planningTypes'
 
-/** Planning panel — thin container: owns all (dummy) planning state and routes
- * each sub-tab (availability / scheduling / open shifts / roles & pools /
- * favourite & blacklist) to its own component. */
 export default function PlanningPanel({ c }: { c: Candidate }) {
   const { t } = useTranslation('candidates')
   const [planningSubTab,    setPlanningSubTab]    = useState('availability')

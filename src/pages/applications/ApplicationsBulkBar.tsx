@@ -1,3 +1,9 @@
+/**
+ * ApplicationsBulkBar — selection action bar shown above the table when ≥1
+ * application is checked. One "bulk actions" menu (ActionMenu, drill-in): change
+ * funnel phase + detach (danger, permission-gated). Thin assembler — options in
+ * via props, the mutation runs in the page. Extend by adding a node.
+ */
 import { useTranslation } from 'react-i18next'
 import { ListChecks, Milestone, Unlink, X } from 'lucide-react'
 import ActionMenu from '@/components/ui/ActionMenu'
@@ -15,12 +21,6 @@ interface ApplicationsBulkBarProps {
   phases?: LookupOption[]
 }
 
-/**
- * ApplicationsBulkBar — selection action bar shown above the table when ≥1
- * application is checked. One "bulk actions" menu (ActionMenu, drill-in): change
- * funnel phase + detach (danger, permission-gated). Thin assembler — options in
- * via props, the mutation runs in the page. Extend by adding a node.
- */
 export default function ApplicationsBulkBar({ count, onClear, onSetPhase, onDetach, canManage = false, phases = [] }: ApplicationsBulkBarProps) {
   const { t } = useTranslation('applications')
   // Phase options from the funnel lookup (never hardcoded).

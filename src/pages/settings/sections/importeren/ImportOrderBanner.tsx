@@ -1,7 +1,8 @@
 /**
  * ImportOrderBanner — the "do this in order" explainer (customers → locations →
  * departments → contacts) for the four SEPARATE files. A location/department/contact
- * links to its parent BY NAME (klant_naam/locatie_naam/afdeling_naam), so importing
+ * links to its parent BY NAME (klant_naam/locatie_naam/afdeling_naam — the
+ * "customer name/location name/department name" columns), so importing
  * out of order produces nothing but "not found" errors — this banner stays visible on
  * every step, not just the first, so the reminder survives a scroll or a step change.
  *

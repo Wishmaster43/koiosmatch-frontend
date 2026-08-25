@@ -1,3 +1,7 @@
+/**
+ * OpportunitiesInsightsRow — see the fuller docblock below, right above the
+ * component, for the donut/KPI footprint this config-driven strip renders.
+ */
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import InsightsRow from '@/components/insights/InsightsRow'

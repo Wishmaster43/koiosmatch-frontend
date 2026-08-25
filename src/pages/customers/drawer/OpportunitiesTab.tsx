@@ -1,6 +1,7 @@
 /**
  * OpportunitiesTab — the customer's real Kansen (sales pipeline), NOT a vacancy
- * list (Danny: the old copy/shape "klopt niet" — it rendered vacancy columns under
+ * list (Danny: the old copy/shape, translated, "wasn't right" — verbatim "klopt
+ * niet" — it rendered vacancy columns under
  * "Open vacatures"). Columns: Titel · Fase (stage soft chip) · Waarde (locale EUR)
  * · Verwachte sluiting. "+ Nieuwe kans" opens AddOpportunityModal prefilled with
  * this customer; a row opens the Kansen page on that record (cross-entity
@@ -8,8 +9,9 @@
  * calls DELETE /opportunities/{id}. The open-flex-shifts section (Planning module)
  * is unrelated to Kansen and stays as its own section below.
  *
- * Same drill-down treatment as Locaties/Afdelingen/Contactpersonen (Danny: "bij
- * Kansen mis ik ook nog de statussen"): a stage filter via the shared
+ * Same drill-down treatment as Locaties/Afdelingen/Contactpersonen (Danny,
+ * translated: "on Opportunities I'm also still missing the statuses" — verbatim:
+ * "bij Kansen mis ik ook nog de statussen"): a stage filter via the shared
  * StatusFilterSelect/useStatusFilter (an opportunity has no separate status axis,
  * only `stage` — the vocabulary this filter narrows on, never a status field the
  * API does not return) and a colour-on/off toggle for the stage chip, mirroring
@@ -30,7 +32,8 @@ import type { Column } from '@/components/ui/DataTable'
 import SoftChip from '@/components/ui/SoftChip'
 import SectionCard from '@/components/ui/SectionCard'
 import { useConfirm } from '@/hooks/useConfirm'
-// House "+ action" trigger (Danny 27-07: "moet een knopje zijn zoals ook bij de
+// House "+ action" trigger (Danny 27-07, translated: "must be a button just like
+// on the candidate drill-down too" — verbatim: "moet een knopje zijn zoals ook bij de
 // kandidaat drill down") — replaces the bare text+Plus button below.
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 import { AddOpportunityModal } from '@/pages/opportunities/shared'
@@ -104,8 +107,9 @@ export default function OpportunitiesTab({ customerId, customerName }: { custome
   const { value: stageFilter, toggle: toggleStage, filtered: stageRows } =
     useStatusFilter(allRows, stages, o => String(o.stageValue ?? ''))
 
-  // Free-text search (Danny 03-08: "bij Kansen-tabblad op hoofd-drilldown mis ik
-  // ook zoekbalk") — narrows on the opportunity title, the same field the title
+  // Free-text search (Danny 03-08, translated: "on the Opportunities tab on the
+  // main drill-down I'm also missing a search bar" — verbatim: "bij Kansen-tabblad
+  // op hoofd-drilldown mis ik ook zoekbalk") — narrows on the opportunity title, the same field the title
   // column itself renders, on top of the stage filter's rows.
   const [search, setSearch] = useState('')
   const rows = useMemo(() => {
@@ -157,7 +161,8 @@ export default function OpportunitiesTab({ customerId, customerName }: { custome
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-      {/* No section title (Danny 05-08 "woord kansen links kan weg"): the tab bar already
+      {/* No section title (Danny 05-08, translated: "the word 'opportunities' on
+          the left can go" — verbatim: "woord kansen links kan weg"): the tab bar already
           names this section, and the freed width goes to the search bar — mirrors how the
           Locaties/Afdelingen toolbars start straight with search. */}
       <SectionCard action={

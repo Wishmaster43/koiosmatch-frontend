@@ -1,5 +1,3 @@
-import { Sparkle } from 'lucide-react'
-
 /**
  * AiAgentAvatar — a round bubble in the house button trio carrying the lucide
  * Sparkle mark, next to the linked AI agent's name. Mirrors Avatar's soft variant
@@ -14,6 +12,8 @@ import { Sparkle } from 'lucide-react'
  * exactly one accessible name for the whole unit even though the name is also
  * visible text.
  */
+import { Sparkle } from 'lucide-react'
+
 export default function AiAgentAvatar({ name, size = 22 }: { name?: string; size?: number }) {
   if (!name) return null
   return (

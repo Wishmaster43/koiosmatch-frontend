@@ -1,11 +1,13 @@
 /**
  * documentLinkRules — the ONE place that decides which documents / which entries a
- * "koppelen" picker may still offer (DOC-1-EIGENAAR-1, Danny 08-08 punt 6).
+ * "koppelen" ("link") picker may still offer (DOC-1-EIGENAAR-1, Danny 08-08, point 6).
  *
  * MEASURED live 08-08 against koiosmatch-api.test:
  *  - `PATCH /candidates/{id}/certifications/{cert}` with a `document_id` that already
- *    hangs on another entry answers **422** with
- *    `{"message":"Dit document is al aan een ander onderdeel gekoppeld.", errors:{document_id:[…]}}`
+ *    hangs on another entry answers **422** with, verbatim:
+ *    `{"message":"Dit document is al aan een
+ *    ander onderdeel gekoppeld.", errors:{document_id:[…]}}`
+ *    (i.e. "This document is already linked to another item.")
  *    — the backend guard (Services/Candidate/DocumentOwnershipGuard) enforces "one
  *    document → at most one owner" across candidate_educations / _certifications /
  *    _languages / _skills / _references, and explicitly EXCLUDES the row being saved.
@@ -88,8 +90,9 @@ export function hasSelectableEntry(entryLists: ClaimingEntry[][], currentEntryId
 type NamedDocument = OwnableDocument & { name?: unknown; file_name?: unknown }
 
 /**
- * The ONE "gekoppeld document" option builder, shared by every section that can claim
- * a document (opleiding · certificering · vaardigheid · taal · referentie) so all five
+ * The ONE "gekoppeld document" ("linked document") option builder, shared by every
+ * section that can claim a document (opleiding · certificering · vaardigheid · taal ·
+ * referentie — education · certification · skill · language · reference) so all five
  * offer exactly the same set — §11: adopt the shared helper, never a per-section copy.
  * `entry` is the row being edited (its `id` + current `document_id`); a fresh add row
  * simply passes an empty object.

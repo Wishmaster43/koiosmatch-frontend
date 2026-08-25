@@ -1,3 +1,7 @@
+/**
+ * useRovingTabs — shared keyboard model for every tablist in the app (see the
+ * fuller docblock below, right above the hook, for the WAI-ARIA rationale).
+ */
 import { useCallback, useRef } from 'react'
 import type { KeyboardEvent } from 'react'
 

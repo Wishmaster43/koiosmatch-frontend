@@ -1,3 +1,5 @@
+// CvBlock — the application drawer's view-only CV summary (file name, upload date,
+// download + preview). See the fuller doc comment on the component below.
 import { useState } from 'react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'

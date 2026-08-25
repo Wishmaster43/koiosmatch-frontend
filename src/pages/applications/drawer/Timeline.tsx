@@ -1,3 +1,15 @@
+/**
+ * Timeline — the application drawer's Tijdlijn tab. A thin adapter: it maps the
+ * mapper's items onto the shared EventTimeline (one calm row per event on a
+ * continuous axis, mono time, per-day headings) and owns only the application's
+ * own event vocabulary. Author is deliberately the muted meta line, not the row's
+ * headline: it is null on every system event (verified live), and the old layout
+ * made that missing name the boldest thing on the row.
+ *
+ * Loading/error are not passed: this tab renders inside a drawer that has already
+ * resolved both before it mounts, so there is no honest signal to forward — the
+ * states themselves live (and are tested) in EventTimeline.
+ */
 import type { ReactNode } from 'react'
 import { ArrowRightLeft, CalendarClock, Handshake, MessageSquare, Mic, XCircle } from 'lucide-react'
 import AiGeneratedLabel from '@/components/ui/AiGeneratedLabel'
@@ -31,18 +43,6 @@ export function kindOf(id?: Id): string {
   return colon > 0 ? s.slice(0, colon) : ''
 }
 
-/**
- * Timeline — the application drawer's Tijdlijn tab. A thin adapter: it maps the
- * mapper's items onto the shared EventTimeline (one calm row per event on a
- * continuous axis, mono time, per-day headings) and owns only the application's
- * own event vocabulary. Author is deliberately the muted meta line, not the row's
- * headline: it is null on every system event (verified live), and the old layout
- * made that missing name the boldest thing on the row.
- *
- * Loading/error are not passed: this tab renders inside a drawer that has already
- * resolved both before it mounts, so there is no honest signal to forward — the
- * states themselves live (and are tested) in EventTimeline.
- */
 export default function Timeline({ items = [], emptyText }: { items?: TimelineItem[]; emptyText?: ReactNode }) {
   return (
     <EventTimeline

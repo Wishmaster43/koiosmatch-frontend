@@ -1,4 +1,3 @@
-import { useMemo } from 'react'
 /**
  * useOutreachOutcomes — tenant-configurable call-list outcome lookup (OUTREACH-2).
  *
@@ -10,6 +9,7 @@ import { useMemo } from 'react'
  * Fetch/cache/dedupe lives in useCachedLookup (audit item 8) — one GET per
  * session, shared across every mounted consumer.
  */
+import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { AxiosResponse } from 'axios'
 import { useCachedLookup } from './useCachedLookup'

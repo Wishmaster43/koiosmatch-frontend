@@ -127,15 +127,17 @@ export default function ContactDetail({ contact, locations, departments, statuse
   // Location/department are no longer in this table — see the Koppeling block
   // below (file header BUG FIX 28-07): a chip-select field can't cascade off
   // another field's live draft value, so they need their own cascading picker.
-  // ONE card for the person (Danny 28-07: "telefoonnummers en contactpersoon moeten
-  // samen"). The numbers used to need their own card because they carry per-field icon
+  // ONE card for the person (Danny 28-07, verbatim: "…moeten samen" — i.e.
+  // "phone numbers and the contact person must be together"). The numbers used
+  // to need their own card because they carry per-field icon
   // affordances — that is what FieldRow.renderValue is for now, so they are plain rows
   // here and the second card is gone. Status is NOT a row: it is the title-row badge
   // below, exactly like a location (§3A(c) — the header shows state, the card shows data).
   const fields: FieldRow[] = [
-    // NAME-COMPOSITE-1 (Danny 05-08: "voornaam, tussenvoegsel en achternaam tonen
-    // als 1 regel; alleen bij het potloodje zijn het er 3") — one composed line in
-    // read mode, the three loose fields only while editing. Mirrors the shared
+    // NAME-COMPOSITE-1 (Danny 05-08, verbatim: "…als 1 regel…" — i.e. "first
+    // name, infix and last name show as 1 line; only next to the pencil are
+    // there 3") — one composed line in read mode, the three loose fields only
+    // while editing. Mirrors the shared
     // EditableFieldTable 'address' composite (see its own doc comment).
     { key: 'name', label: t('contacts.detail.name'), type: 'name',
       nameFields: [

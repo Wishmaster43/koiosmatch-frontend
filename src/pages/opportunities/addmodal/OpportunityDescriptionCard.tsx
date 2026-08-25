@@ -7,7 +7,8 @@
  * parent's form state; the expand/editing UI state is purely local (nothing
  * outside this card ever reads it).
  *
- * TASK-ASSIST-ACTIONS-1 (Danny 14-08, "ook bij nieuwe kans"): opts into the
+ * TASK-ASSIST-ACTIONS-1 (Danny 14-08, "ook bij nieuwe kans" — "also for a new
+ * opportunity"): opts into the
  * third Koios assist mode via `assistModes={['improve', 'summarize', 'actions']}`
  * — mirrors AddTaskModal's DescriptionCard so Actiepunten (subtask/follow-up
  * suggestions) is available while drafting an opportunity's own text too.
@@ -33,8 +34,9 @@ export default function OpportunityDescriptionCard({ value, onChange }: Opportun
     <div>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
         <div style={cardHead}>{t('modal.groups.description')}</div>
-        {/* Danny 14-08 ("de schakelaar"): the same Wizard/Auto switch the task modal
-            carries — one shared per-user preference, mirrored, never a forked copy. */}
+        {/* Danny 14-08 ("de schakelaar" — "the switch"): the same Wizard/Auto switch
+            the task modal carries — one shared per-user preference, mirrored, never
+            a forked copy. */}
         <NoteKoiosModeToggle />
       </div>
       <div style={cardBox}>

@@ -17,10 +17,11 @@ export default makeEntityModule({
     { value: 'status',   label: 'Status' },
     { value: 'customer', label: 'Klant' },
     { value: 'function', label: 'Functie' },
-    // NODE-SYNC-1 (22-08, nameting): 'location' is GEEN backing field — de BE
-    // nult hem expliciet (backend VacanciesModule nults it: "HAS NO BACKING FIELD"), dus de
-    // optie beloofde filtering die nooit gebeurde. De echte drilldown-filters
-    // (customer_location_id/afdeling) komen met de herstelronde als pickers.
+    // NODE-SYNC-1 (22-08, follow-up measurement): 'location' is NOT a backing field —
+    // the backend nulls it explicitly (backend VacanciesModule nulls it: "HAS NO
+    // BACKING FIELD"), so the option promised filtering that never actually
+    // happened. The real drilldown filters (customer_location_id/department,
+    // "afdeling") arrive with the repair round as pickers.
     { value: 'owner',    label: 'Eigenaar / recruiter' },
   ],
   sortOptions: [

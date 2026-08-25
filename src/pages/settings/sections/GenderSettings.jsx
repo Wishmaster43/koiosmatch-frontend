@@ -1,8 +1,11 @@
+/**
+ * GenderSettings — Geslacht (Dutch for "gender"): configurable list with a
+ * colour. The colour drives the candidate avatar/icon in the list + drawer.
+ * Backed by /genders.
+ */
 import { useTranslation } from 'react-i18next'
 import StatusListEditor from './StatusListEditor'
 
-/** Geslacht — configurable list with a colour. The colour drives the candidate
- * avatar/icon in the list + drawer. Backed by /genders. */
 export default function GenderSettings() {
   const { t } = useTranslation('settings')
   return (

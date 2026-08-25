@@ -1,12 +1,3 @@
-import { useState } from 'react'
-import { useTranslation } from 'react-i18next'
-import { useAllSettings, getJsonSetting, saveSettingsKeys } from '@/lib/settings/useAllSettings'
-import { useLookups } from '@/context/LookupsContext'
-import { VacancyLookupsProvider, useVacancyLookups } from '@/context/VacancyLookupsContext'
-import { getVacancyTabDefaults } from '@/pages/candidates/shared'
-import SubTabBar from '@/components/drawer/SubTabBar'
-import LookupChipSelect from '../components/LookupChipSelect'
-
 /**
  * Vacatures-tab visibility + filter-default editor (Danny 23-07): the candidate
  * drawer's "Vacatures" (vacancySearch) tab is tenant-configurable per candidate
@@ -24,6 +15,15 @@ import LookupChipSelect from '../components/LookupChipSelect'
  * tab — reusing the shared `SubTabBar` (the same bar ActionRulesSettings uses for
  * its in-file domain tabs), not a new tab-bar implementation.
  */
+import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import { useAllSettings, getJsonSetting, saveSettingsKeys } from '@/lib/settings/useAllSettings'
+import { useLookups } from '@/context/LookupsContext'
+import { VacancyLookupsProvider, useVacancyLookups } from '@/context/VacancyLookupsContext'
+import { getVacancyTabDefaults } from '@/pages/candidates/shared'
+import SubTabBar from '@/components/drawer/SubTabBar'
+import LookupChipSelect from '../components/LookupChipSelect'
+
 const KEY = 'candidate_vacancy_tab'
 
 // Wraps the editor in its OWN VacancyLookupsProvider (mirrors VacancySearchTab.tsx)

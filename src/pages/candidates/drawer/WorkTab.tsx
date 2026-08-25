@@ -1,3 +1,12 @@
+/** Work tab — matches + paginated applications, with the two candidate actions
+ *  (§3B two-action model): couple to a vacancy, or plan an intake.
+ *  `onRefresh` (Danny P1 "stale after match create"): replaces the DRAWER's shared
+ *  record (header status/phase, Ervaring, MatchesTab) after a create — see reload().
+ *
+ *  Danny punt 5/7 (08-08): every application row now links to the application
+ *  record, can be edited (pencil → the same form in EDIT mode) and detached
+ *  (unlink → reason prompt → DELETE /applications/{id}); the row itself lives in
+ *  `ApplicationRow` so this file stays the thin container it is meant to be. */
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { CalendarPlus, Search } from 'lucide-react'
@@ -26,15 +35,6 @@ import type { Id, LookupOption } from '@/types/common'
 // Known sub-tab ids (deep-link validation lives here, not in the drawer).
 const KNOWN_SUB_TABS = ['applications', 'matches', 'pools'] as const
 
-/** Work tab — matches + paginated applications, with the two candidate actions
- *  (§3B two-action model): couple to a vacancy, or plan an intake.
- *  `onRefresh` (Danny P1 "stale after match create"): replaces the DRAWER's shared
- *  record (header status/phase, Ervaring, MatchesTab) after a create — see reload().
- *
- *  Danny punt 5/7 (08-08): every application row now links to the application
- *  record, can be edited (pencil → the same form in EDIT mode) and detached
- *  (unlink → reason prompt → DELETE /applications/{id}); the row itself lives in
- *  `ApplicationRow` so this file stays the thin container it is meant to be. */
 export default function WorkTab({ c, onRefresh, initialSubTab }: { c: Candidate; onRefresh?: () => Promise<void> | void; initialSubTab?: string }) {
   const { t, i18n } = useTranslation(['candidates', 'common'])
   // applications.update is the ONE permission the backend's own route group requires

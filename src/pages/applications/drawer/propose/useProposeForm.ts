@@ -147,8 +147,9 @@ export function useProposeForm(application: ApplicationDetail) {
   // registers the new one. Guarded by dirtyRef: once the recruiter has edited
   // subject/body themselves, their words are never overwritten again. With no
   // recipient yet, the fill is skipped entirely rather than resolving {contact}
-  // to an empty string — a bare "Beste ," reads worse than a still-empty field,
-  // and submit() is disabled without a recipient anyway (see disabledReason).
+  // to an empty string — a bare "Beste ," ("Dear ,") reads worse than a
+  // still-empty field, and submit() is disabled without a recipient anyway
+  // (see disabledReason).
   useEffect(() => {
     if (dirtyRef.current || !recipient) return
     const tokens = {
@@ -182,7 +183,8 @@ export function useProposeForm(application: ApplicationDetail) {
   // Copy the drafted subject + a plain-text version of the (rich-text) body.
   // The message as it is actually shared: the drafted body, plus the candidate's
   // own motivation letter appended when the recruiter ticked it. Without this the
-  // "motivatiebrief meesturen" checkbox changed nothing at all — the /propose
+  // "motivatiebrief meesturen" ("send along motivation letter") checkbox changed
+  // nothing at all — the /propose
   // contract has no field for it, so the letter travels inside the message body
   // (§3: a control must have a real effect, or not exist).
   const composedBody = () => (includeMotivation && application.coverLetter

@@ -1,3 +1,8 @@
+/**
+ * LanguagesSection — the candidate's languages sub-tab: see the fuller docblock
+ * below, right above the component, for the full behaviour (edit pattern,
+ * per-row proof-document link).
+ */
 import { useState, useId } from 'react'
 import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -46,12 +51,13 @@ interface LinkedDocument {
 
 /**
  * LanguagesSection — the candidate's languages, fully editable (add / change /
- * remove) with dropdowns for taal + gesproken/schriftelijk niveau. Options come
- * from the tenant-configurable lists (Settings → Talen) with a package default.
+ * remove) with dropdowns for language + spoken/written level. Options come
+ * from the tenant-configurable lists (Settings → Languages) with a package default.
  * Same in-place pencil ↔ save/cancel pattern as the profile blocks.
  *
- * TAAL-DOC-LINK-1 (Danny 08-08: "Talen: kan ik nog geen document koppelen"): a row
- * can now carry a proof document (taalcertificaat) — picked per row while editing,
+ * TAAL-DOC-LINK-1 (Danny 08-08, translated: "Languages: I still can't link a
+ * document" — verbatim: "Talen: kan ik nog geen document koppelen"): a row
+ * can now carry a proof document (a language certificate) — picked per row while editing,
  * previewed/downloaded from the read chip — mirroring what Opleiding /
  * Certificeringen / Vaardigheden / Referenties already offer.
  */
@@ -173,7 +179,8 @@ export default function LanguagesSection({ c, onEditSave }: { c: Candidate; onEd
           section — the trash beside it then looked out of line. */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 6, marginBottom: 10 }}>
         {/* "+ Taal" top-right, same reference style as + Match / Ervaring — ALWAYS
-            visible (Danny 20-07: net als de andere secties): outside edit mode a
+            visible (Danny 20-07, translated: "just like the other sections" —
+            verbatim: "net als de andere secties"): outside edit mode a
             click enters edit AND adds the fresh row in one go.
             Short text (DRAWER-ADD-SHORT-1, Danny 05-08): always inside the
             Achtergrond → Talen sub-tab, never a full page. */}
@@ -181,7 +188,8 @@ export default function LanguagesSection({ c, onEditSave }: { c: Candidate; onEd
           onClick={() => { if (!editing) { setRows([...initial(), { language: '', spoken: '', written: '', documentId: '' }]); setEditing(true) } else addRow() }} />
       </div>
 
-      {/* The edit cluster lives INSIDE the card ("potlootje in talen box", Danny
+      {/* The edit cluster lives INSIDE the card (translated: "little pencil in
+          the languages box" — verbatim: "potlootje in talen box", Danny
           05-08) — pencil top-right of the block it edits, toggling to save/✕. */}
       {/* TRASH-ALIGN-1 (Danny 08-08, twice): in edit mode the save/✕ cluster used to
           FLOAT (absolute, top-right) over the first row and force a 68px right
@@ -227,8 +235,9 @@ export default function LanguagesSection({ c, onEditSave }: { c: Candidate; onEd
                       placeholder={t('addFields.writtenLevel')} options={levels} style={pickerStyle} />
                   </div>
                   {/* Same 28×28 box (house Button size="sm") as every other icon button
-                      in this card (Danny 08-08: "is stuk groter dan de andere 2 knopjes")
-                      — one size for trash, save and ✕; the row centers it vertically. */}
+                      in this card (Danny 08-08, translated: "is quite a bit bigger than
+                      the other 2 buttons" — verbatim: "is stuk groter dan de andere 2
+                      knopjes") — one size for trash, save and ✕; the row centers it vertically. */}
                   <Button variant="dangerSoft" size="sm" iconOnly onClick={() => removeRow(i)} title={t('common:remove')} aria-label={t('common:remove')} style={{ flexShrink: 0 }}>
                     <Trash2 size={12} />
                   </Button>

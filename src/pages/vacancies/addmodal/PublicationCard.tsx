@@ -1,3 +1,10 @@
+/**
+ * PublicationCard — punt 20: `published`, `published_channels` and
+ * `application_settings` all accepted at create (measured). Mirrors the
+ * drawer's PublishingTab controls verbatim, including its honest-state notice
+ * (channels are not wired to real job-board feeds yet) — only the persistence
+ * path differs: here every value just rides the create POST body, no PATCH.
+ */
 import { useTranslation } from 'react-i18next'
 import SelectMenu from '@/components/ui/SelectMenu'
 import Toggle from '@/components/ui/Toggle'
@@ -14,13 +21,6 @@ interface Props {
   applicationSettings: Record<string, unknown>; onSettingChange: (field: string, value: unknown) => void
 }
 
-/**
- * PublicationCard — punt 20: `published`, `published_channels` and
- * `application_settings` all accepted at create (measured). Mirrors the
- * drawer's PublishingTab controls verbatim, including its honest-state notice
- * (channels are not wired to real job-board feeds yet) — only the persistence
- * path differs: here every value just rides the create POST body, no PATCH.
- */
 export default function PublicationCard({ published, onPublishedChange, channels, onToggleChannel, applicationSettings, onSettingChange }: Props) {
   const { t } = useTranslation(['vacancies', 'common'])
 

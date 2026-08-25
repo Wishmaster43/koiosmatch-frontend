@@ -4,9 +4,10 @@
  * layout; extracted here mirroring how VacanciesPage got useVacancyInsights).
  *
  * VAC-DETAILS-SPLIT-1 (Danny 24-07): "een potlood zet 21 velden tegelijk in
- * edit-mode ... ruk om te onderhouden" — one shared `editing`/`form` for the
+ * edit-mode ... ruk om te onderhouden" — "one pencil puts 21 fields into edit
+ * mode at once ... a hassle to maintain" — one shared `editing`/`form` for the
  * whole tab meant a single pencil turned every card into an input at once.
- * Split into FOUR independent sections (Algemeen/Locatie/Eisen/Voorwaarden),
+ * Split into FOUR independent sections (General/Location/Requirements/Conditions),
  * mirroring PreferencesZzpTabs: each section owns its own `editing`/`form`/
  * `save`/`cancel`, so saving one never submits another's untouched draft.
  * `buildVacancyPatch` (vacanciesShared.ts) gates every key with `if (key in
@@ -15,12 +16,12 @@
  * the number/grouping of calls differs (one big save → up to four small ones).
  *
  * The description block's own edit state lives in useVacancyDescription
- * (Danny 21-07: Beschrijving moved to its own drawer tab) — untouched here.
+ * (Danny 21-07: Beschrijving — description — moved to its own drawer tab) — untouched here.
  *
  * DRILLDOWN-VOLGORDE-CANON (Danny 21-08, VACATURES 1/2/3/4): the required
- * skills list moved to the Vacaturetekst tab (its own useVacancySkills hook,
+ * skills list moved to the Vacaturetekst (vacancy-text) tab (its own useVacancySkills hook,
  * next to the vacancy text) and the bureau branch (vestiging) moved out of
- * this Locatie section entirely, onto its own LAST block in the drill-down
+ * this Location section entirely, onto its own LAST block in the drill-down
  * (VacancyBranchBlock, its own useLocations()) — neither lives in this hook
  * any more.
  */
@@ -54,7 +55,7 @@ type LocationForm = Record<LocationKey, string>
 type RequirementsForm = Record<RequirementsKey, string>
 type ConditionsForm = Record<ConditionsKey, string>
 
-// V4-V6 (VACATURES-100): klant → locatie → afdeling → contactpersoon cascade — one
+// V4-V6 (VACATURES-100): customer → location → department → contact cascade — one
 // picked {id,name} per step (VAC-CASCADE-1: seeded from the detail, persisted for real).
 type CascadeState = { locationId: string; locationName: string; departmentId: string; departmentName: string; contactId: string; contactName: string }
 
@@ -141,10 +142,10 @@ export function useVacancyDetailsForm(v: VacancyDetail, onUpdate?: UpdateFn) {
     customerLocationId: cascade.locationId,
     onLocationChange: p => {
       setCascade(c => ({ ...c, locationId: p.id, locationName: p.name }))
-      // V9 (Danny vacatures-ronde): picking a customer location takes over its
-      // address onto the Locatie sub-tab's OWN draft — only on a real pick (not
+      // V9 (Danny vacancies review round): picking a customer location takes over its
+      // address onto the Location sub-tab's OWN draft — only on a real pick (not
       // a clear), and only into the form state, so the recruiter still reviews/
-      // Saves the Locatie card themselves (never a silent cross-section write).
+      // Saves the Location card themselves (never a silent cross-section write).
       if (p.id) {
         locationForm.setF('street', p.street ?? '')
         locationForm.setF('houseNumber', p.houseNumber ?? '')
@@ -183,7 +184,7 @@ export function useVacancyDetailsForm(v: VacancyDetail, onUpdate?: UpdateFn) {
     generalForm.setEditing(false)
   }
 
-  // ---- Locatie: structured address + country→province cascade ----
+  // ---- Location: structured address + country→province cascade ----
   const seedLocation = (): LocationForm => ({
     street: v.street, houseNumber: v.houseNumber, houseNumberSuffix: v.houseNumberSuffix, postalCode: v.postalCode, city: v.city,
     province: v.province, country: v.country,

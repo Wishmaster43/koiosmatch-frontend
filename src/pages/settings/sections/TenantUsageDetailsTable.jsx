@@ -121,7 +121,8 @@ export default function TenantUsageDetailsTable({ history }) {
     return <p style={{ fontSize: 13, color: 'var(--text-muted)', padding: 8 }}>{t('usage.details.empty')}</p>
   }
 
-  // Bounded height (Danny 17-08: "hoe lang wordt dit dan wel niet") — the history
+  // Bounded height (Danny 17-08: "hoe lang wordt dit dan wel niet" — "how long
+  // is this going to get") — the history
   // is a rolling window that grows with the tenant, and an expanded row adds a
   // whole panel on top of that. Nothing is dropped: the footer states the real
   // number of months, and every one of them stays in the scroll area.

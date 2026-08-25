@@ -2,7 +2,7 @@
  * WaWebQueueTab — K-193 fase 1: the private WhatsApp (WAHA/Baileys) outbox.
  * A per-number stats strip (KpiCard: backlog / rate limit / est. drain) above a
  * DataTable of the tenant's queue rows, with send-now/pause/retry/cancel row
- * actions gated on messaging.manage. Status filtering lives in the right panel
+ * actions gated on whatsapp.manage. Status filtering lives in the right panel
  * (WhatsAppPage registers it while this tab is active) — this component stays
  * presentational plus the mutation wiring.
  */

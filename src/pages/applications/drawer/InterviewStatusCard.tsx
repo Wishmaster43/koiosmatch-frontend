@@ -1,3 +1,32 @@
+/**
+ * InterviewStatusCard — the compact "who's talking to whom, right now" summary
+ * for the live interview session: agent, flow, turn, step and elapsed time.
+ * Every visibility field stays optional, so a payload that carries only
+ * category/step/total still renders the calm branches instead of inventing a
+ * value (§3 no fake affordances).
+ *
+ * INTERVIEW-VISIBILITY-1 is LIVE (measured 01-08 in InterviewSessionResource):
+ * `flow_name` comes off the flow relation and the agent is resolved
+ * DETERMINISTICALLY (InterviewSession::resolveAgent — vacancy-coupled agent, then
+ * the flow's persona, then the oldest agent on the flow ordered by created_at,
+ * id), so both are presented plainly here. This card is DRAWER-ONLY on purpose:
+ * `agent`, `turn` and `duration_seconds` exist only on the detail resource, so no
+ * table, board or KPI may render them.
+ *
+ * INTERVIEW-STOP-1 is LIVE (measured 31-07). `POST /applications/{id}/stop-interview`
+ * and `POST /applications/{id}/resume-interview` are registered inside the tenant
+ * group behind `permission:applications.update` and answer `{status: 'paused' |
+ * 'active', paused_at}`. Consequences encoded below:
+ *  · both routes target the APPLICATION id — the interview session id is never sent,
+ *    so the buttons do NOT gate on `interview.id` (the LIST payload has no session id,
+ *    which made the control read "unavailable" until the detail fetch landed);
+ *  · a 404 is the backend's ordinary "no open interview session for this application"
+ *    reply — it shows a notice and the control stays retryable, it does NOT mean the
+ *    route is missing (that stale reading permanently killed the button);
+ *  · the action responses carry only status/paused_at, so a success reconciles from a
+ *    `GET /applications/{id}` refetch — the backend derives `turn` (and who paused)
+ *    itself, and this card must show that, not a local guess.
+ */
 import { useEffect, useRef, useState } from 'react'
 import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -43,35 +72,6 @@ const cardStyle: CSSProperties = {
 const MetaDot = () => <span aria-hidden="true" style={{ color: 'var(--text-muted)', fontSize: 12 }}>·</span>
 
 
-/**
- * InterviewStatusCard — the compact "who's talking to whom, right now" summary
- * for the live interview session: agent, flow, turn, step and elapsed time.
- * Every visibility field stays optional, so a payload that carries only
- * category/step/total still renders the calm branches instead of inventing a
- * value (§3 no fake affordances).
- *
- * INTERVIEW-VISIBILITY-1 is LIVE (measured 01-08 in InterviewSessionResource):
- * `flow_name` comes off the flow relation and the agent is resolved
- * DETERMINISTICALLY (InterviewSession::resolveAgent — vacancy-coupled agent, then
- * the flow's persona, then the oldest agent on the flow ordered by created_at,
- * id), so both are presented plainly here. This card is DRAWER-ONLY on purpose:
- * `agent`, `turn` and `duration_seconds` exist only on the detail resource, so no
- * table, board or KPI may render them.
- *
- * INTERVIEW-STOP-1 is LIVE (measured 31-07). `POST /applications/{id}/stop-interview`
- * and `POST /applications/{id}/resume-interview` are registered inside the tenant
- * group behind `permission:applications.update` and answer `{status: 'paused' |
- * 'active', paused_at}`. Consequences encoded below:
- *  · both routes target the APPLICATION id — the interview session id is never sent,
- *    so the buttons do NOT gate on `interview.id` (the LIST payload has no session id,
- *    which made the control read "unavailable" until the detail fetch landed);
- *  · a 404 is the backend's ordinary "no open interview session for this application"
- *    reply — it shows a notice and the control stays retryable, it does NOT mean the
- *    route is missing (that stale reading permanently killed the button);
- *  · the action responses carry only status/paused_at, so a success reconciles from a
- *    `GET /applications/{id}` refetch — the backend derives `turn` (and who paused)
- *    itself, and this card must show that, not a local guess.
- */
 export default function InterviewStatusCard({ interview, applicationId }: { interview: ApplicationInterview | null; applicationId?: Id }) {
   const { t } = useTranslation('applications')
   const auth = useAuth()

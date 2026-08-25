@@ -1,3 +1,13 @@
+/**
+ * CvProposalRepeatables — the work-history and education rows a CV proposes.
+ * These are APPEND-ONLY on the backend (CvParseProposalApplier never overwrites
+ * an existing row), so there is nothing to compare them against — the honest
+ * framing is "these lines get added", which is what the header says.
+ *
+ * Dates and employers are the two things the parser gets wrong most often, so
+ * every row carries the CV badge and every value is shown exactly as read — no
+ * reformatting that would launder a misread into something that looks parsed.
+ */
 import { useTranslation } from 'react-i18next'
 import SoftChip from '@/components/ui/SoftChip'
 import { Caption } from '@/components/ui/typography'
@@ -11,21 +21,11 @@ interface CvProposalRepeatablesProps {
   educations: CvProposalEducation[]
 }
 
-/**
- * CvProposalRepeatables — the work-history and education rows a CV proposes.
- * These are APPEND-ONLY on the backend (CvParseProposalApplier never overwrites
- * an existing row), so there is nothing to compare them against — the honest
- * framing is "these lines get added", which is what the header says.
- *
- * Dates and employers are the two things the parser gets wrong most often, so
- * every row carries the CV badge and every value is shown exactly as read — no
- * reformatting that would launder a misread into something that looks parsed.
- */
 export default function CvProposalRepeatables({ experiences, educations }: CvProposalRepeatablesProps) {
   const { t } = useTranslation('applications')
   if (experiences.length === 0 && educations.length === 0) return null
 
-  // Literal CV period text — "2015 – heden" when only a start date was read.
+  // Literal CV period text — e.g. "2015 – now" when only a start date was read.
   const period = (start: string, end: string) => {
     if (!start && !end) return ''
     return `${start || '?'} – ${end || t('cvProposal.ongoing')}`

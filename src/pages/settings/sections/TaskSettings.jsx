@@ -1,12 +1,11 @@
-import { useTranslation } from 'react-i18next'
-import StatusListEditor from './StatusListEditor'
-import { resolveGenericLookupIcon } from './lookupIcons'
-
 /**
  * Task (activity) lookups — three tenant-managed lists behind the Tasks feature,
  * each its own Settings sub-tab. All reuse the shared StatusListEditor (name +
  * colour + reorder + 409 in-use), so nothing in the Tasks UI is hardcoded.
  */
+import { useTranslation } from 'react-i18next'
+import StatusListEditor from './StatusListEditor'
+import { resolveGenericLookupIcon } from './lookupIcons'
 
 // Curated icon subset for activity types — the generic set (task-ish glyphs are
 // most of it already), scoped so the picker grid isn't the full 24-icon set.

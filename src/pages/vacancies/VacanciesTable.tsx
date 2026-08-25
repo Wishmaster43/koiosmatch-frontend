@@ -1,3 +1,7 @@
+/**
+ * VacanciesTable — vacancy list as a loose component. See the fuller docblock
+ * below, right above the component, for the column contract it declares.
+ */
 import type { RefObject } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Globe } from 'lucide-react'
@@ -179,12 +183,14 @@ export default function VacanciesTable({ rows, loading, selectedId, onSelect, on
           else if (state.partial) caveat = t('columns.leadsPartial')
           // A FRESH count keeps its computed-at as hover info only — NO dot: the
           // dot means "this number carries a caveat", and a correct, current
-          // number carries none (Danny 22-08: "dat stomme ballentje moet weg").
+          // number carries none (Danny 22-08, translated: "that stupid little
+          // dot needs to go" — verbatim: "dat stomme ballentje moet weg").
           else if (state.computedAt) title = t('columns.leadsComputedAt', { date: formatDate(state.computedAt) })
         }
         if (caveat) title = caveat
-        // NO dot, ever (Danny 24-08 — "die stomme balen waren toch weg", the
-        // 22-08 fresh-only removal was not enough): the caveat rides as the
+        // NO dot, ever (Danny 24-08, translated: "those stupid dots were
+        // supposed to be gone already" — verbatim: "die stomme balen waren toch
+        // weg", the 22-08 fresh-only removal was not enough): the caveat rides as the
         // hover title/aria-label on the cell itself, never as a visual marker.
         const dot = null
         return onOpenCandidateSearch ? (

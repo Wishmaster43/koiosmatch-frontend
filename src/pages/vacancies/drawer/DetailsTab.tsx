@@ -1,3 +1,16 @@
+/**
+ * DetailsTab — thin container: wires useVacancyDetailsForm and stacks EVERY
+ * field group as its own card on this ONE tab (VAC-ALGEMEEN-MERGE-1, Danny
+ * 14-08 punt 9: "het Locatie-subtabblad verdwijnt: op het eerste tabblad
+ * Algemeen staat ALLES in eigen blokjes"). The earlier Algemeen/Locatie/Eisen/
+ * Voorwaarden SubTabBar (VAC-DETAILS-SPLIT-1) is gone — each Details<X>Tab
+ * still keeps its OWN pencil/save/cancel from its OWN hook section, so
+ * editing one block never submits another's untouched draft; only the
+ * navigation chrome around them (the sub-tab strip) was removed. No card/row
+ * JSX lives here — that stays in detailsFieldKit + the four Details<X>Tab
+ * siblings; this file only owns the block order and the shared Koios
+ * advisory block (still bottom-of-tab, unaffected by the merge).
+ */
 import { useTranslation } from 'react-i18next'
 import KoiosAdviceBlock from '@/components/ai/KoiosAdviceBlock'
 import { useVacancyAdvice } from '@/lib/useVacancyAdvice'
@@ -14,19 +27,6 @@ import type { Id } from '@/types/common'
 
 type UpdateFn = (id: Id | undefined, patch: Record<string, unknown>) => void
 
-/**
- * DetailsTab — thin container: wires useVacancyDetailsForm and stacks EVERY
- * field group as its own card on this ONE tab (VAC-ALGEMEEN-MERGE-1, Danny
- * 14-08 punt 9: "het Locatie-subtabblad verdwijnt: op het eerste tabblad
- * Algemeen staat ALLES in eigen blokjes"). The earlier Algemeen/Locatie/Eisen/
- * Voorwaarden SubTabBar (VAC-DETAILS-SPLIT-1) is gone — each Details<X>Tab
- * still keeps its OWN pencil/save/cancel from its OWN hook section, so
- * editing one block never submits another's untouched draft; only the
- * navigation chrome around them (the sub-tab strip) was removed. No card/row
- * JSX lives here — that stays in detailsFieldKit + the four Details<X>Tab
- * siblings; this file only owns the block order and the shared Koios
- * advisory block (still bottom-of-tab, unaffected by the merge).
- */
 export default function DetailsTab({ vacancy: v, onUpdate }: { vacancy: VacancyDetail; onUpdate?: UpdateFn }) {
   const { t } = useTranslation('vacancies')
   // KOIOS-ADVIES-OVERAL-1: the SAME resolver the vacancies table's Koios column

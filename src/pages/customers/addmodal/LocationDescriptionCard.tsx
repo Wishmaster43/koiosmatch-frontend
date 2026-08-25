@@ -1,7 +1,8 @@
 /**
  * LocationDescriptionCard — the "Omschrijving" card of AddLocationModal, same
- * convention as AddDepartmentModal's own (Danny 02-08: "bij locatie en
- * afdeling moeten we ook een beschrijving hebben"). Extracted (§0.3 — the
+ * convention as AddDepartmentModal's own (Danny 02-08, translated: "we should
+ * also have a description for location and department" — verbatim: "bij
+ * locatie en afdeling moeten we ook een beschrijving hebben"). Extracted (§0.3 — the
  * ~400-line split trigger, 2026-08-03); pure presentational, the text VALUE
  * and its `onChange` callback come from the parent's form state, but the
  * expand/editing UI state is purely local to this card (nothing outside it

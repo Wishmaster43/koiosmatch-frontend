@@ -1,5 +1,3 @@
-import { BrainCircuit } from 'lucide-react'
-
 /**
  * KoiosAiMark — the Koios AI brand mark: a brain-circuit glyph in a soft rounded
  * square. Reuse it anywhere we signal "Koios AI" (sidebar, AI advisory block, the
@@ -9,6 +7,7 @@ import { BrainCircuit } from 'lucide-react'
  *                  follows the tenant's chosen fill instantly (calm, for content blocks);
  *       'solid' = primary background + on-accent glyph (for accent buttons).
  */
+import { BrainCircuit } from 'lucide-react'
 interface KoiosAiMarkProps {
   size?: number
   tone?: 'soft' | 'solid'

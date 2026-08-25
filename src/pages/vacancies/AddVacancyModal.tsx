@@ -12,7 +12,8 @@
  * — nothing pending keeps the exact pre-SLICE-2 immediate-close behaviour.
  *
  * EXCEL-VACATURES-1 (Danny 14-08, screenshot: "Excel importeren moet in de
- * pop-up + nieuwe vacature niet hier boven de tabel!!"): the Excel/CSV bulk
+ * pop-up + nieuwe vacature niet hier boven de tabel!!", i.e. "Excel import
+ * must be in the popup + new vacancy, not here above the table!!"): the Excel/CSV bulk
  * upload moved off the list toolbar into THIS modal — mirrors AddCustomerModal's
  * KLANT-LAYOUT-3 shape verbatim: a header toggle (ModalHeader), the import flow
  * as the FIRST card in the body while open, wired to the same shared
@@ -123,7 +124,8 @@ export default function AddVacancyModal({
     <FloatingPanel open onClose={onClose} ariaLabel={f.t('modal.title')}
       persistKey="add-vacancy" scrollBody={false} hideClose
       // WIDER (Danny 08-08: "Nieuwe vacature mag breder zijn dus knoppen naar
-      // rechts"): the shared 1060px cap squeezed the header so the title wrapped
+      // rechts", i.e. "New vacancy may be wider so buttons go to the right"):
+      // the shared 1060px cap squeezed the header so the title wrapped
       // onto two lines and the status pills sat right against it. This form has
       // three column groups, so it gets its own, wider cap — the shared
       // WIDE_MODAL stays untouched for every other modal.

@@ -3,7 +3,8 @@
  * ContactsPanel, which is now the ONE contact surface: the same table, chips, search,
  * actions and drill-down are rendered inside a location and a department too (Danny
  * 28-07: "het contactpersonen tabblad op locatie en afdeling komt niet overeen met dat
- * van de hoofdklant").
+ * van de hoofdklant" — "the contact persons tab on location and department doesn't
+ * match the one on the main customer").
  *
  * Everything this file used to own — the column definitions, the singular-id fallback
  * resolver, the search shell, the add modal and the drill-in — moved into that panel, so
@@ -21,7 +22,7 @@ interface Props {
   locations?: { id: Id; name: string }[]
   departments?: Department[]
   statuses?: LookupOption[]
-  // ARCHIVE-SUBENTITY-1: threaded down for the "Gearchiveerd" quick-view's own
+  // ARCHIVE-SUBENTITY-1: threaded down for the "Gearchiveerd" ("Archived") quick-view's own
   // fetch. Optional — ContactsPanel falls back to a live contact's own customerId
   // when absent, so an as-yet-unthreaded caller still works for a non-empty list.
   customerId?: Id

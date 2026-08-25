@@ -1,6 +1,8 @@
 /**
  * addmodal/defaults — smart defaults for a NEW task's planning fields
- * (TASK-SMART-DEFAULTS-1, Danny: "+ Nieuwe taak is minder mooi en intelligent
+ * (TASK-SMART-DEFAULTS-1, Danny, translated: "+ New task is less nice and
+ * intelligent than + match — the date is neatly filled in etc." — verbatim:
+ * "+ Nieuwe taak is minder mooi en intelligent
  * dan + match — de datum is netjes gevuld etc."). +Match proposes today for
  * its start date (match/helpers' todayISO) but has no time-of-day field to
  * mirror; tasks do (`dueTime`, TASK-DUE-TIME-1), so the planning-date default

@@ -1,25 +1,3 @@
-import { useState } from 'react'
-import type { ComponentType } from 'react'
-import { useTranslation } from 'react-i18next'
-import DatePicker from 'react-datepicker'
-import { useDateFormat } from '@/lib/datetime'
-import { toLocalIsoDate } from '@/lib/localDate'
-import { useWorkPermitTypes } from '@/lib/useWorkPermitTypes'
-import CreatableSelectJs from '@/components/ui/CreatableSelect'
-import { FieldRow, EditControls, GroupCard, GroupHeader, inputStyle } from './profileFieldShared'
-import { useWorkPermitVisibility } from './useWorkPermitVisibility'
-import type { WorkPermitDataState } from './workPermitVisibility'
-import type { Candidate } from '@/types/candidate'
-
-type AnyProps = Record<string, unknown>
-// CreatableSelect is still untyped JS — accept any props at the boundary (mirrors ProfilePersonalTab).
-const CreatableSelect = CreatableSelectJs as unknown as ComponentType<AnyProps>
-
-// The fields this card owns — mirrors ProfilePersonalTab's per-card split (own
-// pencil, own draft/error state, never blocking another card's in-progress edit).
-type WPKey = 'workPermitType' | 'workPermitValidUntil'
-type WPForm = Record<WPKey, string>
-
 /**
  * WorkPermitBlock — KAND-WERKVERGUNNING-2: work-permit fields backed by two plain
  * backend columns (candidates.work_permit_type / work_permit_valid_until — see the
@@ -52,6 +30,28 @@ type WPForm = Record<WPKey, string>
  * `work_permit_valid_until` is unaffected by the lookup move and keeps its own
  * plain date column + DatePicker, untouched here.
  */
+import { useState } from 'react'
+import type { ComponentType } from 'react'
+import { useTranslation } from 'react-i18next'
+import DatePicker from 'react-datepicker'
+import { useDateFormat } from '@/lib/datetime'
+import { toLocalIsoDate } from '@/lib/localDate'
+import { useWorkPermitTypes } from '@/lib/useWorkPermitTypes'
+import CreatableSelectJs from '@/components/ui/CreatableSelect'
+import { FieldRow, EditControls, GroupCard, GroupHeader, inputStyle } from './profileFieldShared'
+import { useWorkPermitVisibility } from './useWorkPermitVisibility'
+import type { WorkPermitDataState } from './workPermitVisibility'
+import type { Candidate } from '@/types/candidate'
+
+type AnyProps = Record<string, unknown>
+// CreatableSelect is still untyped JS — accept any props at the boundary (mirrors ProfilePersonalTab).
+const CreatableSelect = CreatableSelectJs as unknown as ComponentType<AnyProps>
+
+// The fields this card owns — mirrors ProfilePersonalTab's per-card split (own
+// pencil, own draft/error state, never blocking another card's in-progress edit).
+type WPKey = 'workPermitType' | 'workPermitValidUntil'
+type WPForm = Record<WPKey, string>
+
 export default function WorkPermitBlock({ c, onSave, autoEditSignal }: {
   c: Candidate; onSave?: (v: Record<string, unknown>) => void; autoEditSignal?: number
 }) {

@@ -1,7 +1,8 @@
 /**
  * KoiosMentionMenu — the "@" picker floated above the composer. Two modes:
  *  - default (no category chosen yet): a live FAN-OUT search (KOIOS-MENTION-
- *    BREED-1, Danny: "@ moet op alle hoofdobjecten zoeken") — from 2 typed
+ *    BREED-1, Danny, verbatim: "@ moet op alle hoofdobjecten
+ *    zoeken" — i.e. "@ must search across all main objects") — from 2 typed
  *    characters, every VISIBLE category with search wiring (koiosMentionCategories.ts
  *    + koiosMentionAccess.isCategoryVisible) is queried in parallel
  *    (useKoiosMultiEntitySearch), each rendered as its own grouped, capped

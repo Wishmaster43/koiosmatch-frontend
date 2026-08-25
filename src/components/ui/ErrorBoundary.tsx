@@ -1,10 +1,3 @@
-import { Component } from 'react'
-import type { ReactNode, ErrorInfo } from 'react'
-import { useTranslation } from 'react-i18next'
-import { AlertTriangle, RotateCcw } from 'lucide-react'
-import { PageTitle } from '@/components/ui/typography'
-import Button from '@/components/ui/Button'
-
 /**
  * ErrorBoundary — catches render-time crashes in its subtree so one broken widget
  * never blanks the whole app (CLAUDE.md §3). Use one global boundary at the root
@@ -13,6 +6,13 @@ import Button from '@/components/ui/Button'
  * Privacy (§8): the raw error is NEVER shown to the user (it may carry server detail
  * or PII) — a generic message is rendered; the technical text is dev-only.
  */
+import { Component } from 'react'
+import type { ReactNode, ErrorInfo } from 'react'
+import { useTranslation } from 'react-i18next'
+import { AlertTriangle, RotateCcw } from 'lucide-react'
+import { PageTitle } from '@/components/ui/typography'
+import Button from '@/components/ui/Button'
+
 interface ErrorBoundaryProps {
   children?: ReactNode
   onError?: (error: Error, info: ErrorInfo) => void

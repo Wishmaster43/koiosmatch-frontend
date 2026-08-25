@@ -1,3 +1,5 @@
+// ChangelogTab — the vacancy's field-change audit trail. See the fuller doc
+// comment on the component below.
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { History, AlertTriangle, ArrowRight, Download } from 'lucide-react'
@@ -52,8 +54,8 @@ const changesOf = (ev: VacancyActivityEvent): Array<{ field: string; old: unknow
  * /vacancies/{id}/activity (EntityChangelogController::vacancy) shares the SAME
  * LogsEntityActivity trait as candidates — the diff bag was always there, the
  * previous version of this file just rendered the flat description instead of it.
- * Distinct from the Tijdlijn TAB (TimelineTab.tsx, real lifecycle activity) — tab =
- * activiteit, icon = veldwijzigingen.
+ * Distinct from the Tijdlijn ("timeline") TAB (TimelineTab.tsx, real lifecycle
+ * activity) — the tab is for activity, the icon is for field changes.
  */
 export default function ChangelogTab({ vacancy: v, bare = false }: { vacancy: VacancyDetail; bare?: boolean }) {
   const { t } = useTranslation('vacancies')

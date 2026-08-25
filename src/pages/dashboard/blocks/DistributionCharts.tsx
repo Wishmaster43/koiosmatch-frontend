@@ -27,8 +27,8 @@ export default function DistributionCharts({ vis, statusData, funnelData, recrui
   if (!(vis('chart.status') || vis('chart.recruiter') || vis('chart.funnel') || vis('chart.oppStage'))) return null
 
   return (
-    // Verdelings-charts — één auto-flow 2-koloms grid; verborgen charts vallen weg zodat de
-    // zichtbare (bv. status + funnel bij recruitment) vanzelf naast elkaar komen.
+    // Distribution charts — one auto-flow 2-column grid; hidden charts drop out so the
+    // visible ones (e.g. status + funnel for recruitment) naturally line up side by side.
     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
       {vis('chart.status') && <Panel><PieChartCard title={t('chart.byStatus')} data={statusData} colors={statusData.map(d => d.color) as string[]} onItemClick={(d) => onNavigate?.('candidates', fv(d) ? { status: fv(d) } : undefined)} /></Panel>}
       {vis('chart.funnel') && <Panel><BarChartCard title={t('chart.funnel')} data={funnelData} colors={funnelData.map(d => d.color) as string[]} showAverage onBarClick={(d) => onNavigate?.('applications', fv(d) ? { stage: fv(d) } : undefined)} /></Panel>}

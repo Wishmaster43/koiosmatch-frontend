@@ -1,3 +1,5 @@
+// taskAiInsights — pure FE Koios heuristic insights for the task drawer (deadline
+// health, assignment, link count). See buildTaskAdviceInsights below for the detail.
 import { isTaskOverdue, dueDateTime } from '../data/mapTask'
 import type { TaskDetail } from '@/types/task'
 import type { KoiosAdviceInsight } from '@/components/ai/KoiosAdviceBlock'

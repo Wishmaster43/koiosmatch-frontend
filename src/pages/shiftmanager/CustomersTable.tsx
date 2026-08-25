@@ -1,3 +1,7 @@
+/**
+ * CustomersTable — customer list, mirrors CandidatesTable: only declares columns,
+ * the generic DataTable handles rendering/sorting/selection/empty states.
+ */
 import { useTranslation } from 'react-i18next'
 import type { CSSProperties } from 'react'
 import DataTable from '@/components/ui/DataTable'
@@ -24,10 +28,6 @@ interface CustomersTableProps {
   onSelect?: (row: SmCustomerRow) => void
 }
 
-/**
- * CustomersTable — customer list, mirrors CandidatesTable: only declares columns,
- * the generic DataTable handles rendering/sorting/selection/empty states.
- */
 export default function CustomersTable({ rows, loading, selectedId, onSelect }: CustomersTableProps) {
   const { t } = useTranslation('customers')
 

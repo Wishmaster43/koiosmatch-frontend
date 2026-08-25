@@ -1,18 +1,7 @@
-import { useState } from 'react'
-import { useTranslation } from 'react-i18next'
-import StatusListEditor from './StatusListEditor'
-import { SettingCard, SettingRow, Toggle } from '../components/SettingsKit'
-import api from '@/lib/api'
-import { extractApiError } from '@/lib/extractApiError'
-import { notifyError } from '@/lib/notify'
-import { useContactFunctions } from '@/lib/useContactFunctions'
-import { useConfirm } from '@/hooks/useConfirm'
-import FreeEntryMismatchDialog, { mismatchesFromError } from '../components/FreeEntryMismatchDialog'
-
 /**
  * ContactFunctionsSettings — the contact-person job-title list (/contact-functions,
  * FUNCTIONS-SPLIT-1) + the free-entry toggle (Danny 24-07: "ook voor deze het blok
- * vrije invoer toestaan").
+ * vrije invoer toestaan" — allow free entry for this block too).
  *
  * FUNC-FREEENTRY-FIX (2026-08-17): persists through the REAL dedicated
  * `PUT /contact-functions/free-entry` route — never the generic `/settings` blob.
@@ -24,6 +13,17 @@ import FreeEntryMismatchDialog, { mismatchesFromError } from '../components/Free
  * route. See useContactFunctions.ts's own doc comment for the full trail; mirrors
  * ApplicationSourcesSettings.jsx / FunctionsSettings.jsx exactly.
  */
+import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import StatusListEditor from './StatusListEditor'
+import { SettingCard, SettingRow, Toggle } from '../components/SettingsKit'
+import api from '@/lib/api'
+import { extractApiError } from '@/lib/extractApiError'
+import { notifyError } from '@/lib/notify'
+import { useContactFunctions } from '@/lib/useContactFunctions'
+import { useConfirm } from '@/hooks/useConfirm'
+import FreeEntryMismatchDialog, { mismatchesFromError } from '../components/FreeEntryMismatchDialog'
+
 export default function ContactFunctionsSettings() {
   const { t } = useTranslation('settings')
   const { allowFreeEntry, invalidate } = useContactFunctions()

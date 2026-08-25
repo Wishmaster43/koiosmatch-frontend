@@ -1,5 +1,6 @@
 /**
- * StatisticsTab — MOVED-FROM-OVERVIEW-1 (Danny 22-08, "AKKOORD"): the ordinal
+ * StatisticsTab — MOVED-FROM-OVERVIEW-1 (Danny 22-08, "AKKOORD" — Dutch for
+ * "AGREED"): the ordinal
  * footnote ("Match 2 van 2 bij deze kandidaat") that used to sit under the
  * Matchgegevens card on Overview MOVES here, together with the data that makes
  * it useful — WHO/WHAT the other match(es) on that axis actually are. Per axis

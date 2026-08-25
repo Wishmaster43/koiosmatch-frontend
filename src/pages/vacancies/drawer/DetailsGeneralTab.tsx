@@ -1,3 +1,10 @@
+/**
+ * DetailsGeneralTab — Algemeen sub-tab (VAC-DETAILS-SPLIT-1): contractvorm
+ * (contract form — the canon "Contractvorm" axis, §3B), id (read-only),
+ * start/end date, customer → location → department → contact cascade, job
+ * function, preferred sector. Its OWN pencil/save/cancel (`general.*` from the
+ * hook) — flipping it never touches Locatie/Eisen/Voorwaarden's drafts.
+ */
 import { useTranslation } from 'react-i18next'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import EntityLink from '@/components/ui/EntityLink'
@@ -17,12 +24,6 @@ interface Props {
   formatDate: (d: string) => string
 }
 
-/**
- * DetailsGeneralTab — Algemeen sub-tab (VAC-DETAILS-SPLIT-1): contractvorm, id
- * (read-only), start/einddatum, klant → locatie → afdeling → contactpersoon
- * cascade, functie, voorkeursbranche. Its OWN pencil/save/cancel (`general.*`
- * from the hook) — flipping it never touches Locatie/Eisen/Voorwaarden's drafts.
- */
 export default function DetailsGeneralTab({ vacancy: v, general, candidateTypes, typeMeta, industries, fnOptions, formatDate }: Props) {
   const { t } = useTranslation('vacancies')
   const { editing, setEditing, form, setF, save, cancel, types, toggleType,
@@ -56,19 +57,19 @@ export default function DetailsGeneralTab({ vacancy: v, general, candidateTypes,
           /* eslint-enable huisstijlLegacy/no-restricted-syntax */
         })}
       </div>, editing)}
-    {/* V7 (Danny vacatures-ronde): the Vacature-ID row (`v.code`) is removed —
+    {/* V7 (Danny vacancies review round): the Vacancy-ID row (`v.code`) is removed —
         it duplicated the reference number, which already renders in the drawer
         title row (VacancyDrawer.tsx's ReferenceNumberChip) and stays there. */}
     {/* VAC-DATES-1: the vacancy's own runtime window — start_date AND end_date
         (validated after_or_equal:start_date server-side), paired half-row. */}
     {row(`${t('details.startDate')} / ${t('details.endDate')}`, dateRange(formatDate, v.startDate, v.endDate) || dash, twoDates('startDate', 'endDate'), editing)}
     {/* V3: client — searchable (was a plain <select>). Picking a different client
-        resets the dependent locatie/afdeling/contactpersoon picks below. */}
+        resets the dependent location/department/contact picks below. */}
     {row(t('drawer.client'),
       <EntityLink page="customers" id={v.clientId}>{v.clientName || '—'}</EntityLink>,
       <CreatableSelect value={clientId || null} onChange={handleClientChange} allowCreate={false}
         placeholder={t('drawer.selectClient')} options={customerOptions.map(c => ({ value: String(c.value), label: c.label }))} />, editing)}
-    {/* V4-V6: locatie → afdeling → contactpersoon — optional, searchable cascade.
+    {/* V4-V6: location → department → contact — optional, searchable cascade.
         VAC-CASCADE-1: the backend persists customer_location_id/customer_department_id/
         contact_id, so read-mode shows the saved name (or a dash) and the edit
         survives a reload instead of silently evaporating.

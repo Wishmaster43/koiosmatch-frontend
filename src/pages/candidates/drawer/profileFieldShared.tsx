@@ -25,7 +25,8 @@ const blockStyle: CSSProperties = { borderRadius: 10, overflow: 'hidden', border
 // Bordered card holding one group's field rows. The group NAME is not in here — it sits
 // on the header row above the card, next to the pencil, exactly like the profile-text
 // block does (Danny 28-07: "kopjes horen er buiten te staan, kijk maar naar profiel
-// txt"). See GroupHeader below; one heading convention for the whole tab.
+// txt", i.e. "headings belong outside it, just look at the profile text"). See
+// GroupHeader below; one heading convention for the whole tab.
 export function GroupCard({ children }: { children: ReactNode }) {
   return <div style={{ ...blockStyle, padding: '6px 12px', display: 'flex', flexDirection: 'column', gap: 2 }}>{children}</div>
 }

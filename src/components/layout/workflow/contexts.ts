@@ -1,11 +1,10 @@
-import { createContext } from 'react'
-import type { FlowNodeData } from '@/types/workflow'
-
 /**
  * Canvas ↔ editor context wiring. The providers live in EditorInner; the consumers
  * are the canvas node/edge components. Shared here so both sides reference the same
  * context objects (importing them from two places would create separate contexts).
  */
+import { createContext } from 'react'
+import type { FlowNodeData } from '@/types/workflow'
 
 // An edge action (insert/delete/filter) keyed by the edge id.
 export type EdgeFn = (edgeId: string) => void

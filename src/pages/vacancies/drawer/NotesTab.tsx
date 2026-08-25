@@ -1,3 +1,11 @@
+/**
+ * NotesTab — internal notes on a vacancy. VACANCY-NOTE-TYPE-1 (2026-08-04): rewritten
+ * onto the SAME shared NotesTab family applications/opportunities use (mirrors
+ * pages/applications/drawer/NotesTab.tsx), now that VacancyNoteController validates
+ * `type` against the entity-scoped note_types lookup — the previous bespoke composer
+ * had no type picker at all ("note TYPES stay as-is until NOTE-TYPES-3 lands", which
+ * has now landed).
+ */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import api from '@/lib/api'
@@ -10,14 +18,6 @@ import type { VacancyDetail } from '@/types/vacancy'
 // Structural match for the shared NotesTab's NoteItem (typed fields + open index).
 interface Note { type?: string; title?: string; author?: string; text?: string; body?: string; created_at?: string; time?: string; [k: string]: unknown }
 
-/**
- * NotesTab — internal notes on a vacancy. VACANCY-NOTE-TYPE-1 (2026-08-04): rewritten
- * onto the SAME shared NotesTab family applications/opportunities use (mirrors
- * pages/applications/drawer/NotesTab.tsx), now that VacancyNoteController validates
- * `type` against the entity-scoped note_types lookup — the previous bespoke composer
- * had no type picker at all ("note TYPES stay as-is until NOTE-TYPES-3 lands", which
- * has now landed).
- */
 export default function NotesTab({ vacancy: v }: { vacancy: VacancyDetail }) {
   const { t } = useTranslation('vacancies')
   // Note categories from the tenant lookup, scoped to 'vacancy' (NOTE-TYPES-2/3).

@@ -1,12 +1,14 @@
 /**
  * ContactLinkSection — a contact's Locatie and Afdeling coupling, rendered in the SAME
  * shape as "+ Vestiging" (Danny 28-07: "zowel de locatie als afdeling moet hetzelfde
- * eruit zien en werken als +vestiging"): a section label with an add-trigger on the
+ * eruit zien en werken als +vestiging", i.e. "both the location and the department
+ * must look and work the same as +branch"): a section label with an add-trigger on the
  * right, a card below holding the current value as a removable chip, and an italic empty
  * state when nothing is linked.
  *
  * MULTI-VALUE (Danny 28-07: "een contactpersoon moet aan meerdere locaties en afdelingen
- * gekoppeld kunnen worden"). The backend has supported this all along through two pivot
+ * gekoppeld kunnen worden", i.e. "a contact must be linkable to multiple locations and
+ * departments"). The backend has supported this all along through two pivot
  * tables and `location_ids[]`/`department_ids[]`; this app only ever wrote the singular
  * columns. It writes the arrays now — see the hook's toApi for the one asymmetry that has
  * to be compensated for.

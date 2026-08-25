@@ -1,3 +1,9 @@
+/**
+ * TasksPage — the tasks list (§3A blueprint page): a thin outer wrapper scopes
+ * the task lookups (statuses/types/priorities) to this screen, TasksPageInner
+ * composes the filters/data hooks and renders the insights row + table/board +
+ * drawer.
+ */
 import { useState, useEffect, useMemo, useRef } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'

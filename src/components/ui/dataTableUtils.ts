@@ -1,11 +1,10 @@
-import type { CSSProperties } from 'react'
-import type { RowId } from './DataTable'
-
 /**
  * DataTable pure helpers & shared constants (split out 2026-07-21, audit item —
  * DataTable.tsx was approaching the 400-line split threshold). Pure logic + static
  * styles only, no rendering — shared by DataTable.tsx and DataTableRow.tsx.
  */
+import type { CSSProperties } from 'react'
+import type { RowId } from './DataTable'
 
 // Read a column's default field off an unknown-shaped row (dynamic accessor).
 export const field = (row: unknown, key: string): unknown => (row as Record<string, unknown>)[key]

@@ -2,7 +2,7 @@
  * AddDepartmentModal — create (or edit, via `initial`) a department. Full field set
  * CustomerDepartmentController accepts: location (required — a department always
  * lives under a location), name, description, status, cost centre (Danny 2026-07-22
- * — the middle afdeling>locatie>klant cascade level; no billing email here, that
+ * — the middle department>location>customer cascade level; no billing email here, that
  * stays customer-only, see OverviewTab). One component serves both the top-level
  * Afdelingen tab AND the location detail's nested list (Danny: "reuse the same
  * components, don't fork") — `lockLocation` hides the location picker when
@@ -98,7 +98,8 @@ export default function AddDepartmentModal({ onClose, onCreate, onImported, loca
   const [descExpanded, setDescExpanded] = useState(false)
   const [descEditing, setDescEditing] = useState(false)
   // STATUS-HIDDEN-1 (Danny 02-08, second round: "+ nieuwe afdeling ... status moet
-  // weg in de popup"): hidden unless the tenant marked it required — mirrors
+  // weg in de popup" — status must go from the popup): hidden unless the tenant
+  // marked it required — mirrors
   // AddLocationModal's own gate, same flat-array setting shape.
   const settings = useAllSettings()
   const showStatusPicker = getJsonSetting<string[]>(settings, 'customer_department_required_fields', []).includes('status_id')

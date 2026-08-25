@@ -1,7 +1,7 @@
 /**
- * useMatchTextPopout — DRILLDOWN-VOLGORDE-CANON (Danny 21-08): de matchtekst
- * krijgt het profieltekst-recept, dus ook de second-screen-popout. Mirrors
- * useVacancyTextPopout 1:1 — a light identity fetch for the popped-out window
+ * useMatchTextPopout — DRILLDOWN-VOLGORDE-CANON (Danny 21-08): the match text
+ * gets the profile-text recipe too, so it also gets the second-screen popout.
+ * Mirrors useVacancyTextPopout 1:1 — a light identity fetch for the popped-out window
  * plus a standalone PATCH /matches/{id} on the SAME `match_text` field the
  * drawer's own MatchTextBlock writes through useMatchContract.save.
  */
@@ -35,8 +35,8 @@ export function useMatchTextLite(id: string | undefined) {
     api.get(`/matches/${id}`)
       .then(r => {
         const raw = unwrap<RawMatchLite>(r)
-        // Kandidaat — vacature als venstertitel; het kastlijntje is hier een
-        // scheidingsteken tussen twee gegevenswaarden (§5-uitzondering).
+        // Candidate — vacancy as the window title; the em-dash here is a
+        // separator between two data values, not sentence punctuation (§5 exception).
         const title = [raw.candidate?.name, raw.vacancy?.title].filter(Boolean).join(' — ') || '?'
         setMatch({ id: String(raw.id ?? id), title, initials: initialsOf(raw.candidate?.name ?? title), matchText: raw.match_text ?? '' })
       })

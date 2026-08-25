@@ -1,7 +1,8 @@
 /**
- * MapColumnsStep (wizard step 2) — "velden worden gekoppeld" (Danny): one row per
- * column found in the uploaded file, each with a select for which backend field it
- * feeds. Auto-mapped by header-name similarity on mount (useMappingWizard.loadFile);
+ * MapColumnsStep (wizard step 2) — "velden worden gekoppeld" (Danny, i.e.
+ * "fields get linked"): one row per column found in the uploaded file, each
+ * with a select for which backend field it feeds. Auto-mapped by header-name
+ * similarity on mount (useMappingWizard.loadFile);
  * every suggestion stays overridable here, and a column nobody claims is marked
  * "will be skipped" rather than silently dropped.
  */

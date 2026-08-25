@@ -1,13 +1,3 @@
-import axios, {
-  type AxiosError,
-  type AxiosResponse,
-  type InternalAxiosRequestConfig,
-} from 'axios'
-import type { ListResult, PaginationMeta } from '../types/api'
-import { CSRF_COOKIE_URL } from './authMode'
-import { isMfaEnrollmentError } from './mfaGate'
-import { notifyError } from './notify'
-
 /**
  * api — the single shared axios instance for the whole app.
  *
@@ -24,6 +14,16 @@ import { notifyError } from './notify'
  * long-running operations (sync/workflows): a hung request becomes a catchable
  * error instead of a spinner that never resolves.
  */
+import axios, {
+  type AxiosError,
+  type AxiosResponse,
+  type InternalAxiosRequestConfig,
+} from 'axios'
+import type { ListResult, PaginationMeta } from '../types/api'
+import { CSRF_COOKIE_URL } from './authMode'
+import { isMfaEnrollmentError } from './mfaGate'
+import { notifyError } from './notify'
+
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL ?? 'http://koiosmatch-api.test/api',
   // Default timeout: 20s (C-CHIP #5). Known long-running paths get 120s via the
@@ -249,7 +249,7 @@ export function isServiceUnavailable(error: unknown): boolean {
 // sites never have to re-guess the shape (the #1 source of hidden bugs):
 //   1. { data, meta }                                      — API Resources
 //   2. bare object / bare array                            — response()->json($model)
-//   3. { data, total, per_page, current_page, last_page }  — custom /reports paginatie
+//   3. { data, total, per_page, current_page, last_page }  — custom /reports pagination
 
 type ResponseLike = AxiosResponse | { data: unknown }
 

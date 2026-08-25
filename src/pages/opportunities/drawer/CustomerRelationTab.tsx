@@ -1,3 +1,21 @@
+/**
+ * CustomerRelationTab (renamed from KlantTab/CustomerTab — canon Dutch-identifier
+ * sweep) — the customer this opportunity is linked to (customer → location →
+ * department → contact). Read-only by default (values hyperlink to the customer record —
+ * §3A cross-entity links); the pencil opens the same searchable customer picker +
+ * dependent location/department/contact cascade the create modal uses
+ * (useCustomerCascade), so re-pointing the deal at a different client/location is a
+ * single in-place edit — no separate screen. Picking a new client resets the
+ * dependent picks (cascade integrity). Contacts are a flat, customer-wide list
+ * (useCustomerCascade), so a coupled contact is always selectable regardless of
+ * whether location/department are set yet; departments are nested PER location on
+ * the API, so this tab additionally flattens them across all locations whenever no
+ * location is (yet) picked — otherwise an already-coupled department silently
+ * couldn't render as selected (Danny: "Locatie/Afdeling ... Selecteer" while
+ * Contactpersoon already showed correctly, i.e. "Location/Department ...
+ * Select" while Contact already showed correctly) — and picking a department
+ * directly auto-fills its parent location for a consistent pair.
+ */
 import { useState } from 'react'
 import type { ComponentType, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -43,23 +61,6 @@ function F({ label, children }: { label: ReactNode; children: ReactNode }) {
   )
 }
 
-/**
- * CustomerRelationTab (renamed from KlantTab/CustomerTab — canon Dutch-identifier
- * sweep) — the customer this opportunity is linked to (customer → location →
- * department → contact). Read-only by default (values hyperlink to the customer record —
- * §3A cross-entity links); the pencil opens the same searchable customer picker +
- * dependent location/department/contact cascade the create modal uses
- * (useCustomerCascade), so re-pointing the deal at a different client/location is a
- * single in-place edit — no separate screen. Picking a new client resets the
- * dependent picks (cascade integrity). Contacts are a flat, customer-wide list
- * (useCustomerCascade), so a coupled contact is always selectable regardless of
- * whether location/department are set yet; departments are nested PER location on
- * the API, so this tab additionally flattens them across all locations whenever no
- * location is (yet) picked — otherwise an already-coupled department silently
- * couldn't render as selected (Danny: "Locatie/Afdeling ... Selecteer" while
- * Contactpersoon already showed correctly) — and picking a department directly
- * auto-fills its parent location for a consistent pair.
- */
 export default function CustomerRelationTab({ opportunity: o, customers = [], onUpdate }: {
   opportunity: Opportunity; customers?: CustomerOption[]; onUpdate?: UpdateFn
 }) {
@@ -124,7 +125,7 @@ export default function CustomerRelationTab({ opportunity: o, customers = [], on
   }
 
   // Read-mode values link through to the customer record (Danny: "hyperlinks?").
-  // Locatie/afdeling/contactpersoon are sub-records of the customer without their
+  // Location/department/contact are sub-records of the customer without their
   // own drill-down page yet, so all four click through to the SAME customer — the
   // known limit until the customer drawer can focus a specific sub-tab/row via intent.
   const openCustomer = t('details.openCustomer')

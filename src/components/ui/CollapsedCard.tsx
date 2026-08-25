@@ -7,7 +7,8 @@
  * mirrors the QuickViewToggle lesson: ONE shared implementation, never a
  * per-modal re-styling); adopted 22-08 by a DRAWER TAB section too
  * (MatchScoreSection — "Match score moet je kunnen openklappen en
- * dichtklappen, standaard dichtgeklapt") once the same collapsed-by-default
+ * dichtklappen, standaard dichtgeklapt" — you must be able to expand and
+ * collapse the match score, collapsed by default) once the same collapsed-by-default
  * need showed up outside a modal. Renders the `cardHead` heading row as a
  * real, keyboard-operable `<button>` (aria-expanded) with a chevron and a
  * small filled/empty indicator dot (solid, not a soft-tint chip — mirrors the

@@ -1,15 +1,16 @@
-import { useMemo } from 'react'
 /**
  * useAppointmentLocations — tenant-configurable WHERE an appointment is held
- * (LOOKUP-DEFAULT-1: Kantoor/Online/Telefonisch/Bij klant), replacing the old
- * hardcoded "Kantoor" preset in PlanIntakeModal. Fed by GET /appointment-locations
- * (seeded defaults, CRUD in Settings); `is_default` marks the one pre-selected
- * when planning a new appointment (seed: Kantoor). The stored value is the slug,
- * sent to the API as `appointment_location`.
+ * (LOOKUP-DEFAULT-1: Kantoor/Online/Telefonisch/Bij klant — Office/Online/
+ * Phone/At the customer's), replacing the old hardcoded "Kantoor" ("Office")
+ * preset in PlanIntakeModal. Fed by GET /appointment-locations (seeded
+ * defaults, CRUD in Settings); `is_default` marks the one pre-selected when
+ * planning a new appointment (seed: Kantoor/Office). The stored value is the
+ * slug, sent to the API as `appointment_location`.
  *
  * Fetch/cache/dedupe lives in useCachedLookup (mirrors useGenders/useAppointmentTypes)
  * — one GET per session, shared across every mounted consumer.
  */
+import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { AxiosResponse } from 'axios'
 import { useCachedLookup } from './useCachedLookup'

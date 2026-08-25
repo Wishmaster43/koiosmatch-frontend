@@ -1,3 +1,14 @@
+/**
+ * TerminateMatchModal — MATCH-TERMINATE-1: the "Beëindigen" ("Terminate")
+ * confirm form. POSTs { stop_reason, effective_date, note? } to
+ * /matches/{id}/terminate; the backend closes the match via the tenant's
+ * is_closed-flagged status and returns the full updated match, which
+ * useMatchTerminate maps + hands to the drawer's existing onUpdate refresh
+ * path. A 422 keeps the modal open with the server's field-level messages
+ * surfaced inline (mirrors no other modal doing per-field errors yet — this
+ * is the first, so errors are shown under each field rather than a single
+ * toast).
+ */
 import { useState } from 'react'
 import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -38,16 +49,6 @@ interface Props {
   onUpdate?: (id: MatchRow['id'], patch: Partial<MatchRow>) => void
 }
 
-/**
- * TerminateMatchModal — MATCH-TERMINATE-1: the "Beëindigen" confirm form.
- * POSTs { stop_reason, effective_date, note? } to /matches/{id}/terminate; the
- * backend closes the match via the tenant's is_closed-flagged status and
- * returns the full updated match, which useMatchTerminate maps + hands to the
- * drawer's existing onUpdate refresh path. A 422 keeps the modal open with the
- * server's field-level messages surfaced inline (mirrors no other modal doing
- * per-field errors yet — this is the first, so errors are shown under each
- * field rather than a single toast).
- */
 export default function TerminateMatchModal({ match, onClose, onUpdate }: Props) {
   const { t } = useTranslation(['matches', 'common'])
   // Reason lookup — tenant-managed, no seed (see useMatchStopReasons doc comment).
@@ -132,7 +133,8 @@ export default function TerminateMatchModal({ match, onClose, onUpdate }: Props)
                 <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>{t('drawer.terminate.noteCounter', { count: note.length, max: NOTE_MAX })}</span>
               )}
             </div>
-            {/* POP-UPS 4: de toelichting krijgt de house-mic (plain-text dictatie). */}
+            {/* POP-UPS 4: de toelichting krijgt de house-mic (plain-text dictatie) —
+                "the note field gets the house mic (plain-text dictation)". */}
             <DictationTextarea value={note} rows={3} onChange={v => setNote(v.slice(0, NOTE_MAX))}
               placeholder={t('drawer.terminate.notePlaceholder')} aria-label={t('drawer.terminate.noteLabel')} />
             {fieldErrors.note && <div style={errorText}>{fieldErrors.note}</div>}

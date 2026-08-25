@@ -1,6 +1,3 @@
-import type { ComponentType, ReactNode } from 'react'
-import { interactive } from '@/lib/a11y'
-
 /**
  * KpiBlock — small KPI card (icon tile + value + label + optional sub-text).
  *
@@ -8,6 +5,9 @@ import { interactive } from '@/lib/a11y'
  * When onClick is provided the card becomes clickable (hover highlight + pointer cursor).
  * Shows an em-dash while `loading`.
  */
+import type { ComponentType, ReactNode } from 'react'
+import { interactive } from '@/lib/a11y'
+
 interface KpiBlockProps {
   label?: ReactNode
   value?: ReactNode

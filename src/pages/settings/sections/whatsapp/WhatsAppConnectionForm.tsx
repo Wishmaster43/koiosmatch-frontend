@@ -2,7 +2,8 @@
  * WhatsAppConnectionForm — create OR edit one WhatsApp Business token (WA-VESTIGING-FE-1).
  * Replaces the old single-connection AddWhatsAppConnectionForm now that a tenant can hold
  * MULTIPLE tokens, each scoped to everyone / one branch / one role (Danny, repeatedly:
- * "elke API key kan voor een vestiging zijn — Yesway Zorg, Yesway Works, Yesway Flex",
+ * "elke API key kan voor een vestiging zijn — Yesway Zorg, Yesway Works, Yesway Flex"
+ * — every API key can be for one branch — Yesway Zorg, Yesway Works, Yesway Flex,
  * later extended to per-role).
  *
  * CREATE (POST /whatsapp): waba_id + access_token are required; app_secret/verify_token/

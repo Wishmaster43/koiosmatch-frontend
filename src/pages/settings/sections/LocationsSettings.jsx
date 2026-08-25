@@ -1,3 +1,8 @@
+/**
+ * LocationsSettings — tenant CRUD for the bureau's own locations (list, map
+ * view, create/edit modal, delete guarded by in-use counts). The reference
+ * screen for the "+ add" wide-form dialog pattern other create flows mirror.
+ */
 import { useState, useEffect, useCallback, lazy, Suspense } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Map as MapIcon, AlertTriangle } from 'lucide-react'

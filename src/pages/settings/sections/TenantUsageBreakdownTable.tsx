@@ -14,8 +14,9 @@
  * fake affordance the unit test could not catch because it mocked the same wrong
  * key. Measured against the live endpoint before changing it.
  *
- * Length is BOUNDED by the shared TableScrollFrame (Danny 17-08: "hoe lang wordt
- * dit dan wel niet") — the user axis grows with the tenant's user count and the
+ * Length is BOUNDED by the shared TableScrollFrame (Danny 17-08, translated:
+ * "how long is this going to become, if not [bounded]" — verbatim: "hoe lang
+ * wordt dit dan wel niet") — the user axis grows with the tenant's user count and the
  * day axis with the month, so the page must not grow with them. Nothing is
  * dropped: every group stays in the scroll area and the footer states the count
  * from the same VISIBLE population, so a scrolled or filtered view still foots.

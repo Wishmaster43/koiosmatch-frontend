@@ -1,10 +1,3 @@
-import { useState, useEffect } from 'react'
-import { useTranslation } from 'react-i18next'
-import { AlertTriangle } from 'lucide-react'
-import api, { unwrap } from '@/lib/api'
-import { notifyError } from '@/lib/notify'
-import { PageTitle } from '@/components/ui/typography'
-
 /**
  * MatchRatesSettings — Settings → Matches → the purchase→sale conversion factor.
  * Danny 22-07: this is a MATCH concept (the rate-proposal fallback: purchase rate ×
@@ -13,6 +6,13 @@ import { PageTitle } from '@/components/ui/typography'
  * render (VacancyMatchingSettings). Only the SCREEN moved — it still persists to the
  * same tenant-wide /settings/matching resource the vacancy strictness slider uses.
  */
+import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
+import { AlertTriangle } from 'lucide-react'
+import api, { unwrap } from '@/lib/api'
+import { notifyError } from '@/lib/notify'
+import { PageTitle } from '@/components/ui/typography'
+
 export default function MatchRatesSettings() {
   const { t } = useTranslation('settings')
   // Nullable: '' = no factor configured (falls back to purchase-only, source: none).

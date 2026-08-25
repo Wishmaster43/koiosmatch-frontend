@@ -1,7 +1,3 @@
-import { useEffect, useRef, useState } from 'react'
-import type { MutableRefObject } from 'react'
-import { handlePopupKeydown } from './popupCommands'
-
 /**
  * useFocusTrap — accessible dialog behaviour for an overlay (§6, WCAG 2.2 AA):
  * moves focus into the panel on open, traps Tab within it, closes on Escape, and
@@ -25,6 +21,10 @@ import { handlePopupKeydown } from './popupCommands'
  * both `ref={trapRef}` and manual `trapRef.current = node` (FloatingPanel's
  * merged ref) arm it.
  */
+import { useEffect, useRef, useState } from 'react'
+import type { MutableRefObject } from 'react'
+import { handlePopupKeydown } from './popupCommands'
+
 export function useFocusTrap<T extends HTMLElement = HTMLDivElement>(onClose?: () => void): MutableRefObject<T | null> {
   // Latest onClose in a ref so the armed trap never needs re-arming to see it.
   const onCloseRef = useRef(onClose)
@@ -49,8 +49,8 @@ export function useFocusTrap<T extends HTMLElement = HTMLDivElement>(onClose?: (
       // Move focus into the panel on open (fall back to the panel itself).
       ;(focusables()[0] ?? el).focus({ preventScroll: true })
 
-      // POP-UPS 3.2: de toetsafhandeling woont in HET ene sneltoetsen-bestand
-      // (hooks/popupCommands) — deze trap levert alleen zijn eigen context aan.
+      // POP-UPS 3.2: the key handling lives in the ONE shared shortcuts file
+      // (hooks/popupCommands) — this trap only supplies its own context to it.
       const onKeyDown = (e: KeyboardEvent) => {
         handlePopupKeydown(e, { onClose: () => onCloseRef.current?.(), focusables })
       }

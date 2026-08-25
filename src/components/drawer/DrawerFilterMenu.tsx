@@ -1,3 +1,11 @@
+/**
+ * DrawerFilterMenu — the one shared "Filter" trigger + popover for a drawer
+ * sub-tab toolbar (notes, documents, tasks, …). Declares its rows as a
+ * `filters: DrawerFilterConfig[]` config array instead of `children`, so this
+ * component owns the recurring bookkeeping (active-count badge, clear-all)
+ * generically instead of every host wiring it by hand. See the full doc
+ * comment on the default export below for the design rationale.
+ */
 import { useEffect, useId, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { SlidersHorizontal, RotateCcw, Search } from 'lucide-react'

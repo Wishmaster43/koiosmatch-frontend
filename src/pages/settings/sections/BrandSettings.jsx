@@ -1,3 +1,8 @@
+/**
+ * BrandSettings — Settings → Branding: the tenant's accent colour (+ presets,
+ * hex input, on-accent text colour override) and logo upload, applied live
+ * through useTenantTheme's CSS variable tokens (§4 per-tenant theming).
+ */
 import { useState, useEffect, useRef } from 'react'
 import { contrastRatio, applyBrandTokens, clampedOnAccent } from '@/hooks/useTenantTheme'
 import { useTranslation } from 'react-i18next'
@@ -26,7 +31,8 @@ export default function BrandSettings() {
   const [primaryColor, setPrimaryColor]   = useState('#3B8FD4') // default brand colour (data, not styling)
   // eslint-disable-next-line no-restricted-syntax -- DATA: typeable hex mirror of primaryColor's default
   const [hexDraft,     setHexDraft]       = useState('#3B8FD4') // typeable hex mirror of primaryColor
-  // BRAND-TEXT-COLOR-1 (Danny 08-08: "als ik geel kies moet de txt niet wit zijn"):
+  // BRAND-TEXT-COLOR-1 (Danny 08-08: "als ik geel kies moet de txt niet wit zijn",
+  // i.e. "if I pick yellow the text shouldn't be white"):
   // the colour of text ON the accent. '' = automatic — useTenantTheme derives
   // black/white from the brand's luminance, which is right for most tenants; an
   // explicit pick overrides it.

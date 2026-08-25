@@ -1,3 +1,7 @@
+/**
+ * mapVacancy — raw API vacancy → the flat shape the list/table renders. See the
+ * mapVacancy() function docblock below for the field-name tolerance contract.
+ */
 import { initialsOf } from '@/lib/initials'
 import { toCoord } from '@/lib/coords'
 import type { Id, Loose } from '@/types/common'
@@ -235,7 +239,8 @@ export function mapVacancyDetail(raw: ApiVacancy = {}): VacancyDetail {
     skills: raw.skills ?? [],
     description: raw.description ?? '',
     // VAC-CASCADE-1 (backend wave 6): the persisted klant → locatie → afdeling →
-    // contactpersoon cascade — ids seed the in-place editor's pickers, names seed
+    // contactpersoon ("customer → location → department → contact person")
+    // cascade — ids seed the in-place editor's pickers, names seed
     // the read-mode rows (both empty when never picked).
     customerLocationId: raw.customer_location_id != null ? String(raw.customer_location_id) : '',
     customerLocationName: raw.customer_location?.name ?? '',

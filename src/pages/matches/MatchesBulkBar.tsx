@@ -1,3 +1,15 @@
+/**
+ * MatchesBulkBar — selection action bar shown above the table when ≥1 match is
+ * checked. A match is read-only (§3B), so the only bulk operations are coupling
+ * the selection to an external backoffice (HelloFlex / Shiftmanager). SYNC-BULK-1:
+ * permission + module-availability are resolved INSIDE this component (mirrors
+ * BackofficeLinksTab's own canLink/useApps checks) rather than via a passed prop —
+ * the previous `canCouple` prop was wired to a `matches.couple` permission that
+ * never existed in the backend (BackofficeEntityRegistry maps "match" to
+ * matches.update, the SAME permission MatchDrawer's canLinkBackoffice already
+ * checks), which silently hid this action for every role. A thin assembler over
+ * the shared ActionMenu — extend by adding a node, never fork the bar.
+ */
 import { useTranslation } from 'react-i18next'
 import { ListChecks, Link2, Building2, Layers, X } from 'lucide-react'
 import ActionMenu from '@/components/ui/ActionMenu'
@@ -14,18 +26,6 @@ interface MatchesBulkBarProps {
   onCoupleShiftmanager: () => void
 }
 
-/**
- * MatchesBulkBar — selection action bar shown above the table when ≥1 match is
- * checked. A match is read-only (§3B), so the only bulk operations are coupling
- * the selection to an external backoffice (HelloFlex / Shiftmanager). SYNC-BULK-1:
- * permission + module-availability are resolved INSIDE this component (mirrors
- * BackofficeLinksTab's own canLink/useApps checks) rather than via a passed prop —
- * the previous `canCouple` prop was wired to a `matches.couple` permission that
- * never existed in the backend (BackofficeEntityRegistry maps "match" to
- * matches.update, the SAME permission MatchDrawer's canLinkBackoffice already
- * checks), which silently hid this action for every role. A thin assembler over
- * the shared ActionMenu — extend by adding a node, never fork the bar.
- */
 export default function MatchesBulkBar({
   count, onClear, onCoupleHelloFlex, onCoupleShiftmanager,
 }: MatchesBulkBarProps) {

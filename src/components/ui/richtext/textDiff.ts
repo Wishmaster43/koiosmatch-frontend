@@ -1,7 +1,8 @@
 /**
  * textDiff — pure word-level LCS diff between two plain texts, used by
  * AssistTextPreview's old-vs-new comparison view (ASSIST-COMPARE-1, Danny
- * 23-08: "oude en nieuwe tekst kan je nu niet goed vergelijken"). Splits both
+ * 23-08, verbatim: "…niet goed vergelijken" — i.e. "you can't compare the old
+ * and new text properly right now"). Splits both
  * texts on whitespace, runs a classic longest-common-subsequence over the
  * word arrays, then walks the LCS table back to front to emit ordered
  * same/added/removed segments (each segment's `text` keeps its original

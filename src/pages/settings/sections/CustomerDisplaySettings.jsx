@@ -1,7 +1,9 @@
 /**
  * CustomerDisplaySettings — the customer table's display preferences, split into
  * per-entity sub-tabs (Danny 02-08: "afdelingen, locaties en contactpersonen moeten
- * sub-tabjes worden, en duidelijk dat het van de drill-down is"). Before this, all
+ * sub-tabjes worden, en duidelijk dat het van de drill-down is", i.e. "departments,
+ * locations and contacts must become sub-tabs, and it must be clear that it's
+ * from the drill-down"). Before this, all
  * eleven settings sat in one flat list with no way to tell which ones affected the
  * customer TABLE (the list you land on) versus the sub-entity tables you only see
  * once a customer is open — mirrors VacancyCandidateTabSettings' shape (shared
@@ -34,7 +36,8 @@
  * TENANT-DEFAULT-1 (Danny 02-08) update: "Kansen" was originally DROPPED here
  * because OpportunitiesTab filtered by pipeline stage with no StatusFilterSelect
  * at all — Danny later asked for that filter back ("bij Kansen mis ik ook nog de
- * statussen"), so OpportunitiesTab now has one, keyed on `stage`. See
+ * statussen", i.e. "on Opportunities I'm also still missing the statuses"), so
+ * OpportunitiesTab now has one, keyed on `stage`. See
  * TASKS/OPPORTUNITIES-1 above for what landed instead of the default-filter picker.
  */
 import { useState } from 'react'

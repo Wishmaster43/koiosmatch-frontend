@@ -1,9 +1,10 @@
 /**
  * StatusFilterSelect — the ONE status filter next to a sub-entity list's search box
- * (Danny 28-07: "filteren op actieve status, in de zoekbalk iets kleiner en ernaast een
- * zoekbare dropdown"). Used by the locations, departments, contacts, vacancies, matches
- * AND tasks lists, so all filter the same way — Danny again: "vacature status is niet
- * hetzelfde als locatie status???".
+ * (Danny 28-07, verbatim: "…zoekbare dropdown…" — i.e. "filter on active status, a bit
+ * smaller in the search bar with a searchable dropdown next to it"). Used by the
+ * locations, departments, contacts, vacancies, matches AND tasks lists, so all filter
+ * the same way — Danny again, verbatim: "…niet hetzelfde…" (i.e. "a vacancy status is
+ * not the same as a location status???").
  *
  * MOVED (Danny 03-08, TAKEN-TOOLBAR-1): was `pages/customers/drawer/StatusFilterSelect`;
  * promoted to `components/drawer/` because the shared `EntityTasksTab` (also used by
@@ -12,10 +13,10 @@
  * byte-identical; `pages/customers/drawer/StatusFilterSelect.tsx` now only re-exports
  * from here so a file locked by another lane never had to change.
  *
- * MULTI-VALUE, deliberately. Danny asked for that on the vacancy list earlier ("standaard
- * alleen open tonen, je moet meerdere kunnen kiezen"), so making everything single-value
- * would have removed something he explicitly wanted; the consistent direction is the other
- * way round. Nothing selected means "all", which is why there is no separate "all" option
+ * MULTI-VALUE, deliberately. Danny asked for that on the vacancy list earlier, verbatim:
+ * "…meerdere kunnen kiezen…" (i.e. "by default only show open, you must be able to pick
+ * several"), so making everything single-value would have removed something he explicitly
+ * wanted; the consistent direction is the other way round. Nothing selected means "all", which is why there is no separate "all" option
  * that would have to be kept in sync with the real ones.
  *
  * DEFAULTING IS THE DANGEROUS PART. Defaulting to "active only" before the lookup has
@@ -30,7 +31,7 @@
  *
  * TENANT-DEFAULT-1 (Danny 02-08): the "active only" guess above was always a heuristic on a
  * TENANT-RENAMEABLE lookup — a tenant who calls their status "In bedrijf" or "Lopend" never
- * matched `isActiveValue` and got no default at all, silently. Settings → Klanten → Tabelweergave
+ * matched `isActiveValue` and got no default at all, silently. Settings → Customers → Table view
  * now lets a tenant configure the REAL default per tab (`STATUS_FILTER_ALL` or one specific
  * status id) via the optional `tenantDefault` param below. WHEN SET IT REPLACES THE GUESS
  * ENTIRELY — it is not layered on top — because a tenant who explicitly chose "all" must never

@@ -1,3 +1,22 @@
+/**
+ * Statistics tab — honest, derived numbers only (STATS-HONEST-1 / B11 point 19).
+ *
+ * The tab used to carry a "Statusoverzicht" ("status overview") key/value card
+ * that held no statistics at all — status, last contact, contact type and branch
+ * are dossier fields, each with its own editable home elsewhere in the drawer
+ * (see the block below). What this tab shows now is genuinely derived from data
+ * the drawer already has, or a cheap side-load (notes/appointments) it fetches
+ * itself:
+ *   - status      → the drawer header's own deployability picker (CandidateDrawer,
+ *                   metaPickers `status`), which shows AND changes it.
+ *   - branch      → the Profiel ("Profile") tab's BranchSection (ProfilePanel),
+ *                   where it is editable against /candidates/{id}/branches.
+ *   - created on / by + source → the Profiel ("Profile") tab's Herkomst
+ *                   ("Origin") card (DANNY-6).
+ * Every block below renders ONLY when its source data actually loaded/exists —
+ * never a fabricated zero for data that was never fetched (§3 four-states rule:
+ * a block with no source is simply absent, not a fake "0").
+ */
 import { useEffect, useState, type ComponentType } from 'react'
 import { useTranslation } from 'react-i18next'
 import StatsTabJs from '@/components/drawer/tabs/StatsTab'
@@ -13,23 +32,6 @@ import type { Candidate } from '@/types/candidate'
 // StatsTab is still untyped JS — declare the props this tab passes.
 const StatsTab = StatsTabJs as ComponentType<{ kpisTitle?: unknown; kpis?: unknown[] }>
 
-/**
- * Statistics tab — honest, derived numbers only (STATS-HONEST-1 / B11 point 19).
- *
- * The tab used to carry a "Statusoverzicht" key/value card that held no statistics
- * at all — status, last contact, contact type and branch are dossier fields, each
- * with its own editable home elsewhere in the drawer (see the block below). What
- * this tab shows now is genuinely derived from data the drawer already has, or a
- * cheap side-load (notes/appointments) it fetches itself:
- *   - status      → the drawer header's own deployability picker (CandidateDrawer,
- *                   metaPickers `status`), which shows AND changes it.
- *   - branch      → the Profiel tab's BranchSection (ProfilePanel), where it is
- *                   editable against /candidates/{id}/branches.
- *   - created on / by + source → the Profiel tab's Herkomst card (DANNY-6).
- * Every block below renders ONLY when its source data actually loaded/exists —
- * never a fabricated zero for data that was never fetched (§3 four-states rule:
- * a block with no source is simply absent, not a fake "0").
- */
 export default function StatisticsTab({ c, onJump }: { c: Candidate; onJump?: (tab: string) => void }) {
   const { t } = useTranslation('candidates')
   const { formatDate } = useDateFormat()
@@ -40,7 +42,8 @@ export default function StatisticsTab({ c, onJump }: { c: Candidate; onJump?: (t
   const { notes, loaded: notesLoaded } = useCandidateNotes(c.id)
 
   // Appointments — same cheap per-id fetch WorkTab already does for the Sollicitaties
-  // list; loaded here too so the intake block only appears once real data arrived.
+  // ("Applications") list; loaded here too so the intake block only appears once
+  // real data arrived.
   const [appointments, setAppointments] = useState<Appt[] | null>(null)
   useEffect(() => {
     let alive = true
@@ -62,7 +65,7 @@ export default function StatisticsTab({ c, onJump }: { c: Candidate; onJump?: (t
           // Counts drill into the Werk tab, where the matches/applications actually live.
           { label: t('statistics.placements'), value: stats.matchesTotal, sub: t('statistics.total'), color: 'var(--color-primary-text)', onClick: () => onJump?.('work') },
           { label: t('statistics.applications'), value: stats.applicationsTotal, sub: t('statistics.total'), color: 'var(--color-secondary)', onClick: () => onJump?.('work') },
-          // Diensten + Uren gewerkt stay hidden — measured live 2026-08-09, not guessed:
+          // Diensten + Uren gewerkt ("Shifts + Hours worked") stay hidden — measured live 2026-08-09, not guessed:
           // GET /candidates/{id} DOES carry stats.shifts_count / stats.hours_worked (and
           // mapCandidate already maps them), but both read 0 on 30 of 30 candidates probed,
           // and /sm_shifts — the Shiftmanager mirror they derive from — returns an empty

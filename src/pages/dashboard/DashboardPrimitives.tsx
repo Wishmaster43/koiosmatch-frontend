@@ -35,7 +35,8 @@ export function KpiCard({ label, value, sub, color, bg, Icon, onClick }: {
 export function Panel({ children }: { children: ReactNode }) {
   return (
     // height 100%: side-by-side tiles in a grid row stay equally tall (Danny 25-08:
-    // "Plaatsingen naar contracttype even groot in hoogte als Fill rate per vestiging").
+    // "Plaatsingen naar contracttype even groot in hoogte als Fill rate per vestiging" —
+    // "Placements by contract type the same height as Fill rate per branch").
     <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, height: '100%', boxSizing: 'border-box' }}>
       {children}
     </div>

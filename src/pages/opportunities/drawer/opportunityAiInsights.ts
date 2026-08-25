@@ -1,11 +1,3 @@
-import type { Opportunity } from '@/types/opportunity'
-import type { LookupOption } from '@/types/common'
-import type { KoiosAdviceInsight } from '@/components/ai/KoiosAdviceBlock'
-import { isTerminalStage } from '../data/opportunityAdvice'
-
-// A bound-namespace translate function (the caller already resolved the namespace).
-type Tx = (key: string, opts?: Record<string, unknown>) => string
-
 /**
  * buildOpportunityAdviceInsights — Koios AI insights for the opportunity drawer's
  * Details tab (mirrors buildMatchAdviceInsights's shape/file placement): a deal-
@@ -14,6 +6,14 @@ type Tx = (key: string, opts?: Record<string, unknown>) => string
  * terminal-stage check the table's overdue styling uses — §11 one computation).
  * Pure FE heuristics over fields the row already carries — no AI/API call.
  */
+import type { Opportunity } from '@/types/opportunity'
+import type { LookupOption } from '@/types/common'
+import type { KoiosAdviceInsight } from '@/components/ai/KoiosAdviceBlock'
+import { isTerminalStage } from '../data/opportunityAdvice'
+
+// A bound-namespace translate function (the caller already resolved the namespace).
+type Tx = (key: string, opts?: Record<string, unknown>) => string
+
 export function buildOpportunityAdviceInsights(o: Opportunity, stages: LookupOption[], t: Tx, now: Date = new Date()): KoiosAdviceInsight[] {
   // (a) Deal magnitude health — is there a value OR an hours figure at all, the
   // minimum a recruiter needs to plan against (unit itself is a tenant setting,

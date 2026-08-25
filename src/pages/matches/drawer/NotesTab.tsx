@@ -1,3 +1,13 @@
+/**
+ * NotesTab — internal notes on a match (NT-MATCH-1). Mirrors vacancies'
+ * NotesTab onto the SAME shared NotesTab family (VacancyNoteController /
+ * MatchNoteController both validate `type` against the entity-scoped
+ * note_types lookup). A match's list row is detail-minimized (§8) and carries
+ * no notes array, unlike VacancyDetail/ApplicationDetail — so this tab fetches
+ * its own list once per match (GET /matches/{id}/notes) instead of reading a
+ * preloaded prop, mirroring useMatchContract's fetch-on-mount shape. The
+ * optimistic-add/revert pattern below is otherwise identical to the vacancy tab.
+ */
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import api, { unwrapList } from '@/lib/api'
@@ -10,16 +20,6 @@ import type { MatchRow } from '@/types/match'
 // Structural match for the shared NotesTab's NoteItem (typed fields + open index).
 interface Note { type?: string; title?: string; author?: string; text?: string; body?: string; created_at?: string; [k: string]: unknown }
 
-/**
- * NotesTab — internal notes on a match (NT-MATCH-1). Mirrors vacancies'
- * NotesTab onto the SAME shared NotesTab family (VacancyNoteController /
- * MatchNoteController both validate `type` against the entity-scoped
- * note_types lookup). A match's list row is detail-minimized (§8) and carries
- * no notes array, unlike VacancyDetail/ApplicationDetail — so this tab fetches
- * its own list once per match (GET /matches/{id}/notes) instead of reading a
- * preloaded prop, mirroring useMatchContract's fetch-on-mount shape. The
- * optimistic-add/revert pattern below is otherwise identical to the vacancy tab.
- */
 export default function NotesTab({ match: m }: { match: MatchRow }) {
   const { t } = useTranslation(['matches', 'common'])
   // Note categories from the tenant lookup, scoped to 'match' (NOTE-TYPES-2/3).

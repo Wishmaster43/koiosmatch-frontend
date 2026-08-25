@@ -1,3 +1,8 @@
+/**
+ * LocationsPage — the Shiftmanager locations list: KPI strip, filterable/sortable
+ * table and a detail drawer, all driven by the read-only mirrored SM data
+ * (useSmLocations).
+ */
 import { useState, useMemo, useEffect } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'

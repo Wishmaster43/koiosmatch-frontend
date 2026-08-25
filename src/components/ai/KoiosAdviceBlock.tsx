@@ -1,3 +1,9 @@
+/**
+ * KoiosAdviceBlock — the shared "Koios AI adviseert" (Koios AI advises) advisory card
+ * reused on every major entity drawer. Purely presentational, no fetching or AI call
+ * here: insights arrive pre-computed from the caller and render as collapsible
+ * dot+label rows behind one shared heading (icon, title, beta chip, refresh).
+ */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { RefreshCw, ChevronDown } from 'lucide-react'

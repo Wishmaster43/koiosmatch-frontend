@@ -4,7 +4,8 @@
  * (Danny 2026-07-22): cost-centre follows the customer→location→department
  * cascade's deepest picked level, while billing email is ALWAYS the customer's
  * own address regardless of the picked location/department ("facturatie blijft
- * het facturatie-adres dat aan de klant gekoppeld zit"). Both still mirror
+ * het facturatie-adres dat aan de klant gekoppeld zit" — billing always stays
+ * the billing address linked to the customer). Both still mirror
  * useRateProposal's "propose but never overwrite a manual edit" pattern: each
  * field freezes the instant the recruiter edits it (the *Dirty flag), so a later
  * customer/location/department pick never clobbers a manual value. Split out of

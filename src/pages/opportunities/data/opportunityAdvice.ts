@@ -1,12 +1,11 @@
-import type { Opportunity } from '@/types/opportunity'
-import type { LookupOption } from '@/types/common'
-
 /**
  * opportunityAdvice — the terminal-stage/overdue check shared by the
  * expectedClose cell's red-bold styling AND the "Koios" column's rule engine
  * (was duplicated the moment the koios column needed the same check — §11:
  * a new consumer adopts the existing computation, never a second copy).
  */
+import type { Opportunity } from '@/types/opportunity'
+import type { LookupOption } from '@/types/common'
 
 // A stage flagged isWon/isLost is terminal — a closed deal's expected-close
 // date is never "overdue" (§4: red/bold is a live-state signal, not permanent).

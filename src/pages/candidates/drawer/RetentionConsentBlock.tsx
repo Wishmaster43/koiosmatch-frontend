@@ -1,14 +1,3 @@
-import { useId } from 'react'
-import { useTranslation } from 'react-i18next'
-import { ShieldCheck, ShieldAlert, HelpCircle } from 'lucide-react'
-import type { LucideIcon } from 'lucide-react'
-import Toggle from '@/components/ui/Toggle'
-import { GroupLabel, Caption } from '@/components/ui/typography'
-import { useDateFormat } from '@/lib/datetime'
-import { useAuth } from '@/context/AuthContext'
-import { resolveRetentionConsent } from './retentionConsent'
-import { useRetentionConsentMonths } from './useRetentionConsentMonths'
-
 /** The candidate's retention-consent facts, straight from GET /candidates/{id}. */
 interface RetentionConsentBlockProps {
   /** `consent.retention_opt_in` — the stored flag the checkbox reflects. */
@@ -31,6 +20,17 @@ interface RetentionConsentBlockProps {
  * kept" box while the consent expired months ago. Every state says plainly where the
  * consent stands, and dates go through lib/formatters' DD-MM-YYYY formatter.
  */
+import { useId } from 'react'
+import { useTranslation } from 'react-i18next'
+import { ShieldCheck, ShieldAlert, HelpCircle } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
+import Toggle from '@/components/ui/Toggle'
+import { GroupLabel, Caption } from '@/components/ui/typography'
+import { useDateFormat } from '@/lib/datetime'
+import { useAuth } from '@/context/AuthContext'
+import { resolveRetentionConsent } from './retentionConsent'
+import { useRetentionConsentMonths } from './useRetentionConsentMonths'
+
 export default function RetentionConsentBlock({ optIn, consentAt, expiresAt, onToggle }: RetentionConsentBlockProps) {
   const { t } = useTranslation('candidates')
   const { formatDate } = useDateFormat()
@@ -78,7 +78,8 @@ export default function RetentionConsentBlock({ optIn, consentAt, expiresAt, onT
 
       {/* Opt-in toggle — described by the validity line below, so a screen reader
           hears "may be kept … consent lapsed on 12-05-2026" as one statement.
-          House toggle (Danny live review, 04-08: "Vervangen door toggles!!" —
+          House toggle (Danny live review, 04-08, translated: "Replace with
+          toggles!!" — verbatim: "Vervangen door toggles!!" —
           a raw checkbox is never the house control, §0/§4); `describedBy` wires
           aria-describedby onto Toggle's own underlying switch button. */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>

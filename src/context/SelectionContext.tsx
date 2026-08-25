@@ -1,7 +1,8 @@
 /**
  * SelectionContext — the active list page's table selection, shared with Koios
  * AI (KOIOS-SELECTIE-CONTEXT-1, Danny: "als ik een taak of kandidaat selecteer
- * moet ik dit terugzien in Koios AI"). Exactly ONE list page is ever mounted at
+ * moet ik dit terugzien in Koios AI" — when I select a task or candidate I must
+ * see this reflected in Koios AI). Exactly ONE list page is ever mounted at
  * a time (DashboardLayout's renderPage swaps the whole page component, never
  * two side by side), so this is a single slot — not a per-key registry like
  * RightPanelContext, which genuinely has multiple simultaneous registrants.

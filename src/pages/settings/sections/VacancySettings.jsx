@@ -1,3 +1,6 @@
+// VacancySettings — the vacancy-feature Settings sub-tabs: the tenant default
+// application-field settings a new vacancy inherits, plus the tenant-maintainable
+// status/phase/seniority/education/channel lookups (each via StatusListEditor).
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Check, Save } from 'lucide-react'

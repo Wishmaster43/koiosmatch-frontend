@@ -7,12 +7,14 @@
  * and WHO owns the task are different concerns.
  *
  * PUNT 15 (Danny 08-08: "een nieuwe taak moet ook aan een bedrijf, locatie,
- * afdeling of contactpersoon kunnen hangen"): the three fixed pickers only ever
+ * afdeling of contactpersoon kunnen hangen" — "a new task should also be able
+ * to attach to a company, location, department or contact"): the three fixed
+ * pickers only ever
  * covered candidate/customer/contact, while the DRAWER's LinksTab could couple a
  * task to ten entity types. The rest of that vocabulary is now reachable here
  * through the SAME shared `AddLinkRow` + `taskLinkTypes` the drawer tab uses
  * (§11 one source) — vacancy, match, application, opportunity, location,
- * afdeling and workflow. The three tokens above stay dedicated fields because a
+ * department and workflow. The three tokens above stay dedicated fields because a
  * host drawer seeds/locks them (`initial`, `lockCustomerId`), so they are
  * EXCLUDED from the adder's type list — one field per coupling, never two truths.
  */
@@ -58,11 +60,11 @@ export default function LinkCard({ t, form, set, candidates, customers, contacts
     <div>
       <div style={cardHead}>{t('modal.cardLink')}</div>
       <div style={cardBox}>
-        {/* Gekoppeld record — candidate/customer/contact, each a searchable
+        {/* Linked record — candidate/customer/contact, each a searchable
             relational picker (allowCreate=false: a real id, never free-text). */}
-        {/* KLANTEN 9-screenshot (21-08): geen row2 hier — de kaart leeft al in
-            een halve modalkolom, dus nóg eens halveren drukte de klant-kiezer
-            het scherm af (zelfde les als de postcode-rij). */}
+        {/* KLANTEN 9-screenshot (21-08): no row2 here — the card already lives
+            in a half modal column, so halving it again squeezed the customer
+            picker off the screen (same lesson as the postcode row). */}
         <div>
           <FieldRow label={t('modal.candidate')}>
             <CreatableSelect value={form.candidateId || null} onChange={(v: string) => set('candidateId', v)} allowCreate={false}
@@ -101,7 +103,7 @@ export default function LinkCard({ t, form, set, candidates, customers, contacts
           <Caption as="div">{t('common:loading')}</Caption>
         ) : null}
 
-        {/* PUNT 15 — the rest of the shared vocabulary (afdeling, locatie, vacature,
+        {/* PUNT 15 — the rest of the shared vocabulary (department, location, vacancy,
             …). A real BUTTON opens the picker row, never coloured text (Danny 08-08). */}
         <div>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 6 }}>

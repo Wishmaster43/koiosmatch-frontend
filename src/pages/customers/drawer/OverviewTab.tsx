@@ -1,23 +1,28 @@
 /**
  * OverviewTab — the customer's company fields, grouped into titled cards
  * (General / Online / Billing) with in-place edit via the shared
- * EditableFieldTable, plus a standalone Teksten section (Description +
+ * EditableFieldTable, plus a standalone Teksten ("Texts") section (Description +
  * Recruitment challenges) using the candidate profile-text pattern — its own
  * rich editor + pencil/save/cancel per field (Danny 2026-07-14), pulled OUT of
  * the EditableFieldTable groups since a bare textarea is no longer the house
  * pattern for prose. Industry options come from the /industries lookup (never
  * hardcoded). Saving flows back through onSave → the page's optimistic PATCH.
  * Billing card (Danny 2026-07-22): cost-centre is the TOP of the afdeling >
- * locatie > klant cascade read by the match form; billing email here is
+ * locatie > klant ("department > location > customer") cascade read by the
+ * match form; billing email here is
  * the customer's own — the ONE source invoicing always reads from, regardless
  * of the location/department picked on a match (see match/helpers.ts).
  *
  * The vacancy-visibility flags (hideCompanyName/showInVacancies/excludeFromSourcing,
- * formerly the "Instellingen" group here) moved to their own VacancySettingsTab
- * (Danny 27-07: "logischer een apart tabje toch?") — see CustomerDrawer.tsx.
+ * formerly the "Instellingen" ("Settings") group here) moved to their own
+ * VacancySettingsTab
+ * (Danny 27-07: "logischer een apart tabje toch?" — "more logical as its own
+ * tab, right?") — see CustomerDrawer.tsx.
  *
- * BRANCH-LINKS-1 (Danny 28-07 "dit wil ik ook terug zien bij klanten"): the
- * "Vestiging koppelen" block at the bottom mirrors the candidate drawer's
+ * BRANCH-LINKS-1 (Danny 28-07 "dit wil ik ook terug zien bij klanten" — "I want
+ * to see this on customers too"): the
+ * "Vestiging koppelen" ("Link branch") block at the bottom mirrors the candidate
+ * drawer's
  * BranchSection verbatim (shared component, §3A/§11) via useEntityBranches. This
  * is a DIFFERENT axis from the `branchId` field above: `branchId` (BRANCH-1,
  * MATCH-PLACEMENT-1) is the single establishment a match's paperwork/invoicing
@@ -29,10 +34,12 @@
  * VESTIGING-2 (28-07): removing a customer's LAST linked branch does not just clear
  * a chip — it WIDENS visibility, since an unlinked customer is visible to every
  * branch again (COORDINATION-LOG 28-07 "Zonder koppeling = zichtbaar voor
- * iedereen"). That must never happen silently, so the last removal is confirmed via
+ * iedereen" — "Without a link = visible to everyone"). That must never happen
+ * silently, so the last removal is confirmed via
  * the shared ConfirmDialog first. Only while `branch_authz_enabled` is actually ON —
  * while it's off nothing about who sees what changes either way, so no warning is
- * shown (matches "bouw geen UI op de aanname dat er gefilterd wordt").
+ * shown (matches "bouw geen UI op de aanname dat er gefilterd wordt" — "never
+ * build UI on the assumption that filtering is happening").
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -109,8 +116,9 @@ export default function OverviewTab({ c, onSave }: { c: Customer; onSave?: (valu
   // Field schema → grouped titled cards. Keys match the flat customer shape and
   // are translated to API keys in the page's updateCustomer. Description/
   // recruitmentProblems live in their own Teksten blocks below, not here.
-  // Danny 28-07 restructure of the (renamed) Bedrijf tab: Gegevens · Adres · Contact ·
-  // Vestiging, mirroring the candidate drawer's grouping. Keys match the flat customer
+  // Danny 28-07 restructure of the (renamed) Bedrijf ("Company") tab: Gegevens ·
+  // Adres · Contact · Vestiging ("Details · Address · Contact · Branch"),
+  // mirroring the candidate drawer's grouping. Keys match the flat customer
   // shape and are translated to API keys in the page's updateCustomer.
   const fields: FieldRow[] = [
     // Options carry { value: stored name, label: translated } so saving never writes a translation.
@@ -130,7 +138,7 @@ export default function OverviewTab({ c, onSave }: { c: Customer; onSave?: (valu
     { key: 'vatNumber', label: t('overview.vat'), group: gDetails,
       renderValue: v => vatValue(v, t('locations.detail.openVies')), validate: validateVat },
 
-    // ADRES — the customer's own address (KLANT-ADRES-1, backend 28-07). Until today the
+    // ADRES ("ADDRESS") — the customer's own address (KLANT-ADRES-1, backend 28-07). Until today the
     // customers table had ONLY `city`, so this block was one lonely row; it now mirrors
     // the location/candidate exactly: street/no/suffix/postcode/city collapse into ONE
     // composed line in read mode and expand to loose fields while editing.
@@ -177,13 +185,16 @@ export default function OverviewTab({ c, onSave }: { c: Customer; onSave?: (valu
       <EditableFieldTable title={gAddress} fields={block(gAddress)} value={values} onSave={onSave} />
       <EditableFieldTable title={gContact} fields={block(gContact)} value={values} onSave={onSave} />
 
-      {/* BEDRIJFSTEKST — one free-text block for company info AND recruitment issues
-          (Danny 28-07: "1 txt blok"), directly under Contact. It edits `description`.
-          `recruitment_problems` AND `tone_of_voice` (Schrijfstijl) are no longer shown as
+      {/* BEDRIJFSTEKST ("COMPANY TEXT") — one free-text block for company info AND
+          recruitment issues
+          (Danny 28-07: "1 txt blok" — "1 text block"), directly under Contact. It
+          edits `description`.
+          `recruitment_problems` AND `tone_of_voice` (Schrijfstijl, "Writing style")
+          are no longer shown as
           separate fields — Danny 28-07: both belong in this one text. Their data stays
           server-side until CMBE merges it into `description` (BEDRIJFSTEKST-1), so
           nothing is destroyed here, only hidden. */}
-      {/* K3 (batch 5): second-screen icon + Genereer, mirroring the candidate
+      {/* K3 (batch 5): second-screen icon + Genereer ("Generate"), mirroring the candidate
           profile text — 'customer' is already a known /ai/koios/generate entity. */}
       <EditableRichTextField label={t('overview.companyText')} value={c.description ?? ''}
         onSave={html => onSave?.({ description: html })}
@@ -196,9 +207,10 @@ export default function OverviewTab({ c, onSave }: { c: Customer; onSave?: (valu
       <KoiosAdviceBlock namespace="customers"
         insights={[...adviceInsightRows(resolveAdvice(c)), ...buildCustomerAdviceInsights(c, t)]} />
 
-      {/* VESTIGING — which of the tenant's establishments may see this customer. The
-          single routing/invoicing branch that used to sit above it moved to the
-          Facturatie block on the Prijsafspraken tab (Danny 28-07). */}
+      {/* VESTIGING ("BRANCH") — which of the tenant's establishments may see this
+          customer. The single routing/invoicing branch that used to sit above it
+          moved to the Facturatie ("Billing") block on the Prijsafspraken
+          ("Price agreements") tab (Danny 28-07). */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         <BranchSection
           label={gBranch}

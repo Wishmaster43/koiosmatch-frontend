@@ -1,3 +1,22 @@
+/**
+ * ChangelogPopover — THE one shared record-history affordance for every entity
+ * drawer (Danny 27-07, translated: "check the changelog icon in every drill-down,
+ * it must match the candidate drill-down" — verbatim: "changelog icon in alle drill
+ * downs nalopen, moet zijn zoals kandidaat drill down"; §3A(d): record history is a
+ * changelog ICON-popover in the title row, never a tab). This shell owns only the
+ * icon/open-close/outside-click/global-open-request chrome — each entity keeps its
+ * OWN content (fetch + field-label mapping) and passes it as `children`, and its own
+ * already-translated `label`.
+ *
+ * POPUP-SLEEP (Danny point 19, translated: "the changelog cannot be dragged; every
+ * popup must be draggable" — verbatim: "wijzigingslog niet sleepbaar; elke popup
+ * sleepbaar"): the hand-rolled fixed/centred panel is gone — the window IS the shared
+ * FloatingPanel now, so it inherits the one drag/resize/remember-my-spot engine
+ * (useDraggablePanel) plus the focus trap, Escape-to-close and focus restore. It runs
+ * MODELESS (`overlay={false}`): a changelog is a reference window you drag aside to
+ * compare against the record underneath, so a dimming scrim would defeat its purpose.
+ * `persistKey` makes it reopen where the recruiter left it.
+ */
 import { useState, useRef, useEffect, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { History } from 'lucide-react'
@@ -6,22 +25,6 @@ import FloatingPanel from '@/components/ui/FloatingPanel'
 // PORTAL-MARKER-1: a click inside an open portalled picker menu is never "outside".
 import { isInsideDropdownPortal } from '@/lib/useDropdownPlacement'
 
-/**
- * ChangelogPopover — THE one shared record-history affordance for every entity
- * drawer (Danny 27-07: "changelog icon in alle drill downs nalopen, moet zijn zoals
- * kandidaat drill down"; §3A(d): record history is a changelog ICON-popover in the
- * title row, never a tab). This shell owns only the icon/open-close/outside-click/
- * global-open-request chrome — each entity keeps its OWN content (fetch + field-label
- * mapping) and passes it as `children`, and its own already-translated `label`.
- *
- * POPUP-SLEEP (Danny punt 19, "wijzigingslog niet sleepbaar; elke popup sleepbaar"):
- * the hand-rolled fixed/centred panel is gone — the window IS the shared
- * FloatingPanel now, so it inherits the one drag/resize/remember-my-spot engine
- * (useDraggablePanel) plus the focus trap, Escape-to-close and focus restore. It runs
- * MODELESS (`overlay={false}`): a changelog is a reference window you drag aside to
- * compare against the record underneath, so a dimming scrim would defeat its purpose.
- * `persistKey` makes it reopen where the recruiter left it.
- */
 export default function ChangelogPopover({ label, children }: { label?: string; children: ReactNode }) {
   const { t } = useTranslation('common')
   const [open, setOpen] = useState(false)

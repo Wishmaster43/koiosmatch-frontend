@@ -1,3 +1,6 @@
+// applicationAiInsights — pure FE Koios heuristic insights for the application
+// drawer (progress/staleness + a completeness gap). See buildApplicationAdviceInsights
+// below for the full reasoning and what deliberately moved to useApplicationAdvice.
 import type { ApplicationDetail } from '@/types/application'
 import type { KoiosAdviceInsight } from '@/components/ai/KoiosAdviceBlock'
 

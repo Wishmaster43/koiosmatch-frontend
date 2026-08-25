@@ -1,5 +1,3 @@
-import type { SVGProps } from 'react'
-
 /**
  * HelloFlexMark — the teal "diamond" mark used for the HelloFlex (HF) workflow
  * modules in the builder: a rounded square on its point with the HF monogram,
@@ -11,6 +9,8 @@ import type { SVGProps } from 'react'
  * Note: simplified brand mark (the full wordmark is illegible at icon sizes) —
  * swap the SVG body for the official vector when available.
  */
+import type { SVGProps } from 'react'
+
 // eslint-disable-next-line no-restricted-syntax -- DATA: HelloFlex brand-mark colour, must match their logo exactly, not a themeable UI colour
 const HF_TEAL = '#3E7C8C'
 

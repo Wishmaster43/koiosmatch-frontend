@@ -1,7 +1,9 @@
 /**
  * ApplicationRowDetails — the panel that unfolds under ONE application row in the
- * candidate drawer (Danny 09-08: "bij matches heb ik een pijltje om uit te klappen
- * en wat informatie te zien, bij sollicitaties niet. Dat is niet consistent").
+ * candidate drawer (Danny 09-08, translated: "on matches I have an arrow to expand
+ * and see some information, not on applications. That's not consistent" —
+ * verbatim: "bij matches heb ik een pijltje om uit te klappen en wat informatie
+ * te zien, bij sollicitaties niet. Dat is niet consistent").
  * Mirrors the label/value rows MatchCard reveals in its own `collapsible` mode, so
  * both collapsibles in this drawer read as one system.
  *
@@ -19,7 +21,7 @@
  * every row below is dropped when its value is absent rather than showing a dash —
  * measured proof this matters: a vacancy-less intake application (S-00046) genuinely
  * returns `vacancy: null` + `client_name: null`, while an application on a vacancy
- * (S-00047) returns "Inovum". Fase / recruiter / aangemaakt-op / referentienr. were
+ * (S-00047) returns "Inovum". Phase / recruiter / created-date / reference number were
  * populated on every application measured.
  */
 import { useEffect, useRef, useState } from 'react'

@@ -1,12 +1,12 @@
-import { createElement, useEffect, useRef, useState } from 'react'
-import { useTranslation } from 'react-i18next'
-
 /**
  * IconPickerControl — a compact in-row icon picker for lookup editors (Danny
  * 23-07: the icon belongs IN the row next to the colour, not in a separate
  * block). Generic: the host passes the curated `icons` (slug list) and a
  * `resolve(slug) → LucideIcon` — this control never hardcodes a vocabulary.
  */
+import { createElement, useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+
 export default function IconPickerControl({ icons, resolve, value, color, label, onPick }) {
   const { t } = useTranslation('settings')
   const [open, setOpen] = useState(false)

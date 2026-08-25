@@ -2,7 +2,8 @@
  * TenantOverridesCard — per-tenant flavour ceiling/floor. A searchable tenant
  * picker (CreatableSelect over useAuth().tenants — the same superadmin list the
  * TenantSwitcher already loads, no second fetch) selects which override to edit;
- * `min_flavor` is a FLOOR ("tilt alle verzoeken voor deze tenant op") and
+ * `min_flavor` is a FLOOR ("tilt alle verzoeken voor deze tenant op", i.e.
+ * "bump all requests for this tenant up") and
  * `allowed_flavors` a ceiling — both null/empty means no override at all.
  * Clearing sends null through PATCH rather than dropping the key, so the
  * override actually resets server-side (§3A VAC-CLEAR-1).

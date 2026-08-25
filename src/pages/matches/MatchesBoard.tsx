@@ -1,3 +1,5 @@
+// MatchesBoard — kanban view of matches, one column per match status, with
+// drag-and-drop between columns. See the fuller doc comment on the component below.
 import { useRef } from 'react'
 import type { DragEvent, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'

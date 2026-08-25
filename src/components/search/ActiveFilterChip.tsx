@@ -1,13 +1,13 @@
+// ActiveFilterChip — GEOSEARCH-1 (Danny 22-08): the ONE removable soft-chip both
+// search twins use for their active-filter row (candidates/drawer/VacancySearchTab's
+// secondary filters, vacancies/drawer/CandidateSearchTab's selected values) —
+// extracted from VacancySearchFilters' own SecondaryFilterChip so the vacancy side
+// gets the identical look instead of a second hand-rolled copy. Always the ACTIVE
+// tint (§4): a chip only ever renders while its filter is genuinely selected.
 import type { CSSProperties } from 'react'
 import { X } from 'lucide-react'
 import { tintBg, tintBorder, chipInk } from '@/lib/tint'
 
-// GEOSEARCH-1 (Danny 22-08): the ONE removable soft-chip both search twins use
-// for their active-filter row (candidates/drawer/VacancySearchTab's secondary
-// filters, vacancies/drawer/CandidateSearchTab's selected values) — extracted
-// from VacancySearchFilters' own SecondaryFilterChip so the vacancy side gets
-// the identical look instead of a second hand-rolled copy. Always the ACTIVE
-// tint (§4): a chip only ever renders while its filter is genuinely selected.
 const chipStyle: CSSProperties = {
   display: 'inline-flex', alignItems: 'center', gap: 5, padding: '4px 6px 4px 9px',
   fontSize: 11.5, fontWeight: 600, borderRadius: 999,

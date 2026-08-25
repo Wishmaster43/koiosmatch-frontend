@@ -1,10 +1,9 @@
-import { useTranslation } from 'react-i18next'
-import StatusListEditor from './StatusListEditor'
-
 /**
  * Outreach (call-list / bellijsten) lookups — tenant-managed lists behind the Outreach
  * feature. Reuse the shared StatusListEditor (name + colour + reorder + 409 in-use).
  */
+import { useTranslation } from 'react-i18next'
+import StatusListEditor from './StatusListEditor'
 
 /** Outreach statuses — the call-list status values. Backend /outreach-statuses (R-1). */
 export function OutreachStatusSettings() {

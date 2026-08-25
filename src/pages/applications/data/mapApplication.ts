@@ -1,3 +1,7 @@
+// mapApplication — the raw API → UI-model mappers for the applications feature:
+// interview sessions, the list/board row shape, stage durations and the match
+// summary. One boundary where the backend's field/vocabulary quirks (mixed-
+// language values, list-vs-detail field gaps) get normalised into our own shape.
 import { bucketOfPhase } from './applicationsShared'
 import { initialsOf } from '@/lib/initials'
 import type { Id } from '@/types/common'

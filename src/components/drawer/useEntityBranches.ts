@@ -1,3 +1,11 @@
+/**
+ * useEntityBranches — the shared branch-membership hook (M2M) behind the shared
+ * BranchSection component, generic over which entity owns the coupling. Persists
+ * via POST/DELETE {prefix}/{id}/branches; the body key is `location_id` on every
+ * entity (CandidateBranchController / CustomerBranchController share the same
+ * contract). Mirrors useEntityDocuments (§3/§11: one hook, parameterised, reused
+ * across entities rather than copied per entity).
+ */
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import api, { unwrapList } from '@/lib/api'
@@ -22,14 +30,6 @@ interface UseEntityBranchesArgs {
   initialBranches?: EntityBranch[]
 }
 
-/**
- * useEntityBranches — the shared branch-membership hook (M2M) behind the shared
- * BranchSection component, generic over which entity owns the coupling. Persists
- * via POST/DELETE {prefix}/{id}/branches; the body key is `location_id` on every
- * entity (CandidateBranchController / CustomerBranchController share the same
- * contract). Mirrors useEntityDocuments (§3/§11: one hook, parameterised, reused
- * across entities rather than copied per entity).
- */
 export function useEntityBranches({ prefix, id, options, fetchOnMount = false, initialBranches = [] }: UseEntityBranchesArgs) {
   const { t } = useTranslation('common')
   const [branches, setBranches] = useState<EntityBranch[]>(initialBranches)

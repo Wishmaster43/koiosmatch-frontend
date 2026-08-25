@@ -1,9 +1,12 @@
 /**
- * LocationAddressTab — the "Adres & gegevens" sub-tab body of LocationDetail
+ * LocationAddressTab — the "Adres & gegevens" ("Address & details") sub-tab
+ * body of LocationDetail
  * (§0.3 split, this task — LocationDetail passed ~450 lines once
  * ARCHIVE-SUBENTITY-1/LOCATIE-SAMENVOEGEN-1/TAKEN-OP-LOCATIE-1 landed). Same
- * block order as the customer's Bedrijf tab (Danny 28-07: "zelfde format als
- * klant"): Gegevens · Adres · Contact · Omschrijving · Koios advies · Vestiging.
+ * block order as the customer's Bedrijf ("Company") tab (Danny 28-07: "zelfde
+ * format als klant" — "same format as customer"): Gegevens · Adres · Contact ·
+ * Omschrijving · Koios advies · Vestiging ("Details · Address · Contact ·
+ * Description · Koios advice · Branch").
  * Pure presentational — LocationDetail still owns all state/handlers and hands
  * them down as props (§3A: details stay thin containers).
  */
@@ -54,7 +57,7 @@ export default function LocationAddressTab({
   const validateVat = (v: unknown, values: Record<string, unknown>) =>
     identifiers.notice('vat', v as string, (values.country as string) ?? l.country)
 
-  // Algemeen/Adres/Registratie — street/no/suffix/postcode/city collapse into ONE
+  // Algemeen/Adres/Registratie ("General/Address/Registration") — street/no/suffix/postcode/city collapse into ONE
   // composed line in read mode (the 'address' composite) and only expand to loose
   // fields while editing; state/country stay their own rows.
   const generalFields: FieldRow[] = [
@@ -75,7 +78,7 @@ export default function LocationAddressTab({
       renderValue: v => kvkValue(v, t('locations.detail.openKvk')), validate: validateCoc },
     { key: 'vatNumber', label: t('locations.detail.vat'), type: 'text', group: t('overview.details'),
       renderValue: v => vatValue(v, t('locations.detail.openVies')), validate: validateVat },
-    // Kostenplaats sits in Gegevens (Danny 28-07) — no billing-email input here:
+    // Kostenplaats ("Cost center") sits in Gegevens ("Details") (Danny 28-07) — no billing-email input here:
     // invoicing always comes from the customer (see OverviewTab).
     { key: 'costCenter', label: t('locations.detail.costCenter'), type: 'text', group: t('overview.details') },
   ]
@@ -114,7 +117,7 @@ export default function LocationAddressTab({
 
       {/* CONTACT-LOCATION-PRIMARY-1, round two (Danny 02-08) — ONE contact block, and the
           coupling is the only truth it shows as a link. Setting/changing it lives on the
-          Contactpersonen sub-tab (the "make primary" star). */}
+          Contactpersonen ("Contact persons") sub-tab (the "make primary" star). */}
       <LocationContactSection
         primaryContact={primaryContact}
         legacyName={l.contactName ?? ''} legacyEmail={l.email ?? ''} legacyPhone={l.phone ?? ''}
@@ -133,7 +136,7 @@ export default function LocationAddressTab({
       {/* Koios advice — pure FE heuristics over this location's OWN completeness. */}
       <KoiosAdviceBlock namespace="customers" insights={buildLocationAdviceInsights(l, t)} />
 
-      {/* Vestiging — which of OUR branches this site works under, and whether that is
+      {/* Vestiging ("Branch") — which of OUR branches this site works under, and whether that is
           inherited from the customer or set here on purpose (LOCATIE-VESTIGING-1). */}
       <LocationBranchSection
         branchIds={l.branchIds} branches={l.branches}

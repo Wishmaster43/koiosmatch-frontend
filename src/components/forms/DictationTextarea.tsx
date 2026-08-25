@@ -1,16 +1,17 @@
+/**
+ * DictationTextarea — the ONE plain-text multi-line field WITH the house mic
+ * (walkthrough 21-08, POP-UPS 4: "alle omschrijvingen in pop-ups een mic",
+ * i.e. "every description field in a popup gets a mic"). For reason/description
+ * fields whose storage is PLAIN text: a full RichTextEditor would silently switch
+ * them to HTML, so this keeps the <textarea> and attaches the shared assist bar
+ * in mic-only plain-text mode (modes=[] + plainText — dictation appends raw
+ * text, Koios-assist stays off because its output is HTML). Field face comes
+ * from fieldMetrics' canon.
+ */
 import type { CSSProperties } from 'react'
 import RichTextAssistBar from '@/components/ui/RichTextAssistBar'
 import { fieldTextareaStyle } from '@/components/forms/fieldMetrics'
 
-/**
- * DictationTextarea — the ONE plain-text multi-line field WITH the house mic
- * (walkthrough 21-08, POP-UPS 4: "alle omschrijvingen in pop-ups een mic").
- * For reason/description fields whose storage is PLAIN text: a full
- * RichTextEditor would silently switch them to HTML, so this keeps the
- * <textarea> and attaches the shared assist bar in mic-only plain-text mode
- * (modes=[] + plainText — dictation appends raw text, Koios-assist stays off
- * because its output is HTML). Field face comes from fieldMetrics' canon.
- */
 interface DictationTextareaProps {
   value: string
   onChange: (v: string) => void

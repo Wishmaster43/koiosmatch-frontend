@@ -1,10 +1,3 @@
-import { useCallback } from 'react'
-import { useTranslation } from 'react-i18next'
-import { useAllSettings, getNumberSetting } from '@/lib/settings/useAllSettings'
-import { deriveVacancyAdvice } from '@/pages/vacancies/shared'
-import type { KoiosAdvice } from '@/lib/koiosAdviceMeta'
-import type { Vacancy } from '@/types/vacancy'
-
 /**
  * useVacancyAdvice — the ONE resolver both the vacancies TABLE column and the
  * drawer's Koios block call, so they can never disagree (KOIOS-ADVIES-OVERAL-1,
@@ -12,6 +5,12 @@ import type { Vacancy } from '@/types/vacancy'
  * with the tenant's stale-days threshold — the setting is read HERE so the
  * threshold logic has exactly one home, never re-read per consumer.
  */
+import { useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
+import { useAllSettings, getNumberSetting } from '@/lib/settings/useAllSettings'
+import { deriveVacancyAdvice } from '@/pages/vacancies/shared'
+import type { KoiosAdvice } from '@/lib/koiosAdviceMeta'
+import type { Vacancy } from '@/types/vacancy'
 export function useVacancyAdvice(): (v: Vacancy) => KoiosAdvice | null {
   const { t } = useTranslation(['vacancies', 'common'])
   // How many days without an application counts as "stale" (mirrors candidates'

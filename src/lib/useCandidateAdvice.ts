@@ -1,11 +1,3 @@
-import { useCallback } from 'react'
-import { useTranslation } from 'react-i18next'
-import { useLookups } from '@/context/LookupsContext'
-import { useAllSettings, getNumberSetting } from '@/lib/settings/useAllSettings'
-import { deriveCandidateAdvice } from '@/lib/candidateAdvice'
-import type { KoiosAdvice } from '@/lib/koiosAdviceMeta'
-import type { Candidate } from '@/types/candidate'
-
 /**
  * useCandidateAdvice — the ONE resolver both the candidates TABLE column and the
  * drawer "Koios AI adviseert" block call, so they can never disagree again.
@@ -18,6 +10,14 @@ import type { Candidate } from '@/types/candidate'
  * this gate auto-lifts the moment the backend ships a tagged source, no FE
  * change required.
  */
+import { useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
+import { useLookups } from '@/context/LookupsContext'
+import { useAllSettings, getNumberSetting } from '@/lib/settings/useAllSettings'
+import { deriveCandidateAdvice } from '@/lib/candidateAdvice'
+import type { KoiosAdvice } from '@/lib/koiosAdviceMeta'
+import type { Candidate } from '@/types/candidate'
+
 export function useCandidateAdvice(): (c: Candidate) => KoiosAdvice | null {
   const { t } = useTranslation('candidates')
   const { phases, statusMeta } = useLookups()

@@ -1,7 +1,3 @@
-import { useEffect, useState } from 'react'
-
-const QUERY = '(prefers-reduced-motion: reduce)'
-
 /**
  * usePrefersReducedMotion (§6) — THE one reduced-motion probe for the app. Reads
  * the OS/browser preference and tracks it live, so toggling it applies without a
@@ -10,6 +6,10 @@ const QUERY = '(prefers-reduced-motion: reduce)'
  * Promoted out of KoiosPanel's inline copy when the drag layer needed the same
  * signal (§11: a new shared helper lands WITH adoption on the existing copy site).
  */
+import { useEffect, useState } from 'react'
+
+const QUERY = '(prefers-reduced-motion: reduce)'
+
 export function usePrefersReducedMotion(): boolean {
   const [reduced, setReduced] = useState(() => {
     if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return false

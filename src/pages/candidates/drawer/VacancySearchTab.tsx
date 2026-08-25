@@ -1,3 +1,10 @@
+/**
+ * VacancySearchTab — Match-zoeker ("Match finder") phase 1b (candidate side):
+ * the MIRROR of vacancies/drawer/CandidateSearchTab — the candidate's own
+ * geocoded home location as the search origin, OPEN vacancies within a radius
+ * plotted on the shared RadiusMap + listed side by side (§3A blueprint: thin
+ * container, all data via the hook, one small component per tab).
+ */
 import type { CSSProperties, ReactNode } from 'react'
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -57,16 +64,9 @@ const rowStyle: CSSProperties = { display: 'flex', alignItems: 'center', justify
 // Snippet length cap (2-3 lines of plain text) — a short teaser, not the full description.
 const SNIPPET_MAX_LENGTH = 220
 
-/**
- * VacancySearchTab — Match-zoeker fase 1b (candidate side): the MIRROR of
- * vacancies/drawer/CandidateSearchTab — the candidate's own geocoded home
- * location as the search origin, OPEN vacancies within a radius plotted on the
- * shared RadiusMap + listed side by side (§3A blueprint: thin container, all
- * data via the hook, one small component per tab). Wraps its own
- * VacancyLookupsProvider (mirrors applications/drawer/VacancyTab.tsx) because
- * that context is only mounted page-scoped around VacanciesPage, not around
- * the candidate drawer.
- */
+// Wraps its own VacancyLookupsProvider (mirrors applications/drawer/VacancyTab.tsx)
+// because that context is only mounted page-scoped around VacanciesPage, not
+// around the candidate drawer.
 export default function VacancySearchTab({ candidate }: { candidate: Candidate }) {
   return (
     <VacancyLookupsProvider>
@@ -304,8 +304,9 @@ function VacancySearchTabInner({ candidate }: { candidate: Candidate }) {
       </Button>
     </div>
   ) : rows.length === 0 ? (
-    // GEO-EMPTY-1 (Danny 14-08 "bij de demo vind ik geen vacatures terwijl die er wel
-    // zijn"): the radius filter runs against the candidate's own coordinates, so an
+    // GEO-EMPTY-1 (Danny 14-08, verbatim: "…geen vacatures terwijl die er wel
+    // zijn" — i.e. "in the demo I find no vacancies while they do exist"): the
+    // radius filter runs against the candidate's own coordinates, so an
     // un-geocoded candidate can NEVER match — blaming the filters there sends the user
     // hunting in the wrong place. Name the real cause and offer the geocode action.
     <div style={{ padding: 16, display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>

@@ -107,9 +107,9 @@ export default function ShiftsChartsBlock({
   const fmtN = (n: number) => formatNumber(Math.round(n))
   const isH = shiftUnit === 'hours'
   const H = hourStats.filterHours, C = hourStats.filterShifts, MH = hourStats.monthHours, MC = hourStats.monthShifts
-  const val = (h: number, c: number) => fmtN(isH ? h : c)  // uren of diensten per de toggle
+  const val = (h: number, c: number) => fmtN(isH ? h : c)  // hours or shifts, per the toggle
 
-  // #6 Open diensten per functie — mini gestapelde balk in de tegel (Danny: donut past niet).
+  // #6 Open shifts per function — mini stacked bar in the tile (Danny: a donut doesn't fit).
   const funcSegs  = functionRows.slice(0, 6).map((r, i) => ({ label: r.label || '—', value: isH ? Number(r.hours) || 0 : Number(r.count) || 0, color: BREAKDOWN_PALETTE[i % BREAKDOWN_PALETTE.length] }))
   const funcTotal = funcSegs.reduce((s, x) => s + x.value, 0)
   const openFuncBar = (
@@ -125,13 +125,13 @@ export default function ShiftsChartsBlock({
   )
 
   const kpiRow: KpiSpec[] = [
-    ...(leadingKpis ?? []),                                             // Gewerkt/Actief · Nieuw · Aandacht
+    ...(leadingKpis ?? []),                                             // Worked/Active · New · Attention
     { key: 'forecast_month',   label: t('dashboard.stats.forecastMonth'), value: val(MH.prognose, MC.prognose),          color: 'var(--color-secondary)' },
     { key: 'open',             label: isH ? t('dashboard.stats.openHours') : t('dashboard.stats.openShifts'), value: val(H.geen_kandidaat, C.geen_kandidaat), color: 'var(--color-warning)' },
     { key: 'open_functions',   label: t('dashboard.stats.openByFunction'), render: openFuncBar },  // #6 mini stacked bar
-    // Actieve klanten: ingeplande / totaal-actief (bv. 5/7), testklant al uitgesloten.
+    // Active customers: scheduled / total-active (e.g. 5/7), test customer already excluded.
     { key: 'active_customers', label: t('dashboard.stats.activeCustomers'), value: `${fmtN(plannedCustomers)}/${fmtN(activeCustomers)}`, color: 'var(--color-secondary)' },
-    // #8/#9 nog te bepalen (Danny) — voorlopig Niet ingevuld + Werkelijk deze maand.
+    // #8/#9 still to be decided (Danny) — for now Unfilled + Actual this month.
     { key: 'unfilled',         label: t('dashboard.stats.unfilled'),      value: val(H.niet_ingevuld, C.niet_ingevuld),  color: 'var(--color-danger-text)' },
     { key: 'actual_month',     label: t('dashboard.stats.actualMonth'),   value: val(MH.werkelijk, MC.werkelijk),        color: 'var(--color-success-text)' },
   ]
@@ -203,7 +203,8 @@ export default function ShiftsChartsBlock({
     setSelectedCustomers(s.selectedCustomers); setSelectedLocations(s.selectedLocations)
   }, [])
 
-  // Apply the default saved filter once on mount (Danny: "wordt niet default geladen?").
+  // Apply the default saved filter once on mount (Danny: "wordt niet default geladen?" —
+  // isn't it loaded by default?).
   const appliedDefaultRef = useRef(false)
   useEffect(() => {
     if (appliedDefaultRef.current || !defaultState) return

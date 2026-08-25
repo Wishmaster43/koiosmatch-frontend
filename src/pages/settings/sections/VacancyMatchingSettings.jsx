@@ -1,3 +1,9 @@
+/**
+ * VacancyMatchingSettings — the GLOBAL matching strictness (how critical the AI
+ * matcher is overall) plus the match APPROVAL mode (per-tenant: off = every
+ * match is always OK). The per-vacancy dimension importance (qualifications,
+ * location, …) lives on each vacancy itself, not here. Persists to /settings/matching.
+ */
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Save, Check } from 'lucide-react'
@@ -8,12 +14,6 @@ import SegmentedControl from '@/components/ui/SegmentedControl'
 import SaveButton from '@/components/ui/SaveButton'
 import { PageTitle, SectionTitle, Mono } from '@/components/ui/typography'
 
-/**
- * VacancyMatchingSettings — the GLOBAL matching strictness (how critical the AI
- * matcher is overall) plus the match APPROVAL mode (per-tenant: off = every
- * match is always OK). The per-vacancy dimension importance (qualifications,
- * location, …) lives on each vacancy itself, not here. Persists to /settings/matching.
- */
 // The backend strictness is an enum; the slider is a 3-step index onto it.
 const LEVELS = ['lenient', 'balanced', 'strict']
 // Approval-mode enum (backend slugs are Dutch by contract; i18n keys stay English).

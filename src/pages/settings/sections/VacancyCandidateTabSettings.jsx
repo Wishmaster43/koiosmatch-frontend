@@ -1,15 +1,3 @@
-import { useState } from 'react'
-import { Caption } from '@/components/ui/typography'
-import { useTranslation } from 'react-i18next'
-import { useAllSettings, getJsonSetting, saveSettingsKeys } from '@/lib/settings/useAllSettings'
-import { useLookups } from '@/context/LookupsContext'
-import { VacancyLookupsProvider, useVacancyLookups } from '@/context/VacancyLookupsContext'
-import { getCandidateTabDefaults } from '@/pages/vacancies/shared'
-import SubTabBar from '@/components/drawer/SubTabBar'
-import { Toggle } from '../components/SettingsKit'
-import LookupChipSelect from '../components/LookupChipSelect'
-import SegmentedControl from '@/components/ui/SegmentedControl'
-
 /**
  * Kandidaten zoeken-tab visibility + filter-default editor (Danny 23-07): the
  * vacancy drawer's "Kandidaten zoeken" (candidateSearch) tab is tenant-configurable
@@ -35,6 +23,18 @@ import SegmentedControl from '@/components/ui/SegmentedControl'
  * (vacancies have no category column yet) and must say so honestly, never present
  * itself as doing more than 'exact' does today.
  */
+import { useState } from 'react'
+import { Caption } from '@/components/ui/typography'
+import { useTranslation } from 'react-i18next'
+import { useAllSettings, getJsonSetting, saveSettingsKeys } from '@/lib/settings/useAllSettings'
+import { useLookups } from '@/context/LookupsContext'
+import { VacancyLookupsProvider, useVacancyLookups } from '@/context/VacancyLookupsContext'
+import { getCandidateTabDefaults } from '@/pages/vacancies/shared'
+import SubTabBar from '@/components/drawer/SubTabBar'
+import { Toggle } from '../components/SettingsKit'
+import LookupChipSelect from '../components/LookupChipSelect'
+import SegmentedControl from '@/components/ui/SegmentedControl'
+
 const KEY = 'vacancy_candidate_tab'
 
 // Function-match strictness options — 'category' is GONE (FUNCTION-MATCH-CATEGORY-1:

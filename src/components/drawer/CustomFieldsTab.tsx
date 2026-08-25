@@ -1,3 +1,9 @@
+/**
+ * CustomFieldsTab — the ONE shared "Extra" drawer tab (§3A(f)): renders one entity's
+ * active tenant-defined custom fields with in-place edit, so a new entity never
+ * builds its own custom-fields UI. See the component docblock below for the
+ * candidates/vacancies exception (they keep their own pre-existing tabs).
+ */
 import { useState, useId } from 'react'
 import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'

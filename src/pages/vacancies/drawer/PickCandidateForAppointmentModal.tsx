@@ -29,8 +29,10 @@ const rowToOption = (r: ApiRow): CandidateOption => {
  * PickCandidateForAppointmentModal (VACDRAWER-ACTIONS-1) — booking an
  * appointment from the vacancy drawer has the vacancy PRESET but, unlike every
  * other PlanIntakeModal caller (candidate/application drawer, vacancy
- * applicant row), no candidate yet: this vacancy's Afspraken tab lists
- * appointments across ALL candidates, so "+ Afspraak" must ask WHICH one first.
+ * applicant row), no candidate yet: this vacancy's Afspraken ("Appointments")
+ * tab lists
+ * appointments across ALL candidates, so "+ Afspraak" ("+ Appointment") must
+ * ask WHICH one first.
  *
  * Step 1 (this component's own body) picks the candidate through the house
  * SERVER-SEARCHED dropdown — SearchSelect's own canonical single-pick FIELD

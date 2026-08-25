@@ -1,3 +1,6 @@
+// OpportunitiesBoard — kanban view, one column per deal stage. Presentational:
+// the page owns the data and the stage mutation (onMove); drag-and-drop wiring
+// and edge-auto-scroll live here, mirroring ApplicationsBoard's own idiom.
 import { useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { DragEvent } from 'react'

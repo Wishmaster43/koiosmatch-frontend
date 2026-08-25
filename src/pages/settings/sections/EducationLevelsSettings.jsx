@@ -1,6 +1,3 @@
-import { useTranslation } from 'react-i18next'
-import StatusListEditor from './StatusListEditor'
-
 /**
  * Education levels (KAND-NIVEAU-1) — the candidate education "niveau" lookup
  * (dropdown for candidate_educations.level_id; backend EducationLevelController
@@ -10,6 +7,9 @@ import StatusListEditor from './StatusListEditor'
  * fields; distinct from the unrelated vacancy_education lookup (a separate
  * vacancy-education-levels table for the vacancy's education REQUIREMENT).
  */
+import { useTranslation } from 'react-i18next'
+import StatusListEditor from './StatusListEditor'
+
 export default function EducationLevelsSettings() {
   const { t } = useTranslation('settings')
   return (

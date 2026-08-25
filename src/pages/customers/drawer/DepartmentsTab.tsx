@@ -3,7 +3,8 @@
  * DepartmentsPanel, which is now the ONE department surface: the same table, chips,
  * search, actions and drill-down are rendered inside a location too (Danny 28-07: "wat je
  * nu aan het doen bent voor de contactpersonen moet je ook nog doen voor de afdelingen op
- * een locatie").
+ * een locatie" — "what you're doing now for the contacts, you still need to do for the
+ * departments on a location").
  *
  * Everything this file used to own — the column definitions, the search shell, the add
  * modal and the drill-in via SubEntityTab — moved into that panel, so there is one copy

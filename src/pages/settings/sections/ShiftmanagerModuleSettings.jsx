@@ -1,15 +1,7 @@
-import { useState } from 'react'
-import { useTranslation } from 'react-i18next'
-import { useAuth } from '@/context/AuthContext'
-import { useApps } from '@/context/AppsContext'
-import SubTabBar from '@/components/drawer/SubTabBar'
-import SchemaSection from '../components/SchemaSection'
-import displaySchema from '../schemas/display'
-import smKpisSchema from '../schemas/smKpis'
-
 /**
  * Shiftmanager module settings — TWO sub-tabs (Danny 04-08: "moeten dan onder
- * Shiftmanager 2 subtabjes worden"): KPI targets and display limits, each on
+ * Shiftmanager 2 subtabjes worden" — "should then become 2 sub-tabs under
+ * Shiftmanager"): KPI targets and display limits, each on
  * their own sub-tab instead of stacked. Labels reuse the schemas' own already-
  * translated titles (smKpis.title / display.title) so there is one source of
  * truth for each section's name. The manual Sync tab is retired (SYNC-RETIRE-1
@@ -17,7 +9,8 @@ import smKpisSchema from '../schemas/smKpis'
  * SM pages' SmSyncButton).
  *
  * SM-MODULE-TABS-1 (Danny 16-08 restore): reachability hangs on TWO independent
- * superadmin toggles — Modules → "Rapportage Shiftmanager" ('sm', hasModule) and
+ * superadmin toggles — Modules → "Rapportage Shiftmanager" ("Shiftmanager
+ * reporting", 'sm', hasModule) and
  * Apps → the Shiftmanager connector ('shiftmanager', isAppEnabled) — the settings
  * nav item is gated on EITHER (registry.jsx `requiresModuleOrApp`, see
  * SettingsPage's passesModuleOrApp). Inside this screen, both existing sub-tabs
@@ -27,6 +20,15 @@ import smKpisSchema from '../schemas/smKpis'
  * the module flag; an app-only tenant still reaches the screen (nav gate) but
  * sees an honest "nothing here yet" notice instead of both tabs.
  */
+import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import { useAuth } from '@/context/AuthContext'
+import { useApps } from '@/context/AppsContext'
+import SubTabBar from '@/components/drawer/SubTabBar'
+import SchemaSection from '../components/SchemaSection'
+import displaySchema from '../schemas/display'
+import smKpisSchema from '../schemas/smKpis'
+
 export default function ShiftmanagerModuleSettings() {
   const { t } = useTranslation('settings')
   const { hasModule } = useAuth()

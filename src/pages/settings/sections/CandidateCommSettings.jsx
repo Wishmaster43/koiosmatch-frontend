@@ -1,9 +1,13 @@
+// CandidateCommSettings — Settings pieces for how candidate contact is tracked:
+// the duplicate-detection field set, the no-contact reminder window, and the
+// tenant-maintainable last-contact-type lookup (LastContactTypesSettings).
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import StatusListEditor from './StatusListEditor'
 // B8: the shared always-visible checkbox list — a hand-rolled `<label><input
 // type="checkbox">` row per field is a finding (§0, "ALTIJD een zoekbare
-// dropdown … óók een lijst van drie opties"); OpenCheckGroup is the ONE
+// dropdown … óók een lijst van drie opties" — "ALWAYS a searchable dropdown …
+// even a list of three options"); OpenCheckGroup is the ONE
 // component for a small fixed vocabulary.
 import OpenCheckGroup from '@/components/reports/filter/OpenCheckGroup'
 import { resolveGenericLookupIcon } from './lookupIcons'
@@ -145,5 +149,5 @@ export function LastContactTypesSettings() {
 }
 
 // Note types moved to their own per-entity settings group (NOTE-TYPES-2/3, Danny
-// "ieder zijn eigen" 2026-07-20) — see ./NoteTypesSettings.jsx + registry.jsx's
+// "ieder zijn eigen" — "each its own" — 2026-07-20) — see ./NoteTypesSettings.jsx + registry.jsx's
 // `note_types` group, one sub-tab per backend NoteType::ENTITIES value.

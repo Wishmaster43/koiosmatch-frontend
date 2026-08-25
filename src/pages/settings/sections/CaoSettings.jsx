@@ -1,9 +1,7 @@
-import { useTranslation } from 'react-i18next'
-import StatusListEditor from './StatusListEditor'
-
 /**
- * CaoSettings — the CAO lookup finally gets its Settings home (Danny 24-07:
- * "ik zie geen CAO's bij instellingen" — the /cao endpoint had full CRUD +
+ * CaoSettings — the CAO (collective labour agreement) lookup finally gets its
+ * Settings home (Danny 24-07: "ik zie geen CAO's bij instellingen" — "I don't
+ * see any CAOs in Settings" — the /cao endpoint had full CRUD +
  * reorder + in-use 409 (via matches.cao) but no screen, same gap class as
  * provinces). Name-only list; drives the customer price agreements and the
  * + Match popup's CAO picker.
@@ -14,6 +12,9 @@ import StatusListEditor from './StatusListEditor'
  * would 422 on every tenant (same bug class already fixed for
  * CustomerPhasesSettings/OpportunityLookupsSettings — see StatusListEditor.jsx).
  */
+import { useTranslation } from 'react-i18next'
+import StatusListEditor from './StatusListEditor'
+
 export default function CaoSettings() {
   const { t } = useTranslation('settings')
   return (

@@ -1,3 +1,11 @@
+/**
+ * DocumentVersionHistory — the collapsible "N previous versions" list under a
+ * document row (point 3 of the documents punchlist). Split out of
+ * DocumentsSection (§3 size discipline): purely presentational, all data comes
+ * from props, and the expand/collapse toggle is local UI state that never needs
+ * lifting to the parent. Renders nothing for a document with no superseded
+ * versions yet — no fake affordance for an empty history.
+ */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ChevronDown, ChevronRight, Download } from 'lucide-react'
@@ -14,14 +22,6 @@ export interface DocVersion {
   download_url?: string
 }
 
-/**
- * DocumentVersionHistory — the collapsible "N previous versions" list under a
- * document row (point 3 of the documents punchlist). Split out of
- * DocumentsSection (§3 size discipline): purely presentational, all data comes
- * from props, and the expand/collapse toggle is local UI state that never needs
- * lifting to the parent. Renders nothing for a document with no superseded
- * versions yet — no fake affordance for an empty history.
- */
 export default function DocumentVersionHistory({ versions }: { versions: DocVersion[] }) {
   const { t } = useTranslation('candidates')
   const { formatDate } = useDateFormat()

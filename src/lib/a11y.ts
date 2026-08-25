@@ -1,3 +1,8 @@
+/**
+ * a11y — small keyboard-interaction helpers (§6, WCAG 2.2 AA) spread onto elements
+ * that need button-like or row-like keyboard behaviour without changing their
+ * semantic role. See the per-export doc comments below.
+ */
 import type { KeyboardEvent } from 'react'
 
 /**

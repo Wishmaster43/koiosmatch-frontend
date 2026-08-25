@@ -1,10 +1,3 @@
-import { useTranslation } from 'react-i18next'
-import Button from '@/components/ui/Button'
-import { Mono } from '@/components/ui/typography'
-import { useAuth } from '@/context/AuthContext'
-import { canAccessPage } from '@/lib/access'
-import type { WebhookRequestWorkflowRef } from './webhookRequestTypes'
-
 /**
  * WorkflowRefs — the workflows an inbound webhook request dispatched to.
  * WEBHOOK-RUN-CORRELATION-1: the backend now attaches each workflow's NAME (next
@@ -15,6 +8,13 @@ import type { WebhookRequestWorkflowRef } from './webhookRequestTypes'
  * honest fallback — the ids as Mono text plus ONE generic link to the run history,
  * gated on the page the tenant can actually open.
  */
+import { useTranslation } from 'react-i18next'
+import Button from '@/components/ui/Button'
+import { Mono } from '@/components/ui/typography'
+import { useAuth } from '@/context/AuthContext'
+import { canAccessPage } from '@/lib/access'
+import type { WebhookRequestWorkflowRef } from './webhookRequestTypes'
+
 export default function WorkflowRefs({ ids, workflows }: { ids: Array<string | number>; workflows?: WebhookRequestWorkflowRef[] }) {
   const { t } = useTranslation('settings')
   const auth = useAuth()

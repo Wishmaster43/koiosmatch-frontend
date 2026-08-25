@@ -1,5 +1,5 @@
 /**
- * useVacancySearch — Match-zoeker fase 1b (candidate side): now the MIRROR of
+ * useVacancySearch — match finder phase 1b (candidate side): now the MIRROR of
  * useCandidateSearch (vacancy side) onto the completed LIVE scored endpoint
  * (MATCH-EXPLORER-1 fase 2/3, CMBE mirror delivery 23-07). Replaces the earlier
  * two-fetch workaround (a plain /vacancies list + a separate score merge) with
@@ -64,10 +64,11 @@ export function useVacancySearch(candidate: Candidate) {
   const { functions: functionOptions } = useFunctions()
   // Tenant candidateTypes lookup (Contractvorm labels + colours) — the SAME axis
   // PreferencesTab reads via useLookups(), reused here to seed/offer the new
-  // contract-form filter (Danny 06-08 "eerst de extra filters").
+  // contract-form filter (Danny 06-08, translated: "the extra filters first" —
+  // verbatim: "eerst de extra filters").
   const { candidateTypes, typeMeta } = useLookups()
   // Tenant default vacancy-status preselection (Settings → Candidate →
-  // Vacatures-tabblad, same `candidate_vacancy_tab` key the tab-visibility gate
+  // Vacancies tab, same `candidate_vacancy_tab` key the tab-visibility gate
   // reads) — kept in ONE place (this hook) so every consumer sees the same
   // pre-checked statuses; a stored (even empty) array always wins over the seed.
   const allSettings = useAllSettings()
@@ -79,7 +80,8 @@ export function useVacancySearch(candidate: Candidate) {
   // the reset action and for the "is anything actually changed?" test behind it.
   const radiusSeed = defaultRadiusKm(candidate)
   const functionMatch = matchFunctionOption(candidate.title, functionOptions)
-  // KOIOS-VOORSTEL-2 (Danny 14-08, live: 250 km en toch nul resultaten): the search
+  // KOIOS-VOORSTEL-2 (Danny 14-08, live feedback, translated: "250 km and still
+  // zero results" — verbatim: "250 km en toch nul resultaten"): the search
   // no longer PRE-APPLIES the candidate's own job title as a filter. Silently
   // narrowing on a guess emptied the list before the recruiter touched anything —
   // and the empty state then blamed "deze filters". The match stays available as a
@@ -199,8 +201,9 @@ export function useVacancySearch(candidate: Candidate) {
     setLoading(true); setError(false)
     api.get(`/candidates/${candidate.id}/vacancy-matches`, {
       params: {
-        // GEO-DEGRADE-1 (Danny 08-08 "vacatures zoeken werkt niet meer + de filters
-        // verdwijnen"): an un-geocoded candidate used to bail out here, which killed
+        // GEO-DEGRADE-1 (Danny 08-08, translated: "vacancy search no longer works +
+        // the filters disappear" — verbatim: "vacatures zoeken werkt niet meer + de
+        // filters verdwijnen"): an un-geocoded candidate used to bail out here, which killed
         // the whole tab — filters, list and all. Measured against the live endpoint:
         // it happily scores and ranks WITHOUT an origin (9 rows, score 66, distance
         // null), so only the radius is dropped. The map/distance stay hidden (they

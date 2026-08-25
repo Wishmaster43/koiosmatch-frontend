@@ -1,6 +1,7 @@
 /**
- * LocationDetail — the Locaties-tab drill-down (Danny 13/7: "kan niets wijzigen,
- * de naam niets???"). Fully editable via the shared EditableFieldTable house
+ * LocationDetail — the Locaties-tab drill-down (Danny 13/7, verbatim: "…de
+ * naam niets???" — i.e. "can't change anything, not even the name???").
+ * Fully editable via the shared EditableFieldTable house
  * pattern (pencil → save/cancel, optimistic PATCH via the parent's onSave).
  * Danny 2026-07-14: reorganised into SUB-TABS (short labels, mirrors the
  * candidate drawer's Communicatie sub-tab bar via the shared SubTabBar) —
@@ -27,8 +28,9 @@ import EntityTasksTab from '@/components/drawer/tabs/EntityTasksTab'
 import { getCountryOptions } from '@/lib/countries'
 import { useProvinces } from '@/hooks/useProvinces'
 import { useDateFormat } from '@/lib/datetime'
-// JOB-STATUS-1 (Danny 28-07: "Status van locatie moet hier!!") — the read-only
-// title-row badge (§3A(c)) + its own inline picker, extracted into a shared
+// JOB-STATUS-1 (Danny 28-07, verbatim: "…moet hier!!" — i.e. "location
+// status must be here!!") — the read-only title-row badge (§3A(c))
+// + its own inline picker, extracted into a shared
 // component (§0.3 split, 2026-08-03 — see that file's own docblock).
 import SubEntityStatusTitleRow from './SubEntityStatusTitleRow'
 // K4BLOGO: the location's own real (non-fake) logo upload — see its own docblock.
@@ -42,7 +44,9 @@ import DepartmentsPanel from './DepartmentsPanel'
 import ContactsPanel from './ContactsPanel'
 // §0.3 split (this task): the "Adres & gegevens" sub-tab body, extracted so this
 // file stays under the ~450-line trigger (§3) once the four ARCHIVE-SUBENTITY-1/
-// LOCATIE-SAMENVOEGEN-1/TAKEN-OP-LOCATIE-1/LOC-DEPT-CHANGELOG-1 features landed.
+// LOCATIE-SAMENVOEGEN-1/
+// TAKEN-OP-LOCATIE-1/
+// LOC-DEPT-CHANGELOG-1 features landed.
 import LocationAddressTab from './LocationAddressTab'
 import PdokCard from '@/components/drawer/PdokCard'
 import { useLocations } from '@/lib/useLocations'
@@ -171,8 +175,9 @@ export default function LocationDetail({
   // EditableFieldTable below manages its own uncontrolled edit toggle (they no
   // longer share one global pencil now that they live on separate sub-tabs).
   // SCOPED-LIST-TAB-1 added vacancies/matches. SOLLICITATIES-SCOPE-1 added
-  // 'applications'. TAKEN-OP-LOCATIE-1 added 'tasks' (KLANTLOCATIE-TAAK-1 — the
-  // WORKLIST note about "no location Taken tab" is now superseded by that ticket).
+  // 'applications'. TAKEN-OP-LOCATIE-1
+  // added 'tasks' (KLANTLOCATIE-TAAK-1 — the
+  // WORKLIST note about "no location Taken ("Tasks") tab" is now superseded by that ticket).
   // NOTES-LOC-DEPT-1/DOCS-LOC-DEPT-1 added 'notes'/'documents', right after 'applications'.
   const [subTab, setSubTab] = useState<'address' | 'departments' | 'contacts' | 'vacancies' | 'applications' | 'notes' | 'documents' | 'matches' | 'opportunities' | 'tasks' | 'extra' | 'koppelingen'>('address')
 
@@ -199,7 +204,8 @@ export default function LocationDetail({
   const doArchive = () => confirm(t('locations.detail.confirmArchive', { name: l.name }), archiveNow)
 
   // A contact opened from this location's own list takes over the whole body: it brings
-  // its own breadcrumb (Locaties › deze vestiging › de persoon), so showing the location's
+  // its own breadcrumb (i.e. "Locations › this branch › the person"), so
+  // showing the location's
   // title, sub-tab bar and delete button underneath would mean two titles and two delete
   // buttons with different blast radii on one narrow panel.
   if (departmentOpen) {

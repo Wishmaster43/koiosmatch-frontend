@@ -1,9 +1,9 @@
-import { useTranslation } from 'react-i18next'
-import StatusListEditor from './StatusListEditor'
-
 /** Driving licence categories — configurable list used by the candidate's
  * driving-licence preference chips. Backed by /driver-licenses. No colour:
  * it is a plain value list. */
+import { useTranslation } from 'react-i18next'
+import StatusListEditor from './StatusListEditor'
+
 export default function DriverLicenseSettings() {
   const { t } = useTranslation('settings')
   return (

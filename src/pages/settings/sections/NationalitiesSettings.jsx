@@ -1,8 +1,3 @@
-import { useTranslation } from 'react-i18next'
-import StatusListEditor from './StatusListEditor'
-import { useCountriesLookup } from '@/lib/useCountriesLookup'
-import { getFlagEmoji } from '@/lib/countries'
-
 /**
  * NationalitiesSettings — the candidate nationality lookup (LOOKUP-GAP-1, backend
  * NationalityController extends SimpleLookupController: plain name+colour CRUD, no
@@ -16,8 +11,9 @@ import { getFlagEmoji } from '@/lib/countries'
  * own /countries whitelist (useCountriesLookup — never a second hand-maintained
  * country list) via the generic extraField combobox. The row's adornment is the
  * flag EMOJI derived from that code (getFlagEmoji — a real Unicode glyph, no image
- * asset), not a colour: colour stays off (§4, Danny 05-08 "alles 1 kleur?" — a
- * nationality's colour carried no meaning; the flag is the real one). extraField.
+ * asset), not a colour: colour stays off (§4, Danny 05-08 "alles 1 kleur?" —
+ * "everything one colour?" — a nationality's colour carried no meaning; the
+ * flag is the real one). extraField.
  * hideRowBadge suppresses the generic text badge StatusListEditor would otherwise
  * also render for it, so the flag is the ONE adornment, not flag + a redundant
  * "Nederland" chip.
@@ -33,6 +29,11 @@ import { getFlagEmoji } from '@/lib/countries'
  * back on (was correctly off before that commit; LOOKUP-GAP-1(d) verification 08-08
  * caught the stale `reorderable={false}`, a capability the backend now serves).
  */
+import { useTranslation } from 'react-i18next'
+import StatusListEditor from './StatusListEditor'
+import { useCountriesLookup } from '@/lib/useCountriesLookup'
+import { getFlagEmoji } from '@/lib/countries'
+
 export default function NationalitiesSettings() {
   const { t } = useTranslation('settings')
   const { options: countryOptions } = useCountriesLookup()

@@ -111,7 +111,8 @@ export function useRelationSort<T>(items: T[], opts: UseRelationSortOptions<T>):
   const [allSorts, setAllSorts] = useUserPreference<SortPreferenceMap>(PREFERENCE_KEY, {})
 
   // ACHTERGROND-DATUM-STANDAARD-1 (Danny 17-08: "standaard op datum dus laatste
-  // werkervaring boven"). A list that carries dates opens newest-first, the way a
+  // werkervaring boven" — "sorted by date by default, so the latest work
+  // experience on top"). A list that carries dates opens newest-first, the way a
   // CV reads, without anyone having to pick it. This needs no stored order at all,
   // which is exactly Danny's point: it is computed from dates the record already
   // has. A column in the database is only needed for the OTHER case, someone

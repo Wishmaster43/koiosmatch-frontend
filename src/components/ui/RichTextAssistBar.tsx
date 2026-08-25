@@ -10,27 +10,30 @@
  *     (hold-open session the user switches off, escaped append, honest
  *     unsupported/insecure gates) because it IS that same component + helper —
  *     not a second copy.
- *  2. KOIOS ASSIST — Verbeteren / Samenvatten / Actiepunten, ALWAYS visible in
- *     their own row under the toolbar (never behind a click-to-expand icon), a
- *     review-only preview, and Overnemen/Verwerpen. Never auto-applies, never
+ *  2. KOIOS ASSIST — Verbeteren / Samenvatten / Actiepunten (Improve / Summarize
+ *     / Action points), ALWAYS visible in their own row under the toolbar
+ *     (never behind a click-to-expand icon), a review-only preview, and
+ *     Overnemen/Verwerpen (Adopt/Reject). Never auto-applies, never
  *     overwrites silently. Mirrors NoteAssistSection's shape and tone 1:1 —
  *     the two now share their state machine (`useRichTextAssist`), their API
  *     call (`assistRichText`) and, for 'actions', the SAME execute wizard
  *     (`AssistActionsResultsPanel`) — notes/ no longer keeps its own copy of
  *     any of the three (§11 one source).
  *
- * CMFE-KOIOS-CONSISTENCY-1 (Danny 09-08, verbatim: "Waarom heb je bij nieuwe
- * taak de icon Koios en staan de knoppen er niet gelijk? Actiepunten auto en
- * wizard ontbreekt!!") — this file used to hide Verbeteren/Samenvatten behind
+ * CMFE-KOIOS-CONSISTENCY-1 (Danny 09-08, verbatim: "…de icon Koios…de knoppen
+ * er niet gelijk? Actiepunten auto en wizard ontbreekt!!" — i.e. "why does
+ * the new-task icon have Koios while the buttons aren't aligned? Action
+ * points auto and wizard are missing!!") — this file used to hide Verbeteren/Samenvatten behind
  * a click on the Koios mark AND lack the Actiepunten mode entirely, both
  * inconsistent with the note composer. Fixed: the mode row is always in view,
  * honestly disabled with a visible reason while the field is empty — same as
  * notes (§3: a disabled-with-reason button is honest, a hidden one is not) —
  * and 'actions' is a first-class third mode with the same execute wizard.
  *
- * ACTIONS-SCOPE-DEFAULT-FLIP (Danny 09-08, verbatim: "Actiepunten volgen uit
- * een GESPREK, niet uit een omschrijving. De meerderheid van de velden zijn
- * omschrijvingen, dus de standaard hoort andersom"): the default `modes` below
+ * ACTIONS-SCOPE-DEFAULT-FLIP (Danny 09-08, verbatim: "…uit een GESPREK, niet
+ * uit een omschrijving…" — i.e. "action points follow from a CONVERSATION,
+ * not from a description; most fields are descriptions, so the default
+ * should be reversed"): the default `modes` below
  * is improve+summarize ONLY — Actiepunten no longer ships on a field unless the
  * caller explicitly opts in with `modes={['improve', 'summarize', 'actions']}`.
  * Before this, every new free-text field got Actiepunten unasked, and each
@@ -43,8 +46,9 @@
  * editor, not this bar) — the one field that genuinely is a conversation.
  *
  * KNOWN FOOTPRINT CHANGE: this rides on ~30 editors app-wide, several of them
- * on the candidate/customer drill-downs a 2026-08-08 memory note freezes
- * ("niets wijzigen zonder overleg, uitsluiten in brede sweeps"). The assist
+ * on the candidate/customer drill-downs a 2026-08-08 memory note freezes,
+ * verbatim: "…niets wijzigen…uitsluiten in brede sweeps" (i.e. "change
+ * nothing without discussion, exclude from broad sweeps"). The assist
  * row now always takes its own line under those toolbars too, exactly as
  * everywhere else — the whole point of ONE shared bar (§4) is one look on
  * every field, never a per-screen exemption. Flagged in the delivery report

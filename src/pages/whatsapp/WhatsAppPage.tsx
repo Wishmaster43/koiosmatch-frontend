@@ -73,7 +73,10 @@ export default function WhatsAppPage({ intent }: { intent?: unknown } = {}) {
   // test render) — default both gates closed rather than throwing.
   const auth = useAuth()
   const waWebEnabled = auth?.hasModule('whatsapp_web') ?? false
-  const canManageQueue = auth?.hasPermission('messaging.manage') ?? false
+  // Queue mutations are whatsapp.manage on the server (CMBE audit round 4). The previous
+  // name was not a real permission, so these actions were offered to roles the server
+  // always refused — the same permission the WhatsApp settings screens already read.
+  const canManageQueue = auth?.hasPermission('whatsapp.manage') ?? false
   // K-193: right-panel status filter for the WA-Web queue tab (registered only
   // while that tab is active, same pattern as the message filters below).
   const [waWebStatus, setWaWebStatus] = useState('')
@@ -255,7 +258,8 @@ export default function WhatsAppPage({ intent }: { intent?: unknown } = {}) {
     { key: 'noReplyEscalations', label: t('kpi.noReplyEscalations'), value: cardValue(escalationsReady, noReplyCount), color: 'var(--color-warning)' },
   ]
 
-  // Overzicht-charts — afgeleid uit de geladen data zodat het scherm leeft.
+  // Overview charts, derived from the data already loaded so the screen has
+  // something to show without a second round trip.
   const statusData = useMemo(() => {
     const c: Record<string, number> = {}
     messages.forEach(m => { const s = (m.status as string) || 'unknown'; c[s] = (c[s] ?? 0) + 1 })
@@ -337,7 +341,7 @@ export default function WhatsAppPage({ intent }: { intent?: unknown } = {}) {
               {badge > 0 && (
                 <span style={{ fontSize: 10, fontWeight: 700, minWidth: 16, height: 16, padding: '0 5px', borderRadius: 99,
                   display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                  // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- meldingsbadge op een tab: DATA-signaal met het gedocumenteerde on-*-contrastpaar, geen actievlak
+                  // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- notification badge on a tab: a DATA signal using the documented on-* contrast pair, not an action surface
                   background: badgeDanger ? 'var(--color-danger)' : 'var(--color-primary)',
                   /* Text colour on a danger/primary badge fill uses the on-* contrast token, never raw white */
                   color: badgeDanger ? 'var(--color-on-danger)' : 'var(--color-on-accent)' }}>

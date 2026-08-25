@@ -56,8 +56,9 @@ const mapFunctions = (res: AxiosResponse): FunctionsLookupData => {
   const free = (res?.data as { allow_free_entry?: unknown })?.allow_free_entry
   return {
     functions: names.length ? names : DEFAULT_FUNCTIONS,
-    // Danny 21-08 (settings-ronde): vrije invoer staat STANDAARD UIT — strikt is
-    // de norm, vrije invoer is de bewuste uitzondering die de tenant zelf aanzet.
+    // Danny 21-08 (settings round), verbatim: "…STANDAARD UIT…" — i.e. free
+    // entry is OFF by default: strict is the norm, free entry is the
+    // deliberate exception a tenant switches on itself.
     apiFreeEntry: typeof free === 'boolean' ? free : false,
   }
 }

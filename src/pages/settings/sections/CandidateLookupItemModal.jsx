@@ -14,7 +14,7 @@ import { GENERIC_LOOKUP_ICON_NAMES, resolveGenericLookupIcon } from './lookupIco
 import Button from '@/components/ui/Button'
 import { Caption, BodyText, PageTitle, SectionTitle } from '@/components/ui/typography'
 
-// "Niet actief" → "niet_actief" — a stable English-ish slug suggestion (mirrors
+// "Niet actief" ("Not active") → "niet_actief" — a stable English-ish slug suggestion (mirrors
 // the parent's slugify; duplicated here to avoid a cross-file import cycle).
 const slugify = (s) => s.toLowerCase().trim().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '')
 
@@ -122,7 +122,8 @@ export default function CandidateLookupItemModal({
               {/* Verify round 22-08: on a LOCKED list the flag is read-only — this
                   delivery removed reorder, the only tiebreaker when several phases
                   carry it, so leaving it editable created an unfixable state; the
-                  list badge keeps communicating the flag. Danny's "alleen de kleur". */}
+                  list badge keeps communicating the flag. Danny's "alleen de kleur" —
+                  "only the colour". */}
               {locked
                 ? <Toggle checked={modal.is_applicant} onChange={() => {}} disabled />
                 : <Toggle checked={modal.is_applicant} onChange={v => setModal(m => ({ ...m, is_applicant: v }))} />}

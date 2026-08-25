@@ -1,3 +1,6 @@
+// documentHelpers — shared types and pure helpers for the candidate Documents
+// section: the DocItem row shape, selection keys, persisted/downloadable checks,
+// grid columns, expiry classification and file-size formatting.
 import type { DocVersion } from './DocumentVersionHistory'
 import type { Id } from '@/types/common'
 
@@ -41,7 +44,8 @@ export const isPersisted = (id: Id | undefined): boolean => id != null && !(type
 export const docUrl = (d: DocItem): string | undefined => d.download_url ?? d.url ?? d.objectUrl
 // Grid used by both the header row and every data row — one source so they never drift.
 // Row layout: checkbox · name · type · size · actions. The actions got their own
-// column (Danny 08-08 "icons moeten opschuiven, past niet meer zo") — they used
+// column (Danny 08-08: "icons moeten opschuiven, past niet meer zo" — the icons
+// need to shift, it doesn't fit any more) — they used
 // to share the 100px size cell, so the fifth icon (re-link) pushed the size text
 // out. `auto` lets the icon strip take exactly what it needs; the name column
 // (1fr) gives the space back.

@@ -1,3 +1,10 @@
+/**
+ * ChangelogTab — the candidate's audit trail in end-user terms (Danny 2026-07-04,
+ * mirror HelloFlex's Historie): ONE card per field change with "when · who · action ·
+ * field" and an old → new row, date-range filters and a CSV export. Presentational:
+ * the fetch lives in useCandidateActivity (§3). `bare` drops the SectionCard +
+ * filters so the title-row popover stays compact.
+ */
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { History, AlertTriangle, ArrowRight, Download } from 'lucide-react'
@@ -40,13 +47,6 @@ const changesOf = (ev: ActivityEvent): Array<{ field: string; old: unknown; next
     .map(field => ({ field, old: old[field], next: (attrs as Record<string, unknown>)[field] }))
 }
 
-/**
- * ChangelogTab — the candidate's audit trail in end-user terms (Danny 2026-07-04,
- * mirror HelloFlex's Historie): ONE card per field change with "when · who · action ·
- * field" and an old → new row, date-range filters and a CSV export. Presentational:
- * the fetch lives in useCandidateActivity (§3). `bare` drops the SectionCard +
- * filters so the title-row popover stays compact.
- */
 export default function ChangelogTab({ c, bare = false }: { c: Candidate; bare?: boolean }) {
   const { t } = useTranslation('candidates')
   const { formatDate } = useDateFormat()
@@ -97,7 +97,7 @@ export default function ChangelogTab({ c, bare = false }: { c: Candidate; bare?:
     ].filter(Boolean).join(' · ')
   }
 
-  // Bare Spatie verbs become readable ("Bijgewerkt"); a human description wins.
+  // Bare Spatie verbs become readable (e.g. "Bijgewerkt" — "Updated"); a human description wins.
   const actionOf = (ev: ActivityEvent): string => {
     const d = ev.description
     if (d && !['updated', 'created', 'deleted', 'restored', ev.log_name].includes(d)) return d
@@ -117,7 +117,7 @@ export default function ChangelogTab({ c, bare = false }: { c: Candidate; bare?:
       const isCreate = (ev.event ?? ev.description) === 'created'
       return diffs
         .map(ch => ({ ...base, field: fieldLabel(ch.field), oldVal: fmtVal(ch.field, ch.old), newVal: fmtVal(ch.field, ch.next) }))
-        // Danny 2026-07-04 ("nog steeds ruk"): no "Leeg → Leeg" rows, and a CREATE
+        // Danny 2026-07-04 ("nog steeds ruk", i.e. "still crappy"): no "Empty → Empty" rows, and a CREATE
         // only lists the fields that actually got a value.
         .filter(cd => cd.oldVal !== cd.newVal)
         .filter(cd => !isCreate || cd.newVal !== t('changelog.emptyValue'))

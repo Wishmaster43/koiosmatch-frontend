@@ -1,7 +1,8 @@
 /**
  * secondScreen — opens a standalone, id-driven page in a REAL separate browser
- * window (NOTITIE-POPOUT-1 F5, "Trap B" of NOTITIE-POPOUT-PLAN.md). A draggable
- * in-window panel (FloatingPanel, "Trap A") can never reach a second monitor —
+ * window (NOTITIE-POPOUT-1 F5, "Trap B" — Dutch for "step B" — of
+ * NOTITIE-POPOUT-PLAN.md). A draggable in-window panel (FloatingPanel, "Trap A"
+ * — "step A") can never reach a second monitor —
  * the browser has no API to drag a DOM element outside its own window — so the
  * second-screen case needs an actual `window.open`. The httpOnly-cookie session,
  * theme and language all bootstrap automatically in the new window (same origin,
@@ -83,8 +84,10 @@ export function openNotesPopout(a: PopoutEntity | string | number, b?: string | 
 export const noteDraftTopic = (entity: PopoutEntity, id: string | number) => `koios-note-draft-${entity}-${id}`
 
 /**
- * NOTITIE-POPOUT-EDIT-1 (Danny 10-08: "icon moet onder change en prullenbakje
- * komen … en direct edit pop-out"): which entities' popout WINDOW can actually
+ * NOTITIE-POPOUT-EDIT-1 (Danny 10-08, translated: "the icon must sit alongside
+ * the edit and trash-can icons … with a direct edit pop-out" — verbatim: "icon
+ * moet onder change en prullenbakje komen … en direct edit pop-out"): which
+ * entities' popout WINDOW can actually
  * SAVE an edit to an existing note. Measured against the running API on 10-08
  * (routes/api/tenant/*.php + the generated spec), re-verified 13-08 (K15NOTES):
  *   candidate → PATCH /candidates/{id}/notes/{note} exists AND CandidateNotesPopout
@@ -116,8 +119,10 @@ export const noteDraftTopic = (entity: PopoutEntity, id: string | number) => `ko
 export const NOTE_EDIT_POPOUT_ENTITIES: ReadonlySet<PopoutEntity> = new Set<PopoutEntity>(['candidate', 'application'])
 
 /**
- * NOTITIE-POPOUT-URL-1 (Danny 11-08 "zet het notitie-id in de URL", live 13-08
- * "zoals de pop-out van de profieltekst"): ONE existing note edits in a window of
+ * NOTITIE-POPOUT-URL-1 (Danny 11-08, translated: "put the note id in the URL"
+ * — verbatim: "zet het notitie-id in de URL"; live 13-08, translated: "like the
+ * pop-out of the profile text" — verbatim: "zoals de pop-out van de
+ * profieltekst"): ONE existing note edits in a window of
  * its OWN, addressed by URL — no channel handoff to resolve, no race against the
  * thread window's own loading, and re-opening the same note re-focuses its
  * window. Only entities in NOTE_EDIT_POPOUT_ENTITIES have this route (the window
@@ -155,8 +160,9 @@ export function openNoteEditPopout(entity: PopoutEntity, id: string | number, no
 // treatment as `departmentText` — a standalone `GET/PATCH /locations/{id}`
 // route exists (unlike departments, no customer prefix needed), so this field's
 // `id` is the location's OWN id, not a composite.
-// `targetNote` (BELLIJST-NOTE-POPOUT-1, Danny 14-08: "dit moet zeker een pop-out
-// kunnen worden op een popup"): a call-list (outreach) TARGET's own note — the
+// `targetNote` (BELLIJST-NOTE-POPOUT-1, Danny 14-08, translated: "this really
+// needs to be able to open as a pop-out window" — verbatim: "dit moet zeker een
+// pop-out kunnen worden op een popup"): a call-list (outreach) TARGET's own note — the
 // SAME single-column PATCH shape as the fields above (never a notes thread), so
 // it belongs on this list, not NOTE_EDIT_POPOUT_ENTITIES. Rides under entity
 // 'outreachTarget'; no standalone `GET /outreach-targets/{id}` exists (measured

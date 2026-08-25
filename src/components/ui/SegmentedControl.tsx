@@ -36,7 +36,8 @@ export interface SegmentedControlProps {
   // layout (e.g. CvSectionList's per-row sidebar⇄main switch). Default unchanged.
   size?: 'default' | 'compact'
   // Tint ONLY the selected option, leaving the rest neutral (Danny 11-08, on the
-  // package picker: "alleen het gekozen pakket moet groen zijn").
+  // package picker: "alleen het gekozen pakket moet groen zijn" — "only the
+  // chosen package should be green").
   //
   // The §4 default — an inactive option keeps its own colour, just weaker — is right
   // when each option carries its OWN meaning (a status, a phase): the tint IS the
@@ -66,7 +67,7 @@ export interface SegmentedControlProps {
   activeInk?: string
   // Explicit check mark on the active option, on top of the tint — the FOURTH
   // ingredient CHIP-TINT-1 prescribes for every selected choice-chip (tint 16/50
-  // + chipInk + 600 + vinkje). Default true since SEGMENTED-CHECK-SWEEP-1
+  // + chipInk + 600 + check mark). Default true since SEGMENTED-CHECK-SWEEP-1
   // (Danny GO, 23-08): the sweep screenshotted the ~27 adopters incl. the frozen
   // candidate/customer drilldown modals and confirmed the check reads cleanly
   // everywhere, so every SegmentedControl now carries it by default. Kept as an
@@ -165,7 +166,7 @@ export default function SegmentedControl({ options, value, onChange, color = 'va
                   <span style={{ fontSize: 13 }}>{opt.label}</span>
                   {opt.description && <span style={{ fontSize: 11, fontWeight: 400, opacity: 0.8 }}>{opt.description}</span>}
                 </span>
-                {/* CHIP-TINT-1's "vinkje": an explicit check reinforcing the active
+                {/* CHIP-TINT-1's "vinkje" (check mark): an explicit check reinforcing the active
                     tint (KOIOS-MODEL-UI-1, Danny 23-08) — on by default since
                     SEGMENTED-CHECK-SWEEP-1, opt-out via showActiveCheck={false}. */}
                 {showActiveCheck && active && <Check size={16} aria-hidden="true" style={{ flexShrink: 0, marginLeft: 8 }} />}

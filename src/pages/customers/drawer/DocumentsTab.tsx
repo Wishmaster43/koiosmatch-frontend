@@ -4,7 +4,8 @@
  * from /customers/{id}/documents and upload/rename/delete are optimistic. Document
  * types come from the tenant /document-types lookup.
  *
- * PREVIEW FIX (Danny 03-08: "Preview van documenten is downloaden i.p.v.
+ * PREVIEW FIX (Danny 03-08, translated: "Document preview downloads instead of
+ * previewing???" — verbatim: "Preview van documenten is downloaden i.p.v.
  * preview???"): this used to `window.open(download_url)` — a real navigation to a
  * route the backend answers with `Content-Disposition: attachment`
  * (Storage::download), so the browser downloaded the file instead of showing it.
@@ -13,7 +14,9 @@
  * triggers the attachment disposition, and renders it in-dialog. The separate
  * "download" bulk/row actions are untouched — they still open the real download route.
  *
- * DOCS-LOC-DEPT-1 (Danny: "je moet weten op welk niveau [een document] gekoppeld
+ * DOCS-LOC-DEPT-1 (Danny, translated: "you need to know at which level [a
+ * document] is linked: CUSTOMER, LOCATION, DEPARTMENT, CONTACT PERSON" —
+ * verbatim: "je moet weten op welk niveau [een document] gekoppeld
  * wordt: KLANT, LOCATIE, AFDELING, CONTACTPERSOON"): a document may ALSO hang off
  * one location or one department of this customer — `customer_documents` has no
  * `customer_contact_id` column (measured: EntityDocumentController::store/update
@@ -221,7 +224,9 @@ export default function DocumentsTab({ customerId, locations = [], departments =
 
   return (
     <div>
-      {/* No section title (Danny 05-08 "documenten naam weg — tabblad heet al zo"): the
+      {/* No section title (Danny 05-08, translated: "drop the 'documents' name —
+          the tab is already called that" — verbatim: "documenten naam weg —
+          tabblad heet al zo"): the
           toolbar starts with the search bar on the LEFT, growing, at the drill-down's
           standard toolbar footprint (6/10 padding, radius 8, fontSize 12 — mirrors the
           Locaties/Kansen search bars). */}

@@ -1,3 +1,6 @@
+// RejectionModal — the reject/correct-rejection FORM (reason + optional note),
+// reused for both a fresh reject and an already-rejected correction. See the
+// fuller doc comment on the component below.
 import { useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { XCircle, X, Edit2, Save } from 'lucide-react'
