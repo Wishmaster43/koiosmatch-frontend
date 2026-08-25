@@ -44,6 +44,7 @@ import { useReportCompare } from './useReportCompare'
 import ReportCompareMetric from './ReportCompareMetric'
 import { COMPARE_OFF } from './reportCompareMode'
 import type { ReportCompareMode } from './reportCompareMode'
+import type { ReportFilterState } from './reportFilterParams'
 
 // The plain single-value XOR axes; `assignee` has its own D2 shape below.
 type Axis = 'campaign' | 'channel' | 'status' | 'outcome'
@@ -56,10 +57,10 @@ type AxisSeg = { value: string; label: string; count: number }
 // SUITE_COLOR idiom, one map instead of inline ternary paint.
 const OUTREACH_COLOR: Record<string, string> = { reached: 'var(--color-success)' }
 
-export default function OutreachReport({ period, compare = COMPARE_OFF }: { period: ReportPeriod; compare?: ReportCompareMode }) {
+export default function OutreachReport({ period, filters, compare = COMPARE_OFF }: { period: ReportPeriod; filters?: ReportFilterState; compare?: ReportCompareMode }) {
   const { t } = useTranslation('analytics')
   const { formatDate } = useDateFormat()
-  const { data, loading, error, refetch } = useOutreachReport(period)
+  const { data, loading, error, refetch } = useOutreachReport(period, filters)
 
   const total   = data?.total ?? data?.total_targets ?? 0
   const hasData = !loading && !error && total > 0

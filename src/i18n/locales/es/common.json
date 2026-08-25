@@ -122,7 +122,9 @@
     "branchExcludesUnassigned": "Un filtro por sucursal oculta los registros sin sucursal vinculada.",
     "button": "Filtrar",
     "toggleActive": "Mostrar/ocultar filtros ({{count}} activos)",
-    "noBranch": "Sin sede"
+    "noBranch": "Sin sede",
+    "valueMin": "Valor mínimo",
+    "valueMax": "Valor máximo"
   },
   "nav": {
     "dashboard": "Panel",
@@ -270,7 +272,16 @@
     "title": "Notificaciones",
     "empty": "Sin notificaciones",
     "moreNew_one": "{{count}} notificación nueva más",
-    "moreNew_other": "{{count}} notificaciones nuevas más"
+    "moreNew_other": "{{count}} notificaciones nuevas más",
+    "actionStatus": {
+      "done": "Completado.",
+      "pending": "En curso.",
+      "failed": "Fallido."
+    },
+    "nextAction": {
+      "pending": "Se procesará automáticamente.",
+      "failed": "Revise la tarea de seguimiento creada."
+    }
   },
   "activeFilters": "Filtros activos",
   "clearAll": "Borrar todo",

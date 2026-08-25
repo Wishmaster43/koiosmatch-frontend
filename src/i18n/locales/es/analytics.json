@@ -38,7 +38,9 @@
       "ownerNone": "Sin propietario",
       "branchNone": "Sin sucursal",
       "sourceNone": "Sin fuente",
-      "phaseLead": "Aún lead"
+      "phaseLead": "Aún lead",
+      "contractForm": "Forma de contrato",
+      "contractFormNone": "Sin forma de contrato"
     },
     "kpiOrderFellBack": "Una tarjeta KPI configurada en Ajustes ya no existe y se restableció al valor predeterminado.",
     "viewSwitch": {
@@ -133,7 +135,8 @@
     "daysValue": "{{days}} días",
     "durationNote": "La duración del match se mostrará cuando el acoplamiento HelloFlex proporcione las fechas de inicio/fin.",
     "axes": {
-      "contractForm": "Forma de contrato"
+      "contractForm": "Forma de contrato",
+      "origin": "Origen"
     },
     "placements": {
       "title": "Estado de los matches",
@@ -196,7 +199,13 @@
     "axes": {
       "direction": "Dirección",
       "type": "Tipo de mensaje",
-      "escalated": "Escalado"
+      "escalated": "Escalado",
+      "owner": "Propietario",
+      "escalatedAny": "Todos",
+      "directionValues": {
+        "inbound": "Entrante",
+        "outbound": "Saliente"
+      }
     },
     "kpi": {
       "conversationsTotal": "Total de conversaciones",
@@ -228,7 +237,8 @@
       "vacancy": "Vacante",
       "stageDuration": "Demasiado tiempo en fase",
       "customerNone": "Sin cliente",
-      "stageNone": "Sin etapa"
+      "stageNone": "Sin etapa",
+      "rejectionReason": "Motivo de rechazo"
     },
     "buckets": {
       "active": "Activo",
@@ -282,7 +292,10 @@
     },
     "forecastCount": "Negocios previstos",
     "forecastValue": "Valor previsto",
-    "kpiOrderFellBack": "Una tarjeta KPI configurada en Ajustes ya no existe y se restableció al valor predeterminado."
+    "kpiOrderFellBack": "Una tarjeta KPI configurada en Ajustes ya no existe y se restableció al valor predeterminado.",
+    "axes": {
+      "value": "Valor de la cartera"
+    }
   },
   "tasks": {
     "loading": "Cargando tareas…",
@@ -325,6 +338,10 @@
       "withoutAssignee": "Sin responsable",
       "avgCompletionDays": "Tiempo medio",
       "daysValue": "{{days}} días"
+    },
+    "filters": {
+      "typeNone": "Sin tipo",
+      "priorityNone": "Sin prioridad"
     }
   },
   "customers": {

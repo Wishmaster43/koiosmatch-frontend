@@ -122,7 +122,9 @@
     "branchExcludesUnassigned": "Un filtre par filiale masque les enregistrements sans filiale liée.",
     "button": "Filtrer",
     "toggleActive": "Afficher/masquer les filtres ({{count}} actifs)",
-    "noBranch": "Sans agence"
+    "noBranch": "Sans agence",
+    "valueMin": "Valeur minimale",
+    "valueMax": "Valeur maximale"
   },
   "nav": {
     "dashboard": "Tableau de bord",
@@ -270,7 +272,16 @@
     "title": "Notifications",
     "empty": "Aucune notification",
     "moreNew_one": "{{count}} nouvelle notification de plus",
-    "moreNew_other": "{{count}} nouvelles notifications de plus"
+    "moreNew_other": "{{count}} nouvelles notifications de plus",
+    "actionStatus": {
+      "done": "Terminé.",
+      "pending": "En cours de traitement.",
+      "failed": "Échoué."
+    },
+    "nextAction": {
+      "pending": "Sera traité automatiquement.",
+      "failed": "Consultez la tâche de suivi créée."
+    }
   },
   "activeFilters": "Filtres actifs",
   "clearAll": "Tout effacer",

@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import ApplicationsReport from './ApplicationsReport'
 import type { ApplicationsReportData } from '@/types/analytics'
 import { getReportKpiCatalog } from './kpiCatalog'
+import { EMPTY_REPORT_FILTERS } from './reportFilterParams'
 
 // Data layer under test control (loading/error/empty/success — the four UI states).
 const mockUseApplicationsReport = vi.fn()
@@ -177,7 +178,7 @@ describe('ApplicationsReport (RAPPORTEN-SUITE-1 portie 2)', () => {
   it('sends the active panel filters to BOTH the report hook and a drill click', async () => {
     const user = userEvent.setup()
     mockUseApplicationsReport.mockReturnValue({ data, loading: false, error: false })
-    const filters = { status: ['active'], ownerId: ['u1'], locationId: [7], customerId: ['c1'] }
+    const filters = { ...EMPTY_REPORT_FILTERS, status: ['active'], ownerId: ['u1'], locationId: [7], customerId: ['c1'] }
     render(
       <QueryClientProvider client={new QueryClient()}>
         <ApplicationsReport period="month" filters={filters} />
@@ -375,15 +376,42 @@ describe('ApplicationsReport (RAPPORTEN-SUITE-1 portie 2)', () => {
       expect.objectContaining({ params: { axis: 'branch', value: 'b1', period: 'month' } }))
   })
 
-  // The planned/done tiles stay display-only: axis=state's value vocabulary is
-  // unconfirmed, so no request may fire from clicking them (§3 no fake affordance).
-  it('never fires a request when clicking the planned/done intake tiles', async () => {
+  // The planned tile now drills via the same intakes/drill endpoint, axis=state,
+  // value='planned' (confirmed vocabulary, api-generated.ts query.value doc).
+  it('clicking the planned intake tile drills via /reports/applications/intakes/drill with axis=state value=planned', async () => {
     const user = userEvent.setup()
     mockUseApplicationsReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
     getSpy.mockClear()
     await user.click(screen.getByText('Gepland'))
-    await user.click(screen.getByText('13'))
+    expect(getSpy).toHaveBeenCalledWith('/reports/applications/intakes/drill',
+      expect.objectContaining({ params: { axis: 'state', value: 'planned', period: 'month' } }))
+  })
+
+  // Same tile family, done-in-period → value='done'.
+  it('clicking the done intake tile drills via /reports/applications/intakes/drill with axis=state value=done', async () => {
+    const user = userEvent.setup()
+    mockUseApplicationsReport.mockReturnValue({ data, loading: false, error: false })
+    renderReport()
+    getSpy.mockClear()
+    await user.click(screen.getByText('Afgerond in periode'))
+    expect(getSpy).toHaveBeenCalledWith('/reports/applications/intakes/drill',
+      expect.objectContaining({ params: { axis: 'state', value: 'done', period: 'month' } }))
+  })
+
+  // With a panel filter active, intake tiles/bars stay non-drillable (same gate
+  // as recruiter/branch — the intakes endpoint has no filter params, so a filtered
+  // envelope would disagree with the drawer's unfiltered count).
+  it('does not fire a request when clicking the planned tile while a panel filter is active', async () => {
+    const user = userEvent.setup()
+    mockUseApplicationsReport.mockReturnValue({ data, loading: false, error: false })
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <ApplicationsReport period="month" filters={{ ...EMPTY_REPORT_FILTERS, status: ['active'] }} />
+      </QueryClientProvider>,
+    )
+    getSpy.mockClear()
+    await user.click(screen.getByText('Gepland'))
     expect(getSpy).not.toHaveBeenCalled()
   })
 

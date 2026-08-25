@@ -12,3 +12,6 @@ export { computeMatchExpiry } from './matchExpiry'
 export { MATCH_COL_ACTIONS, MATCH_COL_OTHER_PARTY, MATCH_COL_SCORE, MATCH_COL_STATUS } from './matchRowColumns'
 export { default as MatchTextPopout } from './popout/MatchTextPopout'
 export { default as MatchListHeaderBar } from './MatchListHeaderBar'
+// WAVE 1c: the reports panel's matches `stop_reason[]` filter reuses the same
+// termination-reason vocabulary as the "Beëindigen" flow.
+export { useMatchStopReasons } from './hooks/useMatchStopReasons'

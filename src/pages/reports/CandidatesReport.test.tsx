@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import CandidatesReport from './CandidatesReport'
 import type { CandidatesReportData } from '@/types/analytics'
 import i18n from '@/i18n'
+import { EMPTY_REPORT_FILTERS } from './reportFilterParams'
 import { getReportKpiCatalog } from './kpiCatalog'
 
 // Data layer under test control (loading/error/empty/success — the four UI states).
@@ -340,9 +341,7 @@ describe('CandidatesReport — Kandidaten/Leads switch (RAPPORTEN-CONSOLIDATIE-1
     renderReport()
     mockUseCandidatesReport.mockClear()
     await user.click(screen.getByRole('radio', { name: 'Leads' }))
-    expect(mockUseCandidatesReport).toHaveBeenCalledWith('month', {
-      status: [], ownerId: [], locationId: [], customerId: [],
-    }, 'lead')
+    expect(mockUseCandidatesReport).toHaveBeenCalledWith('month', EMPTY_REPORT_FILTERS, 'lead')
   })
 
   it('renders exactly nine KPI cards on the Leads position too, with its own "Total leads" card 1', () => {

@@ -82,7 +82,65 @@ describe('isFilterableReport', () => {
     expect(isFilterableReport('applications')).toBe(true)
     expect(isFilterableReport('matches')).toBe(true)
     expect(isFilterableReport('tasks')).toBe(true)
+    expect(isFilterableReport('opportunities')).toBe(true)
+    expect(isFilterableReport('outreach')).toBe(true)
+    expect(isFilterableReport('whatsapp')).toBe(true)
     expect(isFilterableReport('flow')).toBe(false)
     expect(isFilterableReport(undefined)).toBe(false)
+  })
+})
+
+// WAVE 1c: PLAN-RAPPORTEN-V3 §a's per-page dimensions, each gated to the exact
+// report whose segmentQuery() reads it (koiosmatch-api AppliesReportFilters.php
+// extraDimensionRules() + verified per-report app/Services/Report/*.php).
+describe('buildReportQueryParams — WAVE 1c per-page dimensions', () => {
+  it('attaches source/phase/contract_form for candidates only', () => {
+    const filters: ReportFilterState = { ...EMPTY_REPORT_FILTERS, source: ['Indeed'], phase: ['lead'], contractForm: ['zzp'] }
+    expect(buildReportQueryParams('month', 'candidates', filters)).toEqual({
+      period: 'month', source: ['Indeed'], phase: ['lead'], contract_form: ['zzp'],
+    })
+    expect(buildReportQueryParams('month', 'applications', { ...filters })).not.toHaveProperty('phase')
+  })
+
+  it('attaches stage/source/rejection_reason for applications', () => {
+    const filters: ReportFilterState = { ...EMPTY_REPORT_FILTERS, stage: ['applied'], source: ['LinkedIn'], rejectionReason: ['r1'] }
+    expect(buildReportQueryParams('month', 'applications', filters)).toEqual({
+      period: 'month', stage: ['applied'], source: ['LinkedIn'], rejection_reason: ['r1'],
+    })
+  })
+
+  it('attaches customer_ids/origin/contract_form for matches (stop_reason stays off: the envelope never applies it)', () => {
+    const filters: ReportFilterState = { ...EMPTY_REPORT_FILTERS, customerIds: ['c1'], origin: ['funnel'], contractForm: ['zzp'] }
+    expect(buildReportQueryParams('month', 'matches', filters)).toEqual({
+      period: 'month', customer_ids: ['c1'], origin: ['funnel'], contract_form: ['zzp'],
+    })
+  })
+
+  it('attaches type/priority/team_id for tasks', () => {
+    const filters: ReportFilterState = { ...EMPTY_REPORT_FILTERS, taskType: ['t1'], priority: ['p1'], teamId: ['team1'] }
+    expect(buildReportQueryParams('month', 'tasks', filters)).toEqual({
+      period: 'month', type: ['t1'], priority: ['p1'], team_id: ['team1'],
+    })
+  })
+
+  it('attaches direction/escalated for whatsapp, and drops status/location_id even when set', () => {
+    const filters: ReportFilterState = { ...EMPTY_REPORT_FILTERS, status: ['x'], locationId: ['l1'], direction: ['inbound'], escalated: true }
+    expect(buildReportQueryParams('month', 'whatsapp', filters)).toEqual({
+      period: 'month', direction: ['inbound'], escalated: true,
+    })
+  })
+
+  it('attaches value_min/value_max for opportunities', () => {
+    const filters: ReportFilterState = { ...EMPTY_REPORT_FILTERS, valueMin: 100, valueMax: 500 }
+    expect(buildReportQueryParams('month', 'opportunities', filters)).toEqual({
+      period: 'month', value_min: 100, value_max: 500,
+    })
+  })
+
+  it('outreach carries no per-page dimension beyond status/owner_id/location_id', () => {
+    const filters: ReportFilterState = { ...EMPTY_REPORT_FILTERS, status: ['todo'], ownerId: ['u1'], locationId: ['l1'] }
+    expect(buildReportQueryParams('month', 'outreach', filters)).toEqual({
+      period: 'month', status: ['todo'], owner_id: ['u1'], location_id: ['l1'],
+    })
   })
 })

@@ -122,7 +122,9 @@
     "branchExcludesUnassigned": "A branch filter hides records with no branch linked yet.",
     "button": "Filter",
     "toggleActive": "Show/hide filters ({{count}} active)",
-    "noBranch": "Without branch"
+    "noBranch": "Without branch",
+    "valueMin": "Minimum value",
+    "valueMax": "Maximum value"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -270,7 +272,16 @@
     "title": "Notifications",
     "empty": "No notifications",
     "moreNew_one": "{{count}} more new notification",
-    "moreNew_other": "{{count}} more new notifications"
+    "moreNew_other": "{{count}} more new notifications",
+    "actionStatus": {
+      "done": "Done.",
+      "pending": "In progress.",
+      "failed": "Failed."
+    },
+    "nextAction": {
+      "pending": "Will be processed automatically.",
+      "failed": "Check the follow-up task that was created."
+    }
   },
   "activeFilters": "Active filters",
   "clearAll": "Clear all",

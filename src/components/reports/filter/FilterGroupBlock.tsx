@@ -60,7 +60,7 @@ export default function FilterGroupBlock({
           // floor (12px/sm) by design, de-emphasised next to the header label.
           // Block form: the flagged style attribute sits on the tag's 2nd line.
           /* eslint-disable huisstijlLegacy/no-restricted-syntax */
-          <button type="button" onClick={() => group.selected?.forEach(v => group.onToggle?.(v))}
+          <button type="button" onClick={() => { if (group.type === 'number-range') { group.onMinChange?.(null); group.onMaxChange?.(null) } else group.selected?.forEach(v => group.onToggle?.(v)) }}
             style={{ fontSize: 9, color: 'var(--text-muted)', background: 'none', border: 'none',
                      cursor: 'pointer', padding: 0, flexShrink: 0 }}>
             {t('filters.clear')}
@@ -82,6 +82,21 @@ export default function FilterGroupBlock({
                 style={{ height: 30, padding: '0 8px', fontSize: 12, border: '1px solid var(--border)',
                          borderRadius: 6, color: 'var(--text)', outline: 'none', width: '100%' }} />
               <input type="date" value={group.to ?? ''} onChange={e => group.onToChange?.(e.target.value)}
+                style={{ height: 30, padding: '0 8px', fontSize: 12, border: '1px solid var(--border)',
+                         borderRadius: 6, color: 'var(--text)', outline: 'none', width: '100%' }} />
+            </div>
+          ) : group.type === 'number-range' ? (
+            // Two numeric inputs for a min/max range filter (opportunities pipeline value).
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <input type="number" min={0} value={group.min ?? ''} aria-label={t('filters.valueMin')}
+                onChange={e => group.onMinChange?.(e.target.value === '' ? null : Number(e.target.value))}
+                placeholder="0"
+                style={{ height: 30, padding: '0 8px', fontSize: 12, border: '1px solid var(--border)',
+                         borderRadius: 6, color: 'var(--text)', outline: 'none', width: '100%' }} />
+              <span style={{ fontSize: 12, color: 'var(--text-muted)', flexShrink: 0 }}>–</span>
+              <input type="number" min={0} value={group.max ?? ''} aria-label={t('filters.valueMax')}
+                onChange={e => group.onMaxChange?.(e.target.value === '' ? null : Number(e.target.value))}
+                placeholder="∞"
                 style={{ height: 30, padding: '0 8px', fontSize: 12, border: '1px solid var(--border)',
                          borderRadius: 6, color: 'var(--text)', outline: 'none', width: '100%' }} />
             </div>

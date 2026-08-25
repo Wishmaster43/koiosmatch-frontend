@@ -6,6 +6,11 @@
  * directly — exactly the seam a real click on the topbar's filter button and a
  * chip in the panel would drive. Every heavy `*Report` sub-page is mocked to a
  * thin stub so this stays a panel-wiring test, not a re-test of each report.
+ *
+ * WAVE 1c (2026-08-25): opportunities/outreach/whatsapp joined the filterable
+ * set, and candidates/applications/matches/tasks each gained their own extra
+ * per-page dimension groups (PLAN-RAPPORTEN-V3 §a) — every new lookup source
+ * this page now reads is stubbed below the same way the pre-existing ones are.
  */
 import { describe, it, expect, vi } from 'vitest'
 import { act, render, screen } from '@testing-library/react'
@@ -23,7 +28,7 @@ const candidateStatusOptions = [{ value: 'available', label: 'Available' }]
 const customerStatusOptions = [{ value: 'active', label: 'Active' }]
 const userRows = [{ id: 'u1', name: 'Anna de Vries' }]
 const branchRows = [{ value: 'utrecht', label: 'Utrecht' }]
-const candidateLookups = { statuses: candidateStatusOptions }
+const candidateLookups = { statuses: candidateStatusOptions, phases: [], candidateTypes: [] }
 const customerLookupsValue = { statuses: customerStatusOptions }
 const usersQueryResult = { data: userRows }
 vi.mock('@/context/LookupsContext', () => ({ useLookups: () => candidateLookups }))
@@ -34,14 +39,35 @@ vi.mock('@/lib/useLocations', () => ({ useLocations: () => branchRows }))
 // stable-reference contract as the candidate/customer stubs above.
 const vacancyStatusOptions = [{ value: 'vs1', label: 'Open' }]
 const taskStatusOptions = [{ value: 'ts1', label: 'To do' }]
+const taskTypeIdOptions: Array<{ value: string; label: string }> = []
+const taskPriorityIdOptions: Array<{ value: string; label: string }> = []
 const matchStatusesValue = { statuses: [{ value: 'open', label: 'Active' }] }
 const customerOptionsValue: Array<{ value: string; label: string }> = []
 vi.mock('./reportStatusLookups', () => ({
   useVacancyStatusIdOptions: () => vacancyStatusOptions,
   useTaskStatusIdOptions: () => taskStatusOptions,
+  useTaskTypeIdOptions: () => taskTypeIdOptions,
+  useTaskPriorityIdOptions: () => taskPriorityIdOptions,
 }))
 vi.mock('@/lib/useMatchStatuses', () => ({ useMatchStatuses: () => matchStatusesValue }))
 vi.mock('@/pages/vacancies/hooks/useCustomerOptions', () => ({ useCustomerOptions: () => customerOptionsValue }))
+// WAVE 1c lookup sources — every filterable report's own extra-dimension vocabulary.
+// STABLE-REFERENCE CONTRACT: every mocked lookup returns the SAME object each
+// render — a fresh literal per call re-derives panelGroups every render and
+// drives the register/unregister effect into an infinite loop (the suite hung
+// forever on exactly that, Opus wave-B2).
+const stableLookup = vi.hoisted(() => ({
+  stages: { stages: [] as unknown[] }, statuses: { statuses: [] as unknown[] }, sources: { sources: [] as unknown[] },
+  appStages: { stages: [] as unknown[] }, reasons: { reasons: [] as unknown[] }, teams: { teams: [] as unknown[] },
+  stopReasons: { reasons: [] as unknown[] },
+}))
+vi.mock('@/lib/useOpportunityStages', () => ({ useOpportunityStages: () => stableLookup.stages }))
+vi.mock('@/lib/useOutreachStatuses', () => ({ useOutreachStatuses: () => stableLookup.statuses }))
+vi.mock('@/lib/useApplicationSources', () => ({ useApplicationSources: () => stableLookup.sources }))
+vi.mock('@/hooks/useApplicationStages', () => ({ useApplicationStages: () => stableLookup.appStages }))
+vi.mock('@/lib/useRejectionReasons', () => ({ useRejectionReasons: () => stableLookup.reasons }))
+vi.mock('@/lib/useTeams', () => ({ useTeams: () => stableLookup.teams }))
+vi.mock('@/pages/matches/shared', () => ({ useMatchStopReasons: () => stableLookup.stopReasons }))
 
 // Every report component collapses to the same stub: it only needs to prove
 // which `period`/`filters` it was handed, never its own body (each has its own tests).
@@ -72,11 +98,18 @@ vi.mock('./MatchesReport', () => ({
     <div data-testid="report-period" data-filters={JSON.stringify(filters ?? null)}>{period}</div>
   ),
 }))
-// A non-filterable report (outreach) proves the hard requirement: the reports
-// off FILTERABLE_REPORT_IDS keep getting a period-only panel — no field the
-// server would drop. (flow, then intakes, held this role until
-// RAPPORTEN-DANNY10-1 retired their pages.)
-vi.mock('./OutreachReport', () => ({ default: ({ period }: { period: string }) => <div data-testid="outreach-period">{period}</div> }))
+// outreach/whatsapp both joined FILTERABLE_REPORT_IDS in WAVE 1c — their stubs
+// now assert on `filters` too, the same as every other filterable report.
+vi.mock('./OutreachReport', () => ({
+  default: ({ period, filters }: { period: string; filters?: unknown }) => (
+    <div data-testid="outreach-period" data-filters={JSON.stringify(filters ?? null)}>{period}</div>
+  ),
+}))
+vi.mock('./WhatsappReport', () => ({
+  default: ({ period, filters }: { period: string; filters?: unknown }) => (
+    <div data-testid="whatsapp-period" data-filters={JSON.stringify(filters ?? null)}>{period}</div>
+  ),
+}))
 vi.mock('./ReportsDashboard', () => ({ default: ({ period }: { period: string }) => <div data-testid="dashboard-period">{period}</div> }))
 
 interface RadioGroup {
@@ -107,15 +140,13 @@ function renderPage() {
 }
 
 describe('ReportsPage — right filter panel', () => {
-  it('registers period + compare + status/owner/branch for candidates (RAPPORT-FILTERS-1 + RAPPORT-COMPARE-2)', () => {
+  it('registers period + compare + status/owner/branch + the candidate dimensions (source/phase/contractForm)', () => {
     const { getGroups } = renderPage()
     const groups = getGroups()
-    // 'compare' joined the panel in RAPPORT-COMPARE-2 (Danny 24-08: every
-    // filter lives in the right panel — the toolbar control is gone).
-    expect(groups.map(g => g.key)).toEqual(['period', 'compare', 'status', 'owner', 'branch'])
+    expect(groups.map(g => g.key)).toEqual(['period', 'compare', 'status', 'owner', 'branch', 'source', 'phase', 'contractForm'])
   })
 
-  it('a report the backend has NOT wired yet (outreach filters aside — outreach is period-only here) still registers ONLY the period — no field the server would silently drop', () => {
+  it('registers period + compare + status/owner/branch for outreach — the shared trio, no per-page dimension of its own', () => {
     let latest: RadioGroup[] = []
     render(
       <RightPanelProvider>
@@ -123,9 +154,7 @@ describe('ReportsPage — right filter panel', () => {
         <ReportsPage reportId="outreach" />
       </RightPanelProvider>,
     )
-    // RAPPORT-COMPARE-2: 'compare' registers for every compare-supporting
-    // report — outreach's DIMENSION groups stay unwired (period only).
-    expect(latest.map(g => g.key)).toEqual(['period', 'compare'])
+    expect(latest.map(g => g.key)).toEqual(['period', 'compare', 'status', 'owner', 'branch'])
     expect(screen.getByTestId('outreach-period').textContent).toBe('month')
   })
 
@@ -164,12 +193,13 @@ describe('ReportsPage — right filter panel', () => {
     act(() => { ownerGroup?.onToggle?.('u1') })
 
     const filters = JSON.parse(screen.getByTestId('report-period').dataset.filters ?? 'null')
-    expect(filters).toEqual({ status: [], ownerId: ['u1'], locationId: [], customerId: [] })
+    expect(filters).toMatchObject({ status: [], ownerId: ['u1'], locationId: [], customerId: [] })
   })
 
   // RAPPORT-FILTERS-2: vacancies/applications also get the customer_id[] group
-  // (client_id-backed), matches/tasks stop at status/owner/branch (no customer FK).
-  it('registers period + status/owner/branch/customer for vacancies and applications, but only status/owner/branch for matches/tasks', () => {
+  // (client_id-backed); applications additionally gets its own WAVE 1c trio
+  // (stage/source/rejectionReason — vacancy_id stays unwired, no lookup hook).
+  it('registers period + status/owner/branch/customer for vacancies, and the same plus stage/source/rejectionReason for applications', () => {
     let latest: RadioGroup[] = []
     const { unmount } = render(
       <RightPanelProvider>
@@ -186,10 +216,10 @@ describe('ReportsPage — right filter panel', () => {
         <ReportsPage reportId="applications" />
       </RightPanelProvider>,
     )
-    expect(latest.map(g => g.key)).toEqual(['period', 'compare', 'status', 'owner', 'branch', 'customer'])
+    expect(latest.map(g => g.key)).toEqual(['period', 'compare', 'status', 'owner', 'branch', 'customer', 'stage', 'source', 'rejectionReason'])
   })
 
-  it('registers period + status/owner/branch for matches — never a customer group (the singular key is already overloaded)', () => {
+  it('registers period + status/owner/branch + customerIds/origin/contractForm for matches (stopReason deliberately absent: the envelope never applies it) — never the singular customer group', () => {
     let latest: RadioGroup[] = []
     render(
       <RightPanelProvider>
@@ -197,10 +227,10 @@ describe('ReportsPage — right filter panel', () => {
         <ReportsPage reportId="matches" />
       </RightPanelProvider>,
     )
-    expect(latest.map(g => g.key)).toEqual(['period', 'compare', 'status', 'owner', 'branch'])
+    expect(latest.map(g => g.key)).toEqual(['period', 'compare', 'status', 'owner', 'branch', 'customerIds', 'origin', 'contractForm'])
   })
 
-  it('registers period + status/owner/branch for tasks — never a customer group (no customer column on tasks)', () => {
+  it('registers period + status/owner/branch + taskType/priority/team for tasks — never a customer group (no customer column on tasks)', () => {
     let latest: RadioGroup[] = []
     render(
       <RightPanelProvider>
@@ -208,7 +238,30 @@ describe('ReportsPage — right filter panel', () => {
         <ReportsPage reportId="tasks" />
       </RightPanelProvider>,
     )
-    expect(latest.map(g => g.key)).toEqual(['period', 'compare', 'status', 'owner', 'branch'])
+    expect(latest.map(g => g.key)).toEqual(['period', 'compare', 'status', 'owner', 'branch', 'taskType', 'priority', 'team'])
+  })
+
+  it('registers period + owner/direction/escalated for whatsapp — status/branch are dropped (WHATSAPP-NARROW-1)', () => {
+    let latest: RadioGroup[] = []
+    render(
+      <RightPanelProvider>
+        <Capture onGroups={g => { latest = g }} />
+        <ReportsPage reportId="whatsapp" />
+      </RightPanelProvider>,
+    )
+    expect(latest.map(g => g.key)).toEqual(['period', 'owner', 'direction', 'escalated'])
+    expect(screen.getByTestId('whatsapp-period').textContent).toBe('month')
+  })
+
+  it('registers period + status/owner/branch/customer + a value number-range for opportunities', () => {
+    let latest: RadioGroup[] = []
+    render(
+      <RightPanelProvider>
+        <Capture onGroups={g => { latest = g }} />
+        <ReportsPage reportId="opportunities" />
+      </RightPanelProvider>,
+    )
+    expect(latest.map(g => g.key)).toEqual(['period', 'compare', 'status', 'owner', 'branch', 'customer', 'value'])
   })
 
   it('sends the active vacancies panel filters to the report AS its filters prop (bar and lade share one state)', () => {
@@ -218,20 +271,15 @@ describe('ReportsPage — right filter panel', () => {
       </RightPanelProvider>,
     )
     const filters = JSON.parse(screen.getByTestId('report-period').dataset.filters ?? 'null')
-    expect(filters).toEqual({ status: [], ownerId: [], locationId: [], customerId: [] })
+    expect(filters).toMatchObject({ status: [], ownerId: [], locationId: [], customerId: [] })
   })
 
-  it('a non-filterable report never receives a filters prop, even with stale selections', () => {
-    render(
-      <RightPanelProvider>
-        <ReportsPage reportId="outreach" />
-      </RightPanelProvider>,
-    )
-    // FlowReport's own stub never reads `filters` — asserting on its absence would
-    // require exposing it; the period-only panel group assertion above already
-    // proves nothing beyond period is registered for this report.
-    expect(screen.getByTestId('outreach-period')).toBeInTheDocument()
-  })
+  // WAVE 1c: every report on REPORT_IDS is now on FILTERABLE_REPORT_IDS too (the
+  // last three holdouts — opportunities/outreach/whatsapp — joined this wave), so
+  // the "a non-filterable report never receives filters" case no longer has a
+  // page left to exercise it. An unknown/stale route id still falls back to the
+  // first report (candidates) per ReportsPage's own resolution rule, which is
+  // covered by the root-vs-sub-report describe block below.
 
   // RIGHTPANEL-FILTERS-1 (Danny 2026-08-14, "rode filters moeten naar rechts
   // filter menu"): ReportsPage used to render its own inline period `CreatableSelect`
@@ -243,7 +291,7 @@ describe('ReportsPage — right filter panel', () => {
   it('renders no inline period picker of its own — period is chosen ONLY via the right panel now', () => {
     const { container } = render(
       <RightPanelProvider>
-        <ReportsPage reportId="outreach" />
+        <ReportsPage reportId="customers" />
       </RightPanelProvider>,
     )
     expect(container.querySelectorAll('button')).toHaveLength(0)
@@ -254,11 +302,11 @@ describe('ReportsPage — right filter panel', () => {
     render(
       <RightPanelProvider>
         <Capture onGroups={g => { latest = g }} />
-        <ReportsPage reportId="outreach" />
+        <ReportsPage reportId="customers" />
       </RightPanelProvider>,
     )
     const periodGroup = latest[0]
-    const params = buildReportQueryParams((periodGroup.selected?.[0] as 'day' | 'week' | 'month') ?? 'month', 'outreach')
+    const params = buildReportQueryParams((periodGroup.selected?.[0] as 'day' | 'week' | 'month') ?? 'month')
     expect(params).toEqual({ period: 'month' })
   })
 })

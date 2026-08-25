@@ -39,3 +39,17 @@ export function useTaskStatusIdOptions(): IdLookupOption[] {
   const { data } = useCachedLookup('/task-statuses', mapIdOptions, EMPTY_ID_OPTIONS)
   return data
 }
+
+// WAVE 1c: the tasks report panel's `type[]`/`priority[]` filters validate
+// against task_types/task_priorities' raw uuid id too (TasksReport.php:335/338 —
+// `where('type_id', $p['type'])` / `where('priority_id', $p['priority'])`), the
+// same id-keyed vocabulary as the two lookups above.
+export function useTaskTypeIdOptions(): IdLookupOption[] {
+  const { data } = useCachedLookup('/task-types', mapIdOptions, EMPTY_ID_OPTIONS)
+  return data
+}
+
+export function useTaskPriorityIdOptions(): IdLookupOption[] {
+  const { data } = useCachedLookup('/task-priorities', mapIdOptions, EMPTY_ID_OPTIONS)
+  return data
+}

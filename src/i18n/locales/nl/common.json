@@ -122,7 +122,9 @@
     "branchExcludesUnassigned": "Een vestigingsfilter verbergt records zonder gekoppelde vestiging.",
     "button": "Filter",
     "toggleActive": "Filters tonen/verbergen ({{count}} actief)",
-    "noBranch": "Zonder vestiging"
+    "noBranch": "Zonder vestiging",
+    "valueMin": "Minimumwaarde",
+    "valueMax": "Maximumwaarde"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -270,7 +272,16 @@
     "title": "Notificaties",
     "empty": "Geen notificaties",
     "moreNew_one": "{{count}} nieuwe notificatie meer",
-    "moreNew_other": "{{count}} nieuwe notificaties meer"
+    "moreNew_other": "{{count}} nieuwe notificaties meer",
+    "actionStatus": {
+      "done": "Afgerond.",
+      "pending": "Wordt verwerkt.",
+      "failed": "Mislukt."
+    },
+    "nextAction": {
+      "pending": "Wordt automatisch verwerkt.",
+      "failed": "Bekijk de aangemaakte vervolgtaak."
+    }
   },
   "activeFilters": "Actieve filters",
   "clearAll": "Alles wissen",

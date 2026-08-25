@@ -311,18 +311,22 @@ export default function ApplicationsReport({ period, filters = EMPTY_REPORT_FILT
 
           {/* INTAKE-IN-APPS-1: appointment numbers for the window — two small
               tiles + two distribution axes. GET /reports/applications/intakes/drill
-              (operation getReportsApplicationsIntakesDrill) now covers axis
-              recruiter|branch|state — the recruiter/branch bars below drill on it.
-              The planned/done tiles stay display-only: axis=state's value
-              vocabulary is unconfirmed (asked CMBE) — no guessing 'planned'/'done'. */}
+              (operation getReportsApplicationsIntakesDrill, api-generated.ts) covers
+              axis state|recruiter|branch — state's value vocabulary is confirmed
+              'planned'|'done' (query.value doc comment) so the two tiles now drill
+              too, gated by the same intakeDrillable flag as the recruiter/branch bars. */}
           <ReportGridItem span={2}>
             <ReportSectionCard>
               <ReportSectionCardBody>
                 <ReportSection title={t('applications.intakes.title')}>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                     <div style={{ display: 'flex', gap: 12 }}>
-                      <StatTile label={t('applications.intakes.planned')} value={formatNumber(data.intakes.planned)} />
-                      <StatTile label={t('applications.intakes.doneInPeriod')} value={formatNumber(data.intakes.done_in_period)} />
+                      <StatTile label={t('applications.intakes.planned')} value={formatNumber(data.intakes.planned)}
+                        onClick={intakeDrillable ? gateDrillClick('applications', () =>
+                          openIntakeDrill('state', t('applications.intakes.planned'), data.intakes.planned, 'planned')) : undefined} />
+                      <StatTile label={t('applications.intakes.doneInPeriod')} value={formatNumber(data.intakes.done_in_period)}
+                        onClick={intakeDrillable ? gateDrillClick('applications', () =>
+                          openIntakeDrill('state', t('applications.intakes.doneInPeriod'), data.intakes.done_in_period, 'done')) : undefined} />
                     </div>
                     <div>
                       <Caption style={{ fontWeight: 600, marginBottom: 4, display: 'block' }}>{t('applications.intakes.byRecruiter')}</Caption>

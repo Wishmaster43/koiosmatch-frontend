@@ -122,7 +122,9 @@
     "branchExcludesUnassigned": "Ein Niederlassungsfilter blendet Datensätze ohne verknüpfte Niederlassung aus.",
     "button": "Filter",
     "toggleActive": "Filter ein-/ausblenden ({{count}} aktiv)",
-    "noBranch": "Ohne Niederlassung"
+    "noBranch": "Ohne Niederlassung",
+    "valueMin": "Mindestwert",
+    "valueMax": "Höchstwert"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -270,7 +272,16 @@
     "title": "Benachrichtigungen",
     "empty": "Keine Benachrichtigungen",
     "moreNew_one": "{{count}} weitere neue Benachrichtigung",
-    "moreNew_other": "{{count}} weitere neue Benachrichtigungen"
+    "moreNew_other": "{{count}} weitere neue Benachrichtigungen",
+    "actionStatus": {
+      "done": "Erledigt.",
+      "pending": "In Bearbeitung.",
+      "failed": "Fehlgeschlagen."
+    },
+    "nextAction": {
+      "pending": "Wird automatisch verarbeitet.",
+      "failed": "Prüfen Sie die erstellte Folgeaufgabe."
+    }
   },
   "activeFilters": "Aktive Filter",
   "clearAll": "Alle löschen",

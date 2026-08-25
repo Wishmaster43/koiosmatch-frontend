@@ -38,7 +38,9 @@
       "ownerNone": "Without owner",
       "branchNone": "Without branch",
       "sourceNone": "Without source",
-      "phaseLead": "Still a lead"
+      "phaseLead": "Still a lead",
+      "contractForm": "Contract form",
+      "contractFormNone": "Without contract form"
     },
     "kpiOrderFellBack": "A KPI card configured in Settings no longer exists and was reset to the default.",
     "viewSwitch": {
@@ -133,7 +135,8 @@
     "daysValue": "{{days}} days",
     "durationNote": "Match duration follows once the HelloFlex coupling provides start/end dates.",
     "axes": {
-      "contractForm": "Contract form"
+      "contractForm": "Contract form",
+      "origin": "Origin"
     },
     "placements": {
       "title": "Match status",
@@ -196,7 +199,13 @@
     "axes": {
       "direction": "Direction",
       "type": "Message type",
-      "escalated": "Escalated"
+      "escalated": "Escalated",
+      "owner": "Owner",
+      "escalatedAny": "Any",
+      "directionValues": {
+        "inbound": "Inbound",
+        "outbound": "Outbound"
+      }
     },
     "kpi": {
       "conversationsTotal": "Total conversations",
@@ -228,7 +237,8 @@
       "vacancy": "Vacancy",
       "stageDuration": "Too long in stage",
       "customerNone": "Without customer",
-      "stageNone": "Without stage"
+      "stageNone": "Without stage",
+      "rejectionReason": "Rejection reason"
     },
     "buckets": {
       "active": "Active",
@@ -282,7 +292,10 @@
     },
     "forecastCount": "Forecasted deals",
     "forecastValue": "Forecasted value",
-    "kpiOrderFellBack": "A KPI card configured in Settings no longer exists and was reset to the default."
+    "kpiOrderFellBack": "A KPI card configured in Settings no longer exists and was reset to the default.",
+    "axes": {
+      "value": "Pipeline value"
+    }
   },
   "tasks": {
     "loading": "Loading tasks…",
@@ -325,6 +338,10 @@
       "withoutAssignee": "Without assignee",
       "avgCompletionDays": "Avg. completion time",
       "daysValue": "{{days}} days"
+    },
+    "filters": {
+      "typeNone": "Without type",
+      "priorityNone": "Without priority"
     }
   },
   "customers": {

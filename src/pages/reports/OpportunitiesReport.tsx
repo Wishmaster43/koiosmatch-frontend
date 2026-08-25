@@ -38,6 +38,15 @@ import { useReportCompare } from './useReportCompare'
 import ReportCompareMetric from './ReportCompareMetric'
 import { COMPARE_OFF } from './reportCompareMode'
 import type { ReportCompareMode } from './reportCompareMode'
+import { EMPTY_REPORT_FILTERS, buildReportQueryParams } from './reportFilterParams'
+import type { ReportFilterState } from './reportFilterParams'
+
+// The kpis/drill `kpi` enum, measured in api-generated.ts::getReportsOpportunitiesKpisDrill
+// (line 45105): "total" | "open" | "won" | "lost" | "win_rate" | "open_value" |
+// "stale" | "closing_soon" | "untouched" | "overdue" | "forecast_count" | "forecast_value".
+type OpportunitiesKpiKey =
+  | 'total' | 'open' | 'won' | 'lost' | 'win_rate' | 'open_value'
+  | 'stale' | 'closing_soon' | 'untouched' | 'overdue' | 'forecast_count' | 'forecast_value'
 
 // The three plain single-value XOR axes; `owner` has its own D2 shape below.
 type Axis = 'stage' | 'customer' | 'branch'
@@ -54,11 +63,11 @@ const OPP_COLOR: Record<string, string> = {
   staleDeal: 'var(--color-warning)', closingSoon: 'var(--color-warning)',
 }
 
-export default function OpportunitiesReport({ period, compare = COMPARE_OFF }: { period: ReportPeriod; compare?: ReportCompareMode }) {
+export default function OpportunitiesReport({ period, filters = EMPTY_REPORT_FILTERS, compare = COMPARE_OFF }: { period: ReportPeriod; filters?: ReportFilterState; compare?: ReportCompareMode }) {
   const { t } = useTranslation('analytics')
   const { formatDate } = useDateFormat()
   const { formatCurrency } = useNumberFormat()
-  const { data, loading, error, refetch } = useOpportunitiesReport(period)
+  const { data, loading, error, refetch } = useOpportunitiesReport(period, filters)
 
   const total   = data?.total ?? 0
   const hasData = !loading && !error && total > 0
@@ -73,21 +82,37 @@ export default function OpportunitiesReport({ period, compare = COMPARE_OFF }: {
   // per open drill.
   const [drill, setDrill] = useState<DrillSpec | null>(null)
   const windowSub = () => `${formatDate(data?.period.from)} – ${formatDate(data?.period.to)}`
+  // Every drill (axis segment, bucket, KPI card) layers on top of the report's own
+  // active panel filters (status/owner/branch/customer + value_min/value_max),
+  // never just `period` — mirrors VacanciesReport's baseParams so bar and drawer
+  // total always agree on the same underlying set. buildReportQueryParams already
+  // attaches value_min/value_max for 'opportunities' (reportFilterParams.ts).
+  const baseParams = buildReportQueryParams(period, 'opportunities', filters)
   const openSegment = (seg: { label: string; count: number }, xorParam: Record<string, unknown>) =>
     setDrill({
       title: seg.label, value: seg.count, subtitle: windowSub(),
       entityPage: 'opportunities',
-      rowsEndpoint: '/reports/opportunities/drill', rowsParams: { ...xorParam, period },
-      adviceEndpoint: '/reports/opportunities/advice', adviceParams: { ...xorParam, period },
+      rowsEndpoint: '/reports/opportunities/drill', rowsParams: { ...baseParams, ...xorParam },
+      // Advice takes the WINDOW + segment only (OpportunitiesAdviceRequest has no
+      // reportFilterRules — panel filters would be silently dropped, so never sent).
+      adviceEndpoint: '/reports/opportunities/advice', adviceParams: { period, ...xorParam },
     })
   const openBucket = (pt: CandidateTimeseriesPoint) => setDrill({
     title: pt.label, value: pt.value, subtitle: windowSub(),
     // A week bar's `date` is the point's own key; the drawer then counts the WHOLE
     // week (bucket=week) so bar and drawer total always agree.
     rowsEndpoint: '/reports/opportunities/drill',
-    rowsParams: { date: pt.date, ...(data?.timeseries.bucket === 'week' ? { bucket: 'week' } : {}), period },
+    rowsParams: { ...baseParams, date: pt.date, ...(data?.timeseries.bucket === 'week' ? { bucket: 'week' } : {}) },
     adviceEndpoint: '/reports/opportunities/advice',
-    adviceParams: { date: pt.date, ...(data?.timeseries.bucket === 'week' ? { bucket: 'week' } : {}), period },
+    adviceParams: { period, date: pt.date, ...(data?.timeseries.bucket === 'week' ? { bucket: 'week' } : {}) },
+  })
+  // WAVE-1B: per-KPI-card drill via GET /reports/opportunities/kpis/drill?kpi=<key>
+  // (measured in api-generated.ts::getReportsOpportunitiesKpisDrill) layered on the
+  // same baseParams every other drill uses; rows are opportunities.
+  const openKpiDrill = (label: string, value: number | string, kpi: OpportunitiesKpiKey) => setDrill({
+    title: label, value, subtitle: windowSub(),
+    entityPage: 'opportunities',
+    rowsEndpoint: '/reports/opportunities/kpis/drill', rowsParams: { ...baseParams, kpi },
   })
 
   // Stage axis: a lookup axis with its own colour per value (CHART-TYPE RULE) →
@@ -131,14 +156,11 @@ export default function OpportunitiesReport({ period, compare = COMPARE_OFF }: {
     if (pt) openBucket(pt)
   })
 
-  // Pipeline-health KPI strip from the envelope's totals. Not drillable: the
-  // five-way XOR carries no open/won/lost segment (no fake affordances). win_rate
-  // is null until a deal is decided — placeholder, never a fabricated 0%.
-  // Nine-card footprint (Danny — same as the dashboard). The pipeline five stay
-  // as-is; the stale-deal counters and the forecast totals are real sums over
-  // fields the endpoint already returns (`stale` and `forecast[]`) — neither is
-  // a drillable XOR axis today, so both render as plain, honest, non-clickable
-  // stats rather than a dead button (no fake affordances).
+  // Pipeline-health KPI strip from the envelope's totals. WAVE-1B: every card
+  // whose key maps 1:1 onto a kpis/drill enum value (measured line 45105) now
+  // opens the shared drawer via openKpiDrill; win_rate is null until a deal is
+  // decided — placeholder, never a fabricated 0%. Nine-card footprint (Danny —
+  // same as the dashboard).
   const s = data?.totals
   const forecastCount = data?.forecast.reduce((sum, row) => sum + row.count, 0) ?? 0
   const forecastValue = data?.forecast.reduce((sum, row) => sum + row.value_sum, 0) ?? 0
@@ -152,23 +174,36 @@ export default function OpportunitiesReport({ period, compare = COMPARE_OFF }: {
   const topCustomer = topReal(data?.by_customer ?? [])
   const kpiByKey: Record<string, KpiSpec> = {
     total:   { key: 'total',   label: t('opportunities.total'),           value: total,
-      sub: totalCompare ? <ReportCompareMetric metric={totalCompare} polarity="up-good" /> : undefined },
-    open:    { key: 'open',    label: t('opportunities.summary.open'),    value: s?.open ?? 0 },
+      sub: totalCompare ? <ReportCompareMetric metric={totalCompare} polarity="up-good" /> : undefined,
+      onClick: gateDrillClick('opportunities', () => openKpiDrill(t('opportunities.total'), total, 'total')) },
+    open:    { key: 'open',    label: t('opportunities.summary.open'),    value: s?.open ?? 0,
+      onClick: gateDrillClick('opportunities', () => openKpiDrill(t('opportunities.summary.open'), s?.open ?? 0, 'open')) },
     won:     { key: 'won',     label: t('opportunities.summary.won'),     value: s?.won ?? 0,
-      color: s?.won ? OPP_COLOR.won : undefined },
+      color: s?.won ? OPP_COLOR.won : undefined,
+      onClick: gateDrillClick('opportunities', () => openKpiDrill(t('opportunities.summary.won'), s?.won ?? 0, 'won')) },
     lost:    { key: 'lost',    label: t('opportunities.summary.lost'),    value: s?.lost ?? 0,
-      color: s?.lost ? OPP_COLOR.lost : undefined },
+      color: s?.lost ? OPP_COLOR.lost : undefined,
+      onClick: gateDrillClick('opportunities', () => openKpiDrill(t('opportunities.summary.lost'), s?.lost ?? 0, 'lost')) },
     winRate: { key: 'winRate', label: t('opportunities.summary.winRate'),
-      value: formatPercent(s?.win_rate) },
+      value: formatPercent(s?.win_rate),
+      onClick: gateDrillClick('opportunities', () => openKpiDrill(t('opportunities.summary.winRate'), formatPercent(s?.win_rate), 'win_rate')) },
     untouched: { key: 'untouched', label: t('opportunities.stale.untouched'), value: data?.stale.untouched ?? 0,
-      color: data?.stale.untouched ? OPP_COLOR.untouched : undefined },
+      color: data?.stale.untouched ? OPP_COLOR.untouched : undefined,
+      onClick: gateDrillClick('opportunities', () => openKpiDrill(t('opportunities.stale.untouched'), data?.stale.untouched ?? 0, 'untouched')) },
     overdue:   { key: 'overdue',   label: t('opportunities.stale.overdue'),   value: data?.stale.overdue ?? 0,
-      color: data?.stale.overdue ? OPP_COLOR.overdue : undefined },
-    forecastCount: { key: 'forecastCount', label: t('opportunities.forecastCount'), value: forecastCount },
-    forecastValue: { key: 'forecastValue', label: t('opportunities.forecastValue'), value: formatCurrency(forecastValue, 'EUR', 0) },
+      color: data?.stale.overdue ? OPP_COLOR.overdue : undefined,
+      onClick: gateDrillClick('opportunities', () => openKpiDrill(t('opportunities.stale.overdue'), data?.stale.overdue ?? 0, 'overdue')) },
+    forecastCount: { key: 'forecastCount', label: t('opportunities.forecastCount'), value: forecastCount,
+      onClick: gateDrillClick('opportunities', () => openKpiDrill(t('opportunities.forecastCount'), forecastCount, 'forecast_count')) },
+    forecastValue: { key: 'forecastValue', label: t('opportunities.forecastValue'), value: formatCurrency(forecastValue, 'EUR', 0),
+      onClick: gateDrillClick('opportunities', () => openKpiDrill(t('opportunities.forecastValue'), formatCurrency(forecastValue, 'EUR', 0), 'forecast_value')) },
     // Spares: real money fields already in `totals` (money via formatCurrency,
-    // never a raw number) + the two top-segment picks above.
-    openValue: { key: 'openValue', label: t('opportunities.summary.openValue'), value: formatCurrency(s?.open_value ?? 0, 'EUR', 0) },
+    // never a raw number) + the two top-segment picks above. openValue maps 1:1
+    // onto the kpis/drill enum's `open_value`; wonValue has no matching enum
+    // value (measured — the enum stops at open_value) so it stays a plain,
+    // honest, non-clickable stat (no fake affordances).
+    openValue: { key: 'openValue', label: t('opportunities.summary.openValue'), value: formatCurrency(s?.open_value ?? 0, 'EUR', 0),
+      onClick: gateDrillClick('opportunities', () => openKpiDrill(t('opportunities.summary.openValue'), formatCurrency(s?.open_value ?? 0, 'EUR', 0), 'open_value')) },
     wonValue:  { key: 'wonValue',  label: t('opportunities.summary.wonValue'),  value: formatCurrency(s?.won_value ?? 0, 'EUR', 0) },
     topStage: { key: 'topStage', label: t('opportunities.summary.topStage'),
       value: topStage ? `${topStage.label} · ${topStage.count}` : '—',
@@ -178,16 +213,17 @@ export default function OpportunitiesReport({ period, compare = COMPARE_OFF }: {
       onClick: topCustomer ? gateDrillClick('opportunities', () => openSegment(topCustomer, { customer: topCustomer.value })) : undefined },
     // KPI-DREMPELS-FE-1: totals.stale / totals.closing_soon (additive, distinct from
     // the older top-level `stale` object above — a different, updated_at-based
-    // contract left untouched), each with its own tenant day-threshold caption. No
-    // XOR param exists for either signal on this report's five-way drill, so both
-    // render as plain, honest, non-clickable stats — the same rule the untouched/
-    // overdue tiles above already follow (no fake affordances).
+    // contract left untouched), each with its own tenant day-threshold caption.
+    // WAVE-1B: both now map 1:1 onto the kpis/drill enum (stale/closing_soon) and
+    // drill via openKpiDrill, same as every other mapped card above.
     staleDeal: { key: 'staleDeal', label: t('opportunities.summary.staleDeal'), value: s?.stale ?? 0,
       color: s?.stale ? OPP_COLOR.staleDeal : undefined,
-      sub: s?.stale_days != null ? t('thresholdDays', { n: s.stale_days }) : undefined },
+      sub: s?.stale_days != null ? t('thresholdDays', { n: s.stale_days }) : undefined,
+      onClick: gateDrillClick('opportunities', () => openKpiDrill(t('opportunities.summary.staleDeal'), s?.stale ?? 0, 'stale')) },
     closingSoon: { key: 'closingSoon', label: t('opportunities.summary.closingSoon'), value: s?.closing_soon ?? 0,
       color: s?.closing_soon ? OPP_COLOR.closingSoon : undefined,
-      sub: s?.closing_soon_days != null ? t('thresholdDays', { n: s.closing_soon_days }) : undefined },
+      sub: s?.closing_soon_days != null ? t('thresholdDays', { n: s.closing_soon_days }) : undefined,
+      onClick: gateDrillClick('opportunities', () => openKpiDrill(t('opportunities.summary.closingSoon'), s?.closing_soon ?? 0, 'closing_soon')) },
   }
   // Which nine keys render, and in what order, is the tenant's Settings → Reports
   // choice (falls back to today's order when nothing is stored, or a stored key

@@ -38,7 +38,9 @@
       "ownerNone": "Zonder eigenaar",
       "branchNone": "Zonder vestiging",
       "sourceNone": "Zonder bron",
-      "phaseLead": "Nog lead"
+      "phaseLead": "Nog lead",
+      "contractForm": "Contractvorm",
+      "contractFormNone": "Zonder contractvorm"
     },
     "kpiOrderFellBack": "Een in Instellingen ingestelde KPI-kaart bestaat niet meer en is teruggezet naar de standaard.",
     "viewSwitch": {
@@ -133,7 +135,8 @@
     "daysValue": "{{days}} dagen",
     "durationNote": "Matchduur volgt zodra de HelloFlex-koppeling de start/einddata levert.",
     "axes": {
-      "contractForm": "Contractvorm"
+      "contractForm": "Contractvorm",
+      "origin": "Herkomst"
     },
     "placements": {
       "title": "Matchstatus",
@@ -196,7 +199,13 @@
     "axes": {
       "direction": "Richting",
       "type": "Berichttype",
-      "escalated": "Geëscaleerd"
+      "escalated": "Geëscaleerd",
+      "owner": "Eigenaar",
+      "escalatedAny": "Alles",
+      "directionValues": {
+        "inbound": "Inkomend",
+        "outbound": "Uitgaand"
+      }
     },
     "kpi": {
       "conversationsTotal": "Totaal gesprekken",
@@ -228,7 +237,8 @@
       "vacancy": "Vacature",
       "stageDuration": "Te lang in fase",
       "customerNone": "Zonder klant",
-      "stageNone": "Zonder fase"
+      "stageNone": "Zonder fase",
+      "rejectionReason": "Afwijzingsreden"
     },
     "buckets": {
       "active": "Actief",
@@ -282,7 +292,10 @@
     },
     "forecastCount": "Verwachte deals",
     "forecastValue": "Verwachte waarde",
-    "kpiOrderFellBack": "Een in Instellingen ingestelde KPI-kaart bestaat niet meer en is teruggezet naar de standaard."
+    "kpiOrderFellBack": "Een in Instellingen ingestelde KPI-kaart bestaat niet meer en is teruggezet naar de standaard.",
+    "axes": {
+      "value": "Pipelinewaarde"
+    }
   },
   "tasks": {
     "loading": "Taken laden…",
@@ -325,6 +338,10 @@
       "withoutAssignee": "Zonder behandelaar",
       "avgCompletionDays": "Gem. doorlooptijd",
       "daysValue": "{{days}} dagen"
+    },
+    "filters": {
+      "typeNone": "Zonder type",
+      "priorityNone": "Zonder prioriteit"
     }
   },
   "customers": {

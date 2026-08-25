@@ -40,6 +40,12 @@ export interface ReportFilterGroup {
   onFromChange?: (value: string) => void
   onToChange?: (value: string) => void
   placeholder?: string
+  // 'number-range' group (WAVE 1c, opportunities pipeline value): two independent
+  // optional numeric bounds — mirrors date-range's from/to shape but numeric.
+  min?: number | null
+  max?: number | null
+  onMinChange?: (value: number | null) => void
+  onMaxChange?: (value: number | null) => void
   // 'open' renders the options as an always-visible checkbox list (small fixed
   // lookups); default keeps the collapsed searchable dropdown (long lists).
   display?: 'open' | 'dropdown'

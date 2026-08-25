@@ -38,7 +38,9 @@
       "ownerNone": "Ohne Eigentümer",
       "branchNone": "Ohne Niederlassung",
       "sourceNone": "Ohne Quelle",
-      "phaseLead": "Noch Lead"
+      "phaseLead": "Noch Lead",
+      "contractForm": "Vertragsform",
+      "contractFormNone": "Ohne Vertragsform"
     },
     "kpiOrderFellBack": "Eine in den Einstellungen konfigurierte KPI-Karte existiert nicht mehr und wurde auf den Standard zurückgesetzt.",
     "viewSwitch": {
@@ -133,7 +135,8 @@
     "daysValue": "{{days}} Tage",
     "durationNote": "Die Match-Dauer folgt, sobald die HelloFlex-Anbindung Start/Ende liefert.",
     "axes": {
-      "contractForm": "Vertragsform"
+      "contractForm": "Vertragsform",
+      "origin": "Herkunft"
     },
     "placements": {
       "title": "Match-Status",
@@ -196,7 +199,13 @@
     "axes": {
       "direction": "Richtung",
       "type": "Nachrichtentyp",
-      "escalated": "Eskaliert"
+      "escalated": "Eskaliert",
+      "owner": "Eigentümer",
+      "escalatedAny": "Alle",
+      "directionValues": {
+        "inbound": "Eingehend",
+        "outbound": "Ausgehend"
+      }
     },
     "kpi": {
       "conversationsTotal": "Gespräche gesamt",
@@ -228,7 +237,8 @@
       "vacancy": "Stelle",
       "stageDuration": "Zu lange in Phase",
       "customerNone": "Ohne Kunde",
-      "stageNone": "Ohne Phase"
+      "stageNone": "Ohne Phase",
+      "rejectionReason": "Ablehnungsgrund"
     },
     "buckets": {
       "active": "Aktiv",
@@ -282,7 +292,10 @@
     },
     "forecastCount": "Prognostizierte Deals",
     "forecastValue": "Prognostizierter Wert",
-    "kpiOrderFellBack": "Eine in den Einstellungen konfigurierte KPI-Karte existiert nicht mehr und wurde auf den Standard zurückgesetzt."
+    "kpiOrderFellBack": "Eine in den Einstellungen konfigurierte KPI-Karte existiert nicht mehr und wurde auf den Standard zurückgesetzt.",
+    "axes": {
+      "value": "Pipelinewert"
+    }
   },
   "tasks": {
     "loading": "Aufgaben werden geladen…",
@@ -325,6 +338,10 @@
       "withoutAssignee": "Ohne Bearbeiter",
       "avgCompletionDays": "Ø Durchlaufzeit",
       "daysValue": "{{days}} Tage"
+    },
+    "filters": {
+      "typeNone": "Ohne Typ",
+      "priorityNone": "Ohne Priorität"
     }
   },
   "customers": {

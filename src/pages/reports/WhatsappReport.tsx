@@ -44,6 +44,7 @@ import type { ReportPeriod, WhatsappSegment } from '@/types/analytics'
 import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
 import { getReportKpiCatalog, getReportKpiDefaultOrder, reportKpiSettingsKey } from './kpiCatalog'
 import { resolveReportKpiOrder } from './resolveReportKpiOrder'
+import type { ReportFilterState } from './reportFilterParams'
 
 // Semantic colour per server key, applied only when the count is non-zero (§4:
 // colour carries meaning — a calm zero stays uncoloured). avg_first_response_
@@ -67,11 +68,11 @@ const KPI_LABEL_KEYS: Record<string, string> = {
   avg_first_response_minutes: 'whatsapp.kpi.avgFirstResponseMinutes',
 }
 
-export default function WhatsappReport({ period }: { period: ReportPeriod }) {
+export default function WhatsappReport({ period, filters }: { period: ReportPeriod; filters?: ReportFilterState }) {
   const { t } = useTranslation('analytics')
   const { formatDate } = useDateFormat()
   const { formatNumber } = useNumberFormat()
-  const { data, loading, error, refetch } = useWhatsappReport(period)
+  const { data, loading, error, refetch } = useWhatsappReport(period, true, filters)
 
   const total = data?.meta.total ?? 0
   const hasData = !loading && !error && total > 0

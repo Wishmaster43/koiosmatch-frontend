@@ -27,6 +27,7 @@ function groupActiveCount(g: ReportFilterGroup): number {
   if (g.type === 'location')       return g.city ? 1 : 0
   if (g.type === 'date-range')     return (g.from || g.to) ? 1 : 0
   if (g.type === 'geo-radius')     return g.applied ? 1 : 0
+  if (g.type === 'number-range')   return (g.min != null || g.max != null) ? 1 : 0
   return g.selected?.length ?? 0
 }
 
@@ -47,6 +48,7 @@ export default function ReportFilterSidebar({
       else if (g.type === 'location') { g.onCityChange?.(''); g.onRadiusChange?.('') }
       else if (g.type === 'date-range') { g.onFromChange?.(''); g.onToChange?.('') }
       else if (g.type === 'geo-radius') { g.onClear?.() }
+      else if (g.type === 'number-range') { g.onMinChange?.(null); g.onMaxChange?.(null) }
       else { g.selected?.forEach(v => g.onToggle?.(v)) }
     })
   }
@@ -84,6 +86,8 @@ export default function ReportFilterSidebar({
     if (g.type === 'location')      return g.city ? [chip(g.key, `${g.city}${g.radius ? ` · ${g.radius} km` : ''}`, () => { g.onCityChange?.(''); g.onRadiusChange?.('') })] : []
     if (g.type === 'date-range')    return (g.from || g.to) ? [chip(g.key, `${g.from ?? '…'} – ${g.to ?? '…'}`, () => { g.onFromChange?.(''); g.onToChange?.('') })] : []
     if (g.type === 'geo-radius')    return g.applied ? [chip(g.key, g.applied.label, () => g.onClear?.())] : []
+    if (g.type === 'number-range')  return (g.min != null || g.max != null)
+      ? [chip(g.key, `${g.min ?? '…'} – ${g.max ?? '…'}`, () => { g.onMinChange?.(null); g.onMaxChange?.(null) })] : []
     return (g.selected ?? []).map(v =>
       chip(`${g.key}:${v}`, (g.options ?? []).find(o => o.value === v)?.label ?? String(v), () => g.onToggle?.(v)))
   })
