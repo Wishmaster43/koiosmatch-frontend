@@ -537,5 +537,67 @@
   },
   "noteConcept": {
     "restored": "Concept hersteld. Nog niet opgeslagen."
+  },
+  "lookupSeeds": {
+    "candidateTypes": {
+      "on_call": "Oproepkracht",
+      "freelance": "ZZP",
+      "payroll": "Payroll",
+      "temp_agency": "Uitzendkracht",
+      "secondment": "Detachering",
+      "flex_services": "Flex-diensten",
+      "on_demand": "Demand"
+    },
+    "phases": {
+      "lead": "Lead",
+      "candidate": "Kandidaat"
+    },
+    "funnelTypes": {
+      "applied": "Gesolliciteerd",
+      "invited": "Uitgenodigd/Intake",
+      "proposal": "Voorgesteld",
+      "hired": "Aangenomen",
+      "rejected": "Afgewezen"
+    },
+    "statuses": {
+      "available": "Beschikbaar",
+      "placed": "Geplaatst",
+      "unavailable": "Niet beschikbaar",
+      "sick": "Ziek",
+      "leave": "Verlof",
+      "blacklist": "Blacklist"
+    },
+    "availability": {
+      "available": "Beschikbaar",
+      "unavailable": "Niet beschikbaar",
+      "sick": "Ziek",
+      "leave": "Verlof"
+    },
+    "taskStatuses": {
+      "todo": "TeDoen",
+      "in_progress": "In behandeling",
+      "done": "Afgerond"
+    },
+    "taskTypes": {
+      "task": "Taak",
+      "call": "Belafspraak",
+      "email": "E-mail",
+      "note": "Notitie"
+    },
+    "taskPriorities": {
+      "low": "Laag",
+      "normal": "Normaal",
+      "high": "Hoog"
+    },
+    "noteTypes": {
+      "general": "Algemeen",
+      "intake": "Intake",
+      "feedback": "Feedback",
+      "appointment": "Afspraak",
+      "followup": "Follow-up",
+      "warning": "Waarschuwing",
+      "status_change": "Statuswissel",
+      "lifecycle": "Dossier"
+    }
   }
 }

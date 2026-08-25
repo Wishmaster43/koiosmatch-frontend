@@ -424,7 +424,7 @@
     "flowUnknown": "Eröffnungsdatum unbekannt · {{count}} Bewerbung(en) erhalten."
   },
   "changelog": {
-    "loading": "Laden…",
+    "loading": "Wird geladen…",
     "error": "Änderungen konnten nicht geladen werden.",
     "empty": "Noch keine Änderungen.",
     "system": "System",
@@ -521,6 +521,41 @@
       "placeholder": "Kandidat suchen…",
       "error": "Kandidaten konnten nicht geladen werden.",
       "noAccess": "Kein Zugriff auf Kandidaten."
+    }
+  },
+  "lookupSeeds": {
+    "statuses": {
+      "open": "Offen",
+      "online": "Online",
+      "concept": "Entwurf",
+      "paused": "Pausiert",
+      "closed": "Geschlossen"
+    },
+    "phases": {
+      "applied": "Beworben",
+      "accepted": "Angenommen",
+      "invited": "Eingeladen",
+      "proposed": "Vorschlag gemacht",
+      "hired": "Eingestellt",
+      "rejected": "Abgelehnt"
+    },
+    "seniorityLevels": {
+      "starter": "Einsteiger",
+      "medior": "Fortgeschritten",
+      "professional": "Professionell",
+      "senior": "Senior"
+    },
+    "educationLevels": {
+      "vmbo": "VMBO",
+      "mbo": "MBO",
+      "hbo": "HBO",
+      "wo": "WO"
+    },
+    "channels": {
+      "career": "Karriereseite",
+      "google": "Google Jobs",
+      "indeed": "Indeed",
+      "werkzoeken": "Werkzoeken"
     }
   }
 }

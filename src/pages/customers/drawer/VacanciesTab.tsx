@@ -52,12 +52,12 @@ import api, { unwrapList } from '@/lib/api'
 import { mapVacancyRow } from '../hooks/useCustomerDrawerData'
 import type { VacancyRow } from '../hooks/useCustomerDrawerData'
 import type { Id } from '@/types/common'
+import { Mono } from '@/components/ui/typography'
+import Button from '@/components/ui/Button'
 
 // K7c/K7b: the same ghost-button count deep-link VacanciesTable.tsx uses for its
 // own Applications/Matches columns (leadsBtn there) — reused here under its own
 // name since this file has no shared style import for it.
-const applicationsBtn = { display: 'inline-flex', fontFamily: 'JetBrains Mono, monospace', fontSize: 12,
-  color: 'var(--text-muted)', background: 'none', border: 'none', padding: 0, cursor: 'pointer' } as const
 
 // K2-FE (13-08): `VacancyRow` (useCustomerDrawerData) has no `published` field, but the
 // BE's open definition needs it (see below), so this tab carries its own extended row
@@ -87,7 +87,8 @@ function useCustomerVacanciesWithPublished(customerId?: Id, params?: Record<stri
 interface StatusOpt { value: string; label: string; isClosed: boolean }
 
 // Seed fallback (mirrors VacancyLookupsContext's DEFAULT_VACANCY_STATUSES) — used
-// only until GET /vacancy-statuses answers, or if it's unavailable.
+// only until GET /vacancy-statuses answers or if it is unavailable; labels translate
+// at use (lookupSeeds.vacancyStatuses.<value>), the Dutch text is the defaultValue.
 const SEED_STATUSES: StatusOpt[] = [
   { value: 'open', label: 'Open', isClosed: false }, { value: 'online', label: 'Online', isClosed: false },
   { value: 'concept', label: 'Concept', isClosed: false }, { value: 'paused', label: 'Gepauzeerd', isClosed: false },
@@ -114,7 +115,10 @@ export default function VacanciesTab({ customerId, customerName, params }: { cus
   // Free-text search over the title (Danny 28-07) — the list can run to dozens of rows.
   const [search, setSearch] = useState('')
   const queryClient = useQueryClient()
-  const [statusOptions, setStatusOptions] = useState<StatusOpt[]>(SEED_STATUSES)
+  // Translate every seed label at init (per-value key, Dutch literal as fallback) so a
+  // failed/empty lookup never leaves a Dutch island in the status filter.
+  const seedStatuses = SEED_STATUSES.map(s => ({ ...s, label: t(`lookupSeeds.vacancyStatuses.${s.value}`, { defaultValue: s.label }) }))
+  const [statusOptions, setStatusOptions] = useState<StatusOpt[]>(seedStatuses)
   // Has the REAL lookup answered? The seed list must never decide the default
   // selection — see the id/name bug documented below.
   const [resolved, setResolved] = useState(false)
@@ -193,12 +197,11 @@ export default function VacanciesTab({ customerId, customerName, params }: { cus
     // count column, routed cross-page via openEntity's optional tab argument.
     { key: 'applications', header: t('vacancies.col.applications'), align: 'right', sortable: true, sortValue: v => v.applications,
       render: v => (
-        <button type="button" style={applicationsBtn} aria-label={t('vacancies.col.applicationsOpen')}
+        <Button variant="ghost" size="sm" aria-label={t('vacancies.col.applicationsOpen')}
           onClick={e => { e.stopPropagation(); openEntity('vacancies', v.id, 'applicants') }}
-          onMouseEnter={e => { e.currentTarget.style.textDecoration = 'underline' }}
-          onMouseLeave={e => { e.currentTarget.style.textDecoration = 'none' }}>
-          {v.applications}
-        </button>
+          style={{ padding: 0, height: 'auto' }}>
+          <Mono style={{ fontSize: 12 }}>{v.applications}</Mono>
+        </Button>
       ) },
     // K7b: row pencil opening the vacancy's own drawer for editing — mirrors
     // CustomerApplicationsList's pencil action cluster (its edit lives in a modal;
@@ -207,11 +210,10 @@ export default function VacanciesTab({ customerId, customerName, params }: { cus
     ...(canEditVacancies ? [{
       key: 'actions', header: '', align: 'right' as const,
       render: (v: PublishedVacancyRow) => (
-        <button type="button" onClick={e => { e.stopPropagation(); openEntity('vacancies', v.id) }}
-          title={t('vacancies.editVacancy')} aria-label={t('vacancies.editVacancy')}
-          style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 22, height: 22, border: 'none', background: 'none', borderRadius: 5, cursor: 'pointer', color: 'var(--text-muted)' }}>
+        <Button variant="ghost" size="sm" iconOnly onClick={e => { e.stopPropagation(); openEntity('vacancies', v.id) }}
+          title={t('vacancies.editVacancy')} aria-label={t('vacancies.editVacancy')}>
           <Pencil size={12} />
-        </button>
+        </Button>
       ),
     }] : []),
   ]

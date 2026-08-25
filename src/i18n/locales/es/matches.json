@@ -9,7 +9,7 @@
     "vacancy": "Vacante",
     "client": "Cliente",
     "score": "Match",
-    "stage": "Fase",
+    "stage": "Etapa",
     "coupling": "Vínculo",
     "owner": "Responsable",
     "date": "Creado",
@@ -18,7 +18,7 @@
     "type": "Tipo"
   },
   "insights": {
-    "stage": "Fase",
+    "stage": "Etapa",
     "owner": "Responsable",
     "clearFilter": "Borrar filtro",
     "status": "Estado",
@@ -64,7 +64,7 @@
       "client": "Cliente",
       "owner": "Responsable",
       "score": "Puntuación",
-      "stage": "Fase",
+      "stage": "Etapa",
       "created": "Creado",
       "status": "Estado",
       "lastSynced": "Última sincronización",
@@ -209,7 +209,7 @@
     }
   },
   "filters": {
-    "stage": "Fase",
+    "stage": "Etapa",
     "owner": "Responsable",
     "status": "Estado",
     "client": "Cliente",
@@ -283,5 +283,11 @@
   "popout": {
     "textWindowTitle": "Texto del match — {{name}}",
     "loadError": "No se pudo cargar este match."
+  },
+  "lookupSeeds": {
+    "statuses": {
+      "open": "Activo",
+      "closed": "Cerrado"
+    }
   }
 }

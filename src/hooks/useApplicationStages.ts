@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 /**
  * useApplicationStages — the candidate application funnel stages (Settings →
  * Sollicitatie-fases), fetched with their real `id` (needed to submit
@@ -11,6 +12,7 @@
  * Fetch/cache/dedupe lives in useCachedLookup (mirrors useAppointmentTypes/useGenders).
  */
 import type { AxiosResponse } from 'axios'
+import { useTranslation } from 'react-i18next'
 import { useCachedLookup } from '@/lib/useCachedLookup'
 import { unwrapList } from '@/lib/api'
 
@@ -51,7 +53,19 @@ const mapStages = (res: AxiosResponse): ApplicationStageOption[] | null => {
 }
 
 export function useApplicationStages() {
-  const { data: stages } = useCachedLookup('/application-stages', mapStages, DEFAULT_APPLICATION_STAGES)
+  const { t } = useTranslation('common')
+  const { data: stagesRaw } = useCachedLookup('/application-stages', mapStages, DEFAULT_APPLICATION_STAGES)
+
+  // Translate the seed labels through i18n (mirrors LookupsContext's translateSeedLabels) —
+  // only while still on the exact seed fallback; real tenant-configured API labels pass
+  // through untouched. Reuses the `funnelTypes` seed keys (same values, same Dutch text —
+  // this array mirrors DEFAULT_FUNNEL_TYPES by design) rather than a duplicate key set.
+  // The Dutch seed text is the defaultValue so a missing key never shows a raw i18n key.
+  // Memoised: consumers memoise on this array's identity (useReportPanelGroups), so the
+  // translated seed must not be rebuilt on every render while the lookup is still pending.
+  const stages = useMemo(() => stagesRaw === DEFAULT_APPLICATION_STAGES
+    ? stagesRaw.map(s => ({ ...s, label: t(`lookupSeeds.funnelTypes.${s.value}`, { defaultValue: s.label }) }))
+    : stagesRaw, [stagesRaw, t])
 
   // The tenant's flagged start stage (APP-CREATE-STAGE-1), falling back to the first.
   const defaultStage = stages.find(s => s.is_default) ?? stages[0]

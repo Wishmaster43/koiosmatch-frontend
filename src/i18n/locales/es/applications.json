@@ -80,7 +80,7 @@
     "aiTasksSub": "A la espera de acción",
     "missingAppointment": "Cita pendiente",
     "missingAppointmentSub": "Solo filas cargadas, no el total del inquilino. Clic para filtrar",
-    "tooLongInStage": "Demasiado tiempo en la fase",
+    "tooLongInStage": "Demasiado tiempo en la etapa",
     "tooLongInStageSub": "Total del inquilino. Clic para filtrar",
     "placed": "Colocados"
   },

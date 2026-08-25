@@ -522,5 +522,40 @@
       "error": "Could not load candidates.",
       "noAccess": "No access to candidates."
     }
+  },
+  "lookupSeeds": {
+    "statuses": {
+      "open": "Open",
+      "online": "Online",
+      "concept": "Draft",
+      "paused": "Paused",
+      "closed": "Closed"
+    },
+    "phases": {
+      "applied": "Applied",
+      "accepted": "Accepted",
+      "invited": "Invited",
+      "proposed": "Proposal made",
+      "hired": "Hired",
+      "rejected": "Rejected"
+    },
+    "seniorityLevels": {
+      "starter": "Starter",
+      "medior": "Mid-level",
+      "professional": "Professional",
+      "senior": "Senior"
+    },
+    "educationLevels": {
+      "vmbo": "VMBO",
+      "mbo": "MBO",
+      "hbo": "HBO",
+      "wo": "WO"
+    },
+    "channels": {
+      "career": "Career page",
+      "google": "Google Jobs",
+      "indeed": "Indeed",
+      "werkzoeken": "Werkzoeken"
+    }
   }
 }

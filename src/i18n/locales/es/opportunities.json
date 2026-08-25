@@ -14,7 +14,7 @@
     "title": "Oportunidad",
     "referenceNumber": "N.º ref.",
     "client": "Cliente",
-    "stage": "Fase",
+    "stage": "Etapa",
     "value": "Valor",
     "owner": "Responsable",
     "date": "Creado",
@@ -24,7 +24,7 @@
     "endDate": "Fecha de fin"
   },
   "insights": {
-    "stage": "Fase",
+    "stage": "Etapa",
     "owner": "Responsable",
     "clearFilter": "Borrar filtro",
     "client": "Cliente"
@@ -42,10 +42,10 @@
   },
   "drawer": {
     "entityLabel": "Oportunidad",
-    "stage": "Fase",
+    "stage": "Etapa",
     "owner": "Responsable",
     "client": "Cliente",
-    "selectStage": "Seleccionar fase",
+    "selectStage": "Seleccionar etapa",
     "selectOwner": "Seleccionar responsable",
     "selectClient": "Seleccionar cliente",
     "createdAt": "Creado el {{date}}",
@@ -84,7 +84,7 @@
     }
   },
   "details": {
-    "stage": "Fase",
+    "stage": "Etapa",
     "value": "Valor",
     "expectedClose": "Cierre previsto",
     "client": "Cliente",
@@ -123,13 +123,13 @@
     "cancel": "Cancelar",
     "groups": {
       "general": "General",
-      "dealStage": "Valor & fase",
+      "dealStage": "Valor & etapa",
       "description": "Descripción"
     },
     "fields": {
       "title": "Título",
       "client": "Cliente",
-      "stage": "Fase",
+      "stage": "Etapa",
       "value": "Valor (€)",
       "expectedClose": "Cierre previsto",
       "owner": "Responsable",

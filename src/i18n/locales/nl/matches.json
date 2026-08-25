@@ -283,5 +283,11 @@
   "popout": {
     "textWindowTitle": "Matchtekst — {{name}}",
     "loadError": "Deze match kon niet worden geladen."
+  },
+  "lookupSeeds": {
+    "statuses": {
+      "open": "Actief",
+      "closed": "Afgesloten"
+    }
   }
 }

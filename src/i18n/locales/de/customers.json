@@ -485,7 +485,7 @@
       "status": "Status",
       "applications": "Bewerbungen",
       "date": "Datum",
-      "shift": "Dienst",
+      "shift": "Einsatz",
       "department": "Abteilung"
     },
     "searchPlaceholder": "Chance suchen…",
@@ -849,5 +849,27 @@
     "companyTextWindowTitle": "Unternehmenstext — {{name}}",
     "departmentTextWindowTitle": "Abteilungstext — {{name}}",
     "contactTextWindowTitle": "Kontakttext: {{name}}"
+  },
+  "lookupSeeds": {
+    "statuses": {
+      "active": "Aktiv",
+      "inactive": "Inaktiv",
+      "blocked": "Gesperrt"
+    },
+    "subStatuses": {
+      "active": "Aktiv",
+      "inactive": "Inaktiv"
+    },
+    "phases": {
+      "prospect": "Interessent",
+      "klant": "Kunde"
+    },
+    "vacancyStatuses": {
+      "open": "Offen",
+      "online": "Online",
+      "concept": "Entwurf",
+      "paused": "Pausiert",
+      "closed": "Geschlossen"
+    }
   }
 }

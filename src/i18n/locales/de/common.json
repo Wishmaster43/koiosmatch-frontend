@@ -61,7 +61,7 @@
     "label": "{{count}} getrennt",
     "tooltip": "Aktuell getrennt: {{count}}"
   },
-  "loading": "Laden…",
+  "loading": "Wird geladen…",
   "noResults": "Keine Ergebnisse",
   "resultsCount": "{{count}} Ergebnisse",
   "shownOf": "{{shown}} von {{total}} angezeigt",
@@ -537,5 +537,67 @@
   },
   "noteConcept": {
     "restored": "Entwurf wiederhergestellt. Noch nicht gespeichert."
+  },
+  "lookupSeeds": {
+    "candidateTypes": {
+      "on_call": "Abrufkraft",
+      "freelance": "Freiberufler",
+      "payroll": "Payrolling",
+      "temp_agency": "Zeitarbeiter",
+      "secondment": "Abordnung",
+      "flex_services": "Flex-Dienste",
+      "on_demand": "On-Demand"
+    },
+    "phases": {
+      "lead": "Lead",
+      "candidate": "Kandidat"
+    },
+    "funnelTypes": {
+      "applied": "Beworben",
+      "invited": "Eingeladen/Intake",
+      "proposal": "Vorgeschlagen",
+      "hired": "Eingestellt",
+      "rejected": "Abgelehnt"
+    },
+    "statuses": {
+      "available": "Verfügbar",
+      "placed": "Platziert",
+      "unavailable": "Nicht verfügbar",
+      "sick": "Krank",
+      "leave": "Urlaub",
+      "blacklist": "Sperrliste"
+    },
+    "availability": {
+      "available": "Verfügbar",
+      "unavailable": "Nicht verfügbar",
+      "sick": "Krank",
+      "leave": "Urlaub"
+    },
+    "taskStatuses": {
+      "todo": "Zu erledigen",
+      "in_progress": "In Bearbeitung",
+      "done": "Abgeschlossen"
+    },
+    "taskTypes": {
+      "task": "Aufgabe",
+      "call": "Anruf",
+      "email": "E-Mail",
+      "note": "Notiz"
+    },
+    "taskPriorities": {
+      "low": "Niedrig",
+      "normal": "Normal",
+      "high": "Hoch"
+    },
+    "noteTypes": {
+      "general": "Allgemein",
+      "intake": "Intake",
+      "feedback": "Feedback",
+      "appointment": "Termin",
+      "followup": "Follow-up",
+      "warning": "Warnung",
+      "status_change": "Statusänderung",
+      "lifecycle": "Aktenverlauf"
+    }
   }
 }

@@ -479,7 +479,7 @@
     "planningOff": "Los turnos abiertos aparecen cuando el módulo de Planificación esté activo.",
     "col": {
       "title": "Título",
-      "stage": "Fase",
+      "stage": "Etapa",
       "value": "Valor",
       "expectedClose": "Cierre previsto",
       "status": "Estado",
@@ -849,5 +849,27 @@
     "companyTextWindowTitle": "Texto de empresa — {{name}}",
     "departmentTextWindowTitle": "Texto del departamento — {{name}}",
     "contactTextWindowTitle": "Texto de contacto: {{name}}"
+  },
+  "lookupSeeds": {
+    "statuses": {
+      "active": "Activo",
+      "inactive": "Inactivo",
+      "blocked": "Bloqueado"
+    },
+    "subStatuses": {
+      "active": "Activo",
+      "inactive": "Inactivo"
+    },
+    "phases": {
+      "prospect": "Prospecto",
+      "klant": "Cliente"
+    },
+    "vacancyStatuses": {
+      "open": "Abierta",
+      "online": "En línea",
+      "concept": "Borrador",
+      "paused": "En pausa",
+      "closed": "Cerrado"
+    }
   }
 }

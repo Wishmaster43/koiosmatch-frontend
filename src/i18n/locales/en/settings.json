@@ -1797,10 +1797,17 @@
       "enterprise": "+ REST API + Insights+ + Connectors + SLA"
     },
     "addon": {
+      "reports": "Reporting Koios Match",
       "sm": "Reporting Shiftmanager",
       "hf": "Reporting HelloFlex",
       "sm_ai": "Shiftmanager AI Planner",
       "plan": "Planning"
+    },
+    "addonDesc": {
+      "reports": "Koios Match's own reporting and insights.",
+      "sm": "Reporting and GET syncs on Shiftmanager data (shifts, customers, candidates).",
+      "hf": "Reporting and GET syncs on HelloFlex data.",
+      "plan": "Its own planning module: orders, shifts and scheduling."
     },
     "pkgCol": "Package",
     "current": "Current",

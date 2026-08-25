@@ -17,8 +17,11 @@ import {
   FileText, Briefcase, Handshake, ListChecks, Target, PieChart, PhoneCall, CalendarDays,
 } from 'lucide-react'
 
-// Resolve a nav item's label from i18n by id (dots → underscores to stay flat).
-const navLabel = (t, id) => t(`nav.${id.replace(/\./g, '_')}`)
+// Resolve a nav item's label from i18n by id (dots → underscores to stay flat,
+// since i18next treats a dot as nesting and e.g. nav.shiftmanager is already a
+// string). The registry's hardcoded Dutch label is kept only as the defaultValue
+// fallback, so a future id without a key degrades to readable text, not a raw key.
+const navLabel = (t, id, fallback) => t(`nav.${id.replace(/\./g, '_')}`, { defaultValue: fallback })
 
 // Koios entitlement (cosmetic only — the backend still enforces 403). Fail-open:
 // hide the toggle only when the auth payload explicitly excludes the `koios_ai`
@@ -218,16 +221,16 @@ export default function Sidebar({ expanded, activePage, setActivePage, koiosOpen
   const visibleNavItems = NAV_ITEMS
     .filter(item => canAccessPage(item.id, auth))
     .map(item => {
-      if (!item.children) return { ...item, label: navLabel(t, item.id) }
-      return { ...item, label: navLabel(t, item.id),
-        children: item.children.filter(child => canAccessPage(child.id, auth)).map(c => ({ ...c, label: navLabel(t, c.id) })) }
+      if (!item.children) return { ...item, label: navLabel(t, item.id, item.label) }
+      return { ...item, label: navLabel(t, item.id, item.label),
+        children: item.children.filter(child => canAccessPage(child.id, auth)).map(c => ({ ...c, label: navLabel(t, c.id, c.label) })) }
     })
   const visibleModuleItems = MODULE_NAV_ITEMS
     .filter(item => canAccessPage(item.id, auth))
     .map(item => {
-      if (!item.children) return { ...item, label: navLabel(t, item.id) }
-      return { ...item, label: navLabel(t, item.id),
-        children: item.children.filter(child => canAccessPage(child.id, auth)).map(c => ({ ...c, label: navLabel(t, c.id) })) }
+      if (!item.children) return { ...item, label: navLabel(t, item.id, item.label) }
+      return { ...item, label: navLabel(t, item.id, item.label),
+        children: item.children.filter(child => canAccessPage(child.id, auth)).map(c => ({ ...c, label: navLabel(t, c.id, c.label) })) }
     })
   const showSettings       = canAccessPage('settings', auth)
 

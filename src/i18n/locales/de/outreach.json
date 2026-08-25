@@ -90,7 +90,7 @@
       "extra": "Extra",
       "stats": "Statistiken"
     },
-    "loading": "Laden…",
+    "loading": "Wird geladen…",
     "error": "Anrufliste konnte nicht geladen werden.",
     "empty": "Noch keine Kandidaten in dieser Liste.",
     "progress": "{{done}} von {{total}} erledigt",
@@ -201,6 +201,14 @@
       "campaign": "Kampagne",
       "organisation": "Organisation",
       "display": "Ansicht"
+    }
+  },
+  "lookupSeeds": {
+    "outcomes": {
+      "no_answer": "Keine Antwort",
+      "callback": "Rückruf",
+      "not_interested": "Kein Interesse",
+      "interested": "Interesse"
     }
   }
 }

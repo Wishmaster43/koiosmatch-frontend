@@ -849,5 +849,27 @@
     "companyTextWindowTitle": "Bedrijfstekst — {{name}}",
     "departmentTextWindowTitle": "Afdelingstekst — {{name}}",
     "contactTextWindowTitle": "Contacttekst: {{name}}"
+  },
+  "lookupSeeds": {
+    "statuses": {
+      "active": "Actief",
+      "inactive": "Inactief",
+      "blocked": "Geblokkeerd"
+    },
+    "subStatuses": {
+      "active": "Actief",
+      "inactive": "Inactief"
+    },
+    "phases": {
+      "prospect": "Prospect",
+      "klant": "Klant"
+    },
+    "vacancyStatuses": {
+      "open": "Open",
+      "online": "Online",
+      "concept": "Concept",
+      "paused": "Gepauzeerd",
+      "closed": "Gesloten"
+    }
   }
 }

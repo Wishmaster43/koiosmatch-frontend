@@ -9,6 +9,7 @@
  * Fetch/cache/dedupe lives in useCachedLookup (audit item 8) — one GET per
  * session, shared across every mounted consumer.
  */
+import { useTranslation } from 'react-i18next'
 import type { AxiosResponse } from 'axios'
 import { useCachedLookup } from './useCachedLookup'
 import type { LookupOption } from '@/types/common'
@@ -37,8 +38,15 @@ const mapOutreachOutcomes = (res: AxiosResponse): LookupOption[] | null => {
 }
 
 export function useOutreachOutcomes() {
+  const { t } = useTranslation('outreach')
   // The endpoint now exists (item 11) — a real 404 should surface in the dev log again.
-  const { data: outcomes } = useCachedLookup('/outreach-outcomes', mapOutreachOutcomes, DEFAULT_OUTREACH_OUTCOMES)
+  const { data: rawOutcomes } = useCachedLookup('/outreach-outcomes', mapOutreachOutcomes, DEFAULT_OUTREACH_OUTCOMES)
+  // Translate labels only while still on the SEED fallback (reference-equal to the
+  // DEFAULT_OUTREACH_OUTCOMES const) — real tenant-configured API labels pass
+  // through untouched; the literal Dutch seed text is the defaultValue.
+  const outcomes = rawOutcomes === DEFAULT_OUTREACH_OUTCOMES
+    ? rawOutcomes.map(o => ({ ...o, label: t(`lookupSeeds.outcomes.${o.value}`, { defaultValue: o.label }) }))
+    : rawOutcomes
 
   // Resolve a stored slug to its meta (label + colour) — tolerant of label-stored values.
   const metaOf = (v?: string | null): LookupOption | undefined =>

@@ -5,6 +5,7 @@
     "blacklistView": "Blacklist",
     "archivedView": "Archivées",
     "filterUnsupported": "Ce filtre n'est pas (encore) pris en charge par le serveur.",
+    "loadError": "Le chargement des candidats a échoué.",
     "searchPlaceholder": "Rechercher un candidat, une note, un document…",
     "empty": "Aucun candidat trouvé.",
     "loading": "Chargement…",
@@ -1395,6 +1396,29 @@
     "system": {
       "shiftmanager": "Shiftmanager",
       "helloflex": "HelloFlex"
+    }
+  },
+  "lookupSeeds": {
+    "referenceRelations": {
+      "manager": "Manager",
+      "collega": "Collègue",
+      "klant": "Client",
+      "opdrachtgever": "Donneur d'ordre",
+      "docent": "Enseignant",
+      "anders": "Autre"
+    },
+    "appointmentLocations": {
+      "kantoor": "Bureau",
+      "online": "En ligne",
+      "telefonisch": "Par téléphone",
+      "bij_klant": "Chez le client"
+    },
+    "workPermitTypes": {
+      "geen_vergunning_nodig": "Aucun permis requis (NL/UE)",
+      "twv": "Permis de travail (TWV)",
+      "gvva": "Permis combiné (GVVA)",
+      "kennismigrant": "Migrant hautement qualifié",
+      "onbekend": "Inconnu"
     }
   }
 }

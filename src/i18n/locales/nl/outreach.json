@@ -202,5 +202,13 @@
       "organisation": "Organisatie",
       "display": "Weergave"
     }
+  },
+  "lookupSeeds": {
+    "outcomes": {
+      "no_answer": "Geen gehoor",
+      "callback": "Terugbellen",
+      "not_interested": "Geen interesse",
+      "interested": "Interesse"
+    }
   }
 }

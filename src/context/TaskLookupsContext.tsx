@@ -1,5 +1,8 @@
+/* eslint-disable react-refresh/only-export-components -- a context module exports its provider and its hooks together by design (§2: contexts live in context/); moving the hooks would change every consumer import for a dev-only HMR nicety */
 import { createContext, useContext, useState, useEffect } from 'react'
 import type { Dispatch, ReactNode, SetStateAction } from 'react'
+import { useTranslation } from 'react-i18next'
+import type { TFunction } from 'i18next'
 import api, { unwrap } from '../lib/api'
 import { sortActiveRows, makeMetaResolver } from '../lib/lookupUtils'
 
@@ -81,12 +84,22 @@ function normalize(raw: unknown, fallback: TaskLookupItem[]): TaskLookupItem[] {
     }))
 }
 
+// Translate a seed lookup's labels through i18n, keyed by lookup name + value; the
+// literal Dutch seed text is the defaultValue so a missing key degrades gracefully.
+// Only ever applied to the SEED fallback (never tenant-configured API labels) —
+// computed on every render (not baked into state) so a live language switch
+// retranslates it too.
+function translateSeedLabels(t: TFunction, lookupName: string, items: TaskLookupItem[]): TaskLookupItem[] {
+  return items.map(it => ({ ...it, label: t(`lookupSeeds.${lookupName}.${it.value}`, { defaultValue: it.label }) }))
+}
+
 const TaskLookupsContext = createContext<TaskLookupsValue | null>(null)
 
 export function TaskLookupsProvider({ children }: { children: ReactNode }) {
-  const [statuses,   setStatuses]   = useState<TaskLookupItem[]>(DEFAULT_TASK_STATUSES)
-  const [types,      setTypes]      = useState<TaskLookupItem[]>(DEFAULT_TASK_TYPES)
-  const [priorities, setPriorities] = useState<TaskLookupItem[]>(DEFAULT_TASK_PRIORITIES)
+  const { t } = useTranslation('common')
+  const [statusesRaw,   setStatuses]   = useState<TaskLookupItem[]>(DEFAULT_TASK_STATUSES)
+  const [typesRaw,      setTypes]      = useState<TaskLookupItem[]>(DEFAULT_TASK_TYPES)
+  const [prioritiesRaw, setPriorities] = useState<TaskLookupItem[]>(DEFAULT_TASK_PRIORITIES)
   const [loading,    setLoading]    = useState(true)
 
   // Fetch each lookup once; a 404/empty keeps the seed fallback so the UI never breaks.
@@ -99,6 +112,12 @@ export function TaskLookupsProvider({ children }: { children: ReactNode }) {
       load('/task-priorities', DEFAULT_TASK_PRIORITIES, setPriorities),
     ]).finally(() => setLoading(false))
   }, [])
+
+  // Translate labels only while still on the SEED fallback (reference-equal to the
+  // DEFAULT_TASK_* const) — real tenant-configured API labels pass through untouched.
+  const statuses   = statusesRaw === DEFAULT_TASK_STATUSES ? translateSeedLabels(t, 'taskStatuses', statusesRaw) : statusesRaw
+  const types      = typesRaw === DEFAULT_TASK_TYPES ? translateSeedLabels(t, 'taskTypes', typesRaw) : typesRaw
+  const priorities = prioritiesRaw === DEFAULT_TASK_PRIORITIES ? translateSeedLabels(t, 'taskPriorities', prioritiesRaw) : prioritiesRaw
 
   // The set of status keys that count as "completed" (for open/overdue/done KPIs).
   const doneStatusValues = statuses.filter(s => s.is_done).map(s => s.value)

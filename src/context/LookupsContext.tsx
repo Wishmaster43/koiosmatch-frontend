@@ -1,5 +1,8 @@
+/* eslint-disable react-refresh/only-export-components -- a context module exports its provider and its hooks together by design (§2: contexts live in context/); moving the hooks would change every consumer import for a dev-only HMR nicety */
 import { createContext, useContext, useState, useEffect } from 'react'
 import type { ReactNode } from 'react'
+import { useTranslation } from 'react-i18next'
+import type { TFunction } from 'i18next'
 import api from '../lib/api'
 import { sortActiveRows, makeMetaResolver } from '../lib/lookupUtils'
 import { useAuth } from './AuthContext'
@@ -172,14 +175,25 @@ function normalize(raw: unknown, fallback: LookupItem[]): LookupItem[] {
       is_default: flag(it, 'is_default') }))
 }
 
+// Translate a seed lookup's labels through i18n, keyed by lookup name + value; the
+// literal Dutch seed text is the defaultValue so a missing key degrades gracefully
+// instead of ever showing a raw i18n key. Only ever applied to the SEED fallback
+// (never tenant-configured API labels, which are real user data, not app copy) —
+// computed on every render (not baked into state) so a live language switch
+// (ThemeContext.setLanguage) retranslates it too.
+function translateSeedLabels(t: TFunction, lookupName: string, items: LookupItem[]): LookupItem[] {
+  return items.map(it => ({ ...it, label: t(`lookupSeeds.${lookupName}.${it.value}`, { defaultValue: it.label }) }))
+}
+
 const LookupsContext = createContext<LookupsValue | null>(null)
 
 export function LookupsProvider({ children }: { children: ReactNode }) {
-  const [candidateTypes, setCandidateTypes] = useState<LookupItem[]>(DEFAULT_CANDIDATE_TYPES)
-  const [phases,         setPhases]         = useState<LookupItem[]>(DEFAULT_PHASES)
-  const [funnelTypes,    setFunnelTypes]    = useState<LookupItem[]>(DEFAULT_FUNNEL_TYPES)
-  const [statuses,       setStatuses]       = useState<LookupItem[]>(DEFAULT_STATUSES)
-  const [availability] = useState<LookupItem[]>(DEFAULT_AVAILABILITY)
+  const { t } = useTranslation('common')
+  const [candidateTypesRaw, setCandidateTypes] = useState<LookupItem[]>(DEFAULT_CANDIDATE_TYPES)
+  const [phasesRaw,         setPhases]         = useState<LookupItem[]>(DEFAULT_PHASES)
+  const [funnelTypesRaw,    setFunnelTypes]    = useState<LookupItem[]>(DEFAULT_FUNNEL_TYPES)
+  const [statusesRaw,       setStatuses]       = useState<LookupItem[]>(DEFAULT_STATUSES)
+  const [availabilityRaw] = useState<LookupItem[]>(DEFAULT_AVAILABILITY)
   const [loading,        setLoading]        = useState(true)
   // Session state gates the fetch — providers mount before login (App shell order).
   const { user } = useAuth() ?? {}
@@ -203,6 +217,15 @@ export function LookupsProvider({ children }: { children: ReactNode }) {
     // default and stop fetching (kills the 404). Full removal of the axis is C-39.
     // eslint-disable-next-line react-hooks/exhaustive-deps -- refetch per login/tenant-switch
   }, [user?.id])
+
+  // Translate labels only while still on the SEED fallback (reference-equal to the
+  // DEFAULT_* const) — real tenant-configured API labels pass through untouched.
+  const candidateTypes = candidateTypesRaw === DEFAULT_CANDIDATE_TYPES ? translateSeedLabels(t, 'candidateTypes', candidateTypesRaw) : candidateTypesRaw
+  const phases         = phasesRaw === DEFAULT_PHASES ? translateSeedLabels(t, 'phases', phasesRaw) : phasesRaw
+  const funnelTypes    = funnelTypesRaw === DEFAULT_FUNNEL_TYPES ? translateSeedLabels(t, 'funnelTypes', funnelTypesRaw) : funnelTypesRaw
+  const statuses       = statusesRaw === DEFAULT_STATUSES ? translateSeedLabels(t, 'statuses', statusesRaw) : statusesRaw
+  // Availability never fetches (C-39 below) — always the seed, always translated.
+  const availability   = translateSeedLabels(t, 'availability', availabilityRaw)
 
   // value → item helpers (with a neutral fallback so the UI never crashes).
   // eslint-disable-next-line no-restricted-syntax -- DATA fallback, not a UI colour choice

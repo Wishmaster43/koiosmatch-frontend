@@ -5,6 +5,7 @@
     "blacklistView": "Blacklist",
     "archivedView": "Archived",
     "filterUnsupported": "This filter isn't supported by the server yet.",
+    "loadError": "Loading candidates failed.",
     "searchPlaceholder": "Search candidate, note, document…",
     "empty": "No candidates found.",
     "loading": "Loading…",
@@ -1395,6 +1396,29 @@
     "system": {
       "shiftmanager": "Shiftmanager",
       "helloflex": "HelloFlex"
+    }
+  },
+  "lookupSeeds": {
+    "referenceRelations": {
+      "manager": "Manager",
+      "collega": "Colleague",
+      "klant": "Customer",
+      "opdrachtgever": "Client",
+      "docent": "Teacher",
+      "anders": "Other"
+    },
+    "appointmentLocations": {
+      "kantoor": "Office",
+      "online": "Online",
+      "telefonisch": "By phone",
+      "bij_klant": "At the customer"
+    },
+    "workPermitTypes": {
+      "geen_vergunning_nodig": "No permit required (NL/EU)",
+      "twv": "Work permit (TWV)",
+      "gvva": "Combined permit (GVVA)",
+      "kennismigrant": "Highly skilled migrant",
+      "onbekend": "Unknown"
     }
   }
 }

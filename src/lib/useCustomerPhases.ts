@@ -18,6 +18,7 @@
  * table, the drawer picker and the create modal.
  */
 import { useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { AxiosResponse } from 'axios'
 import { useCachedLookup } from './useCachedLookup'
 import { sortActiveRows } from './lookupUtils'
@@ -57,7 +58,14 @@ const mapPhases = (res: AxiosResponse): CustomerPhaseOption[] | null => {
 }
 
 export function useCustomerPhases() {
-  const { data: phases, loading } = useCachedLookup('/customer-phases', mapPhases, DEFAULT_CUSTOMER_PHASES)
+  const { t } = useTranslation('customers')
+  const { data: rawPhases, loading } = useCachedLookup('/customer-phases', mapPhases, DEFAULT_CUSTOMER_PHASES)
+  // Translate labels only while still on the SEED fallback (reference-equal to the
+  // DEFAULT_CUSTOMER_PHASES const) — real tenant-configured API labels pass
+  // through untouched; the literal Dutch seed text is the defaultValue.
+  const phases = rawPhases === DEFAULT_CUSTOMER_PHASES
+    ? rawPhases.map(p => ({ ...p, label: t(`lookupSeeds.phases.${p.value}`, { defaultValue: p.label }) }))
+    : rawPhases
 
   // slug → row, with a neutral fallback so an unknown/retired phase still renders.
   // useCallback: consumers hang this in memo deps (mirrors useGenders' colorOf).

@@ -202,5 +202,13 @@
       "organisation": "Organización",
       "display": "Visualización"
     }
+  },
+  "lookupSeeds": {
+    "outcomes": {
+      "no_answer": "Sin respuesta",
+      "callback": "Devolver llamada",
+      "not_interested": "Sin interés",
+      "interested": "Interesado"
+    }
   }
 }

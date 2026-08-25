@@ -537,5 +537,67 @@
   },
   "noteConcept": {
     "restored": "Draft restored. Not saved yet."
+  },
+  "lookupSeeds": {
+    "candidateTypes": {
+      "on_call": "On-call worker",
+      "freelance": "Freelancer",
+      "payroll": "Payroll",
+      "temp_agency": "Temp agency worker",
+      "secondment": "Secondment",
+      "flex_services": "Flex services",
+      "on_demand": "On demand"
+    },
+    "phases": {
+      "lead": "Lead",
+      "candidate": "Candidate"
+    },
+    "funnelTypes": {
+      "applied": "Applied",
+      "invited": "Invited/Intake",
+      "proposal": "Proposed",
+      "hired": "Hired",
+      "rejected": "Rejected"
+    },
+    "statuses": {
+      "available": "Available",
+      "placed": "Placed",
+      "unavailable": "Unavailable",
+      "sick": "Sick",
+      "leave": "Leave",
+      "blacklist": "Blacklist"
+    },
+    "availability": {
+      "available": "Available",
+      "unavailable": "Unavailable",
+      "sick": "Sick",
+      "leave": "Leave"
+    },
+    "taskStatuses": {
+      "todo": "To do",
+      "in_progress": "In progress",
+      "done": "Done"
+    },
+    "taskTypes": {
+      "task": "Task",
+      "call": "Call",
+      "email": "Email",
+      "note": "Note"
+    },
+    "taskPriorities": {
+      "low": "Low",
+      "normal": "Normal",
+      "high": "High"
+    },
+    "noteTypes": {
+      "general": "General",
+      "intake": "Intake",
+      "feedback": "Feedback",
+      "appointment": "Appointment",
+      "followup": "Follow-up",
+      "warning": "Warning",
+      "status_change": "Status change",
+      "lifecycle": "Record history"
+    }
   }
 }

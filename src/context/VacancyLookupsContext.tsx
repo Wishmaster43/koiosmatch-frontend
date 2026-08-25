@@ -1,5 +1,8 @@
+/* eslint-disable react-refresh/only-export-components -- a context module exports its provider and its hooks together by design (§2: contexts live in context/); moving the hooks would change every consumer import for a dev-only HMR nicety */
 import { createContext, useContext, useState, useEffect } from 'react'
 import type { Dispatch, ReactNode, SetStateAction } from 'react'
+import { useTranslation } from 'react-i18next'
+import type { TFunction } from 'i18next'
 import api, { unwrap } from '../lib/api'
 import { sortActiveRows, makeMetaResolver } from '../lib/lookupUtils'
 
@@ -133,15 +136,25 @@ function normalize(raw: unknown, fallback: VacancyLookupItem[], pinId = false): 
 // that flagged nothing must get no proposal at all (§3 no invented behaviour).
 const defaultValueOf = (list: VacancyLookupItem[]): string => list.find(i => i.is_default)?.value ?? ''
 
+// Translate a seed lookup's labels through i18n, keyed by lookup name + value; the
+// literal Dutch seed text is the defaultValue so a missing key degrades gracefully.
+// Only ever applied to the SEED fallback (never tenant-configured API labels) —
+// computed on every render (not baked into state) so a live language switch
+// retranslates it too.
+function translateSeedLabels(t: TFunction, lookupName: string, items: VacancyLookupItem[]): VacancyLookupItem[] {
+  return items.map(it => ({ ...it, label: t(`lookupSeeds.${lookupName}.${it.value}`, { defaultValue: it.label }) }))
+}
+
 const VacancyLookupsContext = createContext<VacancyLookupsValue | null>(null)
 
 export function VacancyLookupsProvider({ children }: { children: ReactNode }) {
-  const [statuses,        setStatuses]        = useState<VacancyLookupItem[]>(DEFAULT_VACANCY_STATUSES)
-  const [phases,          setPhases]          = useState<VacancyLookupItem[]>(DEFAULT_VACANCY_PHASES)
-  const [seniorityLevels, setSeniorityLevels] = useState<VacancyLookupItem[]>(DEFAULT_SENIORITY_LEVELS)
-  const [educationLevels, setEducationLevels] = useState<VacancyLookupItem[]>(DEFAULT_EDUCATION_LEVELS)
-  const [channels,        setChannels]        = useState<VacancyLookupItem[]>(DEFAULT_CHANNELS)
-  const [loading,         setLoading]         = useState(true)
+  const { t } = useTranslation('vacancies')
+  const [statusesRaw,        setStatuses]        = useState<VacancyLookupItem[]>(DEFAULT_VACANCY_STATUSES)
+  const [phasesRaw,          setPhases]          = useState<VacancyLookupItem[]>(DEFAULT_VACANCY_PHASES)
+  const [seniorityLevelsRaw, setSeniorityLevels] = useState<VacancyLookupItem[]>(DEFAULT_SENIORITY_LEVELS)
+  const [educationLevelsRaw, setEducationLevels] = useState<VacancyLookupItem[]>(DEFAULT_EDUCATION_LEVELS)
+  const [channelsRaw,        setChannels]        = useState<VacancyLookupItem[]>(DEFAULT_CHANNELS)
+  const [loading,            setLoading]         = useState(true)
 
   // Fetch each lookup once; a 404/empty keeps the seed fallback so the UI never breaks.
   useEffect(() => {
@@ -155,6 +168,14 @@ export function VacancyLookupsProvider({ children }: { children: ReactNode }) {
       load('/vacancy-channels',         DEFAULT_CHANNELS,         setChannels, true),
     ]).finally(() => setLoading(false))
   }, [])
+
+  // Translate labels only while still on the SEED fallback (reference-equal to the
+  // DEFAULT_* const) — real tenant-configured API labels pass through untouched.
+  const statuses        = statusesRaw === DEFAULT_VACANCY_STATUSES ? translateSeedLabels(t, 'statuses', statusesRaw) : statusesRaw
+  const phases          = phasesRaw === DEFAULT_VACANCY_PHASES ? translateSeedLabels(t, 'phases', phasesRaw) : phasesRaw
+  const seniorityLevels = seniorityLevelsRaw === DEFAULT_SENIORITY_LEVELS ? translateSeedLabels(t, 'seniorityLevels', seniorityLevelsRaw) : seniorityLevelsRaw
+  const educationLevels = educationLevelsRaw === DEFAULT_EDUCATION_LEVELS ? translateSeedLabels(t, 'educationLevels', educationLevelsRaw) : educationLevelsRaw
+  const channels         = channelsRaw === DEFAULT_CHANNELS ? translateSeedLabels(t, 'channels', channelsRaw) : channelsRaw
 
   // value → item helper with a neutral fallback so the UI never crashes.
   const value: VacancyLookupsValue = {

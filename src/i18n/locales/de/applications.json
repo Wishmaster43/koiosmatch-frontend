@@ -526,7 +526,7 @@
     "missingVacancy": "Keine Stelle mit dieser Bewerbung verknüpft."
   },
   "changelog": {
-    "loading": "Laden…",
+    "loading": "Wird geladen…",
     "error": "Änderungen konnten nicht geladen werden.",
     "empty": "Noch keine Änderungen.",
     "system": "System",

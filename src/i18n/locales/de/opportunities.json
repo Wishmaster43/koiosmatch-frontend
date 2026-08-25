@@ -104,7 +104,7 @@
     },
     "startDate": "Startdatum",
     "endDate": "Enddatum",
-    "serviceType": "Dienst",
+    "serviceType": "Service",
     "agreementType": "Vereinbarung",
     "location": "Standort",
     "department": "Abteilung",
@@ -133,7 +133,7 @@
       "value": "Wert (€)",
       "expectedClose": "Voraussichtlicher Abschluss",
       "owner": "Inhaber",
-      "serviceType": "Dienst",
+      "serviceType": "Service",
       "agreementType": "Vereinbarung",
       "hours": "Stunden",
       "startDate": "Startdatum",
@@ -150,7 +150,7 @@
     "archived": "Archiviert"
   },
   "changelog": {
-    "loading": "Laden…",
+    "loading": "Wird geladen…",
     "error": "Änderungen konnten nicht geladen werden.",
     "empty": "Noch keine Änderungen.",
     "system": "System"

@@ -849,5 +849,27 @@
     "companyTextWindowTitle": "Texte entreprise — {{name}}",
     "departmentTextWindowTitle": "Texte du département — {{name}}",
     "contactTextWindowTitle": "Texte du contact: {{name}}"
+  },
+  "lookupSeeds": {
+    "statuses": {
+      "active": "Actif",
+      "inactive": "Inactif",
+      "blocked": "Bloqué"
+    },
+    "subStatuses": {
+      "active": "Actif",
+      "inactive": "Inactif"
+    },
+    "phases": {
+      "prospect": "Prospect",
+      "klant": "Client"
+    },
+    "vacancyStatuses": {
+      "open": "Ouverte",
+      "online": "En ligne",
+      "concept": "Brouillon",
+      "paused": "En pause",
+      "closed": "Clôturé"
+    }
   }
 }

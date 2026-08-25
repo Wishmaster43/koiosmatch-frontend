@@ -9,6 +9,7 @@
  * session, shared across every mounted consumer.
  */
 import { useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { AxiosResponse } from 'axios'
 import { useCachedLookup } from './useCachedLookup'
 import { unwrapList } from '@/lib/api'
@@ -42,8 +43,15 @@ const mapMatchStatuses = (res: AxiosResponse): MatchStatus[] | null => {
 }
 
 export function useMatchStatuses() {
+  const { t } = useTranslation('matches')
   // The endpoint now exists (item 11) — a real 404 should surface in the dev log again.
-  const { data: statuses } = useCachedLookup('/match-statuses', mapMatchStatuses, DEFAULT_MATCH_STATUSES)
+  const { data: rawStatuses } = useCachedLookup('/match-statuses', mapMatchStatuses, DEFAULT_MATCH_STATUSES)
+  // Translate labels only while still on the SEED fallback (reference-equal to the
+  // DEFAULT_MATCH_STATUSES const) — real tenant-configured API labels pass through
+  // untouched; the literal Dutch seed text is the defaultValue.
+  const statuses = rawStatuses === DEFAULT_MATCH_STATUSES
+    ? rawStatuses.map(s => ({ ...s, label: t(`lookupSeeds.statuses.${s.value}`, { defaultValue: s.label }) }))
+    : rawStatuses
 
   // Resolve a stored slug to its meta; tolerant of label-stored values.
   // useCallback: consumers hang this in memo/effect deps — it must be stable.

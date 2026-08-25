@@ -179,7 +179,7 @@
       "mobile": "Mobile",
       "street": "Street",
       "house_number": "House number",
-      "postcode": "Postcode",
+      "postcode": "Postal code",
       "city": "City"
     },
     "currentEmpty": "still empty",

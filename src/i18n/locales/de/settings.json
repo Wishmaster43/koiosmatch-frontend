@@ -16,7 +16,7 @@
     "upload": "Hochladen",
     "remove": "Entfernen",
     "cancel": "Abbrechen",
-    "loadingShort": "Laden…",
+    "loadingShort": "Lädt…",
     "copied": "Kopiert!",
     "back": "Zurück",
     "next": "Weiter",
@@ -1574,10 +1574,17 @@
       "enterprise": "+ REST API + Insights+ + Connectors + SLA"
     },
     "addon": {
+      "reports": "Reporting Koios Match",
       "sm": "Reporting Shiftmanager",
       "hf": "Reporting HelloFlex",
       "sm_ai": "Shiftmanager AI Planner",
       "plan": "Planung"
+    },
+    "addonDesc": {
+      "reports": "Eigene Koios Match-Berichte und Einblicke.",
+      "sm": "Berichte und GET-Abgleiche auf Shiftmanager-Daten (Schichten, Kunden, Kandidaten).",
+      "hf": "Berichte und GET-Abgleiche auf HelloFlex-Daten.",
+      "plan": "Eigenes Planungsmodul: Aufträge, Schichten und Einsatzplanung."
     },
     "tabs": {
       "pricing": "Plattformpreise",

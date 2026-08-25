@@ -5,6 +5,7 @@
     "blacklistView": "Blacklist",
     "archivedView": "Archivados",
     "filterUnsupported": "Este filtro (todavía) no es compatible con el servidor.",
+    "loadError": "No se pudieron cargar los candidatos.",
     "searchPlaceholder": "Buscar candidato, nota, documento…",
     "empty": "No se encontraron candidatos.",
     "loading": "Cargando…",
@@ -624,7 +625,7 @@
     "source": "Origen",
     "recentActivity": "Actividad reciente",
     "noActivity": "Aún no hay actividad.",
-    "byOutcome": "Candidaturas por fase",
+    "byOutcome": "Candidaturas por etapa",
     "appointments": "Intakes / citas",
     "appointmentsUpcoming": "previstas",
     "appointmentsCompleted": "completadas",
@@ -990,7 +991,7 @@
     "empty": "Aún no hay coincidencias.",
     "client": "Cliente",
     "contractType": "Tipo de contrato",
-    "stage": "Fase",
+    "stage": "Etapa",
     "contract": "Contrato",
     "functionTitle": "Título de la función",
     "branch": "Sucursal",
@@ -1395,6 +1396,29 @@
     "system": {
       "shiftmanager": "Shiftmanager",
       "helloflex": "HelloFlex"
+    }
+  },
+  "lookupSeeds": {
+    "referenceRelations": {
+      "manager": "Gerente",
+      "collega": "Compañero/a",
+      "klant": "Cliente",
+      "opdrachtgever": "Contratante",
+      "docent": "Profesor",
+      "anders": "Otro"
+    },
+    "appointmentLocations": {
+      "kantoor": "Oficina",
+      "online": "En línea",
+      "telefonisch": "Por teléfono",
+      "bij_klant": "En las instalaciones del cliente"
+    },
+    "workPermitTypes": {
+      "geen_vergunning_nodig": "No se requiere permiso (NL/UE)",
+      "twv": "Permiso de trabajo (TWV)",
+      "gvva": "Permiso combinado (GVVA)",
+      "kennismigrant": "Migrante altamente cualificado",
+      "onbekend": "Desconocido"
     }
   }
 }

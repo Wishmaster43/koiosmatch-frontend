@@ -283,5 +283,11 @@
   "popout": {
     "textWindowTitle": "Match text — {{name}}",
     "loadError": "This match could not be loaded."
+  },
+  "lookupSeeds": {
+    "statuses": {
+      "open": "Active",
+      "closed": "Closed"
+    }
   }
 }

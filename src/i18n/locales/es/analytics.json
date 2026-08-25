@@ -294,12 +294,12 @@
     "window": "Solicitudes {{from}} a {{to}}",
     "axes": {
       "bucket": "Funnel",
-      "stage": "Fase",
+      "stage": "Etapa",
       "source": "Fuente",
       "owner": "Propietario",
       "customer": "Cliente",
       "vacancy": "Vacante",
-      "stageDuration": "Demasiado tiempo en fase",
+      "stageDuration": "Demasiado tiempo en etapa",
       "customerNone": "Sin cliente",
       "stageNone": "Sin etapa",
       "rejectionReason": "Motivo de rechazo"
@@ -319,7 +319,7 @@
       "rejected": "Rechazadas",
       "conversionPct": "Conversión",
       "avgDaysToMatch": "Días prom. hasta match",
-      "tooLongInStage": "Demasiado tiempo en fase",
+      "tooLongInStage": "Demasiado tiempo en etapa",
       "missingAppointment": "Falta cita",
       "daysUnit": "días"
     },

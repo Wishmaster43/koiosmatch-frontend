@@ -1574,10 +1574,17 @@
       "enterprise": "+ REST API + Insights+ + Connectors + SLA"
     },
     "addon": {
+      "reports": "Rapports Koios Match",
       "sm": "Rapports Shiftmanager",
       "hf": "Rapports HelloFlex",
       "sm_ai": "Shiftmanager AI Planner",
       "plan": "Planning"
+    },
+    "addonDesc": {
+      "reports": "Rapports et insights propres à Koios Match.",
+      "sm": "Rapports et synchronisations GET sur les données Shiftmanager (missions, clients, candidats).",
+      "hf": "Rapports et synchronisations GET sur les données HelloFlex.",
+      "plan": "Module de planning propre : commandes, missions et planification."
     },
     "tabs": {
       "pricing": "Tarifs de la plateforme",

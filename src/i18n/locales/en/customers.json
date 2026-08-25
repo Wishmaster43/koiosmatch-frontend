@@ -849,5 +849,27 @@
     "companyTextWindowTitle": "Company text — {{name}}",
     "departmentTextWindowTitle": "Department text — {{name}}",
     "contactTextWindowTitle": "Contact text: {{name}}"
+  },
+  "lookupSeeds": {
+    "statuses": {
+      "active": "Active",
+      "inactive": "Inactive",
+      "blocked": "Blocked"
+    },
+    "subStatuses": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "phases": {
+      "prospect": "Prospect",
+      "klant": "Customer"
+    },
+    "vacancyStatuses": {
+      "open": "Open",
+      "online": "Online",
+      "concept": "Draft",
+      "paused": "Paused",
+      "closed": "Closed"
+    }
   }
 }

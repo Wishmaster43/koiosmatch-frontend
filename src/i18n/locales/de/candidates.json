@@ -5,9 +5,10 @@
     "blacklistView": "Blacklist",
     "archivedView": "Archiviert",
     "filterUnsupported": "Dieser Filter wird (noch) nicht vom Server unterstützt.",
+    "loadError": "Kandidaten konnten nicht geladen werden.",
     "searchPlaceholder": "Kandidat, Notiz, Dokument suchen…",
     "empty": "Keine Kandidaten gefunden.",
-    "loading": "Laden…",
+    "loading": "Wird geladen…",
     "createForbidden": "Sie sind nicht berechtigt, einen neuen Kandidaten anzulegen."
   },
   "columns": {
@@ -1395,6 +1396,29 @@
     "system": {
       "shiftmanager": "Shiftmanager",
       "helloflex": "HelloFlex"
+    }
+  },
+  "lookupSeeds": {
+    "referenceRelations": {
+      "manager": "Manager",
+      "collega": "Kollege",
+      "klant": "Kunde",
+      "opdrachtgever": "Auftraggeber",
+      "docent": "Dozent",
+      "anders": "Sonstiges"
+    },
+    "appointmentLocations": {
+      "kantoor": "Büro",
+      "online": "Online",
+      "telefonisch": "Telefonisch",
+      "bij_klant": "Beim Kunden"
+    },
+    "workPermitTypes": {
+      "geen_vergunning_nodig": "Keine Genehmigung erforderlich (NL/EU)",
+      "twv": "Arbeitserlaubnis (TWV)",
+      "gvva": "Kombinierte Genehmigung (GVVA)",
+      "kennismigrant": "Hochqualifizierter Migrant",
+      "onbekend": "Unbekannt"
     }
   }
 }

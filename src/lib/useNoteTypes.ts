@@ -15,6 +15,7 @@
  * per session, shared across every mounted consumer of that entity (the `?entity=`
  * query string is part of the cache key, so entities never share a cache slot).
  */
+import { useTranslation } from 'react-i18next'
 import type { AxiosResponse } from 'axios'
 import { useCachedLookup } from './useCachedLookup'
 import type { LookupOption } from '@/types/common'
@@ -73,7 +74,16 @@ const mapNoteTypes = (res: AxiosResponse): LookupOption[] | null => {
 // entity is required — every caller scopes to its own owning entity (candidate/
 // application/customer/opportunity/…), never the old flat cross-entity fetch.
 export function useNoteTypes(entity: NoteTypeEntity) {
-  const { data: types } = useCachedLookup(`/note-types?entity=${entity}`, mapNoteTypes, DEFAULT_NOTE_TYPES)
+  // Cross-entity lookup (candidates/customers/matches/applications/tasks/…) — the
+  // 'common' namespace is its shared home, mirroring common.json's own 'notes' keys.
+  const { t } = useTranslation('common')
+  const { data: rawTypes } = useCachedLookup(`/note-types?entity=${entity}`, mapNoteTypes, DEFAULT_NOTE_TYPES)
+  // Translate labels only while still on the SEED fallback (reference-equal to the
+  // DEFAULT_NOTE_TYPES const) — real tenant-configured API labels pass through
+  // untouched; the literal Dutch seed text is the defaultValue.
+  const types = rawTypes === DEFAULT_NOTE_TYPES
+    ? rawTypes.map(nt => ({ ...nt, label: t(`lookupSeeds.noteTypes.${nt.value}`, { defaultValue: nt.label }) }))
+    : rawTypes
 
   // Resolve a stored value/slug to its label/colour; fall back to the raw value.
   const find = (value?: string | null) => {

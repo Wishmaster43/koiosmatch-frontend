@@ -1797,10 +1797,17 @@
       "enterprise": "+ REST API + Insights+ + Connectors + SLA"
     },
     "addon": {
+      "reports": "Rapporten Koios Match",
       "sm": "Rapportage Shiftmanager",
       "hf": "Rapportage HelloFlex",
       "sm_ai": "Shiftmanager AI Planner",
       "plan": "Planning"
+    },
+    "addonDesc": {
+      "reports": "Eigen Koios Match-rapportages en inzichten.",
+      "sm": "Rapportages en GET-syncs op Shiftmanager-data (diensten, klanten, kandidaten).",
+      "hf": "Rapportages en GET-syncs op HelloFlex-data.",
+      "plan": "Eigen planningsmodule: orders, diensten en inplanning."
     },
     "pkgCol": "Pakket",
     "current": "Huidig",

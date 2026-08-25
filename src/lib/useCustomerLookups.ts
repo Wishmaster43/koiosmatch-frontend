@@ -10,6 +10,8 @@
  * Fetch/cache/dedupe lives in useCachedLookup (audit item 8) — one GET per
  * session, shared across every mounted consumer.
  */
+import { useTranslation } from 'react-i18next'
+import type { TFunction } from 'i18next'
 import type { AxiosResponse } from 'axios'
 import { useCachedLookup } from './useCachedLookup'
 import { normalizeOptions } from './lookupUtils'
@@ -74,18 +76,32 @@ const mapCustomerLookups = (res: AxiosResponse): CustomerLookupsData => {
   }
 }
 
+// Translate a seed lookup's labels through i18n, keyed by lookup name + value; the
+// literal Dutch seed text is the defaultValue so a missing key degrades gracefully.
+// Only ever applied to the SEED fallback (never tenant-configured API labels).
+const translateSeed = (t: TFunction, lookupName: string, items: LookupOption[]): LookupOption[] =>
+  items.map(it => ({ ...it, label: t(`lookupSeeds.${lookupName}.${it.value}`, { defaultValue: it.label }) }))
+
 export function useCustomerLookups() {
+  const { t } = useTranslation('customers')
   const { data, loading } = useCachedLookup('/settings/customer-lookups', mapCustomerLookups, FALLBACK)
+
+  // Each field falls back independently (mapCustomerLookups), so each is checked
+  // against its OWN seed default before translating — never the tenant's own labels.
+  const statuses           = data.statuses === DEFAULT_CUSTOMER_STATUSES ? translateSeed(t, 'statuses', data.statuses) : data.statuses
+  const locationStatuses   = data.locationStatuses === DEFAULT_SUB_STATUSES ? translateSeed(t, 'subStatuses', data.locationStatuses) : data.locationStatuses
+  const departmentStatuses = data.departmentStatuses === DEFAULT_SUB_STATUSES ? translateSeed(t, 'subStatuses', data.departmentStatuses) : data.departmentStatuses
+  const contactStatuses    = data.contactStatuses === DEFAULT_SUB_STATUSES ? translateSeed(t, 'subStatuses', data.contactStatuses) : data.contactStatuses
 
   // value → item helper with a neutral fallback so the UI never crashes.
   // eslint-disable-next-line no-restricted-syntax -- DATA fallback, not a UI colour choice
   const metaIn = (list: LookupOption[]) => (v?: string | null): LookupOption => list.find(s => s.value === v) ?? { value: v ?? '', label: v || '—', color: '#9CA3AF' }
 
   return {
-    statuses: data.statuses, statusMeta: metaIn(data.statuses),
-    locationStatuses:   data.locationStatuses,   locationStatusMeta:   metaIn(data.locationStatuses),
-    departmentStatuses: data.departmentStatuses, departmentStatusMeta: metaIn(data.departmentStatuses),
-    contactStatuses:    data.contactStatuses,    contactStatusMeta:    metaIn(data.contactStatuses),
+    statuses, statusMeta: metaIn(statuses),
+    locationStatuses,   locationStatusMeta:   metaIn(locationStatuses),
+    departmentStatuses, departmentStatusMeta: metaIn(departmentStatuses),
+    contactStatuses,    contactStatusMeta:    metaIn(contactStatuses),
     loading,
   }
 }

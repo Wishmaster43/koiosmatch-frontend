@@ -9,6 +9,7 @@
  * Fetch/cache/dedupe lives in useCachedLookup (mirrors useGenders/useAppointmentTypes)
  * — one GET per session, shared across every mounted consumer.
  */
+import { useTranslation } from 'react-i18next'
 import type { AxiosResponse } from 'axios'
 import { useCachedLookup } from './useCachedLookup'
 import { unwrapList } from '@/lib/api'
@@ -47,7 +48,14 @@ const mapLocations = (res: AxiosResponse): AppointmentLocation[] | null => {
 }
 
 export function useAppointmentLocations() {
-  const { data: locations } = useCachedLookup('/appointment-locations', mapLocations, DEFAULT_APPOINTMENT_LOCATIONS)
+  const { t } = useTranslation('candidates')
+  const { data: rawLocations } = useCachedLookup('/appointment-locations', mapLocations, DEFAULT_APPOINTMENT_LOCATIONS)
+  // Translate labels only while still on the SEED fallback (reference-equal to the
+  // DEFAULT_APPOINTMENT_LOCATIONS const) — real tenant-configured API labels pass
+  // through untouched; the literal Dutch seed text is the defaultValue.
+  const locations = rawLocations === DEFAULT_APPOINTMENT_LOCATIONS
+    ? rawLocations.map(l => ({ ...l, label: t(`lookupSeeds.appointmentLocations.${l.value}`, { defaultValue: l.label }) }))
+    : rawLocations
 
   // The tenant's chosen modal default, falling back to the first entry.
   const defaultLocation = locations.find(x => x.is_default) ?? locations[0]

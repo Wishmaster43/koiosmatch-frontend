@@ -16,6 +16,7 @@
  * Fetch/cache/dedupe lives in useCachedLookup (audit item 8) — one GET per
  * session, shared across every mounted consumer.
  */
+import { useTranslation } from 'react-i18next'
 import type { AxiosResponse } from 'axios'
 import { useCachedLookup } from './useCachedLookup'
 import type { LookupOption } from '@/types/common'
@@ -40,6 +41,13 @@ const mapWorkPermitTypes = (res: AxiosResponse): LookupOption[] | null => {
 }
 
 export function useWorkPermitTypes() {
-  const { data: workPermitTypes } = useCachedLookup('/work-permit-types', mapWorkPermitTypes, DEFAULT_WORK_PERMIT_TYPES)
+  const { t } = useTranslation('candidates')
+  const { data: rawTypes } = useCachedLookup('/work-permit-types', mapWorkPermitTypes, DEFAULT_WORK_PERMIT_TYPES)
+  // Translate labels only while still on the SEED fallback (reference-equal to the
+  // DEFAULT_WORK_PERMIT_TYPES const) — real tenant-configured API labels pass
+  // through untouched; the literal Dutch seed text is the defaultValue.
+  const workPermitTypes = rawTypes === DEFAULT_WORK_PERMIT_TYPES
+    ? rawTypes.map(w => ({ ...w, label: t(`lookupSeeds.workPermitTypes.${w.value}`, { defaultValue: w.label }) }))
+    : rawTypes
   return { workPermitTypes }
 }

@@ -48,10 +48,10 @@
     "pipelineHours": "Horas de pipeline",
     "openVacancies": "Vacantes",
     "openVacanciesSub": "Activas en gestión",
-    "tooLongInStage": "Demasiado en fase",
-    "tooLongInStageSub": "sin cambio de fase",
+    "tooLongInStage": "Demasiado en etapa",
+    "tooLongInStageSub": "sin cambio de etapa",
     "missingApptApps": "Falta cita",
-    "missingApptAppsSub": "la fase la requiere",
+    "missingApptAppsSub": "la etapa la requiere",
     "candidatesNew": "Candidatos nuevos",
     "noFollowup": "Sin seguimiento",
     "leadsPipeline": "Leads en el pipeline",
@@ -67,7 +67,7 @@
     "matchesActive": "Colocaciones en curso",
     "matchesActiveSub": "Sin fecha de fin o posterior",
     "applicationsActive": "Solicitudes abiertas",
-    "applicationsActiveSub": "No en una fase final",
+    "applicationsActiveSub": "No en una etapa final",
     "vacanciesStale": "Vacantes abiertas demasiado tiempo",
     "vacanciesStaleSub": "Sin presentación reciente",
     "redeployDue": "Redespliegue en 14 días",
@@ -104,7 +104,7 @@
     "byStatus": "Candidatos por estado",
     "byRecruiter": "Candidatos por reclutador",
     "funnel": "Embudo de candidaturas",
-    "byStage": "Oportunidades por fase",
+    "byStage": "Oportunidades por etapa",
     "intakeOverTime": "Entradas a lo largo del tiempo",
     "intakeWeekly": "Entrada de candidatos y candidaturas (semanal)",
     "series": {
@@ -271,7 +271,7 @@
     "intakes": "Intakes",
     "tooLong": "Demasiado",
     "intakesCount": "{{count}} intakes planificados",
-    "tooLongCount": "{{count}} demasiado tiempo en fase"
+    "tooLongCount": "{{count}} demasiado tiempo en etapa"
   },
   "oppAging": {
     "sub": "días abierta",

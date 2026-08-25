@@ -5,6 +5,7 @@
     "blacklistView": "Blacklist",
     "archivedView": "Gearchiveerd",
     "filterUnsupported": "Dit filter wordt (nog) niet door de server ondersteund.",
+    "loadError": "Kandidaten laden is mislukt.",
     "searchPlaceholder": "Zoek kandidaat, notitie, document…",
     "empty": "Geen kandidaten gevonden.",
     "loading": "Laden…",
@@ -1395,6 +1396,29 @@
     "system": {
       "shiftmanager": "Shiftmanager",
       "helloflex": "HelloFlex"
+    }
+  },
+  "lookupSeeds": {
+    "referenceRelations": {
+      "manager": "Manager",
+      "collega": "Collega",
+      "klant": "Klant",
+      "opdrachtgever": "Opdrachtgever",
+      "docent": "Docent",
+      "anders": "Anders"
+    },
+    "appointmentLocations": {
+      "kantoor": "Kantoor",
+      "online": "Online",
+      "telefonisch": "Telefonisch",
+      "bij_klant": "Bij klant"
+    },
+    "workPermitTypes": {
+      "geen_vergunning_nodig": "Geen vergunning nodig (NL/EU)",
+      "twv": "Tewerkstellingsvergunning (TWV)",
+      "gvva": "Gecombineerde vergunning (GVVA)",
+      "kennismigrant": "Kennismigrant",
+      "onbekend": "Onbekend"
     }
   }
 }

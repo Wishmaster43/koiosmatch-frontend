@@ -28,6 +28,7 @@
  * Fetch/cache/dedupe lives in useCachedLookup (audit item 8) — one GET per
  * session, shared across every mounted consumer.
  */
+import { useTranslation } from 'react-i18next'
 import type { AxiosResponse } from 'axios'
 import { useCachedLookup } from './useCachedLookup'
 import type { LookupOption } from '@/types/common'
@@ -60,8 +61,15 @@ const mapReferenceRelations = (res: AxiosResponse): ReferenceRelationOption[] | 
 }
 
 export function useReferenceRelations() {
-  const { data: referenceRelations } = useCachedLookup(
+  const { t } = useTranslation('candidates')
+  const { data: rawRelations } = useCachedLookup(
     '/reference-relations', mapReferenceRelations, DEFAULT_REFERENCE_RELATIONS,
   )
+  // Translate labels only while still on the SEED fallback (reference-equal to the
+  // DEFAULT_REFERENCE_RELATIONS const) — real tenant-configured API labels pass
+  // through untouched; the literal Dutch seed text is the defaultValue.
+  const referenceRelations = rawRelations === DEFAULT_REFERENCE_RELATIONS
+    ? rawRelations.map(r => ({ ...r, label: t(`lookupSeeds.referenceRelations.${r.value}`, { defaultValue: r.label }) }))
+    : rawRelations
   return { referenceRelations }
 }

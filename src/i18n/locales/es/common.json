@@ -537,5 +537,67 @@
   },
   "noteConcept": {
     "restored": "Borrador restaurado. Aún no guardado."
+  },
+  "lookupSeeds": {
+    "candidateTypes": {
+      "on_call": "Trabajador a demanda",
+      "freelance": "Autónomo",
+      "payroll": "Payroll",
+      "temp_agency": "Trabajador temporal",
+      "secondment": "Cesión temporal",
+      "flex_services": "Servicios flex",
+      "on_demand": "Bajo demanda"
+    },
+    "phases": {
+      "lead": "Cliente potencial",
+      "candidate": "Candidato"
+    },
+    "funnelTypes": {
+      "applied": "Postulado",
+      "invited": "Invitado/Entrevista inicial",
+      "proposal": "Propuesto",
+      "hired": "Contratado",
+      "rejected": "Rechazado"
+    },
+    "statuses": {
+      "available": "Disponible",
+      "placed": "Colocado",
+      "unavailable": "No disponible",
+      "sick": "Enfermo",
+      "leave": "Permiso",
+      "blacklist": "Lista negra"
+    },
+    "availability": {
+      "available": "Disponible",
+      "unavailable": "No disponible",
+      "sick": "Enfermo",
+      "leave": "Permiso"
+    },
+    "taskStatuses": {
+      "todo": "Por hacer",
+      "in_progress": "En curso",
+      "done": "Finalizado"
+    },
+    "taskTypes": {
+      "task": "Tarea",
+      "call": "Llamada",
+      "email": "Correo electrónico",
+      "note": "Nota"
+    },
+    "taskPriorities": {
+      "low": "Baja",
+      "normal": "Normal",
+      "high": "Alta"
+    },
+    "noteTypes": {
+      "general": "General",
+      "intake": "Entrevista inicial",
+      "feedback": "Comentarios",
+      "appointment": "Cita",
+      "followup": "Seguimiento",
+      "warning": "Advertencia",
+      "status_change": "Cambio de estado",
+      "lifecycle": "Historial del expediente"
+    }
   }
 }

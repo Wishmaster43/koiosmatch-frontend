@@ -15,6 +15,7 @@
  * `t(key, { defaultValue })` convention) so a translated key wins once it lands in
  * every locale, without ever showing a raw i18n key for an entity that has none yet.
  */
+import { useTranslation } from 'react-i18next'
 import type { AxiosResponse } from 'axios'
 import { useCachedLookup } from '@/lib/useCachedLookup'
 import { unwrapList } from '@/lib/api'
@@ -58,6 +59,14 @@ function mapEntities(res: AxiosResponse): NumberingEntity[] | null {
 }
 
 export function useNumberingEntities() {
-  const { data: entities, loading } = useCachedLookup('/numbering-entities', mapEntities, FALLBACK)
+  const { t } = useTranslation('settings')
+  const { data: rawEntities, loading } = useCachedLookup('/numbering-entities', mapEntities, FALLBACK)
+  // Translate labels only while still on the pre-endpoint SEED fallback (reference-
+  // equal to FALLBACK) — the backend's own label already resolves through the SAME
+  // key in the consumer (NumberingSettings.jsx), so this only removes the raw Dutch
+  // literal from this hook's own return value, never double-translates real data.
+  const entities = rawEntities === FALLBACK
+    ? rawEntities.map(e => ({ ...e, label: t(`numbering.entities.${e.key}`, { defaultValue: e.label }) }))
+    : rawEntities
   return { entities, loading }
 }

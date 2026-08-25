@@ -522,5 +522,40 @@
       "error": "Impossible de charger les candidats.",
       "noAccess": "Pas d'accès aux candidats."
     }
+  },
+  "lookupSeeds": {
+    "statuses": {
+      "open": "Ouvert",
+      "online": "En ligne",
+      "concept": "Brouillon",
+      "paused": "En pause",
+      "closed": "Fermé"
+    },
+    "phases": {
+      "applied": "Candidature déposée",
+      "accepted": "Accepté",
+      "invited": "Invité",
+      "proposed": "Proposition faite",
+      "hired": "Recruté",
+      "rejected": "Refusé"
+    },
+    "seniorityLevels": {
+      "starter": "Débutant",
+      "medior": "Intermédiaire",
+      "professional": "Professionnel",
+      "senior": "Senior"
+    },
+    "educationLevels": {
+      "vmbo": "VMBO",
+      "mbo": "MBO",
+      "hbo": "HBO",
+      "wo": "WO"
+    },
+    "channels": {
+      "career": "Page carrière",
+      "google": "Google Jobs",
+      "indeed": "Indeed",
+      "werkzoeken": "Werkzoeken"
+    }
   }
 }

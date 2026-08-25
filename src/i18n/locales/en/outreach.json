@@ -202,5 +202,13 @@
       "organisation": "Organisation",
       "display": "Display"
     }
+  },
+  "lookupSeeds": {
+    "outcomes": {
+      "no_answer": "No answer",
+      "callback": "Call back",
+      "not_interested": "Not interested",
+      "interested": "Interested"
+    }
   }
 }

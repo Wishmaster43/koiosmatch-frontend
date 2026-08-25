@@ -80,7 +80,7 @@
     "company": "General",
     "locations": "Sucursales",
     "memory": "Memoria",
-    "candidate_lookups": "Estados y fases",
+    "candidate_lookups": "Estados y etapas",
     "phases": "Fases",
     "candidate_status": "Estado del candidato",
     "vacancy": "Vacante",
@@ -1474,7 +1474,7 @@
       },
       "applications": {
         "title": "Solicitudes",
-        "desc": "Solicitudes con fase, candidato y vacante."
+        "desc": "Solicitudes con etapa, candidato y vacante."
       },
       "vacancies": {
         "title": "Vacantes",
@@ -1574,10 +1574,17 @@
       "enterprise": "+ REST API + Insights+ + Connectors + SLA"
     },
     "addon": {
+      "reports": "Informes Koios Match",
       "sm": "Informes Shiftmanager",
       "hf": "Informes HelloFlex",
       "sm_ai": "Shiftmanager AI Planner",
       "plan": "Planificación"
+    },
+    "addonDesc": {
+      "reports": "Informes e insights propios de Koios Match.",
+      "sm": "Informes y sincronizaciones GET sobre los datos de Shiftmanager (turnos, clientes, candidatos).",
+      "hf": "Informes y sincronizaciones GET sobre los datos de HelloFlex.",
+      "plan": "Módulo de planificación propio: pedidos, turnos y programación."
     },
     "tabs": {
       "pricing": "Precios de la plataforma",
@@ -1942,7 +1949,7 @@
     "labelField": "Etiqueta",
     "labelPlaceholder": "Nombre visible",
     "title": "Lookups de candidatos",
-    "subtitle": "Gestiona los tipos de contrato, las fases del funnel y los estados (etiquetas, colores y orden).",
+    "subtitle": "Gestiona los tipos de contrato, las etapas del embudo y los estados (etiquetas, colores y orden).",
     "confirmDelete": "¿Eliminar «{{name}}»? Si está en uso, se archivará.",
     "isApplicant": "Muestra el funnel de candidatura",
     "isApplicantHint": "Los candidatos con este estado muestran el funnel de candidatura. Normalmente un solo estado (p. ej. \"Solicitante\").",
@@ -1956,7 +1963,7 @@
       "subtitle": "Varios por candidato (p. ej. Eventual, Autónomo, Payroll)."
     },
     "funnel_types": {
-      "title": "Fases del funnel",
+      "title": "Etapas del embudo",
       "subtitle": "Uno por candidato (Prospecto → Admisión → Pool → Alumni)."
     },
     "statuses": {
@@ -1971,9 +1978,9 @@
     "reasonBadge": "Motivo",
     "inUse": "En uso. No se puede eliminar",
     "isMatch": "Crea un match",
-    "isMatchHint": "En cuanto una candidatura llega a esta fase, se convierte en un match (el bucket Matched).",
+    "isMatchHint": "En cuanto una candidatura llega a esta etapa, se convierte en un match (el bucket Matched).",
     "isRejected": "Es un rechazo",
-    "isRejectedHint": "Las candidaturas en esta fase cuentan como rechazadas (el bucket Rejected).",
+    "isRejectedHint": "Las candidaturas en esta etapa cuentan como rechazadas (el bucket Rejected).",
     "phases": {
       "title": "Fase",
       "subtitle": "Fase de la relación (Lead → Candidato)."
@@ -2494,8 +2501,8 @@
         "description": "Activado = el chip de estado en la tabla de tareas tiene color. Desactivado = texto plano."
       },
       "customer_opportunity_table_color_stage": {
-        "label": "Color de fase (oportunidades)",
-        "description": "Activado = el chip de fase en la tabla de oportunidades tiene color. Desactivado = texto plano."
+        "label": "Color de etapa (oportunidades)",
+        "description": "Activado = el chip de etapa en la tabla de oportunidades tiene color. Desactivado = texto plano."
       }
     },
     "tabs": {
@@ -2560,8 +2567,8 @@
         "description": "Activado = la tabla de Oportunidades y los KPI muestran horas en lugar de euros."
       },
       "opportunity_table_color_stage": {
-        "label": "Fase",
-        "description": "Activado = fase con etiqueta de color. Desactivado = texto plano."
+        "label": "Etapa",
+        "description": "Activado = etapa con etiqueta de color. Desactivado = texto plano."
       },
       "opportunity_table_color_owner": {
         "label": "Color del propietario",
@@ -3259,10 +3266,10 @@
     "matchRenewHint": "Cuántos días antes (o después) de la fecha de fin de un match Koios sugiere renovarlo.",
     "matchRenewLabel": "Días (1-365)",
     "matchRenewSaveFailed": "No se pudo guardar la ventana de renovación del match.",
-    "applicationStaleTitle": "Estancamiento de la solicitud en fase",
-    "applicationStaleHint": "Después de cuántos días en la misma fase del embudo una solicitud es marcada por Koios como demasiado tiempo en fase.",
+    "applicationStaleTitle": "Estancamiento de la solicitud en etapa",
+    "applicationStaleHint": "Después de cuántos días en la misma etapa del embudo una solicitud es marcada por Koios como demasiado tiempo en etapa.",
     "applicationStaleLabel": "Días (1-365)",
-    "applicationStaleSaveFailed": "No se pudo guardar la ventana de fase de la solicitud."
+    "applicationStaleSaveFailed": "No se pudo guardar la ventana de etapa de la solicitud."
   },
   "koiosModelsAdmin": {
     "title": "Modelos de IA Koios",

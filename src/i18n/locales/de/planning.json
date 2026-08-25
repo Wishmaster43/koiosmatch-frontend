@@ -48,7 +48,7 @@
     "orders": "Aufträge"
   },
   "filters": {
-    "shift": "Dienst",
+    "shift": "Einsatz",
     "location": "Standort"
   },
   "order": {
