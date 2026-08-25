@@ -141,18 +141,33 @@ describe('NotificationBell row click-through', () => {
     window.removeEventListener('popstate', onPopState)
   })
 
-  // NOTIF-PAYLOAD: a workflow-run row renders its action-status line; a plain row does not.
+  // NOTIF-PAYLOAD / K-192: a workflow-run row renders its action-status line, keyed
+  // off the next_action KEY (not prose); a plain row does not.
   it('renders the action-status line for a workflow-run row', () => {
     vi.spyOn(useNotificationsModule, 'useNotifications').mockReturnValue({
       items: [{
         id: 1, title: 'Workflow run', seen: false,
-        action_status: 'failed', next_action: 'Bekijk de aangemaakte vervolgtaak.',
+        action_status: 'failed', next_action: 'check_followup_task',
       }],
       unseen: 1, markAllSeen: vi.fn(), reload: vi.fn(),
     } as unknown as ReturnType<typeof useNotificationsModule.useNotifications>)
     render(<NotificationBell />)
     fireEvent.click(screen.getByRole('button', { name: /notificat/i }))
     expect(screen.getByText(/Bekijk de aangemaakte vervolgtaak\./)).toBeInTheDocument()
+  })
+
+  // K-192: an unknown next_action key must never render the raw key.
+  it('renders no follow-up line for an unknown next_action key', () => {
+    vi.spyOn(useNotificationsModule, 'useNotifications').mockReturnValue({
+      items: [{
+        id: 3, title: 'Workflow run', seen: false,
+        action_status: 'failed', next_action: 'some_unknown_key',
+      }],
+      unseen: 1, markAllSeen: vi.fn(), reload: vi.fn(),
+    } as unknown as ReturnType<typeof useNotificationsModule.useNotifications>)
+    render(<NotificationBell />)
+    fireEvent.click(screen.getByRole('button', { name: /notificat/i }))
+    expect(screen.queryByText(/some_unknown_key/)).not.toBeInTheDocument()
   })
 
   it('renders no action-status line for a plain row', () => {

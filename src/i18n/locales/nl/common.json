@@ -279,8 +279,8 @@
       "failed": "Mislukt."
     },
     "nextAction": {
-      "pending": "Wordt automatisch verwerkt.",
-      "failed": "Bekijk de aangemaakte vervolgtaak."
+      "auto_processing": "Wordt automatisch verwerkt.",
+      "check_followup_task": "Bekijk de aangemaakte vervolgtaak."
     }
   },
   "activeFilters": "Actieve filters",

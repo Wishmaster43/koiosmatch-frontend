@@ -96,10 +96,11 @@ export function useNotifications(pollMs = 60000) {
               // A workflow-run row also carries a calm status line (done/pending/
               // failed) + the backend's fixed next-step copy — never a raw unknown status.
               const action = resolveActionLine(n)
+              // K-192: next_action is a KEY, not prose — render its copy only for the
+              // two known keys (auto_processing/check_followup_task); an unknown or
+              // null key shows the status line alone, never a raw key.
               const actionLine = action
-                // The follow-up copy is keyed off action_status (the BE's next_action is
-                // fixed Dutch prose, 1:1 with the status — never rendered raw, §5).
-                ? `${t(`notifications.actionStatus.${action.status}`)}${t(`notifications.nextAction.${action.status}`, { defaultValue: '' }) ? ` ${t(`notifications.nextAction.${action.status}`, { defaultValue: '' })}` : ''}`
+                ? `${t(`notifications.actionStatus.${action.status}`)}${action.nextAction ? ` ${t(`notifications.nextAction.${action.nextAction}`)}` : ''}`
                 : undefined
               notify('info', n.body || '', {
                 title: n.title,

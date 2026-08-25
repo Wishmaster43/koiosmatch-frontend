@@ -279,8 +279,8 @@
       "failed": "Fallido."
     },
     "nextAction": {
-      "pending": "Se procesará automáticamente.",
-      "failed": "Revise la tarea de seguimiento creada."
+      "auto_processing": "Se procesará automáticamente.",
+      "check_followup_task": "Revise la tarea de seguimiento creada."
     }
   },
   "activeFilters": "Filtros activos",

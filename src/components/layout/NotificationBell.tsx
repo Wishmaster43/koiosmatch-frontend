@@ -138,8 +138,10 @@ export default function NotificationBell() {
                     <BodyText style={{ fontWeight: n.seen ? 400 : 600 }}>{n.title || '—'}</BodyText>
                     {n.body && <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{n.body}</div>}
                     {action && (
+                      // K-192: next_action is a KEY, rendered only for the two known
+                      // keys — an unknown/null key shows the status line alone.
                       <Caption>
-                        {t(`notifications.actionStatus.${action.status}`)}{t(`notifications.nextAction.${action.status}`, { defaultValue: '' }) ? ` ${t(`notifications.nextAction.${action.status}`, { defaultValue: '' })}` : ''}
+                        {t(`notifications.actionStatus.${action.status}`)}{action.nextAction ? ` ${t(`notifications.nextAction.${action.nextAction}`)}` : ''}
                       </Caption>
                     )}
                     <Caption>{fmt(n.created_at)}</Caption>

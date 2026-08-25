@@ -171,8 +171,8 @@ describe('useNotifications attention toasts', () => {
     window.addEventListener('km:toast', onToast)
     const workflowRow = row(21, false)
     ;(workflowRow as Record<string, unknown>).action_status = 'pending'
-    // The BE's next_action prose is never rendered raw — the copy is keyed off action_status.
-    ;(workflowRow as Record<string, unknown>).next_action = 'Wordt automatisch verwerkt.'
+    // K-192: next_action is a KEY, not prose — the copy is keyed off next_action itself.
+    ;(workflowRow as Record<string, unknown>).next_action = 'auto_processing'
     vi.mocked(api.get)
       .mockResolvedValueOnce({ data: { data: [] } })
       .mockResolvedValueOnce({ data: { data: [workflowRow] } })
@@ -183,8 +183,29 @@ describe('useNotifications attention toasts', () => {
     await waitFor(() => expect(result.current.items).toHaveLength(1))
 
     const detail = (onToast.mock.calls[0][0] as CustomEvent).detail
-    expect(detail.actionLine).toContain('notifications.nextAction.pending')
-    expect(detail.actionLine).not.toContain('Wordt automatisch verwerkt.')
+    expect(detail.actionLine).toContain('notifications.nextAction.auto_processing')
+    window.removeEventListener('km:toast', onToast)
+  })
+
+  // K-192: an unknown next_action key must never render the raw key.
+  it('omits the follow-up line for an unknown next_action key', async () => {
+    const onToast = vi.fn()
+    window.addEventListener('km:toast', onToast)
+    const workflowRow = row(22, false)
+    ;(workflowRow as Record<string, unknown>).action_status = 'failed'
+    ;(workflowRow as Record<string, unknown>).next_action = 'some_unknown_key'
+    vi.mocked(api.get)
+      .mockResolvedValueOnce({ data: { data: [] } })
+      .mockResolvedValueOnce({ data: { data: [workflowRow] } })
+
+    const { result } = renderHook(() => useNotifications(1000))
+    await waitFor(() => expect(result.current.items).toHaveLength(0))
+    await act(async () => { result.current.reload() })
+    await waitFor(() => expect(result.current.items).toHaveLength(1))
+
+    const detail = (onToast.mock.calls[0][0] as CustomEvent).detail
+    expect(detail.actionLine).toContain('notifications.actionStatus.failed')
+    expect(detail.actionLine).not.toContain('some_unknown_key')
     window.removeEventListener('km:toast', onToast)
   })
 

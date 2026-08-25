@@ -23,6 +23,12 @@ export interface NotificationTarget { page: string; id: string }
 export const KNOWN_ACTION_STATUSES = ['done', 'pending', 'failed'] as const
 export type KnownActionStatus = (typeof KNOWN_ACTION_STATUSES)[number]
 
+// K-192: next_action is now a KEY, not prose — the only two values a workflow-run
+// notification ever carries (NotificationActionStatus::fromRunStatus, backend).
+// An unknown/unlisted value must render nothing, never the raw key.
+export const KNOWN_NEXT_ACTIONS = ['auto_processing', 'check_followup_task'] as const
+export type KnownNextAction = (typeof KNOWN_NEXT_ACTIONS)[number]
+
 // Parse the backend-resolved hash deep link ("#candidates?open=42" or
 // "/#candidates?open=42") into {page, id} — mirrors the existing same-app
 // link fallback below, reused so both paths agree on the shape.
@@ -108,14 +114,17 @@ export function buildNotificationDeepLink(target: NotificationTarget): string {
   return `${window.location.pathname}#${target.page}?open=${encodeURIComponent(target.id)}`
 }
 
-export interface NotificationActionLine { status: KnownActionStatus; nextAction: string | null }
+export interface NotificationActionLine { status: KnownActionStatus; nextAction: KnownNextAction | null }
 
 // Pure: resolve a workflow-run row's {action_status, next_action} into a
 // renderable pair, or null when there is nothing to show (no run behind the
 // row, or an unrecognized status — never render a raw, un-translated value).
+// next_action is a KEY (K-192); an unknown key is dropped, never rendered raw.
 export function resolveActionLine(n: AppNotification): NotificationActionLine | null {
   const status = (n as { action_status?: string | null }).action_status
   if (!status || !(KNOWN_ACTION_STATUSES as readonly string[]).includes(status)) return null
-  const nextAction = (n as { next_action?: string | null }).next_action ?? null
+  const rawNextAction = (n as { next_action?: string | null }).next_action
+  const nextAction = rawNextAction && (KNOWN_NEXT_ACTIONS as readonly string[]).includes(rawNextAction)
+    ? (rawNextAction as KnownNextAction) : null
   return { status: status as KnownActionStatus, nextAction }
 }

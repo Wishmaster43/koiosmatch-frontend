@@ -279,8 +279,8 @@
       "failed": "Failed."
     },
     "nextAction": {
-      "pending": "Will be processed automatically.",
-      "failed": "Check the follow-up task that was created."
+      "auto_processing": "Will be processed automatically.",
+      "check_followup_task": "Check the follow-up task that was created."
     }
   },
   "activeFilters": "Active filters",

@@ -279,8 +279,8 @@
       "failed": "Fehlgeschlagen."
     },
     "nextAction": {
-      "pending": "Wird automatisch verarbeitet.",
-      "failed": "Prüfen Sie die erstellte Folgeaufgabe."
+      "auto_processing": "Wird automatisch verarbeitet.",
+      "check_followup_task": "Prüfen Sie die erstellte Folgeaufgabe."
     }
   },
   "activeFilters": "Aktive Filter",
