@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 /**
  * useNoteTypes — tenant-configurable note-category lookup, scoped per owning entity
  * (NOTE-TYPES-2/3 wave 2, Danny 2026-07-20). A note type created for "Kandidaat" no
@@ -81,9 +82,9 @@ export function useNoteTypes(entity: NoteTypeEntity) {
   // Translate labels only while still on the SEED fallback (reference-equal to the
   // DEFAULT_NOTE_TYPES const) — real tenant-configured API labels pass through
   // untouched; the literal Dutch seed text is the defaultValue.
-  const types = rawTypes === DEFAULT_NOTE_TYPES
+  const types = useMemo(() => rawTypes === DEFAULT_NOTE_TYPES
     ? rawTypes.map(nt => ({ ...nt, label: t(`lookupSeeds.noteTypes.${nt.value}`, { defaultValue: nt.label }) }))
-    : rawTypes
+    : rawTypes, [rawTypes, t])
 
   // Resolve a stored value/slug to its label/colour; fall back to the raw value.
   const find = (value?: string | null) => {

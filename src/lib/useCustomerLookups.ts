@@ -17,6 +17,7 @@ import { useCachedLookup } from './useCachedLookup'
 import { normalizeOptions } from './lookupUtils'
 import type { LookupOption } from '@/types/common'
 import { unwrap } from '@/lib/api'
+import { useMemo } from 'react'
 
 // Seed defaults — the values shipped for new tenants and the fallback before the
 // backend is ready. Colours match the calm light/dark scheme used across lookups.
@@ -88,10 +89,11 @@ export function useCustomerLookups() {
 
   // Each field falls back independently (mapCustomerLookups), so each is checked
   // against its OWN seed default before translating — never the tenant's own labels.
-  const statuses           = data.statuses === DEFAULT_CUSTOMER_STATUSES ? translateSeed(t, 'statuses', data.statuses) : data.statuses
-  const locationStatuses   = data.locationStatuses === DEFAULT_SUB_STATUSES ? translateSeed(t, 'subStatuses', data.locationStatuses) : data.locationStatuses
-  const departmentStatuses = data.departmentStatuses === DEFAULT_SUB_STATUSES ? translateSeed(t, 'subStatuses', data.departmentStatuses) : data.departmentStatuses
-  const contactStatuses    = data.contactStatuses === DEFAULT_SUB_STATUSES ? translateSeed(t, 'subStatuses', data.contactStatuses) : data.contactStatuses
+  // Memoised: consumers put these arrays in dependency arrays (§9 stable reference).
+  const statuses           = useMemo(() => data.statuses === DEFAULT_CUSTOMER_STATUSES ? translateSeed(t, 'statuses', data.statuses) : data.statuses, [data.statuses, t])
+  const locationStatuses   = useMemo(() => data.locationStatuses === DEFAULT_SUB_STATUSES ? translateSeed(t, 'subStatuses', data.locationStatuses) : data.locationStatuses, [data.locationStatuses, t])
+  const departmentStatuses = useMemo(() => data.departmentStatuses === DEFAULT_SUB_STATUSES ? translateSeed(t, 'subStatuses', data.departmentStatuses) : data.departmentStatuses, [data.departmentStatuses, t])
+  const contactStatuses    = useMemo(() => data.contactStatuses === DEFAULT_SUB_STATUSES ? translateSeed(t, 'subStatuses', data.contactStatuses) : data.contactStatuses, [data.contactStatuses, t])
 
   // value → item helper with a neutral fallback so the UI never crashes.
   // eslint-disable-next-line no-restricted-syntax -- DATA fallback, not a UI colour choice

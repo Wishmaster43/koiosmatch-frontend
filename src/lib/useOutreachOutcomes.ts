@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 /**
  * useOutreachOutcomes — tenant-configurable call-list outcome lookup (OUTREACH-2).
  *
@@ -44,9 +45,9 @@ export function useOutreachOutcomes() {
   // Translate labels only while still on the SEED fallback (reference-equal to the
   // DEFAULT_OUTREACH_OUTCOMES const) — real tenant-configured API labels pass
   // through untouched; the literal Dutch seed text is the defaultValue.
-  const outcomes = rawOutcomes === DEFAULT_OUTREACH_OUTCOMES
+  const outcomes = useMemo(() => rawOutcomes === DEFAULT_OUTREACH_OUTCOMES
     ? rawOutcomes.map(o => ({ ...o, label: t(`lookupSeeds.outcomes.${o.value}`, { defaultValue: o.label }) }))
-    : rawOutcomes
+    : rawOutcomes, [rawOutcomes, t])
 
   // Resolve a stored slug to its meta (label + colour) — tolerant of label-stored values.
   const metaOf = (v?: string | null): LookupOption | undefined =>

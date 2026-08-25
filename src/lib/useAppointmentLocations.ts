@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 /**
  * useAppointmentLocations — tenant-configurable WHERE an appointment is held
  * (LOOKUP-DEFAULT-1: Kantoor/Online/Telefonisch/Bij klant), replacing the old
@@ -53,9 +54,9 @@ export function useAppointmentLocations() {
   // Translate labels only while still on the SEED fallback (reference-equal to the
   // DEFAULT_APPOINTMENT_LOCATIONS const) — real tenant-configured API labels pass
   // through untouched; the literal Dutch seed text is the defaultValue.
-  const locations = rawLocations === DEFAULT_APPOINTMENT_LOCATIONS
+  const locations = useMemo(() => rawLocations === DEFAULT_APPOINTMENT_LOCATIONS
     ? rawLocations.map(l => ({ ...l, label: t(`lookupSeeds.appointmentLocations.${l.value}`, { defaultValue: l.label }) }))
-    : rawLocations
+    : rawLocations, [rawLocations, t])
 
   // The tenant's chosen modal default, falling back to the first entry.
   const defaultLocation = locations.find(x => x.is_default) ?? locations[0]

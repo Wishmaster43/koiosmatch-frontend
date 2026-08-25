@@ -1,5 +1,5 @@
 /* eslint-disable react-refresh/only-export-components -- a context module exports its provider and its hooks together by design (§2: contexts live in context/); moving the hooks would change every consumer import for a dev-only HMR nicety */
-import { createContext, useContext, useState, useEffect } from 'react'
+import { createContext, useContext, useState, useEffect, useMemo } from 'react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { TFunction } from 'i18next'
@@ -220,12 +220,12 @@ export function LookupsProvider({ children }: { children: ReactNode }) {
 
   // Translate labels only while still on the SEED fallback (reference-equal to the
   // DEFAULT_* const) — real tenant-configured API labels pass through untouched.
-  const candidateTypes = candidateTypesRaw === DEFAULT_CANDIDATE_TYPES ? translateSeedLabels(t, 'candidateTypes', candidateTypesRaw) : candidateTypesRaw
-  const phases         = phasesRaw === DEFAULT_PHASES ? translateSeedLabels(t, 'phases', phasesRaw) : phasesRaw
-  const funnelTypes    = funnelTypesRaw === DEFAULT_FUNNEL_TYPES ? translateSeedLabels(t, 'funnelTypes', funnelTypesRaw) : funnelTypesRaw
-  const statuses       = statusesRaw === DEFAULT_STATUSES ? translateSeedLabels(t, 'statuses', statusesRaw) : statusesRaw
+  const candidateTypes = useMemo(() => candidateTypesRaw === DEFAULT_CANDIDATE_TYPES ? translateSeedLabels(t, 'candidateTypes', candidateTypesRaw) : candidateTypesRaw, [candidateTypesRaw, t])
+  const phases         = useMemo(() => phasesRaw === DEFAULT_PHASES ? translateSeedLabels(t, 'phases', phasesRaw) : phasesRaw, [phasesRaw, t])
+  const funnelTypes    = useMemo(() => funnelTypesRaw === DEFAULT_FUNNEL_TYPES ? translateSeedLabels(t, 'funnelTypes', funnelTypesRaw) : funnelTypesRaw, [funnelTypesRaw, t])
+  const statuses       = useMemo(() => statusesRaw === DEFAULT_STATUSES ? translateSeedLabels(t, 'statuses', statusesRaw) : statusesRaw, [statusesRaw, t])
   // Availability never fetches (C-39 below) — always the seed, always translated.
-  const availability   = translateSeedLabels(t, 'availability', availabilityRaw)
+  const availability   = useMemo(() => translateSeedLabels(t, 'availability', availabilityRaw), [availabilityRaw, t])
 
   // value → item helpers (with a neutral fallback so the UI never crashes).
   // eslint-disable-next-line no-restricted-syntax -- DATA fallback, not a UI colour choice

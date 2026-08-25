@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 /**
  * useNumberingEntities — reads the numbering entity list from the backend
  * (NUMBERING-LOOKUP-1, GET /numbering-entities) instead of a hardcoded six-entity
@@ -65,8 +66,8 @@ export function useNumberingEntities() {
   // equal to FALLBACK) — the backend's own label already resolves through the SAME
   // key in the consumer (NumberingSettings.jsx), so this only removes the raw Dutch
   // literal from this hook's own return value, never double-translates real data.
-  const entities = rawEntities === FALLBACK
+  const entities = useMemo(() => rawEntities === FALLBACK
     ? rawEntities.map(e => ({ ...e, label: t(`numbering.entities.${e.key}`, { defaultValue: e.label }) }))
-    : rawEntities
+    : rawEntities, [rawEntities, t])
   return { entities, loading }
 }

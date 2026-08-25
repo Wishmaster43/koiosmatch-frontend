@@ -8,7 +8,7 @@
  * Fetch/cache/dedupe lives in useCachedLookup (audit item 8) — one GET per
  * session, shared across every mounted consumer.
  */
-import { useCallback } from 'react'
+import { useCallback, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { AxiosResponse } from 'axios'
 import { useCachedLookup } from './useCachedLookup'
@@ -49,9 +49,9 @@ export function useMatchStatuses() {
   // Translate labels only while still on the SEED fallback (reference-equal to the
   // DEFAULT_MATCH_STATUSES const) — real tenant-configured API labels pass through
   // untouched; the literal Dutch seed text is the defaultValue.
-  const statuses = rawStatuses === DEFAULT_MATCH_STATUSES
+  const statuses = useMemo(() => rawStatuses === DEFAULT_MATCH_STATUSES
     ? rawStatuses.map(s => ({ ...s, label: t(`lookupSeeds.statuses.${s.value}`, { defaultValue: s.label }) }))
-    : rawStatuses
+    : rawStatuses, [rawStatuses, t])
 
   // Resolve a stored slug to its meta; tolerant of label-stored values.
   // useCallback: consumers hang this in memo/effect deps — it must be stable.

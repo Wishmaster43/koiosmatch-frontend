@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 /**
  * useReferenceRelations — tenant-configurable relation lookup for a candidate's
  * third-party REFERENCES (REFERENTIE-VELDEN-1). Feeds candidate_references.relation_id.
@@ -68,8 +69,8 @@ export function useReferenceRelations() {
   // Translate labels only while still on the SEED fallback (reference-equal to the
   // DEFAULT_REFERENCE_RELATIONS const) — real tenant-configured API labels pass
   // through untouched; the literal Dutch seed text is the defaultValue.
-  const referenceRelations = rawRelations === DEFAULT_REFERENCE_RELATIONS
+  const referenceRelations = useMemo(() => rawRelations === DEFAULT_REFERENCE_RELATIONS
     ? rawRelations.map(r => ({ ...r, label: t(`lookupSeeds.referenceRelations.${r.value}`, { defaultValue: r.label }) }))
-    : rawRelations
+    : rawRelations, [rawRelations, t])
   return { referenceRelations }
 }

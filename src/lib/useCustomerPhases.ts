@@ -17,7 +17,7 @@
  * Fetch/cache/dedupe lives in useCachedLookup — one GET per session, shared by the
  * table, the drawer picker and the create modal.
  */
-import { useCallback } from 'react'
+import { useCallback, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { AxiosResponse } from 'axios'
 import { useCachedLookup } from './useCachedLookup'
@@ -63,9 +63,9 @@ export function useCustomerPhases() {
   // Translate labels only while still on the SEED fallback (reference-equal to the
   // DEFAULT_CUSTOMER_PHASES const) — real tenant-configured API labels pass
   // through untouched; the literal Dutch seed text is the defaultValue.
-  const phases = rawPhases === DEFAULT_CUSTOMER_PHASES
+  const phases = useMemo(() => rawPhases === DEFAULT_CUSTOMER_PHASES
     ? rawPhases.map(p => ({ ...p, label: t(`lookupSeeds.phases.${p.value}`, { defaultValue: p.label }) }))
-    : rawPhases
+    : rawPhases, [rawPhases, t])
 
   // slug → row, with a neutral fallback so an unknown/retired phase still renders.
   // useCallback: consumers hang this in memo deps (mirrors useGenders' colorOf).

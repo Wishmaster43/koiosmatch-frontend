@@ -71,10 +71,11 @@ export default function ScopedVacanciesTab({ scope, id, customerId, customerName
   const queryClient = useQueryClient()
   const paramName = scope === 'department' ? 'customer_department_id' : 'customer_location_id'
   const [adding, setAdding] = useState(false)
-  // Translate every seed label at init (per-value key, Dutch literal as fallback) so a
-  // failed/empty lookup never leaves a Dutch island in the status filter.
-  const seedStatuses = SEED_STATUSES.map(s => ({ ...s, label: t(`lookupSeeds.vacancyStatuses.${s.value}`, { defaultValue: s.label }) }))
-  const [statusOptions, setStatusOptions] = useState<StatusOpt[]>(seedStatuses)
+  // Translate every seed label in the LAZY state initialiser (per-value key, Dutch
+  // literal as fallback) so a failed/empty lookup never leaves a Dutch island in the
+  // status filter, and the map runs once instead of on every render.
+  const [statusOptions, setStatusOptions] = useState<StatusOpt[]>(() =>
+    SEED_STATUSES.map(s => ({ ...s, label: t(`lookupSeeds.vacancyStatuses.${s.value}`, { defaultValue: s.label }) })))
   // Has the REAL lookup answered? The seed list must never decide the default
   // selection — mirrors VacanciesTab's own guard (uuid vs seed-slug mismatch).
   const [resolved, setResolved] = useState(false)

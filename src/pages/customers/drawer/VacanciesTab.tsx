@@ -115,10 +115,11 @@ export default function VacanciesTab({ customerId, customerName, params }: { cus
   // Free-text search over the title (Danny 28-07) — the list can run to dozens of rows.
   const [search, setSearch] = useState('')
   const queryClient = useQueryClient()
-  // Translate every seed label at init (per-value key, Dutch literal as fallback) so a
-  // failed/empty lookup never leaves a Dutch island in the status filter.
-  const seedStatuses = SEED_STATUSES.map(s => ({ ...s, label: t(`lookupSeeds.vacancyStatuses.${s.value}`, { defaultValue: s.label }) }))
-  const [statusOptions, setStatusOptions] = useState<StatusOpt[]>(seedStatuses)
+  // Translate every seed label in the LAZY state initialiser (per-value key, Dutch
+  // literal as fallback) so a failed/empty lookup never leaves a Dutch island in the
+  // status filter, and the map runs once instead of on every render.
+  const [statusOptions, setStatusOptions] = useState<StatusOpt[]>(() =>
+    SEED_STATUSES.map(s => ({ ...s, label: t(`lookupSeeds.vacancyStatuses.${s.value}`, { defaultValue: s.label }) })))
   // Has the REAL lookup answered? The seed list must never decide the default
   // selection — see the id/name bug documented below.
   const [resolved, setResolved] = useState(false)

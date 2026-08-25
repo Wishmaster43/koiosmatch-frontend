@@ -1,5 +1,5 @@
 /* eslint-disable react-refresh/only-export-components -- a context module exports its provider and its hooks together by design (§2: contexts live in context/); moving the hooks would change every consumer import for a dev-only HMR nicety */
-import { createContext, useContext, useState, useEffect } from 'react'
+import { createContext, useContext, useState, useEffect, useMemo } from 'react'
 import type { Dispatch, ReactNode, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { TFunction } from 'i18next'
@@ -115,9 +115,9 @@ export function TaskLookupsProvider({ children }: { children: ReactNode }) {
 
   // Translate labels only while still on the SEED fallback (reference-equal to the
   // DEFAULT_TASK_* const) — real tenant-configured API labels pass through untouched.
-  const statuses   = statusesRaw === DEFAULT_TASK_STATUSES ? translateSeedLabels(t, 'taskStatuses', statusesRaw) : statusesRaw
-  const types      = typesRaw === DEFAULT_TASK_TYPES ? translateSeedLabels(t, 'taskTypes', typesRaw) : typesRaw
-  const priorities = prioritiesRaw === DEFAULT_TASK_PRIORITIES ? translateSeedLabels(t, 'taskPriorities', prioritiesRaw) : prioritiesRaw
+  const statuses   = useMemo(() => statusesRaw === DEFAULT_TASK_STATUSES ? translateSeedLabels(t, 'taskStatuses', statusesRaw) : statusesRaw, [statusesRaw, t])
+  const types      = useMemo(() => typesRaw === DEFAULT_TASK_TYPES ? translateSeedLabels(t, 'taskTypes', typesRaw) : typesRaw, [typesRaw, t])
+  const priorities = useMemo(() => prioritiesRaw === DEFAULT_TASK_PRIORITIES ? translateSeedLabels(t, 'taskPriorities', prioritiesRaw) : prioritiesRaw, [prioritiesRaw, t])
 
   // The set of status keys that count as "completed" (for open/overdue/done KPIs).
   const doneStatusValues = statuses.filter(s => s.is_done).map(s => s.value)

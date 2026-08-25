@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 /**
  * useWorkPermitTypes — tenant-configurable work-permit-kind lookup
  * (KAND-WERKVERGUNNING-LOOKUP-1). candidates.work_permit_type moved from a
@@ -46,8 +47,8 @@ export function useWorkPermitTypes() {
   // Translate labels only while still on the SEED fallback (reference-equal to the
   // DEFAULT_WORK_PERMIT_TYPES const) — real tenant-configured API labels pass
   // through untouched; the literal Dutch seed text is the defaultValue.
-  const workPermitTypes = rawTypes === DEFAULT_WORK_PERMIT_TYPES
+  const workPermitTypes = useMemo(() => rawTypes === DEFAULT_WORK_PERMIT_TYPES
     ? rawTypes.map(w => ({ ...w, label: t(`lookupSeeds.workPermitTypes.${w.value}`, { defaultValue: w.label }) }))
-    : rawTypes
+    : rawTypes, [rawTypes, t])
   return { workPermitTypes }
 }

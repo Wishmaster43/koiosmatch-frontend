@@ -1,5 +1,5 @@
 /* eslint-disable react-refresh/only-export-components -- a context module exports its provider and its hooks together by design (§2: contexts live in context/); moving the hooks would change every consumer import for a dev-only HMR nicety */
-import { createContext, useContext, useState, useEffect } from 'react'
+import { createContext, useContext, useState, useEffect, useMemo } from 'react'
 import type { Dispatch, ReactNode, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { TFunction } from 'i18next'
@@ -171,11 +171,11 @@ export function VacancyLookupsProvider({ children }: { children: ReactNode }) {
 
   // Translate labels only while still on the SEED fallback (reference-equal to the
   // DEFAULT_* const) — real tenant-configured API labels pass through untouched.
-  const statuses        = statusesRaw === DEFAULT_VACANCY_STATUSES ? translateSeedLabels(t, 'statuses', statusesRaw) : statusesRaw
-  const phases          = phasesRaw === DEFAULT_VACANCY_PHASES ? translateSeedLabels(t, 'phases', phasesRaw) : phasesRaw
-  const seniorityLevels = seniorityLevelsRaw === DEFAULT_SENIORITY_LEVELS ? translateSeedLabels(t, 'seniorityLevels', seniorityLevelsRaw) : seniorityLevelsRaw
-  const educationLevels = educationLevelsRaw === DEFAULT_EDUCATION_LEVELS ? translateSeedLabels(t, 'educationLevels', educationLevelsRaw) : educationLevelsRaw
-  const channels         = channelsRaw === DEFAULT_CHANNELS ? translateSeedLabels(t, 'channels', channelsRaw) : channelsRaw
+  const statuses        = useMemo(() => statusesRaw === DEFAULT_VACANCY_STATUSES ? translateSeedLabels(t, 'statuses', statusesRaw) : statusesRaw, [statusesRaw, t])
+  const phases          = useMemo(() => phasesRaw === DEFAULT_VACANCY_PHASES ? translateSeedLabels(t, 'phases', phasesRaw) : phasesRaw, [phasesRaw, t])
+  const seniorityLevels = useMemo(() => seniorityLevelsRaw === DEFAULT_SENIORITY_LEVELS ? translateSeedLabels(t, 'seniorityLevels', seniorityLevelsRaw) : seniorityLevelsRaw, [seniorityLevelsRaw, t])
+  const educationLevels = useMemo(() => educationLevelsRaw === DEFAULT_EDUCATION_LEVELS ? translateSeedLabels(t, 'educationLevels', educationLevelsRaw) : educationLevelsRaw, [educationLevelsRaw, t])
+  const channels         = useMemo(() => channelsRaw === DEFAULT_CHANNELS ? translateSeedLabels(t, 'channels', channelsRaw) : channelsRaw, [channelsRaw, t])
 
   // value → item helper with a neutral fallback so the UI never crashes.
   const value: VacancyLookupsValue = {
