@@ -1,10 +1,10 @@
 /**
- * DashboardsSettings — DASH-SUBTABS-1 (Danny 04-08 "lijst is te lang met 2
- * tabellen dus moet Grafieken & lijsten subtabje worden"): the KPI matrix and
- * the blocks matrix render as two sub-tabs, one visible at a time, switching
- * via the shared underline SubTabBar. DASH-SET-UI-1: also covers the loading
- * state and the toggle save path — §13 asserts the REQUEST body, not just
- * that a callback fired.
+ * DashboardsSettings — F6 REBUILD: one role at a time (RolePicker), grouped
+ * KPI order+toggle list and Werkfeeds/Grafieken/Lijsten block groups, search +
+ * on/off filter. §13 asserts the REQUEST body for every write path, not just
+ * that a callback fired — those assertions are unchanged from the pre-rebuild
+ * screen since the persistence logic itself did not change, only the render
+ * shape around it.
  */
 import { describe, it, expect, vi, afterEach } from 'vitest'
 import { render, screen, within, waitFor } from '@testing-library/react'
@@ -19,7 +19,7 @@ const ct = (key: string) => i18n.t(key, { ns: 'common' })
 // Controllable settings blob + loaded flag + a spy on the save path (mirrors
 // KoiosAdviceSettings.test.tsx's mocking pattern). vi.hoisted: factories run
 // before these const declarations otherwise (TDZ). `mockLoaded` defaults to
-// true so every pre-existing test keeps seeing the matrix immediately.
+// true so every pre-existing test keeps seeing the page immediately.
 const mockSettings = vi.hoisted(() => vi.fn(() => ({} as Record<string, unknown>)))
 const mockLoaded = vi.hoisted(() => vi.fn(() => true))
 const saveSettingsKeys = vi.hoisted(() => vi.fn(async () => {}))
@@ -33,7 +33,7 @@ vi.mock('@/lib/settings/useAllSettings', async () => {
   }
 })
 
-// K3-REFIT-1 — the new kpi-catalog endpoints. Defaults: catalog resolves with one
+// K3-REFIT-1 — the kpi-catalog endpoints. Defaults: catalog resolves with one
 // entry carrying honest counts/drills_to text, every role's GET REJECTS (an older
 // server without the route) so every PRE-EXISTING test keeps exercising the old
 // settings-blob path. A RESOLVED GET — even an empty list — is authoritative
@@ -59,67 +59,92 @@ afterEach(() => {
   mockPutKpisRole.mockImplementation(async () => {})
 })
 
-describe('DashboardsSettings — KPIs / Charts & lists sub-tabs', () => {
-  // The sub-tab and the matrix section share the same label — query the named
-  // REGION (the matrix section carries aria-label), never bare text, so the
-  // always-present tab button can't shadow the visibility assertion.
-  it('shows the KPI matrix first and hides the blocks matrix', () => {
+// Switch to a given role via the RolePicker radio group.
+const pickRole = async (typeKey: string) => {
+  await userEvent.click(screen.getByRole('radio', { name: dt(`types.${typeKey}`) }))
+}
+
+describe('DashboardsSettings — role picker (F6 rebuild)', () => {
+  it('defaults to the first dashboard type and shows only that role\'s own KPIs', () => {
     render(<DashboardsSettings />)
 
-    expect(screen.getByRole('tablist')).toBeInTheDocument()
-    expect(screen.getByRole('region', { name: st('dashboardsKpis') })).toBeInTheDocument()
-    expect(screen.queryByRole('region', { name: st('dashboardsBlocks') })).not.toBeInTheDocument()
+    expect(screen.getAllByRole('radiogroup').length).toBeGreaterThan(0)
+    // 'admin' (DASHBOARD_TYPES[0]) carries matchesActive — 'recruitment'-only 'never' is absent.
+    expect(screen.getByText(dt('kpi.matchesActive'))).toBeInTheDocument()
+    expect(screen.queryByText(dt('kpi.neverContacted'))).not.toBeInTheDocument()
   })
 
-  it('switching to the Charts & lists sub-tab shows that matrix and hides the KPI one', async () => {
+  it('switching role shows that role\'s own KPIs only', async () => {
     render(<DashboardsSettings />)
 
-    await userEvent.click(screen.getByRole('tab', { name: st('dashboards.tabs.blocks') }))
+    await pickRole('recruitment')
+
+    expect(screen.getByText(dt('kpi.neverContacted'))).toBeInTheDocument()
+    expect(screen.queryByText(dt('kpi.matchesActive'))).not.toBeInTheDocument()
+  })
+
+  it('a wildcard role (admin) shows the Werkfeeds/Grafieken/Lijsten block groups', () => {
+    render(<DashboardsSettings />)
 
     expect(screen.getByRole('region', { name: st('dashboardsBlocks') })).toBeInTheDocument()
-    expect(screen.queryByRole('region', { name: st('dashboardsKpis') })).not.toBeInTheDocument()
+    expect(screen.getByText(dt('chart.byRecruiter'))).toBeInTheDocument()
   })
 })
 
 describe('DashboardsSettings — loading state (§3)', () => {
-  // mockReturnValueOnce so the override never leaks into the tests below it.
-  it('shows a loading message instead of the matrix while the settings blob has not resolved yet', () => {
+  it('shows a loading message instead of the page while the settings blob has not resolved yet', () => {
     mockLoaded.mockReturnValueOnce(false)
     render(<DashboardsSettings />)
 
     expect(screen.getByText(st('common.loading'))).toBeInTheDocument()
-    expect(screen.queryByRole('tablist')).not.toBeInTheDocument()
-    expect(screen.queryByRole('region', { name: st('dashboardsKpis') })).not.toBeInTheDocument()
+    expect(screen.queryAllByRole('radiogroup').length).toBe(0)
   })
 })
 
-// DASHBOARD-KIEZER-1 chain audit: 'chart.recruiter' (the per-recruiter breakdown
-// chart, wildcard-rendered via BLOCK_LABEL_KEY) was missing from that catalog, so its row
-// rendered the raw id "chart.recruiter" instead of a translated label — the exact
-// class of bug KPI_LABEL_KEY.openVacancies hit before (see this file's header).
-describe('DashboardsSettings — every block row carries a real translated label', () => {
-  it('shows the translated "Candidates by recruiter" label for chart.recruiter, never the raw id', async () => {
+describe('DashboardsSettings — search + on/off filter', () => {
+  it('filters rows by the translated label', async () => {
     render(<DashboardsSettings />)
-    await userEvent.click(screen.getByRole('tab', { name: st('dashboards.tabs.blocks') }))
+
+    expect(screen.getByText(dt('kpi.placements'))).toBeInTheDocument()
+    await userEvent.type(screen.getByRole('textbox'), dt('kpi.matchesActive'))
+
+    await waitFor(() => {
+      expect(screen.getByText(dt('kpi.matchesActive'))).toBeInTheDocument()
+      expect(screen.queryByText(dt('kpi.placements'))).not.toBeInTheDocument()
+    })
+  })
+
+  it('the "off" filter hides every enabled row', async () => {
+    render(<DashboardsSettings />)
+
+    await userEvent.click(screen.getByRole('radio', { name: st('dashboardsFilterOff') }))
+
+    expect(screen.queryByText(dt('kpi.matchesActive'))).not.toBeInTheDocument()
+  })
+})
+
+describe('DashboardsSettings — every block row carries a real translated label', () => {
+  it('shows the translated "Candidates by recruiter" label for chart.recruiter, never the raw id', () => {
+    render(<DashboardsSettings />)
 
     expect(screen.getByText(dt('chart.byRecruiter'))).toBeInTheDocument()
     expect(screen.queryByText('chart.recruiter', { exact: true })).not.toBeInTheDocument()
   })
 })
 
-describe('DashboardsSettings — toggle save path (§13, request body)', () => {
-  // 'occupancy' is unique to the 'planning' dashboard type (templates.ts KPI_ROWS),
-  // so its row renders exactly one live toggle button — a deterministic target that
-  // doesn't depend on table column order.
-  const occupancyToggle = () => {
-    const row = screen.getByText(dt('kpi.occupancy')).closest('tr') as HTMLElement
-    return within(row).getByRole('button')
+describe('DashboardsSettings — KPI toggle save path (§13, request body)', () => {
+  // 'occupancy' is unique to the 'planning' dashboard type (templates.ts KPI_ROWS).
+  const occupancyToggle = async () => {
+    render(<DashboardsSettings />)
+    await pickRole('planning')
+    const row = screen.getByText(dt('kpi.occupancy')).closest('[data-kpi-row]') as HTMLElement
+    return within(row).getByRole('switch')
   }
 
   it('toggling a KPI off PATCHes the exact { type: { kpis: [id] } } hidden-map body', async () => {
-    render(<DashboardsSettings />)
+    const toggle = await occupancyToggle()
 
-    await userEvent.click(occupancyToggle())
+    await userEvent.click(toggle)
 
     await waitFor(() => {
       expect(saveSettingsKeys).toHaveBeenCalledWith({
@@ -129,11 +154,15 @@ describe('DashboardsSettings — toggle save path (§13, request body)', () => {
   })
 
   it('toggling the same KPI back on removes it from the hidden-map body again', async () => {
-    render(<DashboardsSettings />)
-    const toggle = occupancyToggle()
+    const toggle = await occupancyToggle()
 
     await userEvent.click(toggle) // hide
-    await userEvent.click(toggle) // show again — same DOM node, React just updates its aria state
+
+    const offToggle = await waitFor(() => {
+      const row = screen.getByText(dt('kpi.occupancy')).closest('[data-kpi-row]') as HTMLElement
+      return within(row).getByRole('switch')
+    })
+    await userEvent.click(offToggle) // show again
 
     await waitFor(() => {
       expect(saveSettingsKeys).toHaveBeenLastCalledWith({
@@ -143,50 +172,11 @@ describe('DashboardsSettings — toggle save path (§13, request body)', () => {
   })
 })
 
-// DASH-VOLGORDE-1 (Danny: "JA is goed maar moet ook werken dus test het") — the
-// Volgorde sub-tab: role defaults to the first dashboard type ('admin'), the
-// preview strip is honest (labels + order, never a real number), and the
-// keyboard-natural move-down arrow persists the exact reordered id array.
-describe('DashboardsSettings — Volgorde sub-tab (§13, request body)', () => {
-  const openOrderTab = async () => {
-    render(<DashboardsSettings />)
-    await userEvent.click(screen.getByRole('tab', { name: st('dashboards.tabs.order') }))
-  }
-
-  it('shows the KPI matrix and the blocks matrix hidden, the order region visible, with an honest "—" preview', async () => {
-    await openOrderTab()
-
-    expect(screen.getByRole('region', { name: st('dashboards.tabs.order') })).toBeInTheDocument()
-    expect(screen.queryByRole('region', { name: st('dashboardsKpis') })).not.toBeInTheDocument()
-    // Preview strip: the admin role's first KPI label appears, with a placeholder
-    // value — never a fabricated number (§0 no fake affordances).
-    expect(screen.getAllByText(dt('kpi.matchesActive')).length).toBeGreaterThan(0)
-    expect(screen.getAllByText('—').length).toBeGreaterThan(0)
-  })
-
-  it('clicking "move down" on the first KPI row persists the exact reordered id array for that role', async () => {
-    await openOrderTab()
-
-    // The default role is DASHBOARD_TYPES[0] = 'admin'; templates.ts KPI_ROWS.admin
-    // starts ['candidates', 'opps', 'pipeline', ...] — swapping the first two rows
-    // is a deterministic, order-catalogue-independent assertion.
-    const moveDownButtons = screen.getAllByRole('button', { name: ct('dragList.moveDown') })
-    await userEvent.click(moveDownButtons[0])
-
-    await waitFor(() => {
-      expect(saveSettingsKeys).toHaveBeenCalledWith({
-        [DASHBOARD_KPI_ORDER_KEY]: {
-          admin: ['placements', 'matchesActive', 'expiringContracts', 'fillRate', 'openVacancies', 'vacanciesStale', 'applicationsActive', 'pipeline', 'oppsWinRate'],
-        },
-      })
-    })
-  })
-})
-
-// K3-REFIT-1 — catalog-driven uitleg, replacing the five local dashboardsExplain copies.
+// K3-REFIT-1 — catalog-driven uitleg, replacing the local dashboardsExplain copies.
 describe('DashboardsSettings — catalog uitleg (K3-REFIT-1)', () => {
   it('renders the counts + drills_to text from GET /dashboard/kpi-catalog for a KPI row', async () => {
     render(<DashboardsSettings />)
+    await pickRole('planning')
 
     const fullText = `Test occupancy count text. ${st('dashboardsGoesTo', { target: 'Test Target' })}`
     await waitFor(() => {
@@ -197,11 +187,12 @@ describe('DashboardsSettings — catalog uitleg (K3-REFIT-1)', () => {
   it('shows a calm "unavailable" notice instead of crashing when the catalog fetch fails (404/422-style)', async () => {
     mockFetchCatalog.mockRejectedValueOnce(new Error('404'))
     render(<DashboardsSettings />)
+    await pickRole('planning')
 
     await waitFor(() => {
       expect(screen.getAllByText(st('dashboardsCatalogUnavailable')).length).toBeGreaterThan(0)
     })
-    // The rest of the matrix — including the still-functional old-path toggle — stays intact.
+    // The rest of the list — including the still-functional old-path toggle — stays intact.
     expect(screen.getByText(dt('kpi.occupancy'))).toBeInTheDocument()
   })
 })
@@ -214,11 +205,12 @@ describe('DashboardsSettings — migrated-role PUT body (K3-REFIT-1)', () => {
     mockFetchKpisRole.mockImplementation(async (role: string) =>
       role === 'recruitment' ? ['candidates', 'never'] : [])
     render(<DashboardsSettings />)
+    await pickRole('recruitment')
 
-    // 'never' is unique to the recruitment KPI row (templates.ts) — one live toggle button.
+    // 'never' is unique to the recruitment KPI row (templates.ts) — one live toggle switch.
     await waitFor(() => screen.getByText(dt('kpi.neverContacted')))
-    const row = screen.getByText(dt('kpi.neverContacted')).closest('tr') as HTMLElement
-    await userEvent.click(within(row).getByRole('button'))
+    const row = screen.getByText(dt('kpi.neverContacted')).closest('[data-kpi-row]') as HTMLElement
+    await userEvent.click(within(row).getByRole('switch'))
 
     await waitFor(() => {
       expect(mockPutKpisRole).toHaveBeenCalledWith('recruitment', ['candidates'])
@@ -233,17 +225,20 @@ describe('DashboardsSettings — migration-window fallback (K3-REFIT-1)', () => 
   it('an EMPTY resolved GET is authoritative all-off — toggling writes the role PUT, never the blob (Opus B4)', async () => {
     mockFetchKpisRole.mockImplementation(async () => [])
     render(<DashboardsSettings />)
-    const row = screen.getByText(dt('kpi.occupancy')).closest('tr') as HTMLElement
-    await userEvent.click(within(row).getByRole('button'))
-    await waitFor(() => expect(mockPutKpisRole).toHaveBeenCalledWith('default', ['occupancy']))
+    await pickRole('planning')
+    const row = screen.getByText(dt('kpi.occupancy')).closest('[data-kpi-row]') as HTMLElement
+    await userEvent.click(within(row).getByRole('switch'))
+    // planning has its OWN catalog row (Opus F6): the PUT names it, never the shared default.
+    await waitFor(() => expect(mockPutKpisRole).toHaveBeenCalledWith('planning', ['occupancy']))
     expect(saveSettingsKeys).not.toHaveBeenCalled()
   })
 
   it('a role whose GET rejects (pre-K-173 server) keeps toggling through the old settings-blob path', async () => {
     render(<DashboardsSettings />)
+    await pickRole('planning')
 
-    const row = screen.getByText(dt('kpi.occupancy')).closest('tr') as HTMLElement
-    await userEvent.click(within(row).getByRole('button'))
+    const row = screen.getByText(dt('kpi.occupancy')).closest('[data-kpi-row]') as HTMLElement
+    await userEvent.click(within(row).getByRole('switch'))
 
     await waitFor(() => {
       expect(saveSettingsKeys).toHaveBeenCalledWith({
@@ -259,9 +254,10 @@ describe('DashboardsSettings — migration-window fallback (K3-REFIT-1)', () => 
       return []
     })
     render(<DashboardsSettings />)
+    await pickRole('recruitment')
 
-    const row = screen.getByText(dt('kpi.neverContacted')).closest('tr') as HTMLElement
-    await userEvent.click(within(row).getByRole('button'))
+    const row = screen.getByText(dt('kpi.neverContacted')).closest('[data-kpi-row]') as HTMLElement
+    await userEvent.click(within(row).getByRole('switch'))
 
     await waitFor(() => {
       expect(saveSettingsKeys).toHaveBeenCalledWith({
@@ -269,6 +265,29 @@ describe('DashboardsSettings — migration-window fallback (K3-REFIT-1)', () => 
       })
     })
     expect(mockPutKpisRole).not.toHaveBeenCalled()
+  })
+})
+
+// DASH-VOLGORDE-1 (Danny: "JA is goed maar moet ook werken dus test het") — the
+// combined KPI order+toggle list: the keyboard-natural move-down arrow persists
+// the exact reordered id array.
+describe('DashboardsSettings — order (§13, request body)', () => {
+  it('clicking "move down" on the first KPI row persists the exact reordered id array for the current role', async () => {
+    render(<DashboardsSettings />)
+
+    // The default role is DASHBOARD_TYPES[0] = 'admin'; templates.ts KPI_ROWS.admin
+    // starts ['matchesActive', 'placements', ...] — swapping the first two rows
+    // is a deterministic, order-catalogue-independent assertion.
+    const moveDownButtons = screen.getAllByRole('button', { name: ct('dragList.moveDown') })
+    await userEvent.click(moveDownButtons[0])
+
+    await waitFor(() => {
+      expect(saveSettingsKeys).toHaveBeenCalledWith({
+        [DASHBOARD_KPI_ORDER_KEY]: {
+          admin: ['placements', 'matchesActive', 'expiringContracts', 'fillRate', 'openVacancies', 'vacanciesStale', 'applicationsActive', 'pipeline', 'oppsWinRate'],
+        },
+      })
+    })
   })
 })
 
@@ -281,8 +300,11 @@ describe('DashboardsSettings — migrated-role order + error lane', () => {
     mockFetchKpisRole.mockImplementation(async (role: string) =>
       role === 'default' ? ['candidates', 'opps', 'occupancy'] : [])
     render(<DashboardsSettings />)
-    await userEvent.click(screen.getByRole('tab', { name: st('dashboards.tabs.order') }))
-    const moveDownButtons = await screen.findAllByRole('button', { name: ct('dragList.moveDown') })
+    // Wait for the migrated role's GET to resolve — 'occupancy' only appears
+    // once the per-role list (not the blob fallback) has landed.
+    await screen.findByText(dt('kpi.occupancy'))
+    const moveDownButtons = screen.getAllByRole('button', { name: ct('dragList.moveDown') })
+    expect(moveDownButtons).toHaveLength(3)
     await userEvent.click(moveDownButtons[0])
     await waitFor(() => expect(mockPutKpisRole).toHaveBeenCalledWith('default', ['opps', 'candidates', 'occupancy']))
     expect(saveSettingsKeys).not.toHaveBeenCalled()
@@ -293,8 +315,10 @@ describe('DashboardsSettings — migrated-role order + error lane', () => {
       role === 'default' ? ['candidates', 'opps'] : [])
     mockPutKpisRole.mockRejectedValue(new Error('403'))
     render(<DashboardsSettings />)
-    await userEvent.click(screen.getByRole('tab', { name: st('dashboards.tabs.order') }))
-    const moveDownButtons = await screen.findAllByRole('button', { name: ct('dragList.moveDown') })
+    // Wait for the migrated role's (2-item) GET to resolve, not the transient
+    // blob-fallback render (9 items) that precedes it.
+    await waitFor(() => expect(screen.getAllByRole('button', { name: ct('dragList.moveDown') })).toHaveLength(2))
+    const moveDownButtons = screen.getAllByRole('button', { name: ct('dragList.moveDown') })
     await userEvent.click(moveDownButtons[0])
     await waitFor(() => expect(screen.getByRole('alert')).toHaveTextContent(st('dashboardsSaveError')))
     // Reverted: candidates is back on top.

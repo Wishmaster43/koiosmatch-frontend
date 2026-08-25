@@ -118,10 +118,35 @@ export interface BillingUsageSubscription {
   resets_at?: string
   ai?: BillingUsageSubscriptionMeter
   workflow?: BillingUsageSubscriptionMeter
+  // Third meter (CMBE, F5 handoff 25-08) — WhatsApp Tokens (1 wa_web message = 1
+  // token). Presence-gated: absent until the backend ships it, never assumed.
+  whatsapp?: BillingUsageSubscriptionMeter
+}
+
+// WhatsApp usage per channel (CMBE, F5 handoff 25-08) — 1 WhatsApp Token = 1
+// message sent via wa_web; waba/waba_coex channels are billed by the provider,
+// not by Koios Tokens, so they still carry their own `amount` line.
+export interface BillingUsageWhatsappChannel {
+  channel: string
+  label?: string
+  messages?: number
+  tokens?: number
+  amount?: number
+}
+export interface BillingUsageWhatsapp {
+  by_channel?: BillingUsageWhatsappChannel[]
+  tokens?: { used?: number; budget?: number; over?: number; over_amount?: number; price_cents?: number }
 }
 
 export interface BillingUsageResponse {
-  data: { workflow: BillingUsageWorkflow; ai: BillingUsageAi; subscription?: BillingUsageSubscription }
+  data: {
+    workflow: BillingUsageWorkflow
+    ai: BillingUsageAi
+    subscription?: BillingUsageSubscription
+    // Presence-gated (CMBE announced, not yet confirmed live) — components must
+    // never assume this key exists and fall back to /settings/messaging-costs.
+    whatsapp?: BillingUsageWhatsapp
+  }
 }
 
 // GET/PUT /admin/platform-pricing — superadmin-only platform pricing knobs.

@@ -27,9 +27,15 @@ interface SubscriptionCardProps {
   onDrillWorkflow?: () => void
 }
 
+// A meter renders only once the server sent a budget for it — an absent
+// WhatsApp meter (CMBE not live yet) must not draw a fake 0/0 bar (§3).
+function hasMeter(meter?: { budget?: number; used?: number }): boolean {
+  return !!meter && (meter.budget !== undefined || meter.used !== undefined)
+}
+
 // One meter bar — used for both the AI-token and the workflow (Koios Tokens)
 // budget; the fill is the tint recipe (§4), never a hardcoded color.
-function MeterBar({ label, used, budget, onDrill }: { label: string; used?: number; budget?: number; onDrill?: () => void }) {
+export function MeterBar({ label, used, budget, onDrill }: { label: string; used?: number; budget?: number; onDrill?: () => void }) {
   const { t } = useTranslation('settings')
   const { formatNumber } = useNumberFormat()
   const total = budget ?? 0
@@ -101,6 +107,10 @@ export default function SubscriptionCard({ subscription, phase, onDrillAi, onDri
 
           <MeterBar label={t('billing.usage.plan.aiMeter')} used={subscription.ai?.used} budget={subscription.ai?.budget} onDrill={onDrillAi} />
           <MeterBar label={t('billing.usage.plan.workflowMeter')} used={subscription.workflow?.used} budget={subscription.workflow?.budget} onDrill={onDrillWorkflow} />
+          {/* Third meter (CMBE, F5 25-08) — WhatsApp Tokens, presence-gated. */}
+          {hasMeter(subscription.whatsapp) && (
+            <MeterBar label={t('billing.usage.plan.whatsappMeter')} used={subscription.whatsapp?.used} budget={subscription.whatsapp?.budget} />
+          )}
 
           {/* `over` is a COUNT — `> 0` guard, never truthiness (a bare 0 leaked
               onto the billing screen for every tenant within budget). The count
@@ -120,6 +130,15 @@ export default function SubscriptionCard({ subscription, phase, onDrillAi, onDri
                 meter: t('billing.usage.plan.workflowMeter'),
                 n: formatNumber(subscription.workflow?.over ?? 0),
                 amount: formatCurrency(subscription.workflow?.over_amount),
+              })}
+            </p>
+          )}
+          {(subscription.whatsapp?.over ?? 0) > 0 && (
+            <p style={{ ...notice, color: 'var(--color-danger-text)' }}>
+              {t('billing.usage.plan.overBudget', {
+                meter: t('billing.usage.plan.whatsappMeter'),
+                n: formatNumber(subscription.whatsapp?.over ?? 0),
+                amount: formatCurrency(subscription.whatsapp?.over_amount),
               })}
             </p>
           )}
