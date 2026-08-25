@@ -91,6 +91,18 @@ export interface VacanciesReportData {
   by_owner: CandidateOwnerSegment[]
   // VESTIGING-2: grouped via the CUSTOMER's mirrored branch, not any vacancy field.
   by_branch: CandidateSegment[]
+  // DASH-FEEDS-V3 depth (plumbing lane, additive) — optional: the compare
+  // endpoint's diffed envelope does not carry these fields.
+  // Median days per funnel step; null on an empty sample for that step.
+  ttf_decomposition?: { published_to_first_application: number | null; first_application_to_proposal: number | null; proposal_to_match: number | null }
+  // Top-20 OPEN vacancies of this report's window + panel filters ($base in
+  // VacanciesReport::aging), oldest first; days_open counts from created_at.
+  // recruiter: null without an owner, the server's own label when unresolved.
+  aging?: { id: string; title: string; days_open: number; recruiter: string | null; candidates_in_process: number }[]
+  // Fixed 14-day window, tenant-wide (ignores this report's period). rate is PERCENT (0..100).
+  fill_rate_timeseries?: { date: string; total: number; filled: number; rate: number | null }[]
+  // House default window (3 months), by the vacancy's location_id. rate is PERCENT.
+  fill_rate_by_branch?: { branch_id: string | null; branch: string; total: number; filled: number; rate: number | null }[]
 }
 
 // ── Matches report (GET /reports/matches) ────────────────────────────────────
@@ -192,6 +204,13 @@ export interface OutreachReportData {
   by_assignee: CandidateOwnerSegment[]
   // Zero-filled over the tenant channels + 'none'.
   by_channel: ApplicationTopSegment[]
+  // DASH-FEEDS-V3 depth (plumbing lane, additive) — optional depth sections.
+  // Per-channel funnel from targeted through placed, not windowed further than the report period.
+  channel_funnel?: { channel: 'call' | 'email' | 'whatsapp' | 'none'; total: number; reached: number; applied: number; placed: number }[]
+  // Top 5 campaigns, one daily count series each.
+  campaign_timeseries?: { campaign_id: string; name: string; series: { date: string; count: number }[] }[]
+  // Sparse: only cells with attempts>0. weekday is ISO (1=Mon); rate is PERCENT.
+  best_contact_heatmap?: { weekday: number; part: 'ochtend' | 'middag' | 'avond'; attempts: number; reached: number; rate: number }[]
 }
 
 // ── WhatsApp report (GET /reports/whatsapp, RAPPORTEN-WHATSAPP-FE-1) ────────────
@@ -329,7 +348,20 @@ export interface CustomersReportData {
   // scope's KPI-catalog spares (kpiCatalog.ts). Optional: the compare endpoint's diffed
   // envelope does not carry this array.
   kpis?: { key: string; label: string; count: number }[]
+  // DASH-FEEDS-V3 depth (plumbing lane, additive) — optional depth sections; the
+  // compare endpoint's diffed envelope does not carry these fields.
+  // Top-5 concentration by placements/vacancies + a 6th 'others' row (customer_id null); shares are PERCENT.
+  concentration_top5?: { by_placements: ConcentrationRow[]; by_vacancies: ConcentrationRow[]; top5_share_placements_pct: number | null; top5_share_vacancies_pct: number | null }
+  // 12 trailing months. rate is a RATIO 0..1 (not percent) — multiply by 100 before formatPercent.
+  phase_cohorts?: { cohort: string; prospects: number; converted: number; rate: number | null }[]
+  // 12 trailing months, fixed window (ignores this report's period).
+  churn_trend?: { month: string; churned: number }[]
+  // 6 trailing months, fixed window (ignores this report's period).
+  by_owner_x_period?: { owner_id: string | null; name: string; months: { month: string; count: number }[] }[]
 }
+
+// One concentration row (≤5 + a synthetic 'others' row with customer_id null).
+export interface ConcentrationRow { customer_id: string | null; name: string; count: number; pct: number }
 
 // ── Opportunities report (GET /reports/opportunities, RAPPORTEN-SUITE-1 "portie 5") ─
 // Hand-written from the backend Service (no 2xx schema in the generated spec yet,

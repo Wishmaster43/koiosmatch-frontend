@@ -84,6 +84,35 @@ export interface OppAgingBucket { bucket: '0-7' | '8-30' | '31-90' | '90+'; coun
 // One merged row of the weekly trend chart (a value per series key + the bucket name).
 export interface TrendRow { name: string; [k: string]: number | string }
 
+// widget feeds v3 (DashboardService::v3Feeds) — presence on DashData = role +
+// permission/module gate; an absent key means "not for this role", an empty
+// array means "nothing today". Row shapes measured from the backend feed classes.
+export interface TaskDueTodayRow { task_id: string; title: string; priority: { value: string; label: string; color?: string | null } | null; due_time: string | null; assignee_id: string | null; assignee: { id: string; name: string | null } | null }
+export interface AppointmentNext48hRow { appointment_id: string; candidate_id: string; candidate: { id: string; name: string } | null; scheduled_at: string; type: string; application_id: string | null }
+export interface ProductivityByRecruiterRow { user_id: string; name: string | null; proposals: number; placements: number }
+export interface RedeployRadarRow { candidate_id: string; candidate: { id: string; name: string } | null; match_id: string; customer: { id: string; name: string } | null; end_date: string; days_left: number }
+export interface FillRatePoint { date: string; total: number; filled: number; rate: number | null }
+export interface FillRateByBranchRow { branch_id: string | null; branch: string; total: number; filled: number; rate: number | null }
+export interface OppsByStageByOwnerRow { stage_id: string; stage_label: string; by_owner: { owner_id: string | null; name: string; count: number }[] }
+export interface OppStalledRow { id: string; title: string; customer: string | null; owner: string; stage_label: string | null; days_still: number; value: number | null }
+export interface ActivityByOwnerRow { owner_id: string | null; name: string; activity: number }
+export interface PipelineValuePoint { date: string; value: number }
+export interface CustomerAtRiskRow { id: string; name: string; owner: string; last_contact_at: string | null; days_quiet: number }
+export interface CustomerByPhaseRow { value: string; label: string; count: number }
+export interface VacancyAttentionRow { vacancy_id: string; title: string; customer: string | null; days_open: number; candidates_in_process: number; last_application_at: string | null }
+export interface VacanciesByCustomerRow { customer_id: string; name: string; by_status: { status_id: string; label: string; count: number }[] }
+export interface DocumentAttentionRow { candidate_id: string; name: string; issue: 'missing_cv' | 'expiring'; expires_at: string | null; days_left: number | null }
+export interface CouplingErrorRow { entity_type: string; entity_id: string; entity_label: string; system: 'shiftmanager' | 'helloflex'; error: string | null; synced_at: string | null }
+export interface MatchesByContractTypeRow { value: string; label: string; color: string | null; count: number }
+export interface PlacementStartedTodayRow { match_id: string; candidate: string | null; customer: string | null; contract_ok: boolean; document_ok: boolean; koppeling_ok: boolean }
+export interface PlacementTodayRow { match_id: string; candidate: string | null; customer: string | null }
+export interface PlacementsStartedEndedToday { started: PlacementTodayRow[]; ended: PlacementTodayRow[] }
+export interface ShiftCoverageCell { date: string; part: 'morning' | 'afternoon' | 'evening'; shifts: number; filled: number }
+export interface OpenShiftRow { shift_id: string; start_time: string; end_time: string | null; order_title: string | null; status: 'open' }
+export interface OccupancyByCustomerRow { label: string; shifts: number; filled: number; rate: number | null }
+export interface ShiftStatusTodayRow { status: string; count: number }
+export interface ShiftUnconfirmedRow { schedule_id: string; candidate_id: string; candidate: string | null; shift_start: string | null; order_title: string | null }
+
 // GET /dashboard (single summary call).
 export interface DashData {
   charts?: { by_funnel?: StatItem[]; timeseries?: Record<string, TimeseriesPoint[] | undefined> }
@@ -118,5 +147,32 @@ export interface DashData {
   // K-173 fase 6 — recruitment_manager / sales_manager+accountmanager feeds.
   recruiter_load?: RecruiterLoadRow[]
   opp_aging?: OppAgingBucket[]
+  // widget feeds v3 (DashboardService::v3Feeds) — 24 role-gated feeds consumed
+  // by blocks/feedRegistry.ts tiles. Each key is optional/absent when the role
+  // or module gate does not apply; an empty array is a real "nothing today".
+  tasks_due_today?: TaskDueTodayRow[]
+  appointments_next_48h?: AppointmentNext48hRow[]
+  productivity_by_recruiter?: ProductivityByRecruiterRow[]
+  redeploy_radar?: RedeployRadarRow[]
+  fill_rate_timeseries?: FillRatePoint[]
+  fill_rate_by_branch?: FillRateByBranchRow[]
+  opps_by_stage_by_owner?: OppsByStageByOwnerRow[]
+  opps_stalled_list?: OppStalledRow[]
+  activity_by_owner?: ActivityByOwnerRow[]
+  pipeline_value_timeseries?: PipelineValuePoint[]
+  customers_at_risk_list?: CustomerAtRiskRow[]
+  customers_by_phase?: CustomerByPhaseRow[]
+  vacancies_attention_by_customer?: VacancyAttentionRow[]
+  vacancies_by_customer?: VacanciesByCustomerRow[]
+  documents_attention?: DocumentAttentionRow[]
+  coupling_errors_list?: CouplingErrorRow[]
+  matches_by_contract_type?: MatchesByContractTypeRow[]
+  placements_started_today?: PlacementStartedTodayRow[]
+  placements_started_ended_today?: PlacementsStartedEndedToday
+  shift_coverage_heatmap?: ShiftCoverageCell[]
+  open_shifts_list?: OpenShiftRow[]
+  occupancy_by_customer?: OccupancyByCustomerRow[]
+  shift_status_today?: ShiftStatusTodayRow[]
+  shifts_unconfirmed_list?: ShiftUnconfirmedRow[]
   [k: string]: unknown
 }

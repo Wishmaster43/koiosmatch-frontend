@@ -30,8 +30,13 @@ function ChartTooltip({ active, payload, total, showPercent, unit, formatNumber 
   )
 }
 
-export default function PieChartCard({ title, data = [], colors = DEFAULT_COLORS, showPercent = false, size = 200, onItemClick, unit, hideLegend = false }: {
+export default function PieChartCard({ title, data = [], colors = DEFAULT_COLORS, showPercent = false, size = 200, onItemClick, unit, hideLegend = false, isInert }: {
   title?: ReactNode; data?: ChartDatum[]; colors?: string[]; showPercent?: boolean; size?: number; onItemClick?: (d: unknown) => void; unit?: string
+  // INERT-SLICE-1: a slice that has no drill target (a synthetic 'others'
+  // remainder, a null-id bucket) must not advertise one — no role/tabIndex/
+  // cursor/hover on its legend row and no click delivered (§3 no fake
+  // affordances). Additive: without it every row follows onItemClick as before.
+  isInert?: (d: ChartDatum) => boolean
   // Drop the per-slice legend (LEGEND-DUP-1): additive and off by default, so
   // every existing caller renders byte-identically. Meant for the one case where
   // the legend would be a second copy of something already on screen — a donut
@@ -75,11 +80,13 @@ export default function PieChartCard({ title, data = [], colors = DEFAULT_COLORS
               innerRadius={innerR} outerRadius={outerR}
               paddingAngle={2} dataKey="value"
               cursor={onItemClick ? 'pointer' : 'default'}
-              onClick={(d: unknown) => onItemClick?.(d)}
+              // The ring click carries the slice datum; an inert slice swallows it.
+              onClick={(d: unknown) => { if (!isInert?.(d as ChartDatum)) onItemClick?.(d) }}
               isAnimationActive={false}
             >
               {data.map((_, i) => (
-                <Cell key={i} fill={colors[i % colors.length]} stroke="white" strokeWidth={2} />
+                <Cell key={i} fill={colors[i % colors.length]} stroke="white" strokeWidth={2}
+                  cursor={onItemClick && !isInert?.(data[i]) ? 'pointer' : 'default'} />
               ))}
             </Pie>
             <Tooltip content={<ChartTooltip total={total} showPercent={showPercent} unit={unit} formatNumber={formatNumber} />} />
@@ -94,18 +101,20 @@ export default function PieChartCard({ title, data = [], colors = DEFAULT_COLORS
             const pct = total ? ((entry.value / total) * 100).toFixed(1) : '0'
             // Keyboard operability (§6): a clickable legend row is a REAL control
             // — role/tabIndex/Enter+Space, mirroring the SegmentBars rows these
-            // donuts replaced on the report pages (wave-2 Opus finding).
+            // donuts replaced on the report pages (wave-2 Opus finding). An inert
+            // slice (isInert) is a plain row: no control, no cursor, no click.
+            const clickable = onItemClick && !isInert?.(entry)
             return (
               <div
                 key={entry.name}
                 className="flex items-center justify-between gap-2 rounded px-1 py-0.5"
-                role={onItemClick ? 'button' : undefined}
-                tabIndex={onItemClick ? 0 : undefined}
-                onClick={() => onItemClick?.(entry)}
-                onKeyDown={onItemClick ? e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onItemClick(entry) } } : undefined}
-                style={{ cursor: onItemClick ? 'pointer' : 'default' }}
-                onMouseEnter={e => { if (onItemClick) e.currentTarget.style.background = 'var(--hover-bg)' }}
-                onMouseLeave={e => { if (onItemClick) e.currentTarget.style.background = 'none' }}
+                role={clickable ? 'button' : undefined}
+                tabIndex={clickable ? 0 : undefined}
+                onClick={clickable ? () => onItemClick(entry) : undefined}
+                onKeyDown={clickable ? e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onItemClick(entry) } } : undefined}
+                style={{ cursor: clickable ? 'pointer' : 'default' }}
+                onMouseEnter={e => { if (clickable) e.currentTarget.style.background = 'var(--hover-bg)' }}
+                onMouseLeave={e => { if (clickable) e.currentTarget.style.background = 'none' }}
               >
                 <div className="flex items-center min-w-0 gap-2">
                   <span className="flex-shrink-0 rounded-full"

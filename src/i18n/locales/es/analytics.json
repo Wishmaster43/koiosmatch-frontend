@@ -118,7 +118,39 @@
       "subtitle": "Contado a partir de las vacantes anteriores: cero candidaturas recibidas en este periodo.",
       "empty": "Todas las vacantes de este período recibieron al menos una candidatura."
     },
-    "kpiOrderFellBack": "Una tarjeta KPI configurada en Ajustes ya no existe y se restableció al valor predeterminado."
+    "kpiOrderFellBack": "Una tarjeta KPI configurada en Ajustes ya no existe y se restableció al valor predeterminado.",
+    "depth": {
+      "ttf": {
+        "title": "Time-to-fill desglosado (mediana, días)",
+        "publishedToFirst": "Publicación hasta primera solicitud",
+        "firstToProposal": "Primera solicitud hasta propuesta",
+        "proposalToMatch": "Propuesta hasta colocación"
+      },
+      "aging": {
+        "title": "Vacantes abiertas más antiguas (top 20)",
+        "cols": {
+          "vacancy": "Vacante",
+          "recruiter": "Reclutador",
+          "daysOpen": "Días abiertos",
+          "inProcess": "Candidatos en proceso"
+        }
+      },
+      "fillRateSeries": {
+        "title": "Tasa de cobertura, últimos 14 días"
+      },
+      "fillRateBranch": {
+        "title": "Tasa de cobertura por sucursal (sucursal de la vacante)",
+        "cols": {
+          "branch": "Sucursal",
+          "total": "Total",
+          "filled": "Cubierto",
+          "rate": "Tasa de cobertura"
+        }
+      },
+      "fixedWindow": "Ventana fija, no sigue los filtros de este informe.",
+      "noBranch": "Sin sucursal",
+      "unknown": "Desconocido"
+    }
   },
   "matches": {
     "title": "Matches",
@@ -180,7 +212,37 @@
       "campaignsDoneInPeriod": "Campañas finalizadas en el período",
       "dueToday": "Vencen hoy"
     },
-    "kpiOrderFellBack": "Una tarjeta KPI configurada en Ajustes ya no existe y se restableció al valor predeterminado."
+    "kpiOrderFellBack": "Una tarjeta KPI configurada en Ajustes ya no existe y se restableció al valor predeterminado.",
+    "depth": {
+      "channelFunnel": {
+        "title": "Embudo por canal",
+        "total": "Contactados",
+        "reached": "Alcanzados",
+        "applied": "Solicitados",
+        "placed": "Colocados"
+      },
+      "channel": {
+        "call": "Llamada",
+        "email": "Correo electrónico",
+        "whatsapp": "WhatsApp",
+        "none": "Sin canal"
+      },
+      "campaignSeries": {
+        "title": "Top 5 listas de llamadas por día"
+      },
+      "heatmap": {
+        "title": "Mejor momento de contacto (alcanzado %)",
+        "part": {
+          "ochtend": "Mañana",
+          "middag": "Tarde",
+          "avond": "Noche"
+        },
+        "weekday": "Día",
+        "attempts_one": "{{count}} intento",
+        "attempts_other": "{{count}} intentos",
+        "noData": "Sin intentos"
+      }
+    }
   },
   "whatsapp": {
     "loading": "Cargando WhatsApp…",
@@ -370,7 +432,33 @@
       "customersWithoutApplications": "Clientes sin candidaturas",
       "matchesStoppedEarly": "Matches finalizados antes de tiempo"
     },
-    "signalSnapshot": "Estado actual"
+    "signalSnapshot": "Estado actual",
+    "depth": {
+      "concentration": {
+        "title": "Concentración de clientes (top 5)",
+        "byPlacements": "Por colocaciones",
+        "byVacancies": "Por vacantes",
+        "share": "Top 5 = {{pct}} del total",
+        "others": "Otros clientes"
+      },
+      "cohorts": {
+        "title": "Prospecto a cliente por cohorte mensual",
+        "prospects": "Prospectos",
+        "converted": "Convertidos",
+        "rate": "Conversión %"
+      },
+      "churn": {
+        "title": "Clientes perdidos por mes",
+        "series": "Perdidos"
+      },
+      "byOwnerPeriod": {
+        "title": "Nuevos clientes por gestor de cuentas por mes"
+      },
+      "unassigned": "Sin asignar",
+      "unknown": "Desconocido",
+      "fixedWindow12": "12 meses fijos, no sigue los filtros de este informe.",
+      "fixedWindow6": "6 meses fijos, no sigue los filtros de este informe."
+    }
   },
   "leads": {
     "loading": "Cargando leads…",

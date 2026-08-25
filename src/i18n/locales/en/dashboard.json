@@ -136,7 +136,31 @@
     "customersByOwner": "Customers by owner",
     "recruiterLoad": "Recruiter load",
     "oppAging": "Opportunity ageing",
-    "koiosPerformance": "Koios AI performance"
+    "koiosPerformance": "Koios AI performance",
+    "tasksDueToday": "Tasks due today",
+    "appointmentsNext48h": "Intake agenda (48 hours)",
+    "redeployRadar": "Redeployment radar",
+    "productivityByRecruiter": "Submissions and placements per recruiter (30 days)",
+    "fillRateTimeseries": "Fill rate, last 14 days",
+    "fillRateByBranch": "Fill rate by branch",
+    "matchesByContractType": "Placements by contract form",
+    "placementsStartedEndedToday": "Started and ended today",
+    "documentsAttention": "Documents needing attention",
+    "couplingErrorsList": "Failed couplings",
+    "placementsStartedToday": "Placements started today",
+    "vacanciesAttentionByCustomer": "Vacancies needing attention",
+    "vacanciesByCustomer": "Vacancies by customer",
+    "customersByPhase": "Customer portfolio by phase",
+    "oppsByStageByOwner": "Opportunities by stage per account manager",
+    "oppsStalledList": "Stalled opportunities",
+    "activityByOwner": "Activity per account manager today",
+    "pipelineValueTimeseries": "Pipeline value, last 14 days",
+    "customersAtRiskList": "Customers losing contact",
+    "shiftCoverageHeatmap": "Coverage by part of day",
+    "openShiftsList": "Open shifts",
+    "occupancyByCustomer": "Occupancy by customer",
+    "shiftStatusToday": "Shift status today",
+    "shiftsUnconfirmedList": "Unconfirmed shifts"
   },
   "koiosPerformance": {
     "title": "Koios AI performance",
@@ -268,5 +292,82 @@
       "31-90": "31-90 days",
       "90+": "90+ days"
     }
+  },
+  "feed": {
+    "col": {
+      "candidate": "Candidate",
+      "customer": "Customer",
+      "vacancy": "Vacancy",
+      "opportunity": "Opportunity",
+      "owner": "Account manager",
+      "recruiter": "Recruiter",
+      "stage": "Stage",
+      "daysOpen": "Days open",
+      "daysLeft": "Days left",
+      "daysStill": "Days idle",
+      "inProcess": "In process",
+      "lastApplication": "Last application",
+      "value": "Value",
+      "contract": "Contract",
+      "document": "Document",
+      "coupling": "Coupling",
+      "branch": "Branch",
+      "total": "Total",
+      "filled": "Filled",
+      "rate": "Fill rate",
+      "record": "Record",
+      "system": "System",
+      "error": "Error",
+      "syncedAt": "Last sync",
+      "issue": "Issue",
+      "expiresAt": "Expires on",
+      "start": "Start",
+      "end": "End",
+      "shift": "Shift",
+      "status": "Status",
+      "date": "Date"
+    },
+    "started": "Started",
+    "ended": "Ended",
+    "issue": {
+      "missing_cv": "CV missing",
+      "expiring": "Expiring"
+    },
+    "system": {
+      "shiftmanager": "Shiftmanager",
+      "helloflex": "HelloFlex"
+    },
+    "ok": "OK",
+    "notOk": "Missing",
+    "unassigned": "Unassigned",
+    "noBranch": "No branch",
+    "noCustomer": "No customer",
+    "series": {
+      "proposals": "Submissions",
+      "placements": "Placements",
+      "fillRate": "Fill rate",
+      "value": "Pipeline value",
+      "shifts": "Shifts",
+      "filled": "Filled",
+      "activity": "Stage changes"
+    },
+    "daysQuiet": "{{count}} days quiet",
+    "activityCount": "{{count}} stage changes",
+    "part": {
+      "morning": "Morning",
+      "afternoon": "Afternoon",
+      "evening": "Evening"
+    },
+    "shiftStatus": {
+      "planned": "Planned",
+      "confirmed": "Confirmed",
+      "completed": "Completed",
+      "cancelled": "Cancelled",
+      "no_show": "No-show"
+    },
+    "coverage": "{{filled}} of {{shifts}} filled",
+    "openPlanning": "Go to planning",
+    "today": "Today",
+    "noTime": "No time"
   }
 }

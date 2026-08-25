@@ -118,7 +118,39 @@
       "subtitle": "Counted from the vacancies above: zero applications received in this period.",
       "empty": "Every vacancy in this period received at least one application."
     },
-    "kpiOrderFellBack": "A KPI card configured in Settings no longer exists and was reset to the default."
+    "kpiOrderFellBack": "A KPI card configured in Settings no longer exists and was reset to the default.",
+    "depth": {
+      "ttf": {
+        "title": "Time-to-fill decomposed (median days)",
+        "publishedToFirst": "Published to first application",
+        "firstToProposal": "First application to submission",
+        "proposalToMatch": "Submission to placement"
+      },
+      "aging": {
+        "title": "Longest open vacancies (top 20)",
+        "cols": {
+          "vacancy": "Vacancy",
+          "recruiter": "Recruiter",
+          "daysOpen": "Days open",
+          "inProcess": "Candidates in process"
+        }
+      },
+      "fillRateSeries": {
+        "title": "Fill rate, last 14 days"
+      },
+      "fillRateBranch": {
+        "title": "Fill rate by branch (vacancy branch)",
+        "cols": {
+          "branch": "Branch",
+          "total": "Total",
+          "filled": "Filled",
+          "rate": "Fill rate"
+        }
+      },
+      "fixedWindow": "Fixed window; does not follow this report's filters.",
+      "noBranch": "No branch",
+      "unknown": "Unknown"
+    }
   },
   "matches": {
     "title": "Matches",
@@ -180,7 +212,37 @@
       "campaignsDoneInPeriod": "Campaigns done in period",
       "dueToday": "Due today"
     },
-    "kpiOrderFellBack": "A KPI card configured in Settings no longer exists and was reset to the default."
+    "kpiOrderFellBack": "A KPI card configured in Settings no longer exists and was reset to the default.",
+    "depth": {
+      "channelFunnel": {
+        "title": "Funnel by channel",
+        "total": "Targeted",
+        "reached": "Reached",
+        "applied": "Applied",
+        "placed": "Placed"
+      },
+      "channel": {
+        "call": "Call",
+        "email": "Email",
+        "whatsapp": "WhatsApp",
+        "none": "No channel"
+      },
+      "campaignSeries": {
+        "title": "Top 5 call lists per day"
+      },
+      "heatmap": {
+        "title": "Best contact moment (reached %)",
+        "part": {
+          "ochtend": "Morning",
+          "middag": "Afternoon",
+          "avond": "Evening"
+        },
+        "weekday": "Day",
+        "attempts_one": "{{count}} attempt",
+        "attempts_other": "{{count}} attempts",
+        "noData": "No attempts"
+      }
+    }
   },
   "whatsapp": {
     "loading": "Loading WhatsApp…",
@@ -370,7 +432,33 @@
       "customersWithoutApplications": "Customers without applications",
       "matchesStoppedEarly": "Matches stopped early"
     },
-    "signalSnapshot": "Current snapshot"
+    "signalSnapshot": "Current snapshot",
+    "depth": {
+      "concentration": {
+        "title": "Customer concentration (top 5)",
+        "byPlacements": "By placements",
+        "byVacancies": "By vacancies",
+        "share": "Top 5 = {{pct}} of the total",
+        "others": "Other customers"
+      },
+      "cohorts": {
+        "title": "Prospect to customer per monthly cohort",
+        "prospects": "Prospects",
+        "converted": "Converted",
+        "rate": "Conversion %"
+      },
+      "churn": {
+        "title": "Churned customers per month",
+        "series": "Churned"
+      },
+      "byOwnerPeriod": {
+        "title": "New customers per account manager per month"
+      },
+      "unassigned": "Unassigned",
+      "unknown": "Unknown",
+      "fixedWindow12": "Fixed 12 months; does not follow this report's filters.",
+      "fixedWindow6": "Fixed 6 months; does not follow this report's filters."
+    }
   },
   "leads": {
     "loading": "Loading leads…",

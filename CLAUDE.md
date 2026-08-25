@@ -1110,6 +1110,13 @@ Be honest. If something is not done, say so — do not pretend.
   · **Zoekbalk vult de rij, de filterknop staat rechts** in drawer-toolbars.
   · **Elke entiteit met berichten heeft een start-affordance** — een lege
     conversatietab zonder startknop is een half scherm (kandidaat = referentie).
+  · **Een percentage van de server is een WAARDE, geen aandeel (EENHEID-LES,
+    25-08, Opus-vondst in golf C):** een `rate` 0..100 (fill rate, bezetting)
+    gaat nooit door een aandeel-van-de-som-modus (`BarChartCard percentValues`,
+    nooit `showPercent`; `PieChartCard showPercent` alléén voor telwaarden). Elke
+    worker-brief benoemt per numeriek veld de EENHEID (telling · percentage ·
+    ratio 0..1 · geld · dagen) en de verifier controleert de as/tooltip/voettekst
+    tegen de servereenheid, niet tegen de mock.
   · Rapporten: KPI-rij = echte server-KPI's met semantische kleur; grafieken =
     mix (donut/staaf/lijn/tabel naar datavorm); "Vergelijk met" en élk filter in
     het rechterpaneel; drill-lade = SM-idioom met record-doorklik.

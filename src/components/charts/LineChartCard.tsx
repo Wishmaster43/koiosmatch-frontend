@@ -9,14 +9,15 @@ import { useNumberFormat } from '@/lib/formatters'
 // Tooltip showing the point value + a caller-supplied unit (e.g. "candidates").
 // `formatNumber` is passed in (the tooltip is a plain function, not a component,
 // so it can't call the useNumberFormat hook itself).
-function LineTooltip({ active, payload, label, onItemClick, unit, t, formatNumber }: TipProps & { onItemClick?: (d: unknown) => void; unit?: string; t: TFunction; formatNumber: (v: number) => string }) {
+function LineTooltip({ active, payload, label, onItemClick, unit, t, formatNumber, formatValue }: TipProps & { onItemClick?: (d: unknown) => void; unit?: string; t: TFunction; formatNumber: (v: number) => string; formatValue?: (v: number) => string }) {
   if (!active || !payload?.length) return null
+  const value = payload[0].value ?? 0
   return (
     <div className="px-3 py-2 text-sm bg-white rounded-xl"
-      style={{ border: '1px solid var(--border)', boxShadow: '0 4px 16px rgba(0,0,0,0.08)' }}>
+      style={{ border: '1px solid var(--border)', boxShadow: 'var(--shadow-float)' }}>
       <div className="mb-0.5 font-medium text-gray-500" style={{ fontSize: 11 }}>{label}</div>
-      <div style={{ color: 'var(--color-primary-text)', fontSize: 13, fontWeight: 600 }}>
-        {formatNumber(payload[0].value ?? 0)}{unit ? ` ${unit}` : ''}
+      <div style={{ color: 'var(--color-primary-text)', fontSize: 13, fontWeight: 500 }}>
+        {formatValue ? formatValue(value) : `${formatNumber(value)}${unit ? ` ${unit}` : ''}`}
       </div>
       {onItemClick && <div className="mt-1 text-xs text-gray-300">{t('clickForDetails')}</div>}
     </div>
@@ -25,8 +26,11 @@ function LineTooltip({ active, payload, label, onItemClick, unit, t, formatNumbe
 
 // `unit` is the noun shown after the value in the tooltip; the caller passes it
 // (the chart is generic), e.g. t('common:units.candidates').
-export default function LineChartCard({ title, data = [], color = 'var(--color-primary)', height = 220, onItemClick, unit = '' }: {
+export default function LineChartCard({ title, data = [], color = 'var(--color-primary)', height = 220, onItemClick, unit = '', formatValue }: {
   title?: ReactNode; data?: ChartDatum[]; color?: string; height?: number; onItemClick?: (d: unknown) => void; unit?: string
+  // Full value formatter for the tooltip (a currency, a percentage) — wins over
+  // `unit`, which is only a noun appended after a plain number.
+  formatValue?: (v: number) => string
 }) {
   const { t } = useTranslation('common')
   // Locale-aware grouping (§ FMT-GETAL-1) — never a hardcoded 'nl-NL' toLocaleString.
@@ -56,7 +60,7 @@ export default function LineChartCard({ title, data = [], color = 'var(--color-p
           <XAxis dataKey="name" tick={{ fontSize: 10, fill: 'var(--text-muted)' }} axisLine={false} tickLine={false} />
           <YAxis tick={{ fontSize: 10, fill: 'var(--text-muted)' }} axisLine={false} tickLine={false} allowDecimals={false}
             tickFormatter={v => formatNumber(Number(v))} />
-          <Tooltip content={<LineTooltip onItemClick={onItemClick} unit={unit} t={t} formatNumber={formatNumber} />} />
+          <Tooltip content={<LineTooltip onItemClick={onItemClick} unit={unit} t={t} formatNumber={formatNumber} formatValue={formatValue} />} />
           <Line
             type="monotone"
             dataKey="value"

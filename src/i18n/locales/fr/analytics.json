@@ -118,7 +118,39 @@
       "subtitle": "Compté à partir des postes ci-dessus : zéro candidature reçue sur cette période.",
       "empty": "Chaque poste de cette période a reçu au moins une candidature."
     },
-    "kpiOrderFellBack": "Une carte KPI configurée dans les paramètres n'existe plus et a été réinitialisée par défaut."
+    "kpiOrderFellBack": "Une carte KPI configurée dans les paramètres n'existe plus et a été réinitialisée par défaut.",
+    "depth": {
+      "ttf": {
+        "title": "Délai de pourvoi décomposé (médiane, jours)",
+        "publishedToFirst": "Publication jusqu’à première candidature",
+        "firstToProposal": "Première candidature jusqu’à proposition",
+        "proposalToMatch": "Proposition jusqu’au placement"
+      },
+      "aging": {
+        "title": "Postes ouverts depuis le plus longtemps (top 20)",
+        "cols": {
+          "vacancy": "Poste",
+          "recruiter": "Recruteur",
+          "daysOpen": "Jours ouverts",
+          "inProcess": "Candidats en cours"
+        }
+      },
+      "fillRateSeries": {
+        "title": "Taux de pourvoi, 14 derniers jours"
+      },
+      "fillRateBranch": {
+        "title": "Taux de pourvoi par agence (agence du poste)",
+        "cols": {
+          "branch": "Agence",
+          "total": "Total",
+          "filled": "Pourvu",
+          "rate": "Taux de pourvoi"
+        }
+      },
+      "fixedWindow": "Fenêtre fixe, ne suit pas les filtres de ce rapport.",
+      "noBranch": "Sans agence",
+      "unknown": "Inconnu"
+    }
   },
   "matches": {
     "title": "Matchs",
@@ -180,7 +212,37 @@
       "campaignsDoneInPeriod": "Campagnes terminées sur la période",
       "dueToday": "Échéance aujourd'hui"
     },
-    "kpiOrderFellBack": "Une carte KPI configurée dans les paramètres n'existe plus et a été réinitialisée par défaut."
+    "kpiOrderFellBack": "Une carte KPI configurée dans les paramètres n'existe plus et a été réinitialisée par défaut.",
+    "depth": {
+      "channelFunnel": {
+        "title": "Entonnoir par canal",
+        "total": "Ciblés",
+        "reached": "Atteints",
+        "applied": "Candidatures",
+        "placed": "Placés"
+      },
+      "channel": {
+        "call": "Appel",
+        "email": "E-mail",
+        "whatsapp": "WhatsApp",
+        "none": "Aucun canal"
+      },
+      "campaignSeries": {
+        "title": "Top 5 des listes d'appels par jour"
+      },
+      "heatmap": {
+        "title": "Meilleur moment de contact (atteint %)",
+        "part": {
+          "ochtend": "Matin",
+          "middag": "Après-midi",
+          "avond": "Soir"
+        },
+        "weekday": "Jour",
+        "attempts_one": "{{count}} tentative",
+        "attempts_other": "{{count}} tentatives",
+        "noData": "Aucune tentative"
+      }
+    }
   },
   "whatsapp": {
     "loading": "Chargement de WhatsApp…",
@@ -370,7 +432,33 @@
       "customersWithoutApplications": "Clients sans candidatures",
       "matchesStoppedEarly": "Matchs arrêtés prématurément"
     },
-    "signalSnapshot": "État actuel"
+    "signalSnapshot": "État actuel",
+    "depth": {
+      "concentration": {
+        "title": "Concentration client (top 5)",
+        "byPlacements": "Par placements",
+        "byVacancies": "Par postes",
+        "share": "Top 5 = {{pct}} du total",
+        "others": "Autres clients"
+      },
+      "cohorts": {
+        "title": "Prospect à client par cohorte mensuelle",
+        "prospects": "Prospects",
+        "converted": "Convertis",
+        "rate": "Taux de conversion %"
+      },
+      "churn": {
+        "title": "Clients perdus par mois",
+        "series": "Perdus"
+      },
+      "byOwnerPeriod": {
+        "title": "Nouveaux clients par account manager par mois"
+      },
+      "unassigned": "Non assigné",
+      "unknown": "Inconnu",
+      "fixedWindow12": "12 mois fixes, ne suit pas les filtres de ce rapport.",
+      "fixedWindow6": "6 mois fixes, ne suit pas les filtres de ce rapport."
+    }
   },
   "leads": {
     "loading": "Chargement des leads…",

@@ -118,7 +118,39 @@
       "subtitle": "Gezählt aus den obigen Vakanzen: null Bewerbungen in diesem Zeitraum erhalten.",
       "empty": "Jede Stelle in diesem Zeitraum erhielt mindestens eine Bewerbung."
     },
-    "kpiOrderFellBack": "Eine in den Einstellungen konfigurierte KPI-Karte existiert nicht mehr und wurde auf den Standard zurückgesetzt."
+    "kpiOrderFellBack": "Eine in den Einstellungen konfigurierte KPI-Karte existiert nicht mehr und wurde auf den Standard zurückgesetzt.",
+    "depth": {
+      "ttf": {
+        "title": "Time-to-fill aufgeschlüsselt (Median, Tage)",
+        "publishedToFirst": "Veröffentlichung bis erste Bewerbung",
+        "firstToProposal": "Erste Bewerbung bis Vorschlag",
+        "proposalToMatch": "Vorschlag bis Platzierung"
+      },
+      "aging": {
+        "title": "Am längsten offene Vakanzen (Top 20)",
+        "cols": {
+          "vacancy": "Vakanz",
+          "recruiter": "Recruiter",
+          "daysOpen": "Tage offen",
+          "inProcess": "Kandidaten in Bearbeitung"
+        }
+      },
+      "fillRateSeries": {
+        "title": "Fill Rate, letzte 14 Tage"
+      },
+      "fillRateBranch": {
+        "title": "Fill Rate nach Niederlassung (Niederlassung der Vakanz)",
+        "cols": {
+          "branch": "Niederlassung",
+          "total": "Gesamt",
+          "filled": "Besetzt",
+          "rate": "Fill Rate"
+        }
+      },
+      "fixedWindow": "Festes Zeitfenster, folgt nicht den Filtern dieses Berichts.",
+      "noBranch": "Ohne Niederlassung",
+      "unknown": "Unbekannt"
+    }
   },
   "matches": {
     "title": "Matches",
@@ -180,7 +212,37 @@
       "campaignsDoneInPeriod": "Kampagnen abgeschlossen im Zeitraum",
       "dueToday": "Fällig heute"
     },
-    "kpiOrderFellBack": "Eine in den Einstellungen konfigurierte KPI-Karte existiert nicht mehr und wurde auf den Standard zurückgesetzt."
+    "kpiOrderFellBack": "Eine in den Einstellungen konfigurierte KPI-Karte existiert nicht mehr und wurde auf den Standard zurückgesetzt.",
+    "depth": {
+      "channelFunnel": {
+        "title": "Funnel nach Kanal",
+        "total": "Angesprochen",
+        "reached": "Erreicht",
+        "applied": "Beworben",
+        "placed": "Platziert"
+      },
+      "channel": {
+        "call": "Anruf",
+        "email": "E-Mail",
+        "whatsapp": "WhatsApp",
+        "none": "Kein Kanal"
+      },
+      "campaignSeries": {
+        "title": "Top 5 Anruflisten pro Tag"
+      },
+      "heatmap": {
+        "title": "Bester Kontaktzeitpunkt (erreicht %)",
+        "part": {
+          "ochtend": "Morgen",
+          "middag": "Nachmittag",
+          "avond": "Abend"
+        },
+        "weekday": "Tag",
+        "attempts_one": "{{count}} Versuch",
+        "attempts_other": "{{count}} Versuche",
+        "noData": "Keine Versuche"
+      }
+    }
   },
   "whatsapp": {
     "loading": "WhatsApp wird geladen…",
@@ -370,7 +432,33 @@
       "customersWithoutApplications": "Kunden ohne Bewerbungen",
       "matchesStoppedEarly": "Vorzeitig beendete Matches"
     },
-    "signalSnapshot": "Aktueller Stand"
+    "signalSnapshot": "Aktueller Stand",
+    "depth": {
+      "concentration": {
+        "title": "Kundenkonzentration (Top 5)",
+        "byPlacements": "Nach Platzierungen",
+        "byVacancies": "Nach Vakanzen",
+        "share": "Top 5 = {{pct}} des Gesamts",
+        "others": "Übrige Kunden"
+      },
+      "cohorts": {
+        "title": "Prospect zu Kunde pro Monatskohorte",
+        "prospects": "Prospects",
+        "converted": "Konvertiert",
+        "rate": "Konversion %"
+      },
+      "churn": {
+        "title": "Verlorene Kunden pro Monat",
+        "series": "Verloren"
+      },
+      "byOwnerPeriod": {
+        "title": "Neue Kunden pro Account Manager pro Monat"
+      },
+      "unassigned": "Nicht zugewiesen",
+      "unknown": "Unbekannt",
+      "fixedWindow12": "Feste 12 Monate, folgt nicht den Filtern dieses Berichts.",
+      "fixedWindow6": "Feste 6 Monate, folgt nicht den Filtern dieses Berichts."
+    }
   },
   "leads": {
     "loading": "Leads werden geladen…",

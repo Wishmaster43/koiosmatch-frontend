@@ -118,7 +118,39 @@
       "subtitle": "Geteld uit de vacatures hierboven: nul sollicitaties ontvangen in deze periode.",
       "empty": "Elke vacature in deze periode ontving minstens één sollicitatie."
     },
-    "kpiOrderFellBack": "Een in Instellingen ingestelde KPI-kaart bestaat niet meer en is teruggezet naar de standaard."
+    "kpiOrderFellBack": "Een in Instellingen ingestelde KPI-kaart bestaat niet meer en is teruggezet naar de standaard.",
+    "depth": {
+      "ttf": {
+        "title": "Time-to-fill opgesplitst (mediaan, dagen)",
+        "publishedToFirst": "Publicatie tot eerste sollicitatie",
+        "firstToProposal": "Eerste sollicitatie tot voordracht",
+        "proposalToMatch": "Voordracht tot plaatsing"
+      },
+      "aging": {
+        "title": "Langst openstaande vacatures (top 20)",
+        "cols": {
+          "vacancy": "Vacature",
+          "recruiter": "Recruiter",
+          "daysOpen": "Dagen open",
+          "inProcess": "Kandidaten in proces"
+        }
+      },
+      "fillRateSeries": {
+        "title": "Fill rate laatste 14 dagen"
+      },
+      "fillRateBranch": {
+        "title": "Fill rate per vestiging (vestiging van de vacature)",
+        "cols": {
+          "branch": "Vestiging",
+          "total": "Totaal",
+          "filled": "Gevuld",
+          "rate": "Fill rate"
+        }
+      },
+      "fixedWindow": "Vast venster, volgt niet de filters van dit rapport.",
+      "noBranch": "Zonder vestiging",
+      "unknown": "Onbekend"
+    }
   },
   "matches": {
     "title": "Matches",
@@ -180,7 +212,37 @@
       "campaignsDoneInPeriod": "Campagnes afgerond in periode",
       "dueToday": "Vervalt vandaag"
     },
-    "kpiOrderFellBack": "Een in Instellingen ingestelde KPI-kaart bestaat niet meer en is teruggezet naar de standaard."
+    "kpiOrderFellBack": "Een in Instellingen ingestelde KPI-kaart bestaat niet meer en is teruggezet naar de standaard.",
+    "depth": {
+      "channelFunnel": {
+        "title": "Funnel per kanaal",
+        "total": "Benaderd",
+        "reached": "Bereikt",
+        "applied": "Gesolliciteerd",
+        "placed": "Geplaatst"
+      },
+      "channel": {
+        "call": "Bellen",
+        "email": "E-mail",
+        "whatsapp": "WhatsApp",
+        "none": "Geen kanaal"
+      },
+      "campaignSeries": {
+        "title": "Top 5 bellijsten per dag"
+      },
+      "heatmap": {
+        "title": "Beste contactmoment (bereikt %)",
+        "part": {
+          "ochtend": "Ochtend",
+          "middag": "Middag",
+          "avond": "Avond"
+        },
+        "weekday": "Dag",
+        "attempts_one": "{{count}} poging",
+        "attempts_other": "{{count}} pogingen",
+        "noData": "Geen pogingen"
+      }
+    }
   },
   "whatsapp": {
     "loading": "WhatsApp laden…",
@@ -370,7 +432,33 @@
       "customersWithoutApplications": "Klanten zonder sollicitaties",
       "matchesStoppedEarly": "Matches voortijdig gestopt"
     },
-    "signalSnapshot": "Actuele stand"
+    "signalSnapshot": "Actuele stand",
+    "depth": {
+      "concentration": {
+        "title": "Klantconcentratie (top 5)",
+        "byPlacements": "Naar plaatsingen",
+        "byVacancies": "Naar vacatures",
+        "share": "Top 5 = {{pct}} van het totaal",
+        "others": "Overige klanten"
+      },
+      "cohorts": {
+        "title": "Prospect naar klant per maandcohort",
+        "prospects": "Prospects",
+        "converted": "Geconverteerd",
+        "rate": "Conversie %"
+      },
+      "churn": {
+        "title": "Verloren klanten per maand",
+        "series": "Verloren"
+      },
+      "byOwnerPeriod": {
+        "title": "Nieuwe klanten per accountmanager per maand"
+      },
+      "unassigned": "Niet toegewezen",
+      "unknown": "Onbekend",
+      "fixedWindow12": "Vaste 12 maanden, volgt niet de filters van dit rapport.",
+      "fixedWindow6": "Vaste 6 maanden, volgt niet de filters van dit rapport."
+    }
   },
   "leads": {
     "loading": "Leads laden…",
