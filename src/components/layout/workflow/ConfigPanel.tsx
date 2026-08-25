@@ -71,6 +71,29 @@ export default function ConfigPanel({ node, onUpdate, onDelete, onTabChange, var
   const fanout = (output && typeof output === 'object' && !Array.isArray(output)
     ? (output as Record<string, unknown>).whatsapp_fanout
     : undefined) as WaFanout | undefined
+  // K-193 fase 2b: a whatsapp_send step over wa_web reports how many messages it
+  // handed to the WhatsApp Web queue (whatsapp_queued). The backend mirrors this
+  // same key onto the WABA fan-out output too (WhatsAppFanoutProgress), so this
+  // line must be gated on the step actually being a wa_web send, never on the
+  // key's mere presence, or a Cloud-API batch would falsely read "WhatsApp Web".
+  const waQueuedRaw = (output && typeof output === 'object' && !Array.isArray(output)
+    ? (output as Record<string, unknown>).whatsapp_queued
+    : undefined) as number | undefined
+  const waQueued = type === 'whatsapp_send' && config?.channel === 'wa_web' && (waQueuedRaw ?? 0) > 0
+    ? waQueuedRaw
+    : undefined
+
+  // K-193 fase 2b: whatsapp_send's channel picker auto-sets message_type to the
+  // ONLY format WhatsApp Web can send (session/free-text) — never silent: the
+  // Caption notice below message_type explains why. Only fires on the ACTUAL
+  // channel field of whatsapp_send, and only when message_type is not already
+  // 'session', so an explicit prior choice is never overwritten redundantly.
+  const handleFieldChange = (key: string, val: unknown) => {
+    onUpdate(node.id, key, val)
+    if (type === 'whatsapp_send' && key === 'channel' && val === 'wa_web' && config?.message_type !== 'session') {
+      onUpdate(node.id, 'message_type', 'session')
+    }
+  }
 
   // Helper: filter schema fields by tab and showIf
   const fieldsForTab = (tab: string) => schema.filter(field => {
@@ -205,9 +228,20 @@ export default function ConfigPanel({ node, onUpdate, onDelete, onTabChange, var
                     {isRequired && <span style={{ color: 'var(--color-danger-text)', marginLeft: 3 }}>*</span>}
                   </label>
                   <FieldInput field={field as WorkflowField} value={config?.[field.key]} variables={variables} config={config}
-                    onChange={(key, val) => onUpdate(node.id, key, val)} />
-                  {/* Registry `hint:`/`help:` helper text through the render-layer i18n (§5). */}
-                  {(field.hint ?? field.help) ? <Caption style={{ display: 'block', marginTop: 4 }}>{fieldHint(t, (field.hint ?? field.help) as string)}</Caption> : null}
+                    onChange={handleFieldChange} />
+                  {/* K-193 fase 2b: on message_type, the wa_web-specific caption below
+                      replaces the registry help (avoid printing the same notice twice). */}
+                  {(() => {
+                    const isWaWebMessageType = type === 'whatsapp_send' && field.key === 'message_type' && config?.channel === 'wa_web'
+                    if (isWaWebMessageType) return null
+                    return (field.hint ?? field.help)
+                      ? <Caption style={{ display: 'block', marginTop: 4 }}>{fieldHint(t, (field.hint ?? field.help) as string)}</Caption>
+                      : null
+                  })()}
+                  {/* K-193 fase 2b: WhatsApp Web only ever sends a session message. */}
+                  {type === 'whatsapp_send' && field.key === 'message_type' && config?.channel === 'wa_web' && (
+                    <Caption style={{ display: 'block', marginTop: 4 }}>{t('fields.waWebSessionOnly')}</Caption>
+                  )}
                   {/* Required-and-empty hint shows regardless of a registry hint, so a required field with a hint still surfaces it (SCHERMWAARHEID-1). */}
                   {isRequired && isEmpty && (
                     <Caption style={{ display: 'block', marginTop: 4, color: 'var(--color-danger-text)' }}>{t('fields.requiredHint')}</Caption>
@@ -251,6 +285,7 @@ export default function ConfigPanel({ node, onUpdate, onDelete, onTabChange, var
               </div>
             : <div style={{ padding: 12 }}>
                 {fanout && <FanoutSummary fanout={fanout} />}
+                {waQueued != null && <Caption style={{ display: 'block', marginBottom: 8, fontWeight: 500 }}>{t('fields.whatsappQueued', { count: waQueued })}</Caption>}
                 {Array.isArray(output) && <Caption style={{ display: 'block', marginBottom: 8, fontWeight: 500 }}>{output.length} {output.length === 1 ? t('config.item') : t('config.items')}</Caption>}
                 <OutputTree data={output} />
               </div>}

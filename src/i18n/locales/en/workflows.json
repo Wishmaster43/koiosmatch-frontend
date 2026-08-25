@@ -71,7 +71,9 @@
     "multiselectLoading": "Loading options…",
     "workflowError": "Workflows could not be loaded.",
     "requiredHint": "Required",
-    "coexistenceOnly": "Coexistence numbers only"
+    "coexistenceOnly": "Coexistence numbers only",
+    "whatsappQueued": "Queued to WhatsApp Web: {{count}}",
+    "waWebSessionOnly": "WhatsApp Web only ever sends session messages (free text); the format is therefore fixed to \"session\"."
   },
   "scheduleModal": {
     "title": "Set schedule",
@@ -218,7 +220,8 @@
     "leads_recount": "Vacancy leads count",
     "experience_add": "Add work experience",
     "sm_employee_create": "Create SM employee",
-    "workflow_call": "Call workflow"
+    "workflow_call": "Call workflow",
+    "workflow": "Workflow"
   },
   "status": {
     "active": "Active",
@@ -785,7 +788,8 @@
     "Instructietekst (agent-prompt)": "Instruction text (agent prompt)",
     "Verzendnummer (voor de sessieantwoorden)": "Sending number (for the session replies)",
     "Terugvaltijd zonder reactie (uren)": "Fallback time without a reply (hours)",
-    "Max pogingen per beurt (bij een tijdelijke API-fout)": "Max. attempts per turn (on a temporary API error)"
+    "Max pogingen per beurt (bij een tijdelijke API-fout)": "Max. attempts per turn (on a temporary API error)",
+    "Gekoppeld nummer": "Linked number"
   },
   "fieldOptions": {
     "Array (meerdere bundles)": "Array (multiple bundles)",
@@ -1081,7 +1085,9 @@
     "Opgeteld bij de dagen (bv 1 dag + 3 uur)": "Added to the days (e.g. 1 day + 3 hours).",
     "Valt het moment in het weekend, dan wordt het maandag op dezelfde tijd": "If the moment falls on a weekend, it moves to Monday at the same time.",
     "De volledige, tenant-bewerkbare instructie voor de AI-agent persona, staps-state-machine, harde regels Het runtime-antwoordcontract wordt automatisch toegevoegd": "The full, tenant-editable instruction for the AI agent: persona, step state machine, hard rules. The runtime response contract is added automatically.",
-    "Reageert de kandidaat niet, dan valt de run na dit aantal uren terug (workflowsresume-due watchdog)": "If the candidate doesn't reply, the run falls back after this many hours (workflows:resume-due watchdog)."
+    "Reageert de kandidaat niet, dan valt de run na dit aantal uren terug (workflowsresume-due watchdog)": "If the candidate doesn't reply, the run falls back after this many hours (workflows:resume-due watchdog).",
+    "Alleen gekoppelde WhatsApp Web-nummers (eigen of vestiging)": "Only connected WhatsApp Web numbers (personal or branch).",
+    "Via WhatsApp Web kan alleen een sessiebericht (vrije tekst) worden verstuurd": "Via WhatsApp Web only a session message (free text) can be sent."
   },
   "triggers": {
     "events": {

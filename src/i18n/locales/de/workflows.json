@@ -67,7 +67,9 @@
     "multiselectLoading": "Optionen werden geladen…",
     "workflowError": "Workflows konnten nicht geladen werden.",
     "requiredHint": "Erforderlich",
-    "coexistenceOnly": "Nur Coexistence-Nummern"
+    "coexistenceOnly": "Nur Coexistence-Nummern",
+    "whatsappQueued": "In die WhatsApp Web-Warteschlange gesetzt: {{count}}",
+    "waWebSessionOnly": "WhatsApp Web sendet ausschließlich Sitzungsnachrichten (Freitext); das Format ist daher fest auf \"Sitzung\" gesetzt."
   },
   "scheduleModal": {
     "title": "Zeitplan festlegen",
@@ -214,7 +216,8 @@
     "leads_recount": "Leads-Zählung der Stellen",
     "experience_add": "Berufserfahrung hinzufügen",
     "sm_employee_create": "SM-Mitarbeiter erstellen",
-    "workflow_call": "Workflow aufrufen"
+    "workflow_call": "Workflow aufrufen",
+    "workflow": "Workflow"
   },
   "status": {
     "active": "Aktiv",
@@ -785,7 +788,8 @@
     "Instructietekst (agent-prompt)": "Anweisungstext (Agent-Prompt)",
     "Verzendnummer (voor de sessieantwoorden)": "Absendernummer (für die Sitzungsantworten)",
     "Terugvaltijd zonder reactie (uren)": "Rückfallzeit ohne Antwort (Stunden)",
-    "Max pogingen per beurt (bij een tijdelijke API-fout)": "Max. Versuche pro Runde (bei einem vorübergehenden API-Fehler)"
+    "Max pogingen per beurt (bij een tijdelijke API-fout)": "Max. Versuche pro Runde (bei einem vorübergehenden API-Fehler)",
+    "Gekoppeld nummer": "Verknüpfte Nummer"
   },
   "fieldOptions": {
     "Array (meerdere bundles)": "Array (mehrere Bundles)",
@@ -1081,7 +1085,9 @@
     "Opgeteld bij de dagen (bv 1 dag + 3 uur)": "Wird zu den Tagen addiert (z. B. 1 Tag + 3 Stunden).",
     "Valt het moment in het weekend, dan wordt het maandag op dezelfde tijd": "Fällt der Zeitpunkt auf ein Wochenende, verschiebt er sich auf Montag zur gleichen Zeit.",
     "De volledige, tenant-bewerkbare instructie voor de AI-agent persona, staps-state-machine, harde regels Het runtime-antwoordcontract wordt automatisch toegevoegd": "Die vollständige, mandantenbearbeitbare Anweisung für den KI-Agenten: Persona, Schritt-Zustandsautomat, feste Regeln. Der Laufzeit-Antwortvertrag wird automatisch hinzugefügt.",
-    "Reageert de kandidaat niet, dan valt de run na dit aantal uren terug (workflowsresume-due watchdog)": "Antwortet der Kandidat nicht, fällt der Lauf nach dieser Anzahl Stunden zurück (workflows:resume-due watchdog)."
+    "Reageert de kandidaat niet, dan valt de run na dit aantal uren terug (workflowsresume-due watchdog)": "Antwortet der Kandidat nicht, fällt der Lauf nach dieser Anzahl Stunden zurück (workflows:resume-due watchdog).",
+    "Alleen gekoppelde WhatsApp Web-nummers (eigen of vestiging)": "Nur verbundene WhatsApp Web-Nummern (eigene oder Standort).",
+    "Via WhatsApp Web kan alleen een sessiebericht (vrije tekst) worden verstuurd": "Über WhatsApp Web kann nur eine Sitzungsnachricht (Freitext) gesendet werden."
   },
   "triggers": {
     "events": {

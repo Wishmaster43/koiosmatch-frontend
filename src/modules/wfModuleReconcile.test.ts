@@ -63,7 +63,7 @@ const EXPECTED_SCHEMA_KEYS: Record<string, string[]> = {
   // those shapes yet (WA-SEND-FIELDS-2); header_variables/variables are written
   // by the composite WhatsappTemplateField.
   whatsapp_send: [
-    'purpose', 'message_type', 'channel', 'phone_number_id', 'template_name', 'language',
+    'purpose', 'message_type', 'channel', 'whatsapp_number_id', 'phone_number_id', 'template_name', 'language',
     'message_category', 'priority_type', 'dedup_hours', 'require_consent_field',
     'throttle_per_minute', 'recipient_field', 'session_text',
   ],

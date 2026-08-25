@@ -67,7 +67,9 @@
     "multiselectLoading": "Cargando opciones…",
     "workflowError": "No se pudieron cargar los workflows.",
     "requiredHint": "Obligatorio",
-    "coexistenceOnly": "Solo números Coexistence"
+    "coexistenceOnly": "Solo números Coexistence",
+    "whatsappQueued": "En cola de WhatsApp Web: {{count}}",
+    "waWebSessionOnly": "WhatsApp Web solo envía mensajes de sesión (texto libre); por eso el formato queda fijado en \"sesión\"."
   },
   "scheduleModal": {
     "title": "Configurar programación",
@@ -214,7 +216,8 @@
     "leads_recount": "Recuento de leads de vacantes",
     "experience_add": "Añadir experiencia laboral",
     "sm_employee_create": "Crear empleado SM",
-    "workflow_call": "Llamar a un workflow"
+    "workflow_call": "Llamar a un workflow",
+    "workflow": "Workflow"
   },
   "status": {
     "active": "Activo",
@@ -785,7 +788,8 @@
     "Instructietekst (agent-prompt)": "Texto de instrucción (prompt del agente)",
     "Verzendnummer (voor de sessieantwoorden)": "Número de envío (para las respuestas de sesión)",
     "Terugvaltijd zonder reactie (uren)": "Tiempo de reserva sin respuesta (horas)",
-    "Max pogingen per beurt (bij een tijdelijke API-fout)": "Máx. intentos por turno (ante un error temporal de la API)"
+    "Max pogingen per beurt (bij een tijdelijke API-fout)": "Máx. intentos por turno (ante un error temporal de la API)",
+    "Gekoppeld nummer": "Número vinculado"
   },
   "fieldOptions": {
     "Array (meerdere bundles)": "Array (varios bundles)",
@@ -1081,7 +1085,9 @@
     "Opgeteld bij de dagen (bv 1 dag + 3 uur)": "Se suma a los días (p. ej. 1 día + 3 horas).",
     "Valt het moment in het weekend, dan wordt het maandag op dezelfde tijd": "Si el momento cae en fin de semana, se traslada al lunes a la misma hora.",
     "De volledige, tenant-bewerkbare instructie voor de AI-agent persona, staps-state-machine, harde regels Het runtime-antwoordcontract wordt automatisch toegevoegd": "La instrucción completa y editable por el cliente para el agente IA: persona, máquina de estados de pasos, reglas estrictas. El contrato de respuesta en tiempo de ejecución se añade automáticamente.",
-    "Reageert de kandidaat niet, dan valt de run na dit aantal uren terug (workflowsresume-due watchdog)": "Si el candidato no responde, la ejecución retrocede tras esta cantidad de horas (workflows:resume-due watchdog)."
+    "Reageert de kandidaat niet, dan valt de run na dit aantal uren terug (workflowsresume-due watchdog)": "Si el candidato no responde, la ejecución retrocede tras esta cantidad de horas (workflows:resume-due watchdog).",
+    "Alleen gekoppelde WhatsApp Web-nummers (eigen of vestiging)": "Solo números de WhatsApp Web conectados (propios o de sucursal).",
+    "Via WhatsApp Web kan alleen een sessiebericht (vrije tekst) worden verstuurd": "A través de WhatsApp Web solo se puede enviar un mensaje de sesión (texto libre)."
   },
   "triggers": {
     "events": {

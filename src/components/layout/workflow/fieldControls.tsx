@@ -199,6 +199,10 @@ export function LookupSelectField({ value, onChange, fieldKey, endpoint, valueKe
   const lookupLabelId = useId()
 
   // Load the lookup values once; accept the common {value|id, label|name} shapes.
+  // K-193 fase 2b: an endpoint may also carry `owner` (user or branch name) and
+  // `scope` ('user'|'location') per option (GET /whatsapp-web-numbers) — kept
+  // additively onto the server's own label, never dropped, so the picker reads
+  // "<label> · <owner>" instead of a bare device name.
   useEffect(() => {
     if (!endpoint) return
     let alive = true
@@ -208,7 +212,12 @@ export function LookupSelectField({ value, onChange, fieldKey, endpoint, valueKe
           ? ((unwrap(r) as Record<string, unknown> | null)?.[responseKey] ?? [])
           : unwrapList(r).rows) as Array<Record<string, unknown>>
         if (alive) setOpts(rows
-          .map(o => ({ value: String((valueKey ? o[valueKey] : undefined) ?? o.value ?? o.id ?? ''), label: String(o.label ?? o.name ?? o.value ?? '') }))
+          .map(o => {
+            const value = String((valueKey ? o[valueKey] : undefined) ?? o.value ?? o.id ?? '')
+            const label = String(o.label ?? o.name ?? o.value ?? '')
+            const owner = typeof o.owner === 'string' && o.owner ? o.owner : undefined
+            return { value, label: owner ? `${label} · ${owner}` : label }
+          })
           .filter(o => o.value))
       })
       .catch(() => {})

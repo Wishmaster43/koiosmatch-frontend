@@ -19,19 +19,34 @@ export default {
     { key: 'purpose',              label: 'Berichtdoel',           type: 'lookup_select', endpoint: '/message-purposes', default: 'manual' },
     // WhatsApp send FORMAT; key stays as the BE contract expects.
     // 'session' = free-form text, only delivered inside Meta's 24h customer-service
-    // window (the BE gates on the conversation's last inbound message).
-    { key: 'message_type',        label: 'Formaat',                type: 'select',  options: ['template','flow','session'] },
+    // window (the BE gates on the conversation's last inbound message). CMBE K-193
+    // fase 2b: WhatsApp Web can only ever send a session message — the builder
+    // auto-sets this (never silently) when `channel` becomes 'wa_web' (ConfigPanel).
+    { key: 'message_type',        label: 'Formaat',                type: 'select',  options: ['template','flow','session'],
+      help: 'Via WhatsApp Web kan alleen een sessiebericht (vrije tekst) worden verstuurd.' },
     // CMBE K-193 fase 0 contract: which WhatsApp channel this step sends over.
     // No `default` on purpose (Danny: no silent fallback to 'waba' in the
     // builder) — the blank placeholder forces an explicit choice, and it
     // filters the sender-number list below when Coexistence is picked.
     { key: 'channel',             label: 'Kanaal',                 type: 'select',  required: true,
       options: ['waba', 'waba_coex', 'wa_web'] },
+    // CMBE K-193 fase 2b: which connected WhatsApp Web device sends this step's
+    // message — a tenant/user's own device or a branch-shared one. Only shown for
+    // the 'wa_web' channel; `phone_number_id` below is ignored server-side then.
+    { key: 'whatsapp_number_id',  label: 'Gekoppeld nummer',       type: 'lookup_select', endpoint: '/whatsapp-web-numbers', required: true,
+      showIf: { key: 'channel', value: 'wa_web' },
+      help: 'Alleen gekoppelde WhatsApp Web-nummers (eigen of vestiging).' },
     // Live options from the tenant's WABA connection (Make parity): active sender
     // numbers + approved templates (the endpoint also returns each template's
     // components for the future per-{{n}} mapping UI). Filtered to Coexistence
-    // numbers when `channel` is 'waba_coex'.
-    { key: 'phone_number_id',     label: 'Afzender',               type: 'whatsapp_phone_number', endpoint: '/whatsapp-phone-numbers' },
+    // numbers when `channel` is 'waba_coex'; hidden entirely for 'wa_web', where
+    // the whatsapp_number_id field above is authoritative and this key is ignored.
+    // `undefined` is included alongside the two enum values: the `channel` field
+    // deliberately carries no builder default (no silent 'waba' fallback), but the
+    // BACKEND defaults a missing/legacy channel to 'waba' and still requires this
+    // field there — an unset channel must not hide an already-stored sender.
+    { key: 'phone_number_id',     label: 'Afzender',               type: 'whatsapp_phone_number', endpoint: '/whatsapp-phone-numbers',
+      showIf: { key: 'channel', value: ['waba', 'waba_coex', undefined] } },
     // Recipient override: empty = each bundle's own mobile; a literal 06-number
     // redirects EVERY message there (dry-run testing, Danny 2026-07-09).
     { key: 'recipient_field',     label: 'Ontvanger',              type: 'text',
