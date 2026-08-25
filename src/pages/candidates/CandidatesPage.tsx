@@ -268,7 +268,9 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
     notifyMsg: m => notify(m.type, m.text, m.action), t,
     markGoneClose: () => markGoneCloseRef.current() })
   // Open a candidate drawer when arriving via a dashboard/cross-entity link ({ open: id }).
-  useOpenFromIntent(intent, (id) => selectCandidate({ id } as Candidate))
+  // The intent may carry a drawer tab (a conversation deep link lands on
+  // Communicatie › Conversaties) — forward it, never drop it (WHATSAPP-PAGINA-ONDERZOEK-1).
+  useOpenFromIntent(intent, (id, tab) => selectCandidate({ id } as Candidate, tab))
 
   // Mirror the open drawer in the URL (?open=<id>): browser back/forward walks
   // through it and a copied link reopens the same candidate (NAV-BACK-1 — Danny
