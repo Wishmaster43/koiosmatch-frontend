@@ -61,6 +61,9 @@ const data: OutreachReportData = {
     { owner_id: 'u1', name: 'Anna de Vries', count: 30 },
     { owner_id: 'none', name: 'Niet toegewezen', count: 10 },
   ],
+  channel_funnel: [
+    { channel: 'call', total: 12, reached: 8, applied: 3, placed: 1 },
+  ],
   by_channel: [
     { value: 'phone', label: 'Telefoon', count: 26 },
     { value: 'whatsapp', label: 'WhatsApp', count: 9 },
@@ -109,6 +112,17 @@ vi.mock('@/components/charts/PieChartCard', () => ({
 vi.mock('@/components/charts/BarChartCard', () => ({
   default: ({ data, onBarClick }: { data?: StubDatum[]; onBarClick?: (d: StubDatum) => void }) => (
     <>{(data ?? []).map(d => <button key={d.key} onClick={() => onBarClick?.(d)}>{d.name}</button>)}</>
+  ),
+}))
+// WeeklyBarChartCard backs the depth 'channel funnel' bar chart — same stub
+// idiom, but one button per (row, series) so a series-specific click (only
+// 'total' drills) can be fired directly.
+type StubSeries = { key: string; label: string }
+vi.mock('@/components/charts/WeeklyBarChartCard', () => ({
+  default: ({ data, series, onBarClick }: { data?: StubDatum[]; series?: StubSeries[]; onBarClick?: (row: unknown, s: StubSeries) => void }) => (
+    <>{(data ?? []).flatMap(d => (series ?? []).map(s => (
+      <button key={`${d.key}-${s.key}`} onClick={() => onBarClick?.(d, s)}>{d.name}-{s.key}</button>
+    )))}</>
   ),
 }))
 
@@ -279,6 +293,17 @@ describe('OutreachReport (RAPPORTEN-SUITE-1 portie 6, bellijsten report)', () =>
     await user.click(screen.getAllByText('Niet toegewezen').at(-1)!)
     expect(getSpy).toHaveBeenCalledWith('/reports/outreach/drill',
       expect.objectContaining({ params: { assignee: 'none', period: 'month' } }))
+  })
+
+  // DASH-FEEDS-V3 depth: the channel-funnel bar chart's onChannel seam — only
+  // the 'total' series bar drills, carrying the channel value as the XOR param.
+  it('clicking the channel-funnel total bar drills with the channel XOR param', async () => {
+    const user = userEvent.setup()
+    mockUseOutreachReport.mockReturnValue({ data, loading: false, error: false })
+    renderReport()
+    await user.click(screen.getByText(`${i18n.t('outreach.depth.channel.call', { ns: 'analytics' })}-total`))
+    expect(getSpy).toHaveBeenCalledWith('/reports/outreach/drill',
+      expect.objectContaining({ params: { channel: 'call', period: 'month' } }))
   })
 
   it('clicking a channel bar drills with the channel XOR param (incl. the none sentinel)', async () => {

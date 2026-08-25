@@ -321,6 +321,32 @@ describe('VacanciesReport (RAPPORTEN-SUITE-1 portie 4, additive on C-34)', () =>
       expect.objectContaining({ params: { vacancy: 'v1', period: 'month' } }))
   })
 
+  // DASH-FEEDS-V3 depth: the four depth sections render from the fixture, and
+  // the aging row's title click drills the same as a table row (vacancy XOR).
+  // Depth fields are scoped to this one test (not the shared fixture): the
+  // aging table's own 'Vacature' column header would otherwise collide with
+  // the main per-vacancy table's identical header across every other test.
+  it('renders the four depth sections and drills an aging row on its title', async () => {
+    const user = userEvent.setup()
+    const depthData: VacanciesReportData = {
+      ...data,
+      ttf_decomposition: { published_to_first_application: 3, first_application_to_proposal: 2, proposal_to_match: 1 },
+      fill_rate_timeseries: [{ date: '2026-08-01', total: 5, filled: 2, rate: 40 }],
+      fill_rate_by_branch: [{ branch_id: 'b1', branch: 'Utrecht', total: 5, filled: 2, rate: 40 }],
+      aging: [{ id: 'v9', title: 'Aging vacature', days_open: 42, recruiter: null, candidates_in_process: 2 }],
+    }
+    mockUseVacanciesReport.mockReturnValue({ data: depthData, loading: false, error: false })
+    renderReport()
+    expect(screen.getByText(i18n.t('vacancies.depth.ttf.title', { ns: 'analytics' }))).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('vacancies.depth.fillRateSeries.title', { ns: 'analytics' }))).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('vacancies.depth.fillRateBranch.title', { ns: 'analytics' }))).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('vacancies.depth.aging.title', { ns: 'analytics' }))).toBeInTheDocument()
+    await user.click(screen.getByText('Aging vacature'))
+    expect(lastDrillParams()).toEqual({ vacancy: 'v9', period: 'month' })
+    expect(getSpy).toHaveBeenCalledWith('/reports/vacancies/advice',
+      expect.objectContaining({ params: { vacancy: 'v9', period: 'month' } }))
+  })
+
   // Exactly nine KPI cards (§ report-KPI-9 sweep): the five legacy summary tiles
   // plus four new ones derived from fields the endpoint already returns — the
   // PDF-VACATURES point 31 "online without candidates" signal, a distinct-

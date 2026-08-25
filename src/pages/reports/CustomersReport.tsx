@@ -54,6 +54,8 @@ import { useReportCompare } from './useReportCompare'
 import ReportCompareMetric from './ReportCompareMetric'
 import { COMPARE_OFF } from './reportCompareMode'
 import type { ReportCompareMode } from './reportCompareMode'
+import { useNavigation } from '@/context/NavigationContext'
+import CustomerDepthSections from './depth/CustomerDepthSections'
 
 // The four plain axes; `param` is the XOR query key the drill/advice endpoints expect.
 // Deliberately no 'source' — see the header comment.
@@ -97,6 +99,7 @@ export default function CustomersReport({ period, filters = EMPTY_REPORT_FILTERS
 }) {
   const { t } = useTranslation('analytics')
   const { formatDate } = useDateFormat()
+  const { openEntity } = useNavigation()
   const { phases } = useCustomerPhases()
   const [view, setView] = useReportSwitch(VIEWS, initialView)
   const isProspects = view === 'prospects'
@@ -324,9 +327,15 @@ export default function CustomersReport({ period, filters = EMPTY_REPORT_FILTERS
           <ReportChartCard title={t('customers.axes.owner')} chart={
             <BarChartCard data={ownerBarData(data.by_owner)} onBarClick={pickOwnerBar(data.by_owner)} />} />
 
-          {/* Last odd card spans the full row — no empty grid hole (uitlijning). */}
+          {/* By-branch card spans the full row: it keeps span=2 even after the
+              depth block below it (four halves + one span=2 cohorts card = even). */}
           <ReportChartCard span={2} title={t('customers.axes.branch')} chart={
             <BarChartCard data={barData(data.by_branch)} onBarClick={pickBar('branch', data.by_branch)} />} />
+
+          {/* Depth block (RAPPORT-DIEPTE-1): concentration, churn, per-owner and
+              cohort sections. Four halves + the cohorts span-2 card keeps the
+              grid parity even after the branch card's own span=2. */}
+          <CustomerDepthSections data={data} onOpenCustomer={id => openEntity('customers', id)} />
         </ReportGrid>
       )}
 

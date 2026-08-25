@@ -23,6 +23,7 @@ import { BodyText, Caption, Mono } from '@/components/ui/typography'
 import ReportDrillDrawer from './ReportDrillDrawer'
 import type { DrillSpec } from './ReportDrillDrawer'
 import VacancyReportAxes from './VacancyReportAxes'
+import VacancyDepthSections from './depth/VacancyDepthSections'
 import { useVacanciesReport } from './useVacanciesReport'
 import { gateDrillClick } from './reportDrillGate'
 import { EMPTY_REPORT_FILTERS, buildReportQueryParams } from './reportFilterParams'
@@ -109,6 +110,24 @@ export default function VacanciesReport({ period, filters = EMPTY_REPORT_FILTERS
     title: label, value, subtitle: windowSub(),
     entityPage: 'vacancies',
     rowsEndpoint: '/reports/vacancies/kpis/drill', rowsParams: { ...baseParams, kpi },
+  })
+  // DASH-FEEDS-V3 depth: the aging table's row click, same endpoints/window as
+  // openVacancyRow. The drawer's rows are ALL applications of the vacancy
+  // (rowsEndpoint has no stage filter), so the headline value must be that same
+  // population, not the non-terminal-only candidates_in_process count — the
+  // latter is shown as a labelled breakdown line instead (kaartdrill-invariant).
+  const onAgingRow = (row: { id: string; title: string; days_open: number; candidates_in_process: number }) => setDrill({
+    // The headline number is candidates_in_process (non-terminal only), so the
+    // subtitle NAMES what it counts — the drawer's own rows below it are the
+    // vacancy's full application list, a larger population by design.
+    title: row.title, value: row.candidates_in_process,
+    subtitle: `${t('vacancies.depth.aging.cols.inProcess')} · ${windowSub()}`,
+    breakdown: [
+      { label: t('vacancies.depth.aging.cols.inProcess'), value: row.candidates_in_process },
+      { label: t('vacancies.depth.aging.cols.daysOpen'), value: row.days_open },
+    ],
+    rowsEndpoint: '/reports/vacancies/drill', rowsParams: { ...baseParams, vacancy: row.id },
+    adviceEndpoint: '/reports/vacancies/advice', adviceParams: { ...baseParams, vacancy: row.id },
   })
   const openBucket = (pt: CandidateTimeseriesPoint) => setDrill({
     title: pt.label, value: pt.value, subtitle: windowSub(),
@@ -306,6 +325,9 @@ export default function VacanciesReport({ period, filters = EMPTY_REPORT_FILTERS
         <ReportGrid>
           {/* Timeseries + the six segment axes (portie pattern) */}
           <VacancyReportAxes data={data} onSegment={openSegment} onBucket={openBucket} />
+
+          {/* DASH-FEEDS-V3 depth blocks: ttf/fill-rate-series/fill-rate-branch/aging. */}
+          <VacancyDepthSections data={data} onAgingRow={gateDrillClick('vacancies', onAgingRow)} />
 
           {/* Per-vacancy table (unchanged C-34 behaviour) — row click drills into
               that vacancy's own applications. Wide table, full row. */}

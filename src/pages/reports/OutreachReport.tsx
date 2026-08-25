@@ -48,6 +48,7 @@ import ReportCompareMetric from './ReportCompareMetric'
 import { COMPARE_OFF } from './reportCompareMode'
 import type { ReportCompareMode } from './reportCompareMode'
 import type { ReportFilterState } from './reportFilterParams'
+import OutreachDepthSections from './depth/OutreachDepthSections'
 
 // The plain single-value XOR axes; `assignee` has its own D2 shape below.
 type Axis = 'campaign' | 'channel' | 'status' | 'outcome'
@@ -236,6 +237,11 @@ export default function OutreachReport({ period, filters, compare = COMPARE_OFF 
               total → donut. Last odd card spans the full row (no grid hole). */}
           <ReportChartCard span={2} title={t('outreach.axes.outcome')} chart={
             <PieChartCard {...donutData(data.by_outcome)} onItemClick={pickSegment('outcome', data.by_outcome)} />} />
+
+          {/* DASH-FEEDS-V3 depth: channel funnel + best-contact heatmap (halves,
+              even parity) + the campaign timeseries last, span 2. */}
+          <OutreachDepthSections data={data}
+            onChannel={gateDrillClick('outreach', (channel: string, total: number) => openSegment({ label: t(`outreach.depth.channel.${channel}`, { defaultValue: channel }), count: total }, { channel }))} />
         </ReportGrid>
       )}
 
