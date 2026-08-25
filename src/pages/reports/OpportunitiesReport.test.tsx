@@ -200,6 +200,23 @@ describe('OpportunitiesReport (RAPPORTEN-SUITE-1 portie 5, kansen pipeline repor
       expect.objectContaining({ params: { kpi: 'total', period: 'month' } }))
   })
 
+  // ACTIVE-KPI-CARD-1 (mirrors CandidatesReport.tsx:228): the card whose drill is
+  // open reads as selected, and closing the drawer clears it again.
+  it('marks the total KPI card active while its drill is open, and clears it on close', async () => {
+    const user = userEvent.setup()
+    mockUseOpportunitiesReport.mockReturnValue({ data, loading: false, error: false })
+    renderReport()
+    // jsdom does not resolve CSS custom properties via toHaveStyle, so assert
+    // the raw style attribute string instead of the computed value.
+    const totalCard = screen.getByRole('button', { name: /Totaal kansen/ })
+    expect(totalCard.getAttribute('style')).toContain('border-color: var(--border)')
+    await user.click(screen.getByText('Totaal kansen'))
+    expect(totalCard.getAttribute('style')).toContain('border-color: var(--color-primary)')
+    // Closing the drawer clears the active state again.
+    await user.click(screen.getByRole('button', { name: /close|sluiten/i }))
+    expect(totalCard.getAttribute('style')).toContain('border-color: var(--border)')
+  })
+
   // WAVE-1B: closingSoon maps onto kpi=closing_soon (distinct from the plain
   // /reports/opportunities/drill route, which has no matching XOR key).
   it('clicking the closingSoon KPI card drills via /reports/opportunities/kpis/drill with kpi=closing_soon', async () => {

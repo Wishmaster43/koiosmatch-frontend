@@ -174,30 +174,44 @@ export default function OpportunitiesReport({ period, filters = EMPTY_REPORT_FIL
     segs.filter(x => x.value !== 'none' && x.value !== 'others').sort((a, b) => b.count - a.count)[0]
   const topStage = topReal(data?.by_stage ?? [])
   const topCustomer = topReal(data?.by_customer ?? [])
+  // ACTIVE-KPI-CARD-1 (mirrors CandidatesReport.tsx:228): the card whose drill is
+  // currently open reads as selected. A kpis/drill card matches on its own enum
+  // value; the two top-segment spares (no `kpi` param, XOR stage/customer instead)
+  // match on their own axis param.
+  const openKpiParams = drill?.rowsParams as Record<string, unknown> | undefined
   const kpiByKey: Record<string, KpiSpec> = {
     total:   { key: 'total',   label: t('opportunities.total'),           value: total,
       sub: totalCompare ? <ReportCompareMetric metric={totalCompare} polarity="up-good" /> : undefined,
+      active: openKpiParams?.kpi === 'total',
       onClick: gateDrillClick('opportunities', () => openKpiDrill(t('opportunities.total'), total, 'total')) },
     open:    { key: 'open',    label: t('opportunities.summary.open'),    value: s?.open ?? 0,
+      active: openKpiParams?.kpi === 'open',
       onClick: gateDrillClick('opportunities', () => openKpiDrill(t('opportunities.summary.open'), s?.open ?? 0, 'open')) },
     won:     { key: 'won',     label: t('opportunities.summary.won'),     value: s?.won ?? 0,
       color: s?.won ? OPP_COLOR.won : undefined,
+      active: openKpiParams?.kpi === 'won',
       onClick: gateDrillClick('opportunities', () => openKpiDrill(t('opportunities.summary.won'), s?.won ?? 0, 'won')) },
     lost:    { key: 'lost',    label: t('opportunities.summary.lost'),    value: s?.lost ?? 0,
       color: s?.lost ? OPP_COLOR.lost : undefined,
+      active: openKpiParams?.kpi === 'lost',
       onClick: gateDrillClick('opportunities', () => openKpiDrill(t('opportunities.summary.lost'), s?.lost ?? 0, 'lost')) },
     winRate: { key: 'winRate', label: t('opportunities.summary.winRate'),
       value: formatPercent(s?.win_rate),
+      active: openKpiParams?.kpi === 'win_rate',
       onClick: gateDrillClick('opportunities', () => openKpiDrill(t('opportunities.summary.winRate'), formatPercent(s?.win_rate), 'win_rate')) },
     untouched: { key: 'untouched', label: t('opportunities.stale.untouched'), value: data?.stale.untouched ?? 0,
       color: data?.stale.untouched ? OPP_COLOR.untouched : undefined,
+      active: openKpiParams?.kpi === 'untouched',
       onClick: gateDrillClick('opportunities', () => openKpiDrill(t('opportunities.stale.untouched'), data?.stale.untouched ?? 0, 'untouched')) },
     overdue:   { key: 'overdue',   label: t('opportunities.stale.overdue'),   value: data?.stale.overdue ?? 0,
       color: data?.stale.overdue ? OPP_COLOR.overdue : undefined,
+      active: openKpiParams?.kpi === 'overdue',
       onClick: gateDrillClick('opportunities', () => openKpiDrill(t('opportunities.stale.overdue'), data?.stale.overdue ?? 0, 'overdue')) },
     forecastCount: { key: 'forecastCount', label: t('opportunities.forecastCount'), value: forecastCount,
+      active: openKpiParams?.kpi === 'forecast_count',
       onClick: gateDrillClick('opportunities', () => openKpiDrill(t('opportunities.forecastCount'), forecastCount, 'forecast_count')) },
     forecastValue: { key: 'forecastValue', label: t('opportunities.forecastValue'), value: formatCurrency(forecastValue, 'EUR', 0),
+      active: openKpiParams?.kpi === 'forecast_value',
       onClick: gateDrillClick('opportunities', () => openKpiDrill(t('opportunities.forecastValue'), formatCurrency(forecastValue, 'EUR', 0), 'forecast_value')) },
     // Spares: real money fields already in `totals` (money via formatCurrency,
     // never a raw number) + the two top-segment picks above. openValue maps 1:1
@@ -205,13 +219,16 @@ export default function OpportunitiesReport({ period, filters = EMPTY_REPORT_FIL
     // value (measured — the enum stops at open_value) so it stays a plain,
     // honest, non-clickable stat (no fake affordances).
     openValue: { key: 'openValue', label: t('opportunities.summary.openValue'), value: formatCurrency(s?.open_value ?? 0, 'EUR', 0),
+      active: openKpiParams?.kpi === 'open_value',
       onClick: gateDrillClick('opportunities', () => openKpiDrill(t('opportunities.summary.openValue'), formatCurrency(s?.open_value ?? 0, 'EUR', 0), 'open_value')) },
     wonValue:  { key: 'wonValue',  label: t('opportunities.summary.wonValue'),  value: formatCurrency(s?.won_value ?? 0, 'EUR', 0) },
     topStage: { key: 'topStage', label: t('opportunities.summary.topStage'),
       value: topStage ? `${topStage.label} · ${topStage.count}` : '—',
+      active: !!topStage && openKpiParams?.stage === topStage.value,
       onClick: topStage ? gateDrillClick('opportunities', () => openSegment(topStage, { stage: topStage.value })) : undefined },
     topCustomer: { key: 'topCustomer', label: t('opportunities.summary.topCustomer'),
       value: topCustomer ? `${topCustomer.label} · ${topCustomer.count}` : '—',
+      active: !!topCustomer && openKpiParams?.customer === topCustomer.value,
       onClick: topCustomer ? gateDrillClick('opportunities', () => openSegment(topCustomer, { customer: topCustomer.value })) : undefined },
     // KPI-DREMPELS-FE-1: totals.stale / totals.closing_soon (additive, distinct from
     // the older top-level `stale` object above — a different, updated_at-based
@@ -221,10 +238,12 @@ export default function OpportunitiesReport({ period, filters = EMPTY_REPORT_FIL
     staleDeal: { key: 'staleDeal', label: t('opportunities.summary.staleDeal'), value: s?.stale ?? 0,
       color: s?.stale ? OPP_COLOR.staleDeal : undefined,
       sub: s?.stale_days != null ? t('thresholdDays', { n: s.stale_days }) : undefined,
+      active: openKpiParams?.kpi === 'stale',
       onClick: gateDrillClick('opportunities', () => openKpiDrill(t('opportunities.summary.staleDeal'), s?.stale ?? 0, 'stale')) },
     closingSoon: { key: 'closingSoon', label: t('opportunities.summary.closingSoon'), value: s?.closing_soon ?? 0,
       color: s?.closing_soon ? OPP_COLOR.closingSoon : undefined,
       sub: s?.closing_soon_days != null ? t('thresholdDays', { n: s.closing_soon_days }) : undefined,
+      active: openKpiParams?.kpi === 'closing_soon',
       onClick: gateDrillClick('opportunities', () => openKpiDrill(t('opportunities.summary.closingSoon'), s?.closing_soon ?? 0, 'closing_soon')) },
   }
   // Which nine keys render, and in what order, is the tenant's Settings → Reports
