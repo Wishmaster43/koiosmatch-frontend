@@ -11,6 +11,7 @@
  * [] and re-hit the aggregation on every change → felt like a full reload).
  */
 import { useMemo } from "react"
+import { useTranslation } from "react-i18next"
 import { useQuery, keepPreviousData } from "@tanstack/react-query"
 import api, { unwrapList } from "@/lib/api"
 import { SERIES, monthAbbr, YEAR_OPACITY, QUARTERS, yearTint } from "./shiftsChartsConfig"
@@ -52,6 +53,7 @@ export function useShiftsChartData({
   // (null/hidden falls back to the first visible series — see barSeries below).
   multiYearMetric?: string | null
 }) {
+  const { t } = useTranslation('shiftmanager')
   // Available filter options — cached ~5 min (rarely changes).
   const filterOptionsQ = useQuery({
     queryKey: ['sm_reports', 'shifts-filter-options'],
@@ -107,7 +109,7 @@ export function useShiftsChartData({
   })
   const rows    = rowsQ.data ?? EMPTY_ROWS
   const loading = rowsQ.isLoading
-  const error   = rowsQ.isError ? ((rowsQ.error as Error)?.message ?? "Laden mislukt") : null
+  const error   = rowsQ.isError ? ((rowsQ.error as Error)?.message ?? t('charts.loadError')) : null
 
   // Index rows by "YYYY-MM" for fast lookup.
   const byYearMonth = useMemo(
@@ -228,7 +230,7 @@ export function useShiftsChartData({
         }
       }
     }
-    // Invulgraad = (prognose − niet ingevuld) ÷ prognose, huidige maand (uren-basis).
+    // Fill rate = (prognose − niet_ingevuld) ÷ prognose, for the current month, hours-based.
     const fillRateMonth = mH.prognose ? Math.round(((mH.prognose - mH.niet_ingevuld) / mH.prognose) * 100) : null
     return { filterHours: fH, filterShifts: fC, monthHours: mH, monthShifts: mC, fillRateMonth }
   }, [chartData, selectedYears])

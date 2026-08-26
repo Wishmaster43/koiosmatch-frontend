@@ -7,7 +7,7 @@ import { useReportCandidates } from './useReportCandidates'
 import type { ReportCandidate } from '@/types/reports'
 import type { ChartDatum } from '../charts/chartTypes'
 import {
-  getLoginGroup, LOGIN_GROUP_ORDER,
+  getLoginGroup, getLoginGroupOrder,
   groupAndCount, toChartData,
   groupByMonth, groupByWeek, getAvailableYears, topN,
 } from '@/lib/chartHelpers'
@@ -27,9 +27,9 @@ const MONTH_COLOR  = 'var(--color-primary)'
 const SAP_BLUE     = '#0064d2' // Used as the primary house color
 const END_COLOR    = 'var(--color-danger)'
 
-// Month labels used to match chart bars back to candidates in drill-downs
-// (must mirror the labels chartHelpers.groupByMonth produces).
-const MONTHS_NL = ['Jan','Feb','Mrt','Apr','Mei','Jun','Jul','Aug','Sep','Okt','Nov','Dec']
+// Month label for a date, in the given locale, to match chart bars back to
+// candidates in drill-downs (must mirror the label chartHelpers.groupByMonth produces).
+const monthLabel = (date: Date, locale: string) => new Intl.DateTimeFormat(locale, { month: 'short' }).format(date)
 
 // ISO week number for a date; drives the week-chart labels and the drill-down match below.
 function getWeekNumber(date: Date) {
@@ -46,7 +46,11 @@ function getWeekNumber(date: Date) {
  * or inline sidebar). KPI targets come from useKpiSettings.
  */
 export default function CandidatesReport() {
-  const { t } = useTranslation('reports')
+  const { t, i18n } = useTranslation('reports')
+  // Translated fallback label for a missing position/city value, shown as the chart
+  // category. Memoized (not just a plain const) so it is a stable reactive value the
+  // react-compiler can reconcile as a dependency of the memos below.
+  const unknownLabel = useMemo(() => t('report.unknown'), [t])
   const { candidates_per_page, top_cities_n } = useKpiSettings()
   // ── Data & filter state ───────────────────────────────────────────────────
   // Data (fetch) lives in the shared hook (§3); this component only derives + renders.
@@ -63,7 +67,7 @@ export default function CandidatesReport() {
 
   // ── Filtered datasets ─────────────────────────────────────────────────────
   const baseFiltered = candidates.filter(c => {
-    const p = c.position || 'Onbekend'
+    const p = c.position || unknownLabel
     return selectedPositions.length === 0 || selectedPositions.includes(p)
   })
 
@@ -79,13 +83,13 @@ export default function CandidatesReport() {
 
   // ── Chart data ────────────────────────────────────────────────────────────
   // chartHelpers returns its own {name,value} shape; cast to the charts' ChartDatum (adds the recharts index signature).
-  const positionData   = toChartData(groupAndCount(filteredGeneral, c => c.position)) as ChartDatum[]
-  const loginData      = toChartData(groupAndCount(filteredGeneral, c => getLoginGroup(c.last_login_at)), LOGIN_GROUP_ORDER) as ChartDatum[]
-  const monthData      = groupByMonth(filteredGeneral, selectedYear) as ChartDatum[]
+  const positionData   = toChartData(groupAndCount(filteredGeneral, c => c.position, unknownLabel)) as ChartDatum[]
+  const loginData      = toChartData(groupAndCount(filteredGeneral, c => getLoginGroup(c.last_login_at, t)), getLoginGroupOrder(t)) as ChartDatum[]
+  const monthData      = groupByMonth(filteredGeneral, selectedYear, 'registration_date', i18n.language) as ChartDatum[]
   const weekData       = groupByWeek(filteredGeneral, selectedYear) as ChartDatum[]
-  const endMonthData   = groupByMonth(filteredDeleted, selectedYear, 'end_date_employment') as ChartDatum[]
+  const endMonthData   = groupByMonth(filteredDeleted, selectedYear, 'end_date_employment', i18n.language) as ChartDatum[]
   const endWeekData    = groupByWeek(filteredDeleted, selectedYear, 'end_date_employment') as ChartDatum[]
-  const cityData       = topN(filteredGeneral, c => (c.city as string) || 'Onbekend', top_cities_n) as ChartDatum[]
+  const cityData       = topN(filteredGeneral, c => (c.city as string) || unknownLabel, top_cities_n, unknownLabel) as ChartDatum[]
   
   // useMemo prevents a new array reference on every render
   const availableYears = useMemo(() => getAvailableYears(candidates), [candidates])
@@ -95,10 +99,10 @@ export default function CandidatesReport() {
     setDrillDown({ title, subtitle, candidates: items })
 
   const handlePositionDrillDown  = (data: unknown) => { const name = (data as ChartDatum).name; openDrillDown(name, t('report.sub.position'),
-    filteredGeneral.filter(c => (c.position || 'Onbekend') === name)) }
+    filteredGeneral.filter(c => (c.position || unknownLabel) === name)) }
 
   const handleLoginDrillDown = (data: unknown) => { const name = (data as ChartDatum).name; openDrillDown(name, t('report.sub.lastLogin'),
-    filteredGeneral.filter(c => getLoginGroup(c.last_login_at) === name)) }
+    filteredGeneral.filter(c => getLoginGroup(c.last_login_at, t) === name)) }
 
   // Bar click on the monthly registration chart: opens the drawer with the candidates
   // registered in that month (of the selected year, if any).
@@ -108,7 +112,7 @@ export default function CandidatesReport() {
       if (!c.registration_date) return false
       const date = new Date(c.registration_date)
       if (selectedYear && date.getFullYear() !== selectedYear) return false
-      return MONTHS_NL[date.getMonth()] === monthName
+      return monthLabel(date, i18n.language) === monthName
     }))
   }
 
@@ -124,7 +128,7 @@ export default function CandidatesReport() {
   }
 
   const handleCityDrillDown = (data: unknown) => { const name = (data as ChartDatum).name; openDrillDown(name, t('report.sub.city'),
-    filteredGeneral.filter(c => (c.city || 'Onbekend') === name)) }
+    filteredGeneral.filter(c => (c.city || unknownLabel) === name)) }
 
   // Deregistration counterpart of handleMonthDrillDown: filters the deleted-status set
   // by end_date_employment instead of registration_date.
@@ -134,7 +138,7 @@ export default function CandidatesReport() {
       if (!c.end_date_employment) return false
       const date = new Date(c.end_date_employment)
       if (selectedYear && date.getFullYear() !== selectedYear) return false
-      return MONTHS_NL[date.getMonth()] === monthName
+      return monthLabel(date, i18n.language) === monthName
     }))
   }
 
@@ -156,8 +160,8 @@ export default function CandidatesReport() {
 
   // Distinct sorted position list for the filter panel; only recomputed when candidates change.
   const allPositions = useMemo(() =>
-    [...new Set(candidates.map(c => c.position||'Onbekend'))].sort(),
-    [candidates])
+    [...new Set(candidates.map(c => c.position||unknownLabel))].sort(),
+    [candidates, unknownLabel])
 
   // Builds the RightPanelContext filter config; memoized so the shared panel doesn't
   // re-render on every keystroke unrelated to these dependencies.
@@ -198,10 +202,10 @@ export default function CandidatesReport() {
       onToggle: (v: string) => setSelectedPositions(p => p.includes(v) ? p.filter(s => s !== v) : [...p, v]),
       options: allPositions.map(p => ({
         value: p, label: p,
-        count: candidates.filter(c => (c.position||'Onbekend') === p).length,
+        count: candidates.filter(c => (c.position||unknownLabel) === p).length,
       })),
     },
-  ], [t, showPercent, selectedYear, selectedStatuses, selectedPositions, allStatuses, allPositions, availableYears, candidates])
+  ], [t, showPercent, selectedYear, selectedStatuses, selectedPositions, allStatuses, allPositions, availableYears, candidates, unknownLabel])
 
   // Keeps this report's filter groups mirrored into the shared right panel whenever they
   // change, and deregisters them on unmount so a stale entry doesn't linger for other pages.

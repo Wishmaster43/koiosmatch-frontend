@@ -116,16 +116,25 @@ export default function WhatsappReport({ period, filters }: { period: ReportPeri
   // categorical breakdowns (2-4 values, no lookup colour field) → donuts falling
   // back to the house series. Each slice still drills on its own RAW server
   // `value`, never the translated label (§ contract discipline).
-  const donutData = (segs: WhatsappSegment[]): { data: ChartDatum[]; colors: string[] } => ({
-    data: segs.map(s => ({ name: s.label, value: s.count, key: s.value })),
+  // Direction/type/escalated donut labels: per-enum-value translation, falling
+  // back to the server's own label when no locale key exists yet for that axis
+  // value — mirrors channelDonutData below so no axis stays an untranslated island.
+  // `escalated` is a fixed two-value server enum (WhatsappReport.php by_escalated:
+  // escalated/normal) and is fully translated via whatsapp.axes.escalatedValues.
+  // `type` (message_type) is NOT a fixed enum — it is an open per-message column
+  // with a `none` sentinel (WhatsappReport.php ~380-385) — so it deliberately
+  // stays on the server-label passthrough here rather than a translated map.
+  const donutData = (axis: 'direction' | 'type' | 'escalated', segs: WhatsappSegment[]): { data: ChartDatum[]; colors: string[] } => ({
+    data: segs.map(s => ({ name: t(`whatsapp.axes.${axis}Values.${s.value}`, { defaultValue: s.label }), value: s.count, key: s.value })),
     colors: segs.map((_, i) => CHART_SERIES_COLORS[i % CHART_SERIES_COLORS.length]),
   })
   const pickSegment = (axis: 'direction' | 'type' | 'escalated' | 'channel', segs: WhatsappSegment[]) =>
     gateDrillClick('whatsapp', (d: unknown) => {
       const key = (d as { key?: string })?.key ?? (d as { payload?: { key?: string } })?.payload?.key
       const seg = segs.find(s => s.value === key)
-      // The channel axis titles its drawer with the same translated label the donut shows.
-      if (seg) openAxisDrill(axis, axis === 'channel' ? t(`whatsapp.channel.${seg.value}`, { defaultValue: seg.label }) : seg.label, seg.count, seg.value)
+      // Every axis titles its drawer with the same translated label its donut shows.
+      const translatedKey = axis === 'channel' ? `whatsapp.channel.${seg?.value}` : `whatsapp.axes.${axis}Values.${seg?.value}`
+      if (seg) openAxisDrill(axis, t(translatedKey, { defaultValue: seg.label }), seg.count, seg.value)
     })
   // Channel donut labels: per-enum-value translation (nl "WABA" / "WABA · lokaal"
   // / "WA Web"), falling back to the server's own label only when a locale key
@@ -225,11 +234,11 @@ export default function WhatsappReport({ period, filters }: { period: ReportPeri
               channel card present the grid holds four halves (even parity), so
               escalated shrinks back to a half card. */}
           <ReportChartCard title={t('whatsapp.axes.direction')} chart={
-            <PieChartCard {...donutData(data.by_direction)} onItemClick={pickSegment('direction', data.by_direction)} />} />
+            <PieChartCard {...donutData('direction', data.by_direction)} onItemClick={pickSegment('direction', data.by_direction)} />} />
           <ReportChartCard title={t('whatsapp.axes.type')} chart={
-            <PieChartCard {...donutData(data.by_type)} onItemClick={pickSegment('type', data.by_type)} />} />
+            <PieChartCard {...donutData('type', data.by_type)} onItemClick={pickSegment('type', data.by_type)} />} />
           <ReportChartCard span={hasChannel ? undefined : 2} title={t('whatsapp.axes.escalated')} chart={
-            <PieChartCard {...donutData(data.by_escalated)} onItemClick={pickSegment('escalated', data.by_escalated)} />} />
+            <PieChartCard {...donutData('escalated', data.by_escalated)} onItemClick={pickSegment('escalated', data.by_escalated)} />} />
           {/* Channel donut (K-193 fase 0) — rendered only when the envelope
               carries it. Drills through axis='channel' (CMBE 4878fb76), same
               window/panel filters as every other axis on this report. */}

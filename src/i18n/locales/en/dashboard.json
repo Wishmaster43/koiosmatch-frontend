@@ -105,6 +105,7 @@
     "byRecruiter": "Candidates by recruiter",
     "funnel": "Application funnel",
     "byStage": "Opportunities by stage",
+    "oppStageUnavailable": "Opportunity stage data not available.",
     "intakeOverTime": "Inflow over time",
     "intakeWeekly": "Candidate & application inflow (weekly)",
     "series": {

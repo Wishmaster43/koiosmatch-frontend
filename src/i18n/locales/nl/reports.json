@@ -34,7 +34,8 @@
       "intake": "Intake",
       "verwijderd": "Verwijderd",
       "onbekend": "Onbekend"
-    }
+    },
+    "loadError": "Kon kandidaten niet laden."
   },
   "customers": {
     "title": "Details — Klanten",
@@ -199,6 +200,17 @@
     "totalWord": "totaal",
     "loadError": "Kon kandidaten niet laden.",
     "unitCandidates": "kandidaten",
+    "unknown": "Onbekend",
+    "loginGroups": {
+      "lt7": "Minder dan 7 dagen",
+      "d8to14": "8 t/m 14 dagen",
+      "d15to21": "15 t/m 21 dagen",
+      "d22to30": "22 t/m 30 dagen",
+      "d31to60": "31 t/m 60 dagen",
+      "d61to90": "61 t/m 90 dagen",
+      "gt90": "Langer dan 90 dagen",
+      "never": "Nooit"
+    },
     "charts": {
       "perPosition": "Per functie",
       "lastLogin": "Laatste inlog",

@@ -171,31 +171,34 @@ export function useDashboardViewModel({
       if (pf.date != null && row.__date == null) row.__date = String(pf.date)
       byName.set(p.name, row)
     })
-    add(ts.candidates_in, 'kandidaten')
-    add(ts.applications,  'sollicitaties')
+    add(ts.candidates_in, 'candidatesIn')
+    add(ts.applications,  'applications')
     add(ts.matches,       'matches')
     // Outflow (backend charts.timeseries.out.*). Graceful: renders only once delivered.
     const out = ts.out ?? {}
-    add(out.candidates_out,        'uitKandidaten')
-    add(out.applications_rejected, 'uitAfgewezen')
-    add(out.matches_ended,         'uitBeeindigd')
+    add(out.candidates_out,        'candidatesOut')
+    add(out.applications_rejected, 'applicationsRejected')
+    add(out.matches_ended,         'matchesEnded')
     // Net = inflow − outflow (sibling of timeseries under charts).
-    add((dashCharts?.net ?? (dash?.charts as { net?: TimeseriesPoint[] } | undefined)?.net) as TimeseriesPoint[] | undefined, 'netto')
+    add((dashCharts?.net ?? (dash?.charts as { net?: TimeseriesPoint[] } | undefined)?.net) as TimeseriesPoint[] | undefined, 'net')
     return [...byName.values()]
   }, [dash, dashCharts])
+  // Series `key`s are stable English internal identifiers (not user-facing —
+  // the `label` below carries the translation); the display text always came
+  // from t(), only the identifier itself was Dutch before this rename.
   const trendSeries = useMemo<BarSeries[]>(() => {
     const present = new Set<string>()
     trendData.forEach(r => Object.keys(r).forEach(k => k !== 'name' && r[k] != null && present.add(k)))
     return [
-      { key: 'kandidaten',    label: t('chart.series.candidates'),   color: 'var(--color-primary)' },
-      { key: 'sollicitaties', label: t('chart.series.applications'), color: 'var(--color-secondary)' },
+      { key: 'candidatesIn',    label: t('chart.series.candidates'),   color: 'var(--color-primary)' },
+      { key: 'applications', label: t('chart.series.applications'), color: 'var(--color-secondary)' },
       { key: 'matches',       label: t('chart.series.matches'),      color: 'var(--color-accent)' },
       // eslint-disable-next-line huisstijl/no-restricted-syntax -- DATA: semantic colour VALUE for the shared chip/donut/series recipes (tinted/chipInked downstream), not text ink
-      { key: 'uitKandidaten', label: t('chart.series.candidatesOut'),       color: 'var(--color-danger)' },
-      { key: 'uitAfgewezen',  label: t('chart.series.applicationsRejected'), color: 'var(--color-warning)' },
+      { key: 'candidatesOut', label: t('chart.series.candidatesOut'),       color: 'var(--color-danger)' },
+      { key: 'applicationsRejected',  label: t('chart.series.applicationsRejected'), color: 'var(--color-warning)' },
       // eslint-disable-next-line no-restricted-syntax -- DATA: chart series colour (matches-ended, neutral grey), no exact design-token match
-      { key: 'uitBeeindigd',  label: t('chart.series.matchesEnded'),         color: '#9CA3AF' },
-      { key: 'netto',         label: t('chart.series.net'),                  color: 'var(--text)', line: true },
+      { key: 'matchesEnded',  label: t('chart.series.matchesEnded'),         color: '#9CA3AF' },
+      { key: 'net',         label: t('chart.series.net'),                  color: 'var(--text)', line: true },
     ].filter(s => present.has(s.key))
   }, [trendData, t])
 

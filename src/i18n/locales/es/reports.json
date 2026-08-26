@@ -34,7 +34,8 @@
       "intake": "Admisión",
       "verwijderd": "Eliminado",
       "onbekend": "Desconocido"
-    }
+    },
+    "loadError": "No se pudieron cargar los candidatos."
   },
   "customers": {
     "title": "Detalles — Clientes",
@@ -199,6 +200,17 @@
     "totalWord": "en total",
     "loadError": "No se pudieron cargar los candidatos.",
     "unitCandidates": "candidatos",
+    "unknown": "Desconocido",
+    "loginGroups": {
+      "lt7": "Menos de 7 días",
+      "d8to14": "8 a 14 días",
+      "d15to21": "15 a 21 días",
+      "d22to30": "22 a 30 días",
+      "d31to60": "31 a 60 días",
+      "d61to90": "61 a 90 días",
+      "gt90": "Más de 90 días",
+      "never": "Nunca"
+    },
     "charts": {
       "perPosition": "Por puesto",
       "lastLogin": "Último acceso",

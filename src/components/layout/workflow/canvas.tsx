@@ -277,7 +277,7 @@ function ModuleNode({ id, data, selected }: { id: string; data: FlowNodeData; se
         <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text)', lineHeight: 1.3 }}>{nodeLabel}</div>
         {!!data.output && (
           <div style={{ fontSize: 9, color: 'var(--color-success-text)', marginTop: 1 }}>
-            {Array.isArray(data.output) ? `${data.output.length} records` : 'Klaar'}
+            {Array.isArray(data.output) ? t('canvas.records', { n: data.output.length }) : t('canvas.response')}
           </div>
         )}
       </div>

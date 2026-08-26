@@ -58,6 +58,7 @@
     "emptyHint": "No branches selected. This user still sees every candidate, unrestricted.",
     "noLocations": "No branches configured yet.",
     "saveFailed": "Couldn't save branches. Please try again.",
+    "loadError": "Couldn't load branches.",
     "loading": "Loading…",
     "previewTitle": "Branches for this role",
     "previewEmpty": "No starting set. This role has no branches, so the new user starts unrestricted."

@@ -134,6 +134,7 @@
     "placementPeriod": "{{start}} – {{end}}",
     "placementOngoing": "doorlopend",
     "pickVacancy": "Selecteer een vacature",
+    "vacancyLoadError": "Vacatures konden niet worden geladen. Probeer opnieuw.",
     "noVacancy": "Geen vacature",
     "editCandidate": "Kandidaatgegevens wijzigen",
     "forVacancy": "Vacature",

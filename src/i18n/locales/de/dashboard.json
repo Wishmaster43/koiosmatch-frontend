@@ -105,6 +105,7 @@
     "byRecruiter": "Kandidaten nach Recruiter",
     "funnel": "Bewerbungs-Funnel",
     "byStage": "Chancen nach Phase",
+    "oppStageUnavailable": "Daten zu Verkaufschancen-Phasen nicht verfügbar.",
     "intakeOverTime": "Zulauf über Zeit",
     "intakeWeekly": "Kandidaten- & Bewerbungszulauf (wöchentlich)",
     "series": {

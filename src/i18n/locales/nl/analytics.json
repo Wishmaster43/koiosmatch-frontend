@@ -264,7 +264,11 @@
         "inbound": "Inkomend",
         "outbound": "Uitgaand"
       },
-      "channel": "Kanaal"
+      "channel": "Kanaal",
+      "escalatedValues": {
+        "escalated": "Open escalatie",
+        "normal": "Normaal"
+      }
     },
     "kpi": {
       "conversationsTotal": "Totaal gesprekken",

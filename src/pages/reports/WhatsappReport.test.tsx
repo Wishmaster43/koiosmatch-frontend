@@ -149,7 +149,7 @@ describe('WhatsappReport (RAPPORTEN-WHATSAPP-FE-1)', () => {
   it('renders every axis with every segment — nothing auto-drills on mount', () => {
     mockUseWhatsappReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
-    for (const label of ['Inkomend', 'Uitgaand', 'Tekst', 'Via app', 'Geëscaleerd', 'Niet geëscaleerd']) {
+    for (const label of ['Inkomend', 'Uitgaand', 'Tekst', 'Via app', 'Open escalatie', 'Normaal']) {
       expect(screen.getAllByText(label).length).toBeGreaterThan(0)
     }
     // No request fires on mount — rendering the segments never itself drills.

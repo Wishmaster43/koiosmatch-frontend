@@ -146,6 +146,7 @@
     "hours": "Nombre d'heures",
     "shifts": "Nombre de missions",
     "loading": "Chargement…",
+    "loadError": "Échec du chargement",
     "perMonthUnit": "mois",
     "perQuarterUnit": "trimestre",
     "periodLabel": "{{years}} — par {{unit}}",
@@ -380,6 +381,7 @@
     }
   },
   "departmentsPage": {
+    "status": { "active": "Actif", "inactive": "Inactif" },
     "drawerTitle": "Département",
     "customer": "Client",
     "linkedCustomer": "Client lié",

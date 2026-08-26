@@ -1,35 +1,57 @@
-// chartHelpers — shared chart constants/utilities (e.g. the fixed display order
-// of "last login" buckets used to sort chart categories consistently).
-export const LOGIN_GROUP_ORDER = [
-  'Minder dan 7 dagen','8 t/m 14 dagen','15 t/m 21 dagen',
-  '22 t/m 30 dagen','31 t/m 60 dagen','61 t/m 90 dagen',
-  'Langer dan 90 dagen','Nooit',
-]
+// chartHelpers — shared chart constants/utilities. Bucket/month labels are
+// locale-aware: callers pass a `t` (for lookup buckets) or a `locale`
+// (for Intl-formatted months), mirroring how src/lib/localDate.ts takes its
+// locale explicitly rather than baking one language's strings into the module.
+
+// Stable English keys for the fixed "last login" bucket order — the display
+// label is resolved per-locale via t('report.loginGroups.<key>'), never hardcoded.
+export const LOGIN_GROUP_KEYS = [
+  'lt7', 'd8to14', 'd15to21', 'd22to30', 'd31to60', 'd61to90', 'gt90', 'never',
+] as const
+type LoginGroupKey = typeof LOGIN_GROUP_KEYS[number]
 
 // A bucketed chart datum (category name + count).
 export interface ChartDatum { name: string; value: number }
 // A generic row with arbitrary fields (chart inputs come from many API shapes).
 type Row = Record<string, unknown>
+// Minimal shape needed from i18next's TFunction — just enough to translate a key.
+type Translate = (key: string) => string
 
-// Buckets a last-login timestamp into the fixed LOGIN_GROUP_ORDER categories; a
+// Buckets a last-login timestamp into the fixed LOGIN_GROUP_KEYS order; a
 // missing/empty value means the user has never logged in.
-export function getLoginGroup(lastLoginAt?: string | number | Date | null): string {
-  if (!lastLoginAt) return 'Nooit'
+function getLoginGroupKey(lastLoginAt?: string | number | Date | null): LoginGroupKey {
+  if (!lastLoginAt) return 'never'
   const days = Math.floor((Date.now() - new Date(lastLoginAt).getTime()) / 86400000)
-  if (days <= 7)  return 'Minder dan 7 dagen'
-  if (days <= 14) return '8 t/m 14 dagen'
-  if (days <= 21) return '15 t/m 21 dagen'
-  if (days <= 30) return '22 t/m 30 dagen'
-  if (days <= 60) return '31 t/m 60 dagen'
-  if (days <= 90) return '61 t/m 90 dagen'
-  return 'Langer dan 90 dagen'
+  if (days <= 7)  return 'lt7'
+  if (days <= 14) return 'd8to14'
+  if (days <= 21) return 'd15to21'
+  if (days <= 30) return 'd22to30'
+  if (days <= 60) return 'd31to60'
+  if (days <= 90) return 'd61to90'
+  return 'gt90'
+}
+
+// Buckets a last-login timestamp into a translated bucket label for chart display.
+export function getLoginGroup(lastLoginAt: string | number | Date | null | undefined, t: Translate): string {
+  return t(`report.loginGroups.${getLoginGroupKey(lastLoginAt)}`)
+}
+
+// Translated, ordered login-group labels — pass as `order` to toChartData so
+// categories keep the fixed lt7..never sequence rather than sorting by count.
+export function getLoginGroupOrder(t: Translate): string[] {
+  return LOGIN_GROUP_KEYS.map(key => t(`report.loginGroups.${key}`))
 }
 
 // Tallies items into named buckets via a key selector; an empty/missing key still
-// counts under "Onbekend" instead of silently dropping the item from the total.
-export function groupAndCount<T>(items: T[], keyFn: (item: T) => string | null | undefined): Record<string, number> {
+// counts under `unknownLabel` (caller-supplied, translated) instead of silently
+// dropping the item from the total.
+export function groupAndCount<T>(
+  items: T[],
+  keyFn: (item: T) => string | null | undefined,
+  unknownLabel = 'Unknown',
+): Record<string, number> {
   return items.reduce<Record<string, number>>((acc, item) => {
-    const key = keyFn(item) || 'Onbekend'
+    const key = keyFn(item) || unknownLabel
     acc[key] = (acc[key] || 0) + 1
     return acc
   }, {})
@@ -44,8 +66,6 @@ export function toChartData(grouped: Record<string, number>, order: string[] | n
   return Object.entries(grouped).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value)
 }
 
-const MONTHS_NL = ['Jan','Feb','Mrt','Apr','Mei','Jun','Jul','Aug','Sep','Okt','Nov','Dec']
-
 // ISO week number (Thursday-anchored) used to bucket dates into "W<n>" chart categories.
 function getWeekNumber(date: Date): number {
   const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()))
@@ -56,15 +76,17 @@ function getWeekNumber(date: Date): number {
 }
 
 // Buckets rows by month (optionally scoped to one year) using a sortable year-month
-// key so the chart can order chronologically while still displaying the short month label.
-export function groupByMonth(items: Row[], year?: string | number | null, dateField = 'registration_date'): ChartDatum[] {
+// key so the chart can order chronologically while still displaying the short month
+// label in the caller's locale (Intl, never a hardcoded language's month names).
+export function groupByMonth(items: Row[], year?: string | number | null, dateField = 'registration_date', locale = 'en'): ChartDatum[] {
+  const monthFmt = new Intl.DateTimeFormat(locale, { month: 'short' })
   const grouped: Record<string, ChartDatum> = {}
   items.forEach(c => {
     if (!c[dateField]) return
     const date = new Date(c[dateField] as string)
     if (year && date.getFullYear() !== parseInt(String(year))) return
     const sortKey = `${date.getFullYear()}-${String(date.getMonth()).padStart(2,'0')}`
-    const label   = MONTHS_NL[date.getMonth()]
+    const label   = monthFmt.format(date)
     if (!grouped[sortKey]) grouped[sortKey] = { name: label, value: 0 }
     grouped[sortKey].value++
   })
@@ -97,8 +119,8 @@ export function getAvailableYears(items: Row[], dateField = 'registration_date')
 
 // Groups then keeps only the top N buckets by count, for "top X" chart widgets that
 // would otherwise be swamped by a long tail of one-off categories.
-export function topN(items: Row[], keyFn: (item: Row) => string | null | undefined, n = 10): ChartDatum[] {
-  const grouped = groupAndCount(items, keyFn)
+export function topN(items: Row[], keyFn: (item: Row) => string | null | undefined, n = 10, unknownLabel = 'Unknown'): ChartDatum[] {
+  const grouped = groupAndCount(items, keyFn, unknownLabel)
   return Object.entries(grouped)
     .sort(([, a], [, b]) => b - a)
     .slice(0, n)

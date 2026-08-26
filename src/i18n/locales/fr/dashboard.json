@@ -105,6 +105,7 @@
     "byRecruiter": "Candidats par recruteur",
     "funnel": "Entonnoir de candidatures",
     "byStage": "Opportunités par phase",
+    "oppStageUnavailable": "Données par étape d'opportunité non disponibles.",
     "intakeOverTime": "Flux dans le temps",
     "intakeWeekly": "Flux de candidats et candidatures (hebdo)",
     "series": {

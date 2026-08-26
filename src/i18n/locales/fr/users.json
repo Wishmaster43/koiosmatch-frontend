@@ -58,6 +58,7 @@
     "emptyHint": "Aucun site sélectionné. Cet utilisateur voit encore tous les candidats, sans restriction.",
     "noLocations": "Aucun site configuré pour le moment.",
     "saveFailed": "Impossible d'enregistrer les sites. Veuillez réessayer.",
+    "loadError": "Impossible de charger les sites.",
     "loading": "Chargement…",
     "previewTitle": "Sites de ce rôle",
     "previewEmpty": "Aucun ensemble de départ. Ce rôle n'a aucun site ; le nouvel utilisateur démarre sans restriction."

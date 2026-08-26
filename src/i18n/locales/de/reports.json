@@ -34,7 +34,8 @@
       "intake": "Intake",
       "verwijderd": "Gelöscht",
       "onbekend": "Unbekannt"
-    }
+    },
+    "loadError": "Kandidaten konnten nicht geladen werden."
   },
   "customers": {
     "title": "Details — Kunden",
@@ -199,6 +200,17 @@
     "totalWord": "gesamt",
     "loadError": "Kandidaten konnten nicht geladen werden.",
     "unitCandidates": "Kandidaten",
+    "unknown": "Unbekannt",
+    "loginGroups": {
+      "lt7": "Weniger als 7 Tage",
+      "d8to14": "8 bis 14 Tage",
+      "d15to21": "15 bis 21 Tage",
+      "d22to30": "22 bis 30 Tage",
+      "d31to60": "31 bis 60 Tage",
+      "d61to90": "61 bis 90 Tage",
+      "gt90": "Mehr als 90 Tage",
+      "never": "Nie"
+    },
     "charts": {
       "perPosition": "Nach Funktion",
       "lastLogin": "Letzter Login",

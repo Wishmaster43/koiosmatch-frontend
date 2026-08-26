@@ -58,6 +58,7 @@
     "emptyHint": "Keine Standorte ausgewählt. Dieser Benutzer sieht weiterhin alle Kandidaten, ohne Einschränkung.",
     "noLocations": "Noch keine Standorte angelegt.",
     "saveFailed": "Die Standorte konnten nicht gespeichert werden. Bitte erneut versuchen.",
+    "loadError": "Die Standorte konnten nicht geladen werden.",
     "loading": "Wird geladen…",
     "previewTitle": "Standorte dieser Rolle",
     "previewEmpty": "Keine Startauswahl. Diese Rolle hat keine Standorte; der neue Benutzer startet ohne Einschränkung."

@@ -146,6 +146,7 @@
     "hours": "Aantal uren",
     "shifts": "Aantal diensten",
     "loading": "Laden…",
+    "loadError": "Laden mislukt",
     "perMonthUnit": "maand",
     "perQuarterUnit": "kwartaal",
     "periodLabel": "{{years}} — per {{unit}}",
@@ -380,6 +381,7 @@
     }
   },
   "departmentsPage": {
+    "status": { "active": "Actief", "inactive": "Inactief" },
     "drawerTitle": "Afdeling",
     "customer": "Klant",
     "linkedCustomer": "Gekoppelde klant",

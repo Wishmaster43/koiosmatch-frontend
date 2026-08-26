@@ -168,9 +168,11 @@ export default function ShiftsDrillDownDrawer({ metric, metricOptions, periods, 
   })
 
   // Small pager button (prev/next period) — house Button, iconOnly/secondary.
-  const pagerBtn = (label: string, onClick: () => void, disabled: boolean) => (
-    <Button type="button" variant="secondary" iconOnly onClick={onClick} disabled={disabled} aria-label={label}>
-      {label === 'prev' ? <ChevronLeft size={13} /> : <ChevronRight size={13} />}
+  // `dir` only selects the icon/translated label; it is never rendered raw.
+  const pagerBtn = (dir: 'prev' | 'next', onClick: () => void, disabled: boolean) => (
+    <Button type="button" variant="secondary" iconOnly onClick={onClick} disabled={disabled}
+      aria-label={dir === 'prev' ? t('common:prevPage') : t('common:nextPage')}>
+      {dir === 'prev' ? <ChevronLeft size={13} /> : <ChevronRight size={13} />}
     </Button>
   )
 

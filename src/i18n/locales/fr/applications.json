@@ -134,6 +134,7 @@
     "placementPeriod": "{{start}} – {{end}}",
     "placementOngoing": "en cours",
     "pickVacancy": "Sélectionner un poste",
+    "vacancyLoadError": "Impossible de charger les postes. Réessayez.",
     "noVacancy": "Aucun poste",
     "editCandidate": "Modifier les données du candidat",
     "forVacancy": "Poste",

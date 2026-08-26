@@ -58,6 +58,7 @@
     "emptyHint": "Geen vestigingen geselecteerd. Deze gebruiker ziet nog alle kandidaten, zonder beperking.",
     "noLocations": "Nog geen vestigingen ingericht.",
     "saveFailed": "Opslaan van vestigingen is mislukt. Probeer het opnieuw.",
+    "loadError": "Vestigingen konden niet worden geladen.",
     "loading": "Laden…",
     "previewTitle": "Vestigingen bij deze rol",
     "previewEmpty": "Geen startset. Deze rol heeft geen vestigingen; de nieuwe gebruiker start zonder beperking."

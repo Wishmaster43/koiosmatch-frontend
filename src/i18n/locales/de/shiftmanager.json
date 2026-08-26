@@ -146,6 +146,7 @@
     "hours": "Anzahl Stunden",
     "shifts": "Anzahl Einsätze",
     "loading": "Wird geladen…",
+    "loadError": "Laden fehlgeschlagen",
     "perMonthUnit": "Monat",
     "perQuarterUnit": "Quartal",
     "periodLabel": "{{years}} — pro {{unit}}",
@@ -380,6 +381,7 @@
     }
   },
   "departmentsPage": {
+    "status": { "active": "Aktiv", "inactive": "Inaktiv" },
     "drawerTitle": "Abteilung",
     "customer": "Kunde",
     "linkedCustomer": "Verknüpfter Kunde",

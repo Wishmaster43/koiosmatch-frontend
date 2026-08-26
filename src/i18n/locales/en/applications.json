@@ -134,6 +134,7 @@
     "placementPeriod": "{{start}} – {{end}}",
     "placementOngoing": "ongoing",
     "pickVacancy": "Select a vacancy",
+    "vacancyLoadError": "Could not load vacancies. Try again.",
     "noVacancy": "No vacancy",
     "editCandidate": "Edit candidate details",
     "forVacancy": "Vacancy",

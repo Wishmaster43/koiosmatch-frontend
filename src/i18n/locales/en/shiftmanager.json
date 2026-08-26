@@ -146,6 +146,7 @@
     "hours": "Number of hours",
     "shifts": "Number of shifts",
     "loading": "Loading…",
+    "loadError": "Failed to load",
     "perMonthUnit": "month",
     "perQuarterUnit": "quarter",
     "periodLabel": "{{years}} — per {{unit}}",
@@ -380,6 +381,7 @@
     }
   },
   "departmentsPage": {
+    "status": { "active": "Active", "inactive": "Inactive" },
     "drawerTitle": "Department",
     "customer": "Customer",
     "linkedCustomer": "Linked customer",

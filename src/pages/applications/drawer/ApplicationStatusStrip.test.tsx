@@ -186,10 +186,10 @@ describe('ApplicationStatusStrip', () => {
   })
 })
 
-// Eindcontrole 22-08 (finding: the "+" shipped untested): the plan-appointment
+// Final check 22-08 (finding: the "+" shipped untested): the plan-appointment
 // affordance — present in BOTH branches, honestly disabled without a candidate,
-// and opening the SAME PlanIntakeModal flow the Afspraken tab mounts (§13).
-describe('ApplicationStatusStrip · "+" plant een afspraak', () => {
+// and opening the SAME PlanIntakeModal flow the Appointments tab mounts (§13).
+describe('ApplicationStatusStrip · "+" schedules an appointment', () => {
   it('renders the + beside an EXISTING appointment and inside the empty state', () => {
     const future = new Date(Date.now() + 86400000).toISOString()
     const { unmount } = render(<ApplicationStatusStrip application={app({

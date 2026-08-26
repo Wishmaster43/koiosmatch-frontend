@@ -58,6 +58,7 @@
     "emptyHint": "Ninguna sede seleccionada. Este usuario sigue viendo todos los candidatos, sin restricción.",
     "noLocations": "Todavía no hay sedes configuradas.",
     "saveFailed": "No se pudieron guardar las sedes. Inténtalo de nuevo.",
+    "loadError": "No se pudieron cargar las sedes.",
     "loading": "Cargando…",
     "previewTitle": "Sedes de este rol",
     "previewEmpty": "Sin conjunto inicial. Este rol no tiene sedes; el nuevo usuario empieza sin restricción."

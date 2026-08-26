@@ -247,9 +247,8 @@ describe('ReferencesTab · work-experience link (REF-ERVARING-1)', () => {
     { id: 'exp-1', title: 'Helpende', company: 'Revalidatiekliniek Zuid', start: '2023-08-06', end: '2024-06-30', current: false },
     { id: 'exp-2', function_title: 'Verzorgende', employer: 'Woonzorg Centrum', start_date: '2024-08-06', end_date: null, current: true },
   ]
-  // The picker's visible name is the (still unreported) i18n key until the manager
-  // lands it in the locale files — match either form so the test survives that
-  // change instead of silently pinning the untranslated state (§5).
+  // addFields.workExperience is translated in all five locales; match either the
+  // key name or its Dutch label so the test is resilient to the exact rendered form.
   const PICKER = /workExperience|Werkervaring/i
 
   it('reads a linked experience as one line: employer · function · period in DD-MM-YYYY', () => {

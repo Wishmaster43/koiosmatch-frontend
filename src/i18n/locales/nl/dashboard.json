@@ -105,6 +105,7 @@
     "byRecruiter": "Kandidaten per recruiter",
     "funnel": "Sollicitatie-funnel",
     "byStage": "Kansen per fase",
+    "oppStageUnavailable": "Kansen per fase niet beschikbaar.",
     "intakeOverTime": "Instroom over tijd",
     "intakeWeekly": "Instroom kandidaten & sollicitaties (per week)",
     "series": {

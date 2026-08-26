@@ -105,6 +105,7 @@
     "byRecruiter": "Candidatos por reclutador",
     "funnel": "Embudo de candidaturas",
     "byStage": "Oportunidades por etapa",
+    "oppStageUnavailable": "Datos por etapa de oportunidad no disponibles.",
     "intakeOverTime": "Entradas a lo largo del tiempo",
     "intakeWeekly": "Entrada de candidatos y candidaturas (semanal)",
     "series": {

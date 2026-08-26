@@ -236,7 +236,7 @@ export default function DashboardLayout() {
               return (
                 <button
                   onClick={() => goTo('profile')}
-                  title={[user?.firstname, user?.lastname].filter(Boolean).join(' ') || user?.name || 'Profiel'}
+                  title={[user?.firstname, user?.lastname].filter(Boolean).join(' ') || user?.name || t('profile', { ns: 'pageTitles' })}
                   // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- app-chrome control (components/layout = chrome, HUISSTIJL-1): nav-rail/topbar place-marker with its own active state, not an action button; Button's variants deliberately don't cover the rail
                   style={{
                     width: 30, height: 30, borderRadius: '50%', flexShrink: 0,

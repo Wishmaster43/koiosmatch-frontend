@@ -264,7 +264,11 @@
         "inbound": "Entrante",
         "outbound": "Saliente"
       },
-      "channel": "Canal"
+      "channel": "Canal",
+      "escalatedValues": {
+        "escalated": "Escalación abierta",
+        "normal": "Normal"
+      }
     },
     "kpi": {
       "conversationsTotal": "Total de conversaciones",

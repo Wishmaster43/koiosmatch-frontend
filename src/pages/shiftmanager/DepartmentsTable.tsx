@@ -16,7 +16,7 @@ import type { SmDepartmentRow } from '@/types/shiftmanager'
 const mutedCell: CSSProperties = { color: 'var(--text-muted)', fontSize: 12 }
 
 // Status → soft-chip colour (tenant values; unknown falls back to neutral grey).
-const STATUS_COLORS: Record<string, string> = { actief: 'var(--color-success)', inactief: 'var(--color-warning)' }
+const STATUS_COLORS: Record<string, string> = { active: 'var(--color-success)', inactive: 'var(--color-warning)' }
 
 // Number cell: emphasised when > 0, muted when zero/empty.
 const numCell = (n?: number) => (
@@ -68,7 +68,7 @@ export default function DepartmentsTable({ rows, loading, selectedId, onSelect }
     {
       key: 'status', header: t('departmentsPage.cols.status'), sortable: true, sortValue: d => d.status ?? '',
       render: d => d.status
-        ? <StatusPill label={d.status} color={STATUS_COLORS[d.status.toLowerCase()]} />
+        ? <StatusPill label={t(`departmentsPage.status.${d.status.toLowerCase()}`, { defaultValue: d.status })} color={STATUS_COLORS[d.status.toLowerCase()]} />
         : <span style={{ color: 'var(--text-muted)' }}>—</span>,
     },
   ]

@@ -38,7 +38,7 @@ export default function TrendsRow({ vis, trendData, trendSeries, funnelData, onN
           onBarClick={(row, s) => {
             const r = row as TrendRowData & { __from?: string; __to?: string; __date?: string }
             const name = r?.name
-            const page = s.key === 'sollicitaties' ? 'applications' : (s.key === 'matches' || s.key === 'uitBeeindigd') ? 'matches' : 'candidates'
+            const page = s.key === 'applications' ? 'applications' : (s.key === 'matches' || s.key === 'matchesEnded') ? 'matches' : 'candidates'
             // Turn the clicked bucket into a created-date range when it carries boundaries
             // (explicit from/to, or an ISO-date name treated as a 7-day week).
             const iso = typeof name === 'string' && /^\d{4}-\d{2}-\d{2}/.test(name) ? name.slice(0, 10) : undefined

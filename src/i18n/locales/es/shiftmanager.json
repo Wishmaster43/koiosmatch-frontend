@@ -146,6 +146,7 @@
     "hours": "Número de horas",
     "shifts": "Número de turnos",
     "loading": "Cargando…",
+    "loadError": "Error al cargar",
     "perMonthUnit": "mes",
     "perQuarterUnit": "trimestre",
     "periodLabel": "{{years}} — por {{unit}}",
@@ -380,6 +381,7 @@
     }
   },
   "departmentsPage": {
+    "status": { "active": "Activo", "inactive": "Inactivo" },
     "drawerTitle": "Departamento",
     "customer": "Cliente",
     "linkedCustomer": "Cliente vinculado",

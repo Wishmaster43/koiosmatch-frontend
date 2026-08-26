@@ -34,6 +34,15 @@ interface WorkflowCardProps {
   graceDays?: number | null
 }
 
+// Workflow-level trigger → i18n key, mirroring WorkflowListRow's triggerMeta so the
+// card subtitle reads a translated trigger label instead of the raw server value.
+function triggerKey(triggerType?: string): string {
+  if (triggerType === 'scheduled') return 'list.triggerScheduled'
+  if (triggerType === 'webhook') return 'list.triggerWebhook'
+  if (triggerType === 'event') return 'list.triggerEvent'
+  return 'list.triggerManual'
+}
+
 // Status badge colours; label = t('status.<key>').
 const STATUS_STYLES: Record<string, { bg: string; color: string; dot: string }> = {
   active:   { bg: 'var(--color-success-bg)', color: 'var(--color-success-text)', dot: 'var(--color-success)' },
@@ -114,7 +123,7 @@ export default function WorkflowCard({ workflow, onRun, onEdit, canManageFolders
             <div className="font-medium text-[var(--text)] truncate" style={{ fontSize: 14 }}>
               {displayName}
             </div>
-            <div className="text-xs text-[var(--text-muted)] mt-0.5">{workflow.trigger}</div>
+            <div className="text-xs text-[var(--text-muted)] mt-0.5">{t(triggerKey(workflow.trigger_type))}</div>
           </div>
         </div>
         {archived ? (
