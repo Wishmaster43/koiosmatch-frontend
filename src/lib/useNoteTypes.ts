@@ -22,6 +22,7 @@ import { useCachedLookup } from './useCachedLookup'
 import type { LookupOption } from '@/types/common'
 import { unwrapList } from '@/lib/api'
 import { translateSeedList } from './lookupSeedI18n'
+import { toLookupOption } from './lookupOption'
 
 // Mirrors the backend NoteType::ENTITIES whitelist (koiosmatch-api NoteType.php) —
 // the only entities a note type can be scoped to. 'vacancy' added 2026-08-02
@@ -53,17 +54,10 @@ export const SYSTEM_NOTE_TYPES = new Set(['status_change', 'lifecycle'])
 
 const norm = (s?: unknown) => (s ?? '').toString().trim().toLowerCase()
 
-// Normalise an API row (id/name/label/value/color) to the UI LookupOption shape.
-const toOption = (r: Record<string, unknown>): LookupOption => ({
-  value: String(r.value ?? r.slug ?? r.name ?? r.label ?? r.id ?? ''),
-  label: String(r.name ?? r.label ?? r.value ?? ''),
-  color: (r.color as string) ?? undefined,
-})
-
 // null = nothing usable in this response — useCachedLookup keeps the seed and retries next mount.
 const mapNoteTypes = (res: AxiosResponse): LookupOption[] | null => {
   const raw = (unwrapList(res).rows) as Record<string, unknown>[]
-  const d = raw.filter(Boolean).map(toOption)
+  const d = raw.filter(Boolean).map(r => toLookupOption(r))
   // Dedupe by value: a defensive backstop against duplicate slugs in one response
   // (was load-bearing pre-wave-2 when every entity's types arrived unscoped in one
   // list; now that the request itself is entity-scoped this should never trigger,
@@ -93,7 +87,7 @@ export function useNoteTypes(entity: NoteTypeEntity) {
 
   // Composer options: system-written categories (Statuswissel) are never offered
   // as a writable type — the seeded lookup DOES contain them for display resolution.
-  const writableTypes = types.filter(nt => !SYSTEM_NOTE_TYPES.has(nt.value))
+  const writableTypes = useMemo(() => types.filter(nt => !SYSTEM_NOTE_TYPES.has(nt.value)), [types])
 
   return { types, writableTypes, labelOf, colorOf }
 }

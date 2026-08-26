@@ -21,7 +21,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import { unwrap } from '@/lib/api'
 import { heavyGet } from '@/lib/heavyGet'
-import { isAbortError } from '@/lib/mocks'
+import { isAbortError } from '@/lib/abortError'
 import type { Id } from '@/types/common'
 
 // Loose server shapes — the dashboard reads defensively (mirrors the old inline types).

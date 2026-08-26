@@ -3,14 +3,17 @@
  * selection toggles + the generic optimistic bulkMutate (apply → reconcile on the
  * server's `updated` → revert) and the concrete bulk actions (owner/status/tags/
  * note/archive). Takes the list state + a `notify` callback from the page. Mirrors
- * useCandidateBulkActions / useVacancyBulkActions.
+ * useCandidateBulkActions / useVacancyBulkActions. `bulkCoupleBackoffice` is built
+ * on the shared useBackofficeCoupleBulk (src/hooks/) now that candidates/matches
+ * carry the exact same action.
  */
 import { useMemo } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import type { TFunction } from 'i18next'
-import api, { isServiceUnavailable } from '@/lib/api'
+import api from '@/lib/api'
 import { initialsOf } from '@/lib/initials'
 import { useConfirm } from '@/hooks/useConfirm'
+import { useBackofficeCoupleBulk } from '@/hooks/useBackofficeCoupleBulk'
 import type { Customer } from '@/types/customer'
 import type { Id } from '@/types/common'
 
@@ -119,29 +122,13 @@ export function useCustomerBulkActions({ customers, setCustomers, setTotal, sele
   }
 
   // SYNC-BULK-1 (§3B — bulk is the 3rd of the three backoffice-coupling paths;
-  // manual is BackofficeLinksTab, workflow is a module). Shares the ONE generic
-  // POST /sync/{entity}/bulk endpoint the per-record tab already uses. That
-  // endpoint returns { queued, skipped } — NOT the `updated` shape bulkMutate
-  // reconciles on — so this is a small dedicated adapter rather than a bulkMutate
-  // call: nothing on the row changes visibly on QUEUE (mirrors bulkGeocode — no
-  // optimistic patch), and the toast stays honest: "queued", never "done", plus
-  // the skipped count so a matrix block or an unknown id is never silently swallowed.
-  const bulkCoupleBackoffice = (system: 'helloflex' | 'shiftmanager') => {
-    const ids = [...selectedIds]; if (!ids.length) return
-    setSelectedIds(new Set())
-    const targetLabel = t(`common:backofficeLinks.${system}.name`)
-    api.post('/sync/customers/bulk', { ids, system })
-      .then((res) => {
-        const queued = Array.isArray(res.data?.queued) ? res.data.queued.length : 0
-        const skipped = Array.isArray(res.data?.skipped) ? res.data.skipped.length : 0
-        if (skipped > 0) notify('warning', t('bulk.coupleQueuedPartial', { target: targetLabel, queued, total: queued + skipped, skipped }))
-        else notify('success', t('bulk.coupleQueued', { target: targetLabel, count: queued }))
-      })
-      .catch((err) => {
-        if (err?.response?.status === 404 || isServiceUnavailable(err)) notify('info', t('bulk.coupleUnavailable'))
-        else notify('error', t('bulk.mutateError'))
-      })
-  }
+  // manual is BackofficeLinksTab, workflow is a module). Built on the shared
+  // useBackofficeCoupleBulk (see its file doc for the endpoint/toast contract) —
+  // customers' target-label lookup and 'warning' partial tone are its defaults.
+  const bulkCoupleBackoffice = useBackofficeCoupleBulk({
+    entity: 'customers', selectedIds, setSelectedIds, notify, t,
+    targetLabel: system => t(`common:backofficeLinks.${system}.name`),
+  })
 
   return { toggleRow, toggleAll, bulkSetOwner, bulkSetStatus, bulkAddTag, bulkRemoveTag, bulkAddNote, bulkArchive, bulkGeocode, bulkCoupleBackoffice, selectedTags, dialog }
 }

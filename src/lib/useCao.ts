@@ -7,12 +7,18 @@
  *
  * Fetch/cache/dedupe lives in useCachedLookup (audit item 8) — one GET per
  * session, shared across every mounted consumer.
+ *
+ * Row mapping goes through the shared toLookupOption (lane D audit item 5):
+ * this hook's own copy used to check `label ?? name`, the reverse of the
+ * name-first order every other lookup hook uses — reconciled to name-first
+ * here (see toLookupOption's own doc for why).
  */
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { AxiosResponse } from 'axios'
 import { useCachedLookup } from './useCachedLookup'
 import { translateSeedList } from './lookupSeedI18n'
+import { toLookupOption } from './lookupOption'
 import type { LookupOption } from '@/types/common'
 import { unwrapList } from '@/lib/api'
 
@@ -28,17 +34,10 @@ export const DEFAULT_CAO: LookupOption[] = [
 
 const norm = (s?: unknown) => (s ?? '').toString().trim().toLowerCase()
 
-// Normalise an API row (value/label/color) to the UI LookupOption shape.
-const toOption = (r: Record<string, unknown>): LookupOption => ({
-  value: String(r.value ?? r.slug ?? r.name ?? r.label ?? r.id ?? ''),
-  label: String(r.label ?? r.name ?? r.value ?? ''),
-  color: (r.color as string) ?? undefined,
-})
-
 // null = nothing usable in this response — useCachedLookup keeps the seed and retries next mount.
 const mapCao = (res: AxiosResponse): LookupOption[] | null => {
   const raw = (unwrapList(res).rows) as Record<string, unknown>[]
-  const d = raw.filter(Boolean).map(toOption)
+  const d = raw.filter(Boolean).map(r => toLookupOption(r))
   return d.length ? d : null
 }
 

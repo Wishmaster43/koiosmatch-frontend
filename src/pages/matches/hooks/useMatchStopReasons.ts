@@ -15,22 +15,16 @@ import type { AxiosResponse } from 'axios'
 import { useCachedLookup } from '@/lib/useCachedLookup'
 import type { LookupOption } from '@/types/common'
 import { unwrapList } from '@/lib/api'
+import { toLookupOption } from '@/lib/lookupOption'
 
 // No seed — see the module doc comment above for why this hook is the exception.
 const NO_STOP_REASONS: LookupOption[] = []
-
-// Normalise an API row (id/name/label/value/color) to the UI LookupOption shape.
-const toOption = (r: Record<string, unknown>): LookupOption => ({
-  value: String(r.value ?? r.slug ?? r.name ?? r.label ?? r.id ?? ''),
-  label: String(r.name ?? r.label ?? r.value ?? ''),
-  color: (r.color as string) ?? undefined,
-})
 
 // null = nothing usable in this response — useCachedLookup keeps the empty
 // fallback and retries on the next mount (mirrors every other lookup hook).
 const mapMatchStopReasons = (res: AxiosResponse): LookupOption[] | null => {
   const rows = (unwrapList(res).rows) as Record<string, unknown>[]
-  return Array.isArray(rows) && rows.length ? rows.map(toOption) : null
+  return Array.isArray(rows) && rows.length ? rows.map(r => toLookupOption(r)) : null
 }
 
 // The tenant's match termination reasons — no seed fallback on purpose (see file

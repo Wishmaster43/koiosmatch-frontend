@@ -5,11 +5,10 @@
  * via props, the mutation runs in the page. Extend by adding a node.
  */
 import { useTranslation } from 'react-i18next'
-import { ListChecks, Milestone, Unlink, X } from 'lucide-react'
+import { ListChecks, Milestone, Unlink } from 'lucide-react'
 import ActionMenu from '@/components/ui/ActionMenu'
 import type { MenuNode } from '@/components/ui/ActionMenu'
-import Button from '@/components/ui/Button'
-import { SectionTitle } from '@/components/ui/typography'
+import BulkBarShell from '@/components/ui/BulkBarShell'
 import type { LookupOption } from '@/types/common'
 
 interface ApplicationsBulkBarProps {
@@ -41,19 +40,9 @@ export default function ApplicationsBulkBar({ count, onClear, onSetPhase, onDeta
   ]
 
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%',
-      padding: '8px 12px', borderRadius: 8, background: 'var(--color-primary-bg)', border: '1px solid var(--color-primary)' }}>
-      {/* colour override: this bar sits on a tinted accent background */}
-      <SectionTitle as="span" style={{ color: 'var(--color-primary-text)' }}>{t('bulk.selected', { count })}</SectionTitle>
-
+    <BulkBarShell label={t('bulk.selected', { count })} onClear={onClear} clearLabel={t('bulk.deselect')}>
       {/* Single bulk-actions menu with drill-in submenus */}
       <ActionMenu label={t('bulk.actions')} icon={ListChecks} items={items} />
-
-      {/* Deselect: ghost keeps its identity except ink, which stays the accent
-          text colour (this bar sits on a tinted accent background). */}
-      <Button variant="ghostAccent" onClick={onClear} style={{ gap: 5, marginLeft: 'auto' }}>
-        <X size={13} /> {t('bulk.deselect')}
-      </Button>
-    </div>
+    </BulkBarShell>
   )
 }

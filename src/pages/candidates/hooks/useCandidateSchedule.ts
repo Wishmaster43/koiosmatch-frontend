@@ -20,7 +20,7 @@
  */
 import { useCallback, useEffect, useState } from 'react'
 import api from '@/lib/api'
-import { isAbortError } from '@/lib/mocks'
+import { isAbortError } from '@/lib/abortError'
 import { useLocale } from '@/lib/datetime'
 import type { Id } from '@/types/common'
 import type { OpenShift, RosterShift } from '../drawer/planningTypes'

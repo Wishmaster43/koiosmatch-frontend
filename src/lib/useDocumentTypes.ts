@@ -33,6 +33,7 @@ import type { LucideIcon } from 'lucide-react'
 import { FileText, IdCard, GraduationCap, FileSignature, ShieldCheck, BadgeCheck, Image, File } from 'lucide-react'
 import { useCachedLookup } from './useCachedLookup'
 import { translateSeedList } from './lookupSeedI18n'
+import { toLookupOption } from './lookupOption'
 import type { LookupOption } from '@/types/common'
 import { unwrapList } from '@/lib/api'
 
@@ -79,11 +80,9 @@ export function resolveDocTypeIcon(name?: string | null): LucideIcon {
 const FALLBACK_COLOR = '#6B7280'
 const norm = (s?: unknown) => (s ?? '').toString().trim().toLowerCase()
 
-// Normalise an API row (id/name/label/value/color/icon) to the UI LookupOption shape.
+// Normalise an API row via the shared mapper, adding the document-specific icon slug.
 const toOption = (r: Record<string, unknown>): LookupOption => ({
-  value: String(r.value ?? r.slug ?? r.name ?? r.label ?? r.id ?? ''),
-  label: String(r.name ?? r.label ?? r.value ?? ''),
-  color: (r.color as string) ?? FALLBACK_COLOR,
+  ...toLookupOption(r, FALLBACK_COLOR),
   icon: (r.icon as string) ?? null,
 })
 

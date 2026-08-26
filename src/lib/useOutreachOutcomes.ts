@@ -14,6 +14,7 @@ import { useTranslation } from 'react-i18next'
 import type { AxiosResponse } from 'axios'
 import { useCachedLookup } from './useCachedLookup'
 import { translateSeedList } from './lookupSeedI18n'
+import { toLookupOption } from './lookupOption'
 import type { LookupOption } from '@/types/common'
 import { unwrapList } from '@/lib/api'
 
@@ -26,17 +27,10 @@ export const DEFAULT_OUTREACH_OUTCOMES: LookupOption[] = [
   { value: 'interested',     label: 'Interesse',      color: 'var(--color-success)' },
 ]
 
-// Normalise an API row (id/name/label/value/color) to the UI LookupOption shape.
-const toOption = (r: Record<string, unknown>): LookupOption => ({
-  value: String(r.value ?? r.slug ?? r.name ?? r.label ?? r.id ?? ''),
-  label: String(r.name ?? r.label ?? r.value ?? ''),
-  color: (r.color as string) ?? undefined,
-})
-
 // null = nothing usable in this response — useCachedLookup keeps the seed and retries next mount.
 const mapOutreachOutcomes = (res: AxiosResponse): LookupOption[] | null => {
   const rows = (unwrapList(res).rows) as Record<string, unknown>[]
-  return Array.isArray(rows) && rows.length ? rows.map(toOption) : null
+  return Array.isArray(rows) && rows.length ? rows.map(r => toLookupOption(r)) : null
 }
 
 // The outreach-outcome tenant lookup, translating seeded defaults into the user language while a tenant's own value stays exactly as typed.

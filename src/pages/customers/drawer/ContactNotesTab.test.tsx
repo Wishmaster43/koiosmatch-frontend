@@ -24,7 +24,7 @@ vi.mock('@/lib/useNoteTypes', () => ({
   },
   SYSTEM_NOTE_TYPES: new Set(['status_change', 'lifecycle']),
 }))
-vi.mock('@/lib/mocks', () => ({ isAbortError: () => false }))
+vi.mock('@/lib/abortError', () => ({ isAbortError: () => false }))
 vi.mock('@/lib/notify', () => ({ notifyError: vi.fn(), notifySuccess: vi.fn() }))
 // Tiptap needs a real browser to mount — stubbed with a plain controlled textarea
 // (mirrors CustomerNotesTab.contactLink.test.tsx's own convention).

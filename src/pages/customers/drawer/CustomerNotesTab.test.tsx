@@ -15,7 +15,7 @@ import CustomerNotesTab from './CustomerNotesTab'
 import api from '@/lib/api'
 
 vi.mock('@/lib/useNoteTypes', () => ({ useNoteTypes: () => ({ types: [], writableTypes: [] }) }))
-vi.mock('@/lib/mocks', () => ({ isAbortError: () => false }))
+vi.mock('@/lib/abortError', () => ({ isAbortError: () => false }))
 // The shared NotesTab pulls in @/lib/datetime, which imports the REAL i18n runtime
 // as a side effect — mocked here (mirrors OpportunitiesTab.test.tsx) so t() keeps
 // echoing raw keys instead of silently switching every assertion to live NL copy.

@@ -5,11 +5,10 @@
  * a thin assembler. Mirrors CandidatesBulkBar — extend by adding a node.
  */
 import { useTranslation } from 'react-i18next'
-import { ListChecks, Search, UserCog, CircleDot, Building2, Globe, GlobeLock, Bot, BotOff, Tag, StickyNote, Archive, X } from 'lucide-react'
+import { ListChecks, Search, UserCog, CircleDot, Building2, Globe, GlobeLock, Bot, BotOff, Tag, StickyNote, Archive } from 'lucide-react'
 import ActionMenu from '@/components/ui/ActionMenu'
 import type { MenuNode } from '@/components/ui/ActionMenu'
-import Button from '@/components/ui/Button'
-import { SectionTitle } from '@/components/ui/typography'
+import BulkBarShell from '@/components/ui/BulkBarShell'
 import type { Id, LookupOption } from '@/types/common'
 
 interface BulkUser { id: Id; name: string }
@@ -106,18 +105,8 @@ export default function VacanciesBulkBar({
   ]
 
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%',
-      padding: '8px 12px', borderRadius: 8, background: 'var(--color-primary-bg)', border: '1px solid var(--color-primary)' }}>
-      {/* colour override: this bar sits on a tinted accent background */}
-      <SectionTitle as="span" style={{ color: 'var(--color-primary-text)' }}>{t('bulk.selected', { count })}</SectionTitle>
-
+    <BulkBarShell label={t('bulk.selected', { count })} onClear={onClear} clearLabel={t('bulk.deselect')}>
       <ActionMenu label={t('bulk.actions')} icon={ListChecks} items={items} />
-
-      {/* Deselect: ghost keeps its identity except ink, which stays the accent
-          text colour (this bar sits on a tinted accent background). */}
-      <Button variant="ghostAccent" onClick={onClear} style={{ gap: 5, marginLeft: 'auto' }}>
-        <X size={13} /> {t('bulk.deselect')}
-      </Button>
-    </div>
+    </BulkBarShell>
   )
 }

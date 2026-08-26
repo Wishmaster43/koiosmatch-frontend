@@ -5,12 +5,11 @@
  * (users, lookups, tags) comes in via props so this stays a thin assembler.
  */
 import { useTranslation } from 'react-i18next'
-import { ListChecks, Folder, FolderPlus, FolderMinus, UserCog, Milestone, Briefcase, Tag, Tags, StickyNote, Archive, ShieldCheck, UserCheck, Activity, GitMerge, RefreshCw, X, ExternalLink, Link2, Building2, Layers } from 'lucide-react'
+import { ListChecks, Folder, FolderPlus, FolderMinus, UserCog, Milestone, Briefcase, Tag, Tags, StickyNote, Archive, ShieldCheck, UserCheck, Activity, GitMerge, RefreshCw, ExternalLink, Link2, Building2, Layers } from 'lucide-react'
 import ActionMenu from '@/components/ui/ActionMenu'
 import { BTN_H_SM } from '@/config/buttonMetrics'
 import type { MenuNode } from '@/components/ui/ActionMenu'
-import Button from '@/components/ui/Button'
-import { SectionTitle } from '@/components/ui/typography'
+import BulkBarShell from '@/components/ui/BulkBarShell'
 import { useAuth } from '@/context/AuthContext'
 import { useApps } from '@/context/AppsContext'
 import { useTenantPools } from './hooks/useCandidatePools'
@@ -179,15 +178,13 @@ export default function CandidatesBulkBar({
     ...(canArchive ? [{ key: 'archive', label: t('bulk.archive'), icon: Archive, danger: true, onSelect: onArchive }] : []),
   ]
 
-  return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%',
-      padding: '8px 12px', borderRadius: 8, background: 'var(--color-primary-bg)', border: '1px solid var(--color-primary)' }}>
-      {/* colour override: this bar sits on a tinted accent background, so the
-          count reads in the accent ink rather than SectionTitle's default --text */}
-      <SectionTitle as="span" style={{ color: 'var(--color-primary-text)' }}>
-        {bulkScope === 'filtered' ? t('bulk.scopeSelected', { count: filteredTotal }) : t('bulk.selected', { count })}
-      </SectionTitle>
+  // colour override note (was on SectionTitle directly): this bar sits on a
+  // tinted accent background, so the count reads in the accent ink rather than
+  // SectionTitle's default --text — BulkBarShell already carries that override.
+  const label = bulkScope === 'filtered' ? t('bulk.scopeSelected', { count: filteredTotal }) : t('bulk.selected', { count })
 
+  return (
+    <BulkBarShell label={label} onClear={onClear} clearLabel={t('bulk.deselect')}>
       {/* BULK-FILTERSET-1: only offered when a filter narrows the list — an empty
           filter set is never sent as "all" (the backend 422s it too, see the hook). */}
       {anyFilterActive && (
@@ -205,13 +202,6 @@ export default function CandidatesBulkBar({
 
       {/* Single bulk-mutations menu with drill-in submenus */}
       <ActionMenu label={t('bulk.actions')} icon={ListChecks} items={items} />
-
-      {/* Deselect: ghost keeps its identity except ink, which stays the accent
-          text colour (differs from Button's default var(--text-muted) — this bar
-          sits on a tinted accent background, so the muted grey would be lost). */}
-      <Button variant="ghostAccent" onClick={onClear} style={{ gap: 5, marginLeft: 'auto' }}>
-        <X size={13} /> {t('bulk.deselect')}
-      </Button>
-    </div>
+    </BulkBarShell>
   )
 }

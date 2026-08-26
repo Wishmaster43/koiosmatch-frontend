@@ -18,7 +18,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import api, { unwrap, unwrapList } from '@/lib/api'
-import { isAbortError } from '@/lib/mocks'
+import { isAbortError } from '@/lib/abortError'
 import { notifyError } from '@/lib/notify'
 import type { Id } from '@/types/common'
 import type { FavLists } from '../drawer/planningTypes'

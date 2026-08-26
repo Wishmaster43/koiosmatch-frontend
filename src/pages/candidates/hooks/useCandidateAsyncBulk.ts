@@ -6,13 +6,16 @@
  * was split out earlier. Kept together because they share that exact shape:
  * `bulkGeocode` (GEO-REGEOCODE-1, PDOK re-geocode) and `bulkCoupleBackoffice`
  * (SYNC-BULK-1, HelloFlex/Shiftmanager coupling — the bulk path of the three
- * §3B linking paths: manual/bulk/workflow).
+ * §3B linking paths: manual/bulk/workflow), the latter built on the shared
+ * useBackofficeCoupleBulk (src/hooks/) now that customers/matches carry the
+ * exact same action.
  */
-import api, { isServiceUnavailable } from '@/lib/api'
+import api from '@/lib/api'
 import type { TFunction } from 'i18next'
 import type { Dispatch, SetStateAction } from 'react'
 import type { Id } from '@/types/common'
 import type { Candidate } from '@/types/candidate'
+import { useBackofficeCoupleBulk } from '@/hooks/useBackofficeCoupleBulk'
 
 interface UseCandidateAsyncBulkParams {
   selectedIds: Set<Id>
@@ -44,33 +47,13 @@ export function useCandidateAsyncBulk({ selectedIds, setSelectedIds, notify, t, 
   }
 
   // SYNC-BULK-1 (§3B — bulk is the 3rd of the three backoffice-coupling paths;
-  // manual is BackofficeLinksTab, workflow is a module). Shares the ONE generic
-  // POST /sync/{entity}/bulk endpoint the per-record tab already uses. That
-  // endpoint returns { queued, skipped } — NOT the `updated`/`skipped` shape
-  // bulkMutate reconciles on — so this is a small dedicated adapter rather than a
-  // bulkMutate call: nothing on the row changes visibly on QUEUE (mirrors
-  // bulkGeocode — no optimistic patch, no revert needed), and the toast stays
-  // honest: "queued", never "done", plus the skipped count so a matrix block or
-  // an unknown/other-tenant id is never silently swallowed (BackofficeSyncController::bulk).
-  const bulkCoupleBackoffice = (system: 'helloflex' | 'shiftmanager') => {
-    const ids = [...selectedIds]
-    if (!ids.length) return
-    setSelectedIds(new Set())
-    const targetLabel = t(`common:backofficeLinks.${system}.name`)
-    api.post('/sync/candidates/bulk', { ids, system })
-      .then((res) => {
-        const queued = Array.isArray(res.data?.queued) ? res.data.queued.length : 0
-        const skipped = Array.isArray(res.data?.skipped) ? res.data.skipped.length : 0
-        if (skipped > 0) notify('warning', t('bulk.coupleQueuedPartial', { target: targetLabel, queued, total: queued + skipped, skipped }))
-        else notify('success', t('bulk.coupleQueued', { target: targetLabel, count: queued }))
-      })
-      .catch((err) => {
-        // 404 (route not yet deployed) and 503 (module not configured for this
-        // tenant) both read as "not available right now", never a hard error.
-        if (err?.response?.status === 404 || isServiceUnavailable(err)) notify('info', t('bulk.coupleUnavailable'))
-        else notify('error', t('bulk.mutateError'))
-      })
-  }
+  // manual is BackofficeLinksTab, workflow is a module). Built on the shared
+  // useBackofficeCoupleBulk (see its file doc for the endpoint/toast contract) —
+  // candidates' target-label lookup and 'warning' partial tone are its defaults.
+  const bulkCoupleBackoffice = useBackofficeCoupleBulk({
+    entity: 'candidates', selectedIds, setSelectedIds, notify, t,
+    targetLabel: system => t(`common:backofficeLinks.${system}.name`),
+  })
 
   return { bulkGeocode, bulkCoupleBackoffice }
 }

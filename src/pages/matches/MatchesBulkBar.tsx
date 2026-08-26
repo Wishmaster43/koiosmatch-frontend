@@ -11,11 +11,10 @@
  * the shared ActionMenu — extend by adding a node, never fork the bar.
  */
 import { useTranslation } from 'react-i18next'
-import { ListChecks, Link2, Building2, Layers, X } from 'lucide-react'
+import { ListChecks, Link2, Building2, Layers } from 'lucide-react'
 import ActionMenu from '@/components/ui/ActionMenu'
 import type { MenuNode } from '@/components/ui/ActionMenu'
-import Button from '@/components/ui/Button'
-import { SectionTitle } from '@/components/ui/typography'
+import BulkBarShell from '@/components/ui/BulkBarShell'
 import { useAuth } from '@/context/AuthContext'
 import { useApps } from '@/context/AppsContext'
 
@@ -50,22 +49,12 @@ export default function MatchesBulkBar({
   ] : []
 
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%',
-      padding: '8px 12px', borderRadius: 8, background: 'var(--color-primary-bg)', border: '1px solid var(--color-primary)' }}>
-      {/* colour override: this bar sits on a tinted accent background */}
-      <SectionTitle as="span" style={{ color: 'var(--color-primary-text)' }}>{t('bulk.selected', { count })}</SectionTitle>
-
+    <BulkBarShell label={t('bulk.selected', { count })} onClear={onClear} clearLabel={t('bulk.deselect')}>
       {items.length > 0
         ? <ActionMenu label={t('bulk.actions')} icon={ListChecks} items={items} />
         // Two honest empty reasons: no permission at all, vs a permission but
         // no backoffice system enabled for this tenant.
         : <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{canCouple ? t('bulk.coupleUnavailable') : t('bulk.noPermission')}</span>}
-
-      {/* Deselect: ghost keeps its identity except ink, which stays the accent
-          text colour (this bar sits on a tinted accent background). */}
-      <Button variant="ghostAccent" onClick={onClear} style={{ gap: 5, marginLeft: 'auto' }}>
-        <X size={13} /> {t('bulk.deselect')}
-      </Button>
-    </div>
+    </BulkBarShell>
   )
 }

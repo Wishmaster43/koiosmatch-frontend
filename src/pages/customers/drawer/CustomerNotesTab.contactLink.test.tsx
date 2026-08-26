@@ -18,7 +18,7 @@ vi.mock('@/lib/useNoteTypes', () => ({
   // The shared NotesTab reads this directly (system-event rows) — must ride along.
   SYSTEM_NOTE_TYPES: new Set(['status_change', 'lifecycle']),
 }))
-vi.mock('@/lib/mocks', () => ({ isAbortError: () => false }))
+vi.mock('@/lib/abortError', () => ({ isAbortError: () => false }))
 vi.mock('@/lib/notify', () => ({ notifyError: vi.fn(), notifySuccess: vi.fn() }))
 // Tiptap needs a real browser to mount — stubbed with a plain controlled textarea
 // (mirrors LocationDetail.test.tsx/DepartmentDetail.test.tsx's own convention).

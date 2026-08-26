@@ -8,7 +8,7 @@
  */
 import { useState, useEffect, useMemo } from 'react'
 import api, { unwrapList } from '@/lib/api'
-import { isAbortError } from '@/lib/mocks'
+import { isAbortError } from '@/lib/abortError'
 import { mapTask } from '../data/mapTask'
 import type { TaskLookupItem } from '@/context/TaskLookupsContext'
 import type { Task, ApiTask } from '@/types/task'
