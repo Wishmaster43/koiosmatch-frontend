@@ -355,3 +355,25 @@ a:not([class]):hover { text-decoration: underline; }
 @media (max-width: 900px) {
   .report-grid { grid-template-columns: 1fr; }
 }
+
+/* Report-table sortable header button (components/reports/reportTableChrome.tsx):
+   all:unset reset so it inherits the header cell's own type/colour, then restores
+   just enough box behaviour to fill the cell's full hit-region (not just the text).
+   Padding (8px 12px) mirrors that file's own TH padding constant — kept in sync by
+   comment, not duplicated at random. A real class, not an inline style, because
+   every value here is static across the whole report-table family; placed after
+   the :focus-visible rule above on purpose so the reset (same specificity) still
+   wins the tie-break, exactly like the inline style it replaces did. */
+.report-th-sort-btn {
+  all: unset;
+  box-sizing: border-box;
+  display: inline-flex;
+  width: 100%;
+  padding: 8px 12px;
+  cursor: pointer;
+  user-select: none;
+  align-items: center;
+  gap: 4px;
+  font: inherit;
+  color: inherit;
+}

@@ -11,6 +11,7 @@ import { useRightPanel } from '@/context/RightPanelContext'
 import LocationsTable from './LocationsTable'
 import PaginationBar from '@/components/ui/PaginationBar'
 import LocationDrawer from './LocationDrawer'
+import SmKpiStrip from './SmKpiStrip'
 import { useSmLocations } from './hooks/useSmLocations'
 import type { SmLocationRow } from '@/types/shiftmanager'
 
@@ -90,22 +91,8 @@ export default function LocationsPage() {
     <div style={{ display: 'flex', height: '100%', overflow: 'hidden' }}>
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, overflow: 'hidden' }}>
 
-        {/* KPI strip */}
-        <div style={{ padding: '20px 24px 18px', display: 'flex', gap: 20, flexShrink: 0 }}>
-          {kpis.map(k => (
-            <div key={k.label} style={{ background: 'var(--surface)', border: '1px solid var(--border)',
-              borderRadius: 10, padding: '14px 18px', display: 'flex', alignItems: 'center', gap: 12, flex: 1 }}>
-              <div style={{ width: 34, height: 34, borderRadius: 8, background: k.bg,
-                display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                <k.Icon size={15} color={k.color} />
-              </div>
-              <div>
-                <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--text)', lineHeight: 1 }}>{k.value}</div>
-                <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>{k.label}</div>
-              </div>
-            </div>
-          ))}
-        </div>
+        {/* KPI strip — shared SmKpiStrip (§3 consolidation) */}
+        <SmKpiStrip kpis={kpis} />
 
         {/* Table — shared DataTable (sticky header, sorting, soft-chip status colours) */}
         <div style={{ flex: 1, overflowY: 'auto', padding: '0 24px 16px' }}>

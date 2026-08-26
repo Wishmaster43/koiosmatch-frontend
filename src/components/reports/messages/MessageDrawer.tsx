@@ -6,7 +6,8 @@
 import { X, MessageCircle, Mail, User, Phone, AlertTriangle } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
-import { PageTitle } from '@/components/ui/typography'
+import { PageTitle, GroupLabel, BodyText } from '@/components/ui/typography'
+import Button from '@/components/ui/Button'
 import type { MessageRow } from '@/types/reports'
 import { formatDT, CHANNEL_META, ChannelBadge, StatusBadge } from './messageParts'
 
@@ -43,17 +44,14 @@ export default function MessageDrawer({ message, onClose }: { message: MessageRo
                 <StatusBadge status={message.status} />
               </div>
             </div>
-            {/* Close icon button with an imperative hover highlight Button does not
-                provide, pre-existing and out of this ink/tint task's scope. */}
-            <button onClick={onClose} aria-label={t('common:close')}
-              // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- see comment above
-              style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                       background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)',
-                       borderRadius: 6, marginLeft: 10, flexShrink: 0 }}
+            {/* Close icon button — the shared Button (§3), mirrors DrillDownDrawer/
+                KpiDrillDownDrawer/ContactPersonDrawer's own close control. */}
+            <Button variant="ghost" iconOnly onClick={onClose} aria-label={t('common:close')}
+              style={{ marginLeft: 10, flexShrink: 0 }}
               onMouseEnter={e => (e.currentTarget.style.background = 'var(--hover-bg)')}
               onMouseLeave={e => (e.currentTarget.style.background = 'none')}>
               <X size={15} />
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -61,10 +59,9 @@ export default function MessageDrawer({ message, onClose }: { message: MessageRo
         <div style={{ flex: 1, overflowY: 'auto', padding: '16px 20px' }}>
 
           {/* Recipient */}
-          <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase',
-                        letterSpacing: '0.05em', marginBottom: 8 }}>
+          <GroupLabel style={{ marginBottom: 8 }}>
             {t('messages.drawer.recipient')}
-          </div>
+          </GroupLabel>
           {[
             { icon: User,  label: t('messages.drawer.name'),   value: message.recipient_name },
             { icon: Phone, label: t('messages.drawer.mobile'), value: message.recipient_phone ?? message.to_phone },
@@ -79,10 +76,9 @@ export default function MessageDrawer({ message, onClose }: { message: MessageRo
           ))}
 
           {/* Timeline */}
-          <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase',
-                        letterSpacing: '0.05em', marginTop: 20, marginBottom: 8 }}>
+          <GroupLabel style={{ marginTop: 20, marginBottom: 8 }}>
             {t('messages.drawer.timeline')}
-          </div>
+          </GroupLabel>
           {[
             { label: t('messages.drawer.sentAt'),      value: formatDT(message.sent_at     ?? message.created_at) },
             { label: t('messages.drawer.deliveredAt'), value: formatDT(message.delivered_at) },
@@ -100,14 +96,13 @@ export default function MessageDrawer({ message, onClose }: { message: MessageRo
           {/* Message content */}
           {message.body && (
             <div style={{ marginTop: 20 }}>
-              <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase',
-                            letterSpacing: '0.05em', marginBottom: 8 }}>
+              <GroupLabel style={{ marginBottom: 8 }}>
                 {t('messages.drawer.body')}
-              </div>
-              <div style={{ background: 'var(--hover-bg)', borderRadius: 10, padding: '12px 14px',
-                            fontSize: 13, color: 'var(--text)', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>
+              </GroupLabel>
+              <BodyText as="div" style={{ background: 'var(--hover-bg)', borderRadius: 10, padding: '12px 14px',
+                            lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>
                 {message.body}
-              </div>
+              </BodyText>
             </div>
           )}
 

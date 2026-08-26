@@ -10,9 +10,9 @@ import { useTranslation } from 'react-i18next'
 import { useRightPanel } from '@/context/RightPanelContext'
 import api, { unwrapList } from '@/lib/api'
 import ErrorBanner from '@/components/ui/ErrorBanner'
-import { isAbortError } from '@/lib/mocks'
+import { isAbortError } from '@/lib/abortError'
 import CustomersTable from './CustomersTable'
-import CustomersInsightsRow from './CustomersInsightsRow'
+import InsightsRow from '@/components/insights/InsightsRow'
 import PaginationBar from '@/components/ui/PaginationBar'
 import type { SmCustomerRow } from '@/types/shiftmanager'
 import type { DonutSpec, KpiSpec } from '@/components/insights/InsightsRow'
@@ -188,7 +188,10 @@ export default function CustomersPage() {
       <div style={{ display: 'flex', height: '100%', overflow: 'hidden' }}>
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
 
-          <CustomersInsightsRow donuts={insightDonuts} kpis={insightKpis} />
+          {/* Shared InsightsRow (§3A) — replaces the stale CustomersInsightsRow fork,
+              which had drifted from the active-donut border, the picked-segment dim
+              and the §4 button-trio clear-chip fixes already made upstream. */}
+          <InsightsRow donuts={insightDonuts} kpis={insightKpis} clearTitle={t('insights.clearFilter')} />
 
 
           <div style={{ flex: 1, overflowY: 'auto', padding: '0 24px 16px' }}>

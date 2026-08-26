@@ -2,43 +2,28 @@
  * DepartmentsTable — searchable, sortable, paginated table of departments.
  * Clicking a row opens DepartmentDrawer. Filters come from RightPanelContext,
  * page size from the user's preference; data is fetched per page from the API.
+ * Chrome (sortable header + toolbar) and paging state come from the shared
+ * reportTableChrome/useReportPaging (§3, "36-42 identical lines" consolidation).
  */
 import { useState, useEffect, useMemo } from 'react'
-import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Search } from 'lucide-react'
-import SortCaret from '@/components/ui/SortCaret'
 import { useRightPanel }      from '@/context/RightPanelContext'
 import DepartmentDrawer       from './DepartmentDrawer'
 import PaginationBar          from '../ui/PaginationBar'
-import { usePersistedPageSize } from '@/hooks/usePersistedPageSize'
+import { useReportPaging }    from './useReportPaging'
+import { TD, SortableTableHead, ReportTableToolbar } from './reportTableChrome'
 import { useSmCustomerTree }  from '@/hooks/useSmCustomerTree'
 import type { ReportDepartment, SortState } from '@/types/reports'
-
-function SortIcon({ active, dir }: { active: boolean; dir: 'asc' | 'desc' }) {
-  // Delegates to the ONE shared caret recipe (HUISSTIJL-1).
-  return <SortCaret active={active} dir={dir} />
-}
-
-const TH: CSSProperties = { padding: '8px 12px', textAlign: 'left', fontSize: 11, fontWeight: 600,
-             color: 'var(--text-muted)', background: 'var(--hover-bg)', borderBottom: '1px solid var(--border)',
-             whiteSpace: 'nowrap', userSelect: 'none' }
-const TD: CSSProperties = { padding: '10px 12px', fontSize: 13, color: 'var(--text)', borderBottom: '1px solid var(--hover-bg)' }
 
 // Owns local search/sort/pagination state and derives the flattened department rows from
 // the shared customer→location→department tree, then registers its filters into the panel.
 export default function DepartmentsTable() {
   const { t } = useTranslation('reports')
-  // Reuses the existing common.sort key for the sortable header's button tooltip
-  // (mirrors DataTable's own sortable header — no new i18n keys needed).
-  const { t: tCommon } = useTranslation('common')
   const [search,  setSearch]  = useState('')
   const [drill,   setDrill]   = useState<ReportDepartment | null>(null)
   const [selectedCustomers, setSelectedCustomers] = useState<Array<string | number>>([])
   const [selectedStatuses,  setSelectedStatuses]  = useState<Array<string | number>>(['active'])
   const [sort,    setSort]    = useState<SortState>({ key: 'customer_name', dir: 'asc' })
-  const [page, setPage] = useState(1)
-  const { pageSize, handlePageSizeChange } = usePersistedPageSize()
 
   const { registerFilters, unregisterFilters } = useRightPanel()
 
@@ -95,16 +80,8 @@ export default function DepartmentsTable() {
     })
   }, [filtered, sort])
 
-  // A changed filter or page size can leave the current page out of range; reset to 1
-  // rather than showing an empty page.
-  useEffect(() => setPage(1), [filtered.length, pageSize])
-  // Slices the sorted rows for the current page/size only, so the table never renders
-  // the full result set at once.
-  const paged      = useMemo(() => sorted.slice((page-1)*pageSize, page*pageSize), [sorted, page, pageSize])
-  const totalPages = Math.max(1, Math.ceil(sorted.length / pageSize))
-
-  const setSort_ = (key: string) => setSort(prev =>
-    prev.key === key ? { key, dir: prev.dir === 'asc' ? 'desc' : 'asc' } : { key, dir: 'asc' })
+  // Shared paging/sort-toggle state (§3 consolidation) — page resets to 1 on any filter/size change.
+  const { page, paged, totalPages, pageSize, handlePageSizeChange, setPage, setSort_ } = useReportPaging(sorted, setSort, 'asc')
 
   // Distinct location statuses seen in the data, for the panel's status filter chips.
   const statusOptions = useMemo(() =>
@@ -153,22 +130,13 @@ export default function DepartmentsTable() {
 
   return (
     <div className="flex flex-col h-full">
-      <div className="flex items-center justify-between flex-shrink-0" style={{ marginBottom: 16 }}>
-        <div>
-          <h1 style={{ fontSize: 18, fontWeight: 600, color: 'var(--text)' }}>{t('departments.title')}</h1>
-          <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 2 }}>
-            {loading ? t('common.loadingShort') : t('departments.summary', { shown: filtered.length, total: rows.length })}
-          </p>
-        </div>
-        <div className="relative">
-          <Search size={14} style={{ position: 'absolute', left: 10, top: '50%',
-                                     transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-          <input value={search} onChange={e => setSearch(e.target.value)}
-            placeholder={t('departments.search')}
-            style={{ height: 34, width: 260, paddingLeft: 32, paddingRight: 12, fontSize: 13,
-                     border: '1px solid var(--border)', borderRadius: 8, outline: 'none', color: 'var(--text)' }} />
-        </div>
-      </div>
+      <ReportTableToolbar
+        title={t('departments.title')}
+        summary={loading ? t('common.loadingShort') : t('departments.summary', { shown: filtered.length, total: rows.length })}
+        searchValue={search}
+        onSearchChange={setSearch}
+        searchPlaceholder={t('departments.search')}
+      />
 
       <div className="flex flex-1 min-h-0 overflow-hidden bg-[var(--surface)] rounded-xl"
         style={{ border: '1px solid var(--border)' }}>
@@ -183,35 +151,7 @@ export default function DepartmentsTable() {
             </div>
           ) : (
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-              <thead>
-                <tr>
-                  {COLS.map(col => {
-                    // Plain header — no sort affordance, no aria-sort (mirrors DataTable's
-                    // own non-sortable column, which never gets aria-sort either).
-                    if (!col.sortable) return <th key={col.key} style={TH}>{col.label}</th>
-                    const active = sort.key === col.key
-                    // Present ('none' for inactive) on EVERY sortable column so a screen
-                    // reader can tell it is sortable at all, not just the active one.
-                    const ariaSort: 'ascending' | 'descending' | 'none' =
-                      active ? (sort.dir === 'asc' ? 'ascending' : 'descending') : 'none'
-                    const { padding: thPadding, ...thStyleRest } = TH
-                    return (
-                      <th key={col.key} style={thStyleRest} aria-sort={ariaSort}>
-                        {/* Real <button> inside the <th> (not tabIndex+onKeyDown on the th) —
-                            gives Tab reachability + native Enter/Space activation; mirrors the
-                            shared DataTable's sortable header exactly. */}
-                        <button type="button" onClick={() => setSort_(col.key)} title={tCommon('sort')}
-                          style={{ all: 'unset', boxSizing: 'border-box', display: 'inline-flex', width: '100%',
-                            padding: thPadding, cursor: 'pointer', userSelect: 'none', alignItems: 'center', gap: 4,
-                            font: 'inherit', color: 'inherit' }}>
-                          {col.label}
-                          <SortIcon active={active} dir={sort.dir} />
-                        </button>
-                      </th>
-                    )
-                  })}
-                </tr>
-              </thead>
+              <SortableTableHead columns={COLS} sort={sort} onSort={setSort_} />
               <tbody>
                 {paged.map((r, i) => (
                   <tr key={r.id ?? i}

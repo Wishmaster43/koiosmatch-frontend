@@ -2,25 +2,22 @@
  * MessagesTable — searchable, sortable, paginated table of sent/received messages
  * (WhatsApp + email). Shows direction, status, channel and contact; filters come
  * from RightPanelContext. Data is fetched per page from the API. The badges +
- * detail drawer live in `./messages/` (messageParts, MessageDrawer).
+ * detail drawer live in `./messages/` (messageParts, MessageDrawer). Chrome
+ * (sortable header + toolbar) and paging state come from the shared
+ * reportTableChrome/useReportPaging (§3, "36-42 identical lines" consolidation).
  */
 import { useState, useEffect, useMemo } from 'react'
-import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Search } from 'lucide-react'
 import { useRightPanel }      from '@/context/RightPanelContext'
 import { useDateFormat }      from '@/lib/datetime'
 import PaginationBar          from '../ui/PaginationBar'
-import { usePersistedPageSize } from '@/hooks/usePersistedPageSize'
+import { useReportPaging }    from './useReportPaging'
+import { TD, SortableTableHead, ReportTableToolbar } from './reportTableChrome'
+import { BodyText, Caption } from '@/components/ui/typography'
 import { useReportList }      from './useReportList'
 import type { MessageRow, ReportFilterGroup, SortState } from '@/types/reports'
-import { ChannelBadge, StatusBadge, SortIcon } from './messages/messageParts'
+import { ChannelBadge, StatusBadge } from './messages/messageParts'
 import MessageDrawer from './messages/MessageDrawer'
-
-const TH: CSSProperties = { padding: '8px 12px', textAlign: 'left', fontSize: 11, fontWeight: 600,
-             color: 'var(--text-muted)', background: 'var(--hover-bg)', borderBottom: '1px solid var(--border)',
-             whiteSpace: 'nowrap', userSelect: 'none' }
-const TD: CSSProperties = { padding: '10px 12px', fontSize: 13, color: 'var(--text)', borderBottom: '1px solid var(--hover-bg)' }
 
 const COL_KEYS = [
   { key: 'sent_at',         tKey: 'sent',      sortable: true },
@@ -34,9 +31,6 @@ const COL_KEYS = [
 // Wires local UI state (search, sort, filters, paging) around the API-backed rows fetched by useReportList; see the module doc above for the overall shape.
 export default function MessagesTable() {
   const { t } = useTranslation('reports')
-  // Reuses the existing common.sort key for the sortable header's button tooltip
-  // (mirrors DataTable's own sortable header — no new i18n keys needed).
-  const { t: tCommon } = useTranslation('common')
   const COLS = COL_KEYS.map(c => ({ ...c, label: t(`messages.cols.${c.tKey}`) }))
   // Data (fetch) lives in the shared hook (§3); this component only derives + renders.
   const { rows, loading } = useReportList<MessageRow>('/messages')
@@ -50,8 +44,6 @@ export default function MessagesTable() {
   const [selectedWorkflows, setSelectedWorkflows] = useState<Array<string | number>>([])
 
   const { registerFilters, unregisterFilters } = useRightPanel()
-  const [page, setPage] = useState(1)
-  const { pageSize, handlePageSizeChange } = usePersistedPageSize()
 
   // Distinct channel values already loaded client-side seed the right-panel filter — no separate lookup fetch needed.
   const channelOptions  = useMemo(() => [...new Set(rows.map(r => r.channel).filter((x): x is string => Boolean(x)))].sort(), [rows])
@@ -91,14 +83,8 @@ export default function MessagesTable() {
     })
   }, [filtered, sort])
 
-  const setSort_ = (key: string) => setSort(prev =>
-    prev.key === key ? { key, dir: prev.dir === 'asc' ? 'desc' : 'asc' } : { key, dir: 'desc' })
-
-  // Reset to page 1 whenever the row COUNT or page size changes, so paging never points past the end (a same-size filter swap keeps the current page).
-  useEffect(() => setPage(1), [filtered.length, pageSize])
-  // Slice the sorted+filtered rows for the current page; kept separate from `sorted` so the paging math stays in one place.
-  const paged      = useMemo(() => sorted.slice((page-1)*pageSize, page*pageSize), [sorted, page, pageSize])
-  const totalPages = Math.max(1, Math.ceil(sorted.length / pageSize))
+  // Shared paging/sort-toggle state (§3 consolidation) — page resets to 1 on any filter/size change.
+  const { page, paged, totalPages, pageSize, handlePageSizeChange, setPage, setSort_ } = useReportPaging(sorted, setSort, 'desc')
 
   // Assembles the right-panel filter groups only from dimensions that actually have options, each carrying live counts from the current rows.
   const filterGroups = useMemo(() => {
@@ -150,57 +136,19 @@ export default function MessagesTable() {
   return (
     <div className="flex flex-col h-full">
 
-      {/* Header */}
-      <div className="flex items-center justify-between flex-shrink-0" style={{ marginBottom: 16 }}>
-        <div>
-          <h1 style={{ fontSize: 18, fontWeight: 600, color: 'var(--text)' }}>{t('messages.title')}</h1>
-          <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 2 }}>
-            {loading ? t('common.loadingShort') : t('messages.summary', { shown: filtered.length, total: rows.length })}
-          </p>
-        </div>
-        <div className="relative">
-          <Search size={14} style={{ position: 'absolute', left: 10, top: '50%',
-                                     transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-          <input value={search} onChange={e => setSearch(e.target.value)}
-            placeholder={t('messages.search')}
-            style={{ height: 34, width: 260, paddingLeft: 32, paddingRight: 12, fontSize: 13,
-                     border: '1px solid var(--border)', borderRadius: 8, outline: 'none', color: 'var(--text)' }} />
-        </div>
-      </div>
+      <ReportTableToolbar
+        title={t('messages.title')}
+        summary={loading ? t('common.loadingShort') : t('messages.summary', { shown: filtered.length, total: rows.length })}
+        searchValue={search}
+        onSearchChange={setSearch}
+        searchPlaceholder={t('messages.search')}
+      />
 
       <div className="flex flex-1 min-h-0 overflow-hidden bg-[var(--surface)] rounded-xl"
         style={{ border: '1px solid var(--border)' }}>
         <div className="flex-1 min-w-0 overflow-auto">
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-            <thead>
-              <tr>
-                {COLS.map(col => {
-                  // Plain header — no sort affordance, no aria-sort (mirrors DataTable's
-                  // own non-sortable column, which never gets aria-sort either).
-                  if (!col.sortable) return <th key={col.key} style={TH}>{col.label}</th>
-                  const active = sort.key === col.key
-                  // Present ('none' for inactive) on EVERY sortable column so a screen
-                  // reader can tell it is sortable at all, not just the active one.
-                  const ariaSort: 'ascending' | 'descending' | 'none' =
-                    active ? (sort.dir === 'asc' ? 'ascending' : 'descending') : 'none'
-                  const { padding: thPadding, ...thStyleRest } = TH
-                  return (
-                    <th key={col.key} style={thStyleRest} aria-sort={ariaSort}>
-                      {/* Real <button> inside the <th> (not tabIndex+onKeyDown on the th) —
-                          gives Tab reachability + native Enter/Space activation; mirrors the
-                          shared DataTable's sortable header exactly. */}
-                      <button type="button" onClick={() => setSort_(col.key)} title={tCommon('sort')}
-                        style={{ all: 'unset', boxSizing: 'border-box', display: 'inline-flex', width: '100%',
-                          padding: thPadding, cursor: 'pointer', userSelect: 'none', alignItems: 'center', gap: 4,
-                          font: 'inherit', color: 'inherit' }}>
-                        {col.label}
-                        <SortIcon active={active} dir={sort.dir} />
-                      </button>
-                    </th>
-                  )
-                })}
-              </tr>
-            </thead>
+            <SortableTableHead columns={COLS} sort={sort} onSort={setSort_} />
             <tbody>
               {loading && (
                 <tr><td colSpan={COLS.length} style={{ textAlign: 'center', padding: 40, color: 'var(--text-muted)' }}>
@@ -222,26 +170,25 @@ export default function MessagesTable() {
                       <div style={{ fontWeight: 500, color: 'var(--text)' }}>
                         {formatDate(r.sent_at ?? r.created_at)}
                       </div>
-                      <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+                      <Caption as="div">
                         {formatTime(r.sent_at ?? r.created_at)}
-                      </div>
+                      </Caption>
                     </td>
                     <td style={TD}>
                       <div style={{ fontWeight: 500, color: 'var(--text)' }}>
                         {r.recipient_name ?? '—'}
                       </div>
                       {(r.recipient_email ?? r.recipient_phone) && (
-                        <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+                        <Caption as="div">
                           {r.recipient_email ?? r.recipient_phone}
-                        </div>
+                        </Caption>
                       )}
                     </td>
                     <td style={TD}><ChannelBadge channel={r.channel} /></td>
                     <td style={{ ...TD, maxWidth: 220 }}>
-                      <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                                    fontSize: 13, color: 'var(--text)' }}>
+                      <BodyText as="div" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                         {r.subject ?? r.template_name ?? <span style={{ color: 'var(--border)' }}>—</span>}
-                      </div>
+                      </BodyText>
                     </td>
                     <td style={TD}><StatusBadge status={r.status} /></td>
                     <td style={{ ...TD, fontSize: 12, color: 'var(--text-muted)' }}>

@@ -11,6 +11,7 @@
 import { useState } from 'react'
 import { formatRatio } from '@/lib/formatters'
 import { useTranslation } from 'react-i18next'
+import { interactive } from '@/lib/a11y'
 import ReportKpiBand from './ReportKpiBand'
 import ReportStateBlock from './ReportStateBlock'
 import { reportCardStyle as card, reportSectionHeadStyle } from './ReportSectionCard'
@@ -358,10 +359,9 @@ export default function VacanciesReport({ period, filters = EMPTY_REPORT_FILTERS
             <ReportGridItem span={2}>
               <div style={{ ...card, overflow: 'hidden' }}>
                 <div style={{ padding: '16px 20px 0' }}>
+                  {/* Real keyboard-operable trigger: interactive() adds role/tabIndex/Enter-Space, the global :focus-visible ring makes it visible (§6) */}
                   <h3 style={{ ...reportSectionHeadStyle, ...(zeroApplicationsDrillHandler ? { cursor: 'pointer' } : {}) }}
-                    role={zeroApplicationsDrillHandler ? 'button' : undefined}
-                    tabIndex={zeroApplicationsDrillHandler ? 0 : undefined}
-                    onClick={zeroApplicationsDrillHandler}>
+                    {...interactive(zeroApplicationsDrillHandler)}>
                     {t('vacancies.noApplicants.title', { count: zeroApplicantRows.length })}
                   </h3>
                   <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: '4px 0 12px' }}>

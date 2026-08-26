@@ -589,6 +589,22 @@ describe('VacanciesReport (RAPPORTEN-SUITE-1 portie 4, additive on C-34)', () =>
     expect(lastDrillParams()).not.toHaveProperty('zero_applications')
   })
 
+  // Regression (§6): the zero-applicants header used to be a click-only <h3> with a
+  // fake role/tabIndex and no key handler — Enter/Space did nothing. interactive()
+  // now wires real keyboard activation, same request as a mouse click.
+  it('activates the zero-applicants section header via keyboard Enter', async () => {
+    const user = userEvent.setup()
+    const zeroRow = { ...row, key: 'v2', label: 'Doktersassistent', applications: 0, matched: 0 }
+    mockUseVacanciesReport.mockReturnValue({ data: { ...data, vacancies: [row, zeroRow] }, loading: false, error: false })
+    renderReport()
+
+    const header = screen.getByRole('button', { name: 'Vacatures zonder sollicitaties (1)' })
+    header.focus()
+    expect(header).toHaveFocus()
+    await user.keyboard('{Enter}')
+    expect(lastDrillParams()).toEqual({ zero_applications: 1, period: 'month' })
+  })
+
   // Integration proof (WCAG 2.2 AA audit, §6): the "Vacature" column stays wired with
   // `sortable: true` into the shared DataTable — keyboard-operable, aria-sort reflected.
   it('sorts the Vacature column via a keyboard Enter press and reflects it via aria-sort', async () => {

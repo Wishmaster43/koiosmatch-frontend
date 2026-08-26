@@ -2,44 +2,30 @@
  * CustomersTable — searchable, sortable, paginated table of customers.
  * Clicking a row opens CustomerDetailDrawer. Filters come from RightPanelContext,
  * page size from the user's preference; data is fetched per page from the API.
+ * Chrome (sortable header + toolbar) and paging state come from the shared
+ * reportTableChrome/useReportPaging (§3, "36-42 identical lines" consolidation).
  */
 import { useState, useEffect, useMemo } from 'react'
-import type { CSSProperties, Dispatch, SetStateAction } from 'react'
+import type { Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Search } from 'lucide-react'
-import SortCaret from '@/components/ui/SortCaret'
 import Spinner from '@/components/ui/Spinner'
 import { useRightPanel }      from '@/context/RightPanelContext'
 import CustomerDetailDrawer   from './CustomerDetailDrawer'
 import PaginationBar          from '../ui/PaginationBar'
-import { usePersistedPageSize } from '@/hooks/usePersistedPageSize'
+import { useReportPaging }    from './useReportPaging'
+import { TD, SortableTableHead, ReportTableToolbar } from './reportTableChrome'
 import { useReportCustomers } from './useReportCustomers'
 import StatusBadge from '../ui/StatusBadge'  // shared active/inactive status pill
 import type { ReportCustomer, SortState } from '@/types/reports'
 
-function SortIcon({ active, dir }: { active: boolean; dir: 'asc' | 'desc' }) {
-  // Delegates to the ONE shared caret recipe (HUISSTIJL-1).
-  return <SortCaret active={active} dir={dir} />
-}
-
-const TH: CSSProperties = { padding: '8px 12px', textAlign: 'left', fontSize: 11, fontWeight: 600,
-             color: 'var(--text-muted)', background: 'var(--hover-bg)', borderBottom: '1px solid var(--border)',
-             whiteSpace: 'nowrap', userSelect: 'none' }
-const TD: CSSProperties = { padding: '10px 12px', fontSize: 13, color: 'var(--text)', borderBottom: '1px solid var(--hover-bg)' }
-
 // Read-only reports view of customers; data/loading/error come from the shared hook, filters register into the right panel below.
 export default function CustomersTable() {
   const { t } = useTranslation('reports')
-  // Reuses the existing common.sort key for the sortable header's button tooltip
-  // (mirrors DataTable's own sortable header — no new i18n keys needed).
-  const { t: tCommon } = useTranslation('common')
   // Data (fetch + dev-mock merge) lives in the shared hook (§3).
   const { customers, loading, error } = useReportCustomers()
   const [search,            setSearch]            = useState('')
   const [selectedStatuses,  setSelectedStatuses]  = useState<Array<string | number>>(['active'])
   const [sort,              setSort]              = useState<SortState>({ key: 'name', dir: 'asc' })
-  const [page, setPage] = useState(1)
-  const { pageSize, handlePageSizeChange } = usePersistedPageSize()
   const [detail,            setDetail]            = useState<ReportCustomer | null>(null)
 
   const { registerFilters, unregisterFilters } = useRightPanel()
@@ -86,17 +72,8 @@ export default function CustomersTable() {
     })
   }, [filtered, sort])
 
-  // Reset to page 1 whenever the filtered set or page size changes, so pagination never points past the end.
-  useEffect(() => setPage(1), [filtered.length, pageSize])
-  // Slices the sorted rows to the current page for rendering.
-  const paged     = useMemo(() => sorted.slice((page-1)*pageSize, page*pageSize), [sorted, page, pageSize])
-  const totalPages = Math.max(1, Math.ceil(sorted.length / pageSize))
-
-  const setSort_ = (key: string) => setSort(prev =>
-    prev.key === key
-      ? { key, dir: prev.dir === 'asc' ? 'desc' : 'asc' }
-      : { key, dir: 'asc' }
-  )
+  // Shared paging/sort-toggle state (§3 consolidation) — page resets to 1 on any filter/size change.
+  const { page, paged, totalPages, pageSize, handlePageSizeChange, setPage, setSort_ } = useReportPaging(sorted, setSort, 'asc')
 
   // Declares the status filter group registered into the shared right-hand filter panel.
   const filterGroups = useMemo(() => [
@@ -130,25 +107,13 @@ export default function CustomersTable() {
   return (
     <div className="flex flex-col h-full">
 
-      {/* Header: title + summary + search — mirrors the sibling SM entity tables
-          (DepartmentsTable/LocationsTable), was missing here so `search` state
-          had no control feeding it (§3 "control that goes nowhere" audit fix). */}
-      <div className="flex items-center justify-between flex-shrink-0" style={{ marginBottom: 16 }}>
-        <div>
-          <h1 style={{ fontSize: 18, fontWeight: 600, color: 'var(--text)' }}>{t('customers.title')}</h1>
-          <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 2 }}>
-            {loading ? t('common.loadingShort') : t('customers.summary', { shown: filtered.length, total: customers.length })}
-          </p>
-        </div>
-        <div className="relative">
-          <Search size={14} style={{ position: 'absolute', left: 10, top: '50%',
-                                     transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-          <input value={search} onChange={e => setSearch(e.target.value)}
-            placeholder={t('customers.search')}
-            style={{ height: 34, width: 260, paddingLeft: 32, paddingRight: 12, fontSize: 13,
-                     border: '1px solid var(--border)', borderRadius: 8, outline: 'none', color: 'var(--text)' }} />
-        </div>
-      </div>
+      <ReportTableToolbar
+        title={t('customers.title')}
+        summary={loading ? t('common.loadingShort') : t('customers.summary', { shown: filtered.length, total: customers.length })}
+        searchValue={search}
+        onSearchChange={setSearch}
+        searchPlaceholder={t('customers.search')}
+      />
 
       {error && (
         <div style={{ padding: '10px 14px', marginBottom: 12, fontSize: 13,
@@ -176,36 +141,7 @@ export default function CustomersTable() {
             </div>
           ) : (
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-              <thead>
-                <tr>
-                  {COLS.map(col => {
-                    // Plain header — no sort affordance, no aria-sort (mirrors DataTable's
-                    // own non-sortable column, which never gets aria-sort either).
-                    if (!col.sortable) return <th key={col.key} style={TH}>{col.label}</th>
-                    const active = sort.key === col.key
-                    // Present ('none' for inactive) on EVERY sortable column so a screen
-                    // reader can tell it is sortable at all, not just the active one.
-                    const ariaSort: 'ascending' | 'descending' | 'none' =
-                      active ? (sort.dir === 'asc' ? 'ascending' : 'descending') : 'none'
-                    const { padding: thPadding, ...thStyleRest } = TH
-                    return (
-                      <th key={col.key} style={thStyleRest} aria-sort={ariaSort}>
-                        {/* Real <button> inside the <th> (not tabIndex+onKeyDown on the th) —
-                            gives Tab reachability + native Enter/Space activation; mirrors the
-                            shared DataTable's sortable header exactly. */}
-                        <button type="button" onClick={() => setSort_(col.key)} title={tCommon('sort')}
-                          // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- table-header sort control (all:unset reset), mirrors the shared DataTable's own sortable header, pre-existing and out of this ink/tint task's scope
-                          style={{ all: 'unset', boxSizing: 'border-box', display: 'inline-flex', width: '100%',
-                            padding: thPadding, cursor: 'pointer', userSelect: 'none', alignItems: 'center', gap: 4,
-                            font: 'inherit', color: 'inherit' }}>
-                          {col.label}
-                          <SortIcon active={active} dir={sort.dir} />
-                        </button>
-                      </th>
-                    )
-                  })}
-                </tr>
-              </thead>
+              <SortableTableHead columns={COLS} sort={sort} onSort={setSort_} />
               <tbody>
                 {paged.map((c, i) => {
                   const locCount  = c.locations?.length ?? 0

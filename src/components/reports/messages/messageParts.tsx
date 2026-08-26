@@ -1,10 +1,10 @@
 /**
- * Shared message-table parts: the date-time formatter, the channel/status badge
- * meta + badge components, and the sortable-column icon. Used by both MessagesTable
- * and MessageDrawer. Labels resolve via t('messages.channel.*' / '.status.*').
+ * Shared message-table parts: the date-time formatter and the channel/status badge
+ * meta + badge components. Used by both MessagesTable and MessageDrawer. Labels
+ * resolve via t('messages.channel.*' / '.status.*'). The sortable-column icon now
+ * comes from the shared SortableTableHead (§3, reportTableChrome.tsx).
  */
 import { MessageCircle, Mail, Phone, CheckCheck, Clock, XCircle, AlertTriangle } from 'lucide-react'
-import SortCaret from '@/components/ui/SortCaret'
 import type { LucideIcon } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { formatDateTimeStr } from '@/lib/localDate'
@@ -68,9 +68,4 @@ export function StatusBadge({ status }: { status?: string }) {
       {status ? t(`messages.status.${key}`, { defaultValue: status }) : '—'}
     </span>
   )
-}
-
-export function SortIcon({ active, dir }: { active: boolean; dir: 'asc' | 'desc' }) {
-  // Delegates to the ONE shared caret recipe (HUISSTIJL-1).
-  return <SortCaret active={active} dir={dir} />
 }

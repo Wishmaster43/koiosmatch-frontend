@@ -2,44 +2,28 @@
  * LocationsTable — searchable, sortable, paginated table of locations.
  * Clicking a row opens LocationDrawer. Filters come from RightPanelContext,
  * page size from the user's preference; data is fetched per page from the API.
+ * Chrome (sortable header + toolbar) and paging state come from the shared
+ * reportTableChrome/useReportPaging (§3, "36-42 identical lines" consolidation).
  */
 import { useState, useEffect, useMemo } from 'react'
-import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Search } from 'lucide-react'
-import SortCaret from '@/components/ui/SortCaret'
 import { useRightPanel }      from '@/context/RightPanelContext'
 import LocationDrawer         from './LocationDrawer'
 import PaginationBar          from '../ui/PaginationBar'
-import { usePersistedPageSize } from '@/hooks/usePersistedPageSize'
+import { useReportPaging }    from './useReportPaging'
+import { TD, SortableTableHead, ReportTableToolbar } from './reportTableChrome'
 import StatusBadge from '../ui/StatusBadge'  // shared active/inactive status pill
 import { useSmCustomerTree } from '@/hooks/useSmCustomerTree'
 import type { ReportLocation, SortState } from '@/types/reports'
 
-
-function SortIcon({ active, dir }: { active: boolean; dir: 'asc' | 'desc' }) {
-  // Delegates to the ONE shared caret recipe (HUISSTIJL-1).
-  return <SortCaret active={active} dir={dir} />
-}
-
-const TH: CSSProperties = { padding: '8px 12px', textAlign: 'left', fontSize: 11, fontWeight: 600,
-             color: 'var(--text-muted)', background: 'var(--hover-bg)', borderBottom: '1px solid var(--border)',
-             whiteSpace: 'nowrap', userSelect: 'none' }
-const TD: CSSProperties = { padding: '10px 12px', fontSize: 13, color: 'var(--text)', borderBottom: '1px solid var(--hover-bg)' }
-
 // Searchable, sortable, paginated locations table; filters live in local state and are pushed into the shared right-panel context, and a row click opens the location drawer.
 export default function LocationsTable() {
   const { t } = useTranslation('reports')
-  // Reuses the existing common.sort key for the sortable header's button tooltip
-  // (mirrors DataTable's own sortable header — no new i18n keys needed).
-  const { t: tCommon } = useTranslation('common')
   const [search,           setSearch]           = useState('')
   const [drill,            setDrill]            = useState<ReportLocation | null>(null)
   const [selectedStatuses,  setSelectedStatuses]  = useState<Array<string | number>>(['active'])
   const [selectedCustomers, setSelectedCustomers] = useState<Array<string | number>>([])
   const [sort,              setSort]              = useState<SortState>({ key: 'customer_name', dir: 'asc' })
-  const [page, setPage] = useState(1)
-  const { pageSize, handlePageSizeChange } = usePersistedPageSize()
 
   const { registerFilters, unregisterFilters } = useRightPanel()
 
@@ -93,14 +77,8 @@ export default function LocationsTable() {
     })
   }, [filtered, sort])
 
-  // Resets to page 1 whenever the filtered set or the page size changes, so the user is never stranded on a now-empty page.
-  useEffect(() => setPage(1), [filtered.length, pageSize])
-  // Slices the sorted rows down to just the rows for the current page.
-  const paged      = useMemo(() => sorted.slice((page-1)*pageSize, page*pageSize), [sorted, page, pageSize])
-  const totalPages = Math.max(1, Math.ceil(sorted.length / pageSize))
-
-  const setSort_ = (key: string) => setSort(prev =>
-    prev.key === key ? { key, dir: prev.dir === 'asc' ? 'desc' : 'asc' } : { key, dir: 'asc' })
+  // Shared paging/sort-toggle state (§3 consolidation) — page resets to 1 on any filter/size change.
+  const { page, paged, totalPages, pageSize, handlePageSizeChange, setPage, setSort_ } = useReportPaging(sorted, setSort, 'asc')
 
   // Builds the customer/status filter definitions, with live per-option counts, handed to the shared right-panel filter UI.
   const filterGroups = useMemo(() => [
@@ -143,22 +121,13 @@ export default function LocationsTable() {
 
   return (
     <div className="flex flex-col h-full">
-      <div className="flex items-center justify-between flex-shrink-0" style={{ marginBottom: 16 }}>
-        <div>
-          <h1 style={{ fontSize: 18, fontWeight: 600, color: 'var(--text)' }}>{t('locations.title')}</h1>
-          <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 2 }}>
-            {loading ? t('common.loadingShort') : t('locations.summary', { shown: filtered.length, total: rows.length })}
-          </p>
-        </div>
-        <div className="relative">
-          <Search size={14} style={{ position: 'absolute', left: 10, top: '50%',
-                                     transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-          <input value={search} onChange={e => setSearch(e.target.value)}
-            placeholder={t('locations.search')}
-            style={{ height: 34, width: 260, paddingLeft: 32, paddingRight: 12, fontSize: 13,
-                     border: '1px solid var(--border)', borderRadius: 8, outline: 'none', color: 'var(--text)' }} />
-        </div>
-      </div>
+      <ReportTableToolbar
+        title={t('locations.title')}
+        summary={loading ? t('common.loadingShort') : t('locations.summary', { shown: filtered.length, total: rows.length })}
+        searchValue={search}
+        onSearchChange={setSearch}
+        searchPlaceholder={t('locations.search')}
+      />
 
       <div className="flex flex-1 min-h-0 overflow-hidden bg-[var(--surface)] rounded-xl"
         style={{ border: '1px solid var(--border)' }}>
@@ -173,35 +142,7 @@ export default function LocationsTable() {
             </div>
           ) : (
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-              <thead>
-                <tr>
-                  {COLS.map(col => {
-                    // Plain header — no sort affordance, no aria-sort (mirrors DataTable's
-                    // own non-sortable column, which never gets aria-sort either).
-                    if (!col.sortable) return <th key={col.key} style={TH}>{col.label}</th>
-                    const active = sort.key === col.key
-                    // Present ('none' for inactive) on EVERY sortable column so a screen
-                    // reader can tell it is sortable at all, not just the active one.
-                    const ariaSort: 'ascending' | 'descending' | 'none' =
-                      active ? (sort.dir === 'asc' ? 'ascending' : 'descending') : 'none'
-                    const { padding: thPadding, ...thStyleRest } = TH
-                    return (
-                      <th key={col.key} style={thStyleRest} aria-sort={ariaSort}>
-                        {/* Real <button> inside the <th> (not tabIndex+onKeyDown on the th) —
-                            gives Tab reachability + native Enter/Space activation; mirrors the
-                            shared DataTable's sortable header exactly. */}
-                        <button type="button" onClick={() => setSort_(col.key)} title={tCommon('sort')}
-                          style={{ all: 'unset', boxSizing: 'border-box', display: 'inline-flex', width: '100%',
-                            padding: thPadding, cursor: 'pointer', userSelect: 'none', alignItems: 'center', gap: 4,
-                            font: 'inherit', color: 'inherit' }}>
-                          {col.label}
-                          <SortIcon active={active} dir={sort.dir} />
-                        </button>
-                      </th>
-                    )
-                  })}
-                </tr>
-              </thead>
+              <SortableTableHead columns={COLS} sort={sort} onSort={setSort_} />
               <tbody>
                 {paged.map((r, i) => (
                   <tr key={r.id ?? i}

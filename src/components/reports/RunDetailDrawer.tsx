@@ -14,6 +14,7 @@ import RunStepList from './RunStepList'
 import RunLineage from './RunLineage'
 import { StopRunButton, CANCELLABLE } from '@/components/layout/workflow/runControl'
 import { PageTitle, Caption, GroupLabel } from '@/components/ui/typography'
+import Button from '@/components/ui/Button'
 import type { RunRow } from '@/types/reports'
 
 // Slide-over for one workflow run: header/status/metrics, a timeline of run
@@ -103,17 +104,14 @@ export default function RunDetailDrawer({ run, onClose, zIndex = 50 }: {
                 <div style={{ fontSize: 11, color: 'var(--color-danger-text)', marginTop: 4 }}>{stopError}</div>
               )}
             </div>
-            {/* Close icon button with an imperative hover highlight Button does not
-                provide, pre-existing and out of this ink/tint task's scope. */}
-            <button onClick={onClose} aria-label={t('common:close')}
-              // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- see comment above
-              style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                       background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)',
-                       borderRadius: 6, marginLeft: 10, flexShrink: 0 }}
+            {/* Close icon button — the shared Button (§3), mirrors DrillDownDrawer/
+                KpiDrillDownDrawer/ContactPersonDrawer's own close control. */}
+            <Button variant="ghost" iconOnly onClick={onClose} aria-label={t('common:close')}
+              style={{ marginLeft: 10, flexShrink: 0 }}
               onMouseEnter={e => (e.currentTarget.style.background = 'var(--hover-bg)')}
               onMouseLeave={e => (e.currentTarget.style.background = 'none')}>
               <X size={15} />
-            </button>
+            </Button>
           </div>
         </div>
 

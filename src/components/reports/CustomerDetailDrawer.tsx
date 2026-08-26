@@ -1,27 +1,16 @@
 /**
  * CustomerDetailDrawer — slide-in panel with one customer's details (locations,
- * departments, contacts). Opened from CustomersTable. StatusBadge = active/inactive pill.
+ * departments, contacts). Opened from CustomersTable. StatusBadge = active/inactive
+ * pill. InfoRow (shared, §3, `variant="inline"`) = one labeled header line.
  */
-import type { ReactNode } from 'react'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { useTranslation } from 'react-i18next'
 import { X, MapPin, Building2, Hash, User, Layers } from 'lucide-react'
-import type { LucideIcon } from 'lucide-react'
+import Button from '@/components/ui/Button'
+import { PageTitle, Caption, SectionTitle } from '@/components/ui/typography'
 import StatusBadge from '../ui/StatusBadge'  // shared active/inactive status pill
+import InfoRow from './InfoRow'
 import type { ReportCustomer } from '@/types/reports'
-
-// One labelled icon+value line; renders nothing when the value is empty so the
-// drawer never shows a row with a dangling blank.
-function InfoRow({ icon: Icon, label, value }: { icon: LucideIcon; label: ReactNode; value?: ReactNode }) {
-  if (!value) return null
-  return (
-    <div style={{ display: 'flex', alignItems: 'flex-start', gap: 6, fontSize: 12 }}>
-      <Icon size={12} color="var(--border)" style={{ flexShrink: 0, marginTop: 1 }} />
-      <span style={{ color: 'var(--text-muted)', flexShrink: 0 }}>{label}:</span>
-      <span style={{ color: 'var(--text)' }}>{value}</span>
-    </div>
-  )
-}
 
 // Read-only slide-in with one customer's locations/departments/contacts, opened
 // from CustomersTable; traps focus while open (§6) and closes on backdrop click.
@@ -37,30 +26,28 @@ export default function CustomerDetailDrawer({ customer, onClose }: { customer: 
 
       <div ref={panelRef} role="dialog" aria-modal="true" aria-label={customer?.name as string | undefined} tabIndex={-1}
         className="fixed top-0 bottom-0 right-0 z-50 flex flex-col bg-[var(--surface)]"
-        style={{ width: 560, boxShadow: '-4px 0 30px rgba(0,0,0,0.12)' }}>
+        style={{ width: 560, boxShadow: 'var(--shadow-drawer)' }}>
 
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between',
                       padding: '16px 20px', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-              <span style={{ fontWeight: 700, fontSize: 15, color: 'var(--text)' }}>{customer.name}</span>
+              <PageTitle as="span" style={{ fontWeight: 700 }}>{customer.name}</PageTitle>
               <StatusBadge status={customer.status} />
             </div>
             <div style={{ display: 'flex', gap: 12 }}>
-              <InfoRow icon={Hash}    label={t('customerDrawer.debtorNumber')}   value={customer.debtor_number} />
-              <InfoRow icon={Hash}    label={t('dr.externalId')}                 value={customer.external_id} />
-              <InfoRow icon={User}    label={t('customerDrawer.accountManager')} value={customer.account_manager} />
+              <InfoRow icon={Hash}    label={t('customerDrawer.debtorNumber')}   value={customer.debtor_number} variant="inline" />
+              <InfoRow icon={Hash}    label={t('dr.externalId')}                 value={customer.external_id} variant="inline" />
+              <InfoRow icon={User}    label={t('customerDrawer.accountManager')} value={customer.account_manager} variant="inline" />
             </div>
           </div>
-          <button onClick={onClose} aria-label={t('common:close')}
-            style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                     background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)',
-                     borderRadius: 6, marginLeft: 10 }}
+          <Button variant="ghost" iconOnly onClick={onClose} aria-label={t('common:close')}
+            style={{ marginLeft: 10 }}
             onMouseEnter={e => (e.currentTarget.style.background = 'var(--hover-bg)')}
             onMouseLeave={e => (e.currentTarget.style.background = 'none')}>
             <X size={15} />
-          </button>
+          </Button>
         </div>
 
         {/* Summary */}
@@ -75,7 +62,7 @@ export default function CustomerDetailDrawer({ customer, onClose }: { customer: 
                 <b.icon size={12} color="var(--text-muted)" />
                 <span style={{ fontSize: 18, fontWeight: 700, color: 'var(--text)' }}>{b.value}</span>
               </div>
-              <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 1 }}>{b.label}</div>
+              <Caption as="div" style={{ marginTop: 1 }}>{b.label}</Caption>
             </div>
           ))}
         </div>
@@ -100,12 +87,12 @@ export default function CustomerDetailDrawer({ customer, onClose }: { customer: 
                   <Building2 size={13} color="var(--color-secondary)" />
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontWeight: 600, fontSize: 13, color: 'var(--text)' }}>{loc.name}</div>
+                  <SectionTitle as="div">{loc.name}</SectionTitle>
                   {(loc.street || loc.city) && (
-                    <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 1 }}>
+                    <Caption as="div" style={{ marginTop: 1 }}>
                       {[loc.street, loc.house_number, loc.postal_code, loc.city]
                         .filter(Boolean).join(' ')}
-                    </div>
+                    </Caption>
                   )}
                 </div>
                 <StatusBadge status={loc.status} />
@@ -136,11 +123,9 @@ export default function CustomerDetailDrawer({ customer, onClose }: { customer: 
         {/* Footer */}
         <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '10px 18px',
                       borderTop: '1px solid var(--border)', background: 'var(--hover-bg)', flexShrink: 0 }}>
-          <button onClick={onClose}
-            style={{ fontSize: 12, borderRadius: 6, padding: '5px 14px',
-                     background: 'none', border: '1px solid var(--border)', cursor: 'pointer', color: 'var(--text-muted)' }}>
+          <Button variant="mutedOutline" onClick={onClose}>
             {t('dr.close')}
-          </button>
+          </Button>
         </div>
       </div>
     </>
