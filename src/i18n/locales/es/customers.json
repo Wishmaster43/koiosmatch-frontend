@@ -755,6 +755,8 @@
     "linkedinPlaceholder": "linkedin.com/in/usuario"
   },
   "changelog": {
+    "loading": "Cargando…",
+    "error": "No se pudieron cargar los cambios.",
     "empty": "Aún no hay cambios.",
     "system": "Sistema",
     "emptyValue": "Vacío",
@@ -769,7 +771,8 @@
       "department": "Departamento",
       "contact": "Contacto",
       "document": "Documento"
-    }
+    },
+    "updatedValue": "actualizado"
   },
   "map": {
     "pointCount": "{{count}} clientes en el mapa"

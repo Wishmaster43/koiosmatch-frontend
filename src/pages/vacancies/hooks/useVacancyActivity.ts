@@ -1,22 +1,15 @@
 /**
- * useVacancyActivity — the vacancy audit trail (who changed what, when). Fetches
- * GET /vacancies/{id}/activity (EntityChangelogController::vacancy). A 404 = read
- * endpoint not built yet → treat as empty (calm), not a hard error. Mirrors
- * useOpportunityActivity / useMatchActivity so every entity's changelog behaves
+ * useVacancyActivity — the vacancy audit trail (who changed what, when). Thin
+ * typed wrapper around the shared useEntityActivity (src/hooks/) — fetches
+ * GET /vacancies/{id}/activity (EntityChangelogController::vacancy). Mirrors
+ * useApplicationActivity / useMatchActivity so every entity's changelog behaves
  * identically (§3A).
  */
-import { useState, useEffect } from 'react'
-import api, { unwrapList } from '@/lib/api'
+import { useEntityActivity } from '@/hooks/useEntityActivity'
+import type { EntityActivityEvent, UseEntityActivityResult } from '@/hooks/useEntityActivity'
 import type { Id } from '@/types/common'
 
-export interface VacancyActivityEvent {
-  id?: Id
-  causer_name?: string
-  // Koios-performed action label ("<name>-KoiosAI") — wins over causer_name when present.
-  actor_label?: string
-  created_at?: string
-  description?: string
-  log_name?: string
+export interface VacancyActivityEvent extends EntityActivityEvent {
   // CHANGELOG-3: field-level diff (Spatie Activitylog shape) — `attributes` = the new
   // values, `old` = the previous values; the changelog tab renders one "field: old →
   // new" row per change. The current backend resource exposes this as `changes`
@@ -25,31 +18,9 @@ export interface VacancyActivityEvent {
   changes?: { attributes?: Record<string, unknown>; old?: Record<string, unknown>; [k: string]: unknown }
   // Spatie event verb (created/updated/deleted/restored) — drives the friendly action line.
   event?: string
-  [k: string]: unknown
 }
 
-export function useVacancyActivity(id?: Id): { items: VacancyActivityEvent[]; loading: boolean; error: boolean } {
-  const [items,   setItems]   = useState<VacancyActivityEvent[]>([])
-  const [loading, setLoading] = useState(false)
-  const [error,   setError]   = useState(false)
-
-  // Reload on every id change, aborting the previous request: without that, a fast switch
-  // between vacancies can let the earlier response land on the newer vacancy (§9).
-  useEffect(() => {
-    if (!id) { setItems([]); return }
-    const ctrl = new AbortController()
-    setLoading(true); setError(false)
-    api.get(`/vacancies/${id}/activity`, { signal: ctrl.signal })
-      .then(res => setItems(unwrapList<VacancyActivityEvent>(res).rows))
-      .catch(err => {
-        if (err?.code === 'ERR_CANCELED') return
-        // 404 = endpoint not built yet → treat as empty (calm), not a hard error.
-        if (err?.response?.status && err.response.status !== 404) setError(true)
-        setItems([])
-      })
-      .finally(() => { if (!ctrl.signal.aborted) setLoading(false) })
-    return () => ctrl.abort()
-  }, [id])
-
-  return { items, loading, error }
+// Fetches the vacancy's audit trail (see file docblock above).
+export function useVacancyActivity(id?: Id): UseEntityActivityResult<VacancyActivityEvent> {
+  return useEntityActivity<VacancyActivityEvent>('vacancies', id)
 }

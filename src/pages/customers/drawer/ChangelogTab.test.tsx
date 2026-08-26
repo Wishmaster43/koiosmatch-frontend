@@ -9,7 +9,7 @@ import { render, screen, waitFor } from '@testing-library/react'
 import ChangelogTab from './ChangelogTab'
 
 vi.mock('@/lib/datetime', () => ({ useDateFormat: () => ({ formatDate: (v: string) => v }) }))
-vi.mock('@/lib/mocks', () => ({ isAbortError: () => false }))
+vi.mock('@/lib/abortError', () => ({ isAbortError: () => false }))
 
 const get = vi.fn()
 vi.mock('@/lib/api', async (importOriginal) => {

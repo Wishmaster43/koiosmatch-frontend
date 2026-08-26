@@ -1,53 +1,26 @@
 /**
- * ChangelogTab — the opportunity's audit trail. Presentational; the fetch lives in
- * useOpportunityActivity (§3). Handles the four UI states explicitly and shows a
- * calm empty state until the backend read endpoint is live (404 → empty).
+ * ChangelogTab — the opportunity's FIELD-CHANGE audit trail (icon-popover, §3A(d)).
+ * Thin wrapper around the shared `components/drawer/tabs/EntityChangelogTab` (§11
+ * LANE-B) — GET /opportunities/{id}/activity shares the same AuditsChanges trait as
+ * candidates/vacancies/applications, so the diff bag renders one old → new row per
+ * changed field here too (previously this tab ignored that bag and showed only the
+ * flat description line).
  */
 import { useTranslation } from 'react-i18next'
-import { History, AlertTriangle } from 'lucide-react'
-import Avatar from '@/components/ui/Avatar'
-import { useDateFormat } from '@/lib/datetime'
-import { initialsOf } from '@/lib/initials'
-import { Caption } from '@/components/ui/typography'
+import EntityChangelogTab, { type ChangelogEvent } from '@/components/drawer/tabs/EntityChangelogTab'
 import { useOpportunityActivity } from '../hooks/useOpportunityActivity'
 import type { Opportunity } from '@/types/opportunity'
 
-// The opportunity's audit-trail feed, handling all four UI states explicitly.
+// Opportunity drawer's changelog tab content.
 export default function ChangelogTab({ opportunity: o }: { opportunity: Opportunity }) {
   const { t } = useTranslation('opportunities')
-  const { formatDate } = useDateFormat()
   const { items, loading, error } = useOpportunityActivity(o?.id)
-
-  return (
-    <div>
-      {loading && <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('changelog.loading')}</div>}
-
-      {!loading && error && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: 'var(--color-danger-text)' }}>
-          <AlertTriangle size={14} /> {t('changelog.error')}
-        </div>
-      )}
-
-      {!loading && !error && items.length === 0 && (
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, padding: '28px 0', color: 'var(--text-muted)', textAlign: 'center' }}>
-          <History size={22} style={{ opacity: 0.5 }} />
-          <span style={{ fontSize: 12 }}>{t('changelog.empty')}</span>
-        </div>
-      )}
-
-      {!loading && !error && items.map((ev, i) => (
-        <div key={ev.id ?? i} style={{ display: 'flex', gap: 10, marginBottom: 12, alignItems: 'flex-start' }}>
-          <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--button-fill)', flexShrink: 0, marginTop: 6 }} />
-          <Avatar initials={initialsOf(ev.causer_name)} size={26} soft />
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 2 }}>
-              <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>{ev.actor_label ?? ev.causer_name ?? t('changelog.system')}</span>
-              <Caption style={{ flexShrink: 0 }}>{formatDate(ev.created_at)}</Caption>
-            </div>
-            <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{ev.description || ev.log_name}</div>
-          </div>
-        </div>
-      ))}
-    </div>
-  )
+  // The hours_period diff arrives as a raw slug (week|month|total); reuse the
+  // details-tab keys so the changelog speaks the same language as the form.
+  const formatValue = (field: string, val: unknown): string | undefined => {
+    if (val === null || val === undefined || val === '') return undefined
+    if (field === 'hours_period') return t(`details.periods.${String(val)}`, { defaultValue: String(val) })
+    return undefined
+  }
+  return <EntityChangelogTab items={items as ChangelogEvent[]} loading={loading} error={error} namespace="opportunities" formatValue={formatValue} />
 }

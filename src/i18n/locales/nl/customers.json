@@ -755,6 +755,8 @@
     "linkedinPlaceholder": "linkedin.com/in/gebruikersnaam"
   },
   "changelog": {
+    "loading": "Laden…",
+    "error": "Wijzigingen konden niet geladen worden.",
     "empty": "Nog geen wijzigingen.",
     "system": "Systeem",
     "emptyValue": "Leeg",
@@ -769,7 +771,8 @@
       "department": "Afdeling",
       "contact": "Contactpersoon",
       "document": "Document"
-    }
+    },
+    "updatedValue": "bijgewerkt"
   },
   "map": {
     "pointCount": "{{count}} klanten op de kaart"
