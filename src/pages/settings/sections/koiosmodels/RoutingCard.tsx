@@ -5,7 +5,7 @@
  * effort picker collapses to "standard" and hides its options whenever the
  * routed flavour's model doesn't support an effort knob (catalog lookup).
  */
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import SaveButton from '@/components/ui/SaveButton'
@@ -27,13 +27,15 @@ export default function RoutingCard({ data, onSaved }: { data: KoiosModelsAdminD
   const [error, setError] = useState<string | null>(null)
 
   const dirty = REQUEST_TYPES.some(rt => JSON.stringify(draft[rt]) !== JSON.stringify(data.routing[rt]))
-  const flavorOptions = (Object.keys(data.flavors) as Array<keyof typeof data.flavors>).map(f => ({
+  // Memoised: option list only changes with the tenant's flavor catalog or the active locale.
+  const flavorOptions = useMemo(() => (Object.keys(data.flavors) as Array<keyof typeof data.flavors>).map(f => ({
     value: f, label: t(`koiosModelsAdmin.flavorLabel.${f}`),
-  }))
-  const effortOptions = [
+  })), [data, t])
+  // Memoised like flavorOptions above — a fresh identity per render defeats the select's memo.
+  const effortOptions = useMemo(() => [
     { value: NO_EFFORT_VALUE, label: t('koiosModelsAdmin.routing.effortDefault') },
     ...EFFORT_LEVELS.map(e => ({ value: e, label: t(`koiosModelsAdmin.effortLevel.${e}`) })),
-  ]
+  ], [t])
 
   // Persist the draft routing and surface the real error on failure, mirroring SaveButton's transient saved state.
   const save = async () => {

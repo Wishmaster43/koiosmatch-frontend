@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next'
+import { useMemo } from 'react'
 import type { CSSProperties, RefObject } from 'react'
 import DataTable from '@/components/ui/DataTable'
 import type { Column } from '@/components/ui/DataTable'
@@ -89,7 +90,10 @@ export default function CustomersTable({
   // Column order mirrors the candidates blueprint (§3A): identity → qualification →
   // status → counts → Koios → dates → accountmanager LAST (Danny 2026-07-14 table
   // standardization: Koios moves before "Aangemaakt", owner moves from #3 to last).
-  const columns: Column<Customer>[] = [
+  // Column defs — memoized so DataTable's per-row memo (mirrors CandidatesTable,
+  // §3A blueprint) actually holds: a stable `columns` reference means a row only
+  // re-renders when ITS OWN data/selection changes.
+  const columns: Column<Customer>[] = useMemo(() => [
     {
       key: 'name', header: t('cols.name'), sortable: true, sortValue: c => c.name,
       sticky: true, width: 270, nowrap: true,
@@ -194,7 +198,11 @@ export default function CustomersTable({
         </div>
       ),
     },
-  ]
+  ], [
+    t, formatDate, seedLabel, phaseMeta, statusMeta, entryPhaseValue,
+    colorStatus, colorKoios, colorOwner, adviceOf,
+    showHelloflex, showShiftmanager, onOpenTab,
+  ])
 
   return (
     <DataTable

@@ -19,7 +19,7 @@
  * blocks now save SEPARATELY (Bedrijf/Adres/Facturatie each narrower than before),
  * not as one shared full-payload save.
  */
-import { useState } from 'react'
+import { useState, useMemo, useCallback } from 'react'
 import { chipInk, tintBg, tintBorder } from '@/lib/tint'
 import type { ComponentType } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -80,23 +80,28 @@ export function PreferencesTab({ c, onSave, onTypesChange, onEditStatus }: { c: 
   // Chip/dropdown option lists from the tenant lookups (never hardcoded vocab).
   // Capitalised, locale-aware weekday labels (2024-01-01 is a Monday).
   const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1)
-  const dayOptions = DAY_SLUGS.map((value, i) => ({ value, label: cap(new Intl.DateTimeFormat(locale, { weekday: 'long' }).format(new Date(2024, 0, 1 + i))) }))
+  // Memoised so the day-chip option list keeps a stable identity across renders (only locale flips it).
+  const dayOptions = useMemo(() => DAY_SLUGS.map((value, i) => ({ value, label: cap(new Intl.DateTimeFormat(locale, { weekday: 'long' }).format(new Date(2024, 0, 1 + i))) })), [locale])
   // industryOptions already pairs the stored name with a translated label.
-  const licenseOptions = licenses.map(l => ({ value: l.value, label: l.label }))
+  // Memoised: this list sits in the fields memo's deps, so it needs a stable identity.
+  const licenseOptions = useMemo(() => licenses.map(l => ({ value: l.value, label: l.label })), [licenses])
   // Read-mode-only icon lookup by value (the shared ChipMultiSelect/EditableFieldTable
   // chip shape has no icon slot — LOOKUP-ICON-1 renders it via a custom renderValue
   // instead of touching that shared component).
-  const licenseIconOf = (value: string) => licenses.find(l => l.value === value)?.icon
+  // Stable identity via useCallback so it can safely sit in the fields memo's deps below.
+  const licenseIconOf = useCallback((value: string) => licenses.find(l => l.value === value)?.icon, [licenses])
 
   // One shared field schema, sliced per section below (each with its own Save).
   // Multi-value chips sit as rows within their group: Contractvorm/Dagen/Branche
   // under Beschikbaarheid, Rijbewijs under Reizen. Chips render as coloured soft
   // chips — Contractvorm keeps its per-value colours.
-  const candidateTypeOptions = candidateTypes.map(ct => ({ value: ct.value, label: ct.label, color: ct.color }))
+  // Memoised for the same reason as licenseOptions above (fields-memo dep).
+  const candidateTypeOptions = useMemo(() => candidateTypes.map(ct => ({ value: ct.value, label: ct.label, color: ct.color })), [candidateTypes])
   // LOOKUP-ICON-1: read-mode-only icon lookup by value (mirrors licenseIconOf
   // above) — the shared ChipMultiSelect/EditableFieldTable chip shape has no
   // icon slot, so the read view overrides via `renderValue` instead.
-  const candidateTypeIconOf = (value: string) => candidateTypes.find(ct => ct.value === value)?.icon
+  // Stable identity via useCallback so it can safely sit in the fields memo's deps below.
+  const candidateTypeIconOf = useCallback((value: string) => candidateTypes.find(ct => ct.value === value)?.icon, [candidateTypes])
   const value = {
     contractvorm:    c.candidateTypes ?? [],
     beschikbaar_per: pref.available_from ?? '',
@@ -145,7 +150,9 @@ export function PreferencesTab({ c, onSave, onTypesChange, onEditStatus }: { c: 
     iban:              (c as { iban?: string }).iban ?? '',
     accountHolderName: (c as { accountHolderName?: string }).accountHolderName ?? '',
   }
-  const fields = [
+  // Memoised: the schema is rebuilt only when a dependent lookup/translation/icon-lookup changes,
+  // not on every render, so the sliced per-section field lists below stay stable too.
+  const fields = useMemo(() => [
     // LOOKUP-ICON-1: renderValue overrides ONLY the read-mode chip row (edit mode
     // keeps the generic ChipMultiSelect) — each contract-form chip gets its
     // tenant-set icon in front of the label, mirroring the rijbewijs pattern below.
@@ -216,7 +223,7 @@ export function PreferencesTab({ c, onSave, onTypesChange, onEditStatus }: { c: 
     { key: 'desiredRateMin', label: t('preferences.desiredRateMin'), group: t('preferences.groupDesiredRate'), inputType: 'number', step: '0.01', mono: true },
     { key: 'desiredRateMax', label: t('preferences.desiredRateMax'), group: t('preferences.groupDesiredRate'), inputType: 'number', step: '0.01', mono: true },
     { key: 'remarks',     label: t('preferences.remarks'),       group: t('preferences.groupOther'), type: 'richtext' },
-  ]
+  ], [t, candidateTypeOptions, candidateTypeIconOf, dayOptions, industryOptions, licenseOptions, licenseIconOf])
   // PREF-PENCIL-SPLIT-1 (05-08): one payload builder PER SECTION, each emitting
   // only the API keys its own card can edit — a Reizen save must never carry
   // Beschikbaarheid's keys along for the ride, even though `form` (the table's
@@ -391,7 +398,7 @@ export function PreferencesTab({ c, onSave, onTypesChange, onEditStatus }: { c: 
   )
 }
 
-// ZzpTab lives in its own file now ( above) — re-exported so
+// ZzpTab lives in its own file now (see ZzpTab.tsx) — re-exported so
 // every existing `import { PreferencesTab, ZzpTab } from './drawer/PreferencesZzpTabs'`
 // (CandidateDrawer.tsx) keeps resolving without a second, hand-edited import path.
 export { ZzpTab } from './ZzpTab'

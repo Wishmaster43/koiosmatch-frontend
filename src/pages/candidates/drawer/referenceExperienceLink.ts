@@ -25,7 +25,7 @@
  * experience list and never trusts a stale nested object — see
  * resolveLinkedExperience.
  */
-import { useCallback } from 'react'
+import { useCallback, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useDateFormat } from '@/lib/datetime'
 import type { Id } from '@/types/common'
@@ -114,5 +114,6 @@ export function useExperienceLabel() {
 /** The picker's option list — same label as the read line, value = the real FK. */
 export function useExperienceOptions(experiences: LinkableExperience[]) {
   const label = useExperienceLabel()
-  return linkableExperiences(experiences).map(e => ({ value: String(e.id), label: label(e) }))
+  // Memoised: option list only rebuilds when the experience list or its label formatter changes.
+  return useMemo(() => linkableExperiences(experiences).map(e => ({ value: String(e.id), label: label(e) })), [experiences, label])
 }

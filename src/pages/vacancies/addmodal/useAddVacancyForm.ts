@@ -105,7 +105,9 @@ export function useAddVacancyForm({
   const { candidateTypes } = useLookups() as unknown as { candidateTypes: Array<{ value: string; label: string; color?: string }> }
   const { industries } = useIndustries()
   const { functions } = useFunctions()
-  const branchOptions = useLocations().map(l => ({ value: String(l.value), label: l.label }))
+  // Memoised: derived from the shared locations lookup, only recomputed when it changes.
+  const locationsRaw = useLocations()
+  const branchOptions = useMemo(() => locationsRaw.map(l => ({ value: String(l.value), label: l.label })), [locationsRaw])
   const authCtx = useAuth() as unknown as {
     user: { id?: Id; name?: string } | null
     hasModule?: (key: string) => boolean
@@ -390,17 +392,25 @@ export function useAddVacancyForm({
   const canSubmit = !!form.title.trim()
   // Owner options: make sure the logged-in default is actually IN the list (a
   // super admin isn't always in the assignable list — mirrors AddCandidateModal).
-  const userOptions = users.map(u => ({ value: String(u.id), label: u.name }))
-  if (me?.id && !userOptions.some(o => o.value === String(me.id))) {
-    userOptions.unshift({ value: String(me.id), label: me.name ?? '' })
-  }
+  // Memoised: the caller-owned super admin fallback insert must stay stable, not re-derived every render.
+  const userOptions = useMemo(() => {
+    const opts = users.map(u => ({ value: String(u.id), label: u.name }))
+    if (me?.id && !opts.some(o => o.value === String(me.id))) {
+      opts.unshift({ value: String(me.id), label: me.name ?? '' })
+    }
+    return opts
+  }, [users, me])
+  // Memoised: status option list only changes with the tenant lookup.
+  const statusOptions = useMemo(() => statuses.map(s => ({ value: s.value, label: s.label, color: s.color })), [statuses])
+  // Memoised: customer option list only changes with the caller-supplied customers.
+  const customerOptions = useMemo(() => customers.map(c => ({ value: String(c.id), label: c.name })), [customers])
 
   return {
     t, form, set, onAddressChange, onConditionsChange, errors, saving, createError, canSubmit, handleSubmit,
-    statuses, statusOptions: statuses.map(s => ({ value: s.value, label: s.label, color: s.color })),
+    statuses, statusOptions,
     industries, functions, branchOptions, handleBranchChange, candidateTypes, toggleContractType,
     seniorityLevels, educationLevels, provinces,
-    customerOptions: customers.map(c => ({ value: String(c.id), label: c.name })),
+    customerOptions,
     userOptions,
     handleClientChange, locationPicker, departmentPicker, contactPicker,
     skills, addSkill, removeSkill, editSkill,

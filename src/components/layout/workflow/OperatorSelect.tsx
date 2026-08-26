@@ -16,7 +16,7 @@
  * CreatableSelect's portalled popover truly survives it.
  */
 import type { CSSProperties } from 'react'
-import { useId } from 'react'
+import { useId, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import { OPERATOR_OPTIONS, OPERATOR_GROUP_LABEL_KEYS, type OperatorGroup } from './constants'
@@ -34,10 +34,11 @@ export function OperatorSelect({ value, onChange, style, ariaLabel }: {
   // for free since useId() is scoped per component instance.
   const labelId = useId()
   const label = ariaLabel ?? t('fields.operator')
-  const options = GROUPS.flatMap(g => OPERATOR_OPTIONS.filter(op => op.group === g).map(op => ({
+  // Memoised: the flattened, translated option list only needs rebuilding when the active locale changes.
+  const options = useMemo(() => GROUPS.flatMap(g => OPERATOR_OPTIONS.filter(op => op.group === g).map(op => ({
     value: op.value,
     label: `${t(OPERATOR_GROUP_LABEL_KEYS[g])} · ${op.symbol ?? t(op.labelKey!)}`,
-  })))
+  }))), [t])
   return (
     <>
       <span id={labelId} className="sr-only">{label}</span>

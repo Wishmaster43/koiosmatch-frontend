@@ -59,8 +59,12 @@ export function useSkillLevels() {
   // The endpoint now exists (item 11) — a real 404 should surface in the dev log again.
   const { data: rawLevels } = useCachedLookup('/skill-levels', mapSkillLevels, DEFAULT_SKILL_LEVEL_ITEMS)
   // Seeded defaults render in the user language; a tenant value stays as typed (LOOKUP-I18N-1).
-  const levelItems = useMemo(() => translateSeedList(t, 'skillLevels', rawLevels), [rawLevels, t])
   // `levels` stays the full-object shape (icon/color intact); `names` is the
   // backward-compatible plain-string list for any old string[]-only call-site.
-  return { levels: levelItems, names: levelItems.map(l => l.label) }
+  // Both are derived inside the same memo so `names` shares levelItems' stable identity.
+  const { levelItems, names } = useMemo(() => {
+    const items = translateSeedList(t, 'skillLevels', rawLevels)
+    return { levelItems: items, names: items.map(l => l.label) }
+  }, [rawLevels, t])
+  return { levels: levelItems, names }
 }

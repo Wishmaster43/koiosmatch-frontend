@@ -14,13 +14,16 @@
  * fact: it now shows only to a super admin (Danny's own "which model is this"
  * question), never to a normal tenant user.
  */
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { Zap, Sparkles, Crown } from 'lucide-react'
 import { updateKoiosModel } from './koiosApi'
 import { tierKeyForModel } from '@/lib/koiosModelTiers'
 import { useAuth } from '@/context/AuthContext'
 import SegmentedControl from '@/components/ui/SegmentedControl'
 import { SectionTitle, Mono } from '@/components/ui/typography'
+
+// Frozen empty list so a missing payload keeps one stable identity (memo deps).
+const EMPTY_SELECTABLE = []
 
 const card = { border: '1px solid var(--border)', borderRadius: 10, padding: 16, marginBottom: 14, background: 'var(--surface)' }
 
@@ -50,7 +53,7 @@ export default function KoiosModelsCard({ models, t, onChanged }) {
   const auth = useAuth()
   const isSuperAdmin = auth?.isSuperAdmin?.() ?? false
   const active = models?.active
-  const selectable = models?.selectable ?? []
+  const selectable = models?.selectable ?? EMPTY_SELECTABLE
   // Honest state (§10 tolerant-by-contract, Opus F2): the backend's Policy keeps
   // `active` inside `selectable` today, but that is a config invariant, not a code
   // one — if it ever breaks, three unmarked radios would silently reproduce the
@@ -75,7 +78,8 @@ export default function KoiosModelsCard({ models, t, onChanged }) {
   // id itself never reaches the label for a non-super-admin). Description folds
   // in the tier blurb, and the raw model id in Mono style, ONLY for a super
   // admin — the id is platform config, never a tenant-visible fact.
-  const modelOptions = selectable.map((m) => {
+  // Memoised: option list only rebuilds when the selectable model set, tier resolver, translation or admin flag changes.
+  const modelOptions = useMemo(() => selectable.map((m) => {
     const { key, Icon } = tierFor(m)
     const label = key ? t(`models.tier.${key}`) : (isSuperAdmin ? m : t('models.unknownTier'))
     const tierDesc = key ? t(`models.tierDesc.${key}`) : null
@@ -83,7 +87,7 @@ export default function KoiosModelsCard({ models, t, onChanged }) {
       ? (tierDesc ? <>{tierDesc} · <Mono>{m}</Mono></> : <Mono>{m}</Mono>)
       : tierDesc
     return { value: m, label, description, icon: Icon }
-  })
+  }), [selectable, t, isSuperAdmin])
 
   return (
     <div style={card}>

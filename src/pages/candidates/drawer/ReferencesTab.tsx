@@ -22,7 +22,7 @@
  * EducationTab/CertificationsTab use, DOC-EDU-1). The OLD single `name` /
  * free-text `relation` fields no longer exist server-side.
  */
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { ComponentType } from 'react'
 import { BadgeCheck, Eye, Download, ArrowRight } from 'lucide-react'
@@ -146,7 +146,8 @@ export default function ReferencesTab({ items = [], onAdd, onEdit, onRemove, onV
   // REFERENTIE-VELDEN-1: the relation lookup, searchable + pick-only (CLAUDE.md
   // §4 — never a hardcoded option list). Sent BY ID, never label/slug.
   const { referenceRelations } = useReferenceRelations()
-  const relationOptions = referenceRelations.map(r => ({ value: r.id, label: r.label }))
+  // Memoised: relation option list only changes with the tenant lookup.
+  const relationOptions = useMemo(() => referenceRelations.map(r => ({ value: r.id, label: r.label })), [referenceRelations])
   // DOC-EDU-1 mirror: "reference letter" picker options, resolved PER ROW — only
   // documents no other entry has claimed, plus this row's own pick
   // (DOC-1-EIGENAAR-1, mirrors EducationTab's documentOptions in SectionTabs.tsx).

@@ -16,7 +16,7 @@
  * WAVE-1B-CONTRACTVRAGEN-CMBE punt 4) — an unnarrowed suite under a Leads
  * heading would pair all-candidate numbers with leads-only charts.
  */
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { BodyText } from '@/components/ui/typography'
 import ReportKpiBand from './ReportKpiBand'
@@ -180,7 +180,9 @@ export default function CandidatesReport({ period, filters = EMPTY_REPORT_FILTER
 
   // Leads position: the axis strip (see file-top for why the suite can't narrow
   // to leads yet) — total + eight axis cards, exactly the pre-wave-2 machinery.
-  const allAxisConfigs: Record<string, AxisKpiConfig> = {
+  // Only consumed on the Leads position (isLeads branch below) — memoized so it
+  // isn't rebuilt on the Kandidaten position where it's never read.
+  const allAxisConfigs: Record<string, AxisKpiConfig> = useMemo(() => ({
     status: { axis: 'status', axisLabel: t('candidates.axes.status'), segs: (data?.by_status ?? []).map(s => ({ key: s.value, label: s.label, count: s.count })) },
     phase:  { axis: 'phase',  axisLabel: t('candidates.axes.phase'),  segs: (data?.by_phase ?? []).map(s => ({ key: s.value, label: s.label, count: s.count })) },
     source: { axis: 'source', axisLabel: t('candidates.axes.source'), segs: (data?.by_source ?? []).map(s => ({ key: s.value, label: s.label, count: s.count })) },
@@ -189,7 +191,7 @@ export default function CandidatesReport({ period, filters = EMPTY_REPORT_FILTER
     owner_none:  { axis: 'owner',  axisLabel: t('candidates.axes.owner'),  segs: (data?.by_owner ?? []).filter(s => s.owner_id === 'none').map(s => ({ key: s.owner_id, label: s.name, count: s.count })) },
     branch_none: { axis: 'branch', axisLabel: t('candidates.axes.branch'), segs: (data?.by_branch ?? []).filter(s => s.value === 'none').map(s => ({ key: s.value, label: s.label, count: s.count })) },
     source_none: { axis: 'source', axisLabel: t('candidates.axes.source'), segs: (data?.by_source ?? []).filter(s => s.value === 'none').map(s => ({ key: s.value, label: s.label, count: s.count })) },
-  }
+  }), [data, t])
   const kpiScope = view as ReportKpiScopeId
   const settingsValues = useAllSettings()
   const catalogKeys = getReportKpiCatalog(kpiScope).map(c => c.key)

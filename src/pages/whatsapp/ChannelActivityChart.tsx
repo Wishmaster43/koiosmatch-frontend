@@ -7,6 +7,7 @@
  * keeps the plain activity chart alone. Own file: the chart atom pulls in
  * @/lib/datetime, which components.tsx's flat i18n test mock cannot carry.
  */
+import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import WeeklyBarChartCard from '@/components/charts/WeeklyBarChartCard'
 import { CHANNEL_COLORS, CHANNEL_KEYS } from '@/components/drawer/channelColors'
@@ -21,7 +22,8 @@ export default function ChannelActivityChart({ data }: { data: WaActivityDatum[]
   // Channel names live in the candidates namespace (one label per enum value, app-wide).
   const { t: tCandidates } = useTranslation('candidates')
   const locale = useLocale()
-  const series = CHANNEL_KEYS.map(key => ({ key, label: tCandidates(`conversations.channel.${key}`), color: CHANNEL_COLORS[key] }))
+  // Memoised: series list only rebuilds when the channel-label translator changes.
+  const series = useMemo(() => CHANNEL_KEYS.map(key => ({ key, label: tCandidates(`conversations.channel.${key}`), color: CHANNEL_COLORS[key] })), [tCandidates])
   // One row per day: each channel's inbound + outbound, `value` = the day total.
   const rows = data.map(d => {
     const per = Object.fromEntries(CHANNEL_KEYS.map(key => [key, (d.by_channel?.[key]?.inbound ?? 0) + (d.by_channel?.[key]?.outbound ?? 0)]))

@@ -12,7 +12,7 @@
  * Leaving the block empty means "use the visit address", so nobody maintains one address
  * twice — while it is empty the block shows the visit address and says it is being used.
  */
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { AlertTriangle, Search } from 'lucide-react'
 // House "+ action" trigger (Danny 27-07: "+ Prijsafspraak toevoegen moet ook
@@ -103,7 +103,8 @@ export default function PriceAgreementsTab({ customerId, c, onSave }: { customer
   // ISO-2 country codes as VALUES: `billing_country` runs through the backend's
   // CountryCodeCast, which normalises every write to ISO-2 and returns it verbatim
   // (LAND-ISO-1). Sending a country NAME here would store a second vocabulary.
-  const countryOptions = getCountryOptions(i18n.language)
+  // Memoised: country option list only rebuilds when the active language changes.
+  const countryOptions = useMemo(() => getCountryOptions(i18n.language), [i18n.language])
   // Loose rows, never the shared 'address' composite: that composite reads the fixed
   // visit-address keys, and an incomplete invoice address must stay visibly incomplete
   // so somebody fixes it rather than hiding behind a composed line. No province row —
