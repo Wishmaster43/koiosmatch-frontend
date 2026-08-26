@@ -121,7 +121,7 @@ export default function ConversationAssistSection({ conversationId, hasMessages,
             <div style={{ fontSize: 12, color: 'var(--text-muted)', fontStyle: 'italic' }}>{t('conversations.assist.noItems', { defaultValue: 'Geen actiepunten gevonden' })}</div>
           )}
           <div style={{ display: 'flex', gap: 8 }}>
-            {/* No apply target when actions came back empty — nothing to overnemen. */}
+            {/* No apply target when actions came back empty — nothing to apply. */}
             {(result.kind === 'text' || result.items.length > 0) && (
               <Button variant="primary" size="sm" onClick={handleApply}><Check size={13} /> {t('conversations.assist.apply', { defaultValue: 'Overnemen' })}</Button>
             )}

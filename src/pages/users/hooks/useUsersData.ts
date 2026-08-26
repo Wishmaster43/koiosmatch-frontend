@@ -36,7 +36,7 @@ export function useUsersData() {
   }, [])
 
   // Optimistically set a user's icon colour (PUT /users/{id}); revert on failure.
-  // PUT, not PATCH: the generated contract (operations.putUsersUserId) documents
+  // PUT, not PATCH: the generated contract only defines operations.putUsersUserId for this route.
   const setColor = async (u: ManagedUser, color: string | null) => {
     const prev = u.avatar_color ?? null
     setUsers(list => list.map(x => x.id === u.id ? { ...x, avatar_color: color } : x))

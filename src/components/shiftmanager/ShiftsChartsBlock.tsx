@@ -317,7 +317,7 @@ export default function ShiftsChartsBlock({
         </ChartCard>
       </div>
 
-      {/* SM-CHARTS2: open diensten per klant + per functie (dashboard only) */}
+      {/* SM-CHARTS2: open shifts per customer + per function (dashboard only) */}
       {showKpiRow && (
         <ShiftsBreakdownCharts customerRows={customerRows} functionRows={functionRows} unit={shiftUnit} loading={loading} error={error} />
       )}

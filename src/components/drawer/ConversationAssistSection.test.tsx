@@ -91,7 +91,7 @@ describe('ConversationAssistSection · Overnemen (apply into the composer draft)
     await user.click(screen.getByRole('button', { name: 'Actiepunten' }))
     await screen.findByText('Bel terug')
     await user.click(screen.getByRole('button', { name: 'Overnemen' }))
-    expect(onApply).toHaveBeenCalledWith('Bel terug (Taak · 2026-08-10); Stuur bevestiging (WhatsApp)')
+    expect(onApply).toHaveBeenCalledWith('Bel terug (Taak · 10-08-2026); Stuur bevestiging (WhatsApp)')
   })
 
   it('actions with zero items shows a calm "no items" notice and no apply button', async () => {

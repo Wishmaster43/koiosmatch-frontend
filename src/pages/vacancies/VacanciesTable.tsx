@@ -153,13 +153,9 @@ export default function VacanciesTable({ rows, loading, selectedId, onSelect, on
     },
     {
       // VACANCY-LEADS-COUNT-1: `leadsCount` is null until the backend computes a
-      // real candidate_match_count — sort unknown rows to the END of the (default,
-      // first-click ascending) order rather than letting them read as 0. The
-      // sentinel is a large-but-finite number (never NaN from Infinity-Infinity)
-      // so the shared DataTable's numeric compare() stays deterministic; a
-      // An unknown count returns null: DataTable sinks null rows to the bottom in
-      // BOTH directions. A sentinel number used to float "not computed yet" rows
-      // above the vacancy with the most real leads on the descending click.
+      // real candidate_match_count. An unknown count returns null: DataTable sinks
+      // null rows to the bottom of the sort in BOTH directions, so they never
+      // read as a fake 0 or float above rows with a real, known count.
       key: 'leads', header: t('columns.leads'), align: 'left', sortable: true,
       sortValue: r => r.leadsCount,
       cellStyle: { ...monoStyle, fontSize: 12, color: 'var(--text)' },

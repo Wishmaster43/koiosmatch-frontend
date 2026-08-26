@@ -244,8 +244,8 @@ export default function OverviewTab({ match, onUpdate, onOpenNotes }: OverviewTa
           onSave={match.archived ? undefined : handleSaveContract} />
       )}
 
-      {/* DRILLDOWN-VOLGORDE-CANON (Danny 21-08): informatie → TEKST met pop-out
-          → Koios AI → vestiging. De matchtekst staat dus vóór het Koios-blok. */}
+      {/* DRILLDOWN-VOLGORDE-CANON (Danny 21-08): information → TEXT with pop-out
+          → Koios AI → branch. So the match text sits before the Koios block. */}
       {/* M17/optie A: Matchtekst — OFFERED-IFF-READ, hidden until the backend
           payload actually carries the `match_text` key (see file header). Koios
           assist + dictation ride the editor's own toolbar (RichTextAssistBar),

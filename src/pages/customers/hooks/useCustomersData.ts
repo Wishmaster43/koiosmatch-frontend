@@ -28,12 +28,10 @@ interface ListResult { customers: Customer[]; total: number; lastPage: number }
 // (see useCandidatesData for the full note).
 const EMPTY_CUSTOMERS: Customer[] = []
 
-// CustomerController::index caps per_page at `between:1,200` — measured 2026-08-05
-// (Danny, verbatim: "…mislukt" — i.e. setting it to 500 gives the toast
-// "Loading customers failed"), reproduced as a real
-// 422; per_page=200 succeeds. Exported so CustomersPage can clamp the pageSize
-// picker to the SAME ceiling — mirrors useApplicationsData/useVacanciesData's
-// identical constant + defensive re-clamp below.
+// CustomerController::index caps per_page at `between:1,500`. Exported so
+// CustomersPage can clamp the pageSize picker to the SAME ceiling — mirrors
+// useApplicationsData/useVacanciesData's identical constant + defensive
+// re-clamp below.
 export const CUSTOMERS_MAX_PER_PAGE = 500
 
 // Composes the customers list/stats React Query data layer for the page (list, filters, pagination and the bulk-selection epoch below).

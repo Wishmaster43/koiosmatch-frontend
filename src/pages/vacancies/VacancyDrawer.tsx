@@ -325,10 +325,6 @@ export default function VacancyDrawer({ vacancy: v, onClose, expanded, onToggleE
             <TrashLifecycleSection entityPath="vacancies" id={v.id} entityLabel={v.title}
               lifecycle={v.lifecycle} pendingEraseAt={v.pendingEraseAt} {...trash} />
           )}
-          {/* V2: published indicator — per-channel icons for the channels this vacancy
-              is ACTUALLY published on (icon + label, colour never the only signal);
-              falls back to the generic globe + "not published" when none are. Click a
-              channel to jump straight to the Publiceren tab. */}
                   </EntityHeader>
         </>
       )}

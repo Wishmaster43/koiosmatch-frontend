@@ -199,7 +199,7 @@ export default function CommunicationTab({ c, onSave, onEditStatusEvent, initial
   // with application events, newest-first, via the tested mergeTimelineEvents util.
   const mergedTimeline = useMemo(
     () => mergeTimelineEvents(c.timeline ?? [], applicationEvents),
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- c.timeline/applications are new arrays per parent render; length is a cheap-enough proxy to avoid re-sorting every keystroke elsewhere in the drawer.
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- applicationEvents is derived from c.applications each render, so listing it too would be redundant with the c.applications dep already present.
     [c.timeline, c.applications],
   )
 

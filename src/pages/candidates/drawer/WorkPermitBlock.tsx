@@ -63,12 +63,11 @@ export default function WorkPermitBlock({ c, onSave, autoEditSignal }: {
   // never a hardcoded option list — see the docblock above.
   const { workPermitTypes } = useWorkPermitTypes()
 
-  // mapCandidate.ts does not map work_permit_type/work_permit_valid_until onto the
-  // typed Candidate model (re-measured 09-08: none of the four key variants survives
-  // the mapper, so in production BOTH read empty even when the API has values — a
-  // pre-existing display gap, owned by the mapper, reported not silently patched
-  // here). Read the (future) camelCase keys and the raw snake_case ones, whichever
-  // is present. Mirrors the identical pattern in BackgroundTab.tsx's `references`.
+  // mapCandidate.ts now maps work_permit_type/work_permit_valid_until onto the typed
+  // Candidate model (KAND-WERKVERGUNNING-BUG-1 fixed the earlier drop). Still read
+  // both the camelCase keys and the raw snake_case ones, whichever is present, so a
+  // future mapper regression degrades rather than breaking. Mirrors the identical
+  // pattern in BackgroundTab.tsx's `references`.
   const raw = c as unknown as {
     workPermitType?: string | null; workPermitValidUntil?: string | null
     work_permit_type?: string | null; work_permit_valid_until?: string | null

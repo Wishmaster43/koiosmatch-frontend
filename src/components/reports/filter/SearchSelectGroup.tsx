@@ -30,8 +30,7 @@ export default function SearchSelectGroup({ group }: { group: ReportFilterGroup 
 
   return (
     <div>
-      {/* Trigger-knop */}
-      {/* Trigger-knop */}
+      {/* Trigger button that opens the search dropdown */}
       <button
         onClick={() => setOpen(o => !o)}
         style={{

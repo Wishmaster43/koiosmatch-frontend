@@ -117,7 +117,7 @@ export default function RecentJobsTab() {
                   <td style={TD}><Mono style={{ fontSize: 12 }}>{r.job}</Mono></td>
                   <td style={TD}>{r.queue}</td>
                   <td style={TD}>{r.tenant ?? '—'}</td>
-                  {/* JOB-PROVENANCE-1: wie vroeg het aan + over welk record het gaat. */}
+                  {/* JOB-PROVENANCE-1: who requested it + which record it concerns. */}
                   <td style={TD}>{r.requested_by ?? '—'}</td>
                   <td style={TD}>
                     <Mono style={{ fontSize: 12 }}>{r.subject ? `${r.subject.type} ${r.subject.reference}` : '—'}</Mono>

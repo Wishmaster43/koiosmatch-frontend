@@ -675,7 +675,7 @@ export const NAV_GROUPS = [
       { id: 'notif_calllists', icon: Bell, render: () => <NotificationsSettings context="calllists" /> },
       { id: 'notif_opportunities', icon: Bell, render: () => <NotificationsSettings context="opportunities" /> },
       { id: 'notif_appointments', icon: Bell, render: () => <NotificationsSettings context="appointments" /> },
-      // 11-escalatie (3b): per stilstand-signaal an optional day-threshold + target (user/role).
+      // Escalation (item 11, 3b): per stall signal, an optional day-threshold + target (user/role).
       { id: 'notif_escalation', icon: Bell, component: EscalationSettings },
     ],
   },

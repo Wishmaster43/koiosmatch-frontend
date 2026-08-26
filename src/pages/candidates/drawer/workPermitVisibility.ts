@@ -40,14 +40,12 @@ export interface NationalityRow {
 /**
  * Whether the card already holds residence-right data — deliberately THREE-valued.
  *
- * 'unobservable' is not defensive padding: mapCandidate.ts (the single mapper the
- * drawer's candidate goes through) drops both work-permit columns today, measured
- * 09-08 — none of `work_permit_type` / `workPermitType` / `work_permit_valid_until`
- * / `workPermitValidUntil` survives it, even though GET /candidates/{id} returns
- * the first and third. Collapsing that blind spot into 'empty' would let the card
- * hide a permit that genuinely exists on the server, which is the single failure
- * mode this whole change is required not to have. Only a provably EMPTY card may
- * ever be hidden; the rule starts hiding by itself once the mapper carries the fields.
+ * 'unobservable' is not defensive padding: mapCandidate.ts now DOES map both
+ * work-permit fields (KAND-WERKVERGUNNING-BUG-1 fixed the earlier drop), but the
+ * three-valued type stays on purpose — collapsing 'unobservable' into 'empty'
+ * would let a future mapper regression hide a permit that genuinely exists on
+ * the server, which is the single failure mode this whole change is required not
+ * to have. Only a provably EMPTY card may ever be hidden.
  */
 export type WorkPermitDataState = 'filled' | 'empty' | 'unobservable'
 

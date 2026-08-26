@@ -324,8 +324,6 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
     clearGeo(); setPage(1)
   }
 
-  // Status tab bar: "All" + one button per configured status.
-
   return (
     <>
       {addOpen && (

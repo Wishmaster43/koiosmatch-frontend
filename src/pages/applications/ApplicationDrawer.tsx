@@ -40,12 +40,11 @@ import type { Criterion } from '@/components/match/MatchScoreBlock'
 import type { Id } from '@/types/common'
 import EntityLink from '@/components/ui/EntityLink'
 
-// The tab order (matches the screenshots). Statistieken sits SECOND, right
-// after Sollicitatie (Danny 22-08 — mirrors MatchDrawer's own statistics tab
-// placement, pages/matches/MatchDrawer.tsx). 'extra' (§3A(f)) is appended
+// The tab order (matches the screenshots). Statistics sits LAST, app-wide
+// (Danny 24-08 — supersedes the 22-08 placement right after Sollicitatie,
+// mirroring MatchDrawer's statistics tab, pages/matches/MatchDrawer.tsx):
+// a read-only summary, never a working tab. 'extra' (§3A(f)) is appended
 // below only when the tenant has ≥1 active application custom field.
-// Statistieken LAST, app-wide (Danny 24-08 — supersedes the 22-08 after-
-// Sollicitatie placement): a read-only summary, never a working tab.
 const TAB_IDS = ['application', 'candidate', 'vacancy', 'interviews', 'appointments', 'timeline', 'notes', 'statistics']
 
 interface ApplicationDrawerProps {
@@ -151,8 +150,8 @@ export default function ApplicationDrawer({ application: a, onClose, expanded, o
   const renderTab = (id: string, setActiveTab?: (id: string) => void): ReactNode => {
     switch (id) {
       case 'application':  return <ApplicationTab application={a} onAdjustScore={onAdjustScore} onLinkVacancy={onLinkVacancy} onUpdateSource={onUpdateSource} onNavigateTab={setActiveTab} />
-      // Danny 22-08: Andere sollicitanten (CompetitionBlock) moved off Sollicitatie
-      // onto its own Statistieken tab — same component, same behaviour.
+      // Danny 22-08: other applicants (CompetitionBlock) moved off the application
+      // tab onto its own statistics tab — same component, same behaviour.
       case 'statistics':   return <StatisticsTab application={a} />
       case 'candidate':    return <CandidateTab application={a} />
       case 'vacancy':      return <VacancyTab application={a} onLinkVacancy={onLinkVacancy} />
@@ -161,7 +160,7 @@ export default function ApplicationDrawer({ application: a, onClose, expanded, o
       // Tijdlijn TAB (real lifecycle activity: funnel transitions, appointments,
       // notes, AI-interviews — ApplicationTimeline on the backend) is intentionally
       // distinct from the changelog ICON in the title row (raw field-change audit,
-      // the shared ChangelogPopover) — §3A(d): tab = activiteit, icon = veldwijzigingen.
+      // the shared ChangelogPopover) — §3A(d): tab = activity, icon = field changes.
       case 'timeline':     return <Timeline items={a.timeline ?? []} emptyText={t('timeline.empty')} />
       case 'notes':        return <NotesTab application={a} />
       case 'extra':        return <CustomFieldsTab entityType="application" values={a.customFields ?? {}}

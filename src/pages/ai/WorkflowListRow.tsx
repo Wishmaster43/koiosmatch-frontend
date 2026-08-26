@@ -232,8 +232,7 @@ export default function WorkflowListRow({ workflow, folderName, onRun, onEdit, o
             {running ? t('page.running') : t('page.run')}
           </button>
 
-          {/* Active/draft toggle — same semantics as the editor's status switch (active <-> inactive).
-              On-colour unified to primary (HUISSTIJL-1); was success — flag for Danny if workflows must stay green. */}
+          {/* Active/draft toggle — same semantics as the editor's status switch (active <-> inactive). */}
           <div onClick={e => e.stopPropagation()} style={{ flexShrink: 0 }}>
             {/* §4 names the ACTIVE WORKFLOW TOGGLE as a success surface — the shared Toggle
               carries that via tone, so house law and house component agree. */}
