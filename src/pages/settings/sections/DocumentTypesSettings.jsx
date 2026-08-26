@@ -2,13 +2,10 @@
  * DocumentTypesSettings — see the fuller docblock below, right above the
  * component, for the entity-scoped document-type CRUD editor this file renders.
  */
-import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import StatusListEditor from './StatusListEditor'
 import { DOC_TYPE_ICON_NAMES, resolveDocTypeIcon } from '@/lib/useDocumentTypes'
-import { useAllSettings, saveSettingsKeys, invalidateAllSettingsCache, getNumberSetting } from '@/lib/settings/useAllSettings'
-import { notifyError } from '@/lib/notify'
-import { SectionTitle } from '@/components/ui/typography'
+import NumberSettingField from '../components/NumberSettingField'
 
 // entity → the nav.<id> label already registered for this tab (registry.jsx dt_*
 // items), reused so each entity name is translated once (mirrors NoteTypesSettings'
@@ -27,52 +24,11 @@ const ENTITY_NAV_ID = {
 // command (DispatchExpiringDocumentAlerts::SETTING_KEY) to decide how many days before
 // a requires_expiry document's expires_at the `candidate.document_expiring` automation
 // event fires (workflows + webhooks). Same commit-on-blur / optimistic / revert pattern
-// as the Koios conversation-memory field (WhatsAppLog.tsx).
+// as the Koios conversation-memory field (WhatsAppLog.tsx), now the shared NumberSettingField.
 export const DOCUMENT_EXPIRING_ALERT_DAYS_KEY = 'document_expiring_alert_days'
 const EXPIRING_ALERT_DAYS_DEFAULT = 30
 const EXPIRING_ALERT_DAYS_MIN = 1
 const EXPIRING_ALERT_DAYS_MAX = 365
-
-// How many days before expiry the expiring-document alert fires. Only meaningful for
-// the candidate scope — the backend command queries CandidateDocument only, so this
-// field is shown on that sub-tab alone (see the entity check in the component below).
-// Commits on blur (not per keystroke), optimistic with revert-on-failure.
-function ExpiringAlertDaysField() {
-  const { t } = useTranslation('settings')
-  const settings = useAllSettings()
-  const saved = getNumberSetting(settings, DOCUMENT_EXPIRING_ALERT_DAYS_KEY, EXPIRING_ALERT_DAYS_DEFAULT)
-  const [value, setValue] = useState(saved)
-
-  // Persist one clamped value — optimistic, revert + toast on failure (house pattern).
-  const commit = async (raw) => {
-    const clamped = Math.min(EXPIRING_ALERT_DAYS_MAX, Math.max(EXPIRING_ALERT_DAYS_MIN, Number(raw) || EXPIRING_ALERT_DAYS_DEFAULT))
-    if (clamped === saved) { setValue(clamped); return }
-    setValue(clamped)
-    try {
-      await saveSettingsKeys({ [DOCUMENT_EXPIRING_ALERT_DAYS_KEY]: clamped })
-      invalidateAllSettingsCache()
-    } catch {
-      setValue(saved)
-      notifyError(t('documentTypes.expiringAlertDaysSaveFailed'))
-    }
-  }
-
-  return (
-    <div style={{ marginBottom: 16, paddingBottom: 16, borderBottom: '1px solid var(--border)' }}>
-      <SectionTitle as="div" style={{ marginBottom: 4 }}>{t('documentTypes.expiringAlertDaysTitle')}</SectionTitle>
-      <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 8, maxWidth: 460 }}>{t('documentTypes.expiringAlertDaysHint')}</div>
-      <label htmlFor="document-expiring-alert-days" style={{ fontSize: 11, fontWeight: 500, color: 'var(--text-muted)', display: 'block', marginBottom: 4 }}>
-        {t('documentTypes.expiringAlertDaysLabel')}
-      </label>
-      <input id="document-expiring-alert-days" type="number" min={EXPIRING_ALERT_DAYS_MIN} max={EXPIRING_ALERT_DAYS_MAX}
-        value={value}
-        onChange={e => setValue(Number(e.target.value))}
-        onBlur={e => commit(Number(e.target.value))}
-        style={{ width: 100, height: 32, padding: '0 8px', borderRadius: 6, border: '1px solid var(--border)',
-          background: 'var(--surface)', color: 'var(--text)', fontSize: 12 }} />
-    </div>
-  )
-}
 
 /**
  * Document types — categorisation + colour + icon of documents (CV, ID, diploma, …),
@@ -109,7 +65,12 @@ export default function DocumentTypesSettings({ entity }) {
   return (
     <div style={{ maxWidth: 640 }}>
       {/* Tenant-wide expiry-alert window — candidate scope only (see the field's own comment). */}
-      {entity === 'candidate' && <ExpiringAlertDaysField />}
+      {entity === 'candidate' && (
+        <NumberSettingField id="document-expiring-alert-days" settingsKey={DOCUMENT_EXPIRING_ALERT_DAYS_KEY}
+          title={t('documentTypes.expiringAlertDaysTitle')} hint={t('documentTypes.expiringAlertDaysHint')}
+          label={t('documentTypes.expiringAlertDaysLabel')} saveFailedMessage={t('documentTypes.expiringAlertDaysSaveFailed')}
+          defaultValue={EXPIRING_ALERT_DAYS_DEFAULT} min={EXPIRING_ALERT_DAYS_MIN} max={EXPIRING_ALERT_DAYS_MAX} />
+      )}
       <StatusListEditor withColor entity={entity}
         title={t('documentTypes.title', { entity: entityLabel })} subtitle={t('documentTypes.subtitle')}
         endpoint="/document-types" addLabel={t('documentTypes.add')}

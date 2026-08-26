@@ -29,6 +29,8 @@ const mockSettings = vi.fn(() => ({}))
 const saveSettingsKeys = vi.fn(async () => {})
 vi.mock('@/lib/settings/useAllSettings', () => ({
   useAllSettings: () => mockSettings(),
+  // STALE-INIT-1: every test here assumes the settings blob has already resolved.
+  useSettingsLoaded: () => true,
   saveSettingsKeys: (...args) => saveSettingsKeys(...args),
   invalidateAllSettingsCache: vi.fn(),
 }))

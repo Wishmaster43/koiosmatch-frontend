@@ -18,15 +18,7 @@ import SaveButton from '@/components/ui/SaveButton'
 import Spinner from '@/components/ui/Spinner'
 import { SectionTitle, Caption, GroupLabel, monoStyle } from '@/components/ui/typography'
 import type { AdminBillingBudgetsResponse, AdminBillingBudgetsUpdate, BillingBudgetEntry, BillingPackageKey } from '@/types/billingUsage'
-
-const PACKAGE_KEYS: BillingPackageKey[] = ['core', 'pro', 'enterprise']
-
-const card = { border: '1px solid var(--border)', borderRadius: 10, padding: 16, marginBottom: 28, background: 'var(--surface)' }
-const sub = { fontSize: 12, color: 'var(--text-muted)', marginBottom: 14 }
-const label = { fontSize: 12, color: 'var(--text-muted)', marginBottom: 4, display: 'block' }
-// Color lives on the WRAP, not the input (§4 HUISSTIJL-1) — mirrors BillingBudgetsCard.
-const inputWrap = { display: 'flex', alignItems: 'center', gap: 6, border: '1px solid var(--border)', borderRadius: 8, padding: '6px 10px', background: 'var(--input-bg)', color: 'var(--text)' }
-const inputStyle = { border: 'none', outline: 'none', background: 'transparent', fontSize: 13, width: '100%', ...monoStyle }
+import { PACKAGE_KEYS, card, sub, label, inputWrap, inputStyle } from './billingCardStyles'
 
 // A package row's two editable numbers. Blank = NULL (= unlimited / no
 // package-level value), NEVER 0: writing 0 onto an unlimited package would

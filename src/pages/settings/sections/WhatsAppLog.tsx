@@ -24,11 +24,10 @@ import type { LogExportCol } from '@/components/ui/LogView'
 import { isInbound } from '@/components/ui/logChips'
 import { useWhatsAppData, useMessageColumns, WA_STATUS_VALUES } from '@/pages/whatsapp/shared'
 import type { WaMessage } from '@/types/whatsapp'
-import { useAllSettings, saveSettingsKeys, invalidateAllSettingsCache, getNumberSetting } from '@/lib/settings/useAllSettings'
-import { notifyError } from '@/lib/notify'
+import NumberSettingField from '../components/NumberSettingField'
 // WA-LOG-LEESBAAR-1: row click opens the candidate's whole thread, readable.
 import WaConversationPanel from './whatsapp/WaConversationPanel'
-import { SectionTitle, Caption, GroupLabel } from '@/components/ui/typography'
+import { Caption } from '@/components/ui/typography'
 import Button from '@/components/ui/Button'
 import Spinner from '@/components/ui/Spinner'
 
@@ -37,45 +36,6 @@ export const KOIOS_MEMORY_DAYS_KEY = 'koios_conversation_memory_days'
 const MEMORY_DAYS_DEFAULT = 90
 const MEMORY_DAYS_MIN = 1
 const MEMORY_DAYS_MAX = 365
-
-// How many days of WhatsApp history Koios keeps in conversation memory. Commits
-// on blur (not per keystroke), optimistic with revert-on-failure.
-function ConversationMemoryField() {
-  const { t } = useTranslation('settings')
-  const settings = useAllSettings()
-  const saved = getNumberSetting(settings, KOIOS_MEMORY_DAYS_KEY, MEMORY_DAYS_DEFAULT)
-  const [value, setValue] = useState(saved)
-
-  // Persist one clamped value — optimistic, revert + toast on failure (house pattern).
-  const commit = async (raw: number) => {
-    const clamped = Math.min(MEMORY_DAYS_MAX, Math.max(MEMORY_DAYS_MIN, Number(raw) || MEMORY_DAYS_DEFAULT))
-    if (clamped === saved) { setValue(clamped); return }
-    setValue(clamped)
-    try {
-      await saveSettingsKeys({ [KOIOS_MEMORY_DAYS_KEY]: clamped })
-      invalidateAllSettingsCache()
-    } catch {
-      setValue(saved)
-      notifyError(t('waLog.memoryDaysSaveFailed'))
-    }
-  }
-
-  return (
-    <div style={{ marginBottom: 16, paddingBottom: 16, borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
-      <SectionTitle as="div" style={{ marginBottom: 4 }}>{t('waLog.memoryDaysTitle')}</SectionTitle>
-      <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 8, maxWidth: 460 }}>{t('waLog.memoryDaysHint')}</div>
-      <GroupLabel as="label" htmlFor="koios-conversation-memory-days" style={{ display: 'block', marginBottom: 4 }}>
-        {t('waLog.memoryDaysLabel')}
-      </GroupLabel>
-      <input id="koios-conversation-memory-days" type="number" min={MEMORY_DAYS_MIN} max={MEMORY_DAYS_MAX}
-        value={value}
-        onChange={e => setValue(Number(e.target.value))}
-        onBlur={e => commit(Number(e.target.value))}
-        style={{ width: 100, height: 32, padding: '0 8px', borderRadius: 6, border: '1px solid var(--border)',
-          background: 'var(--surface)', color: 'var(--text)', fontSize: 12 }} />
-    </div>
-  )
-}
 
 // A row's recipient name, whichever owner it carries (candidate or customer
 // contact) — WA-MSG-TABLE-2 added the contact-owned shape, so this can no
@@ -170,7 +130,11 @@ export default function WhatsAppLog() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-      <ConversationMemoryField />
+      <NumberSettingField id="koios-conversation-memory-days" settingsKey={KOIOS_MEMORY_DAYS_KEY}
+        title={t('waLog.memoryDaysTitle')} hint={t('waLog.memoryDaysHint')}
+        label={t('waLog.memoryDaysLabel')} saveFailedMessage={t('waLog.memoryDaysSaveFailed')}
+        defaultValue={MEMORY_DAYS_DEFAULT} min={MEMORY_DAYS_MIN} max={MEMORY_DAYS_MAX}
+        style={{ flexShrink: 0 }} />
       <div style={{ flex: 1, minHeight: 0 }}>
         <LogView<WaMessage> rows={filtered} columns={columns} loading={loading.messages} filterKey="whatsapp-log"
           filterGroups={filterGroups} getRowId={m => m.id ?? ''} exportName="whatsapp-log"

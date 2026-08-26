@@ -17,22 +17,12 @@ import { extractApiError } from '@/lib/extractApiError'
 import { useNumberFormat } from '@/lib/formatters'
 import SaveButton from '@/components/ui/SaveButton'
 import Spinner from '@/components/ui/Spinner'
-import { SectionTitle, Caption, GroupLabel, monoStyle } from '@/components/ui/typography'
+import { SectionTitle, Caption, GroupLabel } from '@/components/ui/typography'
 import TenantBudgetOverride from './TenantBudgetOverride'
 import type {
   AdminBillingBudgetsResponse, AdminBillingBudgetsUpdate, BillingBudgetEntry, BillingPackageKey,
 } from '@/types/billingUsage'
-
-const PACKAGE_KEYS: BillingPackageKey[] = ['core', 'pro', 'enterprise']
-
-const card = { border: '1px solid var(--border)', borderRadius: 10, padding: 16, marginBottom: 28, background: 'var(--surface)' }
-const sub = { fontSize: 12, color: 'var(--text-muted)', marginBottom: 14 }
-const label = { fontSize: 12, color: 'var(--text-muted)', marginBottom: 4, display: 'block' }
-// Color lives on the WRAP, not the input — an <input> is not the BodyText/Mono
-// text atoms, and splitting fontSize+color across two objects keeps that honest
-// without re-approximating the atom's identity locally (§4 HUISSTIJL-1).
-const inputWrap = { display: 'flex', alignItems: 'center', gap: 6, border: '1px solid var(--border)', borderRadius: 8, padding: '6px 10px', background: 'var(--input-bg)', color: 'var(--text)' }
-const inputStyle = { border: 'none', outline: 'none', background: 'transparent', fontSize: 13, width: '100%', ...monoStyle }
+import { PACKAGE_KEYS, card, sub, label, inputWrap, inputStyle } from './billingCardStyles'
 
 // A package row's three editable numbers, blank = 0 for an empty field.
 type PackageDraft = { ai_token_budget: string; workflow_credit_budget: string; whatsapp_token_budget: string }

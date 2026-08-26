@@ -8,17 +8,15 @@
  */
 import { useState, useRef, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ArrowLeft, Check, Copy, Key } from 'lucide-react'
+import { ArrowLeft, Key } from 'lucide-react'
 import { createApiKey } from './apiKeysApi'
 import { KEY_TYPES } from './constants'
 import ScopeEditor from './ScopeEditor'
 import SearchSelect from '@/components/ui/SearchSelect'
-import CalloutBox from '@/components/ui/CalloutBox'
-import { BTN_H } from '@/config/buttonMetrics'
+import OneTimeSecretReveal from '@/pages/settings/components/OneTimeSecretReveal'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import Button from '@/components/ui/Button'
-import { Mono, Caption } from '@/components/ui/typography'
-import { tintBorder } from '@/lib/tint'
+import { Caption } from '@/components/ui/typography'
 
 // Two-phase inline view (see the module doc above): the create form, then the one-time secret reveal — no modal, so the whole overview stays readable.
 export default function ApiKeyCreate({ onBack, onCreated }) {
@@ -28,7 +26,6 @@ export default function ApiKeyCreate({ onBack, onCreated }) {
   const [saving, setSaving] = useState(false)
   const [error, setError]   = useState(false)
   const [result, setResult] = useState(null)   // { ...key, secret } after create
-  const [copied, setCopied] = useState(false)
   const firstField          = useRef(null)
 
   // Focus the name field on open.
@@ -49,13 +46,6 @@ export default function ApiKeyCreate({ onBack, onCreated }) {
       setError(true)
     }
     setSaving(false)
-  }
-
-  // Copies the freshly created secret to the clipboard and shows a brief 'copied' confirmation, since this is the only moment the raw secret is ever available.
-  const copySecret = () => {
-    navigator.clipboard.writeText(result?.secret ?? '')
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
   }
 
   // Canon field style (G33/fieldMetrics) — was its own height-38/padding-11 copy
@@ -80,25 +70,15 @@ export default function ApiKeyCreate({ onBack, onCreated }) {
       {/* Form / secret reveal, capped to a comfortable reading width */}
       <div style={{ maxWidth: 760 }}>
         {result ? (
-          // Phase 2 — one-time secret reveal.
-          <div>
-            <div style={{ marginBottom: 16 }}>
-              <CalloutBox variant="success" title={t('apiKeys.secretOnce')}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <Mono as="code" style={{ flex: 1, fontSize: 12, background: 'var(--surface)', border: tintBorder('var(--color-success)'), borderRadius: 6, padding: '9px 11px', color: 'var(--text)', overflowX: 'auto', whiteSpace: 'nowrap' }}>{result.secret}</Mono>
-                  {/* HUISSTIJL-1 necessity: success-tinted action, no Button variant covers a success-tinted border/text pairing (only primary/secondary/ghost/soft/danger/dangerSoft exist). */}
-                  <button onClick={copySecret} aria-label={t('apiKeys.copySecret')}
-                    // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- state-carrying success accent (secret-copy confirmation); Button has no success-tint variant
-                    style={{ height: BTN_H, padding: '0 12px', display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, border: tintBorder('var(--color-success)'), borderRadius: 6, background: 'var(--surface)', cursor: 'pointer', color: 'var(--color-success-text)', whiteSpace: 'nowrap' }}>
-                    {copied ? <Check size={12} /> : <Copy size={12} />} {copied ? t('common.copied') : t('apiKeys.copySecret')}
-                  </button>
-                </div>
-              </CalloutBox>
-            </div>
-            <Button variant="primary" onClick={onBack}>
-              {t('apiKeys.done')}
-            </Button>
-          </div>
+          // Phase 2 — one-time secret reveal (shared with WebhookCreate).
+          <OneTimeSecretReveal
+            title={t('apiKeys.secretOnce')}
+            secret={result.secret}
+            copyLabel={t('apiKeys.copySecret')}
+            copiedLabel={t('common.copied')}
+            doneLabel={t('apiKeys.done')}
+            onDone={onBack}
+          />
         ) : (
           // Phase 1 — the create form.
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>

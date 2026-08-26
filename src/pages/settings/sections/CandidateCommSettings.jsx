@@ -11,9 +11,10 @@ import StatusListEditor from './StatusListEditor'
 // component for a small fixed vocabulary.
 import OpenCheckGroup from '@/components/reports/filter/OpenCheckGroup'
 import { resolveGenericLookupIcon } from './lookupIcons'
-import { useAllSettings, saveSettingsKeys, invalidateAllSettingsCache, getNumberSetting, getJsonSetting } from '@/lib/settings/useAllSettings'
+import { useAllSettings, saveSettingsKeys, invalidateAllSettingsCache, getJsonSetting } from '@/lib/settings/useAllSettings'
 import { notifyError } from '@/lib/notify'
 import { SectionTitle } from '@/components/ui/typography'
+import NumberSettingField from '../components/NumberSettingField'
 
 // Tenant-setting key — the duplicate-detection field set (v1: email/mobile/phone).
 // Consumed TODAY by the backend DuplicateFinder (dedupeKeys(), default ['email','mobile'])
@@ -39,46 +40,6 @@ const NO_CONTACT_DAYS_DEFAULT = 90
 const NO_CONTACT_DAYS_MIN = 1
 const NO_CONTACT_DAYS_MAX = 365
 
-// How many days without a recorded last contact before a candidate counts as
-// "not contacted" for automation. Commits on blur (not per keystroke), optimistic
-// with revert-on-failure.
-function NoContactDaysField() {
-  const { t } = useTranslation('settings')
-  const settings = useAllSettings()
-  const saved = getNumberSetting(settings, NO_CONTACT_DAYS_KEY, NO_CONTACT_DAYS_DEFAULT)
-  const [value, setValue] = useState(saved)
-
-  // Persist one clamped value — optimistic, revert + toast on failure (house pattern).
-  const commit = async (raw) => {
-    const clamped = Math.min(NO_CONTACT_DAYS_MAX, Math.max(NO_CONTACT_DAYS_MIN, Number(raw) || NO_CONTACT_DAYS_DEFAULT))
-    if (clamped === saved) { setValue(clamped); return }
-    setValue(clamped)
-    try {
-      await saveSettingsKeys({ [NO_CONTACT_DAYS_KEY]: clamped })
-      invalidateAllSettingsCache()
-    } catch {
-      setValue(saved)
-      notifyError(t('lastContactTypes.noContactDaysSaveFailed'))
-    }
-  }
-
-  return (
-    <div style={{ marginBottom: 16, paddingBottom: 16, borderBottom: '1px solid var(--border)' }}>
-      <SectionTitle as="div" style={{ marginBottom: 4 }}>{t('lastContactTypes.noContactDaysTitle')}</SectionTitle>
-      <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 8, maxWidth: 460 }}>{t('lastContactTypes.noContactDaysHint')}</div>
-      <label htmlFor="candidate-no-contact-days" style={{ fontSize: 11, fontWeight: 500, color: 'var(--text-muted)', display: 'block', marginBottom: 4 }}>
-        {t('lastContactTypes.noContactDaysLabel')}
-      </label>
-      <input id="candidate-no-contact-days" type="number" min={NO_CONTACT_DAYS_MIN} max={NO_CONTACT_DAYS_MAX}
-        value={value}
-        onChange={e => setValue(Number(e.target.value))}
-        onBlur={e => commit(Number(e.target.value))}
-        style={{ width: 100, height: 32, padding: '0 8px', borderRadius: 6, border: '1px solid var(--border)',
-          background: 'var(--surface)', color: 'var(--text)', fontSize: 12 }} />
-    </div>
-  )
-}
-
 // Which fields count as a duplicate match on candidate create (email/mobile/phone).
 // Checkbox toggle per field, optimistic with revert-on-failure (house pattern), stored
 // as a JSON array so DuplicateFinder::dedupeKeys() can json_decode it directly.
@@ -91,6 +52,10 @@ function DedupeKeysField() {
   // seed default while the tenant's stored value arrives a render later (control
   // round). Re-seed from the store until the user actually toggles.
   const touchedRef = useRef(false)
+  // Deliberately keyed on the stringified snapshot, not the `saved` array reference
+  // (getJsonSetting returns a fresh array every render, so depending on `saved`
+  // itself would re-fire this effect on every render and fight the guard above).
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- see comment above
   useEffect(() => { if (!touchedRef.current) setKeys(saved) }, [JSON.stringify(saved)])
 
   // Toggle one field in the set and persist the full array — optimistic, revert on failure.
@@ -132,13 +97,16 @@ function DedupeKeysField() {
  * Tenant-maintainable lookup, backed by /last-contact-types (C-21). Feeds the
  * candidate `last_contact_type` field + the list column. Backend `last_contact_types`
  * carries a colour column too, so the editor now shows colour like every other lookup.
- * Also carries the tenant-wide no-contact reminder window (NoContactDaysField above) —
- * same screen a recruiter already visits to configure "how contact is tracked". */
+ * Also carries the tenant-wide no-contact reminder window (the shared NumberSettingField
+ * below) — same screen a recruiter already visits to configure "how contact is tracked". */
 export function LastContactTypesSettings() {
   const { t } = useTranslation('settings')
   return (
     <div style={{ maxWidth: 640 }}>
-      <NoContactDaysField />
+      <NumberSettingField id="candidate-no-contact-days" settingsKey={NO_CONTACT_DAYS_KEY}
+        title={t('lastContactTypes.noContactDaysTitle')} hint={t('lastContactTypes.noContactDaysHint')}
+        label={t('lastContactTypes.noContactDaysLabel')} saveFailedMessage={t('lastContactTypes.noContactDaysSaveFailed')}
+        defaultValue={NO_CONTACT_DAYS_DEFAULT} min={NO_CONTACT_DAYS_MIN} max={NO_CONTACT_DAYS_MAX} />
       <DedupeKeysField />
       <StatusListEditor
         title={t('lastContactTypes.title')} subtitle={t('lastContactTypes.subtitle')}

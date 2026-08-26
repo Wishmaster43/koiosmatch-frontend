@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import SearchSelect from '@/components/ui/SearchSelect'
 import { useCustomerLookups } from '@/lib/useCustomerLookups'
-import { useAllSettings, saveSettingsKeys, invalidateAllSettingsCache } from '@/lib/settings/useAllSettings'
+import { useAllSettings, useSettingsLoaded, saveSettingsKeys, invalidateAllSettingsCache } from '@/lib/settings/useAllSettings'
 import { notifyError } from '@/lib/notify'
 import { SectionTitle } from '@/components/ui/typography'
 
@@ -20,22 +20,29 @@ export const CONVERT_DEFAULT_STATUS_KEY = 'customer_default_status_on_convert'
 export function CustomerConversionSettings() {
   const { t } = useTranslation('settings')
   const settings = useAllSettings()
+  const loaded = useSettingsLoaded()
   const { statuses } = useCustomerLookups()
 
   // Current value (plain string setting); 'none' = leave the status empty — also
   // the honest fallback when nothing is configured yet.
   const saved = typeof settings?.[CONVERT_DEFAULT_STATUS_KEY] === 'string' ? settings[CONVERT_DEFAULT_STATUS_KEY] : 'none'
-  const [value, setValue] = useState(saved)
+  // STALE-INIT-1: nullable draft — see VacancyDefaultStatusSettings.jsx's own
+  // comment for the full cold-cache story this replaces (`useState(saved)` froze
+  // the fallback forever). `null` means "no local pick yet".
+  const [draft, setDraft] = useState(null)
+  const value = draft ?? saved
 
-  // Optimistic save + revert on failure (house pattern, mirrors the candidate screen).
+  // Optimistic save + revert on failure (house pattern, mirrors the candidate screen);
+  // a no-op before the blob has loaded (see the vacancy screen's own comment).
   const save = async (next) => {
-    const prev = value
-    setValue(next)
+    if (!loaded) return
+    if (next === saved) { setDraft(next); return }
+    setDraft(next)
     try {
       await saveSettingsKeys({ [CONVERT_DEFAULT_STATUS_KEY]: next })
       invalidateAllSettingsCache()
     } catch {
-      setValue(prev)
+      setDraft(null)
       notifyError(t('customerConversion.saveFailed'))
     }
   }
@@ -45,7 +52,7 @@ export function CustomerConversionSettings() {
       <SectionTitle as="div" style={{ marginBottom: 4 }}>{t('customerConversion.title')}</SectionTitle>
       <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 12 }}>{t('customerConversion.subtitle')}</div>
       {/* Searchable single-pick dropdown, like every other lookup filter (Danny 23-07). */}
-      <SearchSelect closeOnToggle width={300}
+      <SearchSelect closeOnToggle width={300} disabled={!loaded}
         options={[
           { value: 'none', label: t('customerConversion.none') },
           ...(statuses ?? []).map(s => ({ value: s.value, label: s.label })),

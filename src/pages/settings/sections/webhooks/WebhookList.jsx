@@ -31,7 +31,7 @@ export default function WebhookList({ subs, loading, error, onReload, onOpen, on
     { key: 'status', header: t('webhooks.outgoing.col.status'),
       render: (r) => <StatusBadge status={r.status ?? 'active'} map={statusMap} /> },
     { key: 'events', header: t('webhooks.outgoing.col.events'), align: 'center',
-      render: (r) => t('webhooks.outgoing.eventsCount', { count: (r.event_types ?? []).length }) },
+      render: (r) => t('webhooks.outgoing.eventsCount', { count: (r.events ?? []).length }) },
     { key: 'last_triggered_at', header: t('webhooks.outgoing.col.lastTriggered'), nowrap: true, sortable: true,
       sortValue: (r) => r.last_triggered_at ?? '', render: (r) => formatDate(r.last_triggered_at) },
   ]

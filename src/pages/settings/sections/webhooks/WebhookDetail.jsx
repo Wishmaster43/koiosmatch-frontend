@@ -27,7 +27,7 @@ export default function WebhookDetail({ subId, listRow, onBack, onPatch, onDelet
   const [loading, setLoading] = useState(true)
   const [editing, setEditing] = useState(false)
   const [form, setForm]       = useState(listRow ?? { name: '', url: '' })
-  const [events, setEvents]   = useState(listRow?.event_types ?? [])
+  const [events, setEvents]   = useState(listRow?.events ?? [])
   const [savingEv, setSavingEv] = useState(false)
   const [savedEv, setSavedEv]   = useState(false)
   const [secret, setSecret]   = useState(null)
@@ -38,7 +38,7 @@ export default function WebhookDetail({ subId, listRow, onBack, onPatch, onDelet
   useEffect(() => {
     let active = true
     getSubscription(subId)
-      .then((full) => { if (active) { setSub((p) => ({ ...p, ...full })); setForm((f) => ({ ...f, ...full })); setEvents(full.event_types ?? []) } })
+      .then((full) => { if (active) { setSub((p) => ({ ...p, ...full })); setForm((f) => ({ ...f, ...full })); setEvents(full.events ?? []) } })
       .catch(() => { /* keep listRow */ })
       .finally(() => { if (active) setLoading(false) })
     return () => { active = false }
@@ -65,7 +65,7 @@ export default function WebhookDetail({ subId, listRow, onBack, onPatch, onDelet
   // Save the event filter.
   const saveEvents = async () => {
     setSavingEv(true)
-    try { await applyUpdate({ event_types: events }); setSavedEv(true); setTimeout(() => setSavedEv(false), 1800) } catch { /* noop */ }
+    try { await applyUpdate({ events }); setSavedEv(true); setTimeout(() => setSavedEv(false), 1800) } catch { /* noop */ }
     setSavingEv(false)
   }
 
@@ -82,7 +82,7 @@ export default function WebhookDetail({ subId, listRow, onBack, onPatch, onDelet
 
   if (!sub) return <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t('common.loadingShort')}</p>
 
-  const eventsDirty = JSON.stringify([...events].sort()) !== JSON.stringify([...(sub.event_types ?? [])].sort())
+  const eventsDirty = JSON.stringify([...events].sort()) !== JSON.stringify([...(sub.events ?? [])].sort())
   // Canon field style (G33/fieldMetrics) — already matched it exactly, now shared.
   const inputStyle = fieldInputStyle
   const labelStyle = { fontSize: 12, color: 'var(--text-muted)', marginBottom: 4, display: 'block' }

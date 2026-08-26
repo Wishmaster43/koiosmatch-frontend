@@ -24,6 +24,10 @@ vi.mock('@/lib/settings/useAllSettings', async () => {
   return {
     ...actual,
     useAllSettings: () => mockSettings(),
+    // STALE-INIT-1: every test here assumes the settings blob has already
+    // resolved (the cold-cache/disabled-until-loaded case is covered by
+    // NumberSettingField.test.tsx, the shared field's own regression test).
+    useSettingsLoaded: () => true,
     saveSettingsKeys,
     invalidateAllSettingsCache: vi.fn(),
   }

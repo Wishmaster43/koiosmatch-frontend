@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import SearchSelect from '@/components/ui/SearchSelect'
 import { VacancyLookupsProvider, useVacancyLookups } from '@/context/VacancyLookupsContext'
-import { useAllSettings, saveSettingsKeys, invalidateAllSettingsCache } from '@/lib/settings/useAllSettings'
+import { useAllSettings, useSettingsLoaded, saveSettingsKeys, invalidateAllSettingsCache } from '@/lib/settings/useAllSettings'
 import { notifyError } from '@/lib/notify'
 import { SectionTitle } from '@/components/ui/typography'
 
@@ -31,21 +31,32 @@ export const VACANCY_DEFAULT_STATUS_KEY = 'vacancy_default_status_on_create'
 function VacancyDefaultStatusEditor() {
   const { t } = useTranslation('settings')
   const settings = useAllSettings()
+  const loaded = useSettingsLoaded()
   const { statuses } = useVacancyLookups()
 
   // Current value (plain string setting); 'none' = leave the status empty.
   const saved = typeof settings?.[VACANCY_DEFAULT_STATUS_KEY] === 'string' ? settings[VACANCY_DEFAULT_STATUS_KEY] : 'none'
-  const [value, setValue] = useState(saved)
+  // STALE-INIT-1: nullable draft — on a cold cache the settings blob is {} on
+  // first render, so freezing `saved` into state (the old `useState(saved)`)
+  // showed the seed fallback and never picked up the real stored value once the
+  // GET resolved (a re-render recomputes `saved`, not the already-initialised
+  // state). `null` means "no local pick yet", so the picker always shows the
+  // live `saved` until the user actually chooses.
+  const [draft, setDraft] = useState(null)
+  const value = draft ?? saved
 
-  // Optimistic save + revert on failure (house pattern, mirrors the candidate/customer screens).
+  // Optimistic save + revert on failure (house pattern, mirrors the candidate/customer
+  // screens); a no-op before the blob has loaded, so a pick can't overwrite the real
+  // stored value with a stale comparison.
   const save = async (next) => {
-    const prev = value
-    setValue(next)
+    if (!loaded) return
+    if (next === saved) { setDraft(next); return }
+    setDraft(next)
     try {
       await saveSettingsKeys({ [VACANCY_DEFAULT_STATUS_KEY]: next })
       invalidateAllSettingsCache()
     } catch {
-      setValue(prev)
+      setDraft(null)
       notifyError(t('vacancyDefaultStatus.saveFailed'))
     }
   }
@@ -55,7 +66,7 @@ function VacancyDefaultStatusEditor() {
       <SectionTitle as="div" style={{ marginBottom: 4 }}>{t('vacancyDefaultStatus.title')}</SectionTitle>
       <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 12 }}>{t('vacancyDefaultStatus.subtitle')}</div>
       {/* Searchable single-pick dropdown, like every other lookup filter (Danny 23-07). */}
-      <SearchSelect closeOnToggle width={300}
+      <SearchSelect closeOnToggle width={300} disabled={!loaded}
         options={[
           { value: 'none', label: t('vacancyDefaultStatus.none') },
           ...(statuses ?? []).map(s => ({ value: s.value, label: s.label })),

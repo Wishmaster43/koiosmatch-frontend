@@ -29,6 +29,11 @@ vi.mock('@/lib/settings/useAllSettings', async () => {
   return {
     ...actual,
     useAllSettings: () => mockSettings(),
+    // STALE-INIT-1: this file's LastContactTypesSettings also renders the shared
+    // NumberSettingField (NoContactDaysField) — every test here assumes the
+    // settings blob has already resolved (the cold-cache case is covered by
+    // NumberSettingField.test.tsx, the shared field's own regression test).
+    useSettingsLoaded: () => true,
     saveSettingsKeys,
     invalidateAllSettingsCache: vi.fn(),
   }
