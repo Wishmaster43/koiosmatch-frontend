@@ -12,6 +12,7 @@ import { Toggle } from '../components/SettingsKit'
 import IconPickerControl from './IconPickerControl'
 import { GENERIC_LOOKUP_ICON_NAMES, resolveGenericLookupIcon } from './lookupIcons'
 import Button from '@/components/ui/Button'
+import ModalFooter from '@/components/ui/ModalFooter'
 import { Caption, BodyText, PageTitle, SectionTitle } from '@/components/ui/typography'
 
 // "Niet actief" ("Not active") → "niet_actief" — a stable English-ish slug suggestion (mirrors
@@ -28,8 +29,8 @@ export default function CandidateLookupItemModal({
 
   return (
     <>
-      <div className="fixed inset-0 z-40" style={{ background: 'rgba(0,0,0,0.3)' }} onClick={onClose} />
-      <div className="fixed z-50" style={{ top: '50%', left: '50%', transform: 'translate(-50%,-50%)', background: 'var(--surface)', borderRadius: 12, padding: 24, width: 400, boxShadow: 'var(--shadow-modal)' }}>
+      <div className="fixed inset-0" style={{ zIndex: 'var(--z-overlay)', background: 'rgba(0,0,0,0.3)' }} onClick={onClose} />
+      <div className="fixed" style={{ zIndex: 'var(--z-overlay)', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', background: 'var(--surface)', borderRadius: 12, padding: 24, width: 400, boxShadow: 'var(--shadow-modal)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
           <PageTitle as="span">{modal.mode === 'add' ? t('lookups.add') : t('lookups.edit')}</PageTitle>
           <Button variant="ghost" iconOnly onClick={onClose} aria-label={t('common:close')}><X size={16} /></Button>
@@ -221,11 +222,11 @@ export default function CandidateLookupItemModal({
           </div>
         )}
 
-        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 20 }}>
-          <Button variant="secondary" onClick={onClose}>{t('common.cancel')}</Button>
-          <Button variant="primary" onClick={onSave} disabled={busy || !modal.label.trim()}>
-            {busy ? t('common.saving') : t('common.save')}
-          </Button>
+        {/* Shared modal footer row (§4) — spans the modal's full width past the body padding. */}
+        <div style={{ margin: '20px -24px -24px' }}>
+          <ModalFooter onCancel={onClose} onSubmit={onSave} busy={busy}
+            disabled={busy || !modal.label.trim()}
+            cancelLabel={t('common.cancel')} submitLabel={busy ? t('common.saving') : t('common.save')} />
         </div>
       </div>
     </>

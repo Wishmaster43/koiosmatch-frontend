@@ -172,8 +172,8 @@ export default function ProvincesSettings() {
 
       {showModal && (
         <>
-          <div className="fixed inset-0 z-40" style={{ background: 'rgba(0,0,0,0.3)' }} onClick={() => setShowModal(false)} />
-          <div className="fixed z-50" style={{ top: '50%', left: '50%', transform: 'translate(-50%,-50%)', background: 'var(--surface)', borderRadius: 12, padding: 24, width: 400, boxShadow: 'var(--shadow-modal)' }}>
+          <div className="fixed inset-0" style={{ zIndex: 'var(--z-overlay)', background: 'rgba(0,0,0,0.3)' }} onClick={() => setShowModal(false)} />
+          <div className="fixed" style={{ zIndex: 'var(--z-overlay)', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', background: 'var(--surface)', borderRadius: 12, padding: 24, width: 400, boxShadow: 'var(--shadow-modal)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
               <PageTitle style={{ fontWeight: 700 }}>{editing ? t('statusList.editTitle') : t('provinces.add')}</PageTitle>
               <Button variant="ghost" iconOnly onClick={() => setShowModal(false)} aria-label={t('common.close')}><X size={16} /></Button>

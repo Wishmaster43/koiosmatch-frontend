@@ -33,7 +33,7 @@ export default function EventCatalog({ value = [], onChange }) {
         !q || ev.toLowerCase().includes(q) || groupLabel(group).toLowerCase().includes(q) || actionLabel(actionOf(ev)).toLowerCase().includes(q)),
     }))
     .filter((g) => g.events.length > 0),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentionally keyed on q only; groupLabel/actionLabel are recomputed on every render so they never go stale
     [q])
 
   // Toggle a single event on/off.

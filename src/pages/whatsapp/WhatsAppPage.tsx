@@ -320,7 +320,7 @@ export default function WhatsAppPage({ intent }: { intent?: unknown } = {}) {
       {/* Nine-card KPI band (WA-KPI9-1) — click = drill-down into a tab/filter, or a plain stat */}
       <ReportKpiBand kpis={kpis} />
 
-      {/* Tabs + verversen op één lijn; badge = wachtrij-achterstand */}
+      {/* Tabs + refresh on one line; badge = queue backlog */}
       <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', borderBottom: '1px solid var(--border)', marginBottom: 20 }}>
         <div role="tablist" style={{ display: 'flex', gap: 4 }}>
         {([
@@ -366,7 +366,7 @@ export default function WhatsAppPage({ intent }: { intent?: unknown } = {}) {
         </Button>
       </div>
 
-      {/* Overzicht — activiteit + verdelingen (KPI's staan bovenaan; verhuist later naar Rapportage) */}
+      {/* Overview — activity + distributions (KPIs sit above; moves to Reporting later) */}
       {tab === 'overview' && (wabaDown ? NoConn : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           <ActivityChart data={activity} loading={loading.activity} />
@@ -379,7 +379,7 @@ export default function WhatsAppPage({ intent }: { intent?: unknown } = {}) {
         </div>
       ))}
 
-      {/* Berichten — de feed */}
+      {/* Messages — the feed */}
       {tab === 'messages' && (wabaDown ? NoConn : (
         // The server cursor only pages BACKWARD (older than the oldest loaded row),
         // so "load more" is disabled while sort=asc — appending older rows to the
@@ -388,10 +388,10 @@ export default function WhatsAppPage({ intent }: { intent?: unknown } = {}) {
           loadingMore={loadingMoreMessages} exhausted={sort === 'asc' ? true : messagesExhausted} onFilter={onTableFilter} />
       ))}
 
-      {/* Wachtrij — today's WABA/Business batches (R3a); hook + polling live in the page now (WA-KPI9-1). */}
+      {/* Queue — today's WABA/Business batches (R3a); hook + polling live in the page now (WA-KPI9-1). */}
       {tab === 'queue' && <QueueTab batches={batches} loading={queueLoading} error={queueError} notAvailable={queueNotAvailable} />}
 
-      {/* Escalaties */}
+      {/* Escalations */}
       {tab === 'escalations' && (wabaDown ? NoConn : <EscalationList escalations={escalations} loading={loading.escalations} />)}
 
       {/* K-193 fase 1: WA-Web outbox queue — its own endpoint, reachable independent of the WABA connection state. */}
@@ -400,7 +400,7 @@ export default function WhatsAppPage({ intent }: { intent?: unknown } = {}) {
       {/* K-193/K-194: the bureau-wide Conversations inbox — also independent of the WABA connection. */}
       {tab === 'conversations' && <ConversationsTab openConversationId={openConversationId} />}
 
-      {/* KPI drill-down (rechter drawer) — berichten + escalaties hebben data; rest wacht op backend */}
+      {/* KPI drill-down (right drawer) — messages + escalations have data; the rest waits on backend */}
       {drill && (
         <RightDrawer
           title={drill === 'today' ? t('kpi.messagesToday') : drill === 'contacted' ? t('kpi.candidatesContacted') : drill === 'filled' ? t('kpi.shiftsFilled') : t('kpi.openEscalations')}

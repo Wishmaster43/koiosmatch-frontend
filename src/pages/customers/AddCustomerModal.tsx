@@ -36,6 +36,7 @@ import EntityImportCard from '@/components/import/EntityImportCard'
 import { useEntityImportCard } from '@/components/import/useEntityImportCard'
 import type { Id, LookupOption } from '@/types/common'
 import Button from '@/components/ui/Button'
+import ModalFooter from '@/components/ui/ModalFooter'
 import QuickViewToggle from '@/components/ui/QuickViewToggle'
 
 // The ONE backend importer that builds a whole customer tree (customer + locations +
@@ -400,18 +401,10 @@ export default function AddCustomerModal({ onClose, onCreate, onImported, users 
           </div>
         )}
 
-        {/* Footer — the house Button (§4/§9) owns the one explicit height, everywhere. */}
-        <div style={{ padding: '14px 24px', borderTop: '1px solid var(--border)', flexShrink: 0,
-          display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
-          <Button variant="secondary" onClick={onClose}>
-            {t('modal.cancel')}
-          </Button>
-          {/* Button's own disabled recipe already reproduces the exact grey-out this
-              hand-painted ternary used to do — no need to branch the fill manually. */}
-          <Button variant="primary" onClick={handleSubmit} disabled={!canSubmit}>
-            {saving ? t('common:saving') : t('modal.create')}
-          </Button>
-        </div>
+        {/* Footer — the shared ModalFooter (§4) owns the one explicit height/layout, everywhere. */}
+        <ModalFooter onCancel={onClose} cancelLabel={t('modal.cancel')}
+          onSubmit={handleSubmit} submitLabel={t('modal.create')}
+          disabled={!canSubmit} busy={saving} />
     </FloatingPanel>
   )
 }

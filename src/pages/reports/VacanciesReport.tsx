@@ -364,9 +364,9 @@ export default function VacanciesReport({ period, filters = EMPTY_REPORT_FILTERS
                     {...interactive(zeroApplicationsDrillHandler)}>
                     {t('vacancies.noApplicants.title', { count: zeroApplicantRows.length })}
                   </h3>
-                  <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: '4px 0 12px' }}>
+                  <Caption style={{ display: 'block', margin: '4px 0 12px' }}>
                     {t('vacancies.noApplicants.subtitle')}
-                  </p>
+                  </Caption>
                 </div>
                 <DataTable
                   columns={columns.filter(c => c.key !== 'applications' && c.key !== 'matched' && c.key !== 'filled')}

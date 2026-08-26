@@ -11,7 +11,7 @@ describe('SALES_TILES registry', () => {
     expect(SALES_TILES[0].blockId).toBe('block.customersByOwner')
   })
 
-  it('registers all five sales tiles', () => {
+  it('registers all six sales tiles', () => {
     expect(SALES_TILES.map(e => e.feedKey)).toEqual([
       'customers_by_owner',
       'opps_by_stage_by_owner',

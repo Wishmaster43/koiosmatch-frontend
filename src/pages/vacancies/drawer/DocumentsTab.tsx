@@ -192,6 +192,7 @@ export default function DocumentsTab({ vacancy: v }: { vacancy: VacancyDetail })
         <div style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '6px 10px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg)', flex: 1, minWidth: 0 }}>
           <Search size={13} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
           <input value={docSearch} onChange={e => setDocSearch(e.target.value)} placeholder={t('documents.search')}
+            aria-label={t('documents.search')}
             style={{ border: 'none', outline: 'none', fontSize: 12, color: 'var(--text)', background: 'none', flex: 1, minWidth: 0 }} />
           {/* Search-clear glyph keeps its flush footprint (mirrors the shared search-chrome precedent). */}
           {/* eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- 11px inline clear glyph inside the search chrome, not a Button copy */}

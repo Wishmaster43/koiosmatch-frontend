@@ -41,6 +41,7 @@ export default function EntityChangelog({ subjectType, subjectId, logName, endpo
   const { formatDateTime } = useDateFormat()
   const [items, setItems] = useState<ActivityEntry[]>([])
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(false)
 
   // One fetch per subject — the shared ChangelogPopover shell only mounts this
   // content while its panel is open. Aborted on subject change/unmount.
@@ -50,6 +51,7 @@ export default function EntityChangelog({ subjectType, subjectId, logName, endpo
     const params: Record<string, string | Id> = subjectType ? { subject_type: subjectType } : { log_name: logName as string }
     if (subjectType && subjectId !== undefined && subjectId !== null) params.subject_id = subjectId
     setLoading(true)
+    setError(false)
     // F1c: an entity with a DEDICATED /…/activity route (same controller shape as
     // /candidates|/vacancies) passes it via `endpoint`; params only apply to the
     // generic /activity-log form.
@@ -57,12 +59,15 @@ export default function EntityChangelog({ subjectType, subjectId, logName, endpo
       // Array guard (CHANGELOG-FLAKE-1): a malformed/non-list payload must render
       // the empty state, never crash items.map in an async window.
       .then(res => { const rows = unwrapList<ActivityEntry>(res).rows; setItems(Array.isArray(rows) ? rows : []) })
-      .catch(() => { if (!ctrl.signal.aborted) setItems([]) })
+      // A failed fetch must render as an error, never silently as "no entries"
+      // (an audit trail staying reassuring-but-wrong is a GDPR-sensitive bug).
+      .catch(() => { if (!ctrl.signal.aborted) { setItems([]); setError(true) } })
       .finally(() => { if (!ctrl.signal.aborted) setLoading(false) })
     return () => ctrl.abort()
   }, [subjectType, subjectId, logName, endpoint])
 
   if (loading) return <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('audit.loading')}</div>
+  if (error) return <div style={{ fontSize: 12, color: 'var(--color-danger-text)' }}>{t('audit.unavailable')}</div>
   if (items.length === 0) return <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('audit.noEntries')}</div>
 
   return (

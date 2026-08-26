@@ -18,6 +18,7 @@ import FilterGroupBlock from './filter/FilterGroupBlock'
 import { useFilterGroupCollapse } from './filter/useFilterGroupCollapse'
 import CountBadge from '@/components/ui/CountBadge'
 import Button from '@/components/ui/Button'
+import { formatDateOnly } from '@/lib/localDate'
 
 // A group's own active-selection count (single-group version of the header sum).
 function groupActiveCount(g: ReportFilterGroup): number {
@@ -88,7 +89,7 @@ export default function ReportFilterSidebar({
     if (g.type === 'global-search') return g.value ? [chip(g.key, `"${g.value}"`, () => g.onChange?.(''))] : []
     if (g.type === 'period')        return g.value ? [chip(g.key, String(g.value), () => g.onChange?.(''))] : []
     if (g.type === 'location')      return g.city ? [chip(g.key, `${g.city}${g.radius ? ` · ${g.radius} km` : ''}`, () => { g.onCityChange?.(''); g.onRadiusChange?.('') })] : []
-    if (g.type === 'date-range')    return (g.from || g.to) ? [chip(g.key, `${g.from ?? '…'} – ${g.to ?? '…'}`, () => { g.onFromChange?.(''); g.onToChange?.('') })] : []
+    if (g.type === 'date-range')    return (g.from || g.to) ? [chip(g.key, `${g.from ? formatDateOnly(g.from) : '…'} – ${g.to ? formatDateOnly(g.to) : '…'}`, () => { g.onFromChange?.(''); g.onToChange?.('') })] : []
     if (g.type === 'geo-radius')    return g.applied ? [chip(g.key, g.applied.label, () => g.onClear?.())] : []
     if (g.type === 'number-range')  return (g.min != null || g.max != null)
       ? [chip(g.key, `${g.min ?? '…'} – ${g.max ?? '…'}`, () => { g.onMinChange?.(null); g.onMaxChange?.(null) })] : []

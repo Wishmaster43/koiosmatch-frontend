@@ -34,6 +34,15 @@ describe('EntityChangelog', () => {
     await waitFor(() => expect(screen.getByText(/geen entries gevonden|no entries/i)).toBeInTheDocument())
   })
 
+  // A failed fetch must render an error, never the same "no entries" state as
+  // a genuinely empty changelog (an audit trail hiding a broken load is a bug).
+  it('renders an error state, not "no entries", when the fetch fails', async () => {
+    vi.mocked(api.get).mockRejectedValue(new Error('network error'))
+    render(<EntityChangelog subjectType="Location" subjectId="loc-1" />)
+    await waitFor(() => expect(screen.getByText(/audit log niet beschikbaar|audit log unavailable/i)).toBeInTheDocument())
+    expect(screen.queryByText(/geen entries gevonden|no entries/i)).not.toBeInTheDocument()
+  })
+
   // F1c: an entity with a dedicated activity route passes it via `endpoint` —
   // the request hits that URL verbatim, without /activity-log params.
   it('requests the dedicated endpoint verbatim when given', async () => {

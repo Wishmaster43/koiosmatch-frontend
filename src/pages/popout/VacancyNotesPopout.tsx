@@ -1,5 +1,5 @@
 /**
- * VacancyNotesPopout — F5-uitbreiding: the vacancy variant of the standalone,
+ * VacancyNotesPopout — F5 extension: the vacancy variant of the standalone,
  * id-driven second-screen notes window. Mirrors vacancies/drawer/NotesTab.tsx
  * (same shared NotesTab, same note-type lookup, same optimistic add) — notes
  * only, no other vacancy tab in this window (mirrors the candidate/customer popouts).

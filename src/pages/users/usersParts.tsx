@@ -229,8 +229,8 @@ export function EditableAvatar({ user: u, onPick }: { user: ManagedUser; onPick?
       </button>
       {open && (
         <>
-          <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
-          <div style={{ position: 'absolute', top: 36, left: 0, zIndex: 20, width: 192,
+          <div className="fixed inset-0" style={{ zIndex: 'var(--z-overlay)' }} onClick={() => setOpen(false)} />
+          <div style={{ position: 'absolute', top: 36, left: 0, zIndex: 'var(--z-popover)', width: 192,
                          background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10,
                          padding: 12, boxShadow: 'var(--shadow-float)' }}>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>

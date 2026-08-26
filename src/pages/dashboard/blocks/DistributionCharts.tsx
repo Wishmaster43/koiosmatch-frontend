@@ -8,8 +8,8 @@
 import { useTranslation } from 'react-i18next'
 import PieChartCard from '@/components/charts/PieChartCard'
 import BarChartCard from '@/components/charts/BarChartCard'
-import LineChartCard from '@/components/charts/LineChartCard'
 import { Panel } from '../DashboardPrimitives'
+import CalloutBox from '@/components/ui/CalloutBox'
 import { fv } from '../dashboardFormat'
 import type { DashOpp } from '@/types/dashboard'
 import type { DashboardViewModel } from '../hooks/useDashboardViewModel'
@@ -38,7 +38,9 @@ export default function DistributionCharts({ vis, statusData, funnelData, recrui
       {vis('chart.oppStage') && <Panel>
         {opp
           ? <PieChartCard title={t('chart.byStage')} data={oppStageData} colors={oppStageData.map(d => d.color) as string[]} onItemClick={(d) => onNavigate?.('opportunities', fv(d) ? { stage: fv(d) } : undefined)} />
-          : <LineChartCard title={t('chart.intakeOverTime')} data={[]} unit={t('common:units.candidates')} />}
+          // Honest "not available" notice — no titled chart faking an empty data series
+          // while /opportunities/stats is unavailable.
+          : <CalloutBox variant="info">{t('chart.oppStageUnavailable')}</CalloutBox>}
       </Panel>}
     </div>
   )

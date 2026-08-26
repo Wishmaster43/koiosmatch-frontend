@@ -183,7 +183,7 @@ export default function AddTaskModal({ onClose, onCreated, onSaved, initial, ext
   // instead of silently carried).
   const [otherLinks, setOtherLinks] = useState<NewLink[]>([])
   // TASKTYPE-ID-1: slug→uuid FK maps, shared with TasksBoard/useTaskBulkActions —
-  // Needed by BOTH create and edit now ( comment).
+  // Needed by BOTH create and edit now.
   const { maps: lookupIds, loading: loadingLookupIds } = useTaskLookupIds()
 
   // Seed sensible defaults once the lookups arrive. Guarded by `|| ` so a value the
@@ -247,7 +247,7 @@ export default function AddTaskModal({ onClose, onCreated, onSaved, initial, ext
       })
     })
     return () => { alive = false }
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- bewust smalle deps: her-runnen op resolvedOpts (eigen setState) zou loopen; de misses-check dedupliceert al tegen de actuele lijsten
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- deliberately narrow deps: re-running on resolvedOpts (its own setState) would loop; the misses-check already dedupes against the current lists
   }, [linkOptions.loading, form.candidateId, form.customerId, form.contactId])
 
   // Edit mode: GET the full task (description/links aren't on the row), then
@@ -277,7 +277,7 @@ export default function AddTaskModal({ onClose, onCreated, onSaved, initial, ext
     }).catch(() => { notifyError(t('common:actionFailed')); onClose() })
       .finally(() => { if (alive) setLoadingTask(false) })
     return () => { alive = false }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentionally keyed on editId/isEdit only; the load is a one-shot per edit target
   }, [editId, isEdit])
 
   const set = (k: keyof TaskForm, v: string) => { setForm(f => ({ ...f, [k]: v })); if (errors[k]) setErrors(e => ({ ...e, [k]: false })) }
@@ -327,7 +327,7 @@ export default function AddTaskModal({ onClose, onCreated, onSaved, initial, ext
   }
 
   // Create — TASKTYPE-ID-1: POSTs the real uuid FKs (type_id/status_id/priority_id),
-  // Resolved from the form's slug via `lookupIds`  comment.
+  // Resolved from the form's slug via `lookupIds`.
   // StoreTaskRequest silently ignores the bare slugs `type`/`status`/`priority`
   // (not declared rules at all), so this used to land on the tenant's DEFAULT
   // status/type no matter what the recruiter picked; `canSubmit` below blocks the
@@ -360,7 +360,7 @@ export default function AddTaskModal({ onClose, onCreated, onSaved, initial, ext
     } finally { setSaving(false) }
   }
 
-  // Edit — PATCH with the update-request's REAL keys ( comment
+  // Edit — PATCH with the update-request's REAL keys (see the create handler above
   // for the slug-vs-uuid rationale). Keys the form doesn't manage (tags, parent_id,
   // custom_fields, location_id) are simply omitted, leaving them untouched server-side.
   const handleUpdate = async () => {

@@ -175,7 +175,7 @@ export default function RichTextAssistBar({ value, onChange, plainText = false, 
     <>
       {/* Dictation — hidden entirely on an unsupported browser, disabled with an
           honest tooltip over plain http; both inherited from the shared button. */}
-      <KoiosVoiceButton onText={appendVoiceText} lang={language} t={t} tone="primary" />
+      <KoiosVoiceButton onText={appendVoiceText} lang={language} t={t} />
 
       {/* Koios assist — its own row under the toolbar, ALWAYS in view once any
           mode is offered (no click-to-expand, mirrors NoteAssistSection 1:1). */}

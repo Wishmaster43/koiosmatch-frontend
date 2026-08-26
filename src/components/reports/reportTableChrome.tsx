@@ -12,7 +12,7 @@ import { useTranslation } from 'react-i18next'
 import type { CSSProperties, ReactNode } from 'react'
 import { Search } from 'lucide-react'
 import SortCaret from '@/components/ui/SortCaret'
-import { captionStyle, bodyTextStyle } from '@/components/ui/typography'
+import { captionStyle, bodyTextStyle, pageTitleStyle } from '@/components/ui/typography'
 import type { SortState } from '@/types/reports'
 
 // Shared header-cell chrome — spreads the Caption identity (11/400/muted) so
@@ -92,8 +92,9 @@ export function ReportTableToolbar({ title, summary, searchValue, onSearchChange
   return (
     <div className="flex items-center justify-between flex-shrink-0" style={{ marginBottom: 16 }}>
       <div>
-        <h1 style={{ fontSize: 18, fontWeight: 600, color: 'var(--text)' }}>{title}</h1>
-        <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 2 }}>{summary}</p>
+        {/* pageTitleStyle raw identity (not a hand-picked size/weight pair, §4 typography) */}
+        <h1 style={{ ...pageTitleStyle, fontSize: 18 }}>{title}</h1>
+        <p style={{ ...captionStyle, marginTop: 2 }}>{summary}</p>
       </div>
       <div className="relative">
         <Search size={14} style={{ position: 'absolute', left: 10, top: '50%',

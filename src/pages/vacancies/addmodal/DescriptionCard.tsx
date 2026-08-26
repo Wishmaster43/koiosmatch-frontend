@@ -1,7 +1,7 @@
 /**
- * DescriptionCard — Beschrijving (punt 9): the shared collapsed-ghost rich-text
+ * DescriptionCard — Beschrijving (point 9): the shared collapsed-ghost rich-text
  * block, the same "+ match" idiom every other create modal uses for its
- * optional prose field. Punt 17: the Koios-AI generate flow sits above the
+ * optional prose field. Point 17: the Koios-AI generate flow sits above the
  * editor — applying a concept seeds the draft AND opens the editor so the
  * recruiter reviews it before Create is even clickable-with-that-text.
  */

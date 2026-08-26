@@ -41,7 +41,7 @@
  * shown (matches "bouw geen UI op de aanname dat er gefilterd wordt" — "never
  * build UI on the assumption that filtering is happening").
  */
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import EditableFieldTable from '@/components/forms/EditableFieldTable'
 import type { FieldRow } from '@/components/forms/EditableFieldTable'
@@ -95,10 +95,11 @@ export default function OverviewTab({ c, onSave }: { c: Customer; onSave?: (valu
   // showed the raw "NL" (no option matched) while edit mode listed "Nederland", and the
   // candidate screens showed the name correctly all along (Danny 02-08). The province
   // list cascades off the same code, which is what useProvinces expects.
-  const countryOptions = getCountryOptions(i18n.language)
-  const countryCode = getCountryOptions(i18n.language).find(o => o.label === (c.country ?? ''))?.value ?? 'NL'
+  // Memoised so the translated option list is not rebuilt on every render.
+  const countryOptions = useMemo(() => getCountryOptions(i18n.language), [i18n.language])
+  const countryCode = countryOptions.find(o => o.label === (c.country ?? ''))?.value ?? 'NL'
   const { provinces } = useProvinces(countryCode)
-  const provinceOptions = provinces.map((p: string) => ({ value: p, label: p }))
+  const provinceOptions = useMemo(() => provinces.map((p: string) => ({ value: p, label: p })), [provinces])
 
   // KVK/BTW-PER-LAND-1 (Danny 08-08, points 10 + 11): the KvK/BTW format check follows
   // THIS customer's country, never a hardcoded Dutch shape, and whether a mismatch
@@ -152,9 +153,8 @@ export default function OverviewTab({ c, onSave }: { c: Customer; onSave?: (valu
         { key: 'postalCode', label: t('locations.detail.postalCode'), type: 'text' },
         { key: 'city', label: t('overview.city'), type: 'text' },
       ] },
-    // Searchable pickers, not free text. Same value format as the location: the country
-    // is stored as a NAME ("Nederland"), not an ISO-2 code — using the candidate's
-    // code-based options here would silently rewrite it on the next save.
+    // Searchable pickers, not free text. Country stores the ISO-2 CODE (see the
+    // comment above countryOptions) — the option value must stay code-based here.
     { key: 'state',   label: t('locations.detail.state'),   type: 'select', options: provinceOptions, group: gAddress },
     { key: 'country', label: t('locations.detail.country'), type: 'select', options: countryOptions, group: gAddress },
 

@@ -6,6 +6,7 @@ import type { ReactNode } from 'react'
 import type { TFunction } from 'i18next'
 import { LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer } from 'recharts'
 import type { ChartDatum, TipProps } from './chartTypes'
+import { captionStyle } from '@/components/ui/typography'
 import ErrorBoundary from '../ui/ErrorBoundary'
 import { useNumberFormat } from '@/lib/formatters'
 
@@ -16,13 +17,13 @@ function LineTooltip({ active, payload, label, onItemClick, unit, t, formatNumbe
   if (!active || !payload?.length) return null
   const value = payload[0].value ?? 0
   return (
-    <div className="px-3 py-2 text-sm bg-white rounded-xl"
-      style={{ border: '1px solid var(--border)', boxShadow: 'var(--shadow-float)' }}>
-      <div className="mb-0.5 font-medium text-gray-500" style={{ fontSize: 11 }}>{label}</div>
+    <div className="px-3 py-2 text-sm rounded-xl"
+      style={{ background: 'var(--surface)', border: '1px solid var(--border)', boxShadow: 'var(--shadow-float)' }}>
+      <div className="mb-0.5 font-medium" style={captionStyle}>{label}</div>
       <div style={{ color: 'var(--color-primary-text)', fontSize: 13, fontWeight: 500 }}>
         {formatValue ? formatValue(value) : `${formatNumber(value)}${unit ? ` ${unit}` : ''}`}
       </div>
-      {onItemClick && <div className="mt-1 text-xs text-gray-300">{t('clickForDetails')}</div>}
+      {onItemClick && <div className="mt-1 text-xs" style={{ color: 'var(--text-muted)' }}>{t('clickForDetails')}</div>}
     </div>
   )
 }

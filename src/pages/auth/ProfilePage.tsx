@@ -2,7 +2,7 @@
  * ProfilePage — the logged-in user's own profile + preferences.
  * Thin container: owns form + avatar state, declares the tab list, and routes
  * each tab to its own component. The header avatar is uploadable. Tabs:
- * Profiel / E-mail / Weergave / WhatsApp Web / Security.
+ * Profile / Email / Display / WhatsApp Web / Security.
  */
 import { useState } from 'react'
 import { useTranslation }      from 'react-i18next'

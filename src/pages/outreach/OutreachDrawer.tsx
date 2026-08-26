@@ -148,8 +148,9 @@ export default function OutreachDrawer({ id, createdAt, archived = false, archiv
     setTargetFilterState(f => (f?.axis === axis && f?.value === value) ? null : { axis, value })
   const onClearFilter = () => setTargetFilterState(null)
 
-  // Tabs are config (§3A) — the call list is the main tab; Stats surfaces the
-  // by_status/by_outcome/by_assignee breakdown (G31); Extra is appended when defined.
+  // Tabs are config (§3A) — the call list is the main tab; Extra (when defined) sits
+  // before Stats, which surfaces the by_status/by_outcome/by_assignee breakdown (G31)
+  // and always stays LAST (canon: statistics closes every drilldown).
   const tabs: EntityTab[] = [
     { id: 'targets', label: t('drawer.tabs.targets'), render: () => (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -165,13 +166,14 @@ export default function OutreachDrawer({ id, createdAt, archived = false, archiv
           filter={targetFilter} onClearFilter={onClearFilter} />
       </div>
     ) },
-    { id: 'stats', label: t('drawer.tabs.stats', { defaultValue: 'Stats' }), render: () => (
-      <CampaignStatsTab campaignId={id} filter={targetFilter} onPick={onPickFilter} onClear={onClearFilter} />
-    ) },
     ...(customFieldDefs.length > 0 ? [{ id: 'extra', label: t('drawer.tabs.extra'), render: () => (
       <CustomFieldsTab entityType="outreach_campaign" values={detail?.custom_fields ?? {}}
         onSave={patch => { if (id) setCustomFields(id, patch) }} />
     ) }] : []),
+    // Stats is always the LAST tab (§3A CANON-CHECKLIST — statistics closes every drilldown).
+    { id: 'stats', label: t('drawer.tabs.stats', { defaultValue: 'Stats' }), render: () => (
+      <CampaignStatsTab campaignId={id} filter={targetFilter} onPick={onPickFilter} onClear={onClearFilter} />
+    ) },
   ]
 
   return (

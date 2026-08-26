@@ -12,6 +12,8 @@ import DepartmentsTable from './DepartmentsTable'
 import PaginationBar from '@/components/ui/PaginationBar'
 import DepartmentDrawer from './DepartmentDrawer'
 import SmKpiStrip from './SmKpiStrip'
+import HeaderSearch from '@/components/ui/HeaderSearch'
+import { useListPageSize } from '@/hooks/useListPageSize'
 import { useSmDepartments } from './hooks/useSmDepartments'
 import type { SmDepartmentRow } from '@/types/shiftmanager'
 
@@ -20,10 +22,11 @@ export default function DepartmentsPage() {
   const { t } = useTranslation('shiftmanager')
   // Data (fetch + transform) lives in the shared hook (§3).
   const { departments } = useSmDepartments()
-  const [search]                      = useState('')
+  const [search,      setSearch]      = useState('')
   const [selected,    setSelected]    = useState<SmDepartmentRow | null>(null)
   const [page,        setPage]        = useState(1)
-  const [pageSize,    setPageSize]    = useState(50)
+  // Shared list page-size: honours the tenant's default_per_page, sticky across navigation (§9).
+  const { pageSize, setPageSize } = useListPageSize('sm.departments')
   const [selStatuses,  setSelStatuses]  = useState<string[]>([])
   const [selCustomers,   setSelCustomers]   = useState<string[]>([])
   const [selLocations,  setSelLocations]  = useState<string[]>([])
@@ -43,7 +46,7 @@ export default function DepartmentsPage() {
   // Assembles the right-panel filter groups (status/customer/location) from the derived option lists.
   const filterGroups = useMemo(() => [
     { key: 'status',  label: t('departmentsPage.filter.status'),
-      options: statusOptions.map(s => ({ value: s, label: s })),
+      options: statusOptions.map(s => ({ value: s, label: t(`departmentsPage.status.${s.toLowerCase()}`, { defaultValue: s }) })),
       selected: selStatuses,  onToggle: toggle(setSelStatuses) },
     { key: 'klant',   label: t('departmentsPage.filter.customer'),
       options: customerOptions.map(k => ({ value: k, label: k })),
@@ -82,7 +85,7 @@ export default function DepartmentsPage() {
   // KPI cards — translated labels; values derived from the live list.
   const kpis = [
     { label: t('departmentsPage.kpi.total'),           value: departments.length,                                       color: 'var(--color-primary-text)',   bg: 'var(--color-primary-bg)',   Icon: Layers },
-    { label: t('departmentsPage.kpi.active'),          value: departments.filter(d => d.status === 'Actief').length,    color: 'var(--color-success-text)',   bg: 'var(--color-success-bg)',   Icon: Layers },
+    { label: t('departmentsPage.kpi.active'),          value: departments.filter(d => d.status === 'active').length,    color: 'var(--color-success-text)',   bg: 'var(--color-success-bg)',   Icon: Layers },
     { label: t('departmentsPage.kpi.employees'),       value: departments.reduce((s,d) => s + (d.employees ?? 0), 0),   color: 'var(--color-warning)',   bg: 'var(--color-warning-bg)',   Icon: Users },
     { label: t('departmentsPage.kpi.linkedCustomers'), value: [...new Set(departments.map(d => d.customer))].length,    color: 'var(--color-secondary)', bg: 'var(--color-secondary-bg)', Icon: Building2 },
   ]
@@ -93,6 +96,11 @@ export default function DepartmentsPage() {
 
         {/* KPI strip — shared SmKpiStrip (§3 consolidation) */}
         <SmKpiStrip kpis={kpis} />
+
+        {/* Toolbar — free-text search only (read-only mirror, no add button); matches the shared spacing spec (§4). */}
+        <div style={{ padding: '0 24px 12px', minHeight: 36, display: 'flex', alignItems: 'center', gap: 10 }}>
+          <HeaderSearch onSearch={setSearch} defaultValue={search} width={300} />
+        </div>
 
         {/* Table — shared DataTable (sticky header, sorting, soft-chip status colours) */}
         <div style={{ flex: 1, overflowY: 'auto', padding: '0 24px 16px' }}>

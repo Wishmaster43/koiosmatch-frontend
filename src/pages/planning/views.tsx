@@ -82,7 +82,7 @@ export function MonthView({ current, shifts, today, locale, onDayClick, onShiftC
       {/* Day headers */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7,1fr)', borderBottom: '1px solid var(--border)' }}>
         {WEEK_DAYS.map(d => (
-          <GroupLabel as="div" style={{ textTransform: 'none', letterSpacing: 0, padding: '8px 0', textAlign: 'center' }}>{d}</GroupLabel>
+          <GroupLabel key={d} as="div" style={{ textTransform: 'none', letterSpacing: 0, padding: '8px 0', textAlign: 'center' }}>{d}</GroupLabel>
         ))}
       </div>
 

@@ -28,7 +28,7 @@ import FloatingPanel from '@/components/ui/FloatingPanel'
 import { modalColumns } from '@/components/ui/modalCards'
 import type { ApiOpportunity, Opportunity } from '@/types/opportunity'
 import type { Id } from '@/types/common'
-import Button from '@/components/ui/Button'
+import ModalFooter from '@/components/ui/ModalFooter'
 
 // 422 field-error keys are snake_case; map them back to this form's field names.
 const API_TO_FORM: Record<string, string> = {
@@ -92,8 +92,10 @@ interface ModalCustomer { id: Id; name: string }
  * an empty/whitespace-only draft is OMITTED from the POST/PATCH body entirely
  * (never sends `description: ''`), a filled one rides as sanitised HTML.
  */
-export default function AddOpportunityModal({ onClose, onCreated, users = [], customers = [], defaultCustomerId, initialLocationId, initialDepartmentId, initialContactId, existing }: {
+export default function AddOpportunityModal({ onClose, onCreated, users = [], customers = [], customersError = false, defaultCustomerId, initialLocationId, initialDepartmentId, initialContactId, existing }: {
   onClose: () => void; onCreated?: (o: Opportunity) => void; users?: ModalUser[]; customers?: ModalCustomer[]
+  // A failed GET /customers must read as an error on the client picker, never as "no customers" (R8).
+  customersError?: boolean
   // Pre-fill the client when opened from a customer's own drawer (Kansen tab) —
   // minimal addition, the picker still shows so the field never silently locks
   // out a correction; keep prop-driven (no hardcoded id) per §3A.
@@ -286,7 +288,7 @@ export default function AddOpportunityModal({ onClose, onCreated, users = [], cu
                 relations + owner (mirrors MatchModal's Relaties card). */}
             <OpportunityGeneralCard t={t}
               title={form.title} onTitleChange={v => set('title', v)} titleError={errors.title} titlePlaceholder={t('modal.titlePlaceholder')}
-              clientId={form.clientId} onClientChange={handleClientChange} customerOptions={customerOptions} clientPicked={!!form.clientId}
+              clientId={form.clientId} onClientChange={handleClientChange} customerOptions={customerOptions} clientPicked={!!form.clientId} customersError={customersError}
               contactId={contactId} onContactChange={setContactId}
               contactOptions={contacts.map(c => ({ value: String(c.id), label: contactOptionLabel(c) }))}
               locationId={locationId} onLocationChange={handleLocationChange}
@@ -329,18 +331,10 @@ export default function AddOpportunityModal({ onClose, onCreated, users = [], cu
           </div>
         )}
 
-        {/* Footer — Button owns the height (sm, 28px) for every text/action button, everywhere. */}
-        <div style={{ padding: '14px 22px', borderTop: '1px solid var(--border)', flexShrink: 0,
-          display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
-          <Button variant="secondary" onClick={onClose}>
-            {t('modal.cancel')}
-          </Button>
-          <Button variant="primary" onClick={handleSubmit} disabled={!canSubmit || saving}>
-            {isEdit
-              ? (saving ? t('modal.saving') : t('modal.save'))
-              : (saving ? t('modal.creating') : t('modal.create'))}
-          </Button>
-        </div>
+        {/* Footer — the shared ModalFooter (§4) owns the layout/height, everywhere. */}
+        <ModalFooter onCancel={onClose} cancelLabel={t('modal.cancel')}
+          onSubmit={handleSubmit} submitLabel={isEdit ? t('modal.save') : t('modal.create')}
+          disabled={!canSubmit} busy={saving} />
     </FloatingPanel>
   )
 }

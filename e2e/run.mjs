@@ -35,7 +35,7 @@ try {
   const res = await fetch(`${API.replace(/\/api$/, '')}/sanctum/csrf-cookie`, { signal: AbortSignal.timeout(8000) })
   if (res.status >= 500) throw new Error(`status ${res.status}`)
 } catch (e) {
-  console.error(`✗ API is NIET bereikbaar (${e?.message}) — start/herstel de backend en run opnieuw.`)
+  console.error(`✗ API is NOT reachable (${e?.message}) — start/restore the backend and run again.`)
   process.exit(2)
 }
 
@@ -59,5 +59,5 @@ for (const [name, fn] of FLOWS) {
 
 await ctx.browser.close()
 const failed = results.filter(r => !r[1])
-console.log(`\n===== SMOKE: ${results.length - failed.length}/${results.length} groen =====`)
+console.log(`\n===== SMOKE: ${results.length - failed.length}/${results.length} green =====`)
 process.exit(failed.length ? 1 : 0)

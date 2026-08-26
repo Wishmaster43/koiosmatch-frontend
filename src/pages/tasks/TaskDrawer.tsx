@@ -188,7 +188,7 @@ export default function TaskDrawer({ task, onClose, expanded, onToggleExpand, on
           avatar={{ initials: initialsOf(task.title, 'T'), soft: true, color: avatarColor }}
           renderTitle={() => editingTitle ? (
             // T1: inline title edit — mirror VacancyDrawer's renderTitle swap.
-            <input autoFocus value={titleDraft} onChange={e => setTitleDraft(e.target.value)}
+            <input autoFocus value={titleDraft} onChange={e => setTitleDraft(e.target.value)} aria-label={t('modal.titleLabel')}
               onKeyDown={e => { if (e.key === 'Enter') saveTitleEdit(); if (e.key === 'Escape') setEditingTitle(false) }}
               // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- an <input> matching the title's own size while editing, not a PageTitle render
               style={{ width: '100%', boxSizing: 'border-box', padding: '6px 10px', fontSize: 15, fontWeight: 700,

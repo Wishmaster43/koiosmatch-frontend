@@ -16,6 +16,7 @@ import FloatingPanel from '@/components/ui/FloatingPanel'
 import Spinner from '@/components/ui/Spinner'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
+import { captionStyle } from '@/components/ui/typography'
 import Button from '@/components/ui/Button'
 import { userDisplayName } from './userRow'
 import type { ManagedUser } from '@/types/api'
@@ -50,7 +51,8 @@ export default function UserTransferDeleteModal({ user, owned, successors, busy,
   // Only the non-zero types come back from the server, so this list is already
   // the exact "what must move" set — rendered as translated, pluralised lines.
   const ownedRows = Object.entries(owned.by_type ?? {})
-  const label = { display: 'block', fontSize: 12, fontWeight: 500, color: 'var(--text-muted)', marginBottom: 5 } as const
+  // Composed from the Caption atom's raw identity (§4 r6) rather than a local style constant.
+  const label = { ...captionStyle, display: 'block', fontWeight: 500, marginBottom: 5 } as const
 
   return (
     <FloatingPanel open onClose={onClose} title={t('delete.title')} ariaLabel={t('delete.title')}

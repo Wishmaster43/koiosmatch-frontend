@@ -11,7 +11,6 @@ import { Edit2, ExternalLink, Save, X } from 'lucide-react'
 import { Field, SelectField, DateField, TextField } from '@/components/forms/fields'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import Avatar from '@/components/ui/Avatar'
-import SoftChip from '@/components/ui/SoftChip'
 import RichTextEditor from '@/components/ui/RichTextEditor'
 import SafeHtml from '@/components/ui/SafeHtml'
 import { GroupLabel } from '@/components/ui/typography'
@@ -267,11 +266,11 @@ export default function DetailsTab({ task, onUpdate, onSubtaskCreated }: {
                 </span>
               ) : <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('bureau')}</span>}
             </Row>
-            {/* TEAM-1: the department chip — the lookup's own colour in the §4
-                soft-tint (SoftChip), mirroring how status/type/priority read. */}
+            {/* TEAM-1: the department, plain value like type/status/priority above
+                (TASK-DISPLAY-DRILL-1 — no chips in the drilldown, colour is a table face). */}
             <Row label={t('details.team')}>
               {task.team
-                ? <SoftChip label={task.team.name} color={task.team.color} />
+                ? plainValue(task.team.name)
                 : <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>—</span>}
             </Row>
             <Row label={t('details.owner')}><span style={{ fontSize: 12, color: 'var(--text)' }}>{task.owner?.name || '—'}</span></Row>

@@ -6,6 +6,7 @@
  * line and actions join into one "; "-separated line instead of a <ul>.
  */
 import type { ConversationAssistActionItem, ConversationAssistResult } from './conversationAssistApi'
+import { formatDateOnly } from '@/lib/localDate'
 
 // Collapse any internal newlines/whitespace — the composer is a single-line input.
 function toSingleLine(text: string): string {
@@ -15,7 +16,8 @@ function toSingleLine(text: string): string {
 // One "; "-joined line: title + type/due-date meta in parentheses, per item.
 function actionsToDraftText(items: ConversationAssistActionItem[], typeLabel: (type: string) => string): string {
   return items.map(it => {
-    const meta = [typeLabel(it.type), it.due_date].filter(Boolean).join(' · ')
+    // DATUM-1: the due date must reach the composer draft as DD-MM-YYYY, not raw ISO.
+    const meta = [typeLabel(it.type), it.due_date ? formatDateOnly(it.due_date) : null].filter(Boolean).join(' · ')
     return meta ? `${it.title} (${meta})` : it.title
   }).join('; ')
 }

@@ -14,7 +14,7 @@
 // overview in the UI (labels go through i18n at the place that shows it).
 export const POPUP_COMMANDS = [
   { keys: 'Escape', command: 'close' },
-  { keys: 'Tab / Shift+Tab', command: 'cycle-focus (binnen de popup)' },
+  { keys: 'Tab / Shift+Tab', command: 'cycle-focus (within the popup)' },
 ] as const
 
 export interface PopupKeyHandlers {

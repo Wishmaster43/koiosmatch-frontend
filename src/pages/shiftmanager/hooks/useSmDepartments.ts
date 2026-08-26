@@ -34,7 +34,9 @@ export function useSmDepartments(): { departments: SmDepartmentRow[] } {
         location:   (typeof d.location === 'object' ? d.location?.name : d.location) ?? '',
         city:       d.city ?? '',
         costCenter: d.cost_center ?? '',
-        status:     d.status === 'active' ? 'Actief' : d.status === 'inactive' ? 'Inactief' : (d.status ?? 'Actief'),
+        // Stable English slug — the raw server status, or 'active' as the sane
+        // default; render sites translate it (departmentsPage.status.<slug>).
+        status:     d.status ?? 'active',
         employees:  d.employee_count ?? 0,
         shifts:     d.shift_count ?? 0,
       })) as SmDepartmentRow[]

@@ -227,14 +227,10 @@ interface KoiosVoiceButtonProps {
   // Omit to follow the active UI locale (the chat composer's original,
   // unchanged behaviour) — NoteComposer passes its OWN language-picker value.
   lang?: string
-  // Idle colour: 'muted' (chat composer default) or 'primary' — the note editor
-  // toolbar wants the tenant accent (Danny 08-08 "met een tenant kleur").
-  // Listening always shows the danger recording tint, whatever the tone.
-  tone?: 'muted' | 'primary'
 }
 
-// `tone` intentionally dropped from the destructure: the mic is a trio chip in
-// every host now (Danny 20-08); the prop stays in the interface for API compat.
+// The mic is a trio chip in every host now (Danny 20-08) and always uses the
+// fixed idleColor below — no `tone` prop, removed as dead API surface.
 export default function KoiosVoiceButton({ onText, t, lang }: KoiosVoiceButtonProps) {
   const { supported, insecureContext, listening, denied, toggle } = useSpeechDictation({ onText, lang })
 

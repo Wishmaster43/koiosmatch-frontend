@@ -76,11 +76,3 @@ export type TargetsAssignBody = TargetSelection & AssigneeAxes
 // lists for an honest result summary.
 export const assignTargets = (id: string, body: TargetsAssignBody) =>
   api.post(`/outreach-campaigns/${id}/targets/assign`, body).then((r) => r.data)
-
-// Same selection/axes contract, on the sibling `/targets/owner` route (backend
-// delivered it alongside `/assign` today). Out of scope for the current
-// divide-the-call-list UI (BELLIJST-ASSIGN-2 only wires `/assign`) — kept here so
-// the exact contract is in one place and a future "set owner" affordance never
-// re-derives the shape.
-export const setTargetsOwner = (id: string, body: TargetsAssignBody) =>
-  api.post(`/outreach-campaigns/${id}/targets/owner`, body).then((r) => r.data)

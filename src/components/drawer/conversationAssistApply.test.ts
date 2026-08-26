@@ -31,7 +31,7 @@ describe('formatAssistResultForDraft · actions', () => {
         { title: 'Stuur bevestiging', type: 'whatsapp', due_date: null, note_excerpt: null },
       ],
     }
-    expect(formatAssistResultForDraft(result, typeLabel)).toBe('Bel terug (TASK · 2026-08-10); Stuur bevestiging (WHATSAPP)')
+    expect(formatAssistResultForDraft(result, typeLabel)).toBe('Bel terug (TASK · 10-08-2026); Stuur bevestiging (WHATSAPP)')
   })
 
   it('returns an empty string for zero items', () => {
