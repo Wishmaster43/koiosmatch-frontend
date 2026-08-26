@@ -17,6 +17,7 @@ import type { Candidate } from '@/types/candidate'
 import { isInsideDropdownPortal } from '@/lib/useDropdownPlacement'
 import { Z } from '@/lib/zIndexScale'
 
+// Presentational pool chips (see the module doc above): the fetch/optimistic membership writes live in useCandidatePools, this file only renders and dispatches toggles.
 export default function PoolsSection({ c }: { c: Candidate }) {
   const { t } = useTranslation('candidates')
   const { pools, allPools, has, toggle } = useCandidatePools(c)

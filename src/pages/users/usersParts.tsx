@@ -95,6 +95,8 @@ export function RoleSelector({ user: u, availableRoles, onChanged }: {
     .map(roleName)
     .find(n => n && n !== 'super_admin') ?? null
 
+  // Replaces the user's role set with this single role, via the same PUT
+  // /users/{id}/roles route UserRolesModal uses.
   const assign = async (roleId: string | number) => {
     setSaving(true)
     setOpen(false)

@@ -26,6 +26,8 @@ const CATEGORY_ORDER = ['Alle', 'Triggers', 'Kandidaten', 'Sollicitaties', 'Vaca
 // they stay exempt from the executability gate below regardless of the catalog.
 const TRIGGER_CATEGORY = 'Triggers'
 
+// Searchable, categorised, app/module-gated grid of every workflow module;
+// picking a tile inserts it after the given edge (or appends it) and closes.
 export default function ModulePicker({ insertAfterEdgeId, onSelect, onClose }: {
   insertAfterEdgeId: string | null
   onSelect: (type: string, edgeId: string | null) => void
@@ -66,6 +68,7 @@ export default function ModulePicker({ insertAfterEdgeId, onSelect, onClose }: {
   // unwraps to a couple of stray keys is corruption, not signal — treating it as
   // known would strip ~67 of 68 modules and mark every saved node.
   const catalogKnown = Object.keys(catalog).length >= 5
+  // Whether the engine can actually run this module type (see the PICKER-INTERSECT comment above).
   const isExecutable = (type: string, category?: string) => {
     if (category === TRIGGER_CATEGORY) return true
     if (!catalogKnown) return true

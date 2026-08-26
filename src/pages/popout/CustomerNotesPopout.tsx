@@ -38,6 +38,8 @@ function linkChip(label: string) {
   )
 }
 
+// Standalone second-screen customer notes window (see file docblock above) —
+// a notes-only simplification of the drawer's notes sub-tab, read-parity intact.
 export default function CustomerNotesPopout({ id }: { id: string | undefined }) {
   const { t } = useTranslation('customers')
   const { customer, loading, error, reload } = useCustomerLite(id)

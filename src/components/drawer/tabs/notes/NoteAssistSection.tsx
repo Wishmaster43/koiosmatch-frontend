@@ -73,6 +73,8 @@ const MODES: { mode: AssistCombinedMode; icon: typeof Wand2 }[] = [
   { mode: 'summarize_process', icon: AlignLeft },
 ]
 
+// Runs Koios's combined process/summarize assist over the note body; the resulting
+// text and action-items halves are applied/discarded independently (§0B: the assistant finishes the loop).
 export default function NoteAssistSection({ body, onApply, language, onItems, knownItems }: NoteAssistSectionProps) {
   const { t } = useTranslation('common')
   const { mode, status, result, errorMessage, tone, run, discard } = useNoteAssist(language)
@@ -91,6 +93,8 @@ export default function NoteAssistSection({ body, onApply, language, onItems, kn
   // lands, regardless of the text half's Overnemen/Verwerpen fate. Guarded
   // against re-firing on an unrelated re-render (same result object).
   const handedRef = useRef<unknown>(null)
+  // Hand the items half to the host as soon as it lands, independent of the text
+  // half's Overnemen/Verwerpen fate; guarded so an unrelated re-render never re-fires on the same result.
   useEffect(() => {
     if (status === 'success' && result && result.kind === 'combined' && handedRef.current !== result) {
       handedRef.current = result

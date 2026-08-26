@@ -11,9 +11,12 @@ import { EVENT_GROUPS, ALL_EVENTS, actionOf } from './webhookEvents'
 import { PermissionToggle } from '@/pages/settings/components/SettingsControls'
 import Button from '@/components/ui/Button'
 
+// Controlled event-picker for a webhook subscription: grouped pill toggles with
+// search and per-group/global select-all (see file docblock above).
 export default function EventCatalog({ value = [], onChange }) {
   const { t } = useTranslation('settings')
   const [query, setQuery] = useState('')
+  // Set form of the controlled `value` for O(1) membership checks below.
   const selected = useMemo(() => new Set(value), [value])
 
   const groupLabel  = (g) => t(`webhooks.events.groups.${g}`)
@@ -21,6 +24,8 @@ export default function EventCatalog({ value = [], onChange }) {
 
   // Filter events by raw key, group label or action label.
   const q = query.trim().toLowerCase()
+  // Groups narrowed to the events matching the search query; a group with no
+  // matching events drops out entirely rather than rendering empty.
   const groups = useMemo(() => EVENT_GROUPS
     .map(({ group, events }) => ({
       group,

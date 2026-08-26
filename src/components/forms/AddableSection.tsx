@@ -71,6 +71,7 @@ interface AddableSectionProps {
   onReorder?: (nextItems: RelItem[]) => void
 }
 
+// See the file's top doc above for the add/edit/remove/reorder contract this shared section implements.
 export default function AddableSection({
   title, items = [], fields, onAdd, onEdit, onRemove, emptyText, renderItem, layout = 'list', addLabel, editInitial, renderAddButton, order, headerExtra,
   dragEnabled = false, onReorder,

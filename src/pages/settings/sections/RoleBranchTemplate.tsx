@@ -13,6 +13,7 @@ import Spinner from '@/components/ui/Spinner'
 import { useLocations } from '@/lib/useLocations'
 import type { Role, UpdateBranchesBody } from './rolesTypes'
 
+// Edits one role's branch TEMPLATE only; existing users keep whatever set they already have, this never retroactively changes their branches (see file header).
 export function RoleBranchTemplate({ roleId }: { roleId: Role['id'] }) {
   const { t } = useTranslation('settings')
   const locationOptions = useLocations()

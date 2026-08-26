@@ -80,6 +80,8 @@ function stripTreePrefix(column: string): string | null {
   return null
 }
 
+// Resolves a column to its label reference: an entity-specific override first, then
+// the shared default, then (via stripTreePrefix) its base column's label for a tree-file prefixed column.
 function labelRefFor(entity: string, column: string): FieldLabelRef {
   const override = ENTITY_OVERRIDES[entity]?.[column]
   if (override) return override

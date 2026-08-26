@@ -52,6 +52,7 @@ import QuickViewToggle from '@/components/ui/QuickViewToggle'
 
 interface RecruiterOption { value: string; label: string }
 
+// The call list itself (see the module doc above): presentational, all data/mutations come from useOutreachDetail via the drawer.
 export default function TargetsTab({ targets, loading, error, onSetStatus, onSetOutcome,
   onSetNote, campaignId = '', onApplyTargetNote, recruiters = [], onAssignTargets, filter = null, onClearFilter }: {
   targets: OutreachTarget[]

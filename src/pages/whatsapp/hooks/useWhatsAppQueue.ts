@@ -23,6 +23,8 @@ export const isBatchActive = (b: WaQueueBatch): boolean =>
 export const sumBatches = (batches: WaQueueBatch[], field: 'queued' | 'sent' | 'skipped' | 'failed'): number =>
   batches.reduce((sum, b) => sum + (b[field] ?? 0), 0)
 
+// Loads today's WABA batch queue and polls every 5s only while a batch is still
+// active, stopping the instant everything has finished (see file doc).
 export function useWhatsAppQueue() {
   const [batches,      setBatches]      = useState<WaQueueBatch[]>([])
   const [loading,      setLoading]      = useState(true)

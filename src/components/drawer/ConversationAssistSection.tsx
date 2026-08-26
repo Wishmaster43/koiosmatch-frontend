@@ -45,6 +45,7 @@ const MODES: { mode: ConversationAssistMode; icon: typeof AlignLeft }[] = [
   { mode: 'actions', icon: ListChecks },
 ]
 
+// The Koios assist panel over a WhatsApp thread's own messages.
 export default function ConversationAssistSection({ conversationId, hasMessages, onApply, language }: ConversationAssistSectionProps) {
   const { t } = useTranslation('candidates')
   const { mode, status, result, errorMessage, tone, run, discard } = useConversationAssist(language)

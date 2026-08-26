@@ -87,6 +87,7 @@ const mapContractTypeOptions = (res: AxiosResponse): ContractTypeOption[] | null
   return options.length ? options : null
 }
 
+// Cached tenant contract-types lookup (see the module doc above for the full slug/label/i18n contract and the known LOOKUP-I18N-1 residual risk in `types`).
 export function useContractTypes() {
   const { t } = useTranslation('common')
   // One cached GET /contract-types per session; the seed list stands in only while

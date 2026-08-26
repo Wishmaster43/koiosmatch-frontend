@@ -183,7 +183,7 @@ export default function AddTaskModal({ onClose, onCreated, onSaved, initial, ext
   // instead of silently carried).
   const [otherLinks, setOtherLinks] = useState<NewLink[]>([])
   // TASKTYPE-ID-1: slug→uuid FK maps, shared with TasksBoard/useTaskBulkActions —
-  // needed by BOTH create and edit now (see the file header comment).
+  // Needed by BOTH create and edit now ( comment).
   const { maps: lookupIds, loading: loadingLookupIds } = useTaskLookupIds()
 
   // Seed sensible defaults once the lookups arrive. Guarded by `|| ` so a value the
@@ -216,9 +216,12 @@ export default function AddTaskModal({ onClose, onCreated, onSaved, initial, ext
   // list's 200-row cap used to render its RAW uuid as the label. Resolve the name by
   // id and inject it as an option, so the picker always shows a name.
   const [resolvedOpts, setResolvedOpts] = useState<Record<string, { value: string; label: string }[]>>({})
+  // Resolve any pre-filled candidate/customer/contact id that fell outside the
+  // picker's own option list (see the comment above) by fetching its name directly.
   useEffect(() => {
     if (linkOptions.loading) return
     const jobs: Array<[key: 'candidates' | 'customers' | 'contacts', id: string, url: string]> = []
+    // Queue a lookup job for one field only when its id is set and unresolved.
     const misses = (key: 'candidates' | 'customers' | 'contacts', id: string, url: string) => {
       if (!id) return
       const known = [...linkOptions[key], ...(resolvedOpts[key] ?? [])].some(o => String(o.value) === String(id))
@@ -324,7 +327,7 @@ export default function AddTaskModal({ onClose, onCreated, onSaved, initial, ext
   }
 
   // Create — TASKTYPE-ID-1: POSTs the real uuid FKs (type_id/status_id/priority_id),
-  // resolved from the form's slug via `lookupIds` — see the file header comment.
+  // Resolved from the form's slug via `lookupIds`  comment.
   // StoreTaskRequest silently ignores the bare slugs `type`/`status`/`priority`
   // (not declared rules at all), so this used to land on the tenant's DEFAULT
   // status/type no matter what the recruiter picked; `canSubmit` below blocks the
@@ -357,7 +360,7 @@ export default function AddTaskModal({ onClose, onCreated, onSaved, initial, ext
     } finally { setSaving(false) }
   }
 
-  // Edit — PATCH with the update-request's REAL keys (see the file header comment
+  // Edit — PATCH with the update-request's REAL keys ( comment
   // for the slug-vs-uuid rationale). Keys the form doesn't manage (tags, parent_id,
   // custom_fields, location_id) are simply omitted, leaving them untouched server-side.
   const handleUpdate = async () => {

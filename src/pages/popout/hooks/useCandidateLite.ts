@@ -38,6 +38,9 @@ const nameOf = (c: RawCandidateLite): string =>
   || [c.firstname, c.lastname].filter(Boolean).join(' ')
   || [c.first_name, c.last_name].filter(Boolean).join(' ') || '?'
 
+// Keys the query by id so the popout refetches per candidate; `enabled` skips
+// the request until an id actually exists (e.g. before the window's `hello`
+// handshake resolves one).
 export function useCandidateLite(id: string | undefined) {
   const { data: candidate = null, isLoading: loading, isError: error, refetch: reload } = useQuery({
     queryKey: ['candidates', id, 'lite'],

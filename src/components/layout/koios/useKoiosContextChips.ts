@@ -35,6 +35,7 @@ import type { KoiosContextRef } from '@/types/koios'
 // the SAME page (not only browser back/forward) updates the ambient ref too.
 function useCurrentHash(): string {
   const [hash, setHash] = useState(() => window.location.hash)
+  // Subscribes to hashchange and popstate so the ambient ref updates on an in-page drawer open/close, not only on browser navigation.
   useEffect(() => {
     const onChange = () => setHash(window.location.hash)
     window.addEventListener('hashchange', onChange)
@@ -57,6 +58,7 @@ export interface KoiosContextChips {
   dismissSelection: () => void
 }
 
+// See the file's top doc above for the two ambient/selection chips this hook derives and their dismiss semantics.
 export function useKoiosContextChips(): KoiosContextChips {
   const { t } = useTranslation('common')
   const hash = useCurrentHash()

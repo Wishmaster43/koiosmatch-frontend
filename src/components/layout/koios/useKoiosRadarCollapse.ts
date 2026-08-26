@@ -21,6 +21,7 @@ function readCollapsed(): boolean {
   }
 }
 
+// Persisted open/closed toggle for the KoiosRadar card (see the module doc above); read/write both degrade to the default (open) on any storage failure.
 export function useKoiosRadarCollapse() {
   const [collapsed, setCollapsed] = useState<boolean>(readCollapsed)
 

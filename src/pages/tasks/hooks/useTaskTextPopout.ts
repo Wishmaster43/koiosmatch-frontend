@@ -25,6 +25,7 @@ export function useTaskTextLite(id: string | undefined) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
 
+  // Fetches the task identity fields the popout needs; resolves to an honest error state on failure rather than leaving the window blank forever.
   const load = useCallback(() => {
     if (!id) { setLoading(false); return }
     setLoading(true); setError(false)
@@ -39,6 +40,7 @@ export function useTaskTextLite(id: string | undefined) {
       .finally(() => setLoading(false))
   }, [id])
 
+  // Loads once on mount/id-change via the stable `load` callback above.
   useEffect(() => { load() }, [load])
   return { task, loading, error, reload: load }
 }

@@ -58,13 +58,14 @@ const mapPhases = (res: AxiosResponse): CustomerPhaseOption[] | null => {
   }))
 }
 
+// The customer-phase tenant lookup, translating seeded defaults into the user language while a tenant's own value stays exactly as typed.
 export function useCustomerPhases() {
   const { t } = useTranslation('common')
   const { data: rawPhases, loading } = useCachedLookup('/customer-phases', mapPhases, DEFAULT_CUSTOMER_PHASES)
   // Seeded defaults render in the user language; a tenant value stays as typed (LOOKUP-I18N-1).
   const phases = useMemo(() => translateSeedList(t, 'customerPhases', rawPhases), [rawPhases, t])
 
-  // slug → row, with a neutral fallback so an unknown/retired phase still renders.
+  // slug → row, with a neutral fallback so an unknown/retired phase still renders
   // useCallback: consumers hang this in memo deps (mirrors useGenders' colorOf).
   const phaseMeta = useCallback((v?: string | null): CustomerPhaseOption => (
     phases.find(p => p.value === v)

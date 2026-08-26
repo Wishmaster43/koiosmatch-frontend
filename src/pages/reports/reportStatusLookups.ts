@@ -49,6 +49,7 @@ export function useTaskTypeIdOptions(): IdLookupOption[] {
   return data
 }
 
+// Task-priority options keyed by raw uuid id, matching the tasks report's own id-keyed filter vocabulary (see the comment above).
 export function useTaskPriorityIdOptions(): IdLookupOption[] {
   const { data } = useCachedLookup('/task-priorities', mapIdOptions, EMPTY_ID_OPTIONS)
   return data

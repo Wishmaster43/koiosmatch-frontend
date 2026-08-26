@@ -10,7 +10,7 @@ import RadiusMapPanel, { type MapPoint } from '@/components/map/RadiusMapPanel'
 import { toCoord } from '@/lib/coords'
 import type { Id } from '@/types/common'
 
-// Minimal row shape — the settings section passes raw API rows (host file is .jsx).
+// Minimal row shape — the settings section passes raw API rows (host file is .jsx)
 // lat/lng are deliberately `unknown`: the API sends DECIMALs as STRINGS, so typing
 // them as number would be a lie the compiler then helps enforce (§10). toCoord below
 // is the one place that coerces them.
@@ -24,6 +24,7 @@ function distanceKm(a: { lat: number; lng: number }, b: { lat: number; lng: numb
   return 2 * 6371 * Math.asin(Math.sqrt(h))
 }
 
+// Radius map of the tenant's own office network; already-loaded rows are filtered locally (haversine), so no extra server round-trip is needed (see file header).
 export default function LocationsMapView({ locations }: { locations: LocationRow[] }) {
   const { t } = useTranslation('settings')
 

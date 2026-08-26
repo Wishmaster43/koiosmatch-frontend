@@ -16,6 +16,8 @@ import { interactive } from '@/lib/a11y'
 import type { ActivityByOwnerRow } from '@/types/dashboard'
 import type { FeedTileContext } from '../feedTileKit'
 
+// Sales activity-per-owner tile (see file docblock above); a zero-activity row
+// still renders, only the null-owner row stays unclickable (nothing to filter on).
 export default function ActivityByOwnerList({ rows, onNavigate }: {
   rows: ActivityByOwnerRow[]
   onNavigate?: FeedTileContext['onNavigate']

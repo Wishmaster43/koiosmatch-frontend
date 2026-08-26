@@ -38,6 +38,8 @@ interface Props {
   onResolved: () => void
 }
 
+// Blocks archive/prullenbak while a live application or active match still
+// hangs on the candidate(s); "resolve all" walks each blocker before proceeding.
 export default function ArchiveGuardModal({ mode, candidateName, aggregate, applications: initialApps, matches: initialMatches, onClose, onResolved }: Props) {
   const { t } = useTranslation(['candidates', 'common'])
   const [applications, setApplications] = useState(initialApps)

@@ -61,10 +61,13 @@ export const CUSTOMER_FILTERABLE_REPORT_IDS = ['vacancies', 'applications', 'opp
 // location_id[] from its own rule set (ReportController.php panelFilterRulesExcept).
 const NO_STATUS_BRANCH_REPORT_IDS = ['whatsapp'] as const
 
+// True when the report's own segmentQuery() reads panel filters at all (also
+// narrows the type to the FilterableReportId union for callers below).
 export function isFilterableReport(reportId: string | undefined): reportId is FilterableReportId {
   return !!reportId && (FILTERABLE_REPORT_IDS as readonly string[]).includes(reportId)
 }
 
+// True only for the reports whose backing table carries a customer/client FK.
 function acceptsCustomerFilter(reportId: string | undefined): boolean {
   return !!reportId && (CUSTOMER_FILTERABLE_REPORT_IDS as readonly string[]).includes(reportId)
 }

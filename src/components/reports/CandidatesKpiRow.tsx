@@ -16,6 +16,7 @@ const count = (candidates: ReportCandidate[], status: string) =>
   candidates.filter(c => (c.status || 'onbekend').toLowerCase() === status).length
 
 
+// Active candidates with a planned shift still in the future.
 function calcGepland(candidates: ReportCandidate[]) {
   return candidates.filter(c => {
     if ((c.status || '').toLowerCase() !== 'actief') return false
@@ -23,6 +24,8 @@ function calcGepland(candidates: ReportCandidate[]) {
   })
 }
 
+// Compares this month's new-registration count against the average of every
+// other month present, so the trend KPI can show a real over/under-average delta.
 function calcMonthStats(candidates: ReportCandidate[]) {
   const now          = new Date()
   const currentMonth = now.getMonth()
@@ -48,6 +51,7 @@ function calcMonthStats(candidates: ReportCandidate[]) {
   return { currentMonthCount, avg, delta }
 }
 
+// Renders the KPI card row above the candidates report.
 export default function CandidatesKpiRow({ candidates = [], loading = false, onDrillDown, onStatusFilter }: {
   candidates?: ReportCandidate[]; loading?: boolean
   onDrillDown?: (label: string, items: ReportCandidate[]) => void

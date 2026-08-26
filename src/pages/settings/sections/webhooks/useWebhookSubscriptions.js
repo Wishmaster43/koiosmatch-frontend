@@ -5,6 +5,8 @@
 import { useState, useEffect, useCallback } from 'react'
 import { listSubscriptions } from './webhooksApi'
 
+// Outgoing-webhook list + optimistic mutations (see file docblock above),
+// mirroring useApiKeys so list/detail views stay in sync.
 export function useWebhookSubscriptions() {
   const [subs, setSubs]       = useState([])
   const [loading, setLoading] = useState(true)

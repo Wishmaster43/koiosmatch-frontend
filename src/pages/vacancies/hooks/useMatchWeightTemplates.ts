@@ -24,6 +24,8 @@ interface ApiTemplate {
   linked_vacancies_count?: number
 }
 
+// Maps the API's snake_case rows to the camelCase shape the template picker
+// expects, defaulting every field so a malformed row never crashes the picker.
 export function useMatchWeightTemplates(): { templates: MatchWeightTemplate[]; loading: boolean; error: boolean } {
   const { data, isLoading, isError } = useQuery({
     queryKey: ['match-weight-templates'],

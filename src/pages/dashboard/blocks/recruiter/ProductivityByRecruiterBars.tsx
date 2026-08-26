@@ -11,6 +11,7 @@ import { Panel } from '@/pages/dashboard/DashboardPrimitives'
 import type { ProductivityByRecruiterRow } from '@/types/dashboard'
 import type { FeedTileContext } from '../feedTileKit'
 
+// Recruitment-manager work-feed tile (see the module doc above): renders nothing when there are no rows, and a bar click filters candidates by that recruiter as owner.
 export default function ProductivityByRecruiterBars({ rows, onNavigate }: {
   rows: ProductivityByRecruiterRow[]
   onNavigate?: FeedTileContext['onNavigate']

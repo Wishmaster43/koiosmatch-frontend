@@ -120,6 +120,8 @@ interface Props {
   close: () => void
 }
 
+// The location drill-down: its own field editing, department/contact sub-sections,
+// merge and prev/next paging through the caller's filtered row set.
 export default function LocationDetail({
   location: l, customerId, customerName, locations, departments, contacts, statuses, departmentStatuses, contactStatuses, canLinkBackoffice = false,
   onSave, onDelete, onAddDepartment, onUpdateDepartment, onRemoveDepartment, onAddContact, onUpdateContact, onRemoveContact,

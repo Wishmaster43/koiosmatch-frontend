@@ -38,6 +38,8 @@ export interface ReportCompareEnvelope {
   [key: string]: unknown
 }
 
+// Fetches a report's current-vs-previous-period comparison envelope (see the
+// ReportCompareEnvelope doc comment above for its shape-agnostic payload).
 export function useReportCompare(
   slug: CompareSlug | null,
   from: string | undefined,

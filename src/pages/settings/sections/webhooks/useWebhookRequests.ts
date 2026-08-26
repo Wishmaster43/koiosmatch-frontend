@@ -18,6 +18,7 @@ interface RequestsResult {
 
 const EMPTY: RequestsResult = { rows: [], total: 0, page: 1, lastPage: 1, perPage: 50 }
 
+// Server-paginated request log for one webhook (see file docblock above).
 export function useWebhookRequests(webhookId: string | number | null) {
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(50)
@@ -37,6 +38,8 @@ export function useWebhookRequests(webhookId: string | number | null) {
       .catch(() => { if (aliveRef.current) setPhase('error') })
   }, [webhookId, page, pageSize])
 
+  // Re-arms the alive-guard in effect SETUP and re-runs the fetch whenever `load`'s
+  // identity changes (webhook/page/pageSize), so a stale response is dropped.
   useEffect(() => {
     aliveRef.current = true
     load()

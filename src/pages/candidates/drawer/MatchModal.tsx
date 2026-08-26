@@ -81,6 +81,8 @@ import { cardHead, cardBox } from '@/components/ui/modalCards'
 import type { Id } from '@/types/common'
 import Button from '@/components/ui/Button'
 
+// Thin container wiring useMatchForm's state/submit to the shared drawer chrome
+// and the four titled card sections (Relaties/Contract/Financieel/Opmerkingen).
 export default function MatchModal({
   candidateId: fixedCandidateId, editMatchId, onClose, onCreated,
   initialCustomerId, initialCustomerLocationId, initialCustomerDepartmentId,

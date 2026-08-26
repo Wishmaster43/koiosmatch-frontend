@@ -25,6 +25,7 @@ interface BranchesCardProps {
   locations: Array<{ value: Id; label: string }>
 }
 
+// Add-candidate modal card: multi-select branch/location picker for the new candidate.
 export default function BranchesCard({ branchIds, setBranchIds, locations }: BranchesCardProps) {
   const { t } = useTranslation(['candidates', 'common'])
   return (

@@ -31,6 +31,7 @@ import { useTranslation } from 'react-i18next'
 import SubTabBar from '@/components/drawer/SubTabBar'
 import StatusListEditor from './StatusListEditor'
 
+// See the file's top doc above; one component, four sub-tabs, replacing the previously missing editors for these lookups.
 export default function OpportunityLookupsSettings() {
   const { t } = useTranslation('settings')
   const [activeTab, setActiveTab] = useState('stages')

@@ -37,6 +37,8 @@ import { useApplicationSources } from '@/lib/useApplicationSources'
 import { useConfirm } from '@/hooks/useConfirm'
 import FreeEntryMismatchDialog, { mismatchesFromError } from '../components/FreeEntryMismatchDialog'
 
+// Settings screen for the acquisition-source lookup and its free-entry toggle; see
+// the module doc comment above for why the toggle persists through its own dedicated route.
 export default function ApplicationSourcesSettings() {
   const { t } = useTranslation('settings')
   const { allowFreeEntry, invalidate } = useApplicationSources()
@@ -56,6 +58,8 @@ export default function ApplicationSourcesSettings() {
   // use) surfaces the server's own worklist message instead of silently no-oping.
   const onToggle = (next) => {
     if (busy) return
+    // Actually persist the toggle; a strict-tightening 409 surfaces the still-in-use
+    // values instead of failing silently.
     const persist = async () => {
       setBusy(true)
       setOverride(next)

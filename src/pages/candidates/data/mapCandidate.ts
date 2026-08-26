@@ -32,6 +32,7 @@ const dateVal = (v: unknown): number => {
 const byNewest = <T>(list: T[], getKey: (x: T) => number): T[] =>
   [...list].sort((a, b) => getKey(b) - getKey(a))
 
+// See the file's top doc above; the one place raw API fields become the candidate shape the UI works with.
 export function mapCandidate(c: ApiCandidate): Candidate {
   const name = c.name || c.full_name
     || [c.firstname, c.lastname].filter(Boolean).join(' ')

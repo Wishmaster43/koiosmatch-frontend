@@ -58,6 +58,7 @@ export function formatPercent(value: NumberInput, locale: string = 'nl-NL'): str
   return `${new Intl.NumberFormat(locale, { maximumFractionDigits: 1 }).format(n)}%`
 }
 
+// A 0-1 ratio rendered as a percentage; null (nothing measured yet, zero denominator) stays a dash.
 export function formatRatio(value: NumberInput, locale: string = 'nl-NL'): string {
   const n = toFiniteNumber(value)
   return n === null ? '—' : formatPercent(n * 100, locale)

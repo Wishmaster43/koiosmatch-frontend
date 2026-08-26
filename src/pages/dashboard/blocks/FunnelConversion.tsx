@@ -8,6 +8,8 @@ import { useTranslation } from 'react-i18next'
 import { interactive } from '@/lib/a11y'
 import type { ChartDatum } from '@/components/charts/chartTypes'
 
+// Funnel stages in order with count/% of top-of-funnel/drop-off vs the previous
+// stage, fully derived client-side; a stage click deep-links into Applications.
 export default function FunnelConversion({ data, onStageClick }: {
   data: ChartDatum[]
   onStageClick?: (filterValue: unknown) => void

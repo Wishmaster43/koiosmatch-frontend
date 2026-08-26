@@ -18,6 +18,7 @@ import type { FlavorKey, KoiosPackageEntry, KoiosModelsAdminData } from './types
 
 const card = { border: '1px solid var(--border)', borderRadius: 10, padding: 16, marginBottom: 14, background: 'var(--surface)' }
 
+// Per-package flavour toggles + effort ceiling editor.
 export default function PackagesCard({ data, onSaved }: { data: KoiosModelsAdminData; onSaved: (patch: Partial<KoiosModelsAdminData>) => void }) {
   const { t } = useTranslation('settings')
   const [draft, setDraft] = useState<Record<string, KoiosPackageEntry>>(data.packages)
@@ -29,6 +30,7 @@ export default function PackagesCard({ data, onSaved }: { data: KoiosModelsAdmin
   const effortOptions = EFFORT_LEVELS.map(e => ({ value: e, label: t(`koiosModelsAdmin.effortLevel.${e}`) }))
   const packageKeys = Object.keys(data.packages)
 
+  // Flips one flavour's membership in a package's allowed set, in local draft state.
   const toggleFlavor = (pkg: string, flavor: FlavorKey) => {
     setDraft(d => {
       const current = d[pkg].allowed_flavors
@@ -37,6 +39,7 @@ export default function PackagesCard({ data, onSaved }: { data: KoiosModelsAdmin
     })
   }
 
+  // Persists the draft package config and adopts the server's own patched copy.
   const save = async () => {
     setSaving(true); setError(null)
     try {

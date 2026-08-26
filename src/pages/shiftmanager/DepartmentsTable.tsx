@@ -23,6 +23,7 @@ const numCell = (n?: number) => (
   <span style={{ fontWeight: (n ?? 0) > 0 ? 600 : 400, color: (n ?? 0) > 0 ? 'var(--text)' : 'var(--text-muted)' }}>{n ?? 0}</span>
 )
 
+// Declares only columns and hands them to the shared DataTable, mirroring CustomersTable/CandidatesTable (see file header).
 export default function DepartmentsTable({ rows, loading, selectedId, onSelect }: {
   rows: SmDepartmentRow[]
   loading?: boolean

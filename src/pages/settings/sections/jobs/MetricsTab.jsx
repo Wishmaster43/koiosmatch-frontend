@@ -40,11 +40,13 @@ function MetricsTable({ rows, nameHeader, t }) {
   )
 }
 
+// Polls Horizon's per-job/per-queue throughput snapshot every 15s while the tab is visible (see the module doc above for what's actually measured).
 export default function MetricsTab() {
   const { t } = useTranslation('settings')
   const [metrics, setMetrics] = useState({ jobs: [], queues: [] })
   const [phase, setPhase] = useState('loading')
 
+  // Refetches the snapshot; keeps the phase at 'ready' during a background poll so the table doesn't flash back to a loading state on every refresh.
   const load = useCallback(async () => {
     setPhase((p) => (p === 'ready' ? 'ready' : 'loading'))
     try {
@@ -58,6 +60,7 @@ export default function MetricsTab() {
 
   // Initial load, then a 15s visible-tab poll (matches Overzicht/Recent).
   useEffect(() => { load() }, [load])
+  // The poll itself: re-loads every 15s only while the tab is visible, so a backgrounded tab doesn't burn requests.
   useEffect(() => {
     const timer = setInterval(() => { if (!document.hidden) load() }, 15000)
     return () => clearInterval(timer)

@@ -18,6 +18,7 @@ import type { TaskDetail } from '@/types/task'
 import type { Id } from '@/types/common'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 
+// Task drawer's polymorphic links tab: lists and adds/removes links to other entities via the shared AddLinkRow.
 export default function LinksTab({ task, onAddLink, onRemoveLink }: {
   task: TaskDetail; onAddLink: (link: NewLink) => void; onRemoveLink: (link: { type: string; id: Id | null }) => void
 }) {

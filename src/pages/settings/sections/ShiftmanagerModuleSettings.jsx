@@ -29,6 +29,8 @@ import SchemaSection from '../components/SchemaSection'
 import displaySchema from '../schemas/display'
 import smKpisSchema from '../schemas/smKpis'
 
+// Shiftmanager settings' two sub-tabs (see file docblock above), gated on the
+// reporting module flag so an app-only tenant sees an honest empty notice instead.
 export default function ShiftmanagerModuleSettings() {
   const { t } = useTranslation('settings')
   const { hasModule } = useAuth()

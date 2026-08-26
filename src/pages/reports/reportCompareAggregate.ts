@@ -18,6 +18,7 @@ import type { CompareMetric } from './useReportCompare'
 // delta,delta_pct} pair, except the identifier/label which stay plain strings.
 export type CompareDiffedRow = Record<string, CompareMetric | string>
 
+// Sums one diffed field across every row into a single team-total metric, applying the same null-on-zero-previous rule as the per-row diff.
 export function sumCompareMetric(rows: CompareDiffedRow[], field: string): CompareMetric {
   let current = 0
   let previous = 0

@@ -40,6 +40,7 @@ interface TrashLifecycleSectionProps extends TrashSectionConfig {
 }
 
 
+// See the file's top doc above for the two-step trash lifecycle this shared section renders.
 export default function TrashLifecycleSection({
   entityPath, id, entityLabel, lifecycle, pendingEraseAt = null,
   canMark, canUnmark, users, onMarked, onUnmarked,

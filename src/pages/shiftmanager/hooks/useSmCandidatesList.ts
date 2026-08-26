@@ -1,9 +1,3 @@
-/**
- * useSmCandidatesList — data layer for the Shiftmanager candidates detail list (§3):
- * the paginated /sm_candidates fetch + page/size state, and persisting the chosen page
- * size as the user's default. Via React Query: each page is cached + a superseded fetch
- * cancels, and the previous page stays visible while the next loads (A-3, no flash).
- */
 import { useState, useEffect } from 'react'
 import { useQuery, keepPreviousData } from '@tanstack/react-query'
 import api from '@/lib/api'
@@ -11,6 +5,12 @@ import { useDefaultPageSize } from '@/lib/usePageSize'
 import { useAuth } from '@/context/AuthContext'
 import { normalizeSmCandidate } from '@/components/reports/useReportCandidates'
 
+/**
+ * useSmCandidatesList — data layer for the Shiftmanager candidates detail list (§3):
+ * the paginated /sm_candidates fetch + page/size state, and persisting the chosen page
+ * size as the user's default. Via React Query: each page is cached + a superseded fetch
+ * cancels, and the previous page stays visible while the next loads (A-3, no flash).
+ */
 export function useSmCandidatesList() {
   const defaultPageSize = useDefaultPageSize()
   const { refreshUser } = useAuth() ?? {}

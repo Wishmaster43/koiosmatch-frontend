@@ -29,6 +29,8 @@ import { roleName } from './usersParts'
 import Button from '@/components/ui/Button'
 import { PageTitle } from '@/components/ui/typography'
 
+// Thin container: wires useUsersData/useUserDeletion, derives the search/role filter
+// state, and renders the shared table + modals — no mutation logic lives here.
 export default function UsersPage() {
   const { t } = useTranslation('users')
   const auth = useAuth()
@@ -56,16 +58,20 @@ export default function UsersPage() {
   // ManagedUser already satisfies UserRow (its extra fields are optional).
   const rows: UserRow[] = users
 
+  // Distinct role names present across the loaded users, each with its own user count for the filter panel.
   const roleOptions = useMemo(() =>
     [...new Set(rows.flatMap(u => (u.roles ?? []).map(roleName)))]
       .filter((r): r is string => Boolean(r))
       .map(r => ({ value: r, label: r, count: rows.filter(u => (u.roles ?? []).some(x => roleName(x) === r)).length }))
   , [rows])
 
+  // Single filter group (role) in the shape the shared right-hand filter panel expects.
   const filterGroups = useMemo(() => [
     { key: 'role', label: t('filterRole'), selected: selectedRole, options: roleOptions, onToggle: (v: string) => setSelectedRole(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]) },
   ], [t, selectedRole, roleOptions])
 
+  // Register this page's filter group with the shared right panel (§4: every filter
+  // lives there, never in the toolbar); unregister on unmount so it doesn't leak to other pages.
   useEffect(() => {
     registerFilters('users-page', filterGroups)
     return () => unregisterFilters('users-page')

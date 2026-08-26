@@ -52,6 +52,7 @@ function TemplateCard({ template, useLabel, onUse }: { template: WorkflowTemplat
   )
 }
 
+// Template gallery panel (see the module doc above): thin container that only hands a picked template up via onUseTemplate, never persists it itself.
 export default function WorkflowTemplateLibrary({ open, onClose, onUseTemplate }: WorkflowTemplateLibraryProps) {
   const { t } = useTranslation('workflows')
   const { templates, category, setCategory, loading, error } = useWorkflowTemplates(open)

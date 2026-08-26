@@ -1,18 +1,3 @@
-/**
- * useTextPopoutHost — the OPENER side of a popped-out free-text field
- * (TEKST-POPOUT-1, Danny 08-08 punt 2). A host screen keeps owning its own value
- * and edit state; this hook only adds the second-screen plumbing: open the window,
- * join the sync channel, answer a fresh window's `hello` with the current draft,
- * and hand incoming draft/saved messages back to the host.
- *
- * Why a hook and not inline in the tab: the candidate drill-down is a FROZEN
- * screen (Danny 08-08) — the visible change there must stay one icon button, and
- * every entity that mirrors this next (customer/vacancy description) reuses this
- * hook instead of copying the wiring (§3 logic-in-hooks, §11 no second copy).
- *
- * The channel is off until the field is actually popped out, so a drawer that
- * nobody pops out opens no BroadcastChannel at all.
- */
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { notifyError } from '@/lib/notify'
@@ -36,6 +21,21 @@ interface TextPopoutHostOptions {
   onSaved: (html: string) => void
 }
 
+/**
+ * useTextPopoutHost — the OPENER side of a popped-out free-text field
+ * (TEKST-POPOUT-1, Danny 08-08 punt 2). A host screen keeps owning its own value
+ * and edit state; this hook only adds the second-screen plumbing: open the window,
+ * join the sync channel, answer a fresh window's `hello` with the current draft,
+ * and hand incoming draft/saved messages back to the host.
+ *
+ * Why a hook and not inline in the tab: the candidate drill-down is a FROZEN
+ * screen (Danny 08-08) — the visible change there must stay one icon button, and
+ * every entity that mirrors this next (customer/vacancy description) reuses this
+ * hook instead of copying the wiring (§3 logic-in-hooks, §11 no second copy).
+ *
+ * The channel is off until the field is actually popped out, so a drawer that
+ * nobody pops out opens no BroadcastChannel at all.
+ */
 export function useTextPopoutHost({ entity, id, field, value, dirty, onDraft, onSaved }: TextPopoutHostOptions) {
   const { t } = useTranslation('common')
   // Null outside any drawer (modal hosts) — then no auto-close, today's behaviour.
@@ -46,6 +46,8 @@ export function useTextPopoutHost({ entity, id, field, value, dirty, onDraft, on
   // handler never answers with a stale closure; assigned in an effect, not in render.
   const valueRef = useRef(value)
   const dirtyRef = useRef(dirty)
+  // Keeps the refs current every render (deliberately no dependency array) so the
+  // message handler's closure always sees the latest draft, never a stale one.
   useEffect(() => { valueRef.current = value; dirtyRef.current = dirty })
 
 

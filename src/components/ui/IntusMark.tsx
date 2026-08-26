@@ -1,12 +1,3 @@
-/**
- * IntusMark — the Intus brand mark: two interlocking rounded-square links on the
- * diagonal, one navy and one orange. Two-tone, so it ignores the `color` prop the
- * canvas passes (it renders its own brand colours); `size`/`title` still follow
- * the lucide icon contract so it can drop in as a module `Icon`.
- *
- * Note: hand-traced approximation — swap the two <rect> links for the official
- * vector when available.
- */
 /* eslint-disable no-restricted-syntax -- DATA: Intus brand-mark colours, must match their logo exactly, not a themeable UI colour */
 const INTUS_NAVY   = '#0E3A53'
 const INTUS_ORANGE = '#F18A00'
@@ -18,6 +9,15 @@ interface IntusMarkProps {
   title?: string
 }
 
+/**
+ * IntusMark — the Intus brand mark: two interlocking rounded-square links on the
+ * diagonal, one navy and one orange. Two-tone, so it ignores the `color` prop the
+ * canvas passes (it renders its own brand colours); `size`/`title` still follow
+ * the lucide icon contract so it can drop in as a module `Icon`.
+ *
+ * Note: hand-traced approximation — swap the two <rect> links for the official
+ * vector when available.
+ */
 export default function IntusMark({ size = 24, title = 'Intus' }: IntusMarkProps) {
   return (
     <svg width={size} height={size} viewBox="0 0 96 96" fill="none"

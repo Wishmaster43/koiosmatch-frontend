@@ -35,6 +35,7 @@ interface QuickViewToggleProps {
   iconOnly?: boolean
 }
 
+// The one shared quick-view toggle; a default-accent toggle reads the solid button trio while a toggle with its own semantic colour keeps the §4 soft-tint (see file header).
 export default function QuickViewToggle({ active, onToggle, label, color = 'var(--color-primary)', icon: Icon, title, size = 'default', iconOnly = false }: QuickViewToggleProps) {
   const compact = size === 'compact'
   const squished = iconOnly && Boolean(Icon)

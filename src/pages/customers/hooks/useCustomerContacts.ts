@@ -260,6 +260,7 @@ const toApi = (p: Partial<ContactPayload>) => ({
   ...(p.notes !== undefined ? { notes: p.notes || null } : {}),
 })
 
+// The customer's live contact list: CRUD + optimistic updates, plus a listener that refetches when another surface (the merge modal) changes contacts elsewhere.
 export function useCustomerContacts(customerId: Id | undefined) {
   const { t } = useTranslation('customers')
   // Rows carry the per-location/per-department primary flags (CONTACT-LOCATION-PRIMARY-1/
@@ -361,6 +362,7 @@ export async function archiveContact(customerId: Id, id: Id): Promise<void> {
   await api.post(`/customers/${customerId}/contacts/${id}/archive`)
   window.dispatchEvent(new CustomEvent(CONTACTS_CHANGED_EVENT))
 }
+// Undo an archived contact (TRASH-OVERAL-1b pair with archiveContact above); broadcasts the same change event so every open list refetches.
 export async function restoreContact(customerId: Id, id: Id): Promise<Contact> {
   const res = await api.post(`/customers/${customerId}/contacts/${id}/restore`)
   window.dispatchEvent(new CustomEvent(CONTACTS_CHANGED_EVENT))
@@ -377,6 +379,7 @@ export function useArchivedCustomerContacts(customerId: Id | undefined, active: 
   const [contacts, setContacts] = useState<ContactWithPrimaryFlags[]>([])
   const [loading, setLoading] = useState(false)
 
+  // Fetch only archived contacts (include_archived=1, filtered defensively); a no-op while the toggle is off or there's no customer yet.
   const load = useCallback((signal?: AbortSignal) => {
     if (!active || !customerId) { setContacts([]); return }
     setLoading(true)
@@ -388,8 +391,10 @@ export function useArchivedCustomerContacts(customerId: Id | undefined, active: 
       .catch(() => { /* the toggle simply shows nothing rather than crashing (§3) */ })
       .finally(() => { if (!signal?.aborted) setLoading(false) })
   }, [customerId, active])
+  // Load archived contacts on mount and whenever the toggle/customer changes; aborts a stale in-flight request.
   useEffect(() => { const ctrl = new AbortController(); load(ctrl.signal); return () => ctrl.abort() }, [load])
 
+  // Refetch archived contacts when another part of the app dispatches CONTACTS_CHANGED_EVENT (e.g. the merge modal).
   useEffect(() => {
     const ctrl = new AbortController()
     const onChanged = () => load(ctrl.signal)

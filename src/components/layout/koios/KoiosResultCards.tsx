@@ -23,6 +23,7 @@ function dedupeRefs(refs: KoiosResultRef[]): KoiosResultRef[] {
   })
 }
 
+// Renders one card per unique referenced record (see the module doc above); a type with no page yet still renders, just non-interactive, never a dead click.
 export default function KoiosResultCards({ refs }: { refs: KoiosResultRef[] }) {
   const { openEntity } = useNavigation()
   const unique = dedupeRefs(refs)

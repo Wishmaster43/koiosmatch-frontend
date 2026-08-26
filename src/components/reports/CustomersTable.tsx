@@ -27,6 +27,7 @@ const TH: CSSProperties = { padding: '8px 12px', textAlign: 'left', fontSize: 11
              whiteSpace: 'nowrap', userSelect: 'none' }
 const TD: CSSProperties = { padding: '10px 12px', fontSize: 13, color: 'var(--text)', borderBottom: '1px solid var(--hover-bg)' }
 
+// Read-only reports view of customers; data/loading/error come from the shared hook, filters register into the right panel below.
 export default function CustomersTable() {
   const { t } = useTranslation('reports')
   // Reuses the existing common.sort key for the sortable header's button tooltip
@@ -43,6 +44,7 @@ export default function CustomersTable() {
 
   const { registerFilters, unregisterFilters } = useRightPanel()
 
+  // Unique, sorted status values found in the current data set, used to build the filter panel options.
   const statusOptions = useMemo(() =>
     [...new Set(customers.map(c => c.status).filter((x): x is string => Boolean(x)))].sort(),
     [customers])
@@ -50,6 +52,7 @@ export default function CustomersTable() {
   const toggle = (setter: Dispatch<SetStateAction<Array<string | number>>>) => (val: string | number) =>
     setter(prev => prev.includes(val) ? prev.filter(v => v !== val) : [...prev, val])
 
+  // Applies the status filter and free-text search (name/debtor number/account manager/external id) before sorting.
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase()
     return customers.filter(c => {
@@ -64,6 +67,7 @@ export default function CustomersTable() {
     })
   }, [customers, search, selectedStatuses])
 
+  // Sorts the filtered rows by the active column; locations/departments sort by derived counts, others by string value.
   const sorted = useMemo(() => {
     const { key, dir } = sort
     return [...filtered].sort((a, b) => {
@@ -82,7 +86,9 @@ export default function CustomersTable() {
     })
   }, [filtered, sort])
 
+  // Reset to page 1 whenever the filtered set or page size changes, so pagination never points past the end.
   useEffect(() => setPage(1), [filtered.length, pageSize])
+  // Slices the sorted rows to the current page for rendering.
   const paged     = useMemo(() => sorted.slice((page-1)*pageSize, page*pageSize), [sorted, page, pageSize])
   const totalPages = Math.max(1, Math.ceil(sorted.length / pageSize))
 
@@ -92,6 +98,7 @@ export default function CustomersTable() {
       : { key, dir: 'asc' }
   )
 
+  // Declares the status filter group registered into the shared right-hand filter panel.
   const filterGroups = useMemo(() => [
     {
       key: 'status', label: t('customers.filters.status'),
@@ -105,6 +112,7 @@ export default function CustomersTable() {
     },
   ], [t, selectedStatuses, statusOptions, customers])
 
+  // Registers this table's filter groups into the shared panel and unregisters them on unmount.
   useEffect(() => {
     registerFilters('customers-table', filterGroups)
     return () => unregisterFilters('customers-table')

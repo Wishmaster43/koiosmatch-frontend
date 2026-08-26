@@ -15,6 +15,7 @@ import { useDateFormat } from '@/lib/datetime'
 import type { VacancyAttentionRow } from '@/types/dashboard'
 import type { FeedTileContext } from '../feedTileKit'
 
+// Accountmanager work-feed tile (see the module doc above): row click deep-links to the vacancy's applicants tab.
 export default function VacanciesAttentionTable({ rows, onNavigate }: {
   rows: VacancyAttentionRow[]
   onNavigate?: FeedTileContext['onNavigate']

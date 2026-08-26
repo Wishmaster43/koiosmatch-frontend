@@ -36,6 +36,7 @@ interface PdokCardProps {
   disabled?: boolean
 }
 
+// Plain PDOK geocode card for the Koppelingen tab; shows a fresh manual result inline until the host refetches, and degrades to read-only when the entity has no re-geocode route (see file header).
 export default function PdokCard({ lat, lng, endpoint, permission, disabled }: PdokCardProps) {
   const { t } = useTranslation('common')
   // GEO-INLINE-1: a manual re-geocode answers inline now — the fresh result

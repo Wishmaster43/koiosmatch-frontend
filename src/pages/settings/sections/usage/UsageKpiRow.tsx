@@ -1,12 +1,3 @@
-/**
- * UsageKpiRow (BILLING-USAGE-REDESIGN-1) — equal-footprint KPI strip on top of the
- * usage page, reusing the shared KpiCard atom (§3A blueprint — never a hand-rolled
- * tile). Four cards: Total this period (workflow + AI amount for the selected
- * `/billing/usage` period — the endpoint has no single "total" field, so this is
- * the documented sum, not a fabricated figure), Workflow (credits + EUR), Koios AI
- * (tokens + EUR), WhatsApp (EUR + messages — deliberately month-only, the messaging
- * endpoint has no period param at all, see UsageOverviewSection's header comment).
- */
 import { Wallet, Workflow, Sparkles, MessageCircle } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useNumberFormat } from '@/lib/formatters'
@@ -22,6 +13,15 @@ interface UsageKpiRowProps {
   waLoading: boolean
 }
 
+/**
+ * UsageKpiRow (BILLING-USAGE-REDESIGN-1) — equal-footprint KPI strip on top of the
+ * usage page, reusing the shared KpiCard atom (§3A blueprint — never a hand-rolled
+ * tile). Four cards: Total this period (workflow + AI amount for the selected
+ * `/billing/usage` period — the endpoint has no single "total" field, so this is
+ * the documented sum, not a fabricated figure), Workflow (credits + EUR), Koios AI
+ * (tokens + EUR), WhatsApp (EUR + messages — deliberately month-only, the messaging
+ * endpoint has no period param at all, see UsageOverviewSection's header comment).
+ */
 export default function UsageKpiRow({ billing, billingLoading, wa, waLoading }: UsageKpiRowProps) {
   const { t } = useTranslation('settings')
   const { formatNumber, formatCurrency } = useNumberFormat()

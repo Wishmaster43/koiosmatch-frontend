@@ -50,6 +50,8 @@ function PreviewRow({ row }: { row: KoiosPreviewRow }) {
   )
 }
 
+// One assist-panel card for a Koios-proposed action: countdown, confirm/cancel,
+// and (for a destructive action) a required second confirm step before submitting.
 export default function KoiosPendingActionCard({ action }: { action: KoiosPendingAction }) {
   const { t } = useTranslation('common')
   const [status, setStatus] = useState<CardStatus>('proposed')
@@ -66,6 +68,8 @@ export default function KoiosPendingActionCard({ action }: { action: KoiosPendin
     return () => clearInterval(id)
   }, [status, action.expires_at])
 
+  // Confirms the action; a destructive one requires an extra click (the "confirming"
+  // step above) before it actually submits to the server.
   const confirm = () => {
     if (action.destructive && status !== 'confirming') { setStatus('confirming'); return }
     setStatus('submitting')

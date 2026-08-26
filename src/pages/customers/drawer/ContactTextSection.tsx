@@ -13,6 +13,7 @@ import EditableRichTextField from './EditableRichTextField'
 import { contactPopoutId } from '@/lib/secondScreen'
 import type { Id } from '@/types/common'
 
+// Thin wrapper over the shared rich-text field for the contact's free-text block; the popout icon needs customerId and stays hidden without it (see file header).
 export default function ContactTextSection({ contactId, customerId, value, onSave }: {
   contactId: Id
   // Second-screen popout needs the owning customer too (nested PATCH route) — no

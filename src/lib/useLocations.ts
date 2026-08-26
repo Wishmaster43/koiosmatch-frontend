@@ -18,6 +18,7 @@ export interface LocationOption { value: Id; label: string; is_default?: boolean
 // Stable empty result — see the return below for why the identity matters.
 const EMPTY: LocationOption[] = []
 
+// Tenant branch/location options for pickers, cached via React Query; returns the stable EMPTY identity above while loading.
 export function useLocations(): LocationOption[] {
   const { data } = useQuery({
     queryKey: ['locations', 'options'],

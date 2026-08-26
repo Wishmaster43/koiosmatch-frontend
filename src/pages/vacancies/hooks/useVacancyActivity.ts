@@ -33,6 +33,8 @@ export function useVacancyActivity(id?: Id): { items: VacancyActivityEvent[]; lo
   const [loading, setLoading] = useState(false)
   const [error,   setError]   = useState(false)
 
+  // Reload on every id change, aborting the previous request: without that, a fast switch
+  // between vacancies can let the earlier response land on the newer vacancy (§9).
   useEffect(() => {
     if (!id) { setItems([]); return }
     const ctrl = new AbortController()

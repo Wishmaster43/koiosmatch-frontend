@@ -12,6 +12,7 @@ import type { Dispatch, SetStateAction } from 'react'
 
 const store = new Map<string, unknown>()
 
+// State keyed per page+field in a module-level store, so a page unmount/remount (browser back) restores exactly where it left off.
 export function usePageMemory<T>(key: string, initial: T | (() => T)): [T, Dispatch<SetStateAction<T>>] {
   const [value, setValue] = useState<T>(() =>
     store.has(key) ? (store.get(key) as T) : (typeof initial === 'function' ? (initial as () => T)() : initial))

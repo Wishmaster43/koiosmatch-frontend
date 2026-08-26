@@ -24,6 +24,7 @@ export interface PopoutApplicationNote {
 interface NotePayload { type: string; title: string; body: string; language?: string }
 interface RawApplicationNotes { notes?: Array<{ id?: Id; author?: string; author_id?: Id | null; type?: string; title?: string | null; text?: string; language?: string | null; created_at?: string }> }
 
+// See the file's top doc above; since notes ride along inside the application payload, this reloads the whole application on mount and after every write.
 export function usePopoutApplicationNotes(applicationId: Id | undefined) {
   const { t } = useTranslation()
   const [notes, setNotes] = useState<PopoutApplicationNote[]>([])

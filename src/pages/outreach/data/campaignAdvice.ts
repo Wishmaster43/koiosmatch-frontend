@@ -20,7 +20,7 @@ const STALE_DRAFT_DAYS = 14
 
 const NONE_RULE: CampaignAdviceRule = { action: 'none', reasonKey: 'koios.reasons.none' }
 
-// First-match-wins priority ladder — see the file header for the read-set constraint.
+// First-match-wins priority ladder  for the read-set constraint.
 export function deriveCampaignAdvice(c: Campaign, now: Date = new Date()): CampaignAdviceRule {
   // Rule 1: no advice on an archived (soft-deleted) campaign.
   if (c.archived) return NONE_RULE

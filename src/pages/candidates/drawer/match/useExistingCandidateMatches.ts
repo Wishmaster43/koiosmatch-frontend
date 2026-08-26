@@ -40,9 +40,13 @@ interface RawMatchListRow {
   hours_per_week?: number | string | null
 }
 
+// Loads the candidate's own (non-archived) matches for the duplicate/overlap
+// preflight (see file docblock above), excluding whichever match is being edited.
 export function useExistingCandidateMatches(candidateId: string, editMatchId?: Id): ExistingMatchRow[] {
   const [matches, setMatches] = useState<ExistingMatchRow[]>([])
 
+  // Fetches the candidate's matches for the overlap check; alive-guarded against a
+  // fast candidate switch, and a failed request degrades to an empty list.
   useEffect(() => {
     if (!candidateId) { setMatches([]); return }
     let alive = true

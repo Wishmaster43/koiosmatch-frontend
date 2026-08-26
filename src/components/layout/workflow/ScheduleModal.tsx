@@ -28,6 +28,8 @@ import { sectionStyle, sectionLabel } from './scheduleModalStyles'
 
 export { scheduleLabel } from './scheduleLabel'
 
+// The modal shell only (see file docblock above) — trigger-type selector, live
+// preview and dialog chrome; form state and the recurrence editor live elsewhere.
 export function ScheduleModal({ trigger, scheduleConfig, onSave, onClose }: {
   trigger?: string; scheduleConfig?: ScheduleConfig | null
   onSave: (trigger: string, cfg: ScheduleConfig | null) => void; onClose: () => void

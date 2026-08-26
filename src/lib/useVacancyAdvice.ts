@@ -11,6 +11,8 @@ import { useAllSettings, getNumberSetting } from '@/lib/settings/useAllSettings'
 import { deriveVacancyAdvice } from '@/pages/vacancies/shared'
 import type { KoiosAdvice } from '@/lib/koiosAdviceMeta'
 import type { Vacancy } from '@/types/vacancy'
+// The one advice resolver shared by the table column and the drawer's Koios block
+// (see the module doc comment above for why it lives here instead of per-consumer).
 export function useVacancyAdvice(): (v: Vacancy) => KoiosAdvice | null {
   const { t } = useTranslation(['vacancies', 'common'])
   // How many days without an application counts as "stale" (mirrors candidates'

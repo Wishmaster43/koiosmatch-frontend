@@ -53,6 +53,8 @@ export function useVacancyDescription(v: VacancyDetail, onUpdate?: UpdateFn) {
   // record value, so text saved from the popped-out window is not overwritten by
   // this drawer's now-stale copy.
   const lastRecordDescription = useRef(v.description ?? '')
+  // Adopt the record's value only on an actual record change, and only when no
+  // edit is in progress — see the block comment above for why the popout's own draft must win otherwise.
   useEffect(() => {
     const next = v.description ?? ''
     if (next === lastRecordDescription.current) return

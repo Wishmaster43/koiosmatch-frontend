@@ -22,6 +22,8 @@ export type ApprovalMode = 'uit' | 'bij_afwijking' | 'altijd'
 // is needed by this hook.
 interface MatchingSettingsResponse { approval_mode?: string }
 
+// Shares the ['settings', 'matching'] query cache with the other Matching-
+// settings readers and extracts just approval_mode from the unwrapped body.
 export function useMatchApprovalMode(): { approvalMode?: ApprovalMode } {
   const { data } = useQuery({
     queryKey: ['settings', 'matching'],

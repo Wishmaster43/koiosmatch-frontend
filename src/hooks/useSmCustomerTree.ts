@@ -10,10 +10,12 @@ import { useState, useEffect } from 'react'
 import api from '@/lib/api'
 import type { ReportCustomer } from '@/types/reports'
 
+// Shared Shiftmanager customer tree fetch; each screen derives its own flattened view from the same one-shot list.
 export function useSmCustomerTree() {
   const [customers, setCustomers] = useState<ReportCustomer[]>([])
   const [loading,   setLoading]   = useState(true)
 
+  // Loads the tree once on mount; the alive flag drops a late response after unmount instead of writing stale state.
   useEffect(() => {
     let active = true
     api.get('/sm_customers')

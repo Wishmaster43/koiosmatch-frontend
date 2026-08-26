@@ -20,6 +20,7 @@ import TenantOverridesCard from './koiosmodels/TenantOverridesCard'
 
 type Phase = 'loading' | 'error' | 'empty' | 'ready'
 
+// Thin container (see the module doc above): fetches the registry once, hands it to the four cards, and owns only the manual refresh action — the cards themselves own their own writes.
 export default function KoiosModelsAdminSettings() {
   const { t } = useTranslation('settings')
   const [data, setData] = useState<KoiosModelsAdminData | null>(null)

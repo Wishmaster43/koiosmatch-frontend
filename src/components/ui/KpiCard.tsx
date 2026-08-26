@@ -19,6 +19,7 @@ interface KpiCardProps {
   note?: ReactNode
 }
 
+// See the file's top doc above for the tile contract; a numeric value gets locale-aware thousands separators, a pre-formatted string passes through untouched.
 export default function KpiCard({ label, value, delta, icon: Icon, iconBg, iconColor, loading = false, onClick, note }: KpiCardProps) {
   const isPositive = (delta ?? 0) > 0
   const isNeutral  = delta === 0 || delta === undefined

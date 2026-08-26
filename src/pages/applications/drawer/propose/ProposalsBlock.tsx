@@ -46,6 +46,8 @@ const linkButtonStyle: CSSProperties = {
   cursor: 'pointer', textDecoration: 'none',
 }
 
+// Renders the recorded-proposal history (see file docblock above); stays invisible
+// entirely until at least one proposal exists, never an empty frame.
 export default function ProposalsBlock({ application }: ProposalsBlockProps) {
   const { t } = useTranslation(['applications', 'common'])
   const { formatDate } = useDateFormat()
@@ -55,6 +57,7 @@ export default function ProposalsBlock({ application }: ProposalsBlockProps) {
   // Per-row "copied" feedback — a short-lived id, cleared on unmount or replaced.
   const [copiedId, setCopiedId] = useState<Id | null>(null)
   const copyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  // Clears the pending "copied" reset timer on unmount so it never fires late.
   useEffect(() => () => { if (copyTimerRef.current) clearTimeout(copyTimerRef.current) }, [])
 
   if (loading || error || proposals.length === 0) return null

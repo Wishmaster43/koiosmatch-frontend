@@ -120,6 +120,8 @@ function VacancySearchTabInner({ candidate }: { candidate: Candidate }) {
   // the extra fields, never an error wall.
   const [description, setDescription] = useState<string | null>(null)
   const [detail, setDetail] = useState<VacancyDetail | null>(null)
+  // Resets, then (re)fetches for the newly selected vacancy — see the comment
+  // above for the abort/quiet-404 contract this follows.
   useEffect(() => {
     setDescription(null)
     setDetail(null)

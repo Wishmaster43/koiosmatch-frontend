@@ -51,6 +51,7 @@ const EMPTY: TeamOption[] = []
 // carries no 2xx success schema for this route (§10 type-gen stance).
 interface ApiTeam { id?: Id; name?: string; color?: string | null }
 
+// The internal teams/departments lookup (never the customer-department axis, see the file's top doc), cached per tenant via React Query.
 export function useTeams(): TeamsState {
   const tenantId = getActiveTenantId() ?? 'none'
   const { data, isFetching, isPlaceholderData, isError, refetch } = useQuery({

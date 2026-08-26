@@ -34,6 +34,8 @@ import { useDateFormat } from '@/lib/datetime'
 import SegmentedControl from '@/components/ui/SegmentedControl'
 import { Caption } from '@/components/ui/typography'
 
+// Thin container for the shifts hours/count charts + tables: owns UI filter state,
+// registers it into the right filter panel, and renders the two ChartCards + drill-down.
 export default function ShiftsChartsBlock({
   filterKey         = 'shifts-charts',
   fixedCustomers:    fixedCustomersProp   = [],
@@ -65,6 +67,7 @@ export default function ShiftsChartsBlock({
   // (a default [] in props would otherwise cause an infinite re-render loop).
   const fixedCustomers   = useMemo(() => fixedCustomersProp,
     [fixedCustomersProp.join(',')])   // eslint-disable-line
+  // Same reference-stabilising trick as fixedCustomers above, keyed on the joined values.
   const fixedLocationIds = useMemo(() => fixedLocationIdsProp,
     [fixedLocationIdsProp.join(',')]) // eslint-disable-line
 
@@ -82,6 +85,7 @@ export default function ShiftsChartsBlock({
   // SM-2YR: which single metric drives the chart/table once 2+ years are selected
   // (null = "follow the first visible series"); irrelevant/untouched in single-year view.
   const [multiYearMetric,    setMultiYearMetric]    = useState<string | null>(null)
+  // Only the series the user has toggled on are candidates for the multi-year metric picker.
   const metricOptions = useMemo(() => SERIES.filter((s) => visible.includes(s.key)), [visible])
   const effectiveMultiYearMetric = metricOptions.find((s) => s.key === multiYearMetric)?.key ?? metricOptions[0]?.key ?? null
 
@@ -149,6 +153,9 @@ export default function ShiftsChartsBlock({
   // A period key encodes the month/quarter of a chart datum (year lives on the drill).
   const periodKeyOf = (d: ShiftsChartDatum) => period === "quarter" ? `Q:${d._quarter ?? d.label}` : `M:${d._monthIndex ?? 1}`
 
+  // User clicked a chart bar or table cell: build the detail query for that
+  // period/metric (filters only — metric and period are chosen inside the drawer)
+  // and open the drill-down drawer on it.
   const handleBarClick = (datum: ShiftsChartDatum, barMeta: ShiftBar) => {
     const { year, seriesKey } = barMeta
     const baseMetric = seriesKey.replace("_uren", "")
@@ -186,6 +193,8 @@ export default function ShiftsChartsBlock({
   // both derived from the already-computed hoursBars (one per selected year once
   // multiYear, sharing colour/fill with the shifts chart).
   const metricTabs = useMemo(() => metricOptions.map((s) => ({ key: s.key, label: seriesLabel(s.key) })), [metricOptions, seriesLabel])
+  // Per-year dot colours for YearIndicator, taken from the already-computed hours bars
+  // so the legend dots always match the actual bar fill for that year.
   const yearColors = useMemo(() => selectedYears.map((y) => hoursBars.find((b) => b.year === y)?.fill), [selectedYears, hoursBars])
 
   const periodLabel = t('charts.periodLabel', {
@@ -197,6 +206,7 @@ export default function ShiftsChartsBlock({
   // interim; swaps to /sm_reports/saved-filters when SM-FILT-SAVE lands). Scoped
   // per page via filterKey, so it only appears where it's registered.
   const { saved, save, remove, setDefault, defaultState } = useSavedShiftFilters(`sm-saved-filters:${filterKey}`)
+  // Restore a saved (or default) filter set onto the live UI state in one go.
   const applyFilterState = useCallback((s: ShiftFilterState) => {
     setSelectedYears(s.selectedYears); setSelectedMonths(s.selectedMonths); setPeriod(s.period)
     setVisible(s.visible); setSelectedJobTypes(s.selectedJobTypes)
@@ -206,6 +216,8 @@ export default function ShiftsChartsBlock({
   // Apply the default saved filter once on mount (Danny: "wordt niet default geladen?" —
   // isn't it loaded by default?).
   const appliedDefaultRef = useRef(false)
+  // Runs once: applies the saved default filter set the first time it becomes available,
+  // guarded by the ref so a later defaultState change never re-applies it mid-session.
   useEffect(() => {
     if (appliedDefaultRef.current || !defaultState) return
     applyFilterState(defaultState)
@@ -235,6 +247,8 @@ export default function ShiftsChartsBlock({
 
   // Sync the groups into the right panel.
   const { registerFilters, unregisterFilters } = useRightPanel()
+  // Re-registers this page's filter groups whenever they change; unregisters on
+  // unmount/filterKey change so a stale group never lingers in the shared panel.
   useEffect(() => {
     registerFilters(filterKey, filterGroups)
     return () => unregisterFilters(filterKey)

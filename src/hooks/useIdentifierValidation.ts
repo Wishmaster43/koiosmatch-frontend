@@ -31,6 +31,8 @@ export interface IdentifierValidation {
   notice: (kind: IdentifierKind, value: string | null | undefined, country: string | null | undefined) => IdentifierNotice | null
 }
 
+// Reads the tenant's configured identifier-validation strictness and returns a
+// notice builder so every identifier field applies the same mode consistently.
 export function useIdentifierValidation(): IdentifierValidation {
   const { t, i18n } = useTranslation('common')
   const settings = useAllSettings()

@@ -54,6 +54,7 @@ interface NoteFieldsProps {
   knownItems?: AssistKnownItem[]
 }
 
+// Purely presentational note form (see the module doc above): renders the shared five fields from useNoteFields, so the drill-down composer and the per-note popout window never drift apart.
 export default function NoteFields({ fields, noteTypes, channels, labels, editorLabels, noteId, titleExtra, editorMinHeight = 160, onItems, knownItems }: NoteFieldsProps) {
   const { type, setType, channel, setChannel, title, setTitle, body, setBody, language, setLanguage } = fields
   const typeLabel = noteTypes.find(n => n.value === type)?.label ?? ''

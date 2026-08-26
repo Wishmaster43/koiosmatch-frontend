@@ -18,6 +18,7 @@ const ENTITY_NAV_ID = {
   vacancy: 'cf_vacancy',
 }
 
+// Note-type editor scoped to one entity, so a type created for Candidate never leaks into Customer (see file header).
 export default function NoteTypesSettings({ entity }) {
   const { t } = useTranslation('settings')
   const entityLabel = t(`nav.${ENTITY_NAV_ID[entity] ?? entity}`)

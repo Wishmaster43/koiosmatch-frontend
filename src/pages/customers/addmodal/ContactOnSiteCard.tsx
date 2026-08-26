@@ -68,6 +68,7 @@ interface ContactOnSiteCardProps {
   existingContacts: Contact[]
 }
 
+// Pure presentational card (see the module doc above): CREATE offers an existing-contact picker or a brand-new name, EDIT keeps the plain text field; the actual submit chain lives in the parent modal.
 export default function ContactOnSiteCard({
   isEdit, contactName, email, phone, onContactNameChange, onEmailChange, onEmailBlur, emailError, emailMessage, onPhoneChange,
   pickedContactId, onPickedContactChange, existingContacts,

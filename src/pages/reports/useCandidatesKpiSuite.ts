@@ -15,6 +15,7 @@ import type { ReportPeriod } from '@/types/analytics'
 
 interface SuiteCard { key: string; label?: string; count: number | null }
 
+// Fetches the nine-KPI suite for the given period+filters (see the module doc above): a card the server honestly omits simply has no entry, never a fabricated zero.
 export function useCandidatesKpiSuite(period: ReportPeriod, filters: ReportFilterState, enabled: boolean) {
   const params = buildReportQueryParams(period, 'candidates', filters)
   const query = useQuery({

@@ -1,3 +1,15 @@
+import { useTranslation } from 'react-i18next'
+import { overlapHoursSum } from './matchConflicts'
+import type { ExistingMatchRow } from './matchConflicts'
+
+// One existing match's display label — vacancy title first, else the client name,
+// never a raw id (never surface an internal identifier to the recruiter).
+const labelOf = (m: ExistingMatchRow): string => m.vacancyTitle || m.client || '—'
+
+// Trim a decimal:2-cast hours sum to a clean display number — 40 instead of
+// "40.00", 36.5 stays "36.5" (never a raw floating-point tail).
+const formatHoursSum = (n: number): string => String(Math.round(n * 100) / 100)
+
 /**
  * MatchConflictBanners — the two calm, non-blocking warnings from the duplicate +
  * overlap preflight (Danny's ten-point round, points 5/6: 1.10/1.11). Both are
@@ -14,18 +26,6 @@
  * a row without `hoursPerWeek`, or no `draftHours` passed in yet, keeps the
  * existing date-only wording — see `overlapHoursSum` (matchConflicts.ts).
  */
-import { useTranslation } from 'react-i18next'
-import { overlapHoursSum } from './matchConflicts'
-import type { ExistingMatchRow } from './matchConflicts'
-
-// One existing match's display label — vacancy title first, else the client name,
-// never a raw id (never surface an internal identifier to the recruiter).
-const labelOf = (m: ExistingMatchRow): string => m.vacancyTitle || m.client || '—'
-
-// Trim a decimal:2-cast hours sum to a clean display number — 40 instead of
-// "40.00", 36.5 stays "36.5" (never a raw floating-point tail).
-const formatHoursSum = (n: number): string => String(Math.round(n * 100) / 100)
-
 export default function MatchConflictBanners({
   duplicateMatch, overlappingMatches, formatDate, draftHours = null,
 }: {

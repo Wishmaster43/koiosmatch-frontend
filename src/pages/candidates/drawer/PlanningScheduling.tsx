@@ -33,6 +33,8 @@ interface PlanningSchedulingProps {
   setUnscheduledIdx: Dispatch<SetStateAction<Set<number>>>
 }
 
+// The roster list (base + open-shift picks) with a mail-roster link and a
+// per-shift detail panel (favourite toggle + unschedule); state lives in the parent.
 export default function PlanningScheduling({
   c, baseShifts, openShifts, loading, error, onReload, scheduleSelected, setScheduleSelected, scheduleFavorites, setScheduleFavorites,
   scheduledIds, setScheduledIds, unscheduledIdx, setUnscheduledIdx,

@@ -66,6 +66,8 @@ interface VacancyTabProps {
   onLinkVacancy?: (id: Id | undefined, vacancyId: Id | null, meta?: { title?: string; client?: string }) => void
 }
 
+// Application drawer's vacancy tab: shows the linked vacancy's detail, re-linking
+// through the same onLinkVacancy handler the Details block uses (§3A: one shared surface).
 export default function VacancyTab({ application: a, onLinkVacancy }: VacancyTabProps) {
   const { t } = useTranslation(['applications', 'vacancies', 'common'])
   const queryClient = useQueryClient()

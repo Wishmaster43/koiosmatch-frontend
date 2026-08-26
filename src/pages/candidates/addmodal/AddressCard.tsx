@@ -15,6 +15,7 @@ interface AddressCardProps {
   provinces: string[]
 }
 
+// The address card fields; country is a fixed, UI-language-localized ISO list (never a tenant lookup), unlike the tenant-driven province list passed in.
 export default function AddressCard({ form, errors, set, isReq, provinces }: AddressCardProps) {
   const { t, i18n } = useTranslation(['candidates', 'common'])
   // COUNTRY-1: fixed ISO-3166 code list, localized to the current UI language —

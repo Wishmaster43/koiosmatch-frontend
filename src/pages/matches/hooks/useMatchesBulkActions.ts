@@ -63,6 +63,8 @@ export function useMatchesBulkActions({ selectedIds, setSelectedIds, t }: UseMat
       .join(', ')
   }
 
+  // Queues the selection for backoffice coupling via the shared bulk-sync endpoint
+  // described above, reporting queued vs. skipped honestly rather than a blanket success.
   const bulkCouple = (target: CoupleTarget) => {
     const ids = [...selectedIds]
     if (!ids.length) return

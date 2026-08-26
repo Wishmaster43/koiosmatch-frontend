@@ -17,6 +17,7 @@ export interface CustomerOption { value: Id; label: string }
 // hook with a stable reference. One shared constant, no loop.
 const EMPTY_CUSTOMER_OPTIONS: CustomerOption[] = []
 
+// Customer picker options, fetched only while enabled; returns the shared stable empty array so a consumer feeding this into a memo never loops on a fresh [] identity (see file header).
 export function useCustomerOptions(enabled: boolean): CustomerOption[] {
   const { data } = useQuery({
     queryKey: ['customers', 'options'],

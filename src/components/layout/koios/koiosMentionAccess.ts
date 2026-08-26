@@ -15,6 +15,7 @@ import { canAccessPage } from '@/lib/access'
 import type { AuthContextValue } from '@/context/AuthContext'
 import type { MentionCategoryConfig } from './koiosMentionCategories'
 
+// Resolves whether a mention category is visible for this user: a page gate defers to the route permission check, a bare permission checks it directly, and a category with no gate configured stays visible by default.
 export function isCategoryVisible(category: MentionCategoryConfig, auth: AuthContextValue | null): boolean {
   const cfg = category.search
   if (!cfg) return true

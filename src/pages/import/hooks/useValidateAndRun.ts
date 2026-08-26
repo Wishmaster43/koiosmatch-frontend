@@ -22,6 +22,7 @@ type AsyncState =
   | { status: 'error'; message: string }
   | { status: 'success'; result: ImportRunResult }
 
+// Explicit-file dry-run/run pair for this wizard's preview+confirm steps (see the module doc above for why it does not reuse useImportWizard's closure-based file).
 export function useValidateAndRun(entity: string) {
   const [preview, setPreview] = useState<AsyncState>({ status: 'idle' })
   const [run, setRun] = useState<AsyncState>({ status: 'idle' })
@@ -54,6 +55,7 @@ export function useValidateAndRun(entity: string) {
     }
   }, [entity])
 
+  // Clears both async states back to idle, e.g. when the caller re-maps rows and the previous preview/run result no longer applies.
   const reset = useCallback(() => {
     setPreview({ status: 'idle' })
     setRun({ status: 'idle' })

@@ -14,7 +14,7 @@ import { describe, it, expect, afterEach } from 'vitest'
 import { renderHook, act } from '@testing-library/react'
 import { useTaskFilters } from './useTaskFilters'
 
-// Reset the shared page-memory search between tests (see the file header).
+// Reset the shared page-memory search between tests ().
 afterEach(() => {
   const { result } = renderHook(() => useTaskFilters())
   act(() => result.current.clearAllFilters())

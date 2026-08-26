@@ -10,6 +10,8 @@ import { useTranslation } from 'react-i18next'
 import { deriveCampaignAdvice } from '@/pages/outreach/shared'
 import type { KoiosAdvice } from '@/lib/koiosAdviceMeta'
 import type { Campaign } from '@/pages/outreach/shared'
+// The one campaign-advice resolver shared by the table column and the drawer's
+// Koios block (see file docblock above), so the two can never disagree.
 export function useCampaignAdvice(): (c: Campaign) => KoiosAdvice | null {
   const { t } = useTranslation('outreach')
 

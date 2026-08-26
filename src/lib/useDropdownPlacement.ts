@@ -45,6 +45,9 @@ export const DROPDOWN_SEARCH_ROW_HEIGHT = 44
 // closes on the option's mousedown before the pick registers — the same class of
 // bug DATE-PORTAL-1 fixed one-off for the DatePicker.
 export const DROPDOWN_PORTAL_ATTR = 'data-dropdown-portal'
+// True when the given event target lives inside ANY portalled dropdown menu — lets a
+// host with its own outside-click-close recognise a pick even though the portal
+// renders outside the host's own DOM subtree.
 export function isInsideDropdownPortal(target: Node | null): boolean {
   const el = target instanceof Element ? target : target?.parentElement ?? null
   return el?.closest(`[${DROPDOWN_PORTAL_ATTR}]`) != null
@@ -64,6 +67,9 @@ export interface DropdownPlacement {
 
 const toAnchorRect = (r: DOMRect): AnchorRect => ({ top: r.top, bottom: r.bottom, left: r.left, right: r.right, width: r.width })
 
+// Computes and keeps up to date whether a popover should flip up, its clamped max
+// height, and the anchor's viewport rect (see the module doc comment above for the
+// portal/overflow-ancestor history this exists to solve).
 export function useDropdownPlacement(anchorRef: RefObject<HTMLElement | null>, open: boolean): DropdownPlacement {
   const [placement, setPlacement] = useState<DropdownPlacement>({ openUp: false, maxHeight: MENU_HEIGHT_CAP, rect: null })
 
@@ -72,6 +78,7 @@ export function useDropdownPlacement(anchorRef: RefObject<HTMLElement | null>, o
   // correctly placed — no flash of an unpositioned/wrongly-positioned popover.
   useLayoutEffect(() => {
     if (!open || !anchorRef.current) return
+    // Re-measures the anchor and recomputes flip/clamp/rect against the current viewport.
     const measure = () => {
       if (!anchorRef.current) return
       const r = anchorRef.current.getBoundingClientRect()

@@ -24,6 +24,7 @@ interface Props {
   formatDate: (d: string) => string
 }
 
+// Vacancy drawer's general-details tab: the field cards plus the customer cascade, all wired through the `general` section hook.
 export default function DetailsGeneralTab({ vacancy: v, general, candidateTypes, typeMeta, industries, fnOptions, formatDate }: Props) {
   const { t } = useTranslation('vacancies')
   const { editing, setEditing, form, setF, save, cancel, types, toggleType,

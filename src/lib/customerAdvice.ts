@@ -16,7 +16,7 @@ export interface CustomerAdviceRule {
 
 const NONE_RULE: CustomerAdviceRule = { action: 'none', reasonKey: 'koios.reasons.none' }
 
-// First-match-wins priority ladder — see the file header for the read-set constraint.
+// First-match-wins priority ladder  for the read-set constraint.
 export function deriveCustomerAdvice(c: Customer): CustomerAdviceRule {
   // Rule 1: no advice on an archived (soft-deleted) customer.
   if (c.archived) return NONE_RULE

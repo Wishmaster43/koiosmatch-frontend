@@ -1,11 +1,3 @@
-/**
- * OutreachDepthSections — the three DASH-FEEDS-V3 depth sections for the
- * Outreach report: a channel funnel bar chart, a best-contact-moment heatmap
- * table, and a per-campaign daily timeseries. Each section self-hides when its
- * optional server field is absent (the compare envelope never carries these).
- * Rendered as a bare fragment of ReportChartCard cells — the page owns the grid
- * and the odd-card span.
- */
 import { Fragment, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import ReportChartCard from '../ReportChartCard'
@@ -28,6 +20,14 @@ const HEATMAP_PARTS = ['ochtend', 'middag', 'avond'] as const
 // short name for ISO weekday 1..7 without touching any real report data.
 const MONDAY_ANCHOR = new Date(Date.UTC(2024, 0, 1)) // 2024-01-01 is a Monday
 
+/**
+ * OutreachDepthSections — the three DASH-FEEDS-V3 depth sections for the
+ * Outreach report: a channel funnel bar chart, a best-contact-moment heatmap
+ * table, and a per-campaign daily timeseries. Each section self-hides when its
+ * optional server field is absent (the compare envelope never carries these).
+ * Rendered as a bare fragment of ReportChartCard cells — the page owns the grid
+ * and the odd-card span.
+ */
 export default function OutreachDepthSections({ data, onChannel }: {
   data: OutreachReportData
   // Fired for a total-series bar click; the page maps it onto its existing

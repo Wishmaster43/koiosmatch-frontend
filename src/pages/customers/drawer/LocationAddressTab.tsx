@@ -40,6 +40,8 @@ interface Props {
   onGoToContacts: (openId?: Id) => void
 }
 
+// The location drawer's address/registration tab: field cards + per-country
+// KVK/BTW validation (mirrors the customer's own Bedrijf tab, see below).
 export default function LocationAddressTab({
   location: l, customerId, contacts, t, provinceOptions, countryOptions, branchOptions, onSave, onAddContact, onGoToContacts,
 }: Props) {
@@ -91,6 +93,7 @@ export default function LocationAddressTab({
     costCenter: l.costCenter,
   }
 
+  // Maps the EditableFieldTable's edited values back onto the location patch shape.
   const save = (v: Record<string, unknown>) => {
     onSave(l.id as Id, {
       name: v.name as string,

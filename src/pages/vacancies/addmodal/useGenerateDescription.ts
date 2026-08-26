@@ -41,7 +41,7 @@ function buildTraits(f: GenerateFormFields): GenerationTraits {
   return traits
 }
 
-// The neutral prompt fields (AVG: only job data, never candidate/health data).
+// The neutral prompt fields (AVG: only job data, never candidate/health data)
 // job_title/location are supplied directly here (no base_vacancy_id exists yet).
 function buildFields(f: GenerateFormFields): Record<string, string> {
   const fields: Record<string, string> = {}
@@ -54,6 +54,9 @@ function buildFields(f: GenerateFormFields): Record<string, string> {
   return fields
 }
 
+// Orchestrates the whole popup lifecycle: open/close state, the read-only
+// profile-resolve query, the one-shot generate action, and its 404/402/503
+// error classification below.
 export function useGenerateDescription(fields: GenerateFormFields) {
   const [open, setOpen] = useState(false)
   const [status, setStatus] = useState<GenerateStatus>('idle')

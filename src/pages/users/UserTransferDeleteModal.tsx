@@ -31,6 +31,9 @@ const OWNED_TYPE_KEYS: Record<string, string> = {
   outreach_campaigns: 'outreachCampaigns', tasks: 'tasks', outreach_targets: 'outreachTargets',
 }
 
+// The mandatory ownership hand-off dialog before a user can be deleted (see file
+// docblock above) — names exactly how many records of which types are at stake
+// and requires picking a successor; there is no delete-without-transfer path.
 export default function UserTransferDeleteModal({ user, owned, successors, busy, onConfirm, onClose }: {
   user: ManagedUser
   owned: OwnedSummary

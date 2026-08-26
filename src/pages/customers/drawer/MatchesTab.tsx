@@ -41,6 +41,7 @@ import { useCustomerMatches } from '../hooks/useCustomerDrawerData'
 import type { CustomerMatchRow } from '../hooks/useCustomerDrawerData'
 import type { Id } from '@/types/common'
 
+// Customer-scoped read-only matches tab (see the module doc above): lazily mounted, with the same search+status toolbar order as the sibling sub-entity lists.
 export default function MatchesTab({ customerId }: { customerId?: Id }) {
   const { t } = useTranslation(['customers', 'candidates', 'matches'])
   // Match lifecycle lookup (R-1b) — resolves the title's fase from the status

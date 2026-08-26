@@ -12,6 +12,7 @@ import { shortGuid } from './constants'
 import Button from '@/components/ui/Button'
 import { PageTitle } from '@/components/ui/typography'
 
+// API-key list table; see the module doc comment above for the shared SM-style columns it mirrors.
 export default function ApiKeyList({ keys, loading, error, onReload, onOpen, onNew }) {
   const { t } = useTranslation('settings')
   const { formatDate } = useDateFormat()

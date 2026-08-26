@@ -45,6 +45,7 @@ const errorNoticeStyle = { ...noticeStyle, display: 'flex', alignItems: 'center'
 const retryStyle = { background: 'none', border: '1px solid var(--border)', borderRadius: 6,
   padding: '2px 8px', cursor: 'pointer', color: 'var(--text)', fontSize: 11 } as const
 
+// The assignee/owner/team fields for the create-task modal, each with its own retry affordance on a failed lookup load.
 export default function AssignmentCard({
   t, form, set, assigneeOpts, ownerName, usersLoading, usersError, hasColleagues, onRetryUsers,
   teams, teamsLoading, teamsError, onRetryTeams,

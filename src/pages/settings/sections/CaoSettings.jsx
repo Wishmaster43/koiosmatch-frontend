@@ -15,6 +15,7 @@
 import { useTranslation } from 'react-i18next'
 import StatusListEditor from './StatusListEditor'
 
+// The CAO lookup editor; withValueSlug is required since CaoController validates `value`.
 export default function CaoSettings() {
   const { t } = useTranslation('settings')
   return (

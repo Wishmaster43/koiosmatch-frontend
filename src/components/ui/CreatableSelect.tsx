@@ -76,6 +76,8 @@ interface CreatableSelectProps {
   renderTrigger?: (toggle: () => void) => ReactNode
 }
 
+// The house searchable-dropdown that can also add a value (never a bare <select>,
+// §3A) — owns its own open/close, outside-click, Escape and focus-restore wiring.
 export default function CreatableSelect({
   id, 'aria-labelledby': ariaLabelledBy,
   value, options = [], onChange, placeholder, allowCreate = true, menuWidth = 220, style,
@@ -104,6 +106,7 @@ export default function CreatableSelect({
   // Close on outside click; focus the search box when opening.
   useEffect(() => {
     if (!open) return
+    // A click outside both the trigger and the portalled menu closes the popover.
     const h = (e: MouseEvent) => {
       const target = e.target as Node
       if (ref.current?.contains(target) || menuRef.current?.contains(target)) return
@@ -133,6 +136,9 @@ export default function CreatableSelect({
   // different picker's own trigger) so this never yanks focus away from what
   // the user just interacted with.
   const wasOpenRef = useRef(false)
+  // Fires on every open/closed transition; the focus restore itself only runs on
+  // close (see the comment above), guarded so it never steals focus from something
+  // the user already interacted with elsewhere.
   useEffect(() => {
     if (wasOpenRef.current && !open && (document.activeElement === document.body || document.activeElement == null)) {
       triggerRef.current?.focus()

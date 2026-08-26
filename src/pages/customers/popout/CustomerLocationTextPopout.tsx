@@ -17,10 +17,14 @@ import { useTextPopoutDraft } from '@/pages/popout/shared'
 import { useLocationTextLite, patchLocationText } from '../hooks/useCustomerTextPopout'
 import { textPopoutTopic } from '@/lib/secondScreen'
 
+// Second-screen pop-out for a customer location's description (TEKST-POPOUT-1
+// recipe, see file docblock above): loads the location, drafts, saves and titles
+// the window with the location's own name.
 export default function CustomerLocationTextPopout({ id }: { id: string | undefined }) {
   const { t } = useTranslation('customers')
   const { location, loading, error, reload } = useLocationTextLite(id)
 
+  // Saves the edited description to the location; reverts the draft on failure.
   const persist = useCallback((html: string, revert: () => void) => {
     if (!id) return Promise.resolve(false)
     return patchLocationText(id, html, t, revert)
@@ -32,6 +36,8 @@ export default function CustomerLocationTextPopout({ id }: { id: string | undefi
     onSave: persist,
   })
 
+  // Sets the popout window's title to the location's name once loaded, restoring
+  // the previous title on unmount.
   useEffect(() => {
     if (!location) return
     const previous = document.title

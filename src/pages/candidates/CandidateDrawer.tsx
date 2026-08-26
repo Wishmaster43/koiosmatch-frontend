@@ -101,6 +101,7 @@ interface CandidateDrawerProps {
   initialTab?: string
 }
 
+// Thin drawer container: composes the phase/status + header-edit hooks, resolves tab visibility (module/tenant/freelance gates) and deep-link targets, and renders each tab's content in renderTabContent below.
 export default function CandidateDrawer({ candidate: c, onClose, expanded, onToggleExpand, onUpdate, onArchive, onMarkDeletion, onRestore, onHardDelete, onMerged, onRefresh, users = [], initialTab }: CandidateDrawerProps) {
   const { t } = useTranslation('candidates')
   const { colorOf: genderColor } = useGenders() as { colorOf: (g?: string) => string | undefined }
@@ -254,6 +255,7 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
     ...users.map(u => ({ value: String(u.id), label: u.name, initials: ownerInitialsOf(u.name) })),
   ]
   const ownerValue = ownerInUsers ? String(currentOwnerId) : '__current'
+  // Ignores the fallback '__current' entry (not a real user); otherwise records the picked owner locally for instant feedback and persists it via onUpdate.
   const onOwnerChange = (id: string | number) => {
     if (id === '__current') return
     const u = users.find(x => String(x.id) === String(id))

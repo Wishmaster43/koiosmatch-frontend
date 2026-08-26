@@ -9,6 +9,7 @@ import { useDateFormat } from '@/lib/datetime'
 import type { RedeployRadarRow } from '@/types/dashboard'
 import type { FeedTileContext } from '../feedTileKit'
 
+// Candidates whose current match ends soon and need redeployment, rendered through the shared WidgetListBlock (see file header).
 export default function RedeployRadarList({ rows, onNavigate }: {
   rows: RedeployRadarRow[]
   onNavigate?: FeedTileContext['onNavigate']

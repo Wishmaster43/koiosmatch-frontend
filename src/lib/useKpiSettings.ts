@@ -31,11 +31,14 @@ const cacheByTenant = new Map<string, Record<string, number>>()
 // the CURRENT tenant, mirroring useCachedLookup's tenantCacheKey.
 const activeTenantKey = (): string => getActiveTenantId() ?? 'none'
 
+// Exposes the active tenant's cached KPI/target settings.
 export function useKpiSettings() {
   const [settings, setSettings] = useState<Record<string, number>>(
     cacheByTenant.get(activeTenantKey()) ?? SETTING_DEFAULTS,
   )
 
+  // Fetches the current tenant's settings once and caches them; a tenant already
+  // in cache (e.g. from another mounted component) skips the request entirely.
   useEffect(() => {
     const key = activeTenantKey()
     if (cacheByTenant.has(key)) return

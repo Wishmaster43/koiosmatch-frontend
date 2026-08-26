@@ -28,6 +28,7 @@ import { handlePopupKeydown } from './popupCommands'
 export function useFocusTrap<T extends HTMLElement = HTMLDivElement>(onClose?: () => void): MutableRefObject<T | null> {
   // Latest onClose in a ref so the armed trap never needs re-arming to see it.
   const onCloseRef = useRef(onClose)
+  // Keeps the ref pointed at the latest onClose, so the already-armed trap picks up a changed callback without needing to be re-armed.
   useEffect(() => {
     onCloseRef.current = onClose
   }, [onClose])

@@ -72,6 +72,7 @@ function MiniTable({ rows, nameCol }: { rows: BreakdownRow[]; nameCol: string })
   )
 }
 
+// Renders the per-customer and per-function open-shifts bar charts + mini tables,
 export default function ShiftsBreakdownCharts({ customerRows, functionRows, unit, loading, error }: {
   customerRows: BreakdownRow[]
   functionRows: BreakdownRow[]

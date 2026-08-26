@@ -12,6 +12,7 @@ import SharedBranchSection from '@/components/drawer/BranchSection'
 import { useCandidateBranches } from '../hooks/useCandidateDrawerData'
 import type { Candidate } from '@/types/candidate'
 
+// Candidate-side adapter onto the shared BranchSection.
 export default function BranchSection({ c }: { c: Candidate }) {
   const { t } = useTranslation('candidates')
   const { branches, options, selectedIds, toggle } = useCandidateBranches(c)

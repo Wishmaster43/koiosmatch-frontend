@@ -9,6 +9,7 @@ const th = { textAlign: 'left', fontSize: 11, fontWeight: 600, color: 'var(--tex
 const td = { fontSize: 12, color: 'var(--text)', padding: '8px', borderBottom: '1px solid var(--border)' }
 const num = { ...td, fontFamily: 'monospace', textAlign: 'right' }
 
+// Per-model input/output rate table, formatted in the active locale + currency.
 export default function KoiosPricingCard({ pricing, currency, locale, t }) {
   const entries = Object.entries(pricing ?? {})
   if (entries.length === 0) return null

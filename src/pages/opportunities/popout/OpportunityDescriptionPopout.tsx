@@ -12,10 +12,14 @@ import { PopoutShell, TextPopoutEditor, useTextPopoutDraft } from '@/pages/popou
 import { useOpportunityTextLite, patchOpportunityText } from '../hooks/useOpportunityTextPopout'
 import { textPopoutTopic } from '@/lib/secondScreen'
 
+// Second-screen pop-out for an opportunity's description (TEKST-POPOUT-1 recipe,
+// see file docblock above); thin container wiring identity/draft/persist together.
 export default function OpportunityDescriptionPopout({ id }: { id: string | undefined }) {
   const { t } = useTranslation('opportunities')
   const { opportunity, loading, error, reload } = useOpportunityTextLite(id)
 
+  // Saves the edited description through the same PATCH the drawer's own block
+  // writes; reverts the draft on failure.
   const persist = useCallback((html: string, revert: () => void) => {
     if (!id) return Promise.resolve(false)
     return patchOpportunityText(id, html, t, revert)

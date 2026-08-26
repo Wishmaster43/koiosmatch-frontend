@@ -89,6 +89,7 @@ interface PriceAgreementFormProps {
   saving?: boolean
 }
 
+// Editable price-agreement form (function/CAO/rate fields), fully controlled by the caller's draft/onChange.
 export default function PriceAgreementForm({ draft, onChange, onSave, onCancel, saveLabel, saving }: PriceAgreementFormProps) {
   const { t } = useTranslation('customers')
   const { functions } = useFunctions()

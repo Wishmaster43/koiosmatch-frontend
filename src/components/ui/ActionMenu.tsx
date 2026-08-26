@@ -97,6 +97,7 @@ interface ActionMenuProps {
   highlighted?: boolean
 }
 
+// The generic drill-in action dropdown: one trigger opens a data-driven item tree (direct fire, sub-panel, or a searchable list), with a back header per level (see file header).
 export default function ActionMenu({
   label, icon: Icon, items = [], menuWidth = 280, align = 'left', disabled = false,
   iconOnly = false, ariaLabel, highlighted = false,
@@ -188,7 +189,7 @@ export default function ActionMenu({
           display: 'flex', alignItems: 'center', justifyContent: 'center', width: 26, height: 26, borderRadius: 6,
           // PRIMAIR-VLAK-1 (Danny 19-08, tweede aanwijzing op de sorteerknopjes):
           // the icon trigger is an ACTION and paints the solid tenant fill in
-          // every state — idle included; open keeps it, with the ring via border.
+          // every state — idle included; open keeps it, with the ring via border
           // highlighted (an active sort/filter) keeps its signal as the ink ring.
           border: (open || highlighted) ? '1px solid var(--button-ink)' : '1px solid var(--button-border)',
           background: 'var(--button-fill)',

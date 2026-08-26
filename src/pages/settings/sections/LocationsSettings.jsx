@@ -1,8 +1,3 @@
-/**
- * LocationsSettings — tenant CRUD for the bureau's own locations (list, map
- * view, create/edit modal, delete guarded by in-use counts). The reference
- * screen for the "+ add" wide-form dialog pattern other create flows mirror.
- */
 import { useState, useEffect, useCallback, lazy, Suspense } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Map as MapIcon, AlertTriangle } from 'lucide-react'
@@ -63,6 +58,11 @@ function formatUsageCounts(counts, t) {
     .join(', ')
 }
 
+/**
+ * LocationsSettings — tenant CRUD for the bureau's own locations (list, map
+ * view, create/edit modal, delete guarded by in-use counts). The reference
+ * screen for the "+ add" wide-form dialog pattern other create flows mirror.
+ */
 export default function LocationsSettings() {
   const { t } = useTranslation(['settings', 'common'])
   const [locations, setLocations] = useState([])
@@ -82,7 +82,7 @@ export default function LocationsSettings() {
   // (Danny 27-07 — the wide-form frame gets the same dialog behaviour as +Match/
   // +Kandidaat). The trap itself is armed INSIDE LocationFormModal (see its
   // docblock) so its effect attaches to a freshly mounted node every time the
-  // dialog opens — arming it here would run once at page mount with no node yet.
+  // dialog opens — arming it here would run once at page mount with no node yet
   // useCallback still keeps ONE stable `onClose` identity across re-renders —
   // every keystroke into `form` re-renders this component and, via props,
   // LocationFormModal too; a fresh inline closure here would re-trigger the

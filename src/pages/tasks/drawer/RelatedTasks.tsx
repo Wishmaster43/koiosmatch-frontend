@@ -74,6 +74,8 @@ export function hasRelatedSubject(task: TaskDetail): boolean {
   return resolveSubject(task) !== null
 }
 
+// Lists this task's siblings sharing the same resolved subject (candidate/vacancy/…),
+// with server-side search/status/type/priority filters; renders nothing without a subject.
 export default function RelatedTasks({ task }: { task: TaskDetail }) {
   const { t } = useTranslation(['tasks', 'common'])
   const { formatDate } = useDateFormat()
@@ -121,6 +123,7 @@ export default function RelatedTasks({ task }: { task: TaskDetail }) {
     // re-render — its two primitive fields (type/id) are the real dependency.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [subject?.type, subject?.id, selectedStatus, selectedType, selectedPriority, query, task.id])
+  // Refetches whenever the subject or any filter changes (via fetchRelated's own deps).
   useEffect(() => { fetchRelated() }, [fetchRelated])
 
   if (!subject) return null

@@ -67,7 +67,7 @@ interface UseRelationSortOptions<T> {
   // shared ui_preferences map above.
   storageKey: string
   // Omit an accessor when the sub-tab has nothing meaningful on that axis — the
-  // menu then never offers it (see the file header + each call site's notes).
+  // Menu then never offers it ( + each call site's notes).
   startDateOf?: (item: T) => string | null | undefined
   startDateLabel?: string
   endDateOf?: (item: T) => string | null | undefined
@@ -102,6 +102,8 @@ const isMissing = (v: unknown): boolean => v === undefined || v === null || v ==
 // for it — see toggle() below).
 const defaultDir = (field: SortField): SortDir => (field === 'function' ? 'asc' : 'desc')
 
+// The shared sort control: resolves the active axis.
+// (persisted per sub-tab), orders the items, and renders the one ActionMenu control.
 export function useRelationSort<T>(items: T[], opts: UseRelationSortOptions<T>): UseRelationSortResult {
   const { t } = useTranslation('candidates')
   const { storageKey, startDateOf, startDateLabel, endDateOf, endDateLabel, functionOf, functionLabel, ownOrder, ownOrderLabel } = opts
@@ -133,6 +135,7 @@ export function useRelationSort<T>(items: T[], opts: UseRelationSortOptions<T>):
   const fallback: SortState | null = startDateOf ? { field: 'startDate', dir: 'desc' } : null
   const state = allSorts[storageKey] ?? fallback
 
+  // Builds the menu's axis list from whichever accessors this caller actually passed.
   const fields = useMemo(() => {
     const list: { field: SortField; label: string }[] = []
     if (startDateOf) list.push({ field: 'startDate', label: startDateLabel ?? t('addFields.startDate') })
@@ -145,6 +148,8 @@ export function useRelationSort<T>(items: T[], opts: UseRelationSortOptions<T>):
 
   const isOwnOrder = state?.field === 'own'
 
+  // Resolves the render order for the active axis; see the OWN ORDER note above for
+  // why 'own' skips comparison entirely.
   const order = useMemo(() => {
     const idx = items.map((_, i) => i)
     // 'own' has no client comparator (file header, OWN ORDER) — the received

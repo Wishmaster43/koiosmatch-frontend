@@ -21,6 +21,7 @@ interface ContactMomentResponse {
   last_contact_type: string | null
 }
 
+// Non-blocking confirm-after-click flow for a mailto/tel link; the server's response is the only source of the new contact-moment stamp, never a local guess (see file header).
 export function useContactMomentConfirm(
   candidateId: string | number | undefined,
   onStamped?: (stamp: ContactMomentResponse) => void,

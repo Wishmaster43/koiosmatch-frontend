@@ -11,6 +11,7 @@ import { mapMatch } from '@/pages/matches/shared'
 import type { RawMatch, MatchRow } from '@/types/match'
 import type { Id } from '@/types/common'
 
+// Read-only vacancy matches (see the module doc above): mapped through the same shared mapMatch every other Matches tab uses, disabled until an id is known.
 export function useVacancyMatches(vacancyId?: Id) {
   const { data = [], isLoading: loading, isError: error } = useQuery({
     queryKey: ['vacancies', vacancyId, 'matches'],

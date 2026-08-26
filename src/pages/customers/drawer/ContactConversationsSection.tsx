@@ -26,6 +26,7 @@ import { StartConversationModal } from '@/pages/candidates/shared'
 import { useAuth } from '@/context/AuthContext'
 import type { Id } from '@/types/common'
 
+// See the file's top doc above; a thin wrapper pointing the shared ConversationsSection at the contact-scoped endpoint.
 export default function ContactConversationsSection({ customerId, contactId, mobile }: {
   customerId: Id
   contactId: Id

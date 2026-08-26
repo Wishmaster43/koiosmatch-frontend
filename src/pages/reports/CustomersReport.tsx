@@ -91,6 +91,7 @@ const SIGNAL_COLOR: Partial<Record<string, string>> = {
 // component satisfies ReportsPage's one shared `ReportComponent` contract.
 const VIEWS = ['customers', 'prospects'] as const
 
+// The customers inflow report, with its Klanten/Prospects switch.
 export default function CustomersReport({ period, filters = EMPTY_REPORT_FILTERS, initialView = 'customers', compare = COMPARE_OFF }: {
   period: ReportPeriod
   filters?: ReportFilterState

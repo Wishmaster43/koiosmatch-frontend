@@ -26,6 +26,7 @@ import './koiosTypes' // module augmentation: KoiosChatMessage.pendingAction, Ko
 
 const welcomeMessage = (): KoiosChatMessage => ({ role: 'assistant', kind: 'welcome' })
 
+// Owns the conversation state (messages, loading, model override) and the single synchronous send(); KoiosPanel stays presentational.
 export function useKoiosChat() {
   const [messages, setMessages] = useState<KoiosChatMessage[]>([welcomeMessage()])
   const [loading, setLoading]   = useState(false)

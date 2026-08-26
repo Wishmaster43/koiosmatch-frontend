@@ -62,6 +62,7 @@ export function useCascadePickers({
     arr.map(x => ({ value: String(x.id), label: x.name ?? '—' }))
   const placeholder = clientId ? t('common:select') : t('details.pickClientFirst')
 
+  // Resolves the picked location and forwards its own address fields alongside id/name, so the caller can decide whether to prefill the vacancy's address from it.
   const handleLocationChange = (id: string) => {
     const loc = locations.find(l => String(l.id) === id)
     // V9: forward the picked location's own address alongside id/name — the

@@ -16,6 +16,7 @@ import Button from '@/components/ui/Button'
 import { Mono } from '@/components/ui/typography'
 import { tintBorder } from '@/lib/tint'
 
+// Two-phase inline create view: the subscription form, then a one-time secret reveal that is never persisted client-side.
 export default function WebhookCreate({ onBack, onCreated }) {
   const { t } = useTranslation('settings')
   const [name, setName]     = useState('')
@@ -48,6 +49,7 @@ export default function WebhookCreate({ onBack, onCreated }) {
     setSaving(false)
   }
 
+  // Copies the one-time signing secret to the clipboard and flashes a copied confirmation for 2s.
   const copySecret = () => {
     navigator.clipboard.writeText(result?.secret ?? '')
     setCopied(true)

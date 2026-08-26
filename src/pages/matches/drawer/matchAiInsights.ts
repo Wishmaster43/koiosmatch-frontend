@@ -13,6 +13,7 @@ import { computeMatchExpiry } from '../matchExpiry'
 // A bound-namespace translate function (the caller already resolved the namespace).
 type Tx = (key: string, opts?: Record<string, unknown>) => string
 
+// Pure FE heuristics over already-loaded fields (see the module doc above): a score reading + a contract-window reading, no AI/API call.
 export function buildMatchAdviceInsights(match: MatchRow, t: Tx, now: Date = new Date()): KoiosAdviceInsight[] {
   const score = match.score
   const scoreInsight: KoiosAdviceInsight = score == null

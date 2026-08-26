@@ -19,6 +19,7 @@ export interface AssignableRole {
   icon?: string | null
 }
 
+// Tenant role options for the user-role picker; shape mirrors GET /roles (see the AssignableRole doc comment above).
 export function useAssignableRoles() {
   const { data, isLoading } = useQuery({
     queryKey: ['roles', 'assignable'],

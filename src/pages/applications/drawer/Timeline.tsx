@@ -43,6 +43,7 @@ export function kindOf(id?: Id): string {
   return colon > 0 ? s.slice(0, colon) : ''
 }
 
+// See the file's top doc above; a thin adapter mapping application events onto the shared EventTimeline.
 export default function Timeline({ items = [], emptyText }: { items?: TimelineItem[]; emptyText?: ReactNode }) {
   return (
     <EventTimeline

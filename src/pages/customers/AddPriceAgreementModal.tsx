@@ -21,6 +21,7 @@ interface Props {
   saveLabel: string
 }
 
+// Compact modal wrapper (see the module doc above): the existing form moves in unchanged, only the surrounding chrome changed from an inline expansion to a real popup.
 export default function AddPriceAgreementModal({ draft, onChange, onSave, onCancel, saveLabel }: Props) {
   const { t } = useTranslation(['customers', 'common'])
 

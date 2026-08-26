@@ -8,6 +8,7 @@ import type { TFunction } from 'i18next'
 
 const STATUSES = ['queued', 'sending', 'sent', 'failed', 'paused', 'canceled'] as const
 
+// Builds the WA-Web queue tab's status filter group.
 export function buildWaWebQueueFilterGroups({ t, status, setStatus }: {
   t: TFunction
   status: string

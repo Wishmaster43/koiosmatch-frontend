@@ -42,6 +42,7 @@ const SIGNAL_META: Record<RadarSignalId, { Icon: LucideIcon; labelKey: string; c
   hasTasks:       { Icon: CheckSquare,   labelKey: 'candidates:kpi.tasks',                color: TASKS_ACCENT },
 }
 
+// The Koios panel's landing-state content: candidate attention signals as clickable deep-links, collapsible via a persisted per-user choice.
 export default function KoiosRadar({ onNavigate }: { onNavigate?: (page: string, intent?: unknown) => void }) {
   const { t } = useTranslation(['common', 'candidates'])
   const { signals, loading, error } = useKoiosRadarSignals()

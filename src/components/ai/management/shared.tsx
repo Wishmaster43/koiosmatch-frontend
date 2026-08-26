@@ -37,6 +37,7 @@ export function Field({ label, children }: { label?: ReactNode; children: ReactN
   )
 }
 
+// A small pill label (cost/model badges); label, color and background are entirely caller-controlled.
 export function Badge({ label, color, bg }: { label?: ReactNode; color?: string; bg?: string }) {
   return (
     <span style={{ fontSize: 10, fontWeight: 600, color, background: bg, borderRadius: 999, padding: '1px 6px', whiteSpace: 'nowrap' }}>
@@ -45,6 +46,7 @@ export function Badge({ label, color, bg }: { label?: ReactNode; color?: string;
   )
 }
 
+// Save control shared by every AI-management tab: a transient saved checkmark plus a save button disabled while saving.
 export function SaveBar({ saving, saved, onSave }: { saving?: boolean; saved?: boolean; onSave?: () => void }) {
   const { t } = useTranslation('workflows')
   return (
@@ -69,6 +71,7 @@ export function SaveBar({ saving, saved, onSave }: { saving?: boolean; saved?: b
 // screen's value isn't a reference number.
 export function CopyableValue({ value, copyLabel, copiedMessage }: { value: string; copyLabel: string; copiedMessage: string }) {
   const [copied, setCopied] = useState(false)
+  // Copy the value to the clipboard and flash a checkmark for 2s; silently no-ops when the Clipboard API is unavailable.
   const copy = async () => {
     try {
       await navigator.clipboard.writeText(value)
@@ -87,6 +90,7 @@ export function CopyableValue({ value, copyLabel, copiedMessage }: { value: stri
   )
 }
 
+// Collapsible history of saved versions for a prompt/agent config, each one restorable via onRestore.
 export function VersionList({ versions, onRestore }: { versions?: Version[]; onRestore?: (v: Version) => void }) {
   const { t } = useTranslation('workflows')
   const { formatDateTime } = useDateFormat()
@@ -119,6 +123,7 @@ export function VersionList({ versions, onRestore }: { versions?: Version[]; onR
   )
 }
 
+// A large text field (prompt/agent body) paired with its own version history and save bar.
 export function TextEditor({ value, onChange, onSave, saving, saved, versions, onRestore, placeholder, height = 220 }: {
   value?: string; onChange: (v: string) => void; onSave?: () => void; saving?: boolean; saved?: boolean
   // FAKE-AFFORDANCE (14-08): optional — a caller with no versions endpoint (e.g.
@@ -174,6 +179,7 @@ export function SideList<T extends { id?: string | number }>({ title, items, sel
   )
 }
 
+// One row in the SideList left column: click to select; delete (when provided) reveals on hover and on keyboard focus.
 export function ListRow<T>({ item, active, onSelect, label, sublabel, leading, onDelete }: {
   item: T; active?: boolean; onSelect: (item: T) => void; label?: ReactNode; sublabel?: ReactNode; leading?: ReactNode; onDelete?: (item: T) => void
 }) {

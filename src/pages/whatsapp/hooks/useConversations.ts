@@ -41,6 +41,7 @@ export interface WaConversationFilters {
   search?: string
 }
 
+// See the file's top doc above; forwards only the server-validated filters to GET /conversations, cached per filter combo.
 export function useConversations(filters: WaConversationFilters) {
   return useQuery({
     queryKey: ['wa-conversations', filters],

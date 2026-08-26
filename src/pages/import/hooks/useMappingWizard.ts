@@ -29,6 +29,7 @@ const INITIAL_STATE: MappingWizardState = {
   step: 'upload', fileName: null, headers: [], sourceRows: [], mapping: {}, editableRows: [], dirty: false,
 }
 
+// Wizard state machine for the pre-validation steps (upload → map → preview); dirty tracks whether the editable rows changed since the last successful dry-run.
 export function useMappingWizard(targetColumns: readonly string[]) {
   const [state, setState] = useState<MappingWizardState>(INITIAL_STATE)
 
@@ -51,6 +52,7 @@ export function useMappingWizard(targetColumns: readonly string[]) {
     })
   }, [])
 
+  // Advance to the preview step once the mapping is confirmed.
   const goToPreview = useCallback(() => setState((s) => ({ ...s, step: 'preview' })), [])
   const backToMapping = useCallback(() => setState((s) => ({ ...s, step: 'map' })), [])
 
@@ -66,6 +68,7 @@ export function useMappingWizard(targetColumns: readonly string[]) {
   // Called by the container right after a dry-run succeeds for the CURRENT rows.
   const markValidated = useCallback(() => setState((s) => ({ ...s, dirty: false })), [])
 
+  // Drop everything and start over from the upload step.
   const reset = useCallback(() => setState(INITIAL_STATE), [])
 
   return { ...state, loadFile, updateMapping, goToPreview, backToMapping, editCell, markValidated, reset }

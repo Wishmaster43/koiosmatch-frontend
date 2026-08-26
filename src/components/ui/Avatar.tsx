@@ -30,6 +30,8 @@ interface AvatarProps {
   soft?: boolean
 }
 
+// Photo when given, otherwise an initials bubble hashed to a stable colour from
+// AVATAR_COLORS (see file docblock above) so the same person always reads the same.
 export default function Avatar({ initials, size = 28, photo, color, soft = false }: AvatarProps) {
   const bg = color || AVATAR_COLORS[(initials ?? '?').charCodeAt(0) % AVATAR_COLORS.length]
 

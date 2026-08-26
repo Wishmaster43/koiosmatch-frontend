@@ -60,6 +60,8 @@ const mapPausedBy = (raw: NonNullable<ApiApplication['interview']>): Application
   return null
 }
 
+// Raw interview session block → the UI model (see the file doc above for the
+// list-vs-detail field split and the mixed-language `turn` normalisation).
 export function mapInterview(raw?: ApiApplication['interview']): ApplicationInterview | null {
   if (!raw) return null
   const category = (raw.category

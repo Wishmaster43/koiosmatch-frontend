@@ -28,6 +28,7 @@ interface UsageWhatsAppTabProps {
   whatsapp: BillingUsageWhatsapp | undefined
 }
 
+// Usage settings' WhatsApp tab: per-number message/cost breakdown from the billing-usage payload.
 export default function UsageWhatsAppTab({ whatsapp }: UsageWhatsAppTabProps) {
   const { t } = useTranslation('settings')
   const { t: tc } = useTranslation('candidates')

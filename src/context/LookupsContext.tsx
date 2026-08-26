@@ -186,6 +186,7 @@ function translateSeedLabels(t: TFunction, lookupName: string, items: LookupItem
 
 const LookupsContext = createContext<LookupsValue | null>(null)
 
+// Loads the tenant's candidate lookups once a session exists (login/tenant-switch), keeping the seed defaults meanwhile so the UI never renders empty pickers pre-login or on failure.
 export function LookupsProvider({ children }: { children: ReactNode }) {
   const { t } = useTranslation('common')
   const [candidateTypesRaw, setCandidateTypes] = useState<LookupItem[]>(DEFAULT_CANDIDATE_TYPES)
@@ -219,7 +220,9 @@ export function LookupsProvider({ children }: { children: ReactNode }) {
 
   // Seeded defaults render in the user language; a tenant value stays as typed (LOOKUP-I18N-1).
   const candidateTypes = useMemo(() => translateSeedList(t, 'candidateTypes', candidateTypesRaw), [candidateTypesRaw, t])
+  // Same seed-or-tenant-value translation as candidateTypes above, for phases.
   const phases         = useMemo(() => translateSeedList(t, 'phases', phasesRaw), [phasesRaw, t])
+  // Same translation, for funnel types.
   const funnelTypes    = useMemo(() => translateSeedList(t, 'funnelTypes', funnelTypesRaw), [funnelTypesRaw, t])
   const statuses       = useMemo(() => translateSeedList(t, 'statuses', statusesRaw), [statusesRaw, t])
   // Availability never fetches (C-39 below) and has no seed-catalogue entry — always the
@@ -246,6 +249,7 @@ export function LookupsProvider({ children }: { children: ReactNode }) {
   return <LookupsContext.Provider value={value}>{children}</LookupsContext.Provider>
 }
 
+// Reads the shared lookups context; throws early if called outside LookupsProvider so a missing wrapper fails loudly instead of returning silently wrong data.
 export function useLookups(): LookupsValue {
   const ctx = useContext(LookupsContext)
   if (!ctx) throw new Error('useLookups must be used within a LookupsProvider')

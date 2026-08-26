@@ -23,6 +23,7 @@ import { OPERATOR_OPTIONS, OPERATOR_GROUP_LABEL_KEYS, type OperatorGroup } from 
 
 const GROUPS: OperatorGroup[] = ['text', 'number', 'date']
 
+// Flattens the three operator groups (text/number/date) into one labelled list for CreatableSelect (see the module doc above for why not SelectMenu/native select).
 export function OperatorSelect({ value, onChange, style, ariaLabel }: {
   value?: string; onChange: (v: string) => void; style?: CSSProperties; ariaLabel?: string
 }) {

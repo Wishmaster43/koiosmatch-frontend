@@ -31,6 +31,7 @@ interface Props {
   onChange: (branchIds: Id[]) => void
 }
 
+// Renders the inherited (muted, non-removable) or deviating (removable chips) state, so a location can be told back to inheriting by clearing its own branches.
 export default function LocationBranchSection({ branchIds, branches, inherited, effectiveBranches, options, onChange }: Props) {
   const { t } = useTranslation('customers')
   const selected = branchIds.map(String)

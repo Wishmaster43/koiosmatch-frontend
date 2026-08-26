@@ -85,6 +85,7 @@ function OpenShifts({ customerId }: { customerId?: Id }) {
   )
 }
 
+// Customer-scoped opportunities list: stage filter (StatusFilterSelect) + free-text title search + tenant colour/hours settings, mirroring the standalone Opportunities page for this one customer.
 export default function OpportunitiesTab({ customerId, customerName }: { customerId?: Id; customerName?: string }) {
   const { t } = useTranslation('customers')
   const auth = useAuth()
@@ -112,6 +113,7 @@ export default function OpportunitiesTab({ customerId, customerName }: { custome
   // op hoofd-drilldown mis ik ook zoekbalk") — narrows on the opportunity title, the same field the title
   // column itself renders, on top of the stage filter's rows.
   const [search, setSearch] = useState('')
+  // Narrows the stage-filtered rows further by a case-insensitive match on the title (the same field the title column renders).
   const rows = useMemo(() => {
     const q = search.trim().toLowerCase()
     return q ? stageRows.filter(o => String(o.title ?? '').toLowerCase().includes(q)) : stageRows
@@ -125,6 +127,7 @@ export default function OpportunitiesTab({ customerId, customerName }: { custome
   // 'opportunity_value_in_hours' read so the drawer tab and the page never disagree.
   const valueInHours = getBoolSetting(settings, 'opportunity_value_in_hours', false)
 
+  // Deletes one opportunity after confirmation, reloading the list on success or surfacing an honest error toast on failure.
   const remove = (o: Opportunity) => {
     confirm(t('opportunities.deleteConfirm'), () => {
       api.delete(`/opportunities/${o.id}`).then(() => reload()).catch(() => notifyError(t('opportunities.deleteFailed')))

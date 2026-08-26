@@ -23,6 +23,7 @@ interface EntityModuleConfig {
   module?: string
 }
 
+// Builds one workflow module from a small per-entity config: a single Action selector drives which config sections show via showIf (see file header).
 export default function makeEntityModule(cfg: EntityModuleConfig): ModuleDef {
   const {
     type, label, category, Icon, color, bg, module,

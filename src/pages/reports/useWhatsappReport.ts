@@ -19,6 +19,7 @@ import { buildReportQueryParams, EMPTY_REPORT_FILTERS } from './reportFilterPara
 import type { ReportFilterState } from './reportFilterParams'
 import type { WhatsappReportData, ReportPeriod } from '@/types/analytics'
 
+// Data layer for the WhatsApp report (see the module doc above); `enabled` lets a tenant without the module skip firing a request that would only ever 403.
 export function useWhatsappReport(period: ReportPeriod, enabled = true, filters: ReportFilterState = EMPTY_REPORT_FILTERS) {
   const params = buildReportQueryParams(period, 'whatsapp', filters)
   const { data, isLoading, isError, refetch } = useQuery({

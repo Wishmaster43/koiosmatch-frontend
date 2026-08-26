@@ -24,6 +24,8 @@ interface UseDashboardFilterPanelArgs {
   selStatus: string[]; setSelStatus: Dispatch<SetStateAction<string[]>>
 }
 
+// Assembles and registers the dashboard's right-panel filter groups; see the module
+// doc comment above for where each dimension's options come from.
 export function useDashboardFilterPanel({
   dash, t, selPeriode, setSelPeriode, selVestiging, setSelVestiging, selStatus, setSelStatus,
 }: UseDashboardFilterPanelArgs) {
@@ -34,6 +36,7 @@ export function useDashboardFilterPanel({
   // user's own scope, incl. the 'none' unassigned sentinel), never dash.filters.locations.
   const branchOptions = useBranchOptions()
 
+  // Three filter groups (period/branch/status) in the shape the shared right panel expects.
   const filterGroups = useMemo(() => [
     { key: 'periode', label: t('filters.periodLabel'), selected: selPeriode,
       options: periodOptions,
@@ -49,8 +52,9 @@ export function useDashboardFilterPanel({
     // explicitly; harmless since their identity never changes across renders.
   ], [selPeriode, selVestiging, selStatus, dash, periodOptions, branchOptions, t, setSelPeriode, setSelVestiging, setSelStatus])
 
-  // Register this page's filter groups with the shared right panel; clean up on unmount.
   const { registerFilters, unregisterFilters } = useRightPanel()
+  // Register this page's filter groups with the shared right panel; unregister on
+  // unmount so they don't leak to other pages.
   useEffect(() => {
     registerFilters('dashboard', filterGroups)
     return () => unregisterFilters('dashboard')

@@ -22,6 +22,7 @@ import { PageTitle } from '@/components/ui/typography'
 // TAAKBEHEER-HORIZON-1 fase 2: Metrics = Horizon's snapshotted throughput/runtime.
 const TABS = ['overview', 'recent', 'jobs', 'failed', 'metrics']
 
+// Job-queue settings: sub-tab shell over the Horizon-backed overview/recent/jobs/failed/metrics views (see TABS above).
 export default function JobQueueSettings() {
   const { t } = useTranslation('settings')
   const [tab, setTab] = useState('overview')

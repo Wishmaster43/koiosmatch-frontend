@@ -16,6 +16,8 @@ import { StopRunButton, CANCELLABLE } from '@/components/layout/workflow/runCont
 import { PageTitle, Caption, GroupLabel } from '@/components/ui/typography'
 import type { RunRow } from '@/types/reports'
 
+// Slide-over for one workflow run: header/status/metrics, a timeline of run
+// metadata, lineage and the per-step input/output list; polls while live.
 export default function RunDetailDrawer({ run, onClose, zIndex = 50 }: {
   run: RunRow
   onClose: () => void
@@ -47,6 +49,8 @@ export default function RunDetailDrawer({ run, onClose, zIndex = 50 }: {
     }
   }, [run.id, run.workflow_id])
 
+  // Poll every 3s only while the opened run is still in a cancellable (live)
+  // state; the interval stops itself the moment a poll sees a terminal status.
   useEffect(() => {
     setLive(null)
     if (!CANCELLABLE.has(String(run.status))) return

@@ -15,6 +15,8 @@ import type { SmContactRow } from '@/types/shiftmanager'
 const mutedCell: CSSProperties = { color: 'var(--text-muted)', fontSize: 12 }
 const fullName = (c: SmContactRow) => [c.firstname, c.lastname].filter(Boolean).join(' ')
 
+// Contact-person columns only, handed to the shared DataTable (see file docblock
+// above) — no table chrome re-implemented here.
 export default function ContactsTable({ rows, loading, selectedId, onSelect }: {
   rows: SmContactRow[]
   loading?: boolean

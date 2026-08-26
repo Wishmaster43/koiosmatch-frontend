@@ -23,6 +23,7 @@ import type { OnChange } from './fieldControls'
 
 type Opt = { value: string; label: string }
 
+// Searchable multi-value chip picker for workflow config fields; resolves its option list from an endpoint, tenant lookup, static schema options, or falls back to free-text entry — priority order documented in the module doc above.
 export default function MultiSelectField({ field, value, onChange }: {
   field: WorkflowField; value?: unknown; onChange: OnChange
 }) {
@@ -38,6 +39,7 @@ export default function MultiSelectField({ field, value, onChange }: {
   const [remoteOpts, setRemoteOpts] = useState<Opt[]>([])
   const [remoteLoading, setRemoteLoading] = useState(!!endpoint)
 
+  // Fetches the endpoint-backed option list once per endpoint (mirrors LookupSelectField); an alive guard drops the result on unmount, and any failure fails soft to an empty list rather than an error state.
   useEffect(() => {
     if (!endpoint) { setRemoteLoading(false); return }
     let alive = true

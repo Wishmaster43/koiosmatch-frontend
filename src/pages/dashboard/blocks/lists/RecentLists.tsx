@@ -30,6 +30,7 @@ const rowStyle = (clickable: boolean, last: boolean) => ({
   borderBottom: last ? 'none' : '1px solid var(--border)',
 })
 
+// Recent-candidates dashboard tile; each row deep-links to that candidate when onNavigate is given.
 export function RecentCandidatesList({ rows, onNavigate }: { rows: FeedTileLists['recentCandidates']; onNavigate?: Nav }) {
   const { t } = useTranslation('dashboard')
   return (
@@ -50,6 +51,7 @@ export function RecentCandidatesList({ rows, onNavigate }: { rows: FeedTileLists
   )
 }
 
+// Recent-applications dashboard tile; each row deep-links to that application when onNavigate is given.
 export function RecentApplicationsList({ rows, onNavigate }: { rows: FeedTileLists['recentApplications']; onNavigate?: Nav }) {
   const { t } = useTranslation('dashboard')
   return (
@@ -69,6 +71,7 @@ export function RecentApplicationsList({ rows, onNavigate }: { rows: FeedTileLis
   )
 }
 
+// Leads-in-pipeline dashboard tile; each row deep-links to that customer when onNavigate is given.
 export function LeadsPipelineList({ rows, onNavigate }: { rows: FeedTileLists['recentLeads']; onNavigate?: Nav }) {
   const { t } = useTranslation('dashboard')
   return (
@@ -88,6 +91,7 @@ export function LeadsPipelineList({ rows, onNavigate }: { rows: FeedTileLists['r
   )
 }
 
+// Recent workflow-runs dashboard tile; success/failure is shown by icon+tint AND stated in words, never colour alone.
 export function RecentRunsList({ rows, onNavigate }: { rows: FeedTileLists['runs']; onNavigate?: Nav }) {
   const { t } = useTranslation('dashboard')
   return (
@@ -112,6 +116,7 @@ export function RecentRunsList({ rows, onNavigate }: { rows: FeedTileLists['runs
   )
 }
 
+// Recent-conversations dashboard tile; rows deep-link to the WhatsApp messages tab, never to a specific candidate (no per-row id).
 export function RecentConversationsList({ rows, onNavigate }: { rows: FeedTileLists['conversations']; onNavigate?: Nav }) {
   const { t } = useTranslation('dashboard')
   return (

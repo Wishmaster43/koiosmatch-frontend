@@ -30,6 +30,7 @@ interface StatisticsTabProps {
   valueInHours?: boolean
 }
 
+// This deal's ordinal position among its customer's other opportunities, plus the peer list to jump to — see the module doc above for the honesty rule.
 export default function StatisticsTab({ opportunity, allRows, valueInHours = false }: StatisticsTabProps) {
   const { t } = useTranslation('opportunities')
   const { formatDate } = useDateFormat()
@@ -40,6 +41,7 @@ export default function StatisticsTab({ opportunity, allRows, valueInHours = fal
   // This deal's position among the customer's other deals + the peer list —
   // computed once per (allRows, opportunity) change, mirroring MatchDrawer's own memo.
   const ordinal = useMemo(() => computeOpportunityOrdinal(allRows, opportunity), [allRows, opportunity])
+  // The customer's OTHER opportunities (excluding this one), recomputed only when the row set or this opportunity changes.
   const others  = useMemo(() => otherOpportunitiesForClient(allRows, opportunity), [allRows, opportunity])
 
   if (!ordinal) {

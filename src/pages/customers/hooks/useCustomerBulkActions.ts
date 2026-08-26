@@ -31,6 +31,7 @@ interface Args {
 const subsetOf = (obj: Record<string, unknown>, keys: string[]): Record<string, unknown> =>
   keys.reduce<Record<string, unknown>>((a, k) => { a[k] = obj[k]; return a }, {})
 
+// Bulk-action data layer for CustomersPage: selection toggles, the generic optimistic bulkMutate, and the concrete bulk actions built on it.
 export function useCustomerBulkActions({ customers, setCustomers, setTotal, selectedIds, setSelectedIds, notify, statusMeta, t }: Args) {
   const { confirm, dialog } = useConfirm()
   const toggleRow = (id: Id) => setSelectedIds(prev => { const n = new Set(prev); if (n.has(id)) n.delete(id); else n.add(id); return n })
@@ -57,12 +58,14 @@ export function useCustomerBulkActions({ customers, setCustomers, setTotal, sele
     patch: { status, statusLabel: statusMeta(status).label, statusColor: statusMeta(status).color }, keys: ['status', 'statusLabel', 'statusColor'],
     onSuccess: n => notify('success', t('bulk.statusChanged', { value: statusMeta(status).label, count: n })) })
 
+  // Tags present across every currently selected customer, for the bulk tag-remove picker's option list.
   const selectedTags = useMemo(() => {
     const set = new Set<string>()
     customers.forEach(c => { if (c.id != null && selectedIds.has(c.id)) (c.tags as string[] ?? []).forEach(tg => set.add(tg)) })
     return [...set]
   }, [customers, selectedIds])
 
+  // Optimistically add a tag to every selected customer; revert just the ones it failed to stick to.
   const bulkAddTag = (tag: string) => {
     const t2 = (tag ?? '').trim(); if (!t2) return
     const ids = [...selectedIds]
@@ -73,6 +76,7 @@ export function useCustomerBulkActions({ customers, setCustomers, setTotal, sele
       .catch(() => { setCustomers(prev => prev.map(c => changed.includes(c.id) ? { ...c, tags: (c.tags ?? []).filter(x => x !== t2) } : c)); notify('error', t('bulk.mutateError')) })
     setSelectedIds(new Set())
   }
+  // Optimistically remove a tag from every selected customer; revert on failure.
   const bulkRemoveTag = (tag: string) => {
     const ids = [...selectedIds]
     const changed = customers.filter(c => ids.includes(c.id!) && (c.tags ?? []).includes(tag)).map(c => c.id)
@@ -82,6 +86,7 @@ export function useCustomerBulkActions({ customers, setCustomers, setTotal, sele
       .catch(() => { setCustomers(prev => prev.map(c => changed.includes(c.id) ? { ...c, tags: [...(c.tags ?? []), tag] } : c)); notify('error', t('bulk.mutateError')) })
     setSelectedIds(new Set())
   }
+  // Post one note to every selected customer; no optimistic patch since notes don't show on the row.
   const bulkAddNote = (text: string) => {
     const ids = [...selectedIds]; if (!ids.length || !text.trim()) return
     api.post('/customers/bulk/notes', { customer_ids: ids, text: text.trim() })
@@ -89,6 +94,7 @@ export function useCustomerBulkActions({ customers, setCustomers, setTotal, sele
       .catch(() => notify('error', t('bulk.mutateError')))
     setSelectedIds(new Set())
   }
+  // Archive every selected customer after a danger-confirm; drops the archived rows from the list and adjusts the total.
   const bulkArchive = () => {
     const ids = [...selectedIds]; if (!ids.length) return
     confirm(t('bulk.archiveConfirm', { count: ids.length }), () => {

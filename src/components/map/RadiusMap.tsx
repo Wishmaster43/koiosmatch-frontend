@@ -17,6 +17,7 @@ function ClickToCenter({ onPick }: { onPick?: (lat: number, lng: number) => void
   return null
 }
 
+// Purely presentational Leaflet map (see the module doc above): renders the search circle + result points, and reports a re-centre click back up rather than owning any filter state itself.
 export default function RadiusMap({ center, radiusKm, points, onCenterChange, onPickPoint, height = 520, centerMarker }: {
   center: { lat: number; lng: number }
   radiusKm: number

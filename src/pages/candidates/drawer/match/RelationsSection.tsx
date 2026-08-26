@@ -49,6 +49,8 @@ const opt = (arr: Array<{ id?: Id; name?: string }>) => arr.map(x => ({ value: S
 // local copy here; now the one shared implementation in lib/contactLabel.
 const contactOpt = (arr: CascadeOption[]) => arr.map(c => ({ value: String(c.id), label: contactOptionLabel(c) }))
 
+// The match form's "Relaties" block (see file docblock above) — pure presentational,
+// every value/handler arrives via props from useMatchForm.
 export default function RelationsSection({
   t, errors, editing,
   candidateTypes, contractForm, setContractForm, hasContractLines, contractLines, setContractLines, customerNotApplicable,

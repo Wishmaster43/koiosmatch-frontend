@@ -34,6 +34,7 @@ interface Props {
   onDraftChange: (draft: Draft) => void
 }
 
+// Super-admin per-tenant budget override: search-picks a tenant, then edits its workflow-credit/WhatsApp-token budget draft.
 export default function TenantBudgetOverride({ tenants, tenantId, onTenantIdChange, draft, onDraftChange }: Props) {
   const { t } = useTranslation('settings')
   const [query, setQuery] = useState('')

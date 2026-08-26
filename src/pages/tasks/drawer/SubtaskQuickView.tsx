@@ -44,6 +44,7 @@ function Row({ label, children }: { label: string; children: ReactNode }) {
   )
 }
 
+// Modeless quick-view popover for one subtask: fetches its detail lazily and lets a status change persist without opening the full drawer.
 export default function SubtaskQuickView({ id, onClose, onChanged }: {
   id: Id
   onClose: () => void
@@ -77,6 +78,7 @@ export default function SubtaskQuickView({ id, onClose, onChanged }: {
       .catch(() => { if (fresh()) setError(true) })
       .finally(() => { if (fresh()) setLoading(false) })
   }
+  // Refetch when id changes; deadRef, re-armed in setup, guards against a stale PATCH-triggered refetch landing after this view unmounted or switched subtasks.
   useEffect(() => {
     deadRef.current = false
     fetchTask()
@@ -87,6 +89,7 @@ export default function SubtaskQuickView({ id, onClose, onChanged }: {
   // Close on outside click — the panel is MODELESS (overlay=false), so a click
   // on the page behind it must close this view (mirrors ChangelogPopover).
   useEffect(() => {
+    // Outside-click closes the modeless popover, but a click inside a portaled dropdown (SelectMenu etc.) does not count as outside.
     const onClick = (e: MouseEvent) => {
       if (isInsideDropdownPortal(e.target as Node)) return
       if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) onClose()

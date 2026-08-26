@@ -15,6 +15,8 @@ import type { Id } from '@/types/common'
 
 export interface VacancyOption { value: Id; label: string; client?: string; ownerId?: Id; ownerName?: string }
 
+// Vacancy picker options, each carrying its owner id/name too (see the module doc
+// comment above for why that saves an extra fetch on pick); disabled until `enabled` flips on.
 export function useVacancyOptions(enabled: boolean): VacancyOption[] {
   const { data } = useQuery({
     queryKey: ['vacancies', 'options'],

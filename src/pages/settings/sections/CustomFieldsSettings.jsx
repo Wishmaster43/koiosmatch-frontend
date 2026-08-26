@@ -38,7 +38,7 @@ const toSlug = s => s.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g
 
 // Pick a label for the active language (fallback lang-base → en → nl → any → key).
 const pickLabel = (l, lang, key) => l ? (l[lang] ?? l[lang.split('-')[0]] ?? l.en ?? l.nl ?? Object.values(l)[0] ?? key) : key
-// Map a generic /custom-fields def to the shape this editor renders (label + has_data).
+// Map a generic /custom-fields def to the shape this editor renders (label + has_data)
 // visible_in_ui defaults true (backend default) — worklist #44: API-only fields stay
 // listed and editable here, they only stop rendering on the entity's Extra tab.
 const toField = (d, lang) => ({ ...d, label: pickLabel(d.label_i18n, lang, d.key), has_data: !!d.in_use, visible_in_ui: d.visible_in_ui !== false })
@@ -50,6 +50,7 @@ const cardStyle = {
 const inputStyle = fieldInputStyle
 const labelStyle = { fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: 4 }
 
+// See the file's top doc above; the one custom-fields CRUD editor, parameterized per entity type.
 export default function CustomFieldsSettings({ entityType }) {
   const { t, i18n } = useTranslation('settings')
   const { invalidate } = useCustomFields(entityType)

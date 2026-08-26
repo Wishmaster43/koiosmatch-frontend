@@ -11,6 +11,8 @@ import type { DragEvent } from 'react'
 const EDGE = 80   // px from the container edge that triggers scrolling
 const STEP = 24   // px scrolled per dragover tick
 
+// Attach the returned ref/handler to a kanban scroll container so native HTML5
+// drag-over near an edge nudges the scroll position (native DnD never scrolls on its own).
 export function useDragAutoScroll<T extends HTMLElement>() {
   const ref = useRef<T | null>(null)
 

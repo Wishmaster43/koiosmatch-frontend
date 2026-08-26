@@ -73,6 +73,8 @@ export function LookupBlock({ slug, title, subtitle, items, setItems, locked = f
     is_proposal: it.is_proposal === true, is_blacklist: it.is_blacklist === true,
     is_applicant: it.is_applicant === true, customer_not_applicable: it.customer_not_applicable === true })
 
+  // Persists the add/edit modal: creates or updates the lookup row, sending only the
+  // per-type flag fields this lookup actually supports (the backend guards the rest).
   const save = async () => {
     if (!modal.label.trim()) return
     setBusy(true)
@@ -99,6 +101,7 @@ export function LookupBlock({ slug, title, subtitle, items, setItems, locked = f
     } catch { /* noop */ } finally { setBusy(false) }
   }
 
+  // In-row colour change: applies optimistically, reverts + notifies on failure.
   const updateColor = async (it, color) => {
     const previous = items
     setItems(p => p.map(x => x.id === it.id ? { ...x, color } : x))
@@ -138,6 +141,9 @@ export function LookupBlock({ slug, title, subtitle, items, setItems, locked = f
   // An item is protected when the backend marks it as referenced by existing data.
   const inUse = (i) => Boolean(i.in_use ?? i.is_used ?? i.locked ?? ((i.usage_count ?? i.candidates_count ?? 0) > 0))
 
+  // Confirms then deletes a lookup row; an in-use item is never sent (guarded above by
+  // the caller's disabled state too) and a 409 from the backend flags it in_use instead
+  // of silently failing.
   const remove = (it) => {
     if (inUse(it)) return
     confirm(t('lookups.confirmDelete', { name: it.label }), async () => {
@@ -150,6 +156,7 @@ export function LookupBlock({ slug, title, subtitle, items, setItems, locked = f
     }, { danger: true })
   }
 
+  // Drag-reorder: applies the new order optimistically, reverts + notifies on failure.
   const reorder = async (next) => {
     const previous = items
     setItems(next)
@@ -283,6 +290,7 @@ function CandidateLookupSection({ typeKey, slug, locked = false }) {
   const [items,   setItems]   = useState([])
   const [loading, setLoading] = useState(true)
 
+  // Loads this tab's slice from the combined lookups endpoint whenever the type changes.
   useEffect(() => {
     api.get(BASE)
       .then(r => { const d = unwrap(r) ?? {}; setItems(d[typeKey] ?? []) })

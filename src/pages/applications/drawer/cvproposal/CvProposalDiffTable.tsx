@@ -29,6 +29,8 @@ interface CvProposalDiffTableProps {
   diff: CvProposalDiff
 }
 
+// Renders the current-vs-CV-proposed comparison table (see file docblock above)
+// as an accessible <table>, scrolling inside its own container.
 export default function CvProposalDiffTable({ diff }: CvProposalDiffTableProps) {
   const { t } = useTranslation('applications')
   const { formatDate } = useDateFormat()

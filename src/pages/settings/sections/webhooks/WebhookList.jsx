@@ -11,6 +11,7 @@ import { useDateFormat } from '@/lib/datetime'
 import Button from '@/components/ui/Button'
 import { PageTitle } from '@/components/ui/typography'
 
+// The outgoing-webhook overview table; handles all four UI states explicitly.
 export default function WebhookList({ subs, loading, error, onReload, onOpen, onNew }) {
   const { t } = useTranslation('settings')
   const { formatDate } = useDateFormat()

@@ -1,10 +1,3 @@
-/** NotificationsSettings — per-context (applications / vacancies / billing / candidates /
- * matches / tasks — mirrors api Notifier::TYPE_CONTEXT_MAP) notification preferences,
- * stored as `notif_<context>_in_app` + `notif_<context>_email` (O-27, commit 551c17e1).
- * Both channel keys live in the SAME generic tenant key/value settings store, so the
- * e-mail toggle needed no new backend route — it POSTs through the exact same `/settings`
- * endpoint the in-app toggle already used. Migrated to the settings kit; the scaffold owns
- * the header + dirty-aware save. */
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSettingsForm } from '../lib/useSettingsForm'
@@ -12,6 +5,13 @@ import { SettingsScaffold, SettingRow, Toggle } from '../components/SettingsKit'
 import SoftChip from '@/components/ui/SoftChip'
 import { hasNoEmitterYet } from '../lib/notificationContexts'
 
+/** NotificationsSettings — per-context (applications / vacancies / billing / candidates /
+ * matches / tasks — mirrors api Notifier::TYPE_CONTEXT_MAP) notification preferences,
+ * stored as `notif_<context>_in_app` + `notif_<context>_email` (O-27, commit 551c17e1).
+ * Both channel keys live in the SAME generic tenant key/value settings store, so the
+ * e-mail toggle needed no new backend route — it POSTs through the exact same `/settings`
+ * endpoint the in-app toggle already used. Migrated to the settings kit; the scaffold owns
+ * the header + dirty-aware save. */
 export default function NotificationsSettings({ context }) {
   const { t } = useTranslation('settings')
   const inAppKey = `notif_${context}_in_app`

@@ -17,6 +17,7 @@ import type { Id } from '@/types/common'
 // Tenant pool list (GET /pools) as full objects; tolerant of a missing endpoint.
 export function useTenantPools(): CandidatePool[] {
   const [pools, setPools] = useState<CandidatePool[]>([])
+  // Load once on mount; a missing /pools endpoint fails soft to an empty list.
   useEffect(() => {
     const ctrl = new AbortController()
     api.get('/pools', { signal: ctrl.signal })

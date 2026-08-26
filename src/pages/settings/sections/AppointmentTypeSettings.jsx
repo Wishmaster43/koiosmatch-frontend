@@ -1,3 +1,11 @@
+import { useTranslation } from 'react-i18next'
+import StatusListEditor from './StatusListEditor'
+import { resolveGenericLookupIcon } from './lookupIcons'
+
+// Curated icon subset for appointment types — the generic set narrowed to the
+// modalities/venues this lookup actually represents.
+const APPOINTMENT_TYPE_ICON_NAMES = ['calendar', 'phone', 'video', 'map-pin', 'building', 'users']
+
 /**
  * Appointment types (APPT-1) — tenant lookup behind "Intake plannen": each type
  * carries a default duration + modality + an is_intake flag, so picking a type
@@ -10,14 +18,6 @@
  * an intake from an application context — both are backend-enforced singletons,
  * each with its own pill so flipping one never touches the other.
  */
-import { useTranslation } from 'react-i18next'
-import StatusListEditor from './StatusListEditor'
-import { resolveGenericLookupIcon } from './lookupIcons'
-
-// Curated icon subset for appointment types — the generic set narrowed to the
-// modalities/venues this lookup actually represents.
-const APPOINTMENT_TYPE_ICON_NAMES = ['calendar', 'phone', 'video', 'map-pin', 'building', 'users']
-
 export function AppointmentTypeSettings() {
   const { t } = useTranslation('settings')
   return (

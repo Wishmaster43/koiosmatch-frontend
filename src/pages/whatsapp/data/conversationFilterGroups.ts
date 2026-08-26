@@ -14,6 +14,7 @@ export interface ConvFilterArgs {
   search: string; setSearch: (v: string) => void
 }
 
+// Pure builder for the Conversations right-panel filters (see the module doc above): status/escalated/unanswered/active plus search.
 export function buildConversationFilterGroups({
   t, escalated, setEscalated, unanswered, setUnanswered, active, setActive, search, setSearch,
 }: ConvFilterArgs) {

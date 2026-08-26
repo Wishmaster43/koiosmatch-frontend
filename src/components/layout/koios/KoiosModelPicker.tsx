@@ -15,6 +15,8 @@ import type { TFn } from '@/types/koios'
 // PORTAL-MARKER-1: a click inside an open portalled picker menu is never "outside".
 import { isInsideDropdownPortal } from '@/lib/useDropdownPlacement'
 
+// Model-tier picker for the Koios panel; see the module doc comment above for the
+// shared whitelist/id→tier map this shares with the Settings model picker.
 export default function KoiosModelPicker({ models, value, onChange, t }: {
   models?: string[]; value?: string | null; onChange: (m: string) => void; t: TFn
 }) {

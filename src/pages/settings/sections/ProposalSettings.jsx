@@ -33,6 +33,7 @@ const DEFAULTS = {
   default_cv_variant: 'proposal',
 }
 
+// Settings screen for the proposal template plus sets_phase/default CV variant, backed by one JSON tenant setting.
 export default function ProposalSettings() {
   const { t } = useTranslation('settings')
   const values = useAllSettings()
@@ -46,6 +47,7 @@ export default function ProposalSettings() {
   const [templateSaving, setTemplateSaving] = useState(false)
   const [templateSaved, setTemplateSaved] = useState(false)
 
+  // Persists the buffered subject/body template only on explicit save, then flashes the shared saved-state for 2s.
   const saveTemplate = async () => {
     setTemplateSaving(true)
     try {
@@ -68,6 +70,7 @@ export default function ProposalSettings() {
       .catch(() => notifyError(t('proposal.saveFailed')))
   }
 
+  // Commits the default CV variant immediately (no draft buffer), mirroring the sets_phase toggle above.
   const chooseVariant = (variant) => {
     if (variant === persisted.default_cv_variant) return
     saveSettingsKeys({ [SETTINGS_KEY]: { ...persisted, default_cv_variant: variant } })

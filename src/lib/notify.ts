@@ -22,6 +22,8 @@ export interface ToastOptions {
   actionLine?: string
 }
 
+// Fires a decoupled toast event (see file docblock above) — <Toaster> is the
+// only listener, so any component can surface a result with no prop-drilling.
 export function notify(type: ToastType, message: string, options?: ToastOptions) {
   window.dispatchEvent(new CustomEvent('km:toast', { detail: { type, message, ...options } }))
 }

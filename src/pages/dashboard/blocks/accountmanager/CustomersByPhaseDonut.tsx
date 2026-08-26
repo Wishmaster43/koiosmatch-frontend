@@ -15,6 +15,8 @@ import { useSeedLabel } from '@/lib/useSeedLabel'
 import type { CustomerByPhaseRow } from '@/types/dashboard'
 import type { FeedTileContext } from '../feedTileKit'
 
+// Customer count per lifecycle phase, zero-count phases dropped, coloured from
+// the tenant lookup when it matches (else the house series fallback).
 export default function CustomersByPhaseDonut({ rows, onNavigate }: {
   rows: CustomerByPhaseRow[]
   onNavigate?: FeedTileContext['onNavigate']

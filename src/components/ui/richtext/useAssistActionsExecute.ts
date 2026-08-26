@@ -48,6 +48,8 @@ export function useAssistActionsExecute(source: ExecuteSource = {}) {
   // Alive guard (§9): the host can unmount mid-request — never set state after
   // unmount. Re-armed in SETUP (StrictMode runs setup→cleanup→setup in dev).
   const aliveRef = useRef(true)
+  // Re-arms the guard in effect SETUP so StrictMode's setup→cleanup→setup dance
+  // never leaves it permanently false.
   useEffect(() => {
     aliveRef.current = true
     return () => { aliveRef.current = false }

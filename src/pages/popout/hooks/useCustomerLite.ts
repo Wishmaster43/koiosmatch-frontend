@@ -17,6 +17,8 @@ export interface CustomerLite { id: string; name: string; initials: string }
 // The subset of the raw customer resource this hook actually reads.
 interface RawCustomerLite { id?: string | number; name?: string }
 
+// Minimal, cached identity fetch for the notes-popout window title (see file
+// docblock above) — skips the full customer mapper on purpose.
 export function useCustomerLite(id: string | undefined) {
   const { data: customer = null, isLoading: loading, isError: error, refetch: reload } = useQuery({
     queryKey: ['customers', id, 'lite'],

@@ -51,6 +51,9 @@ const mapSkillLevels = (res: AxiosResponse): SkillLevelItem[] | null => {
   return items.length ? items : null
 }
 
+// Wires the cached fetch to the seed-label translator and re-exposes the
+// resolved items as both the full-object `levels` and the legacy plain-string
+// `names`, so neither caller shape breaks.
 export function useSkillLevels() {
   const { t } = useTranslation('common')
   // The endpoint now exists (item 11) — a real 404 should surface in the dev log again.

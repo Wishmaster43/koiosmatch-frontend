@@ -80,6 +80,8 @@ function loadCounts(): Promise<KoiosMentionCounts> {
   }))
 }
 
+// Streams real tenant totals into the "@" mention menu once it first opens,
+// reusing a module-level cache so re-opening the menu never re-fetches.
 export function useKoiosMentionCounts(enabled: boolean): KoiosMentionCounts {
   const [counts, setCounts] = useState<KoiosMentionCounts>({})
 

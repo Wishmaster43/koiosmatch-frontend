@@ -46,6 +46,7 @@ const DEBOUNCE_MS = 400
 const centsDiffer = (entered: string, proposed?: number | null) =>
   proposed != null && Math.round((Number(entered) || 0) * 100) !== Math.round(proposed * 100)
 
+// Debounced, cancellable rate-proposal lookup driven by the pricing inputs (customer/function/cao/scale/step).
 export function useRateProposal({ customerId, functionTitle, cao, scale, step, purchase, sell, setPurchase, setSell }: RateProposalParams) {
   const [proposal, setProposal] = useState<RateProposal | null>(null)
 

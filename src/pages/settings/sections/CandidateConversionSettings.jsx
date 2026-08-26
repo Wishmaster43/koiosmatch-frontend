@@ -18,6 +18,8 @@ import { SectionTitle } from '@/components/ui/typography'
 // (DEFAULT-STATUS-1 contract) so both conversion paths behave identically.
 export const CONVERT_DEFAULT_STATUS_KEY = 'candidate_default_status_on_convert'
 
+// Picks the tenant's default deployability status for a fresh Lead→Kandidaat
+// conversion; only plain statuses are offered (flagged ones need their own prompt).
 export function CandidateConversionSettings() {
   const { t } = useTranslation('settings')
   const settings = useAllSettings()

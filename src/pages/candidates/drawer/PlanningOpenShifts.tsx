@@ -32,6 +32,7 @@ interface PlanningOpenShiftsProps {
   blacklist: FavLists
 }
 
+// Candidate drawer's open-shifts planning list: filterable by tenant function/level, with favourite/blacklist and already-scheduled state per row.
 export default function PlanningOpenShifts({ openShifts, loading, error, onReload, openFilters, setOpenFilters, scheduledIds, setScheduledIds, favorites, blacklist }: PlanningOpenShiftsProps) {
   const { t } = useTranslation('candidates')
   // Function/level options from the tenant lookup (no hardcoded care-level list).

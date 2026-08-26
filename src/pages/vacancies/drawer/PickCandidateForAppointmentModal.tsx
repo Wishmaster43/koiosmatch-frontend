@@ -96,6 +96,7 @@ export default function PickCandidateForAppointmentModal({ vacancyId, onClose, o
   }, [query, picked, retryTick])
 
   const pickerOptions = options.map(o => ({ value: String(o.id), label: o.label }))
+  // Resolves the picked option's full candidate row from the loaded search results.
   const pickCandidate = (id: string) => {
     const opt = options.find(o => String(o.id) === id)
     if (opt) setPicked(opt)

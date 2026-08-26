@@ -41,6 +41,8 @@ export interface Campaign {
 export const OUTREACH_MAX_PER_PAGE = 500
 const OUTREACH_MAX_PAGES = 5
 
+// Loads the full campaign list (paging past the server's per-page cap, see
+// OUTREACH_MAX_PER_PAGE above) and exposes optimistic add/patch/drop for post-mutation sync.
 export function useOutreachCampaigns() {
   const [campaigns, setCampaigns] = useState<Campaign[]>([])
   const [loading, setLoading]     = useState(true)
@@ -50,6 +52,8 @@ export function useOutreachCampaigns() {
   const load = useCallback(() => {
     setLoading(true)
     setError(false)
+    // Pages through the list until the server's own last_page is reached (capped at
+    // OUTREACH_MAX_PAGES), so the truncation bug described above can't recur.
     const loadAll = async () => {
       const all: Campaign[] = []
       for (let pageNo = 1; pageNo <= OUTREACH_MAX_PAGES; pageNo++) {

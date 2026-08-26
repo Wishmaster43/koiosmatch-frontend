@@ -67,6 +67,7 @@ export default function AssignTargetsBar({ selection, count, recruiters, onAssig
     (axis === 'team' && !!teamId) ||
     (axis === 'role' && !!roleId)
 
+  // Submits the assign request on whichever axis (person/team/role) the recruiter picked, mirroring the task model assignee shape (see the file's top doc).
   const handleSubmit = async () => {
     if (!canSubmit) return
     const assignee: AssigneeAxes =

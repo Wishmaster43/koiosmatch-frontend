@@ -14,6 +14,8 @@
  */
 import { Sparkle } from 'lucide-react'
 
+// Renders the Koios agent bubble + name; nothing shown
+// without a name (an unlinked record gets no placeholder bubble).
 export default function AiAgentAvatar({ name, size = 22 }: { name?: string; size?: number }) {
   if (!name) return null
   return (

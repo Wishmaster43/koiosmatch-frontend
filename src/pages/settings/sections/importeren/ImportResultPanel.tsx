@@ -32,6 +32,8 @@ interface ImportResultPanelProps {
   wholeTree?: boolean
 }
 
+// Shared per-row import report (see file docblock above); defaults to showing
+// only failed-or-partial rows so a half-imported row is never hidden by default.
 export default function ImportResultPanel({ result, showAllRows, onToggleShowAll, wholeTree = false }: ImportResultPanelProps) {
   const { t } = useTranslation('settings')
   const { summary, unknown_columns: unknownColumns, rows } = result

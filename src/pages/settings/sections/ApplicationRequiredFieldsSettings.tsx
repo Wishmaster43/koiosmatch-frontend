@@ -20,6 +20,7 @@ import { APPLICATION_FIELDS } from './applications/requiredFieldsCatalog'
 
 const KEY = 'application_required_fields'
 
+// Flat one-toggle-per-field required-fields screen (see the module doc above): mirrors the customer sub-entities' shape since an application has no phase axis here.
 export default function ApplicationRequiredFieldsSettings() {
   const { t } = useTranslation('settings')
   return (

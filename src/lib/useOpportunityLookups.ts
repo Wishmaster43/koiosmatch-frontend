@@ -41,11 +41,13 @@ function useLookup(url: string, seed: LookupOption[]) {
   return { items, meta }
 }
 
+// The service/sector-type tenant lookup, seeded with the healthcare-staffing default until the API resolves.
 export function useOpportunityServiceTypes() {
   const { items, meta } = useLookup('/opportunity-service-types', DEFAULT_SERVICE_TYPES)
   return { serviceTypes: items, serviceTypeMeta: meta }
 }
 
+// The agreement-type tenant lookup, seeded with the default contract forms until the API resolves.
 export function useOpportunityAgreementTypes() {
   const { items, meta } = useLookup('/opportunity-agreement-types', DEFAULT_AGREEMENT_TYPES)
   return { agreementTypes: items, agreementTypeMeta: meta }

@@ -94,6 +94,7 @@ export default function RejectionModal({ application: a, onCancel, onConfirm, su
   const reason = reasons.find(r => String(r.id) === String(reasonId))
   const reasonLabel = reason?.name ?? reason?.label ?? ''
 
+  // Confirms the rejection with the chosen reason (id + resolved label) and note; a no-op without a picked reason or while already submitting.
   const submit = () => {
     if (!reasonId || submitting) return
     onConfirm({ reason_id: reasonId, note, reason_label: reasonLabel })

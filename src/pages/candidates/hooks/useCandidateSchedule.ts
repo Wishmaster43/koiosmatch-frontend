@@ -58,6 +58,7 @@ function useCandidateAgenda(candidateId: Id | undefined, locale: string) {
   const [error,   setError]   = useState(false)
   const [attempt, setAttempt] = useState(0)
 
+  // Fetches and maps the candidate's roster; retriable via attempt, and aborted on unmount/id change so a stale response never lands.
   useEffect(() => {
     if (!candidateId) { setLoading(false); return }
     const ctrl = new AbortController()
@@ -87,6 +88,7 @@ function useCandidateOpenShifts(candidateId: Id | undefined, locale: string) {
   const [error,      setError]      = useState(false)
   const [attempt,    setAttempt]    = useState(0)
 
+  // Fetches and maps the open shifts this candidate could still take; retriable via attempt, and aborted on unmount/id change so a stale response never lands.
   useEffect(() => {
     if (!candidateId) { setLoading(false); return }
     const ctrl = new AbortController()

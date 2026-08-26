@@ -17,6 +17,7 @@ import { useTranslation } from 'react-i18next'
 import { useSettingsForm } from '../lib/useSettingsForm'
 import { SettingsScaffold, SettingCardList, SettingRow, NumberField } from '../components/SettingsKit'
 
+// Tenant-wide AVG retention windows editor (see the module doc above): the only screen that edits the policy the backend derives retention_expires_at from.
 export default function RetentionSettings() {
   const { t } = useTranslation('settings')
   // Tenant defaults per the backend policy (AVG-RET-2): 24 months for a candidate

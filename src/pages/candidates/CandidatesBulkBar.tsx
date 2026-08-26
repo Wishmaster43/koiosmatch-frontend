@@ -69,6 +69,7 @@ interface CandidatesBulkBarProps {
   selectedTags?: string[]
 }
 
+// Thin assembler (see the module doc above): builds the ActionMenu config tree from props, owning no mutation logic itself — every action's data/permission gate is decided by the caller.
 export default function CandidatesBulkBar({
   count, onClear, bulkScope, onSetBulkScope, filteredTotal, anyFilterActive,
   onAddToPool, onRemoveFromPool, onSetOwner, onSetStage, onSetTypes, onSetConsent,

@@ -59,6 +59,8 @@ const TEMPLATE_STATUS_META: Record<string, { color: string; bg: string }> = {
   PAUSED:   { color: 'var(--text-muted)',              bg: 'var(--hover-bg)' },
 }
 
+// Settings → WhatsApp: manages the tenant's connections plus each connection's
+// numbers/templates sub-views, gated on the whatsapp.manage permission.
 export default function WhatsAppSettings() {
   const { t } = useTranslation('settings')
   // PROVISION-GATE-1 (08-08): the create/edit/sync affordances are gated on the
@@ -115,6 +117,7 @@ export default function WhatsAppSettings() {
     setTemplates(Array.isArray(full?.templates) ? full.templates : [])
   }
 
+  // Trigger a server-side numbers sync for the selected connection, then reload its detail.
   const syncNumbers = async () => {
     if (!selectedConnId) return
     setSyncing('numbers'); setSyncMsg(null)
@@ -123,6 +126,7 @@ export default function WhatsAppSettings() {
     setSyncing(null)
   }
 
+  // Trigger a server-side templates sync for the selected connection, then reload its detail.
   const syncTemplates = async () => {
     if (!selectedConnId) return
     setSyncing('templates'); setSyncMsg(null)

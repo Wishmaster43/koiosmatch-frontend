@@ -26,6 +26,7 @@ export interface ToggleProps {
   tone?: 'primary' | 'success'
 }
 
+// The switch button itself: toggles on click; its on-colour follows tone (success for the one active-workflow consumer, accent elsewhere).
 export default function Toggle({ checked, onChange, ariaLabel, disabled, describedBy, title, tone = 'primary' }: ToggleProps) {
   return (
     <button type="button" role="switch" aria-checked={checked} aria-label={ariaLabel} aria-describedby={describedBy}

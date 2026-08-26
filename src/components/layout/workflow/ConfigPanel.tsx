@@ -25,6 +25,7 @@ import type { FlowNode, WorkflowField, WorkflowVarGroup } from '@/types/workflow
 // eslint-disable-next-line react-refresh/only-export-components -- the editor and this panel share the tab-id contract; a constants-only split for one array is not worth the extra file (HMR-nicety warning only)
 export const MANAGE_TABS = ['agents', 'prompts', 'faq', 'knowledge', 'tools', '__wide__']
 
+// The workflow editor's right-side module configuration panel.
 export default function ConfigPanel({ node, onUpdate, onDelete, onTabChange, variables = [] }: {
   node: FlowNode | null
   onUpdate: (nodeId: string, key: string, val: unknown) => void

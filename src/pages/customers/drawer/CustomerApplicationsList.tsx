@@ -87,6 +87,8 @@ type Props =
   | { customerId?: Id }
   | { vacancyIds: Id[]; vacancyIdsLoading: boolean; vacancyIdsError?: boolean }
 
+// Applications list scoped either to a whole customer or to a caller-supplied
+// vacancy-id set (see the module doc comment above for the two-step-loading contract this folds together).
 export default function CustomerApplicationsList(props: Props) {
   const { t } = useTranslation(['customers', 'applications', 'candidates'])
   // Seeded lookup labels the server embedded in the row render in the user language.

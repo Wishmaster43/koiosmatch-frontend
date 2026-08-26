@@ -11,6 +11,8 @@ import { KPI_KEYS, LogBadge, isAccessEvent, buildFieldDiff, entityLabel } from '
 import { BodyText, GroupLabel, Caption, PageTitle } from '@/components/ui/typography'
 import Button from '@/components/ui/Button'
 
+// One before/after field row; the value panels tint danger/success only when
+// the two sides actually differ, so an unchanged field reads calm/neutral.
 function DiffRow({ label, before, after }) {
   const { t } = useTranslation('settings')
   const changed = JSON.stringify(before) !== JSON.stringify(after)
@@ -32,6 +34,8 @@ function DiffRow({ label, before, after }) {
   )
 }
 
+// Drill-down for one audit log entry: dispatches to a per-log-type rendering
+// (access/http/auth/sync/roles/settings) or the generic before/after diff fallback.
 export function AuditDrawer({ entry, onClose }) {
   const { t } = useTranslation('settings')
   // DATUM-1: DD-MM-YYYY HH:mm in every app language, never the browser's own locale.

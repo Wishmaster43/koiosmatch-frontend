@@ -36,6 +36,7 @@ function Stat({ label, value, color }: { label: string; value: number; color: st
   )
 }
 
+// The batch-progress card itself: status chip plus sent/skipped/failed/total counts.
 export default function FanoutSummary({ fanout }: { fanout: WaFanout }) {
   const { t } = useTranslation('workflows')
   const statusKey   = String(fanout.status ?? '').toLowerCase()

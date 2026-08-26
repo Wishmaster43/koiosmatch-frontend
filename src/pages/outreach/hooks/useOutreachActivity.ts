@@ -30,6 +30,7 @@ export interface OutreachActivityEvent {
   [k: string]: unknown
 }
 
+// Fetches one campaign's audit trail from the shared LogsEntityActivity feed, mirroring every other entity's changelog hook (see file header).
 export function useOutreachActivity(id?: Id | null): { items: OutreachActivityEvent[]; loading: boolean; error: boolean } {
   const [items,   setItems]   = useState<OutreachActivityEvent[]>([])
   const [loading, setLoading] = useState(false)

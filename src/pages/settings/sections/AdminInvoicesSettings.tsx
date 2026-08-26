@@ -67,10 +67,13 @@ async function downloadBlob(route: string, params: Record<string, string>, filen
   URL.revokeObjectURL(url)
 }
 
+// The super-admin invoice console: month picker
+// generate/finalize/re-send/download/export actions over the tenant invoice list.
 export default function AdminInvoicesSettings() {
   const { t } = useTranslation('settings')
   const { formatCurrency } = useNumberFormat()
   const locale = useLocale()
+  // Rebuilds the 12-month picker options only when the active locale changes.
   const months = useMemo(() => buildMonths(locale), [locale])
   const [month, setMonth] = useState(months[0].value)
   const [invoices, setInvoices] = useState<AdminInvoice[]>([])
@@ -94,8 +97,11 @@ export default function AdminInvoicesSettings() {
       .catch(() => setPhase('error'))
   }
 
+  // Reloads the invoice list whenever the selected month changes.
   useEffect(() => { reload() /* eslint-disable-line react-hooks/exhaustive-deps */ }, [month])
 
+  // Generates draft invoices for the selected month across every tenant, then reports
+  // how many were actually created vs. already final (per GenerateResult).
   const handleGenerate = async () => {
     setGenerating(true)
     try {
@@ -130,6 +136,7 @@ export default function AdminInvoicesSettings() {
     }
   }
 
+  // Downloads a single invoice's PDF via the shared blob helper.
   const handleDownload = async (invoice: AdminInvoice) => {
     setDownloadingId(invoice.id)
     try {
@@ -141,6 +148,7 @@ export default function AdminInvoicesSettings() {
     }
   }
 
+  // Downloads the superadmin-only reconciliation spreadsheet for the selected month.
   const handleExport = async () => {
     setExporting(true)
     try {

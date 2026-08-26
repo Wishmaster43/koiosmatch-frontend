@@ -27,6 +27,8 @@ interface OpportunityGeneralCardProps {
   branchId: string; onBranchChange: (v: string) => void; branchOptions: Option[]
 }
 
+// Add-opportunity modal card: title plus the customer cascade (client/contact/
+// location/department), owner and branch pickers — client/contract fields the "pick client first" gate applies to.
 export default function OpportunityGeneralCard({
   t, title, onTitleChange, titleError, titlePlaceholder,
   clientId, onClientChange, customerOptions, clientPicked,

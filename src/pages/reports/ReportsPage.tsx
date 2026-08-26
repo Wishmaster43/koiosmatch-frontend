@@ -96,6 +96,8 @@ const REPORTS: Record<ReportId, ReportComponent> = {
 // as a click on the reports sidebar submenu would (DASH-REPORT-DEEPLINK-1).
 export interface ReportsPageIntent { report?: string }
 
+// Resolves which report (or the root dashboard) to render from the route/intent,
+// and owns the period/compare state shared by every report body.
 export default function ReportsPage({ reportId, initialView, intent }: { reportId?: string; initialView?: string; intent?: ReportsPageIntent }) {
   const [period, setPeriod] = useState<ReportPeriod>('month')
 
@@ -120,6 +122,7 @@ export default function ReportsPage({ reportId, initialView, intent }: { reportI
   // surface). The mode resets when the user switches reports, so one page's
   // comparison never leaks into the next page's numbers.
   const [compareMode, setCompareMode] = useState<ReportCompareMode>(COMPARE_OFF)
+  // Resets compare mode whenever the active report changes (see comment above).
   useEffect(() => { setCompareMode(COMPARE_OFF) }, [active])
   const compareInPanel = !isRoot && reportSupportsCompare(active)
 

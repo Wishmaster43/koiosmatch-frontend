@@ -10,6 +10,7 @@
  */
 import type { ReportCandidate } from '@/types/reports'
 
+// Filters to the shared Aandachtskandidaten definition: active + (new-and-unplanned OR never logged in).
 export function calcAandacht(candidates: ReportCandidate[]) {
   const now = Date.now()
   return candidates.filter(c => {

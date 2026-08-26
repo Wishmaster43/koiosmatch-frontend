@@ -14,6 +14,7 @@ import api from '@/lib/api'
 
 export interface SmConnectionOption { value: string; label: string }
 
+// Fetch the tenant's active Shiftmanager planning connections for the sync picker, filtering out non-Shiftmanager rows by label.
 export function useSmConnections() {
   const { data, isLoading, isError } = useQuery({
     queryKey: ['planning-connections'],

@@ -85,6 +85,8 @@ interface PermissionMatrixProps {
   onToggle: (permName: string) => void
 }
 
+// The expandable permission-group matrix, filtered to modules the viewing admin
+// can actually see (canAccessPage), per the comment below.
 export function PermissionMatrix({ groups, hasPermission, onToggle }: PermissionMatrixProps) {
   const { t } = useTranslation('settings')
   // Same gate as the sidebar: canAccessPage handles the tenant module flags,
@@ -118,7 +120,7 @@ export function PermissionMatrix({ groups, hasPermission, onToggle }: Permission
   // One label function for EVERY permission in a group now that the whole row
   // (CRUD + non-CRUD alike) expands into a flat toggle list: CRUD verbs get their
   // generic action label, PERMISSION_LABEL overrides win for names the segment
-  // split can't handle, everything else falls back through the other-label chain.
+  // split can't handle, everything else falls back through the other-label chain
   // page.* entries additionally get a "Pagina: …" prefix so a page-access toggle
   // never reads identically to its own CRUD group row (e.g. the "Kandidaten" CRUD
   // row vs. the "page.candidates" nav toggle).

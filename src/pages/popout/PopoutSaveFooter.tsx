@@ -25,6 +25,7 @@ interface PopoutSaveFooterProps {
   onSave: () => Promise<boolean>
 }
 
+// Renders the shared save/close footer for every second-screen editor window; the behavior contracts are described in the module doc above — never re-implement a second close-guard elsewhere (§11).
 export default function PopoutSaveFooter({ dirty, onSave }: PopoutSaveFooterProps) {
   const { t } = useTranslation('common')
   const { confirm, dialog: confirmDialog } = useConfirm()
@@ -53,8 +54,10 @@ export default function PopoutSaveFooter({ dirty, onSave }: PopoutSaveFooterProp
   // Cmd/Ctrl+S saves without reaching for the mouse (§6). Read off a ref so the
   // listener binds ONCE, not per keystroke (the parent re-renders per character).
   const saveRef = useRef(onSave)
+  // Keeps the ref pointed at the latest onSave without re-binding the keydown listener below on every parent re-render.
   useEffect(() => { saveRef.current = onSave })
   useEffect(() => {
+    // Only Cmd/Ctrl+S proceeds; preventDefault stops the browser's own save-page shortcut from firing too.
     const handler = (e: KeyboardEvent) => {
       if (!(e.key === 's' && (e.metaKey || e.ctrlKey))) return
       e.preventDefault()

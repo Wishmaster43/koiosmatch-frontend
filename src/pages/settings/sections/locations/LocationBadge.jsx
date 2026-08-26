@@ -18,6 +18,8 @@ import { Building2 } from 'lucide-react'
 import { avatarColor } from '@/lib/avatarColor'
 import { resolveLocationIcon } from '@/lib/locationIcons'
 
+// Renders a branch's own colour/icon when the backend has them (see file docblock
+// above), falling back to the shared deterministic hash for older rows without either.
 export default function LocationBadge({ name, color, icon }) {
   const resolvedColor = color || avatarColor(name)
   const Icon = icon ? resolveLocationIcon(icon) : Building2

@@ -36,6 +36,7 @@ function resolveChipColor(raw: unknown, fallback: string): string {
   return trimmed === '' ? fallback : trimmed
 }
 
+// Tenant-configurable chip colours (location/department/…), each falling back to its house default via resolveChipColor above.
 export function useChipColors(): ChipColors {
   const settings = useAllSettings()
   return {

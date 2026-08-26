@@ -25,6 +25,7 @@ import FloatingPanel from '@/components/ui/FloatingPanel'
 // PORTAL-MARKER-1: a click inside an open portalled picker menu is never "outside".
 import { isInsideDropdownPortal } from '@/lib/useDropdownPlacement'
 
+// The shared modeless changelog icon-popover shell (chrome only); each entity supplies its own translated label and content as children (see file header).
 export default function ChangelogPopover({ label, children }: { label?: string; children: ReactNode }) {
   const { t } = useTranslation('common')
   const [open, setOpen] = useState(false)

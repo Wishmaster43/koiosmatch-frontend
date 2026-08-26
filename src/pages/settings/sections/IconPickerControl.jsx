@@ -7,6 +7,7 @@
 import { createElement, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
+// See the file's top doc above; a generic icon popover, never hardcoding a vocabulary itself.
 export default function IconPickerControl({ icons, resolve, value, color, label, onPick }) {
   const { t } = useTranslation('settings')
   const [open, setOpen] = useState(false)

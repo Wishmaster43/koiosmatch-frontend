@@ -18,6 +18,8 @@ export interface VacancyLite { id: string; name: string; initials: string }
 // no "name" field — its identity is its `title`.
 interface RawVacancyLite { id?: string | number; title?: string }
 
+// Minimal vacancy identity (id/name/initials) for the second-screen popout's
+// title/header, deliberately skipping the full detail mapper (see file doc).
 export function useVacancyLite(id: string | undefined) {
   const { data: vacancy = null, isLoading: loading, isError: error, refetch: reload } = useQuery({
     queryKey: ['vacancies', id, 'lite'],

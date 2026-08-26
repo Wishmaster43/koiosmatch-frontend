@@ -47,6 +47,7 @@ interface Args {
   markGoneClose?: () => void
 }
 
+// Drawer selection + lifecycle actions for CandidatesPage: open/close, in-place patch, archive/restore/delete, all optimistic against the list.
 export function useCandidateDrawerActions({ candidates, setCandidates, setTotal, notifyMsg, t, markGoneClose }: Args) {
   const [selected,       setSelected]       = useState<Candidate | null>(null)
   const [detail,         setDetail]         = useState<Candidate | null>(null)
@@ -197,10 +198,12 @@ export function useCandidateDrawerActions({ candidates, setCandidates, setTotal,
 
   // PERMANENT delete — opens the deletion-preview popup first; onConfirm force-deletes.
   const [eraseTarget, setEraseTarget] = useState<{ id: Id; name: string } | null>(null)
+  // Stage a candidate for permanent deletion; opens the deletion-preview popup before anything irreversible happens.
   const hardDeleteOne = (id: Id) => {
     const cand = candidates.find(x => x.id === id)
     setEraseTarget({ id, name: cand?.name ?? '' })
   }
+  // Confirmed from the preview popup: force-delete for real via the /force route.
   const confirmHardDelete = async () => {
     if (!eraseTarget) return
     const id = eraseTarget.id

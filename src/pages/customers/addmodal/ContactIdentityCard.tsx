@@ -30,6 +30,7 @@ interface ContactIdentityCardProps {
   genders: OptionRow[]
 }
 
+// Pure presentational "Persoon" card: first/middle/last name, function and gender.
 export default function ContactIdentityCard({
   firstName, onFirstNameChange, firstNameError, middleName, onMiddleNameChange, lastName, onLastNameChange, lastNameError,
   role, onRoleChange, contactFunctions, allowFreeEntry, gender, onGenderChange, genders,

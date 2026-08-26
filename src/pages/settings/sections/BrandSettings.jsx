@@ -48,6 +48,7 @@ export default function BrandSettings() {
   const [logoError,    setLogoError]      = useState(null)
   const fileRef = useRef(null)
 
+  // Loads the persisted brand colour/text-colour/logo/company name once on mount.
   useEffect(() => {
     loadSettings()
       .then(stored => {
@@ -60,6 +61,7 @@ export default function BrandSettings() {
       .finally(() => setLoading(false))
   }, [])
 
+  // Reads the picked logo file into a data-URL preview; the actual upload happens on save.
   const handleLogoChange = (e) => {
     const file = e.target.files?.[0]
     if (!file) return
@@ -77,12 +79,15 @@ export default function BrandSettings() {
   // FULL token set (primary/-light/-bg/-text/on-accent) instead of a partial pair.
   const applyAccentTokens = (color, text) => applyBrandTokens(color, text)
 
+  // Swatch/hex pick: updates local state and pushes the live preview via applyAccentTokens.
   const applyColor = (color) => {
     setPrimaryColor(color)
     setHexDraft(color)
     applyAccentTokens(color, textColor)
   }
 
+  // Uploads a picked logo (if any) then persists the rest of the brand settings;
+  // a logo-upload failure surfaces inline but doesn't block saving the other fields.
   const save = async () => {
     setSaving(true)
     setLogoError(null)

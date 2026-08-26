@@ -13,6 +13,7 @@ import { useAuth } from '@/context/AuthContext'
 // the raw stored preference can be 500, which 422s (seam harness, 05-08).
 const SERVER_CAP = 200
 
+// Page-size state clamped to the server cap on read, persisting a change as the user's default; the local size still applies even if the PUT fails.
 export function usePersistedPageSize(serverCap: number = SERVER_CAP) {
   const defaultPageSize = useDefaultPageSize()
   const { refreshUser } = useAuth() ?? {}

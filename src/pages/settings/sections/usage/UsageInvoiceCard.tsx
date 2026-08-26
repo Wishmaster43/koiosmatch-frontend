@@ -21,6 +21,7 @@ interface UsageInvoiceCardProps {
   phase: 'loading' | 'ready' | 'empty' | 'error' | 'unavailable'
 }
 
+// Provisional invoice total from the one /billing/usage source only; deliberately never mixes in the legacy Koios-usage endpoint's different axis/price knob (see file header).
 export default function UsageInvoiceCard({ data, phase }: UsageInvoiceCardProps) {
   const { t } = useTranslation('settings')
   const { formatCurrency } = useNumberFormat()

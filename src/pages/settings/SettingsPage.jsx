@@ -54,6 +54,7 @@ const SLUG_ALIASES = {
   'workflows/automations': { category: 'workflows', tab: 'workflow_run_history' },
 }
 
+// Parses the location hash into {category, tab}, accepting both the #settings/ prefix and legacy unprefixed links, and rewriting renamed slugs via SLUG_ALIASES.
 function parseHash() {
   const raw = window.location.hash.replace(/^#/, '')
   const parts = raw.split('/')
@@ -65,6 +66,7 @@ function parseHash() {
   return SLUG_ALIASES[`${category}/${tab}`] ?? { category, tab }
 }
 
+// Settings shell: builds the role/module-gated nav, tracks the active category+tab, and keeps it in sync with the URL hash for deep links.
 export default function SettingsPage() {
   const auth = useAuth()
   const { isSuperAdmin, hasModule, hasPermission } = auth
@@ -99,6 +101,7 @@ export default function SettingsPage() {
     .sort((a, b) => t(`groups.${a.key}`).localeCompare(t(`groups.${b.key}`), undefined, { sensitivity: 'base' })),
     [auth, isSuperAdmin, hasModule, hasPermission, isAppEnabled, t])
 
+  // Looks up a nav location by group/tab id among the currently visible groups, so a hash target can be validated before navigating to it.
   const findLocation = (groupKey, tabId) => {
     const group = visibleGroups.find(g => g.key === groupKey)
     const item = group?.items.find(i => i.id === tabId)
@@ -123,6 +126,7 @@ export default function SettingsPage() {
 
   // Dirty-guard: migrated sections report through this; we confirm before leaving.
   const dirtyRef = useRef(false)
+  // Stable context value wrapping the dirty ref, so a section can report unsaved changes without forcing this component to re-render.
   const dirtyCtx = useMemo(() => ({ report: (d) => { dirtyRef.current = d } }), [])
   const { confirm, dialog } = useConfirm()
 
@@ -133,6 +137,7 @@ export default function SettingsPage() {
     setTab(tabId)
   }
 
+  // Navigates to a tab, routing through the unsaved-changes confirm first unless the caller explicitly skips the guard (e.g. a hash change already committed).
   const goTo = (groupKey, tabId, { guard = true } = {}) => {
     if (guard && dirtyRef.current) {
       confirm(t('common.unsavedConfirm'), () => applyNav(groupKey, tabId))
@@ -141,6 +146,7 @@ export default function SettingsPage() {
     applyNav(groupKey, tabId)
     return true
   }
+  // Switches to a category's first visible tab, used by the mobile category picker.
   const selectCategory = (groupKey) => {
     const group = visibleGroups.find(g => g.key === groupKey)
     if (group) goTo(groupKey, group.items[0].id)
@@ -162,13 +168,16 @@ export default function SettingsPage() {
     if (window.location.hash !== next) window.history.replaceState(null, '', next)
   }, [category, tab])
 
+  // One effect owns two listeners: hash changes (back/forward, manual edit) resync the active tab, and Cmd/Ctrl+K opens the search palette.
   useEffect(() => {
+    // Re-parses the hash on navigation and switches tab with the dirty-guard skipped, since the URL has already changed.
     const onHashChange = () => {
       const loc = parseHash()
       if (loc && findLocation(loc.category, loc.tab) && (loc.category !== category || loc.tab !== tab)) {
         goTo(loc.category, loc.tab, { guard: false })
       }
     }
+    // Opens the settings search palette on Cmd/Ctrl+K.
     const onKey = (e) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); setSearchOpen(true) }
     }

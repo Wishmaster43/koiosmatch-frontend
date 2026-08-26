@@ -9,6 +9,8 @@ import { formatNumber } from '@/lib/formatters'
 
 export interface DrillTab { key: string; label: ReactNode; count?: number; title?: string }
 
+// The one pill-tab switcher for drill-down drawers (see file docblock above) —
+// every option always stays visible, active reads the house button trio.
 export default function DrillTabs({ tabs, active, onChange }: {
   tabs: DrillTab[]
   active: string

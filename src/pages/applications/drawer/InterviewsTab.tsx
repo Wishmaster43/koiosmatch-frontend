@@ -178,6 +178,9 @@ type ConversationScope = { params: Record<string, Id> } | null
  */
 function useConversationScope(enabled: boolean, applicationId: Id | undefined, candidateId: Id | null): { scope: ConversationScope; resolved: boolean } {
   const [state, setState] = useState<{ scope: ConversationScope; resolved: boolean }>({ scope: null, resolved: false })
+  // Resolves which conversation scope to use, per the precise-then-fallback strategy
+  // in the file header; the `alive` guard drops a stale response after unmount or
+  // a changed application/candidate id.
   useEffect(() => {
     let alive = true
     // No candidate at all, or the panel isn't offered — never was a conversation
@@ -207,6 +210,8 @@ function useConversationScope(enabled: boolean, applicationId: Id | undefined, c
   return state
 }
 
+// The application drawer's interviews tab: schedule/history + the linked
+// conversation thread, using useConversationScope's precise-then-fallback link.
 export default function InterviewsTab({ application: a }: { application: ApplicationDetail }) {
   const { t } = useTranslation('applications')
   const { formatDateTime } = useDateFormat()

@@ -18,6 +18,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import { loadSettings, saveSettings } from './settingsApi'
 
+// Coerce a stored (string) API value to the type of its default so the form
+// state stays typed (number/boolean/string) regardless of what the server sent.
 function coerce(raw, sample) {
   if (typeof sample === 'number')  return Number(raw)
   if (typeof sample === 'boolean') return raw === true || raw === 'true'
@@ -39,6 +41,8 @@ export function useSettingsForm(defaults) {
   // show an error notice and Save stays blocked until a reload succeeds.
   const [loadError, setLoadError] = useState(false)
 
+  // Load the persisted values once on mount, coercing each onto its default's
+  // type; an alive-guard drops the result if the hook unmounted meanwhile.
   useEffect(() => {
     let alive = true
     loadSettings()
@@ -58,6 +62,8 @@ export function useSettingsForm(defaults) {
 
   const set = (key, val) => setValues(prev => ({ ...prev, [key]: val }))
 
+  // The scaffold's save button is only enabled once the live values actually
+  // differ from the last-persisted snapshot.
   const dirty = useMemo(
     () => JSON.stringify(values) !== JSON.stringify(initial),
     [values, initial],

@@ -128,6 +128,7 @@ function Children({ value, depth, query, t }: { value: object; depth: number; qu
   )
 }
 
+// Root of the Make-style bundle inspector: wraps the data in a searchable expandable field tree instead of a raw JSON dump (see file header).
 export default function OutputTree({ data, searchable = true }: { data: unknown; searchable?: boolean }) {
   const { t } = useTranslation('workflows')
   const [q, setQ] = useState('')

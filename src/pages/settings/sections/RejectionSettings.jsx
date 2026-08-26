@@ -7,6 +7,8 @@
 import { useTranslation } from 'react-i18next'
 import StatusListEditor from './StatusListEditor'
 
+// Thin StatusListEditor wrapper for the rejection-reasons lookup (channel/message
+// templates now live in the workflow engine — this only manages the reasons themselves).
 export default function RejectionSettings() {
   const { t } = useTranslation('settings')
   // reorderable off: SimpleLookupController family has no /reorder route (audit 04-08).

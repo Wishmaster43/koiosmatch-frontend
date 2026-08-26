@@ -65,6 +65,8 @@ const targetGroupNameOf = (c: Campaign) => (c as Record<string, unknown>).pool_n
 const tog = (set: Dispatch<SetStateAction<string[]>>) => (v: string) =>
   set(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v])
 
+// Route page for the call-lists (bellijsten) entity: insights row, toolbar,
+// table/board view, bulk bar and the per-campaign drawer, wired to the trash flow.
 export default function OutreachPage() {
   const { t } = useTranslation('outreach')
   const auth = useAuth()
@@ -123,6 +125,8 @@ export default function OutreachPage() {
   const [archError, setArchError] = useState(false)
   // Bumped after a mark/unmark so the soft-deleted list refetches (TRASH-OVERAL-2).
   const [archTick, setArchTick] = useState(0)
+  // Lazily fetch the soft-deleted campaigns only once the archived/trash view is
+  // opened; archTick bumps to refetch after a mark/unmark elsewhere on the page.
   useEffect(() => {
     if (!showArchived && !showTrash) return
     setArchLoading(true); setArchError(false)
@@ -146,6 +150,7 @@ export default function OutreachPage() {
   const donutBy = (defs: { key: string; color: string }[], ns: string, keyOf: (c: Campaign) => string) => defs
     .map((d) => ({ name: t(`${ns}.${d.key}`), key: d.key, color: d.color, value: campaigns.filter((c) => keyOf(c) === d.key).length }))
     .filter((d) => d.value > 0)
+  // Status donut data, only non-empty buckets, recomputed when the row set or locale changes.
   const statusData  = useMemo(() => donutBy(STATUSES, 'status', statusKey), [campaigns, t]) // eslint-disable-line react-hooks/exhaustive-deps
   const channelData = useMemo(() => donutBy(CHANNELS, 'channel', channelKey), [campaigns, t]) // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -158,6 +163,7 @@ export default function OutreachPage() {
     campaigns.forEach((c) => { const n = nameOf(c); if (n) m.set(n, (m.get(n) ?? 0) + 1) })
     return [...m.entries()].map(([value, count]) => ({ value, label: value, count }))
   }, [campaigns])
+  // Owner filter options, derived from the loaded campaigns (never hardcoded).
   const ownerOptions = useMemo(() => optionsFrom(ownerNameOf), [optionsFrom])
   const targetGroupOptions = useMemo(() => optionsFrom(targetGroupNameOf), [optionsFrom])
 
@@ -172,6 +178,8 @@ export default function OutreachPage() {
     ownerOptions, targetGroupOptions,
   }), [t, selectedStatus, selectedChannel, selectedOwner, selectedTargetGroup, showArchived, statusData, channelData, ownerOptions, targetGroupOptions])
 
+  // Publish the current filter groups into the shared right panel; unregister on
+  // unmount/change so a stale group set never lingers there.
   useEffect(() => {
     registerFilters('outreach-page', filterGroups)
     return () => unregisterFilters('outreach-page')
@@ -212,6 +220,8 @@ export default function OutreachPage() {
     || selectedOwner.length || selectedTargetGroup.length || kpiTargets || showArchived || showTrash)
   // Remount the (self-stateful) search input on clear so the visible text resets too.
   const [searchEpoch, setSearchEpoch] = useState(0)
+  // "Clear all filters" button: resets every filter dimension this page owns, and
+  // bumps searchEpoch so the (self-stateful) search input's visible text resets too.
   const clearAllFilters = () => {
     setSearchEpoch(e => e + 1); setQuery(''); setSelectedStatus([]); setSelectedChannel([])
     setSelectedOwner([]); setSelectedTargetGroup([]); setKpiTargets(false); setShowArchived(false); setShowTrash(false)

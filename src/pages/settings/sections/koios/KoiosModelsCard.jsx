@@ -32,11 +32,15 @@ const card = { border: '1px solid var(--border)', borderRadius: 10, padding: 16,
 // a single group colour, not one per option, so tier identity now reads through
 // the icon shape + label/description text instead of colour.
 const TIER_ICON = { snel: Zap, slim: Sparkles, max: Crown }
+// Resolves a raw vendor model id to its tier + icon via the shared lib/koiosModelTiers
+// map, so this card and the Koios panel's model picker never drift onto two id→tier maps.
 const tierFor = (id) => {
   const key = tierKeyForModel(id)
   return { key, Icon: key ? TIER_ICON[key] : Sparkles }
 }
 
+// Tenant-facing model-tier picker (Snel/Slim/Max); the raw vendor id stays
+// super-admin-only (see the module doc comment above).
 export default function KoiosModelsCard({ models, t, onChanged }) {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState(null)

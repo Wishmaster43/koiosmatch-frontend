@@ -10,6 +10,8 @@ import type { Id } from '@/types/common'
 
 export interface HeaderForm { firstname: string; lastname: string; middleName: string; title: string }
 
+// Owns the drawer header's name/function edit state: captured fields on edit
+// start, reset when the open candidate changes, and a joined-name PATCH on save.
 export function useCandidateHeaderEdit(c: Candidate | null, onUpdate?: (id: Id, patch: Record<string, unknown>) => void) {
   const [headerEditing, setHeaderEditing] = useState(false)
   const [headerForm,    setHeaderForm]    = useState<HeaderForm | null>(null)
@@ -42,6 +44,7 @@ export function useCandidateHeaderEdit(c: Candidate | null, onUpdate?: (id: Id, 
   }
   const setHF = (k: keyof HeaderForm, v: string) => setHeaderForm(f => f ? { ...f, [k]: v } : f)
   const hf = (k: keyof HeaderForm) => headerForm?.[k] ?? ''
+  // Recompose the full name from the edited parts and PATCH it along with the raw fields.
   const saveHeader = () => {
     if (c && headerForm) {
       const name = [headerForm.firstname, headerForm.middleName, headerForm.lastname].filter(Boolean).join(' ')

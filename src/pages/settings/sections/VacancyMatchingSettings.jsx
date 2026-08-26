@@ -23,6 +23,8 @@ const MODES = [
   { value: 'altijd', key: 'always' },
 ]
 
+// Settings screen for the global matching strictness slider and the match-approval
+// mode; per-vacancy dimension weights live elsewhere (see the module doc comment above).
 export default function VacancyMatchingSettings() {
   const { t } = useTranslation('settings')
   const [level, setLevel] = useState(1) // index into LEVELS (1 = balanced default)
@@ -43,6 +45,7 @@ export default function VacancyMatchingSettings() {
       .catch(() => {})
   }, [])
 
+  // Persist the strictness level (slider index mapped back to its enum slug), flashing the saved-check briefly on success.
   const save = async () => {
     setSaving(true)
     try { await api.put('/settings/matching', { strictness: LEVELS[level] }); setSaved(true); setTimeout(() => setSaved(false), 2000) }

@@ -16,6 +16,7 @@ import Button from '@/components/ui/Button'
 
 interface PreviewCounts { applications?: number; matches?: number; appointments?: number; notes?: number; documents?: number; tasks?: number; timeline_events?: number; conversations?: number }
 
+// Permanent-delete confirm popup (see the module doc above): fetches the blast-radius preview so the recruiter sees exactly what will be erased before force-delete.
 export default function DeletionPreviewModal({ candidateId, candidateName, onClose, onConfirm }: {
   candidateId: Id
   candidateName: string

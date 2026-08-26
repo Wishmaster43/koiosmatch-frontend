@@ -43,6 +43,7 @@ function TodaySubList({ label, rows, onNavigate }: {
   )
 }
 
+// Two labelled sub-lists (started/ended today); the whole tile self-hides when both are empty.
 export default function PlacementsTodayLists({ feed, onNavigate }: {
   feed: PlacementsStartedEndedToday
   onNavigate?: FeedTileContext['onNavigate']

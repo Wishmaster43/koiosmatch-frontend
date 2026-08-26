@@ -15,6 +15,7 @@ interface SafeHtmlProps {
   className?: string
 }
 
+// Renders rich-text HTML after DOMPurify sanitization (§7: the one sanctioned dangerouslySetInnerHTML use, see the module doc comment above).
 export default function SafeHtml({ html, style, className }: SafeHtmlProps) {
   const clean = DOMPurify.sanitize(html ?? '', { USE_PROFILES: { html: true } })
   return <div className={className} style={style} dangerouslySetInnerHTML={{ __html: clean }} />

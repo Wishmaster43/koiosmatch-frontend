@@ -66,6 +66,8 @@ export default function WorkflowsPage({ intent }: { intent?: WorkflowsIntent } =
   })
   // LOOKUP-I18N-1: the trash preview shows the same (translated) name as the row.
   const seedLabel = useSeedLabel()
+  // Opens the trash-mark confirm for one workflow, previewing it under its
+  // (possibly tenant-renamed) translated name.
   const openMarkDeletion = (wf: Workflow) => {
     if (wf.id == null) return
     trash.openFor(String(wf.id), seedLabel('workflowNames', { label: wf.name ?? null }) || String(wf.id))

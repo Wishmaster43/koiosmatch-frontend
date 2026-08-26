@@ -148,6 +148,7 @@ function ProseField({ value }: { value?: string }) {
   )
 }
 
+// Work-experience list tab: add/edit/remove/reorder rows, each optionally previewing an already-linked proof document via the shared DocPreviewModal.
 export function ExperienceTab({ items = [], onAdd, onEdit, onRemove, documents = [], onJumpToDocuments, onReorder }: RelTabProps) {
   const { t } = useTranslation('candidates')
   const { formatDate } = useDateFormat()
@@ -228,6 +229,7 @@ export function ExperienceTab({ items = [], onAdd, onEdit, onRemove, documents =
   )
 }
 
+// Education list tab: add/edit/remove/reorder rows, each optionally previewing an already-linked proof document via the shared DocPreviewModal.
 export function EducationTab({ items = [], onAdd, onEdit, onRemove, documents = [], onJumpToDocuments, onReorder }: RelTabProps) {
   const { t } = useTranslation('candidates')
   const { formatDate } = useDateFormat()
@@ -348,6 +350,7 @@ export function EducationTab({ items = [], onAdd, onEdit, onRemove, documents = 
   )
 }
 
+// Certifications list tab: add/edit/remove/reorder rows, each optionally previewing an already-linked proof document via the shared DocPreviewModal.
 export function CertificationsTab({ items = [], onAdd, onEdit, onRemove, documents = [], onJumpToDocuments, onReorder }: RelTabProps) {
   const { t } = useTranslation('candidates')
   const { formatDate } = useDateFormat()
@@ -427,6 +430,7 @@ export function CertificationsTab({ items = [], onAdd, onEdit, onRemove, documen
   )
 }
 
+// Skills list tab: level is a tenant lookup, and a row can optionally link an already-uploaded proof document once the candidate has any.
 export function SkillsTab({ items = [], onAdd, onEdit, onRemove, documents = [], onJumpToDocuments, onReorder }: RelTabProps) {
   const { t } = useTranslation('candidates')
   // Level is a tenant lookup dropdown (SKILL-LVL-1), mirroring the languages editor.

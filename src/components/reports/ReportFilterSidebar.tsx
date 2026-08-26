@@ -33,6 +33,7 @@ function groupActiveCount(g: ReportFilterGroup): number {
   return g.selected?.length ?? 0
 }
 
+// The right-hand filter panel body: header, active-count, clear-all and one collapsible block per registered filter group.
 export default function ReportFilterSidebar({
   title, groups = [], onClose, pageId = 'default',
 }: { title?: ReactNode; groups?: ReportFilterGroup[]; onClose: () => void; pageId?: string }) {
@@ -42,6 +43,7 @@ export default function ReportFilterSidebar({
   const heading = title ?? t('filters.title')
   const activeCount = groups.reduce((sum, g) => sum + groupActiveCount(g), 0)
 
+  // Reset every registered group via its own type-specific clear path (saved-filters is exempt — it's not a filter).
   const clearAll = () => {
     groups.forEach(g => {
       if (g.type === 'saved-filters') { /* not a filter — never cleared */ }

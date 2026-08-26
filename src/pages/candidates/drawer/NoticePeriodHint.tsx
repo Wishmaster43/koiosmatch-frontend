@@ -33,6 +33,7 @@ interface NoticePeriodHintProps {
   now?: Date
 }
 
+// Shows the derived available-from date (today + notice weeks) as a one-click suggestion; disappears once a real date is on file, and never applies itself (see file header).
 export default function NoticePeriodHint({ weeks, availableFrom, onApply, canApply = true, now }: NoticePeriodHintProps) {
   const { t } = useTranslation('candidates')
   const { formatDate } = useDateFormat()

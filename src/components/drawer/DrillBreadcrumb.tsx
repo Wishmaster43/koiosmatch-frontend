@@ -22,6 +22,8 @@ const crumbBtn = {
   color: 'var(--color-primary-text)', cursor: 'pointer', whiteSpace: 'nowrap' as const,
 }
 
+// One trail line for a nested drill-down: clickable ancestors, then the current
+// (non-clickable) level — the single way back, replacing per-level "← Terug" buttons.
 export default function DrillBreadcrumb({ trail, current }: { trail: Crumb[]; current: string }) {
   const { t } = useTranslation('common')
   return (

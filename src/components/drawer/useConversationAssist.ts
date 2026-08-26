@@ -34,6 +34,7 @@ function describeFailure(
   return { message: extractApiError(err, fallback), tone: CALM_STATUSES.includes(httpStatus ?? 0) ? 'warning' : 'danger' }
 }
 
+// See the file's top doc above for the state machine this hook drives; language is used to translate the assist result.
 export function useConversationAssist(language?: string) {
   const { t } = useTranslation('candidates')
   const { t: tCommon } = useTranslation('common')
@@ -48,6 +49,7 @@ export function useConversationAssist(language?: string) {
   // StrictMode runs setup→cleanup→setup in dev, a cleanup-only ref would stay false forever.
   const aliveRef = useRef(true)
   const abortRef = useRef<AbortController | null>(null)
+  // Marks the hook alive on mount and dead on unmount, aborting any in-flight request; re-armed in setup (not only cleanup) so StrictMode double-mount never leaves it permanently false.
   useEffect(() => {
     aliveRef.current = true
     return () => { aliveRef.current = false; abortRef.current?.abort() }

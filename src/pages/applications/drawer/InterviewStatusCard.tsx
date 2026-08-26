@@ -72,6 +72,7 @@ const cardStyle: CSSProperties = {
 const MetaDot = () => <span aria-hidden="true" style={{ color: 'var(--text-muted)', fontSize: 12 }}>·</span>
 
 
+// Live interview summary card (see the module doc above): every field renders defensively as optional, and the stop/resume controls gate on the application id, never the interview session id (see the INTERVIEW-STOP-1 note).
 export default function InterviewStatusCard({ interview, applicationId }: { interview: ApplicationInterview | null; applicationId?: Id }) {
   const { t } = useTranslation('applications')
   const auth = useAuth()

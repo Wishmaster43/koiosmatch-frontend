@@ -15,6 +15,8 @@ export const RADIUS_SLIDER_MIN = 5
 export const RADIUS_SLIDER_MAX = 150
 export const RADIUS_SLIDER_STEP = 5
 
+// The shared radius row (label + slider + exact-km input); owns the slider
+// domain and clamps a dragged/typed value back onto the 5km floor.
 export default function RadiusControlRow({ value, onChange, children }: {
   value: number
   onChange: (km: number) => void

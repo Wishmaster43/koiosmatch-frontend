@@ -14,6 +14,7 @@
  */
 export const RESOLVABLE_CONTEXT_TYPES: readonly string[] = ['candidate']
 
+// Whether an @-mention's context type is one the backend can actually resolve today.
 export function isContextResolvable(type: string): boolean {
   return RESOLVABLE_CONTEXT_TYPES.includes(type)
 }

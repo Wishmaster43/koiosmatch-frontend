@@ -66,6 +66,8 @@ export function fetchCategoryHits(categoryId: string, query: string, signal?: Ab
     .catch((err) => ({ hits: [], error: !axios.isCancel(err) }))
 }
 
+// Debounced, abortable @-mention search for one category in the Koios composer;
+// exposes a retry() so a failed search can be re-run without the query changing.
 export function useKoiosEntitySearch(categoryId: string, query: string) {
   const [results, setResults] = useState<KoiosEntityHit[]>([])
   const [loading, setLoading] = useState(false)
@@ -74,6 +76,8 @@ export function useKoiosEntitySearch(categoryId: string, query: string) {
   const [retryTick, setRetryTick] = useState(0)
   const config = MENTION_CATEGORIES.find((c) => c.id === categoryId)?.search
 
+  // Debounce the query and abort the in-flight request on every keystroke/category
+  // switch/retry, so a stale response can never overwrite a newer one.
   useEffect(() => {
     const q = query.trim()
     // No search wiring for this category (measured gap) — never hit the API.
@@ -94,6 +98,7 @@ export function useKoiosEntitySearch(categoryId: string, query: string) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [categoryId, query, retryTick])
 
+  // Bumping the tick re-runs the search effect above without needing a query change.
   const retry = useCallback(() => setRetryTick((t) => t + 1), [])
   return { results, loading, unsupported: !config, error, retry }
 }

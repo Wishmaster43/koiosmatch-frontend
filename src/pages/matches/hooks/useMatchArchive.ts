@@ -26,6 +26,8 @@ interface Args {
   onReload: () => void
 }
 
+// Per-record archive/restore lifecycle for one open match (see file docblock
+// above) — the drawer's own action, distinct from list-level archived visibility.
 export function useMatchArchive({ onPatch, onReload }: Args) {
   const { t } = useTranslation('matches')
   const [archiving, setArchiving] = useState(false)

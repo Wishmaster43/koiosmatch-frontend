@@ -12,6 +12,8 @@ import api, { unwrap } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 import type { Id } from '@/types/common'
 
+// Creates a direct match for a candidate via the canonical endpoint (see file
+// docblock above); kept out of the drawer so it stays presentational.
 export function useCreateMatch(candidateId: Id) {
   const { t } = useTranslation('candidates')
   const [creating, setCreating] = useState(false)

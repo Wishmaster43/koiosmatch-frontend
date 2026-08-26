@@ -10,6 +10,7 @@ import { PageTitle } from '@/components/ui/typography'
 import type { MessageRow } from '@/types/reports'
 import { formatDT, CHANNEL_META, ChannelBadge, StatusBadge } from './messageParts'
 
+// One message full detail drawer, with a per-channel icon/colour falling back to a neutral chat icon for an unrecognised channel.
 export default function MessageDrawer({ message, onClose }: { message: MessageRow; onClose: () => void }) {
   const { t } = useTranslation('reports')
   const panelRef = useFocusTrap<HTMLDivElement>(onClose)

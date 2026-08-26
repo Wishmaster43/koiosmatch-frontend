@@ -297,6 +297,7 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
   const anyFilterActive = Boolean(query.trim() || kpiScored || kpiUnscored || (approvalReviewVisible && pendingApprovalOnly) || stageFilter.length || ownerFilter.length
     || clientFilter.length || branchFilter.length || contractFormFilter.length || contractTypeFilter.length || dateRange || showArchived || showTrash)
   const [searchEpoch, setSearchEpoch] = useState(0)
+  // Resets every filter dimension (and bumps the search epoch) back to defaults in one action.
   const clearAllFilters = () => {
     setSearchEpoch(e => e + 1); setQuery(''); setKpiScored(false); setKpiUnscored(false); setPendingApprovalOnly(false)
     setStageFilter([]); setOwnerFilter([]); setClientFilter([]); setBranchFilter([]); setContractFormFilter([]); setContractTypeFilter([]); setDateRange(null); setShowArchived(false); setShowTrash(false)
@@ -345,13 +346,14 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
   useEffect(() => {
     const contractForm = (intent as { contract_form?: unknown } | undefined)?.contract_form
     if (contractForm != null) setContractFormFilter([String(contractForm)])
-    // MATCH-AXIS-FIX: same seeding for the distinct contract-TYPE intent (e.g.
+    // MATCH-AXIS-FIX: same seeding for the distinct contract-TYPE intent (e.g
     // the ops-dashboard MatchesByContractTypeDonut's slice click).
     const contractType = (intent as { contract_type?: unknown } | undefined)?.contract_type
     if (contractType != null) setContractTypeFilter([String(contractType)])
   }, [intent, setContractFormFilter, setContractTypeFilter])
 
   useOpenFromIntent(intent, (id) => setPendingOpenId(id))
+  // Opens the deep-linked match once its row is loaded; if it sits outside the current page/filters, fetches it directly instead of silently dropping the open.
   useEffect(() => {
     if (pendingOpenId == null) return
     const row = rows.find(r => String(r.id) === String(pendingOpenId))

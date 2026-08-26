@@ -44,6 +44,8 @@ interface Args {
   toggleKpi: (k: string) => void
 }
 
+// Pure builder for the customers KPI/insights strip (see file docblock above) —
+// server-wide totals win, the loaded page is only the honest fallback.
 export function buildCustomerInsightsConfig({
   t, stats, customers, statusData, ownerData, entryPhaseValue,
   selectedStatus, setSelectedStatus, selectedPhase, setSelectedPhase, selectedOwner, setSelectedOwner,

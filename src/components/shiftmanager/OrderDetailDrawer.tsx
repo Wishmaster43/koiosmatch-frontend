@@ -20,6 +20,7 @@ const Field = ({ label, value }: { label: ReactNode; value?: ReactNode }) => (
   </div>
 )
 
+// Read-only slide-in detail panel for one Shiftmanager order; renders nothing without a row (see file header).
 export default function OrderDetailDrawer({ row, onClose }: { row: OrderRow | null; onClose: () => void }) {
   const panelRef = useFocusTrap<HTMLDivElement>(onClose)
   const { t } = useTranslation('shiftmanager')

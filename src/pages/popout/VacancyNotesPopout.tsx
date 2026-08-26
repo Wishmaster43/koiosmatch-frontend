@@ -18,6 +18,7 @@ type AnyProps = Record<string, unknown>
 // Still-untyped JS component — accept any props at the boundary (mirrors vacancies/drawer/NotesTab.tsx).
 const NotesTab = NotesTabJs as unknown as ComponentType<AnyProps>
 
+// Second-screen notes window for one vacancy (see the module doc above): mirrors the drawer's own NotesTab, notes only.
 export default function VacancyNotesPopout({ id }: { id: string | undefined }) {
   const { t } = useTranslation('vacancies')
   const { vacancy, loading, error, reload } = useVacancyLite(id)

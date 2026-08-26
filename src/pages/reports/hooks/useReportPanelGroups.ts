@@ -34,6 +34,9 @@ import type { ReportFilterGroup } from '@/types/reports'
 import type { ReportId } from '../reportIds'
 import type { ReportPeriod } from '@/types/analytics'
 
+// Central filter-panel hook shared by every /reports/* page: owns each panel dimension's
+// state, resolves the report-specific option lists, and assembles/registers the groups
+// so ReportsPage itself stays a thin container (see file docblock above).
 export function useReportPanelGroups({ active, period, setPeriod, compareInPanel, compareMode, setCompareMode }: {
   active: ReportId
   period: ReportPeriod
@@ -113,6 +116,7 @@ export function useReportPanelGroups({ active, period, setPeriod, compareInPanel
   const taskTypeOptions = useTaskTypeIdOptions()
   const taskPriorityOptions = useTaskPriorityIdOptions()
   const { statuses: matchStatusesRaw } = useMatchStatuses()
+  // Reshapes the raw match-status lookup into the panel's {value,label} option shape.
   const matchStatusOptions = useMemo(() => matchStatusesRaw.map(s => ({ value: s.value, label: s.label })), [matchStatusesRaw])
   const { stages: opportunityStages } = useOpportunityStages()
   const { statuses: outreachStatuses } = useOutreachStatuses()
@@ -132,6 +136,8 @@ export function useReportPanelGroups({ active, period, setPeriod, compareInPanel
     : active === 'opportunities' ? opportunityStages
     : active === 'outreach' ? outreachStatuses
     : candidateStatuses
+  // Maps tenant users to owner options, dropping any without an id so the panel never
+  // offers a selectable empty value.
   const ownerOptions = useMemo(() => users.map(u => ({ value: u.id ?? '', label: u.name || '—' })).filter(o => o.value !== ''), [users])
   const branchOptions = useMemo(() => locations.map(l => ({ value: l.value, label: l.label })), [locations])
 
@@ -150,25 +156,32 @@ export function useReportPanelGroups({ active, period, setPeriod, compareInPanel
     [candidateTypes, t],
   )
   const { stages: applicationStages } = useApplicationStages()
+  // Prepends the 'none' sentinel (mirrors the backend's own "no stage" bucket) ahead
+  // of the tenant's own funnel stages.
   const stageOptions = useMemo(
     () => [{ value: 'none', label: t('applications.axes.stageNone') }, ...applicationStages.map(s => ({ value: s.value, label: s.label }))],
     [applicationStages, t],
   )
   const { reasons: rejectionReasonOptions } = useRejectionReasons()
   const { teams } = useTeams()
+  // Prepends the 'none' sentinel for tasks that have no team assigned.
   const teamOptions = useMemo(
     () => [{ value: 'none', label: t('tasks.noTeam') }, ...teams.map(tm => ({ value: tm.value, label: tm.label }))],
     [teams, t],
   )
+  // Prepends the 'none' sentinel ahead of the shared task-type lookup options.
   const taskTypePanelOptions = useMemo(
     () => [{ value: 'none', label: t('tasks.filters.typeNone') }, ...taskTypeOptions], [taskTypeOptions, t],
   )
+  // Prepends the 'none' sentinel ahead of the shared task-priority lookup options.
   const taskPriorityPanelOptions = useMemo(
     () => [{ value: 'none', label: t('tasks.filters.priorityNone') }, ...taskPriorityOptions], [taskPriorityOptions, t],
   )
+  // Static, translated inbound/outbound options — not a tenant lookup, so built inline.
   const directionOptions = useMemo(
     () => (['inbound', 'outbound'] as const).map(v => ({ value: v, label: t(`whatsapp.axes.directionValues.${v}`) })), [t],
   )
+  // Static, translated match-origin options (funnel vs. direct match) — not a lookup.
   const originOptions = useMemo(
     () => [{ value: 'funnel', label: t('matches.viaFunnel') }, { value: 'direct', label: t('matches.direct') }], [t],
   )

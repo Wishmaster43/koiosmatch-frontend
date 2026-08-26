@@ -36,6 +36,8 @@ function PhotoAvatar({ avatar, onChange, labels }: { avatar: AvatarConfig; onCha
   // revoked when replaced/removed and on unmount — otherwise every upload leaks memory.
   const createdUrlRef = useRef<string | null>(null)
 
+  // Close the photo menu on an outside click; a click inside a portalled dropdown
+  // is never "outside" (PORTAL-MARKER-1), so it doesn't get mistaken for a dismiss.
   useEffect(() => {
     if (!menuOpen) return
     const h = (e: MouseEvent) => { if (isInsideDropdownPortal(e.target as Node)) return; if (ref.current && !ref.current.contains(e.target as Node)) setMenuOpen(false) }
@@ -112,6 +114,8 @@ function PhotoAvatar({ avatar, onChange, labels }: { avatar: AvatarConfig; onCha
   )
 }
 
+// Renders the tag chip list with an inline "+" add input and click-to-rename per chip
+// (rename commits as remove(old)+add(new) so any add/remove-only wiring keeps working).
 function TagRow({ items = [], onAdd, onRemove, addLabel }: { items?: string[]; onAdd: (v: string) => void; onRemove: (tag: string) => void; addLabel: string }) {
   const [adding, setAdding] = useState(false)
   const [value, setValue] = useState('')
@@ -121,9 +125,13 @@ function TagRow({ items = [], onAdd, onRemove, addLabel }: { items?: string[]; o
   const [editValue, setEditValue] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
   const editRef = useRef<HTMLInputElement>(null)
+  // Focus follows the input that just appeared, so adding or renaming a tag stays a
+  // keyboard flow: the click that opened it never has to be followed by a second click.
   useEffect(() => { if (adding) inputRef.current?.focus() }, [adding])
   useEffect(() => { if (editing != null) editRef.current?.focus() }, [editing])
   const commit = () => { if (value.trim()) onAdd(value.trim()); setValue(''); setAdding(false) }
+  // Renaming a tag has no dedicated API, so it commits as remove(old) + add(new); a
+  // no-op (empty or unchanged value) just exits edit mode without calling either.
   const commitEdit = () => {
     const next = editValue.trim()
     if (editing != null && next && next !== editing) { onRemove(editing); onAdd(next) }
@@ -197,6 +205,8 @@ interface EntityHeaderProps {
   onClose?: () => void
 }
 
+// The shared drawer header shell: title row + expand/close, avatar/title/actions,
+// meta pickers and tags — every entity drawer composes this instead of its own markup.
 export default function EntityHeader({
   label, avatar, onPhotoChange, photoLabels, title, subtitle, renderTitle,
   titleActions, actions, meta = [], metaExtra, tags, tagsLabel, children, expanded, onToggleExpand, onClose,

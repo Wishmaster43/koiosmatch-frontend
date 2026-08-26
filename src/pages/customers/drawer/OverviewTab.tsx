@@ -62,6 +62,8 @@ import EditableRichTextField from './EditableRichTextField'
 import { buildCustomerAdviceInsights } from './customerAiInsights'
 import type { Customer } from '@/types/customer'
 
+// The customer overview tab: grouped field cards.
+// + the standalone rich-text Teksten section.
 export default function OverviewTab({ c, onSave }: { c: Customer; onSave?: (values: Record<string, unknown>) => void }) {
   const { t, i18n } = useTranslation('customers')
   // KOIOS-ADVIES-OVERAL-1: the SAME resolver the customers table's Koios column

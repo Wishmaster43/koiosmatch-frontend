@@ -26,6 +26,7 @@ const deptChip = (label: string) => (
     border: '1px solid var(--border)', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>{label}</span>
 )
 
+// Presentational locations table for the shiftmanager customer detail view; selection/loading/click all controlled by the host.
 export default function LocationsTable({ rows, loading, selectedId, onSelect }: {
   rows: SmLocationRow[]
   loading?: boolean

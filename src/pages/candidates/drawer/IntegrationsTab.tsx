@@ -53,6 +53,8 @@ function PdokMetaLine({ geocode }: { geocode: Candidate['geocode'] }) {
   return null
 }
 
+// Backoffice/PDOK integrations tab: manual geocode refresh (with its own poll for
+// the async result) plus the Koppelen (link) buttons, both gated on candidates.update.
 export default function IntegrationsTab({ c, onUpdate }: {
   c: Candidate
   // Optional record-merge callback (CandidateDrawer wires the page's updateCandidate):
@@ -86,6 +88,8 @@ export default function IntegrationsTab({ c, onUpdate }: {
     return () => { mountedRef.current = false }
   }, [])
 
+  // Kick off the async geocode job, drop the spinner as soon as it's queued (202),
+  // then poll a few times in the background so fresh coords/provenance land without a full reload.
   const onRefreshPdok = async () => {
     if (pdokRefreshing) return
     setPdokRefreshing(true)

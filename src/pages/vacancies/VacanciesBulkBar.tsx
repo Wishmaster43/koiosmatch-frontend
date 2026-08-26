@@ -43,6 +43,7 @@ interface VacanciesBulkBarProps {
   onOpenCandidateSearch?: (id: Id) => void
 }
 
+// See the file's top doc above; a thin assembler, all mutation data arrives via props.
 export default function VacanciesBulkBar({
   count, onClear, onSetOwner, onSetStatus, onSetClient, onPublish, onUnpublish, onSetAiAgent,
   onRemoveTag, onAddNote, onArchive, canArchive = false,

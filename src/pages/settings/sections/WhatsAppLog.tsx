@@ -88,6 +88,7 @@ const contactOf = (m: WaMessage) =>
   || [m.customer_contact?.first_name, m.customer_contact?.last_name].filter(Boolean).join(' ')
   || '—'
 
+// Bureau-wide WhatsApp message log: server-filtered direction/status plus a client-side search over the loaded page.
 export default function WhatsAppLog() {
   const { t } = useTranslation('settings')
   const [search, setSearch] = useState('')
@@ -129,6 +130,7 @@ export default function WhatsAppLog() {
   // canon CEL-DOORKLIK-CANON gateways straight to the candidate drilldown.
   const columns = useMessageColumns({ clampBody: true })
 
+  // Assemble the right-hand filter panel groups for this log (search + direction + status).
   const filterGroups = useMemo(() => [
     { key: 'search', label: t('waLog.searchPlaceholder'), type: 'global-search', value: search, onChange: setSearch },
     // WA-MSG-TABLE-1 stage B: direction/status are now server params (the

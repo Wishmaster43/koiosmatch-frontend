@@ -40,6 +40,7 @@ interface BuildArgs {
   contractTypeOptions?: Opt[]
 }
 
+// See the file's top doc above; pure builder, the one place these dimensions are filterable since the toolbar duplicate was deleted.
 export function buildMatchFilterGroups({
   t, tog, stageFilter, setStageFilter, ownerFilter, setOwnerFilter,
   clientFilter, setClientFilter, branchFilter, setBranchFilter, contractFormFilter, setContractFormFilter,

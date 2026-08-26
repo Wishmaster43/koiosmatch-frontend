@@ -33,6 +33,8 @@ const STATUS_META: Record<string, { bg: string; color: string }> = {
   niet_factureerbaar: { bg: 'var(--hover-bg)', color: 'var(--text-muted)' },
 }
 
+// Renders a shift's status as a soft-tinted pill, falling back to a neutral
+// "unknown" look for a status not covered by STATUS_META.
 function Badge({ status }: { status?: string }) {
   const { t } = useTranslation('shiftmanager')
   const s = STATUS_META[status ?? ''] ?? { bg: 'var(--hover-bg)', color: 'var(--text-muted)' }
@@ -44,6 +46,8 @@ function Badge({ status }: { status?: string }) {
   )
 }
 
+// One labeled detail line with a leading icon; renders nothing for an empty value
+// so a shift missing a field doesn't leave a dangling "Label: —" row.
 function Row({ icon: Icon, label, value, mono }: { icon: LucideIcon; label: ReactNode; value?: ReactNode; mono?: boolean }) {
   if (value === null || value === undefined || value === '') return null
   return (
@@ -68,16 +72,20 @@ function formatDateTime(iso: string | null | undefined, locale: string) {
   })
 }
 
+// Time-only variant of formatDateTime, for the start/end columns in the details list.
 function formatTime(iso: string | null | undefined, locale: string) {
   if (!iso) return null
   return new Date(iso).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' })
 }
 
+// Date-only variant of formatDateTime, for the date column in the details list.
 function formatDate(iso: string | null | undefined, locale: string) {
   if (!iso) return null
   return new Date(iso).toLocaleDateString(locale, { day: 'numeric', month: 'short', year: 'numeric' })
 }
 
+// Renders the assigned candidate on a shift row; tolerates the different name-field
+// shapes seen on the shift-mirror data and falls back to the email local-part.
 function CandidateBlock({ invite }: { invite: ShiftInvite }) {
   const { t } = useTranslation('shiftmanager')
   // App-wide active locale (§5) — fed into formatDateTime below instead of a hardcoded 'nl-NL'.
@@ -116,6 +124,7 @@ function CandidateBlock({ invite }: { invite: ShiftInvite }) {
   )
 }
 
+// The slide-in panel itself: series/period picker over totals or a searchable detail
 export default function ShiftsDrillDownDrawer({ metric, metricOptions, periods, initialPeriod, buildUrl, titleFor, countFor, onClose, locationMeta }: {
   metric: string                                              // initial series (totaal / geen_kandidaat / …)
   metricOptions: { value: string; label: string }[]           // switchable series (chips)

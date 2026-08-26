@@ -183,6 +183,7 @@ export default function DetailsTab({ task, onUpdate, onSubtaskCreated }: {
   // assignee pickers) — it rebuilds the display object alongside the id so the
   // optimistic UI shows the branch name immediately, same as the assignee handler.
   const locationOpts = locations.map(l => ({ value: String(l.value), label: l.label }))
+  // Persists the picked location, rebuilding the display object alongside the id so the optimistic UI shows the branch name immediately.
   const onLocationChange = (v: string) => {
     const sel = locations.find(l => String(l.value) === v)
     onUpdate({ locationId: v || null, location: sel ? { id: sel.value, name: sel.label } : null })

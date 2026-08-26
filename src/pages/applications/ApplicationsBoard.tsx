@@ -119,6 +119,7 @@ function BoardColumn({ phase, items, onDragStart, onDrop, onDragOver, onSelect, 
   )
 }
 
+// Kanban board view of the funnel: renders phase columns from the wide sample and reports its own loading/error/empty state honestly (F3) instead of showing zero-count columns while data is missing.
 export default function ApplicationsBoard({ rows, phases, onMove, onSelect, selectedId, loading, error }: {
   rows: Application[]; phases: BoardPhase[]; onMove: (id: Id, phaseKey: string) => void; onSelect: (app: Application) => void; selectedId?: Id | null
   // F3 (audit R1): the board renders off the wide (bucket-less) sample — surface
@@ -133,6 +134,7 @@ export default function ApplicationsBoard({ rows, phases, onMove, onSelect, sele
 
   const handleDragStart = (e: DragEvent<HTMLDivElement>, id: Id | undefined) => { dragId.current = id ?? null; e.dataTransfer.effectAllowed = 'move' }
   const handleDragOver = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move' }
+  // Completes a card drag: moves the dragged application to the dropped-on phase and clears the tracked drag id.
   const handleDrop = (e: DragEvent<HTMLDivElement>, phaseKey: string) => {
     e.preventDefault()
     if (dragId.current != null) { onMove(dragId.current, phaseKey); dragId.current = null }

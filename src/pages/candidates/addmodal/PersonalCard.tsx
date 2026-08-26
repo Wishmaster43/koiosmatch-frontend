@@ -15,6 +15,7 @@ interface PersonalCardProps {
   genderOptions: FieldOption[]
 }
 
+// Add-candidate modal card: the personal-details fields (name/gender/birthdate/…), required-ness driven by isReq.
 export default function PersonalCard({ form, errors, set, isReq, genderOptions }: PersonalCardProps) {
   const { t } = useTranslation(['candidates', 'common'])
   return (

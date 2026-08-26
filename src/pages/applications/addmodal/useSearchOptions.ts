@@ -42,12 +42,14 @@ function classifySearchError(err: unknown): SearchErrorKind {
   return 'unknown'
 }
 
+// Server-searched picker options for one entity: re-fetches per keystroke, guarded against out-of-order responses, and skips entirely when the caller's context is already locked.
 export function useSearchOptions(url: string, mapRow: (row: RawPickRow) => PickOption, skip: boolean) {
   const [query, setQuery]           = useState('')
   const [options, setOptions]       = useState<PickOption[]>([])
   const [error, setError]           = useState<SearchErrorKind | null>(null)
   const [reloadTick, setReloadTick] = useState(0)
   const requestIdRef = useRef(0)
+  // Re-runs the search on every query/skip/retry change; requestId drops a superseded response instead of letting a slow earlier query overwrite a faster later one.
   useEffect(() => {
     if (skip) return
     const requestId = ++requestIdRef.current

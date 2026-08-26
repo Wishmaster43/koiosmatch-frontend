@@ -20,6 +20,7 @@ export const RESULT_REF_PAGE: Record<string, string> = {
   outreach_campaign: 'outreach',
 }
 
+// Resolves a Koios result's entity type to the page route it deep-links to; an unknown type yields no link at all.
 export function pageForResultRef(type: string): string | null {
   return RESULT_REF_PAGE[type] ?? null
 }

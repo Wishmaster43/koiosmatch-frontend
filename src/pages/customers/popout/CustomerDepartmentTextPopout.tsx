@@ -18,11 +18,14 @@ import { useTextPopoutDraft } from '@/pages/popout/shared'
 import { useDepartmentTextLite, patchDepartmentText } from '../hooks/useCustomerTextPopout'
 import { textPopoutTopic, parseDepartmentPopoutId } from '@/lib/secondScreen'
 
+// Second-screen editor for a department's description, per the composite-id
 export default function CustomerDepartmentTextPopout({ id }: { id: string | undefined }) {
   const { t } = useTranslation('customers')
   const parsed = parseDepartmentPopoutId(id)
   const { department, loading, error, reload } = useDepartmentTextLite(parsed?.customerId, parsed?.departmentId)
 
+  // Save handler for useTextPopoutDraft below; stable identity so a save in flight
+  // isn't retriggered by an unrelated re-render.
   const persist = useCallback((html: string, revert: () => void) => {
     if (!parsed) return Promise.resolve(false)
     return patchDepartmentText(parsed.customerId, parsed.departmentId, html, t, revert)
@@ -34,6 +37,8 @@ export default function CustomerDepartmentTextPopout({ id }: { id: string | unde
     onSave: persist,
   })
 
+  // Sets the window title to the department name once it loads, restoring the
+  // previous title on unmount so a closed popout doesn't leak its title elsewhere.
   useEffect(() => {
     if (!department) return
     const previous = document.title

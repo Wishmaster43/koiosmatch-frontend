@@ -58,6 +58,7 @@ export default function AddLinkRow({ existing, onAdd, onClose, types = TASK_LINK
       .then(r => { if (requestIdRef.current === requestId) setRows(unwrapList<LinkRow>(r).rows) })
       .catch(() => { if (requestIdRef.current === requestId) setError(true) })
   }, [type, query])
+  // Re-runs the search whenever type/query changes, clearing stale rows first so the previous type's options never flash before the new page lands.
   useEffect(() => { setRows([]); fetchOptions() }, [fetchOptions])
 
   const cfg = TASK_LINK_ENDPOINTS[type]

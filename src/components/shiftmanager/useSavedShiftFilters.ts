@@ -36,6 +36,8 @@ function tenantScopedKey(key: string): string {
   return `${key}:t=${tenant}`
 }
 
+// Persists named shift-filter presets to localStorage under a tenant-scoped key
+// (see tenantScopedKey above) so a super admin's saved sets never leak across tenants.
 export function useSavedShiftFilters(rawKey: string) {
   const storageKey = tenantScopedKey(rawKey)
   const [saved, setSaved] = useState<SavedShiftFilter[]>(() => read(storageKey))

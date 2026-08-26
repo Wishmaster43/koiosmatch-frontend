@@ -44,6 +44,7 @@ interface WhatsAppConnectionsListProps extends UseWhatsAppConnectionsResult {
   canManage: boolean
 }
 
+// Lists every WhatsApp token with its scope/default badge; promoting a row to default re-fetches instead of reconciling locally, since the server demotes siblings itself.
 export default function WhatsAppConnectionsList({
   connections, loading, error, reload, removeLocal, canManage,
 }: WhatsAppConnectionsListProps) {
@@ -87,6 +88,7 @@ export default function WhatsAppConnectionsList({
     setPromotingId(null)
   }
 
+  // Confirms and deletes a connection, removing it locally on success without a full reload.
   const remove = (row: WhatsappConnectionRow) => {
     confirm(t('whatsapp.confirmDelete'), async () => {
       setDeletingId(row.id)

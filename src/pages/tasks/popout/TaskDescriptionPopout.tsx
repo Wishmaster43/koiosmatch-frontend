@@ -12,10 +12,12 @@ import { PopoutShell, TextPopoutEditor, useTextPopoutDraft } from '@/pages/popou
 import { useTaskTextLite, patchTaskText } from '../hooks/useTaskTextPopout'
 import { textPopoutTopic } from '@/lib/secondScreen'
 
+// Second-screen editor for one task's description, the same TEKST-POPOUT-1 recipe as the other entity popouts (see file header).
 export default function TaskDescriptionPopout({ id }: { id: string | undefined }) {
   const { t } = useTranslation('tasks')
   const { task, loading, error, reload } = useTaskTextLite(id)
 
+  // Wraps the PATCH with the task id; resolves to false without persisting when there is no id.
   const persist = useCallback((html: string, revert: () => void) => {
     if (!id) return Promise.resolve(false)
     return patchTaskText(id, html, t, revert)

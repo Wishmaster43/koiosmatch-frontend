@@ -7,6 +7,7 @@
 import { useCustomFields } from './useCustomFields'
 import type { CandidateCustomFieldDef } from '@/types/candidate'
 
+// Thin candidate-scoped wrapper over useCustomFields — see the module doc comment above for why it stays its own module.
 export function useCandidateCustomFields() {
   const { fields, allFields, loading, invalidate } = useCustomFields('candidate')
   // CandidateCustomFieldDef and the generic CustomFieldDef share the identical

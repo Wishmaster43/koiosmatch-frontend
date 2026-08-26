@@ -13,6 +13,8 @@ import { useDateFormat } from '@/lib/datetime'
 import type { FillRatePoint } from '@/types/dashboard'
 import type { FeedTileContext } from '../feedTileKit'
 
+// 14-day fill-rate line (days with no cohort skipped, never plotted as zero);
+// a point click deep-links into the Vacancies report.
 export default function FillRateTimeseriesLine({ rows, onNavigate }: {
   rows: FillRatePoint[]
   onNavigate?: FeedTileContext['onNavigate']

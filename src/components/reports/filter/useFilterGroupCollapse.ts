@@ -68,29 +68,35 @@ export function useFilterGroupCollapse(
     return idx === -1 || idx >= defaultOpenCount
   }, [groups, groupKeys, defaultOpenCount])
 
+  // Resolves one group's open/closed state: a stored user choice wins, otherwise falls back to defaultFor's index/flag rule.
   const isCollapsed = useCallback((key: string) => stored[key] ?? defaultFor(key), [stored, defaultFor])
 
+  // Updates state and mirrors it to localStorage in one call, so every mutator below shares one write path.
   const persist = useCallback((next: Record<string, boolean>) => {
     setStored(next)
     writeStored(pageId, next)
   }, [pageId])
 
+  // Flips one group's collapse state and persists the result.
   const toggle = useCallback((key: string) => {
     persist({ ...stored, [key]: !isCollapsed(key) })
   }, [stored, isCollapsed, persist])
 
+  // Opens every registered group at once, for the panel's expand-all control.
   const expandAll = useCallback(() => {
     const next = { ...stored }
     groupKeys.forEach(k => { next[k] = false })
     persist(next)
   }, [groupKeys, stored, persist])
 
+  // Closes every registered group at once, for the panel's collapse-all control.
   const collapseAll = useCallback(() => {
     const next = { ...stored }
     groupKeys.forEach(k => { next[k] = true })
     persist(next)
   }, [groupKeys, stored, persist])
 
+  // True only once every group is open, so the header can offer collapse-all instead of expand-all.
   const allExpanded = useMemo(
     () => groupKeys.length > 0 && groupKeys.every(k => !isCollapsed(k)),
     [groupKeys, isCollapsed],

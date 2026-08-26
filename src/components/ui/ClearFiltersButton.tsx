@@ -12,6 +12,8 @@ import { useTranslation } from 'react-i18next'
 import { FilterX } from 'lucide-react'
 import { useRightPanel } from '@/context/RightPanelContext'
 
+// Renders only while the page is actually filtered; also reports that state to
+// the shared right panel so the topbar filter icon shows its dot without per-page wiring.
 export default function ClearFiltersButton({ active, onClear }: { active: boolean; onClear: () => void }) {
   const { t } = useTranslation('common')
   const { reportPageFilter } = useRightPanel()

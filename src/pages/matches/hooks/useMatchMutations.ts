@@ -44,6 +44,7 @@ function snapshotFields(row: MatchRow | null | undefined, patch: Record<string, 
   return snap as Partial<MatchRow>
 }
 
+// Optimistic single-match field mutations, reverting via snapshotFields above on failure.
 export function useMatchMutations({ rows, selected, updateMatch, setSelected }: Args) {
   const { t } = useTranslation('matches')
 

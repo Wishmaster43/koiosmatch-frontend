@@ -12,6 +12,7 @@ import { fv } from '@/pages/dashboard/dashboardFormat'
 import type { DashData } from '@/types/dashboard'
 import type { FeedTileContext } from '../feedTileKit'
 
+// Sales dashboard tile: see the module doc comment above for the feed it replaced.
 export default function CustomersByOwnerDonut({ dash, onNavigate }: {
   dash: DashData
   onNavigate?: FeedTileContext['onNavigate']

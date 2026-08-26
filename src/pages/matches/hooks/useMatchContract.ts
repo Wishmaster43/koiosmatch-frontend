@@ -89,6 +89,7 @@ function pick(d: Record<string, unknown>): MatchContract {
   }
 }
 
+// See the file's top doc above; fetches the contract/financial detail once per match and owns its optimistic save-with-revert.
 export function useMatchContract(
   matchId: Id | undefined,
   onUpdate?: (id: MatchRow['id'], patch: Partial<MatchRow>) => void,

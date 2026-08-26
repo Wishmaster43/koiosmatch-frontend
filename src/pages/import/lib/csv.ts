@@ -35,6 +35,7 @@ export const MAX_IMPORT_FILE_BYTES = 5120 * 1024
 const COMBINING_MARK_RANGE = `${String.fromCharCode(0x0300)}-${String.fromCharCode(0x036f)}`
 const COMBINING_DIACRITICS = new RegExp(`[${COMBINING_MARK_RANGE}]`, 'g')
 
+// Normalises one CSV header the same way the backend's own CsvFile.php does (lowercase, strip accents, non-alnum to underscore), so a mapping suggestion made here matches what the server would call the same column.
 export function normaliseHeader(header: string): string {
   return header
     .toLowerCase()

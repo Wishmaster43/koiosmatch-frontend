@@ -17,6 +17,7 @@
 import SegmentedControl from '@/components/ui/SegmentedControl'
 import type { SegmentedControlOption } from '@/components/ui/SegmentedControl'
 
+// Population/entity switch (see the module doc above): renders unconditionally since flipping it is UI state, not something gated on data having arrived.
 export default function ReportSwitchBar({ options, value, onChange, ariaLabel }: {
   options: SegmentedControlOption[]
   value: string

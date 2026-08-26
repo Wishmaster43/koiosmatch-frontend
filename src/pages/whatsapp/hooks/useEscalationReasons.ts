@@ -54,6 +54,7 @@ const mapEscalationReasons = (res: AxiosResponse): LookupOption[] | null => {
   return Array.isArray(rows) && rows.length ? rows.map(toOption) : null
 }
 
+// Tenant escalation-reason lookup, cached with a seed fallback so the picker never renders empty before the API answers.
 export function useEscalationReasons() {
   const { t } = useTranslation('common')
   const { data: rawReasons, loading } = useCachedLookup('/escalation-reasons', mapEscalationReasons, DEFAULT_ESCALATION_REASONS)

@@ -13,6 +13,7 @@
 import { MODULE_SCHEMAS } from '@/modules/index'
 import type { SchemaField } from '@/modules/types'
 
+// Builds a new node's initial config from its schema's declared defaults, so what the panel shows is also what actually gets persisted and read by the engine (see file header).
 export function defaultConfigFor(type: string): Record<string, unknown> {
   const schema = (MODULE_SCHEMAS[type] ?? []) as SchemaField[]
   const config: Record<string, unknown> = {}

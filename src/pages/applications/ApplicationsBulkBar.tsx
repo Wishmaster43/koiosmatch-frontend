@@ -21,6 +21,7 @@ interface ApplicationsBulkBarProps {
   phases?: LookupOption[]
 }
 
+// See the file's top doc above for the bulk-actions menu this assembles; funnel options come from the tenant lookup, never hardcoded.
 export default function ApplicationsBulkBar({ count, onClear, onSetPhase, onDetach, canManage = false, phases = [] }: ApplicationsBulkBarProps) {
   const { t } = useTranslation('applications')
   // Phase options from the funnel lookup (never hardcoded).

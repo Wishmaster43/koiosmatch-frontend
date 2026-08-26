@@ -38,6 +38,7 @@ interface UsageOverviewSectionProps {
   waLoading: boolean
 }
 
+// Pure presenter for the Overzicht sub-tab (see file header for the F5 fetch-sharing decision).
 export default function UsageOverviewSection({ data, phase, drillRequest, wa, waLoading }: UsageOverviewSectionProps) {
   const { t } = useTranslation('settings')
 
@@ -56,8 +57,11 @@ export default function UsageOverviewSection({ data, phase, drillRequest, wa, wa
   const [granularity, setGranularity] = useState<UsageGranularity>('day')
   const [selectedDate, setSelectedDate] = useState<string | null>(null)
 
+  // Normalizes the raw API response into one row per day.
   const rows = useMemo(() => mergeDailyRows(data), [data])
+  // Rolls the daily rows up into weekly buckets for the week-granularity view.
   const weekRows = useMemo(() => aggregateToWeeks(rows), [rows])
+  // The row behind the currently drilled-into date, for the detail card.
   const selectedRow = useMemo(() => rows.find(r => r.date === selectedDate) ?? null, [rows, selectedDate])
 
   return (

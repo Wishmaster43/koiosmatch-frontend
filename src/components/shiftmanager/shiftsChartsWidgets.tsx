@@ -15,6 +15,7 @@ import { YEAR_OPACITY } from "./shiftsChartsConfig"
 import type { ShiftsChartDatum, ShiftBar } from '@/types/shiftmanager'
 import { formatNumber } from '@/lib/formatters'
 
+// Grouped bar chart for shift counts by year/series; onBarClick drills a bar into its underlying rows.
 export function BarChartWidget({ data, bars, onBarClick }: {
   data: ShiftsChartDatum[]
   bars: ShiftBar[]
@@ -134,6 +135,7 @@ export function ShiftsDataTable({ data, bars, monthLabel, totalLabel, multiYear,
     const denom = Number(row[totaalKeyByYear.get(b.year) ?? '']) || 0
     return denom ? `${Math.round((Number(row[b.dataKey]) || 0) / denom * 100)}%` : '—'
   }
+  // Same value/Δ/% logic as `cell` above, but for the totals row at the bottom of the table.
   const totalCell = (b: ShiftBar, colTotal: number, idx: number) => {
     if (!pct) return fmt(colTotal)
     if (deltaMode) {

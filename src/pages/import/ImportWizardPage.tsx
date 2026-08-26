@@ -30,6 +30,9 @@ interface ImportWizardPageProps {
   intent?: { entity?: string } | null
 }
 
+// Thin route page for the full-screen import wizard (see file docblock above):
+// owns the entity list/permission checks, delegates the per-step flow to
+// EntityImportWizard, remounted per entity so no stale file/mapping survives.
 export default function ImportWizardPage({ intent }: ImportWizardPageProps = {}) {
   const { t } = useTranslation('settings')
   // Auth context can be null pre-boot — an honest fallback, mirrors ImporterenSettings.tsx.

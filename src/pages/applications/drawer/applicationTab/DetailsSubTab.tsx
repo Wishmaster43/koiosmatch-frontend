@@ -18,6 +18,7 @@ interface DetailsSubTabProps {
   onUpdateSource?: (id: Id | undefined, source: string) => void
 }
 
+// Thin passthrough (see the module doc above): renders the unchanged editable card, forwarding the two PATCH callbacks as-is.
 export default function DetailsSubTab({ application: a, onLinkVacancy, onUpdateSource }: DetailsSubTabProps) {
   return <ApplicationDetailsCard application={a} onLinkVacancy={onLinkVacancy} onUpdateSource={onUpdateSource} />
 }

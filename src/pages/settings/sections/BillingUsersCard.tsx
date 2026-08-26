@@ -40,6 +40,7 @@ const draftFromEntry = (entry?: BillingBudgetEntry): PackageDraft => ({
   extra_user_price_cents: entry?.extra_user_price_cents != null ? String(entry.extra_user_price_cents) : '',
 })
 
+// Per-package included-users/extra-user-price editor; blank fields mean unlimited/unset, never 0 (see PackageDraft's doc comment above).
 export default function BillingUsersCard() {
   const { t } = useTranslation('settings')
   const { formatCurrency } = useNumberFormat()

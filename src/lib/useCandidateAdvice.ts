@@ -18,6 +18,7 @@ import { deriveCandidateAdvice } from '@/lib/candidateAdvice'
 import type { KoiosAdvice } from '@/lib/koiosAdviceMeta'
 import type { Candidate } from '@/types/candidate'
 
+// Returns a memo-free deriver closure that turns one candidate into a Koios advice item, fed by the tenant phases/status lookups and the stale-contact threshold setting.
 export function useCandidateAdvice(): (c: Candidate) => KoiosAdvice | null {
   const { t } = useTranslation('candidates')
   const { phases, statusMeta } = useLookups()

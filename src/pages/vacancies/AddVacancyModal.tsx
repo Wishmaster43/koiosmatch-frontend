@@ -57,6 +57,8 @@ interface ModalCustomer { id: Id; name: string }
 // never guessed from the entity's display name.
 const VACANCY_IMPORT_ENTITY = 'vacancies'
 
+// Thin assembler for the create-vacancy modal (see file docblock above): shell
+// + card wiring only, all state/lookups/submit logic lives in useAddVacancyForm.
 export default function AddVacancyModal({
   onClose, onCreated, onImported, users = [], customers = [], lockCustomerId, lockCustomerName,
   initialCustomerLocationId, initialCustomerDepartmentId, initialCustomerLocationName, initialCustomerDepartmentName,

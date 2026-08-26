@@ -92,6 +92,7 @@ export interface BulkMutateArgs {
   onSuccess: (updated: number, total: number, skipped?: unknown[]) => void
 }
 
+// Bulk-mutation handlers for the candidates table (funnel/phase/type/…), reporting an updated/total/skipped breakdown so a partial failure never reads as a bare success.
 export function useCandidateBulkActions({
   candidates, setCandidates, setTotal, selectedIds, setSelectedIds, notify, t, funnelTypes, candidateTypes,
   filterParams, filteredTotal, onFilteredMutated,

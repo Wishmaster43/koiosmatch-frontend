@@ -17,6 +17,7 @@ const ITEMS = [
   { key: 'locked', Icon: Lock, color: 'var(--text-muted)' },
 ] as const
 
+// Legend for the action-rule grid's four cell states plus its popup-code list, collapsed by default to stay calm (see file header).
 export default function ActionRuleLegend() {
   const { t } = useTranslation('settings')
   const [expanded, setExpanded] = useState(false)

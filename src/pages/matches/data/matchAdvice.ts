@@ -27,7 +27,7 @@ export interface MatchAdviceOptions {
 
 const NONE_RULE: MatchAdviceRule = { action: 'none', reasonKey: 'koios.reasons.none' }
 
-// First-match-wins priority ladder — see the file header for the read-set constraint.
+// First-match-wins priority ladder  for the read-set constraint.
 export function deriveMatchAdvice(m: MatchRow, opts: MatchAdviceOptions): MatchAdviceRule {
   // Rule 1: no advice on an archived (soft-deleted) match.
   if (m.archived) return NONE_RULE

@@ -37,6 +37,7 @@ type PersonalForm = Record<PersonalKey, string>
 // the old PROFILE_REQ_MAP — nationality/placeOfBirth are never required).
 const REQ_MAP: Partial<Record<PersonalKey, string>> = { gender: 'gender', dob: 'date_of_birth' }
 
+// The personal-details sub-tab, with its own independent pencil/draft/error state.
 export default function ProfilePersonalTab({ c, onSave, autoEditSignal }: {
   c: Candidate; onSave?: (v: Record<string, unknown>) => void; autoEditSignal?: number
 }) {

@@ -24,6 +24,7 @@ interface WhatsAppWebDeviceProps {
   onRemove: (id: WhatsAppDevice['id']) => void
 }
 
+// One WhatsApp Web device row: status dot/label, QR/connecting block, and the connect/disconnect/remove actions.
 export default function WhatsAppWebDevice({ device, busy, notEnabled, onConnect, onDisconnect, onRemove }: WhatsAppWebDeviceProps) {
   const { t } = useTranslation('auth')
   const { formatDateTime } = useDateFormat()

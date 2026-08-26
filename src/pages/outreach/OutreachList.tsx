@@ -44,6 +44,7 @@ interface Props {
   onToggleAll?: (ids: string[], allSelected: boolean) => void
 }
 
+// The campaigns table: renders the four UI states the page owns the toolbar.
 export default function OutreachList({ campaigns, loading, error, onReload, onOpen, emptyText,
   selectable, selectedIds, onToggleRow, onToggleAll }: Props) {
   const { t } = useTranslation('outreach')

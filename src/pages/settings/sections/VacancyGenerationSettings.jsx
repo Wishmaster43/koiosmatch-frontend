@@ -14,6 +14,7 @@ import SubTabBar from '@/components/drawer/SubTabBar'
 import VacancyGenerationProfilesList from './VacancyGenerationProfilesList'
 import VacancyContentBlocksSettings from './VacancyContentBlocksSettings'
 
+// Thin sub-tab container switching between the profiles and reusable-blocks CRUD lists (see the module doc comment above).
 export default function VacancyGenerationSettings() {
   const { t } = useTranslation('settings')
   const [tab, setTab] = useState('profiles')

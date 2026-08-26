@@ -45,6 +45,7 @@ interface ContactLinkCardProps {
   onPrimaryToggle: (v: boolean) => void
 }
 
+// Location/department/status/primary card for the add-contact modal; purely presentational, and hides the status field entirely when the tenant hasn't required it (see file header).
 export default function ContactLinkCard({
   locationId, departmentId, statusId, isPrimary, locationOptions, departmentOptions, departmentPlaceholder, statusOptions,
   showLocationPicker, showDepartmentPicker, showStatusPicker, onLocationChange, onDepartmentChange, onStatusChange, onPrimaryToggle,

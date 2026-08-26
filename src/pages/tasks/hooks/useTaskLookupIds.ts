@@ -33,6 +33,8 @@ function idMapOf(rows: unknown): Record<string, string> {
     .map(r => [r.value, r.id]))
 }
 
+// Fetches the raw task lookups and builds slug→uuid FK maps, since the backend's
+// write endpoints validate the uuid id, not the slug the shared context exposes.
 export function useTaskLookupIds(): { maps: TaskLookupIdMaps; loading: boolean } {
   const [maps, setMaps] = useState<TaskLookupIdMaps>({ type: {}, status: {}, priority: {} })
   const [loading, setLoading] = useState(true)

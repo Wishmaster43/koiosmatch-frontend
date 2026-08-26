@@ -11,6 +11,7 @@ import { canAccessPage } from '@/lib/access'
 import Toggle from '@/components/ui/Toggle'
 import { readableOn } from '@/hooks/useTenantTheme'
 
+// Connector toggles gated on super-admin + package: shows an honest disabled state, never a clickable 403.
 export default function AppsSettings() {
   const { t } = useTranslation('settings')
   const { enabled, setApps } = useApps()
@@ -29,6 +30,7 @@ export default function AppsSettings() {
   // True when the active tenant's package includes connectors (package 3).
   const tenantHasConnectors = canAccessPage('apps', auth)
 
+  // Flip one app's enabled flag, persist it, and surface a real error (invalid slug, no permission) rather than a silent no-op.
   const toggle = async (appId) => {
     if (!canEdit) return
     const newEnabled = enabled.includes(appId)

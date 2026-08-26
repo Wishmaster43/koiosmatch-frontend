@@ -24,7 +24,7 @@ import Button from '@/components/ui/Button'
 import { groupLabelStyle, SectionTitle, GroupLabel } from '@/components/ui/typography'
 
 // Mirrors shared.tsx's `Field` label style — used directly (not via `Field`) for the
-// two CreatableSelect pickers below, which need their own aria-labelledby wiring.
+// two CreatableSelect pickers below, which need their own aria-labelledby wiring
 // r6: identity from the typography module; only display/margin are local layout.
 const fieldLabelStyle: CSSProperties = { ...groupLabelStyle, display: 'block', marginBottom: 5 }
 
@@ -48,6 +48,7 @@ function ChatTest({ agent, onClose }: { agent: AiAgent; onClose?: () => void }) 
 
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [messages])
 
+  // Sends the typed message, appends it to the local transcript immediately, then appends the assistant's reply (or a visible error bubble) once the API responds.
   const send = async () => {
     const text = input.trim()
     if (!text || loading) return
@@ -175,6 +176,7 @@ export function AgentForm({ agent, prompts, faqs, onSaved, onDelete }: {
   // picker MUST offer only these, never free text or a hardcoded name.
   const [waTemplates, setWaTemplates] = useState<WaTemplateOption[]>([])
   const [waLoading,   setWaLoading]   = useState(true)
+  // Loads the tenant's real synced WhatsApp templates for the intro picker (WA_INTRO_TEMPLATE-1); an alive guard drops the result if the form unmounts first, and a failed/absent connection just leaves the empty-state below.
   useEffect(() => {
     let alive = true
     api.get('/whatsapp-templates')
@@ -186,6 +188,7 @@ export function AgentForm({ agent, prompts, faqs, onSaved, onDelete }: {
 
   const set = <K extends keyof AgentFormState>(k: K, v: AgentFormState[K]) => setForm(f => ({ ...f, [k]: v }))
 
+  // Persists the form (see the API-key handling below for why it is stripped by default).
   const save = async () => {
     setSaving(true); setSaved(false)
     // The API key is write-only — never re-send the masked placeholder. Omit the

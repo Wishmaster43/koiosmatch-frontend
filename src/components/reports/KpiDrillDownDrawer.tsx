@@ -22,6 +22,7 @@ import { useLocale, useDateFormat } from '@/lib/datetime'
 // module-scope helper never hardcodes nl-NL or imports i18n).
 const monthName = (locale: string, i: number) => new Date(2000, i, 1).toLocaleString(locale, { month: 'long' })
 
+// A colour-tinted status pill for a drilldown row, falling back to a neutral tint and the raw value for an unrecognised status.
 function StatusBadge({ status }: { status?: string }) {
   const { t } = useTranslation('reports')
   const styles: Record<string, { bg: string; color: string }> = {

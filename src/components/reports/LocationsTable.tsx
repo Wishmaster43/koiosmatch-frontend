@@ -27,6 +27,7 @@ const TH: CSSProperties = { padding: '8px 12px', textAlign: 'left', fontSize: 11
              whiteSpace: 'nowrap', userSelect: 'none' }
 const TD: CSSProperties = { padding: '10px 12px', fontSize: 13, color: 'var(--text)', borderBottom: '1px solid var(--hover-bg)' }
 
+// Searchable, sortable, paginated locations table; filters live in local state and are pushed into the shared right-panel context, and a row click opens the location drawer.
 export default function LocationsTable() {
   const { t } = useTranslation('reports')
   // Reuses the existing common.sort key for the sortable header's button tooltip
@@ -54,15 +55,18 @@ export default function LocationsTable() {
     }))
   ), [customers])
 
+  // Distinct status values present in the flattened rows, sorted, so the status filter only ever offers values that actually occur.
   const statusOptions = useMemo(() =>
     [...new Set(rows.map(r => r.status).filter((x): x is string => Boolean(x)))].sort(), [rows])
 
+  // One option per customer, deduped via a Map keyed by id, for the customer filter list.
   const customerOptions = useMemo(() =>
     [...new Map(rows.map(r => [r.customer_id, r.customer_name] as [string | number, string | undefined])).entries()]
       .map(([id, name]) => ({ id, name }))
       .sort((a, b) => (a.name ?? '').localeCompare(b.name ?? '')),
     [rows])
 
+  // Applies the active status/customer filters plus the free-text search (name/customer/address) in one pass.
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase()
     return rows.filter(r => {
@@ -77,6 +81,7 @@ export default function LocationsTable() {
     })
   }, [rows, search, selectedStatuses, selectedCustomers])
 
+  // Sorts the filtered rows by the active column; dept_count is compared as a number so it does not sort lexically.
   const sorted = useMemo(() => {
     const { key, dir } = sort
     return [...filtered].sort((a, b) => {
@@ -88,13 +93,16 @@ export default function LocationsTable() {
     })
   }, [filtered, sort])
 
+  // Resets to page 1 whenever the filtered set or the page size changes, so the user is never stranded on a now-empty page.
   useEffect(() => setPage(1), [filtered.length, pageSize])
+  // Slices the sorted rows down to just the rows for the current page.
   const paged      = useMemo(() => sorted.slice((page-1)*pageSize, page*pageSize), [sorted, page, pageSize])
   const totalPages = Math.max(1, Math.ceil(sorted.length / pageSize))
 
   const setSort_ = (key: string) => setSort(prev =>
     prev.key === key ? { key, dir: prev.dir === 'asc' ? 'desc' : 'asc' } : { key, dir: 'asc' })
 
+  // Builds the customer/status filter definitions, with live per-option counts, handed to the shared right-panel filter UI.
   const filterGroups = useMemo(() => [
     {
       key: 'customer', label: t('locations.filters.customer'),
@@ -119,6 +127,7 @@ export default function LocationsTable() {
     },
   ], [t, selectedCustomers, selectedStatuses, customerOptions, statusOptions, rows])
 
+  // Registers this table's filter groups with the shared right panel, and unregisters them on unmount so they do not leak to another page.
   useEffect(() => {
     registerFilters('locations-table', filterGroups)
     return () => unregisterFilters('locations-table')

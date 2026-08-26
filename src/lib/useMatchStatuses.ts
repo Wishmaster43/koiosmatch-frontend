@@ -43,6 +43,8 @@ const mapMatchStatuses = (res: AxiosResponse): MatchStatus[] | null => {
   return Array.isArray(rows) && rows.length ? rows.map(toStatus) : null
 }
 
+// The tenant's match lifecycle statuses, translated for seeded defaults, plus a
+// slug/label-tolerant meta resolver (stable identity for memo/effect deps).
 export function useMatchStatuses() {
   const { t } = useTranslation('common')
   // The endpoint now exists (item 11) — a real 404 should surface in the dev log again.
@@ -50,7 +52,7 @@ export function useMatchStatuses() {
   // Seeded defaults render in the user language; a tenant value stays as typed (LOOKUP-I18N-1).
   const statuses = useMemo(() => translateSeedList(t, 'matchStatuses', rawStatuses), [rawStatuses, t])
 
-  // Resolve a stored slug to its meta; tolerant of label-stored values.
+  // Resolve a stored slug to its meta; tolerant of label-stored values
   // useCallback: consumers hang this in memo/effect deps — it must be stable.
   const metaOf = useCallback((v?: string | null): MatchStatus | undefined =>
     statuses.find(s => s.value === v || s.label === v), [statuses])

@@ -11,6 +11,8 @@ import type { DashboardType } from './templates'
 import { isInsideDropdownPortal } from '@/lib/useDropdownPlacement'
 import Button from '@/components/ui/Button'
 
+// Compact dropdown to switch the dashboard's role view (see file docblock above);
+// only rendered by the caller when more than one view is actually visible.
 export default function DashboardSwitcher({ value, options, onChange }: {
   value: DashboardType
   options: DashboardType[]

@@ -62,6 +62,7 @@ export function findDuplicateMatch(
 // Two [start,end] date ranges (YYYY-MM-DD strings) overlap — a null end reads as
 // "still ongoing" (an open-ended assignment), never as "no period at all".
 const OPEN_ENDED = '9999-12-31'
+// Two date ranges overlap, treating a missing end as still-ongoing (open-ended) rather than as no period at all.
 function rangesOverlap(aStart: string, aEnd: string | null, bStart: string | null, bEnd: string | null): boolean {
   if (!aStart || !bStart) return false // an unset start on either side can't be compared yet
   const aE = aEnd || OPEN_ENDED

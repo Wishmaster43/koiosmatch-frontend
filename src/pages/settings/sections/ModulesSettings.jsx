@@ -59,6 +59,7 @@ const LEGACY_TO_TIER = {
 
 const sameSet = (a, b) => a.length === b.length && [...a].sort().join() === [...b].sort().join()
 
+// Super-admin tenant module config: base tier + add-ons, plus the platform pricing/budgets/users sub-tabs.
 export default function ModulesSettings() {
   const { t } = useTranslation('settings')
   const { activeTenant, refreshUser } = useAuth()
@@ -90,8 +91,11 @@ export default function ModulesSettings() {
   // Re-sync on window focus so a long-open tab never shows stale toggles (a reseed or a
   // colleague's change elsewhere) — but never clobber the admin's unsaved edits.
   const stateRef = useRef({ pkg, addons, savedAt })
+  // Keep a ref mirror of the latest state so the focus handler below can read it without becoming its dependency.
   useEffect(() => { stateRef.current = { pkg, addons, savedAt } }, [pkg, addons, savedAt])
+  // Add a window-focus listener so a long-open tab picks up a reseed or a colleague's change; removed on unmount.
   useEffect(() => {
+    // Refetch server state and adopt it only when there's no unsaved local edit, per the dirty check below.
     const onFocus = () => {
       if (!activeTenant?.id) return
       api.get('/tenant-modules', { params: { tenant_id: activeTenant.id } })

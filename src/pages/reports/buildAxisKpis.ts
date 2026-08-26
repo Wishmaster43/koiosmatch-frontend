@@ -24,6 +24,7 @@ import type { KpiSpec } from '@/components/insights/InsightsRow'
 export interface AxisKpiSeg { key: string; label: string; count: number }
 export interface AxisKpiConfig { axis: string; axisLabel: string; segs: AxisKpiSeg[] }
 
+// Round-robins each axis's top segments into KPI cards until `slots` fill or every axis runs out (see the module doc above): a thin axis just yields its turn, never a fabricated number.
 export function buildAxisKpis(
   configs: AxisKpiConfig[],
   slots: number,

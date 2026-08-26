@@ -68,6 +68,8 @@ export interface ApplicationNote {
 // The composer payload the shared NotesTab hands back on save.
 interface NotePayload { type: string; title: string; body: string; language?: string }
 
+// Manages one application's internal notes's seed/create/edit
+// contract (no delete route exists yet, so none is offered).
 export function useApplicationNotes(applicationId: Id | undefined, initialNotes: ApplicationDetail['notes']) {
   const { t } = useTranslation()
   const { user } = useAuth() ?? {}

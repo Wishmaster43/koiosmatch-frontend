@@ -20,6 +20,7 @@ const ACCENT = 'var(--color-primary)'
 const monthAbbr = (locale: string, i: number) => new Date(2000, i, 1).toLocaleString(locale, { month: 'short' })
 const QUARTERS  = ['Q1','Q2','Q3','Q4']
 
+// Renders one filter group: granularity toggle + year chips + month/quarter grid, all driving group.value ('' | year | year-Qn | year-mm').
 export default function PeriodGroup({ group }: { group: ReportFilterGroup }) {
   const { t } = useTranslation('common')
   const locale = useLocale()
@@ -33,11 +34,13 @@ export default function PeriodGroup({ group }: { group: ReportFilterGroup }) {
     return 'year'
   }, [val])
 
+  // Year portion of the encoded value, or null when no period is set yet.
   const selectedYear = useMemo(() => {
     if (!val) return null
     return Number(val.split('-')[0])
   }, [val])
 
+  // The month ('05') or quarter ('Q2') suffix of the encoded value; null for a bare year or no selection.
   const selectedSub = useMemo(() => {
     if (!val || !val.includes('-')) return null
     return val.split('-')[1] // 'Q2' or '05'
@@ -45,17 +48,20 @@ export default function PeriodGroup({ group }: { group: ReportFilterGroup }) {
 
   const years = group.years ?? []
 
+  // Switching to year collapses the value to just the year; switching away from year clears it, so the value never carries a half-picked month/quarter.
   const setGranularity = (g: string) => {
     if (!selectedYear) return group.onChange?.('')
     if (g === 'year')    return group.onChange?.(String(selectedYear))
     group.onChange?.('')
   }
 
+  // Picking a year commits it immediately only when granularity is already 'year'; otherwise it just clears since no month/quarter is picked yet.
   const setYear = (y: number) => {
     if (granularity === 'year') return group.onChange?.(String(y))
     group.onChange?.('')
   }
 
+  // Picking a month/quarter combines it with the already-selected year into the encoded value.
   const setSub = (sub: string) => {
     if (!selectedYear) return
     group.onChange?.(`${selectedYear}-${sub}`)

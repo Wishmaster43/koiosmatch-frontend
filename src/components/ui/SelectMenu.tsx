@@ -45,6 +45,7 @@ interface SelectMenuProps {
   style?: CSSProperties
 }
 
+// Trigger button + portal checklist; closes on outside click/Escape and returns focus to the trigger so keyboard users keep their place.
 export default function SelectMenu({ id, 'aria-labelledby': ariaLabelledBy, value, options = [], onChange, placeholder, leading, menuWidth = 170, style }: SelectMenuProps) {
   const listId = useId()
   const autoId = useId()
@@ -79,6 +80,7 @@ export default function SelectMenu({ id, 'aria-labelledby': ariaLabelledBy, valu
   // also reaching the modal; a second press, with no menu open, closes that.
   useEffect(() => {
     if (!open) return
+    // Closes the menu on a genuine outside click, ignoring clicks on the trigger or the portal-rendered menu itself.
     const handleClick = (e: MouseEvent) => {
       const target = e.target as Node
       if (ref.current?.contains(target) || menuRef.current?.contains(target)) return
@@ -99,6 +101,7 @@ export default function SelectMenu({ id, 'aria-labelledby': ariaLabelledBy, valu
   // (e.g. the outside click landed on a different picker's own trigger) so this
   // never yanks focus away from what the user just interacted with.
   const wasOpenRef = useRef(false)
+  // Returns focus to the trigger when the menu just closed, unless some other element already claimed focus in the meantime.
   useEffect(() => {
     if (wasOpenRef.current && !open && (document.activeElement === document.body || document.activeElement == null)) {
       triggerRef.current?.focus()

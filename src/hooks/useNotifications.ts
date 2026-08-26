@@ -52,6 +52,7 @@ export function shouldPollNotifications(visibilityState: DocumentVisibilityState
   return visibilityState === 'visible'
 }
 
+// Polls the notification feed, raising attention toasts (+ chime) only for rows that are both unseen and new since the previous successful poll — the first load never toasts, or the whole feed would replay as 'new'.
 export function useNotifications(pollMs = 60000) {
   const { t } = useTranslation('common')
   const [items, setItems] = useState<AppNotification[]>([])
@@ -84,6 +85,7 @@ export function useNotifications(pollMs = 60000) {
           // unparseable created_at is never "new" (§0B: an assistant that
           // re-announces what the user already had erodes trust).
           const freshCutoffMs = pollMs * 2
+          // Named predicate so the filter expression below reads as one sentence instead of an inline timestamp calculation.
           const isRecent = (n: AppNotification) => {
             const ts = n.created_at ? new Date(n.created_at).getTime() : NaN
             return Number.isFinite(ts) && Date.now() - ts <= freshCutoffMs

@@ -14,6 +14,8 @@ import { useDateFormat } from '@/lib/datetime'
 import type { DocumentAttentionRow } from '@/types/dashboard'
 import type { FeedTileContext } from '../feedTileKit'
 
+// Ops tile listing candidates with a missing/expiring document (see file
+// docblock above); each row deep-links to that candidate's documents tab.
 export default function DocumentsAttentionTable({ rows, onNavigate }: {
   rows: DocumentAttentionRow[]
   onNavigate?: FeedTileContext['onNavigate']

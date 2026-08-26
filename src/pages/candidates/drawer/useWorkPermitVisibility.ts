@@ -25,6 +25,9 @@ import api, { unwrapList } from '@/lib/api'
 import { useAllSettings, getStringSetting } from '@/lib/settings/useAllSettings'
 import { isWorkPermitBlockVisible, type NationalityRow, type WorkPermitDataState } from './workPermitVisibility'
 
+// Plumbing only (see file docblock above): gathers the tenant's country, the
+// nationality's own country/EU data, and the candidate's nationality, then hands
+// them to the pure visibility rule.
 export function useWorkPermitVisibility(
   nationality: string | null | undefined,
   dataState: WorkPermitDataState,

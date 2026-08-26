@@ -42,6 +42,7 @@ const mapWorkPermitTypes = (res: AxiosResponse): LookupOption[] | null => {
   return d.length ? d : null
 }
 
+// The tenant's work-permit-type lookup, translated for seeded defaults.
 export function useWorkPermitTypes() {
   const { t } = useTranslation('common')
   const { data: rawTypes } = useCachedLookup('/work-permit-types', mapWorkPermitTypes, DEFAULT_WORK_PERMIT_TYPES)

@@ -70,6 +70,9 @@ interface SmCandidatesInsightsRowProps {
   onDrillDown: (title: string, items: ReportCandidate[]) => void
 }
 
+// Renders the Shiftmanager candidates page's KPI/insights strip through the shared
+// InsightsRow (§3A footprint), deriving every donut/KPI count from the full mirrored
+// candidate set so paging the table never changes the numbers.
 export default function SmCandidatesInsightsRow({
   candidates, statusFilter, onStatusPick, onStatusClear, onDrillDown,
 }: SmCandidatesInsightsRowProps) {
@@ -101,15 +104,22 @@ export default function SmCandidatesInsightsRow({
   // data-derived additions (no-shows, cancellations) and one tied to the new
   // Uitschrijfdatum column (ending soon) to fill the shared 9-card footprint.
   const aandacht      = useMemo(() => calcAandacht(candidates), [candidates])
+  // Headcount feeding the "active" KPI card.
   const activeTotal   = useMemo(() => candidates.filter(c => (c.status || '').toLowerCase() === 'actief').length, [candidates])
+  // Active candidates with a future shift already planned — surfaced as the active KPI's sub-label.
   const plannedActive = useMemo(() => candidates.filter(c => {
     if ((c.status || '').toLowerCase() !== 'actief') return false
     return c.last_planned_shift && new Date(c.last_planned_shift) > new Date()
   }).length, [candidates])
+  // Headcount feeding the "inactive" KPI card.
   const inactiveTotal = useMemo(() => candidates.filter(c => (c.status || '').toLowerCase() === 'nietactief').length, [candidates])
+  // Headcount feeding the "intake" KPI card.
   const intakeTotal   = useMemo(() => candidates.filter(c => (c.status || '').toLowerCase() === 'intake').length, [candidates])
+  // New-registration count for the current month plus the historical monthly average.
   const monthStats    = useMemo(() => calcMonthStats(candidates), [candidates])
+  // Candidates with at least one recorded no-show, for their own KPI card.
   const noShows       = useMemo(() => candidates.filter(c => noShowCountOf(c) > 0), [candidates])
+  // Candidates with at least one recorded cancellation, for their own KPI card.
   const cancellations = useMemo(() => candidates.filter(c => cancellationsOf(c) > 0), [candidates])
   const endingSoon    = useMemo(() => calcEndingSoon(candidates), [candidates])
   // Locale-aware month name (app locale, not a hardcoded 'nl-NL' — §5).

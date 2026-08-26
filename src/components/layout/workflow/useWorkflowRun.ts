@@ -12,6 +12,7 @@ import type { RunRow } from '@/types/reports'
 // editor can seed node outputs from the finished run's steps.
 export const TERMINAL = new Set(['success', 'failed', 'error', 'cancelled', 'completed'])
 
+// Polls this run's live status via React Query; polling stops once its status lands in TERMINAL.
 export function useWorkflowRun(runId: string | number | null | undefined) {
   const { data } = useQuery<RunRow>({
     queryKey: ['workflow-run', runId],

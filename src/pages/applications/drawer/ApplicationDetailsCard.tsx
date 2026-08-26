@@ -88,6 +88,7 @@ interface ApplicationDetailsCardProps {
   onUpdateSource?: (id: Id | undefined, source: string) => void
 }
 
+// Vacancy-link + Bron (source) card for the application: shows the linked vacancy's cascade (customer/location/contact) and shares one pencil-edit mode for both fields.
 export default function ApplicationDetailsCard({ application: a, onLinkVacancy, onUpdateSource }: ApplicationDetailsCardProps) {
   const { t } = useTranslation(['applications', 'common', 'vacancies'])
   const { formatDate } = useDateFormat()
@@ -107,12 +108,14 @@ export default function ApplicationDetailsCard({ application: a, onLinkVacancy, 
   // three rows below fall back to a dash rather than fabricate a value.
   const { vacancy: vac } = useApplicationVacancy(a.vacancyId)
 
+  // Seed the edit form with the current vacancy/source before switching the card into edit mode.
   const startEdit = () => {
     setVacancyId(a.vacancyId != null ? String(a.vacancyId) : '')
     setSource(a.source ?? '')
     setEditing(true)
   }
   const cancelEdit = () => setEditing(false)
+  // Commit the vacancy link and, only if it changed, the source; both calls are no-ops when their callback prop is absent.
   const saveEdit = () => {
     const picked = vacancyId ? vacancyOptions.find(v => String(v.value) === vacancyId) : undefined
     onLinkVacancy?.(a.id, vacancyId || null, { title: picked?.label, client: picked?.client })

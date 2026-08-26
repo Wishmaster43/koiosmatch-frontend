@@ -21,6 +21,7 @@ import { CUSTOMER_FIELDS } from './requiredFieldsCatalog'
 
 const KEY = 'customer_required_fields'
 
+// The required-fields-per-phase matrix for customers.
 export default function CustomerPhaseRequiredFieldsMatrix() {
   const { t } = useTranslation(['settings', 'customers'])
   const { phases } = useCustomerPhases()
@@ -34,6 +35,8 @@ export default function CustomerPhaseRequiredFieldsMatrix() {
   // Required-set membership for one phase/field cell, and a toggle that persists the
   // whole map (merge-by-phase) — mirrors CandidateRequiredFieldsSettings' toggle().
   const isReq = (phase: string, field: string) => (cfg[phase] ?? []).includes(field)
+  // Flips one field's required-membership for a phase and persists the merged map;
+  // no-ops before the settings blob has loaded (see REQFIELDS-TOGGLE-RACE-1 above).
   const toggle = (phase: string, field: string) => {
     if (!loaded) return
     const cur = cfg[phase] ?? []

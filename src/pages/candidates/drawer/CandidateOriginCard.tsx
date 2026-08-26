@@ -39,6 +39,7 @@ function Stamp({ value, locked = true }: { value: string | null | undefined; loc
   )
 }
 
+// See the file's top doc above for why this is its own read-only card; renders the record's own source/creator/timestamp, never a pencil.
 export default function CandidateOriginCard({ c }: { c: Candidate }) {
   const { t } = useTranslation('candidates')
   const { formatDateTime } = useDateFormat() as { formatDateTime: (d?: string | null) => string }

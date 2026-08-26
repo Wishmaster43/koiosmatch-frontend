@@ -86,6 +86,7 @@ const STATUS_TONE: Record<NoteActionPanelItem['status'], string> = {
   proposed: 'var(--text-muted)', pending: 'var(--color-warning)', executed: 'var(--color-success)', failed: 'var(--color-danger)',
 }
 
+// Renders one action's lifecycle status as a soft-tinted chip, coloured by STATUS_TONE.
 function StatusChip({ status }: { status: NoteActionPanelItem['status'] }) {
   const { t } = useTranslation('common')
   const STATUS_LABEL_NL: Record<NoteActionPanelItem['status'], string> = {
@@ -191,6 +192,7 @@ function ActionItemCard({ item, index, onEdit, onConfirm, candidateId }: {
   )
 }
 
+// Renders the action list and drives its batch execute/auto-run; Wizard confirms per item, Auto runs the same path unattended.
 export default function NoteActionsPanel({ items, onItemsChange, noteId, candidateId, autoRun }: NoteActionsPanelProps) {
   const { t } = useTranslation('common')
   const exec = useAssistActionsExecute(noteId ? { note_id: noteId } : {})
@@ -239,6 +241,7 @@ export default function NoteActionsPanel({ items, onItemsChange, noteId, candida
   // guarded by their own key set so a re-render (or an already-run batch
   // that came back all-pending) never re-triggers the same items twice.
   const autoRanKeysRef = useRef<string>('')
+  // Fires the batch execute once per fresh proposed-keys set, so Auto mode never re-runs an already-handled batch on a re-render.
   useEffect(() => {
     if (!autoRun) return
     const proposedKeys = items.filter(it => it.status === 'proposed').map(it => `${it.title}__${it.type}`).sort().join('|')
@@ -248,7 +251,7 @@ export default function NoteActionsPanel({ items, onItemsChange, noteId, candida
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [autoRun, items])
 
-  // A single item's own "Bevestigen" — re-sends only that item confirmed.
+  // A single item's own "Bevestigen" — re-sends only that item confirmed
   // exec.confirm indexes into exec's OWN items array (seeded by the last
   // preview), so the panel index is looked up there by the same key.
   const confirmOne = (index: number) => {

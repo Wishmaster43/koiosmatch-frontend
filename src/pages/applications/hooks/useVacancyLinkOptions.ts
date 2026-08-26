@@ -14,9 +14,13 @@ import type { Id } from '@/types/common'
 
 export interface VacancyLinkOption { value: Id; label: string; client?: string }
 
+// Shared vacancy-picker options for the application details block and the
+// Vacature tab's own link flow; fetches only while `enabled` (§8/§9 data minimisation).
 export function useVacancyLinkOptions(enabled: boolean): VacancyLinkOption[] {
   const [options, setOptions] = useState<VacancyLinkOption[]>([])
 
+  // Load once the picker becomes enabled; an alive-guard drops a stale response
+  // if the hook is disabled/unmounted again before the request resolves.
   useEffect(() => {
     if (!enabled) return
     let alive = true

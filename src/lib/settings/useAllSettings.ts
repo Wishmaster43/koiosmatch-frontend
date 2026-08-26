@@ -40,6 +40,7 @@ export function useAllSettings(): SettingsBlob {
   // Initial state already reflects THIS tenant's cache, so no synchronous setState in the effect.
   const [values, setValues] = useState<SettingsBlob>(cacheByTenant.get(activeTenantKey()) ?? {})
 
+  // Subscribe to this tenant's settings slot and kick off the shared fetch only once per tenant (module-level dedupe across every subscriber).
   useEffect(() => {
     const key = activeTenantKey()
     const notify = (v: SettingsBlob) => setValues(v)
@@ -72,6 +73,7 @@ export function useAllSettings(): SettingsBlob {
 export function useSettingsLoaded(): boolean {
   const [loaded, setLoaded] = useState(cacheByTenant.has(activeTenantKey()))
 
+  // Subscribe to this tenant's slot just to learn WHEN it first resolves; an already-cached tenant resolves synchronously above.
   useEffect(() => {
     const key = activeTenantKey()
     if (cacheByTenant.has(key)) { setLoaded(true); return }

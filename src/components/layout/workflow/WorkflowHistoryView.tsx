@@ -29,6 +29,7 @@ const TH: CSSProperties = { ...captionStyle, padding: '10px 16px', textAlign: 'l
 const TD: CSSProperties = { ...bodyTextStyle, padding: '12px 16px',
   borderBottom: '1px solid var(--hover-bg)' }
 
+// Run history table (list + optional per-run drawer); scoped to one workflow or the global list depending on whether workflowId is given.
 export default function WorkflowHistoryView({ workflowId, initialRun }: {
   workflowId?: string | number
   // LOGS-DRILL-1: arriving from the Logs panel's history-jump — auto-open this
@@ -56,6 +57,7 @@ export default function WorkflowHistoryView({ workflowId, initialRun }: {
   // Prefer the freshly fetched list row; the carried row is the fallback so a run
   // outside this page still opens instead of silently no-oping (verify finding).
   const consumedRun = useRef<{ row: RunRow } | null>(null)
+  // Opens the jumped-to run's drawer once per fresh initialRun object, preferring the live list row over the carried fallback row.
   useEffect(() => {
     if (initialRun == null || loading || consumedRun.current === initialRun) return
     consumedRun.current = initialRun

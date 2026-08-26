@@ -110,6 +110,7 @@ function PerformanceStrip() {
   )
 }
 
+// Tenant-wide performance card (see PerformanceStrip above for the actual data/trend derivation): one shared card idiom, footer swapped in per caller.
 export default function KoiosPerformanceCard() {
   const { t } = useTranslation('dashboard')
   // One idiom: the shared card, tenant-wide, with the performance strip below.

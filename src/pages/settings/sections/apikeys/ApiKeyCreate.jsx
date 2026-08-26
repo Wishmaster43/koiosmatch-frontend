@@ -20,6 +20,7 @@ import Button from '@/components/ui/Button'
 import { Mono, Caption } from '@/components/ui/typography'
 import { tintBorder } from '@/lib/tint'
 
+// Two-phase inline view (see the module doc above): the create form, then the one-time secret reveal — no modal, so the whole overview stays readable.
 export default function ApiKeyCreate({ onBack, onCreated }) {
   const { t } = useTranslation('settings')
   const [form, setForm]     = useState({ friendly_name: '', type: 'additional', organisation: '', description: '', contact_name: '', contact_email: '' })
@@ -50,6 +51,7 @@ export default function ApiKeyCreate({ onBack, onCreated }) {
     setSaving(false)
   }
 
+  // Copies the freshly created secret to the clipboard and shows a brief 'copied' confirmation, since this is the only moment the raw secret is ever available.
   const copySecret = () => {
     navigator.clipboard.writeText(result?.secret ?? '')
     setCopied(true)

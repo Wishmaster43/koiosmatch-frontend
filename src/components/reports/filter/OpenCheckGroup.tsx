@@ -5,6 +5,7 @@
  */
 import type { ReportFilterGroup } from '@/types/reports'
 
+// Always-visible checkbox list for a small fixed lookup, so a filter toggles in one click instead of open-dropdown-then-click (see file header).
 export default function OpenCheckGroup({ group }: { group: ReportFilterGroup }) {
   const options  = group.options  ?? []
   const selected = group.selected ?? []

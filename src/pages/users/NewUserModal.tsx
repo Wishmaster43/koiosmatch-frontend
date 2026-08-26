@@ -40,6 +40,8 @@ interface CreateUserResponse {
   agent?: { created: boolean; meta_setup_required: boolean; notice: string } | null
 }
 
+// The new-user create form: role + branch assignment + optional AI agent
+// provisioning for the roles the backend supports (see AGENT-META-SETUP above).
 export default function NewUserModal({ onClose, onCreated }: {
   onClose: () => void
   onCreated: (user: ManagedUser) => void
@@ -78,6 +80,7 @@ export default function NewUserModal({ onClose, onCreated }: {
   // toggle diverges; switching role snaps back to the new template.
   const locations = useLocations()
   const [chosenBranches, setChosenBranches] = useState<string[] | null>(null)
+  // Switching role resets a manual branch pick back to following that role's own template.
   useEffect(() => { setChosenBranches(null) }, [selectedRoleId])
   const effectiveBranches = chosenBranches ?? templateBranches.map(b => String(b.location_id))
   const toggleBranch = (id: string) =>
@@ -90,6 +93,8 @@ export default function NewUserModal({ onClose, onCreated }: {
   const setRole = (v: string) => setForm(f => ({ ...f, role: v }))
   const roleLabelId = useId()
 
+  // Creates the user, then (only on a manual branch divergence) replaces its
+  // branch set, and surfaces any agent-provisioning notice the backend echoed.
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
     // VALIDATIE-LIVE-1-rest: block on a live format failure too — marks any

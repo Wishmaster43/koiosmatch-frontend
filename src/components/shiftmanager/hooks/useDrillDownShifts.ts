@@ -17,12 +17,16 @@ const rowsOf = (body: unknown): ShiftRow[] => {
   return Array.isArray(data) ? (data as ShiftRow[]) : []
 }
 
+// Loads every shift behind a drill-down URL by paging through the endpoint and
+// concatenating (see the module doc comment above for why a single page isn't enough).
 export function useDrillDownShifts(fetchUrl: string) {
   const [shifts,  setShifts]  = useState<ShiftRow[]>([])
   const [total,   setTotal]   = useState(0)
   const [loading, setLoading] = useState(false)
   const [error,   setError]   = useState(false)
 
+  // Fetch page 1 to learn the true last_page, then pull the rest in parallel and
+  // concatenate; aborts (via the `active` flag) a stale request on URL change/unmount.
   useEffect(() => {
     if (!fetchUrl) return
     let active = true

@@ -15,6 +15,7 @@ import { buildReportQueryParams, EMPTY_REPORT_FILTERS } from './reportFilterPara
 import type { ReportFilterState } from './reportFilterParams'
 import type { OutreachReportData, ReportPeriod } from '@/types/analytics'
 
+// See the file's top doc above; a thin React Query wrapper around GET /reports/outreach forwarding only status/owner/branch plus period.
 export function useOutreachReport(period: ReportPeriod, filters: ReportFilterState = EMPTY_REPORT_FILTERS) {
   const params = buildReportQueryParams(period, 'outreach', filters)
   const { data, isLoading, isError, refetch } = useQuery({

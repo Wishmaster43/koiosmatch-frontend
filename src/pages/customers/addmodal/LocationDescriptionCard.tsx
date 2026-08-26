@@ -18,6 +18,7 @@ interface LocationDescriptionCardProps {
   onChange: (v: string) => void
 }
 
+// Pure presentational description card (see the module doc above): value/onChange come from the parent form, expand/edit UI state is purely local.
 export default function LocationDescriptionCard({ value, onChange }: LocationDescriptionCardProps) {
   const { t } = useTranslation(['customers', 'common'])
   // COLLAPSIBLE-TEXT-1 (02-08 round 2): the always-open editor became the shared

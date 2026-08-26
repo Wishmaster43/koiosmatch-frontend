@@ -8,6 +8,7 @@ import RadiusMapPanel, { type MapPoint } from '@/components/map/RadiusMapPanel'
 import type { Vacancy } from '@/types/vacancy'
 import type { Id } from '@/types/common'
 
+// Thin adapter mapping vacancy rows to MapPoints for the shared RadiusMapPanel (see the module doc comment above).
 export default function VacanciesMapView({ rows, center, radiusKm, onCenterChange, onRadiusChange, onClearRadius, onPick, padded }: {
   rows: Vacancy[]
   center: { lat: number; lng: number }

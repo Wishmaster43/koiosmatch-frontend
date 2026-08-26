@@ -63,6 +63,8 @@ const OPP_COLOR: Record<string, string> = {
   staleDeal: 'var(--color-warning)', closingSoon: 'var(--color-warning)',
 }
 
+// Opportunities pipeline report (see file docblock above): KPI band, chart grid
+// and drill drawer, mirroring the customers/vacancies reports' shared envelope.
 export default function OpportunitiesReport({ period, filters = EMPTY_REPORT_FILTERS, compare = COMPARE_OFF }: { period: ReportPeriod; filters?: ReportFilterState; compare?: ReportCompareMode }) {
   const { t } = useTranslation('analytics')
   const { formatDate } = useDateFormat()

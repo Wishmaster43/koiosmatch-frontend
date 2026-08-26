@@ -14,10 +14,12 @@ import { useTextPopoutDraft } from '@/pages/popout/shared'
 import { useVacancyTextLite, patchVacancyText } from '../hooks/useVacancyTextPopout'
 import { textPopoutTopic } from '@/lib/secondScreen'
 
+// Second-screen editor for the vacancy description (see the module doc above for the shared TEKST-POPOUT-1 recipe); a thin composer of identity/draft/persistence hooks.
 export default function VacancyDescriptionPopout({ id }: { id: string | undefined }) {
   const { t } = useTranslation('vacancies')
   const { vacancy, loading, error, reload } = useVacancyTextLite(id)
 
+  // Stable save function for useTextPopoutDraft: writes through the same PATCH the drawer's DescriptionTab uses, so a save here and a save there never disagree.
   const persist = useCallback((html: string, revert: () => void) => {
     if (!id) return Promise.resolve(false)
     return patchVacancyText(id, html, t, revert)

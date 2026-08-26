@@ -25,6 +25,7 @@ interface PaginationBarProps {
   pageSizeOptions?: number[]
 }
 
+// Shared pagination footer (see the module doc above): renders the row-range/page-size/step controls and calls back to the parent, which owns the actual page/pageSize state.
 export default function PaginationBar({ page, totalPages, totalRows, pageSize, onPageChange, onPageSizeChange, pageSizeOptions = PAGE_SIZE_OPTIONS }: PaginationBarProps) {
   const { t } = useTranslation('common')
   // Locale-aware grouping (§ FMT-GETAL-1) — "1.501–2.000 van 99.968", never bare digits.

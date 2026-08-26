@@ -11,6 +11,7 @@ import { useNoteTypes } from '@/lib/useNoteTypes'
 import { useOpportunityNotes } from '../hooks/useOpportunityNotes'
 import type { Opportunity } from '@/types/opportunity'
 
+// Wires opportunity notes into the shared NotesTab so it matches the candidate drawer exactly; data and edit/add persistence come from useOpportunityNotes (see file header).
 export default function NotesTab({ opportunity: o }: { opportunity: Opportunity }) {
   const { t } = useTranslation(['opportunities', 'common'])
   // Note categories from the tenant lookup, scoped to 'opportunity' (NOTE-TYPES-2/3).

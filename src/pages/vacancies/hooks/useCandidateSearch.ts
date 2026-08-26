@@ -53,6 +53,8 @@ interface RawMatchRow {
   ai_advice_reason?: string | null
 }
 
+// Owns the live scored candidate-match search for one vacancy: filter state (with
+// tenant defaults), the abortable fetch, and the Koios advice-refresh side channel.
 export function useCandidateSearch(vacancy: VacancyDetail) {
   const { statuses, candidateTypes } = useLookups()
 

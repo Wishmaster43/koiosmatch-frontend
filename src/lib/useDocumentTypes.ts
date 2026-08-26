@@ -94,6 +94,7 @@ const mapDocumentTypes = (res: AxiosResponse): LookupOption[] | null => {
   return d.length ? d : null
 }
 
+// Tenant document-type lookup, optionally scoped to one entity's own cache slot.
 export function useDocumentTypes(entity?: string) {
   const { t } = useTranslation('common')
   // Bake the optional entity filter into the cache key itself (see file header) —

@@ -10,6 +10,8 @@
 import { useTranslation } from 'react-i18next'
 import StatusListEditor from './StatusListEditor'
 
+// Thin StatusListEditor wrapper for the candidate education-level lookup (name +
+// colour + icon + drag-reorder), distinct from the unrelated vacancy-education lookup.
 export default function EducationLevelsSettings() {
   const { t } = useTranslation('settings')
   return (

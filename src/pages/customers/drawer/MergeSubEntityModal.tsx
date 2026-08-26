@@ -38,6 +38,7 @@ export type MergeSubEntityScope = 'location' | 'department'
 // Only the fields the two picker cards show — never the whole record (§8).
 export interface MergeCandidate { id: Id; name: string; code?: string }
 
+// Two-step merge (pick the duplicate, choose the survivor) for a location or department, scoped to this customer's own already-loaded list (see file header).
 export default function MergeSubEntityModal({ scope, customerId, current, others, onClose, onMerged }: {
   scope: MergeSubEntityScope
   /** Scopes the route; both records are resolved through THIS customer server-side. */

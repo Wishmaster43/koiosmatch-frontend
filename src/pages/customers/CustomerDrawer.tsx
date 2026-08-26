@@ -121,6 +121,9 @@ interface CustomerDrawerProps {
   trash?: TrashSectionConfig
 }
 
+// Thin container: the customer entity drawer. Wires header state (status/phase/owner/
+// tags), the sub-entity CRUD hooks (locations/departments/contacts) and tab rendering;
+// mutations flow through the optimistic onUpdate prop, never a local source of truth.
 export default function CustomerDrawer({
   customer: c, onClose, expanded, onToggleExpand, onUpdate, onAddNote, onEditNote, onDeleteNote,
   onFetchPreviousVersion, onRestorePreviousNote,
@@ -182,10 +185,12 @@ export default function CustomerDrawer({
     if (c) onUpdate?.(c.id, { locationsCount: locationsApi.locations.length })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [locationsApi.locations.length])
+  // Mirror the live department count into the list/KPI cache, same reasoning as the locations effect above.
   useEffect(() => {
     if (c) onUpdate?.(c.id, { departmentsCount: departmentsApi.departments.length })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [departmentsApi.departments.length])
+  // Mirror the live contact count into the list/KPI cache, same reasoning as the locations effect above.
   useEffect(() => {
     if (c) onUpdate?.(c.id, { contactsCount: contactsApi.contacts.length })
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -281,6 +286,8 @@ export default function CustomerDrawer({
     ...users.map(u => ({ value: String(u.id), label: u.name, initials: initialsOf(u.name) })),
   ]
   const ownerValue = ownerInUsers ? String(currentOwnerId) : '__current'
+  // Picking a real owner also caches their display fields locally so the header
+  // renders instantly without waiting on a refetch; the '__current' fallback sentinel is a no-op.
   const onOwnerChange = (id: string) => {
     if (id === '__current') return
     const u = users.find(x => String(x.id) === id)

@@ -15,6 +15,8 @@ import ActionRuleBanner from '@/components/actionrules/ActionRuleBanner'
 import { SectionTitle } from '@/components/ui/typography'
 import Button from '@/components/ui/Button'
 
+// Client-side confirm panel for a phase move into an appointment-requiring stage
+// with no appointment yet; see the module doc comment above for why this stays a local heuristic, not a server preflight.
 export default function PhaseChangeAppointmentWarning({ phaseLabel, onConfirm, onCancel }: {
   phaseLabel: string
   onConfirm: () => void

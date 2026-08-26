@@ -32,6 +32,8 @@ interface Args {
   t: TFunction
 }
 
+// Task drawer's open/close state plus its single-record mutations (select/patch/
+// link/restore); see the module doc comment above for the full scope.
 export function useTaskDrawerActions({ setTasks, archivedTasks, setArchivedTasks, decorate, t }: Args) {
   const [selected, setSelected] = useState<TaskDetail | null>(null)
   const [expanded, setExpanded] = useState(false)
@@ -45,6 +47,8 @@ export function useTaskDrawerActions({ setTasks, archivedTasks, setArchivedTasks
   // Open a task: show the light row immediately, then fetch the full detail.
   const selectedIdRef = useRef<Id | null>(null)
   const closeDrawer = () => { selectedIdRef.current = null; setSelected(null); setExpanded(false) }
+  // Show the light row immediately, then replace it with the full-detail fetch; a
+  // response for a task the user has since navigated away from is ignored (selectedIdRef).
   const selectTask = (task: Task) => {
     if (selected?.id === task.id) { closeDrawer(); return }
     selectedIdRef.current = task.id ?? null

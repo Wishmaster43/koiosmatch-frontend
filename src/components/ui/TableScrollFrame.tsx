@@ -22,6 +22,8 @@ interface Props {
   footer?: ReactNode
 }
 
+// The shared scrollable table frame: a focusable, labelled scroll region capped
+// at maxHeight, with an optional honest size/total footer (see the prop docs above).
 export default function TableScrollFrame({ children, label, maxHeight = 340, footer }: Props) {
   return (
     <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10, overflow: 'hidden' }}>

@@ -16,6 +16,8 @@ import { useNavigation } from '@/context/NavigationContext'
 import { useCustomerStats } from '../hooks/useCustomerDrawerData'
 import type { Customer } from '@/types/customer'
 
+// The customer's KPI numbers (matches/active/open vacancies/fill rate), each
+// tile click-navigating into the matching tab or page where that applies.
 export default function StatisticsTab({ c, onGoToVacancies }: { c: Customer; onGoToVacancies?: () => void }) {
   const { t } = useTranslation('customers')
   const stats = useCustomerStats(c?.id)

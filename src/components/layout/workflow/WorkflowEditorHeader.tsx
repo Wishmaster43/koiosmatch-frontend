@@ -26,6 +26,7 @@ import Spinner from '@/components/ui/Spinner'
 // parent/child relations (WF-RELATIONS-FE-1).
 export type EditorView = 'diagram' | 'history' | 'relations'
 
+// The builder's presentational top toolbar: name, diagram/history/relations view tabs, schedule/status/run controls — all state lives in useWorkflowEditor.
 export default function WorkflowEditorHeader({
   workflowId,
   name, onNameChange,

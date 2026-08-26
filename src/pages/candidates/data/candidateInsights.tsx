@@ -40,6 +40,8 @@ interface Args {
   counts: { stale: number; neverContacted: number; noFollowup: number | null; intake: number; activeConv: number; tasks: number }
 }
 
+// Pure builder for the candidates KPI/insights strip (see file docblock above) —
+// takes plain data/callbacks in, returns the donuts/kpis config InsightsRow renders.
 export function buildCandidateInsights({
   t, statusData, funnelData, rcData, pickStatus, pickFunnel, pickOwner, pickPhase, entryPhase,
   selectedStatus, setSelectedStatus, selectedPhase, setSelectedPhase, selectedFunnel, setSelectedFunnel,

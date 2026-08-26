@@ -16,6 +16,7 @@ import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import Button from '@/components/ui/Button'
 import { Mono } from '@/components/ui/typography'
 
+// See the file's top doc above; read mode via the shared DetailTable, Edit flips to an inline form; the secret can only ever be masked here.
 export default function ApiKeyGeneralTab({ apiKey, onSave }) {
   const { t } = useTranslation('settings')
   const { formatDate } = useDateFormat()

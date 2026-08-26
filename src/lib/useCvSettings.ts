@@ -103,6 +103,7 @@ const DEFAULTS: CvSettings = {
 // Settings-blob key (tenant-scoped, JSON-encoded).
 const SETTINGS_KEY = 'candidate_cv_template'
 
+// Tenant CV-template settings, merged over the house defaults so a partial or absent settings blob still renders a complete template.
 export function useCvSettings() {
   const values = useAllSettings()
   // Merge stored value over defaults so a partial/absent blob still renders fully.

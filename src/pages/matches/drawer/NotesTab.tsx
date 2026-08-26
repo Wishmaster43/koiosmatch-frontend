@@ -20,6 +20,9 @@ import type { MatchRow } from '@/types/match'
 // Structural match for the shared NotesTab's NoteItem (typed fields + open index).
 interface Note { type?: string; title?: string; author?: string; text?: string; body?: string; created_at?: string; [k: string]: unknown }
 
+// Internal notes on a match (see file docblock above): fetches its own list on
+// mount (a match row carries no preloaded notes) and renders through the shared
+// NotesTab family, mirroring the vacancy tab's optimistic-add/revert pattern.
 export default function NotesTab({ match: m }: { match: MatchRow }) {
   const { t } = useTranslation(['matches', 'common'])
   // Note categories from the tenant lookup, scoped to 'match' (NOTE-TYPES-2/3).

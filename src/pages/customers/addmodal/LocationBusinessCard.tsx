@@ -21,6 +21,8 @@ interface LocationBusinessCardProps {
   vatNotice?: IdentifierNotice | null
 }
 
+// Pure presentational "Zakelijk" card: KvK/BTW numbers + cost center, with the
+// per-country format verdicts (computed by the container) rendered alongside each field.
 export default function LocationBusinessCard({
   cocNumber, onCocNumberChange, vatNumber, onVatNumberChange, costCenter, onCostCenterChange,
   cocNotice, vatNotice,

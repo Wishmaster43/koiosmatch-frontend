@@ -65,6 +65,7 @@ const mapAppointmentTypes = (res: AxiosResponse): AppointmentType[] | null => {
   return Array.isArray(rows) && rows.length ? rows.map(toType) : null
 }
 
+// Cached tenant appointment-types lookup with translated seed labels (see the module doc above for the duration/modality/intake/default flags each type carries).
 export function useAppointmentTypes() {
   const { t } = useTranslation('common')
   // The endpoint now exists (item 11) — a real 404 should surface in the dev log again.

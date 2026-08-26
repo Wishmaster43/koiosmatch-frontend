@@ -24,6 +24,8 @@ import { CUSTOMER_CONTACT_FIELDS, CUSTOMER_LOCATION_FIELDS, CUSTOMER_DEPARTMENT_
 
 type TabId = 'customer' | 'location' | 'department' | 'contact'
 
+// Sub-tab container for the customer/location/department/contact required-fields
+// matrices, reusing the shared field catalogue (see the module doc comment above).
 export default function CustomerRequiredFieldsSettings() {
   const { t } = useTranslation('settings')
   const [active, setActive] = useState<TabId>('customer')

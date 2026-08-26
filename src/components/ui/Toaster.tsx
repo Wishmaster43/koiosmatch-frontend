@@ -23,6 +23,8 @@ const ICON: Record<ToastType, LucideIcon> = { error: AlertTriangle, success: Che
 const COLOR: Record<ToastType, string> = { error: 'var(--color-danger)', success: 'var(--color-success)', info: 'var(--color-info)' }
 const DEFAULT_DURATION = 5000
 
+// Global toast host (see file docblock above): listens for `km:toast` events and
+// renders the queue bottom-right, each auto-expiring on its own timer.
 export default function Toaster() {
   const { t } = useTranslation('common')
   const [toasts, setToasts] = useState<Toast[]>([])
@@ -30,6 +32,8 @@ export default function Toaster() {
 
   // Subscribe to global toast events; each toast auto-dismisses after its duration (default 5s).
   useEffect(() => {
+    // A `km:toast` CustomEvent arrived (via lib/notify): queues it and schedules
+    // its own auto-dismiss.
     const onToast = (e: Event) => {
       const detail = (e as CustomEvent<Omit<Toast, 'id'>>).detail
       const id = Date.now() + Math.random()

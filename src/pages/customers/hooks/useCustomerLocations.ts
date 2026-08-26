@@ -82,6 +82,7 @@ const toApi = (p: Partial<LocationPayload>) => ({
 // Monotonic counter behind the optimistic row id (see `add`).
 let tempLocationSeq = 0
 
+// Owns the live location list for one customer: load/add/update/remove, each optimistic and reconciled with (or reverted from) the server row (see the module doc above for the overall CRUD shape).
 export function useCustomerLocations(customerId: Id | undefined) {
   const { t } = useTranslation('customers')
   const [locations, setLocations] = useState<Location[]>([])
@@ -180,6 +181,7 @@ export async function archiveLocation(customerId: Id, id: Id): Promise<void> {
   await api.post(`/customers/${customerId}/locations/${id}/archive`)
   window.dispatchEvent(new CustomEvent(LOCATIONS_CHANGED_EVENT))
 }
+// Restores a previously archived location and notifies other hook instances via LOCATIONS_CHANGED_EVENT so their lists refetch (see the doc block above).
 export async function restoreLocation(customerId: Id, id: Id): Promise<Location> {
   const res = await api.post(`/customers/${customerId}/locations/${id}/restore`)
   window.dispatchEvent(new CustomEvent(LOCATIONS_CHANGED_EVENT))
@@ -215,6 +217,7 @@ export function useArchivedCustomerLocations(customerId: Id | undefined, active:
   const [locations, setLocations] = useState<Location[]>([])
   const [loading, setLoading] = useState(false)
 
+  // Fetches only archived locations for the quick-view toggle; a no-op (and cleared list) while `active` is false or there is no customer yet, so the request is never made for nothing.
   const load = useCallback((signal?: AbortSignal) => {
     if (!active || !customerId) { setLocations([]); return }
     setLoading(true)
@@ -226,8 +229,10 @@ export function useArchivedCustomerLocations(customerId: Id | undefined, active:
       .catch(() => { /* the toggle simply shows nothing rather than crashing (§3) */ })
       .finally(() => { if (!signal?.aborted) setLoading(false) })
   }, [customerId, active])
+  // Loads once on mount/dependency change; the AbortController cancels an in-flight request if `load`'s identity changes before it resolves.
   useEffect(() => { const ctrl = new AbortController(); load(ctrl.signal); return () => ctrl.abort() }, [load])
 
+  // Also refetches when another hook instance archives/restores/merges a location elsewhere (LOCATIONS_CHANGED_EVENT), keeping this archived-only view in sync with the live list.
   useEffect(() => {
     const ctrl = new AbortController()
     const onChanged = () => load(ctrl.signal)

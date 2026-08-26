@@ -13,6 +13,7 @@ import { buildReportQueryParams, EMPTY_REPORT_FILTERS } from './reportFilterPara
 import type { ReportFilterState } from './reportFilterParams'
 import type { ApplicationsReportData, ReportPeriod } from '@/types/analytics'
 
+// Cached, cancel-aware fetch of the applications report for one period+filter combo.
 export function useApplicationsReport(period: ReportPeriod, filters: ReportFilterState = EMPTY_REPORT_FILTERS) {
   const params = buildReportQueryParams(period, 'applications', filters)
   const { data, isLoading, isError, refetch } = useQuery({

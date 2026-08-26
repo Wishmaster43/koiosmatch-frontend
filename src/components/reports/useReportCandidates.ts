@@ -19,11 +19,13 @@ export const normalizeSmCandidate = (r: Record<string, unknown>): ReportCandidat
   phone:     (r.phone ?? r.mobile) as string | undefined,
 })
 
+// Data layer for the SM candidates report (see the module doc above); normalises the two known field spellings so a backend rename never blanks the drill-down.
 export function useReportCandidates(perPage: number): { candidates: ReportCandidate[]; loading: boolean; error: boolean } {
   const [candidates, setCandidates] = useState<ReportCandidate[]>([])
   const [loading,    setLoading]    = useState(true)
   const [error,      setError]      = useState(false)
 
+  // Refetches whenever the configured page size changes; the alive guard drops the response if a new perPage arrives (or the component unmounts) before it resolves.
   useEffect(() => {
     let active = true
     setLoading(true); setError(false)

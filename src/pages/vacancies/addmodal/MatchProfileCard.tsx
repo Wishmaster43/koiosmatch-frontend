@@ -25,6 +25,9 @@ interface Props {
   onWeightsChange: (weights: Record<string, number> | null) => void
 }
 
+// Optional match-weight template picker plus its per-dimension slider override
+// (see file docblock above) — reuses the drawer's own dimension config so the two
+// never drift into separate weight models.
 export default function MatchProfileCard({ templateId, onTemplateChange, onWeightsChange }: Props) {
   const { t } = useTranslation(['vacancies', 'common'])
   const { templates, loading, error } = useMatchWeightTemplates()
@@ -47,6 +50,8 @@ export default function MatchProfileCard({ templateId, onTemplateChange, onWeigh
 
   // Picking a (different) template previews its snapshot and clears any prior override.
   const pickTemplate = (id: string) => { setEdited(false); onTemplateChange(id); onWeightsChange(null) }
+  // A slider move marks the weights an explicit override, so it rides alongside
+  // the template id and always wins server-side.
   const setWeight = (d: string, val: number) => {
     const next = { ...weights, [d]: val }
     setWeights(next)

@@ -39,6 +39,7 @@ function formatAddress(loc) {
   return parts.length ? parts.join(', ') : '—'
 }
 
+// Settings locations table: paginated rows with edit/delete actions, disabled while isLocked (a delete in flight).
 export default function LocationsTable({ isLocked, rows, page, totalPages, onPageChange, onEdit, onDelete, deletingId }) {
   const { t } = useTranslation(['settings', 'common'])
   // DATUM-1: DD-MM-YYYY HH:mm in every app language, never a hardcoded locale.

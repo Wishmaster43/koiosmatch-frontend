@@ -1,10 +1,3 @@
-/**
- * FlavorsCard — the platform-wide Snel/Slim/Max → vendor model map. Each stand
- * gets a searchable model picker over `available` (never a native <select>,
- * CLAUDE.md §3A) plus an honest Caption when the picked model has no effort
- * knob (catalog[id].supports_effort === false — the "Haiku-eerlijkheid" the
- * brief asks for), and a Mono cost hint pulled from the same catalog entry.
- */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Zap, Sparkles, Crown } from 'lucide-react'
@@ -26,6 +19,13 @@ function costHint(entry?: KoiosCatalogEntry): string | null {
   return `€${entry.input_price_per_1m} / €${entry.output_price_per_1m} per 1M`
 }
 
+/**
+ * FlavorsCard — the platform-wide Snel/Slim/Max → vendor model map. Each stand
+ * gets a searchable model picker over `available` (never a native <select>,
+ * CLAUDE.md §3A) plus an honest Caption when the picked model has no effort
+ * knob (catalog[id].supports_effort === false — the "Haiku-eerlijkheid" the
+ * brief asks for), and a Mono cost hint pulled from the same catalog entry.
+ */
 export default function FlavorsCard({ data, onSaved }: { data: KoiosModelsAdminData; onSaved: (patch: Partial<KoiosModelsAdminData>) => void }) {
   const { t } = useTranslation('settings')
   const [draft, setDraft] = useState(data.flavors)

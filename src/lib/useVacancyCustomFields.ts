@@ -17,6 +17,7 @@ export interface VacancyFieldDef {
   has_data?: boolean
 }
 
+// Vacancy-scoped view over the generic useCustomFields, dropping the fields this entity never uses.
 export function useVacancyCustomFields() {
   const { fields, allFields, loading, invalidate } = useCustomFields('vacancy')
   // VacancyFieldDef is the generic CustomFieldDef minus required_for/sort_order —

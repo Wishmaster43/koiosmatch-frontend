@@ -32,6 +32,7 @@ import type { Candidate } from '@/types/candidate'
 // StatsTab is still untyped JS — declare the props this tab passes.
 const StatsTab = StatsTabJs as ComponentType<{ kpisTitle?: unknown; kpis?: unknown[] }>
 
+// Statistics tab (last in every drilldown, per canon): KPI cards derived from useCandidateStatistics plus the notes/appointments counts fetched below.
 export default function StatisticsTab({ c, onJump }: { c: Candidate; onJump?: (tab: string) => void }) {
   const { t } = useTranslation('candidates')
   const { formatDate } = useDateFormat()

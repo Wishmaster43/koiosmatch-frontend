@@ -66,6 +66,7 @@ interface WorkflowFolderSidebarProps {
   moveToFolder: (workflowId: string | number | null, folderId: FolderId) => void
 }
 
+// See the file's top doc above; the presentational folder nav with drag-and-drop move targets.
 export default function WorkflowFolderSidebar({
   folders, canManageFolders, selectedFolder, setSelectedFolder,
   dragOverFolder, setDragOverFolder, dragWf, createFolder, deleteFolder, moveToFolder,

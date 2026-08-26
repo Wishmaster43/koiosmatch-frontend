@@ -30,6 +30,7 @@ interface SmCandidatesTableProps {
   onRowClick?: (row: ReportCandidate) => void
 }
 
+// Declares only columns for the shared DataTable (see the module doc above): rendering/sorting/selection/empty states all live there.
 export default function SmCandidatesTable({ rows, loading, onRowClick }: SmCandidatesTableProps) {
   const { t } = useTranslation(['shiftmanager', 'reports'])
   const { formatDate } = useDateFormat()

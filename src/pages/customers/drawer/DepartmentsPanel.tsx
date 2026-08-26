@@ -106,6 +106,7 @@ interface Props {
   onRemoveContact: (id: Id) => void
 }
 
+// One panel for both scopes (see the module doc above): the same department list drills into DepartmentDetail without navigating away, keeping membership narrowing in this one place.
 export default function DepartmentsPanel({
   departments, scope, scopeId, scopeName, customerId, customerName, locations, contacts, statuses,
   contactStatuses = [], canLinkBackoffice = false, openId, onOpenChange, trail = [],

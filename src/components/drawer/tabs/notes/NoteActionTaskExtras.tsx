@@ -25,6 +25,8 @@ const SearchSelect = SearchSelectJs as unknown as ComponentType<AnyProps>
 interface UserRow { id?: string | number; name?: string; first_name?: string; last_name?: string; [k: string]: unknown }
 const userLabel = (u: UserRow) => (u.name ?? [u.first_name, u.last_name].filter(Boolean).join(' ')) || String(u.id ?? '')
 
+// The two task-only fields on an action item's edit mode: WHO it's assigned to
+// (defaults to the requester when cleared) and WHAT entity it links to.
 export default function NoteActionTaskExtras({ item, index, onEdit }: {
   item: NoteActionPanelItem
   index: number

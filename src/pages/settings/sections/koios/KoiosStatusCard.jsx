@@ -26,6 +26,7 @@ function Indicator({ label, ok, okText, badText }) {
   )
 }
 
+// Renders the three connection indicators (see the module doc above): each uses icon + colour + text so status is never colour-only, and the raw api_error string is never rendered directly (§5).
 export default function KoiosStatusCard({ status, t }) {
   const s = status ?? {}
   return (

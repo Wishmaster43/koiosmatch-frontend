@@ -44,6 +44,7 @@ interface Props {
   onUpdate?: (id: MatchRow['id'], patch: Partial<MatchRow>) => void
 }
 
+// Modal for renewing a match's end date, delegating the actual save to useMatchRenew.
 export default function RenewMatchModal({ match, onClose, onUpdate }: Props) {
   const { t } = useTranslation(['matches', 'common'])
   const { formatDate } = useDateFormat()

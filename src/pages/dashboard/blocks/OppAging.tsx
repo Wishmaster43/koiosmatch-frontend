@@ -12,6 +12,7 @@ import type { OppAgingBucket } from '@/types/dashboard'
 // never reflows depending on which buckets happen to have data.
 const BUCKET_ORDER: OppAgingBucket['bucket'][] = ['0-7', '8-30', '31-90', '90+']
 
+// Opportunity-ageing tiles in a fixed bucket order (so the row never reflows); renders nothing when the feed is absent (see file header).
 export default function OppAging({ rows }: { rows: OppAgingBucket[] }) {
   const { t } = useTranslation('dashboard')
   if (!rows.length) return null

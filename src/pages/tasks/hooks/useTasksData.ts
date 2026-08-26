@@ -55,6 +55,7 @@ async function fetchAllTaskPages(baseParams: Record<string, unknown>, ref: strin
   return all
 }
 
+// Data layer for TasksPage (see the module doc above): loads the active list, lazily loads archived tasks while that toggle is on, and decorates every row with its lookup label/colour.
 export function useTasksData({
   showArchived, refQuery = null, statuses, priorities, types, statusMeta, priorityMeta, typeMeta, doneStatusValues,
 }: UseTasksDataParams) {

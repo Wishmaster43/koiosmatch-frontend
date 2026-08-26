@@ -63,6 +63,8 @@ export function DeliveryTicks({ sentAt, deliveredAt, readAt }: { sentAt?: string
   return <Icon size={12} style={{ color, flexShrink: 0 }} role="img" aria-label={t(`conversations.delivery.${state}`)} />
 }
 
+// Renders one WhatsApp bubble (see file docblock above): side/colour by direction
+// and sender, purpose badge, delivery ticks for outbound messages.
 export default function ConversationMessage({ message, formatDateTime }: {
   message: MessageRow
   // The host's locale-aware formatter — never a second date formatting rule (§5).

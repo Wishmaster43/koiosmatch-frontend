@@ -15,6 +15,8 @@ interface UsagePerUserTabProps {
   phase: 'loading' | 'ready' | 'empty' | 'error' | 'unavailable'
 }
 
+// Per-user AI usage table (see file docblock above) — calls, tokens, amount and
+// success rate, one row per user.
 export default function UsagePerUserTab({ ai, phase }: UsagePerUserTabProps) {
   const { t } = useTranslation('settings')
   const { formatNumber, formatCurrency, formatRatio } = useNumberFormat()

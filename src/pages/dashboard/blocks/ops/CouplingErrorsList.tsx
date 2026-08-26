@@ -1,9 +1,3 @@
-/**
- * CouplingErrorsList — ops tile: records that failed to sync to an external
- * system (dash.coupling_errors_list). Each row deep-links to the source
- * record's own page when the entity type is a known one; an unknown
- * entity_type renders inert (no target to route to).
- */
 import { useTranslation } from 'react-i18next'
 import { Block } from '@/pages/dashboard/DashboardPrimitives'
 import { BodyText, Caption } from '@/components/ui/typography'
@@ -20,6 +14,12 @@ const ENTITY_PAGE: Record<string, string> = {
   vacancy: 'vacancies',
 }
 
+/**
+ * CouplingErrorsList — ops tile: records that failed to sync to an external
+ * system (dash.coupling_errors_list). Each row deep-links to the source
+ * record's own page when the entity type is a known one; an unknown
+ * entity_type renders inert (no target to route to).
+ */
 export default function CouplingErrorsList({ rows, onNavigate }: {
   rows: CouplingErrorRow[]
   onNavigate?: FeedTileContext['onNavigate']

@@ -16,6 +16,8 @@ import type { ReactNode } from 'react'
 import { useAuth } from '@/context/AuthContext'
 import { useTenantTheme } from '@/hooks/useTenantTheme'
 
+// Applies the resolved tenant's brand tokens to a subtree outside DashboardLayout,
+// (fixes pop-out windows rendering the default brand colour).
 export default function TenantThemed({ children }: { children: ReactNode }) {
   const auth = useAuth()
   const tenant = auth?.activeTenant ?? auth?.user?.tenant ?? null

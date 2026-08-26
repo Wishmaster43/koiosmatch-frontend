@@ -33,6 +33,8 @@ interface KpiOrderListProps {
   td: TFunction
 }
 
+// Renders the on/off + order state for one role's KPI list (see file docblock
+// above) — a pure view over data/request logic the container hook already owns.
 export default function KpiOrderList({
   role, apiRole, migrated, isHidden, onToggle, onSaveOrder, roleKpis, order, resolveOrder,
   catalogByKey, search, onOffFilter, t, td,
@@ -48,6 +50,7 @@ export default function KpiOrderList({
   const offIds = roleIds.filter(id => !onIds.includes(id))
 
   const label = (id: string) => (KPI_LABEL_KEY[id] ? td(KPI_LABEL_KEY[id]) : id)
+  // The catalog's "counts → drills to" caption for one KPI, or a loading/unavailable hint.
   const explanation = (id: string) => {
     const entry = catalogByKey?.[id]
     if (entry) return `${entry.counts} ${t('dashboardsGoesTo', { target: entry.drills_to })}`

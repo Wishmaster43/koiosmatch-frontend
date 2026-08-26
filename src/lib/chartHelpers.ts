@@ -11,6 +11,8 @@ export interface ChartDatum { name: string; value: number }
 // A generic row with arbitrary fields (chart inputs come from many API shapes).
 type Row = Record<string, unknown>
 
+// Buckets a last-login timestamp into the fixed LOGIN_GROUP_ORDER categories; a
+// missing/empty value means the user has never logged in.
 export function getLoginGroup(lastLoginAt?: string | number | Date | null): string {
   if (!lastLoginAt) return 'Nooit'
   const days = Math.floor((Date.now() - new Date(lastLoginAt).getTime()) / 86400000)
@@ -23,6 +25,8 @@ export function getLoginGroup(lastLoginAt?: string | number | Date | null): stri
   return 'Langer dan 90 dagen'
 }
 
+// Tallies items into named buckets via a key selector; an empty/missing key still
+// counts under "Onbekend" instead of silently dropping the item from the total.
 export function groupAndCount<T>(items: T[], keyFn: (item: T) => string | null | undefined): Record<string, number> {
   return items.reduce<Record<string, number>>((acc, item) => {
     const key = keyFn(item) || 'Onbekend'
@@ -31,6 +35,8 @@ export function groupAndCount<T>(items: T[], keyFn: (item: T) => string | null |
   }, {})
 }
 
+// Turns a group-count map into chart rows. With an explicit order, categories keep
+// that fixed order (and drop empty ones); otherwise the fallback sorts by count descending.
 export function toChartData(grouped: Record<string, number>, order: string[] | null = null): ChartDatum[] {
   if (order) {
     return order.map(name => ({ name, value: grouped[name] || 0 })).filter(d => d.value > 0)
@@ -40,6 +46,7 @@ export function toChartData(grouped: Record<string, number>, order: string[] | n
 
 const MONTHS_NL = ['Jan','Feb','Mrt','Apr','Mei','Jun','Jul','Aug','Sep','Okt','Nov','Dec']
 
+// ISO week number (Thursday-anchored) used to bucket dates into "W<n>" chart categories.
 function getWeekNumber(date: Date): number {
   const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()))
   const day = d.getUTCDay() || 7
@@ -48,6 +55,8 @@ function getWeekNumber(date: Date): number {
   return Math.ceil((((d.getTime() - yearStart.getTime()) / 86400000) + 1) / 7)
 }
 
+// Buckets rows by month (optionally scoped to one year) using a sortable year-month
+// key so the chart can order chronologically while still displaying the short month label.
 export function groupByMonth(items: Row[], year?: string | number | null, dateField = 'registration_date'): ChartDatum[] {
   const grouped: Record<string, ChartDatum> = {}
   items.forEach(c => {
@@ -62,6 +71,8 @@ export function groupByMonth(items: Row[], year?: string | number | null, dateFi
   return Object.entries(grouped).sort(([a],[b]) => a.localeCompare(b)).map(([,d]) => d)
 }
 
+// Buckets rows by ISO week number (optionally scoped to one year), sorted numerically
+// by week rather than alphabetically so "W2" doesn't sort after "W10".
 export function groupByWeek(items: Row[], year?: string | number | null, dateField = 'registration_date'): ChartDatum[] {
   const grouped: Record<string, number> = {}
   items.forEach(c => {
@@ -76,6 +87,7 @@ export function groupByWeek(items: Row[], year?: string | number | null, dateFie
     .map(([name, value]) => ({ name, value }))
 }
 
+// Collects the distinct years present in a date field, newest first, to populate a year filter.
 export function getAvailableYears(items: Row[], dateField = 'registration_date'): number[] {
   return [...new Set(
     items.map(c => c[dateField] ? new Date(c[dateField] as string).getFullYear() : null)
@@ -83,6 +95,8 @@ export function getAvailableYears(items: Row[], dateField = 'registration_date')
   )].sort((a, b) => b - a)
 }
 
+// Groups then keeps only the top N buckets by count, for "top X" chart widgets that
+// would otherwise be swamped by a long tail of one-off categories.
 export function topN(items: Row[], keyFn: (item: Row) => string | null | undefined, n = 10): ChartDatum[] {
   const grouped = groupAndCount(items, keyFn)
   return Object.entries(grouped)

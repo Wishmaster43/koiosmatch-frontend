@@ -41,6 +41,7 @@ function BucketCard({ t, name, bucket }) {
   )
 }
 
+// See the file's top doc above; read-only backlog health, polled every 15s while visible.
 export default function QueueOverviewTab({ summary, phase, onRefresh, onGoToFailed }) {
   const { t } = useTranslation('settings')
   const byQueue = summary?.by_queue ?? []

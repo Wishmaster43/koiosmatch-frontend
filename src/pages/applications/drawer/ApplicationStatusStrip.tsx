@@ -44,11 +44,11 @@ function daysSince(iso: string | undefined, now: Date = new Date()): number | nu
   return Math.max(0, Math.floor((now.getTime() - d.getTime()) / 86400000))
 }
 
+type Appointment = ApplicationDetail['appointments'][number]
 // The first FUTURE appointment (server order not guaranteed) — a past one is
 // stale information, so it never wins over an upcoming one. A plain helper
 // (not inline in the component body) keeps the Date.now() read out of render
 // per the react-hooks purity rule; `now` is injectable for deterministic tests.
-type Appointment = ApplicationDetail['appointments'][number]
 function nextFutureAppointment(appointments: Appointment[], now: number = Date.now()): Appointment | undefined {
   return appointments
     .filter(ap => ap.when && new Date(ap.when).getTime() > now)

@@ -14,6 +14,7 @@ const inputStyle = {
   background: 'var(--hover-bg)', color: 'var(--text)', outline: 'none', boxSizing: 'border-box' as const,
 }
 
+// Dumb radius-filter block (see the module doc above): local draft input only, the applied filter's own state/handlers come from the host page.
 export default function GeoRadiusGroup({ group }: { group: ReportFilterGroup }) {
   const { t } = useTranslation('common')
   const [q,  setQ]  = useState('')

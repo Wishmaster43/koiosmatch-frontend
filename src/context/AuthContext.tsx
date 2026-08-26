@@ -63,11 +63,13 @@ const userIsSuperAdmin = (u?: AuthUser | null) => u?.is_super_admin === true
 // HMR, provider re-creation) share the in-flight /auth/me instead of stacking calls
 // that once flooded the global rate bucket and 429'd the login itself.
 let meProbe: Promise<import('axios').AxiosResponse> | null = null
+// Return the shared in-flight /auth/me probe if one exists, else start one; concurrent remounts share it instead of stacking calls.
 const probeMe = () => {
   meProbe ??= api.get('/auth/me').finally(() => { meProbe = null })
   return meProbe
 }
 
+// Root auth/tenant provider: owns user, tenant list and active tenant in state, and exposes the login/permission helpers below via context.
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user,          setUser]              = useState<AuthUser | null>(null)
   const [loading,       setLoading]           = useState(true)
@@ -137,6 +139,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // storage event fires only in OTHER tabs — hard-reload them too, exactly
   // like the switching tab itself.
   useEffect(() => {
+    // Another tab changed the active tenant; reload this tab too so no tenant-scoped state leaks across tabs.
     const onStorage = (e: StorageEvent) => {
       if (e.key === 'active_tenant' && e.oldValue !== null && e.newValue !== null && e.newValue !== e.oldValue) {
         window.location.reload()
@@ -186,6 +189,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // localStorage). We clear React state here so ProtectedRoute routes to /login
   // within the SPA — no full-page reload, no lost router context.
   useEffect(() => {
+    // A 401 elsewhere already cleared localStorage; clear the in-memory auth state too so ProtectedRoute routes to /login without a full reload.
     const onExpired = () => {
       setUser(null)
       setActiveTenantState(null)
@@ -200,6 +204,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // code mfa_enrollment_required. Re-fetching /auth/me sets mfa_setup_required on
   // the user, which flips App.tsx's ProtectedRoute into the enrollment gate.
   useEffect(() => {
+    // Mid-session MFA enforcement kicked in; re-fetch the profile so mfa_setup_required flips ProtectedRoute into the enrollment gate.
     const onMfaRequired = () => {
       api.get('/auth/me').then(res => applyAuthResponse(res.data)).catch(() => {})
     }
@@ -354,6 +359,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const hasRole = useCallback((role: string) =>
     user?.roles?.some(r => (typeof r === 'string' ? r : r.name) === role) ?? false, [user])
+  // True for any of the admin-ish roles; built from hasRole so the role list stays the single source.
   const isAdmin = useCallback(() =>
     hasRole('admin') || hasRole('tenant_admin') || hasRole('super_admin'), [hasRole])
   // Super admin = explicit flag, the super_admin role, or a user without a tenant.
@@ -384,6 +390,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return resolveDashboardType(types)
   }, [user])
 
+  // Checks the user's own permissions, then any role's permissions, then the sync/refresh fallback for tenant_admin/planner.
   const hasPermission = useCallback((permName: string) => {
     if (!user) return false
     if (isSuperAdmin()) return true
@@ -426,6 +433,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }
 
+// Reads the auth context; null outside AuthProvider — callers must guard, this never throws.
 export function useAuth(): AuthContextValue | null {
   return useContext(AuthContext)
 }

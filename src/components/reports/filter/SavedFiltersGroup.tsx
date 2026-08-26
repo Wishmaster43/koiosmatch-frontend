@@ -13,6 +13,7 @@ import Button from '@/components/ui/Button'
 // One saved set — state is opaque to this component.
 interface SavedSet { id: string; name: string; state: unknown; isDefault?: boolean }
 
+// The saved-filters block: name+save, then a star/load/delete row per saved set.
 export default function SavedFiltersGroup({ group }: { group: ReportFilterGroup }) {
   const { t } = useTranslation('shiftmanager')
   const saved        = (group.saved as SavedSet[] | undefined) ?? []

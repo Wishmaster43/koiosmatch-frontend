@@ -22,6 +22,8 @@ function InfoRow({ icon: Icon, label, value }: { icon: LucideIcon; label: ReactN
   )
 }
 
+// Read-only slide-in with one department's customer/location/code details (see
+// file docblock above); traps focus while open (§6).
 export default function DepartmentDrawer({ department, onClose }: { department: ReportDepartment; onClose: () => void }) {
   const panelRef = useFocusTrap<HTMLDivElement>(onClose)
   const { t } = useTranslation('reports')

@@ -13,6 +13,7 @@ interface ReferenceNumberChipProps {
   value?: string | null
 }
 
+// The shared click-to-copy reference-number chip renders nothing without a value.
 export default function ReferenceNumberChip({ value }: ReferenceNumberChipProps) {
   const { t } = useTranslation('common')
   const [copied, setCopied] = useState(false)

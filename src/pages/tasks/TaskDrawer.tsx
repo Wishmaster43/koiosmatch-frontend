@@ -65,6 +65,7 @@ interface TaskDrawerProps {
   onSubtaskCreated?: (id: Id | undefined) => void
 }
 
+// Thin drawer container: inline title edit, tab visibility (Extra/Related gating) and the tab-content dispatcher below; header meta reads the live tenant lookup at render (see the TAKEN-CHIP-KLEUR-BUG-1 note).
 export default function TaskDrawer({ task, onClose, expanded, onToggleExpand, onUpdate, onAddLink, onRemoveLink, onRestore, trash, onSubtaskCreated }: TaskDrawerProps) {
   const { t } = useTranslation('tasks')
   const { formatDate, formatDateTime } = useDateFormat()

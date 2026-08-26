@@ -95,6 +95,8 @@ function RelationSection({ title, Icon, rows, emptyLabel, onToggle }: {
   )
 }
 
+// The editor's RELATIES tab: parent/child workflow lists with their own status,
+// run stats and active toggle, each list rendering its own honest empty state.
 export default function WorkflowRelationsView({ workflowId }: { workflowId?: string | number }) {
   const { t } = useTranslation('workflows')
   const { parents, children, loading, error, retry, toggleStatus } = useWorkflowRelations(workflowId)

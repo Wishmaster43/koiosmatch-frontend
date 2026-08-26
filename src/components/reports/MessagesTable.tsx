@@ -31,6 +31,7 @@ const COL_KEYS = [
   { key: 'workflow_name',   tKey: 'workflow',  sortable: true },
 ]
 
+// Wires local UI state (search, sort, filters, paging) around the API-backed rows fetched by useReportList; see the module doc above for the overall shape.
 export default function MessagesTable() {
   const { t } = useTranslation('reports')
   // Reuses the existing common.sort key for the sortable header's button tooltip
@@ -52,10 +53,14 @@ export default function MessagesTable() {
   const [page, setPage] = useState(1)
   const { pageSize, handlePageSizeChange } = usePersistedPageSize()
 
+  // Distinct channel values already loaded client-side seed the right-panel filter — no separate lookup fetch needed.
   const channelOptions  = useMemo(() => [...new Set(rows.map(r => r.channel).filter((x): x is string => Boolean(x)))].sort(), [rows])
+  // Same derivation for status: built from the current row set, not a lookup table.
   const statusOptions   = useMemo(() => [...new Set(rows.map(r => r.status).filter((x): x is string => Boolean(x)))].sort(), [rows])
+  // Workflow names vary per tenant automation, so the filter list is built from what actually appears in the loaded rows.
   const workflowOptions = useMemo(() => [...new Set(rows.map(r => r.workflow_name).filter((x): x is string => Boolean(x)))].sort(), [rows])
 
+  // Combines the right-panel chip selections with the free-text search across recipient/subject/template/workflow fields.
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase()
     return rows.filter(r => {
@@ -74,6 +79,7 @@ export default function MessagesTable() {
     })
   }, [rows, search, selectedStatuses, selectedChannels, selectedWorkflows])
 
+  // Case-insensitive string sort driven by the sortable column headers; runs after filtering so paging reflects the filtered set.
   const sorted = useMemo(() => {
     const { key, dir } = sort
     return [...filtered].sort((a, b) => {
@@ -88,10 +94,13 @@ export default function MessagesTable() {
   const setSort_ = (key: string) => setSort(prev =>
     prev.key === key ? { key, dir: prev.dir === 'asc' ? 'desc' : 'asc' } : { key, dir: 'desc' })
 
+  // Reset to page 1 whenever the row COUNT or page size changes, so paging never points past the end (a same-size filter swap keeps the current page).
   useEffect(() => setPage(1), [filtered.length, pageSize])
+  // Slice the sorted+filtered rows for the current page; kept separate from `sorted` so the paging math stays in one place.
   const paged      = useMemo(() => sorted.slice((page-1)*pageSize, page*pageSize), [sorted, page, pageSize])
   const totalPages = Math.max(1, Math.ceil(sorted.length / pageSize))
 
+  // Assembles the right-panel filter groups only from dimensions that actually have options, each carrying live counts from the current rows.
   const filterGroups = useMemo(() => {
     const groups: ReportFilterGroup[] = []
     if (channelOptions.length) {
@@ -132,6 +141,7 @@ export default function MessagesTable() {
     return groups
   }, [t, channelOptions, statusOptions, workflowOptions, selectedChannels, selectedStatuses, selectedWorkflows, rows])
 
+  // Publish the filter groups into the shared right panel on mount/change, and unregister them on unmount so a stale filter UI doesn't linger after leaving this table.
   useEffect(() => {
     registerFilters('messages-table', filterGroups)
     return () => unregisterFilters('messages-table')

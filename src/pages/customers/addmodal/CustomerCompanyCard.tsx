@@ -22,6 +22,7 @@ interface CustomerCompanyCardProps {
   industries: Array<{ value: string; label: string }>
 }
 
+// The company-details card fields; industries come from the tenant lookup as plain seed names, translated only for display.
 export default function CustomerCompanyCard({ form, set, errors, industries }: CustomerCompanyCardProps) {
   const { t } = useTranslation(['customers', 'common'])
   return (

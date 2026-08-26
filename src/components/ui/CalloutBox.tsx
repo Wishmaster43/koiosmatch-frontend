@@ -49,6 +49,7 @@ const TOKEN_INK: Record<CalloutBoxVariant, string> = {
   danger: 'var(--color-on-danger-bg)',
 }
 
+// See the file's top doc above for why this is the one inline banner component; renders as role=alert for the warning/danger variants.
 export default function CalloutBox({ variant, title, children, onDismiss, dismissLabel }: CalloutBoxProps) {
   const token = TOKEN[variant]
   return (

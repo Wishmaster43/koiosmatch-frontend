@@ -22,6 +22,9 @@ interface ActionRuleMatrixGridProps {
   onSelectDetail: (action: string, condition: string) => void
 }
 
+// Purely presentational: axis definitions, effect lookups and cell handlers all
+// arrive via props, so this file only lays out the sticky-header grid and
+// forwards cell interactions.
 export default function ActionRuleMatrixGrid({
   title, subtitle, actions, conditions, getEffect, isOverridden, selectedCell, onCycle, onSelectDetail,
 }: ActionRuleMatrixGridProps) {

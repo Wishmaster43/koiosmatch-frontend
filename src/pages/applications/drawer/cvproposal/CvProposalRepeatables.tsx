@@ -21,6 +21,7 @@ interface CvProposalRepeatablesProps {
   educations: CvProposalEducation[]
 }
 
+// See the file's top doc above; renders nothing when the CV proposed no work-history/education rows.
 export default function CvProposalRepeatables({ experiences, educations }: CvProposalRepeatablesProps) {
   const { t } = useTranslation('applications')
   if (experiences.length === 0 && educations.length === 0) return null

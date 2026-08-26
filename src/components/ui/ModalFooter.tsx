@@ -9,6 +9,7 @@
 import type { ReactNode } from 'react'
 import Button from './Button'
 
+// The one cancel/submit footer row for modals; omit onSubmit for a close-only dialog.
 export default function ModalFooter({ onCancel, onSubmit, cancelLabel, submitLabel, disabled = false, busy = false, danger = false, leftSlot }: {
   onCancel: () => void
   // Omit onSubmit to render a close-only footer (read-only dialogs).

@@ -281,6 +281,8 @@ export default function DrawerFilterMenu({ filters, label, title, clearAllLabel 
   // Close on outside click while open — mirrors ChangelogPopover's own convention.
   useEffect(() => {
     if (!open) return
+    // Ignore a click inside the panel, the date-picker portal, or any other
+    // portalled picker menu; anything else counts as outside and closes the panel.
     const onClick = (e: MouseEvent) => {
       const target = e.target as Node
       if (wrapRef.current && wrapRef.current.contains(target)) return

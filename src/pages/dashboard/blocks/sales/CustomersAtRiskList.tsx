@@ -10,6 +10,7 @@ import { useDateFormat } from '@/lib/datetime'
 import type { CustomerAtRiskRow } from '@/types/dashboard'
 import type { FeedTileContext } from '../feedTileKit'
 
+// At-risk customers widget list: each row meta shows days-quiet plus the last-contact date when known, and clicks drill into the customer record.
 export default function CustomersAtRiskList({ rows, onNavigate }: {
   rows: CustomerAtRiskRow[]
   onNavigate?: FeedTileContext['onNavigate']

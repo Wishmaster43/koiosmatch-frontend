@@ -6,6 +6,8 @@
 import { useTranslation } from 'react-i18next'
 import StatusListEditor from './StatusListEditor'
 
+// Thin StatusListEditor wrapper for the tenant's jargon-correction vocabulary
+// (no colour, no active toggle — see the comment below for why).
 export default function JargonSettings() {
   const { t } = useTranslation('settings')
   return (

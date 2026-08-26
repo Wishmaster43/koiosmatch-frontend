@@ -14,6 +14,8 @@ import { fv } from '../dashboardFormat'
 import type { DashOpp } from '@/types/dashboard'
 import type { DashboardViewModel } from '../hooks/useDashboardViewModel'
 
+// Dashboard's distribution-chart group (status/funnel/recruiter/opportunity-stage);
+// see the module doc comment above for the role-visibility/empty-group behaviour.
 export default function DistributionCharts({ vis, statusData, funnelData, recruiterData, oppStageData, opp, onNavigate }: {
   vis: DashboardViewModel['vis']
   statusData: DashboardViewModel['statusData']

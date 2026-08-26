@@ -22,6 +22,7 @@ const BUCKET_COLOR: Record<string, string> = {
   rejected: 'var(--color-danger)',
 }
 
+// Read-only outcome badge (see the module doc above): renders nothing when there's no bucket, and falls back to a neutral colour for an unrecognised value.
 export default function ApplicationBucketBadge({ bucket }: { bucket?: string }) {
   const { t } = useTranslation('applications')
   if (!bucket) return null

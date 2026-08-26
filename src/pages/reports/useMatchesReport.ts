@@ -14,6 +14,9 @@ import { buildReportQueryParams, EMPTY_REPORT_FILTERS } from './reportFilterPara
 import type { ReportFilterState } from './reportFilterParams'
 import type { MatchesReportData, ReportPeriod } from '@/types/analytics'
 
+// Cached data layer for MatchesReport (see file docblock above); builds its
+// request params through the same helper the drilldown uses, so the two never
+// describe two different filter sets.
 export function useMatchesReport(period: ReportPeriod, filters: ReportFilterState = EMPTY_REPORT_FILTERS) {
   const params = buildReportQueryParams(period, 'matches', filters)
   const { data, isLoading, isError, refetch } = useQuery({

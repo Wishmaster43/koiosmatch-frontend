@@ -75,6 +75,7 @@ export default function CustomerDisplaySettings() {
   )
 }
 
+// The actual settings body, rendered inside its own VacancyLookupsProvider (see the wrapper above).
 function CustomerDisplaySettingsInner() {
   const { t } = useTranslation('settings')
   const { locationStatuses, departmentStatuses, contactStatuses } = useCustomerLookups()

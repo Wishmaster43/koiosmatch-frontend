@@ -16,6 +16,7 @@ interface ErrorBannerProps {
   dismissLabel?: string
 }
 
+// The shared error-state banner (§3A: always handle error explicitly); retry/dismiss controls render only when their handler is actually given.
 export default function ErrorBanner({ children, style, onRetry, onDismiss, retryLabel, dismissLabel }: ErrorBannerProps) {
   const { t } = useTranslation('common')
   return (

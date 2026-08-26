@@ -27,6 +27,8 @@ import type { Id } from '@/types/common'
 
 type UpdateFn = (id: Id | undefined, patch: Record<string, unknown>) => void
 
+// Thin container: wires useVacancyDetailsForm and stacks every field-group card
+// on this one merged tab, in the fixed canon block order (see file doc).
 export default function DetailsTab({ vacancy: v, onUpdate }: { vacancy: VacancyDetail; onUpdate?: UpdateFn }) {
   const { t } = useTranslation('vacancies')
   // KOIOS-ADVIES-OVERAL-1: the SAME resolver the vacancies table's Koios column

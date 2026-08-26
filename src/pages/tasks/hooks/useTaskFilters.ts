@@ -45,6 +45,7 @@ const inDueRange = (due: string | null | undefined, range: DueRangeFilter | null
   return true
 }
 
+// All task list/board filter state (panel dimensions, search, KPI tile), plus the derived active flag and row predicate.
 export function useTaskFilters() {
   const [showArchived,     setShowArchived]     = usePageMemory('tasks.archived', false)
   // TRASH-OVERAL-2: Prullenbak view (lifecycle pending_erase) — rides the same
@@ -76,6 +77,7 @@ export function useTaskFilters() {
     || selectedTeam.length || selectedLinkType.length || dueRange)
   // Remount the (self-stateful) search input on clear so the visible text resets too.
   const [searchEpoch, setSearchEpoch] = useState(0)
+  // Reset every filter dimension and bump the search epoch so the (self-stateful) search input remounts blank too.
   const clearAllFilters = () => {
     setSearchEpoch(e => e + 1); setQuery(''); setShowArchived(false); setShowTrash(false); setKpiFilter(null)
     setSelectedStatus([]); setSelectedPriority([]); setSelectedType([]); setSelectedAssignee([])

@@ -67,6 +67,7 @@ export function useEditorExitGuards({ isDirty, liveRunActive, onClose, confirm }
     return () => window.removeEventListener('popstate', onPop)
   }, [])
 
+  // Warns on a tab close/refresh while there are unsaved changes or a live run,
   useEffect(() => {
     const handler = (e: BeforeUnloadEvent) => {
       // Tab close/refresh: warn on unsaved changes OR a live run (same honesty).

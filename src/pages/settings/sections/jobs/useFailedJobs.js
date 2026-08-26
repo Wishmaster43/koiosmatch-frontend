@@ -12,6 +12,7 @@ import { unwrapList } from '@/lib/api'
 
 const POLL_MS = 15000
 
+// Owns the failed-jobs list (filters, paging, polling) plus the four intervention actions; confirmation for the two destructive bulk actions lives in the tab, this hook just executes and surfaces the server's error (see module doc above).
 export function useFailedJobs() {
   const { t } = useTranslation('settings')
   const [filters, setFilters] = useState({ queue: '', tenant: '' })
@@ -26,6 +27,7 @@ export function useFailedJobs() {
   const [actionError, setActionError] = useState(null)
   const abortRef = useRef(null)
 
+  // Query params derived from the current filters/page; omits empty filter values rather than sending them as blank strings.
   const params = useMemo(() => {
     const p = { page, per_page: 25 }
     if (filters.queue) p.queue = filters.queue
@@ -33,6 +35,7 @@ export function useFailedJobs() {
     return p
   }, [filters, page])
 
+  // Fetches the current page; aborts any in-flight request first so a fast filter/page change can't let a stale response overwrite a newer one.
   const load = useCallback(() => {
     abortRef.current?.abort()
     const ctrl = new AbortController()
@@ -42,6 +45,7 @@ export function useFailedJobs() {
       .catch((err) => { if (err?.code !== 'ERR_CANCELED') setPhase('error') })
   }, [params])
 
+  // Loads on mount/filter change and then polls every 15s while the tab is visible, so the failure log stays fresh without a manual refresh; cleanup clears the interval and aborts any in-flight request.
   useEffect(() => {
     setPhase('loading')
     load()

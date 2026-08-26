@@ -20,6 +20,7 @@ interface UrlRowProps {
   openLabel: string
 }
 
+// One labelled URL row with copy-to-clipboard and an open action that can be disabled with a notice instead of silently doing nothing.
 export default function UrlRow({ label, url, notice, disabledOpen, copyLabel, copiedLabel, openLabel }: UrlRowProps) {
   const [copied, setCopied] = useState(false)
 

@@ -19,11 +19,13 @@ export interface CampaignStats {
   by_assignee: Array<{ owner_id: string | null; name: string; count: number }>
 }
 
+// Fetches the campaign's target-status/outcome/assignee counts on open, aborting a stale request when the campaign switches.
 export function useOutreachStats(campaignId?: Id | null) {
   const [stats,   setStats]   = useState<CampaignStats | null>(null)
   const [loading, setLoading] = useState(false)
   const [error,   setError]   = useState(false)
 
+  // Fetch the stats for this campaign, aborting on unmount/switch; a 404 is treated as no data yet, not a failure.
   useEffect(() => {
     if (!campaignId) { setStats(null); return }
     const ctrl = new AbortController()

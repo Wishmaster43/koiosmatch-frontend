@@ -50,6 +50,7 @@ function StatTile({ label, value, accent, onClick }: { label: string; value: num
 // The under_contract tile keys — each drills contract_status=<key> (portie 7 XOR).
 const CONTRACT_STATUS_TILES = ['sent', 'active', 'ended', 'none'] as const
 
+// Matches report page: KPI strip plus charts, wired to the shared period/filters/compare params every reports page shares.
 export default function MatchesReport({ period, filters = EMPTY_REPORT_FILTERS, compare = COMPARE_OFF }: { period: ReportPeriod; filters?: ReportFilterState; compare?: ReportCompareMode }) {
   const { t } = useTranslation('analytics')
   const { formatDate } = useDateFormat()
@@ -157,6 +158,7 @@ export default function MatchesReport({ period, filters = EMPTY_REPORT_FILTERS, 
     dur: 'avg_duration_days',
   }
   const kpiByServerKey = new Map((data?.kpis ?? []).map(k => [k.key, k.count]))
+  // Opens the KPI's row-level drill-down using its mapped server-side key; a KPI with no mapping is not drillable at all.
   const openKpiDrill = (localKey: string, label: string, value: string | number) => {
     const serverKey = KPI_DRILL_KEY[localKey]
     if (!serverKey) return undefined

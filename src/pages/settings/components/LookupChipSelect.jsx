@@ -11,6 +11,8 @@
  */
 import Toggle from '@/components/ui/Toggle'
 
+// The one shared "select which lookup values count" block (see file docblock
+// above): one row per value, a real Toggle switch rather than a static-looking chip.
 export default function LookupChipSelect({ label, hint, items, selected, onToggle, emptyText, ariaLabel }) {
   return (
     <div>

@@ -177,6 +177,9 @@ export function useStatusFilter<T>(
   return { value, setValue, toggle, filtered }
 }
 
+// The dumb rendering half: computes the trio pill's compact label (all / one
+// name / "N selected") from the already-filtered value; the selection logic
+// itself lives entirely in useStatusFilter above.
 export default function StatusFilterSelect({ value, onToggle, statuses, optionKey = s => String(s.id ?? s.value) }: {
   value: string[]
   onToggle: (v: string) => void

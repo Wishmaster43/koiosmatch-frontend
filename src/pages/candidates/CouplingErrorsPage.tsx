@@ -30,6 +30,8 @@ const SYSTEM_COLOR: Record<string, string> = {
   helloflex: 'var(--color-warning-text)',
 }
 
+// The dashboard KPI tile's deep-link destination (see file docblock above) —
+// lists every failed backoffice mapping so a recruiter can act on it.
 export default function CouplingErrorsPage() {
   const { t } = useTranslation('candidates')
   const { formatDateTime } = useDateFormat()

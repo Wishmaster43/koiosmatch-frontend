@@ -77,6 +77,7 @@ function mixHex(a: string, b: string, amount: number): string {
  */
 const ACCENT_TEXT_TARGET = 5.5
 
+// Darkens/lightens the brand colour just enough to clear the target contrast against its surface, stepping in 2% increments so the hue stays recognisable instead of overshooting.
 export function readableAccentText(brand: string, surface: string, target = ACCENT_TEXT_TARGET): string {
   if (contrastRatio(brand, surface) >= target) return brand
   // Move AWAY from the surface: darken on a light one, lighten on a dark one.
@@ -155,6 +156,7 @@ export function applyBrandTokens(brand: string | null | undefined, brandText: st
   }
 }
 
+// Applies the tenant's brand tokens to <html> on mount and keeps them synced with theme changes; settings.brand_color wins over the auth tenant payload.
 export function useTenantTheme(tenant?: { primary_color?: string | null; text_color?: string | null } | null): void {
   const settings = useAllSettings()
   // The Branding form saves settings.brand_color; some tenant payloads carry
@@ -166,6 +168,7 @@ export function useTenantTheme(tenant?: { primary_color?: string | null; text_co
   // tenant.text_color from /auth/me); otherwise it is derived from real contrast.
   const brandText = (settings?.brand_text_color as string | undefined) ?? tenant?.text_color ?? undefined
 
+  // (Re)applies the brand tokens whenever the theme flips (data-theme attribute or OS preference), since the readable accent depends on the surface it sits on; resets on unmount so the next tenant starts clean.
   useEffect(() => {
     const root = document.documentElement
 

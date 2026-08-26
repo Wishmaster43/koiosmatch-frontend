@@ -36,6 +36,7 @@ interface Args {
   hasApplications: boolean; setHasApplications: Dispatch<SetStateAction<boolean>>
 }
 
+// Pure builder for the 7-donut + 2-KPI insights config (see the module doc above): no hooks/state, everything arrives as arguments.
 export function buildVacancyInsightsConfig({
   t, navigate, statusData, ownerData, clientData, categoryData, publishedData, funnelData, agentData,
   statusBucket, setStatusBucket, selectedOwner, pickOwner, clearOwner, selectedClient, pickClient, clearClient,
@@ -74,7 +75,7 @@ export function buildVacancyInsightsConfig({
     // VAC-KPI-REDESIGN 22-07: AI-agent donut (NEW). A real-agent segment sets
     // ?agent_id=; the "Geen agent" segment (key '__none') is the same quick view as
     // the toolbar toggle/KPI card — see agentData's honest-gate comment in
-    // useVacancyInsights.ts for why this still falls back to page-scope counts.
+    // useVacancyInsights.ts for why this still falls back to page-scope counts
     // pickAgentSegment is the pure resolver (insightPicks.ts) so the mutually-
     // exclusive agent_id/without_agent toggle is unit-tested.
     { key: 'agent', title: t('insights.agentTitle'), data: agentData,

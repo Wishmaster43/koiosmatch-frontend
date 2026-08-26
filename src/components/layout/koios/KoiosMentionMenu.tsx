@@ -155,6 +155,7 @@ function CategoryRow({ label, desc, onPick, optionId, highlighted }: {
   )
 }
 
+// See the file's top doc above for the two modes; wrapped in forwardRef below so the composer can imperatively drive keyboard navigation.
 function KoiosMentionMenu({
   query, counts, activeCategoryId, activeCategoryLabel, onPickCategory, onPickEntity, t, locale, menuRef,
   onActiveOptionChange, onOpenChange,
@@ -250,6 +251,7 @@ function KoiosMentionMenu({
   // Report the highlighted row's id up so KoiosPanel can point the textarea's
   // aria-activedescendant at it — a real cross-component sync, hence an effect.
   const activeOption = highlightedIndex >= 0 ? options[highlightedIndex] : undefined
+  // Reports the highlighted option id up so the composer can point aria-activedescendant at it.
   useEffect(() => {
     onActiveOptionChange?.(activeOption?.id ?? null)
   }, [activeOption?.id, onActiveOptionChange])
@@ -280,6 +282,7 @@ function KoiosMentionMenu({
   // composer's aria-expanded/aria-controls/aria-activedescendant only ever
   // describe a menu that is truly in the DOM (KOIOS-SEARCH-FIX-2).
   const willRender = scoped || defaultSearchActive || categories.length > 0
+  // Reports whether the menu is actually about to render, so the composer aria-expanded/-controls only ever describe a menu truly in the DOM.
   useEffect(() => {
     onOpenChange?.(willRender)
   }, [willRender, onOpenChange])
@@ -287,7 +290,7 @@ function KoiosMentionMenu({
   if (!willRender) return null
 
   return (
-    // HUISSTIJL-1: dropdown menu — z-popover ladder tier, shadow-float role.
+    // HUISSTIJL-1: dropdown menu — z-popover ladder tier, shadow-float role
     // role="listbox": every pickable row below is role="option" (group
     // headings stay presentational); aria-activedescendant lives on the
     // textarea in KoiosPanel, not here.

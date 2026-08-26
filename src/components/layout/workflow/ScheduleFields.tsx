@@ -1,23 +1,3 @@
-/**
- * ScheduleFields — the recurrence editor of the trigger modal: the frequency
- * row (interval · daily · weekly · monthly · quarterly · yearly) plus the detail
- * fields belonging to the chosen frequency.
- *
- * WORKFLOW-SCHEMA-1: every frequency except interval now shares the SAME
- * times-list editor (up to 12 H:i moments) — the backend contract applies
- * `times` uniformly, it no longer singles daily out with an array while the
- * rest carry one `time`. Weekly adds an ISO-weekday (Monday=1..Sunday=7)
- * multi-select above the times; monthly/quarterly add a day-of-month picker;
- * yearly adds both a month picker and a day-of-month picker. Interval keeps its
- * own single "every N minutes" field (5-10080, the contract's own bounds).
- *
- * Its own file because it is the one big, self-contained section of the modal —
- * roughly a third of the markup — and it renders only for the `scheduled`
- * trigger type. It takes the whole form object as ONE prop (state lives in
- * useScheduleForm at modal level, so the user's input survives switching the
- * trigger type back and forth) and reads its own `t`/locale, so nothing is
- * threaded through.
- */
 import { useId } from 'react'
 import { useTranslation } from 'react-i18next'
 import { X } from 'lucide-react'
@@ -42,6 +22,26 @@ const ACCENT = 'var(--color-primary)'
 // ISO weekdays, Monday-first (1..7) — matches the contract's own numbering.
 const ISO_WEEKDAYS = [1, 2, 3, 4, 5, 6, 7]
 
+/**
+ * ScheduleFields — the recurrence editor of the trigger modal: the frequency
+ * row (interval · daily · weekly · monthly · quarterly · yearly) plus the detail
+ * fields belonging to the chosen frequency.
+ *
+ * WORKFLOW-SCHEMA-1: every frequency except interval now shares the SAME
+ * times-list editor (up to 12 H:i moments) — the backend contract applies
+ * `times` uniformly, it no longer singles daily out with an array while the
+ * rest carry one `time`. Weekly adds an ISO-weekday (Monday=1..Sunday=7)
+ * multi-select above the times; monthly/quarterly add a day-of-month picker;
+ * yearly adds both a month picker and a day-of-month picker. Interval keeps its
+ * own single "every N minutes" field (5-10080, the contract's own bounds).
+ *
+ * Its own file because it is the one big, self-contained section of the modal —
+ * roughly a third of the markup — and it renders only for the `scheduled`
+ * trigger type. It takes the whole form object as ONE prop (state lives in
+ * useScheduleForm at modal level, so the user's input survives switching the
+ * trigger type back and forth) and reads its own `t`/locale, so nothing is
+ * threaded through.
+ */
 export function ScheduleFields({ form }: { form: ScheduleForm }) {
   const { t, i18n } = useTranslation('workflows')
   const locale = i18n.language

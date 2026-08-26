@@ -25,7 +25,7 @@ export interface VacancyAdviceOptions {
 
 const NONE_RULE: VacancyAdviceRule = { action: 'none', reasonKey: 'koios.reasons.none' }
 
-// First-match-wins priority ladder — see the file header for the read-set constraint.
+// First-match-wins priority ladder  for the read-set constraint.
 export function deriveVacancyAdvice(v: Vacancy, opts: VacancyAdviceOptions): VacancyAdviceRule {
   // Rule 1: no advice on an archived vacancy — it is no longer being worked.
   if (v.archived) return NONE_RULE

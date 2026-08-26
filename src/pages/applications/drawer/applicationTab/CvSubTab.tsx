@@ -13,6 +13,8 @@ import type { ApplicationDetail } from '@/types/application'
 
 interface CvSubTabProps { application: ApplicationDetail }
 
+// Every CV-themed block for this application, each honest-gating its own
+// loading/empty/error state (see file doc for what each block covers).
 export default function CvSubTab({ application: a }: CvSubTabProps) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>

@@ -42,6 +42,7 @@ const draftFromEntry = (entry?: BillingBudgetEntry): PackageDraft => ({
   whatsapp_token_budget: entry?.whatsapp_token_budget != null ? String(entry.whatsapp_token_budget) : '',
 })
 
+// See the file's top doc above; superadmin package/tenant budget editor with the SaveButton optimistic-confirm pattern.
 export default function BillingBudgetsCard() {
   const { t } = useTranslation('settings')
   const { formatCurrency } = useNumberFormat()

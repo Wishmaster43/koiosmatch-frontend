@@ -50,6 +50,8 @@ export interface InUseCountsDialogProps {
   archiving?: boolean
 }
 
+// The shared "still in use" dialog for a lost 409 delete race (see file docblock
+// above): lists every blocking relation and, when wired, an Archive escape hatch.
 export default function InUseCountsDialog({ open, counts, onClose, onArchive, archiving = false }: InUseCountsDialogProps) {
   const { t } = useTranslation('customers')
   const relationLabel = useRelationLabel()

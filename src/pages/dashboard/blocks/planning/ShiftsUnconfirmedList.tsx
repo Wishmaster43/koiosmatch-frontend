@@ -7,6 +7,7 @@ import WidgetListBlock from '@/pages/dashboard/blocks/WidgetListBlock'
 import { useDateFormat } from '@/lib/datetime'
 import type { ShiftUnconfirmedRow } from '@/types/dashboard'
 
+// Planning dashboard tile: see the module doc comment above.
 export default function ShiftsUnconfirmedList({ rows, onNavigate }: {
   rows: ShiftUnconfirmedRow[]
   onNavigate?: (page: string, params?: Record<string, unknown>) => void

@@ -69,6 +69,8 @@ function Group({ title, children }) {
 // Field faces come from fieldMetrics' canon (§4 2b) — never a local copy.
 const baseInput = fieldInputStyle
 
+// Thin wrapper over the shared field style (baseInput) so a call-site can layer its
+// own override on top without re-declaring the canon face.
 function Input({ value, onChange, placeholder, style }) {
   return (
     <input value={value ?? ''} onChange={e => onChange(e.target.value)} placeholder={placeholder}
@@ -114,6 +116,7 @@ const EMPTY = {
   company_language: 'nl', company_currency: 'Euro (€)', company_timezone: 'Europa/Amsterdam',
 }
 
+// Renders the company-profile form (see file docblock above) and owns its load/save state.
 export default function CompanySettings() {
   const { t } = useTranslation('settings')
   // Tenant-configurable industry options for the dropdown below.
@@ -133,6 +136,8 @@ export default function CompanySettings() {
   const [loading,    setLoading]    = useState(true)
   const bannerRef = useRef(null)
 
+  // Loads the saved company settings once on mount, migrating a legacy single-line
+  // address into the street field and normalising the language code.
   useEffect(() => {
     loadSettings().then(s => {
       setForm(f => ({
@@ -178,6 +183,8 @@ export default function CompanySettings() {
     }
   }
 
+  // User pressed save: persists the form (banner URL excluded, it is backend-owned)
+  // and flashes the saved state briefly for feedback.
   const save = async () => {
     setSaving(true)
     try {

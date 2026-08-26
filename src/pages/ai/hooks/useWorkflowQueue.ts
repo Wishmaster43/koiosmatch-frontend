@@ -37,8 +37,11 @@ export function useWorkflowQueue(workflowId?: string) {
   // a red error banner — the caller renders the honest "no access" empty state.
   const [forbidden, setForbidden] = useState(false)
   const [tick, setTick] = useState(0)
+  // Bump the tick to force the load effect below to refetch on demand.
   const retry = useCallback(() => setTick(v => v + 1), [])
 
+  // Load the queue snapshot for the tenant (or one workflow); a 403 degrades to
+  // the calm "forbidden" state instead of the red error banner (see file doc).
   useEffect(() => {
     let alive = true
     setLoading(true); setError(false); setForbidden(false)

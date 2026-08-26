@@ -24,6 +24,7 @@ interface ProfileDisplayTabProps {
   setLanguage: (lang: string) => void
 }
 
+// Display preferences tab (see the module doc above): owns only local dropdown-open state, everything else round-trips through the caller/hooks that actually persist it.
 export default function ProfileDisplayTab({ form, setForm, theme, setTheme, language, setLanguage }: ProfileDisplayTabProps) {
   const { t } = useTranslation('auth')
   const [langOpen, setLangOpen] = useState(false)

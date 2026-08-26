@@ -12,10 +12,14 @@ import { PopoutShell, TextPopoutEditor, useTextPopoutDraft } from '@/pages/popou
 import { useMatchTextLite, patchMatchText } from '../hooks/useMatchTextPopout'
 import { textPopoutTopic } from '@/lib/secondScreen'
 
+// Thin container: the match text on a second screen (TEKST-POPOUT-1 recipe, see
+// the module doc comment above) — identity/draft/save are all delegated to shared hooks.
 export default function MatchTextPopout({ id }: { id: string | undefined }) {
   const { t } = useTranslation('matches')
   const { match, loading, error, reload } = useMatchTextLite(id)
 
+  // Saves through the same PATCH /matches/{id} the drawer's own MatchTextBlock
+  // writes, so the popout and the drawer never drift onto two save paths.
   const persist = useCallback((html: string, revert: () => void) => {
     if (!id) return Promise.resolve(false)
     return patchMatchText(id, html, t, revert)

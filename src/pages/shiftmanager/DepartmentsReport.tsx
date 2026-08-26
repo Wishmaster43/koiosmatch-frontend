@@ -12,6 +12,8 @@ import KpiBlock from '@/components/ui/KpiBlock'  // shared KPI card
 import Spinner from '@/components/ui/Spinner'
 import { useSmCustomerTree } from '@/hooks/useSmCustomerTree'
 
+// Flattens the SM customer→location→department tree into one department list, derives
+// its KPI counts, and registers the customer filter with the shared right panel.
 export default function DepartmentsReport() {
   const { t } = useTranslation('shiftmanager')
   const { customers, loading } = useSmCustomerTree()
@@ -32,11 +34,15 @@ export default function DepartmentsReport() {
     )
   ), [customers])
 
+  // Distinct customer names across the flattened departments, for the customer filter's option list.
   const uniqueCustomers = useMemo(() =>
     [...new Set(departments.map(d => d.customer_name).filter((x): x is string => Boolean(x)))], [departments])
+  // Distinct location names, used for the "unique locations" KPI card below.
   const uniqueLocations = useMemo(() =>
     [...new Set(departments.map(d => d.location_name).filter((x): x is string => Boolean(x)))], [departments])
 
+  // Single search-select filter group (customer), in the shape the shared right
+  // panel expects; empty until the customer tree has loaded.
   const filterGroups = useMemo(() => uniqueCustomers.length === 0 ? [] : [{
     key: 'klant', label: t('departmentsReport.filterCustomer'), type: 'search-select',
     selected: selectedCustomers,
@@ -47,6 +53,8 @@ export default function DepartmentsReport() {
     onToggle: (v: string) => setSelectedCustomers(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]),
   }], [t, uniqueCustomers, selectedCustomers, departments])
 
+  // Register the customer filter with the shared right panel; unregister on unmount
+  // so it doesn't leak to other pages.
   useEffect(() => {
     registerFilters('departments-report', filterGroups)
     return () => unregisterFilters('departments-report')

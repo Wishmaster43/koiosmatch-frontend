@@ -15,6 +15,8 @@ import { useSeedLabel } from '@/lib/useSeedLabel'
 import type { MatchesByContractTypeRow } from '@/types/dashboard'
 import type { FeedTileContext } from '../feedTileKit'
 
+// Ops dashboard tile: matches broken down by contract type; see the module doc
+// comment above for why the 'none' slice drills broadly instead of by a filter value.
 export default function MatchesByContractTypeDonut({ rows, onNavigate }: {
   rows: MatchesByContractTypeRow[]
   onNavigate?: FeedTileContext['onNavigate']

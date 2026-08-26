@@ -98,6 +98,7 @@ export default function TenantSwitcher({ expanded }: { expanded?: boolean }) {
     return () => { document.removeEventListener('mousedown', onDoc); document.removeEventListener('keydown', onKey) }
   }, [open])
 
+  // Infinite-scroll trigger: loads the next page once the user nears the bottom of the tenant list.
   const onScroll = (e: UIEvent<HTMLDivElement>) => {
     const el = e.currentTarget
     if (!loading && page < lastPage && el.scrollHeight - el.scrollTop - el.clientHeight < 48) {
@@ -105,6 +106,7 @@ export default function TenantSwitcher({ expanded }: { expanded?: boolean }) {
     }
   }
 
+  // Switches the active tenant (no-op if already active); closes the picker and clears the search either way.
   const pick = async (tn: Tenant) => {
     if (tn.id === tenant?.id) { setOpen(false); return }
     setSwitching(tn.id)

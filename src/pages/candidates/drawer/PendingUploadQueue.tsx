@@ -49,6 +49,7 @@ interface PendingUploadQueueProps {
   onCancel: () => void
 }
 
+// The staged-file upload queue; purely presentational.
 export default function PendingUploadQueue({
   pending, docTypes, educations, certifications, languages, skills, references = [], onSetType, onSetAllTypes, onSetLink, onRemove, onUploadAll, onCancel,
 }: PendingUploadQueueProps) {

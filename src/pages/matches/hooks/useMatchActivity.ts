@@ -19,11 +19,15 @@ export interface MatchActivityEvent {
   [k: string]: unknown
 }
 
+// Fetches one match's changelog (see file docblock above) — mirrors the other
+// entities' own activity hooks so every changelog behaves identically (§3A).
 export function useMatchActivity(id?: Id): { items: MatchActivityEvent[]; loading: boolean; error: boolean } {
   const [items,   setItems]   = useState<MatchActivityEvent[]>([])
   const [loading, setLoading] = useState(false)
   const [error,   setError]   = useState(false)
 
+  // Fetches the activity log for the current match id, aborting the request (and
+  // ignoring its cancellation) on a fast id switch or unmount.
   useEffect(() => {
     if (!id) { setItems([]); return }
     const ctrl = new AbortController()

@@ -25,6 +25,7 @@ import { WORKFLOW_EVENT_KEYS } from './eventCatalog'
 import { DATE_RELATIVE_FIELDS } from './dateRelativeFieldOptions'
 import { normalizeScheduleConfig } from './scheduleLabel'
 
+// See the file's top doc above for the full set of values this hook owns and the legacy shapes it normalizes on load.
 export function useScheduleForm(
   trigger: string | undefined,
   scheduleConfig: ScheduleConfig | null | undefined,

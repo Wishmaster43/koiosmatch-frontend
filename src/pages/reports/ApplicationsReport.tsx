@@ -86,6 +86,7 @@ const KPI_COLOR: Partial<Record<string, string>> = {
     too_long_in_stage: 'var(--color-warning)', missing_appointment: 'var(--color-warning)',
 }
 
+// Merged applications report page (see the module doc above): composes the KPI band, axis charts and drill lade around useApplicationsReport's data.
 export default function ApplicationsReport({ period, filters = EMPTY_REPORT_FILTERS, compare = COMPARE_OFF }: { period: ReportPeriod; filters?: ReportFilterState; compare?: ReportCompareMode }) {
   const { t } = useTranslation('analytics')
   const { formatDate } = useDateFormat()

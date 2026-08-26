@@ -18,6 +18,7 @@ import { invalidateKoiosSettings } from '@/components/layout/koios/useKoiosSetti
 
 const notice = { fontSize: 13, color: 'var(--text-muted)' }
 
+// Koios AI settings screen (status/models/rates); a 403 degrades to a calm unavailable notice rather than an error (see file header).
 export default function KoiosSettings() {
   const { t } = useTranslation('koios')
   const locale = useLocale()

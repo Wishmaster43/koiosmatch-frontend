@@ -36,6 +36,7 @@ interface TransferRequiredBody {
   owned?: OwnedSummary
 }
 
+// Two-step soft-delete flow (see the module doc above): a 422 with requires_transfer opens the transfer dialog rather than reporting an error; any other 422 surfaces as a real failure.
 export function useUserDeletion(onDeleted: (userId: string) => void) {
   const { t } = useTranslation('users')
   // The user held back at the transfer gate (null = no dialog open).

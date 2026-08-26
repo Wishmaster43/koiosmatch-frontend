@@ -40,6 +40,7 @@ export interface WaMessageFilters {
   sort?: 'asc' | 'desc'
 }
 
+// The WhatsApp screen's whole data layer: stats, messages (with older-page loading), escalations and activity, each with its own error state.
 export function useWhatsAppData(filters: WaMessageFilters = {}) {
   const [stats,         setStats]         = useState<WaStats | null>(null)
   const [messages,      setMessages]      = useState<WaMessage[]>([])
@@ -143,6 +144,7 @@ export function useWhatsAppData(filters: WaMessageFilters = {}) {
   // fresh-but-equal array/object reference from the caller.
   const filtersSignature = JSON.stringify(filters)
   const didMount = useRef(false)
+  // Reload messages when the filters actually change, skipping the first run so the mount effect's own fetch isn't duplicated.
   useEffect(() => {
     if (!didMount.current) { didMount.current = true; return }
     reloadMessages()

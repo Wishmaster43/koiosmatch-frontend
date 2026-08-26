@@ -6,6 +6,7 @@
  */
 const REFERENCE_QUERY_RE = /^[A-Za-z]{1,3}-\d{2,}$/
 
+// True when the typed query looks like a reference number (prefix + at least 2 digits), so the header search does an exact ?ref= lookup instead of a free-text search.
 export function isReferenceQuery(query: string): boolean {
   return REFERENCE_QUERY_RE.test(query.trim())
 }

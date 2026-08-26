@@ -138,6 +138,9 @@ export const MODULE_PAGES: { id: string; label: string; soon?: boolean }[] = [
   { id: 'whatsapp',     label: 'WhatsApp'  },
 ]
 
+// Resolves the tenant's accessible page ids, in priority order: effective modules
+// (base package + add-ons), then the legacy package→pages map, then whatever the
+// backend already computed; null means "no restrictions configured".
 function accessiblePages(auth?: AuthLike | null): string[] | null {
   const tenant = auth?.activeTenant ?? auth?.user?.tenant ?? null
   // Derive from the tenant's effective modules (base package + add-ons); explicit
@@ -158,6 +161,8 @@ function accessiblePages(auth?: AuthLike | null): string[] | null {
   return null
 }
 
+// True when the tenant's own page list (above) includes this exact page id, or
+// when no restriction list exists at all.
 function hasAccess(pageId: string, auth?: AuthLike | null): boolean {
   const pages = accessiblePages(auth)
   if (pages === null) return true // no restrictions configured

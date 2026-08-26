@@ -62,6 +62,8 @@ const mapReferenceRelations = (res: AxiosResponse): ReferenceRelationOption[] | 
   return d.length ? d : null
 }
 
+// The tenant's reference-relation lookup (relation TOWARDS a referent, distinct
+// from emergency-contact relations), translated for seeded defaults.
 export function useReferenceRelations() {
   const { t } = useTranslation('common')
   const { data: rawRelations } = useCachedLookup(

@@ -75,6 +75,8 @@ interface SearchSelectProps {
   selectAll?: boolean
 }
 
+// Searchable multi-select trigger + portalled popover — the shared component every
+// picker uses instead of a native <select> (§3A canon).
 export default function SearchSelect({
   triggerLabel, options = [], selected = [], onToggle, searchable = true, width = 280, onSearch, renderTrigger, menuAlign = 'left', closeOnToggle = false, disabled = false, selectAll, triggerAriaLabel,
 }: SearchSelectProps) {
@@ -90,8 +92,11 @@ export default function SearchSelect({
   // Shared flip + clamp + rect placement (see the module doc comment above).
   const { openUp, maxHeight: menuMaxHeight, rect } = useDropdownPlacement(ref, open)
 
+  // Close the popover on an outside click; the portalled menu counts as "inside" too,
+  // or toggling an option would immediately self-close before the click registers.
   useEffect(() => {
     if (!open) return
+    // Ignore clicks inside the trigger or the portalled menu; anything else closes the popover.
     const h = (e: MouseEvent) => {
       const target = e.target as Node
       if (ref.current?.contains(target) || menuRef.current?.contains(target)) return
@@ -120,6 +125,8 @@ export default function SearchSelect({
   // when some other element already claimed focus — same rule CreatableSelect
   // documents for the identical situation; never a second behaviour for one idiom.
   const wasOpenRef = useRef(false)
+  // Only the open→closed transition matters here, and only when focus fell all the
+  // way to <body> — if something else already claimed it, that choice is left alone.
   useEffect(() => {
     if (wasOpenRef.current && !open && (document.activeElement === document.body || document.activeElement == null)) {
       ref.current?.querySelector<HTMLElement>('button, [tabindex]:not([tabindex="-1"])')?.focus()

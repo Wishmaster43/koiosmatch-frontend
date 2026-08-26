@@ -34,6 +34,7 @@ interface WaConversationPanelProps {
 const nameOf = (m: WaMessage) => [m.candidate?.first_name, m.candidate?.last_name].filter(Boolean).join(' ')
   || [m.customer_contact?.first_name, m.customer_contact?.last_name].filter(Boolean).join(' ')
 
+// Read-only conversation detail panel anchored on the clicked message row (see nameOf above for the candidate/contact name fallback).
 export default function WaConversationPanel({ message, onClose }: WaConversationPanelProps) {
   const { t } = useTranslation('settings')
   // Per-namespace hooks (not an { ns } option) so the static key check resolves each key.

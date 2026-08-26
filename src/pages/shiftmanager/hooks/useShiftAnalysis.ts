@@ -96,6 +96,7 @@ export function useShiftAnalysis(contractForm?: string | null) {
   })
   const unavailable = error ? isServiceUnavailable(error) : false
 
+  // Normalises the raw shift feed and derives every filter/aggregate the analysis view needs, recomputed only when the feed or filter changes.
   const derived = useMemo(() => {
     const rawAll = (Array.isArray(data?.data) ? data.data : Array.isArray(data) ? data : []) as RawRow[]
     const now = new Date()

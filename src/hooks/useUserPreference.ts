@@ -23,6 +23,8 @@ import { useCallback, useState } from 'react'
 import api from '@/lib/api'
 import { useAuth } from '@/context/AuthContext'
 
+// One key inside the user's ui_preferences blob, read/written like local state; see
+// the module doc comment above for why a failed save never reverts the local value.
 export function useUserPreference<T>(key: string, fallback: T): [T, (next: T) => void] {
   const auth = useAuth()
   const user = auth?.user
@@ -35,7 +37,6 @@ export function useUserPreference<T>(key: string, fallback: T): [T, (next: T) =>
 
   const update = useCallback((next: T) => {
     // Optimistic + final: the UI never waits on the network, and a rejection
-    // below does not undo this — see the file header.
     setValue(next)
     const merged = { ...((user?.ui_preferences as Record<string, unknown> | null | undefined) ?? {}), [key]: next }
     api.put('/auth/me', { ui_preferences: merged })

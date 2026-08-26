@@ -36,6 +36,7 @@ interface Props {
   onRemoveSkill: (name: string) => void
 }
 
+// Required-skills list on the shared AddableSection idiom; wraps/unwraps a vacancy skill's plain string at this component's boundary since the persisted shape carries no id/level (see file header).
 export default function AdditionalSkillsSection({ skills, onAddSkill, onEditSkill, onRemoveSkill }: Props) {
   const { t } = useTranslation('vacancies')
   const fields = [{ key: 'name', label: t('details.addSkill') }]

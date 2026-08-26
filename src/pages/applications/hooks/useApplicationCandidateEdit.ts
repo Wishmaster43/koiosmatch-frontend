@@ -43,6 +43,7 @@ interface RawCandidateNameParts {
 
 const EMPTY_FORM: ApplicationCandidateForm = { firstName: '', middleName: '', lastName: '', functionTitle: '' }
 
+// Self-contained name/function editor for the application header (see the module doc above): fetches the raw candidate record once on edit-start so a Dutch tussenvoegsel never gets split/joined client-side.
 export function useApplicationCandidateEdit(
   candidateId: Id | null,
   onSaved?: (candidateId: Id, patch: { candidateName: string; candidateFunction: string }) => void,

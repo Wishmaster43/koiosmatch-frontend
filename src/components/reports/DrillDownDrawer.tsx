@@ -48,6 +48,7 @@ function formatDate(dateStr: string | null | undefined, locale: string) {
   return new Date(dateStr).toLocaleDateString(locale, { day: 'numeric', month: 'short', year: 'numeric' })
 }
 
+// One icon+label+value line; renders nothing at all when the value is empty, so a drilldown card never shows a dangling label with no data.
 function InfoRow({ icon: Icon, label, value, highlight }: { icon: LucideIcon; label: ReactNode; value?: ReactNode; highlight?: boolean }) {
   if (value === null || value === undefined || value === '') return null
   return (
@@ -63,6 +64,7 @@ function InfoRow({ icon: Icon, label, value, highlight }: { icon: LucideIcon; la
   )
 }
 
+// A right-hand drawer listing the candidates behind one report drilldown, optionally split into tabs, with a search box and a two-column-friendly width.
 export default function DrillDownDrawer({ title, subtitle, candidates = [], onClose, tabs, initialTab }: { title?: ReactNode; subtitle?: ReactNode; candidates?: ReportCandidate[]; onClose: () => void; tabs?: { key: string; label: ReactNode; candidates: ReportCandidate[]; title?: string }[]; initialTab?: string }) {
   const panelRef = useFocusTrap<HTMLDivElement>(onClose)
   const { t } = useTranslation('reports')

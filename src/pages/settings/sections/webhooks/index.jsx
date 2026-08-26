@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next'
 import OutgoingWebhooks from './OutgoingWebhooks'
 import IncomingWebhooks from './IncomingWebhooks'
 
+// The Webhooks section: outgoing/incoming sub-tabs.
 export default function WebhooksSettings() {
   const { t } = useTranslation('settings')
   const [tab, setTab] = useState('outgoing')

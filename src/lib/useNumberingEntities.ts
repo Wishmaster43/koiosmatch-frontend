@@ -59,6 +59,7 @@ function mapEntities(res: AxiosResponse): NumberingEntity[] | null {
   return rows.length ? rows : null
 }
 
+// All twelve numbering entities from the backend config, translating each seeded label while a tenant rename passes through as typed (see file header).
 export function useNumberingEntities() {
   const { t } = useTranslation('common')
   const { data: rawEntities, loading } = useCachedLookup('/numbering-entities', mapEntities, FALLBACK)

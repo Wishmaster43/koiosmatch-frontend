@@ -49,6 +49,8 @@ interface Props {
   onUpdate?: (id: MatchRow['id'], patch: Partial<MatchRow>) => void
 }
 
+// The "Beëindigen" confirm form: reason + effective date + optional note,
+// posting the exact terminate contract and surfacing 422s inline per field.
 export default function TerminateMatchModal({ match, onClose, onUpdate }: Props) {
   const { t } = useTranslation(['matches', 'common'])
   // Reason lookup — tenant-managed, no seed (see useMatchStopReasons doc comment).

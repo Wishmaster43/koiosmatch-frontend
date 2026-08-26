@@ -33,37 +33,37 @@ const slugify = (s) => {
 }
 
 // extraField (optional): { key, label, options: [{value,label}], default } —
-// renders one extra picker in the create modal plus a badge on the row.
+// renders one extra picker in the create modal plus a badge on the row
 // flagField (optioneel): { key, label, description } — a single boolean behaviour
 // flag (R-1b: is_closed/is_reached); checkbox in the modal + badge in the row. The
 // FLAG drives behaviour, never the slug — so tenant-own statuses work on the write
 // paths. flagFields (optional): array of flagField-shaped objects — MULTIPLE
 // independent behaviour flags on the same lookup (back-compat sugar exactly like
 // defaultField → defaultFields below); flagField stays supported as a one-element
-// shorthand for existing callers.
+// shorthand for existing callers
 // defaultField (optional): { key, label } — a SINGLETON flag (is_default and the
 // like), enforced by the backend model (at most one per lookup). Deliberately not a
 // modal field: a per-row DefaultToggle promotes that row and optimistically clears
 // every other row, so the UI mirrors the server's singleton without a refetch.
 // The shared DefaultToggle is undoable by default (DEFAULT-UNDO, Danny 04-08:
 // "je kan niet undo doen") — clicking the active pill clears the flag; setDefault
-// below flips true/false on the same per-id PUT route.
+// below flips true/false on the same per-id PUT route
 // entity (optioneel): scopes a shared lookup (e.g. /note-types) to one owning entity —
 // GET reads `?entity=X`, POST/PUT writes send `entity: X` so create/edit stay scoped
-// (mirrors NoteType::ENTITIES on the backend; NOTE-TYPES-2/3).
+// (mirrors NoteType::ENTITIES on the backend; NOTE-TYPES-2/3)
 // notFoundNotice (optioneel): a lookup requested from the backend but not deployed
 // yet 404s on GET — pass a calm i18n message and the editor shows it instead of an
 // empty list + live CRUD buttons that would silently fail (§3 no fake affordances).
-// Omitted (default), a 404 stays silently swallowed like every other lookup here.
+// Omitted (default), a 404 stays silently swallowed like every other lookup here
 // withValueSlug (optioneel): the SLUG-shaped lookups (SlugLookupController /
 // CustomerLookupController) validate `value` as REQUIRED on create — this editor only
 // ever sent name/label, so their "+ toevoegen" 422'd. Opt in and the create POST
-// carries a slug derived from the typed name; name-shaped lookups stay untouched.
+// carries a slug derived from the typed name; name-shaped lookups stay untouched
 // extraField.hideRowBadge (optioneel): suppresses extraField's own generic text
 // badge in the row — for a lookup that renders its extraField value a DIFFERENT
 // way (rowPrefix below), so the row never shows the same value twice (NATION-FLAG-1:
 // the flag prefix already conveys the country, a trailing "Netherlands" text chip
-// would be redundant clutter).
+// would be redundant clutter)
 // rowPrefix (optioneel): (item) => ReactNode, rendered right before the name/
 // ColorBadge — a small row-adornment hook for a lookup whose "extra" value needs
 // a bespoke glyph rather than the generic extraField/flagField/numberField badges
@@ -129,6 +129,7 @@ export default function StatusListEditor({ title, subtitle, endpoint, addLabel, 
 
   // Open the modal blank (create) or prefilled with an existing item (edit).
   const openCreate = () => { setEditing(null); setDraft(emptyDraft()); setShowModal(true) }
+  // Opens the modal prefilled from an existing item, seeding every optional field (icon/extra/number) from its current value or a sane default.
   const openEdit = (item) => {
     setEditing(item)
     // eslint-disable-next-line no-restricted-syntax -- DATA: fallback swatch colour for a lookup row without one stored yet, not UI chrome
@@ -165,6 +166,7 @@ export default function StatusListEditor({ title, subtitle, endpoint, addLabel, 
     } finally { setSaving(false) }
   }
 
+  // Confirms and deletes a row, blocked upfront when it is in use; a 409 from the server still keeps the row and flags it, since another change could have made it in-use meanwhile.
   const remove = (item) => {
     if (inUse(item)) return
     confirm(t('statusList.confirmDelete', { name: labelOf(item) }), async () => {
@@ -188,6 +190,7 @@ export default function StatusListEditor({ title, subtitle, endpoint, addLabel, 
     catch { setItems(previous); notifyError(t('statusList.saveFailed')) }
   }
 
+  // Optimistic per-row colour update; reverts to the previous colour on a failed save so the row never shows an unsaved value as persisted.
   const updateColor = async (item, color) => {
     const previous = items
     setItems(p => p.map(x => x.id === item.id ? { ...x, color } : x))

@@ -68,6 +68,7 @@ function RichTextFieldBlock({ value, onChange }: { value: string | undefined; on
   )
 }
 
+// Renders one generic add-form field by its FieldDef type; wraps in a disabled visual state and applies the label-switch/required-asterisk conventions.
 function FieldInput({ f, value, onChange, values, disabled, invalid }: {
   f: FieldDef; value: unknown; onChange: (v: string | boolean) => void; values: FormValues; disabled?: boolean
   // KAND-ACHTERGROND-VERPLICHT-1: true once a blocked Save flagged this required
@@ -165,6 +166,7 @@ export default function AddForm({ fields, onSave, onCancel, initial }: {
   // empty — cleared per-field the moment the user edits it (mirrors
   // AddCandidateModal's own `errors` state, the established convention).
   const [invalid, setInvalid] = useState<Record<string, boolean>>({})
+  // Update one field's value and clear its invalid flag now that the user has touched it.
   const set = (k: string, v: string | boolean) => {
     setValues(p => ({ ...p, [k]: v }))
     setInvalid(p => (p[k] ? { ...p, [k]: false } : p))

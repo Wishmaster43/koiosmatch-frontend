@@ -19,6 +19,7 @@ interface Props {
   locationPicker: ReactNode; departmentPicker: ReactNode; contactPicker: ReactNode
 }
 
+// Customer→location→department→contact cascade card; the customer is locked read-only when lockCustomerId is given, but every level below it stays editable and clearable (see file header).
 export default function ClientCascadeCard({
   lockCustomerId, lockCustomerName, clientId, onClientChange, customerOptions, locationPicker, departmentPicker, contactPicker,
 }: Props) {

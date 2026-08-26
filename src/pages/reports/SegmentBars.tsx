@@ -16,6 +16,9 @@ export interface SegmentBarItem {
   color: string | null
 }
 
+// The one shared horizontal-bar renderer for every inflow report (see file
+// docblock above) — renders exactly whatever label/value each segment carries,
+// including an orphaned-lookup row, with no special-casing.
 export default function SegmentBars({ items, max, onPick }: {
   items: SegmentBarItem[]
   max: number

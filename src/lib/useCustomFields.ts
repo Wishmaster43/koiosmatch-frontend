@@ -20,7 +20,7 @@ import api, { unwrapList, getActiveTenantId } from '@/lib/api'
 export type CustomFieldType = 'text' | 'number' | 'date' | 'boolean' | 'select' | 'textarea'
 
 // Every entity_type the unified /custom-fields endpoint whitelists
-// (CustomFieldDefinition::TABLE_FOR, koiosmatch-api routes/api/tenant/core-lookups.php).
+// (CustomFieldDefinition::TABLE_FOR, koiosmatch-api routes/api/tenant/core-lookups.php)
 // planning_* entries are skipped — the planning module isn't live yet.
 export type CustomFieldEntityType =
   | 'candidate' | 'application' | 'match' | 'vacancy' | 'task' | 'opportunity'
@@ -71,6 +71,7 @@ function pickLabel(l: Record<string, string> | undefined, lang: string, key: str
   return l[lang] ?? l[lang.split('-')[0]] ?? l.en ?? l.nl ?? Object.values(l)[0] ?? key
 }
 
+// Fetches + normalises one entity type's custom-field definitions.
 export function useCustomFields(entityType: CustomFieldEntityType) {
   const { i18n } = useTranslation()
   const cached = cacheByEntity.get(tenantEntityKey(entityType))

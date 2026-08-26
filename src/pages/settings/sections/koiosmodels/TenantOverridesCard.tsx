@@ -25,6 +25,7 @@ const NO_FLOOR = '' // maps to null — no floor set
 
 const EMPTY_OVERRIDE: KoiosTenantOverride = { allowed_flavors: null, min_flavor: null }
 
+// Card body: picks a tenant then edits its flavour floor/ceiling in a local draft, saved only on explicit Save.
 export default function TenantOverridesCard({ data, onSaved }: { data: KoiosModelsAdminData; onSaved: (patch: Partial<KoiosModelsAdminData>) => void }) {
   const { t } = useTranslation('settings')
   const tenants = useAuth()?.tenants ?? []
@@ -42,11 +43,13 @@ export default function TenantOverridesCard({ data, onSaved }: { data: KoiosMode
   ]
   const dirty = JSON.stringify(draft) !== JSON.stringify(data.tenants)
 
+  // Merges a partial patch into the currently selected tenant's draft override.
   const updateCurrent = (patch: Partial<KoiosTenantOverride>) => {
     if (!tenantId) return
     setDraft(d => ({ ...d, [tenantId]: { ...(d[tenantId] ?? EMPTY_OVERRIDE), ...patch } }))
   }
 
+  // Adds/removes one flavour from the current tenant's allowed ceiling; an empty result clears it entirely (null, not []).
   const toggleFlavor = (flavor: FlavorKey) => {
     if (!tenantId || !current) return
     const list = current.allowed_flavors ?? []
@@ -54,6 +57,7 @@ export default function TenantOverridesCard({ data, onSaved }: { data: KoiosMode
     updateCurrent({ allowed_flavors: next.length ? next : null })
   }
 
+  // Persists the whole draft map in one PATCH, syncs the parent's data, and flashes the shared saved-state for 2s.
   const save = async () => {
     setSaving(true); setError(null)
     try {

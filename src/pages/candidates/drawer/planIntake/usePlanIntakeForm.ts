@@ -55,6 +55,9 @@ export interface PlanIntakeFormOptions {
 // A real tenant location (vs. a lookup entry) is encoded with this prefix inside the ONE "where" select.
 const LOC_PREFIX = 'loc:'
 
+// Owns the whole plan-intake/appointment form state — type/when/duration/modality/
+// location/owner/vacancy — each defaulted from the tenant's lookups, or from the
+// existing record when editing one already booked.
 export function usePlanIntakeForm({
   candidateId, onClose, onCreated, existing, applicationId = null, defaultVacancyId = null,
   suggestedVacancyId = null, candidateOwnerId = null, mode = 'intake',
@@ -106,6 +109,8 @@ export function usePlanIntakeForm({
     // Koios suggestion seeds LAST — visible as a marked proposal, never a silent guess.
     return suggestedVacancyId ? String(suggestedVacancyId) : ''
   })
+  // A stored vacancy missing from the option list would render as a raw id
+  // otherwise, so fetch its title once and inject it as an extra option.
   useEffect(() => {
     if (!vacancyId || vacancyOptions.some(v => String(v.value) === String(vacancyId))) { setExtraVacancy(null); return }
     // AbortController (§9) — a fast vacancy-id switch must never let a stale

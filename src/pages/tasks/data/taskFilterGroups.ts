@@ -31,6 +31,7 @@ interface BuildArgs {
   linkTypeOptions: { value: string; count: number }[]
 }
 
+// Builds the tasks page's right-panel filter config.
 export function buildTaskFilterGroups({
   t, tog, selectedStatus, setSelectedStatus, selectedPriority, setSelectedPriority,
   selectedType, setSelectedType, selectedAssignee, setSelectedAssignee,

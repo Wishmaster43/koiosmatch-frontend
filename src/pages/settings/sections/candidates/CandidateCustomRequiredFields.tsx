@@ -26,6 +26,7 @@ import CollapsibleFieldsBlock from './CollapsibleFieldsBlock'
 import type { PhaseColumn } from './RequiredFieldsGroup'
 import { Caption } from '@/components/ui/typography'
 
+// Custom-field × phase required matrix; each toggle PATCHes the field definition itself (never the built-in fields setting) since that is what the backend guard actually reads (see file header).
 export default function CandidateCustomRequiredFields({ phases }: { phases: PhaseColumn[] }) {
   const { t } = useTranslation(['settings', 'candidates', 'common'])
   const { allFields, loading, invalidate } = useCustomFields('candidate')

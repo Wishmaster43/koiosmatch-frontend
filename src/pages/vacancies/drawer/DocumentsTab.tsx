@@ -130,6 +130,7 @@ export default function DocumentsTab({ vacancy: v }: { vacancy: VacancyDetail })
       return next
     })
   }
+  // Row-level checkbox toggle for the multi-select download; independent of the select-all above, which acts on the whole filtered set at once.
   const toggleSelectedRow = (key: string) => {
     setSelected(prev => { const next = new Set(prev); if (next.has(key)) next.delete(key); else next.add(key); return next })
   }

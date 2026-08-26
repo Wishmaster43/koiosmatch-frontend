@@ -225,6 +225,7 @@ export default function AddCustomerModal({ onClose, onCreate, onImported, users 
   // KLANT-ADRES-1: province list CASCADES on the picked country, same shared hook
   // (and same clear-on-mismatch behaviour) as the candidate's home address.
   const { provinces } = useProvinces(form.country)
+  // Clears the province the moment the resolved list for the newly picked country no longer contains it, so a stale country's previous province can never linger silently.
   useEffect(() => {
     if (form.province && !provinces.includes(form.province)) setForm(f => ({ ...f, province: '' }))
     // eslint-disable-next-line react-hooks/exhaustive-deps -- only react to the resolved province list changing, not every form edit
@@ -235,6 +236,7 @@ export default function AddCustomerModal({ onClose, onCreate, onImported, users 
   const { markTouched, fieldMessage, touchInvalidFields, hasFormatError } =
     useLiveFieldValidation(form, t, EMAIL_VALIDATORS, EMAIL_ERROR_KEYS)
 
+  // Generic field setter: updates the form, clears that field error/create-error, and invalidates any stale duplicate-check verdict so the next submit re-asks the server.
   const set = (k: keyof CustomerForm, v: string) => {
     setForm(f => ({ ...f, [k]: v }))
     if (errors[k]) setErrors(e => ({ ...e, [k]: false }))

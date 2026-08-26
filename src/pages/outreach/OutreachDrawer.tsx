@@ -63,6 +63,7 @@ const STATUS_COLOR: Record<string, string> = {
 interface UserLike { id?: Id; name?: string; firstname?: string; lastname?: string; email?: string }
 const userName = (u: UserLike): string => u.name || [u.firstname, u.lastname].filter(Boolean).join(' ') || u.email || '—'
 
+// Thin container: wires useOutreachDetail's data into the shared drawer shell and owns the Stats-to-Targets click-to-filter state shared by the two tabs.
 export default function OutreachDrawer({ id, createdAt, archived = false, archivedAt = null, fallbackName, fallbackStatus, onRestore, inTrash = false, pendingEraseAt = null, graceDays = null, onMarkDeletion, onUnmark, onClose, expanded = false, onToggleExpand }: {
   id: string | null
   createdAt?: string
@@ -116,6 +117,7 @@ export default function OutreachDrawer({ id, createdAt, archived = false, archiv
       ? [] : [{ value: String(detail?.owner?.id ?? ''), label: detail?.owner?.name ?? '' }]),
     ...users.map(u => ({ value: String(u.id), label: userName(u) })),
   ]
+  // Persists the picked owner (or clears it) for this campaign.
   const onOwnerChange = (v: string) => {
     if (!id) return
     const u = users.find(x => String(x.id) === v)

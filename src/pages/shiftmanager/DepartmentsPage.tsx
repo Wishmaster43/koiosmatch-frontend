@@ -14,6 +14,7 @@ import DepartmentDrawer from './DepartmentDrawer'
 import { useSmDepartments } from './hooks/useSmDepartments'
 import type { SmDepartmentRow } from '@/types/shiftmanager'
 
+// Thin container: reads the SM mirror, derives filter option lists + KPI totals, and composes the table + drawer.
 export default function DepartmentsPage() {
   const { t } = useTranslation('shiftmanager')
   // Data (fetch + transform) lives in the shared hook (§3).
@@ -31,10 +32,14 @@ export default function DepartmentsPage() {
   const toggle = (setter: Dispatch<SetStateAction<string[]>>) => (val: string) =>
     setter(prev => prev.includes(val) ? prev.filter(v => v !== val) : [...prev, val])
 
+  // Distinct status values present in the current department list, for the status filter.
   const statusOptions  = useMemo(() => [...new Set(departments.map(d => d.status).filter((x): x is string => Boolean(x)))].sort(), [departments])
+  // Same derivation for customer, for the customer filter.
   const customerOptions   = useMemo(() => [...new Set(departments.map(d => d.customer).filter((x): x is string => Boolean(x)))].sort(), [departments])
+  // Same derivation for location, for the location filter.
   const locationOptions = useMemo(() => [...new Set(departments.map(d => d.location).filter((x): x is string => Boolean(x)))].sort(), [departments])
 
+  // Assembles the right-panel filter groups (status/customer/location) from the derived option lists.
   const filterGroups = useMemo(() => [
     { key: 'status',  label: t('departmentsPage.filter.status'),
       options: statusOptions.map(s => ({ value: s, label: s })),
@@ -47,11 +52,13 @@ export default function DepartmentsPage() {
       selected: selLocations,  onToggle: toggle(setSelLocations) },
   ], [t, statusOptions, customerOptions, locationOptions, selStatuses, selCustomers, selLocations])
 
+  // Publishes the filter groups to the shared right panel, and unregisters them on unmount so a stale filter set doesn't linger after leaving this page.
   useEffect(() => {
     registerFilters('departments-page', filterGroups)
     return () => unregisterFilters('departments-page')
   }, [filterGroups, registerFilters, unregisterFilters])
 
+  // Client-side filter combining the picked status/customer/location chips with the free-text search across name/customer/location.
   const filtered = useMemo(() => {
     let rows = departments
     if (selStatuses.length)  rows = rows.filter(d => selStatuses.includes(d.status as string))

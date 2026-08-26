@@ -36,6 +36,7 @@ function hasWhatsappWebPagePermission(auth: ReturnType<typeof useAuth>): boolean
   return pagePerms.length === 0 || pagePerms.some((p) => nameOf(p) === 'page.whatsapp')
 }
 
+// The profile page container: form/avatar state + tab routing.
 export default function ProfilePage() {
   const { t } = useTranslation('auth')
   const { t: tSettings } = useTranslation('settings')

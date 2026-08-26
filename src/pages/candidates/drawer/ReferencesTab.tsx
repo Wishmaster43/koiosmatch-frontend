@@ -137,6 +137,9 @@ function ReferenceLetterLink({ doc, onPreview, onJump }: { doc: RelItem; onPrevi
   )
 }
 
+// Third-party references list (see file docblock above): add/edit/remove/verify
+// rows plus the reference-letter and linked-experience pickers, mirroring
+// EducationTab/CertificationsTab's own anatomy.
 export default function ReferencesTab({ items = [], onAdd, onEdit, onRemove, onVerify, documents = [], onJumpToDocuments, experiences = [], onReorder }: ReferencesTabProps) {
   const { t } = useTranslation('candidates')
   const { formatDate } = useDateFormat()

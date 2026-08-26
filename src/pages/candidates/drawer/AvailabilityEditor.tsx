@@ -24,6 +24,7 @@ function dmy(iso: string): string {
   return y && m && d ? `${d}-${m}-${y}` : iso
 }
 
+// Sub-tab for date+day-part availability exceptions (see the module doc above): the real API-backed hook drives add/remove, this file only renders the list and the add row.
 export default function AvailabilityEditor({ candidateId }: { candidateId?: Id }) {
   const { t } = useTranslation('candidates')
   const { entries, loading, error, add, remove, reload } = useCandidateAvailability(candidateId)

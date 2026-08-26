@@ -36,6 +36,7 @@ const PROVIDERS = [
 const inputStyle: CSSProperties = fieldInputStyle
 const labelStyle: CSSProperties = { fontSize: 12, fontWeight: 500, color: 'var(--text-muted)', marginBottom: 5, display: 'block' }
 
+// The signed-in user's personal mailbox connector (OAuth for Office 365/Gmail, manual form for SMTP), distinct from the tenant-wide sender in Settings (see file header).
 export default function ProfileEmailConnect() {
   const { t } = useTranslation('auth')
   // Data layer: connection state + the OAuth/SMTP connect flows and disconnect (§3).

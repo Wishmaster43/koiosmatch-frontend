@@ -10,6 +10,7 @@ import type { ReactNode } from 'react'
 import { ReportGridItem } from './ReportGrid'
 import { ReportSectionCard, ReportSectionCardBody, ReportSection } from './ReportSectionCard'
 
+// One report grid cell (title + chart) in the shared card shape; see the module doc comment above for the shared drill-drawer contract this replaced.
 export default function ReportChartCard({ title, chart, span }: {
   title: ReactNode   // the section heading (uppercase muted label)
   chart: ReactNode   // the chart/segment picker — owns its own click handlers

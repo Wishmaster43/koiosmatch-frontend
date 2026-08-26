@@ -26,6 +26,8 @@ interface Args {
   openCount: number; overdue: number; dueToday: number; completedCount: number
 }
 
+// Pure builder for the tasks KPI/insights strip (see file docblock above) —
+// plain data/callbacks in, the donuts/kpis config InsightsRow renders out.
 export function buildTaskInsights({
   t, statusData, priorityData, typeData,
   selectedStatus, setSelectedStatus, selectedPriority, setSelectedPriority, selectedType, setSelectedType,

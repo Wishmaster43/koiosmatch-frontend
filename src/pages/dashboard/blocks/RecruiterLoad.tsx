@@ -1,3 +1,12 @@
+import { useTranslation } from 'react-i18next'
+import { Block } from '../DashboardPrimitives'
+import Avatar from '@/components/ui/Avatar'
+import SoftChip from '@/components/ui/SoftChip'
+import { BodyText, Caption, Mono } from '@/components/ui/typography'
+import { initialsOf } from '@/lib/initials'
+import { interactive } from '@/lib/a11y'
+import type { RecruiterLoadRow } from '@/types/dashboard'
+
 /**
  * RecruiterLoad — K-173 fase 6, recruitment_manager only: one row per recruiter
  * in the order the server delivers (no client re-sort — the server's own
@@ -14,15 +23,6 @@
  * given. No server-side "norm" exists for the load bar, so it stays relative to
  * the busiest recruiter in the row set, as before.
  */
-import { useTranslation } from 'react-i18next'
-import { Block } from '../DashboardPrimitives'
-import Avatar from '@/components/ui/Avatar'
-import SoftChip from '@/components/ui/SoftChip'
-import { BodyText, Caption, Mono } from '@/components/ui/typography'
-import { initialsOf } from '@/lib/initials'
-import { interactive } from '@/lib/a11y'
-import type { RecruiterLoadRow } from '@/types/dashboard'
-
 export default function RecruiterLoad({ rows, onNavigate }: {
   rows: RecruiterLoadRow[]
   onNavigate?: (page: string, params?: Record<string, unknown>) => void

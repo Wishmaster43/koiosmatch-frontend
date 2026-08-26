@@ -29,6 +29,7 @@ export function useMatchTextLite(id: string | undefined) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
 
+  // Fetches the match identity/text and builds the window title from candidate+vacancy; stable via useCallback so the mount effect and the exposed reload share one function.
   const load = useCallback(() => {
     if (!id) { setLoading(false); return }
     setLoading(true); setError(false)
@@ -44,6 +45,7 @@ export function useMatchTextLite(id: string | undefined) {
       .finally(() => setLoading(false))
   }, [id])
 
+  // Runs the fetch once on mount (and again whenever load is recreated by an id change).
   useEffect(() => { load() }, [load])
   return { match, loading, error, reload: load }
 }

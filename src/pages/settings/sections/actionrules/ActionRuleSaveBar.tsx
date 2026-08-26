@@ -16,6 +16,8 @@ interface ActionRuleSaveBarProps {
   onResetAll: () => void
 }
 
+// The action-rules dirty-state bar (see file docblock above): staged-change count,
+// a confirm-gated reset-to-default, and the one Save button.
 export default function ActionRuleSaveBar({ dirtyCount, saving, saved, onSave, onResetAll }: ActionRuleSaveBarProps) {
   const { t } = useTranslation('settings')
   const dirty = dirtyCount > 0

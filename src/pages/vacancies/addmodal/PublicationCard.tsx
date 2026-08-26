@@ -21,6 +21,8 @@ interface Props {
   applicationSettings: Record<string, unknown>; onSettingChange: (field: string, value: unknown) => void
 }
 
+// The create-time publication card: published flag, per-channel toggles (honest
+// "not live yet" notice) and the application-form field-visibility settings.
 export default function PublicationCard({ published, onPublishedChange, channels, onToggleChannel, applicationSettings, onSettingChange }: Props) {
   const { t } = useTranslation(['vacancies', 'common'])
 

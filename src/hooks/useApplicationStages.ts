@@ -53,6 +53,7 @@ const mapStages = (res: AxiosResponse): ApplicationStageOption[] | null => {
   return Array.isArray(rows) && rows.length ? rows.map(toStage) : null
 }
 
+// Tenant application-stage lookup with an i18n'd seed fallback; a tenant-created value stays exactly as typed.
 export function useApplicationStages() {
   const { t } = useTranslation('common')
   const { data: stagesRaw } = useCachedLookup('/application-stages', mapStages, DEFAULT_APPLICATION_STAGES)

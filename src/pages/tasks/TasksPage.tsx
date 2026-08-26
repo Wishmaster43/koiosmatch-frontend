@@ -56,6 +56,7 @@ export default function TasksPage({ intent }: { intent?: unknown } = {}) {
   )
 }
 
+// Inner page: everything but the lookups provider — filters/paging/selection state (mostly delegated to hooks, §0.3), seeded from a navigation intent, composing the insights/table/board + drawer.
 function TasksPageInner({ intent }: { intent?: unknown }) {
   const auth = useAuth()
   // Bulk archive (soft-delete, reversible → update-class gating; the backend re-checks).
@@ -133,6 +134,7 @@ function TasksPageInner({ intent }: { intent?: unknown }) {
        dueRange, setDueRange, showArchived, setShowArchived,
        statusData, priorityData, typeData, assigneeOptions, teamOptions, linkTypeOptions])
 
+  // Publishes the assembled filter groups to the shared right panel, and unregisters them on unmount/change so a stale filter set doesn't linger after leaving this page.
   useEffect(() => {
     registerFilters('tasks-page', filterGroups)
     return () => unregisterFilters('tasks-page')
@@ -181,6 +183,7 @@ function TasksPageInner({ intent }: { intent?: unknown }) {
     setArchivedTasks(prev => prev.map(x => x.id === id ? { ...x, ...stamp } : x))
     setSelected(prev => (prev && prev.id === id ? { ...prev, ...stamp } : prev))
   }
+  // Un-marking from the archived/trash view puts a row back to plain 'archived' locally, mirroring onTaskMarked's local reconcile above without a refetch.
   const onTaskUnmarked = (id: Id) => {
     const stamp = { lifecycle: 'archived', pendingEraseAt: null }
     setArchivedTasks(prev => prev.map(x => x.id === id ? { ...x, ...stamp } : x))

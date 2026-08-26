@@ -56,6 +56,7 @@ interface ScopedListTabProps<T> {
   defaultStatusLoaded?: boolean
 }
 
+// Config-driven read-only list body (search, optional status filter, optional add) shared by every department/location scoped sub-tab; a row click opens the real entity (see file header).
 export default function ScopedListTab<T>({
   queryKey, endpoint, paramName, id, mapRow, columns, searchKeys,
   searchPlaceholder, emptyText, loadingText, errorText, onRowClick, onAdd, addLabel,

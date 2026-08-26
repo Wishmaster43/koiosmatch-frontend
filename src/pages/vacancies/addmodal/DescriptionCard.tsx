@@ -18,6 +18,9 @@ interface Props {
   genFields: GenerateFormFields
 }
 
+// The vacancy description card (see file docblock above): a collapsed rich-text
+// block plus the Koios-generate flow, which seeds the draft into review, never a
+// silent overwrite.
 export default function DescriptionCard({ value, onChange, expanded, setExpanded, editing, setEditing, genFields }: Props) {
   const { t } = useTranslation(['vacancies', 'common'])
   // Apply a generated concept: seed the draft and open the editor — never a

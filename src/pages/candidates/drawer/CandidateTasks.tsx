@@ -92,6 +92,7 @@ export default function CandidateTasks(props: { candidateId: Id }) {
   )
 }
 
+// The actual tab body, rendered inside its own TaskLookupsProvider (see the wrapper above).
 function CandidateTasksBody({ candidateId }: { candidateId: Id }) {
   const { t } = useTranslation('candidates')
   const { formatDate } = useDateFormat()

@@ -42,6 +42,7 @@ const STATUS_STYLES: Record<string, { bg: string; color: string; dot: string }> 
   inactive: { bg: 'var(--color-warning-bg)', color: '#C2410C', dot: '#F97316' },
 }
 
+// One small pill for a workflow step's module type, with its icon and translated label; renders nothing for an unknown/missing type.
 function StepPill({ type }: { type?: string }) {
   const { t } = useTranslation('workflows')
   const meta = type ? MODULE_META[type] : undefined
@@ -60,6 +61,7 @@ function StepPill({ type }: { type?: string }) {
   )
 }
 
+// One card in the workflow list/board: status badge, step pills, and the run/edit/archive/restore/delete actions for that workflow.
 export default function WorkflowCard({ workflow, onRun, onEdit, canManageFolders, onArchive, onRestore, onMarkDeletion, onUnmark, graceDays = null }: WorkflowCardProps) {
   const { t } = useTranslation('workflows')
   const { formatDate, formatDateTime } = useDateFormat()

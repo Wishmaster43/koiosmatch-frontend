@@ -19,6 +19,7 @@ import AddOrderModal from './AddOrderModal'
 import { extractApiError } from '@/lib/extractApiError'
 import Button from '@/components/ui/Button'
 
+// Planning orders list + create/edit/delete, entirely real data (see the module doc comment above).
 export default function OrdersPanel() {
   const { t } = useTranslation('planning')
   const { orders, loading, error } = usePlanningOrdersList()

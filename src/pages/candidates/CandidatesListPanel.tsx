@@ -87,6 +87,7 @@ interface CandidatesListPanelProps {
   onMapClearRadius?: () => void
 }
 
+// Insights row, toolbar and table/map view for the candidates page; purely dumb rendering, all state and mutations arrive as props from CandidatesPage (see file header).
 export default function CandidatesListPanel({
   insightDonuts, insightKpis, statsFailed, total, loadedCount,
   actionMsg, onDismissMessage,

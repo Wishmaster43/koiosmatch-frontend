@@ -39,6 +39,7 @@ const mapOutreachOutcomes = (res: AxiosResponse): LookupOption[] | null => {
   return Array.isArray(rows) && rows.length ? rows.map(toOption) : null
 }
 
+// The outreach-outcome tenant lookup, translating seeded defaults into the user language while a tenant's own value stays exactly as typed.
 export function useOutreachOutcomes() {
   const { t } = useTranslation('common')
   // The endpoint now exists (item 11) — a real 404 should surface in the dev log again.

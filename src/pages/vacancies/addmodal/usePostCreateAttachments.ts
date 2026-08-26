@@ -21,6 +21,9 @@ export interface PendingFile { id: string; file: File; name: string; status: Att
 // tick must never collide — mirrors useEntityDocuments' documented tempDocSeq lesson).
 let pendingSeq = 0
 
+// Holds pending documents + one note before the vacancy exists, then runs them
+// in order (documents, then note) right after create returns a real id (see file
+// docblock above), reporting per-item failure without rolling anything back.
 export function usePostCreateAttachments() {
   const { t } = useTranslation(['vacancies', 'common'])
   const [files, setFiles] = useState<PendingFile[]>([])

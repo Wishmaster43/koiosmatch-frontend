@@ -34,6 +34,7 @@ const INPUT = { ...fieldInputStyle,
 
 interface Props { shift: PlanningBoardShift; onClose: () => void }
 
+// Live drawer for one shift: the currently assigned roster (unassign / cancel-with-reason / checkout) plus the eligible-candidate pool to assign from; every mutation hits the real API (see the module doc above).
 export default function ShiftStaffingDrawer({ shift, onClose }: Props) {
   const { t } = useTranslation('planning')
   const { formatDateTime } = useDateFormat()
@@ -56,6 +57,7 @@ export default function ShiftStaffingDrawer({ shift, onClose }: Props) {
   // a cancelled row still shows for the record but its spot is already freed.
   const active = shift.assigned.filter(a => a.status !== 'cancelled' && a.status !== 'no_show')
 
+  // Assigning clears any previous error first so a retry doesn't leave a stale message showing.
   const handleAssign = (candidateId: string) => {
     setError('')
     assign.mutate(candidateId, {
@@ -63,12 +65,14 @@ export default function ShiftStaffingDrawer({ shift, onClose }: Props) {
     })
   }
 
+  // Unassigning follows the same clear-error-then-mutate pattern as assign.
   const handleUnassign = (scheduleId: string) => {
     setError('')
     unassign.mutate(scheduleId, { onError: err => setError(extractApiError(err, t('staffing.unassignError'))) })
   }
 
   const startCancel = (scheduleId: string) => { setCancelling(scheduleId); setCancelReason(''); setError('') }
+  // Cancellation requires a reason (enforced by the disabled submit button); on success it closes the inline cancel form.
   const submitCancel = (scheduleId: string) => {
     if (!cancelReason) return
     setError('')
@@ -78,9 +82,11 @@ export default function ShiftStaffingDrawer({ shift, onClose }: Props) {
     })
   }
 
+  // Seeds the checkout form with the shift's planned start/end so the recruiter only has to correct what actually differed.
   const startCheckout = (scheduleId: string) => {
     setCheckingOut(scheduleId); setActualStart(shift.startTime ?? ''); setActualEnd(shift.endTime ?? ''); setActualBreak(''); setError('')
   }
+  // Checkout requires both actual start and end; on success it records the server-computed hours so the row can show them without a refetch.
   const submitCheckout = (scheduleId: string) => {
     if (!actualStart || !actualEnd) return
     setError('')

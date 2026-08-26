@@ -76,6 +76,8 @@ export interface SegmentedControlProps {
   showActiveCheck?: boolean
 }
 
+// A radiogroup of soft-tint option cards/pills with roving-tabindex keyboard
+// support; renders the §4 tint (or an exact activeFill pastel) plus the active check.
 export default function SegmentedControl({ options, value, onChange, color = 'var(--color-primary)', ariaLabel, size = 'default', activeOnly = false, activeFill, activeInk = 'var(--color-on-success-bg)', commitOnFocus = true, showActiveCheck = true }: SegmentedControlProps) {
   const refs = useRef<Array<HTMLButtonElement | null>>([])
   // Roving-focus index for commitOnFocus=false: arrows park here; Enter/Space

@@ -44,13 +44,13 @@ interface OpportunityDescriptionBlockProps {
   onSave: (html: string) => void
 }
 
+// MatchTextBlock's pop-out/edit idiom.
 export default function OpportunityDescriptionBlock({ opportunityId, value, onSave }: OpportunityDescriptionBlockProps) {
   const { t } = useTranslation('opportunities')
   const [editing, setEditing] = useState(false)
   const [expanded, setExpanded] = useState(false)
   const [draft, setDraft] = useState(value)
-  // What the read-only branch shows — see the file header for why this is
-  // tracked separately from the `value` prop.
+  // What the read-only branch shows  for why this is tracked separately from the `value` prop.
   const [shown, setShown] = useState(value)
   useEffect(() => { setShown(value); setDraft(value) }, [value])
 

@@ -50,6 +50,8 @@ const searchWrap = {
 } as const
 const searchInput = { flex: 1, border: 'none', background: 'transparent', outline: 'none', fontSize: 12, color: 'var(--text)' } as const
 
+// The customer's price agreements list (Prijsafspraken sub-tab) plus the
+// Facturatie sub-tab (billing settings + the customer's own invoice address).
 export default function PriceAgreementsTab({ customerId, c, onSave }: { customerId?: Id; c?: Customer; onSave?: (values: Record<string, unknown>) => void }) {
   const { t, i18n } = useTranslation('customers')
   const { agreements, loading, error, reload, add, update, remove } = usePriceAgreements(customerId)

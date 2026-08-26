@@ -25,6 +25,7 @@ interface DictationTextareaProps {
   style?: CSSProperties
 }
 
+// A plain textarea plus a dictation (speech-to-text) affordance, sharing one onChange path for typed and dictated input.
 export default function DictationTextarea({ value, onChange, placeholder, rows = 3, autoFocus, style, ...aria }: DictationTextareaProps) {
   return (
     <div>

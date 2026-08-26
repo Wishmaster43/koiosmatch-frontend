@@ -10,6 +10,7 @@
 import { useTranslation } from 'react-i18next'
 import StatusListEditor from './StatusListEditor'
 
+// Thin config wrapper around the shared StatusListEditor for the appointment-location lookup; colour, reorder and the default singleton all come from that shared editor (see file header).
 export function AppointmentLocationSettings() {
   const { t } = useTranslation('settings')
   return (

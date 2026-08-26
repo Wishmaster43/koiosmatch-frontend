@@ -31,6 +31,7 @@ import { useAuth } from '@/context/AuthContext'
 import { resolveRetentionConsent } from './retentionConsent'
 import { useRetentionConsentMonths } from './useRetentionConsentMonths'
 
+// See the file's top doc above; the retention opt-in toggle plus its consent/expiry facts, gated on the tenant validity-window lookup.
 export default function RetentionConsentBlock({ optIn, consentAt, expiresAt, onToggle }: RetentionConsentBlockProps) {
   const { t } = useTranslation('candidates')
   const { formatDate } = useDateFormat()

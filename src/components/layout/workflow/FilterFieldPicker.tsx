@@ -19,6 +19,7 @@ import { splitFieldFormat, joinFieldFormat, DISPLAY_AS_OPTIONS } from './fieldFo
 
 export interface FilterFieldPickerOption { value: string; label: string }
 
+// The field-path + "Toon als" (display format) pair for one filter condition row.
 export function FilterFieldPicker({ value, onChange, options }: {
   value: string
   onChange: (next: string) => void

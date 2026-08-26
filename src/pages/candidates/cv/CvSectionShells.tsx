@@ -12,6 +12,7 @@ import { View, Text } from '@react-pdf/renderer'
 import type { ReactNode } from 'react'
 import type { CvStyles } from './cvStyles'
 
+// Tinted sidebar column shell; `first` swaps in the top-most label's own style.
 export function SideSection({ label, first, S, children }: { label: ReactNode; first?: boolean; S: CvStyles; children?: ReactNode }) {
   return (
     <View style={S.sideBlock}>
@@ -21,6 +22,7 @@ export function SideSection({ label, first, S, children }: { label: ReactNode; f
   )
 }
 
+// White main-column section shell, with the title + underline rule.
 export function MainSection({ label, S, children }: { label: ReactNode; S: CvStyles; children?: ReactNode }) {
   return (
     <View style={S.mainBlock}>

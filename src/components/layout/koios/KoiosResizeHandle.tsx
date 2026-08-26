@@ -19,6 +19,8 @@ interface KoiosResizeHandleProps {
   t: TFn
 }
 
+// Purely presentational drag/keyboard resize edge — renders the WAI-ARIA
+// separator semantics and wires the handlers; all logic lives in useKoiosPanelWidth.
 export default function KoiosResizeHandle({ width, minWidth, maxWidth, onPointerDown, onKeyDown, t }: KoiosResizeHandleProps) {
   return (
     <div

@@ -14,6 +14,7 @@ import type { KoiosMode } from '@/pages/auth/shared'
 
 const MODES: KoiosMode[] = ['wizard', 'auto']
 
+// Compact Wizard/Auto pill for the note popup's assist header; renders nothing until the shared per-user mode has loaded, to avoid flashing the wrong mode.
 export default function NoteKoiosModeToggle() {
   const { t } = useTranslation('common')
   const koios = useMyKoiosMode()

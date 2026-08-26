@@ -25,6 +25,7 @@ export const FEATURE_TYPE = 'whatsapp_business_app_onboarding'
 // Load the SDK once per session (module-level promise — a second wizard mount
 // must never inject a second script tag).
 let sdkPromise: Promise<FacebookSdk> | null = null
+// Injects Meta's SDK script exactly once per session (module-level promise, see the module doc above), resolving once fbAsyncInit fires or rejecting if window.FB never appears.
 export function loadFacebookSdk(appId: string, version: string): Promise<FacebookSdk> {
   if (sdkPromise) return sdkPromise
   sdkPromise = new Promise<FacebookSdk>((resolve, reject) => {

@@ -59,6 +59,7 @@ function MiniWeightBars({ weights }) {
   )
 }
 
+// Match-weight template CRUD, rendering each dimension's weight as the small dot-bar built above.
 export default function MatchTemplatesSettings() {
   const { t } = useTranslation(['settings', 'vacancies'])
   const dimLabel = (d) => t(`vacancies:matching.dim.${d}`)

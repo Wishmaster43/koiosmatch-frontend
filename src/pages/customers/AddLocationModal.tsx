@@ -81,6 +81,7 @@ const API_TO_FORM: Record<string, string> = {
 const EMAIL_VALIDATORS = { email: isValidEmailFormat }
 const EMAIL_ERROR_KEYS = { email: 'validation.emailFormat' }
 
+// Create/edit modal for a customer location: address + contact fields, an optional CSV import path, and the province-cascade guard below.
 export default function AddLocationModal({
   onClose, onCreate, onImported, onAddContact, customerId, customerName, statuses = [], initial, existingContacts = [],
 }: {
@@ -189,6 +190,7 @@ export default function AddLocationModal({
   // cascade-clear behaviour as AddCustomerModal's own AddressCard) — a province from
   // the PREVIOUS country must never survive a country switch.
   const { provinces } = useProvinces(form.country)
+  // Clear a province that no longer exists in the new country's list, right after the cascade resolves.
   useEffect(() => {
     if (form.state && !provinces.includes(form.state)) setForm(f => ({ ...f, state: '' }))
     // eslint-disable-next-line react-hooks/exhaustive-deps -- only react to the resolved province list changing, not every form edit

@@ -56,6 +56,7 @@ const mapLevels = (res: AxiosResponse): EducationLevelOption[] | null => {
   return d.length ? d : null
 }
 
+// Tenant education-level lookup, keeping the real id alongside the display name since candidate_educations references it by id, never by name (see file header).
 export function useEducationLevels() {
   const { t } = useTranslation('common')
   const { data: rawLevels } = useCachedLookup('/education-levels', mapLevels, DEFAULT_EDUCATION_LEVELS)

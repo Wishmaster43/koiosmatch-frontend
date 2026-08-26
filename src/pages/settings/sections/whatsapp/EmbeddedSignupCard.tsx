@@ -23,6 +23,7 @@ import { useEmbeddedSignup } from './useEmbeddedSignup'
 
 const card = { border: '1px solid var(--border)', borderRadius: 10, padding: 16, marginBottom: 14, background: 'var(--surface)' } as const
 
+// See the file's top doc above for the three honest states (not-ready/ready/linked) this card renders.
 export default function EmbeddedSignupCard({ onLinked, canManage }: { onLinked?: () => void; canManage: boolean }) {
   const { t } = useTranslation('settings')
   const es = useEmbeddedSignup(onLinked)

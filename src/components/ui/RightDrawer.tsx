@@ -11,6 +11,7 @@ import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { PageTitle } from '@/components/ui/typography'
 import Button from '@/components/ui/Button'
 
+// See the file's top doc above; a dumb backdrop+focus-trap+header shell, callers render their own body as children.
 export default function RightDrawer({ title, subtitle, onClose, width = 480, children }: {
   title?: ReactNode; subtitle?: ReactNode; onClose: () => void; width?: number; children?: ReactNode
 }) {

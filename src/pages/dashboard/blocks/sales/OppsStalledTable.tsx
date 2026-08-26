@@ -15,6 +15,8 @@ import { useSeedLabel } from '@/lib/useSeedLabel'
 import type { OppStalledRow } from '@/types/dashboard'
 import type { FeedTileContext } from '../feedTileKit'
 
+// Full-width table of opportunities that have not moved in a while; a row click
+// deep-links into that opportunity's own drawer on the Opportunities page.
 export default function OppsStalledTable({ rows, onNavigate }: {
   rows: OppStalledRow[]
   onNavigate?: FeedTileContext['onNavigate']

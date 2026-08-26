@@ -1,10 +1,3 @@
-/**
- * JobsTab — Taakbeheer → Taken: the live pending/reserved backlog, filterable by
- * queue/tenant/status, with runtime for jobs currently being executed and a
- * cancel action for jobs that HAVEN'T started yet. A cancel can still race a
- * worker picking the job up between render and click — the resulting 409 is
- * shown inline with the backend's own explanation rather than swallowed.
- */
 import { useTranslation } from 'react-i18next'
 import { X } from 'lucide-react'
 import DataTable from '@/components/ui/DataTable'
@@ -18,6 +11,13 @@ import { tintBorder } from '@/lib/tint'
 
 const STATE_COLOR = { pending: 'var(--text-muted)', reserved: 'var(--color-warning)' }
 
+/**
+ * JobsTab — Taakbeheer → Taken: the live pending/reserved backlog, filterable by
+ * queue/tenant/status, with runtime for jobs currently being executed and a
+ * cancel action for jobs that HAVEN'T started yet. A cancel can still race a
+ * worker picking the job up between render and click — the resulting 409 is
+ * shown inline with the backend's own explanation rather than swallowed.
+ */
 export default function JobsTab() {
   const { t } = useTranslation('settings')
   const { filters, setFilter, page, setPage, result, phase, cancel, cancelError, setCancelError } = useJobsList()

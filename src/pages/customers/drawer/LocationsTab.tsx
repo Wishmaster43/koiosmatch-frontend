@@ -78,6 +78,8 @@ interface Props {
   onRemoveContact: (id: Id) => void
 }
 
+// The customer's locations as a searchable/filterable table; a row drills into
+// the editable LocationDetail, and this tab owns which one is open (for the pager).
 export default function LocationsTab({
   customerId, customerName, locations = [], departments = [], contacts = [], statuses = [], departmentStatuses = [], contactStatuses = [],
   canLinkBackoffice = false,

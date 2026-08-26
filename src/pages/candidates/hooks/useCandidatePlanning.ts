@@ -210,6 +210,7 @@ interface RawAvailability {
   status?: string; reason?: string
 }
 
+// Normalises a raw availability row: accepts any of the day-part field-name variants and falls back to the whole-day 'day' part for an unrecognised value.
 function toAvailability(row: RawAvailability): Availability {
   const raw = String(row.part ?? row.day_part ?? row.period ?? 'day').toLowerCase()
   const part: DayPart = raw === 'morning' || raw === 'afternoon' || raw === 'evening' ? raw : 'day'

@@ -47,6 +47,8 @@ interface Params {
   onUpdate: (id: Id, payload: Partial<ContactPayload>) => void
 }
 
+// Builds ContactsPanel's DataTable column set (see file docblock above), dropping
+// the location/department column that would be redundant inside that own scope.
 export function useContactsPanelColumns({ scope, scopeId, locationScope, locations, departments, onUpdate }: Params): Column<Contact>[] {
   const { t } = useTranslation('customers')
   const { labelOf: lastContactLabel, iconOf: lastContactIcon } = useLastContactTypes()

@@ -34,6 +34,7 @@ interface Props {
   onRemove: (id: Id) => void
 }
 
+// See the file's top doc above; a thin host around the one shared ContactsPanel, owning only which contact is open.
 export default function ContactsTab({
   contacts = [], locations = [], departments = [], statuses = [], customerId, canLinkBackoffice = false,
   onAdd, onUpdate, onRemove,

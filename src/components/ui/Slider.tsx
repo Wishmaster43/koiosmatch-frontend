@@ -33,6 +33,8 @@ interface SliderProps {
 
 const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v))
 
+// The shared house slider: single-thumb or two-thumb range mode from one component
+// (see the module doc comment above for the full mode contract).
 export default function Slider({
   value = 50, range, max = 100, step = 1, onChange, onRangeChange,
   labels = [], color = 'var(--color-primary)', ariaLabel, ariaLabels,
@@ -83,6 +85,8 @@ export default function Slider({
     }
   }, [valueFromClientX, onRangeChange, lower, upper])
 
+  // Pointer-down decides which thumb to grab for the rest of the drag; a collapsed
+  // (tied) range can't be resolved by distance, so it's deferred to the first move's direction.
   const onPointerDown = (e: ReactPointerEvent<HTMLDivElement>) => {
     e.currentTarget.setPointerCapture?.(e.pointerId)
     if (!range) { setFromClientX(e.clientX); return }
@@ -99,11 +103,11 @@ export default function Slider({
     }
     setRangeFromClientX(e.clientX, activeThumb.current)
   }
+  // Drags whichever thumb pointer-down picked, resolving a deferred tie by which
+  // side of the down-point the drag moved to.
   const onPointerMove = (e: ReactPointerEvent<HTMLDivElement>) => {
     if (e.buttons !== 1) return
     if (!range) { setFromClientX(e.clientX); return }
-    // Resolve a pending tie by drag direction: which side of the down-point did
-    // the pointer move to?
     if (pendingTieValue.current != null) {
       const next = valueFromClientX(e.clientX)
       if (next != null && next !== pendingTieValue.current) activeThumb.current = next > pendingTieValue.current ? 1 : 0

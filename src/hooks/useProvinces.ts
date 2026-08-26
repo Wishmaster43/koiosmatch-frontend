@@ -32,6 +32,8 @@ import { NL_PROVINCES } from '@/pages/candidates/shared'
 // where empty meant "not seeded yet, keep the fallback".
 const mapProvinces = (res: AxiosResponse): string[] => lookupNames(res)
 
+// Tenant province lookup cascaded on country (see file docblock above); each
+// country gets its own cache slot so switching country never leaks a stale list.
 export function useProvinces(country: string = 'NL') {
   const cc = (country || 'NL').toUpperCase()
   // NL keeps its hardcoded seed (pre-fetch / offline grace); any other country

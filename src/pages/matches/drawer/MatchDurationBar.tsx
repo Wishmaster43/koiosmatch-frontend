@@ -13,6 +13,7 @@ interface Props {
   endDate: string | null | undefined
 }
 
+// Contract-duration label plus progress bar; renders nothing unless both start and end dates are set, an honest absence rather than a fake 0% bar (see file header).
 export default function MatchDurationBar({ startDate, endDate }: Props) {
   const { t } = useTranslation('matches')
   const duration = computeMatchDuration(startDate, endDate)

@@ -56,6 +56,8 @@ const EMPTY: EmergencyContactValues = {
   firstName: '', middleName: '', lastName: '', phone: '', mobile: '', relationId: '', relationLabel: '',
 }
 
+// The "Noodcontact" preference block (see file docblock above): collapsed read
+// line or split-field edit form, validating phone/mobile before Save ever sends.
 export default function EmergencyContactCard({ value, onSave }: {
   value: EmergencyContactValues
   onSave: (v: Record<string, unknown>) => void

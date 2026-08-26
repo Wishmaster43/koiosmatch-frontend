@@ -20,6 +20,7 @@ import { useId } from 'react'
 import { useTranslation } from 'react-i18next'
 import { labelLeftRow, rowLabel, rowField, errMsg } from './styles'
 
+// Label-left field row shared by the match form; supplies a stable labelId so a non-native picker trigger (a button) still gets a real accessible name (see file header).
 export function FormField({ label, error, children, labelId: labelIdProp }: {
   label: string
   error?: boolean

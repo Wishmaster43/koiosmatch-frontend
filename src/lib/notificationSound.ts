@@ -13,6 +13,8 @@ export function playNotificationChime(): void {
     const AudioCtx = window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext
     if (!AudioCtx) return
     const ctx = new AudioCtx()
+    // One oscillator blip: ramps its gain down to near-silence so the tone fades
+    // instead of clicking off abruptly.
     const playTone = (freq: number, startAt: number) => {
       const osc = ctx.createOscillator()
       const gain = ctx.createGain()

@@ -22,6 +22,7 @@ interface UsageDrilldownCardProps {
   onClose: () => void
 }
 
+// Single-day detail card (see the module doc above): renders only the figures that really exist on a merged row, never a fabricated per-activity split.
 export default function UsageDrilldownCard({ row, onClose }: UsageDrilldownCardProps) {
   const { t } = useTranslation('settings')
   const { formatNumber, formatCurrency } = useNumberFormat()

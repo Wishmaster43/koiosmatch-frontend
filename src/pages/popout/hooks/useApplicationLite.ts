@@ -24,6 +24,7 @@ interface RawApplicationLite {
   vacancy_title?: string
 }
 
+// Minimal candidate name + vacancy title for the notes popout header, reusing the full detail endpoint but never its heavy transform (see file header).
 export function useApplicationLite(id: string | undefined) {
   const { data: application = null, isLoading: loading, isError: error, refetch: reload } = useQuery({
     queryKey: ['applications', id, 'lite'],

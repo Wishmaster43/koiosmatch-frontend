@@ -14,6 +14,8 @@ import { fmtAxisDate } from './data/axisDate'
 // App-wide active locale (DATUM-1/LANE-B) — feeds the per-day axis label.
 import { useLocale } from '@/lib/datetime'
 
+// Daily inbound/outbound WhatsApp volume area chart (see file docblock above),
+// kept in its own file since it pulls the locale-aware axis date formatter.
 export default function ActivityChart({ data, loading }: { data: WaActivityDatum[]; loading?: boolean }) {
   const { t } = useTranslation('whatsapp')
   const locale = useLocale()

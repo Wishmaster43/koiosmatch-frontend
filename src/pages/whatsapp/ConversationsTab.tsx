@@ -34,6 +34,7 @@ import { buildConversationFilterGroups } from './data/conversationFilterGroups'
 const counterpartName = (row: WaConversationRow) =>
   row.candidate?.full_name || row.customer_contact?.full_name || row.owner?.name || row.wa_number || '—'
 
+// Bureau-wide WhatsApp inbox: a thread table plus a read-only thread drill-down; the real composer lives on the candidate/contact record, deep-linked from here.
 export default function ConversationsTab({ openConversationId }: { openConversationId?: string | null }) {
   const { t } = useTranslation('whatsapp')
   const { formatDateTime } = useDateFormat()
@@ -47,6 +48,7 @@ export default function ConversationsTab({ openConversationId }: { openConversat
   // responsive, but the PII-bearing GET /conversations request only fires
   // 300ms after the user stops typing.
   const [debouncedSearch, setDebouncedSearch] = useState('')
+  // Debounce the search value before it reaches the server-side filter (300ms after typing stops).
   useEffect(() => {
     const id = setTimeout(() => setDebouncedSearch(search), 300)
     return () => clearTimeout(id)
@@ -60,6 +62,7 @@ export default function ConversationsTab({ openConversationId }: { openConversat
   const filterGroups = useMemo(() => buildConversationFilterGroups({
     t, escalated, setEscalated, unanswered, setUnanswered, active, setActive, search, setSearch,
   }), [t, escalated, unanswered, active, search])
+  // Register this tab's own filter dimensions with the shared right-hand panel while it is active.
   useEffect(() => {
     registerFilters('whatsapp-conversations', filterGroups)
     return () => unregisterFilters('whatsapp-conversations')
@@ -72,6 +75,7 @@ export default function ConversationsTab({ openConversationId }: { openConversat
   // itself so the drawer opens instead of silently doing nothing.
   const [fallbackRow, setFallbackRow] = useState<WaConversationRow | null>(null)
   const inPage = selectedId != null && rows.some(r => r.id === selectedId)
+  // A deep-linked thread outside the loaded page: fetch it directly so the drawer still opens instead of doing nothing.
   useEffect(() => {
     if (selectedId == null || inPage) return
     let alive = true

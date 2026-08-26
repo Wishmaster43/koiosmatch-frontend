@@ -17,11 +17,13 @@ import { useTextPopoutDraft } from '@/pages/popout/shared'
 import { useContactTextLite, patchContactText } from '../hooks/useCustomerTextPopout'
 import { textPopoutTopic, parseContactPopoutId } from '@/lib/secondScreen'
 
+// Second-screen editor for one customer contact's free-text block; the composite id carries both the customer and contact ids the PATCH route needs.
 export default function CustomerContactTextPopout({ id }: { id: string | undefined }) {
   const { t } = useTranslation('customers')
   const parsed = parseContactPopoutId(id)
   const { contact, loading, error, reload } = useContactTextLite(parsed?.customerId, parsed?.contactId)
 
+  // Wraps the PATCH with the parsed customer/contact ids; resolves to false without one when the id is malformed.
   const persist = useCallback((html: string, revert: () => void) => {
     if (!parsed) return Promise.resolve(false)
     return patchContactText(parsed.customerId, parsed.contactId, html, t, revert)
@@ -33,6 +35,7 @@ export default function CustomerContactTextPopout({ id }: { id: string | undefin
     onSave: persist,
   })
 
+  // Sets the window/tab title to the contact's name while this popout is open, restoring the previous title on close.
   useEffect(() => {
     if (!contact) return
     const previous = document.title

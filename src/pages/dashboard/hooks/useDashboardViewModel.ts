@@ -45,6 +45,8 @@ interface UseDashboardViewModelArgs {
   onNavigate?: (page: string, params?: Record<string, unknown>) => void
 }
 
+// Derives every chart/list/KPI shape the dashboard renders from the raw server state;
+// For why this lives outside Dashboard.tsx.
 export function useDashboardViewModel({
   t, formatNumber, stats, opp, dash, dashCharts, statusMeta, funnelMeta, funnelTypes,
   activeType, hiddenBlocks, hiddenKpis, kpiOrder = {}, hasPlanning, valueInHours,
@@ -67,6 +69,7 @@ export function useDashboardViewModel({
   // value so a donut click still filters on it, never on the translated text.
   const statusData = useMemo(() =>
     (stats?.by_status ?? []).map(o => { const v = o.value ?? o.status; const m = statusMeta(v); return { name: seedLabel('statuses', { value: v, label: m.label }), value: o.count ?? 0, color: m.color, filterValue: v } }).filter(d => d.value) as ChartDatum[], [stats, statusMeta, seedLabel])
+  // Per-recruiter counts for the donut; filterValue keeps the raw owner id for click-to-filter.
   const recruiterData = useMemo(() =>
     (stats?.by_owner ?? []).map(o => ({ name: o.name || '—', value: o.count ?? 0, filterValue: o.id ?? o.owner_id })).filter(d => d.value) as ChartDatum[], [stats])
   // Funnel bars: EVERY lookup phase shows, also at 0 — the count-only mapping hid
@@ -77,6 +80,7 @@ export function useDashboardViewModel({
       name: seedLabel('funnelTypes', { value: f.value, label: f.label }), value: counts.get(String(f.value)) ?? 0, color: f.color, filterValue: f.value,
     })) as ChartDatum[]
   }, [dash, funnelTypes, seedLabel])
+  // Opportunity-stage counts for the sales donut; humanize() covers a stage without a label yet.
   const oppStageData = useMemo(() =>
     (opp?.by_stage ?? []).map(o => { const label = o.label ?? humanize(o.key); return { name: seedLabel('opportunityStages', { value: o.key, label }), value: Number(o.value ?? 0), color: o.color, filterValue: o.key } }).filter(d => d.value) as ChartDatum[], [opp, seedLabel])
 
@@ -89,6 +93,7 @@ export function useDashboardViewModel({
       status: seedLabel('statuses', { value: c.status_value, label: m.label }), statusColor: m.color, time: fmtWhen(c.last_activity_at, locale) }
   }), [dash, statusMeta, seedLabel, locale])
 
+  // Same lookup-backed mapping as recentCandidates above, for the applications feed.
   const recentApplications = useMemo(() => (dash?.recent?.applications ?? []).map(a => {
     const m = funnelMeta(a.stage_value)
     return { id: a.id, candidate: a.candidate_name || '—', vacancy: a.vacancy_title || '—',
@@ -109,6 +114,7 @@ export function useDashboardViewModel({
     onClick: m.id != null ? () => onNavigate?.('matches', { open: m.id }) : undefined,
   })), [dash, onNavigate, locale])
 
+  // Same WidgetListBlock row shape as expiringMatchesRows above, for stale (long-open) vacancies.
   const staleVacanciesRows = useMemo(() => (dash?.stale_vacancies ?? []).map((v, i) => ({
     key: v.id ?? v.title ?? `row-${i}`,
     primary: v.title || '—',
@@ -116,6 +122,7 @@ export function useDashboardViewModel({
     onClick: v.id != null ? () => onNavigate?.('vacancies', { open: v.id }) : undefined,
   })), [dash, onNavigate, locale])
 
+  // Same row shape again, for the Koios per-vacancy suggestion counts.
   const koiosSuggestionsRows = useMemo(() => (dash?.koios_suggestions ?? []).map((s, i) => ({
     key: s.vacancy_id ?? s.vacancy_title ?? `row-${i}`,
     primary: s.vacancy_title || '—',
@@ -131,10 +138,13 @@ export function useDashboardViewModel({
     status: humanize(l.status_value), statusColor: 'var(--color-secondary)', time: fmtWhen(l.created_at, locale),
   })), [dash, locale])
 
+  // Recent workflow-run rows for the Koios AI runs block; workflowNames goes through
+  // seedLabel so a tenant rename overrides the seeded default.
   const runs = useMemo(() => (dash?.ai_runs ?? []).map(r => ({
     name: r.name ? seedLabel('workflowNames', { label: r.name }) : '—', time: fmtWhen(r.ran_at, locale), ok: r.ok, n: r.processed, err: r.error,
   })), [dash, seedLabel, locale])
 
+  // Recent WhatsApp/chat rows for the conversations block.
   const conversations = useMemo(() => (dash?.conversations ?? []).map(c => ({
     name: c.name || '—', msg: c.last_message || '', time: fmtWhen(c.at, locale),
   })), [dash, locale])

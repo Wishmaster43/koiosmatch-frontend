@@ -15,6 +15,7 @@ import RichTextEditor from '@/components/ui/RichTextEditor'
 import { useTextPopoutSync } from '@/hooks/useTextPopoutSync'
 import { textPopoutTopic } from '@/lib/secondScreen'
 
+// See the file's top doc above; mirrors the draft over the shared channel and never offers its own save, since the real persistence is the opener form submit.
 export default function MatchRemarksPopout({ id }: { id: string | undefined }) {
   const { t } = useTranslation('candidates')
   const [text, setText] = useState('')

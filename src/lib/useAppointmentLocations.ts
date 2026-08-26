@@ -50,6 +50,8 @@ const mapLocations = (res: AxiosResponse): AppointmentLocation[] | null => {
   return Array.isArray(rows) && rows.length ? rows.map(toLocation) : null
 }
 
+// The tenant's appointment-location lookup, translated for seeded defaults,
+// plus the tenant's default location and a slug/label-tolerant meta resolver.
 export function useAppointmentLocations() {
   const { t } = useTranslation('common')
   const { data: rawLocations } = useCachedLookup('/appointment-locations', mapLocations, DEFAULT_APPOINTMENT_LOCATIONS)

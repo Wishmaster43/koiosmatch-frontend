@@ -9,6 +9,8 @@ import { useTranslation } from 'react-i18next'
 import { Mail } from 'lucide-react'
 import type { ContactChannel } from '../hooks/useContactMomentConfirm'
 
+// Non-blocking inline prompt after a mailto: click, offering to log it as a
+// real contact moment; dismissing is a genuine no-op, never a forced choice.
 export default function ContactMomentConfirmBanner({ channel, saving, onConfirm, onDismiss }: {
   channel: ContactChannel
   saving: boolean

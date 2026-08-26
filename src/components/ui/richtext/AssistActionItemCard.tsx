@@ -64,6 +64,7 @@ interface AssistActionItemCardProps {
   onViewRun?: () => void
 }
 
+// Renders one action item's execute outcome (executed/pending/wizard_required/forbidden/unsupported) with its own icon, reason tooltip and draft/appointment preview (see the module doc above for why this isn't KoiosPendingActionCard).
 export default function AssistActionItemCard({ item, onConfirm, onViewRun }: AssistActionItemCardProps) {
   const { t } = useTranslation('common')
   const { formatDateTime } = useDateFormat()

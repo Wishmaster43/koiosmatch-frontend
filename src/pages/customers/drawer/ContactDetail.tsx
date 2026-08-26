@@ -72,6 +72,8 @@ import type { Id, LookupOption } from '@/types/common'
 import type { ContactPayload } from '../hooks/useCustomerContacts'
 
 
+// The Contactpersonen-tab drill-down: main field card, location/department
+// coupling, and the sub-tab family (tasks/conversations/notes/koppelingen/…).
 export default function ContactDetail({ contact, locations, departments, statuses, existing = [], canLinkBackoffice = false, pager, onSave, onDelete, close, onMerged }: {
   contact: Contact
   locations: { id: Id; name: string }[]
@@ -188,7 +190,10 @@ export default function ContactDetail({ contact, locations, departments, statuse
   // demotes them when this contact is saved as primary, so we ask first.
   const currentPrimary = existing.find(c => c.isPrimary && String(c.id) !== String(contact.id))
 
+  // Field-table save: asks first when promoting this contact would silently
+  // demote the customer's current primary contact.
   const save = (v: Record<string, unknown>) => {
+    // Persist the edited fields with the resolved primary flag, then close the editor.
     const commit = (isPrimary: boolean) => {
       onSave(contact.id as Id, {
         firstName: v.firstName as string, middleName: v.middleName as string, lastName: v.lastName as string,

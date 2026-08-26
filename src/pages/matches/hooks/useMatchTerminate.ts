@@ -19,6 +19,7 @@ export interface MatchTerminatePayload {
   note?: string
 }
 
+// Ends a match via the real terminate endpoint (see the module doc above); maps the response through the shared mapMatch so the row and the open drawer refresh from one path, and rethrows errors for the modal to surface per-field.
 export function useMatchTerminate(
   matchId: MatchRow['id'] | undefined,
   onUpdate?: (id: MatchRow['id'], patch: Partial<MatchRow>) => void,

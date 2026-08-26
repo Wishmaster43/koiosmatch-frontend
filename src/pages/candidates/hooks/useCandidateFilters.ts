@@ -83,6 +83,7 @@ export function useCandidateFilters({ t, staleMonths, view, mapCenter, mapRadius
     || selectedPool.length || selectedCity.length || selectedSource.length)
   // Remount the (self-stateful) search input on clear so the visible text resets too.
   const [searchEpoch, setSearchEpoch] = useState(0)
+  // Resets every filter to its default and bumps searchEpoch so the self-stateful search input clears its own visible text too.
   const clearAllFilters = () => {
     setSearchEpoch(e => e + 1)
     setGlobalSearch(''); setAttentionFilter(null); setDateRange(null); setShowArchived(false); setShowTrash(false)

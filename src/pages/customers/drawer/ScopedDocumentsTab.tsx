@@ -19,6 +19,7 @@
 import DocumentsTab from './DocumentsTab'
 import type { Id } from '@/types/common'
 
+// Thin scoped wrapper around DocumentsTab (see the module doc above): locks the upload level and swaps in the location/department listing endpoint + matching document-type lookup.
 export default function ScopedDocumentsTab({ scope, id, customerId }: {
   scope: 'location' | 'department'
   id: Id

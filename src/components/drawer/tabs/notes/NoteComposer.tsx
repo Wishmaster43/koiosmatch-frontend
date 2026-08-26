@@ -108,6 +108,7 @@ interface NoteComposerProps {
   onCancel: () => void
 }
 
+// The note create/edit popup: text + type/channel fields, Koios AI action-panel items, and the concept-draft handoff to popout windows.
 export default function NoteComposer({ open, initialNote, noteTypes, channels, labels, editorLabels, composerExtra, onPopOutDraft, popOutPending, initialDraft, candidateId, onSave, onCancel, onDraft, conceptRestored }: NoteComposerProps) {
   const { t } = useTranslation('common')
   const isNew = initialNote == null
@@ -132,6 +133,7 @@ export default function NoteComposer({ open, initialNote, noteTypes, channels, l
   const koios = useMyKoiosMode()
   const onAssistItems = (fresh: AssistActionItem[]) =>
     setPanelItems(prev => mergeNoteActionItems(prev, fresh))
+  // Extracted action-panel keys already known to the AI, so a later call never re-suggests what it already surfaced.
   const knownItems = useMemo(() => toKnownItems(panelItems), [panelItems])
 
   const save = () => onSave(fields.payload)

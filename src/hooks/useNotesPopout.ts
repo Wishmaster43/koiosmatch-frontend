@@ -96,6 +96,7 @@ interface NotesPopoutOptions {
   onHandedOver: (kind: NoteHandoff['kind']) => void
 }
 
+// Coordinates the host side of a note popout handoff: tracks the target's identity by primitive fields (not the object reference, which is fresh every render) and follows the host/window protocol documented above.
 export function useNotesPopout({ target, onHandedOver }: NotesPopoutOptions) {
   const { t } = useTranslation('common')
   // Read the identity as primitives: hosts inline `popout={{…}}`, so the object

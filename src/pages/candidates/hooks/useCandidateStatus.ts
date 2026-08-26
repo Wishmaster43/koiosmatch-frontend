@@ -28,6 +28,7 @@ interface Args {
   onConvertIncomplete?: (setActiveTab?: (id: string) => void) => void
 }
 
+// Owns the phase/status axis state machine (see the module doc above): a flagged status re-pick opens its own reason/date edit, and a flag-driven prompt gates a status change before the deployability write happens.
 export function useCandidateStatus({ c, onUpdate, onConvertIncomplete }: Args) {
   const { phases, statuses, phaseMeta } = useLookups() as unknown as {
     phases: LookupOption[]; statuses: LookupOption[]

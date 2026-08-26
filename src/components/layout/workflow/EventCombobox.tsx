@@ -29,6 +29,8 @@ import { useTranslation } from 'react-i18next'
 import { Search, ChevronDown, Check } from 'lucide-react'
 import { WORKFLOW_EVENT_KEYS, eventKeyToI18nKey } from './eventCatalog'
 
+// Searchable dropdown over the workflow event catalogue; see the module doc
+// comment above for why its Escape handling stops propagation at capture phase.
 export function EventCombobox({ value, onChange, label }: {
   value: string; onChange: (key: string) => void; label: string
 }) {

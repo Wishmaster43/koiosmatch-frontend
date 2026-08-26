@@ -126,6 +126,7 @@ interface DataTableProps<Row> {
   expandLabel?: string
 }
 
+// Renders header/rows/sort/selection/loading-empty-error from `columns` alone, so no entity page hand-rolls table chrome.
 export default function DataTable<Row>({
   columns,
   rows,
@@ -179,6 +180,7 @@ export default function DataTable<Row>({
     return sortProp ? { key: sortProp.by, dir: sortProp.dir } : null
   }, [isControlled, sortProp, internalSort])
 
+  // Header click handler: sorts by the clicked column, flipping direction on a repeat click; routes through the caller's onSortChange when sort is controlled, otherwise updates local state.
   const toggleSort = (col: Column<Row>) => {
     if (isControlled) {
       // The caller owns the commit — compute the next state from the CURRENT
@@ -195,6 +197,7 @@ export default function DataTable<Row>({
     })
   }
 
+  // Sorts rows by the active column value; rows whose value is unknown are set aside and appended at the bottom regardless of direction (see the comment inside for why).
   const sortedRows = useMemo(() => {
     if (!sort) return rows
     const col = columns.find(c => c.key === sort.key)
@@ -232,6 +235,7 @@ export default function DataTable<Row>({
   // TableRow's props — and therefore its memo — stable regardless of the caller.
   const onRowClickRef = useRef(onRowClick)
   onRowClickRef.current = onRowClick
+  // Wraps onRowClick in a ref-read callback with an empty deps array, so its identity never changes across renders; a fresh function per render would defeat every row's memoization.
   const stableRowClick = useCallback((row: Row) => onRowClickRef.current?.(row), [])
   const onToggleRowRef = useRef(onToggleRow)
   onToggleRowRef.current = onToggleRow

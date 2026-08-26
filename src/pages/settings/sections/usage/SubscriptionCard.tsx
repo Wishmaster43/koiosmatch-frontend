@@ -77,6 +77,8 @@ export function MeterBar({ label, used, budget, onDrill }: { label: string; used
   )
 }
 
+// The three consumption meters of the current package (AI tokens, Koios Tokens, WhatsApp
+// Tokens): each shows used against included, and clicking one drills into its own detail.
 export default function SubscriptionCard({ subscription, phase, onDrillAi, onDrillWorkflow }: SubscriptionCardProps) {
   const { t } = useTranslation('settings')
   const { formatCurrency, formatNumber } = useNumberFormat()

@@ -28,6 +28,7 @@ interface AddressCardProps {
   provinces: string[]
 }
 
+// Customer visiting-address card, mirroring the candidate add-modal's own address layout and its shared province/country cascade; pure presentational (see file header).
 export default function AddressCard({ form, set, provinces }: AddressCardProps) {
   const { t, i18n } = useTranslation(['customers', 'common'])
   // Fixed ISO-3166 code list, localized to the current UI language — mirrors the

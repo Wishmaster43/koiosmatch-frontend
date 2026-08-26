@@ -10,6 +10,8 @@ import { useTranslation } from 'react-i18next'
 import { Caption } from '@/components/ui/typography'
 import type { DashScope } from '@/types/dashboard'
 
+// States the server's actual query scope (see file docblock above); renders
+// nothing when neither narrowing nor a folded-in footnote applies.
 export default function ScopeBadge({ scope }: { scope: DashScope | null }) {
   const { t } = useTranslation('dashboard')
   if (!scope) return null

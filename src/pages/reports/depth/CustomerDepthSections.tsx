@@ -23,6 +23,7 @@ function formatMonth(ym: string): string {
   return `${month}-${year}`
 }
 
+// Four depth cards (concentration/churn/owner cohorts); each self-hides when its own optional field is absent, never a fabricated empty chart (see file header).
 export default function CustomerDepthSections({ data, onOpenCustomer }: {
   data: CustomersReportData
   onOpenCustomer: (customerId: string) => void

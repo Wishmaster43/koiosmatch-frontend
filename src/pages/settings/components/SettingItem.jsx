@@ -5,6 +5,7 @@
  */
 import SchemaSection from './SchemaSection'
 
+// See the file's top doc above; picks the right render strategy so the shell needs no change when a new registry item is added.
 export default function SettingItem({ item }) {
   if (!item) return null
   if (item.render)    return item.render()

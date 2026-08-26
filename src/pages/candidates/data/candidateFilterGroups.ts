@@ -47,6 +47,7 @@ interface BuildArgs {
   options: Record<string, Opt[]>
 }
 
+// Builds the candidates page's right-panel filter config.
 export function buildCandidateFilterGroups({ t, tog, filters: f, options: o }: BuildArgs) {
   const catLifecycle      = t('filters.categories.lifecycle')
   const catQualifications = t('filters.categories.qualifications')

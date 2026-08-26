@@ -147,6 +147,7 @@ function StatusReasonModal({
   )
 }
 
+// Composes the two deployability-change overlays (match-pick, status-reason) described in the file's top doc; purely presentational, the parent owns state and the confirm handlers.
 export default function CandidateStatusModals({
   matchPrompt, onCloseMatch, matches, matchChoice, setMatchChoice, newMatchVacancyId, setNewMatchVacancyId,
   vacancyOptions, creatingMatch, onConfirmMatch, statusModal, setStatusModal, onConfirmStatus,
@@ -156,6 +157,7 @@ export default function CandidateStatusModals({
   // Blacklist reasons (tenant lookup) — loaded once when a blacklist prompt opens; the
   // backend validates against blacklist_reasons.name, so free text would 422.
   const [blReasons, setBlReasons] = useState<BlacklistReasonOption[]>([])
+  // Loads the blacklist-reason tenant lookup once, the first time a blacklist prompt opens, since the backend validates against these names rather than accepting free text.
   useEffect(() => {
     if (!statusModal?.isBlacklist || blReasons.length) return
     api.get('/candidate-blacklist-reasons')

@@ -32,6 +32,7 @@ const TRIGGER_CATEGORY = 'Triggers'
 
 const DRAG_TYPE = 'application/x-wf-start'
 
+// Renders one workflow node: resolves its module metadata (or a neutral fallback for an unknown/legacy type), tracks live run status/progress, and marks a saved-but-no-longer-executable type honestly instead of hiding it.
 function ModuleNode({ id, data, selected }: { id: string; data: FlowNodeData; selected?: boolean }) {
   const onRun   = useContext(NodeRunContext)
   const startCtx = useContext(StartContext)
@@ -94,6 +95,7 @@ function ModuleNode({ id, data, selected }: { id: string; data: FlowNodeData; se
   const ARC_R = 39
   const ARC_C = 2 * Math.PI * ARC_R
 
+  // Manual run-this-step trigger; stopPropagation keeps the click from also selecting/dragging the node, and the busy flag drives the button's own spinner state.
   const handleRun = async (e: MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation()
     setBusy(true)
@@ -108,6 +110,7 @@ function ModuleNode({ id, data, selected }: { id: string; data: FlowNodeData; se
     setDropOver(true)
   }
   const handleDragLeave = () => setDropOver(false)
+  // Completes the START-badge drag: dropping it onto this node makes it the workflow's start step.
   const handleDrop = (e: DragEvent<HTMLDivElement>) => {
     if (!e.dataTransfer.types.includes(DRAG_TYPE)) return
     e.preventDefault()

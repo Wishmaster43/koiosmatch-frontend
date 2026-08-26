@@ -10,6 +10,7 @@ import ScopeEditor from './ScopeEditor'
 import Spinner from '@/components/ui/Spinner'
 import SaveButton from '@/components/ui/SaveButton'
 
+// The Access tab: edits the scope map as a local draft, persisted only on Save.
 export default function ApiKeyAccessTab({ scopes, onSave }) {
   const { t } = useTranslation('settings')
   const [draft, setDraft]   = useState(() => ({ ...(scopes ?? {}) }))
@@ -19,6 +20,7 @@ export default function ApiKeyAccessTab({ scopes, onSave }) {
   // Dirty when the draft scope map differs from the persisted one.
   const dirty = JSON.stringify(draft) !== JSON.stringify(scopes ?? {})
 
+  // Persist the whole draft scope map, briefly showing a saved confirmation.
   const save = async () => {
     setSaving(true)
     try {

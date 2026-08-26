@@ -37,6 +37,7 @@ export interface OutreachTarget {
 export interface AssignResult { updated: string[]; skipped: string[] }
 export interface CampaignDetail extends Campaign { targets?: OutreachTarget[] }
 
+// Loads one campaign and its mutation setters.
 export function useOutreachDetail(id: string | null) {
   const [detail,  setDetail]  = useState<CampaignDetail | null>(null)
   const [loading, setLoading] = useState(false)

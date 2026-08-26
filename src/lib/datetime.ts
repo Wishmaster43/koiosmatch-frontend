@@ -35,6 +35,7 @@ const NUMERIC_DATE: Intl.DateTimeFormatOptions = { day: '2-digit', month: '2-dig
 const isNumericDate = (o: Intl.DateTimeFormatOptions) =>
   o.day === '2-digit' && o.month === '2-digit' && o.year === 'numeric' && !o.weekday && !o.hour && !o.minute && !o.era && !o.timeZoneName
 
+// Resolves the active i18n language to its Intl locale tag, falling back to nl-NL when the language is unresolved or the test mock has no i18n instance.
 export function useLocale(): string {
   const { i18n } = useTranslation()
   // Optional chaining: some tests stub react-i18next with a bare `{ t }` (no
@@ -43,6 +44,7 @@ export function useLocale(): string {
   return (LOCALE_BY_LANG as Record<string, string>)[i18n?.language ?? ''] ?? 'nl-NL'
 }
 
+// Memoized date/time formatters (stable identities so they never bust a column-array memo); see the inline comments below for the DD-MM-YYYY-everywhere rule.
 export function useDateFormat() {
   const locale = useLocale()
   // Stable identities (audit item 7 fast-follow): these feed column-array memos —

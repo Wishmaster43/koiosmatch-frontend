@@ -22,6 +22,7 @@ interface ActionRuleDetailPanelProps {
   onClose: () => void
 }
 
+// Persistent side-detail card for the selected non-allow cell (see the module doc above): a fixed slot instead of per-cell floating position math.
 export default function ActionRuleDetailPanel({
   actionLabel, conditionLabel, effect, popupCode, locked, isOverride, onReset, onClose,
 }: ActionRuleDetailPanelProps) {

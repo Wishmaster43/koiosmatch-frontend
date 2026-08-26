@@ -87,6 +87,7 @@ function DonutCard({ title, data, colors, onPick, active, onClear, picked, clear
 }
 
 
+// One equal-footprint KPI tile: a big number (or a custom render override), optional sub-label or per-channel mini-legend, and an active/tinted state when it doubles as a click-to-filter toggle.
 function KpiCard({ label, value, sub, color, onClick, active, channels, render, wrapLabel }: Omit<KpiSpec, 'key'> & { wrapLabel?: boolean }) {
   const clickable = typeof onClick === 'function'
   // Locale-aware grouping (§ FMT-GETAL-1) — never a hardcoded 'nl-NL' toLocaleString.
@@ -135,6 +136,7 @@ function KpiCard({ label, value, sub, color, onClick, active, channels, render, 
   )
 }
 
+// Config-driven insights strip (§3A): equal-footprint donut + KPI cards, click-to-filter, with an optional data-honesty notice when server-wide stats fell back to page-scope counts (STATS-OOM-1).
 export default function InsightsRow({ donuts = [], kpis = [], padding = '16px 24px 12px', clearTitle, notice, wrapLabels = false }: {
   donuts?: DonutSpec[]; kpis?: KpiSpec[]; padding?: string; clearTitle?: string
   // Two-line card titles instead of one ellipsised line — see TITLE_WRAP. Used by

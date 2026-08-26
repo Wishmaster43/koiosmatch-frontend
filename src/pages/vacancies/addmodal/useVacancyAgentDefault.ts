@@ -12,6 +12,7 @@ import { useState, useEffect } from 'react'
 import type { AiAgent } from '@/types/ai'
 import type { Id } from '@/types/common'
 
+// See the file's top doc above; proposes the owner's own linked AI agent, re-proposing on every owner switch until the recruiter edits the field by hand.
 export function useVacancyAgentDefault(ownerId: string, agents: AiAgent[], setAiAgentId: (v: string) => void) {
   const [agentDirty, setAgentDirty] = useState(false)
   // Empty when the owner has no linked agent — never a fallback guess (§0).

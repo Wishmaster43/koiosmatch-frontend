@@ -15,6 +15,7 @@ import { useAuth } from '@/context/AuthContext'
 import { canAccessPage } from '@/lib/access'
 import type { WebhookRequestWorkflowRef } from './webhookRequestTypes'
 
+// Named workflows get a real deep link into their own filtered run history; unnamed legacy ids fall back to bare Mono text plus one generic run-history link (see file header).
 export default function WorkflowRefs({ ids, workflows }: { ids: Array<string | number>; workflows?: WebhookRequestWorkflowRef[] }) {
   const { t } = useTranslation('settings')
   const auth = useAuth()

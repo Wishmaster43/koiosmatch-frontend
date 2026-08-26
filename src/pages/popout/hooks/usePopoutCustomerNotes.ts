@@ -24,6 +24,8 @@ import type { CustomerNote } from '@/types/customer'
 // useCandidateNotes' index-based edit/delete instead of staying add-only.
 interface NotePayload { type: string; title: string; body: string; language?: string }
 
+// Notes CRUD for the customer notes popout window, mirroring useCandidateNotes'
+// index-based edit/delete (see the module doc comment above).
 export function usePopoutCustomerNotes(customerId: string | undefined) {
   const { t } = useTranslation()
   const [notes, setNotes] = useState<CustomerNote[]>([])

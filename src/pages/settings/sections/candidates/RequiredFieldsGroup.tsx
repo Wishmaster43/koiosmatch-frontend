@@ -15,6 +15,7 @@ import type { CandidateRequiredFieldGroup } from './requiredFieldsCatalog'
 /** One phase column, narrowed from the tenant lookup item. */
 export interface PhaseColumn { value: string; label: string }
 
+// One collapsible field×phase matrix block; purely presentational.
 export default function RequiredFieldsGroup({ group, phases, isRequired, onToggle, open, onOpenToggle, disabled }: {
   group: CandidateRequiredFieldGroup
   phases: PhaseColumn[]

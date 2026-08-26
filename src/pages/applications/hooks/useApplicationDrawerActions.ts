@@ -40,6 +40,7 @@ interface Args {
   t: TFunction
 }
 
+// Drawer state plus every single-application mutation for the applications page; list updates are optimistic while the server re-validates (see file header).
 export function useApplicationDrawerActions({ applications, wideRows, setApplications, setTotal, funnelTypes, users, bucket, decorate, t }: Args) {
   const [selected, setSelected] = useState<ApplicationDetail | null>(null)
   const [expanded, setExpanded] = useState(false)

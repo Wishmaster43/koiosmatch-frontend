@@ -27,6 +27,7 @@ interface Args {
   t: TFunction
 }
 
+// Bulk-action handlers for the tasks table (status/priority/assignee/archive), each patching the wire FK while keeping the decorated row's local display slug (see BULK-WIRE-1 below).
 export function useTaskBulkActions({
   setTasks, setSelected, selected, closeDrawer, selectedIds, setSelectedIds, decorate, users, t,
 }: Args) {
@@ -62,6 +63,7 @@ export function useTaskBulkActions({
   // record PATCH paths (AddTaskModal/useTaskDrawerActions).
   const bulkSetStatus   = (statusKey: string)   => runBulkPatch({ statusKey },   { status_id: lookupIds.status[statusKey] })
   const bulkSetPriority = (priorityKey: string) => runBulkPatch({ priorityKey }, { priority_id: lookupIds.priority[priorityKey] })
+  // Resolves the picked user to a display-ready assignee shape for the local optimistic patch, while the wire body sends the raw user id (or null to unassign).
   const bulkSetAssignee = (userId: string) => {
     const sel = users.find(u => String(u.id) === String(userId))
     const assignee = sel ? { name: sel.name, initials: initialsOf(sel.name), color: sel.avatar_color ?? null } : null

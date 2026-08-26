@@ -13,6 +13,8 @@ import type { ChartDatum } from '@/components/charts/chartTypes'
 import type { TrendRow as TrendRowData } from '@/types/dashboard'
 import type { DashboardViewModel } from '../hooks/useDashboardViewModel'
 
+// Dashboard's weekly trend chart plus the funnel-conversion panel; see the module
+// doc comment above for the role-visibility/full-width behaviour.
 export default function TrendsRow({ vis, trendData, trendSeries, funnelData, onNavigate }: {
   vis: DashboardViewModel['vis']
   trendData: DashboardViewModel['trendData']

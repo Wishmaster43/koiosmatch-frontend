@@ -98,6 +98,8 @@ const MODULE_NAV_ITEMS = [
   },
 ]
 
+// One child row under an expanded nav group (e.g. a "Details" sub-page); active
+// state reads the theme-adjusted primary tokens so it stays readable per tenant brand.
 function SubNavItem({ item, active, onNavigate }) {
   const [hovered, setHovered] = useState(false)
   return (
@@ -126,6 +128,8 @@ function SubNavItem({ item, active, onNavigate }) {
   )
 }
 
+// A top-level nav entry: a leaf link, or (with children) a group that expands
+// its sub-items in place while the rail stays expanded.
 function NavItem({ item, activePage, expanded, openItems, toggleOpen, onNavigate }) {
   const { t } = useTranslation('common')
   const [hovered, setHovered] = useState(false)
@@ -136,6 +140,8 @@ function NavItem({ item, activePage, expanded, openItems, toggleOpen, onNavigate
   const isOpen      = openItems.includes(item.id)
   const Icon        = item.icon
 
+  // A group item both toggles its expansion AND navigates to its own page (e.g.
+  // Settings groups still act as a page); a leaf item just navigates.
   const handleClick = () => {
     if (hasChildren) { toggleOpen(item.id); onNavigate(item.id) }
     else onNavigate(item.id)
@@ -206,6 +212,8 @@ function NavItem({ item, activePage, expanded, openItems, toggleOpen, onNavigate
   )
 }
 
+// The app's left navigation rail: renders only the pages/modules this user's role
+// can access, resolves nav labels through i18n, and hosts the Koios panel toggle.
 export default function Sidebar({ expanded, activePage, setActivePage, koiosOpen, onToggleKoios }) {
   const { t } = useTranslation('common')
   const [openItems, setOpenItems] = useState([])
@@ -300,7 +308,7 @@ export default function Sidebar({ expanded, activePage, setActivePage, koiosOpen
             justifyContent: expanded ? 'flex-start' : 'center',
             // KOIOS-NAV-TINT-1 (Danny 22-08): ONE visual language for both states —
             // the brand-gradient TINT pair (rest 12% / open 22%), per the active-nav
-            // rule (tint = place-marker; a full fill reads as an action button).
+            // rule (tint = place-marker; a full fill reads as an action button)
             // color-mix — a var() cannot take a hex-alpha suffix ('var(--x)20' is
             // invalid CSS, the declaration was silently dropped; audit-consolidatie 23-07).
             // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- chrome/brand tint with deliberately its own percentages (Koios gradient rest/active pair), predates lib/tint and is not a status chip

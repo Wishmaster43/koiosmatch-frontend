@@ -73,6 +73,7 @@ export interface FloatingPanelProps {
   maximizable?: boolean
 }
 
+// The mounted panel body: focus trap plus drag/resize/maximize, mounted fresh per open by the exported wrapper below.
 function Panel({ onClose, ariaLabel, title, header, children, width, maxWidth, persistKey, resizable, zIndex, bodyStyle, hideClose, scrollBody = true, onPopOut, overlay = true, closeOnBackdrop = true, maximizable = false }: Omit<FloatingPanelProps, 'open'>) {
   const { t } = useTranslation('common')
   const panelTrapRef = useFocusTrap<HTMLDivElement>(onClose)
@@ -186,6 +187,7 @@ function Panel({ onClose, ariaLabel, title, header, children, width, maxWidth, p
   )
 }
 
+// Public entry point: renders nothing when closed, and remounts a fresh Panel on every open so its focus-trap/drag state always starts clean.
 export default function FloatingPanel(props: FloatingPanelProps) {
   if (!props.open) return null
   // Strip `open` — Panel mounts fresh per open (house rule for useFocusTrap).

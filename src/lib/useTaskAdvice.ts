@@ -11,6 +11,9 @@ import { isTaskOverdue } from '@/pages/tasks/shared'
 import type { KoiosAdvice } from '@/lib/koiosAdviceMeta'
 import type { Task } from '@/types/task'
 
+// The one task-advice resolver shared by the table column and the drawer's
+// Koios block (see file docblock above), reusing the exact overdue predicate
+// the due-date cell colours red so the two can never diverge.
 export function useTaskAdvice(): (r: Task) => KoiosAdvice | null {
   const { t } = useTranslation('tasks')
 

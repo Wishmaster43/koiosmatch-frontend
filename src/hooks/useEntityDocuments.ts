@@ -60,6 +60,9 @@ const fmtSize = (s: string | number | undefined): string => {
   return s >= 1_048_576 ? (s / 1_048_576).toFixed(1) + ' MB' : Math.max(1, Math.round(s / 1024)) + ' KB'
 }
 
+// Generic document-attachment hook shared by every entity (see file docblock
+// above): loads the list and does optimistic upload/rename/delete, reconciling
+// each optimistic row with the server's real id once it lands.
 export function useEntityDocuments(prefix: string, parentId: Id | undefined, listUrl?: string) {
   const { t } = useTranslation()
   const [docs, setDocs] = useState<EntityDoc[]>([])

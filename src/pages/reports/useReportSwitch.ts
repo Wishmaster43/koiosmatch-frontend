@@ -45,12 +45,14 @@ function resolveInitial(positions: readonly string[], fallback: string): string 
   return fromUrl && positions.includes(fromUrl) ? fromUrl : fallback
 }
 
+// Ties the switch position to the page's own `?view=` hash param — see the module
+// doc comment above for the full URL-sync contract.
 export function useReportSwitch(positions: readonly string[], initial: string) {
   const [position, setPositionState] = useState<string>(() => resolveInitial(positions, initial))
 
-  // Re-seed when `initial` changes without an unmount (legacy alias → canonical
-  // route on the same mounted component — see file comment).
   const seeded = useRef(initial)
+  // Only re-seed when `initial` itself actually changes — the legacy-alias-route
+  // case described above, not every render.
   useEffect(() => {
     if (seeded.current !== initial) {
       seeded.current = initial
@@ -68,6 +70,8 @@ export function useReportSwitch(positions: readonly string[], initial: string) {
 
   // Back/forward: pick up a `view` change from history navigation.
   useEffect(() => {
+    // A `view` change from browser back/forward navigation; ignored if it doesn't
+    // name a position this switch actually offers.
     const onPop = () => {
       const fromUrl = getViewFromHash(window.location.hash)
       if (fromUrl && positions.includes(fromUrl)) setPositionState(fromUrl)

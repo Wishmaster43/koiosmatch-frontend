@@ -21,6 +21,7 @@ const STATUS_COLOR: Record<string, string> = {
   no_show: 'var(--color-danger)',
 }
 
+// Today shift-status donut; zero-count slices are dropped and an unrecognised status still gets a coloured slice via the shared chart palette.
 export default function ShiftStatusTodayDonut({ rows, onNavigate }: {
   rows: ShiftStatusTodayRow[]
   onNavigate?: (page: string, params?: Record<string, unknown>) => void

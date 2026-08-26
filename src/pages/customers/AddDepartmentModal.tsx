@@ -55,6 +55,8 @@ const API_TO_FORM: Record<string, string> = {
   cost_center: 'costCenter',
 }
 
+// Create/edit modal for a customer department, with an in-header CSV import path
+// (mirrors AddCustomerModal) that closes this modal once a real import lands rows.
 export default function AddDepartmentModal({ onClose, onCreate, onImported, locations = [], customerName, statuses = [], initial, lockLocationId }: {
   onClose: () => void
   onCreate?: (v: DepartmentPayload) => void
@@ -121,6 +123,7 @@ export default function AddDepartmentModal({ onClose, onCreate, onImported, loca
     // eslint-disable-next-line react-hooks/exhaustive-deps -- only react to the run RESULT changing, not onClose/onImported identity
   }, [importWizard.run])
 
+  // Validate the required name/location fields, then create or update the department via the API.
   const submit = async () => {
     if (!form.name.trim() || !form.locationId) {
       setErrors({ name: !form.name.trim(), locationId: !form.locationId })

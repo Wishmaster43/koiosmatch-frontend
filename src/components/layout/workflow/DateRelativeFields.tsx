@@ -18,6 +18,8 @@ import { DATE_RELATIVE_FIELDS } from './dateRelativeFieldOptions'
 // Shared modal field identity (label + input face) — never re-declared locally.
 import { fieldLabel, inputStyle } from './scheduleModalStyles'
 
+// The "date_relative" trigger row (see file docblock above): a searchable date-field
+// picker plus a positive "N days before" input the caller negates on save.
 export function DateRelativeFields({ dateField, onDateFieldChange, days, onDaysChange, disabled }: {
   dateField: string
   onDateFieldChange: (v: string) => void

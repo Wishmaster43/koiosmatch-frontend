@@ -130,6 +130,7 @@ export function useMatches(ref: string | null = null, includeArchived: boolean =
   // the list and a just-restored one comes back.
   const [refreshTick, setRefreshTick] = useState(0)
 
+  // Loads the full match set (paginating past the server cap) so KPIs/board never undercount, unless a reference-number query narrows it to one exact lookup.
   useEffect(() => {
     let alive = true
     setLoading(true)

@@ -79,6 +79,7 @@ interface UseCvParseOptions {
   onReady: (fields: ParsedCvFields) => void
 }
 
+// Drives the async CV-parse flow: upload then poll a token until ready/failed/timeout, never persisting or logging the file or the parsed payload (see file header).
 export function useCvParse({ onReady }: UseCvParseOptions) {
   const [phase, setPhase] = useState<CvPhase>('idle')
   const [errorKey, setErrorKey] = useState<string | null>(null)
@@ -123,6 +124,7 @@ export function useCvParse({ onReady }: UseCvParseOptions) {
   // Poll one token until it resolves or the deadline passes. setTimeout-chained (not
   // setInterval) so a slow response can never stack overlapping requests.
   const poll = useCallback((token: string, deadline: number) => {
+    // One poll attempt: reads the token's current status and either stops (ready/failed) or reschedules itself, giving up once the deadline passes.
     const tick = async () => {
       if (!aliveRef.current) return
       const controller = new AbortController()

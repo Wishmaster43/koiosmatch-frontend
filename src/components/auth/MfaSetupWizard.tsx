@@ -29,6 +29,7 @@ interface MfaSetupWizardProps {
   onCancel?: () => void
 }
 
+// See the file's top doc above for the shared enrollment flow; state/handlers all arrive as props so the same wizard renders in Settings and in the enforcement gate.
 export default function MfaSetupWizard({ setupMfa, confirmMfa, onConfirmed, onFinished, onCancel }: MfaSetupWizardProps) {
   const { t } = useTranslation('settings')
   // 'loading' (fetching QR) | 'setup' (QR + confirm code) | 'recovery' (codes shown once)

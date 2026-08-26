@@ -19,6 +19,9 @@ export interface CouplingErrorRow {
   synced_at: string | null
 }
 
+// Normalizes the raw React Query result to the {rows, loading, error, refetch}
+// shape the dashboard KPI card expects, defaulting rows to an empty array
+// before the first response arrives.
 export function useCouplingErrors() {
   const query = useQuery({
     queryKey: ['external-id-mappings', 'failures'],

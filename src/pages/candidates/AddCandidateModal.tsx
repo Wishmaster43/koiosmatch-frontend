@@ -103,6 +103,8 @@ interface AddCandidateModalProps {
   onImported?: () => void
 }
 
+// The candidate create modal: the manual form, with the Excel import card (CAND-IMPORT-FE-1)
+// shown above it once the recruiter opens it from the header.
 export default function AddCandidateModal({ onClose, onCreated, onImported }: AddCandidateModalProps) {
   const { t } = useTranslation(['candidates', 'common'])
   const { phases } = useLookups() as unknown as { phases: LookupOption[] }
@@ -179,6 +181,7 @@ export default function AddCandidateModal({ onClose, onCreated, onImported }: Ad
   // country's list in. If the country changes and the currently filled province no
   // longer exists in the new list, clear it rather than silently keep a mismatch.
   const { provinces } = useProvinces(form.country)
+  // Clears the picked province when it no longer exists in the country-scoped list above.
   useEffect(() => {
     if (form.province && !provinces.includes(form.province)) setForm(f => ({ ...f, province: '' }))
     // eslint-disable-next-line react-hooks/exhaustive-deps -- only react to the resolved province list changing, not every form edit
@@ -202,6 +205,8 @@ export default function AddCandidateModal({ onClose, onCreated, onImported }: Ad
   const { setFieldMessages, markTouched, fieldMessage, clearFieldMessage, touchInvalidFields, hasFormatError } =
     useLiveFieldValidation(form, t)
 
+  // Central field-change handler: updates the form value and clears every stale
+  // validation/duplicate signal that no longer applies to the edited field.
   const set = (k: keyof FormState, v: string) => {
     setForm(f => ({ ...f, [k]: v }))
     if (errors[k]) setErrors(e => ({ ...e, [k]: false }))
@@ -235,6 +240,8 @@ export default function AddCandidateModal({ onClose, onCreated, onImported }: Ad
   // sibling hook (§3 size split), fed the current phase.
   const { requiredForm, isReq } = useRequiredFields(status)
 
+  // Validates required + live-format fields, then submits the create; a 409 renders
+  // the duplicate panel, a 422 maps field errors, anything else shows a generic message.
   const handleSubmit = async () => {
     const e: Record<string, boolean> = {}
     requiredForm.forEach(k => { if (!String(form[k] ?? '').trim()) e[k] = true })

@@ -51,9 +51,11 @@ function Avatar({ candidate, size = 32 }: { candidate?: WaCandidate; size?: numb
   )
 }
 
+// Escalated-conversation list; each row's reason colour/label prefers the real
+// tenant lookup, falling back to the derived-diagnostic-key palette (see file doc).
 export function EscalationList({ escalations, loading }: { escalations: WaEscalation[]; loading?: boolean }) {
   const { t } = useTranslation('whatsapp')
-  // Real tenant escalation-reason lookup (LOOKUP-GAP-1(c)) — see the file header
+  // Real tenant escalation-reason lookup (LOOKUP-GAP-1(c))
   // comment on DERIVED_REASON_STYLE for why today's rows still fall through to it.
   const { metaOf } = useEscalationReasons()
   return (

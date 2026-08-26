@@ -53,6 +53,8 @@ const TEXT_POPOUT_PAGES: Record<string, ComponentType<{ id: string | undefined }
   'outreachTarget:targetNote': OutreachTargetNotePopout,
 }
 
+// Route dispatcher for every popped-out free-text field: resolves entity:field
+// to its own thin page, or the shared shell's honest error state when unknown.
 export default function TextPopoutPage() {
   const { entity, id, field } = useParams<{ entity: string; id: string; field: string }>()
   const { t } = useTranslation('common')

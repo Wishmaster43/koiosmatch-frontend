@@ -30,6 +30,7 @@ import { PageTitle, Caption } from '@/components/ui/typography'
 const EMAIL_VALIDATORS = { email: isValidEmailFormat }
 const EMAIL_ERROR_KEYS = { email: 'validation.emailFormat' }
 
+// The user edit modal: name/email/phone/password fields + the branch assignment list.
 export default function EditUserModal({ user, onClose, onSaved }: {
   user: ManagedUser
   onClose: () => void
@@ -58,6 +59,8 @@ export default function EditUserModal({ user, onClose, onSaved }: {
   const set = (k: keyof typeof form) => (e: ChangeEvent<HTMLInputElement>) =>
     setForm(f => ({ ...f, [k]: e.target.value }))
 
+  // Validates then PUTs the profile fields (+ password when changing it) and adopts
+  // the server's saved copy.
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
     // VALIDATIE-LIVE-1-rest: block on a live format failure too — marks any

@@ -101,6 +101,8 @@ interface Props {
   onSave?: (values: Record<string, unknown>) => void
 }
 
+// The Communicatie tab's sub-tabs (Notities/Taken/Tijdlijn/Vacature-zichtbaarheid),
+// with the four-level "gekoppeld aan" note-link picker (see file doc for its shape).
 export default function CustomerNotesTab({ customerId, customerName, customerInitials, authorInitials, notes, onAddNote, onEditNote, onDeleteNote, onFetchPreviousVersion, onRestorePreviousNote, c, onSave }: Props) {
   const { t } = useTranslation('customers')
   // Note categories from the tenant lookup (NOTE-TYPES-2/3). CustomerController::
@@ -148,7 +150,7 @@ export default function CustomerNotesTab({ customerId, customerName, customerIni
   // own locations/departments/contacts (or leave it at "Klant", the default — no
   // link at all). Resets after each save (see handleAddNote) so linking one note
   // never silently carries over onto the next, unrelated one. Encoded as a single
-  // string: 'customer' or '<level>:<id>' — see the file header for why this is
+  // String: 'customer' or '<level>:<id>'  for why this is.
   // ONE SelectMenu (disabled header rows) rather than a two-step level→record UI.
   const [pendingLink, setPendingLink] = useState('customer')
   const [pendingKind, pendingRecordId] = pendingLink.includes(':')

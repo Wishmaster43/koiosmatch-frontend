@@ -9,6 +9,7 @@ import { fetchImportTemplates, type ImportTemplateSummary } from './importApi'
 
 type Phase = 'loading' | 'ready' | 'error'
 
+// Fetches the import-wizard's entity list from the real endpoint (see the module doc above) so a new backend importer shows up here automatically.
 export function useImportTemplates() {
   const [templates, setTemplates] = useState<ImportTemplateSummary[]>([])
   const [phase, setPhase] = useState<Phase>('loading')

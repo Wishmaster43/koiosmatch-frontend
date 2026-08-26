@@ -114,6 +114,7 @@ interface MatchDrawerProps {
   canRenew?: boolean
 }
 
+// Thin drawer container (see the module doc above): composes the approval hook + presentational header pieces, wires the tab list, and keeps the match facts read-only.
 export default function MatchDrawer({
   match, allRows = [], onClose, expanded = false, onToggleExpand, onSetStatus, onSetOwner, canApprove = false, onApprovalChange, onUpdate, onUpdateCustomFields,
   onArchive, onRestore, onMarkDeletion, onUnmark, graceDays = null, canLinkBackoffice = false, canTerminate: canTerminatePermission = false, canRenew: canRenewPermission = false,

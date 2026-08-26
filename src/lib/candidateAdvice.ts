@@ -29,7 +29,7 @@ export interface CandidateAdviceOptions {
 
 const NONE_RULE: CandidateAdviceRule = { action: 'none', reasonKey: 'koios.reasons.none' }
 
-// First-match-wins priority ladder — see the file header for the read-set constraint.
+// First-match-wins priority ladder  for the read-set constraint.
 export function deriveCandidateAdvice(c: Candidate, opts: CandidateAdviceOptions): CandidateAdviceRule {
   // Rule 1: no advice on an archived/erasing dossier.
   if (c.lifecycle !== 'active' || c.archived) return NONE_RULE

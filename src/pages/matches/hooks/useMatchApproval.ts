@@ -12,6 +12,7 @@ import { notify } from '@/lib/notify'
 import type { MatchRow } from '@/types/match'
 import type { Id } from '@/types/common'
 
+// Optimistic approve/reject for one match, lazily fetching the rejection reason only when needed; a 409 means someone else already reviewed it (see file header).
 export function useMatchApproval(match: MatchRow | null, onUpdate?: (id: MatchRow['id'], patch: Partial<MatchRow>) => void) {
   const { t } = useTranslation('matches')
   const [reason, setReason] = useState<string>(match?.approval_rejected_reason || '')

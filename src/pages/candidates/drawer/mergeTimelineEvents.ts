@@ -21,6 +21,7 @@ const timeOf = (ev: TimelineEvent): number | null => {
   return isNaN(t) ? null : t
 }
 
+// Interleaves multiple already-mapped timeline sources into one newest-first list; an undated event sorts last instead of jumping to the top (see file header).
 export function mergeTimelineEvents(...sources: TimelineEvent[][]): TimelineEvent[] {
   return sources
     .flat()

@@ -9,6 +9,8 @@
 import { useState, useEffect } from 'react'
 import { useCustomerCascade } from '../hooks/useCustomerCascade'
 
+// Proposes the customer's mirrored branch into the form, freezing once the
+// recruiter edits it by hand — see the module doc comment above for the full propose-but-freeze idiom.
 export function useVacancyBranchDefault(clientId: string, setBranchId: (v: string) => void) {
   const { detail } = useCustomerCascade(clientId)
   const [branchDirty, setBranchDirty] = useState(false)

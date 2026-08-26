@@ -40,6 +40,7 @@ interface Props {
   onRemoveContact: (id: Id) => void
 }
 
+// Thin host that owns which department is open and passes it to the one shared DepartmentsPanel, which renders everything else (see file header).
 export default function DepartmentsTab({
   customerId, customerName, departments = [], contacts = [], locations = [], statuses = [], canLinkBackoffice = false,
   contactStatuses = [], onAdd, onUpdate, onRemove, onAddContact, onUpdateContact, onRemoveContact,

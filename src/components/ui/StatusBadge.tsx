@@ -30,6 +30,8 @@ interface StatusBadgeProps {
   size?: number
 }
 
+// Shared status chip (see file docblock above): a caller's map can add/override
+// colours and labels, an unrecognised status falls back to a grey chip.
 export default function StatusBadge({ status, map = {}, size = 12 }: StatusBadgeProps) {
   const { t } = useTranslation('common')
   const key = String(status ?? '').toLowerCase()

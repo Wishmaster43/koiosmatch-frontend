@@ -46,6 +46,7 @@ const lbl = { fontSize: 11, fontWeight: 600, textTransform: 'uppercase' as const
 // Canon field style (G33/fieldMetrics) — was its own height-36 copy.
 const inputStyle = fieldInputStyle
 
+// New call-list modal on the shared wide-form frame, mirroring MatchModal/AddCandidateModal's card layout; behaviour is unchanged from the old inline view (see file header).
 export default function OutreachCreate({ onClose, onCreated }: Props) {
   const { t } = useTranslation('outreach')
   const [name, setName]     = useState('')

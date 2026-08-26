@@ -13,6 +13,7 @@ import { useTranslation } from 'react-i18next'
 import EntityTasksTab from '@/components/drawer/tabs/EntityTasksTab'
 import type { VacancyDetail } from '@/types/vacancy'
 
+// See the file's top doc above; thin wrapper over the shared EntityTasksTab scoped to this vacancy link type.
 export default function VacancyTasksTab({ vacancy: v }: { vacancy: VacancyDetail }) {
   const { t } = useTranslation('vacancies')
   return (

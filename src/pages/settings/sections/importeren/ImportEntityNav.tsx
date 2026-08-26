@@ -22,6 +22,7 @@ interface ImportEntityNavProps {
   onReload: () => void
 }
 
+// Splits import templates into whole-tree vs per-entity groups, so the two real choices stay visible instead of one hiding behind the other (see file header).
 export default function ImportEntityNav({ templates, phase, selected, onSelect, onReload }: ImportEntityNavProps) {
   const { t } = useTranslation('settings')
   const { wholeTree, perEntity } = groupTemplates(templates)

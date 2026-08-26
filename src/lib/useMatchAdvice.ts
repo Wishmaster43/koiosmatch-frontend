@@ -12,6 +12,7 @@ import { useMatchStatuses } from '@/lib/useMatchStatuses'
 import { deriveMatchAdvice } from '@/pages/matches/shared'
 import type { KoiosAdvice } from '@/lib/koiosAdviceMeta'
 import type { MatchRow } from '@/types/match'
+// Resolves one match's Koios advice by composing the shared rule engine with tenant settings and lifecycle status — the single source both the table and drawer read.
 export function useMatchAdvice(): (m: MatchRow) => KoiosAdvice | null {
   const { t } = useTranslation('matches')
   // Match lifecycle lookup (R-1b) — a closed match has nothing left to renew.

@@ -12,6 +12,7 @@ import type { SmLocationRow } from '@/types/shiftmanager'
 import ChangelogPopover from '@/components/drawer/ChangelogPopover'
 import EntityChangelog from '@/components/drawer/EntityChangelog'
 
+// The read-only location detail slide-in; renders nothing without a location.
 export default function LocationDrawer({ loc, onClose }: { loc: SmLocationRow | null; onClose: () => void }) {
   const { t } = useTranslation('shiftmanager')
   if (!loc) return null

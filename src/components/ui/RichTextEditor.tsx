@@ -41,7 +41,7 @@ interface RichTextEditorProps {
   // Collapsed content height; inline row editors (experience/education desc) pass a
   // compact value so a one-line note doesn't open a huge block (Danny punt 48).
   minHeight?: number
-  // TAAL-SPELL-1: spellcheck language. Controlled (language + onLanguageChange, e.g.
+  // TAAL-SPELL-1: spellcheck language. Controlled (language + onLanguageChange, e.g
   // notes persist it) or uncontrolled (defaults to the app language). The picker
   // shows on every editor unless a caller opts out.
   language?: string
@@ -74,10 +74,13 @@ export default function RichTextEditor({ value, onChange, expanded, onToggleExpa
   // Effective spellcheck language: caller-controlled wins, else local choice, else app language.
   const [innerLang, setInnerLang] = useState<string | null>(null)
   const lang = language ?? innerLang ?? (i18n.language || 'nl').slice(0, 2)
+  // User picked a spellcheck language from the menu; also lets a controlling
+  // caller (language prop owner) hear about the choice.
   const pickLang = (l: string) => {
     setInnerLang(l)
     onLanguageChange?.(l)
   }
+  // Merges the i18n default toolbar labels with any caller overrides.
   const lab = useMemo(() => ({
     ...Object.fromEntries(LABEL_KEYS.map(k => [k, t(`editor.${k}`)])) as EditorLabels,
     ...labels,

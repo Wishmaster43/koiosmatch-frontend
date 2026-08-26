@@ -21,6 +21,8 @@ interface UsageDailyTableProps {
   onSelectDate: (date: string) => void
 }
 
+// The day- or week-granularity usage table; only day rows are individually
+// clickable (a week has no single day to drill into).
 export default function UsageDailyTable({ granularity, dayRows, weekRows, onSelectDate }: UsageDailyTableProps) {
   const { t } = useTranslation('settings')
   const { formatNumber, formatCurrency } = useNumberFormat()

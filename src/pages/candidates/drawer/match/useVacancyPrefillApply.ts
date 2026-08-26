@@ -33,6 +33,7 @@ import type { MutableRefObject } from 'react'
 import { useVacancyPrefill } from './useVacancyPrefill'
 import type { Id } from '@/types/common'
 
+// Applies vacancy-derived fields onto the untouched parts of the match form (see the module doc above for the touched/auto bookkeeping and why it's a wide interface by design).
 export function useVacancyPrefillApply({
   editing, vacancyId, setVacancyIdRaw,
   customerId, setCustomerIdRaw, skipCascadeResetRef,

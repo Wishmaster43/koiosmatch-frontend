@@ -23,6 +23,7 @@ interface PreviewStepProps {
   wholeTree?: boolean
 }
 
+// See the file's top doc above; Confirm stays disabled until the dry-run preview actually found something to import.
 export default function PreviewStep({ result, runStatus, runError, canImport, onConfirm, onBack, wholeTree = false }: PreviewStepProps) {
   const { t } = useTranslation('settings')
   const [showAllRows, setShowAllRows] = useState(false)

@@ -23,6 +23,8 @@ import api, { unwrap } from '@/lib/api'
 import type { CustomerCascadeDetail } from '@/hooks/useCustomerCascade'
 import type { Id } from '@/types/common'
 
+// Fallback branch/owner fetch for the picked-candidate case (see the module doc
+// comment above for why it's not needed when the candidate is already known).
 export function useBranchMismatch(candidateId: Id | string, detail: CustomerCascadeDetail | null) {
   const [candBranch, setCandBranch] = useState<{ id: Id | null; name: string } | null>(null)
   // Candidate's own owner (RECRUITER-DEFAULT-1) — null until the fetch below resolves.

@@ -38,6 +38,7 @@ export interface MatchScoreOverride {
   savingScore: boolean
 }
 
+// Owns the match-score recalculate + manual-override editing state for one application.
 export function useMatchScoreOverride(application: ScoreCarrier): MatchScoreOverride {
   const { t } = useTranslation(['applications', 'common'])
   const [recalculating, setRecalculating] = useState(false)

@@ -31,9 +31,14 @@ interface Options {
   renderPreview: (html: string) => ReactNode
 }
 
+// Owns the "restore previous version" flow for one note (see file docblock above):
+// peeks the one-slot undo, then stages the shared confirm dialog with a preview.
 export function useNoteRestorePrevious({ onFetchPreviousVersion, onRestorePreviousNote, confirm, formatDate, t, restoreConfirmTitle, renderPreview }: Options) {
   const [restoringIdx, setRestoringIdx] = useState<number | null>(null)
 
+  // User clicked the restore-previous icon: peeks the previous version (guarded
+  // against a second click while in flight) and, if one exists, opens the confirm
+  // dialog with a preview; a 422/empty result degrades to a calm info toast.
   const requestRestorePrevious = (i: number) => {
     if (!onFetchPreviousVersion || restoringIdx != null) return
     setRestoringIdx(i)

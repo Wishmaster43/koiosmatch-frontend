@@ -37,6 +37,8 @@ import { useFunctions } from '@/lib/useFunctions'
 import { useConfirm } from '@/hooks/useConfirm'
 import FreeEntryMismatchDialog, { mismatchesFromError } from '../components/FreeEntryMismatchDialog'
 
+// Settings screen for the candidate function lookup and its free-entry toggle; see
+// the module doc comment above for the dedicated-route and strict-preflight reasoning.
 export default function FunctionsSettings() {
   const { t } = useTranslation('settings')
   const { allowFreeEntry, invalidate } = useFunctions()
@@ -57,6 +59,8 @@ export default function FunctionsSettings() {
   // this is the LAST-RESORT guard; the preflight below is what a tenant actually sees.
   const onToggle = (next) => {
     if (busy) return
+    // Actually persist the toggle; a strict-tightening 409 is the last-resort guard
+    // here, since the preflight below is what a tenant actually sees first.
     const persist = async () => {
       setBusy(true)
       setOverride(next)

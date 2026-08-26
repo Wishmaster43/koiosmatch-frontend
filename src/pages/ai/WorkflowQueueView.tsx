@@ -82,6 +82,8 @@ function QueueSection<T>({ icon: Icon, title, rows, emptyLabel, renderRow }: {
   )
 }
 
+// The tenant-wide (or one-workflow) queue snapshot: KPI counts up top, then the
+// four independent pending/waiting/scheduled/retrying sections.
 export default function WorkflowQueueView({ workflowId }: { workflowId?: string | number }) {
   const { t } = useTranslation('workflows')
   const { formatDateTime } = useDateFormat()

@@ -34,6 +34,7 @@ interface Props {
   hasFile: boolean
 }
 
+// Add-vacancy modal header: status picker, close, and the import toggle (gated on canImport, tinted deeper once a file is picked — see the props' doc comments above).
 export default function ModalHeader({ status, statusOptions, onSelectStatus, onClose, canImport, importOpen, onToggleImport, hasFile }: Props) {
   const { t } = useTranslation(['vacancies', 'common'])
   return (

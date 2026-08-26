@@ -16,6 +16,8 @@ import CustomerApplicationsList from './CustomerApplicationsList'
 import { useScopedVacancyIds } from '../hooks/useCustomerDrawerData'
 import type { Id } from '@/types/common'
 
+// Applications tab scoped to one location/department; see the module doc comment
+// above for the two-step vacancy-ids→applications loading it drives.
 export default function ScopedSollicitatiesTab({ scope, id }: {
   scope: 'location' | 'department'
   id: Id

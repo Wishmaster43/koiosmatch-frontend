@@ -15,6 +15,9 @@ import { mapVacancyDetail } from '@/pages/vacancies/shared'
 import type { VacancyDetail } from '@/types/vacancy'
 import type { Id } from '@/types/common'
 
+// Shared cached fetch of the linked vacancy's detail (see file docblock above),
+// enabled only once a vacancy is actually linked, and shared across every tab
+// that reads this same query key.
 export function useApplicationVacancy(vacancyId: Id | null | undefined) {
   const { data, isLoading, isError } = useQuery({
     queryKey: ['vacancies', vacancyId, 'detail'],

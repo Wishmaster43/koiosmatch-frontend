@@ -25,6 +25,7 @@ export function useVacancyTextLite(id: string | undefined) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
 
+  // Fetch just the id/title/description this popped-out window needs to render.
   const load = useCallback(() => {
     if (!id) { setLoading(false); return }
     setLoading(true); setError(false)
@@ -38,6 +39,7 @@ export function useVacancyTextLite(id: string | undefined) {
       .finally(() => setLoading(false))
   }, [id])
 
+  // Load once on mount (and whenever the id changes).
   useEffect(() => { load() }, [load])
   return { vacancy, loading, error, reload: load }
 }

@@ -41,6 +41,8 @@ export function useCustomerDuplicateProbe(name: string, cocNumber: string, billi
   // Cancel the in-flight request when the inputs change again before it resolves.
   const abortRef = useRef<AbortController | null>(null)
 
+  // Debounces the probe request and aborts a stale in-flight one when the
+  // watched fields change again before it resolves.
   useEffect(() => {
     abortRef.current?.abort()
     setMatch(null)

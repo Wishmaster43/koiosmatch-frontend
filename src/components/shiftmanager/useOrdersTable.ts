@@ -13,6 +13,8 @@ import type { OrderRow, EnrichedOrderRow } from '@/types/shiftmanager'
 // The request lifecycle held by the reducer (replaced wholesale per dispatch).
 interface OrdersState { rows: OrderRow[]; loading: boolean; total: number; lastPage: number }
 
+// Data layer for OrdersTable: server paging + row loading, plus the derived
+// enrich/filter/sort pipeline over the loaded page (see file docblock above).
 export function useOrdersTable({ selectedMonth, search, selectedStatuses, sort }: {
   selectedMonth: string
   search: string
@@ -62,6 +64,7 @@ export function useOrdersTable({ selectedMonth, search, selectedStatuses, sort }
     } catch { /* noop */ }
   }
 
+  // Distinct own_status values on the current page, for the status filter's option list.
   const statusOptions = useMemo(() =>
     [...new Set(rows.map(r => r.own_status).filter((s): s is string => Boolean(s)))].sort(), [rows])
 
@@ -78,6 +81,8 @@ export function useOrdersTable({ selectedMonth, search, selectedStatuses, sort }
     order_ref:              r.order?.order_ref ?? '',
   })), [rows])
 
+  // Narrows the enriched rows by the selected statuses and the free-text search
+  // across order ref/customer/location/job-type.
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase()
     return enriched.filter(r => {
@@ -93,6 +98,7 @@ export function useOrdersTable({ selectedMonth, search, selectedStatuses, sort }
     })
   }, [enriched, search, selectedStatuses])
 
+  // Applies the active column/direction on top of the filtered rows.
   const sorted = useMemo(() => {
     const { key, dir } = sort
     return [...filtered].sort((a, b) => {

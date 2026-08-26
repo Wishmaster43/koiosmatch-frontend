@@ -25,6 +25,8 @@ interface PublicUrlsCardProps {
   active: boolean
 }
 
+// Lists this tenant's real, copyable public career-site + feed URLs (see file
+// docblock above) so an admin can paste them into a job board's feed config.
 export default function PublicUrlsCard({ active }: PublicUrlsCardProps) {
   const { t } = useTranslation('settings')
   const auth = useAuth()

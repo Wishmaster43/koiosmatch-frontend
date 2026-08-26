@@ -98,6 +98,7 @@ const TO_API: Record<string, (v: RelItem) => Record<string, unknown>> = {
   }),
 }
 
+// Background sub-tabs (experience/education/certifications/skills/languages/references), each an optimistic local list that reverts on a failed persist (see file header).
 export default function BackgroundTab({ c, onEditSave, onJump }: { c: Candidate; onEditSave?: (v: Record<string, unknown>) => void; onJump?: (tab: string) => void }) {
   const [experiences, setExperiences] = useState<RelItem[]>(c.experiences ?? [])
   const [educations,  setEducations]  = useState<RelItem[]>(c.educations ?? [])

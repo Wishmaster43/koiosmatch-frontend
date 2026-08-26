@@ -23,6 +23,7 @@ import type { WebhookRequestRow } from './webhookRequestTypes'
 
 const PAGE_SIZE_OPTIONS = [25, 50, 100] // contract cap: ≤100 per page
 
+// Per-webhook requests drill-in (see the module doc above): server-paginated, newest first, with all four UI states handled.
 export default function WebhookRequestsPanel({ webhookId, webhookName, onClose }: {
   webhookId: string | number
   webhookName: string

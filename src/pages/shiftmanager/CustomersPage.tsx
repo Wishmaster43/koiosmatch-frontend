@@ -74,6 +74,7 @@ export default function CustomersPage() {
   const [selectedAM,     setSelectedAM]     = useState<string[]>([])
   const [selectedCity,   setSelectedCity]   = useState<string[]>([])
 
+  // Fetch this page from the Shiftmanager mirror endpoint on page/size change; an aborted stale request is swallowed, not surfaced as an error.
   useEffect(() => {
     const ctrl = new AbortController()
     setLoading(true)
@@ -98,16 +99,20 @@ export default function CustomersPage() {
     values.forEach(v => { counts[v] = (counts[v] ?? 0) + 1 })
     return Object.keys(counts).map(v => ({ value: v, label: v, count: counts[v] }))
   }
+  // Build status filter options (label + live count) from the fixed STATUS_COLORS set, dropping any status with zero matches.
   const statusOptions = useMemo(() =>
     Object.keys(STATUS_COLORS).map(s => ({ value: s, label: t(`status.${s}`), count: customers.filter(c => c.status === s).length })).filter(o => o.count > 0)
   , [customers, t])
+  // Build account-manager filter options from the values present in this page's rows.
   const amOptions   = useMemo(() => optsFrom(customers.map(c => c.accountManager).filter((x): x is string => Boolean(x))), [customers])
+  // Build city filter options from the values present in this page's rows.
   const cityOptions = useMemo(() => optsFrom(customers.map(c => c.city).filter((x): x is string => Boolean(x))), [customers])
 
   const tog = (set: Dispatch<SetStateAction<string[]>>) => (v: string) => set(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v])
 
   const catGeneral = t('filters.categories.general')
 
+  // Assemble the right-hand filter panel groups (search + status/AM/city) for registerFilters below.
   const filterGroups = useMemo(() => [
     { key: 'global-search', type: 'global-search', label: t('filters.search'), placeholder: t('page.searchPlaceholder'), value: globalSearch, onChange: setGlobalSearch },
     { key: 'status',  type: 'search-select', category: catGeneral, label: t('filters.status'),         selected: selectedStatus, options: statusOptions, onToggle: tog(setSelectedStatus) },
@@ -115,11 +120,13 @@ export default function CustomersPage() {
     { key: 'city',    type: 'search-select', category: catGeneral, label: t('filters.city'),           selected: selectedCity,   options: cityOptions,   onToggle: tog(setSelectedCity) },
   ], [t, catGeneral, globalSearch, selectedStatus, selectedAM, selectedCity, statusOptions, amOptions, cityOptions])
 
+  // Register these filter groups with the shared right-hand filter panel; unregister on unmount or when the groups change identity.
   useEffect(() => {
     registerFilters('customers-page', filterGroups)
     return () => unregisterFilters('customers-page')
   }, [filterGroups, registerFilters, unregisterFilters])
 
+  // Narrow this page's rows by the active status/AM/city filters and the free-text search.
   const filtered = useMemo(() => {
     const q = globalSearch.trim().toLowerCase()
     return customers.filter(c => {
@@ -138,13 +145,18 @@ export default function CustomersPage() {
   }
   const pickOne = (set: Dispatch<SetStateAction<string[]>>) => (v?: string) => { if (v != null) set(p => (p.length === 1 && p[0] === v) ? [] : [v]) }
 
+  // Shape statusOptions into donut segments, carrying each status's semantic color token.
   const statusData = useMemo(() =>
     statusOptions.map(o => ({ name: o.label, value: o.count, key: o.value, color: STATUS_COLORS[o.value] }))
   , [statusOptions])
+  // Shape amOptions into donut segments (no fixed color — the donut assigns its own palette).
   const amData = useMemo(() => amOptions.map(o => ({ name: o.label, value: o.count, key: o.value })), [amOptions])
 
+  // Sum locations across all customers on this page, for the KPI tile.
   const totalLocations   = useMemo(() => customers.reduce((s, c) => s + (c.locations ?? []).length, 0), [customers])
+  // Sum departments (via deptCount) across all customers, for the KPI tile.
   const totalDepartments = useMemo(() => customers.reduce((s, c) => s + deptCount(c), 0), [customers])
+  // Sum contacts across all customers, for the KPI tile.
   const totalContacts    = useMemo(() => customers.reduce((s, c) => s + (c.contacts ?? []).length, 0), [customers])
   const noContactCount   = useMemo(() => customers.filter(c => (c.contacts ?? []).length === 0).length, [customers])
 

@@ -45,6 +45,8 @@ const pickKey = (d: unknown): string | undefined => {
   return o?.key ?? o?.payload?.key
 }
 
+// Renders the chart: a chronological bar chart for
+// the day axis, a capped share donut for every other axis.
 export default function TenantUsageBreakdownChart({ axis, rows, onSelectKey }: {
   axis: AdminUsageDetailsAxis
   rows: AdminUsageDetailsRow[]
@@ -56,6 +58,8 @@ export default function TenantUsageBreakdownChart({ axis, rows, onSelectKey }: {
   const { formatDate } = useDateFormat()
   const title = t('usage.breakdown.chartTitle', { axis: t(`usage.breakdown.axis.${axis}`).toLowerCase() })
 
+  // Forwards a click to onSelectKey with the row's real key; the "Overig" bucket
+  // has none, so it stays a no-op instead of trying to filter to a fake row.
   const handleClick = (d: unknown) => {
     const key = pickKey(d)
     if (key && key !== OTHER_KEY) onSelectKey?.(key)

@@ -1,9 +1,3 @@
-/**
- * WebhookDetail — the per-subscription detail (replaces the list). A header
- * (back, name, status, Action menu) over two cards: the editable name + URL, and
- * the event filter. Status toggle, secret regeneration (one-time banner) and
- * deletion live in the Action menu and bubble back to the list via onPatch/onDelete.
- */
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ArrowLeft, Check, Copy, MoreHorizontal, Pencil, Power, RefreshCw, Save, Trash2, Webhook, X } from 'lucide-react'
@@ -21,6 +15,12 @@ import SaveButton from '@/components/ui/SaveButton'
 import { SectionTitle, BodyText, Mono } from '@/components/ui/typography'
 import { tintBorder } from '@/lib/tint'
 
+/**
+ * WebhookDetail — the per-subscription detail (replaces the list). A header
+ * (back, name, status, Action menu) over two cards: the editable name + URL, and
+ * the event filter. Status toggle, secret regeneration (one-time banner) and
+ * deletion live in the Action menu and bubble back to the list via onPatch/onDelete.
+ */
 export default function WebhookDetail({ subId, listRow, onBack, onPatch, onDelete }) {
   const { t } = useTranslation('settings')
   const [sub, setSub]         = useState(listRow ?? null)
@@ -72,6 +72,7 @@ export default function WebhookDetail({ subId, listRow, onBack, onPatch, onDelet
   // Header actions.
   const regenerate = async () => { try { const res = await regenerateSecret(subId); setSecret(res?.secret ?? null) } catch { /* noop */ } }
   const toggleStatus = () => applyUpdate({ status: (sub?.status ?? 'active') === 'active' ? 'disabled' : 'active' }).catch(() => {})
+  // Confirms then deletes the subscription, bubbling the removal back to the list.
   const remove = () => {
     confirm(t('webhooks.outgoing.deleteConfirm', { name: sub?.name ?? '' }), async () => {
       try { await deleteSubscription(subId); onDelete?.(subId) } catch { /* noop */ }

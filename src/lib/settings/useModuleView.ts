@@ -12,10 +12,13 @@ import type { ModuleBlock } from './moduleRegistry'
 
 interface SavedBlock { id: string; enabled?: boolean }
 
+// The settings key a module's saved block/view config is stored under.
 export function viewConfigKey(moduleId: string): string {
   return `view.${moduleId}`
 }
 
+// Merge the saved block order/enabled-flags onto the registry's blocks, appending
+// any block the registry gained after the config was last saved (see file doc).
 export function useModuleView(moduleId: string): ModuleBlock[] {
   const values = useAllSettings()
   const blocks = MODULES[moduleId]?.blocks ?? []

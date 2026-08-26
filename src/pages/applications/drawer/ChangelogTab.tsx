@@ -31,7 +31,7 @@ interface LogCard { when?: string; who: string; action: string; field?: string; 
 // Backend field key → a readable label when no translation key exists.
 const humanizeField = (f: string) => f.replace(/_/g, ' ').replace(/([a-z])([A-Z])/g, '$1 $2').replace(/^\w/, c => c.toUpperCase())
 
-// Bookkeeping fields carry no user meaning — never show them as diff rows.
+// Bookkeeping fields carry no user meaning — never show them as diff rows
 // application_stage_id is excluded too: that transition already reads clearly on
 // the Tijdlijn tab ("Fase gewijzigd: A → B"), so it never gets a second, differently
 // phrased row here — not even when it changed alongside another field.
@@ -58,6 +58,7 @@ const changesOf = (ev: ApplicationActivityEvent): Array<{ field: string; old: un
     .map(field => ({ field, old: old[field], next: attrs[field] }))
 }
 
+// Application drawer's changelog tab: loads the activity feed and renders each event's per-field diff via changesOf above.
 export default function ChangelogTab({ application: a }: { application: ApplicationDetail }) {
   const { t } = useTranslation('applications')
   const { formatDate } = useDateFormat()

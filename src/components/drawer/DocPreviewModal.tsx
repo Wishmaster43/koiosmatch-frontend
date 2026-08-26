@@ -112,6 +112,7 @@ export default function DocPreviewModal({ doc, onClose, docTypeScope = 'candidat
   })()
   // Stable primitive key for the effect below — the array itself is rebuilt every render.
   const previewUrlKey = previewUrls.join('|')
+  // Tries each candidate preview URL for the current document, resetting failure/blob state on a real change (previewUrlKey is a stable primitive so an equal-content array rebuild does not re-run this).
   useEffect(() => {
     setPdfFailed(false)
     setBlobUrl(null)

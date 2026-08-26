@@ -27,6 +27,7 @@ interface ProfileTextCardProps {
   set: (k: keyof FormState, v: string) => void
 }
 
+// Always-present, collapsed-by-default profile-text card (see the module doc above for the +Match parity requirement); expand/edit state is local since this modal has no form-level hook to own it.
 export default function ProfileTextCard({ form, set }: ProfileTextCardProps) {
   const { t } = useTranslation(['candidates', 'common'])
   // Collapsed by default, own local state (mirrors useMatchForm's remarksExpanded/
@@ -37,11 +38,13 @@ export default function ProfileTextCard({ form, set }: ProfileTextCardProps) {
   // recruiter actually edits the text — mirrors the CV-prefill mark lifecycle.
   const [generated, setGenerated] = useState(false)
 
+  // Accepts a Koios-generated concept into the field, expands the block so it's visible, and marks it as a suggestion (badge) until the recruiter edits it.
   const applyGenerated = (concept: string) => {
     set('summary', concept)
     setExpanded(true)
     setGenerated(true)
   }
+  // A manual edit clears the suggestion badge (GENERATE-FIELDS-1): once touched, the text is the recruiter's own, not Koios's proposal.
   const handleChange = (v: string) => {
     set('summary', v)
     setGenerated(false)

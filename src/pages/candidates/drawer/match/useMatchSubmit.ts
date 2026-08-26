@@ -46,6 +46,8 @@ interface MatchEditDetail {
   contract_lines?: Array<{ id?: Id; function_title?: string | null; rate?: number | string | null }> | null
 }
 
+// Owns the match create/edit submit path: field-error state, the edit-mode full-
+// record fetch, financial-line redaction, and the actual POST/PATCH body assembly.
 export function useMatchSubmit({
   editing, editMatchId, candidateId, t, onClose, onCreated,
   customerId, locationId, departmentId, contactId, branchId,
@@ -127,6 +129,8 @@ export function useMatchSubmit({
   const linesAreConfidential = getStringSetting(settingValues, 'match_contract_line_rate_side', 'purchase') === 'purchase'
   const canSeeFinancial = !!auth?.hasPermission?.('matches.financial.view')
   const [redactedLines, setRedactedLines] = useState(false)
+  // In edit mode, fetch the full match record once — the candidate's embedded
+  // `matches` row carries none of the match/contract/financial fields.
   useEffect(() => {
     if (!editMatchId) return
     let alive = true

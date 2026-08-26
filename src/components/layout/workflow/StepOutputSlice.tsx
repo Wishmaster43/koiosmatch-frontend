@@ -55,6 +55,7 @@ function ownSlice(step: RunStep, catalog: ModuleCatalog): { rows: Array<Record<s
   return { rows, total: typeof capTotal === 'number' ? capTotal : rows.length }
 }
 
+// See the file's top doc above for why this renders only the step's own output slice, never the merged upstream blob.
 export default function StepOutputSlice({ step, catalog }: { step: RunStep; catalog: ModuleCatalog }) {
   const { t } = useTranslation('workflows')
   const slice = ownSlice(step, catalog)

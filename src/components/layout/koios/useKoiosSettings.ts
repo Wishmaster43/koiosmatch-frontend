@@ -23,18 +23,24 @@ const listeners = new Set<() => void>()
 // effort setting) so an open panel re-reads them.
 export const invalidateKoiosSettings = () => { listeners.forEach(fn => fn()) }
 
+// Lazily loads and caches the tenant's Koios settings for the panel, refetching
+// whenever another surface invalidates them (see invalidateKoiosSettings above).
 export function useKoiosSettings(enabled?: boolean) {
   const [settings, setSettings] = useState<KoiosSettings | null>(null)
   const [loaded, setLoaded]     = useState(false)
   // Epoch bumps on every invalidation → the load effect runs again.
   const [epoch, setEpoch]       = useState(0)
 
+  // Subscribe to the invalidation bus for this hook's lifetime: any other
+  // surface changing the tenant's defaults flips loaded back to false here.
   useEffect(() => {
     const fn = () => { setLoaded(false); setEpoch(e => e + 1) }
     listeners.add(fn)
     return () => { listeners.delete(fn) }
   }, [])
 
+  // Fetch once the panel is enabled (or re-fetch after an invalidation); an
+  // alive-guard skips the state update if the hook unmounted mid-request.
   useEffect(() => {
     if (!enabled || loaded) return
     let alive = true

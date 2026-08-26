@@ -39,6 +39,7 @@ const btnBase = {
   gap: 6, fontSize: 13, borderRadius: 8, whiteSpace: 'nowrap', flexShrink: 0,
 } as const
 
+// Purely presentational shared trash-confirm dialog (see the module doc above): renders the loading/error/blocked/confirm states from props, owning only the local transfer-picker choice and the projected erase date.
 export default function DeletionPreviewModal({
   open, onClose, entityLabel, preview, loading, error, users, onConfirm, busy, blocked, graceDays = null,
 }: DeletionPreviewModalProps) {
@@ -50,6 +51,7 @@ export default function DeletionPreviewModal({
   // Projected erasure moment, stamped ON OPEN (not during render — purity rule):
   // marking stamps pending_erase_at at ~now, so the modal previews now + grace window.
   const [eraseDate, setEraseDate] = useState<Date | null>(null)
+  // Resets the transfer choice and stamps the projected erase date on OPEN, not during render (purity rule): the grace window is computed from now at the moment the modal appears, not recomputed on every re-render.
   useEffect(() => {
     if (!open) return
     setTransferTo('')

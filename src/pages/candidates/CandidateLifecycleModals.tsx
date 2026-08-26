@@ -30,6 +30,8 @@ interface Props {
   onMergedBulk: (survivorId: Id) => void
 }
 
+// Composes the three confirm/guard popups a candidate lifecycle action can raise
+// (erase preview, single/bulk archive guard, bulk merge) — pure wiring, no logic.
 export default function CandidateLifecycleModals({
   eraseTarget, onCloseErase, onConfirmErase,
   archiveGuard, onCloseArchiveGuard, onResolveArchiveGuard,

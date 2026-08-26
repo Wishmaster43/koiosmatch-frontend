@@ -36,6 +36,7 @@ function buildMonths(locale) {
   })
 }
 
+// Usage screen for the active tenant only (see the module doc above): the month selector browses history, never an all-tenants list.
 export default function TenantUsageSettings() {
   const { t } = useTranslation('settings')
   const { formatNumber } = useNumberFormat()

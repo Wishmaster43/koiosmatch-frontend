@@ -30,6 +30,8 @@ import type { Id } from '@/types/common'
 
 export type CvProposalDecision = 'accept' | 'reject'
 
+// Loads CV-parser proposals for one application and exposes the accept/reject
+// mutations that write candidate data (§8: special-category personal data, see the module doc comment above).
 export function useCvParseProposals(candidateId: Id | null | undefined, applicationId: Id | null | undefined) {
   const auth = useAuth()
   const canView = auth?.hasPermission?.('candidates.view') ?? false

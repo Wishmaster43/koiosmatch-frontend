@@ -17,6 +17,7 @@ import { buildReportQueryParams, EMPTY_REPORT_FILTERS } from './reportFilterPara
 import type { ReportFilterState } from './reportFilterParams'
 import type { CandidatesReportData, ReportPeriod } from '@/types/analytics'
 
+// Cached, cancellable candidates-report fetch; phaseFilter joins the query key so the Candidates and Leads populations never share a stale cache entry (see file header).
 export function useCandidatesReport(
   period: ReportPeriod,
   filters: ReportFilterState = EMPTY_REPORT_FILTERS,

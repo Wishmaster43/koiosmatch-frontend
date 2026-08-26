@@ -44,6 +44,7 @@ interface Props {
   archived?: boolean
 }
 
+// Editable Contract & Financieel tab (see the module doc above for what moved to Overview and what stayed here): reads/saves through useMatchContract's optimistic PATCH.
 export default function MatchContractSection({ matchId, onUpdate, archived }: Props) {
   const { t } = useTranslation(['matches', 'common'])
   const { types: caoTypes } = useCao()

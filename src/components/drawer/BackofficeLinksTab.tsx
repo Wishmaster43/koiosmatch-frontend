@@ -48,6 +48,7 @@ export interface BackofficeLinksTabProps {
   children?: ReactNode
 }
 
+// Renders the koppelen tab: gates the HelloFlex/Shiftmanager cards on which connector apps are enabled, and owns the link/sync mutations below.
 export default function BackofficeLinksTab({ entity, id, helloflexLink, shiftmanagerLink, canLink, children }: BackofficeLinksTabProps) {
   const { t } = useTranslation('common')
   // GATING-MATRIX (Danny 23-07): the koppel-cards gate on the CONNECTOR APP ONLY —
@@ -67,6 +68,7 @@ export default function BackofficeLinksTab({ entity, id, helloflexLink, shiftman
   // stray response after unmount never sets state.
   const [linksOverride, setLinksOverride] = useState<{ helloflex: BackofficeLink | null; shiftmanager: BackofficeLink | null } | null>(null)
   const mountedRef = useRef(true)
+  // Re-arm the mounted flag on every mount (StrictMode double-mount) so a stray response after unmount can't set state.
   useEffect(() => {
     mountedRef.current = true
     return () => { mountedRef.current = false }
@@ -74,6 +76,7 @@ export default function BackofficeLinksTab({ entity, id, helloflexLink, shiftman
   // A drawer switching to a different record (new `id`) must drop the stale
   // override — otherwise the previous record's refetched links would leak in.
   useEffect(() => { setLinksOverride(null) }, [entity, id])
+  // Re-fetch the record from its own entity route and rebuild the link overrides; only overwrites state when the response genuinely carries backoffice_links.
   const refetchLinks = async () => {
     try {
       const res = await api.get(`/${entity}/${id}`)
@@ -106,6 +109,7 @@ export default function BackofficeLinksTab({ entity, id, helloflexLink, shiftman
   // fires at all once `canLink` is false.
   const [linking, setLinking] = useState<Partial<Record<BackofficeSystem, boolean>>>({})
   const [queuedStatus, setQueuedStatus] = useState<Partial<Record<BackofficeSystem, string>>>({})
+  // Fire the shared sync POST for one system, optimistically show pending, then refetch so the card reflects the real linked/failed result.
   const onLink = async (system: BackofficeSystem) => {
     if (linking[system] || !canLink) return
     setLinking(s => ({ ...s, [system]: true }))
@@ -139,6 +143,7 @@ export default function BackofficeLinksTab({ entity, id, helloflexLink, shiftman
   const canSyncNow = SM_SYNC_ROUTES.includes(entity)
   const smExternalId = effectiveShiftmanagerLink?.status === 'linked' ? effectiveShiftmanagerLink.externalId ?? null : null
   const [syncing, setSyncing] = useState(false)
+  // Manual Shiftmanager resync for an already-linked record; only offered on entities the sm_ sync route actually supports.
   const onSyncNow = async () => {
     if (!smExternalId || syncing || !canSyncNow) return
     setSyncing(true)

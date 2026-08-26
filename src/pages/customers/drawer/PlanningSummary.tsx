@@ -15,6 +15,8 @@ import type { Id } from '@/types/common'
 
 const Muted = ({ text }: { text: ReactNode }) => <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{text}</div>
 
+// Module-gated "currently at work + upcoming shifts" block (see file docblock
+// above) — renders a calm note instead of the fetch when Planning is off.
 export default function PlanningSummary({ customerId, params }: { customerId: Id; params?: Record<string, unknown> }) {
   const { t } = useTranslation('customers')
   const auth = useAuth()

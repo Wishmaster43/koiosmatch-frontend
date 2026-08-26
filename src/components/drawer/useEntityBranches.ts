@@ -30,6 +30,8 @@ interface UseEntityBranchesArgs {
   initialBranches?: EntityBranch[]
 }
 
+// Generic branch-membership hook behind BranchSection (see file docblock above),
+// parameterised by URL prefix so every entity shares one implementation.
 export function useEntityBranches({ prefix, id, options, fetchOnMount = false, initialBranches = [] }: UseEntityBranchesArgs) {
   const { t } = useTranslation('common')
   const [branches, setBranches] = useState<EntityBranch[]>(initialBranches)

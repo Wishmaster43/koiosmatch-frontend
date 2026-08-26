@@ -10,6 +10,7 @@ import { useWorkflowRun } from './useWorkflowRun'
 import api from '@/lib/api'
 import type { RunRow } from '@/types/reports'
 
+// Owns a workflow's run lifecycle: starting, live-polling, the 409 conflict, and stopping; extracted so useWorkflowEditor stays under its size cap.
 export function useWorkflowRunControl({ workflowId, initialRunId = null, onRunStarted }: {
   workflowId: string | number | undefined
   // RUN-CONTROL-1: open already focused on an active run (the 409 "already
@@ -36,6 +37,7 @@ export function useWorkflowRunControl({ workflowId, initialRunId = null, onRunSt
   // run that is still live for this workflow — the poll, node rings, "Bezig"
   // ("busy") status and the stop button resume as if never closed.
   const adopted = useRef(false)
+  // On mount, adopt any run already live for this workflow so reopening the editor shows it as busy instead of idle.
   useEffect(() => {
     if (adopted.current || initialRunId != null || workflowId == null) return
     adopted.current = true
@@ -56,6 +58,7 @@ export function useWorkflowRunControl({ workflowId, initialRunId = null, onRunSt
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [workflowId])
 
+  // Starts a real server-side run (or dry-run), tracks its id for polling, and turns a 409 into the 'already running' conflict state instead of a generic error.
   const handleRun = useCallback(async (opts?: { dryRun?: boolean }) => {
     setRunning(true)
     setRunError(null)

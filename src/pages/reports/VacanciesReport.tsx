@@ -52,6 +52,7 @@ const SUMMARY_COLOR: Partial<Record<string, string>> = {
   noMatches: 'var(--color-warning)', closingSoon: 'var(--color-warning)',
 }
 
+// Vacancies report: summary KPI cards (coloured via SUMMARY_COLOR above) plus charts, scoped by period/filters/compare.
 export default function VacanciesReport({ period, filters = EMPTY_REPORT_FILTERS, compare = COMPARE_OFF }: { period: ReportPeriod; filters?: ReportFilterState; compare?: ReportCompareMode }) {
   const { t } = useTranslation('analytics')
   const { formatDate } = useDateFormat()

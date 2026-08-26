@@ -54,6 +54,7 @@ interface DuplicateNoticeProps {
   ns?: string
 }
 
+// The duplicate-notice panel itself: shows who the existing record is and its archived state, with open/restore actions — never a merge affordance.
 export default function DuplicateNotice({ match, variant, canRestore, restoring, onOpen, onRestore, onDismiss, ns = 'candidates' }: DuplicateNoticeProps) {
   const { t } = useTranslation(ns)
   const blocked = variant === 'blocked'

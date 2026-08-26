@@ -104,6 +104,8 @@ export default function EntityTasksTab(props: Props) {
   )
 }
 
+// The actual tab body, rendered inside its own TaskLookupsProvider (see the wrapper
+// above) so the status filter always has a lookup to read from.
 function EntityTasksTabBody({ linkType, id, labels, extraLinks = [] }: Props) {
   const { t } = useTranslation('tasks')
   const { formatDate } = useDateFormat()

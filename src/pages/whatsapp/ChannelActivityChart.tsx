@@ -15,6 +15,7 @@ import { fmtAxisDate } from './data/axisDate'
 // App-wide active locale (DATUM-1/LANE-B) — feeds the per-day axis label.
 import { useLocale } from '@/lib/datetime'
 
+// Per-day inbound/outbound activity bar chart, one series per channel with its house colour and translated label.
 export default function ChannelActivityChart({ data }: { data: WaActivityDatum[] }) {
   const { t } = useTranslation('whatsapp')
   // Channel names live in the candidates namespace (one label per enum value, app-wide).

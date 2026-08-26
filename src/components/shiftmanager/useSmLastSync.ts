@@ -8,6 +8,8 @@ import { heavyGet } from '@/lib/heavyGet'
 
 interface SyncSource { system?: string; label?: string; last_synced_at?: string | null }
 
+// Cached lookup of the Shiftmanager mirror's own sync timestamp out of the
+// dashboard's shared sync_sources list, matched loosely since tenant labels vary.
 export function useSmLastSync(enabled = true): string | null {
   const { data } = useQuery({
     queryKey: ['dashboard', 'sync-sources'],

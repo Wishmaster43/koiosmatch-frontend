@@ -33,6 +33,8 @@ export class CooldownError extends Error {
   constructor(url: string) { super(`heavyGet cooldown: ${url}`); this.name = 'CooldownError' }
 }
 
+// Guarded GET for expensive aggregate endpoints: dedupes identical concurrent
+// requests and, after an outage-shaped failure, cools that url down before retrying.
 export function heavyGet(url: string, config: AxiosRequestConfig = {}): Promise<AxiosResponse> {
   const cd = cooldown.get(url)
   if (cd && Date.now() < cd.blockedUntil) return Promise.reject(new CooldownError(url))

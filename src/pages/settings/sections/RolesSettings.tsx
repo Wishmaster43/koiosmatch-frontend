@@ -18,6 +18,8 @@ import { tintBg, tintBorder } from '@/lib/tint'
 import { PageTitle } from '@/components/ui/typography'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 
+// Thin container: owns the roles/permissions fetch and create/delete, and delegates
+// the actual permission editing to RoleDetail (see file docblock above).
 export default function RolesSettings() {
   const { t } = useTranslation('settings')
   const [roles,       setRoles]       = useState<Role[]>([])
@@ -30,6 +32,8 @@ export default function RolesSettings() {
   const [editRole,    setEditRole]    = useState<Role | null>(null)
   const { confirm, dialog } = useConfirm()
 
+  // Loads the role list, the full permission catalogue, and the allowed role-icon set
+  // once on mount; the icon fetch degrades to the built-in list on a 404.
   useEffect(() => {
     Promise.all([api.get<Role[]>('/roles'), api.get<PermissionsByGroup>('/permissions')])
       .then(([rolesRes, permsRes]) => { setRoles(rolesRes.data); setPermissions(permsRes.data) })
@@ -44,6 +48,7 @@ export default function RolesSettings() {
     }).catch(() => {})
   }, [])
 
+  // User submitted the "new role" field: creates it and appends the server's own row.
   const createRole = async () => {
     if (!newRoleName.trim()) return
     setCreating(true)
@@ -54,6 +59,8 @@ export default function RolesSettings() {
     setCreating(false)
   }
 
+  // User asked to delete a role: confirms first, then removes it and closes the
+  // detail panel if that role was the one currently open.
   const deleteRole = (role: Role) => {
     confirm(t('roles.confirmDelete', { name: role.name }), async () => {
       setDeleting(role.id)
@@ -66,6 +73,8 @@ export default function RolesSettings() {
     }, { danger: true })
   }
 
+  // RoleDetail already persisted the change server-side; syncs the local list and
+  // the open detail state so both reflect the saved role.
   const handleUpdate = (updated: Role) => {
     setRoles(prev => prev.map(r => r.id === updated.id ? updated : r))
     setEditRole(updated)

@@ -15,6 +15,7 @@ import Button from '@/components/ui/Button'
 import { Mono } from '@/components/ui/typography'
 import { tintBorder } from '@/lib/tint'
 
+// Failure log with per-row retry/forget and two destructive bulk actions, both gated behind the shared confirm dialog naming the exact count (see file header).
 export default function FailedJobsTab() {
   const { t } = useTranslation('settings')
   const {

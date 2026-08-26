@@ -34,6 +34,8 @@ interface UseKoiosComposerKeysArgs {
   textareaRef: RefObject<HTMLTextAreaElement | null>
 }
 
+// Owns the "@" mention picker's state and keyboard handling for the Koios composer
+// (see file docblock above); the panel keeps ownership of input/send/context chips.
 export function useKoiosComposerKeys({ input, setInput, addMentionRef, textareaRef }: UseKoiosComposerKeysArgs) {
   const [showMention, setShowMention] = useState(false)
   const [mentionQ, setMentionQ] = useState('')
@@ -63,6 +65,7 @@ export function useKoiosComposerKeys({ input, setInput, addMentionRef, textareaR
 
   // Close the mention picker on an outside click.
   useEffect(() => {
+    // A click outside the mention picker (and not inside a portalled menu) closes it.
     const handler = (e: MouseEvent) => {
       if (isInsideDropdownPortal(e.target as Node)) return
       if (mentionRef.current && !mentionRef.current.contains(e.target as Node)) closeMentionMenu()

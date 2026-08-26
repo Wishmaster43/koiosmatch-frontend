@@ -31,6 +31,7 @@ import { useTranslation } from 'react-i18next'
 import { SettingRow, SelectField } from './SettingsKit'
 import { STATUS_FILTER_ALL, isActiveValue } from '@/components/drawer/StatusFilterSelect'
 
+// One SettingRow picking the tenant's stored default status filter, or showing the same guess useStatusFilter applies today when nothing is stored yet (see file header).
 export default function DefaultStatusFilterPicker({ statuses, value, onChange }) {
   const { t } = useTranslation('settings')
 

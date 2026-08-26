@@ -34,6 +34,7 @@ const mapLastContactTypes = (res: AxiosResponse): LookupOption[] | null => {
   return d.length ? d : null
 }
 
+// The last-contact-type tenant lookup, translating seeded defaults into the user language while a tenant's own value stays exactly as typed.
 export function useLastContactTypes() {
   const { t } = useTranslation('common')
   const { data: rawTypes } = useCachedLookup('/last-contact-types', mapLastContactTypes, DEFAULT_LAST_CONTACT_TYPES)
@@ -43,7 +44,7 @@ export function useLastContactTypes() {
   // Resolve a stored value/slug to its label. NEVER prefix `icon` as text: the
   // backend sends lucide icon NAMES ("building"), which rendered as literal words
   // in the drawer footer ("building Afspraak") — same bug class as the intake
-  // modal (2026-07-08). Icons render as components where a surface wants them.
+  // modal (2026-07-08). Icons render as components where a surface wants them
   // useCallback: CandidatesTable hangs both of these in its columns useMemo deps
   // (audit item 7) — they must only change identity when `types` actually changes.
   const labelOf = useCallback((value?: string | null): string => {

@@ -65,6 +65,8 @@ async function downloadUsageXlsx(period: Period) {
   URL.revokeObjectURL(url)
 }
 
+// Settings → Billing → Usage: owns the one shared /billing/usage fetch and period
+// filter that every sub-tab reads, so switching tabs never triggers its own refetch.
 export default function GebruikSettings() {
   const { t } = useTranslation('settings')
   const { registerFilters, unregisterFilters } = useRightPanel()
@@ -78,6 +80,8 @@ export default function GebruikSettings() {
   const [data, setData] = useState<BillingUsageResponse['data'] | undefined>(undefined)
   const [phase, setPhase] = useState<Phase>('loading')
 
+  // Fetch usage for the selected period; aborting on a period switch avoids a stale
+  // response landing after a newer one, and 'empty' vs 'ready' is derived from whether anything was actually used.
   useEffect(() => {
     const ctrl = new AbortController()
     setPhase('loading')
@@ -103,6 +107,7 @@ export default function GebruikSettings() {
   // WhatsApp tab's fallback (month-only, no period param, §see UsageWhatsAppTab).
   const [wa, setWa] = useState<WhatsAppUsage | null>(null)
   const [waPhase, setWaPhase] = useState<Phase>('loading')
+  // One-time legacy WhatsApp KPI fetch (month-only, no period param) for the overview tile and the WhatsApp tab's fallback.
   useEffect(() => {
     const ctrl = new AbortController()
     api.get('/settings/messaging-costs', { signal: ctrl.signal })
@@ -136,6 +141,7 @@ export default function GebruikSettings() {
   }, [t, period, registerFilters, unregisterFilters])
 
   const [exporting, setExporting] = useState(false)
+  // Download the usage export for the current period, surfacing a mapped error message on failure.
   const handleExport = async () => {
     setExporting(true)
     try {

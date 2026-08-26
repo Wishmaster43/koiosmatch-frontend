@@ -15,6 +15,7 @@ import { humanizeIsoDates } from '@/lib/localDate'
 import { tintBg, tintBorder, chipInk } from '@/lib/tint'
 import type { ActionRuleDecision } from './actionRuleTypes'
 
+// Renders the warn/block banner for an AXIS-MATRIX-2 decision.
 export default function ActionRuleBanner({ decision }: { decision: ActionRuleDecision | null | undefined }) {
   const { t } = useTranslation('common')
   if (!decision || decision.effect === 'allow') return null

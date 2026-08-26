@@ -10,6 +10,8 @@ import ApiKeyList from './ApiKeyList'
 import ApiKeyDetail from './ApiKeyDetail'
 import ApiKeyCreate from './ApiKeyCreate'
 
+// Container for the API-keys section: switches between the list, a create
+// screen and a single key's detail, all backed by the one useApiKeys hook.
 export default function ApiKeysSettings() {
   const { keys, loading, error, reload, add, patch, drop } = useApiKeys()
   const [selectedId, setSelectedId] = useState(null)

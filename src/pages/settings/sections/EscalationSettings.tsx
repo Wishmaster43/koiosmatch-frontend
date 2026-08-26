@@ -145,6 +145,8 @@ export default function EscalationSettings() {
     })
   }, [form.values])
 
+  // Fires the actual save once requestSave has cleared the atomic-pair gate above
+  // and flagged pendingSave, so form.save() only ever runs after that validation.
   useEffect(() => {
     if (pendingSave) { setPendingSave(false); form.save() }
     // form.save/form.values intentionally excluded: this effect only reacts to the
@@ -181,6 +183,8 @@ export default function EscalationSettings() {
   const usersQuery = useUsers()
   const { roles } = useAssignableRoles()
   const users = (usersQuery.data ?? []) as Array<{ id?: string | number; name?: string; firstname?: string; lastname?: string; email?: string }>
+  // Combines tenant users and assignable roles into one searchable target list,
+  // each option labelled by kind so a uuid/role-name never shows as a bare string.
   const targetOptions = useMemo(() => {
     const userOpts = users
       .filter(u => u.id != null)

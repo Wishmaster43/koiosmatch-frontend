@@ -28,6 +28,7 @@ function stepTime(step: RunStep): string | null {
   return to && to !== from ? `${from} → ${to}` : from
 }
 
+// Right-panel run viewer for one workflow: the run list with expandable step results, plus the live run's own ticking duration and stop control.
 export default function LogsPanel({ workflowId, liveRun, onClose, onOpenHistory }: {
   workflowId?: string | number; liveRun?: RunRow | null; onClose: () => void
   // LOGS-DRILL-1 (Danny 23-07: "MEER INFORMATIE of klik naar geschiedenis" — MORE
@@ -46,6 +47,7 @@ export default function LogsPanel({ workflowId, liveRun, onClose, onOpenHistory 
   // SYNC-PROGRESS-1: a 1s clock in STATE (never Date.now() in render — impure per
   // the compiler lint) so a busy run's Duur ticks live.
   const [nowTick, setNowTick] = useState(() => Date.now())
+  // Tick once a second so a running run's Duur (duration) updates live without re-fetching.
   useEffect(() => {
     const timer = setInterval(() => setNowTick(Date.now()), 1000)
     return () => clearInterval(timer)

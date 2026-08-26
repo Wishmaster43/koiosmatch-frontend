@@ -22,6 +22,7 @@ export interface DocVersion {
   download_url?: string
 }
 
+// Collapsible superseded-versions list under a document row; renders nothing when there are no prior versions (see file header).
 export default function DocumentVersionHistory({ versions }: { versions: DocVersion[] }) {
   const { t } = useTranslation('candidates')
   const { formatDate } = useDateFormat()

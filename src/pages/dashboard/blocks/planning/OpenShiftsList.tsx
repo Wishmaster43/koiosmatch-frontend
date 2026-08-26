@@ -1,14 +1,14 @@
+import { useTranslation } from 'react-i18next'
+import WidgetListBlock from '@/pages/dashboard/blocks/WidgetListBlock'
+import { useDateFormat, toLocalIsoDate } from '@/lib/datetime'
+import type { OpenShiftRow } from '@/types/dashboard'
+
 /**
  * OpenShiftsList — planning work-feed tile: open shifts still needing a
  * candidate, rendered through the shared WidgetListBlock row idiom. A row
  * click carries `{ open: shift_id, date }` so the planning page lands on the
  * right day AND opens that shift's staffing drawer (PLANNING-INTENT-1).
  */
-import { useTranslation } from 'react-i18next'
-import WidgetListBlock from '@/pages/dashboard/blocks/WidgetListBlock'
-import { useDateFormat, toLocalIsoDate } from '@/lib/datetime'
-import type { OpenShiftRow } from '@/types/dashboard'
-
 export default function OpenShiftsList({ rows, onNavigate }: {
   rows: OpenShiftRow[]
   onNavigate?: (page: string, params?: Record<string, unknown>) => void

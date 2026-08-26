@@ -39,6 +39,7 @@ export interface GeocodeButtonProps {
   onResult?: (lat: number, lng: number) => void
 }
 
+// Fires the queued per-id geocode POST and only ever claims 'started' (see the module doc above — every route answers 202, so completion is never rendered as done here).
 export default function GeocodeButton({ endpoint, permission, disabled = false, variant = 'ghost', onResult }: GeocodeButtonProps) {
   const { t } = useTranslation('common')
   const auth = useAuth()

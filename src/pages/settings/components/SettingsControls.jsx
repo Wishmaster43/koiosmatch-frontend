@@ -9,9 +9,11 @@ import { COLOR_PRESETS } from '@/lib/colorPresets'
 import Toggle from '@/components/ui/Toggle'
 import SoftChip from '@/components/ui/SoftChip'
 
+// The curated-palette popover anchored under ColorSwatch; an outside click closes it via the effect below.
 function ColorPickerPopup({ color, onChange, onClose }) {
   const [hex, setHex] = useState(color)
   const ref = useRef(null)
+  // Close the popup on any outside mousedown, not just its own trigger.
   useEffect(() => {
     const handler = (e) => { if (ref.current && !ref.current.contains(e.target)) onClose() }
     document.addEventListener('mousedown', handler)
@@ -37,6 +39,7 @@ function ColorPickerPopup({ color, onChange, onClose }) {
   )
 }
 
+// Swatch trigger plus its picker popup; the only state it owns is whether the popup is open.
 export function ColorSwatch({ color, onChange }) {
   const [open, setOpen] = useState(false)
   return (
@@ -120,6 +123,7 @@ export function DragList({ items, onReorder, renderItem, sortable = true, bare =
   const [dragIdx, setDragIdx] = useState(null)
   const [overIdx, setOverIdx] = useState(null)
 
+  // Mouse-drop reorder: moves the dragged item to the hovered index and persists via onReorder.
   const handleDrop = () => {
     if (dragIdx === null || overIdx === null || dragIdx === overIdx) { setDragIdx(null); setOverIdx(null); return }
     const next = [...items]

@@ -16,6 +16,7 @@ const TONE: Record<'error' | 'warning', { color: string; role: 'alert' | 'status
   warning: { color: 'var(--color-warning)', role: 'status' },
 }
 
+// The notice itself: renders nothing without text, and picks its color/ARIA role from the severity tone map.
 export default function FieldNotice({ text, severity = 'error', style }: {
   text?: string | null
   severity?: 'error' | 'warning'

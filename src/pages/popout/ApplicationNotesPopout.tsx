@@ -19,6 +19,8 @@ type AnyProps = Record<string, unknown>
 // Still-untyped JS component — accept any props at the boundary (mirrors applications/drawer/NotesTab.tsx).
 const NotesTab = NotesTabJs as unknown as ComponentType<AnyProps>
 
+// The standalone second-screen notes window for one application: notes only,
+// same shared NotesTab/note-type lookup the drill-down's own tab uses.
 export default function ApplicationNotesPopout({ id }: { id: string | undefined }) {
   const { t } = useTranslation('applications')
   const { application, loading, error, reload } = useApplicationLite(id)

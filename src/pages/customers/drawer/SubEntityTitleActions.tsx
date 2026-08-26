@@ -39,6 +39,8 @@ export interface SubEntityTitleActionsProps {
   deleteTitle: string
 }
 
+// The shared sub-entity title-row action cluster
+// each action renders only when the caller wires a handler for it.
 export default function SubEntityTitleActions({
   pager, changelogEndpoint, onMerge, mergeTitle, onArchive, archiveTitle, archiving = false,
   onDelete, deleteDisabled = false, deleteTitle,

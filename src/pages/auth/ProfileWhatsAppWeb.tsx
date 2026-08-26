@@ -17,6 +17,9 @@ import Spinner from '@/components/ui/Spinner'
 import CalloutBox from '@/components/ui/CalloutBox'
 import { BodyText, Caption } from '@/components/ui/typography'
 
+// Thin container for the logged-in user's own WhatsApp Web devices (see file
+// docblock above): all state/polling lives in useWhatsAppWeb, this only renders
+// the four UI states plus the honest "module/permission off" case.
 export default function ProfileWhatsAppWeb() {
   const { t } = useTranslation('auth')
   const { devices, phase, busyId, notEnabledId, createDevice, connect, disconnect, remove } = useWhatsAppWeb()

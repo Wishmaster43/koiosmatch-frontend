@@ -101,6 +101,9 @@ const API_TO_FORM: Record<string, string> = {
 const EMAIL_VALIDATORS = { email: isValidEmailFormat }
 const EMAIL_ERROR_KEYS = { email: 'validation.emailFormat' }
 
+// Create/edit a contact person: owns cross-card orchestration (form/error state,
+// the primary-replace confirm, the client-side duplicate check, the location→
+// department cascade, and the submit chain + 422 mapping); cards render the fields.
 export default function AddContactPersonModal({
   onClose, onCreate, onImported, customerName, locations = [], departments = [], statuses = [], initial, lockLocationId, lockDepartmentId, existing = [],
 }: {

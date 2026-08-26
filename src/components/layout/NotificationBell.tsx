@@ -40,6 +40,7 @@ import type { NotificationTarget } from './notificationTarget'
 export { resolveNotificationTarget }
 export type { NotificationTarget }
 
+// Topbar bell + dropdown; opening it marks everything seen, and each row deep-links to its record only when the backend supplies a resolvable target (see file header).
 export default function NotificationBell() {
   const { t } = useTranslation('common')
   // DATUM-1: rows read DD-MM-YYYY HH:mm through the house formatter — never a

@@ -33,6 +33,8 @@ function computeMaxWidth(): number {
   return Math.max(MIN_WIDTH, Math.min(MAX_WIDTH_ABSOLUTE, Math.round(window.innerWidth * MAX_WIDTH_VIEWPORT_RATIO)))
 }
 
+// Bound a candidate width to [MIN_WIDTH, current viewport ceiling] so neither a
+// drag nor a stored value can ever produce an unusable or overflowing panel.
 function clamp(px: number): number {
   return Math.min(computeMaxWidth(), Math.max(MIN_WIDTH, Math.round(px)))
 }
@@ -59,6 +61,8 @@ function readWidth(): number {
   }
 }
 
+// Owns the Koios panel's persisted width plus all the ways it can change: the
+// toggle button's preset snap, pointer drag, and keyboard resize.
 export function useKoiosPanelWidth() {
   const [width, setWidth] = useState<number>(readWidth)
   const [maxWidth, setMaxWidth] = useState<number>(computeMaxWidth)
@@ -78,6 +82,8 @@ export function useKoiosPanelWidth() {
   // Re-clamp whenever the window is resized narrower than the stored width,
   // and refresh the exposed ceiling so the handle's aria-valuemax stays live.
   useEffect(() => {
+    // Window shrank/grew: refresh the ceiling and pull the current width back
+    // under it if needed, so a stored wide panel never overflows a narrower window.
     const onResize = () => {
       const nextMax = computeMaxWidth()
       setMaxWidth(nextMax)
@@ -93,6 +99,7 @@ export function useKoiosPanelWidth() {
   // preset the button jumps to next. This is how a free width and the
   // existing two-size toggle coexist without one silently overriding the other.
   const isExpanded = width > (WIDTH_COLLAPSED + WIDTH_EXPANDED) / 2
+  // Snap to whichever preset is on the OTHER side of the current width.
   const toggle = useCallback(() => {
     commitWidth(isExpanded ? WIDTH_COLLAPSED : WIDTH_EXPANDED)
   }, [isExpanded, commitWidth])
@@ -112,6 +119,8 @@ export function useKoiosPanelWidth() {
   // unmount (the cleanup function covers both) — no leaked global listeners.
   useEffect(() => {
     if (!isDragging) return
+    // Compute the new width from how far the pointer moved since drag start,
+    // not from its absolute position, so the handle can be grabbed anywhere.
     const onMove = (e: PointerEvent) => {
       const start = dragStartRef.current
       if (!start) return

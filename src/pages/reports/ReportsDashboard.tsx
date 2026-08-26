@@ -32,6 +32,8 @@ import type { ReportPeriod } from '@/types/analytics'
 // KPI card needs — total/loading/error, plus the sub-report it drills into.
 type Row = { key: string; label: string; page: ReportId; loading: boolean; error: boolean; total: number | null }
 
+// The bare #reports overview: nine KPI cards, each
+// backed by an existing report hook and click-through to its own sub-report.
 export default function ReportsDashboard({ period }: { period: ReportPeriod }) {
   const { t } = useTranslation('analytics')
   const { navigate } = useNavigation()

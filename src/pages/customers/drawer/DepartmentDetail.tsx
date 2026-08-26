@@ -115,6 +115,7 @@ function buildDepartmentAdviceInsights(d: Department, t: Tx): KoiosAdviceInsight
   ]
 }
 
+// One department's own drill-down body: the field-table card, sub-tabs (contacts/vacancies/applications/notes/documents/matches/opportunities/tasks/extra/koppelingen) and merge/delete actions — see the prop comments for each sub-tab's own history.
 export default function DepartmentDetail({ department, locations, statuses, contactStatuses = [], departments = [], contacts = [], canLinkBackoffice = false, trail = [], pager, onMerged, onAddContact, onUpdateContact, onRemoveContact, onSave, onDelete, close, customerId, customerName }: {
   department: Department
   locations: { id: Id; name: string }[]
@@ -207,6 +208,7 @@ export default function DepartmentDetail({ department, locations, statuses, cont
     costCenter: department.costCenter,
   }
 
+  // Maps the field-table's edited values back onto the specific PATCH fields onSave expects.
   const save = (v: Record<string, unknown>) => {
     onSave(department.id as Id, {
       name: v.name as string, locationId: v.locationId as string,

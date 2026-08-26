@@ -38,6 +38,8 @@ interface CustomerStatusChipProps {
   round?: boolean
 }
 
+// The customer deployability chip; a customer still
+// in the flagged entry phase renders a dash instead of a chip.
 export default function CustomerStatusChip({ status, phase, plain = false, fallbackLabel, fallbackColor, round = false }: CustomerStatusChipProps) {
   const { phases } = useCustomerPhases()
   const { statusMeta } = useCustomerLookups()

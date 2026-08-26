@@ -14,6 +14,7 @@ import EntityListDrawer  from '@/components/ui/EntityListDrawer'
 import Spinner from '@/components/ui/Spinner'
 import type { SmDrillItem } from '@/types/shiftmanager'
 
+// Renders the KPI blocks and shifts chart, registers filters into the right panel, and opens a drill-down drawer on KPI click.
 export default function CustomersReport() {
   const { t } = useTranslation('shiftmanager')
   const { customers, loading } = useSmCustomerTree()
@@ -82,9 +83,11 @@ export default function CustomersReport() {
 
   // Right-panel filter
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([])
+  // Distinct status values present in the loaded customers, sorted, for the status filter options.
   const statusOptions = useMemo(() =>
     [...new Set(customers.map(c => c.status).filter((x): x is string => Boolean(x)))].sort(), [customers])
 
+  // Builds the single status filter definition, with live counts, handed to the shared right-panel filter UI; empty when no status value occurs at all.
   const filterGroups = useMemo(() => statusOptions.length === 0 ? [] : [{
     key: 'status', label: t('customersReport.filterStatus'),
     selected: selectedStatuses,
@@ -96,6 +99,7 @@ export default function CustomersReport() {
     onToggle: (v: string) => setSelectedStatuses(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]),
   }], [t, statusOptions, selectedStatuses, customers])
 
+  // Registers this report's filter groups with the shared right panel, and unregisters them on unmount so they do not leak into another page.
   useEffect(() => {
     registerFilters('customers-report', filterGroups)
     return () => unregisterFilters('customers-report')

@@ -47,6 +47,7 @@ interface Props {
   emptyLabel?: string
 }
 
+// Searchable picker for (re)pointing a contact's candidate coupling; note/emptyLabel let each caller phrase its own copy.
 export default function ContactLinkPicker({ candidates, locations, departments, onPick, onClose, note, emptyLabel }: Props) {
   const { t } = useTranslation('customers')
   const [search, setSearch] = useState('')

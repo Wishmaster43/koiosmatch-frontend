@@ -12,6 +12,7 @@ import { eur } from '@/pages/dashboard/dashboardFormat'
 import type { PipelineValuePoint } from '@/types/dashboard'
 import type { FeedTileContext } from '../feedTileKit'
 
+// Sales-manager tile (see the module doc above): a point click only sends the report id, the reports lane seeds its own filter from that intent.
 export default function PipelineValueLine({ rows, onNavigate }: {
   rows: PipelineValuePoint[]
   onNavigate?: FeedTileContext['onNavigate']

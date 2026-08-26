@@ -24,6 +24,7 @@ export function lucideFor(icon?: string | null): LucideIcon | null {
   return icon ? (SLUG_ICONS[icon.trim().toLowerCase()] ?? null) : null
 }
 
+// Renders the actual icon for a lookup: a curated lucide slug, or the raw value (emoji/free text) as-is.
 export default function LookupIcon({ icon, size = 13, color }: { icon?: string | null; size?: number; color?: string }) {
   if (!icon) return null
   const Icon = lucideFor(icon)

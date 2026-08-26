@@ -45,6 +45,7 @@ const pickOne = (set: Dispatch<SetStateAction<string[]>>) => (d: unknown) => {
 const tog = (set: Dispatch<SetStateAction<string[]>>) => (v: string) =>
   set(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v])
 
+// Thin container: filters/pagination/selection state, seeded from a navigation intent, composing the insights/table/board + drawer (data lives in useOpportunitiesData).
 export default function OpportunitiesPage({ intent }: { intent?: unknown } = {}) {
   const { t } = useTranslation(['opportunities', 'common'])
   // LOOKUP-I18N-1: the seeded stage label renders in the user's language; the
@@ -135,6 +136,7 @@ export default function OpportunitiesPage({ intent }: { intent?: unknown } = {})
   // Shared clear-all (page memory keeps filters sticky).
   const anyFilterActive = Boolean(query.trim() || stage.length || owner.length || client.length || selectedBranch.length || expiringOnly || showArchived || showTrash)
   const [searchEpoch, setSearchEpoch] = useState(0)
+  // Resets every filter dimension (search, stage/owner/client/branch, quick-views) and the page back to default, bumping searchEpoch so the search input itself clears too.
   const clearAllFilters = () => {
     setSearchEpoch(e => e + 1); setQuery(''); setStage([]); setOwner([]); setClient([]); setSelectedBranch([])
     setExpiringOnly(false); setShowArchived(false); setShowTrash(false); setPage(1)
@@ -199,6 +201,7 @@ export default function OpportunitiesPage({ intent }: { intent?: unknown } = {})
     rows.forEach(r => { const v = r[key]; if (v) m.set(v, (m.get(v) ?? 0) + 1) })
     return [...m.entries()].map(([value, count]) => ({ value, label: value, count }))
   }
+  // Builds the right-panel filter groups (stage/owner/client/branch) from the option lists derived above, recomputing only when the underlying rows or picked values change.
   const filterGroups = useMemo(() => buildOpportunityFilterGroups({
     t, tog, stage, setStage, owner, setOwner, client, setClient,
     selectedBranch, setSelectedBranch, showArchived, setShowArchived,

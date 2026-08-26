@@ -16,6 +16,8 @@ import type { AiAgent } from '@/types/ai'
 export interface AiAgentOption { value: Id; label: string }
 export interface UseAiAgentsResult { options: AiAgentOption[]; agents: AiAgent[]; loading: boolean; error: boolean }
 
+// AI agent picker options + the raw list, cached under the same react-query key
+// as the vacancy feature's mirror hook (see file doc for why this stays a separate copy).
 export function useAiAgents(enabled: boolean = true): UseAiAgentsResult {
   const { data, isLoading, isError } = useQuery({
     queryKey: ['ai-agents'],

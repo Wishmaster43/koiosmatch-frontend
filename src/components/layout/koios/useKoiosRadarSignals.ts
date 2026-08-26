@@ -28,12 +28,13 @@ const SIGNAL_ORDER: Array<{ id: RadarSignalId; statKey: keyof AttentionStats }> 
   { id: 'hasTasks',       statKey: 'tasks' },
 ]
 
+// Fetches candidate attention stats for the Koios landing radar, keeping only non-zero signals in priority order so an empty signal never renders a dead card.
 export function useKoiosRadarSignals() {
   const [signals, setSignals] = useState<RadarSignal[] | null>(null)
   const [error,   setError]   = useState(false)
 
   // One-shot fetch on mount — the panel only mounts this component while showing
-  // the landing state, so there is no need for extra enable/disable plumbing.
+  // the landing state, so there is no need for extra enable/disable plumbing
   // heavyGet already dedupes concurrent calls and cools down after a failure.
   useEffect(() => {
     let alive = true

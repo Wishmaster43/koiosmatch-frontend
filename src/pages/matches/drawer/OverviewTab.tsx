@@ -100,6 +100,7 @@ interface OverviewTabProps {
   onOpenNotes?: () => void
 }
 
+// See the file's top doc above; the one overview tab carrying all match facts, read-only except where noted.
 export default function OverviewTab({ match, onUpdate, onOpenNotes }: OverviewTabProps) {
   const { t } = useTranslation(['matches', 'candidates'])
   const { formatDate } = useDateFormat()
@@ -122,7 +123,7 @@ export default function OverviewTab({ match, onUpdate, onOpenNotes }: OverviewTa
 
   // MATCH-EDIT-1: the six fields that used to live on the Contract tab — now
   // editable here, grouped under that tab's OWN "Contract"/"Financieel" titles
-  // (one source per label §11 — these are exactly the fields that moved).
+  // (one source per label §11 — these are exactly the fields that moved)
   // contract_type is optional → the real VAC-CLEAR-1 clear-cross via the table's
   // `clearable` passthrough (Opus round 22-08: the earlier injected "none" option
   // leaked its label into read mode where every sibling empty renders a dash).

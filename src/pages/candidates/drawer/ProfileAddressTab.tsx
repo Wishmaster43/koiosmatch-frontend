@@ -28,6 +28,7 @@ type AddressForm = Record<AddressKey, string>
 // (mirrors the old PROFILE_REQ_MAP — houseNumber/suffix/province/country aren't).
 const REQ_MAP: Partial<Record<AddressKey, string>> = { street: 'street', postalCode: 'postal_code', city: 'city' }
 
+// Address sub-tab: its own pencil/draft/error state, so editing here never discards an in-progress edit elsewhere in the profile.
 export default function ProfileAddressTab({ c, onSave, autoEditSignal }: {
   c: Candidate; onSave?: (v: Record<string, unknown>) => void; autoEditSignal?: number
 }) {
@@ -55,6 +56,7 @@ export default function ProfileAddressTab({ c, onSave, autoEditSignal }: {
   // country's list in. If the country changes and the currently filled province no
   // longer exists in the new list, clear it rather than silently keep a mismatch.
   const { provinces } = useProvinces(form.country)
+  // Clear a province that no longer exists in the new country's list, right after the cascade resolves.
   useEffect(() => {
     if (form.province && !provinces.includes(form.province)) setF('province', '')
     // eslint-disable-next-line react-hooks/exhaustive-deps -- only react to the resolved province list changing, not every form edit

@@ -121,6 +121,8 @@ const FIELD_MAP: Record<string, string> = {
 const mapCustomerDetail = (raw: ApiCustomer): Customer =>
   ({ ...mapCustomer(raw), ...mapCustomerBilling(raw) })
 
+// Owns the selected customer + its fetched detail, the optimistic single-record
+// PATCH, restore, create flow and notes CRUD, keeping CustomersPage presentational.
 export function useCustomerRecord({ setCustomers, setTotal, users, t }: Args) {
   const [selected,       setSelected]       = useState<Customer | null>(null)
   const [detail,         setDetail]         = useState<Customer | null>(null)

@@ -26,6 +26,7 @@ interface UseEntityImportCardArgs {
   onClose: () => void
 }
 
+// Owns the import wizard instance + resolved view/create permission pair for the given entity (see the module doc above for why this is its own hook).
 export function useEntityImportCard({ entity, hasPermission, onImported, onClose }: UseEntityImportCardArgs) {
   const wizard = useImportWizard(entity)
   // GET /imports/{entity}/template.csv needs the entity's own view right; the

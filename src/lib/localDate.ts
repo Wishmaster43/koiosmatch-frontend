@@ -47,6 +47,8 @@ export const hhmmss = (d: Date) => `${pad2(d.getHours())}:${pad2(d.getMinutes())
 // verbatim, so we cannot format a field — only repair the date notation inside.
 const ISO_TIMESTAMP_RE = /\b(\d{4})-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])[T ](\d{2}):(\d{2})(?::\d{2}(?:\.\d+)?)?(?:Z|[+-]\d{2}:?\d{2})?\b/g
 const ISO_DATE_RE = /\b(\d{4})-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])\b/g
+// Rewrites every embedded ISO date/timestamp inside a string to DD-MM-YYYY[ HH:mm] —
+// text-level because the surrounding prose is server-composed and can't be reformatted as a field.
 export function humanizeIsoDates(text: string | null | undefined): string {
   if (!text) return ''
   return text
@@ -66,6 +68,8 @@ export function formatDateOnly(dt?: string | number | Date | null): string {
   const d = new Date(dt)
   return isNaN(d.getTime()) ? '—' : ddmmyyyy(d)
 }
+// Same non-hook DD-MM-YYYY formatting as formatDateOnly above, with the time appended;
+// an invalid/missing input renders as a dash, never a raw value.
 export function formatDateTimeStr(dt?: string | number | Date | null): string {
   if (!dt) return '—'
   const d = new Date(dt)

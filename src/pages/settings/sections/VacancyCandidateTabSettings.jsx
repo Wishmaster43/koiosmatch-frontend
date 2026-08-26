@@ -73,6 +73,7 @@ export default function VacancyCandidateTabSettings() {
   )
 }
 
+// The actual three-sub-tab editor; needs the vacancy-lookups context the outer wrapper above provides.
 function VacancyCandidateTabSettingsInner() {
   const { t } = useTranslation('settings')
   const { statuses: candidateStatuses, candidateTypes } = useLookups()

@@ -10,6 +10,8 @@ import type { LucideIcon } from 'lucide-react'
 import StatusBadge from '../ui/StatusBadge'  // shared active/inactive status pill
 import type { ReportCustomer } from '@/types/reports'
 
+// One labelled icon+value line; renders nothing when the value is empty so the
+// drawer never shows a row with a dangling blank.
 function InfoRow({ icon: Icon, label, value }: { icon: LucideIcon; label: ReactNode; value?: ReactNode }) {
   if (!value) return null
   return (
@@ -21,6 +23,8 @@ function InfoRow({ icon: Icon, label, value }: { icon: LucideIcon; label: ReactN
   )
 }
 
+// Read-only slide-in with one customer's locations/departments/contacts, opened
+// from CustomersTable; traps focus while open (§6) and closes on backdrop click.
 export default function CustomerDetailDrawer({ customer, onClose }: { customer: ReportCustomer; onClose: () => void }) {
   const panelRef = useFocusTrap<HTMLDivElement>(onClose)
   const { t } = useTranslation('reports')

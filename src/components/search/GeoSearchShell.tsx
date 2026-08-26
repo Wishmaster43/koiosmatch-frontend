@@ -38,6 +38,8 @@ interface GeoSearchShellProps {
   results: ReactNode
 }
 
+// The one shared layout for both geo-search directions: trigger pills, an
+// optional chips row, the radius/actions row, then the map/results split.
 export default function GeoSearchShell({ triggers, chips, radius, actions, mapHeight, map, results }: GeoSearchShellProps) {
   const { t } = useTranslation('common')
 

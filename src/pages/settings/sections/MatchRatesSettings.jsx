@@ -13,6 +13,7 @@ import api, { unwrap } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 import { PageTitle } from '@/components/ui/typography'
 
+// See the file's top doc above; the purchase-to-sale conversion factor, persisted to the shared tenant matching settings resource.
 export default function MatchRatesSettings() {
   const { t } = useTranslation('settings')
   // Nullable: '' = no factor configured (falls back to purchase-only, source: none).

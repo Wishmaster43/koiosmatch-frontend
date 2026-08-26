@@ -13,6 +13,7 @@
 import { useTranslation } from 'react-i18next'
 import StatusListEditor from './StatusListEditor'
 
+// Thin wrapper over the shared StatusListEditor (see the module doc above): plain name+colour CRUD with reorder now enabled since the backend added sort_order.
 export default function EscalationReasonsSettings() {
   const { t } = useTranslation('settings')
   return (

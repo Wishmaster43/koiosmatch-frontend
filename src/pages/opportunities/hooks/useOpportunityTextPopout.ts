@@ -31,6 +31,8 @@ export function useOpportunityTextLite(id: string | undefined) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
 
+  // Fetches the opportunity's identity + description for the popped-out window;
+  // stable identity so the effect below only refires when `id` actually changes.
   const load = useCallback(() => {
     if (!id) { setLoading(false); return }
     setLoading(true); setError(false)
@@ -44,6 +46,7 @@ export function useOpportunityTextLite(id: string | undefined) {
       .finally(() => setLoading(false))
   }, [id])
 
+  // Loads on mount and whenever `id` changes (via `load`'s own dependency).
   useEffect(() => { load() }, [load])
   return { opportunity, loading, error, reload: load }
 }

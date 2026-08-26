@@ -59,6 +59,7 @@ const mapEmergencyContactRelations = (res: AxiosResponse): EmergencyContactRelat
   return d.length ? d : null
 }
 
+// must send the option's `id`, never its `value`/`label` (see the ID-vs-slug note above).
 export function useEmergencyContactRelations() {
   const { t } = useTranslation('common')
   const { data: rawRelations } = useCachedLookup(

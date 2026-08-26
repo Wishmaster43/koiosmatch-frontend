@@ -23,6 +23,7 @@ interface EntityListDrawerProps {
   onClose: () => void
 }
 
+// See the file's top doc above; a searchable slide-in list of the records behind one KPI tile.
 export default function EntityListDrawer({ title, items, onClose }: EntityListDrawerProps) {
   const { t } = useTranslation('common')
   const panelRef = useFocusTrap<HTMLDivElement>(onClose)

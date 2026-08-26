@@ -100,6 +100,7 @@ const mapSources = (res: AxiosResponse): SourcesLookupData => {
   }
 }
 
+// Tenant candidate-source lookup with its own free-entry toggle, defaulting to strict when the response omits the flag.
 export function useApplicationSources() {
   const { t } = useTranslation('common')
   const { data, invalidate } = useCachedLookup('/candidate-sources', mapSources, FALLBACK)

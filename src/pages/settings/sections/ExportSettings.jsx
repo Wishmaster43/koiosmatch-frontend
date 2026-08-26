@@ -83,6 +83,7 @@ export async function downloadCsv(route, entityId) {
   URL.revokeObjectURL(url)
 }
 
+// Per-entity CSV export screen, each button gated on the same view-permission its list uses since exporting is bulk reading (see file header).
 export default function ExportSettings() {
   const { t } = useTranslation('settings')
   const { hasPermission } = useAuth()

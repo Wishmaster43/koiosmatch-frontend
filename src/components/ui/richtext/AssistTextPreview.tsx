@@ -54,6 +54,7 @@ function DiffSpan({ segment }: { segment: DiffSegment }) {
   )
 }
 
+// The shared readable Koios assist result preview with an optional expand toggle and New/Compare view.
 export default function AssistTextPreview({ text, compareWith }: { text: string; compareWith?: string }) {
   const { t } = useTranslation('common')
   const [expanded, setExpanded] = useState(false)

@@ -74,6 +74,7 @@ function EmailLogDrawer({ entry, onClose }: { entry: EmailLogEntry; onClose: () 
   )
 }
 
+// Settings → e-mail audit log: table + search/direction filters + a row detail panel.
 export default function EmailLog() {
   const { t } = useTranslation('settings')
   // App-wide active locale (§5) — formatDateTime replaces the old hardcoded 'nl-NL' fmt().
@@ -111,6 +112,7 @@ export default function EmailLog() {
     { key: 'created_at', header: t('log.date'), width: 150, nowrap: true, render: r => formatDateTime(r.created_at) },
   ]
 
+  // Builds the search + direction filter groups fed to the shared right panel.
   const filterGroups = useMemo(() => [
     { key: 'search', label: t('emailLog.searchPlaceholder'), type: 'global-search', value: search, onChange: setSearch },
     { key: 'direction', label: t('log.direction'), type: 'search-select', selected: selectedDir,

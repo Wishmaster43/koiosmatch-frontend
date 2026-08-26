@@ -8,6 +8,7 @@ import { useCampaignAdvice } from '@/lib/useCampaignAdvice'
 import { adviceInsightRows } from '@/lib/koiosAdviceInsight'
 import type { Campaign } from '../hooks/useOutreachCampaigns'
 
+// Outreach drawer's Koios AI block; see the module doc comment above for why it renders nothing when there is no advice.
 export default function CampaignKoiosBlock({ campaign }: { campaign: Campaign }) {
   const resolveAdvice = useCampaignAdvice()
   const insights = adviceInsightRows(resolveAdvice(campaign))

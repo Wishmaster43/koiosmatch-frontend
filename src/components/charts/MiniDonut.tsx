@@ -36,6 +36,7 @@ export function MiniTooltip({ active, payload, total }: TipProps & { total?: num
   )
 }
 
+// The ring itself: dims every segment except the picked one, and centers the total unless the host renders it elsewhere.
 export default function MiniDonut({ data = [], colors = DEFAULT_COLORS, size = 56, onItemClick, pickedKey = null, showCenter = true }: {
   data?: ChartDatum[]; colors?: string[]; size?: number; onItemClick?: (d: unknown) => void
   // Active-filter value (key or label) — the other segments dim so the pick is visible.

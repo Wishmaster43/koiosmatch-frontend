@@ -63,6 +63,7 @@ export function buildFieldDiff(entry, t) {
   const before = (changes?.old && typeof changes.old === 'object') ? changes.old : {}
   const isCreate = entry?.event === 'created'
   const empty = t('audit.emptyValue', { defaultValue: 'Empty' })
+  // Renders one changed value for display: null/empty become the empty label, booleans/arrays get readable text, and a nested object falls back to compact JSON rather than '[object Object]'.
   const fmt = (v) => {
     if (v === null || v === undefined || v === '') return empty
     if (typeof v === 'boolean') return v ? t('common:yes') : t('common:no')
@@ -79,6 +80,7 @@ export function buildFieldDiff(entry, t) {
     .filter(row => !isCreate || row.after !== empty)
 }
 
+// Small tinted pill naming a log's source (e.g. system/user), coloured per LOG_NAME_META with a neutral fallback for an unknown log name.
 export function LogBadge({ logName }) {
   const { t } = useTranslation('settings')
   const m = LOG_NAME_META[logName] ?? { bg: 'var(--border)', color: 'var(--text-muted)' }

@@ -90,6 +90,7 @@ import type { MatchContractLine } from '@/types/match'
 
 interface UserLike { id?: Id; name?: string }
 
+// See the file's top doc above for what this hook owns; this is the composed match-form state it exposes.
 export function useMatchForm({
   candidateId: fixedCandidateId, editMatchId, onClose, onCreated,
   initialCustomerId, initialCustomerLocationId, initialCustomerDepartmentId,
@@ -144,6 +145,7 @@ export function useMatchForm({
   // Candidate picker (only when no fixed candidate): light option list from the API.
   const [pickedCandidateId, setPickedCandidateId] = useState('')
   const [candidateOptions, setCandidateOptions] = useState<Array<{ id?: Id; name?: string }>>([])
+  // Loads the candidate option list for the picker only when the candidate is not already fixed by the caller (e.g. opened from the Matches page rather than a candidate's own Match tab).
   useEffect(() => {
     if (fixedCandidateId) return
     api.get('/candidates', { params: { per_page: 200 } })
@@ -213,7 +215,7 @@ export function useMatchForm({
   const { candBranch, candOwnerId, mismatchChoice, setMismatchChoice, branchMismatch } = useBranchMismatch(candidateId, detail)
 
   // Inline contact-create (Danny): when a customer has no matching contact, add one
-  // and couple it to the picked location right here (POST /customers/{id}/contacts).
+  // and couple it to the picked location right here (POST /customers/{id}/contacts)
   // function/phone/mobile (Danny 24-07 addendum) are all accepted by the backend's
   // CustomerContactController::validateContact — verified directly against the
   // koiosmatch-api source, never assumed.
@@ -241,6 +243,7 @@ export function useMatchForm({
   // existing record would silently rewrite a match the recruiter opened to edit.
   // One-shot via the ref, so clearing the field by hand keeps it cleared.
   const contractTypeProposedRef = useRef(false)
+  // Proposes the tenant default contract type into an empty field once, on create only, so it never silently rewrites a match the recruiter opened to edit.
   useEffect(() => {
     if (editing || contractTypeProposedRef.current || contractType) return
     const def = contractTypeOptions.find(o => o.is_default)

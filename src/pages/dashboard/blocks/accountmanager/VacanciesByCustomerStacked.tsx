@@ -16,6 +16,7 @@ import { useSeedLabel } from '@/lib/useSeedLabel'
 import type { VacanciesByCustomerRow } from '@/types/dashboard'
 import type { FeedTileContext } from '../feedTileKit'
 
+// Stacked bar of vacancies per customer, one segment per status; clicking a segment deep-links to that customer's vacancies tab (see file header).
 export default function VacanciesByCustomerStacked({ rows, onNavigate }: {
   rows: VacanciesByCustomerRow[]
   onNavigate?: FeedTileContext['onNavigate']

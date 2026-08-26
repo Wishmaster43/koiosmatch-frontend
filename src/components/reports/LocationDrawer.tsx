@@ -10,6 +10,7 @@ import type { LucideIcon } from 'lucide-react'
 import StatusBadge from '../ui/StatusBadge'  // shared active/inactive status pill
 import type { ReportLocation } from '@/types/reports'
 
+// One label/value row with a leading icon; renders nothing when the value is empty, so absent fields don't leave a blank row.
 function InfoRow({ icon: Icon, label, value }: { icon: LucideIcon; label: ReactNode; value?: ReactNode }) {
   if (!value) return null
   return (
@@ -22,6 +23,7 @@ function InfoRow({ icon: Icon, label, value }: { icon: LucideIcon; label: ReactN
   )
 }
 
+// Read-only slide-in panel for one location's address/department/customer details, opened from LocationsTable.
 export default function LocationDrawer({ location, onClose }: { location: ReportLocation; onClose: () => void }) {
   const panelRef = useFocusTrap<HTMLDivElement>(onClose)
   const { t } = useTranslation('reports')

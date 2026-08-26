@@ -33,6 +33,7 @@ export interface OpportunityNote {
   [k: string]: unknown
 }
 
+// CRUD notes for one opportunity; a 404 (endpoint not yet built for this tenant) degrades to a calm empty list instead of an error banner.
 export function useOpportunityNotes(id?: Id) {
   const { t } = useTranslation()
   const [items,   setItems]   = useState<OpportunityNote[]>([])
@@ -42,6 +43,7 @@ export function useOpportunityNotes(id?: Id) {
   // response) flags error, mirroring useOpportunityActivity.
   const [error,   setError]   = useState(false)
 
+  // Fetches the note list for the current id; any non-404 failure sets error so the empty state never lies about it.
   const load = useCallback((signal?: AbortSignal) => {
     if (!id) { setItems([]); return }
     setLoading(true); setError(false)
@@ -57,6 +59,7 @@ export function useOpportunityNotes(id?: Id) {
       .finally(() => { if (!signal?.aborted) setLoading(false) })
   }, [id])
 
+  // Loads notes on mount/id change, aborting the in-flight request if the id changes again before it resolves.
   useEffect(() => {
     const ctrl = new AbortController()
     load(ctrl.signal)

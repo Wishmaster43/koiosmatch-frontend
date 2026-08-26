@@ -1,8 +1,3 @@
-/**
- * CandidatesReport — candidates analytics report with several charts.
- * Filters are pushed to the layout via RightPanelContext (no own filter button
- * or inline sidebar). KPI targets come from useKpiSettings.
- */
 import { useState, useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import ErrorBanner from '@/components/ui/ErrorBanner'
@@ -36,6 +31,7 @@ const END_COLOR    = 'var(--color-danger)'
 // (must mirror the labels chartHelpers.groupByMonth produces).
 const MONTHS_NL = ['Jan','Feb','Mrt','Apr','Mei','Jun','Jul','Aug','Sep','Okt','Nov','Dec']
 
+// ISO week number for a date; drives the week-chart labels and the drill-down match below.
 function getWeekNumber(date: Date) {
   const d     = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()))
   const day   = d.getUTCDay() || 7
@@ -44,6 +40,11 @@ function getWeekNumber(date: Date) {
   return Math.ceil((((d.getTime() - start.getTime()) / 86400000) + 1) / 7)
 }
 
+/**
+ * CandidatesReport — candidates analytics report with several charts.
+ * Filters are pushed to the layout via RightPanelContext (no own filter button
+ * or inline sidebar). KPI targets come from useKpiSettings.
+ */
 export default function CandidatesReport() {
   const { t } = useTranslation('reports')
   const { candidates_per_page, top_cities_n } = useKpiSettings()
@@ -99,6 +100,8 @@ export default function CandidatesReport() {
   const handleLoginDrillDown = (data: unknown) => { const name = (data as ChartDatum).name; openDrillDown(name, t('report.sub.lastLogin'),
     filteredGeneral.filter(c => getLoginGroup(c.last_login_at) === name)) }
 
+  // Bar click on the monthly registration chart: opens the drawer with the candidates
+  // registered in that month (of the selected year, if any).
   const handleMonthDrillDown = (data: unknown) => {
     const monthName = ((data as ChartDatum).name || (data as { payload?: { name?: string } }).payload?.name) ?? ''
     openDrillDown(monthName, t('report.sub.regMonth'), filteredGeneral.filter(c => {
@@ -109,6 +112,7 @@ export default function CandidatesReport() {
     }))
   }
 
+  // Same as handleMonthDrillDown, but matched on ISO week label instead of month name.
   const handleWeekDrillDown = (data: unknown) => {
     const label = ((data as ChartDatum).name || (data as { payload?: { name?: string } }).payload?.name) ?? ''
     openDrillDown(label, t('report.sub.regWeek'), filteredGeneral.filter(c => {
@@ -122,6 +126,8 @@ export default function CandidatesReport() {
   const handleCityDrillDown = (data: unknown) => { const name = (data as ChartDatum).name; openDrillDown(name, t('report.sub.city'),
     filteredGeneral.filter(c => (c.city || 'Onbekend') === name)) }
 
+  // Deregistration counterpart of handleMonthDrillDown: filters the deleted-status set
+  // by end_date_employment instead of registration_date.
   const handleEndMonthDrillDown = (data: unknown) => {
     const monthName = ((data as ChartDatum).name || (data as { payload?: { name?: string } }).payload?.name) ?? ''
     openDrillDown(monthName, t('report.sub.endMonth'), filteredDeleted.filter(c => {
@@ -132,6 +138,7 @@ export default function CandidatesReport() {
     }))
   }
 
+  // Weekly counterpart of handleEndMonthDrillDown.
   const handleEndWeekDrillDown = (data: unknown) => {
     const label = ((data as ChartDatum).name || (data as { payload?: { name?: string } }).payload?.name) ?? ''
     openDrillDown(label, t('report.sub.endWeek'), filteredDeleted.filter(c => {
@@ -147,10 +154,13 @@ export default function CandidatesReport() {
     [...new Set(candidates.map(c => (c.status||'onbekend').toLowerCase()))].sort(),
     [candidates])
 
+  // Distinct sorted position list for the filter panel; only recomputed when candidates change.
   const allPositions = useMemo(() =>
     [...new Set(candidates.map(c => c.position||'Onbekend'))].sort(),
     [candidates])
 
+  // Builds the RightPanelContext filter config; memoized so the shared panel doesn't
+  // re-render on every keystroke unrelated to these dependencies.
   const filterGroups = useMemo(() => [
     {
       key: 'weergave', label: t('report.filters.view'),
@@ -193,6 +203,8 @@ export default function CandidatesReport() {
     },
   ], [t, showPercent, selectedYear, selectedStatuses, selectedPositions, allStatuses, allPositions, availableYears, candidates])
 
+  // Keeps this report's filter groups mirrored into the shared right panel whenever they
+  // change, and deregisters them on unmount so a stale entry doesn't linger for other pages.
   useEffect(() => {
     registerFilters('candidates-analysis', filterGroups)
     return () => unregisterFilters('candidates-analysis')

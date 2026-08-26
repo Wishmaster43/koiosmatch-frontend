@@ -35,6 +35,7 @@ export function useOutreachTargetTextLite(campaignId: string | undefined, target
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
 
+  // Fetch the campaign detail and pick out this one target row (see file doc for why).
   const load = useCallback(() => {
     if (!campaignId || !targetId) { setLoading(false); return }
     setLoading(true); setError(false)
@@ -51,6 +52,7 @@ export function useOutreachTargetTextLite(campaignId: string | undefined, target
       .finally(() => setLoading(false))
   }, [campaignId, targetId])
 
+  // Load once on mount (and whenever the campaign/target id pair changes).
   useEffect(() => { load() }, [load])
   return { target, loading, error, reload: load }
 }

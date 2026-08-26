@@ -56,6 +56,7 @@ const mapRow = (raw: Record<string, unknown>): ScopedMatchRow => ({
   contractType: (raw.contract_type as string) ?? null,
 })
 
+// Thin adapter over ScopedListTab for the department/location Matches sub-tab,
 export default function ScopedMatchesTab({ scope, id, customerId }: {
   scope: 'department' | 'location'; id: Id | undefined
   // Point 1: threaded down from LocationDetail/DepartmentDetail so "+ Match" can

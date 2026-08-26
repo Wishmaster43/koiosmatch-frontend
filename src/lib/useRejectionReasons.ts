@@ -35,6 +35,7 @@ const mapRejectionReasons = (res: AxiosResponse): LookupOption[] | null => {
   return Array.isArray(rows) && rows.length ? rows.map(toOption) : null
 }
 
+// Cached tenant rejection-reasons lookup shared by the report filter panel and RejectionModal (see the module doc above); no seed fallback since an unknown reason set renders honestly empty.
 export function useRejectionReasons() {
   const { t } = useTranslation('common')
   const { data: rawReasons, loading } = useCachedLookup('/candidate-rejection-reasons', mapRejectionReasons, NO_REJECTION_REASONS)

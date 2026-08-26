@@ -18,6 +18,7 @@ interface HeaderSearchProps {
   width?: number | string
 }
 
+// The one shared header search box: debounces internally and calls onSearch with the trimmed query, so every page wires it to its own server-side search (see file header).
 export default function HeaderSearch({
   onSearch, placeholder, ariaLabel, defaultValue = '',
   debounceMs = 300, autoFocus = false, width = 260,

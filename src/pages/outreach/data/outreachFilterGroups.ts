@@ -23,6 +23,8 @@ interface BuildArgs {
   statusOptions: Opt[]; channelOptions: Opt[]; ownerOptions: Opt[]; targetGroupOptions: Opt[]
 }
 
+// Pure builder for the outreach page's right-panel filter groups (see file
+// docblock above) — state/options in, group config out, no side effects.
 export function buildOutreachFilterGroups({
   t, tog, selectedStatus, setSelectedStatus, selectedChannel, setSelectedChannel,
   selectedOwner, setSelectedOwner, selectedTargetGroup, setSelectedTargetGroup,

@@ -7,6 +7,7 @@
  */
 import { Navigate, useParams } from 'react-router-dom'
 
+// Legacy-URL redirect to the entity-aware route, so an already-open window or bookmarked link keeps resolving (see file header).
 export default function CandidatePopoutRedirect() {
   const { candidateId } = useParams<{ candidateId: string }>()
   return <Navigate to={`/popout/notes/candidate/${candidateId}`} replace />

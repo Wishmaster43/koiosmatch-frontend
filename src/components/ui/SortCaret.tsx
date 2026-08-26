@@ -10,6 +10,7 @@
  */
 import { ChevronUp, ChevronDown, ChevronsUpDown } from 'lucide-react'
 
+// The one sort indicator: a muted double-chevron when inactive, the accent-coloured directional chevron when active; purely decorative (aria-hidden), the real state lives on the header button.
 export default function SortCaret({ active, dir, size = 12 }: {
   active: boolean
   dir?: 'asc' | 'desc'

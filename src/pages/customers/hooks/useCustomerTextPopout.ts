@@ -42,6 +42,7 @@ export function useCustomerTextLite(id: string | undefined) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
 
+  // Fetch this customer's identity + description for the popup; ignores an aborted/cancelled request.
   const load = useCallback((signal?: AbortSignal) => {
     if (!id) { setLoading(false); return }
     setLoading(true); setError(false)
@@ -68,12 +69,12 @@ export function useCustomerTextLite(id: string | undefined) {
 
 // Light identity fetch for the popped-out department omschrijving window — reads
 // the customer-wide department LIST and picks the one row (no single-record GET,
-// see the file header).
 export function useDepartmentTextLite(customerId: string | undefined, departmentId: string | undefined) {
   const [department, setDepartment] = useState<DepartmentLite | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
 
+  // Fetch the department by scanning the customer's department list (no single-record GET exists) and pick the matching row.
   const load = useCallback((signal?: AbortSignal) => {
     if (!customerId || !departmentId) { setLoading(false); return }
     setLoading(true); setError(false)
@@ -108,6 +109,7 @@ export function useLocationTextLite(locationId: string | undefined) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
 
+  // Fetch this location's identity + description directly (a single-record GET exists here, unlike departments).
   const load = useCallback((signal?: AbortSignal) => {
     if (!locationId) { setLoading(false); return }
     setLoading(true); setError(false)
@@ -141,6 +143,7 @@ export function useContactTextLite(customerId: string | undefined, contactId: st
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
 
+  // Fetch this contact's identity + notes directly via the flat /contacts/{id} route.
   const load = useCallback((signal?: AbortSignal) => {
     if (!customerId || !contactId) { setLoading(false); return }
     setLoading(true); setError(false)

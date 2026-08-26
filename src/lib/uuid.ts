@@ -8,6 +8,7 @@
  */
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
+// Matches the canonical UUID format (see the module doc above for why this one shared check replaces three drifting copies).
 export function isUuid(value: unknown): boolean {
   return typeof value === 'string' && UUID_RE.test(value)
 }

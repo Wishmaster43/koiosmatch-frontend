@@ -82,6 +82,8 @@ interface RoleDetailProps {
   onUpdate: (role: Role) => void
 }
 
+// Renders one role's permission matrix + appearance/name editing; every change
+// persists immediately via its own PUT and bubbles up through onUpdate.
 export function RoleDetail({ role, permissions, iconOptions, onBack, onUpdate }: RoleDetailProps) {
   const { t } = useTranslation('settings')
   // Dashboard-namespace translator so the "start dashboard" options use the same labels as the switcher.
@@ -97,6 +99,8 @@ export function RoleDetail({ role, permissions, iconOptions, onBack, onUpdate }:
 
   const hasPermission = (perm: string) => localRole.permissions?.some(p => p.name === perm) ?? false
 
+  // User toggled one permission checkbox: sends the full updated permission set
+  // and adopts the server's own row as the new source of truth.
   const togglePermission = async (permName: string) => {
     const current = localRole.permissions?.map(p => p.name) ?? []
     const updated = current.includes(permName) ? current.filter(p => p !== permName) : [...current, permName]
@@ -108,6 +112,7 @@ export function RoleDetail({ role, permissions, iconOptions, onBack, onUpdate }:
     setSaving(false)
   }
 
+  // Commits the in-place name edit; a blank or unchanged name just closes the editor.
   const saveName = async () => {
     const name = draftName.trim()
     if (!name || name === localRole.name) { setEditName(false); return }

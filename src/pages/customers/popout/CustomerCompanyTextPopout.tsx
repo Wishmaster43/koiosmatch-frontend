@@ -14,10 +14,12 @@ import { useTextPopoutDraft } from '@/pages/popout/shared'
 import { useCustomerTextLite, patchCustomerText } from '../hooks/useCustomerTextPopout'
 import { textPopoutTopic } from '@/lib/secondScreen'
 
+// Second-screen editor for the customer's bedrijfstekst; a thin wire-up of identity/draft/persist hooks (TEKST-POPOUT-1 recipe).
 export default function CustomerCompanyTextPopout({ id }: { id: string | undefined }) {
   const { t } = useTranslation('customers')
   const { customer, loading, error, reload } = useCustomerTextLite(id)
 
+  // Save the draft through the same PATCH /customers/{id} the drawer's OverviewTab writes; no-ops without an id.
   const persist = useCallback((html: string, revert: () => void) => {
     if (!id) return Promise.resolve(false)
     return patchCustomerText(id, html, t, revert)

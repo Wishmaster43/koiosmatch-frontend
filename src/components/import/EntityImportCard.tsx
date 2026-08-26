@@ -65,6 +65,8 @@ interface EntityImportCardProps {
   wholeTree?: boolean
 }
 
+// The compact "create from a file" card at the top of a create modal: pick →
+// mandatory dry-run preview → real import, reusing the Settings wizard's own steps.
 export default function EntityImportCard({ wizard, canView, canImport, entity, intro, wholeTree = false }: EntityImportCardProps) {
   const { t } = useTranslation('settings')
   const { step, file, preview, run } = wizard

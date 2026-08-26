@@ -68,6 +68,8 @@ interface Props {
   save: (patch: Partial<MatchContract>) => Promise<void>
 }
 
+// The match's free-text block, rich-text editable and second-screen pop-outable
+// like the candidate profile text (mirrors useVacancyDescription's idiom).
 export default function MatchTextBlock({ matchId, value, present, loading, save }: Props) {
   const { t } = useTranslation('matches')
 
@@ -96,6 +98,7 @@ export default function MatchTextBlock({ matchId, value, present, loading, save 
 
   const startEdit  = () => { setDraft(shown ?? ''); setEditing(true) }
   const cancelEdit = () => { setDraft(shown ?? ''); setEditing(false) }
+  // Persists the draft as match_text and reports success/failure via toast.
   const saveEdit = async () => {
     try {
       await save({ match_text: draft || null })

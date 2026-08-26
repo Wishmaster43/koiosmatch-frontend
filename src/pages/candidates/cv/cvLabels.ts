@@ -33,6 +33,7 @@ const interp = (str: string, opts: Record<string, unknown> = {}) => str.replace(
 // Resolves one CV label key: through the caller's `t` under the `cv.` namespace
 // when available, otherwise through the Dutch seed above.
 export type CvLabelFn = (key: string, opts?: Record<string, unknown>) => string
+// Returns a label resolver bound once to the caller's t, falling back to the Dutch seed dictionary when none is supplied.
 export function makeCvLabeller(t?: TranslateFn): CvLabelFn {
   return (k, opts) => (t ? t(`cv.${k}`, opts) : interp(CV_NL[k] ?? k, opts))
 }

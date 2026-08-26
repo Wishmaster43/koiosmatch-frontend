@@ -34,6 +34,7 @@ import StatusListEditor from './StatusListEditor'
 import { useCountriesLookup } from '@/lib/useCountriesLookup'
 import { getFlagEmoji } from '@/lib/countries'
 
+// Thin wrapper over the shared StatusListEditor (see the module doc above): adds the country-code flag adornment and the EU/EEA flagField on top of the plain name+colour CRUD.
 export default function NationalitiesSettings() {
   const { t } = useTranslation('settings')
   const { options: countryOptions } = useCountriesLookup()

@@ -29,6 +29,8 @@ interface TasksBulkBarProps {
   users?: BulkUser[]
 }
 
+// Thin assembler for the tasks bulk-action bar (see file docblock above) — every
+// mutation is one ActionMenu config node fed by props, never a forked bar.
 export default function TasksBulkBar({
   count, onClear, onSetStatus, onSetPriority, onSetAssignee, onArchive, canArchive = false,
   statuses = [], priorities = [], users = [],

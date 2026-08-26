@@ -184,16 +184,21 @@ export default function AddOpportunityModal({ onClose, onCreated, users = [], cu
     // eslint-disable-next-line react-hooks/exhaustive-deps -- locations arriving is the trigger; ids are guards
   }, [locations])
 
+  // Update one field, clearing that field's 422 error once the user edits it.
   const set = (k: keyof OppForm, v: string) => {
     setForm(f => ({ ...f, [k]: v }))
     if (errors[k]) setErrors(e => ({ ...e, [k]: false }))
   }
+  // Picking a different client invalidates the whole downstream cascade pick.
   const handleClientChange = (v: string) => {
     set('clientId', v)
     setLocationId(''); setDepartmentId(''); setContactId('')
   }
+  // Picking a different location invalidates the department picked under it.
   const handleLocationChange = (v: string) => { setLocationId(v); setDepartmentId('') }
 
+  // Build the create/update body (every field conditionally null-guarded) and
+  // POST or PATCH depending on whether an existing Kans is being edited.
   const handleSubmit = async () => {
     if (!form.title.trim()) { setErrors({ title: true }); return }
     setSaving(true)

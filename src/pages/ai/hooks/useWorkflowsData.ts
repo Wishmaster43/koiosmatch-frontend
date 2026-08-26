@@ -131,6 +131,8 @@ export function useWorkflowsData(showArchived: boolean) {
     setFetchTick(v => v + 1)
   }
 
+  // User pressed "run" on a workflow: fires the run, and on a 409 (already running)
+  // opens the builder focused on that live run instead of just failing.
   const handleRun = async (id?: string | number) => {
     try {
       // 409 (already running) is handled below with its own toast + builder focus.
@@ -161,6 +163,9 @@ export function useWorkflowsData(showArchived: boolean) {
     })
   }
 
+  // User saved the canvas editor's graph: creates or updates the workflow, then keeps
+  // the FE graph (steps + connections) as source of truth in localStorage since the
+  // backend does not persist connections yet (C-27), so a reload still restores it.
   const handleSave = async (updated: Workflow, closeAfter = true) => {
     if (!updated.steps || updated.steps.length === 0) {
       alert(t('page.addModuleAlert'))
@@ -193,6 +198,7 @@ export function useWorkflowsData(showArchived: boolean) {
     }
   }
 
+  // User created a new workflow folder: posts it and appends the server's own row.
   const createFolder = async (name: string) => {
     try {
       const res = await api.post('/workflow-folders', { name })
@@ -203,6 +209,8 @@ export function useWorkflowsData(showArchived: boolean) {
     }
   }
 
+  // User asked to delete a folder: confirms first, then detaches any workflows it held
+  // rather than deleting them, and surfaces the backend's 409 when it still has active ones.
   const deleteFolder = (folder: WorkflowFolder) => {
     if (!canManageFolders) return
     confirm(t('page.deleteFolderConfirm', { name: seedLabel('workflowFolders', { label: folder.name }) }), async () => {
@@ -247,6 +255,8 @@ export function useWorkflowsData(showArchived: boolean) {
     }
   }
 
+  // User moved a workflow into a (different) folder: updates optimistically, rolling
+  // back and toasting on failure (mirrors handleToggleStatus's own pattern).
   const moveToFolder = async (workflowId: string | number | null, folderId: FolderId) => {
     setWorkflows(prev => prev.map(w => w.id === workflowId ? { ...w, folder_id: folderId } : w))
     const wf = workflows.find(w => w.id === workflowId)

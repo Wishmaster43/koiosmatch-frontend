@@ -14,6 +14,7 @@ import { buildReportQueryParams, EMPTY_REPORT_FILTERS } from './reportFilterPara
 import type { ReportFilterState } from './reportFilterParams'
 import type { VacanciesReportData, ReportPeriod } from '@/types/analytics'
 
+// Cached, cancel-aware fetch of the vacancies report for one period+filter+bucket combo.
 export function useVacanciesReport(period: ReportPeriod, filters: ReportFilterState = EMPTY_REPORT_FILTERS, bucket?: 'day' | 'week') {
   const params = { ...buildReportQueryParams(period, 'vacancies', filters), ...(bucket ? { bucket } : {}) }
   const { data, isLoading, isError, refetch } = useQuery({

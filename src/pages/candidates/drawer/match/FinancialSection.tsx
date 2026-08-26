@@ -21,6 +21,7 @@ import { input, pairRow, rowLabel, rowField, errMsg } from './styles'
 // HUISSTIJL-1: the shared JetBrains Mono atom (identity-only swap).
 import { Mono } from '@/components/ui/typography'
 
+// Pure presentational financial block (see the module doc above): all state and the computed margin come from useMatchForm via props.
 export default function FinancialSection({
   t, errors,
   scale, setScale, step, setStep,

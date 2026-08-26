@@ -82,6 +82,9 @@ function sortParams(sort?: CandidateSort | null): Record<string, string> {
   return sortBy ? { sort_by: sortBy, sort_dir: sort!.dir } : {}
 }
 
+// Data layer for the candidates page: the paginated/filtered/sorted list query
+// plus the SELECT-RACE-1 row-signature tracking that decides when bulk selection
+// must be dropped (see the comment above that effect below).
 export function useCandidatesData({ filterParams, page, pageSize, t, setActionMsg, sort }: UseCandidatesDataParams) {
   const queryClient = useQueryClient()
 
@@ -124,6 +127,8 @@ export function useCandidatesData({ filterParams, page, pageSize, t, setActionMs
   // response replacing the rows) do — rows that left the page cannot stay selected.
   const lastRowIdsRef = useRef<string | null>(null)
   const [rowsEpoch, setRowsEpoch] = useState(0)
+  // Bumps the epoch only when the settled row-id set actually changed (see the
+  // comment above) — the signal the caller uses to know it must drop bulk selection.
   useEffect(() => {
     if (listQuery.isFetching) return
     const sig = (listQuery.data?.candidates ?? []).map(r => String(r.id)).join('|')

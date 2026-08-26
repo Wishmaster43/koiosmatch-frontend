@@ -14,6 +14,8 @@ import type { Id } from '@/types/common'
 
 export const VACANCY_APPOINTMENTS_PER_PAGE = 20
 
+// Loads one server page of this vacancy's appointments across all candidates
+// (see file docblock above); rows are never accumulated client-side.
 export function useVacancyAppointments(vacancyId?: Id, page = 1) {
   const { data, isLoading: loading, isError: error } = useQuery({
     queryKey: ['vacancies', vacancyId, 'appointments', page],

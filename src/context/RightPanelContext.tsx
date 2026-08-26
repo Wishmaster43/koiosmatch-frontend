@@ -76,6 +76,7 @@ export function RightPanelProvider({ children }: { children: ReactNode }) {
   // Page-filter signal: keyed per reporter (ClearFiltersButton instances) so a
   // stale unmount can never wipe a fresh page's flag. Any true ⇒ active.
   const [pageFlags, setPageFlags] = useState<Record<string, boolean>>({})
+  // Record one reporter's active/inactive flag, skipping the setState when the value is unchanged (same defence-in-depth as registerFilters).
   const reportPageFilter = useCallback((key: string, active: boolean) => {
     setPageFlags(prev => {
       if ((prev[key] ?? false) === active) return prev
@@ -84,6 +85,7 @@ export function RightPanelProvider({ children }: { children: ReactNode }) {
       return next
     })
   }, [])
+  // True when any reporter currently has an active filter — feeds the topbar's filter-active dot.
   const pageFilterActive = useMemo(() => Object.values(pageFlags).some(Boolean), [pageFlags])
 
   return (
@@ -93,6 +95,7 @@ export function RightPanelProvider({ children }: { children: ReactNode }) {
   )
 }
 
+// Reads the panel context; the default value above keeps consumers rendering safely outside a Provider.
 export function useRightPanel(): RightPanelValue {
   return useContext(RightPanelContext)
 }

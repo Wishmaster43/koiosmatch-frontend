@@ -7,6 +7,7 @@
 import { monthAbbr, SERIES, YEAR_OPTIONS } from "./shiftsChartsConfig"
 import type { BuildShiftsFilterGroupsArgs, ShiftFilterGroup } from '@/types/shiftmanager'
 
+// See the file's top doc above for the shape this builds; a pure function so the caller memo only recomputes when a real input changes.
 export function buildShiftsFilterGroups({
   t, locale, seriesLabel, period, selectedYears, selectedMonths, visible,
   selectedJobTypes, selectedCustomers, selectedLocations, filterOptions,

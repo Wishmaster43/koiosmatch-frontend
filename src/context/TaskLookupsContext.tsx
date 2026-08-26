@@ -86,6 +86,9 @@ function normalize(raw: unknown, fallback: TaskLookupItem[]): TaskLookupItem[] {
 
 const TaskLookupsContext = createContext<TaskLookupsValue | null>(null)
 
+// Fetches the tenant's task lookups (statuses/types/priorities) once, falling
+// back to the seed defaults per-list on a 404/empty response, and exposes both
+// the raw lists and derived meta-resolvers/KPI helpers to every task screen.
 export function TaskLookupsProvider({ children }: { children: ReactNode }) {
   const { t } = useTranslation('common')
   const [statusesRaw,   setStatuses]   = useState<TaskLookupItem[]>(DEFAULT_TASK_STATUSES)
@@ -106,6 +109,7 @@ export function TaskLookupsProvider({ children }: { children: ReactNode }) {
 
   // Seeded defaults render in the user language; a tenant value stays as typed (LOOKUP-I18N-1).
   const statuses   = useMemo(() => translateSeedList(t, 'taskStatuses', statusesRaw), [statusesRaw, t])
+  // Same seed-translation treatment as statuses above, for the activity-type list.
   const types      = useMemo(() => translateSeedList(t, 'taskTypes', typesRaw), [typesRaw, t])
   const priorities = useMemo(() => translateSeedList(t, 'taskPriorities', prioritiesRaw), [prioritiesRaw, t])
 
@@ -126,6 +130,8 @@ export function TaskLookupsProvider({ children }: { children: ReactNode }) {
   return <TaskLookupsContext.Provider value={value}>{children}</TaskLookupsContext.Provider>
 }
 
+// Read the task lookups from context; throws if used outside the provider so a
+// missing wrap fails loudly instead of silently rendering empty lookups.
 export function useTaskLookups(): TaskLookupsValue {
   const ctx = useContext(TaskLookupsContext)
   if (!ctx) throw new Error('useTaskLookups must be used within a TaskLookupsProvider')

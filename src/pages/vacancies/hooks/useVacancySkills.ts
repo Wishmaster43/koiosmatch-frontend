@@ -17,6 +17,8 @@ type UpdateFn = (id: Id | undefined, patch: Record<string, unknown>) => void
 // Normalise a skill entry (string, or an object shape some seeds still carry) to plain text.
 export const skillStr = (s: unknown): string => (typeof s === 'string' ? s : ((s as { name?: string; label?: string })?.name ?? (s as { label?: string })?.label ?? ''))
 
+// The vacancy required-skills list; every change
+// persists immediately (no sibling pencil to ride along with anymore).
 export function useVacancySkills(v: VacancyDetail, onUpdate?: UpdateFn) {
   const [skills, setSkills] = useState<string[]>(() => (v.skills ?? []).map(skillStr).filter(Boolean))
   // Reseed when the entity itself changes — switching to a different vacancy

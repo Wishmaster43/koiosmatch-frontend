@@ -74,6 +74,7 @@ const KEY = DASHBOARD_HIDDEN_KEY
 export const DASHBOARD_KPI_ORDER_KEY = 'dashboard_kpi_order'
 type OrderMap = Record<string, string[]>
 
+// Settings screen for per-role KPI visibility/order; reads/writes the new per-role API, with the legacy settings-blob overrides as a migration-window fallback.
 export default function DashboardsSettings() {
   const { t } = useTranslation('settings')
   const { t: td } = useTranslation('dashboard')
@@ -143,6 +144,7 @@ export default function DashboardsSettings() {
   // silently survives a 403/422 shows a configuration the server never accepted
   // (Opus B2). One error lane for both write paths below.
   const [saveError, setSaveError] = useState(false)
+  // Optimistically writes one role's KPI order/visibility, then rolls back and flags saveError if the server rejects the PUT.
   const putRoleList = (apiRole: ApiRole, nextIds: string[]) => {
     const previous = roleKpis[apiRole] ?? []
     setSaveError(false)

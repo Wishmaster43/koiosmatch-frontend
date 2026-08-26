@@ -36,6 +36,7 @@ const EMPTY_CUSTOMERS: Customer[] = []
 // identical constant + defensive re-clamp below.
 export const CUSTOMERS_MAX_PER_PAGE = 500
 
+// Composes the customers list/stats React Query data layer for the page (list, filters, pagination and the bulk-selection epoch below).
 export function useCustomersData({ filterParams, page, pageSize, t }: Args) {
   const queryClient = useQueryClient()
 
@@ -77,6 +78,7 @@ export function useCustomersData({ filterParams, page, pageSize, t }: Args) {
   // response replacing the rows) do — rows that left the page cannot stay selected.
   const lastRowIdsRef = useRef<string | null>(null)
   const [rowsEpoch, setRowsEpoch] = useState(0)
+  // Bumps rowsEpoch only when the actual row-id set changes (not on a same-ids refetch), so a bulk selection survives a background refresh but drops when the underlying rows really changed.
   useEffect(() => {
     if (listQuery.isFetching) return
     const sig = (listQuery.data?.customers ?? []).map(r => String(r.id)).join('|')

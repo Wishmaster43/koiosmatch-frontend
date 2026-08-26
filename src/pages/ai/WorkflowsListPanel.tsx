@@ -51,6 +51,7 @@ interface WorkflowsListPanelProps {
   graceDays?: number | null
 }
 
+// Toolbar plus the loading/error/grid/list render of the visible workflows; purely presentational, all data/mutations arrive as props (see file header).
 export default function WorkflowsListPanel({
   loading, error, retryLoad, visibleWorkflows, folders, viewMode, setViewMode,
   showArchived, onToggleArchived, showTrash, onToggleTrash, selectedFolder, dragWf, openEditor, handleRun, handleToggleStatus,

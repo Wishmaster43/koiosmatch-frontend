@@ -49,6 +49,7 @@ const VacanciesMapView = lazy(() => import('./VacanciesMapView'))
 
 interface AppUser { id: Id; name: string }
 
+// Split from the default export below so VacancyLookupsProvider wraps it before any hook here calls useVacancyLookups().
 function VacanciesPageInner({ intent }: { intent?: unknown }) {
   const { t } = useTranslation(['vacancies', 'common'])
   // Cross-page jump for the funnel KPI cards (→ Sollicitaties with the stage filter).
@@ -145,6 +146,7 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
   // Column sort item 4: a new sort also resets to page 1 (mirrors ApplicationsPage).
   useEffect(() => { setPage(1) }, [sort, setPage])
 
+  // Shows a transient action-result banner and auto-dismisses it after 4s, clearing any pending timer first so an overlapping call can't cut a new message short.
   const notify = (type: string, text: string) => {
     setActionMsg({ type, text })
     if (msgTimer.current) clearTimeout(msgTimer.current)
@@ -226,9 +228,13 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
 
   // Option lists for the right-panel filters.
   const ownerOptions    = useMemo(() => ownerData.map(d => ({ value: d.key, label: d.name, count: d.value })), [ownerData])
+  // Same value/label/count mapping as ownerOptions, for the client filter dropdown.
   const clientOptions   = useMemo(() => clientData.map(d => ({ value: d.key, label: d.name, count: d.value })), [clientData])
+  // Same mapping, for the category filter dropdown.
   const categoryOptions = useMemo(() => categoryData.map(d => ({ value: d.key, label: d.name, count: d.value })), [categoryData])
+  // Status options also carry their configured color, for the status filter chips.
   const statusOptions   = useMemo(() => statuses.map(s => ({ value: s.value, label: s.label, color: s.color })), [statuses])
+  // Same mapping, for the AI-agent filter dropdown.
   const agentOptions    = useMemo(() => agentData.map(d => ({ value: d.key, label: d.name, count: d.value })), [agentData])
 
   const tog = (set: Dispatch<SetStateAction<string[]>>) => (v: string) => set(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v])
@@ -250,6 +256,7 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
   // buildCandidateFilterGroups/buildCustomerFilterGroups) — owner/client/functie/
   // branch here, status/published/agent/has-applications/archived/geo there.
   const catOrg = t('filters.categories.organisation')
+  // Assembles the right-panel filter groups from the organisation-level pickers here plus the status/published/agent/geo groups built in vacancyFilterGroups.
   const filterGroups = useMemo(() => [
     { key: 'owner',    type: 'search-select', category: catOrg, label: t('filters.owner'),    selected: selectedOwner,    options: ownerOptions,    onToggle: tog(setSelectedOwner) },
     { key: 'client',   type: 'search-select', category: catOrg, label: t('filters.client'),   selected: selectedClient,   options: clientOptions,   onToggle: tog(setSelectedClient) },
@@ -272,6 +279,7 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
     showWithoutAgent, setShowWithoutAgent, hasApplications, setHasApplications, showArchived, setShowArchived,
     geoFilter, geoHint, applyGeo, clearGeo, statusOptions, agentOptions])
 
+  // Publishes the assembled filter groups to the shared right panel, and unregisters them on unmount/change so a stale filter set doesn't linger after leaving this page.
   useEffect(() => {
     registerFilters('vacancies-page', filterGroups)
     return () => unregisterFilters('vacancies-page')
@@ -309,6 +317,7 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
   const anyFilterActive = Boolean(globalSearch.trim() || showArchived || showTrash || showWithoutAgent || Boolean(selectedAgentId) || statusBucket !== 'all'
     || selectedOwner.length || selectedClient.length || selectedCategory.length || selectedBranch.length || publishedBucket !== 'all' || hasApplications || attention || geoFilter)
   const [searchEpoch, setSearchEpoch] = useState(0)
+  // Resets every filter dimension (search, quick-views, pickers, geo) and the page back to default, bumping searchEpoch so the search input itself clears too.
   const clearAllFilters = () => {
     setSearchEpoch(e => e + 1); setGlobalSearch(''); setShowArchived(false); setShowTrash(false); setShowWithoutAgent(false); setSelectedAgentId(null); setStatusBucket('all')
     setSelectedOwner([]); setSelectedClient([]); setSelectedCategory([]); setSelectedBranch([]); setPublishedBucket('all'); setHasApplications(false); setAttention(null)

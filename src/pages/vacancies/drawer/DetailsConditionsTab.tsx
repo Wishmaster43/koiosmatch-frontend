@@ -25,6 +25,7 @@ interface Props {
   contractTypeOptions: LookupOpt[]; caoOptions: LookupOpt[]
 }
 
+// The Voorwaarden (conditions) tab; contract-form/CAO options come from the same tenant lookups the +Match modal's own Contract section reads.
 export default function DetailsConditionsTab({ vacancy: v, conditions, contractTypeOptions, caoOptions }: Props) {
   const { t } = useTranslation('vacancies')
   const { editing, setEditing, form, setF, save, cancel } = conditions

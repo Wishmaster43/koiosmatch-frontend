@@ -52,6 +52,8 @@ const CreatableSelect = CreatableSelectJs as unknown as ComponentType<AnyProps>
 type WPKey = 'workPermitType' | 'workPermitValidUntil'
 type WPForm = Record<WPKey, string>
 
+// One EditableFieldTable-style card for the work-permit type + expiry, visibility-gated
+// on nationality per useWorkPermitVisibility (see the DANNY-PUNT-1 note below).
 export default function WorkPermitBlock({ c, onSave, autoEditSignal }: {
   c: Candidate; onSave?: (v: Record<string, unknown>) => void; autoEditSignal?: number
 }) {
@@ -105,6 +107,8 @@ export default function WorkPermitBlock({ c, onSave, autoEditSignal }: {
   // nothing to ask (calm by default, §3B). Every other case stays visible.
   if (!visible) return null
 
+  // Renders the edit-mode control for one field: a date picker for the expiry,
+  // a clearable lookup dropdown for the type.
   const renderInput = (key: WPKey) => {
     if (key === 'workPermitValidUntil') return (
       <DatePicker
@@ -135,6 +139,7 @@ export default function WorkPermitBlock({ c, onSave, autoEditSignal }: {
     )
   }
 
+  // Renders the read-only display for one field, mirroring renderInput's field split.
   const renderValue = (key: WPKey) => {
     if (key === 'workPermitValidUntil') {
       const v = currentValidUntil

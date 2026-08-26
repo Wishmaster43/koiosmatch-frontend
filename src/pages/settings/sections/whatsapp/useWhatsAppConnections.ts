@@ -25,6 +25,7 @@ export interface UseWhatsAppConnectionsResult {
   removeLocal: (id: string) => void
 }
 
+// Loads and holds the tenant's WhatsApp connection list, shared by the management list and the numbers/templates tabs.
 export function useWhatsAppConnections(): UseWhatsAppConnectionsResult {
   const [connections, setConnections] = useState<WhatsappConnectionRow[]>([])
   const [loading, setLoading] = useState(true)
@@ -33,6 +34,7 @@ export function useWhatsAppConnections(): UseWhatsAppConnectionsResult {
   // or StrictMode's dev double-invoke leaves it permanently false.
   const mountedRef = useRef(false)
 
+  // Fetch the connection list; every setState is gated on the mount-ref so a stale response after unmount is a no-op.
   const load = useCallback(async () => {
     setLoading(true); setError(false)
     try {
@@ -45,6 +47,7 @@ export function useWhatsAppConnections(): UseWhatsAppConnectionsResult {
     }
   }, [])
 
+  // Load on mount (StrictMode-safe mount-ref) and whenever load's identity changes.
   useEffect(() => {
     mountedRef.current = true
     load()

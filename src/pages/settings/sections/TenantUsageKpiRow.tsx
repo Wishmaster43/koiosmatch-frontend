@@ -21,6 +21,8 @@ interface Props {
   loading: boolean
 }
 
+// The superadmin usage KPI strip (AI margin, workflow tokens, WhatsApp numbers,
+// planning hours) — all read off the already-fetched monthly usage response.
 export default function TenantUsageKpiRow({ usage, loading }: Props) {
   const { t } = useTranslation('settings')
   const { formatNumber, formatCurrency } = useNumberFormat()

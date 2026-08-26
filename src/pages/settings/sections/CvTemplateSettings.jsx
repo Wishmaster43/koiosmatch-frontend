@@ -20,6 +20,7 @@ import CvHtmlPreview from './cvTemplate/CvHtmlPreview'
 import CvSectionList from './cvTemplate/CvSectionList'
 import { Caption } from '@/components/ui/typography'
 
+// Thin composer: colour pickers + section list on the left, live A4 preview on the right (see the module doc above for where each piece lives).
 export default function CvTemplateSettings() {
   const { settings, save, reset } = useCvSettings()
   const { t } = useTranslation('settings')
@@ -58,6 +59,7 @@ export default function CvTemplateSettings() {
 
   const settingsWithBrand = { ...settings, logoUrl: brandLogoUrl, companyName: brandName }
 
+  // Renders the sample CV to a PDF blob and triggers a browser download via a throwaway anchor element, so recruiters can preview the template before it's used on a real candidate.
   const handleDownloadPreview = async () => {
     setGenerating(true)
     try {

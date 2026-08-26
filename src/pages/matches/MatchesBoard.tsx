@@ -99,6 +99,7 @@ export default function MatchesBoard({ rows, columns, onMove, onSelect, selected
 
   const handleDragStart = (e: DragEvent<HTMLDivElement>, id: Id | undefined) => { dragId.current = id ?? null; e.dataTransfer.effectAllowed = 'move' }
   const handleDragOver = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move' }
+  // Drop moves the dragged match into the target stage column, delegating the status mutation to the page's onMove.
   const handleDrop = (e: DragEvent<HTMLDivElement>, stageKey: string) => {
     e.preventDefault()
     if (dragId.current != null) { onMove(dragId.current, stageKey); dragId.current = null }

@@ -6,6 +6,7 @@
 import PlanningSummary from './PlanningSummary'
 import type { Id } from '@/types/common'
 
+// See the file's top doc above; a thin pass-through to the module-gated PlanningSummary.
 export default function PlanningTab({ customerId }: { customerId: Id }) {
   return <PlanningSummary customerId={customerId} />
 }

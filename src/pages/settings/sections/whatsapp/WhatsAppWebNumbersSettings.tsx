@@ -28,6 +28,8 @@ const SETTINGS_BASE_PATH = '/settings/whatsapp-web-numbers'
 // owning location (VESTIGING-DEVICE-1 row: `location {id,name} | null`).
 type BranchDevice = WhatsAppDevice & { location?: { id: string | number; name: string } | null }
 
+// Lists the tenant's branch WhatsApp Web devices and offers a permission-gated
+// add form; reuses the exact device card from Profile (only the owning entity differs).
 export default function WhatsAppWebNumbersSettings() {
   const { t } = useTranslation('settings')
   const auth = useAuth()

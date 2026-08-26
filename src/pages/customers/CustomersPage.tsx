@@ -71,6 +71,7 @@ interface CustomerIntent {
   tab?: string
 }
 
+// Thin container: wires the filter/data/bulk hooks and composes the insights row, table/map view and drawer for this page.
 export default function CustomersPage({ intent }: { intent?: CustomerIntent } = {}) {
   const { t } = useTranslation(['customers', 'common'])
   // LOOKUP-I18N-1: the seeded status/phase label renders in the user's language;
@@ -144,6 +145,7 @@ export default function CustomersPage({ intent }: { intent?: CustomerIntent } = 
     if (intent.phase)         setSelectedPhase([intent.phase])
   }, [intent, setSelectedOwner, setSelectedPhase])
 
+  // Builds the server-side query params from every active filter dimension; the derived filterKey below drives page reset and refetch.
   const filterParams = useMemo(() => {
     const p: Record<string, unknown> = {}
     // NUMMER-1: a typed reference number (D-4) does an exact server-side `?ref=`
@@ -233,8 +235,11 @@ export default function CustomersPage({ intent }: { intent?: CustomerIntent } = 
     customers.forEach(c => { if (c.ownerId != null) { const key = String(c.ownerId); (m[key] ??= { value: c.ownerId as Id, label: c.owner || '—', count: 0 }).count++ } })
     return Object.values(m)
   }, [stats, customers])
+  // Distinct city values from the current page, used as a fallback filter option list.
   const cityOptions     = useMemo(() => optsFrom(customers.map(c => c.city).filter(Boolean)), [customers])
+  // Distinct province (state) values from the current page, used as a fallback filter option list.
   const provinceOptions = useMemo(() => optsFrom(customers.map(c => c.state).filter(Boolean)), [customers])
+  // Distinct industry values from the current page, used as a fallback filter option list.
   const industryOptions = useMemo(() => optsFrom(customers.map(c => c.industry).filter(Boolean)), [customers])
   const phaseOptions = useMemo<Opt[]>(() => customerPhases.map(p => ({ value: p.value, label: p.label, count: 0, color: p.color })), [customerPhases])
 
@@ -269,6 +274,7 @@ export default function CustomersPage({ intent }: { intent?: CustomerIntent } = 
       geoFilter, geoHint, applyGeo, setGeoFilter, statusOptions, phaseOptions, industryOptions, cityOptions,
       provinceOptions, ownerOptions, branchOptions])
 
+  // Registers the page's filter groups into the shared right-hand panel and cleans up on unmount/change.
   useEffect(() => {
     registerFilters('customers-page', filterGroups)
     return () => unregisterFilters('customers-page')
@@ -282,6 +288,7 @@ export default function CustomersPage({ intent }: { intent?: CustomerIntent } = 
     name: seedLabel(o.value === NO_STATUS_KEY ? 'customerPhases' : 'customerStatuses', { value: o.value === NO_STATUS_KEY ? entryPhaseValue : o.value, label: o.label }),
     value: o.count, key: o.value, color: o.color,
   })), [statusOptions, seedLabel, entryPhaseValue])
+  // Same reshape as the status donut above, keyed by owner id/name for the account-manager donut.
   const ownerData  = useMemo(() => ownerOptions.map(o => ({ name: o.label, value: o.count, key: String(o.value) })), [ownerOptions])
 
 
@@ -293,6 +300,7 @@ export default function CustomersPage({ intent }: { intent?: CustomerIntent } = 
   const anyFilterActive = Boolean(globalSearch.trim() || showArchived || showTrash || kpiFilter || geoFilter || dateRange
     || selectedStatus.length || selectedPhase.length || selectedOwner.length || selectedCity.length || selectedProvince.length || selectedIndustry.length || selectedBranch.length)
   const [searchEpoch, setSearchEpoch] = useState(0)
+  // Resets every filter dimension (and bumps the search epoch) back to defaults in one action.
   const clearAllFilters = () => {
     setSearchEpoch(e => e + 1); setGlobalSearch(''); setShowArchived(false); setShowTrash(false); setKpiFilter(null)
     setSelectedStatus([]); setSelectedPhase([]); setSelectedOwner([]); setSelectedCity([]); setSelectedProvince([]); setSelectedIndustry([]); setSelectedBranch([])

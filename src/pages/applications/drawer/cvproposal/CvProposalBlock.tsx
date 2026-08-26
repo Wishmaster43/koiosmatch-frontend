@@ -28,6 +28,7 @@ interface CvProposalBlockProps {
   applicationId: Id | null | undefined
 }
 
+// The CV-parser-2 proposal block, with its deliberately asymmetric loading/empty/error rendering.
 export default function CvProposalBlock({ candidateId, applicationId }: CvProposalBlockProps) {
   const { t } = useTranslation(['applications', 'common'])
   const {

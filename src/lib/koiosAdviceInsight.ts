@@ -10,6 +10,7 @@
 import type { KoiosAdviceInsight } from '@/components/ai/KoiosAdviceBlock'
 import { ADVICE_META, type KoiosAdvice } from '@/lib/koiosAdviceMeta'
 
+// Maps a resolved Koios advice onto the shared insight-row shape (see the module doc above): empty array when there is no actionable advice, so callers render no row/block at all.
 export function adviceInsightRows(advice: KoiosAdvice | null | undefined): KoiosAdviceInsight[] {
   if (!advice?.action || advice.action === 'none') return []
   const meta = ADVICE_META[advice.action] ?? ADVICE_META.default

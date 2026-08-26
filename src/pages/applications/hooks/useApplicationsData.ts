@@ -113,6 +113,7 @@ function sortParams(sort?: AppSort | null): Record<string, string> {
   return sortBy ? { sort_by: sortBy, sort_dir: sort!.dir } : {}
 }
 
+// React-Query data layer for the applications list: server-paginated table rows plus the always-on wide funnel rows the board/insights need.
 export function useApplicationsData({ view, filterParams, bucketParam, page, pageSize, funnelTypes, sort }: UseApplicationsDataParams) {
   const queryClient = useQueryClient()
 
@@ -182,6 +183,7 @@ export function useApplicationsData({ view, filterParams, bucketParam, page, pag
   // response replacing the rows) do — rows that left the page cannot stay selected.
   const lastRowIdsRef = useRef<string | null>(null)
   const [rowsEpoch, setRowsEpoch] = useState(0)
+  // Bump the selection epoch only when the settled row-id set actually changed (per the race rule above), never mid-fetch.
   useEffect(() => {
     if (listQuery.isFetching) return
     const sig = (listQuery.data?.applications ?? []).map(r => String(r.id)).join('|')

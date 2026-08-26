@@ -62,6 +62,7 @@ const CandidateDrawer = CandidateDrawerJs as ComponentType<{
   users: AppUser[]; initialTab?: string
 }>
 
+// The candidate list page shell (the §3A blueprint); an optional intent prop lets a deep link (dashboard tile, notification) preselect a filter/attention state on mount.
 export default function CandidatesPage({ intent }: { intent?: CandidateIntent } = {}) {
   const { hasPermission } = useAuth() as unknown as { hasPermission: (p: string) => boolean }
   const { t } = useTranslation(['candidates', 'common'])
@@ -146,6 +147,7 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
   // gate lives on the open handler: an unauthorized click gets an honest reason
   // via the message banner instead of a silent no-op.
   const canCreateCandidate = hasPermission('candidates.create')
+  // Gates the create-candidate action on the candidates.create permission, so an unauthorized click surfaces an honest reason instead of a silent no-op (the toolbar button itself always renders).
   const handleAddOpen = () => {
     if (!canCreateCandidate) { notify('error', t('page.createForbidden')); return }
     setAddOpen(true)
@@ -174,7 +176,9 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
   const poolOptions   = useMemo(() => poolItems.map(p => ({ value: p.id, label: p.name })), [poolItems])
   // Fase-filter options (lifecycle axis) — straight from the tenant phases lookup.
   const phaseOptions  = useMemo(() => phases.map(ph => ({ value: ph.value, label: ph.label, color: ph.color })), [phases])
+  // Builds the city filter option list from the cities actually present in the loaded candidates (no tenant lookup backs city).
   const cityOptions   = useMemo(() => optsFrom(candidates.map(c => c.city).filter(Boolean) as string[]), [candidates])
+  // Builds the source filter option list from the source values actually present in the loaded candidates.
   const sourceOptions = useMemo(() => optsFrom(candidates.map(c => (c as { source?: string | null }).source ?? '').filter(Boolean)), [candidates])
 
 
@@ -223,6 +227,7 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
    poolOptions, cityOptions, sourceOptions,
    statusOptions, phaseOptions, funnelOptions, typeOptions, titleOptions, genderOptions, provinceOptions, ownerOptions, locationOptions])
 
+  // Registers this page's filter groups with the shared right panel, and unregisters them on unmount so they do not leak into another page filter list.
   useEffect(() => {
     registerFilters('candidates-page', filterGroups)
     return () => unregisterFilters('candidates-page')
@@ -297,6 +302,7 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
     // values back instead of leaving a rejected edit on screen until the drawer is
     // reopened. Never the whole record — a parallel edit to another field must survive.
     const keys = Object.keys(patch)
+    // Snapshots only the patched keys from a given record, so a rejected PATCH can revert precisely instead of rolling back the whole row.
     const pick = (c: Candidate | null | undefined) => {
       if (!c) return null
       const snap: Record<string, unknown> = {}

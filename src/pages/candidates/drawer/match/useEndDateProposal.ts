@@ -1,3 +1,7 @@
+import { useState, useEffect } from 'react'
+import { addDays } from './helpers'
+import type { ContractTypeOption } from '@/lib/useContractTypes'
+
 /**
  * useEndDateProposal — proposes the match's end date from the picked
  * contract type's default duration (7.1, MATCH-CONTRACT-DURATION-1). Honest-
@@ -8,16 +12,14 @@
  * changes, UNLESS the recruiter has already edited the end date by hand
  * (`endDateDirty`), which freezes it for good.
  */
-import { useState, useEffect } from 'react'
-import { addDays } from './helpers'
-import type { ContractTypeOption } from '@/lib/useContractTypes'
-
 export function useEndDateProposal({ contractType, startDate, options = [] }: {
   contractType: string; startDate: string; options?: ContractTypeOption[]
 }) {
   const [endDate, setEndDate] = useState('')
   const [endDateDirty, setEndDateDirty] = useState(false)
 
+  // Recomputes the proposed end date from the contract type's default duration,
+  // unless the recruiter already edited it by hand (endDateDirty freezes it).
   useEffect(() => {
     if (endDateDirty || !contractType || !startDate) return
     const days = options.find(o => o.value === contractType || o.label === contractType)?.default_duration_days

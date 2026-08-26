@@ -19,6 +19,7 @@ export type SmSyncResult =
   | { kind: 'throttled'; retryAfter: number }
   | { kind: 'error'; detail?: string }
 
+// Fires the queued sync + tracks queued/throttled/error feedback (see the module doc above for the deferred single-refetch, never a poll).
 export function useSmSync() {
   const queryClient = useQueryClient()
   const [syncing, setSyncing] = useState(false)

@@ -12,6 +12,7 @@ import { notifyError } from '@/lib/notify'
 import type { AvailableRole } from '../usersParts'
 import type { ManagedUser } from '@/types/api'
 
+// Data layer for the users page: loads users/roles, owns the list, and applies the optimistic mutations, so the page itself stays presentational (see file header).
 export function useUsersData() {
   const { t } = useTranslation('users')
   const [users,   setUsers]   = useState<ManagedUser[]>([])

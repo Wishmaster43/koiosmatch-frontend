@@ -35,6 +35,7 @@ export function FaqSelectField({ value, onChange, fieldKey }: { value?: unknown;
   const [loading, setLoading] = useState(true)
   const selected: unknown[] = Array.isArray(value) ? value : []
 
+  // Loads the tenant's FAQ list once on mount; a failure silently keeps the empty list since this is an optional multi-select, not a blocking form field.
   useEffect(() => {
     import('@/lib/api').then(m => m.default.get('/ai/faqs'))
       .then(r => setFaqs(unwrapList<{ id?: string | number; name?: string; title?: string }>(r).rows))
@@ -42,6 +43,7 @@ export function FaqSelectField({ value, onChange, fieldKey }: { value?: unknown;
       .finally(() => setLoading(false))
   }, [])
 
+  // Adds/removes one FAQ id from the selected set and writes the whole array back into the node config.
   const toggle = (id: string | number) => {
     const next = selected.includes(id) ? selected.filter(v => v !== id) : [...selected, id]
     onChange(fieldKey, next)
@@ -76,6 +78,7 @@ export function FaqSelectField({ value, onChange, fieldKey }: { value?: unknown;
 const WEBHOOK_API_URL = import.meta.env.VITE_API_URL ?? 'http://koiosmatch-api.test/api'
 const WEBHOOK_BASE    = `${WEBHOOK_API_URL}/webhook`
 
+// Lets a workflow's Webhook Trigger pick or inline-create an inbound webhook, then shows the receiving URL to hand to the external system (Facebook, Intus, …).
 export function WebhookSelectField({ value, onChange, fieldKey }: { value?: unknown; onChange: OnChange; fieldKey: string }) {
   const { t } = useTranslation('workflows')
   const [hooks,    setHooks]    = useState<Array<{ id?: string | number; name?: string; token?: string }>>([])
@@ -182,11 +185,10 @@ export function WebhookSelectField({ value, onChange, fieldKey }: { value?: unkn
 // ── Lookup-backed select ────────────────────────────────────────────────────────
 // Options come from a tenant lookup endpoint (e.g. /whatsapp-message-types) instead of
 // a hardcoded list (§10: no hardcoded vocabularies in workflow nodes). Lazy api import,
-// mirroring WebhookSelectField. Fail-soft to an empty list.
 export function LookupSelectField({ value, onChange, fieldKey, endpoint, valueKey, responseKey }: {
   // valueKey: which row property becomes the STORED value. Roles resolve server-side
   // by roles.name (NotificationSendModule::resolveRecipients), so the role field
-  // stores the name — a numeric Spatie id would silently match nobody (§3).
+  // stores the name — a numeric Spatie id would silently match nobody (§3)
   // responseKey: for endpoints that return an OBJECT of collections (GET
   // /settings/candidate-lookups → {statuses, phases, …}) — the collection to read;
   // omitted = the response is a plain list (WF-BUILDER-VELDEN-1 Opus fix).
@@ -308,6 +310,7 @@ export function WorkflowSelectField({ value, onChange, fieldKey }: { value?: unk
   // name — a sr-only span + aria-labelledby names it instead (§4).
   const workflowLabelId = useId()
 
+  // Loads the other workflows this node can call, excluding archived/deleted ones and the current workflow itself (WF-PICKER-SELF-1); the alive guard drops a stale response if id/retryTick changes first, and a failure surfaces as the honest error state above rather than an empty list.
   useEffect(() => {
     let alive = true
     setLoading(true)
@@ -327,6 +330,7 @@ export function WorkflowSelectField({ value, onChange, fieldKey }: { value?: unk
     return () => { alive = false }
   }, [currentWorkflowId, retryTick])
 
+  // Stable retry trigger for the error banner: bumping retryTick re-runs the load effect without needing a new function identity each render.
   const retry = useCallback(() => setRetryTick(n => n + 1), [])
 
   if (loading) return <div style={{ fontSize: 12, color: 'var(--text-muted)', padding: '4px 0' }}>{t('fields.workflowLoading')}</div>

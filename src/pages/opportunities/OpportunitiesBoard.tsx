@@ -87,11 +87,13 @@ export default function OpportunitiesBoard({ rows, stages, onMove, selectedId, o
   const { ref: boardScrollRef, onDragOver: boardAutoScroll } = useDragAutoScroll<HTMLDivElement>()
   const dragging = useRef<Id | null>(null)
 
+  // Track the dragged card's id in a ref (no re-render needed) for the drop handler to read.
   const onDragStart = (e: DragEvent<HTMLDivElement>, id: Id | undefined) => {
     dragging.current = id ?? null
     e.dataTransfer.effectAllowed = 'move'
   }
   const onDragOver = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move' }
+  // Move the dragged card to the dropped-on stage, then clear the drag ref.
   const onDrop = (e: DragEvent<HTMLDivElement>, stageValue: string | number) => {
     e.preventDefault()
     if (dragging.current != null) { onMove(dragging.current, stageValue); dragging.current = null }

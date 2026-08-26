@@ -18,6 +18,8 @@ interface StatisticsTabProps {
   application: ApplicationDetail
 }
 
+// Thin host for CompetitionBlock on its own Statistics tab (see file docblock
+// above) — no behaviour change from its old home, same component and props.
 export default function StatisticsTab({ application }: StatisticsTabProps) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>

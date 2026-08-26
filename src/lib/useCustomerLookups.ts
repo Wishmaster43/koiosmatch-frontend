@@ -77,6 +77,8 @@ const mapCustomerLookups = (res: AxiosResponse): CustomerLookupsData => {
   }
 }
 
+// Tenant customer/location/department/contact status lookups, with translated seed
+// fallbacks and a value→item meta helper per list (mirrors useGenders/useFunctions).
 export function useCustomerLookups() {
   const { t } = useTranslation('common')
   const { data, loading } = useCachedLookup('/settings/customer-lookups', mapCustomerLookups, FALLBACK)
@@ -84,7 +86,9 @@ export function useCustomerLookups() {
   // Seeded defaults render in the user language; a tenant value stays as typed (LOOKUP-I18N-1).
   // Memoised: consumers put these arrays in dependency arrays (§9 stable reference).
   const statuses           = useMemo(() => translateSeedList(t, 'customerStatuses', data.statuses), [data.statuses, t])
+  // Same seed-translation treatment as `statuses` above, for locations.
   const locationStatuses   = useMemo(() => translateSeedList(t, 'subStatuses', data.locationStatuses), [data.locationStatuses, t])
+  // Same seed-translation treatment as `statuses` above, for departments.
   const departmentStatuses = useMemo(() => translateSeedList(t, 'subStatuses', data.departmentStatuses), [data.departmentStatuses, t])
   const contactStatuses    = useMemo(() => translateSeedList(t, 'subStatuses', data.contactStatuses), [data.contactStatuses, t])
 

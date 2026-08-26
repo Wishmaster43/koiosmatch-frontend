@@ -50,6 +50,8 @@ const rowBtnStyle = {
   background: 'var(--bg)', cursor: 'pointer',
 }
 
+// Renders a task's subtask list (with a per-row quick view) and owns the
+// freshness-guarded fetch that backs it.
 export default function SubtasksSection({ task, onSubtaskCreated }: {
   task: TaskDetail
   // Local-only tally bump on the HOST task's own `subtaskProgress` (see file
@@ -72,6 +74,9 @@ export default function SubtasksSection({ task, onSubtaskCreated }: {
 
   const hasSubtasks = Boolean(task.subtaskProgress && task.subtaskProgress.total > 0)
 
+  // Loads this task's subtasks (skipped entirely when the progress tally says
+  // there are none); the request-id guard drops a slow response for a task the
+  // drawer has already moved past.
   const fetchSubtasks = useCallback(() => {
     if (!hasSubtasks) { setRows([]); setLoading(false); setError(false); return }
     const requestId = ++requestIdRef.current

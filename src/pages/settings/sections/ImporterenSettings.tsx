@@ -95,6 +95,7 @@ function EntityWizard({ entity, wholeTree, otherPathEntity, onSelectEntity, canV
   )
 }
 
+// Settings screen driving the shared import wizard through upload/preview/confirm/result steps.
 export default function ImporterenSettings() {
   const { t } = useTranslation('settings')
   // Auth context can be null pre-boot (mirrors CustomersBulkBar's own fallback).

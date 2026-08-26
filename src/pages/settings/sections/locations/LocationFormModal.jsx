@@ -39,6 +39,7 @@ import Button from '@/components/ui/Button'
 const lbl = { fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)', marginBottom: 5 }
 const inp = { width: '100%', height: 36, padding: '0 10px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, outline: 'none', boxSizing: 'border-box', background: 'var(--surface)', color: 'var(--text)' }
 
+// The location create/edit modal; the focus trap is safe to attach unconditionally since this component only ever mounts while the dialog is actually open.
 export default function LocationFormModal({ editingId, form, setForm, saving, onClose, onSubmit }) {
   const { t } = useTranslation(['settings', 'common'])
   // This component is only mounted while the dialog is open (the container

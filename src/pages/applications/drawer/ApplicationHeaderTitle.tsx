@@ -28,6 +28,7 @@ interface ApplicationHeaderTitleProps {
   setField: (k: keyof ApplicationCandidateForm, v: string) => void
 }
 
+// Application drawer title: read mode shows name/reference/function/vacancy, edit mode swaps in the name-part and function inputs; pure rendering (see file header).
 export default function ApplicationHeaderTitle({
   candidateName, referenceNumber, candidateFunction, editing, loading, form, setField,
 }: ApplicationHeaderTitleProps) {

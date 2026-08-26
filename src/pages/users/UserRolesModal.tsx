@@ -26,6 +26,7 @@ import type { ManagedUser } from '@/types/api'
 import { RoleBadge, roleLabel, roleName } from './usersParts'
 import type { AvailableRole } from './usersParts'
 
+// The role-assignment modal: a full-set replace via PUT /users/{id}/roles, never a saveable empty set.
 export default function UserRolesModal({ user, roles, onSaved, onClose }: {
   user: ManagedUser
   // Assignable roles from GET /roles (super_admin/tenant_admin already filtered out).

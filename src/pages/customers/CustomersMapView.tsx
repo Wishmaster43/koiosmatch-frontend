@@ -9,6 +9,8 @@ import { toCoord } from '@/lib/coords'
 import type { Customer } from '@/types/customer'
 import type { Id } from '@/types/common'
 
+// Thin adapter mapping customer rows to MapPoints for the shared RadiusMapPanel
+// (see file docblock above) — centre/radius/drawer stay owned by the host page.
 export default function CustomersMapView({ rows, statusColor, center, radiusKm, onCenterChange, onRadiusChange, onPick, padded }: {
   rows: Customer[]
   // Status → colour resolver from the page's lookup (stable per render is fine here).

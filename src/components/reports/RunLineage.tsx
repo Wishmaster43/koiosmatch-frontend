@@ -23,6 +23,7 @@ import type { RunRow } from '@/types/reports'
 type ChainEntry = { id?: string | number; name?: string } | string | number
 const asEntry = (e: ChainEntry) => (typeof e === 'object' && e != null) ? e : { id: e }
 
+// Renders a workflow run's parent→child call chain as a breadcrumb trail, each entry deep-linking to its own run.
 export default function RunLineage({ run }: { run: RunRow }) {
   const { t } = useTranslation('reports')
   const ctx = run.context ?? {}

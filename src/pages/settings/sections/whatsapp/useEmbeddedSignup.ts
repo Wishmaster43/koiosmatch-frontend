@@ -31,6 +31,8 @@ export interface UseEmbeddedSignupResult {
   startHistorySync: () => Promise<void>
 }
 
+// The state machine driving the whole Embedded Signup flow — see the module doc
+// comment above for the full config→popup→exchange→sync sequence it owns.
 export function useEmbeddedSignup(onLinked?: () => void): UseEmbeddedSignupResult {
   const [phase, setPhase] = useState<SignupPhase>('config-loading')
   const [config, setConfig] = useState<EmbeddedSignupConfig | null>(null)
@@ -53,6 +55,8 @@ export function useEmbeddedSignup(onLinked?: () => void): UseEmbeddedSignupResul
 
   // Session-info listener: facebook.com origins only, WA_EMBEDDED_SIGNUP only.
   useEffect(() => {
+    // Only trust facebook.com origins and the WA_EMBEDDED_SIGNUP payload type;
+    // anything else, including a non-JSON frame, is ignored (§7).
     const onMessage = (event: MessageEvent) => {
       if (event.origin !== 'https://www.facebook.com' && event.origin !== 'https://web.facebook.com') return
       try {
@@ -67,6 +71,8 @@ export function useEmbeddedSignup(onLinked?: () => void): UseEmbeddedSignupResul
     return () => window.removeEventListener('message', onMessage)
   }, [])
 
+  // Kicks off the popup flow: loads the FB SDK, opens FB.login, and on a successful
+  // code + waba_id pair exchanges it server-side to link the connection.
   const start = useCallback(async () => {
     if (!config?.ready || !config.app_id || !config.config_id) return
     setErrorKey(null)

@@ -22,6 +22,8 @@ const thBase: CSSProperties = {
 }
 const tdBase: CSSProperties = { padding: '8px 12px', fontSize: 13, whiteSpace: 'nowrap' }
 
+// Candidate × month pivot grid for the selected metric, with a sticky first
+// column and a totals footer row (bespoke — see file doc for why, not DataTable).
 export default function ShiftMatrixTable({ columns, rows, metric }: {
   columns: string[]; rows: MatrixRow[]; metric: MetricKey
 }) {

@@ -25,11 +25,16 @@ function cacheKey(action: string, subject: ActionRuleSubject): string | null {
   return `${action}|${axis}|${id}`
 }
 
+// Resolves the AXIS-MATRIX-2 decision for one action×subject pair, reading through
+// the session-scoped cache above (see file docblock) so repeated cards never re-poll.
 export function useActionRulePreflight(action: string, subject: ActionRuleSubject) {
   const [decision, setDecision] = useState<ActionRuleDecision | null>(null)
   const [loading, setLoading]   = useState(false)
   const [error, setError]       = useState(false)
 
+  // Resolves (or joins) the session-shared preflight promise for this action×subject
+  // pair; deliberately never aborts it on unmount (see file docblock) — only the
+  // `alive` guard below is scoped to this instance.
   useEffect(() => {
     const key = cacheKey(action, subject)
     if (!key) { setDecision(null); setLoading(false); setError(false); return }

@@ -16,6 +16,8 @@ import { deriveCustomerAdvice } from '@/lib/customerAdvice'
 import type { KoiosAdvice } from '@/lib/koiosAdviceMeta'
 import type { Customer } from '@/types/customer'
 
+// The customers table's Koios-column resolver (see file docblock above): trusts
+// the backend's advice only once it carries a real, non-seeded source.
 export function useCustomerAdvice(): (c: Customer) => KoiosAdvice | null {
   const { t } = useTranslation('customers')
 

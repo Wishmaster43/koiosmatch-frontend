@@ -32,6 +32,8 @@ import { Caption } from '@/components/ui/typography'
 // though several no longer have their own top-level route — see kpiCatalog.ts.
 const CONFIGURABLE_SCOPE_IDS: ReportKpiScopeId[] = REPORT_KPI_SCOPE_IDS.filter(id => REPORT_KPI_FAMILY[id] != null)
 
+// The Report cards settings screen: a sub-tab per configurable report scope,
+// each rendering its own nine-slot editor (ReportKpiBlock below).
 export default function ReportKpiSettings() {
   const { t } = useTranslation('settings')
   const values = useAllSettings()
@@ -78,6 +80,8 @@ function ReportKpiBlock({ reportId, values }: { reportId: ReportKpiScopeId; valu
     return entry ? t(entry.labelKey, { ns: 'analytics' }) : key
   }
 
+  // Saves a new card order to this scope's settings key, updating local state
+  // first so the drag list never snaps back while the request is in flight.
   const persist = async (next: string[]) => {
     setOrder(next)
     setSaving(true)
@@ -88,6 +92,7 @@ function ReportKpiBlock({ reportId, values }: { reportId: ReportKpiScopeId; valu
     }
   }
 
+  // Replaces one slot's card via the picker and persists the resulting order.
   const swap = (index: number, newKey: string) => {
     if (order.includes(newKey)) return // no duplicate card twice in one report
     const next = [...order]

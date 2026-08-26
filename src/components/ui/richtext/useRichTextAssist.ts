@@ -22,7 +22,6 @@ export type RichTextAssistTone = 'warning' | 'danger'
 export type RichTextAssistStatus = 'idle' | 'loading' | 'success' | 'error'
 // The bar tracks which control is active/loading — the three text modes, the
 // two combined modes (ASSIST-SIDEPANEEL-1), plus 'generate', which runs a
-// differently-shaped call (see the file header).
 export type RichTextAssistActiveMode = RichTextAssistMode | RichTextAssistCombinedMode | 'generate'
 
 // Expected/handled outcomes (budget exhausted, unusable answer, no API key
@@ -44,6 +43,7 @@ function describeFailure(err: unknown, t: (key: string) => string, fallback: str
   return { message: extractApiError(err, fallback), tone: CALM_STATUSES.includes(httpStatus ?? 0) ? 'warning' : 'danger' }
 }
 
+// See the file's top doc above for the shared assist state machine; language is used to translate the assist result.
 export function useRichTextAssist(language?: string) {
   const { t } = useTranslation('common')
   const [mode, setMode] = useState<RichTextAssistActiveMode | null>(null)
@@ -58,6 +58,7 @@ export function useRichTextAssist(language?: string) {
   // would stay false forever and silently kill every later request.
   const aliveRef = useRef(true)
   const abortRef = useRef<AbortController | null>(null)
+  // Marks the hook alive on mount and dead on unmount, aborting any in-flight request; re-armed in setup (not only cleanup) so StrictMode double-mount never leaves it permanently false.
   useEffect(() => {
     aliveRef.current = true
     return () => { aliveRef.current = false; abortRef.current?.abort() }

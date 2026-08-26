@@ -21,6 +21,7 @@ import { useVacancyMatches } from '../hooks/useVacancyMatches'
 import type { MatchRow } from '@/types/match'
 import type { Id } from '@/types/common'
 
+// Read-only matches list for this vacancy; no create affordance here, a Match is always created from the candidate/customer side (see file header).
 export default function MatchesTab({ vacancyId }: { vacancyId?: Id }) {
   const { t } = useTranslation(['vacancies', 'candidates', 'matches'])
   // Match lifecycle lookup (R-1b) — same source the candidate/customer cards use.

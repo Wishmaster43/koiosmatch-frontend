@@ -17,6 +17,7 @@ function Tile({ label, value, color }: { label: string; value: string; color: st
   return <StatTile label={label} value={value} dotColor={color} />
 }
 
+// See the file's top doc above; filled/unfilled render only once a real value arrives, never a permanent placeholder.
 export default function ShiftsSummary({ open, filled, unfilled, occupancy, onOpen }: {
   open?: number | null
   filled?: number | null

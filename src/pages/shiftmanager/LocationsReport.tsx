@@ -14,6 +14,8 @@ import EntityListDrawer from '@/components/ui/EntityListDrawer'
 import { useSmCustomerTree } from '@/hooks/useSmCustomerTree'
 import type { SmDrillItem } from '@/types/shiftmanager'
 
+// Flattens the SM customer→location tree into one location list, builds its KPI/
+// drill-down datasets, and registers the status filter with the shared right panel.
 export default function LocationsReport() {
   const { t } = useTranslation('shiftmanager')
   const { customers, loading } = useSmCustomerTree()
@@ -57,9 +59,11 @@ export default function LocationsReport() {
     badgeBg:    'var(--color-warning-bg)',
   }))
 
+  // Distinct location statuses present, sorted alphabetically, for the status filter's option list.
   const statusOptions = useMemo(() =>
     [...new Set(locations.map(l => l.status).filter((x): x is string => Boolean(x)))].sort(), [locations])
 
+  // Single filter group (status), in the shape the shared right panel expects; empty until locations load.
   const filterGroups = useMemo(() => statusOptions.length === 0 ? [] : [{
     key: 'status', label: t('locationsReport.filterStatus'),
     selected: selectedStatuses,
@@ -71,6 +75,7 @@ export default function LocationsReport() {
     onToggle: (v: string) => setSelectedStatuses(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]),
   }], [t, statusOptions, selectedStatuses, locations])
 
+  // Register the status filter with the shared right panel; unregister on unmount so it doesn't leak to other pages.
   useEffect(() => {
     registerFilters('locations-report', filterGroups)
     return () => unregisterFilters('locations-report')

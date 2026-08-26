@@ -35,6 +35,8 @@ export interface DashboardServerState<Stats, Opp, Dash, Charts> {
   retry: () => void
 }
 
+// Owns the dashboard's server state: the two critical feeds (candidates/stats,
+// /dashboard) surface a real error, the two enrichment feeds stay fail-soft.
 export function useDashboardData<Stats, Opp, Dash, Charts>({ tenantId, filterParams }: {
   tenantId?: Id | null
   // Single-value dashboard filters (period/status/location_id) — a NEW OBJECT per
@@ -73,6 +75,8 @@ export function useDashboardData<Stats, Opp, Dash, Charts>({ tenantId, filterPar
   // computed `kpis` block (K-168); /dashboard/charts (dedicated out-timeseries +
   // net feed) stays fail-soft when absent.
   const filterKey = JSON.stringify(filterParams)
+  // Refetch the summary + charts whenever the serialised filter key changes;
+  // abort in-flight requests on cleanup so a stale filter's response never wins.
   useEffect(() => {
     const ctrl = new AbortController()
     const params = JSON.parse(filterKey) as Record<string, unknown>

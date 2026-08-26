@@ -32,10 +32,14 @@ export default function LocationsPage() {
   const toggle = (setter: Dispatch<SetStateAction<string[]>>) => (val: string) =>
     setter(prev => prev.includes(val) ? prev.filter(v => v !== val) : [...prev, val])
 
+  // Distinct status values present in the loaded locations, sorted, for the status filter options.
   const statusOptions = useMemo(() => [...new Set(locations.map(l => l.status).filter((x): x is string => Boolean(x)))].sort(), [locations])
+  // Distinct customer names present in the loaded locations, sorted, for the customer filter options.
   const customerOptions  = useMemo(() => [...new Set(locations.map(l => l.customer).filter((x): x is string => Boolean(x)))].sort(), [locations])
+  // Distinct city values present in the loaded locations, sorted, for the city filter options.
   const cityOptions  = useMemo(() => [...new Set(locations.map(l => l.city).filter((x): x is string => Boolean(x)))].sort(), [locations])
 
+  // Builds the status/customer/city filter definitions handed to the shared right-panel filter UI.
   const filterGroups = useMemo(() => [
     { key: 'status',  label: t('locationsPage.filter.status'),
       options: statusOptions.map(s => ({ value: s, label: s })),
@@ -48,11 +52,13 @@ export default function LocationsPage() {
       selected: selCities,    onToggle: toggle(setSelCities) },
   ], [t, statusOptions, customerOptions, cityOptions, selStatuses, selCustomers, selCities])
 
+  // Registers this page's filter groups with the shared right panel, and unregisters them on unmount so they do not leak into another page.
   useEffect(() => {
     registerFilters('locations-page', filterGroups)
     return () => unregisterFilters('locations-page')
   }, [filterGroups, registerFilters, unregisterFilters])
 
+  // Applies the active status/customer/city filters plus the free-text search (name/customer/city) in one pass.
   const filtered = useMemo(() => {
     let rows = locations
     if (selStatuses.length) rows = rows.filter(l => selStatuses.includes(l.status as string))

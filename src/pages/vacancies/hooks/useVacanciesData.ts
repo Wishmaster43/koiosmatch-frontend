@@ -72,6 +72,8 @@ const EMPTY_CUSTOMERS: VacancyCustomer[] = []
 // one source of truth for both the table's page size and this defensive re-clamp.
 export const VACANCIES_MAX_PER_PAGE = 500
 
+// Server-paginated vacancy list (React Query) plus the customer picker list; see
+// VACANCIES_MAX_PER_PAGE above for the shared page-size ceiling both this hook and the page respect.
 export function useVacanciesData({ filterParams, page, pageSize, t, sort }: UseVacanciesDataArgs): UseVacanciesDataResult {
   const queryClient = useQueryClient()
   const sortQuery = vacancySortParams(sort)
@@ -87,7 +89,7 @@ export function useVacanciesData({ filterParams, page, pageSize, t, sort }: UseV
     },
   })
 
-  // List (paginated, server-filtered). 404 = endpoint not built → empty, not an error.
+  // List (paginated, server-filtered). 404 = endpoint not built → empty, not an error
   // sort rides in the key too (DATATABLE-SORT-1 reference adoption) — a header
   // click that maps to a real sort_by cleanly refetches.
   const listQuery = useQuery({
@@ -127,6 +129,8 @@ export function useVacanciesData({ filterParams, page, pageSize, t, sort }: UseV
   // response replacing the rows) do — rows that left the page cannot stay selected.
   const lastRowIdsRef = useRef<string | null>(null)
   const [rowsEpoch, setRowsEpoch] = useState(0)
+  // Bump rowsEpoch only when the settled row-id set actually changes (never mid-fetch,
+  // never on a same-ids refetch) — see the block comment above for the full SELECT-RACE-1 reasoning.
   useEffect(() => {
     if (listQuery.isFetching) return
     const sig = (listQuery.data?.vacancies ?? []).map(r => String(r.id)).join('|')

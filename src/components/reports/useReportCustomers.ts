@@ -113,11 +113,13 @@ const DUMMY_CUSTOMERS: ReportCustomer[] = [
   },
 ]
 
+// Fetches Shiftmanager customers for the reports table; dev-only mock rows fill gaps behind real ids when USE_MOCKS is on.
 export function useReportCustomers(): { customers: ReportCustomer[]; loading: boolean; error: boolean } {
   const [customers, setCustomers] = useState<ReportCustomer[]>([])
   const [loading,   setLoading]   = useState(true)
   const [error,     setError]     = useState(false)
 
+  // Loads once on mount; the alive flag stops a late response from writing into state after this hook has unmounted.
   useEffect(() => {
     let active = true
     setLoading(true); setError(false)

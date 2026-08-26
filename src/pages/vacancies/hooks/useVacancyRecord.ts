@@ -29,6 +29,7 @@ interface Args {
   t: TFunction
 }
 
+// Owns the selected vacancy, its detail fetch, create-then-open flow and optimistic header/picker PATCH, taking the list's setters and lookups as args (see file header).
 export function useVacancyRecord({ setVacancies, setTotal, statusMeta, users, customers, t }: Args) {
   const [selected,       setSelected]       = useState<Vacancy | null>(null)
   const [detail,         setDetail]         = useState<VacancyDetail | null>(null)

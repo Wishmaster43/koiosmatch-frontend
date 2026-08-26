@@ -57,6 +57,7 @@ function MatcherField({ label, options, selected, onToggle, emptyText }) {
   )
 }
 
+// See the file's top doc above; pure controlled form, no persistence of its own.
 export default function VacancyGenerationProfileEditor({ draft, onChange, contentBlocks = [] }) {
   const { t } = useTranslation('settings')
   const [wordDraft, setWordDraft] = useState('')

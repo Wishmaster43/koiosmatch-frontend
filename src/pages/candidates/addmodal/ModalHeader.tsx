@@ -40,6 +40,8 @@ interface ModalHeaderProps {
   hasFile: boolean
 }
 
+// The candidate create modal's header: title, CV
+// entry icons, phase-choice pills, import toggle and close — purely presentational.
 export default function ModalHeader({ status, pickStatuses, selectedStatus, statusLabel, onSelectStatus, onClose,
   canParseCv, onCvFile, onCvText, canImport, importOpen, onToggleImport, hasFile }: ModalHeaderProps) {
   const { t } = useTranslation(['candidates', 'common'])

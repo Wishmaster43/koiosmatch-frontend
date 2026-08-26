@@ -21,6 +21,9 @@ import api, { unwrapList } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 import type { BranchRow } from '../usersParts'
 
+// One user's branch coupling: loads the current set, then toggles one branch
+// via an optimistic replace-set PUT (revert + notify on failure) — see file doc
+// for why an empty set still means unrestricted while a non-empty one is enforced.
 export function useUserBranches(userId: string | number | null | undefined) {
   const { t } = useTranslation('users')
   const [branches, setBranches] = useState<BranchRow[]>([])

@@ -28,6 +28,7 @@ export function Field({ label, children }: { label?: ReactNode; children: ReactN
 // for both the avatar and the scheduled-candidate accent border.
 // eslint-disable-next-line no-restricted-syntax -- DATA: avatar colour-cycling palette, not UI element styling
 const AVATAR_COLORS = ['var(--color-primary)', 'var(--color-secondary)', 'var(--color-success)', 'var(--color-warning)', 'var(--color-danger)', '#8B5CF6', '#EC4899']
+// Deterministic colour for an avatar/accent border from a name's initials, since no per-candidate colour field exists.
 export function colorFor(initials: string) {
   return AVATAR_COLORS[initials.charCodeAt(0) % AVATAR_COLORS.length]
 }

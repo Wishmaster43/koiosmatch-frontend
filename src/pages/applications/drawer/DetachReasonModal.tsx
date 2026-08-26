@@ -22,6 +22,8 @@ interface Props {
   submitting?: boolean
 }
 
+// A small, honest confirm step for detaching an application: requires a
+// plain-text reason (server 422s without one) before the destructive action fires.
 export default function DetachReasonModal({ onCancel, onConfirm, submitting }: Props) {
   const { t } = useTranslation(['applications', 'common'])
   const [reason, setReason] = useState('')

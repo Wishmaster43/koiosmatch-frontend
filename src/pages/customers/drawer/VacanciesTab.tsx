@@ -96,6 +96,9 @@ const SEED_STATUSES: StatusOpt[] = [
   { value: 'closed', label: 'Gesloten', isClosed: true },
 ]
 
+// Two-sub-tab host for a customer's Vacatures/Sollicitaties (see file docblock
+// above); the Vacatures list carries its own status filter, seeded until the
+// tenant lookup answers.
 export default function VacanciesTab({ customerId, customerName, params }: { customerId?: Id; customerName?: string; params?: Record<string, unknown> }) {
   const { t } = useTranslation(['customers', 'applications'])
   const { openEntity } = useNavigation()

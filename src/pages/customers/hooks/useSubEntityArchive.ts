@@ -22,6 +22,8 @@ interface Options<T> {
   restoreFailedMessage: string
 }
 
+// The one shared archive/restore mutation for location/department/contact detail
+// screens — see the module doc comment above for why it replaced three near-identical copies.
 export function useSubEntityArchive<T>({
   customerId, id, archiveFn, restoreFn, onDone, archiveFailedMessage, restoreFailedMessage,
 }: Options<T>) {
@@ -37,6 +39,7 @@ export function useSubEntityArchive<T>({
     finally { setArchiving(false) }
   }
 
+  // Restore an archived record and close the drill-down on success, same as archiveNow above.
   const doRestore = async () => {
     if (!customerId) return
     try { await restoreFn(customerId, id); onDone() }

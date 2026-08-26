@@ -1,3 +1,7 @@
+import { useQuery } from '@tanstack/react-query'
+import api, { unwrapList } from '@/lib/api'
+import type { Id } from '@/types/common'
+
 /**
  * useScopedEntityList — generic GET <endpoint>?<paramName>=<id> fetch for the
  * department/location scoped sub-tabs (Vacatures/Matches, SCOPED-LIST-TAB-1).
@@ -12,10 +16,6 @@
  * (lib/queryClient.ts), so that 404 surfaces as `error: true` here, the real
  * ERROR state, never a silently empty list.
  */
-import { useQuery } from '@tanstack/react-query'
-import api, { unwrapList } from '@/lib/api'
-import type { Id } from '@/types/common'
-
 export function useScopedEntityList<T>(
   queryKey: string,
   endpoint: string,

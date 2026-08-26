@@ -33,6 +33,8 @@ export function getWorkflowIdFromHash(hash: string): string | null {
   return new URLSearchParams(raw.slice(qIdx + 1)).get('workflow_id')
 }
 
+// Searchable, filterable workflow-runs list built on the shared DataTable; row
+// click opens RunDetailDrawer for the per-step input/output of that execution.
 export default function RunsTable() {
   const { t } = useTranslation('reports')
   // WEBHOOK-RUN-CORRELATION-1: a workflow_id arriving via this page's own hash
@@ -52,12 +54,15 @@ export default function RunsTable() {
 
   const { registerFilters, unregisterFilters } = useRightPanel()
 
+  // Distinct workflow names present in the run list, for the "Workflow" filter.
   const workflowOptions = useMemo(() =>
     [...new Set(rows.map(r => r.workflow_name).filter((x): x is string => Boolean(x)))].sort(), [rows])
 
+  // Distinct statuses present in the run list, for the "Status" filter.
   const statusOptions = useMemo(() =>
     [...new Set(rows.map(r => r.status).filter((x): x is string => Boolean(x)))].sort(), [rows])
 
+  // Apply the status/workflow filters and the free-text search over trigger/error fields.
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase()
     return rows.filter(r => {
@@ -123,6 +128,8 @@ export default function RunsTable() {
     },
   ], [t, formatDate, formatTime])
 
+  // Build the right-panel filter groups (status + workflow), each option carrying
+  // a live count against the unfiltered run list.
   const filterGroups = useMemo(() => {
     const groups: ReportFilterGroup[] = []
     if (statusOptions.length) {
@@ -151,6 +158,8 @@ export default function RunsTable() {
     return groups
   }, [t, statusOptions, workflowOptions, selectedStatuses, selectedWorkflows, rows])
 
+  // Publish the current filter groups into the shared right panel; unregister on
+  // unmount/change so a stale group set never lingers there.
   useEffect(() => {
     registerFilters('runs-table', filterGroups)
     return () => unregisterFilters('runs-table')

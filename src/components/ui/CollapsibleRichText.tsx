@@ -68,6 +68,7 @@ export interface CollapsibleRichTextProps {
   minHeight?: number
 }
 
+// Shared always-present ghost-to-editor block (see the module doc above): purely presentational, all state via props, so every entity's optional prose field looks and behaves identically.
 export default function CollapsibleRichText({
   t, value, onChange, expanded, setExpanded, editing, setEditing, placeholder, ariaLabel, assistModes, onPopout, fill, minHeight,
 }: CollapsibleRichTextProps) {

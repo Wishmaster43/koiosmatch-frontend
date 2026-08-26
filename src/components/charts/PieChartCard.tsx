@@ -30,6 +30,8 @@ function ChartTooltip({ active, payload, total, showPercent, unit, formatNumber 
   )
 }
 
+// Themed donut chart with a keyboard-operable legend, a tooltip, and an
+// optional per-slice click-through; an inert slice (isInert) never advertises one.
 export default function PieChartCard({ title, data = [], colors = DEFAULT_COLORS, showPercent = false, size = 200, onItemClick, unit, hideLegend = false, isInert }: {
   title?: ReactNode; data?: ChartDatum[]; colors?: string[]; showPercent?: boolean; size?: number; onItemClick?: (d: unknown) => void; unit?: string
   // INERT-SLICE-1: a slice that has no drill target (a synthetic 'others'

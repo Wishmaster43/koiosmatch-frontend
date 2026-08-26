@@ -8,6 +8,7 @@
  */
 import { tintBg, tintBorder, chipInk } from '@/lib/tint'
 
+// Compact score chip, tinted success/warning/danger by the same thresholds as MatchScoreBlock's ring.
 export default function ScorePill({ score }: { score: number }) {
   const color = score >= 75 ? 'var(--color-success)' : score >= 50 ? 'var(--color-warning)' : 'var(--color-danger)'
   return (

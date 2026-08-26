@@ -18,6 +18,7 @@ import type { VacancyDetail } from '@/types/vacancy'
 // Structural match for the shared NotesTab's NoteItem (typed fields + open index).
 interface Note { type?: string; title?: string; author?: string; text?: string; body?: string; created_at?: string; time?: string; [k: string]: unknown }
 
+// The vacancy notes tab, on the shared NotesTab family.
 export default function NotesTab({ vacancy: v }: { vacancy: VacancyDetail }) {
   const { t } = useTranslation('vacancies')
   // Note categories from the tenant lookup, scoped to 'vacancy' (NOTE-TYPES-2/3).

@@ -85,6 +85,8 @@ function EntityRow({ entity, settings }) {
   )
 }
 
+// Per-entity numbering (prefix/pad/start) settings table (see file header above);
+// the entity list itself is fetched, so a new numbered entity needs no FE change.
 export default function NumberingSettings() {
   const { t } = useTranslation('settings')
   const settings = useAllSettings()

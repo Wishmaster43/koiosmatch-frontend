@@ -15,6 +15,7 @@ const REQ_FIELD_MAP: Record<string, keyof FormState> = {
   street: 'street', postal_code: 'postalCode', city: 'city',
 }
 
+// Resolves the required-field set for the given phase from the tenant setting, with the Settings-mirrored fallback defined above.
 export function useRequiredFields(status: string) {
   const settings = useAllSettings()
   const requiredCfg = getJsonSetting<Record<string, string[]>>(settings, 'candidate_required_fields',

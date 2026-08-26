@@ -17,6 +17,7 @@ interface Props {
   industries: string[]
 }
 
+// The general-info fields for the create-vacancy modal; category/industry option lists come in via props from the tenant lookups.
 export default function GeneralCard({
   title, onTitleChange, titleError, category, onCategoryChange, functions, industry, onIndustryChange, industries,
 }: Props) {

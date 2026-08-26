@@ -24,6 +24,8 @@ interface ViewModeToggleProps<T extends string = string> {
   color?: string
 }
 
+// The one shared icon-only view switcher (table/board/…), soft-tinted so the
+// active option never wears the forbidden solid-fill drift.
 export default function ViewModeToggle<T extends string = string>({ value, onChange, options, color = 'var(--color-primary)' }: ViewModeToggleProps<T>) {
   return (
     <div style={{ display: 'flex', gap: 4 }}>

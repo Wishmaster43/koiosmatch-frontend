@@ -29,7 +29,9 @@ function CodeBlock({ value, emptyLabel, copyLabel }: { value: string | null; emp
   // The "copied" flash resets after 2s — cleared on unmount so closing the panel
   // within that window never sets state on a dead component (Opus nit).
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  // Clears the pending copied-flash timeout on unmount.
   useEffect(() => () => { if (timerRef.current) clearTimeout(timerRef.current) }, [])
+  // Copies the value to the clipboard and flashes a copied confirmation for 2 seconds.
   const copy = () => {
     void navigator.clipboard?.writeText(value ?? '')
     setCopied(true)
@@ -65,6 +67,7 @@ function KeyValueRow({ label, value, maskedTitle }: { label: string; value: stri
   )
 }
 
+// Floating panel showing one webhook request full detail (headers/query/body/response), fetched by id with an explicit notFound/error phase alongside loading/ready.
 export default function WebhookRequestDetailPanel({ webhookId, requestId, onClose }: {
   webhookId: string | number
   requestId: string | number

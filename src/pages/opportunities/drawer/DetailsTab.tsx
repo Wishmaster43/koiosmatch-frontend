@@ -28,6 +28,7 @@ interface DetailsTabProps {
   stages?: LookupOption[]
 }
 
+// Deal-fields card + description/Koios/branch blocks in canon order (see the module doc above for the DRILLDOWN-VOLGORDE-CANON correction).
 export default function DetailsTab({ opportunity: o, onUpdate, stages = [] }: DetailsTabProps) {
   const { t } = useTranslation(['opportunities', 'candidates'])
   const { serviceTypes }   = useOpportunityServiceTypes()

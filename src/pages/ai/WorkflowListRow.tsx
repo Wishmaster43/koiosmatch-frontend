@@ -100,6 +100,7 @@ function triggerMeta(triggerType?: string): { Icon: LucideIcon; key: string } {
   return { Icon: MousePointerClick, key: 'list.triggerManual' }
 }
 
+// One row in the workflow list: status/trigger badges plus its run/edit/archive/restore actions, gated on canManageFolders where relevant.
 export default function WorkflowListRow({ workflow, folderName, onRun, onEdit, onToggleStatus, canManageFolders, onArchive, onRestore, onMarkDeletion, onUnmark, graceDays = null }: WorkflowListRowProps) {
   const { t } = useTranslation('workflows')
   const { formatDate, formatDateTime } = useDateFormat()

@@ -25,6 +25,8 @@ const sectionLabelStyle: CSSProperties = {
 // A dossier field's declared type may not always be a plain string — render safely.
 const renderFieldType = (value: unknown): string => (typeof value === 'string' ? value : JSON.stringify(value))
 
+// Read-only view of an agent's interview-flow design (see file docblock above) —
+// display only, since no flow-editing endpoint exists yet.
 export function InterviewFlowSection({ flow }: { flow?: InterviewFlow | null }) {
   const { t } = useTranslation('workflows')
   const [showPrompt, setShowPrompt] = useState(false)

@@ -15,6 +15,7 @@ import type { FillRateByBranchRow } from '@/types/dashboard'
 import type { ChartDatum } from '@/components/charts/chartTypes'
 import type { FeedTileContext } from '../feedTileKit'
 
+// Fill-rate-per-branch bar; a real branch bar drills into the vacancies page filtered on it, the no-branch bucket stays inert.
 export default function FillRateByBranchBar({ rows, onNavigate }: {
   rows: FillRateByBranchRow[]
   onNavigate?: FeedTileContext['onNavigate']

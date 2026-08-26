@@ -23,6 +23,7 @@ import SaveButton from '@/components/ui/SaveButton'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import { PageTitle, Caption } from '@/components/ui/typography'
 
+// Email provider settings for one context (klanten/kandidaten); the context prefixes every settings key so the two contexts never share state.
 export default function EmailSettings({ context = 'klanten' }) {
   const { t } = useTranslation('settings')
   const K = `email_${context}_`   // settings-key prefix for this context
@@ -45,6 +46,7 @@ export default function EmailSettings({ context = 'klanten' }) {
   const [testing,      setTesting]       = useState(false)
   const [testResult,   setTestResult]    = useState(null)
 
+  // Loads this context's settings on mount, seeding every field from the stored keys (or a safe default when a key is absent).
   useEffect(() => {
     setLoading(true)
     loadSettings()
@@ -63,6 +65,7 @@ export default function EmailSettings({ context = 'klanten' }) {
       .finally(() => setLoading(false))
   }, [K])
 
+  // Persists the current form values under this context's prefixed keys, and flashes the saved state briefly on success.
   const save = async () => {
     setSaving(true)
     try {
@@ -79,6 +82,7 @@ export default function EmailSettings({ context = 'klanten' }) {
     setSaving(false)
   }
 
+  // Sends a live test email through the configured provider and surfaces the server outcome/error as a banner.
   const testConnection = async () => {
     setTesting(true)
     setTestResult(null)

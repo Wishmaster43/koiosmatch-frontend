@@ -49,6 +49,8 @@ async function fetchCatalog(): Promise<ModuleCatalog> {
   return inFlight
 }
 
+// Exposes the session-cached module catalog (see file docblock above) as component
+// state, so every consumer re-renders once the shared fetch resolves.
 export function useModuleCatalog(): { catalog: ModuleCatalog; loading: boolean } {
   const [catalog, setCatalog] = useState<ModuleCatalog>(cache ?? {})
   const [loading, setLoading] = useState(!cache)

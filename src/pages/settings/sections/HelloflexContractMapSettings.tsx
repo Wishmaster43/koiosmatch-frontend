@@ -35,6 +35,8 @@ type ContractMap = Record<string, MapRow>
 
 const labelStyle = { fontSize: 12, fontWeight: 500, color: 'var(--text-muted)', marginBottom: 4, display: 'block' }
 
+// One row per tenant contract-form, mapping to a HelloFlex GUID + label (see file
+// docblock above); an empty mapping is a legal saved state, not a bug.
 export default function HelloflexContractMapSettings() {
   const { t } = useTranslation('settings')
   // Contract-form values come from the tenant's own lookup — never hardcoded here.

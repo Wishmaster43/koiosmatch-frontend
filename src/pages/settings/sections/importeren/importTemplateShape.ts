@@ -37,6 +37,8 @@ export interface TemplateGroups {
   perEntity: ImportTemplateSummary[]
 }
 
+// Split the API's template list into the whole-tree vs. per-entity groups the
+// wizard's sub-nav shows (see isWholeTreeTemplate for the column-based test).
 export function groupTemplates(templates: readonly ImportTemplateSummary[]): TemplateGroups {
   const wholeTree = templates.filter((tpl) => isWholeTreeTemplate(tpl.columns))
   const perEntity = templates.filter((tpl) => !isWholeTreeTemplate(tpl.columns))

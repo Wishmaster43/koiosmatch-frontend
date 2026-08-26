@@ -6,6 +6,7 @@
 import type { ReactNode } from 'react'
 import { Mono } from '@/components/ui/typography'
 
+// The one shared totals-strip chrome under a usage table, so no table hand-rolls its own twin (see file header).
 export default function UsageTotalsRow({ label, values }: { label: string; values: ReactNode[] }) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',

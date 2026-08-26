@@ -18,6 +18,8 @@
  */
 import { useEffect, useRef, useState } from 'react'
 
+// Queues a batch of values and applies them ONE per commit through a host's
+// per-value onToggle, so a stale-closure setState handler never drops all but the last.
 export function useBatchToggle<T extends string | number>(onToggle?: (value: T) => void) {
   const [queue, setQueue] = useState<T[]>([])
   const handlerRef = useRef(onToggle)

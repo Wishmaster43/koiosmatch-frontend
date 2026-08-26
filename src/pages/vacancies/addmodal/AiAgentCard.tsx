@@ -21,6 +21,8 @@ interface Props {
   showSuggestion?: boolean
 }
 
+// Links the vacancy's AI-interview agent; only rendered by the caller when the
+// tenant module + permission actually allow it (never a disabled tease).
 export default function AiAgentCard({ agentId, onAgentChange, showSuggestion = false }: Props) {
   const { t } = useTranslation(['vacancies', 'common'])
   const { options, loading, error } = useAiAgents(true)

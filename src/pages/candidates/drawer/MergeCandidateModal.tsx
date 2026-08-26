@@ -53,6 +53,7 @@ const rowToLite = (r: ApiRow): LiteCandidate => ({
   email: r.email ?? undefined,
 })
 
+// Two-step merge flow (see the module doc above): a searchable duplicate picker, then a survivor choice, calling the real merge endpoint and handing the survivor id back to the page.
 export default function MergeCandidateModal({ current, onClose, onMerged, initialOther }: {
   current: LiteCandidate
   onClose: () => void

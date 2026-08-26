@@ -32,6 +32,7 @@ interface ConfirmState extends ConfirmOptions {
   onConfirm: () => void
 }
 
+// One in-memory pending confirmation + the dialog element to render for it (see the module doc above); confirm() stages it, ConfirmDialog itself only fires onConfirm when the user actually clicks through.
 export function useConfirm() {
   const [state, setState] = useState<ConfirmState | null>(null)
 

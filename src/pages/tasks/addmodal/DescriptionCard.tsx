@@ -36,6 +36,7 @@ import NoteKoiosModeToggle from '@/components/drawer/tabs/notes/NoteKoiosModeTog
 import { cardHead, cardBox } from './fields'
 import type { TaskForm } from '../AddTaskModal'
 
+// Add-task modal card: the rich-text description field plus its Koios assist and Wizard/Auto mode toggle (see the module doc comment above).
 export default function DescriptionCard({ t, form, set }: {
   t: TFunction
   form: TaskForm

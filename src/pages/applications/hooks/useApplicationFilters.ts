@@ -61,6 +61,8 @@ interface FilterableApplication {
   hasMatch?: boolean
 }
 
+// Owns every applications-page filter dimension (each sticky via usePageMemory,
+// two deep-link scopes deliberately transient) plus the derived row predicate and server filterParams.
 export function useApplicationFilters() {
   const [bucket,         setBucket]         = usePageMemory('apps.bucket', 'active')
   const [selectedPhase,  setSelectedPhase]  = usePageMemory<string[]>('apps.phase', [])
@@ -106,6 +108,7 @@ export function useApplicationFilters() {
     || selectedClient.length || selectedBranch.length || selectedCandidateIds.length || selectedCandidateOwnerId)
   // Remount the (self-stateful) search input on clear so the visible text resets too.
   const [searchEpoch, setSearchEpoch] = useState(0)
+  // Resets every filter to its default and bumps searchEpoch so the self-stateful search input clears its own visible text too.
   const clearAllFilters = () => {
     setSearchEpoch(e => e + 1); setQuery(''); setAttention(null); setShowArchived(false); setShowTrash(false); setBucket('active')
     setSelectedPhase([]); setSelectedOwner([]); setSelectedSource([]); setSelectedVac([]); setInterviewBusy(false)
@@ -136,7 +139,7 @@ export function useApplicationFilters() {
     // 'allActive' (TOTAAL ACTIEF-kaart) spans the active + matched buckets together.
     // 'placed' (PLACED-1) is a subset of 'matched' — a real Match must exist too,
     // never a real server bucket value of its own (ApplicationQuery's enum stays
-    // active|matched|rejected — see filterParams' bucket translation below).
+    // active|matched|rejected — see filterParams' bucket translation below)
     // opts.ignoreBucket: the board view shows the whole funnel (all buckets).
     if (!opts?.ignoreBucket) {
       if (bucket === 'allActive') { if (!['active', 'matched'].includes(a.bucket ?? '')) return false }

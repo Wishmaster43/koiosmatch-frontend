@@ -38,6 +38,7 @@ interface ChipMultiSelectProps {
   selectAll?: boolean
 }
 
+// The chip grid itself: unchosen chips stay neutral, chosen ones carry the tint + checkmark, so selection reads without relying on colour alone.
 export default function ChipMultiSelect({ options, values, selected, onToggle, color = 'var(--color-primary)', emptyText, ariaLabel, selectAll = true }: ChipMultiSelectProps) {
   const active = values ?? selected ?? []
   // Hooks run before any early return — the batch is applied one value per commit

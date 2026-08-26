@@ -61,6 +61,8 @@ function F({ label, children }: { label: ReactNode; children: ReactNode }) {
   )
 }
 
+// Read-only customer→location→department→contact card (links out to the
+// customer record); the pencil opens the same cascade picker the create modal uses.
 export default function CustomerRelationTab({ opportunity: o, customers = [], onUpdate }: {
   opportunity: Opportunity; customers?: CustomerOption[]; onUpdate?: UpdateFn
 }) {
@@ -91,6 +93,7 @@ export default function CustomerRelationTab({ opportunity: o, customers = [], on
     setEditing(true)
   }
   const cancel = () => setEditing(false)
+  // Picking a different customer invalidates the whole downstream cascade pick.
   const handleCustomerChange = (v: string) => {
     setCustomerId(v)
     setLocationId(''); setDepartmentId(''); setContactId('')

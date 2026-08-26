@@ -13,6 +13,8 @@ import { Caption } from '@/components/ui/typography'
 import { useMatchActivity } from '../hooks/useMatchActivity'
 import type { MatchRow } from '@/types/match'
 
+// Match drawer's changelog tab; see the module doc comment above for the honest
+// empty-state fallback before the backend read endpoint ships.
 export default function ChangelogTab({ match }: { match: MatchRow }) {
   const { t } = useTranslation('matches')
   const { formatDate } = useDateFormat()

@@ -53,6 +53,7 @@ const mapNationalities = (res: AxiosResponse): NationalitiesData | null => {
   return names.length ? { names, flags } : null
 }
 
+// Cached tenant nationality lookup + a name-to-flag-emoji map derived from each row's country code (see the module doc above for why both share one cache entry).
 export function useNationalities() {
   const { t } = useTranslation('common')
   const { data } = useCachedLookup('/nationalities', mapNationalities, DEFAULT_DATA)

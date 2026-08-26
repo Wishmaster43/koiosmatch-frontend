@@ -41,6 +41,7 @@ interface BuildArgs {
   users: { id: string | number; name?: string | null }[]
 }
 
+// Pure builder of the WhatsApp messages filter-panel config; shares the same setters the table's own chip clicks use, so the two filter gateways can never disagree (see file header).
 export function buildWaMessageFilterGroups({
   t, tog,
   selectedStatus, setSelectedStatus, selectedDirection, setSelectedDirection,

@@ -129,6 +129,7 @@ export default function LocationContactSection({
   // listener refetches the customer's contacts and this section re-renders into its
   // coupled state on its own — no manual reload needed.
   const [coupling, setCoupling] = useState(false)
+  // Couples the one unique matching contact as this location's primary contact.
   const coupleMatch = async () => {
     if (!uniqueMatch || uniqueMatch.id == null || customerId == null || coupling) return
     setCoupling(true)
@@ -158,6 +159,9 @@ export default function LocationContactSection({
   // find that new contact on the very next render (its email now matches it uniquely),
   // so recovering needs nothing more than the unique-match button that already exists.
   const [creating, setCreating] = useState(false)
+  // Creates a real contact from the typed text, then couples it as the location's
+  // primary contact — two sequenced steps (see the comment above) so a step-2
+  // failure never rolls back the just-created contact.
   const createAndLink = async () => {
     if (!customerId || !onAddContact || creating || coupling) return
     setCreating(true)

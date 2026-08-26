@@ -33,6 +33,8 @@ interface LogViewProps<Row> {
   emptyText?: string
 }
 
+// Generic log/audit table shell: filter panel wiring, row click, export and the
+// four UI states, parameterised by the caller's own row shape and columns.
 export default function LogView<Row>({
   rows, columns, loading, error, filterKey, filterGroups, getRowId, onRowClick,
   totalCount, exportName, exportColumns, emptyText,

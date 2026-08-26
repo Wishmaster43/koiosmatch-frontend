@@ -34,6 +34,8 @@ export function invalidateRetentionConsentMonths() {
   inFlight = null
 }
 
+// Seeds state synchronously from any already-resolved cache so a second mount
+// never flashes loading before the effect below dedupes the fetch.
 export function useRetentionConsentMonths(): RetentionConsentMonths {
   const [state, setState] = useState<RetentionConsentMonths>(() =>
     cache === null ? { months: null, loading: true, error: false } : { months: cache, loading: false, error: false })

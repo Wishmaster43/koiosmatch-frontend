@@ -40,6 +40,7 @@ interface AssistActionsResultsPanelProps {
   onDiscard: () => void
 }
 
+// Shared action-points result surface: a preview + execute/apply-as-text/discard before running, then a live per-item status card with a drill-in to its run once executed (see file header).
 export default function AssistActionsResultsPanel({ items, source, onApplyAsText, onDiscard }: AssistActionsResultsPanelProps) {
   const { t } = useTranslation('common')
   const exec = useAssistActionsExecute(source)

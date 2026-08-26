@@ -72,6 +72,7 @@ function PublicRoute({ children }: { children: ReactNode }) {
   return auth.user ? <Navigate to="/" replace /> : <>{children}</>
 }
 
+// Wires the app's providers and top-level routes.
 export default function App() {
   return (
     <BrowserRouter>

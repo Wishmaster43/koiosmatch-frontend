@@ -28,6 +28,7 @@ import type { Id } from '@/types/common'
 type AnyProps = Record<string, unknown>
 const Slider = SliderJs as unknown as ComponentType<AnyProps>
 
+// Match-weight sliders tab: local editable weights seeded from the vacancy, saved back through onUpdate.
 export default function MatchingTab({ vacancy: v, onUpdate }: { vacancy: VacancyDetail; onUpdate?: (id: Id | undefined, patch: Record<string, unknown>) => void | Promise<boolean> }) {
   const { t } = useTranslation('vacancies')
   const { templates, loading: templatesLoading, error: templatesError } = useMatchWeightTemplates()
@@ -36,6 +37,7 @@ export default function MatchingTab({ vacancy: v, onUpdate }: { vacancy: Vacancy
   // a different vacancy, or a fresh template-snapshot response) — the parent only
   // hands down a new object reference when the value actually changed.
   const [weights, setWeights] = useState<Record<string, number>>(() => buildWeights(v.matchWeights as Record<string, unknown>))
+  // Resyncs local weights whenever the vacancy id or its stored weights actually change (a different vacancy, or a fresh server snapshot).
   useEffect(() => { setWeights(buildWeights(v.matchWeights as Record<string, unknown>)) }, [v.id, v.matchWeights])
 
   const [saved, setSaved] = useState(false)

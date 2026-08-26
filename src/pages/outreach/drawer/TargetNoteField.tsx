@@ -44,6 +44,8 @@ import Button from '@/components/ui/Button'
 import { useTextPopoutHost } from '@/hooks/useTextPopoutHost'
 import { outreachTargetPopoutId } from '@/lib/secondScreen'
 
+// Rich-text note field for one outreach target, with the same second-screen
+// pop-out + local-draft mechanism the candidate profile text uses (see file header).
 export default function TargetNoteField({ note, onSave, targetId, campaignId, onNoteSavedElsewhere }: {
   note?: string | null
   // Persists the trimmed note via PATCH /outreach-targets/{id}; the caller
@@ -75,6 +77,8 @@ export default function TargetNoteField({ note, onSave, targetId, campaignId, on
   // clobber text the popped-out window already saved (mirrors ProfileTab's
   // lastRecordSummary guard).
   const lastProp = useRef(note ?? '')
+  // Applies the guard described above: adopts a genuinely new prop value, but never
+  // while an edit (local or popped-out) is in progress.
   useEffect(() => {
     const next = note ?? ''
     if (next === lastProp.current) return
@@ -109,6 +113,8 @@ export default function TargetNoteField({ note, onSave, targetId, campaignId, on
   // Enter edit mode with a fresh draft (in case `current` changed since last edit).
   const start = () => { setDraft(current); setFailed(false); setEditing(true) }
   const cancel = () => { setDraft(current); setFailed(false); setEditing(false) }
+  // Persists the trimmed draft via the caller's onSave; leaves edit mode open on
+  // failure so the unsent text isn't lost.
   const save = async () => {
     setSaving(true); setFailed(false)
     try {

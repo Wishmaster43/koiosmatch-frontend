@@ -1,3 +1,9 @@
+import { useQuery } from '@tanstack/react-query'
+import api from '@/lib/api'
+import { buildReportQueryParams, EMPTY_REPORT_FILTERS } from './reportFilterParams'
+import type { ReportFilterState } from './reportFilterParams'
+import type { CustomersReportData, ReportPeriod } from '@/types/analytics'
+
 /**
  * useCustomersReport — data layer for CustomersReport: loads GET /reports/customers
  * for the given period (+ RAPPORT-FILTERS-1 status/owner/branch filters) and exposes the
@@ -11,12 +17,6 @@
  * SERVER-side narrowing, included in the query key so the two populations cache
  * separately.
  */
-import { useQuery } from '@tanstack/react-query'
-import api from '@/lib/api'
-import { buildReportQueryParams, EMPTY_REPORT_FILTERS } from './reportFilterParams'
-import type { ReportFilterState } from './reportFilterParams'
-import type { CustomersReportData, ReportPeriod } from '@/types/analytics'
-
 export function useCustomersReport(
   period: ReportPeriod,
   filters: ReportFilterState = EMPTY_REPORT_FILTERS,

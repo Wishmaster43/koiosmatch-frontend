@@ -91,6 +91,8 @@ interface Args {
 
 const NOOP_ATTACHMENTS: AttachmentsController = { hasPending: false, runSequence: async () => {} }
 
+// Owns every field, lookup, cascade and default for the "+ Vacature" create form,
+// plus its submit → POST /vacancies and the post-create attachments hand-off.
 export function useAddVacancyForm({
   onClose, onCreated, users, customers, lockCustomerId,
   initialCustomerLocationId, initialCustomerDepartmentId, initialCustomerLocationName, initialCustomerDepartmentName,
@@ -187,6 +189,8 @@ export function useAddVacancyForm({
   // Country -> province cascade (VAC-COUNTRY-1 pattern): an already-filled
   // province that no longer exists in the new country's list is cleared.
   const { provinces } = useProvinces(form.country)
+  // A country switch invalidates a province from the old list — clear it rather
+  // than silently submitting a value the new country's list no longer has.
   useEffect(() => {
     if (form.province && !provinces.includes(form.province)) set('province', '')
     // eslint-disable-next-line react-hooks/exhaustive-deps -- only react to the resolved list changing
@@ -265,6 +269,8 @@ export function useAddVacancyForm({
   // which would otherwise hand the effect below an unstable dependency and loop forever
   // (measured — an unstable mock reference reproduced this exact hang in tests).
   const rawAppDefaults = (allSettings as Record<string, unknown>)[VACANCY_APP_DEFAULTS_KEY]
+  // Parse the tenant's application-form defaults, re-parsing only when the raw
+  // stored value itself changes (see the comment above for why that matters).
   const tenantAppDefaults = useMemo(
     () => getJsonSetting<Record<string, unknown>>(allSettings, VACANCY_APP_DEFAULTS_KEY, FALLBACK_APP_SETTINGS),
     [rawAppDefaults], // eslint-disable-line react-hooks/exhaustive-deps -- allSettings is a stable cache object; only this one key's raw value should force a re-parse
@@ -288,11 +294,16 @@ export function useAddVacancyForm({
     if (!applicationSettingsTouched) setApplicationSettingsState(tenantAppDefaults)
     // eslint-disable-next-line react-hooks/exhaustive-deps -- only react to the tenant defaults resolving
   }, [tenantAppDefaults])
+  // Recruiter edited one application-form setting: mark it touched (so the
+  // backfill effect above stops overwriting it) and merge in the new value.
   const setApplicationSetting = (field: string, value: unknown) => {
     setApplicationSettingsTouched(true)
     setApplicationSettingsState(s => ({ ...s, [field]: value }))
   }
 
+  // Validate, build the conditional POST body (every optional field rides only
+  // when filled), create the vacancy, then hand off to any pending post-create
+  // documents/notes before closing — or map 422 field errors back onto the form.
   const handleSubmit = async () => {
     if (!form.title.trim()) { setErrors({ title: true }); return }
     setSaving(true)

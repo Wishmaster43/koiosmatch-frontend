@@ -49,6 +49,7 @@ type Axis = 'status' | 'type' | 'priority' | 'team' | 'branch'
 // colour, the other axes do not (SegmentBars falls back to the primary tint).
 type AxisSeg = { value: string; label: string; count: number; color?: string | null }
 
+// See the file's top doc above for the chart-mix rule and the seven-way drill contract this report renders against.
 export default function TasksReport({ period, filters = EMPTY_REPORT_FILTERS, compare = COMPARE_OFF }: { period: ReportPeriod; filters?: ReportFilterState; compare?: ReportCompareMode }) {
   const { t } = useTranslation('analytics')
   const { formatDate } = useDateFormat()

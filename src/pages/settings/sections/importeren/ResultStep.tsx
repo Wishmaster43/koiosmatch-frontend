@@ -23,6 +23,7 @@ interface ResultStepProps {
   wholeTree?: boolean
 }
 
+// Import wizard's final step: renders the run summary/error rows and offers a reset for a new import.
 export default function ResultStep({ result, onReset, wholeTree = false }: ResultStepProps) {
   const { t } = useTranslation('settings')
   const [showAllRows, setShowAllRows] = useState(false)

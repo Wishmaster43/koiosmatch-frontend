@@ -44,6 +44,7 @@ export interface CachedLookupResult<T> {
   invalidate: () => void
 }
 
+// The generic tenant-scoped, session-cached lookup loader.
 export function useCachedLookup<T>(
   url: string,
   mapFn: (res: AxiosResponse) => T | null,

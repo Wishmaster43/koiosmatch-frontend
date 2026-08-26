@@ -61,6 +61,8 @@ const SUBJECT_LABEL_KEYS: Record<string, string> = {
   CustomerLocation: 'location', CustomerDepartment: 'department', CustomerContact: 'contact', Document: 'document',
 }
 
+// The customer (or sub-entity, via `endpoint`) audit-trail content, rendered
+// as one card per activity entry with an old → new row per changed field.
 export default function ChangelogTab({ customerId, endpoint }: { customerId?: Id; endpoint?: string }) {
   const { t } = useTranslation('customers')
   const { formatDate } = useDateFormat()
@@ -71,6 +73,8 @@ export default function ChangelogTab({ customerId, endpoint }: { customerId?: Id
   // content while its panel is open. `endpoint` wins when given (a sub-entity's
   // own activity route); otherwise falls back to the customer's own route.
   const url = endpoint ?? (customerId ? `/customers/${customerId}/activity` : undefined)
+  // Fetch this mount's activity feed once; abort on unmount/url change so a
+  // stale response from a previous endpoint can never overwrite the current one.
   useEffect(() => {
     if (!url) return
     const ctrl = new AbortController()

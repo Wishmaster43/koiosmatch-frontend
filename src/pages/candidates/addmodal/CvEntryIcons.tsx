@@ -30,6 +30,8 @@ const iconBtn: CSSProperties = {
   color: 'var(--color-primary-text)',
 }
 
+// Two compact icon buttons for starting a candidate from a CV: upload (file
+// picker) and paste (a small popover feeding the same parse flow).
 export default function CvEntryIcons({ onFile, onSubmitText }: CvEntryIconsProps) {
   const { t } = useTranslation(['candidates', 'common'])
   const inputRef = useRef<HTMLInputElement>(null)

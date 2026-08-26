@@ -35,6 +35,7 @@ function MultiTooltip({ active, payload, label, formatNumber, rightKeys, rightAx
   )
 }
 
+// Config-driven grouped bar chart (see the module doc above); `axis` is set per series so a rate column never silently shares the count scale, while `stacked` is one card-level switch applied to every bar series alike.
 export default function WeeklyBarChartCard({ title, data = [], series = [], height = 240, onBarClick, stacked = false, rightAxisUnit = '' }: {
   title?: ReactNode; data?: ChartDatum[]; series?: BarSeries[]; height?: number; onBarClick?: (row: unknown, series: BarSeries) => void
   // Stack every bar series onto one column instead of grouping them side-by-side.

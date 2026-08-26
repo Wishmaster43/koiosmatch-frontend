@@ -11,6 +11,7 @@ import { unwrapList } from '@/lib/api'
 
 const POLL_MS = 15000
 
+// Owns filters, pagination, the 15s visible-tab poll and the cancel action for the pending/reserved jobs list.
 export function useJobsList() {
   const [filters, setFilters] = useState({ queue: '', tenant: '', status: '' })
   const [page, setPage] = useState(1)
@@ -38,6 +39,7 @@ export function useJobsList() {
       .catch((err) => { if (err?.code !== 'ERR_CANCELED') setPhase('error') })
   }, [params])
 
+  // Loads on mount/filter change and polls every 15s while the tab is visible, aborting any in-flight request and the interval on cleanup.
   useEffect(() => {
     setPhase('loading')
     load()

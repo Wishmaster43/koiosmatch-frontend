@@ -15,6 +15,7 @@ import { cardHead, cardBox, row2, pickerStyle, PICKER_MENU_W } from './fields'
 import type { TaskForm } from '../AddTaskModal'
 import type { TaskLookupItem } from '@/context/TaskLookupsContext'
 
+// Pure presentational task-type/title card (see the module doc above): all state lives in the parent form, this only reads and calls back.
 export default function TaskCard({ t, form, errors, set, types }: {
   t: TFunction
   form: TaskForm

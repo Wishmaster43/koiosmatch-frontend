@@ -28,6 +28,7 @@ const ghostBtn = {
   display: 'inline-flex', alignItems: 'center', gap: 6,
 } as const
 
+// See the file's top doc above; renders nothing while idle, only once a paste has actually been submitted.
 export default function PasteCvCard({ phase, errorKey, summary, onReset }: PasteCvCardProps) {
   const { t } = useTranslation(['candidates', 'common'])
   const busy = phase === 'uploading' || phase === 'processing'

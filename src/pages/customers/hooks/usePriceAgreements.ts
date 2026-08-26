@@ -74,6 +74,7 @@ const toApi = (p: PriceAgreementPayload) => ({
   remarks: p.remarks || null,
 })
 
+// CRUD for one customer's price agreements; optimistic add/update/remove reconciled with the server row, reverting and toasting on failure (see file header).
 export function usePriceAgreements(customerId: Id | undefined) {
   const { t } = useTranslation('customers')
   const [agreements, setAgreements] = useState<PriceAgreement[]>([])

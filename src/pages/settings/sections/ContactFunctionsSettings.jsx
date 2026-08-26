@@ -24,6 +24,7 @@ import { useContactFunctions } from '@/lib/useContactFunctions'
 import { useConfirm } from '@/hooks/useConfirm'
 import FreeEntryMismatchDialog, { mismatchesFromError } from '../components/FreeEntryMismatchDialog'
 
+// The contact job-title list + its free-entry toggle (see the module doc above for the dedicated-route history); optimistic override so the switch reflects a just-saved value before the cache re-fetches.
 export default function ContactFunctionsSettings() {
   const { t } = useTranslation('settings')
   const { allowFreeEntry, invalidate } = useContactFunctions()
@@ -43,6 +44,7 @@ export default function ContactFunctionsSettings() {
   // use) surfaces the server's own worklist message instead of silently no-oping.
   const onToggle = (next) => {
     if (busy) return
+    // Actually persists the toggle; a tightening 409 shows the server's own non-conforming-values list (§3B) instead of a bare toast, and reverts the optimistic override on any failure.
     const persist = async () => {
       setBusy(true)
       setOverride(next)

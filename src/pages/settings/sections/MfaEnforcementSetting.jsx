@@ -13,6 +13,7 @@ import { loadSettings, saveSettings } from '../lib/settingsApi'
 
 const KEY = 'mfa.enforced'
 
+// Admin-only "Require MFA for everyone" toggle, optimistic save with revert on failure.
 export default function MfaEnforcementSetting() {
   const { t } = useTranslation('settings')
   const { isAdmin } = useAuth() ?? {}

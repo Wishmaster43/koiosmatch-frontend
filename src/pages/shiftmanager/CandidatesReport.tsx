@@ -18,7 +18,10 @@ function ComingSoon({ label }: { label?: ReactNode }) {
   )
 }
 
+// Route-level switch between the built candidates report and a coming-soon
+// placeholder for every other (not-yet-built) shiftmanager report tab.
 export default function Reports({ initialTab = 'candidates' }: { initialTab?: string }) {
+  // Renders the tab named by initialTab, falling back to the placeholder for anything not yet built.
   const renderTab = () => {
     switch (initialTab) {
       case 'candidates': return <CandidatesReport />

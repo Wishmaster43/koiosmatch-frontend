@@ -32,6 +32,7 @@ export interface EntityTask {
   [k: string]: unknown
 }
 
+// Generic reverse-lookup hook: fetches the tasks linked to one record via the shared /tasks?<linkType>=<id> filter (see the module doc above for why every entity works uniformly now).
 export function useEntityTasks(linkType: string, id?: Id): { items: EntityTask[]; loading: boolean; error: boolean; reload: () => void } {
   const [items, setItems] = useState<EntityTask[]>([])
   const [loading, setLoading] = useState(false)
@@ -39,6 +40,7 @@ export function useEntityTasks(linkType: string, id?: Id): { items: EntityTask[]
   // Bump to refetch (e.g. after creating a task from the tab).
   const [epoch, setEpoch] = useState(0)
 
+  // Fetches whenever the link target or epoch changes; aborts on unmount/id-change, and a 404 is treated as calmly empty rather than an error (see note below).
   useEffect(() => {
     if (!id) { setItems([]); return }
     const ctrl = new AbortController()
@@ -56,6 +58,7 @@ export function useEntityTasks(linkType: string, id?: Id): { items: EntityTask[]
     return () => ctrl.abort()
   }, [linkType, id, epoch])
 
+  // Stable trigger to force a refetch (e.g. after creating a task from the tab) without needing a new function identity each render.
   const reload = useCallback(() => setEpoch(e => e + 1), [])
 
   return { items, loading, error, reload }

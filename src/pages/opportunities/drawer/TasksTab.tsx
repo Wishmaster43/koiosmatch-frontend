@@ -13,6 +13,7 @@ import { useTranslation } from 'react-i18next'
 import EntityTasksTab from '@/components/drawer/tabs/EntityTasksTab'
 import type { Opportunity } from '@/types/opportunity'
 
+// See the file's top doc above; thin wrapper over the shared EntityTasksTab scoped to this opportunity link type.
 export default function TasksTab({ opportunity: o }: { opportunity: Opportunity }) {
   const { t } = useTranslation('opportunities')
 

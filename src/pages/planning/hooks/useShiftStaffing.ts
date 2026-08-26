@@ -27,6 +27,8 @@ export interface EligibleCandidate {
 }
 interface RawEligible { id: string; first_name: string; last_name: string; favourite: boolean; reason: string }
 
+// Fetches the ranked, eligible candidate pool for one shift (see file docblock
+// above); disabled entirely with no shift selected.
 export function useShiftEligibleCandidates(shiftId: string | null) {
   const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ['planning', 'shift-candidates', shiftId],
@@ -48,6 +50,7 @@ const mapReasons = (res: AxiosResponse): LookupOption[] | null => {
   const mapped = rows.map(r => ({ value: String(r.value ?? ''), label: String(r.label ?? r.name ?? r.value ?? ''), color: r.color }))
   return mapped.length ? mapped : null
 }
+// Cached tenant lookup for cancellation reasons, never a hardcoded list.
 export function usePlanningCancellationReasons() {
   const { data, loading } = useCachedLookup('/planning-cancellation-reasons', mapReasons, [] as LookupOption[])
   return { reasons: data, loading }
@@ -82,6 +85,9 @@ const mapSchedule = (r: RawSchedule): PlanningScheduleRow => ({
 // candidate must drop out of / back into the pool without a manual refresh). ──
 export function useShiftStaffingMutations(shiftId: string | null) {
   const qc = useQueryClient()
+  // Refreshes the board (assigned/open counts) and this shift's own eligible-candidate
+  // list after any staffing mutation, so a newly assigned/freed candidate moves without
+  // a manual reload.
   const invalidate = () => {
     qc.invalidateQueries({ queryKey: ['planning', 'board'] })
     qc.invalidateQueries({ queryKey: ['planning', 'shift-candidates', shiftId] })

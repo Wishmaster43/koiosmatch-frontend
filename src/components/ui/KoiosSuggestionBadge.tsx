@@ -15,6 +15,8 @@ import KoiosAiMark from './KoiosAiMark'
 
 interface Props { labelKey?: string }
 
+// The one "Koios proposed this" marker (see file docblock above) — the mark stays
+// the same shape regardless of which specific i18n copy a caller passes.
 export default function KoiosSuggestionBadge({ labelKey = 'koiosSuggested' }: Props) {
   const { t } = useTranslation('common')
   return (

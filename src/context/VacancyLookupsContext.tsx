@@ -164,8 +164,11 @@ export function VacancyLookupsProvider({ children }: { children: ReactNode }) {
   // Seeded defaults render in the user language; a tenant value stays as typed (LOOKUP-I18N-1).
   // All five lists route through the shared catalogue (family names below).
   const statuses        = useMemo(() => translateSeedList(tCommon, 'vacancyStatuses', statusesRaw), [statusesRaw, tCommon])
+  // Phases render through the funnelTypes seed family (they ARE funnel stages), unlike the other lists' own catalogue names.
   const phases          = useMemo(() => translateSeedList(tCommon, 'funnelTypes', phasesRaw), [phasesRaw, tCommon])
+  // Seniority levels get the same translate-or-passthrough treatment as statuses above.
   const seniorityLevels = useMemo(() => translateSeedList(tCommon, 'seniorityLevels', seniorityLevelsRaw), [seniorityLevelsRaw, tCommon])
+  // Education levels get the same translate-or-passthrough treatment as statuses above.
   const educationLevels = useMemo(() => translateSeedList(tCommon, 'educationLevels', educationLevelsRaw), [educationLevelsRaw, tCommon])
   const channels         = useMemo(() => translateSeedList(tCommon, 'channels', channelsRaw), [channelsRaw, tCommon])
 
@@ -183,6 +186,7 @@ export function VacancyLookupsProvider({ children }: { children: ReactNode }) {
   return <VacancyLookupsContext.Provider value={value}>{children}</VacancyLookupsContext.Provider>
 }
 
+// Consumer hook: throws early outside the provider so a missing wrap fails loudly instead of silently returning undefined lookups.
 export function useVacancyLookups(): VacancyLookupsValue {
   const ctx = useContext(VacancyLookupsContext)
   if (!ctx) throw new Error('useVacancyLookups must be used within a VacancyLookupsProvider')

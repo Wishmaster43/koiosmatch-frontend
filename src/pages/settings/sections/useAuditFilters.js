@@ -13,6 +13,8 @@ import { useTranslation } from 'react-i18next'
 import { useRightPanel } from '@/context/RightPanelContext'
 import { isAccessEvent, entityLabel } from './auditShared'
 
+// Owns the audit log's full filter surface — state, derived option lists, the
+// filtered result and the right-panel registration (see file docblock above).
 export function useAuditFilters(logs) {
   const { t } = useTranslation('settings')
   const [search,        setSearch]        = useState('')
@@ -34,9 +36,13 @@ export function useAuditFilters(logs) {
 
   const { registerFilters, unregisterFilters } = useRightPanel()
 
+  // Distinct log-domain values (auth/settings/…) seen in the loaded rows, for the type filter.
   const typeOptions  = useMemo(() => [...new Set(logs.map(l => l.log_name).filter(Boolean))].sort(), [logs])
+  // Distinct entity kinds (Candidate, Vacancy, …) seen in the loaded rows, for the entity filter.
   const subjectTypeOptions = useMemo(() => [...new Set(logs.map(l => l.subject_type).filter(Boolean))].sort(), [logs])
+  // Distinct causer names seen in the loaded rows, for the "who" filter.
   const userOptions  = useMemo(() => [...new Set(logs.map(l => l.causer_name).filter(Boolean))].sort(), [logs])
+  // Distinct role names touched by role-domain log entries, for the role filter.
   const roleOptions  = useMemo(() => [...new Set(
     logs.filter(l => l.log_name === 'roles').map(l => l.properties?.role ?? l.properties?.name).filter(Boolean)
   )].sort(), [logs])
@@ -159,6 +165,8 @@ export function useAuditFilters(logs) {
     // guarantees is referentially stable across renders.
   ], [search, selectedTypes, selectedSubjectTypes, selectedUsers, selectedRoles, selectedActor, selectedKind, typeOptions, subjectTypeOptions, userOptions, roleOptions, logs, dateFrom, dateTo, t])
 
+  // Registers this screen's filter groups with the shared right panel, and
+  // unregisters them on cleanup so a stale group doesn't outlive this screen.
   useEffect(() => {
     registerFilters('audit-log', filterGroups)
     return () => unregisterFilters('audit-log')

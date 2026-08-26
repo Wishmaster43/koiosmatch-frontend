@@ -27,6 +27,7 @@ interface Props {
   onRemoveSkill: (name: string) => void
 }
 
+// Seniority/education pickers plus the required-skills list, reusing the drawer's own AdditionalSkillsSection so create and edit share one skills UI (see file header).
 export default function RequirementsCard({
   seniority, onSeniorityChange, seniorityLevels, education, onEducationChange, educationLevels,
   skills, onAddSkill, onEditSkill, onRemoveSkill,

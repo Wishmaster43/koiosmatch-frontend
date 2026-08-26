@@ -23,11 +23,13 @@ export interface ApplicationActivityEvent {
   [k: string]: unknown
 }
 
+// Fetches the application's audit trail; a 404 (endpoint not built yet) is treated as empty rather than a hard error.
 export function useApplicationActivity(id?: Id): { items: ApplicationActivityEvent[]; loading: boolean; error: boolean } {
   const [items,   setItems]   = useState<ApplicationActivityEvent[]>([])
   const [loading, setLoading] = useState(false)
   const [error,   setError]   = useState(false)
 
+  // Fetches the activity log for the given id, aborting the in-flight request on an id change/unmount, and treating a 404 as empty rather than an error since the read endpoint may not exist yet.
   useEffect(() => {
     if (!id) { setItems([]); return }
     const ctrl = new AbortController()

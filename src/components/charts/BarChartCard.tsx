@@ -24,6 +24,8 @@ function BarTooltip({ active, payload, label, total, showPercent, percentValues,
   )
 }
 
+// House bar chart card. percentValues renders values already expressed as a
+// server percentage (0..100) as-is; showPercent instead computes each bar's own share of the total (EENHEID-LES, §14).
 export default function BarChartCard({ title, data = [], colors = [], showPercent = false, percentValues = false, height = 220, onBarClick, showAverage = false }: {
   title?: ReactNode; data?: ChartDatum[]; colors?: string[]; showPercent?: boolean; height?: number; onBarClick?: (d: ChartDatum) => void; showAverage?: boolean
   // PERCENT-VALUES-1: the values ARE already percentages (0..100, e.g. a fill

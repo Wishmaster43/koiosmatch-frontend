@@ -80,6 +80,7 @@ const SUITE_LABEL_KEY: Record<string, string> = {
   active_conversations: 'candidates.kpi.activeConversations',
 }
 
+// Candidates/leads report and the house reference face for reports: real KPI suite for Candidates, the older axis strip for Leads until its endpoint accepts a phase narrowing (see file header).
 export default function CandidatesReport({ period, filters = EMPTY_REPORT_FILTERS, initialView = 'candidates', compare = COMPARE_OFF }: {
   period: ReportPeriod
   filters?: ReportFilterState

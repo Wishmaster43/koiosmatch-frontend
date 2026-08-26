@@ -45,7 +45,7 @@ export function useShiftCustomers() {
   return { customers: data ?? [], loading: isLoading, error: isError }
 }
 
-// A customer's departments — see the file header for why useCustomerDepartments
+// A customer's departments  for why useCustomerDepartments.
 // (flat, one level) was picked over useCustomerCascade (location→department).
 export function useShiftDepartments(customerId: Id | string) {
   const { departments, loading, error } = useCustomerDepartments(customerId || undefined)

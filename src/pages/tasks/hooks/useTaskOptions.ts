@@ -27,7 +27,9 @@ export function useTaskOptions({ all, statuses, priorities, types }: UseTaskOpti
   const donutBy = (list: TaskLookupItem[], keyOf: (x: Task) => string | number): Aggregate[] => list
     .map(it => ({ name: it.label, key: it.value, color: it.color, value: all.filter(x => keyOf(x) === it.value).length }))
     .filter(d => d.value > 0)
+  // Status donut/filter counts, only non-empty buckets.
   const statusData   = useMemo(() => donutBy(statuses,   x => x.statusKey),   [all, statuses])   // eslint-disable-line react-hooks/exhaustive-deps
+  // Same as statusData, keyed on priority instead.
   const priorityData = useMemo(() => donutBy(priorities, x => x.priorityKey), [all, priorities]) // eslint-disable-line react-hooks/exhaustive-deps
   const typeData     = useMemo(() => donutBy(types,      x => x.typeKey),     [all, types])      // eslint-disable-line react-hooks/exhaustive-deps
 

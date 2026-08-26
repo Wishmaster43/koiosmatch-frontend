@@ -31,6 +31,7 @@ type Loose = Record<string, unknown>
 type AnyProps = Record<string, unknown>
 const SearchSelect = SearchSelectJs as unknown as ComponentType<AnyProps>
 
+// See the file's top doc above; one shared linked/unlinked document slot reused for both the private and ZZP IBAN fields.
 export default function IbanDocumentSlot({ candidateId, documents = [], linkedDocumentId, onLink, preferredType }: {
   candidateId: string | number
   documents?: Loose[]

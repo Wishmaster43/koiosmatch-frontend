@@ -262,7 +262,7 @@ describe('ZzpTab · business e-mail validation + duplicate check (1.1.5)', () =>
     await user.click(screen.getByTitle('save'))
     // The dialog itself proves the warning fired for THIS duplicate (dup.name feeds
     // the i18n interpolation — untestable at the raw-key/no-i18n-instance level this
-    // file runs at, see the file header; the message KEY is asserted instead).
+    // File runs at; the message KEY is asserted instead).
     const dialog = await screen.findByRole('dialog')
     expect(within(dialog).getByText('zzp.businessEmailDuplicateBody')).toBeInTheDocument()
     await user.click(within(dialog).getByRole('button', { name: 'zzp.businessEmailDuplicateConfirm' }))

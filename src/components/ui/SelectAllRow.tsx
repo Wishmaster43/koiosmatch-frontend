@@ -38,6 +38,7 @@ interface SelectAllRowProps<T extends string | number> {
   menuItem?: boolean
 }
 
+// Dumb select-all/clear-all row (see the module doc above): acts only on the visible (already filtered) values, never the whole vocabulary, and shows the count so the scope is never a surprise.
 export default function SelectAllRow<T extends string | number>({
   visibleValues, selectedValues, onApply, dense = false, role, menuItem = false,
 }: SelectAllRowProps<T>) {

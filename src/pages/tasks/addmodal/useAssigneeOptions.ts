@@ -50,6 +50,7 @@ interface UsersQuery {
   refetch?: () => void
 }
 
+// Loads tenant users and builds the role-grouped assignee options, exposing the four explicit UI states so the modal stays a thin wiring component (see file header).
 export function useAssigneeOptions(): AssigneeOptionsState {
   const { t } = useTranslation('tasks')
   // Role labels come from the SHARED users vocabulary, so the picker names a role

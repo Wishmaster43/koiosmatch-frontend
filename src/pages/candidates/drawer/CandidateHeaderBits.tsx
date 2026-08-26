@@ -48,6 +48,8 @@ export function PhaseChip({ phaseInfo }: { phaseInfo: { label: string; color: st
   )
 }
 
+// Name + phase-chip view, or the name/function edit form when `editing` is true
+// (see file docblock above) — purely presentational, state lives in the caller.
 export function CandidateTitle({ c, editing, hf, setHF }: {
   c: Candidate; editing: boolean
   hf: (k: keyof HeaderForm) => string; setHF: (k: keyof HeaderForm, v: string) => void

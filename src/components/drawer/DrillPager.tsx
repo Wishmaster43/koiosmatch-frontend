@@ -39,6 +39,7 @@ const btnStyle = (disabled: boolean) => ({
   cursor: disabled ? 'default' : 'pointer',
 } as const)
 
+// Purely rendered up/down stepper (see the module doc above): buttons disable themselves whenever the caller has no onPrev/onNext, never wrapping around.
 export default function DrillPager({ index, total, onPrev, onNext }: DrillPagerProps) {
   const { t } = useTranslation('common')
   return (

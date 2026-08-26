@@ -14,6 +14,8 @@ import CreatableSelect from '@/components/ui/CreatableSelect'
 import { FormField as F } from './FormField'
 import { input, pairRow, pickerMenuWidth } from './styles'
 
+// Pure presentational "Contract" card: contract type, CAO, start/end date and
+// hours-per-week, all state supplied by useMatchForm via props.
 export default function ContractSection({
   t, errors,
   contractType, setContractType, contractTypeOptions,

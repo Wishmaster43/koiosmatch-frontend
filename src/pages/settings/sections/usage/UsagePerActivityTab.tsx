@@ -34,6 +34,7 @@ function activityLabel(t: (k: string, o?: Record<string, unknown>) => string, co
   return t(`billing.usage.activity.activityMap.${code}`, { defaultValue: code })
 }
 
+// AI-tokens-per-activity view (see the module doc above for the prev_month fallback and the split with the workflow-total endpoint).
 export default function UsagePerActivityTab({ overviewPeriod, workflow, workflowLoading }: UsagePerActivityTabProps) {
   const { t } = useTranslation('settings')
   const { formatNumber, formatCurrency } = useNumberFormat()
@@ -44,6 +45,7 @@ export default function UsagePerActivityTab({ overviewPeriod, workflow, workflow
   // AI usage per activity — the endpoint has no prev_month support, so any
   // overview period other than 'month' falls back to 'month' with a caption.
   const aiPeriod = overviewPeriod === 'prev_month' ? 'month' : overviewPeriod
+  // Fetches the AI usage breakdown for the (possibly folded-back) period; a 403 reads as 'unavailable' (feature not entitled) rather than a generic error, and an empty-but-successful response reads as the empty state.
   useEffect(() => {
     const ctrl = new AbortController()
     setPhase('loading')

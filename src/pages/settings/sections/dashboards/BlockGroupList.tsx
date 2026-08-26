@@ -27,6 +27,7 @@ interface BlockGroupListProps {
   td: TFunction
 }
 
+// One toggle row per block, grouped by category (see the module doc above): a category with nothing to show after filtering renders no heading at all.
 export default function BlockGroupList({ role, isHidden, onToggle, search, onOffFilter, t, td }: BlockGroupListProps) {
   const ids = blocksForRole(role)
   const groups = groupBlocksByCategory(ids)

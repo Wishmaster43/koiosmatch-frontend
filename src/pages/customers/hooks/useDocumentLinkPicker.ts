@@ -14,6 +14,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { Id } from '@/types/common'
 
+// The 'gekoppeld aan' level picker state + option list (see the module doc above): pure state/derivation, extracted from DocumentsTab to keep it under the split trigger.
 export function useDocumentLinkPicker(
   locations: { id: Id | undefined; name: string }[],
   departments: { id: Id | undefined; name: string; locationName?: string }[],

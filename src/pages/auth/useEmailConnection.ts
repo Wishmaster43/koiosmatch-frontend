@@ -24,6 +24,7 @@ export interface SmtpForm {
 // Pull the HTTP status off an axios-style error without leaking the rest.
 const statusOf = (e: unknown) => (e as { response?: { status?: number } })?.response?.status
 
+// See the file's top doc above for the backend contract this hook wraps (status/connect/disconnect).
 export function useEmailConnection() {
   const { t } = useTranslation('auth')
   const [status, setStatus] = useState<EmailStatus>('loading')

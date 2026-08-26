@@ -34,6 +34,8 @@ interface UsageDayChartProps {
   onSelectDate: (date: string) => void
 }
 
+// The daily/weekly usage bar chart, with two view-only toggles (category,
+// granularity) that reshape the already-fetched rows — never a second fetch.
 export default function UsageDayChart({ rows, weekRows, category, onCategoryChange, granularity, onGranularityChange, onSelectDate }: UsageDayChartProps) {
   const { t } = useTranslation('settings')
   const { formatDate } = useDateFormat()
@@ -54,6 +56,7 @@ export default function UsageDayChart({ rows, weekRows, category, onCategoryChan
     }))
   }, [rows, weekRows, granularity, formatDate, t])
 
+  // The one series to plot for the picked category, each with its own label/colour.
   const chartSeries = useMemo(() => {
     if (category === 'workflow') return [{ key: 'workflow', label: t('billing.usage.daily.categoryWorkflow'), color: 'var(--color-primary)' }]
     if (category === 'ai') return [{ key: 'ai', label: t('billing.usage.daily.categoryAi'), color: 'var(--color-info, var(--color-primary))' }]

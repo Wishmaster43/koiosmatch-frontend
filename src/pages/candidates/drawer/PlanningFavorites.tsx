@@ -28,6 +28,7 @@ interface PlanningFavoritesProps {
   onReload?: () => void
 }
 
+// See the file's top doc above; the preferred/do-not-schedule cards, with local add-mode/typeahead state layered over the real API data.
 export default function PlanningFavorites({ favorites, blacklist, targets, onAdd, onRemove, loading, error, onReload }: PlanningFavoritesProps) {
   const { t } = useTranslation('candidates')
   // Which card is in add-mode ('favorite' | 'blacklist' | null) + its inputs.

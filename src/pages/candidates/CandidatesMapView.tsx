@@ -10,6 +10,7 @@ import { useLookups } from '@/context/LookupsContext'
 import type { Candidate } from '@/types/candidate'
 import type { Id } from '@/types/common'
 
+// Thin adapter from candidate rows to MapPoints for the shared RadiusMapPanel,
 export default function CandidatesMapView({ rows, center, radiusKm, onCenterChange, onRadiusChange, onClearRadius, onPick, padded }: {
   rows: Candidate[]
   center: { lat: number; lng: number }

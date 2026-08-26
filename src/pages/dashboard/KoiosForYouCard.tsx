@@ -175,6 +175,7 @@ interface KoiosForYouCardProps {
   footer?: ReactNode
 }
 
+// See the file's top doc above for the for-you endpoint and the period-picker/KPI-tile drilldown it drives.
 export default function KoiosForYouCard({ title, scope, scopeToggle = false, footer }: KoiosForYouCardProps = {}) {
   const { t } = useTranslation(['dashboard', 'common'])
   const { formatDate } = useDateFormat()

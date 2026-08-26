@@ -19,6 +19,7 @@ export function mismatchesFromError(e) {
   return resp.data.mismatches
 }
 
+// The strict-mode preflight dialog; renders nothing without a mismatches list.
 export default function FreeEntryMismatchDialog({ mismatches, onClose }) {
   const { t } = useTranslation('settings')
   if (!mismatches) return null

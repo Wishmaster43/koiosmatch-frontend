@@ -70,6 +70,8 @@ const KPI_LABEL_KEYS: Record<string, string> = {
   avg_first_response_minutes: 'whatsapp.kpi.avgFirstResponseMinutes',
 }
 
+// WhatsApp conversations report: nine fixed KPI cards, timeseries + categorical
+// donuts and a top-conversations table, each surface drilling into the shared drawer.
 export default function WhatsappReport({ period, filters }: { period: ReportPeriod; filters?: ReportFilterState }) {
   const { t } = useTranslation('analytics')
   const { formatDate } = useDateFormat()

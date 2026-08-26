@@ -6,6 +6,8 @@
  */
 import { Loader2 } from 'lucide-react'
 
+// The shared loading spinner; decorative unless a.
+// `label` is passed, which promotes it to the accessible loading announcement.
 export default function Spinner({ size = 14, label }: { size?: number; label?: string }) {
   return (
     <Loader2 size={size} className="animate-spin"

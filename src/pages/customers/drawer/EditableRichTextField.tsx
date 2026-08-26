@@ -40,6 +40,7 @@ interface Props {
   assistGenerate?: { entity: GenerateEntity; id: string }
 }
 
+// The generic rich-text prose block with in-place edit.
 export default function EditableRichTextField({ label, value, onSave, popout, assistGenerate }: Props) {
   const { t } = useTranslation('common')
   const [editing,  setEditing]  = useState(false)

@@ -25,6 +25,8 @@ const TH: CSSProperties = { padding: '8px 12px', textAlign: 'left', fontSize: 11
              whiteSpace: 'nowrap', userSelect: 'none' }
 const TD: CSSProperties = { padding: '10px 12px', fontSize: 13, color: 'var(--text)', borderBottom: '1px solid var(--hover-bg)' }
 
+// Owns local search/sort/pagination state and derives the flattened department rows from
+// the shared customer→location→department tree, then registers its filters into the panel.
 export default function DepartmentsTable() {
   const { t } = useTranslation('reports')
   // Reuses the existing common.sort key for the sortable header's button tooltip
@@ -55,12 +57,16 @@ export default function DepartmentsTable() {
     )
   ), [customers])
 
+  // Deduped, alphabetised customer id/name pairs for the panel's search-select — only
+  // rebuilds when the underlying rows change, not on every search keystroke.
   const customerOptions = useMemo(() =>
     [...new Map(rows.map(r => [r.customer_id, r.customer_name] as [string | number, string | undefined])).entries()]
       .map(([id, name]) => ({ id, name }))
       .sort((a, b) => (a.name ?? '').localeCompare(b.name ?? '')),
     [rows])
 
+  // Applies the panel's customer/status selections plus the free-text search across
+  // department, location, customer and cost-center fields.
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase()
     return rows.filter(r => {
@@ -76,6 +82,8 @@ export default function DepartmentsTable() {
     })
   }, [rows, search, selectedCustomers, selectedStatuses])
 
+  // Applies the active column/direction on top of the filtered rows; recomputes only
+  // when the filter result or the sort state changes.
   const sorted = useMemo(() => {
     const { key, dir } = sort
     return [...filtered].sort((a, b) => {
@@ -87,16 +95,24 @@ export default function DepartmentsTable() {
     })
   }, [filtered, sort])
 
+  // A changed filter or page size can leave the current page out of range; reset to 1
+  // rather than showing an empty page.
   useEffect(() => setPage(1), [filtered.length, pageSize])
+  // Slices the sorted rows for the current page/size only, so the table never renders
+  // the full result set at once.
   const paged      = useMemo(() => sorted.slice((page-1)*pageSize, page*pageSize), [sorted, page, pageSize])
   const totalPages = Math.max(1, Math.ceil(sorted.length / pageSize))
 
   const setSort_ = (key: string) => setSort(prev =>
     prev.key === key ? { key, dir: prev.dir === 'asc' ? 'desc' : 'asc' } : { key, dir: 'asc' })
 
+  // Distinct location statuses seen in the data, for the panel's status filter chips.
   const statusOptions = useMemo(() =>
     [...new Set(rows.map(r => r.location_status).filter((x): x is string => Boolean(x)))].sort(), [rows])
 
+  // Declarative filter-group config fed to RightPanelContext (§4: every filter lives in
+  // the right-hand panel, never the toolbar); memoised so the panel doesn't re-render
+  // on every keystroke.
   const filterGroups = useMemo(() => [
     {
       key: 'customer', label: t('departments.filters.customer'),
@@ -121,6 +137,8 @@ export default function DepartmentsTable() {
     },
   ], [t, selectedCustomers, selectedStatuses, customerOptions, statusOptions, rows])
 
+  // Registers this table's filter groups with the shared right panel on mount/change,
+  // and unregisters them on cleanup so a stale group doesn't linger for another table.
   useEffect(() => {
     registerFilters('departments-table', filterGroups)
     return () => unregisterFilters('departments-table')

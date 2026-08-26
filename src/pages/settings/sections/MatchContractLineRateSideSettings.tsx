@@ -36,6 +36,8 @@ function resolveSide(raw: string | null): Side {
   return raw === SALE ? SALE : PURCHASE
 }
 
+// Tenant toggle for which side of the money a contract-line rate shows (see file
+// docblock above); resolveSide keeps the same guarded default as the backend.
 export default function MatchContractLineRateSideSettings() {
   const { t } = useTranslation('settings')
   const values = useAllSettings()

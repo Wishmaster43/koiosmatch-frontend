@@ -74,6 +74,7 @@ function formFromOrder(order: PlanningOrderRow): OrderForm {
   }
 }
 
+// Create/edit modal for one planning order (shift-block), seeded from `order` when editing; the customer→location→department cascade resets downstream picks the same way AddShiftModal does.
 export default function AddOrderModal({ onClose, onCreated, order }: { onClose: () => void; onCreated?: () => void; order?: PlanningOrderRow }) {
   const { t } = useTranslation(['planning', 'common'])
   const [form, setForm] = useState<OrderForm>(() => order ? formFromOrder(order) : EMPTY_FORM)
@@ -97,6 +98,7 @@ export default function AddOrderModal({ onClose, onCreated, order }: { onClose: 
   const pickedLocation = locations.find(l => String(l.id) === form.locationId)
   const departmentOptions = pickedLocation?.departments ?? []
 
+  // Builds the API body from the form, creates or updates depending on `isEditing`, and closes on success; a failure surfaces the server's own message instead of a generic one.
   const handleSubmit = async () => {
     const body: PlanningOrderInput = {
       customer_id: form.customerId || null,

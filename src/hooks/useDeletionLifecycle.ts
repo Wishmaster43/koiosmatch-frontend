@@ -51,6 +51,8 @@ export function eraseAroundDate(pendingEraseAt: string | null | undefined, grace
   return d
 }
 
+// Loads the entity's soft-delete preview/blockers and the tenant's grace window,
+// so a delete confirm can show real "erased around" wording and real blockers.
 export function useDeletionLifecycle(entityPath: string, id: string | null) {
   const [preview, setPreview] = useState<DeletionPreview | null>(null)
   const [loading, setLoading] = useState<boolean>(Boolean(id))

@@ -34,6 +34,7 @@ export default function AttachmentsCard({ files, onAddFile, onRemoveFile, noteTe
   const [noteExpanded, setNoteExpanded] = useState(false)
   const [noteEditing, setNoteEditing] = useState(false)
 
+  // Adds every picked file to the pending list and resets the input value so picking the same file again still fires onChange.
   const onPick = (e: ChangeEvent<HTMLInputElement>) => {
     const picked = e.target.files
     if (picked) Array.from(picked).forEach(f => onAddFile(f))

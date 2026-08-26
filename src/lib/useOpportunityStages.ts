@@ -33,6 +33,8 @@ export const DEFAULT_OPPORTUNITY_STAGES: LookupOption[] = [
 // null = nothing usable in this response — useCachedLookup keeps the seed and retries next mount.
 const mapOpportunityStages = (res: AxiosResponse): LookupOption[] | null => normalizeOptions(unwrap(res))
 
+// Tenant opportunity-pipeline stage lookup (see file docblock above), seed-labelled
+// and cached so every mounted consumer shares one fetch.
 export function useOpportunityStages() {
   const { t } = useTranslation('common')
   const { data: rawStages } = useCachedLookup('/opportunity-stages', mapOpportunityStages, DEFAULT_OPPORTUNITY_STAGES)

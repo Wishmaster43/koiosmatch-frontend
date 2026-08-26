@@ -63,6 +63,8 @@ export interface PlanningIntent {
   open?: Shift['id']
 }
 
+// Renders the shift calendar toolbar + active view; wires the real board data
+// (read side) while the create flow stays gated above.
 export default function PlanningPage({ intent }: { intent?: PlanningIntent | null } = {}) {
   const { t } = useTranslation('planning')
   // App-wide active locale (DATUM-1/LANE-B) — feeds the month-name header label.
@@ -87,6 +89,7 @@ export default function PlanningPage({ intent }: { intent?: PlanningIntent | nul
   // tile click). Guarded on intent object identity, mirroring useOpenFromIntent
   // (NavigationContext) — fires once per fresh intent, not on every re-render.
   const dateIntentDone = useRef<unknown>(intent ?? null)
+  // Applies the date-intent guarded above: moves the window once per fresh intent object.
   useEffect(() => {
     if (!intent?.date || dateIntentDone.current === intent) return
     dateIntentDone.current = intent
@@ -97,6 +100,8 @@ export default function PlanningPage({ intent }: { intent?: PlanningIntent | nul
   // window actually contains that shift — never on an id the current fetch
   // hasn't returned yet, which would otherwise pop an empty drawer.
   const openIntentDone = useRef<unknown>(null)
+  // Applies the open-intent guarded above: waits for the board fetch to actually contain
+  // the shift before opening its drawer, then marks the intent done.
   useEffect(() => {
     if (!intent?.open || openIntentDone.current === intent) return
     const found = boardShifts.find(s => s.id === intent.open)
@@ -112,9 +117,12 @@ export default function PlanningPage({ intent }: { intent?: PlanningIntent | nul
   const [selectedLocation, setSelectedLocation] = useState<string[]>([])
   const { registerFilters, unregisterFilters } = useRightPanel()
 
+  // Distinct shift titles for the filter panel, with a live count per option.
   const shiftOptions    = useMemo(() => [...new Set(shifts.map(s => s.title))].map(v => ({ value: v, label: v, count: shifts.filter(s => s.title === v).length })), [shifts])
+  // Same shape as shiftOptions, grouped by location instead.
   const locationOptions = useMemo(() => [...new Set(shifts.map(s => s.location))].map(v => ({ value: v, label: v, count: shifts.filter(s => s.location === v).length })), [shifts])
 
+  // Builds the shift + location filter groups fed to the shared right panel.
   const filterGroups = useMemo(() => [
     { key: 'shift',    label: t('filters.shift'),    selected: selectedShift,    options: shiftOptions,
       onToggle: (v: string) => setSelectedShift(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]) },
@@ -122,6 +130,7 @@ export default function PlanningPage({ intent }: { intent?: PlanningIntent | nul
       onToggle: (v: string) => setSelectedLocation(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]) },
   ], [t, selectedShift, selectedLocation, shiftOptions, locationOptions])
 
+  // Mirrors this page's filter groups into the shared right panel, and cleans up on unmount.
   useEffect(() => {
     registerFilters('planning-page', filterGroups)
     return () => unregisterFilters('planning-page')
@@ -134,6 +143,7 @@ export default function PlanningPage({ intent }: { intent?: PlanningIntent | nul
     return true
   }), [shifts, selectedShift, selectedLocation])
 
+  // Moves `current` by one unit of the active view (month/week/day) in the given direction.
   const navigate = (dir: number) => {
     const d = new Date(current)
     if (view === 'month') d.setMonth(d.getMonth() + dir)
@@ -144,6 +154,7 @@ export default function PlanningPage({ intent }: { intent?: PlanningIntent | nul
 
   const goToday = () => setCurrent(new Date())
 
+  // Formats the period label next to the nav arrows, one shape per active view.
   const headerLabel = () => {
     if (view === 'month') return `${monthName(locale, current.getMonth())} ${current.getFullYear()}`
     if (view === 'week') {

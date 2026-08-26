@@ -54,6 +54,7 @@ interface EditableNote {
   [k: string]: unknown
 }
 
+// Dispatches on the entity route param to the right per-entity loader, or an honest error row for an entity this popout cannot really save yet.
 export default function NoteEditPopout() {
   const { entity } = useParams()
   const { t } = useTranslation('common')
@@ -83,6 +84,7 @@ function CandidateNoteEditPopout() {
   const noteIndex = notes.findIndex(n => String(n.id) === String(noteId))
   const note = noteIndex >= 0 ? (notes[noteIndex] as CandidateNote) : null
 
+  // Sets the OS window title to the candidate name while this popout is open, restoring the previous title on close.
   useEffect(() => {
     if (!candidate) return
     const previous = document.title
@@ -126,6 +128,7 @@ function ApplicationNoteEditPopout() {
   const noteIndex = notes.findIndex(n => String(n.id) === String(noteId))
   const note = noteIndex >= 0 ? (notes[noteIndex] as PopoutApplicationNote) : null
 
+  // Sets the OS window title to the application candidate name while this popout is open, restoring the previous title on close.
   useEffect(() => {
     if (!application) return
     const previous = document.title

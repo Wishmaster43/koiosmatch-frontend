@@ -21,6 +21,7 @@ interface UsagePerWorkflowTabProps {
 
 type Row = NonNullable<BillingUsageWorkflow['per_workflow']>[number]
 
+// See the file's top doc above; each row deep-links to its workflow editor (CEL-DOORKLIK-CANON, a cell is a gateway, never a dead end).
 export default function UsagePerWorkflowTab({ workflow, phase }: UsagePerWorkflowTabProps) {
   const { t } = useTranslation('settings')
   const { formatNumber, formatCurrency } = useNumberFormat()

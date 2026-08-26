@@ -23,6 +23,8 @@ type AgingRow = NonNullable<VacanciesReportData['aging']>[number]
 // One fill-rate-by-branch row shape, matching the server field exactly.
 type BranchRow = NonNullable<VacanciesReportData['fill_rate_by_branch']>[number]
 
+// The vacancies report's four depth blocks (see file docblock above); each
+// section self-hides when its own optional field is absent, never a fake zero-state.
 export default function VacancyDepthSections({ data, onAgingRow }: {
   data: VacanciesReportData
   // Optional: gateDrillClick (§ drill gate) yields undefined when the drill

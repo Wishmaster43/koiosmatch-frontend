@@ -11,6 +11,7 @@ import { cardHead, cardBox, row2, pickerStyle, PICKER_MENU_W } from './fields'
 import type { TaskForm } from '../AddTaskModal'
 import type { TaskLookupItem } from '@/context/TaskLookupsContext'
 
+// Pure presentational "Planning" card: due date/time, priority and status pickers.
 export default function PlanningCard({ t, form, set, priorities, statuses }: {
   t: TFunction
   form: TaskForm

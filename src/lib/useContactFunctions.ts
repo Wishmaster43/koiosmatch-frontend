@@ -65,6 +65,8 @@ const mapContactFunctions = (res: AxiosResponse): ContactFunctionsLookupData => 
   }
 }
 
+// The tenant's contact-person job-title lookup plus the free-entry flag, both
+// read off the SAME cached response (see the file doc for the two-key pitfall this avoids).
 export function useContactFunctions() {
   const { t } = useTranslation('common')
   const { data, invalidate } = useCachedLookup('/contact-functions', mapContactFunctions, FALLBACK)

@@ -93,7 +93,7 @@ function BatchRow({ batch, active }: { batch: WaQueueBatch; active: boolean }) {
 }
 
 // Batches + their loading/error/notAvailable state, lifted to WhatsAppPage so the
-// KPI band and this tab share the one polled fetch (see the file header above).
+// KPI band and this tab share the one polled fetch ( above).
 interface QueueTabProps {
   batches: WaQueueBatch[]
   loading: boolean
@@ -101,6 +101,7 @@ interface QueueTabProps {
   notAvailable: boolean
 }
 
+// Renders the batches passed down from WhatsAppPage's shared polled fetch (see the interface doc comment above); owns no fetch of its own.
 export default function QueueTab({ batches, loading, error, notAvailable }: QueueTabProps) {
   const { t } = useTranslation('whatsapp')
 

@@ -20,6 +20,7 @@ import {
   Toggle, NumberField, TextField, SelectField, ColorField,
 } from './SettingsKit'
 
+// Picks the right input widget for one schema field, by its declared type.
 function FieldControl({ field, value, onChange, t, base }) {
   switch (field.type) {
     case 'toggle':
@@ -49,8 +50,10 @@ function FieldControl({ field, value, onChange, t, base }) {
   }
 }
 
+// Renders an entire settings section from its declarative schema: field defaults, the shared settings-form hook, and the scaffold/card chrome.
 export default function SchemaSection({ schema }) {
   const { t } = useTranslation('settings')
+  // Build the field-key → default-value map once per schema, seeding useSettingsForm.
   const defaults = useMemo(
     () => Object.fromEntries(schema.fields.map(f => [f.key, f.default])),
     [schema],

@@ -25,6 +25,7 @@ import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 // track+thumb <button> the 'boolean' field used to paint itself.
 import Toggle from '@/components/ui/Toggle'
 
+// Dispatches one schema field type to its control; the data-fetching/nested field types delegate to fieldControls, this file only holds the plain inline ones (see the module doc above).
 export function FieldInput({ field, value, onChange, variables, config }: {
   field: WorkflowField; value?: unknown; onChange: OnChange; variables?: WorkflowVarGroup[]
   config?: Record<string, unknown>

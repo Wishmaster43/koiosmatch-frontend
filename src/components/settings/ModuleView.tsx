@@ -14,6 +14,7 @@ import { useModuleView } from '@/lib/settings/useModuleView'
 
 interface BlockData { value?: ReactNode; sub?: ReactNode; onClick?: () => void }
 
+// Renders one module's configured KPI blocks (see the module doc above): layout comes from the saved view config, live values come from the caller's `data` map.
 export default function ModuleView({ module, data = {}, loading = false }: {
   module: string; data?: Record<string, BlockData>; loading?: boolean
 }) {

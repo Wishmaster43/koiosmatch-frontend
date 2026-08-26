@@ -108,7 +108,9 @@ export function useWhatsAppWeb(basePath: string = '/profile/whatsapp-web') {
     }
   }, [refetch, basePath])
 
+  // Disconnect this device; shares run()'s busy-tracking + error handling.
   const disconnect = useCallback((id: WhatsAppDevice['id']) => run(id, () => api.post(`${basePath}/${id}/disconnect`)), [run, basePath])
+  // Remove this device entirely; shares run()'s busy-tracking + error handling.
   const remove      = useCallback((id: WhatsAppDevice['id']) => run(id, () => api.delete(`${basePath}/${id}`)), [run, basePath])
 
   return { devices, phase, busyId, notEnabledId, createDevice, connect, disconnect, remove }

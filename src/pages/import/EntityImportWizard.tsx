@@ -1,11 +1,3 @@
-/**
- * EntityImportWizard — thin per-entity container: local parse/map/edit state
- * (useMappingWizard) + the dry-run/run calls (useValidateAndRun) + which step
- * component to render. Remounted (key={entity}) by ImportWizardPage on every entity
- * switch, so switching entities never carries over a stale file/mapping/preview —
- * mirrors the same `key`-remount contract settings/importeren/ImporterenSettings.tsx
- * already uses for its own EntityWizard.
- */
 import { useCallback } from 'react'
 import { ImportOrderBanner } from '@/pages/settings/shared'
 import { WholeTreeBanner } from '@/pages/settings/shared'
@@ -27,6 +19,14 @@ interface EntityImportWizardProps {
   canImport: boolean
 }
 
+/**
+ * EntityImportWizard — thin per-entity container: local parse/map/edit state
+ * (useMappingWizard) + the dry-run/run calls (useValidateAndRun) + which step
+ * component to render. Remounted (key={entity}) by ImportWizardPage on every entity
+ * switch, so switching entities never carries over a stale file/mapping/preview —
+ * mirrors the same `key`-remount contract settings/importeren/ImporterenSettings.tsx
+ * already uses for its own EntityWizard.
+ */
 export default function EntityImportWizard({ template, otherPathEntity, onSelectEntity, canView, canImport }: EntityImportWizardProps) {
   const entity = template.entity
   const wholeTree = isWholeTreeTemplate(template.columns)

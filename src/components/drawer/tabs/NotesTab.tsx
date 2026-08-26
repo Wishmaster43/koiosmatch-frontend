@@ -108,7 +108,7 @@ export interface NoteType { value: string; label: string; color?: string }
 // author_id (RECHTEN-DETAIL-1): the note creator's user id, present only on hosts that
 // implement the rights model — undefined (key absent) vs. explicit null are DIFFERENT
 // states, see the RIGHTS comment above. `language` (NOTE-TAAL-1): the note's own
-// spellcheck/output language, optional — null/absent = tenant default.
+// spellcheck/output language, optional — null/absent = tenant default
 // has_previous_version (NOTE-UNDO-FE-1, K-172): true once the note carries an
 // undo slot (one previous body, filled by the update that most recently
 // overwrote it) — drives the row's "restore previous version" action below.
@@ -244,6 +244,7 @@ interface NotesTabProps {
   renderTimelineContent?: (ev: TimelineItem) => ReactNode | null
 }
 
+// Entity-agnostic notes/timeline/conversations tab; all entity-specific labels and data arrive via props (see file header).
 export default function NotesTab({
   draftEntity,
   notes = [], systemNotes = [], timeline = [], noteTypes = [], chipTypes, channels = [], labels = {}, editorLabels,
@@ -302,6 +303,7 @@ export default function NotesTab({
   const incomingEditIdx = incomingNoteId != null && !adding
     ? notes.findIndex(n => noteIdOf(n) === incomingNoteId)
     : -1
+  // Once incomingEditIdx resolves to a real note, switch the composer into edit mode for it.
   useEffect(() => {
     if (incomingEditIdx < 0) return
     setEditingIdx(incomingEditIdx)
@@ -392,6 +394,7 @@ export default function NotesTab({
   // session concept keeps working when the server call fails.
   const draftType = draftEntity?.type
   const draftId = draftEntity?.id
+  // Load any durable draft for this dossier once per draftType/draftId; a failed fetch simply keeps the session-only concept.
   useEffect(() => {
     if (!draftType || !draftId) return
     const ctrl = new AbortController()
@@ -416,6 +419,7 @@ export default function NotesTab({
     if (draft) putNoteDraft(draftEntity.type, draftEntity.id, draft).catch(() => { /* session concept still holds */ })
     else deleteNoteDraft(draftEntity.type, draftEntity.id).catch(() => { /* stale server draft is cleaned up server-side after 30 days */ })
   }
+  // Finalizes a note save (add or edit): clears the concept/draft, applies the add-vs-edit branch, then closes the composer.
   const handleSave = (payload: NotePayload) => {
     setConcept(null)
     if (draftEntity) deleteNoteDraft(draftEntity.type, draftEntity.id).catch(() => { /* server cleanup catches strays */ })

@@ -35,6 +35,7 @@ export default function OutreachBoard({ rows, columns, onMove, onOpen }: Props) 
   const { t } = useTranslation('outreach')
   const [dragOver, setDragOver] = useState<string | null>(null)
 
+  // Card dropped on a column: optimistically move it by firing the status change.
   const onDrop = (e: DragEvent<HTMLDivElement>, colKey: string) => {
     e.preventDefault()
     const id = e.dataTransfer.getData('text/plain')

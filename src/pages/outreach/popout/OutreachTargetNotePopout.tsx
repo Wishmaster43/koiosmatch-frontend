@@ -32,6 +32,9 @@ import { useTextPopoutDraft } from '@/pages/popout/shared'
 import { useOutreachTargetTextLite, patchTargetNote } from '../hooks/useOutreachTargetTextPopout'
 import { textPopoutTopic, parseOutreachTargetPopoutId } from '@/lib/secondScreen'
 
+// Second-screen pop-out for a call-list target's note (see file docblock above):
+// mirrors the row's own note editor stack, and talks back to the opener over the
+// same BroadcastChannel every text pop-out already uses.
 export default function OutreachTargetNotePopout({ id }: { id: string | undefined }) {
   const { t } = useTranslation(['outreach', 'common'])
   const parsed = parseOutreachTargetPopoutId(id)

@@ -11,6 +11,8 @@ import type { ReportFilterGroup } from '@/types/reports'
 import SelectAllRow from '@/components/ui/SelectAllRow'
 import { useBatchToggle } from '@/hooks/useBatchToggle'
 
+// One collapsible searchable multi-select filter group (see file docblock above),
+// rendering directly off the group's own options/selected/onToggle contract.
 export default function SearchSelectGroup({ group }: { group: ReportFilterGroup }) {
   const { t } = useTranslation('common')
   const [open,  setOpen]  = useState(false)

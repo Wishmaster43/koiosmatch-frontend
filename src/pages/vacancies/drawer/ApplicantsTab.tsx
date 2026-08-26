@@ -99,6 +99,8 @@ export default function ApplicantsTab({ vacancy: v }: { vacancy: VacancyDetail }
   // Local override of the vacancy detail, refetched after "+ Sollicitatie" — reset
   // whenever a different vacancy is shown so a stale override never leaks across.
   const [override, setOverride] = useState<VacancyDetail | null>(null)
+  // Clears the local detail override and resets pagination when a different
+  // vacancy is shown, so a stale override never leaks across vacancies.
   useEffect(() => { setOverride(null); setPage(1) }, [v.id])
   const live = override ?? v
 

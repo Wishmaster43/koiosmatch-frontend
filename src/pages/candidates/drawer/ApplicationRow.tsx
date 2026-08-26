@@ -76,6 +76,8 @@ const titleCell: CSSProperties = { fontWeight: 500, ...APPLICATION_COL_TITLE }
 // so it is one stable component type, never re-created on every render.
 const ModalityIcon = ({ m }: { m?: string }) => m === 'remote' ? <Video size={11} /> : m === 'phone' ? <Phone size={11} /> : <Building2 size={11} />
 
+// One application row in the candidate drawer's applications list, with its own
+// expand/collapse, edit/detach actions (gated on canManage) and linked-appointment line.
 export default function ApplicationRow({ candidateId, row, appointment, canManage, canView = false, onEdit, onDetach, onEditAppointment, expanded: expandedProp, onToggleExpanded, pager }: {
   candidateId: Id
   row: AppRow

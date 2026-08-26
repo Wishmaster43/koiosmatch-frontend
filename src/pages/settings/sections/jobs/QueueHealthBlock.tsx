@@ -32,6 +32,8 @@ function SupervisorChip({ name, status }: { name: string; status: string }) {
   )
 }
 
+// The queue/scheduler health strip (see file docblock above); renders nothing
+// against an older server that sends no queue_status at all.
 export default function QueueHealthBlock({ queueStatus }: { queueStatus?: QueueStatus }) {
   const { t } = useTranslation('settings')
   const { formatDateTime } = useDateFormat()

@@ -6,6 +6,7 @@
 import { useTranslation } from 'react-i18next'
 import { UserPlus } from 'lucide-react'
 
+// Empty-state placeholder shown until a phase is picked (see file docblock above).
 export default function NoStatusNotice() {
   const { t } = useTranslation(['candidates', 'common'])
   return (

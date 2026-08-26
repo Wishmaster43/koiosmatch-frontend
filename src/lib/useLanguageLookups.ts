@@ -29,6 +29,8 @@ const mapNames = (res: AxiosResponse): string[] | null => {
   return d.length ? d : null
 }
 
+// Tenant-configurable languages + proficiency levels, seed-labelled and cached
+// (see file docblock above); a tenant-created value renders as typed, never translated.
 export function useLanguageLookups() {
   const { t } = useTranslation('common')
   const { data: rawLanguages } = useCachedLookup('/languages', mapNames, DEFAULT_LANGUAGES)
@@ -38,6 +40,7 @@ export function useLanguageLookups() {
     () => rawLanguages.map(name => translateSeedLabel(t, 'languages', { label: name })),
     [rawLanguages, t],
   )
+  // Same seed-label treatment as `languages` above, for the proficiency-level list.
   const levels = useMemo(
     () => rawLevels.map(name => translateSeedLabel(t, 'languageLevels', { label: name })),
     [rawLevels, t],

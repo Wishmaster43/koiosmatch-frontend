@@ -1,3 +1,12 @@
+import { useCallback, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
+import PopoutShell from './PopoutShell'
+import TextPopoutEditor from './TextPopoutEditor'
+import { useCandidateLite } from './hooks/useCandidateLite'
+import { useTextPopoutDraft } from './hooks/useTextPopoutDraft'
+import { useCandidateRecord } from '@/pages/candidates/shared'
+import { textPopoutTopic } from '@/lib/secondScreen'
+
 /**
  * CandidateSummaryPopout — TEKST-POPOUT-1 (Danny 08-08 punt 2): the candidate's
  * PROFILE TEXT on a second screen. Same second-screen recipe as the notes popout
@@ -11,15 +20,6 @@
  * so this window writes the field through exactly the same code the drill-down
  * does — including its centrally translated error message (§10).
  */
-import { useCallback, useEffect } from 'react'
-import { useTranslation } from 'react-i18next'
-import PopoutShell from './PopoutShell'
-import TextPopoutEditor from './TextPopoutEditor'
-import { useCandidateLite } from './hooks/useCandidateLite'
-import { useTextPopoutDraft } from './hooks/useTextPopoutDraft'
-import { useCandidateRecord } from '@/pages/candidates/shared'
-import { textPopoutTopic } from '@/lib/secondScreen'
-
 export default function CandidateSummaryPopout({ id }: { id: string | undefined }) {
   const { t } = useTranslation('candidates')
   const { candidate, loading, error, reload } = useCandidateLite(id)

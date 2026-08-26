@@ -391,7 +391,7 @@ export function PreferencesTab({ c, onSave, onTypesChange, onEditStatus }: { c: 
   )
 }
 
-// ZzpTab lives in its own file now (see the file header above) — re-exported so
+// ZzpTab lives in its own file now ( above) — re-exported so
 // every existing `import { PreferencesTab, ZzpTab } from './drawer/PreferencesZzpTabs'`
 // (CandidateDrawer.tsx) keeps resolving without a second, hand-edited import path.
 export { ZzpTab } from './ZzpTab'

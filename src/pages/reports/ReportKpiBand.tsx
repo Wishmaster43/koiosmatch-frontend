@@ -19,6 +19,8 @@
 import InsightsRow from '@/components/insights/InsightsRow'
 import type { KpiSpec, DonutSpec } from '@/components/insights/InsightsRow'
 
+// The one nine-card KPI strip every report opens with — cards sit directly on
+// the page background (no wrapping surface), a dev-only guard flags a wrong count.
 export default function ReportKpiBand({ kpis, donuts, clearTitle, notice }: {
   kpis?: KpiSpec[]
   donuts?: DonutSpec[]

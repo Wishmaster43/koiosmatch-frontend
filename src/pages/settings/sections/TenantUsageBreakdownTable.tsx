@@ -50,6 +50,8 @@ interface Props {
 
 const AXES: AdminUsageDetailsAxis[] = ['activity', 'model', 'user', 'day']
 
+// Super-admin drill-down of one tenant's usage for a given month, switchable
+// between axes (activity/model/user/day) with a click-to-filter single-row view.
 export default function TenantUsageBreakdownTable({ tenantId, month }: Props) {
   const { t } = useTranslation('settings')
   const { formatNumber, formatCurrency } = useNumberFormat()
@@ -92,6 +94,7 @@ export default function TenantUsageBreakdownTable({ tenantId, month }: Props) {
   // Totals row under the table — sums the CURRENTLY VISIBLE rows (so a filtered
   // single row shows its own totals, matching what the reader sees above it).
   const purchaseOf = (r: AdminUsageDetailsRow) => r.sale?.purchase ?? r.cost ?? 0
+  // Sums exactly the rows currently on screen (see the comment above).
   const visibleTotals = useMemo(() => visibleRows.reduce((acc, r) => ({
     requests: acc.requests + (r.requests ?? 0),
     inputTokens: acc.inputTokens + (r.input_tokens ?? 0),

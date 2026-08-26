@@ -24,6 +24,8 @@ export interface KoiosContextChipRow {
 // never reads as a hand-painted `background: var(--color-primary)` fill.
 const ACCENT = 'var(--color-primary)'
 
+// Purely presentational chip row (see file docblock above); renders nothing with
+// no chips, and dashes/tooltips any chip type the backend can't resolve yet.
 export default function KoiosContextChips({ chips, t }: { chips: KoiosContextChipRow[]; t: TFn }) {
   if (chips.length === 0) return null
   return (

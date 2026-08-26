@@ -23,6 +23,7 @@ export function useWorkflowsFilters(workflows: Workflow[], showArchived: boolean
   const { t } = useTranslation(['workflows', 'common'])
   // List is the Make.com-style default; the choice persists across reloads (localStorage, non-PII).
   const [viewMode, setViewModeState] = useState<ViewMode>(readStoredViewMode)
+  // Sets the view mode and persists the choice to localStorage so it survives a reload.
   const setViewMode = (mode: ViewMode) => {
     setViewModeState(mode)
     localStorage.setItem(VIEW_MODE_KEY, mode)
@@ -34,14 +35,17 @@ export function useWorkflowsFilters(workflows: Workflow[], showArchived: boolean
   const [selectedModule, setSelectedModule] = useState<string[]>([])
   const { registerFilters, unregisterFilters } = useRightPanel()
 
+  // Distinct workflow statuses present, with live counts, for the status filter options.
   const statusOptions = useMemo(() => [...new Set(workflows.map(w => w.status))].filter((v): v is string => Boolean(v))
     .map(v => ({ value: v, label: t(`status.${v}`, { defaultValue: v }), count: workflows.filter(w => w.status === v).length })), [workflows, t])
+  // Counts how many workflows use each step/module type, across all workflows' steps, for the module-type filter options.
   const moduleOptions = useMemo(() => {
     const counts: Record<string, number> = {}
     workflows.forEach(w => new Set((w.steps ?? []).map(s => s.type).filter((x): x is string => Boolean(x))).forEach(ty => { counts[ty] = (counts[ty] ?? 0) + 1 }))
     return Object.keys(counts).map(v => ({ value: v, label: t(`modules.${v}`, { defaultValue: v }), count: counts[v] }))
   }, [workflows, t])
 
+  // Builds the status/module filter definitions handed to the shared right-panel filter UI.
   const filterGroups = useMemo(() => [
     { key: 'status', label: t('filters.status'), selected: selectedStatus, options: statusOptions,
       onToggle: (v: string) => setSelectedStatus(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]) },
@@ -49,6 +53,7 @@ export function useWorkflowsFilters(workflows: Workflow[], showArchived: boolean
       onToggle: (v: string) => setSelectedModule(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]) },
   ], [t, selectedStatus, selectedModule, statusOptions, moduleOptions])
 
+  // Registers this page's filter groups with the shared right panel, and unregisters them on unmount so they do not leak into another page.
   useEffect(() => {
     registerFilters('workflows-page', filterGroups)
     return () => unregisterFilters('workflows-page')

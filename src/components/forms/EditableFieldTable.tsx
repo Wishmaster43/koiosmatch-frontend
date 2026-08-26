@@ -48,7 +48,7 @@ export interface FieldRow {
   mono?: boolean
   // 'chip-select' empty-state text (e.g. "no locations yet").
   emptyOptionsText?: ReactNode
-  // Custom READ-mode rendering for this field's value (edit mode is unaffected) — e.g.
+  // Custom READ-mode rendering for this field's value (edit mode is unaffected) — e.g
   // an e-mail as a real mailto link with a shortcut icon. Added 28-07 so contact data
   // looks the same on every entity instead of each drawer hand-rolling its own block.
   renderValue?: (value: unknown) => ReactNode
@@ -235,6 +235,7 @@ export default function EditableFieldTable({
     </div>
   )
 
+  // Render the EDIT-mode control for one field, dispatched on its declared type.
   const renderControl = (f: FieldRow) => {
     const v = form[f.key]
     // A boolean field is a TOGGLE, never a tick box (Danny: "GEEN VINKJES MAAR
@@ -297,6 +298,7 @@ export default function EditableFieldTable({
       style={f.mono ? { ...compact, ...monoStyle } : compact} />
   }
 
+  // Render the READ-mode display for one field, dispatched on its declared type.
   const renderValue = (f: FieldRow) => {
     const v = saved[f.key]
     // Canon guard (Danny 05-08, "Geslacht: Man" rendered huge): a caller-supplied

@@ -20,6 +20,7 @@ type AnyProps = Record<string, unknown>
 // Still-untyped JS component — accept any props at the boundary (mirrors CommunicationTab).
 const NotesTab = NotesTabJs as unknown as ComponentType<AnyProps>
 
+// Second-screen notes window for one candidate (see the module doc above): renders the same shared NotesTab the drawer's Communication tab uses, notes only.
 export default function CandidateNotesPopout({ id }: { id: string | undefined }) {
   const { t } = useTranslation('candidates')
   const { candidate, loading, error, reload } = useCandidateLite(id)

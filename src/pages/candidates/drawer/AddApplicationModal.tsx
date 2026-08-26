@@ -96,6 +96,9 @@ const API_TO_FORM: Record<string, string> = {
   application_stage_id: 'phase', source: 'source',
 }
 
+// Create-or-edit modal for one candidate's application: owns vacancy/owner/phase/
+// source state, the owner-derivation chain, the AXIS-MATRIX preflight, and the
+// tenant's required-fields gate (create-only), then POSTs or PATCHes.
 export default function AddApplicationModal({ candidateId, candidateOwnerId, candidateOwnerName, initialVacancyId, suggestedVacancyId, editApplicationId, onClose, onCreated }: {
   candidateId: Id
   // OWNER-DEVIATION-1: the candidate's own owner, passed down from the already-
@@ -106,7 +109,7 @@ export default function AddApplicationModal({ candidateId, candidateOwnerId, can
   // in VacancySearchTab) — seeds the picker once, still freely changeable.
   initialVacancyId?: Id
   // KOIOS-VOORSTEL-1 (Danny 13-08): vacancy Koios suggests from the candidate's
-  // history — seeds the picker AND shows the Koios mark while it still holds.
+  // history — seeds the picker AND shows the Koios mark while it still holds
   // initialVacancyId (score panel: user clicked THAT vacancy) stays badge-less:
   // explicit context is the user's own choice, not a proposal.
   suggestedVacancyId?: Id | null
@@ -206,6 +209,8 @@ export default function AddApplicationModal({ candidateId, candidateOwnerId, can
   // still must be able to promote itself over that earlier auto-seed).
   const [ownerId, setOwnerIdState] = useState('')
   const ownerManualRef = useRef(false)
+  // Adopts the derived owner whenever a higher-priority rung resolves later than a
+  // lower one already auto-seeded, but never once the recruiter has picked manually.
   useEffect(() => {
     if (ownerManualRef.current) return
     if (derivedOwnerId && derivedOwnerId !== ownerId) setOwnerIdState(derivedOwnerId)

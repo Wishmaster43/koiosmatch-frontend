@@ -215,6 +215,8 @@ export default function AddApplicationModal({ onClose, onCreated, lockedVacancy 
   // (same shape SearchPickField expects — no extra fetch needed since the
   // created record already carries id/name/title/city/ownerId).
   const [addingCandidate, setAddingCandidate] = useState(false)
+  // AddCandidateModal reports the freshly created candidate back here; pick it straight
+  // into the form since the create response already carries every field the picker needs.
   const onCandidateCreated = (c: Candidate) => {
     setAddingCandidate(false)
     pickCandidate(mapCandidateRow({
@@ -233,6 +235,8 @@ export default function AddApplicationModal({ onClose, onCreated, lockedVacancy 
   // its caller — its own recruiter is fetched once, alive-guarded, since the
   // non-locked search above (which DOES carry owner) never runs for it.
   const [lockedVacancyOwnerId, setLockedVacancyOwnerId] = useState<Id | undefined>(undefined)
+  // Locked-vacancy callers only pass {id, title, client}, never the owner — fetch it
+  // once here (alive-guarded against an unmount mid-request).
   useEffect(() => {
     if (!lockedVacancy?.id) return
     let alive = true
@@ -262,6 +266,8 @@ export default function AddApplicationModal({ onClose, onCreated, lockedVacancy 
   // itself over it; mirrors the candidate-drawer variant's identical guard).
   const [ownerId, setOwnerIdState] = useState('')
   const ownerManualRef = useRef(false)
+  // Auto-seed the owner from the derived chain above, but never once the recruiter
+  // has made a manual pick (ownerManualRef) — a later-arriving auto-seed must not override it.
   useEffect(() => {
     if (ownerManualRef.current) return
     if (derivedOwnerId && derivedOwnerId !== ownerId) setOwnerIdState(derivedOwnerId)
@@ -336,7 +342,7 @@ export default function AddApplicationModal({ onClose, onCreated, lockedVacancy 
     setErrors({})
     try {
       // application_stage_id is omitted (not null-ed) when unset so the backend's own
-      // `?? ApplicationStage::defaultStageId()` fallback decides the start stage.
+      // `?? ApplicationStage::defaultStageId()` fallback decides the start stage
       // source is omitted the same way — an empty field means "let the server default
       // to 'manual'", never an explicit empty-string value. custom_fields only rides
       // along once the recruiter actually filled something in (an empty {} is

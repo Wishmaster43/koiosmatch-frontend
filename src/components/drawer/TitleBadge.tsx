@@ -14,6 +14,8 @@ interface TitleBadgeProps {
   color?: string | null
 }
 
+// The shared drawer-title status pill (see file docblock above); renders nothing
+// with no label so a drawer never shows an empty badge.
 export default function TitleBadge({ label, color }: TitleBadgeProps) {
   if (!label) return null
   // Neutral grey fallback when the lookup carries no colour yet (mirrors the same

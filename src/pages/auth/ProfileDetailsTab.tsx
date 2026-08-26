@@ -23,6 +23,7 @@ interface ProfileDetailsTabProps {
   user?: ProfileUser | null
 }
 
+// The editable personal-info form plus a read-only roles/locations access card.
 export default function ProfileDetailsTab({ form, onField, onSave, saving, saved, error, user }: ProfileDetailsTabProps) {
   const { t } = useTranslation('auth')
   const { t: tUsers } = useTranslation('users')

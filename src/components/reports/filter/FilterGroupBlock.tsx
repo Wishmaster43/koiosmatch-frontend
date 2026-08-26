@@ -15,6 +15,8 @@ import GeoRadiusGroup from './GeoRadiusGroup'
 import CountBadge from '@/components/ui/CountBadge'
 import { tint } from '@/lib/tint'
 
+// One collapsible right-panel filter block: chevron+label header (count chip
+// always visible, even collapsed) plus the group's own body, dispatched by type.
 export default function FilterGroupBlock({
   group, collapsed, count, onToggle,
 }: { group: ReportFilterGroup; collapsed: boolean; count: number; onToggle: () => void }) {

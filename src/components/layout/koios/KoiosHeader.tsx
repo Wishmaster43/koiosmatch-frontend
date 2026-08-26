@@ -32,6 +32,7 @@ interface KoiosHeaderProps {
   t: TFn
 }
 
+// See the file's top doc above for the connection-dot/CONNECT-1 background; purely presentational, all state arrives as props.
 export default function KoiosHeader({ connected, expanded, onNewChat, onToggleExpanded, onClose, onConfigure, t }: KoiosHeaderProps) {
   return (
     <div style={{ height: 56, borderBottom: '1px solid var(--sidebar-border)', flexShrink: 0,

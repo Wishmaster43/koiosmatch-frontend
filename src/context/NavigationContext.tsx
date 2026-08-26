@@ -35,6 +35,8 @@ export function useOpenFromIntent(intent: unknown, openById: (id: Id, tab?: stri
   // Guard on the intent object identity: each openEntity() call is a fresh object,
   // so re-clicking the same link (after closing) re-fires; renders don't.
   const done = useRef<unknown>(null)
+  // Open the record once per distinct intent object; a re-click produces a fresh
+  // object (so it re-fires) while a plain render reuses the same one (so it doesn't).
   useEffect(() => {
     if (!intent || done.current === intent) return
     done.current = intent

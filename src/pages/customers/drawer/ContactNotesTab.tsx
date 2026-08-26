@@ -26,6 +26,7 @@ type AnyProps = Record<string, unknown>
 // Still-untyped JS UI helper — accept any props at the boundary (mirrors ScopedNotesTab).
 const NotesTab = NotesTabJs as unknown as ComponentType<AnyProps>
 
+// Thin wrapper around the shared NotesTab (see the module doc above): the read path filters the customer's own notes client-side since a contact has no dedicated scoped-notes endpoint.
 export default function ContactNotesTab({ contactId, customerId }: {
   contactId: Id
   customerId?: Id

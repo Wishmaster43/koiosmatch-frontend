@@ -13,6 +13,7 @@ import MfaSetupWizard from '@/components/auth/MfaSetupWizard'
 import Button from '@/components/ui/Button'
 import { tintBorder } from '@/lib/tint'
 
+// Personal MFA status + enable/disable flow (see the module doc above for why the tenant-wide policy lives elsewhere); a small local state machine (idle/wizard/disabling) switches the whole view.
 export default function SecuritySettings() {
   const { t } = useTranslation('settings')
   const { user, setupMfa, confirmMfa, disableMfa, refreshUser } = useAuth()
@@ -26,6 +27,7 @@ export default function SecuritySettings() {
 
   const reset = () => { setStep('idle'); setDisableCode(''); setError('') }
 
+  // Submits the disable-MFA TOTP code; strips non-digits before sending, and shows the server's own error (falling back to a generic one) without leaving the entered code in place.
   const handleDisable = async (e) => {
     e.preventDefault()
     if (disableCode.replace(/\D/g, '').length < 6) return

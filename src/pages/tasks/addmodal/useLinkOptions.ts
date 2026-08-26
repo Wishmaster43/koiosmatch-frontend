@@ -38,6 +38,7 @@ export interface LinkOptionsState {
 interface Rows { candidates: EntityRow[]; customers: EntityRow[]; contacts: EntityRow[] }
 const NO_ROWS: Rows = { candidates: [], customers: [], contacts: [] }
 
+// Loads the three link pickers' options in parallel and exposes a combined loading/error/retry state.
 export function useLinkOptions(): LinkOptionsState {
   const [rows, setRows] = useState<Rows>(NO_ROWS)
   const [loading, setLoading] = useState(true)
@@ -45,6 +46,7 @@ export function useLinkOptions(): LinkOptionsState {
   // Bumped by retry() — the effect's only dependency, so a retry re-runs it.
   const [attempt, setAttempt] = useState(0)
 
+  // Fetch all three lists with allSettled so one dead endpoint doesn't blank the others that answered; alive-guarded against a stale response after unmount or a fast retry.
   useEffect(() => {
     let alive = true
     setLoading(true)
@@ -69,8 +71,11 @@ export function useLinkOptions(): LinkOptionsState {
 
   // Map to picker options once per load, not on every render of the modal.
   const toOptions = (list: EntityRow[]): LinkOption[] => list.map(r => ({ value: String(r.id), label: nameOf(r) }))
+  // Options for the candidate picker, recomputed only when its rows change.
   const candidates = useMemo(() => toOptions(rows.candidates), [rows.candidates])
+  // Options for the customer picker, recomputed only when its rows change.
   const customers  = useMemo(() => toOptions(rows.customers),  [rows.customers])
+  // Options for the contact picker, recomputed only when its rows change.
   const contacts   = useMemo(() => toOptions(rows.contacts),   [rows.contacts])
 
   return { candidates, customers, contacts, loading, error, retry }

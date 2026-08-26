@@ -33,6 +33,9 @@ function buildRows(moduleId: string, values: SettingsBlob): Row[] {
   return rows
 }
 
+// Lets a tenant toggle and reorder one dashboard module's blocks (see file
+// docblock above), re-syncing its local row order whenever the module or its
+// saved config changes.
 export default function ViewConfigEditor({ module }: { module: string }) {
   const { t } = useTranslation('settings')
   const values = useAllSettings()
@@ -60,6 +63,7 @@ export default function ViewConfigEditor({ module }: { module: string }) {
     const next = [...rs];[next[i], next[j]] = [next[j], next[i]]; return next
   })
 
+  // User pressed save: persists the block on/off + order, then flashes "saved" briefly.
   const save = async () => {
     setSaving(true)
     try {

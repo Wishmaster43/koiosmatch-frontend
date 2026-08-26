@@ -31,6 +31,9 @@ interface RawAppt {
 
 const dateTimeOpts = { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'UTC' } as const
 
+// Lists this application's appointments straight from the shared appointments
+// entity (see file docblock above), filtered client-side since the endpoint has
+// no application_id filter; create/edit reuses PlanIntakeModal.
 export default function AppointmentsTab({ application: a }: { application: ApplicationDetail }) {
   const { t } = useTranslation(['applications', 'common'])
   const { formatDate } = useDateFormat()

@@ -26,6 +26,7 @@ interface ActiveFilterChipProps {
   onRemove: () => void
 }
 
+// The removable filter chip itself: always the active tint, since it only ever renders while its filter is selected.
 export default function ActiveFilterChip({ label, ariaLabel, onRemove }: ActiveFilterChipProps) {
   return (
     <span style={chipStyle}>

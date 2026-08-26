@@ -55,6 +55,7 @@ export default function PdfPreview({ url, onError }: PdfPreviewProps) {
     docRef.current = null
     loadingTaskRef.current = null
 
+    // Lazy-loads pdf.js and opens the document; a cancelled/errored load never sets state on an unmounted or superseded preview.
     const open = async () => {
       try {
         const pdfjsLib = await import('pdfjs-dist')
@@ -91,6 +92,7 @@ export default function PdfPreview({ url, onError }: PdfPreviewProps) {
     if (!doc || !numPages) return
     let cancelled = false
 
+    // Renders every page into its canvas at a width fitted to the container, bailing out early if a newer load has cancelled this one.
     const renderAll = async () => {
       try {
         const width = containerRef.current?.clientWidth || FALLBACK_WIDTH

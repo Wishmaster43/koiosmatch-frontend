@@ -16,6 +16,8 @@ import type { ShiftCoverageCell } from '@/types/dashboard'
 
 const PARTS: ShiftCoverageCell['part'][] = ['morning', 'afternoon', 'evening']
 
+// Planning coverage grid (see file docblock above); a cell click deep-links the
+// planning page onto that exact date.
 export default function ShiftCoverageHeatmap({ rows, onNavigate }: {
   rows: ShiftCoverageCell[]
   onNavigate?: (page: string, params?: Record<string, unknown>) => void

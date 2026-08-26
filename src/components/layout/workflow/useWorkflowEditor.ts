@@ -22,6 +22,8 @@ import { unwrapList } from '@/lib/api'
 // here so existing test imports (`from './useWorkflowEditor'`) keep working unchanged.
 export { flattenSample, buildVarFields, computeWorkflowSnapshot } from './workflowEditorUtils'
 
+// Owns the full editor session for one workflow: graph state, trigger config, run
+// control and dirty-checking, returned as one flat props object for the JSX to render.
 export function useWorkflowEditor({ workflow, onSave, initialRunId = null }: {
   workflow: Workflow
   onSave: (updated: Workflow, closeAfter?: boolean) => void
@@ -94,6 +96,8 @@ export function useWorkflowEditor({ workflow, onSave, initialRunId = null }: {
   // null = auto (node without incoming edge, leftmost); set via START badge drag
   const [startNodeId,    setStartNodeId]    = useState<string | null>(null)
 
+  // Load the webhook list once on mount; a failed fetch leaves it empty rather
+  // than blocking the editor, since the Webhook trigger picker degrades gracefully.
   useEffect(() => {
     import('@/lib/api').then(m => {
       m.default.get('/webhooks')
@@ -127,18 +131,23 @@ export function useWorkflowEditor({ workflow, onSave, initialRunId = null }: {
     setPickerState({ edgeId })
   }, [])
 
+  // User removed a connector on the canvas — drop that one edge, nothing else.
   const handleEdgeDelete = useCallback((edgeId: string) => {
     setEdges(eds => eds.filter(e => e.id !== edgeId))
   }, [setEdges])
 
+  // User clicked an edge's filter control — open the filter panel for that edge.
   const handleEdgeFilter = useCallback((edgeId: string) => {
     setFilterState({ edgeId })
   }, [])
 
+  // Filter panel submitted — write the condition + optional label onto that one edge.
   const saveEdgeFilter = useCallback((edgeId: string, filters: EdgeFilters, label: string) => {
     setEdges(eds => eds.map(e => e.id === edgeId ? { ...e, data: { ...e.data, filters, label: label || undefined } } : e))
   }, [setEdges])
 
+  // User asked to test-run a single node: calls the matching preview endpoint per
+  // module type and stashes the result on the node so the config panel can show it.
   const handleNodeRun = useCallback(async (nodeId: string, data: FlowNodeData) => {
     const { default: api } = await import('@/lib/api')
     let output: unknown = null
@@ -176,6 +185,9 @@ export function useWorkflowEditor({ workflow, onSave, initialRunId = null }: {
     setOutputState({ nodeId, output })
   }, [setNodes])
 
+  // User dragged a new connection between two handles: a plain add unless the
+  // target already has an incoming edge, in which case a router node is spliced
+  // in so both sources can feed the same target.
   const onConnect = useCallback((params: Connection) => {
     setEdges(eds => {
       const targetAlreadyHasIncoming = eds.some(e => e.target === params.target)
@@ -219,6 +231,8 @@ export function useWorkflowEditor({ workflow, onSave, initialRunId = null }: {
     })
   }, [setEdges, setNodes])
 
+  // Picker chose a module type: append it as a new tail node, or splice it into
+  // an existing edge (keeping that edge's filter/consent data on the upstream half).
   const insertModule = useCallback((type: string, edgeId: string | null) => {
     const newId = uid()
     // Read current state snapshots to avoid stale closures
@@ -279,12 +293,16 @@ export function useWorkflowEditor({ workflow, onSave, initialRunId = null }: {
     setSelectedNodeId(newId)
   }, [setNodes, setEdges, edges, nodes])
 
+  // Config panel edited one field of one node — merge just that key into its config.
   const updateNodeConfig = useCallback((nodeId: string, key: string, val: unknown) => {
     setNodes(nds => nds.map(n =>
       n.id === nodeId ? { ...n, data: { ...n.data, config: { ...n.data.config, [key]: val } } } : n
     ))
   }, [setNodes])
 
+  // Remove a node and re-wire around it: if it sat between an incoming and an
+  // outgoing edge, splice them into one direct edge (keeping the incoming edge's
+  // filter data) instead of leaving the graph disconnected.
   const deleteNode = useCallback((nodeId: string) => {
     setEdges(eds => {
       const inEdge  = eds.find(e => e.target === nodeId)
@@ -302,6 +320,8 @@ export function useWorkflowEditor({ workflow, onSave, initialRunId = null }: {
     setSelectedNodeId(id => id === nodeId ? null : id)
   }, [setEdges, setNodes])
 
+  // Serialize the graph back into workflow.steps and persist it; also refreshes
+  // the dirty-check baseline so the just-saved state no longer reads as unsaved.
   const handleSave = useCallback((closeAfter = false) => {
     const steps = flowToSteps(nodes, edges)
     let nextTriggerConfig: Record<string, unknown> | undefined = undefined

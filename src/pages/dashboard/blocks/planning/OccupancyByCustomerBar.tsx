@@ -13,6 +13,7 @@ import type { OccupancyByCustomerRow } from '@/types/dashboard'
 import type { ChartDatum } from '@/components/charts/chartTypes'
 import type { FeedTileContext } from '../feedTileKit'
 
+// Fill-rate-per-customer bar; a bar with a known customer id drills into that customer, the no-customer bar stays inert (see file header).
 export default function OccupancyByCustomerBar({ rows, onNavigate }: {
   rows: OccupancyByCustomerRow[]
   onNavigate?: FeedTileContext['onNavigate']

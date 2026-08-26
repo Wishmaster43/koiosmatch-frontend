@@ -29,6 +29,7 @@ const STATUS_COLOR = {
 const TH = { padding: '9px 12px', textAlign: 'left', borderBottom: '1px solid var(--border)', whiteSpace: 'nowrap' }
 const TD = { padding: '9px 12px', fontSize: 12.5, color: 'var(--text)', borderBottom: '1px solid var(--hover-bg)' }
 
+// Superadmin view of the jobs Horizon just processed, filterable by tenant/job, polling while the tab stays visible.
 export default function RecentJobsTab() {
   const { t } = useTranslation('settings')
   const [rows, setRows] = useState([])
@@ -36,6 +37,7 @@ export default function RecentJobsTab() {
   const [tenant, setTenant] = useState('')
   const [jobSearch, setJobSearch] = useState('')
 
+  // Fetches the recent-jobs window with the current filters; keeps phase 'ready' during a background refresh so the table never flashes back to loading.
   const load = useCallback(async () => {
     setPhase(p => (p === 'ready' ? 'ready' : 'loading'))
     try {
@@ -52,6 +54,7 @@ export default function RecentJobsTab() {
 
   // Initial + filter-driven load, then a 15s visible-tab poll (matches Overzicht).
   useEffect(() => { load() }, [load])
+  // Polls every 15s while this tab is visible; skipped when the document is hidden to save requests.
   useEffect(() => {
     const timer = setInterval(() => { if (!document.hidden) load() }, 15000)
     return () => clearInterval(timer)

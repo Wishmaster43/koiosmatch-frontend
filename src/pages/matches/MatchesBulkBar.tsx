@@ -26,6 +26,8 @@ interface MatchesBulkBarProps {
   onCoupleShiftmanager: () => void
 }
 
+// The matches bulk-action bar: backoffice coupling
+// only, permission/module-gated inside this component (see the SYNC-BULK-1 note above).
 export default function MatchesBulkBar({
   count, onClear, onCoupleHelloFlex, onCoupleShiftmanager,
 }: MatchesBulkBarProps) {

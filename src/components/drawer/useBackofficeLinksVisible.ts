@@ -12,6 +12,7 @@
  */
 import { useApps } from '@/context/AppsContext'
 
+// True when the shared Koppelingen tab would actually render content.
 export function useBackofficeLinksVisible(): boolean {
   const apps = useApps()
   const isAppEnabled = apps?.isAppEnabled ?? (() => false)

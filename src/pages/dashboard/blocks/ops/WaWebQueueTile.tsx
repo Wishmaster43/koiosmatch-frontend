@@ -14,6 +14,7 @@ import { useNumberFormat } from '@/lib/formatters'
 import type { WaWebQueueFeed } from '@/types/dashboard'
 import type { FeedTileContext } from '../feedTileKit'
 
+// Ops tile (see the module doc above): renders the headline figures/breakdown; clicking it deep-links to the WhatsApp queue settings tab.
 export default function WaWebQueueTile({ feed, onNavigate }: {
   feed: WaWebQueueFeed
   onNavigate?: FeedTileContext['onNavigate']

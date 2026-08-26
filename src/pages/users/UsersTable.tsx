@@ -39,6 +39,7 @@ const ICON_BTN = {
   background: 'var(--surface)', cursor: 'pointer', flexShrink: 0,
 } as const
 
+// Presentational users table; edit/roles/delete/colour actions are all permission-gated by the caller, this component only renders them.
 export default function UsersTable({
   rows, loading, currentUserId, canUpdate, canDelete, canAssignRoles,
   onEdit, onEditRoles, onDelete, onPickColor,

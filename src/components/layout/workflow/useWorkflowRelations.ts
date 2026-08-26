@@ -11,6 +11,8 @@ import { useEffect, useState, useCallback } from 'react'
 import api, { unwrap } from '@/lib/api'
 import type { WorkflowRelation } from '@/types/workflow'
 
+// Loads a workflow's parent/child relations and exposes the active-toggle mutation
+// described in the module doc comment above (never touches the related workflow's own steps).
 export function useWorkflowRelations(workflowId?: string | number) {
   const [parents,  setParents]  = useState<WorkflowRelation[]>([])
   const [children, setChildren] = useState<WorkflowRelation[]>([])

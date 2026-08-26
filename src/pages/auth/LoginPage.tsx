@@ -113,6 +113,8 @@ function CredentialForm({ onMfaRequired }: { onMfaRequired: (token: string) => v
     return () => clearTimeout(timer)
   }, [retryAfter])
 
+  // Submit credentials: routes to the MFA step when the server asks for it,
+  // otherwise navigates straight in; a 429 starts the live throttle countdown.
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
     setError('')
@@ -213,8 +215,10 @@ function MfaForm({ mfaToken, onBack }: { mfaToken: string; onBack: () => void })
   const [loading, setLoading] = useState(false)
   const [error,   setError]   = useState('')
 
+  // Focus the code input as soon as this step mounts, so typing can start immediately.
   useEffect(() => { inputRef.current?.focus() }, [])
 
+  // Submit the entered TOTP code; a rejected code clears the field and refocuses it.
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
     if (code.replace(/\s/g, '').length < 6) return

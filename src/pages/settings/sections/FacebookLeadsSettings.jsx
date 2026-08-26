@@ -57,6 +57,7 @@ function SecretField({ id, label, value, onChange, alreadySet, setBadge, placeho
   )
 }
 
+// Loads and saves the tenant's Facebook Leads credentials (verify token, masked app secret/access token, dataset id) through the shared settings endpoints.
 export default function FacebookLeadsSettings() {
   const { t } = useTranslation('settings')
   const { activeTenant } = useAuth()
@@ -108,6 +109,7 @@ export default function FacebookLeadsSettings() {
 
   // This tenant's own webhook URL — paste target for the Facebook app dashboard.
   const webhookUrl = activeTenant?.id ? `${API_URL}/facebook/webhook/${activeTenant.id}` : null
+  // Copies this tenant's webhook URL to the clipboard and flashes a copied confirmation for 2 seconds.
   const copyUrl = () => {
     if (!webhookUrl) return
     navigator.clipboard.writeText(webhookUrl)

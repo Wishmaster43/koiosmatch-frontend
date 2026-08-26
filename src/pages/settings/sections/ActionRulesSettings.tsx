@@ -39,6 +39,9 @@ type Phase = 'loading' | 'error' | 'ready'
 // The three domain sub-tabs — one grid (or section) each; content only, no data split.
 type MatrixTab = 'candidate' | 'customer' | 'avg'
 
+// Thin container: loads the tenant's action-rule matrix, tracks staged edits against
+// the server baseline per cell, and hands the actual grid/legend/save-bar rendering
+// to the actionrules/* components below.
 export default function ActionRulesSettings() {
   const { t } = useTranslation('settings')
   const [phase, setPhase] = useState<Phase>('loading')

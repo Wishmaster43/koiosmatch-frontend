@@ -68,6 +68,7 @@ export default function MergeCustomerModal({ current, onClose, onMerged }: {
   const [merging, setMerging] = useState(false)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
 
+  // Debounced duplicate search as the query changes; a fresh AbortController cancels the previous in-flight request, and the search is skipped once a duplicate is already picked.
   useEffect(() => {
     if (duplicate) return // picker collapsed once a duplicate is chosen
     const q = query.trim()

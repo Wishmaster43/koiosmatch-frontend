@@ -58,6 +58,7 @@ export interface CustomerCascadeDetail {
   contacts?: CascadeOption[]
 }
 
+// One shared customer→location→department→contact cascade fetch, exposing the full detail payload so callers needing takeover-default fields don't need their own fetch (see file header).
 export function useCustomerCascade(customerId: string) {
   const [detail, setDetail] = useState<CustomerCascadeDetail | null>(null)
 

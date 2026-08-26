@@ -15,6 +15,8 @@ import { useSmCustomerTree }  from '@/hooks/useSmCustomerTree'
 import type { ReportContact, ReportFilterGroup } from '@/types/reports'
 
 
+// Searchable, filterable, paginated list of every customer contact person, flattened
+// from the shared customer tree; row click opens the read-only ContactPersonDrawer.
 export default function ContactPersonsTable() {
   const { t } = useTranslation('reports')
   const [search,   setSearch]     = useState('')
@@ -37,11 +39,13 @@ export default function ContactPersonsTable() {
     }))
   ), [customers])
 
+  // Distinct, sorted customer names for the "Klant" filter's option list.
   const customerOptions = useMemo(() =>
     [...new Set(contacts.map(c => c.customer_name).filter((x): x is string => Boolean(x)))].sort(),
     [contacts]
   )
 
+  // Apply customer/planning-contact filters and the free-text search in one pass.
   const filtered = useMemo(() => {
     let rows = contacts
     if (selectedCustomers.length > 0)
@@ -64,10 +68,15 @@ export default function ContactPersonsTable() {
     return rows
   }, [contacts, selectedCustomers, selectedReceives, search])
 
+  // A changed filter/search result or page size invalidates the current page number.
   useEffect(() => setPage(1), [filtered.length, pageSize])
+  // Paging stays client-side: the full contact list is already loaded and filtered
+  // in memory, so turning a page never re-queries the server.
   const paged      = useMemo(() => filtered.slice((page-1)*pageSize, page*pageSize), [filtered, page, pageSize])
   const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize))
 
+  // Build the right-panel filter groups (customer + planning-contact yes/no), each
+  // option carrying a live count against the unfiltered contact list.
   const filterGroups = useMemo(() => {
     const groups: ReportFilterGroup[] = []
     if (customerOptions.length > 0) {
@@ -93,6 +102,8 @@ export default function ContactPersonsTable() {
     return groups
   }, [t, customerOptions, selectedCustomers, selectedReceives, contacts])
 
+  // Publish the current filter groups into the shared right panel; unregister on
+  // unmount/change so a stale group set never lingers there.
   useEffect(() => {
     registerFilters('contact-persons', filterGroups)
     return () => unregisterFilters('contact-persons')

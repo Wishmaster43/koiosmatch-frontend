@@ -32,6 +32,8 @@ interface UploadStepProps {
   onFileReady: (file: File) => Promise<void>
 }
 
+// Wizard step 1: template download + a permission-gated dropzone that parses the
+// picked CSV client-side and hands it to the caller to advance to column mapping.
 export default function UploadStep({ entity, canView, canImport, onFileReady }: UploadStepProps) {
   const { t } = useTranslation('settings')
   const [drag, setDrag] = useState(false)
@@ -60,6 +62,7 @@ export default function UploadStep({ entity, canView, canImport, onFileReady }: 
     }
   }
 
+  // User clicked "download template" — fetch the entity's example file.
   const handleDownloadTemplate = async () => {
     setDownloadPending(true)
     try {
@@ -71,6 +74,7 @@ export default function UploadStep({ entity, canView, canImport, onFileReady }: 
     }
   }
 
+  // File dropped onto the zone — ignored while import isn't permitted.
   const handleDrop = (event: DragEvent<HTMLDivElement>) => {
     event.preventDefault()
     setDrag(false)
@@ -79,6 +83,7 @@ export default function UploadStep({ entity, canView, canImport, onFileReady }: 
     if (dropped) void acceptFile(dropped)
   }
 
+  // File picked via the hidden native input (the "Selecteer csv" button/click-zone).
   const handleFileInput = (event: ChangeEvent<HTMLInputElement>) => {
     const picked = event.target.files?.[0]
     if (picked) void acceptFile(picked)

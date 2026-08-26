@@ -29,6 +29,8 @@ export const ENTITY_ICONS: Record<string, LucideIcon> = {
   conversation: MessageCircle,
 }
 
+// Resolves the shared icon for an entity type, falling back to a generic person
+// icon for any type not in the map above.
 export function entityIconFor(type: string): LucideIcon {
   return ENTITY_ICONS[type] ?? User
 }

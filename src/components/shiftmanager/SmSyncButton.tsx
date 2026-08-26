@@ -15,6 +15,8 @@ import SelectMenu from '@/components/ui/SelectMenu'
 import { useSmConnections } from './useSmConnections'
 import { useSmSync } from './useSmSync'
 
+// The manual Shiftmanager sync action (see file docblock above): syncs immediately
+// with one connection, or opens a picker first with several — never a silent guess.
 export default function SmSyncButton() {
   const { t } = useTranslation('shiftmanager')
   const auth = useAuth()

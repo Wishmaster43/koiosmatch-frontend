@@ -26,6 +26,7 @@ interface CustomerCompanyTextCardProps {
   set: (k: keyof CustomerForm, v: string) => void
 }
 
+// Add-customer modal card: the company free-text field, rich-text with its own collapse/edit state.
 export default function CustomerCompanyTextCard({ form, set }: CustomerCompanyTextCardProps) {
   const { t } = useTranslation(['customers', 'common'])
   // COLLAPSIBLE-TEXT-1: Bedrijfstekst's own collapsed/editing state (mirrors

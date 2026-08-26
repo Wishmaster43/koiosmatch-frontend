@@ -1,3 +1,10 @@
+import { useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
+import { deriveOpportunityAdvice } from '@/pages/opportunities/shared'
+import type { KoiosAdvice } from '@/lib/koiosAdviceMeta'
+import type { Opportunity } from '@/types/opportunity'
+import type { LookupOption } from '@/types/common'
+
 /**
  * useOpportunityAdvice — the ONE resolver both the opportunities TABLE column
  * and the drawer's Koios block call, so they can never disagree
@@ -6,13 +13,6 @@
  * expectedClose cell uses for its red/bold styling (§11: one computation).
  * `stages` carries the tenant's won/lost flags: a closed deal is never overdue.
  */
-import { useCallback } from 'react'
-import { useTranslation } from 'react-i18next'
-import { deriveOpportunityAdvice } from '@/pages/opportunities/shared'
-import type { KoiosAdvice } from '@/lib/koiosAdviceMeta'
-import type { Opportunity } from '@/types/opportunity'
-import type { LookupOption } from '@/types/common'
-
 export function useOpportunityAdvice(stages: LookupOption[] = []): (r: Opportunity) => KoiosAdvice | null {
   const { t } = useTranslation(['opportunities', 'common'])
 

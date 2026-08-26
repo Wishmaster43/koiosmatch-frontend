@@ -1,8 +1,3 @@
-/**
- * ContactPersonDrawer — slide-in panel with one contact person's details and
- * quick mail/call links. Opened from ContactPersonsTable.
- * InfoRow below = one labeled detail row (optionally a clickable mailto/tel link).
- */
 import type { ReactNode } from 'react'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { useTranslation } from 'react-i18next'
@@ -31,6 +26,11 @@ function InfoRow({ icon: Icon, label, value, href }: { icon: LucideIcon; label: 
   )
 }
 
+/**
+ * ContactPersonDrawer — slide-in panel with one contact person's details and
+ * quick mail/call links. Opened from ContactPersonsTable.
+ * InfoRow below = one labeled detail row (optionally a clickable mailto/tel link).
+ */
 export default function ContactPersonDrawer({ contact, onClose }: { contact: ReportContact; onClose: () => void }) {
   const panelRef = useFocusTrap<HTMLDivElement>(onClose)
   const { t } = useTranslation('reports')

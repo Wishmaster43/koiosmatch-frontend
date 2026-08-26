@@ -15,6 +15,8 @@
 import { SquareArrowOutUpRight } from 'lucide-react'
 import type { Id } from '@/types/common'
 
+// A contact's name as an in-app jump into its own drill-down (see file doc for
+// why this is a button, not a real link); degrades to plain text with no id/handler.
 export default function ContactNameLink({ name, id, onOpen, title }: {
   name: string
   id?: Id | null

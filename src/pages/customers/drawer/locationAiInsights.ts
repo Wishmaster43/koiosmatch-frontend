@@ -16,6 +16,8 @@ import type { KoiosAdviceInsight } from '@/components/ai/KoiosAdviceBlock'
 // A bound-namespace translate function (the caller already resolved the namespace).
 type Tx = (key: string, opts?: Record<string, unknown>) => string
 
+// Builds the location's Koios advice insights from only what the location record
+// can actually store (see the module doc comment above for why it never claims more).
 export function buildLocationAdviceInsights(l: Location, t: Tx): KoiosAdviceInsight[] {
   const coreFields = [
     l.street && l.city,

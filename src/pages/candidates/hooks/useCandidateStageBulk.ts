@@ -1,12 +1,3 @@
-/**
- * useCandidateStageBulk — the funnel/phase/status cluster split out of
- * useCandidateBulkActions (§3 size split, > ~400-line trigger): `bulkSetStage`
- * (funnel stage), `bulkConvertPhase` (lifecycle phase) and `bulkSetStatus`
- * (deployability, with its AXIS-MATRIX-2 N2 bulk preflight) all share the
- * reasoned-skip breakdown below. `bulkMutate`/`notifyOutcome` stay owned by the
- * parent hook (shared with owner/type/tag/consent mutations too) and are passed
- * in so there is exactly one implementation of each — never a second copy here.
- */
 import api from '@/lib/api'
 import type { TFunction } from 'i18next'
 import { metaOf } from '../data/candidatesShared'
@@ -35,6 +26,15 @@ interface UseCandidateStageBulkParams {
   notifyOutcome: (successKey: string, params: Record<string, unknown>, updated: number, total: number) => void
 }
 
+/**
+ * useCandidateStageBulk — the funnel/phase/status cluster split out of
+ * useCandidateBulkActions (§3 size split, > ~400-line trigger): `bulkSetStage`
+ * (funnel stage), `bulkConvertPhase` (lifecycle phase) and `bulkSetStatus`
+ * (deployability, with its AXIS-MATRIX-2 N2 bulk preflight) all share the
+ * reasoned-skip breakdown below. `bulkMutate`/`notifyOutcome` stay owned by the
+ * parent hook (shared with owner/type/tag/consent mutations too) and are passed
+ * in so there is exactly one implementation of each — never a second copy here.
+ */
 export function useCandidateStageBulk({
   selectedIds, notify, t, funnelTypes, confirm, bulkMutate, notifyOutcome,
 }: UseCandidateStageBulkParams) {
@@ -119,6 +119,8 @@ export function useCandidateStageBulk({
     patch: { status }, keys: ['status'],
     onSuccess: (n, total) => notifyOutcome('bulk.statusChanged', { value: label }, n, total),
   })
+  // Runs the AXIS-MATRIX-2 N2 preflight first, then either proceeds directly (nothing
+  // blocked) or confirms with the recruiter, naming the blocked candidates/reasons.
   const bulkSetStatus = (status: string, label: string) => {
     const ids = [...selectedIds]
     if (!ids.length) return

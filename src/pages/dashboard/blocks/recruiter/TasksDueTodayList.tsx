@@ -1,9 +1,3 @@
-/**
- * TasksDueTodayList — recruitment work-feed tile: open tasks due today
- * (dash.tasks_due_today). Mirrors WidgetListBlock's row shape via a plain
- * list since the feed row carries a priority chip the shared list doesn't
- * model. Self-hides on an empty feed (handled by the registry's hasData).
- */
 import { useTranslation } from 'react-i18next'
 import { Block } from '@/pages/dashboard/DashboardPrimitives'
 import SoftChip from '@/components/ui/SoftChip'
@@ -13,6 +7,12 @@ import { useSeedLabel } from '@/lib/useSeedLabel'
 import type { TaskDueTodayRow } from '@/types/dashboard'
 import type { FeedTileContext } from '../feedTileKit'
 
+/**
+ * TasksDueTodayList — recruitment work-feed tile: open tasks due today
+ * (dash.tasks_due_today). Mirrors WidgetListBlock's row shape via a plain
+ * list since the feed row carries a priority chip the shared list doesn't
+ * model. Self-hides on an empty feed (handled by the registry's hasData).
+ */
 export default function TasksDueTodayList({ rows, onNavigate }: {
   rows: TaskDueTodayRow[]
   onNavigate?: FeedTileContext['onNavigate']

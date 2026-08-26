@@ -57,6 +57,8 @@ interface Args {
   t: TFunction
 }
 
+// Pure donut/KPI derivation for the vacancies insights row: server-wide stats
+// first, page-loaded rows as the honest fallback — no fetching, no side effects.
 export function useVacancyInsights({ stats, vacancies, statuses, phases, statusMeta, t }: Args) {
   const s = stats as VacancyStatsShape | null
   // LOOKUP-I18N-1: the seeded status/funnel/function label renders in the user's

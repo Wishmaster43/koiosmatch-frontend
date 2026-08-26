@@ -72,6 +72,7 @@ function GroupTable({ icon: Icon, title, rows, total, valueCol, totalRow, fmt }:
   )
 }
 
+// Renders three per-group total tables (customer/function/location) instead of a raw shift list, per the totals-only requirement.
 export default function ShiftsDrillDownTotals({ shifts, locationMeta }: {
   shifts: ShiftRow[]; locationMeta: LocationMeta
 }) {
@@ -86,10 +87,14 @@ export default function ShiftsDrillDownTotals({ shifts, locationMeta }: {
   const locId = (s: ShiftRow) => String(s.order?.customer_location?.id ?? '')
   const valFn = (s: ShiftRow) => unit === 'hours' ? shiftHours(s) : 1
 
+  // Grand total for the selected unit (count or hours), used for the tables' % column and footer row.
   const total = useMemo(() => shifts.reduce((sum, s) => sum + valFn(s), 0), [shifts, unit]) // eslint-disable-line react-hooks/exhaustive-deps
+  // Totals per customer, resolving the display name via locationMeta with a raw-id fallback when meta hasn't loaded yet.
   const byCustomer = useMemo(() => groupSum(shifts, (s) =>
     locationMeta.get(locId(s))?.customer ?? String(s.order?.customer_location?.customer_external_id ?? ''), valFn, unknown), [shifts, locationMeta, unknown, unit]) // eslint-disable-line react-hooks/exhaustive-deps
+  // Totals per job function/type.
   const byFunction = useMemo(() => groupSum(shifts, (s) => String(s.job_type ?? ''), valFn, unknown), [shifts, unknown, unit]) // eslint-disable-line react-hooks/exhaustive-deps
+  // Totals per location, resolving the display name via locationMeta with a raw-name fallback when meta hasn't loaded yet.
   const byLocation = useMemo(() => groupSum(shifts, (s) =>
     locationMeta.get(locId(s))?.name ?? String(s.order?.customer_location?.name ?? ''), valFn, unknown), [shifts, locationMeta, unknown, unit]) // eslint-disable-line react-hooks/exhaustive-deps
 

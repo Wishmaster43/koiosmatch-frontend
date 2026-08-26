@@ -33,6 +33,7 @@ interface UseVacancyBulkActionsArgs {
 
 interface BulkMutateArgs { url: string; body: Record<string, unknown>; patch: Record<string, unknown>; keys: string[]; onSuccess: (n: number) => void }
 
+// See the file's top doc above; each mutation is optimistic and reconciles against the server updated/archived list on completion.
 export function useVacancyBulkActions({ vacancies, setVacancies, setTotal, selectedIds, setSelectedIds, notify, t, statusMeta }: UseVacancyBulkActionsArgs) {
   const { confirm, dialog } = useConfirm()
   // ── Bulk selection ──

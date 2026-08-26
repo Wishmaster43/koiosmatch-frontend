@@ -52,6 +52,8 @@ import { tintBg, tintBorder } from '@/lib/tint'
 // Right-panel multi-toggle for a filter dimension.
 const tog = (set: Dispatch<SetStateAction<string[]>>) => (v: string) => set(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v])
 
+// Thin container: wires the filters/data/drawer-action/bulk-action hooks together and
+// renders the insights strip plus table/board — the mutation and aggregation logic all lives in those hooks.
 export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) {
   const { t } = useTranslation('applications')
   const auth = useAuth()
@@ -149,9 +151,12 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
   // when stats itself hasn't loaded (mirrors phaseCount/bucketCount's own
   // per-field fallback, already established above).
   const phaseData  = useMemo(() => buildPhaseData(phases, stats, wideRows), [phases, stats, wideRows])
+  // Recruiter (owner) donut: prefer the real server-wide stats.by_owner; only fall
+  // back to counting the wide sample while stats hasn't loaded.
   const ownerData  = useMemo(() => stats?.by_owner
     ? buildOwnerDataFromStats(stats.by_owner, t('insights.noOwner'), OWNER_NONE)
     : buildOwnerData(wideRows, t('insights.noOwner'), OWNER_NONE), [stats, wideRows, t])
+  // Source donut: same stats-first, wide-sample-fallback pattern as ownerData above.
   const sourceData = useMemo(() => stats?.by_source
     ? buildSourceDataFromStats(stats.by_source)
     : buildSourceData(wideRows), [stats, wideRows])
@@ -195,6 +200,8 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
     showArchived, setShowArchived, showTrash, setShowTrash, dateRange, setDateRange,
     bucketOptions, phaseData, ownerData, sourceData, vacOptions, clientOptions, branchOptions])
 
+  // Register this page's filter groups with the shared right panel (§4: every filter
+  // lives there, never in the toolbar); unregister on unmount so it doesn't leak to other pages.
   useEffect(() => {
     registerFilters('applications-page', filterGroups)
     return () => unregisterFilters('applications-page')
@@ -276,6 +283,8 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
   const tooLongInStageCount = useMemo(() => stats
     ? (stats.attention?.too_long_in_stage ?? 0)
     : wideRows.filter(a => a.tooLongInStage).length, [stats, wideRows])
+  // Bucket counts plus the "new" KPI, which prefers the server-wide stats total and
+  // falls back to the wide sample only while stats hasn't loaded (same pattern as above).
   const counts = useMemo(() => ({
     ...bucketCounts,
     new: stats ? (stats.attention?.new ?? 0) : wideRows.filter(a => a.isNew && a.bucket === 'active').length,

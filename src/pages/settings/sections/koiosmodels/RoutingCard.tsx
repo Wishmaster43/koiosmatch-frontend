@@ -18,6 +18,7 @@ import type { KoiosRequestType, KoiosRoutingEntry, KoiosModelsAdminData } from '
 const card = { border: '1px solid var(--border)', borderRadius: 10, padding: 16, marginBottom: 14, background: 'var(--surface)' }
 const NO_EFFORT_VALUE = '' // maps to null — "standaard" (tenant/platform default)
 
+// Per-request-type flavour + effort routing card: a local draft against the tenant's saved routing, diffed for dirty state.
 export default function RoutingCard({ data, onSaved }: { data: KoiosModelsAdminData; onSaved: (patch: Partial<KoiosModelsAdminData>) => void }) {
   const { t } = useTranslation('settings')
   const [draft, setDraft] = useState<Record<KoiosRequestType, KoiosRoutingEntry>>(data.routing)
@@ -34,6 +35,7 @@ export default function RoutingCard({ data, onSaved }: { data: KoiosModelsAdminD
     ...EFFORT_LEVELS.map(e => ({ value: e, label: t(`koiosModelsAdmin.effortLevel.${e}`) })),
   ]
 
+  // Persist the draft routing and surface the real error on failure, mirroring SaveButton's transient saved state.
   const save = async () => {
     setSaving(true); setError(null)
     try {

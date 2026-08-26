@@ -24,6 +24,7 @@ interface OpportunityDescriptionCardProps {
   onChange: (v: string) => void
 }
 
+// Description field for the opportunity create modal, rendered as the shared collapsed-ghost rich-text block rather than an always-open editor.
 export default function OpportunityDescriptionCard({ value, onChange }: OpportunityDescriptionCardProps) {
   const { t } = useTranslation(['opportunities', 'common'])
   // COLLAPSIBLE-TEXT-1: the always-open editor became the shared collapsed-ghost

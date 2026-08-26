@@ -25,6 +25,7 @@ import OrderDetailDrawer from './OrderDetailDrawer'
 import { useOrdersTable } from './useOrdersTable'
 import type { EnrichedOrderRow } from '@/types/shiftmanager'
 
+// Shiftmanager orders list: local filter/search state drives the data hook, with filter groups pushed into the shared right panel and a row click opening the order detail drawer.
 export default function OrdersTable() {
   const { t } = useTranslation('shiftmanager')
   const locale = useLocale()
@@ -62,6 +63,7 @@ export default function OrdersTable() {
     onToggle: (v: string) => setSelectedStatuses(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]),
   }], [t, selectedStatuses, statusOptions, rows])
 
+  // Registers this table's filter groups with the shared right panel, and unregisters them on unmount so they do not leak into another page.
   useEffect(() => {
     registerFilters('orders-table', filterGroups)
     return () => unregisterFilters('orders-table')

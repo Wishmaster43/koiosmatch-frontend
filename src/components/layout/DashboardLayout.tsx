@@ -49,6 +49,8 @@ function NoAccessPage() {
   )
 }
 
+// The app shell: sidebar + active page + Koios/right panels, driving real browser
+// history so back/forward navigates between pages instead of doing nothing.
 export default function DashboardLayout() {
   const { t } = useTranslation('common')
   const [expanded,       setExpanded]       = useState(true)
@@ -70,6 +72,8 @@ export default function DashboardLayout() {
   // A jump WITH an intent (KPI/doorklik) remembers where it came from → back-chip;
   // plain navigation (sidebar) clears it.
   const [jumpOrigin, setJumpOrigin] = useState<string | null>(null)
+  // Navigates to a page: pushes a real history entry (so browser back/forward work)
+  // and remembers where a KPI/doorklik jump came from for the back-chip.
   const goTo = (page: string, intent: unknown = null) => {
     setJumpOrigin(intent != null && page !== activePage ? activePage : null)
     setNavIntent(intent); setActivePage(page)
@@ -79,6 +83,8 @@ export default function DashboardLayout() {
   // Same '/'+'?' split as above — a NAV-BACK-1 drawer entry's `kmPage` is already
   // the bare page (see useDrawerUrl), but the hash fallback still carries `?open=`.
   useEffect(() => {
+    // User pressed browser back/forward: resolve the target page from the pushed
+    // history state, falling back to the hash for a hard reload.
     const onPop = (e: PopStateEvent) => {
       const page = (e.state as { kmPage?: string } | null)?.kmPage
         ?? window.location.hash.replace(/^#/, '').split(/[/?]/)[0]

@@ -22,6 +22,7 @@ import Button from '@/components/ui/Button'
 import { Mono } from '@/components/ui/typography'
 import { tintBorder } from '@/lib/tint'
 
+// Owns one API key's full lifecycle: fetch full detail, edit, status toggle, secret regeneration and deletion, bubbling changes back to the list.
 export default function ApiKeyDetail({ keyId, listRow, onBack, onPatch, onDelete }) {
   const { t } = useTranslation('settings')
   const [apiKey, setApiKey]   = useState(listRow ?? null)
@@ -59,10 +60,12 @@ export default function ApiKeyDetail({ keyId, listRow, onBack, onPatch, onDelete
   const regenerate = async () => {
     try { const res = await regenerateApiKey(keyId); setSecret(res?.secret ?? null) } catch { /* noop */ }
   }
+  // Flip active ⇄ disabled and persist it immediately.
   const toggleStatus = () => {
     const next = (apiKey?.status ?? 'active') === 'active' ? 'disabled' : 'active'
     applyUpdate({ status: next }).catch(() => {})
   }
+  // Confirm, then delete the key for real and let the parent list drop the row.
   const remove = () => {
     confirm(t('apiKeys.deleteConfirm', { name: apiKey?.friendly_name ?? '' }), async () => {
       try { await deleteApiKey(keyId); onDelete?.(keyId) } catch { /* noop */ }

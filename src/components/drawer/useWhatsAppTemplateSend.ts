@@ -46,6 +46,8 @@ export interface PhoneNumberOption { value: string; label: string }
 // redeclared per caller.
 export interface ConversationSubject { kind: 'candidate' | 'customer_contact'; id: Id }
 
+// Base hook for sending an approved WhatsApp template to a candidate or customer
+// contact — loads templates/sender numbers, tracks the picked template's variable slots, and posts the send.
 export function useWhatsAppTemplateSend(subject: ConversationSubject | null | undefined, onSent: () => void) {
   const { t } = useTranslation('candidates')
   const [templates, setTemplates] = useState<WaTemplateOption[]>([])
@@ -76,6 +78,7 @@ export function useWhatsAppTemplateSend(subject: ConversationSubject | null | un
     return () => { alive = false }
   }, [])
 
+  // Resolve the picked template's full definition, from which the variable-slot count below is derived.
   const selected = useMemo(() => templates.find(tpl => tpl.value === templateName), [templates, templateName])
   const texts = useMemo(() => templateTexts(selected?.components), [selected])
   // How many {{n}} slots this template needs filled — the blocker described above.

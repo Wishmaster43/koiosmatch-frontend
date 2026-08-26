@@ -33,6 +33,7 @@ import type { ApplicationDetail } from '@/types/application'
 const ZZP_TYPES = ['freelance', 'zzp']
 const muted = { fontSize: 12, color: 'var(--text-muted)', padding: '8px 0' }
 
+// The application drawer candidate tab: shows the linked candidate profile pieces and shares its React Query cache key with the candidate drawer's own edit path, so an edit from either surface refetches both.
 export default function CandidateTab({ application: a }: { application: ApplicationDetail }) {
   const { t } = useTranslation('candidates')
   const queryClient = useQueryClient()

@@ -36,6 +36,8 @@ const inputStyle = fieldInputStyle
 // A fresh draft for the create card / an opened edit card.
 const emptyDraft = () => ({ name: '', kind: 'intro', body: '' })
 
+// Expand-card CRUD for reusable vacancy-text blocks (see file docblock above);
+// degrades to a calm "not available yet" notice when the backend route 404s.
 export default function VacancyContentBlocksSettings() {
   const { t } = useTranslation('settings')
   const [blocks, setBlocks] = useState([])

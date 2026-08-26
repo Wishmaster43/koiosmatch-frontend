@@ -15,6 +15,7 @@ import ContactDrawer from './ContactDrawer'
 import { useSmContacts } from './hooks/useSmContacts'
 import type { SmContactRow } from '@/types/shiftmanager'
 
+// Shiftmanager contacts list: filters/search/pagination in local state, filter groups pushed into the shared right panel, and a row click opens the contact drawer.
 export default function ContactsPage() {
   const { t } = useTranslation('shiftmanager')
   // Data (fetch + transform) lives in the shared hook (§3).
@@ -31,8 +32,10 @@ export default function ContactsPage() {
   const toggle = (setter: Dispatch<SetStateAction<string[]>>) => (val: string) =>
     setter(prev => prev.includes(val) ? prev.filter(v => v !== val) : [...prev, val])
 
+  // Distinct customer names present in the loaded contacts, sorted, for the customer filter options.
   const customerOptions = useMemo(() => [...new Set(contacts.map(c => c.customer).filter((x): x is string => Boolean(x)))].sort(), [contacts])
 
+  // Builds the customer/planning-contact filter definitions, with live counts, handed to the shared right-panel filter UI.
   const filterGroups = useMemo(() => [
     { key: 'klant', label: t('contactsPage.cols.customer'),
       options: customerOptions.map(k => ({ value: k, label: k, count: contacts.filter(c => c.customer === k).length })),
@@ -45,11 +48,13 @@ export default function ContactsPage() {
       selected: selPlanning, onToggle: toggle(setSelPlanning) },
   ], [t, customerOptions, contacts, selCustomers, selPlanning])
 
+  // Registers this page's filter groups with the shared right panel, and unregisters them on unmount so they do not leak into another page.
   useEffect(() => {
     registerFilters('klanten-contacts', filterGroups)
     return () => unregisterFilters('klanten-contacts')
   }, [filterGroups, registerFilters, unregisterFilters])
 
+  // Applies the active customer/planning-contact filters plus the free-text search (name/customer/email) in one pass.
   const filtered = useMemo(() => {
     let rows = contacts
     if (selCustomers.length)  rows = rows.filter(c => selCustomers.includes(c.customer as string))

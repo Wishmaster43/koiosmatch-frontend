@@ -15,6 +15,7 @@ const REFUSAL: Record<string, { color: string; Icon: LucideIcon; labelKey: strin
   rechten:         { color: 'var(--color-danger-text)',  Icon: ShieldX, labelKey: 'koios.refusedRights' },
 }
 
+// Collapsible trace of one Koios answer's tool steps; renders nothing without steps, and colours an organisational refusal differently from a rights refusal so the cause reads at a glance.
 export default function KoiosSteps({ steps, t }: { steps?: KoiosStep[]; t: TFn }) {
   const [open, setOpen] = useState(false)
   if (!steps?.length) return null

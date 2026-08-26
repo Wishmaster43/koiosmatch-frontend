@@ -12,6 +12,7 @@ import { Caption } from '@/components/ui/typography'
 import { useOpportunityActivity } from '../hooks/useOpportunityActivity'
 import type { Opportunity } from '@/types/opportunity'
 
+// The opportunity's audit-trail feed, handling all four UI states explicitly.
 export default function ChangelogTab({ opportunity: o }: { opportunity: Opportunity }) {
   const { t } = useTranslation('opportunities')
   const { formatDate } = useDateFormat()

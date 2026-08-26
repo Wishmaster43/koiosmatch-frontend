@@ -26,12 +26,14 @@ function buildFields(form: FormState): Record<string, string> {
   return fields
 }
 
+// State machine for the modal's Generate-with-Koios popup: open/closed, generate status, the returned concept text, and error handling.
 export function useProfileGenerate(form: FormState) {
   const [open, setOpen] = useState(false)
   const [status, setStatus] = useState<GenerateStatus>('idle')
   const [concept, setConcept] = useState('')
   const [errorKey, setErrorKey] = useState<string | null>(null)
 
+  // Opens the popup and resets it to a fresh idle state, so a previous concept/error never leaks into the next open.
   const openFlow = useCallback(() => { setOpen(true); setStatus('idle'); setConcept(''); setErrorKey(null) }, [])
   const closeFlow = useCallback(() => { setOpen(false); setStatus('idle'); setConcept(''); setErrorKey(null) }, [])
 
@@ -51,6 +53,7 @@ export function useProfileGenerate(form: FormState) {
     }
   }, [form])
 
+  // Discards the generated concept without touching the form; the caller decides whether to re-open or apply instead.
   const discard = useCallback(() => { setConcept(''); setStatus('idle'); setErrorKey(null) }, [])
 
   return { open, openFlow, closeFlow, status, concept, errorKey, generate, discard }

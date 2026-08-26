@@ -72,6 +72,8 @@ const EditableFieldTable = EditableFieldTableJs as unknown as ComponentType<AnyP
 // "not even shaped like an e-mail" without pulling in a full validator library.
 const EMAIL_FORMAT_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
+// The ZZP (freelance) preferences tab: business/invoicing fields plus the
+// creditor-number auto-fill flow, saved back through the drawer's onSave patch.
 export function ZzpTab({ c, onSave }: { c: Candidate; onSave?: (v: Record<string, unknown>) => void }) {
   const { t } = useTranslation('candidates')
   const zzp = c.zzp
@@ -80,7 +82,7 @@ export function ZzpTab({ c, onSave }: { c: Candidate; onSave?: (v: Record<string
 
   // CREDITOR-AUTO-1: "is the creditor number on the tenant's numbering sequence?"
   // — the only place the FE can check is the numbering-entities lookup; a
-  // `zzp_creditor` entry there is the honest signal (see the file header).
+  // `zzp_creditor` entry there is the honest signal ().
   const { entities: numberingEntities } = useNumberingEntities()
   const creditorAutoNumbered = numberingEntities.some(e => e.key === 'zzp_creditor')
 
@@ -98,6 +100,8 @@ export function ZzpTab({ c, onSave }: { c: Candidate; onSave?: (v: Record<string
   // Re-armed in effect SETUP (§9): StrictMode's setup→cleanup→setup must never
   // leave this permanently false.
   const mountedRef = useRef(false)
+  // Arms the alive-guard in effect SETUP (not just cleanup) so StrictMode's
+  // setup→cleanup→setup dance never leaves it permanently false.
   useEffect(() => { mountedRef.current = true; return () => { mountedRef.current = false } }, [])
   const { fetchDetail } = useCandidateRecord()
   // Re-read just this one record and adopt the fresh creditor number, if any —
@@ -223,6 +227,8 @@ export function ZzpTab({ c, onSave }: { c: Candidate; onSave?: (v: Record<string
   const [invoicingEpoch, setInvoicingEpoch] = useState(0)
   const originalEmail = String(value.email_zakelijk ?? '').trim()
 
+  // Saves the invoicing card, warning (never blocking) on a duplicate business
+  // e-mail before committing, and bumping the epoch to force a re-sync on decline.
   const handleSaveInvoicing = (v: Record<string, unknown>) => {
     const commit = () => {
       // BANK-1: the IBAN goes out WITHOUT spaces (the API stores the string

@@ -23,6 +23,8 @@ import { useDateFormat } from '@/lib/datetime'
 const API_URL = import.meta.env.VITE_API_URL ?? 'http://koiosmatch-api.test/api'
 const BASE_URL = `${API_URL}/webhook`
 
+// Manages the tenant's inbound webhook tokens (see file docblock above) — create,
+// in-place edit, delete, copy-URL, and the per-webhook request-log drill-in.
 export default function IncomingWebhooks() {
   const { t } = useTranslation('settings')
   const { formatDateTime } = useDateFormat()
@@ -42,6 +44,7 @@ export default function IncomingWebhooks() {
 
   // Start / save an in-place edit of an existing webhook (name + description).
   const startEdit = (wh) => { setEditId(wh.id); setEditName(wh.name ?? ''); setEditDesc(wh.description ?? '') }
+  // Commits the in-place edit: updates local state optimistically, then persists.
   const saveEdit = async (id) => {
     const nm = editName.trim(); if (!nm) return
     const description = editDesc.trim() || null
@@ -71,6 +74,7 @@ export default function IncomingWebhooks() {
     setCreating(false)
   }
 
+  // User asked to delete a webhook: confirms first (destructive), then removes it.
   const remove = (id) => {
     confirm(t('webhooks.incoming.removeConfirm'), async () => {
       await api.delete(`/webhooks/${id}`).catch(() => {})
@@ -78,6 +82,7 @@ export default function IncomingWebhooks() {
     }, { danger: true })
   }
 
+  // Copies the full webhook URL to the clipboard and shows temporary "copied" feedback.
   const copyUrl = (token) => {
     navigator.clipboard.writeText(`${BASE_URL}/${token}`)
     setCopied(token)

@@ -89,6 +89,8 @@ interface Props {
   onRemove: (id: Id) => void
 }
 
+// The one contact-person surface for all three scopes
+// clicking a row swaps this panel's own body instead of navigating away.
 export default function ContactsPanel({
   contacts, scope, scopeId, scopeName, customerId, locations, departments, statuses,
   canLinkBackoffice = false, openId, onOpenChange, trail = [], onAdd, onUpdate, onRemove,

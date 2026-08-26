@@ -14,6 +14,9 @@ import { buildOpportunityAdviceInsights } from './opportunityAiInsights'
 import type { Opportunity } from '@/types/opportunity'
 import type { LookupOption } from '@/types/common'
 
+// Always-visible Koios block for the opportunity drawer (see file docblock
+// above): the table-identical live advice first, then derived default rows so
+// the block never renders empty.
 export default function OpportunityKoiosBlock({ opportunity, stages = [] }: {
   opportunity: Opportunity
   // The tenant's stage lookup (won/lost flags) — the same list the page hands the table.

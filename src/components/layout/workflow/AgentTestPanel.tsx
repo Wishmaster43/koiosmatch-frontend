@@ -29,6 +29,8 @@ function fmtMs(ms: number) {
   return ms >= 1000 ? `${(ms / 1000).toFixed(1)}s` : `${ms}ms`
 }
 
+// Chat UI that POSTs the agent's own inline config (instructions, not a persona) so
+// a recruiter can try it live before saving; see the module doc comment above for why.
 export default function AgentTestPanel({ config }: {
   config?: Record<string, unknown>
 }) {
@@ -48,6 +50,8 @@ export default function AgentTestPanel({ config }: {
   const updateVariable = (i: number, field: 'key' | 'value', val: string) =>
     setVariables(v => v.map((r, j) => j === i ? { ...r, [field]: val } : r))
 
+  // Send the typed message, the conversation so far, and any test variables to the
+  // test endpoint, then append the agent's reply with its token/latency stats.
   const sendMessage = async () => {
     if (!input.trim() || loading) return
     const userMsg: Message = { role: 'user', content: input.trim() }

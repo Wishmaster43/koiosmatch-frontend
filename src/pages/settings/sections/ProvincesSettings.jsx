@@ -23,6 +23,8 @@ import Button from '@/components/ui/Button'
 import SaveButton from '@/components/ui/SaveButton'
 import { PageTitle } from '@/components/ui/typography'
 
+// Bespoke per-country province lookup editor (see file doc for why it isn't
+// the shared StatusListEditor): country picker + drag-reorderable, CRUD list.
 export default function ProvincesSettings() {
   const { t, i18n } = useTranslation('settings')
   const { confirm, dialog } = useConfirm()
@@ -44,6 +46,7 @@ export default function ProvincesSettings() {
   // when the country switches (or the component unmounts) before it lands (§9).
   // `reloadKey` lets the retry button re-run the same effect without duplicating it.
   const [reloadKey, setReloadKey] = useState(0)
+  // Load the current country's provinces (see the comment above for the guard/retry contract).
   useEffect(() => {
     let alive = true
     setLoading(true)

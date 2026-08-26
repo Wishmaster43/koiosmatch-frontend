@@ -21,6 +21,7 @@ const AI_PACKAGES = ['reporting_sm_ai', 'reporting_hf_ai', 'reporting_sm_hf_ai',
 // Loosely-typed SM candidate row (mirrors external data).
 type Rec = Record<string, unknown>
 
+// Shiftmanager report dashboard: KPI cards, activity buckets and drill-down popups, gated on the tenant's AI/workflow package.
 export default function ShiftmanagerDashboard() {
   const { t } = useTranslation('shiftmanager')
   const { candidates_per_page, new_candidates_target: target } = useKpiSettings()
@@ -84,6 +85,7 @@ export default function ShiftmanagerDashboard() {
   // The Activiteit card opens the drill with a tab per bucket (Danny: "kunnen switchen"),
   // starting on the biggest bucket.
   const activityTabs = activityBuckets.map(b => ({ key: b.key, label: b.label, title: b.title, candidates: b.list as unknown as ReportCandidate[] }))
+  // Open the drill-down defaulted to whichever activity bucket currently has the most candidates.
   const openActivityDrill = () => {
     const biggest = [...activityBuckets].sort((a, b) => b.list.length - a.list.length)[0]
     setDrill({ mode: 'nieuw', title: '', candidates: [], tabs: activityTabs, initialTab: biggest?.key })

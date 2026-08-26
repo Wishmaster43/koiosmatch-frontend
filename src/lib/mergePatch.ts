@@ -20,6 +20,7 @@
 const isPlainObject = (v: unknown): v is Record<string, unknown> =>
   typeof v === 'object' && v !== null && !Array.isArray(v) && !(v instanceof Date)
 
+// Deep-merge entry point: nested plain objects merge key-by-key, while arrays and an explicit null always replace/clear wholesale (see file header rules).
 export function mergePatch<T extends Record<string, unknown>>(base: T, patch: Record<string, unknown>): T {
   const out: Record<string, unknown> = { ...base }
   for (const key of Object.keys(patch)) {

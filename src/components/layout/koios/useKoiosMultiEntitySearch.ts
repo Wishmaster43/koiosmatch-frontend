@@ -34,6 +34,7 @@ export interface KoiosMultiEntitySearchResult {
   retry: () => void
 }
 
+// Fan out one search request per visible category so an unscoped '@' query searches every entity at once.
 export function useKoiosMultiEntitySearch(categoryIds: string[], query: string): KoiosMultiEntitySearchResult {
   const [state, setState] = useState<Record<string, KoiosCategoryResult>>({})
   const [retryTick, setRetryTick] = useState(0)
@@ -41,6 +42,7 @@ export function useKoiosMultiEntitySearch(categoryIds: string[], query: string):
   // actually changes, not on every render's fresh array literal from the caller.
   const idsKey = categoryIds.join(',')
 
+  // Debounce the fan-out fetch; only mark groups loading once the timer fires so fast typing doesn't flash a skeleton every keystroke.
   useEffect(() => {
     const q = query.trim()
     if (q.length < MIN_QUERY_LENGTH || categoryIds.length === 0) { setState({}); return }
@@ -67,6 +69,7 @@ export function useKoiosMultiEntitySearch(categoryIds: string[], query: string):
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [idsKey, query, retryTick])
 
+  // Bump the retry tick to re-fire the same category set/query, e.g. after a fetch error.
   const retry = useCallback(() => setRetryTick((t) => t + 1), [])
   return { groups: state, retry }
 }

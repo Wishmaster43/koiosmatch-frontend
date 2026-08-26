@@ -33,6 +33,8 @@ interface CustomerBusinessCardsProps {
   onBillingEmailBlur?: () => void
 }
 
+// The right-column trio of secondary cards (see file docblock above) — purely
+// presentational, every value/callback comes from the parent's own form state.
 export default function CustomerBusinessCards({
   form, set, userOptions, billingEmailError, billingEmailMessage, onBillingEmailBlur,
 }: CustomerBusinessCardsProps) {

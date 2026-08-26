@@ -26,6 +26,7 @@ export interface CvDocument {
 
 const isCv = (type?: string) => (type ?? '').trim().toLowerCase() === 'cv'
 
+// See the file's top doc above for the data-minimal endpoint this reads; results are already server-ordered newest-first.
 export function useCandidateCvDocument(candidateId: Id | null | undefined) {
   const { data, isLoading, isError } = useQuery({
     queryKey: ['candidates', candidateId, 'documents', 'cv'],

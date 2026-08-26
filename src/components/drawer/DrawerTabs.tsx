@@ -9,6 +9,7 @@ import { useRovingTabs } from '@/hooks/useRovingTabs'
 
 export interface DrawerTabItem { id: string; label: ReactNode; badge?: string | number }
 
+// The tab strip itself: renders each tab as a roving-tabindex button, active state driven entirely by the caller.
 export default function DrawerTabs({ tabs = [], active, onChange }: {
   tabs?: DrawerTabItem[]
   active?: string

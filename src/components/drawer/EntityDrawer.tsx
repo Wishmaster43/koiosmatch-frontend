@@ -33,6 +33,7 @@ interface EntityDrawerProps {
   initialTab?: string
 }
 
+// Generic panel shell: sizing, header, tab bar and scroll/footer — see the module doc above for what's config vs. owned here.
 export default function EntityDrawer({
   entity, header, tabs = [], footer,
   expanded, onToggleExpand,
@@ -53,6 +54,7 @@ export default function EntityDrawer({
 
   // Auto-expand for flagged tabs; restore when leaving.
   const autoExpandedRef = useRef(false)
+  // An effect (not derived state) because it must fire the SIDE EFFECT (onToggleExpand) exactly once per tab switch, not recompute a value every render.
   useEffect(() => {
     if (active?.autoExpand && !expanded) { autoExpandedRef.current = true; onToggleExpand?.() }
     else if (autoExpandedRef.current && expanded && !active?.autoExpand) { autoExpandedRef.current = false; onToggleExpand?.() }
@@ -73,6 +75,7 @@ export default function EntityDrawer({
   // listener from ever firing. Verified against both useFocusTrap.ts and
   // SelectMenu.tsx before writing this, per the ordering they already established.
   const rootRef = useRef<HTMLDivElement>(null)
+  // Escape closes the drawer via the header's own close button (see the SWEEP-ESC note above) rather than owning a second close path here.
   const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
     if (e.key !== 'Escape') return
     rootRef.current?.querySelector<HTMLButtonElement>('[data-drawer-close]')?.click()

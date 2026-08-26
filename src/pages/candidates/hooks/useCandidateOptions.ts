@@ -26,6 +26,8 @@ interface UseCandidateOptionsParams {
   genders: LookupOption[]
 }
 
+// Single entry point for CandidatesPage: bundles every filter option list, donut
+// dataset and attention/intake/conversation count behind one hook so the page stays a thin consumer.
 export function useCandidateOptions({ stats, candidates, locations, statuses, funnelTypes, candidateTypes, genders, phases }: UseCandidateOptionsParams) {
   const { t } = useTranslation('candidates')
   // LOOKUP-I18N-1: the seeded status/funnel label renders in the user's language;
@@ -52,11 +54,13 @@ export function useCandidateOptions({ stats, candidates, locations, statuses, fu
   // phases/t in deps: the Leads-bucket label/colour must refresh once the phase
   // lookup arrives after stats (it read stale otherwise — exhaustive-deps payoff).
   , [stats, candidates, statuses, phases, t])
+  // Funnel-stage options: same stats-first, page-count-fallback pattern as statusOptions above.
   const funnelOptions = useMemo(() =>
     stats?.by_funnel
       ? stats.by_funnel.map(o => { const v = o.value ?? o.funnel_type; return { value: v, label: o.label ?? metaOf(funnelTypes, v)?.label ?? v, color: o.color, count: o.count } })
       : funnelTypes.map(f => ({ value: f.value, label: f.label, color: f.color, count: candidates.filter(c => c.stage === f.value).length })).filter(o => o.count > 0)
   , [stats, candidates, funnelTypes])
+  // Contract-form (candidate-type) option counts; no stats.by_* equivalent exists for this axis, so always page-derived.
   const typeOptions = useMemo(() =>
     candidateTypes.map(ct => ({ value: ct.value, label: ct.label, color: ct.color, count: candidates.filter(c => (c.candidateTypes ?? []).includes(ct.value)).length })).filter(o => o.count > 0)
   , [candidates, candidateTypes])
@@ -88,12 +92,15 @@ export function useCandidateOptions({ stats, candidates, locations, statuses, fu
   // LOOKUP-I18N-1: `name` (display) runs through seedLabel; `filterValue` stays the
   // raw lookup value so a donut click still filters on it, never the translated text.
   const colorFor = (list: LookupOption[], v: unknown) => list.find(x => x.value === v)?.color
+  // Status donut rows: translated display name via seedLabel, but filterValue stays the raw lookup value.
   const statusData = useMemo(() =>
     statusOptions.map(o => ({ name: seedLabel('statuses', { value: o.value, label: o.label }), value: o.count, filterValue: o.value, color: o.color ?? colorFor(statuses, o.value) }))
   , [statusOptions, statuses, seedLabel])
+  // Funnel donut rows: same translated-name/raw-filterValue split as statusData above.
   const funnelData = useMemo(() =>
     funnelOptions.map(o => ({ name: seedLabel('funnelTypes', { value: o.value, label: o.label }), value: o.count, filterValue: o.value, color: o.color ?? colorFor(funnelTypes, o.value) }))
   , [funnelOptions, funnelTypes, seedLabel])
+  // Per-recruiter donut rows; owner names are already user-entered, so no seedLabel translation needed.
   const rcData = useMemo(() =>
     ownerOptions.map(o => ({ name: o.label, value: o.count, filterValue: o.value }))
   , [ownerOptions])
@@ -106,7 +113,7 @@ export function useCandidateOptions({ stats, candidates, locations, statuses, fu
   // "No follow-up planned": server-wide total (C-13; STATS-SCOPE-1 scope).
   // Deliberately has NO page-local fallback — see noFollowupUncomputable: the rule
   // needs appointments and open tasks, which a list row does not carry, so a
-  // fallback here would count a different set of people than the list it filters.
+  // fallback here would count a different set of people than the list it filters
   // null renders as a dash instead of a number that quietly means something else.
   const noFollowupCount = stats?.attention?.no_followup_planned ?? noFollowupUncomputable()
   // Intake stages are flag-driven (§3B: requires_appointment), never a hardcoded value key.

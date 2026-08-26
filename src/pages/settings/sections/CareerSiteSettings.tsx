@@ -20,6 +20,8 @@ import { SettingRow, Toggle } from '../components/SettingsKit'
 import PublicUrlsCard from './careerSite/PublicUrlsCard'
 import { PageTitle } from '@/components/ui/typography'
 
+// Career-site on/off toggle plus the public-URLs card (see file docblock above);
+// the switch is a real control since the backend middleware enforces it live.
 export default function CareerSiteSettings() {
   const { t } = useTranslation('settings')
   const values = useAllSettings()

@@ -50,6 +50,8 @@ const toApi = (p: Partial<DepartmentPayload>) => ({
  */
 export const DEPARTMENTS_CHANGED_EVENT = 'km:departments-changed'
 
+// Owns the customer-wide department list plus its optimistic add/update/remove,
+// shared by the top-level tab and the per-location nested section (see file doc).
 export function useCustomerDepartments(customerId: Id | undefined) {
   const { t } = useTranslation('customers')
   const [departments, setDepartments] = useState<Department[]>([])
@@ -135,6 +137,8 @@ export async function archiveDepartment(customerId: Id, id: Id): Promise<void> {
   await api.post(`/customers/${customerId}/departments/${id}/archive`)
   window.dispatchEvent(new CustomEvent(DEPARTMENTS_CHANGED_EVENT))
 }
+// Bring a soft-deleted department back and broadcast the change event so every
+// open department list (top-level tab + location section) refetches.
 export async function restoreDepartment(customerId: Id, id: Id): Promise<Department> {
   const res = await api.post(`/customers/${customerId}/departments/${id}/restore`)
   window.dispatchEvent(new CustomEvent(DEPARTMENTS_CHANGED_EVENT))
@@ -151,6 +155,8 @@ export function useArchivedCustomerDepartments(customerId: Id | undefined, activ
   const [departments, setDepartments] = useState<Department[]>([])
   const [loading, setLoading] = useState(false)
 
+  // Fetch only the soft-deleted departments; a no-op with an empty result when
+  // the archived view isn't active, so this hook stays inert until toggled on.
   const load = useCallback((signal?: AbortSignal) => {
     if (!active || !customerId) { setDepartments([]); return }
     setLoading(true)
@@ -162,8 +168,10 @@ export function useArchivedCustomerDepartments(customerId: Id | undefined, activ
       .catch(() => { /* the toggle simply shows nothing rather than crashing (§3) */ })
       .finally(() => { if (!signal?.aborted) setLoading(false) })
   }, [customerId, active])
+  // Load once (and on customerId/active change), aborting any in-flight request on cleanup.
   useEffect(() => { const ctrl = new AbortController(); load(ctrl.signal); return () => ctrl.abort() }, [load])
 
+  // Refetch whenever another part of the app (archive/restore, bulk import) changes departments.
   useEffect(() => {
     const ctrl = new AbortController()
     const onChanged = () => load(ctrl.signal)

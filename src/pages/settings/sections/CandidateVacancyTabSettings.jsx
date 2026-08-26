@@ -36,6 +36,7 @@ export default function CandidateVacancyTabSettings() {
   )
 }
 
+// The actual editor body; needs its own VacancyLookupsProvider since that context is normally only mounted around VacanciesPage (see wrapper above).
 function CandidateVacancyTabSettingsInner() {
   const { t } = useTranslation('settings')
   const { phases, statuses, candidateTypes } = useLookups()

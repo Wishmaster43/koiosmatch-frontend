@@ -112,6 +112,7 @@ function useBrowserPush() {
     return () => { alive = false }
   }, [supported])
 
+  // Optimistically flip the browser push subscription, reverting on failure.
   const toggle = async (next: boolean) => {
     setBusy(true)
     const prev = subscribed
@@ -152,6 +153,7 @@ function useSoundSetting() {
   return { enabled, toggle: setEnabled }
 }
 
+// Per-user notification preferences: per-context in-app/email toggles, browser push subscription and the sound setting.
 export default function MyNotificationsSettings() {
   const { t } = useTranslation('settings')
   const { contexts, loading, error, setContext } = useMyNotifications()

@@ -22,6 +22,8 @@ interface MatchApprovalBadgeProps {
   approvalMode?: string
 }
 
+// Read-only approval-status chip; hidden when a bare "approved" would be a
+// constant rather than real information (see the honesty-gate comment below).
 export default function MatchApprovalBadge({ status, approvalMode }: MatchApprovalBadgeProps) {
   const { t } = useTranslation('matches')
   if (!status) return null

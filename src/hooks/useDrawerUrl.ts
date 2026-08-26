@@ -141,6 +141,7 @@ export function useDrawerUrl({ selectedId, openById, close, intent, tab, setTab 
   // Refs must not be written during render (react-hooks/refs) — kept current via
   // its own effect below so the popstate handler can read the latest value.
   const selectedIdRef = useRef(selectedId)
+  // Keep the ref current outside render (see the comment above) for the popstate handler.
   useEffect(() => { selectedIdRef.current = selectedId }, [selectedId])
   const tabRef = useRef(tab)
   useEffect(() => { tabRef.current = tab }, [tab])
@@ -179,6 +180,8 @@ export function useDrawerUrl({ selectedId, openById, close, intent, tab, setTab 
   // set (source-page restore). Tab is read/applied alongside id, but a tab-only
   // URL difference (id already correct) still calls `setTab` on its own.
   useEffect(() => {
+    // Read the URL's open/tab params and, if they actually differ from what this
+    // hook last agreed on, drive the page's own open/close/tab state to match.
     const sync = () => {
       const urlId = readOpenId()
       const urlTab = readTab()

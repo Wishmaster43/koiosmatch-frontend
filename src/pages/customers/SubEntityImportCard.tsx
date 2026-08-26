@@ -108,6 +108,9 @@ const ghostBtn = {
   display: 'inline-flex', alignItems: 'center', gap: 6,
 } as const
 
+// Renders the compact select/download/drop step, then the mandatory dry-run
+// preview, with the parent-mismatch confirm gating the final import (see the
+// file header): the wizard's own step drives which of those three shows.
 export default function SubEntityImportCard({ entity, customerName, wizard, canView, canImport }: SubEntityImportCardProps) {
   const { t } = useTranslation(['customers', 'settings'])
   const { confirm, dialog } = useConfirm()

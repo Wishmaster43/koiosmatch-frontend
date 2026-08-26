@@ -34,6 +34,8 @@ const ENTITY_PAGES: Partial<Record<PopoutEntity, ComponentType<{ id: string | un
 // Type guard: narrows the raw `:entity` URL param to a known PopoutEntity.
 const isKnownEntity = (v: string | undefined): v is PopoutEntity => !!v && v in ENTITY_PAGES
 
+// Route shell for a notes popout: resolves the `:entity` URL param to its
+// component via ENTITY_PAGES above, or shows an honest not-found state.
 export default function NotesPopoutPage() {
   const { entity, id } = useParams<{ entity: string; id: string }>()
   const { t } = useTranslation('common')

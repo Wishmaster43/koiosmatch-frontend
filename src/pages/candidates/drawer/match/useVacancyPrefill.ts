@@ -74,6 +74,8 @@ interface RawVacancyDetail {
   cao?: string | null
 }
 
+// Fetches the picked vacancy's detail and normalises it to the fields worth
+// proposing onto the match form (editable proposals, never a lock — see file doc).
 export function useVacancyPrefill(vacancyId: string): VacancyPrefillDetail | null {
   const [detail, setDetail] = useState<VacancyPrefillDetail | null>(null)
 

@@ -26,6 +26,8 @@ const EMPTY_ROWS: ShiftMonthRow[] = []
 // unregister effect loops forever ("Maximum update depth exceeded").
 const EMPTY_FILTER_OPTIONS: ShiftFilterOptions = { job_types: [], locations: [] }
 
+// Loads shift filter options + per-month rows (React Query, cached/kept-previous)
+// and derives the chart data, bar descriptors and hour KPIs from the UI filter state.
 export function useShiftsChartData({
   selectedYears, selectedMonths, period, visible,
   selectedJobTypes, selectedCustomers, selectedLocations,
@@ -150,6 +152,7 @@ export function useShiftsChartData({
     })
   }, [byYearMonth, selectedYears, selectedMonths, period, locale])
 
+  // Only the series toggled visible feed the bars/table below.
   const activeSeries = useMemo(() => SERIES.filter((s) => visible.includes(s.key)), [visible])
   const multiYear    = selectedYears.length > 1
 

@@ -57,6 +57,7 @@ type Axis = 'campaign' | 'channel' | 'status' | 'outcome'
 // colour, so donuts fall back to the house series.
 type AxisSeg = { value: string; label: string; count: number }
 
+// See the file's top doc above for the chart-mix rule and the six-way drill contract this report renders against.
 export default function OutreachReport({ period, filters, compare = COMPARE_OFF }: { period: ReportPeriod; filters?: ReportFilterState; compare?: ReportCompareMode }) {
   const { t } = useTranslation('analytics')
   const { formatDate } = useDateFormat()

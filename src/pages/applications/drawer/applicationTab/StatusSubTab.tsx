@@ -17,6 +17,7 @@ interface StatusSubTabProps {
   onNavigateTab?: (id: string) => void
 }
 
+// Read-only outcome + at-a-glance strip (rejection summary, phase/appointment/interview); the match-score breakdown lives in its own sibling section (see file header).
 export default function StatusSubTab({ application: a, onNavigateTab }: StatusSubTabProps) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>

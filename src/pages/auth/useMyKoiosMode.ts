@@ -27,6 +27,7 @@ function normalize(raw: unknown): MyKoiosModeData {
   return { mode: r.mode === 'auto' ? 'auto' : 'wizard', auto_messages: Boolean(r.auto_messages) }
 }
 
+// Loads and updates the signed-in user's own Koios mode (wizard/auto) + auto-messages flag, starting from the safe DEFAULT_MODE above.
 export function useMyKoiosMode() {
   const { t } = useTranslation('auth')
   const [data, setData] = useState<MyKoiosModeData>(DEFAULT_MODE)

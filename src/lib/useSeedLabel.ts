@@ -12,6 +12,7 @@ import { useTranslation } from 'react-i18next'
 import { translateSeedLabel } from './lookupSeedI18n'
 import type { SeedTranslatable } from './lookupSeedI18n'
 
+// Stable label-translator callback for records that embed a lookup label directly, so a column config depending on it never rebuilds every render (see file header).
 export function useSeedLabel() {
   const { t } = useTranslation('common')
   return useCallback(

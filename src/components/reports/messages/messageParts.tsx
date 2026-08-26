@@ -55,6 +55,7 @@ export function ChannelBadge({ channel }: { channel?: string }) {
   )
 }
 
+// Coloured status pill with an icon; an unrecognised/missing status falls back to a muted neutral look rather than rendering nothing.
 export function StatusBadge({ status }: { status?: string }) {
   const { t } = useTranslation('reports')
   const key = status?.toLowerCase()

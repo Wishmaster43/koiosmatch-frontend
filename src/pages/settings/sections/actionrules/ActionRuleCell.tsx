@@ -26,6 +26,8 @@ interface ActionRuleCellProps {
   onSelectDetail: () => void
 }
 
+// One action×condition cell: a cycling allow/warn/block chip, or a read-only
+// locked chip for the hard AXIS-MATRIX rules the tenant may never loosen.
 export default function ActionRuleCell({
   effect, locked, overridden, actionLabel, conditionLabel, selected, onCycle, onSelectDetail,
 }: ActionRuleCellProps) {

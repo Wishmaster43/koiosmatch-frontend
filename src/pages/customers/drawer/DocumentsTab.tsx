@@ -94,6 +94,7 @@ interface DocumentsTabProps {
   docTypeScope?: string
 }
 
+// Customer document manager: list/upload/rename/delete, type filter, and multi-select download; the level (customer/location/department) is driven entirely by props.
 export default function DocumentsTab({ customerId, locations = [], departments = [], listUrl, lockedLevelFields, docTypeScope = 'customer' }: DocumentsTabProps) {
   const { t } = useTranslation('customers')
   const { formatDate } = useDateFormat()
@@ -144,6 +145,7 @@ export default function DocumentsTab({ customerId, locations = [], departments =
       return next
     })
   }
+  // Flips one row's selection for the bulk-download set.
   const toggleSelectedRow = (key: string) => {
     setSelected(prev => { const next = new Set(prev); if (next.has(key)) next.delete(key); else next.add(key); return next })
   }

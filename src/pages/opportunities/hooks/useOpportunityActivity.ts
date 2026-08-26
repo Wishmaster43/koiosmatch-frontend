@@ -20,11 +20,13 @@ export interface OpportunityActivityEvent {
   [k: string]: unknown
 }
 
+// Fetches one opportunity's audit trail; a 404 (read endpoint not built yet for this tenant) degrades to a calm empty list, not an error.
 export function useOpportunityActivity(id?: Id): { items: OpportunityActivityEvent[]; loading: boolean; error: boolean } {
   const [items,   setItems]   = useState<OpportunityActivityEvent[]>([])
   const [loading, setLoading] = useState(false)
   const [error,   setError]   = useState(false)
 
+  // Loads on mount/id change, aborting the in-flight request on unmount/id change so a stale response never lands.
   useEffect(() => {
     if (!id) { setItems([]); return }
     const ctrl = new AbortController()

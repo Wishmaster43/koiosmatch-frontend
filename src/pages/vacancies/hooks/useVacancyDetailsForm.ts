@@ -106,6 +106,7 @@ function useEditableForm<K extends string>(seed: () => Record<K, string>) {
   return { editing, setEditing, form, setF, reset }
 }
 
+// Composes the four independent editable sections (General/Location/Requirements/Conditions) for the details tab, each with its own edit/save/cancel so one pencil never submits another section draft.
 export function useVacancyDetailsForm(v: VacancyDetail, onUpdate?: UpdateFn) {
   const { candidateTypes, typeMeta } = useLookups() as unknown as {
     candidateTypes: Array<{ value: string; label: string; color?: string }>
@@ -164,6 +165,7 @@ export function useVacancyDetailsForm(v: VacancyDetail, onUpdate?: UpdateFn) {
   const toggleType = (val: string) => setTypes(p => p.includes(val) ? p.filter(x => x !== val) : [...p, val])
   // Customer options load only while the Algemeen pencil is open (capped page, React Query).
   const customerOptions = useCustomerOptions(generalForm.editing)
+  // Persists the Algemeen section patch (client, cascade, contract types, category/industry, dates) and commits the cascade as the new saved baseline.
   const saveGeneral = () => {
     onUpdate?.(v.id, {
       // Client lives in Algemeen (header stays calm) — send the name too for optimistic UI.
@@ -178,6 +180,7 @@ export function useVacancyDetailsForm(v: VacancyDetail, onUpdate?: UpdateFn) {
     setSavedCascade(cascade)
     generalForm.setEditing(false)
   }
+  // Discards the Algemeen draft, restoring client id, contract types and the cascade to their last-saved values.
   const cancelGeneral = () => {
     generalForm.reset(); setClientId(String(v.clientId ?? '')); setTypes(v.contractTypes ?? [])
     setCascade(savedCascade)
@@ -197,10 +200,12 @@ export function useVacancyDetailsForm(v: VacancyDetail, onUpdate?: UpdateFn) {
   // filled province no longer exists in the new list, clear it rather than
   // silently keep a mismatch.
   const { provinces } = useProvinces(locationForm.form.country)
+  // Clears the province the moment the resolved list for the newly picked country no longer contains it, so a stale country's previous province can never linger silently.
   useEffect(() => {
     if (locationForm.form.province && !provinces.includes(locationForm.form.province)) locationForm.setF('province', '')
     // eslint-disable-next-line react-hooks/exhaustive-deps -- only react to the resolved province list changing, not every form edit
   }, [provinces])
+  // Recomposes the one-line address from the structured fields and persists the Location section patch.
   const saveLocation = () => {
     const location = composeAddress(locationForm.form.street, locationForm.form.houseNumber, locationForm.form.houseNumberSuffix, locationForm.form.postalCode, locationForm.form.city)
     onUpdate?.(v.id, {
@@ -227,6 +232,7 @@ export function useVacancyDetailsForm(v: VacancyDetail, onUpdate?: UpdateFn) {
     if (!requirementsForm.form.education && defaultEducation) requirementsForm.setF('education', defaultEducation)
     // eslint-disable-next-line react-hooks/exhaustive-deps -- only react to opening the editor / the lookups resolving, never to the recruiter's own pick
   }, [requirementsForm.editing, defaultSeniority, defaultEducation])
+  // Resolves the picked seniority/education values to their display labels and persists the Requirements section patch.
   const saveRequirements = () => {
     const sen = seniorityLevels.find(s => s.value === requirementsForm.form.seniority)
     const edu = educationLevels.find(e => e.value === requirementsForm.form.education)
@@ -237,6 +243,7 @@ export function useVacancyDetailsForm(v: VacancyDetail, onUpdate?: UpdateFn) {
     })
     requirementsForm.setEditing(false)
   }
+  // Discards the Requirements draft back to its last-saved values.
   const cancelRequirements = () => {
     requirementsForm.reset()
     requirementsForm.setEditing(false)
@@ -248,6 +255,7 @@ export function useVacancyDetailsForm(v: VacancyDetail, onUpdate?: UpdateFn) {
     contractType: v.contractType, cao: v.cao,
   })
   const conditionsForm = useEditableForm(seedConditions)
+  // Builds the display strings for the salary/hours ranges and persists the Conditions section patch alongside the raw min/max values.
   const saveConditions = () => {
     const salary = [conditionsForm.form.salaryMin, conditionsForm.form.salaryMax].filter(Boolean).join(' – ')
     const hours = [conditionsForm.form.hoursMin, conditionsForm.form.hoursMax].filter(Boolean).join(' – ')

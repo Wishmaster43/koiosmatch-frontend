@@ -40,6 +40,7 @@ const CARD = {
   background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10,
 }
 
+// The one settings-section shell: title/subtitle, the shared dirty-aware save button, and loading/error/content states.
 export function SettingsScaffold({ title, subtitle, form, maxWidth, actions, children }) {
   const { t } = useTranslation('settings')
   const dirtyCtx = useContext(SettingsDirtyContext)
@@ -85,6 +86,7 @@ export function SettingsScaffold({ title, subtitle, form, maxWidth, actions, chi
   )
 }
 
+// The white bordered card every settings row/section renders inside.
 export function SettingCard({ children, style }) {
   return <div style={{ ...CARD, padding: '14px 16px', ...style }}>{children}</div>
 }
@@ -94,6 +96,7 @@ export function SettingCardList({ children }) {
   return <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>{children}</div>
 }
 
+// One label+description/control row inside a SettingCard, the standard settings row layout.
 export function SettingRow({ label, description, children }) {
   return (
     <SettingCard style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
@@ -118,6 +121,7 @@ export const Toggle = ToggleUi
 // other field on the platform is 13; this settings kit was the one outlier).
 const inputStyle = fieldInputStyle
 
+// Right-aligned numeric input with an optional unit suffix, for settings that store a plain number.
 export function NumberField({ value, onChange, min = 0, max, unit, width = 80 }) {
   return (
     <>
@@ -129,6 +133,7 @@ export function NumberField({ value, onChange, min = 0, max, unit, width = 80 })
   )
 }
 
+// Plain single-line text input sized for settings rows.
 export function TextField({ value, onChange, placeholder, width = 220 }) {
   return (
     <input value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder}
@@ -136,6 +141,7 @@ export function TextField({ value, onChange, placeholder, width = 220 }) {
   )
 }
 
+// Multi-line text input for short settings values; not rich text since this kit is for config strings, not prose.
 export function TextareaField({ value, onChange, placeholder, minHeight = 220 }) {
   return (
     <textarea value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder}

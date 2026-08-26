@@ -11,6 +11,7 @@ import Button from '@/components/ui/Button'
 import { ac, ContactAvatar } from './contactParts'
 import type { SmContactRow } from '@/types/shiftmanager'
 
+// Read-only Shiftmanager contact detail panel; renders nothing without a contact (see file header).
 export default function ContactDrawer({ contact, onClose }: { contact: SmContactRow | null; onClose: () => void }) {
   const { t } = useTranslation('shiftmanager')
   if (!contact) return null

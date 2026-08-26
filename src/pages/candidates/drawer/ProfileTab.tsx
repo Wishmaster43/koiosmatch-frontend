@@ -33,6 +33,8 @@ type AnyProps = Record<string, unknown>
 const RichTextEditor = RichTextEditorJs as unknown as ComponentType<AnyProps>
 const SafeHtml = SafeHtmlJs as unknown as ComponentType<AnyProps>
 
+// The candidate drawer's Profile tab: three independently-editable field cards
+// plus the profile free-text block (with its own second-screen pop-out).
 export default function ProfileTab({ c, onEditSave, autoEditSignal, onContactMoment }: {
   c: Candidate; onEditSave?: (v: Record<string, unknown>) => void; autoEditSignal?: number
   onContactMoment?: (v: Record<string, unknown>) => void
@@ -70,6 +72,7 @@ export default function ProfileTab({ c, onEditSave, autoEditSignal, onContactMom
   // record value, so text saved from the popped-out window is not overwritten by
   // this drawer's now-stale copy.
   const lastRecordSummary = useRef(c.summary ?? '')
+  // Adopt a record-level summary change only while not mid-edit (see the comment above).
   useEffect(() => {
     const next = c.summary ?? ''
     if (next === lastRecordSummary.current) return

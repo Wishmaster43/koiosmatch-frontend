@@ -46,6 +46,7 @@ const mapDriverLicenses = (res: AxiosResponse): DriverLicenseItem[] | null => {
   return items.length ? items : null
 }
 
+// Cached tenant driver-licence lookup (see the module doc above for why each item carries its own optional icon rather than collapsing to a plain name).
 export function useDriverLicenses() {
   const { t } = useTranslation('common')
   const { data: rawLicenses } = useCachedLookup('/driver-licenses', mapDriverLicenses, DEFAULT_DRIVER_LICENSES)

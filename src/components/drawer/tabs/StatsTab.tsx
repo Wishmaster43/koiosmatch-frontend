@@ -16,6 +16,7 @@ interface Overview { title?: ReactNode; rows?: Array<[ReactNode, ReactNode]> }
 interface ActivityItem { text?: ReactNode; time?: ReactNode }
 interface Activity { title?: ReactNode; items: ActivityItem[]; emptyText?: ReactNode }
 
+// Entity-agnostic Statistics tab: renders whichever of KPI grid / overview card / activity card the caller supplies.
 export default function StatsTab({ kpis = [], kpisTitle, overview, activity }: { kpis?: Kpi[]; kpisTitle?: ReactNode; overview?: Overview; activity?: Activity }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>

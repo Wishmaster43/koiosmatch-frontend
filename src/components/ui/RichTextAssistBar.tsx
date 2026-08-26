@@ -118,7 +118,7 @@ interface RichTextAssistBarProps {
   // set below the editor.
   modes?: RichTextAssistMode[]
   // KOIOS-GENERATE-1: which entity/id to generate a fresh suggestion FROM. Omit
-  // entirely on a field the backend cannot generate for — see the file header.
+  // Entirely on a field the backend cannot generate for.
   generate?: { entity: GenerateEntity; id: string }
 }
 
@@ -132,6 +132,8 @@ const MODES: { mode: RichTextAssistMode; icon: typeof Wand2 }[] = [
 ]
 
 
+// The shared mic + Koios-assist toolbar add-on for every rich-text field (see file
+// docblock above); never auto-applies, always a review-only Adopt/Reject preview.
 export default function RichTextAssistBar({ value, onChange, plainText = false, language, modes = ['improve', 'summarize'], generate }: RichTextAssistBarProps) {
   const { t } = useTranslation('common')
   const { mode, status, result, errorMessage, tone, run, runGenerate, discard } = useRichTextAssist(language)

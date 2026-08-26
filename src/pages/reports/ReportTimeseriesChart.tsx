@@ -13,6 +13,7 @@ import type { ChartDatum } from '@/components/charts/chartTypes'
 
 export interface ReportTimeseriesPoint { date: string; label: string; value: number }
 
+// The one shared timeseries line chart every report renders through; a click hands back the point's raw date key so callers keep their own bucket logic (see file header).
 export default function ReportTimeseriesChart({ series, onPick, unit }: {
   series: ReportTimeseriesPoint[]
   onPick?: (dateKey: string) => void

@@ -7,6 +7,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { listApiKeys } from './apiKeysApi'
 
+// Owns the key list state (see the module doc above) so the container can switch list/detail views without refetching, while mutations keep it in sync.
 export function useApiKeys() {
   const [keys, setKeys]       = useState([])
   const [loading, setLoading] = useState(true)

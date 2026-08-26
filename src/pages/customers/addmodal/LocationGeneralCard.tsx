@@ -30,6 +30,7 @@ interface LocationGeneralCardProps {
   statusOptions: OptionRow[]
 }
 
+// Location name plus a status picker that stays hidden unless the tenant requires status_id (the detail view's title editor already covers it otherwise, see file header).
 export default function LocationGeneralCard({
   name, onNameChange, nameError, showStatusPicker, statusId, onStatusChange, statusOptions,
 }: LocationGeneralCardProps) {

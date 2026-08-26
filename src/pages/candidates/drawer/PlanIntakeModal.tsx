@@ -55,6 +55,8 @@ import Button from '@/components/ui/Button'
 export type { ExistingAppointment } from './planIntake/usePlanIntakeForm'
 export { endTimeOf } from './planIntake/helpers'
 
+// Thin container for the shared appointment modal (see file docblock above) — all
+// state/effects/submit live in usePlanIntakeForm, this only wires it to chrome.
 export default function PlanIntakeModal(props: PlanIntakeFormOptions) {
   const { onClose } = props
   // All state, effects, submit + 422-mapping live in the hook — this component

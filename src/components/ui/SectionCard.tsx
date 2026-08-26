@@ -22,6 +22,7 @@ interface SectionCardProps {
   style?: CSSProperties
 }
 
+// The card shell itself: title/action header row over the bordered surface, or just the surface when there's no title.
 export default function SectionCard({ title, action, children, style }: SectionCardProps) {
   return (
     <div>

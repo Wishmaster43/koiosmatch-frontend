@@ -36,6 +36,7 @@ const ghostBtn = {
   display: 'inline-flex', alignItems: 'center', gap: 6,
 } as const
 
+// Presentational progress/result strip (see the module doc above): renders nothing while idle, only prefills the form, never saves.
 export default function CvUploadCard({ phase, errorKey, fileName, summary, onReset }: CvUploadCardProps) {
   const { t } = useTranslation(['candidates', 'common'])
   const busy = phase === 'uploading' || phase === 'processing'

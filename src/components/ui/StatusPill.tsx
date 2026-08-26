@@ -11,6 +11,7 @@ interface StatusPillProps {
   color?: string | null
 }
 
+// Thin alias over the shared SoftChip (rounded), so every status pill in the app shares one implementation.
 export default function StatusPill({ label, color }: StatusPillProps) {
   return <SoftChip label={label} color={color} round />
 }

@@ -14,6 +14,8 @@ export type NoteDraftEntityType = typeof NOTE_DRAFT_ENTITY_TYPES[number]
 
 const MAX_PAYLOAD = 100000
 
+// Fetch the durable draft for this user × dossier; a corrupt or absent payload
+// resolves to null rather than throwing, so the notes tab always has a clean state to start from.
 export async function getNoteDraft(entityType: NoteDraftEntityType, entityId: string, signal?: AbortSignal): Promise<NoteDraft | null> {
   const res = await api.get<{ data: { payload?: string } | null }>(`/note-drafts/${entityType}/${entityId}`, { signal })
   const payload = (res.data as { data?: { payload?: string } | null })?.data?.payload
@@ -35,6 +37,8 @@ export async function putNoteDraft(entityType: NoteDraftEntityType, entityId: st
   return true
 }
 
+// Remove the durable draft once its note has been sent/discarded, so the next
+// visit to this dossier starts from a clean concept instead of stale text.
 export async function deleteNoteDraft(entityType: NoteDraftEntityType, entityId: string): Promise<void> {
   await api.delete(`/note-drafts/${entityType}/${entityId}`)
 }

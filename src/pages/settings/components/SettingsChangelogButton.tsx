@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next'
 import ChangelogPopover from '@/components/drawer/ChangelogPopover'
 import EntityChangelog from '@/components/drawer/EntityChangelog'
 
+// The one shared changelog affordance for settings screens; see the module doc comment above for why it lives here, not per-section.
 export default function SettingsChangelogButton() {
   const { t } = useTranslation('settings')
   return (

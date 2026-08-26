@@ -11,6 +11,9 @@ import api, { unwrapList } from '@/lib/api'
 import type { MessageRow } from '@/components/drawer/ConversationMessage'
 import type { Id } from '@/types/common'
 
+// Loads one WhatsApp thread's messages plus "load older" pagination (see file
+// docblock above), reversing the server's newest→oldest older-chunk order to
+// prepend it correctly.
 export function useConversationThread(conversationId: Id | null) {
   const [messages, setMessages] = useState<MessageRow[]>([])
   const [loading, setLoading] = useState(true)

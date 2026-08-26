@@ -29,6 +29,7 @@ const KEEP_VISIBLE = 80 // px of the panel that must ALWAYS stay inside the view
 const HANDLE_H = 48 // the header strip's height — it may never leave the bottom edge
 const FALLBACK_W = 400 // assumed width when a stored placement has no measured size
 
+// Shared min/max clamp reused by every drag/resize path below.
 function clampNumber(v: number, min: number, max: number): number {
   return Math.min(Math.max(v, min), max)
 }
@@ -47,10 +48,12 @@ export function clampToViewport(x: number, y: number, w: number | null): { x: nu
   }
 }
 
+// Namespaces the persisted placement so it never collides with unrelated localStorage keys.
 function storageKey(key: string): string {
   return `km-float-${key}`
 }
 
+// Central drag/resize/persist engine shared by every floating panel (see file header for the design rationale).
 export function useDraggablePanel(persistKey?: string, resizable = true) {
   const panelRef = useRef<HTMLDivElement>(null)
   // null = centered via CSS (the pre-drag default every modal has today).
@@ -76,6 +79,7 @@ export function useDraggablePanel(persistKey?: string, resizable = true) {
   // transitions off with it, so a dragged window never lags behind the cursor.
   const [dragging, setDragging] = useState(false)
 
+  // Writes (or clears) the placement to localStorage; failures are swallowed so a full/blocked store never breaks dragging.
   const persist = useCallback((p: PanelPlacement | null) => {
     if (!persistKey) return
     try {
@@ -87,6 +91,7 @@ export function useDraggablePanel(persistKey?: string, resizable = true) {
   // Current placement in a ref so pointermove handlers never see stale state
   // (synced in an effect — writing a ref during render is a lint error).
   const placementRef = useRef(placement)
+  // Keep the ref in sync with state after each render so pointer handlers always read the latest placement, not a stale closure.
   useEffect(() => {
     placementRef.current = placement
   }, [placement])
@@ -120,6 +125,7 @@ export function useDraggablePanel(persistKey?: string, resizable = true) {
     // `w`, an untouched one is measured from the DOM (0 in jsdom → fall back).
     const clampWidth = start.w ?? (rect.width || null)
 
+    // Pointer move while dragging: reapply the initial cursor offset and clamp the result into view.
     const move = (ev: PointerEvent) => {
       const next: PanelPlacement = {
         ...start,
@@ -128,6 +134,7 @@ export function useDraggablePanel(persistKey?: string, resizable = true) {
       placementRef.current = next
       setPlacement(next)
     }
+    // Pointer up ends the drag: detach the listeners, restore text selection, and persist the final placement.
     const up = () => {
       window.removeEventListener('pointermove', move)
       window.removeEventListener('pointerup', up)
@@ -155,6 +162,7 @@ export function useDraggablePanel(persistKey?: string, resizable = true) {
     const restoreSelection = suppressSelection()
     setDragging(true)
 
+    // Pointer move while resizing: grow/shrink from the starting rect, clamped to sane min/viewport-max bounds.
     const move = (ev: PointerEvent) => {
       const next: PanelPlacement = {
         // Resizing pins the panel where it stands (switches from centered to absolute).
@@ -166,6 +174,7 @@ export function useDraggablePanel(persistKey?: string, resizable = true) {
       placementRef.current = next
       setPlacement(next)
     }
+    // Pointer up ends the resize: detach the listeners, restore selection, and persist the new size.
     const up = () => {
       window.removeEventListener('pointermove', move)
       window.removeEventListener('pointerup', up)
@@ -186,6 +195,7 @@ export function useDraggablePanel(persistKey?: string, resizable = true) {
 
   // A window resize may strand the panel off-view — reclamp it back into reach.
   useEffect(() => {
+    // Reclamp only a panel already pinned by a drag (x/y set); a centered panel needs no adjustment.
     const onWinResize = () => {
       const p = placementRef.current
       // Centered placements (x/y null) have nothing to reclamp — CSS keeps them centered.

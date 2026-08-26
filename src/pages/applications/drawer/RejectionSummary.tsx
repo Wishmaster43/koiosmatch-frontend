@@ -44,6 +44,8 @@ const pencilBtn = {
   borderRadius: 6, cursor: 'pointer', background: 'none', border: 'none', color: 'var(--color-danger-text)', flexShrink: 0,
 } as const
 
+// The rejected-outcome card, with a permission-gated
+// pencil that reopens RejectionModal in correction mode.
 export default function RejectionSummary({ application: a }: { application: ApplicationDetail }) {
   const { t } = useTranslation(['applications', 'common'])
   const { formatDate } = useDateFormat()

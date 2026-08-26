@@ -25,6 +25,9 @@ import { featureNamesOf, registrationYearOf } from './data/smCandidateFields'
 import { useRightPanel } from '@/context/RightPanelContext'
 import type { ReportCandidate } from '@/types/reports'
 
+// Shiftmanager candidates list restyled onto the native candidate-page blueprint:
+// server-wide KPI counts, a client-refined table over the current page, and the
+// rich drill-down drawers (per-KPI subset + per-row detail).
 export default function CandidatesDetailPage() {
   const { t } = useTranslation('reports')
   const { candidates_per_page } = useKpiSettings()
@@ -77,6 +80,8 @@ export default function CandidatesDetailPage() {
   // Filter options come from the FULL set so an axis never hides its own values.
   const toggle = (setter: (fn: (prev: Array<string | number>) => Array<string | number>) => void) => (value: string | number) =>
     setter(prev => (prev.includes(value) ? prev.filter(v => v !== value) : [...prev, value]))
+  // Build the right-panel filter groups (year/status/position/features), option
+  // lists sourced from the FULL candidate set so an axis never hides its own values.
   const filterGroups = useMemo(() => {
     const src = allCandidates.length ? allCandidates : candidates
     const years = [...new Set(src.map(registrationYearOf).filter((y): y is number => y != null))].sort((a, b) => b - a)
@@ -92,6 +97,8 @@ export default function CandidatesDetailPage() {
       { key: 'kenmerken', label: t('candidates.filters.features'), options: features.map(k => ({ value: k, label: k })), selected: selectedFeatures, onToggle: toggle(setSelectedFeatures) },
     ]
   }, [t, allCandidates, candidates, selectedYears, statusFilter, selectedPositions, selectedFeatures])
+  // Publish the current filter groups into the shared right panel; unregister on
+  // unmount/change so a stale group set never lingers there.
   useEffect(() => {
     registerFilters('candidates-table', filterGroups)
     return () => unregisterFilters('candidates-table')

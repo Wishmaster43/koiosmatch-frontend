@@ -109,6 +109,7 @@ function BoardColumnView({ column, items, onDragStart, onDrop, onDragOver, onSel
   )
 }
 
+// Column board with HTML5 drag-and-drop between status columns, plus edge-autoscroll while dragging (native DnD never scrolls the container itself).
 export default function TasksBoard({ rows, columns, onMove, onSelect, selectedId }: {
   rows: Task[]; columns: BoardColumn[]; onMove: (id: Id, statusKey: string | number) => void; onSelect: (t: Task) => void; selectedId?: Id | null
 }) {
@@ -120,6 +121,7 @@ export default function TasksBoard({ rows, columns, onMove, onSelect, selectedId
 
   const handleDragStart = (e: DragEvent<HTMLDivElement>, id: Id | undefined) => { dragId.current = id ?? null; e.dataTransfer.effectAllowed = 'move' }
   const handleDragOver = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move' }
+  // Drop moves the dragged task into the target column; onMove alone both re-groups locally and persists, so no separate PATCH is fired here.
   const handleDrop = (e: DragEvent<HTMLDivElement>, statusKey: string | number) => {
     e.preventDefault()
     if (dragId.current != null) {

@@ -60,6 +60,7 @@ async function downloadInvoicePdf(id: string, number: string | null) {
   URL.revokeObjectURL(url)
 }
 
+// Read-only list of the tenant's own billing invoices, each downloadable as a PDF.
 export default function TenantInvoicesSettings() {
   const { t } = useTranslation('settings')
   const { formatDate } = useDateFormat()
@@ -84,6 +85,7 @@ export default function TenantInvoicesSettings() {
     return () => ctrl.abort()
   }, [])
 
+  // Downloads one invoice's PDF, tracking its own id so only that row shows a busy state; failures surface the server's own reason.
   const handleDownload = async (invoice: TenantInvoice) => {
     setDownloadingId(invoice.id)
     try {

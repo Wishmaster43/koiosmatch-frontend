@@ -24,6 +24,8 @@ interface OpportunityDealStageCardProps {
   endDate: string; onEndDateChange: (v: string) => void
 }
 
+// The "Waarde & fase" card of AddOpportunityModal (see file docblock above) —
+// purely presentational, every value/handler comes from the parent's form state.
 export default function OpportunityDealStageCard({
   t, stageId, onStageChange, stageOptions,
   serviceTypeId, onServiceTypeChange, serviceOptions,

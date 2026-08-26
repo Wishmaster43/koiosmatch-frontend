@@ -17,6 +17,7 @@ interface ModalFooterProps {
   statusLabel: string
 }
 
+// Cancel/Create footer; the Create label names the picked phase when one exists, otherwise falls back to a generic wording.
 export default function ModalFooter({ onClose, onSubmit, canSubmit, saving, hasType, statusLabel }: ModalFooterProps) {
   const { t } = useTranslation(['candidates', 'common'])
   return (

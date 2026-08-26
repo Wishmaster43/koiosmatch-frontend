@@ -31,12 +31,16 @@ export function seedOutputsFromSteps(nds: FlowNode[], steps: RunStep[]): FlowNod
   })
 }
 
+// Feeds a finished run's step outputs back onto the canvas nodes, so the editor shows what
+// each step actually produced instead of an empty output panel after the run ends.
 export function useOutputSeeding(liveRun: RunRow | null, setNodes: (updater: (nds: FlowNode[]) => FlowNode[]) => void) {
   const { t } = useTranslation('workflows')
   // Guards this effect so a terminal run is only processed once (react-query stops
   // polling at that point, but this stays defensive against re-renders).
   const seededRunIdRef = useRef<string | number | null>(null)
 
+  // Once the run reaches a terminal status, seeds node outputs and reports a
+  // failed step exactly once, guarded by seededRunIdRef above.
   useEffect(() => {
     if (!liveRun || liveRun.id == null || !liveRun.status || !TERMINAL.has(liveRun.status)) return
     if (seededRunIdRef.current === liveRun.id) return

@@ -44,6 +44,8 @@ import type { Id } from '@/types/common'
 
 const rowStyle: CSSProperties = { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, padding: '8px 10px', borderRadius: 8, cursor: 'pointer' }
 
+// Thin container for the live scored candidate search (see file docblock above):
+// all data comes from useCandidateSearch, rendered through the shared GeoSearchShell.
 export default function CandidateSearchTab({ vacancy }: { vacancy: VacancyDetail }) {
   const { t } = useTranslation('vacancies')
   const { formatDate } = useDateFormat()

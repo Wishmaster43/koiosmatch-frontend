@@ -24,6 +24,7 @@ interface Args {
   onUnmarked?: (id: string) => void
 }
 
+// See the file's top doc above for the shared mark/unmark trash flow this hook wires up for one entity list.
 export function useTrashFlow({ entityPath, onMarked, onUnmarked }: Args) {
   const { t } = useTranslation('common')
   const [target, setTarget] = useState<TrashTarget | null>(null)

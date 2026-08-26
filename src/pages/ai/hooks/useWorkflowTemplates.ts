@@ -36,6 +36,8 @@ export function useWorkflowTemplates(open: boolean) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
 
+  // Refetches on open/category change (see the comment above); alive-guarded so a
+  // closed panel or a fast category switch never lets a stale response land.
   useEffect(() => {
     if (!open) return
     let alive = true

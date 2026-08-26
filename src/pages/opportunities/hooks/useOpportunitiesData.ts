@@ -52,7 +52,7 @@ export const OPPORTUNITIES_MAX_PER_PAGE = 500
 const OPPORTUNITIES_MAX_PAGES = 5
 
 // includeArchived (ARCHIVE-1): reveal soft-deleted opportunities alongside the
-// active set (?include_archived=1) — off by default; the page owns the toggle state.
+// active set (?include_archived=1) — off by default; the page owns the toggle state
 // branchIds (VESTIGING-2): explicit branch filter, off (empty) by default.
 // ref (NUMMER-1): an exact reference-number lookup (KA-00042) — OpportunityQuery
 // returns early on `ref`, so pasting a number always finds that one deal. Null =
@@ -141,6 +141,8 @@ export function useOpportunitiesData(includeArchived: boolean = false, branchIds
   // past this session for an archived row — recommend BE add withTrashed() to show().
   const selectedIdRef = useRef<Id | null>(null)
   const closeDrawer = () => { selectedIdRef.current = null; setSelected(null); setDrawerExpanded(false) }
+  // Show the row immediately, then refresh from the detail endpoint (see the block
+  // comment above for the archived-row caveat this refresh silently falls back on).
   const selectOpportunity = (o: Opportunity) => {
     if (selected?.id === o.id) { closeDrawer(); return }
     selectedIdRef.current = o.id ?? null

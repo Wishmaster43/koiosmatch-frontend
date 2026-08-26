@@ -17,6 +17,7 @@ interface Props {
   onChange: (k: ConditionsKey, v: string) => void
 }
 
+// The Voorwaarden card: only the fields the backend actually models, never an invented free-text field.
 export default function ConditionsCard({ salaryMin, salaryMax, salaryPeriod, hoursMin, hoursMax, onChange }: Props) {
   const { t } = useTranslation(['vacancies', 'common'])
   return (

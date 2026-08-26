@@ -36,6 +36,7 @@ const SelectionContext = createContext<SelectionContextValue>({
 // share the one slot.
 export function SelectionProvider({ children }: { children: ReactNode }) {
   const [selection, setSelection] = useState<EntitySelection | null>(null)
+  // Stable context value, so a consumer that only reads it doesn't re-render whenever setSelection's identity would otherwise churn.
   const value = useMemo(() => ({ selection, setSelection }), [selection])
   return <SelectionContext.Provider value={value}>{children}</SelectionContext.Provider>
 }
@@ -52,6 +53,7 @@ export function useSelectionContext(): SelectionContextValue {
 // eslint-disable-next-line react-refresh/only-export-components -- same reason as useSelectionContext above
 export function usePublishSelection(entity: string, ids: Set<Id>, label?: string): void {
   const { setSelection } = useSelectionContext()
+  // Publish this page's selection into the shared slot; clears it both when the Set empties and on unmount/entity switch.
   useEffect(() => {
     setSelection(ids.size > 0 ? { entity, ids: Array.from(ids), label } : null)
     return () => setSelection(null)

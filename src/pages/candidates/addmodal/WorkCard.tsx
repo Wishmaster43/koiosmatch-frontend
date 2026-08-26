@@ -15,6 +15,7 @@ interface WorkCardProps {
   ownerOptions: FieldOption[]
 }
 
+// Pure presentational "Werk" card: function-title combobox + owner picker.
 export default function WorkCard({ form, set, isReq, allowFreeEntry, functions, ownerOptions }: WorkCardProps) {
   const { t } = useTranslation(['candidates', 'common'])
   return (

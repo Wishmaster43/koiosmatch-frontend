@@ -40,6 +40,7 @@ export interface SubEntityStatusTitleRowProps {
   onSave: (id: Id, payload: { statusId: Id | null }) => void
 }
 
+// Shared title-row status badge + inline picker (see the module doc above): editing state is local, only the scoped statusId PATCH leaves this component.
 export default function SubEntityStatusTitleRow({
   id, name, referenceNumber, statusId, statusLabel, statusColor, statusOptions, onSave,
 }: SubEntityStatusTitleRowProps) {

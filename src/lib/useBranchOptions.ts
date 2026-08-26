@@ -26,6 +26,7 @@ export interface BranchOption { value: string; label: string }
 // without a branch" (?branch_id[]=none) — combinable with real ids as a union.
 export const NO_BRANCH_VALUE = 'none'
 
+// Branch filter options narrowed to the signed-in user's own scope; an empty branch_ids means unrestricted, not zero branches (see file header).
 export function useBranchOptions(): BranchOption[] {
   const { t } = useTranslation('common')
   const auth = useAuth()

@@ -40,6 +40,7 @@ interface CustomersBulkBarProps {
   selectedTags?: string[]
 }
 
+// The thin bulk-action assembler for the customers table.
 export default function CustomersBulkBar({
   count, onClear, onSetOwner, onSetStatus, onAddTag, onRemoveTag, onAddNote, onArchive,
   canArchive = false, onGeocode, canGeocode = false, onCoupleBackoffice,

@@ -23,6 +23,7 @@ interface Props {
   statuses: StatusOption[]
 }
 
+// Thin assembler (see the module doc above): builds the ActionMenu config tree from props, mirroring TasksBulkBar/CandidatesBulkBar.
 export default function OutreachBulkBar({ count, onClear, onSetStatus, onArchive, canArchive = false, statuses }: Props) {
   const { t } = useTranslation('outreach')
 

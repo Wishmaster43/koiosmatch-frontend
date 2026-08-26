@@ -11,6 +11,8 @@ import Button from '@/components/ui/Button'
 import { ac, Avatar, StatusBadge } from './departmentParts'
 import type { SmDepartmentRow } from '@/types/shiftmanager'
 
+// Read-only slide-in detail panel for one Shiftmanager department (mirror data,
+// no write route — see the footer comment for why there is no edit action).
 export default function DepartmentDrawer({ dep, onClose }: { dep: SmDepartmentRow | null; onClose: () => void }) {
   const { t } = useTranslation('shiftmanager')
   if (!dep) return null

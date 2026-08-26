@@ -24,6 +24,8 @@ interface FilterTriggerPillProps {
   icon?: ComponentType<{ size?: number }> | null
 }
 
+// The one solid-fill trigger face for a search-surface filter dropdown, always
+// carrying a filter glyph by default so it reads as a filter control at a glance.
 export default function FilterTriggerPill({ label, count, icon: Icon = ListFilter }: FilterTriggerPillProps) {
   return (
     <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, height: 26, padding: '0 10px',

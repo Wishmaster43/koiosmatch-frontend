@@ -25,6 +25,8 @@ type AnyProps = Record<string, unknown>
 // Still-untyped JS UI helper — accept any props at the boundary (mirrors CustomerNotesTab).
 const NotesTab = NotesTabJs as unknown as ComponentType<AnyProps>
 
+// Location/department-scoped notes tab (see file docblock above): every note
+// composed here is pinned to this exact scope id, never a "linked to" choice.
 export default function ScopedNotesTab({ scope, id, customerId }: {
   scope: 'location' | 'department'
   id: Id

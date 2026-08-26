@@ -54,6 +54,7 @@ export interface ZzpAddressValues {
 
 const EMPTY: ZzpAddressValues = { street: '', houseNumber: '', houseNumberSuffix: '', postalCode: '', city: '', province: '', country: '' }
 
+// ZZP business-address card (in-place pencil→save/cancel); country whitelist is the tenant operating-country list, distinct from the candidate's personal address.
 export default function ZzpAddressCard({ value, onSave }: { value: ZzpAddressValues; onSave: (v: ZzpAddressValues) => void }) {
   const { t, i18n } = useTranslation('candidates')
   const { t: tc } = useTranslation('common')
@@ -71,6 +72,7 @@ export default function ZzpAddressCard({ value, onSave }: { value: ZzpAddressVal
   // list for the NEWLY picked country lands (mirrors AddLocationModal's
   // PROVINCIE-1 cascade-clear exactly).
   const { provinces } = useProvinces(form.country)
+  // Clears a picked province once it no longer exists in the newly resolved list for the current country, so the form never holds a stale province.
   useEffect(() => {
     if (form.province && !provinces.includes(form.province)) setF('province', '')
     // eslint-disable-next-line react-hooks/exhaustive-deps -- only react to the resolved province list changing, not every form edit

@@ -14,6 +14,7 @@ interface Props {
   userOptions: Array<{ value: string; label: string }>
 }
 
+// Renders only the owner picker (see the module doc above); the default-to-self logic lives in useAddVacancyForm.
 export default function RecruiterCard({ ownerId, onOwnerChange, userOptions }: Props) {
   const { t } = useTranslation(['vacancies', 'common'])
   return (

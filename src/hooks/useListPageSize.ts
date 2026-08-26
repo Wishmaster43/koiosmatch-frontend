@@ -30,6 +30,7 @@ import { PAGE_SIZE_OPTIONS } from '@/components/ui/PaginationBar'
 // implementation, MatchesPage.tsx: `user?.default_per_page ?? 50`).
 const FALLBACK_PAGE_SIZE = 50
 
+// Resolves this list's effective page size: the user's saved default, clamped to the server's real cap so the request never 422s.
 export function useListPageSize(memoryKey: string, serverCap: number = PAGE_SIZE_OPTIONS[PAGE_SIZE_OPTIONS.length - 1]) {
   const auth = useAuth()
   const rawDefault = Number(auth?.user?.default_per_page) || FALLBACK_PAGE_SIZE

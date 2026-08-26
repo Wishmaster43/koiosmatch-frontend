@@ -133,6 +133,7 @@ export default function WhatsAppPage({ intent }: { intent?: unknown } = {}) {
   // from i18n; the VALUES come from the contract.
   const directionOptions = useMemo(() => WA_DIRECTION_VALUES
     .map(v => ({ value: v, label: t(`msgDirection.${v}`, { defaultValue: v }) })), [t])
+  // Status filter options, values pinned to the server contract (see comment above).
   const statusOptions = useMemo(() => WA_STATUS_VALUES
     .map(v => ({ value: v, label: t(`msgStatus.${v}`, { defaultValue: v }) })), [t])
 
@@ -195,6 +196,8 @@ export default function WhatsAppPage({ intent }: { intent?: unknown } = {}) {
   // K-193: the WA-Web queue's own status filter — registered only while that
   // tab is the active one, so it never bleeds into the message feed's panel.
   const waWebFilterGroups = useMemo(() => buildWaWebQueueFilterGroups({ t, status: waWebStatus, setStatus: setWaWebStatus }), [t, waWebStatus])
+  // Register the WA-Web queue's own status filter only while that tab is active;
+  // switching away unregisters it so it never bleeds into the message feed's panel.
   useEffect(() => {
     if (tab !== 'wa-web-queue') { unregisterFilters('whatsapp-wa-web-queue'); return }
     registerFilters('whatsapp-wa-web-queue', waWebFilterGroups)
@@ -205,6 +208,8 @@ export default function WhatsAppPage({ intent }: { intent?: unknown } = {}) {
   const [drill, setDrill] = useState<null | 'today' | 'contacted' | 'filled' | 'escal'>(null)
   // Refresh both data sources; briefly lock the button so it can't be double-clicked.
   const [refreshing, setRefreshing] = useState(false)
+  // User clicked refresh: reload both data sources and briefly disable the
+  // button so a repeated click can't fire the same reload twice.
   const handleRefresh = () => {
     if (refreshing) return
     setRefreshing(true)
@@ -265,6 +270,7 @@ export default function WhatsAppPage({ intent }: { intent?: unknown } = {}) {
     messages.forEach(m => { const s = (m.status as string) || 'unknown'; c[s] = (c[s] ?? 0) + 1 })
     return Object.entries(c).map(([s, value]) => ({ name: t(`msgStatus.${s}`, { defaultValue: s }), value }))
   }, [messages, t])
+  // Escalation reasons, tallied client-side from the already-loaded list, for the overview chart.
   const reasonsData = useMemo(() => {
     const c: Record<string, number> = {}
     escalations.forEach(e => { const r = (e.reason as string) || 'unknown'; c[r] = (c[r] ?? 0) + 1 })

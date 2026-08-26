@@ -39,6 +39,8 @@ interface PreviewEditStepProps {
   onBackToMapping: () => void
 }
 
+// Wizard step 3: an editable grid of the mapped rows, a dry-run trigger, and
+// (once a validate succeeds against the CURRENT rows) the real confirm step.
 export default function PreviewEditStep({
   entity, targetColumns, mapping, editableRows, dirty, onEditCell, onValidate,
   previewStatus, previewError, previewResult, runStatus, runError, canImport, wholeTree, onConfirm, onBackToMapping,

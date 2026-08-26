@@ -25,6 +25,8 @@ interface CandidateStatusChipProps {
   round?: boolean
 }
 
+// House status/phase chip: resolves a slug via the tenant lookup when given one,
+// else falls back to a pre-resolved label/colour for resources without the slug yet (see the prop doc above).
 export default function CandidateStatusChip({ status, phase, plain = false, fallbackLabel, fallbackColor, round = false }: CandidateStatusChipProps) {
   const { statusMeta, phases } = useLookups() as unknown as {
     statusMeta: (v: string) => { label: string; color: string }

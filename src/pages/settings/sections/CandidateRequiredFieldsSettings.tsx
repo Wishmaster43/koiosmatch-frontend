@@ -32,6 +32,7 @@ import Button from '@/components/ui/Button'
 
 const KEY = 'candidate_required_fields'
 
+// Thin container over the full field catalog + custom fields (see the module doc above for the two separate storage paths — built-in fields in the settings blob, custom fields on their own definition).
 export default function CandidateRequiredFieldsSettings() {
   const { t } = useTranslation(['settings', 'candidates'])
   const { phases } = useLookups()

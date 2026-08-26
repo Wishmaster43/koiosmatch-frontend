@@ -18,6 +18,8 @@ import Button from '@/components/ui/Button'
 
 const PAGE_SIZE = 25
 
+// Thin container wiring the toolbar, table and drill-down drawer together (see
+// file docblock above); filtering and table markup live in their own modules.
 export default function AuditLog() {
   const { t } = useTranslation('settings')
   const [logs,    setLogs]    = useState([])

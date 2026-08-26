@@ -66,6 +66,7 @@ const money = new Intl.NumberFormat('nl-NL', { style: 'currency', currency: 'EUR
 // Reuse the customer-level Kansen tab's own mapper verbatim — never a forked shape.
 const mapRow = (raw: Record<string, unknown>): Opportunity => mapOpportunity(raw as ApiOpportunity)
 
+// See the file's top doc above; a thin adapter over the shared ScopedListTab reusing the customer-level opportunity mapper and column set.
 export default function ScopedOpportunitiesTab({ scope, id, customerId, customerName }: {
   scope: 'department' | 'location' | 'contact'; id: Id | undefined
   // Threaded down from LocationDetail/DepartmentDetail (mirrors ScopedMatchesTab)

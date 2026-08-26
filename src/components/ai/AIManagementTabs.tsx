@@ -29,6 +29,8 @@ export function AgentsTab() {
   // House confirmation dialog (§0 restschuld) — replaces the native window.confirm() below.
   const { confirm, dialog } = useConfirm()
 
+  // Load the agents and their prompt/faq option lists as three parallel requests,
+  // awaited together, then preselect the first agent when there is one.
   useEffect(() => {
     Promise.all([
       api.get('/ai/agents'),
@@ -43,6 +45,8 @@ export function AgentsTab() {
     }).catch(() => { /* noop */ }).finally(() => setLoading(false))
   }, [])
 
+  // AgentForm reports back after a successful save; upsert into the local list so the
+  // new/edited agent shows up immediately without a refetch.
   const onSaved = (agent: AiAgent) => {
     setAgents(prev => {
       const exists = prev.find(a => a.id === agent.id)
@@ -51,6 +55,7 @@ export function AgentsTab() {
     setSelected(agent)
   }
 
+  // Deleting an agent asks first, then waits for the server before the list changes.
   const onDelete = (agent: AiAgent) => {
     confirm(t('ai.agent.confirmDelete', { name: agent.name }), async () => {
       try {
@@ -107,6 +112,7 @@ export function PromptsTab() {
   // House confirmation dialog (§0 restschuld) — replaces the native window.confirm() below.
   const { confirm, dialog } = useConfirm()
 
+  // Load the prompt list on mount and preselect the first entry, which also seeds its version history.
   useEffect(() => {
     api.get('/ai/prompts').then(r => {
       const list = unwrapList<AiItem>(r).rows
@@ -115,11 +121,13 @@ export function PromptsTab() {
     }).catch(() => {}).finally(() => setLoading(false))
   }, [])
 
+  // Selecting a prompt loads the form fields plus its version history for the restore control.
   const select = (p: AiItem) => {
     setSelected(p); setName(p.name ?? ''); setBody(p.body ?? p.content ?? '')
     api.get(`/ai/prompts/${p.id}/versions`).then(r => setVersions(unwrapList<Version>(r).rows)).catch(() => setVersions([]))
   }
 
+  // Create or update depending on whether a prompt is already selected, then refresh its version list.
   const save = async () => {
     setSaving(true); setSaved(false)
     try {
@@ -187,6 +195,7 @@ export function FAQTab() {
   // House confirmation dialog (§0 restschuld) — replaces the native window.confirm() below.
   const { confirm, dialog } = useConfirm()
 
+  // Load the FAQ list on mount and preselect the first entry, which also seeds its version history.
   useEffect(() => {
     api.get('/ai/faqs').then(r => {
       const list = unwrapList<AiItem>(r).rows
@@ -195,11 +204,13 @@ export function FAQTab() {
     }).catch(() => {}).finally(() => setLoading(false))
   }, [])
 
+  // Selecting a FAQ loads the form fields plus its version history for the restore control.
   const select = (f: AiItem) => {
     setSelected(f); setName(f.name ?? ''); setBody(f.body ?? f.content ?? '')
     api.get(`/ai/faqs/${f.id}/versions`).then(r => setVersions(unwrapList<Version>(r).rows)).catch(() => setVersions([]))
   }
 
+  // Create or update depending on whether a FAQ is already selected.
   const save = async () => {
     setSaving(true); setSaved(false)
     try {
@@ -263,6 +274,7 @@ export function KnowledgeTab() {
   const [saved,    setSaved]    = useState(false)
   const [loading,  setLoading]  = useState(true)
 
+  // Load knowledge items on mount and preselect the first one, seeding the form fields from it.
   useEffect(() => {
     api.get('/ai/knowledge').then(r => {
       const list = unwrapList<AiItem>(r).rows
@@ -271,6 +283,7 @@ export function KnowledgeTab() {
     }).catch(() => {}).finally(() => setLoading(false))
   }, [])
 
+  // Create or update the knowledge item depending on whether one is already selected.
   const save = async () => {
     setSaving(true); setSaved(false)
     try {

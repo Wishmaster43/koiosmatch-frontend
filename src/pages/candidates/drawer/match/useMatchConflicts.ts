@@ -10,6 +10,7 @@ import { useExistingCandidateMatches } from './useExistingCandidateMatches'
 import { findDuplicateMatch, findOverlappingMatches } from './matchConflicts'
 import type { Id } from '@/types/common'
 
+// See the file's top doc above for the duplicate/overlap preflight this hook computes (warn-only, never gates submit).
 export function useMatchConflicts({
   candidateId, editMatchId, customerId, locationId, departmentId, startDate, endDate,
 }: {
@@ -23,6 +24,7 @@ export function useMatchConflicts({
   // Resolve a stored status slug to its is_closed flag — an unresolvable status
   // (unknown slug) is treated as ACTIVE: a false warning is safe, a missed one isn't.
   const { metaOf } = useMatchStatuses()
+  // Treats an unresolvable status slug as active, since a false warning is safe but a missed one is not.
   const isActiveStatus = (status: string | null) => {
     const meta = metaOf(status ?? undefined)
     return meta ? !meta.is_closed : true

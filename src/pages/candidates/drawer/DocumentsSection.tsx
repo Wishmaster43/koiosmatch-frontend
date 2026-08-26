@@ -131,6 +131,7 @@ export default function DocumentsSection({ c, onRefresh }: { c: Candidate; onRef
       return next
     })
   }
+  // Flips one row's selection for the bulk-download picker.
   const toggleSelectedRow = (key: string) => {
     setSelected(prev => { const next = new Set(prev); if (next.has(key)) next.delete(key); else next.add(key); return next })
   }

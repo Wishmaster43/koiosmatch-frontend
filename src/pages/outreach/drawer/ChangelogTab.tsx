@@ -50,6 +50,8 @@ const changesOf = (ev: OutreachActivityEvent): Array<{ field: string; old: unkno
     .map(field => ({ field, old: old[field], next: attrs[field] }))
 }
 
+// The call-list's field-change audit trail, rendered inside the shared changelog
+// popover — one card per changed field, an empty history reads as normal, not an error.
 export default function ChangelogTab({ campaignId }: { campaignId?: Id | null }) {
   const { t } = useTranslation('outreach')
   const { formatDate } = useDateFormat()

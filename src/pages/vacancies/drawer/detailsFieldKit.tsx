@@ -71,6 +71,7 @@ export function pair(min: string, max: string, suffix?: string): string {
   const s = [min, max].filter(Boolean).join(' – ')
   return s ? `${s}${suffix ? ` ${suffix}` : ''}` : ''
 }
+// Formats a from/to date pair as one "a – b" string via the house date formatter, dropping either side if empty.
 export function dateRange(formatDate: (d: string) => string, a: string, b: string): string {
   return [a, b].filter(Boolean).map(d => formatDate(d)).join(' – ')
 }

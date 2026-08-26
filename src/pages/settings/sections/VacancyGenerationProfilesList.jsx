@@ -36,6 +36,7 @@ const emptyDraft = () => ({
   content: { template: '', tone_of_voice: 'neutral', length: 'medium', language: '', allow_emoji: false, brand_instructions: '', forbidden_words: [], content_block_ids: [] },
 })
 
+// Loads profiles + content blocks; a 404 on the not-yet-built backend endpoints degrades to a calm notice instead of a dead CRUD list.
 export default function VacancyGenerationProfilesList() {
   const { t } = useTranslation('settings')
   const [profiles, setProfiles] = useState([])
@@ -71,6 +72,7 @@ export default function VacancyGenerationProfilesList() {
   // Shallow-merge a patch from the editor into one profile's draft (top-level keys;
   // the editor itself already rebuilds the full nested matcher/content object).
   const patch = (id, p) => setEditForms(prev => ({ ...prev, [id]: { ...(prev[id] ?? emptyDraft()), ...p } }))
+  // Seeds this profile's edit draft from its current values (backfilling any matcher/content key the stored record predates) and expands its card.
   const openEdit = (profile) => {
     setEditForms(prev => ({ ...prev, [profile.id]: {
       name: profile.name, is_default: !!profile.is_default, priority: profile.priority ?? 10,

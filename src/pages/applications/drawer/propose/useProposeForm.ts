@@ -52,6 +52,8 @@ function fillTemplate(template: string, tokens: Record<string, string>): string 
   return template.replace(/\{(kandidaat|vacature|klant|contact|recruiter)\}/g, (_m, key: string) => tokens[key] ?? '')
 }
 
+// Owns every field, fetch and side effect behind ProposeCandidateModal (see file
+// docblock) and returns the flat state/handlers the modal renders.
 export function useProposeForm(application: ApplicationDetail) {
   const { t } = useTranslation(['applications', 'common'])
   const locale = useLocale()
@@ -73,6 +75,8 @@ export function useProposeForm(application: ApplicationDetail) {
   const [contactsLoading, setContactsLoading] = useState(true)
   const [contactsError, setContactsError] = useState(false)
 
+  // Fetches the customer's contacts for the recipient picker; alive-guarded so a
+  // fast application/customer switch can't let a stale response overwrite the list.
   useEffect(() => {
     const customerId = application.customerId
     if (!customerId) { setContactsLoading(false); return }
@@ -97,6 +101,8 @@ export function useProposeForm(application: ApplicationDetail) {
   const [candidateLoading, setCandidateLoading] = useState(true)
   const [candidateError, setCandidateError] = useState(false)
 
+  // Fetches the full candidate record (the application only carries a trimmed
+  // summary) so the CV builder has real data; alive-guarded against a stale write.
   useEffect(() => {
     const candidateId = application.candidateId
     if (!candidateId) { setCandidateLoading(false); return }
@@ -191,6 +197,8 @@ export function useProposeForm(application: ApplicationDetail) {
     ? `${body}<hr />${application.coverLetter}`
     : body)
 
+  // Copies the drafted subject + a plain-text (tags stripped) version of the composed
+  // body, then flips a temporary "copied" flag for the button's own feedback.
   const copyMessage = async () => {
     const plainBody = composedBody().replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()
     try {
@@ -267,7 +275,11 @@ export function useProposeForm(application: ApplicationDetail) {
   // subject, and the URL itself never reaches a log or toast (§8).
   const [shareLinkCopied, setShareLinkCopied] = useState(false)
   const shareLinkCopyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  // Clears the pending "copied" reset timer on unmount so it never fires against
+  // an already-unmounted modal.
   useEffect(() => () => { if (shareLinkCopyTimerRef.current) clearTimeout(shareLinkCopyTimerRef.current) }, [])
+  // Copies only the share link — never the subject/body — and shows temporary
+  // "copied" feedback; the URL itself is never logged (§8).
   const copyShareLink = async () => {
     if (!shareUrl) return
     try {

@@ -40,6 +40,7 @@ function operatorHint(t: (key: string) => string, operator?: string): string | u
   return undefined
 }
 
+// See the file's top doc above for the OR-group filter/branch contract this editor builds against.
 export function EdgeFilterPanel({ filters, label, sourceNodeId, nodes = [], edges = [], catalog = {}, onClose, onSave }: {
   filters?: unknown; label?: string
   sourceNodeId?: string

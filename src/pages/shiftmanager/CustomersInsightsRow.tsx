@@ -57,6 +57,7 @@ function DonutCard({ title, data, colors, onPick, active, onClear, clearTitle }:
   )
 }
 
+// One KPI tile in the insights row; clickable (click-to-filter) only when onClick is actually given.
 function KpiCard({ label, value, sub, color, onClick, active }: Omit<KpiSpec, 'key'>) {
   const clickable = typeof onClick === 'function'
   // Locale-aware grouping (§ FMT-GETAL-1) — never a hardcoded 'nl-NL' toLocaleString.

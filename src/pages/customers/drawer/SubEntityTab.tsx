@@ -35,6 +35,7 @@ interface SubEntityTabProps<Item> {
   getRowId?: (item: Item) => string | number | undefined
 }
 
+// Shared list/detail shell for a customer's nested sub-entities; a row click drills into the caller-supplied detail renderer, with its own back-to-list close (see file header).
 export default function SubEntityTab<Item extends object>({
   items = [], columns, addLabel, emptyText, searchPlaceholder,
   searchKeys = ['name'], onAdd, filter, renderDetail,

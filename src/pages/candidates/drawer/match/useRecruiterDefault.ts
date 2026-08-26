@@ -24,6 +24,7 @@ import type { Id } from '@/types/common'
 
 interface UserLike { id?: Id; name?: string }
 
+// Seed the match form's owner once, in priority order: the candidate's own owner, the sibling-fetched fallback, then the logged-in user — never overwrites a manual pick.
 export function useRecruiterDefault({
   editing, candidateOwnerId, candOwnerId, users,
 }: {
@@ -35,6 +36,7 @@ export function useRecruiterDefault({
   const { user: me } = useAuth() as unknown as { user: { id?: Id; name?: string } | null }
   const [ownerId, setOwnerId] = useState('')
 
+  // Fires once (guarded by ownerId itself) while creating; skips a candidate owner who isn't actually assignable, mirroring the server's own check.
   useEffect(() => {
     if (editing || ownerId) return
     const preferred = candidateOwnerId ?? candOwnerId

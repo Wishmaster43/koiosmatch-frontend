@@ -19,6 +19,7 @@ export default function CvSectionList({ sections, onSave }) {
 
   const labelStyle = { fontSize: 12, fontWeight: 600, color: 'var(--text)', marginBottom: 5, display: 'block' }
 
+  // Flip one section's on/off flag and persist the whole (partial-saved) list.
   const handleSectionToggle = (id) => {
     onSave({ sections: sections.map(s => s.id === id ? { ...s, enabled: !s.enabled } : s) })
   }

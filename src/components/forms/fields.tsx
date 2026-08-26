@@ -33,6 +33,7 @@ export function parseDate(value?: string | number | Date | null): Date | null {
   return isNaN(d.getTime()) ? null : d
 }
 
+// Field label with the shared muted/uppercase style and a required-asterisk suffix.
 export function Label({ children, required, htmlFor, id }: { children: ReactNode; required?: boolean; htmlFor?: string; id?: string }) {
   return (
     <label id={id} htmlFor={htmlFor} style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', display: 'block',
@@ -84,6 +85,7 @@ export function Field({ label, required, children }: { label: ReactNode; require
   )
 }
 
+// Single-line text input on the shared field style, with an optional error-border variant.
 export function TextField({ id, value, onChange, placeholder, type = 'text', error, style }: {
   id?: string; value?: string; onChange: (v: string) => void; placeholder?: string; type?: string; error?: boolean; style?: CSSProperties
 }) {
@@ -97,6 +99,7 @@ export function TextField({ id, value, onChange, placeholder, type = 'text', err
   )
 }
 
+// Multi-line text input on the shared field style, vertically resizable only.
 export function TextArea({ id, value, onChange, placeholder, rows = 3, style }: {
   id?: string; value?: string; onChange: (v: string) => void; placeholder?: string; rows?: number; style?: CSSProperties
 }) {
@@ -124,6 +127,7 @@ export function SelectField({ id, value, onChange, options = [], placeholder, st
   )
 }
 
+// Date input wrapping the shared DatePicker instance, formatted dd-MM-yyyy for every date field in the app.
 export function DateField({ id, value, onChange, placeholder, style }: {
   id?: string; value?: string | number | Date | null; onChange: (v: string) => void; placeholder?: string; style?: CSSProperties
 }) {
@@ -144,6 +148,7 @@ export function DateField({ id, value, onChange, placeholder, style }: {
   )
 }
 
+// Checkbox input on the shared accent colour; disabled also flips the cursor to default.
 export function CheckboxField({ id, checked, onChange, disabled }: {
   id?: string; checked?: boolean; onChange: (v: boolean) => void; disabled?: boolean
 }) {
@@ -167,6 +172,7 @@ export function AddButton({ onClick, label }: { onClick: () => void; label?: Rea
   return <DrawerAddButton onClick={onClick} label={label} />
 }
 
+// Save/Cancel button pair for a form footer, on the house Button variants with translated defaults.
 export function SaveCancel({ onSave, onCancel, saveLabel, cancelLabel }: {
   onSave: () => void; onCancel: () => void; saveLabel?: ReactNode; cancelLabel?: ReactNode
 }) {

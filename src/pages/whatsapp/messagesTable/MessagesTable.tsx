@@ -25,6 +25,7 @@ interface MessagesTableProps {
   onFilter?: (patch: MessageFilterPatch) => void
 }
 
+// Renders the shared DataTable with message columns (see the module doc above): cursor-paginated via onLoadMore, chips gateway into the right-panel filter when onFilter is wired.
 export default function MessagesTable({ messages, loading, onLoadMore, loadingMore, exhausted, onFilter }: MessagesTableProps) {
   const { t } = useTranslation('whatsapp')
   const columns = useMessageColumns({ onFilter })

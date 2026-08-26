@@ -19,6 +19,8 @@ import type { TFunction } from 'i18next'
 type FieldChecks<T> = Partial<Record<keyof T, (v: string) => boolean>>
 type FieldErrorKeys<T> = Partial<Record<keyof T, string>>
 
+// Generic touched/message state for on-blur field format checks, shared across
+// non-candidate create/edit modals; a server 422 message always wins over a live check.
 export function useLiveFieldValidation<T extends object>(
   form: T,
   t: TFunction,

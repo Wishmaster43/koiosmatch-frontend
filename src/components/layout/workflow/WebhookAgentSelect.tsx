@@ -29,6 +29,8 @@ import { selectStyle } from './scheduleModalStyles'
 // trapped dialog, so CreatableSelect (portalled popover) is the safe pick.
 import CreatableSelect from '@/components/ui/CreatableSelect'
 
+// Searchable AI-agent picker for a webhook step; built on CreatableSelect rather
+// than SelectMenu because this modal is focus-trapped (see the import comment above).
 export function WebhookAgentSelect({ value, onChange, label }: {
   value: string; onChange: (name: string) => void; label: string
 }) {

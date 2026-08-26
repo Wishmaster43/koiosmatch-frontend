@@ -18,6 +18,8 @@ export function pickFunnelPhase(d: unknown): string | undefined {
 // real agent id (→ ?agent_id=<id>), clicking the SAME agent again clears it. The
 // two filters are mutually exclusive — picking one always clears the other.
 export interface AgentPickResult { selectedAgentId: string | null; showWithoutAgent: boolean }
+// Resolve an AI-agent donut click into the next mutually-exclusive filter state
+// (a real agent id, the dedicated "no agent" bucket, or a click that clears either).
 export function pickAgentSegment(d: unknown, currentAgentId: string | null, currentWithoutAgent: boolean): AgentPickResult {
   const k = pickKey(d)
   if (k === '__none') return { selectedAgentId: null, showWithoutAgent: !currentWithoutAgent }

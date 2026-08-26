@@ -32,6 +32,7 @@ const FIELDS = [
 
 interface Props { c: Customer; onSave?: (values: Record<string, unknown>) => void }
 
+// See the file's top doc above; each toggle persists immediately and shows the tenant default alongside for the honest follow-default reset.
 export default function VacancySettingsTab({ c, onSave }: Props) {
   const { t } = useTranslation('customers')
   const settings = useAllSettings()

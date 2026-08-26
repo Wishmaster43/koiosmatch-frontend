@@ -9,6 +9,8 @@ function scoreColor(value: number): string {
   return value >= 75 ? 'var(--color-success)' : value >= 50 ? 'var(--color-warning)' : 'var(--color-danger)'
 }
 
+// Renders a match score as a colour-coded percentage (see file docblock above);
+// a missing value shows a plain dash rather than a coloured zero.
 export default function ScorePill({ value }: { value: number | null }) {
   if (value == null) return <span style={{ color: 'var(--text-muted)' }}>—</span>
   return <span style={{ fontWeight: 600, color: scoreColor(value) }}>{value}%</span>

@@ -8,6 +8,7 @@
  */
 import type { CSSProperties } from 'react'
 
+// The one inverted count badge (button-trio colours swapped); callers decide whether to render it at all for a zero count.
 export default function CountBadge({ count, style }: { count: number; style?: CSSProperties }) {
   return (
     <span style={{ background: 'var(--button-ink)', color: 'var(--button-fill)',

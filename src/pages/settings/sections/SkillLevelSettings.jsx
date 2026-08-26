@@ -5,6 +5,7 @@
 import { useTranslation } from 'react-i18next'
 import StatusListEditor from './StatusListEditor'
 
+// See the file's top doc above; the name-only, in-use-protected skill-level lookup editor.
 export function SkillLevelSettings() {
   const { t } = useTranslation('settings')
   return (

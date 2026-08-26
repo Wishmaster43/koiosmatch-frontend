@@ -52,6 +52,8 @@ interface Props {
   onOpenNotes?: () => void
 }
 
+// The read-only legacy remarks block; renders nothing
+// once `remarks` is empty, offering only a one-way move into Notes.
 export default function MatchRemarksBlock({ remarks, loading, save, matchId, onOpenNotes }: Props) {
   const { t } = useTranslation('matches')
   const typeLabelId = useId()
