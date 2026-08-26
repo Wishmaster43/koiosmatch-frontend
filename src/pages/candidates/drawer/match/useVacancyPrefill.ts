@@ -76,6 +76,10 @@ interface RawVacancyDetail {
 
 // Fetches the picked vacancy's detail and normalises it to the fields worth
 // proposing onto the match form (editable proposals, never a lock — see file doc).
+// A failed fetch still resolves to EMPTY_DETAIL so the form stays fully usable — the
+// vacancy picker itself has no error surface today (its only caller, useVacancyPrefillApply,
+// never passed a handler), so a real failure reads the same as "this vacancy proposes
+// nothing" rather than shipping an unused escape hatch (R8 caveat, tracked in WORKLIST).
 export function useVacancyPrefill(vacancyId: string): VacancyPrefillDetail | null {
   const [detail, setDetail] = useState<VacancyPrefillDetail | null>(null)
 

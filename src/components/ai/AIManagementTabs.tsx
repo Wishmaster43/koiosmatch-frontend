@@ -26,12 +26,15 @@ export function AgentsTab() {
   const [prompts,  setPrompts]  = useState<AiItem[]>([])
   const [faqs,     setFaqs]     = useState<AiItem[]>([])
   const [loading,  setLoading]  = useState(true)
-  // House confirmation dialog (§0 restschuld) — replaces the native window.confirm() below.
+  // A failed agents load must render its own state, never the "nothing yet" empty state (R8).
+  const [loadError, setLoadError] = useState(false)
+  // House confirmation dialog (§0 leftover debt) — replaces the native window.confirm() below.
   const { confirm, dialog } = useConfirm()
 
   // Load the agents and their prompt/faq option lists as three parallel requests,
   // awaited together, then preselect the first agent when there is one.
   useEffect(() => {
+    setLoadError(false)
     Promise.all([
       api.get('/ai/agents'),
       api.get('/ai/prompts').catch(() => ({ data: [] })),
@@ -42,7 +45,7 @@ export function AgentsTab() {
       setPrompts(unwrapList<AiItem>(pr).rows)
       setFaqs(unwrapList<AiItem>(fr).rows)
       if (list.length) setSelected(list[0])
-    }).catch(() => { /* noop */ }).finally(() => setLoading(false))
+    }).catch(() => setLoadError(true)).finally(() => setLoading(false))
   }, [])
 
   // AgentForm reports back after a successful save; upsert into the local list so the
@@ -77,7 +80,7 @@ export function AgentsTab() {
     <>
       <SideList
         title={t('ai.tabs.agents')} items={agents} selected={selected}
-        onSelect={setSelected} onNew={() => setSelected({ _new: true })} loading={loading}
+        onSelect={setSelected} onNew={() => setSelected({ _new: true })} loading={loading} error={loadError}
         renderItem={(a, active) => (
           // AI-AGENTS-2: show the linked recruiter/manager user, not a model (removed — MODEL-1).
           <ListRow key={a.id} item={a} active={active} onSelect={setSelected}
@@ -109,16 +112,19 @@ export function PromptsTab() {
   const [saved,    setSaved]    = useState(false)
   const [versions, setVersions] = useState<Version[]>([])
   const [loading,  setLoading]  = useState(true)
-  // House confirmation dialog (§0 restschuld) — replaces the native window.confirm() below.
+  // A failed prompts load must render its own state, never the "nothing yet" empty state (R8).
+  const [loadError, setLoadError] = useState(false)
+  // House confirmation dialog (§0 leftover debt) — replaces the native window.confirm() below.
   const { confirm, dialog } = useConfirm()
 
   // Load the prompt list on mount and preselect the first entry, which also seeds its version history.
   useEffect(() => {
+    setLoadError(false)
     api.get('/ai/prompts').then(r => {
       const list = unwrapList<AiItem>(r).rows
       setPrompts(list)
       if (list.length) select(list[0])
-    }).catch(() => {}).finally(() => setLoading(false))
+    }).catch(() => setLoadError(true)).finally(() => setLoading(false))
   }, [])
 
   // Selecting a prompt loads the form fields plus its version history for the restore control.
@@ -164,7 +170,7 @@ export function PromptsTab() {
     <>
       <SideList
         title={t('ai.tabs.prompts')} items={prompts} selected={selected}
-        onSelect={select} onNew={() => { setSelected(null); setName(''); setBody(''); setVersions([]) }} loading={loading}
+        onSelect={select} onNew={() => { setSelected(null); setName(''); setBody(''); setVersions([]) }} loading={loading} error={loadError}
         renderItem={(p, active) => <ListRow key={p.id} item={p} active={active} onSelect={select} label={p.name} onDelete={del} />}>
         <Field label={t('ai.field.name')}>
           <input value={name} onChange={e => setName(e.target.value)} style={inputStyle} placeholder={t('ai.prompts.namePlaceholder')} />
@@ -192,16 +198,19 @@ export function FAQTab() {
   const [saved,    setSaved]    = useState(false)
   const [versions, setVersions] = useState<Version[]>([])
   const [loading,  setLoading]  = useState(true)
-  // House confirmation dialog (§0 restschuld) — replaces the native window.confirm() below.
+  // A failed FAQ load must render its own state, never the "nothing yet" empty state (R8).
+  const [loadError, setLoadError] = useState(false)
+  // House confirmation dialog (§0 leftover debt) — replaces the native window.confirm() below.
   const { confirm, dialog } = useConfirm()
 
   // Load the FAQ list on mount and preselect the first entry, which also seeds its version history.
   useEffect(() => {
+    setLoadError(false)
     api.get('/ai/faqs').then(r => {
       const list = unwrapList<AiItem>(r).rows
       setFaqs(list)
       if (list.length) select(list[0])
-    }).catch(() => {}).finally(() => setLoading(false))
+    }).catch(() => setLoadError(true)).finally(() => setLoading(false))
   }, [])
 
   // Selecting a FAQ loads the form fields plus its version history for the restore control.
@@ -246,7 +255,7 @@ export function FAQTab() {
     <>
       <SideList
         title={t('ai.tabs.faqs')} items={faqs} selected={selected}
-        onSelect={select} onNew={() => { setSelected(null); setName(''); setBody(''); setVersions([]) }} loading={loading}
+        onSelect={select} onNew={() => { setSelected(null); setName(''); setBody(''); setVersions([]) }} loading={loading} error={loadError}
         renderItem={(f, active) => <ListRow key={f.id} item={f} active={active} onSelect={select} label={f.name} onDelete={del} />}>
         <Field label={t('ai.field.name')}>
           <input value={name} onChange={e => setName(e.target.value)} style={inputStyle} placeholder={t('ai.faqs.namePlaceholder')} />
@@ -273,14 +282,17 @@ export function KnowledgeTab() {
   const [saving,   setSaving]   = useState(false)
   const [saved,    setSaved]    = useState(false)
   const [loading,  setLoading]  = useState(true)
+  // A failed knowledge load must render its own state, never the "nothing yet" empty state (R8).
+  const [loadError, setLoadError] = useState(false)
 
   // Load knowledge items on mount and preselect the first one, seeding the form fields from it.
   useEffect(() => {
+    setLoadError(false)
     api.get('/ai/knowledge').then(r => {
       const list = unwrapList<AiItem>(r).rows
       setItems(list)
       if (list.length) { setSelected(list[0]); setName(list[0].name ?? ''); setBody(list[0].body ?? list[0].content ?? '') }
-    }).catch(() => {}).finally(() => setLoading(false))
+    }).catch(() => setLoadError(true)).finally(() => setLoading(false))
   }, [])
 
   // Create or update the knowledge item depending on whether one is already selected.
@@ -304,7 +316,7 @@ export function KnowledgeTab() {
     <SideList
       title={t('ai.tabs.knowledge')} items={items} selected={selected}
       onSelect={item => { setSelected(item); setName(item.name ?? ''); setBody(item.body ?? item.content ?? '') }}
-      onNew={() => { setSelected(null); setName(''); setBody('') }} loading={loading}
+      onNew={() => { setSelected(null); setName(''); setBody('') }} loading={loading} error={loadError}
       renderItem={(item, active) => (
         <ListRow key={item.id} item={item} active={active}
           onSelect={i => { setSelected(i); setName(i.name ?? ''); setBody(i.body ?? i.content ?? '') }}

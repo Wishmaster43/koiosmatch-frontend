@@ -98,7 +98,7 @@ export function LookupBlock({ slug, title, subtitle, items, setItems, locked = f
         setItems(p => p.map(x => x.id === modal.id ? { ...x, label: modal.label.trim(), color: modal.color, ...flagFields } : x))
       }
       setModal(null)
-    } catch { /* noop */ } finally { setBusy(false) }
+    } catch { notifyError(t('statusList.saveFailed')) } finally { setBusy(false) }
   }
 
   // In-row colour change: applies optimistically, reverts + notifies on failure.
@@ -289,20 +289,28 @@ function CandidateLookupSection({ typeKey, slug, locked = false }) {
   const { t } = useTranslation('settings')
   const [items,   setItems]   = useState([])
   const [loading, setLoading] = useState(true)
+  const [error,   setError]   = useState(false)
 
   // Loads this tab's slice from the combined lookups endpoint whenever the type changes.
+  // An alive guard stops a stale response from a previous typeKey overwriting a newer one.
   useEffect(() => {
+    let alive = true
+    setLoading(true)
+    setError(false)
     api.get(BASE)
-      .then(r => { const d = unwrap(r) ?? {}; setItems(d[typeKey] ?? []) })
-      .catch(() => {})
-      .finally(() => setLoading(false))
+      .then(r => { if (!alive) return; const d = unwrap(r) ?? {}; setItems(d[typeKey] ?? []) })
+      .catch(() => { if (alive) setError(true) })
+      .finally(() => { if (alive) setLoading(false) })
+    return () => { alive = false }
   }, [typeKey])
 
   return (
     <div style={{ maxWidth: 640 }}>
       {loading
         ? <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t('common.loadingShort')}</p>
-        : <LookupBlock slug={slug} title={t(`lookups.${typeKey}.title`)} subtitle={t(`lookups.${typeKey}.subtitle`)} items={items} setItems={setItems} locked={locked} />}
+        : error
+          ? <p style={{ fontSize: 13, color: 'var(--color-danger-text)' }}>{t('statusList.loadError')}</p>
+          : <LookupBlock slug={slug} title={t(`lookups.${typeKey}.title`)} subtitle={t(`lookups.${typeKey}.subtitle`)} items={items} setItems={setItems} locked={locked} />}
     </div>
   )
 }

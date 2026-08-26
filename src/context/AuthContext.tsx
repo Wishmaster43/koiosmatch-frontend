@@ -278,9 +278,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           localStorage.setItem('active_tenant', first.id)
           setActiveTenantState(first)
         }
-      } catch {
-        localStorage.setItem('active_tenant', 'yesway')
-      }
+      } catch { /* fall through with no tenant list — never pin a hardcoded tenant */ }
     }
 
     return u

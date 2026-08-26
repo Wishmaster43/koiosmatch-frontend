@@ -21,7 +21,7 @@ export function useSmCandidatesList() {
   useEffect(() => { setPage(1) }, [pageSize])
 
   // Load one page of candidates; cached per page/size, keeps the previous page on change.
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, error } = useQuery({
     queryKey: ['sm_candidates', page, pageSize],
     queryFn: async ({ signal }) => {
       const body = (await api.get('/sm_candidates', { params: { page, per_page: pageSize }, signal })).data
@@ -48,6 +48,7 @@ export function useSmCandidatesList() {
   return {
     candidates: data?.candidates ?? [],
     loading:    isLoading,
+    error:      !!error,
     page, pageSize,
     total:      data?.total ?? 0,
     lastPage:   data?.lastPage ?? 1,

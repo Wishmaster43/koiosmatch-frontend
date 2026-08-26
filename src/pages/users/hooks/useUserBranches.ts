@@ -29,22 +29,30 @@ export function useUserBranches(userId: string | number | null | undefined) {
   const [branches, setBranches] = useState<BranchRow[]>([])
   const [loading,  setLoading]  = useState(true)
   const [saving,   setSaving]   = useState(false)
+  // A failed GET must never read as "unrestricted" (empty set) — track it
+  // separately so toggle() can refuse to PUT a replace-set built from a load
+  // failure, which would silently wipe the user's real enforced scoping.
+  const [error,    setError]    = useState(false)
 
   // Load the user's current branch set once (re-run if the edited user changes).
   useEffect(() => {
-    if (userId == null) { setBranches([]); setLoading(false); return }
+    if (userId == null) { setBranches([]); setLoading(false); setError(false); return }
     let cancelled = false
     setLoading(true)
+    setError(false)
     api.get(`/users/${userId}/branches`)
       .then(res => { if (!cancelled) setBranches(unwrapList<BranchRow>(res).rows) })
-      .catch(() => { if (!cancelled) setBranches([]) })
+      .catch(() => { if (!cancelled) { setBranches([]); setError(true); notifyError(t('branches.loadError')) } })
       .finally(() => { if (!cancelled) setLoading(false) })
     return () => { cancelled = true }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- `t` from useTranslation is stable in the app; excluding it avoids a re-fetch loop
   }, [userId])
 
   // Toggle one branch — optimistic PUT (replace-set), revert + notify on failure.
+  // Refuses to run against a failed load: the current [] would not be the real
+  // server set, so a toggle from it would PUT a wrong replace-set (§8 security).
   const toggle = async (locationId: string | number) => {
-    if (userId == null) return
+    if (userId == null || error) return
     const prev = branches
     const ids = branches.map(b => b.location_id)
     const nextIds = ids.includes(locationId) ? ids.filter(id => id !== locationId) : [...ids, locationId]
@@ -61,5 +69,5 @@ export function useUserBranches(userId: string | number | null | undefined) {
     }
   }
 
-  return { branches, loading, saving, toggle }
+  return { branches, loading, saving, error, toggle }
 }

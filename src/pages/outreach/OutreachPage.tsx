@@ -129,11 +129,13 @@ export default function OutreachPage() {
   // opened; archTick bumps to refetch after a mark/unmark elsewhere on the page.
   useEffect(() => {
     if (!showArchived && !showTrash) return
+    let alive = true
     setArchLoading(true); setArchError(false)
     listCampaigns({ archived: 1 })
-      .then((res) => setArchivedRaw((res.rows as Campaign[]) ?? []))
-      .catch(() => setArchError(true))
-      .finally(() => setArchLoading(false))
+      .then((res) => { if (alive) setArchivedRaw((res.rows as Campaign[]) ?? []) })
+      .catch(() => { if (alive) setArchError(true) })
+      .finally(() => { if (alive) setArchLoading(false) })
+    return () => { alive = false }
   }, [showArchived, showTrash, archTick])
 
   // Soft-deleted rows, exactly as the server returned them (each already carries

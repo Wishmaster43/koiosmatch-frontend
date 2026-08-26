@@ -15,6 +15,7 @@ import Spinner from '@/components/ui/Spinner'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import { useLocations } from '@/lib/useLocations'
 import ChipMultiSelect from '@/components/ui/ChipMultiSelect'
+import ErrorBanner from '@/components/ui/ErrorBanner'
 import Button from '@/components/ui/Button'
 import { useLiveFieldValidation } from '@/hooks/useLiveFieldValidation'
 import { isValidEmailFormat } from '@/lib/contactFieldValidation'
@@ -38,7 +39,7 @@ export default function EditUserModal({ user, onClose, onSaved }: {
 }) {
   const { t } = useTranslation('users')
   const locationOptions = useLocations()
-  const { branches, loading: branchesLoading, saving: branchesSaving, toggle: toggleBranch } = useUserBranches(user.id)
+  const { branches, loading: branchesLoading, saving: branchesSaving, error: branchesError, toggle: toggleBranch } = useUserBranches(user.id)
   // Fallback: split `name` when firstname/lastname arrive as a single string.
   const nameParts = (user.name ?? '').split(' ')
   const [form, setForm] = useState({
@@ -151,6 +152,11 @@ export default function EditUserModal({ user, onClose, onSaved }: {
             <Caption as="p" style={{ marginBottom: 10 }}>{t('branches.hint')}</Caption>
             {branchesLoading ? (
               <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('branches.loading')}</p>
+            ) : branchesError ? (
+              // Honest failure notice — never render the empty-set chip grid (which
+              // would silently read as "unrestricted") after a failed GET; chips stay
+              // disabled since toggle() itself also refuses while error is set.
+              <ErrorBanner>{t('branches.loadError')}</ErrorBanner>
             ) : (
               // Locations are always UUID strings server-side; ChipMultiSelect's
               // ChipOption.value is typed as plain `string` (narrower than the
@@ -162,7 +168,7 @@ export default function EditUserModal({ user, onClose, onSaved }: {
                 emptyText={t('branches.noLocations')}
               />
             )}
-            {!branchesLoading && branches.length === 0 && locationOptions.length > 0 && (
+            {!branchesLoading && !branchesError && branches.length === 0 && locationOptions.length > 0 && (
               <Caption as="p" style={{ marginTop: 8 }}>{t('branches.emptyHint')}</Caption>
             )}
           </div>

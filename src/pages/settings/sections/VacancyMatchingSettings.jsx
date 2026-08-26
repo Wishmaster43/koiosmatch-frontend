@@ -31,29 +31,43 @@ export default function VacancyMatchingSettings() {
   const [approval, setApproval] = useState('bij_afwijking') // backend default
   const [saving, setSaving] = useState(false)
   const [saved, setSaved]   = useState(false)
+  const [loading, setLoading] = useState(true)
+  // A failed GET must never let the hardcoded defaults above (level=1, approval=
+  // 'bij_afwijking') pass as the tenant's real saved values — a persistent banner
+  // + disabled controls stop the compounding wrong-write the audit named.
+  const [loadError, setLoadError] = useState(false)
 
   // Load the saved strictness enum → slider index + approval mode. The purchase→sale
   // conversion factor moved to Settings → Matches → MatchRatesSettings (Danny 22-07:
   // it's a match concept, not a vacancy one) — this screen no longer reads/writes it.
   useEffect(() => {
+    let alive = true
+    setLoading(true)
+    setLoadError(false)
     api.get('/settings/matching')
       .then(r => {
+        if (!alive) return
         const d = (unwrap(r)) ?? {}
         const i = LEVELS.indexOf(d.strictness); if (i >= 0) setLevel(i)
         if (MODES.some(m => m.value === d.approval_mode)) setApproval(d.approval_mode)
       })
-      .catch(() => {})
+      .catch(() => { if (alive) { setLoadError(true); notifyError(t('statusList.loadError')) } })
+      .finally(() => { if (alive) setLoading(false) })
+    return () => { alive = false }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- `t` from useTranslation is stable in the app; excluding it avoids a re-fetch loop
   }, [])
 
   // Persist the strictness level (slider index mapped back to its enum slug), flashing the saved-check briefly on success.
   const save = async () => {
+    if (loadError) return
     setSaving(true)
     try { await api.put('/settings/matching', { strictness: LEVELS[level] }); setSaved(true); setTimeout(() => setSaved(false), 2000) }
-    catch { /* noop */ } finally { setSaving(false) }
+    catch { notifyError(t('statusList.saveFailed')) } finally { setSaving(false) }
   }
 
   // Approval mode saves on click (partial PUT) — optimistic, revert + toast on failure.
   const setApprovalMode = async (mode) => {
+    if (loadError) return
     const prev = approval
     if (mode === prev) return
     setApproval(mode)
@@ -73,13 +87,19 @@ export default function VacancyMatchingSettings() {
           <PageTitle>{t('matching.title')}</PageTitle>
           <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('matching.subtitle')}</p>
         </div>
-        {/* SaveButton — the ONE saved-state save action (§4 success token pair). */}
-        <SaveButton saved={saved} onClick={save} disabled={saving}>
+        {/* SaveButton — the ONE saved-state save action (§4 success token pair). Disabled
+            while the load failed so a guessed default can never overwrite the real setting. */}
+        <SaveButton saved={saved} onClick={save} disabled={saving || loadError}>
           {saved ? <><Check size={13} /> {t('matching.saved')}</> : <><Save size={13} /> {t('matching.save')}</>}
         </SaveButton>
       </div>
 
-      <div style={{ marginTop: 18 }}>
+      {/* Honest load states — a failed GET must never silently show the hardcoded
+          defaults as if they were the tenant's saved values. */}
+      {loading && <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('common.loading')}</p>}
+      {loadError && <p style={{ fontSize: 12, color: 'var(--color-danger-text)' }}>{t('statusList.loadError')}</p>}
+
+      <div style={{ marginTop: 18, opacity: loading || loadError ? 0.5 : 1, pointerEvents: loading || loadError ? 'none' : 'auto' }}>
         <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 4 }}>
           <Mono style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>
             {level + 1}/{LEVELS.length} · {levelPct}%
@@ -92,7 +112,7 @@ export default function VacancyMatchingSettings() {
       <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 22 }}>{t('matching.perVacancyHint')}</p>
 
       {/* Match approval — three-option segmented control (house idiom for option cards). */}
-      <div style={{ marginTop: 28, paddingTop: 20, borderTop: '1px solid var(--border)' }}>
+      <div style={{ marginTop: 28, paddingTop: 20, borderTop: '1px solid var(--border)', opacity: loading || loadError ? 0.5 : 1, pointerEvents: loading || loadError ? 'none' : 'auto' }}>
         <SectionTitle>{t('matching.approval.title')}</SectionTitle>
         <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2, marginBottom: 12 }}>{t('matching.approval.subtitle')}</p>
         <SegmentedControl

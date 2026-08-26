@@ -7,7 +7,9 @@
  * drawer's ConversationsSection documents (measured against the same endpoint).
  */
 import { useCallback, useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import api, { unwrapList } from '@/lib/api'
+import { notifyError } from '@/lib/notify'
 import type { MessageRow } from '@/components/drawer/ConversationMessage'
 import type { Id } from '@/types/common'
 
@@ -15,6 +17,7 @@ import type { Id } from '@/types/common'
 // docblock above), reversing the server's newest→oldest older-chunk order to
 // prepend it correctly.
 export function useConversationThread(conversationId: Id | null) {
+  const { t } = useTranslation('common')
   const [messages, setMessages] = useState<MessageRow[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
@@ -52,9 +55,9 @@ export function useConversationThread(conversationId: Id | null) {
         setMessages(prev => [...[...older].reverse(), ...prev])
         setHasOlder(Boolean(body?.has_older))
       })
-      .catch(() => {})
+      .catch(() => notifyError(t('actionFailed')))
       .finally(() => setLoadingOlder(false))
-  }, [conversationId, messages])
+  }, [conversationId, messages, t])
 
   return { messages, loading, error, hasOlder, loadingOlder, loadOlder }
 }

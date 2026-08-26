@@ -26,6 +26,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import api, { unwrap, unwrapList } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
+import { isAbortError } from '@/lib/abortError'
 import { extractApiError } from '@/lib/extractApiError'
 import { useUsers } from '@/lib/queries'
 import { useOpportunityStages } from '@/lib/useOpportunityStages'
@@ -64,6 +65,8 @@ export function useOpportunitiesData(includeArchived: boolean = false, branchIds
 
   const queryClient = useQueryClient()
   const [customers, setCustomers] = useState<PageCustomer[]>([])
+  // A failed customers load must not read as "this tenant has no customers" (R8).
+  const [customersError, setCustomersError] = useState(false)
 
   // Opportunities list via React Query (A-3). A missing endpoint (404) is an
   // empty list, not an error. `refetch` doubles as the post-archive/restore
@@ -126,9 +129,10 @@ export function useOpportunitiesData(includeArchived: boolean = false, branchIds
   // type-filter over, not just the backend's small default page.
   useEffect(() => {
     const ctrl = new AbortController()
+    setCustomersError(false)
     api.get('/customers', { params: { per_page: 100 }, signal: ctrl.signal })
       .then(res => setCustomers(unwrapList<{ id?: Id; name?: string; company_name?: string }>(res).rows.map(c => ({ id: c.id ?? '', name: c.name ?? c.company_name ?? '—' }))))
-      .catch(() => {})
+      .catch(err => { if (!isAbortError(err)) setCustomersError(true) })
     return () => ctrl.abort()
   }, [])
 
@@ -162,17 +166,18 @@ export function useOpportunitiesData(includeArchived: boolean = false, branchIds
   // optimistic write is about to overwrite and put them back on failure, mirroring
   // useApplicationDrawerActions.handleMove.
   const handleMove = (id: Id, stageValue: string | number) => {
+    // A stage without a persistable id (seed fallback) cannot be PATCHed - refuse
+    // the move honestly instead of letting an optimistic write pretend it saved.
+    const s = stages.find(x => x.value === stageValue)
+    if (!s?.id) { notifyError(t('common:actionFailed')); return }
     const m = stageMeta(String(stageValue))
     const before = rows.find(r => r.id === id)
     const beforeStage = before ? { stage: before.stage, stageValue: before.stageValue, stageColor: before.stageColor } : undefined
     setRows(prev => prev.map(r => r.id === id ? ({ ...r, stage: m.label, stageValue, stageColor: m.color } as Opportunity) : r))
-    const s = stages.find(x => x.value === stageValue)
-    if (s?.id) {
-      api.patch(`/opportunities/${id}`, { opportunity_stage_id: s.id }).catch(err => {
-        if (beforeStage) setRows(prev => prev.map(r => r.id === id ? ({ ...r, ...beforeStage } as Opportunity) : r))
-        notifyError(extractApiError(err, t('common:actionFailed')))
-      })
-    }
+    api.patch(`/opportunities/${id}`, { opportunity_stage_id: s.id }).catch(err => {
+      if (beforeStage) setRows(prev => prev.map(r => r.id === id ? ({ ...r, ...beforeStage } as Opportunity) : r))
+      notifyError(extractApiError(err, t('common:actionFailed')))
+    })
   }
 
   // Header/picker edits: optimistic locally, then PATCH (UI keys → API keys).
@@ -237,7 +242,7 @@ export function useOpportunitiesData(includeArchived: boolean = false, branchIds
   const reload = () => { void refetch() }
 
   return {
-    rows, loading, error, customers, users, stages, stageMeta,
+    rows, loading, error, customers, customersError, users, stages, stageMeta,
     selected, drawerExpanded, setDrawerExpanded,
     selectedIds, toggleRow, toggleAll, clearSelection,
     selectOpportunity, closeDrawer, handleCreated, handleMove, updateOpportunity, reload,

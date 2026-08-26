@@ -181,7 +181,8 @@ export default function AddApplicationModal({ onClose, onCreated, lockedVacancy 
   // NOT in it (measured: e.g. a super-admin login isn't always a tenant user
   // row), so — unlike the cosmetic-only AddCandidateModal merge (0115255) — an
   // owner outside this list is never offered as a pickable/submittable option.
-  const ownerOptions = users.map(u => ({ value: String(u.id), label: u.name ?? '—' }))
+  // Memoised like the sibling stageOptions below — rebuilt only when the users list itself changes.
+  const ownerOptions = useMemo(() => users.map(u => ({ value: String(u.id), label: u.name ?? '—' })), [users])
   const meIsAssignable = me?.id != null && ownerOptions.some(o => o.value === String(me.id))
 
   // APP-REQUIRED-FE-1: tenant-configurable required fields for this popup (Settings
@@ -242,6 +243,10 @@ export default function AddApplicationModal({ onClose, onCreated, lockedVacancy 
     let alive = true
     api.get(`/vacancies/${lockedVacancy.id}`)
       .then(r => { if (alive) setLockedVacancyOwnerId(unwrap<{ owner?: { id?: Id } | null }>(r)?.owner?.id) })
+      // Deliberately silent: this only seeds an owner PROPOSAL, and the derivation
+      // chain below still falls back to the candidate owner then the logged-in user,
+      // so a failed fetch leaves the (still editable, still visible) owner picker empty
+      // rather than breaking the form.
       .catch(() => {})
     return () => { alive = false }
   }, [lockedVacancy?.id])

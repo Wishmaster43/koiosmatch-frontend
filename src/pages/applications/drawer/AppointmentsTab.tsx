@@ -6,7 +6,7 @@
  * straight from /candidates/{id}/appointments so it always reflects the shared
  * appointments entity, not a stale copy nested under the application.
  */
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Calendar, Clock, User, MapPin, Pencil, Search } from 'lucide-react'
 import api, { unwrapList } from '@/lib/api'
@@ -15,6 +15,7 @@ import { useAppointmentTypes } from '@/lib/useAppointmentTypes'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 import StatusFilterSelect, { useStatusFilter } from '@/components/drawer/StatusFilterSelect'
 import { SectionTitle } from '@/components/ui/typography'
+import SoftChip from '@/components/ui/SoftChip'
 import { PlanIntakeModal } from '@/pages/candidates/shared'
 import type { ExistingAppointment } from '@/pages/candidates/shared'
 import type { ApplicationDetail } from '@/types/application'
@@ -47,16 +48,24 @@ export default function AppointmentsTab({ application: a }: { application: Appli
   const [editing, setEditing] = useState<ExistingAppointment | null>(null)
 
   // Load this candidate's appointments and keep only the ones linked to this application.
+  // Request-id guarded (§9): `load` also re-runs as the PlanIntakeModal onCreated callback
+  // (lines 144/188/192 below), so the effect-driven call and that callback's call can overlap
+  // in flight — a per-call `alive` alone would NOT stop the older response from winning if it
+  // lands last, since each invocation has its own closure. A shared ref counter tags each call
+  // and only the response matching the LATEST tag is applied, so the last-fired call always wins.
+  const requestIdRef = useRef(0)
   const load = useCallback(() => {
+    const requestId = ++requestIdRef.current
     if (a.candidateId == null) { setAppointments([]); setLoading(false); return }
     setLoading(true); setLoadFailed(false)
     api.get(`/candidates/${a.candidateId}/appointments`, { quiet404: true })
       .then(r => {
+        if (requestIdRef.current !== requestId) return
         const rows = (unwrapList(r).rows) as RawAppt[]
         setAppointments(rows.filter(ap => String(ap.application_id) === String(a.id)))
       })
-      .catch(() => setLoadFailed(true))
-      .finally(() => setLoading(false))
+      .catch(() => { if (requestIdRef.current === requestId) setLoadFailed(true) })
+      .finally(() => { if (requestIdRef.current === requestId) setLoading(false) })
   }, [a.candidateId, a.id])
   useEffect(() => { load() }, [load])
 
@@ -154,8 +163,7 @@ export default function AppointmentsTab({ application: a }: { application: Appli
           <div key={ap.id} style={{ border: '1px solid var(--border)', borderRadius: 10, padding: '12px 14px', background: 'var(--surface)' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 6 }}>
               <SectionTitle as="span">{typeLabel}</SectionTitle>
-              <span style={{ fontSize: 11, fontWeight: 500, padding: '2px 8px', borderRadius: 99,
-                background: 'var(--color-secondary-bg)', color: 'var(--color-secondary)' }}>{statusLabel}</span>
+              <SoftChip label={statusLabel} color="var(--color-secondary)" round />
             </div>
             <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 10, fontSize: 12, color: 'var(--text-muted)' }}>
               {/* Wall-time DD-MM-YYYY HH:mm — the BE stores it in UTC as-entered, so no local-tz shift. */}

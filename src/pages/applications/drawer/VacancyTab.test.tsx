@@ -71,7 +71,7 @@ vi.mock('./VacancyLinkField', () => ({
   ),
 }))
 vi.mock('../hooks/useVacancyLinkOptions', () => ({
-  useVacancyLinkOptions: () => [{ value: '9', label: 'IC-verpleegkundige', client: 'Rivas' }],
+  useVacancyLinkOptions: () => ({ options: [{ value: '9', label: 'IC-verpleegkundige', client: 'Rivas' }], error: false }),
 }))
 // OPTIMISTIC-REVERT-1: mock notify so a failed save's error toast is assertable.
 vi.mock('@/lib/notify', () => ({ notifyError: vi.fn() }))

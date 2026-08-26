@@ -50,8 +50,15 @@ describe('KoiosAdviceBlock', () => {
   // attribute, no `aria-label` — a weaker, less consistently exposed accessible name
   // than every other icon-only control in this area. A role+name query only succeeds
   // once a real accessible name (aria-label) is present.
-  it('exposes an accessible name on the icon-only refresh button', () => {
-    render(<KoiosAdviceBlock namespace="candidates" insights={insights} />)
+  it('exposes an accessible name on the icon-only refresh button when a real callback exists', () => {
+    render(<KoiosAdviceBlock namespace="candidates" insights={insights} onRefresh={() => {}} />)
     expect(screen.getByRole('button', { name: 'ai.refresh' })).toBeInTheDocument()
+  })
+
+  // §3 no fake affordances: without a real onRefresh there is nothing to call,
+  // so the refresh button must not render at all (it used to fake a 1.4s delay).
+  it('renders no refresh button without a real onRefresh callback', () => {
+    render(<KoiosAdviceBlock namespace="candidates" insights={insights} />)
+    expect(screen.queryByRole('button', { name: 'ai.refresh' })).not.toBeInTheDocument()
   })
 })

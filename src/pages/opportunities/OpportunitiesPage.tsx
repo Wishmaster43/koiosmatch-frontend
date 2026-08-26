@@ -82,7 +82,7 @@ export default function OpportunitiesPage({ intent }: { intent?: unknown } = {})
 
   // Data layer (§3): list + customers + selection + optimistic mutations.
   const {
-    rows, loading, error, customers, users, stages,
+    rows, loading, error, customers, customersError, users, stages,
     selected, drawerExpanded, setDrawerExpanded,
     selectedIds, toggleRow, toggleAll, clearSelection,
     selectOpportunity, closeDrawer, handleCreated, handleMove, updateOpportunity, reload,
@@ -250,7 +250,7 @@ export default function OpportunitiesPage({ intent }: { intent?: unknown } = {})
 
   return (
     <>
-      {addOpen && <AddOpportunityModal onClose={() => setAddOpen(false)} onCreated={o => { setAddOpen(false); handleCreated(o) }} users={users} customers={customers} />}
+      {addOpen && <AddOpportunityModal onClose={() => setAddOpen(false)} onCreated={o => { setAddOpen(false); handleCreated(o) }} users={users} customers={customers} customersError={customersError} />}
       <div style={{ display: 'flex', height: '100%', overflow: 'hidden' }}>
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
 

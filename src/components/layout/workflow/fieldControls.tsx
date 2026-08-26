@@ -33,15 +33,19 @@ export function FaqSelectField({ value, onChange, fieldKey }: { value?: unknown;
   const { t } = useTranslation('workflows')
   const [faqs,    setFaqs]    = useState<Array<{ id?: string | number; name?: string; title?: string }>>([])
   const [loading, setLoading] = useState(true)
+  // A failed load must read as an error, never as "no FAQs configured" (R8/§3 four states).
+  const [error,   setError]   = useState(false)
+  const [retryTick, setRetryTick] = useState(0)
   const selected: unknown[] = Array.isArray(value) ? value : []
 
-  // Loads the tenant's FAQ list once on mount; a failure silently keeps the empty list since this is an optional multi-select, not a blocking form field.
+  // Loads the tenant's FAQ list once on mount; a failure surfaces the honest error state below instead of the empty-list copy.
   useEffect(() => {
+    setLoading(true); setError(false)
     import('@/lib/api').then(m => m.default.get('/ai/faqs'))
       .then(r => setFaqs(unwrapList<{ id?: string | number; name?: string; title?: string }>(r).rows))
-      .catch(() => {})
+      .catch(() => setError(true))
       .finally(() => setLoading(false))
-  }, [])
+  }, [retryTick])
 
   // Adds/removes one FAQ id from the selected set and writes the whole array back into the node config.
   const toggle = (id: string | number) => {
@@ -50,6 +54,7 @@ export function FaqSelectField({ value, onChange, fieldKey }: { value?: unknown;
   }
 
   if (loading) return <div style={{ fontSize: 12, color: 'var(--text-muted)', padding: '4px 0' }}>{t('fields.faqLoading')}</div>
+  if (error) return <ErrorBanner onRetry={() => setRetryTick(n => n + 1)}>{t('common:errorGeneric')}</ErrorBanner>
   if (faqs.length === 0) return (
     <div style={{ fontSize: 12, color: 'var(--text-muted)', padding: '6px 10px', border: '1px solid var(--border)', borderRadius: 8 }}>
       {t('fields.faqEmpty')}
@@ -196,6 +201,9 @@ export function LookupSelectField({ value, onChange, fieldKey, endpoint, valueKe
 }) {
   const { t } = useTranslation('workflows')
   const [opts, setOpts] = useState<Array<{ value: string; label: string }>>([])
+  // A failed load must read as an error, never as an honestly-empty lookup (R8/§3 four states).
+  const [error, setError] = useState(false)
+  const [retryTick, setRetryTick] = useState(0)
   // CreatableSelect's trigger is a <button>, which a plain aria-label cannot
   // name — a sr-only span + aria-labelledby names it instead (§4).
   const lookupLabelId = useId()
@@ -208,6 +216,7 @@ export function LookupSelectField({ value, onChange, fieldKey, endpoint, valueKe
   useEffect(() => {
     if (!endpoint) return
     let alive = true
+    setError(false)
     import('@/lib/api').then(m => m.default.get(endpoint))
       .then(r => {
         const rows = (responseKey
@@ -222,9 +231,11 @@ export function LookupSelectField({ value, onChange, fieldKey, endpoint, valueKe
           })
           .filter(o => o.value))
       })
-      .catch(() => {})
+      .catch(() => { if (alive) setError(true) })
     return () => { alive = false }
-  }, [endpoint, valueKey, responseKey])
+  }, [endpoint, valueKey, responseKey, retryTick])
+
+  if (error) return <ErrorBanner onRetry={() => setRetryTick(n => n + 1)}>{t('common:errorGeneric')}</ErrorBanner>
 
   return (
     <>
@@ -250,12 +261,16 @@ export function WhatsappPhoneNumberField({ value, onChange, fieldKey, endpoint, 
 }) {
   const { t } = useTranslation('workflows')
   const [opts, setOpts] = useState<Array<{ value: string; label: string; coexistence: boolean }>>([])
+  // A failed load must read as an error, never as an honestly-empty number list (R8/§3 four states).
+  const [error, setError] = useState(false)
+  const [retryTick, setRetryTick] = useState(0)
   const phoneLabelId = useId()
 
   // Load the tenant's WABA sender numbers, keeping the coexistence flag per option.
   useEffect(() => {
     if (!endpoint) return
     let alive = true
+    setError(false)
     import('@/lib/api').then(m => m.default.get(endpoint))
       .then(r => {
         const rows = unwrapList<Record<string, unknown>>(r).rows
@@ -263,9 +278,9 @@ export function WhatsappPhoneNumberField({ value, onChange, fieldKey, endpoint, 
           .map(o => ({ value: String(o.value ?? o.id ?? ''), label: String(o.label ?? o.name ?? o.value ?? ''), coexistence: !!o.coexistence }))
           .filter(o => o.value))
       })
-      .catch(() => {})
+      .catch(() => { if (alive) setError(true) })
     return () => { alive = false }
-  }, [endpoint])
+  }, [endpoint, retryTick])
 
   const filterActive = config?.channel === 'waba_coex'
   const filtered = filterActive ? opts.filter(o => o.coexistence) : opts
@@ -274,6 +289,8 @@ export function WhatsappPhoneNumberField({ value, onChange, fieldKey, endpoint, 
   const list = current && !filtered.some(o => o.value === current)
     ? [...filtered, ...opts.filter(o => o.value === current)]
     : filtered
+
+  if (error) return <ErrorBanner onRetry={() => setRetryTick(n => n + 1)}>{t('common:errorGeneric')}</ErrorBanner>
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>

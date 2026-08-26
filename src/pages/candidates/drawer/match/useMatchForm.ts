@@ -145,12 +145,15 @@ export function useMatchForm({
   // Candidate picker (only when no fixed candidate): light option list from the API.
   const [pickedCandidateId, setPickedCandidateId] = useState('')
   const [candidateOptions, setCandidateOptions] = useState<Array<{ id?: Id; name?: string }>>([])
+  // A failed load must not read the same as "no candidates" (R8) — surfaced via candidateOptionsError below.
+  const [candidateOptionsError, setCandidateOptionsError] = useState(false)
   // Loads the candidate option list for the picker only when the candidate is not already fixed by the caller (e.g. opened from the Matches page rather than a candidate's own Match tab).
   useEffect(() => {
     if (fixedCandidateId) return
+    setCandidateOptionsError(false)
     api.get('/candidates', { params: { per_page: 200 } })
       .then(r => setCandidateOptions((r.data?.data ?? []) as Array<{ id?: Id; name?: string }>))
-      .catch(() => setCandidateOptions([]))
+      .catch(() => { setCandidateOptions([]); setCandidateOptionsError(true) })
   }, [fixedCandidateId])
   const candidateId = fixedCandidateId ?? (pickedCandidateId || '')
   const { functions } = useFunctions()
@@ -172,7 +175,7 @@ export function useMatchForm({
   // P-dialog rollout is a later wave).
   const { decision: matchRuleDecision } = useActionRulePreflight('match.create', { candidateId: String(candidateId || '') })
 
-  // ── Relaties ── customer drives the location/department/contact cascade —
+  // ── Relations ── customer drives the location/department/contact cascade —
   // ONE shared implementation (audit R1 item 2; used to be its own inline
   // GET /customers/{id} effect here, duplicated in opportunities/vacancies). The
   // Raw setters below are the plain useState setters — VACANCY-PREFILL-1 wraps its
@@ -308,7 +311,7 @@ export function useMatchForm({
   const setContractType = (v: string) => { markTouched('contractType'); setContractTypeRaw(v) }
   const setCao = (v: string) => { markTouched('cao'); setCaoRaw(v) }
 
-  // ── Financieel ──
+  // ── Financial ──
   const [scale, setScale] = useState('')
   const [step, setStep] = useState('')
   const [purchase, setPurchase] = useState('')
@@ -398,7 +401,7 @@ export function useMatchForm({
 
   return {
     t, editing,
-    fixedCandidateId, pickedCandidateId, setPickedCandidateId, candidateOptions,
+    fixedCandidateId, pickedCandidateId, setPickedCandidateId, candidateOptions, candidateOptionsError,
     users, customerOptions, vacancyOptions, functions, contractTypeOptions, caoOptions,
     contactFunctions, contactFunctionsAllowFreeEntry,
     matchRuleDecision,

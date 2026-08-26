@@ -380,15 +380,14 @@ export default function KoiosPanel({ open, onClose, onNavigate }: { open?: boole
               <AtSign size={14} />
             </button>
 
-            {/* Paperclip */}
+            {/* Paperclip — no upload path exists yet, so it renders honestly disabled (§3: no fake affordances). */}
             <button
-              title={t('koios.attachFile')}
-              // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- imperative two-property hover swap (background AND ink together); not a static Button variant
-              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px 5px',
-                borderRadius: 7, color: 'var(--sidebar-muted)', display: 'flex',
-                transition: 'background 0.1s, color 0.1s' }}
-              onMouseEnter={e => { e.currentTarget.style.background = 'var(--hover-bg)'; e.currentTarget.style.color = 'var(--color-primary)' }}
-              onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = 'var(--sidebar-muted)' }}>
+              disabled aria-disabled="true"
+              title={`${t('koios.attachFile')} — ${t('common:comingSoon')}`}
+              aria-label={`${t('koios.attachFile')} — ${t('common:comingSoon')}`}
+              // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- disabled placeholder in the composer icon row; not a Button-variant action
+              style={{ background: 'none', border: 'none', cursor: 'default', padding: '4px 5px',
+                borderRadius: 7, color: 'var(--sidebar-muted)', display: 'flex', opacity: 0.45 }}>
               <Paperclip size={14} />
             </button>
 

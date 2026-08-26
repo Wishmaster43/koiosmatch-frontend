@@ -54,7 +54,7 @@ const contactOpt = (arr: CascadeOption[]) => arr.map(c => ({ value: String(c.id)
 export default function RelationsSection({
   t, errors, editing,
   candidateTypes, contractForm, setContractForm, hasContractLines, contractLines, setContractLines, customerNotApplicable,
-  fixedCandidateId, pickedCandidateId, setPickedCandidateId, candidateOptions,
+  fixedCandidateId, pickedCandidateId, setPickedCandidateId, candidateOptions, candidateOptionsError,
   customerId, setCustomerId, customerOptions,
   locationId, setLocationId, locations,
   departmentId, setDepartmentId, departments,
@@ -84,6 +84,8 @@ export default function RelationsSection({
   contractLines: MatchContractLine[]; setContractLines: (v: MatchContractLine[]) => void
   fixedCandidateId?: Id; pickedCandidateId: string; setPickedCandidateId: (v: string) => void
   candidateOptions: Array<{ id?: Id; name?: string }>
+  // A failed GET /candidates must read as an honest error on this picker, not "no candidates" (R8).
+  candidateOptionsError?: boolean
   customerId: string; setCustomerId: (v: string) => void; customerOptions: CustomerOption[]
   locationId: string; setLocationId: (v: string) => void; locations: CascadeLocation[]
   departmentId: string; setDepartmentId: (v: string) => void; departments: CascadeDepartment[]
@@ -131,10 +133,16 @@ export default function RelationsSection({
       {!fixedCandidateId && (
         <F label={t('placement.candidate')} error={errors.pickedCandidateId}>
           {(labelId: string) => (
-            <CreatableSelect value={pickedCandidateId || null} onChange={setPickedCandidateId} allowCreate={false}
-              placeholder={t('placement.pickCandidate')} menuWidth={pickerMenuWidth}
-              aria-labelledby={labelId}
-              options={candidateOptions.map(c => ({ value: String(c.id), label: c.name ?? '—' }))} />
+            <>
+              <CreatableSelect value={pickedCandidateId || null} onChange={setPickedCandidateId} allowCreate={false}
+                placeholder={t('placement.pickCandidate')} menuWidth={pickerMenuWidth}
+                aria-labelledby={labelId}
+                options={candidateOptions.map(c => ({ value: String(c.id), label: c.name ?? '—' }))} />
+              {/* R8: a failed /candidates load must read as an error, never as "this tenant has no candidates". */}
+              {candidateOptionsError && (
+                <div style={{ fontSize: 11, color: 'var(--color-danger-text)', marginTop: 3 }}>{t('common:errorGeneric')}</div>
+              )}
+            </>
           )}
         </F>
       )}

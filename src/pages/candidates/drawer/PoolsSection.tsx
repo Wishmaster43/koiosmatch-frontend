@@ -20,7 +20,7 @@ import { Z } from '@/lib/zIndexScale'
 // Presentational pool chips (see the module doc above): the fetch/optimistic membership writes live in useCandidatePools, this file only renders and dispatches toggles.
 export default function PoolsSection({ c }: { c: Candidate }) {
   const { t } = useTranslation('candidates')
-  const { pools, allPools, has, toggle } = useCandidatePools(c)
+  const { pools, allPools, allPoolsError, has, toggle } = useCandidatePools(c)
   const [open,   setOpen]   = useState(false)
   const [search, setSearch] = useState('')
   const ref = useRef<HTMLDivElement>(null)
@@ -54,7 +54,11 @@ export default function PoolsSection({ c }: { c: Candidate }) {
                   style={{ width: '100%', border: 'none', fontSize: 12, color: 'var(--text)', background: 'none' }} />
               </div>
               <div style={{ maxHeight: 200, overflowY: 'auto' }}>
-                {allPools.length === 0 && (
+                {/* R8: a failed /pools load must read as an error, never as "this tenant has no pools". */}
+                {allPoolsError && (
+                  <div style={{ padding: '10px 12px', fontSize: 12, color: 'var(--color-danger-text)' }}>{t('common:errorGeneric')}</div>
+                )}
+                {!allPoolsError && allPools.length === 0 && (
                   <div style={{ padding: '10px 12px', fontSize: 12, color: 'var(--text-muted)' }}>{t('sections.poolsEmpty')}</div>
                 )}
                 {allPools

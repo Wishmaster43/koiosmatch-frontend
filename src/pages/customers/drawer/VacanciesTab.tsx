@@ -39,6 +39,7 @@ import { Search, Pencil } from 'lucide-react'
 import { AddVacancyModal } from '@/pages/vacancies/shared'
 import { VacancyLookupsProvider } from '@/context/VacancyLookupsContext'
 import DataTable from '@/components/ui/DataTable'
+import ErrorBanner from '@/components/ui/ErrorBanner'
 import type { Column } from '@/components/ui/DataTable'
 import StatusPill from '@/components/ui/StatusPill'
 import EntityLink from '@/components/ui/EntityLink'
@@ -71,14 +72,15 @@ type PublishedVacancyRow = VacancyRow & { published: boolean }
 // queryKey prefix (`['customers', customerId, 'vacancies', …]`) as before, so the
 // existing `queryClient.invalidateQueries` call below (on create) still hits it.
 function useCustomerVacanciesWithPublished(customerId?: Id, params?: Record<string, unknown>) {
-  const { data = [], isLoading: loading } = useQuery({
+  // isError surfaced alongside data/loading — a failed load must not read as "no vacancies" (R8).
+  const { data = [], isLoading: loading, isError } = useQuery({
     queryKey: ['customers', customerId, 'vacancies', params ?? {}],
     enabled: !!customerId,
     queryFn: async ({ signal }): Promise<PublishedVacancyRow[]> =>
       unwrapList<Record<string, unknown>>(await api.get('/vacancies', { params: { customer_id: customerId, ...params }, signal }))
         .rows.map(v => ({ ...mapVacancyRow(v), published: v.published === true })),
   })
-  return { rows: data, loading }
+  return { rows: data, loading, error: isError }
 }
 
 // K2-FE: carries `isClosed` alongside value/label so the default filter can select
@@ -108,7 +110,7 @@ export default function VacanciesTab({ customerId, customerName, params }: { cus
   // Two sub-tabs (SubTabBar) — Vacatures stays the default so this tab's behaviour
   // is unchanged for anyone who never opens Sollicitaties.
   const [subTab, setSubTab] = useState<'vacancies' | 'applications'>('vacancies')
-  const { rows, loading } = useCustomerVacanciesWithPublished(customerId, params)
+  const { rows, loading, error } = useCustomerVacanciesWithPublished(customerId, params)
   // Explicit, reversible control (acceptance #2) to reach unpublished vacancies — the
   // default view hides them (matching the open-count definition below), but this toggle
   // makes them reachable again rather than silently unreachable behind a hidden filter.
@@ -262,6 +264,7 @@ export default function VacanciesTab({ customerId, customerName, params }: { cus
               label={t('vacancies.showUnpublished')} size="compact" />
             <DrawerAddButton onClick={() => setAdding(true)} label={t('vacancies.add')} />
           </div>
+          {error && <ErrorBanner style={{ marginBottom: 12 }}>{t('common:errorGeneric')}</ErrorBanner>}
           <DataTable columns={columns} rows={filteredRows} loading={loading} loadingText={t('page.loading')} emptyText={t('vacancies.empty')} />
         </>
       )}

@@ -12,6 +12,7 @@ import { useRightPanel } from '@/context/RightPanelContext'
 import ModuleView       from '@/components/settings/ModuleView'
 import EntityListDrawer  from '@/components/ui/EntityListDrawer'
 import Spinner from '@/components/ui/Spinner'
+import { PageTitle } from '@/components/ui/typography'
 import type { SmDrillItem } from '@/types/shiftmanager'
 
 // Renders the KPI blocks and shifts chart, registers filters into the right panel, and opens a drill-down drawer on KPI click.
@@ -110,9 +111,9 @@ export default function CustomersReport() {
 
       {/* Header */}
       <div className="flex items-center gap-4 mb-6">
-        <h2 style={{ fontSize: 20, fontWeight: 700, color: 'var(--text)', letterSpacing: '-0.3px', flexShrink: 0 }}>
+        <PageTitle style={{ flexShrink: 0 }}>
           {t('customersReport.title')}
-        </h2>
+        </PageTitle>
         {!loading && (
           <>
             <div style={{ width: 1, height: 18, background: 'var(--border)', flexShrink: 0 }} />

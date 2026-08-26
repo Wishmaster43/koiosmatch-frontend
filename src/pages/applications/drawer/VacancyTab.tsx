@@ -84,7 +84,7 @@ export default function VacancyTab({ application: a, onLinkVacancy }: VacancyTab
   // is nothing read-only to show yet, so no separate pencil step is needed).
   const [linking, setLinking] = useState(false)
   const [vacancyId, setVacancyId] = useState('')
-  const vacancyOptions = useVacancyLinkOptions(linking)
+  const { options: vacancyOptions, error: vacancyOptionsError } = useVacancyLinkOptions(linking)
 
   // Once a vacancy is actually linked, drop any in-flight linking draft.
   useEffect(() => { if (state === 'ok') setLinking(false) }, [state])
@@ -219,7 +219,7 @@ export default function VacancyTab({ application: a, onLinkVacancy }: VacancyTab
           {onLinkVacancy && (linking ? (
             <div style={{ display: 'flex', gap: 6, alignItems: 'center', width: '100%', maxWidth: 340 }}>
               <div style={{ flex: 1 }}>
-                <VacancyLinkField value={vacancyId} options={vacancyOptions} onChange={setVacancyId} />
+                <VacancyLinkField value={vacancyId} options={vacancyOptions} onChange={setVacancyId} error={vacancyOptionsError} />
               </div>
               <Button variant="primary" iconOnly size="sm" onClick={saveLink} disabled={!vacancyId} title={t('common:save')} aria-label={t('common:save')}><Save size={13} /></Button>
               <Button variant="secondary" iconOnly size="sm" onClick={() => setLinking(false)} title={t('common:cancel')} aria-label={t('common:cancel')}><X size={13} /></Button>

@@ -179,7 +179,7 @@ export default function MatchModal({
                 hasContractLines={form.hasContractLines} contractLines={form.contractLines} setContractLines={form.setContractLines}
                 customerNotApplicable={form.customerNotApplicable}
                 fixedCandidateId={form.fixedCandidateId} pickedCandidateId={form.pickedCandidateId} setPickedCandidateId={form.setPickedCandidateId}
-                candidateOptions={form.candidateOptions}
+                candidateOptions={form.candidateOptions} candidateOptionsError={form.candidateOptionsError}
                 customerId={form.customerId} setCustomerId={form.setCustomerId} customerOptions={form.customerOptions}
                 locationId={form.locationId} setLocationId={form.setLocationId} locations={form.locations}
                 departmentId={form.departmentId} setDepartmentId={form.setDepartmentId} departments={form.departments}

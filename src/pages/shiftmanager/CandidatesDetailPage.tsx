@@ -19,6 +19,7 @@ import DrillDownDrawer from '@/components/reports/DrillDownDrawer'
 import CandidateDetailDrawer from '@/components/reports/CandidateDetailDrawer'
 import HeaderSearch from '@/components/ui/HeaderSearch'
 import ClearFiltersButton from '@/components/ui/ClearFiltersButton'
+import ErrorBanner from '@/components/ui/ErrorBanner'
 import PaginationBar from '@/components/ui/PaginationBar'
 import { filterSmCandidates } from './data/smCandidateFilters'
 import { featureNamesOf, registrationYearOf } from './data/smCandidateFields'
@@ -31,7 +32,7 @@ import type { ReportCandidate } from '@/types/reports'
 export default function CandidatesDetailPage() {
   const { t } = useTranslation('reports')
   const { candidates_per_page } = useKpiSettings()
-  const { candidates, loading, page, pageSize, total, lastPage, setPage, handlePageSizeChange } = useSmCandidatesList()
+  const { candidates, loading, error, page, pageSize, total, lastPage, setPage, handlePageSizeChange } = useSmCandidatesList()
   // Full set for server-wide KPI counts (independent of the table's page). While
   // loading this is simply empty — the shared InsightsRow has no loading prop, so
   // the donut/cards show zero/"—" until the stats arrive, same as the native page.
@@ -136,6 +137,8 @@ export default function CandidatesDetailPage() {
       </div>
 
       <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', padding: '0 24px 16px', overflow: 'auto' }}>
+        {/* Honest error state — a failed /sm_candidates fetch must never read as "no candidates" */}
+        {error && <ErrorBanner style={{ marginBottom: 12 }}>{t('candidates.loadError')}</ErrorBanner>}
         <SmCandidatesTable rows={filtered} loading={loading} onRowClick={setDetail} />
       </div>
 

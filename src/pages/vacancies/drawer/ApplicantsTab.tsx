@@ -7,7 +7,7 @@
  * FOR THIS VACANCY, reusing the applications page's own create modal with the
  * vacancy preselected + locked (Danny, vacancy drawer screenshot).
  */
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { CalendarPlus, Search, ChevronLeft, ChevronRight } from 'lucide-react'
 import Avatar from '@/components/ui/Avatar'
@@ -103,14 +103,21 @@ export default function ApplicantsTab({ vacancy: v }: { vacancy: VacancyDetail }
   // vacancy is shown, so a stale override never leaks across vacancies.
   useEffect(() => { setOverride(null); setPage(1) }, [v.id])
   const live = override ?? v
+  // Tracks the currently open vacancy id so an in-flight refresh() can detect a
+  // switch to a different vacancy and drop its stale response (§9 alive guard).
+  const currentIdRef = useRef(v.id)
+  useEffect(() => { currentIdRef.current = v.id }, [v.id])
 
   // Refetch this vacancy's detail so the applications list + phase counts + total
-  // leads reflect the just-created/edited/detached application right away.
+  // leads reflect the just-created/edited/detached application right away. Guards
+  // the response against the vacancy id having changed in the meantime, so a
+  // slow response never overwrites a since-opened different vacancy (§9).
   const refresh = () => {
     if (v.id == null) return
-    api.get(`/vacancies/${v.id}`)
-      .then(r => setOverride(mapVacancyDetail(unwrap(r))))
-      .catch(() => {})
+    const requestedId = v.id
+    api.get(`/vacancies/${requestedId}`)
+      .then(r => { if (currentIdRef.current === requestedId) setOverride(mapVacancyDetail(unwrap(r))) })
+      .catch(() => { if (currentIdRef.current === requestedId) notifyError(t('common:actionFailed')) })
   }
 
   const applications = (live.applications ?? []) as ApplicantRow[]

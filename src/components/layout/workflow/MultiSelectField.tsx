@@ -35,15 +35,18 @@ export default function MultiSelectField({ field, value, onChange }: {
   const endpoint = typeof field.endpoint === 'string' ? field.endpoint : undefined
   const valueKey = typeof field.valueKey === 'string' ? field.valueKey : undefined
   // Endpoint-backed options (fetched once per endpoint) — mirrors LookupSelectField's
-  // own fetch, fail-soft to an empty list on error (fieldControls.tsx precedent).
+  // own fetch; an error still surfaces as an honest error state (see remoteError below), not a silent empty list.
   const [remoteOpts, setRemoteOpts] = useState<Opt[]>([])
   const [remoteLoading, setRemoteLoading] = useState(!!endpoint)
+  // A failed load must read as an error, never as "no results" (R8) — see the dropdown render below.
+  const [remoteError, setRemoteError] = useState(false)
 
-  // Fetches the endpoint-backed option list once per endpoint (mirrors LookupSelectField); an alive guard drops the result on unmount, and any failure fails soft to an empty list rather than an error state.
+  // Fetches the endpoint-backed option list once per endpoint (mirrors LookupSelectField); an alive guard drops the result on unmount, and a failure sets remoteError so the dropdown shows the honest error state instead of "no results".
   useEffect(() => {
     if (!endpoint) { setRemoteLoading(false); return }
     let alive = true
     setRemoteLoading(true)
+    setRemoteError(false)
     import('@/lib/api').then(m => m.default.get(endpoint))
       .then(r => {
         const rows = (unwrapList(r).rows) as Array<Record<string, unknown>>
@@ -51,7 +54,7 @@ export default function MultiSelectField({ field, value, onChange }: {
           .map(o => ({ value: String((valueKey ? o[valueKey] : undefined) ?? o.value ?? o.id ?? ''), label: String(o.label ?? o.name ?? o.value ?? '') }))
           .filter(o => o.value))
       })
-      .catch(() => {})
+      .catch(() => { if (alive) setRemoteError(true) })
       .finally(() => { if (alive) setRemoteLoading(false) })
     return () => { alive = false }
   }, [endpoint, valueKey])
@@ -141,6 +144,10 @@ export default function MultiSelectField({ field, value, onChange }: {
           {endpoint && remoteLoading ? (
             <div style={{ padding: '9px 12px', fontSize: 12, color: 'var(--text-muted)' }}>
               {t('fields.multiselectLoading', { defaultValue: 'Opties laden…' })}
+            </div>
+          ) : endpoint && remoteError ? (
+            <div style={{ padding: '9px 12px', fontSize: 12, color: 'var(--color-danger-text)' }}>
+              {t('common:errorGeneric')}
             </div>
           ) : freeEntry ? (
             <div style={{ padding: '9px 12px', fontSize: 12, color: 'var(--text-muted)' }}>

@@ -11,19 +11,24 @@ import { useTranslation } from 'react-i18next'
 import api, { unwrapList } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
+import { isAbortError } from '@/lib/abortError'
 import type { Candidate, CandidatePool } from '@/types/candidate'
 import type { Id } from '@/types/common'
 
-// Tenant pool list (GET /pools) as full objects; tolerant of a missing endpoint.
-export function useTenantPools(): CandidatePool[] {
+// Tenant pool list (GET /pools) as full objects. The list itself stays soft-fail
+// (an empty list is fine for an optional chip picker), but a REAL failure must
+// still be distinguishable from "this tenant has no pools" (R8) — `onError` is an
+// additive, optional escape hatch for a caller that wants to know (useCandidatePools
+// below); the plain array return (CandidatesBulkBar's call site) is unchanged.
+export function useTenantPools(onError?: () => void): CandidatePool[] {
   const [pools, setPools] = useState<CandidatePool[]>([])
-  // Load once on mount; a missing /pools endpoint fails soft to an empty list.
   useEffect(() => {
     const ctrl = new AbortController()
     api.get('/pools', { signal: ctrl.signal })
       .then(r => setPools(unwrapList<CandidatePool>(r).rows))
-      .catch(() => {})
+      .catch(err => { if (!isAbortError(err)) onError?.() })
     return () => ctrl.abort()
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- mount-once load; onError is a caller-supplied callback, not a value this effect should re-run for
   }, [])
   return pools
 }
@@ -31,7 +36,9 @@ export function useTenantPools(): CandidatePool[] {
 // A candidate's pool membership: local optimistic chips + persisted add/remove.
 export function useCandidatePools(candidate: Candidate) {
   const { t } = useTranslation('candidates')
-  const allPools = useTenantPools()
+  // A failed /pools load must be distinguishable from "this tenant has no pools" (R8).
+  const [allPoolsError, setAllPoolsError] = useState(false)
+  const allPools = useTenantPools(() => setAllPoolsError(true))
   const [pools, setPools] = useState<CandidatePool[]>(candidate.pools ?? [])
 
   // Is the candidate already in this pool (id or, for bare slugs, name)?
@@ -59,5 +66,5 @@ export function useCandidatePools(candidate: Candidate) {
     }
   }
 
-  return { pools, allPools, has, toggle }
+  return { pools, allPools, allPoolsError, has, toggle }
 }

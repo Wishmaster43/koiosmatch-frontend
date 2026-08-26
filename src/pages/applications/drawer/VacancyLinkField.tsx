@@ -16,11 +16,14 @@ const CreatableSelect = CreatableSelectJs as unknown as ComponentType<AnyProps>
  * match picker, useVacancyOptions). The caller's wrapper must NOT clip
  * overflow while this is open — the dropdown would be cut off (§3A(c)).
  */
-export default function VacancyLinkField({ value, options, onChange, menuWidth = 280 }: {
+export default function VacancyLinkField({ value, options, onChange, menuWidth = 280, error = false }: {
   value: string
   options: VacancyLinkOption[]
   onChange: (v: string) => void
   menuWidth?: number
+  // Set when the options fetch failed — surfaced as an honest placeholder/notice
+  // instead of presenting a broken load as an empty vocabulary.
+  error?: boolean
 }) {
   const { t } = useTranslation('applications')
   const opts = [
@@ -28,7 +31,10 @@ export default function VacancyLinkField({ value, options, onChange, menuWidth =
     ...options.map(v => ({ value: String(v.value), label: v.client ? `${v.label} · ${v.client}` : v.label })),
   ]
   return (
-    <CreatableSelect allowCreate={false} value={value} onChange={onChange}
-      placeholder={t('drawer.pickVacancy')} menuWidth={menuWidth} options={opts} />
+    <>
+      <CreatableSelect allowCreate={false} value={value} onChange={onChange}
+        placeholder={t('drawer.pickVacancy')} menuWidth={menuWidth} options={opts} />
+      {error && <div style={{ fontSize: 11, color: 'var(--color-danger-text)', marginTop: 4 }}>{t('drawer.vacancyLoadError')}</div>}
+    </>
   )
 }

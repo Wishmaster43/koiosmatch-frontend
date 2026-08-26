@@ -19,6 +19,8 @@ interface OpportunityGeneralCardProps {
   // Whether a client is picked yet — gates the "pick client first" placeholder
   // on the dependent contact/location/department pickers below.
   clientPicked: boolean
+  // A failed GET /customers must read as an honest error on this picker, not an empty list (R8).
+  customersError?: boolean
   contactId: string; onContactChange: (v: string) => void; contactOptions: Option[]
   locationId: string; onLocationChange: (v: string) => void; locationOptions: Option[]
   departmentId: string; onDepartmentChange: (v: string) => void; departmentOptions: Option[]
@@ -31,7 +33,7 @@ interface OpportunityGeneralCardProps {
 // location/department), owner and branch pickers — client/contract fields the "pick client first" gate applies to.
 export default function OpportunityGeneralCard({
   t, title, onTitleChange, titleError, titlePlaceholder,
-  clientId, onClientChange, customerOptions, clientPicked,
+  clientId, onClientChange, customerOptions, clientPicked, customersError,
   contactId, onContactChange, contactOptions,
   locationId, onLocationChange, locationOptions,
   departmentId, onDepartmentChange, departmentOptions,
@@ -57,6 +59,8 @@ export default function OpportunityGeneralCard({
             <CreatableSelect allowCreate={false} value={clientId || null} onChange={onClientChange}
               clearable clearLabel={t('modal.fields.client')}
               placeholder={t('common:select')} options={customerOptions} />
+            {/* R8: a failed /customers load must read as an error, never as "this tenant has no customers". */}
+            {customersError && <div style={{ fontSize: 11, color: 'var(--color-danger-text)', marginTop: 3 }}>{t('common:errorGeneric')}</div>}
           </FieldRow>
           <FieldRow label={t('modal.fields.contact')}>
             {/* Danny 28-07: same-named contacts (one per location/department

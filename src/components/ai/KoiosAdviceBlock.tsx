@@ -46,15 +46,13 @@ export default function KoiosAdviceBlock({ namespace, insights, onRefresh }: Koi
   // Which insight is expanded (null = all collapsed, the default).
   const [openIdx, setOpenIdx] = useState<number | null>(null)
 
-  // Refresh replays the "analysing" state; awaits a real callback when given,
-  // otherwise simulates a short delay (today there is nothing to call).
+  // Refresh awaits the real callback; without one there is nothing to call, so
+  // the button is not rendered at all (§3: no fake affordances, no fake delay).
   const handleRefresh = async () => {
-    if (loading) return
+    if (loading || !onRefresh) return
     setLoading(true)
     try {
-      const result = onRefresh?.()
-      if (result && typeof (result as Promise<void>).then === 'function') await result
-      else await new Promise(resolve => setTimeout(resolve, 1400))
+      await onRefresh()
     } finally {
       setLoading(false)
     }
@@ -70,11 +68,13 @@ export default function KoiosAdviceBlock({ namespace, insights, onRefresh }: Koi
         <KoiosAiMark size={16} title={t('common:aiGeneratedHint', { defaultValue: 'Door Koios AI gegenereerd — controleer voor gebruik.' })} />
         <span style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)', flex: 1 }}>{t('ai.title')}</span>
         <span style={{ fontSize: 10, padding: '2px 7px', borderRadius: 99, background: 'var(--button-fill)', color: 'var(--button-ink)', fontWeight: 600 }}>{t('ai.beta')}</span>
-        <button onClick={handleRefresh}
-          title={t('ai.refresh')} aria-label={t('ai.refresh')} disabled={loading}
-          style={{ background: 'none', border: 'none', cursor: loading ? 'default' : 'pointer', color: 'var(--text-muted)', padding: 3, display: 'flex', opacity: loading ? 0.4 : 1, borderRadius: 5 }}>
-          <RefreshCw size={12} />
-        </button>
+        {onRefresh && (
+          <button onClick={handleRefresh}
+            title={t('ai.refresh')} aria-label={t('ai.refresh')} disabled={loading}
+            style={{ background: 'none', border: 'none', cursor: loading ? 'default' : 'pointer', color: 'var(--text-muted)', padding: 3, display: 'flex', opacity: loading ? 0.4 : 1, borderRadius: 5 }}>
+            <RefreshCw size={12} />
+          </button>
+        )}
       </div>
 
       <div style={{ border: '1px solid var(--border)', borderRadius: 10, padding: '8px 10px', background: 'var(--surface)' }}>

@@ -1,7 +1,7 @@
 /**
  * LogsPanel — the workflow's run viewer in the right side panel: lists the real
  * executions of this workflow (status, time, candidate count, duration) with
- * expandable step results. Empty on failure, never fabricated. Extracted from
+ * expandable step results. An honest error state on failure, never fabricated data or a silent empty list. Extracted from
  * WorkflowCanvasEditor. RUN-CONTROL-1: a running/waiting run gets a stop button,
  * each step card shows its own timestamp + its OWN output slice (StepOutputSlice).
  */
@@ -13,10 +13,11 @@ import { StatusBadge, StepStatusBadge, DryRunBanner, formatDT, formatDuration } 
 import { CANCELLABLE, StopRunButton } from './runControl'
 import { useModuleCatalog } from './useModuleCatalog'
 import StepOutputSlice from './StepOutputSlice'
-import { SectionTitle, Caption } from '@/components/ui/typography'
+import { SectionTitle, Caption, Mono } from '@/components/ui/typography'
 import Button from '@/components/ui/Button'
 import { hhmmss } from '@/lib/localDate'
 import type { RunRow, RunStep } from '@/types/reports'
+import { isAbortError } from '@/lib/abortError'
 
 // Step time range, e.g. "14:03:11 → 14:03:14" (seconds matter inside one run).
 // House numeric shape (DATUM-1): digits only, so no locale is needed here.
@@ -43,6 +44,8 @@ export default function LogsPanel({ workflowId, liveRun, onClose, onOpenHistory 
   const { t: tw } = useTranslation('workflows')
   const [runs,     setRuns]     = useState<RunRow[]>([])
   const [loading,  setLoading]  = useState(true)
+  // A failed load must read as an honest error, never the "no runs yet" empty state (R8).
+  const [loadError, setLoadError] = useState(false)
   const [expanded, setExpanded] = useState<string | number | null>(null)
   // SYNC-PROGRESS-1: a 1s clock in STATE (never Date.now() in render — impure per
   // the compiler lint) so a busy run's Duur ticks live.
@@ -64,10 +67,11 @@ export default function LogsPanel({ workflowId, liveRun, onClose, onOpenHistory 
     : runs
   useEffect(() => { if (liveRun?.id != null) setExpanded(liveRun.id) }, [liveRun?.id])
 
-  // Load this workflow's real executions; empty on failure, never fabricated.
+  // Load this workflow's real executions; a failure surfaces the honest error state below, never fabricated data or a silent empty list.
   useEffect(() => {
     const ctrl = new AbortController()
     setLoading(true)
+    setLoadError(false)
     api.get('/workflow-runs', { signal: ctrl.signal })
       .then(res => {
         const rows = unwrapList<RunRow>(res).rows
@@ -75,7 +79,7 @@ export default function LogsPanel({ workflowId, liveRun, onClose, onOpenHistory 
         mine.sort((a: RunRow, b: RunRow) => +new Date(b.started_at ?? b.created_at ?? 0) - +new Date(a.started_at ?? a.created_at ?? 0))
         setRuns(mine)
       })
-      .catch(() => setRuns([]))
+      .catch(err => { if (!isAbortError(err)) setLoadError(true) })
       .finally(() => setLoading(false))
     return () => ctrl.abort()
   }, [workflowId])
@@ -105,7 +109,10 @@ export default function LogsPanel({ workflowId, liveRun, onClose, onOpenHistory 
         {loading && (
           <div style={{ padding: 24, textAlign: 'center', fontSize: 12, color: 'var(--text-muted)' }}>{t('runs.loading')}</div>
         )}
-        {!loading && displayRuns.length === 0 && (
+        {!loading && loadError && (
+          <div style={{ padding: 24, textAlign: 'center', fontSize: 12, color: 'var(--color-danger-text)' }}>{t('common:errorGeneric')}</div>
+        )}
+        {!loading && !loadError && displayRuns.length === 0 && (
           <div style={{ padding: 24, textAlign: 'center', fontSize: 12, color: 'var(--text-muted)' }}>{t('runs.empty')}</div>
         )}
         {!loading && displayRuns.map((run, idx) => {
@@ -199,7 +206,7 @@ export default function LogsPanel({ workflowId, liveRun, onClose, onOpenHistory 
                         </div>
                         {/* WHEN this step ran — prominent on every card (RUN-CONTROL-1). */}
                         {time && (
-                          <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text)', fontFamily: 'monospace', marginTop: 4 }}>{time}</div>
+                          <Mono as="div" style={{ fontSize: 11, fontWeight: 600, color: 'var(--text)', marginTop: 4 }}>{time}</Mono>
                         )}
                         {step.error != null && (
                           <div style={{ fontSize: 11, color: 'var(--color-danger-text)', marginTop: 4 }}>{String(step.error)}</div>

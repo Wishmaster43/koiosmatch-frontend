@@ -57,6 +57,7 @@ export default function CustomFieldsSettings({ entityType }) {
   const entityLabel = t(`nav.${ENTITY_NAV_ID[entityType] ?? entityType}`)
   const [fields,   setFields]   = useState([])
   const [loading,  setLoading]  = useState(true)
+  const [loadError, setLoadError] = useState(false)
   const [expanded, setExpanded] = useState(null)
   const [adding,   setAdding]   = useState(false)
   const [saving,   setSaving]   = useState(null)
@@ -64,12 +65,16 @@ export default function CustomFieldsSettings({ entityType }) {
   const [editForms, setEditForms] = useState({})
 
   // Load definitions whenever the entity or language changes (unified /custom-fields).
+  // An alive guard stops a stale response from a previous entity tab overwriting a newer one.
   useEffect(() => {
+    let alive = true
     setLoading(true)
+    setLoadError(false)
     api.get('/custom-fields', { params: { entity_type: entityType } })
-      .then(r => setFields((unwrapList(r).rows).map(d => toField(d, i18n.language))))
-      .catch(() => {})
-      .finally(() => setLoading(false))
+      .then(r => { if (alive) setFields((unwrapList(r).rows).map(d => toField(d, i18n.language))) })
+      .catch(() => { if (alive) setLoadError(true) })
+      .finally(() => { if (alive) setLoading(false) })
+    return () => { alive = false }
   }, [entityType, i18n.language])
 
   // Persist a drag-reordered list (same mechanism as the contract-forms lookup
@@ -172,6 +177,7 @@ export default function CustomFieldsSettings({ entityType }) {
   const setEF = (id, k, v) => setEditForms(p => ({ ...p, [id]: { ...(p[id] ?? {}), [k]: v } }))
 
   if (loading) return <div style={{ padding: 24, color: 'var(--text-muted)', fontSize: 13 }}>{t('common.loading')}</div>
+  if (loadError) return <div style={{ padding: 24, color: 'var(--color-danger-text)', fontSize: 13 }}>{t('statusList.loadError')}</div>
 
   return (
     <div style={{ maxWidth: 640 }}>

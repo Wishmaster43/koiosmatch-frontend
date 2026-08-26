@@ -14,6 +14,7 @@ import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Save, Check, Mail, AlertTriangle, Eye, EyeOff } from 'lucide-react'
 import api from '@/lib/api'
+import { notifyError } from '@/lib/notify'
 import { loadSettings, saveSettings } from '../lib/settingsApi'
 import RichTextEditor from '@/components/ui/RichTextEditor'
 import Spinner from '@/components/ui/Spinner'
@@ -45,12 +46,17 @@ export default function EmailSettings({ context = 'klanten' }) {
   const [loading,      setLoading]       = useState(true)
   const [testing,      setTesting]       = useState(false)
   const [testResult,   setTestResult]    = useState(null)
+  const [loadError,    setLoadError]     = useState(false)
 
   // Loads this context's settings on mount, seeding every field from the stored keys (or a safe default when a key is absent).
+  // An alive guard stops a stale response from a previous context tab overwriting a newer one.
   useEffect(() => {
+    let alive = true
     setLoading(true)
+    setLoadError(false)
     loadSettings()
       .then(stored => {
+        if (!alive) return
         setProvider(stored[`${K}provider`]  ?? 'manual')
         setFromName(stored[`${K}from_name`] ?? '')
         setFromEmail(stored[`${K}from`]     ?? '')
@@ -61,8 +67,9 @@ export default function EmailSettings({ context = 'klanten' }) {
         setSmtpPassSet(stored[`${K}smtp_pass`] === '••••••••')
         setSignature(stored[`${K}signature`] ?? '')
       })
-      .catch(() => {})
-      .finally(() => setLoading(false))
+      .catch(() => { if (alive) setLoadError(true) })
+      .finally(() => { if (alive) setLoading(false) })
+    return () => { alive = false }
   }, [K])
 
   // Persists the current form values under this context's prefixed keys, and flashes the saved state briefly on success.
@@ -78,7 +85,7 @@ export default function EmailSettings({ context = 'klanten' }) {
       await saveSettings(payload)
       setSaved(true)
       setTimeout(() => setSaved(false), 2000)
-    } catch { /* noop */ }
+    } catch { notifyError(t('statusList.saveFailed')) }
     setSaving(false)
   }
 
@@ -142,6 +149,7 @@ export default function EmailSettings({ context = 'klanten' }) {
       )}
 
       {loading && <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 12 }}>{t('common.loading')}</p>}
+      {loadError && <p style={{ fontSize: 13, color: 'var(--color-danger-text)', marginBottom: 12 }}>{t('statusList.loadError')}</p>}
 
       {/* Two columns: connection settings stacked left, signature alongside right.
           items-stretch lets the signature card match the left column's height. */}

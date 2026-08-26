@@ -15,6 +15,7 @@ import { Check, Save, Package, Rocket, Crown, BarChart2, CalendarDays } from 'lu
 import shiftmanagerLogo from '@/assets/integrations/shiftmanager.png'
 import helloflexLogo from '@/assets/integrations/helloflex.png'
 import api from '@/lib/api'
+import { notifyError } from '@/lib/notify'
 import { useAuth } from '@/context/AuthContext'
 import SegmentedControl from '@/components/ui/SegmentedControl'
 import Spinner from '@/components/ui/Spinner'
@@ -71,19 +72,25 @@ export default function ModulesSettings() {
   const [loading, setLoading] = useState(true)
   const [saving,  setSaving]  = useState(false)
   const [savedOk, setSavedOk] = useState(false)
+  const [loadError, setLoadError] = useState(false)
 
-  // Load the tenant's current package + add-ons.
+  // Load the tenant's current package + add-ons. An alive guard stops a stale
+  // response from a previous tenant overwriting a newer one (fast super-admin switch).
   useEffect(() => {
     if (!activeTenant?.id) return
+    let alive = true
     setLoading(true)
+    setLoadError(false)
     api.get('/tenant-modules', { params: { tenant_id: activeTenant.id } })
       .then(res => {
+        if (!alive) return
         const tier = LEGACY_TO_TIER[res.data?.package] ?? 'core'
         const ad   = Array.isArray(res.data?.addons) ? res.data.addons : []
         setPkg(tier); setAddons(ad); setSavedAt({ pkg: tier, addons: ad })
       })
-      .catch(() => { setPkg('core'); setAddons([]); setSavedAt({ pkg: 'core', addons: [] }) })
-      .finally(() => setLoading(false))
+      .catch(() => { if (alive) setLoadError(true) })
+      .finally(() => { if (alive) setLoading(false) })
+    return () => { alive = false }
   }, [activeTenant?.id])
 
   const hasChange = pkg !== savedAt.pkg || !sameSet(addons, savedAt.addons)
@@ -123,13 +130,18 @@ export default function ModulesSettings() {
       setSavedAt({ pkg, addons })
       await refreshUser()
       setSavedOk(true); setTimeout(() => setSavedOk(false), 2500)
-    } catch { /* noop */ }
+    } catch { notifyError(t('statusList.saveFailed')) }
     setSaving(false)
   }
 
   if (loading) return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 160 }}>
       <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t('modules.loading')}</p>
+    </div>
+  )
+  if (loadError) return (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 160 }}>
+      <p style={{ fontSize: 13, color: 'var(--color-danger-text)' }}>{t('statusList.loadError')}</p>
     </div>
   )
 

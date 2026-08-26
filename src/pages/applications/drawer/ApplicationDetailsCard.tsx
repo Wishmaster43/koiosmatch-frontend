@@ -98,7 +98,7 @@ export default function ApplicationDetailsCard({ application: a, onLinkVacancy, 
   const [editing, setEditing] = useState(false)
   const [vacancyId, setVacancyId] = useState('')
   const [source, setSource] = useState('')
-  const vacancyOptions = useVacancyLinkOptions(editing)
+  const { options: vacancyOptions, error: vacancyOptionsError } = useVacancyLinkOptions(editing)
   // S-SOURCE-1, GRADUATED 2026-08-14: source is a searchable/creatable picker backed
   // by the real /candidate-sources tenant lookup (see useApplicationSources' doc
   // comment for the full backend contract) instead of free text — never a hardcoded list.
@@ -193,7 +193,7 @@ export default function ApplicationDetailsCard({ application: a, onLinkVacancy, 
       </Row>
       {editing ? (
         <Row label={t('drawer.vacancy')}>
-          <VacancyLinkField value={vacancyId} options={vacancyOptions} onChange={setVacancyId} />
+          <VacancyLinkField value={vacancyId} options={vacancyOptions} onChange={setVacancyId} error={vacancyOptionsError} />
         </Row>
       ) : (
         <Row label={t('drawer.vacancy')}>

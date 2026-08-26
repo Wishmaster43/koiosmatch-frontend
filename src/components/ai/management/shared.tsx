@@ -146,8 +146,10 @@ export function TextEditor({ value, onChange, onSave, saving, saved, versions, o
 
 // ── SideList — reusable left-list + right-detail layout ──────────────────────
 
-export function SideList<T extends { id?: string | number }>({ title, items, selected, onNew, loading, renderItem, children }: {
+export function SideList<T extends { id?: string | number }>({ title, items, selected, onNew, loading, error, renderItem, children }: {
   title?: ReactNode; items: T[]; selected?: T | null; onNew?: () => void; loading?: boolean
+  // A failed load must render its own state — an error must never be mistaken for "nothing configured yet" (R8).
+  error?: boolean
   // onSelect is accepted for call-site symmetry but selection is wired via renderItem's ListRow.
   onSelect?: (item: T) => void
   renderItem: (item: T, active: boolean) => ReactNode; children?: ReactNode
@@ -165,10 +167,14 @@ export function SideList<T extends { id?: string | number }>({ title, items, sel
         </div>
         <div style={{ flex: 1, overflowY: 'auto' }}>
           {loading && <p style={{ padding: '12px 11px', fontSize: 12, color: 'var(--text-muted)' }}>{t('ai.loading')}</p>}
-          {!loading && items.length === 0 && (
+          {/* Distinguish a failed load from an honestly empty list (R8 four-states). */}
+          {!loading && error && (
+            <p style={{ padding: '12px 11px', fontSize: 12, color: 'var(--color-danger-text)' }}>{t('common:errorGeneric')}</p>
+          )}
+          {!loading && !error && items.length === 0 && (
             <p style={{ padding: '12px 11px', fontSize: 12, color: 'var(--text-muted)' }}>{t('ai.emptyStart')}</p>
           )}
-          {items.map(item => renderItem(item, selected?.id === item.id))}
+          {!loading && !error && items.map(item => renderItem(item, selected?.id === item.id))}
         </div>
       </div>
       {/* Detail */}

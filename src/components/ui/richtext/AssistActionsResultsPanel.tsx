@@ -22,6 +22,7 @@ import { ACTION_TYPE_LABEL_NL } from './richTextAssistApi'
 import type { RichTextAssistActionItem } from './richTextAssistApi'
 import type { RunRow } from '@/types/reports'
 import { humanizeIsoDates } from '@/lib/localDate'
+import { notifyError } from '@/lib/notify'
 import Spinner from '../Spinner'
 import Button from '../Button'
 import { Caption } from '../typography'
@@ -58,8 +59,10 @@ export default function AssistActionsResultsPanel({ items, source, onApplyAsText
     try {
       setViewingRun(await fetchWorkflowRun(runId))
     } catch {
-      // Honest no-op: the card's own "Uitgevoerd" state already proved the
-      // action ran — a failed detail fetch just means the drawer can't open now.
+      // The card's own "Uitgevoerd" state already proved the action ran, so this
+      // is not fatal — but the click must still give visible feedback (R8), not
+      // silently do nothing.
+      notifyError(t('common:errorGeneric'))
     } finally {
       setRunLoading(false)
     }
