@@ -142,10 +142,13 @@ export const PAGE_TITLES: Record<string, string> = {
   'details.messages':           'AI Details — Messages',
 }
 
-// Temporary placeholder for pages that are not built yet.
-export function PlaceholderPage({ title }: { title?: ReactNode }) {
+// Temporary placeholder for pages that are not built yet. The title resolves
+// through the `pageTitles` namespace (keySeparator off — route keys contain
+// dots), falling back to the raw PAGE_TITLES English string for an untranslated key.
+export function PlaceholderPage({ pageKey }: { pageKey: string }) {
   // "Coming soon" suffix — this route has no real feature behind it yet.
-  const { t } = useTranslation('common')
+  const { t } = useTranslation(['common', 'pageTitles'])
+  const title: ReactNode = t(pageKey, { ns: 'pageTitles', keySeparator: false, defaultValue: PAGE_TITLES[pageKey] || pageKey })
   return (
     <div className="flex items-center justify-center h-full">
       <p className="font-mono text-sm text-[var(--text-muted)]">{title} — {t('comingSoon')}</p>
@@ -241,7 +244,7 @@ export function renderPage(activePage: string, { navIntent, goTo, dashView }: { 
 
     // ── HelloFlex module ──────────────────────────────────────────────────
     case 'helloflex':
-    case 'helloflex.dashboard': return <PlaceholderPage title="HelloFlex Dashboard" />
+    case 'helloflex.dashboard': return <PlaceholderPage pageKey="helloflex.dashboard" />
 
     // ── AI & Workflow module ──────────────────────────────────────────────
     // WF-EDITOR-DEEPLINK-1: forward the nav intent so a cross-entity
@@ -260,6 +263,6 @@ export function renderPage(activePage: string, { navIntent, goTo, dashView }: { 
       // the ten-page decision, or an old alias whose host retired) resolves to
       // the hub root — house rule: a removed route never breaks a deep link.
       if (activePage.startsWith('reports.')) return <ReportsPage />
-      return <PlaceholderPage title={PAGE_TITLES[activePage] || activePage} />
+      return <PlaceholderPage pageKey={activePage} />
   }
 }

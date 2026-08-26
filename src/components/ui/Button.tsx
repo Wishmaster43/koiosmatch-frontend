@@ -29,7 +29,7 @@ import type { AnchorHTMLAttributes, ButtonHTMLAttributes, CSSProperties, Ref } f
 import { BTN_H } from '@/config/buttonMetrics'
 import { tintBg, tintBorder, chipInk } from '@/lib/tint'
 
-export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'ghostAccent' | 'soft' | 'success' | 'danger' | 'dangerSoft'
+export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'ghostAccent' | 'soft' | 'success' | 'danger' | 'dangerSoft' | 'mutedOutline'
 export type ButtonSize = 'md' | 'sm'
 
 // iconOnly REQUIRES an accessible name at the TYPE level (herhaal-audit r6
@@ -90,6 +90,11 @@ const VARIANTS: Record<ButtonVariant, CSSProperties> = {
   // 10% tint measured 4.13:1 (< 4.5, herhaal-slotaudit 20-08) — chipInk blends it
   // toward --text far enough to read, in both themes.
   dangerSoft: { background: tintBg('var(--color-danger)'), color: chipInk('var(--color-danger)'), border: tintBorder('var(--color-danger)'), fontWeight: 500 },
+  // A bordered action with MUTED (not full-strength) text — the drawer-footer
+  // "Close" look. Neither existing bordered variant reproduces it: secondary
+  // paints --surface/--text, ghost has no border at all. Reference call site:
+  // CustomerDetailDrawer's footer close button.
+  mutedOutline: { background: 'none', color: 'var(--text-muted)', border: '1px solid var(--border)', fontWeight: 500 },
 }
 
 const SIZES: Record<ButtonSize, { height: number; padding: string; fontSize: number; borderRadius: number }> = {

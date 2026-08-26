@@ -18,10 +18,15 @@
  * ONE shared card behind every "create record(s) directly from a whole-record
  * file" flow in a create modal — customers (customer_tree, `wholeTree`) AND
  * vacancies (`vacancies`, one row = one record). The entity/template id and the
- * intro copy are props so a new caller never forks a second copy; only the
- * PARENT-mismatch variant (locations/departments/contacts scoped under an
- * already-open customer) stays its own component (`SubEntityImportCard`) since
- * that needs the parent-name-matching warning this card has no concept of.
+ * intro copy are props so a new caller never forks a second copy.
+ *
+ * PARENT-mismatch callers (locations/departments/contacts scoped under an
+ * already-open customer, `SubEntityImportCard`) reuse this SAME step rendering
+ * via `introExtra` (order-hint/parent-warning copy under the intro line),
+ * `previewBanner` (the measured mismatch alert above the dry-run report) and
+ * `onConfirmImport` (an interceptor in front of `wizard.confirmImport` that
+ * gates a mismatched import behind an extra confirm) — never a second copy of
+ * the upload/preview/result steps.
  *
  * Presentational only: the wizard state (useImportWizard) is owned by the PARENT
  * modal (AddCustomerModal / AddVacancyModal), exactly like useCvParse/CvUploadCard,
@@ -29,7 +34,7 @@
  * without this component knowing anything about closing itself.
  */
 import { useRef, useState } from 'react'
-import type { ChangeEvent, DragEvent } from 'react'
+import type { ChangeEvent, DragEvent, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { FileUp, FileText, AlertTriangle, Download } from 'lucide-react'
 import { cardBox } from '@/components/ui/modalCards'
@@ -63,11 +68,17 @@ interface EntityImportCardProps {
   intro: string
   /** True only for a combined file where one row can touch several linked records (e.g. customer_tree). */
   wholeTree?: boolean
+  /** Extra content under the intro line, before the button row — e.g. SubEntityImportCard's order-hint + parent-name warning. */
+  introExtra?: ReactNode
+  /** Extra content above the mandatory dry-run preview — e.g. SubEntityImportCard's measured parent-mismatch alert. */
+  previewBanner?: ReactNode
+  /** Confirm override for the dry-run preview step — defaults to `wizard.confirmImport`; SubEntityImportCard intercepts it to gate a parent mismatch behind an extra confirm dialog. */
+  onConfirmImport?: () => void
 }
 
 // The compact "create from a file" card at the top of a create modal: pick →
 // mandatory dry-run preview → real import, reusing the Settings wizard's own steps.
-export default function EntityImportCard({ wizard, canView, canImport, entity, intro, wholeTree = false }: EntityImportCardProps) {
+export default function EntityImportCard({ wizard, canView, canImport, entity, intro, wholeTree = false, introExtra, previewBanner, onConfirmImport }: EntityImportCardProps) {
   const { t } = useTranslation('settings')
   const { step, file, preview, run } = wizard
   const inputRef = useRef<HTMLInputElement>(null)
@@ -122,6 +133,7 @@ export default function EntityImportCard({ wizard, canView, canImport, entity, i
       {step === 'upload' && !file && (
         <>
           <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{intro}</div>
+          {introExtra}
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
             {/* HUISSTIJL-1: the primary create action of this step reads the house
                 trio, solid — same as every other accent action button. */}
@@ -178,15 +190,18 @@ export default function EntityImportCard({ wizard, canView, canImport, entity, i
 
       {/* Step 2: the mandatory dry-run report — reused verbatim from Settings. */}
       {step === 'preview' && preview.status === 'success' && (
-        <PreviewStep
-          result={preview.result}
-          runStatus={run.status}
-          runError={run.status === 'error' ? run.message : undefined}
-          canImport={canImport}
-          wholeTree={wholeTree}
-          onConfirm={wizard.confirmImport}
-          onBack={wizard.backToUpload}
-        />
+        <>
+          {previewBanner}
+          <PreviewStep
+            result={preview.result}
+            runStatus={run.status}
+            runError={run.status === 'error' ? run.message : undefined}
+            canImport={canImport}
+            wholeTree={wholeTree}
+            onConfirm={onConfirmImport ?? wizard.confirmImport}
+            onBack={wizard.backToUpload}
+          />
+        </>
       )}
 
       {/* Only reached when the real run left NOTHING resolved (see useEntityImportCard's

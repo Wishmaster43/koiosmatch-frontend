@@ -10,9 +10,6 @@ import { render, screen, within, fireEvent, waitFor } from '@testing-library/rea
 import ConfigPanel from './ConfigPanel'
 import type { FlowNode } from '@/types/workflow'
 
-vi.mock('@/components/ai/AIManagementTabs', () => ({
-  AgentsTab: () => null, PromptsTab: () => null, FAQTab: () => null, KnowledgeTab: () => null, ToolsTab: () => null,
-}))
 // The channel field renders through CreatableSelect (searchable dropdown); no
 // network options needed since 'channel' is a static select, not a lookup.
 // Its own field block is located via its visible label ("Kanaal", fieldLabel's

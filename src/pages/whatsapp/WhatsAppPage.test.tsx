@@ -318,3 +318,15 @@ describe('WhatsAppPage · per-channel overview (K-197)', () => {
     expect(screen.queryByTestId('channel-activity-chart')).not.toBeInTheDocument()
   })
 })
+
+describe('WhatsAppPage · dashboard deep link with a status (predecessor audit 57be1399)', () => {
+  it('a wa-web-queue intent with a status opens the tab pre-filtered on it', async () => {
+    mockUseWhatsAppData.mockReturnValue(dataFixture({}))
+    mockUseWhatsAppQueue.mockReturnValue(queueFixture({ batches: [] }))
+    // The wa-web-queue tab only exists when the tenant has the whatsapp_web module.
+    mockUseAuth.mockReturnValue({ hasModule: (m: string) => m === 'whatsapp_web', hasPermission: () => false })
+    render(<WhatsAppPage intent={{ tab: 'wa-web-queue', status: 'failed' }} />)
+    // The tab renders and the queue tab receives the status the tile clicked.
+    expect(await screen.findByTestId('wa-web-queue-tab')).toBeInTheDocument()
+  })
+})

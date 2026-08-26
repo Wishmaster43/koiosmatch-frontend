@@ -1,18 +1,18 @@
 /**
  * GenerateDescriptionFlow — see the fuller docblock below, right above the
- * component, for the "Genereer met Koios" create-form flow it renders.
+ * component, for the "Genereer met Koios" create-form flow it renders. The
+ * loading/error/success status panel is the shared GenerateFlowStatus
+ * (components/ui/) — only the idle entry button and the resolving/profile-chip
+ * header stay entity-specific (this form has no `base_vacancy_id` yet, so its
+ * generation profile is resolved live rather than seeded server-side).
  */
 import { useTranslation } from 'react-i18next'
-import type { CSSProperties } from 'react'
-import { Sparkles, X, Check } from 'lucide-react'
+import { Sparkles, X } from 'lucide-react'
 import KoiosAiMark from '@/components/ui/KoiosAiMark'
-import Spinner from '@/components/ui/Spinner'
-import AiGeneratedLabel from '@/components/ui/AiGeneratedLabel'
-import CalloutBox from '@/components/ui/CalloutBox'
 import Button from '@/components/ui/Button'
-import AssistTextPreview from '@/components/ui/richtext/AssistTextPreview'
+import GenerateFlowStatus from '@/components/ui/GenerateFlowStatus'
 // HUISSTIJL-1: the status chip line (11px/muted) is the shared Caption atom.
-import { Caption, GroupLabel } from '@/components/ui/typography'
+import { Caption } from '@/components/ui/typography'
 import { useGenerateDescription } from './useGenerateDescription'
 import type { GenerateFormFields } from './useGenerateDescription'
 
@@ -22,9 +22,6 @@ interface GenerateDescriptionFlowProps {
   // overwrite) — the caller decides what "apply" means (open the editor + seed it).
   onApply: (concept: string) => void
 }
-
-// HUISSTIJL-1: a genuine text link (underlined, no chrome) — not a Button variant.
-const linkBtn: CSSProperties = { height: 'auto', padding: 0, fontSize: 11, fontWeight: 600, color: 'var(--color-primary-text)', textDecoration: 'underline' }
 
 /**
  * GenerateDescriptionFlow — punt 17: "Genereer met Koios" on the CREATE form's
@@ -78,65 +75,12 @@ export default function GenerateDescriptionFlow({ fields, onApply }: GenerateDes
         </Button>
       )}
 
-      {status === 'loading' && (
-        <div aria-live="polite" style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: 'var(--text-muted)' }}>
-          <Spinner size={14} /> {t('generate.generating')}
-        </div>
-      )}
-
-      {/* 503 — genuinely down right now; honest outage copy, no credit wording. */}
-      {status === 'unavailable' && (
-        <CalloutBox variant="warning">
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <span>{t('common:errors.koiosUnavailable')}</span>
-            <Button variant="ghost" size="sm" type="button" onClick={generate} style={linkBtn}>{t('common:error.retry')}</Button>
-          </div>
-        </CalloutBox>
-      )}
-
-      {/* 402 — tenant credit spent/not activated; calm warning tone (never red), retry stays enabled. */}
-      {status === 'creditExhausted' && (
-        <CalloutBox variant="warning">
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <span>{t('common:errors.koiosCreditExhausted')}</span>
-            <Button variant="ghost" size="sm" type="button" onClick={generate} style={linkBtn}>{t('common:error.retry')}</Button>
-          </div>
-        </CalloutBox>
-      )}
-
       {status === 'noProfile' && (
         <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('generate.noProfile')}</div>
       )}
 
-      {status === 'error' && (
-        <div aria-live="polite" style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 12, color: 'var(--color-danger-text)' }}>
-          <span>{t('generate.error')}</span>
-          <Button variant="ghost" size="sm" type="button" onClick={generate} style={linkBtn}>{t('common:error.retry')}</Button>
-        </div>
-      )}
-
-      {status === 'success' && (
-        <>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, flexWrap: 'wrap' }}>
-            <GroupLabel as="span">{t('generate.previewLabel')}</GroupLabel>
-            {/* AI-Act disclosure (AI-ACT-1): the concept below is Koios-generated content. */}
-            <AiGeneratedLabel />
-          </div>
-          {/* Plain text (the backend returns prose, not HTML) — rendered as text
-              content, never dangerouslySetInnerHTML (§7). */}
-          {/* Shared readable preview (ASSIST-LEESBAAR-1) — no compareWith: a
-              generated concept is not a rewrite of existing text. */}
-          <div style={{ border: '1px solid var(--border)', borderRadius: 6, padding: '8px 10px', background: 'var(--bg)' }}>
-            <AssistTextPreview text={concept} />
-          </div>
-          <div style={{ display: 'flex', gap: 8 }}>
-            <Button variant="primary" size="sm" onClick={() => { onApply(concept); closeFlow() }}>
-              <Check size={13} /> {t('generate.apply')}
-            </Button>
-            <Button variant="secondary" size="sm" onClick={discard}>{t('generate.discard')}</Button>
-          </div>
-        </>
-      )}
+      <GenerateFlowStatus status={status} concept={concept} onRetry={generate}
+        onApply={() => { onApply(concept); closeFlow() }} onDiscard={discard} t={t} />
     </div>
   )
 }

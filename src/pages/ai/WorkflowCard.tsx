@@ -38,8 +38,10 @@ interface WorkflowCardProps {
 const STATUS_STYLES: Record<string, { bg: string; color: string; dot: string }> = {
   active:   { bg: 'var(--color-success-bg)', color: 'var(--color-success-text)', dot: 'var(--color-success)' },
   draft:    { bg: 'var(--hover-bg)', color: 'var(--text-muted)', dot: 'var(--text-muted)' },
-  // eslint-disable-next-line no-restricted-syntax -- DATA: per-status colour map (inactive badge shade), no exact token matches this specific orange
-  inactive: { bg: 'var(--color-warning-bg)', color: '#C2410C', dot: '#F97316' },
+  // Ink is the documented on-warning-bg pair (§4) — AA-safe on the pastel in both
+  // themes; the dot stays DATA hex, no exact token matches this specific orange.
+  // eslint-disable-next-line no-restricted-syntax -- DATA: per-status colour map (inactive badge dot shade)
+  inactive: { bg: 'var(--color-warning-bg)', color: 'var(--color-on-warning-bg)', dot: '#F97316' },
 }
 
 // One small pill for a workflow step's module type, with its icon and translated label; renders nothing for an unknown/missing type.

@@ -6,6 +6,12 @@
  * It never saves. The modal's own create button stays the single confirmation step,
  * which is the whole safety model of this feature; keeping the orchestration in a
  * hook keeps that promise visible in one place instead of inside the JSX container.
+ *
+ * Shared by BOTH CV entry points (PASTE-CV-1's paste card and the file-upload
+ * card, see AddCandidateModal.tsx) — each call site gets its own independent
+ * useCvParse instance (own phase/error) for free, since every hook call creates
+ * its own state; a second copy of this hook was never needed to keep the two
+ * paths from bleeding into each other.
  */
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useCvParse } from './useCvParse'

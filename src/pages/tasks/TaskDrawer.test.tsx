@@ -7,7 +7,7 @@
  * a technical 404 anymore (TaskController::update is now withTrashed).
  * (The live seed has no archived tasks, so this wiring is verified here.)
  */
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, fireEvent, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 // Real i18n (nl) instance so t() resolves genuine Dutch text — kept as a binding
@@ -16,13 +16,16 @@ import userEvent from '@testing-library/user-event'
 // copy for the new 'notes' tab key has landed in tasks.json yet.
 import i18n from '@/i18n'
 import api from '@/lib/api'
-import { chipInk } from '@/lib/tint'
+import { chipInk, tint, tintBg } from '@/lib/tint'
+import { NEUTRAL_AVATAR } from '@/components/ui/Avatar'
 import TaskDrawer from './TaskDrawer'
-// TASK-DISPLAY-DRILL-1: flat settings mock — defaults on, so existing
-// assertions keep seeing coloured chips.
+// TASK-DISPLAY-DRILL-1: controllable display settings (DetailsTab.test.tsx's
+// record pattern) — defaults on; the colour-toggle OFF-case below flips it.
+const displaySettingsRecord = vi.hoisted(() => ({ current: {} as Record<string, unknown> }))
 vi.mock('@/lib/settings/useAllSettings', () => ({
-  useAllSettings: () => ({}),
-  getBoolSetting: (_s: unknown, _key: string, fallback: boolean) => fallback,
+  useAllSettings: () => displaySettingsRecord.current,
+  getBoolSetting: (s: Record<string, unknown>, key: string, fallback: boolean) =>
+    key in s ? s[key] === true || s[key] === 'true' || s[key] === '1' : fallback,
 }))
 
 import type { TaskDetail } from '@/types/task'
@@ -353,5 +356,42 @@ describe('TaskDrawer · header badge reads the LIVE lookup, not a baked snapshot
     expect(titleRowScope().getByText('Te doen')).toHaveStyle({ color: chipInk('#123456') })
     // eslint-disable-next-line no-restricted-syntax -- restore the fixture colour for tests running after this one
     statusesRef.current[0].color = '#888888'
+  })
+})
+
+/*
+ * TASK-DISPLAY-DRILL-1 OFF-case (predecessor audit 65ad059e): colours off in the
+ * table means a NEUTRAL drill-down header — Avatar hashes a palette colour on
+ * null, so the fix must pass an explicit NEUTRAL_AVATAR, and the badge falls
+ * back to TitleBadge's own grey.
+ */
+describe('TaskDrawer · header follows the table colour toggle (TASK-DISPLAY-DRILL-1 off-case)', () => {
+  const titleRowScope = () => within(screen.getByRole('button', { name: 'Sluiten' }).parentElement!)
+  beforeEach(() => { displaySettingsRecord.current = {} })
+  afterEach(() => {
+    displaySettingsRecord.current = {}
+    // eslint-disable-next-line no-restricted-syntax -- restore the fixture colour for tests running after this one
+    statusesRef.current[0].color = '#888888'
+  })
+
+  it('toggle ON (default): avatar and badge carry the live lookup colour', () => {
+    // eslint-disable-next-line no-restricted-syntax -- test fixture lookup colour (DATA, not UI styling)
+    statusesRef.current[0].color = '#123456'
+    mount(task(false))
+    // eslint-disable-next-line no-restricted-syntax -- asserting tint() output for the fixture colour, not a UI colour choice
+    expect(screen.getByText('BK')).toHaveStyle({ background: tint('#123456', 12) })
+    // eslint-disable-next-line no-restricted-syntax -- asserting chipInk() output for the fixture colour, not a UI colour choice
+    expect(titleRowScope().getByText('Te doen')).toHaveStyle({ color: chipInk('#123456') })
+  })
+
+  it('toggle OFF: avatar renders the explicit neutral and the badge its own grey', () => {
+    // eslint-disable-next-line no-restricted-syntax -- test fixture lookup colour (DATA, not UI styling)
+    statusesRef.current[0].color = '#123456'
+    displaySettingsRecord.current = { task_table_color_status: false }
+    mount(task(false))
+    expect(screen.getByText('BK')).toHaveStyle({ background: tint(NEUTRAL_AVATAR, 12) })
+    const badge = titleRowScope().getByText('Te doen')
+    // The DOM lowercases hex colours, so assert against the lowercased token.
+    expect(badge).toHaveStyle({ color: chipInk(NEUTRAL_AVATAR.toLowerCase()), background: tintBg(NEUTRAL_AVATAR) })
   })
 })

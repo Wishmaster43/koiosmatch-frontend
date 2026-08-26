@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, fireEvent, renderHook } from '@testing-library/react'
 // Real i18n (nl) instance — kept as a binding (not just the side-effect import) so
 // the T4 advice-block test below can read the SAME resolved string the component
@@ -6,6 +6,7 @@ import { render, screen, fireEvent, renderHook } from '@testing-library/react'
 // in tasks.json yet (mirrors TaskDrawer.test.tsx's NT-TASK-1 pattern).
 import i18n from '@/i18n'
 import DetailsTab from './DetailsTab'
+import { NEUTRAL_AVATAR } from '@/components/ui/Avatar'
 import { useTaskAdvice } from '@/lib/useTaskAdvice'
 import type { TaskDetail } from '@/types/task'
 
@@ -432,5 +433,30 @@ describe('tasks DetailsTab — field values are plain text, never chips', () => 
     expect(statusEl.style.color).toBe('var(--text)')
     expect(screen.getByText('Belafspraak').style.display).not.toBe('inline-flex')
     expect(screen.getByText('Normaal').style.display).not.toBe('inline-flex')
+  })
+})
+
+/*
+ * TASK-DISPLAY-DRILL-1 OFF-case (predecessor audit 65ad059e): Avatar hashes a
+ * palette colour on null, so "colours off" must pass an explicit NEUTRAL_AVATAR —
+ * otherwise the assignee bubble stays coloured with the toggle off.
+ */
+describe('tasks DetailsTab — assignee avatar follows the table colour toggle', () => {
+  beforeEach(() => { displaySettingsRecord.current = {} })
+  afterEach(() => { displaySettingsRecord.current = {} })
+
+  // eslint-disable-next-line no-restricted-syntax -- test fixture avatar colour (DATA, not UI styling)
+  const withAssignee = { ...task, assigneeId: 'u1', assignee: { name: 'Anna', initials: 'AN', color: '#ff0000' } }
+
+  it('toggle ON (default): the assignee avatar carries their own colour', () => {
+    render(<DetailsTab task={withAssignee} onUpdate={vi.fn()} />)
+    // eslint-disable-next-line no-restricted-syntax -- asserting the fixture colour, not a UI colour choice
+    expect(screen.getByText('AN')).toHaveStyle({ background: '#ff0000' })
+  })
+
+  it('toggle OFF: the assignee avatar renders the explicit neutral', () => {
+    displaySettingsRecord.current = { task_table_color_assignee: false }
+    render(<DetailsTab task={withAssignee} onUpdate={vi.fn()} />)
+    expect(screen.getByText('AN')).toHaveStyle({ background: NEUTRAL_AVATAR })
   })
 })

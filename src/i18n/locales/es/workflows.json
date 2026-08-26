@@ -458,8 +458,8 @@
     "routerNote": "Ninguna ruta coincidente → el flujo se detiene para esa rama.",
     "noConfig": "No se requiere configuración.",
     "noOutput": "Aún no hay datos de ejecución. Pulsa ▶ en el módulo para probar.",
-    "item": "elemento",
-    "items": "elementos",
+    "itemsCount_one": "{{count}} elemento",
+    "itemsCount_other": "{{count}} elementos",
     "tabStandard": "Estándar",
     "tabAdvanced": "Avanzado",
     "tabTest": "Probar"
@@ -801,7 +801,7 @@
     "Spatie": "Espacio",
     "Dienstinformatie": "Información del turno",
     "Contracten": "Contratos",
-    "AVG": "RGPD",
+    "AVG": "AVG",
     "aangenomen": "contratado",
     "actief": "activo",
     "afgewezen": "rechazado",
@@ -1033,6 +1033,7 @@
     "naam_1 naam_2": "nombre_1\nnombre_2",
     "optioneel — leeg = alle redenen": "opcional. Vacío = todos los motivos",
     "{{1output}} of leeg laten voor volledige output": "{{1.output}} o dejar vacío para la salida completa",
+    "{{veldnaam}} of vaste tekst": "{{veldnaam}} o texto fijo",
     "{{vraag van kandidaat}}": "{{pregunta del candidato}}"
   },
   "fieldHints": {

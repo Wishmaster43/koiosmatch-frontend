@@ -34,6 +34,7 @@ import { initialsOf } from '@/lib/initials'
 import Button from '@/components/ui/Button'
 import type { TaskDetail } from '@/types/task'
 import type { Id } from '@/types/common'
+import { NEUTRAL_AVATAR } from '@/components/ui/Avatar'
 
 interface NewLink { type: string; id: string; label: string }
 interface UserLike { id?: Id; name?: string; firstname?: string; lastname?: string; email?: string; avatar_color?: string | null }
@@ -99,7 +100,11 @@ export default function TaskDrawer({ task, onClose, expanded, onToggleExpand, on
   // TASK-DISPLAY-DRILL-1: the header badge/avatar follow the same table toggle —
   // colours off in the table means a neutral drill-down header too.
   const colorStatus = getBoolSetting(displaySettings, 'task_table_color_status', true)
+  // Badge takes null (TitleBadge renders its own neutral grey); the AVATAR must get an
+  // explicit neutral instead — Avatar falls back to a hashed palette colour on null, so
+  // "colours off" would still paint a coloured bubble (predecessor audit, 65ad059e).
   const statusColor = colorStatus ? statusInfo.color : null
+  const avatarColor = colorStatus ? (statusInfo.color || NEUTRAL_AVATAR) : NEUTRAL_AVATAR
   const typeInfo = typeMeta(String(task.typeKey))
 
   // Map a tab id to its content component.
@@ -180,7 +185,7 @@ export default function TaskDrawer({ task, onClose, expanded, onToggleExpand, on
           // entity word doubled with the badge beside the name.
           label={<TitleBadge label={statusInfo.label} color={statusColor} />}
           expanded={expanded} onToggleExpand={onToggleExpand} onClose={onClose}
-          avatar={{ initials: initialsOf(task.title, 'T'), soft: true, color: statusColor }}
+          avatar={{ initials: initialsOf(task.title, 'T'), soft: true, color: avatarColor }}
           renderTitle={() => editingTitle ? (
             // T1: inline title edit — mirror VacancyDrawer's renderTitle swap.
             <input autoFocus value={titleDraft} onChange={e => setTitleDraft(e.target.value)}

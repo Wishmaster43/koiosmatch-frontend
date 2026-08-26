@@ -23,7 +23,7 @@ import { EdgeAddContext, EdgeDeleteContext, EdgeFilterContext, NodeRunContext, S
 import { OutputPanel, NODE_TYPES, EDGE_TYPES } from './workflow/canvas'
 import { EdgeFilterPanel } from './workflow/EdgeFilterPanel'
 import ModulePicker from './workflow/ModulePicker'
-import ConfigPanel, { MANAGE_TABS } from './workflow/ConfigPanel'
+import ConfigPanel from './workflow/ConfigPanel'
 import LogsPanel from './workflow/LogsPanel'
 import WorkflowHistoryView from './workflow/WorkflowHistoryView'
 import WorkflowRelationsView from './workflow/WorkflowRelationsView'
@@ -191,7 +191,7 @@ function EditorInner({ workflow, onClose, onSave, initialRunId }: {
                   onOpenHistory={run => { setHistoryRun({ row: run }); setView('history') }} />
               : <ConfigPanel node={selectedNode} onUpdate={updateNodeConfig} onDelete={deleteNode}
                   variables={upstreamVariables}
-                  onTabChange={tab => setWidePanelActive(MANAGE_TABS.includes(tab))} />
+                  onTabChange={tab => setWidePanelActive(tab === '__wide__')} />
             }
           </div>
         </div>

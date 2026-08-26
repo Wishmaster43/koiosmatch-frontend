@@ -4,8 +4,9 @@
  * icon buttons replace the old two full banner cards: an upload icon (opens the
  * existing file picker) and a paste icon (opens a small popover with the
  * existing paste-and-read flow). Parsing itself is unchanged — useCvParse /
- * usePasteCvPrefill / cvPrefill still drive both paths; this component only
- * decides how the recruiter STARTS them. Mirrors the drill-down's 26x26
+ * useCvPrefill / cvPrefill still drive both paths (useCvPrefill is called once
+ * per path, each getting its own independent parse instance); this component
+ * only decides how the recruiter STARTS them. Mirrors the drill-down's 26x26
  * bordered icon idiom (ProfileTab's own pop-out affordance).
  */
 import { useEffect, useRef, useState } from 'react'

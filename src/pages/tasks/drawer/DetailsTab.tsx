@@ -35,6 +35,7 @@ import type { TaskDetail } from '@/types/task'
 import type { Id } from '@/types/common'
 import type { ReactNode } from 'react'
 import { CANON_LABEL_STYLE } from '@/components/drawer/fieldRowCanon'
+import { NEUTRAL_AVATAR } from '@/components/ui/Avatar'
 
 interface UserLike { id?: Id; name?: string; firstname?: string; lastname?: string; email?: string; avatar_color?: string | null }
 
@@ -260,7 +261,8 @@ export default function DetailsTab({ task, onUpdate, onSubtaskCreated }: {
             <Row label={t('details.assignee')}>
               {task.assignee ? (
                 <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <Avatar initials={task.assignee.initials} size={20} color={colorAssignee ? task.assignee.color : null} />
+                  {/* Explicit neutral when colours are off: Avatar hashes a palette colour on null. */}
+                  <Avatar initials={task.assignee.initials} size={20} color={colorAssignee ? (task.assignee.color || NEUTRAL_AVATAR) : NEUTRAL_AVATAR} />
                   <span style={{ fontSize: 12, color: 'var(--text)' }}>{task.assignee.name}</span>
                 </span>
               ) : <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('bureau')}</span>}

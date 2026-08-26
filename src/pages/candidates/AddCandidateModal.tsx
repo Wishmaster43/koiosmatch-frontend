@@ -54,7 +54,6 @@ import CvUploadCard from './addmodal/CvUploadCard'
 import PasteCvCard from './addmodal/PasteCvCard'
 import { CvFilledContext } from './addmodal/cvFilledContext'
 import { useCvPrefill } from './addmodal/useCvPrefill'
-import { usePasteCvPrefill } from './addmodal/usePasteCvPrefill'
 import { useLiveFieldValidation } from './addmodal/useLiveFieldValidation'
 import { useRequiredFields } from './addmodal/useRequiredFields'
 
@@ -194,8 +193,9 @@ export default function AddCandidateModal({ onClose, onCreated, onImported }: Ad
     setErrors({})
   }, [])
   const { cv, cvFilled, summary: cvSummary, clearMark } = useCvPrefill(form, applyCvPatch)
-  // PASTE-CV-1: an independent parse instance (own phase/error), same mapping.
-  const { cv: pasteCv, cvFilled: pasteCvFilled, summary: pasteCvSummary, clearMark: clearPasteMark } = usePasteCvPrefill(form, applyCvPatch)
+  // PASTE-CV-1: a second call to the SAME hook, which gives it its own independent
+  // parse instance (own phase/error) for free — no separate hook needed.
+  const { cv: pasteCv, cvFilled: pasteCvFilled, summary: pasteCvSummary, clearMark: clearPasteMark } = useCvPrefill(form, applyCvPatch)
   // Marks from either path share one "from CV, check me" context — a field can
   // only have come from one of them at a time in practice, so a union is safe.
   const combinedCvFilled = new Set<string>([...cvFilled, ...pasteCvFilled])

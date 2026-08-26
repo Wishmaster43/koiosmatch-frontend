@@ -78,7 +78,6 @@ export function useWorkflowEditor({ workflow, onSave, initialRunId = null }: {
   const [trigger,        setTrigger]        = useState(workflow.trigger)
   const [scheduleConfig, setScheduleConfig] = useState<ScheduleConfig | null>(initialScheduleConfig)
   const [webhookId]                         = useState<string | number | null>(triggerConfig?.webhook_id ?? null)
-  const [, setWebhooks]                      = useState<unknown[]>([])
 
   // Dirty-check baseline (item 19): the snapshot right after load, computed via the
   // SAME serializer as the live snapshot below, so a freshly-opened workflow never
@@ -96,15 +95,6 @@ export function useWorkflowEditor({ workflow, onSave, initialRunId = null }: {
   // null = auto (node without incoming edge, leftmost); set via START badge drag
   const [startNodeId,    setStartNodeId]    = useState<string | null>(null)
 
-  // Load the webhook list once on mount; a failed fetch leaves it empty rather
-  // than blocking the editor, since the Webhook trigger picker degrades gracefully.
-  useEffect(() => {
-    import('@/lib/api').then(m => {
-      m.default.get('/webhooks')
-        .then(res => setWebhooks(unwrapList(res).rows))
-        .catch(() => {})
-    })
-  }, [])
   const [showLogs,       setShowLogs]       = useState(initialRunId != null)
   const [filterState,    setFilterState]    = useState<{ edgeId: string } | null>(null)
   const [outputState,    setOutputState]    = useState<{ nodeId: string; output: unknown } | null>(null)

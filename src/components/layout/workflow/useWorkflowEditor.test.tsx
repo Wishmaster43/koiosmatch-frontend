@@ -16,8 +16,9 @@ import { useWorkflowEditor } from './useWorkflowEditor'
 import type { Workflow, WorkflowStep } from '@/types/workflow'
 import api from '@/lib/api'
 
-// The mount effect fetches /webhooks through the default client — stub it, but
-// keep the real unwrap/unwrapList (importActual) so that call still resolves cleanly.
+// RUN-CONTROL-1's mount effect adopts a live run via GET /workflows/{id}/runs
+// through the default client — stub it, but keep the real unwrap/unwrapList
+// (importActual) so that call still resolves cleanly.
 vi.mock('@/lib/api', async () => {
   const actual = await vi.importActual<typeof import('@/lib/api')>('@/lib/api')
   return { ...actual, default: { get: vi.fn().mockResolvedValue({ data: { data: [] } }), post: vi.fn() } }
@@ -408,7 +409,7 @@ describe('useWorkflowEditor · getUpstreamVariables', () => {
 
 describe('useWorkflowEditor · NODE-PROGRESS-1 live progress mapping', () => {
   it('maps the polled run steps (status + {done,total} progress + items_total) onto node data', async () => {
-    // Route the mocked GET: the polled run for /workflow-runs/r1, [] for the webhooks mount fetch.
+    // Route the mocked GET: the polled run for /workflow-runs/r1, [] for the runs-adoption mount fetch.
     const run = {
       id: 'r1', status: 'running',
       steps: [

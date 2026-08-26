@@ -129,15 +129,6 @@ const PAGE_RESTRICTABLE = [
   'whatsapp', 'aiagents', 'workflows',
 ]
 
-// Module pages shown in the "Modules" nav group. Driven by accessible_pages.
-export const MODULE_PAGES: { id: string; label: string; soon?: boolean }[] = [
-  { id: 'shiftmanager', label: 'Rapportage Shiftmanager' },
-  { id: 'helloflex',    label: 'Rapportage HelloFlex', soon: true },
-  { id: 'aiagents',     label: 'AI Agents' },
-  { id: 'workflows',    label: 'Workflows' },
-  { id: 'whatsapp',     label: 'WhatsApp'  },
-]
-
 // Resolves the tenant's accessible page ids, in priority order: effective modules
 // (base package + add-ons), then the legacy package→pages map, then whatever the
 // backend already computed; null means "no restrictions configured".

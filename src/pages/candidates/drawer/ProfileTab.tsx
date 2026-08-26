@@ -154,8 +154,6 @@ export default function ProfileTab({ c, onEditSave, autoEditSignal, onContactMom
                 </div>
               : <div style={{ ...blockStyle, padding: '10px 12px', fontSize: 12, color: 'var(--text-muted)' }}>-</div>)}
       </div>
-
-      {/* Tenant custom fields — only renders when definitions exist */}
     </div>
   )
 }

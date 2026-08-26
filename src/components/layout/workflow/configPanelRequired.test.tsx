@@ -11,10 +11,6 @@ import { render, screen } from '@testing-library/react'
 import ConfigPanel from './ConfigPanel'
 import type { FlowNode } from '@/types/workflow'
 
-vi.mock('@/components/ai/AIManagementTabs', () => ({
-  AgentsTab: () => null, PromptsTab: () => null, FAQTab: () => null, KnowledgeTab: () => null, ToolsTab: () => null,
-}))
-
 const node: FlowNode = {
   id: 'n1', position: { x: 0, y: 0 },
   data: { type: 'whatsapp_send', config: {} },

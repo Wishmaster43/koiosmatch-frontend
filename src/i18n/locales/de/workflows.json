@@ -458,8 +458,8 @@
     "routerNote": "Keine passende Route → der Flow stoppt für diesen Zweig.",
     "noConfig": "Keine Konfiguration erforderlich.",
     "noOutput": "Noch keine Ausführungsdaten. Drücken Sie ▶ am Modul zum Testen.",
-    "item": "Element",
-    "items": "Elemente",
+    "itemsCount_one": "{{count}} Element",
+    "itemsCount_other": "{{count}} Elemente",
     "tabStandard": "Standard",
     "tabAdvanced": "Erweitert",
     "tabTest": "Testen"
@@ -801,7 +801,7 @@
     "Spatie": "Leerzeichen",
     "Dienstinformatie": "Dienstinformation",
     "Contracten": "Verträge",
-    "AVG": "DSGVO",
+    "AVG": "AVG",
     "aangenomen": "eingestellt",
     "actief": "aktiv",
     "afgewezen": "abgelehnt",
@@ -1033,6 +1033,7 @@
     "naam_1 naam_2": "name_1\nname_2",
     "optioneel — leeg = alle redenen": "optional. Leer = alle Gründe",
     "{{1output}} of leeg laten voor volledige output": "{{1.output}} oder leer lassen für die volle Ausgabe",
+    "{{veldnaam}} of vaste tekst": "{{veldnaam}} oder fester Text",
     "{{vraag van kandidaat}}": "{{Frage des Kandidaten}}"
   },
   "fieldHints": {

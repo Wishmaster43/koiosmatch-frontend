@@ -236,8 +236,11 @@ const CAPTION_ALLOWLIST = {
   'pages/candidates/drawer/VacancySearchTab.tsx': 4,
   'pages/customers/MergeCustomerModal.tsx': 2,
   'pages/customers/addmodal/CustomerBranchesCard.tsx': 1,
-  'pages/customers/drawer/MergeContactModal.tsx': 1,
-  'pages/customers/drawer/MergeSubEntityModal.tsx': 1,
+  // MERGE-DEDUP-1: MergeSubEntityModal.tsx/MergeContactModal.tsx each carried
+  // this pattern once; both are now thin configs over the shared
+  // MergeEntityModal.tsx (below), which carries the ONE remaining occurrence —
+  // a genuine shrink (2 files -> 1), not new drift.
+  'pages/customers/drawer/MergeEntityModal.tsx': 1,
   'pages/customers/drawer/PriceAgreementsTab.tsx': 1,
   'pages/dashboard/Dashboard.tsx': 1,
   'pages/dashboard/DashboardPrimitives.tsx': 1,

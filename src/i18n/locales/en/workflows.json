@@ -458,8 +458,8 @@
     "routerNote": "No matching route → the flow stops for that branch.",
     "noConfig": "No configuration required.",
     "noOutput": "No execution data yet. Press ▶ on the module to test.",
-    "item": "item",
-    "items": "items",
+    "itemsCount_one": "{{count}} item",
+    "itemsCount_other": "{{count}} items",
     "tabStandard": "Standard",
     "tabAdvanced": "Advanced",
     "tabTest": "Test"
@@ -801,7 +801,7 @@
     "Spatie": "Space",
     "Dienstinformatie": "Shift information",
     "Contracten": "Contracts",
-    "AVG": "GDPR",
+    "AVG": "AVG",
     "aangenomen": "hired",
     "actief": "active",
     "afgewezen": "rejected",
@@ -1033,6 +1033,7 @@
     "naam_1 naam_2": "name_1\nname_2",
     "optioneel — leeg = alle redenen": "optional. Empty = all reasons",
     "{{1output}} of leeg laten voor volledige output": "{{1.output}} or leave empty for the full output",
+    "{{veldnaam}} of vaste tekst": "{{veldnaam}} or fixed text",
     "{{vraag van kandidaat}}": "{{question from candidate}}"
   },
   "fieldHints": {

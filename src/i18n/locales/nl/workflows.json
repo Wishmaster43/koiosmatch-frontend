@@ -493,8 +493,8 @@
     "routerNote": "Geen overeenkomende route → de flow stopt voor die tak.",
     "noConfig": "Geen configuratie vereist.",
     "noOutput": "Nog geen uitvoerdata. Druk op ▶ bij de module om te testen.",
-    "item": "item",
-    "items": "items",
+    "itemsCount_one": "{{count}} item",
+    "itemsCount_other": "{{count}} items",
     "tabStandard": "Standaard",
     "tabAdvanced": "Geavanceerd",
     "tabTest": "Testen"
@@ -1033,6 +1033,7 @@
     "naam_1 naam_2": "naam_1\nnaam_2",
     "optioneel — leeg = alle redenen": "optioneel. Leeg = alle redenen",
     "{{1output}} of leeg laten voor volledige output": "{{1.output}} of leeg laten voor volledige output",
+    "{{veldnaam}} of vaste tekst": "{{veldnaam}} of vaste tekst",
     "{{vraag van kandidaat}}": "{{vraag van kandidaat}}"
   },
   "fieldHints": {

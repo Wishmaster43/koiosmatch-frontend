@@ -55,4 +55,17 @@ describe('WaWebQueueTile', () => {
     fireEvent.click(screen.getByText('+31 6 12345678'))
     expect(onNavigate).toHaveBeenCalledWith('whatsapp', { tab: 'wa-web-queue' })
   })
+
+  // Predecessor audit 57be1399: a count and its click-through must show the same
+  // population, so every headline figure deep-links with its OWN status.
+  it('each headline count navigates pre-filtered on its own status', () => {
+    const onNavigate = vi.fn()
+    render(<WaWebQueueTile feed={feed} onNavigate={onNavigate} />)
+    fireEvent.click(screen.getByText('feed.waWebQueue.inQueue'))
+    expect(onNavigate).toHaveBeenLastCalledWith('whatsapp', { tab: 'wa-web-queue', status: 'queued' })
+    fireEvent.click(screen.getByText('feed.waWebQueue.sending'))
+    expect(onNavigate).toHaveBeenLastCalledWith('whatsapp', { tab: 'wa-web-queue', status: 'sending' })
+    fireEvent.click(screen.getByText('feed.waWebQueue.failed'))
+    expect(onNavigate).toHaveBeenLastCalledWith('whatsapp', { tab: 'wa-web-queue', status: 'failed' })
+  })
 })

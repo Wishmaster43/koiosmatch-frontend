@@ -182,7 +182,7 @@ export default function WhatsAppPage({ intent }: { intent?: unknown } = {}) {
   // Open a specific tab when arriving via a dashboard link — includes the new
   // wa-web-queue/conversations targets (F1A) and an optional conversation to open.
   useEffect(() => {
-    const target = intent as { tab?: string; open?: string } | undefined
+    const target = intent as { tab?: string; open?: string; status?: string } | undefined
     const wanted = target?.tab
     // A module-gated target with the module off has no tab button and no body:
     // fall back to overview instead of leaving the tab bar with nothing selected.
@@ -191,6 +191,9 @@ export default function WhatsAppPage({ intent }: { intent?: unknown } = {}) {
       setTab(wanted as TabId)
     }
     if (wanted === 'conversations' && target?.open) setOpenConversationId(String(target.open))
+    // A dashboard count deep-links pre-filtered: the tile's status lands on the queue's
+    // own filter, so the destination shows the same population as the number clicked.
+    if (wanted === 'wa-web-queue' && target?.status) setWaWebStatus(String(target.status))
   }, [intent, waWebEnabled])
 
   // K-193: the WA-Web queue's own status filter — registered only while that
@@ -333,8 +336,8 @@ export default function WhatsAppPage({ intent }: { intent?: unknown } = {}) {
           ['conversations', t('conversations.title')],
         ] as const).map(([id, label]) => {
           const active = id === tab
+          // Only the escalations tab ever carries a badge — always the danger tint.
           const badge = id === 'escalations' ? escalations.length : 0
-          const badgeDanger = id === 'escalations'
           return (
             <button key={id} role="tab" aria-selected={active} onClick={() => setTab(id)}
               // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- role="tab" NAVIGATIE-face (rustende tab = plaatsmarkering, PRIMAIR-VLAK-1): underline-actief, geen actieknop; Button modelleert geen tabblad
@@ -347,10 +350,9 @@ export default function WhatsAppPage({ intent }: { intent?: unknown } = {}) {
               {badge > 0 && (
                 <span style={{ fontSize: 10, fontWeight: 700, minWidth: 16, height: 16, padding: '0 5px', borderRadius: 99,
                   display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                  // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- notification badge on a tab: a DATA signal using the documented on-* contrast pair, not an action surface
-                  background: badgeDanger ? 'var(--color-danger)' : 'var(--color-primary)',
-                  /* Text colour on a danger/primary badge fill uses the on-* contrast token, never raw white */
-                  color: badgeDanger ? 'var(--color-on-danger)' : 'var(--color-on-accent)' }}>
+                  background: 'var(--color-danger)',
+                  /* Text colour on the danger badge fill uses the on-* contrast token, never raw white */
+                  color: 'var(--color-on-danger)' }}>
                   {badge}
                 </span>
               )}

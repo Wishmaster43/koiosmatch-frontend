@@ -458,8 +458,8 @@
     "routerNote": "Aucune route correspondante → le flux s'arrête pour cette branche.",
     "noConfig": "Aucune configuration requise.",
     "noOutput": "Pas encore de données d'exécution. Appuyez sur ▶ sur le module pour tester.",
-    "item": "élément",
-    "items": "éléments",
+    "itemsCount_one": "{{count}} élément",
+    "itemsCount_other": "{{count}} éléments",
     "tabStandard": "Standard",
     "tabAdvanced": "Avancé",
     "tabTest": "Tester"
@@ -801,7 +801,7 @@
     "Spatie": "Espace",
     "Dienstinformatie": "Informations de service",
     "Contracten": "Contrats",
-    "AVG": "RGPD",
+    "AVG": "AVG",
     "aangenomen": "embauché",
     "actief": "actif",
     "afgewezen": "refusé",
@@ -1033,6 +1033,7 @@
     "naam_1 naam_2": "nom_1\nnom_2",
     "optioneel — leeg = alle redenen": "facultatif. Vide = tous les motifs",
     "{{1output}} of leeg laten voor volledige output": "{{1.output}} ou laisser vide pour la sortie complète",
+    "{{veldnaam}} of vaste tekst": "{{veldnaam}} ou texte fixe",
     "{{vraag van kandidaat}}": "{{question du candidat}}"
   },
   "fieldHints": {

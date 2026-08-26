@@ -1,9 +1,8 @@
 /**
  * ConfigPanel — the right side panel that configures the selected module: its
  * header (icon/label/category + delete), the settings tab (schema fields via
- * FieldInput), the execution-output tab, and — for the AI agent module — the
- * management tabs (Agents/Prompts/FAQ/Knowledge/Tools). Extracted from
- * WorkflowCanvasEditor. `MANAGE_TABS` is re-used by the editor to widen the panel.
+ * FieldInput) and the execution-output tab. For the AI agent module it also
+ * renders the Standard/Advanced/Test/Output tabs. Extracted from WorkflowCanvasEditor.
  */
 import { useState, useEffect } from 'react'
 import { Zap, Trash2, Play } from 'lucide-react'
@@ -13,17 +12,12 @@ import { SectionTitle, Caption, BodyText } from '@/components/ui/typography'
 import Button from '@/components/ui/Button'
 import DrawerTabs from '@/components/drawer/DrawerTabs'
 import { MODULE_META, MODULE_SCHEMAS } from '@/modules/index'
-import { AgentsTab, PromptsTab, FAQTab, KnowledgeTab, ToolsTab } from '@/components/ai/AIManagementTabs'
 import { FieldInput } from './fields'
 import { categorySlug, fieldHint, fieldLabel } from './moduleI18n'
 import AgentTestPanel from './AgentTestPanel'
 import OutputTree from './OutputTree'
 import FanoutSummary, { type WaFanout } from './FanoutSummary'
 import type { FlowNode, WorkflowField, WorkflowVarGroup } from '@/types/workflow'
-
-// '__wide__' is a sentinel that signals the editor to widen the right panel
-// eslint-disable-next-line react-refresh/only-export-components -- the editor and this panel share the tab-id contract; a constants-only split for one array is not worth the extra file (HMR-nicety warning only)
-export const MANAGE_TABS = ['agents', 'prompts', 'faq', 'knowledge', 'tools', '__wide__']
 
 // The workflow editor's right-side module configuration panel.
 export default function ConfigPanel({ node, onUpdate, onDelete, onTabChange, variables = [] }: {
@@ -196,13 +190,6 @@ export default function ConfigPanel({ node, onUpdate, onDelete, onTabChange, var
         </div>
       )}
 
-      {/* ── Non-agent management tabs (legacy/other modules) ─────────────────── */}
-      {!isAgent && activeTab === 'agents'    && <div style={{ flex: 1, overflow: 'hidden', padding: 12 }}><AgentsTab /></div>}
-      {!isAgent && activeTab === 'prompts'   && <div style={{ flex: 1, overflow: 'hidden', padding: 12 }}><PromptsTab /></div>}
-      {!isAgent && activeTab === 'faq'       && <div style={{ flex: 1, overflow: 'hidden', padding: 12 }}><FAQTab /></div>}
-      {!isAgent && activeTab === 'knowledge' && <div style={{ flex: 1, overflow: 'hidden', padding: 12 }}><KnowledgeTab /></div>}
-      {!isAgent && activeTab === 'tools'     && <div style={{ flex: 1, overflowY: 'auto', padding: 12 }}><ToolsTab /></div>}
-
       {/* ── Standard instellingen + uitvoering (non-agent) ───────────────────── */}
       {!isAgent && activeTab === 'instellingen' && (
         <div style={{ flex: 1, overflowY: 'auto', padding: 16, display: 'flex', flexDirection: 'column', gap: 14 }}>
@@ -287,7 +274,7 @@ export default function ConfigPanel({ node, onUpdate, onDelete, onTabChange, var
             : <div style={{ padding: 12 }}>
                 {fanout && <FanoutSummary fanout={fanout} />}
                 {waQueued != null && <Caption style={{ display: 'block', marginBottom: 8, fontWeight: 500 }}>{t('fields.whatsappQueued', { count: waQueued })}</Caption>}
-                {Array.isArray(output) && <Caption style={{ display: 'block', marginBottom: 8, fontWeight: 500 }}>{output.length} {output.length === 1 ? t('config.item') : t('config.items')}</Caption>}
+                {Array.isArray(output) && <Caption style={{ display: 'block', marginBottom: 8, fontWeight: 500 }}>{t('config.itemsCount', { count: output.length })}</Caption>}
                 <OutputTree data={output} />
               </div>}
         </div>
