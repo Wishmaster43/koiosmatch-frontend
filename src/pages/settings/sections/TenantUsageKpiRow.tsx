@@ -37,6 +37,13 @@ export default function TenantUsageKpiRow({ usage, loading }: Props) {
   // CREDITS-2-FE deel 3 — the package-budget split alongside the raw credits.
   const workflowCredits = usage?.billing?.workflow?.credits
   const workflowIncluded = usage?.billing?.workflow?.included_budget
+  // CMBE c963cdb1: AI meter (budget = package free tokens) + the WhatsApp block
+  // in the same tenant-facing shape, scoped to this tenant.
+  const aiUsed = usage?.billing?.ai?.used
+  const aiBudget = usage?.billing?.ai?.budget
+  const aiOver = usage?.billing?.ai?.over
+  const waTokens = usage?.whatsapp?.tokens
+  const waChannels = usage?.whatsapp?.by_channel ?? []
   const workflowBillable = usage?.billing?.workflow?.billable_credits
 
   return (
@@ -81,32 +88,53 @@ export default function TenantUsageKpiRow({ usage, loading }: Props) {
       />
       </div>
 
-      {/* Workflow (Koios Tokens) budget-status strip — the ONLY meter this
-          superadmin endpoint carries a real used/budget/over split for.
-          Measured (CLAUDE.md §10 discipline): AdminUsageController::show never
-          merges an ai_token_budget or a whatsapp tokens/by_channel block, so
-          the AI and WhatsApp meters cannot render honestly here yet — see the
-          worklist handoff rather than fake a bar with a guessed budget. */}
-      {(workflowIncluded ?? 0) > 0 ? (
-        <div style={{ maxWidth: 320, marginBottom: 18 }}>
-          <SectionTitle style={{ marginBottom: 6, fontSize: 12 }}>{t('usage.kpi.budgetStatus.title')}</SectionTitle>
-          <MeterBar label={t('usage.kpi.workflowLabel')} used={workflowCredits} budget={workflowIncluded} />
-          {(workflowBillable ?? 0) > 0 ? (
-            <Caption style={{ color: 'var(--color-danger-text)' }}>
-              {t('billing.usage.plan.overBudget', {
-                meter: t('usage.kpi.workflowLabel'),
-                n: formatNumber(workflowBillable ?? 0),
-                amount: formatCurrency(workflowAmount ?? 0),
-              })}
+      {/* Budget-status strips (CMBE c963cdb1: all three meters now emit a real
+          used/budget/over split on this endpoint). Per meter: a real budget (>0)
+          renders the MeterBar with an honest over/under caption; a 0/absent
+          budget renders the no-budget caption - never a 0-budget danger meter. */}
+      <SectionTitle style={{ marginBottom: 6, fontSize: 12 }}>{t('usage.kpi.budgetStatus.title')}</SectionTitle>
+      <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', marginBottom: 18 }}>
+        {[
+          { key: 'workflow', label: t('usage.kpi.workflowLabel'), used: workflowCredits, budget: workflowIncluded, over: workflowBillable, amount: workflowAmount },
+          { key: 'ai', label: t('usage.kpi.aiMeterLabel'), used: aiUsed, budget: aiBudget, over: aiOver },
+          { key: 'whatsapp', label: t('usage.kpi.waWebLabel'), used: waTokens?.used, budget: waTokens?.budget, over: waTokens?.over, amount: waTokens?.over_amount },
+        ].map(m => (
+          <div key={m.key} style={{ width: 300 }}>
+            {(m.budget ?? 0) > 0 ? (
+              <>
+                <MeterBar label={m.label} used={m.used} budget={m.budget} />
+                {(m.over ?? 0) > 0 ? (
+                  <Caption style={{ color: 'var(--color-danger-text)' }}>
+                    {t('billing.usage.plan.overBudget', {
+                      meter: m.label,
+                      n: formatNumber(m.over ?? 0),
+                      amount: formatCurrency(m.amount ?? 0),
+                    })}
+                  </Caption>
+                ) : (
+                  <Caption>{t('usage.kpi.budgetStatus.withinBudget')}</Caption>
+                )}
+              </>
+            ) : (
+              <Caption as="div">{m.label}: {t('usage.kpi.budgetStatus.noBudget')}</Caption>
+            )}
+          </div>
+        ))}
+      </div>
+      {/* WhatsApp split (Danny: "Ik wil WA-Web en WABA zien") - wa_web is
+          Koios-token-billed, waba/coexistence are provider-billed (contract). */}
+      {waChannels.length > 0 && (
+        <div style={{ marginBottom: 18 }}>
+          <SectionTitle style={{ marginBottom: 6, fontSize: 12 }}>{t('usage.kpi.waSplitTitle')}</SectionTitle>
+          {waChannels.map(ch => (
+            <Caption as="div" key={ch.channel}>
+              {(ch.label ?? ch.channel)}: {formatNumber(ch.messages ?? 0)} {t('usage.kpi.waMessages')}
+              {ch.channel === 'wa_web'
+                ? ` · ${formatNumber(ch.tokens ?? 0)} ${t('usage.kpi.waTokens')}`
+                : ` · ${formatCurrency(ch.amount ?? 0)} ${t('usage.kpi.waProviderBilled')}`}
             </Caption>
-          ) : (
-            <Caption>{t('usage.kpi.budgetStatus.withinBudget')}</Caption>
-          )}
+          ))}
         </div>
-      ) : (
-        // Legacy packages emit included_budget 0 - that is "no budget configured",
-        // never a 0-budget meter with a danger line (the false-over the audit caught).
-        <Caption as="div" style={{ marginBottom: 18 }}>{t('usage.kpi.budgetStatus.noBudget')}</Caption>
       )}
     </div>
   )

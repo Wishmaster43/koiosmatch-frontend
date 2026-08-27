@@ -80,6 +80,7 @@ import FloatingPanel from '@/components/ui/FloatingPanel'
 import { cardHead, cardBox } from '@/components/ui/modalCards'
 import type { Id } from '@/types/common'
 import Button from '@/components/ui/Button'
+import TitleBarPills from '@/components/ui/TitleBarPills'
 
 // Thin container wiring useMatchForm's state/submit to the shared drawer chrome
 // and the four titled card sections (Relaties/Contract/Financieel/Opmerkingen).
@@ -145,8 +146,20 @@ export default function MatchModal({
     // card-stack footprint (Danny 13-08); scrollBody={false} + the modal's own
     // scroll area below mirrors PlanIntakeModal/AddApplicationModal exactly, so
     // the footer buttons stay pinned instead of scrolling with the form.
-    <FloatingPanel open onClose={onClose} title={title} ariaLabel={title}
-      persistKey="candidate-match" width={WIDE_MODAL.maxWidth} maxWidth="92vw" scrollBody={false} bodyStyle={{ padding: 0 }}>
+    <FloatingPanel open onClose={onClose} ariaLabel={title}
+      persistKey="candidate-match" width={WIDE_MODAL.maxWidth} maxWidth="92vw" scrollBody={false} bodyStyle={{ padding: 0 }}
+      header={
+        // TITELBALK-PILLS (Danny 27-08): the Contractvorm choice moves OUT of the
+        // Relaties card and into the title bar, via the shared TitleBarPills atom —
+        // same idiom as AddCandidateModal/AddVacancyModal. Optional field: clearable
+        // keeps the VAC-CLEAR-1 re-click-clears semantics the card row had.
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16, flex: '1 1 100%' }}>
+          <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)', whiteSpace: 'nowrap' }}>{title}</div>
+          <TitleBarPills options={form.candidateTypes} value={form.contractForm} onChange={form.setContractForm}
+            ariaLabel={t('placement.contractForm')} clearable
+            error={form.errors.contractForm ? t('common:required') : null} />
+        </div>
+      }>
 
       {/* Fields scroll in their own area so the footer buttons stay pinned (mirrors PlanIntakeModal, Danny 13-08). */}
       <div style={{ overflow: 'auto', flex: 1, minHeight: 0, padding: 22 }}>
@@ -175,7 +188,6 @@ export default function MatchModal({
             <div style={cardBox}>
               <RelationsSection
                 t={t} errors={form.errors} editing={editing}
-                candidateTypes={form.candidateTypes} contractForm={form.contractForm} setContractForm={form.setContractForm}
                 hasContractLines={form.hasContractLines} contractLines={form.contractLines} setContractLines={form.setContractLines}
                 customerNotApplicable={form.customerNotApplicable}
                 fixedCandidateId={form.fixedCandidateId} pickedCandidateId={form.pickedCandidateId} setPickedCandidateId={form.setPickedCandidateId}

@@ -23,7 +23,6 @@
 import { useId, type Dispatch, type SetStateAction } from 'react'
 import type { TFunction } from 'i18next'
 import CreatableSelect from '@/components/ui/CreatableSelect'
-import ChipMultiSelect from '@/components/ui/ChipMultiSelect'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 import { FormField as F } from './FormField'
 import ContractLinesSection from './ContractLinesSection'
@@ -33,7 +32,6 @@ import type { CustomerOption } from '@/pages/vacancies/shared'
 import type { VacancyOption } from '@/pages/candidates/hooks/useVacancyOptions'
 import type { LocationOption } from '@/lib/useLocations'
 import type { Id } from '@/types/common'
-import type { LookupItem } from '@/context/LookupsContext'
 import type { MatchContractLine } from '@/types/match'
 import { contactOptionLabel } from '@/lib/contactLabel'
 import { tintBg, tintBorder } from '@/lib/tint'
@@ -54,7 +52,7 @@ const contactOpt = (arr: CascadeOption[]) => arr.map(c => ({ value: String(c.id)
 // every value/handler arrives via props from useMatchForm.
 export default function RelationsSection({
   t, errors, editing,
-  candidateTypes, contractForm, setContractForm, hasContractLines, contractLines, setContractLines, customerNotApplicable,
+  hasContractLines, contractLines, setContractLines, customerNotApplicable,
   fixedCandidateId, pickedCandidateId, setPickedCandidateId, candidateOptions, candidateOptionsError,
   customerId, setCustomerId, customerOptions,
   locationId, setLocationId, locations,
@@ -74,10 +72,6 @@ export default function RelationsSection({
   // backend's PATCH — the vacancy field renders read-only while editing an
   // existing match instead of a pick that would silently never persist (§3).
   editing?: boolean
-  // MATCH-SOORT-1: Contractvorm (§1 of the changelog) — the FIRST field in this
-  // card, feeding the conditional CONTRACTREGELS editor below it.
-  candidateTypes: LookupItem[]
-  contractForm: string; setContractForm: (v: string) => void
   hasContractLines: boolean
   // MATCH-KLANTLOOS-1: the picked Contractvorm's own flag — hides customer/location/
   // department/contact entirely and makes Branch required instead.
@@ -114,21 +108,10 @@ export default function RelationsSection({
   const contactLabelId = useId()
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-      {/* MATCH-SOORT-1: Contractvorm is the FIRST choice in this card — rendered as
-          the shared soft-chip row like every other create modal (Danny 27-08:
-          "chips bovenin zoals we dat overal doen"). Single-value: picking another
-          chip switches, re-clicking the active chip clears (VAC-CLEAR-1, optional
-          field). A flagged value still reveals CONTRACTREGELS right under it. */}
-      <F label={t('placement.contractForm')} error={errors.contractForm}>
-        {() => (
-          <ChipMultiSelect
-            options={candidateTypes.map(c => ({ value: c.value, label: c.label, color: c.color }))}
-            values={contractForm ? [contractForm] : []}
-            onToggle={(v) => setContractForm(v === contractForm ? '' : v)}
-            selectAll={false}
-            ariaLabel={t('placement.contractForm')} />
-        )}
-      </F>
+      {/* TITELBALK-PILLS (Danny 27-08): Contractvorm moved OUT of this card into
+          the modal's title bar (MatchModal.tsx header, shared TitleBarPills atom);
+          a 422-mapped errors.contractForm renders at the pills via the atom's
+          own error line, not in this card. */}
       {hasContractLines && (
         <ContractLinesSection t={t} lines={contractLines} setLines={setContractLines} functions={functions} />
       )}

@@ -5,6 +5,11 @@
  * shows its phase pills top-right. Pure presentational: the selected status
  * value in, `onSelectStatus`/`onClose` callbacks out.
  *
+ * TITELBALK-PILLS (Danny 27-08): the status pill row now reads the shared
+ * `components/ui/TitleBarPills` atom instead of a hand-rolled button — the
+ * SAME atom AddCandidateModal's phase pills use, so the two create modals no
+ * longer wear two different pill styles.
+ *
  * EXCEL-VACATURES-1 (Danny 14-08, screenshot: "Excel importeren moet in de
  * pop-up + nieuwe vacature niet hier boven de tabel!!" — Excel import must be in
  * the popup + new vacancy, not here above the table!!): adds the same top-right
@@ -14,10 +19,9 @@
  */
 import { useTranslation } from 'react-i18next'
 import { X, Upload, CheckCircle2 } from 'lucide-react'
-import { BTN_H } from '@/config/buttonMetrics'
 import { PageTitle } from '@/components/ui/typography'
 import Button from '@/components/ui/Button'
-import { tintBg , chipInk } from '@/lib/tint'
+import TitleBarPills from '@/components/ui/TitleBarPills'
 
 interface StatusOpt { value: string; label: string; color?: string }
 
@@ -43,27 +47,12 @@ export default function ModalHeader({ status, statusOptions, onSelectStatus, onC
       {/* nowrap: the title must stay on ONE line so the status pills sit fully
           right (Danny 08-08) instead of being pushed against a wrapped title. */}
       <PageTitle as="span" style={{ whiteSpace: 'nowrap' }}>{t('modal.title')}</PageTitle>
-      {/* Status pill row — a read-and-pick control, never a form field. A
-          genuinely empty lookup renders no pills at all (never a fabricated
-          highlight), matching the honest "nothing picked" state. Each pill's
-          fill/ink/border carries the tenant lookup's OWN colour (state+data),
-          which Button's fixed variant palette cannot express per-option. */}
-      <div style={{ display: 'flex', gap: 8, marginLeft: 'auto', flexShrink: 0, flexWrap: 'wrap' }}>
-        {statusOptions.map(s => {
-          const active = status === s.value
-          const c = s.color ?? 'var(--color-primary)'
-          return (
-            <button key={s.value} type="button" onClick={() => onSelectStatus(s.value)} aria-pressed={active} title={s.label}
-              // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- state-carrying lookup-colour pill: fill/border encode the tenant status colour, per option; Button has no per-option colour face
-              style={{ display: 'flex', alignItems: 'center', gap: 8, height: BTN_H, padding: '0 14px',
-                borderRadius: 999, cursor: 'pointer', transition: 'all 0.15s',
-                border: `1.5px solid ${active ? c : 'var(--border)'}`,
-                background: active ? tintBg(c, true) : 'var(--surface)' }}>
-              <div style={{ width: 8, height: 8, borderRadius: '50%', background: c, flexShrink: 0 }} />
-              <span style={{ fontSize: 13, fontWeight: active ? 600 : 500, color: active ? chipInk(c) : 'var(--text)' }}>{s.label}</span>
-            </button>
-          )
-        })}
+      {/* Status pill row — the shared TitleBarPills atom. A genuinely empty
+          lookup renders no pills at all (never a fabricated highlight),
+          matching the honest "nothing picked" state. Required field: no
+          `clearable`, the active pill always stays picked. */}
+      <div style={{ marginLeft: 'auto', flexShrink: 0 }}>
+        <TitleBarPills options={statusOptions} value={status} onChange={onSelectStatus} ariaLabel={t('modal.title')} />
       </div>
       {/* EXCEL-VACATURES-1: mirrors AddCustomerModal's header import button 1:1 —
           same placement and accessible-name pattern; the paused-import signal is

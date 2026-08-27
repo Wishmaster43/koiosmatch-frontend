@@ -6,6 +6,7 @@ import { useTaskLookupIds } from './hooks/useTaskLookupIds'
 import { WIDE_MODAL } from '@/components/ui/modalMetrics'
 import { tintBorder } from '@/lib/tint'
 import FloatingPanel from '@/components/ui/FloatingPanel'
+import TitleBarPills from '@/components/ui/TitleBarPills'
 import { modalColumns } from '@/components/ui/modalCards'
 import TaskCard from './addmodal/TaskCard'
 import PlanningCard from './addmodal/PlanningCard'
@@ -209,9 +210,21 @@ export default function AddTaskModal({ onClose, onCreated, onSaved, initial, ext
     // SE-resize, remembered position, same overlay/Esc/backdrop semantics as before.
     // Shared footprint (Danny 27-07): WIDE_MODAL still caps the frame; the ONE place
     // to resize the wide trio stays components/ui/modalMetrics.ts.
-    <FloatingPanel open onClose={onClose} title={modalTitle} ariaLabel={modalTitle}
+    <FloatingPanel open onClose={onClose} ariaLabel={modalTitle}
       persistKey="add-task" scrollBody={false}
-      width={`min(calc(100vw - 48px), ${WIDE_MODAL.maxWidth}px)`} maxWidth={`${WIDE_MODAL.maxWidth}px`}>
+      width={`min(calc(100vw - 48px), ${WIDE_MODAL.maxWidth}px)`} maxWidth={`${WIDE_MODAL.maxWidth}px`}
+      header={
+        // TITELBALK-PILLS (Danny 27-08): the Soort activiteit choice moves OUT of
+        // TaskCard and into the title bar, via the shared TitleBarPills atom —
+        // same idiom as AddCandidateModal/AddVacancyModal/MatchModal. Required
+        // field: no `clearable`, the active pill always stays picked.
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16, flex: '1 1 100%' }}>
+          <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)', whiteSpace: 'nowrap' }}>{modalTitle}</div>
+          <TitleBarPills
+            options={types.map(x => ({ value: x.value, label: x.icon ? `${x.icon} ${x.label}` : x.label, color: x.color }))}
+            value={form.type} onChange={v => set('type', v)} ariaLabel={t('modal.type')} />
+        </div>
+      }>
 
         {/* Body: titled cards — Taak full-width, then Planning+Toewijzing (left,
             stacked) paired against Koppelingen (right) — mirrors +Match's
@@ -223,7 +236,7 @@ export default function AddTaskModal({ onClose, onCreated, onSaved, initial, ext
           <div style={{ flex: 1, padding: 40, textAlign: 'center', fontSize: 12, color: 'var(--text-muted)' }}>{t('modal.loadingTask')}</div>
         ) : (
         <div style={{ flex: 1, overflowY: 'auto', padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: 16 }}>
-          <TaskCard t={t} form={form} errors={errors} set={set} types={types} />
+          <TaskCard t={t} form={form} errors={errors} set={set} />
           {/* CARD-COLUMNS-CANON: the shared modalColumns grid (§11, mirrors
               AddCustomerModal/MatchModal) — was the local `cardPair` alias. */}
           <div style={modalColumns()}>

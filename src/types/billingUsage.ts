@@ -217,7 +217,13 @@ export interface AdminUsageMonth {
 }
 export interface AdminTenantUsage {
   ai?: { tokens?: number; requests?: number }
-  whatsapp?: { business_numbers?: number }
+  // CMBE c963cdb1: same shape as the tenant-facing /billing/usage whatsapp block,
+  // scoped to the viewed tenant (isolation-tested server-side).
+  whatsapp?: {
+    business_numbers?: number
+    tokens?: { used?: number; budget?: number; over?: number; over_amount?: number; price_cents?: number }
+    by_channel?: BillingUsageWhatsappChannel[]
+  }
   planning?: { processed_hours?: number }
   connectors?: Array<{ key: string; usage?: number }>
   workflow_tokens?: { total_module_runs?: number; per_module?: Record<string, number> }
@@ -228,7 +234,8 @@ export interface AdminTenantUsage {
   billing?: {
     workflow_credit_budget?: number
     resets_at?: string
-    ai?: { purchase?: number; sale?: number; margin?: number }
+    // CMBE c963cdb1: used/budget/over ride along (budget = package free tokens).
+    ai?: { purchase?: number; sale?: number; margin?: number; used?: number; budget?: number; over?: number }
     // CREDITS-2 — `credits` stays the raw consumed count (unchanged); the three
     // new fields carry the package-budget split: how many of those credits are
     // billable vs already included in the package, and the resulting EUR amount.

@@ -18,7 +18,7 @@
 import { useTranslation } from 'react-i18next'
 import { X, Upload, CheckCircle2 } from 'lucide-react'
 import Button from '@/components/ui/Button'
-import QuickViewToggle from '@/components/ui/QuickViewToggle'
+import TitleBarPills from '@/components/ui/TitleBarPills'
 import type { LookupOption } from '@/types/common'
 import CvEntryIcons from './CvEntryIcons'
 
@@ -67,18 +67,12 @@ export default function ModalHeader({ status, pickStatuses, selectedStatus, stat
           <span style={{ fontSize: 12.5, color: 'var(--text)', lineHeight: 1.35, whiteSpace: 'nowrap' }}>{t('modal.entryHint')}</span>
         </div>
       )}
-      {/* Phase choice — two compact pills, same colour semantics as the old cards. */}
-      <div style={{ display: 'flex', gap: 8, marginLeft: 'auto', flexShrink: 0 }}>
-        {/* HUISSTIJL r3.5: the shared QuickViewToggle — the SAME control the
-            customer create-modal renders for its phase choice. At HEAD the two
-            pills were byte-identical hand-rolled copies; converting only one of
-            them (r3) introduced the exact sibling-drift this audit exists to
-            kill, so both now read the one component. */}
-        {pickStatuses.map(s => (
-          <QuickViewToggle key={s.value} active={status === s.value}
-            onToggle={() => onSelectStatus(s.value)}
-            label={s.label} color={s.color ?? 'var(--color-primary)'} />
-        ))}
+      {/* Phase choice — the shared TitleBarPills atom (TITELBALK-PILLS, 27-08):
+          the SAME atom AddVacancyModal's status pills use, so the two create
+          modals no longer wear two different pill styles. Required field: no
+          `clearable`, the active pill always stays picked. */}
+      <div style={{ marginLeft: 'auto', flexShrink: 0 }}>
+        <TitleBarPills options={pickStatuses} value={status} onChange={onSelectStatus} ariaLabel={t('modal.candidateData')} />
       </div>
       {/* CAND-IMPORT-FE-1: mirrors AddVacancyModal/AddCustomerModal's header
           import button 1:1 — never rendered without the create right. */}

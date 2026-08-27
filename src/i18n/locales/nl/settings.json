@@ -2847,8 +2847,14 @@
       "budgetStatus": {
         "title": "Workflow-budget",
         "withinBudget": "Binnen budget deze maand.",
-          "noBudget": "Geen tokenbudget ingesteld voor dit pakket."
-      }
+        "noBudget": "Geen tokenbudget ingesteld voor dit pakket."
+      },
+      "aiMeterLabel": "AI-tokens",
+      "waWebLabel": "WhatsApp-Web-tokens",
+      "waSplitTitle": "WhatsApp per kanaal",
+      "waMessages": "berichten",
+      "waTokens": "tokens",
+      "waProviderBilled": "via provider gefactureerd"
     }
   },
   "jobs": {
@@ -3313,7 +3319,7 @@
     "flavors": {
       "title": "Smaken",
       "subtitle": "Welk leveranciersmodel achter elke tenant-zichtbare smaak zit.",
-        "per1m": "per 1M tokens",
+      "per1m": "per 1M tokens",
       "pickPlaceholder": "Kies een model",
       "noEffort": "Dit model kent geen inspanningsniveaus."
     },

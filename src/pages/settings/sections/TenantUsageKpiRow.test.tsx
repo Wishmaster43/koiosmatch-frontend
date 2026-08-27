@@ -70,7 +70,9 @@ describe('TenantUsageKpiRow', () => {
       ai: { tokens: 100 },
       billing: { workflow: { credits: 620, included_budget: 0, billable_credits: 620, amount: 62 } },
     }} />)
-    expect(screen.getByText(/budgetStatus\.noBudget/)).toBeInTheDocument()
+    // All three meters (workflow/ai/whatsapp) carry no budget in this fixture -
+    // each renders the honest caption and none paints an over-budget line.
+    expect(screen.getAllByText(/budgetStatus\.noBudget/).length).toBe(3)
     expect(document.body.textContent).not.toMatch(/billing\.usage\.plan\.overBudget/)
   })
 
@@ -86,5 +88,22 @@ describe('TenantUsageKpiRow', () => {
     render(<TenantUsageKpiRow loading={false} usage={{ ai: { tokens: 100 } }} />)
     expect(screen.getAllByText('—').length).toBeGreaterThan(0)
     expect(document.body.textContent).not.toMatch(/€\s?0,00/)
+  })
+
+  // CMBE c963cdb1: the WhatsApp split renders wa_web as tokens and waba as
+  // provider-billed - Danny's "Ik wil WA-Web en WABA zien".
+  it('renders the WhatsApp channel split: wa_web tokens vs waba provider-billed', () => {
+    render(<TenantUsageKpiRow loading={false} usage={{
+      ai: { tokens: 100 },
+      whatsapp: { business_numbers: 2, tokens: { used: 250, budget: 4500, over: 0 }, by_channel: [
+        { channel: 'wa_web', label: 'WhatsApp Web', messages: 250, tokens: 250 },
+        { channel: 'waba', label: 'WABA', messages: 40, amount: 12.5 },
+      ] },
+      billing: { workflow: { credits: 10, included_budget: 500, billable_credits: 0, amount: 0 } },
+    }} />)
+    expect(screen.getByText(/WhatsApp Web: 250/)).toBeInTheDocument()
+    expect(screen.getByText(/waTokens/)).toBeInTheDocument()
+    expect(screen.getByText(/WABA: 40/)).toBeInTheDocument()
+    expect(screen.getByText(/waProviderBilled/)).toBeInTheDocument()
   })
 })

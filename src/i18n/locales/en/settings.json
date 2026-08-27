@@ -2847,8 +2847,14 @@
       "budgetStatus": {
         "title": "Workflow budget",
         "withinBudget": "Within budget this month.",
-          "noBudget": "No token budget configured for this package."
-      }
+        "noBudget": "No token budget configured for this package."
+      },
+      "aiMeterLabel": "AI tokens",
+      "waWebLabel": "WhatsApp Web tokens",
+      "waSplitTitle": "WhatsApp per channel",
+      "waMessages": "messages",
+      "waTokens": "tokens",
+      "waProviderBilled": "billed by the provider"
     }
   },
   "jobs": {
@@ -3313,7 +3319,7 @@
     "flavors": {
       "title": "Flavours",
       "subtitle": "Which vendor model backs each tenant-facing flavour.",
-        "per1m": "per 1M tokens",
+      "per1m": "per 1M tokens",
       "pickPlaceholder": "Pick a model",
       "noEffort": "This model has no effort levels."
     },

@@ -2847,8 +2847,14 @@
       "budgetStatus": {
         "title": "Presupuesto de workflow",
         "withinBudget": "Dentro del presupuesto este mes.",
-          "noBudget": "No hay presupuesto de tokens configurado para este paquete."
-      }
+        "noBudget": "No hay presupuesto de tokens configurado para este paquete."
+      },
+      "aiMeterLabel": "Tokens de IA",
+      "waWebLabel": "Tokens de WhatsApp Web",
+      "waSplitTitle": "WhatsApp por canal",
+      "waMessages": "mensajes",
+      "waTokens": "tokens",
+      "waProviderBilled": "facturado por el proveedor"
     }
   },
   "jobs": {
@@ -3313,7 +3319,7 @@
     "flavors": {
       "title": "Variantes",
       "subtitle": "Qué modelo del proveedor respalda cada variante visible para el cliente.",
-        "per1m": "por 1M de tokens",
+      "per1m": "por 1M de tokens",
       "pickPlaceholder": "Elegir un modelo",
       "noEffort": "Este modelo no tiene niveles de esfuerzo."
     },

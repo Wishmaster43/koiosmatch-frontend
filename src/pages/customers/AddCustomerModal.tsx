@@ -37,7 +37,7 @@ import { useEntityImportCard } from '@/components/import/useEntityImportCard'
 import type { Id, LookupOption } from '@/types/common'
 import Button from '@/components/ui/Button'
 import ModalFooter from '@/components/ui/ModalFooter'
-import QuickViewToggle from '@/components/ui/QuickViewToggle'
+import TitleBarPills from '@/components/ui/TitleBarPills'
 
 // The ONE backend importer that builds a whole customer tree (customer + locations +
 // departments + contacts) from one flat file — verified against koiosmatch-api's
@@ -313,15 +313,14 @@ export default function AddCustomerModal({ onClose, onCreate, onImported, users 
             </div>
             <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('modal.subtitle')}</div>
           </div>
-          {/* Phase choice — two compact pills, the same control the candidate uses.
-              HUISSTIJL-1: the shared QuickViewToggle carries the clickable coloured
-              chip identity (§4 soft-tint), never a hand-painted tintBg/border pair. */}
-          <div style={{ display: 'flex', gap: 8, marginLeft: 'auto', marginRight: 12, flexShrink: 0 }}>
-            {phases.map(ph => (
-              <QuickViewToggle key={String(ph.value)} active={form.phase === ph.value}
-                onToggle={() => set('phase', String(ph.value))}
-                label={ph.label} color={ph.color ?? 'var(--color-primary)'} />
-            ))}
+          {/* Phase choice — the ONE title-bar pill row (TITELBALK-PILLS, Danny
+              27-08): same atom as the candidate/vacancy/match/task popups. */}
+          <div style={{ marginLeft: 'auto', marginRight: 12, flexShrink: 0 }}>
+            <TitleBarPills
+              options={phases.map(ph => ({ value: String(ph.value), label: ph.label, color: ph.color ?? 'var(--color-primary)' }))}
+              value={String(form.phase ?? '')}
+              onChange={(v) => set('phase', v)}
+              ariaLabel={t('modal.title')} />
           </div>
           {/* KLANT-LAYOUT-3 (Danny 14-08): the import affordance lives top-right in the
               header, via the house Button (HUISSTIJL-1) — never a repainted fill/border.
