@@ -25,6 +25,11 @@ vi.mock('@/lib/datetime', () => ({
 const mockUseApps = vi.fn()
 vi.mock('@/context/AppsContext', () => ({ useApps: () => mockUseApps() }))
 beforeEach(() => { mockUseApps.mockReturnValue({ isAppEnabled: () => false }) })
+// TYPE-KOLOM-ROUTE: spy on the deep-link navigation the Type column's "Via
+// sollicitatie" chip triggers.
+const mockOpenEntity = vi.fn()
+vi.mock('@/context/NavigationContext', () => ({ useNavigation: () => ({ openEntity: mockOpenEntity }) }))
+beforeEach(() => { mockOpenEntity.mockClear() })
 // Real (nl) translations, since mocking '@/lib/datetime' above removes the
 // transitive '@/i18n' side-effect import the production component relies on.
 import '@/i18n'
@@ -166,6 +171,31 @@ describe('MatchesTable · type column (MATCH-ORIGIN-1)', () => {
     const rows = container.querySelectorAll('tbody tr')
     const values = Array.from(rows).map(r => r.children[colIndex].textContent)
     expect(values).toEqual(['Direct', '—'])
+  })
+})
+
+// TYPE-KOLOM-ROUTE (Danny GO 23-08): "Via sollicitatie" deep-links to the
+// source application's own drilldown; "Direct" has nothing to link to.
+describe('MatchesTable · type column deep-link (TYPE-KOLOM-ROUTE)', () => {
+  it('clicking the "Via sollicitatie" chip opens the application drilldown, not the match row', async () => {
+    const user = userEvent.setup()
+    const onRowClick = vi.fn()
+    const viaApplication = { ...baseRow, id: 90, origin: 'application' as const, applicationId: 'app-1' }
+    render(<MatchesTable rows={[viaApplication]} onRowClick={onRowClick} />)
+
+    const chipButton = screen.getByText('Via sollicitatie').closest('button') as HTMLElement
+    await user.click(chipButton)
+
+    expect(mockOpenEntity).toHaveBeenCalledWith('applications', 'app-1')
+    expect(onRowClick).not.toHaveBeenCalled()
+  })
+
+  it('renders "Direct" as a plain, unclickable chip', () => {
+    const direct = { ...baseRow, id: 91, origin: 'direct' as const }
+    render(<MatchesTable rows={[direct]} />)
+
+    expect(screen.getByText('Direct')).toBeInTheDocument()
+    expect(screen.getByText('Direct').closest('button')).toBeNull()
   })
 })
 

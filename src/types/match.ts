@@ -178,6 +178,10 @@ export interface MatchRow {
   // fabricated value) until the raw payload actually carries the
   // `application_id` key — see mapMatch's OFFERED-IFF-READ comment.
   origin?: 'application' | 'direct'
+  // MATCH-ORIGIN-1 / TYPE-KOLOM-ROUTE: the application id the match grew out of
+  // (only set when origin === 'application') — lets the Type cell deep-link to
+  // that application's own drilldown instead of just naming the origin.
+  applicationId?: string | number | null
   // MATCH-DRILL-2: termination read-back + renewal count — see RawMatch.termination
   // above for why these are hand-written. null/undefined = not terminated / no
   // renewals yet, never a fabricated value.

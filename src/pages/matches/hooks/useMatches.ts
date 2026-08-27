@@ -111,6 +111,9 @@ export function mapMatch(m: RawMatch): MatchRow {
     // claims "Direct"); key present + null → a genuine direct match; key
     // present + a value → grew out of that application.
     origin: 'application_id' in m ? (m.application_id != null ? 'application' : 'direct') : undefined,
+    // TYPE-KOLOM-ROUTE: carry the raw application id along so the Type cell can
+    // deep-link to the source application drilldown (same key-presence tolerance).
+    applicationId: 'application_id' in m ? (m.application_id ?? null) : null,
     // MATCH-DRILL-2: termination read-back + renewal count (AttachesMatchParityFields,
     // K-126) — resolved off the nested `termination` object; undefined/null when
     // the match was never terminated (never a fabricated reason).

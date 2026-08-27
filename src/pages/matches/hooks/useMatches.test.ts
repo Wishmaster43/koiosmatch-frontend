@@ -120,6 +120,18 @@ describe('useMatches · origin field (MATCH-ORIGIN-1, OFFERED-IFF-READ)', () => 
     await waitFor(() => expect(result.current.loading).toBe(false))
     expect(result.current.rows[0].origin).toBe('application')
   })
+
+  // applicationId rides the same key-presence tolerance (golf-1 verify): the
+  // deep-link cell needs origin==='application' AND a non-null id, so an absent
+  // key can never fabricate a link — each case pinned.
+  it('applicationId per case: absent key → null, null → null, value → the id', async () => {
+    mockedGet.mockResolvedValue({ data: { data: [
+      { id: 'm1' }, { id: 'm2', application_id: null }, { id: 'm3', application_id: 'a-9' },
+    ], meta: { last_page: 1 } } })
+    const { result } = renderHook(() => useMatches())
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    expect(result.current.rows.map(r => r.applicationId)).toEqual([null, null, 'a-9'])
+  })
 })
 
 describe('useMatches · MATCH-ARCHIVED-LIST-1', () => {

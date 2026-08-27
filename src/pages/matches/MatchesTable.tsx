@@ -17,7 +17,9 @@ import { useMatchStatuses } from '@/lib/useMatchStatuses'
 import { useApps } from '@/context/AppsContext'
 import { useAllSettings, getBoolSetting } from '@/lib/settings/useAllSettings'
 import { useMatchAdvice } from '@/lib/useMatchAdvice'
+import { useNavigation } from '@/context/NavigationContext'
 import { Mono } from '@/components/ui/typography'
+import Button from '@/components/ui/Button'
 import ScorePill from './ScorePill'
 import ContractFormChip from './ContractFormChip'
 import type { MatchRow } from '@/types/match'
@@ -53,6 +55,8 @@ export default function MatchesTable({
   const { formatDate } = useDateFormat()
   // Match lifecycle lookup (R-1b) — resolves the status chip label/colour.
   const { metaOf: statusMeta } = useMatchStatuses()
+  // TYPE-KOLOM-ROUTE: the "Via sollicitatie" chip deep-links to the source application.
+  const { openEntity } = useNavigation()
   // Tenant display settings (Settings → Matches → Tabelweergave). Coloured chips ON
   // by default, mirrors candidates/applications.
   const settings = useAllSettings()
@@ -117,9 +121,21 @@ export default function MatchesTable({
     // never a guessed "Direct".
     { key: 'origin', header: t('cols.type'), sortable: true,
       sortValue: r => r.origin === 'application' ? t('type.application') : r.origin === 'direct' ? t('type.direct') : '',
-      render: r => r.origin === undefined
-        ? <span style={{ color: 'var(--text-muted)' }}>—</span>
-        : <SoftChip label={r.origin === 'application' ? t('type.application') : t('type.direct')} /> },
+      render: r => {
+        if (r.origin === undefined) return <span style={{ color: 'var(--text-muted)' }}>—</span>
+        // CEL-DOORKLIK-CANON: "Via sollicitatie" links to that application's own
+        // drilldown (default overview tab); "Direct" has no source record to open.
+        if (r.origin === 'application' && r.applicationId != null) {
+          return (
+            <Button variant="ghost" size="sm"
+              onClick={e => { e.stopPropagation(); openEntity('applications', r.applicationId) }}
+              style={{ padding: 0, height: 'auto' }}>
+              <SoftChip label={t('type.application')} />
+            </Button>
+          )
+        }
+        return <SoftChip label={r.origin === 'application' ? t('type.application') : t('type.direct')} />
+      } },
     { key: 'score',   header: t('cols.score'), align: 'right', sortable: true,
       sortValue: r => r.score ?? -1, render: r => <ScorePill value={r.score} /> },
     { key: 'stage',   header: t('cols.status'),
