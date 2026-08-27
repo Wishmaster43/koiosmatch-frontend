@@ -15,7 +15,7 @@
  * blocked popup says so instead of failing silently.
  */
 import { describe, it, expect, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { act, fireEvent, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import '@/i18n'
 import TargetNoteField from './TargetNoteField'
@@ -67,5 +67,27 @@ describe('TargetNoteField · second-screen pop-out', () => {
     await user.click(screen.getByTitle('Open op tweede scherm'))
     expect(notifyError).toHaveBeenCalled()
     vi.unstubAllGlobals()
+  })
+
+  // NOTITIE-PARITEIT (Danny 27-08 bug "pop-out gesloten maar blijft open staan"):
+  // the popped-out window can close without ever posting a draft/saved message
+  // (its own X, no edits made) — the inline editor must still exit edit mode,
+  // not stay stuck open forever believing the second screen is still there.
+  it('closes the inline editor once the popped-out window closes unedited', () => {
+    vi.useFakeTimers()
+    const fakeWin = { closed: false } as Window
+    vi.stubGlobal('open', vi.fn(() => fakeWin))
+    render(<TargetNoteField note={null} onSave={vi.fn().mockResolvedValue(undefined)} targetId="t1" campaignId="camp-1" />)
+
+    fireEvent.click(screen.getByTitle('Open op tweede scherm'))
+    expect(screen.getByLabelText('body')).toBeInTheDocument()
+
+    // Simulate the popout window closing on its own — the poll picks this up.
+    ;(fakeWin as { closed: boolean }).closed = true
+    act(() => { vi.advanceTimersByTime(500) })
+
+    expect(screen.queryByLabelText('body')).toBeNull()
+    vi.unstubAllGlobals()
+    vi.useRealTimers()
   })
 })

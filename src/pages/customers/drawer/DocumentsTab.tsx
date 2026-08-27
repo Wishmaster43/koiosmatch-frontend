@@ -97,7 +97,7 @@ interface DocumentsTabProps {
 // Customer document manager: list/upload/rename/delete, type filter, and multi-select download; the level (customer/location/department) is driven entirely by props.
 export default function DocumentsTab({ customerId, locations = [], departments = [], listUrl, lockedLevelFields, docTypeScope = 'customer' }: DocumentsTabProps) {
   const { t } = useTranslation('customers')
-  const { formatDate } = useDateFormat()
+  const { formatDateTime } = useDateFormat()
   // Customer documents offer the customer's own types PLUS the global ones — the backend
   // adds the globals to `?entity=<scope>` itself (null = applies everywhere).
   const { types: docTypes, labelOf: docTypeLabel, colorOf: docColor, iconOf: docTypeIcon } = useDocumentTypes(docTypeScope)
@@ -393,7 +393,7 @@ export default function DocumentsTab({ customerId, locations = [], departments =
                     const when = d.uploaded_at ?? d.created_at
                     if (!by && !when) return null
                     return <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>
-                      {by}{by && when ? ' · ' : ''}{when ? formatDate(when, { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : ''}
+                      {by}{by && when ? ' · ' : ''}{when ? formatDateTime(when) : ''}
                     </div>
                   })()}
                 </div>

@@ -25,7 +25,7 @@ export interface DocVersion {
 // Collapsible superseded-versions list under a document row; renders nothing when there are no prior versions (see file header).
 export default function DocumentVersionHistory({ versions }: { versions: DocVersion[] }) {
   const { t } = useTranslation('candidates')
-  const { formatDate } = useDateFormat()
+  const { formatDateTime } = useDateFormat()
   const [expanded, setExpanded] = useState(false)
   if (versions.length === 0) return null
   return (
@@ -40,7 +40,7 @@ export default function DocumentVersionHistory({ versions }: { versions: DocVers
         <div style={{ display: 'flex', flexDirection: 'column', gap: 3, marginTop: 4, paddingLeft: 14, borderLeft: '2px solid var(--border)' }}>
           {versions.map(v => (
             <div key={String(v.id)} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 10, color: 'var(--text-muted)' }}>
-              <span>{v.created_at ? formatDate(v.created_at, { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—'}</span>
+              <span>{v.created_at ? formatDateTime(v.created_at) : '—'}</span>
               {v.replaced_by_name && <span>· {v.replaced_by_name}</span>}
               {v.file_size != null && <span>· {v.file_size}</span>}
               {v.download_url && (

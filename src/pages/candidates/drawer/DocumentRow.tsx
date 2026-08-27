@@ -93,7 +93,7 @@ export default function DocumentRow({
   linked, linking, linkValue, canLink, onLinkToggle, onLinkChange, educations, certifications, languages, skills, references,
 }: DocumentRowProps) {
   const { t } = useTranslation('candidates')
-  const { formatDate } = useDateFormat()
+  const { formatDate, formatDateTime } = useDateFormat()
   // The type's own curated icon (fallback FileText) — so rows stand out per type.
   // Optional-chained: older test mocks of useDocumentTypes don't stub iconOf.
   const DocIcon = resolveDocTypeIcon(docTypeIcon?.(d.type))
@@ -131,7 +131,7 @@ export default function DocumentRow({
           {(by || when || expiry || linked || linking) && (
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
               {(by || when) && <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>
-                {by}{by && when ? ' · ' : ''}{when ? formatDate(when, { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : ''}
+                {by}{by && when ? ' · ' : ''}{when ? formatDateTime(when) : ''}
               </span>}
               {expiry && (
                 <SoftChip size={10}

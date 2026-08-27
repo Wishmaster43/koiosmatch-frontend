@@ -13,7 +13,7 @@ export default function ShiftsUnconfirmedList({ rows, onNavigate }: {
   onNavigate?: (page: string, params?: Record<string, unknown>) => void
 }) {
   const { t } = useTranslation('dashboard')
-  const { formatDate } = useDateFormat()
+  const { formatDateTime } = useDateFormat()
   const goToPlanning = () => onNavigate?.('planning')
 
   // Each row deep-links to the candidate's communication tab.
@@ -22,7 +22,7 @@ export default function ShiftsUnconfirmedList({ rows, onNavigate }: {
     primary: r.candidate || t('widget.unknown'),
     secondary: r.order_title ?? undefined,
     meta: r.shift_start
-      ? formatDate(r.shift_start, { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
+      ? formatDateTime(r.shift_start)
       : '—',
     onClick: onNavigate ? () => onNavigate('candidates', { open: r.candidate_id, tab: 'communication' }) : undefined,
   }))

@@ -7,7 +7,7 @@ import { render, screen, fireEvent } from '@testing-library/react'
 import ShiftsUnconfirmedList from './ShiftsUnconfirmedList'
 
 vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string) => k }) }))
-vi.mock('@/lib/datetime', () => ({ useDateFormat: () => ({ formatDate: (v: string) => v }) }))
+vi.mock('@/lib/datetime', () => ({ useDateFormat: () => ({ formatDate: (v: string) => v, formatDateTime: (v: string) => v }) }))
 
 const rows = [
   { schedule_id: 'sc1', candidate_id: 'c1', candidate: 'Jane Doe', shift_start: '2026-08-24T08:00:00Z', order_title: 'Warehouse shift' },

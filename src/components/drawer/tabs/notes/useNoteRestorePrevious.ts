@@ -24,7 +24,8 @@ interface Options {
   onRestorePreviousNote?: (i: number) => Promise<boolean>
   // Stages the shared ConfirmDialog (useConfirm) — signature mirrors its own `confirm()`.
   confirm: (message: string, onConfirm: () => void, options?: { title?: string; children?: ReactNode }) => void
-  formatDate: (v: string, opts?: Record<string, string>) => string
+  // DATUM-1: house DD-MM-YYYY HH:mm formatter, never the locale-shifting formatDate option set.
+  formatDateTime: (v: string) => string
   t: TFunction
   restoreConfirmTitle?: string
   // Renders the previous-text preview (SafeHtml, never raw-injected) inside the dialog.
@@ -33,7 +34,7 @@ interface Options {
 
 // Owns the "restore previous version" flow for one note (see file docblock above):
 // peeks the one-slot undo, then stages the shared confirm dialog with a preview.
-export function useNoteRestorePrevious({ onFetchPreviousVersion, onRestorePreviousNote, confirm, formatDate, t, restoreConfirmTitle, renderPreview }: Options) {
+export function useNoteRestorePrevious({ onFetchPreviousVersion, onRestorePreviousNote, confirm, formatDateTime, t, restoreConfirmTitle, renderPreview }: Options) {
   const [restoringIdx, setRestoringIdx] = useState<number | null>(null)
 
   // User clicked the restore-previous icon: peeks the previous version (guarded
@@ -46,7 +47,7 @@ export function useNoteRestorePrevious({ onFetchPreviousVersion, onRestorePrevio
       .then(preview => {
         if (!preview || preview.previous_body == null) { notify('info', unavailable(t)); return }
         const savedAt = preview.previous_saved_at
-          ? formatDate(preview.previous_saved_at, { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+          ? formatDateTime(preview.previous_saved_at)
           : ''
         confirm(
           savedAt

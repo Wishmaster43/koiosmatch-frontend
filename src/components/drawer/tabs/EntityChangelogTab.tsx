@@ -99,7 +99,7 @@ export default function EntityChangelogTab<E extends ChangelogEvent = ChangelogE
   fallbackDescription = false, wrapWhoAction = false, toolbar = false, exportFileNameBase = 'changelog',
 }: EntityChangelogTabProps<E>) {
   const { t } = useTranslation(namespace)
-  const { formatDate } = useDateFormat()
+  const { formatDate, formatDateTime } = useDateFormat()
   // Client-side date-range filter + free-text search (HelloFlex: "Datum van / t/m") —
   // only rendered/applied when the caller opts into the toolbar.
   const [from, setFrom] = useState('')
@@ -243,7 +243,7 @@ export default function EntityChangelogTab<E extends ChangelogEvent = ChangelogE
       {!loading && !error && cards.map((cd, i) => (
         <div key={i} style={{ border: '1px solid var(--border)', borderRadius: 8, background: 'var(--bg)', padding: '9px 12px', marginBottom: 8 }}>
           <Caption as="div">
-            {cd.when ? formatDate(cd.when, { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—'}
+            {cd.when ? formatDateTime(cd.when) : '—'}
             {wrapWhoAction ? (
               <>{' · '}<span>{cd.who}</span>{' · '}<span>{cd.action}</span></>
             ) : (

@@ -59,7 +59,7 @@ export default function ShiftsChartsBlock({
   // App-wide active locale (§5) — feeds the "last sync" timestamp below and the
   // month-abbreviation labels in the chart data + filter groups, instead of a
   // hardcoded 'nl-NL' toLocaleString.
-  const { formatDate, locale } = useDateFormat()
+  const { formatDateTime, locale } = useDateFormat()
   // Stable series-label resolver (memoised so derived bars don't recompute each render).
   const seriesLabel = useCallback((key: string) => t(`charts.series.${key}`, { defaultValue: key }), [t])
 
@@ -264,7 +264,7 @@ export default function ShiftsChartsBlock({
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 0 8px', gap: 12 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               <Caption as="span">
-                {lastSync && t('charts.lastSync', { time: formatDate(lastSync, { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) })}
+                {lastSync && t('charts.lastSync', { time: formatDateTime(lastSync) })}
               </Caption>
               <SmSyncButton />
             </div>

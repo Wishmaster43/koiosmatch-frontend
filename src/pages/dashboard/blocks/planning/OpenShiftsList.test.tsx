@@ -10,7 +10,7 @@ vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string) => k }
 // toLocalIsoDate mirrors the real house helper: local-calendar-day formatting
 // of a Date, so the UTC-vs-local-day mock case below is genuinely exercised.
 vi.mock('@/lib/datetime', () => ({
-  useDateFormat: () => ({ formatDate: (v: string) => v }),
+  useDateFormat: () => ({ formatDate: (v: string) => v, formatDateTime: (v: string) => v, formatTime: (v: string) => v }),
   toLocalIsoDate: (d: Date) => {
     const pad = (n: number) => String(n).padStart(2, '0')
     return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`

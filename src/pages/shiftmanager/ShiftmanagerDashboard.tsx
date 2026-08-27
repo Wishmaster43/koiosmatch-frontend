@@ -10,7 +10,7 @@ import { useAuth } from '@/context/AuthContext'
 import type { KpiSpec } from '@/components/insights/InsightsRow'
 import KpiDrillDownDrawer from '@/components/reports/KpiDrillDownDrawer'
 import DrillDownDrawer from '@/components/reports/DrillDownDrawer'
-import { calcAandacht } from '@/components/reports/candidateAttention'
+import { calcAttention } from '@/components/reports/candidateAttention'
 import type { ReportCandidate } from '@/types/reports'
 import ShiftsChartsBlock from '@/components/shiftmanager/ShiftsChartsBlock'
 import { useShiftmanagerDashboard } from './hooks/useShiftmanagerDashboard'
@@ -61,11 +61,11 @@ export default function ShiftmanagerDashboard() {
     }
     const inactive = list.filter(c => String(c.status ?? '').toLowerCase() === 'nietactief')
     // Aandachtskandidaten ("attention candidates") — the SAME function as the candidates
-    // report (calcAandacht: active + new <30d + not yet scheduled) so the KPIs on both
+    // report (calcAttention: active + new <30d + not yet scheduled) so the KPIs on both
     // screens match (Danny). The "active but never logged in" rule CANNOT be added:
     // `last_login_at` DOES exist on the model but NOT on the resource (BE handoff). The
     // 2 "works less" rules wait on future per-candidate hours (shifts-per-candidate).
-    const attention = calcAandacht(list as unknown as ReportCandidate[])
+    const attention = calcAttention(list as unknown as ReportCandidate[])
     return { newList, avg, active, inactive, all: list, bNever, bWorked, bPlanned, bIdle, attention }
   }, [candidates])
 

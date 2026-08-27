@@ -17,7 +17,7 @@ export default function AppointmentsNext48hList({ rows, onNavigate }: {
   onNavigate?: FeedTileContext['onNavigate']
 }) {
   const { t } = useTranslation('dashboard')
-  const { formatDate } = useDateFormat()
+  const { formatDateTime } = useDateFormat()
   const { metaOf } = useAppointmentTypes()
   // LOOKUP-I18N-1: the seeded appointment-type label renders in the user's language.
   const seedLabel = useSeedLabel()
@@ -30,7 +30,7 @@ export default function AppointmentsNext48hList({ rows, onNavigate }: {
       key: r.appointment_id,
       primary: r.candidate?.name || t('widget.unknown'),
       secondary: meta?.label ? seedLabel('appointmentTypes', { value: r.type, label: meta.label }) : undefined,
-      meta: formatDate(r.scheduled_at, { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }),
+      meta: formatDateTime(r.scheduled_at),
       // No onNavigate → a plain row (no role/cursor), never a dead click.
       onClick: onNavigate ? () => (r.application_id
         ? onNavigate('applications', { open: r.application_id })

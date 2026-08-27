@@ -13,6 +13,7 @@ import { notifyError } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
 import SharedNotesTab from '@/components/drawer/tabs/NotesTab'
 import { useNoteTypes } from '@/lib/useNoteTypes'
+import { useAuth } from '@/context/AuthContext'
 import type { VacancyDetail } from '@/types/vacancy'
 
 // Structural match for the shared NotesTab's NoteItem (typed fields + open index).
@@ -24,16 +25,21 @@ export default function NotesTab({ vacancy: v }: { vacancy: VacancyDetail }) {
   // Note categories from the tenant lookup, scoped to 'vacancy' (NOTE-TYPES-2/3).
   const { writableTypes: noteTypes } = useNoteTypes('vacancy')
   const [notes, setNotes] = useState<Note[]>((v.notes ?? []) as Note[])
+  // AUTHOR-CURRENT-USER-1: the note being composed is written by the LOGGED-IN
+  // user, never the vacancy's owning recruiter — those can differ (a colleague
+  // covering someone else's vacancy). Mirrors useCandidateNotes/ScopedNotesTab.
+  const auth = useAuth()
+  const currentUserName = auth?.user?.name || 'Koios'
 
-  // Author avatar initials — the vacancy's owning recruiter, else a Koios fallback.
-  const initials = (v.owner?.name ?? 'Koios').split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase()
+  // Author avatar initials — the current user composing the note.
+  const initials = currentUserName.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase()
 
   // Optimistic add, then persist. OPTIMISTIC-REVERT-1 pattern (mirrors applications):
   // on failure the exact optimistic object is removed again and the server's own
   // message surfaced — never a silently-stuck fake note. NOTE-TAAL-1: `payload` is
   // forwarded to the API AS-IS, so the optional `language` field rides along for free.
   const addNote = (payload: { type: string; title: string; body: string; language?: string }) => {
-    const local: Note = { ...payload, text: payload.body, author: v.owner?.name ?? 'Koios', created_at: new Date().toISOString() }
+    const local: Note = { ...payload, text: payload.body, author: currentUserName, created_at: new Date().toISOString() }
     setNotes(prev => [local, ...prev])
     if (v.id != null) {
       api.post(`/vacancies/${v.id}/notes`, payload).catch(err => {
@@ -43,10 +49,27 @@ export default function NotesTab({ vacancy: v }: { vacancy: VacancyDetail }) {
     }
   }
 
+  // NOTITIE-PARITEIT (Danny 27-08): DELETE /vacancies/{vacancy}/notes/{note}
+  // exists (VacancyNoteController::destroy) — no update route, so no edit
+  // pencil here. Index-keyed like every other family; the note's own id must
+  // have resolved (never a local optimistic-only add) before it can be deleted.
+  const deleteNote = (i: number) => {
+    const target = notes[i]
+    const noteId = target?.id
+    if (v.id == null || noteId == null) return
+    const snapshot = notes
+    setNotes(prev => prev.filter((_, idx) => idx !== i))
+    api.delete(`/vacancies/${v.id}/notes/${noteId}`).catch(err => {
+      setNotes(snapshot)
+      notifyError(extractApiError(err, t('common:actionFailed')))
+    })
+  }
+
   return (
     <SharedNotesTab
       notes={notes}
       onAddNote={addNote}
+      onDeleteNote={deleteNote}
       noteTypes={noteTypes}
       authorInitials={initials}
       showTimeline={false}
@@ -69,6 +92,8 @@ export default function NotesTab({ vacancy: v }: { vacancy: VacancyDetail }) {
         notesEmpty: t('notes.empty'),
         notePlaceholder: () => t('notes.placeholder'),
         searchPlaceholder: t('notes.searchPlaceholder'),
+        deleteNote: t('notes.deleteNote'),
+        deleteConfirm: t('notes.deleteConfirm'),
       }}
     />
   )

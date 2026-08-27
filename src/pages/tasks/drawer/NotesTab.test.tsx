@@ -12,7 +12,7 @@ vi.mock('@/lib/api', async () => {
   return { ...actual, default: { get: vi.fn(() => Promise.resolve({ data: [] })), post: vi.fn() } }
 })
 // Stub useDateFormat so the shared NotesTab doesn't transitively init i18n (t() → keys).
-vi.mock('@/lib/datetime', () => ({ useDateFormat: () => ({ formatDate: (v: string) => v, locale: 'nl-NL' }) }))
+vi.mock('@/lib/datetime', () => ({ useDateFormat: () => ({ formatDate: (v: string) => v, formatDateTime: (v: string) => v, locale: 'nl-NL' }) }))
 // OPTIMISTIC-REVERT-1 pattern (mirrors matches/vacancies/applications NotesTab.test.tsx):
 // mock notify so a failed save's error toast is assertable.
 vi.mock('@/lib/notify', () => ({ notifyError: vi.fn() }))

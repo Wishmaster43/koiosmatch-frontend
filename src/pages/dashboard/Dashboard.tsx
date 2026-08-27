@@ -33,6 +33,7 @@ import { useAllSettings, getJsonSetting, getBoolSetting } from '@/lib/settings/u
 import { useNumberFormat } from '@/lib/formatters'
 import { useDateFormat } from '@/lib/datetime'
 import type { DashboardType } from './templates'
+import { topGridExclude } from './templates'
 
 // Recent lists, AI runs and conversations are now live (GET /dashboard, C-30/C-31).
 // The demo placeholder arrays were removed — data is mapped by useDashboardViewModel.
@@ -43,7 +44,7 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
   const { formatNumber } = useNumberFormat()
   // App-wide active locale (§5) — feeds the sync-sources timestamp below instead
   // of a hardcoded 'nl-NL' toLocaleString.
-  const { formatDate } = useDateFormat()
+  const { formatDateTime } = useDateFormat()
   const auth = useAuth()
   const { activeTenant } = auth ?? {}
   // The active view/type is chosen in the topbar switcher (DashboardLayout); fall
@@ -115,7 +116,12 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
   // viewmodel-mapped rows reach them through the tile context, and a list a pair
   // in the top grid already shows is not repeated in the bottom grid.
   const lists = { recentCandidates, recentApplications, recentLeads, runs, conversations, expiringMatchesRows, staleVacanciesRows, koiosSuggestionsRows }
-  const topTileIds = renderedTileIds(FEED_TILES, dash ?? ({} as DashData), vis, { onNavigate, hasPlanning, lists })
+  // DASHBOARD-MGMT-1 — management/recruitment_manager pull "Leads in pipeline" out
+  // of the top pipeline-value pair so it lands in the bottom recent-lists row
+  // instead (where "Recente uitvoeringen" sat); both grids below must agree on
+  // the exclusion or the top pair swallows it into topTileIds and it renders nowhere.
+  const topExclude = new Set(topGridExclude(activeType))
+  const topTileIds = renderedTileIds(FEED_TILES, dash ?? ({} as DashData), vis, { onNavigate, hasPlanning, lists }, topExclude)
 
   // Registers this page's right-panel filter groups (period/location/status options).
   useDashboardFilterPanel({
@@ -155,7 +161,7 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
               {(dash?.sync_sources ?? []).filter(s => s.system !== 'shiftmanager').map(s => (
                 <Caption key={s.system} as="span">
                   {t('lastSync', { source: s.label })}: {s.last_synced_at
-                    ? formatDate(s.last_synced_at, { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
+                    ? formatDateTime(s.last_synced_at)
                     : t('neverSynced')}
                 </Caption>
               ))}
@@ -174,7 +180,7 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
           {/* DASH-FEEDS-V3 + DASH-PAIRS-1 — every work-feed tile (the 24 v3 feeds,
               recruiter load, the pairs Danny asked for) in ONE packed grid right
               under the KPI strip: the day's work first, then Koios and the charts. */}
-          <FeedTileGrid dash={dash} vis={vis} onNavigate={onNavigate} hasPlanning={hasPlanning} lists={lists} />
+          <FeedTileGrid dash={dash} vis={vis} onNavigate={onNavigate} hasPlanning={hasPlanning} lists={lists} exclude={topExclude} />
 
           {/* K-173 fase 6 — sales_manager/accountmanager opportunity-ageing buckets. */}
           {vis('block.oppAging') && <OppAging rows={oppAgingRows} />}
@@ -184,11 +190,20 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
           {/* Tenant-wide Koios performance is a MANAGEMENT surface (plan v3);
               recruitment_manager's '*' template must not inherit it — that role
               gets "Koios deed dit voor jou" with the team scope instead. */}
-          {vis('block.koiosPerformance') && (activeType === 'admin' || activeType === 'management') && <KoiosPerformanceCard />}
-
-          {/* "Koios deed dit voor jou" (K0-D noordster) — self-contained card, own
-              loading/error/empty/success handling; fetches its own 7/30-day report. */}
-          <KoiosForYouCard scopeToggle={activeType === 'recruitment_manager' || activeType === 'sales_manager'} />
+          {/* DASHBOARD-MGMT-1 (Danny 23-08): on the management/admin view, "Koios AI
+              performance" (left) and "Koios did this for you" (right) sit side by
+              side — other roles keep KoiosForYouCard full-width, unpaired. */}
+          {vis('block.koiosPerformance') && (activeType === 'admin' || activeType === 'management') ? (
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16, alignItems: 'start' }}>
+              <KoiosPerformanceCard />
+              {/* activeType is narrowed to admin/management here, neither of which uses the scope toggle. */}
+              <KoiosForYouCard scopeToggle={false} />
+            </div>
+          ) : (
+            /* "Koios deed dit voor jou" (K0-D noordster) — self-contained card, own
+               loading/error/empty/success handling; fetches its own 7/30-day report. */
+            <KoiosForYouCard scopeToggle={activeType === 'recruitment_manager' || activeType === 'sales_manager'} />
+          )}
 
           <DistributionCharts vis={vis} statusData={statusData} funnelData={funnelData} recruiterData={recruiterData} oppStageData={oppStageData} opp={opp} onNavigate={onNavigate} />
 

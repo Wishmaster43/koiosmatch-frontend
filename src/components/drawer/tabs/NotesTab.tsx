@@ -61,33 +61,28 @@
  * today; the customer/vacancy popouts wire add-only, so no button there) and only
  * where this user may edit the note here as well (same gate as the pencil).
  */
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 import DrawerFilterMenu from '@/components/drawer/DrawerFilterMenu'
 import type { DrawerFilterConfig } from '@/components/drawer/DrawerFilterMenu'
-import { Edit2, ExternalLink, History, RotateCcw, Search, Trash2 } from 'lucide-react'
-import Avatar from '@/components/ui/Avatar'
+import { History, Search } from 'lucide-react'
 import EventTimeline from '@/components/ui/EventTimeline'
-import type { TimelineEvent as TimelineEventInput } from '@/components/ui/EventTimeline'
 import SafeHtml from '@/components/ui/SafeHtml'
 import SectionCard, { sectionBlock } from '@/components/ui/SectionCard'
 import { useAuth } from '@/context/AuthContext'
 import { useConfirm } from '@/hooks/useConfirm'
-import { useNotesPopout } from '@/hooks/useNotesPopout'
 import type { NotesPopoutTarget } from '@/hooks/useNotesPopout'
 import { useDateFormat } from '@/lib/datetime'
-import { initialsOf } from '@/lib/initials'
-import { notifyError } from '@/lib/notify'
-import { openNoteEditPopout } from '@/lib/secondScreen'
-import { Caption } from '@/components/ui/typography'
 import Button from '@/components/ui/Button'
 import NoteComposer from './notes/NoteComposer'
 import type { NoteDraft } from '@/hooks/useNotesPopout'
 import { getNoteDraft, putNoteDraft, deleteNoteDraft } from './notes/noteDraftApi'
-import { NoteTypeChip, NoteChannelChip } from './notes/NoteChips'
 import { useNoteRestorePrevious } from './notes/useNoteRestorePrevious'
+import { useNotesPopoutHandoff } from './notes/useNotesPopoutHandoff'
+import { renderSystemRow, useMergedTimelineEvents } from './notes/notesTimeline'
+import NoteRow from './notes/NoteRow'
 // Rights + system-note rule — the SAME module the per-note popout window applies
 // (noteRights, §11: one rule, two surfaces — they must never disagree).
 import { canManageNote as canManageNoteRule, isSystemNote } from './notes/noteRights'
@@ -269,7 +264,7 @@ export default function NotesTab({
   // SHARED tab, so every entity's notes get it at once ('' = all).
   const [typeFilter, setTypeFilter] = useState('')
   const [channelFilter, setChannelFilter] = useState('')
-  const { formatDate } = useDateFormat()
+  const { formatDateTime } = useDateFormat()
   // Rights model (RECHTEN-DETAIL-1): current user id + the UI-gate permission check
   // (never security — the BE re-checks). Null-safe: a host with no AuthProvider in
   // its render tree (existing tests, hosts that haven't migrated) still works —
@@ -279,49 +274,15 @@ export default function NotesTab({
   const hasPermission = auth?.hasPermission ?? (() => false)
   // Delete goes through the shared confirm dialog, never a native window.confirm() (§0).
   const { confirm, dialog } = useConfirm()
-  // Second screen (NOTITIE-POPOUT-HANDOFF-1 / -EDIT-1): handing the composer's
-  // half-typed note over, handing ONE existing note over to be edited there, and —
-  // when this render IS that window — taking either over. The protocol lives in
-  // the hook (§3). Only a DRAFT handoff closes the composer here: an edit handoff
-  // left the note in the list untouched, so closing on its ack would throw away
-  // whatever else the recruiter happened to have open.
-  const { isWindow: isPopoutWindow, handOff, canHandOffNote, pending: handoffPending, incoming, incomingNoteId, ack, clearIncoming } =
-    useNotesPopout({ target: popout, onHandedOver: kind => { if (kind === 'draft') { setAdding(false); setEditingIdx(null) } } })
-  // A handed-over draft is only taken over while THIS composer is free: overwriting
-  // a note being written here would just move the text loss elsewhere. Not taken
-  // over = never acked = the drill-down keeps its own text (see the hook).
-  const incomingDraft = adding ? null : incoming
-  // Ack from an EFFECT, i.e. after the render that actually shows the draft — the
-  // other window may close only once this one demonstrably holds the text.
-  useEffect(() => { if (incomingDraft) ack() }, [incomingDraft, ack])
-  // Window side (NOTITIE-POPOUT-EDIT-1): the drill-down asked this window to open
-  // ONE existing note in its editor. Resolved against the thread THIS window
-  // loaded — never against anything the sender sent — and only while this composer
-  // is free, so a note being written here is never overwritten. Not found (thread
-  // still loading, note outside this window's scope) = index -1 = nothing happens
-  // and nothing is acked, which is what keeps the drill-down honest.
-  const incomingEditIdx = incomingNoteId != null && !adding
-    ? notes.findIndex(n => noteIdOf(n) === incomingNoteId)
-    : -1
-  // Once incomingEditIdx resolves to a real note, switch the composer into edit mode for it.
-  useEffect(() => {
-    if (incomingEditIdx < 0) return
-    setEditingIdx(incomingEditIdx)
-    setAdding(true)
-  }, [incomingEditIdx])
-  // Confirm ONLY from a render where the composer really holds that exact note —
-  // acking on the request alone would tell the drill-down the note is being edited
-  // here while this window never found it.
-  useEffect(() => {
-    const shown = editingIdx == null ? undefined : notes[editingIdx]
-    if (incomingNoteId == null || !adding || !shown) return
-    if (noteIdOf(shown) !== incomingNoteId) return
-    ack()
-  }, [incomingNoteId, adding, editingIdx, notes, ack])
+  // Second screen (NOTITIE-POPOUT-HANDOFF-1 / -EDIT-1): the whole handoff
+  // protocol (draft handoff, per-note edit handoff, and this-window-is-the-
+  // receiver wiring) is pulled out into its own hook — see that file (§3).
+  const { isPopoutWindow, handOff, handoffPending, incomingDraft, clearIncoming, canPopOutNote, openNoteWindow } =
+    useNotesPopoutHandoff({ popout, notes, adding, editingIdx, setAdding, setEditingIdx, onEditNote, noteIdOf })
 
   // Note timestamp: real date+time when the note carries one, else the relative "ago".
   const noteWhen = (n: NoteItem) => n.created_at
-    ? formatDate(n.created_at as string, { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+    ? formatDateTime(n.created_at as string)
     : n.ago
   // Note author ("by whom"): the note's own author, from any of the API shapes.
   const noteAuthor = (n: NoteItem) =>
@@ -336,14 +297,8 @@ export default function NotesTab({
   // Per-note second-screen affordance (NOTITIE-POPOUT-EDIT-1): only where the
   // receiving window can actually PATCH the note (canHandOffNote) AND this surface
   // edits notes at all — the icon sits in the pencil's group and must never promise
-  // more than the pencil does.
-  const canPopOutNote = canHandOffNote && Boolean(onEditNote)
-  // NOTITIE-POPOUT-URL-1 (live 13-08 "zoals de profieltekst"): the row icon opens
-  // the note's OWN window by URL — no channel handoff, no race, no pending state.
-  const openNoteWindow = (noteId: string) => {
-    if (!popout) return
-    if (!openNoteEditPopout(popout.entity, popout.id, noteId)) notifyError(t('popupBlocked'))
-  }
+  // more than the pencil does. Both canPopOutNote/openNoteWindow now come from
+  // useNotesPopoutHandoff above.
   // Search narrows on body text (HTML stripped) + author name. The original index
   // is kept alongside each note (not just filtered away) because openEdit/
   // onEditNote key off a note's position in the FULL `notes` array, not the
@@ -434,87 +389,19 @@ export default function NotesTab({
   // extracted hook (§3, this file's own 400-line split trigger) so this stays a
   // thin renderer; the preview panel is still built HERE via SafeHtml.
   const { restoringIdx, requestRestorePrevious } = useNoteRestorePrevious({
-    onFetchPreviousVersion, onRestorePreviousNote, confirm, formatDate, t,
+    onFetchPreviousVersion, onRestorePreviousNote, confirm, formatDateTime, t,
     restoreConfirmTitle: labels.restoreConfirmTitle,
     renderPreview: html => <SafeHtml style={{ fontSize: 12, color: 'var(--text-muted)', display: 'block', marginTop: 4 }} html={html} />,
   })
 
-  // Note-type chip: resolves value→label against ALL types (chipTypes) — the
-  // composer list excludes system types, which made the chip fall back to the
-  // raw slug ("status_change" instead of "Statuswissel", Danny 13/7).
-  // Calm one-line system-event row (status/phase change): History icon, chip, no pencil
-  // by default. The icon is a BUTTON that opens the record changelog (Danny 13/7) —
-  // decoupled via a window event so this shared tab needs no drawer-specific wiring.
-  const systemRow = (n: NoteItem, key: string | number) => {
-    const who = noteAuthor(n)
-    // Only the "Statuswissel" event (n.type === 'status_change') is editable in place —
-    // never a 'lifecycle' event (archived/restored) — and only when the host actually
-    // passed the callback (see onEditStatusEvent on the props for why).
-    const canEditStatus = Boolean(onEditStatusEvent) && n.type === 'status_change'
-    return (
-      <div key={key} style={{ display: 'flex', gap: 8, marginBottom: 10, alignItems: 'center' }}>
-        <button onClick={() => window.dispatchEvent(new CustomEvent('km:open-changelog'))}
-          title={labels.openChangelog} aria-label={labels.openChangelog}
-          // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- 26px ROUND timeline marker-button: Button's 28px r6 geometry breaks the circular marker; identity stays on hover-bg/muted tokens
-          style={{ width: 26, height: 26, borderRadius: '50%', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--hover-bg)', color: 'var(--text-muted)', border: 'none', cursor: 'pointer' }}>
-          <History size={13} />
-        </button>
-        <div style={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 8, padding: '6px 10px' }}>
-          {n.type && <NoteTypeChip value={n.type} types={chipTypes ?? noteTypes} />}
-          <SafeHtml style={{ fontSize: 12, color: 'var(--text)', flex: 1, minWidth: 0 }} html={n.text ?? n.body ?? ''} />
-          <Caption as="span" style={{ whiteSpace: 'nowrap' }}>{who ? `${who} · ` : ''}{noteWhen(n)}</Caption>
-        </div>
-        {canEditStatus && (
-          <button onClick={onEditStatusEvent} title={labels.editStatusEvent} aria-label={labels.editStatusEvent}
-            // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- compact inline icon cluster in the note row (13px icons, 6px step): Button's 28px box would widen every row; identity stays muted ink on none
-            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 4, display: 'flex', flexShrink: 0 }}>
-            <Edit2 size={13} />
-          </button>
-        )}
-      </div>
-    )
-  }
-
-
-  // NOTES-TIMELINE-CONVERGE-1: system events (status/phase changes) + the host's
-  // own timeline items, merged into ONE chronological list for the shared
-  // EventTimeline (see the SectionCard comment below for why this replaced the
-  // old hand-rolled two-block render). Sort is stable, so items that share a
-  // timestamp (or carry none) keep their incoming relative order.
-  const mergedTimelineEvents = useMemo(() => {
-    const sysEvents: TimelineEventInput[] = systemNotes.map((n, i) => {
-      const canEditStatus = Boolean(onEditStatusEvent) && n.type === 'status_change'
-      return {
-        id: `sys-${n.id ?? i}`,
-        time: n.created_at,
-        kind: 'system',
-        text: (
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-            {n.type && <NoteTypeChip value={n.type} types={chipTypes ?? noteTypes} />}
-            <SafeHtml html={n.text ?? n.body ?? ''} />
-          </span>
-        ),
-        meta: noteAuthor(n) || undefined,
-        trailing: canEditStatus
-          ? <button onClick={onEditStatusEvent} title={labels.editStatusEvent} aria-label={labels.editStatusEvent}
-              // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- compact inline icon cluster in the note row (13px icons, 6px step): Button's 28px box would widen every row; identity stays muted ink on none
-              style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 4, display: 'flex', flexShrink: 0 }}>
-              <Edit2 size={13} />
-            </button>
-          : null,
-        onMarkerClick: () => window.dispatchEvent(new CustomEvent('km:open-changelog')),
-        markerLabel: typeof labels.openChangelog === 'string' ? labels.openChangelog : undefined,
-      }
-    })
-    const hostEvents: TimelineEventInput[] = timeline.map((ev, i) => ({
-      id: `ev-${i}`,
-      time: ev.time ?? ev.created_at,
-      meta: timelineName,
-      text: renderTimelineContent?.(ev) ?? (ev.text ?? ev.description),
-    }))
-    return [...sysEvents, ...hostEvents]
-      .sort((a, b) => (Date.parse(String(b.time ?? '')) || 0) - (Date.parse(String(a.time ?? '')) || 0))
-  }, [systemNotes, timeline, chipTypes, noteTypes, onEditStatusEvent, labels.editStatusEvent, labels.openChangelog, timelineName, renderTimelineContent])
+  // Note-type chip resolution, the system-event row and the merged timeline
+  // builder now live in `notes/notesTimeline.tsx` (§3 split) — this container
+  // only calls them with its own data + labels.
+  const mergedTimelineEvents = useMergedTimelineEvents({
+    systemNotes, timeline, chipTypes, noteTypes, onEditStatusEvent,
+    editStatusEventLabel: labels.editStatusEvent, openChangelogLabel: labels.openChangelog,
+    timelineName, renderTimelineContent, noteAuthor,
+  })
 
   // Load-error state (see NotesTabProps.error) — a calm danger row replaces the
   // whole tab body, same shape as MatchContractSection's error+retry; no button
@@ -590,80 +477,22 @@ export default function NotesTab({
         {visibleNotes.length === 0 && !composerOpen
           ? <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{labels.notesEmpty}</div>
           : visibleNotes.map(({ n, i }) => {
-              const who = noteAuthor(n)
               // Safety net: a stray system note still renders as an event row here.
-              if (isSystemNote(n)) return systemRow(n, i)
+              // System-row + regular-row rendering now live in notes/notesTimeline
+              // and notes/NoteRow (§3 split) — this container only wires the data.
+              if (isSystemNote(n)) {
+                return renderSystemRow(n, i, { labels, chipTypes, noteTypes, onEditStatusEvent, noteAuthor, noteWhen })
+              }
               return (
-              <div key={i} style={{ display: 'flex', gap: 8, marginBottom: 10 }}>
-                <Avatar initials={who ? initialsOf(who) : authorInitials} size={26} />
-                <div style={{ flex: 1, background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 8, padding: '8px 10px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', marginBottom: 4 }}>
-                    <div style={{ flex: 1 }}>
-                      {n.type && <NoteTypeChip value={n.type} types={chipTypes ?? noteTypes} />}
-                      {n.channel && <NoteChannelChip value={n.channel} channels={channels} />}
-                      <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>{n.title ?? who}</span>
-                    </div>
-                    {/* "By whom · when" (always) + "edited by X" once the backend logs it (NOTES-2b). */}
-                    <Caption as="span" style={{ display: 'inline-flex', alignItems: 'center', gap: 4, whiteSpace: 'nowrap' }}>
-                      {who ? `${who} · ` : ''}{noteWhen(n)}
-                      {/* EDIT-MARKER-1 (Danny 08-08 "2 keer een potloodje"): plain italic
-                          meta text, no icon — a pencil here read as a second edit BUTTON. */}
-                      {noteEdited(n) && (
-                        <span style={{ fontStyle: 'italic' }}>
-                          · {t('notes.editedBy', { name: noteEditor(n), defaultValue: 'bewerkt door {{name}}' })}
-                        </span>
-                      )}
-                    </Caption>
-                    {/* RECHTEN-DETAIL-1: own note or manage_all — never a button the BE will 403. */}
-                    {onEditNote && canManageNote(n) && (
-                      <button onClick={() => openEdit(i)} title={labels.edit} aria-label={labels.edit}
-                        // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- compact inline icon cluster in the note row (13px icons, 6px step): Button's 28px box would widen every row; identity stays muted ink on none
-                        style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '0 0 0 6px', display: 'flex' }}>
-                        <Edit2 size={13} />
-                      </button>
-                    )}
-                    {onDeleteNote && canManageNote(n) && (
-                      <button onClick={() => requestDelete(i)} title={labels.deleteNote} aria-label={labels.deleteNote}
-                        // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- compact inline icon cluster in the note row (13px icons, 6px step): Button's 28px box would widen every row; identity stays muted ink on none
-                        style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '0 0 0 6px', display: 'flex' }}>
-                        <Trash2 size={13} />
-                      </button>
-                    )}
-                    {/* NOTITIE-POPOUT-EDIT-1 → URL-1: third icon of the same group —
-                        same borderless, muted, 6px-left footprint as the pencil and
-                        the bin. Opens THIS note's own second-screen window by URL
-                        (the profile-text treatment): the id is in the address, so
-                        there is no handoff to race and re-opening re-focuses the
-                        same OS window. Same edit rights as the pencil, only where
-                        that window can really save, never inside that window. */}
-                    {canPopOutNote && canManageNote(n) && noteIdOf(n) && (
-                      <button type="button" onClick={() => openNoteWindow(noteIdOf(n) as string)}
-                        title={t('openSecondScreen')} aria-label={t('openSecondScreen')}
-                        // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- compact inline icon cluster in the note row (13px icons, 6px step): Button's 28px box would widen every row; identity stays muted ink on none
-                        style={{ background: 'none', border: 'none', cursor: 'pointer',
-                          color: 'var(--text-muted)', padding: '0 0 0 6px', display: 'flex' }}>
-                        <ExternalLink size={13} />
-                      </button>
-                    )}
-                    {/* NOTE-UNDO-FE-1 (K-172): fourth icon of the same borderless
-                        muted group — only where the host wired the family's
-                        undo routes AND this exact note carries a filled slot. */}
-                    {onFetchPreviousVersion && onRestorePreviousNote && n.has_previous_version && canManageNote(n) && (
-                      // Shared Button (ghost, iconOnly) — new debt never re-uses the
-                      // sibling icons' pre-existing raw-button exception (HUISSTIJL-1
-                      // ceiling: a fresh eslint-disable here would raise the file's
-                      // frozen count, which the gate refuses without --force).
-                      <Button variant="ghost" iconOnly size="sm" onClick={() => requestRestorePrevious(i)} disabled={restoringIdx === i}
-                        title={labels.restorePrevious} aria-label={labels.restorePrevious ?? ''}
-                        style={{ marginLeft: 6, flexShrink: 0 }}>
-                        <RotateCcw size={13} />
-                      </Button>
-                    )}
-                  </div>
-                  <SafeHtml style={{ fontSize: 12, color: 'var(--text)', lineHeight: 1.5 }} html={n.text ?? n.body ?? ''} />
-                </div>
-              </div>
-            )})
+                <NoteRow key={i} n={n} i={i} who={noteAuthor(n)} authorInitials={authorInitials}
+                  chipTypes={chipTypes} noteTypes={noteTypes} channels={channels} labels={labels} t={t}
+                  noteWhen={noteWhen} noteEditor={noteEditor} noteEdited={noteEdited} canManageNote={canManageNote}
+                  onEditNote={onEditNote} onDeleteNote={onDeleteNote} openEdit={openEdit} requestDelete={requestDelete}
+                  canPopOutNote={canPopOutNote} openNoteWindow={openNoteWindow} noteIdOf={noteIdOf}
+                  onFetchPreviousVersion={onFetchPreviousVersion} onRestorePreviousNote={onRestorePreviousNote}
+                  restoringIdx={restoringIdx} requestRestorePrevious={requestRestorePrevious} />
+              )
+            })
         }
       </div>
       </div>

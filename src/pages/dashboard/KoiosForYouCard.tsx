@@ -178,7 +178,7 @@ interface KoiosForYouCardProps {
 // See the file's top doc above for the for-you endpoint and the period-picker/KPI-tile drilldown it drives.
 export default function KoiosForYouCard({ title, scope, scopeToggle = false, footer }: KoiosForYouCardProps = {}) {
   const { t } = useTranslation(['dashboard', 'common'])
-  const { formatDate } = useDateFormat()
+  const { formatDateTime } = useDateFormat()
   const { formatNumber } = useNumberFormat()
   // Period preset — 'thisWeek' is the default (KOIOS-KAART-COMPACT-2 spec).
   const [preset, setPreset] = useState<PeriodPreset>('thisWeek')
@@ -276,7 +276,7 @@ export default function KoiosForYouCard({ title, scope, scopeToggle = false, foo
     {
       key: 'executed_at',
       header: t('koiosForYou.col.executedAt'),
-      render: (row: KoiosForYouAction) => formatDate(row.executed_at, { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
+      render: (row: KoiosForYouAction) => formatDateTime(row.executed_at),
       nowrap: true,
     },
     {

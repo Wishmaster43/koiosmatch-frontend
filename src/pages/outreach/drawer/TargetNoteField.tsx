@@ -102,6 +102,13 @@ export default function TargetNoteField({ note, onSave, targetId, campaignId, on
       setDraft(html); setCurrent(html); setEditing(false); lastProp.current = html
       onNoteSavedElsewhere?.(html)
     },
+    // BUG FIX (Danny 27-08, "pop-out gesloten maar blijft open staan"): the
+    // popout can close without ever posting draft/saved (closed unedited, or a
+    // dirty draft discarded via its own confirm) — nothing told this inline
+    // editor the second screen was gone. Mirror what a save/cancel already does
+    // here: no pending edit → exit edit mode; a pending edit → stays open so the
+    // text already streamed in via publishDraft is never silently dropped.
+    onClosed: () => { if (draft === current) setEditing(false) },
   })
   // Publish every local edit (typing, dictation, applied Koios suggestion) —
   // a no-op while no popout window is open (useTextPopoutSync's `post`).

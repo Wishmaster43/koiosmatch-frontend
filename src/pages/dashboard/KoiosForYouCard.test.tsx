@@ -21,7 +21,7 @@ vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string) => k }
 // Avoid real locale-dependent formatting / the @/i18n side-effect import
 // (same reasoning as Dashboard.test.tsx).
 vi.mock('@/lib/formatters', () => ({ useNumberFormat: () => ({ formatNumber: (n: number) => String(n) }) }))
-vi.mock('@/lib/datetime', () => ({ useDateFormat: () => ({ formatDate: (v: unknown) => String(v) }) }))
+vi.mock('@/lib/datetime', () => ({ useDateFormat: () => ({ formatDate: (v: unknown) => String(v), formatDateTime: (v: unknown) => String(v) }) }))
 
 // Preserve the real `unwrap` (used by the card's queryFn) — only the network
 // call is stubbed.

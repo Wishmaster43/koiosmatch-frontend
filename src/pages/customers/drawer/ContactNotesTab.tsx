@@ -50,6 +50,21 @@ export default function ContactNotesTab({ contactId, customerId }: {
       .catch(err => notifyError(extractApiError(err, t('common:actionFailed'))))
   }
 
+  // NOTITIE-PARITEIT (Danny 27-08): same customer-level PATCH/DELETE routes
+  // ScopedNotesTab uses — the note's id is scope-agnostic (see that file).
+  const editNote = (noteId: Id | undefined, payload: { type: string; title: string; body: string; language?: string }) => {
+    if (!customerId || noteId == null) return
+    api.patch(`/customers/${customerId}/notes/${noteId}`, { type: payload.type, text: payload.body, language: payload.language })
+      .then(reload)
+      .catch(err => notifyError(extractApiError(err, t('common:actionFailed'))))
+  }
+  const deleteNote = (noteId: Id | undefined) => {
+    if (!customerId || noteId == null) return
+    api.delete(`/customers/${customerId}/notes/${noteId}`)
+      .then(reload)
+      .catch(err => notifyError(extractApiError(err, t('common:actionFailed'))))
+  }
+
   // Four explicit UI states (§3) — never a blank screen while the scoped fetch is in flight or failed.
   if (loading) return <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('page.loading')}</div>
   // Neutral copy: the shared scopedList.loadError names a LOCATION, untrue here.
@@ -57,7 +72,10 @@ export default function ContactNotesTab({ contactId, customerId }: {
 
   return (
     <NotesTab
-      notes={notes} onAddNote={addNote} noteTypes={noteTypes} chipTypes={chipTypes}
+      notes={notes} onAddNote={addNote}
+      onEditNote={(i: number, payload: { type: string; title: string; body: string; language?: string }) => editNote(notes[i]?.id as Id | undefined, payload)}
+      onDeleteNote={(i: number) => deleteNote(notes[i]?.id as Id | undefined)}
+      noteTypes={noteTypes} chipTypes={chipTypes}
       authorInitials={authorInitials}
       showTimeline={false} showConversations={false}
       labels={{
@@ -66,6 +84,7 @@ export default function ContactNotesTab({ contactId, customerId }: {
         notesEmpty: t('notes.notesEmpty'),
         notePlaceholder: () => t('notes.notePlaceholder'),
         searchPlaceholder: t('notes.searchPlaceholder'),
+        deleteNote: t('notes.deleteNote'), deleteConfirm: t('notes.deleteConfirm'),
       }}
     />
   )

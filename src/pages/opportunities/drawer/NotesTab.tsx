@@ -16,7 +16,9 @@ export default function NotesTab({ opportunity: o }: { opportunity: Opportunity 
   const { t } = useTranslation(['opportunities', 'common'])
   // Note categories from the tenant lookup, scoped to 'opportunity' (NOTE-TYPES-2/3).
   const { writableTypes: noteTypes } = useNoteTypes('opportunity')
-  const { items: notes, loading, error, addNote, editNote } = useOpportunityNotes(o?.id)
+  // NOTITIE-PARITEIT (Danny 27-08): DELETE /opportunities/{id}/notes/{note}
+  // exists — wired alongside the existing edit (OPP-NOTE-EDIT-1).
+  const { items: notes, loading, error, addNote, editNote, deleteNote } = useOpportunityNotes(o?.id)
 
   // §3 (audit r4): loading/error render explicitly — a failed fetch must never
   // look like "no notes yet" (SharedNotesTab has no state props of its own).
@@ -31,6 +33,7 @@ export default function NotesTab({ opportunity: o }: { opportunity: Opportunity 
       onAddNote={(p: { type: string; body: string; language?: string }) => addNote({ type: p.type, body: p.body, language: p.language })}
       // OPP-NOTE-EDIT-1: the index-keyed edit callback — see useOpportunityNotes.editNote.
       onEditNote={(i: number, p: { type: string; body: string; language?: string }) => editNote(i, { type: p.type, body: p.body, language: p.language })}
+      onDeleteNote={deleteNote}
       noteTypes={noteTypes}
       showTimeline={false}
       showConversations={false}
@@ -44,6 +47,8 @@ export default function NotesTab({ opportunity: o }: { opportunity: Opportunity 
         notesEmpty: t('notes.empty'),
         notePlaceholder: () => t('notes.placeholder'),
         searchPlaceholder: t('notes.searchPlaceholder'),
+        deleteNote: t('notes.deleteNote'),
+        deleteConfirm: t('notes.deleteConfirm'),
       }}
     />
   )

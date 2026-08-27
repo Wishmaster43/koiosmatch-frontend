@@ -105,5 +105,21 @@ export function useOpportunityNotes(id?: Id) {
       })
   }, [id, items, load, t])
 
-  return { items, loading, error, addNote, editNote }
+  // Delete — NOTITIE-PARITEIT (Danny 27-08): DELETE /opportunities/{id}/notes/{note}
+  // exists on the backend (opportunities.php route); mirrors editNote's optimistic
+  // remove + revert-on-failure, index-keyed like editNote/onDeleteNote everywhere else.
+  const deleteNote = useCallback((index: number) => {
+    if (!id) return
+    const target = items[index]
+    if (!target?.id) return
+    const snapshot = items
+    setItems(prev => prev.filter((_, i) => i !== index))
+    api.delete(`/opportunities/${id}/notes/${target.id}`)
+      .catch(err => {
+        setItems(snapshot)
+        notifyError(extractApiError(err, t('common:actionFailed')))
+      })
+  }, [id, items, t])
+
+  return { items, loading, error, addNote, editNote, deleteNote }
 }

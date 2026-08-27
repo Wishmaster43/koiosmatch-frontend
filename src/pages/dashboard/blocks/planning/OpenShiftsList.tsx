@@ -14,7 +14,7 @@ export default function OpenShiftsList({ rows, onNavigate }: {
   onNavigate?: (page: string, params?: Record<string, unknown>) => void
 }) {
   const { t } = useTranslation('dashboard')
-  const { formatDate } = useDateFormat()
+  const { formatDateTime, formatTime } = useDateFormat()
   const goToPlanning = () => onNavigate?.('planning')
   // Row click: open that exact shift's staffing drawer on its own day — the
   // backend serialises `start_time` as a UTC instant, so a night shift can
@@ -26,8 +26,8 @@ export default function OpenShiftsList({ rows, onNavigate }: {
   const widgetRows = rows.map(r => ({
     key: r.shift_id,
     primary: r.order_title || t('widget.unknown'),
-    meta: formatDate(r.start_time, { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
-      + (r.end_time ? ' – ' + formatDate(r.end_time, { hour: '2-digit', minute: '2-digit' }) : ''),
+    meta: formatDateTime(r.start_time)
+      + (r.end_time ? ' – ' + formatTime(r.end_time) : ''),
     onClick: onNavigate ? goToShift(r) : undefined,
   }))
 

@@ -19,6 +19,12 @@ interface TextPopoutHostOptions {
   onDraft: (html: string) => void
   // The other window persisted the field: adopt the value, drop the edit state.
   onSaved: (html: string) => void
+  // NOTITIE-PARITEIT (Danny 27-08, outreach call-list bug "pop-out gesloten
+  // maar blijft open staan"): the window can close WITHOUT ever sending a
+  // draft/saved message (closed unedited, or a dirty draft discarded via the
+  // footer's own confirm) — nothing on this channel tells the host that. Optional:
+  // a host that omits it keeps today's behaviour (the frozen candidate drill-down).
+  onClosed?: () => void
 }
 
 /**
@@ -36,12 +42,16 @@ interface TextPopoutHostOptions {
  * The channel is off until the field is actually popped out, so a drawer that
  * nobody pops out opens no BroadcastChannel at all.
  */
-export function useTextPopoutHost({ entity, id, field, value, dirty, onDraft, onSaved }: TextPopoutHostOptions) {
+export function useTextPopoutHost({ entity, id, field, value, dirty, onDraft, onSaved, onClosed }: TextPopoutHostOptions) {
   const { t } = useTranslation('common')
   // Null outside any drawer (modal hosts) — then no auto-close, today's behaviour.
   const registry = useDrawerPopoutRegistry()
   // Joined only after the user pops the field out (see `open` below).
   const [active, setActive] = useState(false)
+  // Latest onClosed in a ref — the poll below binds once per open() call, never
+  // per render, so it must read the current callback without re-subscribing.
+  const onClosedRef = useRef(onClosed)
+  useEffect(() => { onClosedRef.current = onClosed })
   // Latest draft + its saved state for the `hello` reply — refs so the message
   // handler never answers with a stale closure; assigned in an effect, not in render.
   const valueRef = useRef(value)
@@ -74,6 +84,16 @@ export function useTextPopoutHost({ entity, id, field, value, dirty, onDraft, on
     // a mere tab switch (the host unmounts on every switch; a host-scoped
     // close destroyed the second screen and its unsaved text on nine hosts).
     registry?.register(win)
+    // NOTITIE-PARITEIT (see onClosed above): the window can close on its own
+    // (its own X, Cmd+W, save-and-close, discard-and-close) without ever
+    // posting a message here — poll `win.closed` so the host still learns the
+    // second screen is gone and can resume/close its inline editor consistently.
+    const poll = window.setInterval(() => {
+      if (!win.closed) return
+      window.clearInterval(poll)
+      setActive(false)
+      onClosedRef.current?.()
+    }, 500)
   }, [entity, id, field, t, registry])
 
   // Mirror one local edit (typing, dictation, Koios assist) to the other window.

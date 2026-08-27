@@ -12,6 +12,7 @@ import { useTranslation } from 'react-i18next'
 import api, { unwrapList } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
+import { useAuth } from '@/context/AuthContext'
 import type { Id } from '@/types/common'
 
 // Structural match for the shared NotesTab's NoteItem (typed fields + open index).
@@ -23,11 +24,21 @@ export interface UseEntityNotesResult {
   error: boolean
   fetchNotes: () => void
   addNote: (payload: { type: string; title: string; body: string; language?: string }) => void
+  // NOTITIE-PARITEIT (Danny 27-08): edit/delete, index-keyed like every other
+  // family (candidates/customers/opportunities) — only wired by a host whose
+  // entity actually has the matching PATCH/DELETE route (see each caller).
+  editNote: (i: number, payload: { type: string; title: string; body: string; language?: string }) => void
+  deleteNote: (i: number) => void
 }
 
 // Fetches and optimistically mutates one record's notes list; see file docblock.
-export function useEntityNotes({ id, basePath, authorName }: { id: Id | null | undefined; basePath: string; authorName: string }): UseEntityNotesResult {
+// AUTHOR-CURRENT-USER-1: the optimistic note stamps the CURRENT logged-in user
+// (mirrors useCandidateNotes), never the record's owner — a match/task owner is
+// not necessarily who is typing the note right now.
+export function useEntityNotes({ id, basePath }: { id: Id | null | undefined; basePath: string }): UseEntityNotesResult {
   const { t } = useTranslation('common')
+  const auth = useAuth()
+  const authorName = auth?.user?.name || [auth?.user?.firstname, auth?.user?.lastname].filter(Boolean).join(' ') || ''
   const [notes, setNotes] = useState<EntityNote[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
@@ -57,12 +68,49 @@ export function useEntityNotes({ id, basePath, authorName }: { id: Id | null | u
     const local: EntityNote = { ...payload, text: payload.body, author: authorName, created_at: new Date().toISOString() }
     setNotes(prev => [local, ...prev])
     if (id != null) {
-      api.post(`${basePath}/notes`, payload).catch(err => {
+      // Refetch on success (mirrors useCandidateNotes) so the real id/author/
+      // timestamp from the server replaces the optimistic stand-in.
+      api.post(`${basePath}/notes`, payload).then(fetchNotes).catch(err => {
         setNotes(prev => prev.filter(n => n !== local))
         notifyError(extractApiError(err, t('actionFailed')))
       })
     }
-  }, [id, basePath, authorName, t])
+  }, [id, basePath, authorName, t, fetchNotes])
 
-  return { notes, loading, error, fetchNotes, addNote }
+  // Edit an existing note by its position in the list (mirrors addNote's
+  // optimistic pattern, PATCH `${basePath}/notes/{id}` — only called by a host
+  // whose entity has this route, e.g. tasks; a note without a resolved id
+  // (still-optimistic) is skipped, mirroring vacancies/customers).
+  const editNote = useCallback((i: number, payload: { type: string; title: string; body: string; language?: string }) => {
+    const target = notes[i]
+    const noteId = target?.id
+    if (noteId == null) return
+    const snapshot = notes
+    setNotes(prev => prev.map((n, idx) => (idx === i ? { ...n, type: payload.type, title: payload.title, text: payload.body } : n)))
+    // TaskCommentController::update validates `body` (not `text`) — send both so
+    // every family's controller finds the field name it actually expects. Refetch
+    // on success so "edited by ..." (server-stamped) actually shows.
+    api.patch(`${basePath}/notes/${noteId}`, { type: payload.type, title: payload.title, body: payload.body, text: payload.body, language: payload.language })
+      .then(fetchNotes)
+      .catch(err => {
+        setNotes(snapshot)
+        notifyError(extractApiError(err, t('actionFailed')))
+      })
+  }, [notes, basePath, t, fetchNotes])
+
+  // Delete an existing note by its position in the list (DELETE `${basePath}/notes/{id}`).
+  const deleteNote = useCallback((i: number) => {
+    const target = notes[i]
+    const noteId = target?.id
+    if (noteId == null) return
+    const snapshot = notes
+    setNotes(prev => prev.filter((_, idx) => idx !== i))
+    api.delete(`${basePath}/notes/${noteId}`)
+      .catch(err => {
+        setNotes(snapshot)
+        notifyError(extractApiError(err, t('actionFailed')))
+      })
+  }, [notes, basePath, t])
+
+  return { notes, loading, error, fetchNotes, addNote, editNote, deleteNote }
 }
