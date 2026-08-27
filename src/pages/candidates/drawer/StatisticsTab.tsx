@@ -26,6 +26,7 @@ import { useDateFormat } from '@/lib/datetime'
 import api, { unwrapList } from '@/lib/api'
 import { useCandidateNotes } from '@/pages/candidates/hooks/useCandidateNotes'
 import { useCandidateStatistics } from '@/pages/candidates/hooks/useCandidateStatistics'
+import { useSeedLabel } from '@/lib/useSeedLabel'
 import type { Appt } from './applicationRowModel'
 import type { Candidate } from '@/types/candidate'
 
@@ -36,6 +37,8 @@ const StatsTab = StatsTabJs as ComponentType<{ kpisTitle?: unknown; kpis?: unkno
 export default function StatisticsTab({ c, onJump }: { c: Candidate; onJump?: (tab: string) => void }) {
   const { t } = useTranslation('candidates')
   const { formatDate } = useDateFormat()
+  // DEMO-TAAL-1: seeded funnel-stage/last-contact labels translate; a tenant rename stays as typed.
+  const seedLabel = useSeedLabel()
 
   // Notes are a separate resource (mirrors CommunicationTab) — `loaded` tells
   // "still loading" apart from "genuinely zero notes" so the block never renders
@@ -92,7 +95,7 @@ export default function StatisticsTab({ c, onJump }: { c: Candidate; onJump?: (t
                   <span style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--text)' }}>
                     {/* eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- an 8px legend-dot marker in the outcome's own DATA colour, not a button fill */}
                     <span style={{ width: 8, height: 8, borderRadius: '50%', background: b.color ?? 'var(--color-primary)', flexShrink: 0 }} />
-                    {b.label}
+                    {seedLabel('funnelTypes', { value: b.key, label: b.label })}
                   </span>
                   <span style={{ fontFamily: 'var(--font-mono, "JetBrains Mono", monospace)', color: 'var(--text-muted)' }}>{b.count}</span>
                 </div>
@@ -128,7 +131,7 @@ export default function StatisticsTab({ c, onJump }: { c: Candidate; onJump?: (t
               )}
               {stats.lastContactAt && (
                 <div style={{ color: 'var(--text-muted)' }}>
-                  {t('statistics.lastContact')}: {t('statistics.lastContactValue', { date: formatDate(stats.lastContactAt), type: stats.lastContactType ?? '—' })}
+                  {t('statistics.lastContact')}: {t('statistics.lastContactValue', { date: formatDate(stats.lastContactAt), type: stats.lastContactType ? seedLabel('lastContactTypes', { value: stats.lastContactType, label: stats.lastContactType }) : '—' })}
                 </div>
               )}
             </div>

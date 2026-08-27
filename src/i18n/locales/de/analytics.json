@@ -234,9 +234,9 @@
       "heatmap": {
         "title": "Bester Kontaktzeitpunkt (erreicht %)",
         "part": {
-          "ochtend": "Morgen",
-          "middag": "Nachmittag",
-          "avond": "Abend"
+          "morning": "Morgen",
+          "afternoon": "Nachmittag",
+          "evening": "Abend"
         },
         "weekday": "Tag",
         "attempts_one": "{{count}} Versuch",

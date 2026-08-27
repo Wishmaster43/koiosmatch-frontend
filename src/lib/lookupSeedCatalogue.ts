@@ -174,6 +174,32 @@ export const SEED_LABELS: Record<string, Record<string, string>> = {
     barmanBarvrouw: "Barman/Barvrouw",
     gastheerGastvrouw: "Gastheer/Gastvrouw",
     cateringmedewerker: "Cateringmedewerker",
+    // zorg preset (SeedsCandidates.php ~line 99-105)
+    verzorgendeIG: "Verzorgende IG",
+    helpendePlus: "Helpende Plus",
+    verpleegkundigeN4: "Verpleegkundige N4",
+    verpleegkundigeN5: "Verpleegkundige N5",
+    helpende: "Helpende",
+    doktersassistent: "Doktersassistent",
+    wijkverpleegkundige: "Wijkverpleegkundige",
+    // logistiek preset
+    orderpicker: "Orderpicker",
+    heftruckchauffeur: "Heftruckchauffeur",
+    magazijnmedewerker: "Magazijnmedewerker",
+    logistiekMedewerker: "Logistiek medewerker",
+    chauffeurCE: "Chauffeur CE",
+    inpakker: "Inpakker",
+    // beveiliging preset
+    beveiliger: "Beveiliger",
+    objectbeveiliger: "Objectbeveiliger",
+    evenementbeveiliger: "Evenementbeveiliger",
+    surveillant: "Surveillant",
+    receptiebeveiliger: "Receptiebeveiliger",
+    mobielSurveillant: "Mobiel surveillant",
+    // scale-vacancy-only titles (SeedsScaleVacancies.php SCALE_VACANCY_TITLES)
+    begeleiderGHZ: "Begeleider GHZ",
+    evvEr: "EVV'er",
+    teamleiderWarehouse: "Teamleider warehouse",
   },
   funnelTypes: {
     applied: "Gesolliciteerd",

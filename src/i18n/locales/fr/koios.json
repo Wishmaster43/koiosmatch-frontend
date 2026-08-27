@@ -22,13 +22,13 @@
     "selectable": "Modèles sélectionnables",
     "pickHint": "Choisissez le niveau d'IA pour votre agence. Les tarifs sont ci-dessous.",
     "tier": {
-      "snel": "Rapide",
-      "slim": "Malin",
+      "fast": "Rapide",
+      "smart": "Malin",
       "max": "Max"
     },
     "tierDesc": {
-      "snel": "Volume maximal, tarif le plus bas. Parfait pour le routinier.",
-      "slim": "Le standard : grande qualité à tarif moyen.",
+      "fast": "Volume maximal, tarif le plus bas. Parfait pour le routinier.",
+      "smart": "Le standard : grande qualité à tarif moyen.",
       "max": "La meilleure qualité pour le plus difficile. Tarif le plus élevé."
     },
     "saveError": "Le changement de modèle a échoué. Réessayez.",

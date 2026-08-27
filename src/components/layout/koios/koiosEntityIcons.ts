@@ -21,6 +21,7 @@ export const ENTITY_ICONS: Record<string, LucideIcon> = {
   opportunity: Target,
   task: ListChecks,
   outreach_campaign: PhoneCall,
+  calllist: PhoneCall,
   customer: Building2,
   location: Building2,
   department: Building2,

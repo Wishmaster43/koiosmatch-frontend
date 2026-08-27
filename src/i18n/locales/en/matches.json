@@ -72,7 +72,9 @@
       "branch": "Branch",
       "customerLocation": "Location",
       "customerDepartment": "Department",
-      "contactPerson": "Contact person"
+      "contactPerson": "Contact person",
+      "terminated": "Terminated",
+      "renewals": "Renewals"
     },
     "openCandidate": "Open candidate",
     "openVacancy": "Open vacancy",
@@ -116,7 +118,9 @@
       "noteCounter": "{{count}}/{{max}}",
       "confirm": "Confirm termination",
       "success": "Match terminated.",
-      "error": "The match could not be terminated."
+      "error": "The match could not be terminated.",
+      "reasonLine": "{{date}} · {{reason}}",
+      "reasonLineNoDate": "Reason: {{reason}}"
     },
     "remarks": {
       "title": "Remarks",
@@ -165,7 +169,11 @@
       "success": "Match renewed.",
       "error": "The match could not be renewed.",
       "disabledArchived": "Archived match. Restore first.",
-      "disabledClosed": "This match has already been terminated."
+      "disabledClosed": "This match has already been terminated.",
+      "renewalCount_ordinal_one": "{{count}}st renewal",
+      "renewalCount_ordinal_two": "{{count}}nd renewal",
+      "renewalCount_ordinal_few": "{{count}}rd renewal",
+      "renewalCount_ordinal_other": "{{count}}th renewal"
     }
   },
   "approval": {
@@ -304,7 +312,9 @@
     "cancel": "Cancel",
     "searchPlaceholder": "Search notes…",
     "loading": "Loading notes…",
-    "loadError": "Notes could not be loaded."
+    "loadError": "Notes could not be loaded.",
+    "deleteNote": "Delete note",
+    "deleteConfirm": "Delete this note?"
   },
   "ai": {
     "title": "Koios AI advises",

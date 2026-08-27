@@ -22,13 +22,13 @@
     "selectable": "Modelos seleccionables",
     "pickHint": "Elige el nivel de IA para tu agencia. Las tarifas están debajo.",
     "tier": {
-      "snel": "Rápido",
-      "slim": "Inteligente",
+      "fast": "Rápido",
+      "smart": "Inteligente",
       "max": "Max"
     },
     "tierDesc": {
-      "snel": "Mayor volumen, tarifa más baja. Ideal para trabajo rutinario.",
-      "slim": "El estándar: gran calidad a tarifa media.",
+      "fast": "Mayor volumen, tarifa más baja. Ideal para trabajo rutinario.",
+      "smart": "El estándar: gran calidad a tarifa media.",
       "max": "La mejor calidad para el trabajo más difícil. Tarifa más alta."
     },
     "saveError": "No se pudo cambiar el modelo. Inténtalo de nuevo.",

@@ -133,7 +133,9 @@
     "placeholder": "Notiz schreiben…",
     "save": "Speichern",
     "cancel": "Abbrechen",
-    "searchPlaceholder": "Notizen suchen…"
+    "searchPlaceholder": "Notizen suchen…",
+    "deleteNote": "Notiz löschen",
+    "deleteConfirm": "Diese Notiz löschen?"
   },
   "drawer": {
     "entityLabel": "Stelle",
@@ -402,7 +404,7 @@
       "resultsTitle": "Stelle erstellt",
       "resultsHint": "Anhänge und Notiz werden unten verarbeitet. Fehlgeschlagene Elemente können erneut versucht werden."
     },
-    "titlePlaceholder": "z. B. Pflegekraft | Den Haag",
+    "titlePlaceholder": "z. B. Pflegekraft | Berlin",
     "create": "Stelle erstellen",
     "cancel": "Abbrechen",
     "creating": "Wird erstellt…",

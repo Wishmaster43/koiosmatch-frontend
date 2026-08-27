@@ -11,6 +11,7 @@ import type { ChangeEvent, KeyboardEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Bot, AtSign, Paperclip, ArrowUp } from 'lucide-react'
 import { useLocale } from '@/lib/datetime'
+import { humanizeIsoDates } from '@/lib/localDate'
 import { tint, TINT_BORDER } from '@/lib/tint'
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion'
 import { useKoiosChat } from './koios/useKoiosChat'
@@ -20,6 +21,8 @@ import { useKoiosMentionCounts } from './koios/useKoiosMentionCounts'
 import { useKoiosContextChips } from './koios/useKoiosContextChips'
 import { useKoiosComposerKeys } from './koios/useKoiosComposerKeys'
 import { addContextRef, removeContextRef } from './koios/contextRefs'
+import { koiosMarkdownToHtml } from './koios/koiosMarkdown'
+import SafeHtml from '@/components/ui/SafeHtml'
 import KoiosSteps from './koios/KoiosSteps'
 import KoiosUsage from './koios/KoiosUsage'
 import KoiosModelPicker from './koios/KoiosModelPicker'
@@ -78,14 +81,15 @@ function KoiosMessage({ msg, isNew, t, locale }: { msg: KoiosChatMessage; isNew?
         <div style={{
           padding: '9px 13px',
           borderRadius: isKoios ? '4px 16px 16px 16px' : '16px 4px 16px 16px',
-          fontSize: 13, lineHeight: 1.6, whiteSpace: 'pre-wrap',
+          fontSize: 13, lineHeight: 1.6, whiteSpace: isKoios && !notice ? 'normal' : 'pre-wrap',
           background: isKoios ? 'var(--surface)' : GRADIENT,
           color:      isKoios ? (notice ? 'var(--text-muted)' : 'var(--text)') : 'var(--color-on-accent)',
           border:     isKoios ? '1px solid var(--border)' : 'none',
           // HUISSTIJL-1: colored glow tied to the gradient bubble background, none of card/float/modal — kept.
           boxShadow:  isKoios ? 'none' : '0 2px 10px rgba(99,102,241,0.35)',
         }}>
-          {text}
+          {/* DATUM-1: rewrite any AI-composed ISO date to DD-MM-YYYY before markdown/DOMPurify; assistant replies render basic markdown (bold/lists) through SafeHtml, user text and notices stay plain. */}
+          {isKoios && !notice ? <SafeHtml html={koiosMarkdownToHtml(humanizeIsoDates(text ?? ''))} /> : text}
         </div>
         {stopTag && <div style={{ marginTop: 4, fontSize: 10, color: 'var(--text-muted)' }}>{stopTag}</div>}
         {/* Job 2 (dormant): a proposed write waiting for the user's confirm/cancel. */}

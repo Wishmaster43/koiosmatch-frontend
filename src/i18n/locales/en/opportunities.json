@@ -102,7 +102,9 @@
     "empty": "No notes yet.",
     "placeholder": "Write a note…",
     "loadError": "Failed to load notes",
-    "searchPlaceholder": "Search notes…"
+    "searchPlaceholder": "Search notes…",
+    "deleteNote": "Delete note",
+    "deleteConfirm": "Delete this note?"
   },
   "tasks": {
     "loading": "Loading tasks…",
@@ -191,7 +193,7 @@
   "modal": {
     "title": "New opportunity",
     "editTitle": "Edit opportunity",
-    "titlePlaceholder": "E.g. 5 nurses — Zorggroep Noord",
+    "titlePlaceholder": "E.g. 5 order pickers for Northern Logistics",
     "required": "Title is required",
     "create": "Create",
     "creating": "Saving…",

@@ -10,6 +10,7 @@
 import { useNavigation } from '@/context/NavigationContext'
 import { entityIconEl } from './koiosEntityIcons'
 import { pageForResultRef } from './koiosResultLinks'
+import { humanizeIsoDates } from '@/lib/localDate'
 import type { KoiosResultRef } from './koiosTypes'
 
 // De-dupe by "type:id" — the same record may surface from more than one step.
@@ -45,7 +46,8 @@ export default function KoiosResultCards({ refs }: { refs: KoiosResultRef[] }) {
               cursor: clickable ? 'pointer' : 'default', textAlign: 'left',
             }}>
             {entityIconEl(ref.type, { size: 13, color: 'var(--color-primary-text)' })}
-            {ref.label}
+            {/* DATUM-1: rewrite any embedded ISO date in a server-composed label (e.g. "intake · 2026-09-02") to DD-MM-YYYY. */}
+            {humanizeIsoDates(ref.label)}
           </Tag>
         )
       })}

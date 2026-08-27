@@ -133,7 +133,9 @@
     "placeholder": "Write a note…",
     "save": "Save",
     "cancel": "Cancel",
-    "searchPlaceholder": "Search notes…"
+    "searchPlaceholder": "Search notes…",
+    "deleteNote": "Delete note",
+    "deleteConfirm": "Delete this note?"
   },
   "drawer": {
     "entityLabel": "Vacancy",
@@ -402,7 +404,7 @@
       "resultsTitle": "Vacancy created",
       "resultsHint": "The attachments and note are being processed below. Failed items can be retried."
     },
-    "titlePlaceholder": "e.g. Nurse | The Hague",
+    "titlePlaceholder": "e.g. Nurse | London",
     "create": "Create vacancy",
     "cancel": "Cancel",
     "creating": "Creating…",

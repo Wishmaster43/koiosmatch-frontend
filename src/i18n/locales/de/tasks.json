@@ -208,7 +208,10 @@
     "cancel": "Abbrechen",
     "searchPlaceholder": "Notizen durchsuchen…",
     "loading": "Notizen werden geladen…",
-    "loadError": "Notizen konnten nicht geladen werden."
+    "loadError": "Notizen konnten nicht geladen werden.",
+    "edit": "Bearbeiten",
+    "deleteNote": "Notiz löschen",
+    "deleteConfirm": "Diese Notiz löschen?"
   },
   "koios": {
     "reasons": {

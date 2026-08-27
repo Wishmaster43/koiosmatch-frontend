@@ -114,7 +114,7 @@
   "modal": {
     "title": "Nouvelle opportunité",
     "editTitle": "Modifier l'opportunité",
-    "titlePlaceholder": "Ex. 5 infirmiers — Zorggroep Noord",
+    "titlePlaceholder": "P. ex. 5 préparateurs de commandes pour Logistique Nord",
     "required": "Le titre est requis",
     "create": "Créer",
     "creating": "Enregistrement…",
@@ -214,7 +214,9 @@
     "empty": "Aucune note pour l’instant.",
     "placeholder": "Écrire une note…",
     "loadError": "Échec du chargement des notes",
-    "searchPlaceholder": "Rechercher des notes…"
+    "searchPlaceholder": "Rechercher des notes…",
+    "deleteNote": "Supprimer la note",
+    "deleteConfirm": "Supprimer cette note ?"
   },
   "tasks": {
     "loading": "Chargement des tâches…",

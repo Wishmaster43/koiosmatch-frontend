@@ -1352,7 +1352,7 @@
   },
   "validation": {
     "emailFormat": "Geben Sie eine gültige E-Mail-Adresse ein.",
-    "phoneFormat": "Geben Sie eine gültige Telefonnummer ein (8 bis 15 Ziffern, z. B. 0612345678 oder +31612345678).",
+    "phoneFormat": "Geben Sie eine gültige Telefonnummer ein (8 bis 15 Ziffern, z. B. 015123456789 oder +4915123456789).",
     "linkedinFormat": "Verwenden Sie nur den LinkedIn-Benutzernamen, ohne Leerzeichen oder Schrägstriche (z. B. jan-jansen-12345)."
   },
   "popout": {

@@ -114,7 +114,7 @@
   "modal": {
     "title": "Nueva oportunidad",
     "editTitle": "Editar oportunidad",
-    "titlePlaceholder": "Ej. 5 enfermeros — Zorggroep Noord",
+    "titlePlaceholder": "P. ej. 5 preparadores de pedidos para Logística Norte",
     "required": "El título es obligatorio",
     "create": "Crear",
     "creating": "Guardando…",
@@ -214,7 +214,9 @@
     "empty": "Aún no hay notas.",
     "placeholder": "Escribe una nota…",
     "loadError": "No se pudieron cargar las notas",
-    "searchPlaceholder": "Buscar notas…"
+    "searchPlaceholder": "Buscar notas…",
+    "deleteNote": "Eliminar nota",
+    "deleteConfirm": "¿Eliminar esta nota?"
   },
   "tasks": {
     "loading": "Cargando tareas…",

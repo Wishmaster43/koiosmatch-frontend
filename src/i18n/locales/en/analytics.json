@@ -234,9 +234,9 @@
       "heatmap": {
         "title": "Best contact moment (reached %)",
         "part": {
-          "ochtend": "Morning",
-          "middag": "Afternoon",
-          "avond": "Evening"
+          "morning": "Morning",
+          "afternoon": "Afternoon",
+          "evening": "Evening"
         },
         "weekday": "Day",
         "attempts_one": "{{count}} attempt",

@@ -31,7 +31,7 @@ for (const [path, json] of Object.entries(BUNDLES)) {
 // i18next stores an ICU plural as key_one / key_other / key_zero — the BASE key has no node
 // of its own, so a plural must not read as missing. It is the single biggest source of false
 // alarms in a codebase that uses counts everywhere.
-const PLURALS = ['_zero', '_one', '_two', '_few', '_many', '_other']
+const PLURALS = ['_zero', '_one', '_two', '_few', '_many', '_other', '_ordinal_zero', '_ordinal_one', '_ordinal_two', '_ordinal_few', '_ordinal_many', '_ordinal_other']
 
 function lookup(ns: string, key: string): unknown {
   let node: unknown = bundles[ns]

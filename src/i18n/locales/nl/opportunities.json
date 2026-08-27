@@ -102,7 +102,9 @@
     "empty": "Nog geen notities.",
     "placeholder": "Schrijf een notitie…",
     "loadError": "Notities laden mislukt",
-    "searchPlaceholder": "Zoek notities…"
+    "searchPlaceholder": "Zoek notities…",
+    "deleteNote": "Notitie verwijderen",
+    "deleteConfirm": "Deze notitie verwijderen?"
   },
   "tasks": {
     "loading": "Taken laden…",
@@ -191,7 +193,7 @@
   "modal": {
     "title": "Nieuwe kans",
     "editTitle": "Kans bewerken",
-    "titlePlaceholder": "Bijv. 5 verpleegkundigen — Zorggroep Noord",
+    "titlePlaceholder": "Bijv. 5 orderpickers voor Logistiek Noord",
     "required": "Titel is verplicht",
     "create": "Aanmaken",
     "creating": "Bezig…",

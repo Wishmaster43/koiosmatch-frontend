@@ -208,7 +208,10 @@
     "cancel": "Annuleren",
     "searchPlaceholder": "Zoek notities…",
     "loading": "Notities laden…",
-    "loadError": "Notities konden niet geladen worden."
+    "loadError": "Notities konden niet geladen worden.",
+    "edit": "Bewerken",
+    "deleteNote": "Notitie verwijderen",
+    "deleteConfirm": "Deze notitie verwijderen?"
   },
   "koios": {
     "reasons": {

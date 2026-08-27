@@ -27,4 +27,11 @@ describe('KoiosUsage — stand name, never the vendor id', () => {
     render(<KoiosUsage model="gpt-4o" usage={{ input_tokens: 1, output_tokens: 1, cost: 0 }} t={t} />)
     expect(screen.getByText(/gpt-4o/)).toBeInTheDocument()
   })
+
+  // KOIOS-CHAT: cost must never render, even when the payload carries a non-zero one.
+  it('never renders a cost/currency figure', () => {
+    render(<KoiosUsage model="claude-sonnet-5" usage={{ input_tokens: 10, output_tokens: 20, cost: 1.23, currency: 'EUR' }} t={t} />)
+    expect(screen.queryByText(/€/)).not.toBeInTheDocument()
+    expect(screen.queryByText(/1[.,]23/)).not.toBeInTheDocument()
+  })
 })

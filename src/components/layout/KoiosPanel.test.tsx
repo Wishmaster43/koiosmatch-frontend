@@ -111,6 +111,16 @@ describe('KoiosPanel — known backend error codes', () => {
     await submitMessage('hello')
     expect(await screen.findByText('koios.errorReply')).toBeInTheDocument()
   })
+
+  // DATUM-1: an AI-composed reply carrying a raw ISO date renders humanised (DD-MM-YYYY), never the raw ISO string.
+  it('humanises an ISO date embedded in the assistant reply', async () => {
+    vi.mocked(sendChat).mockResolvedValueOnce({
+      answer: 'De intake staat gepland op 2026-09-02.', steps: [], usage: null, model: null, stopReason: null,
+    })
+    await submitMessage('wanneer is de intake')
+    expect(await screen.findByText(/02-09-2026/)).toBeInTheDocument()
+    expect(screen.queryByText(/2026-09-02/)).toBeNull()
+  })
 })
 
 // KOIOS-SEARCH-FIX-1 blocker (2): the panel SEAM — ambient/selection chips,

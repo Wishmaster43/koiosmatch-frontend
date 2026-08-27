@@ -72,7 +72,9 @@
       "branch": "Sucursal",
       "customerLocation": "Ubicación",
       "customerDepartment": "Departamento",
-      "contactPerson": "Persona de contacto"
+      "contactPerson": "Persona de contacto",
+      "terminated": "Finalizado",
+      "renewals": "Renovaciones"
     },
     "openCandidate": "Abrir candidato",
     "openVacancy": "Abrir vacante",
@@ -116,7 +118,9 @@
       "noteCounter": "{{count}}/{{max}}",
       "confirm": "Confirmar finalización",
       "success": "Match finalizado.",
-      "error": "No se pudo finalizar el match."
+      "error": "No se pudo finalizar el match.",
+      "reasonLine": "{{date}} · {{reason}}",
+      "reasonLineNoDate": "Motivo: {{reason}}"
     },
     "remarks": {
       "title": "Observaciones",
@@ -165,7 +169,8 @@
       "success": "Match renovado.",
       "error": "No se pudo renovar el match.",
       "disabledArchived": "Match archivado. Restaura primero.",
-      "disabledClosed": "Este match ya ha finalizado."
+      "disabledClosed": "Este match ya ha finalizado.",
+      "renewalCount_ordinal_other": "{{count}}.ª renovación"
     }
   },
   "approval": {
@@ -304,7 +309,9 @@
     "cancel": "Cancelar",
     "searchPlaceholder": "Buscar notas…",
     "loading": "Cargando notas…",
-    "loadError": "No se pudieron cargar las notas."
+    "loadError": "No se pudieron cargar las notas.",
+    "deleteNote": "Eliminar nota",
+    "deleteConfirm": "¿Eliminar esta nota?"
   },
   "ai": {
     "title": "Koios AI recomienda",

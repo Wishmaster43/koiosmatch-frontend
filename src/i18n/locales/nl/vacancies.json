@@ -133,7 +133,9 @@
     "placeholder": "Schrijf een notitie…",
     "save": "Opslaan",
     "cancel": "Annuleren",
-    "searchPlaceholder": "Zoek notities…"
+    "searchPlaceholder": "Zoek notities…",
+    "deleteNote": "Notitie verwijderen",
+    "deleteConfirm": "Deze notitie verwijderen?"
   },
   "drawer": {
     "entityLabel": "Vacature",

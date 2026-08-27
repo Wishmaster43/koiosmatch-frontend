@@ -133,7 +133,9 @@
     "placeholder": "Écrire une note…",
     "save": "Enregistrer",
     "cancel": "Annuler",
-    "searchPlaceholder": "Rechercher des notes…"
+    "searchPlaceholder": "Rechercher des notes…",
+    "deleteNote": "Supprimer la note",
+    "deleteConfirm": "Supprimer cette note ?"
   },
   "drawer": {
     "entityLabel": "Poste",

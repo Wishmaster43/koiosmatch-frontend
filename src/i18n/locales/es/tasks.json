@@ -208,7 +208,10 @@
     "cancel": "Cancelar",
     "searchPlaceholder": "Buscar notas…",
     "loading": "Cargando notas…",
-    "loadError": "No se pudieron cargar las notas."
+    "loadError": "No se pudieron cargar las notas.",
+    "edit": "Editar",
+    "deleteNote": "Eliminar nota",
+    "deleteConfirm": "¿Eliminar esta nota?"
   },
   "koios": {
     "reasons": {

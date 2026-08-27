@@ -33,6 +33,8 @@ describe('KoiosResultCards', () => {
     ['opportunity', 'opportunities'],
     ['task', 'tasks'],
     ['outreach_campaign', 'outreach'],
+    ['calllist', 'outreach'],
+    ['workflow', 'aiagents'],
   ])('maps %s refs to the %s page', async (type, page) => {
     const user = userEvent.setup()
     openEntity.mockClear()
@@ -41,14 +43,21 @@ describe('KoiosResultCards', () => {
     expect(openEntity).toHaveBeenCalledWith(page, 'x1')
   })
 
-  // A type with no page yet (e.g. a workflow) still renders the card — non-interactively.
+  // A child ref with no route yet (appointment/note/document — honest skip, see koiosResultLinks) still renders the card — non-interactively.
   it('renders a non-clickable card for a type without a page', async () => {
     const user = userEvent.setup()
-    render(<KoiosResultCards refs={[{ type: 'workflow', id: 'w1', label: 'Onboarding flow' }]} />)
-    const card = screen.getByText('Onboarding flow').closest('div, button')
+    render(<KoiosResultCards refs={[{ type: 'appointment', id: 'a1', label: 'intake · 02-09-2026' }]} />)
+    const card = screen.getByText('intake · 02-09-2026').closest('div, button')
     expect(card?.tagName).toBe('DIV')
-    await user.click(screen.getByText('Onboarding flow'))
+    await user.click(screen.getByText('intake · 02-09-2026'))
     expect(openEntity).not.toHaveBeenCalled()
+  })
+
+  // DATUM-1: a server-composed label carrying an ISO date renders DD-MM-YYYY, never raw ISO.
+  it('rewrites an embedded ISO date in the label to DD-MM-YYYY', () => {
+    render(<KoiosResultCards refs={[{ type: 'candidate', id: 'c1', label: 'intake · 2026-09-02' }]} />)
+    expect(screen.getByText('intake · 02-09-2026')).toBeInTheDocument()
+    expect(screen.queryByText(/2026-09-02/)).not.toBeInTheDocument()
   })
 
   // The same record surfacing from two steps collapses to one card.
