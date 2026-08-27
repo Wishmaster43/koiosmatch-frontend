@@ -282,3 +282,21 @@ describe('ApplicationsTable · vacancy cell navigation (point 6)', () => {
     expect(onSelect).toHaveBeenCalledWith(baseRow)
   })
 })
+
+
+// SOLL-SCORE-LEIDEND-1 (Danny 27-08): an AI-set score wears the Koios mark; a
+// manual override (human fact) and an unknown source render bare.
+describe('ApplicationsTable · score source marking', () => {
+  const base = { id: 1, candidateName: 'A', vacancyTitle: 'V', score: 82 }
+  it('marks an ai-sourced score with the Koios mark', () => {
+    render(<ApplicationsTable rows={[{ ...base, scoreSource: 'ai' } as unknown as Application]} />)
+    expect(screen.getByTitle('Score door Koios AI')).toBeInTheDocument()
+  })
+  it('renders a manual override and an unknown source bare', () => {
+    render(<ApplicationsTable rows={[
+      { ...base, id: 2, scoreSource: 'manual' } as unknown as Application,
+      { ...base, id: 3 } as unknown as Application,
+    ]} />)
+    expect(screen.queryByTitle('Score door Koios AI')).toBeNull()
+  })
+})

@@ -140,6 +140,11 @@ export function mapApplication(a: ApiApplication = {}, funnelTypes: LookupItem[]
     // nested `match.overall` fallback is dead — that array never carried an `overall`
     // key (only id/reference_number/status_label/status_color/match_*).
     score: a.score ?? a.match_score ?? null,
+    // SOLL-SCORE-LEIDEND-1 (Danny 27-08): the score IS already the leading value
+    // (a manual override wins server-side); the source says WHO set it, so the
+    // cell can wear the Koios mark on AI values. Absent on older list payloads →
+    // undefined → no mark (honest unknown, never guessed).
+    scoreSource: a.match_score_source ?? undefined,
     task: a.task ?? a.ai_task ?? a.ai?.task ?? '',
     phaseKey,
     bucket: a.bucket ?? bucketOfPhase(phaseKey, funnelTypes),

@@ -59,7 +59,8 @@
     "interview": "Interview",
     "created": "Aangemaakt",
     "referenceNumber": "Referentienr.",
-    "daysInPhase": "Dagen in fase"
+    "daysInPhase": "Dagen in fase",
+    "scoreByKoios": "Score door Koios AI"
   },
   "kpi": {
     "totalActive": "Totaal actief",

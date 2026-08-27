@@ -59,7 +59,8 @@
     "interview": "Entretien",
     "created": "Créé le",
     "referenceNumber": "N° de référence",
-    "daysInPhase": "Jours en phase"
+    "daysInPhase": "Jours en phase",
+    "scoreByKoios": "Score par Koios AI"
   },
   "kpi": {
     "totalActive": "Total actives",

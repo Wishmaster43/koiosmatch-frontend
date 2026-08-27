@@ -117,6 +117,8 @@ export interface Application {
   // S5: the application's own human-readable display number (e.g. "S-00123").
   referenceNumber: string
   score: number | null
+  // Who set the leading score: 'ai' | 'manual' (undefined on older list payloads).
+  scoreSource?: string
   task: string
   phaseKey: string
   bucket: string

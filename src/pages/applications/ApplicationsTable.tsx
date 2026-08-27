@@ -13,6 +13,7 @@ import EntityNameCell from '@/components/ui/EntityNameCell'
 import StatusPill from '@/components/ui/StatusPill'
 import CandidateStatusChip from '@/components/ui/CandidateStatusChip'
 import { makeKoiosColumn } from '@/components/ui/koiosColumn'
+import KoiosAiMark from '@/components/ui/KoiosAiMark'
 // HUISSTIJL-1: the interview step count rides the Caption atom's own 11px/muted
 // identity, with the raw monoStyle identity layered on for JetBrains Mono digits;
 // the two plain mono cellStyle objects below reuse the same raw identity.
@@ -128,7 +129,15 @@ export default function ApplicationsTable({ rows, loading, error, selectedId, on
     // Match score. DATATABLE-SORT-1: serverKey maps to ApplicationQuery's match_score sort.
     { key: 'score', header: t('cols.score'), align: 'right', sortable: true,
       sortValue: r => r.score ?? -1, serverKey: APPLICATION_SORT_KEYS.score,
-      render: r => <ScorePill value={r.score} plain={!colorScore} /> },
+      // SOLL-SCORE-LEIDEND-1 (Danny 27-08): the AI-set score wears the Koios mark
+      // (canon: a system value shows its face); a manual override is a human fact
+      // and renders bare. Unknown source (older payload) renders bare too.
+      render: r => (
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+          <ScorePill value={r.score} plain={!colorScore} />
+          {r.score != null && r.scoreSource === 'ai' && <KoiosAiMark size={13} title={t('cols.scoreByKoios')} />}
+        </span>
+      ) },
     // Funnel phase — soft pill in the phase colour (or plain text when the toggle is off).
     // DATATABLE-SORT-1: serverKey maps to ApplicationQuery's stage_order sort (the
     // tenant's configured funnel order, not this column's alphabetical label sort).
