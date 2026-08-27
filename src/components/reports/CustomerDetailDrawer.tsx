@@ -10,6 +10,7 @@ import Button from '@/components/ui/Button'
 import { PageTitle, Caption, SectionTitle } from '@/components/ui/typography'
 import StatusBadge from '../ui/StatusBadge'  // shared active/inactive status pill
 import InfoRow from './InfoRow'
+import CopyIconButton from '../ui/CopyIconButton'
 import type { ReportCustomer } from '@/types/reports'
 
 // Read-only slide-in with one customer's locations/departments/contacts, opened
@@ -88,12 +89,15 @@ export default function CustomerDetailDrawer({ customer, onClose }: { customer: 
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <SectionTitle as="div">{loc.name}</SectionTitle>
-                  {(loc.street || loc.city) && (
-                    <Caption as="div" style={{ marginTop: 1 }}>
-                      {[loc.street, loc.house_number, loc.postal_code, loc.city]
-                        .filter(Boolean).join(' ')}
-                    </Caption>
-                  )}
+                  {(loc.street || loc.city) && (() => {
+                    const line = [loc.street, loc.house_number, loc.postal_code, loc.city].filter(Boolean).join(' ')
+                    return (
+                      <Caption as="div" style={{ marginTop: 1, display: 'flex', alignItems: 'center', gap: 6 }}>
+                        {line}
+                        <CopyIconButton label={t('common:copyAddress.copy')} copiedLabel={t('common:copyAddress.copied')} value={line} />
+                      </Caption>
+                    )
+                  })()}
                 </div>
                 <StatusBadge status={loc.status} />
               </div>

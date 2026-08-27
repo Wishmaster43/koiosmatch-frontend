@@ -15,6 +15,7 @@ import GeocodeButton from '@/components/ui/GeocodeButton'
 import Spinner from '@/components/ui/Spinner'
 import Button from '@/components/ui/Button'
 import LocationBadge from './LocationBadge'
+import CopyIconButton from '@/components/ui/CopyIconButton'
 
 // NECESSITY: these are shared `<th>`/`<td>` cell styles (not standalone text), spread
 // across every column of this table. Migrating them to the Caption/BodyText atoms
@@ -74,7 +75,13 @@ export default function LocationsTable({ isLocked, rows, page, totalPages, onPag
                     {loc.name}
                   </div>
                 </td>
-                <td style={TD}>{formatAddress(loc)}</td>
+                <td style={TD}>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+                    {formatAddress(loc)}
+                    {/* ADRES-KOPIEER canon: every displayed address carries the shared copy button. */}
+                    {formatAddress(loc) && <CopyIconButton value={formatAddress(loc)} label={t('common:copyAddress.copy')} copiedLabel={t('common:copyAddress.copied')} />}
+                  </span>
+                </td>
                 <td style={{ ...TD, color: 'var(--text-muted)', fontSize: 12 }}>
                   {formatDateTime(loc.created_at)}
                 </td>

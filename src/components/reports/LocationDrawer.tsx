@@ -10,6 +10,7 @@ import Button from '@/components/ui/Button'
 import { PageTitle, Caption, GroupLabel, BodyText } from '@/components/ui/typography'
 import StatusBadge from '../ui/StatusBadge'  // shared active/inactive status pill
 import InfoRow from './InfoRow'
+import CopyIconButton from '../ui/CopyIconButton'
 import type { ReportLocation } from '@/types/reports'
 
 // Read-only slide-in panel for one location's address/department/customer details, opened from LocationsTable.
@@ -78,7 +79,9 @@ export default function LocationDrawer({ location, onClose }: { location: Report
             {t('locationDrawer.info')}
           </GroupLabel>
 
-          <InfoRow icon={MapPin}    label={t('dr.address')}    value={fullAddress} />
+          <InfoRow icon={MapPin}    label={t('dr.address')}    value={fullAddress
+            ? <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>{fullAddress}<CopyIconButton label={t('common:copyAddress.copy')} copiedLabel={t('common:copyAddress.copied')} value={fullAddress} /></span>
+            : null} />
           <InfoRow icon={Hash}      label={t('dr.externalId')} value={location.external_id} />
           <InfoRow icon={Building2} label={t('dr.customer')}   value={location.customer_name} />
 

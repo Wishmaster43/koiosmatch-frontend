@@ -1049,5 +1049,9 @@
       "onbekend": "Unknown",
       "twv": "Employment permit (TWV)"
     }
+  },
+  "copyAddress": {
+    "copy": "Copy address",
+    "copied": "Address copied"
   }
 }

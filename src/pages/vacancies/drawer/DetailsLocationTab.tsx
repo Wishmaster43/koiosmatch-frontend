@@ -3,6 +3,7 @@ import CreatableSelect from '@/components/ui/CreatableSelect'
 import { getCountryOptions, getCountryName } from '@/lib/countries'
 import { row, card, controls, dash, makeFieldHelpers } from './detailsFieldKit'
 import { composeAddress } from '../hooks/useVacancyDetailsForm'
+import CopyIconButton from '@/components/ui/CopyIconButton'
 import type { LocationSection } from '../hooks/useVacancyDetailsForm'
 import type { VacancyDetail } from '@/types/vacancy'
 
@@ -45,7 +46,12 @@ export default function DetailsLocationTab({ vacancy: v, location }: Props) {
         {row(t('details.city'), null, text('city'), editing)}
       </>
     ) : (
-      row(t('details.address'), composeAddress(v.street, v.houseNumber, v.houseNumberSuffix, v.postalCode, v.city) || v.location || dash, null, editing)
+      row(t('details.address'), (() => {
+        const line = composeAddress(v.street, v.houseNumber, v.houseNumberSuffix, v.postalCode, v.city) || v.location
+        return line
+          ? <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>{line}<CopyIconButton label={t('common:copyAddress.copy')} copiedLabel={t('common:copyAddress.copied')} value={line} /></span>
+          : dash
+      })(), null, editing)
     )}
     {/* VAC-COUNTRY-1: land→provincie cascade, mirroring the candidate ProfileTab/
         AddCandidateModal pattern exactly — both are pick-only (allowCreate=false)

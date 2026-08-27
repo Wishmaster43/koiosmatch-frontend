@@ -1049,5 +1049,9 @@
       "onbekend": "Unbekannt",
       "twv": "Arbeitserlaubnis (TWV)"
     }
+  },
+  "copyAddress": {
+    "copy": "Adresse kopieren",
+    "copied": "Adresse kopiert"
   }
 }

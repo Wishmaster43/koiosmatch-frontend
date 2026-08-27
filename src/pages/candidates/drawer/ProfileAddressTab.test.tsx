@@ -36,6 +36,14 @@ describe('ProfileAddressTab · own fields, composed line, own request shape', ()
     expect(screen.queryByText('Huisnummer')).toBeNull()
   })
 
+  it('read mode shows a copy-to-clipboard icon next to the composed address', async () => {
+    const user = userEvent.setup()
+    const writeTextSpy = vi.spyOn(navigator.clipboard, 'writeText')
+    render(<ProfileAddressTab c={candidate} />)
+    await user.click(screen.getByTitle('Kopieer adres'))
+    expect(writeTextSpy).toHaveBeenCalledWith('Kerkstraat 12-a, 1234 AB Utrecht')
+  })
+
   it('editing expands the composed line into its structured fields, plus province/country stay their own rows', async () => {
     const user = userEvent.setup()
     render(<ProfileAddressTab c={candidate} />)

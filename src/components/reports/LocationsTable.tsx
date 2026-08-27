@@ -13,6 +13,7 @@ import PaginationBar          from '../ui/PaginationBar'
 import { useReportPaging }    from './useReportPaging'
 import { TD, SortableTableHead, ReportTableToolbar } from './reportTableChrome'
 import StatusBadge from '../ui/StatusBadge'  // shared active/inactive status pill
+import CopyIconButton from '../ui/CopyIconButton'
 import { useSmCustomerTree } from '@/hooks/useSmCustomerTree'
 import type { ReportLocation, SortState } from '@/types/reports'
 
@@ -152,7 +153,15 @@ export default function LocationsTable() {
                     onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
                     <td style={{ ...TD, fontWeight: 500, color: 'var(--text)' }}>{r.name}</td>
                     <td style={TD}>{r.customer_name}</td>
-                    <td style={{ ...TD, color: 'var(--text-muted)', fontSize: 12 }}>{r.address || <span style={{ color: 'var(--border)' }}>—</span>}</td>
+                    <td style={{ ...TD, color: 'var(--text-muted)', fontSize: 12 }}>
+                      {r.address ? (
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                          {r.address}
+                          {/* Stop the row-click drill-down from also firing when the copy icon is used. */}
+                          <span onClick={e => e.stopPropagation()}><CopyIconButton label={t('common:copyAddress.copy')} copiedLabel={t('common:copyAddress.copied')} value={r.address} /></span>
+                        </span>
+                      ) : <span style={{ color: 'var(--border)' }}>—</span>}
+                    </td>
                     <td style={TD}><StatusBadge status={r.status} /></td>
                     <td style={TD}><span style={{ fontWeight: 500 }}>{r.dept_count}</span></td>
                   </tr>

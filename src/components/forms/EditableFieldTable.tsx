@@ -27,6 +27,7 @@ import SoftChip from '@/components/ui/SoftChip'
 import Button from '@/components/ui/Button'
 import { GroupLabel, monoStyle } from '@/components/ui/typography'
 import { tintBg, tintBorder, chipInk } from '@/lib/tint'
+import CopyIconButton from '@/components/ui/CopyIconButton'
 
 export interface FieldRow {
   key: string
@@ -345,7 +346,12 @@ export default function EditableFieldTable({
     // editing expands this row into its addressFields instead, see renderRows).
     if (f.type === 'address') {
       const line = composeAddressLine(saved)
-      return <span style={{ fontSize: 12, color: line ? 'var(--text)' : 'var(--text-muted)' }}>{line || '-'}</span>
+      return (
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+          <span style={{ fontSize: 12, color: line ? 'var(--text)' : 'var(--text-muted)' }}>{line || '-'}</span>
+          <CopyIconButton label={t('common:copyAddress.copy')} copiedLabel={t('common:copyAddress.copied')} value={line || null} />
+        </span>
+      )
     }
     // Name composite reads as ONE composed line (only reached in read mode —
     // editing expands this row into its nameFields instead, see renderRows). An

@@ -15,6 +15,7 @@
 import { useState, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { AlertTriangle, Search } from 'lucide-react'
+import CopyIconButton from '@/components/ui/CopyIconButton'
 // House "+ action" trigger (Danny 27-07: "+ Prijsafspraak toevoegen moet ook
 // knopje zijn!!! zoals in kandidaat drill down" — + Add price agreement must also
 // be a button!!! like in the candidate drill-down) — replaces the bare text button below.
@@ -125,8 +126,10 @@ export default function PriceAgreementsTab({ customerId, c, onSave }: { customer
     label: t('overview.address'),
     renderValue: () => (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-        <span style={{ fontSize: 12, color: billing.visitLine ? 'var(--text)' : 'var(--text-muted)' }}>
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 12, color: billing.visitLine ? 'var(--text)' : 'var(--text-muted)' }}>
           {billing.visitLine || t('overview.billingAddress.visitEmpty')}
+          {/* ADRES-KOPIEER canon: the composed visit address copies like any other. */}
+          {billing.visitLine && <CopyIconButton value={billing.visitLine} label={t('common:copyAddress.copy')} copiedLabel={t('common:copyAddress.copied')} />}
         </span>
         <Caption>{t('overview.billingAddress.usesVisitAddress')}</Caption>
       </div>

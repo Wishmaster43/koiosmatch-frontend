@@ -1049,5 +1049,9 @@
       "onbekend": "Desconocido",
       "twv": "Permiso de trabajo (TWV)"
     }
+  },
+  "copyAddress": {
+    "copy": "Copiar dirección",
+    "copied": "Dirección copiada"
   }
 }

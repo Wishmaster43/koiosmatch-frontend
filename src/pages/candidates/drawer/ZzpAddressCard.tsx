@@ -39,6 +39,7 @@ import Button from '@/components/ui/Button'
 import { useProvinces } from '@/hooks/useProvinces'
 import { useCountriesLookup } from '@/lib/useCountriesLookup'
 import { getCountryName } from '@/lib/countries'
+import CopyIconButton from '@/components/ui/CopyIconButton'
 
 // The composite's fixed shape — matches composeAddressLine's expected keys
 // (street/houseNumber/houseNumberSuffix/postalCode/city) plus the two rows below.
@@ -109,7 +110,10 @@ export default function ZzpAddressCard({ value, onSave }: { value: ZzpAddressVal
           </>
         ) : (
           <FieldRow label={t('profile.address')}>
-            <span style={{ fontSize: 12, color: line ? 'var(--text)' : 'var(--text-muted)' }}>{line || '-'}</span>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+              <span style={{ fontSize: 12, color: line ? 'var(--text)' : 'var(--text-muted)' }}>{line || '-'}</span>
+              <CopyIconButton label={t('common:copyAddress.copy')} copiedLabel={t('common:copyAddress.copied')} value={line || null} />
+            </span>
           </FieldRow>
         )}
         {/* Provincie/land stay their own rows below the composed line, searchable

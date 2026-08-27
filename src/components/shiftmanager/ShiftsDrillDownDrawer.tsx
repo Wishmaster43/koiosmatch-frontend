@@ -17,6 +17,7 @@ import DrillTabs from '@/components/ui/DrillTabs'
 import ShiftsDrillDownTotals from './ShiftsDrillDownTotals'
 import type { LocationMeta } from './ShiftsDrillDownTotals'
 import type { ShiftInvite } from '@/types/shiftmanager'
+import CopyIconButton from '@/components/ui/CopyIconButton'
 
 // Stable empty location-meta fallback (keeps a constant ref for the totals useMemo).
 const EMPTY_META: LocationMeta = new Map()
@@ -303,8 +304,13 @@ export default function ShiftsDrillDownDrawer({ metric, metricOptions, periods, 
                   {/* Address */}
                   {shift.order?.location_place &&
                     <Row icon={MapPin} label={t('shiftsDrawer.fields.place')}
-                      value={[shift.order?.location_street, shift.order?.location_postal_code,
-                              shift.order?.location_place].filter(Boolean).join(', ')} />}
+                      value={<span style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+                        {[shift.order?.location_street, shift.order?.location_postal_code,
+                          shift.order?.location_place].filter(Boolean).join(', ')}
+                        <CopyIconButton value={[shift.order?.location_street, shift.order?.location_postal_code,
+                          shift.order?.location_place].filter(Boolean).join(', ')}
+                          label={t('common:copyAddress.copy')} copiedLabel={t('common:copyAddress.copied')} />
+                      </span>} />}
 
                   {/* Order info */}
                   {shift.order?.order_ref  && <Row icon={Hash} label={t('shiftsDrawer.fields.orderRef')}  value={shift.order?.order_ref} />}

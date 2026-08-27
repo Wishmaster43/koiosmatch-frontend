@@ -1049,5 +1049,9 @@
       "onbekend": "Onbekend",
       "twv": "Tewerkstellingsvergunning (TWV)"
     }
+  },
+  "copyAddress": {
+    "copy": "Kopieer adres",
+    "copied": "Adres gekopieerd"
   }
 }

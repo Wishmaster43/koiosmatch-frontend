@@ -14,6 +14,7 @@ import CreatableSelectJs from '@/components/ui/CreatableSelect'
 import { FieldRow, EditControls, GroupCard, GroupHeader, inputStyle } from './profileFieldShared'
 import { useProfileRequiredKeys } from './useProfileRequiredKeys'
 import type { Candidate } from '@/types/candidate'
+import CopyIconButton from '@/components/ui/CopyIconButton'
 
 type AnyProps = Record<string, unknown>
 // CreatableSelect is still untyped JS — accept any props at the boundary.
@@ -124,7 +125,10 @@ export default function ProfileAddressTab({ c, onSave, autoEditSignal }: {
     ].filter(s => s && s.trim()).join(', ')
     return (
       <FieldRow label={t('profile.address')}>
-        <span style={{ fontSize: 12, color: line ? 'var(--text)' : 'var(--text-muted)' }}>{line || '-'}</span>
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+          <span style={{ fontSize: 12, color: line ? 'var(--text)' : 'var(--text-muted)' }}>{line || '-'}</span>
+          <CopyIconButton label={t('common:copyAddress.copy')} copiedLabel={t('common:copyAddress.copied')} value={line || null} />
+        </span>
       </FieldRow>
     )
   }
