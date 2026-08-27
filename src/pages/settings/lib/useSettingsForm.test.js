@@ -58,10 +58,10 @@ describe('useSettingsForm · slow load never clobbers in-flight edits', () => {
   it('keeps a value typed before the load resolves, and stays dirty', async () => {
     let resolveLoad
     vi.mocked(api.get).mockReturnValue(new Promise(r => { resolveLoad = r }))
-    const { result } = renderHook(() => useSettingsForm({ colour: '' }))
-    act(() => result.current.set('colour', '#0EA5E9'))
-    await act(async () => { resolveLoad({ data: { colour: '#111111' } }); await Promise.resolve() })
-    expect(result.current.values.colour).toBe('#0EA5E9')
+    const { result } = renderHook(() => useSettingsForm({ note: '' }))
+    act(() => result.current.set('note', 'typed-while-loading'))
+    await act(async () => { resolveLoad({ data: { note: 'stored-on-server' } }); await Promise.resolve() })
+    expect(result.current.values.note).toBe('typed-while-loading')
     expect(result.current.dirty).toBe(true)
   })
 })
