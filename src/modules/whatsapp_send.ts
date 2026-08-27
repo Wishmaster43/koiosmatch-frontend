@@ -3,6 +3,7 @@ import { MessageCircle } from 'lucide-react'
 // HUISSTIJL-1: the §4 soft-tint formula lives in lib/tint, never a hand-rolled
 // color-mix literal per module (herhaal-slotaudit r3).
 import { tint } from '@/lib/tint'
+import type { SchemaField } from './types'
 
 export default {
   type:  'whatsapp_send',
@@ -12,6 +13,11 @@ export default {
   Icon:  MessageCircle,
   color: 'var(--module-green)',
   bg:    tint('var(--module-green)', 12),
+  // WA-SEND-FIELDS-2: explicit SchemaField[] — the after_send_updates 'group'
+  // entry's per-sub-field `suggestions` shapes differ (conversation vs
+  // candidate), which without this annotation TS merges into one over-strict
+  // union across the whole array (fails a strict-typed consumer like
+  // whatsappSendChannelLabels.test.tsx's `find()` on an unrelated field).
   schema: [
     // WF-BUILDER-VELDEN-1: WhatsAppSendModule::configSchema()'s tenant-lookup-driven
     // message purpose (message_purposes, same lookup as email_send's `purpose`) — the
@@ -82,5 +88,22 @@ export default {
     // bundle field is present AND truthy on the candidate row (missing = no send).
     { key: 'require_consent_field', label: 'Vereist toestemmingsveld (fail-closed)', type: 'text',
       help: 'Optioneel. Bijv. whatsapp_consent: verstuur ALLEEN als dit veld op de kandidaatrij aanwezig én waar is (ontbrekend veld = geen verzending).' },
-  ],
+    // WA-SEND-FIELDS-2: WhatsAppSendModule::configSchema's `after_send_updates`
+    // (lines 641-664) — plain conversation/candidate key->value writes applied
+    // after a successful send (engine reads config.after_send_updates.conversation
+    // / .candidate directly, lines 145-146). No `showIf`: the BE schema does not
+    // gate it, so it stays always visible like its sibling group-less fields.
+    { key: 'after_send_updates', label: 'Database updates na verzending', type: 'group',
+      fields: [
+        { value: 'conversation', label: 'Conversation velden', type: 'key_value', suggestions: {
+          state_shifts_offered: ['AWAITING', 'SENT', 'DONE'],
+          state_shift_reminder: ['AWAITING', 'SENT', 'DONE'],
+          state_no_response: ['AWAITING', 'SENT', 'DONE'],
+          active_intent: ['AWAITING_SHIFTS_OFFERED', 'AWAITING_RESPONSE'],
+        } },
+        { value: 'candidate', label: 'Kandidaat velden', type: 'key_value', suggestions: {
+          last_offered_at: '{{now}}',
+        } },
+      ] },
+  ] as SchemaField[],
 }

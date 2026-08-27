@@ -13,6 +13,7 @@ import {
   FaqSelectField, WebhookSelectField, LookupSelectField, WorkflowSelectField,
   WhatsappPhoneNumberField, FiltersField, OrderedListField, type OnChange,
 } from './fieldControls'
+import { KeyValueField, GroupField } from './groupKeyValueFields'
 import { TextFieldWithVars } from './VariablePicker'
 import { fieldLabel, fieldPlaceholder, optionLabel } from './moduleI18n'
 import WhatsappTemplateField from './WhatsappTemplateField'
@@ -120,6 +121,15 @@ export function FieldInput({ field, value, onChange, variables, config }: {
     // WA-SEND-FIELDS-2: WhatsAppSendModule's body_parameters — a positional
     // {{1}}, {{2}}, … list, so reordering matters (unlike 'keyvalue' below).
     return <OrderedListField value={value} onChange={onChange} fieldKey={field.key} />
+  }
+  if (field.type === 'key_value') {
+    // WA-SEND-FIELDS-2: a plain key->value record (see fieldControls' header
+    // comment) — distinct from 'keyvalue' below, which persists a {name,value}[] array.
+    return <KeyValueField value={value} onChange={onChange} fieldKey={field.key} suggestions={field.suggestions} />
+  }
+  if (field.type === 'group') {
+    // WA-SEND-FIELDS-2: a titled sub-card per named sub-field (after_send_updates).
+    return <GroupField field={field} value={value} onChange={onChange} />
   }
   if (field.type === 'keyvalue') {
     const pairs = (Array.isArray(value) ? value : []) as Array<{ name?: string; value?: string }>

@@ -158,7 +158,15 @@ export interface WorkflowVarGroup {
 }
 
 // One selectable option in a config-panel field.
-export interface FieldOption { value: string; label: string }
+// WA-SEND-FIELDS-2: a 'group' field's own `fields` entries reuse this shape and
+// add `type` (the sub-field's control, e.g. 'key_value') + `suggestions` — the
+// engine's per-key pick-help: known key -> a single value or a value list.
+export interface FieldOption {
+  value: string
+  label: string
+  type?: string
+  suggestions?: Record<string, string | string[]>
+}
 // A module config-panel field (schema entry the FieldInput renders).
 export interface WorkflowField {
   key: string
@@ -166,6 +174,10 @@ export interface WorkflowField {
   label?: string
   fields?: Array<string | FieldOption>
   options?: Array<string | FieldOption>
+  // WA-SEND-FIELDS-2: a 'key_value' field's own pick-help — known key -> a
+  // single suggested value or a list of value suggestions (WhatsAppSendModule
+  // configSchema's `suggestions`).
+  suggestions?: Record<string, string | string[]>
   // WF-MULTISELECT-1: tenant-lookup source for multiselect (candidate_statuses/phases/types).
   source?: string
   default?: unknown

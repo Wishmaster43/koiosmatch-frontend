@@ -58,14 +58,14 @@ describe('WF-MODULE-RECONCILE-FE-1 · the eight engine modules get a registry ca
  * fails loudly instead of silently reopening the gap.
  */
 const EXPECTED_SCHEMA_KEYS: Record<string, string[]> = {
-  // WA-SEND-FIELDS-2: body_parameters (ordered_list) now has a real FE control
-  // (OrderedListField) and is pinned below. after_send_updates (group of
-  // key_value) still has none — the FE field kit has no 'group' type yet;
-  // header_variables/variables are written by the composite WhatsappTemplateField.
+  // WA-SEND-FIELDS-2: body_parameters (ordered_list) and after_send_updates
+  // (group of key_value, GroupField/KeyValueField) both have real FE controls
+  // now and are pinned below. header_variables/variables are written by the
+  // composite WhatsappTemplateField.
   whatsapp_send: [
     'purpose', 'message_type', 'channel', 'whatsapp_number_id', 'phone_number_id', 'template_name', 'language',
     'message_category', 'priority_type', 'dedup_hours', 'require_consent_field',
-    'throttle_per_minute', 'recipient_field', 'session_text', 'body_parameters',
+    'throttle_per_minute', 'recipient_field', 'session_text', 'body_parameters', 'after_send_updates',
   ],
   email_send: ['subject', 'body', 'sender_context', 'purpose', 'skip_if_consent_field', 'recipient_role'],
   notification_send: ['title', 'body', 'recipients', 'role', 'user_ids', 'type', 'link_entity'],
