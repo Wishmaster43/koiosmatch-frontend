@@ -1144,6 +1144,25 @@ Be honest. If something is not done, say so — do not pretend.
   · **GEEN KOSTEN IN DE CHAT (Danny 27-08: "Euro's moeten weg"):** de Koios-chat
     toont model · tokens (gelokaliseerde duizendtallen), nooit kosten aan de
     eindgebruiker.
+  · **TIJDLIJN-OVERAL (Danny 27-08, verbatim: "Alles moet een tijdlijn en
+    statsietieken hebben. We willen alles meeten en altijd een tijdlijn zien wat
+    er gebeurd is met een object"):** élke entiteit — klant, locatie, afdeling,
+    contactpersoon, match, vacature, sollicitatie, taak, bellijst, én de twee
+    bevroren drilldowns — draagt een TIJDLIJN (wat is er met dit object gebeurd)
+    en, waar logisch, STATISTIEKEN (laatste tab, bestaande canon). Op de
+    bevroren schermen is dit een PUUR ADDITIEVE tab — niets bestaands wijzigt.
+  · **AI-SCORE-LEIDEND (Danny 27-08: "AI score is leidend en kan handmatig
+    overruled worden"):** de score-kolom bij sollicitaties toont de AI-score als
+    dé waarde; een handmatige override wint en is zichtbaar als override —
+    nooit twee losse kolommen, nooit criteria in de cel (drilldown = detail).
+  · **ADRES-KOPIEER (Danny 27-08, screenshot kandidaat-ADRES-kaart: "overal waar
+    een adress staat moet zo'n subtiel klein kopieer knopje zitten"):** élke
+    adres-WEERGAVE (kandidaat, klant, vacature, locatie, afdeling, contactpersoon,
+    tabelcel én drawer-veldrij) draagt het gedeelde `components/ui/CopyIconButton`
+    naast de tekst — volledig samengesteld adres op het klembord, Check-flits +
+    toast; nooit in editors; nooit per scherm hergerold (ReferenceNumberChip
+    composeert hetzelfde atoom). Een nieuwe adresweergave zonder knopje is een
+    finding.
   · **TITELBALK-PILLS (Danny 27-08, twee screenshots: "in de title bar dus!! …
     laten we 1 type chips aanhouden — zo moeten we de pop-ups doen"):** de korte
     keuze bovenin een create-pop-up (Lead/Kandidaat-modus, vacaturestatus,
