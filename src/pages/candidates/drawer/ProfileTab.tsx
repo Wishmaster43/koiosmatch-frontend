@@ -16,6 +16,7 @@ import type { ComponentType, CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Edit2, Save, X, Trash2, ExternalLink } from 'lucide-react'
 import { useTextPopoutHost } from '@/hooks/useTextPopoutHost'
+import { useSeedText } from '@/lib/demoSeedTexts'
 import RichTextEditorJs from '@/components/ui/RichTextEditor'
 import SafeHtmlJs from '@/components/ui/SafeHtml'
 // HUISSTIJL-1: the shared uppercase group-label atom (identity-only swap).
@@ -50,6 +51,9 @@ export default function ProfileTab({ c, onEditSave, autoEditSignal, onContactMom
   const [savedSummary, setSavedSummary] = useState(c.summary ?? '')
   const saveSummary   = () => { onEditSave?.({ summary }); setSavedSummary(summary); setSummaryEditing(false) }
   const cancelSummary = () => { setSummary(savedSummary); setSummaryEditing(false) }
+  // DEMO-SEED-TAAL-1: read-mode display only — the demo tenant's seeded text
+  // renders translated for a non-Dutch UI language; edited text passes through.
+  const displaySummary = useSeedText(summary)
 
   // TEKST-POPOUT-1 (Danny 08-08 punt 2) — the profile text gets the notes' own
   // second-screen affordance: the SAME window.open mechanism, one icon in this
@@ -150,7 +154,8 @@ export default function ProfileTab({ c, onEditSave, autoEditSignal, onContactMom
               assistGenerate={{ entity: 'candidate', id: String(c.id) }} />
           : (summary
               ? <div style={{ ...blockStyle, padding: '10px 12px', maxHeight: 220, overflow: 'auto' }}>
-                  <SafeHtml html={summary} style={{ fontSize: 12, color: 'var(--text)', lineHeight: 1.5 }} />
+                  {/* DEMO-SEED-TAAL-1: read-mode only — the editor above keeps editing the stored NL text. */}
+                  <SafeHtml html={displaySummary} style={{ fontSize: 12, color: 'var(--text)', lineHeight: 1.5 }} />
                 </div>
               : <div style={{ ...blockStyle, padding: '10px 12px', fontSize: 12, color: 'var(--text-muted)' }}>-</div>)}
       </div>

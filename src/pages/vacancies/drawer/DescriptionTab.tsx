@@ -4,6 +4,7 @@ import { Edit2, Save, X, Trash2, ExternalLink } from 'lucide-react'
 import RichTextEditorJs from '@/components/ui/RichTextEditor'
 import SafeHtmlJs from '@/components/ui/SafeHtml'
 import Button from '@/components/ui/Button'
+import { useSeedText } from '@/lib/demoSeedTexts'
 import { GroupLabel } from '@/components/ui/typography'
 import { useVacancyDescription } from '../hooks/useVacancyDescription'
 import { useVacancySkills } from '../hooks/useVacancySkills'
@@ -43,6 +44,9 @@ export default function DescriptionTab({ vacancy: v, onUpdate }: { vacancy: Vaca
     openDescriptionPopout,
   } = useVacancyDescription(v, onUpdate)
   const { skills, addSkill, editSkill, removeSkill } = useVacancySkills(v, onUpdate)
+  // DEMO-SEED-TAAL-1: read-mode display only — the demo tenant's seeded text
+  // renders translated for a non-Dutch UI language; edited text passes through.
+  const displayDescription = useSeedText(v.description)
 
   // Edit-toggle control block (pencil ↔ save/cancel), same pattern as DetailsTab's
   // Algemeen card — an independent editing state, own title row placement.
@@ -86,7 +90,8 @@ export default function DescriptionTab({ vacancy: v, onUpdate }: { vacancy: Vaca
           : (v.description
               // Full height — the block grows with the text; the drawer body scrolls
               // when it overflows (Danny 23-07: no inner 220px scrollbox on a full tab).
-              ? <div style={{ ...blockStyle, padding: '10px 12px' }}><SafeHtml html={v.description} style={{ fontSize: 12, color: 'var(--text)', lineHeight: 1.5 }} /></div>
+              // DEMO-SEED-TAAL-1: read-mode only — the editor above keeps editing the stored NL text.
+              ? <div style={{ ...blockStyle, padding: '10px 12px' }}><SafeHtml html={displayDescription} style={{ fontSize: 12, color: 'var(--text)', lineHeight: 1.5 }} /></div>
               : <div style={{ ...blockStyle, padding: '10px 12px', fontSize: 12, color: 'var(--text-muted)' }}>—</div>)}
       </div>
       {/* VACATURES 4: required skills now live directly under the vacancy text,

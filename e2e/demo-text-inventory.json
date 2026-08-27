@@ -1,0 +1,1003 @@
+[
+ {
+  "entity": "candidate",
+  "id": "65cd3747-700b-4a66-ac64-6cfacf23a7c3",
+  "field": "description",
+  "chars": 54,
+  "text": "Thijs is een ervaren logistiek medewerker uit Utrecht."
+ },
+ {
+  "entity": "candidate",
+  "id": "65b6f537-d584-4afb-b793-edb77a755036",
+  "field": "description",
+  "chars": 56,
+  "text": "Amira is een ervaren logistiek medewerker uit Amsterdam."
+ },
+ {
+  "entity": "candidate",
+  "id": "12251aa1-1e93-430d-84c6-0e83bf859e25",
+  "field": "description",
+  "chars": 56,
+  "text": "Kevin is een ervaren logistiek medewerker uit Groningen."
+ },
+ {
+  "entity": "candidate",
+  "id": "b4fdeec7-e96b-419b-b29b-05b146a348ba",
+  "field": "description",
+  "chars": 54,
+  "text": "Bram is een ervaren logistiek medewerker uit Den Haag."
+ },
+ {
+  "entity": "candidate",
+  "id": "392ad8b1-0dee-4d6f-8d41-d0eb4d6af7e0",
+  "field": "description",
+  "chars": 56,
+  "text": "Milan is een ervaren logistiek medewerker uit Groningen."
+ },
+ {
+  "entity": "candidate",
+  "id": "7ca79191-58b6-4554-96da-68f70e8fb437",
+  "field": "description",
+  "chars": 55,
+  "text": "Kevin is een ervaren logistiek medewerker uit Den Haag."
+ },
+ {
+  "entity": "candidate",
+  "id": "a44eee25-37b2-4282-bfec-49c35dc3b5fa",
+  "field": "description",
+  "chars": 53,
+  "text": "Nora is een ervaren logistiek medewerker uit Utrecht."
+ },
+ {
+  "entity": "candidate",
+  "id": "111b2202-e96d-428c-b375-abe0acf6949e",
+  "field": "description",
+  "chars": 50,
+  "text": "Tim is een ervaren logistiek medewerker uit Breda."
+ },
+ {
+  "entity": "candidate",
+  "id": "b20271d6-94ee-4d79-8253-3cf96b88a854",
+  "field": "description",
+  "chars": 52,
+  "text": "Esmee is een ervaren logistiek medewerker uit Breda."
+ },
+ {
+  "entity": "candidate",
+  "id": "170b77c2-445b-42c6-9f2b-2893188d6ab8",
+  "field": "description",
+  "chars": 54,
+  "text": "Tim is een ervaren logistiek medewerker uit Amsterdam."
+ },
+ {
+  "entity": "candidate",
+  "id": "bf7dbba2-c60c-4355-b660-b380656055d7",
+  "field": "description",
+  "chars": 55,
+  "text": "Ruben is een ervaren logistiek medewerker uit Den Haag."
+ },
+ {
+  "entity": "candidate",
+  "id": "28a8bc18-d88a-4bb0-a12d-4f795c1723d1",
+  "field": "description",
+  "chars": 55,
+  "text": "Mert is een ervaren logistiek medewerker uit Eindhoven."
+ },
+ {
+  "entity": "candidate",
+  "id": "c4b308b0-b67e-4e67-ab8a-18dd1e53ba76",
+  "field": "description",
+  "chars": 56,
+  "text": "Anouk is een ervaren logistiek medewerker uit Eindhoven."
+ },
+ {
+  "entity": "candidate",
+  "id": "44db2fc7-4f6c-4e18-a25f-c8a50671913e",
+  "field": "description",
+  "chars": 54,
+  "text": "Lars is een ervaren logistiek medewerker uit Den Haag."
+ },
+ {
+  "entity": "candidate",
+  "id": "3bb9d074-4edd-4a58-a211-90a70ed199f2",
+  "field": "description",
+  "chars": 56,
+  "text": "Ruben is een ervaren logistiek medewerker uit Groningen."
+ },
+ {
+  "entity": "candidate",
+  "id": "83da894e-df12-4981-9e8b-64410bbfe773",
+  "field": "description",
+  "chars": 55,
+  "text": "Bram is een ervaren logistiek medewerker uit Amsterdam."
+ },
+ {
+  "entity": "candidate",
+  "id": "05658fe1-cbda-412f-b748-6b8d118db9fd",
+  "field": "description",
+  "chars": 56,
+  "text": "Ahmed is een ervaren logistiek medewerker uit Groningen."
+ },
+ {
+  "entity": "candidate",
+  "id": "1a92b17f-e206-40c8-8dd6-87227ec4b45e",
+  "field": "description",
+  "chars": 52,
+  "text": "Eva is een ervaren logistiek medewerker uit Haarlem."
+ },
+ {
+  "entity": "candidate",
+  "id": "d91dea53-c842-4ab1-9340-86ed16b09fe8",
+  "field": "description",
+  "chars": 56,
+  "text": "Ahmed is een ervaren logistiek medewerker uit Amsterdam."
+ },
+ {
+  "entity": "candidate",
+  "id": "2309f00c-dc99-41dd-bb0c-ef2df8202c38",
+  "field": "description",
+  "chars": 54,
+  "text": "Ines is een ervaren logistiek medewerker uit Den Haag."
+ },
+ {
+  "entity": "candidate",
+  "id": "491e502e-c5a5-482e-a8ec-3b0dc33e61a9",
+  "field": "description",
+  "chars": 55,
+  "text": "Lars is een ervaren logistiek medewerker uit Amsterdam."
+ },
+ {
+  "entity": "candidate",
+  "id": "941f75a0-6061-446f-b80d-bc77188e1167",
+  "field": "description",
+  "chars": 53,
+  "text": "Eva is een ervaren logistiek medewerker uit Den Haag."
+ },
+ {
+  "entity": "candidate",
+  "id": "c7ab3913-f086-4798-996f-544bfe6162af",
+  "field": "description",
+  "chars": 54,
+  "text": "Kevin is een ervaren logistiek medewerker uit Haarlem."
+ },
+ {
+  "entity": "candidate",
+  "id": "954679bf-9725-4613-9514-15be0dcca340",
+  "field": "description",
+  "chars": 53,
+  "text": "Tim is een ervaren logistiek medewerker uit Den Haag."
+ },
+ {
+  "entity": "candidate",
+  "id": "3699ea81-e695-41a2-af82-4ac9e4f91d90",
+  "field": "description",
+  "chars": 56,
+  "text": "Ahmed is een ervaren logistiek medewerker uit Eindhoven."
+ },
+ {
+  "entity": "candidate",
+  "id": "ce69be22-65ab-4444-99d0-13f622f19194",
+  "field": "description",
+  "chars": 56,
+  "text": "Priya is een ervaren logistiek medewerker uit Groningen."
+ },
+ {
+  "entity": "candidate",
+  "id": "d1a8b9ab-13f7-4180-9e89-c0f5f72c941f",
+  "field": "description",
+  "chars": 56,
+  "text": "Ruben is een ervaren logistiek medewerker uit Groningen."
+ },
+ {
+  "entity": "candidate",
+  "id": "9f00c811-2e31-45a2-afb0-e8fccc802bff",
+  "field": "description",
+  "chars": 51,
+  "text": "Bram is een ervaren logistiek medewerker uit Breda."
+ },
+ {
+  "entity": "candidate",
+  "id": "fb3008c5-4ebb-4422-9caa-092a24d4a9da",
+  "field": "description",
+  "chars": 53,
+  "text": "Mert is een ervaren logistiek medewerker uit Utrecht."
+ },
+ {
+  "entity": "candidate",
+  "id": "131769ca-e7c5-4b55-be6e-f62ddbc6c33e",
+  "field": "description",
+  "chars": 56,
+  "text": "Priya is een ervaren logistiek medewerker uit Eindhoven."
+ },
+ {
+  "entity": "candidate",
+  "id": "af568d37-81b3-4608-a4b2-6b3e7a661dcc",
+  "field": "description",
+  "chars": 55,
+  "text": "Nora is een ervaren logistiek medewerker uit Rotterdam."
+ },
+ {
+  "entity": "candidate",
+  "id": "01ce1ab1-fdc7-499c-9162-dadc3f00e916",
+  "field": "description",
+  "chars": 54,
+  "text": "Priya is een ervaren logistiek medewerker uit Haarlem."
+ },
+ {
+  "entity": "candidate",
+  "id": "e3ffacf2-b2ef-4d3d-8d88-12126a1802c2",
+  "field": "description",
+  "chars": 54,
+  "text": "Tim is een ervaren logistiek medewerker uit Rotterdam."
+ },
+ {
+  "entity": "candidate",
+  "id": "e75cb7f3-cdb0-42d1-860b-4e59c48dc5be",
+  "field": "description",
+  "chars": 54,
+  "text": "Nora is een ervaren logistiek medewerker uit Den Haag."
+ },
+ {
+  "entity": "candidate",
+  "id": "f2fb2dbf-380c-4b0e-a51a-2e64d7b9d237",
+  "field": "description",
+  "chars": 55,
+  "text": "Lars is een ervaren logistiek medewerker uit Amsterdam."
+ },
+ {
+  "entity": "candidate",
+  "id": "a0ee6305-86df-4cee-919a-777a2598ea0a",
+  "field": "description",
+  "chars": 56,
+  "text": "Milan is een ervaren logistiek medewerker uit Groningen."
+ },
+ {
+  "entity": "candidate",
+  "id": "bf3ac82f-7b3d-4952-9bb9-61f4069ae43b",
+  "field": "description",
+  "chars": 54,
+  "text": "Amira is een ervaren logistiek medewerker uit Utrecht."
+ },
+ {
+  "entity": "candidate",
+  "id": "3747beb4-5613-4977-8455-dc1566183862",
+  "field": "description",
+  "chars": 53,
+  "text": "Bram is een ervaren logistiek medewerker uit Haarlem."
+ },
+ {
+  "entity": "candidate",
+  "id": "9d3480eb-b354-4c04-9298-e1e6e098f320",
+  "field": "description",
+  "chars": 52,
+  "text": "Jesse is een ervaren logistiek medewerker uit Breda."
+ },
+ {
+  "entity": "candidate",
+  "id": "1d7f2168-9cdb-4cc4-b8e4-f296c4af7394",
+  "field": "description",
+  "chars": 56,
+  "text": "Kevin is een ervaren logistiek medewerker uit Eindhoven."
+ },
+ {
+  "entity": "candidate",
+  "id": "e2ed18f3-e7d1-4352-ae10-7a2285275501",
+  "field": "description",
+  "chars": 52,
+  "text": "Tim is een ervaren logistiek medewerker uit Haarlem."
+ },
+ {
+  "entity": "candidate",
+  "id": "41bd7504-5c5a-47e7-8ee1-e3d28ee93a38",
+  "field": "description",
+  "chars": 52,
+  "text": "Tim is een ervaren logistiek medewerker uit Haarlem."
+ },
+ {
+  "entity": "candidate",
+  "id": "7b42df8b-f569-47de-9bbd-1acad905abda",
+  "field": "description",
+  "chars": 56,
+  "text": "Kevin is een ervaren logistiek medewerker uit Rotterdam."
+ },
+ {
+  "entity": "candidate",
+  "id": "64719f0e-d63c-404a-b865-1bc74420e304",
+  "field": "description",
+  "chars": 54,
+  "text": "Milan is een ervaren logistiek medewerker uit Haarlem."
+ },
+ {
+  "entity": "candidate",
+  "id": "c31f5d6f-fddc-41da-860c-dba03bdd9845",
+  "field": "description",
+  "chars": 55,
+  "text": "Ahmed is een ervaren logistiek medewerker uit Den Haag."
+ },
+ {
+  "entity": "candidate",
+  "id": "a013ba39-1dac-4b9c-a7c3-f22116029c05",
+  "field": "description",
+  "chars": 56,
+  "text": "Amira is een ervaren logistiek medewerker uit Amsterdam."
+ },
+ {
+  "entity": "candidate",
+  "id": "b24a4d7a-a9d3-40f0-b463-a9c9886e3d10",
+  "field": "description",
+  "chars": 54,
+  "text": "Mert is een ervaren logistiek medewerker uit Den Haag."
+ },
+ {
+  "entity": "candidate",
+  "id": "00fad576-e17b-4664-8150-b6b4f00fe50f",
+  "field": "description",
+  "chars": 54,
+  "text": "Tim is een ervaren logistiek medewerker uit Rotterdam."
+ },
+ {
+  "entity": "candidate",
+  "id": "b7909ecd-a28c-48ed-8019-4990eddd744e",
+  "field": "description",
+  "chars": 56,
+  "text": "Anouk is een ervaren logistiek medewerker uit Rotterdam."
+ },
+ {
+  "entity": "candidate",
+  "id": "4172d5f8-a35f-45d3-8746-80997c9a147f",
+  "field": "description",
+  "chars": 54,
+  "text": "Thijs is een ervaren logistiek medewerker uit Haarlem."
+ },
+ {
+  "entity": "candidate",
+  "id": "fbd43881-01ae-45b2-88c9-7e446a133290",
+  "field": "description",
+  "chars": 52,
+  "text": "Femke is een ervaren logistiek medewerker uit Breda."
+ },
+ {
+  "entity": "candidate",
+  "id": "b2b04fba-8cb0-4bf7-bfa7-8e894ba95911",
+  "field": "description",
+  "chars": 56,
+  "text": "Amira is een ervaren logistiek medewerker uit Groningen."
+ },
+ {
+  "entity": "candidate",
+  "id": "0c19bb1a-011e-449c-8414-be2a9e526d68",
+  "field": "description",
+  "chars": 53,
+  "text": "Nora is een ervaren logistiek medewerker uit Utrecht."
+ },
+ {
+  "entity": "candidate",
+  "id": "d60d4356-033a-405c-b774-b0cd7b24133f",
+  "field": "description",
+  "chars": 55,
+  "text": "Esmee is een ervaren logistiek medewerker uit Den Haag."
+ },
+ {
+  "entity": "candidate",
+  "id": "290b5376-49b6-4173-b3b1-70979064aed2",
+  "field": "description",
+  "chars": 52,
+  "text": "Zoë is een ervaren logistiek medewerker uit Utrecht."
+ },
+ {
+  "entity": "candidate",
+  "id": "89f7a930-0b59-4a9d-9e62-c0edf7b46631",
+  "field": "description",
+  "chars": 55,
+  "text": "Bram is een ervaren logistiek medewerker uit Rotterdam."
+ },
+ {
+  "entity": "candidate",
+  "id": "51653f39-c1af-4373-8cde-83673f617313",
+  "field": "description",
+  "chars": 54,
+  "text": "Bram is een ervaren logistiek medewerker uit Den Haag."
+ },
+ {
+  "entity": "candidate",
+  "id": "ab49ce79-ec04-4a8b-afac-65538cc5a4f0",
+  "field": "description",
+  "chars": 54,
+  "text": "Kevin is een ervaren logistiek medewerker uit Haarlem."
+ },
+ {
+  "entity": "candidate",
+  "id": "f65c2d01-9bf7-4fe3-b8eb-c9da3a6874be",
+  "field": "description",
+  "chars": 52,
+  "text": "Sofia is een ervaren logistiek medewerker uit Breda."
+ },
+ {
+  "entity": "candidate",
+  "id": "b279a59c-0b10-427a-a275-be4bae5a7d71",
+  "field": "description",
+  "chars": 54,
+  "text": "Nora is een ervaren logistiek medewerker uit Den Haag."
+ },
+ {
+  "entity": "candidate",
+  "id": "3a2c4d39-0472-431e-885b-b67603475be2",
+  "field": "description",
+  "chars": 52,
+  "text": "Ruben is een ervaren logistiek medewerker uit Breda."
+ },
+ {
+  "entity": "candidate",
+  "id": "4c1a41c8-4423-45ec-a0c6-2ae924f98fe7",
+  "field": "description",
+  "chars": 56,
+  "text": "Jesse is een ervaren logistiek medewerker uit Amsterdam."
+ },
+ {
+  "entity": "candidate",
+  "id": "55fc3496-b0b0-49de-9c9e-ddbca88830ed",
+  "field": "description",
+  "chars": 55,
+  "text": "Nora is een ervaren logistiek medewerker uit Groningen."
+ },
+ {
+  "entity": "candidate",
+  "id": "dc268368-da1e-46c8-a875-20f1371aff34",
+  "field": "description",
+  "chars": 56,
+  "text": "Thijs is een ervaren logistiek medewerker uit Rotterdam."
+ },
+ {
+  "entity": "candidate",
+  "id": "ec7f1ab9-d1ce-42d6-817c-a7f9948120f2",
+  "field": "description",
+  "chars": 54,
+  "text": "Tim is een ervaren logistiek medewerker uit Amsterdam."
+ },
+ {
+  "entity": "candidate",
+  "id": "e26aae71-2ccf-4c85-95ec-8d057b643b94",
+  "field": "description",
+  "chars": 53,
+  "text": "Nora is een ervaren logistiek medewerker uit Haarlem."
+ },
+ {
+  "entity": "candidate",
+  "id": "19ba3835-f21e-40f3-8454-0b752cda04c6",
+  "field": "description",
+  "chars": 52,
+  "text": "Anouk is een ervaren logistiek medewerker uit Breda."
+ },
+ {
+  "entity": "candidate",
+  "id": "83f952c9-9acf-4057-adfe-e7e1acff2631",
+  "field": "description",
+  "chars": 52,
+  "text": "Priya is een ervaren logistiek medewerker uit Breda."
+ },
+ {
+  "entity": "candidate",
+  "id": "5fbcb5eb-7b91-4f88-8755-d3c1ac3e9871",
+  "field": "description",
+  "chars": 51,
+  "text": "Lars is een ervaren logistiek medewerker uit Breda."
+ },
+ {
+  "entity": "candidate",
+  "id": "86734dfb-95f8-4578-a368-64825feff2ef",
+  "field": "description",
+  "chars": 56,
+  "text": "Esmee is een ervaren logistiek medewerker uit Rotterdam."
+ },
+ {
+  "entity": "candidate",
+  "id": "0a722c94-9ca8-4c44-94f5-840e5e91cae1",
+  "field": "description",
+  "chars": 50,
+  "text": "Tim is een ervaren logistiek medewerker uit Breda."
+ },
+ {
+  "entity": "candidate",
+  "id": "5317ce5f-6210-448d-bd53-83b403a90a8a",
+  "field": "description",
+  "chars": 56,
+  "text": "Thijs is een ervaren logistiek medewerker uit Amsterdam."
+ },
+ {
+  "entity": "candidate",
+  "id": "5c78f424-5912-482f-a94a-2446ab0cedff",
+  "field": "description",
+  "chars": 53,
+  "text": "Lars is een ervaren logistiek medewerker uit Utrecht."
+ },
+ {
+  "entity": "candidate",
+  "id": "b38e74ae-081d-4856-a2a3-2a815639df24",
+  "field": "description",
+  "chars": 53,
+  "text": "Ines is een ervaren logistiek medewerker uit Haarlem."
+ },
+ {
+  "entity": "candidate",
+  "id": "7e8e3755-419d-4510-ab8e-25f729521908",
+  "field": "description",
+  "chars": 56,
+  "text": "Anouk is een ervaren logistiek medewerker uit Groningen."
+ },
+ {
+  "entity": "candidate",
+  "id": "608b1b7c-31c7-4b52-9ded-c1378b7f36a2",
+  "field": "description",
+  "chars": 53,
+  "text": "Lars is een ervaren logistiek medewerker uit Utrecht."
+ },
+ {
+  "entity": "candidate",
+  "id": "cc999f3b-210f-4728-8242-b7d784c90608",
+  "field": "description",
+  "chars": 56,
+  "text": "Anouk is een ervaren logistiek medewerker uit Amsterdam."
+ },
+ {
+  "entity": "candidate",
+  "id": "e4ec2180-5f8c-4586-b137-ae8f29c551ad",
+  "field": "description",
+  "chars": 54,
+  "text": "Sofia is een ervaren logistiek medewerker uit Haarlem."
+ },
+ {
+  "entity": "candidate",
+  "id": "87773065-f548-4e0c-af89-facf64e8d7e7",
+  "field": "description",
+  "chars": 54,
+  "text": "Zoë is een ervaren logistiek medewerker uit Groningen."
+ },
+ {
+  "entity": "candidate",
+  "id": "ad0534c8-c290-443d-93fb-8b97d82fdde5",
+  "field": "description",
+  "chars": 52,
+  "text": "Sofia is een ervaren logistiek medewerker uit Breda."
+ },
+ {
+  "entity": "candidate",
+  "id": "014005a4-2623-4a5d-9621-914d140d0040",
+  "field": "description",
+  "chars": 56,
+  "text": "Amira is een ervaren logistiek medewerker uit Groningen."
+ },
+ {
+  "entity": "candidate",
+  "id": "216b7e8b-a60a-446e-8946-04e3e20333a8",
+  "field": "description",
+  "chars": 54,
+  "text": "Jesse is een ervaren logistiek medewerker uit Haarlem."
+ },
+ {
+  "entity": "candidate",
+  "id": "cb583b68-38e4-4b1c-b6bc-bff6cf4a4296",
+  "field": "description",
+  "chars": 55,
+  "text": "Mert is een ervaren logistiek medewerker uit Eindhoven."
+ },
+ {
+  "entity": "candidate",
+  "id": "d5cf08de-c570-45ae-9344-c69fda3429fb",
+  "field": "description",
+  "chars": 52,
+  "text": "Milan is een ervaren logistiek medewerker uit Breda."
+ },
+ {
+  "entity": "candidate",
+  "id": "309123df-1183-4059-9a0a-d1abe6f2fb52",
+  "field": "description",
+  "chars": 55,
+  "text": "Esmee is een ervaren logistiek medewerker uit Den Haag."
+ },
+ {
+  "entity": "candidate",
+  "id": "0b5cdf6d-ac75-451c-b889-977438753466",
+  "field": "description",
+  "chars": 53,
+  "text": "Tim is een ervaren logistiek medewerker uit Den Haag."
+ },
+ {
+  "entity": "candidate",
+  "id": "b9b72bbe-7e5a-4515-b7d1-ff46b8e14227",
+  "field": "description",
+  "chars": 54,
+  "text": "Anouk is een ervaren logistiek medewerker uit Haarlem."
+ },
+ {
+  "entity": "candidate",
+  "id": "6a126e27-84d7-4b16-995f-b2d40be40767",
+  "field": "description",
+  "chars": 54,
+  "text": "Amira is een ervaren logistiek medewerker uit Haarlem."
+ },
+ {
+  "entity": "candidate",
+  "id": "742a3c75-2f45-4ad3-b5c0-c498cf78815e",
+  "field": "description",
+  "chars": 55,
+  "text": "Nora is een ervaren logistiek medewerker uit Amsterdam."
+ },
+ {
+  "entity": "candidate",
+  "id": "98fb6abc-a20a-40f8-869e-a670639fe1c4",
+  "field": "description",
+  "chars": 53,
+  "text": "Ines is een ervaren logistiek medewerker uit Utrecht."
+ },
+ {
+  "entity": "candidate",
+  "id": "8978387b-25ef-4acd-a623-df14c46ba29e",
+  "field": "description",
+  "chars": 53,
+  "text": "Tim is een ervaren logistiek medewerker uit Den Haag."
+ },
+ {
+  "entity": "candidate",
+  "id": "523547f4-1890-4e5b-9274-49ed344dc15e",
+  "field": "description",
+  "chars": 54,
+  "text": "Esmee is een ervaren logistiek medewerker uit Utrecht."
+ },
+ {
+  "entity": "candidate",
+  "id": "5db81d0f-8aae-4412-894d-7fcb73ca1153",
+  "field": "description",
+  "chars": 56,
+  "text": "Ruben is een ervaren logistiek medewerker uit Groningen."
+ },
+ {
+  "entity": "vacancy",
+  "id": "01a042cd-a66f-72fa-8951-d190ee2016ad",
+  "field": "description",
+  "chars": 70,
+  "text": "Demo-vacature voor Activiteitenbegeleider. Gegenereerd voor test-data."
+ },
+ {
+  "entity": "vacancy",
+  "id": "01a042cd-a5b5-72b2-9592-e010e9fc40ef",
+  "field": "description",
+  "chars": 67,
+  "text": "Demo-vacature voor Wijkverpleegkundige. Gegenereerd voor test-data."
+ },
+ {
+  "entity": "vacancy",
+  "id": "01a042cd-a6d5-7031-9739-be08afa1e62a",
+  "field": "description",
+  "chars": 62,
+  "text": "Demo-vacature voor Woonbegeleider. Gegenereerd voor test-data."
+ },
+ {
+  "entity": "vacancy",
+  "id": "01a042cd-a6c8-736f-9915-59a7f73e5fe9",
+  "field": "description",
+  "chars": 54,
+  "text": "Demo-vacature voor EVV'er. Gegenereerd voor test-data."
+ },
+ {
+  "entity": "vacancy",
+  "id": "01a042cd-a6bd-701d-905a-fee3aaff96f1",
+  "field": "description",
+  "chars": 67,
+  "text": "Demo-vacature voor Ambulant begeleider. Gegenereerd voor test-data."
+ },
+ {
+  "entity": "vacancy",
+  "id": "01a042cd-a6b1-7309-b678-53cd5fd3ae9f",
+  "field": "description",
+  "chars": 64,
+  "text": "Demo-vacature voor Doktersassistent. Gegenereerd voor test-data."
+ },
+ {
+  "entity": "vacancy",
+  "id": "01a042cd-a6a7-72c4-8388-e4706819cac5",
+  "field": "description",
+  "chars": 66,
+  "text": "Demo-vacature voor Verpleegkundige N4. Gegenereerd voor test-data."
+ },
+ {
+  "entity": "vacancy",
+  "id": "01a042cd-a69d-736c-b579-93f573bdbe4a",
+  "field": "description",
+  "chars": 61,
+  "text": "Demo-vacature voor Helpende Plus. Gegenereerd voor test-data."
+ },
+ {
+  "entity": "vacancy",
+  "id": "01a042cd-a692-721c-98fc-3af8e818af45",
+  "field": "description",
+  "chars": 62,
+  "text": "Demo-vacature voor Begeleider GHZ. Gegenereerd voor test-data."
+ },
+ {
+  "entity": "vacancy",
+  "id": "01a042cd-a688-71a6-b45e-4249aa85891d",
+  "field": "description",
+  "chars": 67,
+  "text": "Demo-vacature voor Wijkverpleegkundige. Gegenereerd voor test-data."
+ },
+ {
+  "entity": "vacancy",
+  "id": "01a042cd-a67e-73d6-9f0c-a9da1064cb62",
+  "field": "description",
+  "chars": 62,
+  "text": "Demo-vacature voor Verzorgende IG. Gegenereerd voor test-data."
+ },
+ {
+  "entity": "vacancy",
+  "id": "01a042cd-a664-7089-93a9-2ab5db33ebac",
+  "field": "description",
+  "chars": 62,
+  "text": "Demo-vacature voor Woonbegeleider. Gegenereerd voor test-data."
+ },
+ {
+  "entity": "vacancy",
+  "id": "01a042cd-a65b-7196-8e74-5e5894c33878",
+  "field": "description",
+  "chars": 54,
+  "text": "Demo-vacature voor EVV'er. Gegenereerd voor test-data."
+ },
+ {
+  "entity": "vacancy",
+  "id": "01a042cd-a64e-73a3-804c-f98ecc695a55",
+  "field": "description",
+  "chars": 67,
+  "text": "Demo-vacature voor Ambulant begeleider. Gegenereerd voor test-data."
+ },
+ {
+  "entity": "vacancy",
+  "id": "01a042cd-a644-7152-b59a-1e696652efe5",
+  "field": "description",
+  "chars": 64,
+  "text": "Demo-vacature voor Doktersassistent. Gegenereerd voor test-data."
+ },
+ {
+  "entity": "vacancy",
+  "id": "01a042cd-a63b-731e-b5a8-b6fd5fd1d1e3",
+  "field": "description",
+  "chars": 66,
+  "text": "Demo-vacature voor Verpleegkundige N4. Gegenereerd voor test-data."
+ },
+ {
+  "entity": "vacancy",
+  "id": "01a042cd-a631-7176-9c99-d283b7a49557",
+  "field": "description",
+  "chars": 61,
+  "text": "Demo-vacature voor Helpende Plus. Gegenereerd voor test-data."
+ },
+ {
+  "entity": "vacancy",
+  "id": "01a042cd-a625-7320-889a-3fefe17d9dea",
+  "field": "description",
+  "chars": 62,
+  "text": "Demo-vacature voor Begeleider GHZ. Gegenereerd voor test-data."
+ },
+ {
+  "entity": "vacancy",
+  "id": "01a042cd-a61c-708a-9a38-5e76d1f0e199",
+  "field": "description",
+  "chars": 67,
+  "text": "Demo-vacature voor Wijkverpleegkundige. Gegenereerd voor test-data."
+ },
+ {
+  "entity": "vacancy",
+  "id": "01a042cd-a613-72c9-9357-59ea89aa9b66",
+  "field": "description",
+  "chars": 62,
+  "text": "Demo-vacature voor Verzorgende IG. Gegenereerd voor test-data."
+ },
+ {
+  "entity": "vacancy",
+  "id": "01a042cd-a606-7222-be36-2e679bbb9654",
+  "field": "description",
+  "chars": 70,
+  "text": "Demo-vacature voor Activiteitenbegeleider. Gegenereerd voor test-data."
+ },
+ {
+  "entity": "vacancy",
+  "id": "01a042cd-a5fb-72bc-b630-5a9a614e0dbc",
+  "field": "description",
+  "chars": 62,
+  "text": "Demo-vacature voor Woonbegeleider. Gegenereerd voor test-data."
+ },
+ {
+  "entity": "vacancy",
+  "id": "01a042cd-a5f3-72aa-bbac-acc04ea53613",
+  "field": "description",
+  "chars": 54,
+  "text": "Demo-vacature voor EVV'er. Gegenereerd voor test-data."
+ },
+ {
+  "entity": "vacancy",
+  "id": "01a042cd-a5e7-7150-9fb9-d93a6adcb5b5",
+  "field": "description",
+  "chars": 67,
+  "text": "Demo-vacature voor Ambulant begeleider. Gegenereerd voor test-data."
+ },
+ {
+  "entity": "vacancy",
+  "id": "01a042cd-a5de-73b3-9d5a-11dc7a37a88f",
+  "field": "description",
+  "chars": 64,
+  "text": "Demo-vacature voor Doktersassistent. Gegenereerd voor test-data."
+ },
+ {
+  "entity": "vacancy",
+  "id": "01a042cd-a6df-730f-b859-a6decc98ab63",
+  "field": "description",
+  "chars": 70,
+  "text": "Demo-vacature voor Activiteitenbegeleider. Gegenereerd voor test-data."
+ },
+ {
+  "entity": "vacancy",
+  "id": "01a042cd-a5d5-7250-b9e3-b1b676c2992a",
+  "field": "description",
+  "chars": 66,
+  "text": "Demo-vacature voor Verpleegkundige N4. Gegenereerd voor test-data."
+ },
+ {
+  "entity": "vacancy",
+  "id": "01a042cd-a5cb-7311-801d-f905423e1c96",
+  "field": "description",
+  "chars": 61,
+  "text": "Demo-vacature voor Helpende Plus. Gegenereerd voor test-data."
+ },
+ {
+  "entity": "vacancy",
+  "id": "01a042cd-a5c1-72a2-ac35-c9110cd298c2",
+  "field": "description",
+  "chars": 62,
+  "text": "Demo-vacature voor Begeleider GHZ. Gegenereerd voor test-data."
+ },
+ {
+  "entity": "vacancy",
+  "id": "01a042cd-a5a7-70e8-9d86-6f4a3c79ae4b",
+  "field": "description",
+  "chars": 62,
+  "text": "Demo-vacature voor Verzorgende IG. Gegenereerd voor test-data."
+ },
+ {
+  "entity": "customer",
+  "id": "01a042cd-9c63-72c9-82e9-97b3f414acd7",
+  "field": "description",
+  "chars": 157,
+  "text": "Action DC is een logistiek dienstverlener en vaste klant.\n\n## Schrijfstijl\nZakelijk en direct\n\n## Wervingsproblemen\nPiekdrukte vraagt om snelle flexinstroom."
+ },
+ {
+  "entity": "customer",
+  "id": "01a042cd-9656-73f4-9c40-4536732ce242",
+  "field": "description",
+  "chars": 163,
+  "text": "Albert Heijn DC is een logistiek dienstverlener en vaste klant.\n\n## Schrijfstijl\nZakelijk en direct\n\n## Wervingsproblemen\nPiekdrukte vraagt om snelle flexinstroom."
+ },
+ {
+  "entity": "customer",
+  "id": "01a042cd-988f-7143-bf8e-7be65eeffa19",
+  "field": "description",
+  "chars": 164,
+  "text": "Bakker Logistiek is een logistiek dienstverlener en vaste klant.\n\n## Schrijfstijl\nZakelijk en direct\n\n## Wervingsproblemen\nPiekdrukte vraagt om snelle flexinstroom."
+ },
+ {
+  "entity": "customer",
+  "id": "01a042cd-9d6f-708b-b4a8-51faa418956d",
+  "field": "description",
+  "chars": 161,
+  "text": "Bol Logistics is een logistiek dienstverlener en vaste klant.\n\n## Schrijfstijl\nZakelijk en direct\n\n## Wervingsproblemen\nPiekdrukte vraagt om snelle flexinstroom."
+ },
+ {
+  "entity": "customer",
+  "id": "01a042cd-97e9-7128-aef0-bbc105feec0b",
+  "field": "description",
+  "chars": 162,
+  "text": "CEVA Logistics is een logistiek dienstverlener en vaste klant.\n\n## Schrijfstijl\nZakelijk en direct\n\n## Wervingsproblemen\nPiekdrukte vraagt om snelle flexinstroom."
+ },
+ {
+  "entity": "customer",
+  "id": "01a042cd-9bec-7061-9b05-4cc673ee226d",
+  "field": "description",
+  "chars": 166,
+  "text": "Coolblue Logistiek is een logistiek dienstverlener en vaste klant.\n\n## Schrijfstijl\nZakelijk en direct\n\n## Wervingsproblemen\nPiekdrukte vraagt om snelle flexinstroom."
+ },
+ {
+  "entity": "customer",
+  "id": "01a042cd-9b2c-70c7-a84b-45f4acc4924f",
+  "field": "description",
+  "chars": 159,
+  "text": "DB Schenker is een logistiek dienstverlener en vaste klant.\n\n## Schrijfstijl\nZakelijk en direct\n\n## Wervingsproblemen\nPiekdrukte vraagt om snelle flexinstroom."
+ },
+ {
+  "entity": "customer",
+  "id": "01a042cd-947b-70d3-ab21-de1cd8eda6a4",
+  "field": "description",
+  "chars": 164,
+  "text": "DHL Supply Chain is een logistiek dienstverlener en vaste klant.\n\n## Schrijfstijl\nZakelijk en direct\n\n## Wervingsproblemen\nPiekdrukte vraagt om snelle flexinstroom."
+ },
+ {
+  "entity": "customer",
+  "id": "01a042cd-95c7-729b-969c-ab413d00b021",
+  "field": "description",
+  "chars": 161,
+  "text": "DSV Solutions is een logistiek dienstverlener en vaste klant.\n\n## Schrijfstijl\nZakelijk en direct\n\n## Wervingsproblemen\nPiekdrukte vraagt om snelle flexinstroom."
+ },
+ {
+  "entity": "customer",
+  "id": "01a042cd-9a8a-707f-a41f-c6c250cc37df",
+  "field": "description",
+  "chars": 161,
+  "text": "GXO Logistics is een logistiek dienstverlener en vaste klant.\n\n## Schrijfstijl\nZakelijk en direct\n\n## Wervingsproblemen\nPiekdrukte vraagt om snelle flexinstroom."
+ },
+ {
+  "entity": "customer",
+  "id": "01a042cd-95f5-7191-89bb-841c00a9da0f",
+  "field": "description",
+  "chars": 165,
+  "text": "Jumbo Distributie is een logistiek dienstverlener en vaste klant.\n\n## Schrijfstijl\nZakelijk en direct\n\n## Wervingsproblemen\nPiekdrukte vraagt om snelle flexinstroom."
+ },
+ {
+  "entity": "customer",
+  "id": "01a042cd-954f-7396-b6c2-13ce3edf1c7f",
+  "field": "description",
+  "chars": 160,
+  "text": "Kuehne+Nagel is een logistiek dienstverlener en vaste klant.\n\n## Schrijfstijl\nZakelijk en direct\n\n## Wervingsproblemen\nPiekdrukte vraagt om snelle flexinstroom."
+ },
+ {
+  "entity": "customer",
+  "id": "01a042cd-96ae-7233-b9d3-580cdb79e4b6",
+  "field": "description",
+  "chars": 162,
+  "text": "Lidl Nederland is een logistiek dienstverlener en vaste klant.\n\n## Schrijfstijl\nZakelijk en direct\n\n## Wervingsproblemen\nPiekdrukte vraagt om snelle flexinstroom."
+ },
+ {
+  "entity": "customer",
+  "id": "01a042cd-9989-738c-ac25-fd813680f51a",
+  "field": "description",
+  "chars": 155,
+  "text": "Nabuurs is een logistiek dienstverlener en vaste klant.\n\n## Schrijfstijl\nZakelijk en direct\n\n## Wervingsproblemen\nPiekdrukte vraagt om snelle flexinstroom."
+ },
+ {
+  "entity": "customer",
+  "id": "01a042cd-9cc4-7381-b801-e377608c46a2",
+  "field": "description",
+  "chars": 154,
+  "text": "Picnic is een logistiek dienstverlener en vaste klant.\n\n## Schrijfstijl\nZakelijk en direct\n\n## Wervingsproblemen\nPiekdrukte vraagt om snelle flexinstroom."
+ },
+ {
+  "entity": "customer",
+  "id": "01a042cd-9512-738f-8648-6bd70848fe71",
+  "field": "description",
+  "chars": 164,
+  "text": "PostNL Logistics is een logistiek dienstverlener en vaste klant.\n\n## Schrijfstijl\nZakelijk en direct\n\n## Wervingsproblemen\nPiekdrukte vraagt om snelle flexinstroom."
+ },
+ {
+  "entity": "customer",
+  "id": "01a042cd-9843-7337-98b8-e89a1b808c35",
+  "field": "description",
+  "chars": 164,
+  "text": "Rhenus Logistics is een logistiek dienstverlener en vaste klant.\n\n## Schrijfstijl\nZakelijk en direct\n\n## Wervingsproblemen\nPiekdrukte vraagt om snelle flexinstroom."
+ },
+ {
+  "entity": "customer",
+  "id": "01a042cd-98ec-7391-8390-76aec9face16",
+  "field": "description",
+  "chars": 158,
+  "text": "Simon Loos is een logistiek dienstverlener en vaste klant.\n\n## Schrijfstijl\nZakelijk en direct\n\n## Wervingsproblemen\nPiekdrukte vraagt om snelle flexinstroom."
+ },
+ {
+  "entity": "customer",
+  "id": "01a042cd-9a28-7039-99a2-9d681467ada6",
+  "field": "description",
+  "chars": 161,
+  "text": "Vos Logistics is een logistiek dienstverlener en vaste klant.\n\n## Schrijfstijl\nZakelijk en direct\n\n## Wervingsproblemen\nPiekdrukte vraagt om snelle flexinstroom."
+ },
+ {
+  "entity": "customer",
+  "id": "01a042cd-975a-7289-861e-426ec0ba514d",
+  "field": "description",
+  "chars": 161,
+  "text": "XPO Logistics is een logistiek dienstverlener en vaste klant.\n\n## Schrijfstijl\nZakelijk en direct\n\n## Wervingsproblemen\nPiekdrukte vraagt om snelle flexinstroom."
+ }
+]

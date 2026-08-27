@@ -17,6 +17,7 @@ import RichTextEditor from '@/components/ui/RichTextEditor'
 import SafeHtml from '@/components/ui/SafeHtml'
 import Button from '@/components/ui/Button'
 import { useTextPopoutHost } from '@/hooks/useTextPopoutHost'
+import { useSeedText } from '@/lib/demoSeedTexts'
 import { GroupLabel } from '@/components/ui/typography'
 import type { PopoutEntity, PopoutTextField } from '@/lib/secondScreen'
 import type { GenerateEntity } from '@/components/ui/richtext/richTextAssistApi'
@@ -82,6 +83,9 @@ export default function EditableRichTextField({ label, value, onSave, popout, as
   }, [value])
 
   const blockStyle: CSSProperties = { borderRadius: 10, overflow: 'hidden', border: '1px solid var(--border)', background: 'var(--surface)' }
+  // DEMO-SEED-TAAL-1: read-mode display only — the demo tenant's seeded text
+  // renders translated for a non-Dutch UI language; edited text passes through.
+  const displayValue = useSeedText(value)
 
   return (
     <div>
@@ -116,7 +120,8 @@ export default function EditableRichTextField({ label, value, onSave, popout, as
             assistGenerate={assistGenerate} />
         : (value
             ? <div style={{ ...blockStyle, padding: '10px 12px', maxHeight: 220, overflow: 'auto' }}>
-                <SafeHtml html={value} style={{ fontSize: 12, color: 'var(--text)', lineHeight: 1.5 }} />
+                {/* DEMO-SEED-TAAL-1: read-mode only — the editor above keeps editing the stored NL text. */}
+                <SafeHtml html={displayValue} style={{ fontSize: 12, color: 'var(--text)', lineHeight: 1.5 }} />
               </div>
             // Empty state renders italic + muted (§4: italic reserved for placeholder text).
             : <div style={{ ...blockStyle, padding: '10px 12px', fontSize: 12, fontStyle: 'italic', color: 'var(--text-muted)' }}>
