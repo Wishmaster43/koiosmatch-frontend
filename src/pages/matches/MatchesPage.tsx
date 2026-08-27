@@ -6,7 +6,6 @@
  * together and owns the page-level view state.
  */
 import { useState, useEffect, useMemo, useRef } from 'react'
-import type { Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Plus, LayoutList, Kanban, Archive, Trash2, ClipboardCheck } from 'lucide-react'
 import ViewModeToggle from '@/components/ui/ViewModeToggle'
@@ -17,12 +16,9 @@ import { useMatchStatuses } from '@/lib/useMatchStatuses'
 import { useContractTypes } from '@/lib/useContractTypes'
 import { useSeedLabel } from '@/lib/useSeedLabel'
 import { useMatchApprovalMode } from './hooks/useMatchApprovalMode'
-import api, { unwrap } from '@/lib/api'
-import { notifyError } from '@/lib/notify'
 import { isReferenceQuery } from '@/lib/referenceNumber'
 import { mergePatch } from '@/lib/mergePatch'
 import InsightsRow from '@/components/insights/InsightsRow'
-import type { DonutSpec, KpiSpec } from '@/components/insights/InsightsRow'
 import MatchesTable from './MatchesTable'
 import MatchesBoard from './MatchesBoard'
 import type { BoardColumn } from './MatchesBoard'
@@ -38,15 +34,13 @@ import ViewSwitch from '@/components/ui/ViewSwitch'
 import HeaderSearch from '@/components/ui/HeaderSearch'
 import ClearFiltersButton from '@/components/ui/ClearFiltersButton'
 import QuickViewToggle from '@/components/ui/QuickViewToggle'
-import { useOpenFromIntent } from '@/context/NavigationContext'
-import { useDrawerUrl } from '@/hooks/useDrawerUrl'
-import { useMatches, mapMatch, MATCHES_MAX_PER_PAGE } from './hooks/useMatches'
-import { buildMatchFilterGroups } from './data/matchFilterGroups'
+import { useMatchesDeepLink } from './hooks/useMatchesDeepLink'
+import { useMatches, MATCHES_MAX_PER_PAGE } from './hooks/useMatches'
 import type { MatchDateRange } from './data/matchFilterGroups'
 import { useMatchesBulkActions } from './hooks/useMatchesBulkActions'
-import { useMatchArchive } from './hooks/useMatchArchive'
 import { useMatchMutations } from './hooks/useMatchMutations'
-import { useTrashFlow } from '@/hooks/useTrashFlow'
+import { useMatchesInsights } from './hooks/useMatchesInsights'
+import { useMatchesTrash } from './hooks/useMatchesTrash'
 import DeletionPreviewModal from '@/components/ui/DeletionPreviewModal'
 import type { MatchRow } from '@/types/match'
 import type { Id } from '@/types/common'
@@ -113,7 +107,7 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
   // with approval_mode 'uit' every match auto-approves and NOTHING can ever move
   // it into 'pending', so a permanent "Te beoordelen" 0-tile would be noise.
   const { approvalMode } = useMatchApprovalMode()
-  const approvalReviewVisible = approvalMode !== 'uit'
+  const approvalReviewVisible = approvalMode !== 'off'
   // Match-date window (a single removable range, not multi-value).
   const [dateRange, setDateRange] = usePageMemory<MatchDateRange | null>('matches.dateRange', null)
   // Start of the current month, captured once (purity — feeds the "Nieuw" KPI).
@@ -125,94 +119,19 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
   const { toggleRow, toggleAll, bulkCoupleHelloFlex, bulkCoupleShiftmanager } =
     useMatchesBulkActions({ selectedIds, setSelectedIds, t })
 
-  // Donut click: toggle one value (second click clears).
-  const pickOne = (set: Dispatch<SetStateAction<string[]>>) => (d: unknown) => {
-    const dd = d as { key?: string; payload?: { key?: string }; name?: string }
-    const v = dd?.key ?? dd?.payload?.key ?? dd?.name
-    if (v != null) set(p => (p.length === 1 && p[0] === v) ? [] : [v])
-  }
-
-  // Aggregate status data for the donut (label/colour from the lookup).
-  // LOOKUP-I18N-1: the seeded status label renders in the user's language; `key`
-  // stays the raw status value so the donut click still filters on it.
-  const stageData = useMemo(() => {
-    const m: Record<string, { name: string; key: string; color?: string; value: number }> = {}
-    rows.forEach(r => {
-      if (!r.status) return
-      const meta = matchStatusMeta(r.status)
-      ;(m[r.status] ??= { name: seedLabel('matchStatuses', { value: r.status, label: meta?.label ?? r.status }), key: r.status, color: meta?.color, value: 0 }).value++
-    })
-    return Object.values(m)
-  }, [rows, matchStatusMeta, seedLabel])
-
-  const ownerData = useMemo(() => {
-    // No explicit colour: the donut assigns its palette per owner (one grey for ALL
-    // owners was the bug — a hardcoded colour suppresses the palette fallback).
-    const m: Record<string, { name: string; key: string; value: number }> = {}
-    rows.forEach(r => { if (r.owner) (m[r.owner] ??= { name: r.owner, key: r.owner, value: 0 }).value++ })
-    return Object.values(m)
-  }, [rows])
-
-  // Client distribution (3rd donut) — palette per client (Danny: 9 KPIs everywhere).
-  const clientData = useMemo(() => {
-    const m: Record<string, { name: string; key: string; value: number }> = {}
-    rows.forEach(r => { if (r.client && r.client !== '—') (m[r.client] ??= { name: r.client, key: r.client, value: 0 }).value++ })
-    return Object.values(m)
-  }, [rows])
-
-  // Branch distribution — right-panel-only filter dimension (no toolbar/donut twin).
-  const branchData = useMemo(() => {
-    const m: Record<string, { value: string; label: string; count: number }> = {}
-    rows.forEach(r => { if (r.branchName) (m[r.branchName] ??= { value: r.branchName, label: r.branchName, count: 0 }).count++ })
-    return Object.values(m)
-  }, [rows])
-
-  // Contract-form distribution — right-panel-only filter dimension.
-  const contractFormData = useMemo(() => {
-    const m: Record<string, { value: string; label: string; count: number }> = {}
-    rows.forEach(r => { if (r.contractForm) (m[r.contractForm.value] ??= { value: r.contractForm.value, label: r.contractForm.label, count: 0 }).count++ })
-    return Object.values(m)
-  }, [rows])
-
-  // Contract-type filter options come straight from the tenant lookup (not the
-  // loaded rows), since rows may carry either the lookup value or its label
-  // (VOCABULARY CAVEAT — see the predicate below and OPEN_QUESTIONS).
-  const contractTypeData = useMemo(
-    () => contractTypeLookupOptions.map(o => ({ value: o.value, label: o.label })),
-    [contractTypeLookupOptions])
-
-  // Multi-select toggle for the right-panel filter groups (add/remove a value).
-  const tog = (set: Dispatch<SetStateAction<string[]>>) => (v: string | number) =>
-    set(p => p.includes(String(v)) ? p.filter(x => x !== String(v)) : [...p, String(v)])
-
-  // Right-panel filters: stage/owner/client/branch/score-state/date-range/archived
-  // — pure builder (§0.3 split). The same stageFilter/ownerFilter drive the donuts,
-  // so both stay in sync.
-  const filterGroups = useMemo(() => buildMatchFilterGroups({
-    t, tog,
+  // Donut/KPI aggregation + right-panel filter-group wiring (§0.3 split).
+  const {
+    insightDonuts, insightKpis, anyFilterActive, clearAllFilters, searchEpoch,
+  } = useMatchesInsights({
+    rows, t, matchStatusMeta, seedLabel, monthStart, query, setQuery,
     stageFilter, setStageFilter, ownerFilter, setOwnerFilter, clientFilter, setClientFilter,
     branchFilter, setBranchFilter, contractFormFilter, setContractFormFilter,
-    contractTypeFilter, setContractTypeFilter, kpiScored, setKpiScored, kpiUnscored, setKpiUnscored,
-    dateRange, setDateRange, showArchived, setShowArchived,
-    ...(approvalReviewVisible ? { pendingApprovalOnly, setPendingApprovalOnly } : {}),
-    stageData: stageData.map(d => ({ value: d.key, label: d.name, count: d.value })),
-    ownerData: ownerData.map(d => ({ value: d.key, label: d.name, count: d.value })),
-    clientData: clientData.map(d => ({ value: d.key, label: d.name, count: d.value })),
-    branchOptions: branchData,
-    contractFormOptions: contractFormData,
-    contractTypeOptions: contractTypeData,
-  }), [t, stageFilter, setStageFilter, ownerFilter, setOwnerFilter, clientFilter, setClientFilter,
-       branchFilter, setBranchFilter, contractFormFilter, setContractFormFilter,
-       contractTypeFilter, setContractTypeFilter, kpiScored, setKpiScored, kpiUnscored, setKpiUnscored,
-       dateRange, setDateRange, showArchived, setShowArchived,
-       approvalReviewVisible, pendingApprovalOnly, setPendingApprovalOnly,
-       stageData, ownerData, clientData, branchData, contractFormData, contractTypeData])
-
-  // Register/unregister the filters in the right panel.
-  useEffect(() => {
-    registerFilters('matches-page', filterGroups)
-    return () => unregisterFilters('matches-page')
-  }, [filterGroups, registerFilters, unregisterFilters])
+    contractTypeFilter, setContractTypeFilter, contractTypeLookupOptions,
+    kpiScored, setKpiScored, kpiUnscored, setKpiUnscored,
+    dateRange, setDateRange, showArchived, setShowArchived, showTrash, setShowTrash,
+    pendingApprovalOnly, setPendingApprovalOnly, approvalReviewVisible,
+    registerFilters, unregisterFilters,
+  })
 
   // Reset to the first page and clear the selection whenever a filter changes
   // (kept out of the memo — setting state during render can loop).
@@ -271,76 +190,10 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
   const lastPage  = Math.max(1, Math.ceil(totalRows / pageSize))
   const paged     = useMemo(() => filteredAll.slice((page - 1) * pageSize, page * pageSize), [filteredAll, page, pageSize])
 
-  // KPI: open vs closed via the is_closed FLAG (never the slug — R-1b).
-  const isClosed    = (r: MatchRow) => Boolean(matchStatusMeta(r.status)?.is_closed)
-  const activeCount = rows.filter(r => !isClosed(r)).length
-  const closedCount = rows.filter(isClosed).length
-  const avgScore    = rows.length ? Math.round(rows.reduce((s, r) => s + (r.score ?? 0), 0) / rows.length) : null
-  // New this month + matches still lacking a score (both derived from the rows).
-  const newThisMonthCount = rows.filter(r => r.date && new Date(r.date).getTime() >= monthStart).length
-  const unscoredCount     = rows.filter(r => typeof r.score !== 'number').length
-  // MATCH-APPROVAL-QUEUE-1: counted off the full server-wide row set, same as
-  // every other KPI above — never the paged/filtered slice.
-  const pendingApprovalCount = rows.filter(r => r.approval_status === 'pending').length
-
-  // Donuts drive the stage/owner filters; each clears its own selection.
-  const insightDonuts: DonutSpec[] = [
-    { key: 'stage', title: t('insights.status'), data: stageData, onPick: pickOne(setStageFilter),
-      active: stageFilter.length > 0, onClear: () => setStageFilter([]) },
-    { key: 'owner', title: t('insights.owner'), data: ownerData, onPick: pickOne(setOwnerFilter),
-      active: ownerFilter.length > 0, onClear: () => setOwnerFilter([]) },
-    { key: 'client', title: t('insights.client'), data: clientData, onPick: pickOne(setClientFilter),
-      active: clientFilter.length > 0, onClear: () => setClientFilter([]) },
-  ]
-
-  // Shared clear-all (page memory keeps filters sticky).
-  const anyFilterActive = Boolean(query.trim() || kpiScored || kpiUnscored || (approvalReviewVisible && pendingApprovalOnly) || stageFilter.length || ownerFilter.length
-    || clientFilter.length || branchFilter.length || contractFormFilter.length || contractTypeFilter.length || dateRange || showArchived || showTrash)
-  const [searchEpoch, setSearchEpoch] = useState(0)
-  // Resets every filter dimension (and bumps the search epoch) back to defaults in one action.
-  const clearAllFilters = () => {
-    setSearchEpoch(e => e + 1); setQuery(''); setKpiScored(false); setKpiUnscored(false); setPendingApprovalOnly(false)
-    setStageFilter([]); setOwnerFilter([]); setClientFilter([]); setBranchFilter([]); setContractFormFilter([]); setContractTypeFilter([]); setDateRange(null); setShowArchived(false); setShowTrash(false)
-  }
-
-  // KPI clicks drive the existing stage filter (chip + clear come for free);
-  // clicking the active card again clears (mirror of the kansen cards).
-  const eqSet = (a: string[], b: string[]) => a.length === b.length && [...a].sort().join('|') === [...b].sort().join('|')
-  const activeStages = [...new Set(rows.filter(r => !isClosed(r)).map(r => r.status).filter(Boolean))]
-  const closedStages = [...new Set(rows.filter(isClosed).map(r => r.status).filter(Boolean))]
-  const toggleStages = (labels: string[]) => { if (labels.length) setStageFilter(p => (eqSet(p, labels) ? [] : labels)) }
-  const insightKpis: KpiSpec[] = [
-    // Totaal is the neutral card: clicking clears, but it never shows as "aan"
-    // (the default highlight read as an active filter — Danny 2026-07-06).
-    { key: 'total',    label: t('kpi.total'),    value: rows.length, color: 'var(--color-primary-text)',
-      onClick: () => { setStageFilter([]); setOwnerFilter([]); setKpiScored(false) } },
-    { key: 'active',   label: t('kpi.active'),   value: activeCount, color: 'var(--color-primary-text)',
-      onClick: () => toggleStages(activeStages), active: stageFilter.length > 0 && eqSet(stageFilter, activeStages) },
-    { key: 'closed',   label: t('kpi.closed'),   value: closedCount, color: 'var(--color-success-text)',
-      onClick: () => toggleStages(closedStages), active: stageFilter.length > 0 && eqSet(stageFilter, closedStages) },
-    { key: 'newThisMonth', label: t('kpi.newThisMonth'), value: newThisMonthCount, color: 'var(--color-primary-text)',
-      onClick: () => { setStageFilter([]); setOwnerFilter([]); setClientFilter([]); setKpiScored(false) } },
-    { key: 'unscored', label: t('kpi.unscored'), value: unscoredCount, color: 'var(--color-warning)',
-      onClick: () => setKpiScored(false) },
-    { key: 'avgScore', label: t('kpi.avgScore'), value: avgScore != null ? `${avgScore}%` : '—', color: 'var(--color-primary-text)',
-      onClick: () => setKpiScored(v => !v), active: kpiScored },
-    // MATCH-APPROVAL-QUEUE-1: honesty-gated (goedkeuring-badge-eerlijk) — absent
-    // entirely once the tenant's approval_mode is 'uit', never a permanent 0-tile.
-    ...(approvalReviewVisible ? [{
-      key: 'pendingApproval', label: t('kpi.pendingApproval'), value: pendingApprovalCount, color: 'var(--color-warning)',
-      onClick: () => setPendingApprovalOnly(v => !v), active: pendingApprovalOnly,
-    }] : []),
-  ]
-
   // Direct-match creation modal (§3B "direct match" path).
   const [addOpen, setAddOpen] = useState(false)
   // Read-only drill-down: the clicked row opens the MatchDrawer beside the table.
   const [selected, setSelected] = useState<MatchRow | null>(null)
-  // Cross-entity open ({ open: id }): the drawer needs the ROW, so park the id until
-  // the rows are loaded, then select the matching one (candidate drawer → match).
-  const [pendingOpenId, setPendingOpenId] = useState<Id | null>(null)
-  // Guards the one-shot direct fetch for a deep-link open (see effect below).
-  const fetchingOpenRef = useRef<string | null>(null)
   // Seed the contract-form filter from a navigation intent (e.g. the ops
   // dashboard donut's slice click) — mirrors CandidatesPage's intent effect.
   useEffect(() => {
@@ -352,26 +205,8 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
     if (contractType != null) setContractTypeFilter([String(contractType)])
   }, [intent, setContractFormFilter, setContractTypeFilter])
 
-  useOpenFromIntent(intent, (id) => setPendingOpenId(id))
-  // Opens the deep-linked match once its row is loaded; if it sits outside the current page/filters, fetches it directly instead of silently dropping the open.
-  useEffect(() => {
-    if (pendingOpenId == null) return
-    const row = rows.find(r => String(r.id) === String(pendingOpenId))
-    if (row) { setSelected(row); setPendingOpenId(null); return }
-    // Deep-link fallback (Danny 20-07: match-link 'deed niets'): the target may not
-    // be in the loaded page (pagination/filters) — fetch it directly, like the
-    // candidates/vacancies openById paths, instead of silently dropping the open.
-    if (loading || fetchingOpenRef.current === String(pendingOpenId)) return
-    fetchingOpenRef.current = String(pendingOpenId)
-    api.get(`/matches/${pendingOpenId}`, { params: { include_archived: 1 } })
-      .then(r => { setSelected(mapMatch(unwrap(r))); setPendingOpenId(null) })
-      .catch(() => { notifyError(t('page.openNotFound')); setPendingOpenId(null) })
-      .finally(() => { fetchingOpenRef.current = null })
-  }, [pendingOpenId, rows, loading, t])
-  // Mirror the open drawer in the URL (?open=<id>): browser back/forward walks
-  // through it and a copied link reopens the same match (NAV-BACK-1). Reuses the
-  // existing pendingOpenId deferral above instead of a second lookup mechanism.
-  useDrawerUrl({ selectedId: selected?.id, openById: setPendingOpenId, close: () => setSelected(null), intent })
+  // Deep-link/intent open + URL mirror live in their own hook (§3 split).
+  useMatchesDeepLink({ intent, rows, loading, selected, setSelected, t })
   const [drawerExpanded, setDrawerExpanded] = useState(false)
   // Shared row-patch: optimistic list update + keep the open drawer's copy in
   // sync. Reused by the approval workflow AND the contract/financial edit (both
@@ -382,27 +217,9 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
     setSelected(p => (p && p.id === id ? mergePatch(p as unknown as Record<string, unknown>, patch) as unknown as MatchRow : p))
   }
 
-  // ARCHIVE-1: per-id archive/restore (enkelstuks-sweep, BE 9170e40) — gated on
-  // matches.update, the same permission the DELETE/restore routes themselves require.
-  const { archiveMatch, restoreMatch, dialog: archiveConfirmDialog } = useMatchArchive({ onPatch: patchRow, onReload: reload })
-  const canArchive = hasPermission('matches.update')
-
-  // TRASH-OVERAL-2: mark/unmark wiring + the shared preview-modal state. Mark is
-  // gated matches.delete (button HIDDEN without it — §7 no fake affordances);
-  // unmark reuses the matches.update gate the archive/restore routes carry.
-  const trash = useTrashFlow({
-    entityPath: 'matches',
-    onMarked: () => { setSelected(null); reload() },
-    onUnmarked: () => { setSelected(null); reload() },
-  })
-  const canMarkDeletion = hasPermission('matches.delete')
-  // Human label for the modal intro — candidate + vacancy (— is a data separator here).
-  const openMarkDeletion = (id: MatchRow['id']) => {
-    if (id == null) return
-    const row = rows.find(r => String(r.id) === String(id)) ?? selected
-    const label = [row?.candidate, row?.vacancy].filter(v => v && v !== '—').join(' — ') || String(id)
-    trash.openFor(String(id), label)
-  }
+  // Archive + trash (Prullenbak) wiring, extracted (§0.3 split).
+  const { archiveMatch, restoreMatch, archiveConfirmDialog, canArchive, trash, canMarkDeletion, openMarkDeletion } =
+    useMatchesTrash({ rows, selected, patchRow, reload, setSelected })
 
   // View toggle: table ⇄ board (planboard). Board columns = the tenant match
   // statuses (R-1b lookup + seed fallback) so there are always columns to drag.
@@ -419,8 +236,8 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
   // picker and the Extra tab's custom fields used to leave a rejected PATCH's
   // optimistic value sitting on screen with only a toast — no revert. The
   // snapshot/revert logic (both the row list and the open drawer, per field)
-  // now lives in useMatchMutations, kept out of the page so it stays under the
-  // ~400-line split trigger (§3) and each mutation is unit-testable on its own.
+  // lives in useMatchMutations, kept out of the page (§3 single-responsibility)
+  // so each mutation stays unit-testable on its own.
   const { setStatus, setOwner, updateCustomFields } = useMatchMutations({ rows, selected, updateMatch, setSelected })
   // Drag a card to another column → change the match's STATUS.
   const handleMove = (id: Id, statusKey: string) => setStatus(id, statusKey)
@@ -459,7 +276,7 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
           <HeaderSearch key={searchEpoch} onSearch={setQuery} placeholder={t('page.searchPlaceholder')} width={260} />
           {/* RIGHTPANEL-FILTERS-1 (Danny 2026-08-14, "rode filters moeten naar rechts
               filter menu"): stage/owner/client/branch/score/date-range/archived all
-              live in the right-hand filter panel now (buildMatchFilterGroups above) —
+              live in the right-hand filter panel now (useMatchesInsights above) —
               the toolbar's own MatchFilterBar (stage/owner triggers + a "More filters"
               popover for client) was an exact duplicate of that panel and is deleted,
               not moved: both copies drove the SAME stageFilter/ownerFilter/clientFilter

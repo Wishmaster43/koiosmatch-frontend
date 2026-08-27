@@ -1,11 +1,8 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import api, { unwrap } from '@/lib/api'
 import { useTaskLookups } from '@/context/TaskLookupsContext'
 import { useAuth } from '@/context/AuthContext'
-import { notifyError } from '@/lib/notify'
 import { useTaskLookupIds } from './hooks/useTaskLookupIds'
-import { mapTaskDetail } from './data/mapTask'
 import { WIDE_MODAL } from '@/components/ui/modalMetrics'
 import { tintBorder } from '@/lib/tint'
 import FloatingPanel from '@/components/ui/FloatingPanel'
@@ -20,11 +17,12 @@ import { todayISO, nextRoundHour } from './addmodal/defaults'
 import { useAssigneeOptions } from './addmodal/useAssigneeOptions'
 import { useTeams } from '@/lib/useTeams'
 import { useLinkOptions } from './addmodal/useLinkOptions'
-import { userName, API_TO_FORM } from './addmodal/formHelpers'
+import { userName } from './addmodal/formHelpers'
 import type { UserLike } from './addmodal/formHelpers'
 import type { Id } from '@/types/common'
-import type { ApiTask } from '@/types/task'
 import Button from '@/components/ui/Button'
+import { useAddTaskEffects } from './hooks/useAddTaskEffects'
+import { useAddTaskSubmit } from './hooks/useAddTaskSubmit'
 
 // Exported so the addmodal/ card components share this exact shape (type-only import).
 export interface TaskForm {
@@ -36,8 +34,6 @@ export interface TaskForm {
   dueTime: string; priority: string; description: string
   candidateId: string; customerId: string; contactId: string
 }
-// A polymorphic link {type,id} as sent to the API.
-type LinkPair = { type: string; id: string }
 
 /**
  * AddTaskModal — the "Nieuwe taak" dialog, also reused in EDIT mode (Danny 20-07:
@@ -169,12 +165,6 @@ export default function AddTaskModal({ onClose, onCreated, onSaved, initial, ext
     priority: '', description: '',
     candidateId: '', customerId: lockCustomerId ?? '', contactId: '', ...initial,
   }))
-  const [errors, setErrors] = useState<Record<string, boolean>>({})
-  const [saving, setSaving] = useState(false)
-  // AUDIT-1 pattern (mirrors AddApplicationModal): a failed create/save keeps the
-  // modal open and shows the server's message inline — the old empty catch silently
-  // dropped production failures (the dev-only interceptor toast never fires in prod).
-  const [createError, setCreateError] = useState<string | null>(null)
   // Edit mode: loading the task detail to prefill.
   const [loadingTask, setLoadingTask] = useState(isEdit)
   // PUNT 15: every coupling outside the three dedicated pickers — added here by
@@ -186,122 +176,16 @@ export default function AddTaskModal({ onClose, onCreated, onSaved, initial, ext
   // Needed by BOTH create and edit now.
   const { maps: lookupIds, loading: loadingLookupIds } = useTaskLookupIds()
 
-  // Seed sensible defaults once the lookups arrive. Guarded by `|| ` so a value the
-  // edit-mode load below already set is never overwritten. Type (like priority via
-  // `defaultPriority`) reads the lookup's own `is_default` FLAG first — never array
-  // position 0 (§3B lesson: task_types carries no such column yet, so this is an
-  // honest no-op today, but it stops guessing the instant a tenant gets one).
-  useEffect(() => {
-    setForm(f => ({ ...f,
-      status:   f.status   || statuses[0]?.value || '',
-      priority: f.priority || defaultPriority || '',
-      type:     f.type     || types.find(x => x.is_default)?.value || types[0]?.value || '' }))
-  }, [statuses, priorities, types, defaultPriority])
-
-  // TASK-ASSIGNEE-DEFAULT-1: propose the logged-in user as assignee ONCE they are
-  // known to be assignable — CREATE ONLY (isEdit guard), so the loaded record's own
-  // assignee (set by the prefill effect below) is never raced/overwritten. The
-  // functional update only fires while assigneeId is still empty, mirroring
-  // AddApplicationModal/AddCustomerModal's identical owner-default effect.
-  useEffect(() => {
-    if (isEdit || !meIsAssignable) return
-    setForm(f => (f.assigneeId ? f : { ...f, assigneeId: String(meId) }))
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- only react to assignability/edit-mode resolving, mirrors AddApplicationModal's owner-default effect
-  }, [isEdit, meIsAssignable])
-
   // The three dedicated relational pickers + their honest load state (§3: a
   // failed list used to be swallowed here and read as "no records" — see the hook).
   const linkOptions = useLinkOptions()
-  // KLANTEN 9 screenshot (21-08): a pre-filled link that sits outside the option
-  // list's 200-row cap used to render its RAW uuid as the label. Resolve the name by
-  // id and inject it as an option, so the picker always shows a name.
-  const [resolvedOpts, setResolvedOpts] = useState<Record<string, { value: string; label: string }[]>>({})
-  // Resolve any pre-filled candidate/customer/contact id that fell outside the
-  // picker's own option list (see the comment above) by fetching its name directly.
-  useEffect(() => {
-    if (linkOptions.loading) return
-    const jobs: Array<[key: 'candidates' | 'customers' | 'contacts', id: string, url: string]> = []
-    // Queue a lookup job for one field only when its id is set and unresolved.
-    const misses = (key: 'candidates' | 'customers' | 'contacts', id: string, url: string) => {
-      if (!id) return
-      const known = [...linkOptions[key], ...(resolvedOpts[key] ?? [])].some(o => String(o.value) === String(id))
-      if (!known) jobs.push([key, id, url])
-    }
-    misses('candidates', form.candidateId, `/candidates/${form.candidateId}`)
-    misses('customers', form.customerId, `/customers/${form.customerId}`)
-    misses('contacts', form.contactId, `/contacts/${form.contactId}`)
-    if (!jobs.length) return
-    let alive = true
-    Promise.all(jobs.map(async ([key, id, url]) => {
-      try {
-        const d = unwrap<{ name?: string; first_name?: string; last_name?: string }>(await api.get(url))
-        const label = d?.name ?? [d?.first_name, d?.last_name].filter(Boolean).join(' ')
-        return label ? { key, opt: { value: String(id), label } } : null
-      } catch { return null }
-    })).then(found => {
-      if (!alive) return
-      setResolvedOpts(prev => {
-        const next = { ...prev }
-        for (const f of found) if (f) next[f.key] = [...(next[f.key] ?? []), f.opt]
-        return next
-      })
-    })
-    return () => { alive = false }
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- deliberately narrow deps: re-running on resolvedOpts (its own setState) would loop; the misses-check already dedupes against the current lists
-  }, [linkOptions.loading, form.candidateId, form.customerId, form.contactId])
 
-  // Edit mode: GET the full task (description/links aren't on the row), then
-  // prefill the form. A failed load means there is nothing sensible to edit —
-  // notify and close. The slug→uuid FK maps load independently via useTaskLookupIds.
-  useEffect(() => {
-    if (!isEdit) return
-    let alive = true
-    setLoadingTask(true)
-    api.get(`/tasks/${editId}`).then(taskRes => {
-      if (!alive) return
-      const detail = mapTaskDetail(unwrap<ApiTask>(taskRes))
-      const linkOf = (type: string) => detail.links.find(l => l.type === type)
-      const managed = new Set(['candidate', 'customer', 'contact'])
-      setOtherLinks(detail.links.filter(l => !managed.has(l.type)).map(l => ({ type: l.type, id: String(l.id), label: l.label ?? '' })))
-      setForm(f => ({ ...f,
-        type: String(detail.typeKey ?? ''), title: detail.title === '—' ? '' : detail.title,
-        assigneeId: detail.assigneeId != null ? String(detail.assigneeId) : '',
-        // TEAM-1: prefill the department too, so a save never silently clears it.
-        teamId: detail.teamId != null ? String(detail.teamId) : '',
-        status: String(detail.statusKey ?? ''), due: detail.due ?? '', dueTime: detail.dueTime ?? '',
-        priority: String(detail.priorityKey ?? ''), description: detail.description ?? '',
-        candidateId: linkOf('candidate')?.id != null ? String(linkOf('candidate')!.id) : '',
-        customerId:  linkOf('customer')?.id  != null ? String(linkOf('customer')!.id)  : '',
-        contactId:   linkOf('contact')?.id   != null ? String(linkOf('contact')!.id)   : '',
-      }))
-    }).catch(() => { notifyError(t('common:actionFailed')); onClose() })
-      .finally(() => { if (alive) setLoadingTask(false) })
-    return () => { alive = false }
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentionally keyed on editId/isEdit only; the load is a one-shot per edit target
-  }, [editId, isEdit])
-
-  const set = (k: keyof TaskForm, v: string) => { setForm(f => ({ ...f, [k]: v })); if (errors[k]) setErrors(e => ({ ...e, [k]: false })) }
-
-  // Shared required-field check for both create and edit.
-  const validateRequired = (): Record<string, boolean> => {
-    const e: Record<string, boolean> = {}
-    if (!form.title.trim()) e.title = true
-    if (!form.type)         e.type  = true
-    return e
-  }
-
-  // Shared 422/message handling for both create and edit submits.
-  const applyServerErrors = (err: unknown) => {
-    const e = err as { response?: { data?: { errors?: Record<string, unknown>; message?: string } } }
-    const apiErrors = e?.response?.data?.errors
-    if (apiErrors) {
-      const e2: Record<string, boolean> = {}
-      Object.keys(apiErrors).forEach(k => { e2[API_TO_FORM[k] ?? k] = true })
-      setErrors(e2)
-    } else {
-      setCreateError(e?.response?.data?.message ?? t('common:errorGeneric'))
-    }
-  }
+  // The four seed/prefill effects (lookup defaults, assignee proposal, id-name
+  // resolution, edit-mode load) live in their own hook (§3 size split).
+  const { resolvedOpts } = useAddTaskEffects({
+    form, setForm, statuses, priorities, types, defaultPriority,
+    isEdit, meIsAssignable, meId, linkOptions, editId, setLoadingTask, setOtherLinks, t, onClose,
+  })
 
   // PUNT 15: add/remove a free-vocabulary coupling (deduped on type+id).
   const addOtherLink = (link: NewLink) =>
@@ -309,91 +193,13 @@ export default function AddTaskModal({ onClose, onCreated, onSaved, initial, ext
   const removeOtherLink = (link: { type: string; id: string }) =>
     setOtherLinks(prev => prev.filter(l => !(l.type === link.type && l.id === link.id)))
 
-  // Assemble the polymorphic links: free-vocabulary couplings first (in edit mode
-  // these include the loaded task's own links, so the full-replace `links` drops
-  // none), then the host-supplied ones, then the three single-value pickers.
-  // Deduped on type+id: a host seeds e.g. {vacancy,id} while the picker can offer
-  // that same vacancy, and the same record must never be coupled twice.
-  const buildLinks = (): LinkPair[] => {
-    const seen = new Set<string>()
-    return ([
-      ...otherLinks.map(l => ({ type: l.type, id: l.id })),
-      ...(extraLinks ?? []),
-      form.candidateId && { type: 'candidate', id: form.candidateId },
-      form.customerId  && { type: 'customer',  id: form.customerId },
-      form.contactId   && { type: 'contact',   id: form.contactId },
-    ].filter(Boolean) as LinkPair[])
-      .filter(l => (seen.has(`${l.type}|${l.id}`) ? false : seen.add(`${l.type}|${l.id}`) != null))
-  }
+  // Validation, error state and the create/edit submit handlers (§3 size split).
+  const { errors, setErrors, saving, createError, canSubmit, handleSubmit, handleUpdate } = useAddTaskSubmit({
+    form, otherLinks, extraLinks, parentId, editId, lookupIds, loadingLookupIds, loadingTask, onCreated, onSaved, t,
+  })
 
-  // Create — TASKTYPE-ID-1: POSTs the real uuid FKs (type_id/status_id/priority_id),
-  // Resolved from the form's slug via `lookupIds`.
-  // StoreTaskRequest silently ignores the bare slugs `type`/`status`/`priority`
-  // (not declared rules at all), so this used to land on the tenant's DEFAULT
-  // status/type no matter what the recruiter picked; `canSubmit` below blocks the
-  // button while `loadingLookupIds` so a fast click can never race an empty map.
-  const handleSubmit = async () => {
-    const e = validateRequired()
-    if (Object.keys(e).length) { setErrors(e); return }
+  const set = (k: keyof TaskForm, v: string) => { setForm(f => ({ ...f, [k]: v })); if (errors[k]) setErrors(e => ({ ...e, [k]: false })) }
 
-    setSaving(true)
-    setCreateError(null)
-    try {
-      const body = {
-        title: form.title.trim(),
-        type_id: form.type ? lookupIds.type[form.type] : null,
-        status_id: form.status ? lookupIds.status[form.status] : null,
-        priority_id: form.priority ? lookupIds.priority[form.priority] : null,
-        assignee_id: form.assigneeId || null, due_date: form.due || null, due_time: form.dueTime || null,
-        // TEAM-1: the internal department — always sent, null when none is picked.
-        assignee_team_id: form.teamId || null,
-        description: form.description || null, links: buildLinks(),
-        // SUBTASK-1: only present when this modal was opened as "+ subtask" — the
-        // key is omitted (never sent as null) for a normal create, so the exact
-        // request body existing callers assert never gains a stray key.
-        ...(parentId != null ? { parent_id: parentId } : {}),
-      }
-      const r = await api.post('/tasks', body)
-      onCreated?.(unwrap(r))
-    } catch (err) {
-      applyServerErrors(err)
-    } finally { setSaving(false) }
-  }
-
-  // Edit — PATCH with the update-request's REAL keys (see the create handler above
-  // for the slug-vs-uuid rationale). Keys the form doesn't manage (tags, parent_id,
-  // custom_fields, location_id) are simply omitted, leaving them untouched server-side.
-  const handleUpdate = async () => {
-    const e = validateRequired()
-    if (Object.keys(e).length) { setErrors(e); return }
-
-    setSaving(true)
-    setCreateError(null)
-    try {
-      const body: Record<string, unknown> = {
-        title: form.title.trim(),
-        type_id: form.type ? lookupIds.type[form.type] : null,
-        // status_id cannot be cleared server-side; an unmapped slug is omitted
-        // (via the undefined-strip below) rather than sent as an invalid value.
-        status_id: form.status ? lookupIds.status[form.status] : undefined,
-        priority_id: form.priority ? lookupIds.priority[form.priority] : null,
-        assignee_id: form.assigneeId || null, due_date: form.due || null, due_time: form.dueTime || null,
-        // TEAM-1: sent explicitly (never omitted) — omitting the key would leave a
-        // cleared department standing, since UpdateTaskRequest uses `sometimes`.
-        assignee_team_id: form.teamId || null,
-        description: form.description || null, links: buildLinks(),
-      }
-      Object.keys(body).forEach(k => { if (body[k] === undefined) delete body[k] })
-      const r = await api.patch(`/tasks/${editId}`, body)
-      onSaved?.(unwrap(r))
-    } catch (err) {
-      applyServerErrors(err)
-    } finally { setSaving(false) }
-  }
-
-  // TASKTYPE-ID-1: also blocked while the slug→uuid maps are still loading — see
-  // the file header comment (a fast click must never race an empty map).
-  const canSubmit = !!(form.title.trim() && form.type) && !saving && !loadingTask && !loadingLookupIds
   // SUBTASK-1: an honest title for the "+ subtask" flow — never silently reuses
   // the generic "Nieuwe taak" wording, which would read like a full standalone create.
   const modalTitle = isEdit ? t('modal.editTitle') : parentId != null ? t('modal.addSubtaskTitle') : t('modal.title')

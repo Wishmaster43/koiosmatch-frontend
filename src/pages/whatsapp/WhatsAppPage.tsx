@@ -7,23 +7,28 @@
  * already loads — today's inbound/outbound split, today's queued/failed WABA
  * sends, and escalations without a reply. Every value is a real field or a real
  * aggregate of real rows; anything the backend can't back today renders the
- * house dash and keeps its slot (see cardValue() below) — never a padded zero.
- * Data: GET /whatsapp/stats, /messages, /escalations, /activity, /whatsapp-queue.
+ * house dash and keeps its slot (see cardValue() in useWhatsappPageData) — never
+ * a padded zero. Data: GET /whatsapp/stats, /messages, /escalations, /activity,
+ * /whatsapp-queue.
  *
  * Main blocks below:
- *   - helpers           → date/time formatting (PAD, time-ago, etc.)
- *   - ActivityChart     → recharts area chart of inbound/outbound volume (own file, ./ActivityChart)
- *   - MessagesTable      → messages table (recipient/conversation gateways)
- *   - EscalationList    → conversations flagged for human follow-up
+ *   - useWhatsappPageData → KPI assembly + overview chart derivations (own hook, ./hooks/useWhatsappPageData)
+ *   - WhatsAppTabBar      → the tab bar + refresh button (own file, ./WhatsAppTabBar)
+ *   - ActivityChart       → recharts area chart of inbound/outbound volume (own file, ./ActivityChart)
+ *   - MessagesTable       → messages table (recipient/conversation gateways)
+ *   - EscalationList      → conversations flagged for human follow-up
  */
 import { useState, useEffect, useMemo, useCallback } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
-import { MessageCircle, RefreshCw } from 'lucide-react'
+import { MessageCircle } from 'lucide-react'
 import { useRightPanel } from '@/context/RightPanelContext'
 import { useAuth } from '@/context/AuthContext'
 import { useWhatsAppData } from './hooks/useWhatsAppData'
-import { useWhatsAppQueue, sumBatches } from './hooks/useWhatsAppQueue'
+import { useWhatsAppQueue } from './hooks/useWhatsAppQueue'
+import { useWhatsappPageData } from './hooks/useWhatsappPageData'
+import WhatsAppTabBar from './WhatsAppTabBar'
+import type { WhatsAppTabId } from './WhatsAppTabBar'
 import { useWaMessageTypes, useWaPhoneNumbers, useWaMessagePurposes, useWaTemplates } from './hooks/useWaFilterOptions'
 import { useUsers } from '@/lib/queries'
 import { buildWaMessageFilterGroups } from './data/waMessageFilterGroups'
@@ -36,29 +41,20 @@ import ConversationsTab from './ConversationsTab'
 // surface of its own, two-line labels, dev-time nine-card guard. Reusing it here
 // keeps one look instead of a second hand-rolled strip (CLAUDE.md §0.9/§11).
 import { ReportKpiBand } from '@/pages/reports/shared'
-import type { KpiSpec } from '@/components/insights/InsightsRow'
 import RightDrawer from '@/components/ui/RightDrawer'
 import PieChartCard from '@/components/charts/PieChartCard'
 import BarChartCard from '@/components/charts/BarChartCard'
 import { EscalationList } from './components'
 import ActivityChart from './ActivityChart'
 import ChannelActivityChart from './ChannelActivityChart'
-import { CHANNEL_COLORS } from '@/components/drawer/channelColors'
 import MessagesTable from './messagesTable/MessagesTable'
 import QueueTab from './QueueTab'
-import Button from '@/components/ui/Button'
 import { GroupLabel, BodyText } from '@/components/ui/typography'
 import { WA_DIRECTION_VALUES, WA_STATUS_VALUES } from './shared'
 
 // Server-validated direction/status vocabulary (WA-MSG-TABLE-1 FIX, 26-08) —
 // mirrors WhatsappDashboardController's `in:` validation rules exactly. This is
 // the SOURCE for the right-panel filter values; i18n only supplies the label.
-
-// The one house placeholder for "the server did not return this" — never a padded zero.
-const DASH = '—'
-// A KPI value is only shown once its source is loaded AND didn't error; otherwise dash.
-const cardValue = (ready: boolean, v: number | undefined | null): number | string =>
-  (!ready || v === undefined || v === null) ? DASH : v
 
 // ─── main page ───────────────────────────────────────────────────────────────
 
@@ -175,8 +171,7 @@ export default function WhatsAppPage({ intent }: { intent?: unknown } = {}) {
   // Active tab (personal-WhatsApp queue removed 2026-07-04 — Business API only;
   // 'queue' below is the WABA/Business batch queue, R3a; 'wa-web-queue' + 'conversations'
   // are K-193 fase 1 — a different feature, module-gated on whatsapp_web).
-  type TabId = 'overview' | 'messages' | 'queue' | 'escalations' | 'wa-web-queue' | 'conversations'
-  const [tab, setTab] = useState<TabId>('overview')
+  const [tab, setTab] = useState<WhatsAppTabId>('overview')
   // Deep link (dashboard tile, F3): a conversation id to open once the tab is active.
   const [openConversationId, setOpenConversationId] = useState<string | null>(null)
   // Open a specific tab when arriving via a dashboard link — includes the new
@@ -188,7 +183,7 @@ export default function WhatsAppPage({ intent }: { intent?: unknown } = {}) {
     // fall back to overview instead of leaving the tab bar with nothing selected.
     if (wanted === 'wa-web-queue' && !waWebEnabled) { setTab('overview'); return }
     if (wanted && ['overview', 'messages', 'queue', 'escalations', 'wa-web-queue', 'conversations'].includes(wanted)) {
-      setTab(wanted as TabId)
+      setTab(wanted as WhatsAppTabId)
     }
     if (wanted === 'conversations' && target?.open) setOpenConversationId(String(target.open))
     // A dashboard count deep-links pre-filtered: the tile's status lands on the queue's
@@ -228,67 +223,11 @@ export default function WhatsAppPage({ intent }: { intent?: unknown } = {}) {
     setTab('messages')
   }
 
-  // Today's point on the 14-day activity series is always the LAST entry — the
-  // backend builds it oldest→newest ending on today (WhatsappDashboardController::activity).
-  const todaysActivity = activity.length ? activity[activity.length - 1] : undefined
-  const activityReady = !loading.activity && !errors.activity
-  // Escalations flagged specifically "no reply" (a real subset of the full,
-  // unpaginated /whatsapp/escalations list — see WaEscalation.reason).
-  const escalationsReady = !loading.escalations && !errors.escalations
-  const noReplyCount = escalationsReady ? escalations.filter(e => e.reason === 'no_reply').length : undefined
-  // Today's WABA batches are always today's-only server-side (WhatsappQueueController
-  // filters by started_at = today) — a plain sum, no client-side date filtering needed.
-  const queueReady = !queueLoading && !queueError && !queueNotAvailable
-  const queuedToday = queueReady ? sumBatches(batches, 'queued') : undefined
-  const failedToday = queueReady ? sumBatches(batches, 'failed') : undefined
-  const statsReady = !loading.stats && !!stats
-
-  // Nine honest cards (WA-KPI9-1): the four legacy stats tiles unchanged in meaning,
-  // plus today's inbound/outbound split (from /whatsapp/activity), today's queued/
-  // failed WABA sends (from /whatsapp-queue) and no-reply escalations (from
-  // /whatsapp/escalations). No card here invents a number — see cardValue() above.
-  const kpis: KpiSpec[] = [
-    { key: 'today', label: t('kpi.messagesToday'), value: cardValue(statsReady, stats?.messages_today),
-      color: 'var(--color-secondary)', onClick: () => setDrill('today') },
-    { key: 'contacted', label: t('kpi.candidatesContacted'), value: cardValue(statsReady, stats?.candidates_contacted),
-      color: 'var(--color-violet)', onClick: () => setDrill('contacted') },
-    { key: 'filled', label: t('kpi.shiftsFilled'), value: cardValue(statsReady, stats?.shifts_filled_via_whatsapp),
-      color: 'var(--color-success-text)', onClick: () => setDrill('filled') },
-    { key: 'escal', label: t('kpi.openEscalations'), value: cardValue(statsReady, stats?.open_escalations),
-      color: 'var(--color-danger-text)', onClick: () => setDrill('escal') },
-    { key: 'sentToday', label: t('kpi.sentToday'), value: cardValue(activityReady, todaysActivity?.outbound),
-      color: 'var(--color-secondary)', onClick: () => drillDirection('outbound') },
-    { key: 'receivedToday', label: t('kpi.receivedToday'), value: cardValue(activityReady, todaysActivity?.inbound),
-      color: 'var(--color-success-text)', onClick: () => drillDirection('inbound') },
-    // Plain stats (no matching filter exists yet to drill into — §0 no fake affordances).
-    { key: 'queuedToday', label: t('kpi.queuedToday'), value: cardValue(queueReady, queuedToday), color: 'var(--color-info)' },
-    { key: 'failedToday', label: t('kpi.failedToday'), value: cardValue(queueReady, failedToday), color: 'var(--color-danger-text)' },
-    { key: 'noReplyEscalations', label: t('kpi.noReplyEscalations'), value: cardValue(escalationsReady, noReplyCount), color: 'var(--color-warning)' },
-  ]
-
-  // Overview charts, derived from the data already loaded so the screen has
-  // something to show without a second round trip.
-  const statusData = useMemo(() => {
-    const c: Record<string, number> = {}
-    messages.forEach(m => { const s = (m.status as string) || 'unknown'; c[s] = (c[s] ?? 0) + 1 })
-    return Object.entries(c).map(([s, value]) => ({ name: t(`msgStatus.${s}`, { defaultValue: s }), value }))
-  }, [messages, t])
-  // Escalation reasons, tallied client-side from the already-loaded list, for the overview chart.
-  const reasonsData = useMemo(() => {
-    const c: Record<string, number> = {}
-    escalations.forEach(e => { const r = (e.reason as string) || 'unknown'; c[r] = (c[r] ?? 0) + 1 })
-    return Object.entries(c).map(([r, value]) => ({ name: t(`reasons.${r}`, { defaultValue: r }), value }))
-  }, [escalations, t])
-
-  // K-197: today's messages per channel (sent + received); the server zero-fills all
-  // three channels, an older envelope has no by_channel and hides the card.
-  const channelData = useMemo(() => (stats?.by_channel ?? []).map(c => ({
-    name: tCandidates(`conversations.channel.${c.channel}`, { defaultValue: c.label ?? c.channel }),
-    value: (c.sent ?? 0) + (c.received ?? 0), key: c.channel,
-    color: CHANNEL_COLORS[c.channel] ?? 'var(--color-primary)',
-  })), [stats, tCandidates])
-  const hasChannelSplit = channelData.length > 0
-  const hasChannelSeries = activity.some(d => d.by_channel != null)
+  // Nine-card KPI assembly + overview chart derivations (WA-KPI9-1) live in the shared hook.
+  const { kpis, statusData, reasonsData, channelData, hasChannelSplit, hasChannelSeries } = useWhatsappPageData({
+    t, tCandidates, stats, messages, escalations, activity, loading, errors,
+    batches, queueLoading, queueError, queueNotAvailable, setDrill, drillDirection,
+  })
 
   // WhatsApp Business connection down — shown inside the tabs that read /whatsapp/*
   // only. The Wachtrij tab queries its own /whatsapp-queue endpoint and handles its
@@ -321,9 +260,9 @@ export default function WhatsAppPage({ intent }: { intent?: unknown } = {}) {
       <ReportKpiBand kpis={kpis} />
 
       {/* Tabs + refresh on one line; badge = queue backlog */}
-      <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', borderBottom: '1px solid var(--border)', marginBottom: 20 }}>
-        <div role="tablist" style={{ display: 'flex', gap: 4 }}>
-        {([
+      <WhatsAppTabBar tab={tab} setTab={setTab} escalationsCount={escalations.length}
+        refreshing={refreshing} onRefresh={handleRefresh} refreshLabel={t('refresh')}
+        tabs={([
           ['overview', t('tabs.overview')], ['messages', t('tabs.messages')],
           // Distinct label from the new WA-Web queue below (measured page brief) —
           // both queues share the tab bar, so their names must not read as one thing.
@@ -334,37 +273,7 @@ export default function WhatsAppPage({ intent }: { intent?: unknown } = {}) {
           // is NOT gated behind the whatsapp_web module.
           ...(waWebEnabled ? [['wa-web-queue', t('waWebQueue.title')]] as const : []),
           ['conversations', t('conversations.title')],
-        ] as const).map(([id, label]) => {
-          const active = id === tab
-          // Only the escalations tab ever carries a badge — always the danger tint.
-          const badge = id === 'escalations' ? escalations.length : 0
-          return (
-            <button key={id} role="tab" aria-selected={active} onClick={() => setTab(id)}
-              // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- role="tab" NAVIGATIE-face (rustende tab = plaatsmarkering, PRIMAIR-VLAK-1): underline-actief, geen actieknop; Button modelleert geen tabblad
-              style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '9px 14px', border: 'none', background: 'transparent',
-                cursor: 'pointer', fontSize: 13, fontWeight: active ? 600 : 500,
-                // Text-colour accent uses the AA-contrast text token, not the raw brand primary.
-                color: active ? 'var(--color-primary-text)' : 'var(--text-muted)',
-                borderBottom: `2px solid ${active ? 'var(--color-primary)' : 'transparent'}`, marginBottom: -1 }}>
-              {label}
-              {badge > 0 && (
-                <span style={{ fontSize: 10, fontWeight: 700, minWidth: 16, height: 16, padding: '0 5px', borderRadius: 99,
-                  display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                  background: 'var(--color-danger)',
-                  /* Text colour on the danger badge fill uses the on-* contrast token, never raw white */
-                  color: 'var(--color-on-danger)' }}>
-                  {badge}
-                </span>
-              )}
-            </button>
-          )
-        })}
-        </div>
-        <Button variant="primary" size="sm" onClick={handleRefresh} disabled={refreshing}
-          style={{ marginBottom: 6 }}>
-          <RefreshCw size={12} className={refreshing ? 'animate-spin' : undefined} /> {t('refresh')}
-        </Button>
-      </div>
+        ] as const)} />
 
       {/* Overview — activity + distributions (KPIs sit above; moves to Reporting later) */}
       {tab === 'overview' && (wabaDown ? NoConn : (

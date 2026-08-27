@@ -4,48 +4,39 @@
  * full docblock further below for the field-by-field contract; this top header
  * only exists so the file opens with one (house rule).
  */
-import { useState, useEffect, useMemo, useId, useRef } from 'react'
+import { useState, useId } from 'react'
 import type { ComponentType, ReactNode, CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
-import api, { unwrap } from '@/lib/api'
-import { extractApiError } from '@/lib/extractApiError'
 import { useUsers } from '@/lib/queries'
 import { useAuth } from '@/context/AuthContext'
-import { useLookups } from '@/context/LookupsContext'
-// Funnel stages WITH their real row id — LookupsContext's `funnelTypes` drops it, and
-// `application_stage_id` needs the id. Same hook the candidate drawer's "+ Solliciteren"
-// modal uses (single source); it lives under pages/candidates today, which is a §2
-// cross-page import — moving it to src/hooks/ is a separate, repo-wide change.
-import { useApplicationStages } from '@/hooks/useApplicationStages'
 // AXIS-1: this page-level modal used to skip the action-rule preflight the
 // candidate-drawer variant runs (AddApplicationModal.tsx under pages/candidates/
 // drawer/) — reuse the SAME shared hook/banner, never a second implementation.
-import { useActionRulePreflight, ActionRuleBanner } from '@/components/actionrules'
+import { ActionRuleBanner } from '@/components/actionrules'
 import { useCustomFields } from '@/lib/useCustomFields'
 import { useApplicationSources } from '@/lib/useApplicationSources'
 import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
-import { mapApplication } from './data/mapApplication'
 import CreatableSelectJs from '@/components/ui/CreatableSelect'
-import RichTextEditor from '@/components/ui/RichTextEditor'
 import FloatingPanel from '@/components/ui/FloatingPanel'
 import type { Application } from '@/types/application'
 import type { Id } from '@/types/common'
-import { isUuid } from '@/lib/uuid'
 // §0.3 split: server-searched picker field/hook + the tenant custom-field
 // control now live in their own folder (mirrors the candidate addmodal/ folder).
 import SearchPickField from './addmodal/SearchPickField'
 import { useSearchOptions } from './addmodal/useSearchOptions'
-import CustomFieldInput from './addmodal/CustomFieldInput'
 import type { PickOption, RawPickRow } from './addmodal/types'
+import CustomFieldsSection from './addmodal/CustomFieldsSection'
+// R6: owner-derivation/preflight/stage-seeding effects and the POST submit now
+// live in their own hooks (extracted verbatim, behaviour unchanged).
+import { useApplicationOwnerAndStage } from './hooks/useApplicationOwnerAndStage'
+import { useCreateApplication } from './hooks/useCreateApplication'
 // NEWCAND-1 (register pt.4): reuse the real candidate create flow (incl. its own
 // CV-parse entry points) — never a second, thinner "create candidate" form here.
 import { AddCandidateModal } from '@/pages/candidates/shared'
 import { UserPlus } from 'lucide-react'
 import type { Candidate } from '@/types/candidate'
 import Button from '@/components/ui/Button'
-// HUISSTIJL-1: the "Extra" custom-fields section title is an exact match for
-// the shared uppercase GroupLabel atom (11/600/uppercase/muted).
-import { GroupLabel, BodyText } from '@/components/ui/typography'
+import { BodyText } from '@/components/ui/typography'
 import { tintBorder } from '@/lib/tint'
 
 type AnyProps = Record<string, unknown>
@@ -79,14 +70,6 @@ const mapVacancyRow = (v: RawPickRow): PickOption => ({
   value: v.id ?? '', label: v.title ?? v.titel ?? '', client: v.client_name ?? v.client,
   ownerId: v.owner?.id, ownerName: v.owner?.name,
 })
-
-// 422 field-error keys are snake_case; map them back to this form's field names
-// (C-18 — there is no free-text field to highlight here, only pickers, so this
-// only sharpens which picker the message is about; the inline message stays).
-const API_TO_FORM: Record<string, string> = {
-  candidate_id: 'candidateId', vacancy_id: 'vacancyId', owner_id: 'ownerId',
-  application_stage_id: 'phase',
-}
 
 // A submittable stage id is the uuid the backend validates against
 // (StoreApplicationRequest: uuid|exists:application_stages,id). useApplicationStages
@@ -172,18 +155,8 @@ export default function AddApplicationModal({ onClose, onCreated, lockedVacancy 
   lockedVacancy?: { id: Id; title: string; client?: string }
 }) {
   const { t } = useTranslation('applications')
-  // Funnel lookup — drives the flag-based bucket resolution in mapApplication (A1).
-  const { funnelTypes } = useLookups()
   const { data: users = [] } = useUsers() as { data?: AppUser[] }
   const { user: me } = useAuth() as unknown as { user: { id?: Id; name?: string } | null }
-  // Owner dropdown = the assignable (tenant-scoped) users list only — POST
-  // /applications 422s with "owner does not belong to this tenant" for anyone
-  // NOT in it (measured: e.g. a super-admin login isn't always a tenant user
-  // row), so — unlike the cosmetic-only AddCandidateModal merge (0115255) — an
-  // owner outside this list is never offered as a pickable/submittable option.
-  // Memoised like the sibling stageOptions below — rebuilt only when the users list itself changes.
-  const ownerOptions = useMemo(() => users.map(u => ({ value: String(u.id), label: u.name ?? '—' })), [users])
-  const meIsAssignable = me?.id != null && ownerOptions.some(o => o.value === String(me.id))
 
   // APP-REQUIRED-FE-1: tenant-configurable required fields for this popup (Settings
   // → Sollicitaties → Verplichte velden) — a flat array, no phase axis, mirroring
@@ -202,7 +175,6 @@ export default function AddApplicationModal({ onClose, onCreated, lockedVacancy 
   const vacancySearch   = useSearchOptions('/vacancies', mapVacancyRow, !!lockedVacancy)
   const [candidateId, setCandidateId] = useState('')
   const [vacancyId, setVacancyId]     = useState(lockedVacancy ? String(lockedVacancy.id) : '')
-  const [saving, setSaving]           = useState(false)
   // The picked candidate/vacancy's own FULL option row (label + owner) — kept apart
   // from the live search results, which a later query legitimately replaces (see the
   // file doc comment above).
@@ -226,84 +198,12 @@ export default function AddApplicationModal({ onClose, onCreated, lockedVacancy 
     }))
   }
 
-  // AXIS-1: same application.create preflight the candidate-drawer variant runs —
-  // POST /applications enforces this against the candidate server-side, so surface
-  // the same warn/block decision here BEFORE submit, once a candidate is picked.
-  const { decision: appRuleDecision } = useActionRulePreflight('application.create', { candidateId })
-  const appRuleBlocked = appRuleDecision?.effect === 'block'
-
-  // APP-OWNER-1: the LOCKED vacancy path only receives {id, title, client} from
-  // its caller — its own recruiter is fetched once, alive-guarded, since the
-  // non-locked search above (which DOES carry owner) never runs for it.
-  const [lockedVacancyOwnerId, setLockedVacancyOwnerId] = useState<Id | undefined>(undefined)
-  // Locked-vacancy callers only pass {id, title, client}, never the owner — fetch it
-  // once here (alive-guarded against an unmount mid-request).
-  useEffect(() => {
-    if (!lockedVacancy?.id) return
-    let alive = true
-    api.get(`/vacancies/${lockedVacancy.id}`)
-      .then(r => { if (alive) setLockedVacancyOwnerId(unwrap<{ owner?: { id?: Id } | null }>(r)?.owner?.id) })
-      // Deliberately silent: this only seeds an owner PROPOSAL, and the derivation
-      // chain below still falls back to the candidate owner then the logged-in user,
-      // so a failed fetch leaves the (still editable, still visible) owner picker empty
-      // rather than breaking the form.
-      .catch(() => {})
-    return () => { alive = false }
-  }, [lockedVacancy?.id])
-
-  const vacancyOwnerId = lockedVacancy ? lockedVacancyOwnerId : pickedVacancy?.ownerId
-
-  // APP-OWNER-1: derivation chain, highest priority first — the picked vacancy's
-  // own recruiter (owner) > the picked candidate's own owner > the logged-in user
-  // (this file's own earlier "default to me" behaviour). Every rung only proposes
-  // a real, ASSIGNABLE tenant user (never a super-admin the server would 422 on).
-  const candidateOwnerId = pickedCandidate?.ownerId
-  const vacancyOwnerAssignable = vacancyOwnerId != null && ownerOptions.some(o => o.value === String(vacancyOwnerId))
-  const candidateOwnerAssignable = candidateOwnerId != null && ownerOptions.some(o => o.value === String(candidateOwnerId))
-  const derivedOwnerId = vacancyOwnerAssignable ? String(vacancyOwnerId)
-    : candidateOwnerAssignable ? String(candidateOwnerId)
-    : meIsAssignable ? String(me?.id)
-    : ''
-
-  // Seeded from the chain above, never re-seeded once the recruiter makes a MANUAL
-  // pick (tracked by a ref — the vacancy/candidate pick can arrive AFTER a
-  // lower-priority auto-seed already landed and still must be able to promote
-  // itself over it; mirrors the candidate-drawer variant's identical guard).
-  const [ownerId, setOwnerIdState] = useState('')
-  const ownerManualRef = useRef(false)
-  // Auto-seed the owner from the derived chain above, but never once the recruiter
-  // has made a manual pick (ownerManualRef) — a later-arriving auto-seed must not override it.
-  useEffect(() => {
-    if (ownerManualRef.current) return
-    if (derivedOwnerId && derivedOwnerId !== ownerId) setOwnerIdState(derivedOwnerId)
-  }, [derivedOwnerId]) // eslint-disable-line react-hooks/exhaustive-deps
-  // The picker's own onChange — any explicit pick permanently stops the auto-seed above.
-  const setOwnerId = (v: string) => { ownerManualRef.current = true; setOwnerIdState(v) }
-
-  // Start stage ("fase") — V17: "+ Sollicitant" used to POST candidate/vacancy/owner only,
-  // so a recruiter adding an applicant from a vacancy could not say where they enter.
-  const { stages } = useApplicationStages()
-  // Only stages the backend would accept: while the lookup is still its seed the ids are
-  // slugs, and offering an option that is a guaranteed 422 is a fake affordance. Empty =>
-  // no picker at all and the field is omitted, so the server applies the tenant's
-  // is_default stage itself (ApplicationController::store) — never a stage we invented.
-  const stageOptions = useMemo(() => stages.filter(s => isUuid(s.id)), [stages])
-  const defaultStageId = stageOptions.find(s => s.is_default)?.id ?? ''
-  const [phaseId, setPhaseId] = useState('')
-  // CLEAR-SWEEP (Danny 13-08): a manual pick — INCLUDING an explicit clear back to
-  // '' via the VAC-CLEAR-1 cross — must stick. Without this guard the effect below
-  // treated a cleared '' exactly like "not yet seeded" and instantly reproposed the
-  // default, so the clear cross never actually reached the persisted state.
-  const phaseManualRef = useRef(false)
-  const setPhaseIdManual = (v: string) => { phaseManualRef.current = true; setPhaseId(v) }
-  // Propose the tenant's flagged default as soon as the real lookup lands (the seed is
-  // gone by then); re-sync whenever the held value is not a real, submittable option —
-  // but never once the recruiter has manually picked or cleared it.
-  useEffect(() => {
-    if (phaseManualRef.current) return
-    if (phaseId && stageOptions.some(s => s.id === phaseId)) return
-    setPhaseId(defaultStageId)
-  }, [defaultStageId, stageOptions, phaseId])
+  // R6: owner-derivation chain, locked-vacancy owner fetch, the application.create
+  // AXIS preflight and the start-stage seeding — all extracted into one hook.
+  const { ownerOptions, ownerId, setOwnerId, appRuleDecision, appRuleBlocked,
+    stageOptions, phaseId, setPhaseIdManual } = useApplicationOwnerAndStage({
+    candidateId, lockedVacancy, pickedCandidate, pickedVacancy, users, me,
+  })
 
   // Acquisition source (CMBE 5961c673) — S-SOURCE-1, graduated 2026-08-14: a
   // searchable/creatable picker backed by the real /candidate-sources tenant
@@ -322,56 +222,13 @@ export default function AddApplicationModal({ onClose, onCreated, lockedVacancy 
   const simpleCustomFields = customFieldDefs.filter(f => f.type !== 'textarea')
   const textCustomFields   = customFieldDefs.filter(f => f.type === 'textarea')
 
-  // Create the application. AUDIT-1 (CRITICAL, 15-07): the old catch fabricated a
-  // fake local row (id: -Date.now()) and closed the modal as if it succeeded —
-  // masking real failures INCLUDING the matrix-guard 422s. A failure now keeps the
-  // modal open and shows the server's message inline.
-  const [createError, setCreateError] = useState<string | null>(null)
-  const [errors,      setErrors]      = useState<Record<string, boolean>>({})
-  const create = async () => {
-    // VACATURE-OPTIONEEL (register pt.2): vacancy_id is `sometimes|nullable` on
-    // StoreApplicationRequest — an "open application" with no vacancy yet is a
-    // real, backend-supported case. Only the candidate is required to submit.
-    if (!candidateId || saving || appRuleBlocked) return
-    // APP-REQUIRED-FE-1: client-side required-field preflight (UX only, §7 — the
-    // backend's own FlatRequiredFieldsGuard('application') on
-    // ApplicationController::store is the real enforcement).
-    const missing: Record<string, boolean> = {}
-    if (vacancyRequired && !vacancyId) missing.vacancyId = true
-    if (ownerRequired && !ownerId) missing.ownerId = true
-    if (phaseRequired && !phaseId) missing.phase = true
-    if (sourceRequired && !source.trim()) missing.source = true
-    if (Object.keys(missing).length > 0) { setErrors(missing); return }
-    setSaving(true)
-    setCreateError(null)
-    setErrors({})
-    try {
-      // application_stage_id is omitted (not null-ed) when unset so the backend's own
-      // `?? ApplicationStage::defaultStageId()` fallback decides the start stage
-      // source is omitted the same way — an empty field means "let the server default
-      // to 'manual'", never an explicit empty-string value. custom_fields only rides
-      // along once the recruiter actually filled something in (an empty {} is
-      // indistinguishable from "not asked" server-side, so it's omitted too).
-      const res = await api.post('/applications', {
-        candidate_id: candidateId, vacancy_id: vacancyId || null, owner_id: ownerId || null,
-        ...(phaseId ? { application_stage_id: phaseId } : {}),
-        ...(source.trim() ? { source: source.trim() } : {}),
-        ...(Object.keys(customFieldValues).length ? { custom_fields: customFieldValues } : {}),
-      })
-      onCreated(mapApplication(unwrap(res), funnelTypes))
-    } catch (err) {
-      // Show field-level errors from 422 validation responses (highlights the
-      // specific picker); fall back to the server's message otherwise.
-      const e = err as { response?: { data?: { errors?: Record<string, unknown>; message?: string } } }
-      const apiErrors = e?.response?.data?.errors
-      if (apiErrors) {
-        const e2: Record<string, boolean> = {}
-        Object.keys(apiErrors).forEach(k => { e2[API_TO_FORM[k] ?? k] = true })
-        setErrors(e2)
-      }
-      setCreateError(extractApiError(err, t('common:errorGeneric')))
-    } finally { setSaving(false) }
-  }
+  // R6: the POST submit, its client-side required-field preflight and its 422
+  // field-error mapping are extracted into their own hook (behaviour unchanged).
+  const { create, saving, createError, errors } = useCreateApplication({
+    candidateId, vacancyId, ownerId, phaseId, source, customFieldValues,
+    vacancyRequired, ownerRequired, phaseRequired, sourceRequired,
+    appRuleBlocked, onCreated,
+  })
 
   // Declared once — it renders either on its own row or paired with the phase picker.
   // CLEAR-SWEEP (Danny 13-08): owner is optional (submitted as `owner_id: ownerId ||
@@ -502,31 +359,9 @@ export default function AddApplicationModal({ onClose, onCreated, lockedVacancy 
           {/* W30 / §3A(f): the "Extra" section — tenant custom fields for applications,
               rendered only once ≥1 active def exists. */}
           {customFieldDefs.length > 0 && (
-            <div style={errors.custom_fields ? { border: '1px solid var(--color-danger)', borderRadius: 8, padding: 10 } : undefined}>
-              <GroupLabel style={{ letterSpacing: '0.04em', marginBottom: 8 }}>
-                {t('common:customFieldsCard.title')}
-              </GroupLabel>
-              {simpleCustomFields.length > 0 && (
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px 16px' }}>
-                  {simpleCustomFields.map(def => {
-                    // §6: a real <label htmlFor> — never a bare div floating near the input.
-                    const inputId = `app-cf-${def.key}`
-                    return (
-                      <div key={def.key}>
-                        <label htmlFor={inputId} style={{ display: 'block', fontSize: 12, color: 'var(--text-muted)', marginBottom: 5 }}>{def.label}</label>
-                        <CustomFieldInput id={inputId} def={def} value={customFieldValues[def.key]} onChange={v => setCustomField(def.key, v)} />
-                      </div>
-                    )
-                  })}
-                </div>
-              )}
-              {textCustomFields.map(def => (
-                <div key={def.key} style={{ marginTop: 10 }}>
-                  <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 5 }}>{def.label}</div>
-                  <RichTextEditor value={String(customFieldValues[def.key] ?? '')} onChange={v => setCustomField(def.key, v)} minHeight={80} />
-                </div>
-              ))}
-            </div>
+            <CustomFieldsSection simpleCustomFields={simpleCustomFields} textCustomFields={textCustomFields}
+              customFieldValues={customFieldValues} setCustomField={setCustomField}
+              hasError={Boolean(errors.custom_fields)} />
           )}
         </div>
 

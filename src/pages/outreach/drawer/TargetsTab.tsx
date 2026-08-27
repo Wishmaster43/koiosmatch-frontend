@@ -33,8 +33,6 @@ import CreatableSelect from '@/components/ui/CreatableSelect'
 import FilterTriggerPill from '@/components/ui/FilterTriggerPill'
 import { AddTaskModal } from '@/pages/tasks/shared'
 import { TaskLookupsProvider } from '@/context/TaskLookupsContext'
-import api from '@/lib/api'
-import { notifyError, notifySuccess } from '@/lib/notify'
 import { initialsOf } from '@/lib/initials'
 import { useDateFormat } from '@/lib/datetime'
 import EntityLink from '@/components/ui/EntityLink'
@@ -44,6 +42,7 @@ import { useOutreachStatuses } from '@/lib/useOutreachStatuses'
 import { useVacancyOptions } from '@/pages/candidates/shared'
 import AssignTargetsBar from './AssignTargetsBar'
 import TargetNoteField from './TargetNoteField'
+import { useOutreachTargets } from '../hooks/useOutreachTargets'
 import type { OutreachTarget, AssignResult } from '../hooks/useOutreachDetail'
 import type { TargetSelection, AssigneeAxes } from '../data/outreachApi'
 import type { TargetFilter } from './targetFilter'
@@ -84,13 +83,14 @@ export default function TargetsTab({ targets, loading, error, onSetStatus, onSet
   // Entry statuses from the tenant lookup (R-1b) — the is_reached FLAG drives
   // behaviour, so tenant-added statuses appear here without any code change.
   const { statuses, metaOf, initial } = useOutreachStatuses()
-  // Per-row follow-up state: which target has the task modal / match prompt open.
+  // Per-row follow-up state: which target has the task modal open.
   const [taskFor,  setTaskFor]  = useState<OutreachTarget | null>(null)
-  const [matchFor, setMatchFor] = useState<OutreachTarget | null>(null)
-  const [matchVacancyId, setMatchVacancyId] = useState('')
-  const [matchSaving, setMatchSaving] = useState(false)
-  // G29 — row selection feeding AssignTargetsBar; cleared once an assign settles.
-  const [selected, setSelected] = useState<Set<string>>(new Set())
+  // Row-selection/expand state + the direct-match mutation live in the shared hook.
+  const {
+    selected, setSelected, toggleRow,
+    expanded, toggleExpanded,
+    matchFor, setMatchFor, matchVacancyId, setMatchVacancyId, matchSaving, confirmMatch,
+  } = useOutreachTargets()
   // BELLIJST-ASSIGN-2: "assign everyone matching the current filter" — a second
   // entry point into AssignTargetsBar that sends `filters` instead of `ids`, so a
   // filtered set larger than the loaded page (a filter is server-unaware today,
@@ -99,14 +99,6 @@ export default function TargetsTab({ targets, loading, error, onSetStatus, onSet
   const [assignAllFiltered, setAssignAllFiltered] = useState(false)
   // Vacancy options only load while the match prompt is open.
   const vacancyOptions = useVacancyOptions(!!matchFor)
-  // BELLIJST-SCALE-1 — rows expanded to show outcome/note; collapsed by default
-  // so a 400-row list stays a scannable list, not 400 open cards.
-  const [expanded, setExpanded] = useState<Set<string>>(new Set())
-  const toggleExpanded = (id: string) => setExpanded(s => {
-    const next = new Set(s)
-    if (next.has(id)) next.delete(id); else next.add(id)
-    return next
-  })
   // BELLIJST-SCALE-1 — client-side search + filter bar on the already-loaded set
   // (no backend pagination yet); combined with the Stats-tab `filter` above.
   const [search, setSearch] = useState('')
@@ -123,19 +115,6 @@ export default function TargetsTab({ targets, loading, error, onSetStatus, onSet
 
   const candidateName = (tg: OutreachTarget) =>
     tg.candidate?.name ?? [tg.candidate?.first_name, tg.candidate?.last_name].filter(Boolean).join(' ') ?? '—'
-
-  // Create the match via the canonical direct-match endpoint (G-2, mirrors useCreateMatch).
-  const confirmMatch = async () => {
-    if (!matchFor?.candidate?.id || !matchVacancyId) return
-    setMatchSaving(true)
-    try {
-      await api.post('/matches', { candidate_id: matchFor.candidate.id, vacancy_id: matchVacancyId })
-      notifySuccess(t('drawer.matchCreated'))
-      setMatchFor(null); setMatchVacancyId('')
-    } catch {
-      notifyError(t('drawer.matchFailed'))
-    } finally { setMatchSaving(false) }
-  }
 
   // G31 — one target matches the active filter axis/value; no filter = everything.
   const matchesFilter = (tg: OutreachTarget): boolean => {
@@ -173,13 +152,9 @@ export default function TargetsTab({ targets, loading, error, onSetStatus, onSet
   const hasAnyFilter = hasLocalFilters || !!filter
 
   // G29 — selection toggles, scoped to the currently visible (filtered) rows.
+  // toggleRow itself lives in useOutreachTargets; only the "select all visible" derivation stays local.
   const visibleIds = visibleTargets.map(tg => tg.id)
   const allSelected = visibleIds.length > 0 && visibleIds.every(id => selected.has(id))
-  const toggleRow = (id: string) => setSelected(s => {
-    const next = new Set(s)
-    if (next.has(id)) next.delete(id); else next.add(id)
-    return next
-  })
   const toggleAll = () => setSelected(allSelected ? new Set() : new Set(visibleIds))
 
   // Four UI states — never a blank panel.

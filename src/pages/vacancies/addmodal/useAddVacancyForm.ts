@@ -10,46 +10,24 @@
  * override, an AI-agent link (module+permission gated), publication state, and
  * the post-create documents/note orchestration (via the caller-owned
  * usePostCreateAttachments controller, kept a SEPARATE hook on purpose).
+ *
+ * The tenant lookups + derived option lists (§3 size split) live in
+ * `useAddVacancyLookups`; the submit/payload builder (§3 size split) lives in
+ * `useAddVacancySubmit`. Both are composed below so this hook's own return
+ * shape stays identical.
  */
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { extractApiError } from '@/lib/extractApiError'
-import api, { unwrap } from '@/lib/api'
-import { useVacancyLookups } from '@/context/VacancyLookupsContext'
-import { useLookups } from '@/context/LookupsContext'
-import { useIndustries } from '@/lib/useIndustries'
-import { useFunctions } from '@/lib/useFunctions'
-import { useLocations } from '@/lib/useLocations'
 import { useProvinces } from '@/hooks/useProvinces'
-import { useAuth } from '@/context/AuthContext'
-import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
-import { VACANCY_APP_DEFAULTS_KEY, FALLBACK_APP_SETTINGS } from '../data/applicationSettingsDefaults'
 import { useCascadePickers } from '../hooks/useCascadePickers'
 import { useVacancyBranchDefault } from './useVacancyBranchDefault'
+import { FALLBACK_APP_SETTINGS } from '../data/applicationSettingsDefaults'
 import { useVacancyAgentDefault } from './useVacancyAgentDefault'
-import { useAiAgents } from '../hooks/useAiAgents'
-import { composeAddress } from '../hooks/useVacancyDetailsForm'
-import { mapVacancy } from '../data/mapVacancy'
+import { useAddVacancyLookups } from './useAddVacancyLookups'
+import { useAddVacancySubmit } from './useAddVacancySubmit'
 import type { PublicationChannel } from './PublicationCard'
-import type { ApiVacancy, Vacancy } from '@/types/vacancy'
+import type { Vacancy } from '@/types/vacancy'
 import type { Id } from '@/types/common'
-
-// 422 field-error keys (snake_case, the MEASURED StoreVacancyRequest/VacancyWriter
-// vocabulary) mapped back onto this form's own field names.
-const API_TO_FORM: Record<string, string> = {
-  title: 'title', status: 'status', owner_id: 'ownerId', customer_id: 'clientId',
-  industry: 'industry', category: 'category', location: 'location',
-  customer_location_id: 'customerLocationId', customer_department_id: 'customerDepartmentId', contact_id: 'contactId',
-  contract_types: 'contractTypes', start_date: 'startDate', end_date: 'endDate',
-  street: 'street', house_number: 'houseNumber', house_number_suffix: 'houseNumberSuffix',
-  postcode: 'postalCode', city: 'city', province: 'province', country: 'country',
-  location_id: 'branchId', seniority: 'seniority', education: 'education', skills: 'skills',
-  salary_min: 'salaryMin', salary_max: 'salaryMax', salary_period: 'salaryPeriod',
-  hours_min: 'hoursMin', hours_max: 'hoursMax', description: 'description',
-  match_weight_template_id: 'matchWeightTemplateId', match_weights: 'matchWeights',
-  ai_agent_id: 'aiAgentId', published: 'published', published_channels: 'publishedChannels',
-  application_settings: 'applicationSettings',
-}
 
 export interface VacancyCreateForm {
   title: string; status: string; ownerId: string; clientId: string; industry: string; category: string
@@ -99,37 +77,12 @@ export function useAddVacancyForm({
   initialIndustry, attachments = NOOP_ATTACHMENTS,
 }: Args) {
   const { t } = useTranslation(['vacancies', 'common'])
-  const { statuses, seniorityLevels, educationLevels, defaultSeniority, defaultEducation, channels: channelLookup } = useVacancyLookups()
-  // Contract types are a CANDIDATE-axis lookup (Contractvorm), shared with the
-  // drawer's DetailsGeneralTab — same source, never a second copy.
-  const { candidateTypes } = useLookups() as unknown as { candidateTypes: Array<{ value: string; label: string; color?: string }> }
-  const { industries } = useIndustries()
-  const { functions } = useFunctions()
-  // Memoised: derived from the shared locations lookup, only recomputed when it changes.
-  const locationsRaw = useLocations()
-  const branchOptions = useMemo(() => locationsRaw.map(l => ({ value: String(l.value), label: l.label })), [locationsRaw])
-  const authCtx = useAuth() as unknown as {
-    user: { id?: Id; name?: string } | null
-    hasModule?: (key: string) => boolean
-    hasPermission?: (perm: string) => boolean
-  }
-  const { user: me, hasModule, hasPermission } = authCtx
-  const meIsAssignable = me?.id != null && users.some(u => String(u.id) === String(me.id))
-
-  // Punt 19: the AI-agent card only exists for a tenant with the module AND a
-  // caller with settings.view (GET /ai/agents is gated on both, measured) —
-  // rendered as NOTHING when either is missing, never a disabled tease (§3).
-  const showAiAgentCard = (hasModule?.('aiagents') ?? false) && (hasPermission?.('settings.view') ?? false)
-  // Punten 21+22: both POST .../documents and POST .../notes need vacancies.update
-  // next to vacancies.create (measured) — the attachment cards gate on that.
-  const showAttachmentCards = hasPermission?.('vacancies.update') ?? false
-
-  const [errors, setErrors] = useState<Record<string, boolean>>({})
-  const [saving, setSaving] = useState(false)
-  const [createError, setCreateError] = useState<string | null>(null)
-  // Punten 21+22: once Create succeeds AND there is a pending file/note, the
-  // modal switches to the results panel instead of closing immediately.
-  const [postCreatePhase, setPostCreatePhase] = useState(false)
+  // Tenant lookups + derived option lists (§3 size split) — see the file header.
+  const {
+    me, meIsAssignable, statuses, seniorityLevels, educationLevels, defaultSeniority, defaultEducation, channelLookup,
+    candidateTypes, industries, functions, branchOptions, showAiAgentCard, showAttachmentCards, aiAgents,
+    tenantAppDefaults, userOptions, statusOptions, customerOptions,
+  } = useAddVacancyLookups({ users, customers })
 
   // Status pill default (punt 7) — never a hardcoded slug, only the tenant's
   // flagged default or the lookup's first entry; a genuinely empty lookup
@@ -146,6 +99,12 @@ export function useAddVacancyForm({
     description: '',
   })
 
+  // Error state owned by the FORM hook (before `set` and every effect that calls
+  // it), then injected into useAddVacancySubmit so its 422 mapping lands here.
+  const [errors, setErrors] = useState<Record<string, boolean>>({})
+  const [createError, setCreateError] = useState<string | null>(null)
+
+  // Field setter — clears the field's error and any stale create error on change.
   const set = <K extends keyof VacancyCreateForm>(k: K, v: VacancyCreateForm[K]) => {
     setForm(f => ({ ...f, [k]: v }))
     if (errors[k as string]) setErrors(e => ({ ...e, [k as string]: false }))
@@ -259,24 +218,11 @@ export function useAddVacancyForm({
   const [aiAgentId, setAiAgentId] = useState('')
   // Punt 20: seed the vacancy owner's own linked AI agent (agent.user.id ===
   // ownerId), empty when the owner has none — a Koios-marked derivation, never
-  // a silent guess (§0). Only fetched while the card can actually show.
-  const { agents: aiAgents } = useAiAgents(showAiAgentCard)
+  // a silent guess (§0).
   const { handleAiAgentChange, showAgentSuggestion } = useVacancyAgentDefault(form.ownerId, aiAgents, setAiAgentId)
 
   // Punt 20: Publicatie — published flag, per-channel publish state and the
   // application-form settings (cv/cover_letter/photo/remarks/interview_consent).
-  const allSettings = useAllSettings()
-  // Memoized on the RAW stored value (a stable string/undefined), not recomputed every
-  // render: getJsonSetting JSON.parses a configured setting into a NEW object each call,
-  // which would otherwise hand the effect below an unstable dependency and loop forever
-  // (measured — an unstable mock reference reproduced this exact hang in tests).
-  const rawAppDefaults = (allSettings as Record<string, unknown>)[VACANCY_APP_DEFAULTS_KEY]
-  // Parse the tenant's application-form defaults, re-parsing only when the raw
-  // stored value itself changes (see the comment above for why that matters).
-  const tenantAppDefaults = useMemo(
-    () => getJsonSetting<Record<string, unknown>>(allSettings, VACANCY_APP_DEFAULTS_KEY, FALLBACK_APP_SETTINGS),
-    [rawAppDefaults], // eslint-disable-line react-hooks/exhaustive-deps -- allSettings is a stable cache object; only this one key's raw value should force a re-parse
-  )
   const [published, setPublished] = useState(false)
   const [channels, setChannels] = useState<PublicationChannel[]>([])
   useEffect(() => {
@@ -303,107 +249,14 @@ export function useAddVacancyForm({
     setApplicationSettingsState(s => ({ ...s, [field]: value }))
   }
 
-  // Validate, build the conditional POST body (every optional field rides only
-  // when filled), create the vacancy, then hand off to any pending post-create
-  // documents/notes before closing — or map 422 field errors back onto the form.
-  const handleSubmit = async () => {
-    if (!form.title.trim()) { setErrors({ title: true }); return }
-    setSaving(true)
-    setCreateError(null)
-    // The single free-text `location` column is DERIVED from the structured
-    // address (mirrors the drawer's saveLocation) — never a second, manually
-    // typed source of truth for the same displayed place.
-    const composedLocation = composeAddress(form.street, form.houseNumber, form.houseNumberSuffix, form.postalCode, form.city)
-    const publishedOnChannels = channels.filter(c => c.published)
-    try {
-      const body = {
-        title: form.title.trim(),
-        status: form.status || null,
-        owner_id: form.ownerId || null,
-        customer_id: form.clientId || null,
-        industry: form.industry || null,
-        category: form.category || null,
-        location: composedLocation || null,
-        // Every field below rides the body CONDITIONALLY (absent when empty) —
-        // the base create (title only) stays byte-identical to the pre-SLICE-1 body.
-        ...(cascade.customerLocationId ? { customer_location_id: cascade.customerLocationId } : {}),
-        ...(cascade.customerDepartmentId ? { customer_department_id: cascade.customerDepartmentId } : {}),
-        ...(cascade.contactId ? { contact_id: cascade.contactId } : {}),
-        ...(form.contractTypes.length ? { contract_types: form.contractTypes } : {}),
-        ...(form.startDate ? { start_date: form.startDate } : {}),
-        ...(form.endDate ? { end_date: form.endDate } : {}),
-        ...(form.street ? { street: form.street } : {}),
-        ...(form.houseNumber ? { house_number: form.houseNumber } : {}),
-        ...(form.houseNumberSuffix ? { house_number_suffix: form.houseNumberSuffix } : {}),
-        ...(form.postalCode ? { postcode: form.postalCode } : {}),
-        ...(form.city ? { city: form.city } : {}),
-        ...(form.province ? { province: form.province } : {}),
-        ...(form.country ? { country: form.country } : {}),
-        ...(form.branchId ? { location_id: form.branchId } : {}),
-        ...(form.seniority ? { seniority: form.seniority } : {}),
-        ...(form.education ? { education: form.education } : {}),
-        ...(skills.length ? { skills } : {}),
-        ...(form.salaryMin ? { salary_min: form.salaryMin } : {}),
-        ...(form.salaryMax ? { salary_max: form.salaryMax } : {}),
-        ...(form.salaryPeriod ? { salary_period: form.salaryPeriod } : {}),
-        ...(form.hoursMin ? { hours_min: form.hoursMin } : {}),
-        ...(form.hoursMax ? { hours_max: form.hoursMax } : {}),
-        ...(form.description ? { description: form.description } : {}),
-        // Punt 18: explicit template/weights — explicit match_weights always
-        // wins server-side even when a template id also rides along.
-        ...(matchWeightTemplateId ? { match_weight_template_id: matchWeightTemplateId } : {}),
-        ...(matchWeights ? { match_weights: matchWeights } : {}),
-        // Punt 19: AI-agent link.
-        ...(aiAgentId ? { ai_agent_id: aiAgentId } : {}),
-        // Punt 20: publication — only sent when touched away from "nothing yet".
-        ...(published ? { published: true } : {}),
-        ...(publishedOnChannels.length
-          ? { published_channels: publishedOnChannels.map(c => ({ value: c.value, published: true })) }
-          : {}),
-        ...(applicationSettingsTouched ? { application_settings: applicationSettings } : {}),
-      }
-      const r = await api.post('/vacancies', body)
-      const created = mapVacancy(unwrap<ApiVacancy>(r))
-      onCreated?.(created)
-      // Punten 21+22: the vacancy exists now — run pending documents/note (in
-      // order) and show their per-item outcome instead of closing immediately.
-      // Nothing pending (the common case) keeps the exact pre-SLICE-2 behaviour.
-      if (showAttachmentCards && attachments.hasPending && created.id != null) {
-        setPostCreatePhase(true)
-        await attachments.runSequence(created.id)
-      } else {
-        onClose()
-      }
-    } catch (err) {
-      const e = err as { response?: { data?: { errors?: Record<string, unknown>; message?: string } } }
-      const apiErrors = e?.response?.data?.errors
-      if (apiErrors) {
-        const e2: Record<string, boolean> = {}
-        Object.keys(apiErrors).forEach(k => { e2[API_TO_FORM[k] ?? k] = true })
-        setErrors(e2)
-      } else {
-        setCreateError(extractApiError(err, t('common:errorGeneric')))
-      }
-    } finally {
-      setSaving(false)
-    }
-  }
+  // The create submit/payload builder (§3 size split) — see the file header.
+  const { saving, postCreatePhase, handleSubmit } = useAddVacancySubmit({
+    setErrors, setCreateError,
+    form, cascade, skills, channels, matchWeightTemplateId, matchWeights, aiAgentId, published,
+    applicationSettings, applicationSettingsTouched, showAttachmentCards, attachments, onClose, onCreated, t,
+  })
 
   const canSubmit = !!form.title.trim()
-  // Owner options: make sure the logged-in default is actually IN the list (a
-  // super admin isn't always in the assignable list — mirrors AddCandidateModal).
-  // Memoised: the caller-owned super admin fallback insert must stay stable, not re-derived every render.
-  const userOptions = useMemo(() => {
-    const opts = users.map(u => ({ value: String(u.id), label: u.name }))
-    if (me?.id && !opts.some(o => o.value === String(me.id))) {
-      opts.unshift({ value: String(me.id), label: me.name ?? '' })
-    }
-    return opts
-  }, [users, me])
-  // Memoised: status option list only changes with the tenant lookup.
-  const statusOptions = useMemo(() => statuses.map(s => ({ value: s.value, label: s.label, color: s.color })), [statuses])
-  // Memoised: customer option list only changes with the caller-supplied customers.
-  const customerOptions = useMemo(() => customers.map(c => ({ value: String(c.id), label: c.name })), [customers])
 
   return {
     t, form, set, onAddressChange, onConditionsChange, errors, saving, createError, canSubmit, handleSubmit,

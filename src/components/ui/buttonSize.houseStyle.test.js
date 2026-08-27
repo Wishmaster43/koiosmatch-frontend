@@ -68,7 +68,7 @@ describe('Button size ratchet (maatwet)', () => {
 const OFF_STANDARD_HEIGHT_ALLOWLIST = {
   'src/components/ai/KoiosAdviceBlock.tsx': 1,
   'src/components/drawer/DrawerAddButton.tsx': 1,
-  'src/components/drawer/tabs/NotesTab.tsx': 1,
+  'src/components/drawer/tabs/notes/notesTimeline.tsx': 1,
   'src/components/forms/EditableFieldTable.tsx': 1,
   'src/components/insights/InsightsRow.tsx': 1,
   'src/components/layout/DashboardLayout.tsx': 3,
