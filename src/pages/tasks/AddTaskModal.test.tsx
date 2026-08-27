@@ -228,7 +228,7 @@ describe('AddTaskModal · edit mode prefill + PATCH (Danny 20-07)', () => {
     // .value (mirrors MatchModal.test.tsx's established pattern).
     // Name is now just the field label (aria-labelledby self-reference drops the
     // button's own visible text) — find by label, assert the picked value via text.
-    expect(screen.getByRole('button', { name: /modal\.type/ })).toHaveTextContent('Belafspraak')
+    expect(screen.getByRole('button', { name: /Belafspraak/, pressed: true })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /modal\.assignee/ })).toHaveTextContent('Danny')
     // TEAM-1: the internal department prefills as its own picker value, next to
     // the person — never folded into the assignee field.
@@ -594,7 +594,7 @@ describe('AddTaskModal · Soort activiteit defaults from the lookup\'s is_defaul
     ]
     const user = userEvent.setup()
     render(<AddTaskModal onClose={noop} onCreated={noop} />)
-    expect(screen.getByRole('button', { name: /modal\.type/ })).toHaveTextContent('E-mail')
+    expect(screen.getByRole('button', { name: /E-mail/, pressed: true })).toBeInTheDocument()
 
     await user.type(screen.getByPlaceholderText('modal.titlePlaceholder'), 'Nieuwe taak')
     await user.click(screen.getByRole('button', { name: 'modal.create' }))

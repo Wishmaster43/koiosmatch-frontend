@@ -10,8 +10,8 @@
  */
 import type { TFunction } from 'i18next'
 import { FieldRow, TextField } from '@/components/forms/fields'
-import CreatableSelect from '@/components/ui/CreatableSelect'
-import { cardHead, cardBox, row2, pickerStyle, PICKER_MENU_W } from './fields'
+import ChipMultiSelect from '@/components/ui/ChipMultiSelect'
+import { cardHead, cardBox, row2 } from './fields'
 import type { TaskForm } from '../AddTaskModal'
 import type { TaskLookupItem } from '@/context/TaskLookupsContext'
 
@@ -28,13 +28,16 @@ export default function TaskCard({ t, form, errors, set, types }: {
       <div style={cardHead}>{t('modal.cardTask')}</div>
       <div style={cardBox}>
         <div style={row2}>
-          {/* Soort activiteit — the TYPE lookup (searchable, allowCreate=false: a
-              tenant-managed value, never a free-text create). */}
+          {/* Soort activiteit — the shared choice-chip row (Danny 27-08, consistency
+              with the other create modals). Required field: picking switches, the
+              active chip never clears on re-click (§3A: verplicht = geen wiskruis). */}
           <FieldRow label={t('modal.type')} required>
-            <CreatableSelect value={form.type || null} onChange={(v: string) => set('type', v)} allowCreate={false}
-              placeholder={t('modal.typePlaceholder')} menuWidth={PICKER_MENU_W}
-              style={errors.type ? { ...pickerStyle, borderColor: 'var(--color-danger)' } : pickerStyle}
-              options={types.map(x => ({ value: x.value, label: x.label, icon: x.icon ? <span>{x.icon}</span> : undefined }))} />
+            <ChipMultiSelect
+              options={types.map(x => ({ value: x.value, label: x.icon ? `${x.icon} ${x.label}` : x.label, color: x.color }))}
+              values={form.type ? [form.type] : []}
+              onToggle={(v: string) => { if (v !== form.type) set('type', v) }}
+              selectAll={false}
+              ariaLabel={t('modal.type')} />
           </FieldRow>
           <FieldRow label={t('modal.titleLabel')} required>
             <TextField value={form.title} onChange={v => set('title', v)} placeholder={t('modal.titlePlaceholder')} error={errors.title} />
