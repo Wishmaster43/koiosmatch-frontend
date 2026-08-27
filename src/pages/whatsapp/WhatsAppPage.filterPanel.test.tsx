@@ -35,9 +35,9 @@ vi.mock('./hooks/useWhatsAppQueue', async (importOriginal) => {
 })
 
 // One tenant message type (id 7) so the type-chip gateway has something to click.
+// eslint-disable-next-line no-restricted-syntax -- test fixture DATA (a seeded tenant message-type colour), not a UI style
+vi.mock('@/hooks/useWaMessageTypes', () => ({ useWaMessageTypes: () => ({ data: [{ id: 7, value: 'reminder', label: 'Herinnering', color: '#4f46e5', is_priority: false }] }) }))
 vi.mock('./hooks/useWaFilterOptions', () => ({
-  // eslint-disable-next-line no-restricted-syntax -- test fixture DATA (a seeded tenant message-type colour), not a UI style
-  useWaMessageTypes: () => ({ data: [{ id: 7, value: 'reminder', label: 'Herinnering', color: '#4f46e5', is_priority: false }] }),
   useWaMessagePurposes: () => ({ data: [{ value: 'manual', label: 'Manual' }] }),
   useWaTemplates: () => ({ data: [{ value: 'welcome_template', label: 'welcome_template' }] }),
   useWaPhoneNumbers: () => ({ data: [{ value: 'pn1', label: '+31 6 1234 5678' }] }),

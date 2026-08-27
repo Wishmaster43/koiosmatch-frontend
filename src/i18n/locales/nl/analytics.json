@@ -169,7 +169,8 @@
     "durationNote": "Matchduur volgt zodra de HelloFlex-koppeling de start/einddata levert.",
     "axes": {
       "contractForm": "Contractvorm",
-      "origin": "Herkomst"
+      "origin": "Herkomst",
+      "stopReason": "Stopreden (beëindigingen)"
     },
     "placements": {
       "title": "Matchstatus",
@@ -268,7 +269,8 @@
       "escalatedValues": {
         "escalated": "Open escalatie",
         "normal": "Normaal"
-      }
+      },
+      "typeNone": "Onbekend"
     },
     "kpi": {
       "conversationsTotal": "Totaal gesprekken",

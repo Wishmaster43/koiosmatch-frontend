@@ -60,6 +60,7 @@ const stableLookup = vi.hoisted(() => ({
   stages: { stages: [] as unknown[] }, statuses: { statuses: [] as unknown[] }, sources: { sources: [] as unknown[] },
   appStages: { stages: [] as unknown[] }, reasons: { reasons: [] as unknown[] }, teams: { teams: [] as unknown[] },
   stopReasons: { reasons: [] as unknown[] },
+  waTypes: { data: [] as unknown[] },
 }))
 vi.mock('@/lib/useOpportunityStages', () => ({ useOpportunityStages: () => stableLookup.stages }))
 vi.mock('@/lib/useOutreachStatuses', () => ({ useOutreachStatuses: () => stableLookup.statuses }))
@@ -67,7 +68,8 @@ vi.mock('@/lib/useApplicationSources', () => ({ useApplicationSources: () => sta
 vi.mock('@/hooks/useApplicationStages', () => ({ useApplicationStages: () => stableLookup.appStages }))
 vi.mock('@/lib/useRejectionReasons', () => ({ useRejectionReasons: () => stableLookup.reasons }))
 vi.mock('@/lib/useTeams', () => ({ useTeams: () => stableLookup.teams }))
-vi.mock('@/pages/matches/shared', () => ({ useMatchStopReasons: () => stableLookup.stopReasons }))
+vi.mock('@/hooks/useMatchStopReasons', () => ({ useMatchStopReasons: () => stableLookup.stopReasons }))
+vi.mock('@/hooks/useWaMessageTypes', () => ({ useWaMessageTypes: () => stableLookup.waTypes }))
 
 // Every report component collapses to the same stub: it only needs to prove
 // which `period`/`filters` it was handed, never its own body (each has its own tests).
@@ -219,7 +221,9 @@ describe('ReportsPage — right filter panel', () => {
     expect(latest.map(g => g.key)).toEqual(['period', 'compare', 'status', 'owner', 'branch', 'customer', 'stage', 'source', 'rejectionReason'])
   })
 
-  it('registers period + status/owner/branch + customerIds/origin/contractForm for matches (stopReason deliberately absent: the envelope never applies it) — never the singular customer group', () => {
+  // stopReason joined 27-08: CMBE measured that the server applies it to the
+  // terminations slice + its drill (scoped label carries that promise).
+  it('registers period + status/owner/branch + customerIds/origin/contractForm/stopReason for matches — never the singular customer group', () => {
     let latest: RadioGroup[] = []
     render(
       <RightPanelProvider>
@@ -227,7 +231,7 @@ describe('ReportsPage — right filter panel', () => {
         <ReportsPage reportId="matches" />
       </RightPanelProvider>,
     )
-    expect(latest.map(g => g.key)).toEqual(['period', 'compare', 'status', 'owner', 'branch', 'customerIds', 'origin', 'contractForm'])
+    expect(latest.map(g => g.key)).toEqual(['period', 'compare', 'status', 'owner', 'branch', 'customerIds', 'origin', 'contractForm', 'stopReason'])
   })
 
   it('registers period + status/owner/branch + taskType/priority/team for tasks — never a customer group (no customer column on tasks)', () => {
@@ -241,7 +245,7 @@ describe('ReportsPage — right filter panel', () => {
     expect(latest.map(g => g.key)).toEqual(['period', 'compare', 'status', 'owner', 'branch', 'taskType', 'priority', 'team'])
   })
 
-  it('registers period + owner/direction/escalated for whatsapp — status/branch are dropped (WHATSAPP-NARROW-1)', () => {
+  it('registers period + owner/direction/messageType/escalated for whatsapp — status/branch are dropped (WHATSAPP-NARROW-1)', () => {
     let latest: RadioGroup[] = []
     render(
       <RightPanelProvider>
@@ -249,7 +253,7 @@ describe('ReportsPage — right filter panel', () => {
         <ReportsPage reportId="whatsapp" />
       </RightPanelProvider>,
     )
-    expect(latest.map(g => g.key)).toEqual(['period', 'owner', 'direction', 'escalated'])
+    expect(latest.map(g => g.key)).toEqual(['period', 'owner', 'direction', 'messageType', 'escalated'])
     expect(screen.getByTestId('whatsapp-period').textContent).toBe('month')
   })
 

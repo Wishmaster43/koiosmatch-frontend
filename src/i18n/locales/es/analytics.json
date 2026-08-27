@@ -169,7 +169,8 @@
     "durationNote": "La duración del match se mostrará cuando el acoplamiento HelloFlex proporcione las fechas de inicio/fin.",
     "axes": {
       "contractForm": "Forma de contrato",
-      "origin": "Origen"
+      "origin": "Origen",
+      "stopReason": "Motivo de baja (finalizaciones)"
     },
     "placements": {
       "title": "Estado de los matches",
@@ -268,7 +269,8 @@
       "escalatedValues": {
         "escalated": "Escalación abierta",
         "normal": "Normal"
-      }
+      },
+      "typeNone": "Desconocido"
     },
     "kpi": {
       "conversationsTotal": "Total de conversaciones",

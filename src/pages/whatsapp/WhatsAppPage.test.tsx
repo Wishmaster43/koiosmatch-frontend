@@ -61,8 +61,8 @@ vi.mock('@/components/charts/BarChartCard', () => ({ default: () => <div data-te
 // Right-panel lookup options (WA-MSG-TABLE-1 stage B) — this file covers the KPI
 // band + tab/filter WIRING, not the type/number/owner lookup fetches themselves
 // (no QueryClientProvider in this render tree; React Query is stubbed out here).
+vi.mock('@/hooks/useWaMessageTypes', () => ({ useWaMessageTypes: () => ({ data: [] }) }))
 vi.mock('./hooks/useWaFilterOptions', () => ({
-  useWaMessageTypes: () => ({ data: [] }),
   useWaMessagePurposes: () => ({ data: [] }),
   useWaTemplates: () => ({ data: [] }),
   useWaPhoneNumbers: () => ({ data: [] }),

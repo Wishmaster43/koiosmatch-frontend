@@ -9,7 +9,6 @@
  */
 import { useQuery } from '@tanstack/react-query'
 import api, { unwrapList } from '@/lib/api'
-import type { WaMessageType } from '@/types/whatsapp'
 import type { WaTemplateOption } from '@/components/layout/workflow/whatsappTemplate'
 
 // GET /whatsapp-phone-numbers option shape (same as useWhatsAppTemplateSend).
@@ -19,20 +18,12 @@ export interface WaPhoneNumberOption { value: string; label: string }
 // can add/relabel/recolour a purpose, so `label` is the tenant's own text).
 export interface WaMessagePurposeOption { value: string; label: string; color?: string | null }
 
-const EMPTY_TYPES: WaMessageType[] = []
 const EMPTY_NUMBERS: WaPhoneNumberOption[] = []
 const EMPTY_PURPOSES: WaMessagePurposeOption[] = []
 const EMPTY_TEMPLATES: WaTemplateOption[] = []
 
-// Tenant message-type lookup (StatusListEditor-backed) — id/value/label/color/
-// is_priority, the exact shape embedded on a message row's `message_type`.
-export function useWaMessageTypes() {
-  return useQuery({
-    queryKey: ['whatsapp-message-types'],
-    queryFn: async ({ signal }) => unwrapList<WaMessageType>(await api.get('/whatsapp-message-types', { signal })).rows,
-    placeholderData: EMPTY_TYPES,
-  })
-}
+// useWaMessageTypes moved to @/hooks/useWaMessageTypes — the reports panel
+// consumes it too, and shared machinery never rides an entity module (§2).
 
 // Tenant message-purpose lookup — replaces the old fixed 8-slug list so a
 // tenant-added or relabelled purpose is filterable and shows its own label.

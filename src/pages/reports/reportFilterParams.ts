@@ -105,13 +105,19 @@ export interface ReportFilterState {
   taskType?: Array<string | number>
   priority?: Array<string | number>
   teamId?: Array<string | number>
-  // WhatsApp: message direction + escalation flag (single boolean, not an array).
+  // WhatsApp: message direction + escalation flag (single boolean, not an array)
+  // + tenant message type (server: type[] on message_type, with by_type as its axis).
   direction?: Array<string | number>
   escalated?: boolean | null
+  messageType?: Array<string | number>
   // Matches: customer uuids (plural, distinct from the singular customerId) +
   // origin (funnel/direct) + termination stop reason.
   customerIds?: Array<string | number>
   origin?: Array<string | number>
+  // stop_reason applies SERVER-SIDE to the terminations slice + its KPI-drill only
+  // (MatchesReport::terminationRows contract, CMBE-gemeten 27-08) — the headline
+  // cards deliberately ignore it, hence the scoped panel label.
+  stopReason?: Array<string | number>
   // Opportunities: pipeline value range — two independent optional bounds.
   valueMin?: number | null
   valueMax?: number | null
@@ -122,8 +128,8 @@ export const EMPTY_REPORT_FILTERS: ReportFilterState = {
   source: [], phase: [], contractForm: [],
   stage: [], vacancyId: [], rejectionReason: [],
   taskType: [], priority: [], teamId: [],
-  direction: [], escalated: null,
-  customerIds: [], origin: [],
+  direction: [], escalated: null, messageType: [],
+  customerIds: [], origin: [], stopReason: [],
   valueMin: null, valueMax: null,
 }
 
@@ -147,6 +153,7 @@ export interface ReportQueryParams {
   escalated?: boolean
   customer_ids?: Array<string | number>
   origin?: Array<string | number>
+  stop_reason?: Array<string | number>
   value_min?: number
   value_max?: number
 }
@@ -187,6 +194,7 @@ export function buildReportQueryParams(
     if (filters.customerIds?.length) params.customer_ids = filters.customerIds
     if (filters.origin?.length) params.origin = filters.origin
     if (filters.contractForm?.length) params.contract_form = filters.contractForm
+    if (filters.stopReason?.length) params.stop_reason = filters.stopReason
   }
   if (reportId === 'tasks') {
     if (filters.taskType?.length) params.type = filters.taskType
@@ -196,6 +204,7 @@ export function buildReportQueryParams(
   if (reportId === 'whatsapp') {
     if (filters.direction?.length) params.direction = filters.direction
     if (filters.escalated != null) params.escalated = filters.escalated
+    if (filters.messageType?.length) params.type = filters.messageType
   }
   if (reportId === 'opportunities') {
     if (filters.valueMin != null) params.value_min = filters.valueMin

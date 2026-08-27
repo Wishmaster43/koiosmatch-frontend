@@ -14,4 +14,5 @@ export { default as MatchTextPopout } from './popout/MatchTextPopout'
 export { default as MatchListHeaderBar } from './MatchListHeaderBar'
 // WAVE 1c: the reports panel's matches `stop_reason[]` filter reuses the same
 // termination-reason vocabulary as the "Beëindigen" flow.
-export { useMatchStopReasons } from './hooks/useMatchStopReasons'
+// useMatchStopReasons moved to @/hooks/useMatchStopReasons — the reports panel
+// consumes it too, and shared machinery never rides an entity barrel (§2).

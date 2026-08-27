@@ -169,7 +169,8 @@
     "durationNote": "Match duration follows once the HelloFlex coupling provides start/end dates.",
     "axes": {
       "contractForm": "Contract form",
-      "origin": "Origin"
+      "origin": "Origin",
+      "stopReason": "Stop reason (terminations)"
     },
     "placements": {
       "title": "Match status",
@@ -268,7 +269,8 @@
       "escalatedValues": {
         "escalated": "Open escalation",
         "normal": "Normal"
-      }
+      },
+      "typeNone": "Unknown"
     },
     "kpi": {
       "conversationsTotal": "Total conversations",

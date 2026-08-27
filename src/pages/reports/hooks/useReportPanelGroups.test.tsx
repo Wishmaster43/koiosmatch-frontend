@@ -48,6 +48,10 @@ vi.mock('@/lib/useOutreachStatuses', () => ({ useOutreachStatuses: () => stableL
 vi.mock('@/lib/useApplicationSources', () => ({ useApplicationSources: () => stableLookup.sources }))
 vi.mock('@/hooks/useApplicationStages', () => ({ useApplicationStages: () => stableLookup.appStages }))
 vi.mock('@/lib/useRejectionReasons', () => ({ useRejectionReasons: () => stableLookup.reasons }))
+const stopReasonsValue = { reasons: [] as unknown[] }
+const waTypesValue = { data: [] as unknown[] }
+vi.mock('@/hooks/useMatchStopReasons', () => ({ useMatchStopReasons: () => stopReasonsValue }))
+vi.mock('@/hooks/useWaMessageTypes', () => ({ useWaMessageTypes: () => waTypesValue }))
 vi.mock('@/lib/useTeams', () => ({ useTeams: () => stableLookup.teams }))
 
 interface RadioGroup { key: string }

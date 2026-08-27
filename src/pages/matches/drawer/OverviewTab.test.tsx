@@ -33,7 +33,7 @@ const mockedPatch = vi.mocked(api.patch)
 vi.mock('@/lib/useContractTypes', () => ({ useContractTypes: () => ({ types: ['ZZP Flex', 'Fase 1-2 z.u.b. (Works)'] }) }))
 // MATCH-DRILL-2: a fixed tenant stop-reason lookup, so the reason-line test
 // asserts against a known label without hitting useCachedLookup's real fetch.
-vi.mock('../hooks/useMatchStopReasons', () => ({
+vi.mock('@/hooks/useMatchStopReasons', () => ({
   useMatchStopReasons: () => ({ reasons: [{ value: 'assignment_ended', label: 'Opdracht beëindigd' }], loading: false }),
 }))
 

@@ -23,6 +23,8 @@ import { useRejectionReasons } from '@/lib/useRejectionReasons'
 import { useTeams } from '@/lib/useTeams'
 import { useOpportunityStages } from '@/lib/useOpportunityStages'
 import { useOutreachStatuses } from '@/lib/useOutreachStatuses'
+import { useMatchStopReasons } from '@/hooks/useMatchStopReasons'
+import { useWaMessageTypes } from '@/hooks/useWaMessageTypes'
 import {
   useVacancyStatusIdOptions, useTaskStatusIdOptions, useTaskTypeIdOptions, useTaskPriorityIdOptions,
 } from '../reportStatusLookups'
@@ -71,6 +73,8 @@ export function useReportPanelGroups({ active, period, setPeriod, compareInPanel
   const [direction, setDirection] = useState<Array<string | number>>([])
   const [escalated, setEscalated] = useState<boolean | null>(null)
   const [customerIds, setCustomerIds] = useState<Array<string | number>>([])
+  const [stopReason, setStopReason] = useState<Array<string | number>>([])
+  const [messageType, setMessageType] = useState<Array<string | number>>([])
   const [origin, setOrigin] = useState<Array<string | number>>([])
   const [valueMin, setValueMin] = useState<number | null>(null)
   const [valueMax, setValueMax] = useState<number | null>(null)
@@ -80,10 +84,10 @@ export function useReportPanelGroups({ active, period, setPeriod, compareInPanel
     stage, vacancyId: [], rejectionReason,
     taskType, priority, teamId,
     direction, escalated,
-    customerIds, origin,
+    customerIds, origin, stopReason, messageType,
     valueMin, valueMax,
   }), [status, ownerId, locationId, customerId, source, phase, contractForm, stage, rejectionReason,
-    taskType, priority, teamId, direction, escalated, customerIds, origin, valueMin, valueMax])
+    taskType, priority, teamId, direction, escalated, customerIds, origin, stopReason, messageType, valueMin, valueMax])
   const acceptsCustomer = (CUSTOMER_FILTERABLE_REPORT_IDS as readonly string[]).includes(active)
   const acceptsStatusBranch = acceptsStatusBranchFilter(active)
 
@@ -97,7 +101,7 @@ export function useReportPanelGroups({ active, period, setPeriod, compareInPanel
     setStage([]); setRejectionReason([])
     setTaskType([]); setPriority([]); setTeamId([])
     setDirection([]); setEscalated(null)
-    setCustomerIds([]); setOrigin([])
+    setCustomerIds([]); setOrigin([]); setStopReason([]); setMessageType([])
     setValueMin(null); setValueMax(null)
   }, [active])
 
@@ -181,6 +185,16 @@ export function useReportPanelGroups({ active, period, setPeriod, compareInPanel
   const directionOptions = useMemo(
     () => (['inbound', 'outbound'] as const).map(v => ({ value: v, label: t(`whatsapp.axes.directionValues.${v}`) })), [t],
   )
+  // Tenant stop reasons (no seed by design — see the hook doc) for the scoped
+  // terminations filter; tenant WhatsApp message types for the type[] filter.
+  const { reasons: stopReasonRows } = useMatchStopReasons()
+  const stopReasonOptions = useMemo(
+    () => (stopReasonRows ?? []).map(r => ({ value: r.value, label: r.label })), [stopReasonRows])
+  const { data: waTypeRows } = useWaMessageTypes()
+  const waTypeOptions = useMemo(
+    // 'none' first: the server's TYPE_NONE sentinel (WhatsappReport, CMBE-gemeten
+    // 27-08) folds NULL/empty message_type; label mirrors the by_type axis bucket.
+    () => [{ value: 'none', label: t('whatsapp.axes.typeNone') }, ...(waTypeRows ?? []).flatMap(r => (r.value ? [{ value: r.value, label: r.label }] : []))], [waTypeRows, t])
   // Static, translated match-origin options (funnel vs. direct match) — not a lookup.
   const originOptions = useMemo(
     () => [{ value: 'funnel', label: t('matches.viaFunnel') }, { value: 'direct', label: t('matches.direct') }], [t],
@@ -327,10 +341,12 @@ export function useReportPanelGroups({ active, period, setPeriod, compareInPanel
             selected: origin, onToggle: (v: string | number) => setOrigin(s => s.includes(v) ? s.filter(x => x !== v) : [...s, v]), options: originOptions },
           { key: 'contractForm', type: 'search-select', label: t('matches.axes.contractForm'),
             selected: contractForm, onToggle: (v: string | number) => setContractForm(s => s.includes(v) ? s.filter(x => x !== v) : [...s, v]), options: contractFormOptions },
-          // stop_reason is deliberately NOT a panel group: MatchesReport::
-          // applyMatchDimensionFilters() does not apply it to the envelope (its
-          // docblock says so), so a picker here would change nothing (§3 no fake
-          // affordance) — filed with CMBE.
+          // stop_reason: CMBE-gemeten 27-08 — the server applies it to the
+          // terminations slice + its drill ONLY (deliberate: the column lives on
+          // match_terminations). The label carries that scope so the picker
+          // promises exactly what it filters (§3 honest affordance).
+          { key: 'stopReason', type: 'search-select', label: t('matches.axes.stopReason'),
+            selected: stopReason, onToggle: (v: string | number) => setStopReason(s => s.includes(v) ? s.filter(x => x !== v) : [...s, v]), options: stopReasonOptions },
         )
       }
       if (active === 'tasks') {
@@ -347,6 +363,10 @@ export function useReportPanelGroups({ active, period, setPeriod, compareInPanel
         groups.push(
           { key: 'direction', type: 'search-select', label: t('whatsapp.axes.direction'),
             selected: direction, onToggle: (v: string | number) => setDirection(s => s.includes(v) ? s.filter(x => x !== v) : [...s, v]), options: directionOptions },
+          // type[] is first-class server-side (message_type filter + by_type axis,
+          // CMBE-gemeten 27-08); options are the tenant message-type lookup.
+          { key: 'messageType', type: 'search-select', label: t('whatsapp.axes.type'),
+            selected: messageType, onToggle: (v: string | number) => setMessageType(s => s.includes(v) ? s.filter(x => x !== v) : [...s, v]), options: waTypeOptions },
           { key: 'escalated', type: 'radio', label: t('whatsapp.axes.escalated'), noChip: escalated === null,
             selected: [escalated === null ? 'any' : escalated ? 'true' : 'false'],
             onToggle: (v: string | number) => setEscalated(v === 'any' ? null : v === 'true'),
@@ -369,7 +389,7 @@ export function useReportPanelGroups({ active, period, setPeriod, compareInPanel
   }, [t, period, filterable, active, status, ownerId, locationId, customerId, acceptsCustomer, acceptsStatusBranch,
     statusOptions, ownerOptions, branchOptions, customerOptions, compareInPanel, compareMode,
     source, phase, contractForm, stage, rejectionReason, taskType, priority, teamId, direction, escalated,
-    customerIds, origin, valueMin, valueMax,
+    customerIds, origin, stopReason, stopReasonOptions, messageType, waTypeOptions, valueMin, valueMax,
     sourceOptions, phaseOptions, contractFormOptions, stageOptions, rejectionReasonOptions,
     taskTypePanelOptions, taskPriorityPanelOptions, teamOptions, directionOptions, originOptions,
     setPeriod, setCompareMode])

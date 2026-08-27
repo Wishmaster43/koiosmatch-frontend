@@ -109,10 +109,12 @@ describe('buildReportQueryParams — WAVE 1c per-page dimensions', () => {
     })
   })
 
-  it('attaches customer_ids/origin/contract_form for matches (stop_reason stays off: the envelope never applies it)', () => {
-    const filters: ReportFilterState = { ...EMPTY_REPORT_FILTERS, customerIds: ['c1'], origin: ['funnel'], contractForm: ['zzp'] }
+  // stop_reason joined 27-08 (CMBE-gemeten): the server applies it to the
+  // terminations slice + its kpi-drill; the panel label carries that scope.
+  it('attaches customer_ids/origin/contract_form/stop_reason for matches', () => {
+    const filters: ReportFilterState = { ...EMPTY_REPORT_FILTERS, customerIds: ['c1'], origin: ['funnel'], contractForm: ['zzp'], stopReason: ['client_stop'] }
     expect(buildReportQueryParams('month', 'matches', filters)).toEqual({
-      period: 'month', customer_ids: ['c1'], origin: ['funnel'], contract_form: ['zzp'],
+      period: 'month', customer_ids: ['c1'], origin: ['funnel'], contract_form: ['zzp'], stop_reason: ['client_stop'],
     })
   })
 
@@ -123,10 +125,11 @@ describe('buildReportQueryParams — WAVE 1c per-page dimensions', () => {
     })
   })
 
-  it('attaches direction/escalated for whatsapp, and drops status/location_id even when set', () => {
-    const filters: ReportFilterState = { ...EMPTY_REPORT_FILTERS, status: ['x'], locationId: ['l1'], direction: ['inbound'], escalated: true }
+  // type[] is first-class server-side (message_type + synthetic 'none' bucket).
+  it('attaches direction/escalated/type for whatsapp, and drops status/location_id even when set', () => {
+    const filters: ReportFilterState = { ...EMPTY_REPORT_FILTERS, status: ['x'], locationId: ['l1'], direction: ['inbound'], escalated: true, messageType: ['template', 'none'] }
     expect(buildReportQueryParams('month', 'whatsapp', filters)).toEqual({
-      period: 'month', direction: ['inbound'], escalated: true,
+      period: 'month', direction: ['inbound'], escalated: true, type: ['template', 'none'],
     })
   })
 

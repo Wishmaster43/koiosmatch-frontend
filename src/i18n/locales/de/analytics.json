@@ -169,7 +169,8 @@
     "durationNote": "Die Match-Dauer folgt, sobald die HelloFlex-Anbindung Start/Ende liefert.",
     "axes": {
       "contractForm": "Vertragsform",
-      "origin": "Herkunft"
+      "origin": "Herkunft",
+      "stopReason": "Beendigungsgrund (Beendigungen)"
     },
     "placements": {
       "title": "Match-Status",
@@ -268,7 +269,8 @@
       "escalatedValues": {
         "escalated": "Offene Eskalation",
         "normal": "Normal"
-      }
+      },
+      "typeNone": "Unbekannt"
     },
     "kpi": {
       "conversationsTotal": "Gespräche gesamt",
