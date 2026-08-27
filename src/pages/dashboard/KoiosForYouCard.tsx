@@ -173,10 +173,12 @@ interface KoiosForYouCardProps {
   scopeToggle?: boolean
   // Compact extra strip rendered at the card's bottom (performance numbers).
   footer?: ReactNode
+  // Paired-grid mode: stretch to the grid row so both cards are equally tall.
+  fill?: boolean
 }
 
 // See the file's top doc above for the for-you endpoint and the period-picker/KPI-tile drilldown it drives.
-export default function KoiosForYouCard({ title, scope, scopeToggle = false, footer }: KoiosForYouCardProps = {}) {
+export default function KoiosForYouCard({ title, scope, scopeToggle = false, footer, fill = false }: KoiosForYouCardProps = {}) {
   const { t } = useTranslation(['dashboard', 'common'])
   const { formatDateTime } = useDateFormat()
   const { formatNumber } = useNumberFormat()
@@ -302,7 +304,8 @@ export default function KoiosForYouCard({ title, scope, scopeToggle = false, foo
   ]
 
   return (
-    <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: 16 }}>
+    // `fill` (paired grid): stretch to the row height and let the grid own the bottom gap.
+    <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, marginBottom: fill ? 0 : 16, height: fill ? '100%' : undefined, boxSizing: 'border-box' }}>
       {/* Header — Koios mark carries the AI-Act disclosure hint as a tooltip
           (mirrors KoiosAdviceBlock: the title already names Koios explicitly, so
           this isn't a bare icon), title, and the period picker. */}

@@ -194,10 +194,11 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
               performance" (left) and "Koios did this for you" (right) sit side by
               side — other roles keep KoiosForYouCard full-width, unpaired. */}
           {vis('block.koiosPerformance') && (activeType === 'admin' || activeType === 'management') ? (
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16, alignItems: 'start' }}>
-              <KoiosPerformanceCard />
+            // Equal footprint (Danny 27-08: "blokken even groot") — cells stretch, cards fill.
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
+              <KoiosPerformanceCard fill />
               {/* activeType is narrowed to admin/management here, neither of which uses the scope toggle. */}
-              <KoiosForYouCard scopeToggle={false} />
+              <KoiosForYouCard scopeToggle={false} fill />
             </div>
           ) : (
             /* "Koios deed dit voor jou" (K0-D noordster) — self-contained card, own
