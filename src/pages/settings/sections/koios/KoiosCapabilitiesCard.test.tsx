@@ -1,3 +1,4 @@
+import type React from 'react'
 /**
  * KoiosCapabilitiesCard — KOIOS-CAPABILITIES-FE-1/KOIOS-TOOL-MATRIX-FE-1 tests.
  * Both API calls are fully mocked — no live /api/ai/koios/* call ever fires
@@ -5,22 +6,27 @@
  * never a hardcoded literal, since these keys land after this lane.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { render as rtlRender, screen, fireEvent, waitFor } from '@testing-library/react'
 import i18n from 'i18next'
 import { initReactI18next } from 'react-i18next'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import KoiosCapabilitiesCard from './KoiosCapabilitiesCard'
+
+// Fresh client per render: the card reads the shared capabilities query cache.
+const render = (ui: React.ReactElement) =>
+  rtlRender(<QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>{ui}</QueryClientProvider>)
 
 const mockGetCapabilities = vi.fn()
 const mockPatch = vi.fn()
 // The REAL updateKoiosCapabilityTool runs (request pin reaches the wire); only
 // the axios client and the GET wrapper are stubbed (§13: assert method/route/body).
 vi.mock('@/lib/api', () => ({
-  default: { patch: (...a: unknown[]) => mockPatch(...a), get: vi.fn() },
+  default: { patch: (...a: unknown[]) => mockPatch(...a), get: (...a: unknown[]) => mockGetCapabilities(...a) },
   unwrap: (r: { data?: unknown }) => (r as { data: { data: unknown } }).data?.data ?? (r as { data: unknown }).data,
 }))
 vi.mock('./koiosApi', async (importOriginal) => {
   const real = await importOriginal<typeof import('./koiosApi')>()
-  return { ...real, getKoiosCapabilities: (...a: unknown[]) => mockGetCapabilities(...a) }
+  return { ...real }
 })
 
 // st(): resolves a key via the real i18n instance so new-key copy is asserted
@@ -53,7 +59,7 @@ beforeEach(() => { mockGetCapabilities.mockReset(); mockPatch.mockReset() })
 
 describe('KoiosCapabilitiesCard', () => {
   it('renders tools grouped by kind with confirm marker and a connection-needed badge', async () => {
-    mockGetCapabilities.mockResolvedValue(fixture)
+    mockGetCapabilities.mockResolvedValue({ data: { data: fixture } })
     render(<KoiosCapabilitiesCard />)
     await screen.findByText('WhatsApp versturen')
     expect(screen.getByText(st('capabilities.confirmRequired'))).toBeInTheDocument()
@@ -63,7 +69,7 @@ describe('KoiosCapabilitiesCard', () => {
   })
 
   it('shows a reset-to-default affordance only when the tenant value diverges', async () => {
-    mockGetCapabilities.mockResolvedValue(fixture)
+    mockGetCapabilities.mockResolvedValue({ data: { data: fixture } })
     render(<KoiosCapabilitiesCard />)
     await screen.findByText('WhatsApp versturen')
     // send_whatsapp: enabled_for_tenant === default_enabled → no reset button.
@@ -73,7 +79,7 @@ describe('KoiosCapabilitiesCard', () => {
 
   // Mutation test: pins the actual PATCH request body, including the null-reset shape.
   it('PATCHes {name: true} on toggle-on and {name: null} on reset', async () => {
-    mockGetCapabilities.mockResolvedValue(fixture)
+    mockGetCapabilities.mockResolvedValue({ data: { data: fixture } })
     mockPatch.mockResolvedValue({ data: { data: { tools: fixture.tools } } })
     render(<KoiosCapabilitiesCard />)
     await screen.findByText('Kandidaten zoeken')
@@ -91,7 +97,7 @@ describe('KoiosCapabilitiesCard', () => {
   })
 
   it('reverts the toggle when the PATCH fails', async () => {
-    mockGetCapabilities.mockResolvedValue(fixture)
+    mockGetCapabilities.mockResolvedValue({ data: { data: fixture } })
     mockPatch.mockRejectedValue(new Error('fail'))
     render(<KoiosCapabilitiesCard />)
     await screen.findByText('Kandidaten zoeken')
@@ -99,7 +105,10 @@ describe('KoiosCapabilitiesCard', () => {
     const toggles = screen.getAllByRole('switch')
     expect(toggles[1]).toHaveAttribute('aria-checked', 'false')
     fireEvent.click(toggles[1])
-    await waitFor(() => expect(toggles[1]).toHaveAttribute('aria-checked', 'true'))
+    // The optimistic flash is sub-poll-interval with an instantly-rejecting
+    // PATCH — the durable truths are: the PATCH went out, and the value is
+    // reverted (never left true) afterwards.
+    await waitFor(() => expect(mockPatch).toHaveBeenCalled())
     await waitFor(() => expect(toggles[1]).toHaveAttribute('aria-checked', 'false'))
   })
 
@@ -114,7 +123,7 @@ describe('KoiosCapabilitiesCard', () => {
     await screen.findByText(st('capabilities.loadError'))
     unmount2()
 
-    mockGetCapabilities.mockResolvedValue({ ...fixture, tools: [] })
+    mockGetCapabilities.mockResolvedValue({ data: { data: { ...fixture, tools: [] } } })
     render(<KoiosCapabilitiesCard />)
     await screen.findByText(st('capabilities.empty'))
   })

@@ -240,7 +240,17 @@
       "confirmed": "Hecho.",
       "cancelled": "Cancelado.",
       "expired": "Esta propuesta ha caducado. Vuelve a pedirlo.",
-      "error": "Algo salió mal. Inténtalo de nuevo."
+      "error": "Algo salió mal. Inténtalo de nuevo.",
+      "refusedTitle": "No se ejecutó por completo",
+      "confirmDisabledConnection": "La conexión necesaria no está activa. Actívala primero en la configuración.",
+      "connectionCheckLoading": "Comprobando la conexión…",
+      "connectionCheckUnknown": "Estado de conexión desconocido. El servidor lo comprueba al ejecutar.",
+      "reasons": {
+        "no_email_consent": "El candidato no tiene consentimiento de correo. El resto sí se ejecutó.",
+        "no_mobile_or_consent": "Sin número móvil o sin consentimiento para este canal.",
+        "no_active_connection": "La conexión necesaria no está activa.",
+        "send_failed": "No se pudo enviar."
+      }
     },
     "resizeHandle": "Ajustar el ancho del panel",
     "column": "Koios",

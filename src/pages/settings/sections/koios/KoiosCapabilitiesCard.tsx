@@ -13,9 +13,14 @@
  * hand-typed against the measured contract in the worker brief (WORKLIST
  * KOIOS-CAPABILITIES-FE-1), not generated.
  */
-import { useEffect, useRef, useState } from 'react'
+import { useRef } from 'react'
 import { useTranslation } from 'react-i18next'
-import { getKoiosCapabilities, updateKoiosCapabilityTool } from './koiosApi'
+import { updateKoiosCapabilityTool } from './koiosApi'
+import { useQueryClient } from '@tanstack/react-query'
+import {
+  useKoiosToolCapabilities, KOIOS_CAPABILITIES_QUERY_KEY, KOIOS_CONNECTION_HASH,
+  type KoiosCapabilities, type KoiosCapabilityTool,
+} from '@/components/layout/koios/useKoiosToolCapabilities'
 import { notifyError } from '@/lib/notify'
 import Toggle from '@/components/ui/Toggle'
 import Button from '@/components/ui/Button'
@@ -23,23 +28,6 @@ import SoftChip from '@/components/ui/SoftChip'
 import { SectionTitle, GroupLabel, Caption, BodyText, bodyTextStyle } from '@/components/ui/typography'
 
 // Hand-typed response shape (see file header) — the measured GET /ai/koios/capabilities contract.
-interface KoiosTool {
-  name: string
-  label_nl: string
-  kind?: string | null
-  confirm_required: boolean
-  enabled_for_me: boolean
-  enabled_for_tenant: boolean
-  default_enabled: boolean
-  connection_active: boolean | null
-  connection: 'whatsapp' | 'shiftmanager' | 'helloflex' | 'pdok' | null
-}
-interface KoiosCapabilities {
-  surfaces: string[]
-  tools: KoiosTool[]
-  limits: Record<string, unknown>
-  models: { active_flavor: string; flavors: string[] }
-}
 
 const card = { border: '1px solid var(--border)', borderRadius: 10, padding: 16, marginBottom: 14, background: 'var(--surface)' }
 const row = { display: 'flex', alignItems: 'center', gap: 10, padding: '10px 0', borderTop: '1px solid var(--border)' } as const
@@ -49,12 +37,11 @@ const row = { display: 'flex', alignItems: 'center', gap: 10, padding: '10px 0',
 // settings routes. Only WhatsApp has a confirmed settings screen today; the other
 // three connections don't exist yet as sections (openQuestions), so those tools
 // show an honest disabled title instead of a dead link.
-const CONNECTION_HASH: Record<string, string> = { whatsapp: '#settings/whatsapp/whatsapp' }
 
 // One tool row: label + confirm-required marker + connection badge + the tenant Toggle + reset affordance.
-function ToolRow({ tool, onToggle, onReset, t }: { tool: KoiosTool; onToggle: (name: string, value: boolean) => void; onReset: (name: string) => void; t: (k: string, opts?: Record<string, unknown>) => string }) {
+function ToolRow({ tool, onToggle, onReset, t }: { tool: KoiosCapabilityTool; onToggle: (name: string, value: boolean) => void; onReset: (name: string) => void; t: (k: string, opts?: Record<string, unknown>) => string }) {
   const diverged = tool.enabled_for_tenant !== tool.default_enabled
-  const connectionHash = tool.connection ? CONNECTION_HASH[tool.connection] : undefined
+  const connectionHash = tool.connection ? KOIOS_CONNECTION_HASH[tool.connection] : undefined
   return (
     <div style={row}>
       <div style={{ flex: 1, minWidth: 0 }}>
@@ -90,18 +77,13 @@ function ToolRow({ tool, onToggle, onReset, t }: { tool: KoiosTool; onToggle: (n
 // The capabilities/tool-matrix card: loads once, groups by `kind` when present, and PATCHes one tool at a time (optimistic, reverts on failure).
 export default function KoiosCapabilitiesCard() {
   const { t } = useTranslation('koios')
-  const [data, setData] = useState<KoiosCapabilities | null>(null)
-  const [phase, setPhase] = useState<'loading' | 'ready' | 'error'>('loading')
-
-  // Load capabilities once; a 403 is treated the same as any other load failure here
-  // (the parent screen already degrades the whole section on 403).
-  useEffect(() => {
-    let alive = true
-    getKoiosCapabilities()
-      .then((d: unknown) => { if (alive) { setData(d as KoiosCapabilities); setPhase('ready') } })
-      .catch(() => { if (alive) setPhase('error') })
-    return () => { alive = false }
-  }, [])
+  // The shared capabilities cache (one GET app-wide: this card + the pending-action
+  // gate read the same entry); optimistic patches write it via setQueryData below.
+  const queryClient = useQueryClient()
+  const { capabilities: data, isLoading, isError } = useKoiosToolCapabilities()
+  const phase = isLoading ? 'loading' : isError ? 'error' : 'ready'
+  const setData = (updater: (cur: KoiosCapabilities | null) => KoiosCapabilities | null) =>
+    queryClient.setQueryData<KoiosCapabilities | null>(KOIOS_CAPABILITIES_QUERY_KEY, (cur) => updater(cur ?? null))
 
   // Names with a PATCH in flight — a late response never clobbers a newer optimistic toggle.
   const pendingRef = useRef(new Map<string, number>())
@@ -117,7 +99,7 @@ export default function KoiosCapabilitiesCard() {
     pendingRef.current.set(name, seq)
     updateKoiosCapabilityTool(name, value)
       .then((res: unknown) => {
-        const tools = (res as { tools?: KoiosTool[] })?.tools
+        const tools = (res as { tools?: KoiosCapabilityTool[] })?.tools
         if (!tools) return
         setData((cur) => (cur ? {
           ...cur,
@@ -144,13 +126,13 @@ export default function KoiosCapabilitiesCard() {
   // group names for a vocabulary the server didn't send (tolerant-by-contract).
   const hasKinds = data.tools.some((tl) => tl.kind)
   const groups = hasKinds
-    ? Object.entries(data.tools.reduce<Record<string, KoiosTool[]>>((acc, tl) => {
+    ? Object.entries(data.tools.reduce<Record<string, KoiosCapabilityTool[]>>((acc, tl) => {
         const key = tl.kind || t('capabilities.otherGroup')
         acc[key] = acc[key] || []
         acc[key].push(tl)
         return acc
       }, {}))
-    : [[null, data.tools] as [string | null, KoiosTool[]]]
+    : [[null, data.tools] as [string | null, KoiosCapabilityTool[]]]
 
   return (
     <div style={card}>

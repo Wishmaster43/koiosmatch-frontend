@@ -240,7 +240,17 @@
       "confirmed": "Terminé.",
       "cancelled": "Annulé.",
       "expired": "Cette proposition a expiré. Redemandez-la.",
-      "error": "Une erreur s'est produite. Veuillez réessayer."
+      "error": "Une erreur s'est produite. Veuillez réessayer.",
+      "refusedTitle": "Exécution incomplète",
+      "confirmDisabledConnection": "La connexion requise n’est pas active. Activez-la d’abord dans les paramètres.",
+      "connectionCheckLoading": "Vérification de la connexion…",
+      "connectionCheckUnknown": "Statut de connexion inconnu. Le serveur le vérifie à l’exécution.",
+      "reasons": {
+        "no_email_consent": "Le candidat n’a pas donné son consentement e-mail. Le reste a été exécuté.",
+        "no_mobile_or_consent": "Pas de numéro mobile ou pas de consentement pour ce canal.",
+        "no_active_connection": "La connexion requise n’est pas active.",
+        "send_failed": "L’envoi a échoué."
+      }
     },
     "resizeHandle": "Ajuster la largeur du panneau",
     "column": "Koios",

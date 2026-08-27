@@ -240,7 +240,17 @@
       "confirmed": "Done.",
       "cancelled": "Cancelled.",
       "expired": "This proposal has expired. Ask again.",
-      "error": "Something went wrong. Please try again."
+      "error": "Something went wrong. Please try again.",
+      "refusedTitle": "Not fully executed",
+      "confirmDisabledConnection": "The required connection is not active. Activate it first in the settings.",
+      "connectionCheckLoading": "Checking the connection…",
+      "connectionCheckUnknown": "Connection status unknown. The server checks this on execution.",
+      "reasons": {
+        "no_email_consent": "The candidate has no e-mail consent. The rest was executed.",
+        "no_mobile_or_consent": "No mobile number or no consent for this channel.",
+        "no_active_connection": "The required connection is not active.",
+        "send_failed": "Sending failed."
+      }
     },
     "resizeHandle": "Resize panel",
     "column": "Koios",

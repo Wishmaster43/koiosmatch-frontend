@@ -240,7 +240,17 @@
       "confirmed": "Erledigt.",
       "cancelled": "Abgebrochen.",
       "expired": "Dieser Vorschlag ist abgelaufen. Bitte erneut fragen.",
-      "error": "Etwas ist schiefgelaufen. Bitte erneut versuchen."
+      "error": "Etwas ist schiefgelaufen. Bitte erneut versuchen.",
+      "refusedTitle": "Nicht vollständig ausgeführt",
+      "confirmDisabledConnection": "Die erforderliche Verbindung ist nicht aktiv. Aktivieren Sie sie zuerst in den Einstellungen.",
+      "connectionCheckLoading": "Verbindungsprüfung läuft…",
+      "connectionCheckUnknown": "Verbindungsstatus unbekannt. Der Server prüft dies bei der Ausführung.",
+      "reasons": {
+        "no_email_consent": "Der Kandidat hat keine E-Mail-Einwilligung. Der Rest wurde ausgeführt.",
+        "no_mobile_or_consent": "Keine Mobilnummer oder keine Einwilligung für diesen Kanal.",
+        "no_active_connection": "Die erforderliche Verbindung ist nicht aktiv.",
+        "send_failed": "Senden fehlgeschlagen."
+      }
     },
     "resizeHandle": "Panelbreite anpassen",
     "column": "Koios",

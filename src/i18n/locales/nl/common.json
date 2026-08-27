@@ -240,7 +240,17 @@
       "confirmed": "Gelukt.",
       "cancelled": "Geannuleerd.",
       "expired": "Dit voorstel is verlopen. Vraag het opnieuw.",
-      "error": "Er ging iets mis. Probeer het opnieuw."
+      "error": "Er ging iets mis. Probeer het opnieuw.",
+      "refusedTitle": "Niet volledig uitgevoerd",
+      "confirmDisabledConnection": "De benodigde koppeling is niet actief. Activeer hem eerst via de instellingen.",
+      "connectionCheckLoading": "Koppelingscontrole wordt uitgevoerd…",
+      "connectionCheckUnknown": "Koppelingsstatus onbekend. De server controleert dit bij het uitvoeren.",
+      "reasons": {
+        "no_email_consent": "De kandidaat heeft geen toestemming voor e-mail. De rest is wel uitgevoerd.",
+        "no_mobile_or_consent": "Geen mobiel nummer of geen toestemming voor dit kanaal.",
+        "no_active_connection": "De benodigde koppeling is niet actief.",
+        "send_failed": "Versturen is niet gelukt."
+      }
     },
     "resizeHandle": "Paneelbreedte aanpassen",
     "column": "Koios",
