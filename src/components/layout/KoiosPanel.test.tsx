@@ -225,6 +225,34 @@ describe('KoiosPanel — context chips (seam)', () => {
     ])))
   })
 
+  // (d2) a manual @-mention of the SAME record as the ambient chip (c-1) dedupes
+  // into ONE chip, in the ambient (first) slot — showing the manual hit's real
+  // name instead of the ambient chip's generic fallback label (KoiosPanel.tsx
+  // chipsById Map.set semantics: later entries update the value, not the slot).
+  it('dedupes a manual mention of the ambient record into the ambient slot with the real name', async () => {
+    mockGet.mockImplementation((url: string) => url === '/candidates'
+      ? Promise.resolve({ data: { data: [{ id: 'c-1', name: 'Real Name' }, { id: 'c-2', name: 'Other Person' }] } })
+      : Promise.resolve({ data: { data: [] } }))
+    renderPanel({ hash: '#candidates?open=c-1' })
+    await screen.findByText('common:koios.radar.empty')
+    expect(screen.getByRole('button', { name: 'remove koios.contextRecordFallback' })).toBeInTheDocument()
+    const textarea = screen.getByPlaceholderText('koios.taskPlaceholder')
+    // Pick ANOTHER record first, so slot ORDER is observable: the ambient slot
+    // must stay first even though c-1's manual mention arrives after c-2's.
+    fireEvent.change(textarea, { target: { value: '@other' } })
+    await waitFor(() => expect(screen.getAllByText('Other Person').length).toBeGreaterThan(0))
+    fireEvent.click(screen.getAllByText('Other Person')[0])
+    fireEvent.change(textarea, { target: { value: '@real' } })
+    await waitFor(() => expect(screen.getAllByText('Real Name').length).toBeGreaterThan(0))
+    fireEvent.click(screen.getAllByText('Real Name')[0])
+    // Only ONE chip for c-1 — the real name replaces the fallback, no duplicate —
+    // AND it holds the ambient (first) slot; a delete-then-set dedupe that moves
+    // the chip to the end must fail here (Opus mutation B, golf-1 verify).
+    expect(screen.queryByRole('button', { name: 'remove koios.contextRecordFallback' })).toBeNull()
+    const removeLabels = screen.getAllByRole('button', { name: /^remove / }).map(x => x.getAttribute('aria-label'))
+    expect(removeLabels).toEqual(['remove Real Name', 'remove Other Person'])
+  })
+
   // (e) chips clear on new chat — the MANUAL @-mention list only (ambient/
   // selection are ongoing page state, not a per-turn pick, and correctly
   // survive a new chat — see the file's own `newChat` comment).

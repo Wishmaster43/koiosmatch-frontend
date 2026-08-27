@@ -9,9 +9,8 @@
 import { useState, useRef, useEffect } from 'react'
 import type { ChangeEvent, KeyboardEvent } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Bot, AtSign, Paperclip, ArrowUp } from 'lucide-react'
+import { AtSign, Paperclip, ArrowUp } from 'lucide-react'
 import { useLocale } from '@/lib/datetime'
-import { humanizeIsoDates } from '@/lib/localDate'
 import { tint, TINT_BORDER } from '@/lib/tint'
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion'
 import { useKoiosChat } from './koios/useKoiosChat'
@@ -21,117 +20,17 @@ import { useKoiosMentionCounts } from './koios/useKoiosMentionCounts'
 import { useKoiosContextChips } from './koios/useKoiosContextChips'
 import { useKoiosComposerKeys } from './koios/useKoiosComposerKeys'
 import { addContextRef, removeContextRef } from './koios/contextRefs'
-import { koiosMarkdownToHtml } from './koios/koiosMarkdown'
-import SafeHtml from '@/components/ui/SafeHtml'
-import KoiosSteps from './koios/KoiosSteps'
-import KoiosUsage from './koios/KoiosUsage'
+import KoiosMessage from './koios/KoiosMessage'
+import TypingIndicator from './koios/TypingIndicator'
 import KoiosModelPicker from './koios/KoiosModelPicker'
 import KoiosMentionMenu from './koios/KoiosMentionMenu'
 import KoiosContextChips from './koios/KoiosContextChips'
 import type { KoiosContextChipRow } from './koios/KoiosContextChips'
 import KoiosHeader from './koios/KoiosHeader'
 import KoiosResizeHandle from './koios/KoiosResizeHandle'
-import KoiosPendingActionCard from './koios/KoiosPendingActionCard'
-import KoiosResultCards from './koios/KoiosResultCards'
 import KoiosRadar from './koios/KoiosRadar'
 import KoiosVoiceButton from './koios/KoiosVoiceButton'
-import type { KoiosResultRef } from './koios/koiosTypes'
-import type { KoiosChatMessage, KoiosContextRef, TFn } from '@/types/koios'
-import type { KoiosModelOption } from '@/lib/koiosModelTiers'
-
-// gradient used for the assistant avatar + user bubble.
-const GRADIENT = 'linear-gradient(135deg,var(--color-primary),var(--color-violet))'
-
-// Resolve a message to its display text + whether it's a calm system notice
-// (notices carry no steps/usage). Keeps the JSX below readable.
-function resolveMessage(msg: KoiosChatMessage, t: TFn) {
-  if (msg.kind === 'welcome')   return { text: t('koios.welcome'),       notice: false }
-  if (msg.kind === 'error')     return { text: t('koios.errorReply'),    notice: true }
-  if (msg.kind === 'forbidden') return { text: t('koios.forbidden'),     notice: true }
-  // A known backend error code (credit exhausted, temporary outage) gets its own
-  // translated notice instead of the generic "couldn't reach Koios" line.
-  if (msg.kind === 'knownError') return { text: t(msg.errorKey ?? 'errorReply'), notice: true }
-  if (msg.role === 'user')      return { text: msg.content,              notice: false }
-  if (msg.stopReason === 'not_configured')
-    return { text: msg.answer || t('koios.notConfigured'),               notice: true }
-  // KOIOS-CHAT-SIGNALS-FE-1: a budget-exhausted stop reads the reason the backend
-  // stamped on `budget.reason` — daily caps reset tomorrow, the monthly cap next
-  // month — instead of always showing the server's monthly-only sentence.
-  if (msg.stopReason === 'budget_exceeded') {
-    const isDaily = msg.budget?.reason === 'daily_user' || msg.budget?.reason === 'daily_tenant'
-    return { text: t(isDaily ? 'koios.budgetExceededDaily' : 'koios.budgetExceededMonthly'), notice: true }
-  }
-  return { text: msg.answer, notice: false }
-}
-
-// ── Chat bubble ───────────────────────────────────────────────────────────────
-function KoiosMessage({ msg, isNew, t, locale, modelOptions }: { msg: KoiosChatMessage; isNew?: boolean; t: TFn; locale?: string; modelOptions?: KoiosModelOption[] }) {
-  const isKoios = msg.role !== 'user'
-  const { text, notice } = resolveMessage(msg, t)
-  // Subtle tag under the bubble for a self-refusal or an unfinished (max_steps) run.
-  const stopTag = isKoios && !notice && msg.stopReason === 'refusal' ? t('koios.stopRefused')
-    : isKoios && !notice && msg.stopReason === 'max_steps' ? t('koios.stopMaxSteps') : null
-  // Job 3 (dormant): flatten every step's `refs[]` into one deep-link card row.
-  const resultRefs: KoiosResultRef[] = (msg.steps ?? []).flatMap((s) => s.refs ?? [])
-
-  return (
-    <div style={{ display: 'flex', gap: 8, flexDirection: isKoios ? 'row' : 'row-reverse',
-      alignItems: 'flex-end', animation: isNew ? 'fadeSlideIn 0.2s ease' : 'none' }}>
-      {isKoios && (
-        <div style={{ width: 26, height: 26, borderRadius: '50%', flexShrink: 0, marginBottom: 2,
-          background: GRADIENT, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          {/* GRADIENT embeds the tenant accent — the on-accent token, not a hardcoded white. */}
-          <Bot size={13} color="var(--color-on-accent)" />
-        </div>
-      )}
-      <div style={{ maxWidth: '84%', display: 'flex', flexDirection: 'column',
-        alignItems: isKoios ? 'flex-start' : 'flex-end' }}>
-        <div style={{
-          padding: '9px 13px',
-          borderRadius: isKoios ? '4px 16px 16px 16px' : '16px 4px 16px 16px',
-          fontSize: 13, lineHeight: 1.6, whiteSpace: isKoios && !notice ? 'normal' : 'pre-wrap',
-          background: isKoios ? 'var(--surface)' : GRADIENT,
-          color:      isKoios ? (notice ? 'var(--text-muted)' : 'var(--text)') : 'var(--color-on-accent)',
-          border:     isKoios ? '1px solid var(--border)' : 'none',
-          // HUISSTIJL-1: colored glow tied to the gradient bubble background, none of card/float/modal — kept.
-          boxShadow:  isKoios ? 'none' : '0 2px 10px rgba(99,102,241,0.35)',
-        }}>
-          {/* DATUM-1: rewrite any AI-composed ISO date to DD-MM-YYYY before markdown/DOMPurify; assistant replies render basic markdown (bold/lists) through SafeHtml, user text and notices stay plain. */}
-          {isKoios && !notice ? <SafeHtml html={koiosMarkdownToHtml(humanizeIsoDates(text ?? ''))} /> : text}
-        </div>
-        {stopTag && <div style={{ marginTop: 4, fontSize: 10, color: 'var(--text-muted)' }}>{stopTag}</div>}
-        {/* Job 2 (dormant): a proposed write waiting for the user's confirm/cancel. */}
-        {isKoios && !notice && msg.pendingAction && <KoiosPendingActionCard action={msg.pendingAction} />}
-        {/* Job 3 (dormant): deep-link cards for any refs a read-tool step returned. */}
-        {isKoios && !notice && resultRefs.length > 0 && <KoiosResultCards refs={resultRefs} />}
-        {isKoios && !notice && <KoiosSteps steps={msg.steps} t={t} />}
-        {isKoios && !notice && msg.stopReason !== 'not_configured' && (
-          <KoiosUsage usage={msg.usage} model={msg.model} t={t} locale={locale} options={modelOptions} />
-        )}
-      </div>
-    </div>
-  )
-}
-
-// ── Typing indicator ──────────────────────────────────────────────────────────
-function TypingIndicator() {
-  return (
-    <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end' }}>
-      <div style={{ width: 26, height: 26, borderRadius: '50%', flexShrink: 0,
-        background: GRADIENT, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <Bot size={13} color="var(--color-on-accent)" />
-      </div>
-      <div style={{ padding: '10px 14px', borderRadius: '4px 16px 16px 16px',
-        background: 'var(--surface)', border: '1px solid var(--border)',
-        display: 'flex', gap: 4, alignItems: 'center' }}>
-        {[0, 1, 2].map(i => (
-          <span key={i} style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--color-violet)',
-            display: 'block', animation: 'bounce 1.2s infinite', animationDelay: `${i * 0.18}s` }} />
-        ))}
-      </div>
-    </div>
-  )
-}
+import type { KoiosContextRef } from '@/types/koios'
 
 // ── Main panel ────────────────────────────────────────────────────────────────
 export default function KoiosPanel({ open, onClose, onNavigate }: { open?: boolean; onClose?: () => void; onNavigate?: (page: string, intent?: unknown) => void }) {
@@ -350,6 +249,13 @@ export default function KoiosPanel({ open, onClose, onNavigate }: { open?: boole
           boxShadow: focused ? '0 0 0 3px rgba(99,102,241,0.1)' : 'var(--shadow-card)',
           transition: 'border-color var(--motion-fast), box-shadow var(--motion-fast)',
         }}>
+          {/* ARIA-in-HTML formally disallows role="combobox" on a <textarea>, but the
+              composer doubles as the mention-combobox input by design: it drives the
+              floating KoiosMentionMenu listbox via aria-activedescendant while staying
+              the one place the user types, so wrapping it in an indirection <div> would
+              break the existing activedescendant wiring for no accessibility gain. This
+              follows the ARIA 1.2 combobox pattern (editable combobox with list popup),
+              which allows the combobox role on any single/multi-line text input. */}
           <textarea
             ref={textareaRef}
             value={input}

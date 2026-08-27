@@ -345,14 +345,14 @@ function KoiosMentionMenu({
           sections. Same ARIA split as the scoped block: heading/notices are
           presentational, results sit in their own labelled role="group". */}
       {!scoped && defaultSearchActive && (
-        <div>
+        <div role="presentation">
           {fanOutCategories.map((c) => {
             const group = multi[c.id]
             if (!group) return null
             if (!group.loading && !group.error && group.results.length === 0) return null
             const headingId = `koios-mention-group-${c.id}-heading`
             return (
-              <div key={c.id}>
+              <div key={c.id} role="presentation">
                 <GroupLabel id={headingId} style={{ padding: '8px 12px 4px' }}>{t(c.labelKey)}</GroupLabel>
                 {group.loading && <Caption as="div" style={{ padding: '6px 12px 10px' }}>{t('loading')}</Caption>}
                 {/* One category failing never sinks the others (its own AbortController) —
@@ -384,7 +384,7 @@ function KoiosMentionMenu({
       {/* Category list — real tenant totals stream in via `counts`. Same ARIA
           split: heading is presentational, the rows are a labelled group. */}
       {!scoped && categories.length > 0 && (
-        <div>
+        <div role="presentation">
           <GroupLabel id="koios-mention-group-categories-heading" style={{ padding: '8px 12px 4px' }}>{t('koios.addContext')}</GroupLabel>
           <div role="group" aria-labelledby="koios-mention-group-categories-heading">
             {categories.map((c) => {

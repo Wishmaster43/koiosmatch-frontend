@@ -16,9 +16,10 @@
 import { Plus, Sparkles, Maximize2, Minimize2, X } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import type { TFn } from '@/types/koios'
+import { GRADIENT } from './koiosMessageParts'
 
 // gradient used for the assistant avatar + user bubble + this header's brand dot.
-const GRADIENT = 'linear-gradient(135deg,var(--color-primary),var(--color-violet))'
+
 
 interface KoiosHeaderProps {
   connected: boolean
