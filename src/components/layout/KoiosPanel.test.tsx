@@ -391,3 +391,41 @@ describe('KoiosPanel · landing cards close/summon (3b)', () => {
   })
 })
 
+
+// Danny 27-08, three composer findings: stacked @'s, Tab-completion, Escape-cancel.
+describe('KoiosPanel · mention polish (27-08)', () => {
+  it('the @ button never stacks a second @ while the menu is open', async () => {
+    renderWithQuery(<KoiosPanel open onClose={() => {}} onNavigate={() => {}} />)
+    await screen.findByText('common:koios.radar.empty')
+    const atButton = screen.getByRole('button', { name: 'koios.addContext' })
+    fireEvent.click(atButton)
+    fireEvent.click(atButton)
+    fireEvent.click(atButton)
+    expect((screen.getByPlaceholderText('koios.taskPlaceholder') as HTMLTextAreaElement).value).toBe('@')
+  })
+
+  it('Escape cancels the half-typed mention fragment entirely', async () => {
+    renderWithQuery(<KoiosPanel open onClose={() => {}} onNavigate={() => {}} />)
+    await screen.findByText('common:koios.radar.empty')
+    const textarea = screen.getByPlaceholderText('koios.taskPlaceholder')
+    fireEvent.change(textarea, { target: { value: 'plan iets @Kandidaten emma' } })
+    fireEvent.keyDown(textarea, { key: 'Escape' })
+    expect((textarea as HTMLTextAreaElement).value).toBe('plan iets ')
+  })
+
+  it('Tab picks the highlighted mention option while the menu is open', async () => {
+    mockGet.mockImplementation((url: string) => url === '/candidates'
+      ? Promise.resolve({ data: { data: [{ id: 'c-9', name: 'Emma Dekker' }] } })
+      : Promise.resolve({ data: { data: [] } }))
+    renderWithQuery(<KoiosPanel open onClose={() => {}} onNavigate={() => {}} />)
+    await screen.findByText('common:koios.radar.empty')
+    const textarea = screen.getByPlaceholderText('koios.taskPlaceholder')
+    fireEvent.change(textarea, { target: { value: '@emma' } })
+    await waitFor(() => expect(screen.getAllByText('Emma Dekker').length).toBeGreaterThan(0))
+    fireEvent.keyDown(textarea, { key: 'ArrowDown' })
+    fireEvent.keyDown(textarea, { key: 'Tab' })
+    expect((textarea as HTMLTextAreaElement).value).toContain('@Emma Dekker')
+  })
+})
+
+

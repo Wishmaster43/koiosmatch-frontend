@@ -108,7 +108,17 @@ export function useKoiosComposerKeys({ input, setInput, addMentionRef, textareaR
       e.preventDefault()
       return true
     }
-    if (e.key === 'Escape') { closeMentionMenu(); return true }
+    // Tab completes the highlighted option while the menu is open (Danny 27-08:
+    // "met Tab moet je het kunnen afmaken") — space cannot (names contain
+    // spaces), and with the menu CLOSED Tab keeps its normal focus behaviour;
+    // Shift+Tab always keeps reverse focus.
+    if (e.key === 'Tab' && !e.shiftKey && showMention && mentionMenuRef.current?.pickHighlighted()) {
+      e.preventDefault()
+      return true
+    }
+    // A second '@' while the fresh menu is open would only stack markers.
+    if (e.key === '@' && showMention && mentionQ === '') { e.preventDefault(); return true }
+    if (e.key === 'Escape') { if (showMention) cancelMention(); else closeMentionMenu(); return true }
     return false
   }
 
@@ -145,11 +155,26 @@ export function useKoiosComposerKeys({ input, setInput, addMentionRef, textareaR
 
   // The "@" toolbar button — same trigger insert as typing "@" manually.
   const openMentionTrigger = () => {
-    setInput(v => v + '@')
+    // Idempotent (Danny 27-08, "@@@@"-screenshot): while the menu is already
+    // open — or the draft already ends in '@' — the button only refocuses; it
+    // never stacks another '@'.
+    if (!showMention) setInput(v => (v.endsWith('@') ? v : v + '@'))
     setShowMention(true)
     setMentionQ('')
     setActiveCategory(null)
     textareaRef.current?.focus()
+  }
+
+  // Explicit cancel (Danny 27-08 "fix ook de canceled"): Escape removes the
+  // half-typed mention fragment ("@Kandidaten emma") instead of leaving it as
+  // stray text; an outside click still only CLOSES (clicking away to do
+  // something else must never eat typed text).
+  const cancelMention = () => {
+    setInput(v => {
+      const lastAt = v.lastIndexOf('@')
+      return lastAt === -1 ? v : v.slice(0, lastAt)
+    })
+    closeMentionMenu()
   }
 
   return {
