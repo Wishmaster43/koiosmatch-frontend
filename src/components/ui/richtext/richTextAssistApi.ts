@@ -87,13 +87,16 @@ export const ACTION_TYPE_LABEL_NL: Record<RichTextAssistActionType, string> = {
 // combined modes return BOTH in one response — one discriminated result so
 // the caller never has to guess the shape by mode alone.
 export type RichTextAssistResult =
-  | { kind: 'text'; text: string }
-  | { kind: 'actions'; items: RichTextAssistActionItem[] }
-  | { kind: 'combined'; text: string; items: RichTextAssistActionItem[] }
+  | { kind: 'text'; text: string; promptLogId?: string }
+  | { kind: 'actions'; items: RichTextAssistActionItem[]; promptLogId?: string }
+  | { kind: 'combined'; text: string; items: RichTextAssistActionItem[]; promptLogId?: string }
 
-interface ApiTextResponse { text: string }
-interface ApiActionsResponse { items: RichTextAssistActionItem[] }
-interface ApiCombinedResponse { text: string; items: RichTextAssistActionItem[] }
+// Every mode arm also returns prompt_log_id (KoiosNoteAssistController, measured
+// 28-08: recordPrompt "up/down can tie back to exactly this answer") — tolerant
+// optional so an older cached response still maps.
+interface ApiTextResponse { text: string; prompt_log_id?: string }
+interface ApiActionsResponse { items: RichTextAssistActionItem[]; prompt_log_id?: string }
+interface ApiCombinedResponse { text: string; items: RichTextAssistActionItem[]; prompt_log_id?: string }
 
 // A previously-suggested/known action item, sent back so the model can dedupe
 // against it instead of re-suggesting the same appointment/task twice (Danny's
@@ -119,12 +122,14 @@ export async function assistRichText(
     // K-155 contract — the panel's own item count never approaches that).
     { text, language, mode, ...(knownItems && knownItems.length > 0 ? { known_items: knownItems } : {}) },
     { signal, timeout: 60000, quietStatuses: [402, 422, 503] })
-  if (mode === 'actions') return { kind: 'actions', items: (res.data as ApiActionsResponse).items ?? [] }
+  const promptLogId = typeof (res.data as { prompt_log_id?: unknown }).prompt_log_id === 'string'
+    ? (res.data as { prompt_log_id: string }).prompt_log_id : undefined
+  if (mode === 'actions') return { kind: 'actions', items: (res.data as ApiActionsResponse).items ?? [], promptLogId }
   if (mode === 'process' || mode === 'summarize_process') {
     const combined = res.data as ApiCombinedResponse
-    return { kind: 'combined', text: combined.text ?? '', items: combined.items ?? [] }
+    return { kind: 'combined', text: combined.text ?? '', items: combined.items ?? [], promptLogId }
   }
-  return { kind: 'text', text: (res.data as ApiTextResponse).text ?? '' }
+  return { kind: 'text', text: (res.data as ApiTextResponse).text ?? '', promptLogId }
 }
 
 // Entities KoiosEntityGenerateController can write a suggestion for — mirrors its

@@ -146,3 +146,28 @@ describe('NoteAssistSection · failure', () => {
     expect(screen.getByRole('button', { name: 'Verwerken' })).toBeInTheDocument()
   })
 })
+
+
+// KOIOS-FEEDBACK-FE-1, second surface: an assist result carrying prompt_log_id
+// renders the thumbs (surface='note_assist'); one without stays calm.
+describe('NoteAssistSection — feedback thumbs (note_assist surface)', () => {
+  it('renders the thumbs only when the assist result carries promptLogId', async () => {
+    vi.mocked(assistNote).mockReset()
+    const user = userEvent.setup()
+    vi.mocked(assistNote).mockResolvedValue({ kind: 'combined', text: 'Better.', items: [], promptLogId: 'pl-9' })
+    render(<NoteAssistSection body="<p>Original</p>" onApply={vi.fn()} language="en" />)
+    await user.click(screen.getByRole('button', { name: 'Verwerken' }))
+    await screen.findByText('Better.')
+    expect(screen.getByRole('button', { name: 'Nuttig' })).toBeInTheDocument()
+  })
+
+  it('stays calm when the assist result has no promptLogId', async () => {
+    vi.mocked(assistNote).mockReset()
+    const user = userEvent.setup()
+    vi.mocked(assistNote).mockResolvedValue({ kind: 'combined', text: 'Zonder log.', items: [] })
+    render(<NoteAssistSection body="<p>Original</p>" onApply={vi.fn()} language="en" />)
+    await user.click(screen.getByRole('button', { name: 'Verwerken' }))
+    await screen.findByText('Zonder log.')
+    expect(screen.queryByRole('button', { name: 'Nuttig' })).not.toBeInTheDocument()
+  })
+})

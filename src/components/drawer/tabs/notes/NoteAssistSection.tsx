@@ -42,6 +42,7 @@ import { useNoteAssist } from './useNoteAssist'
 const AssistActionsResultsPanel = lazy(() => import('@/components/ui/richtext/AssistActionsResultsPanel'))
 import { applyAssistResult, toPlainText } from './noteAssistApply'
 import AssistTextPreview from '@/components/ui/richtext/AssistTextPreview'
+import KoiosFeedback from '@/components/layout/koios/KoiosFeedback'
 import NoteKoiosModeToggle from './NoteKoiosModeToggle'
 import { Caption, GroupLabel } from '@/components/ui/typography'
 import { ACTION_TYPE_LABEL_NL } from './noteAssistApi'
@@ -163,6 +164,14 @@ export default function NoteAssistSection({ body, onApply, language, onItems, kn
             <Button variant="primary" size="sm" onClick={handleApply}><Check size={13} /> {t('notesAssist.apply', { defaultValue: 'Overnemen' })}</Button>
             <Button variant="secondary" size="sm" onClick={discard}><X size={13} /> {t('notesAssist.discard', { defaultValue: 'Verwerpen' })}</Button>
           </div>
+        </div>
+      )}
+
+      {/* KOIOS-FEEDBACK-FE-1, second surface: the server logs every assist answer
+          (prompt_log_id in every mode arm) — thumbs tie back to exactly this one. */}
+      {status === 'success' && result?.promptLogId && (
+        <div style={{ marginTop: 6 }}>
+          <KoiosFeedback promptLogId={result.promptLogId} surface="note_assist" t={t} />
         </div>
       )}
     </div>
