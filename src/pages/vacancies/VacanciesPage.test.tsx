@@ -129,7 +129,7 @@ describe('VacanciesPage · filter-panel parity (status/published/agent/archived)
     // CONTIGUITY is the real invariant (Opus filterpaneel-verify): the sidebar
     // renders a heading whenever the category CHANGES, so a stranded group
     // paints a duplicate section header. Categories must never interleave.
-    const cats = capturedGroups.map((g: { category?: string }) => g.category).filter(Boolean)
+    const cats = capturedGroups.map(g => (g as unknown as { category?: string }).category).filter(Boolean) as string[]
     const changes = cats.filter((c: string, i: number) => c !== cats[i - 1])
     expect(new Set(changes).size).toBe(changes.length)
     // And the canonical order holds: general → organisation → display.

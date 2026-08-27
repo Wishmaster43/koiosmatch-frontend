@@ -2855,6 +2855,13 @@
       "waMessages": "Nachrichten",
       "waTokens": "Tokens",
       "waProviderBilled": "über den Anbieter abgerechnet"
+    },
+    "subscription": {
+      "title": "Abonnement",
+      "base": "Paket-Grundpreis",
+      "usersLine": "{{active}} Benutzer ({{included}} inklusive)",
+      "overLimit": "{{extra}} Benutzer über dem Paket",
+      "total": "Gesamt diesen Monat"
     }
   },
   "jobs": {

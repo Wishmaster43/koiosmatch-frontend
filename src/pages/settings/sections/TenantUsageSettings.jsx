@@ -17,6 +17,7 @@ import { Mono, GroupLabel, SectionTitle, BodyText } from '@/components/ui/typogr
 import { useNumberFormat } from '@/lib/formatters'
 import { card } from './usageCardStyles'
 import { fieldSelectStyle } from '@/components/forms/fieldMetrics'
+import AdminSubscriptionCard from './usage/AdminSubscriptionCard'
 // App-wide active locale (DATUM-1/LANE-B) — feeds the month-picker labels.
 import { useLocale } from '@/lib/datetime'
 
@@ -129,6 +130,11 @@ export default function TenantUsageSettings() {
                 {t('usage.nothingUsed')}
               </p>
             )}
+
+            {/* BILLING-FACTUUR-1: the subscription split (package · users · add-ons
+                · total) straight from the usage payload; renders nothing on an
+                older BE without the block. */}
+            <AdminSubscriptionCard subscription={usage?.subscription} />
 
             {/* Connectors (per connector — for invoicing), a real card. */}
             <div style={card}>

@@ -2855,6 +2855,13 @@
       "waMessages": "messages",
       "waTokens": "tokens",
       "waProviderBilled": "billed by the provider"
+    },
+    "subscription": {
+      "title": "Subscription",
+      "base": "Package base price",
+      "usersLine": "{{active}} users ({{included}} included)",
+      "overLimit": "{{extra}} users above the package",
+      "total": "Total this month"
     }
   },
   "jobs": {

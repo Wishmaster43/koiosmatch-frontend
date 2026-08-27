@@ -2855,6 +2855,13 @@
       "waMessages": "berichten",
       "waTokens": "tokens",
       "waProviderBilled": "via provider gefactureerd"
+    },
+    "subscription": {
+      "title": "Abonnement",
+      "base": "Basisprijs pakket",
+      "usersLine": "{{active}} gebruikers ({{included}} inbegrepen)",
+      "overLimit": "{{extra}} gebruikers boven het pakket",
+      "total": "Totaal deze maand"
     }
   },
   "jobs": {
