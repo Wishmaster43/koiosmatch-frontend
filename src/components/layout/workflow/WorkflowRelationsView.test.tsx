@@ -66,6 +66,44 @@ describe('WorkflowRelationsView', () => {
 
 // WF-WACHTRIJ-FE-1: the queue badge per related workflow (K-171) — only ever
 // renders when there is something in the queue, never a noisy "0".
+// WF-RELATIONS-BOOM-1: the recursive tree — lazy expand fetches the CHILD's own
+// relations, a failing relation carries the visible warning marker, and a cycle
+// renders the loop marker instead of an expander.
+describe('WorkflowRelationsView · recursive tree', () => {
+  it('renders the warning marker on a child whose last run failed', async () => {
+    mockedGet.mockResolvedValue({ data: { parents: [], children: [
+      { id: 'c1', name: 'Kindflow', status: 'active', last_run_status: 'failed' },
+    ] } })
+    render(<WorkflowRelationsView workflowId="wf-1" />)
+    expect(await screen.findByRole('img', { name: 'Laatste run mislukt' })).toBeInTheDocument()
+  })
+
+  it('expanding a child fetches THAT workflow\'s relations and renders its nested child', async () => {
+    mockedGet.mockImplementation((url: string) => {
+      if (url === '/workflows/wf-1/relations') return Promise.resolve({ data: { parents: [], children: [{ id: 'c1', name: 'Kindflow', status: 'active' }] } })
+      if (url === '/workflows/c1/relations') return Promise.resolve({ data: { parents: [], children: [{ id: 'g1', name: 'Kleinkindflow', status: 'active' }] } })
+      return Promise.resolve({ data: { parents: [], children: [] } })
+    })
+    render(<WorkflowRelationsView workflowId="wf-1" />)
+    fireEvent.click(await screen.findByRole('button', { name: 'Onderliggende workflows tonen' }))
+    expect(await screen.findByText('Kleinkindflow')).toBeInTheDocument()
+    expect(mockedGet).toHaveBeenCalledWith('/workflows/c1/relations')
+  })
+
+  it('a cycle back to an ancestor renders the loop marker, never an expander', async () => {
+    mockedGet.mockImplementation((url: string) => {
+      if (url === '/workflows/wf-1/relations') return Promise.resolve({ data: { parents: [], children: [{ id: 'c1', name: 'Kindflow', status: 'active' }] } })
+      if (url === '/workflows/c1/relations') return Promise.resolve({ data: { parents: [], children: [{ id: 'wf-1', name: 'Rootflow', status: 'active' }] } })
+      return Promise.resolve({ data: { parents: [], children: [] } })
+    })
+    render(<WorkflowRelationsView workflowId="wf-1" />)
+    fireEvent.click(await screen.findByRole('button', { name: 'Onderliggende workflows tonen' }))
+    expect(await screen.findByRole('img', { name: 'Deze workflow zit al in deze tak (lus)' })).toBeInTheDocument()
+    // The looping row offers NO further expander (one expander total: the outer child's, now collapsed-state toggled).
+    expect(screen.getAllByRole('button', { name: /Onderliggende workflows/ })).toHaveLength(1)
+  })
+})
+
 describe('WorkflowRelationsView · queue badge', () => {
   it('renders the queue badge when the related workflow has entries', async () => {
     mockedGet.mockImplementation((url: string) => {

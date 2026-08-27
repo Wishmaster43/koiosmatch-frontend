@@ -1186,7 +1186,11 @@
     "loadFailed": "Beziehungen konnten nicht geladen werden",
     "runsCount_one": "{{count}} Ausführung",
     "runsCount_other": "{{count}} Ausführungen",
-    "lastRun": "Letzter Lauf: {{date}} {{time}}"
+    "lastRun": "Letzter Lauf: {{date}} {{time}}",
+    "childFailing": "Letzter Lauf fehlgeschlagen",
+    "expand": "Untergeordnete Workflows anzeigen",
+    "collapse": "Untergeordnete Workflows ausblenden",
+    "cycle": "Dieser Workflow kommt in diesem Zweig bereits vor (Schleife)"
   },
   "notFound": {
     "title": "Workflow nicht gefunden",

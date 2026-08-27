@@ -55,3 +55,40 @@ export function useWorkflowRelations(workflowId?: string | number) {
 
   return { parents, children, loading, error, retry, toggleStatus }
 }
+
+// WF-RELATIONS-BOOM-1 (Danny 27-08 via adviezen-akkoord: recursieve boom): one
+// tree node's OWN children, loaded lazily on expand — same endpoint per node,
+// children direction only. Enabled gates the fetch so collapsed nodes cost nothing.
+export function useWorkflowChildren(workflowId: string | number, enabled: boolean) {
+  const [rows, setRows] = useState<WorkflowRelation[]>([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(false)
+  useEffect(() => {
+    if (!enabled) return
+    let alive = true
+    setLoading(true); setError(false)
+    api.get(`/workflows/${workflowId}/relations`)
+      .then(res => {
+        if (!alive) return
+        const body = unwrap<{ children?: WorkflowRelation[] }>(res) ?? {}
+        setRows(body.children ?? [])
+      })
+      .catch(() => { if (alive) setError(true) })
+      .finally(() => { if (alive) setLoading(false) })
+    return () => { alive = false }
+  }, [workflowId, enabled])
+
+  // Same optimistic PUT + rollback as the top-level toggle, scoped to this node's list.
+  const toggleRow = useCallback(async (row: WorkflowRelation) => {
+    const prevStatus = row.status
+    const nextStatus = prevStatus === 'active' ? 'inactive' : 'active'
+    setRows(prev => prev.map(r => r.id === row.id ? { ...r, status: nextStatus } : r))
+    try {
+      await api.put(`/workflows/${row.id}`, { status: nextStatus, active: nextStatus === 'active' })
+    } catch {
+      setRows(prev => prev.map(r => r.id === row.id ? { ...r, status: prevStatus } : r))
+    }
+  }, [])
+
+  return { rows, loading, error, toggleRow }
+}

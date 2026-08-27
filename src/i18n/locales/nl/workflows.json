@@ -1186,7 +1186,11 @@
     "loadFailed": "Relaties laden mislukt",
     "runsCount_one": "{{count}} uitvoering",
     "runsCount_other": "{{count}} uitvoeringen",
-    "lastRun": "Laatste run: {{date}} {{time}}"
+    "lastRun": "Laatste run: {{date}} {{time}}",
+    "childFailing": "Laatste run mislukt",
+    "expand": "Onderliggende workflows tonen",
+    "collapse": "Onderliggende workflows verbergen",
+    "cycle": "Deze workflow zit al in deze tak (lus)"
   },
   "notFound": {
     "title": "Workflow niet gevonden",

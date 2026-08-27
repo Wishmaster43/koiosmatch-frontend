@@ -6,9 +6,11 @@
  * workflow's own editor. Four UI states; each list renders independently since
  * a workflow can have parents with no children or vice versa.
  */
-import { GitBranch, ArrowDownToLine, ArrowUpFromLine, ListOrdered } from 'lucide-react'
+import { useState } from 'react'
+import { GitBranch, ArrowDownToLine, ArrowUpFromLine, ListOrdered, ChevronRight, AlertTriangle } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import { useWorkflowRelations } from './useWorkflowRelations'
+import { useWorkflowRelations, useWorkflowChildren } from './useWorkflowRelations'
+import Button from '@/components/ui/Button'
 import { PageTitle, SectionTitle, Caption } from '@/components/ui/typography'
 import EntityLink from '@/components/ui/EntityLink'
 import StatusPill from '@/components/ui/StatusPill'
@@ -45,15 +47,26 @@ function relationStatusColor(status?: string) {
 
 // One parent/child row: name (deep-links into that workflow's editor), status,
 // run count, last run, and the active toggle.
-function RelationRow({ row, onToggle }: { row: WorkflowRelation; onToggle: () => void }) {
+function RelationRow({ row, onToggle, expander }: { row: WorkflowRelation; onToggle: () => void; expander?: React.ReactNode }) {
   const { t } = useTranslation('workflows')
   const { formatDate, formatTime } = useDateFormat()
   const active = row.status === 'active'
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 14px',
                   border: '1px solid var(--border)', borderRadius: 10, background: 'var(--surface)' }}>
+      {expander}
       <div style={{ flex: 1, minWidth: 0 }}>
-        <EntityLink page="aiagents" id={row.id}>{row.name ?? String(row.id)}</EntityLink>
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+          <EntityLink page="aiagents" id={row.id}>{row.name ?? String(row.id)}</EntityLink>
+          {/* WF-RELATIONS-BOOM-1: the at-a-glance warning marker on a failing
+              relation — icon + title/aria, never colour alone (§6). */}
+          {row.last_run_status === 'failed' && (
+            <span title={t('relations.childFailing')} style={{ display: 'inline-flex' }}>
+              <AlertTriangle size={13} color="var(--color-danger-text)" role="img"
+                aria-label={t('relations.childFailing')} />
+            </span>
+          )}
+        </div>
         <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 8, marginTop: 4 }}>
           <StatusPill label={t(active ? 'status.active' : 'status.inactive')} color={relationStatusColor(row.status)} />
           <Caption>{t('relations.runsCount', { count: row.runs_count ?? 0 })}</Caption>
@@ -68,6 +81,51 @@ function RelationRow({ row, onToggle }: { row: WorkflowRelation; onToggle: () =>
       <Toggle tone="success" checked={active} onChange={onToggle}
         ariaLabel={t(active ? 'list.setInactive' : 'list.setActive')}
         title={t(active ? 'list.setInactive' : 'list.setActive')} />
+    </div>
+  )
+}
+
+// WF-RELATIONS-BOOM-1 (Danny 27-08): one child node in the recursive Make-style
+// tree — its own row plus a lazily loaded branch of ITS children. `branch`
+// carries every workflow id from the root down to here, so a cycle stops the
+// recursion with an honest marker instead of looping.
+function ChildNode({ row, branch, onToggle }: { row: WorkflowRelation; branch: ReadonlySet<string>; onToggle: () => void }) {
+  const { t } = useTranslation('workflows')
+  const [open, setOpen] = useState(false)
+  const isCycle = branch.has(String(row.id))
+  const expander = isCycle
+    ? (
+      <span title={t('relations.cycle')} style={{ width: 28, display: 'inline-flex', justifyContent: 'center', color: 'var(--text-muted)' }}>
+        <GitBranch size={12} role="img" aria-label={t('relations.cycle')} />
+      </span>
+    ) : (
+      <Button variant="ghost" iconOnly size="sm" aria-expanded={open}
+        aria-label={t(open ? 'relations.collapse' : 'relations.expand')}
+        onClick={() => setOpen(v => !v)}>
+        <ChevronRight size={13} style={{ transform: open ? 'rotate(90deg)' : undefined, transition: 'transform var(--motion-fast)' }} />
+      </Button>
+    )
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <RelationRow row={row} onToggle={onToggle} expander={expander} />
+      {open && !isCycle && <ChildBranch parentId={row.id} branch={new Set([...branch, String(row.id)])} />}
+    </div>
+  )
+}
+
+// The lazily fetched branch under an expanded node — its own three states,
+// indented one step per depth; rows recurse via ChildNode again.
+function ChildBranch({ parentId, branch }: { parentId: string | number; branch: ReadonlySet<string> }) {
+  const { t } = useTranslation('workflows')
+  const { rows, loading, error, toggleRow } = useWorkflowChildren(parentId, true)
+  return (
+    <div style={{ marginLeft: 26, display: 'flex', flexDirection: 'column', gap: 8 }}>
+      {loading && <Caption>{t('relations.loading')}</Caption>}
+      {!loading && error && <ErrorBanner variant="subtle">{t('relations.loadFailed')}</ErrorBanner>}
+      {!loading && !error && rows.length === 0 && <Caption>{t('relations.noChildren')}</Caption>}
+      {!loading && !error && rows.map(r => (
+        <ChildNode key={r.id} row={r} branch={branch} onToggle={() => toggleRow(r)} />
+      ))}
     </div>
   )
 }
@@ -129,8 +187,23 @@ export default function WorkflowRelationsView({ workflowId }: { workflowId?: str
           <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
             <RelationSection title={t('relations.parents')} Icon={ArrowUpFromLine} rows={parents}
               emptyLabel={t('relations.noParents')} onToggle={row => toggleStatus(row, 'parents')} />
-            <RelationSection title={t('relations.children')} Icon={ArrowDownToLine} rows={children}
-              emptyLabel={t('relations.noChildren')} onToggle={row => toggleStatus(row, 'children')} />
+            {/* Children render as the recursive tree (WF-RELATIONS-BOOM-1); parents
+                stay flat — upward chains read better as a plain list. */}
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}>
+                <ArrowDownToLine size={14} color="var(--text-muted)" />
+                <SectionTitle as="span">{t('relations.children')}</SectionTitle>
+              </div>
+              {children.length === 0
+                ? <Caption>{t('relations.noChildren')}</Caption>
+                : <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    {children.map(row => (
+                      <ChildNode key={row.id} row={row}
+                        branch={new Set([String(workflowId ?? '')])}
+                        onToggle={() => toggleStatus(row, 'children')} />
+                    ))}
+                  </div>}
+            </div>
           </div>
         )}
       </div>

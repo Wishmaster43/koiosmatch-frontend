@@ -1186,7 +1186,11 @@
     "loadFailed": "Error al cargar las relaciones",
     "runsCount_one": "{{count}} ejecución",
     "runsCount_other": "{{count}} ejecuciones",
-    "lastRun": "Última ejecución: {{date}} {{time}}"
+    "lastRun": "Última ejecución: {{date}} {{time}}",
+    "childFailing": "Última ejecución fallida",
+    "expand": "Mostrar workflows anidados",
+    "collapse": "Ocultar workflows anidados",
+    "cycle": "Este workflow ya aparece en esta rama (bucle)"
   },
   "notFound": {
     "title": "Workflow no encontrada",

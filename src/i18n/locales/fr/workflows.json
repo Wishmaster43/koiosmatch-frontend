@@ -1186,7 +1186,11 @@
     "loadFailed": "Échec du chargement des relations",
     "runsCount_one": "{{count}} exécution",
     "runsCount_other": "{{count}} exécutions",
-    "lastRun": "Dernière exécution : {{date}} {{time}}"
+    "lastRun": "Dernière exécution : {{date}} {{time}}",
+    "childFailing": "Dernière exécution échouée",
+    "expand": "Afficher les workflows imbriqués",
+    "collapse": "Masquer les workflows imbriqués",
+    "cycle": "Ce workflow figure déjà dans cette branche (boucle)"
   },
   "notFound": {
     "title": "Workflow introuvable",
