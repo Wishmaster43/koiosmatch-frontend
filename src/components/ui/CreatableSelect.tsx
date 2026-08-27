@@ -74,6 +74,11 @@ interface CreatableSelectProps {
   // open/close toggle; omitted = the existing bordered trigger, so every
   // FORM-role call site (pick a value to save) renders byte-for-byte unchanged.
   renderTrigger?: (toggle: () => void) => ReactNode
+  // W30: opt-in server-side search (mirrors SearchSelect's own `onSearch`) — the
+  // typed query is debounced and forwarded here instead of filtering `options`
+  // locally, for pickers whose full list is too large to load in one page.
+  // Omitted (every existing call site) keeps the current client-side filter.
+  onSearch?: (query: string) => void
 }
 
 // The house searchable-dropdown that can also add a value (never a bare <select>,
@@ -81,7 +86,7 @@ interface CreatableSelectProps {
 export default function CreatableSelect({
   id, 'aria-labelledby': ariaLabelledBy,
   value, options = [], onChange, placeholder, allowCreate = true, menuWidth = 220, style,
-  clearable = false, clearLabel, renderTrigger,
+  clearable = false, clearLabel, renderTrigger, onSearch,
 }: CreatableSelectProps) {
   const { t } = useTranslation('common')
   const listId = useId()
@@ -117,6 +122,15 @@ export default function CreatableSelect({
   }, [open])
   useEffect(() => { if (open) inputRef.current?.focus() }, [open])
 
+  // W30: server-side search — when `onSearch` is given, debounce the typed query
+  // up to the parent (mirrors SearchSelect's identical debounce) instead of
+  // filtering `options` locally below.
+  useEffect(() => {
+    if (!onSearch) return
+    const id = setTimeout(() => onSearch(query), 250)
+    return () => clearTimeout(id)
+  }, [query, onSearch])
+
   // Document-level, CAPTURE-phase Escape (mirrors SelectMenu — see its doc comment
   // for the full rationale): closes the popover even right after opening, before
   // focus has moved into the portalled search input, instead of relying solely on
@@ -150,7 +164,9 @@ export default function CreatableSelect({
   const current = opts.find(o => o.value === value)
   const q = query.trim()
   const ql = q.toLowerCase()
-  const filtered = ql ? opts.filter(o => o.label.toLowerCase().includes(ql)) : opts
+  // W30: server-search callers already filtered `opts` themselves — filtering
+  // again locally would double-narrow on a query the server already applied.
+  const filtered = onSearch ? opts : (ql ? opts.filter(o => o.label.toLowerCase().includes(ql)) : opts)
   const exists = opts.some(o => o.label.toLowerCase() === ql)
   const canCreate = allowCreate && q.length > 0 && !exists
 

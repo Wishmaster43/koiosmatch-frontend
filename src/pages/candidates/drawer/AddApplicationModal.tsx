@@ -1,74 +1,40 @@
 /**
  * AddApplicationModal — "+ Solliciteren" from the candidate Match tab: couple the
- * candidate to a vacancy in a chosen funnel phase. APP-VACANCY-OPTIONAL-1 (CMBE
- * 2e72cb1e): vacancy_id is nullable server-side — an OPEN application (no vacancy
- * yet, coupled later via PATCH) is a real flow, so the picker is optional and the
- * save button no longer waits for it. Picking "hired" without a vacancy is refused
- * by the backend with a Dutch 422 message, surfaced by the existing error handler.
- * On success the host reloads the applications list.
+ * candidate to a vacancy in a chosen funnel phase. vacancy_id is nullable
+ * server-side (APP-VACANCY-OPTIONAL-1) — an open application without a vacancy
+ * yet is a real backend flow, so the picker is optional and Create never waits
+ * on it. Vacancy + phase + owner + source are all searchable pick-only
+ * comboboxes (S24b), owner seeded from the APP-OWNER-1 priority chain (picked
+ * vacancy's recruiter > candidate's own owner > logged-in user) with an
+ * OWNER-DEVIATION-1 soft warning when the final pick still differs — both the
+ * chain and the soft-warning booleans live in useApplicationOwnerChain.
  *
- * S24b (Danny 16-07): vacancy + phase are both searchable pickers (CreatableSelect,
- * allowCreate=false — a vacancy/stage is a real relational id, never free text); the
- * phase picker now actually WORKS server-side — POST /applications previously only
- * accepted `phase_key`, which the backend silently ignored on create (APP-CREATE-
- * STAGE-1 fixed this), so this now sends the real `application_stage_id` and
- * preselects the tenant's flagged default stage (falling back to the first stage).
+ * The AXIS-MATRIX-2 `application.create` preflight banners on warn and
+ * additionally disables Create on block, matching the backend guard.
+ * `initialVacancyId`/`suggestedVacancyId` seed the vacancy picker once
+ * (VACANCY-PREFILL-1 / KOIOS-VOORSTEL-1). With `editApplicationId` the form
+ * PREFILLS from GET /applications/{id} and PATCHes instead of POSTing (punt 5).
  *
- * AXIS-MATRIX-2 (CMFE audit R1): wires the shared action-rule preflight for
- * `application.create` (mirrors MatchModal's match.create) — a warn cell
- * shows an inline banner and still lets the recruiter proceed; a block cell (e.g. an
- * archived/blacklisted candidate) additionally disables Create, matching what the
- * backend's own ApplicationController::store guard will refuse anyway.
+ * APPMODAL-SPLIT-1 (§0.3 split): all state/derivation/effects/submit logic now
+ * lives in useAddApplicationForm — this file stays a thin container wiring the
+ * tenant lookups into the shared field layout below.
  *
- * OWNER-DEVIATION-1 (Danny: "de recruiter moet default zijn degene die de plus
- * drukt", i.e. "the recruiter should default to whoever presses the plus
- * [button]"): the original shape — a Recruiter picker defaulted straight to the
- * logged-in user — is now the LAST rung of APP-OWNER-1's derivation chain below.
- * The soft warning (never a block) stays: when the FINAL chosen recruiter still
- * differs from the candidate's own owner (prop from the drawer's already-loaded
- * record) or the picked vacancy's owner, an inline notice names who owns what;
- * Create stays enabled either way.
- *
- * APP-OWNER-1 (Danny's GO): the owner picker now seeds from a priority chain —
- * (1) the picked vacancy's own recruiter (owner) — VacancyListResource already
- * resolves it on the same /vacancies row useVacancyOptions reads, no extra fetch;
- * (2) else the candidate's own owner (`candidateOwnerId` prop); (3) else the
- * logged-in user (the old OWNER-DEVIATION-1 default). Every rung only proposes a
- * real, ASSIGNABLE tenant user (never a super-admin the server would 422 on).
- * Seeded once: a manual pick is never overwritten, and picking/changing the
- * vacancy AFTER a manual owner change never reseeds it.
- *
- * VACANCY-PREFILL-1 (Danny 06-08, "Solliciteren" from the vacancy-search score
- * panel): `initialVacancyId` seeds the vacancy picker once on mount — a soft
- * prefill, not a lock, so a misklik stays recoverable via the same searchable
- * combobox.
- *
- * EDIT MODE (Danny punt 5, 08-08 — the pencil on a candidate application row):
- * with `editApplicationId` set this form PREFILLS from GET /applications/{id}
- * (vacancy, recruiter, funnel phase) and submits `PATCH /applications/{id}`
- * instead of POSTing — the exact shape MatchModal's own pencil/edit mode uses.
- * Only CHANGED fields go in the payload: UpdateApplicationRequest validates each
- * field `sometimes`, and re-sending an unchanged stage would write a phantom
- * stage transition into the application's own stage history. The create-only
- * seeds (owner derivation chain, default start stage) stand down in edit mode so
- * they can never overwrite what the record already holds.
+ * W30: the vacancy picker now server-searches (useVacancyOptions' `search` arg,
+ * via CreatableSelect's own onSearch) instead of a flat 100-row mount fetch,
+ * and the POST body now also carries `source` + tenant `custom_fields`
+ * (StoreApplicationRequest accepts both), mirroring
+ * pages/applications/AddApplicationModal.tsx's identical fields.
  */
-import { useState, useEffect, useRef, useId } from 'react'
+import { useId } from 'react'
 import { useTranslation } from 'react-i18next'
 import { AlertTriangle } from 'lucide-react'
-import api, { unwrap } from '@/lib/api'
-import { notifyError, notifySuccess } from '@/lib/notify'
-import { extractApiError } from '@/lib/extractApiError'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import KoiosSuggestionBadge from '@/components/ui/KoiosSuggestionBadge'
 import FloatingPanel from '@/components/ui/FloatingPanel'
-import { useVacancyOptions } from '../hooks/useVacancyOptions'
-import { useApplicationStages } from '@/hooks/useApplicationStages'
-import { useActionRulePreflight, ActionRuleBanner } from '@/components/actionrules'
-import { useAuth } from '@/context/AuthContext'
-import { useUsers } from '@/lib/queries'
-import { useApplicationSources } from '@/lib/useApplicationSources'
-import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
+import { ActionRuleBanner } from '@/components/actionrules'
+import { useApplicationModalLookups } from '../hooks/useApplicationModalLookups'
+import { useAddApplicationForm } from '../hooks/useAddApplicationForm'
+import ApplicationCustomFieldsSection from './ApplicationCustomFieldsSection'
 import { CANON_LABEL_STYLE } from '@/components/drawer/fieldRowCanon'
 import type { Id } from '@/types/common'
 import Button from '@/components/ui/Button'
@@ -90,15 +56,9 @@ const pickerMenuWidth = 340
 // picker in this modal must render at the same height as the reference modal.
 const fieldFootprint: React.CSSProperties = { padding: '8px 11px', borderRadius: 8, fontSize: 13 }
 
-// 422 field-error keys are snake_case; map them back to this form's field names.
-const API_TO_FORM: Record<string, string> = {
-  candidate_id: 'candidateId', vacancy_id: 'vacancyId', owner_id: 'ownerId',
-  application_stage_id: 'phase', source: 'source',
-}
-
-// Create-or-edit modal for one candidate's application: owns vacancy/owner/phase/
-// source state, the owner-derivation chain, the AXIS-MATRIX preflight, and the
-// tenant's required-fields gate (create-only), then POSTs or PATCHes.
+// Create-or-edit modal for one candidate's application: wires the tenant lookups
+// (vacancies/stages/users/sources/settings/custom fields) and the AXIS-MATRIX
+// preflight into useAddApplicationForm, then renders the shared field layout.
 export default function AddApplicationModal({ candidateId, candidateOwnerId, candidateOwnerName, initialVacancyId, suggestedVacancyId, editApplicationId, onClose, onCreated }: {
   candidateId: Id
   // OWNER-DEVIATION-1: the candidate's own owner, passed down from the already-
@@ -120,230 +80,33 @@ export default function AddApplicationModal({ candidateId, candidateOwnerId, can
 }) {
   const { t } = useTranslation('candidates')
   const editing = editApplicationId != null
-  // §6: stable id pair linking the Bron label to its combobox trigger.
+  // §6: stable id pairs linking each row's label to its combobox trigger.
+  const vacancyFieldId = useId()
+  const phaseFieldId = useId()
+  const ownerFieldId = useId()
   const sourceFieldId = useId()
-  const vacancyOptions = useVacancyOptions(true)
-  // S24b: the real stage id (not just the slug) — needed to submit application_stage_id.
-  const { stages, defaultStage } = useApplicationStages()
 
-  // APP-OWNER-1: recruiter default inputs — the tenant's assignable users list and
-  // the logged-in user (chain's last rung; mirrors pages/applications/
-  // AddApplicationModal.tsx's identical meIsAssignable guard, a non-tenant login,
-  // e.g. a super-admin, is never proposed as an owner).
-  const { user: me } = useAuth() as unknown as { user: { id?: Id; name?: string } | null }
-  const { data: users = [] } = useUsers() as { data?: { id: Id; name: string }[] }
-  const userOptions = users.map(u => ({ value: String(u.id), label: u.name }))
-  const meIsAssignable = me?.id != null && userOptions.some(o => o.value === String(me.id))
+  // APPMODAL-SPLIT-1: every tenant lookup (vacancies/stages/users/sources/custom
+  // fields/required-flags/AXIS preflight) now lives in this hook.
+  const {
+    vacancyOptions, setVacancySearch, stages, defaultStage,
+    userOptions, meId, meIsAssignable,
+    sourceOptions, sourceAllowFreeEntry,
+    customFieldDefs, simpleCustomFields, textCustomFields,
+    vacancyRequired, phaseRequired, ownerRequired, sourceRequired,
+    appRuleDecision, appRuleBlocked,
+  } = useApplicationModalLookups({ candidateId, editing })
 
-  // Acquisition source (APP-REQUIRED-FE-1 measured gap: this modal had NO source
-  // field at all — pages/applications/AddApplicationModal.tsx's variant already
-  // does) — same searchable/creatable tenant lookup, mirrors ApplicationDetailsCard.
-  const { sources: sourceOptions, allowFreeEntry: sourceAllowFreeEntry } = useApplicationSources()
-
-  // APP-REQUIRED-FE-1: tenant-configurable required fields for this popup (Settings
-  // → Sollicitaties → Verplichte velden) — a flat array, no phase axis, mirroring
-  // `FlatRequiredFieldsGuard('application')` on the backend (create only, hence the
-  // `!editing` gate on the client preflight below, exactly like appRuleBlocked above).
-  const settingsValues = useAllSettings()
-  // Required-ness applies to CREATE only — the backend guard runs on store, never
-  // on update (Opus round 22-08: an ungated flag showed a false asterisk in edit
-  // mode AND removed the VAC-CLEAR-1 crosses there, over-enforcing a rule the
-  // server does not have on PATCH).
-  const requiredActive = !editing
-  const requiredFields = getJsonSetting<string[]>(settingsValues, 'application_required_fields', [])
-  const sourceRequired = requiredActive && requiredFields.includes('source')
-  const vacancyRequired = requiredActive && requiredFields.includes('vacancy_id')
-  const ownerRequired = requiredActive && requiredFields.includes('owner_id')
-  const phaseRequired = requiredActive && requiredFields.includes('application_stage_id')
-
-  // AXIS-MATRIX-2 preflight (mirrors MatchModal's match.create wiring, the
-  // reference implementation): POST /applications enforces application.create against
-  // the candidate server-side (ApplicationController::store) — surface the same
-  // warn/block decision here BEFORE submit. warn stays a banner only (proceed
-  // allowed); block additionally disables the submit button (§3A "calm explanation",
-  // never a silent 422 the recruiter has to decode).
-  const { decision: appRuleDecision } = useActionRulePreflight('application.create', { candidateId: String(candidateId || '') })
-  // Edit mode never creates anything, so the application.create rule may neither
-  // warn nor block there — the decision itself stays loaded (Rules of Hooks), only
-  // its effect on this form is gated.
-  const appRuleBlocked = !editing && appRuleDecision?.effect === 'block'
-
-  // VACANCY-PREFILL-1: seed once from the caller's prop (a lazy initializer, read
-  // only at mount) — the picker still lets the recruiter pick a different vacancy.
-  const [vacancyId, setVacancyId] = useState(() => {
-    if (initialVacancyId != null) return String(initialVacancyId)
-    // Koios suggestion seeds last — a marked proposal, never a silent guess.
-    return suggestedVacancyId != null ? String(suggestedVacancyId) : ''
+  // APPMODAL-SPLIT-1: all state/derivation/effects/submit now live in this hook.
+  const {
+    vacancyId, setVacancyId, phaseId, setPhaseId, source, setSource,
+    ownerId, setOwnerId, pickedVacancy, ownerDiffersFromCandidate, ownerDiffersFromVacancy,
+    saving, errors, submit, customFieldValues, setCustomField,
+  } = useAddApplicationForm({
+    candidateId, candidateOwnerId, initialVacancyId, suggestedVacancyId, editApplicationId,
+    vacancyOptions, stages, defaultStage, userOptions, meId, meIsAssignable,
+    vacancyRequired, phaseRequired, ownerRequired, sourceRequired, onCreated, onClose,
   })
-  // Default to the tenant's flagged start stage (APP-CREATE-STAGE-1), falling back to the first.
-  const [phaseId, setPhaseId] = useState(() => defaultStage?.id ?? '')
-  // Acquisition source — optional unless the tenant requires it (APP-REQUIRED-FE-1).
-  const [source, setSource] = useState('')
-  const [saving, setSaving] = useState(false)
-  const [errors, setErrors] = useState<Record<string, boolean>>({})
-  // EDIT MODE: the record as loaded, so the PATCH below can send only what changed.
-  const [loaded, setLoaded] = useState<{ vacancyId: string; ownerId: string; phaseKey: string; source: string } | null>(null)
-  const phaseSeededRef = useRef(false)
-
-  // The picked vacancy's own option row — carries ownerId/ownerName (useVacancyOptions
-  // reads it straight off VacancyListResource's `owner`, no extra fetch, see that hook).
-  const pickedVacancy = vacancyOptions.find(v => String(v.value) === String(vacancyId))
-
-  // APP-OWNER-1: derivation chain, highest priority first — the picked vacancy's
-  // own recruiter (owner) > the candidate's own owner (prop) > the logged-in user
-  // (the old OWNER-DEVIATION-1 default). Every rung only proposes a real,
-  // ASSIGNABLE tenant user. Evaluated fresh every render from its three inputs.
-  const vacancyOwnerId = pickedVacancy?.ownerId
-  const vacancyOwnerAssignable = vacancyOwnerId != null && userOptions.some(o => o.value === String(vacancyOwnerId))
-  const candidateOwnerAssignable = candidateOwnerId != null && userOptions.some(o => o.value === String(candidateOwnerId))
-  const derivedOwnerId = vacancyOwnerAssignable ? String(vacancyOwnerId)
-    : candidateOwnerAssignable ? String(candidateOwnerId)
-    : meIsAssignable ? String(me?.id)
-    : ''
-
-  // Seeded from the chain above, never re-seeded once the recruiter makes a MANUAL
-  // pick (tracked by a ref, not by "ownerId is already set" — unlike
-  // usePlanIntakeForm's RECRUITER-DEFAULT-1, whose two inputs both resolve together
-  // off the same /users load, this chain's highest-priority input — the vacancy
-  // pick — can arrive LATER than a lower-priority auto-seed already did, and it
-  // still must be able to promote itself over that earlier auto-seed).
-  const [ownerId, setOwnerIdState] = useState('')
-  const ownerManualRef = useRef(false)
-  // Adopts the derived owner whenever a higher-priority rung resolves later than a
-  // lower one already auto-seeded, but never once the recruiter has picked manually.
-  useEffect(() => {
-    if (ownerManualRef.current) return
-    if (derivedOwnerId && derivedOwnerId !== ownerId) setOwnerIdState(derivedOwnerId)
-  }, [derivedOwnerId]) // eslint-disable-line react-hooks/exhaustive-deps
-  // The picker's own onChange — any explicit pick permanently stops the auto-seed above.
-  const setOwnerId = (v: string) => { ownerManualRef.current = true; setOwnerIdState(v) }
-
-  // OWNER-DEVIATION-1: a soft warning, never a block (Danny: "wel een melding") —
-  // the FINAL recruiter still differs from the candidate's own owner and/or the
-  // picked vacancy's owner (e.g. after a manual override). Both sides must be a
-  // KNOWN owner to compare (an unowned candidate/vacancy is not a "deviation",
-  // mirroring useBranchMismatch's own "both sides nullable" rule) — never claims a
-  // mismatch against an unknown "—".
-  const ownerDiffersFromCandidate = Boolean(
-    ownerId && candidateOwnerId != null && String(candidateOwnerId) !== String(ownerId))
-  const ownerDiffersFromVacancy = Boolean(
-    ownerId && pickedVacancy?.ownerId != null && String(pickedVacancy.ownerId) !== String(ownerId))
-
-  // Measured live (PlanIntakeModal probe hit the identical bug — see its S24a(c)
-  // comment): the lazy useState initializer above only reads `stages` at MOUNT time,
-  // which is still the seed fallback (useCachedLookup's real /application-stages
-  // fetch resolves a beat later). The seed's fake id ("applied") never matches a REAL
-  // stage's UUID, so once the real data replaces the seed, `phaseId` is left holding
-  // a value that matches nothing — the picker then shows its placeholder instead of
-  // the default. Re-sync to the CURRENT default whenever it no longer matches a real
-  // option; skipped once the recruiter (or an already-valid default) picked one.
-  useEffect(() => {
-    // Edit mode prefills the record's OWN stage below — never seed a default over it.
-    if (editing) return
-    if (phaseId && stages.some(s => s.id === phaseId)) return
-    if (!defaultStage) return
-    setPhaseId(defaultStage.id)
-  }, [defaultStage, stages, phaseId, editing])
-
-  // EDIT MODE prefill (punt 5): one GET of the full record — the candidate-embedded
-  // row is thin (no owner, no phase key), exactly like MatchModal's own edit-mode
-  // fetch. `alive` guards a fast id switch so a stale response can never win.
-  useEffect(() => {
-    if (!editing) return
-    let alive = true
-    api.get(`/applications/${editApplicationId}`)
-      .then(r => {
-        if (!alive) return
-        const d = unwrap(r) as {
-          vacancy?: { id?: Id } | null; owner?: { id?: Id } | null; phase_key?: string | null
-          source?: string | null; source_name?: string | null
-        }
-        const snap = {
-          vacancyId: d?.vacancy?.id != null ? String(d.vacancy.id) : '',
-          ownerId: d?.owner?.id != null ? String(d.owner.id) : '',
-          phaseKey: d?.phase_key ?? '',
-          source: d?.source ?? d?.source_name ?? '',
-        }
-        setLoaded(snap)
-        setVacancyId(snap.vacancyId)
-        setSource(snap.source)
-        // The stored owner counts as an explicit choice: the create-time derivation
-        // chain (vacancy > candidate > me) must never overwrite it.
-        ownerManualRef.current = true
-        setOwnerIdState(snap.ownerId)
-      })
-      .catch(err => { if (alive) notifyError(extractApiError(err, t('work.applicationLoadFailed'))) })
-    return () => { alive = false }
-  }, [editing, editApplicationId]) // eslint-disable-line react-hooks/exhaustive-deps
-
-  // Map the loaded `phase_key` onto the REAL stage id once the tenant lookup has
-  // resolved — the seed fallback's fake ids would otherwise stick (the same
-  // measured trap the create-mode default effect documents above). Seeded once,
-  // so a manual pick made while the lookup was still loading survives.
-  useEffect(() => {
-    if (!editing || phaseSeededRef.current) return
-    const stage = loaded?.phaseKey ? stages.find(s => s.value === loaded.phaseKey) : undefined
-    if (!stage) return
-    phaseSeededRef.current = true
-    setPhaseId(stage.id)
-  }, [editing, loaded, stages])
-
-  // Create via the canonical POST /applications — vacancy_id may be null (open
-  // application) — or, in EDIT mode, PATCH /applications/{id} with the changed
-  // fields only (measured contract: UpdateApplicationRequest takes vacancy_id /
-  // owner_id / application_stage_id, each `sometimes`).
-  const submit = async () => {
-    // APP-REQUIRED-FE-1: client-side required-field preflight (UX only, §7 — the
-    // backend's own FlatRequiredFieldsGuard('application') on
-    // ApplicationController::store is the real enforcement, create only, so this
-    // gates on `!editing` exactly like appRuleBlocked above).
-    if (!editing) {
-      const missing: Record<string, boolean> = {}
-      if (vacancyRequired && !vacancyId) missing.vacancyId = true
-      if (phaseRequired && !phaseId) missing.phase = true
-      if (ownerRequired && !ownerId) missing.ownerId = true
-      if (sourceRequired && !source.trim()) missing.source = true
-      if (Object.keys(missing).length > 0) { setErrors(missing); return }
-    }
-    setSaving(true)
-    setErrors({})
-    try {
-      if (editing) {
-        const payload: Record<string, unknown> = {}
-        if ((loaded?.vacancyId ?? '') !== vacancyId) payload.vacancy_id = vacancyId || null
-        if ((loaded?.ownerId ?? '') !== ownerId) payload.owner_id = ownerId || null
-        const loadedStageId = loaded?.phaseKey ? (stages.find(s => s.value === loaded.phaseKey)?.id ?? '') : ''
-        if (phaseId && phaseId !== loadedStageId) payload.application_stage_id = phaseId
-        if ((loaded?.source ?? '') !== source.trim()) payload.source = source.trim() || null
-        // Nothing changed: close without a pointless write (and without a fake
-        // "bijgewerkt" toast for a request that never happened).
-        if (Object.keys(payload).length > 0) {
-          await api.patch(`/applications/${editApplicationId}`, payload)
-          notifySuccess(t('work.applicationUpdated'))
-        }
-        onCreated(); onClose()
-        return
-      }
-      await api.post('/applications', {
-        candidate_id: candidateId, vacancy_id: vacancyId || null, owner_id: ownerId || null,
-        application_stage_id: phaseId || undefined,
-        ...(source.trim() ? { source: source.trim() } : {}),
-      })
-      notifySuccess(t('work.applicationCreated'))
-      onCreated(); onClose()
-    } catch (err) {
-      // Show field-level errors from 422 validation responses; fall back to the
-      // server's message (or a generic one) instead of a fixed toast string.
-      const e = err as { response?: { data?: { errors?: Record<string, unknown>; message?: string } } }
-      const apiErrors = e?.response?.data?.errors
-      if (apiErrors) {
-        const e2: Record<string, boolean> = {}
-        Object.keys(apiErrors).forEach(k => { e2[API_TO_FORM[k] ?? k] = true })
-        setErrors(e2)
-      }
-      notifyError(e?.response?.data?.message ?? t(editing ? 'work.applicationUpdateFailed' : 'work.applicationFailed'))
-    } finally { setSaving(false) }
-  }
 
   // One title/labels source for both modes (§5: never a hardcoded twin).
   const title = t(editing ? 'work.editApplication' : 'work.addApplication')
@@ -365,12 +128,11 @@ export default function AddApplicationModal({ candidateId, candidateOwnerId, can
 
         {/* Vacancy — searchable pick-only combobox (S24b), mirrors PlanIntakeModal.
             APP-VACANCY-OPTIONAL-1: the label says "(optioneel)" honestly — an open
-            application without a vacancy is a real backend flow now.
-            S24c (Danny 24-07): resized to the AddCandidateModal text-input footprint
-            (padding '8px 11px' / fontSize 13) so every drawer combobox reads as one system. */}
+            application without a vacancy is a real backend flow now. W30: server-
+            searched via onSearch, so a >100-vacancy tenant can still find anything. */}
         <div style={{ marginBottom: 14 }}>
           <div style={fieldRow}>
-            <div style={CANON_LABEL_STYLE}>
+            <div id={`${vacancyFieldId}-label`} style={CANON_LABEL_STYLE}>
               {t(vacancyRequired ? 'work.vacancy' : 'work.vacancyOptional')}
               {vacancyRequired && requiredMark}
             </div>
@@ -379,10 +141,18 @@ export default function AddApplicationModal({ candidateId, candidateOwnerId, can
                   staan'): an OPTIONAL vacancy must be releasable back to an open
                   application — VAC-CLEAR-1 cross, same as the intake modal. No cross
                   once the tenant made it required (APP-REQUIRED-FE-1). */}
-              <CreatableSelect value={vacancyId || null} onChange={setVacancyId} placeholder={t('work.pickVacancy')}
-                clearable={!vacancyRequired} clearLabel={t('work.vacancyOptional')}
+              <CreatableSelect id={vacancyFieldId} aria-labelledby={`${vacancyFieldId}-label`}
+                value={vacancyId || null} onChange={setVacancyId} onSearch={setVacancySearch}
+                placeholder={t('work.pickVacancy')} clearable={!vacancyRequired} clearLabel={t('work.vacancyOptional')}
                 allowCreate={false} menuWidth={pickerMenuWidth} style={fieldFootprint}
-                options={vacancyOptions.map(v => ({ value: String(v.value), label: v.client ? `${v.label} · ${v.client}` : v.label }))} />
+                options={(() => {
+                  // Pin the picked row into the list: after a pick the query resets and
+                  // the refreshed top-100 may not contain it — the trigger label and the
+                  // open menu must keep showing the actual pick (golf-1 verify).
+                  const rows = vacancyOptions.some(v => String(v.value) === String(vacancyId)) || !pickedVacancy
+                    ? vacancyOptions : [pickedVacancy, ...vacancyOptions]
+                  return rows.map(v => ({ value: String(v.value), label: v.client ? `${v.label} · ${v.client}` : v.label }))
+                })()} />
               {/* The badge lives exactly as long as the suggestion holds — cleared
                   or repicked means the value is the recruiter's own again. */}
               {suggestedVacancyId != null && String(vacancyId) === String(suggestedVacancyId) && !editApplicationId && <KoiosSuggestionBadge />}
@@ -400,9 +170,10 @@ export default function AddApplicationModal({ candidateId, candidateOwnerId, can
             separate change — only the required-marker is added here. */}
         <div style={{ marginBottom: 14 }}>
           <div style={fieldRow}>
-            <div style={CANON_LABEL_STYLE}>{t('work.phase')}{phaseRequired && requiredMark}</div>
+            <div id={`${phaseFieldId}-label`} style={CANON_LABEL_STYLE}>{t('work.phase')}{phaseRequired && requiredMark}</div>
             <div style={fieldControl}>
-              <CreatableSelect value={phaseId || null} onChange={setPhaseId} allowCreate={false} menuWidth={pickerMenuWidth}
+              <CreatableSelect id={phaseFieldId} aria-labelledby={`${phaseFieldId}-label`}
+                value={phaseId || null} onChange={setPhaseId} allowCreate={false} menuWidth={pickerMenuWidth}
                 style={fieldFootprint} options={stages.map(s => ({ value: s.id, label: s.label }))} />
             </div>
           </div>
@@ -418,9 +189,10 @@ export default function AddApplicationModal({ candidateId, candidateOwnerId, can
             No clear cross here either, for the same reason as phase above. */}
         <div style={{ marginBottom: 14 }}>
           <div style={fieldRow}>
-            <div style={CANON_LABEL_STYLE}>{t('work.owner')}{ownerRequired && requiredMark}</div>
+            <div id={`${ownerFieldId}-label`} style={CANON_LABEL_STYLE}>{t('work.owner')}{ownerRequired && requiredMark}</div>
             <div style={fieldControl}>
-              <CreatableSelect value={ownerId || null} onChange={setOwnerId} placeholder={t('work.pickOwner')}
+              <CreatableSelect id={ownerFieldId} aria-labelledby={`${ownerFieldId}-label`}
+                value={ownerId || null} onChange={setOwnerId} placeholder={t('work.pickOwner')}
                 allowCreate={false} menuWidth={pickerMenuWidth} style={fieldFootprint} options={userOptions} />
             </div>
           </div>
@@ -452,6 +224,14 @@ export default function AddApplicationModal({ candidateId, candidateOwnerId, can
             </div>
           )}
         </div>
+        {/* W30: tenant custom fields — only rendered once ≥1 active def exists (§3A(f)). */}
+        {customFieldDefs.length > 0 && (
+          <div style={{ marginBottom: 14 }}>
+            <ApplicationCustomFieldsSection
+              simpleCustomFields={simpleCustomFields} textCustomFields={textCustomFields}
+              customFieldValues={customFieldValues} setCustomField={setCustomField} />
+          </div>
+        )}
         {/* Soft warning (never a block, Danny: "wel een melding") — mirrors the
             AXIS-MATRIX banner's warn tint (ActionRuleBanner) so both notices in this
             modal read as the same idiom. Only fires once both sides of a comparison

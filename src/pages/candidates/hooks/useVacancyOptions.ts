@@ -8,6 +8,11 @@
  * already resolves `owner: { id, name }` on this same /vacancies row, so the
  * "+ Solliciteren" owner-deviation notice (AddApplicationModal) reads it straight
  * off the option the recruiter already picked, no extra fetch-on-pick needed.
+ *
+ * W30: an optional `search` string forwards a `?search=` param — the 100-row cap
+ * per page stays (server-side search narrows within it), so a >100-vacancy tenant
+ * can still find a vacancy the flat mount fetch would never surface. Callers that
+ * pass no search keep the original unfiltered 100-row list, byte-for-byte.
  */
 import { useQuery } from '@tanstack/react-query'
 import api, { unwrapList } from '@/lib/api'
@@ -17,13 +22,13 @@ export interface VacancyOption { value: Id; label: string; client?: string; owne
 
 // Vacancy picker options, each carrying its owner id/name too (see the module doc
 // comment above for why that saves an extra fetch on pick); disabled until `enabled` flips on.
-export function useVacancyOptions(enabled: boolean): VacancyOption[] {
+export function useVacancyOptions(enabled: boolean, search = ''): VacancyOption[] {
   const { data } = useQuery({
-    queryKey: ['vacancies', 'options'],
+    queryKey: ['vacancies', 'options', search],
     enabled,
     queryFn: async ({ signal }) => {
       const { rows } = unwrapList<{ id?: Id; title?: string; titel?: string; client_name?: string; client?: string; owner?: { id?: Id; name?: string } | null }>(
-        await api.get('/vacancies', { params: { per_page: 100 }, signal }),
+        await api.get('/vacancies', { params: { per_page: 100, ...(search ? { search } : {}) }, signal }),
       )
       return rows.map(v => ({
         value: v.id ?? '', label: v.title ?? v.titel ?? '', client: v.client_name ?? v.client,

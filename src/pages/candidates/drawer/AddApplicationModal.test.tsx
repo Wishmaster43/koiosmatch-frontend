@@ -19,7 +19,7 @@
  * recruiter differs — proceeding always stays allowed (never a block).
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { fireEvent, render, screen } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import AddApplicationModal from './AddApplicationModal'
 import api from '@/lib/api'
@@ -27,8 +27,12 @@ import { useActionRulePreflight } from '@/components/actionrules'
 import { useVacancyOptions } from '../hooks/useVacancyOptions'
 import { useUsers } from '@/lib/queries'
 import { useAuth } from '@/context/AuthContext'
+import { useCustomFields } from '@/lib/useCustomFields'
 
 vi.mock('../hooks/useVacancyOptions', () => ({ useVacancyOptions: vi.fn() }))
+// W30: no active custom-field defs by default — the "Extra" section renders
+// only once a test opts in with ≥1 def (§3A(f)).
+vi.mock('@/lib/useCustomFields', () => ({ useCustomFields: vi.fn(() => ({ fields: [] })) }))
 vi.mock('@/hooks/useApplicationStages', () => ({
   useApplicationStages: () => ({
     stages: [
@@ -102,13 +106,15 @@ beforeEach(() => {
   // the whole file (found live: it silently disabled Create in every
   // OWNER-DEVIATION-1 test that ran after the "block" case).
   vi.mocked(useActionRulePreflight).mockReturnValue({ decision: null, loading: false, error: false })
+  // W30: default back to "no custom fields" between tests.
+  vi.mocked(useCustomFields).mockReturnValue({ fields: [] } as unknown as ReturnType<typeof useCustomFields>)
 })
 
 describe('AddApplicationModal · searchable pickers (S24b)', () => {
   it('the vacancy picker is a typeable searchable combobox', async () => {
     const user = userEvent.setup()
     render(<AddApplicationModal candidateId="cand-1" onClose={noop} onCreated={noop} />)
-    await user.click(screen.getByRole('button', { name: 'work.pickVacancy' }))
+    await user.click(screen.getByRole('button', { name: /work\.pickVacancy/ }))
     expect(screen.getByPlaceholderText('work.pickVacancy')).toBeInTheDocument()
   })
 
@@ -124,7 +130,7 @@ describe('AddApplicationModal · submits application_stage_id (S24b bug fix)', (
     const user = userEvent.setup()
     render(<AddApplicationModal candidateId="cand-1" onClose={noop} onCreated={noop} />)
 
-    await user.click(screen.getByRole('button', { name: 'work.pickVacancy' }))
+    await user.click(screen.getByRole('button', { name: /work\.pickVacancy/ }))
     await user.click(await screen.findByRole('button', { name: /Verzorgende IG/ }))
     await user.click(screen.getByRole('button', { name: 'work.createApplication' }))
 
@@ -138,7 +144,7 @@ describe('AddApplicationModal · submits application_stage_id (S24b bug fix)', (
     const user = userEvent.setup()
     render(<AddApplicationModal candidateId="cand-1" onClose={noop} onCreated={noop} />)
 
-    await user.click(screen.getByRole('button', { name: 'work.pickVacancy' }))
+    await user.click(screen.getByRole('button', { name: /work\.pickVacancy/ }))
     await user.click(await screen.findByRole('button', { name: /Verzorgende IG/ }))
     await user.click(screen.getByRole('button', { name: /Gesolliciteerd/ }))
     await user.click(await screen.findByRole('button', { name: /Uitgenodigd\/Intake/ }))
@@ -186,7 +192,7 @@ describe('AddApplicationModal · AXIS-MATRIX-2 preflight (CMFE audit R1)', () =>
     expect(banner).toHaveAttribute('data-effect', 'warn')
     expect(screen.getByText('Piet is tijdelijk niet inzetbaar (ziek).')).toBeInTheDocument()
 
-    await user.click(screen.getByRole('button', { name: 'work.pickVacancy' }))
+    await user.click(screen.getByRole('button', { name: /work\.pickVacancy/ }))
     await user.click(await screen.findByRole('button', { name: /Verzorgende IG/ }))
     expect(screen.getByRole('button', { name: 'work.createApplication' })).toBeEnabled()
   })
@@ -200,7 +206,7 @@ describe('AddApplicationModal · AXIS-MATRIX-2 preflight (CMFE audit R1)', () =>
 
     expect(screen.getByTestId('action-rule-banner')).toHaveAttribute('data-effect', 'block')
 
-    await user.click(screen.getByRole('button', { name: 'work.pickVacancy' }))
+    await user.click(screen.getByRole('button', { name: /work\.pickVacancy/ }))
     await user.click(await screen.findByRole('button', { name: /Verzorgende IG/ }))
     expect(screen.getByRole('button', { name: 'work.createApplication' })).toBeDisabled()
   })
@@ -222,7 +228,7 @@ describe('AddApplicationModal · OWNER-DEVIATION-1 recruiter default', () => {
   it('the POST carries the chosen owner_id', async () => {
     const user = userEvent.setup()
     render(<AddApplicationModal candidateId="cand-1" onClose={noop} onCreated={noop} />)
-    await user.click(screen.getByRole('button', { name: 'work.pickVacancy' }))
+    await user.click(screen.getByRole('button', { name: /work\.pickVacancy/ }))
     await user.click(await screen.findByRole('button', { name: /Verzorgende IG/ }))
     await user.click(screen.getByRole('button', { name: 'work.createApplication' }))
     expect(api.post).toHaveBeenCalledWith('/applications', expect.objectContaining({ owner_id: 'u1' }))
@@ -247,7 +253,7 @@ describe('AddApplicationModal · OWNER-DEVIATION-1 deviation notice (soft warnin
     expect(screen.queryByText('work.ownerDeviationVacancy')).not.toBeInTheDocument()
 
     // Never a block (Danny: "wel een melding") — Create stays enabled once a vacancy is picked.
-    await user.click(screen.getByRole('button', { name: 'work.pickVacancy' }))
+    await user.click(screen.getByRole('button', { name: /work\.pickVacancy/ }))
     await user.click(await screen.findByRole('button', { name: /Verzorgende IG/ }))
     expect(screen.getByRole('button', { name: 'work.createApplication' })).toBeEnabled()
   })
@@ -257,7 +263,7 @@ describe('AddApplicationModal · OWNER-DEVIATION-1 deviation notice (soft warnin
     const user = userEvent.setup()
     render(<AddApplicationModal candidateId="cand-1" onClose={noop} onCreated={noop} />)
 
-    await user.click(screen.getByRole('button', { name: 'work.pickVacancy' }))
+    await user.click(screen.getByRole('button', { name: /work\.pickVacancy/ }))
     await user.click(await screen.findByRole('button', { name: /Verzorgende IG/ }))
     // Auto-seeded to the vacancy's own recruiter (u3) — no deviation yet.
     expect(screen.queryByText('work.ownerDeviationVacancy')).not.toBeInTheDocument()
@@ -274,7 +280,7 @@ describe('AddApplicationModal · OWNER-DEVIATION-1 deviation notice (soft warnin
     const user = userEvent.setup()
     render(<AddApplicationModal candidateId="cand-1" candidateOwnerId="u2" candidateOwnerName="Klaas Anders" onClose={noop} onCreated={noop} />)
 
-    await user.click(screen.getByRole('button', { name: 'work.pickVacancy' }))
+    await user.click(screen.getByRole('button', { name: /work\.pickVacancy/ }))
     await user.click(await screen.findByRole('button', { name: /Verzorgende IG/ }))
 
     // Manually override to a THIRD user — differs from both record owners.
@@ -290,7 +296,7 @@ describe('AddApplicationModal · OWNER-DEVIATION-1 deviation notice (soft warnin
     const user = userEvent.setup()
     render(<AddApplicationModal candidateId="cand-1" candidateOwnerId="u1" candidateOwnerName="Piet Recruiter" onClose={noop} onCreated={noop} />)
 
-    await user.click(screen.getByRole('button', { name: 'work.pickVacancy' }))
+    await user.click(screen.getByRole('button', { name: /work\.pickVacancy/ }))
     await user.click(await screen.findByRole('button', { name: /Verzorgende IG/ }))
 
     expect(screen.queryByText('work.ownerDeviationCandidate')).not.toBeInTheDocument()
@@ -312,7 +318,7 @@ describe('AddApplicationModal · APP-OWNER-1 recruiter derivation chain', () => 
     const user = userEvent.setup()
     render(<AddApplicationModal candidateId="cand-1" candidateOwnerId="u2" candidateOwnerName="Klaas Anders" onClose={noop} onCreated={noop} />)
 
-    await user.click(screen.getByRole('button', { name: 'work.pickVacancy' }))
+    await user.click(screen.getByRole('button', { name: /work\.pickVacancy/ }))
     await user.click(await screen.findByRole('button', { name: /Verzorgende IG/ }))
 
     // The vacancy's own recruiter (u3) wins over the candidate's own owner (u2).
@@ -343,7 +349,7 @@ describe('AddApplicationModal · APP-OWNER-1 recruiter derivation chain', () => 
 
     // Picking the vacancy afterwards must NOT reseed the manual pick, even though
     // the vacancy's own recruiter (u3) would otherwise outrank it.
-    await user.click(screen.getByRole('button', { name: 'work.pickVacancy' }))
+    await user.click(screen.getByRole('button', { name: /work\.pickVacancy/ }))
     await user.click(await screen.findByRole('button', { name: /Verzorgende IG/ }))
     expect(screen.getByRole('button', { name: /Piet Recruiter/ })).toBeInTheDocument()
 
@@ -538,5 +544,77 @@ describe('AddApplicationModal · APP-REQUIRED-FE-1 (tenant-configurable required
     // PATCH — the required-source rule must not block an edit of other fields.
     await user.click(await screen.findByRole('button', { name: 'common:save' }))
     expect(api.patch).not.toHaveBeenCalled()
+  })
+})
+
+/**
+ * W30 — the vacancy picker server-searches instead of a flat 100-row mount
+ * fetch, and the POST body now carries `source` + tenant `custom_fields`
+ * (StoreApplicationRequest accepts both, mirroring pages/applications/
+ * AddApplicationModal.tsx). §13: request-asserting, not callback-only.
+ */
+describe('AddApplicationModal · W30 (search + source/custom_fields)', () => {
+  it('forwards the typed vacancy query to useVacancyOptions (debounced server search)', async () => {
+    const user = userEvent.setup()
+    render(<AddApplicationModal candidateId="cand-1" onClose={noop} onCreated={noop} />)
+
+    await user.click(screen.getByRole('button', { name: /work\.pickVacancy/ }))
+    await user.type(screen.getByPlaceholderText('work.pickVacancy'), 'zorg')
+
+    await new Promise(r => setTimeout(r, 300))
+    expect(useVacancyOptions).toHaveBeenLastCalledWith(true, 'zorg')
+  })
+
+  // Golf-1 verify (mirrors pages/applications/AddApplicationModal.test.tsx's
+  // pinned regression): the picked vacancy is STICKY state — when the cleared
+  // query refetches the unfiltered top-100 WITHOUT the picked row, the trigger
+  // must keep its label and the owner chain must keep the vacancy recruiter
+  // (the live-lookup version silently re-seeded owner_id down to the me-rung).
+  it('keeps the picked vacancy label + owner-chain data after a later search replaces the option list', async () => {
+    const user = userEvent.setup()
+    vi.mocked(useVacancyOptions).mockImplementation(((_enabled: boolean, search?: string) =>
+      search === 'far'
+        ? [{ value: 'vac-far', label: 'Verre Vacature', ownerId: 'u3', ownerName: 'Anna Derde' }]
+        : [{ value: 'vac-near', label: 'Dichtbij' }]) as never)
+    render(<AddApplicationModal candidateId="cand-1" onClose={noop} onCreated={noop} />)
+
+    await user.click(screen.getByRole('button', { name: /work\.pickVacancy/ }))
+    await user.type(screen.getByPlaceholderText('work.pickVacancy'), 'far')
+    await new Promise(r => setTimeout(r, 300))
+    await user.click(await screen.findByText('Verre Vacature'))
+    // The pick resets the query; after the debounce the unfiltered list (without
+    // vac-far) is back — label and owner data must survive that swap.
+    await new Promise(r => setTimeout(r, 300))
+    expect(screen.getByText('Verre Vacature')).toBeInTheDocument()
+    expect(screen.queryByText('vac-far')).toBeNull()
+
+    await user.click(screen.getByRole('button', { name: 'work.createApplication' }))
+    await waitFor(() => expect(api.post).toHaveBeenCalled())
+    const body = vi.mocked(api.post).mock.calls[0][1] as Record<string, unknown>
+    expect(body.vacancy_id).toBe('vac-far')
+    expect(body.owner_id).toBe('u3')
+  })
+
+  it('omits custom_fields from the POST body when no tenant def is active', async () => {
+    const user = userEvent.setup()
+    render(<AddApplicationModal candidateId="cand-1" onClose={noop} onCreated={noop} />)
+    await user.click(screen.getByRole('button', { name: 'work.createApplication' }))
+
+    expect(api.post).toHaveBeenCalledWith('/applications', expect.not.objectContaining({ custom_fields: expect.anything() }))
+  })
+
+  it('sends the filled-in tenant custom field in the POST body', async () => {
+    vi.mocked(useCustomFields).mockReturnValue({
+      fields: [{ key: 'shift_pref', label: 'Voorkeur dienst', type: 'text', sort_order: 0, active: true, visible_in_ui: true, has_data: false, required_for: [] }],
+    } as unknown as ReturnType<typeof useCustomFields>)
+    const user = userEvent.setup()
+    render(<AddApplicationModal candidateId="cand-1" onClose={noop} onCreated={noop} />)
+
+    await user.type(screen.getByLabelText('Voorkeur dienst'), 'Nacht')
+    await user.click(screen.getByRole('button', { name: 'work.createApplication' }))
+
+    expect(api.post).toHaveBeenCalledWith('/applications', expect.objectContaining({
+      custom_fields: { shift_pref: 'Nacht' },
+    }))
   })
 })
