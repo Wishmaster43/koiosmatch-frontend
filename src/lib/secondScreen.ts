@@ -130,6 +130,11 @@ export const NOTE_EDIT_POPOUT_ENTITIES: ReadonlySet<PopoutEntity> = new Set<Popo
   ['candidate', 'application', 'customer', 'vacancy', 'task', 'match', 'opportunity'],
 )
 
+// Entities with a WHOLE-THREAD notes popout page (NotesPopoutPage.ENTITY_PAGES) —
+// the composer's hand-off may only open these; the per-note EDIT popout above is
+// a wider set. Reusing one set for both painted a dead-end window (27-08 audit).
+export const NOTES_THREAD_POPOUT_ENTITIES: ReadonlySet<string> = new Set(['candidate', 'customer', 'vacancy', 'application'])
+
 /**
  * NOTITIE-POPOUT-URL-1 (Danny 11-08, translated: "put the note id in the URL"
  * — verbatim: "zet het notitie-id in de URL"; live 13-08, translated: "like the

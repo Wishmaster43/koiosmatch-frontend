@@ -215,11 +215,16 @@ describe('useNotesPopout · canHandOffNote', () => {
     expect(result.current.canHandOffNote).toBe(true)
   })
 
-  it('is false for customer and vacancy hosts (their window cannot save an edit)', () => {
+  it('is true for customer and vacancy hosts since their PATCH routes landed (27-08)', () => {
     const customer = renderHook(() => useNotesPopout({ target: { entity: 'customer', id: 'x1' }, onHandedOver: vi.fn() }))
     const vacancy = renderHook(() => useNotesPopout({ target: { entity: 'vacancy', id: 'v1' }, onHandedOver: vi.fn() }))
-    expect(customer.result.current.canHandOffNote).toBe(false)
-    expect(vacancy.result.current.canHandOffNote).toBe(false)
+    expect(customer.result.current.canHandOffNote).toBe(true)
+    expect(vacancy.result.current.canHandOffNote).toBe(true)
+  })
+
+  it('stays false for an entity outside the per-note edit set', () => {
+    const { result } = renderHook(() => useNotesPopout({ target: { entity: 'outreachTarget', id: 'o1' }, onHandedOver: vi.fn() }))
+    expect(result.current.canHandOffNote).toBe(false)
   })
 
   it('is false inside the popout window itself (no self-reopening)', () => {

@@ -1144,6 +1144,13 @@ Be honest. If something is not done, say so — do not pretend.
   · **GEEN KOSTEN IN DE CHAT (Danny 27-08: "Euro's moeten weg"):** de Koios-chat
     toont model · tokens (gelokaliseerde duizendtallen), nooit kosten aan de
     eindgebruiker.
+  · **TITELBALK-PILLS (Danny 27-08, twee screenshots: "in de title bar dus!! …
+    laten we 1 type chips aanhouden — zo moeten we de pop-ups doen"):** de korte
+    keuze bovenin een create-pop-up (Lead/Kandidaat-modus, vacaturestatus,
+    contractvorm bij + Match, activiteitstype bij + Taak) rendert als ÉÉN gedeelde
+    pill-rij in de titelbalk — het atoom `components/ui/TitleBarPills` (CHIP-TINT-1-
+    recept, optioneel kleurstipje, actief = tint 16/50 + 600) — nooit twee
+    varianten naast elkaar en nooit een dropdown voor zo'n korte moduskeuze.
 - **Subagent model policy (Danny 2026-07-22 — supersedes 2026-07-08/15/17; fallback updated 2026-07-24):**
   The MANAGER runs **Fable 5 at reasoning effort high**; when Fable's budget is
   exhausted, **Opus 5 (`claude-opus-5`) at high** takes over as the TEMPORARY

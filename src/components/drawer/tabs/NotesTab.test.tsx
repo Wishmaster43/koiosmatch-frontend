@@ -406,13 +406,25 @@ describe('NotesTab · per-note pop-out (NOTITIE-POPOUT-EDIT-1)', () => {
     expect(screen.queryByRole('dialog')).toBeNull()
   })
 
-  it('renders none for customer/vacancy hosts — their popout can only ADD, so it would duplicate the note', () => {
+  it('renders the icon for customer/vacancy hosts too — PATCH routes exist since 27-08, so the popout can edit', () => {
     const { unmount } = render(<NotesTab notes={[first]} labels={editLabels} popout={{ entity: 'customer', id: 'x1' }}
       onEditNote={vi.fn()} showTimeline={false} showConversations={false} />)
-    expect(screen.queryByRole('button', { name: 'openSecondScreen' })).toBeNull()
+    expect(screen.getByRole('button', { name: 'openSecondScreen' })).toBeInTheDocument()
     unmount()
 
     render(<NotesTab notes={[first]} labels={editLabels} popout={{ entity: 'vacancy', id: 'v1' }}
+      onEditNote={vi.fn()} showTimeline={false} showConversations={false} />)
+    expect(screen.getByRole('button', { name: 'openSecondScreen' })).toBeInTheDocument()
+  })
+
+  // Still absent when the host wires no edit path or the entity is outside the set.
+  it('renders none without onEditNote, and none for an entity outside the popout set', () => {
+    const { unmount } = render(<NotesTab notes={[first]} labels={editLabels} popout={{ entity: 'customer', id: 'x1' }}
+      showTimeline={false} showConversations={false} />)
+    expect(screen.queryByRole('button', { name: 'openSecondScreen' })).toBeNull()
+    unmount()
+
+    render(<NotesTab notes={[first]} labels={editLabels} popout={{ entity: 'outreachTarget', id: 'o1' }}
       onEditNote={vi.fn()} showTimeline={false} showConversations={false} />)
     expect(screen.queryByRole('button', { name: 'openSecondScreen' })).toBeNull()
   })

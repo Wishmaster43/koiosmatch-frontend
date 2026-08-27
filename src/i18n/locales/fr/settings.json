@@ -2846,7 +2846,8 @@
       "workflowBillableNote": "{{billable}} facturables (sur {{credits}}, {{included}} inclus)",
       "budgetStatus": {
         "title": "Budget workflow",
-        "withinBudget": "Dans le budget ce mois-ci."
+        "withinBudget": "Dans le budget ce mois-ci.",
+          "noBudget": "Aucun budget de tokens configuré pour ce forfait."
       }
     }
   },
@@ -3312,6 +3313,7 @@
     "flavors": {
       "title": "Variantes",
       "subtitle": "Quel modèle fournisseur se trouve derrière chaque variante visible du client.",
+        "per1m": "par million de tokens",
       "pickPlaceholder": "Choisir un modèle",
       "noEffort": "Ce modèle n'a pas de niveaux d'effort."
     },

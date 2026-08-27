@@ -117,4 +117,5 @@ describe('KoiosModelsAdminSettings', () => {
     await userEvent.click(saveButtons[0])
     await waitFor(() => expect(api.patch).toHaveBeenCalledWith('/superadmin/koios/models', { flavors: expect.objectContaining({ snel: 'claude-sonnet-5' }) }))
   })
+
 })

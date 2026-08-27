@@ -38,7 +38,9 @@ export interface UseEntityNotesResult {
 // AUTHOR-CURRENT-USER-1: the optimistic note stamps the CURRENT logged-in user
 // (mirrors useCandidateNotes), never the record's owner — a match/task owner is
 // not necessarily who is typing the note right now.
-export function useEntityNotes({ id, basePath }: { id: Id | null | undefined; basePath: string }): UseEntityNotesResult {
+// updateMethod: the opportunities route registers PUT only (measured 27-08); every
+// sibling accepts both, so PATCH stays the default.
+export function useEntityNotes({ id, basePath, updateMethod = 'patch' }: { id: Id | null | undefined; basePath: string; updateMethod?: 'patch' | 'put' }): UseEntityNotesResult {
   const { t } = useTranslation('common')
   const auth = useAuth()
   const authorName = auth?.user?.name || [auth?.user?.firstname, auth?.user?.lastname].filter(Boolean).join(' ') || ''
@@ -93,14 +95,15 @@ export function useEntityNotes({ id, basePath }: { id: Id | null | undefined; ba
     // TaskCommentController::update validates `body` (not `text`) — send both so
     // every family's controller finds the field name it actually expects. Refetch
     // on success so "edited by ..." (server-stamped) actually shows.
-    return api.patch(`${basePath}/notes/${noteId}`, { type: payload.type, title: payload.title, body: payload.body, text: payload.body, language: payload.language })
+    const call = updateMethod === 'put' ? api.put : api.patch
+    return call(`${basePath}/notes/${noteId}`, { type: payload.type, title: payload.title, body: payload.body, text: payload.body, language: payload.language })
       .then(() => { fetchNotes(); return true })
       .catch(err => {
         setNotes(snapshot)
         notifyError(extractApiError(err, t('actionFailed')))
         return false
       })
-  }, [notes, basePath, t, fetchNotes])
+  }, [notes, basePath, t, fetchNotes, updateMethod])
 
   // Delete an existing note by its position in the list (DELETE `${basePath}/notes/{id}`).
   const deleteNote = useCallback((i: number) => {

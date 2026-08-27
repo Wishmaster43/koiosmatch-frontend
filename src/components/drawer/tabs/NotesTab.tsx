@@ -61,6 +61,7 @@
  * today; the customer/vacancy popouts wire add-only, so no button there) and only
  * where this user may edit the note here as well (same gate as the pencil).
  */
+import { NOTES_THREAD_POPOUT_ENTITIES } from '@/lib/secondScreen'
 import { useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -470,7 +471,7 @@ export default function NotesTab({
           onDraft={handleSaveConcept}
           noteTypes={noteTypes} channels={channels} labels={labels} editorLabels={editorLabels}
           composerExtra={composerExtra}
-          onPopOutDraft={popout && !isPopoutWindow ? handOff : undefined} popOutPending={handoffPending}
+          onPopOutDraft={popout && !isPopoutWindow && NOTES_THREAD_POPOUT_ENTITIES.has(popout.entity) ? handOff : undefined} popOutPending={handoffPending}
           onSave={handleSave} onCancel={closeComposer}
         />
         <div style={sectionBlock}>

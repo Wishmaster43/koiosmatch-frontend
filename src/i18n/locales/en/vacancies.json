@@ -373,6 +373,15 @@
     "openMatch": "Open match"
   },
   "modal": {
+    "tabs": {
+      "general": "General",
+      "requirements": "Conditions & requirements",
+      "description": "Vacancy text",
+      "matching": "Match profile",
+      "aiAgent": "AI agent",
+      "publication": "Publication",
+      "attachments": "Documents & note"
+    },
     "title": "New vacancy",
     "import": {
       "title": "Vacancy from file",

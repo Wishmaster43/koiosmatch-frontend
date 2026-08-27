@@ -373,6 +373,15 @@
     "openMatch": "Abrir match"
   },
   "modal": {
+    "tabs": {
+      "general": "General",
+      "requirements": "Condiciones y requisitos",
+      "description": "Texto de la vacante",
+      "matching": "Perfil de coincidencia",
+      "aiAgent": "Agente de IA",
+      "publication": "Publicación",
+      "attachments": "Documentos y nota"
+    },
     "title": "Nueva vacante",
     "import": {
       "title": "Vacante desde archivo",

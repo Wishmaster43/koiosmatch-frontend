@@ -1,3 +1,4 @@
+import { formatCurrency } from '@/lib/formatters'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Zap, Sparkles, Crown } from 'lucide-react'
@@ -12,11 +13,11 @@ import type { FlavorKey, KoiosModelInfo, KoiosCatalogEntry, KoiosModelsAdminData
 const card = { border: '1px solid var(--border)', borderRadius: 10, padding: 16, marginBottom: 14, background: 'var(--surface)' }
 const TIER_ICON = { snel: Zap, slim: Sparkles, max: Crown }
 
-// Compact "€x in / €y out per 1M" cost hint — omitted entirely when the catalog
-// carries no price fields, rather than rendering "€undefined".
-function costHint(entry?: KoiosCatalogEntry): string | null {
+// Compact cost hint — house currency formatting (§5), omitted entirely when the
+// catalog carries no price fields, rather than rendering "€undefined".
+function costHint(entry: KoiosCatalogEntry | undefined, fmt: (v: number) => string, per1m: string): string | null {
   if (!entry || entry.input_price_per_1m == null || entry.output_price_per_1m == null) return null
-  return `€${entry.input_price_per_1m} / €${entry.output_price_per_1m} per 1M`
+  return `${fmt(Number(entry.input_price_per_1m))} / ${fmt(Number(entry.output_price_per_1m))} ${per1m}`
 }
 
 /**
@@ -64,7 +65,7 @@ export default function FlavorsCard({ data, onSaved }: { data: KoiosModelsAdminD
           const Icon = TIER_ICON[flavor]
           const modelId = draft[flavor]
           const entry = data.catalog?.[modelId]
-          const hint = costHint(entry)
+          const hint = costHint(entry, (v) => formatCurrency(v, 'EUR', undefined, 2, 2), t('koiosModelsAdmin.flavors.per1m'))
           return (
             <div key={flavor} style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6, width: 90, flexShrink: 0 }}>

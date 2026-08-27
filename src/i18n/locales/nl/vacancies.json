@@ -373,6 +373,15 @@
     "openMatch": "Open match"
   },
   "modal": {
+    "tabs": {
+      "general": "Algemeen",
+      "requirements": "Voorwaarden & eisen",
+      "description": "Vacaturetekst",
+      "matching": "Matchprofiel",
+      "aiAgent": "AI-agent",
+      "publication": "Publicatie",
+      "attachments": "Documenten & notitie"
+    },
     "title": "Nieuwe vacature",
     "import": {
       "title": "Vacature uit bestand",

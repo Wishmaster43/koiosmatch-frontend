@@ -76,6 +76,7 @@ export default function ScopedNotesTab({ scope, id, customerId }: {
   return (
     <NotesTab
       notes={notes} onAddNote={addNote}
+      popout={customerId ? { entity: 'customer', id: customerId } : undefined}
       onEditNote={(i: number, payload: { type: string; title: string; body: string; language?: string }) => editNote(notes[i]?.id as Id | undefined, payload)}
       onDeleteNote={(i: number) => deleteNote(notes[i]?.id as Id | undefined)}
       noteTypes={noteTypes} chipTypes={chipTypes}

@@ -80,8 +80,7 @@ describe('MatchModal · klant-loos Contractvorm DOM (MATCH-KLANTLOOS-1)', () => 
     // Unflagged by default: the customer field is visible.
     expect(pickerBtn('Kies klant')).toBeInTheDocument()
 
-    await user.click(screen.getByRole('button', { name: 'Contractvorm Kies…' }))
-    await user.click(await screen.findByText('ZZP'))
+    await user.click(screen.getByRole('button', { name: 'ZZP', pressed: false }))
 
     await waitFor(() => expect(queryPickerBtn('Kies klant')).not.toBeInTheDocument())
     expect(queryPickerBtn('Kies locatie')).not.toBeInTheDocument()
@@ -89,8 +88,7 @@ describe('MatchModal · klant-loos Contractvorm DOM (MATCH-KLANTLOOS-1)', () => 
     expect(screen.queryByText('Afdeling')).not.toBeInTheDocument()
 
     // Switch back to an unflagged form — the fields return.
-    await user.click(screen.getByRole('button', { name: /ZZP$/ }))
-    await user.click(await screen.findByText('Uitzend'))
+    await user.click(screen.getByRole('button', { name: 'Uitzend', pressed: false }))
     await waitFor(() => expect(pickerBtn('Kies klant')).toBeInTheDocument())
   })
 
@@ -100,8 +98,7 @@ describe('MatchModal · klant-loos Contractvorm DOM (MATCH-KLANTLOOS-1)', () => 
 
     await user.click(pickerBtn('Kies functie'))
     await user.click(await screen.findByText('Verzorgende IG'))
-    await user.click(screen.getByRole('button', { name: 'Contractvorm Kies…' }))
-    await user.click(await screen.findByText('ZZP'))
+    await user.click(screen.getByRole('button', { name: 'ZZP', pressed: false }))
 
     const saveBtn = await screen.findByRole('button', { name: 'Match aanmaken' })
     expect(saveBtn).toBeDisabled()

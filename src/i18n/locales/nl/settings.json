@@ -2846,7 +2846,8 @@
       "workflowBillableNote": "{{billable}} factureerbaar (van {{credits}}, {{included}} inbegrepen)",
       "budgetStatus": {
         "title": "Workflow-budget",
-        "withinBudget": "Binnen budget deze maand."
+        "withinBudget": "Binnen budget deze maand.",
+          "noBudget": "Geen tokenbudget ingesteld voor dit pakket."
       }
     }
   },
@@ -3312,6 +3313,7 @@
     "flavors": {
       "title": "Smaken",
       "subtitle": "Welk leveranciersmodel achter elke tenant-zichtbare smaak zit.",
+        "per1m": "per 1M tokens",
       "pickPlaceholder": "Kies een model",
       "noEffort": "Dit model kent geen inspanningsniveaus."
     },

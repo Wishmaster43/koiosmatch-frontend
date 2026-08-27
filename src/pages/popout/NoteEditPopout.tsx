@@ -244,6 +244,11 @@ function CustomerNoteEditPopout() {
 // for why these four qualify and customer/candidate/application don't.
 // The uniform shape every entity's lite hook adapts down to for this component.
 interface AdaptedLite { record: unknown; name: string; initials: string; subtitle?: string }
+// The API plural per entity — kept next to the branch that uses it.
+const ENTITY_API_BASE: Record<'vacancy' | 'task' | 'match' | 'opportunity', string> = {
+  vacancy: '/vacancies', task: '/tasks', match: '/matches', opportunity: '/opportunities',
+}
+
 function GenericNoteEditPopout<R extends { loading: boolean; error: boolean; reload: () => void }>({ entity, i18nNs, useLite, adapt }: {
   entity: 'vacancy' | 'task' | 'match' | 'opportunity'
   i18nNs: 'vacancies' | 'tasks' | 'matches' | 'opportunities'
@@ -255,7 +260,9 @@ function GenericNoteEditPopout<R extends { loading: boolean; error: boolean; rel
   const lite = useLite(id)
   const { record, name, initials, subtitle } = adapt(lite)
   const { loading, error, reload } = lite
-  const { notes, editNote } = useEntityNotes({ id, basePath: `/${i18nNs}/${id}` })
+  // Explicit per-entity API route + update method — never derived from the i18n
+  // namespace (a coincidental coupling), and opportunities' route is PUT-only.
+  const { notes, editNote } = useEntityNotes({ id, basePath: `${ENTITY_API_BASE[entity]}/${id}`, updateMethod: entity === 'opportunity' ? 'put' : 'patch' })
   const { writableTypes } = useNoteTypes(entity)
   const loaded = !loading && !error
 

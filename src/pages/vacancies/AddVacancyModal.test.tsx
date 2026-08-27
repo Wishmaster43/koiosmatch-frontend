@@ -212,6 +212,13 @@ async function fillTitleAndSubmit(user: ReturnType<typeof userEvent.setup>) {
   await user.click(screen.getByRole('button', { name: 'modal.create' }))
 }
 
+// TABBLADEN-1: the modal's cards now live behind free-switching tabs — a test
+// touching a non-General card must open its tab first (panes stay mounted but
+// hidden via CSS, which getByRole correctly treats as inaccessible).
+async function openTab(user: ReturnType<typeof userEvent.setup>, id: string) {
+  await user.click(screen.getByRole('tab', { name: `modal.tabs.${id}` }))
+}
+
 describe('AddVacancyModal · seven titled cards (SLICE 1)', () => {
   it('renders Algemeen / Klant / Inzet / Functie-eisen / Voorwaarden / Beschrijving / Recruiter', () => {
     render(<AddVacancyModal onClose={noop} users={users} customers={customers} />)
@@ -254,32 +261,71 @@ describe('AddVacancyModal · A+D layout (Danny 03-08 — two columns + collapsed
     expect(screen.getByPlaceholderText('modal.titlePlaceholder')).toBeInTheDocument()
   })
 
-  it('Matchprofiel starts collapsed', () => {
+  it('Matchprofiel starts collapsed', async () => {
+    const user = userEvent.setup()
     render(<AddVacancyModal onClose={noop} users={users} customers={customers} />)
+    await openTab(user, 'matching')
     expect(screen.queryByRole('button', { name: 'matching.custom' })).not.toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'modal.fields.cardMatching' })).toHaveAttribute('aria-expanded', 'false')
   })
 
-  it('AI-agent card starts collapsed (when rendered)', () => {
+  it('AI-agent card starts collapsed (when rendered)', async () => {
+    const user = userEvent.setup()
     authState.hasModule = k => k === 'aiagents'
     authState.hasPermission = p => p === 'settings.view'
     aiAgentsState.options = [{ value: 'a1', label: 'Interview Bot' }]
     render(<AddVacancyModal onClose={noop} users={users} customers={customers} />)
+    await openTab(user, 'aiAgent')
     expect(screen.queryByRole('button', { name: 'aiagent.placeholder' })).not.toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'modal.fields.cardAiAgent' })).toHaveAttribute('aria-expanded', 'false')
   })
 
-  it('Publicatie starts collapsed', () => {
+  it('Publicatie starts collapsed', async () => {
+    const user = userEvent.setup()
     render(<AddVacancyModal onClose={noop} users={users} customers={customers} />)
+    await openTab(user, 'publication')
     expect(screen.queryByRole('switch', { name: 'columns.published' })).not.toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'modal.fields.cardPublication' })).toHaveAttribute('aria-expanded', 'false')
   })
 
-  it('Documenten+notitie starts collapsed (when rendered)', () => {
+  it('Documenten+notitie starts collapsed (when rendered)', async () => {
+    const user = userEvent.setup()
     authState.hasPermission = p => p === 'vacancies.update'
     render(<AddVacancyModal onClose={noop} users={users} customers={customers} />)
+    await openTab(user, 'attachments')
     expect(screen.queryByLabelText('drawer.tabs.documents')).not.toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'modal.attachments.cardTitle' })).toHaveAttribute('aria-expanded', 'false')
+  })
+})
+
+describe('AddVacancyModal · free-switching tabs (TABBLADEN-1, Danny 27-08)', () => {
+  it('keeps a typed title after switching to another tab and back', async () => {
+    const user = userEvent.setup()
+    render(<AddVacancyModal onClose={noop} users={users} customers={customers} />)
+    await user.type(screen.getByPlaceholderText('modal.titlePlaceholder'), 'Verpleegkundige')
+    await openTab(user, 'matching')
+    await openTab(user, 'general')
+    expect(screen.getByPlaceholderText('modal.titlePlaceholder')).toHaveValue('Verpleegkundige')
+  })
+
+  it('blocks Create while the required title is empty, on any tab', async () => {
+    const user = userEvent.setup()
+    render(<AddVacancyModal onClose={noop} users={users} customers={customers} />)
+    await openTab(user, 'requirements')
+    expect(screen.getByRole('button', { name: 'modal.create' })).toBeDisabled()
+  })
+
+  it('switches to the owning tab when the server rejects a non-General field (422)', async () => {
+    // A server-side 422 on `description` (VacancyWriter/StoreVacancyRequest) maps
+    // back onto the form's own `description` field — owned by the "Vacancy text"
+    // tab — so a rejection lands the recruiter there even though submit happened
+    // from a different, currently-active tab.
+    mockPost.mockRejectedValueOnce({ response: { data: { errors: { description: ['too long'] } } } })
+    const user = userEvent.setup()
+    render(<AddVacancyModal onClose={noop} users={users} customers={customers} />)
+    await openTab(user, 'requirements')
+    await fillTitleAndSubmit(user)
+    expect(await screen.findByRole('tab', { name: 'modal.tabs.description' })).toHaveAttribute('aria-selected', 'true')
   })
 })
 
@@ -572,6 +618,7 @@ describe('AddVacancyModal · Functie-eisen — senioriteit/opleiding + skills (p
   it('picks a seniority level and adds a required skill', async () => {
     const user = userEvent.setup()
     render(<AddVacancyModal onClose={noop} users={users} customers={customers} />)
+    await openTab(user, 'requirements')
     await user.click(screen.getByRole('button', { name: 'details.seniority' }))
     await user.click(screen.getByRole('button', { name: 'Senior' }))
     // K6e: AdditionalSkillsSection's add/edit/remove list — the "+" trigger opens
@@ -588,6 +635,7 @@ describe('AddVacancyModal · Functie-eisen — senioriteit/opleiding + skills (p
   it('edits a staged required skill in place (K6e)', async () => {
     const user = userEvent.setup()
     render(<AddVacancyModal onClose={noop} users={users} customers={customers} />)
+    await openTab(user, 'requirements')
     await user.click(screen.getByRole('button', { name: /details\.addSkill/ }))
     await user.type(screen.getByPlaceholderText('details.addSkill'), 'BIG-registratie')
     await user.click(screen.getByTitle('save'))
@@ -628,6 +676,7 @@ describe('AddVacancyModal · Beschrijving (punt 9)', () => {
   it('reveals the rich-text editor on click and carries the typed description', async () => {
     const user = userEvent.setup()
     render(<AddVacancyModal onClose={noop} users={users} customers={customers} />)
+    await openTab(user, 'description')
     await user.click(screen.getByRole('button', { name: /details.description/ }))
     await user.type(screen.getByLabelText('rich-text-editor'), 'Dienst op de IC-afdeling.')
     await fillTitleAndSubmit(user)
@@ -642,6 +691,7 @@ describe('AddVacancyModal · Matchprofiel (punt 18)', () => {
     matchTemplatesState.templates = [template]
     const user = userEvent.setup()
     render(<AddVacancyModal onClose={noop} users={users} customers={customers} />)
+    await openTab(user, 'matching')
     // A+D layout (03-08): Matchprofiel is a CollapsedCard, closed by default — open it first.
     await user.click(screen.getByRole('button', { name: 'modal.fields.cardMatching' }))
     await user.click(screen.getByRole('button', { name: 'matching.custom' }))
@@ -657,6 +707,7 @@ describe('AddVacancyModal · Matchprofiel (punt 18)', () => {
     matchTemplatesState.templates = [template]
     const user = userEvent.setup()
     render(<AddVacancyModal onClose={noop} users={users} customers={customers} />)
+    await openTab(user, 'matching')
     await user.click(screen.getByRole('button', { name: 'modal.fields.cardMatching' }))
     await user.click(screen.getByRole('button', { name: 'matching.custom' }))
     await user.click(screen.getByRole('button', { name: 'IC-team' }))
@@ -685,6 +736,7 @@ describe('AddVacancyModal · AI-agent card gating (punt 19)', () => {
     const user = userEvent.setup()
     render(<AddVacancyModal onClose={noop} users={users} customers={customers} />)
     expect(screen.getByText('modal.fields.cardAiAgent')).toBeInTheDocument()
+    await openTab(user, 'aiAgent')
 
     // A+D layout (03-08): AI-agent is a CollapsedCard, closed by default — open it first.
     await user.click(screen.getByRole('button', { name: 'modal.fields.cardAiAgent' }))
@@ -710,9 +762,10 @@ describe('AddVacancyModal · AI-agent seeds from the owner (punt 20, KOIOS-VOORS
     aiAgentsState.options = [{ value: 'a1', label: 'Interview Bot' }]
     render(<AddVacancyModal onClose={noop} users={users} customers={customers} />)
     await screen.findByText('modal.fields.cardAiAgent')
+    const user = userEvent.setup()
+    await openTab(user, 'aiAgent')
     // Owner (u1, the logged-in default) has an agent — the card shows it filled + suggested even collapsed.
     expect(screen.getByText('modal.fields.cardAiAgent').closest('button')).toHaveAttribute('aria-expanded', 'false')
-    const user = userEvent.setup()
     await user.click(screen.getByRole('button', { name: 'modal.fields.cardAiAgent' }))
     expect(screen.getByRole('button', { name: 'Interview Bot' })).toBeInTheDocument()
     expect(screen.getByTestId('koios-suggestion')).toBeInTheDocument()
@@ -726,6 +779,7 @@ describe('AddVacancyModal · AI-agent seeds from the owner (punt 20, KOIOS-VOORS
     aiAgentsState.options = [{ value: 'a1', label: 'Interview Bot' }]
     const user = userEvent.setup()
     render(<AddVacancyModal onClose={noop} users={users} customers={customers} />)
+    await openTab(user, 'aiAgent')
     await user.click(screen.getByRole('button', { name: 'modal.fields.cardAiAgent' }))
     expect(screen.getByRole('button', { name: 'aiagent.placeholder' })).toBeInTheDocument()
     expect(screen.queryByTestId('koios-suggestion')).not.toBeInTheDocument()
@@ -741,14 +795,18 @@ describe('AddVacancyModal · AI-agent seeds from the owner (punt 20, KOIOS-VOORS
     aiAgentsState.options = [{ value: 'a1', label: 'Interview Bot' }, { value: 'a2', label: 'Zorg Bot' }]
     const user = userEvent.setup()
     render(<AddVacancyModal onClose={noop} users={usersWithSecond} customers={customers} />)
+    await openTab(user, 'aiAgent')
     await user.click(screen.getByRole('button', { name: 'modal.fields.cardAiAgent' }))
     expect(screen.getByRole('button', { name: 'Interview Bot' })).toBeInTheDocument()
 
-    // Switch owner to Anne Manager (u2) — the suggestion re-proposes her own agent.
-    // (The owner trigger's accessible name is its FIELD LABEL, not the picked value —
-    // its <label> is aria-labelledby'd onto the button, so it never reads "Piet Recruiter".)
+    // Switch owner to Anne Manager (u2) — the RecruiterCard lives on the General
+    // tab, so switch there to reach it (the owner trigger's accessible name is
+    // its FIELD LABEL, not the picked value — its <label> is aria-labelledby'd
+    // onto the button, so it never reads "Piet Recruiter") — then back to see the re-suggestion.
+    await openTab(user, 'general')
     await user.click(screen.getByRole('button', { name: 'modal.fields.owner' }))
     await user.click(screen.getByRole('button', { name: 'Anne Manager' }))
+    await openTab(user, 'aiAgent')
     expect(screen.getByRole('button', { name: 'Zorg Bot' })).toBeInTheDocument()
     expect(screen.getByTestId('koios-suggestion')).toBeInTheDocument()
 
@@ -761,6 +819,7 @@ describe('AddVacancyModal · AI-agent seeds from the owner (punt 20, KOIOS-VOORS
     aiAgentsState.options = [{ value: 'a1', label: 'Interview Bot' }]
     const user = userEvent.setup()
     render(<AddVacancyModal onClose={noop} users={users} customers={customers} />)
+    await openTab(user, 'aiAgent')
     await user.click(screen.getByRole('button', { name: 'modal.fields.cardAiAgent' }))
     expect(screen.getByTestId('koios-suggestion')).toBeInTheDocument()
 
@@ -792,6 +851,7 @@ describe('AddVacancyModal · Publicatie (punt 20)', () => {
     lookupState.channels = [{ value: 'indeed', label: 'Indeed' }]
     const user = userEvent.setup()
     render(<AddVacancyModal onClose={noop} users={users} customers={customers} />)
+    await openTab(user, 'publication')
 
     // A+D layout (03-08): Publicatie is a CollapsedCard, closed by default — open it first.
     await user.click(screen.getByRole('button', { name: 'modal.fields.cardPublication' }))

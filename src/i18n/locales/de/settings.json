@@ -2846,7 +2846,8 @@
       "workflowBillableNote": "{{billable}} abrechenbar (von {{credits}}, {{included}} inbegriffen)",
       "budgetStatus": {
         "title": "Workflow-Budget",
-        "withinBudget": "Diesen Monat innerhalb des Budgets."
+        "withinBudget": "Diesen Monat innerhalb des Budgets.",
+          "noBudget": "Kein Token-Budget für dieses Paket konfiguriert."
       }
     }
   },
@@ -3312,6 +3313,7 @@
     "flavors": {
       "title": "Varianten",
       "subtitle": "Welches Anbietermodell hinter jeder mandantensichtbaren Variante steht.",
+        "per1m": "pro 1 Mio. Tokens",
       "pickPlaceholder": "Modell wählen",
       "noEffort": "Dieses Modell kennt keine Anstrengungsstufen."
     },

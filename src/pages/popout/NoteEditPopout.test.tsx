@@ -53,6 +53,24 @@ const { appLiteState } = vi.hoisted(() => ({
 }))
 vi.mock('./hooks/useApplicationLite', () => ({ useApplicationLite: () => appLiteState }))
 
+// POPOUT-PARITEIT-1 (27-08): the generalised GenericNoteEditPopout branch —
+// proves a non-candidate/application entity (match) reaches the dispatcher's
+// registration AND saves through its own PATCH route (useEntityNotes), not
+// merely that the icon shows up.
+const { matchLiteState } = vi.hoisted(() => ({
+  matchLiteState: { match: null as { id: string; candidateName: string; vacancyTitle: string; initials: string } | null, loading: false, error: false, reload: vi.fn() },
+}))
+vi.mock('./hooks/useMatchLite', () => ({ useMatchLite: () => matchLiteState }))
+// Same minimal identity for the opportunity branch (react-query-free harness).
+vi.mock('./hooks/useOpportunityLite', () => ({ useOpportunityLite: () => ({ opportunity: { id: 'o1', name: 'Kans', initials: 'K' }, loading: false, error: false, reload: () => {} }) }))
+const { entityNotesState } = vi.hoisted(() => ({
+  entityNotesState: { notes: [] as Array<Record<string, unknown>>, loading: false, error: false, fetchNotes: vi.fn(), addNote: vi.fn(), editNote: vi.fn(), deleteNote: vi.fn() },
+}))
+// Spy keeps the call ARGS assertable: the generic branch must hand the hook the
+// EXPLICIT api base + method (the namespace-coincidence bug the audit caught).
+const useEntityNotesSpy = vi.hoisted(() => vi.fn())
+vi.mock('@/hooks/useEntityNotes', () => ({ useEntityNotes: (args: unknown) => { useEntityNotesSpy(args); return entityNotesState } }))
+
 // Mount on the REAL route shape so useParams carries entity/id/noteId like production.
 const renderAt = (path: string) => render(
   <MemoryRouter initialEntries={[path]}>
@@ -117,8 +135,10 @@ describe('NoteEditPopout · NOTITIE-POPOUT-URL-1', () => {
     expect(screen.queryByTestId('text-popout-save')).toBeNull()
   })
 
-  it('refuses an entity whose window cannot PATCH a note (customer) — error row, never a form', () => {
-    renderAt('/popout/notes/customer/x1/n1')
+  it('refuses an entity outside NOTE_EDIT_POPOUT_ENTITIES (outreachTarget) — error row, never a form', () => {
+    // outreachTarget has no notes THREAD at all (a plain `note` column, see
+    // secondScreen.ts's own doc) — it can never gain a per-note edit route.
+    renderAt('/popout/notes/outreachTarget/x1/n1')
     expect(screen.getByText('popout.loadError')).toBeInTheDocument()
     expect(screen.queryByLabelText('body')).toBeNull()
   })
@@ -164,5 +184,53 @@ describe('NoteEditPopout · application branch (A-popout-1)', () => {
     renderAt('/popout/notes/application/a1/ontbreekt')
     expect(screen.getByText('common:popout.noteNotFound')).toBeInTheDocument()
     expect(screen.queryByLabelText('body')).toBeNull()
+  })
+})
+
+// POPOUT-PARITEIT-1 (27-08): the generic branch — proves a non-candidate/
+// application entity really registers in the dispatcher AND persists its edit
+// through ITS OWN PATCH route (useEntityNotes basePath `/matches/{id}`), not
+// just that the popout renders.
+describe('NoteEditPopout · generic branch (match, POPOUT-PARITEIT-1)', () => {
+  const previousTitle = document.title
+  beforeEach(() => {
+    vi.spyOn(window, 'close').mockImplementation(() => {})
+    matchLiteState.match = { id: 'm1', candidateName: 'Bram Jansen', vacancyTitle: 'Verpleegkundige', initials: 'BJ' }
+    matchLiteState.loading = false
+    matchLiteState.error = false
+    matchLiteState.reload = vi.fn()
+    entityNotesState.notes = [
+      { id: 'n1', type: 'general', text: '<p>Eerste</p>', author_id: 'u1' },
+      { id: 'n2', type: 'general', text: '<p>Tweede</p>', author_id: 'u1' },
+    ]
+    entityNotesState.editNote = vi.fn().mockResolvedValue(true)
+  })
+  afterEach(() => { document.title = previousTitle; vi.restoreAllMocks() })
+
+  it("renders the match's candidate name and THAT note's text", () => {
+    renderAt('/popout/notes/match/m1/n2')
+    expect(screen.getByText('Bram Jansen')).toBeInTheDocument()
+    expect(screen.getByLabelText('body')).toHaveValue('<p>Tweede</p>')
+  })
+
+  it('saves through the SAME PATCH route the match drawer uses (useEntityNotes.editNote) — the seam (§13)', async () => {
+    const user = userEvent.setup()
+    renderAt('/popout/notes/match/m1/n2')
+    await user.type(screen.getByLabelText('body'), ' extra')
+    await user.click(screen.getByTestId('text-popout-save'))
+    await waitFor(() => expect(entityNotesState.editNote).toHaveBeenCalledWith(1, expect.objectContaining({
+      type: 'general', body: '<p>Tweede</p> extra',
+    })))
+    // The route/method is EXPLICIT, never derived from the i18n namespace — this
+    // is the exact coupling that let the opportunity PUT/PATCH mismatch slip.
+    expect(useEntityNotesSpy).toHaveBeenCalledWith(expect.objectContaining({ basePath: '/matches/m1', updateMethod: 'patch' }))
+  })
+
+  // Opportunities' note-update route registers PUT only (measured 27-08) — the
+  // generic branch must hand the hook updateMethod 'put' there, or every save 405s.
+  it('hands the opportunity branch the PUT method its route requires', () => {
+    useEntityNotesSpy.mockClear()
+    renderAt('/popout/notes/opportunity/o1/n2')
+    expect(useEntityNotesSpy).toHaveBeenCalledWith(expect.objectContaining({ basePath: '/opportunities/o1', updateMethod: 'put' }))
   })
 })

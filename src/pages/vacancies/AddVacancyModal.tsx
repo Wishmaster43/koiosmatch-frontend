@@ -20,12 +20,13 @@
  * useEntityImportCard/EntityImportCard the customer modal uses, pointed at the
  * 'vacancies' importer (never a second upload implementation, §11).
  */
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { WIDE_MODAL } from '@/components/ui/modalMetrics'
 import FloatingPanel from '@/components/ui/FloatingPanel'
 import { tintBorder } from '@/lib/tint'
-import { modalColumns, cardBox, cardHead } from '@/components/ui/modalCards'
+import { cardBox, cardHead } from '@/components/ui/modalCards'
 import CollapsedCard from '@/components/ui/CollapsedCard'
+import DrawerTabs from '@/components/drawer/DrawerTabs'
 import { useAuth } from '@/context/AuthContext'
 import EntityImportCard from '@/components/import/EntityImportCard'
 import { useEntityImportCard } from '@/components/import/useEntityImportCard'
@@ -56,6 +57,27 @@ interface ModalCustomer { id: Id; name: string }
 // and importTemplateShape.ts's importPermissionsFor (vacancies.view/vacancies.create),
 // never guessed from the entity's display name.
 const VACANCY_IMPORT_ENTITY = 'vacancies'
+
+// TABBLADEN-1 (Danny 27-08: "tabbladen zijn beter omdat je kan switchen") —
+// maps every form field name (the useAddVacancyForm/useAddVacancySubmit
+// vocabulary) onto the tab that must become active when that field carries a
+// client- or server-side (422) validation error, so a failed submit always
+// lands the recruiter on the right tab instead of a silent no-op.
+const FIELD_TO_TAB: Record<string, string> = {
+  title: 'general', status: 'general', ownerId: 'general', clientId: 'general',
+  industry: 'general', category: 'general', location: 'general',
+  customerLocationId: 'general', customerDepartmentId: 'general', contactId: 'general',
+  contractTypes: 'general', startDate: 'general', endDate: 'general',
+  street: 'general', houseNumber: 'general', houseNumberSuffix: 'general',
+  postalCode: 'general', city: 'general', province: 'general', country: 'general', branchId: 'general',
+  seniority: 'requirements', education: 'requirements', skills: 'requirements',
+  salaryMin: 'requirements', salaryMax: 'requirements', salaryPeriod: 'requirements',
+  hoursMin: 'requirements', hoursMax: 'requirements',
+  description: 'description',
+  matchWeightTemplateId: 'matching', matchWeights: 'matching',
+  aiAgentId: 'aiAgent',
+  published: 'publication', publishedChannels: 'publication', applicationSettings: 'publication',
+}
 
 // Thin assembler for the create-vacancy modal (see file docblock above): shell
 // + card wiring only, all state/lookups/submit logic lives in useAddVacancyForm.
@@ -92,6 +114,26 @@ export default function AddVacancyModal({
   // EXCEL-VACATURES-1: the import affordance opens from the header button
   // (closed on open, mirrors AddCustomerModal's importOpen/KLANT-LAYOUT-3).
   const [importOpen, setImportOpen] = useState(false)
+  // TABBLADEN-1: free-switching tabs (no wizard/step gating) — component-local
+  // active-tab state only; the form itself keeps living in useAddVacancyForm,
+  // so nothing here remounts and typed values survive every tab switch.
+  const [activeTab, setActiveTab] = useState('general')
+  const tabs = [
+    { id: 'general', label: f.t('modal.tabs.general') },
+    { id: 'requirements', label: f.t('modal.tabs.requirements') },
+    { id: 'description', label: f.t('modal.tabs.description') },
+    { id: 'matching', label: f.t('modal.tabs.matching') },
+    ...(f.showAiAgentCard ? [{ id: 'aiAgent', label: f.t('modal.tabs.aiAgent') }] : []),
+    { id: 'publication', label: f.t('modal.tabs.publication') },
+    ...(f.showAttachmentCards ? [{ id: 'attachments', label: f.t('modal.tabs.attachments') }] : []),
+  ]
+  // Any field carrying an error (required-title client check or a mapped 422)
+  // jumps the view to its owning tab, so a failed submit is never silent.
+  useEffect(() => {
+    const badField = Object.keys(f.errors).find(k => f.errors[k])
+    const tab = badField ? FIELD_TO_TAB[badField] : undefined
+    if (tab) setActiveTab(tab)
+  }, [f.errors])
   const authCtx = useAuth() as unknown as { hasPermission?: (perm: string) => boolean }
   const hasPermission = authCtx.hasPermission ?? (() => false)
   const { wizard: importWizard, canView: canViewImportTemplate, canImport: canRunImport } =
@@ -141,20 +183,21 @@ export default function AddVacancyModal({
         </div>
       }>
 
-        {/* Form — A+D layout (Danny 03-08 decision, shared primitives from
-            components/ui/modalCards + CollapsedCard, commit 4845a6ee): required-core
-            cards (Algemeen/Klant/Inzet/Recruiter) sit LEFT, content cards
-            (Functie-eisen/Voorwaarden/Vacaturetekst) sit RIGHT via the shared
-            modalColumns two-column grid (falls back to one column at narrow widths,
-            mirrors AddLocationModal's exact idiom); the four secondary/optional
-            cards (Matchprofiel/AI-agent/Publicatie/Documenten+notitie) collapse
-            full-width below — never a required field inside a CollapsedCard. */}
+        {/* TABBLADEN-1 (Danny 27-08): free-switching tabs replace the old long
+            scroll — the house DrawerTabs bar, own tab ids, i18n labels x5.
+            Panes stay MOUNTED and are only hidden (never unmounted) while
+            inactive, so typed values and any in-flight card state survive a
+            switch without re-wiring anything in useAddVacancyForm. */}
+        <div style={{ padding: '0 22px', flexShrink: 0, borderBottom: '1px solid var(--border)' }}>
+          <DrawerTabs tabs={tabs} active={activeTab} onChange={setActiveTab} />
+        </div>
         <div style={{ flex: 1, overflowY: 'auto', padding: '20px 22px', display: 'flex', flexDirection: 'column', gap: 16 }}>
           {/* EXCEL-VACATURES-1 (Danny 14-08): the import flow opens from the header
-              toggle and renders as the FIRST card only while open — a rare, optional
-              path stays out of the way until deliberately summoned (KLANT-LAYOUT-3
-              mirror). One row = one vacancy here, never a linked multi-record tree,
-              so wholeTree stays false (the EntityImportCard/PreviewStep default). */}
+              toggle and renders as the FIRST card only while open, above every tab —
+              a rare, optional path stays out of the way until deliberately summoned
+              (KLANT-LAYOUT-3 mirror). One row = one vacancy here, never a linked
+              multi-record tree, so wholeTree stays false (the EntityImportCard/
+              PreviewStep default). */}
           {importOpen && (
             <div style={{ ...cardBox, padding: 16 }}>
               <div style={cardHead}>{f.t('modal.import.title')}</div>
@@ -162,77 +205,90 @@ export default function AddVacancyModal({
                 entity={VACANCY_IMPORT_ENTITY} intro={f.t('modal.import.intro')} />
             </div>
           )}
-          <div style={modalColumns('repeat(auto-fit, minmax(340px, 1fr))')}>
-            {/* LEFT — required core: what/who/where/whom this vacancy is for. */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-              <GeneralCard
-                title={f.form.title} onTitleChange={v => f.set('title', v)} titleError={f.errors.title}
-                category={f.form.category} onCategoryChange={v => f.set('category', v)} functions={f.functions}
-                industry={f.form.industry} onIndustryChange={v => f.set('industry', v)} industries={f.industries}
-              />
-              <ClientCascadeCard
-                lockCustomerId={lockCustomerId} lockCustomerName={lockCustomerName}
-                clientId={f.form.clientId} onClientChange={f.handleClientChange} customerOptions={f.customerOptions}
-                locationPicker={f.locationPicker} departmentPicker={f.departmentPicker} contactPicker={f.contactPicker}
-              />
-              <PlacementCard
-                contractTypes={f.form.contractTypes} candidateTypes={f.candidateTypes} onToggleType={f.toggleContractType}
-                startDate={f.form.startDate} endDate={f.form.endDate}
-                onStartDateChange={v => f.set('startDate', v)} onEndDateChange={v => f.set('endDate', v)}
-                street={f.form.street} houseNumber={f.form.houseNumber} houseNumberSuffix={f.form.houseNumberSuffix}
-                postalCode={f.form.postalCode} city={f.form.city} province={f.form.province} country={f.form.country}
-                onFieldChange={f.onAddressChange} provinces={f.provinces}
-                branchId={f.form.branchId} onBranchChange={f.handleBranchChange} branchOptions={f.branchOptions}
-              />
-              <RecruiterCard ownerId={f.form.ownerId} onOwnerChange={v => f.set('ownerId', v)} userOptions={f.userOptions} />
-            </div>
 
-            {/* RIGHT — content: what the job requires, offers, and reads like. */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-              <RequirementsCard
-                seniority={f.form.seniority} onSeniorityChange={v => f.set('seniority', v)} seniorityLevels={f.seniorityLevels}
-                education={f.form.education} onEducationChange={v => f.set('education', v)} educationLevels={f.educationLevels}
-                skills={f.skills} onAddSkill={f.addSkill} onEditSkill={f.editSkill} onRemoveSkill={f.removeSkill}
-              />
-              <ConditionsCard
-                salaryMin={f.form.salaryMin} salaryMax={f.form.salaryMax} salaryPeriod={f.form.salaryPeriod}
-                hoursMin={f.form.hoursMin} hoursMax={f.form.hoursMax}
-                onChange={f.onConditionsChange}
-              />
-              <DescriptionCard value={f.form.description} onChange={v => f.set('description', v)}
-                expanded={f.descExpanded} setExpanded={f.setDescExpanded} editing={f.descEditing} setEditing={f.setDescEditing}
-                genFields={f.genFields} />
-            </div>
+          {/* General — title/function/industry (GeneralCard), the client cascade,
+              assignment/address/contract form (PlacementCard) and the recruiter. */}
+          <div style={{ display: activeTab === 'general' ? 'flex' : 'none', flexDirection: 'column', gap: 16 }}>
+            <GeneralCard
+              title={f.form.title} onTitleChange={v => f.set('title', v)} titleError={f.errors.title}
+              category={f.form.category} onCategoryChange={v => f.set('category', v)} functions={f.functions}
+              industry={f.form.industry} onIndustryChange={v => f.set('industry', v)} industries={f.industries}
+            />
+            <ClientCascadeCard
+              lockCustomerId={lockCustomerId} lockCustomerName={lockCustomerName}
+              clientId={f.form.clientId} onClientChange={f.handleClientChange} customerOptions={f.customerOptions}
+              locationPicker={f.locationPicker} departmentPicker={f.departmentPicker} contactPicker={f.contactPicker}
+            />
+            <PlacementCard
+              contractTypes={f.form.contractTypes} candidateTypes={f.candidateTypes} onToggleType={f.toggleContractType}
+              startDate={f.form.startDate} endDate={f.form.endDate}
+              onStartDateChange={v => f.set('startDate', v)} onEndDateChange={v => f.set('endDate', v)}
+              street={f.form.street} houseNumber={f.form.houseNumber} houseNumberSuffix={f.form.houseNumberSuffix}
+              postalCode={f.form.postalCode} city={f.form.city} province={f.form.province} country={f.form.country}
+              onFieldChange={f.onAddressChange} provinces={f.provinces}
+              branchId={f.form.branchId} onBranchChange={f.handleBranchChange} branchOptions={f.branchOptions}
+            />
+            <RecruiterCard ownerId={f.form.ownerId} onOwnerChange={v => f.set('ownerId', v)} userOptions={f.userOptions} />
           </div>
 
-          {/* Secondary/optional — collapsed by default (A+D decision): each card's
-              `filled` dot lights up once it holds a real value, so a recruiter can
-              tell at a glance what still needs a look without expanding everything. */}
-          <CollapsedCard title={f.t('modal.fields.cardMatching')} filled={!!f.matchWeightTemplateId || !!f.matchWeights}>
-            <MatchProfileCard templateId={f.matchWeightTemplateId} onTemplateChange={f.setMatchWeightTemplateId}
-              onWeightsChange={f.setMatchWeights} />
-          </CollapsedCard>
+          {/* Conditions & requirements — what the job requires and offers. */}
+          <div style={{ display: activeTab === 'requirements' ? 'flex' : 'none', flexDirection: 'column', gap: 16 }}>
+            <RequirementsCard
+              seniority={f.form.seniority} onSeniorityChange={v => f.set('seniority', v)} seniorityLevels={f.seniorityLevels}
+              education={f.form.education} onEducationChange={v => f.set('education', v)} educationLevels={f.educationLevels}
+              skills={f.skills} onAddSkill={f.addSkill} onEditSkill={f.editSkill} onRemoveSkill={f.removeSkill}
+            />
+            <ConditionsCard
+              salaryMin={f.form.salaryMin} salaryMax={f.form.salaryMax} salaryPeriod={f.form.salaryPeriod}
+              hoursMin={f.form.hoursMin} hoursMax={f.form.hoursMax}
+              onChange={f.onConditionsChange}
+            />
+          </div>
+
+          {/* Vacancy text — the free-text description card, own tab (rich text needs room). */}
+          <div style={{ display: activeTab === 'description' ? 'block' : 'none' }}>
+            <DescriptionCard value={f.form.description} onChange={v => f.set('description', v)}
+              expanded={f.descExpanded} setExpanded={f.setDescExpanded} editing={f.descEditing} setEditing={f.setDescEditing}
+              genFields={f.genFields} />
+          </div>
+
+          {/* Match profile / AI agent / Publication / Documents & note — each its
+              own tab now; CollapsedCard stays UNCHANGED (pure recomposition) so its
+              own collapsed-by-default/filled-dot behaviour is untouched. */}
+          <div style={{ display: activeTab === 'matching' ? 'block' : 'none' }}>
+            <CollapsedCard title={f.t('modal.fields.cardMatching')} filled={!!f.matchWeightTemplateId || !!f.matchWeights}>
+              <MatchProfileCard templateId={f.matchWeightTemplateId} onTemplateChange={f.setMatchWeightTemplateId}
+                onWeightsChange={f.setMatchWeights} />
+            </CollapsedCard>
+          </div>
           {/* Punt 19: rendered as NOTHING without module `aiagents` + settings.view —
-              GET /ai/agents is gated on both, never a disabled tease (§3) — the
-              CollapsedCard itself must not exist without access, not just its body. */}
+              GET /ai/agents is gated on both, never a disabled tease (§3) — the tab
+              itself is filtered out of `tabs` above, and its pane never mounts. */}
           {f.showAiAgentCard && (
-            <CollapsedCard title={f.t('modal.fields.cardAiAgent')} filled={!!f.aiAgentId}>
-              <AiAgentCard agentId={f.aiAgentId} onAgentChange={f.setAiAgentId} showSuggestion={f.showAgentSuggestion} />
-            </CollapsedCard>
+            <div style={{ display: activeTab === 'aiAgent' ? 'block' : 'none' }}>
+              <CollapsedCard title={f.t('modal.fields.cardAiAgent')} filled={!!f.aiAgentId}>
+                <AiAgentCard agentId={f.aiAgentId} onAgentChange={f.setAiAgentId} showSuggestion={f.showAgentSuggestion} />
+              </CollapsedCard>
+            </div>
           )}
-          <CollapsedCard title={f.t('modal.fields.cardPublication')}
-            filled={f.published || f.channels.some(c => c.published) || f.applicationSettingsTouched}>
-            <PublicationCard published={f.published} onPublishedChange={f.setPublished}
-              channels={f.channels} onToggleChannel={f.toggleChannel}
-              applicationSettings={f.applicationSettings} onSettingChange={f.setApplicationSetting} />
-          </CollapsedCard>
-          {/* Punten 21+22: both POST .../documents and .../notes need vacancies.update
-              next to vacancies.create (measured) — hidden entirely without it. */}
-          {f.showAttachmentCards && (
-            <CollapsedCard title={f.t('modal.attachments.cardTitle')} filled={attachments.hasPending}>
-              <AttachmentsCard files={attachments.files} onAddFile={attachments.addFile} onRemoveFile={attachments.removeFile}
-                noteText={attachments.noteText} onNoteChange={attachments.setNoteText} />
+          <div style={{ display: activeTab === 'publication' ? 'block' : 'none' }}>
+            <CollapsedCard title={f.t('modal.fields.cardPublication')}
+              filled={f.published || f.channels.some(c => c.published) || f.applicationSettingsTouched}>
+              <PublicationCard published={f.published} onPublishedChange={f.setPublished}
+                channels={f.channels} onToggleChannel={f.toggleChannel}
+                applicationSettings={f.applicationSettings} onSettingChange={f.setApplicationSetting} />
             </CollapsedCard>
+          </div>
+          {/* Punten 21+22: both POST .../documents and .../notes need vacancies.update
+              next to vacancies.create (measured) — the tab is filtered out of `tabs`
+              entirely without it, so its pane never mounts either. */}
+          {f.showAttachmentCards && (
+            <div style={{ display: activeTab === 'attachments' ? 'block' : 'none' }}>
+              <CollapsedCard title={f.t('modal.attachments.cardTitle')} filled={attachments.hasPending}>
+                <AttachmentsCard files={attachments.files} onAddFile={attachments.addFile} onRemoveFile={attachments.removeFile}
+                  noteText={attachments.noteText} onNoteChange={attachments.setNoteText} />
+              </CollapsedCard>
+            </div>
           )}
         </div>
 

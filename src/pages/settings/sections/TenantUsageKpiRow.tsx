@@ -87,7 +87,7 @@ export default function TenantUsageKpiRow({ usage, loading }: Props) {
           merges an ai_token_budget or a whatsapp tokens/by_channel block, so
           the AI and WhatsApp meters cannot render honestly here yet — see the
           worklist handoff rather than fake a bar with a guessed budget. */}
-      {workflowIncluded !== undefined && (
+      {(workflowIncluded ?? 0) > 0 ? (
         <div style={{ maxWidth: 320, marginBottom: 18 }}>
           <SectionTitle style={{ marginBottom: 6, fontSize: 12 }}>{t('usage.kpi.budgetStatus.title')}</SectionTitle>
           <MeterBar label={t('usage.kpi.workflowLabel')} used={workflowCredits} budget={workflowIncluded} />
@@ -103,6 +103,10 @@ export default function TenantUsageKpiRow({ usage, loading }: Props) {
             <Caption>{t('usage.kpi.budgetStatus.withinBudget')}</Caption>
           )}
         </div>
+      ) : (
+        // Legacy packages emit included_budget 0 - that is "no budget configured",
+        // never a 0-budget meter with a danger line (the false-over the audit caught).
+        <Caption as="div" style={{ marginBottom: 18 }}>{t('usage.kpi.budgetStatus.noBudget')}</Caption>
       )}
     </div>
   )

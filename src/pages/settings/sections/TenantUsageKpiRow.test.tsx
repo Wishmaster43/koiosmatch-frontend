@@ -56,9 +56,22 @@ describe('TenantUsageKpiRow', () => {
       ai: { tokens: 100 },
       billing: { workflow: { credits: 620, included_budget: 500, billable_credits: 120, amount: 6 } },
     }} />)
-    // The overBudget key interpolates meter/n/amount — assert the count and amount land.
-    expect(document.body.textContent).toMatch(/120/)
+    // Pin the SEAM (mutation-proven weak before): the over line is the overBudget
+    // KEY itself in the danger ink — deleting the branch must fail this test.
+    const over = screen.getByText(/billing\.usage\.plan\.overBudget/)
+    expect(over).toHaveStyle({ color: 'var(--color-danger-text)' })
     expect(document.body.textContent).not.toMatch(/withinBudget/)
+  })
+
+  // Legacy packages emit included_budget 0 — that means NO budget, never a
+  // 0-budget meter painted over-budget in danger (the false-over the audit caught).
+  it('renders the honest no-budget caption when included_budget is 0', () => {
+    render(<TenantUsageKpiRow loading={false} usage={{
+      ai: { tokens: 100 },
+      billing: { workflow: { credits: 620, included_budget: 0, billable_credits: 620, amount: 62 } },
+    }} />)
+    expect(screen.getByText(/budgetStatus\.noBudget/)).toBeInTheDocument()
+    expect(document.body.textContent).not.toMatch(/billing\.usage\.plan\.overBudget/)
   })
 
   it('renders the calm within-budget caption when billable_credits is 0 (usage-meters)', () => {

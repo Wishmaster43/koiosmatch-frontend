@@ -373,6 +373,15 @@
     "openMatch": "Match öffnen"
   },
   "modal": {
+    "tabs": {
+      "general": "Allgemein",
+      "requirements": "Bedingungen & Anforderungen",
+      "description": "Stellentext",
+      "matching": "Match-Profil",
+      "aiAgent": "KI-Agent",
+      "publication": "Veröffentlichung",
+      "attachments": "Dokumente & Notiz"
+    },
     "title": "Neue Stelle",
     "import": {
       "title": "Stelle aus Datei",

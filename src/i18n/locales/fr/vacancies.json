@@ -373,6 +373,15 @@
     "openMatch": "Ouvrir le match"
   },
   "modal": {
+    "tabs": {
+      "general": "Général",
+      "requirements": "Conditions & exigences",
+      "description": "Texte de l'offre",
+      "matching": "Profil de correspondance",
+      "aiAgent": "Agent IA",
+      "publication": "Publication",
+      "attachments": "Documents & note"
+    },
     "title": "Nouveau poste",
     "import": {
       "title": "Poste depuis un fichier",
