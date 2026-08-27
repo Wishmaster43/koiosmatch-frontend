@@ -23,6 +23,7 @@
 import { useId, type Dispatch, type SetStateAction } from 'react'
 import type { TFunction } from 'i18next'
 import CreatableSelect from '@/components/ui/CreatableSelect'
+import ChipMultiSelect from '@/components/ui/ChipMultiSelect'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 import { FormField as F } from './FormField'
 import ContractLinesSection from './ContractLinesSection'
@@ -113,16 +114,19 @@ export default function RelationsSection({
   const contactLabelId = useId()
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-      {/* MATCH-SOORT-1 (§1 of the changelog): Contractvorm is the FIRST choice in
-          this card — pick-only (allowCreate=false, a real lookup value), clearable
-          (an optional field per CLAUDE.md §3A's VAC-CLEAR-1 rule). Picking a
-          flagged value reveals CONTRACTREGELS right under it. */}
+      {/* MATCH-SOORT-1: Contractvorm is the FIRST choice in this card — rendered as
+          the shared soft-chip row like every other create modal (Danny 27-08:
+          "chips bovenin zoals we dat overal doen"). Single-value: picking another
+          chip switches, re-clicking the active chip clears (VAC-CLEAR-1, optional
+          field). A flagged value still reveals CONTRACTREGELS right under it. */}
       <F label={t('placement.contractForm')} error={errors.contractForm}>
-        {(labelId: string) => (
-          <CreatableSelect value={contractForm || null} onChange={setContractForm} allowCreate={false}
-            placeholder={t('placement.pickContractForm')} menuWidth={pickerMenuWidth} clearable clearLabel={t('placement.contractForm')}
-            aria-labelledby={labelId}
-            options={candidateTypes.map(c => ({ value: c.value, label: c.label }))} />
+        {() => (
+          <ChipMultiSelect
+            options={candidateTypes.map(c => ({ value: c.value, label: c.label, color: c.color }))}
+            values={contractForm ? [contractForm] : []}
+            onToggle={(v) => setContractForm(v === contractForm ? '' : v)}
+            selectAll={false}
+            ariaLabel={t('placement.contractForm')} />
         )}
       </F>
       {hasContractLines && (
