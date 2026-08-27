@@ -170,6 +170,9 @@ export default function OutreachDrawer({ id, createdAt, archived = false, archiv
       <CustomFieldsTab entityType="outreach_campaign" values={detail?.custom_fields ?? {}}
         onSave={patch => { if (id) setCustomFields(id, patch) }} />
     ) }] : []),
+    // TIJDLIJN-OVERAL (27-08): second-to-last, reuses the same ChangelogTab content
+    // the title-row popover renders — the popover itself stays untouched (§3A(d)).
+    { id: 'timeline', label: t('drawer.tabs.timeline'), render: () => <ChangelogTab campaignId={id} /> },
     // Stats is always the LAST tab (§3A CANON-CHECKLIST — statistics closes every drilldown).
     { id: 'stats', label: t('drawer.tabs.stats', { defaultValue: 'Stats' }), render: () => (
       <CampaignStatsTab campaignId={id} filter={targetFilter} onPick={onPickFilter} onClear={onClearFilter} />

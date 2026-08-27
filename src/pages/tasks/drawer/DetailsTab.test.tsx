@@ -79,7 +79,7 @@ const task: TaskDetail = {
   assigneeId: null, assignee: null, owner: { name: 'Danny' },
   due: '2026-08-01', dueTime: '', completedAt: '', tags: [], links: [], linkLabel: '', commentCount: 0,
   createdAt: '2026-07-01T10:00:00', description: '<p>Existing description</p>',
-  comments: [], activity: [], customFields: {}, archived: false, archivedAt: null,
+  comments: [], customFields: {}, archived: false, archivedAt: null,
   // TASK-LOCATION-READ-1: no branch by default; the picker's own tests below set one.
   locationId: null, location: null,
   // TEAM-1: no internal department by default; the team block below sets one.

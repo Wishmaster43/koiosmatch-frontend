@@ -103,7 +103,8 @@
       "extra": "Extra",
       "financial": "Finanzen",
       "billing": "Abrechnung",
-      "tasks": "Aufgaben"
+      "tasks": "Aufgaben",
+      "timeline": "Verlauf"
     },
     "changelog": "Änderungen",
     "photoUpload": "Logo hochladen",
@@ -543,8 +544,8 @@
   "priceAgreements": {
     "add": "Neue Preisvereinbarung",
     "any": "Alle",
-      "purchaseRateExample": "22,18",
-      "saleRateExample": "31,10",
+    "purchaseRateExample": "22,18",
+    "saleRateExample": "31,10",
     "function": "Funktion",
     "cao": "Tarifvertrag",
     "scale": "Gruppe",

@@ -68,7 +68,8 @@
       "tasks": "Tareas",
       "extra": "Extra",
       "customer": "Cliente",
-      "conversation": "Conversación"
+      "conversation": "Conversación",
+      "timeline": "Cronología"
     },
     "markWon": "Ganado",
     "markLost": "Perdido",

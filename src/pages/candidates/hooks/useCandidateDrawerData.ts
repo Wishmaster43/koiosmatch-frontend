@@ -40,6 +40,10 @@ export interface ActivityEvent {
 export function useCandidateActivity(id?: Id): { items: ActivityEvent[]; loading: boolean; error: boolean } {
   const { data = [], isLoading: loading, isError: error } = useQuery({
     queryKey: ['candidates', id, 'activity'],
+    // Popover + Tijdlijn-tab can observe this query simultaneously (Opus
+    // tijdlijn-verify measured a double GET on popover-open) — a short staleTime
+    // lets the second observer reuse the first fetch.
+    staleTime: 60_000,
     enabled: !!id,
     queryFn: async ({ signal }): Promise<ActivityEvent[]> => {
       try {

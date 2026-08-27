@@ -110,6 +110,9 @@ export default function OpportunityDrawer({
       <CustomFieldsTab entityType="opportunity" values={o.customFieldValues ?? {}}
         onSave={patch => onUpdate?.(o.id, { customFieldValues: { ...o.customFieldValues, ...patch } })} />
     ) }] : []),
+    // TIJDLIJN-OVERAL (27-08): second-to-last, reuses the same ChangelogTab content
+    // the title-row popover renders — the popover itself stays untouched (§3A(d)).
+    { id: 'timeline', label: t('drawer.tabs.timeline'), render: () => <ChangelogTab opportunity={o} /> },
     // Statistieken LAST, app-wide (Danny 24-08: "statistieken is laatste tabje,
     // HUISSTIJL") — a read-only summary, never a working tab.
     { id: 'statistics', label: t('drawer.tabs.statistics'), render: () => <StatisticsTab opportunity={o} allRows={allRows} valueInHours={valueInHours} /> },

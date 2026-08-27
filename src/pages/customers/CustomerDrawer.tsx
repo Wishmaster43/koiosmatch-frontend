@@ -78,6 +78,9 @@ const TABS = [
   // common:backofficeLinks.tabLabel key (not this file's own drawer.tabs.*), so all
   // six adopting entities read identically.
   { id: 'koppelingen',   tKey: 'backofficeLinks' },
+  // TIJDLIJN-OVERAL (27-08): second-to-last, reuses the same ChangelogTab content
+  // the title-row popover renders — the popover itself stays untouched (§3A(d)).
+  { id: 'timeline',      tKey: 'timeline' },
   // Statistieken sits LAST (Danny 28-07) — it is a read-only summary, not a working tab.
   { id: 'statistics',    tKey: 'statistics' },
 ]
@@ -233,6 +236,9 @@ export default function CustomerDrawer({
       case 'matches':       return <MatchesTab customerId={c.id} />
       case 'opportunities': return <OpportunitiesTab customerId={c.id} customerName={c.name} />
       case 'planning':      return <PlanningTab customerId={c.id ?? ''} />
+      // TIJDLIJN-OVERAL (27-08): same content component the title-row changelog
+      // popover uses (mixed customer + sub-entity feed).
+      case 'timeline':      return <ChangelogTab customerId={c.id} />
       case 'statistics':    return <StatisticsTab c={c} onGoToVacancies={() => setActiveTab?.('vacancies')} />
       case 'priceAgreements': return <PriceAgreementsTab customerId={c.id} c={c} onSave={v => onUpdate?.(c.id, v)} />
       // DOCS-LOC-DEPT-1: the customer's own locations/departments enable the

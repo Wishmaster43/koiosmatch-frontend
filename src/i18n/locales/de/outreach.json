@@ -88,7 +88,8 @@
     "tabs": {
       "targets": "Anrufliste",
       "extra": "Extra",
-      "stats": "Statistiken"
+      "stats": "Statistiken",
+      "timeline": "Verlauf"
     },
     "loading": "Wird geladen…",
     "error": "Anrufliste konnte nicht geladen werden.",

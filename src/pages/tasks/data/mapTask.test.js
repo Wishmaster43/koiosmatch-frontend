@@ -129,15 +129,17 @@ describe('isTaskOverdue', () => {
 })
 
 describe('mapTaskDetail', () => {
-  it('normalises description, comments and the activity log', () => {
+  // The bespoke activity mapping retired with the ActivityTab fork (TIJDLIJN-
+  // OVERAL wave 1): the timeline reads GET /tasks/{id}/activity via the shared
+  // EntityChangelogTab; the detail model no longer carries an activity list.
+  it('normalises description and comments', () => {
     const detail = mapTaskDetail({
       id: 't1', title: 'Test', description: 'Doe dit',
       comments: [{ id: 'k1', author: { name: 'Danny Polak' }, body: 'Done', created_at: '2026-06-18' }],
-      activity: [{ id: 'a1', author: { name: 'System' }, description: 'Status → Afgerond', created_at: '2026-06-19' }],
     })
     expect(detail.description).toBe('Doe dit')
     expect(detail.comments[0]).toMatchObject({ author: 'Danny Polak', authorInitials: 'DP', body: 'Done' })
-    expect(detail.activity[0]).toMatchObject({ author: 'System', description: 'Status → Afgerond' })
+    expect(detail).not.toHaveProperty('activity')
   })
 })
 

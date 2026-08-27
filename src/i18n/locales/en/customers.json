@@ -103,7 +103,8 @@
       "extra": "Extra",
       "financial": "Financial",
       "billing": "Billing",
-      "tasks": "Tasks"
+      "tasks": "Tasks",
+      "timeline": "Timeline"
     },
     "changelog": "Changelog",
     "photoUpload": "Upload logo",
@@ -543,8 +544,8 @@
   "priceAgreements": {
     "add": "New price agreement",
     "any": "Any",
-      "purchaseRateExample": "22.18",
-      "saleRateExample": "31.10",
+    "purchaseRateExample": "22.18",
+    "saleRateExample": "31.10",
     "function": "Function",
     "cao": "CAO",
     "scale": "Scale",

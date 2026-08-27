@@ -55,7 +55,8 @@
       "statistics": "Statistiken",
       "relations": "Beziehungen",
       "changelog": "Änderungen",
-      "extra": "Extra"
+      "extra": "Extra",
+      "timeline": "Verlauf"
     },
     "sectionDetails": "Match-Details",
     "fields": {
@@ -311,7 +312,7 @@
     "loading": "Notizen werden geladen…",
     "loadError": "Notizen konnten nicht geladen werden.",
     "edit": "Bearbeiten",
-      "deleteNote": "Notiz löschen",
+    "deleteNote": "Notiz löschen",
     "deleteConfirm": "Diese Notiz löschen?"
   },
   "ai": {

@@ -88,7 +88,8 @@
     "tabs": {
       "targets": "Lista de llamadas",
       "extra": "Extra",
-      "stats": "Estadísticas"
+      "stats": "Estadísticas",
+      "timeline": "Cronología"
     },
     "loading": "Cargando…",
     "error": "No se pudo cargar la lista de llamadas.",

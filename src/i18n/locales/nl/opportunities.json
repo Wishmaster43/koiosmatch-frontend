@@ -71,7 +71,8 @@
       "changelog": "Wijzigingen",
       "extra": "Extra",
       "customer": "Klant",
-      "conversation": "Conversatie"
+      "conversation": "Conversatie",
+      "timeline": "Tijdlijn"
     },
     "tags": "Tags",
     "ordinal": {

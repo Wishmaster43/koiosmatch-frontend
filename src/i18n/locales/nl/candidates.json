@@ -328,7 +328,8 @@
       "integrations": "Koppelingen",
       "statistics": "Statistieken",
       "changelog": "Wijzigingslog",
-      "extra": "Extra"
+      "extra": "Extra",
+      "timeline": "Tijdlijn"
     },
     "status": "Status",
     "owner": "Eigenaar",

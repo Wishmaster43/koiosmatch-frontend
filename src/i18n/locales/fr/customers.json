@@ -103,7 +103,8 @@
       "extra": "Extra",
       "financial": "Financier",
       "billing": "Facturation",
-      "tasks": "Tâches"
+      "tasks": "Tâches",
+      "timeline": "Chronologie"
     },
     "changelog": "Historique",
     "photoUpload": "Téléverser le logo",
@@ -543,8 +544,8 @@
   "priceAgreements": {
     "add": "Nouvel accord tarifaire",
     "any": "Tous",
-      "purchaseRateExample": "22,18",
-      "saleRateExample": "31,10",
+    "purchaseRateExample": "22,18",
+    "saleRateExample": "31,10",
     "function": "Fonction",
     "cao": "Convention collective",
     "scale": "Échelon",

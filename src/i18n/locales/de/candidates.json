@@ -305,7 +305,8 @@
       "integrations": "Integrationen",
       "statistics": "Statistiken",
       "changelog": "Änderungsprotokoll",
-      "extra": "Extra"
+      "extra": "Extra",
+      "timeline": "Verlauf"
     },
     "status": "Status",
     "owner": "Eigentümer",

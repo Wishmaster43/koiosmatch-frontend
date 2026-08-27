@@ -24,7 +24,7 @@ import RelatedTasks, { hasRelatedSubject } from './drawer/RelatedTasks'
 import LinksTab from './drawer/LinksTab'
 import NotesTab from './drawer/NotesTab'
 import ChangelogPopover from '@/components/drawer/ChangelogPopover'
-import ActivityTab from './drawer/ActivityTab'
+import ChangelogTab from './drawer/ChangelogTab'
 import { Caption } from '@/components/ui/typography'
 import { PageTitle } from '@/components/ui/typography'
 import ArchivedBanner from '@/components/drawer/ArchivedBanner'
@@ -47,7 +47,10 @@ const userName = (u: UserLike): string => u.name || [u.firstname, u.lastname].fi
 // T5: "related" (the other tasks of whichever record this task is linked to) is its
 // own tab now — was a section pinned under Details, generalised beyond candidate-only.
 // 'extra' (§3A(f)) is appended below only when the tenant has ≥1 active custom field.
-const TAB_IDS = ['details', 'links', 'related', 'notes']
+// TIJDLIJN-OVERAL (27-08): 'timeline' mounts after notes, reusing the same
+// ChangelogTab content the title-row popover shows. Tasks carry no Statistics
+// tab (measured — not built in this wave), so timeline is the LAST tab here.
+const TAB_IDS = ['details', 'links', 'related', 'notes', 'timeline']
 
 interface TaskDrawerProps {
   task: TaskDetail | null
@@ -116,6 +119,8 @@ export default function TaskDrawer({ task, onClose, expanded, onToggleExpand, on
       // pinned under Details.
       case 'related':  return <RelatedTasks task={task} />
       case 'notes':    return <NotesTab task={task} />
+      // TIJDLIJN-OVERAL: reuses the same changelog content the popover shows.
+      case 'timeline': return <ChangelogTab task={task} />
       case 'extra':    return <CustomFieldsTab entityType="task" values={task.customFields ?? {}}
                           onSave={patch => onUpdate(task.id, { customFields: { ...task.customFields, ...patch } })} />
       default:         return null
@@ -207,8 +212,8 @@ export default function TaskDrawer({ task, onClose, expanded, onToggleExpand, on
           )}
           // Danny 27-07: the shared house ChangelogPopover shell (§3A(d)) — was a
           // cramped 360px dropdown with no focus trap; now the same 900px centred
-          // panel as the candidate drawer. ActivityTab supplies the task's own content.
-          titleActions={<ChangelogPopover><ActivityTab task={task} /></ChangelogPopover>}
+          // panel as the candidate drawer. ChangelogTab supplies the task's own content.
+          titleActions={<ChangelogPopover><ChangelogTab task={task} /></ChangelogPopover>}
           // T1: title pencil → save/cancel, same spot as VacancyDrawer; "mark done"
           // rides alongside it. No pencil on an ARCHIVED task (mirrors every other
           // edit affordance in this drawer — restore first, a deliberate product

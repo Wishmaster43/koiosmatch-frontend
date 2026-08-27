@@ -305,7 +305,8 @@
       "integrations": "Intégrations",
       "statistics": "Statistiques",
       "changelog": "Journal",
-      "extra": "Extra"
+      "extra": "Extra",
+      "timeline": "Chronologie"
     },
     "status": "Statut",
     "owner": "Responsable",

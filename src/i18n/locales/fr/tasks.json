@@ -54,7 +54,8 @@
       "activity": "Activité",
       "extra": "Extra",
       "notes": "Notes",
-      "related": "Connexes"
+      "related": "Connexes",
+      "timeline": "Chronologie"
     },
     "markDone": "Marquer comme terminé",
     "tags": "Tags",
@@ -111,9 +112,6 @@
     "outreach_campaign": "Liste d'appels",
     "conversation": "Conversation",
     "task": "Tâche"
-  },
-  "activity": {
-    "empty": "Aucune activité pour le moment."
   },
   "modal": {
     "title": "Nouvelle tâche",
@@ -249,5 +247,27 @@
   "popout": {
     "textWindowTitle": "Description de la tâche — {{name}}",
     "loadError": "Cette tâche n'a pas pu être chargée."
+  },
+  "changelog": {
+    "loading": "Chargement de l'historique…",
+    "error": "Impossible de charger l'historique.",
+    "empty": "Aucune modification enregistrée.",
+    "system": "Système",
+    "emptyValue": "Vide",
+    "updatedValue": "mis à jour",
+    "fields": {
+      "title": "Titre",
+      "description": "Description",
+      "status": "Statut",
+      "priority": "Priorité",
+      "due_date": "Échéance",
+      "assignee_id": "Assigné à"
+    },
+    "actions": {
+      "updated": "Mis à jour",
+      "created": "Créé",
+      "deleted": "Archivé",
+      "restored": "Restauré"
+    }
   }
 }

@@ -13,7 +13,8 @@
  * financieel (MatchContractSection, moved as-is) and
  * Notities (NT-MATCH-1, 2026-08-04 — MatchNoteController now exists, so the
  * placeholder note above about "no /matches/{id}/notes route yet" no longer
- * applies). ChangelogTab stays the icon-popover, never a tab (§3A(d)). Header
+ * applies). ChangelogTab renders BOTH as the title-row icon-popover (quick
+ * glance) and as the Tijdlijn tab (TIJDLIJN-OVERAL, Danny 27-08). Header
  * meta row (DRAWER-STD-1, 2026-07-14): a standard Status picker (the same
  * /match-statuses lookup the board/table use, ~160) + a real Eigenaar picker
  * (MATCH-OWNER-1, 2026-07-31) — PATCH /matches/{id} accepts `owner_id`
@@ -195,7 +196,7 @@ export default function MatchDrawer({
   const ownerValue = ownerInUsers ? String(match.ownerId) : (match.owner ? '__current' : null)
 
   // Tabs are config (§3A). Record history is the changelog ICON-popover in the title row
-  // (never a tab) — see titleActions below. Contract/financial reuses drawer.contract.title
+  // (popover = quick glance; the same content also rides the Tijdlijn tab, TIJDLIJN-OVERAL). Contract/financial reuses drawer.contract.title
   // as its tab label (already translated ×5) instead of a duplicate key.
   const tabs: EntityTab[] = [
     // M9 (overzicht-layout): Overview carries the relation hyperlinks — the whole
@@ -207,7 +208,7 @@ export default function MatchDrawer({
     // onto its own tab, now WITH who/what the other matches on each axis are.
     { id: 'contract',  label: t('drawer.contract.title'), render: () => <MatchContractSection matchId={match.id} onUpdate={onUpdate} archived={match.archived} /> },
     // NT-MATCH-1: notes, after the content tabs above and before Extra/Koppelingen
-    // (there is no Changelog TAB — record history stays the icon-popover, §3A(d)).
+    // (the changelog ALSO rides the Tijdlijn tab since TIJDLIJN-OVERAL, 27-08).
     { id: 'notes', label: t('notes.title'), render: () => <NotesTab match={match} /> },
     ...(customFieldDefs.length > 0 ? [{ id: 'extra', label: t('drawer.tabs.extra'), render: () => (
       <CustomFieldsTab entityType="match" values={match.customFieldValues ?? {}}
@@ -220,6 +221,10 @@ export default function MatchDrawer({
     ...(showKoppelingen ? [{ id: 'links', label: t('common:backofficeLinks.tabLabel'), render: () => (
       <BackofficeLinksTab entity="matches" id={match.id as Id} helloflexLink={match.helloflexLink} shiftmanagerLink={match.shiftmanagerLink} canLink={canLinkBackoffice} />
     ) }] : []),
+    // TIJDLIJN-OVERAL (27-08): the record-history changelog also gets a tab, second-
+    // to-last before Statistics — reuses the same ChangelogTab content the title-row
+    // popover shows (icon-popover stays untouched, §3A(d)).
+    { id: 'timeline', label: t('drawer.tabs.timeline'), render: () => <ChangelogTab match={match} /> },
     // Statistieken LAST, app-wide (Danny 24-08: "statistieken is laatste tabje").
     { id: 'statistics', label: t('drawer.tabs.statistics'), render: () => <StatisticsTab match={match} allRows={allRows} ordinals={ordinals} /> },
   ]

@@ -88,7 +88,8 @@
     "tabs": {
       "targets": "Call list",
       "extra": "Extra",
-      "stats": "Stats"
+      "stats": "Stats",
+      "timeline": "Timeline"
     },
     "loading": "Loading…",
     "error": "Failed to load the call list.",

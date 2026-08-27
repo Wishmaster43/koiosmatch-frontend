@@ -69,6 +69,10 @@ const TABS = [
   { id: 'communication',  tKey: 'communication' },
   { id: 'documents',      tKey: 'documents'     },
   { id: 'integrations',   tKey: 'integrations'  },
+  // TIJDLIJN-OVERAL (27-08): the record-history changelog also gets a tab, second-
+  // to-last before Statistics — reuses the same ChangelogTab content the title-row
+  // popover shows (icon-popover stays untouched, §3A(d)).
+  { id: 'timeline',       tKey: 'timeline'      },
   { id: 'statistics',     tKey: 'statistics'    },
 ]
 
@@ -183,8 +187,11 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
     if (tab.id === 'vacancySearch')  return isVacancyTabVisible(vacancyTabCfg, c, tenantPhases, tenantStatuses, tenantCandidateTypes)
     return true
   })
-  // 'Extra' appears only when the tenant has ≥1 active candidate custom field (§3A(f)).
-  if (customFieldDefs.length > 0) tabs.push({ id: 'extra', tKey: 'extra' })
+  // 'Extra' appears only when the tenant has ≥1 active candidate custom field
+  // (§3A(f)). SPLICED before the tail, never appended (Opus tijdlijn-verify:
+  // the old push landed Extra AFTER Statistics — a pre-existing 24-08 canon
+  // break): the tail order is ... extra? · timeline · statistics, always.
+  if (customFieldDefs.length > 0) tabs.splice(tabs.length - 2, 0, { id: 'extra', tKey: 'extra' })
   const currentTags = tags ?? c.tags ?? []
 
   const renderTabContent = (activeTab: string, setTab?: (id: string) => void) => {
@@ -233,6 +240,8 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
       // record (pure local merge — buildCandidatePatch maps none of those fields,
       // so patchCandidate skips the API call): no CMD+R needed (Danny 22-07).
       case 'integrations':   return <IntegrationsTab c={c} onUpdate={onUpdate} />
+      // TIJDLIJN-OVERAL: same ChangelogTab content the title-row popover renders.
+      case 'timeline':       return <ChangelogTab c={c} bare />
       case 'statistics':     return <StatisticsTab c={c} onJump={setTab} />
       // §3A(f): tenant custom fields live on their OWN gated tab (Danny 16-07,
       // punt 28 — they were buried as a section at the bottom of Profiel).

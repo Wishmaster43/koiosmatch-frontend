@@ -665,7 +665,6 @@
   "src/pages/tasks/AddTaskModal.test.tsx": 9,
   "src/pages/tasks/data/mapTask.test.js": 5,
   "src/pages/tasks/data/taskInsights.ts": 3,
-  "src/pages/tasks/drawer/ActivityTab.tsx": 3,
   "src/pages/tasks/drawer/DetailsTab.test.tsx": 8,
   "src/pages/tasks/drawer/LinksTab.tsx": 2,
   "src/pages/tasks/drawer/RelatedTasks.test.tsx": 4,

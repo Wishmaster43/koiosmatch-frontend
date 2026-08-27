@@ -55,7 +55,8 @@
       "statistics": "Statistieken",
       "relations": "Relaties",
       "changelog": "Wijzigingen",
-      "extra": "Extra"
+      "extra": "Extra",
+      "timeline": "Tijdlijn"
     },
     "sectionDetails": "Matchgegevens",
     "fields": {
@@ -311,7 +312,7 @@
     "loading": "Notities laden…",
     "loadError": "Notities konden niet geladen worden.",
     "edit": "Bewerken",
-      "deleteNote": "Notitie verwijderen",
+    "deleteNote": "Notitie verwijderen",
     "deleteConfirm": "Deze notitie verwijderen?"
   },
   "ai": {

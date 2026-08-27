@@ -54,7 +54,8 @@
       "activity": "Actividad",
       "extra": "Extra",
       "notes": "Notas",
-      "related": "Relacionado"
+      "related": "Relacionado",
+      "timeline": "Cronología"
     },
     "markDone": "Marcar como hecho",
     "tags": "Etiquetas",
@@ -111,9 +112,6 @@
     "outreach_campaign": "Lista de llamadas",
     "conversation": "Conversación",
     "task": "Tarea"
-  },
-  "activity": {
-    "empty": "Aún no hay actividad."
   },
   "modal": {
     "title": "Nueva tarea",
@@ -249,5 +247,27 @@
   "popout": {
     "textWindowTitle": "Descripción de la tarea — {{name}}",
     "loadError": "Esta tarea no se pudo cargar."
+  },
+  "changelog": {
+    "loading": "Cargando historial…",
+    "error": "No se pudo cargar el historial.",
+    "empty": "Aún no hay cambios registrados.",
+    "system": "Sistema",
+    "emptyValue": "Vacío",
+    "updatedValue": "actualizado",
+    "fields": {
+      "title": "Título",
+      "description": "Descripción",
+      "status": "Estado",
+      "priority": "Prioridad",
+      "due_date": "Fecha límite",
+      "assignee_id": "Asignado a"
+    },
+    "actions": {
+      "updated": "Actualizado",
+      "created": "Creado",
+      "deleted": "Archivado",
+      "restored": "Restaurado"
+    }
   }
 }

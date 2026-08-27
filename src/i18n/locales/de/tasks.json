@@ -54,7 +54,8 @@
       "activity": "Aktivität",
       "extra": "Extra",
       "notes": "Notizen",
-      "related": "Verwandt"
+      "related": "Verwandt",
+      "timeline": "Verlauf"
     },
     "markDone": "Als erledigt markieren",
     "tags": "Tags",
@@ -111,9 +112,6 @@
     "outreach_campaign": "Anrufliste",
     "conversation": "Gespräch",
     "task": "Aufgabe"
-  },
-  "activity": {
-    "empty": "Noch keine Aktivität."
   },
   "modal": {
     "title": "Neue Aufgabe",
@@ -249,5 +247,27 @@
   "popout": {
     "textWindowTitle": "Aufgabenbeschreibung — {{name}}",
     "loadError": "Diese Aufgabe konnte nicht geladen werden."
+  },
+  "changelog": {
+    "loading": "Verlauf wird geladen…",
+    "error": "Änderungsprotokoll konnte nicht geladen werden.",
+    "empty": "Noch keine Änderungen erfasst.",
+    "system": "System",
+    "emptyValue": "Leer",
+    "updatedValue": "aktualisiert",
+    "fields": {
+      "title": "Titel",
+      "description": "Beschreibung",
+      "status": "Status",
+      "priority": "Priorität",
+      "due_date": "Frist",
+      "assignee_id": "Zugewiesen an"
+    },
+    "actions": {
+      "updated": "Aktualisiert",
+      "created": "Erstellt",
+      "deleted": "Archiviert",
+      "restored": "Wiederhergestellt"
+    }
   }
 }

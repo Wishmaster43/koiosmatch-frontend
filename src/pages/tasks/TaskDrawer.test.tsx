@@ -91,7 +91,7 @@ const task = (archived: boolean, archivedAt: string | null = null): TaskDetail =
   priorityKey: 'normal', priorityLabel: 'Normaal', priorityColor: null,
   assigneeId: null, assignee: null, owner: { name: 'Danny' },
   due: '', dueTime: '', completedAt: '', tags: [], links: [], linkLabel: '', commentCount: 0,
-  createdAt: '2026-07-01T10:00:00', description: '', comments: [], activity: [], customFields: {},
+  createdAt: '2026-07-01T10:00:00', description: '', comments: [], customFields: {},
   archived, archivedAt,
 })
 
@@ -393,5 +393,37 @@ describe('TaskDrawer · header follows the table colour toggle (TASK-DISPLAY-DRI
     const badge = titleRowScope().getByText('Te doen')
     // The DOM lowercases hex colours, so assert against the lowercased token.
     expect(badge).toHaveStyle({ color: chipInk(NEUTRAL_AVATAR.toLowerCase()), background: tintBg(NEUTRAL_AVATAR) })
+  })
+})
+
+/**
+ * TIJDLIJN-OVERAL (27-08): the timeline tab is LAST (tasks carry no Statistics
+ * tab) and reuses the same ChangelogTab content the title-row popover shows —
+ * verified via the request it fires (GET /tasks/{id}/activity, the shared
+ * useTaskActivity/EntityChangelogTab plumbing).
+ */
+describe('TaskDrawer · Timeline tab (TIJDLIJN-OVERAL)', () => {
+  it('renders "timeline" as the LAST tab, after notes', () => {
+    mount(task(false))
+    const labels = screen.getAllByRole('tab').map(b => b.textContent)
+    const notesIdx = labels.indexOf(i18n.t('tasks:drawer.tabs.notes'))
+    // Literal label: a raw-key render (missing i18n) must FAIL, never round-trip.
+    const timelineIdx = labels.indexOf('Tijdlijn')
+    expect(timelineIdx).toBeGreaterThan(notesIdx)
+    expect(timelineIdx).toBe(labels.length - 1)
+  })
+
+  it('mounts the shared changelog content (fires GET /tasks/{id}/activity) when selected', async () => {
+    mount(task(false))
+    fireEvent.click(screen.getByRole('tab', { name: i18n.t('tasks:drawer.tabs.timeline') }))
+    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/tasks/t1/activity', expect.anything()))
+  })
+
+  it('the title-row popover still opens the same changelog content', async () => {
+    const user = userEvent.setup()
+    mount(task(false))
+    const trigger = screen.getByRole('button', { name: i18n.t('common:changelog') })
+    await user.click(trigger)
+    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/tasks/t1/activity', expect.anything()))
   })
 })

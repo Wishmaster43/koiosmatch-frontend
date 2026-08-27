@@ -56,7 +56,8 @@
       "activity": "Activity",
       "extra": "Extra",
       "notes": "Notes",
-      "related": "Related"
+      "related": "Related",
+      "timeline": "Timeline"
     },
     "lookupNotReady": "Couldn't save yet. This option isn't available. Please try again in a moment."
   },
@@ -125,9 +126,6 @@
     "outreach_campaign": "Call list",
     "conversation": "Conversation",
     "task": "Task"
-  },
-  "activity": {
-    "empty": "No activity yet."
   },
   "modal": {
     "title": "New task",
@@ -249,5 +247,27 @@
   "popout": {
     "textWindowTitle": "Task description — {{name}}",
     "loadError": "This task could not be loaded."
+  },
+  "changelog": {
+    "loading": "Loading history…",
+    "error": "Couldn't load the changelog.",
+    "empty": "No changes recorded yet.",
+    "system": "System",
+    "emptyValue": "Empty",
+    "updatedValue": "updated",
+    "fields": {
+      "title": "Title",
+      "description": "Description",
+      "status": "Status",
+      "priority": "Priority",
+      "due_date": "Due date",
+      "assignee_id": "Assignee"
+    },
+    "actions": {
+      "updated": "Updated",
+      "created": "Created",
+      "deleted": "Archived",
+      "restored": "Restored"
+    }
   }
 }

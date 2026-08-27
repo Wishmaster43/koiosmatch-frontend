@@ -57,11 +57,27 @@ describe('OpportunityDrawer — reference number chip', () => {
 // Danny 24-08: the Conversatie tab sits where E-mails used to, and Statistieken
 // stays last (§3A canon) — pin the whole order so a future edit can't drift it.
 describe('OpportunityDrawer — tab order (conversation replaces e-mails)', () => {
-  it('shows Conversatie where E-mails used to sit, with Statistieken last', () => {
+  it('shows Conversatie where E-mails used to sit, with Timeline then Statistieken last', () => {
     const o = mapOpportunity({ id: 'o3', title: 'Deal C' })
     render(<OpportunityDrawer opportunity={o} onClose={noop} />)
     const tabLabels = screen.getAllByRole('tab').map(t => t.textContent)
-    expect(tabLabels).toEqual(['Details', 'Klant', 'Notities', 'Conversatie', 'Taken', 'Statistieken'])
+    // Literal label: a raw-key render (missing i18n) must FAIL, never round-trip.
+    const timelineLabel = 'Tijdlijn'
+    expect(tabLabels).toEqual(['Details', 'Klant', 'Notities', 'Conversatie', 'Taken', timelineLabel, 'Statistieken'])
+  })
+})
+
+// TIJDLIJN-OVERAL (27-08): the new tab reuses the same ChangelogTab content the
+// title-row popover renders — assert the real activity request fires when opened.
+describe('OpportunityDrawer · Timeline tab (TIJDLIJN-OVERAL)', () => {
+  it('fetches the opportunity activity feed when the Timeline tab opens', async () => {
+    const o = mapOpportunity({ id: 'o4', title: 'Deal D' })
+    const user = userEvent.setup()
+    render(<OpportunityDrawer opportunity={o} onClose={noop} />)
+
+    await user.click(screen.getByRole('tab', { name: 'Tijdlijn' }))
+
+    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/opportunities/o4/activity', expect.anything()))
   })
 })
 

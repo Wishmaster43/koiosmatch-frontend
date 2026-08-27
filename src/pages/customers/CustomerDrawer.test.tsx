@@ -389,3 +389,27 @@ describe('CustomerDrawer · trash lifecycle (TRASH-OVERAL-2)', () => {
     expect(onRestore).toHaveBeenCalledWith(1)
   })
 })
+
+// TIJDLIJN-OVERAL (27-08): the new tab mounts second-to-last (Statistics stays
+// last) and reuses the same ChangelogTab content the title-row popover renders.
+describe('CustomerDrawer · Timeline tab (TIJDLIJN-OVERAL)', () => {
+  it('renders the Timeline tab right before Statistics, as the second-to-last tab', () => {
+    render(<CustomerDrawer customer={customer} onClose={() => {}} statuses={statuses} />)
+    const tabs = screen.getAllByRole('tab').map(el => el.textContent)
+    // Literal label: a raw-key render (missing i18n) must FAIL, never round-trip.
+    const timelineIdx = tabs.findIndex(label => label === 'Tijdlijn')
+    const statisticsIdx = tabs.findIndex(label => label === ct('drawer.tabs.statistics'))
+    expect(timelineIdx).toBeGreaterThan(-1)
+    expect(timelineIdx).toBe(statisticsIdx - 1)
+    expect(timelineIdx).toBe(tabs.length - 2)
+  })
+
+  it('fetches the customer activity feed (the same request the changelog popover uses) when the tab opens', async () => {
+    const user = userEvent.setup()
+    render(<CustomerDrawer customer={customer} onClose={() => {}} statuses={statuses} />)
+
+    await user.click(screen.getByRole('tab', { name: ct('drawer.tabs.timeline') }))
+
+    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/customers/1/activity', expect.anything()))
+  })
+})

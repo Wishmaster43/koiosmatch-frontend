@@ -71,7 +71,8 @@
       "changelog": "Changelog",
       "extra": "Extra",
       "customer": "Client",
-      "conversation": "Conversation"
+      "conversation": "Conversation",
+      "timeline": "Timeline"
     },
     "tags": "Tags",
     "ordinal": {

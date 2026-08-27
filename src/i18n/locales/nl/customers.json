@@ -103,7 +103,8 @@
       "extra": "Extra",
       "financial": "Financieel",
       "billing": "Facturatie",
-      "tasks": "Taken"
+      "tasks": "Taken",
+      "timeline": "Tijdlijn"
     },
     "changelog": "Wijzigingen",
     "photoUpload": "Logo uploaden",
@@ -543,8 +544,8 @@
   "priceAgreements": {
     "add": "Nieuwe prijsafspraak",
     "any": "Alle",
-      "purchaseRateExample": "22,18",
-      "saleRateExample": "31,10",
+    "purchaseRateExample": "22,18",
+    "saleRateExample": "31,10",
     "function": "Functie",
     "cao": "CAO",
     "scale": "Schaal",

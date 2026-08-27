@@ -143,12 +143,6 @@ export function mapTaskDetail(raw: ApiTask = {}): TaskDetail {
       body: c.body ?? c.text ?? '',
       time: c.created_at ?? c.time ?? '',
     })),
-    activity: (raw.activity ?? raw.timeline ?? []).map(ev => ({
-      id: ev.id,
-      author: asObj(ev.author).name ?? (typeof ev.author === 'string' ? ev.author : '') ?? '',
-      description: ev.description ?? '',
-      time: ev.created_at ?? ev.time ?? '',
-    })),
     // Tenant custom-field values (§3B "Eigen velden").
     customFields: raw.custom_fields ?? {},
   }

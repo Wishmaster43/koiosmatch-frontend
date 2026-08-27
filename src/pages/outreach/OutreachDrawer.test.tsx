@@ -160,6 +160,21 @@ describe('OutreachDrawer — G29/G30/G31 wiring (assign, note, stats filter)', (
     expect(screen.getByRole('tab', { name: statsTabLabel })).toBeInTheDocument()
   })
 
+  // TIJDLIJN-OVERAL (27-08): the Timeline tab mounts second-to-last, right before
+  // Stats, and reuses the SAME ChangelogTab content component the title-row
+  // changelog popover renders (mocked once, above, for both usages).
+  it('renders Timeline as the second-to-last tab, right before Stats, and mounts the shared ChangelogTab content', () => {
+    render(<OutreachDrawer id="c1" onClose={() => {}} />)
+    const tabLabels = screen.getAllByRole('tab').map(t => t.textContent)
+    // Literal label: a raw-key render (missing i18n) must FAIL, never round-trip.
+    const timelineLabel = 'Tijdlijn'
+    expect(tabLabels.indexOf(timelineLabel)).toBe(tabLabels.length - 2)
+    expect(tabLabels[tabLabels.length - 1]).toBe(statsTabLabel)
+
+    fireEvent.click(screen.getByRole('tab', { name: timelineLabel }))
+    expect(screen.getByTestId('changelog-body')).toBeInTheDocument()
+  })
+
   it('a Stats-tab donut pick sets the SAME filter the Targets tab reads', () => {
     render(<OutreachDrawer id="c1" onClose={() => {}} />)
     fireEvent.click(screen.getByRole('tab', { name: statsTabLabel }))

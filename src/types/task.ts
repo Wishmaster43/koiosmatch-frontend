@@ -73,7 +73,6 @@ export interface Task {
 export interface TaskDetail extends Task {
   description: string
   comments: Array<{ id: Id | undefined; author: string; authorInitials: string; body: string; time: string }>
-  activity: Array<{ id: Id | undefined; author: string; description: string; time: string }>
   // Tenant custom-field values (§3B "Eigen velden" — the drawer's gated Extra tab).
   customFields: Record<string, unknown>
 }
@@ -136,7 +135,6 @@ export interface ApiTask {
   // NOTES-4b: the canonical field name once BE renames the resource (same rows).
   notes?: Array<{ id?: Id; author?: { name?: string }; author_name?: string; body?: string; text?: string; created_at?: string; time?: string }>
   description?: string
-  activity?: Array<{ id?: Id; author?: { name?: string } | string; description?: string; created_at?: string; time?: string }>
   timeline?: Array<{ id?: Id; author?: { name?: string } | string; description?: string; created_at?: string; time?: string }>
   // Tenant custom-field values (§3B "Eigen velden").
   custom_fields?: Record<string, unknown>

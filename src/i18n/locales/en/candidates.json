@@ -328,7 +328,8 @@
       "integrations": "Integrations",
       "statistics": "Statistics",
       "changelog": "Changelog",
-      "extra": "Extra"
+      "extra": "Extra",
+      "timeline": "Timeline"
     },
     "status": "Status",
     "owner": "Owner",

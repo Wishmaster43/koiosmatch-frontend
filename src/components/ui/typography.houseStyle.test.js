@@ -317,7 +317,6 @@ const CAPTION_ALLOWLIST = {
   'pages/tasks/TaskDrawer.tsx': 1,
   'pages/tasks/TasksBoard.tsx': 1,
   'pages/tasks/addmodal/LinkCard.tsx': 1,
-  'pages/tasks/drawer/ActivityTab.tsx': 1,
   'pages/tasks/drawer/RelatedTasks.tsx': 1,
   'pages/tasks/drawer/SubtasksSection.tsx': 2,
   'pages/users/EditUserModal.tsx': 2,

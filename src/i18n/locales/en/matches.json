@@ -55,7 +55,8 @@
       "statistics": "Statistics",
       "relations": "Relations",
       "changelog": "Changelog",
-      "extra": "Extra"
+      "extra": "Extra",
+      "timeline": "Timeline"
     },
     "sectionDetails": "Match details",
     "fields": {
@@ -314,7 +315,7 @@
     "loading": "Loading notes…",
     "loadError": "Notes could not be loaded.",
     "edit": "Edit",
-      "deleteNote": "Delete note",
+    "deleteNote": "Delete note",
     "deleteConfirm": "Delete this note?"
   },
   "ai": {
