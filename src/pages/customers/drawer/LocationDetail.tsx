@@ -72,7 +72,7 @@ import { archiveLocation, restoreLocation } from '../hooks/useCustomerLocations'
 import { useSubEntityArchive } from '../hooks/useSubEntityArchive'
 import type { LocationPayload } from '../hooks/useCustomerLocations'
 import type { DepartmentPayload } from '../hooks/useCustomerDepartments'
-import ScopedSollicitatiesTab from './ScopedSollicitatiesTab'
+import ScopedApplicationsTab from './ScopedApplicationsTab'
 // NOTES-LOC-DEPT-1/DOCS-LOC-DEPT-1: this location's own Notities/Documenten
 // sub-tabs (§3A — shared config-driven surfaces, never a forked copy).
 import ScopedNotesTab from './ScopedNotesTab'
@@ -181,7 +181,7 @@ export default function LocationDetail({
   // added 'tasks' (KLANTLOCATIE-TAAK-1 — the
   // WORKLIST note about "no location Taken ("Tasks") tab" is now superseded by that ticket).
   // NOTES-LOC-DEPT-1/DOCS-LOC-DEPT-1 added 'notes'/'documents', right after 'applications'.
-  const [subTab, setSubTab] = useState<'address' | 'departments' | 'contacts' | 'vacancies' | 'applications' | 'notes' | 'documents' | 'matches' | 'opportunities' | 'tasks' | 'extra' | 'koppelingen'>('address')
+  const [subTab, setSubTab] = useState<'address' | 'departments' | 'contacts' | 'vacancies' | 'applications' | 'notes' | 'documents' | 'matches' | 'opportunities' | 'tasks' | 'extra' | 'links'>('address')
 
   const statusOptions = statuses.map(s => ({ value: String(s.id ?? s.value), label: s.label }))
 
@@ -302,7 +302,7 @@ export default function LocationDetail({
           ...(customFieldDefs.length > 0 ? [{ id: 'extra', label: t('drawer.tabs.extra') }] : []),
           // EXTRACT-1: the shared Koppelingen sub-tab, always last (§3A/§11) — the
           // shared common:backofficeLinks.tabLabel key, not this file's own labels.
-          { id: 'koppelingen', label: t('common:backofficeLinks.tabLabel') },
+          { id: 'links', label: t('common:backofficeLinks.tabLabel') },
         ]}
         active={subTab}
         onChange={id => setSubTab(id as typeof subTab)}
@@ -344,11 +344,11 @@ export default function LocationDetail({
           resolution) — mounting it only here, not unconditionally in this component,
           keeps useScopedVacancyIds' react-query call out of every OTHER sub-tab/caller
           that never opens this one (no QueryClientProvider needed for those). */}
-      {subTab === 'applications' && <ScopedSollicitatiesTab scope="location" id={l.id as Id} />}
+      {subTab === 'applications' && <ScopedApplicationsTab scope="location" id={l.id as Id} />}
       {/* NOTES-LOC-DEPT-1/DOCS-LOC-DEPT-1: this site's own Notities/Documenten,
           read through the scoped GET endpoints (with ?rollup=1 folding in its
           departments' notes/documents — a department is a leaf, nothing rolls up
-          under it). Mounted only while active, mirrors ScopedSollicitatiesTab. */}
+          under it). Mounted only while active, mirrors ScopedApplicationsTab. */}
       {subTab === 'notes' && <ScopedNotesTab scope="location" id={l.id as Id} customerId={customerId} />}
       {subTab === 'documents' && <ScopedDocumentsTab scope="location" id={l.id as Id} customerId={customerId} />}
       {subTab === 'matches' && <ScopedMatchesTab scope="location" id={l.id as Id} customerId={customerId} />}
@@ -374,7 +374,7 @@ export default function LocationDetail({
           onSave={patch => onSave(l.id as Id, { customFields: { ...l.customFields, ...patch } })} />
       )}
 
-      {subTab === 'koppelingen' && (
+      {subTab === 'links' && (
         <BackofficeLinksTab entity="locations" id={l.id as Id} helloflexLink={l.helloflexLink} shiftmanagerLink={l.shiftmanagerLink} canLink={canLinkBackoffice}>
           {/* PDOK sits in Koppelingen, like every other integration (Danny 28-07).
               KLANTLOCATIE-GEOCODE-1 (backend 2026-08-01): the per-site re-geocode route

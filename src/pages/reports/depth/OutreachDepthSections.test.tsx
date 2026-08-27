@@ -73,9 +73,9 @@ describe('OutreachDepthSections', () => {
     const headers = screen.getAllByRole('columnheader').map(h => h.textContent)
     expect(headers).toEqual([
       i18n.t('outreach.depth.heatmap.weekday', { ns: 'analytics' }),
-      i18n.t('outreach.depth.heatmap.part.ochtend', { ns: 'analytics' }),
-      i18n.t('outreach.depth.heatmap.part.middag', { ns: 'analytics' }),
-      i18n.t('outreach.depth.heatmap.part.avond', { ns: 'analytics' }),
+      i18n.t('outreach.depth.heatmap.part.morning', { ns: 'analytics' }),
+      i18n.t('outreach.depth.heatmap.part.afternoon', { ns: 'analytics' }),
+      i18n.t('outreach.depth.heatmap.part.evening', { ns: 'analytics' }),
     ])
     // Row names must be the ISO weekday (1=Monday..7=Sunday), pinned via a
     // UTC-anchored formatter — the exact case that shifted by one day in a

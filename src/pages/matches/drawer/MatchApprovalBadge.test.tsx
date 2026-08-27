@@ -15,35 +15,35 @@ const badgeText = (status: string) => i18n.t('matches:approval.badgeWithLabel', 
 
 describe('MatchApprovalBadge', () => {
   it('renders nothing without a status', () => {
-    const { container } = render(<MatchApprovalBadge approvalMode="altijd" />)
+    const { container } = render(<MatchApprovalBadge approvalMode="always" />)
     expect(container).toBeEmptyDOMElement()
   })
 
   // §13-ish acceptance case 1: off + approved → no badge.
-  it('hides an approved badge when approval_mode is off (uit) — it would carry no information', () => {
-    render(<MatchApprovalBadge status="approved" approvalMode="uit" />)
+  it('hides an approved badge when approval_mode is off — it would carry no information', () => {
+    render(<MatchApprovalBadge status="approved" approvalMode="off" />)
     expect(screen.queryByText(badgeText('approved'))).not.toBeInTheDocument()
   })
 
   // §13-ish acceptance case 2: off + rejected → badge (never hide a real rejection).
   it('still shows a genuine rejection even when approval_mode is off', () => {
-    render(<MatchApprovalBadge status="rejected" approvalMode="uit" />)
+    render(<MatchApprovalBadge status="rejected" approvalMode="off" />)
     expect(screen.getByText(badgeText('rejected'))).toBeInTheDocument()
   })
 
   // §13-ish acceptance case 3: on + approved → badge.
-  it('shows an approved badge once approval_mode is genuinely on (altijd)', () => {
-    render(<MatchApprovalBadge status="approved" approvalMode="altijd" />)
+  it('shows an approved badge once approval_mode is genuinely on (always)', () => {
+    render(<MatchApprovalBadge status="approved" approvalMode="always" />)
     expect(screen.getByText(badgeText('approved'))).toBeInTheDocument()
   })
 
-  it('shows an approved badge when approval_mode is on via deviation-only (bij_afwijking)', () => {
-    render(<MatchApprovalBadge status="approved" approvalMode="bij_afwijking" />)
+  it('shows an approved badge when approval_mode is on via deviation-only (on_deviation)', () => {
+    render(<MatchApprovalBadge status="approved" approvalMode="on_deviation" />)
     expect(screen.getByText(badgeText('approved'))).toBeInTheDocument()
   })
 
   it('shows a pending badge regardless of approval_mode — pending is always a real outcome', () => {
-    render(<MatchApprovalBadge status="pending" approvalMode="uit" />)
+    render(<MatchApprovalBadge status="pending" approvalMode="off" />)
     expect(screen.getByText(badgeText('pending'))).toBeInTheDocument()
   })
 

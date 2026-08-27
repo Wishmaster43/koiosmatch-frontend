@@ -80,7 +80,7 @@
     "generation": "generate generation text",
     "history": "history log changes",
     "identifier": "chamber of commerce vat number identification",
-    "importeren": "import importing upload",
+    "import": "import importing upload",
     "industries": "industry industries sector",
     "invoices": "invoices invoice",
     "jobs": "job queue queue background jobs",

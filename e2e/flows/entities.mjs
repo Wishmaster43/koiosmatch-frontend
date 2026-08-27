@@ -1,6 +1,6 @@
 /**
  * entities — the ONE roster of entity list-pages shared by the pagination,
- * drill-down-render and API-contract smoke flows (paginering.mjs,
+ * drill-down-render and API-contract smoke flows (pagination.mjs,
  * drilldown-render.mjs, naad-contract.mjs), so "every list page" lives in exactly
  * one place instead of being copy-pasted three times (§11 — one source, not three
  * hand-kept copies). `nav` is the exact sidebar button label (see lib.mjs's `go`);

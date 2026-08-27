@@ -38,7 +38,7 @@ export interface CustomerPhaseOption extends LookupOption {
 /* eslint-disable no-restricted-syntax -- seed DATA hex mirroring the backend seed, not UI styling */
 export const DEFAULT_CUSTOMER_PHASES: CustomerPhaseOption[] = [
   { value: 'prospect', label: 'Prospect', color: '#1B60A9', isCustomer: false, isDefault: true },
-  { value: 'klant',    label: 'Klant',    color: '#16A34A', isCustomer: true,  isDefault: false },
+  { value: 'customer', label: 'Klant',    color: '#16A34A', isCustomer: true,  isDefault: false },
 ]
 /* eslint-enable no-restricted-syntax */
 

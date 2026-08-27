@@ -10,7 +10,7 @@ import { pagesRender, drillDowns } from './flows/nav.mjs'
 import { boardsDrag } from './flows/boards.mjs'
 import { statusWithReason, archiveAndFindBack, noteWithChannel, superSearch } from './flows/candidates.mjs'
 import { mfaLifecycle } from './flows/mfa.mjs'
-import { paginering } from './flows/paginering.mjs'
+import { pagination } from './flows/pagination.mjs'
 import { drilldownRender } from './flows/drilldown-render.mjs'
 import { naadContract } from './flows/naad-contract.mjs'
 
@@ -18,14 +18,14 @@ const FLOWS = [
   ['pages-render', pagesRender],
   ['drill-downs', drillDowns],
   ['boards-drag', boardsDrag],
-  ['status-met-reden', statusWithReason],
-  ['notitie-met-kanaal', noteWithChannel],
+  ['status-with-reason', statusWithReason],
+  ['note-with-channel', noteWithChannel],
   ['super-search', superSearch],
   ['mfa-lifecycle', mfaLifecycle],
-  ['paginering', paginering],
+  ['pagination', pagination],
   ['drilldown-render', drilldownRender],
   ['naad-contract', naadContract],
-  ['archiveren-terugvinden', archiveAndFindBack], // last: it mutates the list
+  ['archive-and-find-back', archiveAndFindBack], // last: it mutates the list
 ]
 
 const filter = process.argv[2]

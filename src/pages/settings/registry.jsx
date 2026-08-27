@@ -96,7 +96,7 @@ import KoiosModelsAdminSettings from './sections/KoiosModelsAdminSettings'
 import JobQueueSettings from './sections/jobs'
 import WhatsAppSettings from './sections/WhatsAppSettings'
 import WhatsAppWebNumbersSettings from './sections/whatsapp/WhatsAppWebNumbersSettings'
-import ImporterenSettings from './sections/ImporterenSettings'
+import ImportSettings from './sections/ImportSettings'
 import ExportSettings from './sections/ExportSettings'
 import FacebookLeadsSettings from './sections/FacebookLeadsSettings'
 import ApiKeysSettings from './sections/apikeys'
@@ -110,7 +110,7 @@ import EscalationSettings from './sections/EscalationSettings'
 import { ShiftTypesSettings, AvailabilitySettings, AutoMatchSettings, PlanningBoardSettings } from './sections/PlanningSettings'
 import ReportKpiSettings from './sections/ReportKpiSettings'
 import TenantInvoicesSettings from './sections/TenantInvoicesSettings'
-import GebruikSettings from './sections/GebruikSettings'
+import BillingUsageSettings from './sections/BillingUsageSettings'
 import InvoiceCompanySettings from './sections/InvoiceCompanySettings'
 import AdminInvoicesSettings from './sections/AdminInvoicesSettings'
 
@@ -630,8 +630,10 @@ export const NAV_GROUPS = [
     // compose or workflow send-step surface.
     key: 'communication', icon: Mail,
     items: [
-      { id: 'email_klanten', icon: Mail, render: () => <EmailSettings context="klanten" /> },
-      { id: 'email_kandidaten', icon: Mail, render: () => <EmailSettings context="kandidaten" /> },
+      // Wire contract: EmailSettings keys its stored settings as email_<context>_* — the
+      // context prop stays the legacy Dutch wire value while the registry id is English.
+      { id: 'email_customers', icon: Mail, render: () => <EmailSettings context="klanten" /> },
+      { id: 'email_candidates', icon: Mail, render: () => <EmailSettings context="kandidaten" /> },
       { id: 'email_planning', icon: Mail, render: () => <EmailSettings context="planning" /> },
       { id: 'email_log', icon: ClipboardList, component: EmailLog },
     ],
@@ -657,17 +659,19 @@ export const NAV_GROUPS = [
     // TYPE_CONTEXT_MAP gate as application/vacancy/invoice, so they get the same rows.
     key: 'notifications', icon: Bell,
     items: [
-      { id: 'notif_sollicitaties', icon: Bell, render: () => <NotificationsSettings context="sollicitaties" /> },
-      { id: 'notif_vacatures', icon: Bell, render: () => <NotificationsSettings context="vacatures" /> },
-      { id: 'notif_kandidaten', icon: Bell, render: () => <NotificationsSettings context="kandidaten" /> },
+      // Wire contract: NotificationsSettings stores notif_<context>_in_app/_email — the
+      // context prop stays the legacy Dutch wire value while the registry id is English.
+      { id: 'notif_applications', icon: Bell, render: () => <NotificationsSettings context="sollicitaties" /> },
+      { id: 'notif_vacancies', icon: Bell, render: () => <NotificationsSettings context="vacatures" /> },
+      { id: 'notif_candidates', icon: Bell, render: () => <NotificationsSettings context="kandidaten" /> },
       // K22 (13-08): all five customer.* producers now fire as scheduled commands
       // (never draft-only), so 'klanten' gets the same real settings row its
       // siblings have — see NotificationsSettings.jsx's CONTEXTS_WITHOUT_EMITTER
       // docblock for why 'vacatures'/'facturering' stay excluded from that set.
-      { id: 'notif_klanten', icon: Bell, render: () => <NotificationsSettings context="klanten" /> },
+      { id: 'notif_customers', icon: Bell, render: () => <NotificationsSettings context="klanten" /> },
       { id: 'notif_matches', icon: Bell, render: () => <NotificationsSettings context="matches" /> },
-      { id: 'notif_taken', icon: Bell, render: () => <NotificationsSettings context="taken" /> },
-      { id: 'notif_facturering', icon: Bell, render: () => <NotificationsSettings context="facturering" /> },
+      { id: 'notif_tasks', icon: Bell, render: () => <NotificationsSettings context="taken" /> },
+      { id: 'notif_billing', icon: Bell, render: () => <NotificationsSettings context="facturering" /> },
       // NOTIF-CONTEXTEN-FE-1 (CMBE 23-08): new English-slug contexts, backend-context
       // keys 'calllists'/'opportunities' match 1:1 — no Dutch-slug migration needed.
       // Icon: Bell, matching every sibling row in this group (SETTINGS-TABS-FIX-1
@@ -693,7 +697,7 @@ export const NAV_GROUPS = [
     // share one master-detail format and belong together, not scattered in Integraties.
     key: 'import_export', icon: Download,
     items: [
-      { id: 'importeren', icon: Download, component: ImporterenSettings },
+      { id: 'import', icon: Download, component: ImportSettings },
       { id: 'export', icon: Upload, component: ExportSettings },
     ],
   },
@@ -719,7 +723,7 @@ export const NAV_GROUPS = [
       // billing_pay (payment methods + auto top-up) dropped per Danny (R-1).
       // CREDITS-1: gated on the new `billing.view` permission — settings.view alone
       // is NOT enough (tenant_admin/admin/manager only); hidden, never disabled (§3).
-      { id: 'billing_usage', icon: BarChart2, component: GebruikSettings, requiresPermission: 'billing.view' },
+      { id: 'billing_usage', icon: BarChart2, component: BillingUsageSettings, requiresPermission: 'billing.view' },
       { id: 'billing_invoices', icon: FileText, component: TenantInvoicesSettings, requiresPermission: 'billing.view' },
     ],
   },

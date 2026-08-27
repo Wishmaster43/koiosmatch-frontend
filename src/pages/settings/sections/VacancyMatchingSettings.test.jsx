@@ -25,7 +25,7 @@ afterEach(() => vi.clearAllMocks())
 
 describe('VacancyMatchingSettings', () => {
   it('shows the concrete level number + % alongside the word label for the loaded strictness', async () => {
-    api.get.mockResolvedValue({ data: { data: { strictness: 'balanced', approval_mode: 'bij_afwijking' } } })
+    api.get.mockResolvedValue({ data: { data: { strictness: 'balanced', approval_mode: 'on_deviation' } } })
     render(<VacancyMatchingSettings />)
     await waitFor(() => expect(screen.getByText(st('matching.balanced'))).toBeInTheDocument())
     // balanced = index 1 of 3 levels → "2/3 · 50%".
@@ -33,7 +33,7 @@ describe('VacancyMatchingSettings', () => {
   })
 
   it('updates the number + % readout when a different strictness level is picked', async () => {
-    api.get.mockResolvedValue({ data: { data: { strictness: 'lenient', approval_mode: 'bij_afwijking' } } })
+    api.get.mockResolvedValue({ data: { data: { strictness: 'lenient', approval_mode: 'on_deviation' } } })
     render(<VacancyMatchingSettings />)
     await waitFor(() => expect(screen.getByText('1/3 · 0%')).toBeInTheDocument())
 
@@ -57,7 +57,7 @@ describe('VacancyMatchingSettings', () => {
   // the slider — a callback-fired test alone would miss a wrong route/body.
   it('PUTs /settings/matching with the exact strictness enum for the picked slider level', async () => {
     const user = userEvent.setup()
-    api.get.mockResolvedValue({ data: { data: { strictness: 'balanced', approval_mode: 'bij_afwijking' } } })
+    api.get.mockResolvedValue({ data: { data: { strictness: 'balanced', approval_mode: 'on_deviation' } } })
     api.put.mockResolvedValue({ data: {} })
     render(<VacancyMatchingSettings />)
     await waitFor(() => expect(screen.getByText('2/3 · 50%')).toBeInTheDocument())
@@ -74,13 +74,13 @@ describe('VacancyMatchingSettings', () => {
   // button) — assert the exact route + body, not just that the UI re-renders.
   it('PUTs /settings/matching with only the picked approval_mode', async () => {
     const user = userEvent.setup()
-    api.get.mockResolvedValue({ data: { data: { strictness: 'balanced', approval_mode: 'bij_afwijking' } } })
+    api.get.mockResolvedValue({ data: { data: { strictness: 'balanced', approval_mode: 'on_deviation' } } })
     api.put.mockResolvedValue({ data: {} })
     render(<VacancyMatchingSettings />)
     await waitFor(() => expect(screen.getByText(st('matching.approval.title'))).toBeInTheDocument())
 
     await user.click(screen.getByText(st('matching.approval.always')))
 
-    await waitFor(() => expect(api.put).toHaveBeenCalledWith('/settings/matching', { approval_mode: 'altijd' }))
+    await waitFor(() => expect(api.put).toHaveBeenCalledWith('/settings/matching', { approval_mode: 'always' }))
   })
 })

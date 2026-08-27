@@ -73,7 +73,7 @@ import type { ContactPayload } from '../hooks/useCustomerContacts'
 
 
 // The Contactpersonen-tab drill-down: main field card, location/department
-// coupling, and the sub-tab family (tasks/conversations/notes/koppelingen/…).
+// coupling, and the sub-tab family (tasks/conversations/notes/links/…).
 export default function ContactDetail({ contact, locations, departments, statuses, existing = [], canLinkBackoffice = false, pager, onSave, onDelete, close, onMerged }: {
   contact: Contact
   locations: { id: Id; name: string }[]
@@ -110,10 +110,10 @@ export default function ContactDetail({ contact, locations, departments, statuse
   // BackofficeLinksTab, so the Koppelingen sub-tab is genuinely empty (no card,
   // no "Koppelen" button) unless at least one connector app is enabled.
   const showKoppelingen = useBackofficeLinksVisible()
-  // SCOPED-LIST-TAB-1/GESPREK-CONTACT-1 added 'kansen'/'conversations', right after
+  // SCOPED-LIST-TAB-1/GESPREK-CONTACT-1 added 'opportunities'/'conversations', right after
   // Gegevens and Taken respectively (§3A — same shared tabs Location/DepartmentDetail carry).
-  // CONTACT-NOTITIES-2: 'notes' joins right before 'koppelingen' (tab-order canon, §3A).
-  const [subTab, setSubTab] = useState<'data' | 'kansen' | 'tasks' | 'conversations' | 'extra' | 'notes' | 'koppelingen'>('data')
+  // CONTACT-NOTITIES-2: 'notes' joins right before 'links' (tab-order canon, §3A).
+  const [subTab, setSubTab] = useState<'data' | 'opportunities' | 'tasks' | 'conversations' | 'extra' | 'notes' | 'links'>('data')
   // Contact function (job title) is a lookup combobox, split from the candidate
   // function list (FUNCTIONS-SPLIT-1) — never a plain free-text field.
   const { contactFunctions, allowFreeEntry } = useContactFunctions()
@@ -339,15 +339,15 @@ export default function ContactDetail({ contact, locations, departments, statuse
           { id: 'data',  label: t('contacts.detail.subtabs.data') },
           // SCOPED-LIST-TAB-1: reuses the existing top-level drawer.tabs.opportunities
           // key (already five-locale complete) — same shared label Location/DepartmentDetail use.
-          { id: 'kansen', label: t('drawer.tabs.opportunities') },
+          { id: 'opportunities', label: t('drawer.tabs.opportunities') },
           { id: 'tasks', label: t('contacts.detail.subtabs.tasks') },
           // GESPREK-CONTACT-1: local-only label, mirrors the 'data'/'tasks' siblings above.
           { id: 'conversations', label: t('contacts.detail.subtabs.conversations') },
           ...(customFieldDefs.length > 0 ? [{ id: 'extra', label: t('drawer.tabs.extra') }] : []),
           // CONTACT-NOTITIES-2: always visible (mirrors the 'data'/'tasks' siblings,
-          // never gated on data presence) and BEFORE 'koppelingen', per tab-order canon.
+          // never gated on data presence) and BEFORE 'links', per tab-order canon.
           { id: 'notes', label: t('contacts.detail.subtabs.notes') },
-          ...(showKoppelingen ? [{ id: 'koppelingen', label: t('common:backofficeLinks.tabLabel') }] : []),
+          ...(showKoppelingen ? [{ id: 'links', label: t('common:backofficeLinks.tabLabel') }] : []),
         ]}
         active={subTab}
         onChange={id => setSubTab(id as typeof subTab)}
@@ -382,7 +382,7 @@ export default function ContactDetail({ contact, locations, departments, statuse
           label stays blank here. The customer/location/contact id itself still
           locks correctly; fixing the label would need a new prop threaded through
           ContactsPanel/CustomerDrawer, neither named in this task (§0 stay in scope). */}
-      {subTab === 'kansen' && (
+      {subTab === 'opportunities' && (
         <ScopedOpportunitiesTab scope="contact" id={contact.id} customerId={contact.customerId ?? undefined} />
       )}
 
@@ -425,7 +425,7 @@ export default function ContactDetail({ contact, locations, departments, statuse
       {subTab === 'notes' && contact.customerId != null && (
         <ContactNotesTab contactId={contact.id as Id} customerId={contact.customerId} />
       )}
-      {subTab === 'koppelingen' && showKoppelingen && (
+      {subTab === 'links' && showKoppelingen && (
         <BackofficeLinksTab entity="contacts" id={contact.id as Id} helloflexLink={contact.helloflexLink} shiftmanagerLink={contact.shiftmanagerLink} canLink={canLinkBackoffice} />
       )}
       {/* `existing` is the CUSTOMER-WIDE list, which is exactly the set the scoped merge

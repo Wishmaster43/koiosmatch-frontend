@@ -29,7 +29,7 @@ export default function ConfigPanel({ node, onUpdate, onDelete, onTabChange, var
 }) {
   const { t } = useTranslation('workflows')
   const isAgent = node?.data.type === 'ai_agent'
-  const [activeTab, setActiveTab] = useState(() => isAgent ? 'standaard' : 'instellingen')
+  const [activeTab, setActiveTab] = useState(() => isAgent ? 'general' : 'settings')
 
   // Widen panel for ai_agent by emitting sentinel; narrow for all other modules
   const switchTab = (id: string) => {
@@ -39,7 +39,7 @@ export default function ConfigPanel({ node, onUpdate, onDelete, onTabChange, var
 
   // Reset to correct first tab when node changes
   useEffect(() => {
-    const first = node?.data.type === 'ai_agent' ? 'standaard' : 'instellingen'
+    const first = node?.data.type === 'ai_agent' ? 'general' : 'settings'
     setActiveTab(first)
     onTabChange?.(node?.data.type === 'ai_agent' ? '__wide__' : first)
   }, [node?.id]) // eslint-disable-line react-hooks/exhaustive-deps
@@ -159,24 +159,24 @@ export default function ConfigPanel({ node, onUpdate, onDelete, onTabChange, var
         <DrawerTabs
           tabs={isAgent ? [
             // ai_agent tabs — through i18n like everything else (§5; was hardcoded Dutch).
-            { id: 'standaard',   label: t('config.tabStandard') },
-            { id: 'geavanceerd', label: t('config.tabAdvanced') },
-            { id: 'testen',      label: `▶ ${t('config.tabTest')}` },
-            { id: 'uitvoering',  label: output ? `${t('config.tabExecution')} (${Array.isArray(output) ? output.length : 1})` : t('config.tabExecution') },
+            { id: 'general',   label: t('config.tabStandard') },
+            { id: 'advanced', label: t('config.tabAdvanced') },
+            { id: 'testing',      label: `▶ ${t('config.tabTest')}` },
+            { id: 'execution',  label: output ? `${t('config.tabExecution')} (${Array.isArray(output) ? output.length : 1})` : t('config.tabExecution') },
           ] : [
-            { id: 'instellingen', label: t('config.tabSettings') },
-            { id: 'uitvoering',   label: output ? `${t('config.tabExecution')} (${Array.isArray(output) ? output.length : 1})` : t('config.tabExecution') },
+            { id: 'settings', label: t('config.tabSettings') },
+            { id: 'execution',   label: output ? `${t('config.tabExecution')} (${Array.isArray(output) ? output.length : 1})` : t('config.tabExecution') },
           ]}
           active={activeTab} onChange={switchTab} />
       </div>
 
       {/* ── AI Agent tab content ─────────────────────────────────────────────── */}
-      {isAgent && activeTab === 'standaard'   && renderFields(fieldsForTab('standaard'))}
-      {isAgent && activeTab === 'geavanceerd' && renderFields(fieldsForTab('geavanceerd'))}
-      {isAgent && activeTab === 'testen'      && (
+      {isAgent && activeTab === 'general'   && renderFields(fieldsForTab('general'))}
+      {isAgent && activeTab === 'advanced' && renderFields(fieldsForTab('advanced'))}
+      {isAgent && activeTab === 'testing'      && (
         <AgentTestPanel config={config} />
       )}
-      {isAgent && activeTab === 'uitvoering'  && (
+      {isAgent && activeTab === 'execution'  && (
         <div style={{ flex: 1, overflowY: 'auto' }}>
           {!output
             ? <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: 10, padding: 24 }}>
@@ -190,8 +190,8 @@ export default function ConfigPanel({ node, onUpdate, onDelete, onTabChange, var
         </div>
       )}
 
-      {/* ── Standard instellingen + uitvoering (non-agent) ───────────────────── */}
-      {!isAgent && activeTab === 'instellingen' && (
+      {/* ── Standard settings + execution (non-agent) ───────────────────── */}
+      {!isAgent && activeTab === 'settings' && (
         <div style={{ flex: 1, overflowY: 'auto', padding: 16, display: 'flex', flexDirection: 'column', gap: 14 }}>
           {schema
             .filter(field => {
@@ -264,7 +264,7 @@ export default function ConfigPanel({ node, onUpdate, onDelete, onTabChange, var
           )}
         </div>
       )}
-      {!isAgent && activeTab === 'uitvoering' && (
+      {!isAgent && activeTab === 'execution' && (
         <div style={{ flex: 1, overflowY: 'auto' }}>
           {!output
             ? <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: 10, padding: 24 }}>

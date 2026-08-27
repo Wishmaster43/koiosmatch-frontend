@@ -52,10 +52,23 @@ const SLUG_ALIASES = {
   // AUTOMATIONS-MIGRATIE-1 (22-08): the automations tab died — its rules ARE
   // workflows now; the run history is the closest surviving surface.
   'workflows/automations': { category: 'workflows', tab: 'workflow_run_history' },
+  // SLUG-MIGRATIE-1 (CLAUDE.md §0.1): old Dutch section ids renamed to English —
+  // old deep links keep resolving to the renamed slug.
+  'import_export/importeren': { category: 'import_export', tab: 'import' },
+  'communication/email_klanten': { category: 'communication', tab: 'email_customers' },
+  'communication/email_kandidaten': { category: 'communication', tab: 'email_candidates' },
+  'notifications/notif_sollicitaties': { category: 'notifications', tab: 'notif_applications' },
+  'notifications/notif_vacatures': { category: 'notifications', tab: 'notif_vacancies' },
+  'notifications/notif_kandidaten': { category: 'notifications', tab: 'notif_candidates' },
+  'notifications/notif_klanten': { category: 'notifications', tab: 'notif_customers' },
+  'notifications/notif_taken': { category: 'notifications', tab: 'notif_tasks' },
+  'notifications/notif_facturering': { category: 'notifications', tab: 'notif_billing' },
 }
 
 // Parses the location hash into {category, tab}, accepting both the #settings/ prefix and legacy unprefixed links, and rewriting renamed slugs via SLUG_ALIASES.
-function parseHash() {
+// Exported for the SLUG_ALIASES regression test — old deep links must keep resolving.
+// eslint-disable-next-line react-refresh/only-export-components -- pure helper exported for unit tests (mirrors passesModuleOrApp above); relocating would split the hash logic from the shell that owns it
+export function parseHash() {
   const raw = window.location.hash.replace(/^#/, '')
   const parts = raw.split('/')
   // Canonical form is #settings/<category>/<tab> — the prefix keeps settings deep-links

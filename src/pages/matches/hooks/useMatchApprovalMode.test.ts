@@ -27,24 +27,32 @@ vi.mock('@/lib/api', () => ({ default: { get: mockGet }, unwrap: (res: { data?: 
 
 describe('useMatchApprovalMode', () => {
   it('requests GET /settings/matching under a stable query key and returns approval_mode', async () => {
-    mockGet.mockResolvedValue({ data: { strictness: 'balanced', approval_mode: 'bij_afwijking' } })
+    mockGet.mockResolvedValue({ data: { strictness: 'balanced', approval_mode: 'on_deviation' } })
     renderHook(() => useMatchApprovalMode())
 
     expect(captured.key).toEqual(['settings', 'matching'])
     const value = await captured.fn!({ signal: undefined })
     expect(mockGet).toHaveBeenCalledWith('/settings/matching', { signal: undefined })
-    expect(value).toBe('bij_afwijking')
+    expect(value).toBe('on_deviation')
   })
 
   it('exposes the resolved value as approvalMode', () => {
-    queryData.current = 'altijd'
+    queryData.current = 'always'
     const { result } = renderHook(() => useMatchApprovalMode())
-    expect(result.current.approvalMode).toBe('altijd')
+    expect(result.current.approvalMode).toBe('always')
   })
 
   it('stays undefined while loading (or on error) — the badge treats that as unknown', () => {
     queryData.current = undefined
     const { result } = renderHook(() => useMatchApprovalMode())
     expect(result.current.approvalMode).toBeUndefined()
+  })
+
+  // Transition safety: a cached pre-ab661e0d response with the Dutch wire value
+  // must normalise to the English enum, never leak 'bij_afwijking' downstream.
+  it('normalises the legacy Dutch wire value to the English enum', () => {
+    queryData.current = 'bij_afwijking'
+    const { result } = renderHook(() => useMatchApprovalMode())
+    expect(result.current.approvalMode).toBe('on_deviation')
   })
 })

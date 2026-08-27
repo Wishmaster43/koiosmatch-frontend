@@ -14,7 +14,13 @@ import type { OutreachReportData } from '@/types/analytics'
 
 // Chronological order for the heatmap columns — the server sorts its rows
 // alphabetically (avond < middag < ochtend), never trust that order on render.
+// The slug itself is a WIRE value (OutreachReportData['best_contact_heatmap'][].part) —
+// kept in the server's Dutch spelling here; only the FE-facing i18n key is English,
+// via DAYPART_I18N_KEY below (ID-ENGELS-1: rename at the FE boundary, not the contract).
 const HEATMAP_PARTS = ['ochtend', 'middag', 'avond'] as const
+const DAYPART_I18N_KEY: Record<typeof HEATMAP_PARTS[number], string> = {
+  ochtend: 'morning', middag: 'afternoon', avond: 'evening',
+}
 
 // A Monday-anchored reference date so Intl gives us the tenant-locale weekday
 // short name for ISO weekday 1..7 without touching any real report data.
@@ -127,7 +133,7 @@ function HeatmapTable({ cells, t, i18n, formatPercent }: {
   const columns: Column<{ weekday: number; name: string }>[] = [
     { key: 'weekday', header: t('outreach.depth.heatmap.weekday'), render: r => r.name, nowrap: true },
     ...HEATMAP_PARTS.map((part): Column<{ weekday: number; name: string }> => ({
-      key: part, header: t(`outreach.depth.heatmap.part.${part}`), align: 'center',
+      key: part, header: t(`outreach.depth.heatmap.part.${DAYPART_I18N_KEY[part]}`), align: 'center',
       render: r => {
         const cell = byKey.get(`${r.weekday}-${part}`)
         if (!cell) return (

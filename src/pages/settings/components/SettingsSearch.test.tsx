@@ -24,8 +24,8 @@ function renderPalette(onSelect = vi.fn()) {
     {
       key: 'communication',
       items: [
-        { id: 'email_klanten' },
-        { id: 'email_kandidaten' },
+        { id: 'email_customers' },
+        { id: 'email_candidates' },
         { id: 'email_planning' },
         { id: 'email_log' },
       ],

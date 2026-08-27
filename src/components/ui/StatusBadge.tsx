@@ -16,11 +16,14 @@ interface StatusStyle {
 }
 
 // Common statuses shared across the app (candidates + active/inactive entities).
+// Canonical keys are English; the Dutch spellings stay as input aliases because
+// incoming DATA (e.g. Shiftmanager) may still carry them (ID-ENGELS-1).
 const DEFAULT_MAP: Record<string, StatusStyle> = {
-  actief:     { color: 'var(--color-success-text)' },
   active:     { color: 'var(--color-success-text)' },
-  nietactief: { color: 'var(--color-warning)' },
+  actief:     { color: 'var(--color-success-text)' },
   inactive:   { color: 'var(--color-warning)' },
+  nietactief: { color: 'var(--color-warning)' },
+  external:   { color: 'var(--color-secondary)' },
   extern:     { color: 'var(--color-secondary)' },
 }
 

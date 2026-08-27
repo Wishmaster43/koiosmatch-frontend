@@ -1,5 +1,5 @@
 /**
- * calcAandacht — the single source for "Aandachtskandidaten": active candidates who are
+ * calcAttention — the single source for "Aandachtskandidaten": active candidates who are
  * either (a) new (<30 days) AND not planned yet, OR (b) never logged in. Shared by the
  * candidates report (CandidatesKpiRow) and the SM dashboard so both KPIs match (Danny).
  *
@@ -11,7 +11,7 @@
 import type { ReportCandidate } from '@/types/reports'
 
 // Filters to the shared Aandachtskandidaten definition: active + (new-and-unplanned OR never logged in).
-export function calcAandacht(candidates: ReportCandidate[]) {
+export function calcAttention(candidates: ReportCandidate[]) {
   const now = Date.now()
   return candidates.filter(c => {
     if ((c.status || '').toLowerCase() !== 'actief') return false

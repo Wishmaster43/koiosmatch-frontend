@@ -103,17 +103,17 @@ export function PreferencesTab({ c, onSave, onTypesChange, onEditStatus }: { c: 
   // Stable identity via useCallback so it can safely sit in the fields memo's deps below.
   const candidateTypeIconOf = useCallback((value: string) => candidateTypes.find(ct => ct.value === value)?.icon, [candidateTypes])
   const value = {
-    contractvorm:    c.candidateTypes ?? [],
-    beschikbaar_per: pref.available_from ?? '',
+    contract_forms:    c.candidateTypes ?? [],
+    available_from: pref.available_from ?? '',
     hoursPerWeek:   pref.hours_per_week ?? '',
-    dagen:           toArray(pref.preferred_days),
-    branche:         toArray(pref.sector_pref),
-    reisafstand:     pref.max_travel_km  ?? '',
-    reistijd:        pref.max_travel_min ?? '',
-    eigen_vervoer:   pref.own_transport  ?? false,
-    rijbewijs:       toArray(pref.license_categories),
-    loonheffing:       pref.wage_tax       ?? false,
-    loonheffing_vanaf: pref.wage_tax_from  ?? '',
+    days:           toArray(pref.preferred_days),
+    industry:         toArray(pref.sector_pref),
+    travel_distance:     pref.max_travel_km  ?? '',
+    travel_time:        pref.max_travel_min ?? '',
+    own_transport:   pref.own_transport  ?? false,
+    driver_licenses:       toArray(pref.license_categories),
+    wage_tax:       pref.wage_tax       ?? false,
+    wage_tax_from: pref.wage_tax_from  ?? '',
     // KAND-OPZEGTERMIJN-1: notice period towards the current employer, in weeks —
     // part of Beschikbaarheid since Danny punt 9 (see the field schema below).
     noticePeriodWeeks: pref.notice_period_weeks ?? '',
@@ -155,8 +155,8 @@ export function PreferencesTab({ c, onSave, onTypesChange, onEditStatus }: { c: 
   const fields = useMemo(() => [
     // LOOKUP-ICON-1: renderValue overrides ONLY the read-mode chip row (edit mode
     // keeps the generic ChipMultiSelect) — each contract-form chip gets its
-    // tenant-set icon in front of the label, mirroring the rijbewijs pattern below.
-    { key: 'contractvorm',    label: t('drawer.candidateType'),      group: t('preferences.groupAvailability'), type: 'chips', chipOptions: candidateTypeOptions,
+    // tenant-set icon in front of the label, mirroring the driver_licenses pattern below.
+    { key: 'contract_forms',    label: t('drawer.candidateType'),      group: t('preferences.groupAvailability'), type: 'chips', chipOptions: candidateTypeOptions,
       renderValue: (v: unknown) => {
         const arr = (Array.isArray(v) ? v : []).map(String)
         if (arr.length === 0) return <span style={{ color: 'var(--text-muted)' }}>-</span>
@@ -181,24 +181,24 @@ export function PreferencesTab({ c, onSave, onTypesChange, onEditStatus }: { c: 
           </div>
         )
       } },
-    { key: 'beschikbaar_per', label: t('preferences.availableFrom'), group: t('preferences.groupAvailability'), type: 'date' },
+    { key: 'available_from', label: t('preferences.availableFrom'), group: t('preferences.groupAvailability'), type: 'date' },
     // KAND-OPZEGTERMIJN-2 (Danny 2026-08-08, punt 9): the notice period sits DIRECTLY
     // under "Inzetbaar vanaf" instead of in its own Overig card — they are one thing
     // (X weeks' notice = deployable in X weeks), and NoticePeriodHint below makes that
     // relation explicit. Same card, same pencil, same save as the rest of Beschikbaarheid.
     { key: 'noticePeriodWeeks', label: t('preferences.noticePeriodWeeks'), group: t('preferences.groupAvailability'), inputType: 'number' },
     { key: 'hoursPerWeek',   label: t('preferences.hoursPerWeek'),  group: t('preferences.groupAvailability'), inputType: 'number' },
-    { key: 'dagen',           label: t('preferences.days'),          group: t('preferences.groupAvailability'), type: 'chips', chipOptions: dayOptions },
-    { key: 'branche',         label: t('preferences.sector'),        group: t('preferences.groupAvailability'), type: 'chips', chipOptions: industryOptions },
-    { key: 'reisafstand',     label: t('preferences.maxDistance'),   group: t('preferences.groupTravel'), inputType: 'number' },
-    { key: 'reistijd',        label: t('preferences.maxTravelTime'), group: t('preferences.groupTravel'), inputType: 'number' },
-    { key: 'eigen_vervoer',   label: t('preferences.ownTransport'),  group: t('preferences.groupTravel'), type: 'checkbox' },
+    { key: 'days',           label: t('preferences.days'),          group: t('preferences.groupAvailability'), type: 'chips', chipOptions: dayOptions },
+    { key: 'industry',         label: t('preferences.sector'),        group: t('preferences.groupAvailability'), type: 'chips', chipOptions: industryOptions },
+    { key: 'travel_distance',     label: t('preferences.maxDistance'),   group: t('preferences.groupTravel'), inputType: 'number' },
+    { key: 'travel_time',        label: t('preferences.maxTravelTime'), group: t('preferences.groupTravel'), inputType: 'number' },
+    { key: 'own_transport',   label: t('preferences.ownTransport'),  group: t('preferences.groupTravel'), type: 'checkbox' },
     // LOOKUP-ICON-1: renderValue overrides ONLY the read-mode chip row (edit mode
     // keeps the generic ChipMultiSelect) — each chip gets its tenant-set icon
     // (lucide slug or emoji) in front of the label, same pattern as the candidate
     // table's last-contact icon.
     // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- licence DATA-chips render inside this entry's renderValue: 11px pills on the primary bg/text pair, not muted caption text
-    { key: 'rijbewijs',       label: t('preferences.license'),       group: t('preferences.groupTravel'), type: 'chips', chipOptions: licenseOptions,
+    { key: 'driver_licenses',       label: t('preferences.license'),       group: t('preferences.groupTravel'), type: 'chips', chipOptions: licenseOptions,
       renderValue: (v: unknown) => {
         const arr = (Array.isArray(v) ? v : []).map(String)
         if (arr.length === 0) return <span style={{ color: 'var(--text-muted)' }}>-</span>
@@ -218,8 +218,8 @@ export function PreferencesTab({ c, onSave, onTypesChange, onEditStatus }: { c: 
           </div>
         )
       } },
-    { key: 'loonheffing',      label: t('preferences.wageTax'),       group: t('preferences.groupPayroll'), type: 'checkbox' },
-    { key: 'loonheffing_vanaf', label: t('preferences.wageTaxFrom'),  group: t('preferences.groupPayroll'), type: 'date' },
+    { key: 'wage_tax',      label: t('preferences.wageTax'),       group: t('preferences.groupPayroll'), type: 'checkbox' },
+    { key: 'wage_tax_from', label: t('preferences.wageTaxFrom'),  group: t('preferences.groupPayroll'), type: 'date' },
     { key: 'desiredRateMin', label: t('preferences.desiredRateMin'), group: t('preferences.groupDesiredRate'), inputType: 'number', step: '0.01', mono: true },
     { key: 'desiredRateMax', label: t('preferences.desiredRateMax'), group: t('preferences.groupDesiredRate'), inputType: 'number', step: '0.01', mono: true },
     { key: 'remarks',     label: t('preferences.remarks'),       group: t('preferences.groupOther'), type: 'richtext' },
@@ -230,23 +230,23 @@ export function PreferencesTab({ c, onSave, onTypesChange, onEditStatus }: { c: 
   // internal draft) still holds the complete value object underneath. Contractvorm
   // stays routed separately to candidateTypes (never part of the preferences blob).
   const toApiAvailability = (v: Record<string, unknown>) => ({
-    available_from: v.beschikbaar_per,
+    available_from: v.available_from,
     // KAND-OPZEGTERMIJN-2: moved in from its own section — both keys are accepted by
     // PATCH /candidates/{id} inside the preferences blob (verified live 2026-08-08).
     notice_period_weeks: v.noticePeriodWeeks === '' ? null : Number(v.noticePeriodWeeks),
     hours_per_week: v.hoursPerWeek === '' ? null : Number(v.hoursPerWeek),
-    preferred_days: v.dagen,
-    sector_pref:    v.branche,
+    preferred_days: v.days,
+    sector_pref:    v.industry,
   })
   const toApiTravel = (v: Record<string, unknown>) => ({
-    max_travel_km:      v.reisafstand === '' ? null : Number(v.reisafstand),
-    max_travel_min:     v.reistijd === '' ? null : Number(v.reistijd),
-    own_transport:      v.eigen_vervoer,
-    license_categories: v.rijbewijs,
+    max_travel_km:      v.travel_distance === '' ? null : Number(v.travel_distance),
+    max_travel_min:     v.travel_time === '' ? null : Number(v.travel_time),
+    own_transport:      v.own_transport,
+    license_categories: v.driver_licenses,
   })
   const toApiPayroll = (v: Record<string, unknown>) => ({
-    wage_tax:      v.loonheffing,
-    wage_tax_from: v.loonheffing_vanaf,
+    wage_tax:      v.wage_tax,
+    wage_tax_from: v.wage_tax_from,
   })
   // RATE-WISH-1: root candidate fields, not part of the preferences blob — the
   // drawer's onSave wrapper splits desired_rate_min/max out into their own PATCH
@@ -258,10 +258,10 @@ export function PreferencesTab({ c, onSave, onTypesChange, onEditStatus }: { c: 
   const toApiOther = (v: Record<string, unknown>) => ({ remarks: v.remarks })
 
   // One save handler per section, mirroring the payload builders above. Only
-  // Beschikbaarheid also routes contractvorm to candidateTypes (its own field).
+  // Beschikbaarheid also routes contract_forms to candidateTypes (its own field).
   // Beschikbaarheid is CONTROLLED (see availEditing below), so its save also has to
   // leave edit mode — the table only does that for itself when uncontrolled.
-  const handleSaveAvailability   = (v: Record<string, unknown>) => { setAvailEditing(false); onTypesChange?.((v.contractvorm as string[]) ?? []); onSave?.(toApiAvailability(v)) }
+  const handleSaveAvailability   = (v: Record<string, unknown>) => { setAvailEditing(false); onTypesChange?.((v.contract_forms as string[]) ?? []); onSave?.(toApiAvailability(v)) }
   const handleSaveTravel         = (v: Record<string, unknown>) => onSave?.(toApiTravel(v))
   const handleSavePayroll        = (v: Record<string, unknown>) => onSave?.(toApiPayroll(v))
   const handleSaveDesiredRate    = (v: Record<string, unknown>) => onSave?.(toApiDesiredRate(v))
@@ -365,7 +365,7 @@ export function PreferencesTab({ c, onSave, onTypesChange, onEditStatus }: { c: 
           <EditableFieldTable key={`${c.id}-availability`} fields={availabilityFields} value={value} labelWidth={WIDE_LABEL_WIDTH}
             editing={availEditing} onStartEdit={() => setAvailEditing(true)} onCancel={() => setAvailEditing(false)}
             onSave={handleSaveAvailability} />
-          <NoticePeriodHint weeks={value.noticePeriodWeeks} availableFrom={value.beschikbaar_per}
+          <NoticePeriodHint weeks={value.noticePeriodWeeks} availableFrom={value.available_from}
             canApply={!availEditing} onApply={handleApplyDerivedDate} />
         </div>
       )}

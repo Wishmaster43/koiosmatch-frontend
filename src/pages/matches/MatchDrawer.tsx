@@ -217,7 +217,7 @@ export default function MatchDrawer({
     // Label comes from the shared common:backofficeLinks.tabLabel key. DD-FE-6
     // ("no empty tabs"): only listed when a connector app is enabled — otherwise
     // the tab body would render nothing (no card, no "Koppelen" button).
-    ...(showKoppelingen ? [{ id: 'koppelingen', label: t('common:backofficeLinks.tabLabel'), render: () => (
+    ...(showKoppelingen ? [{ id: 'links', label: t('common:backofficeLinks.tabLabel'), render: () => (
       <BackofficeLinksTab entity="matches" id={match.id as Id} helloflexLink={match.helloflexLink} shiftmanagerLink={match.shiftmanagerLink} canLink={canLinkBackoffice} />
     ) }] : []),
     // Statistieken LAST, app-wide (Danny 24-08: "statistieken is laatste tabje").

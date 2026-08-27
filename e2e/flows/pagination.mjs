@@ -22,7 +22,7 @@ import { ENTITIES } from './entities.mjs'
 // drive was replaced by the house searchable menu — the probe tested old furniture).
 const FOOTER_LABEL = 'Rijen per pagina'
 
-export async function paginering({ page, errors }) {
+export async function pagination({ page, errors }) {
   const findings = []
   for (const { nav } of ENTITIES) {
     await go(page, nav)

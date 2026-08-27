@@ -16,11 +16,12 @@ import { PageTitle, SectionTitle, Mono } from '@/components/ui/typography'
 
 // The backend strictness is an enum; the slider is a 3-step index onto it.
 const LEVELS = ['lenient', 'balanced', 'strict']
-// Approval-mode enum (backend slugs are Dutch by contract; i18n keys stay English).
+// Approval-mode enum — English wire values since CMBE ab661e0d (legacy Dutch
+// aliases still accepted server-side during the transition).
 const MODES = [
-  { value: 'uit', key: 'off' },
-  { value: 'bij_afwijking', key: 'deviation' },
-  { value: 'altijd', key: 'always' },
+  { value: 'off', key: 'off' },
+  { value: 'on_deviation', key: 'deviation' },
+  { value: 'always', key: 'always' },
 ]
 
 // Settings screen for the global matching strictness slider and the match-approval
@@ -28,12 +29,12 @@ const MODES = [
 export default function VacancyMatchingSettings() {
   const { t } = useTranslation('settings')
   const [level, setLevel] = useState(1) // index into LEVELS (1 = balanced default)
-  const [approval, setApproval] = useState('bij_afwijking') // backend default
+  const [approval, setApproval] = useState('on_deviation') // backend default
   const [saving, setSaving] = useState(false)
   const [saved, setSaved]   = useState(false)
   const [loading, setLoading] = useState(true)
   // A failed GET must never let the hardcoded defaults above (level=1, approval=
-  // 'bij_afwijking') pass as the tenant's real saved values — a persistent banner
+  // 'on_deviation') pass as the tenant's real saved values — a persistent banner
   // + disabled controls stop the compounding wrong-write the audit named.
   const [loadError, setLoadError] = useState(false)
 

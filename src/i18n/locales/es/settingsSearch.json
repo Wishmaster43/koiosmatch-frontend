@@ -80,7 +80,7 @@
     "generation": "generar generacion texto",
     "history": "historial registro cambios",
     "identifier": "cif nif numero identificacion",
-    "importeren": "importar importacion subir",
+    "import": "importar importacion subir",
     "industries": "sector sectores rama",
     "invoices": "facturas factura",
     "jobs": "cola de tareas queue trabajos en segundo plano",

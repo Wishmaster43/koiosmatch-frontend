@@ -27,17 +27,17 @@ interface MatchApprovalBadgeProps {
 export default function MatchApprovalBadge({ status, approvalMode }: MatchApprovalBadgeProps) {
   const { t } = useTranslation('matches')
   if (!status) return null
-  // Honesty gate (goedkeuring-badge-eerlijk, 08-08): with approval_mode 'uit' a new
+  // Honesty gate (goedkeuring-badge-eerlijk, 08-08): with approval_mode 'off' a new
   // match always defaults to 'approved' and NOTHING can ever move it off that value —
   // so a bare "Approved" badge is a constant, not information, and must stay hidden.
   // Show the badge when either (a) the mode genuinely gates something (anything but
-  // 'uit'), or (b) the match itself already IS informative regardless of the current
+  // 'off'), or (b) the match itself already IS informative regardless of the current
   // mode — pending/rejected are real outcomes, never hidden even if approval was
   // switched off afterwards. When approvalMode is unresolved (still loading, or a
   // caller that never wires useMatchApprovalMode at all) this falls back to gating on
   // the match's own state alone: pending/rejected still show, an unproven "approved"
   // stays hidden rather than risk showing noise.
-  const informative = status !== 'approved' || (approvalMode !== undefined && approvalMode !== 'uit')
+  const informative = status !== 'approved' || (approvalMode !== undefined && approvalMode !== 'off')
   if (!informative) return null
   // DD-FE-5/M2 (08-08, DRILL-DOWN-CONSISTENCY): this badge sits right beside the
   // header's separate Status picker (the operational `status`, e.g. "Open") — a bare

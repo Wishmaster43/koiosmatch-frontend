@@ -80,7 +80,7 @@
     "generation": "generer generation texte",
     "history": "historique journal modifications",
     "identifier": "siret tva numero identification",
-    "importeren": "import importer televerser",
+    "import": "import importer televerser",
     "industries": "secteur secteurs branche",
     "invoices": "factures facture",
     "jobs": "file d attente queue taches de fond",

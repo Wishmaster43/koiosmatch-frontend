@@ -6,7 +6,7 @@
  * those two toggles never round-trip to the server on their own, `pageSize`
  * is the only thing that does), and both are honesty-gated on the tenant's
  * approval_mode setting (goedkeuring-badge-eerlijk) — absent entirely once
- * it is 'uit', never a permanent 0-tile.
+ * it is 'off', never a permanent 0-tile.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { __resetPageMemoryForTests } from '@/lib/usePageMemory'
@@ -68,7 +68,7 @@ vi.mock('./MatchesTable', () => ({
   ),
 }))
 
-beforeEach(() => { __resetPageMemoryForTests(); lastKpis = []; mockApprovalMode.mockReturnValue({ approvalMode: 'altijd' }) })
+beforeEach(() => { __resetPageMemoryForTests(); lastKpis = []; mockApprovalMode.mockReturnValue({ approvalMode: 'always' }) })
 
 describe('MatchesPage · "Te beoordelen" quick-view toggle + KPI (MATCH-APPROVAL-QUEUE-1)', () => {
   it('shows the toggle, and clicking it narrows the table to the pending row only', async () => {
@@ -91,8 +91,8 @@ describe('MatchesPage · "Te beoordelen" quick-view toggle + KPI (MATCH-APPROVAL
     await waitFor(() => expect(screen.getByTestId('table-rows')).toHaveTextContent(/^m-1$/))
   })
 
-  it('is absent (toggle AND KPI) once the tenant approval_mode is "uit" — never a permanent 0-tile', async () => {
-    mockApprovalMode.mockReturnValue({ approvalMode: 'uit' })
+  it('is absent (toggle AND KPI) once the tenant approval_mode is "off" — never a permanent 0-tile', async () => {
+    mockApprovalMode.mockReturnValue({ approvalMode: 'off' })
     render(<MatchesPage />)
     await waitFor(() => expect(screen.getByTestId('table-rows')).toHaveTextContent('m-1,m-2'))
 

@@ -8,12 +8,12 @@ import { describe, it, expect } from 'vitest'
 import { tierKeyForModel } from './koiosModelTiers'
 
 describe('tierKeyForModel', () => {
-  it('maps haiku ids to snel', () => {
-    expect(tierKeyForModel('claude-haiku-4-5')).toBe('snel')
+  it('maps haiku ids to fast', () => {
+    expect(tierKeyForModel('claude-haiku-4-5')).toBe('fast')
   })
 
-  it('maps sonnet ids to slim', () => {
-    expect(tierKeyForModel('claude-sonnet-5')).toBe('slim')
+  it('maps sonnet ids to smart', () => {
+    expect(tierKeyForModel('claude-sonnet-5')).toBe('smart')
   })
 
   it('maps opus and fable ids to max', () => {

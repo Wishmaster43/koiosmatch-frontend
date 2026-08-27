@@ -1,5 +1,5 @@
 /**
- * ScopedSollicitatiesTab — the Sollicitaties sub-tab body for a location or
+ * ScopedApplicationsTab — the Sollicitaties sub-tab body for a location or
  * department drill-down. Extracted out of LocationDetail/DepartmentDetail
  * (§0.3 mini-cleanup, 2026-08-03) where it lived as two near-identical local
  * wrappers; one scope-parameterized component mirrors the ScopedVacanciesTab/
@@ -18,7 +18,7 @@ import type { Id } from '@/types/common'
 
 // Applications tab scoped to one location/department; see the module doc comment
 // above for the two-step vacancy-ids→applications loading it drives.
-export default function ScopedSollicitatiesTab({ scope, id }: {
+export default function ScopedApplicationsTab({ scope, id }: {
   scope: 'location' | 'department'
   id: Id
 }) {

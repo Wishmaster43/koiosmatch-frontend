@@ -37,12 +37,12 @@ const mockUseApps = vi.fn()
 vi.mock('@/context/AppsContext', () => ({ useApps: () => mockUseApps() }))
 beforeEach(() => { mockUseApps.mockReturnValue({ isAppEnabled: (id: string) => id === 'hf' }) })
 // goedkeuring-badge-eerlijk (08-08): default the tenant approval mode to a "real"
-// one (not 'uit') so every pre-existing test below — including the DD-FE-5/M2 badge
+// one (not 'off') so every pre-existing test below — including the DD-FE-5/M2 badge
 // test on an 'approved' fixture — keeps proving its own thing undisturbed; the
 // dedicated describe block near the bottom overrides this to prove the honesty gate.
 const mockUseMatchApprovalMode = vi.fn()
 vi.mock('./hooks/useMatchApprovalMode', () => ({ useMatchApprovalMode: () => mockUseMatchApprovalMode() }))
-beforeEach(() => { mockUseMatchApprovalMode.mockReturnValue({ approvalMode: 'altijd' }) })
+beforeEach(() => { mockUseMatchApprovalMode.mockReturnValue({ approvalMode: 'always' }) })
 // avatar_color values off the /users payload — DATA fixtures, not UI styling.
 // eslint-disable-next-line no-restricted-syntax -- API fixture value, never rendered as a style literal
 const COLOR_A = '#abcdef'
@@ -177,19 +177,19 @@ describe('MatchDrawer · approval badge honesty gate (goedkeuring-badge-eerlijk)
   })
 
   it('hides the badge on an approved match when approval_mode is off (uit)', () => {
-    mockUseMatchApprovalMode.mockReturnValue({ approvalMode: 'uit' })
+    mockUseMatchApprovalMode.mockReturnValue({ approvalMode: 'off' })
     render(<MatchDrawer match={match} onClose={vi.fn()} />)
     expect(screen.queryByText(approvedBadgeText())).not.toBeInTheDocument()
   })
 
   it('still shows a genuine rejection even when approval_mode is off — never hide a real rejection', () => {
-    mockUseMatchApprovalMode.mockReturnValue({ approvalMode: 'uit' })
+    mockUseMatchApprovalMode.mockReturnValue({ approvalMode: 'off' })
     render(<MatchDrawer match={{ ...match, approval_status: 'rejected' }} onClose={vi.fn()} />)
     expect(screen.getByText(rejectedBadgeText())).toBeInTheDocument()
   })
 
   it('shows the badge on an approved match once approval_mode is genuinely on (altijd)', () => {
-    mockUseMatchApprovalMode.mockReturnValue({ approvalMode: 'altijd' })
+    mockUseMatchApprovalMode.mockReturnValue({ approvalMode: 'always' })
     render(<MatchDrawer match={match} onClose={vi.fn()} />)
     expect(screen.getByText(approvedBadgeText())).toBeInTheDocument()
   })

@@ -80,7 +80,7 @@ import { useCustomFields } from '@/lib/useCustomFields'
 import { useConfirm } from '@/hooks/useConfirm'
 import { useAuth } from '@/context/AuthContext'
 import { useDateFormat } from '@/lib/datetime'
-import ScopedSollicitatiesTab from './ScopedSollicitatiesTab'
+import ScopedApplicationsTab from './ScopedApplicationsTab'
 // NOTES-LOC-DEPT-1/DOCS-LOC-DEPT-1: this department's own Notities/Documenten
 // sub-tabs (§3A — shared config-driven surfaces, never a forked copy).
 import ScopedNotesTab from './ScopedNotesTab'
@@ -115,7 +115,7 @@ function buildDepartmentAdviceInsights(d: Department, t: Tx): KoiosAdviceInsight
   ]
 }
 
-// One department's own drill-down body: the field-table card, sub-tabs (contacts/vacancies/applications/notes/documents/matches/opportunities/tasks/extra/koppelingen) and merge/delete actions — see the prop comments for each sub-tab's own history.
+// One department's own drill-down body: the field-table card, sub-tabs (contacts/vacancies/applications/notes/documents/matches/opportunities/tasks/extra/links) and merge/delete actions — see the prop comments for each sub-tab's own history.
 export default function DepartmentDetail({ department, locations, statuses, contactStatuses = [], departments = [], contacts = [], canLinkBackoffice = false, trail = [], pager, onMerged, onAddContact, onUpdateContact, onRemoveContact, onSave, onDelete, close, customerId, customerName }: {
   department: Department
   locations: { id: Id; name: string }[]
@@ -184,7 +184,7 @@ export default function DepartmentDetail({ department, locations, statuses, cont
   // Sub-tabs (short labels, Danny 2026-07-14) — default Gegevens. SCOPED-LIST-TAB-1/
   // TAKEN-OP-AFDELING-1 added vacancies/matches/tasks. SOLLICITATIES-SCOPE-1 added
   // 'applications'. NOTES-LOC-DEPT-1/DOCS-LOC-DEPT-1 added 'notes'/'documents'.
-  const [subTab, setSubTab] = useState<'data' | 'contacts' | 'vacancies' | 'applications' | 'notes' | 'documents' | 'matches' | 'opportunities' | 'tasks' | 'extra' | 'koppelingen'>('data')
+  const [subTab, setSubTab] = useState<'data' | 'contacts' | 'vacancies' | 'applications' | 'notes' | 'documents' | 'matches' | 'opportunities' | 'tasks' | 'extra' | 'links'>('data')
 
   // JOB-STATUS-1 (mirrors LocationDetail): status options for the title-row picker.
   const statusOptions = statuses.map(s => ({ value: String(s.id ?? s.value), label: s.label }))
@@ -315,7 +315,7 @@ export default function DepartmentDetail({ department, locations, statuses, cont
           ...(customFieldDefs.length > 0 ? [{ id: 'extra', label: t('drawer.tabs.extra') }] : []),
           // EXTRACT-1: the shared Koppelingen sub-tab, last when it has content.
           // DD-FE-6 ("no empty tabs"): hidden when no connector app is enabled.
-          ...(showKoppelingen ? [{ id: 'koppelingen', label: t('common:backofficeLinks.tabLabel') }] : []),
+          ...(showKoppelingen ? [{ id: 'links', label: t('common:backofficeLinks.tabLabel') }] : []),
         ]}
         active={subTab}
         onChange={id => setSubTab(id as typeof subTab)}
@@ -360,7 +360,7 @@ export default function DepartmentDetail({ department, locations, statuses, cont
           resolution) — mounting it only here, not unconditionally in this component,
           keeps useScopedVacancyIds' react-query call out of every OTHER sub-tab/caller
           that never opens this one (no QueryClientProvider needed for those). */}
-      {subTab === 'applications' && <ScopedSollicitatiesTab scope="department" id={department.id as Id} />}
+      {subTab === 'applications' && <ScopedApplicationsTab scope="department" id={department.id as Id} />}
       {/* NOTES-LOC-DEPT-1/DOCS-LOC-DEPT-1: this department's own Notities/Documenten
           — a department is a LEAF, so neither scoped fetch adds a rollup param
           (mirrors LocationDetail's identical wiring, minus the rollup). */}
@@ -391,7 +391,7 @@ export default function DepartmentDetail({ department, locations, statuses, cont
           onSave={patch => onSave(department.id as Id, { customFields: { ...department.customFields, ...patch } })} />
       )}
 
-      {subTab === 'koppelingen' && showKoppelingen && (
+      {subTab === 'links' && showKoppelingen && (
         <BackofficeLinksTab entity="departments" id={department.id as Id} helloflexLink={department.helloflexLink} shiftmanagerLink={department.shiftmanagerLink} canLink={canLinkBackoffice} />
       )}
 
