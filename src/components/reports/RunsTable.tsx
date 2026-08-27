@@ -42,7 +42,18 @@ export default function RunsTable() {
   // once at mount — a fresh navigation here always remounts this table (a page
   // switch, never an in-place hash edit), so a later effect isn't needed.
   const [workflowIdFilter] = useState(() => getWorkflowIdFromHash(window.location.hash))
-  const runsUrl = workflowIdFilter ? `/workflow-runs?workflow_id=${encodeURIComponent(workflowIdFilter)}` : '/workflow-runs'
+  // Time window (WEBHOOK-RUN-CORRELATION-1 slotstuk): server-side from/to,
+  // inclusive bureau-local day edges (53fe3bb0) — sent only when set.
+  const [rangeFrom, setRangeFrom] = useState('')
+  const [rangeTo, setRangeTo] = useState('')
+  const runsUrl = useMemo(() => {
+    const params = new URLSearchParams()
+    if (workflowIdFilter) params.set('workflow_id', workflowIdFilter)
+    if (rangeFrom) params.set('from', rangeFrom)
+    if (rangeTo) params.set('to', rangeTo)
+    const q = params.toString()
+    return q ? `/workflow-runs?${q}` : '/workflow-runs'
+  }, [workflowIdFilter, rangeFrom, rangeTo])
   // Data (fetch) lives in the shared hook (§3); this component only derives + renders.
   const { rows, loading } = useReportList<RunRow>(runsUrl)
   // App-wide active locale (§5) — never a hardcoded 'nl-NL' toLocale*String call.
@@ -155,8 +166,16 @@ export default function RunsTable() {
         onToggle: v => setSelectedWorkflows(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]),
       })
     }
+    // The run window — server-filtered (from/to ride the request), so counts and
+    // rows always agree with what the endpoint returns.
+    groups.push({
+      key: 'runRange', label: t('runs.filters.range'), type: 'date-range',
+      from: rangeFrom, to: rangeTo,
+      onFromChange: (v: string) => setRangeFrom(v),
+      onToChange: (v: string) => setRangeTo(v),
+    })
     return groups
-  }, [t, statusOptions, workflowOptions, selectedStatuses, selectedWorkflows, rows])
+  }, [t, statusOptions, workflowOptions, selectedStatuses, selectedWorkflows, rows, rangeFrom, rangeTo])
 
   // Publish the current filter groups into the shared right panel; unregister on
   // unmount/change so a stale group set never lingers there.

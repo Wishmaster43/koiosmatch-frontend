@@ -363,7 +363,8 @@
     },
     "filters": {
       "status": "Estado",
-      "workflow": "Workflow"
+      "workflow": "Workflow",
+      "range": "Periodo"
     },
     "drawer": {
       "startedColon": "Iniciado:",

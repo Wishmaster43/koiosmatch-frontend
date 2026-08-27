@@ -6,7 +6,7 @@
  * the current sort — asserted end-to-end through this table's own columns.
  */
 import { describe, it, expect, vi, afterEach } from 'vitest'
-import { render, screen, within } from '@testing-library/react'
+import { render, screen, within, act, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import '@/i18n'
 import RunsTable, { getWorkflowIdFromHash } from './RunsTable'
@@ -23,6 +23,13 @@ const runs: RunRow[] = [
 vi.mock('./useReportList', () => ({
   useReportList: vi.fn(() => ({ rows: runs, loading: false })),
 }))
+
+// Panel spy: captures the registered group set so the range pin can drive its callbacks.
+const registerFilters = vi.fn()
+vi.mock('@/context/RightPanelContext', () => ({
+  useRightPanel: () => ({ registerFilters, unregisterFilters: vi.fn() }),
+}))
+const lastRegisteredGroups = () => registerFilters.mock.calls.at(-1)?.[1] ?? []
 
 afterEach(() => { window.location.hash = '' })
 
@@ -81,5 +88,19 @@ describe('RunsTable — WEBHOOK-RUN-CORRELATION-1 workflow_id filter', () => {
   it('requests the plain /workflow-runs endpoint when the hash carries no filter', () => {
     render(<RunsTable />)
     expect(vi.mocked(useReportList)).toHaveBeenCalledWith('/workflow-runs')
+  })
+
+  // Time window (slotstuk, server contract 53fe3bb0): picking from/to in the
+  // registered date-range group must reach the REQUEST as from/to params.
+  it('requests /workflow-runs with from/to when the range group is set', async () => {
+    render(<RunsTable />)
+    const groups = lastRegisteredGroups()
+    const range = groups.find((g: { key: string }) => g.key === 'runRange') as
+      { onFromChange: (v: string) => void; onToChange: (v: string) => void }
+    expect(range).toBeDefined()
+    act(() => range.onFromChange('2026-08-01'))
+    act(() => range.onToChange('2026-08-28'))
+    await waitFor(() => expect(vi.mocked(useReportList))
+      .toHaveBeenCalledWith('/workflow-runs?from=2026-08-01&to=2026-08-28'))
   })
 })
