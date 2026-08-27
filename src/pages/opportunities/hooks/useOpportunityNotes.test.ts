@@ -104,3 +104,47 @@ describe('useOpportunityNotes · editNote (OPP-NOTE-EDIT-1)', () => {
     expect(mockedPut).not.toHaveBeenCalled()
   })
 })
+
+// NOTE-UNDO-FE-1 (K-172): the one-slot undo — pin the REQUEST (method + route),
+// never only that a callback fired (§13).
+describe('useOpportunityNotes · previous-version undo (NOTE-UNDO-FE-1)', () => {
+  it('GETs the note\'s own previous-version route, keyed off the list index', async () => {
+    mockedGet.mockResolvedValueOnce({ data: [{ id: 'n1', body: 'First' }] })
+    mockedGet.mockResolvedValueOnce({ data: { data: { previous_body: '<p>Oud</p>', previous_saved_at: '2026-08-20T10:00:00Z' } } })
+    const { result } = renderHook(() => useOpportunityNotes('o1'))
+    await waitFor(() => expect(result.current.items).toHaveLength(1))
+    const preview = await act(() => result.current.fetchPreviousVersion(0))
+    expect(mockedGet).toHaveBeenCalledWith('/opportunities/o1/notes/n1/previous-version')
+    expect(preview).toEqual({ previous_body: '<p>Oud</p>', previous_saved_at: '2026-08-20T10:00:00Z' })
+  })
+
+  it('resolves null (never throws) when the peek 422s — no slot yet', async () => {
+    mockedGet.mockResolvedValueOnce({ data: [{ id: 'n1', body: 'First' }] })
+    mockedGet.mockRejectedValueOnce({ response: { status: 422 } })
+    const { result } = renderHook(() => useOpportunityNotes('o1'))
+    await waitFor(() => expect(result.current.items).toHaveLength(1))
+    const preview = await act(() => result.current.fetchPreviousVersion(0))
+    expect(preview).toBeNull()
+  })
+
+  it('POSTs restore-previous to the note\'s own route and reloads the thread on success', async () => {
+    mockedGet.mockResolvedValueOnce({ data: [{ id: 'n1', body: 'First' }] })
+    mockedGet.mockResolvedValueOnce({ data: [{ id: 'n1', body: 'Restored', has_previous_version: false }] })
+    mockedPost.mockResolvedValueOnce({ data: { data: { id: 'n1', body: 'Restored' } } })
+    const { result } = renderHook(() => useOpportunityNotes('o1'))
+    await waitFor(() => expect(result.current.items).toHaveLength(1))
+    const landed = await act(() => result.current.restorePreviousVersion(0))
+    expect(mockedPost).toHaveBeenCalledWith('/opportunities/o1/notes/n1/restore-previous')
+    expect(landed).toBe(true)
+    await waitFor(() => expect(result.current.items[0].body).toBe('Restored'))
+  })
+
+  it('resolves false (never throws) when the restore 422s — the guard rejected it', async () => {
+    mockedGet.mockResolvedValueOnce({ data: [{ id: 'n1', body: 'First' }] })
+    mockedPost.mockRejectedValueOnce({ response: { status: 422 } })
+    const { result } = renderHook(() => useOpportunityNotes('o1'))
+    await waitFor(() => expect(result.current.items).toHaveLength(1))
+    const landed = await act(() => result.current.restorePreviousVersion(0))
+    expect(landed).toBe(false)
+  })
+})

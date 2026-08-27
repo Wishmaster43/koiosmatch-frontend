@@ -814,5 +814,24 @@ describe('NotesTab · restore previous version (NOTE-UNDO-FE-1)', () => {
     expect(onRestorePreviousNote).not.toHaveBeenCalled()
     window.removeEventListener('km:toast', onToast)
   })
+
+  // A FAILED restore keeps the current text on screen (revert contract): the
+  // row must not show the previous body when onRestorePreviousNote resolves false.
+  it('keeps the current note text when the restore itself fails', async () => {
+    const user = userEvent.setup()
+    const onFetchPreviousVersion = vi.fn().mockResolvedValue({ previous_body: '<p>Oude tekst</p>', previous_saved_at: '2026-08-20T10:00:00Z' })
+    const onRestorePreviousNote = vi.fn().mockResolvedValue(false)
+    render(<NotesTab notes={[note({ has_previous_version: true, text: '<p>Huidige tekst</p>' })]} labels={undoLabels}
+      onFetchPreviousVersion={onFetchPreviousVersion} onRestorePreviousNote={onRestorePreviousNote}
+      showTimeline={false} showConversations={false} />)
+
+    await user.click(screen.getByTitle('Vorige versie terug'))
+    await waitFor(() => expect(screen.getByText('Vorige versie terugzetten')).toBeInTheDocument())
+    await user.click(screen.getByRole('button', { name: 'confirm' }))
+    expect(onRestorePreviousNote).toHaveBeenCalledWith(0)
+    // The visible row still carries the CURRENT text — never the previous one.
+    expect(screen.getByText('Huidige tekst')).toBeInTheDocument()
+    expect(screen.queryByText('Oude tekst')).not.toBeInTheDocument()
+  })
 })
 

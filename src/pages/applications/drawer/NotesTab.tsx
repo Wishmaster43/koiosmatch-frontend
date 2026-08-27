@@ -21,7 +21,7 @@ export default function NotesTab({ application: a }: { application: ApplicationD
   const { t } = useTranslation('applications')
   // Note categories from the tenant lookup, scoped to 'application' (NOTE-TYPES-2/3).
   const { writableTypes: noteTypes } = useNoteTypes('application')
-  const { notes, addNote, editNote, deleteNote } = useApplicationNotes(a.id, a.notes ?? [])
+  const { notes, addNote, editNote, deleteNote, fetchPreviousVersion, restorePreviousVersion } = useApplicationNotes(a.id, a.notes ?? [])
 
   // Fallback avatar for a note with no resolved author (mirrors the candidate
   // drawer's own fallback: CommunicationTab passes the CANDIDATE's owner
@@ -35,6 +35,9 @@ export default function NotesTab({ application: a }: { application: ApplicationD
       onAddNote={addNote}
       onEditNote={editNote}
       onDeleteNote={deleteNote}
+      // NOTE-UNDO-FE-1 (K-172): "restore previous version" affordance in the shared row.
+      onFetchPreviousVersion={fetchPreviousVersion}
+      onRestorePreviousNote={restorePreviousVersion}
       noteTypes={noteTypes}
       authorInitials={initials}
       showTimeline={false}
@@ -55,6 +58,8 @@ export default function NotesTab({ application: a }: { application: ApplicationD
         notesEmpty: t('notes.empty'),
         notePlaceholder: () => t('notes.placeholder'),
         searchPlaceholder: t('notes.searchPlaceholder'),
+        restorePrevious: t('common:notes.restorePrevious'),
+        restoreConfirmTitle: t('common:notes.restoreConfirmTitle'),
       }}
     />
   )

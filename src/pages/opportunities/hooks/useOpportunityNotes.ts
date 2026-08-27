@@ -30,6 +30,8 @@ export interface OpportunityNote {
   // typed without it to match the shared NotesTab's NoteItem.updated_by shape).
   updated_by?: string
   updated_at?: string
+  // NOTE-UNDO-FE-1 (K-172): true once the note carries a filled one-slot undo.
+  has_previous_version?: boolean
   [k: string]: unknown
 }
 
@@ -121,5 +123,28 @@ export function useOpportunityNotes(id?: Id) {
       })
   }, [id, items, t])
 
-  return { items, loading, error, addNote, editNote, deleteNote }
+  // NOTE-UNDO-FE-1 (K-172): peek the one-slot undo — GET /opportunities/{id}/notes/{note}/previous-version
+  // → { data: { previous_body, previous_saved_at } }, nulls when there is no slot yet.
+  const fetchPreviousVersion = useCallback((index: number) => {
+    if (!id) return Promise.resolve(null)
+    const target = items[index]
+    if (!target?.id) return Promise.resolve(null)
+    return api.get(`/opportunities/${id}/notes/${target.id}/previous-version`)
+      .then(res => (res.data as { data?: { previous_body: string | null; previous_saved_at: string | null } })?.data ?? null)
+      .catch(() => null)
+  }, [id, items])
+
+  // NOTE-UNDO-FE-1 (K-172): execute the undo — POST /opportunities/{id}/notes/{note}/restore-previous
+  // → the note in this family's own shape. A 422 (no slot / guard failed) resolves false so
+  // NotesTab degrades calmly instead of throwing.
+  const restorePreviousVersion = useCallback((index: number): Promise<boolean> => {
+    if (!id) return Promise.resolve(false)
+    const target = items[index]
+    if (!target?.id) return Promise.resolve(false)
+    return api.post(`/opportunities/${id}/notes/${target.id}/restore-previous`)
+      .then(() => { load(); return true })
+      .catch(() => false)
+  }, [id, items, load])
+
+  return { items, loading, error, addNote, editNote, deleteNote, fetchPreviousVersion, restorePreviousVersion }
 }

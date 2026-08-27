@@ -350,13 +350,19 @@ describe('mapApplicationDetail · notes (W10)', () => {
     })
     expect(detail.notes).toEqual([{
       id: 'n1', author: 'Bente de Jong', authorId: null, type: 'call', title: 'Belafspraak',
-      text: 'Gebeld over intake', language: 'nl', time: '2026-08-06T10:00:00Z',
+      text: 'Gebeld over intake', language: 'nl', time: '2026-08-06T10:00:00Z', hasPreviousVersion: false,
     }])
   })
 
   it('defaults type/title/language to empty strings when the resource omits them', () => {
     const detail = mapApplicationDetail({ id: 24, notes: [{ id: 'n2', author: 'Bente de Jong', text: 'Kort' }] })
-    expect(detail.notes).toEqual([{ id: 'n2', author: 'Bente de Jong', authorId: null, type: '', title: '', text: 'Kort', language: '', time: '' }])
+    expect(detail.notes).toEqual([{ id: 'n2', author: 'Bente de Jong', authorId: null, type: '', title: '', text: 'Kort', language: '', time: '', hasPreviousVersion: false }])
+  })
+
+  // NOTE-UNDO-FE-1 (K-172): has_previous_version maps through to hasPreviousVersion.
+  it('maps has_previous_version through to hasPreviousVersion', () => {
+    const detail = mapApplicationDetail({ id: 26, notes: [{ id: 'n3', author: 'Bente de Jong', text: 'Kort', has_previous_version: true }] })
+    expect(detail.notes[0].hasPreviousVersion).toBe(true)
   })
 
   it('defaults to an empty array when the application has no notes', () => {

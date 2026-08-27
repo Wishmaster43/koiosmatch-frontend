@@ -60,6 +60,8 @@ export interface ApplicationNote {
   text?: string
   language?: string
   created_at?: string
+  // NOTE-UNDO-FE-1 (K-172): true once the note carries a filled one-slot undo.
+  has_previous_version?: boolean
   // The shared NoteItem type carries an index signature (author_name/created_by/…
   // it also reads) — mirrored here so this narrower shape stays assignable to it.
   [k: string]: unknown
@@ -78,7 +80,7 @@ export function useApplicationNotes(applicationId: Id | undefined, initialNotes:
   const [notes, setNotes] = useState<ApplicationNote[]>(
     initialNotes.map(n => ({
       id: n.id, type: n.type, title: n.title, author: n.author, author_id: n.authorId ?? null,
-      text: n.text, language: n.language, created_at: n.time,
+      text: n.text, language: n.language, created_at: n.time, has_previous_version: n.hasPreviousVersion ?? false,
     })),
   )
 
@@ -117,7 +119,8 @@ export function useApplicationNotes(applicationId: Id | undefined, initialNotes:
       ? { ...n, type: payload.type, title: payload.title, text: payload.body, language: payload.language }
       : n)))
     return api.patch(`/applications/${applicationId}/notes/${target.id}`, payload)
-      .then(() => true)
+      // K-172: the edit itself fills the one-slot undo — surface the icon now.
+      .then(() => { setNotes(prev => prev.map((n, i) => (i === index ? { ...n, has_previous_version: true } : n))); return true })
       .catch(err => {
         setNotes(snapshot)
         notifyError(extractApiError(err, t('common:actionFailed')))
@@ -141,5 +144,39 @@ export function useApplicationNotes(applicationId: Id | undefined, initialNotes:
     })
   }, [applicationId, notes, t])
 
-  return { notes, deleteNote, addNote, editNote }
+  // NOTE-UNDO-FE-1 (K-172): peek the one-slot undo — GET /applications/{id}/notes/{note}/previous-version
+  // → { data: { previous_body, previous_saved_at } }, nulls when there is no slot yet.
+  const fetchPreviousVersion = useCallback((index: number) => {
+    if (!applicationId) return Promise.resolve(null)
+    const target = notes[index]
+    if (!target) return Promise.resolve(null)
+    return api.get(`/applications/${applicationId}/notes/${target.id}/previous-version`)
+      .then(res => (res.data as { data?: { previous_body: string | null; previous_saved_at: string | null } })?.data ?? null)
+      .catch(() => null)
+  }, [applicationId, notes])
+
+  // NOTE-UNDO-FE-1 (K-172): execute the undo — POST /applications/{id}/notes/{note}/restore-previous.
+  // Unlike candidates/customers, ApplicationController::restorePrevious returns the FULL
+  // application detail (`$this->detail()`), not the single note — so the swapped note is
+  // pulled back out of that payload's notes array by id. A 422 (no slot / guard failed)
+  // resolves false so NotesTab degrades calmly instead of throwing.
+  const restorePreviousVersion = useCallback((index: number): Promise<boolean> => {
+    if (!applicationId) return Promise.resolve(false)
+    const target = notes[index]
+    if (!target) return Promise.resolve(false)
+    return api.post(`/applications/${applicationId}/notes/${target.id}/restore-previous`)
+      .then(res => {
+        const raw = (res.data as { data?: { notes?: Array<{ id?: Id; text?: string; has_previous_version?: boolean }> } })?.data
+        const restored = raw?.notes?.find(n => String(n.id) === String(target.id))
+        if (restored) {
+          setNotes(prev => prev.map((n, i) => (i === index
+            ? { ...n, text: restored.text ?? n.text, has_previous_version: restored.has_previous_version ?? false }
+            : n)))
+        }
+        return true
+      })
+      .catch(() => false)
+  }, [applicationId, notes])
+
+  return { notes, deleteNote, addNote, editNote, fetchPreviousVersion, restorePreviousVersion }
 }

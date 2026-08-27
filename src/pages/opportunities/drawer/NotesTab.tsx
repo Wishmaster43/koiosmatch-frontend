@@ -18,7 +18,7 @@ export default function NotesTab({ opportunity: o }: { opportunity: Opportunity 
   const { writableTypes: noteTypes } = useNoteTypes('opportunity')
   // NOTITIE-PARITEIT (Danny 27-08): DELETE /opportunities/{id}/notes/{note}
   // exists — wired alongside the existing edit (OPP-NOTE-EDIT-1).
-  const { items: notes, loading, error, addNote, editNote, deleteNote } = useOpportunityNotes(o?.id)
+  const { items: notes, loading, error, addNote, editNote, deleteNote, fetchPreviousVersion, restorePreviousVersion } = useOpportunityNotes(o?.id)
 
   // §3 (audit r4): loading/error render explicitly — a failed fetch must never
   // look like "no notes yet" (SharedNotesTab has no state props of its own).
@@ -34,6 +34,9 @@ export default function NotesTab({ opportunity: o }: { opportunity: Opportunity 
       // OPP-NOTE-EDIT-1: the index-keyed edit callback — see useOpportunityNotes.editNote.
       onEditNote={(i: number, p: { type: string; body: string; language?: string }) => editNote(i, { type: p.type, body: p.body, language: p.language })}
       onDeleteNote={deleteNote}
+      // NOTE-UNDO-FE-1 (K-172): "restore previous version" affordance in the shared row.
+      onFetchPreviousVersion={fetchPreviousVersion}
+      onRestorePreviousNote={restorePreviousVersion}
       noteTypes={noteTypes}
       showTimeline={false}
       showConversations={false}
@@ -53,6 +56,8 @@ export default function NotesTab({ opportunity: o }: { opportunity: Opportunity 
         searchPlaceholder: t('notes.searchPlaceholder'),
         deleteNote: t('notes.deleteNote'),
         deleteConfirm: t('notes.deleteConfirm'),
+        restorePrevious: t('common:notes.restorePrevious'),
+        restoreConfirmTitle: t('common:notes.restoreConfirmTitle'),
       }}
     />
   )

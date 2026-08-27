@@ -14,7 +14,7 @@ const mockUseAuth = vi.fn(() => ({ user: { id: 'u9', name: 'Kelly Recruiter' } }
 vi.mock('@/context/AuthContext', () => ({ useAuth: () => mockUseAuth() }))
 vi.mock('@/lib/api', async () => {
   const actual = await vi.importActual('@/lib/api')
-  return { ...actual, default: { post: vi.fn().mockResolvedValue({ data: {} }) } }
+  return { ...actual, default: { post: vi.fn().mockResolvedValue({ data: {} }), get: vi.fn(), patch: vi.fn().mockResolvedValue({ data: {} }) } }
 })
 vi.mock('@/lib/notify', () => ({ notifyError: vi.fn() }))
 
@@ -93,4 +93,63 @@ describe('useApplicationNotes · seeding thread the real author_id (NOTE-AUTHOR-
     const { result } = renderHook(() => useApplicationNotes('app1', initial))
     expect(result.current.notes[0].author_id).toBeNull()
   })
+})
+
+// NOTE-UNDO-FE-1 (K-172): the one-slot undo — pin the REQUEST (method + route),
+// never only that a callback fired (§13).
+describe('useApplicationNotes · previous-version undo (NOTE-UNDO-FE-1)', () => {
+  it('GETs the note\'s own previous-version route, keyed off the list index', async () => {
+    vi.mocked(api.get).mockResolvedValueOnce({ data: { data: { previous_body: '<p>Oud</p>', previous_saved_at: '2026-08-20T10:00:00Z' } } })
+    const initial: ApplicationDetail['notes'] = [
+      { id: 'n1', author: 'Kelly', authorId: 'u9', type: 'general', title: '', text: 'First', language: '', time: '2026-08-06T09:00:00Z' },
+    ]
+    const { result } = renderHook(() => useApplicationNotes('app1', initial))
+    const preview = await act(() => result.current.fetchPreviousVersion(0))
+    expect(api.get).toHaveBeenCalledWith('/applications/app1/notes/n1/previous-version')
+    expect(preview).toEqual({ previous_body: '<p>Oud</p>', previous_saved_at: '2026-08-20T10:00:00Z' })
+  })
+
+  it('resolves null (never throws) when the peek 422s — no slot yet', async () => {
+    vi.mocked(api.get).mockRejectedValueOnce({ response: { status: 422 } })
+    const initial: ApplicationDetail['notes'] = [
+      { id: 'n1', author: 'Kelly', authorId: 'u9', type: 'general', title: '', text: 'First', language: '', time: '2026-08-06T09:00:00Z' },
+    ]
+    const { result } = renderHook(() => useApplicationNotes('app1', initial))
+    const preview = await act(() => result.current.fetchPreviousVersion(0))
+    expect(preview).toBeNull()
+  })
+
+  it('POSTs restore-previous to the note\'s own route and updates the note from the returned detail payload', async () => {
+    vi.mocked(api.post).mockResolvedValueOnce({ data: { data: { notes: [{ id: 'n1', text: 'Restored', has_previous_version: true }] } } })
+    const initial: ApplicationDetail['notes'] = [
+      { id: 'n1', author: 'Kelly', authorId: 'u9', type: 'general', title: '', text: 'First', language: '', time: '2026-08-06T09:00:00Z' },
+    ]
+    const { result } = renderHook(() => useApplicationNotes('app1', initial))
+    const landed = await act(() => result.current.restorePreviousVersion(0))
+    expect(api.post).toHaveBeenCalledWith('/applications/app1/notes/n1/restore-previous')
+    expect(landed).toBe(true)
+    expect(result.current.notes[0].text).toBe('Restored')
+    // K-172 is a REVERSIBLE one-slot swap: after a restore the slot holds the
+    // swapped-out text, so the icon stays (restore is itself undoable).
+    expect(result.current.notes[0].has_previous_version).toBe(true)
+  })
+
+  it('resolves false (never throws) when the restore 422s — the guard rejected it', async () => {
+    vi.mocked(api.post).mockRejectedValueOnce({ response: { status: 422 } })
+    const initial: ApplicationDetail['notes'] = [
+      { id: 'n1', author: 'Kelly', authorId: 'u9', type: 'general', title: '', text: 'First', language: '', time: '2026-08-06T09:00:00Z' },
+    ]
+    const { result } = renderHook(() => useApplicationNotes('app1', initial))
+    const landed = await act(() => result.current.restorePreviousVersion(0))
+    expect(landed).toBe(false)
+  })
+})
+
+// The Opus verify measured the icon never appearing: editNote must fill the
+// one-slot undo locally (the hook has no reload path).
+it('marks the edited note as restorable after a successful PATCH (K-172 slot)', async () => {
+    const { result } = renderHook(() => useApplicationNotes('app1',
+    [{ id: 'n1', type: 'note', title: '', text: 'Oud', language: 'nl', hasPreviousVersion: false }] as never))
+  await act(async () => { await result.current.editNote(0, { type: 'note', title: '', body: 'Nieuw', language: 'nl' }) })
+  expect(result.current.notes[0].has_previous_version).toBe(true)
 })

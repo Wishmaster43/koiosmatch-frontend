@@ -290,9 +290,10 @@ export function mapApplicationDetail(raw: ApiApplication = {}, funnelTypes: Look
     // maps through too — a fetched note used to always drop this key, which kept the
     // shared NotesTab's canManageNote() permissive by omission (`undefined` = "not
     // migrated") for every application note regardless of who actually wrote it.
+    // NOTE-UNDO-FE-1 (K-172): hasPreviousVersion drives the shared row's restore icon.
     notes: (raw.notes ?? []).map(n => ({
       id: n.id, author: n.author ?? '', authorId: n.author_id ?? null, type: n.type ?? '', title: n.title ?? '',
-      text: n.text ?? '', language: n.language ?? '', time: n.created_at ?? '',
+      text: n.text ?? '', language: n.language ?? '', time: n.created_at ?? '', hasPreviousVersion: n.has_previous_version ?? false,
     })),
     // Match SCORE = the fit on the application (flat fields; "match" the noun is a
     // separate entity). `score` (overall) comes from mapApplication (match_score).
