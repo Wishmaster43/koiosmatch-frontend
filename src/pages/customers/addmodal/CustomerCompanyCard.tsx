@@ -42,6 +42,12 @@ export default function CustomerCompanyCard({ form, set, errors, industries }: C
         <FieldRow label={t('overview.coc')}>
           <TextField value={form.cocNumber} onChange={v => set('cocNumber', v)} />
         </FieldRow>
+        {/* CUST-CREATE-VELDEN (Danny 27-08): VAT number rides along on create —
+            optional like KvK, drawer's own "overview.vat" label (ONE label per
+            thing); the debtor number stays deliberately absent (DEBITEURNUMMER-1). */}
+        <FieldRow label={t('overview.vat')}>
+          <TextField value={form.vatNumber} onChange={v => set('vatNumber', v)} />
+        </FieldRow>
         {/* DEBITEURNUMMER-1 (Danny 02-08): the debtor number is no longer collected
             here — it is the customer's own accounting number, decided later, and
             stays editable everywhere else (drawer/table/search). Two fields remain. */}

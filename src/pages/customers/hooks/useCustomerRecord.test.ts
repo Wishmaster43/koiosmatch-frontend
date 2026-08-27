@@ -240,6 +240,30 @@ describe('useCustomerRecord · customer phase (KLANT-FASE-1)', () => {
     expect(vi.mocked(api.post)).toHaveBeenCalledWith('/customers', expect.objectContaining({ industry: 'Zorg', owner_id: 'u1' }))
   })
 
+  // CUST-CREATE-VELDEN (Danny 27-08): the VAT number rides the create body like
+  // KvK — asserts the REQUEST (§13), and its absence when left empty.
+  it('sends vat_number on the create body once typed, omits it when empty', async () => {
+    vi.mocked(api.post).mockResolvedValue({ data: { id: 13, name: 'Nieuw' } })
+    const r = harness([])
+    await act(async () => {
+      await r.result.current.record.handleCreate({
+        name: 'Nieuw', debtorNumber: '', status: 'active', ownerId: '', industry: '', city: '', phase: '',
+        cocNumber: '12345678', vatNumber: 'NL123456789B01',
+      })
+    })
+    expect(vi.mocked(api.post)).toHaveBeenCalledWith('/customers',
+      expect.objectContaining({ coc_number: '12345678', vat_number: 'NL123456789B01' }))
+
+    vi.mocked(api.post).mockClear()
+    vi.mocked(api.post).mockResolvedValue({ data: { id: 14, name: 'Leeg' } })
+    await act(async () => {
+      await r.result.current.record.handleCreate({
+        name: 'Leeg', debtorNumber: '', status: 'active', ownerId: '', industry: '', city: '', phase: '', vatNumber: '',
+      })
+    })
+    expect(vi.mocked(api.post).mock.calls[0][1]).not.toHaveProperty('vat_number')
+  })
+
   it('CLEAR-SWEEP: omits industry and owner_id from the create body when cleared back to empty', async () => {
     vi.mocked(api.post).mockResolvedValue({ data: { id: 12, name: 'Nieuw' } })
     const r = harness([])

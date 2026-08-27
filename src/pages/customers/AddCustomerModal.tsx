@@ -67,6 +67,7 @@ export interface CustomerForm {
   // CUST-DUP-FE-1 (22-08): the tenant's own KvK/CoC number — the DEFAULT first
   // dedupe key (customer_dedupe_keys). Optional; a brand-new prospect may not have one yet.
   cocNumber: string
+  vatNumber: string
 }
 interface ModalUser { id: Id; name: string }
 
@@ -196,7 +197,7 @@ export default function AddCustomerModal({ onClose, onCreate, onImported, users 
     phase: defaultPhase,
     branchId: '', website: '', employeeCount: '', toneOfVoice: '', costCenter: '', billingEmail: '',
     street: '', houseNumber: '', houseNumberSuffix: '', postalCode: '', province: '', country: '',
-    cocNumber: '',
+    cocNumber: '', vatNumber: '',
   })
 
   // CUST-DUP-FE-1: live probe + create-409 verdict + restore, bundled in one hook

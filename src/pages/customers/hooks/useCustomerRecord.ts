@@ -55,6 +55,7 @@ interface CreateForm {
   // CUST-DUP-FE-1 (22-08): the KvK/CoC number, now collected by the create modal
   // (the tenant's default primary dedupe key) — optional, same as the rest above.
   cocNumber?: string
+  vatNumber?: string
 }
 
 // Optional create fields → their API keys (same mapping the PATCH path uses).
@@ -74,6 +75,9 @@ const OPTIONAL_CREATE_FIELDS: Array<[keyof CreateForm, string]> = [
   // CUST-DUP-FE-1: without this entry the field would be a fake affordance (§3) —
   // typed in the modal, silently dropped from the POST body.
   ['cocNumber', 'coc_number'],
+  // CUST-CREATE-VELDEN (Danny 27-08 via adviezen-akkoord): the VAT number joins
+  // the create popup; StoreCustomerRequest already accepts vat_number.
+  ['vatNumber', 'vat_number'],
 ]
 
 interface Args {
