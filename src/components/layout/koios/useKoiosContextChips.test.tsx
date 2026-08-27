@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, afterEach } from 'vitest'
 import { render, renderHook, screen, fireEvent, act } from '@testing-library/react'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
 import { useKoiosContextChips } from './useKoiosContextChips'
@@ -27,8 +28,13 @@ function Publisher({ ids, children }: { ids: Set<string>; children: ReactNode })
 }
 function withSelection(ids: string[]) {
   const idSet = new Set(ids)
+  // Fresh QueryClient per wrapper: the hook's record-label resolver runs on
+  // react-query now (retry off so a mocked failure never loops).
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   return ({ children }: { children: ReactNode }) => (
-    <SelectionProvider><Publisher ids={idSet}>{children}</Publisher></SelectionProvider>
+    <QueryClientProvider client={client}>
+      <SelectionProvider><Publisher ids={idSet}>{children}</Publisher></SelectionProvider>
+    </QueryClientProvider>
   )
 }
 
@@ -117,7 +123,8 @@ describe('useKoiosContextChips — selection', () => {
         </div>
       )
     }
-    render(<SelectionProvider><Harness /></SelectionProvider>)
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+    render(<QueryClientProvider client={client}><SelectionProvider><Harness /></SelectionProvider></QueryClientProvider>)
     expect(screen.getByTestId('chip')).toHaveTextContent('1')
     fireEvent.click(screen.getByText('dismiss'))
     expect(screen.getByTestId('chip')).toHaveTextContent('none')

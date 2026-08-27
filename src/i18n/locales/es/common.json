@@ -204,7 +204,8 @@
     "contextRecordFallback": "{{entity}} #{{id}}",
     "selection": {
       "chip": "{{count}} {{entity}} seleccionados",
-      "moreCount": "+{{count}} más"
+      "moreCount": "+{{count}} más",
+      "chipOne": "1 {{entity}} seleccionado/a"
     },
     "radar": {
       "title": "Consejos de Koios",

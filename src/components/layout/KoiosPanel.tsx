@@ -9,7 +9,7 @@
 import { useState, useRef, useEffect } from 'react'
 import type { ChangeEvent, KeyboardEvent } from 'react'
 import { useTranslation } from 'react-i18next'
-import { AtSign, Paperclip, ArrowUp, Sparkles, Lightbulb } from 'lucide-react'
+import { AtSign, ArrowUp, Sparkles, Lightbulb } from 'lucide-react'
 import { useLocale } from '@/lib/datetime'
 import { tint, TINT_BORDER } from '@/lib/tint'
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion'
@@ -313,17 +313,8 @@ export default function KoiosPanel({ open, onClose, onNavigate }: { open?: boole
               onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = 'var(--sidebar-muted)' }}>
               <AtSign size={14} />
             </button>
-
-            {/* Paperclip — no upload path exists yet, so it renders honestly disabled (§3: no fake affordances). */}
-            <button
-              disabled aria-disabled="true"
-              title={`${t('koios.attachFile')} — ${t('common:comingSoon')}`}
-              aria-label={`${t('koios.attachFile')} — ${t('common:comingSoon')}`}
-              // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- disabled placeholder in the composer icon row; not a Button-variant action
-              style={{ background: 'none', border: 'none', cursor: 'default', padding: '4px 5px',
-                borderRadius: 7, color: 'var(--sidebar-muted)', display: 'flex', opacity: 0.45 }}>
-              <Paperclip size={14} />
-            </button>
+            {/* Bijlage-knop VERBORGEN tot het uploadpad bestaat (Danny 27-08:
+                een zichtbaar-dode knop is erger dan geen knop). */}
 
             {/* Danny 27-08: the two landing cards are summonable/dismissable from
                 the composer — visible = primary ink, closed = muted (aria-pressed). */}

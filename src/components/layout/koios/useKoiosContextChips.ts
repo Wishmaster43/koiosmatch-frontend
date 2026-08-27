@@ -30,6 +30,8 @@ import { useSelectionContext } from '@/context/SelectionContext'
 import { deriveAmbientRef, PAGE_TO_REF_TYPE } from './koiosAmbientContext'
 import { RESULT_CAP } from './useKoiosEntitySearch'
 import type { KoiosContextRef } from '@/types/koios'
+import { useQuery } from '@tanstack/react-query'
+import api, { unwrap } from '@/lib/api'
 
 // Live URL hash — a plain hashchange/popstate subscription so an open/close on
 // the SAME page (not only browser back/forward) updates the ambient ref too.
@@ -58,6 +60,46 @@ export interface KoiosContextChips {
   dismissSelection: () => void
 }
 
+
+// Per-type record-label fetch for the ambient chip: application = "kandidaat ·
+// vacature" (KANDIDAAT-EERST), the rest their own display name. Unknown types
+// and failures resolve to null so the honest fallback stays; the query caches
+// per record and never retries a hard failure into a loop.
+const REF_LABEL_SOURCES: Record<string, { path: (id: string) => string; pick: (d: Record<string, unknown>) => string | null }> = {
+  candidate:   { path: id => `/candidates/${id}`,   pick: d => (d.name as string) ?? null },
+  customer:    { path: id => `/customers/${id}`,    pick: d => (d.name as string) ?? null },
+  vacancy:     { path: id => `/vacancies/${id}`,    pick: d => (d.title as string) ?? (d.name as string) ?? null },
+  task:        { path: id => `/tasks/${id}`,        pick: d => (d.title as string) ?? null },
+  opportunity: { path: id => `/opportunities/${id}`, pick: d => (d.title as string) ?? (d.name as string) ?? null },
+  application: { path: id => `/applications/${id}`, pick: d => {
+    const cand = ((d.candidate as Record<string, unknown>)?.name ?? d.candidate_name) as string | undefined
+    const vac  = ((d.vacancy as Record<string, unknown>)?.title ?? d.vacancy_title) as string | undefined
+    return cand ? (vac ? `${cand} · ${vac}` : cand) : null
+  } },
+  match:       { path: id => `/matches/${id}`,      pick: d => {
+    const cand = ((d.candidate as Record<string, unknown>)?.name ?? d.candidate_name) as string | undefined
+    const vac  = ((d.vacancy as Record<string, unknown>)?.title ?? d.vacancy_title) as string | undefined
+    return cand ? (vac ? `${cand} · ${vac}` : cand) : null
+  } },
+}
+
+// Resolves the open record's display label; null while loading/failed/unknown type.
+function useAmbientRefLabel(type?: string, id?: string): string | null {
+  const source = type ? REF_LABEL_SOURCES[type] : undefined
+  const { data } = useQuery({
+    queryKey: ['koios', 'ref-label', type, id],
+    enabled: Boolean(source && id),
+    staleTime: 5 * 60_000,
+    retry: false,
+    queryFn: async () => {
+      const res = await api.get(source!.path(String(id)))
+      const body = (unwrap<Record<string, unknown>>(res) ?? {}) as Record<string, unknown>
+      return source!.pick(body)
+    },
+  })
+  return data ?? null
+}
+
 // See the file's top doc above for the two ambient/selection chips this hook derives and their dismiss semantics.
 export function useKoiosContextChips(): KoiosContextChips {
   const { t } = useTranslation('common')
@@ -66,12 +108,14 @@ export function useKoiosContextChips(): KoiosContextChips {
   const [dismissedAmbientId, setDismissedAmbientId] = useState<string | null>(null)
   const [dismissedSelectionKey, setDismissedSelectionKey] = useState<string | null>(null)
 
-  // The open-drawer chip: prefer a real per-record name (no cheap source
-  // exists today — see the file banner); the honest fallback names the
-  // SINGULAR entity + id, never the plural nav label ("Kandidaten").
+  // The open-drawer chip: the RECORD'S OWN NAME (Danny 27-08, screenshot of a
+  // raw application UUID in the chip: "mooier is de naam van de kandidaat en de
+  // vacature naam") — resolved with one cheap GET per open record; while it
+  // loads (or when it fails) the honest entity+id fallback stands.
   const raw = deriveAmbientRef(hash)
+  const resolvedLabel = useAmbientRefLabel(raw?.type, raw?.id)
   const ambientRef: KoiosContextRef | null = raw && raw.id !== dismissedAmbientId
-    ? { type: raw.type, id: raw.id, label: t('koios.contextRecordFallback', {
+    ? { type: raw.type, id: raw.id, label: resolvedLabel ?? t('koios.contextRecordFallback', {
         entity: t(`koios.mention.singular.${raw.type}`), id: raw.id,
       }) }
     : null
@@ -81,13 +125,20 @@ export function useKoiosContextChips(): KoiosContextChips {
   const selectionKey = selection ? `${selection.entity}:${selection.ids.join(',')}` : null
   const singularType = selection ? (PAGE_TO_REF_TYPE[selection.entity] ?? selection.entity) : null
   const overflow = selection ? selection.ids.length - RESULT_CAP : 0
+  // A single selected record shows its NAME (Danny 27-08: "nu zie je weer niet
+  // welke") via the same resolver as the ambient chip; the singular fallback
+  // stands while it loads. Multi-selection keeps the count chip.
+  const singleId = selection && selection.ids.length === 1 ? String(selection.ids[0]) : undefined
+  const singleLabel = useAmbientRefLabel(singleId ? (singularType ?? undefined) : undefined, singleId)
   const selectionChip: KoiosContextChips['selectionChip'] = selection && selectionKey !== dismissedSelectionKey
     ? {
         id: `selection:${selection.entity}`,
-        label: t('koios.selection.chip', {
-          count: selection.ids.length,
-          entity: selection.label ?? t(`nav.${selection.entity}`),
-        }) + (overflow > 0 ? ' ' + t('koios.selection.moreCount', { count: overflow }) : ''),
+        label: (singleId
+          ? (singleLabel ?? t('koios.selection.chipOne', { entity: t(`koios.mention.singular.${singularType}`) }))
+          : t('koios.selection.chip', {
+              count: selection.ids.length,
+              entity: selection.label ?? t(`nav.${selection.entity}`),
+            })) + (overflow > 0 ? ' ' + t('koios.selection.moreCount', { count: overflow }) : ''),
         // Real ids, singular ref type — capped the same as every other search
         // result list (RESULT_CAP) so a 200-row selection never floods the turn.
         refs: selection.ids.slice(0, RESULT_CAP).map((id) => ({
