@@ -68,4 +68,59 @@ describe('KoiosResultCards', () => {
     ]} />)
     expect(screen.getAllByText('Ahmed Vos')).toHaveLength(1)
   })
+
+  // A subtitle renders as a caption line under the label.
+  it('renders a subtitle under the label', () => {
+    render(<KoiosResultCards refs={[{ type: 'candidate', id: 'c1', label: 'Ahmed Vos', subtitle: 'Verpleegkundige' }]} />)
+    expect(screen.getByText('Verpleegkundige')).toBeInTheDocument()
+  })
+
+  // Six measured child-ref routings (koiosResultLinks CHILD_REF_TAB): the card
+  // opens the PARENT's page + its measured drawer sub-tab, never a route of its own.
+  it.each([
+    ['appointment', 'candidate', 'candidates', 'planning'],
+    ['note', 'candidate', 'candidates', 'communication'],
+    ['document', 'candidate', 'candidates', 'documents'],
+    ['appointment', 'vacancy', 'vacancies', 'appointments'],
+    ['note', 'vacancy', 'vacancies', 'notes'],
+    ['document', 'customer', 'customers', 'documents'],
+  ])('routes a %s child ref with a %s parent to %s tab %s', async (childType, parentType, page, tab) => {
+    const user = userEvent.setup()
+    openEntity.mockClear()
+    render(<KoiosResultCards refs={[
+      { type: childType, id: 'child1', label: 'Row', parent: { type: parentType, id: 'p1' } },
+    ]} />)
+    await user.click(screen.getByText('Row'))
+    expect(openEntity).toHaveBeenCalledWith(page, 'p1', tab)
+  })
+
+  // A child ref whose parent type has no matching drawer tab still opens the parent, without a tab param.
+  it('opens the parent without a tab when the parent drawer has no matching tab', async () => {
+    const user = userEvent.setup()
+    render(<KoiosResultCards refs={[
+      { type: 'document', id: 'd1', label: 'Row', parent: { type: 'opportunity', id: 'p1' } },
+    ]} />)
+    await user.click(screen.getByText('Row'))
+    expect(openEntity).toHaveBeenCalledWith('opportunities', 'p1')
+  })
+
+  // A child ref missing `parent` entirely stays the existing non-clickable fallback.
+  it('renders non-clickable when a child ref has no parent at all', async () => {
+    const user = userEvent.setup()
+    render(<KoiosResultCards refs={[{ type: 'note', id: 'n1', label: 'Row' }]} />)
+    const card = screen.getByText('Row').closest('div, button')
+    expect(card?.tagName).toBe('DIV')
+    await user.click(screen.getByText('Row'))
+    expect(openEntity).not.toHaveBeenCalled()
+  })
 })
+// Reference guard: a child ref whose PARENT type has no page mapping stays a
+// calm non-clickable div — never a guessed route (§3 no fake affordance).
+it('renders a child ref with an unknown parent type as non-clickable', () => {
+  openEntity.mockClear()
+  render(<KoiosResultCards refs={[{ type: 'note', id: 'n1', label: 'Notitie', parent: { type: 'mystery' as never, id: 'x1' } }]} />)
+  const el = screen.getByText('Notitie').closest('div')
+  expect(el?.getAttribute('role')).not.toBe('button')
+  expect(openEntity).not.toHaveBeenCalled()
+})
+

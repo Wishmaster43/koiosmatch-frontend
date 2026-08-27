@@ -52,7 +52,8 @@
   },
   "tabs": {
     "overview": "Overzicht",
-    "learning": "Leerrapport"
+    "learning": "Leerrapport",
+    "capabilities": "Tool-matrix"
   },
   "learning": {
     "loading": "Rapport laden…",
@@ -72,5 +73,20 @@
     "downPct": "{{pct}} van de reacties kreeg een duim omlaag.",
     "suggestions": "Suggesties",
     "noSuggestions": "Geen suggesties voor deze periode."
+  },
+  "capabilities": {
+    "title": "Tool-matrix",
+    "subtitle": "Welke tools Koios voor jouw organisatie mag gebruiken.",
+    "loading": "Tool-matrix laden…",
+    "loadError": "De tool-matrix kon niet worden geladen.",
+    "empty": "Er zijn nog geen tools beschikbaar.",
+    "confirmRequired": "Bevestiging vereist",
+    "disabledForMe": "Voor jou uit",
+    "connectionNeeded": "Koppeling nodig",
+    "connectionSectionMissing": "Dit koppelingsscherm is nog niet beschikbaar.",
+    "resetToDefault": "Standaard",
+    "toggleAria": "Schakel {{label}} in of uit",
+    "otherGroup": "Overig",
+    "saveError": "Opslaan van de tool-instelling is niet gelukt."
   }
 }

@@ -256,6 +256,23 @@
       "askKoios": "Im Chat abschließen",
       "askIntent": "Hilf mir hiermit: {{title}}",
       "execute": "Ausführen"
+    },
+    "feedback": {
+      "up": "Hilfreich",
+      "down": "Nicht hilfreich",
+      "thanks": "Danke für dein Feedback",
+      "reasonsLabel": "Grund",
+      "commentPlaceholder": "Anmerkung (optional)",
+      "send": "Senden",
+      "error": "Feedback senden fehlgeschlagen. Bitte erneut versuchen.",
+      "retry": "Erneut versuchen",
+      "reasons": {
+        "inaccurate": "Ungenau",
+        "incomplete": "Unvollständig",
+        "harmful": "Schädlich",
+        "tone": "Tonfall",
+        "other": "Sonstiges"
+      }
     }
   },
   "actionRules": {

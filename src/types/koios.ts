@@ -32,6 +32,10 @@ export interface KoiosChatMessage {
   // KOIOS-CHAT-SIGNALS-FE-1: which cap tripped a budget_exceeded stop —
   // 'monthly' | 'daily_user' | 'daily_tenant' (null for any other stop reason).
   budget?: { status?: string; reason?: string | null; [k: string]: unknown } | null
+  // KOIOS-FEEDBACK-FE-1: the backend's prompt-log id for this answer, when it
+  // logged one — KoiosFeedback (thumbs up/down) only renders when this is set,
+  // since POST /ai/koios/feedback requires it.
+  prompt_log_id?: string
   [k: string]: unknown
 }
 
@@ -54,6 +58,11 @@ export interface KoiosContextRef {
   type: string
   id: string
   label: string
+  // KOIOS-RESULT-CARDS-6-FE-1: optional caption line rendered under the label.
+  subtitle?: string
+  // KOIOS-RESULT-CARDS-6-FE-1: for a CHILD ref (appointment/note/document, which
+  // have no page of their own) the owning parent record to route through instead.
+  parent?: { type: string; id: string }
 }
 
 // Minimal translate signature for the Koios subcomponents.

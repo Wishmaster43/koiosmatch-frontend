@@ -177,7 +177,7 @@ export function renderPage(activePage: string, { navIntent, goTo, dashView }: { 
     case 'matches':                return <MatchesPage intent={navIntent} />
     case 'opportunities':          return <OpportunitiesPage intent={navIntent} />
     case 'tasks':                  return <TasksPage intent={navIntent} />
-    case 'outreach':               return <OutreachPage />
+    case 'outreach':               return <OutreachPage intent={navIntent} />
     case 'customers':              return <CustomersPage intent={navIntent} />
     // PDF-VACATURES-2026-08-14 point 7: forward the nav intent so a caller (the
     // vacancies toolbar's Excel-upload button) can preselect an entity on arrival.

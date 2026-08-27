@@ -831,6 +831,9 @@
     "channels": {
       "label": "Notificar mediante",
       "desc": "Elige por canal si estas notificaciones llegan: en la aplicación, por correo electrónico o ambos."
+    },
+    "popup": {
+      "label": "Ventana emergente"
     }
   },
   "escalation": {

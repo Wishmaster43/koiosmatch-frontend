@@ -8,7 +8,7 @@ import { createElement } from 'react'
 import type { CSSProperties, ReactElement } from 'react'
 import {
   Users, FileText, Briefcase, Handshake, Target, ListChecks, PhoneCall,
-  Building2, MessageCircle, Brain, User,
+  Building2, MessageCircle, Brain, User, Calendar, StickyNote,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 
@@ -28,6 +28,10 @@ export const ENTITY_ICONS: Record<string, LucideIcon> = {
   contact: User,
   workflow: Brain,
   conversation: MessageCircle,
+  // KOIOS-RESULT-CARDS-6-FE-1: child-ref types (routed through their parent's tab).
+  appointment: Calendar,
+  note: StickyNote,
+  document: FileText,
 }
 
 // Resolves the shared icon for an entity type, falling back to a generic person

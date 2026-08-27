@@ -77,6 +77,27 @@ describe('KoiosPanel — landing state', () => {
     await waitFor(() => expect(sendChat).toHaveBeenCalled())
     expect(screen.queryByText('koios.assistant.title')).toBeNull()
   })
+
+  // KOIOS-FEEDBACK-FE-1: the passthrough that makes the thumbs REAL — a reply
+  // carrying prompt_log_id renders the feedback buttons, one without stays calm
+  // (the Opus verify caught the type-only version rendering nothing, ever).
+  it('renders the feedback thumbs only when the reply carries prompt_log_id', async () => {
+    vi.mocked(sendChat).mockResolvedValueOnce({
+      answer: 'Antwoord met log.', steps: [], usage: null, model: null, prompt_log_id: 'pl-1',
+    })
+    renderWithQuery(<KoiosPanel open onClose={() => {}} onNavigate={() => {}} />)
+    const textarea = screen.getByPlaceholderText('koios.taskPlaceholder')
+    fireEvent.change(textarea, { target: { value: 'log test' } })
+    fireEvent.click(screen.getByRole('button', { name: 'koios.taskPlaceholder' }))
+    await screen.findByText('Antwoord met log.')
+    expect(screen.getByRole('button', { name: 'Nuttig' })).toBeInTheDocument()
+
+    vi.mocked(sendChat).mockResolvedValueOnce({ answer: 'Antwoord zonder log.', steps: [] })
+    fireEvent.change(textarea, { target: { value: 'zonder' } })
+    fireEvent.click(screen.getByRole('button', { name: 'koios.taskPlaceholder' }))
+    await screen.findByText('Antwoord zonder log.')
+    expect(screen.getAllByRole('button', { name: 'Nuttig' })).toHaveLength(1)
+  })
 })
 
 // Resizable panel (replaces the old two-fixed-width toggle) — the drag handle

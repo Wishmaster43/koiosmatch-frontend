@@ -15,6 +15,7 @@ vi.mock('@/components/layout/koios/useKoiosSettings', () => ({ invalidateKoiosSe
 vi.mock('./KoiosStatusCard', () => ({ default: () => <div>overview-status-card</div> }))
 vi.mock('./KoiosModelsCard', () => ({ default: () => <div>overview-models-card</div> }))
 vi.mock('./KoiosLearningCard', () => ({ default: () => <div>learning-card</div> }))
+vi.mock('./KoiosCapabilitiesCard', () => ({ default: () => <div>capabilities-card</div> }))
 
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key) => key }),
@@ -33,6 +34,16 @@ describe('KoiosSettings sub-tabs', () => {
 
     fireEvent.click(screen.getByRole('tab', { name: 'tabs.learning' }))
     await waitFor(() => expect(screen.getByText('learning-card')).toBeInTheDocument())
+    expect(screen.queryByText('overview-status-card')).not.toBeInTheDocument()
+  })
+
+  // KOIOS-TOOL-MATRIX-FE-1: the third sub-tab mounts the capabilities card exclusively.
+  it('switches to the capabilities card on its tab click', async () => {
+    mockGetKoiosSettings.mockResolvedValue({ status: {}, models: {} })
+    render(<KoiosSettings />)
+    await screen.findByText('overview-status-card')
+    fireEvent.click(screen.getByRole('tab', { name: 'tabs.capabilities' }))
+    await waitFor(() => expect(screen.getByText('capabilities-card')).toBeInTheDocument())
     expect(screen.queryByText('overview-status-card')).not.toBeInTheDocument()
   })
 })

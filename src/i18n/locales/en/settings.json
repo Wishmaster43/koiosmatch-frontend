@@ -1077,6 +1077,9 @@
     "channels": {
       "label": "Notify via",
       "desc": "Choose per channel whether these notifications arrive: in the app, by email, or both."
+    },
+    "popup": {
+      "label": "Pop-up"
     }
   },
   "escalation": {

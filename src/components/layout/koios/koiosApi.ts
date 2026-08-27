@@ -49,3 +49,13 @@ export const cancelPendingAction = (id: string) =>
 // 201 {status:'staged', action:{id,title,preview,expires_at}}; 403/422 {message}.
 export const stagePendingAction = (tool: string, input: Record<string, unknown>) =>
   api.post('/ai/koios/actions/stage', { tool, input }).then((r) => r.data)
+
+// KOIOS-FEEDBACK-FE-1: record (or update) this user's thumbs up/down on one
+// answer. `reasons`/`comment` only ever accompany a 'down' rating.
+export const sendKoiosFeedback = (body: {
+  prompt_log_id: string
+  surface: string
+  rating: 'up' | 'down'
+  reasons?: string[]
+  comment?: string
+}) => api.post('/ai/koios/feedback', body).then((r) => r.data)

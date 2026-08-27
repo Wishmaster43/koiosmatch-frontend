@@ -52,7 +52,8 @@
   },
   "tabs": {
     "overview": "Aperçu",
-    "learning": "Rapport d'apprentissage"
+    "learning": "Rapport d'apprentissage",
+    "capabilities": "Matrice d’outils"
   },
   "learning": {
     "loading": "Chargement du rapport…",
@@ -72,5 +73,20 @@
     "downPct": "{{pct}} des réponses ont reçu un pouce vers le bas.",
     "suggestions": "Suggestions",
     "noSuggestions": "Aucune suggestion pour cette période."
+  },
+  "capabilities": {
+    "title": "Matrice d’outils",
+    "subtitle": "Les outils que Koios peut utiliser pour votre organisation.",
+    "loading": "Chargement de la matrice d’outils…",
+    "loadError": "Impossible de charger la matrice d’outils.",
+    "empty": "Aucun outil n’est encore disponible.",
+    "confirmRequired": "Confirmation requise",
+    "disabledForMe": "Désactivé pour vous",
+    "connectionNeeded": "Connexion requise",
+    "connectionSectionMissing": "Cet écran de connexion n’est pas encore disponible.",
+    "resetToDefault": "Par défaut",
+    "toggleAria": "Activer ou désactiver {{label}}",
+    "otherGroup": "Autre",
+    "saveError": "L’enregistrement du réglage de l’outil a échoué."
   }
 }

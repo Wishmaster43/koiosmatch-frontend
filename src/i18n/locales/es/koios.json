@@ -52,7 +52,8 @@
   },
   "tabs": {
     "overview": "Resumen",
-    "learning": "Informe de aprendizaje"
+    "learning": "Informe de aprendizaje",
+    "capabilities": "Matriz de herramientas"
   },
   "learning": {
     "loading": "Cargando informe…",
@@ -72,5 +73,20 @@
     "downPct": "{{pct}} de las respuestas recibieron un pulgar hacia abajo.",
     "suggestions": "Sugerencias",
     "noSuggestions": "No hay sugerencias para este periodo."
+  },
+  "capabilities": {
+    "title": "Matriz de herramientas",
+    "subtitle": "Qué herramientas puede usar Koios para tu organización.",
+    "loading": "Cargando matriz de herramientas…",
+    "loadError": "No se pudo cargar la matriz de herramientas.",
+    "empty": "Todavía no hay herramientas disponibles.",
+    "confirmRequired": "Confirmación requerida",
+    "disabledForMe": "Desactivado para ti",
+    "connectionNeeded": "Conexión necesaria",
+    "connectionSectionMissing": "Esta pantalla de conexión aún no está disponible.",
+    "resetToDefault": "Predeterminado",
+    "toggleAria": "Activar o desactivar {{label}}",
+    "otherGroup": "Otros",
+    "saveError": "No se pudo guardar el ajuste de la herramienta."
   }
 }

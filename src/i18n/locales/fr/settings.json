@@ -831,6 +831,9 @@
     "channels": {
       "label": "Notifier via",
       "desc": "Choisissez par canal si ces notifications arrivent : dans l’application, par e-mail ou les deux."
+    },
+    "popup": {
+      "label": "Popup"
     }
   },
   "escalation": {

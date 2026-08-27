@@ -52,7 +52,8 @@
   },
   "tabs": {
     "overview": "Übersicht",
-    "learning": "Lernbericht"
+    "learning": "Lernbericht",
+    "capabilities": "Tool-Matrix"
   },
   "learning": {
     "loading": "Bericht wird geladen…",
@@ -72,5 +73,20 @@
     "downPct": "{{pct}} der Antworten erhielten einen Daumen runter.",
     "suggestions": "Vorschläge",
     "noSuggestions": "Keine Vorschläge für diesen Zeitraum."
+  },
+  "capabilities": {
+    "title": "Tool-Matrix",
+    "subtitle": "Welche Tools Koios für Ihre Organisation nutzen darf.",
+    "loading": "Tool-Matrix wird geladen…",
+    "loadError": "Die Tool-Matrix konnte nicht geladen werden.",
+    "empty": "Es sind noch keine Tools verfügbar.",
+    "confirmRequired": "Bestätigung erforderlich",
+    "disabledForMe": "Für dich deaktiviert",
+    "connectionNeeded": "Verbindung erforderlich",
+    "connectionSectionMissing": "Dieser Verbindungsbildschirm ist noch nicht verfügbar.",
+    "resetToDefault": "Standard",
+    "toggleAria": "{{label}} ein- oder ausschalten",
+    "otherGroup": "Sonstiges",
+    "saveError": "Speichern der Tool-Einstellung fehlgeschlagen."
   }
 }

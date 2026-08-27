@@ -20,3 +20,14 @@ export const updateKoiosModel = (model) => api.put('/ai/koios/model', { model })
 // no AI call. { period, top_questions[], failure_reasons{}, tools_requested_but_denied{},
 // feedback{}, suggestions[] }.
 export const getKoiosLearning = (from, to) => api.get('/ai/koios/learning', { params: { from, to } }).then(unwrap)
+
+// KOIOS-CAPABILITIES-FE-1 (measured): the tenant tool matrix — surfaces/tools the
+// assistant can act through, plus limits and the active model flavour. No AI call.
+export const getKoiosCapabilities = () => api.get('/ai/koios/capabilities').then(unwrap)
+
+// KOIOS-TOOL-MATRIX-FE-1: enable/disable/reset one tool for the tenant. A `null`
+// value resets that tool to the platform default_enabled (never a client-side
+// guess of what that default is). The backend rejects an unknown/forbidden tool
+// name with 422 and returns fresh tools[] + default_enabled.
+export const updateKoiosCapabilityTool = (name, value) =>
+  api.patch('/ai/koios/capabilities/tools', { tools: { [name]: value } }).then(unwrap)

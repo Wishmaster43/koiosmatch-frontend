@@ -256,6 +256,23 @@
       "askKoios": "Terminar en el chat",
       "askIntent": "Ayúdame con esto: {{title}}",
       "execute": "Ejecutar"
+    },
+    "feedback": {
+      "up": "Útil",
+      "down": "No útil",
+      "thanks": "Gracias por tu opinión",
+      "reasonsLabel": "Motivo",
+      "commentPlaceholder": "Comentario (opcional)",
+      "send": "Enviar",
+      "error": "No se pudo enviar la opinión. Inténtalo de nuevo.",
+      "retry": "Reintentar",
+      "reasons": {
+        "inaccurate": "Inexacto",
+        "incomplete": "Incompleto",
+        "harmful": "Perjudicial",
+        "tone": "Tono",
+        "other": "Otro"
+      }
     }
   },
   "actionRules": {

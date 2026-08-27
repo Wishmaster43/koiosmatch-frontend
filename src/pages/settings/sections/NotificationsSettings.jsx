@@ -16,6 +16,7 @@ export default function NotificationsSettings({ context }) {
   const { t } = useTranslation('settings')
   const inAppKey = `notif_${context}_in_app`
   const emailKey = `notif_${context}_email`
+  const popupKey = `notif_${context}_popup`
   // NOTIF-PARITY-1: shared with MyNotificationsSettings so both screens agree on
   // which contexts have no working backend emitter yet (see lib/notificationContexts).
   const noEmitterYet = hasNoEmitterYet(context)
@@ -24,7 +25,11 @@ export default function NotificationsSettings({ context }) {
   // ON (absent = on, unchanged), e-mail is OPT-IN and defaults OFF (absent = off) — the FE
   // default mirrors the backend gate exactly so an unsaved screen never misrepresents the
   // live state before the first load resolves.
-  const defaults = useMemo(() => ({ [inAppKey]: true, [emailKey]: false }), [inAppKey, emailKey])
+  // Popup defaults ON like in-app (absent = on, same passthrough, NOTIF-POPUP-1).
+  const defaults = useMemo(
+    () => ({ [inAppKey]: true, [emailKey]: false, [popupKey]: true }),
+    [inAppKey, emailKey, popupKey],
+  )
   const form = useSettingsForm(defaults)
 
   // ONE block, TWO named toggles (Danny 13-08 "1 blok met 2 toggles"): the two
@@ -36,6 +41,7 @@ export default function NotificationsSettings({ context }) {
   const channels = [
     { key: inAppKey, label: t('notifications.inApp.label') },
     { key: emailKey, label: t('notifications.email.label') },
+    { key: popupKey, label: t('notifications.popup.label') },
   ]
 
   return (
@@ -45,7 +51,7 @@ export default function NotificationsSettings({ context }) {
       maxWidth={640} form={form}>
       <SettingRow label={t('notifications.channels.label')} description={t('notifications.channels.desc')}>
         {/* Honest gate (NOTIF-PARITY-1): a context with no real emitter never promises
-            delivery it cannot make, on either channel — a calm muted marker replaces
+            delivery it cannot make, on any of the three channels — a calm muted marker replaces
             the working-toggle look, and both switches are disabled-with-reason. */}
         {noEmitterYet && (
           <SoftChip label={t('notifications.inApp.notYetActive')} color="var(--text-muted)"

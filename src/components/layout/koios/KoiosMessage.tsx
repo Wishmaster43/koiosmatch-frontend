@@ -13,6 +13,7 @@ import KoiosSteps from './KoiosSteps'
 import KoiosUsage from './KoiosUsage'
 import KoiosPendingActionCard from './KoiosPendingActionCard'
 import KoiosResultCards from './KoiosResultCards'
+import KoiosFeedback from './KoiosFeedback'
 import type { KoiosResultRef } from './koiosTypes'
 import type { KoiosChatMessage, TFn } from '@/types/koios'
 import { GRADIENT, resolveMessage } from './koiosMessageParts'
@@ -61,6 +62,12 @@ export default function KoiosMessage({ msg, isNew, t, locale, modelOptions }: { 
         {isKoios && !notice && <KoiosSteps steps={msg.steps} t={t} />}
         {isKoios && !notice && msg.stopReason !== 'not_configured' && (
           <KoiosUsage usage={msg.usage} model={msg.model} t={t} locale={locale} options={modelOptions} />
+        )}
+        {/* KOIOS-FEEDBACK-FE-1: thumbs up/down, only when the backend logged this answer. */}
+        {isKoios && !notice && msg.prompt_log_id && (
+          <div style={{ marginTop: 4 }}>
+            <KoiosFeedback promptLogId={msg.prompt_log_id} surface="chat" t={t} />
+          </div>
         )}
       </div>
     </div>

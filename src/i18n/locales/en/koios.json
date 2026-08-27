@@ -52,7 +52,8 @@
   },
   "tabs": {
     "overview": "Overview",
-    "learning": "Learning report"
+    "learning": "Learning report",
+    "capabilities": "Tool matrix"
   },
   "learning": {
     "loading": "Loading report…",
@@ -72,5 +73,20 @@
     "downPct": "{{pct}} of responses received a thumbs down.",
     "suggestions": "Suggestions",
     "noSuggestions": "No suggestions for this period."
+  },
+  "capabilities": {
+    "title": "Tool matrix",
+    "subtitle": "Which tools Koios may use for your organisation.",
+    "loading": "Loading tool matrix…",
+    "loadError": "The tool matrix could not be loaded.",
+    "empty": "No tools are available yet.",
+    "confirmRequired": "Confirmation required",
+    "disabledForMe": "Off for you",
+    "connectionNeeded": "Connection needed",
+    "connectionSectionMissing": "This connection’s settings screen isn’t available yet.",
+    "resetToDefault": "Default",
+    "toggleAria": "Toggle {{label}} on or off",
+    "otherGroup": "Other",
+    "saveError": "Saving the tool setting failed."
   }
 }

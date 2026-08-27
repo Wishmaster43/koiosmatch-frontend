@@ -52,6 +52,9 @@ export function useKoiosChat() {
         // daily ("tomorrow") vs monthly ("next month") notice on budget_exceeded.
         budget: data?.budget ?? null,
         pendingAction: data?.pending_action ?? null,
+        // KOIOS-FEEDBACK-FE-1: the feedback thumbs key on this id — tolerant
+        // passthrough, absent on older backends and the thumbs simply stay hidden.
+        prompt_log_id: typeof data?.prompt_log_id === 'string' ? data.prompt_log_id : undefined,
       }])
     } catch (e) {
       // A known backend error code (credit exhausted, outage) gets its own translated

@@ -233,7 +233,8 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
     [wideRows, matchesFilters, refMode, funnelTypes]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Open an application drawer when arriving via a cross-entity link (intent).
-  useOpenFromIntent(intent, (id) => selectApplication({ id } as Application))
+  // The result-card/child-ref tab rides along — selectApplication already speaks tab.
+  useOpenFromIntent(intent, (id, tab) => selectApplication({ id } as Application, tab))
 
   // Mirror the open drawer in the URL (?open=<id>): browser back/forward walks
   // through it and a copied link reopens the same application (NAV-BACK-1;

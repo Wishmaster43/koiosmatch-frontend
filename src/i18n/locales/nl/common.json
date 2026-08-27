@@ -256,6 +256,23 @@
       "askKoios": "In de chat afmaken",
       "askIntent": "Help me hiermee: {{title}}",
       "execute": "Uitvoeren"
+    },
+    "feedback": {
+      "up": "Nuttig",
+      "down": "Niet nuttig",
+      "thanks": "Bedankt voor je feedback",
+      "reasonsLabel": "Reden",
+      "commentPlaceholder": "Toelichting (optioneel)",
+      "send": "Versturen",
+      "error": "Feedback versturen is niet gelukt. Probeer het opnieuw.",
+      "retry": "Opnieuw proberen",
+      "reasons": {
+        "inaccurate": "Onjuist",
+        "incomplete": "Onvolledig",
+        "harmful": "Schadelijk",
+        "tone": "Toon",
+        "other": "Anders"
+      }
     }
   },
   "actionRules": {

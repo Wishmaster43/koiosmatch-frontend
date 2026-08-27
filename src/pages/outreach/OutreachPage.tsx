@@ -20,6 +20,7 @@ import QuickViewToggle from '@/components/ui/QuickViewToggle'
 import ViewModeToggle from '@/components/ui/ViewModeToggle'
 import type { DonutSpec, KpiSpec } from '@/components/insights/InsightsRow'
 import { useDrawerUrl } from '@/hooks/useDrawerUrl'
+import { useOpenFromIntent } from '@/context/NavigationContext'
 import { usePageMemory } from '@/lib/usePageMemory'
 import { useListPageSize } from '@/hooks/useListPageSize'
 import { useOutreachCampaigns, OUTREACH_MAX_PER_PAGE } from './hooks/useOutreachCampaigns'
@@ -67,7 +68,7 @@ const tog = (set: Dispatch<SetStateAction<string[]>>) => (v: string) =>
 
 // Route page for the call-lists (bellijsten) entity: insights row, toolbar,
 // table/board view, bulk bar and the per-campaign drawer, wired to the trash flow.
-export default function OutreachPage() {
+export default function OutreachPage({ intent }: { intent?: unknown } = {}) {
   const { t } = useTranslation('outreach')
   const auth = useAuth()
   const hasPermission = (auth as unknown as { hasPermission?: (p: string) => boolean })?.hasPermission
@@ -115,8 +116,11 @@ export default function OutreachPage() {
   // Archived campaigns are fetched lazily (only while the archived toggle is on).
   // Mirror the open drawer in the URL (?open=<id>): browser back/forward walks
   // through it and a copied link reopens the same call list (NAV-BACK-1). This
-  // page has no cross-entity intent today, so there is nothing to pass for it.
-  useDrawerUrl({ selectedId: openId, openById: (id) => setOpenId(String(id)), close: () => setOpenId(null) })
+  // KOIOS-RESULT-CARDS-6: calllist result cards target a campaign by id — the
+  // cross-entity intent now opens the drawer directly (tab ignored: the outreach
+  // drawer has no addressable sub-tabs today).
+  useOpenFromIntent(intent, (id) => setOpenId(String(id)))
+  useDrawerUrl({ selectedId: openId, openById: (id) => setOpenId(String(id)), close: () => setOpenId(null), intent })
 
   // OUTREACH-TRASHED-1 fixed (W2 delivered, measured): the BE now takes
   // `?archived=1` as a true onlyTrashed filter (mirrors tasks), so the archived

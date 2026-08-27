@@ -831,6 +831,9 @@
     "channels": {
       "label": "Benachrichtigen über",
       "desc": "Wählen Sie pro Kanal, ob diese Benachrichtigungen ankommen: in der App, per E-Mail oder beides."
+    },
+    "popup": {
+      "label": "Pop-up"
     }
   },
   "escalation": {

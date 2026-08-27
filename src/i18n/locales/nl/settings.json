@@ -1077,6 +1077,9 @@
     "channels": {
       "label": "Melden via",
       "desc": "Kies per kanaal of deze meldingen aankomen: in de app, per e-mail of allebei."
+    },
+    "popup": {
+      "label": "Pop-up"
     }
   },
   "escalation": {

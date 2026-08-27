@@ -60,10 +60,13 @@ import { PageTitle } from '@/components/ui/typography'
 type ContextValue = boolean | null
 type ContextMap = Record<string, ContextValue>
 
-/** Load + optimistically persist the caller's own per-context overrides. */
+/** Load + optimistically persist the caller's own per-context overrides, both the
+ * in-app map (`contexts`) and the popup map (NOTIF-POPUP-1, a SEPARATE top-level
+ * key so a popup override never collides with the in-app one for the same context). */
 function useMyNotifications() {
   const { t } = useTranslation('settings')
   const [contexts, setContexts] = useState<ContextMap>({})
+  const [popup, setPopup] = useState<ContextMap>({})
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
 
@@ -73,8 +76,9 @@ function useMyNotifications() {
     api.get('/settings/my-notifications')
       .then(res => {
         if (!alive) return
-        const body = unwrap<{ contexts?: ContextMap }>(res)
+        const body = unwrap<{ contexts?: ContextMap; popup?: ContextMap }>(res)
         setContexts(body?.contexts ?? {})
+        setPopup(body?.popup ?? {})
       })
       .catch(() => { if (alive) setError(true) })
       .finally(() => { if (alive) setLoading(false) })
@@ -92,7 +96,18 @@ function useMyNotifications() {
     })
   }
 
-  return { contexts, loading, error, setContext }
+  // Persist ONE popup override optimistically (NOTIF-POPUP-1), mirroring setContext
+  // but writing the separate `popup` map the contract defines.
+  const setPopupContext = (context: string, value: ContextValue) => {
+    const prev = popup[context] ?? null
+    setPopup(c => ({ ...c, [context]: value }))
+    api.put('/settings/my-notifications', { popup: { [context]: value } }).catch(() => {
+      setPopup(c => ({ ...c, [context]: prev }))
+      notifyError(t('notifications.my.saveFailed'))
+    })
+  }
+
+  return { contexts, popup, loading, error, setContext, setPopupContext }
 }
 
 /** Load + toggle the browser-push subscription (P11-FASE5). Subscribing IS the
@@ -132,7 +147,8 @@ function useBrowserPush() {
 }
 
 // Tri-state UI value <-> API value mapping, shared by every row.
-const toUi = (v: ContextValue): string => (v === null ? 'inherit' : v ? 'on' : 'off')
+// Absent (undefined) and explicit null both mean INHERIT — only a real boolean is a per-user override.
+const toUi = (v: ContextValue | undefined): string => (v === true ? 'on' : v === false ? 'off' : 'inherit')
 const fromUi = (v: string): ContextValue => (v === 'inherit' ? null : v === 'on')
 
 // Small column caption above each channel control — reused for BOTH the working
@@ -156,7 +172,7 @@ function useSoundSetting() {
 // Per-user notification preferences: per-context in-app/email toggles, browser push subscription and the sound setting.
 export default function MyNotificationsSettings() {
   const { t } = useTranslation('settings')
-  const { contexts, loading, error, setContext } = useMyNotifications()
+  const { contexts, popup, loading, error, setContext, setPopupContext } = useMyNotifications()
   const push = useBrowserPush()
   const sound = useSoundSetting()
   const known = Object.keys(contexts)
@@ -217,9 +233,11 @@ export default function MyNotificationsSettings() {
             const noEmitterYet = hasNoEmitterYet(context)
             return (
               <SettingRow key={context} label={title} description={t(`notifications.context.${context}.desc`, '')}>
-                {/* Two columns, side by side: a real working in-app override next to
-                    the (currently honest, non-functional) e-mail marker — see the
-                    O-27 note at the top of this file for why e-mail isn't a control yet. */}
+                {/* Three columns, side by side: a real working in-app override, the
+                    (currently honest, non-functional) e-mail marker — see the O-27 note
+                    at the top of this file for why e-mail isn't a control yet — and a
+                    real working popup override (NOTIF-POPUP-1, same request shape as
+                    in-app, its own `popup` map). */}
                 <div style={{ display: 'flex', alignItems: 'flex-end', gap: 16 }}>
                   <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
                     <span style={captionStyle}>{t('notifications.inApp.label')}</span>
@@ -227,7 +245,8 @@ export default function MyNotificationsSettings() {
                       <SoftChip label={t('notifications.inApp.notYetActive')} color="var(--text-muted)"
                         title={t('notifications.inApp.notYetActiveReason')} />
                     ) : (
-                      <SegmentedControl size="compact" ariaLabel={title}
+                      <SegmentedControl size="compact"
+                        ariaLabel={`${title} ${t('notifications.inApp.label')}`}
                         value={toUi(contexts[context])}
                         onChange={next => setContext(context, fromUi(next))}
                         options={options} />
@@ -237,6 +256,19 @@ export default function MyNotificationsSettings() {
                     <span style={captionStyle}>{t('notifications.email.label')}</span>
                     <SoftChip label={t('notifications.my.emailNotAvailable')} color="var(--text-muted)"
                       title={t('notifications.my.emailNotAvailableReason')} />
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+                    <span style={captionStyle}>{t('notifications.popup.label')}</span>
+                    {noEmitterYet ? (
+                      <SoftChip label={t('notifications.inApp.notYetActive')} color="var(--text-muted)"
+                        title={t('notifications.inApp.notYetActiveReason')} />
+                    ) : (
+                      <SegmentedControl size="compact"
+                        ariaLabel={`${title} ${t('notifications.popup.label')}`}
+                        value={toUi(popup[context])}
+                        onChange={next => setPopupContext(context, fromUi(next))}
+                        options={options} />
+                    )}
                   </div>
                 </div>
               </SettingRow>
