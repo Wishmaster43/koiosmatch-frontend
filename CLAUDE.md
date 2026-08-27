@@ -253,7 +253,10 @@ surface, built from the same shared parts** — an `<Entity>Page` composing an
 > config-driven, click-to-filter); (b) the **"+ Add" button sits in the same place/style**;
 > (c) the **drawer header stays calm** — a colour-coded read-only phase/outcome **badge**
 > next to the title (not a wall of pickers), plus at most an owner picker; (d) **record
-> history is a changelog *icon* (popover) in the title-row, never a tab**; (e) controlled
+> history is a changelog *icon* (popover) in the title-row VOOR de snelle blik, én
+> sinds TIJDLIJN-OVERAL (Danny 27-08) óók een **Tijdlijn-tab op de voor-laatste
+> positie** (Statistieken blijft laatste) — de oude "nooit een tab"-regel is
+> daarmee vervangen**; (e) controlled
 > vocabularies are **multi-value tenant lookups shown as soft chips** (mirror *Contractvorm*
 > / `candidateTypes`); (f) an **"Extra" tab appears only when ≥1 tenant custom field is
 > active** (Settings-driven). If the candidate feature and an entity disagree, the candidate
@@ -789,8 +792,7 @@ the code is worse than no rule, because the next reader builds on it. What is tr
   1:1 (§3A). Verify before shipping:** (1) quick-view toggles via `QuickViewToggle`; (2) the
   shared `HeaderSearch` present; (3) `<Entity>InsightsRow` with the same donut/KPI footprint;
   (4) "+ Add" in the same place/style; (5) table via the shared `DataTable` with soft chips
-  (`StatusPill` / soft-chip); (6) drawer record-history is a **changelog icon-popover in the
-  title row, never a tab**; (7) drawer header stays calm (colour-coded badge, not pickers);
+  (`StatusPill` / soft-chip); (6) drawer record-history = the **changelog icon-popover in the title row** for the quick glance ÉN the **Tijdlijn tab second-to-last** (TIJDLIJN-OVERAL, Danny 27-08 — supersedes the earlier "never a tab" ruling; Statistics stays last); (7) drawer header stays calm (colour-coded badge, not pickers);
   (8) **the toolbar row under the InsightsRow uses the one spacing spec** — `padding: '0 24px
   12px'`, `minHeight: 36`, `gap: 10`, `alignItems: 'center'`, **no background/divider** — so the
   KPI-row→button gap is identical on every page (it had drifted: 0-vs-8px top, 10/12/8/0 bottom,
