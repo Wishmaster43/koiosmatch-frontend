@@ -27,4 +27,16 @@ describe('ErrorBanner', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Sluiten' }))
     expect(onDismiss).toHaveBeenCalledTimes(1)
   })
+
+  // The calm widget face (Danny 27-08: a full-width red band per dashboard card
+  // "kan zo niet"): still an alert with a working retry, but NO filled danger band.
+  it('subtle variant keeps alert semantics and retry but drops the filled band', () => {
+    const onRetry = vi.fn()
+    render(<ErrorBanner variant="subtle" onRetry={onRetry}>Oops</ErrorBanner>)
+    const alert = screen.getByRole('alert')
+    expect(alert.style.background).toBe('')
+    expect(alert.style.border).toBe('')
+    fireEvent.click(screen.getByRole('button', { name: 'Probeer opnieuw' }))
+    expect(onRetry).toHaveBeenCalledTimes(1)
+  })
 })

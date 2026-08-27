@@ -373,7 +373,7 @@ export default function KoiosForYouCard({ title, scope, scopeToggle = false, foo
       {/* Error — the report call failed (e.g. missing koios.use permission, or a
           transient network error); a calm banner with retry, never a blank card. */}
       {!isLoading && isError && (
-        <ErrorBanner onRetry={() => refetch()}>{t('koiosForYou.loadError')}</ErrorBanner>
+        <ErrorBanner variant="subtle" onRetry={() => refetch()}>{t('koiosForYou.loadError')}</ErrorBanner>
       )}
 
       {/* Empty — no Koios-triggered runs in the selected period. */}
