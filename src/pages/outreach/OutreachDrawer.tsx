@@ -64,7 +64,7 @@ interface UserLike { id?: Id; name?: string; firstname?: string; lastname?: stri
 const userName = (u: UserLike): string => u.name || [u.firstname, u.lastname].filter(Boolean).join(' ') || u.email || '—'
 
 // Thin container: wires useOutreachDetail's data into the shared drawer shell and owns the Stats-to-Targets click-to-filter state shared by the two tabs.
-export default function OutreachDrawer({ id, createdAt, archived = false, archivedAt = null, fallbackName, fallbackStatus, onRestore, inTrash = false, pendingEraseAt = null, graceDays = null, onMarkDeletion, onUnmark, onClose, expanded = false, onToggleExpand }: {
+export default function OutreachDrawer({ id, createdAt, archived = false, archivedAt = null, fallbackName, fallbackStatus, onRestore, inTrash = false, pendingEraseAt = null, graceDays = null, onMarkDeletion, onUnmark, onClose, expanded = false, onToggleExpand, onMutated }: {
   id: string | null
   createdAt?: string
   // Enkelstuks-sweep: soft-deleted row (flag from the page). W2 delivered (measured:
@@ -86,13 +86,16 @@ export default function OutreachDrawer({ id, createdAt, archived = false, archiv
   onMarkDeletion?: (id: string) => void
   onUnmark?: (id: string) => void
   onClose: () => void
+  // DRILL-REFRESH-AUDIT-1: reports every successful drawer mutation upstream —
+  // with an owner delta when the table shows it, else as a stale-list signal.
+  onMutated?: (delta?: { owner?: { id: string; name: string } | null }) => void
   expanded?: boolean
   onToggleExpand?: () => void
 }) {
   const { t } = useTranslation('outreach')
   const { formatDate, formatDateTime } = useDateFormat()
   // Always fetch: an archived campaign's detail now loads too (withTrashed show()).
-  const { detail, loading, error, setTargetStatus, setTargetOutcome, setTargetNote, applyTargetNote, assignTargets, setOwner, setCustomFields } = useOutreachDetail(id)
+  const { detail, loading, error, setTargetStatus, setTargetOutcome, setTargetNote, applyTargetNote, assignTargets, setOwner, setCustomFields } = useOutreachDetail(id, onMutated)
   const { data: users = [] } = useUsers() as { data?: UserLike[] }
   // The Extra tab only shows when the tenant has defined outreach-campaign custom fields (§3A(f)).
   const { fields: customFieldDefs } = useCustomFields('outreach_campaign')

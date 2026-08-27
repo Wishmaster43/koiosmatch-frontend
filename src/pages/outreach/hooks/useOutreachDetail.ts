@@ -38,7 +38,11 @@ export interface AssignResult { updated: string[]; skipped: string[] }
 export interface CampaignDetail extends Campaign { targets?: OutreachTarget[] }
 
 // Loads one campaign and its mutation setters.
-export function useOutreachDetail(id: string | null) {
+// onMutated (DRILL-REFRESH-AUDIT-1): every successful drawer mutation reports
+// upstream — with a row DELTA when the table shows the field directly (owner),
+// or without one as a "list is stale" signal (target status/outcome/notes/
+// assignments change server-computed counts the drawer cannot derive).
+export function useOutreachDetail(id: string | null, onMutated?: (delta?: { owner?: { id: string; name: string } | null }) => void) {
   const [detail,  setDetail]  = useState<CampaignDetail | null>(null)
   const [loading, setLoading] = useState(false)
   const [error,   setError]   = useState(false)
@@ -62,9 +66,9 @@ export function useOutreachDetail(id: string | null) {
       prev = d?.targets
       return d ? { ...d, targets: (d.targets ?? []).map(t => t.id === targetId ? { ...t, status } : t) } : d
     })
-    try { await updateTarget(targetId, { status }) }
+    try { await updateTarget(targetId, { status }); onMutated?.() }
     catch { setDetail(d => (d && prev ? { ...d, targets: prev } : d)) }
-  }, [])
+  }, [onMutated])
 
   // Record the call OUTCOME for one target (OUTREACH-2) — optimistic, revert on failure
   // (the PATCH 422s until the backend ships the `outcome` column; the UI stays honest).
@@ -74,9 +78,9 @@ export function useOutreachDetail(id: string | null) {
       prev = d?.targets
       return d ? { ...d, targets: (d.targets ?? []).map(t => t.id === targetId ? { ...t, outcome } : t) } : d
     })
-    try { await updateTarget(targetId, { outcome }) }
+    try { await updateTarget(targetId, { outcome }); onMutated?.() }
     catch { setDetail(d => (d && prev ? { ...d, targets: prev } : d)) }
-  }, [])
+  }, [onMutated])
 
   // Save a target's per-candidate note (G30, max:2000 plain string on the backend —
   // no rich-text storage, so no optimistic-revert is needed beyond the same pattern
@@ -87,9 +91,9 @@ export function useOutreachDetail(id: string | null) {
       prev = d?.targets
       return d ? { ...d, targets: (d.targets ?? []).map(t => t.id === targetId ? { ...t, note } : t) } : d
     })
-    try { await updateTarget(targetId, { note }) }
+    try { await updateTarget(targetId, { note }); onMutated?.() }
     catch (err) { setDetail(d => (d && prev ? { ...d, targets: prev } : d)); throw err }
-  }, [])
+  }, [onMutated])
 
   // BELLIJST-ASSIGN-2: assign the given selection (manual `ids` OR a `filters`
   // set that reaches beyond the loaded page, never both) to one person, team or
@@ -102,8 +106,9 @@ export function useOutreachDetail(id: string | null) {
     const res = await assignTargetsApi(id, { ...selection, ...assignee }) as
       { data?: CampaignDetail; meta?: AssignResult }
     if (res?.data) setDetail(res.data)
+    onMutated?.()
     return res?.meta ?? { updated: [], skipped: [] }
-  }, [id])
+  }, [id, onMutated])
 
   // BELLIJST-NOTE-POPOUT-1: adopt a note the POP-OUT WINDOW already persisted on
   // its own standalone PATCH (OutreachTargetNotePopout) — local state only, no
@@ -121,9 +126,9 @@ export function useOutreachDetail(id: string | null) {
       prev = d?.owner
       return d ? { ...d, owner } : d
     })
-    try { await updateCampaign(campaignId, { owner_id: owner?.id ?? null }) }
+    try { await updateCampaign(campaignId, { owner_id: owner?.id ?? null }); onMutated?.({ owner }) }
     catch { setDetail(d => (d ? { ...d, owner: prev ?? null } : d)) }
-  }, [])
+  }, [onMutated])
 
   // Save the Extra tab's tenant custom fields (§3B) — optimistic, merges the partial
   // patch into the full map so the backend persists it whole; reverts on failure.
@@ -134,9 +139,9 @@ export function useOutreachDetail(id: string | null) {
       prev = d?.custom_fields
       return d ? { ...d, custom_fields: merged } : d
     })
-    try { await updateCampaign(campaignId, { custom_fields: merged }) }
+    try { await updateCampaign(campaignId, { custom_fields: merged }); onMutated?.() }
     catch { setDetail(d => (d ? { ...d, custom_fields: prev } : d)) }
-  }, [detail])
+  }, [detail, onMutated])
 
   return { detail, loading, error, setTargetStatus, setTargetOutcome, setTargetNote, applyTargetNote, assignTargets, setOwner, setCustomFields }
 }

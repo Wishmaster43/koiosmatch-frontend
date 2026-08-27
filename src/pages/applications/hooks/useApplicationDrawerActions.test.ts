@@ -100,6 +100,28 @@ describe('useApplicationDrawerActions · handleReject', () => {
   })
 })
 
+// DRILL-REFRESH-AUDIT-1 verdict: Danny's F5 case was root-fixed 23-08
+// (REFRESH-FIX-2 / invalidateCandidate); the handler below ALREADY merged the
+// edit into both surfaces (since 25-07). This pin keeps that invariant from
+// regressing — an Opus round measured that a proposed extra "race guard" here
+// would itself pin stale names across reopens, so none exists by design.
+describe('useApplicationDrawerActions · handleCandidateUpdated (DRILL-REFRESH-AUDIT-1)', () => {
+  beforeEach(() => { vi.clearAllMocks() })
+
+  it('merges the new name into the open drawer detail immediately (no F5 needed)', async () => {
+    apiGet.mockResolvedValue({ data: { id: 1, candidate_id: 9, candidate: { name: 'Test kandidaat' } } })
+    const { result } = harness([app()])
+    act(() => { result.current.actions.selectApplication(app()) })
+    await waitFor(() => expect(result.current.actions.selected).not.toBeNull())
+    await waitFor(() => expect(result.current.actions.selected?.candidateId).toBe(9))
+    act(() => { result.current.actions.handleCandidateUpdated(9, { candidateName: 'Isa van der Groen', candidateFunction: 'Verpleegkundige' }) })
+    // Both surfaces update from the same handler — row AND the open drawer detail.
+    expect(result.current.applications[0].candidateName).toBe('Isa van der Groen')
+    expect(result.current.actions.selected?.candidateName).toBe('Isa van der Groen')
+  })
+
+})
+
 // V-appdetail-2: a move onto a requires_appointment phase for a row with no
 // appointment planned yet warns first (never blocks) — every other move stays
 // exactly as before, unintercepted.

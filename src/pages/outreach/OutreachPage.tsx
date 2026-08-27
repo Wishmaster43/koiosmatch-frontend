@@ -5,7 +5,7 @@
  * and an archived text-toggle + table/board view toggle on the RIGHT, a bulk bar
  * over the table, and a kanban board. The per-bellijst call-list detail is step 2.
  */
-import { useState, useEffect, useMemo, useCallback, type Dispatch, type SetStateAction } from 'react'
+import { useState, useEffect, useMemo, useCallback, type Dispatch, type SetStateAction , useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { LayoutList, Kanban, Archive, Plus, Trash2 } from 'lucide-react'
 import { notifyError, notifySuccess } from '@/lib/notify'
@@ -79,6 +79,8 @@ export default function OutreachPage() {
   // Mark-for-erasure stays delete-class (tenant-admin-seeded) — HIDDEN without it (§7).
   const canMarkDeletion = hasPermission?.('outreach.delete') ?? false
   const { campaigns, loading, error, reload, add, patch, drop } = useOutreachCampaigns()
+  // Marks the campaigns list stale while the drawer session mutates targets.
+  const drawerDirtyRef = useRef(false)
   const { registerFilters, unregisterFilters } = useRightPanel()
 
   const [view, setView] = useState<'table' | 'board'>('table')
@@ -379,7 +381,12 @@ export default function OutreachPage() {
             archived row feeds the drawer its banner + name/status fallbacks; W2
             delivered (measured: OutreachCampaignController::show is now withTrashed)
             so the drawer fetches the real detail instead of skipping the call. */}
-        <OutreachDrawer id={openId} createdAt={openRow?.created_at} onClose={() => setOpenId(null)}
+        <OutreachDrawer id={openId} createdAt={openRow?.created_at}
+          onClose={() => { setOpenId(null); if (drawerDirtyRef.current) { drawerDirtyRef.current = false; reload() } }}
+          // DRILL-REFRESH-AUDIT-1: an owner change patches the row instantly; every
+          // other drawer mutation marks the list stale — one reload on close, so a
+          // call session of 50 ticks never fires 50 list fetches.
+          onMutated={delta => { if (delta?.owner !== undefined && openId) patch(openId, { owner: delta.owner }); else drawerDirtyRef.current = true }}
           archived={Boolean(openRow?.archived)} archivedAt={openRow?.deleted_at ?? null}
           fallbackName={openRow?.name} fallbackStatus={openRow?.status}
           onRestore={canRestore ? restoreOne : undefined}

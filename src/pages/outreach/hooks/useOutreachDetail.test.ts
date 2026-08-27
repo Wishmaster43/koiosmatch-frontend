@@ -104,3 +104,28 @@ describe('useOutreachDetail · assignTargets (BELLIJST-ASSIGN-2)', () => {
     expect(summary).toEqual({ updated: [], skipped: ['t9'] })
   })
 })
+
+
+// DRILL-REFRESH-AUDIT-1: every successful mutation reports upstream — owner as
+// a row delta (table shows it), target changes as a stale-list signal.
+describe('useOutreachDetail · onMutated reporter', () => {
+  it('reports an owner delta after a successful owner PATCH', async () => {
+    vi.mocked(api.patch).mockResolvedValueOnce({ data: {} } as never)
+    const onMutated = vi.fn()
+    const { result } = renderHook(() => useOutreachDetail('camp-1', onMutated))
+    await act(async () => { await result.current.setOwner('camp-1', { id: 'u1', name: 'Sara' }) })
+    expect(onMutated).toHaveBeenCalledWith({ owner: { id: 'u1', name: 'Sara' } })
+  })
+
+  it('reports a bare stale signal after a target status PATCH, and nothing on failure', async () => {
+    vi.mocked(api.patch).mockResolvedValueOnce({ data: {} } as never)
+    const onMutated = vi.fn()
+    const { result } = renderHook(() => useOutreachDetail('camp-1', onMutated))
+    await act(async () => { await result.current.setTargetStatus('t1', 'done') })
+    expect(onMutated).toHaveBeenCalledWith()
+    onMutated.mockClear()
+    vi.mocked(api.patch).mockRejectedValueOnce(new Error('422'))
+    await act(async () => { await result.current.setTargetStatus('t2', 'done') })
+    expect(onMutated).not.toHaveBeenCalled()
+  })
+})
