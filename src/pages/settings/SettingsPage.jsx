@@ -139,6 +139,9 @@ export default function SettingsPage() {
 
   // Dirty-guard: migrated sections report through this; we confirm before leaving.
   const dirtyRef = useRef(false)
+  // SETTINGS-GUARD-HASH-1: guards a programmatic hash restore (below) against
+  // re-triggering the hashchange listener as if the user had navigated again.
+  const suppressHashRef = useRef(false)
   // Stable context value wrapping the dirty ref, so a section can report unsaved changes without forcing this component to re-render.
   const dirtyCtx = useMemo(() => ({ report: (d) => { dirtyRef.current = d } }), [])
   const { confirm, dialog } = useConfirm()
@@ -183,12 +186,31 @@ export default function SettingsPage() {
 
   // One effect owns two listeners: hash changes (back/forward, manual edit) resync the active tab, and Cmd/Ctrl+K opens the search palette.
   useEffect(() => {
-    // Re-parses the hash on navigation and switches tab with the dirty-guard skipped, since the URL has already changed.
+    // Re-parses the hash on navigation. The browser URL has ALREADY changed by the
+    // time this fires, so a dirty section can't simply be guarded the normal way
+    // (goTo's guard would leave the stale hash in place while showing the old tab).
+    // Instead: dirty → show the same confirm; confirm applies the new location,
+    // cancel restores the OLD hash (via the suppress-ref, so that restore itself
+    // does not re-enter this handler and loop).
     const onHashChange = () => {
+      if (suppressHashRef.current) { suppressHashRef.current = false; return }
       const loc = parseHash()
-      if (loc && findLocation(loc.category, loc.tab) && (loc.category !== category || loc.tab !== tab)) {
-        goTo(loc.category, loc.tab, { guard: false })
+      if (!loc || !findLocation(loc.category, loc.tab) || (loc.category === category && loc.tab === tab)) return
+      if (dirtyRef.current) {
+        // The browser has already written the NEW hash by the time this handler
+        // runs; restore the OLD one right away (suppressed, so it does not
+        // re-enter this handler) so the address bar matches the still-open tab
+        // while the user decides.
+        suppressHashRef.current = true
+        window.location.hash = `#settings/${category}/${tab}`
+        confirm(t('common.unsavedConfirm'), () => {
+          // The hash-sync effect below writes the new hash once category/tab
+          // change, so applyNav alone is enough to move the URL forward again.
+          applyNav(loc.category, loc.tab)
+        })
+        return
       }
+      goTo(loc.category, loc.tab, { guard: false })
     }
     // Opens the settings search palette on Cmd/Ctrl+K.
     const onKey = (e) => {

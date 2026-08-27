@@ -89,7 +89,8 @@
     "body": "Dieser Bereich konnte nicht geladen werden. Bitte erneut versuchen.",
     "retry": "Erneut versuchen",
     "reload": "Seite neu laden",
-    "details": "Technische Details"
+    "details": "Technische Details",
+    "loadFailed": "Laden fehlgeschlagen."
   },
   "status": {
     "active": "Aktiv",

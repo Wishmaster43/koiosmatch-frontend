@@ -89,7 +89,8 @@
     "body": "This section couldn’t be loaded. Please try again.",
     "retry": "Try again",
     "reload": "Reload page",
-    "details": "Technical details"
+    "details": "Technical details",
+    "loadFailed": "Failed to load."
   },
   "status": {
     "active": "Active",

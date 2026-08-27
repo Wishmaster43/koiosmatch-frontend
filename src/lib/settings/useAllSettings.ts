@@ -19,11 +19,18 @@ import { invalidateKpiCache } from '../useKpiSettings'
 
 type SettingsBlob = Record<string, unknown>
 
-// One slot per tenant: the cached blob, whether a fetch is already in flight, and
-// the set of subscribers to notify when that tenant's blob changes.
+// SETTINGS-LOAD-ERROR-1: load state per tenant, exposed via useSettingsLoadState()
+// so a consumer can tell "still loading" apart from "the GET actually failed" —
+// the plain useAllSettings() blob stays {} in both cases and can't distinguish them.
+type LoadState = 'loading' | 'loaded' | 'failed'
+
+// One slot per tenant: the cached blob, whether a fetch is already in flight, the
+// load state, and the set of subscribers to notify when that tenant's blob changes.
 const cacheByTenant = new Map<string, SettingsBlob>()
 const fetchStartedByTenant = new Set<string>()
 const listenersByTenant = new Map<string, Set<(v: SettingsBlob) => void>>()
+const loadStateByTenant = new Map<string, LoadState>()
+const loadStateListenersByTenant = new Map<string, Set<(s: LoadState) => void>>()
 
 // Reads localStorage fresh on every call (never memoized) so it always reflects
 // the CURRENT tenant, mirroring useCachedLookup's tenantCacheKey.
@@ -36,6 +43,38 @@ function listenersFor(tenantKey: string): Set<(v: SettingsBlob) => void> {
   return set
 }
 
+// Same lazy-set pattern for the load-state listeners.
+function loadStateListenersFor(tenantKey: string): Set<(s: LoadState) => void> {
+  let set = loadStateListenersByTenant.get(tenantKey)
+  if (!set) { set = new Set(); loadStateListenersByTenant.set(tenantKey, set) }
+  return set
+}
+
+// Sets a tenant's load state and notifies its load-state subscribers.
+function setLoadState(tenantKey: string, state: LoadState): void {
+  loadStateByTenant.set(tenantKey, state)
+  loadStateListenersFor(tenantKey).forEach(l => l(state))
+}
+
+// Shared fetch: the actual GET /settings, updating both the blob cache and the
+// load state, used by the initial load, useSettingsLoadState's retry, and any
+// future re-fetch path. Kept here so the two call sites can't drift.
+function fetchSettings(tenantKey: string): void {
+  fetchStartedByTenant.add(tenantKey)
+  setLoadState(tenantKey, 'loading')
+  api.get('/settings')
+    .then(res => {
+      const next = (res.data ?? {}) as SettingsBlob
+      cacheByTenant.set(tenantKey, next)
+      setLoadState(tenantKey, 'loaded')
+      listenersFor(tenantKey).forEach(l => l(next))
+    })
+    .catch(() => {
+      fetchStartedByTenant.delete(tenantKey)
+      setLoadState(tenantKey, 'failed')
+    })
+}
+
 export function useAllSettings(): SettingsBlob {
   // Initial state already reflects THIS tenant's cache, so no synchronous setState in the effect.
   const [values, setValues] = useState<SettingsBlob>(cacheByTenant.get(activeTenantKey()) ?? {})
@@ -46,16 +85,7 @@ export function useAllSettings(): SettingsBlob {
     const notify = (v: SettingsBlob) => setValues(v)
     const listeners = listenersFor(key)
     listeners.add(notify)
-    if (!fetchStartedByTenant.has(key)) {
-      fetchStartedByTenant.add(key)
-      api.get('/settings')
-        .then(res => {
-          const next = (res.data ?? {}) as SettingsBlob
-          cacheByTenant.set(key, next)
-          listenersFor(key).forEach(l => l(next))
-        })
-        .catch(() => { fetchStartedByTenant.delete(key) })
-    }
+    if (!fetchStartedByTenant.has(key)) fetchSettings(key)
     return () => { listeners.delete(notify) }
   }, [])
 
@@ -86,6 +116,41 @@ export function useSettingsLoaded(): boolean {
   return loaded
 }
 
+/**
+ * SETTINGS-LOAD-ERROR-1: the ACTIVE tenant's `/settings` load state —
+ * 'loading' | 'loaded' | 'failed' — distinct from useSettingsLoaded()'s plain
+ * boolean, so a gating consumer can render a real error state (with retry)
+ * instead of silently treating a failed GET as "still empty". `retry()` clears
+ * the tenant's fetch-started flag and re-issues the GET, notifying listeners
+ * on both this hook and useAllSettings()/useSettingsLoaded() when it resolves.
+ */
+export function useSettingsLoadState(): { state: LoadState; retry: () => void } {
+  const [state, setState] = useState<LoadState>(loadStateByTenant.get(activeTenantKey()) ?? 'loading')
+
+  // Subscribe to this tenant's load-state slot; an in-flight/failed/loaded state
+  // already recorded resolves synchronously above, this effect just keeps it live.
+  useEffect(() => {
+    const key = activeTenantKey()
+    const current = loadStateByTenant.get(key)
+    if (current) setState(current)
+    const notify = (s: LoadState) => setState(s)
+    const listeners = loadStateListenersFor(key)
+    listeners.add(notify)
+    if (!fetchStartedByTenant.has(key) && !current) fetchSettings(key)
+    return () => { listeners.delete(notify) }
+  }, [])
+
+  // Re-issues the GET for the active tenant, clearing the in-flight flag first
+  // so a stuck 'failed' state can actually retry (mirrors invalidateAllSettingsCache).
+  const retry = () => {
+    const key = activeTenantKey()
+    fetchStartedByTenant.delete(key)
+    fetchSettings(key)
+  }
+
+  return { state, retry }
+}
+
 /** Persist a partial set of keys (merge), update the ACTIVE tenant's cache slot and notify its subscribers. */
 export async function saveSettingsKeys(partial: Record<string, unknown>): Promise<void> {
   const stringified: Record<string, string> = {}
@@ -112,14 +177,7 @@ export function invalidateAllSettingsCache(): void {
   fetchStartedByTenant.delete(key)
   const listeners = listenersByTenant.get(key)
   if (!listeners || listeners.size === 0) return
-  fetchStartedByTenant.add(key)
-  api.get('/settings')
-    .then(res => {
-      const next = (res.data ?? {}) as SettingsBlob
-      cacheByTenant.set(key, next)
-      listeners.forEach(l => l(next))
-    })
-    .catch(() => { fetchStartedByTenant.delete(key) })
+  fetchSettings(key)
 }
 
 /**

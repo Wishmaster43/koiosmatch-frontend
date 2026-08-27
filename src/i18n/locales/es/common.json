@@ -89,7 +89,8 @@
     "body": "No se pudo cargar esta sección. Inténtalo de nuevo.",
     "retry": "Intentar de nuevo",
     "reload": "Recargar la página",
-    "details": "Detalles técnicos"
+    "details": "Detalles técnicos",
+    "loadFailed": "No se pudo cargar."
   },
   "status": {
     "active": "Activo",

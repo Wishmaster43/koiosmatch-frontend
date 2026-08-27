@@ -89,7 +89,8 @@
     "body": "Dit onderdeel kon niet worden geladen. Probeer het opnieuw.",
     "retry": "Probeer opnieuw",
     "reload": "Pagina herladen",
-    "details": "Technische details"
+    "details": "Technische details",
+    "loadFailed": "Kon niet laden."
   },
   "status": {
     "active": "Actief",

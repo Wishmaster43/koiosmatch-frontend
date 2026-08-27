@@ -51,7 +51,8 @@ import { useNavigation } from '@/context/NavigationContext'
 import { useDateFormat } from '@/lib/datetime'
 import { useEntityTasks } from '@/hooks/useEntityTasks'
 import type { EntityTask } from '@/hooks/useEntityTasks'
-import { useAllSettings, getBoolSetting } from '@/lib/settings/useAllSettings'
+import { useAllSettings, useSettingsLoadState, getBoolSetting } from '@/lib/settings/useAllSettings'
+import ErrorBanner from '@/components/ui/ErrorBanner'
 import type { Id } from '@/types/common'
 
 export interface EntityTasksLabels {
@@ -155,9 +156,21 @@ function EntityTasksTabBody({ linkType, id, labels, extraLinks = [] }: Props) {
   // always-coloured look unchanged until a tenant explicitly turns it off here.
   const settings = useAllSettings()
   const colorStatus = linkType === 'customer' ? getBoolSetting(settings, 'customer_task_table_color_status', true) : true
+  // SETTINGS-LOAD-ERROR-1: colorStatus reads the shared /settings blob (customer
+  // embedding only) — surface a retry banner if that particular load failed,
+  // rather than silently falling back to the always-coloured default forever.
+  const { t: tCommon } = useTranslation('common')
+  const { state: settingsLoadState, retry: retrySettingsLoad } = useSettingsLoadState()
 
   return (
     <div>
+      {/* SETTINGS-LOAD-ERROR-1: only the customer embedding actually gates on the
+          settings blob (colorStatus above) — surface the failure there only. */}
+      {linkType === 'customer' && settingsLoadState === 'failed' && (
+        <ErrorBanner variant="subtle" onRetry={retrySettingsLoad} style={{ marginBottom: 8 }}>
+          {tCommon('error.loadFailed')}
+        </ErrorBanner>
+      )}
       {/* Toolbar mirrors the Vacatures tab (Danny 03-08): search left, the filter
           button middle, add right. The search markup copies DepartmentsPanel's
           verbatim (§11 debt noted there). TASK-FILTER-MENU-1: status/type/priority

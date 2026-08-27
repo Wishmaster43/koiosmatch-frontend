@@ -72,3 +72,22 @@ describe('ViewConfigEditor', () => {
     })
   })
 })
+
+// Golf-1 verify: the failed-load banner PROMISES saving is disabled — pin that the
+// SaveButton really is, so a failed GET /settings can never be overwritten with
+// defaults. Drives the REAL hook (fresh tenant slot + rejected GET) — a
+// doMock/resetModules version poisoned sibling settings suites in the same worker.
+describe('ViewConfigEditor · failed settings load gates save', () => {
+  it('disables the save button and shows the retry banner while the load failed', async () => {
+    localStorage.setItem('active_tenant', `t-failed-${Date.now()}`)
+    vi.mocked(api.get).mockRejectedValueOnce(new Error('boom'))
+    try {
+      render(<ViewConfigEditor module="customers" />)
+      expect(await screen.findByRole('alert')).toBeInTheDocument()
+      const save = screen.getByRole('button', { name: st('common.save') })
+      expect(save).toBeDisabled()
+    } finally {
+      localStorage.removeItem('active_tenant')
+    }
+  })
+})

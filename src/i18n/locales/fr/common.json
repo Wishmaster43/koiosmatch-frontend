@@ -89,7 +89,8 @@
     "body": "Cette section n’a pas pu être chargée. Veuillez réessayer.",
     "retry": "Réessayer",
     "reload": "Recharger la page",
-    "details": "Détails techniques"
+    "details": "Détails techniques",
+    "loadFailed": "Échec du chargement."
   },
   "status": {
     "active": "Actif",

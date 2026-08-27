@@ -13,7 +13,7 @@ import { describe, it, expect, vi, afterEach } from 'vitest'
 import { renderHook, waitFor, act } from '@testing-library/react'
 import api, { getActiveTenantId } from '../api'
 import {
-  useAllSettings, useSettingsLoaded, saveSettingsKeys, invalidateAllSettingsCache,
+  useAllSettings, useSettingsLoaded, useSettingsLoadState, saveSettingsKeys, invalidateAllSettingsCache,
 } from './useAllSettings'
 
 // The default client (get/post) and getActiveTenantId are stubbed — the latter
@@ -142,5 +142,33 @@ describe('useSettingsLoaded · tenant scoping', () => {
     mockedTenantId.mockReturnValue('tenant-as-loaded-b')
     const loadedForB = renderHook(() => useSettingsLoaded())
     expect(loadedForB.result.current).toBe(false)
+  })
+})
+
+// SETTINGS-LOAD-ERROR-1: a failed GET /settings must be visible as a real 'failed'
+// state (not silently collapsed into "not loaded yet"), and retry() must clear the
+// stuck fetch-started flag and actually re-issue the GET.
+describe('useSettingsLoadState · load failure + retry', () => {
+  it('reflects a failed GET as state "failed", and retry() refetches and resolves "loaded"', async () => {
+    mockedTenantId.mockReturnValue('tenant-as-load-error')
+    mockedGet.mockRejectedValueOnce(new Error('network down'))
+
+    const { result } = renderHook(() => useSettingsLoadState())
+    await waitFor(() => expect(result.current.state).toBe('failed'))
+    expect(mockedGet).toHaveBeenCalledTimes(1)
+
+    mockedGet.mockResolvedValueOnce({ data: { foo: 'recovered' } })
+    act(() => { result.current.retry() })
+
+    await waitFor(() => expect(result.current.state).toBe('loaded'))
+    expect(mockedGet).toHaveBeenCalledTimes(2)
+  })
+
+  it('a successful load reports state "loaded", never "failed"', async () => {
+    mockedTenantId.mockReturnValue('tenant-as-load-ok')
+    mockedGet.mockResolvedValue({ data: { foo: 'ok' } })
+
+    const { result } = renderHook(() => useSettingsLoadState())
+    await waitFor(() => expect(result.current.state).toBe('loaded'))
   })
 })

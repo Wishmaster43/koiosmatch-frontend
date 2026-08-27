@@ -8,12 +8,13 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { GripVertical, ArrowUp, ArrowDown, Check, Save } from 'lucide-react'
 import { MODULES } from '@/lib/settings/moduleRegistry'
-import { useAllSettings, getJsonSetting, saveSettingsKeys } from '@/lib/settings/useAllSettings'
+import { useAllSettings, useSettingsLoadState, getJsonSetting, saveSettingsKeys } from '@/lib/settings/useAllSettings'
 import { viewConfigKey } from '@/lib/settings/useModuleView'
 import Spinner from '@/components/ui/Spinner'
 import SaveButton from '@/components/ui/SaveButton'
 import Button from '@/components/ui/Button'
 import Toggle from '@/components/ui/Toggle'
+import ErrorBanner from '@/components/ui/ErrorBanner'
 import { PageTitle } from '@/components/ui/typography'
 
 interface Row { id: string; enabled: boolean }
@@ -39,6 +40,9 @@ function buildRows(moduleId: string, values: SettingsBlob): Row[] {
 export default function ViewConfigEditor({ module }: { module: string }) {
   const { t } = useTranslation('settings')
   const values = useAllSettings()
+  // SETTINGS-LOAD-ERROR-1: this editor is gated on the shared /settings blob —
+  // surface a real retry banner instead of silently rendering an all-default view.
+  const { state: loadState, retry: retryLoad } = useSettingsLoadState()
   const mod = MODULES[module]
   const [rows, setRows] = useState<Row[]>(() => buildRows(module, values))
   const [saved, setSaved] = useState(false)
@@ -75,6 +79,13 @@ export default function ViewConfigEditor({ module }: { module: string }) {
 
   return (
     <div style={{ maxWidth: 640 }}>
+      {/* SETTINGS-LOAD-ERROR-1: the load failed — an offline-looking blank editor
+          is worse than an honest banner with a retry. */}
+      {loadState === 'failed' && (
+        <ErrorBanner variant="subtle" onRetry={retryLoad} style={{ marginBottom: 12 }}>
+          {t('common.loadError')}
+        </ErrorBanner>
+      )}
       <div className="flex items-center justify-between mb-5">
         <div>
           {/* Module + block names are i18n keys in the registry (§5). No toLowerCase()
@@ -86,7 +97,7 @@ export default function ViewConfigEditor({ module }: { module: string }) {
           </p>
         </div>
         {/* SaveButton — the ONE saved-state save action (§4 success token pair). */}
-        <SaveButton saved={saved} onClick={save} disabled={saving} aria-label={t('common.save')}>
+        <SaveButton saved={saved} onClick={save} disabled={saving || loadState === 'failed'} aria-label={t('common.save')}>
           {saved ? <><Check size={13} /> {t('common.saved')}</> : saving ? <><Spinner size={13} /> {t('common.saving')}</> : <><Save size={13} /> {t('common.save')}</>}
         </SaveButton>
       </div>
