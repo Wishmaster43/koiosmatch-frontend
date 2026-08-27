@@ -26,6 +26,11 @@ async function openMatchesTab() {
   await user.click(screen.getByRole('tab', { name: st('reportKpis.reportNames.matches') }))
 }
 
+async function openVacanciesTab() {
+  const user = userEvent.setup()
+  await user.click(screen.getByRole('tab', { name: st('reportKpis.reportNames.vacancies') }))
+}
+
 // Prospects is the "still no spares" control case (see file-top note).
 async function openProspectsTab() {
   const user = userEvent.setup()
@@ -57,7 +62,7 @@ describe('ReportKpiSettings', () => {
     render(<ReportKpiSettings />)
     await openMatchesTab()
     const defaultOrder = getReportKpiDefaultOrder('matches')
-    expect(screen.getAllByText(t('matches.total')).length).toBeGreaterThan(0)
+    expect(screen.getAllByText(t('matches.kpi.total')).length).toBeGreaterThan(0)
     expect(defaultOrder).toHaveLength(9)
     expect(defaultOrder[0]).toBe('total')
   })
@@ -68,20 +73,26 @@ describe('ReportKpiSettings', () => {
     expect(screen.getByText(st('reportKpis.noSpareAxes'))).toBeTruthy()
   })
 
-  it('offers real spare cards for matches now that the catalogue grew beyond its nine defaults (REPORTS-KPI-SPARE-1)', async () => {
+  // KPI-MATCHES-1 supersede: the four ad-hoc spares retired with the server-suite
+  // flip — matches now shows the honest no-spares notice, and every suite entry
+  // carries a real i18n label. The spare-offering path stays covered by vacancies.
+  it('shows the honest no-spares notice for matches after the server-suite flip', async () => {
     render(<ReportKpiSettings />)
     await openMatchesTab()
-    expect(screen.queryByText(st('reportKpis.noSpareCards'))).toBeNull()
+    expect(screen.getByText(st('reportKpis.noSpareCards'))).toBeTruthy()
     const catalog = getReportKpiCatalog('matches')
-    const defaultOrder = getReportKpiDefaultOrder('matches')
-    expect(catalog.length).toBeGreaterThan(defaultOrder.length)
-    // The four spare keys are real catalogue entries with real i18n labels
-    // (not raw keys falling back to themselves).
-    for (const key of ['noContract', 'topContractForm', 'topTerminationReason', 'funnelRate']) {
-      const entry = catalog.find(c => c.key === key)
-      expect(entry).toBeDefined()
-      expect(i18n.t(entry!.labelKey, { ns: 'analytics' })).not.toBe(entry!.labelKey)
+    expect(catalog).toHaveLength(9)
+    for (const entry of catalog) {
+      expect(i18n.t(entry.labelKey, { ns: 'analytics' })).not.toBe(entry.labelKey)
     }
+  })
+  it('offers real spare cards for vacancies (REPORTS-KPI-SPARE-1 path stays covered)', async () => {
+    render(<ReportKpiSettings />)
+    await openVacanciesTab()
+    expect(screen.queryByText(st('reportKpis.noSpareCards'))).toBeNull()
+    const catalog = getReportKpiCatalog('vacancies')
+    const defaultOrder = getReportKpiDefaultOrder('vacancies')
+    expect(catalog.length).toBeGreaterThan(defaultOrder.length)
   })
 
   it('reordering PUTs the exact settings key with the same nine keys in the new order', async () => {
@@ -90,7 +101,7 @@ describe('ReportKpiSettings', () => {
     const rows = container.querySelectorAll('[draggable="true"]')
     expect(rows).toHaveLength(9)
 
-    // Drag row 0 ("total") onto row 1 ("funnel") — swaps their positions.
+    // Drag row 0 ("total") onto row 1 ("new_in_period") — swaps their positions.
     fireEvent.dragStart(rows[0])
     fireEvent.dragOver(rows[1])
     fireEvent.drop(rows[1])
@@ -99,7 +110,7 @@ describe('ReportKpiSettings', () => {
     const body = saveSettingsKeys.mock.calls.at(-1)?.[0] as Record<string, string[]>
     const key = reportKpiSettingsKey('matches')
     expect(body[key]).toHaveLength(9)
-    expect(body[key][0]).toBe('funnel')
+    expect(body[key][0]).toBe('new_in_period')
     expect(body[key][1]).toBe('total')
     expect(new Set(body[key]).size).toBe(9) // still every card exactly once
   })

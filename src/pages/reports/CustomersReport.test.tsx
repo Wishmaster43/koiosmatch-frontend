@@ -51,6 +51,20 @@ const data: CustomersReportData = {
   by_industry: [{ value: 'healthcare', label: 'Zorg', color: null, count: 13 }],
   by_owner:   [{ owner_id: 'u1', name: 'Anna de Vries', count: 9 }, { owner_id: 'none', name: 'Niet toegewezen', count: 4 }],
   by_branch:  [{ value: 'utrecht', label: 'Utrecht', color: null, count: 13 }],
+  // KPI-CUSTOMERS-SIGNALS-1: the nine STANDING signal counts the Klanten strip
+  // now reads verbatim — distinct values so a KPI-card assertion can never
+  // accidentally match a different card's number.
+  kpis: [
+    { key: 'contract_ending', label: 'Overeenkomst loopt af', count: 7 },
+    { key: 'no_contact', label: 'Lang geen contact', count: 2 },
+    { key: 'task_overdue', label: 'Taak te laat', count: 11 },
+    { key: 'price_agreement_ending', label: 'Prijsafspraak loopt af', count: 5 },
+    { key: 'vacancy_stale', label: 'Vacature verouderd', count: 14 },
+    { key: 'departments_without_placement', label: 'Afdelingen zonder plaatsing', count: 3 },
+    { key: 'customers_without_vacancies', label: 'Klanten zonder vacatures', count: 6 },
+    { key: 'customers_without_applications', label: 'Klanten zonder sollicitaties', count: 15 },
+    { key: 'matches_stopped_early', label: 'Vroegtijdig gestopte matches', count: 12 },
+  ],
 }
 
 function renderReport() {
@@ -129,7 +143,7 @@ describe('CustomersReport (RAPPORTEN-SUITE-1 portie 3, customers inflow report)'
   it('renders the data window prominently as DD-MM-YYYY', () => {
     mockUseCustomersReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
-    expect(screen.getByText('Instroom 01-08-2026 t/m 31-08-2026')).toBeInTheDocument()
+    expect(screen.getByText(/Instroom 01-08-2026 t\/m 31-08-2026: \d+ nieuwe klanten/)).toBeInTheDocument()
     expect(screen.queryByText(/2026-08-01/)).not.toBeInTheDocument()
   })
 
@@ -221,48 +235,63 @@ describe('CustomersReport (RAPPORTEN-SUITE-1 portie 3, customers inflow report)'
       expect.objectContaining({ params: { status: 'zzz-deleted-status', period: 'month' } }))
   })
 
-  // Nine-card KPI strip: total + eight axis-derived cards, all real counts from
-  // the fixture's own axes.
-  it('renders nine KPI cards derived from the report axes', () => {
+  // KPI-CUSTOMERS-SIGNALS-1 (supersedes the old axis-topsegment strip pin,
+  // "renders nine KPI cards derived from the report axes"): Klanten's nine
+  // cards ARE the report's own STANDING signal kpis[] suite, read verbatim —
+  // no separate pinned "total" card any more (ReportKpiBand renders exactly
+  // nine, mirrors OutreachReport/TasksReport's kpiByServerKey pin); the
+  // windowed inflow total still renders in the prominent window line below.
+  it('renders the nine standing signal KPI cards on Klanten', () => {
     mockUseCustomersReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
-    expect(screen.getByText('Totaal instroom')).toBeInTheDocument()
-    expect(screen.getByText('Status: Actief')).toBeInTheDocument()
-    expect(screen.getByText('Branche: Zorg')).toBeInTheDocument()
-    expect(screen.getByText('Eigenaar: Anna de Vries')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('customers.kpis.contractEnding', { ns: 'analytics' }))).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('customers.kpis.matchesStoppedEarly', { ns: 'analytics' }))).toBeInTheDocument()
+    expect(screen.getByText('7')).toBeInTheDocument()
+    expect(screen.getByText('12')).toBeInTheDocument()
+    // The five dropped axis-topsegment cards no longer render on Klanten (the
+    // axes' own charts below still do — asserted separately below).
+    expect(screen.queryByText('Status: Actief')).not.toBeInTheDocument()
+    expect(screen.queryByText('Eigenaar: Anna de Vries')).not.toBeInTheDocument()
   })
 
-  // RAPPORT-KPI-INSTELBAAR: which axes drive cards 2-9, and in what priority
-  // order, is the tenant's stored Settings → Reports choice, not the hardcoded
-  // status→phase→industry→owner→branch order.
-  it('reorders the axis-derived KPI cards to the tenant-stored axis priority', () => {
-    mockSettings.mockReturnValue({ report_kpis_customers: JSON.stringify(['branch', 'owner', 'industry', 'phase', 'status']) })
+  // RAPPORT-KPI-INSTELBAAR: which signal keys drive cards 2-9, and in what
+  // priority order, is the tenant's stored Settings → Reports choice.
+  it('reorders the signal KPI cards to the tenant-stored priority', () => {
+    mockSettings.mockReturnValue({ report_kpis_customers: JSON.stringify([
+      'matches_stopped_early', 'contract_ending', 'no_contact', 'task_overdue',
+      'price_agreement_ending', 'vacancy_stale', 'departments_without_placement',
+      'customers_without_vacancies', 'customers_without_applications',
+    ]) })
     mockUseCustomersReport.mockReturnValue({ data, loading: false, error: false })
     const { container } = renderReport()
     const text = container.textContent ?? ''
-    // "Vestiging" (branch) now leads the axis priority, so its card text appears
-    // before "Status" — the reverse of the hardcoded default order.
-    expect(text.indexOf('Vestiging:')).toBeGreaterThanOrEqual(0)
-    expect(text.indexOf('Vestiging:')).toBeLessThan(text.indexOf('Status:'))
+    const matchesStopped = i18n.t('customers.kpis.matchesStoppedEarly', { ns: 'analytics' })
+    const contractEnding = i18n.t('customers.kpis.contractEnding', { ns: 'analytics' })
+    expect(text.indexOf(matchesStopped)).toBeGreaterThanOrEqual(0)
+    expect(text.indexOf(matchesStopped)).toBeLessThan(text.indexOf(contractEnding))
   })
 
-  // A vanished stored axis key falls back to the default order silently on the
-  // report (still nine real cards, never a crash) but shows a visible notice.
-  it('falls back a vanished stored axis key to the default and shows a notice', () => {
-    mockSettings.mockReturnValue({ report_kpis_customers: JSON.stringify(['ghost_axis', 'phase', 'industry', 'owner', 'branch']) })
+  // A vanished stored signal key falls back to the default order silently on
+  // the report (still the real nine cards, never a crash) but shows a notice.
+  it('falls back a vanished stored signal key to the default and shows a notice', () => {
+    mockSettings.mockReturnValue({ report_kpis_customers: JSON.stringify(['ghost_signal', 'contract_ending']) })
     mockUseCustomersReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
-    expect(screen.getByText('Status: Actief')).toBeInTheDocument() // backfilled from the default order
+    expect(screen.getByText(i18n.t('customers.kpis.contractEnding', { ns: 'analytics' }))).toBeInTheDocument()
     expect(screen.getByText(i18n.t('customers.kpiOrderFellBack', { ns: 'analytics' }))).toBeInTheDocument()
   })
 
-  it('clicking an axis-derived KPI card drills with the same XOR param as its bar', async () => {
-    const user = userEvent.setup()
-    mockUseCustomersReport.mockReturnValue({ data, loading: false, error: false })
+  // A signal key the server omitted from its kpis[] response renders the house
+  // dash with no clickable affordance — mirrors OutreachReport/TasksReport's
+  // "missing key renders the house dash with no drill" contract.
+  it('a signal card the server omitted renders the house dash with no onClick', () => {
+    mockUseCustomersReport.mockReturnValue({
+      data: { ...data, kpis: [{ key: 'contract_ending', label: 'Overeenkomst loopt af', count: 7 }] },
+      loading: false, error: false,
+    })
     renderReport()
-    await user.click(screen.getByText('Status: Actief'))
-    expect(getSpy).toHaveBeenCalledWith('/reports/customers/drill',
-      expect.objectContaining({ params: { status: 'active', period: 'month' } }))
+    const label = screen.getByText(i18n.t('customers.kpis.noContact', { ns: 'analytics' }))
+    expect(label.closest('div[role="button"]')).toBeNull()
   })
 
   it('clicking a week timeseries bar drills with date + bucket=week', async () => {
@@ -313,41 +342,23 @@ describe('CustomersReport (RAPPORTEN-SUITE-1 portie 3, customers inflow report)'
       expect.objectContaining({ params: expect.objectContaining({ industry: expect.anything() }) }))
   })
 
-  // REPORTS-KPI-SPARE-2: a tenant swapping a slot to one of the nine standing
-  // `kpis[]` signal spares sees the endpoint's REAL count, not a fabricated
-  // number — the strip never invents this value.
-  it('renders a real "kpis[]" signal spare when the tenant swaps it into a slot', () => {
-    mockSettings.mockReturnValue({
-      report_kpis_customers: JSON.stringify(['signal:contract_ending', 'status', 'phase', 'industry', 'owner', 'branch']),
-    })
-    mockUseCustomersReport.mockReturnValue({
-      data: {
-        ...data,
-        kpis: [
-          { key: 'contract_ending', label: 'Overeenkomst loopt af', count: 7 },
-          { key: 'no_contact', label: 'Lang geen contact', count: 2 },
-        ],
-      },
-      loading: false, error: false,
-    })
+  // KPI-CUSTOMERS-SIGNALS-1 (supersedes the old "signal spare" pins): the
+  // signal cards show the endpoint's REAL count, never a fabricated number —
+  // this is now true by default on Klanten (no settings override needed, the
+  // nine signals ARE the default catalog).
+  it('shows the real server count for each signal card, never a fabricated number', () => {
+    mockUseCustomersReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
     expect(screen.getByText(i18n.t('customers.kpis.contractEnding', { ns: 'analytics' }))).toBeInTheDocument()
     expect(screen.getByText('7')).toBeInTheDocument()
-    // The unpicked signal (no_contact) never leaks in — only the swapped-in one renders.
-    expect(screen.queryByText(i18n.t('customers.kpis.noContact', { ns: 'analytics' }))).not.toBeInTheDocument()
   })
 
-  // KPIS-DRILL-1: a signal card whose key is one of the nine kpi-drill enum
-  // values now drills via the dedicated endpoint, not the plain drill route.
+  // KPIS-DRILL-1: a signal card drills via the dedicated kpi-drill endpoint,
+  // not the plain drill route — no settings override needed, the nine signals
+  // ARE the default Klanten catalog.
   it('clicking the contract_ending signal card drills via /reports/customers/kpi-drill with kpi=contract_ending', async () => {
     const user = userEvent.setup()
-    mockSettings.mockReturnValue({
-      report_kpis_customers: JSON.stringify(['signal:contract_ending', 'status', 'phase', 'industry', 'owner', 'branch']),
-    })
-    mockUseCustomersReport.mockReturnValue({
-      data: { ...data, kpis: [{ key: 'contract_ending', label: 'Overeenkomst loopt af', count: 7 }] },
-      loading: false, error: false,
-    })
+    mockUseCustomersReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
     await user.click(screen.getByText(i18n.t('customers.kpis.contractEnding', { ns: 'analytics' })))
     // Contract: the kpi-drill endpoint accepts ONLY `kpi` (standing signal, no
@@ -355,96 +366,6 @@ describe('CustomersReport (RAPPORTEN-SUITE-1 portie 3, customers inflow report)'
     expect(getSpy).toHaveBeenCalledWith('/reports/customers/kpi-drill',
       expect.objectContaining({ params: { kpi: 'contract_ending' } }))
     expect(getSpy.mock.calls.some(c => c[0] === '/reports/customers/drill')).toBe(false)
-  })
-
-  // Negative pin: a signal key outside both the kpi-drill and kpi-signal-drill
-  // enums (e.g. a future backend key CUSTOMERS_SIGNAL_LABEL_KEYS doesn't yet
-  // list) stays display-only — no clickable affordance, no drill call. The real
-  // catalogue today has no such entry (its nine signal spares ARE the kpi-drill
-  // enum 1:1), so this pins the code path with one extra catalogue entry mocked
-  // in — proves the strip-back-onClick logic, not just today's data shape.
-  it('a signal card whose key is outside both enums renders without an onClick', async () => {
-    vi.resetModules()
-    // resetModules() drops hoisted vi.mock registrations for the fresh import
-    // graph — re-declare the ones CustomersReport needs via vi.doMock so the
-    // dynamically re-imported page still runs against controlled test doubles.
-    vi.doMock('./useCustomersReport', () => ({ useCustomersReport: (...args: unknown[]) => mockUseCustomersReport(...args) }))
-    vi.doMock('@/lib/useCustomerPhases', () => ({
-      useCustomerPhases: () => ({ phases: [
-        { value: 'lead', label: 'Lead', isCustomer: false, isDefault: true },
-        { value: 'customer', label: 'Klant', isCustomer: true, isDefault: false },
-      ] }),
-    }))
-    vi.doMock('@/lib/api', () => ({
-      default: { get: (...args: unknown[]) => getSpy(...args) },
-      unwrapList: (r: { data: { data?: unknown[]; meta?: { total?: number } } }) => ({ rows: r.data?.data ?? [], total: r.data?.meta?.total ?? 0 }),
-      getActiveTenantId: () => 'test-tenant',
-    }))
-    vi.doMock('@/lib/settings/useAllSettings', async () => {
-      const actual = await vi.importActual('@/lib/settings/useAllSettings')
-      return { ...actual, useAllSettings: () => mockSettings() }
-    })
-    vi.doMock('./kpiCatalog', async () => {
-      const actual = await vi.importActual<typeof import('./kpiCatalog')>('./kpiCatalog')
-      const customersCatalog = [...actual.getReportKpiCatalog('customers'), { key: 'signal:some_future_signal', labelKey: 'customers.kpis.someFutureSignal' }]
-      return {
-        ...actual,
-        getReportKpiCatalog: (scope: string) => scope === 'customers' ? customersCatalog : actual.getReportKpiCatalog(scope as never),
-      }
-    })
-    // try/finally: an assertion throw must never leave the five doMock
-    // registrations armed for later tests — resetModules() clears them all.
-    try {
-    const { default: CustomersReportFresh } = await import('./CustomersReport')
-    const user = userEvent.setup()
-    mockSettings.mockReturnValue({
-      report_kpis_customers: JSON.stringify(['signal:some_future_signal', 'status', 'phase', 'industry', 'owner', 'branch']),
-    })
-    mockUseCustomersReport.mockReturnValue({
-      data: { ...data, kpis: [{ key: 'some_future_signal', label: 'Toekomstig signaal', count: 4 }] },
-      loading: false, error: false,
-    })
-    render(
-      <QueryClientProvider client={new QueryClient()}>
-        <CustomersReportFresh period="month" />
-      </QueryClientProvider>,
-    )
-    // No `customers.kpis.some_future_signal` translation key exists in any
-    // locale (test-only catalogue entry, never shipped) — i18next renders the
-    // raw dotted key, which is good enough to locate the card.
-    const label = screen.getByText('customers.kpis.some_future_signal')
-    const card = label.closest('div[role="button"]')
-    expect(card).toBeNull()
-    await user.click(label)
-    expect(getSpy.mock.calls.some(c => c[0] === '/reports/customers/kpi-drill')).toBe(false)
-    expect(getSpy.mock.calls.some(c => c[0] === '/reports/customers/drill')).toBe(false)
-    } finally {
-      vi.doUnmock('./kpiCatalog')
-      vi.resetModules()
-    }
-  })
-
-  // The catalog knowingly excludes these signal spares from Prospects (they
-  // describe an existing client relationship a lead can't have) — swapping one
-  // into a Prospects slot must not silently render there.
-  it('never offers a customers-only signal spare on the Prospects position', () => {
-    mockSettings.mockReturnValue({
-      report_kpis_prospects: JSON.stringify(['signal:contract_ending', 'phase', 'industry', 'owner', 'branch']),
-    })
-    mockUseCustomersReport.mockReturnValue({
-      data: { ...data, kpis: [{ key: 'contract_ending', label: 'Overeenkomst loopt af', count: 7 }] },
-      loading: false, error: false,
-    })
-    render(
-      <QueryClientProvider client={new QueryClient()}>
-        <CustomersReport period="month" initialView="prospects" />
-      </QueryClientProvider>,
-    )
-    // 'signal:contract_ending' is not in the prospects catalogue, so
-    // resolveReportKpiOrder drops it and backfills from the default order —
-    // Status (the real default) renders in its place, never the signal card.
-    expect(screen.queryByText(i18n.t('customers.kpis.contractEnding', { ns: 'analytics' }))).not.toBeInTheDocument()
-    expect(screen.getByText('Status: Actief')).toBeInTheDocument()
   })
 })
 
@@ -474,6 +395,23 @@ describe('CustomersReport — Klanten/Prospects switch (RAPPORTEN-CONSOLIDATIE-1
     expect(screen.getByText('Totaal prospects')).toBeInTheDocument()
     expect(screen.getByText('Status: Actief')).toBeInTheDocument()
     expect(screen.getByText('Branche: Zorg')).toBeInTheDocument()
+  })
+
+  // Supersede-guard: the Klanten flip retired the axis cards THERE, but the
+  // Prospects position keeps them — so the axis-card → /reports/customers/drill
+  // REQUEST stays pinned here (it was previously pinned on Klanten).
+  it('clicking a Prospects axis card drills the axis XOR param on /reports/customers/drill', async () => {
+    const user = userEvent.setup()
+    mockUseCustomersReport.mockReturnValue({ data, loading: false, error: false })
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <CustomersReport period="month" initialView="prospects" />
+      </QueryClientProvider>,
+    )
+    getSpy.mockClear()
+    await user.click(screen.getByText('Status: Actief'))
+    expect(getSpy).toHaveBeenCalledWith('/reports/customers/drill',
+      expect.objectContaining({ params: expect.objectContaining({ status: 'active', phase: 'lead' }) }))
   })
 
   it('a drill list opened on the Prospects position carries the `phase` filter — bar, list and switch position never disagree', async () => {
@@ -506,5 +444,40 @@ describe('CustomersReport — Klanten/Prospects switch (RAPPORTEN-CONSOLIDATIE-1
     mockUseCustomersReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
     expect(screen.queryByText('Vergelijk met')).not.toBeInTheDocument()
+  })
+
+  // RAPPORT-KPI-INSTELBAAR: Prospects kept the axis-topsegment strip (own
+  // catalog/order) unaffected by KPI-CUSTOMERS-SIGNALS-1's Klanten conversion
+  // — supersedes the pre-conversion combined "reorders the axis-derived KPI
+  // cards" pin, now scoped to the position that still has axis cards.
+  it('reorders the axis-derived KPI cards to the tenant-stored priority on Prospects', () => {
+    mockSettings.mockReturnValue({ report_kpis_prospects: JSON.stringify(['branch', 'owner', 'industry', 'phase', 'status']) })
+    mockUseCustomersReport.mockReturnValue({ data, loading: false, error: false })
+    const { container } = render(
+      <QueryClientProvider client={new QueryClient()}>
+        <CustomersReport period="month" initialView="prospects" />
+      </QueryClientProvider>,
+    )
+    const text = container.textContent ?? ''
+    expect(text.indexOf('Vestiging:')).toBeGreaterThanOrEqual(0)
+    expect(text.indexOf('Vestiging:')).toBeLessThan(text.indexOf('Status:'))
+  })
+
+  // The catalog knowingly excludes the customers-only signal cards from
+  // Prospects (they describe an existing client relationship a lead can't
+  // have) — a stored signal key must not silently render there.
+  it('never offers a customers-only signal card on the Prospects position', () => {
+    mockSettings.mockReturnValue({ report_kpis_prospects: JSON.stringify(['contract_ending', 'phase', 'industry', 'owner', 'branch']) })
+    mockUseCustomersReport.mockReturnValue({ data, loading: false, error: false })
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <CustomersReport period="month" initialView="prospects" />
+      </QueryClientProvider>,
+    )
+    // 'contract_ending' is not in the prospects catalogue, so
+    // resolveReportKpiOrder drops it and backfills from the default order —
+    // Status (the real default) renders in its place, never the signal card.
+    expect(screen.queryByText(i18n.t('customers.kpis.contractEnding', { ns: 'analytics' }))).not.toBeInTheDocument()
+    expect(screen.getByText('Status: Actief')).toBeInTheDocument()
   })
 })

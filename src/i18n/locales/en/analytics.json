@@ -190,7 +190,18 @@
       "topContractForm": "Top contract form",
       "funnelRate": "Share via application"
     },
-    "kpiOrderFellBack": "A KPI card configured in Settings no longer exists and was reset to the default."
+    "kpiOrderFellBack": "A KPI card configured in Settings no longer exists and was reset to the default.",
+    "kpi": {
+      "total": "Total",
+      "newInPeriod": "New in period",
+      "active": "Active",
+      "expiringSoon": "Expiring soon",
+      "terminatedInPeriod": "Terminated in period",
+      "renewalsInPeriod": "Renewals in period",
+      "withoutEndDate": "Without end date",
+      "avgDurationDays": "Average duration",
+      "reachRate": "Share with contract"
+    }
   },
   "outreach": {
     "loading": "Loading outreach…",
@@ -472,7 +483,8 @@
       "unknown": "Unknown",
       "fixedWindow12": "Fixed 12 months; does not follow this report's filters.",
       "fixedWindow6": "Fixed 6 months; does not follow this report's filters."
-    }
+    },
+    "windowWithTotal": "Inflow {{from}} through {{to}}: {{total}} new customers"
   },
   "leads": {
     "loading": "Loading leads…",

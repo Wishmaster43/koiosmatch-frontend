@@ -155,7 +155,7 @@ export interface MatchesReportData {
   // RAPPORT-KAARTDRILLS-2: the full KPI suite (GET /reports/matches/kpis/drill's
   // enum). Optional so a cached pre-update response still parses. Server sends a
   // `label` per card too — deliberately ignored (§5: labels come from i18n).
-  kpis?: { key: string; label?: string; count: number | null }[]
+  kpis?: { key: string; label?: string; count: number | null; unit?: 'pct' | 'ratio' | 'euro' | 'days' }[]
 }
 
 // ── Intakes report (GET /reports/intakes, C-22) ──────────────────────────────
@@ -195,7 +195,7 @@ export interface OutreachReportData {
   // in catalog order (total_targets/open_todo/called_in_period/reached/
   // not_reached/conversion_pct/campaigns_active/campaigns_done_in_period/
   // due_today) — counts identical to the flat fields, one predicate per card.
-  kpis?: { key: string; label?: string; count: number | null }[]
+  kpis?: { key: string; label?: string; count: number | null; unit?: 'pct' | 'ratio' | 'euro' | 'days' }[]
   by_status: OutreachStatusCount[]
   by_outcome: OutreachOutcomeCount[]
   // Top-20 + 'others' (the exact complement — a real, drillable row); an archived
@@ -236,7 +236,7 @@ export interface WhatsappReportData {
   meta: { period: string | null; from: string; to: string; total: number }
   // Server sends a `label` per card too — deliberately ignored (§5: labels come
   // from i18n, never server-composed).
-  kpis: { key: string; label?: string; count: number | null }[]
+  kpis: { key: string; label?: string; count: number | null; unit?: 'pct' | 'ratio' | 'euro' | 'days' }[]
   timeseries: { bucket: 'day' | 'week'; series: { date: string; inbound: number; outbound: number }[] }
   by_direction: WhatsappSegment[]
   by_type: WhatsappSegment[]
@@ -482,7 +482,7 @@ export interface TasksReportData {
   // RAPPORT-KAARTDRILLS-2: the full KPI suite (GET /reports/tasks/kpis/drill's
   // enum). Optional so a cached pre-update response still parses. Server sends a
   // `label` per card too — deliberately ignored (§5: labels come from i18n).
-  kpis?: { key: string; label?: string; count: number | null }[]
+  kpis?: { key: string; label?: string; count: number | null; unit?: 'pct' | 'ratio' | 'euro' | 'days' }[]
 }
 
 // ── Sources report (GET /reports/sources, REPORTS-2 fase 2) ──────────────────

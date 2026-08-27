@@ -1,12 +1,15 @@
 /**
  * MatchesReport — matches summary (GET /reports/matches, closed by RAPPORTEN-SUITE-1
- * "portie 7"). KPI strip (total · via-funnel vs direct) + the shared timeseries,
- * the contract-form axis (MATCH-SOORT-1), the under_contract contract-status tiles
- * and the terminations-by-reason axis, window label from the RESPONSE. Drill/advice
- * XOR params follow the four-way matches contract: origin | contract_form |
- * contract_status | date (+bucket=week next to a week bar's date).
- * `avg_placement_duration_days` is honestly null until the HelloFlex coupling
- * fills match start/end — we show a note rather than a fabricated number.
+ * "portie 7"). KPI-MATCHES-1 (CMBE 27-08): the strip now reads the server's own
+ * nine-card kpis[] suite verbatim (total/new_in_period/active/expiring_soon/
+ * terminated_in_period/renewals_in_period/without_end_date/avg_duration_days/
+ * reach_rate), mirroring TasksReport/OutreachReport. Below the strip: the shared
+ * timeseries, the contract-form axis (MATCH-SOORT-1), the under_contract
+ * contract-status tiles and the terminations-by-reason axis — untouched by the
+ * strip migration. Their own drill/advice XOR params still follow the four-way
+ * contract: origin | contract_form | contract_status | date (+bucket=week next
+ * to a week bar's date) | stop_reason. `avg_placement_duration_days` is honestly
+ * null until the HelloFlex coupling fills match start/end.
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -27,7 +30,6 @@ import { CHART_SERIES_COLORS } from '@/components/charts/chartTypes'
 import type { ChartDatum } from '@/components/charts/chartTypes'
 import ReportTimeseriesChart from './ReportTimeseriesChart'
 import { useDateFormat } from '@/lib/datetime'
-import { formatPercent } from '@/lib/formatters'
 import type { ReportPeriod, CandidateTimeseriesPoint, CandidateSegment, MatchTerminationReasonSegment } from '@/types/analytics'
 import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
 import { getReportKpiCatalog, getReportKpiDefaultOrder, reportKpiSettingsKey } from './kpiCatalog'
@@ -39,6 +41,8 @@ import { COMPARE_OFF } from './reportCompareMode'
 import type { ReportCompareMode } from './reportCompareMode'
 import SharedStatTile from '@/components/ui/StatTile'
 import { BodyText } from '@/components/ui/typography'
+import { formatKpiUnitValue } from './kpiUnitFormat'
+import type { KpiUnit } from './kpiUnitFormat'
 
 // One match stat tile; with an onClick it becomes a drillable surface (keyboard
 // operable — same affordance pattern as SegmentBars).
@@ -71,16 +75,6 @@ export default function MatchesReport({ period, filters = EMPTY_REPORT_FILTERS, 
   // The report window from the RESPONSE, DD-MM-YYYY (§3B DATUM-1) — drawer subtitle.
   const windowSub = () => `${formatDate(data?.from)} – ${formatDate(data?.to)}`
   const baseParams = buildReportQueryParams(period, 'matches', filters)
-  const openMatches = (title: string, value: number, origin?: 'funnel' | 'direct') => setDrill({
-    title, value, subtitle: windowSub(),
-    breakdown: [
-      { label: t('matches.viaFunnel'), value: data?.by_origin.funnel ?? 0 },
-      { label: t('matches.direct'),    value: data?.by_origin.direct ?? 0 },
-    ],
-    entityPage: 'matches',
-    rowsEndpoint: '/reports/matches/drill', rowsParams: { ...baseParams, origin },
-    adviceEndpoint: '/reports/matches/advice', adviceParams: { ...baseParams, origin },
-  })
 
   // Soort-as (MATCH-SOORT-1): by_contract_form — a lookup axis with its own
   // colour per value (CHART-TYPE RULE) → donut, `contract_form` is one leg
@@ -97,6 +91,24 @@ export default function MatchesReport({ period, filters = EMPTY_REPORT_FILTERS, 
   const donutData = (segs: CandidateSegment[]): { data: ChartDatum[]; colors: string[] } => ({
     data: segs.map(s => ({ name: s.label, value: s.count, key: s.value })),
     colors: segs.map((s, i) => s.color ?? CHART_SERIES_COLORS[i % CHART_SERIES_COLORS.length]),
+  })
+  // Origin donut (herkomst: via funnel vs. direct match) — restores by_origin's
+  // display surface after the old origin KPI cards retired with the strip flip;
+  // static two-value axis, so house series colours, and each slice drills the
+  // origin XOR leg the panel filter already speaks.
+  const originSegs: CandidateSegment[] = data ? [
+    { value: 'funnel', label: t('matches.viaFunnel'), count: data.by_origin.funnel, color: null },
+    { value: 'direct', label: t('matches.direct'), count: data.by_origin.direct, color: null },
+  ] : []
+  const onOriginPick = gateDrillClick('matches', (d: unknown) => {
+    const key = (d as { key?: string })?.key ?? (d as { payload?: { key?: string } })?.payload?.key
+    const seg = originSegs.find(s => s.value === key)
+    if (!seg) return
+    setDrill({
+      title: seg.label, value: seg.count, subtitle: windowSub(), entityPage: 'matches',
+      rowsEndpoint: '/reports/matches/drill', rowsParams: { ...baseParams, origin: seg.value },
+      adviceEndpoint: '/reports/matches/advice', adviceParams: { ...baseParams, origin: seg.value },
+    })
   })
   const onContractFormPick = gateDrillClick('matches', (d: unknown) => {
     const key = (d as { key?: string })?.key ?? (d as { payload?: { key?: string } })?.payload?.key
@@ -135,46 +147,6 @@ export default function MatchesReport({ period, filters = EMPTY_REPORT_FILTERS, 
   // The axis is windowed on the termination EVENT server-side, so the drawer shows
   // the matches whose termination fell in the window: drawer == bar, always.
   const terminationSegs = data?.terminations.by_reason ?? []
-  // RAPPORT-KAARTDRILLS-2: per-KPI-card drill via GET /reports/matches/kpis/drill?kpi=<key>
-  // (MatchesKpiDrillRequest enum: total|new_in_period|active|expiring_soon|
-  // terminated_in_period|renewals_in_period|without_end_date|avg_duration_days|
-  // reach_rate, measured in api-generated.ts). Only the pairs that measurably
-  // mean the same thing are mapped (never guessed) — `total` and `active`
-  // already open a real XOR drill above (full-population, with a breakdown) and
-  // stay untouched; `funnel`/`direct`/`sent`/`ended`/`terminationRate` have no
-  // matching server kpi (new_in_period/expiring_soon/renewals_in_period/
-  // without_end_date/reach_rate mean something else) so they keep no onClick.
-  const KPI_DRILL_KEY: Partial<Record<string, string>> = {
-    // terminated_in_period is the one hard-confirmed identical pair
-    // (BuildsMatchKpis reuses terminationRows() verbatim).
-    terminationsTotal: 'terminated_in_period',
-    // dur mirrors avg_placement_duration_days's own concept (average contract
-    // duration); now that the kpi suite carries avg_duration_days, the card
-    // reads it the moment the server fills it (the envelope field stays null
-    // until the HelloFlex coupling lands — see the fallback below).
-    // POPULATION NOTE: the suite number averages matches TERMINATED in the
-    // window that carry a start_date (BuildsMatchKpis::avgDurationDays), not an
-    // all-placements average — the drill lists exactly that population.
-    dur: 'avg_duration_days',
-  }
-  const kpiByServerKey = new Map((data?.kpis ?? []).map(k => [k.key, k.count]))
-  // Opens the KPI's row-level drill-down using its mapped server-side key; a KPI with no mapping is not drillable at all.
-  const openKpiDrill = (localKey: string, label: string, value: string | number) => {
-    const serverKey = KPI_DRILL_KEY[localKey]
-    if (!serverKey) return undefined
-    return gateDrillClick('matches', () => setDrill({
-      title: label, value, subtitle: windowSub(),
-      rowsEndpoint: '/reports/matches/kpis/drill', rowsParams: { ...baseParams, kpi: serverKey },
-    }))
-  }
-  // Tolerant fallback: the server kpi VALUE wins when the strip carries that
-  // key, otherwise the legacy envelope value renders WITHOUT a drill.
-  const terminationsWired = kpiByServerKey.has('terminated_in_period')
-  const terminationsValue = terminationsWired ? (kpiByServerKey.get('terminated_in_period') ?? 0) : (data?.terminations.total ?? 0)
-  const durWired = kpiByServerKey.has('avg_duration_days')
-  const durRaw = durWired ? kpiByServerKey.get('avg_duration_days') : data?.avg_placement_duration_days
-  const durValue = durRaw != null ? t('matches.daysValue', { days: Math.round(durRaw) }) : '—'
-
   const openReason = gateDrillClick('matches', (d: unknown) => {
     const value = (d as { key?: string })?.key ?? (d as { payload?: { key?: string } })?.payload?.key
     const seg = terminationSegs.find((s: MatchTerminationReasonSegment) => s.value === value)
@@ -188,72 +160,54 @@ export default function MatchesReport({ period, filters = EMPTY_REPORT_FILTERS, 
     })
   })
 
-  // The XOR axis of the OPEN drill (if any) — drives the KPI active states.
-  const openParams = drill?.rowsParams as Record<string, unknown> | undefined
-  const openAxis = openParams ? ['origin', 'contract_form', 'contract_status', 'date', 'stop_reason'].find(k => openParams[k] != null) : undefined
-
-  // Nine-card footprint (Danny — same as the dashboard). The first three mirror
-  // the origin axis; sent/active/ended mirror the under_contract tiles below (a
-  // real segment total, not a fabricated metric) and drill the same
-  // contract_status=<key> XOR leg; the last three are honest, non-fabricated
-  // derived stats: terminations total, avg duration (dash until HelloFlex fills
-  // it) and the termination rate (a ratio of two real fields).
-  const terminationRate = data && data.total > 0 ? (data.terminations.total / data.total) * 100 : null
-  // Spare-card sources (REPORTS-KPI-SPARE-1): the top real contract-form/reason
-  // segment (excluding the 'none' sentinel — that already has its own card
-  // below), an honest ratio of two real counts (funnel share of total), and the
-  // fourth under_contract tile ('none' = tileValue('none'), already computed
-  // above as `noContract`, just never offered as its own card until now).
-  const topContractForm = contractFormSegs.filter(s => s.value !== 'none').sort((a, b) => b.count - a.count)[0]
-  const topTerminationReason = terminationSegs.slice().sort((a, b) => b.count - a.count)[0]
-  const funnelRate = data && data.total > 0 ? (data.by_origin.funnel / data.total) * 100 : null
-  const kpiByKey: Record<string, KpiSpec> = {
-    total:  { key: 'total',  label: t('matches.total'),     value: data?.total ?? 0,
-      active: drill != null && openAxis == null,
-      sub: totalCompare ? <ReportCompareMetric metric={totalCompare} polarity="up-good" /> : undefined,
-      onClick: gateDrillClick('matches', () => openMatches(t('matches.total'), data?.total ?? 0)) },
-    funnel: { key: 'funnel', label: t('matches.viaFunnel'), value: data?.by_origin.funnel ?? 0,
-      active: openParams?.origin === 'funnel',
-      onClick: gateDrillClick('matches', () => openMatches(t('matches.viaFunnel'), data?.by_origin.funnel ?? 0, 'funnel')) },
-    direct: { key: 'direct', label: t('matches.direct'),    value: data?.by_origin.direct ?? 0,
-      active: openParams?.origin === 'direct',
-      onClick: gateDrillClick('matches', () => openMatches(t('matches.direct'), data?.by_origin.direct ?? 0, 'direct')) },
-    sent:   { key: 'sent',   label: t('matches.placements.sent'),   value: tileValue('sent'),
-      active: openParams?.contract_status === 'sent',
-      onClick: gateDrillClick('matches', () => openContractStatus(t('matches.placements.sent'), tileValue('sent'), 'sent')) },
-    active: { key: 'active', label: t('matches.placements.active'), value: tileValue('active'),
-      color: tileValue('active') !== 0 ? 'var(--color-success)' : undefined,
-      active: openParams?.contract_status === 'active',
-      onClick: gateDrillClick('matches', () => openContractStatus(t('matches.placements.active'), tileValue('active'), 'active')) },
-    ended:  { key: 'ended',  label: t('matches.placements.ended'),  value: tileValue('ended'),
-      active: openParams?.contract_status === 'ended',
-      onClick: gateDrillClick('matches', () => openContractStatus(t('matches.placements.ended'), tileValue('ended'), 'ended')) },
-    terminationsTotal: { key: 'terminationsTotal', label: t('matches.terminations.total'), value: terminationsValue,
-      // Colour follows the VALUE (real in both branches); only the drill needs wiring.
-      color: terminationsValue !== 0 ? 'var(--color-danger)' : undefined,
-      onClick: terminationsWired ? openKpiDrill('terminationsTotal', t('matches.terminations.total'), terminationsValue) : undefined },
-    dur:    { key: 'dur',    label: t('matches.avgDuration'), value: durValue,
-      onClick: durWired && durRaw != null ? openKpiDrill('dur', t('matches.avgDuration'), durValue) : undefined },
-    terminationRate: { key: 'terminationRate', label: t('matches.terminations.rate'),
-      value: formatPercent(terminationRate) },
-    // Spares (REPORTS-KPI-SPARE-1): see the derivations above.
-    noContract: { key: 'noContract', label: t('matches.summary.noContract'), value: noContract,
-      active: openParams?.contract_status === 'none',
-      onClick: gateDrillClick('matches', () => openContractStatus(t('matches.summary.noContract'), noContract, 'none')) },
-    topContractForm: { key: 'topContractForm', label: t('matches.summary.topContractForm'),
-      value: topContractForm ? `${topContractForm.label} · ${topContractForm.count}` : '—',
-      onClick: topContractForm ? gateDrillClick('matches', () => openContractForm(topContractForm.label, topContractForm.count, topContractForm.value)) : undefined },
-    topTerminationReason: { key: 'topTerminationReason', label: t('matches.terminations.topReason'),
-      value: topTerminationReason ? `${topTerminationReason.label} · ${topTerminationReason.count}` : '—',
-      onClick: topTerminationReason ? gateDrillClick('matches', () => setDrill({
-        title: topTerminationReason.label, value: topTerminationReason.count, subtitle: windowSub(),
-        entityPage: 'matches',
-        rowsEndpoint: '/reports/matches/drill', rowsParams: { ...baseParams, stop_reason: topTerminationReason.value },
-        adviceEndpoint: '/reports/matches/advice', adviceParams: { ...baseParams, stop_reason: topTerminationReason.value },
-      })) : undefined },
-    funnelRate: { key: 'funnelRate', label: t('matches.summary.funnelRate'),
-      value: formatPercent(funnelRate) },
+  // KPI-MATCHES-1 (CMBE 27-08, BuildsMatchKpis): the strip reads the server's
+  // own nine-card kpis[] suite verbatim — mirrors TasksReport/OutreachReport's
+  // KPI-TAKEN-1 idiom (kpiByServerKey Map, one predicate shared by value and
+  // drill). A key the server omitted (or a pre-suite cached envelope) renders
+  // the house dash with no drill — never a value from another population. The
+  // origin/contract-status/terminations DATA keeps a chart surface below: the
+  // origin DONUT (restored when the old origin KPI cards retired — its panel
+  // filter and drill leg predate the strip flip), the StatTiles and the
+  // terminations donut.
+  const kpiByServerKey = new Map((data?.kpis ?? []).map(k => [k.key, k.count]))
+  const openKpiDrill = (kpi: string, label: string, value: string | number) =>
+    gateDrillClick('matches', () => setDrill({
+      title: label, value, subtitle: windowSub(), entityPage: 'matches',
+      rowsEndpoint: '/reports/matches/kpis/drill', rowsParams: { ...baseParams, kpi },
+    }))
+  // Semantic colour only where the number is a SIGNAL and non-zero (§4: colour
+  // carries meaning; a calm zero stays uncoloured).
+  const KPI_COLOR: Partial<Record<string, string>> = {
+    expiring_soon: 'var(--color-warning)', terminated_in_period: 'var(--color-danger)',
+    active: 'var(--color-success)',
   }
+  const SUITE_LABEL_KEY: Record<string, string> = {
+    total: 'matches.kpi.total', new_in_period: 'matches.kpi.newInPeriod', active: 'matches.kpi.active',
+    expiring_soon: 'matches.kpi.expiringSoon', terminated_in_period: 'matches.kpi.terminatedInPeriod',
+    renewals_in_period: 'matches.kpi.renewalsInPeriod', without_end_date: 'matches.kpi.withoutEndDate',
+    avg_duration_days: 'matches.kpi.avgDurationDays', reach_rate: 'matches.kpi.reachRate',
+  }
+  // UNIT-CANON (FRONTEND-CONTRACT §13, REPORT-KPI-STRIP-1): the SERVER's unit
+  // field on each kpis[] entry decides the formatting; the local map is only the
+  // tolerant fallback for a cached pre-unit envelope (§10) — never the source.
+  const KPI_UNIT_FALLBACK: Partial<Record<string, KpiUnit>> = { avg_duration_days: 'days', reach_rate: 'ratio' }
+  const unitByServerKey = new Map((data?.kpis ?? []).map(k => [k.key, k.unit ?? KPI_UNIT_FALLBACK[k.key]]))
+  const openKpiParams = drill?.rowsParams as Record<string, unknown> | undefined
+  const kpiByKey: Record<string, KpiSpec> = Object.fromEntries(
+    Object.entries(SUITE_LABEL_KEY).map(([key, labelKey]) => {
+      const label = t(labelKey)
+      const raw = kpiByServerKey.get(key)
+      const has = raw != null
+      const unit = unitByServerKey.get(key)
+      const value = !has ? '—' : unit ? formatKpiUnitValue(raw, unit) : raw
+      return [key, {
+        key, label, value,
+        color: has && raw !== 0 ? KPI_COLOR[key] : undefined,
+        active: openKpiParams?.kpi === key,
+        sub: key === 'total' && totalCompare ? <ReportCompareMetric metric={totalCompare} polarity="up-good" /> : undefined,
+        onClick: has ? openKpiDrill(key, label, value) : undefined,
+      } satisfies KpiSpec]
+    }))
   // Which nine keys render, and in what order, is the tenant's Settings → Reports
   // choice (falls back to today's order when nothing is stored, or a stored key
   // has vanished — RAPPORT-KPI-INSTELBAAR).
@@ -304,9 +258,15 @@ export default function MatchesReport({ period, filters = EMPTY_REPORT_FILTERS, 
             <PieChartCard {...donutData(contractFormSegs)} onItemClick={onContractFormPick} />
           } />
 
+          {/* Herkomst-as: two-value static axis (funnel vs. direct) → donut; every
+              slice drills origin=<key> (the XOR leg the right-panel filter shares). */}
+          <ReportChartCard title={t('matches.axes.origin')} chart={
+            <PieChartCard {...donutData(originSegs)} onItemClick={onOriginPick} />
+          } />
+
           {/* Contract-status tiles (under_contract, MATCH-VOCABULAIRE-1): the four
               tiles sum to the report total and each drills contract_status=<key>. */}
-          <ReportChartCard title={t('matches.placements.title')} chart={
+          <ReportChartCard span={2} title={t('matches.placements.title')} chart={
             <>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12 }}>
                 {CONTRACT_STATUS_TILES.map(key => (

@@ -190,7 +190,18 @@
       "topContractForm": "Forma de contrato principal",
       "funnelRate": "Porcentaje vía solicitud"
     },
-    "kpiOrderFellBack": "Una tarjeta KPI configurada en Ajustes ya no existe y se restableció al valor predeterminado."
+    "kpiOrderFellBack": "Una tarjeta KPI configurada en Ajustes ya no existe y se restableció al valor predeterminado.",
+    "kpi": {
+      "total": "Total",
+      "newInPeriod": "Nuevos en el periodo",
+      "active": "Activos",
+      "expiringSoon": "Vence pronto",
+      "terminatedInPeriod": "Finalizados en el periodo",
+      "renewalsInPeriod": "Renovaciones en el periodo",
+      "withoutEndDate": "Sin fecha fin",
+      "avgDurationDays": "Duración media",
+      "reachRate": "Proporción con contrato"
+    }
   },
   "outreach": {
     "loading": "Cargando outreach…",
@@ -472,7 +483,8 @@
       "unknown": "Desconocido",
       "fixedWindow12": "12 meses fijos, no sigue los filtros de este informe.",
       "fixedWindow6": "6 meses fijos, no sigue los filtros de este informe."
-    }
+    },
+    "windowWithTotal": "Entradas del {{from}} al {{to}}: {{total}} clientes nuevos"
   },
   "leads": {
     "loading": "Cargando leads…",

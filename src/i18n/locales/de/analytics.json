@@ -190,7 +190,18 @@
       "topContractForm": "Top-Vertragsform",
       "funnelRate": "Anteil über Bewerbung"
     },
-    "kpiOrderFellBack": "Eine in den Einstellungen konfigurierte KPI-Karte existiert nicht mehr und wurde auf den Standard zurückgesetzt."
+    "kpiOrderFellBack": "Eine in den Einstellungen konfigurierte KPI-Karte existiert nicht mehr und wurde auf den Standard zurückgesetzt.",
+    "kpi": {
+      "total": "Gesamt",
+      "newInPeriod": "Neu im Zeitraum",
+      "active": "Aktiv",
+      "expiringSoon": "Läuft bald ab",
+      "terminatedInPeriod": "Beendet im Zeitraum",
+      "renewalsInPeriod": "Verlängerungen im Zeitraum",
+      "withoutEndDate": "Ohne Enddatum",
+      "avgDurationDays": "Durchschnittliche Dauer",
+      "reachRate": "Anteil mit Vertrag"
+    }
   },
   "outreach": {
     "loading": "Outreach wird geladen…",
@@ -472,7 +483,8 @@
       "unknown": "Unbekannt",
       "fixedWindow12": "Feste 12 Monate, folgt nicht den Filtern dieses Berichts.",
       "fixedWindow6": "Feste 6 Monate, folgt nicht den Filtern dieses Berichts."
-    }
+    },
+    "windowWithTotal": "Zugang {{from}} bis {{to}}: {{total}} neue Kunden"
   },
   "leads": {
     "loading": "Leads werden geladen…",

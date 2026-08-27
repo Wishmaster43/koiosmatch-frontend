@@ -30,8 +30,15 @@ describe('kpiCatalog — spare cards on surviving scopes', () => {
     },
   )
 
-  it('matches reports real spare cards to the settings screen', () => {
-    expect(reportHasSpareKpiCards('matches')).toBe(true)
+  // KPI-MATCHES-1 (27-08): matches moved to the server's own nine-key kpis[]
+  // suite — the four spare cards retired with the ad-hoc strip, so the settings
+  // screen must now be honest about having nothing extra to offer. Vacancies
+  // still carries real spares and keeps that path covered below.
+  it('matches no longer reports spare cards after the server-suite flip', () => {
+    expect(reportHasSpareKpiCards('matches')).toBe(false)
+  })
+  it('vacancies still reports real spare cards to the settings screen', () => {
+    expect(reportHasSpareKpiCards('vacancies')).toBe(true)
   })
 
   // CMBE K-191: outreach moved to the server's own nine-card kpis[] suite —

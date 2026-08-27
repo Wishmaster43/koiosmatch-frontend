@@ -3,23 +3,23 @@
  * settings screen (RAPPORT-KPI-INSTELBAAR). Two families exist, mirrored from how
  * each report already builds its strip (never a second hand-maintained list):
  *
- * - `family: 'axis'` (candidates, leads, applications, customers, prospects) — cards
- *   2-9 are derived live per-tenant by `buildAxisKpis` from the report's own axis
- *   segments (the SPECIFIC top segment is data-dependent, so it can't be a stable
- *   catalogue entry). What IS stable and pickable is the axis itself — its id and
- *   order. Card 1 ("total") stays pinned; it is not part of the catalogue. `customers`
- *   (REPORTS-KPI-SPARE-2) additionally offers nine single-segment "signal" pseudo-axes
- *   built from the report's own `kpis[]` array (real standing counts the strip never
- *   surfaced) — see REPORT_KPI_AXIS_DEFAULT_LENGTH below for why its default order
- *   stays capped at five, not nine. `prospects` deliberately does NOT mirror those
- *   signal spares — they describe an existing client relationship a lead can't have.
- *   `candidates`/`leads`/`applications` (REPORTS-KPI-SPARE-3) also grew real
+ * - `family: 'axis'` (leads, prospects) — cards 2-9 are derived live per-tenant by
+ *   `buildAxisKpis` from the report's own axis segments (the SPECIFIC top segment
+ *   is data-dependent, so it can't be a stable catalogue entry). What IS stable
+ *   and pickable is the axis itself — its id and order. Card 1 ("total") stays
+ *   pinned; it is not part of the catalogue. `candidates`/`leads`/`applications`
+ *   (REPORTS-KPI-SPARE-3) also grew real
  *   spares this way — single-segment 'none'-bucket pseudo-axes plus (applications
  *   only) two full axes the strip already computes but never offered (vacancy,
  *   stage duration) — see REPORT_KPI_AXIS_DEFAULT_LENGTH.
  * - `family: 'fixed'` — every other report's nine cards are a literal, hand-written
  *   array today. The catalogue entry IS that literal card (key + i18n label ref),
- *   copied here without touching the report's own compute logic. Most scopes still
+ *   copied here without touching the report's own compute logic. `customers`
+ *   (KPI-CUSTOMERS-SIGNALS-1) moved here from the axis family — its nine cards are
+ *   now the report's own STANDING signal `kpis[]` suite (CUSTOMERS_SIGNAL_LABEL_KEYS
+ *   below), replacing the old axis-topsegment filler cards; `prospects` still has
+ *   no signal suite (those describe an existing client relationship a lead can't
+ *   have) so it stays on the axis family, untouched. Most scopes still
  *   equal the report's current default order 1:1 (no spares yet); `vacancies`,
  *   `opportunities`, `tasks`, `matches`, `intakes`, `ai`, `workflows`
  *   (REPORTS-KPI-SPARE-1) and `recruiters`, `accountmanagers`, `contacts`, `locations`,
@@ -113,7 +113,12 @@ export const REPORT_KPI_FAMILY: Partial<Record<ReportKpiScopeId, ReportKpiFamily
   // numbers over leads-only charts.
   candidates: 'fixed',
   leads: 'axis',
-  customers: 'axis',
+  // KPI-CUSTOMERS-SIGNALS-1: the Klanten position's strip is now the report's
+  // own nine STANDING signal kpis[] cards (server predicate == drill predicate),
+  // replacing the axis-topsegment filler cards — mirrors the candidates/
+  // applications suite moves above. Prospects has no signal suite (see the
+  // CUSTOMERS_SIGNAL_LABEL_KEYS comment) so it stays on the axis family.
+  customers: 'fixed',
   prospects: 'axis',
   // RAPPORT-APPS-VERDIEPING-1: 'applications' moved from 'axis' to 'fixed' —
   // the strip is now the server's own nine-card kpis[] (see REPORT_KPI_FIXED_CATALOG).
@@ -153,25 +158,10 @@ export const REPORT_KPI_AXIS_CATALOG: Partial<Record<ReportKpiScopeId, KpiCatalo
     { key: 'branch_none', labelKey: 'candidates.axes.branchNone' },
     { key: 'source_none', labelKey: 'candidates.axes.sourceNone' },
   ],
-  // 'customers' spares (KPI-SPARE-1): nine pseudo-axes built from the report's own
-  // `kpis[]` STANDING-signal array (GET /reports/customers, CustomersReport::signalKpis) —
-  // real, already-computed counts (contract ending, no contact, overdue tasks, …) that
-  // sat in the response entirely unused by the strip. Each renders as a single-segment
-  // "axis" (buildAxisKpis round-robins it in as one card, never split further) — see
-  // CustomersReport.tsx's `signalAxisConfigs`. Deliberately NOT offered on 'prospects'
-  // (below): every one of these signals describes an existing client relationship
-  // (contract, price agreement, placement coverage) that a lead/prospect cannot yet
-  // have — offering them there would be a pickable card that always reads zero/absent.
-  customers: [
-    { key: 'status', labelKey: 'customers.axes.status' },
-    { key: 'phase', labelKey: 'customers.axes.phase' },
-    { key: 'industry', labelKey: 'customers.axes.industry' },
-    { key: 'owner', labelKey: 'customers.axes.owner' },
-    { key: 'branch', labelKey: 'customers.axes.branch' },
-    ...Object.entries(CUSTOMERS_SIGNAL_LABEL_KEYS).map(([signalKey, i18nSuffix]) => ({
-      key: `signal:${signalKey}`, labelKey: `customers.kpis.${i18nSuffix}`,
-    })),
-  ],
+  // 'prospects' keeps the axis-topsegment strip — customers-only KPI-CUSTOMERS-
+  // SIGNALS-1 converted the Klanten position to the fixed signal suite above
+  // (REPORT_KPI_FIXED_CATALOG.customers); prospects still has no signal suite
+  // (see the CUSTOMERS_SIGNAL_LABEL_KEYS comment) so it is untouched.
   prospects: [
     { key: 'status', labelKey: 'customers.axes.status' },
     { key: 'phase', labelKey: 'customers.axes.phase' },
@@ -201,6 +191,14 @@ export const REPORT_KPI_FIXED_CATALOG: Partial<Record<ReportKpiScopeId, KpiCatal
     { key: 'no_contact', labelKey: 'candidates.kpi.noContact' },
     { key: 'active_conversations', labelKey: 'candidates.kpi.activeConversations' },
   ],
+  // KPI-CUSTOMERS-SIGNALS-1: the Klanten position's nine cards are now the
+  // report's own STANDING signal kpis[] suite verbatim (server predicate ==
+  // drill predicate via /reports/customers/kpi-drill) — CUSTOMERS_SIGNAL_LABEL_KEYS
+  // above is the one place the key→i18n-suffix mapping is spelled out, consumed
+  // both here and by CustomersReport.tsx so the two can never drift.
+  customers: Object.entries(CUSTOMERS_SIGNAL_LABEL_KEYS).map(([signalKey, i18nSuffix]) => ({
+    key: signalKey, labelKey: `customers.kpis.${i18nSuffix}`,
+  })),
   vacancies: [
     { key: 'total', labelKey: 'vacancies.summary.total' },
     { key: 'open', labelKey: 'vacancies.summary.open' },
@@ -264,24 +262,20 @@ export const REPORT_KPI_FIXED_CATALOG: Partial<Record<ReportKpiScopeId, KpiCatal
     { key: 'without_assignee', labelKey: 'tasks.kpi.withoutAssignee' },
     { key: 'avg_completion_days', labelKey: 'tasks.kpi.avgCompletionDays' },
   ],
+  // KPI-MATCHES-1 (CMBE 27-08, BuildsMatchKpis): the strip reads the server's
+  // own nine-card kpis[] suite verbatim, mirroring outreach/tasks/applications —
+  // replaces the old ad-hoc origin/placements/derived-stat cards (value and
+  // drill now share one backend predicate per key).
   matches: [
-    { key: 'total', labelKey: 'matches.total' },
-    { key: 'funnel', labelKey: 'matches.viaFunnel' },
-    { key: 'direct', labelKey: 'matches.direct' },
-    { key: 'sent', labelKey: 'matches.placements.sent' },
-    { key: 'active', labelKey: 'matches.placements.active' },
-    { key: 'ended', labelKey: 'matches.placements.ended' },
-    { key: 'terminationsTotal', labelKey: 'matches.terminations.total' },
-    { key: 'dur', labelKey: 'matches.avgDuration' },
-    { key: 'terminationRate', labelKey: 'matches.terminations.rate' },
-    // Spares (REPORTS-KPI-SPARE-1): the fourth under_contract tile (`none`,
-    // already in the envelope but never offered as its own card), the top real
-    // segment of by_contract_form / terminations.by_reason, and an honest ratio
-    // of two real counts (funnel share of total).
-    { key: 'noContract', labelKey: 'matches.summary.noContract' },
-    { key: 'topContractForm', labelKey: 'matches.summary.topContractForm' },
-    { key: 'topTerminationReason', labelKey: 'matches.terminations.topReason' },
-    { key: 'funnelRate', labelKey: 'matches.summary.funnelRate' },
+    { key: 'total', labelKey: 'matches.kpi.total' },
+    { key: 'new_in_period', labelKey: 'matches.kpi.newInPeriod' },
+    { key: 'active', labelKey: 'matches.kpi.active' },
+    { key: 'expiring_soon', labelKey: 'matches.kpi.expiringSoon' },
+    { key: 'terminated_in_period', labelKey: 'matches.kpi.terminatedInPeriod' },
+    { key: 'renewals_in_period', labelKey: 'matches.kpi.renewalsInPeriod' },
+    { key: 'without_end_date', labelKey: 'matches.kpi.withoutEndDate' },
+    { key: 'avg_duration_days', labelKey: 'matches.kpi.avgDurationDays' },
+    { key: 'reach_rate', labelKey: 'matches.kpi.reachRate' },
   ],
   // CMBE K-191 (commit 00e72f45): the server's own nine-card kpis[] suite,
   // in catalog order — replaces the old ad-hoc summary/top-segment cards.
@@ -338,8 +332,10 @@ export const REPORT_KPI_PINNED_FIRST: Partial<Record<ReportKpiScopeId, string>> 
   // 'candidates' unpinned since its move to the fixed family (suite strip is
   // fully reorderable, like applications/whatsapp).
   leads: 'total',
-  customers: 'total',
   prospects: 'total',
+  // 'customers' unpinned since its move to the fixed family (KPI-CUSTOMERS-
+  // SIGNALS-1) — the nine signal keys ARE the whole reorderable strip, no
+  // separate pinned "total" card any more (mirrors outreach/tasks/applications).
   // 'applications' no longer pins 'total' outside the catalogue — it is now a
   // fixed-family scope and 'total' is just kpis[0], reorderable like whatsapp's.
 }
@@ -364,7 +360,9 @@ const REPORT_KPI_DEFAULT_LENGTH = 9
 // axis scope absent here (prospects — untouched by this pass) keeps using its
 // FULL catalogue length as before.
 const REPORT_KPI_AXIS_DEFAULT_LENGTH: Partial<Record<ReportKpiScopeId, number>> = {
-  customers: 5,
+  // 'customers' moved to the fixed family (KPI-CUSTOMERS-SIGNALS-1) — its old
+  // axis-cap entry is gone with it; 'candidates' is fixed-family too (dead
+  // leftover from before that move, untouched here — out of this lane's scope).
   candidates: 5,
   leads: 5,
 }

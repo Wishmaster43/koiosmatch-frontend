@@ -61,18 +61,15 @@ import CustomerDepthSections from './depth/CustomerDepthSections'
 // Deliberately no 'source' — see the header comment.
 type Axis = 'status' | 'phase' | 'industry' | 'branch'
 
-// KPIS-DRILL-1: the nine standing `kpis[]` signal keys that now have their own
+// KPI-CUSTOMERS-SIGNALS-1: CUSTOMERS_SIGNAL_LABEL_KEYS's nine keys are now the
+// Klanten position's ENTIRE fixed KPI-strip catalog (kpiCatalog.ts,
+// REPORT_KPI_FAMILY.customers = 'fixed') — every one of them has its own
 // GET /reports/customers/kpi-drill endpoint (measured, api-generated.ts::
-// getReportsCustomersKpiDrill) — exactly CUSTOMERS_SIGNAL_LABEL_KEYS's key set.
-// A separate GET /reports/customers/kpi-signal-drill endpoint also landed for
+// getReportsCustomersKpiDrill), so all nine are drillable, no separate
+// "which of these nine" set needed any more. A separate GET
+// /reports/customers/kpi-signal-drill endpoint also landed for
 // customers_active/customers_prospect/customers_at_risk (getReportsCustomersKpiSignalDrill),
-// but this page renders no cards for those three keys, so that endpoint is left
-// unwired here — nothing to wire it to.
-const CUSTOMERS_KPI_DRILL_KEYS = new Set<string>([
-  'contract_ending', 'no_contact', 'task_overdue', 'price_agreement_ending', 'vacancy_stale',
-  'departments_without_placement', 'customers_without_vacancies', 'customers_without_applications',
-  'matches_stopped_early',
-])
+// but this page renders no cards for those three keys, so that endpoint stays unwired here.
 
 // Semantic colour per signal key, applied only when the count is non-zero
 // (§4: colour carries meaning — a calm zero stays uncoloured). Mirrors
@@ -191,11 +188,9 @@ export default function CustomersReport({ period, filters = EMPTY_REPORT_FILTERS
     if (pt) openBucket(pt)
   })
 
-  // Nine-card KPI strip (same footprint as the dashboard): "total" plus eight
-  // axis-derived cards, all real counts from the five axes already on the
-  // response (§0 no fake affordances — nothing here is invented or hardcoded;
-  // deliberately no by_source axis here, see the header comment). Klanten and
-  // Prospects keep independently configurable catalogs/orders (`kpiScope`).
+  // Klanten and Prospects keep independently configurable catalogs/orders
+  // (`kpiScope`) — Klanten's cards 2-9 are the fixed signal suite below,
+  // Prospects' stay the axis-topsegment strip (unaffected by the conversion).
   const allAxisConfigs: Record<Axis | 'owner', AxisKpiConfig> = {
     status:   { axis: 'status',   axisLabel: t('customers.axes.status'),   segs: (data?.by_status ?? []).map(s => ({ key: s.value, label: s.label, count: s.count })) },
     phase:    { axis: 'phase',    axisLabel: t('customers.axes.phase'),    segs: (data?.by_phase ?? []).map(s => ({ key: s.value, label: s.label, count: s.count })) },
@@ -203,76 +198,69 @@ export default function CustomersReport({ period, filters = EMPTY_REPORT_FILTERS
     owner:    { axis: 'owner',    axisLabel: t('customers.axes.owner'),    segs: (data?.by_owner ?? []).map(s => ({ key: s.owner_id, label: s.name, count: s.count })) },
     branch:   { axis: 'branch',   axisLabel: t('customers.axes.branch'),   segs: (data?.by_branch ?? []).map(s => ({ key: s.value, label: s.label, count: s.count })) },
   }
-  // REPORTS-KPI-SPARE-2: the customers-only "signal" pseudo-axes (see kpiCatalog.ts) —
-  // each of the report's own STANDING kpis[] counts, wrapped as a single-segment axis
-  // config so buildAxisKpis can round-robin it in as one honest card. Never offered on
-  // Prospects (kpiCatalog.ts REPORT_KPI_AXIS_CATALOG.prospects has no `signal:*` keys),
-  // so `signalAxisConfigs` is simply unused/empty there — no runtime branch needed.
-  const signalAxisConfigs: Record<string, AxisKpiConfig> = Object.fromEntries(
-    (data?.kpis ?? []).map(k => [`signal:${k.key}`, {
-      axis: `signal:${k.key}`,
-      axisLabel: t(`customers.kpis.${CUSTOMERS_SIGNAL_LABEL_KEYS[k.key] ?? k.key}`),
-      segs: [{ key: 'count', label: '', count: k.count }],
-    }]),
-  )
   // `view` is constrained to VIEWS at runtime (useReportSwitch); both members
   // are valid KPI-catalog scope ids (kpiCatalog.ts), so the cast is safe.
   const kpiScope = view as ReportKpiScopeId
   const settingsValues = useAllSettings()
   const catalogKeys = getReportKpiCatalog(kpiScope).map(c => c.key)
-  const defaultAxisOrder = getReportKpiDefaultOrder(kpiScope)
-  const storedAxisOrder = getJsonSetting<string[] | undefined>(settingsValues, reportKpiSettingsKey(kpiScope), undefined)
-  const { order: axisOrder, fellBack } = resolveReportKpiOrder(storedAxisOrder, catalogKeys, defaultAxisOrder)
-  const axisConfigs: AxisKpiConfig[] = axisOrder
-    .map(axis => allAxisConfigs[axis as Axis | 'owner'] ?? signalAxisConfigs[axis])
-    .filter(Boolean)
-  // A KPI card for an axis segment opens the page's ONE shared drill drawer on
-  // that segment, exactly like clicking the bar itself. A "signal" pseudo-axis
-  // whose key is one of the nine kpi-drill enum values now drills via
-  // openSignalKpiDrill; a signal key OUTSIDE both enums still has no matching
-  // drill (a standing count, not an axis segment) — display-only, same as
-  // every other non-clickable KPI card (e.g. departments.customersCount).
+  const defaultKpiOrder = getReportKpiDefaultOrder(kpiScope)
+  const storedKpiOrder = getJsonSetting<string[] | undefined>(settingsValues, reportKpiSettingsKey(kpiScope), undefined)
+  const { order: kpiOrder, fellBack } = resolveReportKpiOrder(storedKpiOrder, catalogKeys, defaultKpiOrder)
+
+  // KPI-CUSTOMERS-SIGNALS-1 (mirrors TasksReport/OutreachReport's
+  // kpiByServerKey idiom): the Klanten position's cards 2-9 are the server's
+  // own nine STANDING signal kpis[] cards, read verbatim — value and drawer
+  // rows share ONE backend predicate per key, so they can never diverge. A key
+  // the server omitted renders the house dash with no drill — never a value
+  // from another population.
+  const kpiByServerKey = new Map((data?.kpis ?? []).map(k => [k.key, k.count]))
+  const signalKpiByKey: Record<string, KpiSpec> = Object.fromEntries(
+    Object.entries(CUSTOMERS_SIGNAL_LABEL_KEYS).map(([key, i18nSuffix]) => {
+      const label = t(`customers.kpis.${i18nSuffix}`)
+      const raw = kpiByServerKey.get(key)
+      const has = raw != null
+      return [key, {
+        key, label, value: has ? raw : '—',
+        // STANDING signal, not a windowed count — every card says so (§SCHERMWAARHEID).
+        sub: t('customers.signalSnapshot'),
+        color: has && raw !== 0 ? SIGNAL_COLOR[key] : undefined,
+        active: (drill?.rowsParams as Record<string, unknown> | undefined)?.kpi === key,
+        onClick: has ? gateDrillClick('customers', () => openSignalKpiDrill(label, raw as number, key)) : undefined,
+      } satisfies KpiSpec]
+    }),
+  )
+  const signalKpis: KpiSpec[] = kpiOrder.map(key => signalKpiByKey[key]).filter((k): k is KpiSpec => k != null)
+
+  // Prospects keeps the axis-topsegment strip: buildAxisKpis round-robins the
+  // five configured axes' top segments in, a KPI-card click opening the SAME
+  // shared drawer as clicking the underlying bar/donut segment.
+  const axisConfigs: AxisKpiConfig[] = isProspects
+    ? kpiOrder.map(axis => allAxisConfigs[axis as Axis | 'owner']).filter((c): c is AxisKpiConfig => c != null)
+    : []
   const onAxisKpiPick = gateDrillClick('customers', (axis: string, key: string) => {
-    if (axis.startsWith('signal:')) {
-      const signalKey = axis.slice('signal:'.length)
-      if (!CUSTOMERS_KPI_DRILL_KEYS.has(signalKey)) return
-      const cfg = axisConfigs.find(c => c.axis === axis)
-      const seg = cfg?.segs.find(s => s.key === key)
-      if (seg) openSignalKpiDrill(cfg!.axisLabel, seg.count, signalKey)
-      return
-    }
     const cfg = axisConfigs.find(c => c.axis === axis)
     const seg = cfg?.segs.find(s => s.key === key)
     if (seg) openSegment({ label: seg.label, count: seg.count }, { [axis]: key })
   })
-  const axisKpisRaw = buildAxisKpis(axisConfigs, 8,
+  const axisKpis: KpiSpec[] = buildAxisKpis(axisConfigs, 8,
     (axis, key) => onAxisKpiPick?.(axis, key),
-    (axis, key) => {
-      const params = drill?.rowsParams as Record<string, unknown> | undefined
-      // A signal pseudo-axis drills via `kpi`, a real axis via its own XOR key.
-      if (axis.startsWith('signal:')) return params?.kpi === axis.slice('signal:'.length)
-      return params?.[axis] === key
-    })
-  // buildAxisKpis always attaches an onClick; strip it back off for signal cards
-  // outside the kpi-drill enum so they render with no clickable affordance (§0
-  // no fake affordances) instead of a dead click. A signal card also picks up
-  // its semantic colour here, only when the count is non-zero (SIGNAL_COLOR).
-  const axisKpis: KpiSpec[] = axisKpisRaw.map(k => {
-    const [axisPart] = k.key.split(':')
-    if (axisPart !== 'signal') return k
-    const signalKey = k.key.slice('signal:'.length).replace(/:count$/, '')
-    const withColor = typeof k.value === 'number' && k.value !== 0 ? { ...k, color: SIGNAL_COLOR[signalKey] } : k
-    return CUSTOMERS_KPI_DRILL_KEYS.has(signalKey) ? withColor : { ...withColor, onClick: undefined }
-  })
+    (axis, key) => (drill?.rowsParams as Record<string, unknown> | undefined)?.[axis] === key)
 
-  // Card 1's label/window/loading/empty/error text is scoped to the active
-  // position — Klanten keeps today's exact wording (a byte-identical default,
-  // zero regression), Prospects gets its own.
-  const kpis: KpiSpec[] = [
-    { key: 'total', label: t(isProspects ? 'prospects.total' : 'customers.total'), value: total,
-      sub: totalCompare ? <ReportCompareMetric metric={totalCompare} polarity="up-good" /> : undefined },
-    ...axisKpis,
-  ]
+  // ReportKpiBand renders EXACTLY nine cards, never ten (house invariant). Klanten's
+  // nine ARE the fixed signal suite (KPI-CUSTOMERS-SIGNALS-1) — no separate pinned
+  // "total" card any more, mirroring outreach/tasks (their own total lives inside
+  // their nine-key suite; the windowed inflow total + compare moved INTO the
+  // window line below the strip). Prospects is untouched: total + eight axis cards.
+  const kpis: KpiSpec[] = isProspects
+    ? [
+        { key: 'total', label: t('prospects.total'), value: total,
+          sub: totalCompare ? <ReportCompareMetric metric={totalCompare} polarity="up-good" /> : undefined },
+        ...axisKpis,
+      ]
+    : signalKpis
+  // Klanten's windowed inflow TOTAL (and its compare metric) lost their card in
+  // the signal-suite flip — the window line below carries them instead, so the
+  // number and the vergelijk-met stay visible (nine-card invariant holds).
 
   return (
     <div>
@@ -289,8 +277,11 @@ export default function CustomersReport({ period, filters = EMPTY_REPORT_FILTERS
 
       {/* The report's data window, rendered prominently — DD-MM-YYYY (never ISO, §3B). */}
       {!loading && !error && data && (
-        <BodyText as="div" style={{ fontWeight: 500, marginBottom: 12 }}>
-          {t(isProspects ? 'prospects.window' : 'customers.window', { from: formatDate(data.from), to: formatDate(data.to) })}
+        <BodyText as="div" style={{ fontWeight: 500, marginBottom: 12, display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+          {isProspects
+            ? t('prospects.window', { from: formatDate(data.from), to: formatDate(data.to) })
+            : t('customers.windowWithTotal', { from: formatDate(data.from), to: formatDate(data.to), total })}
+          {!isProspects && totalCompare && <ReportCompareMetric metric={totalCompare} polarity="up-good" />}
         </BodyText>
       )}
 

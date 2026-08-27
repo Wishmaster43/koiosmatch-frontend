@@ -190,7 +190,18 @@
       "topContractForm": "Forme de contrat principale",
       "funnelRate": "Part via candidature"
     },
-    "kpiOrderFellBack": "Une carte KPI configurée dans les paramètres n'existe plus et a été réinitialisée par défaut."
+    "kpiOrderFellBack": "Une carte KPI configurée dans les paramètres n'existe plus et a été réinitialisée par défaut.",
+    "kpi": {
+      "total": "Total",
+      "newInPeriod": "Nouveaux sur la période",
+      "active": "Actifs",
+      "expiringSoon": "Expire bientôt",
+      "terminatedInPeriod": "Terminés sur la période",
+      "renewalsInPeriod": "Renouvellements sur la période",
+      "withoutEndDate": "Sans date de fin",
+      "avgDurationDays": "Durée moyenne",
+      "reachRate": "Part avec contrat"
+    }
   },
   "outreach": {
     "loading": "Chargement de l’outreach…",
@@ -472,7 +483,8 @@
       "unknown": "Inconnu",
       "fixedWindow12": "12 mois fixes, ne suit pas les filtres de ce rapport.",
       "fixedWindow6": "6 mois fixes, ne suit pas les filtres de ce rapport."
-    }
+    },
+    "windowWithTotal": "Entrées du {{from}} au {{to}} : {{total}} nouveaux clients"
   },
   "leads": {
     "loading": "Chargement des leads…",

@@ -190,7 +190,18 @@
       "topContractForm": "Grootste contractvorm",
       "funnelRate": "Percentage via sollicitatie"
     },
-    "kpiOrderFellBack": "Een in Instellingen ingestelde KPI-kaart bestaat niet meer en is teruggezet naar de standaard."
+    "kpiOrderFellBack": "Een in Instellingen ingestelde KPI-kaart bestaat niet meer en is teruggezet naar de standaard.",
+    "kpi": {
+      "total": "Totaal",
+      "newInPeriod": "Nieuw in periode",
+      "active": "Actief",
+      "expiringSoon": "Loopt binnenkort af",
+      "terminatedInPeriod": "Beëindigd in periode",
+      "renewalsInPeriod": "Verlengingen in periode",
+      "withoutEndDate": "Zonder einddatum",
+      "avgDurationDays": "Gemiddelde duur",
+      "reachRate": "Aandeel met contract"
+    }
   },
   "outreach": {
     "loading": "Outreach laden…",
@@ -472,7 +483,8 @@
       "unknown": "Onbekend",
       "fixedWindow12": "Vaste 12 maanden, volgt niet de filters van dit rapport.",
       "fixedWindow6": "Vaste 6 maanden, volgt niet de filters van dit rapport."
-    }
+    },
+    "windowWithTotal": "Instroom {{from}} t/m {{to}}: {{total}} nieuwe klanten"
   },
   "leads": {
     "loading": "Leads laden…",

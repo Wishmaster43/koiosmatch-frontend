@@ -183,18 +183,10 @@ describe('MatchesReport (MATCH-SOORT-1, by_contract_form axis)', () => {
       expect.objectContaining({ params: { contract_form: 'zzz-deleted-form', period: 'month' } }))
   })
 
-  // XOR proof: the ORIGIN KPI (funnel/direct) sends `origin`, never `contract_form`,
-  // and vice versa — the two axes are mutually exclusive request params.
-  it('clicking the "Via sollicitatie" KPI drills with origin=funnel and no contract_form param', async () => {
-    const user = userEvent.setup()
-    mockUseMatchesReport.mockReturnValue({ data, loading: false, error: false })
-    renderReport()
-    await user.click(screen.getByText('Via sollicitatie'))
-    expect(getSpy).toHaveBeenCalledWith('/reports/matches/drill',
-      expect.objectContaining({ params: { origin: 'funnel', period: 'month' } }))
-    const call = getSpy.mock.calls.filter(c => c[0] === '/reports/matches/drill').at(-1)
-    expect(call?.[1].params).not.toHaveProperty('contract_form')
-  })
+  // SUPERSEDE (KPI-MATCHES-1): the origin KPI cards (funnel/direct/total) that
+  // used to trigger `origin=` were the OLD ad-hoc strip, retired by the server-
+  // suite conversion above — the origin axis has no remaining UI trigger at all
+  // (no chart, no tile), so this XOR proof has no surface left to test against.
 
   it('clicking a contract_form bar sends contract_form and no origin param', async () => {
     const user = userEvent.setup()
@@ -246,8 +238,10 @@ describe('MatchesReport (RAPPORTEN-SUITE-1 portie 7, closing enrichment)', () =>
     expect(grid).not.toBeNull()
     expect(grid?.contains(seriesHeading)).toBe(true)
     expect(grid?.contains(terminationsHeading)).toBe(true)
-    // Each section is its own card — four cards, not one shared outer card.
-    expect(container.querySelectorAll('[style*="border-radius: 12px"]').length).toBe(4)
+    // Each section is its own card — five since the origin donut regained its
+    // surface (the by_origin axis lost its KPI cards in the KPI-MATCHES-1 flip).
+    expect(container.querySelectorAll('[style*="border-radius: 12px"]').length).toBe(5)
+    expect(screen.getByText('Herkomst')).toBeInTheDocument()
   })
 
   // WEEK-FLOOR contract: a week bar drills date=<its own Monday key> + bucket=week —
@@ -279,14 +273,14 @@ describe('MatchesReport (RAPPORTEN-SUITE-1 portie 7, closing enrichment)', () =>
     const user = userEvent.setup()
     mockUseMatchesReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
-    // 'Verzonden'/'Actief'/'Beëindigd' now render twice (KPI card + StatTile
-    // below) — either fires the identical contract_status drill, so click the
-    // first (the KPI card).
+    // 'Verzonden'/'Beëindigd' are unique to the StatTile row. 'Actief' also
+    // labels the new suite's own 'active' KPI card (KPI-MATCHES-1, kpi=active
+    // drill) — so click the LAST match, always the StatTile below the strip.
     await user.click(screen.getAllByText('Verzonden')[0])
     expect(lastDrillParams()).toEqual({ contract_status: 'sent', period: 'month' })
     expect(getSpy).toHaveBeenCalledWith('/reports/matches/advice',
       expect.objectContaining({ params: { contract_status: 'sent', period: 'month' } }))
-    await user.click(screen.getAllByText('Actief')[0])
+    await user.click(screen.getAllByText('Actief').at(-1)!)
     expect(lastDrillParams()).toEqual({ contract_status: 'active', period: 'month' })
     await user.click(screen.getAllByText('Beëindigd')[0])
     expect(lastDrillParams()).toEqual({ contract_status: 'ended', period: 'month' })
@@ -326,22 +320,22 @@ describe('MatchesReport (RAPPORTEN-SUITE-1 portie 7, closing enrichment)', () =>
       expect.objectContaining({ params: { contract_form: 'secondment', period: 'month' } }))
   })
 
-  // Four-way XOR proof, both directions across all four axes: every drill call
-  // carries exactly ONE segment param — no residue from the earlier pick.
+  // XOR proof across the remaining axes: every drill call carries exactly ONE
+  // segment param — no residue from the earlier pick. `origin` dropped from
+  // this proof with KPI-MATCHES-1 (see the SUPERSEDE note above): its only UI
+  // trigger was the retired ad-hoc KPI card.
   it('sends exactly one XOR param per drill call, in both directions across the axes', async () => {
     const user = userEvent.setup()
     mockUseMatchesReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
-    await user.click(screen.getByText('Via sollicitatie'))
-    expect(lastDrillParams()).toEqual({ origin: 'funnel', period: 'month' })
     await user.click(screen.getByText('Uitzend'))
     expect(lastDrillParams()).toEqual({ contract_form: 'temp_agency', period: 'month' })
-    await user.click(screen.getAllByText('Verzonden')[0])
+    await user.click(screen.getByText('Verzonden'))
     expect(lastDrillParams()).toEqual({ contract_status: 'sent', period: 'month' })
     await user.click(screen.getByText('Wk 32'))
     expect(lastDrillParams()).toEqual({ date: '2026-08-03', bucket: 'week', period: 'month' })
-    await user.click(screen.getByText('Direct'))
-    expect(lastDrillParams()).toEqual({ origin: 'direct', period: 'month' })
+    await user.click(screen.getByText('Klant stopt'))
+    expect(lastDrillParams()).toEqual({ stop_reason: 'client_stop', period: 'month' })
   })
 
   // terminations.by_reason drills stop_reason=<value> — the FIFTH XOR leg
@@ -362,9 +356,8 @@ describe('MatchesReport (RAPPORTEN-SUITE-1 portie 7, closing enrichment)', () =>
     const user = userEvent.setup()
     mockUseMatchesReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
-    await user.click(screen.getByText('Via sollicitatie'))
     await user.click(screen.getByText('Detachering'))
-    await user.click(screen.getAllByText('Actief')[0])
+    await user.click(screen.getAllByText('Actief').at(-1)!)
     await user.click(screen.getByText('Wk 32'))
     expect(getSpy.mock.calls.length).toBeGreaterThan(0)
     expect(getSpy.mock.calls.every(c =>
@@ -372,130 +365,115 @@ describe('MatchesReport (RAPPORTEN-SUITE-1 portie 7, closing enrichment)', () =>
   })
 })
 
-// Nine-card KPI footprint (Danny — same as the dashboard, all reports). Every
-// card is derived from a field the endpoint already returns; sent/active/ended
-// mirror the under_contract tiles below and share their drill; the termination
-// total/rate and avg duration render as honest, non-fabricated stats.
-describe('MatchesReport (nine-card KPI footprint)', () => {
+// KPI-MATCHES-1 (CMBE 27-08, BuildsMatchKpis): the strip now reads the
+// server's own nine-card kpis[] suite verbatim — supersedes the old
+// origin/placements/derived-stat strip tests above. Assertions key on the
+// fixture's own DISTINCT numeric values and the drill request's `kpi` param
+// rather than on label text, since the `matches.kpi.*` copy is landed by the
+// manager in a separate i18n change (this lane never touches locale files).
+// Deliberately distinct from every other digit the fixture already renders
+// (the under_contract StatTiles show 5/6/2/3 further down the same page) so
+// each suite card's value is a unique, unambiguous text node.
+const matchKpis: NonNullable<MatchesReportData['kpis']> = [
+  { key: 'total', count: 120 },
+  { key: 'new_in_period', count: 45 },
+  { key: 'active', count: 112 },
+  { key: 'expiring_soon', count: 33 },
+  { key: 'terminated_in_period', count: 44 },
+  { key: 'renewals_in_period', count: 22 },
+  { key: 'without_end_date', count: 66 },
+  { key: 'avg_duration_days', count: 47.6 },
+  { key: 'reach_rate', count: 0.375 },
+]
+const dataWithKpis: MatchesReportData = { ...data, kpis: matchKpis }
+
+// Asserts (or denies) a rendered element's semantic ink token — the token lives
+// in the assertion argument, not in a style literal: this test paints nothing.
+function expectInk(el: HTMLElement, token: string, opts?: { absent?: boolean }) {
+  const m = expect(el)
+  if (opts?.absent) m.not.toHaveStyle({ color: token })
+  else m.toHaveStyle({ color: token })
+}
+
+describe('MatchesReport (nine-card server-suite KPI strip, KPI-MATCHES-1)', () => {
   beforeEach(() => {
     getSpy.mockReset()
     getSpy.mockResolvedValue({ data: { data: [], meta: { total: 0 } } })
   })
 
-  it('renders exactly nine KPI cards from the fixture', () => {
-    mockUseMatchesReport.mockReturnValue({ data, loading: false, error: false })
+  // Each plain-count card renders its own server value; avg_duration_days
+  // (unit 'days') rounds to a whole day count, reach_rate (unit 'ratio')
+  // renders ×100 with one decimal and a % sign — the UNIT-CANON formatter.
+  it('renders every suite card with its own value, days/ratio units formatted via kpiUnitFormat', () => {
+    mockUseMatchesReport.mockReturnValue({ data: dataWithKpis, loading: false, error: false })
     renderReport()
-    for (const label of ['Totaal matches', 'Via sollicitatie', 'Direct', 'Verzonden', 'Actief', 'Beëindigd',
-      'Totaal beëindigingen', 'Gem. matchduur', 'Beëindigingspercentage']) {
-      expect(screen.getAllByText(label).length).toBeGreaterThanOrEqual(1)
+    for (const value of ['120', '45', '112', '33', '44', '22', '66']) {
+      expect(screen.getByText(value)).toBeInTheDocument()
     }
-    // Termination rate: 3 / 16 * 100 = 18,75% → the house number formatter.
-    expect(screen.getByText('18,8%')).toBeInTheDocument()  // FMT-PROCENT-1: at most one decimal
+    // avg_duration_days: 47.6 → Math.round → 48 (formatNumber, no decimals).
+    expect(screen.getByText('48')).toBeInTheDocument()
+    // reach_rate: 0.375 → formatRatio → "37,5%" (FMT-PROCENT-1: ≤1 decimal).
+    expect(screen.getByText('37,5%')).toBeInTheDocument()
   })
 
-  it('clicking the "sent" KPI card sends contract_status=sent, same as the tile below', async () => {
-    const user = userEvent.setup()
-    mockUseMatchesReport.mockReturnValue({ data, loading: false, error: false })
+  // Semantic colour only on the three signal keys, only when non-zero (§4).
+  it('colours active/expiring_soon/terminated_in_period only, all non-zero in the fixture', () => {
+    mockUseMatchesReport.mockReturnValue({ data: dataWithKpis, loading: false, error: false })
     renderReport()
-    await user.click(screen.getAllByText('Verzonden')[0])
-    expect(lastDrillParams()).toEqual({ contract_status: 'sent', period: 'month' })
+    // ASSERT (not a component style): the KPI value ink is a deliberate raw
+    // semantic colour, not the -text twin (InsightsRow's HUISSTIJL carve-out
+    // for a KpiCard's own big number) — mirrored verbatim from TasksReport's
+    // KPI_COLOR/OutreachReport's KPI_COLOR usage, which lint does not flag
+    // there since it sits in a variable, not a literal JSX style prop.
+    expectInk(screen.getByText('112'), 'var(--color-success)') // active
+    expectInk(screen.getByText('33'), 'var(--color-warning)') // expiring_soon
+    expectInk(screen.getByText('44'), 'var(--color-danger)') // terminated_in_period
+    // A plain count key carries no signal colour (falls back to the house text token).
+    expectInk(screen.getByText('45'), 'var(--color-success)', { absent: true })
   })
 
-  it('the avg-duration KPI shows a dash, never a fabricated zero, while HelloFlex has not filled it', () => {
-    mockUseMatchesReport.mockReturnValue({ data, loading: false, error: false })
-    renderReport()
-    expect(data.avg_placement_duration_days).toBeNull()
-    expect(screen.getAllByText('—').length).toBeGreaterThanOrEqual(1)
-  })
-
-  // RAPPORT-KAARTDRILLS-2: with a kpis[] strip, `terminationsTotal` reads its
-  // VALUE from kpis[] and drills via GET /reports/matches/kpis/drill?kpi=
-  // terminated_in_period (mutation test asserts the exact request, §13).
-  it('reads terminationsTotal from kpis[] and drills via kpi=terminated_in_period', async () => {
+  // Value and drill share ONE backend predicate per key: clicking any suite
+  // card requests /reports/matches/kpis/drill?kpi=<its own key> (§13 mutation test).
+  it('clicking a suite card drills via its own kpi key', async () => {
     const user = userEvent.setup()
-    const withKpis: MatchesReportData = { ...data, kpis: [{ key: 'terminated_in_period', count: 5 }] }
-    mockUseMatchesReport.mockReturnValue({ data: withKpis, loading: false, error: false })
+    mockUseMatchesReport.mockReturnValue({ data: dataWithKpis, loading: false, error: false })
     renderReport()
     getSpy.mockClear()
-    // The server kpi value (5), not the legacy envelope terminations.total (3),
-    // rendered under the same label.
-    const card = screen.getAllByText('Totaal beëindigingen')[0].closest('[role="button"]')!
-    expect(card).toHaveTextContent('5')
-    await user.click(screen.getAllByText('Totaal beëindigingen')[0])
+    await user.click(screen.getByText('22')) // renewals_in_period
     expect(getSpy).toHaveBeenCalledWith('/reports/matches/kpis/drill',
-      expect.objectContaining({ params: expect.objectContaining({ kpi: 'terminated_in_period', period: 'month' }) }))
+      expect.objectContaining({ params: expect.objectContaining({ kpi: 'renewals_in_period', period: 'month' }) }))
+    getSpy.mockClear()
+    await user.click(screen.getByText('37,5%')) // reach_rate
+    expect(getSpy).toHaveBeenCalledWith('/reports/matches/kpis/drill',
+      expect.objectContaining({ params: expect.objectContaining({ kpi: 'reach_rate', period: 'month' }) }))
   })
 
-  // Tolerant fallback (RAPPORT-KAARTDRILLS-2): with no kpis[] strip at all, the
-  // card pins the legacy envelope value and renders WITHOUT a drill — no
-  // kpis/drill request fires on click.
-  it('falls back to the legacy terminationsTotal value with no drill when kpis[] is absent', async () => {
+  // Honest fallback (RAPPORT-KAARTDRILLS-2): with no kpis[] at all (a pre-suite
+  // cached envelope), every card renders the house dash with no drill affordance
+  // — never a value from another population.
+  it('renders dashes with no drill when kpis[] is absent from the envelope', async () => {
     const user = userEvent.setup()
     mockUseMatchesReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
+    expect(screen.getAllByText('—').length).toBeGreaterThanOrEqual(9)
     getSpy.mockClear()
-    await user.click(screen.getAllByText('Totaal beëindigingen')[0])
+    await user.click(screen.getAllByText('—')[0])
     expect(getSpy).not.toHaveBeenCalledWith('/reports/matches/kpis/drill', expect.anything())
-  })
-
-  // With avg_placement_duration_days null (as above), the dur card carries no
-  // onClick at all — no fake affordance on a fabricated/absent number.
-  it('the avg-duration card is non-clickable while its value is null', () => {
-    mockUseMatchesReport.mockReturnValue({ data, loading: false, error: false })
-    renderReport()
-    expect(screen.getByText('Gem. matchduur').closest('[role="button"]')).toBeNull()
-  })
-
-  // Once HelloFlex fills the field, the same card becomes a real drill
-  // (kpi=avg_duration_days) — never crashes on the transition.
-  // Opus-REJECT: avg_placement_duration_days staat server-side hard op null
-  // (wacht op HelloFlex) — de mapping was onbereikbaar dood en is ontkoppeld.
-  it('the avg-duration card carries no drill while the envelope value is null by contract', () => {
-    renderReport()
-    expect(getSpy.mock.calls.map(c => String(c[0])).some(u => u.includes("kpi': 'avg_duration_days'"))).toBe(false)
   })
 })
 
-// REPORTS-KPI-SPARE-1: four real spares grow the catalogue so the settings
-// screen has something to swap in.
-describe('MatchesReport (spare KPI cards)', () => {
-  beforeEach(() => {
-    getSpy.mockReset()
-    getSpy.mockResolvedValue({ data: { data: [], meta: { total: 0 } } })
-  })
-
-  it('offers the four new spare cards to the settings catalogue', async () => {
+// KPI-MATCHES-1: the catalogue is now the server suite's own nine keys — no
+// spares (supersedes the old REPORTS-KPI-SPARE-1 four-spare block above).
+describe('MatchesReport (kpi catalogue, KPI-MATCHES-1)', () => {
+  it('offers exactly the nine server-suite keys, in suite order, no spares', async () => {
     const { getReportKpiCatalog, getReportKpiDefaultOrder, reportHasSpareKpiCards } = await import('./kpiCatalog')
-    const catalogKeys = getReportKpiCatalog('matches').map(c => c.key)
-    expect(catalogKeys).toEqual(expect.arrayContaining(['noContract', 'topContractForm', 'topTerminationReason', 'funnelRate']))
-    expect(catalogKeys.length).toBe(getReportKpiDefaultOrder('matches').length + 4)
-    expect(reportHasSpareKpiCards('matches')).toBe(true)
-  })
-
-  it('renders swapped-in spare cards with their real fixture values, strip still exactly nine', async () => {
-    const user = userEvent.setup()
-    mockSettings.mockReturnValue({
-      report_kpis_matches: JSON.stringify([
-        'noContract', 'topContractForm', 'topTerminationReason', 'funnelRate',
-        'total', 'funnel', 'direct', 'sent', 'active',
-      ]),
-    })
-    mockUseMatchesReport.mockReturnValue({ data, loading: false, error: false })
-    renderReport()
-    // noContract reuses the same 'none' tile count (3) already covered above.
-    expect(screen.getAllByText('Geen contract').length).toBeGreaterThanOrEqual(1)
-    // topContractForm: the largest real (non-'none') segment — Detachering · 9.
-    expect(screen.getByText('Detachering · 9')).toBeInTheDocument()
-    // topTerminationReason: the largest reason segment — Klant stopt · 2.
-    expect(screen.getByText('Klant stopt · 2')).toBeInTheDocument()
-    // funnelRate: 10 / 16 * 100 = 62,5%.
-    expect(screen.getByText('62,5%')).toBeInTheDocument()
-
-    // Clicking the swapped-in cards sends the real, already-supported XOR params.
-    await user.click(screen.getByText('Detachering · 9'))
-    expect(lastDrillParams()).toEqual({ contract_form: 'secondment', period: 'month' })
-    await user.click(screen.getByText('Klant stopt · 2'))
-    expect(lastDrillParams()).toEqual({ stop_reason: 'client_stop', period: 'month' })
+    const keys = getReportKpiCatalog('matches').map(c => c.key)
+    expect(keys).toEqual([
+      'total', 'new_in_period', 'active', 'expiring_soon', 'terminated_in_period',
+      'renewals_in_period', 'without_end_date', 'avg_duration_days', 'reach_rate',
+    ])
+    expect(getReportKpiDefaultOrder('matches')).toEqual(keys)
+    expect(reportHasSpareKpiCards('matches')).toBe(false)
   })
 
   // RAPPORT-COMPARE-2 (§4): the compare window lives in the right-hand filter
