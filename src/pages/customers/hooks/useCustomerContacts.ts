@@ -63,7 +63,8 @@ export interface ContactPayload {
   // CustomerContactController::validateContact. Optional — every OTHER call site
   // building this payload (Add*Modal, LocationContactSection) creates a contact
   // without touching this field; only ContactTextSection's save sends it.
-  notes?: string
+  // Dossier free-text (wire key `description` since CMBE b87e3240); the separate note THREAD stays its own tab.
+  description?: string
 }
 
 /**
@@ -257,7 +258,7 @@ const toApi = (p: Partial<ContactPayload>) => ({
   ...(p.isPrimary !== undefined ? { is_primary: p.isPrimary } : {}),
   ...(p.customFields !== undefined ? { custom_fields: p.customFields } : {}),
   // CONTACT-TEKST-1: empty string → null, mirroring gender/linkedin above.
-  ...(p.notes !== undefined ? { notes: p.notes || null } : {}),
+  ...(p.description !== undefined ? { description: p.description || null } : {}),
 })
 
 // The customer's live contact list: CRUD + optimistic updates, plus a listener that refetches when another surface (the merge modal) changes contacts elsewhere.

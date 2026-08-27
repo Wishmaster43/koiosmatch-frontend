@@ -296,10 +296,10 @@ export default function OverviewTab({ match, onUpdate, onOpenNotes }: OverviewTa
       {/* DRILLDOWN-VOLGORDE-CANON (Danny 21-08): information → TEXT with pop-out
           → Koios AI → branch. So the match text sits before the Koios block. */}
       {/* M17/optie A: Matchtekst — OFFERED-IFF-READ, hidden until the backend
-          payload actually carries the `match_text` key (see file header). Koios
+          payload actually carries the `description` key (see file header). Koios
           assist + dictation ride the editor's own toolbar (RichTextAssistBar),
           so no per-block AI wiring is needed here anymore. */}
-      <MatchTextBlock matchId={match.id} value={contract.match_text} present={matchTextPresent} loading={contractLoading} save={saveContract} />
+      <MatchTextBlock matchId={match.id} value={contract.description} present={matchTextPresent} loading={contractLoading} save={saveContract} />
 
       {/* M18: Koios AI advice — the table-identical advice row first (KOIOS-ADVIES-
           OVERAL-1; [] when there is none), then the score/contract-window heuristics. */}

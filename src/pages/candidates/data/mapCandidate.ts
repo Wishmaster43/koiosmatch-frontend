@@ -190,7 +190,8 @@ export function mapCandidate(c: ApiCandidate): Candidate {
     // Tolerant per §10 (never typeof-number gates); both are plain strings/nulls.
     workPermitType:      c.work_permit_type ?? null,
     workPermitValidUntil: c.work_permit_valid_until ?? null,
-    summary:         c.summary ?? c.bio ?? '',
+    // Wire key renamed to `description` (CMBE b87e3240); old keys tolerated during transition.
+    summary:         (c.description as string | undefined) ?? c.summary ?? c.bio ?? '',
     tags:            c.tags ?? [],
     // Archived = soft-deleted (deleted_at set). Off by default in the list; the
     // "Gearchiveerd" view opts in via ?include_archived=1. When/by whom/why feed the

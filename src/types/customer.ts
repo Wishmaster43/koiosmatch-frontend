@@ -8,6 +8,8 @@ import type { ApiBackofficeLink, BackofficeLink } from '@/lib/backofficeLink'
 
 /** A contact person (flat UI shape). SUB-STATUS-1 status + CONTACT-MULTI-1 multi coupling. */
 export interface Contact {
+  // Dossier free-text (wire `description`, CMBE b87e3240); the note THREAD is separate.
+  description?: string
   id: Id | undefined
   // NUMMER-2: immutable human-readable display number (C-00042).
   referenceNumber?: string

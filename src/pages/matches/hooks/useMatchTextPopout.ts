@@ -21,6 +21,7 @@ interface RawMatchLite {
   candidate?: { name?: string } | null
   vacancy?: { title?: string } | null
   match_text?: string | null
+  description?: string | null
 }
 
 // Light identity fetch for the popped-out match-text window.
@@ -39,7 +40,7 @@ export function useMatchTextLite(id: string | undefined) {
         // Candidate — vacancy as the window title; the em-dash here is a
         // separator between two data values, not sentence punctuation (§5 exception).
         const title = [raw.candidate?.name, raw.vacancy?.title].filter(Boolean).join(' — ') || '?'
-        setMatch({ id: String(raw.id ?? id), title, initials: initialsOf(raw.candidate?.name ?? title), matchText: raw.match_text ?? '' })
+        setMatch({ id: String(raw.id ?? id), title, initials: initialsOf(raw.candidate?.name ?? title), matchText: raw.description ?? raw.match_text ?? '' })
       })
       .catch(() => setError(true))
       .finally(() => setLoading(false))
@@ -52,7 +53,7 @@ export function useMatchTextLite(id: string | undefined) {
 
 // Standalone PATCH /matches/{id} — same field MatchTextBlock writes.
 export function patchMatchText(id: Id, html: string, t: TFunction, revert: () => void): Promise<boolean> {
-  return api.patch(`/matches/${id}`, { match_text: html || null })
+  return api.patch(`/matches/${id}`, { description: html || null })
     .then(() => true)
     .catch(err => { revert(); notifyError(extractApiError(err, t('common:actionFailed'))); return false })
 }

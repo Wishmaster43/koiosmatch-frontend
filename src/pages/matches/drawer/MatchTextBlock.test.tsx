@@ -13,7 +13,7 @@ import userEvent from '@testing-library/user-event'
 import MatchTextBlock from './MatchTextBlock'
 
 describe('MatchTextBlock', () => {
-  it('renders nothing when the payload does not carry the match_text key (OFFERED-IFF-READ)', () => {
+  it('renders nothing when the payload does not carry the description key (OFFERED-IFF-READ)', () => {
     const { container } = render(<MatchTextBlock value={undefined} present={false} loading={false} save={vi.fn()} />)
     expect(container).toBeEmptyDOMElement()
   })
@@ -42,7 +42,7 @@ describe('MatchTextBlock', () => {
     expect(screen.getByText(/veilige tekst/)).toBeInTheDocument()
   })
 
-  it('pencil opens the editor; save calls save({ match_text }) with the edited value, then closes edit mode', async () => {
+  it('pencil opens the editor; save calls save({ description }) with the edited value, then closes edit mode', async () => {
     const user = userEvent.setup()
     const save = vi.fn().mockResolvedValue(undefined)
     render(<MatchTextBlock value="<p>Oud</p>" present loading={false} save={save} />)
@@ -53,7 +53,7 @@ describe('MatchTextBlock', () => {
     // (RichTextEditor has its own test suite), so it saves the seeded draft as-is.
     await user.click(screen.getByTitle('common:save'))
 
-    expect(save).toHaveBeenCalledWith({ match_text: '<p>Oud</p>' })
+    expect(save).toHaveBeenCalledWith({ description: '<p>Oud</p>' })
   })
 
   it('cancel (✕) discards the draft without calling save', async () => {
@@ -94,7 +94,7 @@ describe('MatchTextBlock', () => {
     await user.click(screen.getByTitle('common:edit'))
     await user.click(screen.getByTitle('common:save'))
 
-    expect(save).toHaveBeenCalledWith({ match_text: null })
+    expect(save).toHaveBeenCalledWith({ description: null })
   })
 
   it('P34-expand: the expand toggle grows the editor and flips to a collapse control', async () => {

@@ -104,7 +104,8 @@ export const buildCandidatePatch = (patch: Record<string, unknown>): Record<stri
   // without this mapping the WorkPermitBlock's save silently dropped its fields.
   if ('workPermitType'       in patch) body.work_permit_type        = patch.workPermitType || null
   if ('workPermitValidUntil' in patch) body.work_permit_valid_until = patch.workPermitValidUntil || null
-  if ('summary'           in patch) body.summary           = patch.summary
+  // FE-internal 'summary' writes the renamed wire key `description` (CMBE b87e3240).
+  if ('summary'           in patch) body.description       = patch.summary
   if ('languages'         in patch) body.languages         = patch.languages
   if ('preferences'       in patch) body.preferences       = patch.preferences
   // RATE-WISH-1: desired hourly rate, min-max ('' -> null so clearing persists).

@@ -555,7 +555,7 @@ describe('ContactDetail · Koppelingen sub-tab hidden when empty (DD-FE-6)', () 
  */
 describe('ContactDetail · free-text block (CONTACT-TEKST-1)', () => {
   it('renders the saved text through SafeHtml on the Gegevens tab', () => {
-    render(<ContactDetail contact={baseContact({ notes: '<p>Werkt op afspraak</p>' })} locations={locations} departments={departments}
+    render(<ContactDetail contact={baseContact({ description: '<p>Werkt op afspraak</p>' })} locations={locations} departments={departments}
       statuses={statuses} onSave={vi.fn()} onDelete={vi.fn()} close={vi.fn()} />)
     expect(screen.getByText('Werkt op afspraak')).toBeInTheDocument()
   })
@@ -566,7 +566,7 @@ describe('ContactDetail · free-text block (CONTACT-TEKST-1)', () => {
     expect(screen.getByText(ct('richText.empty'))).toBeInTheDocument()
   })
 
-  it('saves the edited HTML as { notes } through the same onSave the drawer wires to the contact PATCH route', async () => {
+  it('saves the edited HTML as { description } through the same onSave the drawer wires to the contact PATCH route', async () => {
     const user = userEvent.setup()
     const onSave = vi.fn()
     render(<ContactDetail contact={baseContact({ notes: '<p>Original</p>' })} locations={locations} departments={departments}
@@ -581,7 +581,7 @@ describe('ContactDetail · free-text block (CONTACT-TEKST-1)', () => {
     await user.type(rte, '<p>Edited</p>')
     await user.click(screen.getByTitle(cm('save')))
 
-    expect(onSave).toHaveBeenCalledWith('c1', { notes: '<p>Edited</p>' })
+    expect(onSave).toHaveBeenCalledWith('c1', { description: '<p>Edited</p>' })
   })
 
   it('shows the second-screen popout icon for the free-text block', () => {

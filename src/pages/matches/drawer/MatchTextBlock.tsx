@@ -61,7 +61,7 @@ interface Props {
   // For the second-screen popout (TEKST-POPOUT-1) — the match this text belongs to.
   matchId?: Id
   value: string | null | undefined
-  // Whether the GET /matches/{id} payload actually carried the `match_text`
+  // Whether the GET /matches/{id} payload actually carried the `description`
   // key — false hides the whole block (OFFERED-IFF-READ, see file header).
   present: boolean
   loading: boolean
@@ -98,10 +98,10 @@ export default function MatchTextBlock({ matchId, value, present, loading, save 
 
   const startEdit  = () => { setDraft(shown ?? ''); setEditing(true) }
   const cancelEdit = () => { setDraft(shown ?? ''); setEditing(false) }
-  // Persists the draft as match_text and reports success/failure via toast.
+  // Persists the draft as the renamed `description` wire key (CMBE b87e3240).
   const saveEdit = async () => {
     try {
-      await save({ match_text: draft || null })
+      await save({ description: draft || null })
       notifySuccess(t('drawer.matchText.saved'))
       setEditing(false)
     } catch (err) {

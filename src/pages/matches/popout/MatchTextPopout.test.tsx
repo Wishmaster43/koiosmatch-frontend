@@ -73,7 +73,7 @@ describe('MatchTextPopout', () => {
     render(<MatchTextPopout id="m-1" />)
     await user.type(screen.getByLabelText('editor'), 'b')
     await user.click(screen.getByTestId('text-popout-save'))
-    expect(api.patch).toHaveBeenCalledWith('/matches/m-1', { match_text: 'ab' })
+    expect(api.patch).toHaveBeenCalledWith('/matches/m-1', { description: 'ab' })
     expect(close).toHaveBeenCalled()
     close.mockRestore()
   })

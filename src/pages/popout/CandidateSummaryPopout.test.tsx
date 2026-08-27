@@ -105,7 +105,7 @@ describe('CandidateSummaryPopout', () => {
     await user.type(screen.getByLabelText('editor'), 'b')
     expect(screen.getByTestId('text-popout-save')).toBeEnabled()
     await user.click(screen.getByTestId('text-popout-save'))
-    expect(api.patch).toHaveBeenCalledWith('/candidates/c1', { summary: 'ab' })
+    expect(api.patch).toHaveBeenCalledWith('/candidates/c1', { description: 'ab' })
     expect(close).toHaveBeenCalled()
     close.mockRestore()
   })

@@ -46,7 +46,7 @@ export interface MatchContract {
   // M17: customer-facing match text — the backend column doesn't exist yet
   // (MATCH-TEXT-FIELD-1), so callers must check `matchTextPresent` (below)
   // before trusting this value: absent-key and present-but-null both map here.
-  match_text: string | null
+  description: string | null
   // Derived server-side (sell − purchase); read-only, never sent back on save.
   margin: number | null
 }
@@ -54,7 +54,7 @@ export interface MatchContract {
 const EMPTY: MatchContract = {
   function_title: null, contract_type: null, start_date: null, end_date: null, hours_per_week: null,
   cao: null, scale: null, step: null, surcharge: null, purchase_rate: null, sell_rate: null,
-  cost_center: null, billing_emails: [], remarks: null, contractForm: null, contractLines: [], match_text: null, margin: null,
+  cost_center: null, billing_emails: [], remarks: null, contractForm: null, contractLines: [], description: null, margin: null,
 }
 
 // Pull just the contract/financial keys off a raw API row (tolerant of extras).
@@ -84,7 +84,7 @@ function pick(d: Record<string, unknown>): MatchContract {
           sortOrder: l.sort_order != null ? Number(l.sort_order) : null,
         }))
       : [],
-    match_text:     (d.match_text as string) ?? null,
+    description:    ((d.description ?? d.match_text) as string) ?? null,
     margin:         num(d.margin),
   }
 }
@@ -145,7 +145,7 @@ export function useMatchContract(
         const raw = (unwrap(r) ?? {}) as Record<string, unknown>
         setData(pick(raw))
         setTermination(pickTermination(raw))
-        setMatchTextPresent('match_text' in raw)
+        setMatchTextPresent('description' in raw || 'match_text' in raw)
       })
       .catch(err => { if (alive) setRawError(err) })
       .finally(() => { if (alive) setLoading(false) })

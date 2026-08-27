@@ -364,7 +364,7 @@ export default function ContactDetail({ contact, locations, departments, statuse
           {/* CONTACT-TEKST-1: the free-text block, canon-ordered directly under the
               field card and above the Vestiging (location/department) coupling. */}
           <ContactTextSection contactId={contact.id as Id} customerId={contact.customerId}
-            value={contact.notes ?? ''} onSave={html => onSave(contact.id as Id, { notes: html })} />
+            value={contact.description ?? ''} onSave={html => onSave(contact.id as Id, { description: html })} />
 
           {/* Koppeling — same shape and behaviour as "+ Vestiging" (Danny 28-07). */}
           <ContactLinkSection locationIds={linkedLocationIds} departmentIds={linkedDepartmentIds}
