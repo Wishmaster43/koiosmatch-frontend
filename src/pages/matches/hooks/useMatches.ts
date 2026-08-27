@@ -111,6 +111,14 @@ export function mapMatch(m: RawMatch): MatchRow {
     // claims "Direct"); key present + null → a genuine direct match; key
     // present + a value → grew out of that application.
     origin: 'application_id' in m ? (m.application_id != null ? 'application' : 'direct') : undefined,
+    // MATCH-DRILL-2: termination read-back + renewal count (AttachesMatchParityFields,
+    // K-126) — resolved off the nested `termination` object; undefined/null when
+    // the match was never terminated (never a fabricated reason).
+    stopReason: m.termination?.stop_reason ?? null,
+    stopReasonLabel: m.termination?.stop_reason_label ?? (m.stop_reason_label as string | undefined) ?? null,
+    terminationEffectiveDate: m.termination?.effective_date ?? null,
+    terminatedAt: m.termination?.terminated_at ?? null,
+    renewalCount: m.renewal_count ?? null,
   }
 }
 

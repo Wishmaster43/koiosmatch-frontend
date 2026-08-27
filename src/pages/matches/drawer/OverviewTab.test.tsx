@@ -30,6 +30,11 @@ const mockedPatch = vi.mocked(api.patch)
 // MATCH-EDIT-1: a fixed tenant lookup, decoupling these tests from the real
 // useCachedLookup network/caching behaviour (mirrors MatchContractSection.test.tsx).
 vi.mock('@/lib/useContractTypes', () => ({ useContractTypes: () => ({ types: ['ZZP Flex', 'Fase 1-2 z.u.b. (Works)'] }) }))
+// MATCH-DRILL-2: a fixed tenant stop-reason lookup, so the reason-line test
+// asserts against a known label without hitting useCachedLookup's real fetch.
+vi.mock('../hooks/useMatchStopReasons', () => ({
+  useMatchStopReasons: () => ({ reasons: [{ value: 'assignment_ended', label: 'Opdracht beëindigd' }], loading: false }),
+}))
 
 afterEach(() => vi.clearAllMocks())
 
@@ -232,5 +237,31 @@ describe('OverviewTab · table-identical Koios advice (KOIOS-ADVIES-OVERAL-1)', 
     renderTab(clean)
     await waitFor(() => expect(mockedGet).toHaveBeenCalledWith('/matches/m1'))
     expect(screen.queryByText(adviceLabel as string)).not.toBeInTheDocument()
+  })
+})
+
+// MATCH-DRILL-2: the termination read-back reason line + renewal-count row —
+// shown for a terminated match fixture, hidden for an open one (canon: a
+// counter never renders "0").
+describe('OverviewTab · termination read-back (MATCH-DRILL-2)', () => {
+  it('renders the reason line + renewal row for a terminated match', async () => {
+    mockedGet.mockResolvedValue({ data: { data: {} } })
+    renderTab({
+      ...baseMatch,
+      stopReason: 'assignment_ended',
+      terminatedAt: '2027-01-15T09:00:00+00:00',
+      renewalCount: 2,
+    })
+    // The resolved tenant-lookup label + DD-MM-YYYY date, joined by the shared separator.
+    expect(await screen.findByText('15-01-2027 · Opdracht beëindigd')).toBeInTheDocument()
+    expect(screen.getByText(i18n.t('matches:drawer.renew.renewalCount', { count: 2, ordinal: true }))).toBeInTheDocument()
+  })
+
+  it('hides the reason line and the renewal row on an open match', async () => {
+    mockedGet.mockResolvedValue({ data: { data: {} } })
+    renderTab(baseMatch)
+    await waitFor(() => expect(mockedGet).toHaveBeenCalledWith('/matches/m1'))
+    expect(screen.queryByText(i18n.t('matches:drawer.fields.terminated'))).not.toBeInTheDocument()
+    expect(screen.queryByText(i18n.t('matches:drawer.fields.renewals'))).not.toBeInTheDocument()
   })
 })

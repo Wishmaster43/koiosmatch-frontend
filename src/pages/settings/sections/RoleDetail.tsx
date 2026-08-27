@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next'
 import { ArrowLeft } from 'lucide-react'
 import api from '@/lib/api'
 import { notifyError } from '@/lib/notify'
+import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { ColorSwatch } from '../components/SettingsControls'
 import { PermissionMatrix } from './RolesPermissionMatrix'
 import type { PermissionGroups } from './RolesPermissionMatrix'
@@ -37,6 +38,10 @@ function IconPicker({ value, color, options, onPick }: IconPickerProps) {
   // inline in the style object below) so the HUISSTIJL accent-fill selector
   // doesn't mistake this tintBg() ARGUMENT for a hand-painted solid fill.
   const swatchColor = color || 'var(--color-primary)'
+  // Single-source popover behaviour (Escape, stopped before it can bubble to a
+  // host modal) via the shared useFocusTrap — arms only while `open`, since the
+  // trap disarms itself when the ref detaches (see the hook's arming semantics).
+  const trapRef = useFocusTrap<HTMLDivElement>(() => setOpen(false))
   return (
     <div style={{ position: 'relative' }}>
       <Button variant="secondary" onClick={() => setOpen(o => !o)}
@@ -46,7 +51,7 @@ function IconPicker({ value, color, options, onPick }: IconPickerProps) {
       {open && (
         <>
           <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
-          <div className="z-50" style={{ position: 'absolute', top: '110%', left: 0, marginTop: 4,
+          <div ref={trapRef} tabIndex={-1} className="z-50" style={{ position: 'absolute', top: '110%', left: 0, marginTop: 4,
             display: 'grid', gridTemplateColumns: 'repeat(8, 1fr)', gap: 4, padding: 8, width: 300,
             background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10,
             boxShadow: 'var(--shadow-float)' }}>

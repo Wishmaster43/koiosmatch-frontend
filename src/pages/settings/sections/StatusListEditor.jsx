@@ -17,8 +17,10 @@ import { useConfirm } from '@/hooks/useConfirm'
 import { DragList, ColorSwatch, ColorBadge, DefaultToggle } from '../components/SettingsControls'
 import { Toggle } from '../components/SettingsKit'
 import Button from '@/components/ui/Button'
+import ModalFooter from '@/components/ui/ModalFooter'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 import { PageTitle, Caption } from '@/components/ui/typography'
+import { useFocusTrap } from '@/hooks/useFocusTrap'
 
 // eslint-disable-next-line no-restricted-syntax -- DATA: fallback swatch colour for a lookup row without one stored yet, not UI chrome
 const FALLBACK_SWATCH = '#6B7280'
@@ -100,6 +102,9 @@ export default function StatusListEditor({ title, subtitle, endpoint, addLabel, 
   const [busyDefaultKey, setBusyDefaultKey] = useState(null)
   // House confirmation dialog (§0 restschuld) — replaces the native window.confirm() below.
   const { confirm, dialog } = useConfirm()
+  // MODAL-HERBOUW-1: shared focus-trap (arm-on-attach, Escape-to-close, restores
+  // focus on close) — the trap's own close callback always reads the latest one.
+  const modalPanelRef = useFocusTrap(() => setShowModal(false))
 
   useEffect(() => {
     // Reset every previous-load flag when the endpoint/entity identity changes —
@@ -384,16 +389,18 @@ export default function StatusListEditor({ title, subtitle, endpoint, addLabel, 
 
       {showModal && (
         <>
-          <div className="fixed inset-0 z-40" style={{ background: 'rgba(0,0,0,0.3)' }} onClick={() => setShowModal(false)} />
-          <div className="fixed z-50" style={{ top: '50%', left: '50%', transform: 'translate(-50%,-50%)', background: 'var(--surface)', borderRadius: 12, padding: 24, width: 400, boxShadow: 'var(--shadow-modal)' }}>
+          {/* Backdrop + panel stack on the shared overlay token, never a raw Tailwind z-40/z-50. */}
+          <div className="fixed inset-0" style={{ zIndex: 'var(--z-overlay)', background: 'rgba(0,0,0,0.3)' }} onClick={() => setShowModal(false)} />
+          <div ref={modalPanelRef} role="dialog" aria-modal="true" aria-label={editing ? t('statusList.editTitle') : addLabel} tabIndex={-1}
+            className="fixed" style={{ zIndex: 'var(--z-overlay)', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', background: 'var(--surface)', borderRadius: 12, padding: '24px 24px 0', width: 400, boxShadow: 'var(--shadow-modal)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
               <PageTitle as="span">{editing ? t('statusList.editTitle') : addLabel}</PageTitle>
               <Button variant="ghost" iconOnly size="sm" onClick={() => setShowModal(false)} title={t('common:close')} aria-label={t('common:close')}><X size={16} /></Button>
             </div>
             <div style={{ marginBottom: 14 }}>
-              <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 5 }}>{t('statusList.nameLabel')}</div>
-              <input value={draft.name} onChange={e => setDraft(d => ({ ...d, name: e.target.value }))}
-                placeholder={t('statusList.namePlaceholder')}
+              <label htmlFor="status-list-name" style={{ display: 'block', fontSize: 12, color: 'var(--text-muted)', marginBottom: 5 }}>{t('statusList.nameLabel')}</label>
+              <input id="status-list-name" value={draft.name} onChange={e => setDraft(d => ({ ...d, name: e.target.value }))}
+                placeholder={t('statusList.namePlaceholder')} aria-label={t('statusList.nameLabel')}
                 style={{ width: '100%', height: 36, padding: '0 10px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, outline: 'none', boxSizing: 'border-box' }} />
             </div>
             {withColor && (
@@ -414,9 +421,10 @@ export default function StatusListEditor({ title, subtitle, endpoint, addLabel, 
             )}
             {numberField && (
               <div style={{ marginBottom: 14 }}>
-                <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 5 }}>{numberField.label}</div>
-                <input type="number" min={numberField.min ?? 1} max={numberField.max ?? 999} value={draft[numberField.key] ?? ''}
+                <label htmlFor="status-list-number" style={{ display: 'block', fontSize: 12, color: 'var(--text-muted)', marginBottom: 5 }}>{numberField.label}</label>
+                <input id="status-list-number" type="number" min={numberField.min ?? 1} max={numberField.max ?? 999} value={draft[numberField.key] ?? ''}
                   onChange={e => setDraft(d => ({ ...d, [numberField.key]: e.target.value === '' ? null : Number(e.target.value) }))}
+                  aria-label={numberField.label}
                   style={{ width: 120, height: 36, padding: '0 10px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, outline: 'none', boxSizing: 'border-box' }} />
               </div>
             )}
@@ -444,11 +452,11 @@ export default function StatusListEditor({ title, subtitle, endpoint, addLabel, 
                 </span>
               </div>
             ))}
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 20 }}>
-              <Button variant="secondary" onClick={() => setShowModal(false)}>{t('common.cancel')}</Button>
-              <Button variant="primary" onClick={submit} disabled={saving || !draft.name.trim()}>
-                {saving ? t('common.saving') : (editing ? t('common.save') : t('statusList.addBtn'))}
-              </Button>
+            {/* Shared modal footer (§4/HUISSTIJL-1) — spans the panel's full width past the body padding. */}
+            <div style={{ margin: '20px -24px 0' }}>
+              <ModalFooter onCancel={() => setShowModal(false)} onSubmit={submit}
+                disabled={saving || !draft.name.trim()} busy={saving}
+                cancelLabel={t('common.cancel')} submitLabel={editing ? t('common.save') : t('statusList.addBtn')} />
             </div>
           </div>
         </>

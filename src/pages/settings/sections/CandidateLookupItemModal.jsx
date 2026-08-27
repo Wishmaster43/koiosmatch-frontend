@@ -14,6 +14,7 @@ import { GENERIC_LOOKUP_ICON_NAMES, resolveGenericLookupIcon } from './lookupIco
 import Button from '@/components/ui/Button'
 import ModalFooter from '@/components/ui/ModalFooter'
 import { Caption, BodyText, PageTitle, SectionTitle } from '@/components/ui/typography'
+import { useFocusTrap } from '@/hooks/useFocusTrap'
 
 // "Niet actief" ("Not active") → "niet_actief" — a stable English-ish slug suggestion (mirrors
 // the parent's slugify; duplicated here to avoid a cross-file import cycle).
@@ -27,10 +28,16 @@ export default function CandidateLookupItemModal({
 }) {
   const { t } = useTranslation('settings')
 
+  // Single-source dialog behaviour (Escape + Tab-trap, guarded against a nested
+  // popup's Escape bubbling past its own scope) via the shared useFocusTrap,
+  // instead of a hand-rolled document-level Escape listener.
+  const trapRef = useFocusTrap(onClose)
+
   return (
     <>
       <div className="fixed inset-0" style={{ zIndex: 'var(--z-overlay)', background: 'rgba(0,0,0,0.3)' }} onClick={onClose} />
-      <div className="fixed" style={{ zIndex: 'var(--z-overlay)', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', background: 'var(--surface)', borderRadius: 12, padding: 24, width: 400, boxShadow: 'var(--shadow-modal)' }}>
+      <div ref={trapRef} role="dialog" aria-modal="true" aria-label={modal.mode === 'add' ? t('lookups.add') : t('lookups.edit')} tabIndex={-1}
+        className="fixed" style={{ zIndex: 'var(--z-overlay)', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', background: 'var(--surface)', borderRadius: 12, padding: 24, width: 400, boxShadow: 'var(--shadow-modal)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
           <PageTitle as="span">{modal.mode === 'add' ? t('lookups.add') : t('lookups.edit')}</PageTitle>
           <Button variant="ghost" iconOnly onClick={onClose} aria-label={t('common:close')}><X size={16} /></Button>

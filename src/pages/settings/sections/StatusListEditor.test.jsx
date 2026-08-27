@@ -279,7 +279,10 @@ describe('StatusListEditor — entity scoping (note types)', () => {
       withColor={false} entity="candidate" />)
 
     await user.click(screen.getByRole('button', { name: 'Type toevoegen' }))
-    await user.type(screen.getByPlaceholderText(st('statusList.namePlaceholder')), 'Intake')
+    // MODAL-HERBOUW-1: the create modal is a real dialog with an accessible name input.
+    expect(screen.getByRole('dialog')).toBeInTheDocument()
+    const nameInput = screen.getByRole('textbox', { name: st('statusList.nameLabel') })
+    await user.type(nameInput, 'Intake')
     await user.click(screen.getByRole('button', { name: st('statusList.addBtn') }))
 
     await waitFor(() => expect(api.post).toHaveBeenCalledWith('/note-types', expect.objectContaining({ entity: 'candidate', name: 'Intake' })))

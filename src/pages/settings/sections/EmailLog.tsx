@@ -10,6 +10,7 @@ import type { TFunction } from 'i18next'
 import { X } from 'lucide-react'
 import api, { unwrapList } from '@/lib/api'
 import { useDateFormat } from '@/lib/datetime'
+import { useFocusTrap } from '@/hooks/useFocusTrap'
 import LogView from '@/components/ui/LogView'
 import type { LogExportCol } from '@/components/ui/LogView'
 import { DirectionPill, StatusPill, isInbound } from '@/components/ui/logChips'
@@ -37,6 +38,9 @@ function EmailLogDrawer({ entry, onClose }: { entry: EmailLogEntry; onClose: () 
   const { t } = useTranslation('settings')
   // App-wide active locale (§5) — formatDateTime replaces the old hardcoded 'nl-NL' fmt().
   const { formatDateTime } = useDateFormat()
+  // Single-source dialog behaviour (Escape + Tab-trap + focus restore) via the
+  // shared useFocusTrap, instead of a hand-rolled document-level Escape listener.
+  const trapRef = useFocusTrap<HTMLDivElement>(onClose)
   const rows: Array<[string, string]> = [
     [t('log.direction'), isInbound(entry.direction) ? t('log.in') : t('log.out')],
     [t('emailLog.from'), entry.from ?? '—'],
@@ -49,7 +53,8 @@ function EmailLogDrawer({ entry, onClose }: { entry: EmailLogEntry; onClose: () 
   return (
     <>
       <div className="fixed inset-0 z-40" style={{ background: 'rgba(0,0,0,0.2)' }} onClick={onClose} />
-      <div className="fixed top-0 bottom-0 right-0 z-50 flex flex-col" style={{ width: 460, background: 'var(--surface)', boxShadow: '-4px 0 30px rgba(0,0,0,0.1)' }}>
+      <div ref={trapRef} role="dialog" aria-modal="true" aria-label={entry.subject || t('emailLog.title')} tabIndex={-1}
+        className="fixed top-0 bottom-0 right-0 z-50 flex flex-col" style={{ width: 460, background: 'var(--surface)', boxShadow: '-4px 0 30px rgba(0,0,0,0.1)' }}>
         <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{entry.subject || t('emailLog.title')}</span>
           <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}><X size={16} /></button>

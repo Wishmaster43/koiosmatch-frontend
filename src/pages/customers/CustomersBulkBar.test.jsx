@@ -3,6 +3,15 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import CustomersBulkBar from './CustomersBulkBar'
 
+// BulkNoteModal's body is the shared RichTextEditor (real Tiptap); stub it with a
+// plain textarea so this test drives the modal's own wiring, not Tiptap internals
+// (mirrors EditableRichTextField.test.tsx's stub).
+vi.mock('@/components/ui/RichTextEditor', () => ({
+  default: ({ value, onChange }) => (
+    <textarea data-testid="rte" value={value ?? ''} onChange={e => onChange(e.target.value)} />
+  ),
+}))
+
 // SYNC-BULK-1: the couple-to-backoffice node gates itself on permission (useAuth)
 // + tenant app availability (useApps) — mocked so each test can drive both.
 const mockUseAuth = vi.fn()
@@ -75,6 +84,23 @@ describe('CustomersBulkBar', () => {
     await user.click(screen.getByText('bulk.actions'))
     await user.click(screen.getByText('common:geocode.refresh'))
     expect(onGeocode).toHaveBeenCalledTimes(1)
+  })
+
+  // NOTITIE-RTE-VRAAG-1: bulk add-note opens the shared rich-text modal instead
+  // of ActionMenu's bare input node; submitting calls onAddNote with the HTML.
+  it('opens the shared note modal and calls onAddNote with the entered content', async () => {
+    const user = userEvent.setup()
+    const props = baseProps()
+    render(<CustomersBulkBar {...props} />)
+    await user.click(screen.getByText('bulk.actions'))
+    await user.click(screen.getByText('bulk.addNote'))
+    expect(screen.getByRole('dialog')).toBeInTheDocument()
+
+    await user.type(screen.getByTestId('rte'), 'Hello there')
+    await user.click(screen.getByText('bulk.noteSubmit'))
+
+    expect(props.onAddNote).toHaveBeenCalledTimes(1)
+    expect(props.onAddNote.mock.calls[0][0]).toContain('Hello there')
   })
 
   // SYNC-BULK-1: bulk backoffice coupling — gated on the SAME permission as the

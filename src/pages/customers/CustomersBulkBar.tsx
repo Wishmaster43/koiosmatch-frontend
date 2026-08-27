@@ -4,11 +4,13 @@
  * mutation; data per action arrives via props so this stays a thin assembler.
  * Mirrors CandidatesBulkBar.
  */
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ListChecks, UserCog, CircleDot, Tag, Tags, StickyNote, Archive, RefreshCw, Link2, Building2, Layers } from 'lucide-react'
 import ActionMenu from '@/components/ui/ActionMenu'
 import type { MenuNode } from '@/components/ui/ActionMenu'
 import BulkBarShell from '@/components/ui/BulkBarShell'
+import BulkNoteModal from '@/components/ui/BulkNoteModal'
 import { useAuth } from '@/context/AuthContext'
 import { useApps } from '@/context/AppsContext'
 import type { Id, LookupOption } from '@/types/common'
@@ -46,6 +48,9 @@ export default function CustomersBulkBar({
   users = [], statuses = [], selectedTags = [],
 }: CustomersBulkBarProps) {
   const { t } = useTranslation('customers')
+  // NOTITIE-RTE-VRAAG-1: the bulk note action opens the shared rich-text modal
+  // instead of ActionMenu's bare input node.
+  const [noteModalOpen, setNoteModalOpen] = useState(false)
 
   // SYNC-BULK-1: same permission as the per-record BackofficeLinksTab's `canLink`
   // (BackofficeEntityRegistry maps the "customer" entity to customers.update) —
@@ -77,8 +82,7 @@ export default function CustomersBulkBar({
       placeholder: t('bulk.tagPlaceholder'), submitLabel: t('bulk.tagSubmit'), onSubmit: v => onAddTag(String(v)) },
     { key: 'remove-tag', label: t('bulk.removeTag'), icon: Tags,
       searchPlaceholder: t('bulk.searchTag'), emptyText: t('bulk.noTags'), options: tagOptions, onPick: v => onRemoveTag(String(v)) },
-    { key: 'note', label: t('bulk.addNote'), icon: StickyNote, input: true,
-      placeholder: t('bulk.notePlaceholder'), submitLabel: t('bulk.noteSubmit'), onSubmit: v => onAddNote(String(v)) },
+    { key: 'note', label: t('bulk.addNote'), icon: StickyNote, onSelect: () => setNoteModalOpen(true) },
     // GEO-REGEOCODE-1: reuses the ONE shared common:geocode.refresh label (no
     // per-entity i18n key) — mirrors the per-record GeocodeButton's tooltip text.
     ...(canGeocode && onGeocode ? [{ key: 'geocode', label: t('common:geocode.refresh'), icon: RefreshCw, onSelect: onGeocode }] : []),
@@ -96,6 +100,9 @@ export default function CustomersBulkBar({
   return (
     <BulkBarShell label={t('bulk.selected', { count })} onClear={onClear} clearLabel={t('bulk.deselect')}>
       <ActionMenu label={t('bulk.actions')} icon={ListChecks} items={items} />
+      <BulkNoteModal open={noteModalOpen} onClose={() => setNoteModalOpen(false)}
+        onSubmit={html => { onAddNote(html); setNoteModalOpen(false) }}
+        title={t('bulk.addNote')} submitLabel={t('bulk.noteSubmit')} />
     </BulkBarShell>
   )
 }

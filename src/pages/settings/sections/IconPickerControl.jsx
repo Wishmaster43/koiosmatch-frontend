@@ -6,6 +6,22 @@
  */
 import { createElement, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useFocusTrap } from '@/hooks/useFocusTrap'
+
+// Panel component so the focus trap arms only while the popover is OPEN: Escape
+// is handled (and stopped) at the popover itself, never by a hosting dialog's trap.
+function IconPopoverPanel({ onClose, children }) {
+  const panelRef = useFocusTrap(onClose)
+  return (
+    // Floating popover under its trigger, usable both on plain rows and inside
+    // modals — the CSS popover rung mirrors SelectMenu/CreatableSelect.
+    <div ref={panelRef} tabIndex={-1} role="menu" style={{ position: 'absolute', zIndex: 'var(--z-popover)', top: 30, left: 0, width: 168,
+      background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10, padding: 10,
+      boxShadow: 'var(--shadow-float)', display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 6 }}>
+      {children}
+    </div>
+  )
+}
 
 // See the file's top doc above; a generic icon popover, never hardcoding a vocabulary itself.
 export default function IconPickerControl({ icons, resolve, value, color, label, onPick }) {
@@ -35,11 +51,7 @@ export default function IconPickerControl({ icons, resolve, value, color, label,
         {createElement(resolve(value), { size: 13 })}
       </button>
       {open && (
-        // Floating popover under its trigger, usable both on plain rows and inside
-        // modals — the CSS popover rung mirrors SelectMenu/CreatableSelect.
-        <div role="menu" style={{ position: 'absolute', zIndex: 'var(--z-popover)', top: 30, left: 0, width: 168,
-          background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10, padding: 10,
-          boxShadow: 'var(--shadow-float)', display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 6 }}>
+        <IconPopoverPanel onClose={() => setOpen(false)}>
           {icons.map(name => {
             const active = name === value
             return (
@@ -56,7 +68,7 @@ export default function IconPickerControl({ icons, resolve, value, color, label,
               </button>
             )
           })}
-        </div>
+        </IconPopoverPanel>
       )}
     </div>
   )

@@ -64,6 +64,7 @@ import type { FieldRow } from '@/components/forms/EditableFieldTable'
 import { useContractTypes } from '@/lib/useContractTypes'
 import { notifySuccess, notifyError } from '@/lib/notify'
 import ScorePill from '../ScorePill'
+import { useMatchStopReasons } from '../hooks/useMatchStopReasons'
 import { useMatchContract } from '../hooks/useMatchContract'
 import type { MatchContract } from '../hooks/useMatchContract'
 import { parseEmails, numOrNull } from './matchContractFieldUtils'
@@ -110,6 +111,11 @@ export default function OverviewTab({ match, onUpdate, onOpenNotes }: OverviewTa
   // MATCH-EDIT-1: contract_type is a tenant lookup (mirrors the Contract tab's
   // own dropdown) — never a hardcoded option list.
   const { types: contractTypes } = useContractTypes()
+  // MATCH-DRILL-2: the tenant's termination-reason lookup, to resolve the raw
+  // stop_reason slug to its label — falls back to the label the read-back
+  // itself already carries, then the raw slug, so a stale/deleted lookup entry
+  // never blanks the line (§3B "nothing hardcoded", but never a dead end either).
+  const { reasons: stopReasons } = useMatchStopReasons()
   // M3/M28/M12 + MATCH-EDIT-1: the contract/financial layer is DETAIL-only (§8 —
   // never on the list row), so this tab fetches (and now edits) it itself, same
   // as every other lazy per-tab fetch in this drawer (§0.19 abort/alive-guard
@@ -119,7 +125,8 @@ export default function OverviewTab({ match, onUpdate, onOpenNotes }: OverviewTa
   // /matches/{id} — a second hook instance here would be a genuine duplicate
   // fetch, not the "one per tab" pattern the comment above describes.
   const { data: contract, loading: contractLoading, error: contractError, unavailable: contractUnavailable,
-    retry: retryContract, revertTick, save: saveContract, matchTextPresent } = useMatchContract(match.id, onUpdate)
+    retry: retryContract, revertTick, save: saveContract, matchTextPresent,
+    termination } = useMatchContract(match.id, onUpdate)
 
   // MATCH-EDIT-1: the six fields that used to live on the Contract tab — now
   // editable here, grouped under that tab's OWN "Contract"/"Financieel" titles
@@ -212,6 +219,41 @@ export default function OverviewTab({ match, onUpdate, onOpenNotes }: OverviewTa
             </Field>
           )}
           <Field label={t('drawer.fields.created')}>{formatDate(match.date)}</Field>
+          {/* MATCH-DRILL-2: a calm reason line after termination — the label
+              resolves through the tenant's stop-reason lookup, falling back to
+              the read-back's own label, then the raw slug (never a blank
+              value once a match actually carries a stop_reason). Rendered
+              only when the match was actually terminated — never a dash row
+              that can never be filled. */}
+          {(() => {
+            // Detail payload first (the LIST row never carries the termination
+            // block, MatchListResource emits only the flat label); the mapped
+            // row values remain the in-session fallback right after terminating.
+            const stopReason = termination?.stopReason ?? match.stopReason
+            const stopLabel = termination?.stopReasonLabel ?? match.stopReasonLabel
+            const when = termination?.terminatedAt ?? termination?.effectiveDate
+              ?? match.terminatedAt ?? match.terminationEffectiveDate ?? null
+            if (!stopReason && !stopLabel) return null
+            const reason = stopReasons.find(r => r.value === stopReason)?.label ?? stopLabel ?? stopReason
+            return (
+              <Field label={t('drawer.fields.terminated')}>
+                {when
+                  ? t('drawer.terminate.reasonLine', { date: formatDate(when), reason })
+                  : t('drawer.terminate.reasonLineNoDate', { reason })}
+              </Field>
+            )
+          })()}
+          {/* MATCH-DRILL-2: renewal count — canon: a counter never renders "0",
+              so this row only mounts once the match has actually been renewed. */}
+          {(() => {
+            // Same detail-first resolution as the reason line above.
+            const renewals = termination?.renewalCount ?? match.renewalCount ?? 0
+            return renewals > 0 && (
+              <Field label={t('drawer.fields.renewals')}>
+                {t('drawer.renew.renewalCount', { count: renewals, ordinal: true })}
+              </Field>
+            )
+          })()}
         </div>
       </SectionCard>
 

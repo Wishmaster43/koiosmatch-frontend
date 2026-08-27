@@ -7,6 +7,7 @@ import { X, Search, TrendingUp, Target, Info } from 'lucide-react'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { PageTitle, BodyText, Caption, GroupLabel } from '@/components/ui/typography'
 import Button from '@/components/ui/Button'
+import StatusPill from '@/components/ui/StatusPill'
 import { tint, tintBorder } from '@/lib/tint'
 import type { ReactNode } from 'react'
 import { useState } from 'react'
@@ -22,27 +23,21 @@ import { useLocale, useDateFormat } from '@/lib/datetime'
 // module-scope helper never hardcodes nl-NL or imports i18n).
 const monthName = (locale: string, i: number) => new Date(2000, i, 1).toLocaleString(locale, { month: 'long' })
 
-// A colour-tinted status pill for a drilldown row, falling back to a neutral tint and the raw value for an unrecognised status.
+// A colour-tinted status pill for a drilldown row, via the shared SoftChip/StatusPill
+// (KPIDRILL-CHROME-1) — the tint/ink pairing (incl. the danger-on-danger AA fix) now
+// lives once in SoftChip/chipInk instead of a local hand-rolled bg/color map.
 function StatusBadge({ status }: { status?: string }) {
   const { t } = useTranslation('reports')
-  const styles: Record<string, { bg: string; color: string }> = {
-    actief:     { bg: 'var(--color-success-bg)', color: 'var(--color-success-text)' },
-    nietactief: { bg: 'var(--color-warning-bg)', color: 'var(--color-warning)' },
-    extern:     { bg: 'var(--color-secondary-bg)', color: 'var(--color-secondary)' },
-    intake:     { bg: 'var(--color-violet-bg)', color: 'var(--color-violet)' },
-    // Ink is --color-on-danger-bg — the raw danger colour reads only 3.95:1 on its
-    // own pastel, AA fail (Opus r3.5).
-    verwijderd: { bg: 'var(--color-danger-bg)', color: 'var(--color-on-danger-bg)' },
+  const colors: Record<string, string> = {
+    actief: 'var(--color-success)',
+    nietactief: 'var(--color-warning)',
+    extern: 'var(--color-secondary)',
+    intake: 'var(--color-violet)',
+    verwijderd: 'var(--color-danger)',
   }
   const key = (status || '').toLowerCase()
-  const s   = styles[key] || { bg: 'var(--hover-bg)', color: 'var(--text-muted)' }
   const label = status ? t(`candidates.status.${key}`, { defaultValue: status }) : t('candidates.unknown')
-  return (
-    <span style={{ background: s.bg, color: s.color, borderRadius: 999,
-                   padding: '2px 8px', fontSize: 11, fontWeight: 500 }}>
-      {label}
-    </span>
-  )
+  return <StatusPill label={label} color={colors[key]} />
 }
 
 // ── Candidate list (New / Deregistered) ───────────────────────────────────────
@@ -110,7 +105,7 @@ function CandidateList({ candidates, dateField, dateLabel, onSelect }: { candida
                   {c.position && dateValue && <span> · </span>}
                   {dateValue && <span>{dateLabel}: {formatDate(dateValue)}</span>}
                 </Caption>
-                {/* Activity meta — keer gewerkt + laatst ingelogd (SM candidate fields) */}
+                {/* Activity meta — times worked + last login (SM candidate fields) */}
                 {(() => {
                   const sm = c as { number_of_times_worked?: number; last_login_at?: string }
                   const worked = sm.number_of_times_worked
@@ -317,12 +312,11 @@ export default function KpiDrillDownDrawer({ mode, title, candidates = [], onClo
   const shown = currentTab?.candidates ?? candidates
   return (
     <>
-      <div className="fixed inset-0 z-40" style={{ background: 'rgba(0,0,0,0.25)' }} onClick={onClose} />
+      <div className="fixed inset-0" style={{ background: 'rgba(0,0,0,0.25)', zIndex: 'var(--z-drawer)' }} onClick={onClose} />
 
       <div ref={panelRef} role="dialog" aria-modal="true" aria-label={typeof title === 'string' ? title : undefined} tabIndex={-1}
-        className="fixed top-0 bottom-0 right-0 z-50 flex flex-col bg-[var(--surface)]"
-        // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- pre-existing side-drawer panel shadow, shared verbatim by every drill-down/side-drawer shell in the app (RightDrawer, ShiftsDrillDownDrawer, …); an app-wide --shadow-drawer token migration is out of this task's mechanical scope
-        style={{ width: 520, boxShadow: '-4px 0 30px rgba(0,0,0,0.12)' }}>
+        className="fixed top-0 bottom-0 right-0 flex flex-col bg-[var(--surface)]"
+        style={{ width: 520, zIndex: 'var(--z-drawer)', boxShadow: 'var(--shadow-drawer)' }}>
 
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',

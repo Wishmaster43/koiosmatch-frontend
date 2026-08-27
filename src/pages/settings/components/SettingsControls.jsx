@@ -2,23 +2,26 @@
  * SettingsControls — small shared UI controls reused across settings sections:
  * a colour picker (swatch + popup), a colour badge, and a drag-to-reorder list.
  */
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { GripVertical, Check, ChevronUp, ChevronDown } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { COLOR_PRESETS } from '@/lib/colorPresets'
 import Toggle from '@/components/ui/Toggle'
+import { useFocusTrap } from '@/hooks/useFocusTrap'
 import SoftChip from '@/components/ui/SoftChip'
 
-// The curated-palette popover anchored under ColorSwatch; an outside click closes it via the effect below.
+// The curated-palette popover anchored under ColorSwatch; outside click closes it,
+// and Escape closes ONLY the popover: useFocusTrap handles the key at this element
+// (stopPropagation), so a hosting dialog's own trap never fires for it.
 function ColorPickerPopup({ color, onChange, onClose }) {
   const [hex, setHex] = useState(color)
-  const ref = useRef(null)
+  const ref = useFocusTrap(onClose)
   // Close the popup on any outside mousedown, not just its own trigger.
   useEffect(() => {
     const handler = (e) => { if (ref.current && !ref.current.contains(e.target)) onClose() }
     document.addEventListener('mousedown', handler)
     return () => document.removeEventListener('mousedown', handler)
-  }, [onClose])
+  }, [onClose, ref])
   const apply = (c) => { setHex(c); onChange(c) }
   // Curated soft palette only — no free colour wheel/hex, so labels stay calm and
   // consistent in light + dark across statuses / funnel / candidate types / pools / …
@@ -26,7 +29,7 @@ function ColorPickerPopup({ color, onChange, onClose }) {
     // Floating popup under its trigger; used both on plain settings rows and inside
     // modals (LocationFormModal, CandidateLookupItemModal) — the CSS popover rung
     // mirrors SelectMenu/CreatableSelect so it always beats a hosting dialog's band.
-    <div ref={ref} style={{ position: 'absolute', zIndex: 'var(--z-popover)', background: 'var(--surface)', border: '1px solid var(--border)',
+    <div ref={ref} tabIndex={-1} style={{ position: 'absolute', zIndex: 'var(--z-popover)', background: 'var(--surface)', border: '1px solid var(--border)',
                              borderRadius: 10, padding: 12, boxShadow: 'var(--shadow-float)', top: 36, left: 0, width: 192 }}>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
         {COLOR_PRESETS.map(c => (

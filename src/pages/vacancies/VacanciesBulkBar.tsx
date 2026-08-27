@@ -4,11 +4,13 @@
  * action needs (users, statuses, customers, tags) comes in via props so this stays
  * a thin assembler. Mirrors CandidatesBulkBar — extend by adding a node.
  */
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ListChecks, Search, UserCog, CircleDot, Building2, Globe, GlobeLock, Bot, BotOff, Tag, StickyNote, Archive } from 'lucide-react'
 import ActionMenu from '@/components/ui/ActionMenu'
 import type { MenuNode } from '@/components/ui/ActionMenu'
 import BulkBarShell from '@/components/ui/BulkBarShell'
+import BulkNoteModal from '@/components/ui/BulkNoteModal'
 import type { Id, LookupOption } from '@/types/common'
 
 interface BulkUser { id: Id; name: string }
@@ -50,6 +52,8 @@ export default function VacanciesBulkBar({
   selectedVacancies = [], onOpenCandidateSearch,
 }: VacanciesBulkBarProps) {
   const { t } = useTranslation('vacancies')
+  // NOTITIE-RTE-VRAAG-1: bulk note opens the shared rich-text modal.
+  const [noteModalOpen, setNoteModalOpen] = useState(false)
 
   // Build the option lists from props.
   const userOptions = users.map(u => ({ value: u.id, label: u.name }))
@@ -99,14 +103,16 @@ export default function VacanciesBulkBar({
     ] }] : []),
     { key: 'tag', label: t('bulk.removeTag'), icon: Tag,
       searchPlaceholder: t('bulk.searchTag'), emptyText: t('bulk.noTags'), options: tagOptions, onPick: v => onRemoveTag(String(v)) },
-    { key: 'note', label: t('bulk.addNote'), icon: StickyNote, input: true,
-      placeholder: t('bulk.notePlaceholder'), submitLabel: t('bulk.noteSubmit'), onSubmit: v => onAddNote(String(v)) },
+    { key: 'note', label: t('bulk.addNote'), icon: StickyNote, onSelect: () => setNoteModalOpen(true) },
     ...(canArchive ? [{ key: 'archive', label: t('bulk.archive'), icon: Archive, danger: true, onSelect: onArchive }] : []),
   ]
 
   return (
     <BulkBarShell label={t('bulk.selected', { count })} onClear={onClear} clearLabel={t('bulk.deselect')}>
       <ActionMenu label={t('bulk.actions')} icon={ListChecks} items={items} />
+      <BulkNoteModal open={noteModalOpen} onClose={() => setNoteModalOpen(false)}
+        onSubmit={html => { onAddNote(html); setNoteModalOpen(false) }}
+        title={t('bulk.addNote')} submitLabel={t('bulk.noteSubmit')} />
     </BulkBarShell>
   )
 }

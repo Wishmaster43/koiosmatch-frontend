@@ -90,11 +90,35 @@ function pick(d: Record<string, unknown>): MatchContract {
 }
 
 // See the file's top doc above; fetches the contract/financial detail once per match and owns its optimistic save-with-revert.
+// Read-only termination read-back (MATCH-DRILL-2, K-126) — detail payload only,
+// so it lives NEXT TO the editable contract, never inside the PATCH-body shape.
+export interface MatchTermination {
+  stopReason: string | null
+  stopReasonLabel: string | null
+  effectiveDate: string | null
+  terminatedAt: string | null
+  renewalCount: number | null
+}
+// Pull the nested termination block plus the renewal counter off a detail row.
+function pickTermination(d: Record<string, unknown>): MatchTermination | null {
+  const term = (d.termination ?? null) as Record<string, unknown> | null
+  const renewal = d.renewal_count != null ? Number(d.renewal_count) : null
+  if (!term && renewal == null) return null
+  return {
+    stopReason: (term?.stop_reason as string) ?? null,
+    stopReasonLabel: (term?.stop_reason_label as string) ?? null,
+    effectiveDate: (term?.effective_date as string) ?? null,
+    terminatedAt: (term?.terminated_at as string) ?? null,
+    renewalCount: renewal,
+  }
+}
+
 export function useMatchContract(
   matchId: Id | undefined,
   onUpdate?: (id: MatchRow['id'], patch: Partial<MatchRow>) => void,
 ) {
   const [data,    setData]    = useState<MatchContract>(EMPTY)
+  const [termination, setTermination] = useState<MatchTermination | null>(null)
   const [loading, setLoading] = useState(true)
   // Raw fetch error kept (not just a boolean) so a 503 — the integration simply
   // isn't configured yet — can be told apart from a real failure (C-15).
@@ -112,7 +136,7 @@ export function useMatchContract(
 
   // Load the contract layer once per match (detail-only fields — never on the list row).
   useEffect(() => {
-    if (!matchId) { setData(EMPTY); setLoading(false); setMatchTextPresent(false); return }
+    if (!matchId) { setData(EMPTY); setTermination(null); setLoading(false); setMatchTextPresent(false); return }
     let alive = true
     setLoading(true); setRawError(null)
     api.get(`/matches/${matchId}`)
@@ -120,6 +144,7 @@ export function useMatchContract(
         if (!alive) return
         const raw = (unwrap(r) ?? {}) as Record<string, unknown>
         setData(pick(raw))
+        setTermination(pickTermination(raw))
         setMatchTextPresent('match_text' in raw)
       })
       .catch(err => { if (alive) setRawError(err) })
@@ -163,5 +188,5 @@ export function useMatchContract(
     }
   }, [matchId, data, onUpdate])
 
-  return { data, loading, error, unavailable, saving, revertTick, retry, save, matchTextPresent }
+  return { data, termination, loading, error, unavailable, saving, revertTick, retry, save, matchTextPresent }
 }

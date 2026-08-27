@@ -4,12 +4,14 @@
  * holds every bulk mutation. Each action is one config node; the data it needs
  * (users, lookups, tags) comes in via props so this stays a thin assembler.
  */
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ListChecks, Folder, FolderPlus, FolderMinus, UserCog, Milestone, Briefcase, Tag, Tags, StickyNote, Archive, ShieldCheck, UserCheck, Activity, GitMerge, RefreshCw, ExternalLink, Link2, Building2, Layers } from 'lucide-react'
 import ActionMenu from '@/components/ui/ActionMenu'
 import { BTN_H_SM } from '@/config/buttonMetrics'
 import type { MenuNode } from '@/components/ui/ActionMenu'
 import BulkBarShell from '@/components/ui/BulkBarShell'
+import BulkNoteModal from '@/components/ui/BulkNoteModal'
 import { useAuth } from '@/context/AuthContext'
 import { useApps } from '@/context/AppsContext'
 import { useTenantPools } from './hooks/useCandidatePools'
@@ -80,6 +82,8 @@ export default function CandidatesBulkBar({
   const { t } = useTranslation('candidates')
   // Talent pools for the add/remove option lists (fetch lives in the hook, §3).
   const pools = useTenantPools()
+  // NOTITIE-RTE-VRAAG-1: bulk note opens the shared rich-text modal.
+  const [noteModalOpen, setNoteModalOpen] = useState(false)
 
   // SYNC-BULK-1: same permission as the per-record BackofficeLinksTab's `canLink`
   // (BackofficeEntityRegistry maps the "candidate" entity to candidates.update) —
@@ -145,8 +149,7 @@ export default function CandidatesBulkBar({
       placeholder: t('bulk.addTagPlaceholder'), submitLabel: t('bulk.typeSubmit'), onSubmit: (v) => onAddTag(String(v)) },
     { key: 'tag', label: t('bulk.removeTag'), icon: Tag,
       searchPlaceholder: t('bulk.searchTag'), emptyText: t('bulk.noTags'), options: tagOptions, onPick: (v) => onRemoveTag(String(v)) },
-    { key: 'note', label: t('bulk.addNote'), icon: StickyNote, input: true,
-      placeholder: t('bulk.notePlaceholder'), submitLabel: t('bulk.noteSubmit'), onSubmit: (v) => onAddNote(String(v)) },
+    { key: 'note', label: t('bulk.addNote'), icon: StickyNote, onSelect: () => setNoteModalOpen(true) },
     { key: 'consent', label: t('bulk.consent'), icon: ShieldCheck, items: [
       { key: 'wa', label: t('communication.consentWhatsapp'), items: [
         { key: 'wa-on',  label: t('bulk.consentOn'),  onSelect: () => onSetConsent({ whatsapp_opt_in: true },  `WhatsApp — ${t('bulk.consentOn')}`) },
@@ -202,6 +205,9 @@ export default function CandidatesBulkBar({
 
       {/* Single bulk-mutations menu with drill-in submenus */}
       <ActionMenu label={t('bulk.actions')} icon={ListChecks} items={items} />
+      <BulkNoteModal open={noteModalOpen} onClose={() => setNoteModalOpen(false)}
+        onSubmit={html => { onAddNote(html); setNoteModalOpen(false) }}
+        title={t('bulk.addNote')} submitLabel={t('bulk.noteSubmit')} />
     </BulkBarShell>
   )
 }
