@@ -306,7 +306,8 @@
       "stageDuration": "Te lang in fase",
       "customerNone": "Zonder klant",
       "stageNone": "Zonder fase",
-      "rejectionReason": "Afwijzingsreden"
+      "rejectionReason": "Afwijzingsreden",
+      "directEntries": "waarvan {{count}} direct ingestroomd"
     },
     "buckets": {
       "active": "Actief",

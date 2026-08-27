@@ -306,7 +306,8 @@
       "stageDuration": "Zu lange in Phase",
       "customerNone": "Ohne Kunde",
       "stageNone": "Ohne Phase",
-      "rejectionReason": "Ablehnungsgrund"
+      "rejectionReason": "Ablehnungsgrund",
+      "directEntries": "davon {{count}} direkt eingestiegen"
     },
     "buckets": {
       "active": "Aktiv",

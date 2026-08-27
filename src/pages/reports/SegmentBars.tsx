@@ -14,6 +14,9 @@ export interface SegmentBarItem {
   label: string
   count: number
   color: string | null
+  // Optional muted caption under the label (e.g. "waarvan 5 direct ingestroomd") —
+  // rendered only when present, so rows without one keep their single-line height.
+  sub?: string
 }
 
 // The one shared horizontal-bar renderer for every inflow report (see file
@@ -36,8 +39,14 @@ export default function SegmentBars({ items, max, onPick }: {
                tabIndex={clickable ? 0 : undefined}
                onKeyDown={clickable ? (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onPick(it.key) } } : undefined}
                style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: clickable ? 'pointer' : 'default' }}>
-            <span style={{ flex: '0 0 34%', fontSize: 12, color: 'var(--text)', overflow: 'hidden',
-                           textOverflow: 'ellipsis', whiteSpace: 'nowrap' } as CSSProperties}>{it.label}</span>
+            <span style={{ flex: '0 0 34%', minWidth: 0 } as CSSProperties}>
+              <span style={{ display: 'block', fontSize: 12, color: 'var(--text)', overflow: 'hidden',
+                             textOverflow: 'ellipsis', whiteSpace: 'nowrap' } as CSSProperties}>{it.label}</span>
+              {it.sub && (
+                <span style={{ display: 'block', fontSize: 10.5, color: 'var(--text-muted)', overflow: 'hidden',
+                               textOverflow: 'ellipsis', whiteSpace: 'nowrap' } as CSSProperties}>{it.sub}</span>
+              )}
+            </span>
             <span style={{ flex: 1, height: 8, background: 'var(--hover-bg)', borderRadius: 999, overflow: 'hidden' }}>
               <span style={{ display: 'block', height: '100%', width: `${max > 0 ? (it.count / max) * 100 : 0}%`,
                              background: `color-mix(in srgb, ${tint} 70%, transparent)`, borderRadius: 999 }} />

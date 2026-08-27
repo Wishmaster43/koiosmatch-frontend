@@ -3,6 +3,7 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import ApplicationsReport from './ApplicationsReport'
+import i18n from '@/i18n'
 import type { ApplicationsReportData } from '@/types/analytics'
 import { getReportKpiCatalog } from './kpiCatalog'
 import { EMPTY_REPORT_FILTERS } from './reportFilterParams'
@@ -35,8 +36,8 @@ const data: ApplicationsReportData = {
   by_bucket: { active: 10, matched: 4, rejected: 3, placed: 3 },
   by_stage: [
     // eslint-disable-next-line no-restricted-syntax -- DATA: server lookup colour in a test fixture, not UI styling
-    { value: 'applied', label: 'Applied', color: '#16a34a', count: 10 },
-    { value: 'none', label: 'Geen fase', color: null, count: 2 },
+    { value: 'applied', label: 'Applied', color: '#16a34a', count: 10, direct_entries: 4 },
+    { value: 'none', label: 'Geen fase', color: null, count: 2, direct_entries: 0 },
   ],
   by_source: [{ value: 'referral', label: 'Referral', color: null, count: 6 }],
   by_owner: [
@@ -200,6 +201,18 @@ describe('ApplicationsReport (RAPPORTEN-SUITE-1 portie 2)', () => {
       expect.objectContaining({ params: { stage: 'applied', period: 'month' } }))
     expect(getSpy).toHaveBeenCalledWith('/reports/applications/advice',
       expect.objectContaining({ params: { stage: 'applied', period: 'month' } }))
+  })
+
+  // REPORT-FUNNEL-DIRECT-1 (BE 862508c3): the per-stage direct-entries caption —
+  // rendered ONLY when > 0 (teller-canon: a zero renders nothing, and an older
+  // BE without the field renders nothing either).
+  it('shows "waarvan {n} direct ingestroomd" per stage only when direct_entries > 0', async () => {
+    mockUseApplicationsReport.mockReturnValue({ data, loading: false, error: false })
+    renderReport()
+    const caption = i18n.t('applications.axes.directEntries', { ns: 'analytics', count: 4 })
+    expect(screen.getByText(caption)).toBeInTheDocument()
+    const zeroCaption = i18n.t('applications.axes.directEntries', { ns: 'analytics', count: 0 })
+    expect(screen.queryByText(zeroCaption)).toBeNull()
   })
 
   // Sentinel drawer: stage='none' opens exactly like any other stage row.

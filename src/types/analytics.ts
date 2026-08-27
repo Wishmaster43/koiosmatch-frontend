@@ -291,6 +291,12 @@ export interface ApplicationTopSegment { value: string; label: string; count: nu
 // days-in-phase (ApplicationsReport::stageDurationDistribution). `value` doubles as
 // the `stage_duration` drill XOR param — the SAME stage-key vocabulary as `by_stage`,
 // a different axis (longest-hanging rows, not just "in this stage").
+// REPORT-FUNNEL-DIRECT-1 (BE 862508c3, def v1): `direct_entries` = applications
+// that entered this stage DIRECTLY (created in it, from_stage_id null) rather
+// than progressing out of an earlier stage — the honest explanation of a >100%
+// funnel conversion. Optional: transition-tolerant while deploys cross.
+export interface ApplicationStageSegment extends CandidateSegment { direct_entries?: number }
+
 export interface ApplicationStageDurationSegment { value: string; label: string; count: number; avg_days_in_phase: number | null }
 
 // RAPPORT-APPS-VERDIEPING-1 (CMFE 24-08): the nine-card KPI strip, now riding in
@@ -320,7 +326,7 @@ export interface ApplicationsReportData {
   total: number
   timeseries: { bucket: 'day' | 'week'; series: CandidateTimeseriesPoint[] }
   by_bucket: ApplicationBucketCounts
-  by_stage: CandidateSegment[]
+  by_stage: ApplicationStageSegment[]
   by_source: CandidateSegment[]
   by_owner: CandidateOwnerSegment[]
   by_customer: ApplicationTopSegment[]

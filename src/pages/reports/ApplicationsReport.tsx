@@ -28,14 +28,13 @@ import StatTile from '@/components/ui/StatTile'
 import ReportTimeseriesChart from './ReportTimeseriesChart'
 import PieChartCard from '@/components/charts/PieChartCard'
 import BarChartCard from '@/components/charts/BarChartCard'
-import { CHART_SERIES_COLORS } from '@/components/charts/chartTypes'
 import type { ChartDatum } from '@/components/charts/chartTypes'
 import { useDateFormat } from '@/lib/datetime'
 import { useNumberFormat } from '@/lib/formatters'
 import { Caption, BodyText } from '@/components/ui/typography'
 import type {
   ReportPeriod, CandidateSegment, CandidateOwnerSegment, CandidateTimeseriesPoint,
-  ApplicationTopSegment, ApplicationBucketCounts, ApplicationStageDurationSegment,
+  ApplicationTopSegment, ApplicationBucketCounts, ApplicationStageDurationSegment, ApplicationStageSegment,
 } from '@/types/analytics'
 import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
 import { getReportKpiCatalog, getReportKpiDefaultOrder, reportKpiSettingsKey } from './kpiCatalog'
@@ -161,16 +160,6 @@ export default function ApplicationsReport({ period, filters = EMPTY_REPORT_FILT
 
   // Donut data for a coloured/few-value lookup axis (§chart-type-rule): each
   // slice wears its own tenant colour, falling back to the house series.
-  const donutData = (segs: (CandidateSegment | ApplicationTopSegment)[]): { data: ChartDatum[]; colors: string[] } => ({
-    data: segs.map(s => ({ name: s.label, value: s.count, key: s.value })),
-    colors: segs.map((s, i) => ('color' in s ? s.color : null) ?? CHART_SERIES_COLORS[i % CHART_SERIES_COLORS.length]),
-  })
-  const pickSegment = (axis: Axis, segs: (CandidateSegment | ApplicationTopSegment)[]) =>
-    gateDrillClick('applications', (d: unknown) => {
-      const key = (d as { key?: string })?.key ?? (d as { payload?: { key?: string } })?.payload?.key
-      const seg = segs.find(s => s.value === key)
-      if (seg) openSegment(seg, { [axis]: seg.value })
-    })
 
   // Bar data for a ranking axis (people/orgs/free values).
   const barData = (segs: (CandidateSegment | ApplicationTopSegment)[]): ChartDatum[] =>
@@ -216,6 +205,23 @@ export default function ApplicationsReport({ period, filters = EMPTY_REPORT_FILT
     })
     return <SegmentBars max={max} onPick={onPick}
       items={segs.map(s => ({ key: s.value, label: s.label, count: s.count, color: null }))} />
+  }
+
+  // REPORT-FUNNEL-DIRECT-1 (BE 862508c3): by_stage now carries a second per-stage
+  // number — direct_entries, the honest explanation of a >100% funnel conversion —
+  // so the stage axis wears the bars face for the same reason stage-duration does:
+  // a donut loses that number entirely. Lookup colours ride per row; the drill is
+  // the SAME `stage` segment drill the donut had. A 0 renders no caption at all
+  // (teller-canon: never "0"); an absent field (older BE) renders none either.
+  const stageBars = (segs: ApplicationStageSegment[]) => {
+    const max = segs.reduce((m, s) => Math.max(m, s.count), 0)
+    const onPick = gateDrillClick('applications', (value: string) => {
+      const seg = segs.find(s => s.value === value)
+      if (seg) openSegment(seg, { stage: value })
+    })
+    return <SegmentBars max={max} onPick={onPick}
+      items={segs.map(s => ({ key: s.value, label: s.label, count: s.count, color: s.color,
+        sub: s.direct_entries ? t('applications.axes.directEntries', { count: s.direct_entries }) : undefined }))} />
   }
 
   const onSeriesPick = gateDrillClick('applications', (dateKey: string) => {
@@ -291,9 +297,9 @@ export default function ApplicationsReport({ period, filters = EMPTY_REPORT_FILT
               semantic BUCKET_COLOR slices. */}
           <ReportChartCard title={t('applications.axes.bucket')} chart={
             <PieChartCard {...bucketDonutData(data.by_bucket)} onItemClick={pickBucket(data.by_bucket)} />} />
-          {/* Funnel stage is a tenant lookup with its own colour → donut. */}
-          <ReportChartCard title={t('applications.axes.stage')} chart={
-            <PieChartCard {...donutData(data.by_stage)} onItemClick={pickSegment('stage', data.by_stage)} />} />
+          {/* Funnel stage carries direct_entries per stage since 862508c3 → bars
+              face (see stageBars above), lookup colours per row. */}
+          <ReportChartCard title={t('applications.axes.stage')} chart={stageBars(data.by_stage)} />
 
           {/* Stage-duration keeps its own bars face (renders avg days per
               stage) — a plain donut would lose that number entirely. */}

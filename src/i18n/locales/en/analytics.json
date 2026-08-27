@@ -306,7 +306,8 @@
       "stageDuration": "Too long in stage",
       "customerNone": "Without customer",
       "stageNone": "Without stage",
-      "rejectionReason": "Rejection reason"
+      "rejectionReason": "Rejection reason",
+      "directEntries": "of which {{count}} entered directly"
     },
     "buckets": {
       "active": "Active",

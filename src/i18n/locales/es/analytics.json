@@ -306,7 +306,8 @@
       "stageDuration": "Demasiado tiempo en etapa",
       "customerNone": "Sin cliente",
       "stageNone": "Sin etapa",
-      "rejectionReason": "Motivo de rechazo"
+      "rejectionReason": "Motivo de rechazo",
+      "directEntries": "de las cuales {{count}} entradas directas"
     },
     "buckets": {
       "active": "Activo",
