@@ -76,12 +76,9 @@ export default function PopoutSaveFooter({ dirty, onSave }: PopoutSaveFooterProp
         {dirty ? t('unsavedChanges') : t('allChangesSaved')}
       </span>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <button type="button" onClick={close} data-testid="text-popout-close"
-          style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 12px', fontSize: 12, fontWeight: 500,
-            borderRadius: 8, border: '1px solid var(--border)', cursor: 'pointer',
-            background: 'var(--surface)', color: 'var(--text-muted)' }}>
+        <Button variant="mutedOutline" size="sm" onClick={close} data-testid="text-popout-close">
           <X size={13} /> {t('close')}
-        </button>
+        </Button>
         <Button variant="primary" size="sm" onClick={saveAndClose} disabled={!dirty} data-testid="text-popout-save">
           <Save size={13} /> {t('popout.saveAndClose')}
         </Button>

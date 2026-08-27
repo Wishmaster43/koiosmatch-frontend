@@ -25,6 +25,8 @@ import { DateRelativeFields } from './DateRelativeFields'
 import { useScheduleForm } from './useScheduleForm'
 import { scheduleLabel } from './scheduleLabel'
 import { sectionStyle, sectionLabel } from './scheduleModalStyles'
+import { SectionTitle, Caption, GroupLabel, BodyText } from '@/components/ui/typography'
+import ModalFooter from '@/components/ui/ModalFooter'
 
 export { scheduleLabel } from './scheduleLabel'
 
@@ -67,6 +69,7 @@ export function ScheduleModal({ trigger, scheduleConfig, onSave, onClose }: {
               { id: 'date_relative', label: t('scheduleModal.trigger.dateRelative'), desc: t('scheduleModal.trigger.dateRelativeDesc'), Icon: CalendarClock },
             ].map(({ id, label, desc, Icon: Ic }: { id: string; label: string; desc: string; Icon: LucideIcon }) => (
               <button key={id} type="button" onClick={() => setType(id)}
+                // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- trigger-type CHOICE CARD: a selection surface (CHIP-TINT idiom, chosen = tint + 2px ring, multi-line wrapped description), a face Button deliberately does not model
                 style={{
                   display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 7,
                   padding: '16px 12px', borderRadius: 12, cursor: 'pointer',
@@ -75,8 +78,9 @@ export function ScheduleModal({ trigger, scheduleConfig, onSave, onClose }: {
                 }}>
                 {/* Text-colour accent uses the AA-contrast text token, not the raw brand primary. */}
                 <Ic size={22} color={type === id ? 'var(--color-primary-text)' : 'var(--text-muted)'} />
-                <span style={{ fontSize: 13, fontWeight: 600, color: type === id ? 'var(--color-primary-text)' : 'var(--text)' }}>{label}</span>
-                <span style={{ fontSize: 11, color: 'var(--text-muted)', textAlign: 'center', lineHeight: 1.35 }}>{desc}</span>
+                {/* State ink: the selected card carries the accent text token — surface state, not a re-typed identity. */}
+                <SectionTitle as="span" style={{ color: type === id ? 'var(--color-primary-text)' : 'var(--text)' }}>{label}</SectionTitle>
+                <Caption as="span" style={{ textAlign: 'center', lineHeight: 1.35 }}>{desc}</Caption>
               </button>
             ))}
           </div>
@@ -86,7 +90,7 @@ export function ScheduleModal({ trigger, scheduleConfig, onSave, onClose }: {
             <div style={sectionStyle}>
               <label style={sectionLabel}>{t('scheduleModal.eventLabel')}</label>
               <EventCombobox value={form.eventKey} onChange={form.setEventKey} label={t('scheduleModal.eventLabel')} />
-              <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 8 }}>{t('scheduleModal.eventHint')}</p>
+              <Caption as="p" style={{ marginTop: 8 }}>{t('scheduleModal.eventHint')}</Caption>
             </div>
           )}
 
@@ -95,7 +99,7 @@ export function ScheduleModal({ trigger, scheduleConfig, onSave, onClose }: {
             <div style={sectionStyle}>
               <label style={sectionLabel}>{t('scheduleModal.agentLabel')}</label>
               <WebhookAgentSelect value={form.agentName} onChange={form.setAgentName} label={t('scheduleModal.agentLabel')} />
-              <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 6 }}>{t('scheduleModal.agentHint')}</p>
+              <Caption as="p" style={{ marginTop: 6 }}>{t('scheduleModal.agentHint')}</Caption>
             </div>
           )}
 
@@ -114,27 +118,20 @@ export function ScheduleModal({ trigger, scheduleConfig, onSave, onClose }: {
           {/* Preview — ALWAYS visible, for every trigger type (TRIGGER-POPUP-2):
               exactly the label the trigger node will show after saving. */}
           <div style={{ background: 'var(--hover-bg)', border: '1px solid var(--border)', borderRadius: 10, padding: '10px 14px' }}>
-            <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 4 }}>{t('scheduleModal.preview')}</div>
-            <div style={{ fontSize: 13, color: 'var(--text)', fontWeight: 500 }}>
+            <GroupLabel style={{ fontSize: 10, letterSpacing: '0.06em', marginBottom: 4 }}>{t('scheduleModal.preview')}</GroupLabel>
+            <BodyText style={{ fontWeight: 500 }}>
               {scheduleLabel(t, locale, form.previewTrigger, form.previewCfg)}
-            </div>
+            </BodyText>
           </div>
         </div>
 
-        {/* Footer */}
-        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, padding: '14px 20px', borderTop: '1px solid var(--border)' }}>
-          <button onClick={onClose} style={{ padding: '7px 16px', borderRadius: 8, fontSize: 13, border: '1px solid var(--border)', background: 'var(--surface)', cursor: 'pointer', color: 'var(--text)' }}>{t('scheduleModal.cancel')}</button>
-          {/* Disabled (not just clamped) whenever the current config would be unusable —
-              e.g. an emptied interval (`+'' === 0`, BUG 3) or a webhook trigger with no
-              agent chosen yet (BUG 4) — a hard backstop regardless of blur/focus state. */}
-          <button onClick={form.handleSave} disabled={!form.canSave}
-            style={{
-              padding: '7px 16px', borderRadius: 8, fontSize: 13, border: 'none', fontWeight: 600,
-              background: form.canSave ? 'var(--color-primary)' : 'var(--border)',
-              color: form.canSave ? 'var(--color-on-accent)' : 'var(--text-muted)',
-              cursor: form.canSave ? 'pointer' : 'not-allowed',
-            }}>{t('scheduleModal.save')}</button>
-        </div>
+        {/* Footer — the shared ModalFooter (§4): disabled (not just clamped) whenever
+            the current config would be unusable — e.g. an emptied interval
+            (`+'' === 0`, BUG 3) or a webhook trigger with no agent chosen yet
+            (BUG 4) — a hard backstop regardless of blur/focus state. */}
+        <ModalFooter onCancel={onClose} onSubmit={form.handleSave}
+          cancelLabel={t('scheduleModal.cancel')} submitLabel={t('scheduleModal.save')}
+          disabled={!form.canSave} />
     </FloatingPanel>
   )
 }

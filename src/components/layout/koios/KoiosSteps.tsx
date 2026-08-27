@@ -8,6 +8,8 @@ import { useState } from 'react'
 import { ChevronDown, ChevronRight, Check, Ban, ShieldX } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import type { KoiosStep, TFn } from '@/types/koios'
+import Button from '@/components/ui/Button'
+import { Caption } from '@/components/ui/typography'
 
 // reason → colour + icon + i18n label. Falls back to the organisational style.
 const REFUSAL: Record<string, { color: string; Icon: LucideIcon; labelKey: string }> = {
@@ -22,12 +24,11 @@ export default function KoiosSteps({ steps, t }: { steps?: KoiosStep[]; t: TFn }
 
   return (
     <div style={{ marginTop: 6 }}>
-      <button onClick={() => setOpen((o) => !o)}
-        style={{ display: 'flex', alignItems: 'center', gap: 4, background: 'none', border: 'none',
-                 cursor: 'pointer', padding: 0, fontSize: 11, color: 'var(--text-muted)' }}>
+      <Button variant="ghost" size="sm" onClick={() => setOpen((o) => !o)}
+        style={{ display: 'flex', alignItems: 'center', gap: 4, height: 'auto', padding: 0 }}>
         {open ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
-        {t('koios.stepsToggle', { count: steps.length })}
-      </button>
+        <Caption>{t('koios.stepsToggle', { count: steps.length })}</Caption>
+      </Button>
 
       {open && (
         <div style={{ marginTop: 6, display: 'flex', flexDirection: 'column', gap: 5 }}>

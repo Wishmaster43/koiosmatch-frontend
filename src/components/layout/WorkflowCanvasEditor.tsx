@@ -168,8 +168,8 @@ function EditorInner({ workflow, onClose, onSave, initialRunId }: {
                 position: 'absolute', bottom: 24, right: 24,
                 display: 'flex', alignItems: 'center', gap: 8,
                 padding: '9px 16px', borderRadius: 999,
-                // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- FAB fill: the floating canvas button deliberately carries the full accent (see the button reason above)
-                background: 'var(--color-primary)', color: 'var(--color-on-accent)',
+                // FAB fill now reads the button trio (--button-fill/--button-ink), so a tenant's branding applies here too.
+                background: 'var(--button-fill)', color: 'var(--button-ink)',
                 border: 'none', cursor: 'pointer', fontSize: 13, fontWeight: 500,
                 boxShadow: 'var(--shadow-float)',
                 // HUISSTIJL-1: orders this FAB above the ReactFlow canvas' own siblings

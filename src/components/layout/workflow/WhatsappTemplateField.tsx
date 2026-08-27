@@ -21,6 +21,7 @@ import { unwrapList } from '@/lib/api'
 // Danny 08-08 (§4): the house searchable combobox replaces the bare native
 // <select> for the template picker below.
 import CreatableSelect from '@/components/ui/CreatableSelect'
+import { Caption } from '@/components/ui/typography'
 
 // ── Preview rendering ────────────────────────────────────────────────────────────
 
@@ -150,7 +151,7 @@ export default function WhatsappTemplateField({ value, onChange, config, variabl
   const rawFallback = (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
       {String(value ?? '') !== '' && !loading && (
-        <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('wa.templateUnknown')}</div>
+        <Caption>{t('wa.templateUnknown')}</Caption>
       )}
       <div>
         <div style={{ fontSize: 10, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>{t('wa.headerVarsRaw')}</div>
@@ -182,7 +183,7 @@ export default function WhatsappTemplateField({ value, onChange, config, variabl
           </>
         )}
       {!loading && templates.length === 0 && (
-        <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('wa.templateEmpty')}</div>
+        <Caption>{t('wa.templateEmpty')}</Caption>
       )}
 
       {selected && (texts.header || texts.body) ? (

@@ -19,6 +19,9 @@ import { NavigationProvider } from '@/context/NavigationContext'
 import { DashboardSwitcher } from '@/pages/dashboard/shared'
 import NotificationBell from '@/components/layout/NotificationBell'
 import { useTenantTheme } from '@/hooks/useTenantTheme'
+import { tint, tintBg, tintBorder } from '@/lib/tint'
+import CountBadge from '@/components/ui/CountBadge'
+import { SectionTitle } from '@/components/ui/typography'
 import { canSwitchViews, switcherTypes } from '@/pages/dashboard/shared'
 import type { DashboardType } from '@/pages/dashboard/shared'
 import type { ReportFilterGroup } from '@/types/reports'
@@ -177,9 +180,9 @@ export default function DashboardLayout() {
             >
               {(tenant?.name ?? 'K').charAt(0).toUpperCase()}
             </div>
-            <span className="font-semibold text-[var(--text)]" style={{ fontSize: 13 }}>
+            <SectionTitle as="span">
               {tenant?.name ?? 'KoiosMatch'}
-            </span>
+            </SectionTitle>
           </div>
 
           {/* Breadcrumb separator + page title — PAGE_TITLES keys index the
@@ -200,10 +203,9 @@ export default function DashboardLayout() {
               // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- app-chrome control (components/layout = chrome, HUISSTIJL-1): nav-rail/topbar place-marker with its own active state, not an action button; Button's variants deliberately don't cover the rail
               style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '2px 10px', fontSize: 11, fontWeight: 600,
                 borderRadius: 999, cursor: 'pointer', color: 'var(--color-primary-text)', flexShrink: 0,
-                // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- chrome/brand tint with a deliberately own percentage (Koios gradient soft state / sidebar hover), predates lib/tint and is not a status chip
-                background: 'color-mix(in srgb, var(--color-primary) 10%, transparent)',
-                // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- chrome/brand tint with a deliberately own percentage (Koios gradient soft state / sidebar hover), predates lib/tint and is not a status chip
-                border: '1px solid color-mix(in srgb, var(--color-primary) 30%, transparent)' }}>
+                // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- tintBg/tintBorder ARE the canonical §4 tint helpers; the primary token here is only their argument, not a hand-painted fill
+                background: tintBg('var(--color-primary)'),
+                border: tintBorder('var(--color-primary)') }}>
               ← {t('back')} · {t(jumpOrigin, { ns: 'pageTitles', keySeparator: false, defaultValue: PAGE_TITLES[jumpOrigin] || jumpOrigin })}
             </button>
           )}
@@ -240,13 +242,13 @@ export default function DashboardLayout() {
                   // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- app-chrome control (components/layout = chrome, HUISSTIJL-1): nav-rail/topbar place-marker with its own active state, not an action button; Button's variants deliberately don't cover the rail
                   style={{
                     width: 30, height: 30, borderRadius: '50%', flexShrink: 0,
-                    // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- chrome accent surface (active nav marker/brand circle, see the adjacent ACCENT-INK/SIDEBAR-CONTRAST comments), not an action surface
-                    background: activePage === 'profile' ? 'var(--color-primary)' : 'var(--color-primary-bg)',
-                    // ACCENT-INK-1: resting, the initials sit on --color-primary-bg (a 12% tint
-                    // of the brand), so they need the contrast-safe twin (AENF measured 1.14:1).
-                    color: activePage === 'profile' ? 'var(--color-on-accent)' : 'var(--color-primary-text)',
-                    border: `1.5px solid ${activePage === 'profile' ? 'var(--color-primary)' : 'transparent'}`,
-                    fontSize: 11, fontWeight: 700, cursor: 'pointer',
+                    // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- tintBg/tintBorder ARE the canonical §4 tint helpers; the primary token here is only their argument, not a hand-painted fill
+                    background: activePage === 'profile' ? tintBg('var(--color-primary)', true) : 'var(--color-primary-bg)',
+                    // ACCENT-INK-1: resting AND active, the initials sit on a tint of the brand
+                    // (never the raw fill), so they always need the contrast-safe twin (AENF measured 1.14:1).
+                    color: 'var(--color-primary-text)',
+                    border: `1.5px solid ${activePage === 'profile' ? tint('var(--color-primary)', 50) : 'transparent'}`,
+                    fontSize: 11, fontWeight: activePage === 'profile' ? 700 : 500, cursor: 'pointer',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     transition: 'all var(--motion-fast)',
                   }}
@@ -279,16 +281,11 @@ export default function DashboardLayout() {
               >
                 <SlidersHorizontal size={14} />
                 {activeFilters > 0 ? (
-                  <span aria-hidden="true" style={{
-                    position: 'absolute', top: -5, right: -5,
-                    // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- chrome accent surface (active nav marker/brand circle, see the adjacent ACCENT-INK/SIDEBAR-CONTRAST comments), not an action surface
-                    background: 'var(--color-primary)', color: 'var(--color-on-accent)',
-                    borderRadius: 999, fontSize: 10, fontWeight: 700,
-                    minWidth: 16, height: 16, display: 'flex',
-                    alignItems: 'center', justifyContent: 'center',
-                    padding: '0 4px', lineHeight: 1,
-                  }}>
-                    {activeFilters}
+                  <span aria-hidden="true" style={{ position: 'absolute', top: -5, right: -5 }}>
+                    <CountBadge count={activeFilters} style={{
+                      minWidth: 16, height: 16, display: 'flex',
+                      alignItems: 'center', justifyContent: 'center',
+                    }} />
                   </span>
                 ) : pageFilterActive ? (
                   // Page-level filters (search/KPI picks/attention) active — show a

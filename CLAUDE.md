@@ -833,6 +833,19 @@ the code is worse than no rule, because the next reader builds on it. What is tr
   GEZICHT geeft (veld → pil), reviewt ook de WRAPPER-maten van het oude gezicht —
   een minWidth die bij het oude face hoorde rendert bij een krimpend face als
   spookruimte, en dat leest als inconsistente toolbar-spacing.
+  **BUTTON-GRENS-LES (27-08, chroomfixronde: 4 van 5 lanes REJECT op één briefzin):**
+  "elke knop is Button" geldt voor ACTIE-knoppen. Menu-/listbox-OPTIERIJEN,
+  KEUZEKAARTEN, token-CHIPS, boomrijen en dropdown-TRIGGERS zijn GEEN
+  Button-werk — hun taal is tint/hover/veldgezicht (§4 staande regels) en de
+  eerlijke lint-uitkomst daar is een noodzaak-disable, nooit een conversie.
+  Elke Button-conversiebrief benoemt bovendien de VOLLEDIGE identityStyle-erfenis
+  die de aanroeper meekrijgt: whiteSpace nowrap (breekt meerregelige teksten),
+  vaste height 28 (sm), het disabled-recept dat caller-style overschrijft, en
+  GEEN hover-state — drie schermbreuken kwamen precies daarvandaan. En:
+  een token via een ALIAS-constante buiten het bereik van een lint-selector
+  tillen is POORTVERBLINDING, geen fix — de gedocumenteerde disable
+  ("tintBg/tintBorder ARE the canonical §4 tint helpers; the primary token here
+  is only their argument") is het eerlijke antwoord.
   **Een disable-reden is een NOODZAAK-reden (r7, 20-08):** een functionele
   uitzondering (kalendercel, zoekchrome, kleurdragende tint-actie zonder
   Button-tone) — nooit "buiten de scope van deze taak"; dan blijft de warning

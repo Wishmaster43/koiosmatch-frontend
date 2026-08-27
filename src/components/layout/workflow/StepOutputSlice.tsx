@@ -13,6 +13,8 @@ import { useTranslation } from 'react-i18next'
 import { fieldLabel } from './moduleI18n'
 import type { ModuleCatalog } from './filterFieldCatalog'
 import type { RunStep } from '@/types/reports'
+import Button from '@/components/ui/Button'
+import { Caption } from '@/components/ui/typography'
 
 // Lists longer than this start collapsed — a run with big syncs stays scannable.
 const OPEN_THRESHOLD = 10
@@ -77,9 +79,9 @@ export default function StepOutputSlice({ step, catalog }: { step: RunStep; cata
 
   if (isPassthrough) {
     return (
-      <div style={{ marginTop: 6, fontSize: 11, color: 'var(--text-muted)', fontStyle: 'italic' }}>
+      <Caption style={{ marginTop: 6, fontStyle: 'italic', display: 'block' }}>
         {t('runViewer.passthrough')}
-      </div>
+      </Caption>
     )
   }
 
@@ -97,13 +99,12 @@ export default function StepOutputSlice({ step, catalog }: { step: RunStep; cata
   return (
     <div style={{ marginTop: 6 }}>
       {/* Collapse toggle: "output · N rows" */}
-      <button type="button" onClick={() => setOpen(o => !o)} aria-expanded={open}
-        style={{ display: 'flex', alignItems: 'center', gap: 5, background: 'none', border: 'none',
-                 padding: '2px 0', cursor: 'pointer', color: 'var(--text-muted)', fontSize: 11 }}>
+      <Button onClick={() => setOpen(o => !o)} aria-expanded={open} variant="ghost"
+        style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '2px 0', height: 'auto', justifyContent: 'flex-start' }}>
         <ChevronRight size={11} style={{ transform: open ? 'rotate(90deg)' : 'none', transition: 'transform 0.12s' }} />
-        <span style={{ fontWeight: 600 }}>{t('runViewer.output')}</span>
-        <span>{t('runViewer.rows', { count: total })}</span>
-      </button>
+        <Caption style={{ fontWeight: 600 }}>{t('runViewer.output')}</Caption>
+        <Caption>{t('runViewer.rows', { count: total })}</Caption>
+      </Button>
 
       {open && slice && (
         <div style={{ maxHeight: 240, overflow: 'auto', marginTop: 4, border: '1px solid var(--border)', borderRadius: 6 }}>
@@ -146,7 +147,7 @@ export default function StepOutputSlice({ step, catalog }: { step: RunStep; cata
             <div key={j} style={{ display: 'flex', justifyContent: 'space-between', gap: 12, padding: '4px 8px',
                                   borderBottom: j < items.length - 1 ? '1px solid var(--hover-bg)' : 'none' }}>
               <span style={{ fontSize: 11, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{it.name ?? '—'}</span>
-              {it.meta && <span style={{ fontSize: 11, color: 'var(--text-muted)', flexShrink: 0 }}>{it.meta}</span>}
+              {it.meta && <Caption style={{ flexShrink: 0 }}>{it.meta}</Caption>}
             </div>
           ))}
           {itemsTotal > items.length && (

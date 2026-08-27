@@ -11,6 +11,7 @@
  */
 import type { CSSProperties } from 'react'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
+import { groupLabelStyle } from '@/components/ui/typography'
 
 // Text/number/time inputs and their select counterpart (G33 canon). `width: 'auto'`
 // overrides the canon's 100% — these render inline in a flex row (several per line,
@@ -20,9 +21,9 @@ export const selectStyle: CSSProperties = { ...inputStyle, cursor: 'pointer' }
 
 // A config group's bordered card + its small uppercase header.
 export const sectionStyle: CSSProperties = { border: '1px solid var(--border)', borderRadius: 12, padding: 16, background: 'var(--surface)' }
-export const sectionLabel: CSSProperties = { display: 'block', fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 10 }
+export const sectionLabel: CSSProperties = { ...groupLabelStyle, display: 'block', fontWeight: 700, letterSpacing: '0.05em', marginBottom: 10 }
 
 // Field label inside a section card; the inline variant sits in a flex row and
 // therefore carries no `display`/margin of its own.
-export const fieldLabelInline: CSSProperties = { fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }
+export const fieldLabelInline: CSSProperties = { ...groupLabelStyle, letterSpacing: '0.05em' }
 export const fieldLabel: CSSProperties = { ...fieldLabelInline, display: 'block', marginBottom: 6 }

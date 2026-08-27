@@ -28,6 +28,7 @@ import { useState, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Search, ChevronDown, Check } from 'lucide-react'
 import { WORKFLOW_EVENT_KEYS, eventKeyToI18nKey } from './eventCatalog'
+import { Mono, bodyTextStyle } from '@/components/ui/typography'
 
 // Searchable dropdown over the workflow event catalogue; see the module doc
 // comment above for why its Escape handling stops propagation at capture phase.
@@ -56,8 +57,7 @@ export function EventCombobox({ value, onChange, label }: {
           onFocus={() => { setOpen(true); setSearch('') }}
           onChange={e => { setSearch(e.target.value); setOpen(true) }}
           onKeyDownCapture={e => { if (e.key === 'Escape') { e.stopPropagation(); setOpen(false) } }}
-          style={{ flex: 1, border: 'none', outline: 'none', background: 'transparent',
-                   fontSize: 13, color: 'var(--text)' }} />
+          style={{ flex: 1, border: 'none', outline: 'none', background: 'transparent', ...bodyTextStyle }} />
         <ChevronDown size={13} color="var(--text-muted)" style={{ flexShrink: 0 }} />
       </div>
 
@@ -78,6 +78,7 @@ export function EventCombobox({ value, onChange, label }: {
               <button key={key} type="button" role="option" aria-selected={active} data-event-key={key}
                 onMouseDown={e => e.preventDefault() /* keep focus so blur doesn't close first */}
                 onClick={() => { onChange(key); setOpen(false); setSearch('') }}
+                // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- listbox OPTION row: selected-list-row idiom (§4 PRIMAIR-VLAK-1, selected = TINT, never the solid fill), a face Button deliberately does not model
                 style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', textAlign: 'left',
                          padding: '9px 12px', border: 'none', cursor: 'pointer', fontSize: 13,
                          background: active ? 'var(--color-primary-bg)' : 'transparent',
@@ -85,7 +86,7 @@ export function EventCombobox({ value, onChange, label }: {
                          color: active ? 'var(--color-primary-text)' : 'var(--text)' }}>
                 <span style={{ width: 14, flexShrink: 0, display: 'flex' }}>{active && <Check size={13} />}</span>
                 <span style={{ flex: 1 }}>{labelFor(key)}</span>
-                <span style={{ fontSize: 10.5, color: 'var(--text-muted)', fontFamily: "'JetBrains Mono', monospace" }}>{key}</span>
+                <Mono style={{ fontSize: 10.5, color: 'var(--text-muted)' }}>{key}</Mono>
               </button>
             )
           })}

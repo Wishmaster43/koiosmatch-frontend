@@ -41,6 +41,7 @@ export default function KoiosModelPicker({ models, options, value, onChange, t }
   return (
     <div ref={ref} style={{ position: 'relative' }}>
       <button onClick={() => setOpen((o) => !o)}
+        // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- dropdown TRIGGER = form-field face (§4), not an action button; its compact 11/600 pill label rides with that face, not document typography
         style={{ display: 'flex', alignItems: 'center', gap: 4, maxWidth: 130, padding: '4px 9px',
                  borderRadius: 999, border: 'none', cursor: 'pointer', fontSize: 11, fontWeight: 600,
                  background: 'var(--hover-bg)', color: 'var(--text-muted)' }}>
@@ -59,6 +60,7 @@ export default function KoiosModelPicker({ models, options, value, onChange, t }
             const hint = resolveModelHint(m, options, t)
             return (
               <button key={m} onClick={() => { onChange(m); setOpen(false) }}
+                // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- menu OPTION row: selected-list-row idiom (§4 PRIMAIR-VLAK-1, tint/hover language), a face Button deliberately does not model
                 style={{ width: '100%', display: 'flex', alignItems: 'flex-start', gap: 8, textAlign: 'left',
                          padding: '8px 10px', border: 'none', background: 'none', cursor: 'pointer',
                          fontSize: 12, color: 'var(--text)' }}

@@ -14,6 +14,7 @@ import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Check, AlertTriangle } from 'lucide-react'
 import { ActionRuleBanner } from '@/components/actionrules'
+import Button from '@/components/ui/Button'
 import { confirmPendingAction, cancelPendingAction } from './koiosApi'
 import { entityIconEl } from './koiosEntityIcons'
 import type { KoiosPendingAction, KoiosPreviewRow } from './koiosTypes'
@@ -140,23 +141,14 @@ export default function KoiosPendingActionCard({ action }: { action: KoiosPendin
       {/* Actions — hidden once resolved (confirmed/cancelled/expired/error are terminal) */}
       {(status === 'proposed' || status === 'confirming' || status === 'submitting') && (
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 2 }}>
-          <button onClick={confirm} disabled={status === 'submitting'}
-            style={{ padding: '6px 12px', fontSize: 12, fontWeight: 600, borderRadius: 7, border: 'none',
-              background: action.destructive && status === 'confirming' ? 'var(--color-danger)' : 'var(--color-primary)',
-              // Danger fill is a fixed semantic red (always readable with white); the
-              // primary branch is the tenant accent, so it needs the on-accent token.
-              // Both go through their tokens — never a raw hex — so a future tweak to
-              // either fill can't silently desync the text colour.
-              color: action.destructive && status === 'confirming' ? 'var(--color-on-danger)' : 'var(--color-on-accent)',
-              cursor: status === 'submitting' ? 'default' : 'pointer', opacity: status === 'submitting' ? 0.6 : 1 }}>
+          {/* Destructive 2nd-step confirm switches to the danger variant; otherwise primary. */}
+          <Button variant={action.destructive && status === 'confirming' ? 'danger' : 'primary'}
+            size="sm" onClick={confirm} disabled={status === 'submitting'}>
             {status === 'confirming' ? t('koios.pendingAction.confirmFinal') : t('koios.pendingAction.confirm')}
-          </button>
-          <button onClick={cancel} disabled={status === 'submitting'}
-            style={{ padding: '6px 12px', fontSize: 12, fontWeight: 500, borderRadius: 7,
-              border: '1px solid var(--border)', background: 'none', color: 'var(--text)',
-              cursor: status === 'submitting' ? 'default' : 'pointer' }}>
+          </Button>
+          <Button variant="secondary" size="sm" onClick={cancel} disabled={status === 'submitting'}>
             {status === 'confirming' ? t('koios.pendingAction.back') : t('koios.pendingAction.cancel')}
-          </button>
+          </Button>
           <span style={{ marginLeft: 'auto', fontSize: 10, color: 'var(--text-muted)' }}>
             {t('koios.pendingAction.expiresIn', { seconds: remaining })}
           </span>

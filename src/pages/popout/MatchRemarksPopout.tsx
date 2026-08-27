@@ -12,6 +12,7 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import RichTextEditor from '@/components/ui/RichTextEditor'
+import { GroupLabel } from '@/components/ui/typography'
 import { useTextPopoutSync } from '@/hooks/useTextPopoutSync'
 import { textPopoutTopic } from '@/lib/secondScreen'
 
@@ -44,9 +45,7 @@ export default function MatchRemarksPopout({ id }: { id: string | undefined }) {
 
   return (
     <div style={{ height: '100vh', background: 'var(--bg)', display: 'flex', flexDirection: 'column', padding: 20, gap: 10 }}>
-      <div style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)' }}>
-        {t('placement.matchRemarks')}
-      </div>
+      <GroupLabel>{t('placement.matchRemarks')}</GroupLabel>
       <RichTextEditor value={text} onChange={change} fill minHeight={220} assistModes={['improve', 'summarize', 'actions']} />
     </div>
   )

@@ -6,6 +6,7 @@
  */
 import { useTranslation } from 'react-i18next'
 import SoftChip from '@/components/ui/SoftChip'
+import { GroupLabel, Mono } from '@/components/ui/typography'
 
 // The step-output shape the backend embeds under `output.whatsapp_fanout`.
 export interface WaFanout {
@@ -30,7 +31,7 @@ const STATUS_COLOR: Record<string, string> = {
 function Stat({ label, value, color }: { label: string; value: number; color: string }) {
   return (
     <span style={{ display: 'inline-flex', alignItems: 'baseline', gap: 4, fontSize: 12 }}>
-      <b style={{ color, fontFamily: "'JetBrains Mono', monospace" }}>{value}</b>
+      <Mono as="b" style={{ color, fontWeight: 700 }}>{value}</Mono>
       <span style={{ color: 'var(--text-muted)' }}>{label}</span>
     </span>
   )
@@ -48,9 +49,7 @@ export default function FanoutSummary({ fanout }: { fanout: WaFanout }) {
                   marginBottom: 10, background: 'var(--surface)', display: 'flex', flexDirection: 'column', gap: 8 }}>
       {/* Header row: title + status chip */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
-        <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-          {t('wa.fanout.title')}
-        </span>
+        <GroupLabel>{t('wa.fanout.title')}</GroupLabel>
         <SoftChip label={statusLabel} color={statusColor} round />
       </div>
       {/* Counts row */}
@@ -62,9 +61,9 @@ export default function FanoutSummary({ fanout }: { fanout: WaFanout }) {
       </div>
       {/* Batch id — muted mono, for cross-referencing the Wachtrij tab */}
       {fanout.batch_id && (
-        <div style={{ fontSize: 10, fontFamily: "'JetBrains Mono', monospace", color: 'var(--text-muted)' }}>
+        <Mono as="div" style={{ fontSize: 10, color: 'var(--text-muted)' }}>
           {fanout.batch_id}
-        </div>
+        </Mono>
       )}
     </div>
   )

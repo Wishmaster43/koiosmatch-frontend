@@ -262,7 +262,7 @@ export default function KoiosPanel({ open, onClose, onNavigate }: { open?: boole
           borderRadius: 20,
           padding: '10px 10px 8px 14px',
           // HUISSTIJL-1: focused state is an inset focus ring (kept as-is); resting state is a card-level shadow.
-          boxShadow: focused ? '0 0 0 3px rgba(99,102,241,0.1)' : 'var(--shadow-card)',
+          boxShadow: focused ? `0 0 0 3px ${tint('var(--color-primary)', 10)}` : 'var(--shadow-card)',
           transition: 'border-color var(--motion-fast), box-shadow var(--motion-fast)',
         }}>
           {/* ARIA-in-HTML formally disallows role="combobox" on a <textarea>, but the
@@ -302,17 +302,11 @@ export default function KoiosPanel({ open, onClose, onNavigate }: { open?: boole
           <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
 
             {/* @ mention */}
-            <button
-              onClick={openMentionTrigger}
-              title={t('koios.addContext')}
-              // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- imperative two-property hover swap (background AND ink together); not a static Button variant
-              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px 5px',
-                borderRadius: 7, color: 'var(--sidebar-muted)', display: 'flex',
-                transition: 'background 0.1s, color 0.1s' }}
-              onMouseEnter={e => { e.currentTarget.style.background = 'var(--hover-bg)'; e.currentTarget.style.color = 'var(--color-primary)' }}
-              onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = 'var(--sidebar-muted)' }}>
+            <Button variant="ghost" size="sm" iconOnly
+              aria-label={t('koios.addContext')} title={t('koios.addContext')}
+              onClick={openMentionTrigger}>
               <AtSign size={14} />
-            </button>
+            </Button>
             {/* Bijlage-knop VERBORGEN tot het uploadpad bestaat (Danny 27-08:
                 een zichtbaar-dode knop is erger dan geen knop). */}
 

@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { X } from 'lucide-react'
 import { dayNameIso, monthName, scheduleShortMonthNote } from './scheduleLabel'
 import { inputStyle, selectStyle, sectionStyle, sectionLabel, fieldLabel, fieldLabelInline } from './scheduleModalStyles'
+import { Caption } from '@/components/ui/typography'
 import type { ScheduleForm } from './useScheduleForm'
 // Danny 08-08 (§4): the house searchable combobox replaces both bare native
 // <select>s below. Also the SAFER pick here specifically: this modal is
@@ -89,7 +90,7 @@ export function ScheduleFields({ form }: { form: ScheduleForm }) {
               aria-label={t('scheduleModal.every')} style={{ ...inputStyle, width: 100 }} />
             <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('scheduleModal.unit.minutes')}</span>
           </div>
-          <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 6 }}>{t('scheduleModal.minInterval')}</p>
+          <Caption as="p" style={{ marginTop: 6 }}>{t('scheduleModal.minInterval')}</Caption>
         </div>
       )}
 
@@ -143,7 +144,7 @@ export function ScheduleFields({ form }: { form: ScheduleForm }) {
                   }}>{d}</button>
               ))}
             </div>
-            {shortMonthNote && <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 6 }}>{shortMonthNote}</p>}
+            {shortMonthNote && <Caption as="p" style={{ marginTop: 6 }}>{shortMonthNote}</Caption>}
           </div>
         </div>
       )}

@@ -36,6 +36,7 @@ import NoteFields from '@/components/drawer/tabs/notes/NoteFields'
 import { useNoteFields } from '@/components/drawer/tabs/notes/useNoteFields'
 import { canManageNote, isSystemNote } from '@/components/drawer/tabs/notes/noteRights'
 import SafeHtml from '@/components/ui/SafeHtml'
+import { bodyTextStyle } from '@/components/ui/typography'
 import { useAuth } from '@/context/AuthContext'
 import { useNoteTypes } from '@/lib/useNoteTypes'
 import { useLastContactTypes } from '@/lib/useLastContactTypes'
@@ -333,7 +334,7 @@ function NoteEditor({ note, onSave, noteTypes, channels, managePermission, label
           background: 'var(--hover-bg)', border: '1px solid var(--border)', color: 'var(--text-muted)' }}>
           {readOnlyCopy}
         </div>
-        <SafeHtml style={{ fontSize: 13, color: 'var(--text)', lineHeight: 1.6 }} html={String(note.body ?? note.text ?? '')} />
+        <SafeHtml style={{ ...bodyTextStyle, color: 'var(--text)', lineHeight: 1.6 }} html={String(note.body ?? note.text ?? '')} />
       </div>
     )
   }

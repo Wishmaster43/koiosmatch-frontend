@@ -9,6 +9,7 @@ import { useState } from 'react'
 import { ChevronRight, Search } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import type { TFunction } from 'i18next'
+import { Caption } from '@/components/ui/typography'
 
 // Cap what we render client-side so a huge (already BE-capped) list stays snappy.
 const MAX_ROWS = 100
@@ -46,7 +47,7 @@ function LeafRow({ label, value, depth }: { label: string; value: unknown; depth
   const str = formatValue(value)
   return (
     <div style={{ display: 'flex', gap: 8, alignItems: 'baseline', padding: '3px 4px', paddingLeft: 4 + depth * 14 }}>
-      <span style={{ fontSize: 11, fontFamily: 'monospace', color: 'var(--text-muted)', flexShrink: 0 }}>{label}:</span>
+      <Caption style={{ fontFamily: 'monospace', flexShrink: 0 }}>{label}:</Caption>
       <span title={typeof value === 'string' && value.length > 140 ? value : undefined}
         style={{ fontSize: 11, fontFamily: 'monospace', color: 'var(--text)', wordBreak: 'break-word',
                  fontStyle: value == null ? 'italic' : 'normal' }}>
@@ -70,6 +71,7 @@ function BranchNode({ label, value, depth, defaultOpen, hint, query, t }: {
   return (
     <div>
       <button type="button" onClick={() => setOpen(o => !o)} aria-expanded={isOpen}
+        // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- TREE branch row: compact expandable list row (17px rhythm with its LeafRow siblings, hover as the affordance), a face Button deliberately does not model
         style={{ display: 'flex', alignItems: 'center', gap: 5, width: '100%', padding: '3px 4px',
                  paddingLeft: 4 + depth * 14, background: 'none', border: 'none', cursor: 'pointer',
                  textAlign: 'left', borderRadius: 6 }}

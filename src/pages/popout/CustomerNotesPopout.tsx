@@ -19,6 +19,7 @@ import { initialsOf } from '@/lib/initials'
 import { useCustomerLite } from './hooks/useCustomerLite'
 import { usePopoutCustomerNotes } from './hooks/usePopoutCustomerNotes'
 import type { CustomerNote } from '@/types/customer'
+import { tintBg, tintBorder } from '@/lib/tint'
 
 type AnyProps = Record<string, unknown>
 // Still-untyped JS component — accept any props at the boundary (mirrors CustomerNotesTab).
@@ -31,8 +32,8 @@ function linkChip(label: string) {
   return (
     <span style={{ display: 'inline-flex', alignItems: 'center', fontSize: 10, fontWeight: 600,
       padding: '1px 6px', borderRadius: 99, marginRight: 6,
-      background: 'color-mix(in srgb, var(--color-info) 12%, transparent)', color: 'var(--color-info)',
-      border: '1px solid color-mix(in srgb, var(--color-info) 40%, transparent)' }}>
+      background: tintBg('var(--color-info)'), color: 'var(--color-info)',
+      border: tintBorder('var(--color-info)') }}>
       {label}
     </span>
   )

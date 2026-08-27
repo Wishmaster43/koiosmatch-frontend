@@ -15,6 +15,7 @@ import { MODULE_META } from '@/modules/index'
 import { fieldLabel, fieldPlaceholder } from './moduleI18n'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 import type { WorkflowField, WorkflowVarField, WorkflowVarGroup } from '@/types/workflow'
+import { Caption } from '@/components/ui/typography'
 
 export type InsertMode = 'token' | 'path'
 
@@ -26,6 +27,7 @@ function FieldChip({ field, display, onInsert }: {
   return (
     <button type="button" onClick={() => onInsert(field)}
       title={field.sample ? `${field.label} — ${field.sample}` : field.label}
+      // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- token CHIP (CHIP-TINT territory: hover-bg pill whose hover-to-tint swap IS the clickability cue on a --surface popover), a face Button deliberately does not model
       style={{ display: 'inline-flex', alignItems: 'center', gap: 5, maxWidth: '100%', padding: '2px 8px',
                borderRadius: 999, border: '1px solid var(--border)', background: 'var(--hover-bg)',
                cursor: 'pointer', lineHeight: '16px' }}
@@ -33,7 +35,7 @@ function FieldChip({ field, display, onInsert }: {
       onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.background = 'var(--hover-bg)' }}>
       <span style={{ fontSize: 11, fontFamily: 'monospace', color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{display}</span>
       {field.sample ? (
-        <span style={{ fontSize: 10, color: 'var(--text-muted)', maxWidth: 70, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flexShrink: 0 }}>{field.sample}</span>
+        <Caption style={{ maxWidth: 70, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flexShrink: 0 }}>{field.sample}</Caption>
       ) : null}
     </button>
   )
@@ -89,7 +91,7 @@ function ModuleGroup({ group, query, onInsert }: {
 
       {/* No output yet → explain how to get fields instead of a dead token */}
       {group.fields.length === 0 && (
-        <p style={{ fontSize: 11, color: 'var(--text-muted)', margin: 0, padding: '0 8px 4px 18px' }}>{t('vars.notRunHint')}</p>
+        <Caption as="p" style={{ padding: '0 8px 4px 18px' }}>{t('vars.notRunHint')}</Caption>
       )}
 
       {/* Field chips (flat) + expandable parents for nested paths */}
@@ -103,10 +105,11 @@ function ModuleGroup({ group, query, onInsert }: {
               {hasChildren && (
                 <button type="button" onClick={() => toggle(entry.key)} aria-expanded={isOpen}
                   aria-label={entry.key}
+                  // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- nested-path EXPANDER chip: the dashed border distinguishes it from insertable token chips (same chip family, not an action button)
                   style={{ display: 'inline-flex', alignItems: 'center', gap: 3, padding: '2px 8px', borderRadius: 999,
                            border: '1px dashed var(--border)', background: 'none', cursor: 'pointer', lineHeight: '16px' }}>
                   <ChevronRight size={10} color="var(--text-muted)" style={{ transform: isOpen ? 'rotate(90deg)' : 'none', transition: 'transform 0.12s' }} />
-                  <span style={{ fontSize: 11, fontFamily: 'monospace', color: 'var(--text-muted)' }}>{entry.key}.</span>
+                  <Caption style={{ fontFamily: 'monospace' }}>{entry.key}.</Caption>
                 </button>
               )}
               {hasChildren && isOpen && (
@@ -229,6 +232,7 @@ export function TextFieldWithVars({ field, value, onChange, variables, multiline
 
       {/* Picker toggle — top-right of the field */}
       <button type="button" onClick={() => setOpen(o => !o)} aria-label={t('vars.title')} title={t('vars.title')}
+        // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- in-field picker toggle: open state = TINT (CHIP-TINT-adjacent, embedded in a form field), a 20px face Button does not model; solid-fill escalation parked as a Danny question
         style={{ position: 'absolute', top: multiline ? 6 : '50%', right: 6, transform: multiline ? 'none' : 'translateY(-50%)',
                  width: 20, height: 20, display: 'flex', alignItems: 'center', justifyContent: 'center',
                  background: open ? 'var(--color-primary-bg)' : 'var(--hover-bg)', border: '1px solid var(--border)',

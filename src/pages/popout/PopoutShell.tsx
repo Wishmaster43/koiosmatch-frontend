@@ -9,6 +9,8 @@
 import type { ReactNode } from 'react'
 import { AlertTriangle } from 'lucide-react'
 import Avatar from '@/components/ui/Avatar'
+import Button from '@/components/ui/Button'
+import { BodyText, Caption, GroupLabel } from '@/components/ui/typography'
 
 interface PopoutShellProps {
   loading: boolean
@@ -58,11 +60,10 @@ function PopoutErrorRow({ message, retryLabel, onRetry }: { message: string; ret
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
       height: '100vh', gap: 10, padding: 24, textAlign: 'center' }}>
       <AlertTriangle size={22} style={{ color: 'var(--color-danger-text)' }} aria-hidden="true" />
-      <p style={{ fontSize: 13, color: 'var(--text)' }}>{message}</p>
-      <button onClick={onRetry} style={{ background: 'none', border: '1px solid var(--border)', borderRadius: 6,
-        padding: '5px 12px', fontSize: 12, color: 'var(--text)', cursor: 'pointer' }}>
+      <BodyText style={{ color: 'var(--text)' }}>{message}</BodyText>
+      <Button variant="secondary" size="sm" onClick={onRetry}>
         {retryLabel}
-      </button>
+      </Button>
     </div>
   )
 }
@@ -85,9 +86,7 @@ export default function PopoutShell({ loading, error, loadingLabel, errorLabel, 
           only needs to say WHAT the surface is, not WHOSE it is. */}
       {hideEntityName ? (
         <header style={{ padding: '14px 20px', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
-          <span style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)' }}>
-            {subtitle}
-          </span>
+          <GroupLabel>{subtitle}</GroupLabel>
         </header>
       ) : (
         <header style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '14px 20px',
@@ -97,7 +96,7 @@ export default function PopoutShell({ loading, error, loadingLabel, errorLabel, 
             <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               {name}
             </div>
-            <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{subtitle}</div>
+            <Caption>{subtitle}</Caption>
           </div>
         </header>
       )}
