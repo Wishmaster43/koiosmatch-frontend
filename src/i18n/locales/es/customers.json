@@ -543,6 +543,8 @@
   "priceAgreements": {
     "add": "Nuevo acuerdo de precios",
     "any": "Todos",
+      "purchaseRateExample": "22,18",
+      "saleRateExample": "31,10",
     "function": "Función",
     "cao": "Convenio colectivo",
     "scale": "Escala",

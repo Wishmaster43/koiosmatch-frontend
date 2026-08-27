@@ -133,11 +133,11 @@ export default function PriceAgreementForm({ draft, onChange, onSave, onCancel, 
       <div style={canSeeFinancial ? row2 : undefined}>
         {canSeeFinancial && (
           <Field label={t('priceAgreements.purchaseRate')}>
-            <input type="number" step="0.01" min={0} value={draft.purchaseRate} onChange={e => onChange({ purchaseRate: e.target.value })} style={{ ...input, fontFamily: 'JetBrains Mono, monospace' }} placeholder="22.18" />
+            <input type="number" step="0.01" min={0} value={draft.purchaseRate} onChange={e => onChange({ purchaseRate: e.target.value })} style={{ ...input, fontFamily: 'JetBrains Mono, monospace' }} placeholder={t('priceAgreements.purchaseRateExample')} />
           </Field>
         )}
         <Field label={t('priceAgreements.saleRate')}>
-          <input type="number" step="0.01" min={0} value={draft.saleRate} onChange={e => onChange({ saleRate: e.target.value })} style={{ ...input, fontFamily: 'JetBrains Mono, monospace' }} placeholder="31.10" />
+          <input type="number" step="0.01" min={0} value={draft.saleRate} onChange={e => onChange({ saleRate: e.target.value })} style={{ ...input, fontFamily: 'JetBrains Mono, monospace' }} placeholder={t('priceAgreements.saleRateExample')} />
         </Field>
       </div>
       <div style={row2}>

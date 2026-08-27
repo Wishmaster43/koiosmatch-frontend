@@ -543,6 +543,8 @@
   "priceAgreements": {
     "add": "Neue Preisvereinbarung",
     "any": "Alle",
+      "purchaseRateExample": "22,18",
+      "saleRateExample": "31,10",
     "function": "Funktion",
     "cao": "Tarifvertrag",
     "scale": "Gruppe",

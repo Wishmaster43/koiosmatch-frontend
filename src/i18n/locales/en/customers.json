@@ -543,6 +543,8 @@
   "priceAgreements": {
     "add": "New price agreement",
     "any": "Any",
+      "purchaseRateExample": "22.18",
+      "saleRateExample": "31.10",
     "function": "Function",
     "cao": "CAO",
     "scale": "Scale",

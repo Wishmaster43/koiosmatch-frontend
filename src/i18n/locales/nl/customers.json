@@ -543,6 +543,8 @@
   "priceAgreements": {
     "add": "Nieuwe prijsafspraak",
     "any": "Alle",
+      "purchaseRateExample": "22,18",
+      "saleRateExample": "31,10",
     "function": "Functie",
     "cao": "CAO",
     "scale": "Schaal",

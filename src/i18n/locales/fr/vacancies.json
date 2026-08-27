@@ -405,7 +405,7 @@
       "resultsTitle": "Poste créé",
       "resultsHint": "Les pièces jointes et la note sont traitées ci-dessous. Les éléments en échec peuvent être réessayés."
     },
-    "titlePlaceholder": "ex. Infirmier | La Haye",
+    "titlePlaceholder": "p. ex. Préparateur de commandes | Paris",
     "create": "Créer le poste",
     "cancel": "Annuler",
     "creating": "Création…",
