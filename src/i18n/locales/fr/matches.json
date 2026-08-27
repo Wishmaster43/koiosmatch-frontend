@@ -311,7 +311,8 @@
     "searchPlaceholder": "Rechercher des notes…",
     "loading": "Chargement des notes…",
     "loadError": "Les notes n'ont pas pu être chargées.",
-    "deleteNote": "Supprimer la note",
+    "edit": "Modifier",
+      "deleteNote": "Supprimer la note",
     "deleteConfirm": "Supprimer cette note ?"
   },
   "ai": {

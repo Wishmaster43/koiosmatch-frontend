@@ -125,5 +125,21 @@ export function useApplicationNotes(applicationId: Id | undefined, initialNotes:
       })
   }, [applicationId, notes, t])
 
-  return { notes, addNote, editNote }
+  // Delete — the route exists since CMBE 1049413a (ApplicationController::
+  // destroyNote, own-note-or-manage_all gate). Optimistic removal with snapshot
+  // revert; only server-resolved ids (never a tmp- optimistic add) can delete.
+  const deleteNote = useCallback((index: number) => {
+    if (!applicationId) return
+    const target = notes[index]
+    const noteId = target?.id
+    if (noteId == null || String(noteId).startsWith('tmp-')) return
+    const snapshot = notes
+    setNotes(prev => prev.filter((_, i) => i !== index))
+    api.delete(`/applications/${applicationId}/notes/${noteId}`).catch(err => {
+      setNotes(snapshot)
+      notifyError(extractApiError(err, t('common:actionFailed')))
+    })
+  }, [applicationId, notes, t])
+
+  return { notes, deleteNote, addNote, editNote }
 }

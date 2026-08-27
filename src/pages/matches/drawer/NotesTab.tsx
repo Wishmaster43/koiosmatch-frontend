@@ -28,7 +28,8 @@ export default function NotesTab({ match: m }: { match: MatchRow }) {
   // AUTHOR-CURRENT-USER-1: useEntityNotes stamps the optimistic note with the
   // CURRENT logged-in user itself (see the hook) — the match's owner is a
   // different person entirely and must not be passed in.
-  const { notes, loading, error, fetchNotes, addNote, deleteNote } = useEntityNotes({ id: m.id, basePath: `/matches/${m.id}` })
+  // PATCH landed with CMBE 1049413a (MatchNoteController::update) — full parity.
+  const { notes, loading, error, fetchNotes, addNote, editNote, deleteNote } = useEntityNotes({ id: m.id, basePath: `/matches/${m.id}` })
   // Author avatar initials — the current user composing the note, not the match's owner.
   const auth = useAuth()
   const initials = (auth?.user?.name || 'Koios').split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase()
@@ -46,6 +47,7 @@ export default function NotesTab({ match: m }: { match: MatchRow }) {
       error={error}
       onRetry={fetchNotes}
       onAddNote={addNote}
+      onEditNote={editNote}
       onDeleteNote={deleteNote}
       noteTypes={noteTypes}
       authorInitials={initials}
@@ -62,6 +64,7 @@ export default function NotesTab({ match: m }: { match: MatchRow }) {
         searchPlaceholder: t('notes.searchPlaceholder'),
         loadError: t('notes.loadError'),
         retry: t('common:error.retry'),
+        edit: t('notes.edit'),
         deleteNote: t('notes.deleteNote'),
         deleteConfirm: t('notes.deleteConfirm'),
       }}

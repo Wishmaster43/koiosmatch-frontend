@@ -310,7 +310,8 @@
     "searchPlaceholder": "Buscar notas…",
     "loading": "Cargando notas…",
     "loadError": "No se pudieron cargar las notas.",
-    "deleteNote": "Eliminar nota",
+    "edit": "Editar",
+      "deleteNote": "Eliminar nota",
     "deleteConfirm": "¿Eliminar esta nota?"
   },
   "ai": {

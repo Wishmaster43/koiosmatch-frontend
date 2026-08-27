@@ -310,7 +310,8 @@
     "searchPlaceholder": "Zoek notities…",
     "loading": "Notities laden…",
     "loadError": "Notities konden niet geladen worden.",
-    "deleteNote": "Notitie verwijderen",
+    "edit": "Bewerken",
+      "deleteNote": "Notitie verwijderen",
     "deleteConfirm": "Deze notitie verwijderen?"
   },
   "ai": {

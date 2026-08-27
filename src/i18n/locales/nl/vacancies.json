@@ -134,7 +134,8 @@
     "save": "Opslaan",
     "cancel": "Annuleren",
     "searchPlaceholder": "Zoek notities…",
-    "deleteNote": "Notitie verwijderen",
+    "edit": "Bewerken",
+      "deleteNote": "Notitie verwijderen",
     "deleteConfirm": "Deze notitie verwijderen?"
   },
   "drawer": {

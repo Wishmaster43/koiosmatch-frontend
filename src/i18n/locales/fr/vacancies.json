@@ -134,7 +134,8 @@
     "save": "Enregistrer",
     "cancel": "Annuler",
     "searchPlaceholder": "Rechercher des notes…",
-    "deleteNote": "Supprimer la note",
+    "edit": "Modifier",
+      "deleteNote": "Supprimer la note",
     "deleteConfirm": "Supprimer cette note ?"
   },
   "drawer": {

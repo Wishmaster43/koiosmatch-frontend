@@ -49,10 +49,21 @@ export default function NotesTab({ vacancy: v }: { vacancy: VacancyDetail }) {
     }
   }
 
-  // NOTITIE-PARITEIT (Danny 27-08): DELETE /vacancies/{vacancy}/notes/{note}
-  // exists (VacancyNoteController::destroy) — no update route, so no edit
-  // pencil here. Index-keyed like every other family; the note's own id must
-  // have resolved (never a local optimistic-only add) before it can be deleted.
+  // NOTITIE-PARITEIT (Danny 27-08): PATCH + DELETE both exist since CMBE
+  // 1049413a (VacancyNoteController::update/destroy) — full candidate parity.
+  // Index-keyed like every other family; the note's own id must have resolved
+  // (never a local optimistic-only add) before it can be edited or deleted.
+  const editNote = (i: number, payload: { type: string; title: string; body: string; language?: string }) => {
+    const target = notes[i]
+    const noteId = target?.id
+    if (v.id == null || noteId == null) return
+    const snapshot = notes
+    setNotes(prev => prev.map((n, idx) => idx === i ? { ...n, ...payload, text: payload.body } : n))
+    api.patch(`/vacancies/${v.id}/notes/${noteId}`, { ...payload, text: payload.body }).catch(err => {
+      setNotes(snapshot)
+      notifyError(extractApiError(err, t('common:actionFailed')))
+    })
+  }
   const deleteNote = (i: number) => {
     const target = notes[i]
     const noteId = target?.id
@@ -69,6 +80,7 @@ export default function NotesTab({ vacancy: v }: { vacancy: VacancyDetail }) {
     <SharedNotesTab
       notes={notes}
       onAddNote={addNote}
+      onEditNote={editNote}
       onDeleteNote={deleteNote}
       noteTypes={noteTypes}
       authorInitials={initials}
@@ -92,6 +104,7 @@ export default function NotesTab({ vacancy: v }: { vacancy: VacancyDetail }) {
         notesEmpty: t('notes.empty'),
         notePlaceholder: () => t('notes.placeholder'),
         searchPlaceholder: t('notes.searchPlaceholder'),
+        edit: t('notes.edit'),
         deleteNote: t('notes.deleteNote'),
         deleteConfirm: t('notes.deleteConfirm'),
       }}

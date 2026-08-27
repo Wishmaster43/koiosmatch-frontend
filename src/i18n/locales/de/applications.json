@@ -381,7 +381,9 @@
     "save": "Speichern",
     "cancel": "Abbrechen",
     "type": "Typ",
-    "searchPlaceholder": "Notizen suchen…"
+    "searchPlaceholder": "Notizen suchen…",
+    "deleteNote": "Notiz löschen",
+    "deleteConfirm": "Diese Notiz löschen?"
   },
   "timeline": {
     "empty": "Noch keine Aktivität."

@@ -134,7 +134,8 @@
     "save": "Speichern",
     "cancel": "Abbrechen",
     "searchPlaceholder": "Notizen suchen…",
-    "deleteNote": "Notiz löschen",
+    "edit": "Bearbeiten",
+      "deleteNote": "Notiz löschen",
     "deleteConfirm": "Diese Notiz löschen?"
   },
   "drawer": {

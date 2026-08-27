@@ -313,7 +313,8 @@
     "searchPlaceholder": "Search notes…",
     "loading": "Loading notes…",
     "loadError": "Notes could not be loaded.",
-    "deleteNote": "Delete note",
+    "edit": "Edit",
+      "deleteNote": "Delete note",
     "deleteConfirm": "Delete this note?"
   },
   "ai": {

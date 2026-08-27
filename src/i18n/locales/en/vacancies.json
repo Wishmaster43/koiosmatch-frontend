@@ -134,7 +134,8 @@
     "save": "Save",
     "cancel": "Cancel",
     "searchPlaceholder": "Search notes…",
-    "deleteNote": "Delete note",
+    "edit": "Edit",
+      "deleteNote": "Delete note",
     "deleteConfirm": "Delete this note?"
   },
   "drawer": {

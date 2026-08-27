@@ -310,7 +310,8 @@
     "searchPlaceholder": "Notizen durchsuchen…",
     "loading": "Notizen werden geladen…",
     "loadError": "Notizen konnten nicht geladen werden.",
-    "deleteNote": "Notiz löschen",
+    "edit": "Bearbeiten",
+      "deleteNote": "Notiz löschen",
     "deleteConfirm": "Diese Notiz löschen?"
   },
   "ai": {

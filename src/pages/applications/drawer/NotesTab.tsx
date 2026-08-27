@@ -13,15 +13,15 @@ import type { ApplicationDetail } from '@/types/application'
  *
  * A-popout-1: passes `popout` so the composer can hand a half-typed note over to
  * the second-screen window (mirrors vacancies/customers), AND wires `onEditNote`
- * — the PATCH route now exists (ApplicationController::updateNote), so a note
- * can be edited right here in the drawer, not only in the popout window. No
- * DELETE route yet, so no delete affordance (§3).
+ * — PATCH (updateNote) and DELETE (destroyNote, CMBE 1049413a) both exist, so
+ * a note can be edited and deleted right here in the drawer: full candidate
+ * parity (NOTITIE-REFERENTIE, Danny 27-08).
  */
 export default function NotesTab({ application: a }: { application: ApplicationDetail }) {
   const { t } = useTranslation('applications')
   // Note categories from the tenant lookup, scoped to 'application' (NOTE-TYPES-2/3).
   const { writableTypes: noteTypes } = useNoteTypes('application')
-  const { notes, addNote, editNote } = useApplicationNotes(a.id, a.notes ?? [])
+  const { notes, addNote, editNote, deleteNote } = useApplicationNotes(a.id, a.notes ?? [])
 
   // Fallback avatar for a note with no resolved author (mirrors the candidate
   // drawer's own fallback: CommunicationTab passes the CANDIDATE's owner
@@ -34,6 +34,7 @@ export default function NotesTab({ application: a }: { application: ApplicationD
       notes={notes}
       onAddNote={addNote}
       onEditNote={editNote}
+      onDeleteNote={deleteNote}
       noteTypes={noteTypes}
       authorInitials={initials}
       showTimeline={false}
@@ -49,6 +50,8 @@ export default function NotesTab({ application: a }: { application: ApplicationD
         // `notes.edit` key — mirrors ApplicationNotesPopout.tsx, which already
         // reuses this same generic key for the identical pencil label.
         edit: t('common:edit'),
+        deleteNote: t('notes.deleteNote'),
+        deleteConfirm: t('notes.deleteConfirm'),
         notesEmpty: t('notes.empty'),
         notePlaceholder: () => t('notes.placeholder'),
         searchPlaceholder: t('notes.searchPlaceholder'),

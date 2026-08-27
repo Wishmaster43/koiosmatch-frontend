@@ -381,7 +381,9 @@
     "save": "Enregistrer",
     "cancel": "Annuler",
     "type": "Type",
-    "searchPlaceholder": "Rechercher des notes…"
+    "searchPlaceholder": "Rechercher des notes…",
+    "deleteNote": "Supprimer la note",
+    "deleteConfirm": "Supprimer cette note ?"
   },
   "timeline": {
     "empty": "Aucune activité pour le moment."

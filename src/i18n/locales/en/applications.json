@@ -381,7 +381,9 @@
     "placeholder": "Write a note…",
     "save": "Save",
     "cancel": "Cancel",
-    "searchPlaceholder": "Search notes…"
+    "searchPlaceholder": "Search notes…",
+    "deleteNote": "Delete note",
+    "deleteConfirm": "Delete this note?"
   },
   "timeline": {
     "empty": "No activity yet."
