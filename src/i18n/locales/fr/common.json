@@ -248,6 +248,11 @@
       "attention": "Attention",
       "renew": "Renouveler ?",
       "overdue": "En retard"
+    },
+    "assistant": {
+      "title": "Koios suggère",
+      "emptyState": "Rien ne nécessite votre attention pour le moment.",
+      "actionAvailable": "Action disponible"
     }
   },
   "actionRules": {

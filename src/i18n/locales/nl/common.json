@@ -248,6 +248,11 @@
       "attention": "Aandacht",
       "renew": "Verlengen?",
       "overdue": "Te laat"
+    },
+    "assistant": {
+      "title": "Koios stelt voor",
+      "emptyState": "Niets dat nu je aandacht nodig heeft.",
+      "actionAvailable": "Actie beschikbaar"
     }
   },
   "actionRules": {

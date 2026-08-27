@@ -1,10 +1,20 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, fireEvent, waitFor, within } from '@testing-library/react'
 import { useMemo } from 'react'
+import type { ReactNode } from 'react'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import KoiosPanel from './KoiosPanel'
 import { sendChat } from './koios/koiosApi'
 import api from '@/lib/api'
 import { SelectionProvider, usePublishSelection } from '@/context/SelectionContext'
+
+// KoiosAssistantBlock (mounted on the landing state, above KoiosRadar) uses
+// react-query — a bare render() would throw "No QueryClient set" now that the
+// panel mounts it. One fresh client per render, mirroring App.tsx's own provider.
+function renderWithQuery(children: ReactNode) {
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+  return render(<QueryClientProvider client={client}>{children}</QueryClientProvider>)
+}
 
 // jsdom has no scrollIntoView implementation; KoiosPanel calls it to keep the
 // latest message in view on every messages/loading change.
@@ -48,12 +58,24 @@ vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ hasPermission: () =>
 // never sits alongside it, and only while no real conversation has started yet.
 describe('KoiosPanel — landing state', () => {
   it('shows the Koios Advies radar instead of the welcome bubble when opened', async () => {
-    render(<KoiosPanel open onClose={() => {}} onNavigate={() => {}} />)
+    renderWithQuery(<KoiosPanel open onClose={() => {}} onNavigate={() => {}} />)
     expect(screen.getByText('common:koios.radar.title')).toBeInTheDocument()
     expect(screen.queryByText('koios.welcome')).toBeNull()
     // Let the radar's own stats fetch settle (mocked all-zero → empty state) so
     // the async state update lands inside RTL's act(), not after the test ends.
     await screen.findByText('common:koios.radar.empty')
+  })
+
+  // KOIOS-ASSISTANT-FE-1: the assistant block mounts on the landing state and
+  // disappears the moment a real conversation starts (mirrors the radar's own contract).
+  it('mounts the assistant block on the landing state and drops it once a message is sent', async () => {
+    renderWithQuery(<KoiosPanel open onClose={() => {}} onNavigate={() => {}} />)
+    await screen.findByText('koios.assistant.title')
+    const textarea = screen.getByPlaceholderText('koios.taskPlaceholder')
+    fireEvent.change(textarea, { target: { value: 'hello' } })
+    fireEvent.click(screen.getByRole('button', { name: 'koios.taskPlaceholder' }))
+    await waitFor(() => expect(sendChat).toHaveBeenCalled())
+    expect(screen.queryByText('koios.assistant.title')).toBeNull()
   })
 })
 
@@ -64,7 +86,7 @@ describe('KoiosPanel — resizable width', () => {
   beforeEach(() => localStorage.clear())
 
   it('renders a keyboard-operable resize handle and keeps the expand/collapse button', async () => {
-    render(<KoiosPanel open onClose={() => {}} onNavigate={() => {}} />)
+    renderWithQuery(<KoiosPanel open onClose={() => {}} onNavigate={() => {}} />)
     await screen.findByText('common:koios.radar.empty')
     // The handle: real separator role + accessible name (never mouse-only).
     expect(screen.getByRole('separator', { name: 'koios.resizeHandle' })).toBeInTheDocument()
@@ -74,7 +96,7 @@ describe('KoiosPanel — resizable width', () => {
 
   it('restores a previously stored pixel width instead of a fixed preset', async () => {
     localStorage.setItem('koios.width', '480')
-    const { container } = render(<KoiosPanel open onClose={() => {}} onNavigate={() => {}} />)
+    const { container } = renderWithQuery(<KoiosPanel open onClose={() => {}} onNavigate={() => {}} />)
     await screen.findByText('common:koios.radar.empty')
     expect((container.firstChild as HTMLElement).style.width).toBe('480px')
   })
@@ -84,7 +106,7 @@ describe('KoiosPanel — resizable width', () => {
 // translated credit notice, not the generic "couldn't reach Koios" line.
 describe('KoiosPanel — known backend error codes', () => {
   const submitMessage = async (text: string) => {
-    render(<KoiosPanel open onClose={() => {}} onNavigate={() => {}} />)
+    renderWithQuery(<KoiosPanel open onClose={() => {}} onNavigate={() => {}} />)
     await screen.findByText('common:koios.radar.empty')
     const textarea = screen.getByPlaceholderText('koios.taskPlaceholder')
     fireEvent.change(textarea, { target: { value: text } })
@@ -165,7 +187,7 @@ describe('KoiosPanel — context chips (seam)', () => {
   }
   function renderPanel({ hash, selectionIds }: { hash?: string; selectionIds?: string[] } = {}) {
     if (hash !== undefined) window.location.hash = hash
-    return render(
+    return renderWithQuery(
       <SelectionProvider>
         {selectionIds && <SelectionSeed ids={selectionIds} />}
         <KoiosPanel open onClose={() => {}} onNavigate={() => {}} />
@@ -292,7 +314,7 @@ describe('KoiosPanel — context chips (seam)', () => {
 describe('KoiosPanel — mention menu keyboard seam', () => {
   // Same minimal render as the chips describe (its helper is scoped there).
   function renderPanel() {
-    return render(
+    return renderWithQuery(
       <SelectionProvider>
         <KoiosPanel open onClose={() => {}} onNavigate={() => {}} />
       </SelectionProvider>,

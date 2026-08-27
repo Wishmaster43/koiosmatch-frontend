@@ -248,6 +248,11 @@
       "attention": "Attention",
       "renew": "Renew?",
       "overdue": "Overdue"
+    },
+    "assistant": {
+      "title": "Koios suggests",
+      "emptyState": "Nothing needs your attention right now.",
+      "actionAvailable": "Action available"
     }
   },
   "actionRules": {

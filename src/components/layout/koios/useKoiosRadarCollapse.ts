@@ -9,28 +9,30 @@
  */
 import { useCallback, useState } from 'react'
 
-const STORAGE_KEY = 'koios.radar.collapsed'
+const RADAR_KEY = 'koios.radar.collapsed'
 
 // Read the persisted collapsed flag; any storage failure (quota, private mode,
 // or simply nothing stored yet) degrades to the default (open).
-function readCollapsed(): boolean {
+function readCollapsed(storageKey: string): boolean {
   try {
-    return localStorage.getItem(STORAGE_KEY) === 'true'
+    return localStorage.getItem(storageKey) === 'true'
   } catch {
     return false
   }
 }
 
-// Persisted open/closed toggle for the KoiosRadar card (see the module doc above); read/write both degrade to the default (open) on any storage failure.
-export function useKoiosRadarCollapse() {
-  const [collapsed, setCollapsed] = useState<boolean>(readCollapsed)
+// Persisted open/closed toggle for a landing-state card (see the module doc
+// above); parameterised by storage key so the assistant block shares the ONE
+// mechanism instead of a copy (§11) — read/write degrade to open on failure.
+export function useKoiosRadarCollapse(storageKey: string = RADAR_KEY) {
+  const [collapsed, setCollapsed] = useState<boolean>(() => readCollapsed(storageKey))
 
   // Persist the new choice; same defensive swallow as every other Koios
   // preference — a failed write just means the choice stays in-memory only.
   const setAndPersist = useCallback((next: boolean) => {
     setCollapsed(next)
-    try { localStorage.setItem(STORAGE_KEY, String(next)) } catch { /* quota / private mode — stays in memory */ }
-  }, [])
+    try { localStorage.setItem(storageKey, String(next)) } catch { /* quota / private mode — stays in memory */ }
+  }, [storageKey])
 
   return { collapsed, setCollapsed: setAndPersist }
 }

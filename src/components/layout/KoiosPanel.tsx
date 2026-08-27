@@ -29,6 +29,7 @@ import type { KoiosContextChipRow } from './koios/KoiosContextChips'
 import KoiosHeader from './koios/KoiosHeader'
 import KoiosResizeHandle from './koios/KoiosResizeHandle'
 import KoiosRadar from './koios/KoiosRadar'
+import KoiosAssistantBlock from './koios/KoiosAssistantBlock'
 import KoiosVoiceButton from './koios/KoiosVoiceButton'
 import type { KoiosContextRef } from '@/types/koios'
 
@@ -203,7 +204,11 @@ export default function KoiosPanel({ open, onClose, onNavigate }: { open?: boole
       <div style={{ flex: 1, overflowY: 'auto', padding: '14px 12px',
         display: 'flex', flexDirection: 'column', gap: 12 }}>
         {isLanding ? (
-          <KoiosRadar onNavigate={onNavigate} />
+          // Assistant block ABOVE the radar (§0B: the assistant's opening move).
+          <>
+            <KoiosAssistantBlock />
+            <KoiosRadar onNavigate={onNavigate} />
+          </>
         ) : (
           messages.map((msg, i) => (
             <KoiosMessage key={i} msg={msg} isNew={i === messages.length - 1} t={t} locale={locale} modelOptions={settings?.models?.options} />

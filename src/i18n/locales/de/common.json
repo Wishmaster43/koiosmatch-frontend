@@ -248,6 +248,11 @@
       "attention": "Achtung",
       "renew": "Verlängern?",
       "overdue": "Überfällig"
+    },
+    "assistant": {
+      "title": "Koios schlägt vor",
+      "emptyState": "Im Moment ist nichts zu erledigen.",
+      "actionAvailable": "Aktion verfügbar"
     }
   },
   "actionRules": {
