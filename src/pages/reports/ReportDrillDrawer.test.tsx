@@ -49,14 +49,17 @@ describe('ReportDrillDrawer — shown-of footer (SM idiom)', () => {
     expect(screen.getByText('1 van 8 getoond')).toBeInTheDocument()
   })
 
-  it('hides the search field on a short list (calm default)', () => {
+  // SM idiom (Danny 24-08: the drill must match the SM report drawer): the search
+  // renders unconditionally — the KpiDrillDownDrawer never hides it. Supersedes
+  // the earlier calm-default (hide under 6 rows) behaviour.
+  it('shows the search field even on a short list (SM idiom)', () => {
     mockUseReportDrill.mockReturnValue({
       rows: [{ id: '1', name: 'Row 1' }],
       rowsTotal: 1, rowsLoading: false, rowsForbidden: false,
       advice: 'Some advice.', adviceLoading: false,
     })
     render(<ReportDrillDrawer drill={baseDrill} onClose={() => {}} />)
-    expect(screen.queryByRole('textbox')).not.toBeInTheDocument()
+    expect(screen.getByRole('textbox', { name: 'Zoeken…' })).toBeInTheDocument()
   })
 
   // entityPage (SM idiom): rows deep-link to the record — the name is the

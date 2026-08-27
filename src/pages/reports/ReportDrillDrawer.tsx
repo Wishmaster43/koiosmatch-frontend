@@ -62,17 +62,18 @@ function DrillRecordsList({ rows, rowsTotal, entityPage }: { rows: DrillRow[]; r
 
   return (
     <>
-      {/* Search — only once the list is long enough to need it (calm default). */}
-      {rows.length > 5 && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '5px 10px', marginBottom: 8,
-          background: 'var(--hover-bg)', border: '1px solid var(--border)', borderRadius: 7 }}>
-          <Search size={13} color="var(--text-muted)" aria-hidden="true" />
-          <input value={search} onChange={e => setSearch(e.target.value)}
-            placeholder={t('drill.search')} aria-label={t('drill.search')}
-            style={{ flex: 1, border: 'none', background: 'transparent', outline: 'none', fontSize: 12, color: 'var(--text)' }} />
-        </div>
-      )}
-      <div style={{ border: '1px solid var(--border)', borderRadius: 10, overflow: 'hidden' }}>
+      {/* Search — ALWAYS visible and fixed above the list (SM idiom: the
+          KpiDrillDownDrawer shows its search unconditionally). */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '5px 10px', marginBottom: 8, flexShrink: 0,
+        background: 'var(--hover-bg)', border: '1px solid var(--border)', borderRadius: 7 }}>
+        <Search size={13} color="var(--text-muted)" aria-hidden="true" />
+        <input value={search} onChange={e => setSearch(e.target.value)}
+          placeholder={t('drill.search')} aria-label={t('drill.search')}
+          style={{ flex: 1, border: 'none', background: 'transparent', outline: 'none', fontSize: 12, color: 'var(--text)' }} />
+      </div>
+      <div style={{ border: '1px solid var(--border)', borderRadius: 10, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+        {/* Rows scroll in a capped region so breakdown/advice below stay reachable. */}
+        <div style={{ overflowY: 'auto', maxHeight: 320 }}>
         {filtered.length === 0 && (
           <div style={{ fontSize: 13, color: 'var(--text-muted)', padding: '10px 12px' }}>{t('drill.noRecords')}</div>
         )}
@@ -95,11 +96,13 @@ function DrillRecordsList({ rows, rowsTotal, entityPage }: { rows: DrillRow[]; r
             </div>
           )
         })}
+        </div>
+        {/* Shown-of footer (SM idiom): fixed under the frame, never scrolls away —
+            and it carries the server cap honestly. */}
+        <Caption as="div" style={{ flexShrink: 0, padding: '7px 12px', borderTop: '1px solid var(--border)', background: 'var(--hover-bg)' }}>
+          {t('drill.shownOf', { shown: filtered.length, total: rowsTotal })}
+        </Caption>
       </div>
-      {/* Shown-of footer (SM idiom) — also carries the server cap honestly. */}
-      <Caption as="div" style={{ marginTop: 6 }}>
-        {t('drill.shownOf', { shown: filtered.length, total: rowsTotal })}
-      </Caption>
     </>
   )
 }
