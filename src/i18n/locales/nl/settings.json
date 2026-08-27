@@ -1920,7 +1920,7 @@
     "manualOnly": "Alleen handmatig",
     "verifyTokenSet": "Verify-token ingesteld",
     "verifyTokenUnset": "Geen verify-token",
-    "confirmDelete": "Weet je zeker dat je dit token wilt verwijderen?",
+    "confirmDelete": "Weet je zeker dat je deze koppeling wilt verwijderen? De server controleert niet op actief gebruik: verwijderen kan een lopende koppeling breken.",
     "deleteFailed": "Verwijderen is niet gelukt.",
     "promoteFailed": "Instellen als standaard is niet gelukt.",
     "selectConnection": "Token",

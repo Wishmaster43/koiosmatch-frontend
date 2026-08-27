@@ -1920,7 +1920,7 @@
     "manualOnly": "Manual only",
     "verifyTokenSet": "Verify token set",
     "verifyTokenUnset": "No verify token",
-    "confirmDelete": "Are you sure you want to remove this token?",
+    "confirmDelete": "Are you sure you want to delete this connection? The server does not check for active use: deleting can break a live connection.",
     "deleteFailed": "Removing failed.",
     "promoteFailed": "Setting as default failed.",
     "selectConnection": "Token",

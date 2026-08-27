@@ -89,7 +89,11 @@ export default function WhatsAppConnectionsList({
   }
 
   // Confirms and deletes a connection, removing it locally on success without a full reload.
+  // WA-SCOPE-1/contract §12a: DELETE has NO in-use guard server-side, so the confirm
+  // copy says so honestly instead of implying a 409-style safety net that does not exist.
   const remove = (row: WhatsappConnectionRow) => {
+    // The copy itself carries the no-guard honesty (§12a: DELETE has no in-use
+    // guard server-side) — one key, so a translator owns the whole sentence pair.
     confirm(t('whatsapp.confirmDelete'), async () => {
       setDeletingId(row.id)
       try { await api.delete(`/whatsapp/${row.id}`); removeLocal(row.id) }

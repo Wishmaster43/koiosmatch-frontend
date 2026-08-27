@@ -1674,7 +1674,7 @@
     "manualOnly": "Nur manuell",
     "verifyTokenSet": "Verify-Token festgelegt",
     "verifyTokenUnset": "Kein Verify-Token",
-    "confirmDelete": "Möchten Sie dieses Token wirklich entfernen?",
+    "confirmDelete": "Möchten Sie diese Verbindung wirklich löschen? Der Server prüft nicht auf aktive Nutzung: Das Löschen kann eine aktive Verbindung unterbrechen.",
     "deleteFailed": "Entfernen fehlgeschlagen.",
     "promoteFailed": "Als Standard festlegen fehlgeschlagen.",
     "selectConnection": "Token",

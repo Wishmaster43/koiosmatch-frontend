@@ -1674,7 +1674,7 @@
     "manualOnly": "Manuel uniquement",
     "verifyTokenSet": "Jeton de vérification défini",
     "verifyTokenUnset": "Aucun jeton de vérification",
-    "confirmDelete": "Voulez-vous vraiment supprimer ce jeton ?",
+    "confirmDelete": "Voulez-vous vraiment supprimer cette connexion ? Le serveur ne vérifie pas l’utilisation active : la suppression peut interrompre une connexion active.",
     "deleteFailed": "La suppression a échoué.",
     "promoteFailed": "La définition par défaut a échoué.",
     "selectConnection": "Jeton",
