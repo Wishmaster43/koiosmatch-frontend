@@ -531,7 +531,7 @@
     "min": "min",
     "max": "max",
     "fullNameExample": "John Smith",
-    "phoneExample": "+44 7911 123456",
+    "phoneExample": "+country code and number",
     "streetExample": "12 Main Street",
     "cityExample": "London",
     "companyNameExample": "Jansen Care Group Ltd"

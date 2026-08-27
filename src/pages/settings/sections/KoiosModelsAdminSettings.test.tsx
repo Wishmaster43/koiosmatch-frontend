@@ -60,17 +60,33 @@ describe('KoiosModelsAdminSettings', () => {
     vi.mocked(api.post).mockReset()
   })
 
-  it('loads the registry via GET and renders the four cards', async () => {
+  it('loads the registry via GET and renders the Models tab by default', async () => {
     renderScreen()
     await waitFor(() => expect(api.get).toHaveBeenCalledWith('/superadmin/koios/models', expect.any(Object)))
     expect(await screen.findByText('Flavours')).toBeInTheDocument()
-    expect(screen.getByText('Routing per request type')).toBeInTheDocument()
-    expect(screen.getByText('Packages')).toBeInTheDocument()
+  })
+
+  it('splits the four cards across their three sub-tabs, keeping data loaded on switch', async () => {
+    renderScreen()
+    await screen.findByText('Flavours')
+    expect(screen.queryByText('Packages')).not.toBeInTheDocument()
+    expect(screen.queryByText('Routing per request type')).not.toBeInTheDocument()
+
+    await userEvent.click(screen.getByRole('tab', { name: 'Packages & tenants' }))
+    expect(await screen.findByText('Packages')).toBeInTheDocument()
     expect(screen.getByText('Tenant overrides')).toBeInTheDocument()
+    expect(screen.queryByText('Flavours')).not.toBeInTheDocument()
+    // No second GET fires — the section data stays loaded across the switch.
+    expect(api.get).toHaveBeenCalledTimes(1)
+
+    await userEvent.click(screen.getByRole('tab', { name: 'Routing' }))
+    expect(await screen.findByText('Routing per request type')).toBeInTheDocument()
+    expect(api.get).toHaveBeenCalledTimes(1)
   })
 
   it('hides the effort picker for a routed flavour whose model has no effort levels', async () => {
     renderScreen()
+    await userEvent.click(screen.getByRole('tab', { name: 'Routing' }))
     await screen.findByText('Routing per request type')
     // note_assist routes to 'snel' == claude-haiku-4-5, supports_effort: false.
     const row = screen.getByText('Note assist').closest('div')!

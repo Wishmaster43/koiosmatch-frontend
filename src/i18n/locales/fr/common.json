@@ -531,7 +531,7 @@
     "min": "min",
     "max": "max",
     "fullNameExample": "Jean Dupont",
-    "phoneExample": "+33 6 12 34 56 78",
+    "phoneExample": "+indicatif et numéro",
     "streetExample": "Rue Principale 12",
     "cityExample": "Paris",
     "companyNameExample": "Groupe de soins Jansen"

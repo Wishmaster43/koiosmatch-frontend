@@ -50,6 +50,10 @@ export default function NotesTab({ task }: { task: TaskDetail }) {
       authorInitials={initials}
       showTimeline={false}
       showConversations={false}
+      // POPOUT-PARITEIT-1: which record the shared tab may pop out — full
+      // parity with candidate/application/vacancy since both PATCH and DELETE
+      // exist for a single task note.
+      popout={{ entity: 'task', id: String(task.id) }}
       labels={{
         notes: t('notes.title'),
         newNote: t('notes.new'),

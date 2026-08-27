@@ -37,6 +37,10 @@ export default function NotesTab({ opportunity: o }: { opportunity: Opportunity 
       noteTypes={noteTypes}
       showTimeline={false}
       showConversations={false}
+      // POPOUT-PARITEIT-1: which record the shared tab may pop out — the
+      // per-note edit route (OPP-NOTE-EDIT-1) lands, so the per-note "edit on
+      // second screen" icon shows too, mirroring candidate/application/vacancy.
+      popout={o?.id ? { entity: 'opportunity', id: String(o.id) } : undefined}
       labels={{
         notes: t('notes.title'),
         newNote: t('notes.new'),

@@ -27,7 +27,10 @@ export interface UseEntityNotesResult {
   // NOTITIE-PARITEIT (Danny 27-08): edit/delete, index-keyed like every other
   // family (candidates/customers/opportunities) — only wired by a host whose
   // entity actually has the matching PATCH/DELETE route (see each caller).
-  editNote: (i: number, payload: { type: string; title: string; body: string; language?: string }) => void
+  // POPOUT-PARITEIT-1: editNote resolves TRUE only on a landed write — the
+  // per-note popout's PopoutSaveFooter contract requires an honest signal
+  // (never "resolved" before the PATCH actually lands, §3).
+  editNote: (i: number, payload: { type: string; title: string; body: string; language?: string }) => Promise<boolean>
   deleteNote: (i: number) => void
 }
 
@@ -81,20 +84,21 @@ export function useEntityNotes({ id, basePath }: { id: Id | null | undefined; ba
   // optimistic pattern, PATCH `${basePath}/notes/{id}` — only called by a host
   // whose entity has this route, e.g. tasks; a note without a resolved id
   // (still-optimistic) is skipped, mirroring vacancies/customers).
-  const editNote = useCallback((i: number, payload: { type: string; title: string; body: string; language?: string }) => {
+  const editNote = useCallback((i: number, payload: { type: string; title: string; body: string; language?: string }): Promise<boolean> => {
     const target = notes[i]
     const noteId = target?.id
-    if (noteId == null) return
+    if (noteId == null) return Promise.resolve(false)
     const snapshot = notes
     setNotes(prev => prev.map((n, idx) => (idx === i ? { ...n, type: payload.type, title: payload.title, text: payload.body } : n)))
     // TaskCommentController::update validates `body` (not `text`) — send both so
     // every family's controller finds the field name it actually expects. Refetch
     // on success so "edited by ..." (server-stamped) actually shows.
-    api.patch(`${basePath}/notes/${noteId}`, { type: payload.type, title: payload.title, body: payload.body, text: payload.body, language: payload.language })
-      .then(fetchNotes)
+    return api.patch(`${basePath}/notes/${noteId}`, { type: payload.type, title: payload.title, body: payload.body, text: payload.body, language: payload.language })
+      .then(() => { fetchNotes(); return true })
       .catch(err => {
         setNotes(snapshot)
         notifyError(extractApiError(err, t('actionFailed')))
+        return false
       })
   }, [notes, basePath, t, fetchNotes])
 

@@ -2843,7 +2843,11 @@
       "workflowNote": "{{n}} Ausführungen",
       "whatsappLabel": "WhatsApp Business",
       "planningLabel": "Verarbeitete Stunden",
-      "workflowBillableNote": "{{billable}} abrechenbar (von {{credits}}, {{included}} inbegriffen)"
+      "workflowBillableNote": "{{billable}} abrechenbar (von {{credits}}, {{included}} inbegriffen)",
+      "budgetStatus": {
+        "title": "Workflow-Budget",
+        "withinBudget": "Diesen Monat innerhalb des Budgets."
+      }
     }
   },
   "jobs": {
@@ -3273,6 +3277,11 @@
     "applicationStaleSaveFailed": "Speichern des Bewerbungs-Phasenfensters fehlgeschlagen."
   },
   "koiosModelsAdmin": {
+    "tabs": {
+      "models": "Modelle",
+      "packages": "Pakete & Mandanten",
+      "routing": "Routing"
+    },
     "title": "Koios KI-Modelle",
     "subtitle": "Plattformweite Modellzuweisung: Varianten, Routing pro Anfragetyp, Paketobergrenzen und Mandanten-Ausnahmen.",
     "refresh": "Aktualisieren",

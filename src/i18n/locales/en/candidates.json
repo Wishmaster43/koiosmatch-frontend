@@ -1352,7 +1352,7 @@
   },
   "validation": {
     "emailFormat": "Enter a valid e-mail address.",
-    "phoneFormat": "Enter a valid phone number (8 to 15 digits, e.g. 07911123456 or +447911123456).",
+    "phoneFormat": "Enter a valid phone number (8 to 15 digits, with or without a country code).",
     "linkedinFormat": "Use only the LinkedIn username, without spaces or slashes (e.g. jan-jansen-12345)."
   },
   "popout": {

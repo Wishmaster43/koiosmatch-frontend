@@ -296,11 +296,9 @@ export default function CustomerNotesTab({ customerId, customerName, customerIni
           // reopening focuses the existing one). Since NOTITIE-POPOUT-HANDOFF-1 the
           // tab owns opening it, the blocked-popup notice AND handing a half-typed
           // note over, so this host only names the target (mirrors CommunicationTab).
-          // NOTITIE-POPOUT-EDIT-1: naming it does NOT give a customer note the
-          // per-note "edit on the second screen" icon — CustomerNotesPopout can only
-          // ADD (the API has no PATCH for a single customer note), so handing an
-          // existing note there would save a duplicate. What still works from here is
-          // popping a NEW note out of the composer.
+          // POPOUT-PARITEIT-1 (27-08): the per-note "edit on the second screen" icon
+          // now shows too — customers.notes PATCH/DELETE landed (K15NOTES) and
+          // NoteEditPopout.tsx's customer branch really persists a handed-over note.
           popout={{ entity: 'customer', id: String(customerId) }}
           // NOTES-LOC-DEPT-1 → composer (Danny 05-08: "koppelen aan klant weg, dat moet
           // komen als je doet + notitie" — remove the link-to-customer control, it should

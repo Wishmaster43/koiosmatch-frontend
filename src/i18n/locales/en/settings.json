@@ -2843,7 +2843,11 @@
       "workflowNote": "{{n}} runs",
       "whatsappLabel": "WhatsApp Business",
       "planningLabel": "Processed hours",
-      "workflowBillableNote": "{{billable}} billable (of {{credits}}, {{included}} included)"
+      "workflowBillableNote": "{{billable}} billable (of {{credits}}, {{included}} included)",
+      "budgetStatus": {
+        "title": "Workflow budget",
+        "withinBudget": "Within budget this month."
+      }
     }
   },
   "jobs": {
@@ -3273,6 +3277,11 @@
     "applicationStaleSaveFailed": "Saving the application stage staleness window failed."
   },
   "koiosModelsAdmin": {
+    "tabs": {
+      "models": "Models",
+      "packages": "Packages & tenants",
+      "routing": "Routing"
+    },
     "title": "Koios AI models",
     "subtitle": "Platform-wide model routing: flavours, per-request-type routing, package ceilings and tenant overrides.",
     "refresh": "Refresh",

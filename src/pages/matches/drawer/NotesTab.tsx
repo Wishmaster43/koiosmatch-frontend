@@ -53,6 +53,10 @@ export default function NotesTab({ match: m }: { match: MatchRow }) {
       authorInitials={initials}
       showTimeline={false}
       showConversations={false}
+      // POPOUT-PARITEIT-1: which record the shared tab may pop out — full
+      // parity with candidate/application/vacancy since the PATCH route above
+      // lands, so the per-note "edit on second screen" icon shows too.
+      popout={{ entity: 'match', id: String(m.id) }}
       labels={{
         notes: t('notes.title'),
         newNote: t('notes.new'),

@@ -2843,7 +2843,11 @@
       "workflowNote": "{{n}} exécutions",
       "whatsappLabel": "WhatsApp Business",
       "planningLabel": "Heures traitées",
-      "workflowBillableNote": "{{billable}} facturables (sur {{credits}}, {{included}} inclus)"
+      "workflowBillableNote": "{{billable}} facturables (sur {{credits}}, {{included}} inclus)",
+      "budgetStatus": {
+        "title": "Budget workflow",
+        "withinBudget": "Dans le budget ce mois-ci."
+      }
     }
   },
   "jobs": {
@@ -3273,6 +3277,11 @@
     "applicationStaleSaveFailed": "Échec de l'enregistrement de la fenêtre de phase de la candidature."
   },
   "koiosModelsAdmin": {
+    "tabs": {
+      "models": "Modèles",
+      "packages": "Forfaits et clients",
+      "routing": "Routage"
+    },
     "title": "Modèles IA Koios",
     "subtitle": "Routage des modèles à l'échelle de la plateforme : variantes, routage par type de requête, plafonds de forfait et exceptions par client.",
     "refresh": "Actualiser",

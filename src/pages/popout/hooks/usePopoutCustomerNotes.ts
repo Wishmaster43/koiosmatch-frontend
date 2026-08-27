@@ -61,17 +61,20 @@ export function usePopoutCustomerNotes(customerId: string | undefined) {
 
   // K15NOTES: edit — index into the current `notes` array, optimistic + PATCH + reload
   // (mirrors useCandidateNotes.editNote). Reverts to the pre-edit snapshot on failure.
-  const editNote = useCallback((index: number, payload: NotePayload) => {
-    if (!customerId) return
+  // POPOUT-PARITEIT-1: resolves TRUE only on a landed write — the per-note popout's
+  // PopoutSaveFooter contract requires an honest signal (§3).
+  const editNote = useCallback((index: number, payload: NotePayload): Promise<boolean> => {
+    if (!customerId) return Promise.resolve(false)
     const target = notes[index]
-    if (!target) return
+    if (!target) return Promise.resolve(false)
     const snapshot = notes
     setNotes(prev => prev.map((n, i) => (i === index ? { ...n, type: payload.type, text: payload.body } : n)))
-    api.patch(`/customers/${customerId}/notes/${target.id}`, { type: payload.type, text: payload.body, language: payload.language })
-      .then(() => load())
+    return api.patch(`/customers/${customerId}/notes/${target.id}`, { type: payload.type, text: payload.body, language: payload.language })
+      .then(() => { load(); return true })
       .catch(err => {
         setNotes(snapshot)
         notifyError(extractApiError(err, t('common:actionFailed')))
+        return false
       })
   }, [customerId, notes, load, t])
 

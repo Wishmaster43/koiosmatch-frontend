@@ -8,14 +8,20 @@
  * design: no BroadcastChannel handoff to resolve, no race against a thread
  * window's own loading, and re-opening the same note re-focuses its OS window.
  *
- * A-popout-1 (14-08): generalised beyond candidate-only — `entity` now
- * dispatches to a per-entity loader component (candidate/application), each
- * wiring its own lite-identity + notes hook, but sharing ONE `NoteEditor` body
- * (§11: one form, no second copy). Any entity outside NOTE_EDIT_POPOUT_ENTITIES
- * (customer/vacancy today — see that set's own docblock in lib/secondScreen for
- * exactly why) renders the honest error row here, never a form whose save the
- * server would 403 or, worse, a window that cannot even resolve the id (§3, no
- * fake affordance for a route that does not really PATCH the note).
+ * POPOUT-PARITEIT-1 (Danny 27-08, "de notities zoals ze zijn bij kandidaat
+ * moeten ook bij de rest zo zijn … en pop-out"): generalised beyond candidate/
+ * application to every entity whose notes route now really PATCHes a single
+ * note (see NOTE_EDIT_POPOUT_ENTITIES's own docblock for the per-entity route
+ * evidence) — customer, vacancy, task, match, opportunity. Four of those five
+ * (vacancy/task/match/opportunity) share the exact same `{basePath}/notes/{id}`
+ * shape the shared `useEntityNotes` hook already fetches/edits with, so they
+ * ride ONE generic branch (`GenericNoteEditPopout`) parameterised by entity +
+ * basePath + lite-identity hook — never a fifth hand-copied component (§11).
+ * Customer keeps its own branch: its notes route takes a `rollup` query param
+ * and its edit hook (usePopoutCustomerNotes) already existed pre-dating this
+ * generalisation, so it is reused rather than forced onto the generic shape.
+ * Any entity outside NOTE_EDIT_POPOUT_ENTITIES renders the honest error row
+ * here, never a form whose save the server would 403 (§3, no fake affordance).
  *
  * A pasteable URL means THIS page re-decides the edit right (noteRights, the
  * same rule the list uses): someone else's note renders read-only with a notice,
@@ -33,15 +39,21 @@ import SafeHtml from '@/components/ui/SafeHtml'
 import { useAuth } from '@/context/AuthContext'
 import { useNoteTypes } from '@/lib/useNoteTypes'
 import { useLastContactTypes } from '@/lib/useLastContactTypes'
+import { useEntityNotes } from '@/hooks/useEntityNotes'
 import { useCandidateNotes, type CandidateNote } from '@/pages/candidates/shared'
 import { useCandidateLite } from './hooks/useCandidateLite'
 import { useApplicationLite } from './hooks/useApplicationLite'
+import { useCustomerLite } from './hooks/useCustomerLite'
+import { useVacancyLite } from './hooks/useVacancyLite'
+import { useTaskLite } from './hooks/useTaskLite'
+import { useMatchLite } from './hooks/useMatchLite'
+import { useOpportunityLite } from './hooks/useOpportunityLite'
 import { usePopoutApplicationNotes, type PopoutApplicationNote } from './hooks/usePopoutApplicationNotes'
+import { usePopoutCustomerNotes } from './hooks/usePopoutCustomerNotes'
 import type { NoteType, NotesLabels } from '@/components/drawer/tabs/NotesTab'
 
-// Structural shape NoteEditor needs off a note — both CandidateNote and
-// PopoutApplicationNote already satisfy it, so ONE editor body serves both
-// entities without a per-entity copy (§11).
+// Structural shape NoteEditor needs off a note — every entity's note shape
+// already satisfies it, so ONE editor body serves all of them (§11).
 interface EditableNote {
   id?: string | number
   type?: string
@@ -61,6 +73,23 @@ export default function NoteEditPopout() {
 
   if (entity === 'candidate') return <CandidateNoteEditPopout />
   if (entity === 'application') return <ApplicationNoteEditPopout />
+  if (entity === 'customer') return <CustomerNoteEditPopout />
+  if (entity === 'vacancy') {
+    return <GenericNoteEditPopout entity="vacancy" i18nNs="vacancies" useLite={useVacancyLite}
+      adapt={r => ({ record: r.vacancy, name: r.vacancy?.name ?? '', initials: r.vacancy?.initials ?? '' })} />
+  }
+  if (entity === 'task') {
+    return <GenericNoteEditPopout entity="task" i18nNs="tasks" useLite={useTaskLite}
+      adapt={r => ({ record: r.task, name: r.task?.name ?? '', initials: r.task?.initials ?? '' })} />
+  }
+  if (entity === 'match') {
+    return <GenericNoteEditPopout entity="match" i18nNs="matches" useLite={useMatchLite}
+      adapt={r => ({ record: r.match, name: r.match?.candidateName ?? '', initials: r.match?.initials ?? '', subtitle: r.match?.vacancyTitle })} />
+  }
+  if (entity === 'opportunity') {
+    return <GenericNoteEditPopout entity="opportunity" i18nNs="opportunities" useLite={useOpportunityLite}
+      adapt={r => ({ record: r.opportunity, name: r.opportunity?.name ?? '', initials: r.opportunity?.initials ?? '' })} />
+  }
   // Any other entity has no route that can really PATCH a note yet (see
   // NOTE_EDIT_POPOUT_ENTITIES's own docblock for the current state per entity) —
   // an honest error row, never a form (§3).
@@ -93,6 +122,10 @@ function CandidateNoteEditPopout() {
   }, [candidate, t])
 
   const notFound = loaded && (!note || isSystemNote(note))
+  const labels: NotesLabels = {
+    type: t('communication.type'), channel: t('communication.channel'),
+    notePlaceholder: (typeLabel: string) => t('communication.notePlaceholder', { type: typeLabel }),
+  }
 
   return (
     <PopoutShell
@@ -107,7 +140,7 @@ function CandidateNoteEditPopout() {
       {note && (
         <NoteEditor key={String(noteId)} note={note} managePermission="candidates.notes.manage_all"
           onSave={payload => editNote(noteIndex, payload)}
-          noteTypes={writableTypes} channels={channels} labelsNs="candidates" />
+          noteTypes={writableTypes} channels={channels} labels={labels} readOnlyCopy={t('popout.noteReadOnly')} />
       )}
     </PopoutShell>
   )
@@ -137,6 +170,7 @@ function ApplicationNoteEditPopout() {
   }, [application, t])
 
   const notFound = loaded && (!note || isSystemNote(note))
+  const labels: NotesLabels = { type: t('notes.type'), notePlaceholder: () => t('notes.placeholder') }
 
   return (
     <PopoutShell
@@ -152,7 +186,107 @@ function ApplicationNoteEditPopout() {
       {note && (
         <NoteEditor key={String(noteId)} note={note} managePermission="applications.notes.manage_all"
           onSave={payload => editNote(noteIndex, payload)}
-          noteTypes={writableTypes} channels={[]} labelsNs="applications" />
+          noteTypes={writableTypes} channels={[]} labels={labels} readOnlyCopy={t('common:popout.noteReadOnly')} />
+      )}
+    </PopoutShell>
+  )
+}
+
+// --- Customer branch (POPOUT-PARITEIT-1) -------------------------------------
+// Kept as its own branch rather than folded into GenericNoteEditPopout: the
+// customer notes route takes a `rollup` query param (location/department-linked
+// notes) and usePopoutCustomerNotes already carried the matching editNote
+// before this generalisation — reused as-is (§11, no second copy of a working hook).
+function CustomerNoteEditPopout() {
+  const { id, noteId } = useParams()
+  const { t } = useTranslation('customers')
+  const { customer, loading, error, reload } = useCustomerLite(id)
+  const { notes, editNote } = usePopoutCustomerNotes(id)
+  const { writableTypes } = useNoteTypes('customer')
+  const loaded = !loading && !error
+
+  const noteIndex = notes.findIndex(n => String(n.id) === String(noteId))
+  const note = noteIndex >= 0 ? (notes[noteIndex] as EditableNote) : null
+
+  // Sets the OS window title to the customer name while this popout is open, restoring the previous title on close.
+  useEffect(() => {
+    if (!customer) return
+    const previous = document.title
+    document.title = t('common:popout.windowTitle', { name: customer.name })
+    return () => { document.title = previous }
+  }, [customer, t])
+
+  const notFound = loaded && (!note || isSystemNote(note))
+  const labels: NotesLabels = { type: t('notes.type'), notePlaceholder: () => t('notes.notePlaceholder') }
+
+  return (
+    <PopoutShell
+      loading={loading}
+      error={Boolean(error) || !customer || notFound}
+      onRetry={reload}
+      loadingLabel={t('common:loading')}
+      errorLabel={notFound ? t('common:popout.noteNotFound') : t('common:popout.loadError')}
+      retryLabel={t('common:error.retry')}
+      name={customer?.name ?? ''} initials={customer?.initials ?? ''} subtitle={t('notes.notes')}
+    >
+      {note && (
+        <NoteEditor key={String(noteId)} note={note} managePermission="customers.notes.manage_all"
+          onSave={payload => editNote(noteIndex, payload)}
+          noteTypes={writableTypes} channels={[]} labels={labels} readOnlyCopy={t('common:popout.noteReadOnly')} />
+      )}
+    </PopoutShell>
+  )
+}
+
+// --- Generic branch (vacancy · task · match · opportunity) -------------------
+// One component for every entity whose notes ride the plain `{basePath}/notes/
+// {id}` shape `useEntityNotes` already fetches/edits — see the file docblock
+// for why these four qualify and customer/candidate/application don't.
+// The uniform shape every entity's lite hook adapts down to for this component.
+interface AdaptedLite { record: unknown; name: string; initials: string; subtitle?: string }
+function GenericNoteEditPopout<R extends { loading: boolean; error: boolean; reload: () => void }>({ entity, i18nNs, useLite, adapt }: {
+  entity: 'vacancy' | 'task' | 'match' | 'opportunity'
+  i18nNs: 'vacancies' | 'tasks' | 'matches' | 'opportunities'
+  useLite: (id: string | undefined) => R
+  adapt: (r: R) => AdaptedLite
+}) {
+  const { id, noteId } = useParams()
+  const { t } = useTranslation(i18nNs)
+  const lite = useLite(id)
+  const { record, name, initials, subtitle } = adapt(lite)
+  const { loading, error, reload } = lite
+  const { notes, editNote } = useEntityNotes({ id, basePath: `/${i18nNs}/${id}` })
+  const { writableTypes } = useNoteTypes(entity)
+  const loaded = !loading && !error
+
+  const noteIndex = notes.findIndex(n => String(n.id) === String(noteId))
+  const note = noteIndex >= 0 ? (notes[noteIndex] as EditableNote) : null
+
+  // Sets the OS window title to the record's identity while this popout is open, restoring the previous title on close.
+  useEffect(() => {
+    if (!record) return
+    const previous = document.title
+    document.title = t('common:popout.windowTitle', { name })
+    return () => { document.title = previous }
+  }, [record, name, t])
+
+  const notFound = loaded && (!note || isSystemNote(note))
+  const labels: NotesLabels = { type: t('notes.type'), notePlaceholder: () => t('notes.placeholder') }
+
+  return (
+    <PopoutShell
+      loading={loading}
+      error={Boolean(error) || !record || notFound}
+      onRetry={reload}
+      loadingLabel={t('common:loading')}
+      errorLabel={notFound ? t('common:popout.noteNotFound') : t('common:popout.loadError')}
+      retryLabel={t('common:error.retry')}
+      name={name} initials={initials} subtitle={subtitle || t('notes.title')}
+    >
+      {note && (
+        <NoteEditor key={String(noteId)} note={note} managePermission="candidates.notes.manage_all"
+          onSave={payload => editNote(noteIndex, payload)}
+          noteTypes={writableTypes} channels={[]} labels={labels} readOnlyCopy={t('common:popout.noteReadOnly')} />
       )}
     </PopoutShell>
   )
@@ -160,16 +294,18 @@ function ApplicationNoteEditPopout() {
 
 // Inner editor — mounted only once the note exists (useNoteFields seeds ONCE at
 // mount; the key above remounts it per note id, same recipe as the composer).
-// Shared by BOTH entity branches (§11: one form, structural EditableNote input).
-function NoteEditor({ note, onSave, noteTypes, channels, managePermission, labelsNs }: {
+// Shared by EVERY entity branch (§11: one form, structural EditableNote input);
+// each branch now hands it its own already-resolved `labels`/`readOnlyCopy`
+// instead of a per-namespace switch living inside this shared body.
+function NoteEditor({ note, onSave, noteTypes, channels, managePermission, labels, readOnlyCopy }: {
   note: EditableNote
   onSave: (payload: { type: string; title: string; body: string; channel?: string; language?: string }) => Promise<boolean>
   noteTypes: NoteType[]
   channels: NoteType[]
   managePermission: string
-  labelsNs: 'candidates' | 'applications'
+  labels: NotesLabels
+  readOnlyCopy: string
 }) {
-  const { t } = useTranslation(labelsNs)
   const auth = useAuth()
   const fields = useNoteFields({
     type: typeof note.type === 'string' ? note.type : undefined,
@@ -181,20 +317,6 @@ function NoteEditor({ note, onSave, noteTypes, channels, managePermission, label
 
   // Same edit right the list applies (noteRights) — a pasted URL is not a licence.
   const editable = canManageNote(note, auth?.user?.id, auth?.hasPermission ?? (() => false), managePermission)
-
-  // The labels NoteFields reads. Candidates own dedicated communication.* keys;
-  // applications.json (sister-agent namespace, reuse-only) has no equivalent, so
-  // that branch reuses the generic common:edit-adjacent notes.* keys it already
-  // ships (mirrors ApplicationNotesPopout.tsx's own key reuse).
-  const labels: NotesLabels = labelsNs === 'candidates'
-    ? { type: t('communication.type'), channel: t('communication.channel'),
-        notePlaceholder: (typeLabel: string) => t('communication.notePlaceholder', { type: typeLabel }) }
-    : { type: t('notes.type'), notePlaceholder: () => t('notes.placeholder') }
-  // "Read-only" / "not found" copy: candidates.json owns its own popout.* pair
-  // (pre-existing); applications.json has no equivalent (sister-agent namespace,
-  // reuse-only), so that branch reuses the entity-agnostic common:popout.* pair
-  // added alongside this generalisation (mirrors the existing windowTitle/loadError keys).
-  const readOnlyCopy = labelsNs === 'candidates' ? t('popout.noteReadOnly') : t('common:popout.noteReadOnly')
 
   // Read-only: someone else's note without the manage right — show, never edit (§7).
   if (!editable) {

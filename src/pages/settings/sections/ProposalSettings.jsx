@@ -24,7 +24,8 @@ const SETTINGS_KEY = 'application_proposal'
 
 // Tokens available in subject/body templates — literal template syntax, not prose,
 // so it is shown as-is rather than run through t().
-const TOKENS = ['{kandidaat}', '{vacature}', '{klant}', '{contact}', '{recruiter}']
+// English token set since CMBE 3a0f6986 (renderer still aliases the old Dutch spellings).
+const TOKENS = ['{candidate}', '{vacancy}', '{customer}', '{contact}', '{recruiter}', '{agency}', '{link}']
 
 const DEFAULTS = {
   subject_template: '',

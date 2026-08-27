@@ -1352,7 +1352,7 @@
   },
   "validation": {
     "emailFormat": "Voer een geldig e-mailadres in.",
-    "phoneFormat": "Voer een geldig telefoonnummer in (8 t/m 15 cijfers, bv. 0612345678 of +31612345678).",
+    "phoneFormat": "Voer een geldig telefoonnummer in (8 t/m 15 cijfers, met of zonder landcode).",
     "linkedinFormat": "Gebruik alleen de LinkedIn-gebruikersnaam, zonder spaties of schuine strepen (bijv. jan-jansen-12345)."
   },
   "popout": {

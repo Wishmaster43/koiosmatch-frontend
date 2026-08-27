@@ -11,6 +11,7 @@ import Button from '@/components/ui/Button'
 import Spinner from '@/components/ui/Spinner'
 import { PageTitle, BodyText } from '@/components/ui/typography'
 import { extractApiError } from '@/lib/extractApiError'
+import SubTabBar, { type SubTab } from '@/components/drawer/SubTabBar'
 import { fetchKoiosModelsAdmin, refreshKoiosModelsAdmin } from './koiosmodels/api'
 import type { KoiosModelsAdminData } from './koiosmodels/types'
 import FlavorsCard from './koiosmodels/FlavorsCard'
@@ -19,6 +20,7 @@ import PackagesCard from './koiosmodels/PackagesCard'
 import TenantOverridesCard from './koiosmodels/TenantOverridesCard'
 
 type Phase = 'loading' | 'error' | 'empty' | 'ready'
+type SubTabId = 'models' | 'packages' | 'routing'
 
 // Thin container (see the module doc above): fetches the registry once, hands it to the four cards, and owns only the manual refresh action — the cards themselves own their own writes.
 export default function KoiosModelsAdminSettings() {
@@ -30,6 +32,15 @@ export default function KoiosModelsAdminSettings() {
   const [refreshError, setRefreshError] = useState<string | null>(null)
   // Bumped on every successful refresh — the cards' remount key.
   const [dataVersion, setDataVersion] = useState(0)
+  // Active sub-tab (Danny 27-08: three sub-tabs read clearer than one long
+  // card list). Data stays loaded at this section level regardless of tab,
+  // so switching tabs never refetches (§9).
+  const [tab, setTab] = useState<SubTabId>('models')
+  const TABS: SubTab[] = [
+    { id: 'models',   label: t('koiosModelsAdmin.tabs.models') },
+    { id: 'packages', label: t('koiosModelsAdmin.tabs.packages') },
+    { id: 'routing',  label: t('koiosModelsAdmin.tabs.routing') },
+  ]
 
   // Initial load — abort on unmount/re-run so a slow response never overwrites
   // a later one (§9).
@@ -82,10 +93,17 @@ export default function KoiosModelsAdminSettings() {
           <PageTitle>{t('koiosModelsAdmin.title')}</PageTitle>
           <BodyText style={{ color: 'var(--text-muted)', marginTop: 2 }}>{t('koiosModelsAdmin.subtitle')}</BodyText>
         </div>
-        <Button variant="secondary" size="sm" onClick={onRefresh} disabled={refreshing || phase === 'loading'}>
-          {refreshing ? <Spinner size={14} /> : null}
-          {t('koiosModelsAdmin.refresh')}
-        </Button>
+        {/* Catalogue refresh lives with the Models tab (flavour→model map is what it repopulates). */}
+        {tab === 'models' && (
+          <Button variant="secondary" size="sm" onClick={onRefresh} disabled={refreshing || phase === 'loading'}>
+            {refreshing ? <Spinner size={14} /> : null}
+            {t('koiosModelsAdmin.refresh')}
+          </Button>
+        )}
+      </div>
+
+      <div style={{ marginBottom: 16 }}>
+        <SubTabBar tabs={TABS} active={tab} onChange={id => setTab(id as SubTabId)} />
       </div>
 
       {phase === 'loading' && (
@@ -110,13 +128,19 @@ export default function KoiosModelsAdminSettings() {
         </div>
       )}
 
-      {phase === 'ready' && data && (
+      {/* Cards stay mounted only for the active tab, but `data` itself lives above
+          this render — switching tabs never re-triggers the load effect. */}
+      {phase === 'ready' && data && tab === 'models' && (
+        <FlavorsCard key={`f${dataVersion}`} data={data} onSaved={mergeSaved} />
+      )}
+      {phase === 'ready' && data && tab === 'packages' && (
         <>
-          <FlavorsCard key={`f${dataVersion}`} data={data} onSaved={mergeSaved} />
-          <RoutingCard key={`r${dataVersion}`} data={data} onSaved={mergeSaved} />
           <PackagesCard key={`p${dataVersion}`} data={data} onSaved={mergeSaved} />
           <TenantOverridesCard key={`t${dataVersion}`} data={data} onSaved={mergeSaved} />
         </>
+      )}
+      {phase === 'ready' && data && tab === 'routing' && (
+        <RoutingCard key={`r${dataVersion}`} data={data} onSaved={mergeSaved} />
       )}
     </div>
   )

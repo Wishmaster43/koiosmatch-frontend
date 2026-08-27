@@ -531,7 +531,7 @@
     "min": "min",
     "max": "max",
     "fullNameExample": "Jan Jansen",
-    "phoneExample": "+31 6 12345678",
+    "phoneExample": "+landcode en nummer",
     "streetExample": "Hoofdstraat 12",
     "cityExample": "Amsterdam",
     "companyNameExample": "Jansen Zorggroep B.V."

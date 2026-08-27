@@ -102,7 +102,8 @@ export const noteDraftTopic = (entity: PopoutEntity, id: string | number) => `ko
  *               pop-out icon that opens a window trying to load a candidate by a
  *               customer id (broken, not merely a duplicate-note risk). Widen this
  *               set ONLY once NoteEditPopout.tsx itself dispatches by entity.
- *   vacancy   → GET/POST + DELETE /vacancies/{id}/notes/{note} — still no PATCH.
+ *   vacancy   → PATCH/DELETE /vacancies/{id}/notes/{note} now exist (CMBE
+ *               1049413a, verified 27-08, NOTITIE-PARITEIT) — full candidate parity.
  *   application → PATCH /applications/{id}/notes/{note} now exists (A-popout-1)
  *               and BOTH the whole-thread ApplicationNotesPopout AND the drawer's
  *               own NotesTab (applications/drawer/NotesTab.tsx) wire onEditNote —
@@ -110,13 +111,24 @@ export const noteDraftTopic = (entity: PopoutEntity, id: string | number) => `ko
  *               dispatches per entity instead of being hardcoded to
  *               useCandidateLite/useCandidateNotes, so the PER-NOTE URL window
  *               works for 'application' too — added to this set.
+ *   customer  → PATCH/DELETE /customers/{id}/notes/{note} exist (K15NOTES) and
+ *               usePopoutCustomerNotes wires editNote — the per-note URL window
+ *               dispatches to it too (POPOUT-PARITEIT-1, 27-08).
+ *   task      → PATCH/DELETE /tasks/{id}/notes/{note} exist (TaskCommentController)
+ *               and tasks/drawer/NotesTab.tsx wires onEditNote — same generic
+ *               useEntityNotes machinery every basePath-shaped family shares.
+ *   match     → PATCH/DELETE /matches/{id}/notes/{note} exist (MatchNoteController,
+ *               CMBE 1049413a) and matches/drawer/NotesTab.tsx wires onEditNote.
+ *   opportunity → PUT/DELETE /opportunities/{id}/notes/{note} exist (OPP-NOTE-EDIT-1)
+ *               and opportunities/drawer/NotesTab.tsx wires onEditNote.
  * Handing an EXISTING note to a window that can only ADD would persist it as a
  * SECOND note: a duplicate the recruiter cannot tell apart from the original and
- * that no undo removes. So customer/vacancy still render no per-note pop-out-to-
- * new-window button (§3, no fake affordance) — only the inline drawer edit and
- * the whole-thread popout's edit are live for customer today.
+ * that no undo removes (§3, no fake affordance) — this is why the set only ever
+ * grows once a real PATCH/PUT route is confirmed, never ahead of it.
  */
-export const NOTE_EDIT_POPOUT_ENTITIES: ReadonlySet<PopoutEntity> = new Set<PopoutEntity>(['candidate', 'application'])
+export const NOTE_EDIT_POPOUT_ENTITIES: ReadonlySet<PopoutEntity> = new Set<PopoutEntity>(
+  ['candidate', 'application', 'customer', 'vacancy', 'task', 'match', 'opportunity'],
+)
 
 /**
  * NOTITIE-POPOUT-URL-1 (Danny 11-08, translated: "put the note id in the URL"

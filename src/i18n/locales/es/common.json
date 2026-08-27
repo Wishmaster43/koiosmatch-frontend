@@ -531,7 +531,7 @@
     "min": "mín",
     "max": "máx",
     "fullNameExample": "Juan García",
-    "phoneExample": "+34 612 345 678",
+    "phoneExample": "+prefijo y número",
     "streetExample": "Calle Mayor 12",
     "cityExample": "Madrid",
     "companyNameExample": "Grupo Sanitario Jansen"

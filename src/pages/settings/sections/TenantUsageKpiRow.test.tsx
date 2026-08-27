@@ -51,6 +51,24 @@ describe('TenantUsageKpiRow', () => {
     expect(notes).toMatch(/01-09-2026/)
   })
 
+  it('renders the over-budget line when billable_credits > 0 (usage-meters)', () => {
+    render(<TenantUsageKpiRow loading={false} usage={{
+      ai: { tokens: 100 },
+      billing: { workflow: { credits: 620, included_budget: 500, billable_credits: 120, amount: 6 } },
+    }} />)
+    // The overBudget key interpolates meter/n/amount — assert the count and amount land.
+    expect(document.body.textContent).toMatch(/120/)
+    expect(document.body.textContent).not.toMatch(/withinBudget/)
+  })
+
+  it('renders the calm within-budget caption when billable_credits is 0 (usage-meters)', () => {
+    render(<TenantUsageKpiRow loading={false} usage={{
+      ai: { tokens: 100 },
+      billing: { workflow: { credits: 200, included_budget: 500, billable_credits: 0, amount: 0 } },
+    }} />)
+    expect(document.body.textContent).toMatch(/budgetStatus.withinBudget/)
+  })
+
   it('renders a dash for missing money values, never a fabricated zero', () => {
     render(<TenantUsageKpiRow loading={false} usage={{ ai: { tokens: 100 } }} />)
     expect(screen.getAllByText('—').length).toBeGreaterThan(0)

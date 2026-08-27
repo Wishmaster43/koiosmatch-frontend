@@ -13,7 +13,8 @@ import { useTranslation } from 'react-i18next'
 import { useNumberFormat } from '@/lib/formatters'
 import { useDateFormat } from '@/lib/datetime'
 import KpiCard from '@/components/ui/KpiCard'
-import { Caption } from '@/components/ui/typography'
+import { Caption, SectionTitle } from '@/components/ui/typography'
+import { MeterBar } from './usage/SubscriptionCard'
 import type { AdminTenantUsage } from '@/types/billingUsage'
 
 interface Props {
@@ -79,6 +80,30 @@ export default function TenantUsageKpiRow({ usage, loading }: Props) {
         value={formatNumber(usage?.planning?.processed_hours ?? 0)}
       />
       </div>
+
+      {/* Workflow (Koios Tokens) budget-status strip — the ONLY meter this
+          superadmin endpoint carries a real used/budget/over split for.
+          Measured (CLAUDE.md §10 discipline): AdminUsageController::show never
+          merges an ai_token_budget or a whatsapp tokens/by_channel block, so
+          the AI and WhatsApp meters cannot render honestly here yet — see the
+          worklist handoff rather than fake a bar with a guessed budget. */}
+      {workflowIncluded !== undefined && (
+        <div style={{ maxWidth: 320, marginBottom: 18 }}>
+          <SectionTitle style={{ marginBottom: 6, fontSize: 12 }}>{t('usage.kpi.budgetStatus.title')}</SectionTitle>
+          <MeterBar label={t('usage.kpi.workflowLabel')} used={workflowCredits} budget={workflowIncluded} />
+          {(workflowBillable ?? 0) > 0 ? (
+            <Caption style={{ color: 'var(--color-danger-text)' }}>
+              {t('billing.usage.plan.overBudget', {
+                meter: t('usage.kpi.workflowLabel'),
+                n: formatNumber(workflowBillable ?? 0),
+                amount: formatCurrency(workflowAmount ?? 0),
+              })}
+            </Caption>
+          ) : (
+            <Caption>{t('usage.kpi.budgetStatus.withinBudget')}</Caption>
+          )}
+        </div>
+      )}
     </div>
   )
 }

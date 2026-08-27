@@ -2843,7 +2843,11 @@
       "workflowNote": "{{n}} runs",
       "whatsappLabel": "WhatsApp Business",
       "planningLabel": "Verwerkte uren",
-      "workflowBillableNote": "{{billable}} factureerbaar (van {{credits}}, {{included}} inbegrepen)"
+      "workflowBillableNote": "{{billable}} factureerbaar (van {{credits}}, {{included}} inbegrepen)",
+      "budgetStatus": {
+        "title": "Workflow-budget",
+        "withinBudget": "Binnen budget deze maand."
+      }
     }
   },
   "jobs": {
@@ -3273,6 +3277,11 @@
     "applicationStaleSaveFailed": "Opslaan van het sollicitatie-fasevenster is mislukt."
   },
   "koiosModelsAdmin": {
+    "tabs": {
+      "models": "Modellen",
+      "packages": "Pakketten & tenants",
+      "routing": "Routering"
+    },
     "title": "Koios AI-modellen",
     "subtitle": "Platformbrede modelroutering: smaken, routering per verzoektype, pakketplafonds en tenant-overrides.",
     "refresh": "Verversen",
