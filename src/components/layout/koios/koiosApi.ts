@@ -43,3 +43,9 @@ export const confirmPendingAction = (id: string) =>
 // Cancel a pending action — same dormant/expiry handling as confirm.
 export const cancelPendingAction = (id: string) =>
   api.post(`/ai/koios/actions/${id}/cancel`).then((r) => r.data)
+
+// One-click staging (CMBE 03f2630c): park an assistant descriptor's
+// {tool,input} as a ring-2 pending action WITHOUT executing anything —
+// 201 {status:'staged', action:{id,title,preview,expires_at}}; 403/422 {message}.
+export const stagePendingAction = (tool: string, input: Record<string, unknown>) =>
+  api.post('/ai/koios/actions/stage', { tool, input }).then((r) => r.data)

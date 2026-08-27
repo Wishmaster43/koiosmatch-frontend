@@ -371,3 +371,23 @@ describe('KoiosPanel — mention menu keyboard seam', () => {
     expect(textarea.getAttribute('aria-expanded')).toBe('false')
   })
 })
+
+// Danny 27-08 (panel idea): a landing card can be closed AWAY entirely via its X
+// and summoned back via the composer toggle; the choice persists per user.
+describe('KoiosPanel · landing cards close/summon (3b)', () => {
+  it('the X hides the suggestions card, the sparkles toggle brings it back, persisted', async () => {
+    renderWithQuery(<KoiosPanel open onClose={() => {}} onNavigate={() => {}} />)
+    await screen.findByText('common:koios.radar.empty')
+    // The suggestions card is present; its X (first 'common:close' inside it) hides it.
+    expect(screen.getByText('koios.assistant.title')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'close' }))
+    expect(screen.queryByText('koios.assistant.title')).toBeNull()
+    expect(localStorage.getItem('koios.assistant.hidden')).toBe('true')
+    // Composer toggle (aria-pressed=false while hidden) summons it back.
+    const toggle = screen.getByRole('button', { name: 'koios.assistant.title', pressed: false })
+    fireEvent.click(toggle)
+    expect(screen.getByText('koios.assistant.title')).toBeInTheDocument()
+    expect(localStorage.getItem('koios.assistant.hidden')).toBe('false')
+  })
+})
+

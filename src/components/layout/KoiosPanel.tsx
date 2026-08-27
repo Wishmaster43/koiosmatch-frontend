@@ -9,7 +9,7 @@
 import { useState, useRef, useEffect } from 'react'
 import type { ChangeEvent, KeyboardEvent } from 'react'
 import { useTranslation } from 'react-i18next'
-import { AtSign, Paperclip, ArrowUp } from 'lucide-react'
+import { AtSign, Paperclip, ArrowUp, Sparkles, Lightbulb } from 'lucide-react'
 import { useLocale } from '@/lib/datetime'
 import { tint, TINT_BORDER } from '@/lib/tint'
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion'
@@ -29,6 +29,8 @@ import type { KoiosContextChipRow } from './koios/KoiosContextChips'
 import KoiosHeader from './koios/KoiosHeader'
 import KoiosResizeHandle from './koios/KoiosResizeHandle'
 import KoiosRadar from './koios/KoiosRadar'
+import Button from '@/components/ui/Button'
+import { useKoiosRadarCollapse } from './koios/useKoiosRadarCollapse'
 import KoiosAssistantBlock from './koios/KoiosAssistantBlock'
 import KoiosVoiceButton from './koios/KoiosVoiceButton'
 import type { KoiosContextRef } from '@/types/koios'
@@ -52,6 +54,10 @@ export default function KoiosPanel({ open, onClose, onNavigate }: { open?: boole
   // just a missing key, so a tenant with an empty balance no longer shows "online".
   const connected = settings?.status?.claude_configured !== false && settings?.status?.api_ok !== false
   const [input,   setInput]   = useState('')
+  // Danny 27-08: each landing card can be closed AWAY entirely (X on the card,
+  // or the composer toggles below); persisted per user like the collapse state.
+  const { collapsed: suggestionsHidden, setCollapsed: setSuggestionsHidden } = useKoiosRadarCollapse('koios.assistant.hidden')
+  const { collapsed: adviceHidden, setCollapsed: setAdviceHidden } = useKoiosRadarCollapse('koios.radar.hidden')
   const [focused, setFocused] = useState(false)
   // @-mentioned records for the outgoing turn (KOIOS-CTX-1) — shown as removable
   // chips above the composer; cleared on send and on "Nieuwe chat".
@@ -208,8 +214,11 @@ export default function KoiosPanel({ open, onClose, onNavigate }: { open?: boole
           <>
             {/* Chat-handoff (golf 2): a suggestion prefills the composer and
                 focuses it — SENDING stays the user's own explicit click. */}
-            <KoiosAssistantBlock onAskKoios={text => { setInput(text); setTimeout(() => textareaRef.current?.focus(), 50) }} />
-            <KoiosRadar onNavigate={onNavigate} />
+            {!suggestionsHidden && (
+              <KoiosAssistantBlock onClose={() => setSuggestionsHidden(true)}
+                onAskKoios={text => { setInput(text); setTimeout(() => textareaRef.current?.focus(), 50) }} />
+            )}
+            {!adviceHidden && <KoiosRadar onNavigate={onNavigate} onClose={() => setAdviceHidden(true)} />}
           </>
         ) : (
           messages.map((msg, i) => (
@@ -315,6 +324,25 @@ export default function KoiosPanel({ open, onClose, onNavigate }: { open?: boole
                 borderRadius: 7, color: 'var(--sidebar-muted)', display: 'flex', opacity: 0.45 }}>
               <Paperclip size={14} />
             </button>
+
+            {/* Danny 27-08: the two landing cards are summonable/dismissable from
+                the composer — visible = primary ink, closed = muted (aria-pressed). */}
+            {isLanding && (
+              <>
+                {/* Shared ghost Button carries the identity; the STATE rides in the
+                    glyph colour (primary = visible, muted = closed) + aria-pressed. */}
+                <Button variant="ghost" iconOnly size="sm" aria-pressed={!suggestionsHidden}
+                  aria-label={t('koios.assistant.title')} title={t('koios.assistant.title')}
+                  onClick={() => setSuggestionsHidden(!suggestionsHidden)}>
+                  <Sparkles size={14} color={suggestionsHidden ? 'var(--sidebar-muted)' : 'var(--color-primary)'} />
+                </Button>
+                <Button variant="ghost" iconOnly size="sm" aria-pressed={!adviceHidden}
+                  aria-label={t('koios.radar.title')} title={t('koios.radar.title')}
+                  onClick={() => setAdviceHidden(!adviceHidden)}>
+                  <Lightbulb size={14} color={adviceHidden ? 'var(--sidebar-muted)' : 'var(--color-primary)'} />
+                </Button>
+              </>
+            )}
 
             {/* Model picker — only renders when there is more than one selectable model */}
             <KoiosModelPicker

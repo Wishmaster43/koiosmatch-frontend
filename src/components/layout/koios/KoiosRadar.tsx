@@ -21,6 +21,8 @@ import { CalendarCheck, Clock, UserX, CalendarX, MessageCircle, CheckSquare } fr
 import type { LucideIcon } from 'lucide-react'
 import { tintBg, chipInk } from '@/lib/tint'
 import CollapsedCard from '@/components/ui/CollapsedCard'
+import Button from '@/components/ui/Button'
+import { X } from 'lucide-react'
 import { useKoiosRadarSignals } from './useKoiosRadarSignals'
 import { useKoiosRadarCollapse } from './useKoiosRadarCollapse'
 import type { RadarSignalId } from './useKoiosRadarSignals'
@@ -43,7 +45,7 @@ const SIGNAL_META: Record<RadarSignalId, { Icon: LucideIcon; labelKey: string; c
 }
 
 // The Koios panel's landing-state content: candidate attention signals as clickable deep-links, collapsible via a persisted per-user choice.
-export default function KoiosRadar({ onNavigate }: { onNavigate?: (page: string, intent?: unknown) => void }) {
+export default function KoiosRadar({ onNavigate, onClose }: { onNavigate?: (page: string, intent?: unknown) => void; onClose?: () => void }) {
   const { t } = useTranslation(['common', 'candidates'])
   const { signals, loading, error } = useKoiosRadarSignals()
   // Persisted per-user collapse choice (Danny 22-08) — default OPEN.
@@ -60,6 +62,11 @@ export default function KoiosRadar({ onNavigate }: { onNavigate?: (page: string,
         filled={hasSignals}
         open={!collapsed}
         onOpenChange={(open) => setCollapsed(!open)}
+        action={onClose && (
+          <Button variant="ghost" iconOnly size="sm" aria-label={t('common:close')} title={t('common:close')} onClick={onClose}>
+            <X size={13} />
+          </Button>
+        )}
       >
         {/* Four explicit UI states: loading / error / empty / non-zero signal rows. */}
         {loading && (

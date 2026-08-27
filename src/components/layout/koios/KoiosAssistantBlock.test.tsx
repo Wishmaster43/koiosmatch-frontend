@@ -155,13 +155,41 @@ describe('KoiosAssistantBlock', () => {
     expect(screen.queryByText(/pendingAction\.confirmed/)).toBeNull()
   })
 
-  it('a parked action WITHOUT its pending_action ref falls back to the honest hint chip', async () => {
+  it('a parked action WITHOUT its pending_action ref stages like any descriptor (golf 3)', async () => {
     mockGet.mockResolvedValueOnce({ data: { data: { suggestions: [
       { kind: 'pending_action', title: 'Old BE', body: 'No ref', refs: [], action: { tool: 'x', input: {} } },
     ] } } })
     renderBlock()
     await screen.findByText('Old BE')
-    expect(screen.getByText(/assistant\.actionAvailable/)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /assistant\.execute/ })).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /pendingAction\.confirm/ })).toBeNull()
+  })
+
+  // Golf 3: one-click staging — Uitvoeren parks {tool,input}, the preview + the
+  // REAL confirm follow on the card; nothing executes before Bevestigen.
+  it('Uitvoeren stages the descriptor, shows the preview and confirms with the staged id', async () => {
+    mockGet.mockResolvedValueOnce({ data: { data: { suggestions: [
+      { kind: 'task_overdue', title: 'Bel Ahmed', body: 'x', refs: [], action: { tool: 'wijzig_taak', input: { task_id: 't1' } } },
+    ] } } })
+    mockPost.mockResolvedValueOnce({ data: { status: 'staged', action: { id: 'pa-77', title: 'Bel Ahmed', preview: [{ label: 'Deadline', before: '26-08-2026', after: '28-08-2026' }] } } })
+    renderBlock()
+    fireEvent.click(await screen.findByRole('button', { name: /assistant\.execute/ }))
+    await waitFor(() => expect(mockPost).toHaveBeenCalledWith('/ai/koios/actions/stage', { tool: 'wijzig_taak', input: { task_id: 't1' } }))
+    await screen.findByText(/Deadline · 26-08-2026 → 28-08-2026/)
+    mockPost.mockResolvedValueOnce({ data: { status: 'executed', data: {} } })
+    fireEvent.click(screen.getByRole('button', { name: /pendingAction\.confirm/ }))
+    await waitFor(() => expect(mockPost).toHaveBeenLastCalledWith('/ai/koios/actions/pa-77/confirm'))
+    await screen.findByText(/pendingAction\.confirmed/)
+  })
+
+  it('a refused stage (403) shows the server message and executes nothing', async () => {
+    mockGet.mockResolvedValueOnce({ data: { data: { suggestions: [
+      { kind: 'task_overdue', title: 'Bel Ahmed', body: 'x', refs: [], action: { tool: 'wijzig_taak', input: {} } },
+    ] } } })
+    mockPost.mockRejectedValueOnce({ response: { status: 403, data: { message: 'Je mag deze tool niet uitvoeren.' } } })
+    renderBlock()
+    fireEvent.click(await screen.findByRole('button', { name: /assistant\.execute/ }))
+    expect(await screen.findByRole('alert')).toHaveTextContent('Je mag deze tool niet uitvoeren.')
+    expect(mockPost).toHaveBeenCalledTimes(1)
   })
 })

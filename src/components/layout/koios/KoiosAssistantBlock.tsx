@@ -14,11 +14,10 @@
  * parked action WITHOUT its ref (older BE) keeps the honest hint chip.
  */
 import { useTranslation } from 'react-i18next'
-import { Clock, UserX, Target, Briefcase, Sparkles } from 'lucide-react'
+import { Clock, UserX, Target, Briefcase, Sparkles, X } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import CollapsedCard from '@/components/ui/CollapsedCard'
 import { Caption, BodyText } from '@/components/ui/typography'
-import SoftChip from '@/components/ui/SoftChip'
 import ErrorBanner from '@/components/ui/ErrorBanner'
 import KoiosResultCards from './KoiosResultCards'
 import { useKoiosAssistant } from './useKoiosAssistant'
@@ -26,9 +25,10 @@ import { useKoiosRadarCollapse } from './useKoiosRadarCollapse'
 import { useState } from 'react'
 import Button from '@/components/ui/Button'
 import Spinner from '@/components/ui/Spinner'
-import { confirmPendingAction, cancelPendingAction } from './koiosApi'
+import { confirmPendingAction, cancelPendingAction, stagePendingAction } from './koiosApi'
 import { extractApiError } from '@/lib/extractApiError'
 import type { KoiosAssistantKind, KoiosAssistantSuggestion } from './useKoiosAssistant'
+import type { KoiosPreviewRow } from './koiosTypes'
 
 // Icon + semantic-token colour per suggestion kind (§4: colour carries meaning, never decoration).
 const KIND_META: Record<KoiosAssistantKind, { Icon: LucideIcon; color: string }> = {
@@ -78,8 +78,10 @@ function suggestionKey(s: KoiosAssistantSuggestion): string {
   return ref ? `pa:${ref.id}` : `${s.kind}:${s.title}`
 }
 
-// Per-suggestion execute state: idle → submitting → executed/cancelled/error(message).
-type ExecState = { phase: 'idle' | 'submitting' | 'executed' | 'cancelled' | 'error'; message?: string }
+// Per-suggestion execute state. Descriptor kinds add the staged leg (golf 3):
+// idle → staging → staged(preview) → submitting → executed/cancelled/error.
+type StagedAction = { id: string; title?: string; preview?: KoiosPreviewRow[]; expires_at?: string }
+type ExecState = { phase: 'idle' | 'staging' | 'staged' | 'submitting' | 'executed' | 'cancelled' | 'error'; message?: string; staged?: StagedAction }
 
 // The action row under one suggestion. kind=pending_action + its "pending_action"
 // ref (exact type value per AssistantSuggestions::pendingActionSuggestions) →
@@ -98,14 +100,27 @@ function SuggestionActions({ suggestion, onAskKoios }: { suggestion: KoiosAssist
   // visible while the row stays rendered; a collapse/re-open or list swap
   // remounts the row to live buttons — re-confirming then gets the server's own
   // honest 410/422 ("al afgehandeld"), never a silent double-write.
-  const run = async (call: (id: string) => Promise<{ status?: string; message?: string }>, done: 'executed' | 'cancelled') => {
-    if (!pendingRef) return
-    setExec({ phase: 'submitting' })
+  const run = async (id: string, call: (id: string) => Promise<{ status?: string; message?: string }>, done: 'executed' | 'cancelled') => {
+    setExec(p => ({ ...p, phase: 'submitting' }))
     try {
       // SERVER truth, not HTTP truth (Opus golf-2 verify): a 200 whose status is
       // not the expected verdict lands in the error branch with its message.
-      const body = await call(pendingRef.id)
+      const body = await call(id)
       if (body?.status === done) setExec({ phase: done })
+      else setExec({ phase: 'error', message: body?.message ?? t('koios.pendingAction.error') })
+    } catch (err) {
+      setExec({ phase: 'error', message: extractApiError(err, t('koios.pendingAction.error')) })
+    }
+  }
+
+  // Golf 3 (CMBE 03f2630c): stage a descriptor's {tool,input} — parks only,
+  // nothing executes; the preview + confirm step follow on the same card.
+  const stage = async () => {
+    if (!suggestion.action) return
+    setExec({ phase: 'staging' })
+    try {
+      const body = await stagePendingAction(suggestion.action.tool, suggestion.action.input ?? {})
+      if (body?.status === 'staged' && body?.action?.id) setExec({ phase: 'staged', staged: body.action as StagedAction })
       else setExec({ phase: 'error', message: body?.message ?? t('koios.pendingAction.error') })
     } catch (err) {
       setExec({ phase: 'error', message: extractApiError(err, t('koios.pendingAction.error')) })
@@ -118,16 +133,58 @@ function SuggestionActions({ suggestion, onAskKoios }: { suggestion: KoiosAssist
     if (exec.phase === 'error') return <span role="alert"><Caption style={{ color: 'var(--color-danger-text)' }}>{exec.message}</Caption></span>
     return (
       <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-        <Button size="sm" onClick={() => run(confirmPendingAction, 'executed')} disabled={exec.phase === 'submitting'}>
+        <Button size="sm" onClick={() => run(pendingRef.id, confirmPendingAction, 'executed')} disabled={exec.phase === 'submitting'}>
           {exec.phase === 'submitting' ? <Spinner size={12} /> : null} {t('koios.pendingAction.confirm')}
         </Button>
-        <Button size="sm" variant="ghost" onClick={() => run(cancelPendingAction, 'cancelled')} disabled={exec.phase === 'submitting'}>
+        <Button size="sm" variant="ghost" onClick={() => run(pendingRef.id, cancelPendingAction, 'cancelled')} disabled={exec.phase === 'submitting'}>
           {t('koios.pendingAction.cancel')}
         </Button>
       </div>
     )
   }
-  // No parked action to execute: hand the intent to the chat composer (prefill+focus).
+  // Descriptor kinds, golf 3: one-click staging next to the chat handoff. The
+  // staged leg shows the server's preview and only CONFIRM executes.
+  if (suggestion.action) {
+    if (exec.phase === 'executed') return <span role="status"><Caption style={{ color: 'var(--color-success-text)' }}>✓ {t('koios.pendingAction.confirmed')}</Caption></span>
+    if (exec.phase === 'cancelled') return <span role="status"><Caption>{t('koios.pendingAction.cancelled')}</Caption></span>
+    if (exec.phase === 'error') return <span role="alert"><Caption style={{ color: 'var(--color-danger-text)' }}>{exec.message}</Caption></span>
+    if (exec.phase === 'staged' || (exec.phase === 'submitting' && exec.staged)) {
+      const st = exec.staged
+      return (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+          {/* The server's own preview of what WOULD happen — nothing ran yet. */}
+          {(st?.preview ?? []).map((row, i) => (
+            <Caption key={i} style={{ display: 'block' }}>
+              {row.before != null || row.after != null
+                ? `${row.label} · ${row.before ?? '—'} → ${row.after ?? '—'}`
+                : `${row.label}${row.text ? `: ${row.text}` : ''}`}
+            </Caption>
+          ))}
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            <Button size="sm" onClick={() => st && run(st.id, confirmPendingAction, 'executed')} disabled={exec.phase === 'submitting'}>
+              {exec.phase === 'submitting' ? <Spinner size={12} /> : null} {t('koios.pendingAction.confirm')}
+            </Button>
+            <Button size="sm" variant="ghost" onClick={() => st && run(st.id, cancelPendingAction, 'cancelled')} disabled={exec.phase === 'submitting'}>
+              {t('koios.pendingAction.cancel')}
+            </Button>
+          </div>
+        </div>
+      )
+    }
+    return (
+      <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+        <Button size="sm" onClick={stage} disabled={exec.phase === 'staging'}>
+          {exec.phase === 'staging' ? <Spinner size={12} /> : null} {t('koios.assistant.execute')}
+        </Button>
+        {onAskKoios && (
+          <Button size="sm" variant="ghost" onClick={() => onAskKoios(t('koios.assistant.askIntent', { title: suggestion.title }))}>
+            {t('koios.assistant.askKoios')}
+          </Button>
+        )}
+      </div>
+    )
+  }
+  // No action at all: hand the intent to the chat composer (prefill+focus).
   if (onAskKoios) {
     return (
       <Button size="sm" variant="soft" onClick={() => onAskKoios(t('koios.assistant.askIntent', { title: suggestion.title }))}>
@@ -135,12 +192,11 @@ function SuggestionActions({ suggestion, onAskKoios }: { suggestion: KoiosAssist
       </Button>
     )
   }
-  // kind=pending_action WITHOUT its ref (older BE): the honest hint chip stays.
-  return suggestion.action ? <SoftChip label={t('koios.assistant.actionAvailable')} color="var(--color-primary)" /> : null
+  return null
 }
 
 // The Koios panel's landing-state assistant block: server-side suggestions rendered in order, collapsible via a persisted per-user choice.
-export default function KoiosAssistantBlock({ onAskKoios }: { onAskKoios?: (text: string) => void }) {
+export default function KoiosAssistantBlock({ onAskKoios, onClose }: { onAskKoios?: (text: string) => void; onClose?: () => void }) {
   const { t } = useTranslation('common')
   const { collapsed, setCollapsed } = useKoiosRadarCollapse('koios.assistant.collapsed')
   // Only fetches while actually rendered — the panel only mounts this block on the landing state.
@@ -154,6 +210,11 @@ export default function KoiosAssistantBlock({ onAskKoios }: { onAskKoios?: (text
         filled={hasSuggestions}
         open={!collapsed}
         onOpenChange={(open) => setCollapsed(!open)}
+        action={onClose && (
+          <Button variant="ghost" iconOnly size="sm" aria-label={t('close')} title={t('close')} onClick={onClose}>
+            <X size={13} />
+          </Button>
+        )}
       >
         {/* Four explicit UI states: loading / error / empty / non-zero suggestion rows. */}
         {loading && (

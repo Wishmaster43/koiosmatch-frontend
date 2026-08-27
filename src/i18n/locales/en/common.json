@@ -252,9 +252,9 @@
     "assistant": {
       "title": "Koios suggests",
       "emptyState": "Nothing needs your attention right now.",
-      "actionAvailable": "Action available",
       "askKoios": "Finish in the chat",
-      "askIntent": "Help me with this: {{title}}"
+      "askIntent": "Help me with this: {{title}}",
+      "execute": "Execute"
     }
   },
   "actionRules": {
