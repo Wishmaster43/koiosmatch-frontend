@@ -19,7 +19,7 @@ import type { VacancyDetail } from '@/types/vacancy'
 // §2 barrel-besluit: useVacancyAdvice (lib) reads the vacancies BARREL — mock it
 // flat with just the pure advice fn, so the barrel's nine modules (and their
 // i18n-initialising import chains) never load into this raw-key suite.
-vi.mock('@/pages/vacancies/shared', async () => ({
+vi.mock('@/pages/vacancies/shared-core', async () => ({
   deriveVacancyAdvice: (await vi.importActual<typeof import('@/pages/vacancies/data/vacancyAdvice')>('@/pages/vacancies/data/vacancyAdvice')).deriveVacancyAdvice,
 }))
 vi.mock('@/lib/countries', () => ({

@@ -8,7 +8,7 @@
 import { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useAllSettings, getNumberSetting } from '@/lib/settings/useAllSettings'
-import { deriveVacancyAdvice } from '@/pages/vacancies/shared'
+import { deriveVacancyAdvice } from '@/pages/vacancies/shared-core'
 import type { KoiosAdvice } from '@/lib/koiosAdviceMeta'
 import type { Vacancy } from '@/types/vacancy'
 // The one advice resolver shared by the table column and the drawer's Koios block

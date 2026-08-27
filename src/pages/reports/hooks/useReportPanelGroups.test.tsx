@@ -38,7 +38,7 @@ vi.mock('../reportStatusLookups', () => ({
   useTaskPriorityIdOptions: () => taskPriorityIdOptions,
 }))
 vi.mock('@/lib/useMatchStatuses', () => ({ useMatchStatuses: () => matchStatusesValue }))
-vi.mock('@/pages/vacancies/shared', () => ({ useCustomerOptions: () => customerOptionsValue }))
+vi.mock('@/hooks/useCustomerOptions', () => ({ useCustomerOptions: () => customerOptionsValue }))
 const stableLookup = vi.hoisted(() => ({
   stages: { stages: [] as unknown[] }, statuses: { statuses: [] as unknown[] }, sources: { sources: [] as unknown[] },
   appStages: { stages: [] as unknown[] }, reasons: { reasons: [] as unknown[] }, teams: { teams: [] as unknown[] },

@@ -36,7 +36,7 @@ vi.mock('@/lib/useCao', () => ({
   useCao: () => ({ types: [{ value: 'vvt', label: 'CAO VVT' }], labelOf: (v: string) => v, colorOf: () => undefined }),
 }))
 vi.mock('@/lib/datetime', () => ({ useDateFormat: () => ({ formatDate: (d: string) => d }) }))
-vi.mock('./useCustomerOptions', () => ({ useCustomerOptions: () => [] }))
+vi.mock('@/hooks/useCustomerOptions', () => ({ useCustomerOptions: () => [] }))
 vi.mock('./useCascadePickers', () => ({ useCascadePickers: () => ({ locationPicker: null, departmentPicker: null, contactPicker: null }) }))
 
 // The country cascade itself: a per-country list (mirrors useProvinces' real

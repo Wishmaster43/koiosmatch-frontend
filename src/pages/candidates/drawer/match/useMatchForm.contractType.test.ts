@@ -54,7 +54,7 @@ vi.mock('@/lib/useContractTypes', async () => {
 // Minimal static mocks for every other relational/lookup hook (mirrors the sibling
 // useMatchForm.test.ts setup) — none of them is under test here.
 vi.mock('@/lib/queries', () => ({ useUsers: () => ({ data: [] }) }))
-vi.mock('@/pages/vacancies/hooks/useCustomerOptions', () => ({ useCustomerOptions: () => [] }))
+vi.mock('@/hooks/useCustomerOptions', () => ({ useCustomerOptions: () => [] }))
 vi.mock('@/pages/candidates/hooks/useVacancyOptions', () => ({ useVacancyOptions: () => [] }))
 vi.mock('@/lib/useFunctions', () => ({ useFunctions: () => ({ functions: ['Verzorgende IG'], allowFreeEntry: false }) }))
 vi.mock('@/lib/useLocations', () => ({ useLocations: () => [] }))

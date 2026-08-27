@@ -69,7 +69,7 @@ const crossEntityBlocks = [
     ignores: ['**/*.test.*'],
     rules: {
       'no-restricted-imports': ['warn', { patterns: [DEEP_RELATIVE_PATTERN, {
-        group: ['@/pages/*/**', `!@/pages/${ent}/**`, '!@/pages/*/shared', '!@/pages/*/*Page'],
+        group: ['@/pages/*/**', `!@/pages/${ent}/**`, '!@/pages/*/shared', '!@/pages/*/shared-core', '!@/pages/*/*Page'],
         message: barrelMessage,
       }] }],
     },
@@ -79,7 +79,7 @@ const crossEntityBlocks = [
     ignores: ['**/*.test.*'],
     rules: {
       'no-restricted-imports': ['warn', { patterns: [DEEP_RELATIVE_PATTERN, {
-        group: ['@/pages/*/**', '!@/pages/*/shared', '!@/pages/*/*Page'],
+        group: ['@/pages/*/**', '!@/pages/*/shared', '!@/pages/*/shared-core', '!@/pages/*/*Page'],
         message: barrelMessage,
       }] }],
     },

@@ -11,8 +11,7 @@ export { buildVacancyPatch } from './data/vacanciesShared'
 export { deriveVacancyAdvice } from './data/vacancyAdvice'
 export { default as DescriptionTab } from './drawer/DescriptionTab'
 export { default as DetailsTab } from './drawer/DetailsTab'
-export { useCustomerOptions } from './hooks/useCustomerOptions'
-export type { CustomerOption } from './hooks/useCustomerOptions'
+// useCustomerOptions moved to @/hooks (generic customer lookup, BARREL-DATETIME-LES).
 export { getCandidateTabDefaults } from './lib/candidateTabVisibility'
 export { default as VacancyDescriptionPopout } from './popout/VacancyDescriptionPopout'
 // APP-VAC-TAB-1: the remaining drawer tabs, re-exported so the application

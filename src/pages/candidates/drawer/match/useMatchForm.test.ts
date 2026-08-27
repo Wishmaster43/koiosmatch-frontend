@@ -29,7 +29,7 @@ const mockCustomer = {
 // below) since the mismatch itself is what's under test.
 vi.mock('@/context/LookupsContext', () => ({ useLookups: () => ({ candidateTypes: [] }) }))
 vi.mock('@/lib/queries', () => ({ useUsers: () => ({ data: [] }) }))
-vi.mock('@/pages/vacancies/shared', () => ({ useCustomerOptions: () => [] }))
+vi.mock('@/hooks/useCustomerOptions', () => ({ useCustomerOptions: () => [] }))
 vi.mock('@/pages/candidates/hooks/useVacancyOptions', () => ({ useVacancyOptions: () => [] }))
 vi.mock('@/lib/useFunctions', () => ({ useFunctions: () => ({ functions: ['Verzorgende IG'], allowFreeEntry: false }) }))
 vi.mock('@/lib/useContractTypes', () => ({ useContractTypes: () => ({ types: [], options: [] }) }))

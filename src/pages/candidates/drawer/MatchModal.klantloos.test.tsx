@@ -20,7 +20,7 @@ const CANDIDATE_TYPES = [
 
 vi.mock('@/context/LookupsContext', () => ({ useLookups: () => ({ candidateTypes: CANDIDATE_TYPES }) }))
 vi.mock('@/lib/queries', () => ({ useUsers: () => ({ data: [] }) }))
-vi.mock('@/pages/vacancies/hooks/useCustomerOptions', () => ({
+vi.mock('@/hooks/useCustomerOptions', () => ({
   useCustomerOptions: () => [{ value: 'cust-1', label: 'Zorggroep A' }],
 }))
 vi.mock('../hooks/useVacancyOptions', () => ({ useVacancyOptions: () => [] }))

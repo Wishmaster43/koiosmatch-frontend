@@ -50,7 +50,7 @@ vi.mock('./reportStatusLookups', () => ({
   useTaskPriorityIdOptions: () => taskPriorityIdOptions,
 }))
 vi.mock('@/lib/useMatchStatuses', () => ({ useMatchStatuses: () => matchStatusesValue }))
-vi.mock('@/pages/vacancies/hooks/useCustomerOptions', () => ({ useCustomerOptions: () => customerOptionsValue }))
+vi.mock('@/hooks/useCustomerOptions', () => ({ useCustomerOptions: () => customerOptionsValue }))
 // WAVE 1c lookup sources — every filterable report's own extra-dimension vocabulary.
 // STABLE-REFERENCE CONTRACT: every mocked lookup returns the SAME object each
 // render — a fresh literal per call re-derives panelGroups every render and

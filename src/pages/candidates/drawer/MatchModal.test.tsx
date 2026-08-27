@@ -81,7 +81,7 @@ const { useContractTypesMock } = vi.hoisted(() => ({ useContractTypesMock: vi.fn
 // name lets a filter test prove typing actually narrows the list).
 vi.mock('@/context/LookupsContext', () => ({ useLookups: () => ({ candidateTypes: [] }) }))
 vi.mock('@/lib/queries', () => ({ useUsers: () => ({ data: [{ id: 'u1', name: 'Piet Recruiter' }, { id: 'u2', name: 'Sanne Planner' }] }) }))
-vi.mock('@/pages/vacancies/hooks/useCustomerOptions', () => ({
+vi.mock('@/hooks/useCustomerOptions', () => ({
   useCustomerOptions: () => [{ value: 'cust-1', label: 'Zorggroep A' }, { value: 'cust-2', label: 'Andere Zorg BV' }],
 }))
 vi.mock('../hooks/useVacancyOptions', () => ({ useVacancyOptions: () => [] }))

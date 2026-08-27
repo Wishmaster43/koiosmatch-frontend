@@ -29,7 +29,7 @@ vi.mock('@/lib/useFunctions', () => ({ useFunctions: () => ({ functions: [] }) }
 vi.mock('@/lib/useContractTypes', () => ({ useContractTypes: () => ({ types: [], options: [] }) }))
 vi.mock('@/lib/useCao', () => ({ useCao: () => ({ types: [], labelOf: (v: string) => v, colorOf: () => undefined }) }))
 vi.mock('@/lib/datetime', () => ({ useDateFormat: () => ({ formatDate: (d: string) => d }) }))
-vi.mock('./useCustomerOptions', () => ({ useCustomerOptions: () => [] }))
+vi.mock('@/hooks/useCustomerOptions', () => ({ useCustomerOptions: () => [] }))
 vi.mock('./useCascadePickers', () => ({ useCascadePickers: () => ({ locationPicker: null, departmentPicker: null, contactPicker: null }) }))
 vi.mock('@/hooks/useProvinces', () => ({ useProvinces: () => ({ provinces: [] }) }))
 
