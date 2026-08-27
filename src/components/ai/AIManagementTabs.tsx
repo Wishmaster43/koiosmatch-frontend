@@ -355,7 +355,7 @@ export function ToolsTab() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
       <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 4 }}>{t('ai.tools.hint')}</p>
-      <p style={{ fontSize: 11, color: 'var(--color-warning)', marginBottom: 4 }}>{t('ai.tools.notAvailable')}</p>
+      <p style={{ fontSize: 11, color: 'var(--color-warning-text)', marginBottom: 4 }}>{t('ai.tools.notAvailable')}</p>
       {BUILTIN_TOOLS.map(toolId => {
         const on = DEFAULT_ENABLED_TOOLS.has(toolId)
         return (

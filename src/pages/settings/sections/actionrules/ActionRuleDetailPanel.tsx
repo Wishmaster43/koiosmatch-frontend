@@ -74,7 +74,7 @@ export default function ActionRuleDetailPanel({
           {t('actionRules.detail.noPopup')}
         </p>
       ) : (
-        <p style={{ marginTop: 10, fontSize: 12.5, color: 'var(--color-warning)', fontStyle: 'italic' }}>
+        <p style={{ marginTop: 10, fontSize: 12.5, color: 'var(--color-warning-text)', fontStyle: 'italic' }}>
           {t('actionRules.detail.noPopupOverrideWarning')}
         </p>
       )}

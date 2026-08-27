@@ -11,7 +11,7 @@ import { useTranslation } from 'react-i18next'
 import type { WorkflowField, EdgeFilters, WorkflowVarGroup } from '@/types/workflow'
 import {
   FaqSelectField, WebhookSelectField, LookupSelectField, WorkflowSelectField,
-  WhatsappPhoneNumberField, FiltersField, type OnChange,
+  WhatsappPhoneNumberField, FiltersField, OrderedListField, type OnChange,
 } from './fieldControls'
 import { TextFieldWithVars } from './VariablePicker'
 import { fieldLabel, fieldPlaceholder, optionLabel } from './moduleI18n'
@@ -115,6 +115,11 @@ export function FieldInput({ field, value, onChange, variables, config }: {
         onFocus={e => (e.target.style.borderColor = 'var(--color-primary)')}
         onBlur={e  => (e.target.style.borderColor = 'var(--border)')} />
     )
+  }
+  if (field.type === 'ordered_list') {
+    // WA-SEND-FIELDS-2: WhatsAppSendModule's body_parameters — a positional
+    // {{1}}, {{2}}, … list, so reordering matters (unlike 'keyvalue' below).
+    return <OrderedListField value={value} onChange={onChange} fieldKey={field.key} />
   }
   if (field.type === 'keyvalue') {
     const pairs = (Array.isArray(value) ? value : []) as Array<{ name?: string; value?: string }>

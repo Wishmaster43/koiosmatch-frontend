@@ -105,7 +105,7 @@ export default function UploadStep({ entity, canView, canImport, onFileReady }: 
       </div>
 
       {!canImport && (
-        <p style={{ fontSize: 12, color: 'var(--color-warning)', marginBottom: 12 }}>{t('import.noImportPermission')}</p>
+        <p style={{ fontSize: 12, color: 'var(--color-warning-text)', marginBottom: 12 }}>{t('import.noImportPermission')}</p>
       )}
 
       <div

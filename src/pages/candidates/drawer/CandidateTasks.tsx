@@ -122,6 +122,15 @@ function CandidateTasksBody({ candidateId }: { candidateId: Id }) {
   }, [candidateId])
   useEffect(() => { load() }, [load])
 
+  // WALKTHROUGH-2108 data-truth fix: prefer the LIVE tenant status lookup over the
+  // row's raw payload — a status renamed/recoloured in Settings after the task was
+  // written must show the current label/colour. Zero visual change: same chip shape,
+  // only the source of label/colour changes (frozen candidate screen, §14).
+  const liveStatusOf = (t: TaskRow): TaskRow['status'] => {
+    const live = statuses.find(s => s.value === statusKeyOf(t))
+    return live ? { value: live.value, label: live.label, color: live.color } : t.status
+  }
+
   // Priority/status chips arrive as lookup objects or bare strings — render defensively.
   const chip = (v: TaskRow['priority']) => {
     const label = typeof v === 'object' ? v?.label ?? v?.value : v
@@ -203,7 +212,7 @@ function CandidateTasksBody({ candidateId }: { candidateId: Id }) {
                 <EntityLink page="tasks" id={task.id} title={t('drawer.taskOpen')}>{task.title ?? '—'}</EntityLink>
               </span>
               {task.due_date && <span style={{ fontSize: 11, color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>{formatDate(task.due_date)}</span>}
-              {chip(task.status)}
+              {chip(liveStatusOf(task))}
               {chip(task.priority)}
             </span>
             {/* Meta line: for whom (assignee) + created by/at (the "alles" Danny asked

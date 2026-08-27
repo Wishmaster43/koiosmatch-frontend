@@ -37,7 +37,7 @@ export const STATUS_META: Record<string, StatusMeta> = {
   // Ink is --color-on-danger-bg — the raw danger colour reads only 3.95:1 on its
   // own pastel, AA fail (Opus r3.5).
   failed:    { bg: 'var(--color-danger-bg)',  color: 'var(--color-on-danger-bg)',  Icon: XCircle },
-  running:   { bg: 'var(--color-warning-bg)', color: 'var(--color-warning)', Icon: RotateCcw },
+  running:   { bg: 'var(--color-warning-bg)', color: 'var(--color-on-warning-bg)', Icon: RotateCcw },
   pending:   { bg: 'var(--hover-bg)',         color: 'var(--text-muted)',    Icon: Clock },
   waiting:   { bg: 'var(--hover-bg)',         color: 'var(--text-muted)',    Icon: Clock },
   cancelled: { bg: 'var(--hover-bg)',         color: 'var(--text-muted)',    Icon: Ban },

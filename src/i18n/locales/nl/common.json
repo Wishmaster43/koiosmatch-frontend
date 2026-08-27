@@ -193,6 +193,8 @@
     "stopMaxSteps": "Kon niet binnen de stappen worden afgerond",
     "notConfigured": "Koios is nog niet gekoppeld.",
     "errorReply": "Kon Koios niet bereiken. Probeer het opnieuw.",
+    "budgetExceededDaily": "Het dagelijkse Koios-budget is bereikt. Morgen kan Koios weer gebruikt worden, of vraag de beheerder het budget te verhogen.",
+    "budgetExceededMonthly": "Het maandelijkse Koios-budget van deze organisatie is bereikt. Vanaf de 1e van de volgende maand kan Koios weer gebruikt worden, of vraag de beheerder het budget te verhogen.",
     "forbidden": "Je hebt geen toegang tot Koios.",
     "usageLine": "{{model}} · {{tokens}} tokens",
     "offline": "Niet gekoppeld",

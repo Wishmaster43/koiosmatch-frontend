@@ -62,7 +62,7 @@ export default function GeoRadiusGroup({ group }: { group: ReportFilterGroup }) 
           {t('filters.apply')}
         </Button>
       </div>
-      {group.hint && <div style={{ fontSize: 11, color: 'var(--color-warning)' }}>{group.hint}</div>}
+      {group.hint && <div style={{ fontSize: 11, color: 'var(--color-warning-text)' }}>{group.hint}</div>}
     </div>
   )
 }

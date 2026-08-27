@@ -37,6 +37,7 @@ import KoiosRadar from './koios/KoiosRadar'
 import KoiosVoiceButton from './koios/KoiosVoiceButton'
 import type { KoiosResultRef } from './koios/koiosTypes'
 import type { KoiosChatMessage, KoiosContextRef, TFn } from '@/types/koios'
+import type { KoiosModelOption } from '@/lib/koiosModelTiers'
 
 // gradient used for the assistant avatar + user bubble.
 const GRADIENT = 'linear-gradient(135deg,var(--color-primary),var(--color-violet))'
@@ -53,11 +54,18 @@ function resolveMessage(msg: KoiosChatMessage, t: TFn) {
   if (msg.role === 'user')      return { text: msg.content,              notice: false }
   if (msg.stopReason === 'not_configured')
     return { text: msg.answer || t('koios.notConfigured'),               notice: true }
+  // KOIOS-CHAT-SIGNALS-FE-1: a budget-exhausted stop reads the reason the backend
+  // stamped on `budget.reason` — daily caps reset tomorrow, the monthly cap next
+  // month — instead of always showing the server's monthly-only sentence.
+  if (msg.stopReason === 'budget_exceeded') {
+    const isDaily = msg.budget?.reason === 'daily_user' || msg.budget?.reason === 'daily_tenant'
+    return { text: t(isDaily ? 'koios.budgetExceededDaily' : 'koios.budgetExceededMonthly'), notice: true }
+  }
   return { text: msg.answer, notice: false }
 }
 
 // ── Chat bubble ───────────────────────────────────────────────────────────────
-function KoiosMessage({ msg, isNew, t, locale }: { msg: KoiosChatMessage; isNew?: boolean; t: TFn; locale?: string }) {
+function KoiosMessage({ msg, isNew, t, locale, modelOptions }: { msg: KoiosChatMessage; isNew?: boolean; t: TFn; locale?: string; modelOptions?: KoiosModelOption[] }) {
   const isKoios = msg.role !== 'user'
   const { text, notice } = resolveMessage(msg, t)
   // Subtle tag under the bubble for a self-refusal or an unfinished (max_steps) run.
@@ -98,7 +106,7 @@ function KoiosMessage({ msg, isNew, t, locale }: { msg: KoiosChatMessage; isNew?
         {isKoios && !notice && resultRefs.length > 0 && <KoiosResultCards refs={resultRefs} />}
         {isKoios && !notice && <KoiosSteps steps={msg.steps} t={t} />}
         {isKoios && !notice && msg.stopReason !== 'not_configured' && (
-          <KoiosUsage usage={msg.usage} model={msg.model} t={t} locale={locale} />
+          <KoiosUsage usage={msg.usage} model={msg.model} t={t} locale={locale} options={modelOptions} />
         )}
       </div>
     </div>
@@ -299,7 +307,7 @@ export default function KoiosPanel({ open, onClose, onNavigate }: { open?: boole
           <KoiosRadar onNavigate={onNavigate} />
         ) : (
           messages.map((msg, i) => (
-            <KoiosMessage key={i} msg={msg} isNew={i === messages.length - 1} t={t} locale={locale} />
+            <KoiosMessage key={i} msg={msg} isNew={i === messages.length - 1} t={t} locale={locale} modelOptions={settings?.models?.options} />
           ))
         )}
         {loading && <TypingIndicator />}
@@ -398,6 +406,7 @@ export default function KoiosPanel({ open, onClose, onNavigate }: { open?: boole
             {/* Model picker — only renders when there is more than one selectable model */}
             <KoiosModelPicker
               models={settings?.models?.selectable}
+              options={settings?.models?.options}
               value={model ?? settings?.models?.active}
               onChange={setModel}
               t={t}

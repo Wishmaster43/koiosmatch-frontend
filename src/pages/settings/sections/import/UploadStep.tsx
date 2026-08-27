@@ -95,7 +95,7 @@ export default function UploadStep({
       </div>
 
       {!canImport && (
-        <p style={{ fontSize: 12, color: 'var(--color-warning)', marginBottom: 12 }}>{t('import.noImportPermission')}</p>
+        <p style={{ fontSize: 12, color: 'var(--color-warning-text)', marginBottom: 12 }}>{t('import.noImportPermission')}</p>
       )}
 
       {/* Upload dropzone — disabled (opacity + cursor), never hidden, without the create right. */}

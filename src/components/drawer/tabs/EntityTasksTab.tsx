@@ -194,11 +194,13 @@ function EntityTasksTabBody({ linkType, id, labels, extraLinks = [] }: Props) {
       {!loading && !error && visible.length > 0 && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
           {visible.map((task, i) => {
-            // The API sends `status` as a lookup OBJECT ({value,label,color}); older
-            // payloads sent a bare string — resolve both, never render the object raw.
+            // Prefer the LIVE tenant lookup (statuses, from useTaskLookups) over the
+            // raw payload — a status renamed/recoloured in Settings after the task's
+            // row was written must show the current label/colour, not a stale snapshot.
+            const liveStatus = statuses.find(s => s.value === statusKeyOf(task))
             const st = task.status as { label?: string; value?: string; color?: string } | string | null | undefined
-            const statusLabel = task.status_label ?? (typeof st === 'object' ? st?.label ?? st?.value : st)
-            const statusColor = task.status_color || (typeof st === 'object' ? st?.color : null) || 'var(--text-muted)'
+            const statusLabel = liveStatus?.label ?? task.status_label ?? (typeof st === 'object' ? st?.label ?? st?.value : st)
+            const statusColor = liveStatus?.color || task.status_color || (typeof st === 'object' ? st?.color : null) || 'var(--text-muted)'
             const due = (task.completed_at ?? task.due_at ?? task.due_date) as string | null | undefined
             return (
               <button key={String(task.id ?? i)} type="button" title={labels.openTask}

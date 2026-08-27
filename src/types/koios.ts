@@ -29,13 +29,19 @@ export interface KoiosChatMessage {
   usage?: KoiosUsageData | null
   model?: string | null
   stopReason?: string
+  // KOIOS-CHAT-SIGNALS-FE-1: which cap tripped a budget_exceeded stop —
+  // 'monthly' | 'daily_user' | 'daily_tenant' (null for any other stop reason).
+  budget?: { status?: string; reason?: string | null; [k: string]: unknown } | null
   [k: string]: unknown
 }
 
-// GET /ai/koios/settings.
+// GET /ai/koios/settings. KOIOS-MODEL-VOCAB-1 (27-08, measured against
+// KoiosAiSettingsController::settings()): the controller never returns a
+// `pricing` field any more (raw model rates are a platform/super-admin concern) —
+// `options[]` (id/label/hint/cost_rank, AI-MODELS-1) is the tenant-facing
+// vocabulary now, resolved server-side.
 export interface KoiosSettings {
-  models?: { active?: string; selectable?: string[] }
-  pricing?: unknown
+  models?: { active?: string; selectable?: string[]; options?: import('@/lib/koiosModelTiers').KoiosModelOption[]; cost_note?: string }
   currency?: string
   status?: { claude_configured?: boolean; policy_loaded?: boolean; api_ok?: boolean; api_error?: string | null; [k: string]: unknown }
   [k: string]: unknown

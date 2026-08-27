@@ -161,7 +161,7 @@ export default function WorkflowEditorHeader({
         style={{
           display: 'flex', alignItems: 'center', gap: 6, padding: '4px 10px', borderRadius: 999,
           background: status === 'active' ? 'var(--color-success-bg)' : 'var(--hover-bg)',
-          color:      status === 'active' ? 'var(--color-success)' : 'var(--text-muted)',
+          color:      status === 'active' ? 'var(--color-on-success-bg)' : 'var(--text-muted)',
           border:     `1px solid ${status === 'active' ? 'var(--color-success)' : 'var(--border)'}`,
           cursor: 'pointer', fontSize: 11, fontWeight: 500,
         }}>
@@ -184,8 +184,8 @@ export default function WorkflowEditorHeader({
           BUG 5: `role="alert"` (implicit aria-live="assertive") so a screen-reader
           user actually hears the failure — it used to sit in a bare span. */}
       {runError !== null && (
-        // eslint-disable-next-line no-restricted-syntax -- DATA: exact-match fallback for var(--color-danger), not an ad-hoc colour
-        <span role="alert" style={{ fontSize: 11, color: 'var(--color-danger, #DC2626)', maxWidth: 220, flexShrink: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+        // eslint-disable-next-line no-restricted-syntax -- DATA: exact-match fallback for var(--color-danger-text), not an ad-hoc colour
+        <span role="alert" style={{ fontSize: 11, color: 'var(--color-danger-text, #B91C1C)', maxWidth: 220, flexShrink: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
           title={runError || t('common:actionFailed')}>
           {runError || t('common:actionFailed')}
         </span>
@@ -195,7 +195,7 @@ export default function WorkflowEditorHeader({
           Same un-announced-span issue as runError above (BUG 5) — `role="status"`
           (aria-live="polite") since this is informational, not a hard failure. */}
       {runConflict && (
-        <span role="status" style={{ fontSize: 11, color: 'var(--color-warning)', maxWidth: 220, flexShrink: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+        <span role="status" style={{ fontSize: 11, color: 'var(--color-warning-text)', maxWidth: 220, flexShrink: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
           title={t('runControl.alreadyRunning')}>
           {t('runControl.alreadyRunning')}
         </span>

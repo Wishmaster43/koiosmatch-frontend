@@ -20,7 +20,7 @@
     "title": "Modelle",
     "active": "Aktives Modell",
     "selectable": "Auswählbare Modelle",
-    "pickHint": "Wählen Sie die KI-Stufe für Ihr Büro. Die Tarife stehen darunter.",
+    "pickHint": "Wählen Sie die KI-Stufe für Ihr Büro.",
     "tier": {
       "fast": "Schnell",
       "smart": "Smart",
@@ -33,14 +33,12 @@
     },
     "saveError": "Modellwechsel fehlgeschlagen. Bitte erneut versuchen.",
     "unknownTier": "Unbekanntes Modell",
-    "activeUnknown": "Keine aktive Variante bekannt. Wählen Sie unten eine aus."
-  },
-  "pricing": {
-    "title": "Tarife",
-    "subtitle": "Preis pro 1 Mio. Tokens.",
-    "model": "Modell",
-    "input": "Eingabe",
-    "output": "Ausgabe"
+    "activeUnknown": "Keine aktive Variante bekannt. Wählen Sie unten eine aus.",
+    "tierHint": {
+      "snel": "Höchstes Volumen, niedrigster Tarif. Ideal für Routinearbeit.",
+      "slim": "Der Standard: starke Qualität zum mittleren Tarif.",
+      "max": "Beste Qualität für die schwierigste Arbeit. Höchster Tarif."
+    }
   },
   "voice": {
     "start": "Nachricht einsprechen",

@@ -20,7 +20,7 @@
     "title": "Modellen",
     "active": "Actief model",
     "selectable": "Selecteerbare modellen",
-    "pickHint": "Kies de AI-smaak voor jouw bureau. Het tarief per smaak staat hieronder.",
+    "pickHint": "Kies de AI-smaak voor jouw bureau.",
     "tier": {
       "fast": "Snel",
       "smart": "Slim",
@@ -33,14 +33,12 @@
     },
     "saveError": "Model wijzigen is niet gelukt. Probeer het opnieuw.",
     "unknownTier": "Onbekend model",
-    "activeUnknown": "Geen actieve smaak bekend. Kies hieronder een smaak."
-  },
-  "pricing": {
-    "title": "Tarieven",
-    "subtitle": "Prijs per 1M tokens.",
-    "model": "Model",
-    "input": "Input",
-    "output": "Output"
+    "activeUnknown": "Geen actieve smaak bekend. Kies hieronder een smaak.",
+    "tierHint": {
+      "snel": "Hoogste volume, laagste tarief. Prima voor routinewerk.",
+      "slim": "De standaard: sterke kwaliteit tegen een gemiddeld tarief.",
+      "max": "Beste kwaliteit voor het moeilijkste werk. Hoogste tarief."
+    }
   },
   "voice": {
     "start": "Spreek je bericht in",

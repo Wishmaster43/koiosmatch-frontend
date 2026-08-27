@@ -18,6 +18,7 @@ import OverviewTab from './OverviewTab'
 import { useMatchAdvice } from '@/lib/useMatchAdvice'
 import api from '@/lib/api'
 import type { MatchRow } from '@/types/match'
+import { computeMatchDuration } from '../matchDuration'
 
 // Only the default axios client is stubbed — useMatchContract's own unwrap logic runs for real.
 vi.mock('@/lib/api', async () => {
@@ -84,6 +85,33 @@ describe('OverviewTab · overzicht-data cluster', () => {
     await waitFor(() => expect(mockedGet).toHaveBeenCalled())
     // Not asserting the exact locale format — just that a real value renders, not a dash-only state.
     expect(screen.queryAllByText('—').length).toBeLessThan(8)
+  })
+
+  // MATCH-EDIT-1 detail-first regression: MatchDurationBar must read the FETCHED
+  // contract dates, not the (possibly stale) match.startDate/endDate prop — a
+  // save elsewhere in the app can leave the list row behind the detail fetch.
+  it('computes the progress bar from the DETAIL fetch dates, not the stale match prop', async () => {
+    // Stale list-row dates: far in the future, so if THESE were used the bar
+    // would show 0% elapsed. The detail fetch below carries dates spanning a
+    // full year around today, so the two sources compute different percentages.
+    // No injected `now` (the component always uses the real clock): the window
+    // is wide enough that day-level rounding cannot flip the outcome between
+    // the render and the assertion below.
+    const staleMatch: MatchRow = { ...baseMatch, startDate: '2099-01-01', endDate: '2099-06-30' }
+    const detailStart = '2020-01-01'
+    const detailEnd = '2099-01-01'
+    mockedGet.mockResolvedValue({
+      data: { data: { start_date: detailStart, end_date: detailEnd } },
+    })
+    render(<I18nextProvider i18n={i18n}><OverviewTab match={staleMatch} /></I18nextProvider>)
+    const bar = await screen.findByRole('progressbar')
+    const expected = computeMatchDuration(detailStart, detailEnd)
+    expect(expected).not.toBeNull()
+    expect(bar).toHaveAttribute('aria-valuenow', String(expected?.elapsedPct))
+    // Sanity: the stale-prop computation (both dates in the future) would be 0%.
+    const staleExpected = computeMatchDuration(staleMatch.startDate, staleMatch.endDate)
+    expect(staleExpected?.elapsedPct).toBe(0)
+    expect(bar.getAttribute('aria-valuenow')).not.toBe('0')
   })
 
   // M17/optie A — the backend `match_text` column doesn't exist yet (MATCH-TEXT-FIELD-1),
@@ -155,8 +183,9 @@ describe('OverviewTab · Contract/Financieel card is editable (MATCH-EDIT-1)', (
     await user.type(costCenterInput, 'KP-9')
     await user.click(screen.getByTitle(i18n.t('common:save')))
     await waitFor(() => expect(mockedPatch).toHaveBeenCalledWith('/matches/m1', expect.objectContaining({ cost_center: 'KP-9' })))
-    // MatchDurationBar + the list row read match.* (not this tab's own fetch) —
-    // a successful save must patch them too, or they go stale (measured gap).
+    // The list row reads match.* (not this tab's own fetch) — a successful save
+    // must patch it too, or it goes stale. MatchDurationBar itself is detail-first
+    // (contract.start_date ?? match.startDate), so it stays fresh regardless.
     expect(onUpdate).toHaveBeenCalledWith('m1', expect.objectContaining({ contractType: null, startDate: null, endDate: null }))
   })
 

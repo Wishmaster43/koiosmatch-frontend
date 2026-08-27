@@ -112,7 +112,8 @@ export default function SegmentedControl({ options, value, onChange, color = 'va
   }
 
   return (
-    <div role="radiogroup" aria-label={ariaLabel} style={{ display: 'flex', flexDirection: compact ? 'row' : 'column', gap: compact ? 4 : 8 }}>
+    // Compact rows wrap instead of overflowing a narrow toolbar (audit item e).
+    <div role="radiogroup" aria-label={ariaLabel} style={{ display: 'flex', flexDirection: compact ? 'row' : 'column', flexWrap: compact ? 'wrap' : undefined, gap: compact ? 4 : 8 }}>
       {options.map((opt, i) => {
         const active = opt.value === value
         const Icon = opt.icon
@@ -159,7 +160,8 @@ export default function SegmentedControl({ options, value, onChange, color = 'va
               {/* CHIP-TINT-1's fourth ingredient, sized for the compact pill row —
                   SEGMENTED-CHECK-SWEEP-1 (23-08) found this branch was the one
                   place the check never rendered at all, not even opt-in. */}
-              {showActiveCheck && active && <Check size={11} aria-hidden="true" style={{ flexShrink: 0, marginLeft: 2 }} />}
+              {/* Width reserved even when inactive, so activating never shifts the row. */}
+              {showActiveCheck && <Check size={11} aria-hidden="true" style={{ flexShrink: 0, marginLeft: 2, visibility: active ? 'visible' : 'hidden' }} />}
             </>) : (
               <>
                 {Icon && <Icon size={16} />}

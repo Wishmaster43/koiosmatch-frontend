@@ -118,7 +118,7 @@ export default function ShiftsChartsBlock({
   const funcTotal = funcSegs.reduce((s, x) => s + x.value, 0)
   const openFuncBar = (
     <div>
-      <div style={{ fontSize: 22, fontWeight: 700, lineHeight: 1, color: 'var(--color-warning)' }}>{val(H.geen_kandidaat, C.geen_kandidaat)}</div>
+      <div style={{ fontSize: 22, fontWeight: 700, lineHeight: 1, color: 'var(--color-warning-text)' }}>{val(H.geen_kandidaat, C.geen_kandidaat)}</div>
       <div style={{ display: 'flex', height: 9, borderRadius: 5, overflow: 'hidden', marginTop: 8, background: 'var(--hover-bg)' }}>
         {funcTotal > 0 && funcSegs.map(seg => (
           <div key={seg.label} title={`${seg.label}: ${fmtN(seg.value)}`}

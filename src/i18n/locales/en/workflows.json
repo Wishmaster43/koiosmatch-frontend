@@ -37,6 +37,8 @@
     "selectPlaceholder": "Select...",
     "keyName": "Name",
     "keyValue": "Value",
+    "moveUp": "Move up",
+    "moveDown": "Move down",
     "add": "Add",
     "faqLoading": "Loading FAQs…",
     "faqEmpty": "No FAQs found",
@@ -789,7 +791,8 @@
     "Verzendnummer (voor de sessieantwoorden)": "Sending number (for the session replies)",
     "Terugvaltijd zonder reactie (uren)": "Fallback time without a reply (hours)",
     "Max pogingen per beurt (bij een tijdelijke API-fout)": "Max. attempts per turn (on a temporary API error)",
-    "Gekoppeld nummer": "Linked number"
+    "Gekoppeld nummer": "Linked number",
+    "Body parameters": "Body parameters"
   },
   "fieldOptions": {
     "Array (meerdere bundles)": "Array (multiple bundles)",
@@ -932,7 +935,30 @@
     "users": "users",
     "waba": "WABA",
     "waba_coex": "WABA · local (Coexistence)",
-    "wa_web": "WA Web (own number)"
+    "wa_web": "WA Web (own number)",
+    "vacancyclosing_soon": "vacancy closing soon",
+    "candidatedocument_expiring": "document expiring (candidate)",
+    "candidatemissing_cv": "missing CV (candidate)",
+    "candidatestatus_stale": "status stagnant (candidate)",
+    "candidatephase_stale": "phase stagnant (candidate)",
+    "matchexpiring": "match expiring",
+    "matchapproval_pending": "match approval pending",
+    "taskassigned": "task assigned",
+    "appointmenttoday": "appointment today",
+    "candidateretention_due": "retention due (candidate)",
+    "candidatearchived": "candidate archived",
+    "whatsappoutage": "WhatsApp outage",
+    "whatsapprestored": "WhatsApp restored",
+    "conversationunanswered": "conversation unanswered",
+    "candidateavailability_upcoming": "availability upcoming (candidate)",
+    "candidateavailability_overdue": "availability overdue (candidate)",
+    "candidateleave_ending_soon": "leave ending soon (candidate)",
+    "candidateleave_overdue": "leave overdue (candidate)",
+    "candidateunavailable_ending_soon": "unavailable ending soon (candidate)",
+    "candidateunavailable_overdue": "unavailable overdue (candidate)",
+    "calllisttarget_assigned": "call-list target assigned",
+    "opportunitywon": "opportunity won",
+    "opportunitylost": "opportunity lost"
   },
   "agentTest": {
     "title": "Test variables",
@@ -1088,7 +1114,8 @@
     "De volledige, tenant-bewerkbare instructie voor de AI-agent persona, staps-state-machine, harde regels Het runtime-antwoordcontract wordt automatisch toegevoegd": "The full, tenant-editable instruction for the AI agent: persona, step state machine, hard rules. The runtime response contract is added automatically.",
     "Reageert de kandidaat niet, dan valt de run na dit aantal uren terug (workflowsresume-due watchdog)": "If the candidate doesn't reply, the run falls back after this many hours (workflows:resume-due watchdog).",
     "Alleen gekoppelde WhatsApp Web-nummers (eigen of vestiging)": "Only connected WhatsApp Web numbers (personal or branch).",
-    "Via WhatsApp Web kan alleen een sessiebericht (vrije tekst) worden verstuurd": "Via WhatsApp Web only a session message (free text) can be sent."
+    "Via WhatsApp Web kan alleen een sessiebericht (vrije tekst) worden verstuurd": "Via WhatsApp Web only a session message (free text) can be sent.",
+    "bijv {{firstname}} of extra bericht tekst": "e.g. {{firstname}} or extra message text"
   },
   "triggers": {
     "events": {

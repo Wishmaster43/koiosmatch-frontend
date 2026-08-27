@@ -112,6 +112,29 @@ describe('KoiosPanel — known backend error codes', () => {
     expect(await screen.findByText('koios.errorReply')).toBeInTheDocument()
   })
 
+  // KOIOS-CHAT-SIGNALS-FE-1: budget_exceeded is a 200 reply carrying stop_reason +
+  // budget.reason (not a 402) — the panel must read the reason to pick daily vs
+  // monthly copy instead of always the server's monthly-only answer text.
+  it('shows the daily budget notice for a daily_user budget.reason', async () => {
+    vi.mocked(sendChat).mockResolvedValueOnce({
+      answer: 'Het Koios-maandbudget van deze organisatie is bereikt.', steps: [], usage: null, model: null,
+      stop_reason: 'budget_exceeded', budget: { status: 'blocked', reason: 'daily_user' },
+    })
+    await submitMessage('hello')
+    expect(await screen.findByText('koios.budgetExceededDaily')).toBeInTheDocument()
+    expect(screen.queryByText('koios.budgetExceededMonthly')).toBeNull()
+  })
+
+  it('shows the monthly budget notice for a monthly budget.reason', async () => {
+    vi.mocked(sendChat).mockResolvedValueOnce({
+      answer: 'Het Koios-maandbudget van deze organisatie is bereikt.', steps: [], usage: null, model: null,
+      stop_reason: 'budget_exceeded', budget: { status: 'blocked', reason: 'monthly' },
+    })
+    await submitMessage('hello')
+    expect(await screen.findByText('koios.budgetExceededMonthly')).toBeInTheDocument()
+    expect(screen.queryByText('koios.budgetExceededDaily')).toBeNull()
+  })
+
   // DATUM-1: an AI-composed reply carrying a raw ISO date renders humanised (DD-MM-YYYY), never the raw ISO string.
   it('humanises an ISO date embedded in the assistant reply', async () => {
     vi.mocked(sendChat).mockResolvedValueOnce({

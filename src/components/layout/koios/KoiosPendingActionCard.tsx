@@ -129,7 +129,7 @@ export default function KoiosPendingActionCard({ action }: { action: KoiosPendin
         <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('koios.pendingAction.cancelled')}</div>
       )}
       {status === 'expired' && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'var(--color-warning)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'var(--color-warning-text)' }}>
           <AlertTriangle size={14} /> {t('koios.pendingAction.expired')}
         </div>
       )}

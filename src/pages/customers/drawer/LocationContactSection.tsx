@@ -242,7 +242,7 @@ export default function LocationContactSection({
                     <PickButton label={pickLabel} onClick={onPickContact} />
                   </>
                 : <>
-                    <span style={{ fontSize: 11, fontStyle: 'italic', color: 'var(--color-warning)' }}>{t('locations.detail.contactNotLinked')}</span>
+                    <span style={{ fontSize: 11, fontStyle: 'italic', color: 'var(--color-warning-text)' }}>{t('locations.detail.contactNotLinked')}</span>
                     <PickButton label={pickLabel} onClick={onPickContact} />
                   </>}
           </div>

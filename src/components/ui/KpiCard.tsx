@@ -60,9 +60,10 @@ export default function KpiCard({ label, value, delta, icon: Icon, iconBg, iconC
           style={{ width: 40, height: 40, background: iconBg }}>
           {Icon && <Icon size={18} color={iconColor} />}
         </div>
+        {/* Delta pill: text sits on the semantic pastel, so it reads via the on-*-bg ink twin (AA on that fill), not the raw token. */}
         {!isNeutral && (
           <div className="flex items-center gap-1 px-2 py-1 rounded-full"
-            style={{ background: isPositive ? 'var(--color-success-bg)' : 'var(--color-danger-bg)', color: isPositive ? 'var(--color-success)' : 'var(--color-danger)' }}>
+            style={{ background: isPositive ? 'var(--color-success-bg)' : 'var(--color-danger-bg)', color: isPositive ? 'var(--color-on-success-bg)' : 'var(--color-on-danger-bg)' }}>
             {isPositive ? <TrendingUp size={11} /> : <TrendingDown size={11} />}
             <span style={{ fontSize: 11, fontWeight: 600 }}>
               {isPositive ? `+${delta}` : delta}%

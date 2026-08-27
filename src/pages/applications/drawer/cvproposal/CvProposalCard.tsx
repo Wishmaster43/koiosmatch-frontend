@@ -105,7 +105,7 @@ export default function CvProposalCard({
       {isPending ? (
         <>
           {/* The safety statement, first thing the recruiter reads. */}
-          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 6, fontSize: 12, color: 'var(--color-warning)' }}>
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 6, fontSize: 12, color: 'var(--color-warning-text)' }}>
             <AlertTriangle size={13} style={{ flexShrink: 0, marginTop: 1 }} />
             <span>{t('cvProposal.intro')}</span>
           </div>

@@ -57,6 +57,12 @@ export default {
     // 'template' format, mirroring session_text's own showIf below.
     { key: 'template_name',       label: 'Template',               type: 'whatsapp_template',
       showIf: { key: 'message_type', value: 'template' } },
+    // WA-SEND-FIELDS-2: WhatsAppSendModule::configSchema's 'flow'-only field — an
+    // ORDERED list of {{1}}, {{2}}, … values passed to a WhatsApp Flow message
+    // (mirrors the engine's `default: [{ value: '{{firstname}}' }]`).
+    { key: 'body_parameters',     label: 'Body parameters',        type: 'ordered_list',
+      showIf: { key: 'message_type', value: 'flow' },
+      help: 'bijv. {{firstname}} of extra bericht tekst' },
     { key: 'language',            label: 'Taal',                   type: 'text',    placeholder: 'nl' },
     // Free-form session text — only shown (and sent) for the 'session' format.
     { key: 'session_text',        label: 'Berichttekst (sessie)',  type: 'textarea',

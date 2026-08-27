@@ -33,6 +33,8 @@
     "selectPlaceholder": "Sélectionner...",
     "keyName": "Nom",
     "keyValue": "Valeur",
+    "moveUp": "Monter",
+    "moveDown": "Descendre",
     "add": "Ajouter",
     "faqLoading": "Chargement des FAQ…",
     "faqEmpty": "Aucune FAQ trouvée",
@@ -789,7 +791,8 @@
     "Verzendnummer (voor de sessieantwoorden)": "Numéro d'envoi (pour les réponses de session)",
     "Terugvaltijd zonder reactie (uren)": "Délai de repli sans réponse (heures)",
     "Max pogingen per beurt (bij een tijdelijke API-fout)": "Nb max. de tentatives par tour (en cas d'erreur API temporaire)",
-    "Gekoppeld nummer": "Numéro lié"
+    "Gekoppeld nummer": "Numéro lié",
+    "Body parameters": "Paramètres du corps"
   },
   "fieldOptions": {
     "Array (meerdere bundles)": "Tableau (plusieurs bundles)",
@@ -932,7 +935,30 @@
     "users": "utilisateurs",
     "waba": "WABA",
     "waba_coex": "WABA · local (Coexistence)",
-    "wa_web": "WA Web (numéro propre)"
+    "wa_web": "WA Web (numéro propre)",
+    "vacancyclosing_soon": "offre bientôt clôturée",
+    "candidatedocument_expiring": "document bientôt expiré (candidat)",
+    "candidatemissing_cv": "CV manquant (candidat)",
+    "candidatestatus_stale": "statut stagnant (candidat)",
+    "candidatephase_stale": "phase stagnante (candidat)",
+    "matchexpiring": "match bientôt expiré",
+    "matchapproval_pending": "match en attente d’approbation",
+    "taskassigned": "tâche assignée",
+    "appointmenttoday": "rendez-vous aujourd'hui",
+    "candidateretention_due": "rétention à échéance (candidat)",
+    "candidatearchived": "candidat archivé",
+    "whatsappoutage": "panne WhatsApp",
+    "whatsapprestored": "WhatsApp rétabli",
+    "conversationunanswered": "conversation sans réponse",
+    "candidateavailability_upcoming": "disponibilité imminente (candidat)",
+    "candidateavailability_overdue": "disponibilité en retard (candidat)",
+    "candidateleave_ending_soon": "congé se terminant bientôt",
+    "candidateleave_overdue": "congé en retard",
+    "candidateunavailable_ending_soon": "indisponibilité se terminant bientôt",
+    "candidateunavailable_overdue": "indisponibilité en retard",
+    "calllisttarget_assigned": "cible de liste d’appels assignée",
+    "opportunitywon": "opportunité gagnée",
+    "opportunitylost": "opportunité perdue"
   },
   "agentTest": {
     "title": "Variables de test",
@@ -1088,7 +1114,8 @@
     "De volledige, tenant-bewerkbare instructie voor de AI-agent persona, staps-state-machine, harde regels Het runtime-antwoordcontract wordt automatisch toegevoegd": "L'instruction complète, modifiable par le client, pour l'agent IA : persona, machine à états des étapes, règles strictes. Le contrat de réponse d'exécution est ajouté automatiquement.",
     "Reageert de kandidaat niet, dan valt de run na dit aantal uren terug (workflowsresume-due watchdog)": "Si le candidat ne répond pas, l'exécution se replie après ce nombre d'heures (workflows:resume-due watchdog).",
     "Alleen gekoppelde WhatsApp Web-nummers (eigen of vestiging)": "Uniquement les numéros WhatsApp Web connectés (personnel ou agence).",
-    "Via WhatsApp Web kan alleen een sessiebericht (vrije tekst) worden verstuurd": "Via WhatsApp Web, seul un message de session (texte libre) peut être envoyé."
+    "Via WhatsApp Web kan alleen een sessiebericht (vrije tekst) worden verstuurd": "Via WhatsApp Web, seul un message de session (texte libre) peut être envoyé.",
+    "bijv {{firstname}} of extra bericht tekst": "ex. {{firstname}} ou texte de message supplémentaire"
   },
   "triggers": {
     "events": {

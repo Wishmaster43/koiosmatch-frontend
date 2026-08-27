@@ -207,7 +207,7 @@ export function LookupBlock({ slug, title, subtitle, items, setItems, locked = f
             <code style={{ fontSize: 11, color: 'var(--text-muted)' }}>{item.value}</code>
             {/* Reason badge: marks a status that requires a reason when set (e.g. Inactive). */}
             {isStatusBlock && item.requires_reason && (
-              <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--color-warning)',
+              <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--color-warning-text)',
                              background: 'var(--color-warning-bg)', padding: '2px 7px', borderRadius: 999 }}>
                 {t('lookups.reasonBadge')}
               </span>

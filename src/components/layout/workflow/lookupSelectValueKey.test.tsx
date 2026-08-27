@@ -44,3 +44,31 @@ describe('LookupSelectField · valueKey', () => {
     await waitFor(() => expect(onChange).toHaveBeenCalledWith('status', '3'))
   })
 })
+
+// LOOKUP-RESPONSEKEY-TEST-1: an endpoint like GET /settings/candidate-lookups
+// returns an OBJECT of collections ({statuses, phases, …}), not a plain list —
+// responseKey picks which collection to read; unwrapList would find nothing.
+describe('LookupSelectField · responseKey', () => {
+  beforeEach(() => vi.clearAllMocks())
+
+  it('reads the named collection out of an object-of-collections response', async () => {
+    const api = (await import('@/lib/api')).default
+    vi.mocked(api.get).mockResolvedValueOnce({ data: {
+      status_set: [
+        { id: 1, name: 'Available' },
+        { id: 2, name: 'Placed' },
+      ],
+      phases: [
+        { id: 9, name: 'Lead' },
+      ],
+    } })
+    const onChange = vi.fn()
+    render(<LookupSelectField value={undefined} onChange={onChange} fieldKey="status" endpoint="/settings/candidate-lookups" responseKey="status_set" />)
+    fireEvent.click(screen.getByRole('button'))
+    const opt = await screen.findByText('Available')
+    fireEvent.click(opt)
+    await waitFor(() => expect(onChange).toHaveBeenCalledWith('status', '1'))
+    // The sibling collection under a different key never leaks into these options.
+    expect(screen.queryByText('Lead')).not.toBeInTheDocument()
+  })
+})

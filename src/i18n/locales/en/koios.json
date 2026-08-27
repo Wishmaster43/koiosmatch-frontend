@@ -20,7 +20,7 @@
     "title": "Models",
     "active": "Active model",
     "selectable": "Selectable models",
-    "pickHint": "Pick the AI tier for your agency. Per-tier rates are below.",
+    "pickHint": "Pick the AI tier for your agency.",
     "tier": {
       "fast": "Fast",
       "smart": "Smart",
@@ -33,14 +33,12 @@
     },
     "saveError": "Changing the model failed. Please try again.",
     "unknownTier": "Unknown model",
-    "activeUnknown": "No active flavour known. Pick one below."
-  },
-  "pricing": {
-    "title": "Rates",
-    "subtitle": "Price per 1M tokens.",
-    "model": "Model",
-    "input": "Input",
-    "output": "Output"
+    "activeUnknown": "No active flavour known. Pick one below.",
+    "tierHint": {
+      "snel": "Highest volume, lowest rate. Great for routine work.",
+      "slim": "The default: strong quality at an average rate.",
+      "max": "Best quality for the hardest work. Highest rate."
+    }
   },
   "voice": {
     "start": "Dictate your message",

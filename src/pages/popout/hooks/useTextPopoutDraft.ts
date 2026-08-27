@@ -76,10 +76,15 @@ export function useTextPopoutDraft({ topic, storedValue, onSave }: TextPopoutDra
   const save = useCallback(async (): Promise<boolean> => {
     if (text === null) return false
     const html = text
-    setDirty(false)
-    post({ kind: 'saved', html })
+    // Ack only AFTER the write lands — announcing "saved" before the await
+    // let a refused write leave both windows optimistically clean (WALKTHROUGH-2108).
     const result = await onSave(html, () => { setDirty(true); post({ kind: 'draft', html }) })
-    return result !== false
+    const landed = result !== false
+    if (landed) {
+      setDirty(false)
+      post({ kind: 'saved', html })
+    }
+    return landed
   }, [text, post, onSave])
 
   return { text, dirty, change, save }

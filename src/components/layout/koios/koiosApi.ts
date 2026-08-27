@@ -5,7 +5,8 @@
  *   POST /api/ai/koios/chat      { message, model?, context?, history? }
  *     → { answer, steps[], model, stop_reason, usage{input_tokens,output_tokens,calls,cost,currency},
  *         pending_action? }                                            — KOIOS-AGENT-PLAN §6, dormant
- *   GET  /api/ai/koios/settings  → { models{active,selectable[]}, pricing, currency, status{...} }
+ *   GET  /api/ai/koios/settings  → { models{active,selectable[],options[]{id,label,hint,cost_rank},cost_note},
+ *         currency, status{...} } — KOIOS-MODEL-VOCAB-1: no `pricing` field (measured).
  *   POST /api/ai/koios/actions/{id}/confirm | /cancel                  — KOIOS-AGENT-PLAN §6, dormant
  *
  * /chat is synchronous (no streaming) and can take a few seconds — the caller

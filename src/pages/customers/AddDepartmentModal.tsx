@@ -216,7 +216,7 @@ export default function AddDepartmentModal({ onClose, onCreate, onImported, loca
                   <div>
                     <FieldRow label={t('subModal.selectLocation')} required>
                       {locations.length === 0 ? (
-                        <div style={{ fontSize: 12, color: 'var(--color-warning)', padding: '8px 11px', border: '1px solid var(--color-warning)', borderRadius: 8, background: 'var(--color-warning-bg)' }}>
+                        <div style={{ fontSize: 12, color: 'var(--color-warning-text)', padding: '8px 11px', border: '1px solid var(--color-warning)', borderRadius: 8, background: 'var(--color-warning-bg)' }}>
                           {t('subModal.noLocationsFirst')}
                         </div>
                       ) : (

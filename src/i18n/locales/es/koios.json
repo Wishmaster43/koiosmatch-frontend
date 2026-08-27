@@ -20,7 +20,7 @@
     "title": "Modelos",
     "active": "Modelo activo",
     "selectable": "Modelos seleccionables",
-    "pickHint": "Elige el nivel de IA para tu agencia. Las tarifas están debajo.",
+    "pickHint": "Elige el nivel de IA para tu agencia.",
     "tier": {
       "fast": "Rápido",
       "smart": "Inteligente",
@@ -33,14 +33,12 @@
     },
     "saveError": "No se pudo cambiar el modelo. Inténtalo de nuevo.",
     "unknownTier": "Modelo desconocido",
-    "activeUnknown": "No hay ninguna variante activa conocida. Elige una abajo."
-  },
-  "pricing": {
-    "title": "Tarifas",
-    "subtitle": "Precio por 1 M de tokens.",
-    "model": "Modelo",
-    "input": "Entrada",
-    "output": "Salida"
+    "activeUnknown": "No hay ninguna variante activa conocida. Elige una abajo.",
+    "tierHint": {
+      "snel": "Mayor volumen, tarifa más baja. Ideal para trabajo rutinario.",
+      "slim": "El estándar: gran calidad a tarifa media.",
+      "max": "La mejor calidad para el trabajo más difícil. Tarifa más alta."
+    }
   },
   "voice": {
     "start": "Dicta tu mensaje",

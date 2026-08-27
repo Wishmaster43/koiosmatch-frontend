@@ -79,6 +79,23 @@ describe('useTextPopoutDraft', () => {
     expect(result.current.dirty).toBe(true)
   })
 
+  // Regression (WALKTHROUGH-2108): a REFUSED save must never announce "saved" —
+  // the ack now waits for the awaited onSave to resolve before broadcasting/clearing dirty.
+  it('never announces saved when the write is refused', async () => {
+    const peer = new FakeChannel('t6')
+    const seen: unknown[] = []
+    peer.onmessage = e => seen.push(e.data)
+    const onSave = vi.fn((_html: string, revert: () => void) => { revert(); return Promise.resolve(false) })
+    const { result } = renderHook(() => useTextPopoutDraft({ topic: 't6', storedValue: 'a', onSave }))
+
+    act(() => result.current.change('ab'))
+    let saved = true
+    await act(async () => { saved = await result.current.save() })
+    expect(saved).toBe(false)
+    expect(result.current.dirty).toBe(true)
+    expect(seen).not.toContainEqual({ kind: 'saved', html: 'ab' })
+  })
+
   it('adopts a remote save: same text, unsaved marker gone', async () => {
     const { result } = renderHook(() => useTextPopoutDraft({ topic: 't5', storedValue: 'a', onSave: vi.fn() }))
     await act(async () => { result.current.change('ab') })

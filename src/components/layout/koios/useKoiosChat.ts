@@ -48,6 +48,9 @@ export function useKoiosChat() {
         usage:      data?.usage ?? null,
         model:      data?.model ?? null,
         stopReason: data?.stop_reason ?? 'end_turn',
+        // KOIOS-CHAT-SIGNALS-FE-1: carries budget.reason so the panel can pick the
+        // daily ("tomorrow") vs monthly ("next month") notice on budget_exceeded.
+        budget: data?.budget ?? null,
         pendingAction: data?.pending_action ?? null,
       }])
     } catch (e) {

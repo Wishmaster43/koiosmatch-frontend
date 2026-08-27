@@ -157,7 +157,7 @@ export default function EntityImportCard({ wizard, canView, canImport, entity, i
             </div>
           )}
           {!canImport && (
-            <div style={{ fontSize: 11, color: 'var(--color-warning)' }}>{t('import.noImportPermission')}</div>
+            <div style={{ fontSize: 11, color: 'var(--color-warning-text)' }}>{t('import.noImportPermission')}</div>
           )}
         </>
       )}

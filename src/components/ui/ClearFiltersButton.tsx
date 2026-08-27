@@ -29,7 +29,7 @@ export default function ClearFiltersButton({ active, onClear }: { active: boolea
   return (
     <button onClick={onClear} title={t('clearFilters')} aria-label={t('clearFilters')}
       style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '5px 11px', fontSize: 11, fontWeight: 600,
-        borderRadius: 999, cursor: 'pointer', whiteSpace: 'nowrap', color: 'var(--color-warning)',
+        borderRadius: 999, cursor: 'pointer', whiteSpace: 'nowrap', color: 'var(--color-warning-text)',
         background: 'color-mix(in srgb, var(--color-warning) 10%, transparent)',
         border: '1px solid color-mix(in srgb, var(--color-warning) 35%, transparent)' }}>
       <FilterX size={12} /> {t('clearFilters')}

@@ -148,6 +148,31 @@ describe('CandidateTasks · row actions (Danny 20-07: EntityLink title + edit pe
 
 // Danny live review, 04-08, final shape ("taken is nog niet goed" → search +
 // StatusFilterSelect + "+ Taak", ONE line, Open/Historie gone entirely).
+// WALKTHROUGH-2108 regression: the status chip prefers the LIVE tenant lookup
+// (liveStatusOf) over the raw payload — a status renamed in Settings must show
+// the current label, not what the task row was written with (no visual assertion,
+// only the label/colour source per the verifier's spec).
+describe('CandidateTasks · live status lookup over stale payload', () => {
+  it('renders the live label, not the stale payload label, for a known status key', async () => {
+    vi.mocked(api.get).mockResolvedValueOnce({ data: { data: [
+      { ...TASK_ROW, status: { value: 'todo', label: 'OUDE naam', color: '#oud' } },
+    ] } })
+    render(<CandidateTasks candidateId="cand-1" />)
+    // statusesRef says 'todo' is 'Te doen' — the stale payload label must not show.
+    expect(await screen.findByText('Te doen')).toBeInTheDocument()
+    expect(screen.queryByText('OUDE naam')).toBeNull()
+  })
+
+  it('falls back to the payload label when the status key is unknown to the live lookup', async () => {
+    vi.mocked(api.get).mockResolvedValueOnce({ data: { data: [
+      // eslint-disable-next-line no-restricted-syntax -- test fixture colour, DATA not a live seed value
+      { ...TASK_ROW, status: { value: 'ghost', label: 'Spookstatus', color: '#123456' } },
+    ] } })
+    render(<CandidateTasks candidateId="cand-1" />)
+    expect(await screen.findByText('Spookstatus')).toBeInTheDocument()
+  })
+})
+
 describe('CandidateTasks · toolbar (search + status filter, ONE line)', () => {
   const twoTasks = [
     { id: 't1', title: 'Bel kandidaat', due_date: null, completed_at: null, created_at: null, status: 'todo' },

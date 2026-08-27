@@ -21,7 +21,13 @@ vi.mock('@/context/AuthContext', () => ({ useAuth: () => mockUseAuth() }))
 // t stub returns the raw key so assertions read exactly what the component asked for.
 const t = (key) => key
 
+// The measured controller serves FLAVOUR KEYS in selectable[] (KOIOS-MODEL-
+// VOCAB-1); the legacy raw-vendor-id fallback keeps its own dedicated test below.
 const models = {
+  active: 'slim',
+  selectable: ['snel', 'slim', 'max'],
+}
+const legacyModels = {
   active: 'claude-sonnet-5',
   selectable: ['claude-haiku-4-5', 'claude-sonnet-5', 'claude-opus-4-8'],
 }
@@ -68,9 +74,9 @@ describe('KoiosModelsCard', () => {
 
   // (c) Danny's own question ("hoe kan ik zien welk model gekoppeld is") — a super
   // admin still sees every raw id, rendered in Mono.
-  it('shows the raw model id to a super admin', () => {
+  it('shows the raw model id to a super admin (legacy vendor-id contract)', () => {
     mockUseAuth.mockReturnValue({ isSuperAdmin: () => true })
-    render(<KoiosModelsCard models={models} t={t} />)
+    render(<KoiosModelsCard models={legacyModels} t={t} />)
     expect(screen.getByText('claude-sonnet-5')).toBeInTheDocument()
     expect(screen.getByText('claude-haiku-4-5')).toBeInTheDocument()
     expect(screen.getByText('claude-opus-4-8')).toBeInTheDocument()
@@ -78,12 +84,39 @@ describe('KoiosModelsCard', () => {
 
   // (d) the display-only hiding must never touch the API contract: picking a tier
   // still PUTs the exact raw model value.
-  it('still PUTs the raw model value when picking another flavour', async () => {
+  it('still PUTs the exact listed value when picking another flavour (legacy vendor-id contract)', async () => {
     mockUpdateKoiosModel.mockResolvedValue({})
     const onChanged = vi.fn()
-    render(<KoiosModelsCard models={models} t={t} onChanged={onChanged} />)
+    render(<KoiosModelsCard models={legacyModels} t={t} onChanged={onChanged} />)
     fireEvent.click(screen.getByRole('radio', { name: /models\.tier\.max/ }))
     await waitFor(() => expect(mockUpdateKoiosModel).toHaveBeenCalledWith('claude-opus-4-8'))
     expect(onChanged).toHaveBeenCalledWith('claude-opus-4-8')
+  })
+
+  // KOIOS-MODEL-VOCAB-1 SEAM TEST (27-08): the CURRENT contract serves
+  // `selectable[]`/`options[]` as FLAVOUR KEYS (snel/slim/max), not raw vendor
+  // ids — proves the cost_rank -> icon mapping (iconForRank) actually reads the
+  // server `options` prop: rank 1 -> Zap, the highest listed rank -> Crown,
+  // anything between -> Sparkles.
+  it('maps flavour-key selectable + server options to icons by cost_rank', () => {
+    const flavourModels = {
+      active: 'slim',
+      selectable: ['snel', 'slim', 'max'],
+      options: [
+        { id: 'snel', label: 'Snel', hint: 'Snelst', cost_rank: 1 },
+        { id: 'slim', label: 'Slim', hint: 'Gebalanceerd', cost_rank: 2 },
+        { id: 'max', label: 'Max', hint: 'Krachtigst', cost_rank: 3 },
+      ],
+    }
+    render(<KoiosModelsCard models={flavourModels} t={t} />)
+    const fast = screen.getByRole('radio', { name: /models\.tier\.fast/ })
+    const smart = screen.getByRole('radio', { name: /models\.tier\.smart/ })
+    const max = screen.getByRole('radio', { name: /models\.tier\.max/ })
+    expect(fast.querySelector('svg.lucide-zap')).not.toBeNull()
+    expect(smart.querySelector('svg.lucide-sparkles')).not.toBeNull()
+    expect(max.querySelector('svg.lucide-crown')).not.toBeNull()
+    // The translated tier KEY (via the t() stub) wins over the server's Dutch
+    // platform label ("Snel") for a known flavour (§5).
+    expect(screen.queryByText('Snel')).not.toBeInTheDocument()
   })
 })

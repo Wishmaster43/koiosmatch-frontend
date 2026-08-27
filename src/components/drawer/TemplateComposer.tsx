@@ -124,7 +124,7 @@ export default function TemplateComposer({ candidateId, subject, windowKnown, on
           {/* The endpoint carries no variable values yet — say it here rather than let
               Meta reject the send afterwards. */}
           {variableCount > 0 && (
-            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 5, marginTop: 8, fontSize: 11, color: 'var(--color-warning)' }}>
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 5, marginTop: 8, fontSize: 11, color: 'var(--color-warning-text)' }}>
               <AlertTriangle size={12} style={{ flexShrink: 0, marginTop: 1 }} />
               <span>{t('conversations.templateVarsUnsupported', { count: variableCount })}</span>
             </div>

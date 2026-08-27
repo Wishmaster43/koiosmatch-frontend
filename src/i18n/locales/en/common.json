@@ -193,6 +193,8 @@
     "stopMaxSteps": "Could not be completed within the steps",
     "notConfigured": "Koios isn't connected yet.",
     "errorReply": "Couldn't reach Koios. Please try again.",
+    "budgetExceededDaily": "The daily Koios budget has been reached. It resets tomorrow, or ask your admin to raise it.",
+    "budgetExceededMonthly": "The monthly Koios budget for this organisation has been reached. It resets on the 1st of next month, or ask your admin to raise it.",
     "forbidden": "You don't have access to Koios.",
     "usageLine": "{{model}} · {{tokens}} tokens",
     "offline": "Not connected",

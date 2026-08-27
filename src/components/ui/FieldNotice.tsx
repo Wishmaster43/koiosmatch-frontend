@@ -13,7 +13,7 @@ import type { CSSProperties } from 'react'
 
 const TONE: Record<'error' | 'warning', { color: string; role: 'alert' | 'status' }> = {
   error: { color: 'var(--color-danger-text)', role: 'alert' },
-  warning: { color: 'var(--color-warning)', role: 'status' },
+  warning: { color: 'var(--color-warning-text)', role: 'status' },
 }
 
 // The notice itself: renders nothing without text, and picks its color/ARIA role from the severity tone map.

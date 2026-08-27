@@ -208,7 +208,7 @@ export default function CustomFieldsSettings({ entityType }) {
                   <Caption as="div">
                     <code style={{ fontFamily: 'JetBrains Mono, monospace' }}>{field.key}</code>
                     {' · '}{t(`customFieldsSettings.types.${field.type}`)}
-                    {field.has_data && <span style={{ color: 'var(--color-warning)', marginLeft: 6 }}>· {t('customFieldsSettings.hasData')}</span>}
+                    {field.has_data && <span style={{ color: 'var(--color-warning-text)', marginLeft: 6 }}>· {t('customFieldsSettings.hasData')}</span>}
                     {/* Worklist #44: legible in words, not just icon colour — a tenant
                         must understand WHY a field they configured isn't showing up. */}
                     {!field.visible_in_ui && <span style={{ color: 'var(--color-info)', marginLeft: 6 }}>· {t('customFieldsSettings.apiOnly')}</span>}
@@ -259,7 +259,7 @@ export default function CustomFieldsSettings({ entityType }) {
                       selector goes inert via SearchSelect's own `disabled` prop
                       (the single source of truth — no per-callsite guard/styling). */}
                   <div>
-                    <label style={labelStyle}>{t('customFieldsSettings.type')} {field.has_data && <span style={{ color: 'var(--color-warning)', fontWeight: 400 }}>({t('customFieldsSettings.hasData')})</span>}</label>
+                    <label style={labelStyle}>{t('customFieldsSettings.type')} {field.has_data && <span style={{ color: 'var(--color-warning-text)', fontWeight: 400 }}>({t('customFieldsSettings.hasData')})</span>}</label>
                     {/* Herhaal-audit r4 finding 5/6/7: SearchSelect's own default
                         single-pick trigger face (closeOnToggle, no renderTrigger) —
                         never a hand-painted trigger button per call site. */}

@@ -137,7 +137,7 @@ export default function AppsSettings() {
                     </span>
                   )}
                   {app.monthly && !soon && (
-                    <span style={{ fontSize: 10, color: 'var(--color-warning)', background: 'var(--color-warning-bg)',
+                    <span style={{ fontSize: 10, color: 'var(--color-warning-text)', background: 'var(--color-warning-bg)',
                                    borderRadius: 999, padding: '1px 7px', fontWeight: 500 }}>
                       {t('apps.monthly')}
                     </span>

@@ -129,7 +129,13 @@ describe('SegmentedControl · showActiveCheck', () => {
 
   it('renders the check mark in the compact pill row too (SEGMENTED-CHECK-SWEEP-1: this branch never rendered it before)', () => {
     render(<SegmentedControl options={options} value="b" onChange={vi.fn()} size="compact" />)
-    expect(screen.getByRole('radio', { name: /Option B/ }).querySelector('svg.lucide-check')).not.toBeNull()
-    expect(screen.getByRole('radio', { name: /Option A/ }).querySelector('svg.lucide-check')).toBeNull()
+    const activeCheck = screen.getByRole('radio', { name: /Option B/ }).querySelector('svg.lucide-check')
+    expect(activeCheck).not.toBeNull()
+    expect((activeCheck as SVGElement).style.visibility).not.toBe('hidden')
+    // Inactive pills RESERVE the check width (hidden, not absent) so activating
+    // never shifts the row (audit item e).
+    const inactiveCheck = screen.getByRole('radio', { name: /Option A/ }).querySelector('svg.lucide-check')
+    expect(inactiveCheck).not.toBeNull()
+    expect((inactiveCheck as SVGElement).style.visibility).toBe('hidden')
   })
 })

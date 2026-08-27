@@ -42,17 +42,27 @@ export default {
     // owner pickers (lib/queries.ts useUsers) — never a hardcoded id list.
     { key: 'user_ids',   label: 'Gebruikers', type: 'multiselect', endpoint: '/users',
       showIf: { key: 'recipients', value: 'users' } },
-    // NOTIF-TYPE-WHITELIST-1: closed vocabulary, a SUBSET of
-    // NotificationSendModule::VALID_TYPES (~40 values; the rest is tracked as
-    // NOTIF-TYPES-FE-1) — never free text (an unknown value there silently
-    // degrades to 'workflow.custom'). Values are technical event tags kept
-    // identical across locales; LABELS translate via fieldOptions.* (see workflows.json).
+    // NOTIF-TYPE-WHITELIST-1/NOTIF-TYPES-FE-1: closed vocabulary, now mirroring
+    // NotificationSendModule::VALID_TYPES exactly (measured 27-08, 37 values) —
+    // never free text (an unknown value there silently degrades to
+    // 'workflow.custom'). Values are technical event tags kept identical across
+    // locales; LABELS translate via fieldOptions.* (see workflows.json).
     { key: 'type', label: 'Type (event)', type: 'select', options: [
       'application.created', 'application.stage_changed', 'application.matched', 'application.rejected',
-      'vacancy.created', 'vacancy.updated', 'vacancy.published',
-      'candidate.created', 'candidate.status_changed', 'candidate.no_contact',
-      'match.created',
-      'task.created', 'task.due',
+      'vacancy.created', 'vacancy.updated', 'vacancy.published', 'vacancy.closing_soon',
+      'candidate.created', 'candidate.status_changed', 'candidate.no_contact', 'candidate.document_expiring',
+      'candidate.missing_cv', 'candidate.status_stale', 'candidate.phase_stale',
+      'match.created', 'match.expiring', 'match.approval_pending',
+      'task.created', 'task.due', 'task.assigned',
+      'appointment.today',
+      'candidate.retention_due', 'candidate.archived',
+      'whatsapp.outage', 'whatsapp.restored',
+      'conversation.unanswered',
+      'candidate.availability_upcoming', 'candidate.availability_overdue',
+      'candidate.leave_ending_soon', 'candidate.leave_overdue',
+      'candidate.unavailable_ending_soon', 'candidate.unavailable_overdue',
+      'calllist.target_assigned',
+      'opportunity.won', 'opportunity.lost',
       'workflow.custom',
     ] },
     // BEL-DOORKLIK: which bundle "<entity>_id" field the in-app bell deep-links to

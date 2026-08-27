@@ -1,16 +1,19 @@
 /**
- * KoiosSettings — the Koios AI settings section (screen B): connection status,
- * models and rates, read from GET /ai/koios/settings. A 403 (tenant lacks the
- * module / user lacks koios.use) degrades to a calm "unavailable" notice rather
- * than an error. Usage (C) and admin (D) tabs land in later slices.
+ * KoiosSettings — the Koios AI settings section (screen B): connection status
+ * and models, read from GET /ai/koios/settings. A 403 (tenant lacks the module /
+ * user lacks koios.use) degrades to a calm "unavailable" notice rather than an
+ * error. Usage (C) and admin (D) tabs land in later slices.
+ *
+ * KOIOS-MODEL-VOCAB-1 (27-08, measured): the controller no longer returns a
+ * `pricing` field — raw model rates are a platform/super-admin concern, and the
+ * old KoiosPricingCard (which rendered raw model ids ungated) was removed rather
+ * than kept as dead code that would leak them if pricing ever returned non-null.
  */
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useLocale } from '@/lib/datetime'
 import { getKoiosSettings } from './koiosApi'
 import KoiosStatusCard from './KoiosStatusCard'
 import KoiosModelsCard from './KoiosModelsCard'
-import KoiosPricingCard from './KoiosPricingCard'
 import { PageTitle } from '@/components/ui/typography'
 // KOIOS-DEFAULT-SYNC-1: the floating panel reads the same settings from the
 // shared query cache — invalidate it so its picker follows a new default.
@@ -21,7 +24,6 @@ const notice = { fontSize: 13, color: 'var(--text-muted)' }
 // Koios AI settings screen (status/models/rates); a 403 degrades to a calm unavailable notice rather than an error (see file header).
 export default function KoiosSettings() {
   const { t } = useTranslation('koios')
-  const locale = useLocale()
   const [settings, setSettings] = useState(null)
   const [phase, setPhase] = useState('loading') // loading | ready | unavailable | error
 
@@ -50,7 +52,6 @@ export default function KoiosSettings() {
           <KoiosStatusCard status={settings?.status} t={t} />
           <KoiosModelsCard models={settings?.models} t={t}
             onChanged={(model) => { setSettings((s) => ({ ...s, models: { ...s.models, active: model } })); invalidateKoiosSettings() }} />
-          <KoiosPricingCard pricing={settings?.pricing} currency={settings?.currency} locale={locale} t={t} />
         </>
       )}
     </div>

@@ -1,8 +1,10 @@
 /**
  * koiosApi — axios calls for the Koios settings area (settings · usage · admin).
  *
- * Backend contract (baseURL already adds /api):
- *   GET /ai/koios/settings → { models{active,selectable[]}, pricing{model:{input,output}},
+ * Backend contract (baseURL already adds /api). KOIOS-MODEL-VOCAB-1 (27-08,
+ * measured against KoiosAiSettingsController::settings()): no `pricing` field —
+ * raw model rates are a platform/super-admin concern, never returned here.
+ *   GET /ai/koios/settings → { models{active,selectable[],options[]{id,label,hint,cost_rank},cost_note},
  *                              currency, status{claude_configured, policy_loaded} }
  */
 import api, { unwrap } from '@/lib/api'

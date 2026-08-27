@@ -129,7 +129,6 @@ const SECTION_TITLE_ALLOWLIST = {
   'pages/settings/sections/actionrules/ActionRuleDetailPanel.tsx': 1,
   'pages/settings/sections/apikeys/ApiKeyGeneralTab.jsx': 1,
   'pages/settings/sections/jobs/QueueOverviewTab.jsx': 1,
-  'pages/settings/sections/koios/KoiosPricingCard.jsx': 1,
   'pages/settings/sections/koios/KoiosStatusCard.jsx': 1,
   'pages/settings/sections/webhooks/IncomingWebhooks.jsx': 1,
   'pages/shiftmanager/ContactDrawer.tsx': 2,

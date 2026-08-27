@@ -21,8 +21,8 @@ interface StatusStyle {
 const DEFAULT_MAP: Record<string, StatusStyle> = {
   active:     { color: 'var(--color-success-text)' },
   actief:     { color: 'var(--color-success-text)' },
-  inactive:   { color: 'var(--color-warning)' },
-  nietactief: { color: 'var(--color-warning)' },
+  inactive:   { color: 'var(--color-warning-text)' },
+  nietactief: { color: 'var(--color-warning-text)' },
   external:   { color: 'var(--color-secondary)' },
   extern:     { color: 'var(--color-secondary)' },
 }

@@ -103,7 +103,7 @@ export default function CvTemplateSettings() {
           notice so this never silently reads the same as "not configured". */}
       {brandLoadError && (
         <div style={{ padding: '10px 14px', borderRadius: 8, background: 'var(--color-warning-bg)',
-                      fontSize: 12, color: 'var(--color-warning)', marginBottom: 16 }}>
+                      fontSize: 12, color: 'var(--color-warning-text)', marginBottom: 16 }}>
           {tCommon('errorGeneric')}
         </div>
       )}

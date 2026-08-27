@@ -115,7 +115,7 @@ function ReportKpiBlock({ reportId, values }: { reportId: ReportKpiScopeId; valu
         </p>
       )}
       {fellBack && (
-        <p style={{ fontSize: 12, color: 'var(--color-warning)', marginBottom: 8 }}>
+        <p style={{ fontSize: 12, color: 'var(--color-warning-text)', marginBottom: 8 }}>
           {t('reportKpis.fellBackNotice')}
         </p>
       )}

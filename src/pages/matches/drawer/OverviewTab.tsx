@@ -36,8 +36,10 @@
  * instance/PATCH /matches/{id} the Contract tab uses (measured: the only path
  * that reaches the match's contract layer) — never a second save route. A
  * successful save also patches the parent row's contractType/startDate/
- * endDate (via onUpdate) so MatchDurationBar below — which reads match.* , not
- * this fetch — and the list row never go stale. The other Overview fields
+ * endDate (via onUpdate) so the list row never goes stale — MatchDurationBar
+ * below is DETAIL-FIRST though: it reads `contract.start_date ?? match.startDate`
+ * (same for end_date), so a fresher contract fetch always wins over the possibly
+ * stale match.* prop, not the other way round. The other Overview fields
  * (candidate/vacancy/client/owner/score/stage/created) stay read-only: some
  * have no server path in MatchRules at all (candidate/vacancy — a match's
  * relations aren't reassignable via PATCH), owner already has its OWN editable
@@ -169,8 +171,8 @@ export default function OverviewTab({ match, onUpdate, onOpenNotes }: OverviewTa
     }
     try {
       await saveContract(patch)
-      // Keep the list row / MatchDurationBar below in sync — they read match.*
-      // (the list-row shape), not this tab's own contract fetch.
+      // Keep the list row in sync; MatchDurationBar below reads the contract
+      // fetch DETAIL-FIRST (with match.* as fallback), so both stay fresh.
       onUpdate?.(match.id, {
         contractType: patch.contract_type ?? null,
         startDate: patch.start_date ?? null,
@@ -257,8 +259,13 @@ export default function OverviewTab({ match, onUpdate, onOpenNotes }: OverviewTa
         </div>
       </SectionCard>
 
-      {/* M25/M26: contract window duration + progress — only once both dates are set. */}
-      <MatchDurationBar startDate={match.startDate} endDate={match.endDate} />
+      {/* M25/M26: contract window duration + progress — only once both dates are set.
+          WALKTHROUGH-2108: prefer the DETAIL fetch's dates once loaded (mirrors the
+          termination detail-first pattern above) — the list row's match.* can be stale
+          right after a date edit lands server-side, before the list itself re-fetches. */}
+      <MatchDurationBar
+        startDate={contract.start_date ?? match.startDate}
+        endDate={contract.end_date ?? match.endDate} />
 
       {/* MATCH-EDIT-1: contract_type/start_date/end_date/hours_per_week (Contract)
           and cost_center/billing_emails (Financieel) — now EDITABLE here, one

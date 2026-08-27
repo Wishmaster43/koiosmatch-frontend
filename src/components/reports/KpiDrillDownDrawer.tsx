@@ -188,7 +188,8 @@ function AverageBreakdown({ candidates, KPI_TARGET, onSelect }: { candidates: Re
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8, marginBottom: 16 }}>
         {[
           { label: t('drilldown.newThisMonth'), value: perMonth[currentMonth].count,
-            color: perMonth[currentMonth].count >= KPI_TARGET ? 'var(--color-success)' : perMonth[currentMonth].count >= avg ? 'var(--color-warning)' : 'var(--color-danger)',
+            // Text ink on the neutral card bg: the -text twins, never the raw fill tokens.
+            color: perMonth[currentMonth].count >= KPI_TARGET ? 'var(--color-success-text)' : perMonth[currentMonth].count >= avg ? 'var(--color-warning-text)' : 'var(--color-danger-text)',
             onClick: () => setSelMonth(currentMonth) },
           { label: t('drilldown.avgPerMonthLabel'),  value: avg,   color: 'var(--text)' },
           { label: t('drilldown.kpiTargetLabel'),    value: KPI_TARGET, color: 'var(--color-primary-text)' },
@@ -216,7 +217,9 @@ function AverageBreakdown({ candidates, KPI_TARGET, onSelect }: { candidates: Re
         {perMonth.filter(m => m.month <= currentMonth).map(m => {
           const pct    = Math.round((m.count / maxCount) * 100)
           const atKpi  = m.count >= KPI_TARGET
+          // Bar fill stays the raw semantic token; text ink on the row reads the -text twin.
           const barColor = atKpi ? 'var(--color-success)' : m.count >= avg ? 'var(--color-warning)' : 'var(--color-danger)'
+          const barInk = atKpi ? 'var(--color-success-text)' : m.count >= avg ? 'var(--color-warning-text)' : 'var(--color-danger-text)'
           const sel = selMonth === m.month
           return (
             <div key={m.month} onClick={() => setSelMonth(m.month)}
@@ -238,12 +241,12 @@ function AverageBreakdown({ candidates, KPI_TARGET, onSelect }: { candidates: Re
                                 borderRadius: 999, transition: 'width 0.3s' }} />
                 </div>
                 <span style={{ width: 24, textAlign: 'right', fontSize: 12,
-                               fontWeight: 600, color: barColor }}>
+                               fontWeight: 600, color: barInk }}>
                   {m.count}
                 </span>
                 {/* KPI indicator */}
                 <span style={{ width: 40, textAlign: 'right', fontSize: 10,
-                               color: atKpi ? 'var(--color-success)' : 'var(--text-muted)' }}>
+                               color: atKpi ? 'var(--color-success-text)' : 'var(--text-muted)' }}>
                   {atKpi ? t('drilldown.atKpi') : `${m.count}/${KPI_TARGET}`}
                 </span>
               </div>

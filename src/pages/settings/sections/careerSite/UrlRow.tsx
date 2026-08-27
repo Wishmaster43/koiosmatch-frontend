@@ -72,7 +72,7 @@ export default function UrlRow({ label, url, notice, disabledOpen, copyLabel, co
         </button>
       </div>
       {notice && (
-        <div style={{ fontSize: 11, color: 'var(--color-warning)', marginTop: 6 }}>{notice}</div>
+        <div style={{ fontSize: 11, color: 'var(--color-warning-text)', marginTop: 6 }}>{notice}</div>
       )}
     </div>
   )

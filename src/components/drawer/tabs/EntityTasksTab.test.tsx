@@ -242,6 +242,40 @@ describe('EntityTasksTab · filter menu (status/type/priority)', () => {
   })
 })
 
+/** WALKTHROUGH-2108 regression: a task row prefers the LIVE tenant status lookup
+ *  over the raw payload — a status renamed/recoloured in Settings after the
+ *  task's row was written must show the CURRENT label/colour, not the stale one. */
+describe('EntityTasksTab · live status lookup over stale payload', () => {
+  it('renders the live label/colour, not the stale payload label/colour', () => {
+    mockTasks({ items: [task({
+      id: 1, title: 'Bel de klant',
+      status: { value: 'todo', label: 'OUDE naam', color: '#old' },
+    })] })
+    render(<EntityTasksTab linkType="contact" id="c-1" labels={labels} />)
+    // The live lookup (statusesRef) says 'todo' is now 'Te doen' / '#D98A8A' —
+    // the stale payload label 'OUDE naam' must never render.
+    expect(screen.getByText('Te doen')).toBeInTheDocument()
+    expect(screen.queryByText('OUDE naam')).toBeNull()
+    // Lowercase (jsdom lowercases hex inside color-mix() on serialization, see the
+    // colour-toggle describe block above for the same note).
+    // eslint-disable-next-line no-restricted-syntax -- test fixture colour, mirrors statusesRef's own seed
+    expect(screen.getByText('Te doen')).toHaveStyle({ color: chipInk('#d98a8a') })
+  })
+
+  it('falls back to the payload label/colour when the status key is unknown to the live lookup', () => {
+    mockTasks({ items: [task({
+      id: 1, title: 'Bel de klant',
+      // eslint-disable-next-line no-restricted-syntax -- test fixture colour, DATA not a live seed value
+      status: { value: 'ghost', label: 'Spookstatus', color: '#123456' },
+    })] })
+    render(<EntityTasksTab linkType="contact" id="c-1" labels={labels} />)
+    // No live lookup entry for 'ghost' — the payload's own label/colour must still show.
+    expect(screen.getByText('Spookstatus')).toBeInTheDocument()
+    // eslint-disable-next-line no-restricted-syntax -- test fixture colour, mirrors the fixture above (already lowercase)
+    expect(screen.getByText('Spookstatus')).toHaveStyle({ color: chipInk('#123456') })
+  })
+})
+
 describe('EntityTasksTab · a row click opens the task', () => {
   it('calls openEntity with ("tasks", id)', async () => {
     const user = userEvent.setup()

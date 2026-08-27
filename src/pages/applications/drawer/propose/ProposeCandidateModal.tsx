@@ -129,7 +129,7 @@ export default function ProposeCandidateModal({ application: a, onClose }: Props
                 placeholder={t('propose.recipientPlaceholder')} />
             )}
             {form.recipient && !form.recipient.email && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginTop: 6, fontSize: 11, color: 'var(--color-warning)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginTop: 6, fontSize: 11, color: 'var(--color-warning-text)' }}>
                 <TriangleAlert size={12} /> {t('propose.recipientMissingEmail')}
               </div>
             )}

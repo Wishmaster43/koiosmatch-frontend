@@ -132,7 +132,7 @@ export default function SubEntityImportCard({ entity, customerName, wizard, canV
           <>
             <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t(`settings:import.order.${entity}Hint`)}</div>
             {customerName && (
-              <div style={{ fontSize: 12, color: 'var(--color-warning)' }}>
+              <div style={{ fontSize: 12, color: 'var(--color-warning-text)' }}>
                 {t('subModal.import.parentWarning', { customerName })}
               </div>
             )}
