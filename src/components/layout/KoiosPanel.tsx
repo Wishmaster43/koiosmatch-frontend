@@ -206,7 +206,9 @@ export default function KoiosPanel({ open, onClose, onNavigate }: { open?: boole
         {isLanding ? (
           // Assistant block ABOVE the radar (§0B: the assistant's opening move).
           <>
-            <KoiosAssistantBlock />
+            {/* Chat-handoff (golf 2): a suggestion prefills the composer and
+                focuses it — SENDING stays the user's own explicit click. */}
+            <KoiosAssistantBlock onAskKoios={text => { setInput(text); setTimeout(() => textareaRef.current?.focus(), 50) }} />
             <KoiosRadar onNavigate={onNavigate} />
           </>
         ) : (

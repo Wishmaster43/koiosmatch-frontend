@@ -9,25 +9,27 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import KoiosAssistantBlock from './KoiosAssistantBlock'
 import api from '@/lib/api'
 
-// GET /ai/koios/assistant — the only endpoint this block calls.
+// GET /ai/koios/assistant + the golf-2 confirm/cancel POSTs — all mocked (API-CREDITS-1).
 vi.mock('@/lib/api', async () => {
   const actual = await vi.importActual<typeof import('@/lib/api')>('@/lib/api')
-  return { ...actual, default: { get: vi.fn() } }
+  return { ...actual, default: { get: vi.fn(), post: vi.fn() } }
 })
 const mockGet = api.get as unknown as ReturnType<typeof vi.fn>
+const mockPost = api.post as unknown as ReturnType<typeof vi.fn>
 
 // openEntity spy for the ref deep-link assertion (KoiosResultCards reads useNavigation()).
 const openEntity = vi.fn()
 vi.mock('@/context/NavigationContext', () => ({ useNavigation: () => ({ openEntity, navigate: vi.fn() }) }))
 
 // Fresh QueryClient per test so cache never leaks between cases.
-function renderBlock() {
+function renderBlock(props: { onAskKoios?: (text: string) => void } = {}) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
-  return render(<QueryClientProvider client={client}><KoiosAssistantBlock /></QueryClientProvider>)
+  return render(<QueryClientProvider client={client}><KoiosAssistantBlock {...props} /></QueryClientProvider>)
 }
 
 beforeEach(() => {
   mockGet.mockReset()
+  mockPost.mockReset()
   openEntity.mockReset()
   localStorage.clear()
 })
@@ -73,13 +75,93 @@ describe('KoiosAssistantBlock', () => {
     expect(mockGet).toHaveBeenNthCalledWith(2, '/ai/koios/assistant')
   })
 
-  it('renders the action-available hint chip only when a suggestion carries an action', async () => {
+  // Golf 2 (contract CMBE-gepind): a parked action executes via the REAL seam.
+  it('confirms a parked action via POST /ai/koios/actions/{id}/confirm and shows the executed state', async () => {
     mockGet.mockResolvedValueOnce({ data: { data: { suggestions: [
-      { kind: 'pending_action', title: 'With action', body: 'Has one', refs: [], action: { tool: 'send_message', input: {} } },
-      { kind: 'task_overdue', title: 'Without action', body: 'Has none', refs: [] },
+      { kind: 'pending_action', title: 'Parked', body: 'Ready', refs: [{ type: 'pending_action', id: 'pa-7', label: 'Parked' }] },
+    ] } } })
+    mockPost.mockResolvedValueOnce({ data: { status: 'executed', data: {} } })
+    renderBlock()
+    fireEvent.click(await screen.findByRole('button', { name: /pendingAction\.confirm/ }))
+    await waitFor(() => expect(mockPost).toHaveBeenCalledWith('/ai/koios/actions/pa-7/confirm'))
+    await screen.findByText(/pendingAction\.confirmed/)
+  })
+
+  it('shows the SERVER message unvarnished when confirm is refused', async () => {
+    mockGet.mockResolvedValueOnce({ data: { data: { suggestions: [
+      { kind: 'pending_action', title: 'Parked', body: 'Ready', refs: [{ type: 'pending_action', id: 'pa-8', label: 'Parked' }] },
+    ] } } })
+    mockPost.mockRejectedValueOnce({ response: { status: 422, data: { message: 'Uitvoering mislukt: tool niet bedraad.' } } })
+    renderBlock()
+    fireEvent.click(await screen.findByRole('button', { name: /pendingAction\.confirm/ }))
+    expect(await screen.findByRole('alert')).toHaveTextContent('Uitvoering mislukt: tool niet bedraad.')
+  })
+
+  it('cancel posts to /cancel and shows the cancelled state', async () => {
+    mockGet.mockResolvedValueOnce({ data: { data: { suggestions: [
+      { kind: 'pending_action', title: 'Parked', body: 'Ready', refs: [{ type: 'pending_action', id: 'pa-9', label: 'Parked' }] },
+    ] } } })
+    mockPost.mockResolvedValueOnce({ data: { status: 'cancelled' } })
+    renderBlock()
+    fireEvent.click(await screen.findByRole('button', { name: /pendingAction\.cancel/ }))
+    await waitFor(() => expect(mockPost).toHaveBeenCalledWith('/ai/koios/actions/pa-9/cancel'))
+    await screen.findByText(/pendingAction\.cancelled/)
+  })
+
+  it('a descriptor kind hands off to the chat: prefills via onAskKoios, never an API call', async () => {
+    mockGet.mockResolvedValueOnce({ data: { data: { suggestions: [
+      { kind: 'task_overdue', title: 'Bel Ahmed terug', body: 'Taak verlopen', refs: [], action: { tool: 'wijzig_taak', input: {} } },
+    ] } } })
+    const onAskKoios = vi.fn()
+    renderBlock({ onAskKoios })
+    fireEvent.click(await screen.findByRole('button', { name: /assistant\.askKoios/ }))
+    expect(onAskKoios).toHaveBeenCalledTimes(1)
+    // Uninitialised i18n echoes the key here; the REAL interpolation ("Help me
+    // hiermee: {{title}}") is pinned in src/i18n/c1AssistantKeys.test.ts.
+    expect(onAskKoios.mock.calls[0][0]).toBe('koios.assistant.askIntent')
+    expect(mockPost).not.toHaveBeenCalled()
+  })
+
+  // Regression for the Opus golf-2 blocker: terminal state may NEVER survive a
+  // list swap onto a DIFFERENT action — stable identity keys remount the row.
+  it('a refetch that swaps in a different parked action shows live buttons, never the previous verdict', async () => {
+    mockGet.mockResolvedValueOnce({ data: { data: { suggestions: [
+      { kind: 'pending_action', title: 'Eerste', body: 'a', refs: [{ type: 'pending_action', id: 'pa-x', label: 'Eerste' }] },
+    ] } } })
+    mockPost.mockResolvedValueOnce({ data: { status: 'executed', data: {} } })
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+    render(<QueryClientProvider client={client}><KoiosAssistantBlock /></QueryClientProvider>)
+    fireEvent.click(await screen.findByRole('button', { name: /pendingAction\.confirm/ }))
+    await screen.findByText(/pendingAction\.confirmed/)
+    // The next fetch returns a DIFFERENT parked action in the same slot.
+    mockGet.mockResolvedValueOnce({ data: { data: { suggestions: [
+      { kind: 'pending_action', title: 'Tweede', body: 'b', refs: [{ type: 'pending_action', id: 'pa-y', label: 'Tweede' }] },
+    ] } } })
+    await client.refetchQueries({ queryKey: ['koios', 'assistant'] })
+    await screen.findAllByText('Tweede')
+    expect(screen.getByRole('button', { name: /pendingAction\.confirm/ })).toBeInTheDocument()
+    expect(screen.queryByText(/pendingAction\.confirmed/)).toBeNull()
+  })
+
+  // SERVER truth beats HTTP truth: a 200 whose status is not the verdict errors honestly.
+  it('a 200 without status=executed lands in the error branch with the server message', async () => {
+    mockGet.mockResolvedValueOnce({ data: { data: { suggestions: [
+      { kind: 'pending_action', title: 'Parked', body: 'x', refs: [{ type: 'pending_action', id: 'pa-z', label: 'Parked' }] },
+    ] } } })
+    mockPost.mockResolvedValueOnce({ data: { status: 'failed', message: 'tool niet bedraad' } })
+    renderBlock()
+    fireEvent.click(await screen.findByRole('button', { name: /pendingAction\.confirm/ }))
+    expect(await screen.findByRole('alert')).toHaveTextContent('tool niet bedraad')
+    expect(screen.queryByText(/pendingAction\.confirmed/)).toBeNull()
+  })
+
+  it('a parked action WITHOUT its pending_action ref falls back to the honest hint chip', async () => {
+    mockGet.mockResolvedValueOnce({ data: { data: { suggestions: [
+      { kind: 'pending_action', title: 'Old BE', body: 'No ref', refs: [], action: { tool: 'x', input: {} } },
     ] } } })
     renderBlock()
-    await screen.findByText('With action')
-    expect(screen.getAllByText('koios.assistant.actionAvailable')).toHaveLength(1)
+    await screen.findByText('Old BE')
+    expect(screen.getByText(/assistant\.actionAvailable/)).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /pendingAction\.confirm/ })).toBeNull()
   })
 })

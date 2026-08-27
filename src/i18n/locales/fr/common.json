@@ -252,7 +252,9 @@
     "assistant": {
       "title": "Koios suggère",
       "emptyState": "Rien ne nécessite votre attention pour le moment.",
-      "actionAvailable": "Action disponible"
+      "actionAvailable": "Action disponible",
+      "askKoios": "Terminer dans le chat",
+      "askIntent": "Aide-moi avec ceci : {{title}}"
     }
   },
   "actionRules": {

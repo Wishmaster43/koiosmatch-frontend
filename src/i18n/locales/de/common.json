@@ -252,7 +252,9 @@
     "assistant": {
       "title": "Koios schlägt vor",
       "emptyState": "Im Moment ist nichts zu erledigen.",
-      "actionAvailable": "Aktion verfügbar"
+      "actionAvailable": "Aktion verfügbar",
+      "askKoios": "Im Chat abschließen",
+      "askIntent": "Hilf mir hiermit: {{title}}"
     }
   },
   "actionRules": {

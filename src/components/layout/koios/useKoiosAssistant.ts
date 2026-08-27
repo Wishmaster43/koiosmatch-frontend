@@ -10,8 +10,9 @@ import { useQuery } from '@tanstack/react-query'
 import api, { unwrap } from '@/lib/api'
 import type { KoiosContextRef } from '@/types/koios'
 
-// One tool call the model proposes for a suggestion (execute seam not wired
-// yet — the caller only shows an availability hint, never a live button).
+// One tool call the model proposes for a suggestion. Golf 2: parked actions
+// (pending_action + ref) confirm/cancel via koiosApi; descriptor kinds hand
+// their intent to the chat composer.
 export interface KoiosAssistantAction {
   tool: string
   input: Record<string, unknown>

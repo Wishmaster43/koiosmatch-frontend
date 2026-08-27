@@ -252,7 +252,9 @@
     "assistant": {
       "title": "Koios stelt voor",
       "emptyState": "Niets dat nu je aandacht nodig heeft.",
-      "actionAvailable": "Actie beschikbaar"
+      "actionAvailable": "Actie beschikbaar",
+      "askKoios": "In de chat afmaken",
+      "askIntent": "Help me hiermee: {{title}}"
     }
   },
   "actionRules": {

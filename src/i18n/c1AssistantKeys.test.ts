@@ -11,6 +11,9 @@ describe('C1 assistant/learning i18n keys resolve', () => {
   it('resolves the assistant block keys from the common namespace', () => {
     expect(i18n.t('koios.assistant.title', { ns: 'common', lng: 'nl' })).toBe('Koios stelt voor')
     expect(i18n.t('koios.assistant.emptyState', { ns: 'common', lng: 'en' })).toBe('Nothing needs your attention right now.')
+    // Golf 2: the chat-handoff intent interpolates the suggestion title.
+    expect(i18n.t('koios.assistant.askIntent', { ns: 'common', lng: 'nl', title: 'Bel Ahmed terug' })).toBe('Help me hiermee: Bel Ahmed terug')
+    expect(i18n.t('koios.assistant.askKoios', { ns: 'common', lng: 'de' })).toBe('Im Chat abschließen')
   })
 
   it('resolves the learning card + tab keys from the koios namespace', () => {
