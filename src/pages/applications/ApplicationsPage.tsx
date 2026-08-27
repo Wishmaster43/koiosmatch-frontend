@@ -38,6 +38,8 @@ import HeaderSearch from '@/components/ui/HeaderSearch'
 import ClearFiltersButton from '@/components/ui/ClearFiltersButton'
 import QuickViewToggle from '@/components/ui/QuickViewToggle'
 import { BTN_H } from '@/config/buttonMetrics'
+// W31 remnant: the paused quick-view wears the SAME colour as the paused chip.
+import { interviewCategoryColor } from './data/applicationsShared'
 import {
   buildPhaseData, buildOwnerData, buildSourceData, buildOwnerDataFromStats, buildSourceDataFromStats,
   buildVacOptions, buildClientOptions, buildBucketData, asOptions,
@@ -363,7 +365,7 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
           {/* W27: "Paused" — was missing entirely (no client or server filter for it);
               now a real server-side interview_status=paused quick-view. */}
           <QuickViewToggle active={interviewPaused} onToggle={() => { setInterviewBusy(false); setInterviewPaused(v => !v) }}
-            label={t('interview.category.paused')} color="var(--color-info)" icon={Pause} />
+            label={t('interview.category.paused')} color={interviewCategoryColor('paused')} icon={Pause} />
           {/* Table/board switcher — shared soft-tint component (§4), never a solid fill. */}
           <ViewModeToggle value={view} onChange={setView} options={[
             { id: 'table', icon: LayoutList, label: t('view.table') },
