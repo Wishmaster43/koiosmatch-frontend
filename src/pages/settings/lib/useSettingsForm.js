@@ -52,7 +52,17 @@ export function useSettingsForm(defaults) {
         for (const key of Object.keys(base)) {
           if (stored[key] !== undefined) next[key] = coerce(stored[key], base[key])
         }
-        setValues(next)
+        // A slow load must never clobber what the user ALREADY typed while it was
+        // in flight (measured: the typed value vanished and Save went dark under
+        // load) — keys the user touched (differ from the pre-load base) win; the
+        // loaded snapshot stays the dirty baseline, so those edits count as dirty.
+        setValues(prev => {
+          const merged = { ...next }
+          for (const key of Object.keys(base)) {
+            if (prev[key] !== base[key]) merged[key] = prev[key]
+          }
+          return merged
+        })
         setInitial(next)
       })
       .catch(() => { if (alive) setLoadError(true) })

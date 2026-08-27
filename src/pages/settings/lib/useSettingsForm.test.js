@@ -49,3 +49,19 @@ describe('useSettingsForm — load failure', () => {
     expect(result.current.values.retention_months_never_placed).toBe(36)
   })
 })
+
+
+// Regression (27-08, full-suite flake root-caused): a SLOW load must not clobber
+// what the user typed while it was in flight — the typed key survives the merge
+// and stays dirty against the loaded baseline.
+describe('useSettingsForm · slow load never clobbers in-flight edits', () => {
+  it('keeps a value typed before the load resolves, and stays dirty', async () => {
+    let resolveLoad
+    vi.mocked(api.get).mockReturnValue(new Promise(r => { resolveLoad = r }))
+    const { result } = renderHook(() => useSettingsForm({ colour: '' }))
+    act(() => result.current.set('colour', '#0EA5E9'))
+    await act(async () => { resolveLoad({ data: { colour: '#111111' } }); await Promise.resolve() })
+    expect(result.current.values.colour).toBe('#0EA5E9')
+    expect(result.current.dirty).toBe(true)
+  })
+})
