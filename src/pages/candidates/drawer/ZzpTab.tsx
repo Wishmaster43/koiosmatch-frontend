@@ -275,7 +275,7 @@ export function ZzpTab({ c, onSave }: { c: Candidate; onSave?: (v: Record<string
       {/* Honest gap notice (§3): the FE now checks per country, the backend does not —
           a non-Dutch KvK/BTW is still refused by PATCH /candidates/{id} (measured 08-08). */}
       {backendNlOnly && (
-        <div style={{ fontSize: 11, fontStyle: 'italic', color: 'var(--color-warning)', padding: '0 12px' }}>{t('zzp.identifierNlOnly')}</div>
+        <div style={{ fontSize: 11, fontStyle: 'italic', color: 'var(--color-warning-text)', padding: '0 12px' }}>{t('zzp.identifierNlOnly')}</div>
       )}
       <ZzpAddressCard value={addressValue} onSave={handleSaveAddress} />
       {/* CREDITOR-AUTO-1 locked row — only rendered once the tenant's numbering

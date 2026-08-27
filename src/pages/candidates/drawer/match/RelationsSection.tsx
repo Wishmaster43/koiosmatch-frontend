@@ -204,7 +204,7 @@ export default function RelationsSection({
                   {/* Duplicate-contact preflight (Danny 24-07): blocks the save, names the
                       existing match — the backend enforces no uniqueness on these fields. */}
                   {duplicateContact && (
-                    <div role="alert" style={{ fontSize: 11.5, color: 'var(--color-warning)',
+                    <div role="alert" style={{ fontSize: 11.5, color: 'var(--color-warning-text)',
                       background: tintBg('var(--color-warning)'),
                       border: tintBorder('var(--color-warning)'), borderRadius: 6, padding: '6px 8px' }}>
                       {t('placement.duplicateContact', { name: duplicateContact.name ?? '—' })}

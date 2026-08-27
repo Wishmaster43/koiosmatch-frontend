@@ -134,7 +134,7 @@ export default function PlanningOpenShifts({ openShifts, loading, error, onReloa
                   {isFavCustomer && <Heart size={11} color="var(--color-danger)" fill="var(--color-danger)" />}
                   {isBlockedCustomer  && <Ban size={11} color="var(--color-danger)" />}
                   {d.openSpots === 1 && (
-                    <span style={{ fontSize: 9, padding: '1px 5px', borderRadius: 3, background: 'var(--color-warning-bg)', color: 'var(--color-warning)', fontWeight: 600 }}>{t('planning.lastSpot')}</span>
+                    <span style={{ fontSize: 9, padding: '1px 5px', borderRadius: 3, background: 'var(--color-warning-bg)', color: 'var(--color-warning-text)', fontWeight: 600 }}>{t('planning.lastSpot')}</span>
                   )}
                 </div>
                 <div style={{ fontSize: 10, color: 'var(--text-muted)', marginBottom: 3 }}>
