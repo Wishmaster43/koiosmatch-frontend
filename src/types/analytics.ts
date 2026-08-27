@@ -105,6 +105,10 @@ export interface VacanciesReportData {
   fill_rate_timeseries?: { date: string; total: number; filled: number; rate: number | null }[]
   // House default window (3 months), by the vacancy's location_id. rate is PERCENT.
   fill_rate_by_branch?: { branch_id: string | null; branch: string; total: number; filled: number; rate: number | null }[]
+  // KPI-VAC-1 (CMBE 28-08): the server's own nine-card kpis[] suite (mirrors
+  // matches/opportunities/tasks) — optional: a cached pre-suite envelope omits
+  // it, and the strip renders the house dash with no drill for a missing key.
+  kpis?: { key: string; label?: string; count: number | null; unit?: 'pct' | 'ratio' | 'euro' | 'days' }[]
 }
 
 // ── Matches report (GET /reports/matches) ────────────────────────────────────
@@ -437,6 +441,10 @@ export interface OpportunitiesReportData {
   period: { from: string; to: string }
   total: number
   timeseries: { bucket: 'day' | 'week'; series: CandidateTimeseriesPoint[] }
+  // KPI-OPP-1 (CMBE 27-08, commit eb3af985): the nine-card suite in catalog
+  // order (total/open/won/lost/win_rate/open_value/stale/closing_soon/overdue) —
+  // mirrors matches/tasks/outreach's kpis[] idiom (KPI-MATCHES-1).
+  kpis?: { key: string; label?: string; count: number | null; unit?: 'pct' | 'ratio' | 'euro' | 'days' }[]
   totals: OpportunityTotals
   by_stage: OpportunityStageSegment[]
   by_owner: CandidateOwnerSegment[]

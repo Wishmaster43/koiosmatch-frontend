@@ -151,6 +151,18 @@
       "fixedWindow": "Festes Zeitfenster, folgt nicht den Filtern dieses Berichts.",
       "noBranch": "Ohne Niederlassung",
       "unknown": "Unbekannt"
+    },
+    "kpi": {
+      "total": "Gesamt",
+      "open": "Offen",
+      "filled": "Besetzt",
+      "fillRate": "Besetzungsquote",
+      "staleOnline": "Online ohne Bewerber",
+      "longConcept": "Lange im Entwurf",
+      "noMatches": "Ohne Matches",
+      "closingSoon": "Schließt bald",
+      "customersCount": "Kunden mit Vakanzen",
+      "customersCountDrillSub": "Vakanzen dieser Kunden"
     }
   },
   "matches": {
@@ -377,6 +389,17 @@
     "kpiOrderFellBack": "Eine in den Einstellungen konfigurierte KPI-Karte existiert nicht mehr und wurde auf den Standard zurückgesetzt.",
     "axes": {
       "value": "Pipelinewert"
+    },
+    "kpi": {
+      "total": "Gesamt",
+      "open": "Offen",
+      "won": "Gewonnen",
+      "lost": "Verloren",
+      "winRate": "Gewinnquote",
+      "openValue": "Offener Pipeline-Wert",
+      "stale": "Ohne Update",
+      "closingSoon": "Schließt bald",
+      "overdue": "Überfällig"
     }
   },
   "tasks": {

@@ -1,9 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, waitFor, within } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import OpportunitiesReport from './OpportunitiesReport'
-import i18n from '@/i18n'
 import { EMPTY_REPORT_FILTERS } from './reportFilterParams'
 import type { OpportunitiesReportData } from '@/types/analytics'
 
@@ -101,17 +100,24 @@ vi.mock('@/components/charts/BarChartCard', () => ({
   ),
 }))
 
-
 // RAPPORT-FILTERS (wave 1c): the panel filters reach BOTH the report hook and a
 // KPI drill click — incl. the opportunities-only value range (§13 seam pin).
 describe('OpportunitiesReport · panel filters reach hook and drill', () => {
+  beforeEach(() => {
+    getSpy.mockReset()
+    getSpy.mockResolvedValue({ data: { data: [], meta: { total: 0 } } })
+  })
+
+  // KPI-OPP-1: the strip now reads the server suite — assert on the fixture's
+  // own numeric value/kpi key rather than label text (labels land via a
+  // separate i18n change this lane never touches).
   it('sends the active panel filters to BOTH the report hook and a kpi drill click', async () => {
     const user = userEvent.setup()
     const filters = { ...EMPTY_REPORT_FILTERS, status: ['won'], ownerId: ['u1'], locationId: [7], customerId: ['c1'], valueMin: 1000, valueMax: 5000 }
-    mockUseOpportunitiesReport.mockReturnValue({ data, loading: false, error: false })
+    mockUseOpportunitiesReport.mockReturnValue({ data: { ...data, kpis: opportunityKpis }, loading: false, error: false })
     render(<QueryClientProvider client={new QueryClient()}><OpportunitiesReport period="month" filters={filters} /></QueryClientProvider>)
     expect(mockUseOpportunitiesReport).toHaveBeenCalledWith('month', filters)
-    await user.click(screen.getByText(i18n.t('opportunities.total', { ns: 'analytics' })))
+    await user.click(screen.getByText('120'))
     expect(getSpy).toHaveBeenCalledWith('/reports/opportunities/kpis/drill', expect.objectContaining({
       params: expect.objectContaining({ kpi: 'total', period: 'month', status: ['won'], owner_id: ['u1'], location_id: [7], customer_id: ['c1'], value_min: 1000, value_max: 5000 }),
     }))
@@ -177,63 +183,6 @@ describe('OpportunitiesReport (RAPPORTEN-SUITE-1 portie 5, kansen pipeline repor
     expect(data.by_owner.reduce((s, x) => s + x.count, 0)).toBe(data.total)
     expect(data.by_branch.reduce((s, x) => s + x.count, 0)).toBe(data.total)
     expect(data.timeseries.series.reduce((s, p) => s + p.value, 0)).toBe(data.total)
-  })
-
-  // Pipeline-health KPI strip from the envelope totals.
-  it('renders the pipeline-health KPI strip from totals', () => {
-    mockUseOpportunitiesReport.mockReturnValue({ data, loading: false, error: false })
-    renderReport()
-    expect(screen.getByText('Totaal kansen')).toBeInTheDocument()
-    expect(screen.getByText('Gewonnen')).toBeInTheDocument()
-    expect(screen.getByText('Verloren')).toBeInTheDocument()
-    expect(screen.getByText('Winratio')).toBeInTheDocument()
-  })
-
-  // WAVE-1B: the total card's key maps 1:1 onto the kpis/drill enum ('total') —
-  // clicking it opens the shared drawer via GET /reports/opportunities/kpis/drill.
-  it('clicking the total KPI card drills via /reports/opportunities/kpis/drill with kpi=total', async () => {
-    const user = userEvent.setup()
-    mockUseOpportunitiesReport.mockReturnValue({ data, loading: false, error: false })
-    renderReport()
-    await user.click(screen.getByText('Totaal kansen'))
-    expect(getSpy).toHaveBeenCalledWith('/reports/opportunities/kpis/drill',
-      expect.objectContaining({ params: { kpi: 'total', period: 'month' } }))
-  })
-
-  // ACTIVE-KPI-CARD-1 (mirrors CandidatesReport.tsx:228): the card whose drill is
-  // open reads as selected, and closing the drawer clears it again.
-  it('marks the total KPI card active while its drill is open, and clears it on close', async () => {
-    const user = userEvent.setup()
-    mockUseOpportunitiesReport.mockReturnValue({ data, loading: false, error: false })
-    renderReport()
-    // jsdom does not resolve CSS custom properties via toHaveStyle, so assert
-    // the raw style attribute string instead of the computed value.
-    const totalCard = screen.getByRole('button', { name: /Totaal kansen/ })
-    expect(totalCard.getAttribute('style')).toContain('border-color: var(--border)')
-    await user.click(screen.getByText('Totaal kansen'))
-    expect(totalCard.getAttribute('style')).toContain('border-color: var(--color-primary)')
-    // Closing the drawer clears the active state again.
-    await user.click(screen.getByRole('button', { name: /close|sluiten/i }))
-    expect(totalCard.getAttribute('style')).toContain('border-color: var(--border)')
-  })
-
-  // WAVE-1B: closingSoon maps onto kpi=closing_soon (distinct from the plain
-  // /reports/opportunities/drill route, which has no matching XOR key).
-  it('clicking the closingSoon KPI card drills via /reports/opportunities/kpis/drill with kpi=closing_soon', async () => {
-    const user = userEvent.setup()
-    // mockReturnValueOnce: this test's stored order must not leak into later
-    // tests in this file (mockReturnValue would persist across suites).
-    mockSettings.mockReturnValueOnce({
-      report_kpis_opportunities: JSON.stringify([
-        'closingSoon', 'total', 'open', 'won', 'lost', 'winRate', 'untouched', 'overdue', 'forecastCount',
-      ]),
-    })
-    mockUseOpportunitiesReport.mockReturnValue({ data, loading: false, error: false })
-    renderReport()
-    await user.click(screen.getByText('Sluit binnenkort'))
-    expect(getSpy.mock.calls.some(c => c[0] === '/reports/opportunities/drill')).toBe(false)
-    expect(getSpy).toHaveBeenCalledWith('/reports/opportunities/kpis/drill',
-      expect.objectContaining({ params: { kpi: 'closing_soon', period: 'month' } }))
   })
 
   // BELANGRIJK per contract: the window must be prominent, DD-MM-YYYY — never ISO
@@ -435,131 +384,123 @@ describe('OpportunitiesReport (RAPPORTEN-SUITE-1 portie 5, kansen pipeline repor
   })
 })
 
-// Nine-card KPI footprint (Danny — same as the dashboard, all reports). The
-// pipeline five stay as-is; stale.untouched/overdue and the forecast sums are
-// real sums over fields the endpoint already returns — WAVE-1B: all four now
-// drill via GET /reports/opportunities/kpis/drill (their key maps 1:1 onto the
-// kpi enum), so all four render as real clickable cards.
-describe('OpportunitiesReport (nine-card KPI footprint)', () => {
+// KPI-OPP-1 (CMBE 27-08, commit eb3af985): the strip now reads the server's own
+// nine-card kpis[] suite verbatim — supersedes the old totals/forecast-derived
+// strip tests above. Assertions key on the fixture's own DISTINCT numeric
+// values and the drill request's `kpi` param rather than on label text, since
+// the `opportunities.kpi.*` copy already exists (see the ground-rule note) but
+// this lane never re-verifies locale-file content. Deliberately distinct from
+// every other digit the fixture already renders elsewhere on the page.
+const opportunityKpis: NonNullable<OpportunitiesReportData['kpis']> = [
+  { key: 'total', count: 120 },
+  { key: 'open', count: 55 },
+  { key: 'won', count: 41 },
+  { key: 'lost', count: 14 },
+  { key: 'win_rate', count: 74.5, unit: 'pct' },
+  { key: 'open_value', count: 32000, unit: 'euro' },
+  { key: 'stale', count: 6 },
+  { key: 'closing_soon', count: 9 },
+  { key: 'overdue', count: 3 },
+]
+const dataWithKpis: OpportunitiesReportData = { ...data, kpis: opportunityKpis }
+
+// Asserts (or denies) a rendered element's semantic ink token — the token lives
+// in the assertion argument, not in a style literal: this test paints nothing.
+function expectInk(el: HTMLElement, token: string, opts?: { absent?: boolean }) {
+  const m = expect(el)
+  if (opts?.absent) m.not.toHaveStyle({ color: token })
+  else m.toHaveStyle({ color: token })
+}
+
+describe('OpportunitiesReport (nine-card server-suite KPI strip, KPI-OPP-1)', () => {
   beforeEach(() => {
     getSpy.mockReset()
     getSpy.mockResolvedValue({ data: { data: [], meta: { total: 0 } } })
   })
 
-  it('renders exactly nine KPI cards from the fixture', () => {
-    mockUseOpportunitiesReport.mockReturnValue({ data, loading: false, error: false })
+  // ACTIVE-KPI-CARD-1 re-pin (existed at HEAD, dropped in the flip): the card
+  // whose kpi-drill is open renders the active border; jsdom cannot resolve CSS
+  // vars via toHaveStyle, so assert the raw style string (HEAD idiom).
+  it('marks a KPI card active while its drill is open', async () => {
+    const user = userEvent.setup()
+    mockUseOpportunitiesReport.mockReturnValue({ data: dataWithKpis, loading: false, error: false })
     renderReport()
-    expect(screen.getByText('Totaal kansen')).toBeInTheDocument()
-    expect(screen.getByText('Open')).toBeInTheDocument()
-    expect(screen.getByText('Gewonnen')).toBeInTheDocument()
-    expect(screen.getByText('Verloren')).toBeInTheDocument()
-    expect(screen.getByText('Winratio')).toBeInTheDocument()
-    expect(screen.getByText('Onaangeraakt')).toBeInTheDocument()
-    expect(screen.getByText('Verwachte deals')).toBeInTheDocument()
-    expect(screen.getByText('Verwachte waarde')).toBeInTheDocument()
-    // The stale.untouched (1) and stale.overdue (1) counts render as their own tiles.
-    expect(screen.getAllByText('1').length).toBeGreaterThanOrEqual(2)
-    // forecast[].count sums to 2 (a real sum over the returned array, not
-    // fabricated) — 'lost' also renders as 2, so assert via count, not uniqueness.
-    expect(screen.getAllByText('2').length).toBeGreaterThanOrEqual(2)
-    // forecast[].value_sum sums to €8.000 via the house currency formatter.
-    expect(screen.getByText('€ 8.000')).toBeInTheDocument()
+    const card = screen.getByRole('button', { name: /Zonder update/ })
+    expect(card.getAttribute('style')).toContain('border-color: var(--border)')
+    await user.click(screen.getByText('Zonder update'))
+    expect(card.getAttribute('style')).toContain('border-color: var(--color-primary)')
   })
 
-  // WAVE-1B: untouched/overdue/forecastCount/forecastValue now drill via
-  // kpis/drill?kpi=<untouched|overdue|forecast_count|forecast_value>.
-  it('the stale and forecast KPI cards drill via kpis/drill with their own kpi key', async () => {
+  // Each plain-count card renders its own server value; win_rate (unit 'pct')
+  // and open_value (unit 'euro') render via the UNIT-CANON kpiUnitFormat.
+  it('renders every suite card with its own value, pct/euro units formatted via kpiUnitFormat', () => {
+    mockUseOpportunitiesReport.mockReturnValue({ data: dataWithKpis, loading: false, error: false })
+    renderReport()
+    for (const value of ['120', '55', '41', '14', '6', '9', '3']) {
+      expect(screen.getByText(value)).toBeInTheDocument()
+    }
+    // win_rate 74.5 unit pct → formatPercent renders as-is (0..100), one decimal.
+    expect(screen.getByText('74,5%')).toBeInTheDocument()
+    // open_value 32000 unit euro → the house currency formatter (kpiUnitFormat
+    // default fraction digits, unlike the page's own formatCurrency(…, 0) calls
+    // elsewhere on this page).
+    expect(screen.getByText('€ 32.000,00')).toBeInTheDocument()
+  })
+
+  // Semantic colour only on the signal keys, only when non-zero (§4).
+  it('colours won/lost/stale/closing_soon/overdue only, all non-zero in the fixture', () => {
+    mockUseOpportunitiesReport.mockReturnValue({ data: dataWithKpis, loading: false, error: false })
+    renderReport()
+    expectInk(screen.getByText('41'), 'var(--color-success)') // won
+    expectInk(screen.getByText('14'), 'var(--color-danger)') // lost
+    expectInk(screen.getByText('6'), 'var(--color-warning)') // stale
+    expectInk(screen.getByText('9'), 'var(--color-warning)') // closing_soon
+    expectInk(screen.getByText('3'), 'var(--color-danger)') // overdue
+    // A plain count key carries no signal colour (falls back to the house text token).
+    expectInk(screen.getByText('55'), 'var(--color-success)', { absent: true }) // open
+  })
+
+  // Value and drill share ONE backend predicate per key: clicking any suite
+  // card requests /reports/opportunities/kpis/drill?kpi=<its own key> (§13 mutation test).
+  it('clicking a suite card drills via its own kpi key', async () => {
+    const user = userEvent.setup()
+    mockUseOpportunitiesReport.mockReturnValue({ data: dataWithKpis, loading: false, error: false })
+    renderReport()
+    getSpy.mockClear()
+    await user.click(screen.getByText('9')) // closing_soon
+    expect(getSpy).toHaveBeenCalledWith('/reports/opportunities/kpis/drill',
+      expect.objectContaining({ params: expect.objectContaining({ kpi: 'closing_soon', period: 'month' }) }))
+    getSpy.mockClear()
+    await user.click(screen.getByText('74,5%')) // win_rate
+    expect(getSpy).toHaveBeenCalledWith('/reports/opportunities/kpis/drill',
+      expect.objectContaining({ params: expect.objectContaining({ kpi: 'win_rate', period: 'month' }) }))
+  })
+
+  // Honest fallback (RAPPORT-KAARTDRILLS-2): with no kpis[] at all (a pre-suite
+  // cached envelope), every card renders the house dash with no drill affordance
+  // — never a value from another population.
+  it('renders dashes with no drill when kpis[] is absent from the envelope', async () => {
     const user = userEvent.setup()
     mockUseOpportunitiesReport.mockReturnValue({ data, loading: false, error: false })
     renderReport()
-    for (const [label, kpi] of [
-      ['Onaangeraakt', 'untouched'], ['Verwachte deals', 'forecast_count'], ['Verwachte waarde', 'forecast_value'],
-    ] as const) {
-      const card = screen.getByText(label).closest('div[role="button"]')
-      expect(card).not.toBeNull()
-      await user.click(card as HTMLElement)
-      expect(getSpy).toHaveBeenCalledWith('/reports/opportunities/kpis/drill',
-        expect.objectContaining({ params: { kpi, period: 'month' } }))
-    }
+    expect(screen.getAllByText('—').length).toBeGreaterThanOrEqual(9)
+    getSpy.mockClear()
+    await user.click(screen.getAllByText('—')[0])
+    expect(getSpy).not.toHaveBeenCalledWith('/reports/opportunities/kpis/drill', expect.anything())
   })
 })
 
-// REPORTS-KPI-SPARE-1 (+KPI-DREMPELS-FE-1): six real spares grow the catalogue
-// so the settings screen has something to swap in.
-describe('OpportunitiesReport (spare KPI cards)', () => {
-  beforeEach(() => {
-    getSpy.mockReset()
-    getSpy.mockResolvedValue({ data: { data: [], meta: { total: 0 } } })
-  })
-
-  it('offers the six new spare cards to the settings catalogue', async () => {
+// KPI-OPP-1: the catalogue is now the server suite's own nine keys — no spares
+// (supersedes the old REPORTS-KPI-SPARE-1 six-spare block).
+describe('OpportunitiesReport (kpi catalogue, KPI-OPP-1)', () => {
+  it('offers exactly the nine server-suite keys, in suite order, no spares', async () => {
     const { getReportKpiCatalog, getReportKpiDefaultOrder, reportHasSpareKpiCards } = await import('./kpiCatalog')
-    const catalogKeys = getReportKpiCatalog('opportunities').map(c => c.key)
-    expect(catalogKeys).toEqual(expect.arrayContaining(['openValue', 'wonValue', 'topStage', 'topCustomer', 'staleDeal', 'closingSoon']))
-    expect(catalogKeys.length).toBe(getReportKpiDefaultOrder('opportunities').length + 6)
-    expect(reportHasSpareKpiCards('opportunities')).toBe(true)
-  })
-
-  // KPI-DREMPELS-FE-1: totals.stale / totals.closing_soon render their real
-  // fixture counts with the tenant threshold as a caption. WAVE-1B: both now map
-  // 1:1 onto the kpis/drill enum (stale/closing_soon) and drill on click.
-  it('renders staleDeal/closingSoon with their threshold caption and drills via kpis/drill', async () => {
-    const user = userEvent.setup()
-    mockSettings.mockReturnValue({
-      report_kpis_opportunities: JSON.stringify([
-        'staleDeal', 'closingSoon', 'total', 'open', 'won', 'lost', 'winRate', 'openValue', 'wonValue',
-      ]),
-    })
-    mockUseOpportunitiesReport.mockReturnValue({ data, loading: false, error: false })
-    renderReport()
-
-    const staleDealLabel = screen.getByText('Stilstaande kansen')
-    const staleDealCard = staleDealLabel.parentElement as HTMLElement
-    expect(within(staleDealCard).getByText('2')).toBeInTheDocument()
-    expect(within(staleDealCard).getByText('Drempel: 30 dagen')).toBeInTheDocument()
-    const staleDealButton = staleDealCard.closest('div[role="button"]')
-    expect(staleDealButton).not.toBeNull()
-    await user.click(staleDealButton as HTMLElement)
-    expect(getSpy).toHaveBeenCalledWith('/reports/opportunities/kpis/drill',
-      expect.objectContaining({ params: { kpi: 'stale', period: 'month' } }))
-
-    const closingSoonLabel = screen.getByText('Sluit binnenkort')
-    const closingSoonCard = closingSoonLabel.parentElement as HTMLElement
-    expect(within(closingSoonCard).getByText('3')).toBeInTheDocument()
-    expect(within(closingSoonCard).getByText('Drempel: 14 dagen')).toBeInTheDocument()
-    const closingSoonButton = closingSoonCard.closest('div[role="button"]')
-    expect(closingSoonButton).not.toBeNull()
-    await user.click(closingSoonButton as HTMLElement)
-    expect(getSpy).toHaveBeenCalledWith('/reports/opportunities/kpis/drill',
-      expect.objectContaining({ params: { kpi: 'closing_soon', period: 'month' } }))
-  })
-
-  it('renders swapped-in spare cards with their real fixture values, strip still exactly nine', async () => {
-    const user = userEvent.setup()
-    mockSettings.mockReturnValue({
-      report_kpis_opportunities: JSON.stringify([
-        'openValue', 'wonValue', 'topStage', 'topCustomer',
-        'total', 'open', 'won', 'lost', 'winRate',
-      ]),
-    })
-    mockUseOpportunitiesReport.mockReturnValue({ data, loading: false, error: false })
-    renderReport()
-    // totals.open_value/won_value, real money fields, via the house formatter.
-    expect(screen.getByText('€ 25.000')).toBeInTheDocument()
-    expect(screen.getByText('€ 18.000')).toBeInTheDocument()
-    // topStage: the largest real (non-'none') stage segment — Voorstel · 6.
-    expect(screen.getByText('Voorstel · 6')).toBeInTheDocument()
-    // topCustomer: the largest real (non-'none'/'others') customer — Careyn · 5.
-    expect(screen.getByText('Careyn · 5')).toBeInTheDocument()
-
-    // Clicking reuses the page's own stage/customer axis drill (already covered
-    // elsewhere for the bars — the KPI card sends the identical XOR param).
-    await user.click(screen.getByText('Voorstel · 6'))
-    await waitFor(() => expect(getSpy).toHaveBeenCalledWith('/reports/opportunities/drill',
-      expect.objectContaining({ params: expect.objectContaining({ stage: 'proposal' }) })))
-    await user.click(screen.getByText('Careyn · 5'))
-    await waitFor(() => expect(getSpy).toHaveBeenCalledWith('/reports/opportunities/drill',
-      expect.objectContaining({ params: expect.objectContaining({ customer: 'cust-1' }) })))
+    const keys = getReportKpiCatalog('opportunities').map(c => c.key)
+    expect(keys).toEqual([
+      'total', 'open', 'won', 'lost', 'win_rate', 'open_value', 'stale', 'closing_soon', 'overdue',
+    ])
+    expect(getReportKpiDefaultOrder('opportunities')).toEqual(keys)
+    expect(reportHasSpareKpiCards('opportunities')).toBe(false)
   })
 
   // RAPPORT-COMPARE-2 (§4): the compare window lives in the right-hand filter
@@ -568,3 +509,4 @@ describe('OpportunitiesReport (spare KPI cards)', () => {
     expect(screen.queryByText('Vergelijk met')).not.toBeInTheDocument()
   })
 })
+

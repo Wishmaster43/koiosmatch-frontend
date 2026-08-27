@@ -37,8 +37,13 @@ describe('kpiCatalog — spare cards on surviving scopes', () => {
   it('matches no longer reports spare cards after the server-suite flip', () => {
     expect(reportHasSpareKpiCards('matches')).toBe(false)
   })
-  it('vacancies still reports real spare cards to the settings screen', () => {
-    expect(reportHasSpareKpiCards('vacancies')).toBe(true)
+  // Both opp+vac moved to server suites (28-08) — LEADS is the one scope left
+  // with spares (catalog 8 > default 5, measured), so it carries the spare-path pin.
+  it('leads still reports real spare cards to the settings screen', () => {
+    expect(reportHasSpareKpiCards('leads')).toBe(true)
+  })
+  it('vacancies no longer reports spare cards after the server-suite flip', () => {
+    expect(reportHasSpareKpiCards('vacancies')).toBe(false)
   })
 
   // CMBE K-191: outreach moved to the server's own nine-card kpis[] suite —

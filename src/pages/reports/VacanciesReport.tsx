@@ -1,15 +1,17 @@
 /**
  * VacanciesReport — vacancies report (GET /reports/vacancies, RAPPORTEN-SUITE-1
- * "portie 4"). ADDITIVE on the old C-34 screen: the summary tile row (total ·
- * open · filled · fill-rate · avg time-to-fill) and the per-vacancy table keep
- * working unchanged, now joined by the portie-pattern blocks — the wave-2 chart
- * mix (status donut in lookup colours, ranking axes as bar charts, timeseries
- * line span-2; see VacancyReportAxes). Drill XOR params follow the eight-way vacancies contract:
- * status|customer|function|industry|owner|branch|date|vacancy. Data lives in the
- * hook; the table uses the shared DataTable (§4 blueprint-conformance).
+ * "portie 4"). KPI-VAC-1 (CMBE 28-08): the strip now reads the server's own
+ * nine-card kpis[] suite verbatim (total/open/filled/fill_rate/stale_online/
+ * long_concept/no_matches/closing_soon/customers_count), mirroring KPI-MATCHES-1/
+ * KPI-OPP-1. Below the strip: the per-vacancy table keeps working unchanged, now
+ * joined by the portie-pattern blocks — the wave-2 chart mix (status donut in
+ * lookup colours, ranking axes as bar charts, timeseries line span-2; see
+ * VacancyReportAxes). Drill XOR params follow the eight-way vacancies contract:
+ * status|customer|function|industry|owner|branch|date|vacancy (plus `kpi` for the
+ * strip's own kpis/drill route). Data lives in the hook; the table uses the
+ * shared DataTable (§4 blueprint-conformance).
  */
 import { useState } from 'react'
-import { formatRatio } from '@/lib/formatters'
 import { useTranslation } from 'react-i18next'
 import { interactive } from '@/lib/a11y'
 import ReportKpiBand from './ReportKpiBand'
@@ -39,27 +41,20 @@ import { useReportCompare } from './useReportCompare'
 import ReportCompareMetric from './ReportCompareMetric'
 import { COMPARE_OFF } from './reportCompareMode'
 import type { ReportCompareMode } from './reportCompareMode'
+import { formatKpiUnitValue } from './kpiUnitFormat'
+import type { KpiUnit } from './kpiUnitFormat'
 
 // Number cell: emphasised when > 0, muted when zero (mirrors the SM entity tables).
 const numCell = (n: number) => (
   <span style={{ fontWeight: n > 0 ? 600 : 400, color: n > 0 ? 'var(--text)' : 'var(--text-muted)' }}>{n}</span>
 )
 
-// Semantic colour per summary card, non-zero only (§4) — the reference's
-// SUITE_COLOR idiom (wave-2 Opus minor: one map, no scattered ternary paint).
-const SUMMARY_COLOR: Partial<Record<string, string>> = {
-  filled: 'var(--color-success)', fillRate: 'var(--color-success)',
-  staleOnline: 'var(--color-warning)', longConcept: 'var(--color-warning)',
-  noMatches: 'var(--color-warning)', closingSoon: 'var(--color-warning)',
-}
-
-// Vacancies report: summary KPI cards (coloured via SUMMARY_COLOR above) plus charts, scoped by period/filters/compare.
+// Vacancies report: server-suite KPI strip (KPI-VAC-1) plus charts, scoped by period/filters/compare.
 export default function VacanciesReport({ period, filters = EMPTY_REPORT_FILTERS, compare = COMPARE_OFF }: { period: ReportPeriod; filters?: ReportFilterState; compare?: ReportCompareMode }) {
   const { t } = useTranslation('analytics')
   const { formatDate } = useDateFormat()
   const { data, loading, error, refetch } = useVacanciesReport(period, filters)
   const rows    = data?.vacancies ?? []
-  const s       = data?.summary
   const hasData = !loading && !error && (data?.total ?? 0) > 0
 
   // RAPPORT-COMPARE-1: mirrors CandidatesReport's hosting exactly.
@@ -75,16 +70,6 @@ export default function VacanciesReport({ period, filters = EMPTY_REPORT_FILTERS
   const windowSub = () => `${formatDate(data?.from)} – ${formatDate(data?.to)}`
   const baseParams = buildReportQueryParams(period, 'vacancies', filters)
 
-  // Summary-KPI drill (unchanged C-34 behaviour): explains the open/filled split.
-  const openVacancies = (title: string, value: number | string, status?: string) => setDrill({
-    title, value, subtitle: t(`period.${period}`),
-    breakdown: [
-      { label: t('vacancies.summary.open'),   value: s?.open ?? 0 },
-      { label: t('vacancies.summary.filled'), value: s?.filled ?? 0 },
-    ],
-    rowsEndpoint: '/reports/vacancies/drill', rowsParams: { ...baseParams, status },
-    adviceEndpoint: '/reports/vacancies/advice', adviceParams: { ...baseParams, status },
-  })
   // Legacy per-vacancy drill (row click): the APPLICATION rows behind one vacancy.
   const openVacancyRow = (v: VacancyReportRow) => setDrill({
     title: v.label, value: v.applications, subtitle: v.customer?.name ?? t(`period.${period}`),
@@ -102,16 +87,6 @@ export default function VacanciesReport({ period, filters = EMPTY_REPORT_FILTERS
     entityPage: 'vacancies',
     rowsEndpoint: '/reports/vacancies/drill', rowsParams: { ...baseParams, ...xorParam },
     adviceEndpoint: '/reports/vacancies/advice', adviceParams: { ...baseParams, ...xorParam },
-  })
-  // KPIS-DRILL-1: the five backend-built kpi-drill cards (fillRate/ttf/
-  // customersCount/longConcept/noMatches) route through GET
-  // /reports/vacancies/kpis/drill with the exact `kpi` enum key (measured in
-  // api-generated.ts::getReportsVacanciesKpisDrill) layered on the same window
-  // params every other drill uses; rows are vacancies too.
-  const openKpiDrill = (label: string, value: number | string, kpi: 'fill_rate' | 'ttf' | 'customers_count' | 'long_concept' | 'no_matches') => setDrill({
-    title: label, value, subtitle: windowSub(),
-    entityPage: 'vacancies',
-    rowsEndpoint: '/reports/vacancies/kpis/drill', rowsParams: { ...baseParams, kpi },
   })
   // DASH-FEEDS-V3 depth: the aging table's row click, same endpoints/window as
   // openVacancyRow. The headline value is now row.applications (CMBE 0ecd0bf5) —
@@ -139,24 +114,6 @@ export default function VacanciesReport({ period, filters = EMPTY_REPORT_FILTERS
     adviceParams: { ...baseParams, date: pt.date, ...(data?.timeseries.bucket === 'week' ? { bucket: 'week' } : {}) },
   })
 
-  // Real, non-fabricated segments to source the four extra KPI slots: the axes
-  // already sum to `total` (see VacancyReportAxes) — 'none'/'others' sentinels are
-  // excluded here because "the biggest real value" should name an actual customer/
-  // industry/owner, not a bucket. The top-of-axis pick reuses openSegment (same
-  // gateDrillClick + XOR-param pattern the axis bars use).
-  const realSeg = <T extends { value: string; count: number }>(segs: T[]) =>
-    segs.filter(x => x.value !== 'none' && x.value !== 'others').sort((a, b) => b.count - a.count)[0]
-  const topIndustry = realSeg(data?.by_industry ?? [])
-  const topOwner = (data?.by_owner ?? []).filter(o => o.owner_id !== 'none').sort((a, b) => b.count - a.count)[0]
-  // Spare-card sources (REPORTS-KPI-SPARE-1): topFunction/topBranch mirror
-  // topIndustry (same "biggest real segment" rule, same by_* axes the report
-  // already renders below).
-  const topFunction = realSeg(data?.by_function ?? [])
-  const topBranch = realSeg(data?.by_branch ?? [])
-  // Distinct real customers among this window's vacancies (from the rows themselves,
-  // not the top-10-capped axis, so it is never truncated by the 'others' bucket).
-  const customersCount = new Set(rows.map(v => v.customer?.id).filter(Boolean)).size
-
   // PDF signal "vacancies without any applications": `rows` is the report's own
   // complete (non-paginated, non-top-N) per-vacancy list for this window/filter
   // set — so counting `applications === 0` here is an honest, exact aggregate, not
@@ -173,86 +130,66 @@ export default function VacanciesReport({ period, filters = EMPTY_REPORT_FILTERS
     { zero_applications: 1 },
   ))
 
-  const kpiByKey: Record<string, KpiSpec> = {
-    total: { key: 'total',  label: t('vacancies.summary.total'),  value: s?.total ?? 0,
-      active: drill != null && drill.rowsParams?.status == null,
-      sub: totalCompare ? <ReportCompareMetric metric={totalCompare} polarity="up-good" /> : undefined,
-      onClick: gateDrillClick('vacancies', () => openVacancies(t('vacancies.summary.total'), s?.total ?? 0)) },
-    open: { key: 'open',   label: t('vacancies.summary.open'),   value: s?.open ?? 0,
-      active: drill?.rowsParams?.status === 'open',
-      onClick: gateDrillClick('vacancies', () => openVacancies(t('vacancies.summary.open'), s?.open ?? 0, 'open')) },
-    filled: { key: 'filled', label: t('vacancies.summary.filled'), value: s?.filled ?? 0,
-      color: s && s.filled !== 0 ? SUMMARY_COLOR.filled : undefined,
-      active: drill?.rowsParams?.status === 'filled',
-      onClick: gateDrillClick('vacancies', () => openVacancies(t('vacancies.summary.filled'), s?.filled ?? 0, 'filled')) },
-    fillRate: { key: 'fillRate', label: t('vacancies.summary.fillRate'),
-      value: s ? formatRatio(s.fill_rate) : '—',
-      color: s && s.fill_rate !== 0 ? SUMMARY_COLOR.fillRate : undefined,
-      active: drill?.rowsParams?.kpi === 'fill_rate',
-      onClick: gateDrillClick('vacancies', () => openKpiDrill(t('vacancies.summary.fillRate'), s ? formatRatio(s.fill_rate) : '—', 'fill_rate')) },
-    ttf: { key: 'ttf', label: t('vacancies.summary.avgTimeToFill'),
-      value: s?.avg_time_to_fill_days != null ? t('vacancies.daysValue', { days: Math.round(s.avg_time_to_fill_days) }) : '—',
-      active: drill?.rowsParams?.kpi === 'ttf',
-      onClick: gateDrillClick('vacancies', () => openKpiDrill(t('vacancies.summary.avgTimeToFill'), s?.avg_time_to_fill_days != null ? t('vacancies.daysValue', { days: Math.round(s.avg_time_to_fill_days) }) : '—', 'ttf')) },
-    // PDF-VACATURES point 31: "vacature staat online maar geen kandidaten na X
-    // dagen" — "vacancy is online but no candidates after X days" — the real,
-    // tenant-threshold-driven backend count (VacanciesReport
-    // ::applySignal SIGNAL_STALE_ONLINE), the SAME predicate the row-level
-    // vacancyAdvice.ts rule, the list's stale_online filter AND (REPORTS-DRILL-2,
-    // verified live) the drill's own `stale_online=1` XOR param all share — so
-    // this card's count and the drawer's rows can never disagree.
-    staleOnline: { key: 'staleOnline', label: t('vacancies.summary.staleOnline'), value: s?.stale_online ?? 0,
-      color: s && s.stale_online !== 0 ? SUMMARY_COLOR.staleOnline : undefined,
-      active: drill?.rowsParams?.stale_online === 1,
-      onClick: gateDrillClick('vacancies', () => openSegment({ label: t('vacancies.summary.staleOnline'), count: s?.stale_online ?? 0 }, { stale_online: 1 })) },
-    // KPIS-DRILL-1: `customers_count` now has its own kpi-drill endpoint, so the
-    // card drills too (was: "no single XOR value represents this, not clickable").
-    customersCount: { key: 'customersCount', label: t('vacancies.summary.customersCount'), value: customersCount,
-      active: drill?.rowsParams?.kpi === 'customers_count',
-      onClick: gateDrillClick('vacancies', () => openKpiDrill(t('vacancies.summary.customersCount'), customersCount, 'customers_count')) },
-    topIndustry: { key: 'topIndustry', label: t('vacancies.summary.topIndustry'),
-      value: topIndustry ? `${topIndustry.label} · ${topIndustry.count}` : '—',
-      onClick: topIndustry ? gateDrillClick('vacancies', () => openSegment(topIndustry, { industry: topIndustry.value })) : undefined },
-    topOwner: { key: 'topOwner', label: t('vacancies.summary.topOwner'),
-      value: topOwner ? `${topOwner.name} · ${topOwner.count}` : '—',
-      onClick: topOwner ? gateDrillClick('vacancies', () => openSegment({ label: topOwner.name, count: topOwner.count }, { owner: topOwner.owner_id })) : undefined },
-    // Spares (REPORTS-KPI-SPARE-1): real summary fields the report already
-    // fetches but never surfaced as a card (SIGNALEN-VAC-1 family) + the two
-    // remaining top-segment picks (function/branch axes, same rule as above).
-    // KPIS-DRILL-1: `long_concept`/`no_matches` now drill via kpis/drill (was:
-    // no `signal` XOR param on the plain drill endpoint, so left display-only).
-    longConcept: { key: 'longConcept', label: t('vacancies.summary.longConcept'), value: s?.long_concept ?? 0,
-      color: s && s.long_concept !== 0 ? SUMMARY_COLOR.longConcept : undefined,
-      active: drill?.rowsParams?.kpi === 'long_concept',
-      onClick: gateDrillClick('vacancies', () => openKpiDrill(t('vacancies.summary.longConcept'), s?.long_concept ?? 0, 'long_concept')) },
-    noMatches: { key: 'noMatches', label: t('vacancies.summary.noMatches'), value: s?.no_matches ?? 0,
-      color: s && s.no_matches !== 0 ? SUMMARY_COLOR.noMatches : undefined,
-      active: drill?.rowsParams?.kpi === 'no_matches',
-      onClick: gateDrillClick('vacancies', () => openKpiDrill(t('vacancies.summary.noMatches'), s?.no_matches ?? 0, 'no_matches')) },
-    topFunction: { key: 'topFunction', label: t('vacancies.summary.topFunction'),
-      value: topFunction ? `${topFunction.label} · ${topFunction.count}` : '—',
-      onClick: topFunction ? gateDrillClick('vacancies', () => openSegment(topFunction, { function: topFunction.value })) : undefined },
-    topBranch: { key: 'topBranch', label: t('vacancies.summary.topBranch'),
-      value: topBranch ? `${topBranch.label} · ${topBranch.count}` : '—',
-      onClick: topBranch ? gateDrillClick('vacancies', () => openSegment(topBranch, { branch: topBranch.value })) : undefined },
-    // KPI-DREMPELS-FE-1: summary.advice_stale mirrors staleOnline's exact predicate
-    // (same underlying set — reuses that card's own stale_online=1 drill rather than
-    // inventing a second signal for the same rows) but now carries its own tenant
-    // threshold as a caption.
-    adviceStale: { key: 'adviceStale', label: t('vacancies.summary.adviceStale'), value: s?.advice_stale ?? 0,
-      sub: s?.advice_stale_days != null ? t('thresholdDays', { n: s.advice_stale_days }) : undefined,
-      active: drill?.rowsParams?.stale_online === 1,
-      onClick: gateDrillClick('vacancies', () => openSegment({ label: t('vacancies.summary.adviceStale'), count: s?.advice_stale ?? 0 }, { stale_online: 1 })) },
-    // summary.closing_soon is a real backend count (open vacancy, application_deadline
-    // within the threshold). VAC-CLOSING-SOON-DRILL-1 (landed, SETTINGS-TABS-FIX-2):
-    // the drill endpoint now accepts `closing_soon` as its own boolean XOR key, exactly
-    // like `stale_online` above — so this card drills the same way, never a `signal` param.
-    closingSoon: { key: 'closingSoon', label: t('vacancies.summary.closingSoon'), value: s?.closing_soon ?? 0,
-      sub: s?.closing_soon_days != null ? t('thresholdDays', { n: s.closing_soon_days }) : undefined,
-      color: s && s.closing_soon !== 0 ? SUMMARY_COLOR.closingSoon : undefined,
-      active: drill?.rowsParams?.closing_soon === 1,
-      onClick: gateDrillClick('vacancies', () => openSegment({ label: t('vacancies.summary.closingSoon'), count: s?.closing_soon ?? 0 }, { closing_soon: 1 })) },
+  // KPI-VAC-1 (CMBE 28-08, BuildsVacancyKpis): the strip reads the server's
+  // own nine-card kpis[] suite verbatim — mirrors KPI-MATCHES-1/KPI-OPP-1's
+  // idiom (kpiByServerKey Map, one predicate shared by value and drill). A key
+  // the server omitted (or a pre-suite cached envelope) renders the house dash
+  // with no drill — never a value from another population. The retired
+  // topIndustry/topOwner/topFunction/topBranch cards keep their DATA surface:
+  // industry/owner/function/branch each still render as a bar/donut axis below
+  // (VacancyReportAxes). adviceStale shared stale_online's exact predicate
+  // (still a card here as staleOnline), so no rows are lost. avg_time_to_fill_days
+  // left the strip; VacancyDepthSections still surfaces time-to-fill via its
+  // median phase decomposition (ttf_decomposition) — a related but not
+  // identical aggregate, flagged for Danny below.
+  const kpiByServerKey = new Map((data?.kpis ?? []).map(k => [k.key, k.count]))
+  const openKpiDrill = (kpi: string, label: string, value: string | number, subtitle?: string) =>
+    gateDrillClick('vacancies', () => setDrill({
+      title: label, value, subtitle: subtitle ?? windowSub(), entityPage: 'vacancies',
+      rowsEndpoint: '/reports/vacancies/kpis/drill', rowsParams: { ...baseParams, kpi },
+    }))
+  // Semantic colour only where the number is a SIGNAL and non-zero (§4: colour
+  // carries meaning; a calm zero stays uncoloured).
+  const KPI_COLOR: Partial<Record<string, string>> = {
+    filled: 'var(--color-success)', stale_online: 'var(--color-warning)',
+    no_matches: 'var(--color-danger)', closing_soon: 'var(--color-warning)',
   }
+  const SUITE_LABEL_KEY: Record<string, string> = {
+    total: 'vacancies.kpi.total', open: 'vacancies.kpi.open', filled: 'vacancies.kpi.filled',
+    fill_rate: 'vacancies.kpi.fillRate', stale_online: 'vacancies.kpi.staleOnline',
+    long_concept: 'vacancies.kpi.longConcept', no_matches: 'vacancies.kpi.noMatches',
+    closing_soon: 'vacancies.kpi.closingSoon', customers_count: 'vacancies.kpi.customersCount',
+  }
+  // UNIT-CANON (FRONTEND-CONTRACT §13, REPORT-KPI-STRIP-1): the SERVER's unit
+  // field on each kpis[] entry decides the formatting; the local map is only the
+  // tolerant fallback for a cached pre-unit envelope (§10) — never the source.
+  const KPI_UNIT_FALLBACK: Partial<Record<string, KpiUnit>> = { fill_rate: 'ratio' }
+  const unitByServerKey = new Map((data?.kpis ?? []).map(k => [k.key, k.unit ?? KPI_UNIT_FALLBACK[k.key]]))
+  const openKpiParams = drill?.rowsParams as Record<string, unknown> | undefined
+  const kpiByKey: Record<string, KpiSpec> = Object.fromEntries(
+    Object.entries(SUITE_LABEL_KEY).map(([key, labelKey]) => {
+      const label = t(labelKey)
+      const raw = kpiByServerKey.get(key)
+      const has = raw != null
+      const unit = unitByServerKey.get(key)
+      const value = !has ? '—' : unit ? formatKpiUnitValue(raw, unit) : raw
+      // PARITY EXCEPTION (documented BE-side, KPI-VAC-1): customers_count counts
+      // DISTINCT customers while its drill lists those customers' VACANCIES (rows
+      // ≥ card value) — an explicit subtitle names the divergence instead of the
+      // default window text.
+      const subtitle = key === 'customers_count' ? t('vacancies.kpi.customersCountDrillSub') : undefined
+      return [key, {
+        key, label, value,
+        color: has && raw !== 0 ? KPI_COLOR[key] : undefined,
+        active: openKpiParams?.kpi === key,
+        // KPI-DREMPELS-FE-1: threshold cards keep their tenant-threshold caption.
+        sub: key === 'total' && totalCompare ? <ReportCompareMetric metric={totalCompare} polarity="up-good" />
+          : key === 'stale_online' && data?.summary?.advice_stale_days != null ? t('thresholdDays', { n: data.summary.advice_stale_days })
+          : key === 'closing_soon' && data?.summary?.closing_soon_days != null ? t('thresholdDays', { n: data.summary.closing_soon_days })
+          : undefined,
+        onClick: has ? openKpiDrill(key, label, value, subtitle) : undefined,
+      } satisfies KpiSpec]
+    }))
   // Which nine keys render, and in what order, is the tenant's Settings → Reports
   // choice (falls back to today's order when nothing is stored, or a stored key
   // has vanished — RAPPORT-KPI-INSTELBAAR).

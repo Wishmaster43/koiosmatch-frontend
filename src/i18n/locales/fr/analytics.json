@@ -151,6 +151,18 @@
       "fixedWindow": "Fenêtre fixe, ne suit pas les filtres de ce rapport.",
       "noBranch": "Sans agence",
       "unknown": "Inconnu"
+    },
+    "kpi": {
+      "total": "Total",
+      "open": "Ouvertes",
+      "filled": "Pourvues",
+      "fillRate": "Taux de couverture",
+      "staleOnline": "En ligne sans candidats",
+      "longConcept": "Longtemps en brouillon",
+      "noMatches": "Sans matchs",
+      "closingSoon": "Clôture bientôt",
+      "customersCount": "Clients avec postes",
+      "customersCountDrillSub": "Postes de ces clients"
     }
   },
   "matches": {
@@ -377,6 +389,17 @@
     "kpiOrderFellBack": "Une carte KPI configurée dans les paramètres n'existe plus et a été réinitialisée par défaut.",
     "axes": {
       "value": "Valeur du pipeline"
+    },
+    "kpi": {
+      "total": "Total",
+      "open": "Ouvertes",
+      "won": "Gagnées",
+      "lost": "Perdues",
+      "winRate": "Taux de réussite",
+      "openValue": "Valeur du pipeline ouvert",
+      "stale": "Sans mise à jour",
+      "closingSoon": "Clôture bientôt",
+      "overdue": "En retard"
     }
   },
   "tasks": {

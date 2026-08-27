@@ -151,6 +151,18 @@
       "fixedWindow": "Vast venster, volgt niet de filters van dit rapport.",
       "noBranch": "Zonder vestiging",
       "unknown": "Onbekend"
+    },
+    "kpi": {
+      "total": "Totaal",
+      "open": "Open",
+      "filled": "Vervuld",
+      "fillRate": "Vervullingsgraad",
+      "staleOnline": "Online zonder sollicitanten",
+      "longConcept": "Lang in concept",
+      "noMatches": "Zonder matches",
+      "closingSoon": "Sluit binnenkort",
+      "customersCount": "Klanten met vacatures",
+      "customersCountDrillSub": "Vacatures van deze klanten"
     }
   },
   "matches": {
@@ -377,6 +389,17 @@
     "kpiOrderFellBack": "Een in Instellingen ingestelde KPI-kaart bestaat niet meer en is teruggezet naar de standaard.",
     "axes": {
       "value": "Pipelinewaarde"
+    },
+    "kpi": {
+      "total": "Totaal",
+      "open": "Open",
+      "won": "Gewonnen",
+      "lost": "Verloren",
+      "winRate": "Winratio",
+      "openValue": "Openstaande pijplijnwaarde",
+      "stale": "Zonder update",
+      "closingSoon": "Sluit binnenkort",
+      "overdue": "Over tijd"
     }
   },
   "tasks": {

@@ -1,13 +1,15 @@
 /**
  * OpportunitiesReport — opportunities (kansen) pipeline report (GET
- * /reports/opportunities, RAPPORTEN-SUITE-1 "portie 5"). Mirrors CustomersReport /
- * VacanciesReport 1:1: same envelope family, same calm hand-rolled bars via the
- * shared SegmentBars, the window rendered prominently. Drill XOR params follow the
- * five-way opportunities contract: stage|customer|owner|branch|date (+bucket=week
- * next to a week bar's date). Every axis sums to `total`; 'none'/'others' sentinels
- * and orphan-uuid rows (deleted stage / hard-deleted customer) are normal, drillable
- * bars. Forecast/stale from the envelope are deliberately not rendered yet (own
- * design round) — nothing hidden is interactive, so no fake affordances.
+ * /reports/opportunities, RAPPORTEN-SUITE-1 "portie 5"). KPI-OPP-1 (CMBE 27-08,
+ * commit eb3af985): the strip now reads the server's own nine-card kpis[] suite
+ * verbatim (total/open/won/lost/win_rate/open_value/stale/closing_soon/overdue),
+ * mirroring KPI-MATCHES-1/KPI-TAKEN-1. Below the strip: the shared timeseries,
+ * the stage/customer/owner/branch axes — untouched by the strip migration. Their
+ * own drill/advice XOR params still follow the five-way opportunities contract:
+ * stage|customer|owner|branch|date (+bucket=week next to a week bar's date).
+ * forecast_count/forecast_value lose their strip surface with this migration —
+ * the spec ordered the spares removed and neither has a chart surface below
+ * (Danny screen note, see openQuestions in the delivery).
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -28,7 +30,6 @@ import { CHART_SERIES_COLORS } from '@/components/charts/chartTypes'
 import type { ChartDatum } from '@/components/charts/chartTypes'
 import ReportTimeseriesChart from './ReportTimeseriesChart'
 import { useDateFormat } from '@/lib/datetime'
-import { useNumberFormat, formatPercent } from '@/lib/formatters'
 import type { ReportPeriod, CandidateOwnerSegment, CandidateTimeseriesPoint } from '@/types/analytics'
 import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
 import { getReportKpiCatalog, getReportKpiDefaultOrder, reportKpiSettingsKey } from './kpiCatalog'
@@ -40,13 +41,8 @@ import { COMPARE_OFF } from './reportCompareMode'
 import type { ReportCompareMode } from './reportCompareMode'
 import { EMPTY_REPORT_FILTERS, buildReportQueryParams } from './reportFilterParams'
 import type { ReportFilterState } from './reportFilterParams'
-
-// The kpis/drill `kpi` enum, measured in api-generated.ts::getReportsOpportunitiesKpisDrill
-// (line 45105): "total" | "open" | "won" | "lost" | "win_rate" | "open_value" |
-// "stale" | "closing_soon" | "untouched" | "overdue" | "forecast_count" | "forecast_value".
-type OpportunitiesKpiKey =
-  | 'total' | 'open' | 'won' | 'lost' | 'win_rate' | 'open_value'
-  | 'stale' | 'closing_soon' | 'untouched' | 'overdue' | 'forecast_count' | 'forecast_value'
+import { formatKpiUnitValue } from './kpiUnitFormat'
+import type { KpiUnit } from './kpiUnitFormat'
 
 // The three plain single-value XOR axes; `owner` has its own D2 shape below.
 type Axis = 'stage' | 'customer' | 'branch'
@@ -55,20 +51,11 @@ type Axis = 'stage' | 'customer' | 'branch'
 // colour, customer/branch rows do not (SegmentBars falls back to the primary tint).
 type AxisSeg = { value: string; label: string; count: number; color?: string | null }
 
-// Semantic colour per signal card, non-zero only (§4) — one map, mirroring the
-// reference's SUITE_COLOR idiom (wave-2 Opus minor: no per-card ternary paint).
-const OPP_COLOR: Record<string, string> = {
-  won: 'var(--color-success)', lost: 'var(--color-danger)',
-  untouched: 'var(--color-warning)', overdue: 'var(--color-danger)',
-  staleDeal: 'var(--color-warning)', closingSoon: 'var(--color-warning)',
-}
-
 // Opportunities pipeline report (see file docblock above): KPI band, chart grid
 // and drill drawer, mirroring the customers/vacancies reports' shared envelope.
 export default function OpportunitiesReport({ period, filters = EMPTY_REPORT_FILTERS, compare = COMPARE_OFF }: { period: ReportPeriod; filters?: ReportFilterState; compare?: ReportCompareMode }) {
   const { t } = useTranslation('analytics')
   const { formatDate } = useDateFormat()
-  const { formatCurrency } = useNumberFormat()
   const { data, loading, error, refetch } = useOpportunitiesReport(period, filters)
 
   const total   = data?.total ?? 0
@@ -109,14 +96,6 @@ export default function OpportunitiesReport({ period, filters = EMPTY_REPORT_FIL
     rowsParams: { ...baseParams, date: pt.date, ...(data?.timeseries.bucket === 'week' ? { bucket: 'week' } : {}) },
     adviceEndpoint: '/reports/opportunities/advice',
     adviceParams: { ...baseParams, date: pt.date, ...(data?.timeseries.bucket === 'week' ? { bucket: 'week' } : {}) },
-  })
-  // WAVE-1B: per-KPI-card drill via GET /reports/opportunities/kpis/drill?kpi=<key>
-  // (measured in api-generated.ts::getReportsOpportunitiesKpisDrill) layered on the
-  // same baseParams every other drill uses; rows are opportunities.
-  const openKpiDrill = (label: string, value: number | string, kpi: OpportunitiesKpiKey) => setDrill({
-    title: label, value, subtitle: windowSub(),
-    entityPage: 'opportunities',
-    rowsEndpoint: '/reports/opportunities/kpis/drill', rowsParams: { ...baseParams, kpi },
   })
 
   // Stage axis: a lookup axis with its own colour per value (CHART-TYPE RULE) →
@@ -160,94 +139,56 @@ export default function OpportunitiesReport({ period, filters = EMPTY_REPORT_FIL
     if (pt) openBucket(pt)
   })
 
-  // Pipeline-health KPI strip from the envelope's totals. WAVE-1B: every card
-  // whose key maps 1:1 onto a kpis/drill enum value (measured line 45105) now
-  // opens the shared drawer via openKpiDrill; win_rate is null until a deal is
-  // decided — placeholder, never a fabricated 0%. Nine-card footprint (Danny —
-  // same as the dashboard).
-  const s = data?.totals
-  const forecastCount = data?.forecast.reduce((sum, row) => sum + row.count, 0) ?? 0
-  const forecastValue = data?.forecast.reduce((sum, row) => sum + row.value_sum, 0) ?? 0
-  // Spare-card sources (REPORTS-KPI-SPARE-1): the top real segment of by_stage /
-  // by_customer (excluding 'none'/'others' sentinels, same rule VacanciesReport
-  // uses for topIndustry/topOwner) — clicking reuses the page's own openSegment,
-  // exactly like the bars() drill and the default-on-mount effect above.
-  const topReal = <T extends { value: string; count: number; label: string }>(segs: T[]) =>
-    segs.filter(x => x.value !== 'none' && x.value !== 'others').sort((a, b) => b.count - a.count)[0]
-  const topStage = topReal(data?.by_stage ?? [])
-  const topCustomer = topReal(data?.by_customer ?? [])
-  // ACTIVE-KPI-CARD-1 (mirrors CandidatesReport.tsx:228): the card whose drill is
-  // currently open reads as selected. A kpis/drill card matches on its own enum
-  // value; the two top-segment spares (no `kpi` param, XOR stage/customer instead)
-  // match on their own axis param.
-  const openKpiParams = drill?.rowsParams as Record<string, unknown> | undefined
-  const kpiByKey: Record<string, KpiSpec> = {
-    total:   { key: 'total',   label: t('opportunities.total'),           value: total,
-      sub: totalCompare ? <ReportCompareMetric metric={totalCompare} polarity="up-good" /> : undefined,
-      active: openKpiParams?.kpi === 'total',
-      onClick: gateDrillClick('opportunities', () => openKpiDrill(t('opportunities.total'), total, 'total')) },
-    open:    { key: 'open',    label: t('opportunities.summary.open'),    value: s?.open ?? 0,
-      active: openKpiParams?.kpi === 'open',
-      onClick: gateDrillClick('opportunities', () => openKpiDrill(t('opportunities.summary.open'), s?.open ?? 0, 'open')) },
-    won:     { key: 'won',     label: t('opportunities.summary.won'),     value: s?.won ?? 0,
-      color: s?.won ? OPP_COLOR.won : undefined,
-      active: openKpiParams?.kpi === 'won',
-      onClick: gateDrillClick('opportunities', () => openKpiDrill(t('opportunities.summary.won'), s?.won ?? 0, 'won')) },
-    lost:    { key: 'lost',    label: t('opportunities.summary.lost'),    value: s?.lost ?? 0,
-      color: s?.lost ? OPP_COLOR.lost : undefined,
-      active: openKpiParams?.kpi === 'lost',
-      onClick: gateDrillClick('opportunities', () => openKpiDrill(t('opportunities.summary.lost'), s?.lost ?? 0, 'lost')) },
-    winRate: { key: 'winRate', label: t('opportunities.summary.winRate'),
-      value: formatPercent(s?.win_rate),
-      active: openKpiParams?.kpi === 'win_rate',
-      onClick: gateDrillClick('opportunities', () => openKpiDrill(t('opportunities.summary.winRate'), formatPercent(s?.win_rate), 'win_rate')) },
-    untouched: { key: 'untouched', label: t('opportunities.stale.untouched'), value: data?.stale.untouched ?? 0,
-      color: data?.stale.untouched ? OPP_COLOR.untouched : undefined,
-      active: openKpiParams?.kpi === 'untouched',
-      onClick: gateDrillClick('opportunities', () => openKpiDrill(t('opportunities.stale.untouched'), data?.stale.untouched ?? 0, 'untouched')) },
-    overdue:   { key: 'overdue',   label: t('opportunities.stale.overdue'),   value: data?.stale.overdue ?? 0,
-      color: data?.stale.overdue ? OPP_COLOR.overdue : undefined,
-      active: openKpiParams?.kpi === 'overdue',
-      onClick: gateDrillClick('opportunities', () => openKpiDrill(t('opportunities.stale.overdue'), data?.stale.overdue ?? 0, 'overdue')) },
-    forecastCount: { key: 'forecastCount', label: t('opportunities.forecastCount'), value: forecastCount,
-      active: openKpiParams?.kpi === 'forecast_count',
-      onClick: gateDrillClick('opportunities', () => openKpiDrill(t('opportunities.forecastCount'), forecastCount, 'forecast_count')) },
-    forecastValue: { key: 'forecastValue', label: t('opportunities.forecastValue'), value: formatCurrency(forecastValue, 'EUR', 0),
-      active: openKpiParams?.kpi === 'forecast_value',
-      onClick: gateDrillClick('opportunities', () => openKpiDrill(t('opportunities.forecastValue'), formatCurrency(forecastValue, 'EUR', 0), 'forecast_value')) },
-    // Spares: real money fields already in `totals` (money via formatCurrency,
-    // never a raw number) + the two top-segment picks above. openValue maps 1:1
-    // onto the kpis/drill enum's `open_value`; wonValue has no matching enum
-    // value (measured — the enum stops at open_value) so it stays a plain,
-    // honest, non-clickable stat (no fake affordances).
-    openValue: { key: 'openValue', label: t('opportunities.summary.openValue'), value: formatCurrency(s?.open_value ?? 0, 'EUR', 0),
-      active: openKpiParams?.kpi === 'open_value',
-      onClick: gateDrillClick('opportunities', () => openKpiDrill(t('opportunities.summary.openValue'), formatCurrency(s?.open_value ?? 0, 'EUR', 0), 'open_value')) },
-    wonValue:  { key: 'wonValue',  label: t('opportunities.summary.wonValue'),  value: formatCurrency(s?.won_value ?? 0, 'EUR', 0) },
-    topStage: { key: 'topStage', label: t('opportunities.summary.topStage'),
-      value: topStage ? `${topStage.label} · ${topStage.count}` : '—',
-      active: !!topStage && openKpiParams?.stage === topStage.value,
-      onClick: topStage ? gateDrillClick('opportunities', () => openSegment(topStage, { stage: topStage.value })) : undefined },
-    topCustomer: { key: 'topCustomer', label: t('opportunities.summary.topCustomer'),
-      value: topCustomer ? `${topCustomer.label} · ${topCustomer.count}` : '—',
-      active: !!topCustomer && openKpiParams?.customer === topCustomer.value,
-      onClick: topCustomer ? gateDrillClick('opportunities', () => openSegment(topCustomer, { customer: topCustomer.value })) : undefined },
-    // KPI-DREMPELS-FE-1: totals.stale / totals.closing_soon (additive, distinct from
-    // the older top-level `stale` object above — a different, updated_at-based
-    // contract left untouched), each with its own tenant day-threshold caption.
-    // WAVE-1B: both now map 1:1 onto the kpis/drill enum (stale/closing_soon) and
-    // drill via openKpiDrill, same as every other mapped card above.
-    staleDeal: { key: 'staleDeal', label: t('opportunities.summary.staleDeal'), value: s?.stale ?? 0,
-      color: s?.stale ? OPP_COLOR.staleDeal : undefined,
-      sub: s?.stale_days != null ? t('thresholdDays', { n: s.stale_days }) : undefined,
-      active: openKpiParams?.kpi === 'stale',
-      onClick: gateDrillClick('opportunities', () => openKpiDrill(t('opportunities.summary.staleDeal'), s?.stale ?? 0, 'stale')) },
-    closingSoon: { key: 'closingSoon', label: t('opportunities.summary.closingSoon'), value: s?.closing_soon ?? 0,
-      color: s?.closing_soon ? OPP_COLOR.closingSoon : undefined,
-      sub: s?.closing_soon_days != null ? t('thresholdDays', { n: s.closing_soon_days }) : undefined,
-      active: openKpiParams?.kpi === 'closing_soon',
-      onClick: gateDrillClick('opportunities', () => openKpiDrill(t('opportunities.summary.closingSoon'), s?.closing_soon ?? 0, 'closing_soon')) },
+  // KPI-OPP-1 (CMBE 27-08, commit eb3af985): the strip reads the server's own
+  // nine-card kpis[] suite verbatim — mirrors MatchesReport/TasksReport's
+  // KPI-MATCHES-1 idiom (kpiByServerKey Map, one predicate shared by value and
+  // drill). A key the server omitted (or a pre-suite cached envelope) renders
+  // the house dash with no drill — never a value from another population. The
+  // stage/customer/owner/branch DATA keeps a chart surface below (donut/bars);
+  // forecast_count/forecast_value have no such surface and drop with the strip.
+  const kpiByServerKey = new Map((data?.kpis ?? []).map(k => [k.key, k.count]))
+  const openKpiDrill = (kpi: string, label: string, value: string | number) =>
+    gateDrillClick('opportunities', () => setDrill({
+      title: label, value, subtitle: windowSub(), entityPage: 'opportunities',
+      rowsEndpoint: '/reports/opportunities/kpis/drill', rowsParams: { ...baseParams, kpi },
+    }))
+  // Semantic colour only where the number is a SIGNAL and non-zero (§4: colour
+  // carries meaning; a calm zero stays uncoloured).
+  const KPI_COLOR: Partial<Record<string, string>> = {
+    won: 'var(--color-success)', lost: 'var(--color-danger)',
+    stale: 'var(--color-warning)', closing_soon: 'var(--color-warning)', overdue: 'var(--color-danger)',
   }
+  const SUITE_LABEL_KEY: Record<string, string> = {
+    total: 'opportunities.kpi.total', open: 'opportunities.kpi.open', won: 'opportunities.kpi.won',
+    lost: 'opportunities.kpi.lost', win_rate: 'opportunities.kpi.winRate', open_value: 'opportunities.kpi.openValue',
+    stale: 'opportunities.kpi.stale', closing_soon: 'opportunities.kpi.closingSoon', overdue: 'opportunities.kpi.overdue',
+  }
+  // UNIT-CANON (FRONTEND-CONTRACT §13, REPORT-KPI-STRIP-1): the SERVER's unit
+  // field on each kpis[] entry decides the formatting; the local map is only the
+  // tolerant fallback for a cached pre-unit envelope (§10) — never the source.
+  const KPI_UNIT_FALLBACK: Partial<Record<string, KpiUnit>> = { win_rate: 'pct', open_value: 'euro' }
+  const unitByServerKey = new Map((data?.kpis ?? []).map(k => [k.key, k.unit ?? KPI_UNIT_FALLBACK[k.key]]))
+  const openKpiParams = drill?.rowsParams as Record<string, unknown> | undefined
+  const kpiByKey: Record<string, KpiSpec> = Object.fromEntries(
+    Object.entries(SUITE_LABEL_KEY).map(([key, labelKey]) => {
+      const label = t(labelKey)
+      const raw = kpiByServerKey.get(key)
+      const has = raw != null
+      const unit = unitByServerKey.get(key)
+      const value = !has ? '—' : unit ? formatKpiUnitValue(raw, unit) : raw
+      return [key, {
+        key, label, value,
+        color: has && raw !== 0 ? KPI_COLOR[key] : undefined,
+        active: openKpiParams?.kpi === key,
+        // KPI-DREMPELS-FE-1: threshold cards keep their tenant-threshold caption
+        // (the envelope still carries the configured day counts).
+        sub: key === 'total' && totalCompare ? <ReportCompareMetric metric={totalCompare} polarity="up-good" />
+          : key === 'stale' && data?.totals?.stale_days != null ? t('thresholdDays', { n: data.totals.stale_days })
+          : key === 'closing_soon' && data?.totals?.closing_soon_days != null ? t('thresholdDays', { n: data.totals.closing_soon_days })
+          : undefined,
+        onClick: has ? openKpiDrill(key, label, value) : undefined,
+      } satisfies KpiSpec]
+    }))
   // Which nine keys render, and in what order, is the tenant's Settings → Reports
   // choice (falls back to today's order when nothing is stored, or a stored key
   // has vanished — RAPPORT-KPI-INSTELBAAR).

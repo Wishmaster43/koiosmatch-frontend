@@ -151,6 +151,18 @@
       "fixedWindow": "Ventana fija, no sigue los filtros de este informe.",
       "noBranch": "Sin sucursal",
       "unknown": "Desconocido"
+    },
+    "kpi": {
+      "total": "Total",
+      "open": "Abiertas",
+      "filled": "Cubiertas",
+      "fillRate": "Tasa de cobertura",
+      "staleOnline": "En línea sin candidatos",
+      "longConcept": "Mucho tiempo en borrador",
+      "noMatches": "Sin matches",
+      "closingSoon": "Cierra pronto",
+      "customersCount": "Clientes con vacantes",
+      "customersCountDrillSub": "Vacantes de estos clientes"
     }
   },
   "matches": {
@@ -377,6 +389,17 @@
     "kpiOrderFellBack": "Una tarjeta KPI configurada en Ajustes ya no existe y se restableció al valor predeterminado.",
     "axes": {
       "value": "Valor de la cartera"
+    },
+    "kpi": {
+      "total": "Total",
+      "open": "Abiertas",
+      "won": "Ganadas",
+      "lost": "Perdidas",
+      "winRate": "Tasa de éxito",
+      "openValue": "Valor del pipeline abierto",
+      "stale": "Sin actualización",
+      "closingSoon": "Cierra pronto",
+      "overdue": "Atrasadas"
     }
   },
   "tasks": {

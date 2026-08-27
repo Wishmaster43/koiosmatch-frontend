@@ -151,6 +151,18 @@
       "fixedWindow": "Fixed window; does not follow this report's filters.",
       "noBranch": "No branch",
       "unknown": "Unknown"
+    },
+    "kpi": {
+      "total": "Total",
+      "open": "Open",
+      "filled": "Filled",
+      "fillRate": "Fill rate",
+      "staleOnline": "Online without applicants",
+      "longConcept": "Long in draft",
+      "noMatches": "Without matches",
+      "closingSoon": "Closing soon",
+      "customersCount": "Customers with vacancies",
+      "customersCountDrillSub": "Vacancies of these customers"
     }
   },
   "matches": {
@@ -377,6 +389,17 @@
     "kpiOrderFellBack": "A KPI card configured in Settings no longer exists and was reset to the default.",
     "axes": {
       "value": "Pipeline value"
+    },
+    "kpi": {
+      "total": "Total",
+      "open": "Open",
+      "won": "Won",
+      "lost": "Lost",
+      "winRate": "Win rate",
+      "openValue": "Open pipeline value",
+      "stale": "Without update",
+      "closingSoon": "Closing soon",
+      "overdue": "Overdue"
     }
   },
   "tasks": {

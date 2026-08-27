@@ -26,11 +26,6 @@ async function openMatchesTab() {
   await user.click(screen.getByRole('tab', { name: st('reportKpis.reportNames.matches') }))
 }
 
-async function openVacanciesTab() {
-  const user = userEvent.setup()
-  await user.click(screen.getByRole('tab', { name: st('reportKpis.reportNames.vacancies') }))
-}
-
 // Prospects is the "still no spares" control case (see file-top note).
 async function openProspectsTab() {
   const user = userEvent.setup()
@@ -86,12 +81,15 @@ describe('ReportKpiSettings', () => {
       expect(i18n.t(entry.labelKey, { ns: 'analytics' })).not.toBe(entry.labelKey)
     }
   })
-  it('offers real spare cards for vacancies (REPORTS-KPI-SPARE-1 path stays covered)', async () => {
+  // 28-08: vacancies flipped to its server suite too — leads is the one scope
+  // still carrying spares, so it keeps the spare-offering path covered.
+  it('offers real spare cards for leads (REPORTS-KPI-SPARE-1 path stays covered)', async () => {
     render(<ReportKpiSettings />)
-    await openVacanciesTab()
+    const user = userEvent.setup()
+    await user.click(screen.getByRole('tab', { name: st('reportKpis.reportNames.leads') }))
     expect(screen.queryByText(st('reportKpis.noSpareCards'))).toBeNull()
-    const catalog = getReportKpiCatalog('vacancies')
-    const defaultOrder = getReportKpiDefaultOrder('vacancies')
+    const catalog = getReportKpiCatalog('leads')
+    const defaultOrder = getReportKpiDefaultOrder('leads')
     expect(catalog.length).toBeGreaterThan(defaultOrder.length)
   })
 

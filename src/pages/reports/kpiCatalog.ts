@@ -19,15 +19,12 @@
  *   now the report's own STANDING signal `kpis[]` suite (CUSTOMERS_SIGNAL_LABEL_KEYS
  *   below), replacing the old axis-topsegment filler cards; `prospects` still has
  *   no signal suite (those describe an existing client relationship a lead can't
- *   have) so it stays on the axis family, untouched. Most scopes still
- *   equal the report's current default order 1:1 (no spares yet); `vacancies`,
- *   `opportunities`, `tasks`, `matches`, `intakes`, `ai`, `workflows`
- *   (REPORTS-KPI-SPARE-1) and `recruiters`, `accountmanagers`, `contacts`, `locations`,
- *   `departments` (REPORTS-KPI-SPARE-2) each grew spare entries beyond their nine
- *   defaults — real fields the endpoint already returns but the strip never surfaced
- *   (a summary counter, an honest ratio of two real counts, or the biggest real
- *   segment of an axis the report already renders). `hasSpareCards` reports per-scope
- *   so the settings screen can be honest where a picker would still have nothing to offer.
+ *   have) so it stays on the axis family, untouched. Since the 28-08 server-suite
+ *   flips (matches, customers, opportunities, vacancies — each catalog now exactly
+ *   its server nine) only `leads` still carries spare entries beyond its defaults;
+ *   every other scope equals its default order 1:1. `hasSpareCards` reports
+ *   per-scope so the settings screen stays honest where a picker has nothing extra
+ *   to offer.
  *
  * SCOPE IDS vs. ROUTE IDS (RAPPORTEN-CONSOLIDATIE-1, 2026-08-14): a KPI catalogue
  * entry is keyed by `ReportKpiScopeId`, a SUPERSET of the route-level `ReportId`.
@@ -199,54 +196,38 @@ export const REPORT_KPI_FIXED_CATALOG: Partial<Record<ReportKpiScopeId, KpiCatal
   customers: Object.entries(CUSTOMERS_SIGNAL_LABEL_KEYS).map(([signalKey, i18nSuffix]) => ({
     key: signalKey, labelKey: `customers.kpis.${i18nSuffix}`,
   })),
+  // KPI-VAC-1 (CMBE 28-08, commit eb3af985): the strip reads the server's own
+  // nine-card kpis[] suite verbatim (BuildsVacancyKpis), mirroring KPI-MATCHES-1/
+  // KPI-OPP-1 — replaces the old ad-hoc summary/top-segment cards (value and
+  // drill now share one backend predicate per key via /reports/vacancies/kpis/drill).
+  // Keys match the server's `key` field exactly (snake_case); avg_time_to_fill_days
+  // (ttf) and the topIndustry/topOwner/topFunction/topBranch/adviceStale spares
+  // left the strip with the flip — ttf stays reachable in VacancyDepthSections.
   vacancies: [
-    { key: 'total', labelKey: 'vacancies.summary.total' },
-    { key: 'open', labelKey: 'vacancies.summary.open' },
-    { key: 'filled', labelKey: 'vacancies.summary.filled' },
-    { key: 'fillRate', labelKey: 'vacancies.summary.fillRate' },
-    { key: 'ttf', labelKey: 'vacancies.summary.avgTimeToFill' },
-    { key: 'staleOnline', labelKey: 'vacancies.summary.staleOnline' },
-    { key: 'customersCount', labelKey: 'vacancies.summary.customersCount' },
-    { key: 'topIndustry', labelKey: 'vacancies.summary.topIndustry' },
-    { key: 'topOwner', labelKey: 'vacancies.summary.topOwner' },
-    // Spares (REPORTS-KPI-SPARE-1): real, so-far-unused fields already in the
-    // GET /reports/vacancies envelope — summary.long_concept / summary.no_matches
-    // (VacanciesReport::applySignal, same family as staleOnline) and the top
-    // real segment of the function/branch axes (mirrors topIndustry/topOwner).
-    { key: 'longConcept', labelKey: 'vacancies.summary.longConcept' },
-    { key: 'noMatches', labelKey: 'vacancies.summary.noMatches' },
-    { key: 'topFunction', labelKey: 'vacancies.summary.topFunction' },
-    { key: 'topBranch', labelKey: 'vacancies.summary.topBranch' },
-    // KPI-DREMPELS-FE-1: summary.advice_stale / summary.closing_soon, each with its
-    // own tenant day-threshold caption. adviceStale mirrors staleOnline's predicate;
-    // closingSoon drills via its own `closing_soon` boolean XOR key (VAC-CLOSING-
-    // SOON-DRILL-1, mirrors stale_online — never a `signal` param).
-    { key: 'adviceStale', labelKey: 'vacancies.summary.adviceStale' },
-    { key: 'closingSoon', labelKey: 'vacancies.summary.closingSoon' },
+    { key: 'total', labelKey: 'vacancies.kpi.total' },
+    { key: 'open', labelKey: 'vacancies.kpi.open' },
+    { key: 'filled', labelKey: 'vacancies.kpi.filled' },
+    { key: 'fill_rate', labelKey: 'vacancies.kpi.fillRate' },
+    { key: 'stale_online', labelKey: 'vacancies.kpi.staleOnline' },
+    { key: 'long_concept', labelKey: 'vacancies.kpi.longConcept' },
+    { key: 'no_matches', labelKey: 'vacancies.kpi.noMatches' },
+    { key: 'closing_soon', labelKey: 'vacancies.kpi.closingSoon' },
+    { key: 'customers_count', labelKey: 'vacancies.kpi.customersCount' },
   ],
+  // KPI-OPP-1 (CMBE 27-08, commit eb3af985): the strip reads the server kpis[]
+  // suite — the catalogue is that suite's own nine keys, replacing the old
+  // summary/derived/top-spare cards (value and drill now share one predicate,
+  // mirrors KPI-MATCHES-1/KPI-TAKEN-1).
   opportunities: [
-    { key: 'total', labelKey: 'opportunities.total' },
-    { key: 'open', labelKey: 'opportunities.summary.open' },
-    { key: 'won', labelKey: 'opportunities.summary.won' },
-    { key: 'lost', labelKey: 'opportunities.summary.lost' },
-    { key: 'winRate', labelKey: 'opportunities.summary.winRate' },
-    { key: 'untouched', labelKey: 'opportunities.stale.untouched' },
-    { key: 'overdue', labelKey: 'opportunities.stale.overdue' },
-    { key: 'forecastCount', labelKey: 'opportunities.forecastCount' },
-    { key: 'forecastValue', labelKey: 'opportunities.forecastValue' },
-    // Spares (REPORTS-KPI-SPARE-1): real fields already in the envelope —
-    // totals.open_value/won_value (money, same source as forecastValue) and the
-    // top real segment of by_stage/by_customer (mirrors the vacancies top-* cards).
-    { key: 'openValue', labelKey: 'opportunities.summary.openValue' },
-    { key: 'wonValue', labelKey: 'opportunities.summary.wonValue' },
-    { key: 'topStage', labelKey: 'opportunities.summary.topStage' },
-    { key: 'topCustomer', labelKey: 'opportunities.summary.topCustomer' },
-    // KPI-DREMPELS-FE-1: totals.stale / totals.closing_soon (additive, distinct
-    // from the older top-level `stale` object above), each with its own tenant
-    // day-threshold caption — not drillable (no XOR param), same non-clickable
-    // pattern the pipeline five above already use.
-    { key: 'staleDeal', labelKey: 'opportunities.summary.staleDeal' },
-    { key: 'closingSoon', labelKey: 'opportunities.summary.closingSoon' },
+    { key: 'total', labelKey: 'opportunities.kpi.total' },
+    { key: 'open', labelKey: 'opportunities.kpi.open' },
+    { key: 'won', labelKey: 'opportunities.kpi.won' },
+    { key: 'lost', labelKey: 'opportunities.kpi.lost' },
+    { key: 'win_rate', labelKey: 'opportunities.kpi.winRate' },
+    { key: 'open_value', labelKey: 'opportunities.kpi.openValue' },
+    { key: 'stale', labelKey: 'opportunities.kpi.stale' },
+    { key: 'closing_soon', labelKey: 'opportunities.kpi.closingSoon' },
+    { key: 'overdue', labelKey: 'opportunities.kpi.overdue' },
   ],
   // KPI-TAKEN-1 (naronde wave 1b): the tasks strip reads the server kpis[]
   // suite — the catalogue is that suite's own nine keys, replacing the old
