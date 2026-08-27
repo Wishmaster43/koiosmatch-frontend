@@ -49,6 +49,27 @@ describe('SubscriptionCard', () => {
     expect(screen.queryByText(t('billing.usage.plan.notice'))).toBeNull()
   })
 
+  // Tokens verbruik-repro (Danny: "klant lijkt door zijn tokens heen maar is
+  // het niet"): a 40 000 budget with lower usage must never read as exhausted,
+  // and the thousands separator must render correctly (§ formatters).
+  it('renders a large budget with lower usage as within budget, not exhausted', () => {
+    const large = { ...subscription, ai: { budget: 40000, used: 12000, over: 0, over_amount: 0 }, workflow: { budget: 500, used: 120, over: 0, over_amount: 0 } }
+    render(<SubscriptionCard subscription={large} phase="ready" />)
+    expect(screen.getByText(t('billing.usage.plan.meterUsage', { used: '12.000', remaining: '28.000' }))).toBeInTheDocument()
+    expect(screen.queryByText(/boven budget|over budget/i)).toBeNull()
+  })
+
+  // K-204 regression: price_cents arrived on the wire but nothing ever
+  // rendered it (Danny: "elke keer is de 0,01 weg") — the WhatsApp meter now
+  // shows the per-token EUR price, converted from cents at the boundary.
+  it('shows the WhatsApp per-token price when price_cents is present', () => {
+    const withWhatsapp = { ...subscription, whatsapp: { budget: 250, used: 10, over: 0, over_amount: 0, price_cents: 1 } }
+    render(<SubscriptionCard subscription={withWhatsapp} phase="ready" />)
+    const eur = formatCurrency(0.01, 'EUR', 'nl-NL', 2, 2).replace(/\u00A0/g, ' ')
+    const match = screen.getAllByText((_, el) => el?.textContent?.replace(/\u00A0/g, ' ').includes(eur) ?? false)
+    expect(match.length).toBeGreaterThan(0)
+  })
+
   // Danny 24-08: the meter is a gateway — clicking it drills into the daily
   // chart filtered on that meter's own series.
   it('fires the per-meter drill on click', async () => {

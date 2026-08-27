@@ -31,7 +31,7 @@ import type { Contact, Department } from '@/types/customer'
 // SUBENTITY-IMPORT-1: only the NETWORK calls are mocked — the real wizard/steps run,
 // so these tests prove the actual wiring (dry-run-before-real-run, xlsx rejection,
 // close-on-success, parent-mismatch), not a stub of it (mirrors AddLocationModal.test.tsx).
-import { dryRunImport, runImport, type ImportRunResult } from '@/pages/settings/sections/importeren/importApi'
+import { dryRunImport, runImport, type ImportRunResult } from '@/pages/settings/sections/import/importApi'
 
 // Both hooks fired by useContactFunctions (contact-functions + tenant settings)
 // hit the module-scope cached-lookup path — a harmless empty response keeps
@@ -40,8 +40,8 @@ vi.mock('@/lib/api', async () => {
   const actual = await vi.importActual('@/lib/api')
   return { ...actual, default: { get: vi.fn().mockResolvedValue({ data: { data: [] } }), post: vi.fn(), patch: vi.fn(), delete: vi.fn() } }
 })
-vi.mock('@/pages/settings/sections/importeren/importApi', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@/pages/settings/sections/importeren/importApi')>()
+vi.mock('@/pages/settings/sections/import/importApi', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/pages/settings/sections/import/importApi')>()
   return { ...actual, dryRunImport: vi.fn(), runImport: vi.fn(), downloadImportTemplate: vi.fn() }
 })
 // hasPermission defaults to "allow everything" so the pre-existing tests above (none of

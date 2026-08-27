@@ -2,7 +2,7 @@
  * useMappingWizard — state for the wizard's PRE-VALIDATION steps: parse the uploaded
  * file client-side, auto-map its columns, and keep the editable preview rows in sync
  * with both the mapping and any manual cell edit. The actual dry-run/run calls stay
- * owned by the existing `useImportWizard` hook (settings/sections/importeren) —
+ * owned by the existing `useImportWizard` hook (settings/sections/import) —
  * this hook only ever hands it a freshly built File (api.ts buildImportFile).
  *
  * `dirty` is the honest-preview guard: true whenever the editable rows changed since

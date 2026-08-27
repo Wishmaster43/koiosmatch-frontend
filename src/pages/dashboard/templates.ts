@@ -74,8 +74,8 @@ export const DASHBOARD_TEMPLATES: Record<DashboardType, string[]> = {
   recruitment: ['chart.status', 'chart.funnel', 'chart.funnelConversion', 'chart.weekly', 'list.candidates', 'list.applications', 'list.conversations', 'list.runs',
     'block.tasksDueToday', 'block.appointmentsNext48h', 'block.redeployRadar'],
   // DASHBOARD-OPRUIMING-1 (Danny 23-08): "recruitment_manager mirrors management
-  // verbatim" — same '*' wildcard, same full dashboard, instead of its own trimmed
-  // block list.
+  // verbatim" — same '*' wildcard, same full dashboard, AND (Danny 27-08) the
+  // same default exclusions: waWebQueue + list.runs hidden, leads-in-pipeline instead.
   recruitment_manager: ['*'],
   backoffice: ['chart.status', 'chart.funnel', 'list.applications', 'list.runs',
     'block.matchesByContractType', 'block.placementsStartedEndedToday', 'block.documentsAttention', 'block.couplingErrorsList', 'block.placementsStartedToday', 'block.waWebQueue'],
@@ -183,11 +183,48 @@ export const BLOCK_LABEL_KEY: Record<string, string> = {
   'block.waWebQueue': 'block.waWebQueue',
 }
 
+// DASHBOARD-MGMT-1 (Danny 23-08): "WhatsApp Web queue voor nu weg; Leads in
+// pipeline ipv Recent runs" for the MANAGEMENT view specifically. Management's
+// template is the '*' wildcard (every block), so these are default EXCLUSIONS
+// layered on top rather than a template rewrite — a wildcard template would
+// otherwise need every current+future block id enumerated by hand. Scoped to
+// 'management' only (not 'admin', which shares the same wildcard but was not
+// named in this instruction). `dashboard_hidden` (tenant Settings) can still
+// hide additional blocks per role on top of this default.
+// DASHBOARD-OPRUIMING-1 (Danny 23-08): recruitment_manager mirrors management
+// verbatim, so its default exclusions must mirror management's too — leaving it
+// off this map would silently break that documented invariant the moment
+// management gained an exclusion recruitment_manager did not.
+const DEFAULT_HIDDEN_BLOCKS: Partial<Record<DashboardType, string[]>> = {
+  management: ['block.waWebQueue', 'list.runs'],
+  recruitment_manager: ['block.waWebQueue', 'list.runs'],
+}
+
+// Exported so Settings → Dashboards (blocksForRole) can filter these ids out of
+// the toggle catalogue too — a hidden-by-template row must never render as a
+// toggleable switch (§3 no fake affordances: visibleBlock() would force it off
+// regardless of what the tenant toggle blob says).
+export const defaultHiddenBlocks = (type: DashboardType): string[] => DEFAULT_HIDDEN_BLOCKS[type] ?? []
+
 // Is a chart/list block visible for the active dashboard type?
 export const visibleBlock = (type: string, id: string): boolean => {
   const tpl = DASHBOARD_TEMPLATES[type as DashboardType] ?? ['*']
+  if (DEFAULT_HIDDEN_BLOCKS[type as DashboardType]?.includes(id)) return false
   return tpl.includes('*') || tpl.includes(id)
 }
+
+// TOP-GRID-only exclusion (DASHBOARD-MGMT-1): for management/recruitment_manager
+// "Leads in pipeline" must land in the BOTTOM recent-lists row (where "Recente
+// uitvoeringen" sat) instead of the top feed grid's sales pipeline-value pair —
+// otherwise the pair (visible via the '*' template) swallows it via topTileIds
+// and the bottom grid excludes it as already-rendered, so it never reaches the
+// intended spot. This only hides the TOP pair's child; `visibleBlock` above still
+// says true, so the bottom LIST_TILES row renders it normally.
+const TOP_GRID_EXCLUDE: Partial<Record<DashboardType, string[]>> = {
+  management: ['list.leads'],
+  recruitment_manager: ['list.leads'],
+}
+export const topGridExclude = (type: string): string[] => TOP_GRID_EXCLUDE[type as DashboardType] ?? []
 
 // KPI ids for the active type (fallback to management's row).
 export const kpiRow = (type: string): string[] =>

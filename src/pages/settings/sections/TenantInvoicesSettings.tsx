@@ -2,7 +2,7 @@
  * TenantInvoicesSettings (INVOICE-1, settings.billing_invoices) — the tenant's own
  * "Facturen" screen: a paginated list of the tenant's FINAL invoices only (drafts
  * never leave the superadmin console). Gated on `billing.view` at the registry
- * level (mirrors GebruikSettings) — this whole screen stays hidden, never a
+ * level (mirrors BillingUsageSettings) — this whole screen stays hidden, never a
  * disabled shell, for a user without the permission (§3). Replaces the old
  * PlaceholderSettings stub (BillingSettings.jsx, now retired).
  * Contract: GET /billing/invoices (paginated) · GET /billing/invoices/{id}/download

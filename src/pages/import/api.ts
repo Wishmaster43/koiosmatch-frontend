@@ -3,7 +3,7 @@
  * request functions (§11 "reuse, never duplicate") rather than re-implementing the
  * same HTTP calls: GET /imports/templates, GET /imports/{entity}/template.csv,
  * POST /imports/{entity}/dry-run and POST /imports/{entity} already live in
- * settings/sections/importeren/importApi.ts, used unchanged by both the settings
+ * settings/sections/import/importApi.ts, used unchanged by both the settings
  * import screen AND the shared EntityImportCard's useEntityImportCard (customers +
  * vacancies create-modal imports). The one thing this wizard adds on top is
  * buildImportFile: turning the MAPPED + user-edited rows back into a File the

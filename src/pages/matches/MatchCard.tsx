@@ -88,6 +88,20 @@ export interface MatchCardProps {
   // matchRowColumns.ts. Only flatRow gets the split, since it is the only
   // variant with a header bar above it to line columns up against.
   flatRow?: boolean
+  // DRAWER-UX-1 (Danny, "Naam van de kandidaat mee beginnen" / "Te klein voor
+  // alle namen"): flatRow default leads the title column with the VACANCY.
+  // Inside a vacancy/customer drawer the candidate is what the recruiter scans
+  // for, so this swaps the title column to the candidate (otherParty) and
+  // pushes the vacancy into the fixed column instead — full width for the name,
+  // no truncation at normal widths. Off by default so the candidate drawer's
+  // own MatchesTab (vacancy is the identity there) renders unchanged.
+  leadWithOtherParty?: boolean
+  // Only meaningful with leadWithOtherParty: the vacancy drawer's own matches
+  // all share ITS vacancy, so that column is redundant there and is dropped;
+  // the customer drawer keeps it (after the candidate) since customers span
+  // several vacancies. Default true so a caller that forgets it still gets
+  // the column rather than silently losing data.
+  showVacancyColumn?: boolean
 }
 
 /**
@@ -120,6 +134,7 @@ export default function MatchCard({
   contractType, contractForm, contractStatus, functionTitle, branchName, ownerName, startDate, endDate,
   isClosed = false, archived = false,
   collapsible = false, flatRow = false,
+  leadWithOtherParty = false, showVacancyColumn = true,
 }: MatchCardProps) {
   const { t } = useTranslation(['candidates', 'common'])
   const { formatDate } = useDateFormat()
@@ -189,7 +204,16 @@ export default function MatchCard({
   // caller has no header bar to line the stage up against and keeps titleBlock.
   // minWidth 140, not 0: with 0 the title collapsed to a single letter in a narrow
   // drawer while the fixed columns kept their full width (Danny 09-08).
-  const titleOnly = (
+  // DRAWER-UX-1: leadWithOtherParty swaps the title identity to the CANDIDATE
+  // (full name gets the flexible column, no truncation) — the vacancy moves to
+  // the fixed column below instead.
+  const titleOnly = leadWithOtherParty ? (
+    <span style={{ flex: 1, minWidth: 140, fontSize: 12, fontWeight: 600, color: 'var(--text)', overflow: 'hidden' }}>
+      <span onClickCapture={onBeforeOpen} onClick={e => e.stopPropagation()} style={{ minWidth: 0, overflow: 'hidden' }}>
+        <EntityLink page={otherParty.page} id={otherParty.id} title={otherParty.label || '—'} hideIcon tone="neutral">{otherParty.label || '—'}</EntityLink>
+      </span>
+    </span>
+  ) : (
     <span style={{ flex: 1, minWidth: 140, fontSize: 12, fontWeight: 600, color: 'var(--text)', overflow: 'hidden' }}>
       <span onClickCapture={onBeforeOpen} onClick={e => e.stopPropagation()} style={{ minWidth: 0, overflow: 'hidden' }}>
         <EntityLink page="vacancies" id={vacancyId} title={vacancyTitle || '—'} hideIcon tone="neutral">{vacancyTitle || '—'}</EntityLink>
@@ -285,12 +309,21 @@ export default function MatchCard({
                 slides left as soon as the value is short, and the label above it
                 stops pointing at anything. Only the header-bar caller (flatRow) pins
                 them; every other caller keeps the content-width summary row it had. */}
-            <span onClick={e => e.stopPropagation()} data-testid={flatRow ? 'match-col-client' : undefined}
-              style={{ fontSize: 12, color: 'var(--text-muted)', flexShrink: 0,
-              ...(flatRow ? MATCH_COL_OTHER_PARTY : { maxWidth: MATCH_COLUMN_WIDTH }),
-              overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-              <EntityLink page={otherParty.page} id={otherParty.id}>{otherParty.label || '—'}</EntityLink>
-            </span>
+            {/* DRAWER-UX-1: when the title already carries the candidate
+                (leadWithOtherParty), this fixed column shows the VACANCY instead —
+                dropped entirely in the vacancy drawer where every row shares the
+                same vacancy (showVacancyColumn=false), kept in the customer
+                drawer since a customer spans several vacancies. */}
+            {(!leadWithOtherParty || showVacancyColumn) && (
+              <span onClick={e => e.stopPropagation()} data-testid={flatRow ? (leadWithOtherParty ? 'match-col-vacancy' : 'match-col-client') : undefined}
+                style={{ fontSize: 12, color: 'var(--text-muted)', flexShrink: 0,
+                ...(flatRow ? MATCH_COL_OTHER_PARTY : { maxWidth: MATCH_COLUMN_WIDTH }),
+                overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {leadWithOtherParty
+                  ? <EntityLink page="vacancies" id={vacancyId}>{vacancyTitle || '—'}</EntityLink>
+                  : <EntityLink page={otherParty.page} id={otherParty.id}>{otherParty.label || '—'}</EntityLink>}
+              </span>
+            )}
             {/* SCORE COLUMN (Danny 09-08 second look, point 3): the score is a DATA
                 value ("82%" or a muted dash), not a click action, so it gets its
                 own labeled column ("Match", matches:cols.score) instead of sitting

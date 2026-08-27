@@ -39,46 +39,45 @@ export default function OpportunityDealStageCard({
     <div>
       <div style={cardHead}>{t('modal.groups.dealStage')}</div>
       <div style={cardBox}>
+        {/* MODAL-FIELD-CANON (§3A): name-bearing selects (stage/service/agreement)
+            get their own full-width row — two-per-row squeezed longer option
+            labels (Danny screenshot). Short numeric/date fields still pair. */}
+        {/* CLEAR-SWEEP (Danny 13-08): stage/service/agreement all ride `|| null`
+            in the submit body (AddOpportunityModal.handleSubmit) — optional. */}
+        <FieldRow label={t('modal.fields.stage')}>
+          <CreatableSelect value={stageId || null} onChange={onStageChange} allowCreate={false}
+            clearable clearLabel={t('modal.fields.stage')}
+            placeholder={t('common:select')} options={stageOptions} />
+        </FieldRow>
+        <FieldRow label={t('modal.fields.serviceType')}>
+          <CreatableSelect value={serviceTypeId || null} onChange={onServiceTypeChange} allowCreate={false}
+            clearable clearLabel={t('modal.fields.serviceType')}
+            placeholder={t('common:select')} options={serviceOptions} />
+        </FieldRow>
+        <FieldRow label={t('modal.fields.agreementType')}>
+          <CreatableSelect value={agreementTypeId || null} onChange={onAgreementTypeChange} allowCreate={false}
+            clearable clearLabel={t('modal.fields.agreementType')}
+            placeholder={t('common:select')} options={agreementOptions} />
+        </FieldRow>
         <div style={row2}>
-          {/* CLEAR-SWEEP (Danny 13-08): stage/service/agreement all ride `|| null`
-              in the submit body (AddOpportunityModal.handleSubmit) — optional. */}
-          <FieldRow label={t('modal.fields.stage')}>
-            <CreatableSelect value={stageId || null} onChange={onStageChange} allowCreate={false}
-              clearable clearLabel={t('modal.fields.stage')}
-              placeholder={t('common:select')} options={stageOptions} />
-          </FieldRow>
-          <FieldRow label={t('modal.fields.serviceType')}>
-            <CreatableSelect value={serviceTypeId || null} onChange={onServiceTypeChange} allowCreate={false}
-              clearable clearLabel={t('modal.fields.serviceType')}
-              placeholder={t('common:select')} options={serviceOptions} />
-          </FieldRow>
-        </div>
-        <div style={row2}>
-          <FieldRow label={t('modal.fields.agreementType')}>
-            <CreatableSelect value={agreementTypeId || null} onChange={onAgreementTypeChange} allowCreate={false}
-              clearable clearLabel={t('modal.fields.agreementType')}
-              placeholder={t('common:select')} options={agreementOptions} />
-          </FieldRow>
           <FieldRow label={t('modal.fields.value')}>
             <TextField type="number" value={value} onChange={onValueChange} placeholder="0" error={valueError} />
           </FieldRow>
-        </div>
-        <div style={row2}>
           <FieldRow label={t('modal.fields.hours')}>
             <TextField type="number" value={hours} onChange={onHoursChange} placeholder="0" error={hoursError} />
           </FieldRow>
+        </div>
+        <div style={row2}>
           <FieldRow label={t('modal.fields.expectedClose')}>
             <DateField value={expectedCloseAt} onChange={onExpectedCloseChange} placeholder={t('common:select')} />
           </FieldRow>
-        </div>
-        <div style={row2}>
           <FieldRow label={t('modal.fields.startDate')}>
             <DateField value={startDate} onChange={onStartDateChange} placeholder={t('common:select')} />
           </FieldRow>
-          <FieldRow label={t('modal.fields.endDate')}>
-            <DateField value={endDate} onChange={onEndDateChange} placeholder={t('common:select')} />
-          </FieldRow>
         </div>
+        <FieldRow label={t('modal.fields.endDate')}>
+          <DateField value={endDate} onChange={onEndDateChange} placeholder={t('common:select')} />
+        </FieldRow>
       </div>
     </div>
   )

@@ -116,7 +116,8 @@ export default function AddCandidateModal({ onClose, onCreated, onImported }: Ad
   // Searchable comboboxes (Danny r2): function title from the functions lookup
   // (the free-entry toggle decides whether typing may produce a new value),
   // provinces from the lookup.
-  const { functions, allowFreeEntry } = useFunctions() as { functions: Array<string | { value: string; label: string }>; allowFreeEntry: boolean }
+  // DEMO-TAAL-1: pass the translated option list (raw value, translated label) to the picker.
+  const { functionOptions, allowFreeEntry } = useFunctions()
   const { createCandidate, saving } = useCreateCandidate()
   // Cross-entity jump (house pattern, same as EntityLink): opens the candidates
   // page + drawer for an existing record without prop-drilling a callback.
@@ -428,7 +429,7 @@ export default function AddCandidateModal({ onClose, onCreated, onImported }: Ad
                   )}
                   <PersonalCard form={form} errors={errors} set={set} isReq={isReq} genderOptions={genderOptions} />
                   <ContactCard form={form} errors={errors} set={set} isReq={isReq} onBlur={markTouched} fieldMessage={fieldMessage} />
-                  <WorkCard form={form} set={set} isReq={isReq} allowFreeEntry={allowFreeEntry} functions={functions} ownerOptions={ownerOptions} />
+                  <WorkCard form={form} set={set} isReq={isReq} allowFreeEntry={allowFreeEntry} functions={functionOptions} ownerOptions={ownerOptions} />
                   <AddressCard form={form} errors={errors} set={set} isReq={isReq} provinces={provinces} />
                   <ProfileTextCard form={form} set={set} />
                   <BranchesCard branchIds={branchIds} setBranchIds={setBranchIds} locations={locations} />

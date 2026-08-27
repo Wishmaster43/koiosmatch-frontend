@@ -92,6 +92,22 @@ export interface RawMatch {
   custom_fields?: Record<string, unknown>
   // EXTRACT-1: the shared raw shape (src/lib/backofficeLink) — the Koppelingen tab.
   backoffice_links?: ApiBackofficeLink[]
+  // MATCH-DRILL-2: termination read-back (AttachesMatchParityFields, K-126). The
+  // openapi spec only documents this nested shape on the /terminate 200 response
+  // (no 2xx schema for GET /matches/{id} yet — measured, only 401 is typed) — the
+  // list/detail resources share the same base class per WORKLIST, so this is
+  // hand-written from that terminate response shape (CLAUDE.md §10).
+  termination?: {
+    stop_reason?: string | null
+    stop_reason_label?: string | null
+    effective_date?: string | null
+    terminated_at?: string | null
+    terminated_by?: string | null
+  } | null
+  // MATCH-DRILL-2: renewal count (1st/2nd/3rd renewal) — not in the openapi spec
+  // at all (no /renew or detail 2xx schema is typed); hand-written per the
+  // WORKLIST field name (AttachesMatchParityFields).
+  renewal_count?: number | null
   [k: string]: unknown
 }
 
@@ -162,5 +178,13 @@ export interface MatchRow {
   // fabricated value) until the raw payload actually carries the
   // `application_id` key — see mapMatch's OFFERED-IFF-READ comment.
   origin?: 'application' | 'direct'
+  // MATCH-DRILL-2: termination read-back + renewal count — see RawMatch.termination
+  // above for why these are hand-written. null/undefined = not terminated / no
+  // renewals yet, never a fabricated value.
+  stopReason?: string | null
+  stopReasonLabel?: string | null
+  terminationEffectiveDate?: string | null
+  terminatedAt?: string | null
+  renewalCount?: number | null
   [k: string]: unknown
 }

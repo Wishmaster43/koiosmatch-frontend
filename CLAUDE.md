@@ -661,7 +661,8 @@ the code is worse than no rule, because the next reader builds on it. What is tr
     boxShadow); STAPELING via `--z-sticky/drawer/overlay/popover/toast`
     (nooit een los getal — de lintregel vangt numerieke én string-literals,
     maar NIET Tailwind-klassen: een `z-40`/`z-50` in een className is dezelfde
-    fout en moet je zelf zien; ~10 oude zitten nog in report/sm-drawers);
+    fout en moet je zelf zien; report/sm-drawers zijn geveegd op 27-08
+    (KPIDRILL-CHROME-1) — 0 resterend);
     BEWEGING via `--motion-fast`.
   Per-tenant instelbaarheid loopt uitsluitend via de tokens die Instellingen →
   Bedrijf → Branding in de backend-DB bewaart — een component dat een kleur
@@ -1125,6 +1126,24 @@ Be honest. If something is not done, say so — do not pretend.
   · Rapporten: KPI-rij = echte server-KPI's met semantische kleur; grafieken =
     mix (donut/staaf/lijn/tabel naar datavorm); "Vergelijk met" en élk filter in
     het rechterpaneel; drill-lade = SM-idioom met record-doorklik.
+  · **DEMO-TAAL (Danny 27-08, verbatim: "DEMO MOET IN ALLE TALEN GEGEVEN KUNNEN
+    WORDEN GELDT DUS VOOR ALLE DATA!!"):** alle GESEEDE demo-data rendert vertaald
+    in elke taal via de LOOKUP-I18N-1-machinerie (functies, documenttypen,
+    faselabels, kanalen) — tenant-hernoemde waarden blijven zoals getypt.
+  · **PLACEHOLDER-LOKAAL (Danny 27-08, screenshots +31/Amsterdam/de-van):**
+    voorbeeld-placeholders dragen per taal een passend marktvoorbeeld (telefoon-
+    prefix, stad, postcodeformaat, tussenvoegsel) en nooit zorg-framing als hét
+    voorbeeld (algemeen staffing) — en nooit een kastlijntje in het voorbeeldproza.
+  · **NOTITIE-REFERENTIE (Danny 27-08: "Notities moeten zo zijn!"):** de
+    kandidaat-notitierij is de canon voor élke entiteit: typechip + auteur +
+    DD-MM-YYYY HH:mm + potlood + prullenbak + pop-out. Een notitietab zonder die
+    rij-affordances is een half scherm.
+  · **KANDIDAAT-EERST (Danny 27-08, matches-subtabellen):** in een drawer-subtabel
+    begint de rij met de kandidaatnaam, met ruimte voor de volledige naam; een
+    kolom die het drawer-onderwerp herhaalt vervalt daar.
+  · **GEEN KOSTEN IN DE CHAT (Danny 27-08: "Euro's moeten weg"):** de Koios-chat
+    toont model · tokens (gelokaliseerde duizendtallen), nooit kosten aan de
+    eindgebruiker.
 - **Subagent model policy (Danny 2026-07-22 — supersedes 2026-07-08/15/17; fallback updated 2026-07-24):**
   The MANAGER runs **Fable 5 at reasoning effort high**; when Fable's budget is
   exhausted, **Opus 5 (`claude-opus-5`) at high** takes over as the TEMPORARY

@@ -36,11 +36,11 @@ describe('KoiosModelsCard', () => {
   // check mark (lucide's Check renders class "lucide-check"), inactive cards carry neither.
   it('marks the active flavour with aria-checked and a visible check mark', () => {
     render(<KoiosModelsCard models={models} t={t} />)
-    const activeRadio = screen.getByRole('radio', { name: /models\.tier\.slim/ })
+    const activeRadio = screen.getByRole('radio', { name: /models.tier.smart/ })
     expect(activeRadio).toHaveAttribute('aria-checked', 'true')
     expect(activeRadio.querySelector('svg.lucide-check')).not.toBeNull()
 
-    const inactiveRadio = screen.getByRole('radio', { name: /models\.tier\.snel/ })
+    const inactiveRadio = screen.getByRole('radio', { name: /models.tier.fast/ })
     expect(inactiveRadio).toHaveAttribute('aria-checked', 'false')
     expect(inactiveRadio.querySelector('svg.lucide-check')).toBeNull()
   })

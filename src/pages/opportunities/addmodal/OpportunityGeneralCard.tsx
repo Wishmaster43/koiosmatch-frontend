@@ -8,7 +8,7 @@
 import type { TFunction } from 'i18next'
 import { FieldRow, TextField } from '@/components/forms/fields'
 import CreatableSelect from '@/components/ui/CreatableSelect'
-import { cardHead, cardBox, row2 } from '@/components/ui/modalCards'
+import { cardHead, cardBox } from '@/components/ui/modalCards'
 
 interface Option { value: string; label: string }
 
@@ -49,55 +49,51 @@ export default function OpportunityGeneralCard({
           <TextField value={title} onChange={onTitleChange} placeholder={titlePlaceholder} error={titleError} />
           {titleError && <div style={{ fontSize: 11, color: 'var(--color-danger-text)', marginTop: 3 }}>{t('modal.required')}</div>}
         </FieldRow>
-        <div style={row2}>
-          <FieldRow label={t('modal.fields.client')}>
-            {/* Searchable, pick-only (allowCreate=false) — a customer is a real
-                relational id, never a free-text create.
-                CLEAR-SWEEP (Danny 13-08): every field here rides `|| null` in the
-                submit body (AddOpportunityModal.handleSubmit) — genuinely optional,
-                so clearable. */}
-            <CreatableSelect allowCreate={false} value={clientId || null} onChange={onClientChange}
-              clearable clearLabel={t('modal.fields.client')}
-              placeholder={t('common:select')} options={customerOptions} />
-            {/* R8: a failed /customers load must read as an error, never as "this tenant has no customers". */}
-            {customersError && <div style={{ fontSize: 11, color: 'var(--color-danger-text)', marginTop: 3 }}>{t('common:errorGeneric')}</div>}
-          </FieldRow>
-          <FieldRow label={t('modal.fields.contact')}>
-            {/* Danny 28-07: same-named contacts (one per location/department
-                coupling) were indistinguishable — the label carries the
-                function title, mirroring RelationsSection's contact picker
-                (resolved in the parent's contactOptions). */}
-            <CreatableSelect value={contactId || null} onChange={onContactChange} allowCreate={false}
-              clearable clearLabel={t('modal.fields.contact')}
-              placeholder={cascadePlaceholder} options={contactOptions} />
-          </FieldRow>
-        </div>
-        <div style={row2}>
-          <FieldRow label={t('modal.fields.location')}>
-            <CreatableSelect value={locationId || null} onChange={onLocationChange} allowCreate={false}
-              clearable clearLabel={t('modal.fields.location')}
-              placeholder={cascadePlaceholder} options={locationOptions} />
-          </FieldRow>
-          <FieldRow label={t('modal.fields.department')}>
-            <CreatableSelect value={departmentId || null} onChange={onDepartmentChange} allowCreate={false}
-              clearable clearLabel={t('modal.fields.department')}
-              placeholder={cascadePlaceholder} options={departmentOptions} />
-          </FieldRow>
-        </div>
-        <div style={row2}>
-          <FieldRow label={t('modal.fields.owner')}>
-            <CreatableSelect value={ownerId || null} onChange={onOwnerChange} allowCreate={false}
-              clearable clearLabel={t('modal.fields.owner')}
-              placeholder={t('common:select')} options={ownerOptions} />
-          </FieldRow>
-          {/* K2: Vestiging — the bureau's own branch handling this deal
-              (`location_id`, distinct from the customer's site above). */}
-          <FieldRow label={t('modal.fields.branch')}>
-            <CreatableSelect value={branchId || null} onChange={onBranchChange} allowCreate={false}
-              clearable clearLabel={t('modal.fields.branch')}
-              placeholder={t('common:select')} options={branchOptions} />
-          </FieldRow>
-        </div>
+        {/* MODAL-FIELD-CANON (§3A): one labelled field per row, full row width —
+            two-pairs-per-row squeezed name-bearing selects (Danny screenshot). */}
+        <FieldRow label={t('modal.fields.client')}>
+          {/* Searchable, pick-only (allowCreate=false) — a customer is a real
+              relational id, never a free-text create.
+              CLEAR-SWEEP (Danny 13-08): every field here rides `|| null` in the
+              submit body (AddOpportunityModal.handleSubmit) — genuinely optional,
+              so clearable. */}
+          <CreatableSelect allowCreate={false} value={clientId || null} onChange={onClientChange}
+            clearable clearLabel={t('modal.fields.client')}
+            placeholder={t('common:select')} options={customerOptions} />
+          {/* R8: a failed /customers load must read as an error, never as "this tenant has no customers". */}
+          {customersError && <div style={{ fontSize: 11, color: 'var(--color-danger-text)', marginTop: 3 }}>{t('common:errorGeneric')}</div>}
+        </FieldRow>
+        <FieldRow label={t('modal.fields.contact')}>
+          {/* Danny 28-07: same-named contacts (one per location/department
+              coupling) were indistinguishable — the label carries the
+              function title, mirroring RelationsSection's contact picker
+              (resolved in the parent's contactOptions). */}
+          <CreatableSelect value={contactId || null} onChange={onContactChange} allowCreate={false}
+            clearable clearLabel={t('modal.fields.contact')}
+            placeholder={cascadePlaceholder} options={contactOptions} />
+        </FieldRow>
+        <FieldRow label={t('modal.fields.location')}>
+          <CreatableSelect value={locationId || null} onChange={onLocationChange} allowCreate={false}
+            clearable clearLabel={t('modal.fields.location')}
+            placeholder={cascadePlaceholder} options={locationOptions} />
+        </FieldRow>
+        <FieldRow label={t('modal.fields.department')}>
+          <CreatableSelect value={departmentId || null} onChange={onDepartmentChange} allowCreate={false}
+            clearable clearLabel={t('modal.fields.department')}
+            placeholder={cascadePlaceholder} options={departmentOptions} />
+        </FieldRow>
+        <FieldRow label={t('modal.fields.owner')}>
+          <CreatableSelect value={ownerId || null} onChange={onOwnerChange} allowCreate={false}
+            clearable clearLabel={t('modal.fields.owner')}
+            placeholder={t('common:select')} options={ownerOptions} />
+        </FieldRow>
+        {/* K2: Vestiging — the bureau's own branch handling this deal
+            (`location_id`, distinct from the customer's site above). */}
+        <FieldRow label={t('modal.fields.branch')}>
+          <CreatableSelect value={branchId || null} onChange={onBranchChange} allowCreate={false}
+            clearable clearLabel={t('modal.fields.branch')}
+            placeholder={t('common:select')} options={branchOptions} />
+        </FieldRow>
       </div>
     </div>
   )

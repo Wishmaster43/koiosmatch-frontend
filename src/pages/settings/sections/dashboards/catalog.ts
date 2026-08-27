@@ -5,7 +5,7 @@
  * share, so the grouping logic has one tested home instead of living inline
  * in JSX.
  */
-import { DASHBOARD_TEMPLATES, BLOCK_LABEL_KEY, type DashboardType } from '@/pages/dashboard/shared'
+import { DASHBOARD_TEMPLATES, BLOCK_LABEL_KEY, defaultHiddenBlocks, type DashboardType } from '@/pages/dashboard/shared'
 
 // Block-id categories, derived from the id prefix — 'chart.*' / 'list.*' /
 // 'block.*' (Werkfeeds). Anything without a known prefix falls back to 'block'
@@ -25,7 +25,12 @@ export const blockCategory = (id: string): BlockCategory => {
 // DashboardsSettings `blocksFor` so wildcard roles keep showing everything.
 export const blocksForRole = (type: DashboardType): string[] => {
   const tpl = DASHBOARD_TEMPLATES[type] ?? []
-  return tpl.includes('*') ? Object.keys(BLOCK_LABEL_KEY) : tpl
+  const ids = tpl.includes('*') ? Object.keys(BLOCK_LABEL_KEY) : tpl
+  // A block hidden by the template default (visibleBlock's DEFAULT_HIDDEN_BLOCKS)
+  // must never appear as a toggleable row here — it would render "on" and lie,
+  // since the dashboard itself force-hides it regardless of the tenant toggle (§3).
+  const hidden = defaultHiddenBlocks(type)
+  return hidden.length ? ids.filter(id => !hidden.includes(id)) : ids
 }
 
 // Group a role's block ids into { block, chart, list } — empty categories are

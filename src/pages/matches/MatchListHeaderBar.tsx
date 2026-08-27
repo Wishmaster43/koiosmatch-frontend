@@ -17,7 +17,13 @@ import { MATCH_COL_STATUS, MATCH_COL_OTHER_PARTY, MATCH_COL_SCORE, MATCH_COL_ACT
  * Kandidaat, "Candidate", on the customer/vacancy side), passed in already
  * translated (§5).
  */
-export default function MatchListHeaderBar({ otherPartyLabel }: { otherPartyLabel: string }) {
+export default function MatchListHeaderBar({ otherPartyLabel, leadWithOtherParty = false, showVacancyColumn = true }: {
+  otherPartyLabel: string
+  // DRAWER-UX-1: mirrors MatchCard's own prop — swaps which column leads and
+  // whether the (now-secondary) vacancy column renders at all.
+  leadWithOtherParty?: boolean
+  showVacancyColumn?: boolean
+}) {
   const { t } = useTranslation(['candidates', 'matches'])
   return (
     // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- table-header BAR: the 11/600 muted typography inherits into its column cells; a text atom cannot be this flex container
@@ -27,10 +33,18 @@ export default function MatchListHeaderBar({ otherPartyLabel }: { otherPartyLabe
       {/* minWidth:0 lets this shrink, so it MUST clip — without overflow the
           label paints straight over the next column when space runs short
           (Danny 09-08 saw "VacatuStatus" printed on top of each other). */}
-      <span style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t('candidates:work.vacancy')}</span>
+      {/* DRAWER-UX-1: leading column is the candidate when leadWithOtherParty,
+          the vacancy otherwise (unchanged default for the candidate drawer). */}
+      <span style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+        {leadWithOtherParty ? otherPartyLabel : t('candidates:work.vacancy')}
+      </span>
       {/* Reuses the SAME key ApplicationRow's own status column uses (WorkTab.tsx). */}
       <span data-testid="match-col-status-header" style={MATCH_COL_STATUS}>{t('candidates:work.colStatus')}</span>
-      <span data-testid="match-col-client-header" style={MATCH_COL_OTHER_PARTY}>{otherPartyLabel}</span>
+      {(!leadWithOtherParty || showVacancyColumn) && (
+        <span data-testid={leadWithOtherParty ? 'match-col-vacancy-header' : 'match-col-client-header'} style={MATCH_COL_OTHER_PARTY}>
+          {leadWithOtherParty ? t('candidates:work.vacancy') : otherPartyLabel}
+        </span>
+      )}
       {/* Reuses MatchesTable's own score-column label ("Match") rather than a new key. */}
       <span data-testid="match-col-score-header" style={MATCH_COL_SCORE}>{t('matches:cols.score')}</span>
       <span aria-hidden="true" data-testid="match-col-actions-header" style={MATCH_COL_ACTIONS} />

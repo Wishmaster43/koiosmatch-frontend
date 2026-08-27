@@ -19,10 +19,10 @@ import AddDepartmentModal from './AddDepartmentModal'
 // SUBENTITY-IMPORT-1: only the NETWORK calls are mocked — the real wizard/steps run,
 // so these tests prove the actual wiring (dry-run-before-real-run, xlsx rejection,
 // close-on-success, parent-mismatch), not a stub of it (mirrors AddLocationModal.test.tsx).
-import { dryRunImport, runImport, type ImportRunResult } from '@/pages/settings/sections/importeren/importApi'
+import { dryRunImport, runImport, type ImportRunResult } from '@/pages/settings/sections/import/importApi'
 
-vi.mock('@/pages/settings/sections/importeren/importApi', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@/pages/settings/sections/importeren/importApi')>()
+vi.mock('@/pages/settings/sections/import/importApi', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/pages/settings/sections/import/importApi')>()
   return { ...actual, dryRunImport: vi.fn(), runImport: vi.fn(), downloadImportTemplate: vi.fn() }
 })
 // Tiptap needs a real browser to mount — stubbed with a plain controlled textarea,

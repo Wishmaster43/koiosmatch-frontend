@@ -78,7 +78,7 @@ export function formatNumberCompact(value: NumberInput, locale: string = 'nl-NL'
 // place billing screens format money (K0 billing block) so they never hand-roll
 // their own `new Intl.NumberFormat(locale, { style: 'currency', ... })` call.
 // Defaults to EUR since every backend money field falls back to it (mirrors
-// KoiosPricingCard/GebruikSettings' prior inline helpers).
+// KoiosPricingCard/BillingUsageSettings' prior inline helpers).
 // `maximumFractionDigits` caps decimals for whole-amount screens (opportunities
 // show "€ 17.000", not "€ 17.000,00"); omitted = the locale's own default.
 // `minimumFractionDigits` (CREDITS-1) lets a sub-cent price render UNROUNDED as

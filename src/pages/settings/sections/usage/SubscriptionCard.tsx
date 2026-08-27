@@ -111,7 +111,18 @@ export default function SubscriptionCard({ subscription, phase, onDrillAi, onDri
           <MeterBar label={t('billing.usage.plan.workflowMeter')} used={subscription.workflow?.used} budget={subscription.workflow?.budget} onDrill={onDrillWorkflow} />
           {/* Third meter (CMBE, F5 25-08) — WhatsApp Tokens, presence-gated. */}
           {hasMeter(subscription.whatsapp) && (
-            <MeterBar label={t('billing.usage.plan.whatsappMeter')} used={subscription.whatsapp?.used} budget={subscription.whatsapp?.budget} />
+            <>
+              <MeterBar label={t('billing.usage.plan.whatsappMeter')} used={subscription.whatsapp?.used} budget={subscription.whatsapp?.budget} />
+              {/* K-204: the € 0,01/token price — measured bug (Danny: "elke keer
+                  is de 0,01 weg"): price_cents arrived on the wire but nothing
+                  ever rendered it. Cents → euros at the boundary, 2 decimals so
+                  a 1-cent price never rounds to "€ 0,00". */}
+              {subscription.whatsapp?.price_cents != null && (
+                <p style={{ ...notice, marginTop: -10 }}>
+                  {t('billing.usage.whatsapp.priceCaption', { amount: formatCurrency(subscription.whatsapp.price_cents / 100, 'EUR', 2, 2) })}
+                </p>
+              )}
+            </>
           )}
 
           {/* `over` is a COUNT — `> 0` guard, never truthiness (a bare 0 leaked

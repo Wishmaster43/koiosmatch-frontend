@@ -1,6 +1,6 @@
 /**
  * UsageOverviewSection (F5 25-08 refactor) — now a pure presenter (data/phase
- * arrive as props, the fetch and the period filter moved to GebruikSettings).
+ * arrive as props, the fetch and the period filter moved to BillingUsageSettings).
  * Asserts the KPI row's real figures and the day-bar/table-row → drill-down
  * open/close flow. The chart itself is exercised via UsageDailyTable's own
  * onRowClick (the same code path UsageDayChart's onBarClick calls into).

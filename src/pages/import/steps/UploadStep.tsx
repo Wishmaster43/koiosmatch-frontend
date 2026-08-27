@@ -20,7 +20,7 @@ import Spinner from '@/components/ui/Spinner'
 // screen parses the file client-side for column mapping (lib/csv.ts, text-only — no
 // xlsx parsing library in this repo) before anything is uploaded, so a binary .xlsx
 // would only produce mojibake here. Left at .csv/.txt on purpose; see
-// settings/sections/importeren/UploadStep.tsx for the raw-upload screen that DOES
+// settings/sections/import/UploadStep.tsx for the raw-upload screen that DOES
 // take .xlsx (it never parses client-side, the backend reads it directly).
 const ACCEPTED_EXTENSIONS = ['.csv', '.txt']
 

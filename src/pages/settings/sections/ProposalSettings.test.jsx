@@ -9,7 +9,7 @@ import i18n from '@/i18n'
 import ProposalSettings from './ProposalSettings'
 
 // Real translations (no i18n provider in this render tree, so t() would
-// otherwise just echo the key) — mirrors GebruikSettings.test.jsx's pattern.
+// otherwise just echo the key) — mirrors BillingUsageSettings.test.jsx's pattern.
 const t = (key, opts) => i18n.t(key, { ns: 'settings', ...opts })
 
 // Route the shared settings loader: the blob is controlled per test; saves go

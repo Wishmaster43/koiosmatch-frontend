@@ -101,7 +101,7 @@ export interface BillingUsageAi {
   per_user?: BillingUsageAiPerUser[]
 }
 // CREDITS-2 (Danny's package budgets) — the tenant's subscription snapshot,
-// additive on the same /billing/usage response (no second fetch, GebruikSettings
+// additive on the same /billing/usage response (no second fetch, BillingUsageSettings
 // lifts this out of UsageOverviewSection's existing call via onSubscriptionChange).
 export interface BillingUsageSubscriptionMeter {
   budget?: number
@@ -110,6 +110,10 @@ export interface BillingUsageSubscriptionMeter {
   // max(0, used - budget); 0 means within budget (Opus round, golf 4).
   over?: number
   over_amount?: number
+  // WhatsApp-only field (contract 25-08 "data.subscription.whatsapp
+  // {used, budget, over, over_amount, price_cents}") — the per-token EUR price
+  // in CENTS, absent on the ai/workflow meters.
+  price_cents?: number
 }
 export interface BillingUsageSubscription {
   package_key?: string
@@ -218,7 +222,7 @@ export interface AdminTenantUsage {
   connectors?: Array<{ key: string; usage?: number }>
   workflow_tokens?: { total_module_runs?: number; per_module?: Record<string, number> }
   // Additive superadmin billing block for the SELECTED month (purchase/margin
-  // never render on the tenant-facing screen — that is `GebruikSettings`).
+  // never render on the tenant-facing screen — that is `BillingUsageSettings`).
   // CREDITS-2: the budget/reset fields live INSIDE billing — the controller
   // merges billingForMonth() under this key (Opus round, golf 4).
   billing?: {

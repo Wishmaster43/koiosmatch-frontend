@@ -13,6 +13,7 @@ import type { CvCandidate } from '../CandidateCvTemplate'
 import { useCvSettings } from '@/lib/useCvSettings'
 import { useLocale, useDateFormat } from '@/lib/datetime'
 import { useFunctions } from '@/lib/useFunctions'
+import { useSeedLabel } from '@/lib/useSeedLabel'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import ReferenceNumberChip from '@/components/ui/ReferenceNumberChip'
@@ -55,7 +56,10 @@ export function CandidateTitle({ c, editing, hf, setHF }: {
   hf: (k: keyof HeaderForm) => string; setHF: (k: keyof HeaderForm, v: string) => void
 }) {
   const { t } = useTranslation('candidates')
-  const { functions, allowFreeEntry } = useFunctions() as { functions: Array<string | { value: string; label: string }>; allowFreeEntry: boolean }
+  // DEMO-TAAL-1: pair the raw stored function name with its translated label for the
+  // picker, and translate the read-only subtitle the same way (seeded default only).
+  const { functionOptions, allowFreeEntry } = useFunctions()
+  const seedLabel = useSeedLabel()
   if (editing) return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 6, minWidth: 0 }}>
       <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: 6 }}>
@@ -72,7 +76,7 @@ export function CandidateTitle({ c, editing, hf, setHF }: {
       <input placeholder={t('modal.fields.middleName')} value={hf('middleName')} onChange={e => setHF('middleName', e.target.value)}
         // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- name edit <input> matching the bold PageTitle it replaces while editing, not a SectionTitle heading
         style={{ ...inputBase, fontSize: 13, fontWeight: 600 }} />
-      <CreatableSelect value={hf('title')} options={functions} onChange={v => setHF('title', v)}
+      <CreatableSelect value={hf('title')} options={functionOptions} onChange={v => setHF('title', v)}
         allowCreate={allowFreeEntry} placeholder={t('columns.function')} menuWidth={260} />
     </div>
   )
@@ -85,7 +89,7 @@ export function CandidateTitle({ c, editing, hf, setHF }: {
         {/* ONTKOPPEL-TELLER-1: whole-history CURRENTLY-detached count, warning-only (hidden at 0). */}
         <DetachedCountBadge count={c.detachedCount} />
       </div>
-      <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{c.title || '—'}</div>
+      <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{c.title ? seedLabel('functions', { label: c.title }) : '—'}</div>
     </>
   )
 }

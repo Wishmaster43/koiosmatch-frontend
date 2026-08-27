@@ -76,6 +76,15 @@ export default function UsageWhatsAppTab({ whatsapp }: UsageWhatsAppTabProps) {
         {tokens && (
           <div style={{ marginBottom: 14 }}>
             <MeterBar label={t('billing.usage.whatsapp.tokensMeterLabel')} used={tokens.used} budget={tokens.budget} />
+            {/* K-204: the € 0,01/token price — measured bug (Danny: "elke keer
+                is de 0,01 weg"): price_cents arrived on the wire but nothing
+                ever rendered it. Cents → euros at the boundary, 2 decimals so
+                a 1-cent price never rounds to "€ 0,00". */}
+            {tokens.price_cents != null && (
+              <p style={notice}>
+                {t('billing.usage.whatsapp.priceCaption', { amount: formatCurrency(tokens.price_cents / 100, 'EUR', 2, 2) })}
+              </p>
+            )}
             {(tokens.over ?? 0) > 0 && (
               <p style={{ ...notice, color: 'var(--color-danger-text)' }}>
                 {t('billing.usage.plan.overBudget', {

@@ -4,7 +4,7 @@
  * day detail card, and the day/week table.
  *
  * F5 (25-08): the /billing/usage fetch and the period right-panel filter both
- * moved UP to the GebruikSettings container — every sub-tab (Overzicht, Per
+ * moved UP to the BillingUsageSettings container — every sub-tab (Overzicht, Per
  * functie, Per workflow, Per gebruiker, WhatsApp) shares the SAME one period
  * control and the SAME one fetch, instead of each tab re-fetching and
  * re-registering its own copy. This component is now a pure presenter: `data`

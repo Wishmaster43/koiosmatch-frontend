@@ -33,10 +33,10 @@ export default function OrderDetailDrawer({ row, onClose }: { row: OrderRow | nu
 
   return (
     <>
-      <div className="fixed inset-0 z-30" onClick={onClose} />
+      <div className="fixed inset-0" style={{ zIndex: 'var(--z-drawer)' }} onClick={onClose} />
       <div ref={panelRef} role="dialog" aria-modal="true" aria-label={t('orders.drawer.title')} tabIndex={-1}
-        className="fixed right-0 top-0 bottom-0 z-40 overflow-y-auto"
-        style={{ width: 400, background: 'var(--surface)', borderLeft: '1px solid var(--border)',
+        className="fixed right-0 top-0 bottom-0 overflow-y-auto"
+        style={{ width: 400, zIndex: 'var(--z-drawer)', background: 'var(--surface)', borderLeft: '1px solid var(--border)',
                  boxShadow: 'var(--shadow-drawer)' }}>
         <div style={{ padding: '20px 20px 0', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                       borderBottom: '1px solid var(--border)', paddingBottom: 16, marginBottom: 20 }}>

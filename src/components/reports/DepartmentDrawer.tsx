@@ -18,11 +18,11 @@ export default function DepartmentDrawer({ department, onClose }: { department: 
   const { t } = useTranslation('reports')
   return (
     <>
-      <div className="fixed inset-0 z-40" style={{ background: 'rgba(0,0,0,0.25)' }} onClick={onClose} />
+      <div className="fixed inset-0" style={{ background: 'rgba(0,0,0,0.25)', zIndex: 'var(--z-drawer)' }} onClick={onClose} />
 
       <div ref={panelRef} role="dialog" aria-modal="true" aria-label={department?.name as string | undefined} tabIndex={-1}
-        className="fixed top-0 bottom-0 right-0 z-50 flex flex-col bg-[var(--surface)]"
-        style={{ width: 420, boxShadow: 'var(--shadow-drawer)' }}>
+        className="fixed top-0 bottom-0 right-0 flex flex-col bg-[var(--surface)]"
+        style={{ width: 420, zIndex: 'var(--z-drawer)', boxShadow: 'var(--shadow-drawer)' }}>
 
         {/* Header */}
         <div style={{ padding: '18px 20px', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>

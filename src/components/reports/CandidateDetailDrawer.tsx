@@ -180,12 +180,12 @@ export default function CandidateDetailDrawer({ candidate: c, onClose }: { candi
 
   return (
     <>
-      <div className="fixed inset-0 z-40" style={{ background: 'rgba(0,0,0,0.25)' }}
+      <div className="fixed inset-0" style={{ background: 'rgba(0,0,0,0.25)', zIndex: 'var(--z-drawer)' }}
         onClick={onClose} />
 
       <div ref={panelRef} role="dialog" aria-modal="true" aria-label={fullName} tabIndex={-1}
-        className="fixed top-0 bottom-0 right-0 z-50 flex flex-col bg-[var(--surface)]"
-        style={{ width: 520, boxShadow: '-4px 0 30px rgba(0,0,0,0.12)', overflow: 'hidden' }}>
+        className="fixed top-0 bottom-0 right-0 flex flex-col bg-[var(--surface)]"
+        style={{ width: 520, zIndex: 'var(--z-drawer)', boxShadow: 'var(--shadow-drawer)', overflow: 'hidden' }}>
 
         {/* Header region: calm EntityHeader idiom — a top row with only close (no
             expand/label, this overlay has no expand mode), then avatar + name +

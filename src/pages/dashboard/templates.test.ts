@@ -106,6 +106,26 @@ describe('dashboard cleanup (DASHBOARD-OPRUIMING-1)', () => {
     expect(() => kpiRow('recruitment')).not.toThrow()
     expect(kpiRow('recruitment')).not.toContain('closingSoon')
   })
+
+  // DASHBOARD-MGMT-1 (Danny 23-08): WhatsApp Web queue and "Recente uitvoeringen"
+  // are off for management — and recruitment_manager mirrors management verbatim
+  // (DASHBOARD-OPRUIMING-1), so its wildcard template must carry the same default
+  // exclusions or the documented mirror invariant silently goes false.
+  it('management and recruitment_manager hide block.waWebQueue and list.runs by default', () => {
+    expect(visibleBlock('management', 'block.waWebQueue')).toBe(false)
+    expect(visibleBlock('management', 'list.runs')).toBe(false)
+    expect(visibleBlock('recruitment_manager', 'block.waWebQueue')).toBe(false)
+    expect(visibleBlock('recruitment_manager', 'list.runs')).toBe(false)
+  })
+
+  // The exclusion is scoped to those two roles only — backoffice's own explicit
+  // template still lists list.runs, and admin (same '*' wildcard as management)
+  // was never named in Danny's instruction, so it must stay unaffected.
+  it('backoffice and admin are unaffected by the management-only exclusions', () => {
+    expect(visibleBlock('backoffice', 'list.runs')).toBe(true)
+    expect(visibleBlock('admin', 'block.waWebQueue')).toBe(true)
+    expect(visibleBlock('admin', 'list.runs')).toBe(true)
+  })
 })
 
 describe('resolveDashboardType (richest-wins precedence)', () => {

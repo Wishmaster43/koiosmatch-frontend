@@ -9,7 +9,7 @@
  * GENERALISED (2026-08-14, EXCEL-VACATURES-1): this used to be customer-only
  * (`useCustomerImport`, hardcoded to `customers.view`/`customers.create`). The
  * permission pair is now resolved from the SELECTED entity via
- * `importPermissionsFor` (settings/sections/importeren/importTemplateShape) — the
+ * `importPermissionsFor` (settings/sections/import/importTemplateShape) — the
  * same source the full-screen import wizard already uses — so a vacancy caller
  * correctly gates on vacancies.view/vacancies.create instead of the customers pair.
  */

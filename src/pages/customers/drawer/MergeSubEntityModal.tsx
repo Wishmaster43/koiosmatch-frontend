@@ -1,6 +1,6 @@
 /**
  * MergeSubEntityModal — absorb a duplicate LOCATION or DEPARTMENT into a survivor,
- * scope-parameterized (mirrors ScopedSollicitatiesTab's `scope` convention, §11 —
+ * scope-parameterized (mirrors ScopedApplicationsTab's `scope` convention, §11 —
  * one shared component, never two near-identical copies). Thin wrapper around the
  * shared MergeEntityModal (picking UI + survivor flow); this file only owns the
  * scope-specific request shape.

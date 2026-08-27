@@ -30,6 +30,22 @@ describe('blocksForRole', () => {
     const ids = blocksForRole('sales')
     expect(ids).toEqual(['chart.oppStage', 'chart.status', 'list.leads'])
   })
+
+  // DASHBOARD-MGMT-1 blocker fix: a block hidden by the template default must
+  // not appear as a toggleable row at all — visibleBlock() force-hides it
+  // regardless of the tenant toggle, so listing it here would be a lying
+  // affordance (§3 no fake affordances).
+  it('drops the default-hidden blocks from management and recruitment_manager', () => {
+    expect(blocksForRole('management')).not.toContain('block.waWebQueue')
+    expect(blocksForRole('management')).not.toContain('list.runs')
+    expect(blocksForRole('recruitment_manager')).not.toContain('block.waWebQueue')
+    expect(blocksForRole('recruitment_manager')).not.toContain('list.runs')
+  })
+
+  it('keeps admin (same wildcard, not named in the exclusion) unaffected', () => {
+    expect(blocksForRole('admin')).toContain('block.waWebQueue')
+    expect(blocksForRole('admin')).toContain('list.runs')
+  })
 })
 
 describe('groupBlocksByCategory', () => {

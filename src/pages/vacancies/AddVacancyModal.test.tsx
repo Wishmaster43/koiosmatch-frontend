@@ -21,10 +21,10 @@ import AddVacancyModal from './AddVacancyModal'
 // EntityImportCard, PreviewStep and ResultStep all run for REAL, so the import
 // tests below prove the actual wizard wiring (dry-run-before-real-run, close +
 // refresh on success), not a stub of it (mirrors AddCustomerModal.test.tsx).
-import { dryRunImport, runImport, type ImportRunResult } from '@/pages/settings/sections/importeren/importApi'
+import { dryRunImport, runImport, type ImportRunResult } from '@/pages/settings/sections/import/importApi'
 
-vi.mock('@/pages/settings/sections/importeren/importApi', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@/pages/settings/sections/importeren/importApi')>()
+vi.mock('@/pages/settings/sections/import/importApi', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/pages/settings/sections/import/importApi')>()
   return { ...actual, dryRunImport: vi.fn(), runImport: vi.fn(), downloadImportTemplate: vi.fn() }
 })
 

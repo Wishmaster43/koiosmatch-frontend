@@ -131,6 +131,26 @@ describe('CustomerDrawer · MatchesTab', () => {
     render(<MatchesTab customerId="cust-1" />)
     expect(screen.queryByTitle(i18n.t('common:edit'))).toBeNull()
   })
+
+  // DRAWER-UX-1 regression: candidate leads the row (the header's flex:1 title
+  // column), vacancy stays a real second column (kept, unlike the vacancy
+  // drawer which drops it) — the data-testid renamed from match-col-client
+  // to match-col-vacancy now that the fixed column shows the vacancy, not the client.
+  it('renders candidate first and vacancy second, with the renamed match-col-vacancy testid', () => {
+    mockUseCustomerMatches.mockReturnValue({ rows: [row()], loading: false, error: false, reload: vi.fn() })
+    render(<MatchesTab customerId="cust-1" />)
+    // Header bar: candidate label leads, vacancy column header is present.
+    expect(screen.getByTestId('match-col-vacancy-header')).toBeInTheDocument()
+    expect(screen.queryByTestId('match-col-client-header')).toBeNull()
+    // Card: the renamed vacancy cell exists (not the old client testid), and
+    // its DOM position follows the title (candidate), proving the swap.
+    const vacancyCell = screen.getByTestId('match-col-vacancy')
+    expect(screen.queryByTestId('match-col-client')).toBeNull()
+    expect(vacancyCell).toHaveTextContent('Verpleegkundige')
+    const header = screen.getByTestId('match-card-header')
+    expect(header).toHaveTextContent('Jane Doe')
+    expect(header.textContent!.indexOf('Jane Doe')).toBeLessThan(header.textContent!.indexOf('Verpleegkundige'))
+  })
 })
 
 /** Point 1 (Danny's ten-point round): "+ Match" opens MatchModal already

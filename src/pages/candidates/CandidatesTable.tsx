@@ -172,7 +172,9 @@ export default function CandidatesTable({ rows, loading, selectedId, onSelect, o
       {
         key: 'title', header: t('columns.function'), nowrap: true, cellStyle: { color: 'var(--text)', fontSize: 12 },
         sortable: true, sortValue: c => c.title,
-        render: c => c.title || '—',
+        // DEMO-TAAL-1: the stored function title renders translated while it still
+        // matches the seeded default; a tenant-renamed function stays as typed.
+        render: c => c.title ? seedLabel('functions', { label: c.title }) : '—',
       },
       { key: 'city', header: t('columns.city'), nowrap: true, cellStyle: plainCell, sortable: true, sortValue: c => c.city, render: c => c.city || '—' },
       {

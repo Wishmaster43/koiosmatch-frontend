@@ -93,12 +93,12 @@ export default function DrillDownDrawer({ title, subtitle, candidates = [], onCl
   return (
     <>
       {/* Backdrop */}
-      <div className="fixed inset-0 z-40" style={{ background: 'rgba(0,0,0,0.25)' }} onClick={onClose} />
+      <div className="fixed inset-0" style={{ background: 'rgba(0,0,0,0.25)', zIndex: 'var(--z-drawer)' }} onClick={onClose} />
 
       {/* Drawer */}
       <div ref={panelRef} role="dialog" aria-modal="true" aria-label={typeof title === 'string' ? title : undefined} tabIndex={-1}
-        className="fixed top-0 bottom-0 right-0 z-50 flex flex-col bg-[var(--surface)]"
-        style={{ width: expanded ? 900 : 560, transition: 'width 0.2s ease', boxShadow: 'var(--shadow-drawer)' }}>
+        className="fixed top-0 bottom-0 right-0 flex flex-col bg-[var(--surface)]"
+        style={{ width: expanded ? 900 : 560, zIndex: 'var(--z-drawer)', transition: 'width 0.2s ease', boxShadow: 'var(--shadow-drawer)' }}>
 
         {/* Header */}
         <div className="flex items-start justify-between flex-shrink-0"

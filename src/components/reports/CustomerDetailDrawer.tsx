@@ -22,11 +22,11 @@ export default function CustomerDetailDrawer({ customer, onClose }: { customer: 
 
   return (
     <>
-      <div className="fixed inset-0 z-40" style={{ background: 'rgba(0,0,0,0.25)' }} onClick={onClose} />
+      <div className="fixed inset-0" style={{ background: 'rgba(0,0,0,0.25)', zIndex: 'var(--z-drawer)' }} onClick={onClose} />
 
       <div ref={panelRef} role="dialog" aria-modal="true" aria-label={customer?.name as string | undefined} tabIndex={-1}
-        className="fixed top-0 bottom-0 right-0 z-50 flex flex-col bg-[var(--surface)]"
-        style={{ width: 560, boxShadow: 'var(--shadow-drawer)' }}>
+        className="fixed top-0 bottom-0 right-0 flex flex-col bg-[var(--surface)]"
+        style={{ width: 560, zIndex: 'var(--z-drawer)', boxShadow: 'var(--shadow-drawer)' }}>
 
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between',

@@ -13,7 +13,10 @@ import { notifyError } from '@/lib/notify'
 // ("action failed") where the backend told us exactly what is wrong
 // (DOC-1-EIGENAAR-1's 422, a validation error, …).
 import { extractApiError } from '@/lib/extractApiError'
-import { ExperienceTab as ExperienceTabJs, EducationTab as EducationTabJs, CertificationsTab as CertificationsTabJs, SkillsTab as SkillsTabJs } from './SectionTabs'
+import { ExperienceTab as ExperienceTabJs } from './ExperienceTab'
+import { EducationTab as EducationTabJs } from './EducationTab'
+import { CertificationsTab as CertificationsTabJs } from './CertificationsTab'
+import { SkillsTab as SkillsTabJs } from './SkillsTab'
 import LanguagesSection from './LanguagesSection'
 import ReferencesTab from './ReferencesTab'
 import SubTabBar from '@/components/drawer/SubTabBar'

@@ -92,7 +92,7 @@ export default function MatchesTab({ customerId }: { customerId?: Id }) {
       <SectionCard>
       {/* KLANTEN 4 (Danny 21-08 "Weergeven zoals bij de kandidaat"): the same
           shared column-header bar + collapsed flat rows the candidate tab has. */}
-      <MatchListHeaderBar otherPartyLabel={t('matches:cols.candidate')} />
+      <MatchListHeaderBar otherPartyLabel={t('matches:cols.candidate')} leadWithOtherParty />
       {matches.length === 0 ? (
         <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('candidates:matchesView.empty')}</div>
       ) : matches.map((m, i) => {
@@ -111,7 +111,7 @@ export default function MatchesTab({ customerId }: { customerId?: Id }) {
             functionTitle={m.functionTitle} branchName={m.branchName} ownerName={m.owner}
             startDate={m.startDate} endDate={m.endDate}
             isClosed={statusMeta?.is_closed} archived={m.archived}
-            collapsible flatRow
+            collapsible flatRow leadWithOtherParty
           />
         )
       })}

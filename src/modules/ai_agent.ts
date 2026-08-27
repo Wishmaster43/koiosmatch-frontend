@@ -21,18 +21,18 @@ export default {
   schema: [
     // Stored value = the agent NAME: AiAgentModule resolves `AiAgent::where('name', …)`
     // and its own schema offers pluck('name') (Opus-measured) — an id would match nobody.
-    { key: 'agent', label: 'AI-agent', type: 'lookup_select', endpoint: '/ai/agents', valueKey: 'name', tab: 'standaard' },
-    { key: 'channel', label: 'Kanaal', type: 'select', tab: 'standaard', default: 'whatsapp',
+    { key: 'agent', label: 'AI-agent', type: 'lookup_select', endpoint: '/ai/agents', valueKey: 'name', tab: 'general' },
+    { key: 'channel', label: 'Kanaal', type: 'select', tab: 'general', default: 'whatsapp',
       options: ['whatsapp'] },
-    { key: 'instruction', label: 'Instructietekst (agent-prompt)', type: 'textarea', tab: 'standaard', required: true,
+    { key: 'instruction', label: 'Instructietekst (agent-prompt)', type: 'textarea', tab: 'general', required: true,
       hint: 'De volledige, tenant-bewerkbare instructie voor de AI-agent: persona, staps-state-machine, harde regels. Het runtime-antwoordcontract wordt automatisch toegevoegd.' },
     // REQUIRED, like the engine's own schema: AiAgentModule::sendReply throws on an
     // empty phone_number_id before any send-path selection runs (Opus-measured) —
     // the WA-SCOPE-2 fallback lives in the WhatsApp send path this module never
     // reaches, so a "leave empty" promise here would be a fake affordance.
-    { key: 'phone_number_id', label: 'Verzendnummer (voor de sessieantwoorden)', type: 'lookup_select', endpoint: '/whatsapp-phone-numbers', tab: 'standaard', required: true },
-    { key: 'reply_timeout_hours', label: 'Terugvaltijd zonder reactie (uren)', type: 'number', tab: 'geavanceerd', default: 48,
+    { key: 'phone_number_id', label: 'Verzendnummer (voor de sessieantwoorden)', type: 'lookup_select', endpoint: '/whatsapp-phone-numbers', tab: 'general', required: true },
+    { key: 'reply_timeout_hours', label: 'Terugvaltijd zonder reactie (uren)', type: 'number', tab: 'advanced', default: 48,
       hint: 'Reageert de kandidaat niet, dan valt de run na dit aantal uren terug (workflows:resume-due watchdog).' },
-    { key: 'max_attempts', label: 'Max. pogingen per beurt (bij een tijdelijke API-fout)', type: 'number', tab: 'geavanceerd', default: 3 },
+    { key: 'max_attempts', label: 'Max. pogingen per beurt (bij een tijdelijke API-fout)', type: 'number', tab: 'advanced', default: 3 },
   ],
 }

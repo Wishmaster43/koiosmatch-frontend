@@ -178,13 +178,12 @@ export default function ShiftsDrillDownDrawer({ metric, metricOptions, periods, 
 
   return (
     <>
-      <div className="fixed inset-0 z-40" style={{ background: 'rgba(0,0,0,0.25)' }} onClick={onClose} />
+      <div className="fixed inset-0" style={{ background: 'rgba(0,0,0,0.25)', zIndex: 'var(--z-drawer)' }} onClick={onClose} />
 
       <div ref={panelRef} role="dialog" aria-modal="true" aria-label={title} tabIndex={-1}
         onKeyDown={e => { if (e.target instanceof HTMLInputElement) return; if (e.key === 'ArrowLeft') goPeriod(-1); else if (e.key === 'ArrowRight') goPeriod(1) }}
-        className="fixed top-0 bottom-0 right-0 z-50 flex flex-col bg-[var(--surface)]"
-        // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- pre-existing side-drawer panel shadow, shared verbatim by every drill-down/side-drawer shell in the app; an app-wide --shadow-drawer token migration is out of this task's mechanical scope
-        style={{ width: 620, boxShadow: '-4px 0 30px rgba(0,0,0,0.12)' }}>
+        className="fixed top-0 bottom-0 right-0 flex flex-col bg-[var(--surface)]"
+        style={{ width: 620, zIndex: 'var(--z-drawer)', boxShadow: 'var(--shadow-drawer)' }}>
 
         {/* Header: title + month pager + count */}
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between',

@@ -15,7 +15,7 @@ import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import InsightsRow from '@/components/insights/InsightsRow'
 import type { DonutSpec, KpiSpec } from '@/components/insights/InsightsRow'
-import { calcAandacht } from '@/components/reports/candidateAttention'
+import { calcAttention } from '@/components/reports/candidateAttention'
 import { useLocale } from '@/lib/datetime'
 import { SM_CANDIDATE_STATUS_COLORS, SM_CANDIDATE_STATUS_KEYS } from './data/smCandidateStatus'
 import { endDateOf, noShowCountOf, cancellationsOf } from './data/smCandidateFields'
@@ -103,7 +103,7 @@ export default function SmCandidatesInsightsRow({
   // Existing report metrics (kept, same predicates as CandidatesKpiRow) plus two
   // data-derived additions (no-shows, cancellations) and one tied to the new
   // Uitschrijfdatum column (ending soon) to fill the shared 9-card footprint.
-  const aandacht      = useMemo(() => calcAandacht(candidates), [candidates])
+  const aandacht      = useMemo(() => calcAttention(candidates), [candidates])
   // Headcount feeding the "active" KPI card.
   const activeTotal   = useMemo(() => candidates.filter(c => (c.status || '').toLowerCase() === 'actief').length, [candidates])
   // Active candidates with a future shift already planned — surfaced as the active KPI's sub-label.

@@ -22,10 +22,10 @@ import AddCustomerModal from './AddCustomerModal'
 // CUSTOMER-IMPORT-1: only the NETWORK calls are mocked — useImportWizard, UploadStep,
 // PreviewStep and ResultStep all run for REAL, so these tests prove the actual wizard
 // wiring (dry-run-before-real-run, xlsx rejection, close-on-success), not a stub of it.
-import { dryRunImport, runImport, type ImportRunResult } from '@/pages/settings/sections/importeren/importApi'
+import { dryRunImport, runImport, type ImportRunResult } from '@/pages/settings/sections/import/importApi'
 
-vi.mock('@/pages/settings/sections/importeren/importApi', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@/pages/settings/sections/importeren/importApi')>()
+vi.mock('@/pages/settings/sections/import/importApi', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/pages/settings/sections/import/importApi')>()
   return { ...actual, dryRunImport: vi.fn(), runImport: vi.fn(), downloadImportTemplate: vi.fn() }
 })
 

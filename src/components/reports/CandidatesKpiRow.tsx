@@ -1,12 +1,12 @@
 /**
  * CandidatesKpiRow — the row of KPI cards above the candidates report
  * (active / inactive / new / needs-attention counts + a trend).
- * count() tallies candidates by status; calcAandacht() flags ones needing attention.
+ * count() tallies candidates by status; calcAttention() flags ones needing attention.
  */
 import { useTranslation } from 'react-i18next'
 import { AlertTriangle, UserCheck, UserX, UserPlus, TrendingUp } from 'lucide-react'
 import KpiCard from '../ui/KpiCard'
-import { calcAandacht } from './candidateAttention'
+import { calcAttention } from './candidateAttention'
 import type { ReportCandidate } from '@/types/reports'
 // App-wide active locale (DATUM-1/LANE-B) — feeds the "new this month" month name.
 import { useLocale } from '@/lib/datetime'
@@ -71,7 +71,7 @@ export default function CandidatesKpiRow({ candidates = [], loading = false, onD
       ? () => onStatusFilter(status)
       : drill(label, c => c.filter(x => (x.status || '').toLowerCase() === status))
 
-  const aandachtItems  = calcAandacht(candidates)
+  const aandachtItems  = calcAttention(candidates)
   const actiefTotal    = count(candidates, 'actief')
   const geplandItems   = calcGepland(candidates)
   const { currentMonthCount, avg, delta } = calcMonthStats(candidates)
@@ -90,7 +90,7 @@ export default function CandidatesKpiRow({ candidates = [], loading = false, onD
         iconBg="var(--color-warning-bg)"
         iconColor="var(--color-warning)"
         loading={loading}
-        onClick={drill(t('kpiRow.attention'), calcAandacht)}
+        onClick={drill(t('kpiRow.attention'), calcAttention)}
       />
 
       {/* Active candidates + how many planned */}

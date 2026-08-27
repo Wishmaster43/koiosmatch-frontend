@@ -71,10 +71,12 @@ export function resolveTiles(entries: FeedTileEntry[], dash: DashData, vis: (id:
 }
 
 // The block ids a grid renders — used to keep a tile that a pair already shows
-// from rendering a second time in a later grid.
-export function renderedTileIds(entries: FeedTileEntry[], dash: DashData, vis: (id: string) => boolean, ctx: FeedTileContext): Set<string> {
+// from rendering a second time in a later grid. `exclude` mirrors what the same
+// grid was actually rendered with (e.g. a role's top-grid-only exclusion), so
+// the ids reported here match reality instead of assuming an unfiltered render.
+export function renderedTileIds(entries: FeedTileEntry[], dash: DashData, vis: (id: string) => boolean, ctx: FeedTileContext, exclude?: ReadonlySet<string>): Set<string> {
   const ids = new Set<string>()
-  for (const r of resolveTiles(entries, dash, vis, ctx)) {
+  for (const r of resolveTiles(entries, dash, vis, ctx, exclude)) {
     if (r.entry.children) r.children.forEach(c => ids.add(c.blockId))
     else ids.add(r.entry.blockId)
   }

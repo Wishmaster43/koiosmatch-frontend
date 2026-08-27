@@ -48,10 +48,10 @@ export default function DepartmentsPage() {
     { key: 'status',  label: t('departmentsPage.filter.status'),
       options: statusOptions.map(s => ({ value: s, label: t(`departmentsPage.status.${s.toLowerCase()}`, { defaultValue: s }) })),
       selected: selStatuses,  onToggle: toggle(setSelStatuses) },
-    { key: 'klant',   label: t('departmentsPage.filter.customer'),
+    { key: 'customer',   label: t('departmentsPage.filter.customer'),
       options: customerOptions.map(k => ({ value: k, label: k })),
       selected: selCustomers,   onToggle: toggle(setSelCustomers) },
-    { key: 'locatie', label: t('departmentsPage.filter.location'),
+    { key: 'location', label: t('departmentsPage.filter.location'),
       options: locationOptions.map(l => ({ value: l, label: l })),
       selected: selLocations,  onToggle: toggle(setSelLocations) },
   ], [t, statusOptions, customerOptions, locationOptions, selStatuses, selCustomers, selLocations])

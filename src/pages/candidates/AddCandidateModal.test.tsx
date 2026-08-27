@@ -17,10 +17,10 @@ import AddCandidateModal from './AddCandidateModal'
 // EntityImportCard, PreviewStep and ResultStep all run for REAL, so the import
 // tests below prove the actual wizard wiring (dry-run-before-real-run, close +
 // refresh on success), not a stub of it (mirrors AddVacancyModal.test.tsx).
-import { dryRunImport, runImport, type ImportRunResult } from '@/pages/settings/sections/importeren/importApi'
+import { dryRunImport, runImport, type ImportRunResult } from '@/pages/settings/sections/import/importApi'
 
-vi.mock('@/pages/settings/sections/importeren/importApi', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@/pages/settings/sections/importeren/importApi')>()
+vi.mock('@/pages/settings/sections/import/importApi', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/pages/settings/sections/import/importApi')>()
   return { ...actual, dryRunImport: vi.fn(), runImport: vi.fn(), downloadImportTemplate: vi.fn() }
 })
 
@@ -61,7 +61,7 @@ vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({
   hasPermission: (p: string) => state.permissions.includes(p),
 }) }))
 vi.mock('./hooks/useCandidateMutations', () => ({ useCreateCandidate: () => ({ createCandidate, saving: false }) }))
-vi.mock('@/lib/useFunctions', () => ({ useFunctions: () => ({ functions: [{ value: 'Verzorgende IG', label: 'Verzorgende IG' }], functionOptions: [{ value: 'Verzorgende IG', label: 'Verzorgende IG' }].map(n => ({ value: n, label: n })), allowFreeEntry: true }) }))
+vi.mock('@/lib/useFunctions', () => ({ useFunctions: () => ({ functions: ['Verzorgende IG'], functionOptions: [{ value: 'Verzorgende IG', label: 'Verzorgende IG' }], allowFreeEntry: true }) }))
 vi.mock('@/hooks/useProvinces', () => ({ useProvinces: () => ({ provinces: [{ value: 'Utrecht', label: 'Utrecht' }] }) }))
 vi.mock('@/lib/useLocations', () => ({ useLocations: () => [{ value: 'b1', label: 'Vestiging Noord' }, { value: 'b2', label: 'Vestiging Zuid' }] }))
 // PROFILE-TEXT-1: Tiptap needs a real browser to mount — stubbed with a plain

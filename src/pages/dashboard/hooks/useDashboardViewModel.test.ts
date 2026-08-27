@@ -248,13 +248,18 @@ describe('useDashboardViewModel · LOOKUP-I18N-1 translates the seeded workflow 
 // DASHBOARD-OPRUIMING-1 (Danny 23-08, verbatim: "recruiter management dashboard
 // moet nu zelfde zijn als management omdat alles ruk is, maar nu heb ik een leeg
 // gat — dus maak hetzelfde"): recruitment_manager mirrors management verbatim —
-// the '*' wildcard, so every block is visible, and management's own KPI row.
+// INCLUDING management's default exclusions since Danny 27-08 ("WhatsApp Web
+// queue voor nu weg; Leads in pipeline ipv Recent runs"): waWebQueue and
+// list.runs are hidden on both roles alike, leads-in-pipeline shows instead.
 describe('useDashboardViewModel · recruitment_manager mirrors management', () => {
-  it('shows every block under the "*" wildcard, exactly like management', () => {
+  it('shows the wildcard blocks minus the shared management exclusions', () => {
     const { result } = renderHook(() => useDashboardViewModel(baseArgs({ activeType: 'recruitment_manager' as const })))
-    for (const id of ['chart.status', 'chart.recruiter', 'chart.funnel', 'chart.funnelConversion', 'chart.weekly', 'list.candidates', 'list.applications', 'list.conversations', 'list.runs']) {
+    for (const id of ['chart.status', 'chart.recruiter', 'chart.funnel', 'chart.funnelConversion', 'chart.weekly', 'list.candidates', 'list.applications', 'list.conversations', 'list.leads']) {
       expect(result.current.vis(id), `${id} should be visible for recruitment_manager`).toBe(true)
     }
+    // The two exclusions Danny named (27-08) ride the mirror on BOTH roles.
+    expect(result.current.vis('list.runs'), 'list.runs is excluded via the management mirror').toBe(false)
+    expect(result.current.vis('block.waWebQueue'), 'waWebQueue is excluded via the management mirror').toBe(false)
   })
 
   it('renders the same KPI row as management, tenant-wide data included (chart.recruiter/by_owner)', () => {

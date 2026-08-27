@@ -56,4 +56,21 @@ describe('MatchesTab (vacancy drawer) · four UI states', () => {
     // are opened/edited from the candidate/customer side, not here.
     expect(screen.queryByRole('button', { name: /match toevoegen|nieuwe match/i })).toBeNull()
   })
+
+  // DRAWER-UX-1 regression: inside a vacancy drawer, the candidate leads the
+  // row and the vacancy column is dropped entirely (every row is already this
+  // one vacancy) — freeing width for the full candidate name.
+  it('leads with the candidate and renders no vacancy column at all', () => {
+    state.rows = [row()]; state.loading = false; state.error = false
+    render(<MatchesTab vacancyId="v-1" />)
+    // Header bar: no vacancy column header, since showVacancyColumn={false}.
+    expect(screen.queryByTestId('match-col-vacancy-header')).toBeNull()
+    expect(screen.queryByTestId('match-col-client-header')).toBeNull()
+    // Card: no fixed other-party cell renders at all in this mode.
+    expect(screen.queryByTestId('match-col-vacancy')).toBeNull()
+    expect(screen.queryByTestId('match-col-client')).toBeNull()
+    // The candidate name is the leading title, not a secondary column value.
+    const header = screen.getByTestId('match-card-header')
+    expect(header).toHaveTextContent('Rosa Tijssen')
+  })
 })
