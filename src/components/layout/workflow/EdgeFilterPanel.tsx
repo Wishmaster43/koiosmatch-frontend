@@ -34,7 +34,7 @@ function operatorHint(t: (key: string) => string, operator?: string): string | u
   // date_older_than_days takes a DAY COUNT, not a date — the exact-match branch
   // must run before the date_ prefix test or it inherits the wrong syntax hint
   // (verify round 22-08: the hint told users to type a date here).
-  if (operator === 'date_older_than_days') return t('canvas.filterDaysHint')
+  if (operator === 'date_older_than_days' || operator === 'date_younger_than_days') return t('canvas.filterDaysHint')
   if (operator?.startsWith('date_')) return t('canvas.filterDateHint')
   if (operator === '>' || operator === '>=' || operator === '<' || operator === '<=') return t('canvas.filterClockHint')
   return undefined

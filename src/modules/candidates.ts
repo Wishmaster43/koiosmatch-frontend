@@ -34,6 +34,10 @@ export default makeEntityModule({
     { value: 'last_contact_at', label: 'Laatste contact' },
   ],
   schemaExtra: [
+    // SEGMENT-via-workflow (Danny 27-08: "kandidaten ouder dan 3 maanden …"):
+    // the fetch narrows on last contact age — BE CandidatesFetchModule reads
+    // last_contact_before_months (older than N months OR never contacted).
+    { key: 'last_contact_before_months', label: 'Laatste contact ouder dan (maanden)', type: 'number', showIf: { key: 'action', value: 'Ophalen' } },
     // Bijwerken — dated + reasoned status change (was status_set).
     { key: 'reason',         label: 'Reden',        type: 'text', showIf: { key: 'action', value: 'Bijwerken' } },
     { key: 'effective_from', label: 'Ingangsdatum', type: 'date', showIf: { key: 'action', value: 'Bijwerken' } },

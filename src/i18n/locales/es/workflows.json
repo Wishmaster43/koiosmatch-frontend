@@ -444,7 +444,8 @@
     "unknownModule": "Módulo desconocido",
     "notExecutable": "No ejecutable",
     "opDateOlderThanDays": "hace más de N días",
-    "filterDaysHint": "Número de días (p. ej. 30)"
+    "filterDaysHint": "Número de días (p. ej. 30)",
+    "opDateYoungerThanDays": "hace menos de N días"
   },
   "picker": {
     "title": "Elegir un módulo",
@@ -796,7 +797,8 @@
     "WhatsApp-toestemming": "Consentimiento de WhatsApp",
     "Workflow": "Workflow",
     "Zoeken": "Buscar",
-    "Zoekopdracht": "Consulta de búsqueda"
+    "Zoekopdracht": "Consulta de búsqueda",
+    "Laatste contact ouder dan (maanden)": "Último contacto anterior a (meses)"
   },
   "fieldOptions": {
     "Array (meerdere bundles)": "Array (varios bundles)",

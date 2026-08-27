@@ -30,6 +30,10 @@ export const OPERATOR_OPTIONS: Array<{ value: string; symbol?: string; labelKey?
   // Value = a day count, re-evaluated every run (an absolute date would freeze
   // the rule); backend evaluator support lands with the same CMBE delivery.
   { value: 'date_older_than_days', labelKey: 'canvas.opDateOlderThanDays', group: 'date' },
+  // SEGMENT-via-workflow (Danny 27-08; BE 85518268): AND-combined with
+  // older_than this makes clean bands ("tussen 3 en 6 maanden") without
+  // leaning on edge evaluation order.
+  { value: 'date_younger_than_days', labelKey: 'canvas.opDateYoungerThanDays', group: 'date' },
 ]
 
 // <optgroup> header i18n keys per operator group, in render order.
