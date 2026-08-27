@@ -14,7 +14,9 @@ import { useTranslation } from 'react-i18next'
 import { getKoiosSettings } from './koiosApi'
 import KoiosStatusCard from './KoiosStatusCard'
 import KoiosModelsCard from './KoiosModelsCard'
+import KoiosLearningCard from './KoiosLearningCard'
 import { PageTitle } from '@/components/ui/typography'
+import SubTabBar from '@/components/drawer/SubTabBar'
 // KOIOS-DEFAULT-SYNC-1: the floating panel reads the same settings from the
 // shared query cache — invalidate it so its picker follows a new default.
 import { invalidateKoiosSettings } from '@/components/layout/koios/useKoiosSettings'
@@ -26,6 +28,12 @@ export default function KoiosSettings() {
   const { t } = useTranslation('koios')
   const [settings, setSettings] = useState(null)
   const [phase, setPhase] = useState('loading') // loading | ready | unavailable | error
+  // Sub-tab state: overview (status+models) vs the new learning report (C1-lane 2).
+  const [tab, setTab] = useState('overview')
+  const TABS = [
+    { id: 'overview', label: t('tabs.overview') },
+    { id: 'learning', label: t('tabs.learning') },
+  ]
 
   // Load the Koios settings once; a 403 means "not entitled" (calm notice).
   useEffect(() => {
@@ -49,9 +57,17 @@ export default function KoiosSettings() {
 
       {phase === 'ready' && (
         <>
-          <KoiosStatusCard status={settings?.status} t={t} />
-          <KoiosModelsCard models={settings?.models} t={t}
-            onChanged={(model) => { setSettings((s) => ({ ...s, models: { ...s.models, active: model } })); invalidateKoiosSettings() }} />
+          <div style={{ marginBottom: 16 }}>
+            <SubTabBar tabs={TABS} active={tab} onChange={setTab} />
+          </div>
+          {tab === 'overview' && (
+            <>
+              <KoiosStatusCard status={settings?.status} t={t} />
+              <KoiosModelsCard models={settings?.models} t={t}
+                onChanged={(model) => { setSettings((s) => ({ ...s, models: { ...s.models, active: model } })); invalidateKoiosSettings() }} />
+            </>
+          )}
+          {tab === 'learning' && <KoiosLearningCard />}
         </>
       )}
     </div>

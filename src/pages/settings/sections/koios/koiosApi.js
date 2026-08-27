@@ -15,3 +15,8 @@ export const getKoiosSettings = () => api.get('/ai/koios/settings').then(unwrap)
 // MODEL-KIEZER-1 (Danny 24-07 GO): switch the tenant's active model — the backend
 // validates against the platform whitelist (Policy::selectableModels) + audits.
 export const updateKoiosModel = (model) => api.put('/ai/koios/model', { model }).then(unwrap)
+
+// C1-lane 2 (K-148, measured): the tenant-facing learning report — deterministic,
+// no AI call. { period, top_questions[], failure_reasons{}, tools_requested_but_denied{},
+// feedback{}, suggestions[] }.
+export const getKoiosLearning = (from, to) => api.get('/ai/koios/learning', { params: { from, to } }).then(unwrap)

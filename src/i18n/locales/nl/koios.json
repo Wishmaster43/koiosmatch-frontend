@@ -49,5 +49,28 @@
     "errorAudioCapture": "Geen microfoon gevonden. Controleer je apparaat",
     "errorNetwork": "Netwerkfout tijdens spraakherkenning. Probeer het opnieuw",
     "errorGeneric": "Spraakherkenning is mislukt. Probeer het opnieuw"
+  },
+  "tabs": {
+    "overview": "Overzicht",
+    "learning": "Leerrapport"
+  },
+  "learning": {
+    "loading": "Rapport laden…",
+    "loadError": "Het leerrapport kon niet worden geladen.",
+    "retry": "Opnieuw proberen",
+    "topQuestions": "Meest gestelde vragen",
+    "noQuestions": "Nog geen vragen geregistreerd in deze periode.",
+    "failureReasons": "Redenen van mislukking",
+    "noFailures": "Geen mislukkingen geregistreerd in deze periode.",
+    "failureRefusal": "Geweigerd",
+    "failureBudget": "Budgetlimiet",
+    "failureToolError": "Tool-fout",
+    "failureNoResult": "Geen resultaat",
+    "deniedNotTracked": "Geweigerde tool-aanvragen worden nog niet apart bijgehouden.",
+    "feedback": "Feedback",
+    "noFeedback": "Nog geen feedback in deze periode.",
+    "downPct": "{{pct}} van de reacties kreeg een duim omlaag.",
+    "suggestions": "Suggesties",
+    "noSuggestions": "Geen suggesties voor deze periode."
   }
 }

@@ -49,5 +49,28 @@
     "errorAudioCapture": "No microphone found. Check your device",
     "errorNetwork": "Network error during speech recognition. Please try again",
     "errorGeneric": "Speech recognition failed. Please try again"
+  },
+  "tabs": {
+    "overview": "Overview",
+    "learning": "Learning report"
+  },
+  "learning": {
+    "loading": "Loading report…",
+    "loadError": "The learning report could not be loaded.",
+    "retry": "Retry",
+    "topQuestions": "Top questions",
+    "noQuestions": "No questions recorded for this period yet.",
+    "failureReasons": "Failure reasons",
+    "noFailures": "No failures recorded for this period.",
+    "failureRefusal": "Refused",
+    "failureBudget": "Budget limit",
+    "failureToolError": "Tool error",
+    "failureNoResult": "No result",
+    "deniedNotTracked": "Denied tool requests are not tracked separately yet.",
+    "feedback": "Feedback",
+    "noFeedback": "No feedback yet for this period.",
+    "downPct": "{{pct}} of responses received a thumbs down.",
+    "suggestions": "Suggestions",
+    "noSuggestions": "No suggestions for this period."
   }
 }

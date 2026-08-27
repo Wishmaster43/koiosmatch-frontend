@@ -49,5 +49,28 @@
     "errorAudioCapture": "Aucun microphone détecté. Vérifiez votre appareil",
     "errorNetwork": "Erreur réseau pendant la reconnaissance vocale. Veuillez réessayer",
     "errorGeneric": "La reconnaissance vocale a échoué. Veuillez réessayer"
+  },
+  "tabs": {
+    "overview": "Aperçu",
+    "learning": "Rapport d'apprentissage"
+  },
+  "learning": {
+    "loading": "Chargement du rapport…",
+    "loadError": "Le rapport d'apprentissage n'a pas pu être chargé.",
+    "retry": "Réessayer",
+    "topQuestions": "Questions les plus fréquentes",
+    "noQuestions": "Aucune question enregistrée pour cette période.",
+    "failureReasons": "Raisons d'échec",
+    "noFailures": "Aucun échec enregistré pour cette période.",
+    "failureRefusal": "Refusé",
+    "failureBudget": "Limite de budget",
+    "failureToolError": "Erreur d'outil",
+    "failureNoResult": "Aucun résultat",
+    "deniedNotTracked": "Les demandes d'outils refusées ne sont pas encore suivies séparément.",
+    "feedback": "Retours",
+    "noFeedback": "Aucun retour pour cette période.",
+    "downPct": "{{pct}} des réponses ont reçu un pouce vers le bas.",
+    "suggestions": "Suggestions",
+    "noSuggestions": "Aucune suggestion pour cette période."
   }
 }

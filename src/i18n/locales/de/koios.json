@@ -49,5 +49,28 @@
     "errorAudioCapture": "Kein Mikrofon gefunden. Überprüfen Sie Ihr Gerät",
     "errorNetwork": "Netzwerkfehler bei der Spracherkennung. Bitte versuchen Sie es erneut",
     "errorGeneric": "Spracherkennung fehlgeschlagen. Bitte versuchen Sie es erneut"
+  },
+  "tabs": {
+    "overview": "Übersicht",
+    "learning": "Lernbericht"
+  },
+  "learning": {
+    "loading": "Bericht wird geladen…",
+    "loadError": "Der Lernbericht konnte nicht geladen werden.",
+    "retry": "Erneut versuchen",
+    "topQuestions": "Häufigste Fragen",
+    "noQuestions": "Für diesen Zeitraum wurden noch keine Fragen erfasst.",
+    "failureReasons": "Fehlerursachen",
+    "noFailures": "Für diesen Zeitraum wurden keine Fehler erfasst.",
+    "failureRefusal": "Verweigert",
+    "failureBudget": "Budgetlimit",
+    "failureToolError": "Tool-Fehler",
+    "failureNoResult": "Kein Ergebnis",
+    "deniedNotTracked": "Abgelehnte Tool-Anfragen werden noch nicht separat erfasst.",
+    "feedback": "Feedback",
+    "noFeedback": "Für diesen Zeitraum liegt noch kein Feedback vor.",
+    "downPct": "{{pct}} der Antworten erhielten einen Daumen runter.",
+    "suggestions": "Vorschläge",
+    "noSuggestions": "Keine Vorschläge für diesen Zeitraum."
   }
 }

@@ -49,5 +49,28 @@
     "errorAudioCapture": "No se encontró micrófono. Revisa tu dispositivo",
     "errorNetwork": "Error de red durante el reconocimiento de voz. Inténtalo de nuevo",
     "errorGeneric": "El reconocimiento de voz falló. Inténtalo de nuevo"
+  },
+  "tabs": {
+    "overview": "Resumen",
+    "learning": "Informe de aprendizaje"
+  },
+  "learning": {
+    "loading": "Cargando informe…",
+    "loadError": "No se pudo cargar el informe de aprendizaje.",
+    "retry": "Reintentar",
+    "topQuestions": "Preguntas más frecuentes",
+    "noQuestions": "Aún no hay preguntas registradas en este periodo.",
+    "failureReasons": "Motivos de fallo",
+    "noFailures": "No se registraron fallos en este periodo.",
+    "failureRefusal": "Rechazado",
+    "failureBudget": "Límite de presupuesto",
+    "failureToolError": "Error de herramienta",
+    "failureNoResult": "Sin resultado",
+    "deniedNotTracked": "Las solicitudes de herramientas denegadas aún no se registran por separado.",
+    "feedback": "Comentarios",
+    "noFeedback": "Aún no hay comentarios en este periodo.",
+    "downPct": "{{pct}} de las respuestas recibieron un pulgar hacia abajo.",
+    "suggestions": "Sugerencias",
+    "noSuggestions": "No hay sugerencias para este periodo."
   }
 }
