@@ -47,7 +47,7 @@ export default function PreviewStep({ result, runStatus, runError, canImport, on
           background: 'color-mix(in srgb, var(--color-warning) 10%, transparent)',
           border: '1px solid color-mix(in srgb, var(--color-warning) 30%, transparent)',
           borderRadius: 8, fontSize: 12, color: 'var(--text)' }}>
-          <AlertTriangle size={14} style={{ color: 'var(--color-warning)', flexShrink: 0 }} aria-hidden="true" />
+          <AlertTriangle size={14} style={{ color: 'var(--color-warning-text)', flexShrink: 0 }} aria-hidden="true" />
           {t('import.preview.nothingToImport')}
         </div>
       )}

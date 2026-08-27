@@ -193,6 +193,7 @@ export function useMatchesInsights(args: UseMatchesInsightsArgs) {
       onClick: () => toggleStages(closedStages), active: stageFilter.length > 0 && eqSet(stageFilter, closedStages) },
     { key: 'newThisMonth', label: t('kpi.newThisMonth'), value: newThisMonthCount, color: 'var(--color-primary-text)',
       onClick: () => { setStageFilter([]); setOwnerFilter([]); setClientFilter([]); setKpiScored(false) } },
+    // eslint-disable-next-line huisstijl/no-restricted-syntax -- DATA: semantic colour VALUE for the shared chip/donut/series recipes (tinted/chipInked downstream), not text ink
     { key: 'unscored', label: t('kpi.unscored'), value: unscoredCount, color: 'var(--color-warning)',
       onClick: () => setKpiScored(false) },
     { key: 'avgScore', label: t('kpi.avgScore'), value: avgScore != null ? `${avgScore}%` : '—', color: 'var(--color-primary-text)',
@@ -200,6 +201,7 @@ export function useMatchesInsights(args: UseMatchesInsightsArgs) {
     // MATCH-APPROVAL-QUEUE-1: honesty-gated (goedkeuring-badge-eerlijk) — absent
     // entirely once the tenant's approval_mode is 'uit', never a permanent 0-tile.
     ...(approvalReviewVisible ? [{
+      // eslint-disable-next-line huisstijl/no-restricted-syntax -- DATA: semantic colour VALUE for the shared chip/donut/series recipes (tinted/chipInked downstream), not text ink
       key: 'pendingApproval', label: t('kpi.pendingApproval'), value: pendingApprovalCount, color: 'var(--color-warning)',
       onClick: () => setPendingApprovalOnly(v => !v), active: pendingApprovalOnly,
     }] : []),

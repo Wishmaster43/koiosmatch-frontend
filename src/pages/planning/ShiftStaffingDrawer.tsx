@@ -215,7 +215,7 @@ export default function ShiftStaffingDrawer({ shift, onClose }: Props) {
           )}
           {!eligibleLoading && !eligibleError && eligible.map(c => (
             <div key={c.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0', borderBottom: '1px solid var(--border)' }}>
-              {c.favourite && <Star size={13} style={{ color: 'var(--color-warning)', flexShrink: 0 }} fill="var(--color-warning)" aria-label={t('staffing.favourite')} />}
+              {c.favourite && <Star size={13} style={{ color: 'var(--color-warning-text)', flexShrink: 0 }} fill="var(--color-warning)" aria-label={t('staffing.favourite')} />}
               <div style={{ flex: 1, minWidth: 0 }}>
                 <BodyText as="div">{c.firstName} {c.lastName}</BodyText>
                 {c.reason && <Caption as="div">{c.reason}</Caption>}

@@ -126,7 +126,7 @@ export default function CustomersReport() {
               </span>
               {inactive.length > 0 && (
                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5,
-                               background: 'var(--color-warning-bg)', color: 'var(--color-warning)', borderRadius: 999,
+                               background: 'var(--color-warning-bg)', color: 'var(--color-warning-text)', borderRadius: 999,
                                padding: '3px 10px', fontSize: 12, fontWeight: 500 }}>
                   <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--color-warning)', flexShrink: 0 }} />
                   {inactive.length} {t('customersReport.inactiveWord')}

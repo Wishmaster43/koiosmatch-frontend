@@ -86,7 +86,7 @@ export default function DepartmentsPage() {
   const kpis = [
     { label: t('departmentsPage.kpi.total'),           value: departments.length,                                       color: 'var(--color-primary-text)',   bg: 'var(--color-primary-bg)',   Icon: Layers },
     { label: t('departmentsPage.kpi.active'),          value: departments.filter(d => d.status === 'active').length,    color: 'var(--color-success-text)',   bg: 'var(--color-success-bg)',   Icon: Layers },
-    { label: t('departmentsPage.kpi.employees'),       value: departments.reduce((s,d) => s + (d.employees ?? 0), 0),   color: 'var(--color-warning)',   bg: 'var(--color-warning-bg)',   Icon: Users },
+    { label: t('departmentsPage.kpi.employees'),       value: departments.reduce((s,d) => s + (d.employees ?? 0), 0),   color: 'var(--color-warning-text)',   bg: 'var(--color-warning-bg)',   Icon: Users },
     { label: t('departmentsPage.kpi.linkedCustomers'), value: [...new Set(departments.map(d => d.customer))].length,    color: 'var(--color-secondary)', bg: 'var(--color-secondary-bg)', Icon: Building2 },
   ]
 

@@ -56,6 +56,7 @@ export function buildApplicationAdviceInsights(a: ApplicationDetail, t: Tx, now:
   // Only surface a completeness gap when there actually is one — a missing vacancy link.
   const hasVacancy = Boolean(a.vacancyId ?? a.vacancy?.id)
   if (!hasVacancy) {
+    // eslint-disable-next-line huisstijl/no-restricted-syntax -- DATA: semantic colour VALUE for the shared chip/donut/series recipes (tinted/chipInked downstream), not text ink
     insights.push({ type: t('ai.completeness'), color: 'var(--color-warning)', text: t('ai.missingVacancy') })
   }
 

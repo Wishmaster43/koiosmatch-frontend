@@ -43,7 +43,7 @@ export default function ResultStep({ result, onReset, wholeTree = false }: Resul
       <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8, marginBottom: 16 }}>
         {clean
           ? <CheckCircle2 size={18} style={{ color: 'var(--color-success-text)', flexShrink: 0, marginTop: 1 }} aria-hidden="true" />
-          : <AlertTriangle size={18} style={{ color: 'var(--color-warning)', flexShrink: 0, marginTop: 1 }} aria-hidden="true" />}
+          : <AlertTriangle size={18} style={{ color: 'var(--color-warning-text)', flexShrink: 0, marginTop: 1 }} aria-hidden="true" />}
         <div>
           <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)' }}>{t('import.result.title')}</div>
           <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{subtitle}</div>

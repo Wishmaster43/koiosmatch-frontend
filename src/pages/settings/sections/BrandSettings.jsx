@@ -218,7 +218,7 @@ export default function BrandSettings() {
                 Say it out loud and name the fix — never silently ignore the choice. */}
             {textColor && contrastRatio(textColor, primaryColor) < 4.5 && (
               <div role="status" style={{ marginTop: 10, fontSize: 11, padding: '7px 10px', borderRadius: 8,
-                color: 'var(--color-warning)', background: 'color-mix(in srgb, var(--color-warning) 10%, transparent)',
+                color: 'var(--color-warning-text)', background: 'color-mix(in srgb, var(--color-warning) 10%, transparent)',
                 border: '1px solid color-mix(in srgb, var(--color-warning) 30%, transparent)' }}>
                 {/* Two different things can be true below AA, and the screen used to
                     say only one of them (Danny 14-08: "staat op wit maar is geen wit").

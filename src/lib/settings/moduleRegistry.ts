@@ -34,6 +34,7 @@ export const MODULES: Record<string, ModuleDef> = {
       { id: 'active_customers',           type: 'kpi', labelKey: 'moduleView.blocks.active_customers',           icon: Building2,  color: 'var(--color-secondary)', bg: 'var(--color-secondary-bg)' },
       { id: 'total_locations',            type: 'kpi', labelKey: 'moduleView.blocks.total_locations',            icon: MapPin,     color: '#7C3AED',                bg: '#F5F3FF' },
       { id: 'total_departments',          type: 'kpi', labelKey: 'moduleView.blocks.total_departments',          icon: Layers,     color: '#059669',                bg: '#ECFDF5' },
+      // eslint-disable-next-line huisstijl/no-restricted-syntax -- DATA: semantic colour VALUE for the shared chip/donut/series recipes (tinted/chipInked downstream), not text ink
       { id: 'customers_without_location', type: 'kpi', labelKey: 'moduleView.blocks.customers_without_location', icon: TrendingUp, color: 'var(--color-warning)',   bg: 'var(--color-warning-bg)' },
     ],
   },
@@ -49,6 +50,7 @@ export const MODULES: Record<string, ModuleDef> = {
       // eslint-disable-next-line huisstijl/no-restricted-syntax -- DATA: semantic colour VALUE for the shared chip/donut/series recipes (tinted/chipInked downstream), not text ink
       { id: 'filled_shifts', type: 'kpi', labelKey: 'moduleView.blocks.filled_shifts', icon: CheckCircle,   color: 'var(--color-success)',   bg: '#ECFDF5' },
       { id: 'fill_rate',     type: 'kpi', labelKey: 'moduleView.blocks.fill_rate',     icon: Percent,       color: 'var(--color-secondary)', bg: 'var(--color-secondary-bg)' },
+      // eslint-disable-next-line huisstijl/no-restricted-syntax -- DATA: semantic colour VALUE for the shared chip/donut/series recipes (tinted/chipInked downstream), not text ink
       { id: 'unfilled',      type: 'kpi', labelKey: 'moduleView.blocks.unfilled',      icon: AlertTriangle, color: 'var(--color-warning)',   bg: 'var(--color-warning-bg)' },
     ],
   },
@@ -69,6 +71,7 @@ export const MODULES: Record<string, ModuleDef> = {
       // eslint-disable-next-line huisstijl/no-restricted-syntax -- DATA: semantic colour VALUE for the shared chip/donut/series recipes (tinted/chipInked downstream), not text ink
       { id: 'available',        type: 'kpi', labelKey: 'moduleView.blocks.available',        icon: UserCheck, color: 'var(--color-success)',   bg: '#ECFDF5' },
       { id: 'new_candidates',   type: 'kpi', labelKey: 'moduleView.blocks.new_candidates',   icon: UserPlus,  color: 'var(--color-secondary)', bg: 'var(--color-secondary-bg)' },
+      // eslint-disable-next-line huisstijl/no-restricted-syntax -- DATA: semantic colour VALUE for the shared chip/donut/series recipes (tinted/chipInked downstream), not text ink
       { id: 'in_progress',      type: 'kpi', labelKey: 'moduleView.blocks.in_progress',      icon: Clock,     color: 'var(--color-warning)',   bg: 'var(--color-warning-bg)' },
     ],
   },

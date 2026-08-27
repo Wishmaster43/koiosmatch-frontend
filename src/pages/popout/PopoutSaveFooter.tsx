@@ -72,7 +72,7 @@ export default function PopoutSaveFooter({ dirty, onSave }: PopoutSaveFooterProp
       {confirmDialog}
       {/* Honest, announced save state — never a silent "did that land?" window. */}
       <span aria-live="polite" data-testid="text-popout-state"
-        style={{ fontSize: 11, color: dirty ? 'var(--color-warning)' : 'var(--text-muted)' }}>
+        style={{ fontSize: 11, color: dirty ? 'var(--color-warning-text)' : 'var(--text-muted)' }}>
         {dirty ? t('unsavedChanges') : t('allChangesSaved')}
       </span>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>

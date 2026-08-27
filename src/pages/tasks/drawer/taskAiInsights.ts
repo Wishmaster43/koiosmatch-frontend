@@ -37,6 +37,7 @@ export function buildTaskAdviceInsights(task: TaskDetail, t: Tx, now: Date = new
   } else {
     const days = calendarDaysDiff(dueMoment, now)
     dueInsight = days <= 0
+      // eslint-disable-next-line huisstijl/no-restricted-syntax -- DATA: semantic colour VALUE for the shared chip/donut/series recipes (tinted/chipInked downstream), not text ink
       ? { type: t('ai.dueLabel'), color: 'var(--color-warning)', text: t('ai.dueToday') }
       // eslint-disable-next-line huisstijl/no-restricted-syntax -- DATA: semantic colour VALUE for the shared chip/donut/series recipes (tinted/chipInked downstream), not text ink
       : { type: t('ai.dueLabel'), color: 'var(--color-success)', text: t('ai.dueUpcoming', { count: days }) }
@@ -44,6 +45,7 @@ export function buildTaskAdviceInsights(task: TaskDetail, t: Tx, now: Date = new
 
   // Assignment: bureau (unassigned) vs a named assignee.
   const assigneeInsight: KoiosAdviceInsight = task.assigneeId == null
+    // eslint-disable-next-line huisstijl/no-restricted-syntax -- DATA: semantic colour VALUE for the shared chip/donut/series recipes (tinted/chipInked downstream), not text ink
     ? { type: t('ai.assigneeLabel'), color: 'var(--color-warning)', text: t('ai.unassigned') }
     // eslint-disable-next-line huisstijl/no-restricted-syntax -- DATA: semantic colour VALUE for the shared chip/donut/series recipes (tinted/chipInked downstream), not text ink
     : { type: t('ai.assigneeLabel'), color: 'var(--color-success)', text: t('ai.assignedTo', { name: task.assignee?.name ?? '' }) }
@@ -51,6 +53,7 @@ export function buildTaskAdviceInsights(task: TaskDetail, t: Tx, now: Date = new
   // Links: whether this task is coupled to any record at all (candidate/customer/…).
   const linkCount = (task.links ?? []).length
   const linksInsight: KoiosAdviceInsight = linkCount === 0
+    // eslint-disable-next-line huisstijl/no-restricted-syntax -- DATA: semantic colour VALUE for the shared chip/donut/series recipes (tinted/chipInked downstream), not text ink
     ? { type: t('ai.linksLabel'), color: 'var(--color-warning)', text: t('ai.noLinks') }
     : { type: t('ai.linksLabel'), color: 'var(--color-secondary)', text: t('ai.linked', { count: linkCount }) }
 

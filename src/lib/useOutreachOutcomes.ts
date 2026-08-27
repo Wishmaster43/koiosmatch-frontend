@@ -19,6 +19,7 @@ import type { LookupOption } from '@/types/common'
 import { unwrapList } from '@/lib/api'
 
 export const DEFAULT_OUTREACH_OUTCOMES: LookupOption[] = [
+  // eslint-disable-next-line huisstijl/no-restricted-syntax -- DATA: semantic colour VALUE for the shared chip/donut/series recipes (tinted/chipInked downstream), not text ink
   { value: 'no_answer',      label: 'Geen gehoor',    color: 'var(--color-warning)' },
   { value: 'callback',       label: 'Terugbellen',    color: 'var(--color-primary)' },
   // eslint-disable-next-line huisstijl/no-restricted-syntax -- DATA: semantic colour VALUE for the shared chip/donut/series recipes (tinted/chipInked downstream), not text ink

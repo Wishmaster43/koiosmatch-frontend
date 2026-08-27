@@ -8,6 +8,7 @@ export default makeEntityModule({
   label:    'Kansen',
   category: 'Kansen',
   Icon:     Target,
+  // eslint-disable-next-line huisstijl/no-restricted-syntax -- DATA: semantic colour VALUE for the shared chip/donut/series recipes (tinted/chipInked downstream), not text ink
   color:    'var(--color-warning)',
   // Own tint % — kept distinct from --color-warning-bg (shared by router/shifts_input) so the Kansen entity stays visually distinguishable.
   bg:       'color-mix(in srgb, var(--color-warning) 9%, transparent)',

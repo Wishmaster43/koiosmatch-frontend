@@ -195,6 +195,7 @@ export function useDashboardViewModel({
       { key: 'matches',       label: t('chart.series.matches'),      color: 'var(--color-accent)' },
       // eslint-disable-next-line huisstijl/no-restricted-syntax -- DATA: semantic colour VALUE for the shared chip/donut/series recipes (tinted/chipInked downstream), not text ink
       { key: 'candidatesOut', label: t('chart.series.candidatesOut'),       color: 'var(--color-danger)' },
+      // eslint-disable-next-line huisstijl/no-restricted-syntax -- DATA: semantic colour VALUE for the shared chip/donut/series recipes (tinted/chipInked downstream), not text ink
       { key: 'applicationsRejected',  label: t('chart.series.applicationsRejected'), color: 'var(--color-warning)' },
       // eslint-disable-next-line no-restricted-syntax -- DATA: chart series colour (matches-ended, neutral grey), no exact design-token match
       { key: 'matchesEnded',  label: t('chart.series.matchesEnded'),         color: '#9CA3AF' },

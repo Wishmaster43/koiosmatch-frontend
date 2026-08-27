@@ -240,7 +240,7 @@ describe('ApplicationsTable · days-in-phase column (PDF-SOLLICITATIES point 8)'
     const flagged = { ...baseRow, id: 42, currentStageEnteredAt: '2026-08-01T00:00:00Z', tooLongInStage: true } as unknown as Application
     render(<ApplicationsTable rows={[flagged]} />)
     const count = screen.getByText('13')
-    expect(count).toHaveStyle({ color: 'var(--color-warning)' })
+    expect(count).toHaveStyle({ color: 'var(--color-warning-text)' })
   })
 
   it('sorts by days in the current phase (who is stuck longest)', () => {

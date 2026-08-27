@@ -206,8 +206,8 @@ export default defineConfig([
         // colour measured 3.47:1 on the dark surface and 4.44:1 on the light --bg
         // (both AA fails) across 182 ink sites + 30 banner sites, all migrated.
         // Zero-hit at adoption; fills/borders keep --color-danger legitimately.
-        selector: "Property[key.name='color'] > Literal[value=/^var\\(--color-(danger|success)\\)$/]",
-        message: 'HUISSTIJL: danger/success als INKT is de -text-twin (var(--color-danger-text) / var(--color-success-text)), of de on-*-bg-inkt óp de eigen pastel — de rauwe vulkleur faalt AA als tekst (danger: dark 3.47:1; success: licht 3.03:1).',
+        selector: "Property[key.name='color'] > Literal[value=/^var\\(--color-(danger|success|warning)\\)$/]",
+        message: 'HUISSTIJL: danger/success/warning als INKT is de -text-twin (var(--color-danger-text) / var(--color-success-text) / var(--color-warning-text)), of de on-*-bg-inkt óp de eigen pastel — de rauwe vulkleur faalt AA als tekst (danger: dark 3.47:1; success: licht 3.03:1; warning: ~3:1).',
       },
       {
         // Herhaal-audit r4 findings 5-7: a dropdown TRIGGER is a form field, not an

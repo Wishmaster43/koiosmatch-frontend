@@ -61,7 +61,7 @@ export function buildCandidateInsights({
       active: selectedOwner.length > 0, onClear: () => setSelectedOwner([]) },
   ]
   const kpis = [
-    { key: 'stale',      label: t('analytics.staleMonths', { months: staleMonths }), value: counts.stale, sub: t('analytics.stale6mSub'), color: 'var(--color-warning)',
+    { key: 'stale',      label: t('analytics.staleMonths', { months: staleMonths }), value: counts.stale, sub: t('analytics.stale6mSub'), color: 'var(--color-warning-text)',
       onClick: () => toggleAttention('stale6m'),    active: attentionFilter === 'stale6m' },
     { key: 'neverContacted', label: t('analytics.neverContacted'), value: counts.neverContacted, sub: t('analytics.neverContactedSub'), color: 'var(--color-info)',
       onClick: () => toggleAttention('neverContacted'), active: attentionFilter === 'neverContacted' },

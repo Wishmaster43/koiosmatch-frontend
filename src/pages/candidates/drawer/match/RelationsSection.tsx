@@ -298,7 +298,7 @@ export default function RelationsSection({
       {branchMismatch && (
         <div role="group" aria-label={t('placement.branchMismatch')}
           style={{ display: 'flex', flexDirection: 'column', gap: 6, padding: '9px 11px', borderRadius: 8, fontSize: 12,
-            color: 'var(--color-warning)', background: tintBg('var(--color-warning)'),
+            color: 'var(--color-warning-text)', background: tintBg('var(--color-warning)'),
             border: tintBorder('var(--color-warning)') }}>
           <span style={{ fontWeight: 600 }}>
             {t('placement.branchMismatchDesc', { candidate: candBranch?.name || '—', customer: detail?.branch?.name || '—' })}

@@ -392,7 +392,7 @@ export default function ConversationsSection({ threadsUrl, threadsParams, header
       {/* Escalated-thread hint: a subtle note so the recruiter knows a human took over. */}
       {!loading && !error && rows.some(r => r.escalated) && (
         <Caption as="div" style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 4 }}>
-          <AlertTriangle size={12} style={{ color: 'var(--color-warning)' }} /> {t('conversations.escalatedHint')}
+          <AlertTriangle size={12} style={{ color: 'var(--color-warning-text)' }} /> {t('conversations.escalatedHint')}
         </Caption>
       )}
     </SectionCard>

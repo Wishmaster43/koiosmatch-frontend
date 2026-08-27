@@ -12,7 +12,7 @@ import { Mono } from '@/components/ui/typography'
 // Same icon/colour pairing as ActionRuleCell, so the legend visually matches the grid.
 const ITEMS = [
   { key: 'allow', Icon: Check, color: 'var(--color-success-text)' },
-  { key: 'warn', Icon: AlertTriangle, color: 'var(--color-warning)' },
+  { key: 'warn', Icon: AlertTriangle, color: 'var(--color-warning-text)' },
   { key: 'block', Icon: Ban, color: 'var(--color-danger-text)' },
   { key: 'locked', Icon: Lock, color: 'var(--text-muted)' },
 ] as const

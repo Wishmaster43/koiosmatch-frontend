@@ -68,7 +68,7 @@ export default function ImportResultPanel({ result, showAllRows, onToggleShowAll
           background: 'color-mix(in srgb, var(--color-warning) 10%, transparent)',
           border: '1px solid color-mix(in srgb, var(--color-warning) 30%, transparent)',
           borderRadius: 8, marginBottom: 16 }}>
-          <AlertTriangle size={14} style={{ color: 'var(--color-warning)', flexShrink: 0, marginTop: 1 }} />
+          <AlertTriangle size={14} style={{ color: 'var(--color-warning-text)', flexShrink: 0, marginTop: 1 }} />
           <div>
             <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>{t('import.unknownColumns.title')}</div>
             <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('import.unknownColumns.hint')}</div>
@@ -110,7 +110,7 @@ export default function ImportResultPanel({ result, showAllRows, onToggleShowAll
               {row.reference && <span style={{ color: 'var(--text-muted)', minWidth: 0, overflowWrap: 'anywhere' }}>{row.reference}</span>}
               {row.messages.length > 0 && (
                 <span style={{ display: 'flex', alignItems: 'flex-start', gap: 5, minWidth: 0, overflowWrap: 'anywhere',
-                  color: hasRemarks(row) ? 'var(--color-warning)' : 'var(--text)' }}>
+                  color: hasRemarks(row) ? 'var(--color-warning-text)' : 'var(--text)' }}>
                   {/* Icon + colour together, never colour alone (§6). */}
                   {hasRemarks(row) && <AlertTriangle size={12} style={{ flexShrink: 0, marginTop: 1 }} aria-hidden="true" />}
                   {hasRemarks(row) ? `${t('import.rows.remark')} ${row.messages.join(' · ')}` : row.messages.join(' · ')}

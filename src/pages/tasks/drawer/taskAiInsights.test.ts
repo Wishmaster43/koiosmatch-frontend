@@ -17,7 +17,9 @@ describe('buildTaskAdviceInsights', () => {
   it('flags an unset due date, unassigned task, and no links', () => {
     const [due, assignee, links] = buildTaskAdviceInsights(base(), t)
     expect(due).toEqual({ type: 'ai.dueLabel', color: 'var(--text-muted)', text: 'ai.dueUnset' })
+    // eslint-disable-next-line huisstijl/no-restricted-syntax -- DATA: semantic colour VALUE for the shared chip/donut/series recipes (tinted/chipInked downstream), not text ink
     expect(assignee).toEqual({ type: 'ai.assigneeLabel', color: 'var(--color-warning)', text: 'ai.unassigned' })
+    // eslint-disable-next-line huisstijl/no-restricted-syntax -- DATA: semantic colour VALUE for the shared chip/donut/series recipes (tinted/chipInked downstream), not text ink
     expect(links).toEqual({ type: 'ai.linksLabel', color: 'var(--color-warning)', text: 'ai.noLinks' })
   })
 

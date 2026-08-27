@@ -78,6 +78,12 @@ describe('house token pairs stay readable (defaults, light theme)', () => {
     expect(ratio(token('color-on-danger-bg'), token('color-danger-bg'))).toBeGreaterThanOrEqual(4.5)
   })
 
+  // WARNING-INK-LINT-1 sweep (27-08): same class, warning side — badges/notices on
+  // the warning pastel carry the on-token, never the raw warning colour.
+  it('on-warning-bg clears 4.5:1 as text on the warning-bg pastel', () => {
+    expect(ratio(token('color-on-warning-bg'), token('color-warning-bg'))).toBeGreaterThanOrEqual(4.5)
+  })
+
   // Klus b (20-08): danger as TEXT rides its own twin (mirrors --color-primary-text).
   // The raw fill colour measured 3.47:1 on the dark surface — an AA fail that sat
   // on 182 ink sites; this pins the twin on both grounds in both themes.

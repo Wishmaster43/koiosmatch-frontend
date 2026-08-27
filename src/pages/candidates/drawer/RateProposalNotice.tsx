@@ -30,7 +30,7 @@ export function RateDeviationWarning({ proposal, purchase, sell, onCancel }: {
   const { t } = useTranslation('candidates')
   return (
     <div role="alert" style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: 12, padding: '9px 11px', borderRadius: 8, fontSize: 12,
-      color: 'var(--color-warning)', background: 'color-mix(in srgb, var(--color-warning) 10%, transparent)',
+      color: 'var(--color-warning-text)', background: 'color-mix(in srgb, var(--color-warning) 10%, transparent)',
       border: '1px solid color-mix(in srgb, var(--color-warning) 35%, transparent)' }}>
       <span style={{ fontWeight: 600 }}>
         {t('placement.rateProposal.deviationWarning', {

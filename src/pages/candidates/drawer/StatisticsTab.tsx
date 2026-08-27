@@ -79,7 +79,7 @@ export default function StatisticsTab({ c, onJump }: { c: Candidate; onJump?: (t
           // former example fallbacks (24 shifts / 186 hours) were invented numbers and must
           // never come back.
           // { label: t('statistics.shifts'),       value: c.shiftsCount ?? 0, sub: t('statistics.thisYear'), color: 'var(--color-success-text)' },
-          // { label: t('statistics.hoursWorked'),  value: c.hoursWorked ?? 0, sub: t('statistics.thisYear'), color: 'var(--color-warning)' },
+          // { label: t('statistics.hoursWorked'),  value: c.hoursWorked ?? 0, sub: t('statistics.thisYear'), color: 'var(--color-warning-text)' },
         ]}
       />
 

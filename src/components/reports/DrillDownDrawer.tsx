@@ -56,7 +56,7 @@ function InfoRow({ icon: Icon, label, value, highlight }: { icon: LucideIcon; la
       <Icon size={11} color={highlight ? 'var(--color-warning)' : 'var(--border)'} style={{ flexShrink: 0 }} />
       <span className="text-xs truncate">
         <span style={{ color: 'var(--text-muted)' }}>{label}: </span>
-        <span style={{ color: highlight ? 'var(--color-warning)' : 'var(--text-muted)', fontWeight: highlight ? 500 : 400 }}>
+        <span style={{ color: highlight ? 'var(--color-warning-text)' : 'var(--text-muted)', fontWeight: highlight ? 500 : 400 }}>
           {value}
         </span>
       </span>

@@ -32,7 +32,7 @@ const plainCell = { color: 'var(--text)', fontSize: 12 }
 // `plain` renders it as neutral text when the colour toggle is off.
 function ScorePill({ value, plain }: { value: number | null; plain?: boolean }) {
   if (value == null) return <span style={{ color: 'var(--text-muted)' }}>—</span>
-  const c = plain ? 'var(--text)' : value >= 75 ? 'var(--color-success)' : value >= 50 ? 'var(--color-warning)' : 'var(--color-danger)'
+  const c = plain ? 'var(--text)' : value >= 75 ? 'var(--color-success-text)' : value >= 50 ? 'var(--color-warning-text)' : 'var(--color-danger-text)'
   return <span style={{ fontWeight: plain ? 400 : 600, fontSize: plain ? 12 : undefined, color: c }}>{value}%</span>
 }
 
@@ -196,7 +196,7 @@ export default function ApplicationsTable({ rows, loading, error, selectedId, on
       render: r => {
         const days = daysSince(r.currentStageEnteredAt)
         if (days == null) return <span style={{ color: 'var(--text-muted)' }}>—</span>
-        return <span style={{ color: r.tooLongInStage ? 'var(--color-warning)' : 'var(--text)' }}>{days}</span>
+        return <span style={{ color: r.tooLongInStage ? 'var(--color-warning-text)' : 'var(--text)' }}>{days}</span>
       } },
     // Created date — the table defaults to newest first. DATATABLE-SORT-1:
     // serverKey maps to ApplicationQuery's created_at sort.

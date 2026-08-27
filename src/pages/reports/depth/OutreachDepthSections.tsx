@@ -71,7 +71,7 @@ export default function OutreachDepthSections({ data, onChannel }: {
             series={[
               { key: 'total', label: t('outreach.depth.channelFunnel.total'), color: 'var(--color-primary)' },
               { key: 'reached', label: t('outreach.depth.channelFunnel.reached'), color: 'var(--color-secondary)' },
-              { key: 'applied', label: t('outreach.depth.channelFunnel.applied'), color: 'var(--color-warning)' },
+              { key: 'applied', label: t('outreach.depth.channelFunnel.applied'), color: 'var(--color-warning-text)' },
               { key: 'placed', label: t('outreach.depth.channelFunnel.placed'), color: 'var(--color-success-text)' },
             ] satisfies BarSeries[]}
             // Undefined (not a no-op) when no handler was passed, so the chart

@@ -35,7 +35,7 @@ const TASKS_ACCENT = '#0D9488'
 // useCandidateFilters' attentionFilter uses.
 const SIGNAL_META: Record<RadarSignalId, { Icon: LucideIcon; labelKey: string; color: string }> = {
   intakePlanned:  { Icon: CalendarCheck, labelKey: 'candidates:kpi.intake',               color: 'var(--color-violet)' },
-  stale6m:        { Icon: Clock,         labelKey: 'candidates:analytics.stale6m',        color: 'var(--color-warning)' },
+  stale6m:        { Icon: Clock,         labelKey: 'candidates:analytics.stale6m',        color: 'var(--color-warning-text)' },
   neverContacted: { Icon: UserX,         labelKey: 'candidates:analytics.neverContacted', color: 'var(--color-info)' },
   noFollowup:     { Icon: CalendarX,     labelKey: 'candidates:analytics.noFollowup',     color: 'var(--color-danger-text)' },
   activeConv:     { Icon: MessageCircle, labelKey: 'candidates:analytics.conversations',  color: 'var(--color-success-text)' },

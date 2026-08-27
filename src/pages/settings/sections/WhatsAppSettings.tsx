@@ -47,14 +47,14 @@ interface ConnectionDetail { phone_numbers?: PhoneNumberRow[]; templates?: Templ
 // keys (Record, not a literal union) since Meta's raw value is looked up dynamically.
 const QUALITY_META: Record<string, { color: string; bg: string }> = {
   GREEN:  { color: 'var(--color-success-text)', bg: 'var(--color-success-bg)' },
-  YELLOW: { color: 'var(--color-warning)', bg: 'var(--color-warning-bg)' },
+  YELLOW: { color: 'var(--color-warning-text)', bg: 'var(--color-warning-bg)' },
   RED:    { color: 'var(--color-danger-text)',  bg: 'var(--color-danger-bg)' },
 }
 
 // Template review status → colour. Label = t('whatsapp.status<KEY>').
 const TEMPLATE_STATUS_META: Record<string, { color: string; bg: string }> = {
   APPROVED: { color: 'var(--color-success-text)', bg: 'var(--color-success-bg)' },
-  PENDING:  { color: 'var(--color-warning)', bg: 'var(--color-warning-bg)' },
+  PENDING:  { color: 'var(--color-warning-text)', bg: 'var(--color-warning-bg)' },
   REJECTED: { color: 'var(--color-danger-text)',  bg: 'var(--color-danger-bg)' },
   PAUSED:   { color: 'var(--text-muted)',              bg: 'var(--hover-bg)' },
 }

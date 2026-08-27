@@ -151,7 +151,7 @@ export default function InsightsRow({ donuts = [], kpis = [], padding = '16px 24
     <>
     {notice && (
       <div role="status" style={{ margin: '10px 24px -6px', padding: '5px 10px', fontSize: 11, borderRadius: 7,
-        color: 'var(--color-warning)', background: 'color-mix(in srgb, var(--color-warning) 10%, transparent)',
+        color: 'var(--color-warning-text)', background: 'color-mix(in srgb, var(--color-warning) 10%, transparent)',
         border: '1px solid color-mix(in srgb, var(--color-warning) 30%, transparent)', width: 'fit-content' }}>
         {notice}
       </div>

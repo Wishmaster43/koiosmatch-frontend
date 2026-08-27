@@ -22,6 +22,7 @@ export function buildOpportunityAdviceInsights(o: Opportunity, stages: LookupOpt
   const magnitudeInsight: KoiosAdviceInsight = hasMagnitude
     // eslint-disable-next-line huisstijl/no-restricted-syntax -- DATA: semantic colour VALUE for the shared chip/donut/series recipes (tinted/chipInked downstream), not text ink
     ? { type: t('ai.dealHealthLabel'), color: 'var(--color-success)', text: t('ai.dealHealthSet') }
+    // eslint-disable-next-line huisstijl/no-restricted-syntax -- DATA: semantic colour VALUE for the shared chip/donut/series recipes (tinted/chipInked downstream), not text ink
     : { type: t('ai.dealHealthLabel'), color: 'var(--color-warning)', text: t('ai.dealHealthMissing') }
 
   // (b) Close-date window — a terminal stage (won/lost) needs no more advice;
@@ -37,6 +38,7 @@ export function buildOpportunityAdviceInsights(o: Opportunity, stages: LookupOpt
     : days == null
       ? { type: t('ai.closeWindowLabel'), color: 'var(--text-muted)', text: t('ai.closeWindowUnknown') }
       : days < 0
+        // eslint-disable-next-line huisstijl/no-restricted-syntax -- DATA: semantic colour VALUE for the shared chip/donut/series recipes (tinted/chipInked downstream), not text ink
         ? { type: t('ai.closeWindowLabel'), color: 'var(--color-warning)', text: t('ai.closeWindowOverdue', { days: Math.abs(days) }) }
         // eslint-disable-next-line huisstijl/no-restricted-syntax -- DATA: semantic colour VALUE for the shared chip/donut/series recipes (tinted/chipInked downstream), not text ink
         : { type: t('ai.closeWindowLabel'), color: 'var(--color-success)', text: t('ai.closeWindowUpcoming', { days }) }

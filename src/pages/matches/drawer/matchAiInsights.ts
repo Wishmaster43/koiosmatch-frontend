@@ -22,6 +22,7 @@ export function buildMatchAdviceInsights(match: MatchRow, t: Tx, now: Date = new
       // eslint-disable-next-line huisstijl/no-restricted-syntax -- DATA: semantic colour VALUE for the shared chip/donut/series recipes (tinted/chipInked downstream), not text ink
       ? { type: t('ai.scoreLabel'), color: 'var(--color-success)', text: t('ai.scoreGood', { score }) }
       : score >= 50
+        // eslint-disable-next-line huisstijl/no-restricted-syntax -- DATA: semantic colour VALUE for the shared chip/donut/series recipes (tinted/chipInked downstream), not text ink
         ? { type: t('ai.scoreLabel'), color: 'var(--color-warning)', text: t('ai.scoreAverage', { score }) }
         // eslint-disable-next-line huisstijl/no-restricted-syntax -- DATA: semantic colour VALUE for the shared chip/donut/series recipes (tinted/chipInked downstream), not text ink
         : { type: t('ai.scoreLabel'), color: 'var(--color-danger)', text: t('ai.scorePoor', { score }) }
@@ -33,6 +34,7 @@ export function buildMatchAdviceInsights(match: MatchRow, t: Tx, now: Date = new
       // eslint-disable-next-line huisstijl/no-restricted-syntax -- DATA: semantic colour VALUE for the shared chip/donut/series recipes (tinted/chipInked downstream), not text ink
       ? { type: t('ai.windowLabel'), color: 'var(--color-danger)', text: t('ai.windowExpired', { days: Math.abs(expiry.days) }) }
       : expiry?.kind === 'warning'
+        // eslint-disable-next-line huisstijl/no-restricted-syntax -- DATA: semantic colour VALUE for the shared chip/donut/series recipes (tinted/chipInked downstream), not text ink
         ? { type: t('ai.windowLabel'), color: 'var(--color-warning)', text: t('ai.windowWarning', { days: expiry.days }) }
         // eslint-disable-next-line huisstijl/no-restricted-syntax -- DATA: semantic colour VALUE for the shared chip/donut/series recipes (tinted/chipInked downstream), not text ink
         : { type: t('ai.windowLabel'), color: 'var(--color-success)', text: t('ai.windowFine') }

@@ -5,7 +5,7 @@ import KoiosAdviceBlock from './KoiosAdviceBlock'
 
 // Shared fixture: two collapsed insight rows, mirroring a typical entity's advice.
 const insights = [
-  { type: 'Completeness', color: 'var(--color-warning)', text: 'Profile is 40% complete.' },
+  { type: 'Completeness', color: 'var(--color-warning-text)', text: 'Profile is 40% complete.' },
   { type: 'Engagement', color: 'var(--color-secondary)', text: 'No recent contact recorded.' },
 ]
 

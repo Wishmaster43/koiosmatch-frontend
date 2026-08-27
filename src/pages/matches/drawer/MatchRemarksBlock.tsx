@@ -120,7 +120,7 @@ export default function MatchRemarksBlock({ remarks, loading, save, matchId, onO
         {/* Honest, translated explanation that this field is going away (§3).
             role="note" (an annotation), not a live region — it is static on mount. */}
         <div style={noticeStyle} role="note">
-          <AlertCircle size={14} style={{ color: 'var(--color-warning)', flexShrink: 0, marginTop: 1 }} aria-hidden="true" />
+          <AlertCircle size={14} style={{ color: 'var(--color-warning-text)', flexShrink: 0, marginTop: 1 }} aria-hidden="true" />
           <span>{t('drawer.remarks.deprecated')}</span>
         </div>
         {/* The existing content, read-only — never an editor. */}

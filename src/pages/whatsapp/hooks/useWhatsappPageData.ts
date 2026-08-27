@@ -71,6 +71,7 @@ export function useWhatsappPageData({
     // Plain stats (no matching filter exists yet to drill into — §0 no fake affordances).
     { key: 'queuedToday', label: t('kpi.queuedToday'), value: cardValue(queueReady, queuedToday), color: 'var(--color-info)' },
     { key: 'failedToday', label: t('kpi.failedToday'), value: cardValue(queueReady, failedToday), color: 'var(--color-danger-text)' },
+    // eslint-disable-next-line huisstijl/no-restricted-syntax -- DATA: semantic colour VALUE for the shared chip/donut/series recipes (tinted/chipInked downstream), not text ink
     { key: 'noReplyEscalations', label: t('kpi.noReplyEscalations'), value: cardValue(escalationsReady, noReplyCount), color: 'var(--color-warning)' },
   ]
 

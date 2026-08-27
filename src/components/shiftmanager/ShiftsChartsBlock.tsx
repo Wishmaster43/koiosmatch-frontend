@@ -131,7 +131,7 @@ export default function ShiftsChartsBlock({
   const kpiRow: KpiSpec[] = [
     ...(leadingKpis ?? []),                                             // Worked/Active · New · Attention
     { key: 'forecast_month',   label: t('dashboard.stats.forecastMonth'), value: val(MH.prognose, MC.prognose),          color: 'var(--color-secondary)' },
-    { key: 'open',             label: isH ? t('dashboard.stats.openHours') : t('dashboard.stats.openShifts'), value: val(H.geen_kandidaat, C.geen_kandidaat), color: 'var(--color-warning)' },
+    { key: 'open',             label: isH ? t('dashboard.stats.openHours') : t('dashboard.stats.openShifts'), value: val(H.geen_kandidaat, C.geen_kandidaat), color: 'var(--color-warning-text)' },
     { key: 'open_functions',   label: t('dashboard.stats.openByFunction'), render: openFuncBar },  // #6 mini stacked bar
     // Active customers: scheduled / total-active (e.g. 5/7), test customer already excluded.
     { key: 'active_customers', label: t('dashboard.stats.activeCustomers'), value: `${fmtN(plannedCustomers)}/${fmtN(activeCustomers)}`, color: 'var(--color-secondary)' },

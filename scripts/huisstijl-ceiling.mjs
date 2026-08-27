@@ -51,7 +51,11 @@ if (withErrors.length) {
 // button clean out of this administration — counting the disables themselves
 // keeps silenced debt on the books; genuine necessity exceptions simply sit in
 // the frozen number and never grow).
-const DISABLE_RE = /eslint-disable(?:-next-line)?[^\n]*huisstijl/g
+// CEILING-REGEX-1 (Opus F1, 23-08): count EVERY disable directive, not only the
+// /huisstijl/-matching ones — a disable on another rule (react-hooks, DATA-colour
+// administration, a11y) silences a warning WITHOUT counting back, which was
+// silent debt-laundering. Broadening = one --force re-baseline, same commit.
+const DISABLE_RE = /eslint-disable(?:-next-line)?/g
 const counts = {}
 for (const r of results) {
   let n = r.warningCount

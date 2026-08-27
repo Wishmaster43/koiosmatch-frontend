@@ -62,7 +62,7 @@ export default function PlanningSummary({ customerId, params }: { customerId: Id
                   borderBottom: i < upcoming.length - 1 ? '1px solid var(--border)' : 'none' }}>
                   <span style={{ width: 78, flexShrink: 0, color: 'var(--text-muted)' }}>{s.date ? formatDate(s.date) : '—'}</span>
                   <span style={{ flex: 1, color: 'var(--text)' }}>{[s.shift, s.department].filter(Boolean).join(' · ') || '—'}</span>
-                  <span style={{ color: s.candidate ? 'var(--text)' : 'var(--color-warning)' }}>{candName ?? t('planning.open')}</span>
+                  <span style={{ color: s.candidate ? 'var(--text)' : 'var(--color-warning-text)' }}>{candName ?? t('planning.open')}</span>
                 </div>
               )
             })}

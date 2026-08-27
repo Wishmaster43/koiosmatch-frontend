@@ -160,7 +160,7 @@ export default function OpportunitiesInsightsRow({
       onClick: () => toggleStages([wonValue]), active: activeIs([wonValue]) },
     { key: 'lost',     label: t('kpi.lost'),                                   value: lost,     color: 'var(--color-danger-text)',
       onClick: () => toggleStages([lostValue]), active: activeIs([lostValue]) },
-    { key: 'winrate',  label: t('kpi.winRate'),                                value: winRate,  color: 'var(--color-warning)',
+    { key: 'winrate',  label: t('kpi.winRate'),                                value: winRate,  color: 'var(--color-warning-text)',
       onClick: () => toggleStages([wonValue, lostValue]), active: activeIs([wonValue, lostValue]) },
   ]
 

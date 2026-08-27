@@ -203,6 +203,7 @@ export function buildApplicationInsights({
       onClick: () => { clearAllFilters(); setShowArchived(false); setBucket(bucket === 'allActive' ? 'active' : 'allActive'); setAttention(null) },
       active: bucket === 'allActive' },
     { key: 'new', label: t('kpi.new'), value: counts.new,
+      // eslint-disable-next-line huisstijl/no-restricted-syntax -- DATA: semantic colour VALUE for the shared chip/donut/series recipes (tinted/chipInked downstream), not text ink
       sub: t('kpi.newSub'), color: 'var(--color-warning)',
       onClick: () => { setShowArchived(false); setBucket('active'); toggleAttention('new') }, active: attention === 'new' },
     { key: 'matched', label: t('kpi.matched'), value: counts.matched, sub: t('kpi.matchedSub'),
@@ -219,6 +220,7 @@ export function buildApplicationInsights({
     // COUNT shown is page-derived (no server-wide stats field exists yet) — the sub
     // label says so honestly rather than presenting a partial figure as the total.
     { key: 'missingAppointment', label: t('kpi.missingAppointment'), value: missingAppointmentCount,
+      // eslint-disable-next-line huisstijl/no-restricted-syntax -- DATA: semantic colour VALUE for the shared chip/donut/series recipes (tinted/chipInked downstream), not text ink
       sub: t('kpi.missingAppointmentSub'), color: 'var(--color-warning)',
       onClick: () => { setShowArchived(false); toggleAttention('missingAppointment') },
       active: attention === 'missingAppointment' },
@@ -226,6 +228,7 @@ export function buildApplicationInsights({
     // real filter param (`too_long_in_stage=1`) as the request-level intent
     // seam already tested in useApplicationFilters.test.ts.
     { key: 'tooLongInStage', label: t('kpi.tooLongInStage'), value: tooLongInStageCount,
+      // eslint-disable-next-line huisstijl/no-restricted-syntax -- DATA: semantic colour VALUE for the shared chip/donut/series recipes (tinted/chipInked downstream), not text ink
       sub: t('kpi.tooLongInStageSub'), color: 'var(--color-warning)',
       onClick: () => { setShowArchived(false); toggleAttention('tooLongInStage') },
       active: attention === 'tooLongInStage' },

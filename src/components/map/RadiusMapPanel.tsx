@@ -48,7 +48,7 @@ export default function RadiusMapPanel({ points, center, radiusKm, onCenterChang
           <button onClick={onClearRadius}
             // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- warning-tinted mini-pill (kleurdragende actie zonder Button-tone, r7); tint via lib/tint below
             style={{ fontSize: 11, fontWeight: 600, padding: '3px 10px', borderRadius: 999, cursor: 'pointer',
-              color: 'var(--color-warning)', background: tintBg('var(--color-warning)'),
+              color: 'var(--color-warning-text)', background: tintBg('var(--color-warning)'),
               border: `1px solid ${tintBorder('var(--color-warning)')}` }}>
             {t('map.clearRadius')}
           </button>

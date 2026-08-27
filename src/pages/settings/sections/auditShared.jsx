@@ -17,8 +17,8 @@ export const LOG_NAME_META = {
   // roles/modules/ai share the violet token (system/AI-ish domains).
   roles:     { bg: 'var(--color-violet-bg)', color: 'var(--color-violet)' },
   settings:  { bg: 'var(--color-success-bg)', color: 'var(--color-success-text)' },
-  users:     { bg: 'var(--color-warning-bg)', color: 'var(--color-warning)' },
-  apps:      { bg: 'var(--color-warning-bg)', color: 'var(--color-warning)' },
+  users:     { bg: 'var(--color-warning-bg)', color: 'var(--color-warning-text)' },
+  apps:      { bg: 'var(--color-warning-bg)', color: 'var(--color-warning-text)' },
   modules:   { bg: 'var(--color-violet-bg)', color: 'var(--color-violet)' },
   workflows: { bg: 'var(--color-primary-bg)', color: 'var(--color-primary-text)' },
   webhooks:  { bg: 'var(--color-info-bg)', color: 'var(--color-info)' },

@@ -106,7 +106,7 @@ export default function MapColumnsStep({ entity, headers, targetColumns, mapping
           background: 'color-mix(in srgb, var(--color-warning) 10%, transparent)',
           border: '1px solid color-mix(in srgb, var(--color-warning) 30%, transparent)',
           borderRadius: 8, fontSize: 12, color: 'var(--text)' }}>
-          <AlertTriangle size={14} style={{ color: 'var(--color-warning)', flexShrink: 0 }} aria-hidden="true" />
+          <AlertTriangle size={14} style={{ color: 'var(--color-warning-text)', flexShrink: 0 }} aria-hidden="true" />
           {t('import.wizard.mapping.missingRequired', {
             defaultValue: `Still required: ${missingRequired.map((column) => fieldLabel(t, entity, column)).join(', ')}`,
             fields: missingRequired.map((column) => fieldLabel(t, entity, column)).join(', '),

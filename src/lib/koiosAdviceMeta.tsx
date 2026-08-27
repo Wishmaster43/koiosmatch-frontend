@@ -25,13 +25,13 @@ interface AdviceMeta { icon: LucideIcon; color: string }
 //   default --text-muted
 export const ADVICE_META: Record<string, AdviceMeta> = {
   add_to_pool: { icon: Target,       color: 'var(--color-primary-text)' },
-  contact:     { icon: Phone,        color: 'var(--color-warning)' },
+  contact:     { icon: Phone,        color: 'var(--color-warning-text)' },
   plan_intake: { icon: CalendarPlus, color: 'var(--color-map)' },
   // Customers + opportunities: a stalled relationship needs a scheduled follow-up.
   follow_up:   { icon: CalendarPlus, color: 'var(--color-map)' },
   // Vacancies + outreach: something needs a human look (stale/misconfigured), not
   // yet urgent enough for the danger colour.
-  attention:   { icon: AlertTriangle, color: 'var(--color-warning)' },
+  attention:   { icon: AlertTriangle, color: 'var(--color-warning-text)' },
   // Matches: the contract end date is approaching or passed while still open.
   renew:       { icon: RefreshCw,     color: 'var(--color-info)' },
   // Tasks: past its due date — mirrors the due-column's own overdue colour.
