@@ -255,15 +255,17 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
   // Register the right-panel filters. Config lives in the data/ builder (mirrors
   // buildCandidateFilterGroups/buildCustomerFilterGroups) — owner/client/functie/
   // branch here, status/published/agent/has-applications/archived/geo there.
-  const catOrg = t('filters.categories.organisation')
-  // Assembles the right-panel filter groups from the organisation-level pickers here plus the status/published/agent/geo groups built in vacancyFilterGroups.
+  // ONE builder owns every group and the canonical contiguous category order
+  // (general → organisation → display) — page-level prepending split the
+  // categories and made the sidebar render duplicate headings (Opus-verify).
   const filterGroups = useMemo(() => [
-    { key: 'owner',    type: 'search-select', category: catOrg, label: t('filters.owner'),    selected: selectedOwner,    options: ownerOptions,    onToggle: tog(setSelectedOwner) },
-    { key: 'client',   type: 'search-select', category: catOrg, label: t('filters.client'),   selected: selectedClient,   options: clientOptions,   onToggle: tog(setSelectedClient) },
-    { key: 'category', type: 'search-select', category: catOrg, label: t('filters.category'), selected: selectedCategory, options: categoryOptions, onToggle: tog(setSelectedCategory) },
-    // VESTIGING-2: values limited to the user's own branch scope (measured above).
-    { key: 'branch',   type: 'search-select', category: catOrg, label: t('common:filters.branch'), selected: selectedBranch, options: branchOptions, onToggle: tog(setSelectedBranch) },
     ...buildVacancyFilterGroups({
+      org: {
+        owner:    { selected: selectedOwner,    options: ownerOptions,    onToggle: tog(setSelectedOwner) },
+        client:   { selected: selectedClient,   options: clientOptions,   onToggle: tog(setSelectedClient) },
+        category: { selected: selectedCategory, options: categoryOptions, onToggle: tog(setSelectedCategory) },
+        branch:   { selected: selectedBranch,   options: branchOptions,   onToggle: tog(setSelectedBranch) },
+      },
       t,
       filters: {
         statusBucket, setStatusBucket, publishedBucket, setPublishedBucket,
@@ -273,7 +275,7 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
       },
       options: { statusOptions, agentOptions },
     }),
-  ], [t, catOrg, selectedOwner, setSelectedOwner, selectedClient, setSelectedClient, selectedCategory, setSelectedCategory,
+  ], [t, selectedOwner, setSelectedOwner, selectedClient, setSelectedClient, selectedCategory, setSelectedCategory,
     selectedBranch, setSelectedBranch, ownerOptions, clientOptions, categoryOptions, branchOptions,
     statusBucket, setStatusBucket, publishedBucket, setPublishedBucket, selectedAgentId, setSelectedAgentId,
     showWithoutAgent, setShowWithoutAgent, hasApplications, setHasApplications, showArchived, setShowArchived,

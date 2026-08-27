@@ -38,6 +38,28 @@ describe('useVacancyFilterParams · has_applications (VAC-HAS-APPLICATIONS-1)', 
   })
 })
 
+// FILTERPANEEL-COMPLEET-1: the owner/client/category/branch groups the right
+// panel now registers must reach the request under the wire keys the backend
+// VacancyQuery actually reads (owner_id/customer_id/category/branch_id).
+describe('useVacancyFilterParams · organisation filter groups (FILTERPANEEL-COMPLEET-1)', () => {
+  it('maps selectedClient to customer_id[]', () => {
+    expect(params({ selectedClient: ['c1'] })).toMatchObject({ customer_id: ['c1'] })
+  })
+
+  it('maps selectedCategory to category[]', () => {
+    expect(params({ selectedCategory: ['nurse'] })).toMatchObject({ category: ['nurse'] })
+  })
+
+  it('maps selectedBranch to branch_id[]', () => {
+    expect(params({ selectedBranch: ['b1'] })).toMatchObject({ branch_id: ['b1'] })
+  })
+
+  it('combines owner/client/category/branch with the other filters instead of replacing them', () => {
+    const p = params({ selectedOwner: ['u1'], selectedClient: ['c1'], selectedCategory: ['nurse'], selectedBranch: ['b1'], statusBucket: 's1' })
+    expect(p).toMatchObject({ owner_id: ['u1'], customer_id: ['c1'], category: ['nurse'], branch_id: ['b1'], status: ['s1'] })
+  })
+})
+
 describe('useVacancyFilterParams · the existing filter shapes stay intact', () => {
   it('maps a reference query to ?ref= and free text to ?search=', () => {
     expect(params({ globalSearch: 'V-00100' })).toMatchObject({ ref: 'V-00100' })

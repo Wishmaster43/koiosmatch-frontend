@@ -124,7 +124,7 @@
     "branchExcludesUnassigned": "Un filtre par filiale masque les enregistrements sans filiale liée.",
     "button": "Filtrer",
     "toggleActive": "Afficher/masquer les filtres ({{count}} actifs)",
-    "noBranch": "Sans agence",
+    "noBranch": "Sans filiale",
     "valueMin": "Valeur minimale",
     "valueMax": "Valeur maximale"
   },

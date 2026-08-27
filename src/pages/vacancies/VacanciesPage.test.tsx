@@ -119,6 +119,21 @@ describe('VacanciesPage · filter-panel parity (status/published/agent/archived)
     expect(capturedGroups.find(g => g.key === 'hasApplications')).toBeTruthy()
     expect(capturedGroups.find(g => g.key === 'archived')).toBeTruthy()
     expect(capturedGroups.find(g => g.key === 'geo')).toBeTruthy()
+    // FILTERPANEEL-COMPLEET-1: owner/client/category/branch mirror the candidate
+    // panel's organisation groups — all ten groups register on the vacancies panel.
+    expect(capturedGroups.find(g => g.key === 'owner')).toBeTruthy()
+    expect(capturedGroups.find(g => g.key === 'client')).toBeTruthy()
+    expect(capturedGroups.find(g => g.key === 'category')).toBeTruthy()
+    expect(capturedGroups.find(g => g.key === 'branch')).toBeTruthy()
+    expect(capturedGroups).toHaveLength(10)
+    // CONTIGUITY is the real invariant (Opus filterpaneel-verify): the sidebar
+    // renders a heading whenever the category CHANGES, so a stranded group
+    // paints a duplicate section header. Categories must never interleave.
+    const cats = capturedGroups.map((g: { category?: string }) => g.category).filter(Boolean)
+    const changes = cats.filter((c: string, i: number) => c !== cats[i - 1])
+    expect(new Set(changes).size).toBe(changes.length)
+    // And the canonical order holds: general → organisation → display.
+    expect(changes).toEqual([...new Set(cats)])
 
     const publishedGroup = capturedGroups.find(g => g.key === 'published')!
     act(() => publishedGroup.onToggle('published'))

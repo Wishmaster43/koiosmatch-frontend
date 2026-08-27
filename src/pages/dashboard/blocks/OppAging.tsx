@@ -18,6 +18,10 @@ export default function OppAging({ rows }: { rows: OppAgingBucket[] }) {
   if (!rows.length) return null
   const byBucket = new Map(rows.map(r => [r.bucket, r.count]))
 
+  // DELIBERATELY UNLINKED (DASHBOARD-DRILL-1 v1, §3): the opportunities page has
+  // no age filter, and a click without it would land on a DIFFERENT population
+  // than the tile counts (teller-canon). The link arrives with the age filter
+  // (BE list param + panel group) — noted in the WORKLIST, never a dead onClick.
   return (
     <div style={{ display: 'flex', gap: 12, marginBottom: 16, flexWrap: 'wrap' }}>
       {BUCKET_ORDER.filter(b => byBucket.has(b)).map(b => (
