@@ -12,6 +12,10 @@ export default {
   schema: [
     { key: 'query',       label: 'Zoekopdracht',    type: 'text',   placeholder: '{{vraag van kandidaat}}' },
     { key: 'limit',       label: 'Max. resultaten', type: 'number', placeholder: '50' },
-    { key: 'files',       label: 'Kennisbestanden', type: 'multiselect', options: ['FAQ Yesway','Dienstinformatie','Contracten'] },
+    // 'files' (knowledge scoping) REMOVED (r2): the engine reads AiKnowledge::all()
+    // — no id-filter exists server-side (CMBE-measured), so the multiselect was a
+    // fake affordance (§3) carrying tenant-branded literals. The real scoping
+    // feature is parked as KNOWLEDGE-SCOPE-1 (Danny-GO): BE engine-filter +
+    // files-contract, FE lookup-multiselect on GET /ai/knowledge/lookup.
   ],
 }
