@@ -44,6 +44,10 @@ vi.mock('@/pages/candidates/hooks/useCandidateNotes', () => ({
   }),
 }))
 vi.mock('./CandidateTasks', () => ({ default: () => <div data-testid="candidate-tasks-stub" /> }))
+// NOTITIE-DOORLINK-1: the additive linked-notes section needs a QueryClientProvider
+// (react-query) this test tree doesn't set up — out of scope here (its own suite
+// covers it), stub to a marker so it never touches useNoteFeed.
+vi.mock('@/components/drawer/tabs/notes/NoteFeedList', () => ({ default: () => <div data-testid="note-feed-list-stub" /> }))
 
 const candidate = (consent: Record<string, unknown> = {}, extra: Partial<Candidate> = {}): Candidate =>
   ({ id: 1, consent, timeline: [], name: 'Piet', initials: 'PJ', ownerInitials: 'AB', ...extra } as unknown as Candidate)

@@ -15,6 +15,8 @@ import CustomerNotesTab from './CustomerNotesTab'
 import api from '@/lib/api'
 
 vi.mock('@/lib/useNoteTypes', () => ({ useNoteTypes: () => ({ types: [], writableTypes: [] }) }))
+// NOTITIE-DOORLINK-1: the additive linked-notes section needs a QueryClientProvider (react-query) this test tree doesn't set up — out of scope here (its own suite covers it), stub to a marker so it never touches useNoteFeed.
+vi.mock('@/components/drawer/tabs/notes/NoteFeedList', () => ({ default: () => <div data-testid="note-feed-list-stub" /> }))
 vi.mock('@/lib/abortError', () => ({ isAbortError: () => false }))
 // The shared NotesTab pulls in @/lib/datetime, which imports the REAL i18n runtime
 // as a side effect — mocked here (mirrors OpportunitiesTab.test.tsx) so t() keeps

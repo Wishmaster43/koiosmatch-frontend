@@ -13,6 +13,8 @@ import i18n from '@/i18n'
 import CustomerNotesTab from './CustomerNotesTab'
 import type { Customer, CustomerNote } from '@/types/customer'
 
+// NOTITIE-DOORLINK-1: the additive linked-notes section needs a QueryClientProvider (react-query) this test tree doesn't set up — out of scope here (its own suite covers it), stub to a marker so it never touches useNoteFeed.
+vi.mock('@/components/drawer/tabs/notes/NoteFeedList', () => ({ default: () => <div data-testid="note-feed-list-stub" /> }))
 vi.mock('@/lib/useNoteTypes', () => ({
   useNoteTypes: () => ({ types: [], writableTypes: [] }),
   // The shared NotesTab reads this directly (system-event rows) — must ride along.

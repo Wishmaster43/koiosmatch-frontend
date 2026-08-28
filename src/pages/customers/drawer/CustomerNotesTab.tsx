@@ -49,6 +49,7 @@ import api, { unwrapList } from '@/lib/api'
 import { isAbortError } from '@/lib/abortError'
 import SubTabBar from '@/components/drawer/SubTabBar'
 import NotesTabJs from '@/components/drawer/tabs/NotesTab'
+import NoteFeedList from '@/components/drawer/tabs/notes/NoteFeedList'
 import EntityTasksTab from '@/components/drawer/tabs/EntityTasksTab'
 import VacancySettingsTab from './VacancySettingsTab'
 import SelectMenu from '@/components/ui/SelectMenu'
@@ -316,6 +317,10 @@ export default function CustomerNotesTab({ customerId, customerName, customerIni
             </div>
           ) : undefined} />
       )}
+      {/* NOTITIE-DOORLINK-1 (additive): notes filed on a linked vacancy/opportunity/
+          match/… that reached this customer (§8 asymmetry — a candidate/application
+          note never crosses to the customer side, only customer-own hosts do). */}
+      {active === 'notes' && <NoteFeedList entity="customers" id={customerId} />}
       {/* The customer's Taken surface — moved here from the top-level drawer tab
           (Danny 03-08); the shared tab brings its own search/status-filter/add toolbar. */}
       {active === 'tasks' && (

@@ -10,6 +10,7 @@ import { useTranslation } from 'react-i18next'
 import { MessageCircle, Briefcase } from 'lucide-react'
 import { useDateFormat } from '@/lib/datetime'
 import NotesTabJs from '@/components/drawer/tabs/NotesTab'
+import NoteFeedList from '@/components/drawer/tabs/notes/NoteFeedList'
 import SubTabBar from '@/components/drawer/SubTabBar'
 import SectionCard from '@/components/ui/SectionCard'
 import Toggle from '@/components/ui/Toggle'
@@ -313,7 +314,14 @@ export default function CommunicationTab({ c, onSave, onEditStatusEvent, initial
         </p>
       )}
       {/* Notes / timeline / conversations — one NotesTab section per sub-tab. */}
-      {subTab === 'notes'         && <NotesTab {...notesProps} showTimeline={false} showConversations={false} />}
+      {subTab === 'notes'         && (
+        <>
+          <NotesTab {...notesProps} showTimeline={false} showConversations={false} />
+          {/* NOTITIE-DOORLINK-1 (additive, frozen screen §GO 28-08): notes filed on a
+              linked application/match/vacancy/… that reached this candidate. */}
+          <NoteFeedList entity="candidates" id={c.id} />
+        </>
+      )}
       {subTab === 'timeline'      && <NotesTab {...notesProps} showNotes={false} showConversations={false} />}
       {subTab === 'conversations' && (
         <>
