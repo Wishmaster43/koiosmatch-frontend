@@ -76,6 +76,7 @@ function SourceRef({ source }: { source: NoteFeedSource }) {
 // slug; the lookup match below only supplies the tenant colour, with the
 // pre-64d976ff resolve kept as the §10-tolerant label fallback.
 function FeedRow({ item, noteTypes }: { item: NoteFeedItem; noteTypes: { value: string; label: string; color?: string | null }[] }) {
+  const { t } = useTranslation('common')
   const { formatDateTime } = useDateFormat()
   const resolved = item.type ? noteTypes.find(n => n.value === item.type || n.label === item.type) : undefined
   const chipLabel = item.type_label ?? resolved?.label ?? null
@@ -90,7 +91,11 @@ function FeedRow({ item, noteTypes }: { item: NoteFeedItem; noteTypes: { value: 
             {item.author ? `${item.author} · ` : ''}{formatDateTime(item.created_at)}
           </Caption>
         </div>
-        <SafeHtml style={{ fontSize: 12, color: 'var(--text)', lineHeight: 1.5 }} html={item.body ?? ''} />
+        {/* AUTHZ-NOTEFEED-1: a masked body states so honestly (italic = §4
+            empty-state voice) instead of rendering a silent blank block. */}
+        {item.body_masked
+          ? <Caption as="div" style={{ fontStyle: 'italic' }}>{t('notes.feed.masked')}</Caption>
+          : <SafeHtml style={{ fontSize: 12, color: 'var(--text)', lineHeight: 1.5 }} html={item.body ?? ''} />}
       </div>
     </div>
   )

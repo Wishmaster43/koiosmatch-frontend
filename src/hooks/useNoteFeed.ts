@@ -45,6 +45,9 @@ export interface NoteFeedItem {
   // Human note-type label resolved server-side per family lookup (64d976ff);
   // null when the slug has no label — render this, never re-map the slug.
   type_label?: string | null
+  // AUTHZ-NOTEFEED-1 (19602aff): true when the reader lacks candidates.view and
+  // the note carries a candidate — body suppressed, principal nameless.
+  body_masked?: boolean
   author: string | null
   language: string | null
   created_at: string

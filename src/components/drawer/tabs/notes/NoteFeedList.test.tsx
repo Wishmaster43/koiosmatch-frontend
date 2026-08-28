@@ -104,3 +104,10 @@ it('renders the server-resolved type_label on the chip, never the raw slug', asy
   expect(screen.queryByText('weird_slug')).not.toBeInTheDocument()
 })
 
+it('renders the honest screened-off state for a masked item, never a blank body', async () => {
+  vi.mocked(api.get).mockResolvedValueOnce(page([
+    { id: 'n8', note_type: 'match_note', source: { type: 'match', id: 'm1', label: 'Match', deleted: false }, body: null, body_masked: true, type: null, author: null, language: null, created_at: '2026-08-01T10:00:00Z', updated_at: '2026-08-01T10:00:00Z', is_direct: false, principals: [] },
+  ]))
+  render(createElement(NoteFeedList, { entity: 'customers', id: 'cu1' }), { wrapper })
+  await waitFor(() => expect(screen.getByText('Inhoud afgeschermd (geen kandidaat-rechten)')).toBeInTheDocument())
+})

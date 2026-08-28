@@ -527,7 +527,8 @@
       "loading": "Verknüpfte Notizen werden geladen…",
       "loadMore": "Mehr laden",
       "loadingMore": "Wird geladen…",
-      "sourceDeleted": "{{label}} (gelöscht)"
+      "sourceDeleted": "{{label}} (gelöscht)",
+      "masked": "Inhalt ausgeblendet (keine Kandidatenrechte)"
     },
     "editedBy": "bearbeitet von {{name}}",
     "allTypes": "Alle Typen",

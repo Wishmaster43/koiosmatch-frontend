@@ -527,7 +527,8 @@
       "loading": "Loading linked notes…",
       "loadMore": "Load more",
       "loadingMore": "Loading…",
-      "sourceDeleted": "{{label}} (deleted)"
+      "sourceDeleted": "{{label}} (deleted)",
+      "masked": "Content screened off (no candidate access)"
     },
     "editedBy": "edited by {{name}}",
     "allTypes": "All types",

@@ -527,7 +527,8 @@
       "loading": "Cargando notas vinculadas…",
       "loadMore": "Cargar más",
       "loadingMore": "Cargando…",
-      "sourceDeleted": "{{label}} (eliminado)"
+      "sourceDeleted": "{{label}} (eliminado)",
+      "masked": "Contenido oculto (sin acceso a candidatos)"
     },
     "editedBy": "editado por {{name}}",
     "allTypes": "Todos los tipos",

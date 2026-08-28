@@ -527,7 +527,8 @@
       "loading": "Gekoppelde notities laden…",
       "loadMore": "Meer laden",
       "loadingMore": "Laden…",
-      "sourceDeleted": "{{label}} (verwijderd)"
+      "sourceDeleted": "{{label}} (verwijderd)",
+      "masked": "Inhoud afgeschermd (geen kandidaat-rechten)"
     },
     "editedBy": "bewerkt door {{name}}",
     "allTypes": "Alle types",

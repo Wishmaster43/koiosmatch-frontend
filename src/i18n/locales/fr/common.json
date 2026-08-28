@@ -527,7 +527,8 @@
       "loading": "Chargement des notes liées…",
       "loadMore": "Charger plus",
       "loadingMore": "Chargement…",
-      "sourceDeleted": "{{label}} (supprimé)"
+      "sourceDeleted": "{{label}} (supprimé)",
+      "masked": "Contenu masqué (pas d’accès candidats)"
     },
     "editedBy": "modifié par {{name}}",
     "allTypes": "Tous les types",
