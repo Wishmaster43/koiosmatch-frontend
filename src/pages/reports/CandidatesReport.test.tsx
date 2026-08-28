@@ -368,7 +368,7 @@ describe('CandidatesReport — Kandidaten/Leads switch (RAPPORTEN-CONSOLIDATIE-1
     // Clicking a status bar opens the shared drawer fresh — a genuinely new request.
     await user.click(screen.getByText('Geplaatst'))
     expect(getSpy).toHaveBeenCalledWith('/reports/candidates/drill',
-      expect.objectContaining({ params: { status: 'placed', period: 'month', phase: ['lead'] } }))
+      expect.objectContaining({ params: { status: 'placed', period: 'month', phase_filter: ['lead'] } }))
   })
 
   it('the active position lives in the URL — a link to Leads opens on Leads and survives a switch flip', async () => {

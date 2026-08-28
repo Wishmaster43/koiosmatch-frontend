@@ -125,7 +125,10 @@ export default function CustomersReport({ period, filters = EMPTY_REPORT_FILTERS
   // (`baseParams`), never just `period`, so the drawer counts the exact same set
   // the bar was drawn from. `baseParams` also carries the switch's own `phase` filter.
   const [drill, setDrill] = useState<DrillSpec | null>(null)
-  const baseParams = { ...buildReportQueryParams(period, 'customers', filters), ...(phaseFilter ? { phase: [phaseFilter] } : {}) }
+  // Drill/advice population filter rides as phase_filter[] (CMBE a0d4627e) —
+  // the XOR segment key `phase` stays free for the segment picker; the compare
+  // params above keep `phase` (the report endpoint's own array contract).
+  const baseParams = { ...buildReportQueryParams(period, 'customers', filters), ...(phaseFilter ? { phase_filter: [phaseFilter] } : {}) }
   const openSegment = (seg: { label: string; count: number }, xorParam: Record<string, unknown>) =>
     setDrill({
       title: seg.label, value: seg.count, subtitle: `${formatDate(data?.from)} – ${formatDate(data?.to)}`,

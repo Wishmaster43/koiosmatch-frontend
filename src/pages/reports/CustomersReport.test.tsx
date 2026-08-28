@@ -411,7 +411,7 @@ describe('CustomersReport — Klanten/Prospects switch (RAPPORTEN-CONSOLIDATIE-1
     getSpy.mockClear()
     await user.click(screen.getByText('Status: Actief'))
     expect(getSpy).toHaveBeenCalledWith('/reports/customers/drill',
-      expect.objectContaining({ params: expect.objectContaining({ status: 'active', phase: ['lead'] }) }))
+      expect.objectContaining({ params: expect.objectContaining({ status: 'active', phase_filter: ['lead'] }) }))
   })
 
   it('a drill list opened on the Prospects position carries the `phase` filter — bar, list and switch position never disagree', async () => {
@@ -427,7 +427,7 @@ describe('CustomersReport — Klanten/Prospects switch (RAPPORTEN-CONSOLIDATIE-1
     // on mount) — clicking it guarantees a genuinely fresh request.
     await user.click(screen.getByText('Inactief'))
     expect(getSpy).toHaveBeenCalledWith('/reports/customers/drill',
-      expect.objectContaining({ params: { status: 'inactive', period: 'month', phase: ['lead'] } }))
+      expect.objectContaining({ params: { status: 'inactive', period: 'month', phase_filter: ['lead'] } }))
   })
 
   it('the active position lives in the URL — a link to Prospects opens on Prospects and survives a switch flip', async () => {
