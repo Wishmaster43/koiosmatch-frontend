@@ -29,8 +29,10 @@ interface BuildArgs {
   drills?: Record<string, DashDrillDescriptor | null>
   num: (v?: number | null) => string
   eur: (v?: unknown) => string
-  // pipeline_hours is not (yet) a pinned server key, so the hours-mode value
-  // still reads the raw opportunities feed.
+  // pipeline_hours is a PINNED dashboard-KPI since BE 4b320105 (sum of the deals'
+  // hours column, same hoursOpenBase predicate as /opportunities/stats — one
+  // predicate, can never diverge); the raw opp feed remains ONLY as the tolerant
+  // fallback for a cached pre-key envelope (§10).
   opp: { pipeline_hours?: number | null } | null
   valueInHours: boolean
   onNavigate?: (page: string, intent?: Record<string, unknown>) => void
@@ -69,7 +71,8 @@ export function buildDashboardKpis({ t, kpis, drills = {}, num, eur, opp, valueI
     // opportunities page. Hours mode shows the hours sum once the feed carries it (DASH-HOURS).
     pipeline:          { id: 'pipeline', label: valueInHours ? t('kpi.pipelineHours') : t('kpi.pipelineValue'),
       value: valueInHours
-        ? (opp?.pipeline_hours != null ? num(opp.pipeline_hours) : '—')
+        ? (kpis.pipeline_hours != null ? num(kpis.pipeline_hours)
+          : opp?.pipeline_hours != null ? num(opp.pipeline_hours) : '—')
         : (kpis.pipeline_value != null ? eur(kpis.pipeline_value) : '—'),
       sub: t('kpi.sumOpenOpps'), color: 'var(--color-success-text)', bg: 'var(--color-success-bg)', Icon: valueInHours ? CalendarClock : Euro, onClick: resolveClick('pipeline_value', () => onNavigate?.('opportunities', {})) },
     placements:        { id: 'placements', label: t('kpi.placements'), value: num(kpis.placements), sub: t('kpi.placementsSub'), color: 'var(--color-success-text)', bg: 'var(--color-success-bg)', Icon: Briefcase, onClick: resolveClick('placements', () => onNavigate?.('matches', {})) },
