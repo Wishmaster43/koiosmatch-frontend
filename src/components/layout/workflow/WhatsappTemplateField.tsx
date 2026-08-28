@@ -16,7 +16,7 @@ import {
   type WaTemplateOption,
 } from './whatsappTemplate'
 import type { WorkflowVarGroup } from '@/types/workflow'
-import type { OnChange } from './fieldControls'
+import type { OnChange } from './fieldControls/types'
 import { unwrapList } from '@/lib/api'
 // Danny 08-08 (§4): the house searchable combobox replaces the bare native
 // <select> for the template picker below.

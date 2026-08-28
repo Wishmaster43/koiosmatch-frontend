@@ -2,17 +2,21 @@
  * FieldInput — the workflow config-panel field dispatcher: one form control per
  * schema `field.type`. The plain inline controls (boolean/multiselect/select/
  * textarea/keyvalue/text/number/date) live here; the data-fetching + nested
- * builders (agent/faq/webhook pickers, filters) are delegated to `./fieldControls`.
+ * builders (agent/faq/webhook pickers, filters) are delegated to `./fieldControls/`.
  * Extracted from WorkflowCanvasEditor.
  */
 import { useId } from 'react'
 import { X } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import type { WorkflowField, EdgeFilters, WorkflowVarGroup } from '@/types/workflow'
-import {
-  FaqSelectField, WebhookSelectField, LookupSelectField, WorkflowSelectField,
-  WhatsappPhoneNumberField, FiltersField, OrderedListField, type OnChange,
-} from './fieldControls'
+import { FaqSelectField } from './fieldControls/FaqSelectField'
+import { WebhookSelectField } from './fieldControls/WebhookSelectField'
+import { LookupSelectField } from './fieldControls/LookupSelectField'
+import { WorkflowSelectField } from './fieldControls/WorkflowSelectField'
+import { WhatsappPhoneNumberField } from './fieldControls/WhatsappPhoneNumberField'
+import { FiltersField } from './fieldControls/FiltersField'
+import { OrderedListField } from './fieldControls/OrderedListField'
+import type { OnChange } from './fieldControls/types'
 import { KeyValueField, GroupField } from './groupKeyValueFields'
 import { TextFieldWithVars } from './VariablePicker'
 import { fieldLabel, fieldPlaceholder, optionLabel } from './moduleI18n'

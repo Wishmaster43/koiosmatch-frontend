@@ -6,7 +6,7 @@
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
-import { LookupSelectField } from './fieldControls'
+import { LookupSelectField } from './fieldControls/LookupSelectField'
 
 // Spatie roles come back as {id, name, ...} — deliberately NO value/label keys.
 // Partial mock: only the transport is faked; unwrapList stays the REAL helper

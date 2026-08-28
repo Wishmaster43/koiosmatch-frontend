@@ -19,7 +19,7 @@ import SelectAllRow from '@/components/ui/SelectAllRow'
 import { optionLabel } from './moduleI18n'
 import { unwrapList } from '@/lib/api'
 import type { WorkflowField } from '@/types/workflow'
-import type { OnChange } from './fieldControls'
+import type { OnChange } from './fieldControls/types'
 
 type Opt = { value: string; label: string }
 
@@ -108,7 +108,7 @@ export default function MultiSelectField({ field, value, onChange }: {
             {labelFor(v)}
             <button type="button" aria-label={t('common:remove', { defaultValue: 'Verwijderen' })}
               onClick={e => { e.stopPropagation(); remove(v) }}
-              // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- dense inline chip-remove icon inside a 2px/8px pill (fieldControls.tsx row-remove precedent); a 28px Button breaks the chip height
+              // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- dense inline chip-remove icon inside a 2px/8px pill (fieldControls/ row-remove precedent); a 28px Button breaks the chip height
               style={{ display: 'flex', background: 'none', border: 'none', cursor: 'pointer', color: 'inherit', padding: 0 }}>
               <X size={11} />
             </button>

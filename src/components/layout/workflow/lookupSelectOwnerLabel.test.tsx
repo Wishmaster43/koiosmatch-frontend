@@ -6,7 +6,7 @@
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
-import { LookupSelectField } from './fieldControls'
+import { LookupSelectField } from './fieldControls/LookupSelectField'
 import api from '@/lib/api'
 
 // WhatsappSendLookupController::webNumbers() returns response()->json(['data' => $options]) —

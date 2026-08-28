@@ -6,7 +6,7 @@
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
-import { WhatsappPhoneNumberField } from './fieldControls'
+import { WhatsappPhoneNumberField } from './fieldControls/WhatsappPhoneNumberField'
 
 // Real GET /whatsapp-phone-numbers shape: value/label + the new coexistence flag.
 vi.mock('@/lib/api', async importOriginal => ({

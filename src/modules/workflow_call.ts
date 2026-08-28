@@ -4,7 +4,7 @@
 // dry-run propagates to the child. Field key mirrors
 // App\Workflow\Modules\WorkflowCallModule::configSchema() exactly — `type:
 // 'workflow'` is a dedicated schema-field type rendering a searchable picker
-// fed by GET /workflows (see fieldControls.tsx's WorkflowSelectField).
+// fed by GET /workflows (see fieldControls/'s WorkflowSelectField).
 import { Workflow as WorkflowIcon } from 'lucide-react'
 import { tintBg } from '@/lib/tint'
 

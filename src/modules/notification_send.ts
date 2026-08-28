@@ -33,7 +33,7 @@ export default {
     // backend via `roles.name` (resolveRecipients: whereHas('roles', name = config.role)),
     // so this is NOT a static list — it is a live GET /roles lookup, same dynamic-options
     // mechanism status_set.ts uses for the candidate statuses (`lookup_select` + `endpoint`,
-    // rendered by the shared LookupSelectField in fieldControls.tsx). GET /roles already
+    // rendered by the shared LookupSelectField in fieldControls/). GET /roles already
     // excludes the platform-only super_admin role server-side (RoleController::index).
     { key: 'role',       label: 'Rol',        type: 'lookup_select', endpoint: '/roles', valueKey: 'name',
       showIf: { key: 'recipients', value: 'role' } },

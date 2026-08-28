@@ -1,6 +1,6 @@
 /**
  * KeyValueField + GroupField — WA-SEND-FIELDS-2's 'key_value' and 'group' field
- * kit citizens. Extracted from fieldControls.tsx (§3 400-line split trigger) —
+ * kit citizens. Extracted from fieldControls/ (§3 400-line split trigger) —
  * these two stay a pair since GroupField renders KeyValueField per sub-field.
  */
 import { useState } from 'react'
@@ -8,7 +8,7 @@ import { useTranslation } from 'react-i18next'
 import { X } from 'lucide-react'
 import type { WorkflowField, FieldOption } from '@/types/workflow'
 import { fieldLabel } from './moduleI18n'
-import type { OnChange } from './fieldControls'
+import type { OnChange } from './fieldControls/types'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 import { Caption } from '@/components/ui/typography'
@@ -17,7 +17,7 @@ import { Caption } from '@/components/ui/typography'
 // WA-SEND-FIELDS-2: whatsapp_send's `after_send_updates.conversation`/`.candidate`
 // (WhatsAppSendModule::configSchema, type 'key_value') — the engine reads a PLAIN
 // key->value RECORD (not the {name,value}[] array the unrelated 'keyvalue' field
-// type in fieldControls.tsx persists), so this writes/reads that record shape
+// type in fieldControls/ persists), so this writes/reads that record shape
 // directly. The schema's `suggestions` (known key -> one value or a value list)
 // render as pick-help via searchable selects; free entry stays allowed either way.
 // One icon-only row-remove cell for both the committed rows and the pending

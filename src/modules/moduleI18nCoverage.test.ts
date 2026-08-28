@@ -3,7 +3,7 @@
  * string the workflow module registry defines must have a `workflows:fieldLabels.*`
  * / `workflows:fieldHints.*` key in `en`, and every registry CATEGORY must resolve
  * through `categorySlug()` to an `en` `categories.*` key. Mirrors exactly how the
- * render layer consumes the registry (ConfigPanel/fields.tsx/fieldControls.tsx use
+ * render layer consumes the registry (ConfigPanel/fields.tsx/fieldControls/ use
  * `fieldLabel()`/`fieldHint()` for these two shapes) — see moduleI18n.ts.
  *
  * Registry `options` (select/multiselect values) are walked too, but intentionally

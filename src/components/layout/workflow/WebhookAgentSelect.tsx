@@ -45,7 +45,7 @@ export function WebhookAgentSelect({ value, onChange, label }: {
   // Load the tenant's AI agents — each agent has its own inbound webhook
   // (AI-AGENTS-3); no reusable agents hook/context exists yet (checked
   // src/hooks, src/context, 2026-07-20), so this mirrors the same lazy-import
-  // fetch idiom as WebhookSelectField/FaqSelectField in fieldControls.tsx.
+  // fetch idiom as WebhookSelectField/FaqSelectField in fieldControls/.
   useEffect(() => {
     let alive = true
     setAgentsLoading(true)

@@ -11,7 +11,7 @@
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
-import { WorkflowSelectField } from './fieldControls'
+import { WorkflowSelectField } from './fieldControls/WorkflowSelectField'
 import { FieldInput } from './fields'
 import { CurrentWorkflowContext } from './contexts'
 
