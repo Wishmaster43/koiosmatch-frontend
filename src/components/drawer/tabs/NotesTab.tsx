@@ -472,6 +472,10 @@ export default function NotesTab({
           noteTypes={noteTypes} channels={channels} labels={labels} editorLabels={editorLabels}
           composerExtra={composerExtra}
           onPopOutDraft={popout && !isPopoutWindow && NOTES_THREAD_POPOUT_ENTITIES.has(popout.entity) ? handOff : undefined} popOutPending={handoffPending}
+          // r2 punt-6 gat: candidateId was dead-wired (never passed) — the
+          // executed appointment link never rendered in production. The popout
+          // prop already names the host entity+id; forward it for candidates.
+          candidateId={popout?.entity === 'candidate' ? String(popout.id) : undefined}
           onSave={handleSave} onCancel={closeComposer}
         />
         <div style={sectionBlock}>

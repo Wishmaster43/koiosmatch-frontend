@@ -39,6 +39,11 @@
  * Hand-written types (§10): this route carries no openapi-typescript entry yet
  * (the generated spec documents request shapes + 401 only), so the success
  * shape below is hand-written by contract.
+ *
+ * DATE ANCHOR (DATUM-ANKER-1): the SERVER injects "today is {weekday} {date}"
+ * into every item-producing prompt arm (NoteAssistPrompt::dateAnchor, bureau
+ * timezone) — the FE never posts an anchor field; relative dates resolve
+ * server-side and arrive as concrete Y-m-d values.
  */
 import api from '@/lib/api'
 

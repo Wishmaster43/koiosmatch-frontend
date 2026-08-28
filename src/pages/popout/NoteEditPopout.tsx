@@ -28,6 +28,11 @@
  * never a form whose save the server would 403 (§7: UI gate, BE re-checks).
  */
 import { useEffect } from 'react'
+import { useMemo, useState } from 'react'
+import NoteActionsPanel from '@/components/drawer/tabs/notes/NoteActionsPanel'
+import type { NoteActionPanelItem } from '@/components/drawer/tabs/notes/NoteActionsPanel'
+import { mergeNoteActionItems, toKnownItems } from '@/components/drawer/tabs/notes/noteActionsPanelHelpers'
+import { useMyKoiosMode } from '@/pages/auth/shared'
 import { useTranslation } from 'react-i18next'
 import { useParams } from 'react-router-dom'
 import PopoutShell from './PopoutShell'
@@ -315,6 +320,14 @@ function NoteEditor({ note, onSave, noteTypes, channels, managePermission, label
   readOnlyCopy: string
 }) {
   const auth = useAuth()
+  // ASSIST-SIDEPANEEL parity with the composer: the panel's item state +
+  // known_items + the tenant's Auto/Wizard stand (r2 punt-3/10 gat).
+  const [panelItems, setPanelItems] = useState<NoteActionPanelItem[]>([])
+  const koios = useMyKoiosMode()
+  const onAssistItems = (fresh: Parameters<typeof mergeNoteActionItems>[1]) =>
+    setPanelItems(prev => mergeNoteActionItems(prev, fresh))
+  const knownItems = useMemo(() => toKnownItems(panelItems), [panelItems])
+
   const fields = useNoteFields({
     type: typeof note.type === 'string' ? note.type : undefined,
     channel: typeof note.channel === 'string' ? note.channel : undefined,
@@ -340,9 +353,21 @@ function NoteEditor({ note, onSave, noteTypes, channels, managePermission, label
   }
 
   return (
+    // r2 punt-3/10 gat: the second screen diverged from the composer (old
+    // append-as-text, no side panel) — it now mirrors the SAME panel wiring,
+    // so "één implementatie" is true again.
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10, height: '100%', minHeight: 0 }}>
-      <NoteFields fields={fields} noteTypes={noteTypes} channels={channels} labels={labels}
-        noteId={typeof note.id === 'string' ? note.id : undefined} editorMinHeight={220} />
+      <div style={{ flex: 1, minHeight: 0, display: 'flex', overflow: 'hidden', gap: 10 }}>
+        <div style={{ flex: 1, minWidth: 0, overflow: 'auto' }}>
+          <NoteFields fields={fields} noteTypes={noteTypes} channels={channels} labels={labels}
+            noteId={typeof note.id === 'string' ? note.id : undefined} editorMinHeight={220}
+            onItems={onAssistItems} knownItems={knownItems} />
+        </div>
+        {panelItems.length > 0 && (
+          <NoteActionsPanel items={panelItems} onItemsChange={setPanelItems}
+            noteId={typeof note.id === 'string' ? note.id : undefined} autoRun={koios.mode === 'auto'} />
+        )}
+      </div>
       {/* The profile text's exact closing contract — shared footer (§11). */}
       <PopoutSaveFooter dirty={fields.dirty} onSave={() => onSave(fields.payload)} />
     </div>

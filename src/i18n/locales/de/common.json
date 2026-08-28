@@ -497,7 +497,8 @@
       "assigneeSelf": "Ich selbst (Standard)",
       "assigneeClear": "Zurück zu mir",
       "linkAdd": "Verknüpfen mit…",
-      "linkClear": "Verknüpfung entfernen"
+      "linkClear": "Verknüpfung entfernen",
+      "modeUnknown": "Koios-Modus unbekannt. Aktionen warten auf deine Bestätigung."
     }
   },
   "ai": {

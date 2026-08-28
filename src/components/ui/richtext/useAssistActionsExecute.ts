@@ -82,9 +82,11 @@ export function useAssistActionsExecute(source: ExecuteSource = {}) {
 
   // Per-item confirm — re-sends ONLY that one item with confirmed:true, so an
   // already-executed/forbidden sibling in the same batch is never re-run.
-  const confirm = useCallback(async (index: number) => {
+  // `override` lets the caller send ITS current copy (late edits at the
+  // pending stage — r2 punt-7 gat: the hook's own array held the pre-edit item).
+  const confirm = useCallback(async (index: number, override?: RichTextAssistActionItem) => {
     setItems(prev => prev?.map((it, i) => i === index ? { ...it, confirming: true, confirmError: false } : it) ?? null)
-    const target = items?.[index]
+    const target = override ?? items?.[index]
     if (!target) return
     try {
       const [result] = await executeRichTextActions([toExecuteItem(target, true)], source)

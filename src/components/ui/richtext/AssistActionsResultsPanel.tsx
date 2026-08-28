@@ -46,6 +46,8 @@ export default function AssistActionsResultsPanel({ items, source, onApplyAsText
   const { t } = useTranslation('common')
   const exec = useAssistActionsExecute(source)
   // Guards the ONE-time text append (idempotent across re-clicks/re-renders).
+  // appliedRef: after one apply, a re-run executes again but never re-appends
+  // text (guards the 6x-duplicate class); deliberately NOT reset by exec.reset().
   const appliedRef = useRef(false)
   // The run being inspected (fetched fresh from its id) — null = drawer closed.
   const [viewingRun, setViewingRun] = useState<RunRow | null>(null)

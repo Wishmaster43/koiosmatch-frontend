@@ -497,7 +497,8 @@
       "assigneeSelf": "Ikzelf (standaard)",
       "assigneeClear": "Terug naar mijzelf",
       "linkAdd": "Koppelen aan…",
-      "linkClear": "Koppeling verwijderen"
+      "linkClear": "Koppeling verwijderen",
+      "modeUnknown": "Koios-stand onbekend. Acties wachten op jouw bevestiging."
     }
   },
   "ai": {

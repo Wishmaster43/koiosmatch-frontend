@@ -497,7 +497,8 @@
       "assigneeSelf": "Yo mismo (predeterminado)",
       "assigneeClear": "Volver a mí",
       "linkAdd": "Vincular a…",
-      "linkClear": "Quitar vínculo"
+      "linkClear": "Quitar vínculo",
+      "modeUnknown": "Modo de Koios desconocido. Las acciones esperan tu confirmación."
     }
   },
   "ai": {

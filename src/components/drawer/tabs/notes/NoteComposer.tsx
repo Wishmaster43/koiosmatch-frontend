@@ -170,7 +170,8 @@ export default function NoteComposer({ open, initialNote, noteTypes, channels, l
     // closeOnBackdrop={false}: this window holds UNSAVED typed/dictated work —
     // only the explicit close/cancel buttons may discard it (Danny 23-08).
     <FloatingPanel open={open} onClose={cancel} title={panelTitle} ariaLabel={panelTitle}
-      persistKey="notes-composer" width={panelItems.length > 0 ? 960 : 640} maxWidth="92vw"
+      persistKey="notes-composer" width={panelItems.length > 0 ? 960 : 720} maxWidth="92vw"
+      minWidth={panelItems.length > 0 ? 960 : undefined}
       scrollBody={false} closeOnBackdrop={false} maximizable>
       {/* Two-column body once the side panel has items (ASSIST-SIDEPANEEL-1
           punt 4): the existing content stays flex:1, the panel is a fixed
@@ -206,8 +207,17 @@ export default function NoteComposer({ open, initialNote, noteTypes, channels, l
         {/* Right-hand action-items panel (Danny punt 4) — mounts only once there
             is at least one item, so an unassisted note keeps its original width. */}
         {panelItems.length > 0 && (
-          <NoteActionsPanel items={panelItems} onItemsChange={setPanelItems} noteId={noteId}
-            candidateId={candidateId} autoRun={koios.mode === 'auto'} />
+          <div style={{ display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+            {/* r2 punt-10 gat: a failed mode-fetch silently degraded Auto to
+                Wizard — say so instead (safe direction stays, honesty added). */}
+            {koios.error && (
+              <Caption as="div" style={{ padding: '8px 12px 0', fontStyle: 'italic' }}>
+                {t('notesAssist.panel.modeUnknown')}
+              </Caption>
+            )}
+            <NoteActionsPanel items={panelItems} onItemsChange={setPanelItems} noteId={noteId}
+              candidateId={candidateId} autoRun={koios.mode === 'auto'} />
+          </div>
         )}
       </div>
 

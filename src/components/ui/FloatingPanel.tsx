@@ -34,6 +34,9 @@ export interface FloatingPanelProps {
   children: ReactNode
   /** Panel width before any user resize (defaults follow the old modal sizes). */
   width?: number | string
+  // Content-driven floor for a REMEMBERED width (see restoredW): the caller's
+  // current layout may need more room than an old persisted size.
+  minWidth?: number
   maxWidth?: string
   /** Remember position/size under this key (omit = always opens centered). */
   persistKey?: string
@@ -74,7 +77,7 @@ export interface FloatingPanelProps {
 }
 
 // The mounted panel body: focus trap plus drag/resize/maximize, mounted fresh per open by the exported wrapper below.
-function Panel({ onClose, ariaLabel, title, header, children, width, maxWidth, persistKey, resizable, zIndex, bodyStyle, hideClose, scrollBody = true, onPopOut, overlay = true, closeOnBackdrop = true, maximizable = false }: Omit<FloatingPanelProps, 'open'>) {
+function Panel({ onClose, ariaLabel, title, header, children, width, minWidth, maxWidth, persistKey, resizable, zIndex, bodyStyle, hideClose, scrollBody = true, onPopOut, overlay = true, closeOnBackdrop = true, maximizable = false }: Omit<FloatingPanelProps, 'open'>) {
   const { t } = useTranslation('common')
   const panelTrapRef = useFocusTrap<HTMLDivElement>(onClose)
   const { panelRef, placement, dragging, onDragPointerDown, onResizePointerDown, onDragHandleDoubleClick } = useDraggablePanel(persistKey, resizable !== false)
@@ -96,16 +99,20 @@ function Panel({ onClose, ariaLabel, title, header, children, width, maxWidth, p
   // Before any drag: CSS-centered exactly like every modal today. After: absolute.
   // Maximized wins over both — a fixed, centered near-fullscreen size regardless
   // of whatever the user previously dragged/resized to.
+  // A remembered width never undercuts the caller's CURRENT content minimum
+  // (minWidth): the two-column composer was permanently robbed of its widening
+  // by any old remembered size (r2 punt-2 gat).
+  const restoredW = (w?: number | null) => (w ? Math.max(w, minWidth ?? 0) : undefined)
   const positioned: CSSProperties = maximized
     ? { position: 'relative', width: '95vw', height: '92vh' }
     : placement
     ? (placement.x != null && placement.y != null
 
-        ? { position: 'fixed' as const, left: placement.x, top: placement.y, ...(placement.w ? { width: placement.w } : { width }), ...(placement.h ? { height: placement.h } : {}) }
+        ? { position: 'fixed' as const, left: placement.x, top: placement.y, ...(restoredW(placement.w) ? { width: restoredW(placement.w) } : { width }), ...(placement.h ? { height: placement.h } : {}) }
 
         // Size-only restore: stay in the CSS-centered flex layout, size applied.
 
-        : { ...(placement.w ? { width: placement.w } : { width }), ...(placement.h ? { height: placement.h } : {}) })
+        : { ...(restoredW(placement.w) ? { width: restoredW(placement.w) } : { width }), ...(placement.h ? { height: placement.h } : {}) })
     : { position: 'relative', width }
 
   return (
@@ -175,8 +182,10 @@ function Panel({ onClose, ariaLabel, title, header, children, width, maxWidth, p
           : { display: 'flex', flexDirection: 'column', overflow: 'hidden', flex: 1, minHeight: 0, ...bodyStyle }}>
           {children}
         </div>
-        {resizable !== false && (
-          // SE resize grip — same pointer pattern as the drag handle.
+        {resizable !== false && !maximized && (
+          // SE resize grip — same pointer pattern as the drag handle. Hidden
+          // while MAXIMIZED: a corner-drag there persisted a ~95vw width into
+          // the remembered placement, reopening near-fullscreen forever (r2).
           <div onPointerDown={onResizePointerDown} aria-hidden
             style={{ position: 'absolute', right: 0, bottom: 0, width: 16, height: 16,
               cursor: 'nwse-resize',

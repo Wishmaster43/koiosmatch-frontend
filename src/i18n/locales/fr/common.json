@@ -497,7 +497,8 @@
       "assigneeSelf": "Moi-même (par défaut)",
       "assigneeClear": "Revenir à moi",
       "linkAdd": "Lier à…",
-      "linkClear": "Supprimer le lien"
+      "linkClear": "Supprimer le lien",
+      "modeUnknown": "Mode Koios inconnu. Les actions attendent votre confirmation."
     }
   },
   "ai": {

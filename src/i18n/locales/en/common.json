@@ -497,7 +497,8 @@
       "assigneeSelf": "Myself (default)",
       "assigneeClear": "Back to myself",
       "linkAdd": "Link to…",
-      "linkClear": "Remove link"
+      "linkClear": "Remove link",
+      "modeUnknown": "Koios mode unknown. Actions wait for your confirmation."
     }
   },
   "ai": {

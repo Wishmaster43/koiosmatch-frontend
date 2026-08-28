@@ -16,7 +16,7 @@
 import { useEffect, useRef, useState } from 'react'
 import NoteActionTaskExtras from './NoteActionTaskExtras'
 import { useTranslation } from 'react-i18next'
-import { Bell, Calendar, ListChecks, Mail, MessageCircle, Pencil, Play } from 'lucide-react'
+import { Bell, Calendar, ExternalLink, ListChecks, Mail, MessageCircle, Pencil, Play } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import Spinner from '@/components/ui/Spinner'
 import { GroupLabel, Caption } from '@/components/ui/typography'
@@ -34,6 +34,9 @@ export interface NoteActionPanelItem {
   due_date: string | null
   note_excerpt: string | null
   message?: string | null
+  // Position of this item in exec's own array, stamped at merge time —
+  // survives a later title edit (see confirmOne).
+  execIndex?: number
   start?: string | null
   status: 'proposed' | 'pending' | 'executed' | 'failed'
   reason?: string
@@ -165,8 +168,18 @@ function ActionItemCard({ item, index, onEdit, onConfirm, candidateId }: {
               {[item.assignee_label, item.link_label].filter(Boolean).join(' · ')}
             </Caption>
           )}
+          {/* The AI-drafted message travels in the execute body — it must be
+              READABLE before a confirm sends it (visie punt 7: nothing goes
+              out unseen; mirrors AssistActionItemCard's message block). */}
+          {item.message && (
+            <Caption as="div" style={{ marginTop: 4, whiteSpace: 'pre-wrap', background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 6, padding: '5px 7px' }}>
+              {item.message}
+            </Caption>
+          )}
         </div>
-        {item.status === 'proposed' && (
+        {/* Editable while proposed AND while pending — pending IS the
+            decision moment before the confirm sends it (visie punt 7, r2). */}
+        {(item.status === 'proposed' || item.status === 'pending') && (
           <Button variant="ghost" size="sm" iconOnly onClick={() => setEditing(v => !v)}
             aria-label={t('notesAssist.panel.edit', { defaultValue: 'Bewerken' })} title={t('notesAssist.panel.edit', { defaultValue: 'Bewerken' })}>
             <Pencil size={12} />
@@ -184,7 +197,7 @@ function ActionItemCard({ item, index, onEdit, onConfirm, candidateId }: {
         {item.status === 'executed' && link && (
           <Button href={link} target="_blank" rel="noopener noreferrer" variant="ghost" size="sm"
             aria-label={t('notesAssist.panel.openNew', { defaultValue: 'Open in nieuw scherm' })} title={t('notesAssist.panel.openNew', { defaultValue: 'Open in nieuw scherm' })}>
-            {t('notesAssist.panel.openNew', { defaultValue: 'Open in nieuw scherm' })}
+            <ExternalLink size={11} /> {t('notesAssist.panel.openNew', { defaultValue: 'Open in nieuw scherm' })}
           </Button>
         )}
       </div>
@@ -213,12 +226,13 @@ export default function NoteActionsPanel({ items, onItemsChange, noteId, candida
     const next = itemsRef.current.map(it => {
       const r = byKey.get(`${it.title}__${it.type}`)
       if (!r || !r.status) return it
+      const execIndex = exec.items!.indexOf(r)
       // Server truth only: 'failed' is a real status (K-153) and `created` is
       // the record the run made (K-157) — run_id opens nothing, and inventing
       // a created-type gave whatsapp items a link to nowhere (Opus round).
       const status: NoteActionPanelItem['status'] = r.status === 'executed' ? 'executed'
         : (r.status === 'failed' || r.status === 'forbidden' || r.status === 'unsupported' ? 'failed' : 'pending')
-      return { ...it, status, reason: r.reason, run_id: r.run_id,
+      return { ...it, status, reason: r.reason, run_id: r.run_id, execIndex,
         created: r.created ?? it.created ?? null }
     })
     onItemsChange(next)
@@ -254,11 +268,14 @@ export default function NoteActionsPanel({ items, onItemsChange, noteId, candida
   // A single item's own "Bevestigen" — re-sends only that item confirmed
   // exec.confirm indexes into exec's OWN items array (seeded by the last
   // preview), so the panel index is looked up there by the same key.
+  // Sends the PANEL's current item (late edits included) at the exec index
+  // stamped during the merge — a title edit no longer breaks the lookup and
+  // the confirm can never resend a stale pre-edit copy (r2 punt-7 gat).
   const confirmOne = (index: number) => {
     const target = items[index]
     if (!target || !exec.items) return
-    const execIndex = exec.items.findIndex(r => r.title === target.title && r.type === target.type)
-    if (execIndex >= 0) exec.confirm(execIndex)
+    const execIndex = target.execIndex ?? exec.items.findIndex(r => r.title === target.title && r.type === target.type)
+    if (execIndex >= 0) exec.confirm(execIndex, target)
   }
 
   // Inline edit — applies a patch to one item's local fields (title/date),
