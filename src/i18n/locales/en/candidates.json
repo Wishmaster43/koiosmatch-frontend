@@ -1319,7 +1319,8 @@
         "task": "Task",
         "whatsapp": "WhatsApp",
         "appointment": "Appointment",
-        "notification": "Notification"
+        "notification": "Notification",
+        "email": "Email"
       }
     },
     "windowLeftHours": "{{hours}}h {{minutes}}m left to reply freely",

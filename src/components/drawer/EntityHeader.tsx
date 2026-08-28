@@ -238,7 +238,7 @@ export default function EntityHeader({
           {renderTitle ? renderTitle() : (
             <>
               <PageTitle style={{ fontWeight: 700 }}>{title}</PageTitle>
-              {subtitle != null && <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{subtitle || '—'}</div>}
+              {!!subtitle && <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{subtitle}</div>}
             </>
           )}
         </div>

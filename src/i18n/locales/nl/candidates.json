@@ -1319,7 +1319,8 @@
         "task": "Taak",
         "whatsapp": "WhatsApp",
         "appointment": "Afspraak",
-        "notification": "Melding"
+        "notification": "Melding",
+        "email": "E-mail"
       }
     },
     "windowLeftHours": "Nog {{hours}} u {{minutes}} min om vrij te antwoorden",

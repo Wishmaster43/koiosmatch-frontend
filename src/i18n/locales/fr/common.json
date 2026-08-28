@@ -70,7 +70,7 @@
   "sort": "Trier",
   "required": "Champ obligatoire",
   "select": "Sélectionner",
-  "optional": "— Facultatif —",
+  "optional": "Facultatif",
   "all": "Tout sélectionner",
   "none": "Tout désélectionner",
   "noData": "Aucune donnée",
@@ -519,6 +519,16 @@
     "noteReadOnly": "Cette note appartient à un autre utilisateur. Vous pouvez uniquement la lire ici."
   },
   "notes": {
+    "feed": {
+      "title": "Notes liées",
+      "onlyDirect": "Notes directes uniquement",
+      "empty": "Aucune note liée.",
+      "loadError": "Échec du chargement des notes liées.",
+      "loading": "Chargement des notes liées…",
+      "loadMore": "Charger plus",
+      "loadingMore": "Chargement…",
+      "sourceDeleted": "{{label}} (supprimé)"
+    },
     "editedBy": "modifié par {{name}}",
     "allTypes": "Tous les types",
     "allChannels": "Tous les canaux",

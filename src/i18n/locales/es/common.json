@@ -70,7 +70,7 @@
   "sort": "Ordenar",
   "required": "Campo obligatorio",
   "select": "Seleccionar",
-  "optional": "— Opcional —",
+  "optional": "Opcional",
   "all": "Seleccionar todo",
   "none": "Deseleccionar todo",
   "noData": "Sin datos",
@@ -519,6 +519,16 @@
     "noteReadOnly": "Esta nota pertenece a otro usuario. Aquí solo puedes leerla."
   },
   "notes": {
+    "feed": {
+      "title": "Notas vinculadas",
+      "onlyDirect": "Solo notas directas",
+      "empty": "No hay notas vinculadas.",
+      "loadError": "Error al cargar las notas vinculadas.",
+      "loading": "Cargando notas vinculadas…",
+      "loadMore": "Cargar más",
+      "loadingMore": "Cargando…",
+      "sourceDeleted": "{{label}} (eliminado)"
+    },
     "editedBy": "editado por {{name}}",
     "allTypes": "Todos los tipos",
     "allChannels": "Todos los canales",

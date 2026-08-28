@@ -1319,7 +1319,8 @@
         "task": "Tâche",
         "whatsapp": "WhatsApp",
         "appointment": "Rendez-vous",
-        "notification": "Notification"
+        "notification": "Notification",
+        "email": "E-mail"
       }
     },
     "windowLeftHours": "Encore {{hours}} h {{minutes}} min pour répondre librement",

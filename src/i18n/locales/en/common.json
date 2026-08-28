@@ -70,7 +70,7 @@
   "sort": "Sort",
   "required": "Required field",
   "select": "Select",
-  "optional": "— Optional —",
+  "optional": "Optional",
   "all": "Select all",
   "none": "Deselect all",
   "noData": "No data",
@@ -519,6 +519,16 @@
     "noteReadOnly": "This note belongs to another user. You can only read it here."
   },
   "notes": {
+    "feed": {
+      "title": "Linked notes",
+      "onlyDirect": "Direct notes only",
+      "empty": "No linked notes.",
+      "loadError": "Failed to load linked notes.",
+      "loading": "Loading linked notes…",
+      "loadMore": "Load more",
+      "loadingMore": "Loading…",
+      "sourceDeleted": "{{label}} (deleted)"
+    },
     "editedBy": "edited by {{name}}",
     "allTypes": "All types",
     "allChannels": "All channels",

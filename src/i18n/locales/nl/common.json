@@ -70,7 +70,7 @@
   "sort": "Sorteren",
   "required": "Verplicht veld",
   "select": "Selecteer",
-  "optional": "— Optioneel —",
+  "optional": "Optioneel",
   "all": "Alles selecteren",
   "none": "Alles deselecteren",
   "noData": "Geen data",
@@ -519,6 +519,16 @@
     "noteReadOnly": "Deze notitie is van een andere gebruiker. Je kunt hem hier alleen lezen."
   },
   "notes": {
+    "feed": {
+      "title": "Gekoppelde notities",
+      "onlyDirect": "Alleen directe notities",
+      "empty": "Geen gekoppelde notities.",
+      "loadError": "Laden van gekoppelde notities is mislukt.",
+      "loading": "Gekoppelde notities laden…",
+      "loadMore": "Meer laden",
+      "loadingMore": "Laden…",
+      "sourceDeleted": "{{label}} (verwijderd)"
+    },
     "editedBy": "bewerkt door {{name}}",
     "allTypes": "Alle types",
     "allChannels": "Alle kanalen",
