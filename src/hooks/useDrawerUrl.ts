@@ -109,7 +109,7 @@ const writeOpenId = (id: string | null, tab: string | null, push: boolean) => {
   // with a synthetic popstate (house pattern, notificationTarget.ts) so
   // hash-derived listeners (the Koios ambient context chip) track a same-page
   // drawer open/close live instead of sticking to the previous record.
-  window.dispatchEvent(new PopStateEvent('popstate', { state }))
+  window.dispatchEvent(new PopStateEvent('popstate', { state: { ...state, kmSynthetic: true } }))
 }
 
 export interface UseDrawerUrlArgs {

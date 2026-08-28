@@ -58,7 +58,11 @@ export function useEditorExitGuards({ isDirty, liveRunActive, onClose, confirm }
     if (!(window.history.state as { kmWorkflowEditor?: boolean } | null)?.kmWorkflowEditor) {
       window.history.pushState({ kmWorkflowEditor: true }, '', window.location.href)
     }
-    const onPop = () => {
+    const onPop = (e: PopStateEvent) => {
+      // Synthetic announcement pops (kmSynthetic — drawer-url/goTo/bell writes)
+      // are not the user pressing back: ignore them or a save would close the
+      // editor it just deep-linked (measured live, mega-audit r2).
+      if ((e.state as { kmSynthetic?: boolean } | null)?.kmSynthetic) return
       // Re-arm first so cancelling the confirm keeps the user in the editor.
       window.history.pushState({ kmWorkflowEditor: true }, '', window.location.href)
       confirmCloseRef.current()

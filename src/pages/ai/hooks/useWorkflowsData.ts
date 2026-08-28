@@ -1,7 +1,9 @@
 /**
- * Workflow list data + mutations. Loads workflows/folders from the API, merges
- * the localStorage graph cache (C-27 — the backend doesn't persist step
- * connections yet), and exposes save/run/toggle-status/folder CRUD, plus
+ * Workflow list data + mutations. Loads workflows/folders from the API (the
+ * backend persists the full graph — steps[].id/position/connections — since
+ * C-27), falls back to the localStorage graph cache only for a workflow whose
+ * server copy carries no edges (pre-C-27 saves), and exposes
+ * save/run/toggle-status/folder CRUD, plus
  * WF-EDITOR-DEEPLINK-1's `openEditorById`/`notFoundId` (open by id alone,
  * resolved against the loaded list — honest not-found if it never resolves).
  * Extracted from WorkflowsPage so the page stays a thin container (§3A); this
@@ -69,9 +71,10 @@ export function useWorkflowsData(showArchived: boolean) {
         setWorkflows([])
       } else {
         const wfs = unwrapList<RawWorkflow>(wfResult.value).rows.map(normalizeWorkflow)
-        // Restore graph from localStorage when the backend doesn't store connections yet
-        // (C-27). The cached steps are self-consistent (node IDs match edge source/target),
-        // so use them wholesale rather than merging with server step IDs which would mismatch.
+        // The backend persists the graph (C-27 landed); the localStorage cache
+        // only steps in for a workflow whose SERVER copy carries no edges (saved
+        // pre-C-27). Cached steps are self-consistent (node ids match edge
+        // source/target), so use them wholesale — merging with server ids would mismatch.
         const merged = wfs.map((wf: Workflow) => {
           const serverHasGraph = wf.steps.some(s => Array.isArray(s.next) && s.next.length)
           if (serverHasGraph) return wf           // backend already stores the graph → trust it
@@ -178,8 +181,10 @@ export function useWorkflowsData(showArchived: boolean) {
       const res = isNew
         ? await api.post('/workflows', payload)
         : await api.put(`/workflows/${updated.id}`, payload)
-      // Keep frontend graph (steps with next/position) as source of truth — backend
-      // doesn't store connections yet (C-27). Persist to localStorage so Cmd+R survives.
+      // The backend is the source of truth (C-27 landed — it persists
+      // steps[].id/position/connections losslessly, measured live by the
+      // workflow-editor smoke flow with a real edge + cleared cache); the
+      // localStorage copy is belt-and-braces for offline Cmd+R only.
       const serverData = normalizeWorkflow(unwrap<RawWorkflow>(res))
       const savedWorkflow = { ...updated, id: serverData.id ?? updated.id }
       localStorage.setItem(`wf_graph_${savedWorkflow.id}`, JSON.stringify(savedWorkflow.steps))

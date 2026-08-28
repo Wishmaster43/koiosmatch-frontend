@@ -39,7 +39,12 @@ async function apiFetch(page, method, path, body) {
   return page.evaluate(async ([m, p, b]) => {
     const r = await fetch(`/api${p}`, {
       method: m,
-      headers: { 'X-Tenant': 'demo', Accept: 'application/json', ...(b ? { 'Content-Type': 'application/json' } : {}) },
+      headers: {
+        'X-Tenant': 'demo', Accept: 'application/json',
+        // Sanctum SPA: mutating verbs need the CSRF token from the cookie.
+        'X-XSRF-TOKEN': decodeURIComponent(document.cookie.match(/XSRF-TOKEN=([^;]+)/)?.[1] ?? ''),
+        ...(b ? { 'Content-Type': 'application/json' } : {}),
+      },
       credentials: 'include',
       body: b ? JSON.stringify(b) : undefined,
     })
@@ -71,6 +76,7 @@ export async function workflowEditorGraph({ page, errors }) {
   page.on('request', onRequest)
 
   let workflowId = null
+  let cleanupLeftover = 0
   try {
     // 1. Navigate to the AI & Workflows page.
     await go(page, 'AI & Workflows')
@@ -90,13 +96,25 @@ export async function workflowEditorGraph({ page, errors }) {
       await sleep(300)
     }
 
+    // 3b. Connect A → B by dragging the xyflow source handle onto B's target
+    //     handle — the FAB append creates NO edge (useWorkflowEditor.insertModule,
+    //     append branch), so without this drag the connections-assert below would
+    //     compare [] to [] and prove nothing (verify-les r2).
+    const srcHandle = page.locator('.react-flow__node').nth(0).locator('.react-flow__handle-right, [data-handleid="out"]').first()
+    const tgtHandle = page.locator('.react-flow__node').nth(1).locator('.react-flow__handle-left, [data-handleid="in"]').first()
+    await srcHandle.hover(); await page.mouse.down()
+    const tgtBox = await tgtHandle.boundingBox()
+    expect(!!tgtBox, 'target handle not found for edge drag')
+    await page.mouse.move(tgtBox.x + tgtBox.width / 2, tgtBox.y + tgtBox.height / 2, { steps: 12 })
+    await page.mouse.up(); await sleep(300)
+
     // 4. Save (without closing) — creates the workflow and assigns a real id.
     await page.locator('button', { hasText: L.save }).first().click()
     await sleep(1200)
 
     // Recover the assigned id from the workflows list via the API (the editor
     // patches its own id in-place, so reading the list is the honest external check).
-    const { status: listStatus, json: listBody } = await apiFetch(page, 'GET', '/workflows')
+    const { status: listStatus, json: listBody } = await apiFetch(page, 'GET', '/workflows?per_page=500')
     expect(listStatus >= 200 && listStatus < 300, `GET /workflows failed: ${listStatus}`)
     const list = Array.isArray(listBody?.data) ? listBody.data : listBody
     const probe = list.find(w => w.name === PROBE_NAME)
@@ -105,6 +123,14 @@ export async function workflowEditorGraph({ page, errors }) {
 
     const graphBeforeReload = await fetchGraph(page, workflowId)
     expect(graphBeforeReload.length >= 2, `expected >=2 persisted steps, got ${graphBeforeReload.length}`)
+    expect(graphBeforeReload.some(st => st.connections.length > 0),
+      'no persisted connection — the edge drag failed, the graph assert would be vacuous')
+
+    // 5a. Clear the editor's localStorage graph cache BEFORE the reload: the load
+    //     effect prefers the cache when it doubts the server, so measuring BACKEND
+    //     persistence honestly requires the cache gone (verify-les r2 — the old
+    //     flow proved a localStorage round trip, not the API's).
+    await page.evaluate(id => localStorage.removeItem(`wf_graph_${id}`), String(workflowId))
 
     // 5. Reload the page — the hash already carries `?open=<id>` (WF-EDITOR-
     //    DEEPLINK-1: saving wrote it there), so a real reload's mount-time hash
@@ -136,25 +162,46 @@ export async function workflowEditorGraph({ page, errors }) {
         `position changed for step ${before.id}: ${JSON.stringify(before.position)} -> ${JSON.stringify(after.position)}`)
     }
 
-    // AI-credits guard: no request in this whole flow touched an AI endpoint.
-    const aiHits = requestUrls.filter(u => u.includes('/api/ai/'))
-    expect(aiHits.length === 0, `AI endpoint(s) called during workflow-editor flow: ${aiHits.join(', ')}`)
+  } catch (mainErr) {
+    // The credits guard still runs on the failure path, without masking the
+    // step error (mirror report-deeplink.mjs, verify-les r2).
+    try { assertNoAiCalls(requestUrls) } catch (guardErr) {
+      throw new Error(`${mainErr.message} — AND ${guardErr.message}`)
+    }
+    throw mainErr
   } finally {
-    // 7. Cleanup: sweep EVERY row named PROBE_NAME, not only the recovered id —
-    //    a failure between the POST and the list-read leaves workflowId null,
-    //    and an id-keyed delete would orphan that row (verify-les 28-08).
-    const { status: listStatus, json: listBody } = await apiFetch(page, 'GET', '/workflows')
-    if (listStatus >= 200 && listStatus < 300) {
-      const list = Array.isArray(listBody?.data) ? listBody.data : listBody
-      for (const w of list.filter(w => w.name === PROBE_NAME)) {
-        await apiFetch(page, 'DELETE', `/workflows/${w.id}`)
+    // 7. Cleanup: sweep EVERY row named PROBE_NAME on BOTH views — the plain
+    //    list holds ACTIVE probes (DELETE archives them) and `include_archived=1`
+    //    is the ARCHIVED-ONLY filter (measured: it does not include active rows),
+    //    where a second DELETE clears earlier strays (TRASH-OVERAL-1b).
+    for (const view of ['/workflows?per_page=500', '/workflows?per_page=500&include_archived=1']) {
+      const { status: sweepStatus, json: sweepBody } = await apiFetch(page, 'GET', view)
+      if (sweepStatus >= 200 && sweepStatus < 300) {
+        const rows = Array.isArray(sweepBody?.data) ? sweepBody.data : sweepBody
+        for (const w of rows.filter(w => w.name === PROBE_NAME)) {
+          await apiFetch(page, 'DELETE', `/workflows/${w.id}`)
+        }
       }
-      const { status: checkStatus, json: checkBody } = await apiFetch(page, 'GET', '/workflows')
+    }
+    {
+      const { status: checkStatus, json: checkBody } = await apiFetch(page, 'GET', '/workflows?per_page=500')
       if (checkStatus >= 200 && checkStatus < 300) {
         const after = Array.isArray(checkBody?.data) ? checkBody.data : checkBody
-        expect(!after.some(w => w.name === PROBE_NAME), 'probe workflow(s) survived cleanup')
+        const leftover = after.filter(w => w.name === PROBE_NAME)
+        // Never throw from finally (it would MASK the step error) — record and
+        // assert on the success path below.
+        cleanupLeftover = leftover.length
       }
     }
     page.off('request', onRequest)
   }
+  expect(cleanupLeftover === 0, `probe workflow(s) survived cleanup: ${cleanupLeftover}`)
+  // Success path: the same credits guard.
+  assertNoAiCalls(requestUrls)
+}
+
+// API-CREDITS-1: not one request in the flow may touch an AI endpoint.
+function assertNoAiCalls(requestUrls) {
+  const aiHits = requestUrls.filter(u => u.includes('/api/ai/'))
+  expect(aiHits.length === 0, `AI endpoint(s) called during workflow-editor flow: ${aiHits.join(', ')}`)
 }

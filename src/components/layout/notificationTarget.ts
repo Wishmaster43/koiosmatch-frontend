@@ -105,7 +105,7 @@ export function navigateToNotificationTarget(target: NotificationTarget) {
   const hash = `#${target.page}?open=${encodeURIComponent(target.id)}`
   const state = { kmPage: target.page, drawerOpen: target.id }
   window.history.pushState(state, '', hash)
-  window.dispatchEvent(new PopStateEvent('popstate', { state }))
+  window.dispatchEvent(new PopStateEvent('popstate', { state: { ...state, kmSynthetic: true } }))
 }
 
 // The same-origin hash deep link EntityLink uses for its own new-tab icon —

@@ -83,7 +83,7 @@ export default function DashboardLayout() {
     window.history.pushState({ kmPage: page }, '', `#${page}`)
     // Synthetic popstate: pushState is silent, and hash-derived listeners
     // (Koios ambient chip) must see a page switch drop the open record.
-    window.dispatchEvent(new PopStateEvent('popstate', { state: { kmPage: page } }))
+    window.dispatchEvent(new PopStateEvent('popstate', { state: { kmPage: page, kmSynthetic: true } }))
   }
   // Back/forward: restore the page from our history state (hash as reload fallback).
   // Same '/'+'?' split as above — a NAV-BACK-1 drawer entry's `kmPage` is already
@@ -92,6 +92,9 @@ export default function DashboardLayout() {
     // User pressed browser back/forward: resolve the target page from the pushed
     // history state, falling back to the hash for a hard reload.
     const onPop = (e: PopStateEvent) => {
+      // Synthetic announcements (kmSynthetic) are for hash-derived listeners
+      // only — they are not user navigation, so never reset intent on them.
+      if ((e.state as { kmSynthetic?: boolean } | null)?.kmSynthetic) return
       const page = (e.state as { kmPage?: string } | null)?.kmPage
         ?? window.location.hash.replace(/^#/, '').split(/[/?]/)[0]
       if (page && PAGE_TITLES[page]) { setNavIntent(null); setActivePage(page) }
