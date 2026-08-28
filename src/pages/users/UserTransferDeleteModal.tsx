@@ -21,6 +21,7 @@ import Button from '@/components/ui/Button'
 import { userDisplayName } from './userRow'
 import type { ManagedUser } from '@/types/api'
 import type { OwnedSummary } from './hooks/useUserDeletion'
+import { tintBg, tintBorder } from '@/lib/tint'
 
 // `owned.by_type` keys are the backend's tenant TABLE names (measured 09-08 —
 // UserOwnershipTransfer::OWNERSHIP_MAP). Each maps to its own ICU-plural label;
@@ -60,8 +61,8 @@ export default function UserTransferDeleteModal({ user, owned, successors, busy,
 
       {/* Why this dialog exists: the account still carries live ownership. */}
       <div style={{ display: 'flex', gap: 10, padding: '12px 14px', borderRadius: 10, marginBottom: 16,
-                    background: 'color-mix(in srgb, var(--color-warning) 10%, transparent)',
-                    border: '1px solid color-mix(in srgb, var(--color-warning) 33%, transparent)' }}>
+                    background: tintBg('var(--color-warning)'),
+                    border: tintBorder('var(--color-warning)') }}>
         <AlertTriangle size={15} style={{ color: 'var(--color-warning-text)', flexShrink: 0, marginTop: 1 }} aria-hidden="true" />
         <p style={{ fontSize: 12, lineHeight: 1.5, color: 'var(--text)' }}>
           {t('delete.explain', { name: userDisplayName(user), count: owned.total })}

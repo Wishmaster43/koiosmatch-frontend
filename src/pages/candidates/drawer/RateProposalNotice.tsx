@@ -7,6 +7,7 @@
  */
 import { useTranslation } from 'react-i18next'
 import type { RateProposal } from '../hooks/useRateProposal'
+import { tintBg, tintBorder } from '@/lib/tint'
 
 // Subtle italic hint — source-labelled, shown only once a proposal was FOUND.
 export function RateProposalHint({ proposal }: { proposal: RateProposal | null }) {
@@ -30,8 +31,8 @@ export function RateDeviationWarning({ proposal, purchase, sell, onCancel }: {
   const { t } = useTranslation('candidates')
   return (
     <div role="alert" style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: 12, padding: '9px 11px', borderRadius: 8, fontSize: 12,
-      color: 'var(--color-warning-text)', background: 'color-mix(in srgb, var(--color-warning) 10%, transparent)',
-      border: '1px solid color-mix(in srgb, var(--color-warning) 35%, transparent)' }}>
+      color: 'var(--color-warning-text)', background: tintBg('var(--color-warning)'),
+      border: tintBorder('var(--color-warning)') }}>
       <span style={{ fontWeight: 600 }}>
         {t('placement.rateProposal.deviationWarning', {
           proposalPurchase: proposal?.purchase_rate?.toFixed(2) ?? '—', proposalSell: proposal?.sale_rate?.toFixed(2) ?? '—',

@@ -43,8 +43,8 @@ export default function LineChartCard({ title, data = [], color = 'var(--color-p
   if (!data.length) {
     return (
       <div className="flex flex-col flex-1 min-w-0">
-        <div className="mb-4 text-sm font-medium text-gray-600">{title}</div>
-        <div className="flex items-center justify-center text-xs text-gray-300" style={{ height }}>
+        <div className="mb-4 text-sm font-medium" style={{ color: 'var(--text-muted)' }}>{title}</div>
+        <div className="flex items-center justify-center text-xs" style={{ height, color: 'var(--text-muted)' }}>
           {t('noData')}
         </div>
       </div>
@@ -54,8 +54,8 @@ export default function LineChartCard({ title, data = [], color = 'var(--color-p
   return (
     <div className="flex flex-col flex-1 min-w-0">
       <div className="flex items-center justify-between mb-4">
-        <div className="text-sm font-medium text-gray-600">{title}</div>
-        {onItemClick && <span className="text-xs text-gray-300">{t('clickPoint')}</span>}
+        <div className="text-sm font-medium" style={{ color: 'var(--text-muted)' }}>{title}</div>
+        {onItemClick && <span className="text-xs" style={{ color: 'var(--text-muted)' }}>{t('clickPoint')}</span>}
       </div>
       <ErrorBoundary compact>
       <ResponsiveContainer width="100%" height={height}>

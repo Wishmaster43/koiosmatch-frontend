@@ -3,11 +3,11 @@
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { AlertTriangle, Check, X } from 'lucide-react'
+import Button from '@/components/ui/Button'
 import KoiosAiMark from '@/components/ui/KoiosAiMark'
 import SoftChip from '@/components/ui/SoftChip'
 import { useConfirm } from '@/hooks/useConfirm'
 import { useDateFormat } from '@/lib/datetime'
-import { BTN_H } from '@/config/buttonMetrics'
 import { buildCvProposalDiff } from '@/pages/applications/data/mapCvProposal'
 import { Caption } from '@/components/ui/typography'
 import CvProposalDiffTable from './CvProposalDiffTable'
@@ -22,9 +22,6 @@ const STATUS_COLOR: Record<CvProposal['status'], string> = {
   accepted: 'var(--color-success)',
   rejected: 'var(--text-muted)',
 }
-
-const btnBase = { display: 'inline-flex', alignItems: 'center', gap: 5, height: BTN_H, padding: '0 12px',
-  fontSize: 12, fontWeight: 500 as const, borderRadius: 8, cursor: 'pointer' }
 
 interface CvProposalCardProps {
   proposal: CvProposal
@@ -136,22 +133,12 @@ export default function CvProposalCard({
           {/* The decision. Read-only viewers get an honest line, not a dead button. */}
           {canDecide ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-              <button type="button" onClick={() => askDecide('accept')} disabled={!canAccept}
-                style={{ ...btnBase, border: '1px solid var(--color-primary)',
-                  background: canAccept ? 'var(--color-primary-bg)' : 'none',
-                  color: 'var(--color-primary-text)', cursor: canAccept ? 'pointer' : 'not-allowed',
-                  opacity: canAccept ? 1 : 0.6 }}>
+              <Button type="button" variant="soft" onClick={() => askDecide('accept')} disabled={!canAccept}>
                 <Check size={13} /> {t('cvProposal.accept')}
-              </button>
-              {/* BUTTON-SOFT-TINT-1 (Danny 05-08): was a white/transparent outline
-                  button — now the house soft-tint recipe (§4). */}
-              <button type="button" onClick={() => askDecide('reject')} disabled={deciding}
-                style={{ ...btnBase, border: '1px solid color-mix(in srgb, var(--color-danger) 30%, transparent)',
-                  background: 'color-mix(in srgb, var(--color-danger) 10%, transparent)',
-                  color: 'var(--color-danger-text)', cursor: deciding ? 'not-allowed' : 'pointer',
-                  opacity: deciding ? 0.6 : 1 }}>
+              </Button>
+              <Button type="button" variant="dangerSoft" onClick={() => askDecide('reject')} disabled={deciding}>
                 <X size={13} /> {t('cvProposal.reject')}
-              </button>
+              </Button>
             </div>
           ) : (
             <Caption as="div">{t('cvProposal.readOnly')}</Caption>

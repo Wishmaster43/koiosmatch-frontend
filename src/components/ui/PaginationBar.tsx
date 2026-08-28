@@ -37,7 +37,7 @@ export default function PaginationBar({ page, totalPages, totalRows, pageSize, o
   const to   = Math.min(page * pageSize, totalRows)
 
   const btn = (onClick: () => void, disabled: boolean, children: ReactNode, title: string) => (
-    <button onClick={onClick} disabled={disabled} title={title} style={{
+    <button type="button" onClick={onClick} disabled={disabled} title={title} style={{
       width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center',
       border: '1px solid var(--border)', borderRadius: 6, background: 'var(--surface)',
       color: disabled ? 'var(--border)' : 'var(--text-muted)', cursor: disabled ? 'default' : 'pointer',

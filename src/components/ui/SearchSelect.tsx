@@ -235,7 +235,7 @@ export default function SearchSelect({
                 // rows already document applies here too. Block form: style spans
                 // several lines.
                 /* eslint-disable huisstijlLegacy/no-restricted-syntax */
-                <button key={o.value} onClick={() => { onToggle(o.value); if (closeOnToggle) setOpen(false) }}
+                <button key={o.value} type="button" onClick={() => { onToggle(o.value); if (closeOnToggle) setOpen(false) }}
                   style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%',
                     padding: '9px 12px', fontSize: 12, textAlign: 'left', cursor: 'pointer', border: 'none',
                     background: isSel ? 'var(--color-primary-bg)' : 'none', color: 'var(--text)' }}>

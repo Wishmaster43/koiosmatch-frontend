@@ -13,6 +13,7 @@ import api, { unwrapList } from '@/lib/api'
 import { useDateFormat } from '@/lib/datetime'
 import { useAppointmentTypes } from '@/lib/useAppointmentTypes'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
+import Button from '@/components/ui/Button'
 import StatusFilterSelect, { useStatusFilter } from '@/components/drawer/StatusFilterSelect'
 import { SectionTitle } from '@/components/ui/typography'
 import SoftChip from '@/components/ui/SoftChip'
@@ -121,9 +122,9 @@ export default function AppointmentsTab({ application: a }: { application: Appli
     return (
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, paddingTop: 40, fontSize: 12, color: 'var(--text-muted)' }}>
         <span>{t('appointments.loadError')}</span>
-        <button onClick={load} style={{ padding: '5px 12px', fontSize: 12, borderRadius: 6, border: '1px solid var(--border)', background: 'var(--surface)', cursor: 'pointer', color: 'var(--text)' }}>
+        <Button variant="secondary" onClick={load}>
           {t('common:error.retry')}
-        </button>
+        </Button>
       </div>
     )
   }
@@ -173,14 +174,14 @@ export default function AppointmentsTab({ application: a }: { application: Appli
               {ap.location_name && <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><MapPin size={12} /> {ap.location_name}</span>}
               {/* Edit: opens the same shared modal, prefilled → PATCH. */}
               {a.candidateId != null && (
-                <button onClick={() => setEditing({
-                  id: ap.id, scheduled_at: ap.scheduled_at, duration_min: ap.duration_min, modality: ap.modality,
-                  type: ap.type, owner_id: ap.owner?.id, location_id: ap.location_id ?? null,
-                })}
-                  title={t('common:edit')} aria-label={t('common:edit')}
-                  style={{ marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', border: 'none', background: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 2 }}>
+                <Button variant="secondary" size="sm" iconOnly style={{ marginLeft: 'auto' }}
+                  onClick={() => setEditing({
+                    id: ap.id, scheduled_at: ap.scheduled_at, duration_min: ap.duration_min, modality: ap.modality,
+                    type: ap.type, owner_id: ap.owner?.id, location_id: ap.location_id ?? null,
+                  })}
+                  title={t('common:edit')} aria-label={t('common:edit')}>
                   <Pencil size={12} />
-                </button>
+                </Button>
               )}
             </div>
           </div>

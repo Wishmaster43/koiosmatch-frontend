@@ -14,9 +14,9 @@ function BarTooltip({ active, payload, label, total, showPercent, percentValues,
   const value = payload[0].value ?? 0
   const pct   = total ? ((value / total) * 100).toFixed(1) : '0'
   return (
-    <div className="px-3 py-2 text-sm bg-white rounded-xl"
-      style={{ border: '1px solid var(--border)', boxShadow: 'var(--shadow-float)' }}>
-      <div className="mb-0.5 font-medium text-gray-800" style={{ fontSize: 12 }}>{label}</div>
+    <div className="px-3 py-2 text-sm rounded-xl"
+      style={{ background: 'var(--surface)', border: '1px solid var(--border)', boxShadow: 'var(--shadow-float)' }}>
+      <div className="mb-0.5 font-medium" style={{ fontSize: 12, color: 'var(--text)' }}>{label}</div>
       <div style={{ color: payload[0].fill, fontSize: 13, fontWeight: 500 }}>
         {percentValues ? `${formatNumber(value)}%` : showPercent ? `${pct}%` : formatNumber(value)}
       </div>
@@ -53,8 +53,8 @@ export default function BarChartCard({ title, data = [], colors = [], showPercen
   if (!data.length) {
     return (
       <div className="flex flex-col flex-1 min-w-0">
-        <div className="mb-4 text-sm font-medium text-gray-600">{title}</div>
-        <div className="flex items-center justify-center h-40 text-xs text-gray-300">{t('noData')}</div>
+        <div className="mb-4 text-sm font-medium" style={{ color: 'var(--text-muted)' }}>{title}</div>
+        <div className="flex items-center justify-center h-40 text-xs" style={{ color: 'var(--text-muted)' }}>{t('noData')}</div>
       </div>
     )
   }
@@ -64,13 +64,13 @@ export default function BarChartCard({ title, data = [], colors = [], showPercen
       <div className="flex items-center justify-between mb-4">
         {/* Average reads as part of the title — "Titel — gem. 7" — instead of a tiny
             dashed legend next to it (Danny 2026-07-06). */}
-        <div className="text-sm font-medium text-gray-600">
+        <div className="text-sm font-medium" style={{ color: 'var(--text-muted)' }}>
           {title}
           {showAverage && displayAverage > 0 && (
             <span> — {t('avg')} {asPercent ? displayAverage : formatNumber(displayAverage)}{asPercent ? '%' : ''}</span>
           )}
         </div>
-        {onBarClick && <span className="text-xs text-gray-300">{t('clickBar')}</span>}
+        {onBarClick && <span className="text-xs" style={{ color: 'var(--text-muted)' }}>{t('clickBar')}</span>}
       </div>
 
       <ErrorBoundary compact>

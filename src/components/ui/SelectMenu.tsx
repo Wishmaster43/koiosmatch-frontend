@@ -120,7 +120,7 @@ export default function SelectMenu({ id, 'aria-labelledby': ariaLabelledBy, valu
       {/* HUISSTIJL-1: ONE trigger recipe shared with CreatableSelect (was var(--bg)/r7
           here vs var(--surface)/r6 there) — background var(--surface), border
           1px solid var(--border), radius 6, padding '6px 10px'. */}
-      <button ref={triggerRef} onClick={() => setOpen(o => !o)}
+      <button ref={triggerRef} type="button" onClick={() => setOpen(o => !o)}
         id={triggerId} aria-labelledby={labelledBy}
         aria-expanded={open} aria-haspopup="listbox" aria-controls={open ? listId : undefined}
         style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 10px', width: '100%',
@@ -159,7 +159,7 @@ export default function SelectMenu({ id, 'aria-labelledby': ariaLabelledBy, valu
             <div style={{ padding: '10px 12px', fontSize: 12, color: 'var(--text-muted)' }}>{t('noResults')}</div>
           )}
           {shown.map(o => (
-            <button key={o.value} onClick={() => { if (o.disabled) return; onChange(o.value); setOpen(false) }}
+            <button key={o.value} type="button" onClick={() => { if (o.disabled) return; onChange(o.value); setOpen(false) }}
               aria-current={value === o.value} disabled={o.disabled} aria-disabled={o.disabled || undefined}
               style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%',
                 padding: '8px 12px', textAlign: 'left', fontSize: 12,

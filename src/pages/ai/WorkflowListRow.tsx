@@ -18,6 +18,7 @@ import { buildTrashNote } from '@/hooks/useTrashFlow'
 import { MODULE_META } from '@/modules/index'
 import Toggle from '@/components/ui/Toggle'
 import Spinner from '@/components/ui/Spinner'
+import Button from '@/components/ui/Button'
 import type { Workflow, WorkflowStep } from '@/types/workflow'
 
 // One workflow row's props — mirrors WorkflowCard's shared shape, plus the
@@ -185,52 +186,47 @@ export default function WorkflowListRow({ workflow, folderName, onRun, onEdit, o
           {/* Restore — settings.update-gated (mirrors deleteFolder's guard); the
               trashed row unmarks first (below) instead of restoring straight to active. */}
           {!inTrash && canManageFolders && onRestore && (
-            <button onClick={handleRestoreClick} disabled={restoring}
+            // Restore is a "gelukt/afronden" action — the house success variant (§4).
+            <Button variant="success" onClick={handleRestoreClick} disabled={restoring} style={{ flexShrink: 0 }}
               aria-label={t('list.restoreWorkflow')} title={t('list.restoreWorkflow')}
-              className="flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-medium flex-shrink-0"
-              style={{ background: 'var(--color-success-bg)', color: 'var(--color-on-success-bg)', border: '1px solid var(--color-success)', cursor: restoring ? 'not-allowed' : 'pointer' }}
             >
               {restoring ? <Spinner size={11} /> : <ArchiveRestore size={11} />}
               {t('list.restore')}
-            </button>
+            </Button>
           )}
 
           {/* TRASH-OVERAL-2: archived → trash (workflows.delete-gated at the page;
-              the shared preview modal confirms). */}
+              the shared preview modal confirms). bin=dangerSoft per the row idiom. */}
           {!inTrash && onMarkDeletion && (
-            <button onClick={e => { e.stopPropagation(); onMarkDeletion() }}
+            <Button variant="dangerSoft" iconOnly style={{ flexShrink: 0 }}
+              onClick={e => { e.stopPropagation(); onMarkDeletion() }}
               aria-label={t('common:trash.markAction')} title={t('common:trash.markAction')}
-              className="flex items-center justify-center rounded-lg flex-shrink-0"
-              style={{ width: 26, height: 26, background: 'color-mix(in srgb, var(--color-danger) 10%, transparent)',
-                border: '1px solid color-mix(in srgb, var(--color-danger) 40%, transparent)', cursor: 'pointer', color: 'var(--color-danger-text)' }}
             >
               <Trash2 size={13} />
-            </button>
+            </Button>
           )}
 
-          {/* TRASH-OVERAL-2: trash → back to plain archived (settings.update-gated). */}
+          {/* TRASH-OVERAL-2: trash → back to plain archived (settings.update-gated).
+              No standing variant reproduces the archive tint; secondary is the
+              closest sanctioned identity (necessity deviation, noted). */}
           {inTrash && onUnmark && (
-            <button onClick={e => { e.stopPropagation(); onUnmark() }}
+            <Button variant="secondary" style={{ flexShrink: 0 }} onClick={e => { e.stopPropagation(); onUnmark() }}
               aria-label={t('common:trash.unmarkAction')} title={t('common:trash.unmarkAction')}
-              className="flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-medium flex-shrink-0"
-              style={{ background: 'color-mix(in srgb, var(--color-archive) 10%, transparent)', color: 'var(--color-archive)',
-                border: '1px solid color-mix(in srgb, var(--color-archive) 40%, transparent)', cursor: 'pointer' }}
             >
               <ArchiveRestore size={11} />
               {t('common:trash.unmarkAction')}
-            </button>
+            </Button>
           )}
         </>
       ) : (
         <>
-          {/* Run */}
-          <button onClick={handleRun} disabled={running}
-            className="flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-medium flex-shrink-0"
-            style={{ background: running ? 'var(--border)' : 'var(--color-primary-bg)', color: running ? 'var(--text-muted)' : 'var(--color-primary)', border: 'none', cursor: running ? 'not-allowed' : 'pointer' }}
-          >
+          {/* Run is this row's primary action — the solid house accent (also fixes the
+              ink-twin: this used to read raw --color-primary on a tinted bg, unlike
+              WorkflowCard's already-correct --color-primary-text). */}
+          <Button variant="soft" onClick={handleRun} disabled={running} style={{ flexShrink: 0 }}>
             {running ? <Spinner size={11} /> : <Play size={11} />}
             {running ? t('page.running') : t('page.run')}
-          </button>
+          </Button>
 
           {/* Active/draft toggle — same semantics as the editor's status switch (active <-> inactive). */}
           <div onClick={e => e.stopPropagation()} style={{ flexShrink: 0 }}>
@@ -241,29 +237,25 @@ export default function WorkflowListRow({ workflow, folderName, onRun, onEdit, o
               title={t(active ? 'list.setInactive' : 'list.setActive')} />
           </div>
 
-          {/* Archive (soft-delete) — settings.update-gated, opens the confirm with the open-runs notice */}
+          {/* Archive (soft-delete) — settings.update-gated, opens the confirm with the
+              open-runs notice. Not destructive (§4 danger-sweep exclusion): secondary
+              chrome + archive ink. */}
           {canManageFolders && onArchive && (
-            <button onClick={e => { e.stopPropagation(); onArchive() }}
+            <Button variant="secondary" iconOnly style={{ flexShrink: 0, color: 'var(--color-archive)' }}
+              onClick={e => { e.stopPropagation(); onArchive() }}
               aria-label={t('list.archiveWorkflow')} title={t('list.archiveWorkflow')}
-              className="flex items-center justify-center rounded-lg flex-shrink-0"
-              style={{ width: 26, height: 26, background: 'var(--hover-bg)', border: '1px solid var(--border)', cursor: 'pointer', color: 'var(--text-muted)' }}
-              onMouseEnter={e => (e.currentTarget.style.color = 'var(--color-danger)')}
-              onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-muted)')}
             >
               <Trash2 size={13} />
-            </button>
+            </Button>
           )}
 
           {/* "…" menu — today: same action as the row click (edit) */}
-          <button onClick={e => { e.stopPropagation(); onEdit() }}
+          <Button variant="secondary" iconOnly style={{ flexShrink: 0 }}
+            onClick={e => { e.stopPropagation(); onEdit() }}
             aria-label={t('list.editWorkflow')} title={t('list.editWorkflow')}
-            className="flex items-center justify-center rounded-lg flex-shrink-0"
-            style={{ width: 26, height: 26, background: 'var(--hover-bg)', border: '1px solid var(--border)', cursor: 'pointer', color: 'var(--text-muted)' }}
-            onMouseEnter={e => (e.currentTarget.style.color = 'var(--text)')}
-            onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-muted)')}
           >
             <MoreHorizontal size={13} />
-          </button>
+          </Button>
         </>
       )}
     </div>

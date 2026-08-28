@@ -32,6 +32,8 @@ function walkSourceFiles(dir, out = []) {
 const MD_ALLOWLIST = {
   'src/pages/applications/ApplicationsPage.tsx': 1,
   'src/pages/candidates/CandidatesToolbar.tsx': 1,
+    // Auth submits (r2): the page's one primary action, full-width — md replaced a hand-painted 44px, a shrink toward canon.
+    'src/pages/auth/LoginPage.tsx': 2,
   'src/pages/customers/CustomersToolbar.tsx': 1,
   'src/pages/matches/MatchesPage.tsx': 1,
   'src/pages/opportunities/OpportunitiesPage.tsx': 1,

@@ -55,13 +55,16 @@ export default function SavedFiltersGroup({ group }: { group: ReportFilterGroup 
       {/* Saved sets: star = default (auto-applied on load), click name to load, trash to delete */}
       {saved.map(s => (
         <div key={s.id} style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 4 }}>
-          <button type="button" onClick={() => onSetDefault?.(s.id)}
+          {/* No variant carries a warning-toned toggle state; the ink override here
+              is data-state (default/not), not a chrome identity change. */}
+          <Button variant="secondary" iconOnly onClick={() => onSetDefault?.(s.id)}
             title={t('savedFilters.setDefault')} aria-label={t('savedFilters.setDefault')} aria-pressed={!!s.isDefault}
-            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 28, height: 28,
-              border: '1px solid var(--border)', borderRadius: 6, background: 'var(--surface)',
-              color: s.isDefault ? 'var(--color-warning)' : 'var(--text-muted)', cursor: 'pointer' }}>
+            style={{ color: s.isDefault ? 'var(--color-warning)' : 'var(--text-muted)' }}>
             <Star size={13} fill={s.isDefault ? 'var(--color-warning)' : 'none'} />
-          </button>
+          </Button>
+          {/* This is a choice-row (load this saved set), not an action button —
+              BUTTON-GRENS-LES: listbox/choice-row surfaces stay off Button. */}
+          {/* eslint-disable-next-line huisstijlLegacy/no-restricted-syntax */}
           <button type="button" onClick={() => onLoad?.(s.state)}
             style={{ flex: 1, minWidth: 0, textAlign: 'left', height: 28, padding: '0 8px', fontSize: 12,
               border: '1px solid var(--border)', borderRadius: 6, background: 'var(--surface)', color: 'var(--text)', cursor: 'pointer',
@@ -71,11 +74,9 @@ export default function SavedFiltersGroup({ group }: { group: ReportFilterGroup 
             onMouseLeave={e => (e.currentTarget.style.background = 'var(--surface)')}>
             {s.name}
           </button>
-          <button type="button" onClick={() => onDelete?.(s.id)} title={t('savedFilters.delete')} aria-label={t('savedFilters.delete')}
-            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 28, height: 28,
-              border: '1px solid var(--border)', borderRadius: 6, background: 'var(--surface)', color: 'var(--color-danger-text)', cursor: 'pointer' }}>
+          <Button variant="dangerSoft" iconOnly onClick={() => onDelete?.(s.id)} title={t('savedFilters.delete')} aria-label={t('savedFilters.delete')}>
             <Trash2 size={13} />
-          </button>
+          </Button>
         </div>
       ))}
     </div>

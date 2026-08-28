@@ -16,6 +16,7 @@ import { notifyError } from '@/lib/notify'
 import SaveButton from '@/components/ui/SaveButton'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import { PageTitle, Mono } from '@/components/ui/typography'
+import { tintBg, tintBorder } from '@/lib/tint'
 
 // The tenant-setting key: one JSON blob holding the whole proposal configuration
 // (shared contract with the sibling "propose candidate" modal — MODAL agent reads
@@ -92,8 +93,8 @@ export default function ProposalSettings() {
 
       {/* Honest notice — no fake affordance: Koios never sends this on its own yet. */}
       <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start', padding: '10px 14px', borderRadius: 8, fontSize: 12,
-        color: 'var(--color-info)', background: 'color-mix(in srgb, var(--color-info) 10%, transparent)',
-        border: '1px solid color-mix(in srgb, var(--color-info) 30%, transparent)', marginBottom: 16 }}>
+        color: 'var(--color-info)', background: tintBg('var(--color-info)'),
+        border: tintBorder('var(--color-info)'), marginBottom: 16 }}>
         <Info size={14} style={{ flexShrink: 0, marginTop: 1 }} />
         <span>{t('proposal.notSentYet')}</span>
       </div>
@@ -117,9 +118,12 @@ export default function ProposalSettings() {
           <p style={hintStyle}>{t('proposal.tokensHint')}</p>
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
             {TOKENS.map(token => (
+              // necessity: deliberately keeps the `--color-primary-bg` fallback chain
+              // (a themed token first, color-mix only as its fallback) — not the plain
+              // tintBg() recipe, so left as a literal rather than swapped.
               <Mono key={token} style={{ fontSize: 11, padding: '3px 8px', borderRadius: 6,
                 color: 'var(--color-primary-text)', background: 'var(--color-primary-bg, color-mix(in srgb, var(--color-primary) 10%, transparent))',
-                border: '1px solid color-mix(in srgb, var(--color-primary) 30%, transparent)' }}>
+                border: tintBorder('var(--color-primary)') }}>
                 {token}
               </Mono>
             ))}

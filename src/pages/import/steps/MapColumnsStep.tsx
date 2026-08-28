@@ -13,6 +13,7 @@ import CreatableSelect from '@/components/ui/CreatableSelect'
 import { fieldLabel } from '../lib/fieldLabels'
 import { SKIP, missingRequiredColumns, unmappedSourceColumns, type ColumnMapping } from '../lib/mapping'
 import Button from '@/components/ui/Button'
+import { tintBg, tintBorder } from '@/lib/tint'
 
 const SELECT_STYLE: CSSProperties = {
   height: 32, fontSize: 13, minWidth: 220,
@@ -103,8 +104,8 @@ export default function MapColumnsStep({ entity, headers, targetColumns, mapping
 
       {missingRequired.length > 0 && (
         <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginTop: 16, padding: '10px 12px',
-          background: 'color-mix(in srgb, var(--color-warning) 10%, transparent)',
-          border: '1px solid color-mix(in srgb, var(--color-warning) 30%, transparent)',
+          background: tintBg('var(--color-warning)'),
+          border: tintBorder('var(--color-warning)'),
           borderRadius: 8, fontSize: 12, color: 'var(--text)' }}>
           <AlertTriangle size={14} style={{ color: 'var(--color-warning-text)', flexShrink: 0 }} aria-hidden="true" />
           {t('import.wizard.mapping.missingRequired', {

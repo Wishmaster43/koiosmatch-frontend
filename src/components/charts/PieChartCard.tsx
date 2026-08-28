@@ -20,9 +20,9 @@ function ChartTooltip({ active, payload, total, showPercent, unit, formatNumber 
   const val  = item.value ?? 0
   const pct  = total ? ((val / total) * 100).toFixed(1) : '0'
   return (
-    <div className="px-4 py-3 text-sm bg-white rounded-xl"
-      style={{ border: '1px solid var(--border)', boxShadow: 'var(--shadow-float)' }}>
-      <div className="mb-1 font-medium text-gray-800">{item.name}</div>
+    <div className="px-4 py-3 text-sm rounded-xl"
+      style={{ background: 'var(--surface)', border: '1px solid var(--border)', boxShadow: 'var(--shadow-float)' }}>
+      <div className="mb-1 font-medium" style={{ color: 'var(--text)' }}>{item.name}</div>
       <div style={{ color: item.payload?.fill }}>
         {showPercent ? `${pct}%` : `${formatNumber(val)}${unit ? ' ' + unit : ''}`}
       </div>
@@ -55,8 +55,8 @@ export default function PieChartCard({ title, data = [], colors = DEFAULT_COLORS
   if (!data.length) {
     return (
       <div className="flex flex-col flex-1 min-w-0">
-        <div className="mb-4 text-sm font-medium text-gray-600">{title}</div>
-        <div className="flex items-center justify-center h-40 text-xs text-gray-300">{t('noData')}</div>
+        <div className="mb-4 text-sm font-medium" style={{ color: 'var(--text-muted)' }}>{title}</div>
+        <div className="flex items-center justify-center h-40 text-xs" style={{ color: 'var(--text-muted)' }}>{t('noData')}</div>
       </div>
     )
   }
@@ -67,8 +67,8 @@ export default function PieChartCard({ title, data = [], colors = DEFAULT_COLORS
   return (
     <div className="flex flex-col flex-1 min-w-0">
       <div className="flex items-center justify-between mb-4">
-        <div className="text-sm font-medium text-gray-600">{title}</div>
-        {onItemClick && <span className="text-xs text-gray-300">{t('clickSegment')}</span>}
+        <div className="text-sm font-medium" style={{ color: 'var(--text-muted)' }}>{title}</div>
+        {onItemClick && <span className="text-xs" style={{ color: 'var(--text-muted)' }}>{t('clickSegment')}</span>}
       </div>
 
       {/* Chart on the left, legend on the right */}
@@ -87,7 +87,7 @@ export default function PieChartCard({ title, data = [], colors = DEFAULT_COLORS
               isAnimationActive={false}
             >
               {data.map((_, i) => (
-                <Cell key={i} fill={colors[i % colors.length]} stroke="white" strokeWidth={2}
+                <Cell key={i} fill={colors[i % colors.length]} stroke="var(--surface)" strokeWidth={2}
                   cursor={onItemClick && !isInert?.(data[i]) ? 'pointer' : 'default'} />
               ))}
             </Pie>
@@ -121,17 +121,17 @@ export default function PieChartCard({ title, data = [], colors = DEFAULT_COLORS
                 <div className="flex items-center min-w-0 gap-2">
                   <span className="flex-shrink-0 rounded-full"
                     style={{ width: 8, height: 8, background: colors[i % colors.length] }} />
-                  <span className="text-xs text-gray-600 truncate">{entry.name}</span>
+                  <span className="text-xs truncate" style={{ color: 'var(--text-muted)' }}>{entry.name}</span>
                 </div>
-                <span className="flex-shrink-0 text-xs font-medium text-gray-800">
+                <span className="flex-shrink-0 text-xs font-medium" style={{ color: 'var(--text)' }}>
                   {showPercent ? `${pct}%` : formatNumber(entry.value)}
                 </span>
               </div>
             )
           })}
           <div className="pt-2 mt-1" style={{ borderTop: '1px solid var(--hover-bg)' }}>
-            <span className="text-xs text-gray-400">
-              {t('total')}: <strong className="text-gray-700">{formatNumber(total)}</strong>
+            <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
+              {t('total')}: <strong style={{ color: 'var(--text)' }}>{formatNumber(total)}</strong>
             </span>
           </div>
         </div>
@@ -142,8 +142,8 @@ export default function PieChartCard({ title, data = [], colors = DEFAULT_COLORS
           own line under the ring — a chart that shows shares and never states
           what they are shares OF is half a chart. */}
       {hideLegend && (
-        <div className="mt-3 text-xs text-gray-400">
-          {t('total')}: <strong className="text-gray-700">{formatNumber(total)}</strong>
+        <div className="mt-3 text-xs" style={{ color: 'var(--text-muted)' }}>
+          {t('total')}: <strong style={{ color: 'var(--text)' }}>{formatNumber(total)}</strong>
         </div>
       )}
     </div>

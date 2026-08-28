@@ -26,6 +26,7 @@ import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { AlertTriangle, ArrowRight } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
+import { tintBg, tintBorder } from '@/lib/tint'
 import { useNavigation } from '@/context/NavigationContext'
 import { useImportTemplates } from './import/useImportTemplates'
 import { useImportWizard } from './import/useImportWizard'
@@ -146,12 +147,18 @@ export default function ImportSettings() {
             wizard — column mapping + an editable preview, which this quicker screen
             does not offer. Both stay: this one for a client whose file already uses
             the exact column names, the wizard for one that needs mapping/adjusting. */}
+        {/* BUTTON-GRENS: a tinted CONTENT CARD with two prose spans is not Button
+            work (Button's nowrap/28px identity breaks the multi-line German copy) —
+            the honest shape is a raw button with a necessity-disable. Colour comes
+            from the §4 tintBg/tintBorder helpers; tintBg/tintBorder ARE the
+            canonical §4 tint helpers; the primary token here is only their argument. */}
+        {/* eslint-disable huisstijlLegacy/no-restricted-syntax -- tinted content-card link (BUTTON-GRENS: not Button territory; multi-line prose); tintBg/tintBorder ARE the canonical §4 tint helpers — the primary token here is only their argument */}
         <button type="button" onClick={() => navigate('import-wizard')}
           style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 20, padding: '10px 14px',
-                   background: 'color-mix(in srgb, var(--color-primary) 8%, transparent)',
-                   border: '1px solid color-mix(in srgb, var(--color-primary) 25%, transparent)',
-                   borderRadius: 8, fontSize: 12, color: 'var(--color-primary-text)', cursor: 'pointer', width: '100%',
-                   textAlign: 'left' }}>
+                   background: tintBg('var(--color-primary)'),
+                   border: tintBorder('var(--color-primary)'),
+                   borderRadius: 8, fontSize: 12, color: 'var(--color-primary-text)', width: '100%',
+                   cursor: 'pointer', textAlign: 'left' }}>
           <span style={{ flex: 1, color: 'var(--text)' }}>
             {t('import.wizard.linkFromSettings', {
               ns: 'settings',
@@ -163,6 +170,7 @@ export default function ImportSettings() {
             <ArrowRight size={13} aria-hidden="true" />
           </span>
         </button>
+        {/* eslint-enable huisstijlLegacy/no-restricted-syntax */}
 
         {phase === 'error' && (
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--color-danger-text)', fontSize: 13 }}>

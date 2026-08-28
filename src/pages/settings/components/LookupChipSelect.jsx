@@ -10,6 +10,7 @@
  * (both callers + tests import it) even though the control inside is now a toggle.
  */
 import Toggle from '@/components/ui/Toggle'
+import { chipInk, tintBg, tintBorder } from '@/lib/tint'
 
 // The one shared "select which lookup values count" block (see file docblock
 // above): one row per value, a real Toggle switch rather than a static-looking chip.
@@ -35,8 +36,8 @@ export default function LookupChipSelect({ label, hint, items, selected, onToggl
               {/* The value reads as the soft chip it is everywhere else (§4) — colour stays
                   even when toggled off; the Toggle carries the on/off state, not the tint. */}
               <span style={{ display: 'inline-block', padding: '3px 10px', borderRadius: 999, fontSize: 12, fontWeight: 500,
-                             background: `color-mix(in srgb, ${tone} 12%, transparent)`, color: tone,
-                             border: `1px solid color-mix(in srgb, ${tone} 40%, transparent)` }}>
+                             background: tintBg(tone), color: chipInk(tone),
+                             border: tintBorder(tone) }}>
                 {it.label}
               </span>
               <Toggle checked={on} onChange={() => onToggle(it.value)} ariaLabel={it.label} />

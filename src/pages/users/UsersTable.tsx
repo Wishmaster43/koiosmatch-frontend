@@ -10,6 +10,7 @@
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Pencil, Trash2, UserCog } from 'lucide-react'
+import Button from '@/components/ui/Button'
 import DataTable from '@/components/ui/DataTable'
 import type { Column } from '@/components/ui/DataTable'
 import SoftChip from '@/components/ui/SoftChip'
@@ -31,13 +32,6 @@ interface UsersTableProps {
   onDelete: (user: UserRow) => void
   onPickColor: (user: UserRow, color: string | null) => void
 }
-
-// Shared square icon-button look for the row actions (one string, not five copies).
-const ICON_BTN = {
-  display: 'flex', alignItems: 'center', justifyContent: 'center',
-  width: 22, height: 22, borderRadius: 6, border: '1px solid var(--border)',
-  background: 'var(--surface)', cursor: 'pointer', flexShrink: 0,
-} as const
 
 // Presentational users table; edit/roles/delete/colour actions are all permission-gated by the caller, this component only renders them.
 export default function UsersTable({
@@ -63,11 +57,12 @@ export default function UsersTable({
             <div style={{ fontWeight: 500, color: 'var(--text)', display: 'flex', alignItems: 'center', gap: 6 }}>
               {userDisplayName(u)}
               {/* System accounts are never edited from the tenant surface. */}
+              {/* pencil=secondary per the row icon-action idiom; Button's sm (28px) is
+                  visibly larger than the old 20px inline icon — kept, gap unchanged. */}
               {canUpdate && !isSA && (
-                <button onClick={() => onEdit(u)} title={t('editUser')} aria-label={t('editUser')}
-                  style={{ ...ICON_BTN, width: 20, height: 20, borderRadius: 5, color: 'var(--text-muted)' }}>
+                <Button variant="secondary" iconOnly onClick={() => onEdit(u)} title={t('editUser')} aria-label={t('editUser')}>
                   <Pencil size={10} aria-hidden="true" />
-                </button>
+                </Button>
               )}
               {isMe && (
                 <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--color-primary-text)',
@@ -100,10 +95,9 @@ export default function UsersTable({
             {list.length === 0 && <span style={{ color: 'var(--text-muted)', fontSize: 12 }}>—</span>}
             {list.map((r, i) => <RoleBadge key={i} role={r} />)}
             {canAssignRoles && !isSA && (
-              <button onClick={() => onEditRoles(u)} title={t('changeRole')} aria-label={t('changeRole')}
-                style={{ ...ICON_BTN, color: 'var(--text-muted)' }}>
+              <Button variant="secondary" iconOnly onClick={() => onEditRoles(u)} title={t('changeRole')} aria-label={t('changeRole')}>
                 <UserCog size={11} aria-hidden="true" />
-              </button>
+              </Button>
             )}
           </div>
         )
@@ -147,11 +141,10 @@ export default function UsersTable({
       cols.push({ key: 'actions', header: '', width: 60, align: 'right', render: u => {
         if (isSuperAdminUser(u) || (u.id != null && u.id === currentUserId)) return null
         return (
-          <button onClick={() => onDelete(u)} title={t('delete.action')} aria-label={t('delete.action')}
-            style={{ ...ICON_BTN, width: 26, height: 26, border: 'none', borderRadius: 8,
-                     background: 'var(--color-danger-bg)', color: 'var(--color-on-danger-bg)' }}>
+          // bin=dangerSoft per the row icon-action idiom.
+          <Button variant="dangerSoft" iconOnly onClick={() => onDelete(u)} title={t('delete.action')} aria-label={t('delete.action')}>
             <Trash2 size={12} aria-hidden="true" />
-          </button>
+          </Button>
         )
       } })
     }

@@ -13,6 +13,7 @@ import { AlertTriangle } from 'lucide-react'
 import SoftChip from '@/components/ui/SoftChip'
 import { hasRemarks, needsAttention } from './importRowAttention'
 import type { ImportRowAction, ImportRunResult } from './importApi'
+import { tintBg, tintBorder } from '@/lib/tint'
 
 // Colour per outcome — carries meaning (§4), reused for both the summary chips and
 // the per-row badges so the same colour always means the same thing.
@@ -65,8 +66,8 @@ export default function ImportResultPanel({ result, showAllRows, onToggleShowAll
           bookkeeping column in the file without being locked out of the import. */}
       {unknownColumns.length > 0 && (
         <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start', padding: '10px 12px',
-          background: 'color-mix(in srgb, var(--color-warning) 10%, transparent)',
-          border: '1px solid color-mix(in srgb, var(--color-warning) 30%, transparent)',
+          background: tintBg('var(--color-warning)'),
+          border: tintBorder('var(--color-warning)'),
           borderRadius: 8, marginBottom: 16 }}>
           <AlertTriangle size={14} style={{ color: 'var(--color-warning-text)', flexShrink: 0, marginTop: 1 }} />
           <div>

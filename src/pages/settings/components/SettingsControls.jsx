@@ -9,6 +9,7 @@ import { COLOR_PRESETS } from '@/lib/colorPresets'
 import Toggle from '@/components/ui/Toggle'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 import SoftChip from '@/components/ui/SoftChip'
+import { tintBg, tintBorder } from '@/lib/tint'
 
 // The curated-palette popover anchored under ColorSwatch; outside click closes it,
 // and Escape closes ONLY the popover: useFocusTrap handles the key at this element
@@ -94,8 +95,8 @@ export function DefaultToggle({ active, onClick, busy, activeLabel, inactiveLabe
       style={{
         display: 'inline-flex', alignItems: 'center', gap: 4, height: 22, padding: '0 9px',
         fontSize: 11, fontWeight: active ? 600 : 500, borderRadius: 999, whiteSpace: 'nowrap', flexShrink: 0,
-        border: `1px solid color-mix(in srgb, var(--color-primary) ${active ? 45 : 28}%, transparent)`,
-        background: `color-mix(in srgb, var(--color-primary) ${active ? 16 : 8}%, transparent)`,
+        border: tintBorder('var(--color-primary)', active),
+        background: tintBg('var(--color-primary)', active),
         color: 'var(--color-primary-text)', cursor: disabled ? 'default' : 'pointer',
         opacity: busy ? 0.6 : 1,
       }}>

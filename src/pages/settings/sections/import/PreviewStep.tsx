@@ -11,6 +11,7 @@ import ImportResultPanel from './ImportResultPanel'
 import type { ImportRunResult } from './importApi'
 import Button from '@/components/ui/Button'
 import Spinner from '@/components/ui/Spinner'
+import { tintBg, tintBorder } from '@/lib/tint'
 
 interface PreviewStepProps {
   result: ImportRunResult
@@ -44,8 +45,8 @@ export default function PreviewStep({ result, runStatus, runError, canImport, on
 
       {nothingToImport && (
         <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginTop: 16, padding: '10px 12px',
-          background: 'color-mix(in srgb, var(--color-warning) 10%, transparent)',
-          border: '1px solid color-mix(in srgb, var(--color-warning) 30%, transparent)',
+          background: tintBg('var(--color-warning)'),
+          border: tintBorder('var(--color-warning)'),
           borderRadius: 8, fontSize: 12, color: 'var(--text)' }}>
           <AlertTriangle size={14} style={{ color: 'var(--color-warning-text)', flexShrink: 0 }} aria-hidden="true" />
           {t('import.preview.nothingToImport')}

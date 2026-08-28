@@ -16,9 +16,9 @@
  * into an analytics payload, and never rendered anywhere outside this block.
  */
 import { useEffect, useRef, useState } from 'react'
-import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Check, Copy, ExternalLink, X } from 'lucide-react'
+import Button from '@/components/ui/Button'
 import SectionCard from '@/components/ui/SectionCard'
 import SoftChip from '@/components/ui/SoftChip'
 import { useConfirm } from '@/hooks/useConfirm'
@@ -32,18 +32,6 @@ import type { ApplicationDetail } from '@/types/application'
 
 interface ProposalsBlockProps {
   application: ApplicationDetail
-}
-
-// Shared button styling for the two link actions — same footprint as the
-// existing revoke button, just tinted with the primary token instead of danger.
-// BUTTON-SOFT-TINT-1 (Danny 05-08): was a white/transparent outline — now the
-// house soft-tint recipe (§4, mirrors DrawerAddButton/QuickViewToggle).
-const linkButtonStyle: CSSProperties = {
-  display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 4,
-  height: 26, minWidth: 26, padding: '0 8px', fontSize: 11, borderRadius: 6,
-  border: '1px solid color-mix(in srgb, var(--color-primary) 30%, transparent)',
-  background: 'color-mix(in srgb, var(--color-primary) 10%, transparent)', color: 'var(--color-primary-text)',
-  cursor: 'pointer', textDecoration: 'none',
 }
 
 // Renders the recorded-proposal history (see file docblock above); stays invisible
@@ -120,26 +108,26 @@ export default function ProposalsBlock({ application }: ProposalsBlockProps) {
               </Caption>
               {canShare && (
                 <div style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-                  <button type="button" onClick={() => handleCopyLink(p.id, p.share_url as string)}
-                    aria-label={t('propose.copyLink')} title={t('propose.copyLink')} style={linkButtonStyle}>
+                  {/* BUTTON-SOFT-TINT-1 (Danny 05-08): the link actions keep the
+                      primary soft tint — Button's soft variant IS that recipe. */}
+                  <Button variant="soft" iconOnly onClick={() => handleCopyLink(p.id, p.share_url as string)}
+                    aria-label={t('propose.copyLink')} title={t('propose.copyLink')}>
                     {copiedId === p.id ? <Check size={11} /> : <Copy size={11} />}
-                  </button>
-                  <a href={p.share_url as string} target="_blank" rel="noopener noreferrer"
-                    aria-label={t('propose.openLink')} title={t('propose.openLink')} style={linkButtonStyle}>
+                  </Button>
+                  {/* Button's polymorphic href keeps this a real <a> (navigation, §6) while
+                      sharing the one visual identity instead of a hand-styled anchor. */}
+                  <Button href={p.share_url as string} target="_blank" rel="noopener noreferrer" variant="soft" iconOnly
+                    aria-label={t('propose.openLink')} title={t('propose.openLink')}>
                     <ExternalLink size={11} />
-                  </a>
+                  </Button>
                 </div>
               )}
               {/* BUTTON-SOFT-TINT-1 (Danny 05-08): was a white/transparent outline
                   button — now the house soft-tint recipe (§4). */}
               {!p.revoked_at && p.is_valid && (
-                <button onClick={() => handleRevoke(p.id)} disabled={revoking} aria-label={t('propose.revoke')}
-                  style={{ display: 'inline-flex', alignItems: 'center', gap: 4, height: 26, padding: '0 8px', fontSize: 11,
-                    borderRadius: 6, border: '1px solid color-mix(in srgb, var(--color-danger) 30%, transparent)',
-                    background: 'color-mix(in srgb, var(--color-danger) 10%, transparent)', color: 'var(--color-danger-text)',
-                    cursor: revoking ? 'not-allowed' : 'pointer', opacity: revoking ? 0.6 : 1 }}>
+                <Button variant="dangerSoft" onClick={() => handleRevoke(p.id)} disabled={revoking} aria-label={t('propose.revoke')}>
                   <X size={11} /> {t('propose.revoke')}
-                </button>
+                </Button>
               )}
             </div>
           )

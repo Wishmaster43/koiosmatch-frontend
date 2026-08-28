@@ -51,15 +51,15 @@ export default function WeeklyBarChartCard({ title, data = [], series = [], heig
   if (!data.length || !series.length) {
     return (
       <div className="flex flex-col flex-1 min-w-0">
-        <div className="mb-4 text-sm font-medium text-gray-600">{title}</div>
-        <div className="flex items-center justify-center text-xs text-gray-300" style={{ height }}>—</div>
+        <div className="mb-4 text-sm font-medium" style={{ color: 'var(--text-muted)' }}>{title}</div>
+        <div className="flex items-center justify-center text-xs" style={{ height, color: 'var(--text-muted)' }}>—</div>
       </div>
     )
   }
 
   return (
     <div className="flex flex-col flex-1 min-w-0">
-      <div className="mb-4 text-sm font-medium text-gray-600">{title}</div>
+      <div className="mb-4 text-sm font-medium" style={{ color: 'var(--text-muted)' }}>{title}</div>
       <ErrorBoundary compact>
       <ResponsiveContainer width="100%" height={height}>
         <ComposedChart data={data} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>

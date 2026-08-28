@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { overlapHoursSum } from './matchConflicts'
 import type { ExistingMatchRow } from './matchConflicts'
+import { tintBg, tintBorder } from '@/lib/tint'
 
 // One existing match's display label — vacancy title first, else the client name,
 // never a raw id (never surface an internal identifier to the recruiter).
@@ -48,8 +49,8 @@ export default function MatchConflictBanners({
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 10 }}>
       {duplicateMatch && (
         <div role="status" style={{ padding: '9px 11px', borderRadius: 8, fontSize: 12, fontWeight: 600,
-          color: 'var(--color-warning-text)', background: 'color-mix(in srgb, var(--color-warning) 10%, transparent)',
-          border: '1px solid color-mix(in srgb, var(--color-warning) 35%, transparent)' }}>
+          color: 'var(--color-warning-text)', background: tintBg('var(--color-warning)'),
+          border: tintBorder('var(--color-warning)') }}>
           {t('placement.duplicateMatchWarning', { label: labelOf(duplicateMatch) })}
         </div>
       )}
@@ -61,8 +62,8 @@ export default function MatchConflictBanners({
         const hoursSum = overlapHoursSum(draftHours, m.hoursPerWeek)
         return (
           <div key={m.id} role="status" style={{ padding: '9px 11px', borderRadius: 8, fontSize: 12, fontWeight: 600,
-            color: 'var(--color-warning-text)', background: 'color-mix(in srgb, var(--color-warning) 10%, transparent)',
-            border: '1px solid color-mix(in srgb, var(--color-warning) 35%, transparent)' }}>
+            color: 'var(--color-warning-text)', background: tintBg('var(--color-warning)'),
+            border: tintBorder('var(--color-warning)') }}>
             {hoursSum != null
               ? t('placement.overlapWarningHours', { label: labelOf(m), hours: formatHoursSum(hoursSum), period })
               : t('placement.overlapWarning', { label: labelOf(m), period })}

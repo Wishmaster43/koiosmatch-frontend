@@ -15,6 +15,7 @@ import { Eye, EyeOff, ShieldCheck, ArrowLeft } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import ErrorBanner from '@/components/ui/ErrorBanner'
 import Spinner from '@/components/ui/Spinner'
+import Button from '@/components/ui/Button'
 
 // Read a server-provided error message off an axios-style error, if present.
 const messageOf = (e: unknown) => (e as { response?: { data?: { message?: string } } })?.response?.data?.message
@@ -172,11 +173,12 @@ function CredentialForm({ onMfaRequired }: { onMfaRequired: (token: string) => v
               style={{ padding: '10px 40px 10px 12px', border: '1px solid var(--border)', outline: 'none' }}
               onFocus={e => (e.target.style.borderColor = 'var(--color-primary)')}
               onBlur={e  => (e.target.style.borderColor = 'var(--border)')} />
+            {/* eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- field-internal chrome (BUTTON-GRENS): the eye lives INSIDE the input's box; Button's 28px square would not sit in the field padding */}
             <button type="button" onClick={() => setShowPw(v => !v)}
               title={showPw ? t('login.hidePassword') : t('login.showPassword')}
               aria-label={showPw ? t('login.hidePassword') : t('login.showPassword')}
-              className="absolute text-gray-400 -translate-y-1/2 right-3 top-1/2 hover:text-gray-600"
-              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
+              className="absolute -translate-y-1/2 right-3 top-1/2"
+              style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 2, display: 'flex' }}>
               {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
             </button>
           </div>
@@ -191,14 +193,11 @@ function CredentialForm({ onMfaRequired }: { onMfaRequired: (token: string) => v
           </div>
         )}
 
-        <button type="submit" disabled={loading || throttled}
-          className="flex items-center justify-center w-full gap-2 text-sm font-medium transition-opacity rounded-lg"
-          style={{ padding: '11px', background: loading || throttled ? 'var(--text-muted)' : 'var(--color-primary)',
-                   color: loading || throttled ? '#fff' : 'var(--color-on-accent)',
-                   border: 'none', cursor: loading || throttled ? 'not-allowed' : 'pointer' }}>
+        <Button type="submit" variant="soft" size="md" disabled={loading || throttled}
+          style={{ width: '100%' }}>
           {loading && <Spinner size={15} />}
           {loading ? t('login.busy') : t('login.signIn')}
-        </button>
+        </Button>
       </form>
     </>
   )
@@ -278,22 +277,15 @@ function MfaForm({ mfaToken, onBack }: { mfaToken: string; onBack: () => void })
 
         {error && <ErrorBanner>{error}</ErrorBanner>}
 
-        <button type="submit" disabled={loading || code.length < 6}
-          className="flex items-center justify-center w-full gap-2 text-sm font-medium transition-opacity rounded-lg"
-          style={{ padding: '11px',
-                   background: (loading || code.length < 6) ? 'var(--text-muted)' : 'var(--color-primary)',
-                   color: (loading || code.length < 6) ? '#fff' : 'var(--color-on-accent)',
-                   border: 'none', cursor: (loading || code.length < 6) ? 'not-allowed' : 'pointer' }}>
+        <Button type="submit" variant="soft" size="md" disabled={loading || code.length < 6}
+          style={{ width: '100%' }}>
           {loading && <Spinner size={15} />}
           {loading ? t('mfa.verifying') : t('mfa.verify')}
-        </button>
+        </Button>
 
-        <button type="button" onClick={onBack}
-          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-                   fontSize: 13, color: 'var(--text-muted)', background: 'none', border: 'none',
-                   cursor: 'pointer', padding: '4px 0' }}>
+        <Button type="button" variant="ghost" onClick={onBack} style={{ width: '100%' }}>
           <ArrowLeft size={13} /> {t('mfa.back')}
-        </button>
+        </Button>
       </form>
     </>
   )
