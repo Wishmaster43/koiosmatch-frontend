@@ -40,7 +40,7 @@ const mapGenders = (res: AxiosResponse): LookupOption[] | null => {
 // and cached so every mounted consumer shares one fetch.
 export function useGenders() {
   const { t } = useTranslation('common')
-  const { data: rawGenders } = useCachedLookup('/genders', mapGenders, DEFAULT_GENDERS)
+  const { data: rawGenders } = useCachedLookup('/genders?active=1', mapGenders, DEFAULT_GENDERS)
   // Seeded defaults render in the user language; a tenant value stays as typed (LOOKUP-I18N-1).
   const genders = useMemo(() => translateSeedList(t, 'genders', rawGenders), [rawGenders, t])
 

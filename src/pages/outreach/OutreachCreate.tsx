@@ -64,7 +64,7 @@ export default function OutreachCreate({ onClose, onCreated }: Props) {
 
   // Load talent pools for the optional source picker (shared /pools resource).
   useEffect(() => {
-    api.get('/pools').then((r) => { const d = r.data; setPools(Array.isArray(d) ? d : (d?.data ?? [])) }).catch(() => {})
+    api.get('/pools', { params: { active: 1 } }).then((r) => { const d = r.data; setPools(Array.isArray(d) ? d : (d?.data ?? [])) }).catch(() => {})
   }, [])
 
   const canSubmit = name.trim().length > 0

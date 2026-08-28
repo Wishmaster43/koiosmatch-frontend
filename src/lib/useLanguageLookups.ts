@@ -33,8 +33,8 @@ const mapNames = (res: AxiosResponse): string[] | null => {
 // (see file docblock above); a tenant-created value renders as typed, never translated.
 export function useLanguageLookups() {
   const { t } = useTranslation('common')
-  const { data: rawLanguages } = useCachedLookup('/languages', mapNames, DEFAULT_LANGUAGES)
-  const { data: rawLevels }    = useCachedLookup('/language-levels', mapNames, DEFAULT_LANGUAGE_LEVELS)
+  const { data: rawLanguages } = useCachedLookup('/languages?active=1', mapNames, DEFAULT_LANGUAGES)
+  const { data: rawLevels }    = useCachedLookup('/language-levels?active=1', mapNames, DEFAULT_LANGUAGE_LEVELS)
   // Seeded defaults render in the user language; a tenant value stays as typed (LOOKUP-I18N-1).
   const languages = useMemo(
     () => rawLanguages.map(name => translateSeedLabel(t, 'languages', { label: name })),

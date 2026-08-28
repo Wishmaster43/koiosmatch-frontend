@@ -24,7 +24,7 @@ export function useTenantPools(onError?: () => void): CandidatePool[] {
   const [pools, setPools] = useState<CandidatePool[]>([])
   useEffect(() => {
     const ctrl = new AbortController()
-    api.get('/pools', { signal: ctrl.signal })
+    api.get('/pools', { params: { active: 1 }, signal: ctrl.signal })
       .then(r => setPools(unwrapList<CandidatePool>(r).rows))
       .catch(err => { if (!isAbortError(err)) onError?.() })
     return () => ctrl.abort()

@@ -99,7 +99,7 @@ export function useDocumentTypes(entity?: string) {
   const { t } = useTranslation('common')
   // Bake the optional entity filter into the cache key itself (see file header) —
   // no entity = the exact same request/url as before this axis existed.
-  const url = entity ? `/document-types?entity=${encodeURIComponent(entity)}` : '/document-types'
+  const url = entity ? `/document-types?entity=${encodeURIComponent(entity)}&active=1` : '/document-types?active=1'
   const { data: rawTypes } = useCachedLookup(url, mapDocumentTypes, DEFAULT_DOCUMENT_TYPES)
   // Seeded defaults render in the user language; a tenant value stays as typed (LOOKUP-I18N-1).
   const types = useMemo(() => translateSeedList(t, 'documentTypes', rawTypes), [rawTypes, t])

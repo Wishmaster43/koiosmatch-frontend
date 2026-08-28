@@ -33,7 +33,7 @@ const mapPools = (res: AxiosResponse): PoolsLookupData | null => {
 // items (id + colour) for consumers that need more than a label.
 export function usePools() {
   const { t } = useTranslation('common')
-  const { data } = useCachedLookup('/pools', mapPools, FALLBACK)
+  const { data } = useCachedLookup('/pools?active=1', mapPools, FALLBACK)
   // Seeded defaults render in the user language; a tenant value stays as typed (LOOKUP-I18N-1).
   // PoolItem carries `name` (not `label`), so translate through a {label} shim and zip it back.
   const poolItems = useMemo(() => {

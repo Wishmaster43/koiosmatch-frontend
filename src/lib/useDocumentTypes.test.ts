@@ -89,7 +89,7 @@ describe('useDocumentTypes — entity scope (V20b)', () => {
 
     renderHook(() => freshUseDocumentTypes())
 
-    expect(freshApi.get).toHaveBeenCalledWith('/document-types', undefined)
+    expect(freshApi.get).toHaveBeenCalledWith('/document-types?active=1', undefined)
   })
 
   it('bakes ?entity=<x> into the request url when an entity is given', async () => {
@@ -100,6 +100,6 @@ describe('useDocumentTypes — entity scope (V20b)', () => {
 
     renderHook(() => freshUseDocumentTypes('vacancy'))
 
-    expect(freshApi.get).toHaveBeenCalledWith('/document-types?entity=vacancy', undefined)
+    expect(freshApi.get).toHaveBeenCalledWith('/document-types?entity=vacancy&active=1', undefined)
   })
 })

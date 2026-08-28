@@ -24,7 +24,7 @@ describe('useProvinces — country cascade', () => {
     mockedGet.mockResolvedValue({ data: ['Utrecht'] })
     const { result: r1 } = renderHook(() => useProvinces())
     await waitFor(() => expect(r1.current.provinces).toEqual(['Utrecht']))
-    expect(mockedGet).toHaveBeenCalledWith('/provinces?country=NL', undefined)
+    expect(mockedGet).toHaveBeenCalledWith('/provinces?country=NL&active=1', undefined)
     expect(mockedGet).toHaveBeenCalledTimes(1)
 
     // An explicit '' arg (e.g. a candidate with no country picked yet) hits the
@@ -37,14 +37,14 @@ describe('useProvinces — country cascade', () => {
   it('scopes the request to the picked country, never reusing another country\'s cached list', async () => {
     mockedGet.mockResolvedValue({ data: ['Antwerpen'] })
     const { result } = renderHook(() => useProvinces('BE'))
-    await waitFor(() => expect(mockedGet).toHaveBeenCalledWith('/provinces?country=BE', undefined))
+    await waitFor(() => expect(mockedGet).toHaveBeenCalledWith('/provinces?country=BE&active=1', undefined))
     await waitFor(() => expect(result.current.provinces).toEqual(['Antwerpen']))
   })
 
   it('shows an empty list — not a stale seed — for a country with no seeded provinces', async () => {
     mockedGet.mockResolvedValue({ data: [] })
     const { result } = renderHook(() => useProvinces('FR'))
-    await waitFor(() => expect(mockedGet).toHaveBeenCalledWith('/provinces?country=FR', undefined))
+    await waitFor(() => expect(mockedGet).toHaveBeenCalledWith('/provinces?country=FR&active=1', undefined))
     await waitFor(() => expect(result.current.provinces).toEqual([]))
   })
 })

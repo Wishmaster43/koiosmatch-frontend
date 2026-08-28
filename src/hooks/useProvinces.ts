@@ -39,6 +39,6 @@ export function useProvinces(country: string = 'NL') {
   // NL keeps its hardcoded seed (pre-fetch / offline grace); any other country
   // starts empty rather than inventing data that was never real for it.
   const fallback = cc === 'NL' ? NL_PROVINCES : []
-  const { data: provinces } = useCachedLookup(`/provinces?country=${cc}`, mapProvinces, fallback)
+  const { data: provinces } = useCachedLookup(`/provinces?country=${cc}&active=1`, mapProvinces, fallback)
   return { provinces }
 }
