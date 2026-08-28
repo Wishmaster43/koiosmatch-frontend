@@ -6,11 +6,10 @@ import { inputStyle, selectStyle, sectionStyle, sectionLabel, fieldLabel, fieldL
 import { Caption } from '@/components/ui/typography'
 import type { ScheduleForm } from './useScheduleForm'
 // Danny 08-08 (§4): the house searchable combobox replaces both bare native
-// <select>s below. Also the SAFER pick here specifically: this modal is
-// wrapped in useFocusTrap (via FloatingPanel), and EventCombobox's own doc
-// comment (this same directory) proved SelectMenu's document-level Escape
-// listener shares the plain <select>'s latent flaw in a trapped dialog —
-// only CreatableSelect's portalled popover truly survives it.
+// <select>s below. Kept as CreatableSelect (rather than SelectMenu) here for
+// consistency with its sibling controls in this directory (OperatorSelect,
+// WebhookAgentSelect) — SelectMenu now closes via the shared useEscapeLayer
+// stack and is equally safe inside a trapped dialog.
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import Button from '@/components/ui/Button'
 import { tintBg, tintBorder, chipInk } from '@/lib/tint'

@@ -1,6 +1,5 @@
 /**
- * FAQ multi-select field — the workflow FAQ-picker config control. Split out of
- * fieldControls/ (§3 400-line split trigger).
+ * FAQ multi-select field — the workflow FAQ-picker config control. Split out of the former fieldControls.tsx monolith (§3 400-line split trigger).
  */
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'

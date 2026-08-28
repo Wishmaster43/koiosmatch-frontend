@@ -75,8 +75,8 @@ export default function AvailabilityEditor({ candidateId }: { candidateId?: Id }
           </div>
           {/* Segmented available/unavailable toggle — the shared softPill convention (§4), not a Button identity. */}
           <div style={{ display: 'flex', gap: 6 }}>
-            <button onClick={() => setStatus('available')}   style={pill(status === 'available')}>{t('planning.statusAvailable')}</button>
-            <button onClick={() => setStatus('unavailable')} style={pill(status === 'unavailable')}>{t('planning.statusUnavailable')}</button>
+            <button onClick={() => setStatus('available')}   aria-pressed={status === 'available'}   style={pill(status === 'available')}>{t('planning.statusAvailable')}</button>
+            <button onClick={() => setStatus('unavailable')} aria-pressed={status === 'unavailable'} style={pill(status === 'unavailable')}>{t('planning.statusUnavailable')}</button>
           </div>
           <input value={reason} onChange={e => setReason(e.target.value)} placeholder={t('planning.reasonPlaceholder')} style={{ ...input, flex: 1, minWidth: 120 }} />
           <Button variant="primary" size="sm" onClick={submit} disabled={!date}>{t('common:add')}</Button>

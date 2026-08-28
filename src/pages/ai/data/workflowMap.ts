@@ -7,18 +7,18 @@
 import type { RawWorkflow, RawStep, Workflow, WorkflowStep } from '@/types/workflow'
 
 export function normalizeWorkflow(wf: RawWorkflow): Workflow {
-  // trigger: string samengesteld uit trigger_type + trigger_config, of al een string
+  // trigger: string composed from trigger_type + trigger_config, or already a string
   const trigger = typeof wf.trigger === 'string'
     ? wf.trigger
     : wf.trigger_type ?? 'Handmatig'
 
-  // status: active boolean → string
+  // status: active boolean -> string
   const status = typeof wf.status === 'string'
     ? wf.status
     : (wf.active ? 'active' : 'inactive')
 
-  // steps: normaliseren naar { id, type, config, position, next } — next = uitgaande
-  // verbindingen (graaf), zodat Router-takken + verbindingsfilters bewaard blijven.
+  // steps: normalize to { id, type, config, position, next } — next = outgoing
+  // connections (graph), so Router branches + connection filters are preserved.
   const rawSteps = (Array.isArray(wf.steps) ? wf.steps : (wf.workflow_steps ?? [])) as RawStep[]
   const steps: WorkflowStep[] = rawSteps.map(s => ({
     id:       s.id ? String(s.id) : undefined,
@@ -36,7 +36,7 @@ export function normalizeWorkflow(wf: RawWorkflow): Workflow {
     })),
   }))
 
-  // last_run: uit laatste WorkflowRun of direct
+  // last_run: from the latest WorkflowRun, or already present directly
   const lastRun = wf.last_run ?? (wf.latest_run
     ? { time: wf.latest_run.created_at, ok: wf.latest_run.status === 'success' }
     : null)
@@ -50,7 +50,7 @@ export function normalizeWorkflow(wf: RawWorkflow): Workflow {
     pending_erase_at: (wf.pending_erase_at as string | null | undefined) ?? null }
 }
 
-// Vertaal frontend trigger string → trigger_type + trigger_config
+// Translate the frontend trigger string -> trigger_type + trigger_config
 function parseTrigger(trigger?: string, config?: Record<string, unknown>): { trigger_type: string; trigger_config: Record<string, unknown> } {
   if (!trigger || trigger === 'Handmatig') return { trigger_type: 'manual', trigger_config: {} }
   // Webhook trigger: two flavors share trigger_type 'webhook' — an AI-agent's own
@@ -73,7 +73,7 @@ function parseTrigger(trigger?: string, config?: Record<string, unknown>): { tri
   if (trigger === 'DateRelative') {
     return { trigger_type: 'date_relative', trigger_config: { date_field: config?.date_field ?? null, offset_days: config?.offset_days ?? null } }
   }
-  // "Dagelijks 08:00", "Elk uur", "Maandag 07:00" → scheduled
+  // e.g. "Dagelijks 08:00", "Elk uur", "Maandag 07:00" (tenant-facing schedule labels) -> scheduled
   const timeMatch = trigger.match(/(\d{2}:\d{2})/)
   return {
     trigger_type: 'scheduled',
@@ -81,7 +81,7 @@ function parseTrigger(trigger?: string, config?: Record<string, unknown>): { tri
   }
 }
 
-// Vertaal frontend formaat → backend formaat voor opslaan
+// Translate the frontend shape -> backend shape for saving
 export function denormalizeWorkflow(wf: Workflow) {
   const { trigger_type, trigger_config } = parseTrigger(wf.trigger, (wf as { trigger_config?: Record<string, unknown> }).trigger_config)
   return {

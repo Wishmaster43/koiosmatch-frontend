@@ -4,7 +4,11 @@
  * listener for Escape, so stacked overlays (dropdown inside modal inside
  * drawer) all closed at once, or in registration order — never top-first.
  * Model: a module-scope stack of active layers + ONE window listener in the
- * capture phase. Escape closes ONLY the top layer and stops the event there;
+ * capture phase. KNOWN CONSTRAINT: layer order is pure push order; when a host
+ * and its inner overlay activate in the SAME React commit, child effects run
+ * before parent effects and the child lands UNDER its host. In practice inner
+ * overlays open on user interaction (a later commit), so order is correct; a
+ * same-commit pair needs a depth token — do not add one speculatively. Escape closes ONLY the top layer and stops the event there;
  * the next Escape reaches the next layer. Components keep their own handling
  * of every OTHER key (arrows, enter, tab) — this hook owns Escape alone.
  */

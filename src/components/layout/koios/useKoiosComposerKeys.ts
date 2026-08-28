@@ -2,7 +2,9 @@
  * useKoiosComposerKeys — the "@" mention picker's open/query/category state,
  * the roving-highlight wiring to KoiosMentionMenu's imperative handle, and the
  * mention-specific part of the composer textarea's keydown handling (ArrowUp/
- * ArrowDown/Enter-to-pick/Escape). Split out of KoiosPanel (§0.3 size
+ * ArrowDown/Enter-to-pick). Escape lives separately, on the shared
+ * `useEscapeLayer` stack (see `cancelMention` below), not in `handleKeyDown`.
+ * Split out of KoiosPanel (§0.3 size
  * discipline, KOIOS-SEARCH-FIX-2) — the panel still owns `input`/`setInput`,
  * the send button and the context-ref chips; this hook owns everything
  * specific to "@". `handleKeyDown` returns whether it fully handled the key
@@ -94,8 +96,8 @@ export function useKoiosComposerKeys({ input, setInput, addMentionRef, textareaR
   // ArrowUp/ArrowDown/Enter are FORWARDED to it — DOM focus never leaves the
   // textarea, the menu owns its own roving highlight and reports back whether
   // it did anything. Returns true when this key was fully this hook's
-  // business (arrow-nav, a mention pick, Escape) so the composer never ALSO
-  // treats it as a plain Enter/newline.
+  // business (arrow-nav, a mention pick) so the composer never ALSO treats it
+  // as a plain Enter/newline. Escape is handled separately, via useEscapeLayer.
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>): boolean => {
     if (showMention && e.key === 'ArrowDown') {
       if (mentionMenuRef.current?.moveHighlight(1)) e.preventDefault()

@@ -154,22 +154,22 @@ export default function RichTextEditor({ value, onChange, expanded, onToggleExpa
         {!htmlMode && (
           <>
             {/* eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- compact tiptap-toolbar-toggle-cluster, deliberately no Button chrome (cf. the calendar-cell precedent) */}
-            <button style={btn(editor.isActive('bold'))} onClick={() => editor.chain().focus().toggleBold().run()} title={lab.bold} aria-label={lab.bold}><Bold size={13} /></button>
+            <button style={btn(editor.isActive('bold'))} aria-pressed={editor.isActive('bold')} onClick={() => editor.chain().focus().toggleBold().run()} title={lab.bold} aria-label={lab.bold}><Bold size={13} /></button>
             {/* eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- compact tiptap-toolbar-toggle-cluster, deliberately no Button chrome (cf. the calendar-cell precedent) */}
-            <button style={btn(editor.isActive('italic'))} onClick={() => editor.chain().focus().toggleItalic().run()} title={lab.italic} aria-label={lab.italic}><Italic size={13} /></button>
+            <button style={btn(editor.isActive('italic'))} aria-pressed={editor.isActive('italic')} onClick={() => editor.chain().focus().toggleItalic().run()} title={lab.italic} aria-label={lab.italic}><Italic size={13} /></button>
             {/* eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- compact tiptap-toolbar-toggle-cluster, deliberately no Button chrome (cf. the calendar-cell precedent) */}
-            <button style={btn(editor.isActive('bulletList'))} onClick={() => editor.chain().focus().toggleBulletList().run()} title={lab.bulletList} aria-label={lab.bulletList}><List size={13} /></button>
+            <button style={btn(editor.isActive('bulletList'))} aria-pressed={editor.isActive('bulletList')} onClick={() => editor.chain().focus().toggleBulletList().run()} title={lab.bulletList} aria-label={lab.bulletList}><List size={13} /></button>
             {/* eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- compact tiptap-toolbar-toggle-cluster, deliberately no Button chrome (cf. the calendar-cell precedent) */}
-            <button style={btn(editor.isActive('orderedList'))} onClick={() => editor.chain().focus().toggleOrderedList().run()} title={lab.orderedList} aria-label={lab.orderedList}><ListOrdered size={13} /></button>
+            <button style={btn(editor.isActive('orderedList'))} aria-pressed={editor.isActive('orderedList')} onClick={() => editor.chain().focus().toggleOrderedList().run()} title={lab.orderedList} aria-label={lab.orderedList}><ListOrdered size={13} /></button>
             {/* eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- compact tiptap-toolbar-toggle-cluster, deliberately no Button chrome (cf. the calendar-cell precedent) */}
-            <button style={btn(editor.isActive('heading', { level: 2 }))} onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()} title={lab.heading} aria-label={lab.heading}><Heading2 size={13} /></button>
+            <button style={btn(editor.isActive('heading', { level: 2 }))} aria-pressed={editor.isActive('heading', { level: 2 })} onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()} title={lab.heading} aria-label={lab.heading}><Heading2 size={13} /></button>
             <div style={{ width: 1, height: 16, background: 'var(--border)', margin: '0 4px' }} />
             {/* eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- compact tiptap-toolbar-toggle-cluster, deliberately no Button chrome (cf. the calendar-cell precedent) */}
-            <button style={btn(editor.isActive({ textAlign: 'left' }))} onClick={() => editor.chain().focus().setTextAlign('left').run()} title={lab.alignLeft} aria-label={lab.alignLeft}><AlignLeft size={13} /></button>
+            <button style={btn(editor.isActive({ textAlign: 'left' }))} aria-pressed={editor.isActive({ textAlign: 'left' })} onClick={() => editor.chain().focus().setTextAlign('left').run()} title={lab.alignLeft} aria-label={lab.alignLeft}><AlignLeft size={13} /></button>
             {/* eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- compact tiptap-toolbar-toggle-cluster, deliberately no Button chrome (cf. the calendar-cell precedent) */}
-            <button style={btn(editor.isActive({ textAlign: 'center' }))} onClick={() => editor.chain().focus().setTextAlign('center').run()} title={lab.alignCenter} aria-label={lab.alignCenter}><AlignCenter size={13} /></button>
+            <button style={btn(editor.isActive({ textAlign: 'center' }))} aria-pressed={editor.isActive({ textAlign: 'center' })} onClick={() => editor.chain().focus().setTextAlign('center').run()} title={lab.alignCenter} aria-label={lab.alignCenter}><AlignCenter size={13} /></button>
             {/* eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- compact tiptap-toolbar-toggle-cluster, deliberately no Button chrome (cf. the calendar-cell precedent) */}
-            <button style={btn(editor.isActive({ textAlign: 'right' }))} onClick={() => editor.chain().focus().setTextAlign('right').run()} title={lab.alignRight} aria-label={lab.alignRight}><AlignRight size={13} /></button>
+            <button style={btn(editor.isActive({ textAlign: 'right' }))} aria-pressed={editor.isActive({ textAlign: 'right' })} onClick={() => editor.chain().focus().setTextAlign('right').run()} title={lab.alignRight} aria-label={lab.alignRight}><AlignRight size={13} /></button>
             <div style={{ width: 1, height: 16, background: 'var(--border)', margin: '0 4px' }} />
             {/* eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- compact tiptap-toolbar-toggle-cluster, deliberately no Button chrome (cf. the calendar-cell precedent) */}
             <button style={btn(false)} onClick={() => editor.chain().focus().undo().run()} title={lab.undo} aria-label={lab.undo}><Undo2 size={13} /></button>
@@ -200,7 +200,7 @@ export default function RichTextEditor({ value, onChange, expanded, onToggleExpa
         )}
         {/* HTML source toggle */}
         {/* eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- compact tiptap-toolbar-toggle-cluster, deliberately no Button chrome (cf. the calendar-cell precedent) */}
-        <button style={btn(htmlMode)} onClick={toggleHtml} title={lab.html ?? 'HTML'} aria-label={lab.html ?? 'HTML'}><Code size={13} /></button>
+        <button style={btn(htmlMode)} onClick={toggleHtml} title={lab.html} aria-label={lab.html} aria-pressed={htmlMode}><Code size={13} /></button>
         {onToggleExpand && (
           // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- compact tiptap-toolbar-toggle-cluster, deliberately no Button chrome (cf. the calendar-cell precedent)
           <button style={{ ...btn(false), marginLeft: 4 }} onClick={onToggleExpand} title={expanded ? lab.collapse : lab.expand} aria-label={expanded ? lab.collapse : lab.expand}>

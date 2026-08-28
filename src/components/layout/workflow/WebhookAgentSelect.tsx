@@ -23,10 +23,9 @@ import { unwrapList } from '@/lib/api'
 import type { AiAgent } from '@/types/ai'
 import { selectStyle } from './scheduleModalStyles'
 // Danny 08-08 (§4): the house searchable combobox replaces the bare native
-// <select>. This modal is wrapped in useFocusTrap (via FloatingPanel) —
-// EventCombobox's own doc comment (this same directory) proved SelectMenu's
-// document-level Escape listener shares the plain <select>'s latent flaw in a
-// trapped dialog, so CreatableSelect (portalled popover) is the safe pick.
+// <select>. This modal is wrapped in useFocusTrap (via FloatingPanel);
+// CreatableSelect is used here for consistency with its sibling controls in
+// this directory (OperatorSelect, ScheduleFields).
 import CreatableSelect from '@/components/ui/CreatableSelect'
 
 // Searchable AI-agent picker for a webhook step; built on CreatableSelect rather

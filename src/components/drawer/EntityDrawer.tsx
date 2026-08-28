@@ -67,6 +67,10 @@ export default function EntityDrawer({
   // prop and no caller-side change at all. Registered as an overlay-close layer (active
   // while an entity is shown) so the shared window-capture Escape mechanism owns
   // ordering against other layered overlays instead of a per-drawer bubble listener.
+  // DELIBERATE scope change vs the old root-div onKeyDown (r2): Escape now closes
+  // the drawer from ANYWHERE on the page when no layer sits above — the drawer is
+  // the top overlay by definition, so an app-global close is the intended UX; the
+  // old focus-scoped behaviour was an implementation accident, not a rule.
   const rootRef = useRef<HTMLDivElement>(null)
   useEscapeLayer(!!entity, () => {
     rootRef.current?.querySelector<HTMLButtonElement>('[data-drawer-close]')?.click()

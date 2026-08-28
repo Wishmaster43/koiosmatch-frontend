@@ -4,7 +4,7 @@
  * FilterFieldPicker + OperatorSelect with the edge-filter modal (FILTER-VELD-1);
  * `field.fields` supplies the selectable field list. The standalone
  * Filter/Router between modules stays untouched (for multi-status branching).
- * Split out of fieldControls/ (§3 400-line split trigger).
+ * Split out of the former fieldControls.tsx monolith (§3 400-line split trigger).
  */
 import { X } from 'lucide-react'
 import { useTranslation } from 'react-i18next'

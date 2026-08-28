@@ -76,7 +76,9 @@ export default function PlanningScheduling({
         {!loading && !error && allShifts.map((d, i) => {
           const isSel = scheduleSelected === d
           return (
-            <div key={i} onClick={() => setScheduleSelected(isSel ? null : d)}
+            // Keyboard-operable roster row: acts as a select toggle, so it needs a role + Enter/Space handling.
+            <div key={i} role="button" tabIndex={0} onClick={() => setScheduleSelected(isSel ? null : d)}
+              onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setScheduleSelected(isSel ? null : d) } }}
               style={{ display: 'flex', alignItems: 'flex-start', gap: 8, padding: '8px 8px', borderRadius: 7, marginBottom: 2, cursor: 'pointer',
                 background: isSel ? 'var(--bg)' : 'transparent',
                 border: isSel ? `1px solid ${d.color}` : '1px solid transparent' }}>
@@ -130,10 +132,11 @@ export default function PlanningScheduling({
                 <Caption as="div">{d.function}</Caption>
               </div>
               <button onClick={toggleFav} title={fav ? t('planning.removeFavorite') : t('planning.favorite')}
+                aria-label={fav ? t('planning.removeFavorite') : t('planning.favorite')} aria-pressed={fav}
                 style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 3, color: fav ? 'var(--color-danger)' : 'var(--text-muted)', display: 'flex' }}>
                 <Heart size={15} fill={fav ? 'var(--color-danger)' : 'none'} />
               </button>
-              <button onClick={() => setScheduleSelected(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 3, display: 'flex' }}>
+              <button onClick={() => setScheduleSelected(null)} aria-label={t('common:close')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 3, display: 'flex' }}>
                 <X size={14} />
               </button>
             </div>

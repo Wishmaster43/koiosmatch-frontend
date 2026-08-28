@@ -120,9 +120,10 @@ export default function KoiosPanel({ open, onClose, onNavigate }: { open?: boole
   }
 
   // Composer onKeyDown: the mention hook gets first refusal (arrow-nav, a
-  // mention pick, Escape) — a plain Enter it does NOT consume falls through to
-  // the real submit here, so "Enter picks a highlighted row" and "Enter sends
-  // the message" can never both fire for the same keystroke.
+  // mention pick) — a plain Enter it does NOT consume falls through to the
+  // real submit here, so "Enter picks a highlighted row" and "Enter sends the
+  // message" can never both fire for the same keystroke. Escape closes the
+  // mention menu separately, via the shared useEscapeLayer stack.
   const onComposerKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     if (handleKeyDown(e)) return
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submit(input) }

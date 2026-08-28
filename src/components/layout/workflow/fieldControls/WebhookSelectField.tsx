@@ -2,8 +2,7 @@
  * Webhook select field — lets a Webhook Trigger pick or inline-create an
  * inbound webhook from the same /webhooks resource as Settings, then shows the
  * receiving URL to hand to externals (Facebook, Intus, …). One webhook binds
- * to one workflow (Make-style). Split out of fieldControls/ (§3 400-line
- * split trigger).
+ * to one workflow (Make-style). Split out of the former fieldControls.tsx monolith (§3 400-line split trigger).
  */
 import { useState, useEffect, useId } from 'react'
 import { Plus, X, Check, Copy } from 'lucide-react'

@@ -1,8 +1,7 @@
 /**
  * Lookup-backed select — options come from a tenant lookup endpoint (e.g.
  * /whatsapp-message-types) instead of a hardcoded list (§10: no hardcoded
- * vocabularies in workflow nodes). Split out of fieldControls/ (§3
- * 400-line split trigger).
+ * vocabularies in workflow nodes). Split out of the former fieldControls.tsx monolith (§3 400-line split trigger).
  */
 import { useState, useEffect, useId } from 'react'
 import { useTranslation } from 'react-i18next'

@@ -17,7 +17,7 @@ import { Caption } from '@/components/ui/typography'
 // WA-SEND-FIELDS-2: whatsapp_send's `after_send_updates.conversation`/`.candidate`
 // (WhatsAppSendModule::configSchema, type 'key_value') — the engine reads a PLAIN
 // key->value RECORD (not the {name,value}[] array the unrelated 'keyvalue' field
-// type in fieldControls/ persists), so this writes/reads that record shape
+// type in fields.tsx persists), so this writes/reads that record shape
 // directly. The schema's `suggestions` (known key -> one value or a value list)
 // render as pick-help via searchable selects; free entry stays allowed either way.
 // One icon-only row-remove cell for both the committed rows and the pending

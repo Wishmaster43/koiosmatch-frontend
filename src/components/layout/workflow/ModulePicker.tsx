@@ -3,7 +3,7 @@
  * add-on apps the tenant has), grouped by category with search, and inserts the
  * picked module into the flow. Extracted from WorkflowCanvasEditor.
  */
-import { useState } from 'react'
+import { useId, useState } from 'react'
 import { X } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
@@ -35,6 +35,8 @@ export default function ModulePicker({ insertAfterEdgeId, onSelect, onClose }: {
 }) {
   // Esc closes + Tab stays inside (useFocusTrap owns both, §6).
   const trapRef = useFocusTrap<HTMLDivElement>(onClose)
+  // Names the dialog via aria-labelledby, linking the title span below.
+  const titleId = useId()
   const { t } = useTranslation('workflows')
   const [search, setSearch] = useState('')
   const [tab,    setTab]    = useState('Alle')
@@ -146,13 +148,13 @@ export default function ModulePicker({ insertAfterEdgeId, onSelect, onClose }: {
     <div style={{ position: 'fixed', inset: 0, zIndex: 'var(--z-overlay)', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.35)' }}
       onClick={onClose}>
       {/* Esc + focus trap via the §6-canonical hook (blok 1 punt 3.3). */}
-      <div ref={trapRef} role="dialog" aria-modal="true" style={{ width: 1100, maxWidth: '94vw', maxHeight: '82vh', background: 'var(--surface)', borderRadius: 16, overflow: 'hidden', boxShadow: 'var(--shadow-modal)', display: 'flex', flexDirection: 'column' }}
+      <div ref={trapRef} role="dialog" aria-modal="true" aria-labelledby={titleId} style={{ width: 1100, maxWidth: '94vw', maxHeight: '82vh', background: 'var(--surface)', borderRadius: 16, overflow: 'hidden', boxShadow: 'var(--shadow-modal)', display: 'flex', flexDirection: 'column' }}
         onClick={e => e.stopPropagation()}>
 
         {/* Header + zoeken */}
         <div style={{ padding: '14px 16px 0', flexShrink: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
-            <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)' }}>{t('picker.title')}</span>
+            <span id={titleId} style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)' }}>{t('picker.title')}</span>
             <Button variant="ghost" iconOnly onClick={onClose} aria-label={t('common:close')}>
               <X size={16} />
             </Button>

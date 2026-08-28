@@ -4,8 +4,8 @@
  * TSX for shortcut keys"). Every key that a popup understands app-wide lives
  * HERE — nowhere else. Consumers:
  *   - useFocusTrap (every FloatingPanel modal + the standalone trapped panels)
- *     routes its keydown through this — Esc-close + Tab-trap.
- *   - WorkflowCanvasEditor's document-level Esc (the guarded editor-exit).
+ *     routes its keydown through this for Tab-trap; Escape itself now goes
+ *     through the layered stack (useEscapeLayer, TRIAGE-3.3) instead.
  * A NEW popup shortcut (e.g. Cmd+Enter = primary action) lands as one case in
  * handlePopupKeydown + one line in POPUP_COMMANDS, and then works everywhere.
  */
@@ -18,9 +18,6 @@ export const POPUP_COMMANDS = [
 ] as const
 
 export interface PopupKeyHandlers {
-  // Close (Esc). The caller decides what "close" means — a guarded editor-exit
-  // passes its own confirm variant here.
-  onClose?: () => void
   // Focus cycle (Tab): only set by useFocusTrap, which knows the focusables.
   focusables?: () => HTMLElement[]
 }
@@ -29,11 +26,10 @@ export interface PopupKeyHandlers {
  * Handle one keydown against the popup command table. Returns true when the
  * key was a command (handled), false when it should keep propagating freely.
  */
-export function handlePopupKeydown(e: KeyboardEvent, { onClose, focusables }: PopupKeyHandlers): boolean {
-  // Escape moved to the layered stack (useEscapeLayer, TRIAGE-3.3): the trap
-  // and every overlay register as layers, and only the TOP layer closes.
-  // Consumers that still pass onClose feed it to their own layer registration.
-  void onClose
+export function handlePopupKeydown(e: KeyboardEvent, { focusables }: PopupKeyHandlers): boolean {
+  // Escape goes through the layered stack (useEscapeLayer, TRIAGE-3.3): the
+  // trap and every overlay register as layers, and only the TOP layer closes —
+  // this table only handles Tab-trap.
   if (e.key === 'Tab' && focusables) {
     const items = focusables()
     if (items.length === 0) { e.preventDefault(); return true }

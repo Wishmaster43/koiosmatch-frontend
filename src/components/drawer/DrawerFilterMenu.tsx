@@ -265,12 +265,11 @@ function DrawerDateFilterRow({ config }: { config: DrawerDateFilterConfig }) {
  *
  * Closing: outside click (this file) + Escape + Tab-trap + focus-restore-to-the-
  * button (all via the shared `useFocusTrap`, §6 — mirrors ChangelogPopover). A
- * SelectMenu opened INSIDE the panel closes on its own Escape press first (its
- * listener is document-capture-phase and stops propagation before useFocusTrap's
- * node-level bubble listener ever sees the key — same ordering SelectMenu's own
- * docblock describes for the modal case) — a second Escape then closes this panel.
- * The multi-select checklist above needs no such handling: it is plain inline
- * markup, never a second popover.
+ * SelectMenu opened INSIDE the panel closes on its own Escape press first — both
+ * it and this panel register as layers on the shared `useEscapeLayer` stack
+ * (TRIAGE-3.3), and only the TOP layer closes — so a second Escape then closes
+ * this panel. The multi-select checklist above needs no such handling: it is
+ * plain inline markup, never a second popover.
  */
 export default function DrawerFilterMenu({ filters, label, title, clearAllLabel }: DrawerFilterMenuProps) {
   const [open, setOpen] = useState(false)

@@ -3,8 +3,7 @@
  * options now carry a `coexistence` flag. When the sibling `channel` field is
  * 'waba_coex' the list is filtered to Coexistence-only numbers; the currently
  * stored value stays visible even if it falls outside that filter (§3 no
- * silent clear of a saved value). Split out of fieldControls/ (§3 400-line
- * split trigger).
+ * silent clear of a saved value). Split out of the former fieldControls.tsx monolith (§3 400-line split trigger).
  */
 import { useState, useEffect, useId } from 'react'
 import { useTranslation } from 'react-i18next'

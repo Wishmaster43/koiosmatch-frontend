@@ -8,12 +8,7 @@
  * native <select>+<optgroup> — CreatableSelect has no optgroup equivalent, so
  * the three groups are flattened into one list with each option's label
  * prefixed by its group name ("Text · contains"), mirroring the same flattening
- * DocumentLinkPicker already applies to its own grouped picker. Preferred over
- * SelectMenu here specifically because this control is also used inside the
- * edge-filter modal, which is wrapped in useFocusTrap — EventCombobox's own
- * doc comment (this same directory) proved SelectMenu's document-level Escape
- * listener shares the plain <select>'s latent flaw in a trapped dialog; only
- * CreatableSelect's portalled popover truly survives it.
+ * DocumentLinkPicker already applies to its own grouped picker.
  */
 import type { CSSProperties } from 'react'
 import { useId, useMemo } from 'react'

@@ -7,8 +7,7 @@
  * run); a self-referencing workflow is excluded too (WF-PICKER-SELF-1 — the
  * engine hard-fails on it at run time, §3 no fake affordance);
  * depth/cycle-through-a-third-workflow stays the backend's own guard
- * (WorkflowCallModule), not re-implemented here. Split out of
- * fieldControls/ (§3 400-line split trigger).
+ * (WorkflowCallModule), not re-implemented here. Split out of the former fieldControls.tsx monolith (§3 400-line split trigger).
  */
 import { useState, useEffect, useContext, useCallback, useId } from 'react'
 import { useTranslation } from 'react-i18next'

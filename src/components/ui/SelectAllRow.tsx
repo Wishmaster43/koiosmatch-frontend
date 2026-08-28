@@ -17,7 +17,7 @@ import { CheckCheck, Eraser } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import { Mono } from '@/components/ui/typography'
 
-// Rendered height of the default (non-dense) row: 6px padding + 26px button +
+// Rendered height of the default (non-dense) row: 6px padding + 28px button +
 // 6px padding + 1px border. Hosts that cap their own list height subtract this
 // (SearchSelect's portal menu) so adding the row never clips the last option.
 export const SELECT_ALL_ROW_HEIGHT = 41

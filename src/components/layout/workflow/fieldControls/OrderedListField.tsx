@@ -3,7 +3,7 @@
  * (WhatsAppSendModule::configSchema, type 'ordered_list') — an ORDER-sensitive
  * list of {value} rows (a WhatsApp Flow's positional {{1}}, {{2}}, …), so
  * reordering is a real affordance here, unlike the unordered 'keyvalue' field.
- * Split out of fieldControls/ (§3 400-line split trigger).
+ * Split out of the former fieldControls.tsx monolith (§3 400-line split trigger).
  */
 import { ChevronUp, ChevronDown, X } from 'lucide-react'
 import { useTranslation } from 'react-i18next'

@@ -151,12 +151,19 @@ export default function PlanningFavorites({ favorites, blacklist, targets, onAdd
                           textTransform: 'uppercase', letterSpacing: '0.06em', background: 'var(--bg)', borderBottom: '1px solid var(--border)' }}>
                           {typeLabel[g.linkable_type]}
                         </div>
+                        {/* Real <button> rows — keyboard operability for free, no invented
+                            ARIA (SelectMenu's own option rows are plain buttons too, §6:
+                            semantic HTML first). Visual identity unchanged (frozen zone). */}
+                        {/* eslint-disable huisstijlLegacy/no-restricted-syntax -- dropdown option rows (BUTTON-GRENS: not Button territory) */}
                         {g.items.map(it => (
-                          <div key={String(it.id)} onClick={() => handleSelect(g.linkable_type, it.id, it.name)}
-                            style={{ padding: '8px 12px', cursor: 'pointer', fontSize: 12, color: 'var(--text)', borderBottom: '1px solid var(--border)' }}>
+                          <button type="button" key={String(it.id)}
+                            onClick={() => handleSelect(g.linkable_type, it.id, it.name)}
+                            style={{ display: 'block', width: '100%', textAlign: 'left', background: 'none', border: 'none',
+                              padding: '8px 12px', cursor: 'pointer', fontSize: 12, color: 'var(--text)', borderBottom: '1px solid var(--border)' }}>
                             {it.name}
-                          </div>
+                          </button>
                         ))}
+                        {/* eslint-enable huisstijlLegacy/no-restricted-syntax */}
                       </div>
                     ))}
                   </div>
