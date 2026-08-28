@@ -368,6 +368,7 @@
       "useKnowledge": "Algemene kennisbank gebruiken",
       "maxHistory": "Max. conversatiehistorie",
       "confirmDelete": "Agent \"{{name}}\" verwijderen?",
+      "inUse": "Deze agent is in gebruik en kan niet worden verwijderd.",
       "selectOrNew": "Selecteer een agent of klik +",
       "webhookLabel": "Webhook-URL",
       "webhookEmpty": "Geen webhook geconfigureerd",

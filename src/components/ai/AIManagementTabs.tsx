@@ -72,8 +72,12 @@ export function AgentsTab() {
         // making the agent vanish from the UI while it was still live server-side
         // (mutation lying about success, audit 2026-07-28).
         await api.delete(`/ai/agents/${agent.id}`)
-      } catch {
-        notifyError(t('common:actionFailed'))
+      } catch (err: unknown) {
+        // AIAGENT-DESTROY-GUARD-1: an in-use agent answers 409 (bound vacancies +
+        // interview flows, counts in the server message) — surface that reason
+        // instead of the generic failure, mirroring the flows in-use branch.
+        const resp = (err as { response?: { status?: number; data?: { message?: string } } })?.response
+        notifyError(resp?.status === 409 ? (resp.data?.message ?? t('ai.agent.inUse')) : t('common:actionFailed'))
         return
       }
       setAgents(prev => prev.filter(a => a.id !== agent.id))

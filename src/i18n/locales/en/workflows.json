@@ -312,6 +312,7 @@
       "useKnowledge": "Use general knowledge base",
       "maxHistory": "Max. conversation history",
       "confirmDelete": "Delete agent \"{{name}}\"?",
+      "inUse": "This agent is in use and cannot be deleted.",
       "selectOrNew": "Select an agent or click +",
       "webhookLabel": "Webhook URL",
       "webhookEmpty": "No webhook configured",

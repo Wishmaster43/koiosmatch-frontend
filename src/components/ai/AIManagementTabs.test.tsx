@@ -143,6 +143,25 @@ describe('AgentsTab — delete failure must not remove the agent from the list',
     // The row must still be there — a failed delete is not a silent success.
     expect(screen.getAllByText('Kelly Jansen').length).toBeGreaterThan(0)
   })
+
+  // AIAGENT-DESTROY-GUARD-1: an in-use agent answers 409 with a human reason
+  // (bound vacancies + interview flows, counts included) — that reason must
+  // reach the user, and the agent must stay listed (mirrors the flows branch).
+  it('surfaces the server reason on a 409 in-use delete and keeps the agent listed', async () => {
+    vi.mocked(api.delete).mockRejectedValue({ response: { status: 409, data: { message: 'Agent is in gebruik: 3 vacatures, 1 flow.' } } })
+    const dispatchSpy = vi.spyOn(window, 'dispatchEvent')
+
+    render(<AgentsTab />)
+    await screen.findAllByText('Kelly Jansen')
+    fireEvent.click(screen.getAllByRole('button', { name: 'Verwijderen' })[0])
+    fireEvent.click(await screen.findByRole('button', { name: 'Bevestigen' }))
+
+    // The 409 branch ships the SERVER message, never the generic failure copy.
+    await waitFor(() => expect(dispatchSpy).toHaveBeenCalledWith(expect.objectContaining({
+      detail: { type: 'error', message: 'Agent is in gebruik: 3 vacatures, 1 flow.' },
+    })))
+    expect(screen.getAllByText('Kelly Jansen').length).toBeGreaterThan(0)
+  })
 })
 
 // Shared fixtures for the Prompts/FAQ delete-failure regressions below.
