@@ -185,30 +185,24 @@ export default function VacancyGenerationProfilesList() {
               </div>
               <DefaultToggle active={!!profile.is_default} busy={settingDefaultId === profile.id}
                 onClick={() => setDefault(profile)} activeLabel={t('common.default')} inactiveLabel={t('common.setDefault')} />
-              <button onClick={() => (isOpen ? setExpanded(null) : openEdit(profile))}
-                aria-label={`${isOpen ? t('common.close') : t('common.edit')}: ${profile.name}`}
-                style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 4 }}>
+              <Button variant="ghost" size="sm" iconOnly onClick={() => (isOpen ? setExpanded(null) : openEdit(profile))}
+                aria-label={`${isOpen ? t('common.close') : t('common.edit')}: ${profile.name}`}>
                 {isOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-              </button>
+              </Button>
             </div>
 
             {isOpen && form && (
               <div style={{ marginTop: 14, borderTop: '1px solid var(--border)', paddingTop: 14 }}>
                 <VacancyGenerationProfileEditor draft={form} onChange={p => patch(profile.id, p)} contentBlocks={contentBlocks} />
                 <div style={{ display: 'flex', gap: 8, justifyContent: 'space-between', marginTop: 14 }}>
-                  <button onClick={() => handleDelete(profile)} disabled={profile.in_use || saving === profile.id}
-                    title={profile.in_use ? t('vacancyGenerationSettings.deleteBlocked') : undefined}
-                    style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '6px 12px', fontSize: 12, borderRadius: 6,
-                      border: '1px solid color-mix(in srgb, var(--color-danger) 40%, transparent)',
-                      background: profile.in_use ? 'var(--hover-bg)' : 'var(--color-danger-bg)',
-                      color: profile.in_use ? 'var(--text-muted)' : 'var(--color-danger)', cursor: profile.in_use ? 'not-allowed' : 'pointer' }}>
+                  <Button variant="dangerSoft" size="sm" onClick={() => handleDelete(profile)} disabled={profile.in_use || saving === profile.id}
+                    title={profile.in_use ? t('vacancyGenerationSettings.deleteBlocked') : undefined}>
                     <Trash2 size={12} /> {t('vacancyGenerationSettings.delete')}
-                  </button>
+                  </Button>
                   <div style={{ display: 'flex', gap: 8 }}>
-                    <button onClick={() => setExpanded(null)}
-                      style={{ padding: '6px 14px', fontSize: 12, borderRadius: 6, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text-muted)', cursor: 'pointer' }}>
+                    <Button variant="secondary" size="sm" onClick={() => setExpanded(null)}>
                       {t('common.cancel')}
-                    </button>
+                    </Button>
                     <Button variant="primary" size="sm" onClick={() => handleSave(profile)} disabled={saving === profile.id || !form.name?.trim()}>
                       {saving === profile.id ? t('common.saving') : t('common.save')}
                     </Button>
@@ -224,10 +218,9 @@ export default function VacancyGenerationProfilesList() {
         <div style={cardStyle}>
           <VacancyGenerationProfileEditor draft={newForm} onChange={p => setNewForm(prev => ({ ...prev, ...p }))} contentBlocks={contentBlocks} />
           <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 14 }}>
-            <button onClick={() => setAdding(false)}
-              style={{ padding: '6px 14px', fontSize: 12, borderRadius: 6, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text-muted)', cursor: 'pointer' }}>
+            <Button variant="secondary" size="sm" onClick={() => setAdding(false)}>
               {t('common.cancel')}
-            </button>
+            </Button>
             <Button variant="primary" size="sm" onClick={handleCreate} disabled={!newForm.name.trim() || saving === 'new'}>
               {saving === 'new' ? t('common.saving') : t('vacancyGenerationSettings.add')}
             </Button>

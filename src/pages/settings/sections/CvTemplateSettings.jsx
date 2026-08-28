@@ -18,6 +18,7 @@ import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import { PREVIEW_CANDIDATE } from './cvTemplate/previewCandidate'
 import CvHtmlPreview from './cvTemplate/CvHtmlPreview'
 import CvSectionList from './cvTemplate/CvSectionList'
+import Button from '@/components/ui/Button'
 import { Caption } from '@/components/ui/typography'
 
 // Thin composer: colour pickers + section list on the left, live A4 preview on the right (see the module doc above for where each piece lives).
@@ -86,16 +87,12 @@ export default function CvTemplateSettings() {
           <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 4, marginBottom: 0 }}>{t('cvTemplate.subtitle')}</p>
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
-          <button onClick={handleDownloadPreview} disabled={generating}
-            style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', fontSize: 12, fontWeight: 500,
-              border: '1px solid var(--border)', borderRadius: 7, background: 'var(--bg)', color: 'var(--text)', cursor: 'pointer' }}>
+          <Button variant="secondary" size="sm" onClick={handleDownloadPreview} disabled={generating}>
             <Download size={13} />{generating ? t('cvTemplate.generating') : t('cvTemplate.pdfPreview')}
-          </button>
-          <button onClick={reset}
-            style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', fontSize: 12, fontWeight: 500,
-              border: '1px solid var(--border)', borderRadius: 7, background: 'var(--bg)', color: 'var(--text-muted)', cursor: 'pointer' }}>
+          </Button>
+          <Button variant="secondary" size="sm" onClick={reset}>
             <RotateCcw size={12} /> {t('cvTemplate.reset')}
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -148,6 +145,7 @@ export default function CvTemplateSettings() {
                     {['#19A5CA','#1B60A9','#F0AB00','#10B981','#EF4444','#8B5CF6','#F97316','#1F2937'].map(col => (
                       <button key={col} type="button" onClick={() => save({ [key]: col })}
                         aria-pressed={settings[key] === col} aria-label={`${label} ${col}`}
+                        // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- the swatch fill IS the chosen accent colour itself, not a Button variant
                         style={{ width: 22, height: 22, borderRadius: '50%', background: col, border: settings[key] === col ? '3px solid var(--text)' : '2px solid transparent', cursor: 'pointer', flexShrink: 0 }} />
                     ))}
                   </div>

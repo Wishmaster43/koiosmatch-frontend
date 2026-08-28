@@ -30,6 +30,7 @@
  */
 import type { TFunction } from 'i18next'
 import { FieldRow } from '@/components/forms/fields'
+import Button from '@/components/ui/Button'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import { cardHead, cardBox, pickerStyle, PICKER_MENU_W } from './fields'
 import { UNASSIGNED_VALUE } from './assigneeOptions'
@@ -41,9 +42,6 @@ import type { TaskForm } from '../AddTaskModal'
 const noticeStyle = { marginTop: 6, fontSize: 11, lineHeight: 1.4, color: 'var(--text-muted)' } as const
 // The load-error line reuses that footprint and only swaps in the danger token.
 const errorNoticeStyle = { ...noticeStyle, display: 'flex', alignItems: 'center', gap: 8, color: 'var(--color-danger-text)' } as const
-// Ghost retry button, identical for both lists (§4: extract the repeated style).
-const retryStyle = { background: 'none', border: '1px solid var(--border)', borderRadius: 6,
-  padding: '2px 8px', cursor: 'pointer', color: 'var(--text)', fontSize: 11 } as const
 
 // The assignee/owner/team fields for the create-task modal, each with its own retry affordance on a failed lookup load.
 export default function AssignmentCard({
@@ -91,7 +89,7 @@ export default function AssignmentCard({
           {teamsError ? (
             <div role="alert" style={errorNoticeStyle}>
               <span>{t('modal.teamLoadError')}</span>
-              {onRetryTeams && <button type="button" onClick={onRetryTeams} style={retryStyle}>{t('common:error.retry')}</button>}
+              {onRetryTeams && <Button type="button" variant="secondary" size="sm" onClick={onRetryTeams}>{t('common:error.retry')}</Button>}
             </div>
           ) : teamsLoading ? (
             <div style={noticeStyle}>{t('common:loading')}</div>
@@ -118,7 +116,7 @@ export default function AssignmentCard({
           {usersError ? (
             <div role="alert" style={errorNoticeStyle}>
               <span>{t('modal.assigneeLoadError')}</span>
-              {onRetryUsers && <button type="button" onClick={onRetryUsers} style={retryStyle}>{t('common:error.retry')}</button>}
+              {onRetryUsers && <Button type="button" variant="secondary" size="sm" onClick={onRetryUsers}>{t('common:error.retry')}</Button>}
             </div>
           ) : usersLoading ? (
             <div style={noticeStyle}>{t('common:loading')}</div>

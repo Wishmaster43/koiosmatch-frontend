@@ -14,11 +14,13 @@
  */
 import { useTranslation } from 'react-i18next'
 import { CheckCheck, Eraser } from 'lucide-react'
+import Button from '@/components/ui/Button'
+import { Mono } from '@/components/ui/typography'
 
 // Rendered height of the default (non-dense) row: 6px padding + 26px button +
 // 6px padding + 1px border. Hosts that cap their own list height subtract this
 // (SearchSelect's portal menu) so adding the row never clips the last option.
-export const SELECT_ALL_ROW_HEIGHT = 39
+export const SELECT_ALL_ROW_HEIGHT = 41
 
 interface SelectAllRowProps<T extends string | number> {
   // The option values currently VISIBLE in the list (already search-filtered).
@@ -65,20 +67,15 @@ export default function SelectAllRow<T extends string | number>({
       {/* One real button (§6: role + name come from the element and its text), sitting
           right after the search box in the tab order. mousedown is prevented so the
           click never steals focus from that search box — and so hosts that close their
-          dropdown on blur (workflow MultiSelectField) do not close before the click. */}
-      <button type="button" role={role} data-menuitem={menuItem ? '' : undefined}
+          dropdown on blur (workflow MultiSelectField) do not close before the click.
+          HUISSTIJL-1: the shared Button atom (variant="primary" = the house trio) —
+          the hand-painted copy this replaced is on the shrink-only sm-height allowlist
+          (buttonSize.houseStyle.test.js) for its old 26px; Button's sm is 28px. */}
+      <Button type="button" variant="primary" size="sm" role={role} data-menuitem={menuItem ? '' : undefined}
         onMouseDown={e => e.preventDefault()}
         onClick={() => onApply(changing, !allSelected)}
         title={t('multiSelect.visibleHint', { count: visibleValues.length })}
-        style={{
-          display: 'flex', alignItems: 'center', gap: 6, width: '100%', height: 26,
-          padding: '0 8px', borderRadius: 6, cursor: 'pointer', fontSize: 11.5, fontWeight: 600,
-          // HUISSTIJL-1: a real ACTION (select/clear the visible scope) reads the
-          // house trio, solid, same as every other accent action button.
-          color: 'var(--button-ink)',
-          background: 'var(--button-fill)',
-          border: '1px solid var(--button-border)',
-        }}>
+        style={{ justifyContent: 'flex-start', width: '100%', gap: 6, padding: '0 8px' }}>
         {allSelected ? <Eraser size={12} aria-hidden="true" /> : <CheckCheck size={12} aria-hidden="true" />}
         <span style={{ flex: 1, textAlign: 'left' }}>
           {allSelected ? t('multiSelect.clearVisible') : t('multiSelect.selectVisible')}
@@ -86,11 +83,12 @@ export default function SelectAllRow<T extends string | number>({
         {/* The scope, in numbers — part of the accessible name on purpose: "how many
             am I about to affect" is the whole point of the filtered-scope rule. The
             parentheses are not decoration: a bare count would read as (and, in tests,
-            match as) one of the app's standalone count badges. */}
-        <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 10.5, fontWeight: 600 }}>
+            match as) one of the app's standalone count badges. Mono atom carries the
+            font identity (§4: the font name lives on exactly one line, in typography.tsx). */}
+        <Mono style={{ fontSize: 10.5, fontWeight: 600 }}>
           ({visibleValues.length})
-        </span>
-      </button>
+        </Mono>
+      </Button>
     </div>
   )
 }

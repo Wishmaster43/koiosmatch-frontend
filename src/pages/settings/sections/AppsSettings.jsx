@@ -1,7 +1,7 @@
 /** AppsSettings — toggle external app connectors (with monthly-cost + package warnings). */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { AlertTriangle, Check } from 'lucide-react'
+import { Check } from 'lucide-react'
 import api from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
@@ -9,6 +9,7 @@ import { useAuth } from '@/context/AuthContext'
 import { useApps, AVAILABLE_APPS } from '@/context/AppsContext'
 import { canAccessPage } from '@/lib/access'
 import Toggle from '@/components/ui/Toggle'
+import CalloutBox from '@/components/ui/CalloutBox'
 import { readableOn } from '@/hooks/useTenantTheme'
 
 // Connector toggles gated on super-admin + package: shows an honest disabled state, never a clickable 403.
@@ -52,18 +53,13 @@ export default function AppsSettings() {
   return (
     <div style={{ maxWidth: 680 }}>
       {/* Package context banner — shown when the active tenant is NOT on package 3 yet.
-          Sky shades have no exact/close index.css token match; kept literal to avoid changing the rendered tone. */}
+          Uses the shared CalloutBox atom (§4) instead of hand-painted hex. */}
       {!tenantHasConnectors && (
-        /* eslint-disable no-restricted-syntax -- no exact/close index.css token match for these banner sky shades; kept literal to avoid changing the rendered tone */
-        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '12px 16px',
-                      background: '#F0F9FF', border: '1px solid #BAE6FD', borderRadius: 10, marginBottom: 16 }}>
-          <AlertTriangle size={15} color="#0369A1" style={{ flexShrink: 0, marginTop: 1 }} />
-          <div>
-            <div style={{ fontSize: 13, fontWeight: 600, color: '#0369A1' }}>{t('apps.notOnPkg3Title')}</div>
-            <div style={{ fontSize: 12, color: '#0284C7', marginTop: 2 }}>{t('apps.notOnPkg3Desc')}</div>
-          </div>
+        <div style={{ marginBottom: 16 }}>
+          <CalloutBox variant="info" title={t('apps.notOnPkg3Title')}>
+            {t('apps.notOnPkg3Desc')}
+          </CalloutBox>
         </div>
-        /* eslint-enable no-restricted-syntax */
       )}
 
       {!canEdit && (

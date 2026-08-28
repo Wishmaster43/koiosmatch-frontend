@@ -6,6 +6,7 @@ import type { ComponentType, ReactNode } from 'react'
 import { TrendingUp, TrendingDown } from 'lucide-react'
 import { useNumberFormat } from '@/lib/formatters'
 import { interactive } from '@/lib/a11y'
+import { Caption } from '@/components/ui/typography'
 
 interface KpiCardProps {
   label?: ReactNode
@@ -77,10 +78,11 @@ export default function KpiCard({ label, value, delta, icon: Icon, iconBg, iconC
           {displayValue ?? '—'}
         </div>
         <div style={{ fontSize: 13, color: 'var(--text-muted)' }}>{label}</div>
+        {/* Caption atom for size (11px), colour/weight overridden via style for this note-role tint — §4: atom owns identity, layout/tone stays with the caller. */}
         {note && (
-          <div style={{ fontSize: 11, color: 'var(--color-violet)', marginTop: 3, fontWeight: 500 }}>
+          <Caption as="div" style={{ color: 'var(--color-violet)', marginTop: 3, fontWeight: 500 }}>
             {note}
-          </div>
+          </Caption>
         )}
       </div>
     </div>

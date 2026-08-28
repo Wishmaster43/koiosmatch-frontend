@@ -201,8 +201,10 @@ export default function MatchTemplatesSettings() {
               <span key={v} style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, padding: '3px 8px',
                 borderRadius: 6, border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text)' }}>
                 {label}
+                {/* eslint-disable huisstijlLegacy/no-restricted-syntax -- chip-remove icon, no fill/border/height of its own */}
                 <button type="button" onClick={() => onToggle(v)} aria-label={t('common.remove')}
                   style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 0, lineHeight: 1, fontSize: 14 }}>×</button>
+                {/* eslint-enable huisstijlLegacy/no-restricted-syntax */}
               </span>
             )
           })}
@@ -264,11 +266,10 @@ export default function MatchTemplatesSettings() {
                 color: linked > 0 ? 'var(--color-primary-text)' : 'var(--text-muted)' }}>
                 {t('matchTemplatesSettings.linkedCount', { count: linked })}
               </span>
-              <button onClick={() => (isOpen ? setExpanded(null) : openEdit(tpl))}
-                aria-label={`${isOpen ? t('common.close') : t('common.edit')}: ${tpl.name}`}
-                style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 4 }}>
+              <Button variant="ghost" size="sm" iconOnly onClick={() => (isOpen ? setExpanded(null) : openEdit(tpl))}
+                aria-label={`${isOpen ? t('common.close') : t('common.edit')}: ${tpl.name}`}>
                 {isOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-              </button>
+              </Button>
             </div>
 
             {isOpen && (
@@ -287,19 +288,14 @@ export default function MatchTemplatesSettings() {
                 <p style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('matchTemplatesSettings.defaultAssignmentHint')}</p>
 
                 <div style={{ display: 'flex', gap: 8, justifyContent: 'space-between' }}>
-                  <button onClick={() => handleDelete(tpl)} disabled={linked > 0 || saving === tpl.id}
-                    title={linked > 0 ? t('matchTemplatesSettings.deleteBlocked') : undefined}
-                    style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '6px 12px', fontSize: 12, borderRadius: 6,
-                      border: '1px solid color-mix(in srgb, var(--color-danger) 40%, transparent)',
-                      background: linked > 0 ? 'var(--hover-bg)' : 'var(--color-danger-bg)',
-                      color: linked > 0 ? 'var(--text-muted)' : 'var(--color-danger)', cursor: linked > 0 ? 'not-allowed' : 'pointer' }}>
+                  <Button variant="dangerSoft" size="sm" onClick={() => handleDelete(tpl)} disabled={linked > 0 || saving === tpl.id}
+                    title={linked > 0 ? t('matchTemplatesSettings.deleteBlocked') : undefined}>
                     <Trash2 size={12} /> {t('matchTemplatesSettings.delete')}
-                  </button>
+                  </Button>
                   <div style={{ display: 'flex', gap: 8 }}>
-                    <button onClick={() => setExpanded(null)}
-                      style={{ padding: '6px 14px', fontSize: 12, borderRadius: 6, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text-muted)', cursor: 'pointer' }}>
+                    <Button variant="secondary" size="sm" onClick={() => setExpanded(null)}>
                       {t('common.cancel')}
-                    </button>
+                    </Button>
                     <Button variant="primary" size="sm" onClick={() => handleSave(tpl)} disabled={saving === tpl.id || !form.name?.trim()}>
                       {saving === tpl.id ? t('common.saving') : t('common.save')}
                     </Button>
@@ -328,10 +324,9 @@ export default function MatchTemplatesSettings() {
             <p style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('matchTemplatesSettings.defaultAssignmentHint')}</p>
 
             <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-              <button onClick={() => setAdding(false)}
-                style={{ padding: '6px 14px', fontSize: 12, borderRadius: 6, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text-muted)', cursor: 'pointer' }}>
+              <Button variant="secondary" size="sm" onClick={() => setAdding(false)}>
                 {t('common.cancel')}
-              </button>
+              </Button>
               <Button variant="primary" size="sm" onClick={handleCreate} disabled={!newForm.name.trim() || saving === 'new'}>
                 {saving === 'new' ? t('common.saving') : t('matchTemplatesSettings.add')}
               </Button>

@@ -27,6 +27,7 @@ import { useTranslation } from 'react-i18next'
 import { AlertCircle, ArrowRight } from 'lucide-react'
 import SafeHtmlJs from '@/components/ui/SafeHtml'
 import SelectMenu from '@/components/ui/SelectMenu'
+import Button from '@/components/ui/Button'
 import api from '@/lib/api'
 import { notifySuccess, notifyError } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
@@ -97,15 +98,6 @@ export default function MatchRemarksBlock({ remarks, loading, save, matchId, onO
     borderBottom: '1px solid color-mix(in srgb, var(--color-warning) 30%, transparent)',
     fontSize: 11, color: 'var(--text)', lineHeight: 1.5,
   } as const
-  // Soft-tint action button (§4 + house rule: an action is a BUTTON, never coloured text).
-  const moveBtnStyle = {
-    display: 'inline-flex', alignItems: 'center', gap: 6, padding: '5px 10px', borderRadius: 8,
-    fontSize: 12, fontWeight: 600, cursor: moving ? 'default' : 'pointer',
-    background: 'color-mix(in srgb, var(--color-primary) 12%, transparent)',
-    color: 'var(--color-primary-text)',
-    border: '1px solid color-mix(in srgb, var(--color-primary) 40%, transparent)',
-    opacity: moving ? 0.6 : 1,
-  } as const
 
   // Retired field: nothing while the shared fetch runs, and nothing at all once it
   // is empty — that is the whole point of the merge (no second free-text field).
@@ -133,10 +125,10 @@ export default function MatchRemarksBlock({ remarks, loading, save, matchId, onO
           <SelectMenu aria-labelledby={typeLabelId} value={noteType} onChange={setType}
             placeholder={t('notes.type')} menuWidth={200}
             options={writableTypes.map(o => ({ value: o.value, label: o.label }))} />
-          <button type="button" onClick={moveToNotes} disabled={moving || !matchId || !noteType} style={moveBtnStyle}>
+          <Button variant="soft" size="sm" onClick={moveToNotes} disabled={moving || !matchId || !noteType}>
             <ArrowRight size={13} aria-hidden="true" />
             {moving ? t('drawer.remarks.moving') : t('drawer.remarks.moveToNotes')}
-          </button>
+          </Button>
         </div>
       </div>
     </div>

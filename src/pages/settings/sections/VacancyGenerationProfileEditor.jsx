@@ -142,6 +142,7 @@ export default function VacancyGenerationProfileEditor({ draft, onChange, conten
               closeOnToggle
               searchable={false}
               renderTrigger={toggle => (
+                // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- SearchSelect renderTrigger: form-field face from fieldMetrics, not a Button
                 <button type="button" onClick={toggle} style={{ ...inputStyle, cursor: 'pointer', textAlign: 'left' }}>
                   {t(`vacancyGenerationSettings.tone.${draft.content.tone_of_voice}`)}
                 </button>
@@ -157,6 +158,7 @@ export default function VacancyGenerationProfileEditor({ draft, onChange, conten
               closeOnToggle
               searchable={false}
               renderTrigger={toggle => (
+                // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- SearchSelect renderTrigger: form-field face from fieldMetrics, not a Button
                 <button type="button" onClick={toggle} style={{ ...inputStyle, cursor: 'pointer', textAlign: 'left' }}>
                   {t(`vacancyGenerationSettings.length.${draft.content.length}`)}
                 </button>
@@ -171,6 +173,7 @@ export default function VacancyGenerationProfileEditor({ draft, onChange, conten
               onToggle={v => setContent('language', v)}
               closeOnToggle
               renderTrigger={toggle => (
+                // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- SearchSelect renderTrigger: form-field face from fieldMetrics, not a Button
                 <button type="button" onClick={toggle} style={{ ...inputStyle, cursor: 'pointer', textAlign: 'left' }}>
                   {draft.content.language || t('vacancyGenerationSettings.languagePlaceholder')}
                 </button>
@@ -201,6 +204,7 @@ export default function VacancyGenerationProfileEditor({ draft, onChange, conten
             {draft.content.forbidden_words.map(w => (
               <span key={w} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, padding: '4px 10px', background: 'var(--hover-bg)', border: '1px solid var(--border)', borderRadius: 7, color: 'var(--text)' }}>
                 {w}
+                {/* eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- chip-remove icon, no fill/border/height of its own */}
                 <button onClick={() => removeWord(w)} aria-label={t('common.remove')} style={{ border: 'none', background: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 0, display: 'flex' }}>
                   <X size={12} />
                 </button>

@@ -8,14 +8,7 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Check, X } from 'lucide-react'
-import { BTN_H } from '@/config/buttonMetrics'
 import Button from '@/components/ui/Button'
-
-// BTN_H (§4/§9): one explicit height for every text/action button, everywhere.
-const actionBtn = (color: string): React.CSSProperties => ({
-  display: 'flex', alignItems: 'center', gap: 4, height: BTN_H, padding: '0 9px', fontSize: 11, fontWeight: 600,
-  borderRadius: 7, cursor: 'pointer', border: `1px solid ${color}`, background: 'transparent', color,
-})
 
 interface MatchApprovalActionsProps {
   status?: string
@@ -41,14 +34,12 @@ export default function MatchApprovalActions({
     <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
       {status === 'pending' && canUpdate && !rejectOpen && (
         <div style={{ display: 'flex', gap: 8 }}>
-          <button onClick={onApprove} disabled={busy} aria-label={t('approval.approve')}
-            style={{ ...actionBtn('var(--color-success)'), opacity: busy ? 0.6 : 1 }}>
+          <Button variant="success" size="sm" onClick={onApprove} disabled={busy} aria-label={t('approval.approve')}>
             <Check size={11} />{t('approval.approve')}
-          </button>
-          <button onClick={onOpenReject} disabled={busy} aria-label={t('approval.reject')}
-            style={{ ...actionBtn('var(--color-danger)'), opacity: busy ? 0.6 : 1 }}>
+          </Button>
+          <Button variant="dangerSoft" size="sm" onClick={onOpenReject} disabled={busy} aria-label={t('approval.reject')}>
             <X size={11} />{t('approval.reject')}
-          </button>
+          </Button>
         </div>
       )}
 

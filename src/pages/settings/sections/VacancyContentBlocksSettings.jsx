@@ -146,11 +146,10 @@ export default function VacancyContentBlocksSettings() {
                 <div style={{ fontWeight: 500, fontSize: 13, color: 'var(--text)' }}>{block.name}</div>
                 <Caption as="div" style={{ marginTop: 2 }}>{t(`vacancyContentBlocksSettings.kind.${block.kind}`)}</Caption>
               </div>
-              <button onClick={() => (isOpen ? setExpanded(null) : openEdit(block))}
-                aria-label={`${isOpen ? t('common.close') : t('common.edit')}: ${block.name}`}
-                style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 4 }}>
+              <Button variant="ghost" size="sm" iconOnly onClick={() => (isOpen ? setExpanded(null) : openEdit(block))}
+                aria-label={`${isOpen ? t('common.close') : t('common.edit')}: ${block.name}`}>
                 {isOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-              </button>
+              </Button>
             </div>
 
             {isOpen && (
@@ -169,6 +168,7 @@ export default function VacancyContentBlocksSettings() {
                       closeOnToggle
                       searchable={false}
                       renderTrigger={toggle => (
+                        // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- SearchSelect renderTrigger: form-field face from fieldMetrics, not a Button
                         <button type="button" onClick={toggle} style={{ ...inputStyle, cursor: 'pointer', textAlign: 'left' }}>
                           {t(`vacancyContentBlocksSettings.kind.${form.kind ?? 'intro'}`)}
                         </button>
@@ -181,19 +181,14 @@ export default function VacancyContentBlocksSettings() {
                   <RichTextEditor value={form.body ?? ''} onChange={v => setEF(block.id, 'body', v)} minHeight={90} />
                 </div>
                 <div style={{ display: 'flex', gap: 8, justifyContent: 'space-between' }}>
-                  <button onClick={() => handleDelete(block)} disabled={block.in_use || saving === block.id}
-                    title={block.in_use ? t('vacancyContentBlocksSettings.deleteBlocked') : undefined}
-                    style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '6px 12px', fontSize: 12, borderRadius: 6,
-                      border: '1px solid color-mix(in srgb, var(--color-danger) 40%, transparent)',
-                      background: block.in_use ? 'var(--hover-bg)' : 'var(--color-danger-bg)',
-                      color: block.in_use ? 'var(--text-muted)' : 'var(--color-danger)', cursor: block.in_use ? 'not-allowed' : 'pointer' }}>
+                  <Button variant="dangerSoft" size="sm" onClick={() => handleDelete(block)} disabled={block.in_use || saving === block.id}
+                    title={block.in_use ? t('vacancyContentBlocksSettings.deleteBlocked') : undefined}>
                     <Trash2 size={12} /> {t('vacancyContentBlocksSettings.delete')}
-                  </button>
+                  </Button>
                   <div style={{ display: 'flex', gap: 8 }}>
-                    <button onClick={() => setExpanded(null)}
-                      style={{ padding: '6px 14px', fontSize: 12, borderRadius: 6, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text-muted)', cursor: 'pointer' }}>
+                    <Button variant="secondary" size="sm" onClick={() => setExpanded(null)}>
                       {t('common.cancel')}
-                    </button>
+                    </Button>
                     <Button variant="primary" size="sm" onClick={() => handleSave(block)} disabled={saving === block.id || !form.name?.trim()}>
                       {saving === block.id ? t('common.saving') : t('common.save')}
                     </Button>
@@ -228,6 +223,7 @@ export default function VacancyContentBlocksSettings() {
                   closeOnToggle
                   searchable={false}
                   renderTrigger={toggle => (
+                    // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- SearchSelect renderTrigger: form-field face from fieldMetrics, not a Button
                     <button type="button" onClick={toggle} style={{ ...inputStyle, cursor: 'pointer', textAlign: 'left' }}>
                       {t(`vacancyContentBlocksSettings.kind.${newForm.kind}`)}
                     </button>
@@ -240,10 +236,9 @@ export default function VacancyContentBlocksSettings() {
               <RichTextEditor value={newForm.body} onChange={v => setNewForm(p => ({ ...p, body: v }))} minHeight={90} />
             </div>
             <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-              <button onClick={() => setAdding(false)}
-                style={{ padding: '6px 14px', fontSize: 12, borderRadius: 6, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text-muted)', cursor: 'pointer' }}>
+              <Button variant="secondary" size="sm" onClick={() => setAdding(false)}>
                 {t('common.cancel')}
-              </button>
+              </Button>
               <Button variant="primary" size="sm" onClick={handleCreate} disabled={!newForm.name.trim() || saving === 'new'}>
                 {saving === 'new' ? t('common.saving') : t('vacancyContentBlocksSettings.add')}
               </Button>

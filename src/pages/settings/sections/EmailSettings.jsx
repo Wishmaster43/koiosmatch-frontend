@@ -137,14 +137,13 @@ export default function EmailSettings({ context = 'klanten' }) {
       </div>
 
       {testResult && (
-        <div style={{ marginBottom: 14, padding: '10px 14px', borderRadius: 8, fontSize: 13,
-                      display: 'flex', alignItems: 'center', gap: 8,
-                      background: testResult.ok ? 'var(--color-success-bg)' : 'var(--color-danger-bg)',
-                      // eslint-disable-next-line no-restricted-syntax -- no exact/close index.css token match for these result-banner border shades; kept literal to avoid changing the rendered tone
-                      border: `1px solid ${testResult.ok ? '#86EFAC' : '#FCA5A5'}`,
-                      color: testResult.ok ? 'var(--color-success)' : 'var(--color-danger)' }}>
-          {testResult.ok ? <Check size={14} /> : <AlertTriangle size={14} />}
-          {testResult.msg}
+        <div style={{ marginBottom: 14 }}>
+          <CalloutBox variant={testResult.ok ? 'success' : 'danger'}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              {testResult.ok ? <Check size={14} /> : <AlertTriangle size={14} />}
+              {testResult.msg}
+            </div>
+          </CalloutBox>
         </div>
       )}
 
