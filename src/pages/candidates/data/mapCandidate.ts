@@ -114,6 +114,9 @@ export function mapCandidate(c: ApiCandidate): Candidate {
     // The API validates/returns `available_again_date`; the old key stays as fallback.
     statusReturnDate: (c.available_again_date as string | null | undefined) ?? c.status_return_date ?? null,
     statusChangedAt:  c.status_changed_at ?? c.status_effective_from ?? null,
+    // Stamped by the BE on a PHASE transition (Candidate.php:227) — the axis the
+    // "days since phase change" statistic actually claims to measure (§3B).
+    phaseChangedAt:   (c.phase_changed_at as string | undefined) ?? null,
     // "By whom" the status was changed — flat name or nested user; graceful null (H2).
     statusChangedBy:  (typeof c.status_changed_by === 'object'
       ? (c.status_changed_by as { name?: string } | null)?.name ?? null

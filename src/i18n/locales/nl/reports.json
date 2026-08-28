@@ -396,5 +396,11 @@
       "banner": "Proefrun: verzendstappen overgeslagen"
     }
   },
-  "messageDetail": "Berichtdetail"
+  "messageDetail": "Berichtdetail",
+  "locationsPage": {
+    "status": {
+      "active": "Actief",
+      "inactive": "Inactief"
+    }
+  }
 }

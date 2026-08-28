@@ -162,6 +162,7 @@ export interface Candidate {
   statusReason: string | null
   statusReturnDate: string | null
   statusChangedAt: string | null
+  phaseChangedAt: string | null
   // "By whom" the status changed — shown in the header info line once the API sends it (H2).
   statusChangedBy: string | null
   blacklistReason: string | null

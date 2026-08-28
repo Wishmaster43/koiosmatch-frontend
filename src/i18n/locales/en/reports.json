@@ -396,5 +396,11 @@
       "banner": "Dry run: send steps skipped"
     }
   },
-  "messageDetail": "Message detail"
+  "messageDetail": "Message detail",
+  "locationsPage": {
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    }
+  }
 }

@@ -396,5 +396,11 @@
       "banner": "Simulación: pasos de envío omitidos"
     }
   },
-  "messageDetail": "Detalle del mensaje"
+  "messageDetail": "Detalle del mensaje",
+  "locationsPage": {
+    "status": {
+      "active": "Activo",
+      "inactive": "Inactivo"
+    }
+  }
 }

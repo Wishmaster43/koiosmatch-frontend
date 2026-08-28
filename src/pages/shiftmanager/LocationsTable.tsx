@@ -17,7 +17,9 @@ const mutedCell: CSSProperties = { color: 'var(--text-muted)', fontSize: 12 }
 
 // Status → soft-chip colour (tenant values; unknown falls back to neutral grey).
 const STATUS_COLORS: Record<string, string> = {
-  actief: 'var(--color-success)', active: 'var(--color-success)', inactief: 'var(--color-warning)',
+  active: 'var(--color-success)', inactive: 'var(--color-warning)',
+  // Tolerant for a mirror that still delivers the Dutch raw values.
+  actief: 'var(--color-success)', nietactief: 'var(--color-warning)', inactief: 'var(--color-warning)',
 }
 
 // Small department chip (name pill), matching the soft-chip convention.
@@ -92,7 +94,7 @@ export default function LocationsTable({ rows, loading, selectedId, onSelect }: 
     {
       key: 'status', header: t('locationsPage.cols.status'), sortable: true, sortValue: l => l.status ?? '',
       render: l => l.status
-        ? <StatusPill label={l.status} color={STATUS_COLORS[l.status.toLowerCase()]} />
+        ? <StatusPill label={t(`locationsPage.status.${l.status.toLowerCase()}`, { defaultValue: l.status })} color={STATUS_COLORS[l.status.toLowerCase()]} />
         : <span style={{ color: 'var(--text-muted)' }}>{t('locationsPage.statusUnknown')}</span>,
     },
   ]

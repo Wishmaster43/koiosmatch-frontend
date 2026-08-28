@@ -396,5 +396,11 @@
       "banner": "Simulation : étapes d'envoi ignorées"
     }
   },
-  "messageDetail": "Détail du message"
+  "messageDetail": "Détail du message",
+  "locationsPage": {
+    "status": {
+      "active": "Actif",
+      "inactive": "Inactif"
+    }
+  }
 }

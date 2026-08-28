@@ -32,7 +32,9 @@ export function useSmLocations(): { locations: SmLocationRow[] } {
         customer:    (typeof l.customer === 'object' ? l.customer?.name : l.customer) ?? '',
         city:        l.city ?? '',
         address:     l.address ?? '',
-        status:      l.status === 'active' ? 'Actief' : l.status === 'inactive' ? 'Inactief' : (l.status ?? 'Actief'),
+        // RAW status value — the label is translated at render (DEMO-TAAL §5),
+        // never baked into the model as a Dutch string.
+        status:      l.status ?? 'active',
         departments: (l.departments ?? []).map(d => (typeof d === 'object' ? d?.name : d) ?? ''),
         shifts:      l.shift_count ?? 0,
       })) as SmLocationRow[]

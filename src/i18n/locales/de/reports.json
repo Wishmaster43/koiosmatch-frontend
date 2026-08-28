@@ -396,5 +396,11 @@
       "banner": "Testlauf: Versandschritte übersprungen"
     }
   },
-  "messageDetail": "Nachrichtendetail"
+  "messageDetail": "Nachrichtendetail",
+  "locationsPage": {
+    "status": {
+      "active": "Aktiv",
+      "inactive": "Inaktiv"
+    }
+  }
 }

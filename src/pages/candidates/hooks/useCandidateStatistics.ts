@@ -95,7 +95,7 @@ export function computeCandidateStatistics(
     lastContactAt: c.lastContactAt ?? null,
     lastContactType: c.lastContactType ?? null,
     daysSinceCreated: daysSince(c.created, now),
-    daysSincePhaseChange: daysSince(c.statusChangedAt, now),
+    daysSincePhaseChange: daysSince(c.phaseChangedAt, now),
   }
 }
 

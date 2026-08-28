@@ -88,7 +88,7 @@ describe('computeCandidateStatistics · notes + last contact', () => {
 
 describe('computeCandidateStatistics · days since creation / phase change', () => {
   it('computes whole days between the stamped date and now', () => {
-    const c = baseCandidate({ created: '2026-08-01T12:00:00Z', statusChangedAt: '2026-08-10T12:00:00Z' })
+    const c = baseCandidate({ created: '2026-08-01T12:00:00Z', phaseChangedAt: '2026-08-10T12:00:00Z' })
     const stats = computeCandidateStatistics(c, null, null, NOW)
     expect(stats.daysSinceCreated).toBe(12)
     expect(stats.daysSincePhaseChange).toBe(3)
@@ -97,6 +97,6 @@ describe('computeCandidateStatistics · days since creation / phase change', () 
   it('reports null for a missing, unparseable, or future date — never a negative/invented number', () => {
     expect(computeCandidateStatistics(baseCandidate(), null, null, NOW).daysSinceCreated).toBeNull()
     expect(computeCandidateStatistics(baseCandidate({ created: 'not-a-date' }), null, null, NOW).daysSinceCreated).toBeNull()
-    expect(computeCandidateStatistics(baseCandidate({ statusChangedAt: '2099-01-01' }), null, null, NOW).daysSincePhaseChange).toBeNull()
+    expect(computeCandidateStatistics(baseCandidate({ phaseChangedAt: '2099-01-01' }), null, null, NOW).daysSincePhaseChange).toBeNull()
   })
 })
