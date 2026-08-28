@@ -26,7 +26,7 @@
   },
   "kpi": {
     "total": "Total",
-    "active": "Activo",
+    "active": "Matches activos",
     "hired": "Contratado",
     "avgScore": "Puntuación media",
     "closed": "Cerrados",

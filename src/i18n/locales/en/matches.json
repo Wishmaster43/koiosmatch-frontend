@@ -26,7 +26,7 @@
   },
   "kpi": {
     "total": "Total",
-    "active": "Active",
+    "active": "Active matches",
     "hired": "Hired",
     "avgScore": "Avg score",
     "closed": "Closed",

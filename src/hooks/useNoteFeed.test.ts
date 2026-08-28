@@ -40,6 +40,14 @@ describe('useNoteFeed', () => {
     expect(config?.params).toMatchObject({ per_page: 25, page: 1 })
   })
 
+  it('nests the sub-entity route under the owning customer (CMBE 64d976ff)', async () => {
+    vi.mocked(api.get).mockResolvedValueOnce({ data: { data: [], current_page: 1, last_page: 1, total: 0, per_page: 25 } } as never)
+    renderHook(() => useNoteFeed('customers', 'cu1', true, { kind: 'locations', id: 'loc9' }), { wrapper })
+    await waitFor(() => expect(api.get).toHaveBeenCalled())
+    const [url] = vi.mocked(api.get).mock.calls[0]
+    expect(url).toBe('/customers/cu1/locations/loc9/note-feed')
+  })
+
   it('does not fetch while id is null/undefined', () => {
     renderHook(() => useNoteFeed('candidates', undefined, false), { wrapper })
     expect(api.get).not.toHaveBeenCalled()

@@ -13,6 +13,8 @@ import type { ComponentType } from 'react'
 import { useTranslation } from 'react-i18next'
 import api from '@/lib/api'
 import NotesTabJs from '@/components/drawer/tabs/NotesTab'
+// NOTITIE-DOORLINK-1: the location/department's own linked-notes feed section.
+import NoteFeedList from '@/components/drawer/tabs/notes/NoteFeedList'
 import { useNoteTypes } from '@/lib/useNoteTypes'
 import { initialsOf } from '@/lib/initials'
 import { notifyError } from '@/lib/notify'
@@ -74,6 +76,7 @@ export default function ScopedNotesTab({ scope, id, customerId }: {
   if (error) return <div style={{ fontSize: 12, color: 'var(--color-danger-text)' }}>{t('scopedList.loadError')}</div>
 
   return (
+    <>
     <NotesTab
       notes={notes} onAddNote={addNote}
       popout={customerId ? { entity: 'customer', id: customerId } : undefined}
@@ -91,5 +94,13 @@ export default function ScopedNotesTab({ scope, id, customerId }: {
         deleteNote: t('notes.deleteNote'), deleteConfirm: t('notes.deleteConfirm'),
       }}
     />
+    {/* NOTITIE-DOORLINK-1 (CMBE 64d976ff): notes written elsewhere in the chain
+        that name THIS location/department as principal — read-only, under the
+        entity's own notes. */}
+    {customerId != null && (
+      <NoteFeedList entity="customers" id={customerId}
+        sub={{ kind: scope === 'location' ? 'locations' : 'departments', id }} />
+    )}
+  </>
   )
 }

@@ -59,6 +59,8 @@ import ContactConversationsSection from './ContactConversationsSection'
 // CONTACT-NOTITIES-2: this contact's own Notities sub-tab, mirrors ScopedNotesTab's
 // identical wiring (§3A — shared notes-tab family, never a forked composer/list).
 import ContactNotesTab from './ContactNotesTab'
+// NOTITIE-DOORLINK-1: read-only linked-notes feed under the contact's own notes.
+import NoteFeedList from '@/components/drawer/tabs/notes/NoteFeedList'
 import { useCustomFields } from '@/lib/useCustomFields'
 import { useContactFunctions } from '@/lib/useContactFunctions'
 import { useGenders } from '@/lib/useGenders'
@@ -423,7 +425,13 @@ export default function ContactDetail({ contact, locations, departments, statuse
           see useContactNotes' docblock). customerId can be null on legacy/edge data
           (mirrors the conversations/changelog gating above). */}
       {subTab === 'notes' && contact.customerId != null && (
-        <ContactNotesTab contactId={contact.id as Id} customerId={contact.customerId} />
+        <>
+          <ContactNotesTab contactId={contact.id as Id} customerId={contact.customerId} />
+          {/* NOTITIE-DOORLINK-1 (CMBE 64d976ff): chain-linked notes naming this
+              contact as principal — additive section on the frozen family (§3B). */}
+          <NoteFeedList entity="customers" id={contact.customerId}
+            sub={{ kind: 'contacts', id: contact.id as Id }} />
+        </>
       )}
       {subTab === 'links' && showKoppelingen && (
         <BackofficeLinksTab entity="contacts" id={contact.id as Id} helloflexLink={contact.helloflexLink} shiftmanagerLink={contact.shiftmanagerLink} canLink={canLinkBackoffice} />

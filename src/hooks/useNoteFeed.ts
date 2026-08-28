@@ -16,8 +16,15 @@ import { useInfiniteQuery } from '@tanstack/react-query'
 import api, { unwrapList } from '@/lib/api'
 import type { Id } from '@/types/common'
 
-// The two principals this feed exists for today (NOTITIE-DOORLINK-1 scope).
+// The two top-level principals this feed exists for (NOTITIE-DOORLINK-1 scope).
 export type NoteFeedEntity = 'candidates' | 'customers'
+
+// Customer sub-entity principals (fast-follow routes, CMBE 64d976ff): the feed
+// URL nests under the owning customer — IDOR-safe by construction server-side.
+export interface NoteFeedSubScope {
+  kind: 'locations' | 'departments' | 'contacts'
+  id: Id
+}
 
 // The host a note was written on (NoteSourceResolver::sourceFor) — degrades to
 // `deleted: true` (best-effort label kept) when the host is gone, never a dead link.
@@ -35,6 +42,9 @@ export interface NoteFeedItem {
   source: NoteFeedSource
   body: string | null
   type: string | null
+  // Human note-type label resolved server-side per family lookup (64d976ff);
+  // null when the slug has no label — render this, never re-map the slug.
+  type_label?: string | null
   author: string | null
   language: string | null
   created_at: string
@@ -59,11 +69,13 @@ export interface UseNoteFeedResult {
 // chain-linked subset server-side (only_linked=1, CMBE fast-follow); until the
 // server honours it the response still carries both kinds and the CALLER keeps
 // its client filter as the §10-tolerant fallback.
-export function useNoteFeed(entity: NoteFeedEntity, id: Id | null | undefined, onlyLinked: boolean): UseNoteFeedResult {
+export function useNoteFeed(entity: NoteFeedEntity, id: Id | null | undefined, onlyLinked: boolean, sub?: NoteFeedSubScope): UseNoteFeedResult {
+  // Sub-entity feeds nest under the owning customer; top-level feeds stay flat.
+  const path = sub ? `/customers/${id}/${sub.kind}/${sub.id}/note-feed` : `/${entity}/${id}/note-feed`
   const query = useInfiniteQuery({
-    queryKey: ['note-feed', entity, id, onlyLinked],
+    queryKey: ['note-feed', entity, id, onlyLinked, sub?.kind, sub?.id],
     queryFn: async ({ pageParam, signal }) => {
-      const res = await api.get(`/${entity}/${id}/note-feed`, {
+      const res = await api.get(path, {
         signal,
         params: { ...(onlyLinked ? { only_linked: 1 } : {}), per_page: PER_PAGE, page: pageParam },
       })
@@ -73,7 +85,7 @@ export function useNoteFeed(entity: NoteFeedEntity, id: Id | null | undefined, o
     // The BE reports current_page/last_page (raw paginator json) — one more page
     // while the current page hasn't reached the last.
     getNextPageParam: last => (last.page < last.lastPage ? last.page + 1 : undefined),
-    enabled: id != null,
+    enabled: id != null && (sub == null || sub.id != null),
   })
 
   return {

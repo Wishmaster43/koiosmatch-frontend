@@ -94,3 +94,13 @@ describe('NoteFeedList', () => {
     expect(config?.params).toEqual({ only_linked: 1, per_page: 25, page: 2 })
   })
 })
+it('renders the server-resolved type_label on the chip, never the raw slug', async () => {
+  vi.mocked(api.get).mockResolvedValueOnce(page([
+    { id: 'n9', note_type: 'application_note', source: { type: 'application', id: 'a1', label: 'Sollicitatie · Jan', deleted: false }, body: 'typed note', type: 'weird_slug', type_label: 'Bellijst', author: 'Kelly', language: null, created_at: '2026-08-01T10:00:00Z', updated_at: '2026-08-01T10:00:00Z', is_direct: false, principals: [] },
+  ]))
+  render(createElement(NoteFeedList, { entity: 'candidates', id: 'c1' }), { wrapper })
+  await waitFor(() => expect(screen.getByText('typed note')).toBeInTheDocument())
+  expect(screen.getByText('Bellijst')).toBeInTheDocument()
+  expect(screen.queryByText('weird_slug')).not.toBeInTheDocument()
+})
+

@@ -28,12 +28,12 @@ import SafeHtml from '@/components/ui/SafeHtml'
 import Toggle from '@/components/ui/Toggle'
 import { Caption, GroupLabel } from '@/components/ui/typography'
 import Spinner from '@/components/ui/Spinner'
-import { NoteTypeChip } from './NoteChips'
+import SoftChip from '@/components/ui/SoftChip'
 import { useDateFormat } from '@/lib/datetime'
 import { initialsOf } from '@/lib/initials'
 import { useNoteTypes } from '@/lib/useNoteTypes'
 import { useNoteFeed } from '@/hooks/useNoteFeed'
-import type { NoteFeedEntity, NoteFeedItem, NoteFeedSource } from '@/hooks/useNoteFeed'
+import type { NoteFeedEntity, NoteFeedItem, NoteFeedSource, NoteFeedSubScope } from '@/hooks/useNoteFeed'
 import type { Id } from '@/types/common'
 
 // source.type (NoteSourceResolver) → the app's own page id (NavigationContext/appPages.tsx).
@@ -52,6 +52,9 @@ const SOURCE_PAGE: Record<string, string> = {
 interface NoteFeedListProps {
   entity: NoteFeedEntity
   id: Id | null | undefined
+  // Customer sub-entity principal (location/department/contact feed routes,
+  // CMBE 64d976ff) — `id` is then the OWNING customer's id.
+  sub?: NoteFeedSubScope
 }
 
 // The source reference: the shared EntityLink (name opens in-app, trailing icon
@@ -69,19 +72,20 @@ function SourceRef({ source }: { source: NoteFeedSource }) {
 }
 
 // One read-only feed row — NOTITIE-REFERENTIE shape (type chip + author + date), plus the source ref.
-// The type chip resolves against the PRINCIPAL's own note-type lookup; a value
-// from another host's vocabulary stays hidden rather than rendering a raw slug
-// (server-resolved type_label is the asked-for fast-follow).
+// The chip label is server-resolved (`type_label`, CMBE 64d976ff) — never a raw
+// slug; the lookup match below only supplies the tenant colour, with the
+// pre-64d976ff resolve kept as the §10-tolerant label fallback.
 function FeedRow({ item, noteTypes }: { item: NoteFeedItem; noteTypes: { value: string; label: string; color?: string | null }[] }) {
   const { formatDateTime } = useDateFormat()
   const resolved = item.type ? noteTypes.find(n => n.value === item.type || n.label === item.type) : undefined
+  const chipLabel = item.type_label ?? resolved?.label ?? null
   return (
     <div style={{ display: 'flex', gap: 8, marginBottom: 10 }}>
       <Avatar initials={item.author ? initialsOf(item.author) : undefined} size={26} />
       <div style={{ flex: 1, background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 8, padding: '8px 10px' }}>
         <div style={{ display: 'flex', alignItems: 'center', marginBottom: 4, flexWrap: 'wrap', gap: 4 }}>
           <SourceRef source={item.source} />
-          {resolved && <NoteTypeChip value={resolved.value} types={noteTypes as never} />}
+          {chipLabel && <SoftChip label={chipLabel} color={resolved?.color ?? 'var(--color-primary)'} round size={10} />}
           <Caption as="span" style={{ marginLeft: 'auto', whiteSpace: 'nowrap' }}>
             {item.author ? `${item.author} · ` : ''}{formatDateTime(item.created_at)}
           </Caption>
@@ -93,7 +97,7 @@ function FeedRow({ item, noteTypes }: { item: NoteFeedItem; noteTypes: { value: 
 }
 
 // The "Linked notes" section — self-contained (owns its own fetch + toggle state).
-export default function NoteFeedList({ entity, id }: NoteFeedListProps) {
+export default function NoteFeedList({ entity, id, sub }: NoteFeedListProps) {
   const { t } = useTranslation('common')
   // Only-direct toggle: since this section only ever shows is_direct:false rows
   // (see file docblock), flipping it to "direct only" would always render empty —
@@ -101,7 +105,7 @@ export default function NoteFeedList({ entity, id }: NoteFeedListProps) {
   const [onlyDirect, setOnlyDirect] = useState(false)
   // only_linked=1 asks the server for the chain-linked subset (CMBE fast-follow);
   // the client filter below stays as the §10-tolerant fallback until it lands.
-  const { items, loading, error, hasMore, loadingMore, loadMore, reload } = useNoteFeed(entity, id, true)
+  const { items, loading, error, hasMore, loadingMore, loadMore, reload } = useNoteFeed(entity, id, true, sub)
   const noteTypeEntity = entity === 'candidates' ? 'candidate' : 'customer'
   const { types: noteTypes } = useNoteTypes(noteTypeEntity as never)
   const linkedItems = items.filter(i => !i.is_direct)
