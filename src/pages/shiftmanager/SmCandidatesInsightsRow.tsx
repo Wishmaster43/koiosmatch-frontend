@@ -12,7 +12,7 @@
  * third copy).
  */
 import { useMemo } from 'react'
-import { SM_STATUS, statusOf } from '@/lib/smStatus'
+import { SM_STATUS, normalizeSmStatus, statusOf } from '@/lib/smStatus'
 import { useTranslation } from 'react-i18next'
 import InsightsRow from '@/components/insights/InsightsRow'
 import type { DonutSpec, KpiSpec } from '@/components/insights/InsightsRow'
@@ -79,13 +79,13 @@ export default function SmCandidatesInsightsRow({
 }: SmCandidatesInsightsRowProps) {
   const { t } = useTranslation(['shiftmanager', 'reports', 'common'])
   const locale = useLocale()
-  const pickedStatus = statusFilter.length === 1 ? String(statusFilter[0]).toLowerCase() : null
+  const pickedStatus = statusFilter.length === 1 ? normalizeSmStatus(statusFilter[0]) : null
 
   // Status distribution — one donut; segments filter the table (§3A click-to-filter).
   const statusData = useMemo(() => SM_CANDIDATE_STATUS_KEYS
     .map(key => ({
       key, name: t(`candidates.status.${key}`, { ns: 'reports' }),
-      value: candidates.filter(c => (c.status || 'onbekend').toLowerCase() === key).length,
+      value: candidates.filter(c => statusOf(c) === key).length,
       color: SM_CANDIDATE_STATUS_COLORS[key],
     }))
     .filter(d => d.value > 0)

@@ -10,6 +10,7 @@
  * `candidate`/`onClose` contract is unchanged so none of those callers move.
  */
 import { useState } from 'react'
+import { statusOf } from '@/lib/smStatus'
 import type { ReactNode } from 'react'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { useTranslation } from 'react-i18next'
@@ -159,7 +160,7 @@ export default function CandidateDetailDrawer({ candidate: c, onClose }: { candi
   // Display name, status colour/label (shared SM palette, never ad-hoc hex — §4) and
   // the reference chip (no dedicated reference_number on this row, so the SM id).
   const fullName = `${c.firstname ?? ''} ${c.lastname ?? ''}`.trim() || t('candidateDrawer.unknownName')
-  const statusKey = (c.status || '').toLowerCase().replace(/\s+/g, '')
+  const statusKey = statusOf(c)
   const statusColor = SM_CANDIDATE_STATUS_COLORS[statusKey] ?? 'var(--text-muted)'
   const statusLabel = c.status ? t(`candidates.status.${statusKey}`, { defaultValue: c.status }) : t('candidates.unknown')
 

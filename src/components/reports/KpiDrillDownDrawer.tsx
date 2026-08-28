@@ -18,7 +18,7 @@ import DrillTabs from '@/components/ui/DrillTabs'
 import type { ReportCandidate } from '@/types/reports'
 // App-wide active locale + the house DD-MM-YYYY date formatter (DATUM-1/LANE-B).
 import { useLocale, useDateFormat } from '@/lib/datetime'
-import { SM_STATUS } from '@/lib/smStatus'
+import { SM_STATUS, normalizeSmStatus } from '@/lib/smStatus'
 
 // Locale-aware full month name for index 0–11; `locale` is required (a pure
 // module-scope helper never hardcodes nl-NL or imports i18n).
@@ -32,11 +32,11 @@ function StatusBadge({ status }: { status?: string }) {
   const colors: Record<string, string> = {
     [SM_STATUS.ACTIVE]: 'var(--color-success)',
     [SM_STATUS.INACTIVE]: 'var(--color-warning)',
-    extern: 'var(--color-secondary)',
+    [SM_STATUS.EXTERNAL]: 'var(--color-secondary)',
     [SM_STATUS.INTAKE]: 'var(--color-violet)',
     [SM_STATUS.DELETED]: 'var(--color-danger)',
   }
-  const key = (status || '').toLowerCase()
+  const key = normalizeSmStatus(status)
   const label = status ? t(`candidates.status.${key}`, { defaultValue: status }) : t('candidates.unknown')
   return <StatusPill label={label} color={colors[key]} />
 }
@@ -199,6 +199,7 @@ function AverageBreakdown({ candidates, KPI_TARGET, onSelect }: { candidates: Re
           return (
             <div key={b.label} onClick={clickable ? b.onClick : undefined}
               role={clickable ? 'button' : undefined} tabIndex={clickable ? 0 : undefined}
+              onKeyDown={clickable ? e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); b.onClick?.() } } : undefined}
               style={{ textAlign: 'center', padding: '10px 8px', borderRadius: 8, cursor: clickable ? 'pointer' : 'default',
                 background: 'var(--hover-bg)', border: `1px solid ${clickable && selMonth === currentMonth ? 'var(--color-primary)' : 'var(--border)'}` }}>
               <div style={{ fontSize: 22, fontWeight: 700, color: b.color, letterSpacing: '-0.5px' }}>

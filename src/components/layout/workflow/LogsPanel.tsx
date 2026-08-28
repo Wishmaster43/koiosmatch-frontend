@@ -72,10 +72,13 @@ export default function LogsPanel({ workflowId, liveRun, onClose, onOpenHistory 
     const ctrl = new AbortController()
     setLoading(true)
     setLoadError(false)
-    api.get('/workflow-runs', { signal: ctrl.signal })
+    // Scoped per-workflow route (mirrors useWorkflowRunControl) — the global
+    // /workflow-runs list is paginated, so client-side filtering page 1 showed
+    // a truncated population for busy tenants (mega-audit r2).
+    api.get(workflowId == null ? '/workflow-runs' : `/workflows/${workflowId}/runs`, { signal: ctrl.signal })
       .then(res => {
         const rows = unwrapList<RunRow>(res).rows
-        const mine = workflowId == null ? rows : rows.filter((r: RunRow) => (r.workflow_id ?? r.workflowId) === workflowId)
+        const mine = rows
         mine.sort((a: RunRow, b: RunRow) => +new Date(b.started_at ?? b.created_at ?? 0) - +new Date(a.started_at ?? a.created_at ?? 0))
         setRuns(mine)
       })

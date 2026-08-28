@@ -6,12 +6,13 @@
  * a true cross-page filter needs a backend query param).
  */
 import type { ReportCandidate } from '@/types/reports'
+import { normalizeSmStatus, statusOf } from '@/lib/smStatus'
 
 // True when the candidate's status matches one of the selected values (case-insensitive,
 // mirrors CandidatesKpiRow's count() predicate). An empty filter matches everything.
 export function matchesStatus(c: ReportCandidate, statusFilter: Array<string | number>): boolean {
   if (!statusFilter.length) return true
-  return statusFilter.map(v => String(v).toLowerCase()).includes((c.status ?? '').toLowerCase())
+  return statusFilter.map(v => normalizeSmStatus(v)).includes(statusOf(c))
 }
 
 // True when name/email/position/mobile/phone contains the (trimmed, lowercased) query.

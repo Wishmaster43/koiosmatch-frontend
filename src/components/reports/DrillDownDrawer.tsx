@@ -15,7 +15,7 @@ import Button from '@/components/ui/Button'
 import { PageTitle } from '@/components/ui/typography'
 import { navigateToPage } from '@/lib/navigate'
 import type { ReportCandidate } from '@/types/reports'
-import { SM_STATUS } from '@/lib/smStatus'
+import { SM_STATUS, normalizeSmStatus } from '@/lib/smStatus'
 
 // Colored status pill (actief / nietactief / extern / ...) for a record.
 function StatusBadge({ status }: { status?: string }) {
@@ -24,14 +24,14 @@ function StatusBadge({ status }: { status?: string }) {
   const styles: Record<string, { bg: string; color: string }> = {
     [SM_STATUS.ACTIVE]:   { bg: 'var(--color-success-bg)', color: 'var(--color-success-text)' },
     [SM_STATUS.INACTIVE]: { bg: 'var(--color-warning-bg)', color: '#C2410C' },
-    extern:                { bg: 'var(--color-secondary-bg)', color: '#1D4ED8' },
+    [SM_STATUS.EXTERNAL]:                { bg: 'var(--color-secondary-bg)', color: '#1D4ED8' },
     [SM_STATUS.INTAKE]:   { bg: '#FAF5FF', color: 'var(--color-violet)' },
     // Ink is --color-on-danger-bg — the raw danger colour reads only 3.95:1 on its
     // own pastel, AA fail (Opus r3.5).
     [SM_STATUS.DELETED]:  { bg: 'var(--color-danger-bg)', color: 'var(--color-on-danger-bg)' },
   }
   /* eslint-enable no-restricted-syntax */
-  const key = (status || '').toLowerCase()
+  const key = normalizeSmStatus(status)
   const s = styles[key] || { bg: 'var(--hover-bg)', color: 'var(--text-muted)' }
   const label = status ? t(`candidates.status.${key}`, { defaultValue: status }) : t('candidates.unknown')
   return (
@@ -42,12 +42,6 @@ function StatusBadge({ status }: { status?: string }) {
   )
 }
 
-// Null (not '—') for empty input so InfoRow below hides the whole row instead of
-// showing "Label: —"; locale is passed in from the caller's useDateFormat().locale.
-function formatDate(dateStr: string | null | undefined, locale: string) {
-  if (!dateStr) return null
-  return new Date(dateStr).toLocaleDateString(locale, { day: 'numeric', month: 'short', year: 'numeric' })
-}
 
 // One icon+label+value line; renders nothing at all when the value is empty, so a drilldown card never shows a dangling label with no data.
 function InfoRow({ icon: Icon, label, value, highlight }: { icon: LucideIcon; label: ReactNode; value?: ReactNode; highlight?: boolean }) {
@@ -69,8 +63,11 @@ function InfoRow({ icon: Icon, label, value, highlight }: { icon: LucideIcon; la
 export default function DrillDownDrawer({ title, subtitle, candidates = [], onClose, tabs, initialTab }: { title?: ReactNode; subtitle?: ReactNode; candidates?: ReportCandidate[]; onClose: () => void; tabs?: { key: string; label: ReactNode; candidates: ReportCandidate[]; title?: string }[]; initialTab?: string }) {
   const panelRef = useFocusTrap<HTMLDivElement>(onClose)
   const { t } = useTranslation('reports')
-  // App-wide active locale (§5) — fed into formatDate below instead of a hardcoded 'nl-NL'.
-  const { locale } = useDateFormat()
+  // DATUM-1: every user-visible date renders DD-MM-YYYY via the house formatter —
+  // the old local toLocaleDateString helper leaked "5 sep 2026"-style output.
+  // `|| null` keeps InfoRow's hide-empty-row contract (formatDate returns '' on empty).
+  const { formatDate } = useDateFormat()
+  const fmt = (d: string | null | undefined) => (d ? formatDate(d) || null : null)
   const [search, setSearch] = useState('')
   // Widen the panel to a two-column-friendly size (same affordance as the candidate drawer).
   const [expanded, setExpanded] = useState(false)
@@ -189,15 +186,15 @@ export default function DrillDownDrawer({ title, subtitle, candidates = [], onCl
                         <InfoRow icon={Briefcase}    label={t('drilldown.fields.position')}     value={c.position} />
                         <InfoRow icon={Phone}        label={t('drilldown.fields.mobile')}       value={c.mobile} />
                         <InfoRow icon={Mail}         label={t('drilldown.fields.email')}        value={c.email} />
-                        <InfoRow icon={Calendar}     label={t('drilldown.fields.registered')}   value={formatDate(c.registration_date, locale)} />
-                        <InfoRow icon={Clock}        label={t('drilldown.fields.lastLogin')}    value={formatDate(c.last_login_at, locale)} />
+                        <InfoRow icon={Calendar}     label={t('drilldown.fields.registered')}   value={fmt(c.registration_date)} />
+                        <InfoRow icon={Clock}        label={t('drilldown.fields.lastLogin')}    value={fmt(c.last_login_at)} />
                         <InfoRow
                           icon={CalendarCheck}
                           label={t('drilldown.fields.plannedOn')}
-                          value={c.last_planned_shift ? formatDate(c.last_planned_shift, locale) : t('drilldown.notPlanned')}
+                          value={c.last_planned_shift ? fmt(c.last_planned_shift) : t('drilldown.notPlanned')}
                           highlight={!isPlannedFuture}
                         />
-                        <InfoRow icon={CalendarCheck} label={t('drilldown.fields.lastShift')}    value={formatDate(c.last_worked_shift, locale)} />
+                        <InfoRow icon={CalendarCheck} label={t('drilldown.fields.lastShift')}    value={fmt(c.last_worked_shift)} />
                         <InfoRow icon={Clock}         label={t('drilldown.fields.shiftsWorked')} value={c.number_of_times_worked ?? null} />
                         {(c.no_show_count ?? 0) > 0 && (
                           <InfoRow icon={Clock} label={t('drilldown.fields.noShows')} value={c.no_show_count} highlight />
