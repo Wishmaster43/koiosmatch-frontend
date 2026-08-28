@@ -39,7 +39,7 @@ function display(def: CustomFieldDef, raw: unknown, t: (k: string) => string, fo
 
 // Render the edit control for one non-textarea field type.
 function FieldInput({ def, value, onChange, labelId }: { def: CustomFieldDef; value: unknown; onChange: (v: unknown) => void; labelId?: string }) {
-  if (def.type === 'boolean') return <input type="checkbox" checked={Boolean(value)} onChange={e => onChange(e.target.checked)} />
+  if (def.type === 'boolean') return <input type="checkbox" checked={Boolean(value)} onChange={e => onChange(e.target.checked)} aria-labelledby={labelId} />
   if (def.type === 'select') return (
     <CreatableSelect aria-labelledby={labelId} value={value != null && value !== '' ? String(value) : null}
       onChange={onChange} allowCreate={false} clearable placeholder="—"
@@ -47,7 +47,7 @@ function FieldInput({ def, value, onChange, labelId }: { def: CustomFieldDef; va
   )
   return (
     <input type={def.type === 'number' ? 'number' : def.type === 'date' ? 'date' : 'text'}
-      value={String(value ?? '')} onChange={e => onChange(e.target.value)} style={inputStyle} />
+      value={String(value ?? '')} onChange={e => onChange(e.target.value)} style={inputStyle} aria-labelledby={labelId} />
   )
 }
 
