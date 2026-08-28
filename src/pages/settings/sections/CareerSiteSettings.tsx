@@ -15,7 +15,8 @@
  * config instead of hunting through backend docs.
  */
 import { useTranslation } from 'react-i18next'
-import { useAllSettings, saveSettingsKeys } from '@/lib/settings/useAllSettings'
+import { useAllSettings, saveSettingsKeys, invalidateAllSettingsCache } from '@/lib/settings/useAllSettings'
+import { notifyError } from '@/lib/notify'
 import { SettingRow, Toggle } from '../components/SettingsKit'
 import PublicUrlsCard from './careerSite/PublicUrlsCard'
 import { PageTitle } from '@/components/ui/typography'
@@ -29,7 +30,15 @@ export default function CareerSiteSettings() {
   const raw = values.career_site_active
   const active = raw === true || raw === 1 || raw === '1' || raw === 'true'
 
-  const toggle = (checked: boolean) => { saveSettingsKeys({ career_site_active: checked }).catch(() => {}) }
+  // Save failure reverts the toggle by refetching the persisted value from the
+  // server (the optimistic cache write inside saveSettingsKeys already flipped
+  // it) and surfaces an honest error instead of leaving a phantom on/off state.
+  const toggle = (checked: boolean) => {
+    saveSettingsKeys({ career_site_active: checked }).catch(() => {
+      invalidateAllSettingsCache()
+      notifyError(t('careerSite.saveError'))
+    })
+  }
 
   return (
     <div style={{ maxWidth: 640, display: 'flex', flexDirection: 'column', gap: 20 }}>

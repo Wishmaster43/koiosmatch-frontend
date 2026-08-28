@@ -11,6 +11,7 @@ import { X } from 'lucide-react'
 import api, { unwrapList } from '@/lib/api'
 import { useDateFormat } from '@/lib/datetime'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
+import Button from '@/components/ui/Button'
 import LogView from '@/components/ui/LogView'
 import type { LogExportCol } from '@/components/ui/LogView'
 import { DirectionPill, StatusPill, isInbound } from '@/components/ui/logChips'
@@ -57,7 +58,7 @@ function EmailLogDrawer({ entry, onClose }: { entry: EmailLogEntry; onClose: () 
         className="fixed top-0 bottom-0 right-0 z-50 flex flex-col" style={{ width: 460, background: 'var(--surface)', boxShadow: '-4px 0 30px rgba(0,0,0,0.1)' }}>
         <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{entry.subject || t('emailLog.title')}</span>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}><X size={16} /></button>
+          <Button variant="ghost" iconOnly onClick={onClose} aria-label={t('common:close')} title={t('common:close')}><X size={16} /></Button>
         </div>
         <div style={{ padding: 20, overflowY: 'auto' }}>
           <div style={{ display: 'grid', gridTemplateColumns: '110px 1fr', gap: '8px 16px', marginBottom: 16 }}>
@@ -86,15 +87,17 @@ export default function EmailLog() {
   const { formatDateTime } = useDateFormat()
   const [rows, setRows] = useState<EmailLogEntry[]>([])
   const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState(false)
   const [search, setSearch] = useState('')
   const [selectedDir, setSelectedDir] = useState<string[]>([])
   const [selected, setSelected] = useState<EmailLogEntry | null>(null)
 
-  // Load the e-mail log; a missing endpoint yields an empty log (graceful).
+  // Load the e-mail log; any load failure — 404 included — surfaces LogView's error state, never a fake empty log.
   useEffect(() => {
+    setLoadError(false)
     api.get('/email-log')
       .then(r => setRows(unwrapList<EmailLogEntry>(r).rows))
-      .catch(() => setRows([]))
+      .catch(() => setLoadError(true))
       .finally(() => setLoading(false))
   }, [])
 
@@ -139,7 +142,7 @@ export default function EmailLog() {
 
   return (
     <>
-      <LogView<EmailLogEntry> rows={filtered} columns={columns} loading={loading} filterKey="email-log"
+      <LogView<EmailLogEntry> rows={filtered} columns={columns} loading={loading} error={loadError ? t('emailLog.loadError') : null} filterKey="email-log"
         filterGroups={filterGroups} getRowId={r => r.id ?? ''} onRowClick={setSelected}
         exportName="email-log" exportColumns={exportColumns} totalCount={rows.length} emptyText={t('emailLog.empty')} />
       {selected && <EmailLogDrawer entry={selected} onClose={() => setSelected(null)} />}

@@ -151,17 +151,29 @@ export function useSettingsLoadState(): { state: LoadState; retry: () => void } 
   return { state, retry }
 }
 
-/** Persist a partial set of keys (merge), update the ACTIVE tenant's cache slot and notify its subscribers. */
+/** Persist a partial set of keys (merge), update the ACTIVE tenant's cache slot and notify its subscribers.
+ * Optimistic: the cache updates before the POST, but a rejected save REVERTS the
+ * slot and renotifies before rethrowing — a refused write must never keep
+ * rendering as saved (mega-audit r2). */
 export async function saveSettingsKeys(partial: Record<string, unknown>): Promise<void> {
   const stringified: Record<string, string> = {}
   Object.entries(partial).forEach(([k, v]) => {
     stringified[k] = typeof v === 'string' ? v : JSON.stringify(v)
   })
   const key = activeTenantKey()
-  const merged: SettingsBlob = { ...(cacheByTenant.get(key) ?? {}), ...stringified }
+  const previous = cacheByTenant.get(key)
+  const merged: SettingsBlob = { ...(previous ?? {}), ...stringified }
   cacheByTenant.set(key, merged)
   listenersFor(key).forEach(l => l(merged))
-  await api.post('/settings', stringified)
+  try {
+    await api.post('/settings', stringified)
+  } catch (err) {
+    if (previous) cacheByTenant.set(key, previous)
+    else cacheByTenant.delete(key)
+    const reverted = cacheByTenant.get(key) ?? {}
+    listenersFor(key).forEach(l => l(reverted))
+    throw err
+  }
   invalidateKpiCache()
 }
 

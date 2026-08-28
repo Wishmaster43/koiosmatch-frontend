@@ -6,7 +6,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { contrastRatio, applyBrandTokens, clampedOnAccent } from '@/hooks/useTenantTheme'
 import { useTranslation } from 'react-i18next'
-import { Check, Save, Upload, X } from 'lucide-react'
+import { Check, Save, Upload, X, AlertTriangle, RefreshCw } from 'lucide-react'
 import Spinner from '@/components/ui/Spinner'
 import api from '@/lib/api'
 import { useAuth } from '@/context/AuthContext'
@@ -15,6 +15,7 @@ import { BTN_H } from '@/config/buttonMetrics'
 import SaveButton from '@/components/ui/SaveButton'
 import Button from '@/components/ui/Button'
 import { PageTitle, Caption } from '@/components/ui/typography'
+import { tintBg, tintBorder } from '@/lib/tint'
 
 // Preset swatches are tenant brand-colour DATA (persisted as brand_color) — literal hex by design, never tokens.
 /* eslint-disable no-restricted-syntax -- DATA: fixed swatch palette offered to tenants in the brand-colour picker */
@@ -43,6 +44,8 @@ export default function BrandSettings() {
   const [saved,        setSaved]          = useState(false)
   const [saving,       setSaving]         = useState(false)
   const [loading,      setLoading]        = useState(true)
+  const [loadError,    setLoadError]      = useState(false)
+  const [reloadKey,    setReloadKey]      = useState(0)
   // Server-side upload error (422 — bad type/size, or the SVG-script-scan rejection) —
   // shown inline near the logo block instead of swallowed (was a silent catch {}).
   const [logoError,    setLogoError]      = useState(null)
@@ -50,6 +53,8 @@ export default function BrandSettings() {
 
   // Loads the persisted brand colour/text-colour/logo/company name once on mount.
   useEffect(() => {
+    setLoading(true)
+    setLoadError(false)
     loadSettings()
       .then(stored => {
         if (stored.brand_color)    { setPrimaryColor(stored.brand_color); setHexDraft(stored.brand_color) }
@@ -57,9 +62,9 @@ export default function BrandSettings() {
         if (stored.company_name)   setCompanyName(stored.company_name)
         if (stored.logo_url)       setLogoPreview(stored.logo_url)
       })
-      .catch(() => {})
+      .catch(() => setLoadError(true))
       .finally(() => setLoading(false))
-  }, [])
+  }, [reloadKey])
 
   // Reads the picked logo file into a data-URL preview; the actual upload happens on save.
   const handleLogoChange = (e) => {
@@ -138,6 +143,19 @@ export default function BrandSettings() {
       </div>
 
       {loading && <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 12 }}>{t('common.loading')}</p>}
+
+      {/* Load failure gets an honest error + retry; the form below still renders with
+          in-memory defaults so a fresh pick/save is still possible (§9). */}
+      {!loading && loadError && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--color-danger-text)', fontSize: 13 }}>
+            <AlertTriangle size={14} /> {t('brand.loadError')}
+          </span>
+          <Button variant="secondary" onClick={() => setReloadKey(k => k + 1)}>
+            <RefreshCw size={13} /> {t('brand.retry')}
+          </Button>
+        </div>
+      )}
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
 
@@ -218,8 +236,8 @@ export default function BrandSettings() {
                 Say it out loud and name the fix — never silently ignore the choice. */}
             {textColor && contrastRatio(textColor, primaryColor) < 4.5 && (
               <div role="status" style={{ marginTop: 10, fontSize: 11, padding: '7px 10px', borderRadius: 8,
-                color: 'var(--color-warning-text)', background: 'color-mix(in srgb, var(--color-warning) 10%, transparent)',
-                border: '1px solid color-mix(in srgb, var(--color-warning) 30%, transparent)' }}>
+                color: 'var(--color-warning-text)', background: tintBg('var(--color-warning)'),
+                border: tintBorder('var(--color-warning)') }}>
                 {/* Two different things can be true below AA, and the screen used to
                     say only one of them (Danny 14-08: "staat op wit maar is geen wit").
                     Between the clamp floor and AA the pick IS in effect, just weak.

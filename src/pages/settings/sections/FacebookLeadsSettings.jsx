@@ -11,7 +11,7 @@
  */
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Eye, EyeOff, Copy, Check, Save } from 'lucide-react'
+import { Eye, EyeOff, Copy, Check, Save, AlertTriangle, RefreshCw } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import { notifyError } from '@/lib/notify'
 import { loadSettings, saveSettings } from '../lib/settingsApi'
@@ -68,6 +68,8 @@ export default function FacebookLeadsSettings() {
   const [appSecretSet, setAppSecretSet] = useState(false)
   const [accessTokenSet, setAccessTokenSet] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState(false)
+  const [reloadKey, setReloadKey] = useState(0)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [copied, setCopied] = useState(false)
@@ -75,15 +77,18 @@ export default function FacebookLeadsSettings() {
   // Load the tenant's current values once; secrets arrive as the MASK (never the real value).
   useEffect(() => {
     let alive = true
+    setLoading(true)
+    setLoadError(false)
     loadSettings().then((s) => {
       if (!alive) return
       setVerifyToken(s.facebook_verify_token ?? '')
       setDatasetId(s.facebook_dataset_id ?? '')
       setAppSecretSet(s.facebook_app_secret === MASK)
       setAccessTokenSet(s.facebook_access_token === MASK)
-    }).finally(() => { if (alive) setLoading(false) })
+    }).catch(() => { if (alive) setLoadError(true) })
+      .finally(() => { if (alive) setLoading(false) })
     return () => { alive = false }
-  }, [])
+  }, [reloadKey])
 
   // Persist; a secret is only sent when the user actually typed a new value — an
   // empty field means "keep the stored one" (mirrors EmailSettings' smtp_pass).
@@ -118,6 +123,18 @@ export default function FacebookLeadsSettings() {
   }
 
   if (loading) return <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t('common.loadingShort')}</p>
+
+  // Load failure gets an honest error + retry instead of a silently blank form (§9).
+  if (loadError) return (
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 10 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--color-danger-text)', fontSize: 13 }}>
+        <AlertTriangle size={14} /> {t('facebookLeads.loadError')}
+      </div>
+      <Button variant="secondary" onClick={() => setReloadKey(k => k + 1)}>
+        <RefreshCw size={13} /> {t('facebookLeads.retry')}
+      </Button>
+    </div>
+  )
 
   return (
     <div style={{ maxWidth: 560 }}>

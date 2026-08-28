@@ -439,7 +439,9 @@
     "textColorLight": "Blanco",
     "textColorDark": "Oscuro",
     "textColorLowContrast": "Este color de texto tiene muy poco contraste con tu color de marca (ratio {{ratio}}; legible es 4,5). Elige «Automático» para la mejor legibilidad.",
-    "textColorOverridden": "Este color de texto NO se está usando: el contraste con el color de marca es demasiado bajo (proporción {{ratio}}). Se muestra {{used}} automáticamente para que los botones sigan siendo legibles. Elige otro color de texto u otro color de marca."
+    "textColorOverridden": "Este color de texto NO se está usando: el contraste con el color de marca es demasiado bajo (proporción {{ratio}}). Se muestra {{used}} automáticamente para que los botones sigan siendo legibles. Elige otro color de texto u otro color de marca.",
+    "loadError": "No se pudieron cargar los ajustes de marca.",
+    "retry": "Intentar de nuevo"
   },
   "company": {
     "title": "Empresa",
@@ -462,7 +464,10 @@
     "bannerUploadFailed": "Error al subir el banner",
     "sectionIdentity": "Identidad",
     "sectionAddress": "Dirección",
-    "sectionPreferences": "Preferencias"
+    "sectionPreferences": "Preferencias",
+    "saveError": "No se pudieron guardar los ajustes.",
+    "loadError": "No se pudo cargar el perfil de la empresa.",
+    "retry": "Intentar de nuevo"
   },
   "locations": {
     "title": "Sucursales",
@@ -698,7 +703,8 @@
     "enforceSection": "Política de la organización",
     "enforceTitle": "MFA obligatorio para todos",
     "enforceDesc": "Cada usuario de esta organización debe configurar la autenticación de dos factores antes de poder seguir trabajando.",
-    "enforceError": "No se pudo guardar. Inténtalo de nuevo."
+    "enforceError": "No se pudo guardar. Inténtalo de nuevo.",
+    "enforceLoadError": "No se pudo cargar el estado de la política MFA. Prueba a actualizar la página."
   },
   "email": {
     "title": "Configuración de correo",
@@ -1462,7 +1468,9 @@
     "datasetIdPlaceholder": "ID del dataset de Conversions API",
     "webhookUrl": "URL del webhook (pégala en la app de Facebook)",
     "copyUrl": "Copiar URL",
-    "saveError": "Error al guardar."
+    "saveError": "Error al guardar.",
+    "loadError": "No se pudieron cargar los ajustes de Facebook Leads.",
+    "retry": "Intentar de nuevo"
   },
   "export": {
     "title": "Exportar",
@@ -1780,7 +1788,10 @@
     "hints": {
       "candidatesSync": "Espejo SM"
     },
-    "matrixAllowed": "{{active}}/{{total}} permitido(s)"
+    "matrixAllowed": "{{active}}/{{total}} permitido(s)",
+    "loadError": "No se pudieron cargar los roles.",
+    "retry": "Intentar de nuevo",
+    "branchesLoadError": "No se pudo cargar la plantilla de sucursales."
   },
   "audit": {
     "title": "Registro de auditoría",
@@ -2609,7 +2620,8 @@
     "to": "Para",
     "title": "Correo",
     "searchPlaceholder": "Buscar remitente, destinatario o asunto…",
-    "empty": "Aún no hay correos registrados."
+    "empty": "Aún no hay correos registrados.",
+    "loadError": "No se pudo cargar el registro de correos."
   },
   "waLog": {
     "contact": "Contacto",
@@ -3007,10 +3019,10 @@
     "lockedTitle": "Regla del sistema — no editable",
     "legend": {
       "title": "Leyenda",
-      "allow": "Permitido — se aplica en silencio",
-      "warn": "Advertencia — con ventana de confirmación",
-      "block": "Bloqueado — con motivo y salida",
-      "locked": "Bloqueado — regla del sistema, nunca editable",
+      "allow": "Permitido: se aplica en silencio",
+      "warn": "Advertencia: con ventana de confirmación",
+      "block": "Bloqueado: con motivo y salida",
+      "locked": "Bloqueado: regla del sistema, nunca editable",
       "override": "Modificado respecto a la regla por defecto",
       "popupsTitle": "¿Qué significa un código de popup?"
     },
@@ -3162,7 +3174,8 @@
       "open": "Abrir",
       "inactiveNotice": "No disponible mientras el sitio de carreras esté desactivado.",
       "noTenant": "Todavía no se ha seleccionado ningún inquilino."
-    }
+    },
+    "saveError": "No se pudo guardar el cambio."
   },
   "caoSettings": {
     "title": "Convenios colectivos",

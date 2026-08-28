@@ -439,7 +439,9 @@
     "textColorLight": "Blanc",
     "textColorDark": "Foncé",
     "textColorLowContrast": "Cette couleur de texte contraste trop peu avec votre couleur de marque (ratio {{ratio}} ; lisible à partir de 4,5). Choisissez « Automatique » pour la meilleure lisibilité.",
-    "textColorOverridden": "Cette couleur de texte n'est PAS utilisée : le contraste avec votre couleur de marque est trop faible (rapport {{ratio}}). {{used}} est affiché automatiquement afin que les boutons restent lisibles. Choisissez une autre couleur de texte ou une autre couleur de marque."
+    "textColorOverridden": "Cette couleur de texte n'est PAS utilisée : le contraste avec votre couleur de marque est trop faible (rapport {{ratio}}). {{used}} est affiché automatiquement afin que les boutons restent lisibles. Choisissez une autre couleur de texte ou une autre couleur de marque.",
+    "loadError": "Impossible de charger les paramètres de marque.",
+    "retry": "Réessayer"
   },
   "company": {
     "title": "Entreprise",
@@ -462,7 +464,10 @@
     "bannerUploadFailed": "Échec du téléversement de la bannière",
     "sectionIdentity": "Identité",
     "sectionAddress": "Adresse",
-    "sectionPreferences": "Préférences"
+    "sectionPreferences": "Préférences",
+    "saveError": "Impossible d'enregistrer les paramètres.",
+    "loadError": "Impossible de charger le profil de l'entreprise.",
+    "retry": "Réessayer"
   },
   "locations": {
     "title": "Agences",
@@ -698,7 +703,8 @@
     "enforceSection": "Politique de l'organisation",
     "enforceTitle": "MFA obligatoire pour tout le monde",
     "enforceDesc": "Chaque utilisateur de cette organisation doit configurer l'authentification à deux facteurs avant de pouvoir continuer à travailler.",
-    "enforceError": "Échec de l'enregistrement. Veuillez réessayer."
+    "enforceError": "Échec de l'enregistrement. Veuillez réessayer.",
+    "enforceLoadError": "Impossible de charger l’état de la politique MFA. Essayez d’actualiser la page."
   },
   "email": {
     "title": "Paramètres e-mail",
@@ -1355,7 +1361,7 @@
       "title": "Cet import crée",
       "replacesOrder": "Aucun ordre fixe requis. Ce fichier unique remplace les quatre étapes séparées.",
       "rowGrain": "Une ligne = une personne de contact, avec le client, le site et le service répétés à côté. Quarante lignes ne veulent donc pas dire quarante clients.",
-      "levelTruncation": "Si vous laissez un champ de nom vide sur une ligne (par exemple le service), cette ligne s'arrête là — rien n'est créé pour ce niveau ni au-delà.",
+      "levelTruncation": "Si vous laissez un champ de nom vide sur une ligne (par exemple le service), cette ligne s'arrête là : rien n'est créé pour ce niveau ni au-delà.",
       "allOrNothing": "Une ligne, c'est tout ou rien : si le contact échoue, le client, le site et le service de cette même ligne ne sont pas créés non plus. Un client déjà créé par une ligne précédente, lui, reste en place.",
       "separateAlternative": "Vous voulez ajouter quelque chose à un client déjà existant ?",
       "switchToSeparate": "Utiliser les fichiers séparés"
@@ -1462,7 +1468,9 @@
     "datasetIdPlaceholder": "ID du dataset Conversions API",
     "webhookUrl": "URL du webhook (à coller dans l'app Facebook)",
     "copyUrl": "Copier l'URL",
-    "saveError": "L'enregistrement a échoué."
+    "saveError": "L'enregistrement a échoué.",
+    "loadError": "Impossible de charger les paramètres Facebook Leads.",
+    "retry": "Réessayer"
   },
   "export": {
     "title": "Exporter",
@@ -1780,7 +1788,10 @@
     "hints": {
       "candidatesSync": "Miroir SM"
     },
-    "matrixAllowed": "{{active}}/{{total}} autorisé(s)"
+    "matrixAllowed": "{{active}}/{{total}} autorisé(s)",
+    "loadError": "Impossible de charger les rôles.",
+    "retry": "Réessayer",
+    "branchesLoadError": "Impossible de charger le modèle d’agence."
   },
   "audit": {
     "title": "Journal d'audit",
@@ -2609,7 +2620,8 @@
     "to": "À",
     "title": "E-mail",
     "searchPlaceholder": "Rechercher expéditeur, destinataire ou objet…",
-    "empty": "Aucun e-mail encore journalisé."
+    "empty": "Aucun e-mail encore journalisé.",
+    "loadError": "Impossible de charger le journal des e-mails."
   },
   "waLog": {
     "contact": "Contact",
@@ -3007,10 +3019,10 @@
     "lockedTitle": "Règle système — non modifiable",
     "legend": {
       "title": "Légende",
-      "allow": "Autorisé — appliqué silencieusement",
-      "warn": "Avertissement — avec popup de confirmation",
-      "block": "Bloqué — avec motif et solution",
-      "locked": "Verrouillé — règle système, jamais modifiable",
+      "allow": "Autorisé : appliqué silencieusement",
+      "warn": "Avertissement : avec popup de confirmation",
+      "block": "Bloqué : avec motif et solution",
+      "locked": "Verrouillé : règle système, jamais modifiable",
       "override": "Modifié par rapport à la règle par défaut",
       "popupsTitle": "Que signifie un code de popup ?"
     },
@@ -3162,7 +3174,8 @@
       "open": "Ouvrir",
       "inactiveNotice": "Indisponible tant que le site carrière est désactivé.",
       "noTenant": "Aucun client sélectionné pour l'instant."
-    }
+    },
+    "saveError": "Impossible d'enregistrer la modification."
   },
   "caoSettings": {
     "title": "Conventions collectives",

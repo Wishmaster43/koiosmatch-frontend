@@ -114,13 +114,17 @@ function CandidateTasksBody({ candidateId }: { candidateId: Id }) {
 
   // Load the candidate-linked tasks; a 404/422 (param not built yet) reads as empty, not broken.
   const load = useCallback(() => {
+    // Alive guard (§9, mirrors StatisticsTab.tsx:52-59): a fast candidate switch
+    // must never let the previous candidate's stale response win.
+    let alive = true
     setLoading(true); setError(false)
     api.get('/tasks', { params: { candidate: candidateId } })
-      .then(r => setTasks((unwrapList(r).rows) as TaskRow[]))
-      .catch(e => { if ([404, 422].includes(e?.response?.status)) setTasks([]); else setError(true) })
-      .finally(() => setLoading(false))
+      .then(r => { if (alive) setTasks((unwrapList(r).rows) as TaskRow[]) })
+      .catch(e => { if (!alive) return; if ([404, 422].includes(e?.response?.status)) setTasks([]); else setError(true) })
+      .finally(() => { if (alive) setLoading(false) })
+    return () => { alive = false }
   }, [candidateId])
-  useEffect(() => { load() }, [load])
+  useEffect(() => load(), [load])
 
   // WALKTHROUGH-2108 data-truth fix: prefer the LIVE tenant status lookup over the
   // row's raw payload — a status renamed/recoloured in Settings after the task was

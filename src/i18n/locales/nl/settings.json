@@ -461,7 +461,9 @@
     "textColorLight": "Wit",
     "textColorDark": "Donker",
     "textColorLowContrast": "Deze tekstkleur heeft te weinig contrast met je huisstijlkleur (ratio {{ratio}}; leesbaar is 4,5). Kies \"Automatisch\" voor de best leesbare kleur.",
-    "textColorOverridden": "Deze tekstkleur wordt NIET gebruikt: het contrast met je huisstijlkleur is te laag (ratio {{ratio}}). Er wordt automatisch {{used}} getoond, zodat knoppen leesbaar blijven. Kies een andere tekstkleur of een andere huisstijlkleur."
+    "textColorOverridden": "Deze tekstkleur wordt NIET gebruikt: het contrast met je huisstijlkleur is te laag (ratio {{ratio}}). Er wordt automatisch {{used}} getoond, zodat knoppen leesbaar blijven. Kies een andere tekstkleur of een andere huisstijlkleur.",
+    "loadError": "Kon de merkinstellingen niet laden.",
+    "retry": "Opnieuw proberen"
   },
   "company": {
     "title": "Bedrijf",
@@ -484,7 +486,10 @@
     "bannerUploadFailed": "Banner uploaden mislukt",
     "sectionIdentity": "Identiteit",
     "sectionAddress": "Adres",
-    "sectionPreferences": "Voorkeuren"
+    "sectionPreferences": "Voorkeuren",
+    "saveError": "Kon de instellingen niet opslaan.",
+    "loadError": "Kon het bedrijfsprofiel niet laden.",
+    "retry": "Opnieuw proberen"
   },
   "locations": {
     "title": "Vestigingen",
@@ -944,7 +949,8 @@
     "enforceSection": "Organisatiebeleid",
     "enforceTitle": "MFA verplicht voor iedereen",
     "enforceDesc": "Elke gebruiker in deze organisatie moet twee-factor verificatie instellen voordat hij verder kan werken.",
-    "enforceError": "Opslaan mislukt. Probeer het opnieuw."
+    "enforceError": "Opslaan mislukt. Probeer het opnieuw.",
+    "enforceLoadError": "Kon de MFA-beleidsstatus niet laden. Probeer de pagina te vernieuwen."
   },
   "email": {
     "title": "E-mail instellingen",
@@ -1708,7 +1714,9 @@
     "datasetIdPlaceholder": "Conversions API dataset-ID",
     "webhookUrl": "Webhook-URL (plak deze in de Facebook-app)",
     "copyUrl": "Kopieer URL",
-    "saveError": "Opslaan is mislukt."
+    "saveError": "Opslaan is mislukt.",
+    "loadError": "Kon de Facebook Leads-instellingen niet laden.",
+    "retry": "Opnieuw proberen"
   },
   "export": {
     "title": "Exporteren",
@@ -2026,7 +2034,10 @@
     "hints": {
       "candidatesSync": "SM-spiegel"
     },
-    "matrixAllowed": "{{active}}/{{total}} toegestaan"
+    "matrixAllowed": "{{active}}/{{total}} toegestaan",
+    "loadError": "Kon de rollen niet laden.",
+    "retry": "Opnieuw proberen",
+    "branchesLoadError": "Kon het vestigingssjabloon niet laden."
   },
   "audit": {
     "title": "Audit log",
@@ -2609,7 +2620,8 @@
     "to": "Naar",
     "title": "E-mail",
     "searchPlaceholder": "Zoek op afzender, ontvanger of onderwerp…",
-    "empty": "Nog geen e-mails gelogd."
+    "empty": "Nog geen e-mails gelogd.",
+    "loadError": "Kon het e-maillog niet laden."
   },
   "waLog": {
     "contact": "Contact",
@@ -3007,10 +3019,10 @@
     "lockedTitle": "Systeemregel — niet aanpasbaar",
     "legend": {
       "title": "Legenda",
-      "allow": "Toegestaan — stil doorgevoerd",
-      "warn": "Waarschuwing — met bevestig-popup",
-      "block": "Geblokkeerd — met reden en uitweg",
-      "locked": "Vergrendeld — systeemregel, nooit aanpasbaar",
+      "allow": "Toegestaan: stil doorgevoerd",
+      "warn": "Waarschuwing: met bevestig-popup",
+      "block": "Geblokkeerd: met reden en uitweg",
+      "locked": "Vergrendeld: systeemregel, nooit aanpasbaar",
       "override": "Aangepast t.o.v. de standaardregel",
       "popupsTitle": "Wat betekent een popup-code?"
     },
@@ -3162,7 +3174,8 @@
       "open": "Openen",
       "inactiveNotice": "Niet beschikbaar zolang de carrière-site uit staat.",
       "noTenant": "Nog geen tenant geselecteerd."
-    }
+    },
+    "saveError": "Kon de wijziging niet opslaan."
   },
   "caoSettings": {
     "title": "CAO's",

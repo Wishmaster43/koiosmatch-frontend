@@ -20,20 +20,24 @@ export function RoleBranchTemplate({ roleId }: { roleId: Role['id'] }) {
   const [branchIds, setBranchIds] = useState<string[]>([])
   const [loading,   setLoading]   = useState(true)
   const [saving,    setSaving]    = useState(false)
+  // Blocks the toggle path while true — never build a destructive replace-set PUT from an empty branchIds[] that only reads empty because the load itself failed (§9).
+  const [loadError, setLoadError] = useState(false)
 
   // Load the role's current template whenever the open role changes.
   useEffect(() => {
     let cancelled = false
     setLoading(true)
+    setLoadError(false)
     api.get(`/roles/${roleId}/branches`)
       .then(r => { if (!cancelled) setBranchIds(unwrapList<{ location_id: string | number }>(r).rows.map(b => String(b.location_id))) })
-      .catch(() => {})
+      .catch(() => { if (!cancelled) setLoadError(true) })
       .finally(() => { if (!cancelled) setLoading(false) })
     return () => { cancelled = true }
   }, [roleId])
 
   // Toggle one branch — optimistic PUT (replace-set), revert + notify on failure.
   const toggle = async (locationId: string) => {
+    if (loadError) return // the current set is unknown, never PUT a replace-set built on it
     const prev = branchIds
     const next = prev.includes(locationId) ? prev.filter(id => id !== locationId) : [...prev, locationId]
     setBranchIds(next)
@@ -58,6 +62,8 @@ export function RoleBranchTemplate({ roleId }: { roleId: Role['id'] }) {
       <p style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 10 }}>{t('roles.branchesTemplateHint')}</p>
       {loading ? (
         <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('common.loadingShort')}</p>
+      ) : loadError ? (
+        <p style={{ fontSize: 12, color: 'var(--color-danger-text)' }}>{t('roles.branchesLoadError')}</p>
       ) : (
         // Locations are always UUID strings server-side; ChipMultiSelect's
         // ChipOption.value is typed as plain `string` (narrower than the

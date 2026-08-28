@@ -55,6 +55,15 @@ export function useWhatsAppData(filters: WaMessageFilters = {}) {
   // `exhausted` renders the "no more" notice once a page comes back empty.
   const [loadingMoreMessages, setLoadingMoreMessages] = useState(false)
   const [messagesExhausted,   setMessagesExhausted]   = useState(false)
+  // §9 unmount/race guards: an alive flag dropped on unmount, plus a per-source
+  // request-id so a fast filter toggle / reload can't let a stale response win
+  // over a newer one that already landed.
+  const aliveRef = useRef(true)
+  const messagesReqRef = useRef(0)
+  const statsReqRef = useRef(0)
+  const escalationsReqRef = useRef(0)
+  const activityReqRef = useRef(0)
+  useEffect(() => { aliveRef.current = true; return () => { aliveRef.current = false } }, [])
 
   // WA-MSG-TABLE-1 FIX (26-08): WhatsappDashboardController validates direction/
   // status as SCALARS (`in:inbound,outbound` / `in:sent,delivered,read,failed,
@@ -91,13 +100,14 @@ export function useWhatsAppData(filters: WaMessageFilters = {}) {
   // three don't depend on these filters, and re-requesting them on every
   // toggle wasted three calls and flickered the KPI band's loading state.
   const reloadMessages = () => {
+    const reqId = ++messagesReqRef.current
     setMessagesExhausted(false)
     setLoading(p => ({ ...p, messages: true }))
     setErrors(p => ({ ...p, messages: false }))
     api.get('/whatsapp/messages', { params: messageParams() })
-      .then(r => setMessages(unwrapList<WaMessage>(r).rows))
-      .catch(() => setErrors(p => ({ ...p, messages: true })))
-      .finally(() => setLoading(p => ({ ...p, messages: false })))
+      .then(r => { if (aliveRef.current && reqId === messagesReqRef.current) setMessages(unwrapList<WaMessage>(r).rows) })
+      .catch(() => { if (aliveRef.current && reqId === messagesReqRef.current) setErrors(p => ({ ...p, messages: true })) })
+      .finally(() => { if (aliveRef.current && reqId === messagesReqRef.current) setLoading(p => ({ ...p, messages: false })) })
   }
 
   // Refresh all four sources; a 404 on stats flags "no connection". The other
@@ -109,26 +119,30 @@ export function useWhatsAppData(filters: WaMessageFilters = {}) {
     setErrors({ messages: false, escalations: false, activity: false })
     setNoConnection(false)
 
+    const statsReqId = ++statsReqRef.current
     api.get('/whatsapp/stats')
-      .then(r => setStats(r.data))
-      .catch(err => { if (err.response?.status === 404) setNoConnection(true) })
-      .finally(() => setLoading(p => ({ ...p, stats: false })))
+      .then(r => { if (aliveRef.current && statsReqId === statsReqRef.current) setStats(r.data) })
+      .catch(err => { if (aliveRef.current && statsReqId === statsReqRef.current && err.response?.status === 404) setNoConnection(true) })
+      .finally(() => { if (aliveRef.current && statsReqId === statsReqRef.current) setLoading(p => ({ ...p, stats: false })) })
 
     setMessagesExhausted(false)
+    const messagesReqId = ++messagesReqRef.current
     api.get('/whatsapp/messages', { params: messageParams() })
-      .then(r => setMessages(unwrapList<WaMessage>(r).rows))
-      .catch(() => setErrors(p => ({ ...p, messages: true })))
-      .finally(() => setLoading(p => ({ ...p, messages: false })))
+      .then(r => { if (aliveRef.current && messagesReqId === messagesReqRef.current) setMessages(unwrapList<WaMessage>(r).rows) })
+      .catch(() => { if (aliveRef.current && messagesReqId === messagesReqRef.current) setErrors(p => ({ ...p, messages: true })) })
+      .finally(() => { if (aliveRef.current && messagesReqId === messagesReqRef.current) setLoading(p => ({ ...p, messages: false })) })
 
+    const escalationsReqId = ++escalationsReqRef.current
     api.get('/whatsapp/escalations')
-      .then(r => setEscalations(unwrapList<WaEscalation>(r).rows))
-      .catch(() => setErrors(p => ({ ...p, escalations: true })))
-      .finally(() => setLoading(p => ({ ...p, escalations: false })))
+      .then(r => { if (aliveRef.current && escalationsReqId === escalationsReqRef.current) setEscalations(unwrapList<WaEscalation>(r).rows) })
+      .catch(() => { if (aliveRef.current && escalationsReqId === escalationsReqRef.current) setErrors(p => ({ ...p, escalations: true })) })
+      .finally(() => { if (aliveRef.current && escalationsReqId === escalationsReqRef.current) setLoading(p => ({ ...p, escalations: false })) })
 
+    const activityReqId = ++activityReqRef.current
     api.get('/whatsapp/activity')
-      .then(r => setActivity(unwrapList<WaActivityDatum>(r).rows))
-      .catch(() => setErrors(p => ({ ...p, activity: true })))
-      .finally(() => setLoading(p => ({ ...p, activity: false })))
+      .then(r => { if (aliveRef.current && activityReqId === activityReqRef.current) setActivity(unwrapList<WaActivityDatum>(r).rows) })
+      .catch(() => { if (aliveRef.current && activityReqId === activityReqRef.current) setErrors(p => ({ ...p, activity: true })) })
+      .finally(() => { if (aliveRef.current && activityReqId === activityReqRef.current) setLoading(p => ({ ...p, activity: false })) })
 
     setLastRefresh(new Date())
   }
@@ -160,8 +174,10 @@ export function useWhatsAppData(filters: WaMessageFilters = {}) {
     const oldest = messages.reduce((min, m) => (m.sent_at && (!min || m.sent_at < min) ? m.sent_at : min), '' as string)
     if (!oldest) return
     setLoadingMoreMessages(true)
+    const reqId = ++messagesReqRef.current
     api.get('/whatsapp/messages', { params: { ...messageParams(), before: oldest } })
       .then(r => {
+        if (!aliveRef.current || reqId !== messagesReqRef.current) return // superseded by a newer reload/filter change
         const older = unwrapList<WaMessage>(r).rows
         // has_older sits next to data/meta in the response body.
         const hasOlder = (r?.data as { has_older?: boolean } | undefined)?.has_older
@@ -173,8 +189,8 @@ export function useWhatsAppData(filters: WaMessageFilters = {}) {
           })
         }
       })
-      .catch(() => setErrors(p => ({ ...p, messages: true })))
-      .finally(() => setLoadingMoreMessages(false))
+      .catch(() => { if (aliveRef.current && reqId === messagesReqRef.current) setErrors(p => ({ ...p, messages: true })) })
+      .finally(() => { if (aliveRef.current && reqId === messagesReqRef.current) setLoadingMoreMessages(false) })
   }
 
   return {

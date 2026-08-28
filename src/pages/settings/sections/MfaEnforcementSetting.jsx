@@ -5,6 +5,7 @@
  * 403 mfa_enrollment_required on everything except the enrollment surface).
  */
 import { useEffect, useState } from 'react'
+import { tintBorder } from '@/lib/tint'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '@/context/AuthContext'
 import Spinner from '@/components/ui/Spinner'
@@ -21,13 +22,15 @@ export default function MfaEnforcementSetting() {
   const [loading,  setLoading]  = useState(true)
   const [saving,   setSaving]   = useState(false)
   const [error,    setError]    = useState('')
+  // Distinguishes "loaded and off" from "load failed" so we never render a false off-toggle (§9).
+  const [loadError, setLoadError] = useState(false)
 
   // Load the current tenant flag once ('1' = enforced; tolerate 'true' just in case).
   useEffect(() => {
     let alive = true
     loadSettings()
       .then(s => { if (alive) setEnforced(['1', 'true'].includes(String(s?.[KEY]))) })
-      .catch(() => {})
+      .catch(() => { if (alive) setLoadError(true) })
       .finally(() => { if (alive) setLoading(false) })
     return () => { alive = false }
   }, [])
@@ -53,12 +56,17 @@ export default function MfaEnforcementSetting() {
         {loading || saving
           ? <span style={{ color: 'var(--text-muted)' }}><Spinner size={15} /></span>
           : null}
-        <Toggle checked={enforced} onChange={toggle} />
+        {/* Load failed: the real value is unknown, so show a disabled toggle instead
+            of a false "off" the admin could mistake for the actual policy state. */}
+        {loadError
+          ? <Toggle checked={false} onChange={() => {}} disabled />
+          : <Toggle checked={enforced} onChange={toggle} />}
       </SettingRow>
-      {error && (
+      {/* One error surface for both failure kinds (load vs save) — §4 tint via lib/tint. */}
+      {(loadError || error) && (
         <div role="alert" style={{ fontSize: 13, color: 'var(--color-on-danger-bg)', background: 'var(--color-danger-bg)',
-                       border: '1px solid color-mix(in srgb, var(--color-danger) 45%, transparent)', borderRadius: 8, padding: '8px 12px', marginTop: 10 }}>
-          {error}
+                       border: `1px solid ${tintBorder('var(--color-danger)', true)}`, borderRadius: 8, padding: '8px 12px', marginTop: 10 }}>
+          {loadError ? t('security.enforceLoadError') : error}
         </div>
       )}
     </div>

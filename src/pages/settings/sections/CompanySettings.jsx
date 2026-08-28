@@ -6,7 +6,7 @@
  */
 import { useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Check, Save } from 'lucide-react'
+import { Check, Save, AlertTriangle, RefreshCw } from 'lucide-react'
 import api from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 import { loadSettings, saveSettings } from '../lib/settingsApi'
@@ -134,11 +134,15 @@ export default function CompanySettings() {
   const [saved,      setSaved]      = useState(false)
   const [saving,     setSaving]     = useState(false)
   const [loading,    setLoading]    = useState(true)
+  const [loadError,  setLoadError]  = useState(false)
+  const [reloadKey,  setReloadKey]  = useState(0)
   const bannerRef = useRef(null)
 
   // Loads the saved company settings once on mount, migrating a legacy single-line
   // address into the street field and normalising the language code.
   useEffect(() => {
+    setLoading(true)
+    setLoadError(false)
     loadSettings().then(s => {
       setForm(f => ({
         ...f,
@@ -159,8 +163,8 @@ export default function CompanySettings() {
       // that created it (session-local object URL) and is dead in every other
       // tab/session/user (§3: no fake affordance surviving a reload).
       if (s.company_banner_url && !String(s.company_banner_url).startsWith('blob:')) setBannerUrl(s.company_banner_url)
-    }).catch(() => {}).finally(() => setLoading(false))
-  }, [])
+    }).catch(() => setLoadError(true)).finally(() => setLoading(false))
+  }, [reloadKey])
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
 
@@ -191,7 +195,7 @@ export default function CompanySettings() {
       // company_banner_url is backend-owned now (BANNER-UPLOAD-1) — never sent here.
       await saveSettings({ ...form })
       setSaved(true); setTimeout(() => setSaved(false), 2000)
-    } catch { /* noop */ } finally { setSaving(false) }
+    } catch { notifyError(t('company.saveError')) } finally { setSaving(false) }
   }
 
   return (
@@ -211,7 +215,19 @@ export default function CompanySettings() {
 
       {loading && <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t('common.loading')}</p>}
 
-      {!loading && (
+      {/* Load failure gets an honest error + retry instead of a silently blank form (§9). */}
+      {!loading && loadError && (
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 10 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--color-danger-text)', fontSize: 13 }}>
+            <AlertTriangle size={14} /> {t('company.loadError')}
+          </div>
+          <Button variant="secondary" onClick={() => setReloadKey(k => k + 1)}>
+            <RefreshCw size={13} /> {t('company.retry')}
+          </Button>
+        </div>
+      )}
+
+      {!loading && !loadError && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           {/* 1. Identity — what the company IS, before any address detail. */}
           <Group title={t('company.sectionIdentity')}>

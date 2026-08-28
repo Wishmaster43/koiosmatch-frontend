@@ -439,7 +439,9 @@
     "textColorLight": "Weiß",
     "textColorDark": "Dunkel",
     "textColorLowContrast": "Diese Textfarbe hat zu wenig Kontrast zur Markenfarbe (Verhältnis {{ratio}}; lesbar ist 4,5). Wähle „Automatisch“ für die beste Lesbarkeit.",
-    "textColorOverridden": "Diese Textfarbe wird NICHT verwendet: der Kontrast zur Markenfarbe ist zu gering (Verhältnis {{ratio}}). Es wird automatisch {{used}} angezeigt, damit Schaltflächen lesbar bleiben. Wählen Sie eine andere Textfarbe oder eine andere Markenfarbe."
+    "textColorOverridden": "Diese Textfarbe wird NICHT verwendet: der Kontrast zur Markenfarbe ist zu gering (Verhältnis {{ratio}}). Es wird automatisch {{used}} angezeigt, damit Schaltflächen lesbar bleiben. Wählen Sie eine andere Textfarbe oder eine andere Markenfarbe.",
+    "loadError": "Die Markeneinstellungen konnten nicht geladen werden.",
+    "retry": "Erneut versuchen"
   },
   "company": {
     "title": "Unternehmen",
@@ -462,7 +464,10 @@
     "bannerUploadFailed": "Banner-Upload fehlgeschlagen",
     "sectionIdentity": "Identität",
     "sectionAddress": "Adresse",
-    "sectionPreferences": "Voreinstellungen"
+    "sectionPreferences": "Voreinstellungen",
+    "saveError": "Die Einstellungen konnten nicht gespeichert werden.",
+    "loadError": "Das Firmenprofil konnte nicht geladen werden.",
+    "retry": "Erneut versuchen"
   },
   "locations": {
     "title": "Niederlassungen",
@@ -698,7 +703,8 @@
     "enforceSection": "Organisationsrichtlinie",
     "enforceTitle": "MFA für alle verpflichtend",
     "enforceDesc": "Jeder Benutzer dieser Organisation muss die Zwei-Faktor-Authentifizierung einrichten, bevor er weiterarbeiten kann.",
-    "enforceError": "Speichern fehlgeschlagen. Bitte erneut versuchen."
+    "enforceError": "Speichern fehlgeschlagen. Bitte erneut versuchen.",
+    "enforceLoadError": "Der MFA-Richtlinienstatus konnte nicht geladen werden. Bitte Seite aktualisieren."
   },
   "email": {
     "title": "E-Mail-Einstellungen",
@@ -1355,7 +1361,7 @@
       "title": "Dieser Import erstellt",
       "replacesOrder": "Keine feste Reihenfolge nötig. Diese eine Datei ersetzt die vier einzelnen Schritte.",
       "rowGrain": "Eine Zeile = eine Kontaktperson, mit wiederholten Angaben zu Kunde, Standort und Abteilung. Vierzig Zeilen sind also nicht vierzig Kunden.",
-      "levelTruncation": "Lassen Sie auf einer Zeile ein Namensfeld leer (etwa die Abteilung), stoppt diese Zeile dort — für dieses und jedes weitere Niveau wird nichts angelegt.",
+      "levelTruncation": "Lassen Sie auf einer Zeile ein Namensfeld leer (etwa die Abteilung), stoppt diese Zeile dort: für dieses und jedes weitere Niveau wird nichts angelegt.",
       "allOrNothing": "Eine Zeile ist alles oder nichts: Scheitert der Kontakt, werden auch Kunde, Standort und Abteilung dieser Zeile nicht angelegt. Ein Kunde, den eine frühere Zeile bereits angelegt hat, bleibt bestehen.",
       "separateAlternative": "Möchten Sie etwas zu einem bereits bestehenden Kunden hinzufügen?",
       "switchToSeparate": "Separate Dateien verwenden"
@@ -1462,7 +1468,9 @@
     "datasetIdPlaceholder": "Conversions-API-Dataset-ID",
     "webhookUrl": "Webhook-URL (in die Facebook-App einfügen)",
     "copyUrl": "URL kopieren",
-    "saveError": "Speichern fehlgeschlagen."
+    "saveError": "Speichern fehlgeschlagen.",
+    "loadError": "Die Facebook-Leads-Einstellungen konnten nicht geladen werden.",
+    "retry": "Erneut versuchen"
   },
   "export": {
     "title": "Exportieren",
@@ -1780,7 +1788,10 @@
     "hints": {
       "candidatesSync": "SM-Spiegel"
     },
-    "matrixAllowed": "{{active}}/{{total}} erlaubt"
+    "matrixAllowed": "{{active}}/{{total}} erlaubt",
+    "loadError": "Die Rollen konnten nicht geladen werden.",
+    "retry": "Erneut versuchen",
+    "branchesLoadError": "Die Filialvorlage konnte nicht geladen werden."
   },
   "audit": {
     "title": "Audit-Log",
@@ -2609,7 +2620,8 @@
     "to": "An",
     "title": "E-Mail",
     "searchPlaceholder": "Nach Absender, Empfänger oder Betreff suchen…",
-    "empty": "Noch keine E-Mails protokolliert."
+    "empty": "Noch keine E-Mails protokolliert.",
+    "loadError": "Das E-Mail-Protokoll konnte nicht geladen werden."
   },
   "waLog": {
     "contact": "Kontakt",
@@ -3007,10 +3019,10 @@
     "lockedTitle": "Systemregel — nicht bearbeitbar",
     "legend": {
       "title": "Legende",
-      "allow": "Erlaubt — wird stillschweigend angewendet",
-      "warn": "Warnung — mit Bestätigungs-Popup",
-      "block": "Blockiert — mit Grund und Ausweg",
-      "locked": "Gesperrt — Systemregel, nie bearbeitbar",
+      "allow": "Erlaubt: wird stillschweigend angewendet",
+      "warn": "Warnung: mit Bestätigungs-Popup",
+      "block": "Blockiert: mit Grund und Ausweg",
+      "locked": "Gesperrt: Systemregel, nie bearbeitbar",
       "override": "Von der Standardregel geändert",
       "popupsTitle": "Was bedeutet ein Popup-Code?"
     },
@@ -3162,7 +3174,8 @@
       "open": "Öffnen",
       "inactiveNotice": "Nicht verfügbar, solange die Karriereseite ausgeschaltet ist.",
       "noTenant": "Noch kein Mandant ausgewählt."
-    }
+    },
+    "saveError": "Die Änderung konnte nicht gespeichert werden."
   },
   "caoSettings": {
     "title": "Tarifverträge",

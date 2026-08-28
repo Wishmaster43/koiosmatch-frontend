@@ -10,7 +10,7 @@
  * POST /admin/invoices/{id}/finalize · GET /admin/invoices/{id}/download ·
  * GET /admin/invoices/export?month= (superadmin-only reconciliation sheet).
  */
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Download, FileSpreadsheet, RefreshCw, Send } from 'lucide-react'
 import api, { unwrap } from '@/lib/api'
@@ -79,6 +79,8 @@ export default function AdminInvoicesSettings() {
   const [invoices, setInvoices] = useState<AdminInvoice[]>([])
   const [phase, setPhase] = useState<'loading' | 'error' | 'empty' | 'ready'>('loading')
   const [generating, setGenerating] = useState(false)
+  // Request-generation guard (§9): a fast month switch must never let a stale reload() win.
+  const reqIdRef = useRef(0)
   const [finalizingId, setFinalizingId] = useState<string | null>(null)
   const [downloadingId, setDownloadingId] = useState<string | null>(null)
   const [exporting, setExporting] = useState(false)
@@ -86,15 +88,17 @@ export default function AdminInvoicesSettings() {
   // Reload the month's invoices — shared by the initial load and every action
   // that changes server state (generate/finalize), so the list always reflects reality.
   const reload = () => {
+    const reqId = ++reqIdRef.current
     setPhase('loading')
     return api.get('/admin/invoices', { params: { month } })
       .then((res) => {
+        if (reqId !== reqIdRef.current) return // a newer reload already superseded this one
         const data = unwrap<AdminInvoice[] | { data: AdminInvoice[] }>(res)
         const rows: AdminInvoice[] = Array.isArray(data) ? data : (data?.data ?? [])
         setInvoices(rows)
         setPhase(rows.length > 0 ? 'ready' : 'empty')
       })
-      .catch(() => setPhase('error'))
+      .catch(() => { if (reqId === reqIdRef.current) setPhase('error') })
   }
 
   // Reloads the invoice list whenever the selected month changes.

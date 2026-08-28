@@ -6,7 +6,7 @@
  */
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Plus, Trash2 } from 'lucide-react'
+import { Plus, Trash2, AlertTriangle, RefreshCw } from 'lucide-react'
 import api, { unwrap } from '@/lib/api'
 import { RoleDetail } from './RoleDetail'
 import { roleIconEl, ROLE_ICON_NAMES } from '@/lib/roleIcons'
@@ -26,6 +26,8 @@ export default function RolesSettings() {
   const [permissions, setPermissions] = useState<PermissionsByGroup>({})
   const [iconOptions, setIconOptions] = useState<string[]>(ROLE_ICON_NAMES)
   const [loading,     setLoading]     = useState(true)
+  const [loadError,   setLoadError]   = useState(false)
+  const [reloadKey,   setReloadKey]   = useState(0)
   const [newRoleName, setNewRoleName] = useState('')
   const [creating,    setCreating]    = useState(false)
   const [deleting,    setDeleting]    = useState<Role['id'] | null>(null)
@@ -35,9 +37,11 @@ export default function RolesSettings() {
   // Loads the role list, the full permission catalogue, and the allowed role-icon set
   // once on mount; the icon fetch degrades to the built-in list on a 404.
   useEffect(() => {
+    setLoading(true)
+    setLoadError(false)
     Promise.all([api.get<Role[]>('/roles'), api.get<PermissionsByGroup>('/permissions')])
       .then(([rolesRes, permsRes]) => { setRoles(rolesRes.data); setPermissions(permsRes.data) })
-      .catch(() => {})
+      .catch(() => setLoadError(true))
       .finally(() => setLoading(false))
     // Allowed icon set (config/roles.php); fall back to the built-in list on 404.
     api.get('/roles/icons').then(r => {
@@ -46,7 +50,7 @@ export default function RolesSettings() {
         setIconOptions(list.map(x => (typeof x === 'string' ? x : x.name ?? x.value)).filter((x): x is string => Boolean(x)))
       }
     }).catch(() => {})
-  }, [])
+  }, [reloadKey])
 
   // User submitted the "new role" field: creates it and appends the server's own row.
   const createRole = async () => {
@@ -83,6 +87,18 @@ export default function RolesSettings() {
   if (loading) return (
     <div className="flex items-center justify-center" style={{ height: 200 }}>
       <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t('roles.loading')}</p>
+    </div>
+  )
+
+  // Load failure gets an honest error + retry instead of a silently empty role list (§9).
+  if (loadError) return (
+    <div className="flex flex-col items-start" style={{ gap: 10, padding: '24px 0' }}>
+      <div className="flex items-center" style={{ gap: 8, color: 'var(--color-danger-text)', fontSize: 13 }}>
+        <AlertTriangle size={14} /> {t('roles.loadError')}
+      </div>
+      <Button variant="secondary" onClick={() => setReloadKey(k => k + 1)}>
+        <RefreshCw size={13} /> {t('roles.retry')}
+      </Button>
     </div>
   )
 

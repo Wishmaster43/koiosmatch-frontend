@@ -461,7 +461,9 @@
     "textColorLight": "White",
     "textColorDark": "Dark",
     "textColorLowContrast": "This text colour has too little contrast with your brand colour (ratio {{ratio}}; readable is 4.5). Pick \"Automatic\" for the most readable option.",
-    "textColorOverridden": "This text colour is NOT being used: the contrast with your brand colour is too low (ratio {{ratio}}). {{used}} is shown automatically so buttons stay readable. Pick another text colour, or another brand colour."
+    "textColorOverridden": "This text colour is NOT being used: the contrast with your brand colour is too low (ratio {{ratio}}). {{used}} is shown automatically so buttons stay readable. Pick another text colour, or another brand colour.",
+    "loadError": "Could not load the brand settings.",
+    "retry": "Try again"
   },
   "company": {
     "title": "Company",
@@ -484,7 +486,10 @@
     "bannerUploadFailed": "Banner upload failed",
     "sectionIdentity": "Identity",
     "sectionAddress": "Address",
-    "sectionPreferences": "Preferences"
+    "sectionPreferences": "Preferences",
+    "saveError": "Could not save the settings.",
+    "loadError": "Could not load the company profile.",
+    "retry": "Try again"
   },
   "locations": {
     "title": "Branches",
@@ -944,7 +949,8 @@
     "enforceSection": "Organisation policy",
     "enforceTitle": "Require MFA for everyone",
     "enforceDesc": "Every user in this organisation must set up two-factor authentication before they can continue working.",
-    "enforceError": "Saving failed. Please try again."
+    "enforceError": "Saving failed. Please try again.",
+    "enforceLoadError": "Could not load the MFA policy status. Try refreshing the page."
   },
   "email": {
     "title": "Email settings",
@@ -1601,7 +1607,7 @@
       "title": "This import builds",
       "replacesOrder": "No fixed order needed. This one file replaces the four separate steps.",
       "rowGrain": "One row = one contact person, with the customer, location and department repeated alongside it. So forty rows isn't forty customers.",
-      "levelTruncation": "Leave a name field blank on a row (say, the department) and that row stops there — nothing is created for that level or beyond.",
+      "levelTruncation": "Leave a name field blank on a row (say, the department) and that row stops there: nothing is created for that level or beyond.",
       "allOrNothing": "One row is all-or-nothing: if the contact fails, the customer, location and department on that same row aren't created either. A customer an earlier row already created stays put.",
       "separateAlternative": "Adding something to a customer that already exists?",
       "switchToSeparate": "Use the separate files"
@@ -1708,7 +1714,9 @@
     "datasetIdPlaceholder": "Conversions API dataset ID",
     "webhookUrl": "Webhook URL (paste this into the Facebook app)",
     "copyUrl": "Copy URL",
-    "saveError": "Saving failed."
+    "saveError": "Saving failed.",
+    "loadError": "Could not load the Facebook Leads settings.",
+    "retry": "Try again"
   },
   "export": {
     "title": "Export",
@@ -2026,7 +2034,10 @@
     "hints": {
       "candidatesSync": "SM mirror"
     },
-    "matrixAllowed": "{{active}}/{{total}} allowed"
+    "matrixAllowed": "{{active}}/{{total}} allowed",
+    "loadError": "Could not load the roles.",
+    "retry": "Try again",
+    "branchesLoadError": "Could not load the branch template."
   },
   "audit": {
     "title": "Audit log",
@@ -2609,7 +2620,8 @@
     "to": "To",
     "title": "Email",
     "searchPlaceholder": "Search sender, recipient or subject…",
-    "empty": "No emails logged yet."
+    "empty": "No emails logged yet.",
+    "loadError": "Could not load the e-mail log."
   },
   "waLog": {
     "contact": "Contact",
@@ -3007,10 +3019,10 @@
     "lockedTitle": "System rule — not editable",
     "legend": {
       "title": "Legend",
-      "allow": "Allowed — applied silently",
-      "warn": "Warning — with a confirm popup",
-      "block": "Blocked — with a reason and a way out",
-      "locked": "Locked — a system rule, never editable",
+      "allow": "Allowed: applied silently",
+      "warn": "Warning: with a confirm popup",
+      "block": "Blocked: with a reason and a way out",
+      "locked": "Locked: a system rule, never editable",
       "override": "Changed from the default rule",
       "popupsTitle": "What does a popup code mean?"
     },
@@ -3162,7 +3174,8 @@
       "open": "Open",
       "inactiveNotice": "Unavailable while the career site is off.",
       "noTenant": "No tenant selected yet."
-    }
+    },
+    "saveError": "Could not save the change."
   },
   "caoSettings": {
     "title": "Collective agreements (CLA)",
