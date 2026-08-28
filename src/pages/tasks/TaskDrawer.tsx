@@ -134,7 +134,9 @@ export default function TaskDrawer({ task, onClose, expanded, onToggleExpand, on
   // link and no assignee, so it only joins the tab bar once it has a real subject.
   const tabIds = TAB_IDS
     .filter(id => id !== 'related' || hasRelatedSubject(task))
-    .concat(customFieldDefs.length > 0 ? ['extra'] : [])
+    // 'extra' slots BEFORE timeline: the canon keeps the history tab at the tail
+    // (TIJDLIJN-OVERAL; tasks carry no Statistics tab, so timeline closes the row).
+    .flatMap(id => (id === 'timeline' && customFieldDefs.length > 0 ? ['extra', 'timeline'] : [id]))
 
   // Assignee options: "Bureau" (unassigned) + every user. Picking rebuilds the
   // assignee object so the optimistic UI shows the name/initials immediately.

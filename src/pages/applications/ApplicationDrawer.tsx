@@ -45,7 +45,7 @@ import EntityLink from '@/components/ui/EntityLink'
 // mirroring MatchDrawer's statistics tab, pages/matches/MatchDrawer.tsx):
 // a read-only summary, never a working tab. 'extra' (§3A(f)) is appended
 // below only when the tenant has ≥1 active application custom field.
-const TAB_IDS = ['application', 'candidate', 'vacancy', 'interviews', 'appointments', 'timeline', 'notes', 'statistics']
+const TAB_IDS = ['application', 'candidate', 'vacancy', 'interviews', 'appointments', 'notes', 'timeline', 'statistics']
 
 interface ApplicationDrawerProps {
   // Detail-fetch phase from the drawer hook — tabs gate their empty states on it.
@@ -170,7 +170,11 @@ export default function ApplicationDrawer({ application: a, onClose, expanded, o
       default:             return null
     }
   }
-  const tabIds = customFieldDefs.length > 0 ? [...TAB_IDS, 'extra'] : TAB_IDS
+  // 'extra' slots BEFORE timeline/statistics: the canon pins Timeline second-to-last
+  // and Statistics last on every drilldown (SCHERMWAARHEID + TIJDLIJN-OVERAL).
+  const tabIds = customFieldDefs.length > 0
+    ? [...TAB_IDS.slice(0, -2), 'extra', ...TAB_IDS.slice(-2)]
+    : TAB_IDS
 
   return (
     <>

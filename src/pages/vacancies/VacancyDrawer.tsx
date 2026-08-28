@@ -93,12 +93,6 @@ const TABS: { id: string; tKey: string; autoExpand?: boolean; render: (v: Vacanc
   // Tijdlijn ("Timeline") TAB (real lifecycle activity — created/status
   // changes/applications
   // received) is distinct BY DESIGN from the changelog ICON in the title row (raw
-  // field-change audit, the shared ChangelogPopover) — §3A(d): tab = activiteit
-  // ("activity"),
-  // icon = veldwijzigingen ("field changes"). Live: VacancyDetailResource::timelineFor() feeds note/
-  // application/match record events with link targets plus created/published/
-  // updated lifecycle moments, newest-first.
-  { id: 'timeline',   tKey: 'timeline',   render: v => <TimelineTab vacancy={v} /> },
   { id: 'notes',      tKey: 'notes',      render: v => <NotesTab vacancy={v} /> },
   // V-tasks-1: mirrors the candidate drawer's own Taken ("Tasks") tab, via the shared
   // EntityTasksTab shell (see VacancyTasksTab's own header for why).
@@ -112,6 +106,14 @@ const TABS: { id: string; tKey: string; autoExpand?: boolean; render: (v: Vacanc
     <PdokCard lat={v.lat} lng={v.lng} endpoint={`/vacancies/${v.id}/geocode`} permission="vacancies.update"
       disabled={!v.city && !v.street && !v.postalCode && !v.location} />
   ) },
+  // TIJDLIJN-OVERAL (27-08): timeline sits SECOND-TO-LAST, Statistics stays last —
+  // the canon order on every drilldown.
+  // field-change audit, the shared ChangelogPopover) — §3A(d): tab = activiteit
+  // ("activity"),
+  // icon = veldwijzigingen ("field changes"). Live: VacancyDetailResource::timelineFor() feeds note/
+  // application/match record events with link targets plus created/published/
+  // updated lifecycle moments, newest-first.
+  { id: 'timeline',   tKey: 'timeline',   render: v => <TimelineTab vacancy={v} /> },
   // Statistieken ("Statistics") last (Danny 28-07) — a read-only summary, not a
   // working tab.
   // V-stats-1: setActiveTab forwarded so the tab's own counts deep-link into
