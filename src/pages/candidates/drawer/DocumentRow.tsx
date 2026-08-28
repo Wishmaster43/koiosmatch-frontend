@@ -10,6 +10,7 @@ import type { DocItem } from './documentHelpers'
 import { Caption } from '@/components/ui/typography'
 import type { Id } from '@/types/common'
 import { tintBg, chipInk } from '@/lib/tint'
+import { useEscapeLayer } from '@/hooks/useEscapeLayer'
 
 // DOC-LIST-LINK-1: the five kinds a document can be linked to — mirrors the reverse-FK
 // ids the backend's DocumentResource serialises per row (education_id/certification_id/
@@ -103,6 +104,8 @@ export default function DocumentRow({
     ?? (typeof d.created_by === 'object' ? d.created_by?.name : d.created_by) ?? ''
   const when = d.uploaded_at ?? d.created_at
   const expiry = computeDocExpiry(d.expires_at)
+  // Escape layer: cancels inline rename (one-stage).
+  useEscapeLayer(renaming, onRenameCancel)
   // DOC-LIST-LINK-1: the linked kind's own icon + its grouped "<Group> · <label>" tooltip.
   const LinkKindIcon = linked ? LINK_KIND_ICON[linked.kind] : null
   const linkedTooltip = linked ? t('documents.linkedTo', { name: `${t(LINK_KIND_SECTION_KEY[linked.kind])} · ${linked.label}` }) : undefined
@@ -120,7 +123,7 @@ export default function DocumentRow({
           {renaming
             ? <div style={{ display: 'flex', alignItems: 'center', gap: 2, minWidth: 0 }}>
                 <input autoFocus value={renameValue} onChange={e => onRenameChange(e.target.value)}
-                  onKeyDown={e => { if (e.key === 'Enter') onRenameCommit(); if (e.key === 'Escape') onRenameCancel() }}
+                  onKeyDown={e => { if (e.key === 'Enter') onRenameCommit() }}
                   onBlur={onRenameCommit}
                   style={{ flex: 1, fontSize: 12, fontWeight: 500, padding: '3px 7px', borderRadius: 6, border: '1px solid var(--color-primary)', outline: 'none', color: 'var(--text)', boxSizing: 'border-box', minWidth: 0 }} />
                 {/* Extension shown but not editable. */}

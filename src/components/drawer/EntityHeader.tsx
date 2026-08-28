@@ -16,6 +16,7 @@ import { isInsideDropdownPortal } from '@/lib/useDropdownPlacement'
 import { Z } from '@/lib/zIndexScale'
 import Button from '@/components/ui/Button'
 import { PageTitle, SectionTitle, Caption } from '@/components/ui/typography'
+import { useEscapeLayer } from '@/hooks/useEscapeLayer'
 
 type AnyProps = Record<string, unknown>
 // Still-untyped JS UI — accept any props at the boundary.
@@ -137,12 +138,16 @@ function TagRow({ items = [], onAdd, onRemove, addLabel }: { items?: string[]; o
     if (editing != null && next && next !== editing) { onRemove(editing); onAdd(next) }
     setEditing(null); setEditValue('')
   }
+  // Inline-edit-cancel layers: the add-tag input and the per-tag rename input each
+  // cancel their own mode on Escape, without stealing it from an outer overlay.
+  useEscapeLayer(adding, () => { setValue(''); setAdding(false) })
+  useEscapeLayer(editing != null, () => { setEditing(null); setEditValue('') })
 
   return (
     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5, alignItems: 'center' }}>
       {items.map(tag => editing === tag ? (
         <input key={tag} ref={editRef} value={editValue} onChange={e => setEditValue(e.target.value)}
-          onKeyDown={e => { if (e.key === 'Enter') commitEdit(); if (e.key === 'Escape') { setEditing(null); setEditValue('') } }}
+          onKeyDown={e => { if (e.key === 'Enter') commitEdit() }}
           onBlur={commitEdit} aria-label={tag}
           style={{ fontSize: 11, padding: '3px 8px', borderRadius: 99, border: '1px solid var(--color-primary)', color: 'var(--text)', width: Math.max(70, tag.length * 7 + 30) }} />
       ) : (
@@ -159,7 +164,7 @@ function TagRow({ items = [], onAdd, onRemove, addLabel }: { items?: string[]; o
       ))}
       {adding ? (
         <input ref={inputRef} value={value} onChange={e => setValue(e.target.value)}
-          onKeyDown={e => { if (e.key === 'Enter') commit(); if (e.key === 'Escape') { setValue(''); setAdding(false) } }}
+          onKeyDown={e => { if (e.key === 'Enter') commit() }}
           onBlur={commit} placeholder={addLabel} aria-label={addLabel}
           style={{ fontSize: 11, padding: '3px 8px', borderRadius: 99, border: '1px solid var(--color-primary)', color: 'var(--text)', width: 110 }} />
       ) : (

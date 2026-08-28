@@ -8,7 +8,7 @@
  * · ModulePicker · ConfigPanel · LogsPanel · fields · canvas · ScheduleModal).
  * This component stays declarative: hook in, JSX out.
  */
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import {
   ReactFlow, Background, Controls, MiniMap, ReactFlowProvider,
 } from '@xyflow/react'
@@ -34,7 +34,7 @@ import { useEditorExitGuards } from './workflow/useEditorExitGuards'
 import { useModuleCatalog } from './workflow/useModuleCatalog'
 import type { Workflow } from '@/types/workflow'
 import type { RunRow } from '@/types/reports'
-import { handlePopupKeydown } from '@/hooks/popupCommands'
+import { useEscapeLayer } from '@/hooks/useEscapeLayer'
 
 // ── Inner editor ──────────────────────────────────────────────────────────────
 
@@ -66,14 +66,10 @@ function EditorInner({ workflow, onClose, onSave, initialRunId }: {
   // Leaving the editor (X, browser-back, tab close) runs one guarded action —
   // unsaved-changes + live-run confirms live in the hook.
   const confirmClose = useEditorExitGuards({ isDirty, liveRunActive, onClose, confirm })
-  // Esc = the same guarded exit as the X (block 1 point 3.3). Nested panels'
-  // useFocusTrap stopPropagations their own Escape first, so this only fires
-  // when the editor itself has focus.
-  useEffect(() => {
-    const h = (e: KeyboardEvent) => { handlePopupKeydown(e, { onClose: confirmClose }) }
-    document.addEventListener('keydown', h)
-    return () => document.removeEventListener('keydown', h)
-  }, [confirmClose])
+  // Esc = the same guarded exit as the X (block 1 point 3.3), as a LAYER on
+  // the one escape stack (TRIAGE-3.3): nested panels register above the editor,
+  // so their Escape wins first and the guarded exit only fires on top.
+  useEscapeLayer(true, confirmClose)
 
   // Top-level editor view: the node diagram, this workflow's run history, or
   // its parent/child relations (WF-RELATIONS-FE-1).

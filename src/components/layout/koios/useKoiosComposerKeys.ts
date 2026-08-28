@@ -16,6 +16,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { Dispatch, KeyboardEvent, RefObject, SetStateAction } from 'react'
 import type { KoiosMentionMenuHandle } from './KoiosMentionMenu'
+import { useEscapeLayer } from '@/hooks/useEscapeLayer'
 import type { KoiosEntityHit } from './useKoiosEntitySearch'
 import { matchMentionQuery } from './mentionMatch'
 import { resolveScopedQuery } from './mentionScope'
@@ -118,7 +119,6 @@ export function useKoiosComposerKeys({ input, setInput, addMentionRef, textareaR
     }
     // A second '@' while the fresh menu is open would only stack markers.
     if (e.key === '@' && showMention && mentionQ === '') { e.preventDefault(); return true }
-    if (e.key === 'Escape') { if (showMention) cancelMention(); else closeMentionMenu(); return true }
     return false
   }
 
@@ -176,6 +176,10 @@ export function useKoiosComposerKeys({ input, setInput, addMentionRef, textareaR
     })
     closeMentionMenu()
   }
+
+  // TRIAGE-3.3: the mention menu is an overlay LAYER — Escape cancels it first,
+  // top-of-stack, even while an entity drawer is open underneath.
+  useEscapeLayer(showMention, cancelMention)
 
   return {
     showMention, mentionQ, activeCategory, activeOptionId, setActiveOptionId, menuRendered, setMenuRendered,

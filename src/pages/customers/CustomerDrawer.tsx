@@ -10,6 +10,7 @@ import { useEffect } from 'react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Trash2, GitMerge } from 'lucide-react'
+import { useEscapeLayer } from '@/hooks/useEscapeLayer'
 import EntityDrawer from '@/components/drawer/EntityDrawer'
 import EntityHeader from '@/components/drawer/EntityHeader'
 import ArchivedBanner from '@/components/drawer/ArchivedBanner'
@@ -173,6 +174,9 @@ export default function CustomerDrawer({
     setTags,
   } = useCustomerDrawerActions({ c, onUpdate, onClose, users, statuses })
 
+  // Inline-edit-cancel layer: the header name input cancels edit mode on Escape (FROZEN family — Escape wiring only, TRIAGE-3.3).
+  useEscapeLayer(headerEditing, () => setHeaderEditing(false))
+
   // Keep the list/KPI counts in sync with the live sub-entity counts (a pure local
   // state bump — 'locationsCount' etc. aren't in useCustomerRecord's FIELD_MAP, so
   // this never fires a stray PATCH /customers/{id}).
@@ -279,7 +283,7 @@ export default function CustomerDrawer({
   const renderTitle = () => headerEditing ? (
     <input value={headerName} autoFocus placeholder={t('cols.name')}
       onChange={e => setHeaderName(e.target.value)}
-      onKeyDown={e => { if (e.key === 'Enter') saveHeader(); if (e.key === 'Escape') setHeaderEditing(false) }}
+      onKeyDown={e => { if (e.key === 'Enter') saveHeader() }}
       style={{ width: '100%', boxSizing: 'border-box', padding: '6px 10px', fontSize: 14, fontWeight: 600, borderRadius: 6, border: '1px solid var(--border)', outline: 'none' }} />
   ) : (
     <>

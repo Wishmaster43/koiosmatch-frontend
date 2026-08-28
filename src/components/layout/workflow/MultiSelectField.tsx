@@ -20,6 +20,7 @@ import { optionLabel } from './moduleI18n'
 import { unwrapList } from '@/lib/api'
 import type { WorkflowField } from '@/types/workflow'
 import type { OnChange } from './fieldControls/types'
+import { useEscapeLayer } from '@/hooks/useEscapeLayer'
 
 type Opt = { value: string; label: string }
 
@@ -93,6 +94,9 @@ export default function MultiSelectField({ field, value, onChange }: {
       ? [...selected, ...values.filter(v => !selected.includes(v))]
       : selected.filter(s => !values.includes(s)))
 
+  // Escape layer: closes this dropdown (one-stage).
+  useEscapeLayer(open, () => setOpen(false))
+
   return (
     <div ref={boxRef} style={{ position: 'relative' }}
       onBlur={e => { if (!boxRef.current?.contains(e.relatedTarget as Node)) setOpen(false) }}>
@@ -119,7 +123,6 @@ export default function MultiSelectField({ field, value, onChange }: {
           onKeyDown={e => {
             // Free-entry (no option list): Enter adds the typed value as a chip.
             if (freeEntry && e.key === 'Enter') { e.preventDefault(); add(search.trim()) }
-            if (e.key === 'Escape') setOpen(false)
           }}
           // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- the dropdown's own search INPUT size/colour (fields.tsx SettingsSearch precedent), not a BodyText paragraph render
           style={{ flex: 1, minWidth: 90, border: 'none', outline: 'none', background: 'transparent',

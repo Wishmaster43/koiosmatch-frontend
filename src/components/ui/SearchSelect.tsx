@@ -25,6 +25,7 @@ import { createPortal } from 'react-dom'
 import { Check, ChevronDown } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useDropdownPlacement, DROPDOWN_SEARCH_ROW_HEIGHT, DROPDOWN_PORTAL_ATTR } from '@/lib/useDropdownPlacement'
+import { useEscapeLayer } from '@/hooks/useEscapeLayer'
 import SelectAllRow, { SELECT_ALL_ROW_HEIGHT } from './SelectAllRow'
 import { useBatchToggle } from '@/hooks/useBatchToggle'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
@@ -106,16 +107,9 @@ export default function SearchSelect({
     return () => document.removeEventListener('mousedown', h)
   }, [open])
 
-  // Document-level, CAPTURE-phase Escape (mirrors SelectMenu — see its doc comment
-  // for the full rationale): closes the popover no matter which element inside it
-  // holds focus — an option button, not just the search input — since only the
-  // search input's own onKeyDown previously handled the key.
-  useEffect(() => {
-    if (!open) return
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') { e.stopPropagation(); setOpen(false) } }
-    document.addEventListener('keydown', onKey, true)
-    return () => document.removeEventListener('keydown', onKey, true)
-  }, [open])
+  // Overlay-close layer: closes the popover no matter which element inside it
+  // holds focus — an option button, not just the search input.
+  useEscapeLayer(open, () => setOpen(false))
 
   // Restore focus to the trigger whenever the popover transitions open → closed —
   // the search input lives in a PORTAL and unmounts on every close path, so focus
@@ -219,11 +213,7 @@ export default function SearchSelect({
           boxShadow: 'var(--shadow-float)', overflow: 'hidden' }}>
           {searchable && (
             <div style={{ padding: '8px 10px', borderBottom: '1px solid var(--border)' }}>
-              {/* Escape closes the innermost open thing — this menu — instead of doing
-                  nothing (the portal sits outside any host modal's focus trap, so the
-                  key never reached a handler at all). Mirrors CreatableSelect's input. */}
               <input value={query} onChange={e => setQuery(e.target.value)} placeholder={t('search')} aria-label={t('search')} autoFocus
-                onKeyDown={e => { if (e.key === 'Escape') { e.stopPropagation(); setOpen(false) } }}
                 style={{ width: '100%', border: 'none', outline: 'none', fontSize: 12, color: 'var(--text)', background: 'none' }} />
             </div>
           )}

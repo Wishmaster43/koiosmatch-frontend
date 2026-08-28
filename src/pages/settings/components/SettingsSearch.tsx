@@ -16,6 +16,7 @@ import {
   type SettingsNavGroup,
   type SettingsTranslate,
 } from './settingsSearchIndex'
+import { useEscapeLayer } from '@/hooks/useEscapeLayer'
 
 /** Props: the palette is fully controlled by the settings page. */
 interface SettingsSearchProps {
@@ -59,6 +60,9 @@ export default function SettingsSearch({ open, onClose, groups, onSelect }: Sett
   // and older engines do not implement scrollIntoView, and this is cosmetic).
   useEffect(() => { activeRef.current?.scrollIntoView?.({ block: 'nearest' }) }, [active])
 
+  // Escape layer: closes the palette (one-stage).
+  useEscapeLayer(open, onClose)
+
   if (!open) return null
 
   // Jump to the picked category + tab and close the palette.
@@ -68,12 +72,11 @@ export default function SettingsSearch({ open, onClose, groups, onSelect }: Sett
     onClose()
   }
 
-  // Full keyboard operability: arrows move, Enter picks, Escape closes (§6).
+  // Full keyboard operability: arrows move, Enter picks (§6); Escape is handled by the escape layer below.
   const onKeyDown = (ev: React.KeyboardEvent<HTMLInputElement>) => {
     if (ev.key === 'ArrowDown') { ev.preventDefault(); setActive(i => Math.min(i + 1, results.length - 1)) }
     else if (ev.key === 'ArrowUp') { ev.preventDefault(); setActive(i => Math.max(i - 1, 0)) }
     else if (ev.key === 'Enter') { ev.preventDefault(); choose(results[active]) }
-    else if (ev.key === 'Escape') { ev.preventDefault(); onClose() }
   }
 
   return (

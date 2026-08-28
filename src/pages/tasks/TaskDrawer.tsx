@@ -12,6 +12,7 @@ import EntityDrawer from '@/components/drawer/EntityDrawer'
 import EntityHeader from '@/components/drawer/EntityHeader'
 import type { MetaPicker } from '@/components/drawer/EntityHeader'
 import TitleBadge from '@/components/drawer/TitleBadge'
+import { useEscapeLayer } from '@/hooks/useEscapeLayer'
 import { useAllSettings, getBoolSetting } from '@/lib/settings/useAllSettings'
 import ReferenceNumberChip from '@/components/ui/ReferenceNumberChip'
 import CustomFieldsTab from '@/components/drawer/CustomFieldsTab'
@@ -87,6 +88,8 @@ export default function TaskDrawer({ task, onClose, expanded, onToggleExpand, on
   if (task?.id !== prevId) { setPrevId(task?.id); setEditingTitle(false); setTitleDraft('') }
   // TASK-DISPLAY-DRILL-1: settings read BEFORE the early return (rules of hooks).
   const displaySettings = useAllSettings()
+  // Inline-edit-cancel layer: the title input cancels edit mode on Escape.
+  useEscapeLayer(editingTitle, () => setEditingTitle(false))
   if (!task) return null
 
   const startTitleEdit = () => { setTitleDraft(task.title); setEditingTitle(true) }
@@ -194,7 +197,7 @@ export default function TaskDrawer({ task, onClose, expanded, onToggleExpand, on
           renderTitle={() => editingTitle ? (
             // T1: inline title edit — mirror VacancyDrawer's renderTitle swap.
             <input autoFocus value={titleDraft} onChange={e => setTitleDraft(e.target.value)} aria-label={t('modal.titleLabel')}
-              onKeyDown={e => { if (e.key === 'Enter') saveTitleEdit(); if (e.key === 'Escape') setEditingTitle(false) }}
+              onKeyDown={e => { if (e.key === 'Enter') saveTitleEdit() }}
               // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- an <input> matching the title's own size while editing, not a PageTitle render
               style={{ width: '100%', boxSizing: 'border-box', padding: '6px 10px', fontSize: 15, fontWeight: 700,
                 borderRadius: 6, border: '1px solid var(--border)', outline: 'none', color: 'var(--text)' }} />

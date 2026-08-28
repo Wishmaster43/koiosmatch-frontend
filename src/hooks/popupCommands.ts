@@ -13,7 +13,7 @@
 // Human-readable command table — the one source for a future shortcuts
 // overview in the UI (labels go through i18n at the place that shows it).
 export const POPUP_COMMANDS = [
-  { keys: 'Escape', command: 'close' },
+  { keys: 'Escape', command: 'close (top layer first — useEscapeLayer stack)' },
   { keys: 'Tab / Shift+Tab', command: 'cycle-focus (within the popup)' },
 ] as const
 
@@ -30,12 +30,10 @@ export interface PopupKeyHandlers {
  * key was a command (handled), false when it should keep propagating freely.
  */
 export function handlePopupKeydown(e: KeyboardEvent, { onClose, focusables }: PopupKeyHandlers): boolean {
-  if (e.key === 'Escape') {
-    // stopPropagation: a nested popup closes ONLY itself, never its host.
-    e.stopPropagation()
-    onClose?.()
-    return true
-  }
+  // Escape moved to the layered stack (useEscapeLayer, TRIAGE-3.3): the trap
+  // and every overlay register as layers, and only the TOP layer closes.
+  // Consumers that still pass onClose feed it to their own layer registration.
+  void onClose
   if (e.key === 'Tab' && focusables) {
     const items = focusables()
     if (items.length === 0) { e.preventDefault(); return true }

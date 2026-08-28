@@ -16,6 +16,7 @@ import { Caption } from '@/components/ui/typography'
 import { Z } from '@/lib/zIndexScale'
 import type { Id } from '@/types/common'
 import type { LinkableType, Preference, PrefKind, PrefTargetGroup } from '../hooks/useCandidatePlanning'
+import { useEscapeLayer } from '@/hooks/useEscapeLayer'
 
 interface PlanningFavoritesProps {
   favorites: Preference[]
@@ -44,6 +45,9 @@ export default function PlanningFavorites({ favorites, blacklist, targets, onAdd
   }
 
   const cancel = () => { setAddMode(null); setQuery(''); setReason('') }
+
+  // Escape layer: cancels the currently-open add-row, whichever card it is on (one-stage).
+  useEscapeLayer(addMode !== null, cancel)
 
   // The two cards: preference (favourite) and do-not-schedule (blacklist).
   const cards: { kind: PrefKind; icon: ReactNode; title: string; emptyText: string; data: Preference[] }[] = [
@@ -121,7 +125,6 @@ export default function PlanningFavorites({ favorites, blacklist, targets, onAdd
               <div style={{ marginTop: data.length ? 10 : 0, position: 'relative' }}>
                 <div style={{ display: 'flex', gap: 4 }}>
                   <input autoFocus value={query} onChange={e => setQuery(e.target.value)}
-                    onKeyDown={e => { if (e.key === 'Escape') cancel() }}
                     placeholder={t('planning.searchFav')}
                     style={{ flex: 1, padding: '5px 9px', fontSize: 12, border: '1px solid var(--color-primary)',
                       borderRadius: 6, outline: 'none', background: 'var(--bg)', color: 'var(--text)' }} />

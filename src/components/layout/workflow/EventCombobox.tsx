@@ -18,10 +18,9 @@
  * trapped DOM subtree entirely. Portalling this control would mean restructuring
  * its single always-mounted input into a trigger+portal shape (breaking the
  * existing tests and drifting from the sibling `MultiSelectField`'s identical
- * shape), so instead this uses `onKeyDownCapture`: capture-phase listeners are
- * dispatched at the React root DURING the native capture pass, which completes
- * BEFORE the bubble phase (and therefore before the trap's node-level bubble
- * listener) even starts — calling `stopPropagation()` here reliably stops the
+ * shape), so instead this now uses `useEscapeLayer`: its window listener runs
+ * in the CAPTURE phase, which reaches window before the trap's node-level
+ * bubble listener even starts, and `stopImmediatePropagation` there stops the
  * event before it ever reaches the trap, closing only this popover.
  */
 import { useState, useRef } from 'react'
@@ -29,9 +28,10 @@ import { useTranslation } from 'react-i18next'
 import { Search, ChevronDown, Check } from 'lucide-react'
 import { WORKFLOW_EVENT_KEYS, eventKeyToI18nKey } from './eventCatalog'
 import { Mono, bodyTextStyle } from '@/components/ui/typography'
+import { useEscapeLayer } from '@/hooks/useEscapeLayer'
 
 // Searchable dropdown over the workflow event catalogue; see the module doc
-// comment above for why its Escape handling stops propagation at capture phase.
+// comment above for why its Escape closes via the window-capture escape layer.
 export function EventCombobox({ value, onChange, label }: {
   value: string; onChange: (key: string) => void; label: string
 }) {
@@ -43,6 +43,9 @@ export function EventCombobox({ value, onChange, label }: {
   const labelFor = (key: string) => t(`triggers.events.${eventKeyToI18nKey(key)}`)
   const filtered = WORKFLOW_EVENT_KEYS.filter(key =>
     !search || labelFor(key).toLowerCase().includes(search.toLowerCase()) || key.includes(search.toLowerCase()))
+
+  // Escape layer: closes this popover before the surrounding focus-trapped modal ever sees the key (one-stage).
+  useEscapeLayer(open, () => setOpen(false))
 
   return (
     <div ref={boxRef} style={{ position: 'relative' }}
@@ -56,7 +59,6 @@ export function EventCombobox({ value, onChange, label }: {
           placeholder={labelFor(value)}
           onFocus={() => { setOpen(true); setSearch('') }}
           onChange={e => { setSearch(e.target.value); setOpen(true) }}
-          onKeyDownCapture={e => { if (e.key === 'Escape') { e.stopPropagation(); setOpen(false) } }}
           style={{ flex: 1, border: 'none', outline: 'none', background: 'transparent', ...bodyTextStyle }} />
         <ChevronDown size={13} color="var(--text-muted)" style={{ flexShrink: 0 }} />
       </div>

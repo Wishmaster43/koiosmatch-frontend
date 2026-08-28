@@ -7,6 +7,7 @@ import { Caption } from '@/components/ui/typography'
 import { tintBg, tintBorder, chipInk } from '@/lib/tint'
 import type { EntityDoc } from '@/hooks/useEntityDocuments'
 import { DOC_GRID_COLUMNS, docKey, docUrl, splitExt } from '../hooks/documentsTabUtils'
+import { useEscapeLayer } from '@/hooks/useEscapeLayer'
 
 interface DocumentRowProps {
   doc: EntityDoc
@@ -35,6 +36,9 @@ export default function DocumentRow({
   const key = docKey(d, i)
   const downloadable = Boolean(docUrl(d))
 
+  // Escape layer: cancels inline rename (one-stage).
+  useEscapeLayer(renamingId === d.id, () => setRenamingId(null))
+
   return (
     <div style={{ display: 'grid', gridTemplateColumns: DOC_GRID_COLUMNS, alignItems: 'center', gap: 8, padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg)', marginBottom: 6 }}>
       {/* Row checkbox — disabled while the doc has no downloadable url yet (pending upload). */}
@@ -47,7 +51,7 @@ export default function DocumentRow({
           {renamingId === d.id
             ? <div style={{ display: 'flex', alignItems: 'center', gap: 2, minWidth: 0 }}>
                 <input autoFocus value={renameValue} onChange={e => setRenameValue(e.target.value)}
-                  onKeyDown={e => { if (e.key === 'Enter') doRename(d, renameValue); if (e.key === 'Escape') setRenamingId(null) }}
+                  onKeyDown={e => { if (e.key === 'Enter') doRename(d, renameValue) }}
                   onBlur={() => doRename(d, renameValue)}
                   style={{ flex: 1, fontSize: 12, fontWeight: 500, padding: '3px 7px', borderRadius: 6, border: '1px solid var(--color-primary)', outline: 'none', color: 'var(--text)', boxSizing: 'border-box', minWidth: 0 }} />
                 <Caption style={{ flexShrink: 0 }}>{splitExt(String(d.name ?? d.file_name ?? '')).ext}</Caption>

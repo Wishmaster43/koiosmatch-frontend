@@ -15,6 +15,7 @@ import type { ReactNode } from 'react'
 import { ChevronDown, Check } from 'lucide-react'
 import Avatar from './Avatar'
 import { useDropdownPlacement, DROPDOWN_PORTAL_ATTR } from '@/lib/useDropdownPlacement'
+import { useEscapeLayer } from '@/hooks/useEscapeLayer'
 
 interface SelectOption {
   value: string
@@ -65,19 +66,9 @@ export default function SelectMenu({ id, 'aria-labelledby': ariaLabelledBy, valu
   // document.body + fixed positioning off the shared flip/clamp hook.
   const { openUp, maxHeight: menuMaxHeight, rect } = useDropdownPlacement(ref, open)
 
-  // Close on outside click or Escape — both listeners only exist while open, so
-  // a CLOSED menu never swallows an Escape meant for an ancestor (e.g. a
-  // wrapping modal's own close-on-Escape).
-  //
-  // The Escape listener is CAPTURE-phase, deliberately. useFocusTrap closes its
-  // modal from a bubble-phase listener on the panel node, which sits closer to
-  // the key's target than this document-level one — so with both bubbling, the
-  // trap won, called stopPropagation, and this menu never even heard the key:
-  // Escape inside an open dropdown closed the whole modal while leaving the
-  // dropdown standing (PlanIntakeModal is exactly that shape). Capture at the
-  // document runs before any bubble handler, so the innermost open thing closes
-  // first — which is what Escape means. stopPropagation keeps the same key from
-  // also reaching the modal; a second press, with no menu open, closes that.
+  // Close on outside click — Escape now goes through the shared layered stack
+  // below, so this listener only ever handles clicks. Only exists while open, so
+  // a CLOSED menu never swallows an outside click meant for something else.
   useEffect(() => {
     if (!open) return
     // Closes the menu on a genuine outside click, ignoring clicks on the trigger or the portal-rendered menu itself.
@@ -86,14 +77,13 @@ export default function SelectMenu({ id, 'aria-labelledby': ariaLabelledBy, valu
       if (ref.current?.contains(target) || menuRef.current?.contains(target)) return
       setOpen(false)
     }
-    const handleKey = (e: KeyboardEvent) => { if (e.key === 'Escape') { e.stopPropagation(); setOpen(false) } }
     document.addEventListener('mousedown', handleClick)
-    document.addEventListener('keydown', handleKey, true)
-    return () => {
-      document.removeEventListener('mousedown', handleClick)
-      document.removeEventListener('keydown', handleKey, true)
-    }
+    return () => document.removeEventListener('mousedown', handleClick)
   }, [open])
+
+  // Overlay-close layer: Escape closes this menu, top layer first, so a modal
+  // underneath is untouched while the menu is open (PlanIntakeModal case).
+  useEscapeLayer(open, () => setOpen(false))
 
   // Restore focus to the trigger whenever the menu transitions open → closed
   // (pick / Escape / outside click) — never on unmount, since that transition

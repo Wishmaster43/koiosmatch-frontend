@@ -16,6 +16,7 @@ import { readableOn } from '@/hooks/useTenantTheme'
 // PORTAL-MARKER-1: a click inside an open portalled picker menu is never "outside".
 import { isInsideDropdownPortal } from '@/lib/useDropdownPlacement'
 import Spinner from '@/components/ui/Spinner'
+import { useEscapeLayer } from '@/hooks/useEscapeLayer'
 
 // Only a real 6-digit hex is safe to feed into readableOn's luminance maths.
 const isHexColor = (v: unknown): v is string => typeof v === 'string' && /^#[0-9a-fA-F]{6}$/.test(v)
@@ -88,15 +89,16 @@ export default function TenantSwitcher({ expanded }: { expanded?: boolean }) {
     return () => ctrl.abort()
   }, [open, canSwitch, debounced, page])
 
-  // Close on outside click / Escape; reset state when closing.
+  // Close on outside click; reset state when closing.
   useEffect(() => {
     if (!open) return
     const onDoc = (e: MouseEvent) => { if (isInsideDropdownPortal(e.target as Node)) return; if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false) }
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(false) }
     document.addEventListener('mousedown', onDoc)
-    document.addEventListener('keydown', onKey)
-    return () => { document.removeEventListener('mousedown', onDoc); document.removeEventListener('keydown', onKey) }
+    return () => document.removeEventListener('mousedown', onDoc)
   }, [open])
+
+  // Escape layer: closes this picker when it is the top-most layer (one-stage).
+  useEscapeLayer(open, () => setOpen(false))
 
   // Infinite-scroll trigger: loads the next page once the user nears the bottom of the tenant list.
   const onScroll = (e: UIEvent<HTMLDivElement>) => {

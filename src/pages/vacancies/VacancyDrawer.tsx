@@ -23,6 +23,7 @@ import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
 import { isCandidateTabVisible } from './lib/candidateTabVisibility'
 import type { CandidateTabConfig } from './lib/candidateTabVisibility'
 import { useDateFormat } from '@/lib/datetime'
+import { useEscapeLayer } from '@/hooks/useEscapeLayer'
 import DetailsTab from './drawer/DetailsTab'
 import DescriptionTab from './drawer/DescriptionTab'
 import ApplicantsTab from './drawer/ApplicantsTab'
@@ -164,6 +165,9 @@ export default function VacancyDrawer({ vacancy: v, onClose, expanded, onToggleE
   const [prevId, setPrevId] = useState<Id | undefined>(v?.id)
   if (v?.id !== prevId) { setPrevId(v?.id); setTags(null); setEditingTitle(false); setTitleDraft('') }
 
+  // Inline-edit-cancel layer: the title input cancels edit mode on Escape.
+  useEscapeLayer(editingTitle, () => setEditingTitle(false))
+
   if (!v) return null
 
   // Extra tab needs ≥1 tenant custom field; Kandidaten zoeken needs this vacancy's
@@ -263,7 +267,7 @@ export default function VacancyDrawer({ vacancy: v, onClose, expanded, onToggleE
           renderTitle={() => editingTitle ? (
             // V7: inline title edit — mirror OpportunityDrawer's renderTitle swap.
             <input autoFocus value={titleDraft} onChange={e => setTitleDraft(e.target.value)}
-              onKeyDown={e => { if (e.key === 'Enter') saveTitleEdit(); if (e.key === 'Escape') setEditingTitle(false) }}
+              onKeyDown={e => { if (e.key === 'Enter') saveTitleEdit() }}
               // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- an <input> matching the title's own size while editing, not a PageTitle render
               style={{ width: '100%', boxSizing: 'border-box', padding: '6px 10px', fontSize: 15, fontWeight: 700,
                 borderRadius: 6, border: '1px solid var(--border)', outline: 'none', color: 'var(--text)' }} />

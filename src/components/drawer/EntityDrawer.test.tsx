@@ -5,11 +5,13 @@
  * now carries) — this test drives that through the REAL EntityHeader, not a stub,
  * so a future edit to either file that breaks the wiring fails here too.
  */
-import { useEffect } from 'react'
+import { useState } from 'react'
 import { describe, it, expect, vi } from 'vitest'
 import { render, fireEvent, screen } from '@testing-library/react'
 import EntityDrawer from './EntityDrawer'
 import EntityHeader from './EntityHeader'
+import { useEscapeLayer } from '@/hooks/useEscapeLayer'
+import { useFocusTrap } from '@/hooks/useFocusTrap'
 
 // Minimal single-tab host — mirrors how every real entity drawer wires onClose
 // into EntityHeader from its own header render function.
@@ -38,24 +40,54 @@ describe('EntityDrawer · Escape-to-close (SWEEP-ESC)', () => {
     expect(onClose).not.toHaveBeenCalled()
   })
 
-  it('Escape swallowed by an open nested popup does not close the drawer', () => {
+  it('Escape closes only the top layer: a nested popup opened AFTER the drawer wins over the drawer', () => {
+    // TRIAGE-3.3: EntityDrawer's own Escape-to-close is now itself a useEscapeLayer
+    // registration (a window-capture stack), superseding the old bubble-phase trick
+    // this test used to simulate (a popup's own node-level stopPropagation no longer
+    // matters — capture fires before any bubble listener sees the key). The correct
+    // way for a nested overlay to win is to register as ITS OWN top layer, exactly
+    // like useFocusTrap/SelectMenu are expected to once they adopt the same hook.
+    // The popup opens on a click AFTER the drawer has mounted (the real-world
+    // sequence) so its layer is pushed on top of the drawer's, not simultaneously
+    // at initial mount where child-before-parent effect order would invert it.
     const onClose = vi.fn()
-    // Mimics FloatingPanel/useFocusTrap: an open popup owns a bubble-phase
-    // listener on ITS OWN node and stops Escape there — the exact ordering
-    // useFocusTrap.ts already relies on, reproduced without pulling the whole
-    // FloatingPanel component in.
+    const onPopupClose = vi.fn()
     function NestedPopup() {
-      useEffect(() => {
-        const node = document.getElementById('nested-popup')
-        const stop = (e: KeyboardEvent) => { if (e.key === 'Escape') e.stopPropagation() }
-        node?.addEventListener('keydown', stop)
-        return () => node?.removeEventListener('keydown', stop)
-      }, [])
+      const [open, setOpen] = useState(false)
+      useEscapeLayer(open, onPopupClose)
+      if (!open) return <button onClick={() => setOpen(true)}>open popup</button>
       return <div id="nested-popup"><button>inside popup</button></div>
     }
     renderDrawer(onClose, () => <NestedPopup />)
+    fireEvent.click(screen.getByText('open popup'))
     fireEvent.keyDown(screen.getByText('inside popup'), { key: 'Escape' })
+    expect(onPopupClose).toHaveBeenCalledTimes(1)
     expect(onClose).not.toHaveBeenCalled()
+  })
+
+  it('Escape in a REAL focus-trapped popup closes the popup, never the drawer (regression 28-08)', () => {
+    // The verify round measured exactly this going wrong mid-wave: the drawer's
+    // window-capture layer swallowed Escape from a useFocusTrap panel (the
+    // FloatingPanel/ConfirmDialog/ChangelogPopover family). Since the trap now
+    // registers its own layer on arm, the popup must win — pinned here against
+    // the REAL hook, not a stand-in.
+    const onClose = vi.fn()
+    const onPopupClose = vi.fn()
+    function TrappedPopup() {
+      const [open, setOpen] = useState(false)
+      // Real close: unmounts the panel so the trap disarms and pops its layer.
+      const trapRef = useFocusTrap<HTMLDivElement>(() => { onPopupClose(); setOpen(false) })
+      if (!open) return <button onClick={() => setOpen(true)}>open trapped</button>
+      return <div ref={trapRef} role="dialog" aria-modal="true" aria-label="trapped" tabIndex={-1}><button>in trap</button></div>
+    }
+    renderDrawer(onClose, () => <TrappedPopup />)
+    fireEvent.click(screen.getByText('open trapped'))
+    fireEvent.keyDown(screen.getByText('in trap'), { key: 'Escape' })
+    expect(onPopupClose).toHaveBeenCalledTimes(1)
+    expect(onClose).not.toHaveBeenCalled()
+    // Second Escape, popup gone: NOW the drawer closes — the layered order.
+    fireEvent.keyDown(document.body, { key: 'Escape' })
+    expect(onClose).toHaveBeenCalledTimes(1)
   })
 
   it('does nothing on Escape when no header close button is rendered (defensive)', () => {

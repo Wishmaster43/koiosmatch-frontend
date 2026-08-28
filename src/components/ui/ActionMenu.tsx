@@ -17,6 +17,7 @@ import { Caption } from './typography'
 import SelectAllRow from './SelectAllRow'
 // PORTAL-MARKER-1: a click inside an open portalled picker menu is never "outside".
 import { isInsideDropdownPortal } from '@/lib/useDropdownPlacement'
+import { useEscapeLayer } from '@/hooks/useEscapeLayer'
 
 // Icon contract shared by the trigger, nodes and options (lucide-compatible).
 type IconComponent = ComponentType<{ size?: number; style?: CSSProperties; color?: string }>
@@ -152,9 +153,12 @@ export default function ActionMenu({
   // Pick an option inside an option-list node, then close.
   const pick = (value: string | number) => { optionNode?.onPick?.(value); close() }
 
-  // Esc steps back one level (or closes at root); arrows roam the menu items.
+  // Overlay-close layer, two-stage: Escape steps back one level while drilled in,
+  // and only closes the whole menu once back at the root.
+  useEscapeLayer(open, () => { if (path.length) back(); else close() })
+
+  // Arrows roam the menu items (Escape now handled by the layer above).
   const onKeyDown = (e: ReactKeyboardEvent) => {
-    if (e.key === 'Escape') { e.stopPropagation(); if (path.length) back(); else close(); return }
     if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
       const nodes = [...(ref.current?.querySelectorAll('[data-menuitem]') ?? [])]
       if (!nodes.length) return

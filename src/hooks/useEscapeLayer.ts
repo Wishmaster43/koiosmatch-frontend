@@ -21,7 +21,10 @@ let listening = false
 function onKeyDown(e: KeyboardEvent) {
   if (e.key !== 'Escape' || stack.length === 0) return
   // Only the TOP layer closes; the event dies here so layers beneath (and any
-  // leftover legacy listeners) never see this press.
+  // leftover legacy listeners) never see this press. stopImmediatePropagation
+  // also silences OTHER window-level listeners (same target, capture or bubble);
+  // stopPropagation alone only stops descendants.
+  e.stopImmediatePropagation()
   e.stopPropagation()
   e.preventDefault()
   stack[stack.length - 1].onClose()
@@ -31,6 +34,22 @@ function ensureListener() {
 }
 function dropListenerIfIdle() {
   if (listening && stack.length === 0) { window.removeEventListener('keydown', onKeyDown, true); listening = false }
+}
+
+/**
+ * Imperative core: push a layer, get back its pop. For non-React lifecycles
+ * (useFocusTrap arms on node-attach inside a ref setter, not in an effect).
+ */
+export function pushEscapeLayer(onClose: () => void): () => void {
+  const layer: Layer = { onClose }
+  stack.push(layer)
+  ensureListener()
+  return () => {
+    // Pop THIS layer wherever it sits (outer overlays can unmount under inner ones).
+    const i = stack.indexOf(layer)
+    if (i !== -1) stack.splice(i, 1)
+    dropListenerIfIdle()
+  }
 }
 
 /**
@@ -45,16 +64,7 @@ export function useEscapeLayer(active: boolean, onClose: () => void) {
 
   useEffect(() => {
     if (!active) return
-    const layer: Layer = { onClose: () => closeRef.current() }
-    stack.push(layer)
-    ensureListener()
-    return () => {
-      // Remove THIS layer wherever it sits (an outer overlay can unmount while
-      // an inner one is still open — never assume top position on cleanup).
-      const i = stack.indexOf(layer)
-      if (i !== -1) stack.splice(i, 1)
-      dropListenerIfIdle()
-    }
+    return pushEscapeLayer(() => closeRef.current())
   }, [active])
 }
 

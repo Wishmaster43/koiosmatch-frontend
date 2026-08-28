@@ -30,6 +30,7 @@ import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
 import { ChevronDown, Check, Plus, X } from 'lucide-react'
 import { useDropdownPlacement, DROPDOWN_SEARCH_ROW_HEIGHT, DROPDOWN_PORTAL_ATTR } from '@/lib/useDropdownPlacement'
+import { useEscapeLayer } from '@/hooks/useEscapeLayer'
 
 // Footprint of the opt-in clear button: a 24px WCAG 2.2 (2.5.8) target, parked
 // left of the chevron. The label span reserves exactly this much extra room so a
@@ -131,16 +132,9 @@ export default function CreatableSelect({
     return () => clearTimeout(id)
   }, [query, onSearch])
 
-  // Document-level, CAPTURE-phase Escape (mirrors SelectMenu — see its doc comment
-  // for the full rationale): closes the popover even right after opening, before
-  // focus has moved into the portalled search input, instead of relying solely on
-  // that input's own onKeyDown (which only fires once focus already landed there).
-  useEffect(() => {
-    if (!open) return
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') { e.stopPropagation(); setOpen(false) } }
-    document.addEventListener('keydown', onKey, true)
-    return () => document.removeEventListener('keydown', onKey, true)
-  }, [open])
+  // Overlay-close layer: closes the popover even right after opening, before
+  // focus has moved into the portalled search input, top layer first.
+  useEscapeLayer(open, () => setOpen(false))
 
   // Restore focus to the trigger whenever the popover transitions open → closed
   // (pick / Escape / outside click — the search input unmounts with the portal
@@ -253,7 +247,7 @@ export default function CreatableSelect({
           {/* Search / type-to-create */}
           <div style={{ padding: 6, borderBottom: '1px solid var(--border)' }}>
             <input ref={inputRef} value={query} onChange={e => setQuery(e.target.value)}
-              onKeyDown={e => { if (e.key === 'Enter' && canCreate) pick(q); if (e.key === 'Escape') setOpen(false) }}
+              onKeyDown={e => { if (e.key === 'Enter' && canCreate) pick(q) }}
               placeholder={placeholder} aria-label={placeholder} aria-labelledby={placeholder ? undefined : ariaLabelledBy}
               style={{ width: '100%', boxSizing: 'border-box', padding: '6px 8px', fontSize: 12,
                 border: '1px solid var(--border)', borderRadius: 6, outline: 'none' }} />

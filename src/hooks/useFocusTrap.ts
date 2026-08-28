@@ -24,6 +24,7 @@
 import { useEffect, useRef, useState } from 'react'
 import type { MutableRefObject } from 'react'
 import { handlePopupKeydown } from './popupCommands'
+import { pushEscapeLayer } from './useEscapeLayer'
 
 export function useFocusTrap<T extends HTMLElement = HTMLDivElement>(onClose?: () => void): MutableRefObject<T | null> {
   // Latest onClose in a ref so the armed trap never needs re-arming to see it.
@@ -50,13 +51,17 @@ export function useFocusTrap<T extends HTMLElement = HTMLDivElement>(onClose?: (
       // Move focus into the panel on open (fall back to the panel itself).
       ;(focusables()[0] ?? el).focus({ preventScroll: true })
 
-      // POP-UPS 3.2: the key handling lives in the ONE shared shortcuts file
-      // (hooks/popupCommands) — this trap only supplies its own context to it.
+      // POP-UPS 3.2: Tab handling lives in the ONE shared shortcuts file
+      // (hooks/popupCommands); ESCAPE goes through the ONE layered stack
+      // (useEscapeLayer, TRIAGE-3.3) — the trap registers as a layer while
+      // armed, so an open popup always outranks its host drawer.
       const onKeyDown = (e: KeyboardEvent) => {
-        handlePopupKeydown(e, { onClose: () => onCloseRef.current?.(), focusables })
+        handlePopupKeydown(e, { focusables })
       }
       el.addEventListener('keydown', onKeyDown)
+      const popLayer = pushEscapeLayer(() => onCloseRef.current?.())
       return () => {
+        popLayer()
         el.removeEventListener('keydown', onKeyDown)
         previouslyFocused?.focus?.({ preventScroll: true })
       }

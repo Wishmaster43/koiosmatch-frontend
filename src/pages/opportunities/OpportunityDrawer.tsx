@@ -22,6 +22,7 @@ import ConversationTab from './drawer/ConversationTab'
 import TasksTab from './drawer/TasksTab'
 import ChangelogPopover from '@/components/drawer/ChangelogPopover'
 import ChangelogTab from './drawer/ChangelogTab'
+import { useEscapeLayer } from '@/hooks/useEscapeLayer'
 import type { Opportunity } from '@/types/opportunity'
 import type { Id, LookupOption } from '@/types/common'
 
@@ -83,6 +84,9 @@ export default function OpportunityDrawer({
   const [tags, setTags] = useState<string[] | null>(null)
   if (o?.id !== prevId) { setPrevId(o?.id); setEditing(false); setTitleDraft(''); setTags(null) }
 
+  // Inline-edit-cancel layer: the title input cancels edit mode on Escape.
+  useEscapeLayer(editing, () => setEditing(false))
+
   if (!o) return null
 
   const currentTags = tags ?? o.tags ?? []
@@ -120,7 +124,7 @@ export default function OpportunityDrawer({
 
   const renderTitle = () => editing ? (
     <input autoFocus value={titleDraft} onChange={e => setTitleDraft(e.target.value)}
-      onKeyDown={e => { if (e.key === 'Enter') saveEdit(); if (e.key === 'Escape') setEditing(false) }}
+      onKeyDown={e => { if (e.key === 'Enter') saveEdit() }}
       // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- an <input> matching the title's own size while editing, not a PageTitle render
       style={{ width: '100%', boxSizing: 'border-box', padding: '6px 10px', fontSize: 15, fontWeight: 700,
         borderRadius: 6, border: '1px solid var(--border)', outline: 'none', color: 'var(--text)' }} />

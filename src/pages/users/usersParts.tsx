@@ -3,7 +3,7 @@
  * UsersPage a thin container (§3 size discipline): role badge + inline role
  * changer, the editable colour avatar, and the small role helpers/meta.
  */
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef } from 'react'
 import type { CSSProperties } from 'react'
 import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
@@ -17,6 +17,7 @@ import Spinner from '@/components/ui/Spinner'
 import Button from '@/components/ui/Button'
 import type { ManagedUser } from '@/types/api'
 import { tintBg, tintBorder, chipInk } from '@/lib/tint'
+import { useEscapeLayer } from '@/hooks/useEscapeLayer'
 
 // A role reference as it can appear on a user: a bare name or a role object
 // (the backend now carries colour + icon on the object).
@@ -198,13 +199,8 @@ export function EditableAvatar({ user: u, onPick }: { user: ManagedUser; onPick?
   const { t } = useTranslation('users')
   const [open, setOpen] = useState(false)
   const c = u.avatar_color || null
-  // Close the colour picker on Escape (non-modal popover; outside-click also closes).
-  useEffect(() => {
-    if (!open) return
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(false) }
-    document.addEventListener('keydown', onKey)
-    return () => document.removeEventListener('keydown', onKey)
-  }, [open])
+  // Escape layer: closes the colour picker (non-modal popover; outside-click also closes; one-stage).
+  useEscapeLayer(open, () => setOpen(false))
   // Non-chip tinted surface (an avatar bubble) — the house tintBg/tintBorder
   // formula applies here rather than SoftChip (§4, HUISSTIJL-1).
   const bubble: CSSProperties = {

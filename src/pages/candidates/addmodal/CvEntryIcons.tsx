@@ -14,6 +14,7 @@ import type { ChangeEvent, CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import { FileUp, ClipboardPaste } from 'lucide-react'
 import { CV_ACCEPT_MIME, CV_TEXT_MIN_CHARS, CV_TEXT_MAX_CHARS } from './useCvParse'
+import { useEscapeLayer } from '@/hooks/useEscapeLayer'
 
 interface CvEntryIconsProps {
   onFile: (file: File) => void
@@ -42,15 +43,16 @@ export default function CvEntryIcons({ onFile, onSubmitText }: CvEntryIconsProps
   const tooShort = text.trim().length > 0 && text.trim().length < CV_TEXT_MIN_CHARS
   const canSubmit = text.trim().length >= CV_TEXT_MIN_CHARS && text.trim().length <= CV_TEXT_MAX_CHARS
 
-  // Close on an outside click or Escape — a plain non-modal popover.
+  // Close on an outside click — a plain non-modal popover.
   useEffect(() => {
     if (!pasteOpen) return
     const onDown = (e: MouseEvent) => { if (popoverRef.current && !popoverRef.current.contains(e.target as Node)) setPasteOpen(false) }
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setPasteOpen(false) }
     document.addEventListener('mousedown', onDown)
-    document.addEventListener('keydown', onKey)
-    return () => { document.removeEventListener('mousedown', onDown); document.removeEventListener('keydown', onKey) }
+    return () => document.removeEventListener('mousedown', onDown)
   }, [pasteOpen])
+
+  // Escape layer: closes the paste popover (one-stage).
+  useEscapeLayer(pasteOpen, () => setPasteOpen(false))
 
   // Hand the chosen file up, then clear the input so picking the SAME file again
   // still fires a change event (browsers suppress an identical value).

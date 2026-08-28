@@ -22,6 +22,7 @@ import { DASHBOARD_TYPES } from '@/pages/dashboard/shared'
 import type { Role, PermissionsByGroup, UpdateRoleBody, UpdatePermissionsBody } from './rolesTypes'
 import Button from '@/components/ui/Button'
 import { tintBg } from '@/lib/tint'
+import { useEscapeLayer } from '@/hooks/useEscapeLayer'
 
 interface IconPickerProps {
   value: string
@@ -153,6 +154,9 @@ export function RoleDetail({ role, permissions, iconOptions, onBack, onUpdate }:
   // (Danny 2026-07-20 "kan weg"); BE removal of sync.refresh tracked as SYNC-RETIRE-1.
   const groups: PermissionGroups = Object.entries(permissions).filter(([g]) => g !== 'module' && g !== 'sync')
 
+  // Escape layer: cancels the in-place name edit, reverting the draft (one-stage).
+  useEscapeLayer(editName, () => { setDraftName(localRole.name); setEditName(false) })
+
   return (
     <div>
       {/* Back + role name header */}
@@ -166,7 +170,7 @@ export function RoleDetail({ role, permissions, iconOptions, onBack, onUpdate }:
         {editName ? (
           <input autoFocus value={draftName}
             onChange={e => setDraftName(e.target.value)} onBlur={saveName}
-            onKeyDown={e => { if (e.key === 'Enter') saveName(); if (e.key === 'Escape') { setDraftName(localRole.name); setEditName(false) } }}
+            onKeyDown={e => { if (e.key === 'Enter') saveName() }}
             style={{ fontSize: 18, fontWeight: 700, color: 'var(--text)', border: '1px solid var(--color-primary)',
                      borderRadius: 8, padding: '4px 10px', outline: 'none' }} />
         ) : (
