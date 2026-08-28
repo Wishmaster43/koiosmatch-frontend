@@ -18,6 +18,7 @@ import DrillTabs from '@/components/ui/DrillTabs'
 import type { ReportCandidate } from '@/types/reports'
 // App-wide active locale + the house DD-MM-YYYY date formatter (DATUM-1/LANE-B).
 import { useLocale, useDateFormat } from '@/lib/datetime'
+import { SM_STATUS } from '@/lib/smStatus'
 
 // Locale-aware full month name for index 0–11; `locale` is required (a pure
 // module-scope helper never hardcodes nl-NL or imports i18n).
@@ -29,11 +30,11 @@ const monthName = (locale: string, i: number) => new Date(2000, i, 1).toLocaleSt
 function StatusBadge({ status }: { status?: string }) {
   const { t } = useTranslation('reports')
   const colors: Record<string, string> = {
-    actief: 'var(--color-success)',
-    nietactief: 'var(--color-warning)',
+    [SM_STATUS.ACTIVE]: 'var(--color-success)',
+    [SM_STATUS.INACTIVE]: 'var(--color-warning)',
     extern: 'var(--color-secondary)',
-    intake: 'var(--color-violet)',
-    verwijderd: 'var(--color-danger)',
+    [SM_STATUS.INTAKE]: 'var(--color-violet)',
+    [SM_STATUS.DELETED]: 'var(--color-danger)',
   }
   const key = (status || '').toLowerCase()
   const label = status ? t(`candidates.status.${key}`, { defaultValue: status }) : t('candidates.unknown')

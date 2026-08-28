@@ -12,6 +12,7 @@
  * third copy).
  */
 import { useMemo } from 'react'
+import { SM_STATUS, statusOf } from '@/lib/smStatus'
 import { useTranslation } from 'react-i18next'
 import InsightsRow from '@/components/insights/InsightsRow'
 import type { DonutSpec, KpiSpec } from '@/components/insights/InsightsRow'
@@ -105,16 +106,16 @@ export default function SmCandidatesInsightsRow({
   // Uitschrijfdatum column (ending soon) to fill the shared 9-card footprint.
   const aandacht      = useMemo(() => calcAttention(candidates), [candidates])
   // Headcount feeding the "active" KPI card.
-  const activeTotal   = useMemo(() => candidates.filter(c => (c.status || '').toLowerCase() === 'actief').length, [candidates])
+  const activeTotal   = useMemo(() => candidates.filter(c => statusOf(c) === SM_STATUS.ACTIVE).length, [candidates])
   // Active candidates with a future shift already planned — surfaced as the active KPI's sub-label.
   const plannedActive = useMemo(() => candidates.filter(c => {
-    if ((c.status || '').toLowerCase() !== 'actief') return false
+    if (statusOf(c) !== SM_STATUS.ACTIVE) return false
     return c.last_planned_shift && new Date(c.last_planned_shift) > new Date()
   }).length, [candidates])
   // Headcount feeding the "inactive" KPI card.
-  const inactiveTotal = useMemo(() => candidates.filter(c => (c.status || '').toLowerCase() === 'nietactief').length, [candidates])
+  const inactiveTotal = useMemo(() => candidates.filter(c => statusOf(c) === SM_STATUS.INACTIVE).length, [candidates])
   // Headcount feeding the "intake" KPI card.
-  const intakeTotal   = useMemo(() => candidates.filter(c => (c.status || '').toLowerCase() === 'intake').length, [candidates])
+  const intakeTotal   = useMemo(() => candidates.filter(c => statusOf(c) === SM_STATUS.INTAKE).length, [candidates])
   // New-registration count for the current month plus the historical monthly average.
   const monthStats    = useMemo(() => calcMonthStats(candidates), [candidates])
   // Candidates with at least one recorded no-show, for their own KPI card.
@@ -128,11 +129,11 @@ export default function SmCandidatesInsightsRow({
   const kpis: KpiSpec[] = [
     { key: 'active', label: t('kpiRow.active', { ns: 'reports' }), value: activeTotal,
       sub: t('kpiRow.activeNote', { ns: 'reports', planned: plannedActive, total: activeTotal }),
-      color: 'var(--color-success-text)', onClick: () => onStatusPick('actief'), active: pickedStatus === 'actief' },
+      color: 'var(--color-success-text)', onClick: () => onStatusPick(SM_STATUS.ACTIVE), active: pickedStatus === SM_STATUS.ACTIVE },
     { key: 'inactive', label: t('kpiRow.inactive', { ns: 'reports' }), value: inactiveTotal,
-      color: 'var(--color-warning-text)', onClick: () => onStatusPick('nietactief'), active: pickedStatus === 'nietactief' },
+      color: 'var(--color-warning-text)', onClick: () => onStatusPick(SM_STATUS.INACTIVE), active: pickedStatus === SM_STATUS.INACTIVE },
     { key: 'intake', label: t('kpiRow.intake', { ns: 'reports' }), value: intakeTotal,
-      color: 'var(--color-violet)', onClick: () => onStatusPick('intake'), active: pickedStatus === 'intake' },
+      color: 'var(--color-violet)', onClick: () => onStatusPick(SM_STATUS.INTAKE), active: pickedStatus === SM_STATUS.INTAKE },
     { key: 'attention', label: t('kpiRow.attention', { ns: 'reports' }), value: aandacht.length,
       sub: t('kpiRow.attentionNote', { ns: 'reports' }), color: 'var(--color-danger-text)',
       onClick: () => onDrillDown(t('kpiRow.attention', { ns: 'reports' }), aandacht) },

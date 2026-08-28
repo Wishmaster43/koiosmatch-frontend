@@ -9,12 +9,13 @@
  * shifts-per-candidate feed and live on the Shift-analyse page.
  */
 import type { ReportCandidate } from '@/types/reports'
+import { SM_STATUS, statusOf } from '@/lib/smStatus'
 
 // Filters to the shared Aandachtskandidaten definition: active + (new-and-unplanned OR never logged in).
 export function calcAttention(candidates: ReportCandidate[]) {
   const now = Date.now()
   return candidates.filter(c => {
-    if ((c.status || '').toLowerCase() !== 'actief') return false
+    if (statusOf(c) !== SM_STATUS.ACTIVE) return false
     const reg = c.registration_date ? new Date(c.registration_date) : null
     const isNew = reg && (now - reg.getTime()) < 30 * 86400000
     const hasNoPlanned = !c.last_planned_shift || new Date(c.last_planned_shift) < new Date()

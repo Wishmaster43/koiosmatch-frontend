@@ -8,6 +8,7 @@
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import SoftChip from './SoftChip'
+import { SM_STATUS } from '@/lib/smStatus'
 
 interface StatusStyle {
   bg?: string
@@ -17,14 +18,15 @@ interface StatusStyle {
 
 // Common statuses shared across the app (candidates + active/inactive entities).
 // Canonical keys are English; the Dutch spellings stay as input aliases because
-// incoming DATA (e.g. Shiftmanager) may still carry them (ID-ENGELS-1).
+// incoming DATA (e.g. Shiftmanager) may still carry them (ID-ENGELS-1) — the
+// Shiftmanager values themselves come from the shared SM_STATUS vocabulary.
 const DEFAULT_MAP: Record<string, StatusStyle> = {
-  active:     { color: 'var(--color-success-text)' },
-  actief:     { color: 'var(--color-success-text)' },
-  inactive:   { color: 'var(--color-warning-text)' },
-  nietactief: { color: 'var(--color-warning-text)' },
-  external:   { color: 'var(--color-secondary)' },
-  extern:     { color: 'var(--color-secondary)' },
+  active:            { color: 'var(--color-success-text)' },
+  [SM_STATUS.ACTIVE]:   { color: 'var(--color-success-text)' },
+  inactive:          { color: 'var(--color-warning-text)' },
+  [SM_STATUS.INACTIVE]: { color: 'var(--color-warning-text)' },
+  external:          { color: 'var(--color-secondary)' },
+  extern:            { color: 'var(--color-secondary)' },
 }
 
 interface StatusBadgeProps {

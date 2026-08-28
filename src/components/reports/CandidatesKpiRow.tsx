@@ -7,19 +7,20 @@ import { useTranslation } from 'react-i18next'
 import { AlertTriangle, UserCheck, UserX, UserPlus, TrendingUp } from 'lucide-react'
 import KpiCard from '../ui/KpiCard'
 import { calcAttention } from './candidateAttention'
+import { SM_STATUS, statusOf } from '@/lib/smStatus'
 import type { ReportCandidate } from '@/types/reports'
 // App-wide active locale (DATUM-1/LANE-B) — feeds the "new this month" month name.
 import { useLocale } from '@/lib/datetime'
 
-// Count candidates whose status matches the given value (defaults missing to 'onbekend').
+// Count candidates whose status matches the given value, via the shared normalisation.
 const count = (candidates: ReportCandidate[], status: string) =>
-  candidates.filter(c => (c.status || 'onbekend').toLowerCase() === status).length
+  candidates.filter(c => statusOf(c) === status).length
 
 
 // Active candidates with a planned shift still in the future.
 function calcGepland(candidates: ReportCandidate[]) {
   return candidates.filter(c => {
-    if ((c.status || '').toLowerCase() !== 'actief') return false
+    if (statusOf(c) !== SM_STATUS.ACTIVE) return false
     return c.last_planned_shift && new Date(c.last_planned_shift) > new Date()
   })
 }
@@ -69,10 +70,10 @@ export default function CandidatesKpiRow({ candidates = [], loading = false, onD
   const statusClick = (status: string, label: string) =>
     onStatusFilter
       ? () => onStatusFilter(status)
-      : drill(label, c => c.filter(x => (x.status || '').toLowerCase() === status))
+      : drill(label, c => c.filter(x => statusOf(x) === status))
 
   const aandachtItems  = calcAttention(candidates)
-  const actiefTotal    = count(candidates, 'actief')
+  const actiefTotal    = count(candidates, SM_STATUS.ACTIVE)
   const geplandItems   = calcGepland(candidates)
   const { currentMonthCount, avg, delta } = calcMonthStats(candidates)
   const currentMonthLabel = new Date().toLocaleString(locale, { month: 'long' })
@@ -102,29 +103,29 @@ export default function CandidatesKpiRow({ candidates = [], loading = false, onD
         iconBg="var(--color-success-bg)"
         iconColor="var(--color-success)"
         loading={loading}
-        onClick={statusClick('actief', t('kpiRow.drillActive'))}
+        onClick={statusClick(SM_STATUS.ACTIVE, t('kpiRow.drillActive'))}
       />
 
       {/* Inactive */}
       <KpiCard
         label={t('kpiRow.inactive')}
-        value={count(candidates, 'nietactief')}
+        value={count(candidates, SM_STATUS.INACTIVE)}
         icon={UserX}
         iconBg="var(--color-warning-bg)"
         iconColor="var(--color-danger)"
         loading={loading}
-        onClick={statusClick('nietactief', t('kpiRow.drillInactive'))}
+        onClick={statusClick(SM_STATUS.INACTIVE, t('kpiRow.drillInactive'))}
       />
 
       {/* Intake */}
       <KpiCard
         label={t('kpiRow.intake')}
-        value={count(candidates, 'intake')}
+        value={count(candidates, SM_STATUS.INTAKE)}
         icon={UserPlus}
         iconBg="var(--color-violet-bg)"
         iconColor="var(--color-violet)"
         loading={loading}
-        onClick={statusClick('intake', t('kpiRow.drillIntake'))}
+        onClick={statusClick(SM_STATUS.INTAKE, t('kpiRow.drillIntake'))}
       />
 
       {/* New this month vs average */}

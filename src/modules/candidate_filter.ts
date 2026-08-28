@@ -31,7 +31,14 @@ export default {
       help: 'Laat leeg voor alle functies' },
     // default 'actief' mirrors CandidateFilterModule::configSchema; since DEFAULT-PERSIST-1
     // a schema default is SEEDED into the node config (and the engine merges its own),
-    // so the card shows exactly what the engine filters on.
+    // so the card shows exactly what the engine filters on. Like pools/positions above,
+    // this filters the SHIFTMANAGER mirror's raw `status` string column, not the native
+    // candidate's tenant-CRUD deployability lookup (a different table/vocabulary
+    // entirely — /settings/candidate-lookups/statuses) — so a `source` here would
+    // validate the picker against the wrong lookup and submit values the SM query
+    // (`where('status', $config['status'])`) does not recognise. Measured: every other
+    // Shiftmanager/HelloFlex mirror module (sm_candidates, hf_candidates, hf_customers,
+    // hf_shifts) hardcodes its status options for the same reason.
     { key: 'status', label: 'Status', type: 'select', options: ['actief', 'nietactief'], default: 'actief' },
     { key: 'last_contact_days', label: 'Niet gecontacteerd in (dagen)', type: 'number' },
     { key: 'last_worked_days',  label: 'Laatste dienst minstens X dagen geleden', type: 'number', placeholder: '30' },

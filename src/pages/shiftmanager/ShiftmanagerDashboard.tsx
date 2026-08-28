@@ -3,6 +3,7 @@
 // so both screens agree, plus shift/hours charts and, on AI-enabled packages, the
 // recent runs/conversations panels. Every KPI opens the shared drill-down drawer.
 import { useMemo, useState } from 'react'
+import { SM_STATUS, statusOf } from '@/lib/smStatus'
 import { useTranslation } from 'react-i18next'
 import { CheckCircle, AlertCircle } from 'lucide-react'
 import { useKpiSettings } from '@/lib/useKpiSettings'
@@ -38,7 +39,7 @@ export default function ShiftmanagerDashboard() {
   const derived = useMemo(() => {
     const now = new Date(); const m = now.getMonth(); const y = now.getFullYear()
     const list = candidates as Array<Record<string, unknown>>
-    const active = list.filter(c => String(c.status ?? 'onbekend').toLowerCase() === 'actief')
+    const active = list.filter(c => statusOf(c) === SM_STATUS.ACTIVE)
     const inMonth = (s: unknown) => { if (typeof s !== 'string' || !s) return false; const d = new Date(s); return d.getMonth() === m && d.getFullYear() === y }
     // "New" + its average are over ALL candidates (a new registration counts regardless
     // of current status) so the tile matches the drill-down's calc (was: active-only → gem 7 vs 9).
@@ -59,7 +60,7 @@ export default function ShiftmanagerDashboard() {
       else if (isFuture(c.last_planned_shift)) bPlanned.push(c)
       else bIdle.push(c)
     }
-    const inactive = list.filter(c => String(c.status ?? '').toLowerCase() === 'nietactief')
+    const inactive = list.filter(c => statusOf(c) === SM_STATUS.INACTIVE)
     // Aandachtskandidaten ("attention candidates") — the SAME function as the candidates
     // report (calcAttention: active + new <30d + not yet scheduled) so the KPIs on both
     // screens match (Danny). The "active but never logged in" rule CANNOT be added:

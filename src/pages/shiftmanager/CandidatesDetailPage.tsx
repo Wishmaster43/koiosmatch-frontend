@@ -9,6 +9,7 @@
  * attention/new/no-shows/cancellations/ending-soon open the rich drill-down.
  */
 import { useState, useMemo, useEffect } from 'react'
+import { SM_STATUS } from '@/lib/smStatus'
 import { useTranslation } from 'react-i18next'
 import { useKpiSettings } from '@/lib/useKpiSettings'
 import { useSmCandidatesList } from './hooks/useSmCandidatesList'
@@ -39,7 +40,7 @@ export default function CandidatesDetailPage() {
   const { candidates: allCandidates } = useReportCandidates(candidates_per_page)
 
   // Controlled status filter so a KPI/donut click can drive the table.
-  const [statusFilter, setStatusFilter] = useState<Array<string | number>>(['actief'])
+  const [statusFilter, setStatusFilter] = useState<Array<string | number>>([SM_STATUS.ACTIVE])
   const [search, setSearch] = useState('')
   // Remount-key for HeaderSearch so "wis alle filters" also empties the input
   // (the native CandidatesToolbar idiom — HeaderSearch owns its own text state).

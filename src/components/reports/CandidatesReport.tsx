@@ -17,6 +17,11 @@ import LineChartCard       from '../charts/LineChartCard'
 import CandidatesKpiRow    from './CandidatesKpiRow'
 import DrillDownDrawer     from './DrillDownDrawer'
 import { useRightPanel }   from '@/context/RightPanelContext'
+import { SM_STATUS, statusOf } from '@/lib/smStatus'
+
+// Fixed deregistered-status filter for the "end of employment" charts — never
+// changes via a setter, so it lives as a module-scope constant, not state.
+const DEREGISTERED_STATUSES: string[] = [SM_STATUS.DELETED]
 
 // Chart color configuration
 /* eslint-disable no-restricted-syntax -- fixed chart colour series, not UI styling: needs more distinct hues than the semantic token set provides */
@@ -55,8 +60,7 @@ export default function CandidatesReport() {
   // ── Data & filter state ───────────────────────────────────────────────────
   // Data (fetch) lives in the shared hook (§3); this component only derives + renders.
   const { candidates, loading, error } = useReportCandidates(candidates_per_page)
-  const [selectedStatuses,    setSelectedStatuses]    = useState<string[]>(['actief'])
-  const [selectedStatusesDEL] = useState<string[]>(['verwijderd'])
+  const [selectedStatuses,    setSelectedStatuses]    = useState<string[]>([SM_STATUS.ACTIVE])
   const [selectedPositions,   setSelectedPositions]   = useState<string[]>([])
   const [selectedYear,        setSelectedYear]        = useState<number | null>(new Date().getFullYear())
   const [showPercent,         setShowPercent]         = useState(false)
@@ -72,14 +76,13 @@ export default function CandidatesReport() {
   })
 
   const filteredGeneral = baseFiltered.filter(c => {
-    const s = (c.status || 'onbekend').toLowerCase()
+    const s = statusOf(c)
     return selectedStatuses.length === 0 || selectedStatuses.includes(s)
   })
 
-  const filteredDeleted = baseFiltered.filter(c => {
-    const s = (c.status || 'onbekend').toLowerCase()
-    return selectedStatusesDEL.length === 0 || selectedStatusesDEL.includes(s)
-  })
+  // No length-0 branch here: DEREGISTERED_STATUSES always holds one value, so
+  // that guard on selectedStatusesDEL used to be unreachable.
+  const filteredDeleted = baseFiltered.filter(c => DEREGISTERED_STATUSES.includes(statusOf(c)))
 
   // ── Chart data ────────────────────────────────────────────────────────────
   // chartHelpers returns its own {name,value} shape; cast to the charts' ChartDatum (adds the recharts index signature).
@@ -155,7 +158,7 @@ export default function CandidatesReport() {
 
   // ── Filter groups ─────────────────────────────────────────────────────────
   const allStatuses  = useMemo(() =>
-    [...new Set(candidates.map(c => (c.status||'onbekend').toLowerCase()))].sort(),
+    [...new Set(candidates.map(statusOf))].sort(),
     [candidates])
 
   // Distinct sorted position list for the filter panel; only recomputed when candidates change.
@@ -193,7 +196,7 @@ export default function CandidatesReport() {
       onToggle: (v: string) => setSelectedStatuses(p => p.includes(v) ? p.filter(s => s !== v) : [...p, v]),
       options: allStatuses.map(s => ({
         value: s, label: t(`candidates.status.${s}`, { defaultValue: s }),
-        count: candidates.filter(c => (c.status||'onbekend').toLowerCase() === s).length,
+        count: candidates.filter(c => statusOf(c) === s).length,
       })),
     },
     {

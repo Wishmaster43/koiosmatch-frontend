@@ -15,19 +15,20 @@ import Button from '@/components/ui/Button'
 import { PageTitle } from '@/components/ui/typography'
 import { navigateToPage } from '@/lib/navigate'
 import type { ReportCandidate } from '@/types/reports'
+import { SM_STATUS } from '@/lib/smStatus'
 
 // Colored status pill (actief / nietactief / extern / ...) for a record.
 function StatusBadge({ status }: { status?: string }) {
   const { t } = useTranslation('reports')
   /* eslint-disable no-restricted-syntax -- fixed status→colour mapping (DATA), mirrors the lookup-colour pattern used elsewhere; these shades have no exact token equivalent */
   const styles: Record<string, { bg: string; color: string }> = {
-    actief:     { bg: 'var(--color-success-bg)', color: 'var(--color-success-text)' },
-    nietactief: { bg: 'var(--color-warning-bg)', color: '#C2410C' },
-    extern:     { bg: 'var(--color-secondary-bg)', color: '#1D4ED8' },
-    intake:     { bg: '#FAF5FF', color: 'var(--color-violet)' },
+    [SM_STATUS.ACTIVE]:   { bg: 'var(--color-success-bg)', color: 'var(--color-success-text)' },
+    [SM_STATUS.INACTIVE]: { bg: 'var(--color-warning-bg)', color: '#C2410C' },
+    extern:                { bg: 'var(--color-secondary-bg)', color: '#1D4ED8' },
+    [SM_STATUS.INTAKE]:   { bg: '#FAF5FF', color: 'var(--color-violet)' },
     // Ink is --color-on-danger-bg — the raw danger colour reads only 3.95:1 on its
     // own pastel, AA fail (Opus r3.5).
-    verwijderd: { bg: 'var(--color-danger-bg)', color: 'var(--color-on-danger-bg)' },
+    [SM_STATUS.DELETED]:  { bg: 'var(--color-danger-bg)', color: 'var(--color-on-danger-bg)' },
   }
   /* eslint-enable no-restricted-syntax */
   const key = (status || '').toLowerCase()
