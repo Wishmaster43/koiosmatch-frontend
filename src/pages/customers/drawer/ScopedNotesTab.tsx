@@ -71,29 +71,34 @@ export default function ScopedNotesTab({ scope, id, customerId }: {
       .catch(err => notifyError(extractApiError(err, t('common:actionFailed'))))
   }
 
-  // Four explicit UI states (§3) — never a blank screen while the scoped fetch is in flight or failed.
-  if (loading) return <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('page.loading')}</div>
-  if (error) return <div style={{ fontSize: 12, color: 'var(--color-danger-text)' }}>{t('scopedList.loadError')}</div>
-
+  // Four explicit UI states (§3) for the OWN-notes fetch only — rendered as a sibling
+  // to NoteFeedList below, so a failed own-notes load never hides the independent
+  // chain-linked-notes section (mirrors ContactDetail.tsx:432's sibling mount).
   return (
     <>
-    <NotesTab
-      notes={notes} onAddNote={addNote}
-      popout={customerId ? { entity: 'customer', id: customerId } : undefined}
-      onEditNote={(i: number, payload: { type: string; title: string; body: string; language?: string }) => editNote(notes[i]?.id as Id | undefined, payload)}
-      onDeleteNote={(i: number) => deleteNote(notes[i]?.id as Id | undefined)}
-      noteTypes={noteTypes} chipTypes={chipTypes}
-      authorInitials={authorInitials}
-      showTimeline={false} showConversations={false}
-      labels={{
-        notes: t('notes.notes'), newNote: t('notes.newNote'), type: t('notes.type'),
-        save: t('notes.save'), cancel: t('notes.cancel'), edit: t('notes.edit'),
-        notesEmpty: t('notes.notesEmpty'),
-        notePlaceholder: () => t('notes.notePlaceholder'),
-        searchPlaceholder: t('notes.searchPlaceholder'),
-        deleteNote: t('notes.deleteNote'), deleteConfirm: t('notes.deleteConfirm'),
-      }}
-    />
+    {loading ? (
+      <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('page.loading')}</div>
+    ) : error ? (
+      <div style={{ fontSize: 12, color: 'var(--color-danger-text)' }}>{t('scopedList.loadError')}</div>
+    ) : (
+      <NotesTab
+        notes={notes} onAddNote={addNote}
+        popout={customerId ? { entity: 'customer', id: customerId } : undefined}
+        onEditNote={(i: number, payload: { type: string; title: string; body: string; language?: string }) => editNote(notes[i]?.id as Id | undefined, payload)}
+        onDeleteNote={(i: number) => deleteNote(notes[i]?.id as Id | undefined)}
+        noteTypes={noteTypes} chipTypes={chipTypes}
+        authorInitials={authorInitials}
+        showTimeline={false} showConversations={false}
+        labels={{
+          notes: t('notes.notes'), newNote: t('notes.newNote'), type: t('notes.type'),
+          save: t('notes.save'), cancel: t('notes.cancel'), edit: t('notes.edit'),
+          notesEmpty: t('notes.notesEmpty'),
+          notePlaceholder: () => t('notes.notePlaceholder'),
+          searchPlaceholder: t('notes.searchPlaceholder'),
+          deleteNote: t('notes.deleteNote'), deleteConfirm: t('notes.deleteConfirm'),
+        }}
+      />
+    )}
     {/* NOTITIE-DOORLINK-1 (CMBE 64d976ff): notes written elsewhere in the chain
         that name THIS location/department as principal — read-only, under the
         entity's own notes. */}

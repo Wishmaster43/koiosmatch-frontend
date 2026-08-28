@@ -12,6 +12,7 @@ import { useTranslation } from 'react-i18next'
 import { Users, Star, Unlink } from 'lucide-react'
 import type { Column } from '@/components/ui/DataTable'
 import Spinner from '@/components/ui/Spinner'
+import Button from '@/components/ui/Button'
 import SoftChipJs from '@/components/ui/SoftChip'
 import LookupIcon from '@/components/ui/LookupIcon'
 import { emailValue, phoneValue } from '@/components/drawer/contactLinks'
@@ -32,10 +33,6 @@ const muted = { color: 'var(--text-muted)', fontSize: 12 }
 // Plain-text fallback style for a coloured column toggled off (CHIPKLEUR-INSTELBAAR-1) —
 // mirrors the `plainCell` convention in CandidatesTable/CustomersTable.
 const plainCell = { color: 'var(--text)', fontSize: 12 }
-const iconBtn = {
-  width: 24, height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 6,
-  cursor: 'pointer', border: 'none', background: 'var(--bg)', color: 'var(--text-muted)', flexShrink: 0,
-} as const
 
 interface Params {
   scope: ContactScope
@@ -167,13 +164,12 @@ export function useContactsPanelColumns({ scope, scopeId, locationScope, locatio
         // rather than firing /customers/undefined/… and calling that an action.
         const blocked = p.customerId == null
         return (
-          <button type="button" onClick={e => { e.stopPropagation(); void promote(p) }}
+          <Button variant="secondary" iconOnly onClick={e => { e.stopPropagation(); void promote(p) }}
             disabled={busy || blocked || promoting != null}
             title={setPrimaryLabel} aria-label={setPrimaryLabel}
-            style={{ ...iconBtn, cursor: busy || blocked || promoting != null ? 'not-allowed' : 'pointer',
-              opacity: blocked ? 0.4 : 1 }}>
+            style={{ opacity: blocked ? 0.4 : 1 }}>
             {busy ? <Spinner size={12} /> : <Star size={12} />}
-          </button>
+          </Button>
         )
       },
     }] : []),
@@ -181,12 +177,11 @@ export function useContactsPanelColumns({ scope, scopeId, locationScope, locatio
     ...(scope === 'customer' ? [] : [{
       key: 'uncouple', header: '', align: 'right' as const,
       render: (p: Contact) => (
-        <button onClick={e => { e.stopPropagation(); onUpdate(p.id as Id, scope === 'location' ? { locationId: null } : { departmentId: null }) }}
+        <Button variant="dangerSoft" iconOnly onClick={e => { e.stopPropagation(); onUpdate(p.id as Id, scope === 'location' ? { locationId: null } : { departmentId: null }) }}
           title={t(scope === 'location' ? 'locations.detail.uncoupleAction' : 'departments.detail.uncoupleAction')}
-          aria-label={t(scope === 'location' ? 'locations.detail.uncoupleAction' : 'departments.detail.uncoupleAction')}
-          style={iconBtn}>
+          aria-label={t(scope === 'location' ? 'locations.detail.uncoupleAction' : 'departments.detail.uncoupleAction')}>
           <Unlink size={12} />
-        </button>
+        </Button>
       ),
     }]),
   ]

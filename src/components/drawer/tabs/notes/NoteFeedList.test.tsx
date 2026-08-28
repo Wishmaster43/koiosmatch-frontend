@@ -46,14 +46,15 @@ describe('NoteFeedList', () => {
     await waitFor(() => expect(screen.getByText('Geen gekoppelde notities.')).toBeInTheDocument())
   })
 
-  it('renders only is_direct:false rows — direct rows are already shown by the host tab', async () => {
+  it('asks the server for the linked subset (only_linked=1) and renders what it returns', async () => {
     vi.mocked(api.get).mockResolvedValueOnce(page([
-      { id: 'n1', note_type: 'candidate_note', source: { type: 'candidate', id: 'c1', label: 'Jan', deleted: false }, body: 'own note', type: 'general', author: 'Kelly', language: null, created_at: '2026-08-01T10:00:00Z', updated_at: '2026-08-01T10:00:00Z', is_direct: true, principals: [] },
       { id: 'n2', note_type: 'application_note', source: { type: 'application', id: 'a1', label: 'Sollicitatie · Jan', deleted: false }, body: 'linked note', type: 'general', author: 'Kelly', language: null, created_at: '2026-08-02T10:00:00Z', updated_at: '2026-08-02T10:00:00Z', is_direct: false, principals: [] },
     ]))
     render(createElement(NoteFeedList, { entity: 'candidates', id: 'c1' }), { wrapper })
     await waitFor(() => expect(screen.getByText('linked note')).toBeInTheDocument())
-    expect(screen.queryByText('own note')).not.toBeInTheDocument()
+    // The filter is SERVER-side since BE 97a1aac1 — the request must carry it.
+    const [, config] = vi.mocked(api.get).mock.calls[0]
+    expect((config?.params as Record<string, unknown>)?.only_linked).toBe(1)
   })
 
   it('a deep-linkable source chip opens the record; a deleted source degrades to plain text', async () => {
@@ -93,21 +94,22 @@ describe('NoteFeedList', () => {
     const [, config] = vi.mocked(api.get).mock.calls[1]
     expect(config?.params).toEqual({ only_linked: 1, per_page: 25, page: 2 })
   })
-})
-it('renders the server-resolved type_label on the chip, never the raw slug', async () => {
-  vi.mocked(api.get).mockResolvedValueOnce(page([
-    { id: 'n9', note_type: 'application_note', source: { type: 'application', id: 'a1', label: 'Sollicitatie · Jan', deleted: false }, body: 'typed note', type: 'weird_slug', type_label: 'Bellijst', author: 'Kelly', language: null, created_at: '2026-08-01T10:00:00Z', updated_at: '2026-08-01T10:00:00Z', is_direct: false, principals: [] },
-  ]))
-  render(createElement(NoteFeedList, { entity: 'candidates', id: 'c1' }), { wrapper })
-  await waitFor(() => expect(screen.getByText('typed note')).toBeInTheDocument())
-  expect(screen.getByText('Bellijst')).toBeInTheDocument()
-  expect(screen.queryByText('weird_slug')).not.toBeInTheDocument()
-})
 
-it('renders the honest screened-off state for a masked item, never a blank body', async () => {
-  vi.mocked(api.get).mockResolvedValueOnce(page([
-    { id: 'n8', note_type: 'match_note', source: { type: 'match', id: 'm1', label: 'Match', deleted: false }, body: null, body_masked: true, type: null, author: null, language: null, created_at: '2026-08-01T10:00:00Z', updated_at: '2026-08-01T10:00:00Z', is_direct: false, principals: [] },
-  ]))
-  render(createElement(NoteFeedList, { entity: 'customers', id: 'cu1' }), { wrapper })
-  await waitFor(() => expect(screen.getByText('Inhoud afgeschermd (geen kandidaat-rechten)')).toBeInTheDocument())
+  it('renders the server-resolved type_label on the chip, never the raw slug', async () => {
+    vi.mocked(api.get).mockResolvedValueOnce(page([
+      { id: 'n9', note_type: 'application_note', source: { type: 'application', id: 'a1', label: 'Sollicitatie · Jan', deleted: false }, body: 'typed note', type: 'weird_slug', type_label: 'Bellijst', author: 'Kelly', language: null, created_at: '2026-08-01T10:00:00Z', updated_at: '2026-08-01T10:00:00Z', is_direct: false, principals: [] },
+    ]))
+    render(createElement(NoteFeedList, { entity: 'candidates', id: 'c1' }), { wrapper })
+    await waitFor(() => expect(screen.getByText('typed note')).toBeInTheDocument())
+    expect(screen.getByText('Bellijst')).toBeInTheDocument()
+    expect(screen.queryByText('weird_slug')).not.toBeInTheDocument()
+  })
+
+  it('renders the honest screened-off state for a masked item, never a blank body', async () => {
+    vi.mocked(api.get).mockResolvedValueOnce(page([
+      { id: 'n8', note_type: 'match_note', source: { type: 'match', id: 'm1', label: 'Match', deleted: false }, body: null, body_masked: true, type: null, author: null, language: null, created_at: '2026-08-01T10:00:00Z', updated_at: '2026-08-01T10:00:00Z', is_direct: false, principals: [] },
+    ]))
+    render(createElement(NoteFeedList, { entity: 'customers', id: 'cu1' }), { wrapper })
+    await waitFor(() => expect(screen.getByText('Inhoud afgeschermd (geen kandidaat-rechten)')).toBeInTheDocument())
+  })
 })

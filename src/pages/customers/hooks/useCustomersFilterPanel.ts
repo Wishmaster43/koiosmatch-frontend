@@ -129,5 +129,7 @@ export function useCustomersFilterPanel({
     return () => unregisterFilters('customers-page')
   }, [filterGroups, registerFilters, unregisterFilters])
 
-  return { statusOptions, ownerOptions, applyGeo }
+  // applyGeo stays internal — CustomersPage never reads it off the return (it only
+  // flows into filterGroups above via the geo filter block), so exposing it was dead API.
+  return { statusOptions, ownerOptions }
 }

@@ -135,7 +135,7 @@
     "cancel": "Cancel",
     "searchPlaceholder": "Search notes…",
     "edit": "Edit",
-      "deleteNote": "Delete note",
+    "deleteNote": "Delete note",
     "deleteConfirm": "Delete this note?"
   },
   "drawer": {
@@ -490,7 +490,14 @@
     "empty": "No documents yet.",
     "loading": "Loading documents…",
     "loadFailed": "Failed to load documents.",
-    "noResults": "No documents found within these filters."
+    "noResults": "No documents found within these filters.",
+    "downloadSelected": "Download ({{count}})",
+    "deleteSelected": "Delete ({{count}})",
+    "name": "Name",
+    "size": "Size",
+    "deleteTitle": "Delete document",
+    "deleteManyMessage": "Are you sure you want to delete {{count}} documents?",
+    "deleteOneMessage": "Are you sure you want to delete this document?"
   },
   "age": {
     "days": "{{count}}d",

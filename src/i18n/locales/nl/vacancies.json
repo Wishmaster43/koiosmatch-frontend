@@ -135,7 +135,7 @@
     "cancel": "Annuleren",
     "searchPlaceholder": "Zoek notities…",
     "edit": "Bewerken",
-      "deleteNote": "Notitie verwijderen",
+    "deleteNote": "Notitie verwijderen",
     "deleteConfirm": "Deze notitie verwijderen?"
   },
   "drawer": {
@@ -490,7 +490,14 @@
     "empty": "Nog geen documenten.",
     "loading": "Documenten laden…",
     "loadFailed": "Documenten laden is mislukt.",
-    "noResults": "Geen documenten gevonden binnen deze filters."
+    "noResults": "Geen documenten gevonden binnen deze filters.",
+    "downloadSelected": "Download ({{count}})",
+    "deleteSelected": "Verwijder ({{count}})",
+    "name": "Naam",
+    "size": "Grootte",
+    "deleteTitle": "Document verwijderen",
+    "deleteManyMessage": "Weet je zeker dat je {{count}} documenten wilt verwijderen?",
+    "deleteOneMessage": "Weet je zeker dat je dit document wilt verwijderen?"
   },
   "age": {
     "days": "{{count}}d",

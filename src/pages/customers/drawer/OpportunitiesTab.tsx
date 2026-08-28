@@ -150,11 +150,11 @@ export default function OpportunitiesTab({ customerId, customerName }: { custome
       sortValue: o => o.expectedCloseAt ?? '', render: o => o.expectedCloseAt ? formatDate(o.expectedCloseAt) : '—' },
     { key: 'actions', header: '', align: 'right', render: o => (
       <div style={{ display: 'flex', gap: 4, justifyContent: 'flex-end' }}>
-        <button onClick={e => { e.stopPropagation(); setEditingOpp(o) }} title={t('common:edit')}
+        <button onClick={e => { e.stopPropagation(); setEditingOpp(o) }} title={t('common:edit')} aria-label={t('common:edit')}
           style={{ width: 24, height: 24, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', borderRadius: 6, cursor: 'pointer', border: 'none', background: 'var(--bg)', color: 'var(--text-muted)' }}>
           <Pencil size={12} />
         </button>
-        <button onClick={e => { e.stopPropagation(); remove(o) }} title={t('common:delete')}
+        <button onClick={e => { e.stopPropagation(); remove(o) }} title={t('common:delete')} aria-label={t('common:delete')}
           style={{ width: 24, height: 24, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', borderRadius: 6, cursor: 'pointer', border: 'none', background: 'var(--bg)', color: 'var(--color-danger-text)' }}>
           <Trash2 size={12} />
         </button>

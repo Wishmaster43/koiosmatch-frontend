@@ -108,12 +108,12 @@ export default function NoteFeedList({ entity, id, sub }: NoteFeedListProps) {
   // (see file docblock), flipping it to "direct only" would always render empty —
   // so it hides the section instead, the honest shape.
   const [onlyDirect, setOnlyDirect] = useState(false)
-  // only_linked=1 asks the server for the chain-linked subset (CMBE fast-follow);
-  // the client filter below stays as the §10-tolerant fallback until it lands.
+  // only_linked=1: the server returns only chain-linked rows (live since BE
+  // 97a1aac1) — no client-side re-filter needed.
   const { items, loading, error, hasMore, loadingMore, loadMore, reload } = useNoteFeed(entity, id, true, sub)
   const noteTypeEntity = entity === 'candidates' ? 'candidate' : 'customer'
   const { types: noteTypes } = useNoteTypes(noteTypeEntity as never)
-  const linkedItems = items.filter(i => !i.is_direct)
+  const linkedItems = items
 
   return (
     <div style={{ marginTop: 16, paddingTop: 12, borderTop: '1px solid var(--border)' }}>

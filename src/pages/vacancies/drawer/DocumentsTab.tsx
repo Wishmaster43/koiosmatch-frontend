@@ -196,7 +196,7 @@ export default function DocumentsTab({ vacancy: v }: { vacancy: VacancyDetail })
             style={{ border: 'none', outline: 'none', fontSize: 12, color: 'var(--text)', background: 'none', flex: 1, minWidth: 0 }} />
           {/* Search-clear glyph keeps its flush footprint (mirrors the shared search-chrome precedent). */}
           {/* eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- 11px inline clear glyph inside the search chrome, not a Button copy */}
-          {docSearch && <button onClick={() => setDocSearch('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 0, display: 'flex' }}><X size={11} /></button>}
+          {docSearch && <button onClick={() => setDocSearch('')} aria-label={t('common:clear')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 0, display: 'flex' }}><X size={11} /></button>}
         </div>
         <DrawerFilterMenu filters={filterRows}
           label={t('common:filters.button')} title={t('common:filters.title')} clearAllLabel={t('common:filters.clearAll')} />

@@ -135,7 +135,7 @@
     "cancel": "Abbrechen",
     "searchPlaceholder": "Notizen suchen…",
     "edit": "Bearbeiten",
-      "deleteNote": "Notiz löschen",
+    "deleteNote": "Notiz löschen",
     "deleteConfirm": "Diese Notiz löschen?"
   },
   "drawer": {
@@ -490,7 +490,14 @@
     "empty": "Noch keine Dokumente.",
     "loading": "Dokumente werden geladen…",
     "loadFailed": "Dokumente konnten nicht geladen werden.",
-    "noResults": "Keine Dokumente innerhalb dieser Filter gefunden."
+    "noResults": "Keine Dokumente innerhalb dieser Filter gefunden.",
+    "downloadSelected": "Herunterladen ({{count}})",
+    "deleteSelected": "Löschen ({{count}})",
+    "name": "Name",
+    "size": "Größe",
+    "deleteTitle": "Dokument löschen",
+    "deleteManyMessage": "Möchtest du wirklich {{count}} Dokumente löschen?",
+    "deleteOneMessage": "Möchtest du dieses Dokument wirklich löschen?"
   },
   "age": {
     "days": "{{count}}T",

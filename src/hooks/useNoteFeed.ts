@@ -69,11 +69,15 @@ export interface UseNoteFeedResult {
 }
 
 // Fetches one principal's cross-source note feed. `onlyLinked` requests the
-// chain-linked subset server-side (only_linked=1, CMBE fast-follow); until the
-// server honours it the response still carries both kinds and the CALLER keeps
-// its client filter as the §10-tolerant fallback.
+// chain-linked subset server-side (only_linked=1 — live since BE 97a1aac1;
+// the response then carries ONLY is_direct:false rows).
 export function useNoteFeed(entity: NoteFeedEntity, id: Id | null | undefined, onlyLinked: boolean, sub?: NoteFeedSubScope): UseNoteFeedResult {
-  // Sub-entity feeds nest under the owning customer; top-level feeds stay flat.
+  // Sub-entity feeds nest under the owning CUSTOMER — `id` is then the customer
+  // id and `entity` must be 'customers'; a sub-scope under 'candidates' would
+  // silently hit the customer route, so it is rejected loudly in dev.
+  if (sub && entity !== 'customers' && import.meta.env.DEV) {
+    throw new Error('useNoteFeed: sub-entity feeds require entity="customers"')
+  }
   const path = sub ? `/customers/${id}/${sub.kind}/${sub.id}/note-feed` : `/${entity}/${id}/note-feed`
   const query = useInfiniteQuery({
     queryKey: ['note-feed', entity, id, onlyLinked, sub?.kind, sub?.id],

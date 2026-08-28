@@ -135,7 +135,7 @@
     "cancel": "Cancelar",
     "searchPlaceholder": "Buscar notas…",
     "edit": "Editar",
-      "deleteNote": "Eliminar nota",
+    "deleteNote": "Eliminar nota",
     "deleteConfirm": "¿Eliminar esta nota?"
   },
   "drawer": {
@@ -490,7 +490,14 @@
     "empty": "Aún no hay documentos.",
     "loading": "Cargando documentos…",
     "loadFailed": "Error al cargar los documentos.",
-    "noResults": "No se han encontrado documentos con estos filtros."
+    "noResults": "No se han encontrado documentos con estos filtros.",
+    "downloadSelected": "Descargar ({{count}})",
+    "deleteSelected": "Eliminar ({{count}})",
+    "name": "Nombre",
+    "size": "Tamaño",
+    "deleteTitle": "Eliminar documento",
+    "deleteManyMessage": "¿Seguro que quieres eliminar {{count}} documentos?",
+    "deleteOneMessage": "¿Seguro que quieres eliminar este documento?"
   },
   "age": {
     "days": "{{count}}d",

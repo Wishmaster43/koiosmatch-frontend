@@ -84,11 +84,14 @@ export default function DocumentRow({
       <span style={{ fontSize: 11, fontWeight: 500, padding: '2px 8px', borderRadius: 99, background: tintBg(docColor(d.type)), color: chipInk(docColor(d.type)), whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{d.type ? docTypeLabel(d.type) : '—'}</span>
       <div style={{ display: 'flex', alignItems: 'center', gap: 2, justifyContent: 'space-between' }}>
         <Caption style={{ whiteSpace: 'nowrap' }}>{d.size ?? ''}</Caption>
-        {/* Row-action icon trio — mirrors the byte-identical unconverted row
-            in the candidate drawer's twin DocumentRow.tsx (out of this task's
-            scope): 3× Button's sm footprint (28px) would overflow this fixed
-            100px grid column (DOC_GRID_COLUMNS), which today fits size text +
-            3 dense icons side by side. */}
+        {/* Row-action icon trio — the candidate drawer's twin DocumentRow.tsx
+            already retired its own equivalent grid to an `auto` actions column
+            (Danny 08-08, documentHelpers.ts:46-51), so this is no longer byte-
+            identical to that row. The necessity here is THIS screen's fixed
+            100px grid column (DOC_GRID_COLUMNS): 3× Button's sm footprint (28px)
+            would overflow it, which today fits size text + 3 dense icons side
+            by side. Widening this column to match the candidate twin is
+            pending Danny's call. */}
         <div style={{ display: 'flex' }}>
           {/* eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- see comment above */}
           <button aria-label={t('common:edit')} onClick={() => { setRenamingId(d.id ?? null); setRenameValue(splitExt(String(d.name ?? d.file_name ?? '')).base) }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '2px 3px', display: 'flex' }}><Pencil size={12} /></button>

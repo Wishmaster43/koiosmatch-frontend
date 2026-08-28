@@ -1,7 +1,7 @@
 // Upload-queue state for DocumentsTab: the pending (not-yet-uploaded) files, each
 // with its own doc type, plus the actions that mutate that queue. Extracted
 // mechanically from DocumentsTab (§3 split trigger, 28-08) — no behavior change.
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { ChangeEvent } from 'react'
 
 // A queued-but-not-yet-uploaded file, each with its own document type (BUGFIX
@@ -18,6 +18,13 @@ interface UseDocumentUploadQueueArgs {
 // Owns the queued-file list and every action that touches it (add/type/remove/upload).
 export function useDocumentUploadQueue({ upload, uploadExtraFields, setUploadLink }: UseDocumentUploadQueueArgs) {
   const [pending, setPending] = useState<PendingItem[]>([])
+  // Mirrors `pending` so the unmount cleanup below reads the latest queue without
+  // depending on it (§9: a blob URL never explicitly revoked leaks for the tab's lifetime).
+  const pendingRef = useRef(pending)
+  // Mirror in an effect — writing a ref during render trips react-hooks/refs.
+  useEffect(() => { pendingRef.current = pending }, [pending])
+  // Revoke any still-queued preview URLs on unmount (e.g. the drawer closes mid-pick).
+  useEffect(() => () => { pendingRef.current.forEach(p => URL.revokeObjectURL?.(p.objectUrl)) }, [])
 
   // Send every queued file to the server — one upload() call per item, each with
   // its OWN type — so a multi-file pick uploads all of them, not just the first.
@@ -46,7 +53,7 @@ export function useDocumentUploadQueue({ upload, uploadExtraFields, setUploadLin
     return items.filter((_, i) => i !== idx)
   })
   // Cancel the whole queue: revoke every blob URL, then clear.
-  const cancelPending = () => { pending.forEach(p => URL.revokeObjectURL(p.objectUrl)); setPending([]) }
+  const cancelPending = () => { pending.forEach(p => URL.revokeObjectURL?.(p.objectUrl)); setPending([]) }
   // File-input change handler: every picked file becomes its own queue entry
   // (default type 'CV') — this is the actual bugfix: previously only files?.[0] was kept.
   const onFilesPicked = (e: ChangeEvent<HTMLInputElement>) => {
