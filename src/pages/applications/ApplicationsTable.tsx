@@ -2,6 +2,7 @@
 // selection and the loading/empty/success states live in the shared DataTable.
 // Cell rendering reuses Avatar/StatusPill/soft-chip conventions, never custom chrome.
 import type { RefObject } from 'react'
+import { cellButton } from '@/components/ui/cellButton'
 import { useTranslation } from 'react-i18next'
 import { useSeedLabel } from '@/lib/useSeedLabel'
 import { Clock, CheckCircle2 } from 'lucide-react'
@@ -23,11 +24,14 @@ import type { Id } from '@/types/common'
 import { useAllSettings, getBoolSetting } from '@/lib/settings/useAllSettings'
 import { useApplicationAdvice } from '@/lib/useApplicationAdvice'
 import { useDateFormat, daysSince } from '@/lib/datetime'
+import { useNavigation } from '@/context/NavigationContext'
 import { interviewCategoryColor } from './data/applicationsShared'
 import { APPLICATION_SORT_KEYS } from './hooks/useApplicationsData'
 
 // Plain-text cell style (used when a colour toggle is off).
 const plainCell = { color: 'var(--text)', fontSize: 12 }
+
+// CEL-DOORKLIK-CANON: shared reset so a cell deep-link renders invisibly inside
 
 // Match score as a soft-coloured percentage (green ≥75, amber ≥50, red below);
 // `plain` renders it as neutral text when the colour toggle is off.
@@ -88,6 +92,8 @@ export default function ApplicationsTable({ rows, loading, error, selectedId, on
   // the backend's free-text `task` through the shared KoiosAdvice shape, so the
   // pill renders with ADVICE_META's task icon like every other entity.
   const adviceOf = useApplicationAdvice()
+  // CEL-DOORKLIK-CANON: candidate/client cells deep-link to their own drilldown.
+  const { openEntity } = useNavigation()
 
   // Column template mirrors the candidates blueprint (§3A): identity → phase/status →
   // dates → qualification → Koios → owner LAST (Danny 2026-07-14 table standardization).
@@ -97,12 +103,18 @@ export default function ApplicationsTable({ rows, loading, error, selectedId, on
     { key: 'candidate', header: t('cols.candidate'), sortable: true, sortValue: r => r.candidateName,
       serverKey: APPLICATION_SORT_KEYS.candidate,
       sticky: true, width: 200, nowrap: true,
-      render: r => (
-        <span style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
-          <Avatar initials={r.candidateInitials} size={24} soft />
-          <span style={{ fontWeight: 500, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block', maxWidth: 150 }} title={r.candidateName}>{r.candidateName}</span>
-        </span>
-      ) },
+      render: r => {
+        const content = (
+          <span style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
+            <Avatar initials={r.candidateInitials} size={24} soft />
+            <span style={{ fontWeight: 500, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block', maxWidth: 150 }} title={r.candidateName}>{r.candidateName}</span>
+          </span>
+        )
+        if (r.candidateId == null) return content
+        // CEL-DOORKLIK-CANON: candidate identity cell deep-links to the candidate drilldown.
+        // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- cell deep-link rendered AS the cell's own identity content via the shared cellButton reset (§14 r7 necessity)
+        return <button type="button" onClick={e => { e.stopPropagation(); openEntity('candidates', r.candidateId as Id) }} aria-label={r.candidateName ? `${t('drawer.openCandidate')}: ${r.candidateName}` : t('drawer.openCandidate')} style={cellButton}>{content}</button>
+      } },
     {
       // Human-readable reference number (S-00042) — an identifier, so it sits right
       // after the identity column, exactly where candidates/customers/vacancies/
@@ -125,7 +137,13 @@ export default function ApplicationsTable({ rows, loading, error, selectedId, on
     // Klant — soft avatar + name (AVATAR-CHIP-1: same chip as the candidate identity
     // column), muted text keeps it reading as a secondary reference.
     { key: 'client', header: t('cols.client'), sortable: true, nowrap: true,
-      render: r => <EntityNameCell name={r.client} textStyle={{ color: 'var(--text-muted)' }} /> },
+      render: r => {
+        const content = <EntityNameCell name={r.client} textStyle={{ color: 'var(--text-muted)' }} />
+        if (r.customerId == null) return content
+        // CEL-DOORKLIK-CANON: client cell deep-links to the customer drilldown.
+        // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- cell deep-link rendered AS the cell's own identity content via the shared cellButton reset (§14 r7 necessity)
+        return <button type="button" onClick={e => { e.stopPropagation(); openEntity('customers', r.customerId as Id) }} aria-label={r.client ? `${t('drawer.openCustomer')}: ${r.client}` : t('drawer.openCustomer')} style={cellButton}>{content}</button>
+      } },
     // Match score. DATATABLE-SORT-1: serverKey maps to ApplicationQuery's match_score sort.
     { key: 'score', header: t('cols.score'), align: 'right', sortable: true,
       sortValue: r => r.score ?? -1, serverKey: APPLICATION_SORT_KEYS.score,

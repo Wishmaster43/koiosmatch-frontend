@@ -30,6 +30,10 @@ vi.mock('@/lib/settings/useAllSettings', () => ({
   useAllSettings: () => ({}),
   getBoolSetting: (_s: unknown, key: string, fallback: boolean) => boolSettingOverrides[key] ?? fallback,
 }))
+// CEL-DOORKLIK-CANON: spy on the deep-link navigation the candidate/client cells trigger.
+const mockOpenEntity = vi.fn()
+vi.mock('@/context/NavigationContext', () => ({ useNavigation: () => ({ openEntity: mockOpenEntity }) }))
+beforeEach(() => { mockOpenEntity.mockClear() })
 
 const baseRow = {
   id: 1, candidateName: 'Jane Doe', candidateInitials: 'JD', vacancyTitle: 'Verpleegkundige',
@@ -298,5 +302,40 @@ describe('ApplicationsTable · score source marking', () => {
       { ...base, id: 3 } as unknown as Application,
     ]} />)
     expect(screen.queryByTitle('Score door Koios AI')).toBeNull()
+  })
+})
+
+// CEL-DOORKLIK-CANON: candidate identity cell + client cell deep-link to their
+// own drilldown, and never let that click also open the row's own detail drawer.
+describe('ApplicationsTable · cell deep-links (CEL-DOORKLIK-CANON)', () => {
+  it('opens the candidate drilldown from the candidate cell, without triggering the row select', async () => {
+    const user = userEvent.setup()
+    const onSelect = vi.fn()
+    const row = { ...baseRow, id: 80, candidateId: 'cand-8' } as unknown as Application
+    render(<ApplicationsTable rows={[row]} onSelect={onSelect} />)
+
+    await user.click(screen.getByRole('button', { name: /Open kandidaat/ }))
+
+    expect(mockOpenEntity).toHaveBeenCalledWith('candidates', 'cand-8')
+    expect(onSelect).not.toHaveBeenCalled()
+  })
+
+  it('opens the customer drilldown from the client cell', async () => {
+    const user = userEvent.setup()
+    const onSelect = vi.fn()
+    const row = { ...baseRow, id: 81, customerId: 'cust-8' } as unknown as Application
+    render(<ApplicationsTable rows={[row]} onSelect={onSelect} />)
+
+    await user.click(screen.getByRole('button', { name: /Klant openen/ }))
+
+    expect(mockOpenEntity).toHaveBeenCalledWith('customers', 'cust-8')
+    expect(onSelect).not.toHaveBeenCalled()
+  })
+
+  it('renders the candidate cell unwrapped when no candidateId is present', () => {
+    const row = { ...baseRow, id: 82, candidateId: null } as unknown as Application
+    render(<ApplicationsTable rows={[row]} />)
+    expect(screen.queryByRole('button', { name: /Open kandidaat/ })).toBeNull()
+    expect(screen.getByText('Jane Doe')).toBeInTheDocument()
   })
 })

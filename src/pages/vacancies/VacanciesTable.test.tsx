@@ -6,6 +6,9 @@ import userEvent from '@testing-library/user-event'
 // seeded-label test below can switch languages (mirrors Sidebar.test.jsx).
 import i18n from '@/i18n'
 import VacanciesTable from './VacanciesTable'
+
+const openEntity = vi.fn()
+vi.mock('@/context/NavigationContext', () => ({ useNavigation: () => ({ openEntity }) }))
 import type { Vacancy } from '@/types/vacancy'
 import nlVacancies from '@/i18n/locales/nl/vacancies.json'
 
@@ -71,7 +74,7 @@ describe('VacanciesTable · AI-agent column (Danny 22-07)', () => {
 describe('VacanciesTable · Leads count deep-link (VACANCY-MATCH-COUNT-1, Danny 23-07)', () => {
   it('renders a plain number when onOpenCandidateSearch is not wired', () => {
     render(<VacanciesTable rows={rows} />)
-    expect(screen.queryByRole('button', { name: 'Open Kandidaten zoeken' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /Open Kandidaten zoeken/ })).not.toBeInTheDocument()
   })
 
   it('clicking the leads count calls onOpenCandidateSearch with the row id and does not open the row', async () => {
@@ -84,7 +87,7 @@ describe('VacanciesTable · Leads count deep-link (VACANCY-MATCH-COUNT-1, Danny 
     render(<VacanciesTable rows={leadsRows} onSelect={onSelect} onOpenCandidateSearch={onOpenCandidateSearch} />)
 
     // The button's real (nl) aria-label + its own text (the leads count).
-    const btn = screen.getByRole('button', { name: 'Open Kandidaten zoeken' })
+    const btn = screen.getByRole('button', { name: /Open Kandidaten zoeken/ })
     expect(btn).toHaveTextContent('3')
     await user.click(btn)
 
@@ -103,7 +106,7 @@ describe('VacanciesTable · Leads count deep-link (VACANCY-MATCH-COUNT-1, Danny 
     ] as unknown as Vacancy[]
     render(<VacanciesTable rows={unknownRows} onOpenCandidateSearch={onOpenCandidateSearch} />)
 
-    const btn = screen.getByRole('button', { name: 'Open Kandidaten zoeken' })
+    const btn = screen.getByRole('button', { name: /Open Kandidaten zoeken/ })
     expect(btn).toHaveTextContent('—')
     await user.click(btn)
     expect(onOpenCandidateSearch).toHaveBeenCalledWith('v9')
@@ -464,5 +467,22 @@ describe('VacanciesTable · Koios column (Danny 05-08)', () => {
     const headerCell = screen.getByRole('img', { name: 'Koios AI' }).closest('th') as HTMLElement
     const col = Array.from(headerCell.parentElement?.children ?? []).indexOf(headerCell)
     expect(container.querySelectorAll('tbody tr')[0].children[col].textContent).toBe('—')
+  })
+})
+
+describe('VacanciesTable · client cell deep-link', () => {
+  it('opens the customers drill-down and never the row onSelect', async () => {
+    const user = userEvent.setup()
+    const onSelect = vi.fn()
+    const row = {
+      id: 'v90', title: 'Verpleegkundige', clientName: 'Zorgpartners', clientId: 'c-77',
+      published: true, archived: false, applicationsCount: 0, created: '2000-01-01', createdSort: '2000-01-01',
+    } as unknown as Vacancy
+    render(<VacanciesTable rows={[row]} onSelect={onSelect} />)
+
+    await user.click(screen.getByRole('button', { name: /Open klant/ }))
+
+    expect(openEntity).toHaveBeenCalledWith('customers', 'c-77')
+    expect(onSelect).not.toHaveBeenCalled()
   })
 })

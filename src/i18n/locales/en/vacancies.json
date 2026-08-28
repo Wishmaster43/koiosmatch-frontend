@@ -576,5 +576,8 @@
       "indeed": "Indeed",
       "werkzoeken": "Werkzoeken"
     }
+  },
+  "cellLinks": {
+    "openCustomer": "Open customer"
   }
 }

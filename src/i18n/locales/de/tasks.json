@@ -269,5 +269,8 @@
       "deleted": "Archiviert",
       "restored": "Wiederhergestellt"
     }
+  },
+  "cellLinks": {
+    "openLink": "Verknüpften Datensatz öffnen"
   }
 }

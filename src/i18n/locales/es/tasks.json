@@ -269,5 +269,8 @@
       "deleted": "Archivado",
       "restored": "Restaurado"
     }
+  },
+  "cellLinks": {
+    "openLink": "Abrir registro vinculado"
   }
 }

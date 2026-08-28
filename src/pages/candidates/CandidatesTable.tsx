@@ -4,6 +4,7 @@
  * loading/empty states live in the shared DataTable.
  */
 import { useMemo } from 'react'
+import { cellButton } from '@/components/ui/cellButton'
 import { useTranslation } from 'react-i18next'
 import { useSeedLabel } from '@/lib/useSeedLabel'
 import type { ComponentType, CSSProperties, RefObject } from 'react'
@@ -34,8 +35,6 @@ const plainCell: CSSProperties = { color: 'var(--text)', fontSize: 12 }
 const dash = <span style={{ color: 'var(--text-muted)' }}>—</span>
 
 // Shared reset style for every clickable cell wrapper — keeps the visual output
-// pixel-identical to a plain <span>/<div> while making the whole cell a real button.
-const cellButton: CSSProperties = { background: 'none', border: 'none', padding: 0, font: 'inherit', cursor: 'pointer', textAlign: 'left' }
 
 type LucideIcon = ComponentType<{ size?: number; title?: string; style?: CSSProperties }>
 

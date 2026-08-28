@@ -94,9 +94,12 @@ export const TASK_LINK_TYPES: string[] = Object.keys(TASK_LINK_ENDPOINTS)
 
 // Link type → the page that honours the { open: id } intent (click-through, Danny
 // 2026-07-04). Types without a drill-down surface yet (contact/location/…) render
-// as plain text until their page exists (contacts = CUST-3). `opportunity` stays
-// OUT on purpose: OpportunitiesPage does not call `useOpenFromIntent`, so a click
-// would switch pages without opening the record — a half-affordance (§3).
+// as plain text until their page exists (contacts = CUST-3). opportunity/match/
+// task joined in r2 — their pages honour the open-intent now (measured:
+// MatchesPage:209, OpportunitiesPage:108, TasksPage:166), the old exclusion
+// comment was stale. This stays the ONE map (§11): the table and the drawer's
+// LinksTab read the same source.
 export const TASK_LINK_PAGE: Record<string, string> = {
   candidate: 'candidates', vacancy: 'vacancies', customer: 'customers', application: 'applications',
+  opportunity: 'opportunities', match: 'matches', task: 'tasks',
 }

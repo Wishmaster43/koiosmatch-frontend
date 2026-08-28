@@ -269,5 +269,8 @@
       "deleted": "Gearchiveerd",
       "restored": "Hersteld"
     }
+  },
+  "cellLinks": {
+    "openLink": "Open gekoppeld record"
   }
 }

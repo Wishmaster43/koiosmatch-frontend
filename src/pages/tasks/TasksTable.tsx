@@ -1,6 +1,7 @@
 // TasksTable — declares the tasks list COLUMNS only (§3A); sorting, selection and
 // the loading/empty/success states live in the shared DataTable.
 import type { RefObject } from 'react'
+import { cellButton } from '@/components/ui/cellButton'
 import { useTranslation } from 'react-i18next'
 import { Building2 } from 'lucide-react'
 import DataTable from '@/components/ui/DataTable'
@@ -13,10 +14,13 @@ import { makeKoiosColumn } from '@/components/ui/koiosColumn'
 import { useDateFormat } from '@/lib/datetime'
 import { useAllSettings, getBoolSetting } from '@/lib/settings/useAllSettings'
 import { useTaskAdvice } from '@/lib/useTaskAdvice'
+import { useNavigation } from '@/context/NavigationContext'
+import { TASK_LINK_PAGE } from './links/taskLinkTypes'
 import { isTaskOverdue, dueDateTime } from './data/mapTask'
 import type { Task } from '@/types/task'
 import type { Id } from '@/types/common'
 
+// Cell deep-link reset (HOUSE RECIPE, CandidatesTable.tsx) — no visual identity of
 const dash = <span style={{ color: 'var(--text-muted)' }}>—</span>
 // Neutral grey fallback (§3A owner-cell convention) when the assignee has no colour.
 // eslint-disable-next-line no-restricted-syntax -- DATA fallback, not a UI colour choice (mirrors Avatar.tsx's identical constant)
@@ -54,6 +58,7 @@ export default function TasksTable({
   rows, loading, error, selectedId, onSelect,
   selectable, selectedIds, onToggleRow, onToggleAll, stickyHeader = false, scrollParentRef,
 }: TasksTableProps) {
+  const { openEntity } = useNavigation()
   const { t } = useTranslation('tasks')
   const { formatDate, formatDateTime } = useDateFormat()
   // Tenant display settings (Settings → Tasks → Table display). Coloured chips ON by
@@ -119,9 +124,18 @@ export default function TasksTable({
     // Linked entity — soft avatar + first link's label (AVATAR-CHIP-1: same chip as
     // the candidate identity column), "+N" when a task is linked to several entities.
     { key: 'links', header: t('cols.links'),
-      render: r => r.links.length === 0
-        ? dash
-        : <EntityNameCell name={r.links[0].label} extra={r.links.length > 1 ? r.links.length - 1 : undefined} /> },
+      render: r => {
+        if (r.links.length === 0) return dash
+        const first = r.links[0]
+        const cell = <EntityNameCell name={first.label} extra={r.links.length > 1 ? r.links.length - 1 : undefined} />
+        // Only linkable types with their own page (ENTITY_PAGE, shared with
+        // notificationTarget) deep-link — an unmapped type (location, department,
+        // contact, workflow, task…) renders unwrapped, as today.
+        const page = first.id != null ? TASK_LINK_PAGE[first.type] : undefined
+        if (!page) return cell
+        // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- cell deep-link rendered AS the cell's own chip content via the shared cellButton reset; Button's fixed sm chrome cannot sit invisibly inside a dense table cell (§14 r7 necessity)
+        return <button type="button" onClick={e => { e.stopPropagation(); openEntity(page, first.id) }} aria-label={first.label ? `${t('cellLinks.openLink')}: ${first.label}` : t('cellLinks.openLink')} style={cellButton}>{cell}</button>
+      } },
     // Due date — DD-MM-YYYY, red when overdue; DD-MM-YYYY HH:mm when a due_time is
     // set (TASK-DUE-TIME-1) — date-only tasks keep the plain date, never fabricated.
     { key: 'due', header: t('cols.due'), sortable: true, sortValue: r => r.due || '',

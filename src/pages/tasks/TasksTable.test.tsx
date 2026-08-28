@@ -8,6 +8,9 @@ import { describe, it, expect, vi } from 'vitest'
 import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import TasksTable from './TasksTable'
+
+const openEntity = vi.fn()
+vi.mock('@/context/NavigationContext', () => ({ useNavigation: () => ({ openEntity }) }))
 import type { Task } from '@/types/task'
 
 vi.mock('@/lib/settings/useAllSettings', () => ({
@@ -142,5 +145,27 @@ describe('TasksTable · subtask progress badge (SUBTASK-1)', () => {
     const zero = { ...baseRow, id: 't8', subtaskProgress: { done: 0, total: 0 } } as unknown as Task
     render(<TasksTable rows={[zero]} />)
     expect(screen.queryByText('0/0')).toBeNull()
+  })
+})
+
+describe('TasksTable · link cell deep-link', () => {
+  it('opens the linked candidate and never the row onSelect', async () => {
+    const user = userEvent.setup()
+    const onSelect = vi.fn()
+    const row = { ...baseRow, id: 't90', links: [{ type: 'candidate', id: 'cand-9', label: 'Jan Jansen' }] }
+    render(<TasksTable rows={[row]} onSelect={onSelect} />)
+
+    await user.click(screen.getByRole('button', { name: /Open gekoppeld record/ }))
+
+    expect(openEntity).toHaveBeenCalledWith('candidates', 'cand-9')
+    expect(onSelect).not.toHaveBeenCalled()
+  })
+
+  it('renders an unmapped link type unwrapped (no button)', () => {
+    const row = { ...baseRow, id: 't91', links: [{ type: 'department', id: 'dep-1', label: 'Backoffice' }] }
+    render(<TasksTable rows={[row]} />)
+
+    expect(screen.getByText('Backoffice')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /Open gekoppeld record/ })).not.toBeInTheDocument()
   })
 })

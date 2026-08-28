@@ -10,6 +10,9 @@ import userEvent from '@testing-library/user-event'
 import OpportunitiesTable from './OpportunitiesTable'
 import type { Opportunity } from '@/types/opportunity'
 
+const openEntity = vi.fn()
+vi.mock('@/context/NavigationContext', () => ({ useNavigation: () => ({ openEntity }) }))
+
 vi.mock('@/lib/settings/useAllSettings', () => ({
   useAllSettings: () => ({}),
   getBoolSetting: (_s: unknown, _key: string, fallback: boolean) => fallback,
@@ -169,5 +172,19 @@ describe('OpportunitiesTable · start/end date columns', () => {
 
     const values = Array.from(container.querySelectorAll('tbody tr')).map(r => r.children[endCol].textContent)
     expect(values).toEqual(['01-02-2026', '01-07-2026', '01-12-2026'])
+  })
+})
+
+describe('OpportunitiesTable · client cell deep-link', () => {
+  it('opens the customers drill-down and never the row onRowClick', async () => {
+    const user = userEvent.setup()
+    const onRowClick = vi.fn()
+    const row = { ...baseRow, id: 'o90', client: 'Zorgpartners', clientId: 'c-42' }
+    render(<OpportunitiesTable rows={[row]} onRowClick={onRowClick} />)
+
+    await user.click(screen.getByRole('button', { name: /klant openen/i }))
+
+    expect(openEntity).toHaveBeenCalledWith('customers', 'c-42')
+    expect(onRowClick).not.toHaveBeenCalled()
   })
 })

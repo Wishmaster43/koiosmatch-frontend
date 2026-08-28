@@ -3,6 +3,7 @@
 // reuse the house avatar/chip/pill conventions so a match row reads exactly
 // like every other entity table.
 import type { RefObject } from 'react'
+import { cellButton } from '@/components/ui/cellButton'
 import { useTranslation } from 'react-i18next'
 import { useDateFormat } from '@/lib/datetime'
 import DataTable from '@/components/ui/DataTable'
@@ -28,6 +29,8 @@ import type { Id } from '@/types/common'
 // Neutral grey fallback (§3A owner-cell convention) when the mapper has no colour.
 // eslint-disable-next-line no-restricted-syntax -- DATA fallback, not a UI colour choice (mirrors Avatar.tsx's identical constant)
 const NEUTRAL_AVATAR = '#9CA3AF'
+
+// CEL-DOORKLIK-CANON: shared reset so a cell deep-link renders invisibly inside
 
 interface MatchesTableProps {
   rows: MatchRow[]
@@ -83,12 +86,18 @@ export default function MatchesTable({
     // Candidate — soft avatar + name, sticky first column (mirrors candidates/applications).
     { key: 'candidate', header: t('cols.candidate'), sortable: true,
       sticky: true, width: 200, nowrap: true,
-      render: r => (
-        <span style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
-          <Avatar initials={r.initials} size={24} soft />
-          <span style={{ fontWeight: 500, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block', maxWidth: 150 }} title={r.candidate}>{r.candidate}</span>
-        </span>
-      ) },
+      render: r => {
+        const content = (
+          <span style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
+            <Avatar initials={r.initials} size={24} soft />
+            <span style={{ fontWeight: 500, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block', maxWidth: 150 }} title={r.candidate}>{r.candidate}</span>
+          </span>
+        )
+        if (r.candidateId == null) return content
+        // CEL-DOORKLIK-CANON: candidate identity cell deep-links to the candidate drilldown.
+        // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- cell deep-link rendered AS the cell's own identity content via the shared cellButton reset (§14 r7 necessity)
+        return <button type="button" onClick={e => { e.stopPropagation(); openEntity('candidates', r.candidateId as Id) }} aria-label={r.candidate ? `${t('drawer.openCandidate')}: ${r.candidate}` : t('drawer.openCandidate')} style={cellButton}>{content}</button>
+      } },
     {
       // Human-readable reference number (M-00042, JOB1) — an identifier, so it sits
       // right after the candidate identity column. Plain mono text, not the interactive
@@ -105,11 +114,24 @@ export default function MatchesTable({
     // SWEEP-TABLES: explicit em-dash fallback — without a render fn, DataTable's
     // default cell (`field(row, col.key)`) prints a blank string for an empty
     // vacancy title, the only column left inconsistent with the house convention.
-    { key: 'vacancy', header: t('cols.vacancy'), sortable: true, nowrap: false, render: r => r.vacancy || '—' },
+    { key: 'vacancy', header: t('cols.vacancy'), sortable: true, nowrap: false,
+      render: r => {
+        const text = r.vacancy || '—'
+        if (r.vacancyId == null) return text
+        // CEL-DOORKLIK-CANON: vacancy cell deep-links to the vacancy drilldown.
+        // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- cell deep-link rendered AS the cell's own text content via the shared cellButton reset (§14 r7 necessity)
+        return <button type="button" onClick={e => { e.stopPropagation(); openEntity('vacancies', r.vacancyId as Id) }} aria-label={r.vacancy ? `${t('drawer.openVacancy')}: ${r.vacancy}` : t('drawer.openVacancy')} style={cellButton}>{text}</button>
+      } },
     // Customer — soft avatar + name (AVATAR-CHIP-1: same chip as the candidate identity
     // column), muted text keeps it reading as a secondary reference.
     { key: 'client',  header: t('cols.client'),  sortable: true, nowrap: true,
-      render: r => <EntityNameCell name={r.client} textStyle={{ color: 'var(--text-muted)' }} /> },
+      render: r => {
+        const content = <EntityNameCell name={r.client} textStyle={{ color: 'var(--text-muted)' }} />
+        if (r.clientId == null) return content
+        // CEL-DOORKLIK-CANON: client cell deep-links to the customer drilldown.
+        // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- cell deep-link rendered AS the cell's own identity content via the shared cellButton reset (§14 r7 necessity)
+        return <button type="button" onClick={e => { e.stopPropagation(); openEntity('customers', r.clientId as Id) }} aria-label={r.client ? `${t('drawer.openClient')}: ${r.client}` : t('drawer.openClient')} style={cellButton}>{content}</button>
+      } },
     // MATCH-SOORT-1: Contractvorm — the ONE shared chip, sortable on its label
     // (mirrors the stage column's own lookup-driven soft chip).
     { key: 'contractForm', header: t('cols.contractForm'), sortable: true, sortValue: r => r.contractForm?.label ?? '',

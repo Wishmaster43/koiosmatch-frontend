@@ -269,5 +269,8 @@
       "deleted": "Archivé",
       "restored": "Restauré"
     }
+  },
+  "cellLinks": {
+    "openLink": "Ouvrir l’enregistrement lié"
   }
 }

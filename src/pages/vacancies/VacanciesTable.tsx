@@ -3,6 +3,7 @@
  * below, right above the component, for the column contract it declares.
  */
 import type { RefObject } from 'react'
+import { cellButton } from '@/components/ui/cellButton'
 import { useTranslation } from 'react-i18next'
 import { Globe } from 'lucide-react'
 import DataTable from '@/components/ui/DataTable'
@@ -15,6 +16,8 @@ import { makeKoiosColumn } from '@/components/ui/koiosColumn'
 import { useDateFormat, daysSince } from '@/lib/datetime'
 import { useSeedLabel } from '@/lib/useSeedLabel'
 import { useVacancyLookups } from '@/context/VacancyLookupsContext'
+import { useNavigation } from '@/context/NavigationContext'
+import EntityNameCell from '@/components/ui/EntityNameCell'
 import { useAllSettings, getBoolSetting } from '@/lib/settings/useAllSettings'
 import { useVacancyAdvice } from '@/lib/useVacancyAdvice'
 import type { Vacancy } from '@/types/vacancy'
@@ -35,6 +38,7 @@ const plainCell = { color: 'var(--text)', fontSize: 12 }
 // number in the row. The affordance stays: pointer cursor plus an underline on
 // hover and on keyboard focus, which is what actually says "clickable" (§4:
 // colour only where it carries meaning, never as decoration).
+// Cell deep-link reset (HOUSE RECIPE, CandidatesTable.tsx) — no visual identity of
 const leadsBtn = { display: 'inline-flex', ...monoStyle, fontSize: 12,
   color: 'var(--text)', background: 'none', border: 'none', padding: 0, cursor: 'pointer', font: 'inherit' }
 
@@ -74,6 +78,7 @@ interface VacanciesTableProps {
  * Mirrors CandidatesTable / ApplicationsTable.
  */
 export default function VacanciesTable({ rows, loading, selectedId, onSelect, onOpenCandidateSearch, onOpenApplicants, onOpenMatches, selectable, selectedIds, onToggleRow, onToggleAll, selectionBusy, stickyHeader = false, scrollParentRef, sort, onSortChange }: VacanciesTableProps) {
+  const { openEntity } = useNavigation()
   const { t } = useTranslation(['vacancies', 'common'])
   const { formatDate } = useDateFormat()
   // Seeded lookup labels the server embedded in the row render in the user language.
@@ -116,12 +121,14 @@ export default function VacanciesTable({ rows, loading, selectedId, onSelect, on
     },
     {
       key: 'client', header: t('columns.client'), nowrap: true, sortable: true, sortValue: r => r.clientName,
-      render: r => r.clientName ? (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <Avatar initials={(r.clientName[0] ?? '?').toUpperCase()} size={20} soft />
-          <span style={{ color: 'var(--text)', fontSize: 12 }}>{r.clientName}</span>
-        </div>
-      ) : <span style={{ color: 'var(--text-muted)' }}>—</span>,
+      // AVATAR-CHIP-1: reuse the shared EntityNameCell rather than hand-building
+      // Avatar + span (drift caught 28-08) — same look as every other identity cell.
+      render: r => {
+        const cell = <EntityNameCell name={r.clientName} textStyle={{ color: 'var(--text-muted)' }} />
+        if (r.clientId == null) return cell
+        // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- cell deep-link rendered AS the cell's own chip content via the shared cellButton reset; Button's fixed sm chrome cannot sit invisibly inside a dense table cell (§14 r7 necessity)
+        return <button type="button" onClick={e => { e.stopPropagation(); openEntity('customers', r.clientId) }} aria-label={r.clientName ? `${t('cellLinks.openCustomer')}: ${r.clientName}` : t('cellLinks.openCustomer')} style={cellButton}>{cell}</button>
+      },
     },
     {
       // SWEEP-TABLES: VacancyQuery::rules() validates `sort` as `in:status` ONLY —

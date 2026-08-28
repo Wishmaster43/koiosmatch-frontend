@@ -1,6 +1,7 @@
 // OpportunitiesTable — declares the opportunities list COLUMNS only (§3A); sorting,
 // selection and the loading/empty/success states live in the shared DataTable.
 import type { RefObject } from 'react'
+import { cellButton } from '@/components/ui/cellButton'
 import { useTranslation } from 'react-i18next'
 import { useDateFormat } from '@/lib/datetime'
 import DataTable from '@/components/ui/DataTable'
@@ -14,11 +15,14 @@ import { makeKoiosColumn } from '@/components/ui/koiosColumn'
 import { initialsOf } from '@/lib/initials'
 import { useAllSettings, getBoolSetting } from '@/lib/settings/useAllSettings'
 import { useOpportunityAdvice } from '@/lib/useOpportunityAdvice'
+import { useNavigation } from '@/context/NavigationContext'
 import { isExpectedCloseOverdue } from './data/opportunityAdvice'
 import { opportunityValueOf, formatOpportunityValue } from './data/opportunityValue'
 import { useSeedLabel } from '@/lib/useSeedLabel'
 import type { Opportunity } from '@/types/opportunity'
 import type { Id, LookupOption } from '@/types/common'
+
+// Cell deep-link reset (HOUSE RECIPE, CandidatesTable.tsx) — no visual identity of
 
 interface OpportunitiesTableProps {
   rows: Opportunity[]
@@ -45,6 +49,7 @@ const NEUTRAL_AVATAR = '#9CA3AF'
 
 // OpportunitiesTable — declares columns only; the shared DataTable owns sorting + states.
 export default function OpportunitiesTable({ rows, loading, error, onRowClick, selectedId, valueInHours = false, stages = [], selectable, selectedIds, onToggleRow, onToggleAll, stickyHeader = false, scrollParentRef }: OpportunitiesTableProps) {
+  const { openEntity } = useNavigation()
   const { t } = useTranslation(['opportunities', 'common'])
   const { formatDate } = useDateFormat()
   // Tenant display settings (Settings → Kansen → Tabelweergave). Coloured chips ON
@@ -85,7 +90,12 @@ export default function OpportunitiesTable({ rows, loading, error, onRowClick, s
     // Klant — soft avatar + name (AVATAR-CHIP-1: same chip as the candidates identity
     // column), muted text keeps it reading as a secondary reference, not the row's own identity.
     { key: 'client', header: t('cols.client'), sortable: true, nowrap: true,
-      render: r => <EntityNameCell name={r.client} textStyle={{ color: 'var(--text-muted)' }} /> },
+      render: r => {
+        const cell = <EntityNameCell name={r.client} textStyle={{ color: 'var(--text-muted)' }} />
+        if (r.clientId == null) return cell
+        // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- cell deep-link rendered AS the cell's own chip content via the shared cellButton reset; Button's fixed sm chrome cannot sit invisibly inside a dense table cell (§14 r7 necessity)
+        return <button type="button" onClick={e => { e.stopPropagation(); openEntity('customers', r.clientId) }} aria-label={r.client ? `${t('details.openCustomer')}: ${r.client}` : t('details.openCustomer')} style={cellButton}>{cell}</button>
+      } },
     { key: 'stage',  header: t('cols.stage'), sortable: true, sortValue: r => r.stage,
       // Phase axis — round chip (StatusPill), mirrors candidates/applications (Danny 2026-07-14).
       render: r => {
