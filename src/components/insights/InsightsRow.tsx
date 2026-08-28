@@ -10,6 +10,9 @@ import type { ComponentType, CSSProperties, ReactNode } from 'react'
 import { FilterX } from 'lucide-react'
 import { interactive } from '@/lib/a11y'
 import { useNumberFormat } from '@/lib/formatters'
+// HUISSTIJL-1: the §4 soft-tint formula lives in lib/tint, never a hand-rolled
+// color-mix literal (10/33 house pair, not an ad-hoc percentage).
+import { tintBg, tintBorder } from '@/lib/tint'
 import MiniDonutJs from '../charts/MiniDonut'
 
 type AnyProps = Record<string, unknown>
@@ -151,8 +154,8 @@ export default function InsightsRow({ donuts = [], kpis = [], padding = '16px 24
     <>
     {notice && (
       <div role="status" style={{ margin: '10px 24px -6px', padding: '5px 10px', fontSize: 11, borderRadius: 7,
-        color: 'var(--color-warning-text)', background: 'color-mix(in srgb, var(--color-warning) 10%, transparent)',
-        border: '1px solid color-mix(in srgb, var(--color-warning) 30%, transparent)', width: 'fit-content' }}>
+        color: 'var(--color-warning-text)', background: tintBg('var(--color-warning)'),
+        border: tintBorder('var(--color-warning)'), width: 'fit-content' }}>
         {notice}
       </div>
     )}

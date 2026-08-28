@@ -86,7 +86,6 @@ const OFF_STANDARD_HEIGHT_ALLOWLIST = {
   'src/components/ui/FloatingPanel.tsx': 1,
   'src/components/ui/QuickViewToggle.tsx': 1,
   'src/components/ui/RichTextEditor.tsx': 2,
-  'src/components/ui/SelectAllRow.tsx': 1,
   'src/components/ui/Toggle.tsx': 1,
   'src/pages/ai/WorkflowListRow.tsx': 3,
   'src/pages/applications/drawer/ApplicationStatusStrip.tsx': 2,

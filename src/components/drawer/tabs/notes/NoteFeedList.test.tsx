@@ -12,7 +12,7 @@ import api from '@/lib/api'
 import NoteFeedList from './NoteFeedList'
 
 // Stable note-type lookup stub (the type chip resolves against the principal's own list).
-const noteTypesValue = { types: [{ value: 'general', label: 'Algemeen', color: '#888888' }] }
+const noteTypesValue = { types: [{ value: 'general', label: 'Algemeen', color: 'var(--color-secondary)' }] }
 vi.mock('@/lib/useNoteTypes', () => ({ useNoteTypes: () => noteTypesValue }))
 vi.mock('@/lib/api', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@/lib/api')>()

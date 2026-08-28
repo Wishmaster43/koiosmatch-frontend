@@ -38,6 +38,7 @@ export default function Toggle({ checked, onChange, ariaLabel, disabled, describ
       {/* HUISSTIJL-1: tiny thumb shadow, none of card/float/modal — kept as-is */}
       <div style={{ position: 'absolute', top: 2, left: checked ? 16 : 2, width: 14, height: 14,
                     borderRadius: '50%', background: 'var(--surface)', transition: 'left var(--motion-fast)',
+                    // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- thumb-class shadow, no card/float/modal tier fits a 14px switch thumb
                     boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }} />
     </button>
   )

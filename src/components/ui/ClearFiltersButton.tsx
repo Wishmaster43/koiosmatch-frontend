@@ -11,6 +11,9 @@ import { useEffect, useId } from 'react'
 import { useTranslation } from 'react-i18next'
 import { FilterX } from 'lucide-react'
 import { useRightPanel } from '@/context/RightPanelContext'
+// HUISSTIJL-1: the §4 soft-tint formula lives in lib/tint, never a hand-rolled
+// color-mix literal (10/33 house pair, not an ad-hoc percentage).
+import { tintBg, tintBorder } from '@/lib/tint'
 
 // Renders only while the page is actually filtered; also reports that state to
 // the shared right panel so the topbar filter icon shows its dot without per-page wiring.
@@ -30,8 +33,8 @@ export default function ClearFiltersButton({ active, onClear }: { active: boolea
     <button onClick={onClear} title={t('clearFilters')} aria-label={t('clearFilters')}
       style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '5px 11px', fontSize: 11, fontWeight: 600,
         borderRadius: 999, cursor: 'pointer', whiteSpace: 'nowrap', color: 'var(--color-warning-text)',
-        background: 'color-mix(in srgb, var(--color-warning) 10%, transparent)',
-        border: '1px solid color-mix(in srgb, var(--color-warning) 35%, transparent)' }}>
+        background: tintBg('var(--color-warning)'),
+        border: tintBorder('var(--color-warning)') }}>
       <FilterX size={12} /> {t('clearFilters')}
     </button>
   )

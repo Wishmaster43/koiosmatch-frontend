@@ -134,6 +134,7 @@ export default function PdfPreview({ url, onError }: PdfPreviewProps) {
           key={i}
           ref={el => { canvasRefs.current[i] = el }}
           aria-label={t('documents.pdfPageLabel', { page: i + 1, total: numPages })}
+          // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- frozen candidate/customer drilldown screen (CLAUDE.md §3B): keeping the exact existing shadow value, not swapping to --shadow-card, to avoid a visible change here without Danny's sign-off
           style={{ display: 'block', width: '100%', height: 'auto', margin: '0 auto 8px', boxShadow: '0 1px 4px rgba(0,0,0,0.15)' }}
         />
       ))}

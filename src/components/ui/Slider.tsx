@@ -138,6 +138,7 @@ export default function Slider({
     position: 'absolute', left: `${leftPct}%`, transform: 'translateX(-50%)',
     width: 16, height: 16, borderRadius: '50%', background: color,
     // HUISSTIJL-1: tiny drag-handle shadow, none of card/float/modal — kept (mirrors the Toggle thumb).
+    // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- thumb-class shadow, no card/float/modal tier fits a 16px drag handle (mirrors the Toggle thumb)
     boxShadow: '0 1px 4px rgba(0,0,0,0.25)', cursor: 'grab', outline: 'none',
   })
 

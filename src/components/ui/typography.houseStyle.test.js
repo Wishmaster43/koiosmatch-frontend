@@ -180,7 +180,6 @@ const CAPTION_ALLOWLIST = {
   'components/layout/workflow/VariablePicker.tsx': 1,
   'components/layout/workflow/WhatsappTemplateField.tsx': 2,
   'components/layout/workflow/WorkflowHistoryView.tsx': 1,
-  'components/layout/workflow/fieldControls.tsx': 1,
   'components/map/RadiusMapPanel.tsx': 1,
   'components/match/MatchScoreBlock.tsx': 1,
   'components/reports/CandidateDetailDrawer.tsx': 3,
