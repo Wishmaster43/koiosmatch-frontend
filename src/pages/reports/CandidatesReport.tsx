@@ -109,7 +109,7 @@ export default function CandidatesReport({ period, filters = EMPTY_REPORT_FILTER
   // RAPPORT-COMPARE-2: the compare mode arrives from the right-hand filter
   // panel (ReportsPage). Same window + same filters as the plain report call.
   const compareSlug = getCompareSlug('candidates', view)
-  const compareBaseParams = { ...buildReportQueryParams(period, 'candidates', filters), ...(phaseFilter ? { phase: phaseFilter } : {}) }
+  const compareBaseParams = { ...buildReportQueryParams(period, 'candidates', filters), ...(phaseFilter ? { phase: [phaseFilter] } : {}) }
   const { data: compareData } = useReportCompare(compareSlug, data?.from, data?.to, compare, compareBaseParams)
   const totalCompare = compare.kind !== 'off' ? (compareData?.total as { current: number; previous: number; delta: number; delta_pct: number | null } | undefined) : undefined
 
@@ -118,7 +118,7 @@ export default function CandidatesReport({ period, filters = EMPTY_REPORT_FILTER
   // candidates drill deep-links its rows to the candidate drilldown (entityPage,
   // SM idiom: name in-app, icon in a new tab).
   const [drill, setDrill] = useState<DrillSpec | null>(null)
-  const baseParams = { ...buildReportQueryParams(period, 'candidates', filters), ...(phaseFilter ? { phase: phaseFilter } : {}) }
+  const baseParams = { ...buildReportQueryParams(period, 'candidates', filters), ...(phaseFilter ? { phase: [phaseFilter] } : {}) }
   const openSegment = (_axis: Axis, seg: { label: string; count: number }, xorParam: Record<string, unknown>) =>
     setDrill({
       title: seg.label, value: seg.count, subtitle: `${formatDate(data?.from)} – ${formatDate(data?.to)}`,

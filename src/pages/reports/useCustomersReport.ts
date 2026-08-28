@@ -22,7 +22,7 @@ export function useCustomersReport(
   filters: ReportFilterState = EMPTY_REPORT_FILTERS,
   phaseFilter?: string | null,
 ) {
-  const params = { ...buildReportQueryParams(period, 'customers', filters), ...(phaseFilter ? { phase: phaseFilter } : {}) }
+  const params = { ...buildReportQueryParams(period, 'customers', filters), ...(phaseFilter ? { phase: [phaseFilter] } : {}) }
   const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ['reports', 'customers', params],
     queryFn: async ({ signal }) => ((await api.get('/reports/customers', { params, signal })).data ?? null) as CustomersReportData | null,

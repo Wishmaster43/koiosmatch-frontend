@@ -23,7 +23,7 @@ export function useCandidatesReport(
   filters: ReportFilterState = EMPTY_REPORT_FILTERS,
   phaseFilter?: string | null,
 ) {
-  const params = { ...buildReportQueryParams(period, 'candidates', filters), ...(phaseFilter ? { phase: phaseFilter } : {}) }
+  const params = { ...buildReportQueryParams(period, 'candidates', filters), ...(phaseFilter ? { phase: [phaseFilter] } : {}) }
   const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ['reports', 'candidates', params],
     queryFn: async ({ signal }) => ((await api.get('/reports/candidates', { params, signal })).data ?? null) as CandidatesReportData | null,

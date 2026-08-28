@@ -36,7 +36,7 @@ describe('useCandidatesReport — request shape', () => {
     const { result } = renderHook(() => useCandidatesReport('month', filters, 'lead'), { wrapper })
     await waitFor(() => expect(result.current.loading).toBe(false))
     expect(getSpy).toHaveBeenCalledWith('/reports/candidates', expect.objectContaining({
-      params: { period: 'month', status: ['available'], owner_id: ['u1'], phase: 'lead' },
+      params: { period: 'month', status: ['available'], owner_id: ['u1'], phase: ['lead'] },
     }))
   })
 
@@ -48,6 +48,6 @@ describe('useCandidatesReport — request shape', () => {
     await waitFor(() => expect(result.current.loading).toBe(false))
     rerender({ phase: 'lead' })
     await waitFor(() => expect(getSpy).toHaveBeenCalledTimes(2))
-    expect(getSpy.mock.calls[1][1]).toEqual(expect.objectContaining({ params: { period: 'month', phase: 'lead' } }))
+    expect(getSpy.mock.calls[1][1]).toEqual(expect.objectContaining({ params: { period: 'month', phase: ['lead'] } }))
   })
 })

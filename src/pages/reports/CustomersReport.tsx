@@ -115,7 +115,7 @@ export default function CustomersReport({ period, filters = EMPTY_REPORT_FILTERS
 
   // RAPPORT-COMPARE-1: mirrors CandidatesReport's hosting exactly.
   const compareSlug = getCompareSlug('customers', view)
-  const compareBaseParams = { ...buildReportQueryParams(period, 'customers', filters), ...(phaseFilter ? { phase: phaseFilter } : {}) }
+  const compareBaseParams = { ...buildReportQueryParams(period, 'customers', filters), ...(phaseFilter ? { phase: [phaseFilter] } : {}) }
   const { data: compareData } = useReportCompare(compareSlug, data?.from, data?.to, compare, compareBaseParams)
   const totalCompare = compare.kind !== 'off' ? (compareData?.total as { current: number; previous: number; delta: number; delta_pct: number | null } | undefined) : undefined
 
@@ -125,7 +125,7 @@ export default function CustomersReport({ period, filters = EMPTY_REPORT_FILTERS
   // (`baseParams`), never just `period`, so the drawer counts the exact same set
   // the bar was drawn from. `baseParams` also carries the switch's own `phase` filter.
   const [drill, setDrill] = useState<DrillSpec | null>(null)
-  const baseParams = { ...buildReportQueryParams(period, 'customers', filters), ...(phaseFilter ? { phase: phaseFilter } : {}) }
+  const baseParams = { ...buildReportQueryParams(period, 'customers', filters), ...(phaseFilter ? { phase: [phaseFilter] } : {}) }
   const openSegment = (seg: { label: string; count: number }, xorParam: Record<string, unknown>) =>
     setDrill({
       title: seg.label, value: seg.count, subtitle: `${formatDate(data?.from)} – ${formatDate(data?.to)}`,

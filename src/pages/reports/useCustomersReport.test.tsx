@@ -36,7 +36,7 @@ describe('useCustomersReport — request shape', () => {
     const { result } = renderHook(() => useCustomersReport('month', filters, 'prospect'), { wrapper })
     await waitFor(() => expect(result.current.loading).toBe(false))
     expect(getSpy).toHaveBeenCalledWith('/reports/customers', expect.objectContaining({
-      params: { period: 'month', owner_id: ['u1'], location_id: [7], phase: 'prospect' },
+      params: { period: 'month', owner_id: ['u1'], location_id: [7], phase: ['prospect'] },
     }))
   })
 
@@ -48,6 +48,6 @@ describe('useCustomersReport — request shape', () => {
     await waitFor(() => expect(result.current.loading).toBe(false))
     rerender({ phase: 'prospect' })
     await waitFor(() => expect(getSpy).toHaveBeenCalledTimes(2))
-    expect(getSpy.mock.calls[1][1]).toEqual(expect.objectContaining({ params: { period: 'month', phase: 'prospect' } }))
+    expect(getSpy.mock.calls[1][1]).toEqual(expect.objectContaining({ params: { period: 'month', phase: ['prospect'] } }))
   })
 })
