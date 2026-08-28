@@ -4,7 +4,7 @@
  * and the customer-tree Excel import flow. See the component docblock below
  * for the full history of decisions this modal encodes.
  */
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Building2, Upload, CheckCircle2 } from 'lucide-react'
 import FloatingPanel from '@/components/ui/FloatingPanel'
@@ -12,8 +12,8 @@ import { tintBorder } from '@/lib/tint'
 import { useIndustries } from '@/lib/useIndustries'
 import { useLocations } from '@/lib/useLocations'
 import { useCustomerPhases } from '@/lib/useCustomerPhases'
-import { useProvinces } from '@/hooks/useProvinces'
 import { useAuth } from '@/context/AuthContext'
+import { useAddCustomerForm } from './hooks/useAddCustomerForm'
 import { useLiveFieldValidation } from '@/hooks/useLiveFieldValidation'
 import { isValidEmailFormat } from '@/lib/contactFieldValidation'
 import { WIDE_MODAL } from '@/components/ui/modalMetrics'
@@ -192,46 +192,13 @@ export default function AddCustomerModal({ onClose, onCreate, onImported, users 
   const [importOpen, setImportOpen] = useState(false)
   // COLLAPSIBLE-TEXT-1: Bedrijfstekst's ("Company text") own collapsed/editing state now lives
   // inside CustomerCompanyTextCard (nothing outside that card ever reads it).
-  const [form, setForm] = useState<CustomerForm>({
-    name: '', status: defaultStatusValue, ownerId: '', industry: '', city: '',
-    phase: defaultPhase,
-    branchId: '', website: '', employeeCount: '', toneOfVoice: '', costCenter: '', billingEmail: '',
-    street: '', houseNumber: '', houseNumberSuffix: '', postalCode: '', province: '', country: '',
-    cocNumber: '', vatNumber: '',
-  })
+  // Form state + its three default-seeding effects + the province cascade,
+  // extracted into their own hook (§0.3 split trigger) — behaviour unchanged.
+  const { form, setForm, provinces } = useAddCustomerForm({ defaultPhase, defaultStatusValue, meIsAssignable, me })
 
   // CUST-DUP-FE-1: live probe + create-409 verdict + restore, bundled in one hook
   // (mirrors AddCandidateModal's C-29 handling).
   const dup = useCustomerDuplicateGuard(form.name, form.cocNumber, form.billingEmail, onClose)
-
-  // The lookup arrives async (one cached GET), so seed the default phase once it lands —
-  // but never overwrite a phase the user already picked.
-  useEffect(() => {
-    setForm(f => (f.phase ? f : { ...f, phase: defaultPhase }))
-  }, [defaultPhase])
-
-  // Same pattern for the (now hidden) status default — the recruiter never picks it
-  // here, so this is the ONLY thing that ever sets it.
-  useEffect(() => {
-    setForm(f => (f.status ? f : { ...f, status: defaultStatusValue }))
-  }, [defaultStatusValue])
-
-  // Propose the current user as account manager ONCE they are known to be
-  // assignable; a value the recruiter already picked (or picks later) is never
-  // overwritten — the functional update only fires while ownerId is still empty.
-  useEffect(() => {
-    if (meIsAssignable) setForm(f => (f.ownerId ? f : { ...f, ownerId: String(me!.id) }))
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- only react to assignability resolving, mirrors AddApplicationModal's owner-default effect
-  }, [meIsAssignable])
-
-  // KLANT-ADRES-1: province list CASCADES on the picked country, same shared hook
-  // (and same clear-on-mismatch behaviour) as the candidate's home address.
-  const { provinces } = useProvinces(form.country)
-  // Clears the province the moment the resolved list for the newly picked country no longer contains it, so a stale country's previous province can never linger silently.
-  useEffect(() => {
-    if (form.province && !provinces.includes(form.province)) setForm(f => ({ ...f, province: '' }))
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- only react to the resolved province list changing, not every form edit
-  }, [provinces])
 
   // VALIDATIE-LIVE-1-rest: live, on-blur/typing format check for billingEmail —
   // own sibling hook (mirrors AddCandidateModal's useLiveFieldValidation).
