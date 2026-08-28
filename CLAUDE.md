@@ -1199,6 +1199,19 @@ Be honest. If something is not done, say so — do not pretend.
   subagent deliverable, runs `tsc --noEmit` + the tests + the smoke suite, and does
   the committing — subagents never `git add/commit/push` on their own. Delicate
   work (auth, API contracts, data model) stays with the manager.
+- **ONIX-FREEZE-1 — audit freeze & branch discipline (Danny 2026-08-28, mirrored in
+  backend-CLAUDE.md; both repos apply one rule).** The moment the joint pre-ONIX
+  round is done and Danny gives the ONIX start signal, `main` is **FROZEN** as the
+  audit target in BOTH repos — record the two freeze commit hashes in WORKLIST.
+  From that moment every new change lands on the shared work branch
+  **`during-onix`** (same name in FE and BE), never on `main`. ONIX reviews the
+  frozen `main` while we keep building on `during-onix`, so nobody stands still;
+  fixes for ONIX findings also land on `during-onix` (one integration line). ONIX
+  delivers its findings on its own branch (**`onix-findings`**) or as reports.
+  After the audit we merge deliberately: findings first, then `during-onix`, back
+  into `main`, resolving conflicts consciously — never a blind merge. This
+  temporarily supersedes the standing "everything straight to main" habit; after
+  the final merge, main-only resumes unless Danny says otherwise.
 - **Session names (Danny 2026-07-08):** this frontend manager session is **CMFE**; the
   backend manager session (koiosmatch-api) is **CMBE**. One manager per repo; cross-repo
   coordination goes through the shared docs in koiosmatch-api/docs/.
