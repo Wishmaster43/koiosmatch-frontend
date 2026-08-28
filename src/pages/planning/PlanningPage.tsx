@@ -12,6 +12,8 @@ import { monthName, formatDate, getViewRange } from './helpers'
 import { usePlanningBoard } from './hooks/usePlanningBoard'
 import { useDateFormat } from '@/lib/datetime'
 import AddShiftModal from './AddShiftModal'
+// ORDERS-AANSLUITING (Danny 28-08): the drop-in Orders panel joins as a view.
+import OrdersPanel from './OrdersPanel'
 import ShiftStaffingDrawer from './ShiftStaffingDrawer'
 import { MonthView, WeekView, DayView, ListView } from './views'
 import type { Shift } from '@/types/planning'
@@ -53,7 +55,7 @@ function mapBoardShift(s: PlanningBoardShift, formatTime: (v: string | null | un
 }
 
 // ── Main planning page ────────────────────────────────────────────────────────
-const VIEW_IDS = ['month', 'week', 'day', 'list']
+const VIEW_IDS = ['month', 'week', 'day', 'list', 'orders']
 
 // Navigation intent this page honours (dashboard tile → planning jump):
 // `date` moves the board window to that day; `open` (with `date`) also opens
@@ -198,8 +200,8 @@ export default function PlanningPage({ intent }: { intent?: PlanningIntent | nul
           <ChevronRight size={15} />
         </Button>
 
-        {/* Period label */}
-        <PageTitle as="span" style={{ flex: 1 }}>{headerLabel()}</PageTitle>
+        {/* Period label — calendar chrome, hidden on the Orders view. */}
+        <PageTitle as="span" style={{ flex: 1 }}>{view === 'orders' ? t('views.orders') : headerLabel()}</PageTitle>
 
         {/* View switcher — the shared segmented control (CHIP-TINT-1: a choice is tinted, never a solid fill). */}
         <SegmentedControl size="compact" ariaLabel={t('viewSwitcher')} value={view}
@@ -233,7 +235,11 @@ export default function PlanningPage({ intent }: { intent?: PlanningIntent | nul
 
       {/* ── Calendar body ── */}
       <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-        {shiftsLoading ? (
+        {/* Orders view: self-contained (own fetch + four states) — deliberately
+            outside the SHIFTS loading/error branch below. */}
+        {view === 'orders' ? (
+          <div style={{ flex: 1, overflowY: 'auto', padding: '12px 20px' }}><OrdersPanel /></div>
+        ) : shiftsLoading ? (
           <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center',
             fontSize: 13, color: 'var(--text-muted)' }}>
             {t('common:loading')}
