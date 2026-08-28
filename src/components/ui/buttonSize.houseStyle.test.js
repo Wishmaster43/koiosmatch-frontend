@@ -32,7 +32,7 @@ function walkSourceFiles(dir, out = []) {
 const MD_ALLOWLIST = {
   'src/pages/applications/ApplicationsPage.tsx': 1,
   'src/pages/candidates/CandidatesToolbar.tsx': 1,
-  'src/pages/customers/CustomersPage.tsx': 1,
+  'src/pages/customers/CustomersToolbar.tsx': 1,
   'src/pages/matches/MatchesPage.tsx': 1,
   'src/pages/opportunities/OpportunitiesPage.tsx': 1,
   'src/pages/outreach/OutreachPage.tsx': 1,

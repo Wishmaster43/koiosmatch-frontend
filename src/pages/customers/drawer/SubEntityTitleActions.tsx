@@ -14,13 +14,7 @@ import { Trash2, Archive, GitMerge } from 'lucide-react'
 import ChangelogPopover from '@/components/drawer/ChangelogPopover'
 import ChangelogTab from './ChangelogTab'
 import DrillPager, { type DrillPagerProps } from '@/components/drawer/DrillPager'
-
-// One shared icon-button look (28×28, bordered, tinted icon) for every action here.
-const iconBtn = (color: string, disabled: boolean) => ({
-  width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 7,
-  cursor: disabled ? 'not-allowed' : 'pointer', border: '1px solid var(--border)', background: 'var(--bg)',
-  color, opacity: disabled ? 0.6 : 1, flexShrink: 0,
-} as const)
+import Button from '@/components/ui/Button'
 
 export interface SubEntityTitleActionsProps {
   /** Prev/next through the caller's own filtered rows (DRILL-PAGER-1). */
@@ -29,9 +23,11 @@ export interface SubEntityTitleActionsProps {
   changelogEndpoint?: string
   /** LOCATIE-SAMENVOEGEN-1/AFDELING-SAMENVOEGEN-1: absent = no icon (no permission or no candidate to merge with). */
   onMerge?: () => void
+  /** Required WITH onMerge — the icon's name; rendering is gated on both so the §6 name guard stays real. */
   mergeTitle?: string
   /** ARCHIVE-SUBENTITY-1: absent = no icon (no permission, or already archived). */
   onArchive?: () => void
+  /** Required WITH onArchive — same §6 gating as mergeTitle. */
   archiveTitle?: string
   archiving?: boolean
   onDelete: () => void
@@ -51,21 +47,21 @@ export default function SubEntityTitleActions({
       {changelogEndpoint && (
         <ChangelogPopover><ChangelogTab endpoint={changelogEndpoint} /></ChangelogPopover>
       )}
-      {onMerge && (
-        <button onClick={onMerge} title={mergeTitle} aria-label={mergeTitle} style={iconBtn('var(--text-muted)', false)}>
+      {onMerge && mergeTitle && (
+        <Button variant="secondary" iconOnly size="sm" onClick={onMerge} title={mergeTitle} aria-label={mergeTitle}>
           <GitMerge size={13} />
-        </button>
+        </Button>
       )}
-      {onArchive && (
-        <button onClick={onArchive} disabled={archiving} title={archiveTitle} aria-label={archiveTitle}
-          style={iconBtn('var(--color-archive)', archiving)}>
+      {onArchive && archiveTitle && (
+        <Button variant="secondary" iconOnly size="sm" onClick={onArchive} disabled={archiving}
+          title={archiveTitle} aria-label={archiveTitle}
+          style={{ color: 'var(--color-archive)' }}>
           <Archive size={13} />
-        </button>
+        </Button>
       )}
-      <button onClick={onDelete} disabled={deleteDisabled} title={deleteTitle} aria-label={deleteTitle}
-        style={iconBtn(deleteDisabled ? 'var(--text-muted)' : 'var(--color-danger)', deleteDisabled)}>
+      <Button variant="dangerSoft" iconOnly size="sm" onClick={onDelete} disabled={deleteDisabled} title={deleteTitle} aria-label={deleteTitle}>
         <Trash2 size={13} />
-      </button>
+      </Button>
     </div>
   )
 }

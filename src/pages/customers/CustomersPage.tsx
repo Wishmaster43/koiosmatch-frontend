@@ -4,10 +4,8 @@
  * mirroring the candidate page blueprint (§3A). Heavy logic lives in the
  * hooks under ./hooks and ./data.
  */
-import { useState, useEffect, useMemo, useCallback, useRef, lazy, Suspense } from 'react'
-import type { Dispatch, SetStateAction } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Archive, Map as MapIcon, Trash2 } from 'lucide-react'
 import { useRightPanel } from '@/context/RightPanelContext'
 import { useAuth } from '@/context/AuthContext'
 import { usePublishSelection } from '@/context/SelectionContext'
@@ -15,41 +13,33 @@ import { useOpenFromIntent } from '@/context/NavigationContext'
 import { useDrawerUrl } from '@/hooks/useDrawerUrl'
 import { usePageMemory } from '@/lib/usePageMemory'
 import { useListPageSize } from '@/hooks/useListPageSize'
-import { geocodeNL } from '@/lib/geocode'
 import { isReferenceQuery } from '@/lib/referenceNumber'
 import ErrorBanner from '@/components/ui/ErrorBanner'
-import QuickViewToggle from '@/components/ui/QuickViewToggle'
 import ViewSwitch from '@/components/ui/ViewSwitch'
 import { useUsers } from '@/lib/queries'
 import { useCustomerLookups } from '@/lib/useCustomerLookups'
 import { useCustomerPhases } from '@/lib/useCustomerPhases'
 import { useBranchOptions } from '@/lib/useBranchOptions'
-import { buildCustomerStatusOptions, NO_STATUS_KEY } from './data/customerInsights'
+import { NO_STATUS_KEY } from './data/customerInsights'
 import { useSeedLabel } from '@/lib/useSeedLabel'
 import { buildCustomerInsightsConfig } from './data/customerInsightsConfig'
-import { buildCustomerFilterGroups } from './data/customerFilterGroups'
 import type { CustomerDateRange } from './data/customerFilterGroups'
 import InsightsRow from '@/components/insights/InsightsRow'
 import PaginationBar from '@/components/ui/PaginationBar'
-import HeaderSearch from '@/components/ui/HeaderSearch'
-import ClearFiltersButton from '@/components/ui/ClearFiltersButton'
 import ActionMessageBanner from '@/components/ui/ActionMessageBanner'
 import CustomersTable from './CustomersTable'
-import CustomersBulkBar from './CustomersBulkBar'
+import CustomersToolbar from './CustomersToolbar'
+import CustomersMapPane from './CustomersMapPane'
 import CustomerDrawer from './CustomerDrawer'
 import AddCustomerModal from './AddCustomerModal'
 import { useCustomersData, CUSTOMERS_MAX_PER_PAGE } from './hooks/useCustomersData'
 import { useCustomerRecord } from './hooks/useCustomerRecord'
 import { useCustomerBulkActions } from './hooks/useCustomerBulkActions'
+import { useCustomersFilterPanel } from './hooks/useCustomersFilterPanel'
 import type { Id } from '@/types/common'
 import type { Customer } from '@/types/customer'
-import Button from '@/components/ui/Button'
-
-// STRAAL-1: Leaflet only loads when the map view opens (§9 — lazy heavy deps).
-const CustomersMapView = lazy(() => import('./CustomersMapView'))
 
 interface AppUser { id: Id; name: string; avatar_color?: string }
-interface Opt { value: Id; label: string; count: number }
 
 // KPI-card filter predicates (pure row checks) — rows with ≥1 of the counted thing,
 // or, for "zonder contactpersoon", exactly 0 (Danny: every card must DO something).
@@ -213,72 +203,17 @@ export default function CustomersPage({ intent }: { intent?: CustomerIntent } = 
     close: closeDrawer, intent,
   })
 
-  // ── Option lists (stats first, page-derived as fallback) ──
-  const optsFrom = (values: string[]): Opt[] => {
-    const counts: Record<string, number> = {}
-    values.forEach(v => { counts[v] = (counts[v] ?? 0) + 1 })
-    return Object.keys(counts).map(v => ({ value: v, label: v, count: counts[v] }))
-  }
-  // Danny 02-08: the status donut must stop counting Prospect as a status — the
-  // '__none' bucket (buildCustomerStatusOptions, mirrors the candidate Lead
-  // bucket) keys on the PHASE, never the (retiring) customer_statuses 'prospect'
-  // value, so nothing here needs to change once the backend finishes removing it.
-  const statusOptions = useMemo(() =>
-    buildCustomerStatusOptions({
-      statsByStatus: stats?.by_status, customers, statuses, entryPhase, entryPhaseValue,
-      noStatusFallbackLabel: t('insights.noStatus'),
-    })
-  , [stats, customers, statuses, entryPhase, entryPhaseValue, t])
-  const ownerOptions = useMemo<Opt[]>(() => {
-    if (stats?.by_owner) return stats.by_owner.map(o => ({ value: (o.id ?? o.owner_id ?? '') as Id, label: o.name || '—', count: o.count ?? 0 })).filter(o => o.value !== '')
-    const m: Record<string, Opt> = {}
-    customers.forEach(c => { if (c.ownerId != null) { const key = String(c.ownerId); (m[key] ??= { value: c.ownerId as Id, label: c.owner || '—', count: 0 }).count++ } })
-    return Object.values(m)
-  }, [stats, customers])
-  // Distinct city values from the current page, used as a fallback filter option list.
-  const cityOptions     = useMemo(() => optsFrom(customers.map(c => c.city).filter(Boolean)), [customers])
-  // Distinct province (state) values from the current page, used as a fallback filter option list.
-  const provinceOptions = useMemo(() => optsFrom(customers.map(c => c.state).filter(Boolean)), [customers])
-  // Distinct industry values from the current page, used as a fallback filter option list.
-  const industryOptions = useMemo(() => optsFrom(customers.map(c => c.industry).filter(Boolean)), [customers])
-  const phaseOptions = useMemo<Opt[]>(() => customerPhases.map(p => ({ value: p.value, label: p.label, count: 0, color: p.color })), [customerPhases])
-
-  const tog = (set: Dispatch<SetStateAction<string[]>>) => (v: string) => set(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v])
-
-  // Straal-blok apply: PDOK-geocode; found → filter + map sync, not found → hint.
-  // Stabilized (useCallback) so the filterGroups useMemo below can safely depend
-  // on it — every captured setter is itself stable, only `t` can genuinely change.
-  const applyGeo = useCallback(async (q: string, km: number) => {
-    setGeoHint(null)
-    const hit = await geocodeNL(q)
-    if (!hit) { setGeoHint(t('common:filters.notFound')); return }
-    setGeoFilter({ q, km, lat: hit.lat, lng: hit.lng, label: `${hit.label} · ${km} km` })
-    setMapCenter({ lat: hit.lat, lng: hit.lng }); setMapRadius(km)
-  }, [t, setGeoHint, setGeoFilter, setMapCenter, setMapRadius])
-
-  // Filter panel config lives in the data/ builder (mirrors buildCandidateFilterGroups).
-  const filterGroups = useMemo(() => buildCustomerFilterGroups({
-    t, tog,
+  // ── Option lists + right-panel filter groups (§0.3 split) ──
+  const { statusOptions, ownerOptions } = useCustomersFilterPanel({
+    t, registerFilters, unregisterFilters, stats, customers, statuses, customerPhases, entryPhase, entryPhaseValue,
+    branchOptions,
     filters: {
-      selectedStatus, setSelectedStatus, selectedPhase, setSelectedPhase,
-      selectedIndustry, setSelectedIndustry, selectedCity, setSelectedCity,
-      selectedProvince, setSelectedProvince, selectedOwner, setSelectedOwner,
-      selectedBranch, setSelectedBranch, showArchived, setShowArchived,
-      dateRange, setDateRange, geoFilter, geoHint, applyGeo,
-      clearGeo: () => { setGeoFilter(null); setGeoHint(null) },
-    },
-    options: { statusOptions, phaseOptions, industryOptions, cityOptions, provinceOptions, ownerOptions, branchOptions },
-  }), [t, selectedStatus, setSelectedStatus, selectedPhase, setSelectedPhase, selectedIndustry, setSelectedIndustry,
-      selectedCity, setSelectedCity, selectedProvince, setSelectedProvince, selectedOwner, setSelectedOwner,
+      selectedStatus, setSelectedStatus, selectedPhase, setSelectedPhase, selectedOwner, setSelectedOwner,
+      selectedCity, setSelectedCity, selectedProvince, setSelectedProvince, selectedIndustry, setSelectedIndustry,
       selectedBranch, setSelectedBranch, showArchived, setShowArchived, dateRange, setDateRange,
-      geoFilter, geoHint, applyGeo, setGeoFilter, statusOptions, phaseOptions, industryOptions, cityOptions,
-      provinceOptions, ownerOptions, branchOptions])
-
-  // Registers the page's filter groups into the shared right-hand panel and cleans up on unmount/change.
-  useEffect(() => {
-    registerFilters('customers-page', filterGroups)
-    return () => unregisterFilters('customers-page')
-  }, [filterGroups, registerFilters, unregisterFilters])
+      geoFilter, setGeoFilter, geoHint, setGeoHint, setMapCenter, setMapRadius,
+    },
+  })
 
   // ── Insights: 2 donuts (status, account manager) + KPI cards ──
   // LOOKUP-I18N-1: the '__none' bucket is the entry PHASE (Prospect); every other
@@ -345,40 +280,21 @@ export default function CustomersPage({ intent }: { intent?: CustomerIntent } = 
           {/* Shared banner (§0.3 split, audit R1 item 1) — was copy-pasted per page. */}
           <ActionMessageBanner msg={actionMsg} onDismiss={() => setActionMsg(null)} dismissLabel={t('common:close')} />
 
-          <div style={{ padding: '0 24px 12px', display: 'flex', gap: 10, alignItems: 'center', minHeight: 36, flexShrink: 0 }}>
-            {selectedIds.size > 0 ? (
-              <CustomersBulkBar count={selectedIds.size} onClear={() => setSelectedIds(new Set())}
-                onSetOwner={bulkSetOwner} onSetStatus={bulkSetStatus} onAddTag={bulkAddTag}
-                onRemoveTag={bulkRemoveTag} onAddNote={bulkAddNote} onArchive={bulkArchive}
-                canArchive={hasPermission('customers.delete')}
-                onGeocode={bulkGeocode} canGeocode={hasPermission('customers.update')}
-                onCoupleBackoffice={bulkCoupleBackoffice}
-                users={users} statuses={statuses} selectedTags={selectedTags} />
-            ) : (
-              <>
-                {/* Add on the left (like Applications/Candidates) — BTN_H (§4/§9): one
-                    explicit height for every text/action button, everywhere. */}
-                <Button variant="primary" size="md" onClick={() => setAddOpen(true)}>
-                  + {t('page.add')}
-                </Button>
-                {/* Shared header search (T10) — debounced, drives the same server-side ?search=. */}
-                <HeaderSearch key={searchEpoch} onSearch={setGlobalSearch} defaultValue={globalSearch}
-                  placeholder={t('page.searchPlaceholder')} width={300} />
-                <ClearFiltersButton active={anyFilterActive} onClear={clearAllFilters} />
-                {/* Archived + map quick-views on the right — shared toggles (§4), map last
-                    to mirror the candidate blueprint's toggle order (§3A). */}
-                <div style={{ marginLeft: 'auto', display: 'flex', gap: 8 }}>
-                  {/* Archived ⇄ trash are mutually exclusive views (mirrors candidates). */}
-                  <QuickViewToggle active={showArchived} onToggle={() => { setShowArchived(v => !v); setShowTrash(false) }}
-                    label={t('page.archivedView')} color="var(--color-archive)" icon={Archive} />
-                  <QuickViewToggle active={showTrash} onToggle={() => { setShowTrash(v => !v); setShowArchived(false) }}
-                    label={t('common:trash.view')} color="var(--color-trash)" icon={Trash2} />
-                  <QuickViewToggle active={view === 'map'} onToggle={() => setView(v => (v === 'map' ? 'table' : 'map'))}
-                    label={t('common:map.view')} color="var(--color-map)" icon={MapIcon} />
-                </div>
-              </>
-            )}
-          </div>
+          <CustomersToolbar
+            t={t} selectedCount={selectedIds.size} onClearSelection={() => setSelectedIds(new Set())}
+            bulk={{
+              onSetOwner: bulkSetOwner, onSetStatus: bulkSetStatus, onAddTag: bulkAddTag,
+              onRemoveTag: bulkRemoveTag, onAddNote: bulkAddNote, onArchive: bulkArchive,
+              onGeocode: bulkGeocode, onCoupleBackoffice: bulkCoupleBackoffice, selectedTags,
+            }}
+            canArchive={hasPermission('customers.delete')} canGeocode={hasPermission('customers.update')}
+            users={users} statuses={statuses} onAdd={() => setAddOpen(true)}
+            searchEpoch={searchEpoch} globalSearch={globalSearch} onSearch={setGlobalSearch}
+            anyFilterActive={anyFilterActive} onClearAllFilters={clearAllFilters}
+            showArchived={showArchived} setShowArchived={setShowArchived}
+            showTrash={showTrash} setShowTrash={setShowTrash}
+            view={view} setView={setView}
+          />
 
           {/* Table ⇄ map — ViewSwitch keeps both mounted (display toggle, not unmount)
               so the table's virtualizer never remeasures 0 on returning from the map
@@ -408,28 +324,13 @@ export default function CustomersPage({ intent }: { intent?: CustomerIntent } = 
             {
               id: 'map',
               render: () => (
-                <div style={{ flex: 1, minHeight: 0, display: 'flex', gap: 14, padding: '0 24px 16px' }}>
-                  <div style={{ flex: '1.1 1 0', minWidth: 400, display: 'flex', flexDirection: 'column' }}>
-                    <Suspense fallback={<div style={{ padding: 24, fontSize: 12, color: 'var(--text-muted)' }}>{t('common:map.loading')}</div>}>
-                      <CustomersMapView rows={visibleRows} padded={false}
-                        statusColor={v => statusMeta(String(v)).color} center={mapCenter} radiusKm={mapRadius}
-                        onCenterChange={(lat, lng) => setMapCenter({ lat, lng })} onRadiusChange={setMapRadius}
-                        onPick={id => selectCustomer({ id } as Parameters<typeof selectCustomer>[0])} />
-                    </Suspense>
-                  </div>
-                  {/* Right pane: the same server-filtered rows as a table (row click = drawer). */}
-                  <div style={{ flex: '1 1 0', minWidth: 0, display: 'flex', flexDirection: 'column' }}>
-                    <div style={{ flex: 1, overflowY: 'auto', overflowX: 'auto' }}>
-                      {error && (
-                        <ErrorBanner style={{ marginBottom: 12 }}>{error}</ErrorBanner>
-                      )}
-                      <CustomersTable rows={visibleRows} loading={loading} selectedId={selected?.id}
-                        onSelect={selectCustomer} onOpenTab={selectCustomer} statusMeta={statusMeta} />
-                    </div>
-                    <PaginationBar page={page} totalPages={lastPage} totalRows={total} pageSize={pageSize}
-                      onPageChange={setPage} onPageSizeChange={s => { setPageSize(s); setPage(1) }} pageSizeOptions={pageSizeOptions} />
-                  </div>
-                </div>
+                <CustomersMapPane
+                  t={t} rows={visibleRows} loading={loading} error={error} selectedId={selected?.id}
+                  onSelect={selectCustomer} statusMeta={statusMeta}
+                  mapCenter={mapCenter} mapRadius={mapRadius} setMapCenter={setMapCenter} setMapRadius={setMapRadius}
+                  page={page} lastPage={lastPage} total={total} pageSize={pageSize} pageSizeOptions={pageSizeOptions}
+                  onPageChange={setPage} onPageSizeChange={s => { setPageSize(s); setPage(1) }}
+                />
               ),
             },
           ]} />

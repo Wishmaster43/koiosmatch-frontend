@@ -38,11 +38,8 @@
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import EditableFieldTable from '@/components/forms/EditableFieldTable'
 import type { FieldRow } from '@/components/forms/EditableFieldTable'
 import SubTabBar from '@/components/drawer/SubTabBar'
-import CustomFieldsTab from '@/components/drawer/CustomFieldsTab'
-import BackofficeLinksTab from '@/components/drawer/BackofficeLinksTab'
 import { useBackofficeLinksVisible } from '@/components/drawer/useBackofficeLinksVisible'
 import ArchivedBanner from '@/components/drawer/ArchivedBanner'
 import MergeSubEntityModal from './MergeSubEntityModal'
@@ -53,38 +50,23 @@ import SubEntityStatusTitleRow from './SubEntityStatusTitleRow'
 // §0.3 split (this task): the pager/changelog/merge/archive/delete cluster,
 // shared with LocationDetail — see that component's own docblock.
 import SubEntityTitleActions from './SubEntityTitleActions'
-import KoiosAdviceBlock from '@/components/ai/KoiosAdviceBlock'
-import type { KoiosAdviceInsight } from '@/components/ai/KoiosAdviceBlock'
 import ContactsPanel from './ContactsPanel'
 import DrillBreadcrumb from '@/components/drawer/DrillBreadcrumb'
 import type { DrillPagerProps } from '@/components/drawer/DrillPager'
 import type { Crumb } from '@/components/drawer/DrillBreadcrumb'
-import EditableRichTextField from './EditableRichTextField'
-import { departmentPopoutId } from '@/lib/secondScreen'
-// SCOPED-LIST-TAB-1: the department's own Vacatures/Matches sub-tabs (§3A —
-// shared config-driven tab, never a forked copy).
-import ScopedVacanciesTab from './ScopedVacanciesTab'
-import ScopedMatchesTab from './ScopedMatchesTab'
-// SCOPED-LIST-TAB-1: this department's own Kansen sub-tab, right after Matches
-// (§3A — shared config-driven tab, never a forked copy — mirrors LocationDetail).
-import ScopedOpportunitiesTab from './ScopedOpportunitiesTab'
-// SOLLICITATIES-SCOPE-1 (Danny asked 3x at customer level, then again here): the
-// department's own Sollicitaties sub-tab — reuses the shared CustomerApplicationsList
-// (its `vacancyIds` mode) fed by this department's OWN vacancy ids.
-// TAKEN-OP-AFDELING-1: TaskLinkResolver already knows 'department' (task_links),
-// so this is one more <EntityTasksTab linkType="…"> line, never a new component.
-import EntityTasksTab from '@/components/drawer/tabs/EntityTasksTab'
+// §0.3 split (this task): the "Gegevens" sub-tab body (field table + description
+// + Koios advice), shared with nothing else — see the component's own docblock.
+import DepartmentDataTab from './DepartmentDataTab'
+// §0.3 split (this task): the remaining scoped-list sub-tab bodies (vacancies/
+// applications/notes/documents/matches/opportunities/tasks/extra/links).
+import DepartmentSubTabPanels from './DepartmentSubTabPanels'
+import type { DepartmentSubTab } from './DepartmentSubTabPanels'
 // SUBENTITEIT-DELETE-1: the honest disabled-trash + 409-race counts dialog.
 import InUseCountsDialog from './InUseCountsDialog'
 import { useCustomFields } from '@/lib/useCustomFields'
 import { useConfirm } from '@/hooks/useConfirm'
 import { useAuth } from '@/context/AuthContext'
 import { useDateFormat } from '@/lib/datetime'
-import ScopedApplicationsTab from './ScopedApplicationsTab'
-// NOTES-LOC-DEPT-1/DOCS-LOC-DEPT-1: this department's own Notities/Documenten
-// sub-tabs (§3A — shared config-driven surfaces, never a forked copy).
-import ScopedNotesTab from './ScopedNotesTab'
-import ScopedDocumentsTab from './ScopedDocumentsTab'
 import { archiveDepartment, restoreDepartment } from '../hooks/useCustomerDepartments'
 import { useSubEntityArchive } from '../hooks/useSubEntityArchive'
 import type { Contact, Department } from '@/types/customer'
@@ -92,28 +74,6 @@ import type { Id, LookupOption } from '@/types/common'
 import type { DepartmentPayload } from '../hooks/useCustomerDepartments'
 import type { ContactPayload } from '../hooks/useCustomerContacts'
 import type { DeleteResult } from '../hooks/subEntityDelete'
-
-// A bound-namespace translate function (mirrors locationAiInsights.ts/customerAiInsights.ts).
-type Tx = (key: string, opts?: Record<string, unknown>) => string
-
-/**
- * buildDepartmentAdviceInsights — Koios advice for THIS department's own fields
- * (description/status/cost centre; name is required so it carries no signal).
- * Pure FE completeness heuristics, no AI/API call — mirrors
- * buildLocationAdviceInsights next to LocationDetail, kept inline here per the
- * PARITY-DEPARTMENT-1 scope note above.
- */
-function buildDepartmentAdviceInsights(d: Department, t: Tx): KoiosAdviceInsight[] {
-  const coreFields = [d.description, d.statusId, d.costCenter]
-  const filledPct = Math.round((coreFields.filter(Boolean).length / coreFields.length) * 100)
-  return [
-    {
-      type: t('ai.completeness'),
-      color: filledPct >= 80 ? 'var(--color-success)' : 'var(--color-warning)',
-      text: filledPct >= 80 ? t('ai.departmentComplete') : t('ai.departmentPartial', { pct: filledPct }),
-    },
-  ]
-}
 
 // One department's own drill-down body: the field-table card, sub-tabs (contacts/vacancies/applications/notes/documents/matches/opportunities/tasks/extra/links) and merge/delete actions — see the prop comments for each sub-tab's own history.
 export default function DepartmentDetail({ department, locations, statuses, contactStatuses = [], departments = [], contacts = [], canLinkBackoffice = false, trail = [], pager, onMerged, onAddContact, onUpdateContact, onRemoveContact, onSave, onDelete, close, customerId, customerName }: {
@@ -184,7 +144,7 @@ export default function DepartmentDetail({ department, locations, statuses, cont
   // Sub-tabs (short labels, Danny 2026-07-14) — default Gegevens. SCOPED-LIST-TAB-1/
   // TAKEN-OP-AFDELING-1 added vacancies/matches/tasks. SOLLICITATIES-SCOPE-1 added
   // 'applications'. NOTES-LOC-DEPT-1/DOCS-LOC-DEPT-1 added 'notes'/'documents'.
-  const [subTab, setSubTab] = useState<'data' | 'contacts' | 'vacancies' | 'applications' | 'notes' | 'documents' | 'matches' | 'opportunities' | 'tasks' | 'extra' | 'links'>('data')
+  const [subTab, setSubTab] = useState<DepartmentSubTab>('data')
 
   // JOB-STATUS-1 (mirrors LocationDetail): status options for the title-row picker.
   const statusOptions = statuses.map(s => ({ value: String(s.id ?? s.value), label: s.label }))
@@ -321,78 +281,17 @@ export default function DepartmentDetail({ department, locations, statuses, cont
         onChange={id => setSubTab(id as typeof subTab)}
       />
 
+      {/* §0.3 split: the "Gegevens" sub-tab body (field table + description + advice). */}
       {subTab === 'data' && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-          {/* No repeated title (verified, unlike LocationDetail — see the file header
-              comment): this sub-tab's own label already IS "Gegevens"/"Details" in
-              three of five locales, identical to the group title, so a card title
-              here would duplicate it AND collide with DepartmentsPanel.test.tsx's
-              getByText on that sub-tab label. */}
-          {/* CANON-DIVIDER-1 (Danny 05-08): candidate ProfileTab canon — no line
-              between rows, 11px labels. */}
-          {/* Canon width (fieldRowCanon, 05-08): EditableFieldTable's own default now matches. */}
-          <EditableFieldTable title="" fields={fields} value={values} onSave={save} />
-
-          {/* Omschrijving AFTER the data blocks — Danny 02-08: every entity's prose block
-              follows the customer Bedrijf-tab order (fields → text → Koios), so the
-              earlier description-first placement was reversed on both location and here. */}
-          {/* K5a (batch 5): second-screen icon, composite customerId:departmentId
-              (departmentPopoutId — no standalone GET for one department). No
-              `assistGenerate` yet — see CustomerDepartmentTextPopout's docblock
-              for the written reason (GenerateEntity type widening is out of scope
-              here). */}
-          <EditableRichTextField label={t('departments.detail.description')} value={department.description ?? ''} onSave={saveDescription}
-            popout={customerId != null ? { entity: 'customer', id: departmentPopoutId(customerId, department.id as Id), field: 'departmentText' } : undefined} />
-
-          {/* Koios advice — pure FE completeness heuristics over this department's OWN
-              fields, same slot LocationDetail/OverviewTab put it in (right after the
-              text block, before any nested-entity sections). No API call. */}
-          <KoiosAdviceBlock namespace="customers" insights={buildDepartmentAdviceInsights(department, t)} />
-        </div>
+        <DepartmentDataTab department={department} fields={fields} values={values}
+          onSaveFields={save} onSaveDescription={saveDescription} customerId={customerId} t={t} />
       )}
 
-      {/* SCOPED-LIST-TAB-1: read-only, opens the real vacancy/match on row-click. */}
-      {subTab === 'vacancies' && (
-        <ScopedVacanciesTab scope="department" id={department.id as Id}
-          customerId={customerId} customerName={customerName} scopeName={department.name} />
-      )}
-      {/* SOLLICITATIES-SCOPE-1: DepartmentSollicitatiesTab (below) owns step 1 (vacancy id
-          resolution) — mounting it only here, not unconditionally in this component,
-          keeps useScopedVacancyIds' react-query call out of every OTHER sub-tab/caller
-          that never opens this one (no QueryClientProvider needed for those). */}
-      {subTab === 'applications' && <ScopedApplicationsTab scope="department" id={department.id as Id} />}
-      {/* NOTES-LOC-DEPT-1/DOCS-LOC-DEPT-1: this department's own Notities/Documenten
-          — a department is a LEAF, so neither scoped fetch adds a rollup param
-          (mirrors LocationDetail's identical wiring, minus the rollup). */}
-      {subTab === 'notes' && <ScopedNotesTab scope="department" id={department.id as Id} customerId={customerId} />}
-      {subTab === 'documents' && <ScopedDocumentsTab scope="department" id={department.id as Id} customerId={customerId} />}
-      {subTab === 'matches' && <ScopedMatchesTab scope="department" id={department.id as Id} customerId={customerId} />}
-      {/* SCOPED-LIST-TAB-1: read-only, opens the real opportunity on row-click.
-          OPP-MODAL-PREFILL-1: customerName rides along too, for the "+ Kans"
-          modal's customer-picker option label (mirrors ScopedVacanciesTab above). */}
-      {subTab === 'opportunities' && <ScopedOpportunitiesTab scope="department" id={department.id as Id} customerId={customerId} customerName={customerName} />}
-      {/* TAKEN-OP-AFDELING-1: own scoped label block (mirrors contacts.tasks.*) —
-          the shared tab's CURRENT labels interface (newTask/searchPlaceholder/empty/
-          loading/error/openTask); re-check this call site if EntityTasksTab's
-          interface changes again before this lands. */}
-      {subTab === 'tasks' && (
-        <EntityTasksTab linkType="department" id={department.id as Id} labels={{
-          newTask: t('departments.detail.tasks.newTask'),
-          searchPlaceholder: t('departments.detail.tasks.searchPlaceholder'),
-          empty: t('departments.detail.tasks.empty'),
-          loading: t('departments.detail.tasks.loading'),
-          error: t('departments.detail.tasks.error'),
-          openTask: t('departments.detail.tasks.openTask'),
-        }} />
-      )}
-
-      {subTab === 'extra' && (
-        <CustomFieldsTab entityType="customer_department" values={department.customFields ?? {}}
-          onSave={patch => onSave(department.id as Id, { customFields: { ...department.customFields, ...patch } })} />
-      )}
-
-      {subTab === 'links' && showKoppelingen && (
-        <BackofficeLinksTab entity="departments" id={department.id as Id} helloflexLink={department.helloflexLink} shiftmanagerLink={department.shiftmanagerLink} canLink={canLinkBackoffice} />
+      {/* §0.3 split: the remaining scoped-list sub-tab bodies. */}
+      {subTab !== 'data' && subTab !== 'contacts' && (
+        <DepartmentSubTabPanels subTab={subTab} department={department} customerId={customerId}
+          customerName={customerName} canLinkBackoffice={canLinkBackoffice} showKoppelingen={showKoppelingen}
+          onSave={onSave} t={t} />
       )}
 
       {/* The SAME panel the customer tab and a location render — one contact surface.

@@ -16,13 +16,13 @@ import { sectionBlock } from '@/components/ui/SectionCard'
 import SafeHtml from '@/components/ui/SafeHtml'
 import { useConfirm } from '@/hooks/useConfirm'
 import SoftChip from '@/components/ui/SoftChip'
+import Button from '@/components/ui/Button'
 import { Caption, Mono } from '@/components/ui/typography'
 import PriceAgreementForm, { draftFromAgreement, draftToPayload } from './PriceAgreementForm'
 import type { PriceAgreementDraft } from './PriceAgreementForm'
 import type { PriceAgreement, PriceAgreementPayload } from '../hooks/usePriceAgreements'
 import type { Id } from '@/types/common'
 
-const iconBtn: CSSProperties = { width: 26, height: 26, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 6, cursor: 'pointer', border: 'none', background: 'var(--bg)', color: 'var(--text-muted)', flexShrink: 0 }
 const mutedItalic: CSSProperties = { fontStyle: 'italic', color: 'var(--text-muted)' }
 
 // A criterion cell: the value, or a muted italic "any" placeholder when the
@@ -83,8 +83,8 @@ export default function PriceAgreementRow({ agreement, onSave, onDelete }: {
           <Criterion label={t('priceAgreements.step')} value={agreement.step} any={t('priceAgreements.any')} />
         </div>
         <div style={{ display: 'flex', gap: 4, flexShrink: 0 }}>
-          <button onClick={startEdit} title={t('drawer.edit')} style={iconBtn}><Pencil size={12} /></button>
-          <button onClick={remove} title={t('priceAgreements.delete')} style={{ ...iconBtn, color: 'var(--color-danger-text)' }}><Trash2 size={12} /></button>
+          <Button variant="secondary" iconOnly size="sm" onClick={startEdit} title={t('drawer.edit')} aria-label={t('drawer.edit')}><Pencil size={12} /></Button>
+          <Button variant="dangerSoft" iconOnly size="sm" onClick={remove} title={t('priceAgreements.delete')} aria-label={t('priceAgreements.delete')}><Trash2 size={12} /></Button>
         </div>
       </div>
 

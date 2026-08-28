@@ -30,19 +30,21 @@
  * WHICH entity-scoped document-type lookup the type chips/picker read — a location/
  * department drill-down now consults its OWN 'customer_location'/'customer_department'
  * lookup (ScopedDocumentsTab passes it) instead of silently reusing the customer's.
+ *
+ * SPLIT (28-08, mechanical, §3): the upload-queue state/actions moved to
+ * hooks/useDocumentUploadQueue, the queued-files card to PendingUploadCard, one
+ * document row to DocumentRow, and the tiny pure helpers to hooks/documentsTabUtils
+ * — this file now only wires them together and owns selection/rename/delete/preview.
  */
 import { useState, useRef, useId } from 'react'
-import type { ChangeEvent } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Search, X, Pencil, Eye, Download, Trash2 } from 'lucide-react'
+import { Search, X, Download, Trash2 } from 'lucide-react'
 import { useDocumentTypes, resolveDocTypeIcon } from '@/lib/useDocumentTypes'
 import { useDateFormat } from '@/lib/datetime'
 import { sectionBlock } from '@/components/ui/SectionCard'
-// DOCS-LOC-DEPT-1: the same shared picker component the notes composer's
-// "gekoppeld aan" level picker uses (§11 — one component, never a fork).
-import SelectMenu from '@/components/ui/SelectMenu'
 import { useEntityDocuments, type EntityDoc } from '@/hooks/useEntityDocuments'
 import { useDocumentLinkPicker } from '../hooks/useDocumentLinkPicker'
+import { useDocumentUploadQueue } from '../hooks/useDocumentUploadQueue'
 import { downloadFilesSequentially } from '@/lib/downloadFiles'
 import ConfirmDialog from '@/components/ui/ConfirmDialog'
 import DocPreviewModal from '@/components/drawer/DocPreviewModal'
@@ -54,29 +56,11 @@ import type { DrawerFilterConfig } from '@/components/drawer/DrawerFilterMenu'
 // House "+ action" trigger (Danny 27-07 consistency sweep) — replaces the bare
 // text+Plus button below; same click target (opens the hidden file input).
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
-import { Caption } from '@/components/ui/typography'
-import type { Id } from '@/types/common'
 import Button from '@/components/ui/Button'
-// §4 soft-tint atoms (herhaal-audit r4, findings 1/2/10): the §4 formula lives
-// in lib/tint, and a same-type "pick one to apply to all" chip picker fits the
-// shared ChipMultiSelect atom (its "active" set just never grows past one).
-import { tintBg, tintBorder, chipInk } from '@/lib/tint'
-import ChipMultiSelect from '@/components/ui/ChipMultiSelect'
-
-// A queued-but-not-yet-uploaded file, each with its own document type (BUGFIX
-// 23-07: a multi-file pick used to collapse to a single pending slot, so picking
-// 5 files silently uploaded only 1 — now every picked file gets its own queue entry).
-interface PendingItem { file: File; objectUrl: string; name: string; size: string; type: string }
-
-// Split a filename into base + extension so rename never touches the extension.
-const splitExt = (fn: string) => { const m = fn.match(/\.[^./\\]+$/); return { base: m ? fn.slice(0, -m[0].length) : fn, ext: m ? m[0] : '' } }
-
-// Stable per-row selection key: the real id, or the row index for not-yet-persisted rows.
-const docKey = (d: EntityDoc, i: number): string => String(d.id ?? 'idx-' + i)
-// A row can be downloaded once the server (or a local blob) has given it a url.
-const docUrl = (d: EntityDoc): string | undefined => d.download_url ?? d.objectUrl
-// Grid used by both the header row and every data row — one source so they never drift.
-const DOC_GRID_COLUMNS = '18px 1fr 80px 100px'
+import PendingUploadCard from './PendingUploadCard'
+import DocumentRow from './DocumentRow'
+import { DOC_GRID_COLUMNS, docKey, docUrl, splitExt } from '../hooks/documentsTabUtils'
+import type { Id } from '@/types/common'
 
 interface DocumentsTabProps {
   customerId: Id | undefined
@@ -108,7 +92,9 @@ export default function DocumentsTab({ customerId, locations = [], departments =
   // (own hook, §3 — kept this file from crossing the ~400-line split trigger).
   const { uploadLink, setUploadLink, linkOptions, showLinkPicker, uploadExtraFields } =
     useDocumentLinkPicker(locations, departments, lockedLevelFields)
-  const [pending,     setPending]     = useState<PendingItem[]>([])
+  // The queued-but-not-yet-uploaded files + every action that touches that queue.
+  const { pending, uploadAll, setItemType, setAllTypes, removePending, cancelPending, onFilesPicked } =
+    useDocumentUploadQueue({ upload, uploadExtraFields, setUploadLink })
   const [renamingId,  setRenamingId]  = useState<Id | null>(null)
   const [renameValue, setRenameValue] = useState('')
   const [docSearch,   setDocSearch]   = useState('')
@@ -155,35 +141,6 @@ export default function DocumentsTab({ customerId, locations = [], departments =
     await downloadFilesSequentially(items)
     setSelected(new Set())
   }
-
-  // Send every queued file to the server — one upload() call per item, each with
-  // its OWN type — so a multi-file pick uploads all of them, not just the first.
-  // DOCS-LOC-DEPT-1: `uploadExtraFields` is only ever spread in when it actually
-  // carries something — an unlinked upload keeps calling upload() with exactly
-  // its original 4 arguments (never a stray 5th `undefined`).
-  const uploadAll = () => {
-    if (!pending.length) return
-    const items = pending
-    setPending([])
-    for (const item of items) {
-      if (uploadExtraFields) upload(item.file, item.type, item.name, item.objectUrl, uploadExtraFields)
-      else upload(item.file, item.type, item.name, item.objectUrl)
-    }
-    // A fresh upload batch starts unlinked again unless the picker is used once more.
-    setUploadLink('customer')
-  }
-  // Set one item's doc type (its own select) without touching the others.
-  const setItemType = (idx: number, type: string) => setPending(items => items.map((it, i) => (i === idx ? { ...it, type } : it)))
-  // Apply-to-all chip: set the SAME type on every queued item at once.
-  const setAllTypes = (type: string) => setPending(items => items.map(it => ({ ...it, type })))
-  // Drop one queued item and revoke its blob preview URL so it never leaks.
-  const removePending = (idx: number) => setPending(items => {
-    const target = items[idx]
-    if (target) URL.revokeObjectURL(target.objectUrl)
-    return items.filter((_, i) => i !== idx)
-  })
-  // Cancel the whole queue: revoke every blob URL, then clear.
-  const cancelPending = () => { pending.forEach(p => URL.revokeObjectURL(p.objectUrl)); setPending([]) }
 
   // Commit a rename: re-attach the original extension, then persist by id.
   const doRename = (d: EntityDoc, base: string) => {
@@ -268,76 +225,12 @@ export default function DocumentsTab({ customerId, locations = [], departments =
       </div>
       <div style={sectionBlock}>
         {pending.length > 0 && (
-          <div style={{ border: '1px solid var(--color-primary)', borderRadius: 10, padding: 12, marginBottom: 10, background: 'var(--color-primary-bg)' }}>
-            <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)', marginBottom: 8 }}>
-              {/* Single file keeps the old name+size header; a multi-pick shows a count instead. */}
-              {pending.length === 1
-                ? <>{pending[0].name} <span style={{ fontWeight: 400, color: 'var(--text-muted)' }}>({pending[0].size})</span></>
-                : t('documents.pendingCount', { count: pending.length })}
-            </div>
-            <Caption as="div" style={{ marginBottom: 6 }}>
-              {pending.length > 1 ? t('documents.applyTypeToAll') : t('documents.docType')}
-            </Caption>
-            {/* Herhaal-audit r4 finding 10: the shared ChipMultiSelect atom (§4 tint +
-                fontWeight 600 + a check mark — CHIP-CONTRAST-1's second signal) reused
-                as a "pick one to apply to all" picker: its own "active" set never grows
-                past the single type every queued item already shares. selectAll is
-                switched off — "select all types" has no meaning here. */}
-            <div style={{ marginBottom: 10 }}>
-              <ChipMultiSelect options={docTypes} selectAll={false}
-                values={pending.length > 0 && pending.every(p => p.type === pending[0].type) ? [pending[0].type] : []}
-                onToggle={setAllTypes} ariaLabel={t('documents.applyTypeToAll')} />
-            </div>
-            {/* DOCS-LOC-DEPT-1: the "gekoppeld aan" level picker — applies to the WHOLE
-                queued batch (a batch is normally meant for one place), unlike the
-                per-file type select below. Hidden entirely once the scope is locked
-                (ScopedDocumentsTab) or the customer has neither a location nor a
-                department to link to (§3 — no dead-end picker). */}
-            {showLinkPicker && (
-              <div style={{ marginBottom: 10 }}>
-                <Caption as="div" style={{ marginBottom: 6 }}>{t('documents.linkLevelLabel')}</Caption>
-                <div style={{ width: 220 }}>
-                  <SelectMenu value={uploadLink} onChange={setUploadLink} options={linkOptions}
-                    placeholder={t('notes.linkLevelOptions.customer')} />
-                </div>
-              </div>
-            )}
-            {/* One compact row per queued file — its own type select + remove. */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 10 }}>
-              {pending.map((item, idx) => (
-                <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <span style={{ flex: 1, minWidth: 0, fontSize: 12, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.name}</span>
-                  <Caption style={{ flexShrink: 0 }}>{item.size}</Caption>
-                  <span id={`${docTypeLabelBaseId}-${idx}`} className="sr-only">{t('documents.docTypeFor', { name: item.name })}</span>
-                  <div style={{ width: 130, flexShrink: 0 }}>
-                    <SelectMenu aria-labelledby={`${docTypeLabelBaseId}-${idx}`} value={item.type} onChange={v => setItemType(idx, v)}
-                      options={docTypes} menuWidth={160}
-                      style={{ fontSize: 11, padding: '4px 8px', border: '1px solid var(--border)', borderRadius: 6, background: 'var(--bg)', color: 'var(--text)' }} />
-                  </div>
-                  {/* Dense queue-row icon — mirrors the identical unconverted remove
-                      button in the candidate drawer's twin PendingUploadQueue.tsx
-                      (out of this task's scope); Button's smallest footprint (28px)
-                      would tower over this 12px icon in a tightly packed row. Block
-                      form: the flagged style attribute sits on the tag's 2nd line. */}
-                  {/* eslint-disable huisstijlLegacy/no-restricted-syntax -- see comment above */}
-                  <button onClick={() => removePending(idx)} aria-label={t('common:remove')}
-                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 2, display: 'flex', flexShrink: 0 }}><X size={12} /></button>
-                  {/* eslint-enable huisstijlLegacy/no-restricted-syntax */}
-                </div>
-              ))}
-            </div>
-            <div style={{ display: 'flex', gap: 8 }}>
-              {/* Herhaal-audit r4 finding 2: this is the card's primary action, so it
-                  reads Button's own primary identity — a hand-painted inverse fill
-                  sitting next to a real Button (cancelPending below) is exactly the
-                  drift the audit closes. Wanting the inverse LOOK back is a Button
-                  variant to add once, in Button.tsx, never a loose fill in a tab. */}
-              <Button variant="primary" size="sm" onClick={uploadAll}>
-                {pending.length > 1 ? t('documents.addAll', { count: pending.length }) : t('documents.add')}
-              </Button>
-              <Button variant="secondary" size="sm" onClick={cancelPending}>{t('drawer.cancel')}</Button>
-            </div>
-          </div>
+          <PendingUploadCard
+            pending={pending} docTypes={docTypes} docTypeLabelBaseId={docTypeLabelBaseId}
+            setItemType={setItemType} setAllTypes={setAllTypes} removePending={removePending}
+            uploadAll={uploadAll} cancelPending={cancelPending}
+            showLinkPicker={showLinkPicker} uploadLink={uploadLink} setUploadLink={setUploadLink} linkOptions={linkOptions}
+          />
         )}
         {docs.length === 0 && pending.length === 0 && <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('documents.empty')}</div>}
         {docs.length > 0 && (
@@ -349,89 +242,16 @@ export default function DocumentsTab({ customerId, locations = [], departments =
             <span>{t('documents.name')}</span><span>{t('documents.type')}</span><span>{t('documents.size')}</span>
           </div>
         )}
-        {filteredDocs.map(d => {
-            const i = d._i
-            const key = docKey(d, i)
-            const downloadable = Boolean(docUrl(d))
-            // The type's own curated icon (fallback FileText) — so rows stand out per type.
-            // Optional-chained: older test mocks of useDocumentTypes don't stub iconOf.
-            const DocIcon = resolveDocTypeIcon(docTypeIcon?.(d.type))
-            return (
-            <div key={String(d.id ?? i)} style={{ display: 'grid', gridTemplateColumns: DOC_GRID_COLUMNS, alignItems: 'center', gap: 8, padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg)', marginBottom: 6 }}>
-              {/* Row checkbox — disabled while the doc has no downloadable url yet (pending upload). */}
-              <input type="checkbox" aria-label={t('documents.selectOne', { name: d.name ?? d.file_name ?? '' })}
-                checked={downloadable && selected.has(key)} disabled={!downloadable} onChange={() => toggleSelectedRow(key)}
-                style={{ accentColor: 'var(--color-primary)' }} />
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
-                <div style={{ width: 28, height: 28, borderRadius: 6, flexShrink: 0, background: docColor(d.type), display: 'flex', alignItems: 'center', justifyContent: 'center' }}><DocIcon size={13} color="white" /></div>
-                <div style={{ minWidth: 0, flex: 1 }}>
-                  {renamingId === d.id
-                    ? <div style={{ display: 'flex', alignItems: 'center', gap: 2, minWidth: 0 }}>
-                        <input autoFocus value={renameValue} onChange={e => setRenameValue(e.target.value)}
-                          onKeyDown={e => { if (e.key === 'Enter') doRename(d, renameValue); if (e.key === 'Escape') setRenamingId(null) }}
-                          onBlur={() => doRename(d, renameValue)}
-                          style={{ flex: 1, fontSize: 12, fontWeight: 500, padding: '3px 7px', borderRadius: 6, border: '1px solid var(--color-primary)', outline: 'none', color: 'var(--text)', boxSizing: 'border-box', minWidth: 0 }} />
-                        <Caption style={{ flexShrink: 0 }}>{splitExt(String(d.name ?? d.file_name ?? '')).ext}</Caption>
-                      </div>
-                    : <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--text)', display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{d.name ?? d.file_name}</span>
-                  }
-                  {/* DOCS-LOC-DEPT-1: "gekoppeld aan" soft-tint chip (§4) — department wins
-                      over location (the deepest level, mirrors CustomerDocument::levelContext()'s
-                      own priority); absent entirely for a company-level document. */}
-                  {(d.department_name ?? d.location_name) && (
-                    <span style={{ display: 'inline-flex', alignItems: 'center', fontSize: 10, fontWeight: 600,
-                      padding: '1px 6px', borderRadius: 99, marginTop: 2,
-                      background: tintBg('var(--color-info)'), color: chipInk('var(--color-info)'),
-                      border: tintBorder('var(--color-info)') }}>
-                      {t('notes.linkedTo', { name: d.department_name ?? d.location_name })}
-                    </span>
-                  )}
-                  {/* Added by whom + when (shown when the backend provides them). */}
-                  {(() => {
-                    const by = (typeof d.uploaded_by === 'object' ? d.uploaded_by?.name : d.uploaded_by)
-                      ?? (typeof d.created_by === 'object' ? d.created_by?.name : d.created_by) ?? ''
-                    const when = d.uploaded_at ?? d.created_at
-                    if (!by && !when) return null
-                    return <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>
-                      {by}{by && when ? ' · ' : ''}{when ? formatDateTime(when) : ''}
-                    </div>
-                  })()}
-                </div>
-              </div>
-              <span style={{ fontSize: 11, fontWeight: 500, padding: '2px 8px', borderRadius: 99, background: tintBg(docColor(d.type)), color: chipInk(docColor(d.type)), whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{d.type ? docTypeLabel(d.type) : '—'}</span>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 2, justifyContent: 'space-between' }}>
-                <Caption style={{ whiteSpace: 'nowrap' }}>{d.size ?? ''}</Caption>
-                {/* Row-action icon trio — mirrors the byte-identical unconverted row
-                    in the candidate drawer's twin DocumentRow.tsx (out of this task's
-                    scope): 3× Button's sm footprint (28px) would overflow this fixed
-                    100px grid column (DOC_GRID_COLUMNS), which today fits size text +
-                    3 dense icons side by side. */}
-                <div style={{ display: 'flex' }}>
-                  {/* eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- see comment above */}
-                  <button aria-label={t('common:edit')} onClick={() => { setRenamingId(d.id ?? null); setRenameValue(splitExt(String(d.name ?? d.file_name ?? '')).base) }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '2px 3px', display: 'flex' }}><Pencil size={12} /></button>
-                  {/* eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- see comment above */}
-                  <button aria-label={t('documents.preview')} onClick={() => preview(d)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '2px 3px', display: 'flex' }}><Eye size={12} /></button>
-                  {/* eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- see comment above */}
-                  <button aria-label={t('common:remove')} onClick={() => setConfirmDelete({ kind: 'one', doc: d, index: i })} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '2px 3px', display: 'flex' }}><X size={12} /></button>
-                </div>
-              </div>
-            </div>
-            )
-          })
-        }
-        <input ref={fileRef} type="file" style={{ display: 'none' }} multiple
-          onChange={(e: ChangeEvent<HTMLInputElement>) => {
-            // Every picked file becomes its own queue entry (default type 'CV') —
-            // this is the actual bugfix: previously only files?.[0] was kept.
-            const files = Array.from(e.target.files ?? [])
-            if (!files.length) return
-            const items: PendingItem[] = files.map(file => ({
-              file, objectUrl: URL.createObjectURL(file), name: file.name,
-              size: Math.round(file.size / 1024) + ' KB', type: 'CV',
-            }))
-            setPending(prev => [...prev, ...items])
-            e.target.value = ''
-          }} />
+        {filteredDocs.map(d => (
+          <DocumentRow key={String(d.id ?? d._i)} doc={d} index={d._i}
+            selected={selected} toggleSelectedRow={toggleSelectedRow}
+            renamingId={renamingId} renameValue={renameValue} setRenamingId={setRenamingId} setRenameValue={setRenameValue}
+            doRename={doRename} docColor={docColor} docTypeLabel={docTypeLabel}
+            DocIcon={resolveDocTypeIcon(docTypeIcon?.(d.type))} formatDateTime={formatDateTime}
+            preview={preview} onDelete={(doc, index) => setConfirmDelete({ kind: 'one', doc, index })}
+          />
+        ))}
+        <input ref={fileRef} type="file" style={{ display: 'none' }} multiple onChange={onFilesPicked} />
         {/* The shared preview dialog reads the SAME docTypeScope so the type chip
             resolves against this level's own document-type lookup, never a
             hardcoded 'customer' once a location/department has its own scope. */}
