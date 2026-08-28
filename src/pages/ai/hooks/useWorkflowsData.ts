@@ -163,9 +163,10 @@ export function useWorkflowsData(showArchived: boolean) {
     })
   }
 
-  // User saved the canvas editor's graph: creates or updates the workflow, then keeps
-  // the FE graph (steps + connections) as source of truth in localStorage since the
-  // backend does not persist connections yet (C-27), so a reload still restores it.
+  // User saved the canvas editor's graph: creates or updates the workflow. The
+  // backend persists the full graph losslessly (steps[].id/position/connections —
+  // C-27 landed; measured live by the workflow-editor smoke flow 28-08); the
+  // localStorage copy below is only a belt-and-braces cache, no longer the truth.
   const handleSave = async (updated: Workflow, closeAfter = true) => {
     if (!updated.steps || updated.steps.length === 0) {
       alert(t('page.addModuleAlert'))

@@ -13,6 +13,8 @@ import { mfaLifecycle } from './flows/mfa.mjs'
 import { pagination } from './flows/pagination.mjs'
 import { drilldownRender } from './flows/drilldown-render.mjs'
 import { naadContract } from './flows/naad-contract.mjs'
+import { workflowEditorGraph } from './flows/workflow-editor.mjs'
+import { reportDeeplinkDrill } from './flows/report-deeplink.mjs'
 
 const FLOWS = [
   ['pages-render', pagesRender],
@@ -25,6 +27,8 @@ const FLOWS = [
   ['pagination', pagination],
   ['drilldown-render', drilldownRender],
   ['naad-contract', naadContract],
+  ['workflow-editor', workflowEditorGraph],
+  ['report-deeplink', reportDeeplinkDrill],
   ['archive-and-find-back', archiveAndFindBack], // last: it mutates the list
 ]
 
