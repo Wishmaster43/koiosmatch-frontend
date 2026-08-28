@@ -143,7 +143,7 @@ describe('CompanySettings — province cascade after the country move (COMPANY-O
     api.get.mockImplementation((url) => {
       if (url === '/countries')  return Promise.resolve({ data: { data: [{ code: 'NL' }, { code: 'BE' }] } })
       if (url === '/industries') return Promise.resolve({ data: { data: ['Zorg'] } })
-      const province = /^\/provinces\?country=([A-Z]{2})$/.exec(url)
+      const province = /^\/provinces\?country=([A-Z]{2})&active=1$/.exec(url)
       if (province) return Promise.resolve({ data: { data: provincesByCountry[province[1]] ?? [] } })
       return new Promise(() => {})
     })
