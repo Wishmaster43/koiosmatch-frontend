@@ -144,7 +144,21 @@ export interface NotesLabels {
 // NOTE-TAAL-1: `language` rides along on save/edit — optional, undefined means
 // "let the backend default to the tenant language" (never force a value the
 // recruiter never picked).
-export interface NotePayload { type: string; title: string; body: string; channel?: string; language?: string }
+// NOTE-ACTION-ITEMS-1 (CMBE 173ffbf7): the wire shape the note write-path owns.
+// status/created are deliberately absent — the write-path owns the DEFINITION
+// only; a stale save must never reset an executed item.
+export interface NoteActionItemWire {
+  id?: string
+  title: string
+  type: string
+  link?: string
+  message?: string
+  due_date?: string
+  start?: string
+  assignee_id?: string
+  sort_order?: number
+}
+export interface NotePayload { type: string; title: string; body: string; channel?: string; language?: string; action_items?: NoteActionItemWire[] }
 
 interface NotesTabProps {
   // CONCEPT-NOTE-2 (K-161): when the host names its dossier, a cancelled

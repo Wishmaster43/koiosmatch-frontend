@@ -37,6 +37,9 @@ export interface NoteActionPanelItem {
   // Position of this item in exec's own array, stamped at merge time —
   // survives a later title edit (see confirmOne).
   execIndex?: number
+  // NOTE-ACTION-ITEMS-1: the persisted row's id — execute sends it (with the
+  // note id) so the server stamps status/created onto the stored item.
+  noteActionItemId?: string
   start?: string | null
   status: 'proposed' | 'pending' | 'executed' | 'failed'
   reason?: string

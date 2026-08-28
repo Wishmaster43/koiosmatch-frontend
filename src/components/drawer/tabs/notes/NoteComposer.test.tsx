@@ -17,7 +17,7 @@
  * modals with a pinned footer (AddTaskModal etc.).
  */
 import { describe, it, expect, vi, afterEach } from 'vitest'
-import { render, screen, act } from '@testing-library/react'
+import { render, screen, act, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import NoteComposer from './NoteComposer'
 import { chipInk } from '@/lib/tint'
@@ -410,5 +410,33 @@ describe('NoteComposer · dictation mic (NOTITIE-VOICE-1)', () => {
     render(<NoteComposer open initialNote={{ type: 'general', text: 'Existing', language: 'fr' }} noteTypes={noteTypes} channels={[]} labels={labels} onSave={vi.fn()} onCancel={vi.fn()} />)
     await user.click(micButton()!)
     expect(MockSpeechRecognition.lastInstance?.lang).toBe('fr-FR')
+  })
+})
+
+describe('NOTE-ACTION-ITEMS-1 · items persist with the note (CMBE 173ffbf7)', () => {
+  it('the save carries the full wire definition — status/created stripped, ids kept, sort_order = index', () => {
+    const onSave = vi.fn()
+    render(<NoteComposer open initialNote={null} noteTypes={[]} channels={[]} labels={labels} editorLabels={{}}
+      initialDraft={{ type: 'general', channel: '', title: '', body: '', language: null,
+        items: [
+          { title: 'Bel kandidaat', type: 'task', due_date: '2026-09-01', note_excerpt: null, status: 'proposed' },
+          { title: 'Plan intake', type: 'appointment', start: '2026-09-02T10:00', due_date: null, note_excerpt: null, status: 'executed', noteActionItemId: 'ai-7', created: { type: 'appointment', id: 'ap-1' } },
+        ] } as never}
+      onSave={onSave} onCancel={vi.fn()} />)
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }))
+    const payload = onSave.mock.calls[0][0]
+    expect(payload.action_items).toEqual([
+      { title: 'Bel kandidaat', type: 'task', due_date: '2026-09-01', sort_order: 0 },
+      { id: 'ai-7', title: 'Plan intake', type: 'appointment', start: '2026-09-02T10:00', sort_order: 1 },
+    ])
+  })
+
+  it('a reopened saved note seeds the panel from action_items, executed status included', () => {
+    render(<NoteComposer open noteTypes={[]} channels={[]} labels={labels} editorLabels={{}} initialDraft={null}
+      initialNote={{ id: 'n1', type: 'general', body: '', action_items: [
+        { id: 'ai-9', title: 'Intake gepland', type: 'appointment', status: 'executed', created: { type: 'appointment', id: 'ap-2' } },
+      ] } as never}
+      onSave={vi.fn()} onCancel={vi.fn()} />)
+    expect(screen.getByText('Intake gepland')).toBeInTheDocument()
   })
 })

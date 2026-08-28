@@ -100,6 +100,10 @@ export function toExecuteItem(item: RichTextAssistActionItem, confirmed?: boolea
     // server-side, and an absent link simply links nothing.
     ...(item.assignee_user_id ? { assignee_user_id: item.assignee_user_id } : null),
     ...(item.link_type && item.link_id ? { link_type: item.link_type, link_id: item.link_id } : null),
+    // NOTE-ACTION-ITEMS-1: with the persisted row id (plus source.note_id) the
+    // server stamps status/created onto the stored item — IDOR-safe pair.
+    ...((item as { noteActionItemId?: string }).noteActionItemId
+      ? { note_action_item_id: (item as { noteActionItemId?: string }).noteActionItemId } : null),
   }
 }
 

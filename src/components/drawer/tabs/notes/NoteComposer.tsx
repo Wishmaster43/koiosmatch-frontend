@@ -129,14 +129,49 @@ export default function NoteComposer({ open, initialNote, noteTypes, channels, l
   // ASSIST-SIDEPANEEL-1: the side panel's own item state — lives in the
   // composer so it survives multiple Verwerken/Samenvatten runs for as long
   // as the popup stays open (Danny punt 6/7: results merge, never reset).
-  const [panelItems, setPanelItems] = useState<NoteActionPanelItem[]>(() => (initialDraft?.items as NoteActionPanelItem[] | undefined) ?? [])
+  const [panelItems, setPanelItems] = useState<NoteActionPanelItem[]>(() => {
+    const fromDraft = initialDraft?.items as NoteActionPanelItem[] | undefined
+    if (fromDraft?.length) return fromDraft
+    // NOTE-ACTION-ITEMS-1: a saved note carries its items — the panel now
+    // SURVIVES saving (visie punt 5/6; the draft-only panel was the r2 gat).
+    const persisted = (initialNote as { action_items?: Array<Record<string, unknown>> } | null)?.action_items
+    if (!persisted?.length) return []
+    return persisted.map(it => ({
+      title: String(it.title ?? ''),
+      type: it.type as NoteActionPanelItem['type'],
+      due_date: (it.due_date as string | null) ?? null,
+      start: (it.start as string | null) ?? null,
+      note_excerpt: null,
+      message: (it.message as string | null) ?? null,
+      assignee_user_id: (it.assignee_id as string | undefined) ?? undefined,
+      noteActionItemId: it.id != null ? String(it.id) : undefined,
+      created: (it.created as NoteActionPanelItem['created']) ?? null,
+      status: it.status === 'executed' ? 'executed'
+        : (it.status === 'failed' || it.status === 'forbidden') ? 'failed'
+        : 'pending',
+    }))
+  })
   const koios = useMyKoiosMode()
   const onAssistItems = (fresh: AssistActionItem[]) =>
     setPanelItems(prev => mergeNoteActionItems(prev, fresh))
   // Extracted action-panel keys already known to the AI, so a later call never re-suggests what it already surfaced.
   const knownItems = useMemo(() => toKnownItems(panelItems), [panelItems])
 
-  const save = () => onSave(fields.payload)
+  // NOTE-ACTION-ITEMS-1: the save carries the panel's full definition when the
+  // panel is in play (present = the whole wanted set; absent = leave alone).
+  const hadPersisted = Boolean((initialNote as { action_items?: unknown[] } | null)?.action_items?.length)
+  const save = () => onSave(panelItems.length > 0 || hadPersisted
+    ? { ...fields.payload,
+        action_items: panelItems.map((it, i) => ({
+          ...(it.noteActionItemId ? { id: it.noteActionItemId } : {}),
+          title: it.title, type: it.type,
+          ...(it.message ? { message: it.message } : {}),
+          ...(it.due_date ? { due_date: it.due_date } : {}),
+          ...(it.start ? { start: it.start } : {}),
+          ...(it.assignee_user_id ? { assignee_id: it.assignee_user_id } : {}),
+          sort_order: i,
+        })) }
+    : fields.payload)
   // Cancel = hand the draft back first (CONCEPT-NOTE-1): a NEW note with any
   // typed/dictated content or live action items becomes the host's session
   // concept; an empty composer clears a stale one. Editing an existing note

@@ -27,6 +27,8 @@
  * per-field mapping here) — declared explicitly below for type safety.
  */
 import { useState, useEffect, useCallback } from 'react'
+// One shared payload shape (§11): the composer's NotePayload, action_items included.
+import type { NotePayload } from '@/components/drawer/tabs/NotesTab'
 import { useTranslation } from 'react-i18next'
 import api, { unwrapList } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
@@ -47,7 +49,6 @@ export interface CandidateNote {
 }
 
 // NotesTab hands back the editor payload on save (both add and edit).
-interface NotePayload { type: string; title: string; body: string; channel?: string; language?: string }
 
 // LAST-CONTACT-REFRESH-1 (Danny 05-08): a channel-note stamps last_contact server-side
 // (CandidateNote::booted → recordContact, live-proven) but the drawer kept showing the
@@ -86,7 +87,9 @@ export function useCandidateNotes(candidateId: string | number | undefined, opts
       id: `tmp-${Date.now()}`, type: payload.type, channel: payload.channel, body: payload.body, created_at: new Date().toISOString(),
     }
     setNotes(prev => [temp, ...prev])
-    api.post(`/candidates/${candidateId}/notes`, { type: payload.type, text: payload.body, channel: payload.channel, language: payload.language })
+    api.post(`/candidates/${candidateId}/notes`, { type: payload.type, text: payload.body, channel: payload.channel, language: payload.language,
+      // NOTE-ACTION-ITEMS-1: present = the full wanted set; absent = untouched.
+      ...(payload.action_items ? { action_items: payload.action_items } : {}) })
       .then(() => { load(); if (payload.channel) opts?.onContactStamped?.() })
       .catch(() => { setNotes(prev => prev.filter(n => n.id !== temp.id)); notifyError(t('common:actionFailed')) })
     // eslint-disable-next-line react-hooks/exhaustive-deps -- opts is a caller-literal; the callback identity must not retrigger
@@ -101,7 +104,9 @@ export function useCandidateNotes(candidateId: string | number | undefined, opts
     if (!target) return Promise.resolve(false)
     const snapshot = notes
     setNotes(prev => prev.map((n, i) => (i === index ? { ...n, type: payload.type, channel: payload.channel, body: payload.body, language: payload.language } : n)))
-    return api.patch(`/candidates/${candidateId}/notes/${target.id}`, { text: payload.body, type: payload.type, channel: payload.channel, language: payload.language })
+    return api.patch(`/candidates/${candidateId}/notes/${target.id}`, { text: payload.body, type: payload.type, channel: payload.channel, language: payload.language,
+      // NOTE-ACTION-ITEMS-1: present = the full wanted set; absent = untouched.
+      ...(payload.action_items ? { action_items: payload.action_items } : {}) })
       .then(() => { load(); return true })
       .catch(() => { setNotes(snapshot); notifyError(t('common:actionFailed')); return false })
   }, [candidateId, notes, load, t])
