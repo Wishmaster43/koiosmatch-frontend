@@ -341,7 +341,9 @@
     "conversation": {
       "title": "Gespräch",
       "noCandidate": "Kein Kandidat verknüpft. Nichts anzuzeigen."
-    }
+    },
+    "loadingDetail": "Interviewdaten werden geladen…",
+    "detailError": "Interviewdaten konnten nicht geladen werden. Schließen Sie das Detail und versuchen Sie es erneut."
   },
   "appointments": {
     "empty": "Keine Termine geplant.",

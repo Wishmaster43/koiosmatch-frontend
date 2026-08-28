@@ -53,7 +53,8 @@
   "tabs": {
     "overview": "Übersicht",
     "learning": "Lernbericht",
-    "capabilities": "Tool-Matrix"
+    "capabilities": "Tool-Matrix",
+    "feedback": "Feedback"
   },
   "learning": {
     "loading": "Bericht wird geladen…",
@@ -88,5 +89,23 @@
     "toggleAria": "{{label}} ein- oder ausschalten",
     "otherGroup": "Sonstiges",
     "saveError": "Speichern der Tool-Einstellung fehlgeschlagen."
+  },
+  "feedbackAdmin": {
+    "summaryTitle": "Feedback-Zusammenfassung",
+    "total": "Gesamt",
+    "downPct": "Daumen runter",
+    "listTitle": "Feedback",
+    "loading": "Feedback wird geladen…",
+    "loadError": "Die Feedback-Übersicht konnte nicht geladen werden.",
+    "retry": "Erneut versuchen",
+    "empty": "Noch kein Feedback erfasst.",
+    "noComment": "Kein Kommentar hinterlassen.",
+    "surfaces": {
+      "chat": "Chat",
+      "note_assist": "Notiz-Assistent",
+      "generate": "Generieren",
+      "conversation_assist": "Gesprächsassistent",
+      "report_advice": "Berichtsempfehlung"
+    }
   }
 }

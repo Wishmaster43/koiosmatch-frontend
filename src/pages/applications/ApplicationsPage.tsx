@@ -137,7 +137,7 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
   // ── Single-record drawer actions (select/move/owner/link/reject/score/detach/…)
   // — §0.3 split (F1, audit R1): mirrors useCandidateDrawerActions.
   const {
-    selected, expanded, setExpanded, closeDrawer, selectApplication, openTab,
+    selected, expanded, setExpanded, closeDrawer, selectApplication, openTab, detailPhase,
     handleMove, handleOwner, handleLinkVacancy, handleUpdateSource, handleReject,
     handleAdjustScore, handleUpdateCustomFields, handleCandidateUpdated, handleDetach, handleRestore,
     pendingMove, confirmPendingMove, cancelPendingMove,
@@ -410,7 +410,8 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
 
       {/* Detail drawer */}
       <ApplicationDrawer
-        key={selected?.id ?? 'none'}
+key={selected?.id ?? 'none'}
+        detailPhase={detailPhase}
         application={selected}
         onClose={closeDrawer}
         expanded={expanded}

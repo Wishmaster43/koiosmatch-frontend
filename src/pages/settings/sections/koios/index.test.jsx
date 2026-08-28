@@ -16,6 +16,7 @@ vi.mock('./KoiosStatusCard', () => ({ default: () => <div>overview-status-card</
 vi.mock('./KoiosModelsCard', () => ({ default: () => <div>overview-models-card</div> }))
 vi.mock('./KoiosLearningCard', () => ({ default: () => <div>learning-card</div> }))
 vi.mock('./KoiosCapabilitiesCard', () => ({ default: () => <div>capabilities-card</div> }))
+vi.mock('./KoiosFeedbackCard', () => ({ default: () => <div>feedback-card</div> }))
 
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key) => key }),
@@ -44,6 +45,16 @@ describe('KoiosSettings sub-tabs', () => {
     await screen.findByText('overview-status-card')
     fireEvent.click(screen.getByRole('tab', { name: 'tabs.capabilities' }))
     await waitFor(() => expect(screen.getByText('capabilities-card')).toBeInTheDocument())
+    expect(screen.queryByText('overview-status-card')).not.toBeInTheDocument()
+  })
+
+  // KOIOS-FEEDBACK-FE-1: the fourth sub-tab mounts the admin feedback card exclusively.
+  it('switches to the feedback card on its tab click', async () => {
+    mockGetKoiosSettings.mockResolvedValue({ status: {}, models: {} })
+    render(<KoiosSettings />)
+    await screen.findByText('overview-status-card')
+    fireEvent.click(screen.getByRole('tab', { name: 'tabs.feedback' }))
+    await waitFor(() => expect(screen.getByText('feedback-card')).toBeInTheDocument())
     expect(screen.queryByText('overview-status-card')).not.toBeInTheDocument()
   })
 })

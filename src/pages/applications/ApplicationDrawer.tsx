@@ -48,6 +48,8 @@ import EntityLink from '@/components/ui/EntityLink'
 const TAB_IDS = ['application', 'candidate', 'vacancy', 'interviews', 'appointments', 'timeline', 'notes', 'statistics']
 
 interface ApplicationDrawerProps {
+  // Detail-fetch phase from the drawer hook — tabs gate their empty states on it.
+  detailPhase?: 'idle' | 'loading' | 'ready' | 'error'
   application: ApplicationDetail | null
   onClose: () => void
   expanded?: boolean
@@ -83,7 +85,7 @@ interface ApplicationDrawerProps {
  * ApplicationDrawer — thin container: declares the header config + tab list and
  * wires them to the shared EntityDrawer shell. No heavy JSX, no business logic.
  */
-export default function ApplicationDrawer({ application: a, onClose, expanded, onToggleExpand, onReject, onAdjustScore, onPhaseChange, onOwnerChange, onLinkVacancy, onUpdateSource, users, onDetach, onRestore, canManage, onUpdateCustomFields, initialTab, onCandidateUpdated }: ApplicationDrawerProps) {
+export default function ApplicationDrawer({ application: a, onClose, expanded, onToggleExpand, onReject, onAdjustScore, onPhaseChange, onOwnerChange, onLinkVacancy, onUpdateSource, users, onDetach, onRestore, canManage, onUpdateCustomFields, initialTab, onCandidateUpdated, detailPhase }: ApplicationDrawerProps) {
   const { t } = useTranslation('applications')
   const { formatDate, formatDateTime } = useDateFormat()
   // S15: the reason-required detach confirm modal (footer "Ontkoppelen").
@@ -155,7 +157,7 @@ export default function ApplicationDrawer({ application: a, onClose, expanded, o
       case 'statistics':   return <StatisticsTab application={a} />
       case 'candidate':    return <CandidateTab application={a} />
       case 'vacancy':      return <VacancyTab application={a} onLinkVacancy={onLinkVacancy} />
-      case 'interviews':   return <InterviewsTab application={a} />
+      case 'interviews':   return <InterviewsTab application={a} detailPhase={detailPhase} />
       case 'appointments': return <AppointmentsTab application={a} />
       // Tijdlijn TAB (real lifecycle activity: funnel transitions, appointments,
       // notes, AI-interviews — ApplicationTimeline on the backend) is intentionally

@@ -53,7 +53,8 @@
   "tabs": {
     "overview": "Aperçu",
     "learning": "Rapport d'apprentissage",
-    "capabilities": "Matrice d’outils"
+    "capabilities": "Matrice d’outils",
+    "feedback": "Retours"
   },
   "learning": {
     "loading": "Chargement du rapport…",
@@ -88,5 +89,23 @@
     "toggleAria": "Activer ou désactiver {{label}}",
     "otherGroup": "Autre",
     "saveError": "L’enregistrement du réglage de l’outil a échoué."
+  },
+  "feedbackAdmin": {
+    "summaryTitle": "Résumé des retours",
+    "total": "Total",
+    "downPct": "Pouce baissé",
+    "listTitle": "Retours",
+    "loading": "Chargement des retours…",
+    "loadError": "L'aperçu des retours n'a pas pu être chargé.",
+    "retry": "Réessayer",
+    "empty": "Aucun retour enregistré pour le moment.",
+    "noComment": "Aucun commentaire laissé.",
+    "surfaces": {
+      "chat": "Chat",
+      "note_assist": "Assistant de notes",
+      "generate": "Générer",
+      "conversation_assist": "Assistant de conversation",
+      "report_advice": "Conseil de rapport"
+    }
   }
 }

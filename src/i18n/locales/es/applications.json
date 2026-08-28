@@ -341,7 +341,9 @@
     "conversation": {
       "title": "Conversación",
       "noCandidate": "Ningún candidato vinculado. Nada que mostrar."
-    }
+    },
+    "loadingDetail": "Cargando datos de la entrevista…",
+    "detailError": "No se pudieron cargar los datos de la entrevista. Cierra el detalle e inténtalo de nuevo."
   },
   "appointments": {
     "empty": "No hay citas programadas.",

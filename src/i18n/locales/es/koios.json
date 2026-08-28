@@ -53,7 +53,8 @@
   "tabs": {
     "overview": "Resumen",
     "learning": "Informe de aprendizaje",
-    "capabilities": "Matriz de herramientas"
+    "capabilities": "Matriz de herramientas",
+    "feedback": "Comentarios"
   },
   "learning": {
     "loading": "Cargando informe…",
@@ -88,5 +89,23 @@
     "toggleAria": "Activar o desactivar {{label}}",
     "otherGroup": "Otros",
     "saveError": "No se pudo guardar el ajuste de la herramienta."
+  },
+  "feedbackAdmin": {
+    "summaryTitle": "Resumen de comentarios",
+    "total": "Total",
+    "downPct": "Pulgar abajo",
+    "listTitle": "Comentarios",
+    "loading": "Cargando comentarios…",
+    "loadError": "No se pudo cargar el resumen de comentarios.",
+    "retry": "Reintentar",
+    "empty": "Todavía no hay comentarios registrados.",
+    "noComment": "No se dejó ningún comentario.",
+    "surfaces": {
+      "chat": "Chat",
+      "note_assist": "Asistente de notas",
+      "generate": "Generar",
+      "conversation_assist": "Asistente de conversación",
+      "report_advice": "Consejo de informe"
+    }
   }
 }

@@ -341,7 +341,9 @@
     "conversation": {
       "title": "Conversation",
       "noCandidate": "No candidate linked. Nothing to show."
-    }
+    },
+    "loadingDetail": "Loading interview details…",
+    "detailError": "Interview details could not be loaded. Close the drill-down and try again."
   },
   "appointments": {
     "empty": "No appointments scheduled.",

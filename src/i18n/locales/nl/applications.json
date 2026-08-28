@@ -341,7 +341,9 @@
     "conversation": {
       "title": "Gesprek",
       "noCandidate": "Geen kandidaat gekoppeld. Niets om te tonen."
-    }
+    },
+    "loadingDetail": "Interviewgegevens laden…",
+    "detailError": "Interviewgegevens konden niet worden geladen. Sluit de drilldown en probeer opnieuw."
   },
   "appointments": {
     "empty": "Geen afspraken ingepland.",

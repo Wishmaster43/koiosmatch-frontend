@@ -250,7 +250,8 @@
         "no_mobile_or_consent": "Keine Mobilnummer oder keine Einwilligung für diesen Kanal.",
         "no_active_connection": "Die erforderliche Verbindung ist nicht aktiv.",
         "send_failed": "Senden fehlgeschlagen."
-      }
+      },
+      "partialTitle": "Teilweise ausgeführt"
     },
     "resizeHandle": "Panelbreite anpassen",
     "column": "Koios",

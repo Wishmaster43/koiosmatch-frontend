@@ -31,3 +31,12 @@ export const getKoiosCapabilities = () => api.get('/ai/koios/capabilities').then
 // name with 422 and returns fresh tools[] + default_enabled.
 export const updateKoiosCapabilityTool = (name, value) =>
   api.patch('/ai/koios/capabilities/tools', { tools: { [name]: value } }).then(unwrap)
+
+// KOIOS-FEEDBACK-FE-1 (measured against KoiosFeedbackController::index()): the
+// admin feedback overview — paginated + filtered list plus a summary over the
+// SAME filters. { summary{total,up,down,down_pct,reasons{}}, data[{id,
+// prompt_log_id,surface,rating,reasons[],comment,user,prompt_excerpt,
+// created_at,updated_at}], total, per_page, current_page, last_page }. No AI
+// call (API-CREDITS-1) — pure reporting over already-stored rows.
+export const getKoiosFeedback = (page = 1, perPage = 25) =>
+  api.get('/ai/koios/feedback', { params: { page, per_page: perPage } }).then(unwrap)

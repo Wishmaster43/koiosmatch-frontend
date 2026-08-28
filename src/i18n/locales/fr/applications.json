@@ -341,7 +341,9 @@
     "conversation": {
       "title": "Conversation",
       "noCandidate": "Aucun candidat lié. Rien à afficher."
-    }
+    },
+    "loadingDetail": "Chargement des données d’entretien…",
+    "detailError": "Les données d’entretien n’ont pas pu être chargées. Fermez le détail et réessayez."
   },
   "appointments": {
     "empty": "Aucun rendez-vous planifié.",

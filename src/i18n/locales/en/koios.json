@@ -53,7 +53,8 @@
   "tabs": {
     "overview": "Overview",
     "learning": "Learning report",
-    "capabilities": "Tool matrix"
+    "capabilities": "Tool matrix",
+    "feedback": "Feedback"
   },
   "learning": {
     "loading": "Loading report…",
@@ -88,5 +89,23 @@
     "toggleAria": "Toggle {{label}} on or off",
     "otherGroup": "Other",
     "saveError": "Saving the tool setting failed."
+  },
+  "feedbackAdmin": {
+    "summaryTitle": "Feedback summary",
+    "total": "Total",
+    "downPct": "Thumbs down",
+    "listTitle": "Feedback",
+    "loading": "Loading feedback…",
+    "loadError": "The feedback overview could not be loaded.",
+    "retry": "Retry",
+    "empty": "No feedback recorded yet.",
+    "noComment": "No comment left.",
+    "surfaces": {
+      "chat": "Chat",
+      "note_assist": "Note assist",
+      "generate": "Generate",
+      "conversation_assist": "Conversation assist",
+      "report_advice": "Report advice"
+    }
   }
 }

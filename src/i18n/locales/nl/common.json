@@ -250,7 +250,8 @@
         "no_mobile_or_consent": "Geen mobiel nummer of geen toestemming voor dit kanaal.",
         "no_active_connection": "De benodigde koppeling is niet actief.",
         "send_failed": "Versturen is niet gelukt."
-      }
+      },
+      "partialTitle": "Gedeeltelijk uitgevoerd"
     },
     "resizeHandle": "Paneelbreedte aanpassen",
     "column": "Koios",

@@ -9,6 +9,7 @@ import { MessageCircle, FileText } from 'lucide-react'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import StatusPill from '@/components/ui/StatusPill'
 import { GroupLabel } from '@/components/ui/typography'
+import Spinner from '@/components/ui/Spinner'
 import ConversationsSection from '@/components/drawer/ConversationsSection'
 import { useAuth } from '@/context/AuthContext'
 import api, { unwrap, unwrapList } from '@/lib/api'
@@ -212,8 +213,9 @@ function useConversationScope(enabled: boolean, applicationId: Id | undefined, c
 
 // The application drawer's interviews tab: schedule/history + the linked
 // conversation thread, using useConversationScope's precise-then-fallback link.
-export default function InterviewsTab({ application: a }: { application: ApplicationDetail }) {
+export default function InterviewsTab({ application: a, detailPhase }: { application: ApplicationDetail; detailPhase?: 'idle' | 'loading' | 'ready' | 'error' }) {
   const { t } = useTranslation('applications')
+
   const { formatDateTime } = useDateFormat()
   const interviews = a.interviews ?? []
   // Local override once a Flow-B "start interview" POST succeeds — the drawer's
@@ -222,6 +224,8 @@ export default function InterviewsTab({ application: a }: { application: Applica
   // override for the same class of problem: no refetch plumbing in this tab).
   const [startedOverride, setStartedOverride] = useState<ApplicationInterview | null>(null)
   const interview = startedOverride ?? a.interview
+
+
   // Hide the start action once a session exists (INCLUDING a borrowed sibling
   // session — INTERVIEW-SIBLING-1 forbids a second session on the same flow), or
   // once the application sits in a terminal bucket (rejected/matched) — starting a
@@ -235,6 +239,24 @@ export default function InterviewsTab({ application: a }: { application: Applica
   // CONV-APPLICATION-ID-1: resolve the precise vs. fallback scope (see the hook's
   // own doc comment above) — only ever runs the preflight while the panel is offered.
   const { scope, resolved } = useConversationScope(hasAnyInterviewActivity, a.id, a.candidateId)
+
+  // The list row carries no interviews[] (detail-only) and a deep-link opens on a
+  // bare {id}: while the detail fetch runs — or after it FAILED — an empty state
+  // would be a lie about data that simply is not here (yet). Honest states first.
+  if (detailPhase === 'loading') {
+    return (
+      <Caption as="div" style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '24px 0' }}>
+        <Spinner size={14} /> {t('interview.loadingDetail', { defaultValue: 'Interviewgegevens laden…' })}
+      </Caption>
+    )
+  }
+  if (detailPhase === 'error') {
+    return (
+      <Caption as="div" style={{ padding: '24px 0' }}>
+        {t('interview.detailError', { defaultValue: 'Interviewgegevens konden niet worden geladen. Sluit de drilldown en probeer opnieuw.' })}
+      </Caption>
+    )
+  }
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>

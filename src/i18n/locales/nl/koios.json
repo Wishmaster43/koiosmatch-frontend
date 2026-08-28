@@ -53,7 +53,8 @@
   "tabs": {
     "overview": "Overzicht",
     "learning": "Leerrapport",
-    "capabilities": "Tool-matrix"
+    "capabilities": "Tool-matrix",
+    "feedback": "Feedback"
   },
   "learning": {
     "loading": "Rapport laden…",
@@ -88,5 +89,23 @@
     "toggleAria": "Schakel {{label}} in of uit",
     "otherGroup": "Overig",
     "saveError": "Opslaan van de tool-instelling is niet gelukt."
+  },
+  "feedbackAdmin": {
+    "summaryTitle": "Feedback samenvatting",
+    "total": "Totaal",
+    "downPct": "Duim omlaag",
+    "listTitle": "Feedback",
+    "loading": "Feedback laden…",
+    "loadError": "Het feedbackoverzicht kon niet worden geladen.",
+    "retry": "Opnieuw proberen",
+    "empty": "Nog geen feedback geregistreerd.",
+    "noComment": "Geen toelichting achtergelaten.",
+    "surfaces": {
+      "chat": "Chat",
+      "note_assist": "Notitie-assistent",
+      "generate": "Genereren",
+      "conversation_assist": "Gespreksassistent",
+      "report_advice": "Rapportadvies"
+    }
   }
 }

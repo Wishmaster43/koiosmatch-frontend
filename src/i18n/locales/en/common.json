@@ -250,7 +250,8 @@
         "no_mobile_or_consent": "No mobile number or no consent for this channel.",
         "no_active_connection": "The required connection is not active.",
         "send_failed": "Sending failed."
-      }
+      },
+      "partialTitle": "Partially executed"
     },
     "resizeHandle": "Resize panel",
     "column": "Koios",

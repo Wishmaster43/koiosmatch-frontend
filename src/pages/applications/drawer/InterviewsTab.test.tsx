@@ -368,3 +368,22 @@ describe('InterviewsTab · live conversation panel (CONV-APPLICATION-ID-1, 08-08
     expect(mockGet).not.toHaveBeenCalledWith('/conversations', expect.anything())
   })
 })
+
+
+// LAADPAD-EERLIJKHEID (Opus-probe 28-08, Danny's screenshotsymptoom): de lijst-rij
+// draagt geen interviews[] (detail-only) en een deep-link opent op een kale {id} —
+// zolang de detail-GET loopt of faalde is ELKE lege staat een leugen.
+describe('InterviewsTab — detail-fetch phase gating', () => {
+  it('shows a loading state, never the empty state, while the detail GET runs', () => {
+    render(<InterviewsTab application={app({ interviews: undefined as never })} detailPhase="loading" />)
+    expect(screen.getByText('interview.loadingDetail')).toBeInTheDocument()
+    expect(screen.queryByText('interview.history.empty')).not.toBeInTheDocument()
+    expect(screen.queryByText('interview.status.none')).not.toBeInTheDocument()
+  })
+
+  it('shows an honest error state, never "no interview", when the detail GET failed', () => {
+    render(<InterviewsTab application={app({ interviews: undefined as never })} detailPhase="error" />)
+    expect(screen.getByText('interview.detailError')).toBeInTheDocument()
+    expect(screen.queryByText('interview.status.none')).not.toBeInTheDocument()
+  })
+})

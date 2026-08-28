@@ -49,12 +49,14 @@ export function useApplicationDrawerActions({ applications, wideRows, setApplica
   // specific drawer tab (Vacature/Interview) instead of always opening on the
   // default Sollicitatie tab — passed through to ApplicationDrawer's initialTab.
   const [openTab, setOpenTab] = useState<string | undefined>(undefined)
+  // 'idle' until a drawer opens; detail-dependent tabs read this to avoid false empties.
+  const [detailPhase, setDetailPhase] = useState<'idle' | 'loading' | 'ready' | 'error'>('idle')
   // V-appdetail-2: a phase-change onto a requires_appointment funnel stage for an
   // application that has none planned yet — warn, never block (§3B "prompt, don't
   // hard-block"). Holds the move the confirm dialog will actually execute.
   const [pendingMove, setPendingMove] = useState<{ id: Id; phaseKey: string; phaseLabel: string } | null>(null)
 
-  const closeDrawer = () => { selectedIdRef.current = null; setSelected(null); setExpanded(false); setOpenTab(undefined) }
+  const closeDrawer = () => { selectedIdRef.current = null; setSelected(null); setExpanded(false); setOpenTab(undefined); setDetailPhase('idle') }
 
   // Open an application: show the light row immediately, then fetch the full detail.
   // `tab` (points 6/7): open straight on this drawer tab instead of the default.
@@ -62,6 +64,7 @@ export function useApplicationDrawerActions({ applications, wideRows, setApplica
     if (selected?.id === a.id) { closeDrawer(); return }
     selectedIdRef.current = a.id ?? null
     setSelected(decorate(a) as ApplicationDetail); setExpanded(false); setOpenTab(tab)
+    setDetailPhase('loading')
     // APP-DELETED-AT-1 (measured live, CMFE 2026-07-17): a row opened straight from
     // the Gearchiveerd quick-view IS soft-deleted server-side — ApplicationController::
     // show() 404s on it (`findOrFail` excludes trashed rows) unless asked to reveal
@@ -69,8 +72,10 @@ export function useApplicationDrawerActions({ applications, wideRows, setApplica
     // it only WIDENS the query scope (withTrashed), never narrows an active row's own
     // lookup, so this fixes the archived case without any branching on `a.archived`.
     api.get(`/applications/${a.id}`, { params: { include_archived: 1 } })
-      .then(r => { if (selectedIdRef.current === a.id) setSelected(decorate(mapApplicationDetail(unwrap(r), funnelTypes))) })
-      .catch(() => {})
+      .then(r => { if (selectedIdRef.current === a.id) { setSelected(decorate(mapApplicationDetail(unwrap(r), funnelTypes))); setDetailPhase('ready') } })
+      // An error is a STATE, not a shrug — the tabs must never present "empty"
+      // as the truth about data that simply failed to arrive (Opus probe, 28-08).
+      .catch(() => { if (selectedIdRef.current === a.id) setDetailPhase('error') })
   }
 
   // Kanban move: set the new phase + bucket; label/colour re-resolve from the lookup.
@@ -342,7 +347,7 @@ export function useApplicationDrawerActions({ applications, wideRows, setApplica
   }
 
   return {
-    selected, setSelected, expanded, setExpanded, closeDrawer, selectApplication, openTab,
+    selected, setSelected, expanded, setExpanded, closeDrawer, selectApplication, openTab, detailPhase,
     handleMove, handleOwner, handleLinkVacancy, handleUpdateSource, handleReject,
     handleAdjustScore, handleUpdateCustomFields, handleCandidateUpdated, handleDetach, handleRestore,
     // V-appdetail-2: the pending move + its resolve/cancel, for the page to render

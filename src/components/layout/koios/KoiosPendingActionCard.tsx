@@ -32,7 +32,7 @@ import { entityIconEl } from './koiosEntityIcons'
 import { useKoiosToolCapabilities, findToolCapability, KOIOS_CONNECTION_HASH } from './useKoiosToolCapabilities'
 import type { KoiosPendingAction, KoiosPreviewRow } from './koiosTypes'
 
-type CardStatus = 'proposed' | 'confirming' | 'submitting' | 'confirmed' | 'cancelled' | 'expired' | 'error' | 'refused'
+type CardStatus = 'proposed' | 'confirming' | 'submitting' | 'confirmed' | 'cancelled' | 'expired' | 'error' | 'refused' | 'partial'
 
 // A pending-action REST call's error status, when the server rejects it because
 // the proposal is gone/already resolved (never a generic error in that case).
@@ -106,20 +106,28 @@ export default function KoiosPendingActionCard({ action }: { action: KoiosPendin
         // tool itself refuses (consent fail-closed, not-found, …) — the refusal
         // rides in `data.fout` / `data.reden` (VoorstelSollicitatie/StartInterview
         // shape), never a 4xx. Surface it honestly instead of a false "confirmed".
-        // A present `reden` means the tool WITHHELD something — also when
-        // `gelukt` stayed true (VoorstelSollicitatie's consent-skip creates the
-        // record but withholds the mail). Translate on the slug; the server's
-        // `fout` prose is only the human fallback. CMBE normalises all ring-2
-        // refusals onto this reden-slug convention (gap-map, 28-08).
-        const data = (res as { data?: { fout?: string; gelukt?: boolean; reden?: string } })?.data
-        if (data?.reden) {
-          const slugKey = `koios.pendingAction.reasons.${data.reden}`
+        // REFUSAL-CONVENTION-1 (gap-map, definitive): `gelukt` is the ONLY
+        // discriminator; `onthouden[]` marks a PARTIAL execution (deliberately
+        // skipped sub-actions); `reden` is the translated carrier — the slug is
+        // always present on refusal AND on every withholding; `fout` is only the
+        // human fallback (and the path for the ~67 not-yet-normalised tools).
+        const data = (res as { data?: { fout?: string; gelukt?: boolean; reden?: string; onthouden?: string[] } })?.data
+        const translateReason = (reden?: string, fout?: string) => {
+          if (!reden) return fout ?? null
+          const slugKey = `koios.pendingAction.reasons.${reden}`
           const translated = t(slugKey)
-          setRefusedReason(translated === slugKey ? (data.fout ?? data.reden) : translated)
+          return translated === slugKey ? (fout ?? reden) : translated
+        }
+        if (data?.gelukt === false || (!('gelukt' in (data ?? {})) && (data?.reden || data?.fout))) {
+          setRefusedReason(translateReason(data?.reden, data?.fout))
           setStatus('refused')
           return
         }
-        if (data?.fout) { setRefusedReason(data.fout); setStatus('refused'); return }
+        if (data?.onthouden?.length || data?.reden) {
+          setRefusedReason(translateReason(data?.reden, data?.fout))
+          setStatus('partial')
+          return
+        }
         setStatus('confirmed')
       })
       .catch((e) => setStatus(isExpiredStatus(e?.response?.status) ? 'expired' : 'error'))
@@ -176,6 +184,9 @@ export default function KoiosPendingActionCard({ action }: { action: KoiosPendin
               title={t('capabilities.connectionSectionMissing', { ns: 'koios' })} />
       )}
 
+      {status === 'partial' && (
+        <CalloutBox variant="warning" title={t('koios.pendingAction.partialTitle')}>{refusedReason}</CalloutBox>
+      )}
       {status === 'refused' && (
         <CalloutBox variant="warning" title={t('koios.pendingAction.refusedTitle')}>{refusedReason}</CalloutBox>
       )}

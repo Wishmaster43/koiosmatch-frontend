@@ -152,11 +152,22 @@ describe('KoiosPendingActionCard', () => {
     expect(screen.getByText('koios.pendingAction.confirm')).toBeEnabled()
   })
 
-  // MEASURED shape 1 (VoorstelSollicitatie consent-skip): gelukt stays TRUE, the
-  // mail is withheld and `reden` carries the slug — a present reden is never a
-  // clean "Bevestigd" (the Opus probe caught the card lying here).
-  it('renders refused, never confirmed, when gelukt=true but reden is present (mail withheld)', async () => {
-    mockConfirm.mockResolvedValue({ status: 'executed', data: { gelukt: true, mail_verzonden: false, reden: 'no_email_consent' } })
+  // REFUSAL-CONVENTION-1 definitive (BuildsToolResult): gelukt:true + onthouden[]
+  // = a PARTIAL execution — its own honest state, never a bare "Bevestigd" and
+  // never a full refusal either (the record DID land, only the mail was withheld).
+  it('renders the partial state when gelukt=true with onthouden + reden (mail withheld)', async () => {
+    mockConfirm.mockResolvedValue({ status: 'executed', data: { gelukt: true, onthouden: ['mail'], reden: 'no_email_consent' } })
+    const user = userEvent.setup()
+    renderCard(action())
+    await user.click(screen.getByText('koios.pendingAction.confirm'))
+    await waitFor(() => expect(screen.getByTestId('koios-pending-action')).toHaveAttribute('data-status', 'partial'))
+    expect(screen.getByText('koios.pendingAction.partialTitle')).toBeInTheDocument()
+    expect(screen.queryByText('koios.pendingAction.confirmed')).not.toBeInTheDocument()
+  })
+
+  // A full refusal under the definitive convention: gelukt:false + reden + fout.
+  it('renders refused on gelukt=false with a reden slug', async () => {
+    mockConfirm.mockResolvedValue({ status: 'executed', data: { gelukt: false, reden: 'customer_blocked', fout: 'Klant is geblokkeerd.' } })
     const user = userEvent.setup()
     renderCard(action())
     await user.click(screen.getByText('koios.pendingAction.confirm'))

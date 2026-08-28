@@ -16,6 +16,7 @@ import KoiosStatusCard from './KoiosStatusCard'
 import KoiosModelsCard from './KoiosModelsCard'
 import KoiosLearningCard from './KoiosLearningCard'
 import KoiosCapabilitiesCard from './KoiosCapabilitiesCard'
+import KoiosFeedbackCard from './KoiosFeedbackCard'
 import { PageTitle } from '@/components/ui/typography'
 import SubTabBar from '@/components/drawer/SubTabBar'
 // KOIOS-DEFAULT-SYNC-1: the floating panel reads the same settings from the
@@ -35,6 +36,7 @@ export default function KoiosSettings() {
     { id: 'overview', label: t('tabs.overview') },
     { id: 'learning', label: t('tabs.learning') },
     { id: 'capabilities', label: t('tabs.capabilities') },
+    { id: 'feedback', label: t('tabs.feedback') },
   ]
 
   // Load the Koios settings once; a 403 means "not entitled" (calm notice).
@@ -71,6 +73,7 @@ export default function KoiosSettings() {
           )}
           {tab === 'learning' && <KoiosLearningCard />}
           {tab === 'capabilities' && <KoiosCapabilitiesCard />}
+          {tab === 'feedback' && <KoiosFeedbackCard />}
         </>
       )}
     </div>
