@@ -31,6 +31,7 @@ import { useEffect, useRef, useState } from 'react'
 import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import Button from '@/components/ui/Button'
+import CreatableSelect from '@/components/ui/CreatableSelect'
 import { resolveDurationSeconds, splitDuration } from '../data/interviewDuration'
 import { Hand, PlayCircle } from 'lucide-react'
 import Avatar from '@/components/ui/Avatar'
@@ -38,7 +39,8 @@ import SoftChip from '@/components/ui/SoftChip'
 import StatusPill from '@/components/ui/StatusPill'
 // HUISSTIJL-1: shared typography atom — the three plain 11px/muted lines
 // below are exact matches for the house Caption scale.
-import { Caption } from '@/components/ui/typography'
+import { Caption, GroupLabel } from '@/components/ui/typography'
+import { useInterviewFlows } from '@/hooks/useInterviewFlows'
 import { useAuth } from '@/context/AuthContext'
 import api, { unwrap } from '@/lib/api'
 import { notifySuccess, notifyError } from '@/lib/notify'
@@ -73,7 +75,7 @@ const MetaDot = () => <span aria-hidden="true" style={{ color: 'var(--text-muted
 
 
 // Live interview summary card (see the module doc above): every field renders defensively as optional, and the stop/resume controls gate on the application id, never the interview session id (see the INTERVIEW-STOP-1 note).
-export default function InterviewStatusCard({ interview, applicationId }: { interview: ApplicationInterview | null; applicationId?: Id }) {
+export default function InterviewStatusCard({ interview, applicationId, interviewFlowId }: { interview: ApplicationInterview | null; applicationId?: Id; interviewFlowId?: Id | null }) {
   const { t } = useTranslation('applications')
   const auth = useAuth()
   // Mirrors ApplicationsPage's own canManage gate and the route's own
@@ -81,6 +83,30 @@ export default function InterviewStatusCard({ interview, applicationId }: { inte
   // source of truth. The backend re-checks (403); the UI only hides what the
   // user may not do.
   const canManage = auth?.hasPermission?.('applications.update') ?? false
+
+  // INTERVIEW-FLOW-BINDING-1: this application's own flow override picker —
+  // the engine resolves module → application → vacancy → agent, so clearing it
+  // (VAC-CLEAR-1) falls back to the vacancy's own default. Own local echo of
+  // the persisted value so the picker reflects the save immediately, mirroring
+  // the stop/resume `refreshed` pattern below rather than waiting on a parent refetch.
+  const { options: flowOptions, loading: flowsLoading, error: flowsError } = useInterviewFlows(true)
+  const [flowOverride, setFlowOverride] = useState<Id | null | undefined>(undefined)
+  const currentFlowId = flowOverride !== undefined ? flowOverride : interviewFlowId ?? null
+  const [flowSaving, setFlowSaving] = useState(false)
+  const pickFlow = async (id: string) => {
+    if (applicationId == null || flowSaving) return
+    const nextId = id || null
+    setFlowSaving(true)
+    try {
+      await api.patch(`/applications/${applicationId}`, { interview_flow_id: nextId })
+      setFlowOverride(nextId)
+      notifySuccess(t('interview.status.flowOverrideSaved'))
+    } catch (err) {
+      notifyError(extractApiError(err, t('common:actionFailed')))
+    } finally {
+      setFlowSaving(false)
+    }
+  }
 
   // Session state as the SERVER last reported it (action response + refetch);
   // null = "nothing newer than the prop". Plus the 404 "no interview running"
@@ -97,12 +123,36 @@ export default function InterviewStatusCard({ interview, applicationId }: { inte
   // A fresh prop wins over our local copy: once the drawer refetches the
   // application, its data is the newer truth and this card must not shadow it.
   useEffect(() => { setRefreshed(null); setNoSession(false) }, [interview])
+  // Same rule for the flow override: a fresh prop (parent refetch) wins over our own echo.
+  useEffect(() => { setFlowOverride(undefined) }, [interviewFlowId])
+
+  // The override picker — rendered above every branch below (§3: this is an
+  // application-level binding, independent of whether a live session exists),
+  // authorization-gated the same way as the stop/resume controls.
+  const flowOverridePicker = canManage && applicationId != null && (
+    <div>
+      <GroupLabel style={{ letterSpacing: '0.04em', marginBottom: 4 }}>{t('interview.status.flowOverrideLabel')}</GroupLabel>
+      <CreatableSelect
+        value={currentFlowId != null ? String(currentFlowId) : null}
+        onChange={pickFlow}
+        allowCreate={false}
+        clearable
+        clearLabel={t('interview.status.flowOverrideLabel')}
+        placeholder={flowsLoading ? t('common:loading') : t('interview.status.flowOverridePlaceholder')}
+        options={flowOptions}
+      />
+      {/* §3 four states: a failed flows load says so — a silently empty picker
+          reads as "no flows exist" (r2 C3). */}
+      {flowsError && <Caption as="div" style={{ color: 'var(--color-danger-text)' }}>{t('aiagent.loadError', { ns: 'vacancies' })}</Caption>}
+    </div>
+  )
 
   // No session at all yet — a calm placeholder, not an empty blank area.
   if (!interview) {
     return (
       <div style={cardStyle}>
         <span style={{ fontSize: 12, color: 'var(--text-muted)', fontStyle: 'italic' }}>{t('interview.status.none')}</span>
+        {flowOverridePicker}
       </div>
     )
   }
@@ -117,6 +167,7 @@ export default function InterviewStatusCard({ interview, applicationId }: { inte
         <span style={{ fontSize: 12, color: 'var(--text-muted)', fontStyle: 'italic' }}>
           {t('interview.status.borrowedFromSibling')}
         </span>
+        {flowOverridePicker}
       </div>
     )
   }
@@ -360,6 +411,8 @@ export default function InterviewStatusCard({ interview, applicationId }: { inte
           {t('interview.status.noRunningSession')}
         </Caption>
       )}
+
+      {flowOverridePicker}
     </div>
   )
 }

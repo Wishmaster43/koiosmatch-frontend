@@ -320,7 +320,10 @@
       "resumeUnavailable": "Fortsetzen nicht möglich: Es gibt keine Bewerbung, auf die es wirken kann.",
       "resumeFailed": "Fortsetzen ist fehlgeschlagen.",
       "noRunningSession": "Für diese Bewerbung läuft kein Interview (mehr).",
-      "notAllowed": "Sie haben keine Berechtigung, dieses Interview zu steuern."
+      "notAllowed": "Sie haben keine Berechtigung, dieses Interview zu steuern.",
+      "flowOverrideLabel": "Stellen-Standard verwenden",
+      "flowOverridePlaceholder": "Abweichender Interviewflow…",
+      "flowOverrideSaved": "Interviewflow aktualisiert."
     },
     "history": {
       "status": {

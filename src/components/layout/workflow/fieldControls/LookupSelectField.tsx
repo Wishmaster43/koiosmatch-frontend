@@ -11,14 +11,17 @@ import ErrorBanner from '@/components/ui/ErrorBanner'
 import type { OnChange } from './types'
 
 // ── Lookup-backed select ────────────────────────────────────────────────────────
-export function LookupSelectField({ value, onChange, fieldKey, endpoint, valueKey, responseKey }: {
+export function LookupSelectField({ value, onChange, fieldKey, endpoint, valueKey, responseKey, emptyLabel }: {
   // valueKey: which row property becomes the STORED value. Roles resolve server-side
   // by roles.name (NotificationSendModule::resolveRecipients), so the role field
   // stores the name — a numeric Spatie id would silently match nobody (§3)
   // responseKey: for endpoints that return an OBJECT of collections (GET
   // /settings/candidate-lookups → {statuses, phases, …}) — the collection to read;
   // omitted = the response is a plain list (WF-BUILDER-VELDEN-1 Opus fix).
-  value?: unknown; onChange: OnChange; fieldKey: string; endpoint: string; valueKey?: string; responseKey?: string
+  // emptyLabel: schema-driven override for the blank/clear option's copy (VAC-CLEAR-1) —
+  // e.g. interview_start's "default from the vacancy/application" — falls back to the
+  // generic select placeholder when the schema doesn't specify one.
+  value?: unknown; onChange: OnChange; fieldKey: string; endpoint: string; valueKey?: string; responseKey?: string; emptyLabel?: string
 }) {
   const { t } = useTranslation('workflows')
   const [opts, setOpts] = useState<Array<{ value: string; label: string }>>([])
@@ -63,10 +66,13 @@ export function LookupSelectField({ value, onChange, fieldKey, endpoint, valueKe
       {/* No visible label wraps this field (schema-driven, key is the only name
           available here) — kept as the accessible name text, same as before. */}
       <span id={lookupLabelId} className="sr-only">{fieldKey}</span>
+      {/* The search input's accessible NAME stays the neutral select-copy —
+          emptyLabel only labels the ''-option (naming the input after one
+          option was a §6 regression, verify r2). */}
       <CreatableSelect value={(value as string) ?? ''} onChange={v => onChange(fieldKey, v)}
         aria-labelledby={lookupLabelId} allowCreate={false}
         placeholder={t('fields.selectPlaceholder')}
-        options={[{ value: '', label: t('fields.selectPlaceholder') }, ...opts]}
+        options={[{ value: '', label: emptyLabel ?? t('fields.selectPlaceholder') }, ...opts]}
         style={{ width: '100%', padding: '7px 9px', fontSize: 13 }} />
     </>
   )

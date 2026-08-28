@@ -271,7 +271,8 @@
     "archiveConfirm": "Archive workflow \"{{name}}\"? Any open runs are closed immediately.",
     "archiveSuccess": "Workflow archived.",
     "restoreSuccess": "Workflow restored.",
-    "viewWorkflows": "Workflows"
+    "viewWorkflows": "Workflows",
+    "viewManagement": "Management"
   },
   "ai": {
     "saved": "Saved",
@@ -332,7 +333,10 @@
       "agents": "Agents",
       "prompts": "Prompts",
       "faqs": "FAQs",
-      "knowledge": "Knowledge base"
+      "knowledge": "Knowledge base",
+      "flows": "Interview flows",
+      "faq": "FAQ",
+      "tools": "Tools"
     },
     "prompts": {
       "namePlaceholder": "E.g. Yessy system prompt",
@@ -378,6 +382,28 @@
           "description": "Checks schedule and shifts"
         }
       }
+    },
+    "flows": {
+      "newFlow": "New flow",
+      "fallback": "Interview flow",
+      "namePlaceholder": "Flow name",
+      "agentLabel": "AI agent",
+      "noAgent": "No agent",
+      "channelLabel": "Channel",
+      "channelWhatsapp": "WhatsApp",
+      "systemPromptLabel": "System prompt",
+      "systemPromptPlaceholder": "Instructions for the interview…",
+      "statusPlaceholder": "Status name",
+      "addStatus": "Add status",
+      "outputFieldKeyPlaceholder": "Dossier field",
+      "outputFieldTypePlaceholder": "Type",
+      "addOutputField": "Add dossier field",
+      "introTemplateLabel": "Intro message",
+      "introTemplatePlaceholder": "First message to the candidate…",
+      "confirmDelete": "Delete flow \"{{name}}\"?",
+      "inUse": "This flow is in use and cannot be deleted.",
+      "noPermission": "You have no permission to manage flows.",
+      "selectOrNew": "Select a flow or create a new one."
     }
   },
   "categories": {
@@ -798,7 +824,8 @@
     "Workflow": "Workflow",
     "Zoeken": "Search",
     "Zoekopdracht": "Search query",
-    "Laatste contact ouder dan (maanden)": "Last contact older than (months)"
+    "Laatste contact ouder dan (maanden)": "Last contact older than (months)",
+    "Interviewflow": "Interview flow"
   },
   "fieldOptions": {
     "Array (meerdere bundles)": "Array (multiple bundles)",
@@ -1066,7 +1093,8 @@
     "optioneel — leeg = alle redenen": "optional. Empty = all reasons",
     "{{1output}} of leeg laten voor volledige output": "{{1.output}} or leave empty for the full output",
     "{{veldnaam}} of vaste tekst": "{{veldnaam}} or fixed text",
-    "{{vraag van kandidaat}}": "{{question from candidate}}"
+    "{{vraag van kandidaat}}": "{{question from candidate}}",
+    "Standaard van de vacature/sollicitatie": "Default from the vacancy/application"
   },
   "fieldHints": {
     "Array stuurt elk item apart door naar de volgende module (zoals een Iterator)": "Array sends each item to the next module separately (like an Iterator).",

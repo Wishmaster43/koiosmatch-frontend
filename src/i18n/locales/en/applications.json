@@ -320,7 +320,10 @@
       "resumeUnavailable": "Can't resume: there's no application to act on.",
       "resumeFailed": "Resuming failed.",
       "noRunningSession": "There's no interview running for this application (any more).",
-      "notAllowed": "You don't have permission to control this interview."
+      "notAllowed": "You don't have permission to control this interview.",
+      "flowOverrideLabel": "Use vacancy default",
+      "flowOverridePlaceholder": "Override interview flow…",
+      "flowOverrideSaved": "Interview flow updated."
     },
     "history": {
       "status": {

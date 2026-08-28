@@ -47,7 +47,7 @@ export function Badge({ label, color, bg }: { label?: ReactNode; color?: string;
 }
 
 // Save control shared by every AI-management tab: a transient saved checkmark plus a save button disabled while saving.
-export function SaveBar({ saving, saved, onSave }: { saving?: boolean; saved?: boolean; onSave?: () => void }) {
+export function SaveBar({ saving, saved, onSave, disabled }: { saving?: boolean; saved?: boolean; onSave?: () => void; disabled?: boolean }) {
   const { t } = useTranslation('workflows')
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -56,7 +56,7 @@ export function SaveBar({ saving, saved, onSave }: { saving?: boolean; saved?: b
           <Check size={11} /> {t('ai.saved')}
         </span>
       )}
-      <Button variant="primary" size="sm" onClick={onSave} disabled={saving}>
+      <Button variant="primary" size="sm" onClick={onSave} disabled={saving || disabled}>
         {saving
           ? <Spinner size={11} />
           : <Save size={11} />}

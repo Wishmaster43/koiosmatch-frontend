@@ -320,7 +320,10 @@
       "resumeUnavailable": "Hervatten kan niet: er is geen sollicitatie om aan te spreken.",
       "resumeFailed": "Hervatten is mislukt.",
       "noRunningSession": "Er loopt geen interview (meer) voor deze sollicitatie.",
-      "notAllowed": "Je hebt geen rechten om dit interview te bedienen."
+      "notAllowed": "Je hebt geen rechten om dit interview te bedienen.",
+      "flowOverrideLabel": "Gebruik vacature-standaard",
+      "flowOverridePlaceholder": "Afwijkende interviewflow…",
+      "flowOverrideSaved": "Interviewflow bijgewerkt."
     },
     "history": {
       "status": {

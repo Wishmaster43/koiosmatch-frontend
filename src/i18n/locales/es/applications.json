@@ -320,7 +320,10 @@
       "resumeUnavailable": "No se puede reanudar: no hay ninguna solicitud sobre la que actuar.",
       "resumeFailed": "No se pudo reanudar la conversación.",
       "noRunningSession": "Ya no hay ninguna entrevista en curso para esta solicitud.",
-      "notAllowed": "No tienes permiso para controlar esta entrevista."
+      "notAllowed": "No tienes permiso para controlar esta entrevista.",
+      "flowOverrideLabel": "Usar el predeterminado de la vacante",
+      "flowOverridePlaceholder": "Flujo de entrevista específico…",
+      "flowOverrideSaved": "Flujo de entrevista actualizado."
     },
     "history": {
       "status": {

@@ -51,7 +51,9 @@ export function FieldInput({ field, value, onChange, variables, config }: {
     return <FaqSelectField value={value} onChange={onChange} fieldKey={field.key} />
   }
   if (field.type === 'lookup_select') {
-    return <LookupSelectField value={value} onChange={onChange} fieldKey={field.key} endpoint={String(field.endpoint ?? '')} valueKey={typeof field.valueKey === 'string' ? field.valueKey : undefined} responseKey={typeof field.responseKey === 'string' ? field.responseKey : undefined} />
+    // field.placeholder overrides the generic "select…" copy for the clear/empty
+    // option (VAC-CLEAR-1) — e.g. interview_start's "default from vacancy/application".
+    return <LookupSelectField value={value} onChange={onChange} fieldKey={field.key} endpoint={String(field.endpoint ?? '')} valueKey={typeof field.valueKey === 'string' ? field.valueKey : undefined} responseKey={typeof field.responseKey === 'string' ? field.responseKey : undefined} emptyLabel={field.placeholder ? fieldPlaceholder(t, field.placeholder) : undefined} />
   }
   if (field.type === 'whatsapp_phone_number') {
     // Reads the sibling `channel` field from the full node config to filter to

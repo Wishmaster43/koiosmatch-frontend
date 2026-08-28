@@ -267,7 +267,8 @@
     "archiveConfirm": "¿Archivar el flujo de trabajo \"{{name}}\"? Las ejecuciones abiertas se cierran de inmediato.",
     "archiveSuccess": "Flujo de trabajo archivado.",
     "restoreSuccess": "Flujo de trabajo restaurado.",
-    "viewWorkflows": "Flujos de trabajo"
+    "viewWorkflows": "Flujos de trabajo",
+    "viewManagement": "Gestión"
   },
   "ai": {
     "saved": "Guardado",
@@ -328,7 +329,10 @@
       "agents": "Agentes",
       "prompts": "Prompts",
       "faqs": "FAQ",
-      "knowledge": "Base de conocimiento"
+      "knowledge": "Base de conocimiento",
+      "flows": "Flujos de entrevista",
+      "faq": "FAQ",
+      "tools": "Herramientas"
     },
     "prompts": {
       "namePlaceholder": "Ej. Prompt de sistema Yessy",
@@ -374,6 +378,28 @@
           "description": "Comprueba el horario y los turnos"
         }
       }
+    },
+    "flows": {
+      "newFlow": "Nuevo flujo",
+      "fallback": "Flujo de entrevista",
+      "namePlaceholder": "Nombre del flujo",
+      "agentLabel": "Agente de IA",
+      "noAgent": "Sin agente",
+      "channelLabel": "Canal",
+      "channelWhatsapp": "WhatsApp",
+      "systemPromptLabel": "Prompt del sistema",
+      "systemPromptPlaceholder": "Instrucciones para la entrevista…",
+      "statusPlaceholder": "Nombre del estado",
+      "addStatus": "Añadir estado",
+      "outputFieldKeyPlaceholder": "Campo del expediente",
+      "outputFieldTypePlaceholder": "Tipo",
+      "addOutputField": "Añadir campo",
+      "introTemplateLabel": "Mensaje de introducción",
+      "introTemplatePlaceholder": "Primer mensaje al candidato…",
+      "confirmDelete": "¿Eliminar el flujo «{{name}}»?",
+      "inUse": "Este flujo está en uso y no se puede eliminar.",
+      "noPermission": "No tienes permiso para gestionar flujos.",
+      "selectOrNew": "Elige un flujo o crea uno nuevo."
     }
   },
   "filters": {
@@ -798,7 +824,8 @@
     "Workflow": "Workflow",
     "Zoeken": "Buscar",
     "Zoekopdracht": "Consulta de búsqueda",
-    "Laatste contact ouder dan (maanden)": "Último contacto anterior a (meses)"
+    "Laatste contact ouder dan (maanden)": "Último contacto anterior a (meses)",
+    "Interviewflow": "Flujo de entrevista"
   },
   "fieldOptions": {
     "Array (meerdere bundles)": "Array (varios bundles)",
@@ -1066,7 +1093,8 @@
     "optioneel — leeg = alle redenen": "opcional. Vacío = todos los motivos",
     "{{1output}} of leeg laten voor volledige output": "{{1.output}} o dejar vacío para la salida completa",
     "{{veldnaam}} of vaste tekst": "{{veldnaam}} o texto fijo",
-    "{{vraag van kandidaat}}": "{{pregunta del candidato}}"
+    "{{vraag van kandidaat}}": "{{pregunta del candidato}}",
+    "Standaard van de vacature/sollicitatie": "Predeterminado de la vacante/candidatura"
   },
   "fieldHints": {
     "Array stuurt elk item apart door naar de volgende module (zoals een Iterator)": "Array envía cada elemento por separado al siguiente módulo (como un Iterator).",

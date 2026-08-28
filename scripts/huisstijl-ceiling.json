@@ -11,7 +11,7 @@
   "src/App.tsx": 1,
   "src/components/actionrules/ActionRuleDialog.tsx": 1,
   "src/components/actionrules/useActionRulePreflight.ts": 1,
-  "src/components/ai/AIManagementTabs.tsx": 4,
+  "src/components/ai/AIManagementTabs.tsx": 5,
   "src/components/ai/KoiosAdviceBlock.tsx": 3,
   "src/components/ai/management/AgentForm.tsx": 7,
   "src/components/ai/management/InterviewFlowSection.tsx": 6,

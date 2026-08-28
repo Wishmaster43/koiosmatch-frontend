@@ -20,6 +20,11 @@ export interface InterviewFlow {
   system_prompt?: string
   statuses?: string[]
   output_fields?: Record<string, unknown>
+  // Measured against $fillable + rules() (FLOW-EDITOR-1, r2): the agent link
+  // and channel are real columns; _new mirrors AiAgent's create-marker idiom.
+  ai_agent_id?: string | null
+  channel?: string
+  _new?: boolean
 }
 
 // An AI agent configuration. Deliberately has no `model` field (MODEL-1: the

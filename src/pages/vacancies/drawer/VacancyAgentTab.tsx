@@ -12,6 +12,7 @@ import { notifySuccess, notifyError } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
 import Button from '@/components/ui/Button'
 import { useAiAgents } from '../hooks/useAiAgents'
+import { useInterviewFlows } from '@/hooks/useInterviewFlows'
 // HUISSTIJL-1: group labels (11/600/uppercase/muted) + hint text (11/muted) are the shared atoms.
 import { GroupLabel, Caption } from '@/components/ui/typography'
 import type { VacancyDetail } from '@/types/vacancy'
@@ -129,15 +130,27 @@ export default function VacancyAgentTab({ vacancy: v, onUpdate }: { vacancy: Vac
   // Own small fetch, always on (no shared edit/save chrome — a single field persists
   // immediately on change, mirroring MatchingTab's template picker).
   const { agents, options, loading, error } = useAiAgents(true)
+  // INTERVIEW-FLOW-BINDING-1: the vacancy's own default-flow override — the
+  // engine resolves module → application → vacancy → agent, so this only
+  // matters once an agent is linked (an unlinked vacancy has no interview at all).
+  const { options: flowOptions, describe: describeFlow, loading: flowsLoading, error: flowsError } = useInterviewFlows(true)
 
   const currentId = v.aiAgentId != null ? String(v.aiAgentId) : ''
   const linkedAgent = currentId ? agents.find(a => String(a.id) === currentId) : undefined
+  const currentFlowId = v.interviewFlowId != null ? String(v.interviewFlowId) : ''
 
   // Picking (or clearing to '') persists immediately — null unlinks (VAC-AGENT-1:
   // no separate flow field, the agent carries its own).
   const pickAgent = (id: string) => {
     const picked = agents.find(a => String(a.id) === id)
     onUpdate?.(v.id, { aiAgentId: id || null, aiAgentName: id ? (picked?.name ?? v.aiAgentName) : '' })
+  }
+
+  // Picking (or clearing to '' → null) the default-flow override persists
+  // immediately, same idiom as pickAgent — VAC-CLEAR-1: an empty value really
+  // clears back to "no override" (the engine then falls back to the agent's own flow).
+  const pickFlow = (id: string) => {
+    onUpdate?.(v.id, { interviewFlowId: id || null })
   }
 
   // Seed the currently linked agent's already-resolved name (from the vacancy detail
@@ -192,18 +205,40 @@ export default function VacancyAgentTab({ vacancy: v, onUpdate }: { vacancy: Vac
         </div>
       </div>
 
-      {/* Interview flow the linked agent carries — read-only, shared component.
-          PDF-VACATURES point 21 (14-08): the eventual model is contract-form
-          default → vacancy override → agent fallback, but only the agent
-          fallback is real today (no vacancy-level flow field in the UI, no
-          contract-form-to-flow mapping on the backend yet — see notes). This
-          note states the CURRENT resolution honestly so a recruiter is never
-          guessing which interview will run. */}
+      {/* Interview flow resolution (FLOW-EDITOR-1, r2): vacancy override →
+          agent fallback, both REAL now (the picker below writes
+          vacancy.interview_flow_id; the engine honours application → vacancy →
+          agent). The block always states the EFFECTIVE flow so a recruiter is
+          never guessing which interview will run. */}
       <div>
         <GroupLabel style={{ letterSpacing: '0.04em', marginBottom: 6 }}>{t('aiagent.flowTitle')}</GroupLabel>
+        {currentId && (
+          <div style={{ marginBottom: 8 }}>
+            <CreatableSelect
+              value={currentFlowId || null}
+              onChange={pickFlow}
+              allowCreate={false}
+              clearable
+              clearLabel={t('aiagent.flowPickerLabel')}
+              placeholder={flowsLoading ? t('common:loading') : t('aiagent.flowPickerPlaceholder')}
+              options={flowOptions}
+            />
+            {flowsError && <Caption style={{ color: 'var(--color-danger-text)' }}>{t('aiagent.loadError')}</Caption>}
+          </div>
+        )}
         {currentId ? (
           loading ? (
             <div style={{ ...blockStyle, padding: '10px 12px', fontSize: 12, color: 'var(--text-muted)' }}>{t('common:loading')}</div>
+          ) : currentFlowId ? (
+            // Override set: THIS flow runs — never the agent summary below it
+            // (the engine's own resolution order; showing both contradicted
+            // the screen the moment the picker was used, r2 C2).
+            <p style={{ margin: 0, fontSize: 12, color: 'var(--text)' }}>
+              {t('aiagent.flowSource.fromVacancy', { flow: describeFlow(currentFlowId)?.label ?? currentFlowId })}
+              {describeFlow(currentFlowId)?.inactive && (
+                <span style={{ color: 'var(--color-danger-text)' }}> {t('aiagent.flowSource.inactiveWarning')}</span>
+              )}
+            </p>
           ) : (
             <>
               <InterviewFlowSection flow={linkedAgent?.interview_flow ?? null} />

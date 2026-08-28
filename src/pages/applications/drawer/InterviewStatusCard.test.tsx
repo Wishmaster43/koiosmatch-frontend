@@ -27,16 +27,23 @@ vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: mockT }) }))
 const mockUseAuth = vi.fn()
 const mockPost = vi.fn()
 const mockGet = vi.fn()
+const mockPatch = vi.fn()
 const mockNotifySuccess = vi.fn()
 const mockNotifyError = vi.fn()
 
 vi.mock('@/context/AuthContext', () => ({ useAuth: () => mockUseAuth() }))
+// INTERVIEW-FLOW-BINDING-1: a flat mock, not a QueryClientProvider — mirrors the
+// other useAiAgents mocks repo-wide (e.g. AddVacancyModal.slice2.test.tsx).
+vi.mock('@/hooks/useInterviewFlows', () => ({
+  useInterviewFlows: () => ({ options: [{ value: 'f1', label: 'Zorgintake (9 stappen)' }], flows: [], loading: false, error: false }),
+}))
 // `unwrap` mirrors the real implementation (data → data.data) so the assertions
 // exercise the same envelope handling the app does.
 vi.mock('@/lib/api', () => ({
   default: {
     post: (...args: unknown[]) => mockPost(...args),
     get: (...args: unknown[]) => mockGet(...args),
+    patch: (...args: unknown[]) => mockPatch(...args),
   },
   unwrap: (res: unknown) => {
     const body = (res as { data?: unknown })?.data ?? res
@@ -75,6 +82,7 @@ beforeEach(() => {
   // resetAllMocks drops mockT's implementation too — restore the default key-echo.
   mockT.mockImplementation((k: string) => k)
   mockUseAuth.mockReturnValue({ hasPermission: () => true })
+  mockPatch.mockResolvedValue({ data: {} })
   // Default refetch answer; individual tests override it when they assert on it.
   mockGet.mockResolvedValue({ data: { data: {} } })
 })
@@ -548,5 +556,24 @@ describe('InterviewStatusCard · fresh prop wins', () => {
     expect(screen.queryByText('interview.currentStatus.ACTIVE_IN_CARE')).toBeNull()
     expect(screen.queryByText('interview.status.turn.recruiter')).toBeNull()
     expect(screen.queryByText('interview.status.turn.completed')).toBeNull()
+  })
+})
+
+// INTERVIEW-FLOW-BINDING-1: the application-level flow override picker —
+// pick → clear → placeholder (VAC-CLEAR-1), and PATCHes the exact request.
+describe('InterviewStatusCard · flow override picker', () => {
+  it('picking a flow PATCHes interview_flow_id, and clearing it back sends null', async () => {
+    render(<InterviewStatusCard interview={fullInterview()} applicationId="app-1" interviewFlowId={null} />)
+    const user = userEvent.setup()
+
+    const trigger = screen.getByRole('button', { name: 'interview.status.flowOverridePlaceholder' })
+    await user.click(trigger)
+    await user.click(screen.getByRole('button', { name: 'Zorgintake (9 stappen)' }))
+    expect(mockPatch).toHaveBeenCalledWith('/applications/app-1', { interview_flow_id: 'f1' })
+
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Zorgintake (9 stappen)' })).toBeInTheDocument())
+    await user.click(screen.getByTitle('clearField'))
+    await waitFor(() => expect(mockPatch).toHaveBeenCalledWith('/applications/app-1', { interview_flow_id: null }))
+    await waitFor(() => expect(screen.getByRole('button', { name: 'interview.status.flowOverridePlaceholder' })).toBeInTheDocument())
   })
 })

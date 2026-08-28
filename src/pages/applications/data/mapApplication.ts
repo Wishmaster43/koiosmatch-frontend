@@ -325,5 +325,7 @@ export function mapApplicationDetail(raw: ApiApplication = {}, funnelTypes: Look
     stageDurations: mapStageDurations(raw.stage_durations),
     // APP-MATCH-SUMMARY-1: the linked Match, null when none hangs on this application.
     match: mapMatchSummary(raw.match),
+    // INTERVIEW-FLOW-BINDING-1: this application's own flow override, null = "use the vacancy default".
+    interviewFlowId: raw.interview_flow_id ?? null,
   }
 }

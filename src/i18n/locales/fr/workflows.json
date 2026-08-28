@@ -267,7 +267,8 @@
     "archiveConfirm": "Archiver le workflow \"{{name}}\" ? Les exécutions en cours seront fermées immédiatement.",
     "archiveSuccess": "Workflow archivé.",
     "restoreSuccess": "Workflow restauré.",
-    "viewWorkflows": "Workflows"
+    "viewWorkflows": "Workflows",
+    "viewManagement": "Gestion"
   },
   "ai": {
     "saved": "Enregistré",
@@ -328,7 +329,10 @@
       "agents": "Agents",
       "prompts": "Prompts",
       "faqs": "FAQ",
-      "knowledge": "Base de connaissances"
+      "knowledge": "Base de connaissances",
+      "flows": "Flux d’entretien",
+      "faq": "FAQ",
+      "tools": "Outils"
     },
     "prompts": {
       "namePlaceholder": "Ex. Prompt système Yessy",
@@ -374,6 +378,28 @@
           "description": "Vérifie le planning et les missions"
         }
       }
+    },
+    "flows": {
+      "newFlow": "Nouveau flux",
+      "fallback": "Flux d’entretien",
+      "namePlaceholder": "Nom du flux",
+      "agentLabel": "Agent IA",
+      "noAgent": "Aucun agent",
+      "channelLabel": "Canal",
+      "channelWhatsapp": "WhatsApp",
+      "systemPromptLabel": "Prompt système",
+      "systemPromptPlaceholder": "Instructions pour l’entretien…",
+      "statusPlaceholder": "Nom du statut",
+      "addStatus": "Ajouter un statut",
+      "outputFieldKeyPlaceholder": "Champ de dossier",
+      "outputFieldTypePlaceholder": "Type",
+      "addOutputField": "Ajouter un champ",
+      "introTemplateLabel": "Message d’introduction",
+      "introTemplatePlaceholder": "Premier message au candidat…",
+      "confirmDelete": "Supprimer le flux « {{name}} » ?",
+      "inUse": "Ce flux est utilisé et ne peut pas être supprimé.",
+      "noPermission": "Vous n’avez pas le droit de gérer les flux.",
+      "selectOrNew": "Choisissez un flux ou créez-en un."
     }
   },
   "filters": {
@@ -798,7 +824,8 @@
     "Workflow": "Workflow",
     "Zoeken": "Rechercher",
     "Zoekopdracht": "Requête de recherche",
-    "Laatste contact ouder dan (maanden)": "Dernier contact plus ancien que (mois)"
+    "Laatste contact ouder dan (maanden)": "Dernier contact plus ancien que (mois)",
+    "Interviewflow": "Flux d’entretien"
   },
   "fieldOptions": {
     "Array (meerdere bundles)": "Tableau (plusieurs bundles)",
@@ -1066,7 +1093,8 @@
     "optioneel — leeg = alle redenen": "facultatif. Vide = tous les motifs",
     "{{1output}} of leeg laten voor volledige output": "{{1.output}} ou laisser vide pour la sortie complète",
     "{{veldnaam}} of vaste tekst": "{{veldnaam}} ou texte fixe",
-    "{{vraag van kandidaat}}": "{{question du candidat}}"
+    "{{vraag van kandidaat}}": "{{question du candidat}}",
+    "Standaard van de vacature/sollicitatie": "Par défaut de l’offre/candidature"
   },
   "fieldHints": {
     "Array stuurt elk item apart door naar de volgende module (zoals een Iterator)": "Array envoie chaque élément séparément au module suivant (comme un Iterator).",

@@ -3,9 +3,10 @@
  * carries (AI-AGENTS-3): name + active badge, intro text, a collapsible system
  * prompt, statuses as soft chips, and the dossier/output fields as a list.
  *
- * Display-only: there is no interview-flow LIST endpoint yet (verified in
- * koiosmatch-api — only the model + a seeder exist), so changing which flow an
- * agent carries isn't wired up from this screen (see AgentForm's report).
+ * Display-only by design, not by missing plumbing: the flow's own CRUD editor
+ * now lives in the Flows tab (AIManagementTabs.tsx FlowsTab + InterviewFlowsPanel,
+ * GET/POST/PUT/DELETE /ai/interview-flows) — this component stays the compact
+ * read-only summary embedded in AgentForm, mirroring which flow that agent uses.
  */
 import { useState } from 'react'
 import type { CSSProperties } from 'react'

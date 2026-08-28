@@ -327,7 +327,8 @@
     "archiveConfirm": "Workflow \"{{name}}\" archiveren? Openstaande runs worden direct gesloten.",
     "archiveSuccess": "Workflow gearchiveerd.",
     "restoreSuccess": "Workflow hersteld.",
-    "viewWorkflows": "Workflows"
+    "viewWorkflows": "Workflows",
+    "viewManagement": "Beheer"
   },
   "ai": {
     "saved": "Opgeslagen",
@@ -388,7 +389,10 @@
       "agents": "Agents",
       "prompts": "Prompts",
       "faqs": "FAQ's",
-      "knowledge": "Kennisbank"
+      "knowledge": "Kennisbank",
+      "flows": "Interviewflows",
+      "faq": "FAQ",
+      "tools": "Tools"
     },
     "prompts": {
       "namePlaceholder": "Bijv. Yessy systeem prompt",
@@ -434,6 +438,28 @@
           "description": "Controleert rooster en diensten"
         }
       }
+    },
+    "flows": {
+      "newFlow": "Nieuwe flow",
+      "fallback": "Interviewflow",
+      "namePlaceholder": "Naam van de flow",
+      "agentLabel": "AI-agent",
+      "noAgent": "Geen agent",
+      "channelLabel": "Kanaal",
+      "channelWhatsapp": "WhatsApp",
+      "systemPromptLabel": "Systeemprompt",
+      "systemPromptPlaceholder": "Instructies voor het interview…",
+      "statusPlaceholder": "Statusnaam",
+      "addStatus": "Status toevoegen",
+      "outputFieldKeyPlaceholder": "Dossierveld",
+      "outputFieldTypePlaceholder": "Type",
+      "addOutputField": "Dossierveld toevoegen",
+      "introTemplateLabel": "Introbericht",
+      "introTemplatePlaceholder": "Eerste bericht aan de kandidaat…",
+      "confirmDelete": "Flow \"{{name}}\" verwijderen?",
+      "inUse": "Deze flow is in gebruik en kan niet worden verwijderd.",
+      "noPermission": "Je hebt geen rechten om flows te beheren.",
+      "selectOrNew": "Kies een flow of maak een nieuwe."
     }
   },
   "canvas": {
@@ -833,7 +859,8 @@
     "Workflow": "Workflow",
     "Zoeken": "Zoeken",
     "Zoekopdracht": "Zoekopdracht",
-    "Laatste contact ouder dan (maanden)": "Laatste contact ouder dan (maanden)"
+    "Laatste contact ouder dan (maanden)": "Laatste contact ouder dan (maanden)",
+    "Interviewflow": "Interviewflow"
   },
   "fieldOptions": {
     "Array (meerdere bundles)": "Array (meerdere bundles)",
@@ -1066,7 +1093,8 @@
     "optioneel — leeg = alle redenen": "optioneel. Leeg = alle redenen",
     "{{1output}} of leeg laten voor volledige output": "{{1.output}} of leeg laten voor volledige output",
     "{{veldnaam}} of vaste tekst": "{{veldnaam}} of vaste tekst",
-    "{{vraag van kandidaat}}": "{{vraag van kandidaat}}"
+    "{{vraag van kandidaat}}": "{{vraag van kandidaat}}",
+    "Standaard van de vacature/sollicitatie": "Standaard van de vacature/sollicitatie"
   },
   "fieldHints": {
     "Array stuurt elk item apart door naar de volgende module (zoals een Iterator)": "Array stuurt elk item apart door naar de volgende module (zoals een Iterator).",

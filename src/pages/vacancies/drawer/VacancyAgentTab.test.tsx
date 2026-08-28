@@ -92,10 +92,13 @@ const renderHarness = () => {
 
 // Route GET by url — the vacancy detail vs. the /ai/agents list (real GET /ai/agents
 // returns a bare array, per unwrapList's array branch — see AIManagementTabs.test.tsx).
-const routeGet = (detail: Record<string, unknown>, agents: unknown[] = [mockAgent]) =>
+const mockFlow = { id: 'f1', name: 'Zorgintake (9 stappen)', channel: 'whatsapp', active: true }
+
+const routeGet = (detail: Record<string, unknown>, agents: unknown[] = [mockAgent], flows: unknown[] = [mockFlow]) =>
   (url: string) => {
     if (url === '/vacancies/v1') return Promise.resolve({ data: { data: detail } })
     if (url === '/ai/agents') return Promise.resolve({ data: agents })
+    if (url === '/ai/interview-flows') return Promise.resolve({ data: flows })
     return Promise.resolve({ data: [] })
   }
 
@@ -153,6 +156,27 @@ describe('VacancyAgentTab · picker → PATCH ai_agent_id + read-only interview 
     await waitFor(() => screen.getByText(LOAD_ERROR))
     // The currently-linked name still shows even though the fresh list failed.
     expect(screen.getByText('Kelly')).toBeInTheDocument()
+  })
+})
+
+// INTERVIEW-FLOW-BINDING-1: the vacancy's own default-flow override, once an
+// agent is linked — pick → clear → placeholder (VAC-CLEAR-1).
+describe('VacancyAgentTab · default flow override picker', () => {
+  it('picking a flow PATCHes interview_flow_id, and clearing it back sends null', async () => {
+    mockGet.mockImplementation(routeGet(rawDetail({ ai_agent: { id: 'a1', name: 'Kelly' } })))
+    renderHarness()
+    await waitFor(() => expect(screen.getByText('Zorgintake (9 stappen)')).toBeInTheDocument())
+
+    const flowTrigger = await screen.findByRole('button', { name: /Kies een interviewflow|flowPickerPlaceholder/i })
+    mockPatch.mockResolvedValue({ data: { data: rawDetail({ ai_agent: { id: 'a1', name: 'Kelly' }, interview_flow_id: 'f1' }) } })
+    const user = userEvent.setup()
+    await user.click(flowTrigger)
+    await user.click(screen.getByRole('button', { name: 'Zorgintake (9 stappen)' }))
+    expect(mockPatch).toHaveBeenCalledWith('/vacancies/v1', { interview_flow_id: 'f1' })
+
+    mockPatch.mockResolvedValue({ data: { data: rawDetail({ ai_agent: { id: 'a1', name: 'Kelly' }, interview_flow_id: null }) } })
+    await user.click(screen.getByTitle('Geen vacature-flow (agent-standaard) wissen'))
+    await waitFor(() => expect(mockPatch).toHaveBeenCalledWith('/vacancies/v1', { interview_flow_id: null }))
   })
 })
 

@@ -12,6 +12,7 @@ import { Plus, LayoutGrid, List, Archive, Trash2 } from 'lucide-react'
 import WorkflowCard from './WorkflowCard'
 import WorkflowListRow from './WorkflowListRow'
 import WorkflowQueueView from './WorkflowQueueView'
+import AIManagementView from './AIManagementView'
 import QuickViewToggle from '@/components/ui/QuickViewToggle'
 import Spinner from '@/components/ui/Spinner'
 import SegmentedControl from '@/components/ui/SegmentedControl'
@@ -61,7 +62,7 @@ export default function WorkflowsListPanel({
   // WF-WACHTRIJ-FE-1: the page's own list⇄queue switch — mirrors the app-wide
   // SegmentedControl view switch (ReportSwitchBar's "compact + activeOnly"
   // idiom), since this page had no existing tab bar to reuse.
-  const [mainView, setMainView] = useState<'list' | 'queue'>('list')
+  const [mainView, setMainView] = useState<'list' | 'queue' | 'beheer'>('list')
   // LOOKUP-I18N-1: resolve + translate a workflow's folder for the row's meta line —
   // a seeded folder name renders in the user language, a tenant rename stays as typed.
   const seedLabel = useSeedLabel()
@@ -80,10 +81,14 @@ export default function WorkflowsListPanel({
         </Button>
 
         <SegmentedControl size="compact" activeOnly ariaLabel={t('queue.switchLabel')}
-          value={mainView} onChange={v => setMainView(v as 'list' | 'queue')}
+          value={mainView} onChange={v => setMainView(v as 'list' | 'queue' | 'beheer')}
           options={[
             { value: 'list', label: t('page.viewWorkflows') },
             { value: 'queue', label: t('queue.tabLabel') },
+            // r2: the AI-management family (agents/prompts/FAQ/tools/flows,
+            // incl. the FLOW-EDITOR Danny GO'd) rendered NOWHERE — this view
+            // is its home; placement itself is Danny-reviewable (WORKLIST).
+            { value: 'beheer', label: t('page.viewManagement') },
           ]} />
 
         <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -109,7 +114,9 @@ export default function WorkflowsListPanel({
         </div>
       </div>
 
-      {mainView === 'queue' ? (
+      {mainView === 'beheer' ? (
+        <AIManagementView />
+      ) : mainView === 'queue' ? (
         <WorkflowQueueView />
       ) : loading ? (
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--text-muted)', fontSize: 13 }}>

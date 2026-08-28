@@ -28,6 +28,12 @@ const mockNotifyError = vi.fn()
 
 vi.mock('@/context/AuthContext', () => ({ useAuth: () => mockUseAuth() }))
 vi.mock('@/lib/notify', () => ({ notifySuccess: (...a: unknown[]) => mockNotifySuccess(...a), notifyError: (...a: unknown[]) => mockNotifyError(...a) }))
+// INTERVIEW-FLOW-BINDING-1: flat mock (not routed through the shared mockGet
+// queue) — InterviewStatusCard's flow-override picker would otherwise consume
+// this file's ordered mockGet…Once responses meant for the conversation preflight.
+vi.mock('@/hooks/useInterviewFlows', () => ({
+  useInterviewFlows: () => ({ options: [], flows: [], loading: false, error: false }),
+}))
 // Keep the real unwrap (importActual) — only the default client (get/post) is stubbed.
 vi.mock('@/lib/api', async () => {
   const actual = await vi.importActual<typeof import('@/lib/api')>('@/lib/api')

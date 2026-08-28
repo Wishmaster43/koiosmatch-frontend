@@ -279,8 +279,12 @@
     "flowSource": {
       "fromAgent": "Übernommen vom verknüpften Agenten ({{agent}}). Es gibt noch keinen Standard pro Vertragsform.",
       "agentHasNoFlow": "Für den verknüpften Agenten ist kein Interview eingerichtet.",
-      "noContractType": "Für diese Vakanz ist keine Vertragsform festgelegt, daher wird der eigene Flow des Agenten als Fallback verwendet."
-    }
+      "noContractType": "Für diese Vakanz ist keine Vertragsform festgelegt, daher wird der eigene Flow des Agenten als Fallback verwendet.",
+      "fromVacancy": "Diese Stelle verwendet den Flow {{flow}}.",
+      "inactiveWarning": "Achtung: Dieser Flow ist inaktiv — das Interview wird übersprungen."
+    },
+    "flowPickerLabel": "Kein Stellen-Flow (Agent-Standard)",
+    "flowPickerPlaceholder": "Interviewflow wählen…"
   },
   "generate": {
     "button": "Mit Koios generieren",

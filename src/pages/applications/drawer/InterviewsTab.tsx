@@ -264,7 +264,7 @@ export default function InterviewsTab({ application: a, detailPhase }: { applica
           duration, distinct from the transcripts below (that's the per-run
           history; this is "where things stand right now"). Always rendered —
           shows its own honest placeholder when there is no session at all. */}
-      <InterviewStatusCard interview={interview} applicationId={a.id} />
+      <InterviewStatusCard interview={interview} applicationId={a.id} interviewFlowId={a.interviewFlowId} />
       {canStartNew && <StartInterviewAction applicationId={a.id} onStarted={setStartedOverride} />}
 
       {/* I2/CONV-APPLICATION-ID-1: the actual live WhatsApp dialogue, scoped to THIS

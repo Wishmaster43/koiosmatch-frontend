@@ -257,6 +257,10 @@ export interface ApplicationDetail extends Application {
   // application has no Match yet — the details card renders nothing for this
   // row rather than a dash when it is absent.
   match: ApplicationMatchSummary | null
+  // INTERVIEW-FLOW-BINDING-1: this application's own flow OVERRIDE (the engine
+  // resolves module → application → vacancy → agent) — null means "use the
+  // vacancy's default" (itself falling back to the agent's own flow).
+  interviewFlowId: Id | null
 }
 
 /** A raw candidate as the API nests it under an application. */
@@ -325,6 +329,8 @@ export interface ApiApplication {
   // PLACED-1 (2026-08-14, backend commit 9ba44e54): batched EXISTS on `matches` —
   // present on list/board/detail rows and the store/update echo alike.
   has_match?: boolean
+  // INTERVIEW-FLOW-BINDING-1: this application's own flow override (detail contract).
+  interview_flow_id?: Id | null
   task?: string
   ai_task?: string
   ai?: { task?: string }

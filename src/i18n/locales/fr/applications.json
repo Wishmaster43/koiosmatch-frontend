@@ -320,7 +320,10 @@
       "resumeUnavailable": "Impossible de rendre la main à l'agent : aucune candidature sur laquelle agir.",
       "resumeFailed": "La reprise a échoué.",
       "noRunningSession": "Aucun entretien n'est (plus) en cours pour cette candidature.",
-      "notAllowed": "Vous n'avez pas l'autorisation de piloter cet entretien."
+      "notAllowed": "Vous n'avez pas l'autorisation de piloter cet entretien.",
+      "flowOverrideLabel": "Utiliser le défaut de l’offre",
+      "flowOverridePlaceholder": "Flux d’entretien spécifique…",
+      "flowOverrideSaved": "Flux d’entretien mis à jour."
     },
     "history": {
       "status": {
