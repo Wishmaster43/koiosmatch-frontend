@@ -237,3 +237,23 @@ describe('useDrawerUrl · sub-tab (F5)', () => {
     expect(window.location.hash).toBe('#candidates')
   })
 })
+
+describe('writeOpenId announces itself (KOIOS-CHIP-STALE-1, Danny 28-08)', () => {
+  // pushState/replaceState fire no events; the hook must dispatch a synthetic
+  // popstate so hash-derived listeners (Koios ambient chip) follow a same-page
+  // drawer switch — the chip stuck on the previous candidate without this.
+  it('dispatches a synthetic popstate on every drawer-url write', async () => {
+    const { renderHook } = await import('@testing-library/react')
+    const { useDrawerUrl } = await import('./useDrawerUrl')
+    const seen = vi.fn()
+    window.addEventListener('popstate', seen)
+    const { rerender } = renderHook(
+      ({ id }: { id: string | null }) => useDrawerUrl({ selectedId: id, openById: vi.fn(), close: vi.fn() }),
+      { initialProps: { id: null as string | null } },
+    )
+    seen.mockClear()
+    rerender({ id: 'abc-1' })
+    expect(seen).toHaveBeenCalled()
+    window.removeEventListener('popstate', seen)
+  })
+})

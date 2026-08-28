@@ -105,6 +105,11 @@ const writeOpenId = (id: string | null, tab: string | null, push: boolean) => {
   const state = { kmPage: path, drawerOpen: id }
   if (push) window.history.pushState(state, '', next)
   else window.history.replaceState(state, '', next)
+  // pushState/replaceState fire NO hashchange/popstate — announce the write
+  // with a synthetic popstate (house pattern, notificationTarget.ts) so
+  // hash-derived listeners (the Koios ambient context chip) track a same-page
+  // drawer open/close live instead of sticking to the previous record.
+  window.dispatchEvent(new PopStateEvent('popstate', { state }))
 }
 
 export interface UseDrawerUrlArgs {

@@ -81,6 +81,9 @@ export default function DashboardLayout() {
     setJumpOrigin(intent != null && page !== activePage ? activePage : null)
     setNavIntent(intent); setActivePage(page)
     window.history.pushState({ kmPage: page }, '', `#${page}`)
+    // Synthetic popstate: pushState is silent, and hash-derived listeners
+    // (Koios ambient chip) must see a page switch drop the open record.
+    window.dispatchEvent(new PopStateEvent('popstate', { state: { kmPage: page } }))
   }
   // Back/forward: restore the page from our history state (hash as reload fallback).
   // Same '/'+'?' split as above — a NAV-BACK-1 drawer entry's `kmPage` is already
