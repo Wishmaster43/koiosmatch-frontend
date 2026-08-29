@@ -309,6 +309,7 @@
       "maxHistory": "Max. historique de conversation",
       "confirmDelete": "Supprimer l'agent « {{name}} » ?",
       "inUse": "Cet agent est utilisé et ne peut pas être supprimé.",
+      "inUseCounts": "Cet agent est encore utilisé ({{vacancies}} postes, {{flows}} flux d’entretien) et ne peut pas être supprimé.",
       "selectOrNew": "Sélectionnez un agent ou cliquez sur +",
       "webhookLabel": "URL du webhook",
       "webhookEmpty": "Aucun webhook configuré",

@@ -309,6 +309,7 @@
       "maxHistory": "Máx. historial de conversación",
       "confirmDelete": "¿Eliminar el agente \"{{name}}\"?",
       "inUse": "Este agente está en uso y no se puede eliminar.",
+      "inUseCounts": "Este agente sigue en uso ({{vacancies}} vacantes, {{flows}} flujos de entrevista) y no se puede eliminar.",
       "selectOrNew": "Selecciona un agente o haz clic en +",
       "webhookLabel": "URL del webhook",
       "webhookEmpty": "Ningún webhook configurado",

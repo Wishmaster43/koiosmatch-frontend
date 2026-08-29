@@ -144,11 +144,14 @@ describe('AgentsTab — delete failure must not remove the agent from the list',
     expect(screen.getAllByText('Kelly Jansen').length).toBeGreaterThan(0)
   })
 
-  // AIAGENT-DESTROY-GUARD-1: an in-use agent answers 409 with a human reason
-  // (bound vacancies + interview flows, counts included) — that reason must
-  // reach the user, and the agent must stay listed (mirrors the flows branch).
-  it('surfaces the server reason on a 409 in-use delete and keeps the agent listed', async () => {
-    vi.mocked(api.delete).mockRejectedValue({ response: { status: 409, data: { message: 'Agent is in gebruik: 3 vacatures, 1 flow.' } } })
+  // AIAGENT-DESTROY-GUARD-1: an in-use agent answers 409 with a structured
+  // in_use payload — the FE composes the reason itself through i18n (counts
+  // included), never relying on the server's NL-only prose (§10).
+  it('composes the translated in-use reason from the 409 in_use counts and keeps the agent listed', async () => {
+    vi.mocked(api.delete).mockRejectedValue({ response: { status: 409, data: {
+      message: 'Deze AI-agent is nog gekoppeld en kan niet verwijderd worden.',
+      in_use: { vacancies: 3, interview_flows: 1 },
+    } } })
     const dispatchSpy = vi.spyOn(window, 'dispatchEvent')
 
     render(<AgentsTab />)
@@ -156,9 +159,25 @@ describe('AgentsTab — delete failure must not remove the agent from the list',
     fireEvent.click(screen.getAllByRole('button', { name: 'Verwijderen' })[0])
     fireEvent.click(await screen.findByRole('button', { name: 'Bevestigen' }))
 
-    // The 409 branch ships the SERVER message, never the generic failure copy.
+    // The structured counts win over the server prose: translated, with numbers.
     await waitFor(() => expect(dispatchSpy).toHaveBeenCalledWith(expect.objectContaining({
-      detail: { type: 'error', message: 'Agent is in gebruik: 3 vacatures, 1 flow.' },
+      detail: { type: 'error', message: 'Deze agent is nog in gebruik (3 vacatures, 1 interviewflows) en kan niet worden verwijderd.' },
+    })))
+    expect(screen.getAllByText('Kelly Jansen').length).toBeGreaterThan(0)
+  })
+
+  // Older 409 payloads without in_use fall back to the server message verbatim.
+  it('falls back to the server message on a 409 without in_use payload', async () => {
+    vi.mocked(api.delete).mockRejectedValue({ response: { status: 409, data: { message: 'Agent is in gebruik.' } } })
+    const dispatchSpy = vi.spyOn(window, 'dispatchEvent')
+
+    render(<AgentsTab />)
+    await screen.findAllByText('Kelly Jansen')
+    fireEvent.click(screen.getAllByRole('button', { name: 'Verwijderen' })[0])
+    fireEvent.click(await screen.findByRole('button', { name: 'Bevestigen' }))
+
+    await waitFor(() => expect(dispatchSpy).toHaveBeenCalledWith(expect.objectContaining({
+      detail: { type: 'error', message: 'Agent is in gebruik.' },
     })))
     expect(screen.getAllByText('Kelly Jansen').length).toBeGreaterThan(0)
   })

@@ -313,6 +313,7 @@
       "maxHistory": "Max. conversation history",
       "confirmDelete": "Delete agent \"{{name}}\"?",
       "inUse": "This agent is in use and cannot be deleted.",
+      "inUseCounts": "This agent is still in use ({{vacancies}} vacancies, {{flows}} interview flows) and cannot be deleted.",
       "selectOrNew": "Select an agent or click +",
       "webhookLabel": "Webhook URL",
       "webhookEmpty": "No webhook configured",

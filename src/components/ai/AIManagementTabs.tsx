@@ -73,11 +73,18 @@ export function AgentsTab() {
         // (mutation lying about success, audit 2026-07-28).
         await api.delete(`/ai/agents/${agent.id}`)
       } catch (err: unknown) {
-        // AIAGENT-DESTROY-GUARD-1: an in-use agent answers 409 (bound vacancies +
-        // interview flows, counts in the server message) — surface that reason
-        // instead of the generic failure, mirroring the flows in-use branch.
-        const resp = (err as { response?: { status?: number; data?: { message?: string } } })?.response
-        notifyError(resp?.status === 409 ? (resp.data?.message ?? t('ai.agent.inUse')) : t('common:actionFailed'))
+        // AIAGENT-DESTROY-GUARD-1: an in-use agent answers 409 with a structured
+        // in_use payload ({vacancies, interview_flows} counts) — compose the
+        // reason FE-side through i18n (§10: own error mapping, never rely on
+        // server prose, which is NL-only); server message stays the middle
+        // fallback for older payloads, generic copy for everything else.
+        const resp = (err as { response?: { status?: number; data?: { message?: string; in_use?: { vacancies?: number; interview_flows?: number } } } })?.response
+        if (resp?.status === 409) {
+          const iu = resp.data?.in_use
+          notifyError(iu
+            ? t('ai.agent.inUseCounts', { vacancies: iu.vacancies ?? 0, flows: iu.interview_flows ?? 0 })
+            : (resp.data?.message ?? t('ai.agent.inUse')))
+        } else notifyError(t('common:actionFailed'))
         return
       }
       setAgents(prev => prev.filter(a => a.id !== agent.id))
