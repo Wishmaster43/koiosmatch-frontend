@@ -6,6 +6,7 @@
  * map state in so the straal-blok and the map share one circle.
  */
 import { useState, useMemo, useCallback } from 'react'
+import { bureauNow } from '@/lib/bureauTime'
 import { usePageMemory } from '@/lib/usePageMemory'
 import { geocodeNL } from '@/lib/geocode'
 import { isReferenceQuery } from '@/lib/referenceNumber'
@@ -124,7 +125,9 @@ export function useCandidateFilters({ t, staleMonths, view, mapCenter, mapRadius
     // "> N months no contact" filters server-wide via last_contact_between at the configured
     // threshold; never-contacted + no-follow-up send server params too (BE KPI-2a).
     if (attentionFilter === 'stale6m') {
-      const cutoff = new Date(); cutoff.setMonth(cutoff.getMonth() - staleMonths)
+      // BUREAU-KLOK-FE-1: the cutoff DAY must be the bureau's, not the browser's
+      // — the server reads last_contact_between in the bureau zone (K-174 class).
+      const cutoff = bureauNow(); cutoff.setMonth(cutoff.getMonth() - staleMonths)
       // Local calendar day, never `.toISOString()` — see toLocalIsoDate's doc for the
       // measured UTC-shift bug this fixes.
       p.last_contact_between = ['1900-01-01', toLocalIsoDate(cutoff)]

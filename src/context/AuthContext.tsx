@@ -20,6 +20,7 @@
  * changes — which is exactly when consumers SHOULD re-render anyway.
  */
 import { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react'
+import { setBureauTimezone } from '@/lib/bureauTime'
 import type { ReactNode } from 'react'
 import api, { primeCsrf, unwrapList } from '../lib/api'
 import { hasModule as tenantHasModule } from '../lib/modules'
@@ -101,6 +102,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // active tenant state in sync so tenant.package + tenant.modules stay fresh.
     const t = d?.tenant ?? u?.tenant
     if (t?.id) {
+      // BUREAU-KLOK-FE-1: feed the resolved bureau timezone (server-degraded
+      // IANA string) into the boundary module — day filters must be computed
+      // in the bureau's zone, never the browser's (K-174 contract).
+      setBureauTimezone((t as Tenant).timezone)
       setActiveTenantState(prev => {
         // Only update if this response is for the currently active tenant
         // (super admins may have switched — don't overwrite their selection).

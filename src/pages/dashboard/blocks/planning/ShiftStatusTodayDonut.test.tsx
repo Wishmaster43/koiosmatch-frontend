@@ -9,7 +9,8 @@ import ShiftStatusTodayDonut from './ShiftStatusTodayDonut'
 import { CHART_SERIES_COLORS } from '@/components/charts/chartTypes'
 
 // Mocked so the test asserts a stable literal, not the live calendar day.
-vi.mock('@/lib/datetime', () => ({ toLocalIsoDate: () => '2026-08-25' }))
+// BUREAU-KLOK-FE-1: the nav intent carries the BUREAU day, not the browser's.
+vi.mock('@/lib/bureauTime', () => ({ bureauToday: () => '2026-08-25' }))
 
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({

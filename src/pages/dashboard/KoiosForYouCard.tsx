@@ -14,6 +14,7 @@
  * (this week default / last week / 30 days / custom range) driving from/to.
  */
 import { useMemo, useState } from 'react'
+import { bureauNow } from '@/lib/bureauTime'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
@@ -193,7 +194,7 @@ export default function KoiosForYouCard({ title, scope, scopeToggle = false, foo
   const [toggledScope, setToggledScope] = useState<'me' | 'team'>('me')
   const effectiveScope = scopeToggle ? toggledScope : scope
 
-  const { from, to } = useMemo(() => resolveRange(preset, new Date(), customFrom, customTo), [preset, customFrom, customTo])
+  const { from, to } = useMemo(() => resolveRange(preset, bureauNow(), customFrom, customTo), [preset, customFrom, customTo])
   // A custom range is only "ready" once both ends are filled and ordered.
   const customReady = preset !== 'custom' || (!!customFrom && !!customTo && customFrom <= customTo)
 

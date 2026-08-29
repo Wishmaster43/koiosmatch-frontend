@@ -5,6 +5,7 @@
  * for the honest read/write split.
  */
 import { useState, useMemo, useEffect, useRef } from 'react'
+import { bureauNow } from '@/lib/bureauTime'
 import { useTranslation } from 'react-i18next'
 import { useRightPanel } from '@/context/RightPanelContext'
 import { ChevronLeft, ChevronRight, Plus, Info, AlertCircle } from 'lucide-react'
@@ -74,12 +75,14 @@ export default function PlanningPage({ intent }: { intent?: PlanningIntent | nul
   const [view,       setView]       = useState('month')
   // Lazy init from a `{ date }` intent so a tile click fetches the intent's
   // window directly, instead of today's window first and the intent's second.
-  const [current,    setCurrent]    = useState(() => intent?.date ? new Date(`${intent.date}T00:00:00`) : new Date())
+  // BUREAU-KLOK-FE-1: the planning window seeds on the BUREAU day — day view
+  // sends from===to as a date string the server reads in the bureau zone.
+  const [current,    setCurrent]    = useState(() => intent?.date ? new Date(`${intent.date}T00:00:00`) : bureauNow())
   const [modal,      setModal]      = useState<Date | null>(null) // date to add shift for
   // SHIFT-STAFF-1: the shift id whose staffing drawer is open (assign/unassign/
   // cancel/checkout on the real API) — separate from `modal` (still-gated add).
   const [staffingId, setStaffingId] = useState<Shift['id'] | null>(null)
-  const todayDate = useMemo(() => new Date(), [])
+  const todayDate = useMemo(() => bureauNow(), [])
 
   // Real shifts for whatever window the active view can show (§9: every
   // entity-keyed load is refetched on view/date change via the query key).

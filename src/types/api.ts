@@ -30,6 +30,8 @@ export interface Tenant {
   modules?: Array<string | { key?: string; name?: string }>
   primary_color?: string
   logo_url?: string | null
+  /** Resolved bureau IANA timezone from /auth/me (BUREAU-KLOK-FE-1); server-degraded, never raw. */
+  timezone?: string
 }
 
 export interface User {

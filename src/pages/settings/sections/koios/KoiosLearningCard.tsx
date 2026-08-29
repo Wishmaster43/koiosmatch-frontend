@@ -5,6 +5,7 @@
  * suggestions. No period picker in v1 (default window only).
  */
 import { useEffect, useState } from 'react'
+import { bureauNow } from '@/lib/bureauTime'
 import { useTranslation } from 'react-i18next'
 import Button from '@/components/ui/Button'
 import Spinner from '@/components/ui/Spinner'
@@ -19,7 +20,7 @@ const notice = { fontSize: 12, color: 'var(--text-muted)' }
 
 // Last 30 days, YYYY-MM-DD via the house toLocalIsoDate — built from LOCAL date
 // parts, so the window never shifts an hour after midnight (UTC slice did).
-function last30Days(now: Date = new Date()): { from: string; to: string } {
+function last30Days(now: Date = bureauNow()): { from: string; to: string } {
   const from = new Date(now)
   from.setDate(from.getDate() - 30)
   return { from: toLocalIsoDate(from), to: toLocalIsoDate(now) }

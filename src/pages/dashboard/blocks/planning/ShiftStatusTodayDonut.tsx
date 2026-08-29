@@ -6,10 +6,10 @@
  * planning page yet — this only lands on today's window, PLANNING-INTENT-1).
  */
 import { useTranslation } from 'react-i18next'
+import { bureauToday } from '@/lib/bureauTime'
 import PieChartCard from '@/components/charts/PieChartCard'
 import { CHART_SERIES_COLORS } from '@/components/charts/chartTypes'
 import { Panel } from '@/pages/dashboard/DashboardPrimitives'
-import { toLocalIsoDate } from '@/lib/datetime'
 import type { ShiftStatusTodayRow } from '@/types/dashboard'
 
 // One fixed colour per status token (§4: colour carries meaning, not decoration).
@@ -41,7 +41,7 @@ export default function ShiftStatusTodayDonut({ rows, onNavigate }: {
         data={data}
         colors={data.map(d => d.color)}
         // No navigator → no click affordance (PieChartCard gates hint/cursor/legend controls on this prop).
-        onItemClick={onNavigate ? () => onNavigate('planning', { date: toLocalIsoDate(new Date()) }) : undefined}
+        onItemClick={onNavigate ? () => onNavigate('planning', { date: bureauToday() }) : undefined}
       />
     </Panel>
   )
