@@ -50,7 +50,8 @@ interface EditingAppointment { candidateId: Id; appt: ExistingAppointment }
 export default function AppointmentsTab({ vacancy: v }: { vacancy: VacancyDetail }) {
   const { t } = useTranslation(['vacancies', 'common'])
   const auth = useAuth()
-  const { formatDateTime } = useDateFormat()
+  // scheduled_at is a zoneless WALL time (BUREAU-KLOK-FE-1 risk 1) — never local-render it.
+  const { formatWallTime } = useDateFormat()
   const queryClient = useQueryClient()
   const [page, setPage] = useState(1)
   // "+ Afspraak" flow: pick a candidate first, then the shared modal opens.
@@ -114,7 +115,7 @@ export default function AppointmentsTab({ vacancy: v }: { vacancy: VacancyDetail
                 <Calendar size={14} color="var(--text-muted)" style={{ flexShrink: 0 }} />
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 2, minWidth: 120 }}>
                   <span style={{ fontSize: 12, fontFamily: 'var(--font-mono, monospace)', color: 'var(--text)' }}>
-                    {a.scheduledAt ? formatDateTime(a.scheduledAt) : '—'}
+                    {a.scheduledAt ? formatWallTime(a.scheduledAt) : '—'}
                   </span>
                   {a.isOverdue && <SoftChip label={t('appointmentsTab.overdue')} color="var(--color-danger)" size={10} />}
                 </div>

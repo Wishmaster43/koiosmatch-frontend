@@ -34,6 +34,15 @@ export { ddmmyyyy, hhmm, hhmmss } from './localDate'
 const NUMERIC_DATE: Intl.DateTimeFormatOptions = { day: '2-digit', month: '2-digit', year: 'numeric' }
 const isNumericDate = (o: Intl.DateTimeFormatOptions) =>
   o.day === '2-digit' && o.month === '2-digit' && o.year === 'numeric' && !o.weekday && !o.hour && !o.minute && !o.era && !o.timeZoneName
+// DD-MM-YYYY in an explicit IANA zone (DATUM-1 digits in every locale) — via
+// formatToParts because a Date carries no zone of its own. BUREAU-KLOK-FE-1:
+// the numeric shortcut used to silently DROP a caller's timeZone into the
+// local-getter path; this honours it without giving up the fixed digit shape.
+const ddmmyyyyInZone = (d: Date, timeZone: string): string => {
+  const parts = new Intl.DateTimeFormat('en-CA', { timeZone, day: '2-digit', month: '2-digit', year: 'numeric' }).formatToParts(d)
+  const get = (t: string) => parts.find(p => p.type === t)?.value ?? ''
+  return `${get('day')}-${get('month')}-${get('year')}`
+}
 
 // Resolves the active i18n language to its Intl locale tag, falling back to nl-NL when the language is unresolved or the test mock has no i18n instance.
 export function useLocale(): string {
@@ -57,7 +66,11 @@ export function useDateFormat() {
     if (!value) return '—'
     const d = new Date(value)
     if (isNaN(d.getTime())) return String(value)
-    return isNumericDate(opts) ? ddmmyyyy(d) : d.toLocaleDateString(locale, opts)
+    // Numeric shape + a caller-pinned zone: keep the DD-MM-YYYY digits but in
+    // THAT zone (was: the shortcut swallowed the timeZone — the fragile save
+    // ApplicationRow relied on). Without a zone the local shortcut stands.
+    if (isNumericDate(opts)) return opts.timeZone ? ddmmyyyyInZone(d, opts.timeZone) : ddmmyyyy(d)
+    return d.toLocaleDateString(locale, opts)
   }, [locale])
   // DD-MM-YYYY HH:mm — the app-wide standard for drill-downs / detail views (never raw ISO).
   const formatDateTime = useCallback((value: DateInput): string => {
@@ -73,7 +86,21 @@ export function useDateFormat() {
     const d = new Date(value)
     return isNaN(d.getTime()) ? '' : hhmm(d)
   }, [])
-  return useMemo(() => ({ locale, formatDate, formatDateTime, formatTime }), [locale, formatDate, formatDateTime, formatTime])
+  // DD-MM-YYYY HH:mm pinned to UTC — for ZONELESS wall-time fields stored as
+  // UTC (appointments.scheduled_at: the intake form posts a naive local string,
+  // the server stores it verbatim under app-TZ UTC, so only UTC getters return
+  // what the user typed; local rendering shifted it +1/+2h and showed the same
+  // appointment two hours apart between drawers — BUREAU-KLOK-FE-1 risk 1).
+  // NOT for real instants (WhatsApp outbox scheduled_at = server now()): those
+  // stay on formatDateTime, where local rendering is the correct behaviour.
+  const formatWallTime = useCallback((value: DateInput): string => {
+    if (!value) return '—'
+    const d = new Date(value)
+    if (isNaN(d.getTime())) return String(value)
+    const p2 = (n: number) => String(n).padStart(2, '0')
+    return `${p2(d.getUTCDate())}-${p2(d.getUTCMonth() + 1)}-${d.getUTCFullYear()} ${p2(d.getUTCHours())}:${p2(d.getUTCMinutes())}`
+  }, [])
+  return useMemo(() => ({ locale, formatDate, formatDateTime, formatTime, formatWallTime }), [locale, formatDate, formatDateTime, formatTime, formatWallTime])
 }
 
 // Age in whole years from a birthdate; accounts for whether the birthday already

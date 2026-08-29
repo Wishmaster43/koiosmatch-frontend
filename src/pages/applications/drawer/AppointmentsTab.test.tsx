@@ -13,7 +13,7 @@ vi.mock('@/lib/api', async () => {
   const actual = await vi.importActual<typeof import('@/lib/api')>('@/lib/api')
   return { ...actual, default: { get: vi.fn() } }
 })
-vi.mock('@/lib/datetime', () => ({ useDateFormat: () => ({ formatDate: (v: string) => v, locale: 'nl-NL' }) }))
+vi.mock('@/lib/datetime', () => ({ useDateFormat: () => ({ formatDate: (v: string) => v, formatWallTime: (v: string) => v, locale: 'nl-NL' }) }))
 vi.mock('@/lib/useAppointmentTypes', () => ({
   useAppointmentTypes: () => ({ metaOf: (v?: string) => (v ? { label: `Type:${v}` } : undefined) }),
 }))

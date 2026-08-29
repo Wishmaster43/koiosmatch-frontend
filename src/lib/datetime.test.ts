@@ -158,3 +158,33 @@ describe('humanizeIsoDates', () => {
     expect(humanizeIsoDates(null)).toBe('')
   })
 })
+
+// BUREAU-KLOK-FE-1 risk 1: appointments.scheduled_at is a ZONELESS wall time the
+// server stores verbatim as UTC — only UTC getters return what the user typed.
+// The pre-fix local rendering showed the same appointment two hours apart between
+// drawers (Amsterdam summer). These pins hold in EVERY process timezone because
+// the input carries an explicit offset and the output is pinned to UTC.
+describe('useDateFormat · formatWallTime — zoneless wall times render pinned to UTC', () => {
+  it('renders the stored wall time, never the browser-local shift', () => {
+    const { result } = renderHook(() => useDateFormat())
+    // Stored "09:00" wall time serialized by the server as +00:00.
+    expect(result.current.formatWallTime('2026-09-01T09:00:00+00:00')).toBe('01-09-2026 09:00')
+  })
+  it('shows an em-dash for empty input and the raw value when unparseable', () => {
+    const { result } = renderHook(() => useDateFormat())
+    expect(result.current.formatWallTime(null)).toBe('—')
+    expect(result.current.formatWallTime('not-a-date')).toBe('not-a-date')
+  })
+})
+
+// BUREAU-KLOK-FE-1 helper fix: the numeric DD-MM-YYYY shortcut used to silently
+// DROP a caller's timeZone (ApplicationRow was saved only by not passing hour).
+// A numeric-shape call WITH a zone now renders that zone's calendar day, still
+// in fixed DD-MM-YYYY digits (DATUM-1) — never the locale's own slash format.
+describe('useDateFormat · formatDate honours a caller-pinned timeZone on the numeric shape', () => {
+  it('renders the UTC calendar day for a numeric call with timeZone UTC', () => {
+    const { result } = renderHook(() => useDateFormat())
+    // 23:30Z: the UTC day is the 1st regardless of the machine timezone ahead of UTC.
+    expect(result.current.formatDate('2026-09-01T23:30:00+00:00', { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'UTC' })).toBe('01-09-2026')
+  })
+})

@@ -31,14 +31,15 @@ interface RawAppt {
   location_name?: string | null; location_id?: Id | null; status?: string
 }
 
-const dateTimeOpts = { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'UTC' } as const
 
 // Lists this application's appointments straight from the shared appointments
 // entity (see file docblock above), filtered client-side since the endpoint has
 // no application_id filter; create/edit reuses PlanIntakeModal.
 export default function AppointmentsTab({ application: a }: { application: ApplicationDetail }) {
   const { t } = useTranslation(['applications', 'common'])
-  const { formatDate } = useDateFormat()
+  // scheduled_at is a zoneless WALL time — the shared formatWallTime replaces the
+  // former hand-pinned UTC dateTimeOpts (BUREAU-KLOK-FE-1: one idiom, not four).
+  const { formatWallTime } = useDateFormat()
   const { metaOf } = useAppointmentTypes()
 
   const [appointments, setAppointments] = useState<RawAppt[]>([])
@@ -168,7 +169,7 @@ export default function AppointmentsTab({ application: a }: { application: Appli
             </div>
             <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 10, fontSize: 12, color: 'var(--text-muted)' }}>
               {/* Wall-time DD-MM-YYYY HH:mm — the BE stores it in UTC as-entered, so no local-tz shift. */}
-              {ap.scheduled_at && <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><Calendar size={12} /> {formatDate(ap.scheduled_at, dateTimeOpts)}</span>}
+              {ap.scheduled_at && <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><Calendar size={12} /> {formatWallTime(ap.scheduled_at)}</span>}
               {ap.duration_min != null && <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><Clock size={12} /> {t('appointments.durationMin', { count: ap.duration_min })}</span>}
               {ap.owner?.name && <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><User size={12} /> {t('appointments.with')}: {ap.owner.name}</span>}
               {ap.location_name && <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><MapPin size={12} /> {ap.location_name}</span>}
