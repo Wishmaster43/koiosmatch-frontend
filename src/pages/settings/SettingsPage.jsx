@@ -63,6 +63,10 @@ const SLUG_ALIASES = {
   'notifications/notif_klanten': { category: 'notifications', tab: 'notif_customers' },
   'notifications/notif_taken': { category: 'notifications', tab: 'notif_tasks' },
   'notifications/notif_facturering': { category: 'notifications', tab: 'notif_billing' },
+  // INTEGRATIONS-SETTINGS-1 (Danny 31-08): the Modules-group connector screens moved
+  // into the Integraties group — old bookmarks keep landing on the moved section.
+  'modules/mod_shiftmanager': { category: 'integrations', tab: 'shiftmanager' },
+  'modules/hf_contract_map': { category: 'integrations', tab: 'helloflex' },
 }
 
 // Parses the location hash into {category, tab}, accepting both the #settings/ prefix and legacy unprefixed links, and rewriting renamed slugs via SLUG_ALIASES.

@@ -122,7 +122,6 @@
     "koios_models": "Modèles IA Koios",
     "facebook_leads": "Facebook Leads",
     "numbering": "Numérotation",
-    "mod_shiftmanager": "Shiftmanager",
     "mod_helloflex": "HelloFlex",
     "contract_forms": "Types de contrat",
     "funnel_stages": "Étapes de l'entonnoir",
@@ -247,10 +246,11 @@
     "notif_my": "Mes notifications",
     "customer_identifier_validation": "Validation des numéros",
     "automations": "Automatisations",
-    "hf_contract_map": "Correspondance des contrats HelloFlex",
     "report_kpis": "Cartes de rapport",
     "jargon": "Jargon métier",
-    "whatsapp_web": "Numéros WhatsApp Web"
+    "whatsapp_web": "Numéros WhatsApp Web",
+    "shiftmanager": "Shiftmanager",
+    "helloflex": "HelloFlex"
   },
   "kpis": {
     "title": "Paramètres KPI",

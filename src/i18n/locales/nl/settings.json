@@ -131,7 +131,6 @@
     "koios_models": "Koios AI-modellen",
     "facebook_leads": "Facebook Leads",
     "numbering": "Nummering",
-    "mod_shiftmanager": "Shiftmanager",
     "mod_helloflex": "HelloFlex",
     "contract_forms": "Contractvormen",
     "funnel_stages": "Funnelfasen",
@@ -247,10 +246,11 @@
     "notif_my": "Mijn meldingen",
     "customer_identifier_validation": "Nummervalidatie",
     "automations": "Automatiseringen",
-    "hf_contract_map": "HelloFlex contractmap",
     "report_kpis": "Rapportkaarten",
     "jargon": "Vakjargon",
-    "whatsapp_web": "WhatsApp Web-nummers"
+    "whatsapp_web": "WhatsApp Web-nummers",
+    "shiftmanager": "Shiftmanager",
+    "helloflex": "HelloFlex"
   },
   "kpis": {
     "title": "KPI-instellingen",

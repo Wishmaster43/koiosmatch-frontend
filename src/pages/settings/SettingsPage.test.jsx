@@ -74,6 +74,13 @@ describe('parseHash — SLUG_ALIASES resolves renamed Dutch slugs to their Engli
     expect(parseHash()).toEqual({ category: 'notifications', tab: 'notif_billing' })
   })
 
+  it('the moved connector screens keep their old modules/ deep-links (INTEGRATIONS-SETTINGS-1)', () => {
+    window.location.hash = '#settings/modules/mod_shiftmanager'
+    expect(parseHash()).toEqual({ category: 'integrations', tab: 'shiftmanager' })
+    window.location.hash = '#settings/modules/hf_contract_map'
+    expect(parseHash()).toEqual({ category: 'integrations', tab: 'helloflex' })
+  })
+
   it('a new-style hash with no alias passes through unchanged', () => {
     window.location.hash = '#settings/candidate/functions'
     expect(parseHash()).toEqual({ category: 'candidate', tab: 'functions' })

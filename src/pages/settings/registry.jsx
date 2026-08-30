@@ -686,6 +686,12 @@ export const NAV_GROUPS = [
   {
     key: 'integrations', icon: Store,
     items: [
+      // INTEGRATIONS-SETTINGS-1 (Danny 31-08): each connector gets its own section
+      // here — the former Modules-group screens move in unchanged (same gates,
+      // same components); old deep-links resolve via SLUG_ALIASES. The Koppeling/
+      // Mapping sub-tabs land with CMBE's contract, never as empty fakes (§3).
+      { id: 'shiftmanager', icon: BarChart2, component: ShiftmanagerModuleSettings, requiresPage: 'shiftmanager' },
+      { id: 'helloflex', icon: Boxes, component: HelloflexContractMapSettings, requiresPage: 'helloflex' },
       { id: 'apikeys', icon: Key, component: ApiKeysSettings },
       { id: 'webhooks', icon: Webhook, component: WebhooksSettings },
       // Facebook Leads (FB-LEADS-1) — per-tenant Leads-app credentials + webhook URL.
@@ -699,22 +705,6 @@ export const NAV_GROUPS = [
     items: [
       { id: 'import', icon: Download, component: ImportSettings },
       { id: 'export', icon: Upload, component: ExportSettings },
-    ],
-  },
-  {
-    // Modules (Danny 2026-07-20): add-on module settings under the SAME name the
-    // super-admin Modules tab uses ("Losse modules"). The group auto-hides when no
-    // item passes its gate (SettingsPage drops empty groups) — so it only shows
-    // with Shiftmanager-rapportage and/or HelloFlex on. The old app-only gate is
-    // gone with the manual Sync tab (SYNC-RETIRE-1): module-only via requiresPage.
-    // HelloFlex settings land here once its credentials flow ships (wacht Danny).
-    key: 'modules', icon: Boxes,
-    items: [
-      { id: 'mod_shiftmanager', icon: BarChart2, component: ShiftmanagerModuleSettings, requiresPage: 'shiftmanager' },
-      // HelloFlex contract-type mapping (HF-CONTRACTMAP-1) — module-gated on
-      // `requiresPage: 'helloflex'` (canAccessPage → hasModule('helloflex')), mirrors
-      // mod_shiftmanager above. Auto-hides for tenants without the HelloFlex module.
-      { id: 'hf_contract_map', icon: Boxes, component: HelloflexContractMapSettings, requiresPage: 'helloflex' },
     ],
   },
   {
