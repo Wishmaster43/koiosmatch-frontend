@@ -1,12 +1,11 @@
 /**
- * configPanelAgentFallback.test — verdict findings 2 & 5: ai_agent's `agent_id`
- * field (a real id-valued lookup) falls back to displaying a legacy
- * name-valued `config.agent` for a step saved before the CMBE 2026-08-30
- * rename, and picking a NEW agent dual-writes both `agent_id` and the legacy
- * `agent` (name) key — the engine still resolves by the legacy name today
- * (AiAgentModule.php:154), see ai_agent.ts's docblock. Real i18n is not
- * initialized here (mirrors configPanelWaWeb.test.tsx), so `t()` returns the
- * raw key and field labels render as the schema's literal (Dutch) label text.
+ * configPanelAgentFallback.test — MODULE-TERUG-1 (Danny 31-08): the ai_agent
+ * step's `agent` field is the pre-P1 NAME-valued lookup again. A stored config
+ * renders its agent name, and picking a new agent writes the NAME through the
+ * one plain onUpdate path — no agent_id dual-write (that P1 rename is parked
+ * until Danny approves it). Real i18n is not initialized here (mirrors
+ * configPanelWaWeb.test.tsx), so field labels render as the schema's literal
+ * (Dutch) label text.
  */
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen, within, fireEvent, waitFor } from '@testing-library/react'
@@ -34,21 +33,20 @@ function openAgentSelect() {
 
 const node: FlowNode = { id: 'n1', position: { x: 0, y: 0 }, data: { type: 'ai_agent', config: { agent: 'Kelly' } } }
 
-describe('ConfigPanel · ai_agent legacy `agent` display fallback', () => {
-  it('shows the legacy name-valued config.agent when agent_id is absent', () => {
+describe('ConfigPanel · ai_agent name-valued agent field (MODULE-TERUG-1)', () => {
+  it('shows the stored config.agent name', () => {
     render(<ConfigPanel node={node} onUpdate={vi.fn()} onDelete={vi.fn()} />)
-    // CreatableSelect's trigger falls back to the raw stored value when nothing
-    // in its (async, not-yet-loaded) options list matches it.
     expect(screen.getByText('Kelly')).toBeInTheDocument()
   })
 
-  it('picking a new agent writes BOTH agent_id and the legacy agent name', async () => {
+  it('picking a new agent writes the NAME to `agent` — and never an agent_id', async () => {
     const onUpdate = vi.fn()
     render(<ConfigPanel node={node} onUpdate={onUpdate} onDelete={vi.fn()} />)
     openAgentSelect()
     const opt = await screen.findByText('Michelle')
     fireEvent.click(opt)
-    await waitFor(() => expect(onUpdate).toHaveBeenCalledWith('n1', 'agent_id', 'a-2'))
-    expect(onUpdate).toHaveBeenCalledWith('n1', 'agent', 'Michelle')
+    await waitFor(() => expect(onUpdate).toHaveBeenCalledWith('n1', 'agent', 'Michelle'))
+    const keys = onUpdate.mock.calls.map(c => c[1])
+    expect(keys).not.toContain('agent_id')
   })
 })
