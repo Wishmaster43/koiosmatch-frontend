@@ -1196,6 +1196,20 @@ Be honest. If something is not done, say so — do not pretend.
     toast; nooit in editors; nooit per scherm hergerold (ReferenceNumberChip
     composeert hetzelfde atoom). Een nieuwe adresweergave zonder knopje is een
     finding.
+  · **MODULE-FACE-BEVRIES (Danny 31-08, na uren verloren werk aan de
+    ai_agent-module: "de AI agent moet terug komen zoals het was ik vroeg
+    alleen om titel/popup/tabje" + "waarom snap jij het niet en vraag je het
+    dan ook niet?" + "zoiets mag nooit meer gebeuren"):** een module-/paneel-/
+    formulier-GEZICHT dat Danny kent verandert uitsluitend op de punten die
+    hij benoemde. Een plan- of BE-contractwijziging (nieuw veld, hernoemde
+    key, verplicht-markering) mag NOOIT als zichtbaar veld op zo'n surface
+    landen zonder zijn expliciete akkoord vooraf — contractvelden zonder
+    akkoord blijven onzichtbaar (dual-write/mapping) of horen op de entiteit
+    (agent-beheer, vacature-tab), niet in zijn paneel. Botst zijn opdracht
+    met een plan/contract: stel EERST één precieze vraag, nooit zelf
+    invullen. Gespiegeld met CMBE (engine-schemawijzigingen die FE-velden
+    zouden tonen wachten op hetzelfde akkoord); referentiecasus:
+    MODULE-TERUG-1, commit met die naam.
   · **TITELBALK-PILLS (Danny 27-08, twee screenshots: "in de title bar dus!! …
     laten we 1 type chips aanhouden — zo moeten we de pop-ups doen"):** de korte
     keuze bovenin een create-pop-up (Lead/Kandidaat-modus, vacaturestatus,
