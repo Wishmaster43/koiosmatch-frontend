@@ -61,6 +61,17 @@ export function LookupSelectField({ value, onChange, fieldKey, endpoint, valueKe
 
   if (error) return <ErrorBanner onRetry={() => setRetryTick(n => n + 1)}>{t('common:errorGeneric')}</ErrorBanner>
 
+  // CMBE delta 2026-08-30: ai_agent's `agent` field was renamed `agent_id`
+  // (a real id-valued lookup), but the engine still resolves the OLD name-valued
+  // `agent` key (AiAgentModule.php:154) until that backend delta lands. This is
+  // the only place the agent's NAME is in scope (it comes from this same lookup
+  // payload), so dual-write the legacy key here for one release — see
+  // ai_agent.ts's docblock. No other lookup_select field carries this key.
+  const handleChange = (v: string) => {
+    onChange(fieldKey, v)
+    if (fieldKey === 'agent_id') onChange('agent', opts.find(o => o.value === v)?.label ?? '')
+  }
+
   return (
     <>
       {/* No visible label wraps this field (schema-driven, key is the only name
@@ -69,7 +80,7 @@ export function LookupSelectField({ value, onChange, fieldKey, endpoint, valueKe
       {/* The search input's accessible NAME stays the neutral select-copy —
           emptyLabel only labels the ''-option (naming the input after one
           option was a §6 regression, verify r2). */}
-      <CreatableSelect value={(value as string) ?? ''} onChange={v => onChange(fieldKey, v)}
+      <CreatableSelect value={(value as string) ?? ''} onChange={handleChange}
         aria-labelledby={lookupLabelId} allowCreate={false}
         placeholder={t('fields.selectPlaceholder')}
         options={[{ value: '', label: emptyLabel ?? t('fields.selectPlaceholder') }, ...opts]}

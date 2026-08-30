@@ -15,15 +15,21 @@ import { unwrap } from '@/lib/api'
 let cache: ModuleCatalog | null = null
 let inFlight: Promise<ModuleCatalog> | null = null
 
-// Normalize the raw /workflows/modules response (per type: output_fields + emits)
-// into the flat catalog map; an unrecognised emits value fails safe to passthrough.
+// Normalize the raw /workflows/modules response (per type: output_fields + emits
+// + the optional instruction_output_fields allow-list, INTERVIEW-WORKFLOW-1 CMBE
+// delta) into the flat catalog map; an unrecognised emits value fails safe to passthrough.
 function normalize(raw: Record<string, unknown>): ModuleCatalog {
   const out: ModuleCatalog = {}
   for (const [type, def] of Object.entries(raw ?? {})) {
-    const d = def as { output_fields?: Record<string, string>; emits?: string }
+    const d = def as { output_fields?: Record<string, string>; emits?: string; instruction_output_fields?: Array<{ key?: string; label?: string }> }
     out[type] = {
       outputFields: d.output_fields ?? {},
       emits: d.emits === 'replace' || d.emits === 'append' ? d.emits : 'passthrough',
+      instructionOutputFields: Array.isArray(d.instruction_output_fields)
+        ? d.instruction_output_fields
+          .filter((f): f is { key: string; label?: string } => typeof f?.key === 'string' && f.key.length > 0)
+          .map(f => ({ key: f.key, label: f.label ?? f.key }))
+        : undefined,
     }
   }
   return out

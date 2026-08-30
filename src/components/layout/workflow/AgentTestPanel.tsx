@@ -13,6 +13,7 @@ import Button from '@/components/ui/Button'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 import Spinner from '@/components/ui/Spinner'
 import { Caption } from '@/components/ui/typography'
+import { buildTestConfig } from './agentTestConfig'
 
 interface Message {
   role: 'user' | 'assistant'
@@ -67,11 +68,12 @@ export default function AgentTestPanel({ config }: {
         message: userMsg.content,
         variables: vars,
         conversation_history: messages,
-        // The schema key is `instruction` (engine AiAgentModule); the test service
-        // reads that key since 23-08 (legacy plural as fallback server-side), so
-        // the config travels verbatim — the tenant's own text, never the platform
-        // persona on a paid test.
-        config,
+        // §0 API-CREDITS-1: the schema key is `instruction` (engine AiAgentModule),
+        // but the config's OWN `instructions` array (the new per-question list) must
+        // never travel raw — the server's legacy plural fallback would cast it to the
+        // string "Array" and burn a real credit on a broken persona. buildTestConfig
+        // strips it and renders a numbered fallback persona when none is set yet.
+        config: buildTestConfig(config),
       })
       const data = unwrap<{
         response?: string; message?: string; tokens_used?: number

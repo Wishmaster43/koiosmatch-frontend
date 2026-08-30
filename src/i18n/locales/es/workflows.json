@@ -1180,7 +1180,7 @@
     "Laat de AI-agent veelgestelde vragen (FAQ) raadplegen tijdens het gesprek": "Permite que el agente de IA consulte las preguntas frecuentes durante la conversación.",
     "De genummerde stappen die de AI-agent doorloopt, elk met een optioneel outputveld en variabele-chips": "Los pasos numerados que recorre el agente de IA, cada uno con un campo de salida opcional y chips de variables.",
     "Extra persona- en toonaanwijzingen voor de AI-agent, naast de instructies hierboven Het runtime-antwoordcontract wordt automatisch toegevoegd": "Indicaciones adicionales de persona y tono para el agente de IA, además de las instrucciones anteriores. El contrato de respuesta en tiempo de ejecución se añade automáticamente.",
-    "Volgt standaard de tenant-instelling; deze vacature kan dat hier overschrijven": "Sigue de forma predeterminada el ajuste del inquilino; esta vacante puede anularlo aqui."
+    "Volgt standaard de tenant-instelling; deze vacature kan dat hier overschrijven": "Sigue de forma predeterminada el ajuste del inquilino; esta vacante puede anularlo aquí."
   },
   "triggers": {
     "events": {

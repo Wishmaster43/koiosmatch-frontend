@@ -16,6 +16,8 @@ import { WorkflowSelectField } from './fieldControls/WorkflowSelectField'
 import { WhatsappPhoneNumberField } from './fieldControls/WhatsappPhoneNumberField'
 import { FiltersField } from './fieldControls/FiltersField'
 import { OrderedListField } from './fieldControls/OrderedListField'
+import { InstructionListField } from './fieldControls/InstructionListField'
+import type { InstructionOutputField } from './filterFieldCatalog'
 import type { OnChange } from './fieldControls/types'
 import { KeyValueField, GroupField } from './groupKeyValueFields'
 import { TextFieldWithVars } from './VariablePicker'
@@ -31,9 +33,12 @@ import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 import Toggle from '@/components/ui/Toggle'
 
 // Dispatches one schema field type to its control; the data-fetching/nested field types delegate to fieldControls, this file only holds the plain inline ones (see the module doc above).
-export function FieldInput({ field, value, onChange, variables, config }: {
+export function FieldInput({ field, value, onChange, variables, config, instructionOutputFields }: {
   field: WorkflowField; value?: unknown; onChange: OnChange; variables?: WorkflowVarGroup[]
   config?: Record<string, unknown>
+  // INTERVIEW-WORKFLOW-1 CMBE delta: the server-served output_field allow-list for
+  // the 'instruction_list' field type only; every other field type ignores it.
+  instructionOutputFields?: InstructionOutputField[]
 }) {
   const { t } = useTranslation('workflows')
   // Called unconditionally (rules-of-hooks) even though only the 'select' branch
@@ -127,6 +132,12 @@ export function FieldInput({ field, value, onChange, variables, config }: {
     // WA-SEND-FIELDS-2: WhatsAppSendModule's body_parameters — a positional
     // {{1}}, {{2}}, … list, so reordering matters (unlike 'keyvalue' below).
     return <OrderedListField value={value} onChange={onChange} fieldKey={field.key} />
+  }
+  if (field.type === 'instruction_list') {
+    // INTERVIEW-WORKFLOW-1: ai_agent's `instructions` — a reorderable list of
+    // rich-text AI-interview questions, each with an output-field mapping, a
+    // required toggle and a per-row variable-insert/duplicate/delete menu.
+    return <InstructionListField value={value} onChange={onChange} fieldKey={field.key} variables={variables} outputFields={instructionOutputFields} />
   }
   if (field.type === 'key_value') {
     // WA-SEND-FIELDS-2: a plain key->value record (see fieldControls' header

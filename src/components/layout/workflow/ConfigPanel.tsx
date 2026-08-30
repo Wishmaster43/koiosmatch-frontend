@@ -14,6 +14,7 @@ import DrawerTabs from '@/components/drawer/DrawerTabs'
 import { MODULE_META, MODULE_SCHEMAS } from '@/modules/index'
 import { FieldInput } from './fields'
 import { categorySlug, fieldHint, fieldLabel } from './moduleI18n'
+import { useModuleCatalog } from './useModuleCatalog'
 import AgentTestPanel from './AgentTestPanel'
 import OutputTree from './OutputTree'
 import FanoutSummary, { type WaFanout } from './FanoutSummary'
@@ -28,6 +29,11 @@ export default function ConfigPanel({ node, onUpdate, onDelete, onTabChange, var
   variables?: WorkflowVarGroup[]
 }) {
   const { t } = useTranslation('workflows')
+  // INTERVIEW-WORKFLOW-1 CMBE delta: the per-type instruction_output_fields
+  // allow-list for ai_agent's instruction_list field (server-served, never
+  // hardcoded) — the session-cached catalog is safe to re-fetch here since
+  // useModuleCatalog shares one in-flight promise across every caller.
+  const { catalog } = useModuleCatalog()
   const isAgent = node?.data.type === 'ai_agent'
   const [activeTab, setActiveTab] = useState(() => isAgent ? 'general' : 'settings')
 
@@ -60,6 +66,17 @@ export default function ConfigPanel({ node, onUpdate, onDelete, onTabChange, var
   const Icon   = meta?.Icon as unknown as LucideIcon | undefined
   const output = node.data.output
   const config = node.data.config as Record<string, unknown> | undefined
+  // ai_agent's instruction-list output_field allow-list, when the backend serves
+  // one for this step's module type; undefined/empty means the InstructionListField
+  // renders no output-field control at all (no fake affordance, §3).
+  const instructionOutputFields = catalog[type]?.instructionOutputFields
+  // agent_id was renamed from the name-valued `agent` (CMBE delta, 2026-08-30):
+  // a step saved before the rename still carries only `config.agent` — fall back
+  // to it for one release so an already-configured step does not read as empty.
+  // The engine (AiAgentModule.php) still resolves the agent by the legacy `agent`
+  // NAME today, not by `agent_id` — LookupSelectField dual-writes both keys on
+  // pick for exactly that reason (see ai_agent.ts docblock).
+  const fieldValue = (key: string) => (key === 'agent_id' ? (config?.agent_id ?? config?.agent) : config?.[key])
   // WhatsApp fanout summary (R3a/CMBE 2026-07-09): present only when this step's
   // output embeds `whatsapp_fanout` — a whatsapp_send step that fanned out into a
   // WABA batch (see the Wachtrij tab on the WhatsApp page for the live batch).
@@ -107,14 +124,15 @@ export default function ConfigPanel({ node, onUpdate, onDelete, onTabChange, var
     <div style={{ flex: 1, overflowY: 'auto', padding: 16, display: 'flex', flexDirection: 'column', gap: 14 }}>
       {fields.map(field => {
         const isRequired = !!(field as WorkflowField & { required?: boolean }).required
-        const isEmpty    = config?.[field.key] == null || config?.[field.key] === ''
+        const isEmpty    = fieldValue(field.key) == null || fieldValue(field.key) === ''
         return (
           <div key={field.key}>
             <label style={{ display: 'block', fontSize: 10, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>
               {fieldLabel(t, field.label as string | undefined)}
               {isRequired && <span style={{ color: 'var(--color-danger-text)', marginLeft: 3 }}>*</span>}
             </label>
-            <FieldInput field={field as WorkflowField} value={config?.[field.key]} variables={variables} config={config}
+            <FieldInput field={field as WorkflowField} value={fieldValue(field.key)} variables={variables} config={config}
+              instructionOutputFields={instructionOutputFields}
               onChange={(key, val) => onUpdate(node.id, key, val)} />
             {/* Helper text under the field — registry `hint:`/`help:` through the render-layer i18n (§5). */}
             {(field.hint ?? field.help) ? <Caption style={{ display: 'block', marginTop: 4 }}>{fieldHint(t, (field.hint ?? field.help) as string)}</Caption> : null}
@@ -208,14 +226,15 @@ export default function ConfigPanel({ node, onUpdate, onDelete, onTabChange, var
               // now on both, plus a hint when a required select is still empty
               // (no save-blocking: the editor has none, the engine fails visibly).
               const isRequired = !!(field as WorkflowField & { required?: boolean }).required
-              const isEmpty    = config?.[field.key] == null || config?.[field.key] === ''
+              const isEmpty    = fieldValue(field.key) == null || fieldValue(field.key) === ''
               return (
                 <div key={field.key}>
                   <label style={{ display: 'block', fontSize: 10, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>
                     {fieldLabel(t, field.label as string | undefined)}
                     {isRequired && <span style={{ color: 'var(--color-danger-text)', marginLeft: 3 }}>*</span>}
                   </label>
-                  <FieldInput field={field as WorkflowField} value={config?.[field.key]} variables={variables} config={config}
+                  <FieldInput field={field as WorkflowField} value={fieldValue(field.key)} variables={variables} config={config}
+                    instructionOutputFields={instructionOutputFields}
                     onChange={handleFieldChange} />
                   {/* K-193 fase 2b: on message_type, the wa_web-specific caption below
                       replaces the registry help (avoid printing the same notice twice). */}

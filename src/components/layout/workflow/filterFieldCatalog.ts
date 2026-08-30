@@ -28,10 +28,22 @@
 // The backend's per-module walk rule (BaseModule::emits) — replace/append/passthrough.
 export type ModuleEmits = 'replace' | 'append' | 'passthrough'
 
+// One selectable output-field mapping option (INTERVIEW-WORKFLOW-1 CMBE delta:
+// ai_agent's per-instruction `output_field` is a CHOICE from a server-served
+// allow-list, never free text — reused here since it is the same {key,label} shape).
+export interface InstructionOutputField {
+  key: string
+  label: string
+}
+
 // One backend module type's static bundle-field catalog entry (GET /workflows/modules).
 export interface ModuleCatalogEntry {
   outputFields: Record<string, string>
   emits: ModuleEmits
+  // Optional per-type allow-list for instruction_list fields' output_field mapping
+  // (server key `instruction_output_fields`) — absent/empty means that module
+  // offers no output-field mapping yet (fields.tsx renders no fake affordance then).
+  instructionOutputFields?: InstructionOutputField[]
 }
 export type ModuleCatalog = Record<string, ModuleCatalogEntry>
 

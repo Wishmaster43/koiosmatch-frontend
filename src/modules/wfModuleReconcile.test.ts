@@ -75,8 +75,11 @@ const EXPECTED_SCHEMA_KEYS: Record<string, string[]> = {
   pdok_geocode: ['entity', 'candidate_id', 'only_missing', 'all_records'],
   // WF-WAIT-NODE-FE-1: the ONE merged 'wait' node — mirrors WaitModule::configSchema.
   wait: ['until_field', 'days', 'hours', 'skip_weekends'],
-  // WF-AI-AGENT-NODE-FE-1: the reduced node — mirrors AiAgentModule::configSchema.
-  ai_agent: ['agent', 'channel', 'instruction', 'phone_number_id', 'reply_timeout_hours', 'max_attempts'],
+  // INTERVIEW-WORKFLOW-1 Appendix C (Danny 30-08) supersedes WF-AI-AGENT-NODE-FE-1
+  // for ai_agent's key set: the reduced 6-key node grows a knowledge group, the
+  // instructions list and a rejection-mode override (see the describe block below).
+  ai_agent: ['agent_id', 'channel', 'instruction', 'instructions', 'max_attempts', 'phone_number_id',
+    'reply_timeout_hours', 'rejection_mode', 'use_external_knowledge', 'use_faq'],
 }
 
 describe('WF-BUILDER-VELDEN-1 · registry config-schema mirrors the engine exactly', () => {
@@ -123,18 +126,26 @@ describe('WF-WAIT-NODE-FE-1 · delay/sleep deleted, wait mirrors WaitModule::con
 /**
  * WF-AI-AGENT-NODE-FE-1 — the generic 13-field instruction builder had no engine
  * counterpart ("generic agent" stays a later product idea, not a node); ai_agent
- * mirrors AiAgentModule::configSchema exactly, six keys, nothing more.
+ * originally mirrored AiAgentModule::configSchema exactly, six keys, nothing more.
+ *
+ * INTERVIEW-WORKFLOW-1 Appendix C (Danny 30-08) supersedes WF-AI-AGENT-NODE-FE-1
+ * for the keys below: `instructions` and `use_knowledge`'s intent are back —
+ * `instructions` as the new numbered instruction-list field, and the knowledge
+ * toggle as `use_external_knowledge`/`use_faq` — both a deliberate CMBE-accepted
+ * schema growth, not a regression to the deleted 13-field builder. Every OTHER
+ * dead key from that builder (naam/input/faq_ids/response_format/…) stays dead.
  */
-describe('WF-AI-AGENT-NODE-FE-1 · the 13-field builder is gone, ai_agent mirrors AiAgentModule::configSchema exactly', () => {
-  it("ai_agent's schema has EXACTLY the engine's six keys, nothing more", () => {
+describe('WF-AI-AGENT-NODE-FE-1 · the 13-field builder is gone; INTERVIEW-WORKFLOW-1 grows the schema deliberately', () => {
+  it("ai_agent's schema has exactly the CMBE-accepted key set, nothing more", () => {
     const keys = (MODULE_SCHEMAS.ai_agent ?? []).map(f => f.key).sort()
-    expect(keys).toEqual(['agent', 'channel', 'instruction', 'max_attempts', 'phone_number_id', 'reply_timeout_hours'])
+    expect(keys).toEqual(['agent_id', 'channel', 'instruction', 'instructions', 'max_attempts',
+      'phone_number_id', 'rejection_mode', 'reply_timeout_hours', 'use_external_knowledge', 'use_faq'])
   })
 
-  it('none of the old 13-field builder keys survive', () => {
+  it('none of the OTHER old 13-field builder keys survive (instructions/use_knowledge are back under new names, see above)', () => {
     const keys = (MODULE_SCHEMAS.ai_agent ?? []).map(f => f.key)
     const dead = [
-      'naam', 'instructions', 'input', 'faq_ids', 'use_knowledge', 'response_format',
+      'naam', 'input', 'faq_ids', 'response_format',
       'response_structure', 'system_prefix', 'conversation_id', 'max_history',
       'temperature', 'max_tokens', 'step_timeout',
     ]
