@@ -1,77 +1,53 @@
 /**
- * ai_agent.test — INTERVIEW-WORKFLOW-1: the extended schema carries the
- * agent_id lookup, the fixed 'whatsapp' channel, the knowledge toggles, the
- * instruction list and the rejection-mode override, each with the
- * defaults/showIf the ConfigPanel and the engine both rely on. A plain
- * schema-shape test (no render) — the render-seam is covered by
- * configPanelInstructionList.test.tsx.
+ * ai_agent.test — MODULE-TERUG-1 (Danny 31-08): the module is the pre-P1
+ * six-field engine schema again, plus ONLY the AI-instructions list on its own
+ * panel tab. A plain schema-shape test (no render) — the render-seam is
+ * covered by configPanelInstructionList.test.tsx.
  */
 import { describe, it, expect } from 'vitest'
 import aiAgent from './ai_agent'
 
 const byKey = (key: string) => aiAgent.schema.find(f => f.key === key)
 
-describe('ai_agent module schema · agent + channel + sender', () => {
-  it('agent_id is a real id-valued lookup_select (renamed from the old name-valued "agent")', () => {
-    expect(byKey('agent_id')).toMatchObject({ type: 'lookup_select', endpoint: '/ai/agents', valueKey: 'id' })
-    expect(byKey('agent')).toBeUndefined()
+describe('ai_agent module schema · the restored pre-P1 base (MODULE-TERUG-1)', () => {
+  it('agent is the name-valued lookup_select the engine resolves on', () => {
+    expect(byKey('agent')).toMatchObject({ type: 'lookup_select', endpoint: '/ai/agents', valueKey: 'name' })
+    expect(byKey('agent_id')).toBeUndefined()
   })
 
-  it('channel stays a fixed "whatsapp"-only select (P1 = WABA/Coexistence only, no wa_web trio)', () => {
+  it('channel stays a fixed "whatsapp"-only select', () => {
     const field = byKey('channel')!
     expect(field.type).toBe('select')
     expect(field.options).toEqual(['whatsapp'])
     expect(field.default).toBe('whatsapp')
   })
 
-  it('phone_number_id is required and always visible (no showIf, no whatsapp_number_id sibling)', () => {
-    const field = byKey('phone_number_id')!
-    expect(field.type).toBe('whatsapp_phone_number')
-    expect(field.required).toBe(true)
-    expect(field.showIf).toBeUndefined()
-    expect(byKey('whatsapp_number_id')).toBeUndefined()
-  })
-
-  it('intro_template is a whatsapp_template select, NOT schema-required (the backend decides per agent)', () => {
-    const field = byKey('intro_template')!
-    expect(field.type).toBe('whatsapp_template')
-    expect(field.required).toBeUndefined()
-    expect(field.hint).toMatch(/24-uursvenster/)
-  })
-})
-
-describe('ai_agent module schema · knowledge toggles', () => {
-  it('use_external_knowledge and use_faq are boolean fields defaulting to true', () => {
-    expect(byKey('use_external_knowledge')).toMatchObject({ type: 'boolean', default: true })
-    expect(byKey('use_faq')).toMatchObject({ type: 'boolean', default: true })
-  })
-})
-
-describe('ai_agent module schema · instructions list', () => {
-  it('registers the instructions field as the new instruction_list control', () => {
-    expect(byKey('instructions')).toMatchObject({ type: 'instruction_list' })
-  })
-
-  it('keeps the instruction textarea as a persona/tone addendum, still required', () => {
+  it('instruction stays the required agent-prompt textarea', () => {
     const field = byKey('instruction')!
     expect(field.type).toBe('textarea')
     expect(field.required).toBe(true)
-    expect(field.hint).toMatch(/naast de instructies hierboven/)
   })
-})
 
-describe('ai_agent module schema · rejection mode', () => {
-  it('defaults to inherit, offering inherit/proposal/automatic', () => {
-    const field = byKey('rejection_mode')!
-    expect(field.type).toBe('select')
-    expect(field.default).toBe('inherit')
-    expect(field.options).toEqual(['inherit', 'proposal', 'automatic'])
+  it('phone_number_id is a required lookup_select, always visible', () => {
+    const field = byKey('phone_number_id')!
+    expect(field.type).toBe('lookup_select')
+    expect(field.required).toBe(true)
   })
-})
 
-describe('ai_agent module schema · pre-existing fields untouched', () => {
   it('keeps reply_timeout_hours/max_attempts defaults', () => {
     expect(byKey('reply_timeout_hours')).toMatchObject({ type: 'number', default: 48 })
     expect(byKey('max_attempts')).toMatchObject({ type: 'number', default: 3 })
+  })
+})
+
+describe('ai_agent module schema · the ONE addition Danny asked for', () => {
+  it('registers the instructions list on its own panel tab', () => {
+    expect(byKey('instructions')).toMatchObject({ type: 'instruction_list', tab: 'instructions' })
+  })
+
+  it('carries NONE of the reverted P1 extras (intro_template, toggles, rejection_mode)', () => {
+    for (const gone of ['intro_template', 'use_external_knowledge', 'use_faq', 'rejection_mode', 'whatsapp_number_id']) {
+      expect(byKey(gone)).toBeUndefined()
+    }
   })
 })
