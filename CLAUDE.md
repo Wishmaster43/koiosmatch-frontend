@@ -1032,7 +1032,15 @@ the code is worse than no rule, because the next reader builds on it. What is tr
   (notification, message, task) is a finding: there is nothing to notify about. Every later
   step and every router condition reads the subject's fields as variables; the trigger is
   never a hidden setting behind a clock icon. Design: koiosmatch-api/docs/plans/
-  INTERVIEW-WORKFLOW-1.md Appendix D.
+  INTERVIEW-WORKFLOW-1.md Appendix D. **Aanscherping (Danny 31-08, verbatim: "KAN NOOIT
+    STARTEN MET AI AGENT OF IETS ANDERS SOM HET BEGIN BIJ MASTERDATA VAN
+    KOIOS!!!!"):** het begin van élk scenario is MASTERDATA van Koios — een
+    entiteitsnode of de inbound-webhook; nooit ai_agent, nooit een verzend- of
+    actiestap. En élk geseed scenario wordt GETEST (doorlopen/dry-run) vóór het
+    bij Danny op het scherm komt, met twee vaste uitzonderingen: nooit een echt
+    WhatsApp-bericht (Danny 31-08) en nooit een live AI-call (API-CREDITS-1:
+    AI-stappen gemockt). De FE-editor toont `editor.missingStartModule` zodra
+    de eerste stap geen geldige vertrekmodule is (START_MODULE_TYPES).
 
 ---
 
