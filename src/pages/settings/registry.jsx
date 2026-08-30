@@ -87,7 +87,8 @@ import EmailSettings from './sections/EmailSettings'
 import AuditLog from './sections/AuditLog'
 import RolesSettings from './sections/RolesSettings'
 import ShiftmanagerModuleSettings from './sections/ShiftmanagerModuleSettings'
-import HelloflexContractMapSettings from './sections/HelloflexContractMapSettings'
+import HelloflexSettings from './sections/integrations/HelloflexSettings'
+import WerkzoekenSettings from './sections/integrations/WerkzoekenSettings'
 import WebhooksSettings from './sections/webhooks'
 import AppsSettings from './sections/AppsSettings'
 import ModulesSettings from './sections/ModulesSettings'
@@ -691,7 +692,10 @@ export const NAV_GROUPS = [
       // same components); old deep-links resolve via SLUG_ALIASES. The Koppeling/
       // Mapping sub-tabs land with CMBE's contract, never as empty fakes (§3).
       { id: 'shiftmanager', icon: BarChart2, component: ShiftmanagerModuleSettings, requiresPage: 'shiftmanager' },
-      { id: 'helloflex', icon: Boxes, component: HelloflexContractMapSettings, requiresPage: 'helloflex' },
+      { id: 'helloflex', icon: Boxes, component: HelloflexSettings, requiresPage: 'helloflex' },
+      // Werkzoeken connector (INTEGRATIONS-CONTRACT §1) — gated on the new 'wz'
+      // module via access.ts; v1 = the connection card only.
+      { id: 'werkzoeken', icon: Globe, component: WerkzoekenSettings, requiresPage: 'werkzoeken' },
       { id: 'apikeys', icon: Key, component: ApiKeysSettings },
       { id: 'webhooks', icon: Webhook, component: WebhooksSettings },
       // Facebook Leads (FB-LEADS-1) — per-tenant Leads-app credentials + webhook URL.

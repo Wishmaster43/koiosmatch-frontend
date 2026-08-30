@@ -1,24 +1,12 @@
 /**
- * Shiftmanager module settings — TWO sub-tabs (Danny 04-08: "moeten dan onder
- * Shiftmanager 2 subtabjes worden" — "should then become 2 sub-tabs under
- * Shiftmanager"): KPI targets and display limits, each on
- * their own sub-tab instead of stacked. Labels reuse the schemas' own already-
- * translated titles (smKpis.title / display.title) so there is one source of
- * truth for each section's name. The manual Sync tab is retired (SYNC-RETIRE-1
- * — the daily sm:sync-all cron replaced it; the emergency trigger stays on the
- * SM pages' SmSyncButton).
- *
- * SM-MODULE-TABS-1 (Danny 16-08 restore): reachability hangs on TWO independent
- * superadmin toggles — Modules → "Rapportage Shiftmanager" ("Shiftmanager
- * reporting", 'sm', hasModule) and
- * Apps → the Shiftmanager connector ('shiftmanager', isAppEnabled) — the settings
- * nav item is gated on EITHER (registry.jsx `requiresModuleOrApp`, see
- * SettingsPage's passesModuleOrApp). Inside this screen, both existing sub-tabs
- * back the REPORTING dashboards only (KPI targets feed the SM dashboard; display
- * limits feed CandidatesReport/ShiftmanagerDashboard — all module-gated pages) —
- * there is no app-only content since the Sync tab retired. So the tab SET follows
- * the module flag; an app-only tenant still reaches the screen (nav gate) but
- * sees an honest "nothing here yet" notice instead of both tabs.
+ * Shiftmanager module settings — INTEGRATIONS-SETTINGS-1 (Danny 31-08: "onder
+ * kopje integratie en dan kopje shiftmanager met eigen subtabjes"): the section
+ * now fronts the CONNECTOR — Connection and Mapping speak the live
+ * INTEGRATIONS-CONTRACT endpoints and are available on EITHER superadmin toggle
+ * (module 'sm' OR app 'shiftmanager'), while the two original reporting
+ * sub-tabs (KPI targets, display limits — Danny 04-08) stay module-only, since
+ * they feed the reporting dashboards (SM-MODULE-TABS-1). Neither flag on =
+ * the calm empty state (the registry already hides the nav item; deep-link guard).
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -28,43 +16,45 @@ import SubTabBar from '@/components/drawer/SubTabBar'
 import SchemaSection from '../components/SchemaSection'
 import displaySchema from '../schemas/display'
 import smKpisSchema from '../schemas/smKpis'
+import IntegrationConnectionCard from './integrations/IntegrationConnectionCard'
+import IntegrationMappingsTable from './integrations/IntegrationMappingsTable'
 
-// Shiftmanager settings' two sub-tabs (see file docblock above), gated on the
-// reporting module flag so an app-only tenant sees an honest empty notice instead.
+// Connector front door first; reporting tabs only with the module on.
 export default function ShiftmanagerModuleSettings() {
   const { t } = useTranslation('settings')
   const { hasModule } = useAuth()
   const { isAppEnabled } = useApps() ?? {}
 
-  // Active sub-tab: KPI targets first, display limits second.
-  const [activeTab, setActiveTab] = useState('kpis')
-
-  // Both tabs back reporting-only content — no module means no tabs to show.
   const moduleOn = hasModule('sm')
   const appOn = isAppEnabled ? isAppEnabled('shiftmanager') : false
 
-  // Deep-link / app-only guard: distinguish "reachable via the app flag but the
-  // reporting module is off" (accurate notice) from "neither flag on" (the
-  // registry already hides the nav item, so this is a defensive fallback only).
-  if (!moduleOn) {
-    return (
-      <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>
-        {appOn ? t('modShiftmanager.reportingOff') : t('shell.empty')}
-      </p>
-    )
+  // Active sub-tab: the connection tab is the connector's front door.
+  const [activeTab, setActiveTab] = useState('koppeling')
+
+  // Deep-link guard: with neither flag on there is nothing to show (the
+  // registry hides the nav item; this is the defensive fallback only).
+  if (!moduleOn && !appOn) {
+    return <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t('shell.empty')}</p>
   }
 
+  // Connection + mapping ride on either flag; KPI/display stay reporting-module-only.
   const tabs = [
-    { id: 'kpis', label: t('smKpis.title') },
-    { id: 'display', label: t('display.title') },
+    { id: 'koppeling', label: t('integrations.tabs.connection') },
+    { id: 'mapping', label: t('integrations.tabs.mapping') },
+    ...(moduleOn ? [
+      { id: 'kpis', label: t('smKpis.title') },
+      { id: 'display', label: t('display.title') },
+    ] : []),
   ]
 
   // One sub-tab renders at a time, via the shared underline SubTabBar.
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
       <SubTabBar tabs={tabs} active={activeTab} onChange={setActiveTab} />
-      {activeTab === 'kpis' && <SchemaSection schema={smKpisSchema} />}
-      {activeTab === 'display' && <SchemaSection schema={displaySchema} />}
+      {activeTab === 'koppeling' && <IntegrationConnectionCard connector="shiftmanager" />}
+      {activeTab === 'mapping' && <IntegrationMappingsTable connector="shiftmanager" domains={['functie']} />}
+      {moduleOn && activeTab === 'kpis' && <SchemaSection schema={smKpisSchema} />}
+      {moduleOn && activeTab === 'display' && <SchemaSection schema={displaySchema} />}
     </div>
   )
 }

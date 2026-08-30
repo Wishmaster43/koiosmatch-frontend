@@ -1,14 +1,8 @@
 /**
- * ShiftmanagerModuleSettings — the KPI + Display view (Danny 04-08: "moeten
- * dan onder Shiftmanager 2 subtabjes worden"): with the 'sm' module on, the
- * two schema sections render as sub-tabs (one visible at a time), switching
- * via the shared underline SubTabBar.
- *
- * SM-MODULE-TABS-1 (Danny 16-08 restore): the screen is reachable via TWO
- * independent superadmin toggles (module 'sm' OR app 'shiftmanager' — see
- * SettingsPage's passesModuleOrApp for the nav-level gate), but both existing
- * sub-tabs back reporting-only content, so the TAB SET itself only follows the
- * module flag. This suite asserts the full module x app combination matrix.
+ * ShiftmanagerModuleSettings — INTEGRATIONS-SETTINGS-1 tab model: the
+ * connector front door (Connection/Mapping, on module OR app) plus the two
+ * original reporting sub-tabs (module-only, Danny 04-08). This suite asserts
+ * the full module x app combination matrix on the RENDERED tab set.
  */
 import { describe, it, expect, afterEach, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
@@ -26,59 +20,60 @@ const mockApps = vi.fn()
 vi.mock('@/context/AppsContext', () => ({ useApps: () => mockApps() }))
 // SchemaSection pulls in api + settings-blob plumbing unrelated to this view test.
 vi.mock('../components/SchemaSection', () => ({ default: ({ schema }) => <div>schema:{schema.i18nKey}</div> }))
+// The connector tabs' own behaviour is covered by their own suites — stubbed here.
+vi.mock('./integrations/IntegrationConnectionCard', () => ({ default: ({ connector }) => <div>connection:{connector}</div> }))
+vi.mock('./integrations/IntegrationMappingsTable', () => ({ default: ({ connector, domains }) => <div>mappings:{connector}:{domains.join(',')}</div> }))
 
 afterEach(() => vi.clearAllMocks())
 
 describe('ShiftmanagerModuleSettings — module x app flag matrix', () => {
-  it('module on, app off: renders a sub-tab bar, showing only the KPI schema first', () => {
+  it('module on: four tabs, the connection front door renders first', () => {
     mockAuth.mockReturnValue({ hasModule: (k) => k === 'sm' })
     mockApps.mockReturnValue({ isAppEnabled: () => false })
     render(<ShiftmanagerModuleSettings />)
 
-    expect(screen.getByRole('tablist')).toBeInTheDocument()
-    expect(screen.getAllByText(/^schema:/)).toHaveLength(1)
-    expect(screen.getByText('schema:smKpis')).toBeInTheDocument()
-    expect(screen.queryByText('schema:display')).not.toBeInTheDocument()
+    expect(screen.getAllByRole('tab')).toHaveLength(4)
+    expect(screen.getByText('connection:shiftmanager')).toBeInTheDocument()
+    expect(screen.queryByText(/^schema:/)).not.toBeInTheDocument()
   })
 
-  it('module on, app off: switching to the Display sub-tab shows that schema and hides the KPI one', async () => {
+  it('module on: switching to the KPI sub-tab shows that schema and hides the card', async () => {
     mockAuth.mockReturnValue({ hasModule: (k) => k === 'sm' })
     mockApps.mockReturnValue({ isAppEnabled: () => false })
     render(<ShiftmanagerModuleSettings />)
 
-    await userEvent.click(screen.getByRole('tab', { name: st('display.title') }))
+    await userEvent.click(screen.getByRole('tab', { name: st('smKpis.title') }))
 
-    expect(screen.getByText('schema:display')).toBeInTheDocument()
-    expect(screen.queryByText('schema:smKpis')).not.toBeInTheDocument()
+    expect(screen.getByText('schema:smKpis')).toBeInTheDocument()
+    expect(screen.queryByText('connection:shiftmanager')).not.toBeInTheDocument()
   })
 
-  it('module on, app on: both tabs still render (module already grants all tabs)', () => {
+  it('module on: the mapping tab carries the functie domain', async () => {
     mockAuth.mockReturnValue({ hasModule: (k) => k === 'sm' })
-    mockApps.mockReturnValue({ isAppEnabled: (id) => id === 'shiftmanager' })
+    mockApps.mockReturnValue({ isAppEnabled: () => false })
     render(<ShiftmanagerModuleSettings />)
 
-    expect(screen.getByRole('tablist')).toBeInTheDocument()
-    expect(screen.getByText('schema:smKpis')).toBeInTheDocument()
+    await userEvent.click(screen.getByRole('tab', { name: st('integrations.tabs.mapping') }))
+
+    expect(screen.getByText('mappings:shiftmanager:functie')).toBeInTheDocument()
   })
 
-  it('module off, app on: reachable but shows the accurate "reporting off" notice, not a role-empty one', () => {
+  it('module off, app on: the connector tabs render, the reporting tabs do not', () => {
     mockAuth.mockReturnValue({ hasModule: () => false })
     mockApps.mockReturnValue({ isAppEnabled: (id) => id === 'shiftmanager' })
     render(<ShiftmanagerModuleSettings />)
 
-    expect(screen.getByText(st('modShiftmanager.reportingOff'))).toBeInTheDocument()
-    expect(screen.queryByText(st('shell.empty'))).not.toBeInTheDocument()
-    expect(screen.queryByText(/^schema:/)).not.toBeInTheDocument()
-    expect(screen.queryByRole('tablist')).not.toBeInTheDocument()
+    expect(screen.getAllByRole('tab')).toHaveLength(2)
+    expect(screen.getByText('connection:shiftmanager')).toBeInTheDocument()
+    expect(screen.queryByRole('tab', { name: st('smKpis.title') })).not.toBeInTheDocument()
   })
 
-  it('module off, app off: shows the calm role-empty state (deep-link guard — the registry already hides the nav item)', () => {
+  it('module off, app off: shows the calm role-empty state (deep-link guard)', () => {
     mockAuth.mockReturnValue({ hasModule: () => false })
     mockApps.mockReturnValue({ isAppEnabled: () => false })
     render(<ShiftmanagerModuleSettings />)
 
     expect(screen.getByText(st('shell.empty'))).toBeInTheDocument()
-    expect(screen.queryByText(/^schema:/)).not.toBeInTheDocument()
     expect(screen.queryByRole('tablist')).not.toBeInTheDocument()
   })
 
