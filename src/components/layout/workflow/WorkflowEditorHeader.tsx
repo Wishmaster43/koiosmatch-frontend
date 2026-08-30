@@ -246,8 +246,11 @@ export default function WorkflowEditorHeader({
           <Caption as="span" style={{ color: 'var(--color-warning-text)' }}>{t('editor.runRequiresActive')}</Caption>
         </span>
       )}
-      <Button variant="secondary" size="sm" onClick={onRunDryRun} disabled={running || status !== 'active'}
-        title={status !== 'active' ? t('editor.runRequiresActive') : t('editor.dryRunTitle')}>
+      {/* DRAFT-DRYRUN-1 (BE 4bb21265): a dry run is allowed on draft/inactive — it
+          replaces the previous test run and costs no runs or credits; only the
+          real Run stays gated on active. */}
+      <Button variant="secondary" size="sm" onClick={onRunDryRun} disabled={running}
+        title={t('editor.dryRunTitle')}>
         {running ? <Spinner size={13} /> : <FlaskConical size={13} />}
         {running ? t('editor.dryRunning') : t('editor.dryRun')}
       </Button>

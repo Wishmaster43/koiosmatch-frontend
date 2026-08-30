@@ -146,6 +146,13 @@ describe('useWorkflowEditor · addRouterBranch (F2, fixes D4)', () => {
     expect(new Set(fromRouter.map(e => e.id)).size).toBe(3)
     expect(new Set(fromRouter.map(e => e.target)).size).toBe(3)
 
+    // ROUTER-FE-2 (BE 4bb21265): added branches carry their own route-N handle,
+    // unique against the seeded route-1.
+    const raws = fromRouter.map(e => (e.data as { sourceHandleRaw?: string } | undefined)?.sourceHandleRaw)
+    expect(raws).toContain('route-1')
+    expect(raws).toContain('route-2')
+    expect(raws).toContain('route-3')
+
     // The pre-existing branch's data is untouched.
     const originalBranch = fromRouter.find(e => e.target === 'a')!
     expect(originalBranch.data?.filters).toEqual([{ field: 'city', operator: '=', value: 'Breda' }])

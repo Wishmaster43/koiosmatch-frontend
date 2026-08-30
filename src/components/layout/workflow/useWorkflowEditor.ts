@@ -309,7 +309,14 @@ export function useWorkflowEditor({ workflow, onSave, initialRunId = null }: {
       const y = (routerNode?.position.y ?? 180) + existingBranches * 140
       return [...nds, { id: newId, type: 'module', position: { x, y }, width: NODE_W, height: NODE_H, data: { type, config: defaultConfigFor(type) } }]
     })
-    setEdges(eds => [...eds, mkEdge(routerId, newId)])
+    setEdges(eds => {
+      // ROUTER-FE-2 (BE 4bb21265 honours source_handle): every added branch gets its
+      // own route-N handle, unique against the router's existing raw handles.
+      const used = new Set(eds.filter(e => e.source === routerId).map(e => (e.data as { sourceHandleRaw?: string } | undefined)?.sourceHandleRaw ?? 'out'))
+      let n = 1
+      while (used.has(`route-${n}`)) n += 1
+      return [...eds, { ...mkEdge(routerId, newId), data: { sourceHandleRaw: `route-${n}` } }]
+    })
     setSelectedNodeId(newId)
   }, [setNodes, setEdges, edges])
 

@@ -86,10 +86,10 @@ describe('WorkflowEditorHeader · budget_exceeded upgrade hint (PRIJSMODEL-C)', 
 // workflow — disabled up front with an honest i18n title, instead of the raw
 // Dutch 422 the server used to be the only source of truth for.
 describe('WorkflowEditorHeader · run gated on status (F4)', () => {
-  it('disables Run and Dry-run for a draft workflow', () => {
+  it('disables Run but keeps Dry-run open for a draft workflow (DRAFT-DRYRUN-1)', () => {
     render(<WorkflowEditorHeader {...baseProps} status="draft" />)
     expect(screen.getByText('editor.run').closest('button')).toBeDisabled()
-    expect(screen.getByText('editor.dryRun').closest('button')).toBeDisabled()
+    expect(screen.getByText('editor.dryRun').closest('button')).not.toBeDisabled()
   })
 
   it('enables Run and Dry-run for an active workflow', () => {

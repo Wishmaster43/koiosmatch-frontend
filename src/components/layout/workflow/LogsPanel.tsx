@@ -223,7 +223,12 @@ export default function LogsPanel({ workflowId, liveRun, onClose, onOpenHistory 
                           <div style={{ display: 'flex', flexDirection: 'column', gap: 2, marginTop: 6 }}>
                             {step.routing.map((r, ri) => (
                               <Caption as="div" key={ri}>
-                                → <span style={{ fontWeight: 600, color: 'var(--text)' }}>{r.to_label ?? '—'}</span>: {r.matched ?? 0}/{r.total ?? 0}
+                                {/* ROUTER-FE-2: the engine reports one entry per EDGE with its handle;
+                                    two routes to one target are two lines. `overruled` marks a branch
+                                    whose match was superseded. */}
+                                → {r.handle ? <Mono style={{ fontSize: 11 }}>[{r.handle}] </Mono> : null}
+                                <span style={{ fontWeight: 600, color: 'var(--text)' }}>{r.to_label ?? '—'}</span>: {r.matched ?? 0}/{r.total ?? 0}
+                                {r.overruled ? <span style={{ color: 'var(--text-muted)' }}> · {t('runs.routingOverruled')}</span> : null}
                               </Caption>
                             ))}
                           </div>

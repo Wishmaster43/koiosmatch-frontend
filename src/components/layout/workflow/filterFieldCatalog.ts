@@ -139,7 +139,8 @@ export function collectUpstreamFilterFields(
       nodeId: id,
       moduleType: type,
       number: i + 1,
-      fields: Object.entries(outputFields).map(([key, label]) => ({ key: `${prefix}${key}`, label })),
+      // Underscore keys (_list, …) are engine pipeline metadata, never user-facing fields.
+      fields: Object.entries(outputFields).filter(([key]) => !key.startsWith('_')).map(([key, label]) => ({ key: `${prefix}${key}`, label })),
     }
   })
 }

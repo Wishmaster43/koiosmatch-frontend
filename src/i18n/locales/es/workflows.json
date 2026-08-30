@@ -1307,5 +1307,8 @@
       "scheduler": "Planificador",
       "webhook": "Webhook"
     }
+  },
+  "runs": {
+    "routingOverruled": "anulada"
   }
 }
