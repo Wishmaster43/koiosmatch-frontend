@@ -89,7 +89,10 @@
     "instructionCount_other": "{{count}} Anweisungen",
     "instructionCharCount": "{{count}}/{{max}}",
     "instructionMaxReached": "Maximal {{max}} Anweisungen",
-    "instructionTotalChars": "{{count}} von {{max}} Zeichen"
+    "instructionTotalChars": "{{count}} von {{max}} Zeichen",
+    "instructionTitle": "Titel",
+    "instructionTitlePlaceholder": "z. B. Reisedistanz (als Phasenname sichtbar)",
+    "textExpand": "Vergrößern"
   },
   "scheduleModal": {
     "title": "Zeitplan festlegen",
@@ -511,7 +514,8 @@
     "itemsCount_other": "{{count}} Elemente",
     "tabStandard": "Standard",
     "tabAdvanced": "Erweitert",
-    "tabTest": "Testen"
+    "tabTest": "Testen",
+    "tabInstructions": "KI-Anweisungen"
   },
   "fieldLabels": {
     "Aan": "An",

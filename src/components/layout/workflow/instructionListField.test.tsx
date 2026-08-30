@@ -164,3 +164,28 @@ describe('InstructionListField · limits (INTERVIEW-WORKFLOW-1 Appendix C: 50 ro
     expect(screen.getByText('fields.instructionTotalChars')).toBeInTheDocument()
   })
 })
+
+// Danny 31-08: "titel van de AI instructie" — each row carries an optional short
+// title (status label "fase 2/9 · <naam>"); typing writes the WHOLE array back.
+describe('InstructionListField · title round-trips', () => {
+  it('renders one title input per row with the stored value', () => {
+    const titled = [{ ...rows[0], title: 'Reisafstand' }, rows[1]]
+    render(<InstructionListField value={titled} onChange={vi.fn()} fieldKey="instructions" />)
+    const inputs = screen.getAllByLabelText('fields.instructionTitle')
+    expect(inputs).toHaveLength(2)
+    expect(inputs[0]).toHaveValue('Reisafstand')
+    expect(inputs[1]).toHaveValue('')
+  })
+
+  it('typing a title emits the full array with that row updated', () => {
+    const onChange = vi.fn()
+    render(<InstructionListField value={rows} onChange={onChange} fieldKey="instructions" />)
+    fireEvent.change(screen.getAllByLabelText('fields.instructionTitle')[1], { target: { value: 'Startdatum' } })
+    const [key, val] = onChange.mock.calls.at(-1)!
+    expect(key).toBe('instructions')
+    expect(val).toHaveLength(2)
+    expect(val[0]).toMatchObject({ id: 'a' })
+    expect(val[1]).toMatchObject({ id: 'b', title: 'Startdatum' })
+  })
+})
+

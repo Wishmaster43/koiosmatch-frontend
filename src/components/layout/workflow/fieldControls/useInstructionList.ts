@@ -12,6 +12,9 @@ import type { OnChange } from './types'
 // into, `required` marks a question the agent must not skip.
 export interface InstructionRow {
   id: string
+  // Short name shown in the row header and, via the BE projector, as the phase
+  // label ("fase 2/9 · Reisafstand" — Danny 31-08).
+  title?: string
   text: string
   output_field?: string
   required?: boolean
@@ -33,7 +36,7 @@ export function useInstructionList(value: unknown, onChange: OnChange, fieldKey:
     write(rows.map(r => (r.id === id ? { ...r, ...patch } : r)))
 
   // Append a fresh, empty row at the bottom (next free position, §3B ordering rule).
-  const add = () => write([...rows, { id: newId(), text: '', required: false }])
+  const add = () => write([...rows, { id: newId(), title: '', text: '', required: false }])
 
   const remove = (id: string) => write(rows.filter(r => r.id !== id))
 

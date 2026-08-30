@@ -89,7 +89,10 @@
     "instructionCount_other": "{{count}} instrucciones",
     "instructionCharCount": "{{count}}/{{max}}",
     "instructionMaxReached": "Máximo {{max}} instrucciones",
-    "instructionTotalChars": "{{count}} de {{max}} caracteres"
+    "instructionTotalChars": "{{count}} de {{max}} caracteres",
+    "instructionTitle": "Título",
+    "instructionTitlePlaceholder": "p. ej. Distancia de viaje (visible como nombre de fase)",
+    "textExpand": "Ampliar"
   },
   "scheduleModal": {
     "title": "Configurar programación",
@@ -511,7 +514,8 @@
     "itemsCount_other": "{{count}} elementos",
     "tabStandard": "Estándar",
     "tabAdvanced": "Avanzado",
-    "tabTest": "Probar"
+    "tabTest": "Probar",
+    "tabInstructions": "Instrucciones de IA"
   },
   "fieldLabels": {
     "Aan": "Para",

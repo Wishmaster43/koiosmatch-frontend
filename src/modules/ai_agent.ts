@@ -70,7 +70,7 @@ export default {
     // ── Group "AI-instructies" ───────────────────────────────────────────────
     // The numbered, per-question instructions (arrow-button reorderable, rich
     // text + variable-insert menu + output-field mapping + a required toggle per row).
-    { key: 'instructions', label: 'AI-instructies', type: 'instruction_list', tab: 'general',
+    { key: 'instructions', label: 'AI-instructies', type: 'instruction_list', tab: 'instructions',
       hint: 'De genummerde stappen die de AI-agent doorloopt, elk met een optioneel outputveld en variabele-chips.' },
     // Persona/tone addendum — the per-question content now lives in `instructions`
     // above; this stays for global persona/tone rules the engine still prepends.

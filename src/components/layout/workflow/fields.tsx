@@ -5,8 +5,8 @@
  * builders (agent/faq/webhook pickers, filters) are delegated to `./fieldControls/`.
  * Extracted from WorkflowCanvasEditor.
  */
-import { useId } from 'react'
-import { X } from 'lucide-react'
+import { useId, useState } from 'react'
+import { X, Maximize2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import type { WorkflowField, EdgeFilters, WorkflowVarGroup } from '@/types/workflow'
 import { FaqSelectField } from './fieldControls/FaqSelectField'
@@ -20,6 +20,8 @@ import { InstructionListField } from './fieldControls/InstructionListField'
 import type { InstructionOutputField } from './filterFieldCatalog'
 import type { OnChange } from './fieldControls/types'
 import { KeyValueField, GroupField } from './groupKeyValueFields'
+import Button from '@/components/ui/Button'
+import { TextExpandModal } from './fieldControls/TextExpandModal'
 import { TextFieldWithVars } from './VariablePicker'
 import { fieldLabel, fieldPlaceholder, optionLabel } from './moduleI18n'
 import WhatsappTemplateField from './WhatsappTemplateField'
@@ -33,6 +35,32 @@ import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 import Toggle from '@/components/ui/Toggle'
 
 // Dispatches one schema field type to its control; the data-fetching/nested field types delegate to fieldControls, this file only holds the plain inline ones (see the module doc above).
+// Plain panel textarea + the enlarge popup (Danny 31-08). Kept beside FieldInput so
+// every 'textarea' field (without variables) shares one implementation.
+function ExpandableTextarea({ field, value, onChange }: { field: WorkflowField; value?: unknown; onChange: OnChange }) {
+  const { t } = useTranslation('workflows')
+  const [expanded, setExpanded] = useState(false)
+  return (
+    <div style={{ position: 'relative' }}>
+      <textarea value={(value as string) || ''} placeholder={fieldPlaceholder(t, field.placeholder)} aria-label={fieldLabel(t, field.label)}
+        onChange={e => onChange(field.key, e.target.value)}
+        rows={4}
+        style={{ width: '100%', padding: '7px 30px 7px 9px', border: '1px solid var(--border)', borderRadius: 8, fontSize: 12, color: 'var(--text)', background: 'var(--surface)', outline: 'none', boxSizing: 'border-box', fontFamily: 'monospace', resize: 'vertical' }}
+        onFocus={e => (e.target.style.borderColor = 'var(--color-primary)')}
+        onBlur={e  => (e.target.style.borderColor = 'var(--border)')} />
+      <Button iconOnly variant="ghost" size="sm" onClick={() => setExpanded(true)}
+        aria-label={t('fields.textExpand')} title={t('fields.textExpand')}
+        style={{ position: 'absolute', top: 4, right: 4 }}>
+        <Maximize2 size={12} />
+      </Button>
+      {expanded && (
+        <TextExpandModal label={fieldLabel(t, field.label)} value={(value as string) || ''}
+          onChange={next => onChange(field.key, next)} onClose={() => setExpanded(false)} />
+      )}
+    </div>
+  )
+}
+
 export function FieldInput({ field, value, onChange, variables, config, instructionOutputFields }: {
   field: WorkflowField; value?: unknown; onChange: OnChange; variables?: WorkflowVarGroup[]
   config?: Record<string, unknown>
@@ -119,14 +147,9 @@ export function FieldInput({ field, value, onChange, variables, config, instruct
     if (variables?.length) {
       return <TextFieldWithVars field={field} value={value} onChange={onChange} variables={variables} multiline />
     }
-    return (
-      <textarea value={(value as string) || ''} placeholder={fieldPlaceholder(t, field.placeholder)} aria-label={fieldLabel(t, field.label)}
-        onChange={e => onChange(field.key, e.target.value)}
-        rows={4}
-        style={{ width: '100%', padding: '7px 9px', border: '1px solid var(--border)', borderRadius: 8, fontSize: 12, color: 'var(--text)', background: 'var(--surface)', outline: 'none', boxSizing: 'border-box', fontFamily: 'monospace', resize: 'vertical' }}
-        onFocus={e => (e.target.style.borderColor = 'var(--color-primary)')}
-        onBlur={e  => (e.target.style.borderColor = 'var(--border)')} />
-    )
+    // Danny 31-08: a long prompt is unreadable in the small box — every panel
+    // textarea carries an enlarge affordance opening the shared popup.
+    return <ExpandableTextarea field={field} value={value} onChange={onChange} />
   }
   if (field.type === 'ordered_list') {
     // WA-SEND-FIELDS-2: WhatsAppSendModule's body_parameters — a positional

@@ -10,7 +10,9 @@
  */
 import { useMemo, useState, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Braces, Search, ChevronRight } from 'lucide-react'
+import { Braces, Search, ChevronRight, Maximize2 } from 'lucide-react'
+import Button from '@/components/ui/Button'
+import { TextExpandModal } from './fieldControls/TextExpandModal'
 import { MODULE_META } from '@/modules/index'
 import { fieldLabel, fieldPlaceholder } from './moduleI18n'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
@@ -194,6 +196,8 @@ export function TextFieldWithVars({ field, value, onChange, variables, multiline
   const { t } = useTranslation('workflows')
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLInputElement & HTMLTextAreaElement>(null)
+  // Danny 31-08: enlarge popup state for the multiline variant.
+  const [expanded, setExpanded] = useState(false)
 
   // Insert the chosen field at the caret and restore the caret just after it.
   // 'token' = flat {{field}} placeholder; 'path' = bare dot-path (filter fields).
@@ -240,6 +244,18 @@ export function TextFieldWithVars({ field, value, onChange, variables, multiline
         <Braces size={12} />
       </button>
 
+      {/* Danny 31-08: enlarge popup for long multiline values (persona, variables). */}
+      {multiline && (
+        <Button iconOnly variant="ghost" size="sm" onClick={() => setExpanded(true)}
+          aria-label={t('fields.textExpand')} title={t('fields.textExpand')}
+          style={{ position: 'absolute', top: 28, right: 2 }}>
+          <Maximize2 size={12} />
+        </Button>
+      )}
+      {expanded && (
+        <TextExpandModal label={fieldLabel(t, field.label)} value={(value as string) || ''}
+          onChange={next => onChange(field.key, next)} onClose={() => setExpanded(false)} />
+      )}
       {open && <PickerPopover variables={variables} onInsert={insert} onClose={() => setOpen(false)} />}
     </div>
   )

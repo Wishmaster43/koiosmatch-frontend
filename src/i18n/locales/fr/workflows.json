@@ -89,7 +89,10 @@
     "instructionCount_other": "{{count}} instructions",
     "instructionCharCount": "{{count}}/{{max}}",
     "instructionMaxReached": "Maximum {{max}} instructions",
-    "instructionTotalChars": "{{count}} sur {{max}} caractères"
+    "instructionTotalChars": "{{count}} sur {{max}} caractères",
+    "instructionTitle": "Titre",
+    "instructionTitlePlaceholder": "p. ex. Distance de trajet (affiché comme nom de phase)",
+    "textExpand": "Agrandir"
   },
   "scheduleModal": {
     "title": "Définir la planification",
@@ -511,7 +514,8 @@
     "itemsCount_other": "{{count}} éléments",
     "tabStandard": "Standard",
     "tabAdvanced": "Avancé",
-    "tabTest": "Tester"
+    "tabTest": "Tester",
+    "tabInstructions": "Instructions IA"
   },
   "fieldLabels": {
     "Aan": "À",

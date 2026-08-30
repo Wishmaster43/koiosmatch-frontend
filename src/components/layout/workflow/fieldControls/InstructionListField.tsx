@@ -15,6 +15,7 @@
  * never cut. Counts are the stored string length (the RichTextEditor's HTML),
  * not the stripped plain text, same honesty rule as everywhere else here.
  */
+import { useState } from 'react'
 import { ChevronUp, ChevronDown, Braces, Copy, Trash2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { Caption, GroupLabel, monoStyle } from '@/components/ui/typography'
@@ -52,6 +53,8 @@ export function InstructionListField({ value, onChange, fieldKey, variables = []
 }) {
   const { t } = useTranslation('workflows')
   const { rows, add, remove, duplicate, move, update, insertVar } = useInstructionList(value, onChange, fieldKey)
+  // One row at a time may be enlarged (Danny 31-08: the small editor is unreadable).
+  const [expandedId, setExpandedId] = useState<string | null>(null)
   const varOptions = flattenVarOptions(variables)
   const hasOutputFields = !!outputFields?.length
   const outputOptions = (outputFields ?? []).map(f => ({ value: f.key, label: f.label }))
@@ -67,10 +70,15 @@ export function InstructionListField({ value, onChange, fieldKey, variables = []
           <div key={row.id} style={{ border: '1px solid var(--border)', borderRadius: 8, padding: 8, display: 'flex', flexDirection: 'column', gap: 6 }}>
             {/* Row header — number, reorder arrows, per-row menu */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <GroupLabel as="span">
+              <GroupLabel as="span" style={{ flexShrink: 0 }}>
                 {t('fields.instructionRow', { n: i + 1 })}
               </GroupLabel>
-              <span style={{ flex: 1 }} />
+              {/* Danny 31-08: a short title per instruction — the BE projector shows it as
+                  the phase name, so progress reads "fase 2/9 · Reisafstand". */}
+              <input value={row.title ?? ''} maxLength={60}
+                onChange={e => update(row.id, { title: e.target.value })}
+                aria-label={t('fields.instructionTitle')} placeholder={t('fields.instructionTitlePlaceholder')}
+                style={{ flex: 1, minWidth: 60, padding: '3px 7px', border: '1px solid var(--border)', borderRadius: 6, fontSize: 12, color: 'var(--text)', background: 'var(--surface)', outline: 'none' }} />
               <Caption as="span" style={{ color: overRowLimit ? 'var(--color-danger-text)' : undefined }}>
                 {t('fields.instructionCharCount', { count: rowChars, max: MAX_CHARS_PER_ROW })}
               </Caption>
@@ -93,7 +101,10 @@ export function InstructionListField({ value, onChange, fieldKey, variables = []
             </div>
 
             {/* Rich-text instruction body — the actual agent question/step. */}
-            <RichTextEditor value={row.text} onChange={html => update(row.id, { text: html })} minHeight={70} showLanguage={false} assist={false} />
+            <RichTextEditor value={row.text} onChange={html => update(row.id, { text: html })}
+              minHeight={expandedId === row.id ? 360 : 70} showLanguage={false} assist={false}
+              expanded={expandedId === row.id}
+              onToggleExpand={() => setExpandedId(cur => (cur === row.id ? null : row.id))} />
 
             {/* Optional output-field mapping + required toggle */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>

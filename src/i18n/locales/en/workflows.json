@@ -93,7 +93,10 @@
     "instructionCount_other": "{{count}} instructions",
     "instructionCharCount": "{{count}}/{{max}}",
     "instructionMaxReached": "Maximum {{max}} instructions",
-    "instructionTotalChars": "{{count}} of {{max}} characters"
+    "instructionTotalChars": "{{count}} of {{max}} characters",
+    "instructionTitle": "Title",
+    "instructionTitlePlaceholder": "e.g. Travel distance (shown as the phase name)",
+    "textExpand": "Enlarge"
   },
   "scheduleModal": {
     "title": "Set schedule",
@@ -511,7 +514,8 @@
     "itemsCount_other": "{{count}} items",
     "tabStandard": "Standard",
     "tabAdvanced": "Advanced",
-    "tabTest": "Test"
+    "tabTest": "Test",
+    "tabInstructions": "AI instructions"
   },
   "fieldLabels": {
     "Aan": "To",

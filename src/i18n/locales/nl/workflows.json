@@ -128,7 +128,10 @@
     "instructionCount_other": "{{count}} instructies",
     "instructionCharCount": "{{count}}/{{max}}",
     "instructionMaxReached": "Maximaal {{max}} instructies",
-    "instructionTotalChars": "{{count}} van {{max}} tekens"
+    "instructionTotalChars": "{{count}} van {{max}} tekens",
+    "instructionTitle": "Titel",
+    "instructionTitlePlaceholder": "bijv. Reisafstand (zichtbaar als fasenaam)",
+    "textExpand": "Vergroten"
   },
   "scheduleModal": {
     "title": "Planning instellen",
@@ -546,7 +549,8 @@
     "itemsCount_other": "{{count}} items",
     "tabStandard": "Standaard",
     "tabAdvanced": "Geavanceerd",
-    "tabTest": "Testen"
+    "tabTest": "Testen",
+    "tabInstructions": "AI-instructies"
   },
   "fieldLabels": {
     "Aan": "Aan",

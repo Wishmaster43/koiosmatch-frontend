@@ -178,6 +178,8 @@ export default function ConfigPanel({ node, onUpdate, onDelete, onTabChange, var
           tabs={isAgent ? [
             // ai_agent tabs — through i18n like everything else (§5; was hardcoded Dutch).
             { id: 'general',   label: t('config.tabStandard') },
+            // Danny 31-08: the AI-instructies list is long — its own tab keeps Standaard readable.
+            { id: 'instructions', label: t('config.tabInstructions') },
             { id: 'advanced', label: t('config.tabAdvanced') },
             { id: 'testing',      label: `▶ ${t('config.tabTest')}` },
             { id: 'execution',  label: output ? `${t('config.tabExecution')} (${Array.isArray(output) ? output.length : 1})` : t('config.tabExecution') },
@@ -190,6 +192,7 @@ export default function ConfigPanel({ node, onUpdate, onDelete, onTabChange, var
 
       {/* ── AI Agent tab content ─────────────────────────────────────────────── */}
       {isAgent && activeTab === 'general'   && renderFields(fieldsForTab('general'))}
+      {isAgent && activeTab === 'instructions' && renderFields(fieldsForTab('instructions'))}
       {isAgent && activeTab === 'advanced' && renderFields(fieldsForTab('advanced'))}
       {isAgent && activeTab === 'testing'      && (
         <AgentTestPanel config={config} />
