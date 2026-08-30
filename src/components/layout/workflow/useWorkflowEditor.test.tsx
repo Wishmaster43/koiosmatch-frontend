@@ -99,6 +99,71 @@ describe('useWorkflowEditor · onConnect', () => {
     expect(result.current.edges.filter(e => e.target === routerId).map(e => e.source).sort()).toEqual(['n1', 'n2'])
     expect(result.current.nodesWithFirst.find(n => n.id === routerId)?.data.type).toBe('router')
   })
+
+  // F1 (ROUTER-EDGE-FILTERS-1/D3): the router auto-insert must carry the
+  // existing incoming edge's data (filters/label/raw handle) onto the new
+  // n2->router edge — a bare mkEdge here silently dropped it (measured to fail
+  // on pre-F1 code).
+  it('preserves the existing incoming edge\'s filters/label/sourceHandleRaw on the router splice', async () => {
+    const branchSteps: WorkflowStep[] = [
+      { id: 'n1', type: 'candidates', config: {}, position: { x: 0, y: 180 } },
+      { id: 'n2', type: 'email', config: {}, position: { x: 220, y: 180 }, next: [
+        { target: 'n3', source_handle: 'route-1', label: 'Breda-route',
+          filters: [{ field: 'city', operator: '=', value: 'Breda' }] },
+      ] },
+      { id: 'n3', type: 'whatsapp', config: {}, position: { x: 440, y: 180 } },
+    ]
+    const { result } = setup(branchSteps)
+    await waitFor(() => expect(result.current.edges).toHaveLength(1))
+    act(() => result.current.onConnect(conn('n1', 'n3')))
+
+    const routerEdge = result.current.edges.find(e => e.source === 'n2')!
+    expect(routerEdge.data?.filters).toEqual([{ field: 'city', operator: '=', value: 'Breda' }])
+    expect(routerEdge.data?.label).toBe('Breda-route')
+    expect(routerEdge.data?.sourceHandleRaw).toBe('route-1')
+  })
+})
+
+describe('useWorkflowEditor · addRouterBranch (F2, fixes D4)', () => {
+  const routerSteps = (): WorkflowStep[] => [
+    { id: 'r', type: 'router', config: {}, position: { x: 0, y: 180 }, next: [
+      { target: 'a', source_handle: 'route-1', label: 'Eén',
+        filters: [{ field: 'city', operator: '=', value: 'Breda' }] },
+    ] },
+    { id: 'a', type: 'email', config: {}, position: { x: 220, y: 180 } },
+  ]
+
+  it('adds branches unconnected to lastNode, never as firstNodeId, leaving the existing branch untouched', async () => {
+    const { result } = setup(routerSteps())
+    await waitFor(() => expect(result.current.edges).toHaveLength(1))
+
+    act(() => result.current.addRouterBranch('r', 'whatsapp'))
+    act(() => result.current.addRouterBranch('r', 'sms'))
+
+    const fromRouter = result.current.edges.filter(e => e.source === 'r')
+    expect(fromRouter).toHaveLength(3)
+    // Distinct edge ids and distinct targets (D2 blocked: targets carry the branches today).
+    expect(new Set(fromRouter.map(e => e.id)).size).toBe(3)
+    expect(new Set(fromRouter.map(e => e.target)).size).toBe(3)
+
+    // The pre-existing branch's data is untouched.
+    const originalBranch = fromRouter.find(e => e.target === 'a')!
+    expect(originalBranch.data?.filters).toEqual([{ field: 'city', operator: '=', value: 'Breda' }])
+    expect(originalBranch.data?.label).toBe('Eén')
+
+    // Guard: neither new node ever becomes firstNodeId — each gets its incoming
+    // edge in the same commit as its creation.
+    const newNodeIds = fromRouter.map(e => e.target).filter(t => t !== 'a')
+    newNodeIds.forEach(id => {
+      expect(result.current.nodesWithFirst.find(n => n.id === id)?.data.isFirst).toBe(false)
+    })
+
+    // flowToSteps emits three next entries with distinct targets.
+    const { flowToSteps } = await import('./serialization')
+    const rStep = flowToSteps(result.current.nodesWithFirst, result.current.edges).find(s => s.id === 'r')!
+    expect(rStep.next).toHaveLength(3)
+    expect(new Set(rStep.next!.map(n => n.target)).size).toBe(3)
+  })
 })
 
 describe('useWorkflowEditor · insertModule', () => {
@@ -253,6 +318,71 @@ describe('useWorkflowEditor · edge filters', () => {
     expect(result.current.pickerState).toEqual({ edgeId })
     act(() => result.current.handleEdgeFilter(edgeId))
     expect(result.current.filterState).toEqual({ edgeId })
+  })
+})
+
+describe('useWorkflowEditor · Router with existing branches', () => {
+  // A router already carrying two seeded branches (route-1/route-2, each with
+  // its own filter) — the shape a template/reload leaves in place.
+  const routerSteps = (): WorkflowStep[] => [
+    { id: 'r', type: 'router', config: {}, position: { x: 0, y: 180 }, next: [
+      { target: 'b1', source_handle: 'route-1', label: 'Eén', filters: { conditions: [{ field: 'a', operator: '=', value: '1' }], logic: 'AND' } },
+      { target: 'b2', source_handle: 'route-2', label: 'Twee', filters: { conditions: [{ field: 'b', operator: '=', value: '2' }], logic: 'AND' } },
+    ] },
+    { id: 'b1', type: 'email', config: {}, position: { x: 220, y: 60 } },
+    { id: 'b2', type: 'whatsapp', config: {}, position: { x: 220, y: 300 } },
+    { id: 'b3', type: 'sms', config: {}, position: { x: 220, y: 540 } }, // an unconnected third target, not yet a branch
+  ]
+
+  it('adding a plain connection to a fresh target grows a THIRD branch, leaving the two existing ones untouched', async () => {
+    const { result } = setup(routerSteps())
+    await waitFor(() => expect(result.current.edges).toHaveLength(2))
+    const before = result.current.edges.map(e => ({ id: e.id, data: e.data }))
+
+    act(() => result.current.onConnect(conn('r', 'b3')))
+
+    expect(result.current.edges).toHaveLength(3)
+    // The two existing branches (id + filter/label data) are byte-identical to before.
+    before.forEach(b => expect(result.current.edges.find(e => e.id === b.id)?.data).toEqual(b.data))
+    const newBranch = result.current.edges.find(e => e.target === 'b3')!
+    expect(newBranch.source).toBe('r')
+    expect(newBranch.data).toBeUndefined() // a fresh branch carries no filter/label yet
+  })
+
+  it('deleting the middle branch leaves the first branch untouched and does not disturb the (still separate) third', async () => {
+    const { result } = setup(routerSteps())
+    await waitFor(() => expect(result.current.edges).toHaveLength(2))
+    act(() => result.current.onConnect(conn('r', 'b3'))) // grow to 3 branches first
+    expect(result.current.edges).toHaveLength(3)
+    const branch1Before = result.current.edges.find(e => e.target === 'b1')!.data
+    const branch3Before = result.current.edges.find(e => e.target === 'b3')!.data
+
+    const middleEdgeId = result.current.edges.find(e => e.target === 'b2')!.id
+    act(() => result.current.handleEdgeDelete(middleEdgeId))
+
+    expect(result.current.edges).toHaveLength(2)
+    expect(result.current.edges.some(e => e.target === 'b2')).toBe(false)
+    expect(result.current.edges.find(e => e.target === 'b1')?.data).toEqual(branch1Before)
+    expect(result.current.edges.find(e => e.target === 'b3')?.data).toEqual(branch3Before)
+  })
+
+  it('each branch opens the SAME filter editor, scoped to its own edge id', async () => {
+    const { result } = setup(routerSteps())
+    await waitFor(() => expect(result.current.edges).toHaveLength(2))
+    const edge1 = result.current.edges.find(e => e.target === 'b1')!.id
+    const edge2 = result.current.edges.find(e => e.target === 'b2')!.id
+
+    act(() => result.current.handleEdgeFilter(edge1))
+    expect(result.current.filterState).toEqual({ edgeId: edge1 })
+    act(() => result.current.handleEdgeFilter(edge2))
+    expect(result.current.filterState).toEqual({ edgeId: edge2 })
+
+    // Saving through the one shared handler only ever touches the edge it was scoped to.
+    act(() => result.current.saveEdgeFilter(edge2, { conditions: [{ field: 'z', operator: '=', value: '9' }], logic: 'AND' }, 'Aangepast'))
+    // saveEdgeFilter merges onto the edge's existing data, so its preserved
+    // sourceHandleRaw (route-2, restoring the seeded port on the next save) survives.
+    expect(result.current.edges.find(e => e.id === edge2)?.data).toEqual({ filters: { conditions: [{ field: 'z', operator: '=', value: '9' }], logic: 'AND' }, label: 'Aangepast', sourceHandleRaw: 'route-2' })
+    expect(result.current.edges.find(e => e.id === edge1)?.data).toEqual({ filters: { conditions: [{ field: 'a', operator: '=', value: '1' }], logic: 'AND' }, label: 'Eén', sourceHandleRaw: 'route-1' })
   })
 })
 

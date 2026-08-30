@@ -29,7 +29,11 @@
     "dryRunning": "Dry run running…",
     "dryRunTitle": "Run this workflow as a dry run, without sending anything for real",
     "dryRunConfirmTitle": "Dry run?",
-    "dryRunConfirmMessage": "Send steps (WhatsApp, email, Facebook, webhooks and Shiftmanager links) are skipped. Every other step still runs for real, exactly like a normal run."
+    "dryRunConfirmMessage": "Send steps (WhatsApp, email, Facebook, webhooks and Shiftmanager links) are skipped. Every other step still runs for real, exactly like a normal run.",
+    "runRequiresActive": "Only an active workflow can run",
+    "router": {
+      "addRoute": "Add route"
+    }
   },
   "fields": {
     "boolOn": "On",
@@ -76,7 +80,20 @@
     "requiredHint": "Required",
     "coexistenceOnly": "Coexistence numbers only",
     "whatsappQueued": "Queued to WhatsApp Web: {{count}}",
-    "waWebSessionOnly": "WhatsApp Web only ever sends session messages (free text); the format is therefore fixed to \"session\"."
+    "waWebSessionOnly": "WhatsApp Web only ever sends session messages (free text); the format is therefore fixed to \"session\".",
+    "instructionRow": "AI instruction {{n}}",
+    "instructionRowMenu": "Instruction actions",
+    "instructionInsertVar": "Insert variable",
+    "instructionDuplicate": "Duplicate",
+    "instructionAdd": "Add instruction",
+    "instructionOutputPlaceholder": "output_field_name",
+    "instructionOutputField": "Output field (optional)",
+    "instructionRequired": "Required",
+    "instructionCount_one": "{{count}} instruction",
+    "instructionCount_other": "{{count}} instructions",
+    "instructionCharCount": "{{count}}/{{max}}",
+    "instructionMaxReached": "Maximum {{max}} instructions",
+    "instructionTotalChars": "{{count}} of {{max}} characters"
   },
   "scheduleModal": {
     "title": "Set schedule",
@@ -827,7 +844,11 @@
     "Zoeken": "Search",
     "Zoekopdracht": "Search query",
     "Laatste contact ouder dan (maanden)": "Last contact older than (months)",
-    "Interviewflow": "Interview flow"
+    "Interviewflow": "Interview flow",
+    "Externe kennisbank gebruiken": "Use external knowledge base",
+    "FAQ's gebruiken": "Use FAQs",
+    "AI-instructies": "AI instructions",
+    "Afwijzingsmodus": "Rejection mode"
   },
   "fieldOptions": {
     "Array (meerdere bundles)": "Array (multiple bundles)",
@@ -993,7 +1014,10 @@
     "candidateunavailable_overdue": "unavailable overdue (candidate)",
     "calllisttarget_assigned": "call-list target assigned",
     "opportunitywon": "opportunity won",
-    "opportunitylost": "opportunity lost"
+    "opportunitylost": "opportunity lost",
+    "inherit": "Inherit from setting",
+    "proposal": "Proposal",
+    "automatic": "Automatic"
   },
   "agentTest": {
     "title": "Test variables",
@@ -1151,7 +1175,12 @@
     "Reageert de kandidaat niet, dan valt de run na dit aantal uren terug (workflowsresume-due watchdog)": "If the candidate doesn't reply, the run falls back after this many hours (workflows:resume-due watchdog).",
     "Alleen gekoppelde WhatsApp Web-nummers (eigen of vestiging)": "Only connected WhatsApp Web numbers (personal or branch).",
     "Via WhatsApp Web kan alleen een sessiebericht (vrije tekst) worden verstuurd": "Via WhatsApp Web only a session message (free text) can be sent.",
-    "bijv {{firstname}} of extra bericht tekst": "e.g. {{firstname}} or extra message text"
+    "bijv {{firstname}} of extra bericht tekst": "e.g. {{firstname}} or extra message text",
+    "Laat de AI-agent tenant-documenten/kennisbank raadplegen tijdens het gesprek": "Lets the AI agent consult the tenant's documents/knowledge base during the conversation.",
+    "Laat de AI-agent veelgestelde vragen (FAQ) raadplegen tijdens het gesprek": "Lets the AI agent consult the FAQ during the conversation.",
+    "De genummerde stappen die de AI-agent doorloopt, elk met een optioneel outputveld en variabele-chips": "The numbered steps the AI agent walks through, each with an optional output field and variable chips.",
+    "Extra persona- en toonaanwijzingen voor de AI-agent, naast de instructies hierboven Het runtime-antwoordcontract wordt automatisch toegevoegd": "Extra persona and tone guidance for the AI agent, alongside the instructions above. The runtime reply contract is added automatically.",
+    "Volgt standaard de tenant-instelling; deze vacature kan dat hier overschrijven": "Follows the tenant setting by default; this vacancy can override it here."
   },
   "triggers": {
     "events": {

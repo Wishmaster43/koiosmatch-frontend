@@ -19,7 +19,7 @@ import { useTranslation } from 'react-i18next'
 import { useConfirm } from '@/hooks/useConfirm'
 import { MODULE_META } from '@/modules/index'
 import { ScheduleModal } from './workflow/ScheduleModal'
-import { EdgeAddContext, EdgeDeleteContext, EdgeFilterContext, NodeRunContext, StartContext, CurrentWorkflowContext } from './workflow/contexts'
+import { EdgeAddContext, EdgeDeleteContext, EdgeFilterContext, NodeRunContext, StartContext, CurrentWorkflowContext, RouterAddBranchContext } from './workflow/contexts'
 import { OutputPanel, NODE_TYPES, EDGE_TYPES } from './workflow/canvas'
 import { EdgeFilterPanel } from './workflow/EdgeFilterPanel'
 import ModulePicker from './workflow/ModulePicker'
@@ -52,7 +52,7 @@ function EditorInner({ workflow, onClose, onSave, initialRunId }: {
     pickerState, setPickerState, filterState, setFilterState, outputState, setOutputState,
     firstNodeId, setStartNodeId, getUpstreamVariables,
     handleEdgeAdd, handleEdgeDelete, handleEdgeFilter, saveEdgeFilter, handleNodeRun,
-    insertModule, updateNodeConfig, deleteNode, handleSave, handleRun, isDirty,
+    insertModule, addRouterBranch, updateNodeConfig, deleteNode, handleSave, handleRun, isDirty,
   } = useWorkflowEditor({ workflow, onSave, initialRunId })
   const { t } = useTranslation('workflows')
   const { confirm, dialog } = useConfirm()
@@ -62,6 +62,11 @@ function EditorInner({ workflow, onClose, onSave, initialRunId }: {
   // plainly that everything else really mutates, same as a normal run.
   const handleRunDryRun = () =>
     confirm(t('editor.dryRunConfirmMessage'), () => handleRun({ dryRun: true }), { title: t('editor.dryRunConfirmTitle') })
+
+  // F2 (ROUTER-EDGE-FILTERS-1/D4): the Router node's "+ route" button opens the
+  // same ModulePicker in "new branch" mode — routed to addRouterBranch below,
+  // never through onConnect/insertModule.
+  const handleRouterAddBranch = (routerId: string) => setPickerState({ routerId })
 
   // Leaving the editor (X, browser-back, tab close) runs one guarded action —
   // unsaved-changes + live-run confirms live in the hook.
@@ -95,6 +100,7 @@ function EditorInner({ workflow, onClose, onSave, initialRunId }: {
     <EdgeAddContext.Provider value={handleEdgeAdd}>
     <EdgeDeleteContext.Provider value={handleEdgeDelete}>
     <EdgeFilterContext.Provider value={handleEdgeFilter}>
+    <RouterAddBranchContext.Provider value={handleRouterAddBranch}>
     <NodeRunContext.Provider value={handleNodeRun}>
       {/* HUISSTIJL-1: full-screen editor takeover — modal/dialog role. */}
       <div style={{ position: 'fixed', inset: 0, zIndex: 'var(--z-overlay)', display: 'flex', flexDirection: 'column', background: 'var(--bg)' }}>
@@ -211,7 +217,11 @@ function EditorInner({ workflow, onClose, onSave, initialRunId }: {
         {pickerState && (
           <ModulePicker
             insertAfterEdgeId={pickerState.edgeId ?? null}
-            onSelect={insertModule}
+            onSelect={(type, edgeId) => {
+              // F2: "new branch" mode never goes through insertModule/onConnect.
+              if (pickerState.routerId) addRouterBranch(pickerState.routerId, type)
+              else insertModule(type, edgeId)
+            }}
             onClose={() => setPickerState(null)}
           />
         )}
@@ -236,6 +246,7 @@ function EditorInner({ workflow, onClose, onSave, initialRunId }: {
         {dialog}
       </div>
     </NodeRunContext.Provider>
+    </RouterAddBranchContext.Provider>
     </EdgeFilterContext.Provider>
     </EdgeDeleteContext.Provider>
     </EdgeAddContext.Provider>

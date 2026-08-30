@@ -15,12 +15,13 @@ import type { LucideIcon } from 'lucide-react'
 import { MODULE_META } from '@/modules/index'
 import { monoStyle } from '@/components/ui/typography'
 import { NODE_W, NODE_H, countEdgeFilterConditions } from './serialization'
-import { EdgeAddContext, EdgeDeleteContext, EdgeFilterContext, NodeRunContext, StartContext } from './contexts'
+import { EdgeAddContext, EdgeDeleteContext, EdgeFilterContext, NodeRunContext, StartContext, RouterAddBranchContext } from './contexts'
 import { useModuleCatalog } from './useModuleCatalog'
 import OutputTree from './OutputTree'
 import type { FlowNodeData, EdgeFilters } from '@/types/workflow'
 import { tint } from '@/lib/tint'
 import Spinner from '@/components/ui/Spinner'
+import Button from '@/components/ui/Button'
 
 // PICKER-INTERSECT: trigger-role modules (registry category 'Triggers' — webhook,
 // applicant_event, gateway_mail_hook) start a workflow run rather than execute as an
@@ -36,6 +37,8 @@ const DRAG_TYPE = 'application/x-wf-start'
 function ModuleNode({ id, data, selected }: { id: string; data: FlowNodeData; selected?: boolean }) {
   const onRun   = useContext(NodeRunContext)
   const startCtx = useContext(StartContext)
+  // F2 (ROUTER-EDGE-FILTERS-1/D4): only a Router node offers "+ route".
+  const onAddRouterBranch = useContext(RouterAddBranchContext)
   const [busy, setBusy] = useState(false)
   const [dropOver, setDropOver] = useState(false)
   const dragRef = useRef(false)
@@ -283,6 +286,22 @@ function ModuleNode({ id, data, selected }: { id: string; data: FlowNodeData; se
       </div>
       <Handle type="source" id="out" position={Position.Right}
         style={{ width: 10, height: 10, background: 'var(--border)', border: '2px solid var(--surface)', top: '38%' }} />
+      {/* F2 (ROUTER-EDGE-FILTERS-1/D4): the Router's "+ route" affordance — the only
+          discoverable way to add a second branch (before this, the only path was a
+          three-step delete-then-reconnect workaround). Opens the picker in "new
+          branch" mode (RouterAddBranchContext), never through onConnect. */}
+      {rawType === 'router' && (
+        // Position only (layout) — identity (fill/border/typography) stays Button's own.
+        <div className="nodrag" style={{ position: 'absolute', right: -34, top: '38%', transform: 'translateY(-50%)' }}>
+          <Button
+            variant="ghost" size="sm" iconOnly
+            aria-label={t('editor.router.addRoute')} title={t('editor.router.addRoute')}
+            onClick={e => { e.stopPropagation(); onAddRouterBranch?.(id) }}
+          >
+            <Plus size={13} />
+          </Button>
+        </div>
+      )}
     </div>
   )
 }

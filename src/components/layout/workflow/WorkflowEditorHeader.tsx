@@ -18,6 +18,7 @@ import ChangelogPopover from '@/components/drawer/ChangelogPopover'
 import EntityChangelog from '@/components/drawer/EntityChangelog'
 import type { Id } from '@/types/common'
 import Button from '@/components/ui/Button'
+import { Caption } from '@/components/ui/typography'
 import SaveButton from '@/components/ui/SaveButton'
 import QuickViewToggle from '@/components/ui/QuickViewToggle'
 import Spinner from '@/components/ui/Spinner'
@@ -209,12 +210,25 @@ export default function WorkflowEditorHeader({
       {/* WF-DRYRUN-FE-1: "Proefdraaien" — same single-flight `running` guard as the
           real Run button (only one run at a time regardless of which triggered it);
           the honest confirm before it actually fires lives in the composer. */}
-      <Button variant="secondary" size="sm" onClick={onRunDryRun} disabled={running} title={t('editor.dryRunTitle')}>
+      {/* A disabled button swallows its tooltip and is not focusable, so the reason
+          renders as a visible status line as well (§3: disabled WITH an honest notice). */}
+      {status !== 'active' && (
+        <span role="status" style={{ maxWidth: 220, flexShrink: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          <Caption as="span" style={{ color: 'var(--color-warning-text)' }}>{t('editor.runRequiresActive')}</Caption>
+        </span>
+      )}
+      <Button variant="secondary" size="sm" onClick={onRunDryRun} disabled={running || status !== 'active'}
+        title={status !== 'active' ? t('editor.runRequiresActive') : t('editor.dryRunTitle')}>
         {running ? <Spinner size={13} /> : <FlaskConical size={13} />}
         {running ? t('editor.dryRunning') : t('editor.dryRun')}
       </Button>
 
-      <Button variant="primary" size="sm" onClick={onRun} disabled={running}>
+      {/* F4 (ROUTER-EDGE-FILTERS-1/D6): a draft workflow's run/dry-run is disabled
+          up front with an honest i18n title, rather than firing and showing the
+          raw Dutch 422 from the server (useWorkflowRunControl's message fallback
+          stays as the belt-and-braces path for any other rejection reason). */}
+      <Button variant="primary" size="sm" onClick={onRun} disabled={running || status !== 'active'}
+        title={status !== 'active' ? t('editor.runRequiresActive') : undefined}>
         {running ? <Spinner size={13} /> : <Play size={13} />}
         {running ? t('editor.running') : t('editor.run')}
       </Button>

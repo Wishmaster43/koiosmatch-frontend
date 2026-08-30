@@ -64,7 +64,11 @@
     "dryRunning": "Proefrun bezig…",
     "dryRunTitle": "Draai deze workflow proef, zonder echt te verzenden",
     "dryRunConfirmTitle": "Proefdraaien?",
-    "dryRunConfirmMessage": "Verzendstappen (WhatsApp, e-mail, Facebook, webhooks en Shiftmanager-koppelingen) worden overgeslagen. Alle andere stappen voeren écht wijzigingen door, net als bij een normale uitvoering."
+    "dryRunConfirmMessage": "Verzendstappen (WhatsApp, e-mail, Facebook, webhooks en Shiftmanager-koppelingen) worden overgeslagen. Alle andere stappen voeren écht wijzigingen door, net als bij een normale uitvoering.",
+    "runRequiresActive": "Alleen een actieve workflow kan draaien",
+    "router": {
+      "addRoute": "Route toevoegen"
+    }
   },
   "fields": {
     "boolOn": "Aan",
@@ -111,7 +115,20 @@
     "requiredHint": "Verplicht",
     "coexistenceOnly": "Alleen Coexistence-nummers",
     "whatsappQueued": "In WhatsApp Web-wachtrij gezet: {{count}}",
-    "waWebSessionOnly": "WhatsApp Web verstuurt alleen sessieberichten (vrije tekst); het formaat staat daarom vast op \"sessie\"."
+    "waWebSessionOnly": "WhatsApp Web verstuurt alleen sessieberichten (vrije tekst); het formaat staat daarom vast op \"sessie\".",
+    "instructionRow": "AI-instructie {{n}}",
+    "instructionRowMenu": "Instructie-acties",
+    "instructionInsertVar": "Variabele invoegen",
+    "instructionDuplicate": "Dupliceren",
+    "instructionAdd": "Instructie toevoegen",
+    "instructionOutputPlaceholder": "outputveld_naam",
+    "instructionOutputField": "Outputveld (optioneel)",
+    "instructionRequired": "Verplicht",
+    "instructionCount_one": "{{count}} instructie",
+    "instructionCount_other": "{{count}} instructies",
+    "instructionCharCount": "{{count}}/{{max}}",
+    "instructionMaxReached": "Maximaal {{max}} instructies",
+    "instructionTotalChars": "{{count}} van {{max}} tekens"
   },
   "scheduleModal": {
     "title": "Planning instellen",
@@ -862,7 +879,11 @@
     "Zoeken": "Zoeken",
     "Zoekopdracht": "Zoekopdracht",
     "Laatste contact ouder dan (maanden)": "Laatste contact ouder dan (maanden)",
-    "Interviewflow": "Interviewflow"
+    "Interviewflow": "Interviewflow",
+    "Externe kennisbank gebruiken": "Externe kennisbank gebruiken",
+    "FAQ's gebruiken": "FAQ's gebruiken",
+    "AI-instructies": "AI-instructies",
+    "Afwijzingsmodus": "Afwijzingsmodus"
   },
   "fieldOptions": {
     "Array (meerdere bundles)": "Array (meerdere bundles)",
@@ -1028,7 +1049,10 @@
     "candidateunavailable_overdue": "onbeschikbaarheid verlopen",
     "calllisttarget_assigned": "belbestand-target toegewezen",
     "opportunitywon": "kans gewonnen",
-    "opportunitylost": "kans verloren"
+    "opportunitylost": "kans verloren",
+    "inherit": "Overnemen van instelling",
+    "proposal": "Voorstel",
+    "automatic": "Automatisch"
   },
   "agentTest": {
     "title": "Test-variabelen",
@@ -1151,7 +1175,12 @@
     "Reageert de kandidaat niet, dan valt de run na dit aantal uren terug (workflowsresume-due watchdog)": "Reageert de kandidaat niet, dan valt de run na dit aantal uren terug (workflows:resume-due watchdog).",
     "Alleen gekoppelde WhatsApp Web-nummers (eigen of vestiging)": "Alleen gekoppelde WhatsApp Web-nummers (eigen of vestiging).",
     "Via WhatsApp Web kan alleen een sessiebericht (vrije tekst) worden verstuurd": "Via WhatsApp Web kan alleen een sessiebericht (vrije tekst) worden verstuurd.",
-    "bijv {{firstname}} of extra bericht tekst": "bijv. {{firstname}} of extra bericht tekst"
+    "bijv {{firstname}} of extra bericht tekst": "bijv. {{firstname}} of extra bericht tekst",
+    "Laat de AI-agent tenant-documenten/kennisbank raadplegen tijdens het gesprek": "Laat de AI-agent tenant-documenten/kennisbank raadplegen tijdens het gesprek.",
+    "Laat de AI-agent veelgestelde vragen (FAQ) raadplegen tijdens het gesprek": "Laat de AI-agent veelgestelde vragen (FAQ) raadplegen tijdens het gesprek.",
+    "De genummerde stappen die de AI-agent doorloopt, elk met een optioneel outputveld en variabele-chips": "De genummerde stappen die de AI-agent doorloopt, elk met een optioneel outputveld en variabele-chips.",
+    "Extra persona- en toonaanwijzingen voor de AI-agent, naast de instructies hierboven Het runtime-antwoordcontract wordt automatisch toegevoegd": "Extra persona- en toonaanwijzingen voor de AI-agent, naast de instructies hierboven. Het runtime-antwoordcontract wordt automatisch toegevoegd.",
+    "Volgt standaard de tenant-instelling; deze vacature kan dat hier overschrijven": "Volgt standaard de tenant-instelling; deze vacature kan dat hier overschrijven."
   },
   "triggers": {
     "events": {

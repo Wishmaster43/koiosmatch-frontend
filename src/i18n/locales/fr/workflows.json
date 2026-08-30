@@ -25,7 +25,11 @@
     "dryRunning": "Simulation en cours…",
     "dryRunTitle": "Exécuter cette workflow en simulation, sans rien envoyer réellement",
     "dryRunConfirmTitle": "Lancer une simulation ?",
-    "dryRunConfirmMessage": "Les étapes d'envoi (WhatsApp, e-mail, Facebook, webhooks et liaisons Shiftmanager) sont ignorées. Toutes les autres étapes s'exécutent réellement, comme lors d'une exécution normale."
+    "dryRunConfirmMessage": "Les étapes d'envoi (WhatsApp, e-mail, Facebook, webhooks et liaisons Shiftmanager) sont ignorées. Toutes les autres étapes s'exécutent réellement, comme lors d'une exécution normale.",
+    "runRequiresActive": "Seul un workflow actif peut s’exécuter",
+    "router": {
+      "addRoute": "Ajouter une route"
+    }
   },
   "fields": {
     "boolOn": "Activé",
@@ -72,7 +76,20 @@
     "requiredHint": "Obligatoire",
     "coexistenceOnly": "Numéros Coexistence uniquement",
     "whatsappQueued": "Mis en file d’attente WhatsApp Web : {{count}}",
-    "waWebSessionOnly": "WhatsApp Web n’envoie que des messages de session (texte libre) ; le format est donc fixé sur « session »."
+    "waWebSessionOnly": "WhatsApp Web n’envoie que des messages de session (texte libre) ; le format est donc fixé sur « session ».",
+    "instructionRow": "Instruction IA {{n}}",
+    "instructionRowMenu": "Actions de l'instruction",
+    "instructionInsertVar": "Insérer une variable",
+    "instructionDuplicate": "Dupliquer",
+    "instructionAdd": "Ajouter une instruction",
+    "instructionOutputPlaceholder": "nom_champ_sortie",
+    "instructionOutputField": "Champ de sortie (optionnel)",
+    "instructionRequired": "Obligatoire",
+    "instructionCount_one": "{{count}} instruction",
+    "instructionCount_other": "{{count}} instructions",
+    "instructionCharCount": "{{count}}/{{max}}",
+    "instructionMaxReached": "Maximum {{max}} instructions",
+    "instructionTotalChars": "{{count}} sur {{max}} caractères"
   },
   "scheduleModal": {
     "title": "Définir la planification",
@@ -827,7 +844,11 @@
     "Zoeken": "Rechercher",
     "Zoekopdracht": "Requête de recherche",
     "Laatste contact ouder dan (maanden)": "Dernier contact plus ancien que (mois)",
-    "Interviewflow": "Flux d’entretien"
+    "Interviewflow": "Flux d’entretien",
+    "Externe kennisbank gebruiken": "Utiliser la base de connaissances externe",
+    "FAQ's gebruiken": "Utiliser la FAQ",
+    "AI-instructies": "Instructions IA",
+    "Afwijzingsmodus": "Mode de refus"
   },
   "fieldOptions": {
     "Array (meerdere bundles)": "Tableau (plusieurs bundles)",
@@ -993,7 +1014,10 @@
     "candidateunavailable_overdue": "indisponibilité en retard",
     "calllisttarget_assigned": "cible de liste d’appels assignée",
     "opportunitywon": "opportunité gagnée",
-    "opportunitylost": "opportunité perdue"
+    "opportunitylost": "opportunité perdue",
+    "inherit": "Hérite du paramètre",
+    "proposal": "Proposition",
+    "automatic": "Automatique"
   },
   "agentTest": {
     "title": "Variables de test",
@@ -1151,7 +1175,12 @@
     "Reageert de kandidaat niet, dan valt de run na dit aantal uren terug (workflowsresume-due watchdog)": "Si le candidat ne répond pas, l'exécution se replie après ce nombre d'heures (workflows:resume-due watchdog).",
     "Alleen gekoppelde WhatsApp Web-nummers (eigen of vestiging)": "Uniquement les numéros WhatsApp Web connectés (personnel ou agence).",
     "Via WhatsApp Web kan alleen een sessiebericht (vrije tekst) worden verstuurd": "Via WhatsApp Web, seul un message de session (texte libre) peut être envoyé.",
-    "bijv {{firstname}} of extra bericht tekst": "ex. {{firstname}} ou texte de message supplémentaire"
+    "bijv {{firstname}} of extra bericht tekst": "ex. {{firstname}} ou texte de message supplémentaire",
+    "Laat de AI-agent tenant-documenten/kennisbank raadplegen tijdens het gesprek": "Permet à l'agent IA de consulter les documents/la base de connaissances du client pendant la conversation.",
+    "Laat de AI-agent veelgestelde vragen (FAQ) raadplegen tijdens het gesprek": "Permet à l'agent IA de consulter la FAQ pendant la conversation.",
+    "De genummerde stappen die de AI-agent doorloopt, elk met een optioneel outputveld en variabele-chips": "Les étapes numérotées que l'agent IA parcourt, chacune avec un champ de sortie optionnel et des jetons de variables.",
+    "Extra persona- en toonaanwijzingen voor de AI-agent, naast de instructies hierboven Het runtime-antwoordcontract wordt automatisch toegevoegd": "Indications supplémentaires de persona et de ton pour l'agent IA, en plus des instructions ci-dessus. Le contrat de réponse d'exécution est ajouté automatiquement.",
+    "Volgt standaard de tenant-instelling; deze vacature kan dat hier overschrijven": "Suit par défaut le paramètre du client ; cette offre peut le remplacer ici."
   },
   "triggers": {
     "events": {

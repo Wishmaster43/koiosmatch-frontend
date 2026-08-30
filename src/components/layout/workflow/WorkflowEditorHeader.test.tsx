@@ -58,6 +58,32 @@ describe('WorkflowEditorHeader · a11y (BUG 5)', () => {
 
   it('a single-flight run conflict is announced (role="status"), not a silent bare span', () => {
     render(<WorkflowEditorHeader {...baseProps} runConflict />)
-    expect(screen.getByRole('status')).toHaveTextContent('runControl.alreadyRunning')
+    expect(screen.getByText('runControl.alreadyRunning')).toHaveAttribute('role', 'status')
+  })
+})
+
+// F4 (ROUTER-EDGE-FILTERS-1/D6): Run/Dry-run must never fire on a non-active
+// workflow — disabled up front with an honest i18n title, instead of the raw
+// Dutch 422 the server used to be the only source of truth for.
+describe('WorkflowEditorHeader · run gated on status (F4)', () => {
+  it('disables Run and Dry-run for a draft workflow', () => {
+    render(<WorkflowEditorHeader {...baseProps} status="draft" />)
+    expect(screen.getByText('editor.run').closest('button')).toBeDisabled()
+    expect(screen.getByText('editor.dryRun').closest('button')).toBeDisabled()
+  })
+
+  it('enables Run and Dry-run for an active workflow', () => {
+    render(<WorkflowEditorHeader {...baseProps} status="active" />)
+    expect(screen.getByText('editor.run').closest('button')).not.toBeDisabled()
+    expect(screen.getByText('editor.dryRun').closest('button')).not.toBeDisabled()
+  })
+
+  // A disabled button shows no tooltip and takes no focus, so the reason must be a
+  // visible status line (§3: disabled WITH an honest notice), absent once active.
+  it('shows the visible run-gate notice for a draft and hides it when active', () => {
+    const { rerender } = render(<WorkflowEditorHeader {...baseProps} status="draft" />)
+    expect(screen.getByText('editor.runRequiresActive').closest('[role="status"]')).not.toBeNull()
+    rerender(<WorkflowEditorHeader {...baseProps} status="active" />)
+    expect(screen.queryByText('editor.runRequiresActive')).toBeNull()
   })
 })

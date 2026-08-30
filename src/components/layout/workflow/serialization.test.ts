@@ -44,9 +44,15 @@ describe('edgeFilterGroupsToFilters', () => {
     expect(edgeFilterGroupsToFilters([[c('a'), c('b')]])).toEqual({ conditions: [c('a'), c('b')], logic: 'AND' })
   })
 
-  it('persists zero/only-empty groups as the legacy empty-conditions shape', () => {
-    expect(edgeFilterGroupsToFilters([[]])).toEqual({ conditions: [], logic: 'AND' })
-    expect(edgeFilterGroupsToFilters([[], []])).toEqual({ conditions: [], logic: 'AND' })
+  // F5 (ROUTER-EDGE-FILTERS-1/D7): zero non-empty groups persists as `null`, not
+  // an empty-but-truthy `{conditions:[],logic:'AND'}` — the backend's
+  // `$filters !== []` check reads a non-empty array as "this route is
+  // filtered" even when it gates nothing, so a cleared filter must serialize
+  // to nothing rather than an empty shape.
+  it('persists zero/only-empty groups as null (F5, fixes D7)', () => {
+    expect(edgeFilterGroupsToFilters([[]])).toBeNull()
+    expect(edgeFilterGroupsToFilters([[], []])).toBeNull()
+    expect(countEdgeFilterConditions(edgeFilterGroupsToFilters([[]]))).toBe(0)
   })
 
   it('drops wholly-empty groups before deciding flat vs. nested', () => {
@@ -288,6 +294,46 @@ describe('round-trip: steps -> flow -> steps', () => {
     expect(roundTripped.find(s => s.id === 'a')?.next).toEqual(original[0].next)
   })
 
+  // Three-branch Router, one branch carrying a NESTED OR-group filter (the
+  // shape a saved EdgeFilterPanel with ≥2 groups persists — serialization.ts's
+  // edgeFilterGroupsToFilters), one a flat AND filter, one unconditional — the
+  // full contract in one graph, both directions.
+  it('preserves THREE Router branches byte-identically, incl. a nested [[…],[…]] OR-group filter on one branch', () => {
+    const nested = [[c('a')], [c('b'), c('c')]]
+    const original: WorkflowStep[] = [
+      { id: 'r', type: 'router', position: { x: 0, y: 0 }, config: {}, next: [
+        { target: 'x', source_handle: 'route-1', label: 'Eén', filters: nested },
+        { target: 'y', source_handle: 'route-2', label: 'Twee', filters: { conditions: [c('d')], logic: 'AND' } },
+        { target: 'z', source_handle: 'route-3' },
+      ] },
+      { id: 'x', type: 'email', position: { x: 220, y: -160 }, config: {} },
+      { id: 'y', type: 'whatsapp', position: { x: 220, y: 0 }, config: {} },
+      { id: 'z', type: 'sms', position: { x: 220, y: 160 }, config: {} },
+    ]
+    const { nodes, edges } = stepsToFlow(original)
+    expect(edges).toHaveLength(3)
+    // ModuleNode has a single 'out' port, so every rendered edge normalizes there —
+    // the three branches stay distinct only via their (raw-handle-carrying) ids.
+    edges.forEach(e => expect(e.sourceHandle).toBe('out'))
+    expect(new Set(edges.map(e => e.id)).size).toBe(3)
+
+    const roundTripped = flowToSteps(nodes, edges)
+    const r = roundTripped.find(s => s.id === 'r')!
+    expect(r.next).toHaveLength(3)
+    expect(r.next?.find(n => n.target === 'x')).toMatchObject({ source_handle: 'route-1', label: 'Eén', filters: nested })
+    expect(r.next?.find(n => n.target === 'y')).toMatchObject({ source_handle: 'route-2', label: 'Twee', filters: { conditions: [c('d')], logic: 'AND' } })
+    expect(r.next?.find(n => n.target === 'z')).toMatchObject({ source_handle: 'route-3' })
+
+    // Removing the MIDDLE branch (route-2, target y) leaves the other two branches'
+    // ids/handles/filters completely unaffected (no handle renumbering).
+    const withoutMiddle = edges.filter(e => e.target !== 'y')
+    const afterRemoval = flowToSteps(nodes, withoutMiddle)
+    const rAfter = afterRemoval.find(s => s.id === 'r')!
+    expect(rAfter.next).toHaveLength(2)
+    expect(rAfter.next?.find(n => n.target === 'x')).toMatchObject({ source_handle: 'route-1', filters: nested })
+    expect(rAfter.next?.find(n => n.target === 'z')).toMatchObject({ source_handle: 'route-3' })
+  })
+
   it('a second round-trip (flow -> steps -> flow) is idempotent — no drift across repeated save/reload', () => {
     const steps1: WorkflowStep[] = [
       { id: 'a', type: 'candidates', position: { x: 0, y: 0 }, config: {}, next: [{ target: 'b' }] },
@@ -297,5 +343,28 @@ describe('round-trip: steps -> flow -> steps', () => {
     const flow2 = stepsToFlow(flowToSteps(flow1.nodes, flow1.edges))
     expect(flow2.nodes.map(n => n.id)).toEqual(flow1.nodes.map(n => n.id))
     expect(flow2.edges.map(e => ({ source: e.source, target: e.target }))).toEqual(flow1.edges.map(e => ({ source: e.source, target: e.target })))
+  })
+
+  // F5 (ROUTER-EDGE-FILTERS-1/D7): a cleared filter round-trips to `filters: null`
+  // on the persisted step, not the empty-but-truthy `{conditions:[],logic:'AND'}`
+  // shape — so the run viewer never marks an unfiltered route as filtered, and
+  // the edge badge (countEdgeFilterConditions) stays hidden.
+  it('a cleared filter serializes to filters:null and the edge badge stays hidden', () => {
+    const original: WorkflowStep[] = [
+      { id: 'a', type: 'router', position: { x: 0, y: 0 }, config: {}, next: [
+        { target: 'b', source_handle: 'route-1', filters: { conditions: [c('x')], logic: 'AND' } },
+      ] },
+      { id: 'b', type: 'email' },
+    ]
+    const { nodes, edges } = stepsToFlow(original)
+    // Simulate the panel clearing the one condition, then saving (the same
+    // conversion EdgeFilterPanel.handleSave and useWorkflowEditor.saveEdgeFilter use).
+    const cleared = edgeFilterGroupsToFilters(parseEdgeFilterGroups({ conditions: [], logic: 'AND' }))
+    expect(cleared).toBeNull()
+    const clearedEdges = edges.map(e => ({ ...e, data: { ...e.data, filters: cleared } }))
+    expect(countEdgeFilterConditions(clearedEdges[0].data?.filters)).toBe(0)
+
+    const roundTripped = flowToSteps(nodes, clearedEdges)
+    expect(roundTripped.find(s => s.id === 'a')?.next?.[0]).toMatchObject({ target: 'b', filters: null })
   })
 })

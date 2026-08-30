@@ -47,7 +47,9 @@ export function EdgeFilterPanel({ filters, label, sourceNodeId, nodes = [], edge
   nodes?: FlowNode[]
   edges?: FlowEdge[]
   catalog?: ModuleCatalog
-  onClose: () => void; onSave: (f: EdgeFilters, label: string) => void
+  // F5 (ROUTER-EDGE-FILTERS-1/D7): widened to accept `null` — a fully-cleared
+  // filter serializes to null, not an empty-but-truthy `{conditions:[]}` object.
+  onClose: () => void; onSave: (f: EdgeFilters | FilterConditionGroup[] | null, label: string) => void
 }) {
   // `groups` is always ≥1 AND-group; ≥2 groups are OR'ed (the new capability).
   const [groups, setGroups] = useState<FilterConditionGroup[]>(() => parseEdgeFilterGroups(filters))
@@ -74,14 +76,11 @@ export function EdgeFilterPanel({ filters, label, sourceNodeId, nodes = [], edge
   const updCond = (gi: number, ci: number, key: keyof FilterCondition, val: string) =>
     setGroups(gs => gs.map((g, i) => (i === gi ? g.map((row, j) => (j === ci ? { ...row, [key]: val } : row)) : g)))
 
-  // Persist: ≤1 non-empty group keeps the legacy flat `{conditions,logic}`
-  // shape; ≥2 groups emit the backend's nested OR-group array directly. The
-  // cast satisfies useWorkflowEditor's `saveEdgeFilter(filters: EdgeFilters, …)`
-  // signature (that hook is out of scope here); it only ever forwards the value
-  // untouched into the edge's opaque `data.filters: unknown`, so widening the
-  // runtime shape is safe — TS just doesn't model that union at its signature.
+  // Persist: no non-empty group left → null (F5); exactly one non-empty group
+  // keeps the legacy flat `{conditions,logic}` shape; ≥2 groups emit the
+  // backend's nested OR-group array directly.
   const handleSave = () => {
-    onSave(edgeFilterGroupsToFilters(groups) as EdgeFilters, name.trim())
+    onSave(edgeFilterGroupsToFilters(groups), name.trim())
     onClose()
   }
 

@@ -14,7 +14,7 @@ import { useWorkflowRunControl } from './useWorkflowRunControl'
 import { TERMINAL } from './useWorkflowRun'
 import { useOutputSeeding } from './useOutputSeeding'
 import { buildVarFields, computeWorkflowSnapshot } from './workflowEditorUtils'
-import type { Workflow, FlowNode, FlowEdge, FlowNodeData, EdgeFilters, ScheduleConfig,
+import type { Workflow, FlowNode, FlowEdge, FlowNodeData, EdgeFilters, FilterConditionGroup, ScheduleConfig,
   WorkflowVarGroup } from '@/types/workflow'
 import { unwrapList } from '@/lib/api'
 
@@ -89,7 +89,9 @@ export function useWorkflowEditor({ workflow, onSave, initialRunId = null }: {
   const [status,         setStatus]         = useState(workflow.status || 'draft')
   const [saved,          setSaved]          = useState(false)
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null)
-  const [pickerState,    setPickerState]    = useState<{ edgeId?: string; append?: boolean } | null>(null)
+  // F2: `routerId` selects "new branch" mode — the picker's pick goes to
+  // addRouterBranch instead of insertModule (see WorkflowCanvasEditor's onSelect).
+  const [pickerState,    setPickerState]    = useState<{ edgeId?: string; append?: boolean; routerId?: string } | null>(null)
   const [showSchedule,   setShowSchedule]   = useState(false)
   const [widePanelActive, setWidePanelActive] = useState(false)
   // null = auto (node without incoming edge, leftmost); set via START badge drag
@@ -131,8 +133,11 @@ export function useWorkflowEditor({ workflow, onSave, initialRunId = null }: {
     setFilterState({ edgeId })
   }, [])
 
-  // Filter panel submitted — write the condition + optional label onto that one edge.
-  const saveEdgeFilter = useCallback((edgeId: string, filters: EdgeFilters, label: string) => {
+  // Filter panel submitted — write the condition + optional label onto that one
+  // edge. F5: `filters` may be `null` (a fully-cleared filter), which must be
+  // written as-is so the edge badge (countEdgeFilterConditions(null) === 0)
+  // stays hidden and the persisted step carries no filter at all.
+  const saveEdgeFilter = useCallback((edgeId: string, filters: EdgeFilters | FilterConditionGroup[] | null, label: string) => {
     setEdges(eds => eds.map(e => e.id === edgeId ? { ...e, data: { ...e.data, filters, label: label || undefined } } : e))
   }, [setEdges])
 
@@ -192,8 +197,11 @@ export function useWorkflowEditor({ workflow, onSave, initialRunId = null }: {
 
       const newEdges = [
         ...otherEdges,
-        // All previous sources now connect to router
-        ...existingIncoming.map(e => mkEdge(e.source, routerId)),
+        // F1 (ROUTER-EDGE-FILTERS-1/D3): the existing incoming edge's data
+        // (filters/label/sourceHandleRaw) must survive the router splice —
+        // a bare mkEdge here silently dropped it, the same mistake already
+        // fixed for insertModule (:253) and deleteNode (:305) below.
+        ...existingIncoming.map(e => ({ ...mkEdge(e.source, routerId), data: e.data })),
         // New source also connects to router
         mkEdge(params.source, routerId),
         // Router connects to original target
@@ -282,6 +290,28 @@ export function useWorkflowEditor({ workflow, onSave, initialRunId = null }: {
 
     setSelectedNodeId(newId)
   }, [setNodes, setEdges, edges, nodes])
+
+  // F2 (ROUTER-EDGE-FILTERS-1/D4): add one new branch off an existing Router node.
+  // The node is created UNCONNECTED to lastNode (never routed through onConnect,
+  // which would trip the router-splice branch above) and gets exactly one new
+  // edge routerId -> newId. The new node is added WITH its incoming edge in the
+  // same commit, so it can never be picked up as firstNodeId (that only happens
+  // to a node with no incoming edge at all). Source handles stay 'out': distinct
+  // source_handle values per branch are pointless until the backend teaches
+  // WorkflowGraph the handle (D2) — distinct TARGETS are what make branches work
+  // today.
+  const addRouterBranch = useCallback((routerId: string, type: string) => {
+    const newId = uid()
+    setNodes(nds => {
+      const routerNode = nds.find(n => n.id === routerId)
+      const existingBranches = edges.filter(e => e.source === routerId).length
+      const x = (routerNode?.position.x ?? 300) + 260
+      const y = (routerNode?.position.y ?? 180) + existingBranches * 140
+      return [...nds, { id: newId, type: 'module', position: { x, y }, width: NODE_W, height: NODE_H, data: { type, config: defaultConfigFor(type) } }]
+    })
+    setEdges(eds => [...eds, mkEdge(routerId, newId)])
+    setSelectedNodeId(newId)
+  }, [setNodes, setEdges, edges])
 
   // Config panel edited one field of one node — merge just that key into its config.
   const updateNodeConfig = useCallback((nodeId: string, key: string, val: unknown) => {
@@ -426,6 +456,6 @@ export function useWorkflowEditor({ workflow, onSave, initialRunId = null }: {
     pickerState, setPickerState, filterState, setFilterState, outputState, setOutputState,
     firstNodeId, setStartNodeId, getUpstreamVariables,
     handleEdgeAdd, handleEdgeDelete, handleEdgeFilter, saveEdgeFilter, handleNodeRun,
-    insertModule, updateNodeConfig, deleteNode, handleSave, handleRun, isDirty,
+    insertModule, addRouterBranch, updateNodeConfig, deleteNode, handleSave, handleRun, isDirty,
   }
 }

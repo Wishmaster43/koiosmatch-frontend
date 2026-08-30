@@ -134,13 +134,19 @@ export function parseEdgeFilterGroups(raw: unknown): FilterConditionGroup[] {
 
 // Normalized groups → the value persisted on the connection. Wholly-empty
 // groups are dropped first (an empty AND-group always matches in the
-// evaluator, which would silently open the whole branch). ≤1 remaining group
-// keeps the exact legacy `{conditions, logic}` shape — backward compatible with
-// every saved workflow and with the backend's flat-list path; ≥2 groups emit
+// evaluator, which would silently open the whole branch). F5
+// (ROUTER-EDGE-FILTERS-1/D7): NO groups left → `null`, not an empty
+// `{conditions:[],logic:'AND'}` object — the backend's `$filters !== []` check
+// (RunWorkflowStep.php:277) reads a non-empty array as "this route is
+// filtered" even when it gates nothing, so a fully-cleared filter must persist
+// as nothing rather than an empty-but-truthy shape. Exactly ONE remaining
+// group keeps the legacy `{conditions, logic}` shape — backward compatible
+// with every saved workflow and the backend's flat-list path; ≥2 groups emit
 // the raw nested shape the backend reads just as directly (FilterEvaluator::groups).
-export function edgeFilterGroupsToFilters(groups: FilterConditionGroup[]): EdgeFilters | FilterConditionGroup[] {
+export function edgeFilterGroupsToFilters(groups: FilterConditionGroup[]): EdgeFilters | FilterConditionGroup[] | null {
   const nonEmpty = groups.filter(g => g.length > 0)
-  if (nonEmpty.length <= 1) return { conditions: nonEmpty[0] ?? [], logic: 'AND' }
+  if (nonEmpty.length === 0) return null
+  if (nonEmpty.length === 1) return { conditions: nonEmpty[0], logic: 'AND' }
   return nonEmpty
 }
 

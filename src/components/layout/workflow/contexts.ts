@@ -17,6 +17,10 @@ export const EdgeAddContext    = createContext<EdgeFn | null>(null)
 export const EdgeDeleteContext = createContext<EdgeFn | null>(null)
 export const EdgeFilterContext = createContext<EdgeFn | null>(null)
 export const NodeRunContext    = createContext<NodeRunFn | null>(null)
+// F2 (ROUTER-EDGE-FILTERS-1/D4): the Router node's "+ route" affordance — keyed
+// by the router node's own id, not an edge id (there is no edge yet). Opens the
+// picker in "new branch" mode, distinct from EdgeAddContext's edge-splice path.
+export const RouterAddBranchContext = createContext<EdgeFn | null>(null)
 // Provides { startNodeId, setStartNodeId } so the START badge and nodes can
 // negotiate which node is the workflow entry point via drag-and-drop.
 export const StartContext      = createContext<StartCtxValue | null>(null)
