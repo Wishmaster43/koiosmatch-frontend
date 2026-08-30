@@ -1026,7 +1026,8 @@ the code is worse than no rule, because the next reader builds on it. What is tr
   every workflow STARTS with a Koios entity node, the vertrekmodule, that names the run's
   subject: candidate · customer · location · department · contact · task · call list ·
   vacancy · application. That first node carries the trigger (event = "dit record", one run
-  per record; schedule = "selectie", one run per matching record) and its FILTERS in the
+  per record; schedule = "selectie", ONE run with N bundles, every step runs per bundle,
+  as the engine already does) and its FILTERS in the
   right-hand panel ("kandidaten met status X"). A workflow whose first node is an action
   (notification, message, task) is a finding: there is nothing to notify about. Every later
   step and every router condition reads the subject's fields as variables; the trigger is
