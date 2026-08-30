@@ -189,7 +189,17 @@ export const MODULE_META = Object.fromEntries(
 
 // VERTREKMODULE-1: the types a workflow may START with — Koios entity nodes and
 // the inbound webhook. Everything else as first step is a finding (CLAUDE.md §10.5).
-export const START_MODULE_TYPES = new Set(MODULES.filter(m => m.isStart).map(m => m.type))
+// CMBE-antwoord 31-08: naast de isStart-gemarkeerde modules (entiteitsnodes +
+// webhook) zijn ook geldig: de SM-vertrekken, twee legacy-maar-geseede
+// ai_planner-vertrekken en het komende whatsapp_inbound-vertrek (kanaalkeuze
+// waba/waba_coex/wa_web). 'trigger' (oude generieke vertrek) blijft bewust
+// ONgeldig — de herseed faseert hem uit, de waarschuwing is daar terecht.
+export const START_MODULE_TYPES = new Set([
+  ...MODULES.filter(m => m.isStart).map(m => m.type),
+  'sm_employees', 'sm_schedules',
+  'candidate_filter', 'candidates_fetch',
+  'whatsapp_inbound',
+])
 
 export const MODULE_SCHEMAS = Object.fromEntries(
   MODULES.map(m => [m.type, m.schema])
