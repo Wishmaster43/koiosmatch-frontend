@@ -15,6 +15,8 @@ import experience_add     from './experience_add'
 import sm_employee_create from './sm_employee_create'
 import workflow_call      from './workflow_call'
 import webhook           from './webhook'
+import whatsapp_inbound  from './whatsapp_inbound'
+import application_lookup from './application_lookup'
 import sm_candidates     from './sm_candidates'
 import sm_customers      from './sm_customers'
 import sm_shifts         from './sm_shifts'
@@ -181,6 +183,8 @@ const MODULES: ModuleDef[] = [
   pdok_geocode,
   candidates_fetch,
   backoffice_sync,
+  whatsapp_inbound,
+  application_lookup,
 ]
 
 export const MODULE_META = Object.fromEntries(

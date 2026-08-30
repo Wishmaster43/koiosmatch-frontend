@@ -241,7 +241,9 @@
     "experience_add": "Berufserfahrung hinzufügen",
     "sm_employee_create": "SM-Mitarbeiter erstellen",
     "workflow_call": "Workflow aufrufen",
-    "workflow": "Workflow"
+    "workflow": "Workflow",
+    "whatsapp_inbound": "WhatsApp Eingehend",
+    "application_lookup": "Bewerbung nachschlagen"
   },
   "status": {
     "active": "Aktiv",

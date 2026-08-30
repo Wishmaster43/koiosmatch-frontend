@@ -245,7 +245,9 @@
     "experience_add": "Add work experience",
     "sm_employee_create": "Create SM employee",
     "workflow_call": "Call workflow",
-    "workflow": "Workflow"
+    "workflow": "Workflow",
+    "whatsapp_inbound": "WhatsApp Inbound",
+    "application_lookup": "Look up application"
   },
   "status": {
     "active": "Active",
