@@ -1,8 +1,15 @@
 import { useState } from 'react'
-import { describe, it, expect } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { describe, it, expect, vi } from 'vitest'
+import { act, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import SubTabBar from './SubTabBar'
+
+// jsdom has no scrollIntoView at all — install a permanent no-op baseline once
+// (module scope) so vi.spyOn always has a real method to wrap; each test spies
+// + mockRestore()s in a finally (mirrors SettingsTabs.test.jsx).
+if (!HTMLElement.prototype.scrollIntoView) {
+  HTMLElement.prototype.scrollIntoView = () => {}
+}
 
 const tabs = [
   { id: 'a', label: 'Alpha' },
@@ -71,5 +78,53 @@ describe('SubTabBar · tablist keyboard model (§6 WCAG 2.2 AA)', () => {
     expect(screen.getByRole('tab', { name: 'Charlie' })).toHaveAttribute('aria-selected', 'true')
     await user.keyboard('{Home}')
     expect(screen.getByRole('tab', { name: 'Alpha' })).toHaveAttribute('aria-selected', 'true')
+  })
+})
+
+// KOIOS-TOOL-MATRIX-FE-3 verdict finding 1: a 12-tab domain strip clipped 6
+// tabs at 1440 with zero cue — SubTabBar never got the overflow treatment
+// SettingsTabs grew the same day. Covers the shared useTabStripOverflow hook
+// wired into SubTabBar: active-tab scroll-into-view on change, and again on a
+// ResizeObserver fire (narrow-container case).
+describe('SubTabBar · overflow handling (narrow container)', () => {
+  it('scrolls the active tab into view when the active tab changes', () => {
+    const scrollIntoViewSpy = vi.spyOn(HTMLElement.prototype, 'scrollIntoView').mockImplementation(() => {})
+    try {
+      const { rerender } = render(<SubTabBar tabs={tabs} active="a" onChange={() => {}} />)
+      scrollIntoViewSpy.mockClear()
+      rerender(<SubTabBar tabs={tabs} active="c" onChange={() => {}} />)
+      expect(scrollIntoViewSpy).toHaveBeenCalledWith({ block: 'nearest', inline: 'nearest' })
+    } finally {
+      scrollIntoViewSpy.mockRestore()
+    }
+  })
+
+  it('re-scrolls the active tab into view on a ResizeObserver fire (narrow container)', () => {
+    const scrollIntoViewSpy = vi.spyOn(HTMLElement.prototype, 'scrollIntoView').mockImplementation(() => {})
+    let resizeCallback: (() => void) | undefined
+    const observe = vi.fn()
+    const disconnect = vi.fn()
+    const originalRO = globalThis.ResizeObserver
+    // Stub ResizeObserver so the test can fire its callback deliberately —
+    // jsdom has no real resize signal to dispatch.
+    globalThis.ResizeObserver = class {
+      constructor(cb: () => void) { resizeCallback = cb }
+      observe = observe
+      disconnect = disconnect
+    } as unknown as typeof ResizeObserver
+    try {
+      render(<SubTabBar tabs={tabs} active="c" onChange={() => {}} />)
+      expect(observe).toHaveBeenCalled()
+      scrollIntoViewSpy.mockClear()
+
+      // Simulate the ResizeObserver firing on a container width change
+      // (narrow container: the active tab may have fallen out of view).
+      act(() => { resizeCallback?.() })
+
+      expect(scrollIntoViewSpy).toHaveBeenCalledWith({ block: 'nearest', inline: 'nearest' })
+    } finally {
+      scrollIntoViewSpy.mockRestore()
+      globalThis.ResizeObserver = originalRO
+    }
   })
 })

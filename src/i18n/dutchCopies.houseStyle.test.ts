@@ -147,6 +147,7 @@ const ALLOWLIST: string[] = [
   'de/shiftmanager:contactsPage.yes',
 
   // German plural "Kandidaten" (of "Kandidat") = "candidates" (identical spelling)
+  'de/koios:capabilities.groups.candidates',
   'de/analytics:candidates.viewSwitch.candidates',
   'de/analytics:tabs.candidates',
   'de/candidates:title',
