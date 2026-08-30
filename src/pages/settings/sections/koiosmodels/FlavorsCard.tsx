@@ -35,13 +35,20 @@ export default function FlavorsCard({ data, onSaved }: { data: KoiosModelsAdminD
   const [error, setError] = useState<string | null>(null)
 
   const dirty = FLAVOR_KEYS.some(k => draft[k] !== data.flavors[k])
+  // Only LINKABLE models are offerable (MODELS-PERSIST-1: a live vendor id with no
+  // catalogue price cannot be pinned to a flavour) — the value is the catalogue id,
+  // never the raw vendor id, since that is what the PATCH must send.
+  // Only models with a catalogue price are offered: linkable AND catalog_id, so the option value is never a raw vendor id.
+  const linkableModels = data.available.filter((m: KoiosModelInfo) => m.linkable && m.catalog_id)
+  const hiddenCount = data.available.length - linkableModels.length
   // CreatableSelect labels are plain strings — the Mono model id rides along in
   // the label text itself rather than as embedded JSX.
-  const options = data.available.map((m: KoiosModelInfo) => ({
-    value: m.id, label: `${m.display_name} · ${m.id}`,
+  const options = linkableModels.map((m: KoiosModelInfo) => ({
+    value: (m.catalog_id ?? m.id) as string, label: `${m.display_name} · ${m.catalog_id ?? m.id}`,
   }))
 
-  // Persist only the flavours section — never the whole document.
+  // Persist only the flavours section — never the whole document. The body is
+  // always the canonical Record of catalogue ids (never a list), per MODELS-PERSIST-1.
   const save = async () => {
     setSaving(true); setError(null)
     try {
@@ -90,6 +97,12 @@ export default function FlavorsCard({ data, onSaved }: { data: KoiosModelsAdminD
           )
         })}
       </div>
+
+      {hiddenCount > 0 && (
+        <Caption style={{ display: 'block', marginTop: 10 }}>
+          {t('koiosModelsAdmin.flavors.hiddenModels', { count: hiddenCount })}
+        </Caption>
+      )}
 
       {error && <div style={{ fontSize: 12, color: 'var(--color-danger-text)', marginTop: 10 }}>{error}</div>}
       <div style={{ marginTop: 12 }}>

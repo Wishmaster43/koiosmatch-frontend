@@ -1634,7 +1634,7 @@
       "pricing": "Tarifs de la plateforme",
       "tiers": "Paliers",
       "budgets": "Budgets mensuels",
-      "package": "Forfait",
+      "package": "Choix du forfait",
       "users": "Utilisateurs"
     }
   },
@@ -3377,7 +3377,9 @@
       "subtitle": "Quel modèle fournisseur se trouve derrière chaque variante visible du client.",
       "per1m": "par million de tokens",
       "pickPlaceholder": "Choisir un modèle",
-      "noEffort": "Ce modèle n'a pas de niveaux d'effort."
+      "noEffort": "Ce modèle n'a pas de niveaux d'effort.",
+      "hiddenModels_one": "{{count}} modèle sans prix catalogue masqué",
+      "hiddenModels_other": "{{count}} modèles sans prix catalogue masqués"
     },
     "routing": {
       "title": "Routage par type de requête",
@@ -3399,6 +3401,10 @@
       "noFloor": "Aucun plancher",
       "allowedFlavors": "Variantes autorisées",
       "allowedFlavorsHint": "Laisser vide pour revenir aux variantes autorisées du forfait."
+    },
+    "source": {
+      "catalog": "Source : catalogue de la plateforme (jamais actualisé)",
+      "live": "Instantané en direct du {{at}}"
     }
   },
   "modShiftmanager": {

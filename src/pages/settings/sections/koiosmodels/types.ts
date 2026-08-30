@@ -9,12 +9,18 @@
 // The three tenant-facing stands — mirrors lib/koiosModelTiers' ModelTierKey.
 export type FlavorKey = 'snel' | 'slim' | 'max'
 
-// One selectable vendor model, as the platform whitelist reports it.
+// One selectable vendor model, as the platform whitelist reports it. MODELS-PERSIST-1
+// (CMBE): the live Models API returns dated vendor ids and models with no catalogue
+// price, so each entry now also carries its own catalogue identity + offerability —
+// `catalog_id` is what a flavour must be pinned to (null when the vendor id has no
+// catalogue price yet), and `linkable` says whether this entry may be offered at all.
 export interface KoiosModelInfo {
   id: string
   display_name: string
   max_input_tokens?: number
   capabilities?: string[]
+  catalog_id: string | null
+  linkable: boolean
 }
 
 // Per-model platform facts: whether it accepts an effort knob, plus whatever
@@ -54,6 +60,20 @@ export interface KoiosModelsAdminData {
   packages: Record<string, KoiosPackageEntry>
   routing: Record<KoiosRequestType, KoiosRoutingEntry>
   tenants: Record<string, KoiosTenantOverride>
+  // Where `available` came from — a fresh vendor pull, or the platform's own
+  // catalogue when nobody has ever refreshed yet. Drives the source line under
+  // the screen title (MODELS-PERSIST-1); `available` itself is never empty.
+  available_source: 'live' | 'catalog'
+  refreshed_at: string | null
+}
+
+// The shape a stale response (or the exact runtime payload CMBE measured) can still
+// carry for `flavors`: the LIST the GET endpoint used to return, one row per stand.
+// PATCH always expects the Record below — this is only ever an INPUT shape.
+export interface KoiosFlavorListRow {
+  key: FlavorKey
+  model_id: string
+  [k: string]: unknown
 }
 
 // PATCH accepts any subset of the four top-level sections — each card saves
@@ -62,6 +82,25 @@ export interface KoiosModelsAdminData {
 export type KoiosModelsAdminPatch = Partial<
   Pick<KoiosModelsAdminData, 'flavors' | 'packages' | 'routing' | 'tenants'>
 >
+
+// Normalises whatever shape `flavors` arrives in — the canonical Record the four
+// cards and the PATCH body expect, or the list-of-rows shape measured arriving from
+// a GET/refresh response (MODELS-PERSIST-1: the card used to PATCH back whichever
+// shape it was handed, and the list shape fails the backend's string validation).
+// Applied to every fetch/refresh/patch response so nothing downstream ever sees the
+// list shape.
+export function normalizeFlavors(input: unknown): Record<FlavorKey, string> {
+  if (Array.isArray(input)) {
+    const out = {} as Record<FlavorKey, string>
+    for (const row of input as KoiosFlavorListRow[]) {
+      if (row && typeof row === 'object' && typeof row.key === 'string') {
+        out[row.key] = row.model_id ?? ''
+      }
+    }
+    return out
+  }
+  return { ...(input as Record<FlavorKey, string>) }
+}
 
 export const FLAVOR_KEYS: FlavorKey[] = ['snel', 'slim', 'max']
 export const EFFORT_LEVELS: EffortLevel[] = ['low', 'medium', 'high', 'xhigh', 'max']

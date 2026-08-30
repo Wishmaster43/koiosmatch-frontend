@@ -1634,7 +1634,7 @@
       "pricing": "Plattformpreise",
       "tiers": "Stufen",
       "budgets": "Monatsbudgets",
-      "package": "Paket",
+      "package": "Paketwahl",
       "users": "Benutzer"
     }
   },
@@ -3377,7 +3377,9 @@
       "subtitle": "Welches Anbietermodell hinter jeder mandantensichtbaren Variante steht.",
       "per1m": "pro 1 Mio. Tokens",
       "pickPlaceholder": "Modell wählen",
-      "noEffort": "Dieses Modell kennt keine Anstrengungsstufen."
+      "noEffort": "Dieses Modell kennt keine Anstrengungsstufen.",
+      "hiddenModels_one": "{{count}} Modell ohne Katalogpreis ausgeblendet",
+      "hiddenModels_other": "{{count}} Modelle ohne Katalogpreis ausgeblendet"
     },
     "routing": {
       "title": "Routing pro Anfragetyp",
@@ -3399,6 +3401,10 @@
       "noFloor": "Keine Untergrenze",
       "allowedFlavors": "Erlaubte Varianten",
       "allowedFlavorsHint": "Leer lassen, um auf die erlaubten Varianten des Pakets zurückzufallen."
+    },
+    "source": {
+      "catalog": "Quelle: Plattform-Katalog (noch nie aktualisiert)",
+      "live": "Live-Snapshot vom {{at}}"
     }
   },
   "modShiftmanager": {

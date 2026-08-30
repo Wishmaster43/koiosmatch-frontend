@@ -1880,7 +1880,7 @@
       "pricing": "Platformprijzen",
       "tiers": "Staffels",
       "budgets": "Maandbudgetten",
-      "package": "Pakket",
+      "package": "Pakketkeuze",
       "users": "Gebruikers"
     }
   },
@@ -3377,7 +3377,9 @@
       "subtitle": "Welk leveranciersmodel achter elke tenant-zichtbare smaak zit.",
       "per1m": "per 1M tokens",
       "pickPlaceholder": "Kies een model",
-      "noEffort": "Dit model kent geen inspanningsniveaus."
+      "noEffort": "Dit model kent geen inspanningsniveaus.",
+      "hiddenModels_one": "{{count}} model zonder catalogusprijs verborgen",
+      "hiddenModels_other": "{{count}} modellen zonder catalogusprijs verborgen"
     },
     "routing": {
       "title": "Routering per verzoektype",
@@ -3399,6 +3401,10 @@
       "noFloor": "Geen vloer",
       "allowedFlavors": "Toegestane smaken",
       "allowedFlavorsHint": "Laat leeg om terug te vallen op de toegestane smaken van het pakket."
+    },
+    "source": {
+      "catalog": "Bron: platform catalogus (nog nooit ververst)",
+      "live": "Live momentopname van {{at}}"
     }
   },
   "modShiftmanager": {

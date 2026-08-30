@@ -9,8 +9,9 @@ import { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import Button from '@/components/ui/Button'
 import Spinner from '@/components/ui/Spinner'
-import { PageTitle, BodyText } from '@/components/ui/typography'
+import { PageTitle, BodyText, Caption } from '@/components/ui/typography'
 import { extractApiError } from '@/lib/extractApiError'
+import { useDateFormat } from '@/lib/datetime'
 import SubTabBar, { type SubTab } from '@/components/drawer/SubTabBar'
 import { fetchKoiosModelsAdmin, refreshKoiosModelsAdmin } from './koiosmodels/api'
 import type { KoiosModelsAdminData } from './koiosmodels/types'
@@ -25,6 +26,7 @@ type SubTabId = 'models' | 'packages' | 'routing'
 // Thin container (see the module doc above): fetches the registry once, hands it to the four cards, and owns only the manual refresh action — the cards themselves own their own writes.
 export default function KoiosModelsAdminSettings() {
   const { t } = useTranslation('settings')
+  const { formatDateTime } = useDateFormat()
   const [data, setData] = useState<KoiosModelsAdminData | null>(null)
   const [phase, setPhase] = useState<Phase>('loading')
   const [error, setError] = useState<string | null>(null)
@@ -92,6 +94,15 @@ export default function KoiosModelsAdminSettings() {
         <div>
           <PageTitle>{t('koiosModelsAdmin.title')}</PageTitle>
           <BodyText style={{ color: 'var(--text-muted)', marginTop: 2 }}>{t('koiosModelsAdmin.subtitle')}</BodyText>
+          {/* Where `available` came from — a fresh vendor pull or the platform's
+              own catalogue when nobody has ever refreshed yet (MODELS-PERSIST-1). */}
+          {data && (
+            <Caption style={{ display: 'block', marginTop: 4 }}>
+              {data.available_source === 'live'
+                ? t('koiosModelsAdmin.source.live', { at: data.refreshed_at ? formatDateTime(data.refreshed_at) : '—' })
+                : t('koiosModelsAdmin.source.catalog')}
+            </Caption>
+          )}
         </div>
         {/* Catalogue refresh lives with the Models tab (flavour→model map is what it repopulates). */}
         {tab === 'models' && (

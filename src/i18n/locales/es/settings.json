@@ -1634,7 +1634,7 @@
       "pricing": "Precios de la plataforma",
       "tiers": "Niveles",
       "budgets": "Presupuestos mensuales",
-      "package": "Paquete",
+      "package": "Elección de paquete",
       "users": "Usuarios"
     }
   },
@@ -3377,7 +3377,9 @@
       "subtitle": "Qué modelo del proveedor respalda cada variante visible para el cliente.",
       "per1m": "por 1M de tokens",
       "pickPlaceholder": "Elegir un modelo",
-      "noEffort": "Este modelo no tiene niveles de esfuerzo."
+      "noEffort": "Este modelo no tiene niveles de esfuerzo.",
+      "hiddenModels_one": "{{count}} modelo sin precio de catálogo oculto",
+      "hiddenModels_other": "{{count}} modelos sin precio de catálogo ocultos"
     },
     "routing": {
       "title": "Enrutamiento por tipo de solicitud",
@@ -3399,6 +3401,10 @@
       "noFloor": "Sin piso",
       "allowedFlavors": "Variantes permitidas",
       "allowedFlavorsHint": "Dejar vacío para recurrir a las variantes permitidas del paquete."
+    },
+    "source": {
+      "catalog": "Fuente: catálogo de la plataforma (nunca actualizado)",
+      "live": "Instantánea en vivo del {{at}}"
     }
   },
   "modShiftmanager": {

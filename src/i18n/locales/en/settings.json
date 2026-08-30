@@ -1880,7 +1880,7 @@
       "pricing": "Platform pricing",
       "tiers": "Tiers",
       "budgets": "Monthly budgets",
-      "package": "Package",
+      "package": "Package choice",
       "users": "Users"
     }
   },
@@ -3377,7 +3377,9 @@
       "subtitle": "Which vendor model backs each tenant-facing flavour.",
       "per1m": "per 1M tokens",
       "pickPlaceholder": "Pick a model",
-      "noEffort": "This model has no effort levels."
+      "noEffort": "This model has no effort levels.",
+      "hiddenModels_one": "{{count}} model without a catalogue price hidden",
+      "hiddenModels_other": "{{count}} models without a catalogue price hidden"
     },
     "routing": {
       "title": "Routing per request type",
@@ -3399,6 +3401,10 @@
       "noFloor": "No floor",
       "allowedFlavors": "Allowed flavours",
       "allowedFlavorsHint": "Leave empty to fall back to the package's allowed flavours."
+    },
+    "source": {
+      "catalog": "Source: platform catalogue (never refreshed yet)",
+      "live": "Live snapshot from {{at}}"
     }
   },
   "modShiftmanager": {
