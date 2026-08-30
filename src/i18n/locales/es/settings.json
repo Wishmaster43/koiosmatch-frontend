@@ -903,7 +903,10 @@
           "unitToken_other": "tokens",
           "unitRun_one": "ejecución",
           "unitRun_other": "ejecuciones",
-          "weightsLine": "Ponderación: pregunta de chat {{chat}} · otras acciones {{other}} · inteligente ×{{slim}} · máx ×{{max}}"
+          "weightsLine": "Ponderación: pregunta de chat {{chat}} · otras acciones {{other}} · inteligente ×{{slim}} · máx ×{{max}}",
+          "warningNoTier": "Estás al {{pct}}% de tu paquete.",
+          "exceededNoTier": "Tu paquete está lleno. Mejora tu nivel para continuar.",
+          "exceededOverageNoTier": "Tu paquete está completo. El uso adicional cuenta como extra: {{price}} por {{unit}}."
         },
         "users": {
           "line": "{{active}} usuarios ({{included}} incluidos)",
@@ -3562,6 +3565,7 @@
     "priceCaption": "= {{amount}} por mes",
     "colActive": "Activo",
     "colInUse": "En uso",
+    "catalogEmpty": "No se han cargado niveles.",
     "inUseValue_one": "{{count}} cliente",
     "inUseValue_other": "{{count}} clientes",
     "overageHeading": "Overage",

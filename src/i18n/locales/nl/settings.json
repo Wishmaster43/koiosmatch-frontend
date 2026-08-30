@@ -1149,7 +1149,10 @@
           "unitToken_other": "tokens",
           "unitRun_one": "run",
           "unitRun_other": "runs",
-          "weightsLine": "Weging: chatvraag {{chat}} · andere acties {{other}} · slim ×{{slim}} · max ×{{max}}"
+          "weightsLine": "Weging: chatvraag {{chat}} · andere acties {{other}} · slim ×{{slim}} · max ×{{max}}",
+          "warningNoTier": "Je zit op {{pct}}% van je bundel.",
+          "exceededNoTier": "Je bundel is vol. Upgrade je staffel om verder te gaan.",
+          "exceededOverageNoTier": "Je bundel is vol. Verder verbruik telt als extra: {{price}} per {{unit}}."
         },
         "users": {
           "line": "{{active}} gebruikers ({{included}} inbegrepen)",
@@ -3562,6 +3565,7 @@
     "priceCaption": "= {{amount}} per maand",
     "colActive": "Actief",
     "colInUse": "In gebruik",
+    "catalogEmpty": "Geen staffels geladen.",
     "inUseValue_one": "{{count}} tenant",
     "inUseValue_other": "{{count}} tenants",
     "overageHeading": "Overage",

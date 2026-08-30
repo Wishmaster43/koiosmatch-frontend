@@ -1149,7 +1149,10 @@
           "unitToken_other": "tokens",
           "unitRun_one": "run",
           "unitRun_other": "runs",
-          "weightsLine": "Weighting: chat question {{chat}} · other actions {{other}} · smart ×{{slim}} · max ×{{max}}"
+          "weightsLine": "Weighting: chat question {{chat}} · other actions {{other}} · smart ×{{slim}} · max ×{{max}}",
+          "warningNoTier": "You are at {{pct}}% of your bundle.",
+          "exceededNoTier": "Your bundle is full. Upgrade your tier to continue.",
+          "exceededOverageNoTier": "Your bundle is full. Further usage counts as extra: {{price}} per {{unit}}."
         },
         "users": {
           "line": "{{active}} users ({{included}} included)",
@@ -3562,6 +3565,7 @@
     "priceCaption": "= {{amount}} per month",
     "colActive": "Active",
     "colInUse": "In use",
+    "catalogEmpty": "No tiers loaded.",
     "inUseValue_one": "{{count}} tenant",
     "inUseValue_other": "{{count}} tenants",
     "overageHeading": "Overage",

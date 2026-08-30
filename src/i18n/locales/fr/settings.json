@@ -903,7 +903,10 @@
           "unitToken_other": "jetons",
           "unitRun_one": "exécution",
           "unitRun_other": "exécutions",
-          "weightsLine": "Pondération : question de chat {{chat}} · autres actions {{other}} · intelligent ×{{slim}} · max ×{{max}}"
+          "weightsLine": "Pondération : question de chat {{chat}} · autres actions {{other}} · intelligent ×{{slim}} · max ×{{max}}",
+          "warningNoTier": "Vous êtes à {{pct}} % de votre forfait.",
+          "exceededNoTier": "Votre forfait est complet. Passez à un palier supérieur pour continuer.",
+          "exceededOverageNoTier": "Votre forfait est complet. L'utilisation supplémentaire est facturée en extra : {{price}} par {{unit}}."
         },
         "users": {
           "line": "{{active}} utilisateurs ({{included}} inclus)",
@@ -3562,6 +3565,7 @@
     "priceCaption": "= {{amount}} par mois",
     "colActive": "Actif",
     "colInUse": "En utilisation",
+    "catalogEmpty": "Aucun palier chargé.",
     "inUseValue_one": "{{count}} client",
     "inUseValue_other": "{{count}} clients",
     "overageHeading": "Overage",

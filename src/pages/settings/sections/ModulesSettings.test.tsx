@@ -13,8 +13,9 @@ import ModulesSettings from './ModulesSettings'
 
 const mockGet = vi.fn()
 const mockPut = vi.fn()
-vi.mock('@/lib/api', () => ({ default: { get: (...a) => mockGet(...a), put: (...a) => mockPut(...a) } }))
-vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k) => k }) }))
+vi.mock('@/lib/api', () => ({ default: { get: (...a: unknown[]) => mockGet(...a), put: (...a: unknown[]) => mockPut(...a) } }))
+vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string) => k }) }))
+vi.mock('./tiers/BillingTiersCard', () => ({ default: () => <div data-testid="billing-tiers-card" /> }))
 vi.mock('@/i18n', () => ({ LOCALE_BY_LANG: { nl: 'nl-NL', en: 'en-GB' } }))
 const mockRefreshUser = vi.fn()
 vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ activeTenant: { id: 't1' }, refreshUser: mockRefreshUser }) }))
@@ -66,13 +67,24 @@ describe('ModulesSettings', () => {
       '/tenant-modules', expect.objectContaining({ addons: ['reports'] })))
   })
 
-  // MODULES-USERS-SUBTAB-1: the fourth sub-tab sits right after "package", in
-  // Danny's named order (pricing, budgets, package, users).
+  // MODULES-USERS-SUBTAB-1 + TASK F (30-08, tiers sub-tab placed second):
+  // the five sub-tabs render in order pricing, tiers, budgets, package, users.
   it('renders the users sub-tab after package', async () => {
     mockGet.mockResolvedValue({ data: { package: 'core', addons: [] } })
     render(<ModulesSettings />)
     const tabs = await screen.findAllByRole('tab')
     const labels = tabs.map((tab) => tab.textContent)
-    expect(labels).toEqual(['modules.tabs.pricing', 'modules.tabs.budgets', 'modules.tabs.package', 'modules.tabs.users'])
+    expect(labels).toEqual([
+      'modules.tabs.pricing', 'modules.tabs.tiers', 'modules.tabs.budgets',
+      'modules.tabs.package', 'modules.tabs.users',
+    ])
+  })
+
+  // TASK F: the new 'tiers' sub-tab renders the (mocked) BillingTiersCard.
+  it('renders BillingTiersCard on the tiers sub-tab', async () => {
+    mockGet.mockResolvedValue({ data: { package: 'core', addons: [] } })
+    render(<ModulesSettings />)
+    await userEvent.click(await screen.findByRole('tab', { name: 'modules.tabs.tiers' }))
+    expect(await screen.findByTestId('billing-tiers-card')).toBeInTheDocument()
   })
 })

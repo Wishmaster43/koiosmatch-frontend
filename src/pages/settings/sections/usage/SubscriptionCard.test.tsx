@@ -9,6 +9,11 @@ import i18n from '@/i18n'
 import { formatCurrency } from '@/lib/formatters'
 import SubscriptionCard from './SubscriptionCard'
 
+// O1: the mailto upgrade subject must name the real tenant, never the package label.
+vi.mock('@/context/AuthContext', () => ({
+  useAuth: () => ({ activeTenant: { name: 'Yesway Flex B.V.' } }),
+}))
+
 const t = (key: string, opts?: Record<string, unknown>) => i18n.t(key, { ns: 'settings', ...opts })
 
 const subscription = {
@@ -17,6 +22,16 @@ const subscription = {
   resets_at: '2026-09-01T00:00:00Z',
   ai: { budget: 1000, used: 400, over: 0, over_amount: 0 },
   workflow: { budget: 500, used: 620, over: 120, over_amount: 12.5 },
+}
+
+// PRIJSMODEL-C tier subscription — has tier/allowance/state, so the assembler
+// renders TierMeter instead of the CREDITS-2 fallback MeterBar.
+const tierSubscription = {
+  package_key: 'pro',
+  package_label: 'Koios Pro',
+  resets_at: '2026-09-01T00:00:00Z',
+  ai: { tier: { key: 'pro', label: 'Pro' }, allowance: 1000, used: 400, pct: 40, state: 'ok' as const, over: 0 },
+  workflow: { tier: { key: 'max', label: 'Max' }, allowance: 500, used: 200, pct: 40, state: 'ok' as const, over: 0 },
 }
 
 describe('SubscriptionCard', () => {
@@ -80,6 +95,43 @@ describe('SubscriptionCard', () => {
     expect(onDrillAi).toHaveBeenCalledTimes(1)
     await user.click(screen.getByRole('button', { name: new RegExp(t('billing.usage.plan.workflowMeter')) }))
     expect(onDrillWorkflow).toHaveBeenCalledTimes(1)
+  })
+
+  // New subscription shape (tier/allowance/state present) renders three real
+  // meters via TierMeter — tier names visible, no regression to the fallback.
+  it('renders the tier meters with tier names when the subscription carries tier fields', () => {
+    render(<SubscriptionCard subscription={tierSubscription} phase="ready" />)
+    expect(screen.getByText(t('billing.usage.plan.tier.aiTitle'))).toBeInTheDocument()
+    expect(screen.getByText(t('billing.usage.plan.tier.workflowTitle'))).toBeInTheDocument()
+    expect(screen.getByText(t('billing.usage.plan.tier.name', { name: 'Pro' }))).toBeInTheDocument()
+    expect(screen.getByText(t('billing.usage.plan.tier.name', { name: 'Max' }))).toBeInTheDocument()
+  })
+
+  // Users line renders when the subscription carries a users block.
+  it('renders the users line when subscription.users is present', () => {
+    const withUsers = { ...subscription, users: { included: 5, active: 7, extra: 2, extra_amount: 9.5 } }
+    render(<SubscriptionCard subscription={withUsers} phase="ready" />)
+    expect(screen.getByText(t('billing.usage.plan.users.line', { active: '7', included: '5' }))).toBeInTheDocument()
+  })
+
+  // O1 regression: the mailto subject names the real tenant, not the package.
+  it('names the real tenant (not the package label) in the mailto upgrade subject', () => {
+    const blocked = {
+      ...tierSubscription,
+      ai: { ...tierSubscription.ai, used: 1000, pct: 100, state: 'blocked' as const, overage_enabled: false, upgrade_hint: { contact: 'mailto:sales@koios.example' } },
+    }
+    render(<SubscriptionCard subscription={blocked} phase="ready" />)
+    const link = screen.getByRole('link', { name: t('billing.usage.plan.tier.upgradeCta') })
+    const href = decodeURIComponent((link.getAttribute('href') ?? '').replace(/\+/g, ' '))
+    expect(href).toContain('Yesway Flex B.V.')
+    expect(href).not.toContain('Koios Pro')
+  })
+
+  // O2: subscription.period.resets_at wins over the root resets_at when both are present.
+  it('prefers subscription.period.resets_at over the root resets_at', () => {
+    const withPeriod = { ...subscription, period: { resets_at: '2026-10-15T00:00:00Z' } }
+    render(<SubscriptionCard subscription={withPeriod} phase="ready" />)
+    expect(screen.getByText(/15-10-2026/)).toBeInTheDocument()
   })
 
   it('renders loading/empty/error/unavailable states honestly', () => {

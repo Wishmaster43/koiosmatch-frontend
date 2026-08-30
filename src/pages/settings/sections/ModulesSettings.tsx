@@ -1,11 +1,10 @@
 /**
  * ModulesSettings — super-admin, per-tenant configuration (Super Admin tab).
- * Picks the base package (Core / Pro / Enterprise) + toggles add-ons (reporting /
- * AI planner / planning). Writes { package, addons } to PUT /tenant-modules.
- * Connectors live under Integrations → Apps. Super-admin-only; the backend re-checks.
- *
- * Model: besloten 2026-06-23 (memory `project-pricing-model`). Legacy package strings
- * are normalised to the new tier for display until the backend sends {package, addons}.
+ * Picks the base package (Core / Pro / Enterprise) + toggles add-ons (reporting / AI
+ * planner / planning); writes { package, addons } to PUT /tenant-modules. Connectors
+ * live under Integrations → Apps; super-admin-only, the backend re-checks. Model
+ * besloten 2026-06-23 (memory `project-pricing-model`) — legacy package strings are
+ * normalised to the new tier for display until the backend sends {package, addons}.
  */
 import { useState, useEffect, useRef } from 'react'
 import SubTabBar from '@/components/drawer/SubTabBar'
@@ -25,21 +24,28 @@ import { GroupLabel } from '@/components/ui/typography'
 import PlatformPricingCard from './PlatformPricingCard'
 import BillingBudgetsCard from './BillingBudgetsCard'
 import BillingUsersCard from './BillingUsersCard'
+import BillingTiersCard from './tiers/BillingTiersCard'
 
-// Base tiers (the "size bar"). `desc` lists what each tier adds over the previous one.
-const TIERS = [
+// Sub-tab ids for the SubTabBar switcher below.
+type ModulesSubTab = 'pricing' | 'tiers' | 'budgets' | 'package' | 'users'
+
+// Base package option ("size bar" cards) / add-on toggle row.
+interface PackageOption { id: string; name: string; desc: string; Icon: typeof Package; }
+interface AddonOption extends Omit<PackageOption, 'Icon'> { Icon?: typeof BarChart2; image?: string; comingSoon?: boolean }
+
+// Base packages (the "size bar"). `desc` lists what each adds over the previous one.
+const PACKAGES: PackageOption[] = [
   { id: 'core',       name: 'Koios Core',       desc: 'ATS + CRM',                                              Icon: Package },
   { id: 'pro',        name: 'Koios Pro',        desc: '+ Koios AI + AI Agents + Workflows + WhatsApp Business', Icon: Rocket },
   { id: 'enterprise', name: 'Koios Enterprise', desc: '+ REST API + Insights+ + Connectors + SLA',              Icon: Crown },
 ]
 
-// Add-ons (toggle on top of any tier). Each id maps 1:1 to a module key the backend
-// must surface in tenant.modules (/auth/me) so the UI gate (lib/access.ts) can hide/show it.
+// Add-ons (toggle on top of any tier). Each id maps 1:1 to a module key the backend must
+// surface in tenant.modules (/auth/me) so the UI gate (lib/access.ts) can hide/show it.
 // 'sm_ai' (Shiftmanager AI Planner) is retired (Danny 2026-07-02): no distinct surface, so it
 // is no longer offered here — legacy tenants keep working (it still resolves to shiftmanager).
-// MODULES-ICONS-1 (Danny 23-07): every row carries an icon — the reporting add-ons
-// show the REAL brand logo of the system they report on.
-const ADDONS = [
+// MODULES-ICONS-1 (Danny 23-07): every row carries an icon — the reporting add-ons show the REAL brand logo of the system they report on.
+const ADDONS: AddonOption[] = [
   { id: 'reports', name: 'Rapporten Koios Match',  Icon: BarChart2,          desc: 'Eigen Koios Match-rapportages en inzichten.' },
   { id: 'sm',    name: 'Rapportage Shiftmanager',  image: shiftmanagerLogo,  desc: 'Rapportages en GET-syncs op Shiftmanager-data (diensten, klanten, kandidaten).' },
   { id: 'hf',    name: 'Rapportage HelloFlex',     image: helloflexLogo,     desc: 'Rapportages en GET-syncs op HelloFlex-data.' },
@@ -48,7 +54,7 @@ const ADDONS = [
 
 // Legacy package string → new base tier (display only; the backend sends {package, addons}
 // once migrated, and that wins). Keeps the UI sensible for not-yet-migrated tenants.
-const LEGACY_TO_TIER = {
+const LEGACY_TO_TIER: Record<string, string> = {
   core: 'core', pro: 'pro', enterprise: 'enterprise',
   ats_crm: 'core', ats_crm_planning: 'core',
   reporting_sm: 'core', reporting_hf: 'core', reporting_sm_hf: 'core',
@@ -58,17 +64,20 @@ const LEGACY_TO_TIER = {
   ats_crm_workflows: 'enterprise', connect: 'enterprise',
 }
 
-const sameSet = (a, b) => a.length === b.length && [...a].sort().join() === [...b].sort().join()
+const sameSet = (a: string[], b: string[]) => a.length === b.length && [...a].sort().join() === [...b].sort().join()
 
-// Super-admin tenant module config: base tier + add-ons, plus the platform pricing/budgets/users sub-tabs.
+// Super-admin tenant module config: base package + add-ons, plus the platform
+// pricing/tiers/budgets/users sub-tabs.
 export default function ModulesSettings() {
   const { t } = useTranslation('settings')
-  const { activeTenant, refreshUser } = useAuth()
+  const auth = useAuth()
+  const activeTenant = auth?.activeTenant
+  const refreshUser = auth?.refreshUser
   const [pkg,     setPkg]     = useState('core')
-  const [addons,  setAddons]  = useState([])
-  const [savedAt, setSavedAt] = useState({ pkg: 'core', addons: [] }) // last-saved snapshot
-  // MODULES-SUBTABS-1: which of the three groups is on screen.
-  const [subTab, setSubTab] = useState('pricing')
+  const [addons,  setAddons]  = useState<string[]>([])
+  const [savedAt, setSavedAt] = useState<{ pkg: string; addons: string[] }>({ pkg: 'core', addons: [] }) // last-saved snapshot
+  // MODULES-SUBTABS-1: which of the sub-tab groups is on screen.
+  const [subTab, setSubTab] = useState<ModulesSubTab>('pricing')
   const [loading, setLoading] = useState(true)
   const [saving,  setSaving]  = useState(false)
   const [savedOk, setSavedOk] = useState(false)
@@ -95,8 +104,7 @@ export default function ModulesSettings() {
 
   const hasChange = pkg !== savedAt.pkg || !sameSet(addons, savedAt.addons)
 
-  // Re-sync on window focus so a long-open tab never shows stale toggles (a reseed or a
-  // colleague's change elsewhere) — but never clobber the admin's unsaved edits.
+  // Re-sync on window focus so a long-open tab never shows stale toggles (a reseed or a colleague's change) — but never clobber the admin's unsaved edits.
   const stateRef = useRef({ pkg, addons, savedAt })
   // Keep a ref mirror of the latest state so the focus handler below can read it without becoming its dependency.
   useEffect(() => { stateRef.current = { pkg, addons, savedAt } }, [pkg, addons, savedAt])
@@ -120,7 +128,7 @@ export default function ModulesSettings() {
     window.addEventListener('focus', onFocus)
     return () => window.removeEventListener('focus', onFocus)
   }, [activeTenant?.id])
-  const toggleAddon = (id) => setAddons(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id])
+  const toggleAddon = (id: string) => setAddons(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id])
 
   // Persist { package, addons }. The backend re-checks authorization + validates.
   const save = async () => {
@@ -128,7 +136,7 @@ export default function ModulesSettings() {
     try {
       await api.put('/tenant-modules', { tenant_id: activeTenant?.id, package: pkg, addons })
       setSavedAt({ pkg, addons })
-      await refreshUser()
+      await refreshUser?.()
       setSavedOk(true); setTimeout(() => setSavedOk(false), 2500)
     } catch { notifyError(t('statusList.saveFailed')) }
     setSaving(false)
@@ -147,12 +155,11 @@ export default function ModulesSettings() {
 
   return (
     <div style={{ maxWidth: 720 }}>
-      {/* MODULES-SUBTABS-1 (Danny 24-08: "3 subtabjes aub") — the three stacked
-          cards become sub-tabs in his named order; SubTabBar is the one shared
-          switcher (roving tabindex, §6). */}
+      {/* MODULES-SUBTABS-1 (Danny 24-08 "3 subtabjes aub"): grew to five tabs (users 25-08, tiers 30-08) — SubTabBar is the one shared switcher (roving tabindex, §6). */}
       <div style={{ marginBottom: 20 }}>
-        <SubTabBar active={subTab} onChange={setSubTab} tabs={[
+        <SubTabBar active={subTab} onChange={(id) => setSubTab(id as ModulesSubTab)} tabs={[
           { id: 'pricing', label: t('modules.tabs.pricing') },
+          { id: 'tiers', label: t('modules.tabs.tiers') },
           { id: 'budgets', label: t('modules.tabs.budgets') },
           { id: 'package', label: t('modules.tabs.package') },
           { id: 'users', label: t('modules.tabs.users') },
@@ -162,6 +169,9 @@ export default function ModulesSettings() {
       {/* Platform pricing (CREDITS-1) — the AI markup % and the workflow credit
           price knobs; superadmin-only. */}
       {subTab === 'pricing' && <PlatformPricingCard />}
+
+      {/* AI/workflow usage-tier catalogue + per-tenant tier assignment (TASK F wiring). */}
+      {subTab === 'tiers' && <BillingTiersCard />}
 
       {/* CREDITS-2-FE deel 2 — package + per-tenant monthly budgets (Danny: "vul beiden en toon ze hier"). */}
       {subTab === 'budgets' && <BillingBudgetsCard />}
@@ -189,7 +199,7 @@ export default function ModulesSettings() {
           activeFill="var(--color-success-bg)"
           value={pkg}
           onChange={setPkg}
-          options={TIERS.map(tier => ({
+          options={PACKAGES.map(tier => ({
             value: tier.id,
             label: tier.name,
             description: t(`modules.tierDesc.${tier.id}`, { defaultValue: tier.desc }),
@@ -206,6 +216,7 @@ export default function ModulesSettings() {
         {ADDONS.map(addon => {
           const on = addons.includes(addon.id)
           const disabled = addon.comingSoon
+          const AddonIcon = addon.Icon
           return (
             <div key={addon.id}
               onClick={disabled ? undefined : () => toggleAddon(addon.id)}
@@ -221,7 +232,7 @@ export default function ModulesSettings() {
                 border: `1px solid ${on ? 'var(--color-success)' : 'var(--border)'}` }}>
               {addon.image
                 ? <img src={addon.image} alt="" width={18} height={18} style={{ flexShrink: 0, objectFit: 'contain', borderRadius: 4 }} />
-                : <addon.Icon size={16} color={on ? 'var(--color-success)' : 'var(--text-muted)'} style={{ flexShrink: 0 }} />}
+                : AddonIcon ? <AddonIcon size={16} color={on ? 'var(--color-success)' : 'var(--text-muted)'} style={{ flexShrink: 0 }} /> : null}
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)' }}>{t(`modules.addon.${addon.id}`, { defaultValue: addon.name })}</div>
                 <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t(`modules.addonDesc.${addon.id}`, { defaultValue: addon.desc })}</div>

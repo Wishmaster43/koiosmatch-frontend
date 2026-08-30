@@ -903,7 +903,10 @@
           "unitToken_other": "Tokens",
           "unitRun_one": "Lauf",
           "unitRun_other": "Läufe",
-          "weightsLine": "Gewichtung: Chat-Anfrage {{chat}} · andere Aktionen {{other}} · Smart ×{{slim}} · Max ×{{max}}"
+          "weightsLine": "Gewichtung: Chat-Anfrage {{chat}} · andere Aktionen {{other}} · Smart ×{{slim}} · Max ×{{max}}",
+          "warningNoTier": "Du liegst bei {{pct}}% deines Kontingents.",
+          "exceededNoTier": "Dein Kontingent ist voll. Wechsle auf eine höhere Stufe, um fortzufahren.",
+          "exceededOverageNoTier": "Dein Kontingent ist voll. Weiterer Verbrauch zählt als Extra: {{price}} pro {{unit}}."
         },
         "users": {
           "line": "{{active}} Nutzer ({{included}} inklusive)",
@@ -3562,6 +3565,7 @@
     "priceCaption": "= {{amount}} pro Monat",
     "colActive": "Aktiv",
     "colInUse": "In Gebrauch",
+    "catalogEmpty": "Keine Stufen geladen.",
     "inUseValue_one": "{{count}} Mandant",
     "inUseValue_other": "{{count}} Mandanten",
     "overageHeading": "Overage",

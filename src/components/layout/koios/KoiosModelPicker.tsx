@@ -17,7 +17,7 @@ import type { TFn } from '@/types/koios'
 // PORTAL-MARKER-1: a click inside an open portalled picker menu is never "outside".
 import { isInsideDropdownPortal } from '@/lib/useDropdownPlacement'
 
-// Model-tier picker for the Koios panel; see the module doc comment above for the
+// Model-flavour picker for the Koios panel; see the module doc comment above for the
 // shared options vocabulary this shares with the Settings model picker.
 export default function KoiosModelPicker({ models, options, value, onChange, t }: {
   models?: string[]; options?: KoiosModelOption[]; value?: string | null; onChange: (m: string) => void; t: TFn
@@ -26,7 +26,7 @@ export default function KoiosModelPicker({ models, options, value, onChange, t }
   const ref = useRef<HTMLDivElement>(null)
 
   // Resolve a model/flavour id to its tenant-facing stand label — server option
-  // label first, the shared tier map as fallback (see module doc comment).
+  // label first, the shared flavour map (tier = staffel since PRIJSMODEL-C) as fallback (see module doc comment).
   const standLabel = (id?: string | null) => resolveModelLabel(id, options, t)
 
   // Close the menu on an outside click.
