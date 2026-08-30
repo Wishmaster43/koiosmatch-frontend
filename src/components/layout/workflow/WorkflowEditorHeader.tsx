@@ -213,7 +213,11 @@ export default function WorkflowEditorHeader({
       {/* A disabled button swallows its tooltip and is not focusable, so the reason
           renders as a visible status line as well (§3: disabled WITH an honest notice). */}
       {status !== 'active' && (
-        <span role="status" style={{ maxWidth: 220, flexShrink: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+        <span role="status" title={t('editor.runRequiresActive')}
+          // The notice may SHRINK (never the buttons): at narrow widths it truncates with an
+          // ellipsis and keeps its full text in the title; a non-shrinking notice pushed
+          // "Opslaan" outside the viewport (smoke flow workflow-editor, 30-08).
+          style={{ maxWidth: 220, minWidth: 0, flexShrink: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           <Caption as="span" style={{ color: 'var(--color-warning-text)' }}>{t('editor.runRequiresActive')}</Caption>
         </span>
       )}
