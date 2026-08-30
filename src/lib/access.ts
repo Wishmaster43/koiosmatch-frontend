@@ -54,6 +54,9 @@ const MODULE_TO_PAGES: Record<string, string[]> = {
   sm:                ['shiftmanager'],
   sm_ai:             ['shiftmanager'], // legacy alias → SM reporting
   hf:                ['helloflex'],
+  // INTEGRATIONS-CONTRACT §1: the Werkzoeken connector module (new) gates its
+  // settings section; BE still has to add 'wz' to Tenant::PACKAGES (open punt).
+  wz:                ['werkzoeken'],
   reports:           ['reports'],
   api:               [],               // REST API lives in settings (no top-level nav page)
   insights:          [],               // Insights+ within reporting/settings (no separate gate yet)
