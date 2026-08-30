@@ -17,6 +17,8 @@ export interface SchemaField {
 
 // A workflow building block: display meta + its config schema + gating hints.
 export interface ModuleDef {
+  // VERTREKMODULE-1: valid workflow START (Koios entity nodes + inbound webhook).
+  isStart?: boolean
   type: string
   label: string
   // Mirrors the lucide icon contract (size); the SM/HF marks match it too.

@@ -40,6 +40,7 @@ export default function WorkflowEditorHeader({
   liveRunActive, activeRunId, onStopped,
   running, onRun, onRunDryRun,
   saved, onSave, onSaveClose,
+  startInvalid,
   onClose,
 }: {
   // Undefined for a brand-new, not-yet-saved workflow — the changelog icon then
@@ -58,6 +59,8 @@ export default function WorkflowEditorHeader({
   onToggleStatus: () => void
   showLogs: boolean
   onToggleLogs: () => void
+  // VERTREKMODULE-1: true when the first step is not a Koios entity/webhook.
+  startInvalid?: boolean
   // Run feedback surfaced next to the controls that caused it.
   runError: string | null
   // PRIJSMODEL-C 30-08: the staffel stand on a 422 budget_exceeded run — only
@@ -237,6 +240,14 @@ export default function WorkflowEditorHeader({
           the honest confirm before it actually fires lives in the composer. */}
       {/* A disabled button swallows its tooltip and is not focusable, so the reason
           renders as a visible status line as well (§3: disabled WITH an honest notice). */}
+      {/* VERTREKMODULE-1 (Danny 30/31-08): a workflow that does not start at Koios
+          master data (entity node or webhook) announces itself as broken. */}
+      {startInvalid && (
+        <span role="status" title={t('editor.missingStartModule')}
+          style={{ maxWidth: 260, minWidth: 0, flexShrink: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          <Caption as="span" style={{ color: 'var(--color-danger-text)' }}>{t('editor.missingStartModule')}</Caption>
+        </span>
+      )}
       {status !== 'active' && (
         <span role="status" title={t('editor.runRequiresActive')}
           // The notice may SHRINK (never the buttons): at narrow widths it truncates with an

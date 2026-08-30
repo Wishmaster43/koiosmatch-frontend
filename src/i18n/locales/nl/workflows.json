@@ -68,7 +68,8 @@
     "runRequiresActive": "Alleen een actieve workflow kan draaien",
     "router": {
       "addRoute": "Route toevoegen"
-    }
+    },
+    "missingStartModule": "Vertrekmodule ontbreekt: de eerste stap moet een Koios-entiteit of webhook zijn"
   },
   "fields": {
     "boolOn": "Aan",

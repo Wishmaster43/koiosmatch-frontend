@@ -107,3 +107,18 @@ describe('WorkflowEditorHeader · run gated on status (F4)', () => {
     expect(screen.queryByText('editor.runRequiresActive')).toBeNull()
   })
 })
+
+// VERTREKMODULE-1 (Danny 30/31-08): a workflow that does not start at Koios
+// master data announces itself as broken in the header — raw key assertions.
+describe('WorkflowEditorHeader · missing start module warning (VERTREKMODULE-1)', () => {
+  it('renders the warning status line when startInvalid', () => {
+    render(<WorkflowEditorHeader {...baseProps} startInvalid />)
+    expect(screen.getByText('editor.missingStartModule')).toBeInTheDocument()
+  })
+
+  it('renders no such line on a valid start', () => {
+    render(<WorkflowEditorHeader {...baseProps} />)
+    expect(screen.queryByText('editor.missingStartModule')).toBeNull()
+  })
+})
+

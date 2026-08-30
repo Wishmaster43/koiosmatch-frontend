@@ -50,7 +50,7 @@ function EditorInner({ workflow, onClose, onSave, initialRunId }: {
     saved, running, runError, runBudget, setRunError, showSchedule, setShowSchedule, widePanelActive, setWidePanelActive, showLogs, setShowLogs,
     liveRun, activeRunId, liveRunActive, runConflict, handleStopped,
     pickerState, setPickerState, filterState, setFilterState, outputState, setOutputState,
-    firstNodeId, setStartNodeId, getUpstreamVariables,
+    firstNodeId, setStartNodeId, startInvalid, getUpstreamVariables,
     handleEdgeAdd, handleEdgeDelete, handleEdgeFilter, saveEdgeFilter, handleNodeRun,
     insertModule, addRouterBranch, updateNodeConfig, deleteNode, handleSave, handleRun, isDirty,
   } = useWorkflowEditor({ workflow, onSave, initialRunId })
@@ -112,6 +112,7 @@ function EditorInner({ workflow, onClose, onSave, initialRunId }: {
           view={view} onViewChange={setView}
           trigger={trigger} scheduleConfig={scheduleConfig} onOpenSchedule={() => setShowSchedule(true)}
           status={status} onToggleStatus={() => setStatus(s => s === 'active' ? 'inactive' : 'active')}
+          startInvalid={startInvalid}
           showLogs={showLogs} onToggleLogs={() => setShowLogs(s => !s)}
           runError={runError} runBudget={runBudget} onRunError={setRunError} runConflict={runConflict}
           liveRunActive={liveRunActive} activeRunId={activeRunId} onStopped={handleStopped}

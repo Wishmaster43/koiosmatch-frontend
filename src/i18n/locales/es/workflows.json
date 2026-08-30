@@ -29,7 +29,8 @@
     "runRequiresActive": "Solo un flujo de trabajo activo puede ejecutarse",
     "router": {
       "addRoute": "Agregar ruta"
-    }
+    },
+    "missingStartModule": "Falta el módulo de inicio: el primer paso debe ser una entidad de Koios o un webhook"
   },
   "fields": {
     "boolOn": "Activado",

@@ -5,6 +5,8 @@ import { Webhook } from 'lucide-react'
 
 export default {
   type:  'webhook',
+  // VERTREKMODULE-1 + Appendix H: the inbound webhook is a valid point of origin.
+  isStart: true,
   category: 'Triggers',
   label: 'Webhook Trigger',
   Icon:  Webhook,

@@ -33,7 +33,8 @@
     "runRequiresActive": "Only an active workflow can run",
     "router": {
       "addRoute": "Add route"
-    }
+    },
+    "missingStartModule": "Missing start module: the first step must be a Koios entity or webhook"
   },
   "fields": {
     "boolOn": "On",

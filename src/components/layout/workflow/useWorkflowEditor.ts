@@ -6,6 +6,7 @@
  * (logic in a hook, §3). Returns the state + handlers the JSX consumes.
  */
 import { useState, useCallback, useEffect, useMemo, useRef } from 'react'
+import { START_MODULE_TYPES } from '@/modules'
 import { addEdge, useNodesState, useEdgesState } from '@xyflow/react'
 import type { Connection } from '@xyflow/react'
 import { uid, mkEdge, NODE_W, NODE_H, stepsToFlow, flowToSteps } from './serialization'
@@ -419,6 +420,12 @@ export function useWorkflowEditor({ workflow, onSave, initialRunId = null }: {
     ? startNodeId
     : autoFirstNodeId
 
+  // VERTREKMODULE-1 (Danny 30/31-08): a workflow STARTS at Koios master data —
+  // an entity node or the inbound webhook. Any other first step renders the
+  // header warning (editor.missingStartModule); the seeder fix is BE-side.
+  const firstNode = nodes.find(n => n.id === firstNodeId)
+  const startInvalid = firstNode != null && !START_MODULE_TYPES.has(firstNode.data.type ?? '')
+
   // WF-R3: map the polled run's steps (step_id → status) onto the nodes so the
   // canvas shows real per-step progress (running/success/failed) live.
   // NODE-PROGRESS-1 (Danny 23-07): also carry the live {done,total} loop progress
@@ -461,7 +468,7 @@ export function useWorkflowEditor({ workflow, onSave, initialRunId = null }: {
     saved, running, runError, runBudget, setRunError, showSchedule, setShowSchedule, widePanelActive, setWidePanelActive, showLogs, setShowLogs,
     liveRun, activeRunId, liveRunActive, runConflict, handleStopped,
     pickerState, setPickerState, filterState, setFilterState, outputState, setOutputState,
-    firstNodeId, setStartNodeId, getUpstreamVariables,
+    firstNodeId, setStartNodeId, startInvalid, getUpstreamVariables,
     handleEdgeAdd, handleEdgeDelete, handleEdgeFilter, saveEdgeFilter, handleNodeRun,
     insertModule, addRouterBranch, updateNodeConfig, deleteNode, handleSave, handleRun, isDirty,
   }

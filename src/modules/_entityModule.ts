@@ -35,6 +35,8 @@ export default function makeEntityModule(cfg: EntityModuleConfig): ModuleDef {
 
   return {
     type, label, category, Icon, color, bg,
+    // VERTREKMODULE-1 (Danny 30-08): every entity node is a valid point of origin.
+    isStart: true,
     ...(module ? { module } : {}),
     schema: [
       // Action picker — drives which section shows (defaults to the first action).

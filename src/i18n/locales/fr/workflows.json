@@ -29,7 +29,8 @@
     "runRequiresActive": "Seul un workflow actif peut s’exécuter",
     "router": {
       "addRoute": "Ajouter une route"
-    }
+    },
+    "missingStartModule": "Module de départ manquant : la première étape doit être une entité Koios ou un webhook"
   },
   "fields": {
     "boolOn": "Activé",
