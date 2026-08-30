@@ -201,6 +201,9 @@ export const MODULE_META = Object.fromEntries(
 export const START_MODULE_TYPES = new Set([
   ...MODULES.filter(m => m.isStart).map(m => m.type),
   'sm_employees', 'sm_schedules',
+  // CMFE-besluit 31-08 (CMBE-vraag): de SM-sync-starts zijn dezelfde familie —
+  // de SM-spiegel IS het subject van die workflows (4 geseede templates).
+  'sm_candidates', 'sm_customers', 'sm_shifts',
   'candidate_filter', 'candidates_fetch',
   'whatsapp_inbound',
 ])
