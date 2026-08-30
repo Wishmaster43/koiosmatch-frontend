@@ -90,8 +90,13 @@ compliant alternative.
     "niet alles is tokens, maar wat via de workflow gaat — wat we liefst met de
     meeste willen — dat zijn wel Koios Tokens").** So the workflow-versus-code
     choice is a COMMERCIAL choice as well as a product one: a workflow run is
-    billable consumption, plumbing and mass sweeps are not. Never call the unit
-    anything else in code or copy — it is a Koios Token. And never quietly move
+    billable consumption, plumbing and mass sweeps are not. **Unit names since
+    PRIJSMODEL-C (Danny 30-08, staffels):** the workflow unit is a **workflow-run**
+    (one module execution; wait/failed/plumbing steps do not count) and the AI unit
+    is a **Koios AI-token** (weighted: chat 3, other actions 1, flavour slim ×2 /
+    max ×5). A bare "Koios Token" as a unit name in code or copy is a finding
+    (13 keys ×5 locales renamed in f34a13e6; contract in
+    koiosmatch-api/docs/plans/PRIJSMODEL-C.md). And never quietly move
     a high-frequency, per-record automation into a workflow "because it is
     cleaner": that is a bill the tenant did not ask for. When the volume is high
     and there is nothing for a tenant to configure, that is exactly the case the
