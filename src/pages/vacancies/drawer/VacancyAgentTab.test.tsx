@@ -94,11 +94,12 @@ const renderHarness = () => {
 // returns a bare array, per unwrapList's array branch — see AIManagementTabs.test.tsx).
 const mockFlow = { id: 'f1', name: 'Zorgintake (9 stappen)', channel: 'whatsapp', active: true }
 
-const routeGet = (detail: Record<string, unknown>, agents: unknown[] = [mockAgent], flows: unknown[] = [mockFlow]) =>
+const routeGet = (detail: Record<string, unknown>, agents: unknown[] = [mockAgent], flows: unknown[] = [mockFlow], workflows: unknown[] = []) =>
   (url: string) => {
     if (url === '/vacancies/v1') return Promise.resolve({ data: { data: detail } })
     if (url === '/ai/agents') return Promise.resolve({ data: agents })
     if (url === '/ai/interview-flows') return Promise.resolve({ data: flows })
+    if (url === '/workflows') return Promise.resolve({ data: workflows })
     return Promise.resolve({ data: [] })
   }
 
@@ -283,5 +284,61 @@ describe('VacancyAgentTab · backfill existing applicants (INTERVIEW-BACKFILL-1)
 
     await waitFor(() => expect(mockNotifyError).toHaveBeenCalledWith('Interview starten voor bestaande sollicitanten is nog niet beschikbaar. Wacht op de backend-koppeling.'))
     expect(screen.getByRole('button', { name: BACKFILL_BUTTON })).toBeDisabled()
+  })
+})
+
+// INTERVIEW-WORKFLOW-1 (Appendix D/E): the vacancy's own workflow link,
+// presence-gated on whether GET /vacancies/{id} carries the
+// `interview_workflow_id` key at all — never inferred from its value.
+const WORKFLOW_UNAVAILABLE = 'Beschikbaar zodra de workflow-koppeling aan de backend is'
+const mockWorkflow = { id: 'wf-1', name: 'Kelly-Helpende', status: 'active', folder: { id: 'fo-1', name: 'Kelly' }, agent: { id: 'a1', name: 'Kelly' } }
+
+describe('VacancyAgentTab · interview-workflow link (INTERVIEW-WORKFLOW-1)', () => {
+  it('presence gate absent: renders disabled with the honest notice, old agent picker untouched, no PATCH on interaction', async () => {
+    // rawDetail() never carries `interview_workflow_id` at all (a tenant/backend
+    // not yet on this contract) — the picker must go inert, not vanish.
+    mockGet.mockImplementation(routeGet(rawDetail()))
+    renderHarness()
+    await waitFor(() => screen.getByText(WORKFLOW_UNAVAILABLE))
+    // The old agent picker still works exactly as before.
+    await waitFor(() => expect(screen.getByRole('button', { name: PLACEHOLDER })).toBeInTheDocument())
+    expect(mockPatch).not.toHaveBeenCalled()
+  })
+
+  it('presence gate present, unlinked: picking a workflow PATCHes exactly { interview_workflow_id }, clearing sends null', async () => {
+    mockGet.mockImplementation(routeGet(rawDetail({ interview_workflow_id: null }), [mockAgent], [mockFlow], [mockWorkflow]))
+    renderHarness()
+    const trigger = await screen.findByRole('button', { name: 'Selecteer een interview-workflow' })
+
+    // THIN response on purpose (no nested interview_workflow): the derived lines must
+    // resolve from the fetched workflow list, never from the PATCH echo (Opus round 2).
+    mockPatch.mockResolvedValue({ data: { data: rawDetail({ interview_workflow_id: 'wf-1' }) } })
+    const user = userEvent.setup()
+    await user.click(trigger)
+    await user.click(screen.getByRole('button', { name: 'Kelly · Kelly-Helpende' }))
+    expect(mockPatch).toHaveBeenCalledWith('/vacancies/v1', { interview_workflow_id: 'wf-1' })
+
+    // HIGH fix (verdict finding 1): right after the pick, the derived line
+    // shows the real agent + workflow names — never the "— / —" dash pair —
+    // with NO reopen needed. Resolved from the already-fetched workflow list
+    // (workflowById), which the picked id itself came from.
+    await waitFor(() => expect(screen.getAllByText('Afgeleid uit de workflow: Kelly / Kelly-Helpende').length).toBe(2))
+    expect(screen.queryByText(/— \/ —/)).not.toBeInTheDocument()
+
+    mockPatch.mockResolvedValue({ data: { data: rawDetail({ interview_workflow_id: null, interview_workflow: null }) } })
+    await waitFor(() => screen.getByTitle(/Geen workflow wissen/))
+    await user.click(screen.getByTitle(/Geen workflow wissen/))
+    expect(mockPatch).toHaveBeenLastCalledWith('/vacancies/v1', { interview_workflow_id: null })
+  })
+
+  it('presence gate present, linked: agent + flow lines become read-only derived display', async () => {
+    mockGet.mockImplementation(routeGet(
+      rawDetail({ interview_workflow_id: 'wf-1', interview_workflow: mockWorkflow }),
+      [mockAgent], [mockFlow], [mockWorkflow],
+    ))
+    renderHarness()
+    await waitFor(() => expect(screen.getAllByText('Afgeleid uit de workflow: Kelly / Kelly-Helpende').length).toBeGreaterThan(0))
+    // The old interactive agent picker is gone — replaced by derived text.
+    expect(screen.queryByRole('button', { name: PLACEHOLDER })).not.toBeInTheDocument()
   })
 })

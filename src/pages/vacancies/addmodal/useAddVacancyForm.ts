@@ -216,6 +216,8 @@ export function useAddVacancyForm({
   // Punt 19: AI-agent — a single optional link (card only rendered when
   // showAiAgentCard is true, but the field itself is harmless either way).
   const [aiAgentId, setAiAgentId] = useState('')
+  // INTERVIEW-WORKFLOW-1 (Appendix D/E): an optional, ungated companion field.
+  const [interviewWorkflowId, setInterviewWorkflowId] = useState('')
   // Punt 20: seed the vacancy owner's own linked AI agent (agent.user.id ===
   // ownerId), empty when the owner has none — a Koios-marked derivation, never
   // a silent guess (§0).
@@ -252,7 +254,7 @@ export function useAddVacancyForm({
   // The create submit/payload builder (§3 size split) — see the file header.
   const { saving, postCreatePhase, handleSubmit } = useAddVacancySubmit({
     setErrors, setCreateError,
-    form, cascade, skills, channels, matchWeightTemplateId, matchWeights, aiAgentId, published,
+    form, cascade, skills, channels, matchWeightTemplateId, matchWeights, aiAgentId, interviewWorkflowId, published,
     applicationSettings, applicationSettingsTouched, showAttachmentCards, attachments, onClose, onCreated, t,
   })
 
@@ -272,6 +274,7 @@ export function useAddVacancyForm({
     matchWeightTemplateId, setMatchWeightTemplateId, matchWeights, setMatchWeights,
     // Punt 19 + punt 20 (owner-derived agent suggestion)
     showAiAgentCard, aiAgentId, setAiAgentId: handleAiAgentChange, showAgentSuggestion,
+    interviewWorkflowId, setInterviewWorkflowId,
     // Punt 20 — applicationSettingsTouched is exposed so the assembler's
     // CollapsedCard `filled` indicator (A+D layout, Danny 03-08) can tell a
     // touched-but-unpublished settings edit apart from the untouched default.

@@ -30,7 +30,7 @@ const API_TO_FORM: Record<string, string> = {
   salary_min: 'salaryMin', salary_max: 'salaryMax', salary_period: 'salaryPeriod',
   hours_min: 'hoursMin', hours_max: 'hoursMax', description: 'description',
   match_weight_template_id: 'matchWeightTemplateId', match_weights: 'matchWeights',
-  ai_agent_id: 'aiAgentId', published: 'published', published_channels: 'publishedChannels',
+  ai_agent_id: 'aiAgentId', interview_workflow_id: 'interviewWorkflowId', published: 'published', published_channels: 'publishedChannels',
   application_settings: 'applicationSettings',
 }
 
@@ -52,6 +52,8 @@ interface Args {
   matchWeightTemplateId: string
   matchWeights: Record<string, number> | null
   aiAgentId: string
+  // INTERVIEW-WORKFLOW-1 (Appendix D/E): an optional, ungated companion field.
+  interviewWorkflowId: string
   published: boolean
   applicationSettings: Record<string, unknown>
   applicationSettingsTouched: boolean
@@ -65,7 +67,7 @@ interface Args {
 // Owns validation, error state and the create submit handler for the "+ Vacature" form.
 export function useAddVacancySubmit({
   setErrors, setCreateError,
-  form, cascade, skills, channels, matchWeightTemplateId, matchWeights, aiAgentId, published,
+  form, cascade, skills, channels, matchWeightTemplateId, matchWeights, aiAgentId, interviewWorkflowId, published,
   applicationSettings, applicationSettingsTouched, showAttachmentCards, attachments, onClose, onCreated, t,
 }: Args) {
   const [saving, setSaving] = useState(false)
@@ -125,6 +127,8 @@ export function useAddVacancySubmit({
         ...(matchWeights ? { match_weights: matchWeights } : {}),
         // Punt 19: AI-agent link.
         ...(aiAgentId ? { ai_agent_id: aiAgentId } : {}),
+        // INTERVIEW-WORKFLOW-1 (Appendix D/E): optional companion link.
+        ...(interviewWorkflowId ? { interview_workflow_id: interviewWorkflowId } : {}),
         // Punt 20: publication — only sent when touched away from "nothing yet".
         ...(published ? { published: true } : {}),
         ...(publishedOnChannels.length

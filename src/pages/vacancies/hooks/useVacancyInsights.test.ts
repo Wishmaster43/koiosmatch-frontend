@@ -20,6 +20,7 @@ const vacancy = (over: Partial<Vacancy> = {}): Vacancy => ({
   startDate: '', endDate: '', archived: false, archivedAt: null,
   lifecycle: 'active', pendingEraseAt: null,
   aiAgentId: null, aiAgentName: '', interviewFlowId: null,
+  interviewWorkflowId: null, interviewWorkflow: null, hasInterviewWorkflowField: false,
   ...over,
 })
 

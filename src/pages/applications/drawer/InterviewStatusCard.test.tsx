@@ -37,6 +37,17 @@ vi.mock('@/context/AuthContext', () => ({ useAuth: () => mockUseAuth() }))
 vi.mock('@/hooks/useInterviewFlows', () => ({
   useInterviewFlows: () => ({ options: [{ value: 'f1', label: 'Zorgintake (9 stappen)' }], flows: [], loading: false, error: false }),
 }))
+// INTERVIEW-WORKFLOW-1: same flat-object idiom as useInterviewFlows above — this
+// suite has no QueryClientProvider, so the real react-query hook cannot mount.
+const mockWorkflowById = new Map([
+  ['wf-1', { id: 'wf-1', name: 'Kelly-Helpende', agent: { id: 'a1', name: 'Kelly' } }],
+])
+vi.mock('@/hooks/useInterviewWorkflows', () => ({
+  useInterviewWorkflows: () => ({
+    options: [{ value: 'wf-1', label: 'Kelly · Kelly-Helpende' }], workflows: [], byId: mockWorkflowById,
+    describe: () => null, loading: false, error: false,
+  }),
+}))
 // `unwrap` mirrors the real implementation (data → data.data) so the assertions
 // exercise the same envelope handling the app does.
 vi.mock('@/lib/api', () => ({
@@ -575,5 +586,47 @@ describe('InterviewStatusCard · flow override picker', () => {
     await user.click(screen.getByTitle('clearField'))
     await waitFor(() => expect(mockPatch).toHaveBeenCalledWith('/applications/app-1', { interview_flow_id: null }))
     await waitFor(() => expect(screen.getByRole('button', { name: 'interview.status.flowOverridePlaceholder' })).toBeInTheDocument())
+  })
+})
+
+// INTERVIEW-WORKFLOW-1 (Appendix D/E): the application-level workflow override,
+// presence-gated on `hasInterviewWorkflowField` — never inferred from the value.
+describe('InterviewStatusCard · workflow override picker (INTERVIEW-WORKFLOW-1)', () => {
+  it('presence gate absent: renders disabled with the honest notice, no PATCH on interaction', () => {
+    render(<InterviewStatusCard interview={fullInterview()} applicationId="app-1" interviewFlowId={null} interviewWorkflowId={null} hasInterviewWorkflowField={false} />)
+    expect(screen.getByText('vacancies:aiagent.workflow.unavailable')).toBeInTheDocument()
+    expect(mockPatch).not.toHaveBeenCalled()
+  })
+
+  it('presence gate present: picking a workflow PATCHes exactly { interview_workflow_id }, clearing sends null', async () => {
+    render(<InterviewStatusCard interview={fullInterview()} applicationId="app-1" interviewFlowId={null} interviewWorkflowId={null} hasInterviewWorkflowField />)
+    const user = userEvent.setup()
+
+    const trigger = screen.getByRole('button', { name: 'aiagent.workflow.placeholder' })
+    await user.click(trigger)
+    await user.click(screen.getByRole('button', { name: 'Kelly · Kelly-Helpende' }))
+    expect(mockPatch).toHaveBeenCalledWith('/applications/app-1', { interview_workflow_id: 'wf-1' })
+
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Kelly · Kelly-Helpende' })).toBeInTheDocument())
+    await user.click(screen.getByTitle('clearField'))
+    await waitFor(() => expect(mockPatch).toHaveBeenCalledWith('/applications/app-1', { interview_workflow_id: null }))
+  })
+
+  // Verdict finding 3 (MEDIUM, fixed): once a workflow is linked, the FLOW
+  // override picker becomes a read-only derived line (mirrors VacancyAgentTab's
+  // own `isWorkflowLinked` — the workflow resolves its own agent+flow, so a
+  // second interactive flow picker would contradict it), and the workflow
+  // picker's own "no workflows configured" notice never shows while a value is set.
+  it('flow override becomes read-only derived display once a workflow is linked, and the empty notice never fires alongside a set value', () => {
+    render(<InterviewStatusCard interview={fullInterview()} applicationId="app-1" interviewFlowId="f1" interviewWorkflowId="wf-1" hasInterviewWorkflowField />)
+    // The flow override's interactive picker is gone…
+    expect(screen.queryByRole('button', { name: 'interview.status.flowOverridePlaceholder' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Zorgintake (9 stappen)' })).not.toBeInTheDocument()
+    // …replaced by the derived line, resolved from the fetched workflow list.
+    expect(screen.getByText('vacancies:aiagent.workflow.derivedFrom')).toBeInTheDocument()
+    // The workflow picker itself stays interactive (it is the source of truth,
+    // not something resolved by anything else) and never claims "no workflows".
+    expect(screen.getByRole('button', { name: 'Kelly · Kelly-Helpende' })).toBeInTheDocument()
+    expect(screen.queryByText('aiagent.workflow.empty')).not.toBeInTheDocument()
   })
 })

@@ -41,6 +41,8 @@ import StatusPill from '@/components/ui/StatusPill'
 // below are exact matches for the house Caption scale.
 import { Caption, GroupLabel } from '@/components/ui/typography'
 import { useInterviewFlows } from '@/hooks/useInterviewFlows'
+import { useInterviewWorkflows } from '@/hooks/useInterviewWorkflows'
+import InterviewWorkflowPicker from '@/components/drawer/InterviewWorkflowPicker'
 import { useAuth } from '@/context/AuthContext'
 import api, { unwrap } from '@/lib/api'
 import { notifySuccess, notifyError } from '@/lib/notify'
@@ -49,6 +51,7 @@ import { translateInterviewStatus } from '@/lib/interviewStatus'
 import { interviewCategoryColor } from '../data/applicationsShared'
 import { mapInterview } from '../data/mapApplication'
 import type { ApiApplication, ApplicationInterview } from '@/types/application'
+import type { InterviewWorkflowRef } from '@/types/vacancy'
 import type { Id } from '@/types/common'
 
 // Soft-chip colour per turn (§4 semantic tokens, never ad-hoc hex) — who is
@@ -75,7 +78,20 @@ const MetaDot = () => <span aria-hidden="true" style={{ color: 'var(--text-muted
 
 
 // Live interview summary card (see the module doc above): every field renders defensively as optional, and the stop/resume controls gate on the application id, never the interview session id (see the INTERVIEW-STOP-1 note).
-export default function InterviewStatusCard({ interview, applicationId, interviewFlowId }: { interview: ApplicationInterview | null; applicationId?: Id; interviewFlowId?: Id | null }) {
+export default function InterviewStatusCard({
+  interview, applicationId, interviewFlowId, interviewWorkflowId, interviewWorkflow, hasInterviewWorkflowField = false,
+}: {
+  interview: ApplicationInterview | null; applicationId?: Id; interviewFlowId?: Id | null
+  // INTERVIEW-WORKFLOW-1 (Appendix D/E): this application's own workflow override,
+  // presence-gated the same way as the vacancy's own field (VacancyAgentTab).
+  interviewWorkflowId?: Id | null
+  // The already-resolved nested ref (folder/name/agent) off the application
+  // detail — same MEDIUM fix as VacancyAgentTab's `selectOptions`: seeds the
+  // InterviewWorkflowPicker's fallback option so a linked workflow missing from
+  // the fetched list never shows the raw id in the trigger.
+  interviewWorkflow?: InterviewWorkflowRef | null
+  hasInterviewWorkflowField?: boolean
+}) {
   const { t } = useTranslation('applications')
   const auth = useAuth()
   // Mirrors ApplicationsPage's own canManage gate and the route's own
@@ -126,25 +142,87 @@ export default function InterviewStatusCard({ interview, applicationId, intervie
   // Same rule for the flow override: a fresh prop (parent refetch) wins over our own echo.
   useEffect(() => { setFlowOverride(undefined) }, [interviewFlowId])
 
+  // INTERVIEW-WORKFLOW-1: this application's own workflow override — same own-echo
+  // idiom as the flow override above, own direct PATCH (this card owns its persist).
+  const { options: workflowOptions, byId: workflowById, describe: describeWorkflow, loading: workflowsLoading, error: workflowsError } = useInterviewWorkflows(hasInterviewWorkflowField)
+  const [workflowOverride, setWorkflowOverride] = useState<Id | null | undefined>(undefined)
+  const currentWorkflowId = workflowOverride !== undefined ? workflowOverride : interviewWorkflowId ?? null
+  // MEDIUM fix: the flow-override picker below becomes read-only derived display
+  // once a workflow is linked — mirrors VacancyAgentTab's own `isWorkflowLinked`
+  // (the workflow resolves its own agent+flow, so a second interactive flow
+  // picker here would contradict what actually runs). Resolved from the
+  // already-fetched workflow list first (instant after a fresh pick, same HIGH
+  // fix as the vacancy tab), falling back to the nested ref.
+  const isWorkflowLinked = hasInterviewWorkflowField && currentWorkflowId != null
+  const linkedWorkflow = currentWorkflowId != null ? workflowById.get(String(currentWorkflowId)) : undefined
+  const derivedAgentName = linkedWorkflow?.agent?.name ?? interviewWorkflow?.agent?.name ?? '—'
+  const derivedWorkflowName = linkedWorkflow?.name ?? interviewWorkflow?.name ?? '—'
+  const [workflowSaving, setWorkflowSaving] = useState(false)
+  const pickWorkflow = async (id: string) => {
+    if (applicationId == null || workflowSaving) return
+    const nextId = id || null
+    setWorkflowSaving(true)
+    try {
+      await api.patch(`/applications/${applicationId}`, { interview_workflow_id: nextId })
+      setWorkflowOverride(nextId)
+      notifySuccess(t('interview.status.workflowOverrideSaved'))
+    } catch (err) {
+      notifyError(extractApiError(err, t('common:actionFailed')))
+    } finally {
+      setWorkflowSaving(false)
+    }
+  }
+  useEffect(() => { setWorkflowOverride(undefined) }, [interviewWorkflowId])
+
   // The override picker — rendered above every branch below (§3: this is an
   // application-level binding, independent of whether a live session exists),
   // authorization-gated the same way as the stop/resume controls.
   const flowOverridePicker = canManage && applicationId != null && (
-    <div>
-      <GroupLabel style={{ letterSpacing: '0.04em', marginBottom: 4 }}>{t('interview.status.flowOverrideLabel')}</GroupLabel>
-      <CreatableSelect
-        value={currentFlowId != null ? String(currentFlowId) : null}
-        onChange={pickFlow}
-        allowCreate={false}
-        clearable
-        clearLabel={t('interview.status.flowOverrideLabel')}
-        placeholder={flowsLoading ? t('common:loading') : t('interview.status.flowOverridePlaceholder')}
-        options={flowOptions}
-      />
-      {/* §3 four states: a failed flows load says so — a silently empty picker
-          reads as "no flows exist" (r2 C3). */}
-      {flowsError && <Caption as="div" style={{ color: 'var(--color-danger-text)' }}>{t('vacancies:aiagent.loadError')}</Caption>}
-    </div>
+    isWorkflowLinked ? (
+      // Derived display (mirrors VacancyAgentTab's own "override set" branch,
+      // r2 C2): the linked workflow resolves its own flow, so a second,
+      // interactive flow picker here would contradict what actually runs.
+      <div>
+        <GroupLabel style={{ letterSpacing: '0.04em', marginBottom: 4 }}>{t('interview.status.flowOverrideLabel')}</GroupLabel>
+        <p style={{ margin: 0, fontSize: 12, color: 'var(--text)' }}>
+          {t('vacancies:aiagent.workflow.derivedFrom', { agent: derivedAgentName, workflow: derivedWorkflowName })}
+        </p>
+      </div>
+    ) : (
+      <div>
+        <GroupLabel style={{ letterSpacing: '0.04em', marginBottom: 4 }}>{t('interview.status.flowOverrideLabel')}</GroupLabel>
+        <CreatableSelect
+          value={currentFlowId != null ? String(currentFlowId) : null}
+          onChange={pickFlow}
+          allowCreate={false}
+          clearable
+          clearLabel={t('interview.status.flowOverrideLabel')}
+          placeholder={flowsLoading ? t('common:loading') : t('interview.status.flowOverridePlaceholder')}
+          options={flowOptions}
+        />
+        {/* §3 four states: a failed flows load says so — a silently empty picker
+            reads as "no flows exist" (r2 C3). */}
+        {flowsError && <Caption as="div" style={{ color: 'var(--color-danger-text)' }}>{t('vacancies:aiagent.loadError')}</Caption>}
+      </div>
+    )
+  )
+
+  // INTERVIEW-WORKFLOW-1: the higher-level workflow override, presence-gated —
+  // renders disabled with an honest notice for a tenant/backend not yet on this
+  // contract, and stays independent of whether a live session exists (mirrors
+  // flowOverridePicker's own placement above every branch below).
+  const workflowOverridePicker = canManage && applicationId != null && (
+    <InterviewWorkflowPicker
+      value={currentWorkflowId}
+      onChange={pickWorkflow}
+      options={workflowOptions}
+      loading={workflowsLoading}
+      error={workflowsError}
+      disabled={!hasInterviewWorkflowField}
+      notice={hasInterviewWorkflowField ? undefined : t('vacancies:aiagent.workflow.unavailable')}
+      linkedRef={interviewWorkflow}
+      describe={describeWorkflow}
+    />
   )
 
   // No session at all yet — a calm placeholder, not an empty blank area.
@@ -153,6 +231,7 @@ export default function InterviewStatusCard({ interview, applicationId, intervie
       <div style={cardStyle}>
         <span style={{ fontSize: 12, color: 'var(--text-muted)', fontStyle: 'italic' }}>{t('interview.status.none')}</span>
         {flowOverridePicker}
+        {workflowOverridePicker}
       </div>
     )
   }
@@ -168,6 +247,7 @@ export default function InterviewStatusCard({ interview, applicationId, intervie
           {t('interview.status.borrowedFromSibling')}
         </span>
         {flowOverridePicker}
+        {workflowOverridePicker}
       </div>
     )
   }
@@ -413,6 +493,7 @@ export default function InterviewStatusCard({ interview, applicationId, intervie
       )}
 
       {flowOverridePicker}
+      {workflowOverridePicker}
     </div>
   )
 }

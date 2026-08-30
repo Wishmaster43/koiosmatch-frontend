@@ -77,10 +77,24 @@ export function useVacancyRecord({ setVacancies, setTotal, statusMeta, users, cu
     // true/false so a caller (MatchingTab's Save) can gate its "Saved ✓" on the REAL
     // PATCH result instead of firing it optimistically (Danny 22-07: a silently failing
     // save must never read as success — §3 no fake affordance). Errors still toast here.
-    if ('matchWeights' in patch || 'matchWeightTemplateId' in patch) {
+    // INTERVIEW-WORKFLOW-1 (HIGH fix): same reasoning as the matchWeights branch
+    // above — a workflow pick resolves agent/flow SERVER-side onto the nested
+    // `interviewWorkflow` ref, which the optimistic local patch never touches
+    // (only the id). Without this re-sync, `isWorkflowLinked` flips true while
+    // `v.interviewWorkflow` stays null and the derived line renders two dashes
+    // until the drawer is closed and reopened.
+    if ('matchWeights' in patch || 'matchWeightTemplateId' in patch || 'interviewWorkflowId' in patch) {
       return request.then(r => {
         const updated = mapVacancyDetail(unwrap(r))
-        setDetail(prev => (prev && prev.id === id ? { ...prev, matchWeights: updated.matchWeights, matchWeightTemplateId: updated.matchWeightTemplateId } : prev))
+        setDetail(prev => (prev && prev.id === id ? {
+          ...prev,
+          ...(('matchWeights' in patch || 'matchWeightTemplateId' in patch)
+            ? { matchWeights: updated.matchWeights, matchWeightTemplateId: updated.matchWeightTemplateId }
+            : {}),
+          ...('interviewWorkflowId' in patch
+            ? { interviewWorkflowId: updated.interviewWorkflowId, interviewWorkflow: updated.interviewWorkflow }
+            : {}),
+        } : prev))
         return true
       }).catch(() => { notifyError(t('common:actionFailed')); return false })
     }

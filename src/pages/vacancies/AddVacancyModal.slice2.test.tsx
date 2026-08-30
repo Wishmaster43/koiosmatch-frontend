@@ -117,6 +117,14 @@ const { aiAgentsState } = vi.hoisted(() => ({
   },
 }))
 vi.mock('./hooks/useAiAgents', () => ({ useAiAgents: () => ({ options: aiAgentsState.options, agents: aiAgentsState.agents, loading: false, error: false }) }))
+// INTERVIEW-WORKFLOW-1: AiAgentCard's optional companion picker — flat-object
+// mock (no QueryClientProvider in this suite, mirrors useAiAgents above).
+const { interviewWorkflowsState } = vi.hoisted(() => ({
+  interviewWorkflowsState: { options: [] as Array<{ value: string; label: string }> },
+}))
+vi.mock('@/hooks/useInterviewWorkflows', () => ({
+  useInterviewWorkflows: () => ({ options: interviewWorkflowsState.options, workflows: [], byId: new Map(), loading: false, error: false }),
+}))
 // PublicationCard's tenant-default lookup — mocked so it never depends on the
 // module-level useAllSettings cache/real `api.get('/settings')` round-trip
 // (that hook's own cache is shared across test files by design, §9).
@@ -167,6 +175,7 @@ beforeEach(() => {
   authState.hasPermission = () => false
   aiAgentsState.options = []
   aiAgentsState.agents = []
+  interviewWorkflowsState.options = []
   matchTemplatesState.templates = []
   attachmentsState.hasPending = false
   attachmentsState.runSequence = async () => {}
@@ -237,6 +246,24 @@ describe('AddVacancyModal · AI-agent card gating (punt 19)', () => {
     await user.click(screen.getByRole('button', { name: 'Interview Bot' }))
     await fillTitleAndSubmit(user)
     expect(mockPost).toHaveBeenCalledWith('/vacancies', expect.objectContaining({ ai_agent_id: 'a1' }))
+  })
+
+  // INTERVIEW-WORKFLOW-1 (Appendix D/E), verdict finding 7 (MEDIUM, fixed): the
+  // create route does not accept `interview_workflow_id` yet (CMBE's P2), so
+  // this field renders disabled with an honest notice on create — never a live
+  // picker whose pick the server would silently drop (§3 no fake affordance).
+  it('renders the workflow field disabled on create and never sends interview_workflow_id', async () => {
+    authState.hasModule = k => k === 'aiagents'
+    authState.hasPermission = p => p === 'settings.view'
+    interviewWorkflowsState.options = [{ value: 'wf-1', label: 'Kelly · Kelly-Helpende' }]
+    const user = userEvent.setup()
+    render(<AddVacancyModal onClose={noop} users={users} customers={customers} />)
+    await openTab(user, 'aiAgent')
+    await user.click(screen.getByRole('button', { name: 'modal.fields.cardAiAgent' }))
+    expect(screen.getByText('aiagent.workflow.createUnavailable')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'aiagent.workflow.placeholder' })).not.toBeInTheDocument()
+    await fillTitleAndSubmit(user)
+    expect(mockPost).toHaveBeenCalledWith('/vacancies', expect.not.objectContaining({ interview_workflow_id: expect.anything() }))
   })
 })
 

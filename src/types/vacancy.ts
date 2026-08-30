@@ -96,6 +96,25 @@ export interface Vacancy {
   aiAgentId: Id | null
   aiAgentName: string
   interviewFlowId: Id | null
+  // INTERVIEW-WORKFLOW-1 (Appendix D/E): the vacancy's linked interview WORKFLOW —
+  // a higher-level replacement for the agent+flow pair above, resolved server-side.
+  // `null` = no workflow linked; the picker only goes LIVE once the loaded resource
+  // carries the `interview_workflow_id` key at all (see `hasInterviewWorkflowField`
+  // below) — a tenant/backend not yet on this contract never sees a broken picker.
+  interviewWorkflowId: Id | null
+  interviewWorkflow: InterviewWorkflowRef | null
+  // Presence gate (§3 no fake affordances): true only when the raw API record
+  // literally carried the `interview_workflow_id` key — never inferred from the
+  // value itself (a real `null` still counts as "carries the key").
+  hasInterviewWorkflowField: boolean
+}
+
+/** A resolved interview-workflow reference, as nested on a vacancy/application. */
+export interface InterviewWorkflowRef {
+  id: Id
+  name: string
+  folder: { id: Id; name: string } | null
+  agent: { id: Id; name: string } | null
 }
 
 /**
@@ -251,6 +270,15 @@ export interface ApiVacancy {
   ai_agent?: { id?: Id; name?: string } | null
   ai_agent_id?: Id | null
   interview_flow_id?: Id | null
+  // INTERVIEW-WORKFLOW-1: optional on purpose — a tenant/backend not yet on this
+  // contract omits the key entirely, which is exactly the presence-gate signal
+  // mapVacancy reads (`'interview_workflow_id' in raw`).
+  interview_workflow_id?: Id | null
+  interview_workflow?: {
+    id?: Id; name?: string
+    folder?: { id?: Id; name?: string } | null
+    agent?: { id?: Id; name?: string } | null
+  } | null
   tags?: unknown[]
   created_at?: string
   createdAt?: string

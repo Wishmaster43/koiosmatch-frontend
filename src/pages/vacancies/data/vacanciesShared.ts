@@ -75,6 +75,10 @@ export const buildVacancyPatch = (patch: Record<string, unknown>): Record<string
   // resolves module → application → vacancy → agent) — null clears back to the
   // agent's own flow (VAC-CLEAR-1).
   if ('interviewFlowId'     in patch) body.interview_flow_id    = patch.interviewFlowId
+  // INTERVIEW-WORKFLOW-1 (Appendix D/E): null clears the linked workflow
+  // (VAC-CLEAR-1) — once linked, the agent/flow lines above become read-only
+  // derived display (resolved by the workflow), see VacancyAgentTab.
+  if ('interviewWorkflowId' in patch) body.interview_workflow_id = patch.interviewWorkflowId
   // V3-V6 (VACATURES-100): customer → location → department → contact cascade on the
   // Algemeen card. VAC-CASCADE-1 (backend wave 6): customer_location_id/
   // customer_department_id/contact_id are real columns on `vacancies`, whitelisted

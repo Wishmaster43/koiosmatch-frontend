@@ -327,5 +327,17 @@ export function mapApplicationDetail(raw: ApiApplication = {}, funnelTypes: Look
     match: mapMatchSummary(raw.match),
     // INTERVIEW-FLOW-BINDING-1: this application's own flow override, null = "use the vacancy default".
     interviewFlowId: raw.interview_flow_id ?? null,
+    // INTERVIEW-WORKFLOW-1 (Appendix D/E): presence-gated (§3) — the key must
+    // literally exist on the raw record, never inferred from the value.
+    interviewWorkflowId: raw.interview_workflow_id ?? null,
+    interviewWorkflow: raw.interview_workflow
+      ? {
+          id: raw.interview_workflow.id ?? '',
+          name: raw.interview_workflow.name ?? '',
+          folder: raw.interview_workflow.folder ? { id: raw.interview_workflow.folder.id ?? '', name: raw.interview_workflow.folder.name ?? '' } : null,
+          agent: raw.interview_workflow.agent ? { id: raw.interview_workflow.agent.id ?? '', name: raw.interview_workflow.agent.name ?? '' } : null,
+        }
+      : null,
+    hasInterviewWorkflowField: 'interview_workflow_id' in raw,
   }
 }

@@ -4,6 +4,7 @@
  * (`ApiApplication`), read defensively by mapApplication / mapApplicationDetail.
  */
 import type { Id, Loose } from './common'
+import type { InterviewWorkflowRef } from './vacancy'
 
 /**
  * APP-STAGE-DURATIONS-1 (landed): one entry per phase the application has
@@ -261,6 +262,12 @@ export interface ApplicationDetail extends Application {
   // resolves module → application → vacancy → agent) — null means "use the
   // vacancy's default" (itself falling back to the agent's own flow).
   interviewFlowId: Id | null
+  // INTERVIEW-WORKFLOW-1 (Appendix D/E): this application's own interview-WORKFLOW
+  // override, mirroring the vacancy's own field one level up. Presence-gated the
+  // same way (see `hasInterviewWorkflowField`) — never inferred from the value.
+  interviewWorkflowId: Id | null
+  interviewWorkflow: InterviewWorkflowRef | null
+  hasInterviewWorkflowField: boolean
 }
 
 /** A raw candidate as the API nests it under an application. */
@@ -331,6 +338,14 @@ export interface ApiApplication {
   has_match?: boolean
   // INTERVIEW-FLOW-BINDING-1: this application's own flow override (detail contract).
   interview_flow_id?: Id | null
+  // INTERVIEW-WORKFLOW-1: optional on purpose — the presence-gate signal is whether
+  // this key exists on the raw record at all (see mapApplicationDetail).
+  interview_workflow_id?: Id | null
+  interview_workflow?: {
+    id?: Id; name?: string
+    folder?: { id?: Id; name?: string } | null
+    agent?: { id?: Id; name?: string } | null
+  } | null
   task?: string
   ai_task?: string
   ai?: { task?: string }

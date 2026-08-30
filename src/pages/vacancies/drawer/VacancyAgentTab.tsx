@@ -13,6 +13,8 @@ import { extractApiError } from '@/lib/extractApiError'
 import Button from '@/components/ui/Button'
 import { useAiAgents } from '../hooks/useAiAgents'
 import { useInterviewFlows } from '@/hooks/useInterviewFlows'
+import { useInterviewWorkflows } from '@/hooks/useInterviewWorkflows'
+import InterviewWorkflowPicker from '@/components/drawer/InterviewWorkflowPicker'
 // HUISSTIJL-1: group labels (11/600/uppercase/muted) + hint text (11/muted) are the shared atoms.
 import { GroupLabel, Caption } from '@/components/ui/typography'
 import type { VacancyDetail } from '@/types/vacancy'
@@ -134,6 +136,10 @@ export default function VacancyAgentTab({ vacancy: v, onUpdate }: { vacancy: Vac
   // engine resolves module → application → vacancy → agent, so this only
   // matters once an agent is linked (an unlinked vacancy has no interview at all).
   const { options: flowOptions, describe: describeFlow, loading: flowsLoading, error: flowsError } = useInterviewFlows(true)
+  // INTERVIEW-WORKFLOW-1 (Appendix D/E): the higher-level workflow link. Only
+  // fetched while the picker can actually go live (presence gate below) — no
+  // point loading the tenant's workflow list for a resource that cannot save it.
+  const { options: workflowOptions, byId: workflowById, describe: describeWorkflow, loading: workflowsLoading, error: workflowsError } = useInterviewWorkflows(v.hasInterviewWorkflowField)
 
   const currentId = v.aiAgentId != null ? String(v.aiAgentId) : ''
   const linkedAgent = currentId ? agents.find(a => String(a.id) === currentId) : undefined
@@ -153,6 +159,12 @@ export default function VacancyAgentTab({ vacancy: v, onUpdate }: { vacancy: Vac
     onUpdate?.(v.id, { interviewFlowId: id || null })
   }
 
+  // Picking (or clearing) the linked workflow persists immediately, same idiom
+  // as pickAgent/pickFlow — VAC-CLEAR-1.
+  const pickWorkflow = (id: string) => {
+    onUpdate?.(v.id, { interviewWorkflowId: id || null })
+  }
+
   // Seed the currently linked agent's already-resolved name (from the vacancy detail
   // itself) as a fallback option, so the picker never flashes the raw id while the
   // separate /ai/agents list is still loading or the tenant list is out of sync.
@@ -163,14 +175,60 @@ export default function VacancyAgentTab({ vacancy: v, onUpdate }: { vacancy: Vac
     ...options.map(o => ({ value: String(o.value), label: o.label })),
   ]
 
+  // INTERVIEW-WORKFLOW-1: once a workflow is actually linked, it resolves the
+  // agent + flow itself — the pickers below become read-only derived display
+  // rather than a second, contradicting source of truth (mirrors the flow
+  // override's own "override set" branch further down, r2 C2).
+  const isWorkflowLinked = v.hasInterviewWorkflowField && v.interviewWorkflowId != null
+
+  // HIGH FIX: right after a fresh pick, `v.interviewWorkflow` may still be the
+  // stale (null) nested ref for one render — `updateVacancy` only merges the UI
+  // patch, and the PATCH-response re-sync in useVacancyRecord lands a tick
+  // later. Resolve the display from the already-fetched workflow list first
+  // (instant, no round trip needed) and fall back to the nested ref only when
+  // the list hasn't loaded that id — never render the bare em-dash pair.
+  const linkedWorkflow = v.interviewWorkflowId != null ? workflowById.get(String(v.interviewWorkflowId)) : undefined
+  const derivedAgentName = linkedWorkflow?.agent?.name ?? v.interviewWorkflow?.agent?.name ?? '—'
+  const derivedWorkflowName = linkedWorkflow?.name ?? v.interviewWorkflow?.name ?? '—'
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      {/* INTERVIEW-WORKFLOW-1 (Appendix D/E): the workflow link supersedes the
+          agent+flow pair below once set. Presence-gated (§3): a tenant/backend
+          not yet on this contract sees the field disabled with an honest notice,
+          and the agent/flow pickers below keep working exactly as today. */}
+      <div>
+        <GroupLabel style={{ letterSpacing: '0.04em', marginBottom: 6 }}>{t('aiagent.workflow.sectionTitle')}</GroupLabel>
+        <div style={{ ...blockStyle, padding: '10px 12px' }}>
+          <InterviewWorkflowPicker
+            value={v.interviewWorkflowId}
+            onChange={pickWorkflow}
+            options={workflowOptions}
+            loading={workflowsLoading}
+            error={workflowsError}
+            disabled={!v.hasInterviewWorkflowField}
+            notice={v.hasInterviewWorkflowField ? undefined : t('aiagent.workflow.unavailable')}
+            linkedRef={v.interviewWorkflow}
+            describe={describeWorkflow}
+          />
+        </div>
+      </div>
+
       {/* Picker card — error state falls back to plain read-only text + notice, so the
           currently-linked agent stays visible even when the fresh list fails to load. */}
       <div>
         <GroupLabel style={{ letterSpacing: '0.04em', marginBottom: 6 }}>{t('aiagent.pickerLabel')}</GroupLabel>
         <div style={{ ...blockStyle, padding: '10px 12px', display: 'flex', flexDirection: 'column', gap: 8 }}>
-          {error ? (
+          {isWorkflowLinked ? (
+            // Derived display: the workflow resolves the agent, so a separate
+            // picker here would be a second, contradicting source of truth.
+            <span style={{ fontSize: 12, color: 'var(--text)' }}>
+              {t('aiagent.workflow.derivedFrom', {
+                agent: derivedAgentName,
+                workflow: derivedWorkflowName,
+              })}
+            </span>
+          ) : error ? (
             <>
               <span style={{ fontSize: 12, color: v.aiAgentName ? 'var(--text)' : 'var(--text-muted)' }}>{v.aiAgentName || t('aiagent.none')}</span>
               <span style={{ fontSize: 11, color: 'var(--color-danger-text)' }}>{t('aiagent.loadError')}</span>
@@ -190,15 +248,20 @@ export default function VacancyAgentTab({ vacancy: v, onUpdate }: { vacancy: Vac
                     options={selectOptions}
                   />
                 </div>
-                {currentId && (
-                  <BackfillInterviewsAction vacancyId={v.id} applicationsCount={v.applicationsCount} />
-                )}
+                {currentId && <BackfillInterviewsAction vacancyId={v.id} applicationsCount={v.applicationsCount} />}
               </div>
               {!loading && options.length === 0 && (
                 <Caption>{t('aiagent.empty')}</Caption>
               )}
             </>
           )}
+          {/* Backfill runs unchanged regardless of workflow linkage — it only needs a
+              linked agent id, which the workflow resolves onto aiAgentId server-side.
+              Mirrors the original error-state exclusion (a failed agent-list load
+              never offered the action either). Only fires for isWorkflowLinked,
+              which has no picker row to sit beside — the picker branch above
+              already renders it next to the CreatableSelect. */}
+          {isWorkflowLinked && currentId && !error && <BackfillInterviewsAction vacancyId={v.id} applicationsCount={v.applicationsCount} />}
           {/* Calm, honest note — per-candidate interview PROGRESS lives on the
               application, this tab only ever shows the interview's setup (§3). */}
           <p style={{ margin: 0, fontSize: 11, color: 'var(--text-muted)' }}>{t('aiagent.explanation')}</p>
@@ -212,6 +275,17 @@ export default function VacancyAgentTab({ vacancy: v, onUpdate }: { vacancy: Vac
           never guessing which interview will run. */}
       <div>
         <GroupLabel style={{ letterSpacing: '0.04em', marginBottom: 6 }}>{t('aiagent.flowTitle')}</GroupLabel>
+        {isWorkflowLinked ? (
+          // Derived display (§3A): the workflow resolves its own flow — a second,
+          // interactive flow picker here would contradict what actually runs.
+          <p style={{ margin: 0, fontSize: 12, color: 'var(--text)' }}>
+            {t('aiagent.workflow.derivedFrom', {
+              agent: derivedAgentName,
+              workflow: derivedWorkflowName,
+            })}
+          </p>
+        ) : (
+          <>
         {currentId && (
           <div style={{ marginBottom: 8 }}>
             <CreatableSelect
@@ -258,6 +332,8 @@ export default function VacancyAgentTab({ vacancy: v, onUpdate }: { vacancy: Vac
           <div style={{ ...blockStyle, padding: '10px 12px', fontSize: 12, color: 'var(--text-muted)' }}>
             {t('aiagent.flowHint')}
           </div>
+        )}
+          </>
         )}
       </div>
     </div>

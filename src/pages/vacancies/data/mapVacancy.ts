@@ -110,6 +110,19 @@ export function mapVacancy(v: ApiVacancy = {}): Vacancy {
     aiAgentId: aiAgent?.id ?? v.ai_agent_id ?? null,
     aiAgentName: aiAgent?.name ?? '',
     interviewFlowId: v.interview_flow_id ?? null,
+    // INTERVIEW-WORKFLOW-1: presence-gated (§3) — `hasInterviewWorkflowField`
+    // reads whether the raw record carries the key AT ALL, never the value
+    // (a real `null` still counts as "carries the key").
+    interviewWorkflowId: v.interview_workflow_id ?? null,
+    interviewWorkflow: v.interview_workflow
+      ? {
+          id: v.interview_workflow.id ?? '',
+          name: v.interview_workflow.name ?? '',
+          folder: v.interview_workflow.folder ? { id: v.interview_workflow.folder.id ?? '', name: v.interview_workflow.folder.name ?? '' } : null,
+          agent: v.interview_workflow.agent ? { id: v.interview_workflow.agent.id ?? '', name: v.interview_workflow.agent.name ?? '' } : null,
+        }
+      : null,
+    hasInterviewWorkflowField: 'interview_workflow_id' in v,
   }
 }
 

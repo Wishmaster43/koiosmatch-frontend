@@ -267,7 +267,8 @@ export default function AddVacancyModal({
           {f.showAiAgentCard && (
             <div style={{ display: activeTab === 'aiAgent' ? 'block' : 'none' }}>
               <CollapsedCard title={f.t('modal.fields.cardAiAgent')} filled={!!f.aiAgentId}>
-                <AiAgentCard agentId={f.aiAgentId} onAgentChange={f.setAiAgentId} showSuggestion={f.showAgentSuggestion} />
+                <AiAgentCard agentId={f.aiAgentId} onAgentChange={f.setAiAgentId} showSuggestion={f.showAgentSuggestion}
+                  interviewWorkflowId={f.interviewWorkflowId} onInterviewWorkflowChange={f.setInterviewWorkflowId} />
               </CollapsedCard>
             </div>
           )}
