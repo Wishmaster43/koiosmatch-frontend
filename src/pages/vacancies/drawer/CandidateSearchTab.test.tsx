@@ -121,12 +121,12 @@ describe('CandidateSearchTab · fetch + defaults', () => {
 
     await waitFor(() => expect(screen.getByText('Alice')).toBeInTheDocument())
 
-    // LEADS-PARITY-1: an untouched default request sends NO radius and NO
-    // status[] — only what the user actively picked (function_title mirrors
-    // the vacancy's own category) — so the server applies its own resolver
-    // default radius and the untouched list matches the leads counter.
+    // LEADS-EERSTE-CALL-1 (BE 3d6a92b1): the untouched FIRST request sends NO
+    // filter params at all — the server applies its own MatchCriteriaResolver
+    // (the same criteria as the leads counter) and reports them back in the
+    // response's `criteria` block, which drives what the controls display.
     expect(mockGet).toHaveBeenCalledWith('/vacancies/v1/candidate-matches', {
-      params: { function_title: ['Verzorgende IG'], per_page: 100 },
+      params: { per_page: 100 },
       signal: expect.anything(),
     })
 
@@ -140,11 +140,10 @@ describe('CandidateSearchTab · fetch + defaults', () => {
   })
 })
 
-// FUNCTION-TITLE-1 (measured truth): `vacancy.category` IS the raw
-// function_title (wire key `function`, VacancyDetailResource.php:87) — exactly
-// what VacancyLeadCounter.php:66-68 matches on, so the default filter SENDS it;
-// a vacancy without a function sends no function filter at all.
-describe('CandidateSearchTab · function default is the raw function_title carried in category (FUNCTION-TITLE-1)', () => {
+// LEADS-EERSTE-CALL-1 (supersedes FUNCTION-TITLE-1's client seed): the client
+// never derives a function filter from vacancy.category any more — the server's
+// resolver owns the criteria, with or without a function on the vacancy.
+describe('CandidateSearchTab · no client-side function seed (LEADS-EERSTE-CALL-1)', () => {
   it('omits function_title entirely when the vacancy carries no function', async () => {
     mockGet.mockResolvedValueOnce({ data: { data: [] } })
     const vacancyNoFunction = mapVacancyDetail({ id: 'v4', title: 'Zonder functietitel', lat: 52.09, lng: 5.12 })
@@ -237,7 +236,7 @@ describe('CandidateSearchTab · radius default vs touched (LEADS-PARITY-1)', () 
     fireEvent.change(kmInput, { target: { value: '50' } })
 
     await waitFor(() => expect(mockGet).toHaveBeenLastCalledWith('/vacancies/v1/candidate-matches', {
-      params: { radius: 50, function_title: ['Verzorgende IG'], per_page: 100 },
+      params: { radius: 50, per_page: 100 },
       signal: expect.anything(),
     }))
   })
@@ -259,7 +258,7 @@ describe('CandidateSearchTab · status toggle via the searchable dropdown', () =
 
     await waitFor(() => expect(mockGet).toHaveBeenCalledTimes(2))
     expect(mockGet).toHaveBeenLastCalledWith('/vacancies/v1/candidate-matches', {
-      params: { status: ['unavailable'], function_title: ['Verzorgende IG'], per_page: 100 },
+      params: { status: ['unavailable'], per_page: 100 },
       signal: expect.anything(),
     })
   })
@@ -276,7 +275,7 @@ describe('CandidateSearchTab · contract-form filter (new third dropdown)', () =
 
     await waitFor(() => expect(mockGet).toHaveBeenCalledTimes(2))
     expect(mockGet).toHaveBeenLastCalledWith('/vacancies/v1/candidate-matches', {
-      params: { function_title: ['Verzorgende IG'], contract_form: ['freelance'], per_page: 100 },
+      params: { contract_form: ['freelance'], per_page: 100 },
       signal: expect.anything(),
     })
   })
@@ -287,21 +286,23 @@ describe('CandidateSearchTab · contract-form filter (new third dropdown)', () =
 // SELECTED value across the three visible filters gets its own removable chip
 // (the shared ActiveFilterChip, extracted for both search twins).
 describe('CandidateSearchTab · active-filter chips (GEOSEARCH-1)', () => {
-  it('shows a chip for the default-seeded function only — LEADS-PARITY-1 leaves status unseeded', async () => {
+  it('shows NO chips on a criteria-less response — nothing is client-seeded any more (LEADS-EERSTE-CALL-1)', async () => {
     mockGet.mockResolvedValue({ data: { data: [] } })
     render(<CandidateSearchTab vacancy={vacancyWithLocation} />)
     await waitFor(() => expect(mockGet).toHaveBeenCalledTimes(1))
 
-    expect(screen.getByText('Verzorgende IG')).toBeInTheDocument()
+    expect(screen.queryByText('Verzorgende IG')).toBeNull()
     expect(screen.queryByText('Beschikbaar')).toBeNull()
     expect(screen.queryByText('ZZP')).toBeNull()
     expect(screen.queryByText('Uitzendkracht')).toBeNull()
   })
 
-  it('removing the function chip drops it from the request without opening the dropdown', async () => {
-    mockGet.mockResolvedValue({ data: { data: [] } })
+  it('removing the criteria-filled function chip empties the selection without opening the dropdown', async () => {
+    mockGet.mockResolvedValue({ data: { data: [],
+      criteria: { function_titles: ['Verzorgende IG'], radius_km: 30, geo_missing: false, include_expiring_matches: false, expiring_within_days: null } } })
     render(<CandidateSearchTab vacancy={vacancyWithLocation} />)
     await waitFor(() => expect(mockGet).toHaveBeenCalledTimes(1))
+    await waitFor(() => expect(screen.getByText('Verzorgende IG')).toBeInTheDocument())
 
     await userEvent.click(screen.getByRole('button', { name: "Filter 'Verzorgende IG' verwijderen" }))
 
@@ -333,8 +334,8 @@ describe('CandidateSearchTab · active-filter chips (GEOSEARCH-1)', () => {
     render(<CandidateSearchTab vacancy={vacancyNoLocation} />)
     await waitFor(() => expect(mockGet).toHaveBeenCalledTimes(1))
 
-    // vacancyNoLocation carries no category, so no function seeds; status/
-    // contract-form are never default-seeded either — no chips render.
+    // No criteria block in the response and nothing client-seeded (LEADS-
+    // EERSTE-CALL-1) — no chips render at all.
     expect(screen.queryByText('Verzorgende IG')).toBeNull()
     expect(screen.queryByText('Beschikbaar')).toBeNull()
   })
@@ -520,3 +521,43 @@ describe('CandidateSearchTab · Solliciteren from the preview (point 18)', () =>
     expect(modal).toHaveAttribute('data-vacancy-id', 'v1')
   })
 })
+
+// LEADS-EERSTE-CALL-1 + LEADS-CIRKEL-1 (BE 3d6a92b1): the response's `criteria`
+// block fills the controls — chips and radius mirror what the server APPLIED,
+// and only an explicit user edit turns into request params.
+describe('CandidateSearchTab · server criteria drive the controls', () => {
+  const withCriteria = {
+    data: {
+      data: rawRows, total: 2, current_page: 1, last_page: 1, per_page: 100,
+      criteria: { function_titles: ['Verzorgende IG'], radius_km: 25, geo_missing: false, include_expiring_matches: true, expiring_within_days: 30 },
+    },
+  }
+
+  it('shows the applied function as a chip and the applied radius in the km input — first call still paramless', async () => {
+    mockGet.mockResolvedValue(withCriteria)
+    render(<CandidateSearchTab vacancy={vacancyWithLocation} />)
+    await waitFor(() => expect(screen.getByText('Alice')).toBeInTheDocument())
+
+    expect(mockGet.mock.calls[0][1].params).toEqual({ per_page: 100 })
+    // The applied criterion renders as a removable chip (its label is the raw title).
+    expect(screen.getByText('Verzorgende IG')).toBeInTheDocument()
+    // The km input mirrors the server's applied radius, not the tenant default 30.
+    expect(screen.getByRole('spinbutton', { name: nlCommon.map.radius })).toHaveValue(25)
+    // Still untouched: no radius param went out.
+    expect(mockGet.mock.calls[0][1].params).not.toHaveProperty('radius')
+  })
+
+  it('a user pick starts FROM the applied criteria and sends the explicit list', async () => {
+    mockGet.mockResolvedValue(withCriteria)
+    render(<CandidateSearchTab vacancy={vacancyWithLocation} />)
+    await waitFor(() => expect(mockGet).toHaveBeenCalledTimes(1))
+
+    await userEvent.click(screen.getByRole('button', { name: new RegExp(`^${nl.candidateSearch.functions}`) }))
+    await userEvent.click(screen.getByRole('button', { name: 'Verpleegkundige' }))
+
+    await waitFor(() => expect(mockGet.mock.calls.at(-1)![1].params).toMatchObject({
+      function_title: ['Verzorgende IG', 'Verpleegkundige'],
+    }))
+  })
+})
+

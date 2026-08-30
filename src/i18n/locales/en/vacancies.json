@@ -362,7 +362,7 @@
     "removeFilter": "Remove '{{label}}' filter",
     "onMap": "{{count}} candidates on the map",
     "empty": "No candidates found within these filters.",
-    "shownOf": "Showing the {{shown}} best matches out of {{total}} candidates",
+    "shownOf": "Showing the {{shown}} closest of {{total}} candidates",
     "centerVacancy": "Vacancy location",
     "refreshAdvice": "Refresh Koios advice",
     "adviceQueued": "Advice is being calculated. The list will refresh shortly.",

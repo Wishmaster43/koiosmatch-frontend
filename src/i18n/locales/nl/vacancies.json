@@ -362,7 +362,7 @@
     "removeFilter": "Filter '{{label}}' verwijderen",
     "onMap": "{{count}} kandidaten op de kaart",
     "empty": "Geen kandidaten gevonden binnen deze filters.",
-    "shownOf": "Toont de {{shown}} best passenden van {{total}} kandidaten",
+    "shownOf": "Toont de {{shown}} dichtstbijzijnden van {{total}} kandidaten",
     "centerVacancy": "Vacaturelocatie",
     "refreshAdvice": "Koios-advies verversen",
     "adviceQueued": "Advies wordt berekend. De lijst ververst zo.",

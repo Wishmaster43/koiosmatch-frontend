@@ -18,6 +18,17 @@ import type { Criterion } from '@/components/match/MatchScoreBlock'
 import type { VacancyDetail } from '@/types/vacancy'
 import type { Id } from '@/types/common'
 
+// LEADS-CIRKEL-1 (BE 3d6a92b1): the criteria block the server ACTUALLY applied,
+// served alongside the paginator — the tab displays these instead of guessing
+// its own seeds, so the leads cell and this tab always describe one population.
+export interface AppliedCriteria {
+  function_titles: string[]
+  radius_km: number | null
+  geo_missing: boolean
+  include_expiring_matches: boolean
+  expiring_within_days: number | null
+}
+
 export interface CandidateSearchRow {
   id: Id
   name: string
@@ -76,10 +87,6 @@ export function useCandidateSearch(vacancy: VacancyDetail) {
   // population. A tenant's SAVED `vacancy_candidate_tab.candidate_statuses`
   // still applies (an explicit tenant choice, not a guess); absent that, the
   // default is an empty selection — no status[] sent at all.
-  const defaultStatusValues = candidateTabCfg?.candidate_statuses ?? []
-  // contract_forms has no seed vocabulary to begin with (getCandidateTabDefaults
-  // always returns [] here) — the tenant setting still wins when saved.
-  const defaultContractForms = candidateTabCfg?.contract_forms ?? []
   // RADIUS-SETTING-1 (Danny 25-07): the search radius now comes from the SAME
   // tenant setting that already drives this tab's status/contract-form defaults
   // (vacancy_candidate_tab.default_radius_km), not a hardcoded 30 — a tenant with
@@ -89,28 +96,33 @@ export function useCandidateSearch(vacancy: VacancyDetail) {
   // match, and that is a separate backend-side ticket, not a radius fix.
   const defaultRadiusKm = candidateTabCfg?.default_radius_km ?? 30
 
-  // FUNCTION-TITLE-1 (naronde, measured truth): the vacancy payload's `function`
-  // key IS the raw function_title column (VacancyDetailResource.php:87 emits
-  // 'function' => $this->function_title, "a free name string") and mapVacancy.ts
-  // carries it verbatim into `category` (labelOf returns a scalar unchanged) —
-  // so `vacancy.category` equals the exact value VacancyLeadCounter.php:66-68
-  // matches on. Reading a fabricated `function_title` field here (which the
-  // mapper never produces) silently dropped the function filter and WIDENED the
-  // tab past the leads count.
-  const vacancyFunctionTitle = vacancy.category ?? ''
+  // FUNCTION-TITLE-1 is superseded by LEADS-EERSTE-CALL-1: the client no longer
+  // seeds a function filter from vacancy.category at all — the server's own
+  // resolver applies the vacancy's match criteria and reports them back in the
+  // response's `criteria` block, which is the one source the controls display.
 
   const [radiusKm, setRadiusKmState]      = useState(defaultRadiusKm)
-  // LEADS-PARITY-1: the radius CONTROL still displays the tenant default so the
-  // recruiter sees the same ring the leads counter used, but the request omits
-  // `radius` until the user actively changes it — the server already applies
-  // its own resolver default when no radius param is sent (CMBE parity fix),
-  // so sending the displayed default here would just re-pin it client-side and
-  // risk drifting from a server-side default change.
+  // LEADS-EERSTE-CALL-1 (BE 3d6a92b1, supersedes LEADS-PARITY-1's display rule):
+  // the FIRST request sends NO filter params at all, so the server applies its
+  // own MatchCriteriaResolver — the same criteria the leads counter used — and
+  // the response's `criteria` block drives what the controls DISPLAY. A param
+  // only rides along once the user actually touches its control.
   const [radiusTouched, setRadiusTouched] = useState(false)
   const setRadiusKm = (km: number) => { setRadiusKmState(km); setRadiusTouched(true) }
-  const [functions, setFunctions]         = useState<string[]>(vacancyFunctionTitle ? [vacancyFunctionTitle] : [])
-  const [statusSel, setStatusSel]         = useState<string[]>(defaultStatusValues)
-  const [contractForms, setContractForms] = useState<string[]>(defaultContractForms)
+  const [functionsState, setFunctionsState] = useState<string[]>([])
+  const [functionsTouched, setFunctionsTouched] = useState(false)
+  // Tenant status/contract-form FORM defaults are deliberately NOT pre-applied
+  // here any more: any prefilled param on the first call desyncs this tab from
+  // the leads cell's population (the exact bug Danny reported: cell 6, tab 296).
+  const [statusSel, setStatusSel]         = useState<string[]>([])
+  const [contractForms, setContractForms] = useState<string[]>([])
+  // The server's applied criteria (null until the first response lands).
+  const [criteria, setCriteria] = useState<AppliedCriteria | null>(null)
+  // Display selection: the user's explicit choice once touched, else the
+  // server's applied criteria — so the chips/trigger honestly mirror the
+  // filter that produced the visible rows, never a client-side guess.
+  const functions = functionsTouched ? functionsState : (criteria?.function_titles ?? [])
+  const setFunctions = (next: string[]) => { setFunctionsState(next); setFunctionsTouched(true) }
 
   // The tab is NOT remounted when a different vacancy is opened (EntityDrawer only
   // keys its tab body by the active TAB id, not the entity) — re-derive the filter
@@ -122,9 +134,11 @@ export function useCandidateSearch(vacancy: VacancyDetail) {
     setPrevId(vacancy.id)
     setRadiusKmState(defaultRadiusKm)
     setRadiusTouched(false)
-    setFunctions(vacancyFunctionTitle ? [vacancyFunctionTitle] : [])
-    setStatusSel(defaultStatusValues)
-    setContractForms(defaultContractForms)
+    setFunctionsState([])
+    setFunctionsTouched(false)
+    setCriteria(null)
+    setStatusSel([])
+    setContractForms([])
   }
 
   // Converge the selection onto the lookup's canonical values once the API rows
@@ -170,7 +184,7 @@ export function useCandidateSearch(vacancy: VacancyDetail) {
         // on the untouched population; an explicit radius still widens/narrows.
         ...(noLocation || !radiusTouched ? {} : { radius: radiusKm }),
         ...(statusSel.length && { status: statusSel }),
-        ...(functions.length && { function_title: functions }),
+        ...(functionsTouched && functionsState.length ? { function_title: functionsState } : {}),
         ...(contractForms.length && { contract_form: contractForms }),
         per_page: 100,
       },
@@ -191,6 +205,20 @@ export function useCandidateSearch(vacancy: VacancyDetail) {
           ? capNum
           : (Number.isFinite(Number(total)) && total > 0 ? total : null)
         setEligibleTotal(eligible)
+        // LEADS-CIRKEL-1: tolerant read of the applied-criteria block (absent on
+        // older backends -> null, the controls then simply show nothing extra).
+        const rawCrit = (res as { data?: { criteria?: Record<string, unknown> } })?.data?.criteria
+        if (rawCrit && typeof rawCrit === 'object') {
+          const radiusNum = Number(rawCrit.radius_km)
+          const expNum = Number(rawCrit.expiring_within_days)
+          setCriteria({
+            function_titles: Array.isArray(rawCrit.function_titles) ? rawCrit.function_titles.filter((x): x is string => typeof x === 'string') : [],
+            radius_km: rawCrit.radius_km != null && Number.isFinite(radiusNum) ? radiusNum : null,
+            geo_missing: Boolean(rawCrit.geo_missing),
+            include_expiring_matches: Boolean(rawCrit.include_expiring_matches),
+            expiring_within_days: rawCrit.expiring_within_days != null && Number.isFinite(expNum) ? expNum : null,
+          })
+        }
         const mapped: CandidateSearchRow[] = list.map(m => {
           const c = m.candidate ?? {}
           return {
@@ -224,7 +252,7 @@ export function useCandidateSearch(vacancy: VacancyDetail) {
       // refresh into either.
       if (refreshTimerRef.current) { clearTimeout(refreshTimerRef.current); refreshTimerRef.current = null }
     }
-  }, [noLocation, vacancy.id, radiusKm, radiusTouched, functions, statusSel, contractForms, reloadKey])
+  }, [noLocation, vacancy.id, radiusKm, radiusTouched, functionsState, functionsTouched, statusSel, contractForms, reloadKey])
 
   // Queue a batched Koios advice refresh (fase 3) for this vacancy's best
   // matches. Resolves true on the server's 202 ack, false on any failure
@@ -243,9 +271,15 @@ export function useCandidateSearch(vacancy: VacancyDetail) {
     }
   }
 
+  // Radius display mirrors the same rule: untouched -> the server's applied
+  // radius (criteria.radius_km), falling back to the tenant default until the
+  // first response lands; touched -> the user's own value (which is also sent).
+  const displayRadiusKm = radiusTouched ? radiusKm : (criteria?.radius_km ?? defaultRadiusKm)
+
   return {
     rows, loading, error, retry: () => setReloadKey(k => k + 1),
-    radiusKm, setRadiusKm,
+    radiusKm: displayRadiusKm, setRadiusKm,
+    criteria,
     functions, setFunctions,
     statuses: statusSel, setStatuses: setStatusSel,
     contractForms, setContractForms,

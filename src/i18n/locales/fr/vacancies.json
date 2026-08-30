@@ -362,7 +362,7 @@
     "removeFilter": "Supprimer le filtre '{{label}}'",
     "onMap": "{{count}} candidats sur la carte",
     "empty": "Aucun candidat trouvé avec ces filtres.",
-    "shownOf": "Affiche les {{shown}} meilleurs profils sur {{total}} candidats",
+    "shownOf": "Affiche les {{shown}} plus proches sur {{total}} candidats",
     "centerVacancy": "Lieu du poste",
     "refreshAdvice": "Actualiser l'avis Koios",
     "adviceQueued": "L'avis est en cours de calcul. La liste va s'actualiser sous peu.",
