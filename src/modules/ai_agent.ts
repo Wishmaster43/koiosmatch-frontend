@@ -31,6 +31,12 @@ export default {
     // the WA-SCOPE-2 fallback lives in the WhatsApp send path this module never
     // reaches, so a "leave empty" promise here would be a fake affordance.
     { key: 'phone_number_id', label: 'Verzendnummer (voor de sessieantwoorden)', type: 'lookup_select', endpoint: '/whatsapp-phone-numbers', tab: 'general', required: true },
+    // Kennis-toggles — Danny's eigen opdracht (30-08 "2 toggles die op de module
+    // AI agent aan staan", herbevestigd 31-08 na MODULE-TERUG-1): terug op de module.
+    { key: 'use_external_knowledge', label: 'Externe kennisbank gebruiken', type: 'boolean', tab: 'general', default: true,
+      hint: 'Laat de AI-agent tenant-documenten/kennisbank raadplegen tijdens het gesprek.' },
+    { key: 'use_faq', label: "FAQ's gebruiken", type: 'boolean', tab: 'general', default: true,
+      hint: 'Laat de AI-agent veelgestelde vragen (FAQ) raadplegen tijdens het gesprek.' },
     // MODULE-TERUG-1 (Danny 31-08, verbatim: "de AI agent moet terug komen zoals
     // het was ik vroeg alleen om titel voor AI instructie, pop-out of popup voor
     // de tekst en AI instructies op tabje"): the module is this pre-P1 schema

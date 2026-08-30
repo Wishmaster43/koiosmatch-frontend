@@ -45,8 +45,13 @@ describe('ai_agent module schema · the ONE addition Danny asked for', () => {
     expect(byKey('instructions')).toMatchObject({ type: 'instruction_list', tab: 'instructions' })
   })
 
-  it('carries NONE of the reverted P1 extras (intro_template, toggles, rejection_mode)', () => {
-    for (const gone of ['intro_template', 'use_external_knowledge', 'use_faq', 'rejection_mode', 'whatsapp_number_id']) {
+  it('the knowledge toggles are back on the module (Danny 31-08 confirm), defaulting on', () => {
+    expect(byKey('use_external_knowledge')).toMatchObject({ type: 'boolean', default: true })
+    expect(byKey('use_faq')).toMatchObject({ type: 'boolean', default: true })
+  })
+
+  it('carries NONE of the reverted P1 extras (intro_template, rejection_mode)', () => {
+    for (const gone of ['intro_template', 'rejection_mode', 'whatsapp_number_id', 'agent_id']) {
       expect(byKey(gone)).toBeUndefined()
     }
   })
