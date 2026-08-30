@@ -46,11 +46,11 @@ export default function UsageKpiRow({ billing, billingLoading, wa, waLoading }: 
         icon={Workflow} iconBg="var(--color-primary-bg)" iconColor="var(--color-primary)"
         label={t('billing.usage.kpi.workflowLabel')}
         value={billing ? formatCurrency(billing.workflow?.amount) : '—'}
-        // credit_price is UNROUNDED by contract (types/billingUsage.ts): render up
+        // overage_price is UNROUNDED by contract (types/billingUsage.ts): render up
         // to 4 decimals, never round it away — restored from the old Credits card.
         note={billing ? t('billing.usage.kpi.workflowNote', {
           n: formatNumber(billing.workflow?.total_credits ?? 0),
-          price: formatCurrency(billing.workflow?.credit_price, 'EUR', 4, 2),
+          price: formatCurrency(billing.workflow?.overage_price, 'EUR', 4, 2),
         }) : undefined}
       />
       <KpiCard

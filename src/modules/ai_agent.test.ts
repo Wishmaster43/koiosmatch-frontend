@@ -31,6 +31,13 @@ describe('ai_agent module schema · agent + channel + sender', () => {
     expect(field.showIf).toBeUndefined()
     expect(byKey('whatsapp_number_id')).toBeUndefined()
   })
+
+  it('intro_template is a whatsapp_template select, NOT schema-required (the backend decides per agent)', () => {
+    const field = byKey('intro_template')!
+    expect(field.type).toBe('whatsapp_template')
+    expect(field.required).toBeUndefined()
+    expect(field.hint).toMatch(/24-uursvenster/)
+  })
 })
 
 describe('ai_agent module schema · knowledge toggles', () => {

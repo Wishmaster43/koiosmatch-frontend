@@ -97,6 +97,22 @@ describe('KoiosAssistantBlock', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent('Uitvoering mislukt: tool niet bedraad.')
   })
 
+  // PRIJSMODEL-C 30-08: a declined confirm's message still renders unvarnished
+  // (asserted above); the budget's upgrade_hint must ALSO surface, not be dropped.
+  it('shows the upgrade hint from data.budget on a budget_exceeded decline', async () => {
+    mockGet.mockResolvedValueOnce({ data: { data: { suggestions: [
+      { kind: 'pending_action', title: 'Parked', body: 'Ready', refs: [{ type: 'pending_action', id: 'pa-10', label: 'Parked' }] },
+    ] } } })
+    mockPost.mockRejectedValueOnce({ response: { status: 422, data: {
+      status: 'declined', message: 'Workflow-staffel is vol.',
+      data: { budget: { state: 'blocked', allowance: 100, used: 100, upgrade_hint: { next_tier_label: 'Pro' } } },
+    } } })
+    renderBlock()
+    fireEvent.click(await screen.findByRole('button', { name: /pendingAction\.confirm/ }))
+    expect(await screen.findByRole('alert')).toHaveTextContent('Workflow-staffel is vol.')
+    expect(screen.getByText(/pendingAction\.upgradeHint/)).toBeInTheDocument()
+  })
+
   it('cancel posts to /cancel and shows the cancelled state', async () => {
     mockGet.mockResolvedValueOnce({ data: { data: { suggestions: [
       { kind: 'pending_action', title: 'Parked', body: 'Ready', refs: [{ type: 'pending_action', id: 'pa-9', label: 'Parked' }] },

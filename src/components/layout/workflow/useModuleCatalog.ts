@@ -9,27 +9,63 @@
  * `import('@/lib/api')` pattern used by FaqSelectField/WebhookSelectField).
  */
 import { useEffect, useState } from 'react'
-import type { ModuleCatalog } from './filterFieldCatalog'
+import type { ModuleCatalog, InstructionOutputField } from './filterFieldCatalog'
 import { unwrap } from '@/lib/api'
 
 let cache: ModuleCatalog | null = null
 let inFlight: Promise<ModuleCatalog> | null = null
 
+// Raw per-type module definition as GET /workflows/modules serves it. Both the
+// SERVED output_field allow-list (INTERVIEW-WORKFLOW-1 Appendix E, CMBE delta
+// 30-08: `schema.instructions.item_schema.output_field.options`, array OR a
+// plain {key: label} object) and the LEGACY module-level `instruction_output_fields`
+// array are accepted; served wins when both are present on the same response.
+interface RawModuleDef {
+  output_fields?: Record<string, string>
+  emits?: string
+  instruction_output_fields?: Array<{ key?: string; label?: string }>
+  schema?: { instructions?: { item_schema?: { output_field?: { options?: unknown } } } }
+}
+
+// Normalizes the served `output_field.options` shape (array of {key,label}, or an
+// object keyed by field name) into the flat InstructionOutputField[] the ConfigPanel
+// consumes; an entry missing a non-empty `key` is dropped rather than rendered blank.
+function servedOutputFields(options: unknown): InstructionOutputField[] | undefined {
+  if (Array.isArray(options)) {
+    return options
+      .filter((o): o is { key: string; label?: string } => typeof (o as { key?: unknown })?.key === 'string' && (o as { key: string }).key.length > 0)
+      .map(o => ({ key: o.key, label: o.label ?? o.key }))
+  }
+  if (options && typeof options === 'object') {
+    return Object.entries(options as Record<string, unknown>)
+      .filter(([key]) => key.length > 0)
+      .map(([key, label]) => ({ key, label: typeof label === 'string' && label.length > 0 ? label : key }))
+  }
+  return undefined
+}
+
+// Normalizes the LEGACY module-level allow-list (pre-Appendix-E shape, still
+// accepted as a fallback when a type has no served options yet).
+function legacyOutputFields(list: Array<{ key?: string; label?: string }> | undefined): InstructionOutputField[] | undefined {
+  return Array.isArray(list)
+    ? list
+      .filter((f): f is { key: string; label?: string } => typeof f?.key === 'string' && f.key.length > 0)
+      .map(f => ({ key: f.key, label: f.label ?? f.key }))
+    : undefined
+}
+
 // Normalize the raw /workflows/modules response (per type: output_fields + emits
-// + the optional instruction_output_fields allow-list, INTERVIEW-WORKFLOW-1 CMBE
-// delta) into the flat catalog map; an unrecognised emits value fails safe to passthrough.
-function normalize(raw: Record<string, unknown>): ModuleCatalog {
+// + the instruction-list output-field allow-list, served or legacy shape) into
+// the flat catalog map; an unrecognised emits value fails safe to passthrough.
+export function normalize(raw: Record<string, unknown>): ModuleCatalog {
   const out: ModuleCatalog = {}
   for (const [type, def] of Object.entries(raw ?? {})) {
-    const d = def as { output_fields?: Record<string, string>; emits?: string; instruction_output_fields?: Array<{ key?: string; label?: string }> }
+    const d = def as RawModuleDef
     out[type] = {
       outputFields: d.output_fields ?? {},
       emits: d.emits === 'replace' || d.emits === 'append' ? d.emits : 'passthrough',
-      instructionOutputFields: Array.isArray(d.instruction_output_fields)
-        ? d.instruction_output_fields
-          .filter((f): f is { key: string; label?: string } => typeof f?.key === 'string' && f.key.length > 0)
-          .map(f => ({ key: f.key, label: f.label ?? f.key }))
-        : undefined,
+      instructionOutputFields: servedOutputFields(d.schema?.instructions?.item_schema?.output_field?.options)
+        ?? legacyOutputFields(d.instruction_output_fields),
     }
   }
   return out

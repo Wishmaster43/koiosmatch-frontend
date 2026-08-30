@@ -45,6 +45,14 @@ export interface Workflow {
   lifecycle?: 'active' | 'archived' | 'pending_erase'
   pending_erase_at?: string | null
   folder_id?: string | number | null
+  // INTERVIEW-WORKFLOW-1 (Appendix D/E): the pickable-workflow list contract
+  // (GET /workflows?kind=interview) nests folder/agent as resolved objects,
+  // alongside the flat `kind`/`tag` the client-side fallback filter reads when
+  // the `kind` query param is not yet honoured server-side.
+  kind?: string
+  tag?: string
+  folder?: { id: string | number; name: string } | null
+  agent?: { id: string | number; name: string } | null
   steps: WorkflowStep[]
   last_run?: WorkflowLastRun | null
   schedule?: unknown

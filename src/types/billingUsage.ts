@@ -34,7 +34,7 @@ export type {
   AdminTenantBillingTiersResponse,
   AdminTenantBillingTiersUpdate,
 } from './billingTiers'
-import type { BillingPackageKey, BillingUsageAiMeter, BillingUsageWorkflowMeter, BillingUsagePeriod, BillingUsageUsers } from './billingTiers'
+import type { BillingPackageKey, BillingUsageAiMeter, BillingUsageWorkflowMeter, BillingUsagePeriod, BillingUsageUsers, BillingOverageConfig, BillingAiTierKey } from './billingTiers'
 
 // GET /ai/koios/usage?period=today|month — own-organisation Koios AI usage.
 // BREAKING (CREDITS-1): totals.cost -> totals.amount; per_activity[].cost -> amount;
@@ -80,28 +80,6 @@ export interface KoiosUsageSummaryResponse {
   by_category?: Array<{ category: string; amount?: number }>
 }
 
-// GET /ai/koios/usage/billing?month=YYYY-MM — invoice-ready Claude + workflow totals.
-// BREAKING (CREDITS-1): claude.cost and claude.margin_pct are REMOVED (purchase-price
-// leak, §9-reparatie); claude.billable_cost stays (the actual sale price).
-export interface KoiosBillingClaude {
-  tokens_in?: number
-  tokens_out?: number
-  free_allowance?: number
-  billable_cost?: number
-}
-export interface KoiosBillingWorkflow {
-  total_module_runs?: number
-  per_module?: Record<string, number>
-  price_cents_per_run?: number
-  amount?: number
-}
-export interface KoiosUsageBillingResponse {
-  claude?: KoiosBillingClaude
-  workflow?: KoiosBillingWorkflow
-  total_amount?: number
-  currency?: string
-}
-
 // GET /billing/usage?period=month|prev_month&from=&to= (billing.view permission,
 // the new #settings/billing/billing_usage screen). Sale-price only — no purchase/
 // margin here, that lives on the superadmin tenant-usage screen only.
@@ -109,7 +87,8 @@ export interface BillingUsageWorkflow {
   total_credits?: number
   // Unrounded as delivered by the backend (can be a sub-cent fraction like 0.005) —
   // NEVER round this client-side, render every decimal the API sends (§ contract).
-  credit_price?: number
+  // Renamed from credit_price (PRIJSMODEL-C, K-227): data.workflow.credit_price -> overage_price.
+  overage_price?: number
   amount?: number
   per_day?: Array<{ date: string; credits?: number }>
   per_workflow?: Array<{ workflow_id: string; name?: string; runs?: number; credits?: number }>
@@ -194,9 +173,11 @@ export interface BillingUsageResponse {
 }
 
 // GET/PUT /admin/platform-pricing — superadmin-only platform pricing knobs.
+// workflow_credit_price is GONE (PRIJSMODEL-C): overage price now lives on
+// /admin/billing-tiers's overage block (BillingOverageConfig), edited there.
 export interface PlatformPricing {
   ai_markup_percent: number
-  workflow_credit_price: number
+  overage?: BillingOverageConfig
 }
 
 // GET /admin/tenants/{tenant}/usage/details?month=YYYY-MM&group_by=activity|model|user|day
@@ -297,11 +278,16 @@ export interface BillingBudgetValue {
   basis?: string
 }
 export interface BillingBudgetEntry {
-  ai_token_budget?: number
-  workflow_credit_budget?: number
+  // ai_token_budget is GONE (PRIJSMODEL-C): AI capacity is now the staffel
+  // picked on /admin/billing-tiers, no separate raw-token budget knob here.
+  // Renamed from workflow_credit_budget (PRIJSMODEL-C): included workflow runs.
+  included_workflow_runs?: number
   // K-196 (Danny 25-08): the WhatsApp Token budget, the third meter next to AI
   // tokens and Koios Tokens (WhatsApp Web traffic costs real performance).
   whatsapp_token_budget?: number
+  // Read-only (PRIJSMODEL-C): the package's AI staffel key, shown as a Caption
+  // next to the row — never an input, never sent back on PUT.
+  ai_tier_key?: BillingAiTierKey
   value?: BillingBudgetValue
   // PRIJSMODEL-B (K-167/K-175, LIVE per worker brief 24-08): included users in
   // the package + the price per user above that, in EUR cents (never euros —
@@ -331,13 +317,13 @@ export interface AdminBillingBudgetsResponse {
 // one override field back to the package default (never the whole entry).
 export interface AdminBillingBudgetsUpdate {
   packages?: Partial<Record<BillingPackageKey, {
-    ai_token_budget?: number; workflow_credit_budget?: number; whatsapp_token_budget?: number
+    included_workflow_runs?: number; whatsapp_token_budget?: number
     // null = clear to "no package value" (unlimited) — the controller writes
     // per-knob (array_key_exists), so an omitted knob stays untouched.
     included_users?: number | null; extra_user_price_cents?: number | null
   }>>
   tenants?: Record<string, {
-    ai_token_budget?: number | null; workflow_credit_budget?: number | null; whatsapp_token_budget?: number | null
+    included_workflow_runs?: number | null; whatsapp_token_budget?: number | null
     included_users?: number | null; extra_user_price_cents?: number | null
   }>
 }

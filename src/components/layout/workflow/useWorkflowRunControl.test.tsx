@@ -94,6 +94,30 @@ describe('useWorkflowRunControl', () => {
     expect(onRunStarted).not.toHaveBeenCalled()
   })
 
+  // PRIJSMODEL-C 30-08: a 422 { status: 'budget_exceeded', budget } keeps
+  // rendering the server message as-is (unchanged behaviour) AND exposes the
+  // staffel stand separately so the header can show the upgrade hint.
+  it('budget_exceeded: keeps the message and exposes runBudget', async () => {
+    mockedPost.mockRejectedValue({
+      response: { status: 422, data: {
+        message: 'Workflow-staffel is vol.', status: 'budget_exceeded',
+        budget: { state: 'blocked', allowance: 100, used: 100, remaining: 0, unit: 'workflow_run', upgrade_hint: { next_tier_key: 'pro', next_tier_label: 'Pro' } },
+      } },
+    })
+    const { result } = renderHook(
+      () => useWorkflowRunControl({ workflowId: 'w1' }),
+      { wrapper },
+    )
+
+    await act(async () => { await result.current.handleRun() })
+
+    expect(result.current.runError).toBe('Workflow-staffel is vol.')
+    expect(result.current.runConflict).toBe(false)
+    expect(result.current.runBudget).toEqual({
+      state: 'blocked', allowance: 100, used: 100, remaining: 0, unit: 'workflow_run', upgrade_hint: { next_tier_key: 'pro', next_tier_label: 'Pro' },
+    })
+  })
+
   it('handleStopped clears a prior conflict/error so the workflow can be re-run', async () => {
     mockedPost.mockRejectedValue({ response: { status: 409, data: { message: 'loopt al', run_id: 'r-existing' } } })
     const { result } = renderHook(

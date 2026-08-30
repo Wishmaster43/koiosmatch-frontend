@@ -101,5 +101,8 @@ export const TASK_LINK_TYPES: string[] = Object.keys(TASK_LINK_ENDPOINTS)
 // LinksTab read the same source.
 export const TASK_LINK_PAGE: Record<string, string> = {
   candidate: 'candidates', vacancy: 'vacancies', customer: 'customers', application: 'applications',
-  opportunity: 'opportunities', match: 'matches', task: 'tasks',
+  // opportunity: deliberately unmapped — the opportunities page does not honour the
+  // open intent yet (no useOpenFromIntent); mapping it would switch pages without
+  // opening the record (§3). Re-add when that page gains the intent (inventoried).
+  match: 'matches', task: 'tasks',
 }

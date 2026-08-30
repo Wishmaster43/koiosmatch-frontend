@@ -251,7 +251,9 @@
         "no_active_connection": "The required connection is not active.",
         "send_failed": "Sending failed."
       },
-      "partialTitle": "Partially executed"
+      "partialTitle": "Partially executed",
+      "budgetLine": "{{used}}/{{allowance}} {{unit}}",
+      "upgradeHint": "Upgrade to {{tier}}"
     },
     "resizeHandle": "Resize panel",
     "column": "Koios",
@@ -462,7 +464,10 @@
         "notification": "You don't have permission to perform this action."
       },
       "draftMessage": "Draft message",
-      "proposedTime": "Proposed time"
+      "proposedTime": "Proposed time",
+      "budgetExceeded": "Workflow tier full",
+      "budgetLine": "{{used}}/{{allowance}} {{unit}}",
+      "upgradeHint": "Upgrade to {{tier}}"
     },
     "koiosMode": {
       "title": "Koios mode",
@@ -498,7 +503,10 @@
       "assigneeClear": "Back to myself",
       "linkAdd": "Link to…",
       "linkClear": "Remove link",
-      "modeUnknown": "Koios mode unknown. Actions wait for your confirmation."
+      "modeUnknown": "Koios mode unknown. Actions wait for your confirmation.",
+      "statusBudgetExceeded": "Tier full",
+      "budgetLine": "{{used}}/{{allowance}} {{unit}}",
+      "upgradeHint": "Upgrade to {{tier}}"
     }
   },
   "ai": {

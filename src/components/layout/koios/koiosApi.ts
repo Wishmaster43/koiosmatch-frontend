@@ -19,6 +19,7 @@
 import api from '@/lib/api'
 import type { KoiosContextRef } from '@/types/koios'
 import { isContextResolvable } from './koiosContextTypes'
+import type { KoiosConfirmActionResponse } from './koiosTypes'
 
 // Send one chat turn. `model` is optional (defaults to the tenant's active
 // model); `context` is the @-mentioned records, filtered to backend-resolvable
@@ -35,10 +36,12 @@ export const sendChat = (message: string, model?: string | null, context?: Koios
 export const getKoiosSettings = () => api.get('/ai/koios/settings').then((r) => r.data)
 
 // Confirm a pending action (KOIOS-AGENT-PLAN §6) — turns a proposed write into
-// an executed one. Dormant until the backend ships `pending_action`; the caller
-// (KoiosPendingActionCard) treats 404/410/422 as "expired/already resolved".
+// an executed one. Dormant until the backend ships `pending_action`. A genuine
+// tool refusal is a 422 { status: 'declined', message, data } (KOIOS-CONFIRM-
+// DECLINE-1); the caller still treats a bare 404/410 (no `declined` status) as
+// "expired/already resolved".
 export const confirmPendingAction = (id: string) =>
-  api.post(`/ai/koios/actions/${id}/confirm`).then((r) => r.data)
+  api.post<KoiosConfirmActionResponse>(`/ai/koios/actions/${id}/confirm`).then((r) => r.data)
 
 // Cancel a pending action — same dormant/expiry handling as confirm.
 export const cancelPendingAction = (id: string) =>

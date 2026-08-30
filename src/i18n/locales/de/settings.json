@@ -1613,7 +1613,7 @@
     "comingSoon": "demnächst",
     "connectorsHint": "Connectors (Shiftmanager, HelloFlex, Elanza…) verwalten Sie je Kunde unter Integrationen → Apps. Aktivieren kostet Geld und schaltet die Workflow-Vorlagen frei.",
     "tierDesc": {
-      "core": "ATS + CRM",
+      "core": "ATS + CRM + Koios Assist",
       "pro": "+ Koios AI + AI Agents + Workflows + WhatsApp Business",
       "enterprise": "+ REST API + Insights+ + Connectors + SLA"
     },
@@ -3438,9 +3438,8 @@
   },
   "platformPricing": {
     "title": "Plattformpreise",
-    "subtitle": "KI-Marge und Workflow-Creditpreis für die gesamte Plattform (Superadmin).",
+    "subtitle": "KI-Marge für die gesamte Plattform (Superadmin).",
     "markupLabel": "KI-Marge (%)",
-    "creditPriceLabel": "Workflow-Creditpreis (€)",
     "loadError": "Plattformpreise konnten nicht geladen werden.",
     "saved": "Plattformpreise gespeichert."
   },
@@ -3546,8 +3545,7 @@
       "pro": "Koios Pro",
       "enterprise": "Koios Enterprise"
     },
-    "aiBudgetLabel": "AI-Tokens",
-    "workflowBudgetLabel": "Workflow-Läufe",
+    "workflowBudgetLabel": "Inbegriffene Workflow-Läufe",
     "whatsappBudgetLabel": "WhatsApp Tokens pro Monat",
     "valueCaption": "Einkauf {{cogs}} · Verkauf {{sale}} · {{basis}}",
     "tenantHeading": "Mandanten-Ausnahme",
@@ -3557,7 +3555,8 @@
     "tenantClearHint": "Leer = diese Ausnahme löschen.",
     "loadError": "Monatsbudgets konnten nicht geladen werden.",
     "saveFailed": "Budgets konnten nicht gespeichert werden.",
-    "saved": "Budgets gespeichert."
+    "saved": "Budgets gespeichert.",
+    "aiTierLabel": "KI-Staffel: {{tier}}"
   },
   "billingTiers": {
     "title": "Stufen",

@@ -284,7 +284,20 @@
       "inactiveWarning": "Atención: este flujo está inactivo, la entrevista se omitirá."
     },
     "flowPickerLabel": "Sin flujo de la vacante (por defecto del agente)",
-    "flowPickerPlaceholder": "Elige un flujo de entrevista…"
+    "flowPickerPlaceholder": "Elige un flujo de entrevista…",
+    "workflow": {
+      "sectionTitle": "Flujo de trabajo de entrevista",
+      "pickerLabel": "Flujo de trabajo",
+      "placeholder": "Selecciona un flujo de entrevista",
+      "none": "Sin flujo de trabajo",
+      "empty": "Aún no hay flujos de entrevista configurados.",
+      "unavailable": "Disponible en cuanto el enlace del flujo esté conectado al backend",
+      "derivedFrom": "Derivado del flujo de trabajo: {{agent}} / {{workflow}}",
+      "loadError": "No se pudieron cargar los flujos de trabajo de entrevista.",
+      "inactiveSuffix": "(inactivo)",
+      "inactiveWarning": "Atención: este flujo de trabajo está inactivo, el enlace no se puede volver a elegir.",
+      "createUnavailable": "Disponible en cuanto las nuevas vacantes puedan enlazar un flujo de trabajo"
+    }
   },
   "generate": {
     "button": "Generar con Koios",

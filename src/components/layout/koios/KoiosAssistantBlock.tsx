@@ -29,6 +29,7 @@ import { confirmPendingAction, cancelPendingAction, stagePendingAction } from '.
 import { extractApiError } from '@/lib/extractApiError'
 import type { KoiosAssistantKind, KoiosAssistantSuggestion } from './useKoiosAssistant'
 import type { KoiosPreviewRow } from './koiosTypes'
+import type { ActionBudget } from '@/types/actionBudget'
 
 // Icon + semantic-token colour per suggestion kind (§4: colour carries meaning, never decoration).
 const KIND_META: Record<KoiosAssistantKind, { Icon: LucideIcon; color: string }> = {
@@ -70,6 +71,19 @@ function SuggestionCard({ suggestion, onAskKoios }: { suggestion: KoiosAssistant
   )
 }
 
+// One error row: the server's message, plus a budget_exceeded upgrade hint when
+// present (KOIOS-CONFIRM-DECLINE-1) — never a price, only the upgrade label.
+function ExecErrorNotice({ message, budget, t }: { message?: string; budget?: ActionBudget; t: (key: string, opts?: Record<string, unknown>) => string }) {
+  return (
+    <span role="alert" style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+      <Caption style={{ color: 'var(--color-danger-text)' }}>{message}</Caption>
+      {budget?.upgrade_hint?.next_tier_label && (
+        <Caption>{t('koios.pendingAction.upgradeHint', { tier: budget.upgrade_hint.next_tier_label })}</Caption>
+      )}
+    </span>
+  )
+}
+
 // Stable row identity (Opus golf-2 verify): the pending-action id when present,
 // else kind+title — NEVER the array index, which glued one action's terminal
 // state onto a DIFFERENT action after a refetch reshuffled the list.
@@ -81,7 +95,13 @@ function suggestionKey(s: KoiosAssistantSuggestion): string {
 // Per-suggestion execute state. Descriptor kinds add the staged leg (golf 3):
 // idle → staging → staged(preview) → submitting → executed/cancelled/error.
 type StagedAction = { id: string; title?: string; preview?: KoiosPreviewRow[]; expires_at?: string }
-type ExecState = { phase: 'idle' | 'staging' | 'staged' | 'submitting' | 'executed' | 'cancelled' | 'error'; message?: string; staged?: StagedAction }
+type ExecState = {
+  phase: 'idle' | 'staging' | 'staged' | 'submitting' | 'executed' | 'cancelled' | 'error'
+  message?: string
+  staged?: StagedAction
+  // KOIOS-CONFIRM-DECLINE-1 (PRIJSMODEL-C): the staffel stand on a budget-full decline.
+  budget?: ActionBudget
+}
 
 // The action row under one suggestion. kind=pending_action + its "pending_action"
 // ref (exact type value per AssistantSuggestions::pendingActionSuggestions) →
@@ -109,7 +129,10 @@ function SuggestionActions({ suggestion, onAskKoios }: { suggestion: KoiosAssist
       if (body?.status === done) setExec({ phase: done })
       else setExec({ phase: 'error', message: body?.message ?? t('koios.pendingAction.error') })
     } catch (err) {
-      setExec({ phase: 'error', message: extractApiError(err, t('koios.pendingAction.error')) })
+      // KOIOS-CONFIRM-DECLINE-1: keep the server's message, and thread the
+      // staffel stand through so the row can show the upgrade hint.
+      const body = (err as { response?: { data?: { data?: { budget?: ActionBudget } } } })?.response?.data
+      setExec({ phase: 'error', message: extractApiError(err, t('koios.pendingAction.error')), budget: body?.data?.budget })
     }
   }
 
@@ -130,7 +153,7 @@ function SuggestionActions({ suggestion, onAskKoios }: { suggestion: KoiosAssist
   if (pendingRef) {
     if (exec.phase === 'executed') return <span role="status"><Caption style={{ color: 'var(--color-success-text)' }}>✓ {t('koios.pendingAction.confirmed')}</Caption></span>
     if (exec.phase === 'cancelled') return <span role="status"><Caption>{t('koios.pendingAction.cancelled')}</Caption></span>
-    if (exec.phase === 'error') return <span role="alert"><Caption style={{ color: 'var(--color-danger-text)' }}>{exec.message}</Caption></span>
+    if (exec.phase === 'error') return <ExecErrorNotice message={exec.message} budget={exec.budget} t={t} />
     return (
       <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
         <Button size="sm" onClick={() => run(pendingRef.id, confirmPendingAction, 'executed')} disabled={exec.phase === 'submitting'}>
@@ -147,7 +170,7 @@ function SuggestionActions({ suggestion, onAskKoios }: { suggestion: KoiosAssist
   if (suggestion.action) {
     if (exec.phase === 'executed') return <span role="status"><Caption style={{ color: 'var(--color-success-text)' }}>✓ {t('koios.pendingAction.confirmed')}</Caption></span>
     if (exec.phase === 'cancelled') return <span role="status"><Caption>{t('koios.pendingAction.cancelled')}</Caption></span>
-    if (exec.phase === 'error') return <span role="alert"><Caption style={{ color: 'var(--color-danger-text)' }}>{exec.message}</Caption></span>
+    if (exec.phase === 'error') return <ExecErrorNotice message={exec.message} budget={exec.budget} t={t} />
     if (exec.phase === 'staged' || (exec.phase === 'submitting' && exec.staged)) {
       const st = exec.staged
       return (

@@ -323,7 +323,8 @@
       "notAllowed": "Sie haben keine Berechtigung, dieses Interview zu steuern.",
       "flowOverrideLabel": "Stellen-Standard verwenden",
       "flowOverridePlaceholder": "Abweichender Interviewflow…",
-      "flowOverrideSaved": "Interviewflow aktualisiert."
+      "flowOverrideSaved": "Interviewflow aktualisiert.",
+      "workflowOverrideSaved": "Interview-Workflow aktualisiert."
     },
     "history": {
       "status": {

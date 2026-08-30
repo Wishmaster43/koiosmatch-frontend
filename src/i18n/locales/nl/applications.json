@@ -323,7 +323,8 @@
       "notAllowed": "Je hebt geen rechten om dit interview te bedienen.",
       "flowOverrideLabel": "Gebruik vacature-standaard",
       "flowOverridePlaceholder": "Afwijkende interviewflow…",
-      "flowOverrideSaved": "Interviewflow bijgewerkt."
+      "flowOverrideSaved": "Interviewflow bijgewerkt.",
+      "workflowOverrideSaved": "Interview-workflow bijgewerkt."
     },
     "history": {
       "status": {

@@ -2,11 +2,14 @@
  * BillingBudgetsCard (CREDITS-2-FE deel 2, Danny: "vul beiden en toon ze hier") —
  * superadmin monthly package budgets, lives inside ModulesSettings alongside
  * PlatformPricingCard. GET /admin/billing-budgets returns the three package
- * defaults (AI-token budget + Koios Tokens/workflow-credit budget + the EUR
- * cost/sale value, MARGEGEHEIM insight only) and any per-tenant overrides; PUT
- * writes back { packages?, tenants? }. A tenant override with a null field
- * clears that field back to the package default — never a whole-entry wipe.
+ * defaults (included workflow runs + WhatsApp Token budget + the EUR cost/sale
+ * value, MARGEGEHEIM insight only) and any per-tenant overrides; PUT writes back
+ * { packages?, tenants? }. A tenant override with a null field clears that
+ * field back to the package default — never a whole-entry wipe.
  * SaveButton-patroon: optimistic edit, saved-state confirmation, 422 → notice.
+ * PRIJSMODEL-C (30-08): the AI-token budget knob is GONE — AI capacity is now
+ * the staffel picked on /admin/billing-tiers; this card shows the package's
+ * resulting ai_tier_key read-only (Caption), never an input, never PUT'd.
  */
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -24,11 +27,11 @@ import type {
 } from '@/types/billingUsage'
 import { PACKAGE_KEYS, card, sub, label, inputWrap, inputStyle } from './billingCardStyles'
 
-// A package row's three editable numbers, blank = 0 for an empty field.
-type PackageDraft = { ai_token_budget: string; workflow_credit_budget: string; whatsapp_token_budget: string }
+// A package row's two editable numbers, blank = 0 for an empty field.
+// ai_token_budget dropped (PRIJSMODEL-C): read-only ai_tier_key replaces it.
+type PackageDraft = { included_workflow_runs: string; whatsapp_token_budget: string }
 const draftFromEntry = (entry?: BillingBudgetEntry): PackageDraft => ({
-  ai_token_budget: entry?.ai_token_budget != null ? String(entry.ai_token_budget) : '',
-  workflow_credit_budget: entry?.workflow_credit_budget != null ? String(entry.workflow_credit_budget) : '',
+  included_workflow_runs: entry?.included_workflow_runs != null ? String(entry.included_workflow_runs) : '',
   whatsapp_token_budget: entry?.whatsapp_token_budget != null ? String(entry.whatsapp_token_budget) : '',
 })
 
@@ -48,7 +51,7 @@ export default function BillingBudgetsCard() {
   // Per-tenant override state, owned by the child so this card stays under the
   // §3 400-line split trigger; lifted here only for the shared Save action.
   const [tenantId, setTenantId] = useState<string | null>(null)
-  const [tenantDraft, setTenantDraft] = useState<{ ai_token_budget: string; workflow_credit_budget: string; whatsapp_token_budget: string }>({ ai_token_budget: '', workflow_credit_budget: '', whatsapp_token_budget: '' })
+  const [tenantDraft, setTenantDraft] = useState<{ included_workflow_runs: string; whatsapp_token_budget: string }>({ included_workflow_runs: '', whatsapp_token_budget: '' })
   const [tenantDirty, setTenantDirty] = useState(false)
 
   // Load package defaults + existing tenant overrides.
@@ -72,8 +75,7 @@ export default function BillingBudgetsCard() {
 
   const packagesDirty = PACKAGE_KEYS.some((key) => {
     const saved = draftFromEntry(data?.packages?.[key])
-    return saved.ai_token_budget !== drafts[key].ai_token_budget
-      || saved.workflow_credit_budget !== drafts[key].workflow_credit_budget
+    return saved.included_workflow_runs !== drafts[key].included_workflow_runs
       || saved.whatsapp_token_budget !== drafts[key].whatsapp_token_budget
   })
   const hasChange = packagesDirty || tenantDirty
@@ -86,8 +88,7 @@ export default function BillingBudgetsCard() {
       body.packages = {}
       for (const key of PACKAGE_KEYS) {
         body.packages[key] = {
-          ai_token_budget: Number(drafts[key].ai_token_budget) || 0,
-          workflow_credit_budget: Number(drafts[key].workflow_credit_budget) || 0,
+          included_workflow_runs: Number(drafts[key].included_workflow_runs) || 0,
           whatsapp_token_budget: Number(drafts[key].whatsapp_token_budget) || 0,
         }
       }
@@ -95,8 +96,7 @@ export default function BillingBudgetsCard() {
     if (tenantId && tenantDirty) {
       body.tenants = {
         [tenantId]: {
-          ai_token_budget: tenantDraft.ai_token_budget === '' ? null : Number(tenantDraft.ai_token_budget),
-          workflow_credit_budget: tenantDraft.workflow_credit_budget === '' ? null : Number(tenantDraft.workflow_credit_budget),
+          included_workflow_runs: tenantDraft.included_workflow_runs === '' ? null : Number(tenantDraft.included_workflow_runs),
           whatsapp_token_budget: tenantDraft.whatsapp_token_budget === '' ? null : Number(tenantDraft.whatsapp_token_budget),
         },
       }
@@ -150,20 +150,11 @@ export default function BillingBudgetsCard() {
               </SectionTitle>
               <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', alignItems: 'flex-end' }}>
                 <div style={{ flex: '1 1 160px', minWidth: 140 }}>
-                  <label style={label} htmlFor={`billing-budget-ai-${key}`}>{t('billingBudgets.aiBudgetLabel')}</label>
-                  <div style={inputWrap}>
-                    <input id={`billing-budget-ai-${key}`} type="number" min={0} step={1}
-                      value={drafts[key].ai_token_budget}
-                      onChange={(e) => setDrafts((prev) => ({ ...prev, [key]: { ...prev[key], ai_token_budget: e.target.value } }))}
-                      style={inputStyle} />
-                  </div>
-                </div>
-                <div style={{ flex: '1 1 160px', minWidth: 140 }}>
                   <label style={label} htmlFor={`billing-budget-wf-${key}`}>{t('billingBudgets.workflowBudgetLabel')}</label>
                   <div style={inputWrap}>
                     <input id={`billing-budget-wf-${key}`} type="number" min={0} step={1}
-                      value={drafts[key].workflow_credit_budget}
-                      onChange={(e) => setDrafts((prev) => ({ ...prev, [key]: { ...prev[key], workflow_credit_budget: e.target.value } }))}
+                      value={drafts[key].included_workflow_runs}
+                      onChange={(e) => setDrafts((prev) => ({ ...prev, [key]: { ...prev[key], included_workflow_runs: e.target.value } }))}
                       style={inputStyle} />
                   </div>
                 </div>
@@ -177,6 +168,12 @@ export default function BillingBudgetsCard() {
                       style={inputStyle} />
                   </div>
                 </div>
+                {/* PRIJSMODEL-C: AI capacity is a staffel now — read-only, never an input, never PUT'd. */}
+                {entry?.ai_tier_key && (
+                  <Caption style={{ paddingBottom: 8 }}>
+                    {t('billingBudgets.aiTierLabel', { tier: entry.ai_tier_key })}
+                  </Caption>
+                )}
                 {entry?.value && (
                   <Caption style={{ paddingBottom: 8 }}>
                     {t('billingBudgets.valueCaption', {

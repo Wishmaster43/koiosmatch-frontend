@@ -16,7 +16,7 @@
 import { useEffect, useRef, useState } from 'react'
 import NoteActionTaskExtras from './NoteActionTaskExtras'
 import { useTranslation } from 'react-i18next'
-import { Bell, Calendar, ExternalLink, ListChecks, Mail, MessageCircle, Pencil, Play } from 'lucide-react'
+import { Bell, Calendar, ExternalLink, ListChecks, Mail, MessageCircle, Pencil, Play, AlertTriangle } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import Spinner from '@/components/ui/Spinner'
 import { GroupLabel, Caption } from '@/components/ui/typography'
@@ -25,6 +25,14 @@ import { humanizeIsoDates } from '@/lib/localDate'
 import { buildEntityDeepLink } from '@/components/ui/EntityLink'
 import { useAssistActionsExecute } from '@/components/ui/richtext/useAssistActionsExecute'
 import type { AssistActionType } from './noteAssistApi'
+import type { ActionBudget } from '@/types/actionBudget'
+
+// Plain grouped-number formatting for the budget line — deliberately NOT
+// lib/formatters' useNumberFormat: that module re-exports lib/datetime, whose
+// import graph self-initialises real i18next as a side effect (BARREL-DATETIME-LES,
+// CLAUDE.md §2) — pulling it into this component would drag real i18n into every
+// test file that renders NoteActionsPanel without expecting that cascade.
+const formatCount = (n: number) => new Intl.NumberFormat().format(n)
 
 // One panel item — a suggested action item plus its OWN execution outcome.
 // `created` only appears once the server actually made a record (executed).
@@ -41,8 +49,12 @@ export interface NoteActionPanelItem {
   // note id) so the server stamps status/created onto the stored item.
   noteActionItemId?: string
   start?: string | null
-  status: 'proposed' | 'pending' | 'executed' | 'failed'
+  // 'budget_exceeded' added PRIJSMODEL-C 30-08: the tenant's workflow-run
+  // staffel is full — its own terminal branch, never a retry (mirrors the
+  // rich-text AssistActionItemCard's vocabulary, §11 one source).
+  status: 'proposed' | 'pending' | 'executed' | 'failed' | 'budget_exceeded'
   reason?: string
+  budget?: ActionBudget
   run_id?: string
   created?: { type: 'appointment' | 'task' | 'calllist'; id: string } | null
   // K-159 task extras (edit-before-execute): who the task is for and one
@@ -90,6 +102,7 @@ function createdLink(created: NoteActionPanelItem['created'], candidateId?: stri
 // warning tint, executed the house success pair, failed danger (§4).
 const STATUS_TONE: Record<NoteActionPanelItem['status'], string> = {
   proposed: 'var(--text-muted)', pending: 'var(--color-warning)', executed: 'var(--color-success)', failed: 'var(--color-danger)',
+  budget_exceeded: 'var(--color-warning)',
 }
 
 // Renders one action's lifecycle status as a soft-tinted chip, coloured by STATUS_TONE.
@@ -97,8 +110,15 @@ function StatusChip({ status }: { status: NoteActionPanelItem['status'] }) {
   const { t } = useTranslation('common')
   const STATUS_LABEL_NL: Record<NoteActionPanelItem['status'], string> = {
     proposed: 'Voorgesteld', pending: 'Wacht op bevestiging', executed: 'Uitgevoerd', failed: 'Mislukt',
+    budget_exceeded: 'Staffel vol',
   }
-  const label = t(`notesAssist.panel.status${status.charAt(0).toUpperCase()}${status.slice(1)}`, { defaultValue: STATUS_LABEL_NL[status] })
+  // camelCase i18n key per status — budget_exceeded needs its own mapping,
+  // the bare charAt-capitalize scheme would produce an invalid statusBudget_exceeded key.
+  const STATUS_LABEL_KEY: Record<NoteActionPanelItem['status'], string> = {
+    proposed: 'statusProposed', pending: 'statusPending', executed: 'statusExecuted', failed: 'statusFailed',
+    budget_exceeded: 'statusBudgetExceeded',
+  }
+  const label = t(`notesAssist.panel.${STATUS_LABEL_KEY[status]}`, { defaultValue: STATUS_LABEL_NL[status] })
   const color = STATUS_TONE[status]
   return (
     <span style={{ fontSize: 10.5, fontWeight: 600, padding: '2px 7px', borderRadius: 99,
@@ -191,11 +211,25 @@ function ActionItemCard({ item, index, onEdit, onConfirm, candidateId }: {
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
         <StatusChip status={item.status} />
-        {(item.status === 'failed' || item.status === 'pending') && item.reason && <Caption as="span" title={item.reason}>{item.reason}</Caption>}
+        {(item.status === 'failed' || item.status === 'pending' || item.status === 'budget_exceeded') && item.reason && <Caption as="span" title={item.reason}>{item.reason}</Caption>}
         {item.status === 'pending' && (
           <Button variant="soft" size="sm" onClick={confirm} disabled={confirming}>
             {confirming ? <Spinner size={11} /> : null} {t('notesAssist.panel.confirm', { defaultValue: 'Bevestigen' })}
           </Button>
+        )}
+        {/* Budget exceeded (PRIJSMODEL-C 30-08) — no confirm button, retrying
+            just re-422s (mirrors AssistActionItemCard's same-status branch). */}
+        {item.status === 'budget_exceeded' && (item.budget?.used != null || item.budget?.upgrade_hint?.next_tier_label) && (
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, color: 'var(--color-warning-text)' }}>
+            <AlertTriangle size={12} />
+            {item.budget?.used != null && item.budget?.allowance != null && t('notesAssist.panel.budgetLine', {
+              used: formatCount(item.budget.used), allowance: formatCount(item.budget.allowance), unit: item.budget.unit ?? '',
+              defaultValue: '{{used}}/{{allowance}} {{unit}}',
+            })}
+            {item.budget?.upgrade_hint?.next_tier_label && (
+              <> · {t('notesAssist.panel.upgradeHint', { tier: item.budget.upgrade_hint.next_tier_label, defaultValue: 'Upgrade naar {{tier}}' })}</>
+            )}
+          </span>
         )}
         {item.status === 'executed' && link && (
           <Button href={link} target="_blank" rel="noopener noreferrer" variant="ghost" size="sm"
@@ -233,9 +267,14 @@ export default function NoteActionsPanel({ items, onItemsChange, noteId, candida
       // Server truth only: 'failed' is a real status (K-153) and `created` is
       // the record the run made (K-157) — run_id opens nothing, and inventing
       // a created-type gave whatsapp items a link to nowhere (Opus round).
+      // 'budget_exceeded' (PRIJSMODEL-C 30-08) gets its OWN branch, checked
+      // before the pending catch-all — a budget-full item must never render
+      // as "wacht op bevestiging" with a confirm button that just re-422s.
       const status: NoteActionPanelItem['status'] = r.status === 'executed' ? 'executed'
+        : r.status === 'budget_exceeded' ? 'budget_exceeded'
         : (r.status === 'failed' || r.status === 'forbidden' || r.status === 'unsupported' ? 'failed' : 'pending')
       return { ...it, status, reason: r.reason, run_id: r.run_id, execIndex,
+        budget: r.budget ?? it.budget,
         created: r.created ?? it.created ?? null }
     })
     onItemsChange(next)

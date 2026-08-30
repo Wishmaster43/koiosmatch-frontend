@@ -146,9 +146,14 @@ export default function NoteComposer({ open, initialNote, noteTypes, channels, l
       assignee_user_id: (it.assignee_id as string | undefined) ?? undefined,
       noteActionItemId: it.id != null ? String(it.id) : undefined,
       created: (it.created as NoteActionPanelItem['created']) ?? null,
+      // 'budget_exceeded' (PRIJSMODEL-C 30-08) gets its own branch on reopen too
+      // — a stored note_action_items.status of 'budget_exceeded' must not
+      // collapse to 'pending' and show a confirm button that just re-422s.
       status: it.status === 'executed' ? 'executed'
+        : it.status === 'budget_exceeded' ? 'budget_exceeded'
         : (it.status === 'failed' || it.status === 'forbidden') ? 'failed'
         : 'pending',
+      budget: it.budget as NoteActionPanelItem['budget'],
     }))
   })
   const koios = useMyKoiosMode()

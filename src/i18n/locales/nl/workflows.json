@@ -883,7 +883,8 @@
     "Externe kennisbank gebruiken": "Externe kennisbank gebruiken",
     "FAQ's gebruiken": "FAQ's gebruiken",
     "AI-instructies": "AI-instructies",
-    "Afwijzingsmodus": "Afwijzingsmodus"
+    "Afwijzingsmodus": "Afwijzingsmodus",
+    "Intro-template": "Intro-template"
   },
   "fieldOptions": {
     "Array (meerdere bundles)": "Array (meerdere bundles)",
@@ -1077,7 +1078,9 @@
     "stopping": "Stoppen…",
     "stopTitle": "Stop deze run",
     "stopFailed": "Stoppen mislukt",
-    "alreadyRunning": "Deze workflow draait al. Bekijk of stop de lopende run."
+    "alreadyRunning": "Deze workflow draait al. Bekijk of stop de lopende run.",
+    "budgetLine": "{{used}}/{{allowance}} {{unit}}",
+    "upgradeHint": "Upgraden"
   },
   "runViewer": {
     "output": "Output",
@@ -1180,7 +1183,8 @@
     "Laat de AI-agent veelgestelde vragen (FAQ) raadplegen tijdens het gesprek": "Laat de AI-agent veelgestelde vragen (FAQ) raadplegen tijdens het gesprek.",
     "De genummerde stappen die de AI-agent doorloopt, elk met een optioneel outputveld en variabele-chips": "De genummerde stappen die de AI-agent doorloopt, elk met een optioneel outputveld en variabele-chips.",
     "Extra persona- en toonaanwijzingen voor de AI-agent, naast de instructies hierboven Het runtime-antwoordcontract wordt automatisch toegevoegd": "Extra persona- en toonaanwijzingen voor de AI-agent, naast de instructies hierboven. Het runtime-antwoordcontract wordt automatisch toegevoegd.",
-    "Volgt standaard de tenant-instelling; deze vacature kan dat hier overschrijven": "Volgt standaard de tenant-instelling; deze vacature kan dat hier overschrijven."
+    "Volgt standaard de tenant-instelling; deze vacature kan dat hier overschrijven": "Volgt standaard de tenant-instelling; deze vacature kan dat hier overschrijven.",
+    "Verplicht als de gekozen agent geen intro-template heeft; een verse sollicitant zit buiten het 24-uursvenster, dus een sessietekst als intro faalt": "Verplicht als de gekozen agent geen intro-template heeft; een verse sollicitant zit buiten het 24-uursvenster, dus een sessietekst als intro faalt."
   },
   "triggers": {
     "events": {

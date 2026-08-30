@@ -138,6 +138,27 @@ describe('AssistActionsResultsPanel · Uitvoeren', () => {
     expect(forbidden.closest('span')).toHaveAttribute('title', 'Deze actie is uitgeschakeld voor jouw rol.')
   })
 
+  // PRIJSMODEL-C 30-08: budget_exceeded gets its own honest branch, no confirm
+  // button (retrying just re-422s, same treatment as forbidden/unsupported),
+  // and shows the staffel stand + upgrade hint from item.budget.
+  it('a budget_exceeded item shows the staffel stand and upgrade hint, with no confirm button', async () => {
+    vi.mocked(executeRichTextActions).mockResolvedValue([{
+      title: 'Bel terug', type: 'task', status: 'budget_exceeded', reason: 'Workflow-staffel is vol.',
+      budget: { state: 'blocked', allowance: 100, used: 100, remaining: 0, unit: 'workflow_run', upgrade_hint: { next_tier_label: 'Pro' } },
+    }])
+    const user = userEvent.setup()
+    render(<AssistActionsResultsPanel items={[items[0]]} source={source} onApplyAsText={vi.fn()} onDiscard={vi.fn()} />)
+    await user.click(screen.getByText('Uitvoeren'))
+
+    expect(await screen.findByText('Workflow-staffel is vol.')).toBeInTheDocument()
+    // The test's i18n stub doesn't interpolate {{}} placeholders — it renders
+    // the raw defaultValue, which still proves the budget line and upgrade
+    // hint blocks are wired to item.budget rather than silently dropped.
+    expect(screen.getByText('{{used}}/{{allowance}} {{unit}}')).toBeInTheDocument()
+    expect(screen.getByText('Upgrade naar {{tier}}')).toBeInTheDocument()
+    expect(screen.queryByText('Bevestigen')).not.toBeInTheDocument()
+  })
+
   // wizard_required is a K3 selection-decision status not reachable from a
   // plain field's own item types today — handled defensively for forward
   // compat, mirrored on the 'unsupported' test below.

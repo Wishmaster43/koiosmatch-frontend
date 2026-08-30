@@ -35,7 +35,7 @@ interface AddonOption extends Omit<PackageOption, 'Icon'> { Icon?: typeof BarCha
 
 // Base packages (the "size bar"). `desc` lists what each adds over the previous one.
 const PACKAGES: PackageOption[] = [
-  { id: 'core',       name: 'Koios Core',       desc: 'ATS + CRM',                                              Icon: Package },
+  { id: 'core',       name: 'Koios Core',       desc: 'ATS + CRM + Koios Assist',                               Icon: Package },
   { id: 'pro',        name: 'Koios Pro',        desc: '+ Koios AI + AI Agents + Workflows + WhatsApp Business', Icon: Rocket },
   { id: 'enterprise', name: 'Koios Enterprise', desc: '+ REST API + Insights+ + Connectors + SLA',              Icon: Crown },
 ]

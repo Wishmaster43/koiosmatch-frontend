@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { canAccessPage } from './access'
+import { canAccessPage, canUseKoiosAssist } from './access'
 
 describe('canAccessPage — module gating', () => {
   it('lets super admins open non-module-gated pages', () => {
@@ -76,5 +76,23 @@ describe('canAccessPage — standard ATS pages', () => {
     expect(canAccessPage('outreach', auth)).toBe(false)
     expect(canAccessPage('users', auth)).toBe(false)
     expect(canAccessPage('settings', auth)).toBe(false)
+  })
+})
+
+describe('canUseKoiosAssist — PRIJSMODEL-C any-of gate (koios_ai OR koios_assist)', () => {
+  it('is true when the tenant has koios_ai (Pro/Enterprise)', () => {
+    expect(canUseKoiosAssist({ activeTenant: { modules: ['ats', 'koios_ai'] } })).toBe(true)
+  })
+
+  it('is true when the tenant has only koios_assist (Core)', () => {
+    expect(canUseKoiosAssist({ activeTenant: { modules: ['ats', 'koios_assist'] } })).toBe(true)
+  })
+
+  it('is false when the tenant has neither', () => {
+    expect(canUseKoiosAssist({ activeTenant: { modules: ['ats'] } })).toBe(false)
+  })
+
+  it('always passes for a super admin', () => {
+    expect(canUseKoiosAssist({ user: { is_super_admin: true }, activeTenant: { modules: ['ats'] } })).toBe(true)
   })
 })

@@ -284,7 +284,20 @@
       "inactiveWarning": "Note: this flow is inactive, the interview will be skipped."
     },
     "flowPickerLabel": "No vacancy flow (agent default)",
-    "flowPickerPlaceholder": "Choose an interview flow…"
+    "flowPickerPlaceholder": "Choose an interview flow…",
+    "workflow": {
+      "sectionTitle": "Interview workflow",
+      "pickerLabel": "Workflow",
+      "placeholder": "Select an interview workflow",
+      "none": "No workflow",
+      "empty": "No interview workflows configured yet.",
+      "unavailable": "Available once the workflow link is connected to the backend",
+      "derivedFrom": "Derived from the workflow: {{agent}} / {{workflow}}",
+      "loadError": "Failed to load interview workflows.",
+      "inactiveSuffix": "(inactive)",
+      "inactiveWarning": "Note: this workflow is inactive, the link cannot be picked again.",
+      "createUnavailable": "Available once new vacancies can link a workflow"
+    }
   },
   "generate": {
     "button": "Generate with Koios",

@@ -17,6 +17,7 @@ import { extractApiError } from '@/lib/extractApiError'
 import { executeRichTextActions, toExecuteItem } from './assistActionsExecuteApi'
 import type { ExecuteItemStatus, ExecuteSource } from './assistActionsExecuteApi'
 import type { RichTextAssistActionItem } from './richTextAssistApi'
+import type { ActionBudget } from '@/types/actionBudget'
 
 export type PreviewStatus = 'idle' | 'loading' | 'success' | 'error'
 
@@ -32,6 +33,8 @@ export interface ExecItem extends RichTextAssistActionItem {
   // Server-supplied explanation for a non-executed status (CMBE 5961c673) —
   // spread in from the execute response, rendered by AssistActionItemCard.
   reason?: string
+  // PRIJSMODEL-C 30-08: present only on status === 'budget_exceeded'.
+  budget?: ActionBudget
   confirming?: boolean
   confirmError?: boolean
 }

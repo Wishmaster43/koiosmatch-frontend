@@ -49,6 +49,7 @@ const MODULE_TO_PAGES: Record<string, string[]> = {
   whatsapp:          ['whatsapp'],
   apps:              ['apps'],
   koios_ai:          [],               // Koios AI assistant — gated via canUseKoios, no nav page
+  koios_assist:      [],               // Core's thin assist scope — gated via canUseKoiosAssist, no nav page
   plan:              PLANNING,
   sm:                ['shiftmanager'],
   sm_ai:             ['shiftmanager'], // legacy alias → SM reporting
@@ -198,4 +199,19 @@ export function canAccessPage(pageId: string, auth?: AuthLike | null): boolean {
   }
 
   return true
+}
+
+/**
+ * canUseKoiosAssist — PRIJSMODEL-C (30-08): Core tenants get a THIN Koios Assist
+ * scope (notes assist, entity generate, cv parse) via the `koios_assist`
+ * module, without the full `koios_ai` module (chat/agents/interviews). This is
+ * an ANY-OF check: koios_ai (Pro/Enterprise) OR koios_assist (Core) — never
+ * required together. Use this on assist-ONLY surfaces; chat/agents/interviews
+ * stay gated on plain `hasModule('koios_ai', …)` (mirrors Sidebar's
+ * canUseKoios, unchanged by this addition).
+ */
+export function canUseKoiosAssist(auth?: AuthLike | null): boolean {
+  const tenant = auth?.activeTenant ?? auth?.user?.tenant
+  const isSuperAdmin = auth?.user?.is_super_admin === true
+  return hasModule('koios_ai', tenant, { isSuperAdmin }) || hasModule('koios_assist', tenant, { isSuperAdmin })
 }

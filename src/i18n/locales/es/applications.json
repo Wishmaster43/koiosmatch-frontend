@@ -323,7 +323,8 @@
       "notAllowed": "No tienes permiso para controlar esta entrevista.",
       "flowOverrideLabel": "Usar el predeterminado de la vacante",
       "flowOverridePlaceholder": "Flujo de entrevista específico…",
-      "flowOverrideSaved": "Flujo de entrevista actualizado."
+      "flowOverrideSaved": "Flujo de entrevista actualizado.",
+      "workflowOverrideSaved": "Flujo de trabajo de entrevista actualizado."
     },
     "history": {
       "status": {

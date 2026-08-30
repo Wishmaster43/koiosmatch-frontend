@@ -108,7 +108,7 @@ export function useWorkflowEditor({ workflow, onSave, initialRunId = null }: {
   // Run lifecycle (start/stop/poll/409-conflict) — extracted to its own hook
   // (§3, split at ~400 lines) since this composer stays focused on graph state.
   const {
-    running, runError, setRunError, runningNodeId,
+    running, runError, setRunError, runBudget, runningNodeId,
     activeRunId, liveRun, liveRunActive, runConflict, handleStopped, handleRun,
   } = useWorkflowRunControl({ workflowId: workflow.id, initialRunId, onRunStarted: openLogsOnRun })
 
@@ -451,7 +451,7 @@ export function useWorkflowEditor({ workflow, onSave, initialRunId = null }: {
   return {
     edges, onNodesChange, onEdgesChange, onConnect, nodesWithFirst, selectedNode, setSelectedNodeId,
     name, setName, trigger, setTrigger, scheduleConfig, setScheduleConfig, status, setStatus,
-    saved, running, runError, setRunError, showSchedule, setShowSchedule, widePanelActive, setWidePanelActive, showLogs, setShowLogs,
+    saved, running, runError, runBudget, setRunError, showSchedule, setShowSchedule, widePanelActive, setWidePanelActive, showLogs, setShowLogs,
     liveRun, activeRunId, liveRunActive, runConflict, handleStopped,
     pickerState, setPickerState, filterState, setFilterState, outputState, setOutputState,
     firstNodeId, setStartNodeId, getUpstreamVariables,

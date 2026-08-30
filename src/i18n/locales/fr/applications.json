@@ -323,7 +323,8 @@
       "notAllowed": "Vous n'avez pas l'autorisation de piloter cet entretien.",
       "flowOverrideLabel": "Utiliser le défaut de l’offre",
       "flowOverridePlaceholder": "Flux d’entretien spécifique…",
-      "flowOverrideSaved": "Flux d’entretien mis à jour."
+      "flowOverrideSaved": "Flux d’entretien mis à jour.",
+      "workflowOverrideSaved": "Workflow d’entretien mis à jour."
     },
     "history": {
       "status": {

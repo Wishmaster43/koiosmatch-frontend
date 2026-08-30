@@ -62,6 +62,26 @@ describe('WorkflowEditorHeader · a11y (BUG 5)', () => {
   })
 })
 
+// PRIJSMODEL-C 30-08: a budget_exceeded run error carries a staffel-stand
+// Caption, and a real Button href ONLY when the server actually gave a
+// contact/url — never a fake CTA (§0 no fake affordances).
+describe('WorkflowEditorHeader · budget_exceeded upgrade hint (PRIJSMODEL-C)', () => {
+  it('shows the budget line but no button when there is no contact/url', () => {
+    render(<WorkflowEditorHeader {...baseProps} runError="Workflow-staffel is vol."
+      runBudget={{ state: 'blocked', allowance: 100, used: 100, remaining: 0, unit: 'workflow_run' }} />)
+    expect(screen.getByRole('alert')).toHaveTextContent('Workflow-staffel is vol.')
+    expect(screen.queryByRole('link', { name: /runControl.upgradeHint/ })).not.toBeInTheDocument()
+  })
+
+  it('renders a real link when the upgrade hint carries a contact', () => {
+    render(<WorkflowEditorHeader {...baseProps} runError="Workflow-staffel is vol."
+      runBudget={{ state: 'blocked', allowance: 100, used: 100, remaining: 0, unit: 'workflow_run',
+        upgrade_hint: { next_tier_key: 'pro', next_tier_label: 'Pro', contact: 'mailto:sales@koiosmatch.nl' } }} />)
+    const link = screen.getByRole('link', { name: /runControl.upgradeHint/ })
+    expect(link).toHaveAttribute('href', 'mailto:sales@koiosmatch.nl')
+  })
+})
+
 // F4 (ROUTER-EDGE-FILTERS-1/D6): Run/Dry-run must never fire on a non-active
 // workflow — disabled up front with an honest i18n title, instead of the raw
 // Dutch 422 the server used to be the only source of truth for.

@@ -52,6 +52,14 @@ export default {
     // empty phone_number_id before any send-path selection runs (Opus-measured) —
     // always visible, never hidden behind a channel showIf (P1 has one channel).
     { key: 'phone_number_id', label: 'Verzendnummer (voor de sessieantwoorden)', type: 'whatsapp_phone_number', endpoint: '/whatsapp-phone-numbers', tab: 'general', required: true },
+    // CMBE delta (Appendix E, 30-08): a select from the tenant's SYNCED Meta
+    // templates, same control as whatsapp_send's own `template_name`. NOT
+    // `required: true` here — the backend decides per agent (an agent that
+    // already carries its own wa_intro_template does not need one) and returns
+    // 422 "Intro-template ontbreekt" on save when it is missing; the hint below
+    // is the only surfaced guidance.
+    { key: 'intro_template', label: 'Intro-template', type: 'whatsapp_template', tab: 'general',
+      hint: 'Verplicht als de gekozen agent geen intro-template heeft; een verse sollicitant zit buiten het 24-uursvenster, dus een sessietekst als intro faalt.' },
 
     // ── Group "Kennis" ─────────────────────────────────────────────────────
     { key: 'use_external_knowledge', label: 'Externe kennisbank gebruiken', type: 'boolean', tab: 'general', default: true,

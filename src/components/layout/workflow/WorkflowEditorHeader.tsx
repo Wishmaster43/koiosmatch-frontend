@@ -22,6 +22,7 @@ import { Caption } from '@/components/ui/typography'
 import SaveButton from '@/components/ui/SaveButton'
 import QuickViewToggle from '@/components/ui/QuickViewToggle'
 import Spinner from '@/components/ui/Spinner'
+import type { ActionBudget } from '@/types/actionBudget'
 
 // Top-level editor view: the node diagram, this workflow's run history, or its
 // parent/child relations (WF-RELATIONS-FE-1).
@@ -35,7 +36,7 @@ export default function WorkflowEditorHeader({
   trigger, scheduleConfig, onOpenSchedule,
   status, onToggleStatus,
   showLogs, onToggleLogs,
-  runError, onRunError, runConflict,
+  runError, runBudget, onRunError, runConflict,
   liveRunActive, activeRunId, onStopped,
   running, onRun, onRunDryRun,
   saved, onSave, onSaveClose,
@@ -59,6 +60,9 @@ export default function WorkflowEditorHeader({
   onToggleLogs: () => void
   // Run feedback surfaced next to the controls that caused it.
   runError: string | null
+  // PRIJSMODEL-C 30-08: the staffel stand on a 422 budget_exceeded run — only
+  // ever rendered alongside runError, never on its own.
+  runBudget?: ActionBudget | null
   onRunError: (message: string) => void
   runConflict: boolean
   liveRunActive: boolean
@@ -191,6 +195,27 @@ export default function WorkflowEditorHeader({
           {runError || t('common:actionFailed')}
         </span>
       )}
+      {/* PRIJSMODEL-C 30-08: the staffel stand next to a budget_exceeded run error —
+          a real Button href only when the server actually gave a contact/url,
+          never a fake CTA (§0 no fake affordances). */}
+      {runError !== null && runBudget && (() => {
+        const upgradeHref = runBudget.upgrade_hint?.contact || runBudget.upgrade_hint?.url
+        return (
+          <span style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+            <Caption>
+              {t('runControl.budgetLine', {
+                used: runBudget.used, allowance: runBudget.allowance, unit: runBudget.unit ?? '',
+                defaultValue: '{{used}}/{{allowance}} {{unit}}',
+              })}
+            </Caption>
+            {upgradeHref && (
+              <Button size="sm" variant="ghost" href={upgradeHref} target={runBudget.upgrade_hint?.url ? '_blank' : undefined}>
+                {t('runControl.upgradeHint')}
+              </Button>
+            )}
+          </span>
+        )
+      })()}
 
       {/* RUN-CONTROL-1 single-flight: 409 → "loopt al" + the viewer points at that run.
           Same un-announced-span issue as runError above (BUG 5) — `role="status"`

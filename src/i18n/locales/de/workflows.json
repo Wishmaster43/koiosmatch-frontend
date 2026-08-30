@@ -848,7 +848,8 @@
     "Externe kennisbank gebruiken": "Externe Wissensdatenbank verwenden",
     "FAQ's gebruiken": "FAQs verwenden",
     "AI-instructies": "KI-Anweisungen",
-    "Afwijzingsmodus": "Ablehnungsmodus"
+    "Afwijzingsmodus": "Ablehnungsmodus",
+    "Intro-template": "Intro-Vorlage"
   },
   "fieldOptions": {
     "Array (meerdere bundles)": "Array (mehrere Bundles)",
@@ -1077,7 +1078,9 @@
     "stopping": "Wird gestoppt…",
     "stopTitle": "Diesen Lauf stoppen",
     "stopFailed": "Stoppen fehlgeschlagen",
-    "alreadyRunning": "Dieser Workflow läuft bereits. Laufenden Lauf ansehen oder stoppen."
+    "alreadyRunning": "Dieser Workflow läuft bereits. Laufenden Lauf ansehen oder stoppen.",
+    "budgetLine": "{{used}}/{{allowance}} {{unit}}",
+    "upgradeHint": "Upgrade"
   },
   "runViewer": {
     "output": "Output",
@@ -1180,7 +1183,8 @@
     "Laat de AI-agent veelgestelde vragen (FAQ) raadplegen tijdens het gesprek": "Lässt den KI-Agenten während des Gesprächs die FAQ konsultieren.",
     "De genummerde stappen die de AI-agent doorloopt, elk met een optioneel outputveld en variabele-chips": "Die nummerierten Schritte, die der KI-Agent durchläuft, jeweils mit optionalem Ausgabefeld und Variablen-Chips.",
     "Extra persona- en toonaanwijzingen voor de AI-agent, naast de instructies hierboven Het runtime-antwoordcontract wordt automatisch toegevoegd": "Zusätzliche Persona- und Tonhinweise für den KI-Agenten, neben den obigen Anweisungen. Der Laufzeit-Antwortvertrag wird automatisch hinzugefügt.",
-    "Volgt standaard de tenant-instelling; deze vacature kan dat hier overschrijven": "Folgt standardmäßig der Mandanteneinstellung; diese Vakanz kann dies hier überschreiben."
+    "Volgt standaard de tenant-instelling; deze vacature kan dat hier overschrijven": "Folgt standardmäßig der Mandanteneinstellung; diese Vakanz kann dies hier überschreiben.",
+    "Verplicht als de gekozen agent geen intro-template heeft; een verse sollicitant zit buiten het 24-uursvenster, dus een sessietekst als intro faalt": "Erforderlich, wenn der gewählte Agent keine Intro-Vorlage hat; ein neuer Bewerber befindet sich außerhalb des 24-Stunden-Fensters, sodass ein Sitzungstext als Intro fehlschlägt."
   },
   "triggers": {
     "events": {

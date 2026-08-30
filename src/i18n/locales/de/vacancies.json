@@ -284,7 +284,20 @@
       "inactiveWarning": "Achtung: Dieser Flow ist inaktiv, das Interview wird übersprungen."
     },
     "flowPickerLabel": "Kein Stellen-Flow (Agent-Standard)",
-    "flowPickerPlaceholder": "Interviewflow wählen…"
+    "flowPickerPlaceholder": "Interviewflow wählen…",
+    "workflow": {
+      "sectionTitle": "Interview-Workflow",
+      "pickerLabel": "Workflow",
+      "placeholder": "Interview-Workflow auswählen",
+      "none": "Kein Workflow",
+      "empty": "Noch keine Interview-Workflows eingerichtet.",
+      "unavailable": "Verfügbar, sobald die Workflow-Anbindung im Backend eingerichtet ist",
+      "derivedFrom": "Abgeleitet aus dem Workflow: {{agent}} / {{workflow}}",
+      "loadError": "Interview-Workflows konnten nicht geladen werden.",
+      "inactiveSuffix": "(inaktiv)",
+      "inactiveWarning": "Achtung: Dieser Workflow ist inaktiv, die Verknüpfung kann nicht erneut gewählt werden.",
+      "createUnavailable": "Verfügbar, sobald neue Stellen einen Workflow verknüpfen können"
+    }
   },
   "generate": {
     "button": "Mit Koios generieren",

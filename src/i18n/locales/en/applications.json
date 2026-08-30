@@ -323,7 +323,8 @@
       "notAllowed": "You don't have permission to control this interview.",
       "flowOverrideLabel": "Use vacancy default",
       "flowOverridePlaceholder": "Override interview flow…",
-      "flowOverrideSaved": "Interview flow updated."
+      "flowOverrideSaved": "Interview flow updated.",
+      "workflowOverrideSaved": "Interview workflow updated."
     },
     "history": {
       "status": {

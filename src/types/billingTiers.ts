@@ -149,8 +149,9 @@ export interface AdminBillingTiersResponse {
 // PUT body — all optional/partial (sometimes-validated server-side); NO tier
 // add/remove and NO tenant block on this endpoint. A row always carries its key.
 export interface AdminBillingTiersUpdate {
-  ai_tiers?: Array<{ key: BillingAiTierKey } & Partial<Pick<BillingAiTier, 'label' | 'monthly_tokens' | 'price_cents' | 'sort' | 'active'>>>
-  workflow_tiers?: Array<{ key: BillingWorkflowTierKey } & Partial<Pick<BillingWorkflowTier, 'label' | 'monthly_runs' | 'price_cents' | 'sort' | 'active'>>>
+  // sort dropped (PRIJSMODEL-C ronde 3): catalogue order is fixed, never PUT-able.
+  ai_tiers?: Array<{ key: BillingAiTierKey } & Partial<Pick<BillingAiTier, 'label' | 'monthly_tokens' | 'price_cents' | 'active'>>>
+  workflow_tiers?: Array<{ key: BillingWorkflowTierKey } & Partial<Pick<BillingWorkflowTier, 'label' | 'monthly_runs' | 'price_cents' | 'active'>>>
   weights?: BillingUsageWeights
   overage?: BillingOverageConfig
   warn_at_pct?: number

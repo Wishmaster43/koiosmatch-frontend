@@ -41,7 +41,7 @@ const t = (key: string, opts?: Record<string, unknown>) => i18n.t(key, { ns: 'se
 
 const billingUsage = (over: Record<string, unknown> = {}) => ({
   workflow: {
-    total_credits: 10, credit_price: 1, amount: 10,
+    total_credits: 10, overage_price: 1, amount: 10,
     per_day: [], per_workflow: [{ workflow_id: 'wf-1', name: 'Welkomstflow', runs: 4, credits: 10 }],
   },
   ai: { input_tokens: 0, output_tokens: 0, amount: 0, per_day: [], per_user: [] },

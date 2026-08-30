@@ -284,7 +284,20 @@
       "inactiveWarning": "Attention : ce flux est inactif, l’entretien sera ignoré."
     },
     "flowPickerLabel": "Pas de flux d’offre (défaut de l’agent)",
-    "flowPickerPlaceholder": "Choisir un flux d’entretien…"
+    "flowPickerPlaceholder": "Choisir un flux d’entretien…",
+    "workflow": {
+      "sectionTitle": "Workflow d’entretien",
+      "pickerLabel": "Workflow",
+      "placeholder": "Sélectionnez un workflow d’entretien",
+      "none": "Aucun workflow",
+      "empty": "Aucun workflow d’entretien configuré pour le moment.",
+      "unavailable": "Disponible dès que la liaison du workflow est connectée au backend",
+      "derivedFrom": "Dérivé du workflow : {{agent}} / {{workflow}}",
+      "loadError": "Impossible de charger les workflows d’entretien.",
+      "inactiveSuffix": "(inactif)",
+      "inactiveWarning": "Attention : ce workflow est inactif, la liaison ne peut plus être sélectionnée.",
+      "createUnavailable": "Disponible dès qu’une nouvelle offre pourra lier un workflow"
+    }
   },
   "generate": {
     "button": "Générer avec Koios",

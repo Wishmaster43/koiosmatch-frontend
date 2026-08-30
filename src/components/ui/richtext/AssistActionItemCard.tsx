@@ -22,8 +22,9 @@ import Button from '../Button'
 import { Caption } from '../typography'
 import { humanizeIsoDates } from '@/lib/localDate'
 import { useTranslation } from 'react-i18next'
-import { CheckSquare, MessageCircle, Mail, CalendarClock, Bell, Check, Clock, ShieldAlert, HelpCircle, ExternalLink } from 'lucide-react'
+import { CheckSquare, MessageCircle, Mail, CalendarClock, Bell, Check, Clock, ShieldAlert, HelpCircle, ExternalLink, AlertTriangle } from 'lucide-react'
 import { useDateFormat } from '@/lib/datetime'
+import { useNumberFormat } from '@/lib/formatters'
 import { ACTION_TYPE_LABEL_NL } from './richTextAssistApi'
 import type { RichTextAssistActionType } from './richTextAssistApi'
 import type { ExecItem } from './useAssistActionsExecute'
@@ -68,6 +69,7 @@ interface AssistActionItemCardProps {
 export default function AssistActionItemCard({ item, onConfirm, onViewRun }: AssistActionItemCardProps) {
   const { t } = useTranslation('common')
   const { formatDateTime } = useDateFormat()
+  const { formatNumber } = useNumberFormat()
   const Icon = TYPE_ICON[item.type]
   const typeLabel = t(`notesAssist.actionTypes.${item.type}`, { defaultValue: ACTION_TYPE_LABEL_NL[item.type] })
   // Only whatsapp/email items carry a draft message; only appointment items
@@ -140,6 +142,30 @@ export default function AssistActionItemCard({ item, onConfirm, onViewRun }: Ass
         <span title={item.reason ?? t(`notesAssist.execute.forbiddenReason.${item.type}`, { defaultValue: FORBIDDEN_REASON_NL[item.type] })}
           style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, color: 'var(--color-danger-text)', cursor: 'help' }}>
           <ShieldAlert size={13} /> {t('notesAssist.execute.forbidden', { defaultValue: 'Geen rechten' })}
+        </span>
+      )}
+
+      {/* Budget exceeded (PRIJSMODEL-C 30-08) — the tenant's workflow-run
+          staffel is full; no retry button (retrying just re-422s, same as
+          forbidden/unsupported), reason + staffel stand + upgrade hint instead. */}
+      {item.status === 'budget_exceeded' && (
+        <span style={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'flex-end', gap: 2 }}>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, color: 'var(--color-warning-text)' }}>
+            <AlertTriangle size={13} /> {item.reason ?? t('notesAssist.execute.budgetExceeded', { defaultValue: 'Workflow-staffel vol' })}
+          </span>
+          {item.budget?.used != null && item.budget?.allowance != null && (
+            <Caption as="span">
+              {t('notesAssist.execute.budgetLine', {
+                used: formatNumber(item.budget.used), allowance: formatNumber(item.budget.allowance), unit: item.budget.unit ?? '',
+                defaultValue: '{{used}}/{{allowance}} {{unit}}',
+              })}
+            </Caption>
+          )}
+          {item.budget?.upgrade_hint?.next_tier_label && (
+            <Caption as="span">
+              {t('notesAssist.execute.upgradeHint', { tier: item.budget.upgrade_hint.next_tier_label, defaultValue: 'Upgrade naar {{tier}}' })}
+            </Caption>
+          )}
         </span>
       )}
 

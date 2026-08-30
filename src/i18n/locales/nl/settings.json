@@ -1836,7 +1836,7 @@
     "comingSoon": "binnenkort",
     "connectorsHint": "Connectors (Shiftmanager, HelloFlex, Elanza…) beheer je per klant onder Integraties → Apps. Aanzetten kost geld én ontsluit de workflow-templates.",
     "tierDesc": {
-      "core": "ATS + CRM",
+      "core": "ATS + CRM + Koios Assist",
       "pro": "+ Koios AI + AI Agents + Workflows + WhatsApp Business",
       "enterprise": "+ REST API + Insights+ + Connectors + SLA"
     },
@@ -3438,9 +3438,8 @@
   },
   "platformPricing": {
     "title": "Platformprijzen",
-    "subtitle": "AI-marge en workflow-creditprijs voor het hele platform (superadmin).",
+    "subtitle": "AI-marge voor het hele platform (superadmin).",
     "markupLabel": "AI-marge (%)",
-    "creditPriceLabel": "Workflow-creditprijs (€)",
     "loadError": "Platformprijzen laden is mislukt.",
     "saved": "Platformprijzen opgeslagen."
   },
@@ -3546,8 +3545,7 @@
       "pro": "Koios Pro",
       "enterprise": "Koios Enterprise"
     },
-    "aiBudgetLabel": "AI-tokens",
-    "workflowBudgetLabel": "Workflow-runs",
+    "workflowBudgetLabel": "Inbegrepen workflow-runs",
     "whatsappBudgetLabel": "WhatsApp Tokens per maand",
     "valueCaption": "inkoop {{cogs}} · verkoop {{sale}} · {{basis}}",
     "tenantHeading": "Tenant-uitzondering",
@@ -3557,7 +3555,8 @@
     "tenantClearHint": "Leeg = deze uitzondering wissen.",
     "loadError": "Maandbudgetten konden niet worden geladen.",
     "saveFailed": "Budgetten opslaan is mislukt.",
-    "saved": "Budgetten opgeslagen."
+    "saved": "Budgetten opgeslagen.",
+    "aiTierLabel": "AI-staffel: {{tier}}"
   },
   "billingTiers": {
     "title": "Staffels",

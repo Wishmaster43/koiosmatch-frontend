@@ -1836,7 +1836,7 @@
     "comingSoon": "soon",
     "connectorsHint": "Connectors (Shiftmanager, HelloFlex, Elanza…) are managed per client under Integrations → Apps. Enabling them costs money and unlocks the workflow templates.",
     "tierDesc": {
-      "core": "ATS + CRM",
+      "core": "ATS + CRM + Koios Assist",
       "pro": "+ Koios AI + AI Agents + Workflows + WhatsApp Business",
       "enterprise": "+ REST API + Insights+ + Connectors + SLA"
     },
@@ -3438,9 +3438,8 @@
   },
   "platformPricing": {
     "title": "Platform pricing",
-    "subtitle": "AI markup and workflow credit price for the whole platform (superadmin).",
+    "subtitle": "AI markup for the whole platform (superadmin).",
     "markupLabel": "AI markup (%)",
-    "creditPriceLabel": "Workflow credit price (€)",
     "loadError": "Failed to load platform pricing.",
     "saved": "Platform pricing saved."
   },
@@ -3546,8 +3545,7 @@
       "pro": "Koios Pro",
       "enterprise": "Koios Enterprise"
     },
-    "aiBudgetLabel": "AI-tokens",
-    "workflowBudgetLabel": "Workflow runs",
+    "workflowBudgetLabel": "Included workflow runs",
     "whatsappBudgetLabel": "WhatsApp Tokens per month",
     "valueCaption": "purchase {{cogs}} · sale {{sale}} · {{basis}}",
     "tenantHeading": "Tenant exception",
@@ -3557,7 +3555,8 @@
     "tenantClearHint": "Empty = clear this override.",
     "loadError": "Failed to load monthly budgets.",
     "saveFailed": "Failed to save the budgets.",
-    "saved": "Budgets saved."
+    "saved": "Budgets saved.",
+    "aiTierLabel": "AI tier: {{tier}}"
   },
   "billingTiers": {
     "title": "Tiers",

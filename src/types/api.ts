@@ -17,6 +17,10 @@ export type ModuleKey =
   | 'insights' | 'sm' | 'hf' | 'plan' | 'reports' | 'sm_ai' | 'ai'
   // K-193: personal (per-user) WhatsApp Web devices, distinct from the tenant-wide 'whatsapp' (WABA).
   | 'whatsapp_web'
+  // PRIJSMODEL-C (30-08): Core's own thin Koios Assist scope (notes assist,
+  // entity generate, cv parse) — narrower than the full 'koios_ai' module
+  // (chat/agents/interviews stay koios_ai-only, see lib/access.ts canUseKoiosAssist).
+  | 'koios_assist'
 
 /** A role or permission can arrive as a bare string or an object with a name. */
 export type Named = string | { name: string }

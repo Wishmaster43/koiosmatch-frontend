@@ -251,7 +251,9 @@
         "no_active_connection": "De benodigde koppeling is niet actief.",
         "send_failed": "Versturen is niet gelukt."
       },
-      "partialTitle": "Gedeeltelijk uitgevoerd"
+      "partialTitle": "Gedeeltelijk uitgevoerd",
+      "budgetLine": "{{used}}/{{allowance}} {{unit}}",
+      "upgradeHint": "Upgrade naar {{tier}}"
     },
     "resizeHandle": "Paneelbreedte aanpassen",
     "column": "Koios",
@@ -462,7 +464,10 @@
         "notification": "Je hebt geen rechten om deze actie uit te voeren."
       },
       "draftMessage": "Conceptbericht",
-      "proposedTime": "Voorgestelde tijd"
+      "proposedTime": "Voorgestelde tijd",
+      "budgetExceeded": "Workflow-staffel vol",
+      "budgetLine": "{{used}}/{{allowance}} {{unit}}",
+      "upgradeHint": "Upgrade naar {{tier}}"
     },
     "koiosMode": {
       "title": "Koios-modus",
@@ -498,7 +503,10 @@
       "assigneeClear": "Terug naar mijzelf",
       "linkAdd": "Koppelen aan…",
       "linkClear": "Koppeling verwijderen",
-      "modeUnknown": "Koios-stand onbekend. Acties wachten op jouw bevestiging."
+      "modeUnknown": "Koios-stand onbekend. Acties wachten op jouw bevestiging.",
+      "statusBudgetExceeded": "Staffel vol",
+      "budgetLine": "{{used}}/{{allowance}} {{unit}}",
+      "upgradeHint": "Upgrade naar {{tier}}"
     }
   },
   "ai": {

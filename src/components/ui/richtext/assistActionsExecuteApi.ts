@@ -43,10 +43,13 @@
 import api from '@/lib/api'
 import type { RichTextAssistActionItem, RichTextAssistActionType } from './richTextAssistApi'
 import type { RunRow } from '@/types/reports'
+import type { ActionBudget } from '@/types/actionBudget'
 
 // K-153: a synchronously failed run reports 'failed' + reason — never a green
-// 'executed' over a broken run.
-export type ExecuteItemStatus = 'executed' | 'failed' | 'pending' | 'wizard_required' | 'forbidden' | 'unsupported'
+// 'executed' over a broken run. 'budget_exceeded' added PRIJSMODEL-C 30-08:
+// the tenant's workflow-run staffel is full — never a retry, the reason +
+// budget line render instead (see AssistActionItemCard).
+export type ExecuteItemStatus = 'executed' | 'failed' | 'pending' | 'wizard_required' | 'forbidden' | 'unsupported' | 'budget_exceeded'
 
 // One item sent to the execute endpoint — the assist-suggested item shape
 // plus the per-item confirm flag (omit/false = preview, true = run it now).
@@ -80,6 +83,9 @@ export interface ExecuteResultItem {
   // Present on every non-'executed' status (pending/wizard_required/forbidden);
   // a raw server string, shown as-is — see the CONTRACT note above.
   reason?: string
+  // PRIJSMODEL-C 30-08: present only on status === 'budget_exceeded' — the
+  // staffel stand (state/allowance/used/remaining/unit/upgrade_hint), no price.
+  budget?: ActionBudget
 }
 
 export interface ExecuteSource {

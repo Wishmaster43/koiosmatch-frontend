@@ -20,10 +20,10 @@ export interface DailyRow {
 }
 
 // Merge the two per-day arrays keyed by date, computing each day's workflow
-// amount from credits × credit_price (the endpoint only sends the amount total,
+// amount from credits × overage_price (the endpoint only sends the amount total,
 // not a per-day amount, for workflow — mirrors the backend export merge).
 export function mergeDailyRows(data: BillingUsageResponse['data'] | undefined): DailyRow[] {
-  const creditPrice = data?.workflow?.credit_price ?? 0
+  const creditPrice = data?.workflow?.overage_price ?? 0
   const byDate = new Map<string, DailyRow>()
   for (const row of data?.workflow?.per_day ?? []) {
     const credits = row.credits ?? 0

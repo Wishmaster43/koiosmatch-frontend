@@ -7,6 +7,7 @@
  * everywhere those interfaces are already used, with no changes to that file.
  */
 import type { KoiosContextRef } from '@/types/koios'
+import type { ActionBudget } from '@/types/actionBudget'
 
 // One preview row inside a pending action's diff (update: label + before/after;
 // create/send: label + a plain text line). All fields optional — a row renders
@@ -42,6 +43,17 @@ export interface KoiosPendingAction {
 
 // A result-card deep link, attached to a tool step's read output (Job 3).
 export type KoiosResultRef = KoiosContextRef
+
+// POST /ai/koios/actions/{id}/confirm response (KOIOS-CONFIRM-DECLINE-1,
+// PRIJSMODEL-C 30-08): a genuine tool refusal (staffel vol, kandidaat niet
+// gevonden, …) is now a 422 { status: 'declined', message, data }, never the
+// old 200 { status: 'executed', data: { fout } } false-positive. data.budget
+// (ActionBudget) carries the staffel stand on a budget-full decline.
+export interface KoiosConfirmActionResponse {
+  status?: 'executed' | 'declined'
+  message?: string
+  data?: { budget?: ActionBudget; [key: string]: unknown }
+}
 
 declare module '@/types/koios' {
   interface KoiosChatMessage {

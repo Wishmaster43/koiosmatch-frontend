@@ -17,7 +17,7 @@ const eur = (v: number) => formatCurrency(v).replace(new RegExp(String.fromCharC
 
 const billingUsage = {
   workflow: {
-    total_credits: 120, credit_price: 0.5, amount: 60,
+    total_credits: 120, overage_price: 0.5, amount: 60,
     per_day: [{ date: '2026-08-17', credits: 100 }, { date: '2026-08-18', credits: 20 }],
     per_workflow: [],
   },

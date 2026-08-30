@@ -848,7 +848,8 @@
     "Externe kennisbank gebruiken": "Usar base de conocimiento externa",
     "FAQ's gebruiken": "Usar preguntas frecuentes",
     "AI-instructies": "Instrucciones de IA",
-    "Afwijzingsmodus": "Modo de rechazo"
+    "Afwijzingsmodus": "Modo de rechazo",
+    "Intro-template": "Plantilla de introducción"
   },
   "fieldOptions": {
     "Array (meerdere bundles)": "Array (varios bundles)",
@@ -1077,7 +1078,9 @@
     "stopping": "Deteniendo…",
     "stopTitle": "Detener esta ejecución",
     "stopFailed": "No se pudo detener",
-    "alreadyRunning": "Este flujo ya se está ejecutando. Consulta o detén la ejecución en curso."
+    "alreadyRunning": "Este flujo ya se está ejecutando. Consulta o detén la ejecución en curso.",
+    "budgetLine": "{{used}}/{{allowance}} {{unit}}",
+    "upgradeHint": "Mejorar plan"
   },
   "runViewer": {
     "output": "Salida",
@@ -1180,7 +1183,8 @@
     "Laat de AI-agent veelgestelde vragen (FAQ) raadplegen tijdens het gesprek": "Permite que el agente de IA consulte las preguntas frecuentes durante la conversación.",
     "De genummerde stappen die de AI-agent doorloopt, elk met een optioneel outputveld en variabele-chips": "Los pasos numerados que recorre el agente de IA, cada uno con un campo de salida opcional y chips de variables.",
     "Extra persona- en toonaanwijzingen voor de AI-agent, naast de instructies hierboven Het runtime-antwoordcontract wordt automatisch toegevoegd": "Indicaciones adicionales de persona y tono para el agente de IA, además de las instrucciones anteriores. El contrato de respuesta en tiempo de ejecución se añade automáticamente.",
-    "Volgt standaard de tenant-instelling; deze vacature kan dat hier overschrijven": "Sigue de forma predeterminada el ajuste del inquilino; esta vacante puede anularlo aquí."
+    "Volgt standaard de tenant-instelling; deze vacature kan dat hier overschrijven": "Sigue de forma predeterminada el ajuste del inquilino; esta vacante puede anularlo aquí.",
+    "Verplicht als de gekozen agent geen intro-template heeft; een verse sollicitant zit buiten het 24-uursvenster, dus een sessietekst als intro faalt": "Obligatorio si el agente elegido no tiene una plantilla de introducción; un candidato reciente está fuera de la ventana de 24 horas, por lo que un texto de sesión como introducción falla."
   },
   "triggers": {
     "events": {

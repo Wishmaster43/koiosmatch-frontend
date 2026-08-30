@@ -1613,7 +1613,7 @@
     "comingSoon": "bientôt",
     "connectorsHint": "Les connecteurs (Shiftmanager, HelloFlex, Elanza…) se gèrent par client sous Intégrations → Apps. L'activation est payante et débloque les modèles de workflow.",
     "tierDesc": {
-      "core": "ATS + CRM",
+      "core": "ATS + CRM + Koios Assist",
       "pro": "+ Koios AI + AI Agents + Workflows + WhatsApp Business",
       "enterprise": "+ REST API + Insights+ + Connectors + SLA"
     },
@@ -3438,9 +3438,8 @@
   },
   "platformPricing": {
     "title": "Tarification de la plateforme",
-    "subtitle": "Marge IA et prix du crédit workflow pour toute la plateforme (superadmin).",
+    "subtitle": "Marge IA pour toute la plateforme (superadmin).",
     "markupLabel": "Marge IA (%)",
-    "creditPriceLabel": "Prix du crédit workflow (€)",
     "loadError": "Échec du chargement de la tarification de la plateforme.",
     "saved": "Tarification de la plateforme enregistrée."
   },
@@ -3546,8 +3545,7 @@
       "pro": "Koios Pro",
       "enterprise": "Koios Enterprise"
     },
-    "aiBudgetLabel": "Jetons AI",
-    "workflowBudgetLabel": "Exécutions de workflow",
+    "workflowBudgetLabel": "Exécutions de workflow incluses",
     "whatsappBudgetLabel": "Jetons WhatsApp par mois",
     "valueCaption": "achat {{cogs}} · vente {{sale}} · {{basis}}",
     "tenantHeading": "Exception client",
@@ -3557,7 +3555,8 @@
     "tenantClearHint": "Vide = supprimer cette exception.",
     "loadError": "Impossible de charger les budgets mensuels.",
     "saveFailed": "Échec de l'enregistrement des budgets.",
-    "saved": "Budgets enregistrés."
+    "saved": "Budgets enregistrés.",
+    "aiTierLabel": "Palier IA : {{tier}}"
   },
   "billingTiers": {
     "title": "Paliers",

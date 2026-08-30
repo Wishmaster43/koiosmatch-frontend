@@ -31,12 +31,20 @@ import { confirmPendingAction, cancelPendingAction } from './koiosApi'
 import { entityIconEl } from './koiosEntityIcons'
 import { useKoiosToolCapabilities, findToolCapability, KOIOS_CONNECTION_HASH } from './useKoiosToolCapabilities'
 import type { KoiosPendingAction, KoiosPreviewRow } from './koiosTypes'
+import type { ActionBudget } from '@/types/actionBudget'
 
 type CardStatus = 'proposed' | 'confirming' | 'submitting' | 'confirmed' | 'cancelled' | 'expired' | 'error' | 'refused' | 'partial'
 
 // A pending-action REST call's error status, when the server rejects it because
 // the proposal is gone/already resolved (never a generic error in that case).
 const isExpiredStatus = (status?: number) => status === 404 || status === 410 || status === 422
+
+// Plain grouped-number formatting for the budget line — deliberately NOT
+// lib/formatters' useNumberFormat: that module re-exports lib/datetime, whose
+// import graph self-initialises real i18next as a side effect (BARREL-DATETIME-LES,
+// CLAUDE.md §2) — pulling it into this component would drag real i18n into every
+// test file that renders KoiosPendingActionCard without expecting that cascade.
+const formatCount = (n: number) => new Intl.NumberFormat().format(n)
 
 // Best-effort: surface an "owner" preview row next to the entity chip, if present
 // (KOIOS-AGENT-PLAN §7 Job 2 — "naam + eigenaar wanneer aanwezig in preview").
@@ -71,6 +79,8 @@ export default function KoiosPendingActionCard({ action }: { action: KoiosPendin
   const [status, setStatus] = useState<CardStatus>('proposed')
   const [remaining, setRemaining] = useState(() => secondsLeft(action.expires_at))
   const [refusedReason, setRefusedReason] = useState<string | null>(null)
+  // KOIOS-CONFIRM-DECLINE-1 (PRIJSMODEL-C): the staffel stand on a budget-full decline.
+  const [budget, setBudget] = useState<ActionBudget | null>(null)
 
   // The tool's connection gate (KOIOS-AGENT-FE-1 rule 1): an integration tool with
   // an inactive connection is never offered as a silent-failing confirm.
@@ -130,7 +140,20 @@ export default function KoiosPendingActionCard({ action }: { action: KoiosPendin
         }
         setStatus('confirmed')
       })
-      .catch((e) => setStatus(isExpiredStatus(e?.response?.status) ? 'expired' : 'error'))
+      .catch((e) => {
+        // KOIOS-CONFIRM-DECLINE-1 (PRIJSMODEL-C): a genuine tool refusal is now a
+        // 422 { status: 'declined', message, data: { budget? } } — checked BEFORE
+        // the generic expired/already-resolved fallback, or a budget-full decline
+        // would misread as "this proposal has expired".
+        const body = e?.response?.data as { status?: string; message?: string; data?: { budget?: ActionBudget } } | undefined
+        if (body?.status === 'declined') {
+          setRefusedReason(body.message ?? null)
+          setBudget(body.data?.budget ?? null)
+          setStatus('refused')
+          return
+        }
+        setStatus(isExpiredStatus(e?.response?.status) ? 'expired' : 'error')
+      })
   }
 
   // The secondary button either steps BACK out of the destructive 2nd-step
@@ -188,7 +211,20 @@ export default function KoiosPendingActionCard({ action }: { action: KoiosPendin
         <CalloutBox variant="warning" title={t('koios.pendingAction.partialTitle')}>{refusedReason}</CalloutBox>
       )}
       {status === 'refused' && (
-        <CalloutBox variant="warning" title={t('koios.pendingAction.refusedTitle')}>{refusedReason}</CalloutBox>
+        <CalloutBox variant="warning" title={t('koios.pendingAction.refusedTitle')}>
+          {refusedReason}
+          {/* KOIOS-CONFIRM-DECLINE-1: the staffel stand on a budget-full decline. */}
+          {budget && (
+            <Caption as="p" style={{ marginTop: 4 }}>
+              {budget.used != null && budget.allowance != null && t('koios.pendingAction.budgetLine', {
+                used: formatCount(budget.used), allowance: formatCount(budget.allowance), unit: budget.unit ?? '',
+              })}
+              {budget.upgrade_hint?.next_tier_label && (
+                <> · {t('koios.pendingAction.upgradeHint', { tier: budget.upgrade_hint.next_tier_label })}</>
+              )}
+            </Caption>
+          )}
+        </CalloutBox>
       )}
 
       {/* Terminal states */}

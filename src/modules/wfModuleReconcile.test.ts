@@ -78,8 +78,8 @@ const EXPECTED_SCHEMA_KEYS: Record<string, string[]> = {
   // INTERVIEW-WORKFLOW-1 Appendix C (Danny 30-08) supersedes WF-AI-AGENT-NODE-FE-1
   // for ai_agent's key set: the reduced 6-key node grows a knowledge group, the
   // instructions list and a rejection-mode override (see the describe block below).
-  ai_agent: ['agent_id', 'channel', 'instruction', 'instructions', 'max_attempts', 'phone_number_id',
-    'reply_timeout_hours', 'rejection_mode', 'use_external_knowledge', 'use_faq'],
+  ai_agent: ['agent_id', 'channel', 'instruction', 'instructions', 'intro_template', 'max_attempts',
+    'phone_number_id', 'reply_timeout_hours', 'rejection_mode', 'use_external_knowledge', 'use_faq'],
 }
 
 describe('WF-BUILDER-VELDEN-1 · registry config-schema mirrors the engine exactly', () => {
@@ -138,7 +138,7 @@ describe('WF-WAIT-NODE-FE-1 · delay/sleep deleted, wait mirrors WaitModule::con
 describe('WF-AI-AGENT-NODE-FE-1 · the 13-field builder is gone; INTERVIEW-WORKFLOW-1 grows the schema deliberately', () => {
   it("ai_agent's schema has exactly the CMBE-accepted key set, nothing more", () => {
     const keys = (MODULE_SCHEMAS.ai_agent ?? []).map(f => f.key).sort()
-    expect(keys).toEqual(['agent_id', 'channel', 'instruction', 'instructions', 'max_attempts',
+    expect(keys).toEqual(['agent_id', 'channel', 'instruction', 'instructions', 'intro_template', 'max_attempts',
       'phone_number_id', 'rejection_mode', 'reply_timeout_hours', 'use_external_knowledge', 'use_faq'])
   })
 

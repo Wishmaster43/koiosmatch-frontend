@@ -9,6 +9,7 @@ import { useState, useCallback, useEffect, useRef } from 'react'
 import { useWorkflowRun } from './useWorkflowRun'
 import api from '@/lib/api'
 import type { RunRow } from '@/types/reports'
+import type { ActionBudget } from '@/types/actionBudget'
 
 // Owns a workflow's run lifecycle: starting, live-polling, the 409 conflict, and stopping; extracted so useWorkflowEditor stays under its size cap.
 export function useWorkflowRunControl({ workflowId, initialRunId = null, onRunStarted }: {
@@ -23,6 +24,9 @@ export function useWorkflowRunControl({ workflowId, initialRunId = null, onRunSt
 }) {
   const [running,        setRunning]        = useState(false)
   const [runError,       setRunError]       = useState<string | null>(null)
+  // PRIJSMODEL-C 30-08: the staffel stand on a 422 { status: 'budget_exceeded',
+  // budget } — the run's own message still lands in runError as before.
+  const [runBudget,      setRunBudget]      = useState<ActionBudget | null>(null)
   const [runningNodeId,  setRunningNodeId]  = useState<string | null>(null)
   // WF-R3: the id of the run we're polling live (set by handleRun), and its steps.
   const [activeRunId,    setActiveRunId]    = useState<string | number | null>(initialRunId)
@@ -62,6 +66,7 @@ export function useWorkflowRunControl({ workflowId, initialRunId = null, onRunSt
   const handleRun = useCallback(async (opts?: { dryRun?: boolean }) => {
     setRunning(true)
     setRunError(null)
+    setRunBudget(null)
     setRunConflict(false)
     try {
       // Actually execute the SAVED workflow server-side (the engine runs the
@@ -81,7 +86,7 @@ export function useWorkflowRunControl({ workflowId, initialRunId = null, onRunSt
       // Show the run history / live viewer (the polled run drives node colours).
       onRunStarted?.()
     } catch (err) {
-      const e = err as { response?: { status?: number; data?: { message?: string; run_id?: string | number } } }
+      const e = err as { response?: { status?: number; data?: { message?: string; run_id?: string | number; status?: string; budget?: ActionBudget } } }
       // RUN-CONTROL-1 single-flight: 409 = this workflow already has a live run.
       // Point the viewer at THAT run (poll + logs panel) and show "loopt al"
       // ("already running").
@@ -92,8 +97,11 @@ export function useWorkflowRunControl({ workflowId, initialRunId = null, onRunSt
       } else {
         // Surface the backend reason (e.g. "Workflow is niet actief" / "Workflow
         // is not active" on a draft); empty string = generic message via i18n
-        // in the component.
+        // in the component. PRIJSMODEL-C 30-08: a 422 { status: 'budget_exceeded',
+        // budget } already falls in here for the message — also thread the
+        // staffel stand through so the header can show its upgrade hint.
         setRunError(e.response?.data?.message ?? '')
+        setRunBudget(e.response?.data?.status === 'budget_exceeded' ? (e.response.data.budget ?? null) : null)
       }
     } finally {
       setRunningNodeId(null)
@@ -108,10 +116,11 @@ export function useWorkflowRunControl({ workflowId, initialRunId = null, onRunSt
   const handleStopped = useCallback(() => {
     setRunConflict(false)
     setRunError(null)
+    setRunBudget(null)
   }, [])
 
   return {
-    running, runError, setRunError, runningNodeId,
+    running, runError, setRunError, runBudget, runningNodeId,
     activeRunId, liveRun, liveRunActive, runConflict, handleStopped, handleRun,
   }
 }

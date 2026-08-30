@@ -284,7 +284,20 @@
       "inactiveWarning": "Let op: deze flow is inactief, het interview wordt overgeslagen."
     },
     "flowPickerLabel": "Geen vacature-flow (agent-standaard)",
-    "flowPickerPlaceholder": "Kies een interviewflow…"
+    "flowPickerPlaceholder": "Kies een interviewflow…",
+    "workflow": {
+      "sectionTitle": "Interview-workflow",
+      "pickerLabel": "Workflow",
+      "placeholder": "Selecteer een interview-workflow",
+      "none": "Geen workflow",
+      "empty": "Nog geen interview-workflows ingesteld.",
+      "unavailable": "Beschikbaar zodra de workflow-koppeling aan de backend is",
+      "derivedFrom": "Afgeleid uit de workflow: {{agent}} / {{workflow}}",
+      "loadError": "Interview-workflows laden is mislukt.",
+      "inactiveSuffix": "(inactief)",
+      "inactiveWarning": "Let op: deze workflow is inactief, de koppeling kan niet opnieuw worden gekozen.",
+      "createUnavailable": "Beschikbaar zodra nieuwe vacatures een workflow kunnen koppelen"
+    }
   },
   "generate": {
     "button": "Genereer met Koios",

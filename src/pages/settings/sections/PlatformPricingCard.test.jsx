@@ -1,7 +1,8 @@
 /**
  * PlatformPricingCard (CREDITS-1) — asserts the REAL request (route + body), per
  * §13: proves the seam, not just that a callback fired. Covers the initial GET,
- * the optimistic save-on-blur PUT with both knobs together, and revert-on-failure.
+ * the optimistic save-on-blur PUT of the one remaining knob, and revert-on-failure.
+ * PRIJSMODEL-C (30-08): the workflow credit-price knob is gone from this endpoint.
  */
 import { describe, it, expect, afterEach, vi } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
@@ -25,50 +26,39 @@ const t = (key, opts) => i18n.t(key, { ns: 'settings', ...opts })
 
 afterEach(() => vi.clearAllMocks())
 
-function mockGet(pricing = { ai_markup_percent: 60, workflow_credit_price: 0 }) {
+function mockGet(pricing = { ai_markup_percent: 60 }) {
   api.get.mockResolvedValue({ data: pricing })
 }
 
 describe('PlatformPricingCard', () => {
-  it('GETs /admin/platform-pricing and renders both knobs', async () => {
+  it('GETs /admin/platform-pricing and renders the markup knob only', async () => {
     mockGet()
     render(<PlatformPricingCard />)
-
-    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/admin/platform-pricing'))
     expect(await screen.findByLabelText(t('platformPricing.markupLabel'))).toHaveValue(60)
-    expect(screen.getByLabelText(t('platformPricing.creditPriceLabel'))).toHaveValue(0)
+    expect(api.get).toHaveBeenCalledWith('/admin/platform-pricing')
+    // The workflow credit-price knob is gone; the overage price lives in the tiers card.
+    expect(screen.queryByText(/creditprijs/i)).toBeNull()
   })
 
-  it('PUTs both knobs together on blur (a small complete pricing sheet, never a partial patch)', async () => {
+  it('PUTs exactly { ai_markup_percent } on blur', async () => {
     mockGet()
-    api.put.mockResolvedValue({ data: { ai_markup_percent: 75, workflow_credit_price: 0.005 } })
+    api.put.mockResolvedValue({ data: { ai_markup_percent: 75 } })
     render(<PlatformPricingCard />)
-
-    const markupInput = await screen.findByLabelText(t('platformPricing.markupLabel'))
-    await userEvent.clear(markupInput)
-    await userEvent.type(markupInput, '75')
-    await userEvent.tab()
-
-    await waitFor(() => expect(api.put).toHaveBeenCalledWith('/admin/platform-pricing', {
-      ai_markup_percent: 75, workflow_credit_price: 0,
-    }))
-    // A successful autosave surfaces a visible confirmation toast.
-    await waitFor(() => expect(notifySuccess).toHaveBeenCalledWith(t('platformPricing.saved')))
+    const user = userEvent.setup()
+    const input = await screen.findByLabelText(t('platformPricing.markupLabel'))
+    await user.clear(input); await user.type(input, '75'); await user.tab()
+    await waitFor(() => expect(api.put).toHaveBeenCalledWith('/admin/platform-pricing', { ai_markup_percent: 75 }))
+    await waitFor(() => expect(notifySuccess).toHaveBeenCalled())
   })
 
   it('reverts the field and toasts on a save failure (optimistic-with-revert)', async () => {
     mockGet()
-    api.put.mockRejectedValue({ response: { status: 422, data: { message: 'Invalid.' } } })
+    api.put.mockRejectedValue({ response: { status: 422, data: { message: 'nee' } } })
     render(<PlatformPricingCard />)
-
-    const priceInput = await screen.findByLabelText(t('platformPricing.creditPriceLabel'))
-    await userEvent.clear(priceInput)
-    await userEvent.type(priceInput, '0.005')
-    await userEvent.tab()
-
+    const user = userEvent.setup()
+    const input = await screen.findByLabelText(t('platformPricing.markupLabel'))
+    await user.clear(input); await user.type(input, '75'); await user.tab()
     await waitFor(() => expect(api.put).toHaveBeenCalled())
-    // Reverted back to the last server-confirmed value (0) after the failed save.
-    await waitFor(() => expect(priceInput).toHaveValue(0))
-    expect(notifySuccess).not.toHaveBeenCalled()
+    await waitFor(() => expect(input).toHaveValue(60))
   })
 })

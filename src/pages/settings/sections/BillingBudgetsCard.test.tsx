@@ -2,6 +2,9 @@
  * BillingBudgetsCard (CREDITS-2-FE deel 2) — asserts the real request seam: the
  * GET shape, the PUT body for a package edit and the PUT body for a tenant-
  * override clear (null fields), per §13.
+ * PRIJSMODEL-C (30-08): ai_token_budget is gone (AI capacity is a staffel now,
+ * shown read-only via ai_tier_key); workflow_credit_budget is renamed
+ * included_workflow_runs.
  */
 import { describe, it, expect, afterEach, vi } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
@@ -25,12 +28,12 @@ afterEach(() => vi.clearAllMocks())
 
 const budgets = {
   packages: {
-    core: { ai_token_budget: 1000, workflow_credit_budget: 200, value: { ai_cogs: 1, ai_sale: 2, basis: 'per 1k' } },
-    pro: { ai_token_budget: 5000, workflow_credit_budget: 800, value: { ai_cogs: 1, ai_sale: 2, basis: 'per 1k' } },
-    enterprise: { ai_token_budget: 20000, workflow_credit_budget: 3000, value: { ai_cogs: 1, ai_sale: 2, basis: 'per 1k' } },
+    core: { included_workflow_runs: 200, ai_tier_key: 'assist', value: { ai_cogs: 1, ai_sale: 2, basis: 'per 1k' } },
+    pro: { included_workflow_runs: 800, ai_tier_key: 'pro', value: { ai_cogs: 1, ai_sale: 2, basis: 'per 1k' } },
+    enterprise: { included_workflow_runs: 3000, ai_tier_key: 'max', value: { ai_cogs: 1, ai_sale: 2, basis: 'per 1k' } },
   },
   tenants: {
-    't-1': { ai_token_budget: 9000, workflow_credit_budget: 500 },
+    't-1': { included_workflow_runs: 500 },
   },
   resets_at: '2026-09-01T00:00:00Z',
 }
@@ -48,10 +51,18 @@ describe('BillingBudgetsCard', () => {
     mockGet()
     render(<BillingBudgetsCard />)
     await waitFor(() => expect(api.get).toHaveBeenCalledWith('/admin/billing-budgets'))
-    const inputs = await screen.findAllByLabelText(t('billingBudgets.aiBudgetLabel'))
+    const inputs = await screen.findAllByLabelText(t('billingBudgets.workflowBudgetLabel'))
     expect(inputs).toHaveLength(3)
-    expect(inputs[0]).toHaveValue(1000)
-    expect(inputs[1]).toHaveValue(5000)
+    expect(inputs[0]).toHaveValue(200)
+    expect(inputs[1]).toHaveValue(800)
+  })
+
+  it('renders the read-only AI staffel per package, never as an input', async () => {
+    mockGet()
+    render(<BillingBudgetsCard />)
+    await screen.findAllByLabelText(t('billingBudgets.workflowBudgetLabel'))
+    expect(screen.getByText(t('billingBudgets.aiTierLabel', { tier: 'assist' }))).toBeInTheDocument()
+    expect(screen.queryByLabelText(t('billingBudgets.aiBudgetLabel'))).not.toBeInTheDocument()
   })
 
   it('PUTs the edited package budget', async () => {
@@ -59,14 +70,14 @@ describe('BillingBudgetsCard', () => {
     vi.mocked(api.put).mockResolvedValue({ data: budgets })
     render(<BillingBudgetsCard />)
 
-    const inputs = await screen.findAllByLabelText(t('billingBudgets.aiBudgetLabel'))
+    const inputs = await screen.findAllByLabelText(t('billingBudgets.workflowBudgetLabel'))
     await userEvent.clear(inputs[0])
     await userEvent.type(inputs[0], '1500')
 
     await userEvent.click(screen.getByRole('button', { name: t('common.save') }))
 
     await waitFor(() => expect(api.put).toHaveBeenCalledWith('/admin/billing-budgets', expect.objectContaining({
-      packages: expect.objectContaining({ core: { ai_token_budget: 1500, workflow_credit_budget: 200, whatsapp_token_budget: 0 } }),
+      packages: expect.objectContaining({ core: { included_workflow_runs: 1500, whatsapp_token_budget: 0 } }),
     })))
   })
 
@@ -75,19 +86,19 @@ describe('BillingBudgetsCard', () => {
     vi.mocked(api.put).mockResolvedValue({ data: budgets })
     render(<BillingBudgetsCard />)
 
-    await screen.findAllByLabelText(t('billingBudgets.aiBudgetLabel'))
+    await screen.findAllByLabelText(t('billingBudgets.workflowBudgetLabel'))
     const tenantTrigger = screen.getByText(t('billingBudgets.tenantPickerPlaceholder'))
     await userEvent.click(tenantTrigger)
     const option = await screen.findByText('Yesway Flex B.V.')
     await userEvent.click(option)
 
-    const aiInput = await screen.findByLabelText(t('billingBudgets.aiBudgetLabel'), { selector: '#tenant-budget-ai' })
-    await userEvent.clear(aiInput)
+    const wfInput = await screen.findByLabelText(t('billingBudgets.workflowBudgetLabel'), { selector: '#tenant-budget-wf' })
+    await userEvent.clear(wfInput)
 
     await userEvent.click(screen.getByRole('button', { name: t('common.save') }))
 
     await waitFor(() => expect(api.put).toHaveBeenCalledWith('/admin/billing-budgets', expect.objectContaining({
-      tenants: { 't-1': { ai_token_budget: null, workflow_credit_budget: 500, whatsapp_token_budget: null } },
+      tenants: { 't-1': { included_workflow_runs: null, whatsapp_token_budget: null } },
     })))
   })
 

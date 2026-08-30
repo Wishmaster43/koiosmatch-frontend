@@ -848,7 +848,8 @@
     "Externe kennisbank gebruiken": "Use external knowledge base",
     "FAQ's gebruiken": "Use FAQs",
     "AI-instructies": "AI instructions",
-    "Afwijzingsmodus": "Rejection mode"
+    "Afwijzingsmodus": "Rejection mode",
+    "Intro-template": "Intro template"
   },
   "fieldOptions": {
     "Array (meerdere bundles)": "Array (multiple bundles)",
@@ -1077,7 +1078,9 @@
     "stopping": "Stopping…",
     "stopTitle": "Stop this run",
     "stopFailed": "Stopping failed",
-    "alreadyRunning": "This workflow is already running. View or stop the active run."
+    "alreadyRunning": "This workflow is already running. View or stop the active run.",
+    "budgetLine": "{{used}}/{{allowance}} {{unit}}",
+    "upgradeHint": "Upgrade"
   },
   "runViewer": {
     "output": "Output",
@@ -1180,7 +1183,8 @@
     "Laat de AI-agent veelgestelde vragen (FAQ) raadplegen tijdens het gesprek": "Lets the AI agent consult the FAQ during the conversation.",
     "De genummerde stappen die de AI-agent doorloopt, elk met een optioneel outputveld en variabele-chips": "The numbered steps the AI agent walks through, each with an optional output field and variable chips.",
     "Extra persona- en toonaanwijzingen voor de AI-agent, naast de instructies hierboven Het runtime-antwoordcontract wordt automatisch toegevoegd": "Extra persona and tone guidance for the AI agent, alongside the instructions above. The runtime reply contract is added automatically.",
-    "Volgt standaard de tenant-instelling; deze vacature kan dat hier overschrijven": "Follows the tenant setting by default; this vacancy can override it here."
+    "Volgt standaard de tenant-instelling; deze vacature kan dat hier overschrijven": "Follows the tenant setting by default; this vacancy can override it here.",
+    "Verplicht als de gekozen agent geen intro-template heeft; een verse sollicitant zit buiten het 24-uursvenster, dus een sessietekst als intro faalt": "Required if the chosen agent has no intro template; a fresh applicant sits outside the 24-hour window, so a session text as intro fails."
   },
   "triggers": {
     "events": {

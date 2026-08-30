@@ -251,7 +251,9 @@
         "no_active_connection": "La conexión necesaria no está activa.",
         "send_failed": "No se pudo enviar."
       },
-      "partialTitle": "Ejecutado parcialmente"
+      "partialTitle": "Ejecutado parcialmente",
+      "budgetLine": "{{used}}/{{allowance}} {{unit}}",
+      "upgradeHint": "Actualizar a {{tier}}"
     },
     "resizeHandle": "Ajustar el ancho del panel",
     "column": "Koios",
@@ -462,7 +464,10 @@
         "notification": "No tienes permisos para realizar esta acción."
       },
       "draftMessage": "Borrador del mensaje",
-      "proposedTime": "Hora propuesta"
+      "proposedTime": "Hora propuesta",
+      "budgetExceeded": "Nivel de workflow completo",
+      "budgetLine": "{{used}}/{{allowance}} {{unit}}",
+      "upgradeHint": "Actualizar a {{tier}}"
     },
     "koiosMode": {
       "title": "Modo Koios",
@@ -498,7 +503,10 @@
       "assigneeClear": "Volver a mí",
       "linkAdd": "Vincular a…",
       "linkClear": "Quitar vínculo",
-      "modeUnknown": "Modo de Koios desconocido. Las acciones esperan tu confirmación."
+      "modeUnknown": "Modo de Koios desconocido. Las acciones esperan tu confirmación.",
+      "statusBudgetExceeded": "Nivel completo",
+      "budgetLine": "{{used}}/{{allowance}} {{unit}}",
+      "upgradeHint": "Actualizar a {{tier}}"
     }
   },
   "ai": {

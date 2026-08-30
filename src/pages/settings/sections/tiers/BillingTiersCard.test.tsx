@@ -85,6 +85,27 @@ describe('BillingTiersCard', () => {
     }))
   })
 
+  // A 422 "duplicate key" response (PRIJSMODEL-C ronde 3's own PUT-time rule)
+  // is a generic error path today — asserts the toast shows the server message
+  // AND the edited row keeps its (now-invalid) typed value, not a silent revert.
+  it('shows the server message in a toast on a 422 duplicate-key response, and keeps the edited row', async () => {
+    mockGet()
+    vi.mocked(api.put).mockRejectedValue({ response: { status: 422, data: { message: 'Dubbele key: pro' } } })
+    const { notifyError } = await import('@/lib/notify')
+    render(<BillingTiersCard />)
+
+    const priceInputs = await screen.findAllByLabelText(t('billingTiers.colPrice'))
+    fireEvent.change(priceInputs[1], { target: { value: '299' } })
+
+    const saveBtn = await screen.findByRole('button', { name: t('common.save') })
+    fireEvent.click(saveBtn)
+
+    await waitFor(() => expect(notifyError).toHaveBeenCalledWith('Dubbele key: pro'))
+    // The row keeps the typed value — no silent revert on a validation failure.
+    const priceInputsAfter = await screen.findAllByLabelText(t('billingTiers.colPrice'))
+    expect(priceInputsAfter[1]).toHaveValue(299)
+  })
+
   it('PUTs only the toggled overage field, never the sibling overage fields (real TierPlatformTogglesCard, F1)', async () => {
     mockGet()
     vi.mocked(api.put).mockResolvedValue({ data: catalog })

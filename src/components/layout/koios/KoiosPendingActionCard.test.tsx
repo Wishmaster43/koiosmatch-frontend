@@ -111,6 +111,26 @@ describe('KoiosPendingActionCard', () => {
     expect(screen.getByText('koios.pendingAction.expired')).toBeInTheDocument()
   })
 
+  // KOIOS-CONFIRM-DECLINE-1 (PRIJSMODEL-C 30-08): a genuine tool refusal is now
+  // a 422 { status: 'declined', message, data: { budget? } } — must land on
+  // 'refused' with the server message + budget, NEVER the generic 'expired'
+  // state a bare 422 used to fall into.
+  it('renders refused (never expired) on a 422 declined response, with the staffel stand', async () => {
+    mockConfirm.mockRejectedValue({
+      response: { status: 422, data: {
+        status: 'declined', message: 'Je AI-staffel is vol.',
+        data: { budget: { state: 'blocked', allowance: 100, used: 100, remaining: 0, unit: 'koios_ai_token', upgrade_hint: { next_tier_label: 'Pro' } } },
+      } },
+    })
+    const user = userEvent.setup()
+    renderCard(action())
+    await user.click(screen.getByText('koios.pendingAction.confirm'))
+    await waitFor(() => expect(screen.getByTestId('koios-pending-action')).toHaveAttribute('data-status', 'refused'))
+    expect(screen.getByText('Je AI-staffel is vol.')).toBeInTheDocument()
+    expect(screen.getByText(/koios\.pendingAction\.upgradeHint/)).toBeInTheDocument()
+    expect(screen.queryByText('koios.pendingAction.expired')).not.toBeInTheDocument()
+  })
+
   it('renders a generic error state on an unrelated failure', async () => {
     mockConfirm.mockRejectedValue({ response: { status: 500 } })
     const user = userEvent.setup()

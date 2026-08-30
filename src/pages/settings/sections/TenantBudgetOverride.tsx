@@ -12,7 +12,9 @@ import { Caption, GroupLabel, monoStyle } from '@/components/ui/typography'
 import { useTenantSearch } from '@/hooks/useTenantSearch'
 import type { BillingBudgetEntry } from '@/types/billingUsage'
 
-interface Draft { ai_token_budget: string; workflow_credit_budget: string; whatsapp_token_budget: string }
+// ai_token_budget dropped (PRIJSMODEL-C): AI capacity is a staffel now, not a
+// raw-token budget knob here. workflow_credit_budget renamed to included_workflow_runs.
+interface Draft { included_workflow_runs: string; whatsapp_token_budget: string }
 
 const label = { fontSize: 12, color: 'var(--text-muted)', marginBottom: 4, display: 'block' }
 // Color lives on the WRAP, not the input — mirrors BillingBudgetsCard's split.
@@ -20,8 +22,7 @@ const inputWrap = { display: 'flex', alignItems: 'center', gap: 6, border: '1px 
 const inputStyle = { border: 'none', outline: 'none', background: 'transparent', fontSize: 13, width: '100%', ...monoStyle }
 
 const draftFromEntry = (entry?: BillingBudgetEntry): Draft => ({
-  ai_token_budget: entry?.ai_token_budget != null ? String(entry.ai_token_budget) : '',
-  workflow_credit_budget: entry?.workflow_credit_budget != null ? String(entry.workflow_credit_budget) : '',
+  included_workflow_runs: entry?.included_workflow_runs != null ? String(entry.included_workflow_runs) : '',
   whatsapp_token_budget: entry?.whatsapp_token_budget != null ? String(entry.whatsapp_token_budget) : '',
 })
 
@@ -65,21 +66,11 @@ export default function TenantBudgetOverride({ tenants, tenantId, onTenantIdChan
       {tenantId && (
         <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', alignItems: 'flex-end', marginBottom: 4 }}>
           <div style={{ flex: '1 1 160px', minWidth: 140 }}>
-            <label style={label} htmlFor="tenant-budget-ai">{t('billingBudgets.aiBudgetLabel')}</label>
-            <div style={inputWrap}>
-              <input id="tenant-budget-ai" type="number" min={0} step={1}
-                value={draft.ai_token_budget}
-                onChange={(e) => onDraftChange({ ...draft, ai_token_budget: e.target.value })}
-                placeholder={t('billingBudgets.tenantClearPlaceholder')}
-                style={inputStyle} />
-            </div>
-          </div>
-          <div style={{ flex: '1 1 160px', minWidth: 140 }}>
             <label style={label} htmlFor="tenant-budget-wf">{t('billingBudgets.workflowBudgetLabel')}</label>
             <div style={inputWrap}>
               <input id="tenant-budget-wf" type="number" min={0} step={1}
-                value={draft.workflow_credit_budget}
-                onChange={(e) => onDraftChange({ ...draft, workflow_credit_budget: e.target.value })}
+                value={draft.included_workflow_runs}
+                onChange={(e) => onDraftChange({ ...draft, included_workflow_runs: e.target.value })}
                 placeholder={t('billingBudgets.tenantClearPlaceholder')}
                 style={inputStyle} />
             </div>

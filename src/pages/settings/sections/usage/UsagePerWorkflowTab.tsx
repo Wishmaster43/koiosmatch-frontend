@@ -33,7 +33,7 @@ export default function UsagePerWorkflowTab({ workflow, phase }: UsagePerWorkflo
     { key: 'name', header: t('billing.usage.perWorkflow.colName'), sortable: true, render: (r) => r.name ?? r.workflow_id },
     { key: 'runs', header: t('billing.usage.perWorkflow.colRuns'), align: 'right', sortable: true, render: (r) => formatNumber(r.runs) },
     { key: 'credits', header: t('billing.usage.perWorkflow.colTokens'), align: 'right', sortable: true, render: (r) => formatNumber(r.credits) },
-    { key: 'amount', header: t('billing.usage.perWorkflow.colAmount'), align: 'right', sortable: true, render: (r) => formatCurrency((r.credits ?? 0) * (workflow?.credit_price ?? 0)) },
+    { key: 'amount', header: t('billing.usage.perWorkflow.colAmount'), align: 'right', sortable: true, render: (r) => formatCurrency((r.credits ?? 0) * (workflow?.overage_price ?? 0)) },
   ]
 
   return (
