@@ -15,22 +15,9 @@ describe('ai_agent module schema · the restored pre-P1 base (MODULE-TERUG-1)', 
     expect(byKey('agent_id')).toBeUndefined()
   })
 
-  it('channel stays a fixed "whatsapp"-only select', () => {
-    const field = byKey('channel')!
-    expect(field.type).toBe('select')
-    expect(field.options).toEqual(['whatsapp'])
-    expect(field.default).toBe('whatsapp')
-  })
-
   it('instruction stays the required agent-prompt textarea', () => {
     const field = byKey('instruction')!
     expect(field.type).toBe('textarea')
-    expect(field.required).toBe(true)
-  })
-
-  it('phone_number_id is a required lookup_select, always visible', () => {
-    const field = byKey('phone_number_id')!
-    expect(field.type).toBe('lookup_select')
     expect(field.required).toBe(true)
   })
 
@@ -51,7 +38,7 @@ describe('ai_agent module schema · the ONE addition Danny asked for', () => {
   })
 
   it('carries NONE of the reverted P1 extras (intro_template, rejection_mode)', () => {
-    for (const gone of ['intro_template', 'rejection_mode', 'whatsapp_number_id', 'agent_id']) {
+    for (const gone of ['intro_template', 'rejection_mode', 'whatsapp_number_id', 'agent_id', 'channel', 'phone_number_id']) {
       expect(byKey(gone)).toBeUndefined()
     }
   })

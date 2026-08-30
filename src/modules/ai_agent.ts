@@ -22,22 +22,20 @@ export default {
     // Stored value = the agent NAME: AiAgentModule resolves `AiAgent::where('name', …)`
     // and its own schema offers pluck('name') (Opus-measured) — an id would match nobody.
     { key: 'agent', label: 'AI-agent', type: 'lookup_select', endpoint: '/ai/agents', valueKey: 'name', tab: 'general' },
-    { key: 'channel', label: 'Kanaal', type: 'select', tab: 'general', default: 'whatsapp',
-      options: ['whatsapp'] },
     { key: 'instruction', label: 'Instructietekst (agent-prompt)', type: 'textarea', tab: 'general', required: true,
       hint: 'De volledige, tenant-bewerkbare instructie voor de AI-agent: persona, staps-state-machine, harde regels. Het runtime-antwoordcontract wordt automatisch toegevoegd.' },
-    // REQUIRED, like the engine's own schema: AiAgentModule::sendReply throws on an
-    // empty phone_number_id before any send-path selection runs (Opus-measured) —
-    // the WA-SCOPE-2 fallback lives in the WhatsApp send path this module never
-    // reaches, so a "leave empty" promise here would be a fake affordance.
-    { key: 'phone_number_id', label: 'Verzendnummer (voor de sessieantwoorden)', type: 'lookup_select', endpoint: '/whatsapp-phone-numbers', tab: 'general', required: true },
     // Kennis-toggles — Danny's eigen opdracht (30-08 "2 toggles die op de module
     // AI agent aan staan", herbevestigd 31-08 na MODULE-TERUG-1): terug op de module.
     { key: 'use_external_knowledge', label: 'Externe kennisbank gebruiken', type: 'boolean', tab: 'general', default: true,
       hint: 'Laat de AI-agent tenant-documenten/kennisbank raadplegen tijdens het gesprek.' },
     { key: 'use_faq', label: "FAQ's gebruiken", type: 'boolean', tab: 'general', default: true,
       hint: 'Laat de AI-agent veelgestelde vragen (FAQ) raadplegen tijdens het gesprek.' },
-    // MODULE-TERUG-1 (Danny 31-08, verbatim: "de AI agent moet terug komen zoals
+    // KANAAL-NAAR-SEND-1 (Danny 31-08, verbatim: "KANAAL IS VOLGENDE STAP IN DE
+// WORKFLOW??? WAAROM IS DAT HIER?" + "Verzendnummer ... TEKST STAAT NERGENS
+// OP"): channel and phone_number_id are REMOVED from this module — the send
+// channel + number live on the whatsapp_send step that follows the agent in
+// the flow; CMBE's engine patch reads them from that node.
+// MODULE-TERUG-1 (Danny 31-08, verbatim: "de AI agent moet terug komen zoals
     // het was ik vroeg alleen om titel voor AI instructie, pop-out of popup voor
     // de tekst en AI instructies op tabje"): the module is this pre-P1 schema
     // again, plus ONLY the AI-instructions list below on its own panel tab.

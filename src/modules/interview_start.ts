@@ -11,6 +11,11 @@ import { BotMessageSquare } from 'lucide-react'
 
 export default {
   type:     'interview_start',
+  // Danny 31-08 ('AI INTERVIEW MOET DAN WEG TOCH? HEEL DE MODULE?' — ja): the
+  // old one-field interview block is superseded by the ai_agent module; hidden
+  // from the picker so nobody grabs the wrong one. Existing nodes keep rendering;
+  // CMBE retires the engine/seed side in the re-provision round.
+  hidden:   true,
   category: 'AI',
   label:    'AI-interview starten',
   Icon:     BotMessageSquare,
