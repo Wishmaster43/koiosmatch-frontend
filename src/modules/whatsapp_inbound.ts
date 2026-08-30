@@ -19,6 +19,9 @@ export default {
   isStart:  true,
   schema: [
     { key: 'source', label: 'Bron', type: 'select', required: true, default: 'meta',
-      options: ['meta', 'wa_web'] },
+      options: [
+        { value: 'meta',   label: 'Meta webhook (WABA + Coexistence)' },
+        { value: 'wa_web', label: 'WhatsApp Web (eigen nummer)' },
+      ] },
   ],
 }
