@@ -250,7 +250,8 @@
     "jargon": "Fachjargon",
     "whatsapp_web": "WhatsApp Web-Nummern",
     "shiftmanager": "Shiftmanager",
-    "helloflex": "HelloFlex"
+    "helloflex": "HelloFlex",
+    "werkzoeken": "Werkzoeken"
   },
   "kpis": {
     "title": "KPI-Einstellungen",
@@ -3698,5 +3699,69 @@
     "threecx": "Telefonie-Anbindung an 3CX: Klick-to-Call und Gesprächsprotokoll in der Kandidatenakte.",
     "vat": "USt-IdNr. über den europäischen VIES-Dienst prüfen.",
     "voys": "Niederländische VoIP-Telefonanlage (VoIPGRID): Klick-to-Call und Anrufverlauf."
+  },
+  "integrations": {
+    "tabs": {
+      "connection": "Verbindung",
+      "mapping": "Mapping",
+      "contractmap": "Vertragszuordnung"
+    },
+    "connection": {
+      "title": "Verbindung",
+      "subtitle": "Verbindungs- und Synchronisierungseinstellungen für diese Integration.",
+      "twoWay": "Zwei-Wege-Synchronisierung",
+      "twoWayHint": "Änderungen fließen in beide Richtungen, sobald die Synchronisierung live ist.",
+      "connectedAs": "Verbunden als {{name}}",
+      "notConnected": "Noch nicht verbunden",
+      "baseUrl": "Basis-URL",
+      "apiKey": "API-Schlüssel",
+      "clientId": "Client-ID",
+      "clientSecret": "Client-Secret",
+      "environment": "Umgebung",
+      "envUat": "UAT (Test)",
+      "envLive": "Live",
+      "secretSet": "Hinterlegt",
+      "secretNotSet": "Noch nicht hinterlegt",
+      "secretPlaceholder": "Leer lassen, um unverändert zu lassen",
+      "clearSecret": "Schlüssel löschen",
+      "test": "Verbindung testen",
+      "testing": "Wird getestet…",
+      "testOk": "Verbunden als {{name}}",
+      "testFailed": "Test fehlgeschlagen",
+      "correlation": "Referenz: {{id}}",
+      "loadError": "Einstellungen konnten nicht geladen werden.",
+      "saveError": "Speichern fehlgeschlagen.",
+      "secretPendingClear": "Wird beim Speichern gelöscht",
+      "undoClear": "Löschen rückgängig machen"
+    },
+    "reason": {
+      "auth_failed": "Zugangsdaten ungültig",
+      "unreachable": "Nicht erreichbar",
+      "timeout": "Zeitüberschreitung",
+      "rate_limited": "Zu viele Anfragen",
+      "invalid_config": "Konfiguration unvollständig",
+      "scope_missing": "Berechtigungen fehlen"
+    },
+    "mappings": {
+      "title": "Mapping",
+      "subtitle": "Übersetzungstabelle zwischen Koios-Werten und den Werten des externen Systems.",
+      "domain": "Domäne",
+      "koiosValue": "Koios-Wert",
+      "externalValue": "Externer Wert",
+      "isDefault": "Standard",
+      "add": "Mapping hinzufügen",
+      "empty": "Noch keine Mappings für diese Domäne.",
+      "deleteConfirm": "Dieses Mapping löschen? Eine Synchronisierung, die diesen Wert benötigt, schlägt danach sichtbar auf dieser Zeile fehl.",
+      "duplicate": "Dieser Koios-Wert hat in dieser Domäne bereits ein Mapping.",
+      "loadError": "Mappings konnten nicht geladen werden.",
+      "saveError": "Speichern fehlgeschlagen.",
+      "deleteError": "Löschen fehlgeschlagen.",
+      "domains": {
+        "cao": "Tarifvertrag",
+        "schaal": "Stufe",
+        "trede": "Schritt",
+        "functie": "Funktion"
+      }
+    }
   }
 }

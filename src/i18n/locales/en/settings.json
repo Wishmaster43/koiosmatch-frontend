@@ -250,7 +250,8 @@
     "jargon": "Jargon terms",
     "whatsapp_web": "WhatsApp Web numbers",
     "shiftmanager": "Shiftmanager",
-    "helloflex": "HelloFlex"
+    "helloflex": "HelloFlex",
+    "werkzoeken": "Werkzoeken"
   },
   "kpis": {
     "title": "KPI settings",
@@ -3698,5 +3699,69 @@
     "threecx": "Telephony connection to 3CX: click to call and a call log on the candidate file.",
     "vat": "Validate a VAT number through the European VIES service.",
     "voys": "Dutch VoIP exchange (VoIPGRID): click to call and call history."
+  },
+  "integrations": {
+    "tabs": {
+      "connection": "Connection",
+      "mapping": "Mapping",
+      "contractmap": "Contract map"
+    },
+    "connection": {
+      "title": "Connection",
+      "subtitle": "Connection and synchronisation settings for this integration.",
+      "twoWay": "Two-way synchronisation",
+      "twoWayHint": "Changes flow both ways once the sync is live.",
+      "connectedAs": "Connected as {{name}}",
+      "notConnected": "Not connected yet",
+      "baseUrl": "Base URL",
+      "apiKey": "API key",
+      "clientId": "Client ID",
+      "clientSecret": "Client secret",
+      "environment": "Environment",
+      "envUat": "UAT (test)",
+      "envLive": "Live",
+      "secretSet": "Set",
+      "secretNotSet": "Not set yet",
+      "secretPlaceholder": "Leave empty to keep unchanged",
+      "clearSecret": "Clear key",
+      "test": "Test connection",
+      "testing": "Testing…",
+      "testOk": "Connected as {{name}}",
+      "testFailed": "Test failed",
+      "correlation": "Reference: {{id}}",
+      "loadError": "Failed to load settings.",
+      "saveError": "Saving failed.",
+      "secretPendingClear": "Will be cleared on save",
+      "undoClear": "Undo clear"
+    },
+    "reason": {
+      "auth_failed": "Invalid credentials",
+      "unreachable": "Unreachable",
+      "timeout": "Timeout",
+      "rate_limited": "Too many requests",
+      "invalid_config": "Configuration incomplete",
+      "scope_missing": "Missing permissions"
+    },
+    "mappings": {
+      "title": "Mapping",
+      "subtitle": "Translation table between Koios values and the external party’s values.",
+      "domain": "Domain",
+      "koiosValue": "Koios value",
+      "externalValue": "External value",
+      "isDefault": "Default",
+      "add": "Add mapping",
+      "empty": "No mappings for this domain yet.",
+      "deleteConfirm": "Delete this mapping? A sync that needs this value will then fail visibly on that row.",
+      "duplicate": "This Koios value already has a mapping in this domain.",
+      "loadError": "Failed to load mappings.",
+      "saveError": "Saving failed.",
+      "deleteError": "Delete failed.",
+      "domains": {
+        "cao": "CLA",
+        "schaal": "Scale",
+        "trede": "Step",
+        "functie": "Function"
+      }
+    }
   }
 }

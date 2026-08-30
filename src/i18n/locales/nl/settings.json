@@ -250,7 +250,8 @@
     "jargon": "Vakjargon",
     "whatsapp_web": "WhatsApp Web-nummers",
     "shiftmanager": "Shiftmanager",
-    "helloflex": "HelloFlex"
+    "helloflex": "HelloFlex",
+    "werkzoeken": "Werkzoeken"
   },
   "kpis": {
     "title": "KPI-instellingen",
@@ -3698,5 +3699,69 @@
     "threecx": "Telefonie-koppeling met 3CX: klikken-om-te-bellen en gesprekslog op het kandidaatdossier.",
     "vat": "BTW-nummer valideren via de Europese VIES-dienst.",
     "voys": "Nederlandse VoIP-centrale (VoIPGRID): klikken-om-te-bellen en gesprekshistorie."
+  },
+  "integrations": {
+    "tabs": {
+      "connection": "Koppeling",
+      "mapping": "Mapping",
+      "contractmap": "Contractmap"
+    },
+    "connection": {
+      "title": "Koppeling",
+      "subtitle": "Verbinding en synchronisatie-instellingen voor deze koppeling.",
+      "twoWay": "Tweeweg-synchronisatie",
+      "twoWayHint": "Wijzigingen stromen beide kanten op zodra de synchronisatie live is.",
+      "connectedAs": "Verbonden als {{name}}",
+      "notConnected": "Nog niet verbonden",
+      "baseUrl": "Basis-URL",
+      "apiKey": "API-sleutel",
+      "clientId": "Client-ID",
+      "clientSecret": "Client-secret",
+      "environment": "Omgeving",
+      "envUat": "UAT (test)",
+      "envLive": "Live",
+      "secretSet": "Ingesteld",
+      "secretNotSet": "Nog niet ingesteld",
+      "secretPlaceholder": "Laat leeg om ongewijzigd te laten",
+      "clearSecret": "Sleutel wissen",
+      "test": "Verbinding testen",
+      "testing": "Testen…",
+      "testOk": "Verbonden als {{name}}",
+      "testFailed": "Test mislukt",
+      "correlation": "Referentie: {{id}}",
+      "loadError": "Instellingen laden mislukt.",
+      "saveError": "Opslaan mislukt.",
+      "secretPendingClear": "Wordt gewist bij opslaan",
+      "undoClear": "Wissen ongedaan maken"
+    },
+    "reason": {
+      "auth_failed": "Inloggegevens onjuist",
+      "unreachable": "Niet bereikbaar",
+      "timeout": "Time-out",
+      "rate_limited": "Te veel verzoeken",
+      "invalid_config": "Configuratie onvolledig",
+      "scope_missing": "Rechten ontbreken"
+    },
+    "mappings": {
+      "title": "Mapping",
+      "subtitle": "Vertaaltabel tussen Koios-waarden en de waarden van de externe partij.",
+      "domain": "Domein",
+      "koiosValue": "Koios-waarde",
+      "externalValue": "Externe waarde",
+      "isDefault": "Standaard",
+      "add": "Mapping toevoegen",
+      "empty": "Nog geen mappings voor dit domein.",
+      "deleteConfirm": "Deze mapping verwijderen? Een synchronisatie die deze waarde nodig heeft, faalt daarna zichtbaar op die rij.",
+      "duplicate": "Deze Koios-waarde heeft al een mapping in dit domein.",
+      "loadError": "Mappings laden mislukt.",
+      "saveError": "Opslaan mislukt.",
+      "deleteError": "Verwijderen mislukt.",
+      "domains": {
+        "cao": "CAO",
+        "schaal": "Schaal",
+        "trede": "Trede",
+        "functie": "Functie"
+      }
+    }
   }
 }

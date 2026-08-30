@@ -250,7 +250,8 @@
     "jargon": "Jerga profesional",
     "whatsapp_web": "Números de WhatsApp Web",
     "shiftmanager": "Shiftmanager",
-    "helloflex": "HelloFlex"
+    "helloflex": "HelloFlex",
+    "werkzoeken": "Werkzoeken"
   },
   "kpis": {
     "title": "Configuración de KPI",
@@ -3698,5 +3699,69 @@
     "threecx": "Conexión de telefonía con 3CX: clic para llamar y registro de llamadas en el expediente del candidato.",
     "vat": "Validar un número de IVA a través del servicio européen VIES.",
     "voys": "Centralita VoIP neerlandesa (VoIPGRID): clic para llamar e historial de llamadas."
+  },
+  "integrations": {
+    "tabs": {
+      "connection": "Conexión",
+      "mapping": "Mapping",
+      "contractmap": "Mapa de contratos"
+    },
+    "connection": {
+      "title": "Conexión",
+      "subtitle": "Ajustes de conexión y sincronización de esta integración.",
+      "twoWay": "Sincronización bidireccional",
+      "twoWayHint": "Los cambios fluyen en ambos sentidos cuando la sincronización está activa.",
+      "connectedAs": "Conectado como {{name}}",
+      "notConnected": "Aún sin conectar",
+      "baseUrl": "URL base",
+      "apiKey": "Clave API",
+      "clientId": "ID de cliente",
+      "clientSecret": "Secreto de cliente",
+      "environment": "Entorno",
+      "envUat": "UAT (pruebas)",
+      "envLive": "Producción",
+      "secretSet": "Configurada",
+      "secretNotSet": "Aún sin configurar",
+      "secretPlaceholder": "Dejar vacío para no cambiar nada",
+      "clearSecret": "Borrar la clave",
+      "test": "Probar la conexión",
+      "testing": "Probando…",
+      "testOk": "Conectado como {{name}}",
+      "testFailed": "La prueba falló",
+      "correlation": "Referencia: {{id}}",
+      "loadError": "No se pudieron cargar los ajustes.",
+      "saveError": "No se pudo guardar.",
+      "secretPendingClear": "Se borrará al guardar",
+      "undoClear": "Deshacer el borrado"
+    },
+    "reason": {
+      "auth_failed": "Credenciales no válidas",
+      "unreachable": "Inaccesible",
+      "timeout": "Tiempo agotado",
+      "rate_limited": "Demasiadas solicitudes",
+      "invalid_config": "Configuración incompleta",
+      "scope_missing": "Faltan permisos"
+    },
+    "mappings": {
+      "title": "Mapping",
+      "subtitle": "Tabla de traducción entre los valores de Koios y los del sistema externo.",
+      "domain": "Dominio",
+      "koiosValue": "Valor de Koios",
+      "externalValue": "Valor externo",
+      "isDefault": "Predeterminado",
+      "add": "Añadir mapping",
+      "empty": "Aún no hay mappings para este dominio.",
+      "deleteConfirm": "¿Eliminar este mapping? Una sincronización que necesite este valor fallará después de forma visible en esa fila.",
+      "duplicate": "Este valor de Koios ya tiene un mapping en este dominio.",
+      "loadError": "No se pudieron cargar los mappings.",
+      "saveError": "No se pudo guardar.",
+      "deleteError": "No se pudo eliminar.",
+      "domains": {
+        "cao": "Convenio",
+        "schaal": "Escala",
+        "trede": "Nivel",
+        "functie": "Función"
+      }
+    }
   }
 }
