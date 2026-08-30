@@ -10,13 +10,13 @@
  *   - Overzicht:    SubscriptionCard (meters) + UsageOverviewSection (KPI/chart/
  *                    table) + UsageInvoiceCard ("Factuurvoorschot").
  *   - Per functie:  AI-tokens per activity (own /ai/koios/usage fetch, no
- *                    prev_month support — honest caption) + Koios Tokens total.
+ *                    prev_month support — honest caption) + workflow-runs total.
  *   - Per workflow: workflow.per_workflow, row click → the workflow editor.
  *   - Per gebruiker:ai.per_user.
  *   - WhatsApp:     whatsapp.by_channel when present, else the legacy
  *                    messaging-costs by_number card (own component fetch).
  *
- * ONE vocabulary everywhere (settings.json billing.usage.*): "Koios Tokens" =
+ * ONE vocabulary everywhere (settings.json billing.usage.*): "workflow-runs" (formerly "Koios Tokens") =
  * workflow executions, "AI-tokens" = Claude tokens, "WhatsApp Tokens" = wa_web
  * messages (§0.11 — never call the workflow unit anything else). The old
  * "Koios AI-facturatie" card (GET /ai/koios/usage/billing?month=) is dropped —

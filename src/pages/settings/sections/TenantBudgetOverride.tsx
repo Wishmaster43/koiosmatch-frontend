@@ -5,14 +5,13 @@
  * clears that one override back to the package default (never a whole-entry
  * wipe) — the parent card owns the actual PUT.
  */
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import api, { unwrapList } from '@/lib/api'
 import SearchSelect from '@/components/ui/SearchSelect'
 import { Caption, GroupLabel, monoStyle } from '@/components/ui/typography'
+import { useTenantSearch } from '@/hooks/useTenantSearch'
 import type { BillingBudgetEntry } from '@/types/billingUsage'
 
-interface TenantOption { id: string; name: string }
 interface Draft { ai_token_budget: string; workflow_credit_budget: string; whatsapp_token_budget: string }
 
 const label = { fontSize: 12, color: 'var(--text-muted)', marginBottom: 4, display: 'block' }
@@ -37,25 +36,14 @@ interface Props {
 // Super-admin per-tenant budget override: search-picks a tenant, then edits its workflow-credit/WhatsApp-token budget draft.
 export default function TenantBudgetOverride({ tenants, tenantId, onTenantIdChange, draft, onDraftChange }: Props) {
   const { t } = useTranslation('settings')
-  const [query, setQuery] = useState('')
-  const [options, setOptions] = useState<TenantOption[]>([])
+  const { options, onSearch } = useTenantSearch()
   const [pickedLabel, setPickedLabel] = useState('')
-
-  // Server-side tenant search — mirrors TenantSwitcher's own /tenants contract.
-  useEffect(() => {
-    const q = query.trim()
-    const ctrl = new AbortController()
-    api.get('/tenants', { params: { search: q || undefined, per_page: 25 }, signal: ctrl.signal })
-      .then((res) => setOptions(unwrapList<TenantOption>(res).rows))
-      .catch(() => { if (!ctrl.signal.aborted) setOptions([]) })
-    return () => ctrl.abort()
-  }, [query])
 
   // Picking a tenant seeds the two fields from its existing override, if any.
   const pickTenant = (id: string) => {
-    const found = options.find((o) => String(o.id) === id)
+    const found = options.find((o) => o.value === id)
     onTenantIdChange(id)
-    setPickedLabel(found?.name ?? id)
+    setPickedLabel(found?.label ?? id)
     onDraftChange(draftFromEntry(tenants[id]))
   }
 
@@ -65,10 +53,10 @@ export default function TenantBudgetOverride({ tenants, tenantId, onTenantIdChan
       <div style={{ marginBottom: 12, maxWidth: 320 }}>
         <label style={label}>{t('billingBudgets.tenantPickerLabel')}</label>
         <SearchSelect
-          options={options.map((o) => ({ value: String(o.id), label: o.name }))}
+          options={options}
           selected={tenantId ? [tenantId] : []}
           onToggle={pickTenant}
-          onSearch={setQuery}
+          onSearch={onSearch}
           closeOnToggle
           triggerLabel={tenantId ? pickedLabel : t('billingBudgets.tenantPickerPlaceholder')}
         />

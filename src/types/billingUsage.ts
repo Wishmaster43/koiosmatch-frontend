@@ -4,7 +4,37 @@
  * spec only documents the 401 error for these routes today (no 2xx schema yet, see
  * CLAUDE.md §10), so every shape below is HAND-WRITTEN from the contract in
  * koiosmatch-api/docs/contract/CONTRACT-CHANGELOG.md ("CREDITS-1 fase 1").
+ *
+ * PRIJSMODEL-C contract fixed 30-08-2026 (docs/plans/PRIJSMODEL-C.md DEEL C);
+ * BE not landed yet; hand-written, no 2xx schema. The tier/meter shapes live
+ * in ./billingTiers.ts (file-size cap) and are re-exported below.
  */
+
+export type {
+  BillingMeterState,
+  BillingPackageKey,
+  BillingTierRef,
+  BillingUsageTierMeterBase,
+  BillingUsageAiMeter,
+  BillingUsageWorkflowMeter,
+  BillingUsageTierMeter,
+  BillingUsagePeriod,
+  BillingUsageUsers,
+  BillingUsageWeights,
+  BillingUpgradeHint,
+  BillingAiTierKey,
+  BillingWorkflowTierKey,
+  BillingAiTier,
+  BillingWorkflowTier,
+  BillingOverageConfig,
+  BillingPackageBaseline,
+  AdminBillingTiersResponse,
+  AdminBillingTiersUpdate,
+  BillingTierHistoryEntry,
+  AdminTenantBillingTiersResponse,
+  AdminTenantBillingTiersUpdate,
+} from './billingTiers'
+import type { BillingPackageKey, BillingUsageAiMeter, BillingUsageWorkflowMeter, BillingUsagePeriod, BillingUsageUsers } from './billingTiers'
 
 // GET /ai/koios/usage?period=today|month — own-organisation Koios AI usage.
 // BREAKING (CREDITS-1): totals.cost -> totals.amount; per_activity[].cost -> amount;
@@ -116,15 +146,25 @@ export interface BillingUsageSubscriptionMeter {
   price_cents?: number
 }
 export interface BillingUsageSubscription {
+  // PRIJSMODEL-C additions (DEEL C) — package identity + period on the
+  // subscription root, alongside the existing per-meter resets_at.
   package_key?: string
   package_label?: string
+  period?: BillingUsagePeriod
   // ISO datetime — render only through useDateFormat/humanizeIsoDates (CLAUDE.md DATUM-1), never raw.
   resets_at?: string
-  ai?: BillingUsageSubscriptionMeter
-  workflow?: BillingUsageSubscriptionMeter
+  // PRIJSMODEL-C: ai/workflow become the full tier-meter shape (unit, tier,
+  // allowance, state, weights, upgrade_hint, ...) — additive superset of the
+  // older BillingUsageSubscriptionMeter fields (budget/used/over/over_amount
+  // are still present, now optional, on BillingUsageTierMeter itself).
+  ai?: BillingUsageAiMeter
+  workflow?: BillingUsageWorkflowMeter
   // Third meter (CMBE, F5 handoff 25-08) — WhatsApp Tokens (1 wa_web message = 1
   // token). Presence-gated: absent until the backend ships it, never assumed.
+  // Unchanged shape per DEEL C ("whatsapp and users blocks unchanged").
   whatsapp?: BillingUsageSubscriptionMeter
+  // K-167 users line (included/active/extra/extra_amount) — unchanged shape, now typed.
+  users?: BillingUsageUsers
 }
 
 // WhatsApp usage per channel (CMBE, F5 handoff 25-08) — 1 WhatsApp Token = 1
@@ -247,7 +287,7 @@ export interface AdminTenantUsage {
 // GET/PUT /admin/billing-budgets — CREDITS-2, superadmin monthly package budgets
 // (Danny: "vul beiden en toon ze hier"), ModulesSettings' "Maandbudgetten" card.
 // HAND-WRITTEN: no 2xx schema yet for this route (CLAUDE.md §10).
-export type BillingPackageKey = 'core' | 'pro' | 'enterprise'
+// BillingPackageKey lives in ./billingTiers (one source, re-exported above).
 export interface BillingBudgetValue {
   // EUR purchase/sale cost per unit — Caption-only display next to the two
   // editable budget fields, never itself editable here (MARGEGEHEIM stays

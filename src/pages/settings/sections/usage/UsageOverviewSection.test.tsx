@@ -38,7 +38,8 @@ describe('UsageOverviewSection — KPI row', () => {
     expect(screen.getAllByText(eur(60)).length).toBeGreaterThan(0)   // workflow.amount (KPI card)
     expect(screen.getAllByText(eur(3.5)).length).toBeGreaterThan(0)  // ai.amount (KPI card + table)
     expect(screen.getByText(eur(18.4))).toBeInTheDocument()          // WhatsApp cost.total (prop, own fetch elsewhere)
-    expect(screen.getByText((txt) => txt.includes('120') && txt.includes('token'))).toBeInTheDocument()
+    // PRIJSMODEL-C rename: the workflow meter is "workflow-runs" now, never "Koios Tokens".
+    expect(screen.getByText((txt) => txt.includes('120') && txt.includes('workflow-runs'))).toBeInTheDocument()
     expect(screen.getByText(t('billing.usage.kpi.whatsappNote', { n: formatNumber(340) }))).toBeInTheDocument()
   })
 })

@@ -2,7 +2,7 @@
  * SubscriptionCard (CREDITS-2-FE deel 1) — replaces the old ComingSoonNotice now
  * that the backend ships a real subscription snapshot on GET /billing/usage
  * (data.subscription). Package label, two progress bars (Koios AI-tokens and
- * Koios Tokens/workflow, §0.11 "never call the unit anything else") with tint
+ * workflow-runs (formerly "Koios Tokens"), §0.11 "never call the unit anything else") with tint
  * bars (§4 lib/tint — never an ad-hoc color), the reset date via useDateFormat
  * (DATUM-1, DD-MM only) and an honest "over budget" line when over>0.
  * Data arrives as a prop (lifted out of UsageOverviewSection's existing
@@ -33,7 +33,7 @@ function hasMeter(meter?: { budget?: number; used?: number }): boolean {
   return !!meter && (meter.budget !== undefined || meter.used !== undefined)
 }
 
-// One meter bar — used for both the AI-token and the workflow (Koios Tokens)
+// One meter bar — used for both the AI-token and the workflow-runs
 // budget; the fill is the tint recipe (§4), never a hardcoded color.
 export function MeterBar({ label, used, budget, onDrill }: { label: string; used?: number; budget?: number; onDrill?: () => void }) {
   const { t } = useTranslation('settings')
@@ -77,7 +77,7 @@ export function MeterBar({ label, used, budget, onDrill }: { label: string; used
   )
 }
 
-// The three consumption meters of the current package (AI tokens, Koios Tokens, WhatsApp
+// The three consumption meters of the current package (AI tokens, workflow-runs, WhatsApp
 // Tokens): each shows used against included, and clicking one drills into its own detail.
 export default function SubscriptionCard({ subscription, phase, onDrillAi, onDrillWorkflow }: SubscriptionCardProps) {
   const { t } = useTranslation('settings')
