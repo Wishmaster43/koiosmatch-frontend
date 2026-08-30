@@ -281,7 +281,7 @@
       "agentHasNoFlow": "El agente vinculado no tiene una entrevista configurada.",
       "noContractType": "Esta vacante no tiene un tipo de contrato establecido, por lo que se usa el flujo propio del agente como respaldo.",
       "fromVacancy": "Esta vacante usa el flujo {{flow}}.",
-      "inactiveWarning": "Atención: este flujo está inactivo — la entrevista se omitirá."
+      "inactiveWarning": "Atención: este flujo está inactivo, la entrevista se omitirá."
     },
     "flowPickerLabel": "Sin flujo de la vacante (por defecto del agente)",
     "flowPickerPlaceholder": "Elige un flujo de entrevista…"

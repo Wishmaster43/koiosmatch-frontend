@@ -281,7 +281,7 @@
       "agentHasNoFlow": "The linked agent has no interview flow configured.",
       "noContractType": "This vacancy has no contract form set, so the agent's own flow is used as the fallback.",
       "fromVacancy": "This vacancy uses the flow {{flow}}.",
-      "inactiveWarning": "Note: this flow is inactive — the interview will be skipped."
+      "inactiveWarning": "Note: this flow is inactive, the interview will be skipped."
     },
     "flowPickerLabel": "No vacancy flow (agent default)",
     "flowPickerPlaceholder": "Choose an interview flow…"

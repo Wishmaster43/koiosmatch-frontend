@@ -281,7 +281,7 @@
       "agentHasNoFlow": "L'agent lié n'a pas d'entretien configuré.",
       "noContractType": "Cette offre n'a pas de type de contrat défini, le flux propre de l'agent est donc utilisé comme solution de repli.",
       "fromVacancy": "Cette offre utilise le flux {{flow}}.",
-      "inactiveWarning": "Attention : ce flux est inactif — l’entretien sera ignoré."
+      "inactiveWarning": "Attention : ce flux est inactif, l’entretien sera ignoré."
     },
     "flowPickerLabel": "Pas de flux d’offre (défaut de l’agent)",
     "flowPickerPlaceholder": "Choisir un flux d’entretien…"

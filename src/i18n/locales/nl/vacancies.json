@@ -281,7 +281,7 @@
       "agentHasNoFlow": "De gekoppelde agent heeft geen interview ingesteld.",
       "noContractType": "Deze vacature heeft geen contractvorm ingesteld, dus de eigen flow van de agent wordt als terugval gebruikt.",
       "fromVacancy": "Deze vacature gebruikt de flow {{flow}}.",
-      "inactiveWarning": "Let op: deze flow is inactief — het interview wordt overgeslagen."
+      "inactiveWarning": "Let op: deze flow is inactief, het interview wordt overgeslagen."
     },
     "flowPickerLabel": "Geen vacature-flow (agent-standaard)",
     "flowPickerPlaceholder": "Kies een interviewflow…"

@@ -143,7 +143,7 @@ export default function InterviewStatusCard({ interview, applicationId, intervie
       />
       {/* §3 four states: a failed flows load says so — a silently empty picker
           reads as "no flows exist" (r2 C3). */}
-      {flowsError && <Caption as="div" style={{ color: 'var(--color-danger-text)' }}>{t('aiagent.loadError', { ns: 'vacancies' })}</Caption>}
+      {flowsError && <Caption as="div" style={{ color: 'var(--color-danger-text)' }}>{t('vacancies:aiagent.loadError')}</Caption>}
     </div>
   )
 
