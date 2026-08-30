@@ -1019,7 +1019,19 @@ the code is worse than no rule, because the next reader builds on it. What is tr
   save/reload or Router branches collapse to a straight line (backend contract — worklist
   §C-27); (4) labels / categories / colours follow §5 / §4 (i18n + tokens). A new entity is
   **one thin config file**, not a new shape; keep **one registry source** (`src/modules/index.js`)
-  — never a second hand-maintained module map.
+  — never a second hand-maintained module map. (5) **VERTREKMODULE-1 (Danny 2026-08-30,
+  verbatim: "elke workflow moet de juiste trigger hebben, kan niet dat het begint gelijk
+  met notificatie!! Notificatie van wat?? Point of origin moet er zijn: begin trigger
+  kandidaten met bepaalde status, en die status staat rechts in het paneel als filters"):**
+  every workflow STARTS with a Koios entity node, the vertrekmodule, that names the run's
+  subject: candidate · customer · location · department · contact · task · call list ·
+  vacancy · application. That first node carries the trigger (event = "dit record", one run
+  per record; schedule = "selectie", one run per matching record) and its FILTERS in the
+  right-hand panel ("kandidaten met status X"). A workflow whose first node is an action
+  (notification, message, task) is a finding: there is nothing to notify about. Every later
+  step and every router condition reads the subject's fields as variables; the trigger is
+  never a hidden setting behind a clock icon. Design: koiosmatch-api/docs/plans/
+  INTERVIEW-WORKFLOW-1.md Appendix D.
 
 ---
 
