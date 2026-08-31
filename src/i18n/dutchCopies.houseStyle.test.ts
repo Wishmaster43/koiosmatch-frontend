@@ -220,6 +220,9 @@ const ALLOWLIST: string[] = [
   // German "Kandidaten" = "candidates" (identical spelling), workflow-folder family
   'de/common:lookupSeeds.workflowFolders.kandidaten',
 
+  // German "Kandidaten" = "candidates" (identical spelling), import-entity label
+  'de/settings:import.entities.candidates.label',
+
   // "AI Planner De-Escalate" is a seeded workflow's own literal name (unbranded across
   // locales, LOOKUP-I18N-1); "De" in "De-Escalate" trips the Dutch-article marker, not
   // the Dutch word itself
