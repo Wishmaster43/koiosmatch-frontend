@@ -1299,6 +1299,19 @@
         "status_changed": "Estado cambiado",
         "funnel_type_changed": "Fase cambiada"
       }
+    },
+    "meta": {
+      "title": "WhatsApp (Meta)",
+      "subtitle": "Una sola dirección de callback para todos los números y tenants — Koios responde por sí mismo a la verificación de Meta (hub.challenge).",
+      "copyUrl": "Copiar URL de callback",
+      "copied": "Copiado",
+      "loadError": "No se pudo cargar el estado de la conexión.",
+      "tokenSet": "verify token configurado",
+      "tokenMissing": "falta el verify token",
+      "stepApp": "El registro es a nivel de app en Meta (developers.facebook.com → app → WhatsApp → Configuration): callback + token una vez, y después suscribir el campo «messages» por WABA. Los números nuevos se suman automáticamente.",
+      "stepToken": "El verify token lo eliges tú mismo y lo introduces en dos sitios: en Meta y en",
+      "tokenLink": "Ajustes → WhatsApp",
+      "stepAgent": "Las URL de webhook de los agentes (en la ficha del agente) son internas de Koios — nunca las registres en Meta."
     }
   },
   "sync": {

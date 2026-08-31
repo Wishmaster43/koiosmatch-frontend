@@ -8,6 +8,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import OutgoingWebhooks from './OutgoingWebhooks'
 import IncomingWebhooks from './IncomingWebhooks'
+import WhatsAppMetaWebhookCard from './WhatsAppMetaWebhookCard'
 
 // The Webhooks section: outgoing/incoming sub-tabs.
 export default function WebhooksSettings() {
@@ -31,7 +32,8 @@ export default function WebhooksSettings() {
         })}
       </div>
 
-      {tab === 'outgoing' ? <OutgoingWebhooks /> : <IncomingWebhooks />}
+      {/* Danny 31-08: het Meta-adresblok hoort vindbaar bij de inkomende webhooks. */}
+      {tab === 'outgoing' ? <OutgoingWebhooks /> : (<><WhatsAppMetaWebhookCard /><IncomingWebhooks /></>)}
     </div>
   )
 }

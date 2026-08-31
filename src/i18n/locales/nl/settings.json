@@ -1545,6 +1545,19 @@
         "status_changed": "Status gewijzigd",
         "funnel_type_changed": "Fase gewijzigd"
       }
+    },
+    "meta": {
+      "title": "WhatsApp (Meta)",
+      "subtitle": "Eén callback-adres voor alle nummers en tenants — Koios beantwoordt de Meta-verificatie (hub.challenge) zelf.",
+      "copyUrl": "Callback-URL kopiëren",
+      "copied": "Gekopieerd",
+      "loadError": "Kon de koppelingsstatus niet laden.",
+      "tokenSet": "verify-token ingesteld",
+      "tokenMissing": "verify-token ontbreekt",
+      "stepApp": "Registratie is op app-niveau bij Meta (developers.facebook.com → app → WhatsApp → Configuration): één keer callback + token, daarna per WABA het veld \"messages\" abonneren. Nieuwe nummers liften vanzelf mee.",
+      "stepToken": "Het verify-token kies je zelf en vul je op twee plekken in: bij Meta én in",
+      "tokenLink": "Instellingen → WhatsApp",
+      "stepAgent": "De agent-webhook-URL\\u2019s (op de agent-kaart) zijn Koios-intern — registreer die nooit bij Meta."
     }
   },
   "sync": {

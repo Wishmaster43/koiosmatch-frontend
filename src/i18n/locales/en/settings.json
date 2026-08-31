@@ -1545,6 +1545,19 @@
         "status_changed": "Status changed",
         "funnel_type_changed": "Phase changed"
       }
+    },
+    "meta": {
+      "title": "WhatsApp (Meta)",
+      "subtitle": "One callback address for all numbers and tenants — Koios answers Meta\\u2019s verification (hub.challenge) itself.",
+      "copyUrl": "Copy callback URL",
+      "copied": "Copied",
+      "loadError": "Could not load the connection status.",
+      "tokenSet": "verify token set",
+      "tokenMissing": "verify token missing",
+      "stepApp": "Registration is app-level at Meta (developers.facebook.com → app → WhatsApp → Configuration): callback + token once, then subscribe the \"messages\" field per WABA. New numbers ride along automatically.",
+      "stepToken": "You choose the verify token yourself and enter it in two places: at Meta and in",
+      "tokenLink": "Settings → WhatsApp",
+      "stepAgent": "The agent webhook URLs (on the agent card) are Koios-internal — never register those at Meta."
     }
   },
   "sync": {
