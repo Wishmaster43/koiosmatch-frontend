@@ -93,14 +93,13 @@ describe('WorkflowFolderSidebar · seeded folder name i18n (LOOKUP-I18N-1)', () 
   })
 })
 
-// FOLDER-SLOT-1 (Danny 31-08 "JA MOETEN WE NOG MAKEN"): an app-gated folder whose app
-// is off arrives `locked` + `unlocked_by_app` and renders visible-but-locked — the
-// sales surface. Its content is server-side hidden, so the row must be honestly
-// non-interactive: no select on click, no delete button, and a tooltip naming the app.
-describe('WorkflowFolderSidebar — locked app-gated folders', () => {
+// FOLDER-SLOT-1 REVERSED (Danny 31-08, verbatim: "moet je niet zien als de module
+// niet actief is" — supersedes the earlier visible-but-locked JA): an app-gated
+// folder whose app is off arrives `locked` from the API and must not render at all.
+describe('WorkflowFolderSidebar — locked app-gated folders stay hidden', () => {
   const folders: WorkflowFolder[] = [
     { id: 'f1', name: 'Onboarding' },
-    { id: 'f2', name: 'Elanza', locked: true, unlocked_by_app: 'elanza' },
+    { id: 'f2', name: 'Koppeling Elanza', locked: true, unlocked_by_app: 'elanza' },
   ]
 
   const props = {
@@ -116,24 +115,9 @@ describe('WorkflowFolderSidebar — locked app-gated folders', () => {
     moveToFolder: vi.fn(),
   }
 
-  it('shows the locked folder with the unlocking app resolved to its catalog label in the tooltip', () => {
+  it('renders the unlocked folder and never the locked one', () => {
     render(<WorkflowFolderSidebar {...props} />)
-    const row = screen.getByTitle('Vergrendeld: beschikbaar met de app Elanza.')
-    expect(row).toBeInTheDocument()
-    expect(row).toHaveAttribute('aria-disabled', 'true')
-  })
-
-  it('never selects a locked folder on click and offers no delete button for it', () => {
-    render(<WorkflowFolderSidebar {...props} />)
-    fireEvent.click(screen.getByTitle('Vergrendeld: beschikbaar met de app Elanza.'))
-    expect(props.setSelectedFolder).not.toHaveBeenCalled()
-    // Exactly one delete button: the unlocked tenant folder's — never the locked row's.
-    expect(screen.getAllByRole('button', { name: 'Verwijderen' })).toHaveLength(1)
-  })
-
-  it('falls back to the raw app key when the catalog has no entry for it', () => {
-    render(<WorkflowFolderSidebar {...props}
-      folders={[{ id: 'f3', name: 'X', locked: true, unlocked_by_app: 'unknown_app' }]} />)
-    expect(screen.getByTitle('Vergrendeld: beschikbaar met de app unknown_app.')).toBeInTheDocument()
+    expect(screen.getByText('Onboarding')).toBeInTheDocument()
+    expect(screen.queryByText('Koppeling Elanza')).toBeNull()
   })
 })

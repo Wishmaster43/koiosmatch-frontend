@@ -300,8 +300,7 @@
     "archiveSuccess": "Workflow archived.",
     "restoreSuccess": "Workflow restored.",
     "viewWorkflows": "Workflows",
-    "viewManagement": "Management",
-    "folderLocked": "Locked: available with the {{app}} app."
+    "viewManagement": "Management"
   },
   "ai": {
     "saved": "Saved",

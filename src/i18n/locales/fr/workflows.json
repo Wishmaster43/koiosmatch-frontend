@@ -296,8 +296,7 @@
     "archiveSuccess": "Workflow archivé.",
     "restoreSuccess": "Workflow restauré.",
     "viewWorkflows": "Workflows",
-    "viewManagement": "Gestion",
-    "folderLocked": "Verrouillé : disponible avec l'application {{app}}."
+    "viewManagement": "Gestion"
   },
   "ai": {
     "saved": "Enregistré",

@@ -8,13 +8,9 @@ import { useState } from 'react'
 import type { ReactNode, DragEvent, MutableRefObject } from 'react'
 import { useTranslation } from 'react-i18next'
 import { interactive } from '@/lib/a11y'
-import { Zap, Folder, FolderPlus, Trash2, Lock } from 'lucide-react'
+import { Zap, Folder, FolderPlus, Trash2 } from 'lucide-react'
 import { useSeedLabel } from '@/lib/useSeedLabel'
-import { AVAILABLE_APPS } from '@/context/AppsContext'
 import type { WorkflowFolder, FolderId } from './hooks/useWorkflowsData'
-
-// FOLDER-SLOT-1: resolve the gating app's key to its catalog brand label (falls back to the key).
-const appLabel = (key?: string | null) => AVAILABLE_APPS.find((a) => a.id === key)?.label ?? key ?? ''
 
 // One row in the folder sidebar (built-in "All"/"Unassigned" or a tenant folder).
 function SidebarRow({ label, icon, active, isDragOver, onClick, onDragOver, onDragLeave, onDrop, onDelete }: {
@@ -108,17 +104,10 @@ export default function WorkflowFolderSidebar({
           />
         ))}
         <div style={{ height: 1, background: 'var(--border)', margin: '4px 12px' }} />
-        {[...folders].sort((a, b) => a.name.localeCompare(b.name, 'nl')).map(f => f.locked ? (
-          // FOLDER-SLOT-1 (Danny 31-08): app-gated folder with its app off — visible but
-          // locked (the sales surface). Content is server-side hidden, so the row is
-          // honestly non-interactive: no select, no drop target, no delete (§3).
-          <div key={f.id} aria-disabled="true"
-            title={t('page.folderLocked', { app: appLabel(f.unlocked_by_app) })}
-            style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', margin: '1px 6px', borderRadius: 6, color: 'var(--text-muted)', opacity: 0.75, cursor: 'default' }}>
-            <Lock size={12} style={{ flexShrink: 0 }} />
-            <span style={{ fontSize: 13, flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{seedLabel('workflowFolders', { label: f.name })}</span>
-          </div>
-        ) : (
+        {/* FOLDER-SLOT-1 reversed (Danny 31-08 "moet je niet zien als de module niet
+            actief is"): a locked app-gated folder is not rendered at all — the server
+            stops listing them too, this filter keeps either landing order safe. */}
+        {[...folders].filter(f => !f.locked).sort((a, b) => a.name.localeCompare(b.name, 'nl')).map(f => (
           <SidebarRow key={f.id} label={seedLabel('workflowFolders', { label: f.name })} icon={<Folder size={13} />}
             active={selectedFolder === f.id}
             isDragOver={dragOverFolder === f.id}
