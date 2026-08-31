@@ -282,7 +282,11 @@
     "workflow_call": "Workflow aanroepen",
     "workflow": "Workflow",
     "whatsapp_inbound": "WhatsApp Inkomend",
-    "application_lookup": "Sollicitatie opzoeken"
+    "application_lookup": "Sollicitatie opzoeken",
+    "customer_locations": "Locaties",
+    "customer_departments": "Afdelingen",
+    "customer_contacts": "Contactpersonen",
+    "outreach_campaigns": "Bellijsten"
   },
   "categories": {
     "all": "Alle",
@@ -303,7 +307,8 @@
     "flow": "Flow beheer",
     "text": "Tekst & Parsing",
     "other": "Overig",
-    "facebook": "Facebook"
+    "facebook": "Facebook",
+    "outreach": "Bellijsten"
   },
   "status": {
     "active": "Actief",
@@ -894,7 +899,9 @@
     "FAQ's gebruiken": "FAQ's gebruiken",
     "AI-instructies": "AI-instructies",
     "Afwijzingsmodus": "Afwijzingsmodus",
-    "Intro-template": "Intro-template"
+    "Intro-template": "Intro-template",
+    "Naam": "Naam",
+    "Primair contact": "Primair contact"
   },
   "fieldOptions": {
     "Array (meerdere bundles)": "Array (meerdere bundles)",

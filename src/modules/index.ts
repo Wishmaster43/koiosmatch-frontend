@@ -41,6 +41,10 @@ import matches           from './matches'
 import opportunities     from './opportunities'
 import tasks             from './tasks'
 import customers         from './customers'
+import customer_locations from './customer_locations'
+import customer_departments from './customer_departments'
+import customer_contacts from './customer_contacts'
+import outreach_campaigns from './outreach_campaigns'
 import planning          from './planning'
 import applicant_event   from './applicant_event'
 import applicant_message from './applicant_message'
@@ -183,6 +187,10 @@ const MODULES: ModuleDef[] = [
   pdok_geocode,
   candidates_fetch,
   backoffice_sync,
+  customer_locations,
+  customer_departments,
+  customer_contacts,
+  outreach_campaigns,
   whatsapp_inbound,
   application_lookup,
 ]

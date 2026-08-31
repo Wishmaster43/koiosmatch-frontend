@@ -10,7 +10,8 @@ describe('START_MODULE_TYPES · Koios master data + webhook only', () => {
   it('contains every entity node and the webhook', () => {
     for (const t of ['candidates', 'customers', 'vacancies', 'applications', 'tasks', 'matches', 'opportunities', 'planning', 'webhook',
       'sm_employees', 'sm_schedules', 'sm_candidates', 'sm_customers', 'sm_shifts',
-      'candidate_filter', 'candidates_fetch', 'whatsapp_inbound']) {
+      'candidate_filter', 'candidates_fetch', 'whatsapp_inbound',
+      'customer_locations', 'customer_departments', 'customer_contacts', 'outreach_campaigns']) {
       expect(START_MODULE_TYPES.has(t), t).toBe(true)
     }
   })

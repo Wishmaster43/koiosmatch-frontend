@@ -243,7 +243,11 @@
     "workflow_call": "Appeler un workflow",
     "workflow": "Workflow",
     "whatsapp_inbound": "WhatsApp entrant",
-    "application_lookup": "Rechercher la candidature"
+    "application_lookup": "Rechercher la candidature",
+    "customer_locations": "Sites",
+    "customer_departments": "Services",
+    "customer_contacts": "Contacts",
+    "outreach_campaigns": "Listes d'appels"
   },
   "status": {
     "active": "Actif",
@@ -453,7 +457,8 @@
     "flow": "Contrôle de flux",
     "text": "Texte & Analyse",
     "other": "Autre",
-    "facebook": "Facebook"
+    "facebook": "Facebook",
+    "outreach": "Listes d'appels"
   },
   "canvas": {
     "filterTitle": "Définir le filtre",
@@ -859,7 +864,9 @@
     "FAQ's gebruiken": "Utiliser la FAQ",
     "AI-instructies": "Instructions IA",
     "Afwijzingsmodus": "Mode de refus",
-    "Intro-template": "Modèle d'introduction"
+    "Intro-template": "Modèle d'introduction",
+    "Naam": "Nom",
+    "Primair contact": "Contact principal"
   },
   "fieldOptions": {
     "Array (meerdere bundles)": "Tableau (plusieurs bundles)",
