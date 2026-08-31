@@ -67,5 +67,13 @@ export function orderedTemplates(templates: readonly ImportTemplateSummary[]): I
 export function importPermissionsFor(entity: string | null | undefined): { view: string; create: string } {
   if (entity === 'vacancies') return { view: 'vacancies.view', create: 'vacancies.create' }
   if (entity === 'candidates') return { view: 'candidates.view', create: 'candidates.create' }
+  // PUNT-6 (31-08, CMBE-contract): the five new importers carry their own pairs.
+  // matches/opportunities gate on .update — no .create right exists for those
+  // (the UI-create carries .update too), mirroring the backend routes 1:1.
+  if (entity === 'applications') return { view: 'applications.view', create: 'applications.create' }
+  if (entity === 'matches') return { view: 'matches.view', create: 'matches.update' }
+  if (entity === 'tasks') return { view: 'tasks.view', create: 'tasks.create' }
+  if (entity === 'opportunities') return { view: 'opportunities.view', create: 'opportunities.update' }
+  if (entity === 'outreach') return { view: 'outreach.view', create: 'outreach.create' }
   return { view: 'customers.view', create: 'customers.create' }
 }

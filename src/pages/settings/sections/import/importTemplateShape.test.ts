@@ -86,3 +86,18 @@ describe('importPermissionsFor', () => {
     expect(importPermissionsFor(undefined)).toEqual({ view: 'customers.view', create: 'customers.create' })
   })
 })
+
+// PUNT-6 (31-08): the five new importers carry their own pairs; matches and
+// opportunities gate on .update (no .create right exists), per the BE routes.
+describe('importPermissionsFor · PUNT-6 pairs', () => {
+  it.each([
+    ['applications', 'applications.view', 'applications.create'],
+    ['matches', 'matches.view', 'matches.update'],
+    ['tasks', 'tasks.view', 'tasks.create'],
+    ['opportunities', 'opportunities.view', 'opportunities.update'],
+    ['outreach', 'outreach.view', 'outreach.create'],
+  ])('%s -> %s / %s', (entity, view, create) => {
+    expect(importPermissionsFor(entity)).toEqual({ view, create })
+  })
+})
+
