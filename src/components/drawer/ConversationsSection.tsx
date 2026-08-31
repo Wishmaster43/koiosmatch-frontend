@@ -34,7 +34,7 @@ import SectionCard from '@/components/ui/SectionCard'
 import SoftChip from '@/components/ui/SoftChip'
 import { useDateFormat } from '@/lib/datetime'
 import ConversationAssistSection from './ConversationAssistSection'
-import ConversationMessage, { type MessageRow } from './ConversationMessage'
+import ConversationMessage, { HANDLED_BY_COLORS, type MessageRow } from './ConversationMessage'
 import { CHANNEL_COLORS } from './channelColors'
 import TemplateComposer from './TemplateComposer'
 import type { ConversationSubject } from './useWhatsAppTemplateSend'
@@ -84,6 +84,8 @@ interface ConversationRow {
   // K-193: the thread's dominant channel (enum) + server label, badge fallback source.
   primary_channel?: 'waba' | 'waba_coex' | 'wa_web' | string
   channel_label?: string | null
+  // PUNT-2: 'laatste beurt'-semantiek — owner van het laatste bericht (incl. inbound-stempel).
+  last_handled_by?: string | null
 }
 
 // Prefer the candidate's real name over the raw WhatsApp number for the thread heading.
@@ -316,6 +318,13 @@ export default function ConversationsSection({ threadsUrl, threadsParams, header
                 <SoftChip label={t('conversations.escalated')} color="var(--color-warning)" />
               )}
               {activeBadge(row.is_active)}
+              {/* PUNT-2: wie bezit de laatste beurt in dit gesprek — tooltip draagt de uitleg. */}
+              {row.last_handled_by && HANDLED_BY_COLORS[row.last_handled_by] && (
+                <span title={t('conversations.lastTurn')}>
+                  <SoftChip label={t(`conversations.handledBy.${row.last_handled_by}`)}
+                    color={HANDLED_BY_COLORS[row.last_handled_by]} />
+                </span>
+              )}
               {row.last_message_at && <Caption as="span" style={{ whiteSpace: 'nowrap' }}>{formatDate(row.last_message_at)}</Caption>}
             </button>
 

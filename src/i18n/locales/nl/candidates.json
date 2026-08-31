@@ -1335,7 +1335,13 @@
     "templateLoading": "Templates laden…",
     "templateNeedsCandidate": "Dit gesprek heeft geen bekende eigenaar; een template versturen kan hier nog niet.",
     "templateVarsUnsupported_one": "Deze template heeft {{count}} variabele die hier nog niet ingevuld kan worden. Kies een template zonder variabelen.",
-    "templateVarsUnsupported_other": "Deze template heeft {{count}} variabelen die hier nog niet ingevuld kunnen worden. Kies een template zonder variabelen."
+    "templateVarsUnsupported_other": "Deze template heeft {{count}} variabelen die hier nog niet ingevuld kunnen worden. Kies een template zonder variabelen.",
+    "handledBy": {
+      "engine": "Koios",
+      "workflow": "Koios · workflow",
+      "human": "Medewerker"
+    },
+    "lastTurn": "Laatste beurt"
   },
   "advice": {
     "reason": {

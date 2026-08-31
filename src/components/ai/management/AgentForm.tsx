@@ -5,6 +5,7 @@
 import { useState, useEffect, useId, useRef } from 'react'
 import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useDateFormat } from '@/lib/datetime'
 import { Brain, ChevronDown, Eye, EyeOff, MessageSquare, Send, Trash2 } from 'lucide-react'
 import api, { unwrap, unwrapList } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
@@ -139,6 +140,8 @@ export function AgentForm({ agent, prompts, faqs, onSaved, onDelete }: {
   agent: AiAgent | null; prompts: AiItem[]; faqs: AiItem[]; onSaved: (a: AiAgent) => void; onDelete: (a: AiAgent) => void
 }) {
   const { t } = useTranslation('workflows')
+  // House date formatting (DATUM-1) for the inbound stamps below.
+  const { formatDateTime } = useDateFormat()
   const isNew = !agent?.id
   const [form, setForm] = useState<AgentFormState>({
     name:            agent?.name            ?? '',
@@ -276,6 +279,18 @@ export function AgentForm({ agent, prompts, faqs, onSaved, onDelete }: {
             {agent?.webhook_url
               ? <CopyableValue value={agent.webhook_url} copyLabel={t('ai.agent.webhookCopy')} copiedMessage={t('ai.agent.webhookCopied')} />
               : <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: 0 }}>{t('ai.agent.webhookEmpty')}</p>}
+            {/* PUNT-2 (BE 0a8521df): inbound-verwerkingsstempels — read-only, DD-MM-YYYY HH:mm. */}
+            {agent?.last_inbound_at && (
+              <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: '6px 0 0' }}>
+                {t('ai.agent.lastInbound')}: {formatDateTime(agent.last_inbound_at)}
+                {typeof agent.inbound_handled_count === 'number' ? ` · ${t('ai.agent.inboundCount', { count: agent.inbound_handled_count })}` : ''}
+              </p>
+            )}
+            {agent?.last_inbound_error_at && (
+              <p style={{ fontSize: 12, color: 'var(--color-danger-text)', margin: '4px 0 0' }}>
+                {t('ai.agent.lastInboundError')}: {agent.last_inbound_error_code ?? '—'} · {formatDateTime(agent.last_inbound_error_at)}
+              </p>
+            )}
           </Field>
 
           <div style={{ marginBottom: 13 }}>

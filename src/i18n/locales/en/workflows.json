@@ -352,7 +352,10 @@
         "hidePrompt": "Hide system prompt",
         "statusesLabel": "Statuses",
         "outputFieldsLabel": "Dossier fields"
-      }
+      },
+      "lastInbound": "Last inbound message",
+      "inboundCount": "{{count}} turns handled",
+      "lastInboundError": "Last error"
     },
     "tabs": {
       "agents": "Agents",

@@ -408,7 +408,10 @@
         "hidePrompt": "Verberg systeemprompt",
         "statusesLabel": "Statussen",
         "outputFieldsLabel": "Dossiervelden"
-      }
+      },
+      "lastInbound": "Laatste inkomend bericht",
+      "inboundCount": "{{count}} beurten verwerkt",
+      "lastInboundError": "Laatste fout"
     },
     "tabs": {
       "agents": "Agents",

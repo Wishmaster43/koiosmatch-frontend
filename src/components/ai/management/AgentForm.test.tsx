@@ -171,3 +171,24 @@ describe('AgentForm — delete button accessible name', () => {
     expect(screen.getByRole('button', { name: 'Verwijderen' })).toBeInTheDocument()
   })
 })
+
+// PUNT-2: the webhook card shows the inbound processing stamps (raw keys — no i18n init).
+describe('AgentForm · inbound stamps on the webhook card (PUNT-2)', () => {
+  it('renders last-inbound line with count, and the error line when present', async () => {
+    const agent: AiAgent = { ...mockAgent, webhook_url: 'https://x/webhook',
+      last_inbound_at: '2026-08-31T08:00:00Z', inbound_handled_count: 12,
+      last_inbound_error_at: '2026-08-31T07:00:00Z', last_inbound_error_code: 'timeout' }
+    render(<AgentForm agent={agent} prompts={[]} faqs={mockFaqs} onSaved={() => {}} onDelete={() => {}} />)
+    expect(await screen.findByText(/ai\.agent\.lastInbound/)).toBeInTheDocument()
+    expect(screen.getByText(/ai\.agent\.inboundCount/)).toBeInTheDocument()
+    expect(screen.getByText(/ai\.agent\.lastInboundError/)).toBeInTheDocument()
+    expect(screen.getByText(/timeout/)).toBeInTheDocument()
+  })
+
+  it('renders neither line for an agent without stamps', async () => {
+    render(<AgentForm agent={{ ...mockAgent, webhook_url: 'https://x/webhook' }} prompts={[]} faqs={mockFaqs} onSaved={() => {}} onDelete={() => {}} />)
+    expect(await screen.findByText(/ai\.agent\.webhookLabel|https:\/\/x\/webhook/)).toBeInTheDocument()
+    expect(screen.queryByText(/ai\.agent\.lastInbound/)).not.toBeInTheDocument()
+  })
+})
+

@@ -35,6 +35,19 @@ export interface MessageRow {
   // K-193: the message's own channel (enum) + server label, badge fallback source.
   channel?: string
   channel_label?: string | null
+  // PUNT-2 (BE 0a8521df): who owned this turn — engine|workflow|human;
+  // null/unknown = pre-flip row or future value, chip stays silent.
+  handled_by?: string | null
+}
+
+// Owner-stempel kleuren — Koios stays the face (engine=primary, workflow=the AI
+// module family violet, human=muted). Shared with the thread header's
+// "laatste beurt" chip in ConversationsSection.
+// eslint-disable-next-line react-refresh/only-export-components -- shared colour map, not a component; HMR-nicety warning only
+export const HANDLED_BY_COLORS: Record<string, string> = {
+  engine: 'var(--color-primary)',
+  workflow: 'var(--color-violet)',
+  human: 'var(--text-muted)',
 }
 
 
@@ -95,6 +108,11 @@ export default function ConversationMessage({ message, formatDateTime }: {
         {message.purpose && (
           <SoftChip label={t(`conversations.purpose.${message.purpose}`, { defaultValue: humanize(message.purpose) })}
             color="var(--color-primary)" />
+        )}
+        {/* PUNT-2: the turn's owner — silent for null/unknown, mirrors the channel chip. */}
+        {message.handled_by && HANDLED_BY_COLORS[message.handled_by] && (
+          <SoftChip label={t(`conversations.handledBy.${message.handled_by}`)}
+            color={HANDLED_BY_COLORS[message.handled_by]} />
         )}
         {message.sent_at && <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>{formatDateTime(message.sent_at)}</span>}
         {out && <DeliveryTicks sentAt={message.sent_at} deliveredAt={message.delivered_at} readAt={message.read_at} />}

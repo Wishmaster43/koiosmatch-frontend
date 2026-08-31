@@ -43,3 +43,19 @@ describe('ConversationMessage · channel badge (K-193)', () => {
     expect(screen.getByText('Manual')).toBeInTheDocument()
   })
 })
+
+// PUNT-2: the turn-owner chip — raw keys render (no i18n init in this file).
+describe('ConversationMessage · handled_by chip (PUNT-2)', () => {
+  it.each(['engine', 'workflow', 'human'])('renders the owner chip for "%s"', (who) => {
+    render(<ConversationMessage message={{ ...baseMessage, handled_by: who }} formatDateTime={formatDateTime} />)
+    expect(screen.getByText(`conversations.handledBy.${who}`)).toBeInTheDocument()
+  })
+
+  it('stays silent for null and for an unknown future value', () => {
+    render(<ConversationMessage message={{ ...baseMessage, handled_by: null }} formatDateTime={formatDateTime} />)
+    expect(screen.queryByText(/conversations\.handledBy/)).not.toBeInTheDocument()
+    render(<ConversationMessage message={{ ...baseMessage, handled_by: 'robot' }} formatDateTime={formatDateTime} />)
+    expect(screen.queryByText('conversations.handledBy.robot')).not.toBeInTheDocument()
+  })
+})
+

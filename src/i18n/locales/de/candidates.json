@@ -1335,7 +1335,13 @@
     "templateLoading": "Vorlagen werden geladen…",
     "templateNeedsCandidate": "Dieses Gespräch hat keinen bekannten Eigentümer; das Senden einer Vorlage ist hier noch nicht möglich.",
     "templateVarsUnsupported_one": "Diese Vorlage hat {{count}} Variable, die hier noch nicht ausgefüllt werden kann. Wählen Sie eine Vorlage ohne Variablen.",
-    "templateVarsUnsupported_other": "Diese Vorlage hat {{count}} Variablen, die hier noch nicht ausgefüllt werden können. Wählen Sie eine Vorlage ohne Variablen."
+    "templateVarsUnsupported_other": "Diese Vorlage hat {{count}} Variablen, die hier noch nicht ausgefüllt werden können. Wählen Sie eine Vorlage ohne Variablen.",
+    "handledBy": {
+      "engine": "Koios",
+      "workflow": "Koios · Workflow",
+      "human": "Mitarbeiter"
+    },
+    "lastTurn": "Letzter Zug"
   },
   "advice": {
     "reason": {

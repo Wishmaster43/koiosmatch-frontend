@@ -1335,7 +1335,13 @@
     "templateLoading": "Cargando plantillas…",
     "templateNeedsCandidate": "Esta conversación no tiene un propietario conocido; todavía no se puede enviar una plantilla aquí.",
     "templateVarsUnsupported_one": "Esta plantilla tiene {{count}} variable que aún no se puede rellenar aquí. Elige una plantilla sin variables.",
-    "templateVarsUnsupported_other": "Esta plantilla tiene {{count}} variables que aún no se pueden rellenar aquí. Elige una plantilla sin variables."
+    "templateVarsUnsupported_other": "Esta plantilla tiene {{count}} variables que aún no se pueden rellenar aquí. Elige una plantilla sin variables.",
+    "handledBy": {
+      "engine": "Koios",
+      "workflow": "Koios · workflow",
+      "human": "Empleado"
+    },
+    "lastTurn": "Último turno"
   },
   "advice": {
     "reason": {

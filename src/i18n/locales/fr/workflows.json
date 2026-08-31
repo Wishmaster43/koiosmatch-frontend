@@ -348,7 +348,10 @@
         "hidePrompt": "Masquer le prompt système",
         "statusesLabel": "Statuts",
         "outputFieldsLabel": "Champs du dossier"
-      }
+      },
+      "lastInbound": "Dernier message entrant",
+      "inboundCount": "{{count}} tours traités",
+      "lastInboundError": "Dernière erreur"
     },
     "tabs": {
       "agents": "Agents",

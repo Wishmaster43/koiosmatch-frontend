@@ -348,7 +348,10 @@
         "hidePrompt": "Ocultar prompt del sistema",
         "statusesLabel": "Estados",
         "outputFieldsLabel": "Campos del expediente"
-      }
+      },
+      "lastInbound": "Último mensaje entrante",
+      "inboundCount": "{{count}} turnos procesados",
+      "lastInboundError": "Último error"
     },
     "tabs": {
       "agents": "Agentes",

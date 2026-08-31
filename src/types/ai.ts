@@ -30,6 +30,11 @@ export interface InterviewFlow {
 // An AI agent configuration. Deliberately has no `model` field (MODEL-1: the
 // company-wide model from Settings is used everywhere — never per-agent).
 export interface AiAgent {
+  // PUNT-2 agent-kaart (BE 0a8521df): inbound-verwerkingsstempels, read-only display.
+  last_inbound_at?: string | null
+  inbound_handled_count?: number | null
+  last_inbound_error_at?: string | null
+  last_inbound_error_code?: string | null
   id?: string | number
   name?: string
   custom_endpoint?: string

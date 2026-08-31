@@ -34,7 +34,7 @@ vi.mock('./conversationAssistApi', async (importOriginal) => {
   return { ...actual, assistConversation: vi.fn() }
 })
 
-const THREADS = [{ id: 'conv-1', wa_number: '+31612345678', last_message_at: '2026-07-17T09:00:00Z', is_active: true, escalated: false }]
+const THREADS = [{ id: 'conv-1', wa_number: '+31612345678', last_message_at: '2026-07-17T09:00:00Z', is_active: true, escalated: false, last_handled_by: 'workflow' }]
 const MESSAGES = [
   { id: 'm1', direction: 'inbound', message_content: 'Hoi, ben ik nog nodig?', sent_at: '2026-07-17T08:00:00Z', purpose: null },
   { id: 'm2', direction: 'outbound', message_content: 'Ja! We plannen een intake.', sent_at: '2026-07-17T09:00:00Z', purpose: 'interview' },
@@ -68,6 +68,12 @@ describe('ConversationsSection', () => {
     // The outbound message's purpose renders as a badge — humanised fallback when
     // the tenant slug has no explicit translation key yet.
     expect(screen.getByText('Interview')).toBeInTheDocument()
+  })
+
+  // PUNT-2: the thread header carries the 'laatste beurt' owner chip (raw key, no i18n init).
+  it('renders the last-turn owner chip on the thread header', async () => {
+    render(<ConversationsSection threadsUrl="/conversations" threadsParams={{ candidate_id: 'cand-1' }} />)
+    expect(await screen.findByText('conversations.handledBy.workflow')).toBeInTheDocument()
   })
 
   it('shows the empty state only when the fetch returns zero threads', async () => {

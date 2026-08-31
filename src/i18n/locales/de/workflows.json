@@ -348,7 +348,10 @@
         "hidePrompt": "Systemprompt ausblenden",
         "statusesLabel": "Status",
         "outputFieldsLabel": "Dossierfelder"
-      }
+      },
+      "lastInbound": "Letzte eingehende Nachricht",
+      "inboundCount": "{{count}} Züge verarbeitet",
+      "lastInboundError": "Letzter Fehler"
     },
     "tabs": {
       "agents": "Agenten",
