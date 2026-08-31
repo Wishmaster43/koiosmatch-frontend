@@ -13,7 +13,7 @@ import SoftChip from '@/components/ui/SoftChip'
 import { avatarColor } from '@/lib/avatarColor'
 import { tintBg, tintBorder } from '@/lib/tint'
 import type { Id } from '@/types/common'
-import { CHANNEL_COLORS } from './channelColors'
+import { CHANNEL_COLORS, HANDLED_BY_COLORS } from './channelColors'
 
 // The recruiter/agent behind an outbound message (e.g. Ravi, Kelly).
 interface SentBy {
@@ -38,16 +38,6 @@ export interface MessageRow {
   // PUNT-2 (BE 0a8521df): who owned this turn — engine|workflow|human;
   // null/unknown = pre-flip row or future value, chip stays silent.
   handled_by?: string | null
-}
-
-// Owner-stempel kleuren — Koios stays the face (engine=primary, workflow=the AI
-// module family violet, human=muted). Shared with the thread header's
-// "laatste beurt" chip in ConversationsSection.
-// eslint-disable-next-line react-refresh/only-export-components -- shared colour map, not a component; HMR-nicety warning only
-export const HANDLED_BY_COLORS: Record<string, string> = {
-  engine: 'var(--color-primary)',
-  workflow: 'var(--color-violet)',
-  human: 'var(--text-muted)',
 }
 
 

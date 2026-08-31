@@ -172,23 +172,29 @@ describe('AgentForm — delete button accessible name', () => {
   })
 })
 
-// PUNT-2: the webhook card shows the inbound processing stamps (raw keys — no i18n init).
+// PUNT-2: the webhook card shows the inbound processing stamps. AgentForm's
+// import graph now carries @/lib/datetime, whose module side effect initialises
+// the REAL i18n (BARREL-DATETIME-LES) — so assertions use the real NL copy via
+// i18n.t, never raw keys.
+import i18n from '@/i18n'
+const wt = (key: string, opts?: Record<string, unknown>) => i18n.t(key, { ns: 'workflows', ...opts }) as string
+
 describe('AgentForm · inbound stamps on the webhook card (PUNT-2)', () => {
   it('renders last-inbound line with count, and the error line when present', async () => {
     const agent: AiAgent = { ...mockAgent, webhook_url: 'https://x/webhook',
       last_inbound_at: '2026-08-31T08:00:00Z', inbound_handled_count: 12,
       last_inbound_error_at: '2026-08-31T07:00:00Z', last_inbound_error_code: 'timeout' }
     render(<AgentForm agent={agent} prompts={[]} faqs={mockFaqs} onSaved={() => {}} onDelete={() => {}} />)
-    expect(await screen.findByText(/ai\.agent\.lastInbound/)).toBeInTheDocument()
-    expect(screen.getByText(/ai\.agent\.inboundCount/)).toBeInTheDocument()
-    expect(screen.getByText(/ai\.agent\.lastInboundError/)).toBeInTheDocument()
+    expect(await screen.findByText(new RegExp(wt('ai.agent.lastInbound')))).toBeInTheDocument()
+    expect(screen.getByText(new RegExp(wt('ai.agent.inboundCount', { count: 12 })))).toBeInTheDocument()
+    expect(screen.getByText(new RegExp(wt('ai.agent.lastInboundError')))).toBeInTheDocument()
     expect(screen.getByText(/timeout/)).toBeInTheDocument()
   })
 
   it('renders neither line for an agent without stamps', async () => {
     render(<AgentForm agent={{ ...mockAgent, webhook_url: 'https://x/webhook' }} prompts={[]} faqs={mockFaqs} onSaved={() => {}} onDelete={() => {}} />)
-    expect(await screen.findByText(/ai\.agent\.webhookLabel|https:\/\/x\/webhook/)).toBeInTheDocument()
-    expect(screen.queryByText(/ai\.agent\.lastInbound/)).not.toBeInTheDocument()
+    expect(await screen.findByText('https://x/webhook')).toBeInTheDocument()
+    expect(screen.queryByText(new RegExp(wt('ai.agent.lastInbound')))).not.toBeInTheDocument()
   })
 })
 

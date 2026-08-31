@@ -12,3 +12,14 @@ export const CHANNEL_COLORS: Record<string, string> = {
   waba_coex: 'var(--color-secondary)',
   wa_web: 'var(--color-info)',
 }
+
+// PUNT-2 (BE 0a8521df): owner-stempel van een beurt — Koios blijft het gezicht
+// (engine = primary, workflow = de AI-modulefamilie violet, human = muted).
+// Gedeeld door de bericht-badge (ConversationMessage) en de thread-kop
+// (ConversationsSection); onbekende waarden renderen nergens.
+export const HANDLED_BY_COLORS: Record<string, string> = {
+  engine: 'var(--color-primary)',
+  workflow: 'var(--color-violet)',
+  human: 'var(--text-muted)',
+}
+
