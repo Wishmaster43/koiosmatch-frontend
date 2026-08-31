@@ -1407,6 +1407,14 @@
       "outreach": {
         "label": "Anruflisten",
         "desc": "Anruflisten mit Name (Pflicht), Kanal, Status, Inhaber (E-Mail) und Wiederholungseinstellungen."
+      },
+      "vacancies": {
+        "label": "Vakanzen",
+        "desc": "Vakanzen mit Titel, Kunde, Funktion, Standort und Status über die Mandantenlisten."
+      },
+      "candidates": {
+        "label": "Kandidaten",
+        "desc": "Kandidaten mit Name, Kontaktdaten, Funktion und Status über die Mandantenlisten."
       }
     },
     "groups": {

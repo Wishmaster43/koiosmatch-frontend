@@ -1407,6 +1407,14 @@
       "outreach": {
         "label": "Listas de llamadas",
         "desc": "Listas de llamadas con nombre (obligatorio), canal, estado, propietario (correo) y ajustes de reintento."
+      },
+      "vacancies": {
+        "label": "Vacantes",
+        "desc": "Vacantes con título, cliente, función, ubicación y estado según las listas del tenant."
+      },
+      "candidates": {
+        "label": "Candidatos",
+        "desc": "Candidatos con nombre, datos de contacto, función y estado según las listas del tenant."
       }
     },
     "groups": {

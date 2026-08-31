@@ -1653,6 +1653,14 @@
       "outreach": {
         "label": "Call lists",
         "desc": "Call lists with name (required), channel, status, owner (email) and retry settings."
+      },
+      "vacancies": {
+        "label": "Vacancies",
+        "desc": "Vacancies with title, customer, function, location and status via the tenant lists."
+      },
+      "candidates": {
+        "label": "Candidates",
+        "desc": "Candidates with name, contact details, function and status via the tenant lists."
       }
     },
     "groups": {

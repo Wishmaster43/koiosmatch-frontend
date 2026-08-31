@@ -1653,6 +1653,14 @@
       "outreach": {
         "label": "Bellijsten",
         "desc": "Bellijsten met naam (verplicht), kanaal, status, eigenaar (e-mail) en herhaalinstellingen."
+      },
+      "vacancies": {
+        "label": "Vacatures",
+        "desc": "Vacatures met titel, klant, functie, locatie en status via de tenant-lijsten."
+      },
+      "candidates": {
+        "label": "Kandidaten",
+        "desc": "Kandidaten met naam, contactgegevens, functie en status via de tenant-lijsten."
       }
     },
     "groups": {

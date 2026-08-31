@@ -1407,6 +1407,14 @@
       "outreach": {
         "label": "Listes d'appels",
         "desc": "Listes d'appels avec nom (requis), canal, statut, propriétaire (e-mail) et paramètres de relance."
+      },
+      "vacancies": {
+        "label": "Offres",
+        "desc": "Offres avec titre, client, fonction, site et statut via les listes du tenant."
+      },
+      "candidates": {
+        "label": "Candidats",
+        "desc": "Candidats avec nom, coordonnées, fonction et statut via les listes du tenant."
       }
     },
     "groups": {
