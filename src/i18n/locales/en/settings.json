@@ -2099,7 +2099,10 @@
       "departments": "Departments",
       "details": "Details",
       "aiagents": "AI agents",
-      "vacancy_generation": "Vacancy generation"
+      "vacancy_generation": "Vacancy generation",
+      "notes": "Notes",
+      "conversations": "Conversations",
+      "documents": "Documents"
     },
     "actions": {
       "view": "View",
@@ -2119,7 +2122,8 @@
       "archive": "Archive",
       "candidatesDocumentsManage": "Manage documents",
       "candidatesNotesManageAll": "Manage all notes",
-      "details": "Report details (SM/AI)"
+      "details": "Report details (SM/AI)",
+      "import": "Import"
     },
     "color": "Colour",
     "icon": "Icon",

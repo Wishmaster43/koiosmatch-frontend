@@ -2099,7 +2099,10 @@
       "departments": "Afdelingen",
       "details": "Details",
       "aiagents": "AI-agents",
-      "vacancy_generation": "Vacature-generatie"
+      "vacancy_generation": "Vacature-generatie",
+      "notes": "Notities",
+      "conversations": "Conversaties",
+      "documents": "Documenten"
     },
     "actions": {
       "view": "Bekijken",
@@ -2119,7 +2122,8 @@
       "archive": "Archiveren",
       "candidatesDocumentsManage": "Documenten beheren",
       "candidatesNotesManageAll": "Alle notities beheren",
-      "details": "Rapportdetails (SM/AI)"
+      "details": "Rapportdetails (SM/AI)",
+      "import": "Importeren"
     },
     "color": "Kleur",
     "icon": "Icoon",

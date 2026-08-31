@@ -1853,7 +1853,10 @@
       "departments": "Departamentos",
       "details": "Detalles",
       "aiagents": "Agentes IA",
-      "vacancy_generation": "Generación de vacantes"
+      "vacancy_generation": "Generación de vacantes",
+      "notes": "Notas",
+      "conversations": "Conversaciones",
+      "documents": "Documentos"
     },
     "actions": {
       "view": "Ver",
@@ -1873,7 +1876,8 @@
       "archive": "Archivar",
       "candidatesDocumentsManage": "Gestionar documentos",
       "candidatesNotesManageAll": "Gestionar todas las notas",
-      "details": "Detalles del informe (SM/IA)"
+      "details": "Detalles del informe (SM/IA)",
+      "import": "Importar"
     },
     "color": "Color",
     "icon": "Icono",

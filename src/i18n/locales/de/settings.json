@@ -1853,7 +1853,10 @@
       "departments": "Abteilungen",
       "details": "Details",
       "aiagents": "KI-Agenten",
-      "vacancy_generation": "Stellengenerierung"
+      "vacancy_generation": "Stellengenerierung",
+      "notes": "Notizen",
+      "conversations": "Konversationen",
+      "documents": "Dokumente"
     },
     "actions": {
       "view": "Anzeigen",
@@ -1873,7 +1876,8 @@
       "archive": "Archivieren",
       "candidatesDocumentsManage": "Dokumente verwalten",
       "candidatesNotesManageAll": "Alle Notizen verwalten",
-      "details": "Berichtsdetails (SM/KI)"
+      "details": "Berichtsdetails (SM/KI)",
+      "import": "Importieren"
     },
     "color": "Farbe",
     "icon": "Symbol",
