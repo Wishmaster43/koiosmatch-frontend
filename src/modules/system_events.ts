@@ -17,10 +17,10 @@ export default {
   // VERTREKMODULE-1: sanctioned system departure (Danny's JA, 31-08).
   isStart:  true,
   schema: [
-    { key: 'event', label: 'Gebeurtenis', type: 'select', required: true, default: 'whatsapp.down',
+    { key: 'event', label: 'Gebeurtenis', type: 'select', required: true, default: 'whatsapp.connection_down',
       options: [
-        { value: 'whatsapp.down', label: 'WhatsApp-storing' },
-        { value: 'whatsapp.restored', label: 'WhatsApp hersteld' },
+        { value: 'whatsapp.connection_down', label: 'WhatsApp-storing' },
+        { value: 'whatsapp.connection_restored', label: 'WhatsApp hersteld' },
       ] },
   ],
 }
