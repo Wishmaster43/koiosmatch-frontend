@@ -1847,8 +1847,26 @@
       "outreach": {
         "title": "Call lists",
         "desc": "Call lists with audience, outcome and last contact."
+      },
+      "appointments": {
+        "title": "Appointments",
+        "desc": "Scheduled appointments with candidate, type, date/time, location and owner."
+      },
+      "notes": {
+        "title": "Notes",
+        "desc": "All notes across all entities, with type, author, date and full text. Requires the notes export right."
+      },
+      "conversations": {
+        "title": "Conversations",
+        "desc": "WhatsApp conversations at message level, including full text and number. Requires the conversations export right — this is full conversation content."
+      },
+      "documents": {
+        "title": "Documents (index)",
+        "desc": "Index of all documents (filename, type, size, validity) across all entities. The files themselves follow via the ZIP export."
       }
-    }
+    },
+    "formatCsv": "CSV",
+    "formatXlsx": "Excel (.xlsx)"
   },
   "apps": {
     "notOnPkg3Title": "Tenant is not on Package 3 yet",

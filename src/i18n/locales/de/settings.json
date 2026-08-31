@@ -1601,8 +1601,26 @@
       "outreach": {
         "title": "Anruflisten",
         "desc": "Anruflisten mit Zielgruppe, Ergebnis und letztem Kontakt."
+      },
+      "appointments": {
+        "title": "Termine",
+        "desc": "Geplante Termine mit Kandidat, Typ, Datum/Uhrzeit, Standort und Inhaber."
+      },
+      "notes": {
+        "title": "Notizen",
+        "desc": "Alle Notizen über alle Entitäten, mit Typ, Autor, Datum und vollständigem Text. Erfordert das Notizen-Exportrecht."
+      },
+      "conversations": {
+        "title": "Konversationen",
+        "desc": "WhatsApp-Gespräche auf Nachrichtenebene, inklusive vollständigem Text und Nummer. Erfordert das Konversations-Exportrecht — dies ist vollständiger Gesprächsinhalt."
+      },
+      "documents": {
+        "title": "Dokumente (Index)",
+        "desc": "Übersicht aller Dokumente (Dateiname, Typ, Größe, Gültigkeit) über alle Entitäten. Die Dateien selbst folgen über den ZIP-Export."
       }
-    }
+    },
+    "formatCsv": "CSV",
+    "formatXlsx": "Excel (.xlsx)"
   },
   "apps": {
     "notOnPkg3Title": "Tenant ist noch nicht auf Paket 3",

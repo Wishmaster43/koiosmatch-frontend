@@ -1847,8 +1847,26 @@
       "outreach": {
         "title": "Bellijsten",
         "desc": "Bellijsten met doelgroep, uitkomst en laatste contact."
+      },
+      "appointments": {
+        "title": "Afspraken",
+        "desc": "Geplande afspraken met kandidaat, type, datum/tijd, locatie en eigenaar."
+      },
+      "notes": {
+        "title": "Notities",
+        "desc": "Alle notities over alle entiteiten, met type, auteur, datum en volledige tekst. Vereist het notities-exportrecht."
+      },
+      "conversations": {
+        "title": "Conversaties",
+        "desc": "WhatsApp-gesprekken op berichtniveau, inclusief volledige tekst en nummer. Vereist het conversaties-exportrecht — dit is volledige gespreksinhoud."
+      },
+      "documents": {
+        "title": "Documenten (index)",
+        "desc": "Overzicht van alle documenten (bestandsnaam, type, grootte, geldigheid) over alle entiteiten. De bestanden zelf volgen via de ZIP-export."
       }
-    }
+    },
+    "formatCsv": "CSV",
+    "formatXlsx": "Excel (.xlsx)"
   },
   "apps": {
     "notOnPkg3Title": "Tenant zit nog niet op Pakket 3",

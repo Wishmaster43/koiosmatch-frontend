@@ -14,7 +14,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   Upload, Users, ClipboardList, Briefcase, Target, Building2,
-  MapPin, Building, Handshake, ListChecks, PhoneCall,
+  MapPin, Building, Handshake, ListChecks, PhoneCall, CalendarDays,
 } from 'lucide-react'
 import api from '@/lib/api'
 import { useAuth } from '@/context/AuthContext'
@@ -31,19 +31,23 @@ import { PageTitle } from '@/components/ui/typography'
 // row icon + Add<Entity>Modal header (ContactsPanel.tsx/AddContactPersonModal.tsx,
 // LocationsTab.tsx/AddLocationModal.tsx, DepartmentsPanel.tsx/AddDepartmentModal.tsx).
 const ENTITIES = [
-  { id: 'candidates', icon: Users, route: '/exports/candidates.csv', permission: 'candidates.view' },
-  { id: 'applications', icon: ClipboardList, route: '/exports/applications.csv', permission: 'applications.view' },
-  { id: 'vacancies', icon: Briefcase, route: '/exports/vacancies.csv', permission: 'vacancies.view' },
-  { id: 'leads', icon: Target, route: '/exports/leads.csv', permission: 'candidates.view' },
-  { id: 'customers', icon: Building2, route: '/exports/customers.csv', permission: 'customers.view' },
+  { id: 'candidates', icon: Users, base: '/exports/candidates', permission: 'candidates.view' },
+  { id: 'applications', icon: ClipboardList, base: '/exports/applications', permission: 'applications.view' },
+  { id: 'vacancies', icon: Briefcase, base: '/exports/vacancies', permission: 'vacancies.view' },
+  { id: 'leads', icon: Target, base: '/exports/leads', permission: 'candidates.view' },
+  { id: 'customers', icon: Building2, base: '/exports/customers', permission: 'customers.view' },
   // EXPORT-UITBREIDEN-1 (CMFE 2026-07-28): the seven routes the backend added today.
-  { id: 'contacts', icon: Users, route: '/exports/contacts.csv', permission: 'customers.view' },
-  { id: 'locations', icon: MapPin, route: '/exports/locations.csv', permission: 'customers.view' },
-  { id: 'departments', icon: Building, route: '/exports/departments.csv', permission: 'customers.view' },
-  { id: 'matches', icon: Handshake, route: '/exports/matches.csv', permission: 'matches.view' },
-  { id: 'tasks', icon: ListChecks, route: '/exports/tasks.csv', permission: 'tasks.view' },
-  { id: 'opportunities', icon: Target, route: '/exports/opportunities.csv', permission: 'opportunities.view' },
-  { id: 'outreach', icon: PhoneCall, route: '/exports/outreach.csv', permission: 'outreach.view' },
+  { id: 'contacts', icon: Users, base: '/exports/contacts', permission: 'customers.view' },
+  { id: 'locations', icon: MapPin, base: '/exports/locations', permission: 'customers.view' },
+  { id: 'departments', icon: Building, base: '/exports/departments', permission: 'customers.view' },
+  { id: 'matches', icon: Handshake, base: '/exports/matches', permission: 'matches.view' },
+  { id: 'tasks', icon: ListChecks, base: '/exports/tasks', permission: 'tasks.view' },
+  { id: 'opportunities', icon: Target, base: '/exports/opportunities', permission: 'opportunities.view' },
+  { id: 'outreach', icon: PhoneCall, base: '/exports/outreach', permission: 'outreach.view' },
+  // FORMATEN-schijf (31-08): appointments export is new; an appointment is
+  // candidate-dossier data, so it rides candidates.view (CMBE-measured — no
+  // appointments.view right exists).
+  { id: 'appointments', icon: CalendarDays, base: '/exports/appointments', permission: 'candidates.view' },
 ]
 
 // Parse the filename the backend sets via Content-Disposition (Laravel's
@@ -58,11 +62,11 @@ function parseFilename(header) {
 
 // Client-side fallback filename, matching the backend's OWN convention exactly
 // (`{entity}-YYYY-MM-DD-HHmm.csv`, see ExportController::streamCsv).
-function fallbackFilename(entityId) {
+function fallbackFilename(entityId, ext) {
   const now = new Date()
   const pad = (n) => String(n).padStart(2, '0')
   const stamp = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}-${pad(now.getHours())}${pad(now.getMinutes())}`
-  return `${entityId}-${stamp}.csv`
+  return `${entityId}-${stamp}.${ext}`
 }
 
 /**
@@ -72,7 +76,9 @@ function fallbackFilename(entityId) {
  */
 export async function downloadCsv(route, entityId) {
   const res = await api.get(route, { responseType: 'blob' })
-  const filename = parseFilename(res.headers?.['content-disposition']) ?? fallbackFilename(entityId)
+  // FORMATEN (31-08): the same helper streams both twins — extension follows the route.
+  const ext = route.endsWith('.xlsx') ? 'xlsx' : 'csv'
+  const filename = parseFilename(res.headers?.['content-disposition']) ?? fallbackFilename(entityId, ext)
   const url = URL.createObjectURL(res.data)
   const a = document.createElement('a')
   a.href = url
@@ -92,10 +98,11 @@ export default function ExportSettings() {
 
   // Trigger one entity's export; a 429 (rate limit) gets its own message, any
   // other failure a generic one — never a raw server string (§10).
-  const handleExport = async (entity) => {
-    setPendingId(entity.id)
+  // One handler for both format twins (identical permissions, extension differs).
+  const handleExport = async (entity, ext) => {
+    setPendingId(`${entity.id}.${ext}`)
     try {
-      await downloadCsv(entity.route, entity.id)
+      await downloadCsv(`${entity.base}.${ext}`, entity.id)
     } catch (err) {
       notifyError(t(err?.response?.status === 429 ? 'export.rateLimited' : 'export.error'))
     } finally {
@@ -105,7 +112,8 @@ export default function ExportSettings() {
 
   const entity = ENTITIES.find(e => e.id === selected) ?? ENTITIES[0]
   const Icon = entity.icon
-  const pending = pendingId === entity.id
+  const pendingCsv = pendingId === `${entity.id}.csv`
+  const pendingXlsx = pendingId === `${entity.id}.xlsx`
   const allowed = hasPermission(entity.permission)
 
   // Master-detail, identical chrome to ImporterenSettings (Danny 21-07: same
@@ -148,13 +156,23 @@ export default function ExportSettings() {
                 <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t(`export.entities.${entity.id}.desc`)}</div>
               </div>
             </div>
-            <Button variant="primary"
-              onClick={() => handleExport(entity)}
-              disabled={!allowed || pending}
-              title={allowed ? t('export.button') : t('export.noPermission')}>
-              {pending ? <Spinner size={14} /> : <Upload size={14} />}
-              {t('export.button')}
-            </Button>
+            {/* FORMATEN (Danny 31-08 "csv en xlsx voor alles"): twin buttons, same gate. */}
+            <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
+              <Button variant="primary"
+                onClick={() => handleExport(entity, 'csv')}
+                disabled={!allowed || pendingCsv || pendingXlsx}
+                title={allowed ? t('export.formatCsv') : t('export.noPermission')}>
+                {pendingCsv ? <Spinner size={14} /> : <Upload size={14} />}
+                {t('export.formatCsv')}
+              </Button>
+              <Button variant="secondary"
+                onClick={() => handleExport(entity, 'xlsx')}
+                disabled={!allowed || pendingCsv || pendingXlsx}
+                title={allowed ? t('export.formatXlsx') : t('export.noPermission')}>
+                {pendingXlsx ? <Spinner size={14} /> : <Upload size={14} />}
+                {t('export.formatXlsx')}
+              </Button>
+            </div>
           </div>
         </div>
       </div>

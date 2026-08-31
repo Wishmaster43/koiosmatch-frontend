@@ -1601,8 +1601,26 @@
       "outreach": {
         "title": "Listes d’appels",
         "desc": "Listes d’appels avec cible, résultat et dernier contact."
+      },
+      "appointments": {
+        "title": "Rendez-vous",
+        "desc": "Rendez-vous planifiés avec candidat, type, date/heure, site et propriétaire."
+      },
+      "notes": {
+        "title": "Notes",
+        "desc": "Toutes les notes de toutes les entités, avec type, auteur, date et texte complet. Requiert le droit d\\u2019export des notes."
+      },
+      "conversations": {
+        "title": "Conversations",
+        "desc": "Conversations WhatsApp au niveau message, avec texte complet et numéro. Requiert le droit d\\u2019export des conversations — il s\\u2019agit du contenu intégral."
+      },
+      "documents": {
+        "title": "Documents (index)",
+        "desc": "Index de tous les documents (nom, type, taille, validité) de toutes les entités. Les fichiers eux-mêmes suivent via l\\u2019export ZIP."
       }
-    }
+    },
+    "formatCsv": "CSV",
+    "formatXlsx": "Excel (.xlsx)"
   },
   "apps": {
     "notOnPkg3Title": "Le tenant n'est pas encore sur le Forfait 3",

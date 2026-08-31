@@ -1601,8 +1601,26 @@
       "outreach": {
         "title": "Listas de llamadas",
         "desc": "Listas de llamadas con público, resultado y último contacto."
+      },
+      "appointments": {
+        "title": "Citas",
+        "desc": "Citas programadas con candidato, tipo, fecha/hora, ubicación y propietario."
+      },
+      "notes": {
+        "title": "Notas",
+        "desc": "Todas las notas de todas las entidades, con tipo, autor, fecha y texto completo. Requiere el permiso de exportación de notas."
+      },
+      "conversations": {
+        "title": "Conversaciones",
+        "desc": "Conversaciones de WhatsApp a nivel de mensaje, con texto completo y número. Requiere el permiso de exportación de conversaciones — es contenido íntegro."
+      },
+      "documents": {
+        "title": "Documentos (índice)",
+        "desc": "Índice de todos los documentos (nombre, tipo, tamaño, validez) de todas las entidades. Los archivos llegan mediante la exportación ZIP."
       }
-    }
+    },
+    "formatCsv": "CSV",
+    "formatXlsx": "Excel (.xlsx)"
   },
   "apps": {
     "notOnPkg3Title": "El tenant aún no está en el Paquete 3",

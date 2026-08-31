@@ -85,6 +85,7 @@ describe('downloadCsv (the real per-entity export request)', () => {
 const ALL_ENTITY_IDS = [
   'candidates', 'applications', 'vacancies', 'leads', 'customers',
   'contacts', 'locations', 'departments', 'matches', 'tasks', 'opportunities', 'outreach',
+  'appointments',
 ]
 
 // Master-detail layout (Danny 21-07: same format as Importeren) — every entity is
@@ -98,10 +99,9 @@ describe('ExportSettings screen', () => {
     for (const id of ALL_ENTITY_IDS) {
       expect(screen.getByRole('button', { name: t(`export.entities.${id}.title`) })).toBeInTheDocument()
     }
-    // The detail panel shows exactly one export button (the selected entity's), enabled.
-    const exportButtons = screen.getAllByRole('button', { name: t('export.button') })
-    expect(exportButtons).toHaveLength(1)
-    expect(exportButtons[0]).toBeEnabled()
+    // The detail panel shows the two format twins (CSV + xlsx), both enabled.
+    expect(screen.getByRole('button', { name: t('export.formatCsv') })).toBeEnabled()
+    expect(screen.getByRole('button', { name: t('export.formatXlsx') })).toBeEnabled()
   })
 
   it('disables (never hides) the export button for a selected entity the user lacks view-permission for', async () => {
@@ -110,11 +110,12 @@ describe('ExportSettings screen', () => {
     render(<ExportSettings />)
 
     // Candidates (default selection) is allowed → enabled.
-    expect(screen.getByRole('button', { name: t('export.button') })).toBeEnabled()
-    // Select vacancies from the sub-nav → its export button is disabled, never hidden.
+    expect(screen.getByRole('button', { name: t('export.formatCsv') })).toBeEnabled()
+    // Select vacancies from the sub-nav → both twins disabled, never hidden.
     await user.click(screen.getByRole('button', { name: t('export.entities.vacancies.title') }))
-    const btn = screen.getByRole('button', { name: t('export.button') })
+    const btn = screen.getByRole('button', { name: t('export.formatCsv') })
     expect(btn).toBeDisabled()
+    expect(screen.getByRole('button', { name: t('export.formatXlsx') })).toBeDisabled()
     expect(btn).toHaveAttribute('title', t('export.noPermission'))
   })
 
@@ -126,7 +127,7 @@ describe('ExportSettings screen', () => {
     render(<ExportSettings />)
 
     await user.click(screen.getByRole('button', { name: t('export.entities.matches.title') }))
-    const btn = screen.getByRole('button', { name: t('export.button') })
+    const btn = screen.getByRole('button', { name: t('export.formatCsv') })
     expect(btn).toBeDisabled()
     expect(btn).toHaveAttribute('title', t('export.noPermission'))
   })
@@ -141,7 +142,7 @@ describe('ExportSettings screen', () => {
     // Select the new "outreach" row from the sub-nav, then trigger its export button —
     // this asserts the REQUEST (exact route), never just that a handler fired (§13).
     await user.click(screen.getByRole('button', { name: t('export.entities.outreach.title') }))
-    await user.click(screen.getByRole('button', { name: t('export.button') }))
+    await user.click(screen.getByRole('button', { name: t('export.formatCsv') }))
 
     expect(api.get).toHaveBeenCalledWith('/exports/outreach.csv', { responseType: 'blob' })
 
@@ -149,3 +150,22 @@ describe('ExportSettings screen', () => {
     vi.unstubAllGlobals()
   })
 })
+
+// FORMATEN (31-08): the xlsx twin rides the same helper — route + blob + .xlsx fallback name.
+describe('downloadCsv · xlsx twin', () => {
+  it('GETs the .xlsx route as blob and falls back to an .xlsx filename', async () => {
+    vi.stubGlobal('URL', { ...URL, createObjectURL, revokeObjectURL })
+    api.get.mockResolvedValue({ data: new Blob(['x']), headers: {} })
+    let capturedName
+    const clickSpy = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(function () { capturedName = this.download })
+
+    await downloadCsv('/exports/candidates.xlsx', 'candidates')
+
+    expect(api.get).toHaveBeenCalledWith('/exports/candidates.xlsx', { responseType: 'blob' })
+    expect(capturedName).toMatch(/^candidates-\d{4}-\d{2}-\d{2}-\d{4}\.xlsx$/)
+
+    clickSpy.mockRestore()
+    vi.unstubAllGlobals()
+  })
+})
+
