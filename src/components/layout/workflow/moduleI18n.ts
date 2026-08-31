@@ -9,6 +9,7 @@ export const CATEGORY_SLUG: Record<string, string> = {
   'Klanten': 'customers', 'Planning': 'planning', 'Communicatie': 'communication', 'AI': 'ai',
   'Shiftmanager': 'shiftmanager', 'HelloFlex': 'helloflex', 'Intus': 'intus', 'Facebook': 'facebook', 'Flow beheer': 'flow',
   'Tekst & Parsing': 'text', 'Overig': 'other',
+  'Bellijsten': 'outreach',
 }
 
 export const categorySlug = (cat?: string) => CATEGORY_SLUG[cat ?? ''] ?? 'other'
