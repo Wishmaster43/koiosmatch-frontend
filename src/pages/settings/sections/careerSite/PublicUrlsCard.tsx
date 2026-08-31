@@ -13,12 +13,8 @@ import { useAuth } from '@/context/AuthContext'
 import SectionCard from '@/components/ui/SectionCard'
 import UrlRow from './UrlRow'
 import { buildCareerSitePublicUrls } from './publicUrls'
+import { publicApiBase } from '@/lib/publicApiUrl'
 
-// Same VITE_API_URL-derived base every other "copy this URL" settings screen
-// uses (IncomingWebhooks.jsx, FacebookLeadsSettings.jsx) — the public career
-// routes live under the same `/api` tree, so appending the route path verbatim
-// reproduces the real, reachable URL.
-const API_BASE = import.meta.env.VITE_API_URL ?? 'http://koiosmatch-api.test/api'
 
 interface PublicUrlsCardProps {
   /** Whether the tenant currently has the public career site switched on (career_site_active). */
@@ -30,7 +26,8 @@ interface PublicUrlsCardProps {
 export default function PublicUrlsCard({ active }: PublicUrlsCardProps) {
   const { t } = useTranslation('settings')
   const auth = useAuth()
-  const urls = buildCareerSitePublicUrls(auth?.activeTenant?.id, API_BASE)
+  // Absolute base (publicApiBase): these URLs are pasted into job-board configs.
+  const urls = buildCareerSitePublicUrls(auth?.activeTenant?.id, publicApiBase())
 
   // No active tenant resolved yet (e.g. a super-admin who hasn't picked one) — an
   // honest empty state instead of URLs built on an "undefined" tenant segment (§3).

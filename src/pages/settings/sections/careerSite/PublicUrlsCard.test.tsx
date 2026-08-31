@@ -8,12 +8,15 @@ import { describe, it, expect, vi, afterEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import i18n from '@/i18n'
 import PublicUrlsCard from './PublicUrlsCard'
+import { publicApiBase } from '@/lib/publicApiUrl'
 
 const t = (key: string, opts?: Record<string, unknown>) => i18n.t(key, { ns: 'settings', ...opts })
 // Same VITE_API_URL-derived base the component itself resolves (.env sets it to
 // the relative dev-proxy path '/api', not the absolute prod fallback) — computed
 // here instead of hardcoded so the assertion holds under either configuration.
-const API_BASE = import.meta.env.VITE_API_URL ?? 'http://koiosmatch-api.test/api'
+// The card composes ABSOLUTE URLs via publicApiBase (regression 31-08: the
+// cookie setup's relative /api base leaked into copy targets) — pin the same.
+const API_BASE = publicApiBase()
 
 const mockUseAuth = vi.fn()
 vi.mock('@/context/AuthContext', () => ({ useAuth: () => mockUseAuth() }))

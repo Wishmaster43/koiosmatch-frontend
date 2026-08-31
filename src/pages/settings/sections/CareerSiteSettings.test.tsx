@@ -11,11 +11,14 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import i18n from '@/i18n'
 import CareerSiteSettings from './CareerSiteSettings'
+import { publicApiBase } from '@/lib/publicApiUrl'
 
 const t = (key: string, opts?: Record<string, unknown>) => i18n.t(key, { ns: 'settings', ...opts })
 // Same VITE_API_URL-derived base PublicUrlsCard resolves (.env sets the relative
 // dev-proxy path '/api', not the absolute prod fallback) — computed, not hardcoded.
-const API_BASE = import.meta.env.VITE_API_URL ?? 'http://koiosmatch-api.test/api'
+// The card composes ABSOLUTE URLs via publicApiBase (regression 31-08: the
+// cookie setup's relative /api base leaked into copy targets) — pin the same.
+const API_BASE = publicApiBase()
 
 // Route the shared settings loader: the blob is controlled per test; saves go
 // through the REAL saveSettingsKeys so the api.post seam is asserted.

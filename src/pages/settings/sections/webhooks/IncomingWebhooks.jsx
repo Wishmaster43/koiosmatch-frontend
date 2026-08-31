@@ -18,10 +18,10 @@ import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import WebhookRequestsPanel from './WebhookRequestsPanel'
 // DATUM-1: every user-visible date rides the house formatter, never toLocaleDateString.
 import { useDateFormat } from '@/lib/datetime'
+import { publicApiUrl } from '@/lib/publicApiUrl'
 
-// Inbound webhook URLs hang off the API root's /webhook path, not under /api.
-const API_URL = import.meta.env.VITE_API_URL ?? 'http://koiosmatch-api.test/api'
-const BASE_URL = `${API_URL}/webhook`
+// Inbound webhook URLs are pasted into external systems — absolute, never /api-relative.
+const BASE_URL = publicApiUrl('/webhook')
 
 // Manages the tenant's inbound webhook tokens (see file docblock above) — create,
 // in-place edit, delete, copy-URL, and the per-webhook request-log drill-in.

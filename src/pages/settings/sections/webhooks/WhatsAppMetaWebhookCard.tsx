@@ -15,10 +15,11 @@ import Button from '@/components/ui/Button'
 import CopyIconButton from '@/components/ui/CopyIconButton'
 import { SectionTitle, Caption, Mono } from '@/components/ui/typography'
 import type { WhatsappConnectionRow } from '@/types/whatsapp'
+import { publicApiUrl } from '@/lib/publicApiUrl'
 
 // One URL for GET (verify) and POST (messages); tenants resolve per payload.
-const API_URL = import.meta.env.VITE_API_URL ?? 'http://koiosmatch-api.test/api'
-const CALLBACK_URL = `${API_URL}/whatsapp/webhook`
+// Absolute via publicApiUrl: Meta needs a reachable URL, never a relative /api path.
+const CALLBACK_URL = publicApiUrl('/whatsapp/webhook')
 
 // Read-only info card: callback URL + copy, token status per connection, steps.
 export default function WhatsAppMetaWebhookCard() {

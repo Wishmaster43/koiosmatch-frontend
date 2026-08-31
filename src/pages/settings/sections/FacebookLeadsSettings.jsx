@@ -18,14 +18,13 @@ import { loadSettings, saveSettings } from '../lib/settingsApi'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import Button from '@/components/ui/Button'
 import { PageTitle } from '@/components/ui/typography'
+import { publicApiUrl } from '@/lib/publicApiUrl'
 
 // The exact placeholder the backend masks a stored secret with (SettingController::MASK) —
 // matching it lets the FE tell "already set" apart from "empty" without ever seeing the value.
 const MASK = '••••••••'
 
-// Webhook URL base — same VITE_API_URL-derived pattern as IncomingWebhooks.jsx
-// (the webhook lives under the API root's /api path, not a page route).
-const API_URL = import.meta.env.VITE_API_URL ?? 'http://koiosmatch-api.test/api'
+
 
 const labelStyle = { fontSize: 12, fontWeight: 500, color: 'var(--text-muted)', marginBottom: 4, display: 'block' }
 // Canon field style (G33/fieldMetrics) — was its own padding-8/12 copy.
@@ -113,7 +112,7 @@ export default function FacebookLeadsSettings() {
   }
 
   // This tenant's own webhook URL — paste target for the Facebook app dashboard.
-  const webhookUrl = activeTenant?.id ? `${API_URL}/facebook/webhook/${activeTenant.id}` : null
+  const webhookUrl = activeTenant?.id ? publicApiUrl(`/facebook/webhook/${activeTenant.id}`) : null
   // Copies this tenant's webhook URL to the clipboard and flashes a copied confirmation for 2 seconds.
   const copyUrl = () => {
     if (!webhookUrl) return
