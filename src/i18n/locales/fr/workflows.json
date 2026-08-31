@@ -247,7 +247,8 @@
     "customer_locations": "Sites",
     "customer_departments": "Services",
     "customer_contacts": "Contacts",
-    "outreach_campaigns": "Listes d'appels"
+    "outreach_campaigns": "Listes d'appels",
+    "system_events": "Événement système"
   },
   "status": {
     "active": "Actif",
@@ -1035,7 +1036,9 @@
     "opportunitylost": "opportunité perdue",
     "inherit": "Hérite du paramètre",
     "proposal": "Proposition",
-    "automatic": "Automatique"
+    "automatic": "Automatique",
+    "WhatsApp-storing": "Panne WhatsApp",
+    "WhatsApp hersteld": "WhatsApp rétabli"
   },
   "agentTest": {
     "title": "Variables de test",

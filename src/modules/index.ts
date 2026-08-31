@@ -15,6 +15,7 @@ import experience_add     from './experience_add'
 import sm_employee_create from './sm_employee_create'
 import workflow_call      from './workflow_call'
 import webhook           from './webhook'
+import system_events    from './system_events'
 import whatsapp_inbound  from './whatsapp_inbound'
 import application_lookup from './application_lookup'
 import sm_candidates     from './sm_candidates'
@@ -192,6 +193,7 @@ const MODULES: ModuleDef[] = [
   customer_contacts,
   outreach_campaigns,
   whatsapp_inbound,
+  system_events,
   application_lookup,
 ]
 

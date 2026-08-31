@@ -251,7 +251,8 @@
     "customer_locations": "Locations",
     "customer_departments": "Departments",
     "customer_contacts": "Contacts",
-    "outreach_campaigns": "Call lists"
+    "outreach_campaigns": "Call lists",
+    "system_events": "System event"
   },
   "status": {
     "active": "Active",
@@ -1035,7 +1036,9 @@
     "opportunitylost": "opportunity lost",
     "inherit": "Inherit from setting",
     "proposal": "Proposal",
-    "automatic": "Automatic"
+    "automatic": "Automatic",
+    "WhatsApp-storing": "WhatsApp outage",
+    "WhatsApp hersteld": "WhatsApp restored"
   },
   "agentTest": {
     "title": "Test variables",

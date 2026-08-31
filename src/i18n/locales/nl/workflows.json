@@ -286,7 +286,8 @@
     "customer_locations": "Locaties",
     "customer_departments": "Afdelingen",
     "customer_contacts": "Contactpersonen",
-    "outreach_campaigns": "Bellijsten"
+    "outreach_campaigns": "Bellijsten",
+    "system_events": "Systeemgebeurtenis"
   },
   "categories": {
     "all": "Alle",
@@ -1070,7 +1071,9 @@
     "opportunitylost": "kans verloren",
     "inherit": "Overnemen van instelling",
     "proposal": "Voorstel",
-    "automatic": "Automatisch"
+    "automatic": "Automatisch",
+    "WhatsApp-storing": "WhatsApp-storing",
+    "WhatsApp hersteld": "WhatsApp hersteld"
   },
   "agentTest": {
     "title": "Test-variabelen",

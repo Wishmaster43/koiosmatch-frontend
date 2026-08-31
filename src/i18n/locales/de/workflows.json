@@ -247,7 +247,8 @@
     "customer_locations": "Standorte",
     "customer_departments": "Abteilungen",
     "customer_contacts": "Ansprechpartner",
-    "outreach_campaigns": "Anruflisten"
+    "outreach_campaigns": "Anruflisten",
+    "system_events": "Systemereignis"
   },
   "status": {
     "active": "Aktiv",
@@ -1035,7 +1036,9 @@
     "opportunitylost": "Chance verloren",
     "inherit": "Von Einstellung übernehmen",
     "proposal": "Vorschlag",
-    "automatic": "Automatisch"
+    "automatic": "Automatisch",
+    "WhatsApp-storing": "WhatsApp-Störung",
+    "WhatsApp hersteld": "WhatsApp wiederhergestellt"
   },
   "agentTest": {
     "title": "Testvariablen",
