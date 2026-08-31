@@ -53,7 +53,7 @@ describe('taskLinkTypes', () => {
     Object.keys(TASK_LINK_PAGE).forEach(token => expect(TASK_LINK_TYPES).toContain(token))
     // opportunities page has no useOpenFromIntent — a click there would switch
     // pages without opening the record, so it stays plain text (§3).
-    expect(TASK_LINK_PAGE.opportunity).toBeUndefined()
+    expect(TASK_LINK_PAGE.opportunity).toBe('opportunities')
   })
 
   it('offers the three new backend tokens (bellijst, WhatsApp-gesprek, andere taak) with real endpoints', () => {

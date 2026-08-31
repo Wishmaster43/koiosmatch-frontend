@@ -101,8 +101,8 @@ export const TASK_LINK_TYPES: string[] = Object.keys(TASK_LINK_ENDPOINTS)
 // LinksTab read the same source.
 export const TASK_LINK_PAGE: Record<string, string> = {
   candidate: 'candidates', vacancy: 'vacancies', customer: 'customers', application: 'applications',
-  // opportunity: deliberately unmapped — the opportunities page does not honour the
-  // open intent yet (no useOpenFromIntent); mapping it would switch pages without
-  // opening the record (§3). Re-add when that page gains the intent (inventoried).
-  match: 'matches', task: 'tasks',
+  // opportunity: re-mapped 31-08 — Danny's JA, and the page now honours the open
+  // intent (OpportunitiesPage.tsx:108 useOpenFromIntent, landed after the 30-08
+  // inventory), so the click really opens the record again (§3 satisfied).
+  opportunity: 'opportunities', match: 'matches', task: 'tasks',
 }
