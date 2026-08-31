@@ -21,7 +21,8 @@ import { normalizeWorkflow, denormalizeWorkflow } from '../data/workflowMap'
 import type { Workflow, RawWorkflow } from '@/types/workflow'
 
 // A workflow folder (left sidebar grouping).
-export interface WorkflowFolder { id: string | number; name: string; [k: string]: unknown }
+// FOLDER-SLOT-1: app-gated folders arrive `locked` with the app key that unlocks them.
+export interface WorkflowFolder { id: string | number; name: string; locked?: boolean; unlocked_by_app?: string | null; [k: string]: unknown }
 export type FolderId = string | number | null
 
 // Fetches workflows/folders and exposes every mutation the page needs.

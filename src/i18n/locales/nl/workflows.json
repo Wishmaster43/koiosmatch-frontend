@@ -357,7 +357,8 @@
     "archiveSuccess": "Workflow gearchiveerd.",
     "restoreSuccess": "Workflow hersteld.",
     "viewWorkflows": "Workflows",
-    "viewManagement": "Beheer"
+    "viewManagement": "Beheer",
+    "folderLocked": "Vergrendeld: beschikbaar met de app {{app}}."
   },
   "ai": {
     "saved": "Opgeslagen",

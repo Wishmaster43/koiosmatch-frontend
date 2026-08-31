@@ -296,7 +296,8 @@
     "archiveSuccess": "Flujo de trabajo archivado.",
     "restoreSuccess": "Flujo de trabajo restaurado.",
     "viewWorkflows": "Flujos de trabajo",
-    "viewManagement": "Gestión"
+    "viewManagement": "Gestión",
+    "folderLocked": "Bloqueado: disponible con la aplicación {{app}}."
   },
   "ai": {
     "saved": "Guardado",
