@@ -96,6 +96,9 @@ describe('importPermissionsFor · PUNT-6 pairs', () => {
     ['tasks', 'tasks.view', 'tasks.create'],
     ['opportunities', 'opportunities.view', 'opportunities.update'],
     ['outreach', 'outreach.view', 'outreach.create'],
+    // TRANSFER-FAMILIES (31-08): one dedicated right for both halves — the AVG lock.
+    ['notes', 'notes.import', 'notes.import'],
+    ['conversations', 'conversations.import', 'conversations.import'],
   ])('%s -> %s / %s', (entity, view, create) => {
     expect(importPermissionsFor(entity)).toEqual({ view, create })
   })

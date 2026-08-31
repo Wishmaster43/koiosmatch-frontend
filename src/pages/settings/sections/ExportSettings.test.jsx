@@ -86,6 +86,7 @@ const ALL_ENTITY_IDS = [
   'candidates', 'applications', 'vacancies', 'leads', 'customers',
   'contacts', 'locations', 'departments', 'matches', 'tasks', 'opportunities', 'outreach',
   'appointments',
+  'notes', 'conversations', 'documents',
 ]
 
 // Master-detail layout (Danny 21-07: same format as Importeren) — every entity is
@@ -169,3 +170,30 @@ describe('downloadCsv · xlsx twin', () => {
   })
 })
 
+// TRANSFER-FAMILIES (31-08 contract): the three sensitive families gate on their
+// own dedicated export right (default-deny, roles-matrix managed) — never a view
+// right. A user holding every view right but not conversations.export must see
+// the conversations twins disabled (never hidden), proving the AVG lock is real.
+describe('ExportSettings · transfer-family rights gating', () => {
+  it('disables the conversations twins without conversations.export, even with all view rights', async () => {
+    mockUseAuth.mockReturnValue({ hasPermission: (perm) => perm !== 'conversations.export' })
+    const user = userEvent.setup()
+    render(<ExportSettings />)
+
+    await user.click(screen.getByRole('button', { name: t('export.entities.conversations.title') }))
+    const btn = screen.getByRole('button', { name: t('export.formatCsv') })
+    expect(btn).toBeDisabled()
+    expect(screen.getByRole('button', { name: t('export.formatXlsx') })).toBeDisabled()
+    expect(btn).toHaveAttribute('title', t('export.noPermission'))
+  })
+
+  it('enables the notes twins for a holder of notes.export', async () => {
+    mockUseAuth.mockReturnValue({ hasPermission: () => true })
+    const user = userEvent.setup()
+    render(<ExportSettings />)
+
+    await user.click(screen.getByRole('button', { name: t('export.entities.notes.title') }))
+    expect(screen.getByRole('button', { name: t('export.formatCsv') })).toBeEnabled()
+    expect(screen.getByRole('button', { name: t('export.formatXlsx') })).toBeEnabled()
+  })
+})

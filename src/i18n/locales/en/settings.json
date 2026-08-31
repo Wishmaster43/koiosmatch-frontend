@@ -1661,6 +1661,14 @@
       "candidates": {
         "label": "Candidates",
         "desc": "Candidates with name, contact details, function and status via the tenant lists."
+      },
+      "notes": {
+        "label": "Notes",
+        "desc": "Notes linked per row to a candidate (email) or customer (name), with type, author, date and text. Requires the notes import right. The date may include a time (10-03-2026 14:30); without one, everything lands at 00:00."
+      },
+      "conversations": {
+        "label": "Conversations",
+        "desc": "WhatsApp history at message level per candidate (email): direction, channel, timestamp and text. Migration only, nothing is ever sent. Requires the conversations import right. For WhatsApp Web history always pass channel wa_web: without a channel waba applies and the history lands permanently in the wrong conversation lane."
       }
     },
     "groups": {

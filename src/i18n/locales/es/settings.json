@@ -1415,6 +1415,14 @@
       "candidates": {
         "label": "Candidatos",
         "desc": "Candidatos con nombre, datos de contacto, función y estado según las listas del tenant."
+      },
+      "notes": {
+        "label": "Notas",
+        "desc": "Notas vinculadas por fila a un candidato (correo) o cliente (nombre), con tipo, autor, fecha y texto. Requiere el permiso de importación de notas. La fecha puede incluir una hora (10-03-2026 14:30); sin hora, todo queda a las 00:00."
+      },
+      "conversations": {
+        "label": "Conversaciones",
+        "desc": "Historial de WhatsApp a nivel de mensaje por candidato (correo): dirección, canal, fecha y texto. Solo migración, nunca se envía nada. Requiere el permiso de importación de conversaciones. Para el historial de WhatsApp Web indique siempre el canal wa_web: sin canal se aplica waba y el historial queda permanentemente en el hilo equivocado."
       }
     },
     "groups": {

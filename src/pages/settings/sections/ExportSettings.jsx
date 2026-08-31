@@ -15,6 +15,7 @@ import { useTranslation } from 'react-i18next'
 import {
   Upload, Users, ClipboardList, Briefcase, Target, Building2,
   MapPin, Building, Handshake, ListChecks, PhoneCall, CalendarDays,
+  StickyNote, MessageSquare, FileText,
 } from 'lucide-react'
 import api from '@/lib/api'
 import { useAuth } from '@/context/AuthContext'
@@ -48,6 +49,12 @@ const ENTITIES = [
   // candidate-dossier data, so it rides candidates.view (CMBE-measured — no
   // appointments.view right exists).
   { id: 'appointments', icon: CalendarDays, base: '/exports/appointments', permission: 'candidates.view' },
+  // TRANSFER-FAMILIES (31-08 contract): the three sensitive families gate on their
+  // own dedicated export right (the AVG lock lives in the roles matrix, default-deny),
+  // never on a view right — full note/message text is exactly what these rights guard.
+  { id: 'notes', icon: StickyNote, base: '/exports/notes', permission: 'notes.export' },
+  { id: 'conversations', icon: MessageSquare, base: '/exports/conversations', permission: 'conversations.export' },
+  { id: 'documents', icon: FileText, base: '/exports/documents', permission: 'documents.export' },
 ]
 
 // Parse the filename the backend sets via Content-Disposition (Laravel's

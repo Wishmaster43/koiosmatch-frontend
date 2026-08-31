@@ -75,5 +75,9 @@ export function importPermissionsFor(entity: string | null | undefined): { view:
   if (entity === 'tasks') return { view: 'tasks.view', create: 'tasks.create' }
   if (entity === 'opportunities') return { view: 'opportunities.view', create: 'opportunities.update' }
   if (entity === 'outreach') return { view: 'outreach.view', create: 'outreach.create' }
+  // TRANSFER-FAMILIES (31-08): the sensitive families carry ONE dedicated import
+  // right for both halves (template download + upload) — the AVG lock, default-deny.
+  if (entity === 'notes') return { view: 'notes.import', create: 'notes.import' }
+  if (entity === 'conversations') return { view: 'conversations.import', create: 'conversations.import' }
   return { view: 'customers.view', create: 'customers.create' }
 }

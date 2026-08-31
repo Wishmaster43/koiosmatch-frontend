@@ -1415,6 +1415,14 @@
       "candidates": {
         "label": "Kandidaten",
         "desc": "Kandidaten mit Name, Kontaktdaten, Funktion und Status über die Mandantenlisten."
+      },
+      "notes": {
+        "label": "Notizen",
+        "desc": "Notizen pro Zeile mit einem Kandidaten (E-Mail) oder Kunden (Name) verknüpft, mit Typ, Autor, Datum und Text. Erfordert das Notizen-Importrecht. Das Datum darf eine Uhrzeit enthalten (10-03-2026 14:30); ohne Uhrzeit landet alles auf 00:00."
+      },
+      "conversations": {
+        "label": "Konversationen",
+        "desc": "WhatsApp-Verlauf auf Nachrichtenebene pro Kandidat (E-Mail): Richtung, Kanal, Zeitpunkt und Text. Nur Migration, es wird nie etwas versendet. Erfordert das Konversations-Importrecht. Bei WhatsApp-Web-Verlauf immer Kanal wa_web angeben: ohne Kanal gilt waba und der Verlauf landet dauerhaft im falschen Gesprächsstrang."
       }
     },
     "groups": {

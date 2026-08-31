@@ -1661,6 +1661,14 @@
       "candidates": {
         "label": "Kandidaten",
         "desc": "Kandidaten met naam, contactgegevens, functie en status via de tenant-lijsten."
+      },
+      "notes": {
+        "label": "Notities",
+        "desc": "Notities per rij aan een kandidaat (e-mail) of klant (naam) gekoppeld, met type, auteur, datum en tekst. Vereist het notities-importrecht. Datum mag een tijd bevatten (10-03-2026 14:30); zonder tijd landt alles op 00:00."
+      },
+      "conversations": {
+        "label": "Conversaties",
+        "desc": "WhatsApp-historie op berichtniveau per kandidaat (e-mail): richting, kanaal, tijdstip en tekst. Alleen migratie, er wordt nooit iets verstuurd. Vereist het conversaties-importrecht. Geef bij WhatsApp-Web-historie altijd kanaal wa_web mee: zonder kanaal geldt waba en landt de historie blijvend in de verkeerde gesprekslijn."
       }
     },
     "groups": {
