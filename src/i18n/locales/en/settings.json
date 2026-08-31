@@ -1633,6 +1633,26 @@
       "customer_tree": {
         "label": "Customer (complete)",
         "desc": "Builds a customer together with its locations, departments and contacts in one go. For a customer that doesn't exist yet."
+      },
+      "applications": {
+        "label": "Applications",
+        "desc": "Applications link a candidate (email, required) to a vacancy; stage and rejection reason via the tenant lists. The candidate must exist."
+      },
+      "matches": {
+        "label": "Matches",
+        "desc": "Matches link a candidate (email, required) to a vacancy/customer with hours, period and rate. Requires the matches edit right."
+      },
+      "tasks": {
+        "label": "Tasks",
+        "desc": "Tasks with title (required), type, status, priority, due date and assignee (email)."
+      },
+      "opportunities": {
+        "label": "Opportunities",
+        "desc": "Opportunities with title (required), customer, stage, value and owner (email). Requires the opportunities edit right."
+      },
+      "outreach": {
+        "label": "Call lists",
+        "desc": "Call lists with name (required), channel, status, owner (email) and retry settings."
       }
     },
     "groups": {

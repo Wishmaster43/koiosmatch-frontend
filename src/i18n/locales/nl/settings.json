@@ -1633,6 +1633,26 @@
       "customer_tree": {
         "label": "Klant (compleet)",
         "desc": "Bouwt een klant met locaties, afdelingen en contactpersonen in één keer op. Voor een klant die nog niet bestaat."
+      },
+      "applications": {
+        "label": "Sollicitaties",
+        "desc": "Sollicitaties koppelen kandidaat (e-mail, verplicht) aan een vacature; fase en afwijsreden via de tenant-lijsten. Kandidaat moet bestaan."
+      },
+      "matches": {
+        "label": "Matches",
+        "desc": "Matches koppelen kandidaat (e-mail, verplicht) aan vacature/klant met uren, periode en tarief. Vereist het matches-bewerkrecht."
+      },
+      "tasks": {
+        "label": "Taken",
+        "desc": "Taken met titel (verplicht), type, status, prioriteit, vervaldatum en toegewezen medewerker (e-mail)."
+      },
+      "opportunities": {
+        "label": "Kansen",
+        "desc": "Kansen met titel (verplicht), klant, fase, waarde en eigenaar (e-mail). Vereist het kansen-bewerkrecht."
+      },
+      "outreach": {
+        "label": "Bellijsten",
+        "desc": "Bellijsten met naam (verplicht), kanaal, status, eigenaar (e-mail) en herhaalinstellingen."
       }
     },
     "groups": {

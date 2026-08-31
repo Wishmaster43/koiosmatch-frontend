@@ -1387,6 +1387,26 @@
       "customer_tree": {
         "label": "Client (complet)",
         "desc": "Crée un client avec ses sites, services et contacts en une seule fois. Pour un client qui n'existe pas encore."
+      },
+      "applications": {
+        "label": "Candidatures",
+        "desc": "Les candidatures lient un candidat (e-mail, requis) à une offre ; phase et motif de refus via les listes du tenant. Le candidat doit exister."
+      },
+      "matches": {
+        "label": "Matches",
+        "desc": "Les matches lient un candidat (e-mail, requis) à une offre/un client avec heures, période et tarif. Requiert le droit de modification des matches."
+      },
+      "tasks": {
+        "label": "Tâches",
+        "desc": "Tâches avec titre (requis), type, statut, priorité, échéance et personne assignée (e-mail)."
+      },
+      "opportunities": {
+        "label": "Opportunités",
+        "desc": "Opportunités avec titre (requis), client, phase, valeur et propriétaire (e-mail). Requiert le droit de modification des opportunités."
+      },
+      "outreach": {
+        "label": "Listes d'appels",
+        "desc": "Listes d'appels avec nom (requis), canal, statut, propriétaire (e-mail) et paramètres de relance."
       }
     },
     "groups": {

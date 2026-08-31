@@ -1387,6 +1387,26 @@
       "customer_tree": {
         "label": "Cliente (completo)",
         "desc": "Crea un cliente junto con sus ubicaciones, departamentos y contactos de una sola vez. Para un cliente que todavía no existe."
+      },
+      "applications": {
+        "label": "Candidaturas",
+        "desc": "Las candidaturas vinculan un candidato (correo, obligatorio) a una vacante; fase y motivo de rechazo según las listas del tenant. El candidato debe existir."
+      },
+      "matches": {
+        "label": "Matches",
+        "desc": "Los matches vinculan un candidato (correo, obligatorio) a una vacante/cliente con horas, periodo y tarifa. Requiere el permiso de edición de matches."
+      },
+      "tasks": {
+        "label": "Tareas",
+        "desc": "Tareas con título (obligatorio), tipo, estado, prioridad, fecha límite y persona asignada (correo)."
+      },
+      "opportunities": {
+        "label": "Oportunidades",
+        "desc": "Oportunidades con título (obligatorio), cliente, fase, valor y propietario (correo). Requiere el permiso de edición de oportunidades."
+      },
+      "outreach": {
+        "label": "Listas de llamadas",
+        "desc": "Listas de llamadas con nombre (obligatorio), canal, estado, propietario (correo) y ajustes de reintento."
       }
     },
     "groups": {

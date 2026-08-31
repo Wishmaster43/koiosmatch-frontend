@@ -1387,6 +1387,26 @@
       "customer_tree": {
         "label": "Kunde (komplett)",
         "desc": "Legt einen Kunden zusammen mit Standorten, Abteilungen und Kontakten in einem Schritt an. Für einen Kunden, der noch nicht existiert."
+      },
+      "applications": {
+        "label": "Bewerbungen",
+        "desc": "Bewerbungen verknüpfen einen Kandidaten (E-Mail, Pflicht) mit einer Vakanz; Phase und Absagegrund über die Mandantenlisten. Der Kandidat muss existieren."
+      },
+      "matches": {
+        "label": "Matches",
+        "desc": "Matches verknüpfen einen Kandidaten (E-Mail, Pflicht) mit Vakanz/Kunde inkl. Stunden, Zeitraum und Tarif. Erfordert das Matches-Bearbeitungsrecht."
+      },
+      "tasks": {
+        "label": "Aufgaben",
+        "desc": "Aufgaben mit Titel (Pflicht), Typ, Status, Priorität, Fälligkeitsdatum und zugewiesener Person (E-Mail)."
+      },
+      "opportunities": {
+        "label": "Chancen",
+        "desc": "Chancen mit Titel (Pflicht), Kunde, Phase, Wert und Inhaber (E-Mail). Erfordert das Chancen-Bearbeitungsrecht."
+      },
+      "outreach": {
+        "label": "Anruflisten",
+        "desc": "Anruflisten mit Name (Pflicht), Kanal, Status, Inhaber (E-Mail) und Wiederholungseinstellungen."
       }
     },
     "groups": {
