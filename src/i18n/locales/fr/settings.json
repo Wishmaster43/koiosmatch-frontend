@@ -1423,6 +1423,10 @@
       "conversations": {
         "label": "Conversations",
         "desc": "Historique WhatsApp au niveau message par candidat (e-mail) : direction, canal, horodatage et texte. Migration uniquement, rien n'est jamais envoyé. Requiert le droit d'import des conversations. Pour l'historique WhatsApp Web, indiquez toujours le canal wa_web : sans canal, waba s'applique et l'historique atterrit définitivement dans le mauvais fil."
+      },
+      "documents": {
+        "label": "Documents (fichiers)",
+        "desc": "ZIP avec les fichiers de documents plus un mapping.csv (nom de fichier, entité, record_ref, type, valide_jusqu'au) reliant chaque fichier à un candidat ou un client. Requiert le droit d'import des documents. Le nom de fichier peut aussi être un chemin dans le ZIP (dossier/fichier.pdf)."
       }
     },
     "groups": {
@@ -1531,7 +1535,9 @@
         "noRows": "Aucune ligne à prévisualiser. Vérifiez votre fichier.",
         "validateHint": "Lancez l'aperçu pour voir ce qui se passerait, puis confirmez."
       }
-    }
+    },
+    "acceptedTypesZip": "Accepté : .zip (max. 200 Mo)",
+    "zipTooLarge": "Le fichier ZIP dépasse {{max}} Mo. Répartissez les fichiers sur plusieurs ZIP."
   },
   "facebookLeads": {
     "title": "Facebook Leads",
@@ -1628,7 +1634,10 @@
       }
     },
     "formatCsv": "CSV",
-    "formatXlsx": "Excel (.xlsx)"
+    "formatXlsx": "Excel (.xlsx)",
+    "zipButton": "Fichiers (ZIP)",
+    "zipQueued": "Le ZIP est en cours de création. Vous recevrez une notification avec le lien de téléchargement dès qu’il sera prêt.",
+    "zipAlreadyRunning": "Un ZIP est déjà en cours de création. Attendez la notification, puis réessayez."
   },
   "apps": {
     "notOnPkg3Title": "Le tenant n'est pas encore sur le Forfait 3",

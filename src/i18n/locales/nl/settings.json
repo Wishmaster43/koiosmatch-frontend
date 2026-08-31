@@ -1669,6 +1669,10 @@
       "conversations": {
         "label": "Conversaties",
         "desc": "WhatsApp-historie op berichtniveau per kandidaat (e-mail): richting, kanaal, tijdstip en tekst. Alleen migratie, er wordt nooit iets verstuurd. Vereist het conversaties-importrecht. Geef bij WhatsApp-Web-historie altijd kanaal wa_web mee: zonder kanaal geldt waba en landt de historie blijvend in de verkeerde gesprekslijn."
+      },
+      "documents": {
+        "label": "Documenten (bestanden)",
+        "desc": "ZIP met de documentbestanden plus een mapping.csv (bestandsnaam, entiteit, record_ref, type, geldig_tot) die elk bestand aan een kandidaat of klant koppelt. Vereist het documenten-importrecht. De bestandsnaam mag ook een pad binnen de ZIP zijn (map/bestand.pdf)."
       }
     },
     "groups": {
@@ -1777,7 +1781,9 @@
         "noRows": "Geen rijen om te bekijken. Controleer je bestand.",
         "validateHint": "Voer de preview uit om te zien wat er zou gebeuren, en bevestig daarna."
       }
-    }
+    },
+    "acceptedTypesZip": "Geaccepteerd: .zip (max. 200 MB)",
+    "zipTooLarge": "Het ZIP-bestand is groter dan {{max}} MB. Splits de bestanden over meerdere ZIP’s."
   },
   "facebookLeads": {
     "title": "Facebook Leads",
@@ -1874,7 +1880,10 @@
       }
     },
     "formatCsv": "CSV",
-    "formatXlsx": "Excel (.xlsx)"
+    "formatXlsx": "Excel (.xlsx)",
+    "zipButton": "Bestanden (ZIP)",
+    "zipQueued": "De ZIP wordt gebouwd. Je krijgt een melding met de downloadlink zodra hij klaarstaat.",
+    "zipAlreadyRunning": "Er wordt al een ZIP gebouwd. Wacht op de melding en probeer het daarna opnieuw."
   },
   "apps": {
     "notOnPkg3Title": "Tenant zit nog niet op Pakket 3",

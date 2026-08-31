@@ -15,11 +15,12 @@ import { useTranslation } from 'react-i18next'
 import {
   Upload, Users, ClipboardList, Briefcase, Target, Building2,
   MapPin, Building, Handshake, ListChecks, PhoneCall, CalendarDays,
-  StickyNote, MessageSquare, FileText,
+  StickyNote, MessageSquare, FileText, FolderArchive,
 } from 'lucide-react'
 import api from '@/lib/api'
 import { useAuth } from '@/context/AuthContext'
-import { notifyError } from '@/lib/notify'
+import { notifyError, notifySuccess } from '@/lib/notify'
+import { extractApiError } from '@/lib/extractApiError'
 import Button from '@/components/ui/Button'
 import Spinner from '@/components/ui/Spinner'
 import { PageTitle } from '@/components/ui/typography'
@@ -102,6 +103,23 @@ export default function ExportSettings() {
   const { hasPermission } = useAuth()
   const [selected, setSelected] = useState(ENTITIES[0].id)
   const [pendingId, setPendingId] = useState(null)
+  // TRANSFER-FAMILIES ZIP: the real files ride a QUEUED build (too heavy for a
+  // direct download) — this requests it; the bell later delivers the signed URL.
+  const [zipPending, setZipPending] = useState(false)
+  const requestZip = async () => {
+    setZipPending(true)
+    try {
+      await api.post('/exports/documents-zip')
+      notifySuccess(t('export.zipQueued'))
+    } catch (err) {
+      // A 422 carries the server's own honest reason (build already running, or
+      // the >5000-files/2GB refusal) — prefer it over a generic key (K-236 ZIP).
+      const serverMsg = err?.response?.status === 422 ? extractApiError(err) : null
+      notifyError(serverMsg || t(err?.response?.status === 422 ? 'export.zipAlreadyRunning' : 'export.error'))
+    } finally {
+      setZipPending(false)
+    }
+  }
 
   // Trigger one entity's export; a 429 (rate limit) gets its own message, any
   // other failure a generic one — never a raw server string (§10).
@@ -179,6 +197,14 @@ export default function ExportSettings() {
                 {pendingXlsx ? <Spinner size={14} /> : <Upload size={14} />}
                 {t('export.formatXlsx')}
               </Button>
+              {entity.id === 'documents' && (
+                <Button variant="secondary" onClick={requestZip}
+                  disabled={!allowed || zipPending}
+                  title={allowed ? t('export.zipButton') : t('export.noPermission')}>
+                  {zipPending ? <Spinner size={14} /> : <FolderArchive size={14} />}
+                  {t('export.zipButton')}
+                </Button>
+              )}
             </div>
           </div>
         </div>

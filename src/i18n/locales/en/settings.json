@@ -1669,6 +1669,10 @@
       "conversations": {
         "label": "Conversations",
         "desc": "WhatsApp history at message level per candidate (email): direction, channel, timestamp and text. Migration only, nothing is ever sent. Requires the conversations import right. For WhatsApp Web history always pass channel wa_web: without a channel waba applies and the history lands permanently in the wrong conversation lane."
+      },
+      "documents": {
+        "label": "Documents (files)",
+        "desc": "ZIP with the document files plus a mapping.csv (filename, entity, record_ref, type, valid_until) linking each file to a candidate or customer. Requires the documents import right. The filename may also be a path inside the ZIP (folder/file.pdf)."
       }
     },
     "groups": {
@@ -1777,7 +1781,9 @@
         "noRows": "No rows to preview. Check your file.",
         "validateHint": "Run the preview to see what would happen, then confirm."
       }
-    }
+    },
+    "acceptedTypesZip": "Accepted: .zip (max. 200 MB)",
+    "zipTooLarge": "The ZIP file is larger than {{max}} MB. Split the files across multiple ZIPs."
   },
   "facebookLeads": {
     "title": "Facebook Leads",
@@ -1874,7 +1880,10 @@
       }
     },
     "formatCsv": "CSV",
-    "formatXlsx": "Excel (.xlsx)"
+    "formatXlsx": "Excel (.xlsx)",
+    "zipButton": "Files (ZIP)",
+    "zipQueued": "The ZIP is being built. You will get a notification with the download link once it is ready.",
+    "zipAlreadyRunning": "A ZIP is already being built. Wait for the notification, then try again."
   },
   "apps": {
     "notOnPkg3Title": "Tenant is not on Package 3 yet",

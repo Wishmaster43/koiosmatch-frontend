@@ -1423,6 +1423,10 @@
       "conversations": {
         "label": "Conversaciones",
         "desc": "Historial de WhatsApp a nivel de mensaje por candidato (correo): dirección, canal, fecha y texto. Solo migración, nunca se envía nada. Requiere el permiso de importación de conversaciones. Para el historial de WhatsApp Web indique siempre el canal wa_web: sin canal se aplica waba y el historial queda permanentemente en el hilo equivocado."
+      },
+      "documents": {
+        "label": "Documentos (archivos)",
+        "desc": "ZIP con los archivos de documentos más un mapping.csv (nombre de archivo, entidad, record_ref, tipo, válido_hasta) que vincula cada archivo a un candidato o cliente. Requiere el permiso de importación de documentos. El nombre de archivo también puede ser una ruta dentro del ZIP (carpeta/archivo.pdf)."
       }
     },
     "groups": {
@@ -1531,7 +1535,9 @@
         "noRows": "No hay filas para previsualizar. Revisa tu archivo.",
         "validateHint": "Ejecuta la vista previa para ver qué ocurriría y luego confirma."
       }
-    }
+    },
+    "acceptedTypesZip": "Aceptado: .zip (máx. 200 MB)",
+    "zipTooLarge": "El archivo ZIP supera los {{max}} MB. Reparta los archivos en varios ZIP."
   },
   "facebookLeads": {
     "title": "Facebook Leads",
@@ -1628,7 +1634,10 @@
       }
     },
     "formatCsv": "CSV",
-    "formatXlsx": "Excel (.xlsx)"
+    "formatXlsx": "Excel (.xlsx)",
+    "zipButton": "Archivos (ZIP)",
+    "zipQueued": "El ZIP se está generando. Recibirá una notificación con el enlace de descarga en cuanto esté listo.",
+    "zipAlreadyRunning": "Ya se está generando un ZIP. Espere la notificación y vuelva a intentarlo."
   },
   "apps": {
     "notOnPkg3Title": "El tenant aún no está en el Paquete 3",

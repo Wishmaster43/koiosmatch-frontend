@@ -17,6 +17,11 @@ import Spinner from '@/components/ui/Spinner'
 // sheet row numbers), never converted client-side.
 const ACCEPTED_EXTENSIONS = ['.csv', '.txt', '.xlsx']
 
+// TRANSFER-FAMILIES ZIP: the documents import is a ZIP (files + mapping.csv);
+// every other entity stays spreadsheet-only. Cap mirrors the server (200 MB).
+const ZIP_ENTITIES = ['documents']
+const ZIP_MAX_MB = 200
+
 interface UploadStepProps {
   entity: string
   file: File | null
@@ -40,11 +45,18 @@ export default function UploadStep({
   const fileRef = useRef<HTMLInputElement>(null)
   const checking = previewStatus === 'loading'
 
-  // Reject anything that isn't .csv/.txt/.xlsx with an honest, actionable message.
+  // The documents entity eats a ZIP; everything else the spreadsheet trio.
+  const isZip = ZIP_ENTITIES.includes(entity)
+  const extensions = isZip ? ['.zip'] : ACCEPTED_EXTENSIONS
+  // Reject a wrong type or an oversized ZIP with an honest, actionable message.
   const acceptFile = (candidate: File) => {
     const lower = candidate.name.toLowerCase()
-    if (!ACCEPTED_EXTENSIONS.some((ext) => lower.endsWith(ext))) {
+    if (!extensions.some((ext) => lower.endsWith(ext))) {
       setTypeError(t('import.wrongFileType'))
+      return
+    }
+    if (isZip && candidate.size > ZIP_MAX_MB * 1024 * 1024) {
+      setTypeError(t('import.zipTooLarge', { max: ZIP_MAX_MB }))
       return
     }
     setTypeError(null)
@@ -114,8 +126,8 @@ export default function UploadStep({
           disabled={!canImport}>
           {t('import.selectCsv')}
         </Button>
-        <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('import.acceptedTypes')}</span>
-        <input ref={fileRef} type="file" accept=".csv,.txt,.xlsx" aria-label={t('import.selectCsv')}
+        <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t(isZip ? 'import.acceptedTypesZip' : 'import.acceptedTypes')}</span>
+        <input ref={fileRef} type="file" accept={isZip ? '.zip' : '.csv,.txt,.xlsx'} aria-label={t('import.selectCsv')}
           style={{ display: 'none' }} onChange={handleFileInput} disabled={!canImport} />
       </div>
 

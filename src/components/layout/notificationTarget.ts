@@ -114,6 +114,23 @@ export function buildNotificationDeepLink(target: NotificationTarget): string {
   return `${window.location.pathname}#${target.page}?open=${encodeURIComponent(target.id)}`
 }
 
+// TRANSFER-FAMILIES ZIP: notification types whose click-through is an EXTERNAL
+// signed URL (meta.download_url), not a record target — resolved separately so
+// the {page,id} model stays untouched. Only http(s) strings pass; anything else
+// leaves the row non-clickable (§3 no fake affordances).
+export const CUSTOM_HREF_TYPES: Record<string, (meta: Record<string, unknown>) => string | null> = {
+  'documents.zip_ready': (meta) =>
+    typeof meta.download_url === 'string' && /^https?:\/\//i.test(meta.download_url) ? meta.download_url : null,
+}
+
+// Pure: resolve a notification whose target is an external download link, or null.
+export function resolveNotificationHref(n: AppNotification): string | null {
+  const dataType = (n as { type?: string }).type
+  if (!dataType || !Object.hasOwn(CUSTOM_HREF_TYPES, dataType)) return null
+  const meta = (n as { meta?: Record<string, unknown> }).meta ?? {}
+  return CUSTOM_HREF_TYPES[dataType](meta)
+}
+
 export interface NotificationActionLine { status: KnownActionStatus; nextAction: KnownNextAction | null }
 
 // Pure: resolve a workflow-run row's {action_status, next_action} into a

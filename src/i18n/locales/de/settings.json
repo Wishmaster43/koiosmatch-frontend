@@ -1423,6 +1423,10 @@
       "conversations": {
         "label": "Konversationen",
         "desc": "WhatsApp-Verlauf auf Nachrichtenebene pro Kandidat (E-Mail): Richtung, Kanal, Zeitpunkt und Text. Nur Migration, es wird nie etwas versendet. Erfordert das Konversations-Importrecht. Bei WhatsApp-Web-Verlauf immer Kanal wa_web angeben: ohne Kanal gilt waba und der Verlauf landet dauerhaft im falschen Gesprächsstrang."
+      },
+      "documents": {
+        "label": "Dokumente (Dateien)",
+        "desc": "ZIP mit den Dokumentdateien plus einer mapping.csv (Dateiname, Entität, record_ref, Typ, gültig_bis), die jede Datei mit einem Kandidaten oder Kunden verknüpft. Erfordert das Dokumente-Importrecht. Der Dateiname darf auch ein Pfad innerhalb des ZIP sein (Ordner/Datei.pdf)."
       }
     },
     "groups": {
@@ -1531,7 +1535,9 @@
         "noRows": "Keine Zeilen zur Vorschau. Überprüfen Sie Ihre Datei.",
         "validateHint": "Führen Sie die Vorschau aus, um zu sehen, was passieren würde, und bestätigen Sie dann."
       }
-    }
+    },
+    "acceptedTypesZip": "Akzeptiert: .zip (max. 200 MB)",
+    "zipTooLarge": "Die ZIP-Datei ist größer als {{max}} MB. Verteilen Sie die Dateien auf mehrere ZIPs."
   },
   "facebookLeads": {
     "title": "Facebook Leads",
@@ -1628,7 +1634,10 @@
       }
     },
     "formatCsv": "CSV",
-    "formatXlsx": "Excel (.xlsx)"
+    "formatXlsx": "Excel (.xlsx)",
+    "zipButton": "Dateien (ZIP)",
+    "zipQueued": "Das ZIP wird erstellt. Sie erhalten eine Benachrichtigung mit dem Downloadlink, sobald es bereitsteht.",
+    "zipAlreadyRunning": "Es wird bereits ein ZIP erstellt. Warten Sie auf die Benachrichtigung und versuchen Sie es dann erneut."
   },
   "apps": {
     "notOnPkg3Title": "Tenant ist noch nicht auf Paket 3",

@@ -79,5 +79,6 @@ export function importPermissionsFor(entity: string | null | undefined): { view:
   // right for both halves (template download + upload) — the AVG lock, default-deny.
   if (entity === 'notes') return { view: 'notes.import', create: 'notes.import' }
   if (entity === 'conversations') return { view: 'conversations.import', create: 'conversations.import' }
+  if (entity === 'documents') return { view: 'documents.import', create: 'documents.import' }
   return { view: 'customers.view', create: 'customers.create' }
 }

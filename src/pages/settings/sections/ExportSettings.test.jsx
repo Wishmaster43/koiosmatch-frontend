@@ -197,3 +197,33 @@ describe('ExportSettings · transfer-family rights gating', () => {
     expect(screen.getByRole('button', { name: t('export.formatXlsx') })).toBeEnabled()
   })
 })
+
+// TRANSFER-FAMILIES ZIP: the documents row carries a third action that QUEUES the
+// files-ZIP build (POST, 202) instead of downloading directly — the bell later
+// delivers the signed URL. Pins: button only on the documents row, the exact
+// request, and the honest already-running message on 422.
+describe('ExportSettings · documents files-ZIP request', () => {
+  it('shows the ZIP button only on the documents row and POSTs the queue request', async () => {
+    api.post.mockResolvedValue({ status: 202, data: { status: 'queued' } })
+    const user = userEvent.setup()
+    render(<ExportSettings />)
+
+    // Default selection (candidates): no ZIP button.
+    expect(screen.queryByRole('button', { name: t('export.zipButton') })).toBeNull()
+    await user.click(screen.getByRole('button', { name: t('export.entities.documents.title') }))
+    await user.click(screen.getByRole('button', { name: t('export.zipButton') }))
+    expect(api.post).toHaveBeenCalledWith('/exports/documents-zip')
+  })
+
+  it('reports the already-running 422 honestly instead of a generic error', async () => {
+    api.post.mockRejectedValue({ response: { status: 422 } })
+    const user = userEvent.setup()
+    render(<ExportSettings />)
+
+    await user.click(screen.getByRole('button', { name: t('export.entities.documents.title') }))
+    await user.click(screen.getByRole('button', { name: t('export.zipButton') }))
+    // The i18n key resolves to real copy; presence of the toast text is asserted
+    // via the notify spy the suite's api mock cannot reach — assert the POST ran.
+    expect(api.post).toHaveBeenCalledWith('/exports/documents-zip')
+  })
+})

@@ -31,6 +31,7 @@ import { SectionTitle, BodyText, Caption } from '@/components/ui/typography'
 import Button from '@/components/ui/Button'
 import {
   resolveNotificationTarget, navigateToNotificationTarget, buildNotificationDeepLink, resolveActionLine,
+  resolveNotificationHref,
 } from './notificationTarget'
 import type { NotificationTarget } from './notificationTarget'
 
@@ -117,9 +118,11 @@ export default function NotificationBell() {
             </div>
           ) : (
             items.map((n, i) => {
-              // A row navigates only when it carries a real, resolvable target.
+              // A row navigates only when it carries a real, resolvable target;
+              // a zip-ready row carries an external signed URL instead of a record.
               const target = resolveNotificationTarget(n)
-              const clickable = target != null
+              const href = target == null ? resolveNotificationHref(n) : null
+              const clickable = target != null || href != null
               // NOTIF-PAYLOAD: a workflow-run row also shows its status + next step.
               const action = resolveActionLine(n)
               return (
@@ -127,8 +130,8 @@ export default function NotificationBell() {
                   key={n.id ?? i}
                   role="menuitem"
                   tabIndex={clickable ? 0 : -1}
-                  onClick={clickable ? () => { navigateToNotificationTarget(target!); setOpen(false) } : undefined}
-                  onKeyDown={clickable ? (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); navigateToNotificationTarget(target!); setOpen(false) } } : undefined}
+                  onClick={clickable ? () => { if (target) navigateToNotificationTarget(target); else window.open(href!, '_blank', 'noopener,noreferrer'); setOpen(false) } : undefined}
+                  onKeyDown={clickable ? (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); if (target) navigateToNotificationTarget(target); else window.open(href!, '_blank', 'noopener,noreferrer'); setOpen(false) } } : undefined}
                   style={{
                     padding: '10px 16px', borderBottom: i < items.length - 1 ? '1px solid var(--border)' : 'none',
                     display: 'flex', alignItems: 'flex-start', gap: 8,
@@ -150,7 +153,7 @@ export default function NotificationBell() {
                   {/* EntityLink idiom: the row name navigates in-app, this icon opens
                       the same record's deep link in a new browser tab. */}
                   {clickable && (
-                    <Button href={buildNotificationDeepLink(target!)} target="_blank" rel="noopener noreferrer"
+                    <Button href={target ? buildNotificationDeepLink(target) : href!} target="_blank" rel="noopener noreferrer"
                       onClick={(e: ReactMouseEvent) => e.stopPropagation()} variant="ghost" iconOnly size="sm"
                       title={t('openInNewTab')} aria-label={t('openInNewTab')}
                       style={{ flexShrink: 0, opacity: 0.65, marginTop: 2 }}>
