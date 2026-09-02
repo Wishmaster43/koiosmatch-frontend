@@ -1038,7 +1038,8 @@
     "proposal": "Proposal",
     "automatic": "Automatic",
     "WhatsApp-storing": "WhatsApp outage",
-    "WhatsApp hersteld": "WhatsApp restored"
+    "WhatsApp hersteld": "WhatsApp restored",
+    "match_and_candidate_owner": "match and candidate owner"
   },
   "agentTest": {
     "title": "Test variables",

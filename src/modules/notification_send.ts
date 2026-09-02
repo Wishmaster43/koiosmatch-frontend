@@ -28,7 +28,9 @@ export default {
     // creation; until then, no field may rely on `default` for engine behaviour.
     // WF-BUILDER-VELDEN-1: 'users' added — without it the `user_ids` field below has no
     // reachable showIf and would be a fake affordance (§3, no dead-end controls).
-    { key: 'recipients', label: 'Ontvangers', type: 'select',   options: ['all', 'role', 'users', 'candidate_owner', 'customer_owner', 'vacancy_owner'] },
+    // K-245 (CMBE): 'match_and_candidate_owner' = union of the match owner and the
+    // candidate owner, de-duplicated — the seeded "Match loopt af" template uses it.
+    { key: 'recipients', label: 'Ontvangers', type: 'select',   options: ['all', 'role', 'users', 'candidate_owner', 'customer_owner', 'vacancy_owner', 'match_and_candidate_owner'] },
     // Only relevant when recipients === 'role'. Roles are tenant-real, resolved by the
     // backend via `roles.name` (resolveRecipients: whereHas('roles', name = config.role)),
     // so this is NOT a static list — it is a live GET /roles lookup, same dynamic-options

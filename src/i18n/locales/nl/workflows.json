@@ -1073,7 +1073,8 @@
     "proposal": "Voorstel",
     "automatic": "Automatisch",
     "WhatsApp-storing": "WhatsApp-storing",
-    "WhatsApp hersteld": "WhatsApp hersteld"
+    "WhatsApp hersteld": "WhatsApp hersteld",
+    "match_and_candidate_owner": "eigenaar match én kandidaat"
   },
   "agentTest": {
     "title": "Test-variabelen",

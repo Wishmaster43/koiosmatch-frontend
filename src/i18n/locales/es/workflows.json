@@ -1038,7 +1038,8 @@
     "proposal": "Propuesta",
     "automatic": "Automático",
     "WhatsApp-storing": "Avería de WhatsApp",
-    "WhatsApp hersteld": "WhatsApp restablecido"
+    "WhatsApp hersteld": "WhatsApp restablecido",
+    "match_and_candidate_owner": "propietario del match y del candidato"
   },
   "agentTest": {
     "title": "Variables de prueba",
