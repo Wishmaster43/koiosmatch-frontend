@@ -232,7 +232,9 @@
     "manualNote": "Handmatig aangepast · AI: {{score}}%",
     "detailsSoon": "De criteria-uitsplitsing verschijnt hier zodra de scoring is ingesteld.",
     "saveOverride": "Score opslaan",
-    "cancelOverride": "Score-aanpassing annuleren"
+    "cancelOverride": "Score-aanpassing annuleren",
+    "hardHint": "Knock-outcriterium: scoort de kandidaat hierop onder de 50%, dan markeert Koios de sollicitatie als kandidaat voor automatische afwijzing. Een recruiter bevestigt dat altijd zelf.",
+    "weightLegend": "Stippen = weging (1 tot 5): hoe zwaar dit criterium in de totaalscore meetelt."
   },
   "profile": {
     "function": "Functie",

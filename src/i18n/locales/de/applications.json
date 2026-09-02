@@ -232,7 +232,9 @@
     "detailsSoon": "Die Kriterienaufschlüsselung erscheint hier, sobald das Scoring konfiguriert ist.",
     "weightLabel": "Gewichtung",
     "saveOverride": "Score speichern",
-    "cancelOverride": "Score-Änderung abbrechen"
+    "cancelOverride": "Score-Änderung abbrechen",
+    "hardHint": "K.-o.-Kriterium: liegt der Kandidat hier unter 50 %, markiert Koios die Bewerbung als Kandidat für eine automatische Absage. Ein Recruiter bestätigt das immer selbst.",
+    "weightLegend": "Punkte = Gewichtung (1 bis 5): wie stark dieses Kriterium in der Gesamtbewertung zählt."
   },
   "profile": {
     "function": "Funktion",

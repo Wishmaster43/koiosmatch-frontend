@@ -55,7 +55,7 @@ function WeightDots({ weight, title }: { weight: number; title: string }) {
 }
 
 // One criterion: read = label + weight + ring + % + note; edit = label + weight + slider + %.
-function CriterionCard({ criterion, hardLabel, weightTitle, editing, onScore }: { criterion: Criterion; hardLabel: string; weightTitle: string; editing: boolean; onScore: (v: number) => void }) {
+function CriterionCard({ criterion, hardLabel, hardHint, weightTitle, editing, onScore }: { criterion: Criterion; hardLabel: string; hardHint: string; weightTitle: string; editing: boolean; onScore: (v: number) => void }) {
   const [open, setOpen] = useState(false)
 
   if (editing) {
@@ -66,7 +66,7 @@ function CriterionCard({ criterion, hardLabel, weightTitle, editing, onScore }: 
           {criterion.hard && (
             // Ink is --color-on-danger-bg — the raw danger colour reads only 3.95:1
             // on its own pastel, AA fail (Opus r3.5).
-            <span style={{ fontSize: 10, fontWeight: 600, padding: '1px 7px', borderRadius: 99,
+            <span title={hardHint} aria-label={`${hardLabel}: ${hardHint}`} style={{ fontSize: 10, fontWeight: 600, padding: '1px 7px', borderRadius: 99, cursor: 'help',
               background: 'var(--color-danger-bg)', color: 'var(--color-on-danger-bg)' }}>{hardLabel}</span>
           )}
           {criterion.weight != null && <WeightDots weight={criterion.weight} title={weightTitle} />}
@@ -91,7 +91,7 @@ function CriterionCard({ criterion, hardLabel, weightTitle, editing, onScore }: 
         {criterion.hard && (
           // Ink is --color-on-danger-bg — the raw danger colour reads only 3.95:1
           // on its own pastel, AA fail (Opus r3.5).
-          <span style={{ fontSize: 10, fontWeight: 600, padding: '1px 7px', borderRadius: 99,
+          <span title={hardHint} aria-label={`${hardLabel}: ${hardHint}`} style={{ fontSize: 10, fontWeight: 600, padding: '1px 7px', borderRadius: 99, cursor: 'help',
             background: 'var(--color-danger-bg)', color: 'var(--color-on-danger-bg)' }}>{hardLabel}</span>
         )}
         {criterion.weight != null && <WeightDots weight={criterion.weight} title={weightTitle} />}
@@ -208,9 +208,14 @@ export default function MatchScoreBlock({ score, criteria = [], summary, onSave,
       {shownCriteria.length > 0 && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           {shownCriteria.map((c, i) => (
-            <CriterionCard key={c.key ?? i} criterion={c} hardLabel={t('matchScore.hard')} weightTitle={t('matchScore.weightLabel')}
+            <CriterionCard key={c.key ?? i} criterion={c} hardLabel={t('matchScore.hard')} hardHint={t('matchScore.hardHint')} weightTitle={t('matchScore.weightLabel')}
               editing={editing} onScore={v => setCriterionScore(i, v)} />
           ))}
+          {/* S10/S28 (Danny 02-09 "Nu A"): the dots never explained themselves — one
+              persistent legend line, not only a hover title. */}
+          {shownCriteria.some(c => c.weight != null) && (
+            <Caption as="div">{t('matchScore.weightLegend')}</Caption>
+          )}
         </div>
       )}
     </div>

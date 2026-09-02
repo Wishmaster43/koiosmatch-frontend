@@ -53,4 +53,24 @@ describe('MatchScoreBlock · AI-Act disclosure label', () => {
     await user.click(screen.getByTitle('matchScore.edit'))
     expect(screen.queryByText('aiGenerated')).toBeNull()
   })
+
+// S10/S28 (02-09): the "Hard" pill explains itself (knock-out) and the weight dots
+// carry a persistent legend — a user must never have to guess what either means.
+describe('MatchScoreBlock · hard hint + weight legend (S10/S28)', () => {
+  it('gives the Hard pill the knock-out explanation as title and accessible name', () => {
+    render(<MatchScoreBlock score={40} criteria={[{ key: 'c1', label: 'Rijbewijs', score: 20, hard: true, weight: 5 }]} />)
+    // Key-echo t() above: the pill shows the label key and carries the hint key.
+    const pill = screen.getByText('matchScore.hard')
+    expect(pill.getAttribute('title')).toBe('matchScore.hardHint')
+    expect(pill.getAttribute('aria-label')).toBe('matchScore.hard: matchScore.hardHint')
+  })
+
+  it('shows the weight legend once a criterion carries a weight, never for weightless criteria', () => {
+    const { unmount } = render(<MatchScoreBlock score={40} criteria={[{ key: 'c1', label: 'Skills', score: 60, weight: 3 }]} />)
+    expect(screen.getByText('matchScore.weightLegend')).toBeInTheDocument()
+    unmount()
+    render(<MatchScoreBlock score={40} criteria={[{ key: 'c2', label: 'Skills', score: 60 }]} />)
+    expect(screen.queryByText('matchScore.weightLegend')).toBeNull()
+  })
+})
 })

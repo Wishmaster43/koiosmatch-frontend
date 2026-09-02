@@ -232,7 +232,9 @@
     "detailsSoon": "El desglose de criterios aparece aquí una vez configurada la puntuación.",
     "weightLabel": "Ponderación",
     "saveOverride": "Guardar puntuación",
-    "cancelOverride": "Cancelar el cambio de puntuación"
+    "cancelOverride": "Cancelar el cambio de puntuación",
+    "hardHint": "Criterio eliminatorio: si el candidato puntúa por debajo del 50 % aquí, Koios marca la candidatura como candidata a rechazo automático. Un reclutador siempre lo confirma.",
+    "weightLegend": "Puntos = ponderación (1 a 5): cuánto pesa este criterio en la puntuación total."
   },
   "profile": {
     "function": "Función",

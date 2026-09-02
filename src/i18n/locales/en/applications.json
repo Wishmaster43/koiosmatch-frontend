@@ -232,7 +232,9 @@
     "manualNote": "Manually adjusted · AI: {{score}}%",
     "detailsSoon": "The criteria breakdown appears here once scoring is configured.",
     "saveOverride": "Save score",
-    "cancelOverride": "Cancel score change"
+    "cancelOverride": "Cancel score change",
+    "hardHint": "Knock-out criterion: if the candidate scores below 50% here, Koios flags the application as a candidate for automatic rejection. A recruiter always confirms it.",
+    "weightLegend": "Dots = weight (1 to 5): how heavily this criterion counts in the overall score."
   },
   "profile": {
     "function": "Function",

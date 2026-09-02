@@ -232,7 +232,9 @@
     "detailsSoon": "Le détail des critères apparaît ici une fois le scoring configuré.",
     "weightLabel": "Pondération",
     "saveOverride": "Enregistrer le score",
-    "cancelOverride": "Annuler la modification du score"
+    "cancelOverride": "Annuler la modification du score",
+    "hardHint": "Critère éliminatoire : si le candidat obtient moins de 50 % ici, Koios signale la candidature comme candidate à un refus automatique. Un recruteur le confirme toujours lui-même.",
+    "weightLegend": "Points = pondération (1 à 5) : le poids de ce critère dans le score global."
   },
   "profile": {
     "function": "Fonction",
