@@ -19,6 +19,7 @@ import DrawerTabs from '@/components/drawer/DrawerTabs'
 import { mapCandidate } from '@/pages/candidates/shared'
 import { buildCandidatePatch } from '@/pages/candidates/shared'
 import { ProfilePanel } from '@/pages/candidates/shared'
+import { ChangelogTab } from '@/pages/candidates/shared'
 import { BackgroundTab } from '@/pages/candidates/shared'
 import { WorkTab } from '@/pages/candidates/shared'
 import { PreferencesTab, ZzpTab } from '@/pages/candidates/shared'
@@ -113,6 +114,9 @@ export default function CandidateTab({ application: a }: { application: Applicat
     ...(isFreelancer ? [{ id: 'administration', label: t('drawer.tabs.zzp') }] : []),
     { id: 'communication', label: t('drawer.tabs.communication') },
     { id: 'documents',     label: t('drawer.tabs.documents') },
+    // TIJDLIJN-OVERAL (27-08) canon: timeline second-to-last, statistics last — kept in
+    // sync with CandidateDrawer (S33: this embedded tab had drifted).
+    { id: 'timeline',      label: t('drawer.tabs.timeline') },
     { id: 'statistics',    label: t('drawer.tabs.statistics') },
   ]
 
@@ -128,6 +132,7 @@ export default function CandidateTab({ application: a }: { application: Applicat
       case 'administration': return <ZzpTab c={cc} onSave={(p: unknown) => onUpdate(cc.id, { zzp: p })} />
       case 'communication':  return <CommunicationTab c={cc} onSave={(p: unknown) => onUpdate(cc.id, { consent: p })} />
       case 'documents':      return <DocumentsSection c={cc} />
+      case 'timeline':       return <ChangelogTab c={cc} bare />
       case 'statistics':     return <StatisticsTab c={cc} />
       default:               return null
     }

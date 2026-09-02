@@ -187,4 +187,18 @@ describe('CandidateTab', () => {
     // candidate.name snapshot (fixture: 'Jan Jansen') is never renamed by a pencil save.
     await waitFor(() => expect(screen.getByText('Jan van Jansen')).toBeInTheDocument())
   })
+
+// S33 (02-09, TIJDLIJN-OVERAL sync): the embedded Kandidaat tab carries the same
+// Tijdlijn tab as CandidateDrawer, second-to-last with Statistieken last.
+describe('CandidateTab · timeline tab (S33)', () => {
+  it('offers Tijdlijn second-to-last, before Statistieken', async () => {
+    mockGet.mockResolvedValue({ id: 7, name: 'Jan Jansen' }) // identity unwrap mock, see above
+    renderTab(app())
+    await screen.findByText('profile-panel')
+    const tabs = screen.getAllByRole('tab').map(el => el.textContent?.trim() ?? '')
+    const timelineIdx = tabs.findIndex(t => /Tijdlijn|Timeline|drawer\.tabs\.timeline/.test(t))
+    expect(timelineIdx).toBeGreaterThan(-1)
+    expect(timelineIdx).toBe(tabs.length - 2)
+  })
+})
 })

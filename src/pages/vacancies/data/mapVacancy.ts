@@ -188,12 +188,11 @@ export function resolveTimelineLink(type: string, compositeId: string): { linkPa
 export function mapVacancyDetail(raw: ApiVacancy = {}): VacancyDetail {
   const base = mapVacancy(raw)
 
-  // V25 fix: GET /vacancies/{id} never attaches applications_by_phase/applications_count
-  // (VacancyController::show() has no attachApplicationCounts() call — only index() does),
-  // so a fresh detail fetch always came back with an empty breakdown ("Statistieken leeg" /
-  // ApplicantsTab's per-phase chips empty too). The full coupled-applications list IS loaded
-  // on the detail endpoint (raw.applications), so derive the same counts from it here — the
-  // exact same real records, just aggregated for this one record (not a page-scope guess).
+  // V25 (measured 02-09): VacancyController::show() DOES attach applications_by_phase /
+  // applications_count since 2e110914 — the attached counts win below. This derivation
+  // from raw.applications is a stopgap from 2026-07-17 kept as a belt-and-braces fallback
+  // so a backend regression can never silently empty the Statistieken tab (same real
+  // records, aggregated for this one record — never a page-scope guess).
   const rawApplications = Array.isArray(raw.applications) ? raw.applications : []
   const phaseFromApplications: Loose = {}
   rawApplications.forEach(a => {

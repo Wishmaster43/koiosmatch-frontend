@@ -12,6 +12,9 @@ export { paletteFor } from './cv/cvStyles'
 export { buildCandidatePatch } from './data/candidatesShared'
 export { mapCandidate } from './data/mapCandidate'
 export { default as CandidateAddApplicationModal } from './drawer/AddApplicationModal'
+// TIJDLIJN-OVERAL: the application drawer's embedded Kandidaat tab renders the same
+// timeline content as CandidateDrawer (S33 sync-drift fix, 02-09).
+export { default as ChangelogTab } from './drawer/ChangelogTab'
 export { default as ApplicationRow } from './drawer/ApplicationRow'
 export { default as ApplicationRowDetails } from './drawer/ApplicationRowDetails'
 export { default as BackgroundTab } from './drawer/BackgroundTab'
