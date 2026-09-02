@@ -57,9 +57,10 @@
  * Only the note's ID travels (see the hook): the window resolves it against the
  * thread it loaded itself and routes the save to that exact record, so the handoff
  * can never produce a duplicate note. It renders only where the receiving window
- * can really PATCH a note (`canHandOffNote` → NOTE_EDIT_POPOUT_ENTITIES: candidate
- * today; the customer/vacancy popouts wire add-only, so no button there) and only
- * where this user may edit the note here as well (same gate as the pencil).
+ * can really PATCH a note (`canHandOffNote` → NOTE_EDIT_POPOUT_ENTITIES — since
+ * the 02-09 measurement: candidate, application, customer, vacancy, task, match and
+ * opportunity, all served by NoteEditPopout) and only where this user may edit the
+ * note here as well (same gate as the pencil).
  */
 import { NOTES_THREAD_POPOUT_ENTITIES } from '@/lib/secondScreen'
 import { useEffect, useState } from 'react'

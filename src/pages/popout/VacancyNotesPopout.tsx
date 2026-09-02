@@ -28,7 +28,7 @@ export default function VacancyNotesPopout({ id }: { id: string | undefined }) {
   // same 'Koios' default the drawer's NotesTab.tsx uses.
   const auth = useAuth()
   const authorName = auth?.user?.name ?? 'Koios'
-  const { notes, addNote } = usePopoutVacancyNotes(id, authorName)
+  const { notes, addNote, editNote, deleteNote } = usePopoutVacancyNotes(id, authorName)
   // Note categories from the tenant lookup, scoped to 'vacancy' (NOTE-TYPES-2/3).
   const { writableTypes: noteTypes } = useNoteTypes('vacancy')
   const initials = authorName.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase()
@@ -43,7 +43,8 @@ export default function VacancyNotesPopout({ id }: { id: string | undefined }) {
   }, [vacancy, t])
 
   const notesProps = {
-    notes, onAddNote: addNote, noteTypes, authorInitials: initials,
+    // Edit/delete per row, same as the drawer's own tab (NOTITIE-REFERENTIE: all seven identical).
+    notes, onAddNote: addNote, onEditNote: editNote, onDeleteNote: deleteNote, noteTypes, authorInitials: initials,
     labels: {
       notes: t('notes.title'), newNote: t('notes.new'), type: t('notes.type'),
       save: t('notes.save'), cancel: t('notes.cancel'),

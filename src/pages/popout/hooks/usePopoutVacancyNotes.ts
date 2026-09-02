@@ -47,5 +47,37 @@ export function usePopoutVacancyNotes(vacancyId: string | undefined, authorName:
       })
   }, [vacancyId, authorName, load, t])
 
-  return { notes, addNote }
+  // Edit — index into the current list, optimistic + PATCH (drawer NotesTab payload
+  // shape: `{...payload, text: body}`) + reload; reverts to the snapshot on failure.
+  // Resolves TRUE only on a landed write (PopoutSaveFooter's honest-signal contract).
+  const editNote = useCallback((index: number, payload: NotePayload): Promise<boolean> => {
+    if (!vacancyId) return Promise.resolve(false)
+    const target = notes[index]
+    if (!target || target.id == null) return Promise.resolve(false)
+    const snapshot = notes
+    setNotes(prev => prev.map((n, i) => (i === index ? { ...n, ...payload, text: payload.body } : n)))
+    return api.patch(`/vacancies/${vacancyId}/notes/${target.id}`, { ...payload, text: payload.body })
+      .then(() => { load(); return true })
+      .catch(err => {
+        setNotes(snapshot)
+        notifyError(extractApiError(err, t('common:actionFailed')))
+        return false
+      })
+  }, [vacancyId, notes, load, t])
+
+  // Delete — optimistic remove with revert (mirrors the customer popout hook).
+  const deleteNote = useCallback((index: number) => {
+    if (!vacancyId) return
+    const target = notes[index]
+    if (!target || target.id == null) return
+    const snapshot = notes
+    setNotes(prev => prev.filter((_, i) => i !== index))
+    api.delete(`/vacancies/${vacancyId}/notes/${target.id}`)
+      .catch(err => {
+        setNotes(snapshot)
+        notifyError(extractApiError(err, t('common:actionFailed')))
+      })
+  }, [vacancyId, notes, t])
+
+  return { notes, addNote, editNote, deleteNote }
 }
