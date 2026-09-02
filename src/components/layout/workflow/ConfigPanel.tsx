@@ -107,10 +107,12 @@ export default function ConfigPanel({ node, onUpdate, onDelete, onTabChange, var
     }
   }
 
-  // Helper: filter schema fields by tab and showIf
+  // Helper: filter schema fields by tab and showIf — strict match, not merely
+  // "same tab or untagged" (a bug that leaked every untagged whatsapp_send/
+  // email_send field onto the new Vertalingen tab as a full duplicate form).
   const fieldsForTab = (tab: string) => schema.filter(field => {
     const f = field as WorkflowField & { tab?: string }
-    if (f.tab && f.tab !== tab) return false
+    if (f.tab !== tab) return false
     const showIf = field.showIf as { key: string; value: unknown } | undefined
     if (!showIf) return true
     const ctrl = schema.find(s => s.key === showIf.key)
@@ -185,6 +187,12 @@ export default function ConfigPanel({ node, onUpdate, onDelete, onTabChange, var
             { id: 'execution',  label: output ? `${t('config.tabExecution')} (${Array.isArray(output) ? output.length : 1})` : t('config.tabExecution') },
           ] : [
             { id: 'settings', label: t('config.tabSettings') },
+            // 02-09: a "Vertalingen" tab only when this module's schema actually
+            // declares a translations-tab field (whatsapp_send/email_send today) —
+            // never shown on modules with nothing to translate.
+            ...(schema.some(f => (f as WorkflowField & { tab?: string }).tab === 'translations')
+              ? [{ id: 'translations', label: t('config.tabTranslations') }]
+              : []),
             { id: 'execution',   label: output ? `${t('config.tabExecution')} (${Array.isArray(output) ? output.length : 1})` : t('config.tabExecution') },
           ]}
           active={activeTab} onChange={switchTab} />
@@ -215,6 +223,9 @@ export default function ConfigPanel({ node, onUpdate, onDelete, onTabChange, var
       {!isAgent && activeTab === 'settings' && (
         <div style={{ flex: 1, overflowY: 'auto', padding: 16, display: 'flex', flexDirection: 'column', gap: 14 }}>
           {schema
+            // 02-09: fields tagged with a `tab` (e.g. translations) live on their
+            // own tab, never on the main settings list (MODULE-FACE-BEVRIES).
+            .filter(field => !(field as WorkflowField & { tab?: string }).tab)
             .filter(field => {
               const showIf = field.showIf as { key: string; value: unknown } | undefined
               if (!showIf) return true
@@ -286,6 +297,9 @@ export default function ConfigPanel({ node, onUpdate, onDelete, onTabChange, var
           )}
         </div>
       )}
+      {/* 02-09: the "Vertalingen" tab — reuses the shared field renderer so hint/
+          required decoration stays identical to the main settings list. */}
+      {!isAgent && activeTab === 'translations' && renderFields(fieldsForTab('translations'))}
       {!isAgent && activeTab === 'execution' && (
         <div style={{ flex: 1, overflowY: 'auto' }}>
           {!output

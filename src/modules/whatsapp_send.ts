@@ -4,6 +4,7 @@ import { MessageCircle } from 'lucide-react'
 // color-mix literal per module (herhaal-slotaudit r3).
 import { tint } from '@/lib/tint'
 import type { SchemaField } from './types'
+import { MESSAGING_LANGUAGES } from './messagingLanguages'
 
 export default {
   type:  'whatsapp_send',
@@ -73,6 +74,12 @@ export default {
     // Free-form session text — only shown (and sent) for the 'session' format.
     { key: 'session_text',        label: 'Berichttekst (sessie)',  type: 'textarea',
       placeholder: 'Hoi {{firstname}}, …', showIf: { key: 'message_type', value: 'session' } },
+    // 02-09 (Danny, verbatim: "vertaling moet wel in de workflow staan"): per-language
+    // overrides for the session text, on their own "Vertalingen" tab (MODULE-FACE-BEVRIES —
+    // main tab stays untouched). Empty per-field = falls back to session_text (bureau language).
+    { key: 'translations', label: 'Vertalingen', type: 'translations', tab: 'translations',
+      fields: ['text'], languages: MESSAGING_LANGUAGES,
+      help: 'Leeg = de tekst van het tabblad Instellingen (bureautaal).' },
     // Danny's own message classification (NOT the send format above) — drives queue
     // order in the WABA batch (Wachtrij tab). Tenant lookup, CRUD'd via Settings.
     { key: 'priority_type',       label: 'Berichttype (classificatie)', type: 'lookup_select', endpoint: '/whatsapp-message-types' },

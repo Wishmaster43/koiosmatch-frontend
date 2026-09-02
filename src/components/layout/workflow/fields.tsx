@@ -33,11 +33,13 @@ import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 // HUISSTIJL-1: the ONE toggle-switch implementation — replaces the hand-rolled
 // track+thumb <button> the 'boolean' field used to paint itself.
 import Toggle from '@/components/ui/Toggle'
+import { TranslationsField } from './TranslationsField'
+import { PANEL_INPUT_STYLE } from './panelInputStyle'
 
 // Dispatches one schema field type to its control; the data-fetching/nested field types delegate to fieldControls, this file only holds the plain inline ones (see the module doc above).
 // Plain panel textarea + the enlarge popup (Danny 31-08). Kept beside FieldInput so
 // every 'textarea' field (without variables) shares one implementation.
-function ExpandableTextarea({ field, value, onChange }: { field: WorkflowField; value?: unknown; onChange: OnChange }) {
+export function ExpandableTextarea({ field, value, onChange }: { field: WorkflowField; value?: unknown; onChange: OnChange }) {
   const { t } = useTranslation('workflows')
   const [expanded, setExpanded] = useState(false)
   return (
@@ -142,6 +144,11 @@ export function FieldInput({ field, value, onChange, variables, config, instruct
       </>
     )
   }
+  if (field.type === 'translations') {
+    // 02-09: per-language message overrides (whatsapp_send/email_send's own
+    // "Vertalingen" tab) — a dedicated multi-language sub-editor, not a plain control.
+    return <TranslationsField field={field} value={value} onChange={onChange} />
+  }
   if (field.type === 'textarea') {
     // Attach the variable picker when upstream modules expose fields to reference.
     if (variables?.length) {
@@ -205,8 +212,7 @@ export function FieldInput({ field, value, onChange, variables, config, instruct
       value={(value ?? field.default ?? '') as string}
       placeholder={fieldPlaceholder(t, field.placeholder)} aria-label={fieldLabel(t, field.label)}
       onChange={e => onChange(field.key, field.type === 'number' ? Number(e.target.value) : e.target.value)}
-      // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- the config-panel text INPUT's own size/colour (SettingsSearch precedent), not a BodyText paragraph render
-      style={{ width: '100%', padding: '7px 9px', border: '1px solid var(--border)', borderRadius: 8, fontSize: 13, color: 'var(--text)', background: 'var(--surface)', outline: 'none', boxSizing: 'border-box' }}
+      style={PANEL_INPUT_STYLE}
       onFocus={e => (e.target.style.borderColor = 'var(--color-primary)')}
       onBlur={e  => (e.target.style.borderColor = 'var(--border)')} />
   )

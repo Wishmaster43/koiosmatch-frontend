@@ -527,7 +527,24 @@
     "tabStandard": "Standard",
     "tabAdvanced": "Avancé",
     "tabTest": "Tester",
-    "tabInstructions": "Instructions IA"
+    "tabInstructions": "Instructions IA",
+    "tabTranslations": "Traductions"
+  },
+  "translations": {
+    "languages": {
+      "nl": "Néerlandais",
+      "en": "Anglais",
+      "de": "Allemand",
+      "fr": "Français",
+      "es": "Espagnol",
+      "pl": "Polonais",
+      "ro": "Roumain"
+    },
+    "fields": {
+      "text": "Texte du message",
+      "subject": "Objet",
+      "body": "Message"
+    }
   },
   "fieldLabels": {
     "Aan": "À",
@@ -867,7 +884,11 @@
     "Afwijzingsmodus": "Mode de refus",
     "Intro-template": "Modèle d'introduction",
     "Naam": "Nom",
-    "Primair contact": "Contact principal"
+    "Primair contact": "Contact principal",
+    "Vertalingen": "Traductions",
+    "text": "Texte du message",
+    "subject": "Objet",
+    "body": "Message"
   },
   "fieldOptions": {
     "Array (meerdere bundles)": "Tableau (plusieurs bundles)",
@@ -1205,7 +1226,8 @@
     "De genummerde stappen die de AI-agent doorloopt, elk met een optioneel outputveld en variabele-chips": "Les étapes numérotées que l'agent IA parcourt, chacune avec un champ de sortie optionnel et des jetons de variables.",
     "Extra persona- en toonaanwijzingen voor de AI-agent, naast de instructies hierboven Het runtime-antwoordcontract wordt automatisch toegevoegd": "Indications supplémentaires de persona et de ton pour l'agent IA, en plus des instructions ci-dessus. Le contrat de réponse d'exécution est ajouté automatiquement.",
     "Volgt standaard de tenant-instelling; deze vacature kan dat hier overschrijven": "Suit par défaut le paramètre du client ; cette offre peut le remplacer ici.",
-    "Verplicht als de gekozen agent geen intro-template heeft; een verse sollicitant zit buiten het 24-uursvenster, dus een sessietekst als intro faalt": "Obligatoire si l'agent choisi n'a pas de modèle d'introduction ; un candidat récent se trouve hors de la fenêtre de 24 heures, donc un texte de session comme intro échoue."
+    "Verplicht als de gekozen agent geen intro-template heeft; een verse sollicitant zit buiten het 24-uursvenster, dus een sessietekst als intro faalt": "Obligatoire si l'agent choisi n'a pas de modèle d'introduction ; un candidat récent se trouve hors de la fenêtre de 24 heures, donc un texte de session comme intro échoue.",
+    "Leeg = de tekst van het tabblad Instellingen (bureautaal)": "Vide = le texte de l'onglet Paramètres (langue de l'agence)."
   },
   "triggers": {
     "events": {

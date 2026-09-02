@@ -6,6 +6,7 @@ import { Mail } from 'lucide-react'
 // HUISSTIJL-1: the §4 soft-tint formula lives in lib/tint, never a hand-rolled
 // color-mix literal per module (herhaal-slotaudit r3).
 import { tintBg } from '@/lib/tint'
+import { MESSAGING_LANGUAGES } from './messagingLanguages'
 
 export default {
   type:  'email_send',
@@ -21,6 +22,12 @@ export default {
     // expose fields (fields.tsx), so this reuses the SAME picker as every other text/
     // textarea field rather than a second variable-mapping UI.
     { key: 'body',                 label: 'Bericht',                type: 'textarea' },
+    // 02-09 (Danny, verbatim: "vertaling moet wel in de workflow staan"): per-language
+    // overrides for subject + body, on their own "Vertalingen" tab (MODULE-FACE-BEVRIES —
+    // main tab stays untouched). Empty per-field = falls back to subject/body (bureau language).
+    { key: 'translations', label: 'Vertalingen', type: 'translations', tab: 'translations',
+      fields: ['subject', 'body'], languages: MESSAGING_LANGUAGES,
+      help: 'Leeg = de tekst van het tabblad Instellingen (bureautaal).' },
     // Which mail sender/context this send uses (Settings → Communicatie contexts).
     { key: 'sender_context',       label: 'Afzender-context',       type: 'select', options: ['kandidaten','algemeen'], default: 'kandidaten' },
     // Tenant-lookup message purpose (message_purposes) — same lookup as whatsapp_send's

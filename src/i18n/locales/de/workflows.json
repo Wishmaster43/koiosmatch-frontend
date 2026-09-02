@@ -527,7 +527,24 @@
     "tabStandard": "Standard",
     "tabAdvanced": "Erweitert",
     "tabTest": "Testen",
-    "tabInstructions": "KI-Anweisungen"
+    "tabInstructions": "KI-Anweisungen",
+    "tabTranslations": "Übersetzungen"
+  },
+  "translations": {
+    "languages": {
+      "nl": "Niederländisch",
+      "en": "Englisch",
+      "de": "Deutsch",
+      "fr": "Französisch",
+      "es": "Spanisch",
+      "pl": "Polnisch",
+      "ro": "Rumänisch"
+    },
+    "fields": {
+      "text": "Nachrichtentext",
+      "subject": "Betreff",
+      "body": "Nachricht"
+    }
   },
   "fieldLabels": {
     "Aan": "An",
@@ -867,7 +884,11 @@
     "Afwijzingsmodus": "Ablehnungsmodus",
     "Intro-template": "Intro-Vorlage",
     "Naam": "Name",
-    "Primair contact": "Primärkontakt"
+    "Primair contact": "Primärkontakt",
+    "Vertalingen": "Übersetzungen",
+    "text": "Nachrichtentext",
+    "subject": "Betreff",
+    "body": "Nachricht"
   },
   "fieldOptions": {
     "Array (meerdere bundles)": "Array (mehrere Bundles)",
@@ -1205,7 +1226,8 @@
     "De genummerde stappen die de AI-agent doorloopt, elk met een optioneel outputveld en variabele-chips": "Die nummerierten Schritte, die der KI-Agent durchläuft, jeweils mit optionalem Ausgabefeld und Variablen-Chips.",
     "Extra persona- en toonaanwijzingen voor de AI-agent, naast de instructies hierboven Het runtime-antwoordcontract wordt automatisch toegevoegd": "Zusätzliche Persona- und Tonhinweise für den KI-Agenten, neben den obigen Anweisungen. Der Laufzeit-Antwortvertrag wird automatisch hinzugefügt.",
     "Volgt standaard de tenant-instelling; deze vacature kan dat hier overschrijven": "Folgt standardmäßig der Mandanteneinstellung; diese Vakanz kann dies hier überschreiben.",
-    "Verplicht als de gekozen agent geen intro-template heeft; een verse sollicitant zit buiten het 24-uursvenster, dus een sessietekst als intro faalt": "Erforderlich, wenn der gewählte Agent keine Intro-Vorlage hat; ein neuer Bewerber befindet sich außerhalb des 24-Stunden-Fensters, sodass ein Sitzungstext als Intro fehlschlägt."
+    "Verplicht als de gekozen agent geen intro-template heeft; een verse sollicitant zit buiten het 24-uursvenster, dus een sessietekst als intro faalt": "Erforderlich, wenn der gewählte Agent keine Intro-Vorlage hat; ein neuer Bewerber befindet sich außerhalb des 24-Stunden-Fensters, sodass ein Sitzungstext als Intro fehlschlägt.",
+    "Leeg = de tekst van het tabblad Instellingen (bureautaal)": "Leer = der Text auf dem Tab Einstellungen (Bürosprache)."
   },
   "triggers": {
     "events": {

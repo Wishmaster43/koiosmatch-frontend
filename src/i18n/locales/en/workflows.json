@@ -527,7 +527,24 @@
     "tabStandard": "Standard",
     "tabAdvanced": "Advanced",
     "tabTest": "Test",
-    "tabInstructions": "AI instructions"
+    "tabInstructions": "AI instructions",
+    "tabTranslations": "Translations"
+  },
+  "translations": {
+    "languages": {
+      "nl": "Dutch",
+      "en": "English",
+      "de": "German",
+      "fr": "French",
+      "es": "Spanish",
+      "pl": "Polish",
+      "ro": "Romanian"
+    },
+    "fields": {
+      "text": "Message text",
+      "subject": "Subject",
+      "body": "Message"
+    }
   },
   "fieldLabels": {
     "Aan": "To",
@@ -867,7 +884,11 @@
     "Afwijzingsmodus": "Rejection mode",
     "Intro-template": "Intro template",
     "Naam": "Name",
-    "Primair contact": "Primary contact"
+    "Primair contact": "Primary contact",
+    "Vertalingen": "Translations",
+    "text": "Message text",
+    "subject": "Subject",
+    "body": "Message"
   },
   "fieldOptions": {
     "Array (meerdere bundles)": "Array (multiple bundles)",
@@ -1205,7 +1226,8 @@
     "De genummerde stappen die de AI-agent doorloopt, elk met een optioneel outputveld en variabele-chips": "The numbered steps the AI agent walks through, each with an optional output field and variable chips.",
     "Extra persona- en toonaanwijzingen voor de AI-agent, naast de instructies hierboven Het runtime-antwoordcontract wordt automatisch toegevoegd": "Extra persona and tone guidance for the AI agent, alongside the instructions above. The runtime reply contract is added automatically.",
     "Volgt standaard de tenant-instelling; deze vacature kan dat hier overschrijven": "Follows the tenant setting by default; this vacancy can override it here.",
-    "Verplicht als de gekozen agent geen intro-template heeft; een verse sollicitant zit buiten het 24-uursvenster, dus een sessietekst als intro faalt": "Required if the chosen agent has no intro template; a fresh applicant sits outside the 24-hour window, so a session text as intro fails."
+    "Verplicht als de gekozen agent geen intro-template heeft; een verse sollicitant zit buiten het 24-uursvenster, dus een sessietekst als intro faalt": "Required if the chosen agent has no intro template; a fresh applicant sits outside the 24-hour window, so a session text as intro fails.",
+    "Leeg = de tekst van het tabblad Instellingen (bureautaal)": "Empty = the text on the Settings tab (agency language)."
   },
   "triggers": {
     "events": {
