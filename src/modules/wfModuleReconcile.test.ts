@@ -14,7 +14,7 @@ import MODULES, { MODULE_META, MODULE_SCHEMAS, ENGINE_INTERNAL_TYPES } from '@/m
 const files = import.meta.glob('../i18n/locales/*/workflows.json', { eager: true, import: 'default' }) as Record<string, {
   modules?: Record<string, string>
 }>
-const LOCS = ['nl', 'en', 'de', 'fr', 'es']
+const LOCS = ['nl', 'en', 'de', 'fr', 'es', 'it', 'pt']
 
 const RECONCILED_TYPES = [
   'task_create', 'appointment_create', 'calllist_add', 'webhook_send',

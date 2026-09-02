@@ -13,9 +13,9 @@ import ProfileDisplayTab from './ProfileDisplayTab'
 import api from '@/lib/api'
 
 // A minimal stand-in translator that resolves languageNames.* the way the real
-// nl/en/de/fr/es auth.json files do — proves the label comes from t(), not a
+// seven auth.json files (nl/en/de/fr/es/it/pt) do — proves the label comes from t(), not a
 // literal in the component.
-const LANGUAGE_NAMES: Record<string, string> = { nl: 'Nederlands', en: 'English', de: 'Deutsch', fr: 'Français', es: 'Español' }
+const LANGUAGE_NAMES: Record<string, string> = { nl: 'Nederlands', en: 'English', de: 'Deutsch', fr: 'Français', es: 'Español', it: 'Italiano', pt: 'Português' }
 vi.mock('react-i18next', () => ({
   // A real (unmocked) module import chain touches src/i18n/index.ts, which calls
   // i18n.use(initReactI18next) — provide a harmless 3rd-party stub so that doesn't throw.

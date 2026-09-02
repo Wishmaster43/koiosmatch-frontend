@@ -19,8 +19,10 @@ import en from '@/i18n/locales/en/settings.json'
 import de from '@/i18n/locales/de/settings.json'
 import fr from '@/i18n/locales/fr/settings.json'
 import es from '@/i18n/locales/es/settings.json'
+import itLoc from '@/i18n/locales/it/settings.json'
+import ptLoc from '@/i18n/locales/pt/settings.json'
 
-const LOCALES = { nl, en, de, fr, es } as Record<string, Record<string, unknown>>
+const LOCALES = { nl, en, de, fr, es, it: itLoc, pt: ptLoc } as Record<string, Record<string, unknown>>
 
 // Every key the import screen (ImportEntityNav, WholeTreeBanner, ImportOrderBanner,
 // ImportResultPanel, UploadStep, PreviewStep, ResultStep, ImporterenSettings) asks

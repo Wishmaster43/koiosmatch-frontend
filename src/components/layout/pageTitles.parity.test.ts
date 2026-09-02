@@ -17,7 +17,7 @@
 import { describe, it, expect } from 'vitest'
 import { PAGE_TITLES } from './appPages'
 
-const LOCALES = ['nl', 'en', 'de', 'fr', 'es'] as const
+const LOCALES = ['nl', 'en', 'de', 'fr', 'es', 'it', 'pt'] as const
 const BUNDLES = import.meta.glob('/src/i18n/locales/*/pageTitles.json', { import: 'default', eager: true }) as Record<string, Record<string, string>>
 
 // Keyed by locale code, read straight off the real locale JSON (never a mock —

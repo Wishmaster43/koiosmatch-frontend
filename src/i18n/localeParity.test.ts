@@ -19,7 +19,7 @@ const flat = (o: Json, pre = ''): string[] =>
 const modules = import.meta.glob('./locales/*/*.json', { eager: true, import: 'default' }) as Record<string, Json>
 
 const REF = 'nl'
-const TARGETS = ['en', 'de', 'fr', 'es'] as const
+const TARGETS = ['en', 'de', 'fr', 'es', 'it', 'pt'] as const
 
 // Group the loaded modules by locale → file.
 const byLoc: Record<string, Record<string, Json>> = {}

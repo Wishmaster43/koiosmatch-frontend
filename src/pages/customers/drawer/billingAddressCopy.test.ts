@@ -14,10 +14,12 @@ import en from '@/i18n/locales/en/customers.json'
 import de from '@/i18n/locales/de/customers.json'
 import fr from '@/i18n/locales/fr/customers.json'
 import es from '@/i18n/locales/es/customers.json'
+import itLoc from '@/i18n/locales/it/customers.json'
+import ptLoc from '@/i18n/locales/pt/customers.json'
 
 // Every key PriceAgreementsTab asks for under this branch.
 const USED = ['title', 'poBox', 'usesVisitAddress', 'visitEmpty', 'hint'] as const
-const LOCALES = { nl, en, de, fr, es } as Record<string, { overview?: { billingAddress?: Record<string, string> } }>
+const LOCALES = { nl, en, de, fr, es, it: itLoc, pt: ptLoc } as Record<string, { overview?: { billingAddress?: Record<string, string> } }>
 
 describe('factuuradres — de teksten bestaan echt', () => {
   it.each(Object.keys(LOCALES))('%s carries every billingAddress string', locale => {

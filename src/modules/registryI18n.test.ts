@@ -14,7 +14,7 @@ const modules = import.meta.glob('../i18n/locales/*/workflows.json', { eager: tr
   fieldPlaceholders?: Record<string, string>
   fieldHints?: Record<string, string>
 }>
-const LOCS = ['nl', 'en', 'de', 'fr', 'es']
+const LOCS = ['nl', 'en', 'de', 'fr', 'es', 'it', 'pt']
 
 // Language-neutral registry literals — identical in every language, so they
 // deliberately have NO key and render via the defaultValue fallback.

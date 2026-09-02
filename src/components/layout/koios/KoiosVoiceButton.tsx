@@ -75,7 +75,7 @@ declare global {
 // spec asks for the US English acoustic/language model for dictation. Shared
 // by both call sites — see the `lang` prop below for who supplies the key.
 const RECOGNITION_LANG: Record<string, string> = {
-  nl: 'nl-NL', en: 'en-US', de: 'de-DE', fr: 'fr-FR', es: 'es-ES',
+  nl: 'nl-NL', en: 'en-US', de: 'de-DE', fr: 'fr-FR', es: 'es-ES', it: 'it-IT', pt: 'pt-PT',
 }
 
 /**

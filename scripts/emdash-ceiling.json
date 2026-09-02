@@ -59,6 +59,7 @@
   "src/i18n/locales/fr/vacancies.json": 1,
   "src/i18n/locales/fr/whatsapp.json": 1,
   "src/i18n/locales/fr/workflows.json": 2,
+  "src/i18n/locales/it/shiftmanager.json": 1,
   "src/i18n/locales/nl/candidates.json": 3,
   "src/i18n/locales/nl/common.json": 36,
   "src/i18n/locales/nl/customers.json": 3,
@@ -73,5 +74,6 @@
   "src/i18n/locales/nl/tasks.json": 1,
   "src/i18n/locales/nl/vacancies.json": 1,
   "src/i18n/locales/nl/whatsapp.json": 1,
-  "src/i18n/locales/nl/workflows.json": 2
+  "src/i18n/locales/nl/workflows.json": 2,
+  "src/i18n/locales/pt/shiftmanager.json": 1
 }

@@ -28,7 +28,7 @@ const BACKEND_DISPATCHED_EVENTS = [
 const workflowsLocales = import.meta.glob('../../../i18n/locales/*/workflows.json', { eager: true, import: 'default' }) as Record<string, {
   triggers?: { events?: Record<string, string> }
 }>
-const LOCALES = ['nl', 'en', 'de', 'fr', 'es']
+const LOCALES = ['nl', 'en', 'de', 'fr', 'es', 'it', 'pt']
 
 describe('WORKFLOW_EVENT_KEYS · backend parity', () => {
   it('contains every event the backend dispatches (no missing trigger)', () => {

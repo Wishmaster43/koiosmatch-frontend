@@ -38,6 +38,8 @@ export const LANGUAGES = [
   { value: 'de', flag: '🇩🇪', label: 'Deutsch' },
   { value: 'fr', flag: '🇫🇷', label: 'Français' },
   { value: 'es', flag: '🇪🇸', label: 'Español' },
+  { value: 'it', flag: '🇮🇹', label: 'Italiano' },
+  { value: 'pt', flag: '🇵🇹', label: 'Português' },
 ]
 
 // Role → colour (mirrors UsersPage). Label comes from the `users` i18n namespace.

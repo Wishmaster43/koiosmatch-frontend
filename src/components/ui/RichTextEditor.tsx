@@ -26,7 +26,7 @@ type EditorLabels = Record<(typeof LABEL_KEYS)[number], string>
 
 // TAAL-SPELL-1 (Danny 06-08): the language menu on EVERY editor — codes match the
 // note `language` field contract (BE max:8) and the app locales.
-const EDITOR_LANGS = ['nl', 'en', 'de', 'fr', 'es'] as const
+const EDITOR_LANGS = ['nl', 'en', 'de', 'fr', 'es', 'it', 'pt'] as const
 
 interface RichTextEditorProps {
   value?: string

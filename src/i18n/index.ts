@@ -45,4 +45,4 @@ i18n.on('languageChanged', lng => { document.documentElement.lang = lng })
 export default i18n
 
 /** Maps the app's language code to a BCP-47 locale for Intl date/number formatting. */
-export const LOCALE_BY_LANG: Record<string, string> = { nl: 'nl-NL', en: 'en-GB', de: 'de-DE', fr: 'fr-FR', es: 'es-ES' }
+export const LOCALE_BY_LANG: Record<string, string> = { nl: 'nl-NL', en: 'en-GB', de: 'de-DE', fr: 'fr-FR', es: 'es-ES', it: 'it-IT', pt: 'pt-PT' } // pt-PT: European Portuguese (Danny 02-09)

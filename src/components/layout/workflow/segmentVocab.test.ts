@@ -17,7 +17,7 @@ describe('segment-via-workflow vocabulary', () => {
   })
 
   it('the younger-than label resolves in every locale, mirroring its sibling', () => {
-    for (const lng of ['nl', 'en', 'de', 'fr', 'es']) {
+    for (const lng of ['nl', 'en', 'de', 'fr', 'es', 'it', 'pt']) {
       const label = i18n.t('canvas.opDateYoungerThanDays', { ns: 'workflows', lng })
       expect(label).not.toContain('opDateYoungerThanDays')
     }

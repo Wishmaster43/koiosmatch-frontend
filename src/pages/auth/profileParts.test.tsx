@@ -13,8 +13,8 @@ import { describe, it, expect } from 'vitest'
 import { LANGUAGES } from './profileParts'
 
 describe('LANGUAGES — the shared language list', () => {
-  it('carries the five shipped locales', () => {
-    expect(LANGUAGES.map(l => l.value)).toEqual(['nl', 'en', 'de', 'fr', 'es'])
+  it('carries the seven shipped locales', () => {
+    expect(LANGUAGES.map(l => l.value)).toEqual(['nl', 'en', 'de', 'fr', 'es', 'it', 'pt'])
   })
 
   it('gives every entry a non-empty value, flag AND label', () => {

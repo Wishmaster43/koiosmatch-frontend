@@ -144,8 +144,8 @@ describe('BillingUsageSettings — Per gebruiker renders ai.per_user with succes
   })
 })
 
-describe('BillingUsageSettings — vocabulary keys exist in all five locales', () => {
-  it.each(['nl', 'en', 'de', 'fr', 'es'])('%s carries the Workflow-tokens / AI-tokens vocabulary', (loc) => {
+describe('BillingUsageSettings — vocabulary keys exist in all seven locales', () => {
+  it.each(['nl', 'en', 'de', 'fr', 'es', 'it', 'pt'])('%s carries the Workflow-tokens / AI-tokens vocabulary', (loc) => {
     const bundle = i18n.getResourceBundle(loc, 'settings')
     expect(bundle?.billing?.usage?.plan?.workflowMeter).toBeTruthy()
     expect(bundle?.billing?.usage?.plan?.aiMeter).toBeTruthy()

@@ -888,7 +888,7 @@ the code is worse than no rule, because the next reader builds on it. What is tr
   is a bug** (e.g. the workflow editor must not stay hardcoded Dutch). **Half-translated is
   worse than untranslated** — it produces Dutch islands for non-NL tenants. **One source per
   label:** never keep a hardcoded label *and* a `t()` key (two truths drift). **No silent
-  Dutch fallback:** add the key to **every shipped locale** (nl+en minimum; keep de/fr/es in
+  Dutch fallback:** add the key to **every shipped locale** (nl+en minimum; keep de/fr/es/it/pt in
   parity) — a missing key is a finding, not "fine because it falls back".
 
 ---
