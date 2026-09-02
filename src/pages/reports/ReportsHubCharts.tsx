@@ -16,7 +16,7 @@ import ReportGrid from './ReportGrid'
 import ReportChartCard from './ReportChartCard'
 import ReportStateBlock from './ReportStateBlock'
 import ReportsHubAttention from './ReportsHubAttention'
-import { reportCardStyle as card } from './ReportSectionCard'
+import { HubBlockBody, HubBlockTitle } from './hubLayout'
 import ReportTimeseriesChart from './ReportTimeseriesChart'
 import PieChartCard from '@/components/charts/PieChartCard'
 import BarChartCard from '@/components/charts/BarChartCard'
@@ -36,26 +36,27 @@ type HookState<T> = { data: T | null; loading: boolean; error: boolean }
 function ChartTitle({ children, onOpen }: { children: ReactNode; onOpen: () => void }) {
   const { t } = useTranslation('analytics')
   return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
-      <span>{children}</span>
-      <Button variant="ghost" size="sm" onClick={onOpen}>{t('hub.openReport')}</Button>
-    </div>
+    <HubBlockTitle action={<Button variant="ghost" size="sm" onClick={onOpen}>{t('hub.openReport')}</Button>}>
+      {children}
+    </HubBlockTitle>
   )
 }
 
-// One block's four states, rendered inside its own ReportChartCard.
+// One block's four states inside the shared fixed-height hub body; states
+// centre, a chart sits at the top — every block ends up exactly the same size.
 function ChartBlock({ title, onOpen, loading, error, empty, span, chart }: {
   title: ReactNode; onOpen: () => void; loading: boolean; error: boolean; empty: boolean; span?: 1 | 2; chart: ReactNode
 }) {
   const { t } = useTranslation('common')
+  const inState = loading || error || empty
   return (
     <ReportChartCard span={span} title={<ChartTitle onOpen={onOpen}>{title}</ChartTitle>} chart={
-      loading || error || empty ? (
-        <div style={{ ...card, overflow: 'hidden', border: 'none', padding: 0 }}>
+      <HubBlockBody centered={inState}>
+        {inState ? (
           <ReportStateBlock loading={loading} error={error} empty={empty}
             loadingLabel={t('loading')} errorLabel={t('error.loadFailed')} emptyLabel={t('empty')} />
-        </div>
-      ) : chart
+        ) : chart}
+      </HubBlockBody>
     } />
   )
 }

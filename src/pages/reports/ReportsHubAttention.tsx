@@ -15,6 +15,7 @@ import Button from '@/components/ui/Button'
 import { Mono } from '@/components/ui/typography'
 import ReportChartCard from './ReportChartCard'
 import ReportStateBlock from './ReportStateBlock'
+import { HubBlockBody, HubBlockTitle } from './hubLayout'
 import { useReportsHub, isReportsHubForbidden } from './useReportsHub'
 import { useNavigation } from '@/context/NavigationContext'
 import { useAuth } from '@/context/AuthContext'
@@ -77,12 +78,14 @@ export default function ReportsHubAttention() {
   )
 
   return (
-    <ReportChartCard title={t('hub.attention.title')} chart={
-      loading || error || empty ? (
-        <ReportStateBlock loading={loading} error={!!error} empty={empty}
-          loadingLabel={t('hub.attention.loading')} errorLabel={t('hub.attention.error')} emptyLabel={t('hub.attention.empty')}
-          onRetry={() => refetch()} />
-      ) : list
+    <ReportChartCard title={<HubBlockTitle>{t('hub.attention.title')}</HubBlockTitle>} chart={
+      <HubBlockBody centered={loading || !!error || empty}>
+        {loading || error || empty ? (
+          <ReportStateBlock loading={loading} error={!!error} empty={empty}
+            loadingLabel={t('hub.attention.loading')} errorLabel={t('hub.attention.error')} emptyLabel={t('hub.attention.empty')}
+            onRetry={() => refetch()} />
+        ) : list}
+      </HubBlockBody>
     } />
   )
 }
