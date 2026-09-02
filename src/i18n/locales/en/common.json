@@ -409,6 +409,10 @@
       "notGeocoded": "Not yet geocoded",
       "autoInfo": "Coordinates update automatically whenever the address changes.",
       "readOnly": "Coordinates come from the customer location itself; re-geocoding is not available here yet."
+    },
+    "statusIcons": {
+      "linked": "{{system}} linked",
+      "failed": "{{system}} sync failed: {{error}}"
     }
   },
   "breadcrumb": "Breadcrumb",
@@ -474,7 +478,8 @@
       "wizard": "Wizard",
       "auto": "Auto",
       "wizardHint": "Confirm every action first",
-      "autoHint": "Run actions immediately (messages still wait for confirmation unless enabled in your profile)"
+      "autoHint": "Run actions immediately (messages still wait for confirmation unless enabled in your profile)",
+      "bureauDefault": "(bureau default)"
     },
     "generate": "Generate with Koios",
     "showAll": "Show all",

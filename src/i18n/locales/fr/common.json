@@ -409,6 +409,10 @@
       "notGeocoded": "Pas encore géocodé",
       "autoInfo": "Les coordonnées se mettent à jour automatiquement dès que l'adresse change.",
       "readOnly": "Les coordonnées proviennent du site client lui-même ; le regéocodage n’est pas encore possible ici."
+    },
+    "statusIcons": {
+      "linked": "{{system}} lié",
+      "failed": "Échec de la synchronisation {{system}} : {{error}}"
     }
   },
   "breadcrumb": "Fil d’Ariane",
@@ -474,7 +478,8 @@
       "wizard": "Assistant",
       "auto": "Auto",
       "wizardHint": "Confirmer chaque action d'abord",
-      "autoHint": "Exécuter les actions immédiatement (les messages attendent une confirmation sauf si activé dans votre profil)"
+      "autoHint": "Exécuter les actions immédiatement (les messages attendent une confirmation sauf si activé dans votre profil)",
+      "bureauDefault": "(défaut du cabinet)"
     },
     "generate": "Générer avec Koios",
     "showAll": "Tout afficher",

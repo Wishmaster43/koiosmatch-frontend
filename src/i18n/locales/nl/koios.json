@@ -135,5 +135,15 @@
       "conversation_assist": "Gespreksassistent",
       "report_advice": "Rapportadvies"
     }
+  },
+  "modeDefault": {
+    "title": "Standaardmodus Koios",
+    "desc": "De bureaubrede standaard voor Wizard/Auto; gebruikers mogen hiervan afwijken in hun eigen profiel.",
+    "wizard": "Wizard (elke actie bevestigen)",
+    "auto": "Auto (direct uitvoeren)",
+    "autoMessages": "Berichten direct versturen in Auto",
+    "deviationHint": "Gebruikers kunnen dit in hun eigen profiel anders instellen.",
+    "noPermission": "Je hebt geen rechten om dit te wijzigen.",
+    "saveError": "Opslaan is mislukt."
   }
 }

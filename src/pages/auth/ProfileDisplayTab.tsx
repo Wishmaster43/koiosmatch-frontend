@@ -14,6 +14,7 @@ import { Section, Field, inputStyle, LANGUAGES } from './profileParts'
 import type { ProfileFormData } from './profileParts'
 import { useMyKoiosMode } from './useMyKoiosMode'
 import type { KoiosMode } from './useMyKoiosMode'
+import { Caption } from '@/components/ui/typography'
 
 interface ProfileDisplayTabProps {
   form: ProfileFormData
@@ -169,6 +170,10 @@ export default function ProfileDisplayTab({ form, setForm, theme, setTheme, lang
                     transition: 'all 0.15s',
                   }}>
                   {opt.label}
+                  {/* KOIOS-MODE-DEFAULT: unset user choice -> this pill's value came from the bureau default. */}
+                  {koios.isBureauDefault && koios.mode === opt.value && (
+                    <Caption as="span" style={{ marginLeft: 4 }}>{t('profile.koiosMode.bureauDefault')}</Caption>
+                  )}
                 </button>
               ))}
             </div>

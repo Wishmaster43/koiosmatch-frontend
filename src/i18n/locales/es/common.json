@@ -409,6 +409,10 @@
       "notGeocoded": "Aún no geocodificado",
       "autoInfo": "Las coordenadas se actualizan automáticamente en cuanto cambia la dirección.",
       "readOnly": "Las coordenadas provienen de la propia ubicación del cliente; volver a geocodificar aún no es posible aquí."
+    },
+    "statusIcons": {
+      "linked": "{{system}} vinculado",
+      "failed": "Error de sincronización de {{system}}: {{error}}"
     }
   },
   "breadcrumb": "Ruta de navegación",
@@ -474,7 +478,8 @@
       "wizard": "Asistente",
       "auto": "Auto",
       "wizardHint": "Confirmar cada acción primero",
-      "autoHint": "Ejecutar acciones de inmediato (los mensajes siguen esperando confirmación salvo que lo actives en tu perfil)"
+      "autoHint": "Ejecutar acciones de inmediato (los mensajes siguen esperando confirmación salvo que lo actives en tu perfil)",
+      "bureauDefault": "(predeterminado de la agencia)"
     },
     "generate": "Generar con Koios",
     "showAll": "Mostrar todo",

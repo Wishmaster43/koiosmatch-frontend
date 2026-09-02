@@ -135,5 +135,15 @@
       "conversation_assist": "Conversation assist",
       "report_advice": "Report advice"
     }
+  },
+  "modeDefault": {
+    "title": "Koios default mode",
+    "desc": "The bureau-wide default for Wizard/Auto; users may deviate in their own profile.",
+    "wizard": "Wizard (confirm every action)",
+    "auto": "Auto (act immediately)",
+    "autoMessages": "Send messages directly in Auto",
+    "deviationHint": "Users can set this differently in their own profile.",
+    "noPermission": "You do not have permission to change this.",
+    "saveError": "Saving failed."
   }
 }

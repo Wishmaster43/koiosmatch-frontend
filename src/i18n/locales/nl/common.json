@@ -409,6 +409,10 @@
       "notGeocoded": "Nog niet gegeocodeerd",
       "autoInfo": "Coördinaten worden automatisch bijgewerkt zodra het adres wijzigt.",
       "readOnly": "Coördinaten komen van de klant­locatie zelf; opnieuw geocoderen kan hier nog niet."
+    },
+    "statusIcons": {
+      "linked": "{{system}} gekoppeld",
+      "failed": "{{system}} synchronisatie mislukt: {{error}}"
     }
   },
   "breadcrumb": "Kruimelpad",
@@ -474,7 +478,8 @@
       "wizard": "Wizard",
       "auto": "Auto",
       "wizardHint": "Elke actie eerst bevestigen",
-      "autoHint": "Acties direct uitvoeren (berichten blijven wachten op bevestiging tenzij aangezet in je profiel)"
+      "autoHint": "Acties direct uitvoeren (berichten blijven wachten op bevestiging tenzij aangezet in je profiel)",
+      "bureauDefault": "(bureaustandaard)"
     },
     "generate": "Genereer met Koios",
     "showAll": "Toon alles",

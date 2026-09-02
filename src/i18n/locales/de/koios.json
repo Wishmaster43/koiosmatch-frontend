@@ -135,5 +135,15 @@
       "conversation_assist": "Gesprächsassistent",
       "report_advice": "Berichtsempfehlung"
     }
+  },
+  "modeDefault": {
+    "title": "Koios-Standardmodus",
+    "desc": "Die büroweite Standardeinstellung für Wizard/Auto; Benutzer können in ihrem eigenen Profil davon abweichen.",
+    "wizard": "Wizard (jede Aktion bestätigen)",
+    "auto": "Auto (sofort ausführen)",
+    "autoMessages": "Nachrichten im Auto-Modus direkt versenden",
+    "deviationHint": "Benutzer können dies in ihrem eigenen Profil anders einstellen.",
+    "noPermission": "Du hast keine Berechtigung, dies zu ändern.",
+    "saveError": "Speichern ist fehlgeschlagen."
   }
 }

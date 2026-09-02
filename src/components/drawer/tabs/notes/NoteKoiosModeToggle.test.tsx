@@ -26,7 +26,7 @@ describe('NoteKoiosModeToggle', () => {
   })
 
   it('shows Wizard active by default, Auto reachable', async () => {
-    vi.mocked(api.get).mockResolvedValue({ data: { mode: 'wizard', auto_messages: false } })
+    vi.mocked(api.get).mockResolvedValue({ data: { mode: 'wizard', auto_messages: false, tenant_default: { mode: 'wizard', auto_messages: false }, user_choice: { mode: 'wizard', auto_messages: false } } })
     render(<NoteKoiosModeToggle />)
     const wizardBtn = await screen.findByRole('button', { name: 'Wizard' })
     expect(wizardBtn).toHaveAttribute('aria-pressed', 'true')
@@ -34,7 +34,7 @@ describe('NoteKoiosModeToggle', () => {
   })
 
   it('clicking Auto PUTs /settings/my-koios-mode via the SAME shared hook used by the profile tab', async () => {
-    vi.mocked(api.get).mockResolvedValue({ data: { mode: 'wizard', auto_messages: false } })
+    vi.mocked(api.get).mockResolvedValue({ data: { mode: 'wizard', auto_messages: false, tenant_default: { mode: 'wizard', auto_messages: false }, user_choice: { mode: 'wizard', auto_messages: false } } })
     vi.mocked(api.put).mockResolvedValue({ data: { mode: 'auto', auto_messages: false } })
     const user = userEvent.setup()
     render(<NoteKoiosModeToggle />)
@@ -43,5 +43,20 @@ describe('NoteKoiosModeToggle', () => {
     await user.click(screen.getByRole('button', { name: 'Auto' }))
 
     await waitFor(() => expect(api.put).toHaveBeenCalledWith('/settings/my-koios-mode', { mode: 'auto', auto_messages: false }))
+  })
+
+  // KOIOS-MODE-DEFAULT: a user who never chose sees the inherited mode marked as
+  // bureau default; an explicit choice removes the mark.
+  it('marks the inherited mode as bureau default when the user never chose', async () => {
+    vi.mocked(api.get).mockResolvedValue({ data: { mode: 'auto', auto_messages: false, tenant_default: { mode: 'auto', auto_messages: false }, user_choice: { mode: null, auto_messages: null } } })
+    render(<NoteKoiosModeToggle />)
+    expect(await screen.findByText('notesAssist.koiosMode.bureauDefault')).toBeInTheDocument()
+  })
+
+  it('shows no bureau-default mark once the user chose explicitly', async () => {
+    vi.mocked(api.get).mockResolvedValue({ data: { mode: 'auto', auto_messages: false, tenant_default: { mode: 'wizard', auto_messages: false }, user_choice: { mode: 'auto', auto_messages: false } } })
+    render(<NoteKoiosModeToggle />)
+    await screen.findByRole('group')
+    expect(screen.queryByText('notesAssist.koiosMode.bureauDefault')).toBeNull()
   })
 })

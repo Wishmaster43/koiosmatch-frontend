@@ -11,6 +11,7 @@
 import { useTranslation } from 'react-i18next'
 import { useMyKoiosMode } from '@/pages/auth/shared'
 import type { KoiosMode } from '@/pages/auth/shared'
+import { Caption } from '@/components/ui/typography'
 
 const MODES: KoiosMode[] = ['wizard', 'auto']
 
@@ -42,6 +43,10 @@ export default function NoteKoiosModeToggle() {
               color: active ? 'var(--button-ink)' : 'var(--text-muted)',
             }}>
             {t(`notesAssist.koiosMode.${m}`, { defaultValue: m === 'wizard' ? 'Wizard' : 'Auto' })}
+            {/* KOIOS-MODE-DEFAULT: this mode is inherited from the bureau default, not chosen by the user. */}
+            {koios.isBureauDefault && active && (
+              <Caption as="span" style={{ marginLeft: 3, color: 'inherit' }}>{t('notesAssist.koiosMode.bureauDefault')}</Caption>
+            )}
           </button>
         )
       })}

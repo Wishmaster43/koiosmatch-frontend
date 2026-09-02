@@ -135,5 +135,15 @@
       "conversation_assist": "Assistant de conversation",
       "report_advice": "Conseil de rapport"
     }
+  },
+  "modeDefault": {
+    "title": "Mode Koios par défaut",
+    "desc": "Le paramètre par défaut à l'échelle du cabinet pour Assistant/Auto ; les utilisateurs peuvent s'en écarter dans leur propre profil.",
+    "wizard": "Assistant (confirmer chaque action)",
+    "auto": "Auto (exécuter immédiatement)",
+    "autoMessages": "Envoyer les messages directement en mode Auto",
+    "deviationHint": "Les utilisateurs peuvent régler cela différemment dans leur propre profil.",
+    "noPermission": "Vous n'avez pas le droit de modifier ceci.",
+    "saveError": "L'enregistrement a échoué."
   }
 }

@@ -135,5 +135,15 @@
       "conversation_assist": "Asistente de conversación",
       "report_advice": "Consejo de informe"
     }
+  },
+  "modeDefault": {
+    "title": "Modo Koios predeterminado",
+    "desc": "El valor predeterminado para toda la agencia para Asistente/Auto; los usuarios pueden desviarse en su propio perfil.",
+    "wizard": "Asistente (confirmar cada acción)",
+    "auto": "Auto (ejecutar de inmediato)",
+    "autoMessages": "Enviar mensajes directamente en modo Auto",
+    "deviationHint": "Los usuarios pueden configurarlo de forma diferente en su propio perfil.",
+    "noPermission": "No tienes permiso para cambiar esto.",
+    "saveError": "Error al guardar."
   }
 }

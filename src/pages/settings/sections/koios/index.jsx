@@ -14,6 +14,7 @@ import { useTranslation } from 'react-i18next'
 import { getKoiosSettings } from './koiosApi'
 import KoiosStatusCard from './KoiosStatusCard'
 import KoiosModelsCard from './KoiosModelsCard'
+import KoiosModeDefaultCard from './KoiosModeDefaultCard'
 import KoiosLearningCard from './KoiosLearningCard'
 import KoiosCapabilitiesCard from './KoiosCapabilitiesCard'
 import KoiosFeedbackCard from './KoiosFeedbackCard'
@@ -69,6 +70,7 @@ export default function KoiosSettings() {
               <KoiosStatusCard status={settings?.status} t={t} />
               <KoiosModelsCard models={settings?.models} t={t}
                 onChanged={(model) => { setSettings((s) => ({ ...s, models: { ...s.models, active: model } })); invalidateKoiosSettings() }} />
+              <KoiosModeDefaultCard />
             </>
           )}
           {tab === 'learning' && <KoiosLearningCard />}
