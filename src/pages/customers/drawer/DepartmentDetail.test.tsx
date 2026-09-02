@@ -111,7 +111,7 @@ const cm = (key: string) => i18n.t(key, { ns: 'common' })
 const department = (over: Partial<Department> = {}): Department => ({
   id: 'd1', helloflexLink: null, shiftmanagerLink: null,
   name: 'Zorg', description: '', locationId: 'loc-1', locationName: 'Vestiging Noord',
-  contacts: [], costCenter: '', statusId: null, status: '', statusLabel: '', statusColor: '',
+  contacts: [], costCenter: '', billingEmail: '', statusId: null, status: '', statusLabel: '', statusColor: '',
   customFields: {},
   ...over,
 } as Department)
@@ -592,5 +592,33 @@ describe('DepartmentDetail · Koppelingen sub-tab hidden when empty (DD-FE-6)', 
     mockUseApps.mockReturnValue({ isAppEnabled: (id: string) => id === 'shiftmanager' })
     render(<DepartmentDetail department={department()} onSave={vi.fn()} {...baseProps} />)
     expect(screen.getByRole('tab', { name: cm('backofficeLinks.tabLabel') })).toBeInTheDocument()
+  })
+})
+
+// K-249 C.4 (31-08): billingEmail joins costCenter as the middle cascade level's
+// own editable fields — the match billing resolver (department → location →
+// customer) reads a department's own billing_email too.
+describe('DepartmentDetail · billing email field (K-249 C.4)', () => {
+  it('renders a billingEmail field row in the field table', () => {
+    render(<DepartmentDetail department={department()} onSave={vi.fn()} {...baseProps} />)
+    expect(screen.getByText(ct('departments.detail.billingEmail'))).toBeInTheDocument()
+  })
+
+  it('edits and saves billingEmail through the same PATCH onSave as costCenter/name', async () => {
+    const user = userEvent.setup()
+    const onSave = vi.fn()
+    render(<DepartmentDetail department={department()} onSave={onSave} {...baseProps} />)
+    // The field-table card's own pencil renders FIRST (DepartmentDataTab: field
+    // table, THEN description, THEN Koios advice — K5a, 02-08).
+    const editButtons = screen.getAllByTitle(cm('edit'))
+    await user.click(editButtons[0])
+    // Locate the input via its own label sibling — EditableFieldTable rows have
+    // no real <label>/htmlFor, mirrors OverviewTab.test.tsx's own convention.
+    const label = screen.getByText(ct('departments.detail.billingEmail'))
+    const input = label.nextElementSibling?.querySelector('input') as HTMLInputElement
+    expect(input).toBeTruthy()
+    await user.type(input, 'facturen@zorg.nl')
+    await user.click(screen.getByTitle(cm('save')))
+    expect(onSave).toHaveBeenCalledWith('d1', expect.objectContaining({ billingEmail: 'facturen@zorg.nl' }))
   })
 })

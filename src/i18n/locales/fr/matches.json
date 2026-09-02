@@ -104,7 +104,14 @@
       "saved": "Détails du contrat enregistrés.",
       "functionTitle": "Intitule de fonction",
       "surcharge": "Majoration",
-      "contractForm": "Forme de contrat"
+      "contractForm": "Forme de contrat",
+      "billingSource": "Repris de",
+      "billingSourceValues": {
+        "department": "service",
+        "location": "site",
+        "customer": "client",
+        "manual": "manuel"
+      }
     },
     "ownerUnassigned": "Aucun responsable",
     "terminate": {

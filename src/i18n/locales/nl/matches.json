@@ -104,7 +104,14 @@
       "saved": "Contractgegevens opgeslagen.",
       "functionTitle": "Functietitel",
       "surcharge": "Toeslag",
-      "contractForm": "Contractvorm"
+      "contractForm": "Contractvorm",
+      "billingSource": "Overgenomen van",
+      "billingSourceValues": {
+        "department": "afdeling",
+        "location": "locatie",
+        "customer": "klant",
+        "manual": "handmatig"
+      }
     },
     "ownerUnassigned": "Geen eigenaar",
     "terminate": {

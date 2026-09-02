@@ -104,7 +104,14 @@
       "saved": "Vertragsdetails gespeichert.",
       "functionTitle": "Funktionstitel",
       "surcharge": "Zuschlag",
-      "contractForm": "Vertragsform"
+      "contractForm": "Vertragsform",
+      "billingSource": "Übernommen von",
+      "billingSourceValues": {
+        "department": "Abteilung",
+        "location": "Standort",
+        "customer": "Kunde",
+        "manual": "manuell"
+      }
     },
     "ownerUnassigned": "Kein Inhaber",
     "terminate": {

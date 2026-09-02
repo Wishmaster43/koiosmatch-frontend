@@ -93,8 +93,11 @@ export interface Department {
   locationName: string
   contacts: Contact[]
   // Cost centre — the middle cascade level (department > location > customer, Danny
-  // 2026-07-22). No billingEmail here: billing is always the customer's own.
+  // 2026-07-22). billingEmail joined it (K-249 C.4, 31-08): the match billing
+  // resolver reads a department's own billing_email too — supersedes the
+  // earlier "billing is always the customer's own" call.
   costCenter: string
+  billingEmail: string
   statusId: Id | null
   status: string
   statusLabel: string
@@ -346,8 +349,9 @@ export interface ApiDepartment {
   id?: Id; reference_number?: string; name?: string; description?: string
   location_id?: Id; locationId?: Id; location_name?: string; location?: { name?: string }; locationName?: string
   departments?: ApiDepartment[]; contacts?: ApiContact[]
-  // Kostenplaats (Danny 2026-07-22) — no billing_email: facturatie stays customer-only.
-  cost_center?: string
+  // Kostenplaats (Danny 2026-07-22) — the middle cascade level. billing_email
+  // joined it (K-249 C.4): the match billing resolver reads a department's own too.
+  cost_center?: string; billing_email?: string
   status?: ApiStatusRef | null; status_id?: Id | null
   custom_fields?: Record<string, unknown>
   // EXTRACT-1: the shared raw shape (src/lib/backofficeLink).

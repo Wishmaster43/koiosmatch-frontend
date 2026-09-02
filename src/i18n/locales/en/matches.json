@@ -104,7 +104,14 @@
       "saved": "Contract details saved.",
       "functionTitle": "Function title",
       "surcharge": "Surcharge",
-      "contractForm": "Contract form"
+      "contractForm": "Contract form",
+      "billingSource": "Copied from",
+      "billingSourceValues": {
+        "department": "department",
+        "location": "location",
+        "customer": "customer",
+        "manual": "manual"
+      }
     },
     "ownerUnassigned": "No owner",
     "terminate": {

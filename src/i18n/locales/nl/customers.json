@@ -262,7 +262,8 @@
         "error": "Taken konden niet worden geladen",
         "openTask": "Open taak",
         "searchPlaceholder": "Zoek taak…"
-      }
+      },
+      "billingEmail": "Factuur e-mailadres"
     },
     "saveFailed": "Opslaan is mislukt.",
     "deleteFailed": "Verwijderen is mislukt.",
@@ -331,7 +332,8 @@
       "restoreFailed": "Herstellen is mislukt.",
       "isPrimaryContact": "Primaire contactpersoon van deze afdeling",
       "setPrimaryContact": "Maak primaire contactpersoon van deze afdeling",
-      "setPrimaryContactDone": "{{name}} is nu de primaire contactpersoon van deze afdeling."
+      "setPrimaryContactDone": "{{name}} is nu de primaire contactpersoon van deze afdeling.",
+      "billingEmail": "Factuur e-mailadres"
     },
     "deleteConfirm": "Deze afdeling verwijderen?",
     "saveFailed": "Opslaan is mislukt.",

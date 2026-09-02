@@ -80,9 +80,13 @@ export default function LocationAddressTab({
       renderValue: v => kvkValue(v, t('locations.detail.openKvk')), validate: validateCoc },
     { key: 'vatNumber', label: t('locations.detail.vat'), type: 'text', group: t('overview.details'),
       renderValue: v => vatValue(v, t('locations.detail.openVies')), validate: validateVat },
-    // Kostenplaats ("Cost center") sits in Gegevens ("Details") (Danny 28-07) — no billing-email input here:
-    // invoicing always comes from the customer (see OverviewTab).
+    // Kostenplaats ("Cost center") sits in Gegevens ("Details") (Danny 28-07).
     { key: 'costCenter', label: t('locations.detail.costCenter'), type: 'text', group: t('overview.details') },
+    // K-249 C.4 (Danny 31-08): a location's OWN billing e-mail now feeds the
+    // match billing resolver (department → location → customer) — the earlier
+    // "invoicing always comes from the customer" call is superseded by that
+    // decision, so the field is editable here again, mirroring the customer's own.
+    { key: 'billingEmail', label: t('locations.detail.billingEmail'), type: 'text', group: t('overview.details') },
   ]
 
   const values = {
@@ -90,7 +94,7 @@ export default function LocationAddressTab({
     street: l.street, houseNumber: l.houseNumber, houseNumberSuffix: l.houseNumberSuffix,
     postalCode: l.postalCode, city: l.city, state: l.state, country: l.country,
     cocNumber: l.cocNumber, vatNumber: l.vatNumber,
-    costCenter: l.costCenter,
+    costCenter: l.costCenter, billingEmail: l.billingEmail,
   }
 
   // Maps the EditableFieldTable's edited values back onto the location patch shape.
@@ -100,7 +104,7 @@ export default function LocationAddressTab({
       street: v.street as string, houseNumber: v.houseNumber as string, houseNumberSuffix: v.houseNumberSuffix as string,
       postalCode: v.postalCode as string, city: v.city as string, state: v.state as string, country: v.country as string,
       cocNumber: v.cocNumber as string, vatNumber: v.vatNumber as string,
-      costCenter: v.costCenter as string,
+      costCenter: v.costCenter as string, billingEmail: v.billingEmail as string,
     })
   }
 

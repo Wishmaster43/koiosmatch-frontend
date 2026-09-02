@@ -262,7 +262,8 @@
         "error": "Tasks could not be loaded",
         "openTask": "Open task",
         "searchPlaceholder": "Search task…"
-      }
+      },
+      "billingEmail": "Billing email"
     },
     "saveFailed": "Saving failed.",
     "deleteFailed": "Deleting failed.",
@@ -331,7 +332,8 @@
       "restoreFailed": "Restoring failed.",
       "isPrimaryContact": "Primary contact for this department",
       "setPrimaryContact": "Make primary contact for this department",
-      "setPrimaryContactDone": "{{name}} is now the primary contact for this department."
+      "setPrimaryContactDone": "{{name}} is now the primary contact for this department.",
+      "billingEmail": "Billing email"
     },
     "deleteConfirm": "Delete this department?",
     "saveFailed": "Saving failed.",

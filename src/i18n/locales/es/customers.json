@@ -262,7 +262,8 @@
         "error": "No se pudieron cargar las tareas",
         "openTask": "Abrir tarea",
         "searchPlaceholder": "Buscar tarea…"
-      }
+      },
+      "billingEmail": "Correo de facturación"
     },
     "saveFailed": "Error al guardar.",
     "deleteFailed": "Error al eliminar.",
@@ -331,7 +332,8 @@
       "restoreFailed": "Error al restaurar.",
       "isPrimaryContact": "Contacto principal de este departamento",
       "setPrimaryContact": "Convertir en contacto principal de este departamento",
-      "setPrimaryContactDone": "{{name}} es ahora el contacto principal de este departamento."
+      "setPrimaryContactDone": "{{name}} es ahora el contacto principal de este departamento.",
+      "billingEmail": "Correo de facturación"
     },
     "deleteConfirm": "¿Eliminar este departamento?",
     "saveFailed": "Error al guardar.",

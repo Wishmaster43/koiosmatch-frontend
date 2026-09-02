@@ -26,7 +26,7 @@ vi.mock('@/lib/useCao', () => ({ useCao: () => ({ types: [] }) }))
 const baseData: MatchContract = {
   function_title: 'Verpleegkundige', contract_type: null, start_date: null, end_date: null,
   hours_per_week: null, cao: null, scale: null, step: null, surcharge: null,
-  purchase_rate: 20, sell_rate: 28, cost_center: null, billing_emails: [], remarks: null,
+  purchase_rate: 20, sell_rate: 28, cost_center: null, billing_emails: [], billing_source: null, remarks: null,
   contractForm: null, contractLines: [], description: null, margin: 8,
 }
 

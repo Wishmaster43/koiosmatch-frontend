@@ -262,7 +262,8 @@
         "error": "Impossible de charger les tâches",
         "openTask": "Ouvrir la tâche",
         "searchPlaceholder": "Rechercher une tâche…"
-      }
+      },
+      "billingEmail": "E-mail de facturation"
     },
     "saveFailed": "L'enregistrement a échoué.",
     "deleteFailed": "La suppression a échoué.",
@@ -331,7 +332,8 @@
       "restoreFailed": "La restauration a échoué.",
       "isPrimaryContact": "Contact principal de ce service",
       "setPrimaryContact": "Définir comme contact principal de ce service",
-      "setPrimaryContactDone": "{{name}} est désormais le contact principal de ce service."
+      "setPrimaryContactDone": "{{name}} est désormais le contact principal de ce service.",
+      "billingEmail": "E-mail de facturation"
     },
     "deleteConfirm": "Supprimer ce service ?",
     "saveFailed": "L'enregistrement a échoué.",

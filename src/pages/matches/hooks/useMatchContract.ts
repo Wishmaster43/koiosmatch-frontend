@@ -34,6 +34,11 @@ export interface MatchContract {
   sell_rate: number | null
   cost_center: string | null
   billing_emails: string[]
+  // K-249 C.4: which level the (frozen-at-creation) cost_center/billing_emails snapshot
+  // was copied from at CREATION — 'department' | 'location' | 'customer', or 'manual'
+  // when both fields were supplied explicitly at creation (JobMatch::creating /
+  // matches:backfill-billing stamp it; a later PATCH does NOT flip it); never sent on save.
+  billing_source: 'department' | 'location' | 'customer' | 'manual' | null
   // REMARKS-INTO-NOTES-1 (09-08): the RETIRED Opmerkingen field. Still read (the
   // column still holds data), but the only write left is clearing it after its
   // content was copied into a note — see MatchRemarksBlock.
@@ -54,7 +59,7 @@ export interface MatchContract {
 const EMPTY: MatchContract = {
   function_title: null, contract_type: null, start_date: null, end_date: null, hours_per_week: null,
   cao: null, scale: null, step: null, surcharge: null, purchase_rate: null, sell_rate: null,
-  cost_center: null, billing_emails: [], remarks: null, contractForm: null, contractLines: [], description: null, margin: null,
+  cost_center: null, billing_emails: [], billing_source: null, remarks: null, contractForm: null, contractLines: [], description: null, margin: null,
 }
 
 // Pull just the contract/financial keys off a raw API row (tolerant of extras).
@@ -74,6 +79,7 @@ function pick(d: Record<string, unknown>): MatchContract {
     sell_rate:      num(d.sell_rate),
     cost_center:    (d.cost_center as string) ?? null,
     billing_emails: Array.isArray(d.billing_emails) ? (d.billing_emails as unknown[]).map(String) : [],
+    billing_source: (d.billing_source as MatchContract['billing_source']) ?? null,
     remarks:        (d.remarks as string) ?? null,
     contractForm:   (d.contract_form as MatchContractForm) ?? null,
     contractLines:  Array.isArray(d.contract_lines)

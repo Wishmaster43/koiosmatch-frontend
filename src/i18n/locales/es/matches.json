@@ -104,7 +104,14 @@
       "saved": "Detalles del contrato guardados.",
       "functionTitle": "Titulo de funcion",
       "surcharge": "Recargo",
-      "contractForm": "Forma de contrato"
+      "contractForm": "Forma de contrato",
+      "billingSource": "Tomado de",
+      "billingSourceValues": {
+        "department": "departamento",
+        "location": "sede",
+        "customer": "cliente",
+        "manual": "manual"
+      }
     },
     "ownerUnassigned": "Sin responsable",
     "terminate": {

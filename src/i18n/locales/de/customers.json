@@ -262,7 +262,8 @@
         "error": "Aufgaben konnten nicht geladen werden",
         "openTask": "Aufgabe öffnen",
         "searchPlaceholder": "Aufgabe suchen…"
-      }
+      },
+      "billingEmail": "Rechnungs-E-Mail"
     },
     "saveFailed": "Speichern fehlgeschlagen.",
     "deleteFailed": "Löschen fehlgeschlagen.",
@@ -331,7 +332,8 @@
       "restoreFailed": "Wiederherstellen fehlgeschlagen.",
       "isPrimaryContact": "Primärer Ansprechpartner dieser Abteilung",
       "setPrimaryContact": "Zum primären Ansprechpartner dieser Abteilung machen",
-      "setPrimaryContactDone": "{{name}} ist jetzt der primäre Ansprechpartner dieser Abteilung."
+      "setPrimaryContactDone": "{{name}} ist jetzt der primäre Ansprechpartner dieser Abteilung.",
+      "billingEmail": "Rechnungs-E-Mail"
     },
     "deleteConfirm": "Diese Abteilung löschen?",
     "saveFailed": "Speichern fehlgeschlagen.",

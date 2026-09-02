@@ -57,3 +57,33 @@ describe('LocationAddressTab · description parity with the customer Bedrijf tab
     expect(onSave).toHaveBeenCalledWith('loc-1', { description: expect.any(String) })
   })
 })
+
+// K-249 C.4 (31-08): billingEmail is editable again on the location — the match
+// billing resolver (department → location → customer) now reads it.
+describe('LocationAddressTab · billing email field (K-249 C.4)', () => {
+  // This fixture hands the tab a namespace-less `t` (i18n.t.bind(i18n), defaultNS
+  // 'common'), so every field label here renders as its raw dotted key — the same
+  // reason the neighbouring costCenter row is never asserted by label text either
+  // in this file. Assert against that same raw key, consistent with the fixture.
+  it('renders a billingEmail field row in the Gegevens card', () => {
+    renderTab()
+    expect(screen.getAllByText('locations.detail.billingEmail').length).toBeGreaterThan(0)
+  })
+
+  it('edits and saves billingEmail through the same PATCH onSave as costCenter', async () => {
+    const user = userEvent.setup()
+    const { onSave } = renderTab()
+    // Two field-table cards render first (Gegevens, Adres — one pencil each),
+    // THEN the description block — billingEmail lives in the FIRST (Gegevens) card.
+    const editButtons = screen.getAllByTitle('Bewerken')
+    await user.click(editButtons[0])
+    // Locate the input via its own label sibling — EditableFieldTable rows have
+    // no real <label>/htmlFor, mirrors OverviewTab.test.tsx's own convention.
+    const label = screen.getByText('locations.detail.billingEmail')
+    const input = label.nextElementSibling?.querySelector('input') as HTMLInputElement
+    expect(input).toBeTruthy()
+    await user.type(input, 'facturen@rotterdam.nl')
+    await user.click(screen.getByTitle('Opslaan'))
+    expect(onSave).toHaveBeenCalledWith('loc-1', expect.objectContaining({ billingEmail: 'facturen@rotterdam.nl' }))
+  })
+})

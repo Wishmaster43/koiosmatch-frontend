@@ -41,6 +41,21 @@ describe('useMatchContract', () => {
     expect(result.current.error).toBe(false)
   })
 
+  // K-249 C.4: pick() maps billing_source straight off the detail row, null when absent.
+  it('maps billing_source off the detail row (department/location/customer/manual, null when absent)', async () => {
+    mockedGet.mockResolvedValue({ data: { data: { ...detailRow, billing_source: 'department' } } })
+    const { result } = renderHook(() => useMatchContract('m1'))
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    expect(result.current.data.billing_source).toBe('department')
+  })
+
+  it('defaults billing_source to null when the detail row carries no such key', async () => {
+    mockedGet.mockResolvedValue({ data: { data: detailRow } })
+    const { result } = renderHook(() => useMatchContract('m1'))
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    expect(result.current.data.billing_source).toBeNull()
+  })
+
   it('flags the error state when the detail fetch fails', async () => {
     mockedGet.mockRejectedValue(new Error('network'))
     const { result } = renderHook(() => useMatchContract('m1'))

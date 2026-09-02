@@ -22,8 +22,10 @@ export interface DepartmentPayload {
   locationId: Id | string
   description: string
   // Kostenplaats (Danny 2026-07-22) — the middle cascade level (afdeling > locatie
-  // > klant); no billingEmail here, facturatie stays the customer's own.
+  // > klant). billingEmail joined it (K-249 C.4, 31-08): the match billing
+  // resolver reads a department's own billing_email too.
   costCenter: string
+  billingEmail: string
   statusId: Id | null
   // Tenant custom-field values (§3B "Eigen velden" — the Extra sub-tab).
   customFields: Record<string, unknown>
@@ -31,11 +33,13 @@ export interface DepartmentPayload {
 
 const isTemp = (id: Id | undefined) => typeof id === 'string' && id.startsWith('tmp-')
 
-const toApi = (p: Partial<DepartmentPayload>) => ({
+// Exported for the wire-shape test (K-249: billing_email joined cost_center).
+export const toApi = (p: Partial<DepartmentPayload>) => ({
   ...(p.name !== undefined ? { name: p.name } : {}),
   ...(p.locationId !== undefined ? { location_id: p.locationId } : {}),
   ...(p.description !== undefined ? { description: p.description } : {}),
   ...(p.costCenter !== undefined ? { cost_center: p.costCenter } : {}),
+  ...(p.billingEmail !== undefined ? { billing_email: p.billingEmail } : {}),
   ...(p.statusId !== undefined ? { status_id: p.statusId || null } : {}),
   ...(p.customFields !== undefined ? { custom_fields: p.customFields } : {}),
 })

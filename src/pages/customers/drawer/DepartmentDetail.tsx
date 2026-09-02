@@ -5,8 +5,9 @@
  * block) · Contactpersonen — default Gegevens. Full edit via the shared
  * EditableFieldTable house pattern (pencil → save/cancel): name, location (movable
  * per CustomerDepartmentController — `location_id` is `sometimes` on update),
- * cost centre (Danny 2026-07-22 — the middle cascade level; billing email
- * stays customer-only, see OverviewTab). Omschrijving is its own rich-text block
+ * cost centre + billing email (Danny 2026-07-22 — the middle cascade level;
+ * K-249 C.4 31-08 added billing email back — the match billing resolver reads
+ * a department's own value too). Omschrijving is its own rich-text block
  * (EditableRichTextField — own
  * pencil/save/cancel, RichTextEditor + SafeHtml), same pattern as the customer's
  * Teksten section — a bare textarea is no longer the house pattern for prose.
@@ -152,13 +153,15 @@ export default function DepartmentDetail({ department, locations, statuses, cont
   // Description lives in its own rich-text block below (EditableRichTextField), and
   // status now lives in the title-row badge (see render below) — neither is a row
   // in this field-table anymore. Kostenplaats ("Cost centre", Danny 2026-07-22)
-  // is the middle cascade level — department, then location, then customer —
-  // no billing email here, facturatie ("billing") always comes from the
-  // customer (see OverviewTab).
+  // is the middle cascade level — department, then location, then customer.
+  // billingEmail (K-249 C.4, 31-08) joined it: the match billing resolver reads
+  // a department's own billing_email too — supersedes the earlier "billing is
+  // always the customer's own" call.
   const fields: FieldRow[] = [
     { key: 'name', label: t('departments.detail.name'), type: 'text' },
     { key: 'locationId', label: t('departments.detail.location'), type: 'select', options: locations.map(l => ({ value: String(l.id), label: l.name })) },
     { key: 'costCenter', label: t('departments.detail.costCenter'), type: 'text' },
+    { key: 'billingEmail', label: t('departments.detail.billingEmail'), type: 'text' },
   ]
 
   // The read/edit values keyed like the fields above; locationId compares as a string.
@@ -166,13 +169,14 @@ export default function DepartmentDetail({ department, locations, statuses, cont
     name: department.name,
     locationId: department.locationId != null ? String(department.locationId) : '',
     costCenter: department.costCenter,
+    billingEmail: department.billingEmail,
   }
 
   // Maps the field-table's edited values back onto the specific PATCH fields onSave expects.
   const save = (v: Record<string, unknown>) => {
     onSave(department.id as Id, {
       name: v.name as string, locationId: v.locationId as string,
-      costCenter: v.costCenter as string,
+      costCenter: v.costCenter as string, billingEmail: v.billingEmail as string,
     })
   }
   const saveDescription = (html: string) => onSave(department.id as Id, { description: html })

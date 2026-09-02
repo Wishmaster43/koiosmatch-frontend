@@ -85,8 +85,10 @@ export function mapDepartment(d: ApiDepartment = {}): Department {
     locationId: d.location_id ?? d.locationId ?? null,
     locationName: d.location_name ?? d.location?.name ?? d.locationName ?? '',
     contacts: (d.contacts ?? []).map(mapContact),
-    // Kostenplaats (Danny 2026-07-22) — the middle cascade level.
+    // Kostenplaats (Danny 2026-07-22) — the middle cascade level. billingEmail
+    // joined it (K-249 C.4): the match billing resolver reads this too.
     costCenter: d.cost_center ?? '',
+    billingEmail: d.billing_email ?? '',
     statusId: d.status_id ?? null,
     ...mapStatusRef(d.status),
     customFields: d.custom_fields ?? {},

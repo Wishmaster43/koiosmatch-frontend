@@ -76,6 +76,23 @@ describe('OverviewTab · overzicht-data cluster', () => {
     expect(screen.getByText('a@example.org')).toBeInTheDocument()
   })
 
+  // K-249 C.4: the read-only "Overgenomen van" row under the Financieel group.
+  it('shows the translated billing_source under the Financieel group', async () => {
+    mockedGet.mockResolvedValue({ data: { data: { cost_center: 'KP-1', billing_source: 'department' } } })
+    renderTab(baseMatch)
+    expect(await screen.findByText('afdeling')).toBeInTheDocument()
+  })
+
+  it('shows a dash for billing_source when null', async () => {
+    mockedGet.mockResolvedValue({ data: { data: { cost_center: 'KP-1', billing_source: null } } })
+    renderTab(baseMatch)
+    await screen.findByText('KP-1')
+    // Several other detail rows also render a dash (owner/score-less fields) —
+    // scope to the "Overgenomen van" row specifically, not just any dash on screen.
+    const label = screen.getByText(i18n.t('drawer.contract.billingSource', { ns: 'matches' }))
+    expect(label.nextElementSibling).toHaveTextContent('—')
+  })
+
   it('shows the HelloFlex last-sync timestamp from the list row when present', async () => {
     mockedGet.mockResolvedValue({ data: { data: {} } })
     renderTab({ ...baseMatch, helloflexLink: {

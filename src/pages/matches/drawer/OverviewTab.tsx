@@ -289,8 +289,17 @@ export default function OverviewTab({ match, onUpdate, onOpenNotes }: OverviewTa
           <Button variant="secondary" size="sm" onClick={retryContract}>{t('common:error.retry')}</Button>
         </div>
       ) : (
-        <EditableFieldTable key={`${match.id}-${revertTick}`} fields={contractFields} value={contractValues}
-          onSave={match.archived ? undefined : handleSaveContract} />
+        <>
+          <EditableFieldTable key={`${match.id}-${revertTick}`} fields={contractFields} value={contractValues}
+            onSave={match.archived ? undefined : handleSaveContract} />
+          {/* K-249 C.4: read-only — where the frozen cost_center/billing_emails snapshot
+              was copied from at creation (department/location/customer; 'manual' only when
+              supplied explicitly at creation — an edit here does not change it). Sits right
+              under the Financieel group it explains (EditableFieldTable has no read-only row). */}
+          <Field label={t('drawer.contract.billingSource')}>
+            {contract.billing_source ? t(`drawer.contract.billingSourceValues.${contract.billing_source}`) : dash}
+          </Field>
+        </>
       )}
 
       {/* DRILLDOWN-VOLGORDE-CANON (Danny 21-08): information → TEXT with pop-out

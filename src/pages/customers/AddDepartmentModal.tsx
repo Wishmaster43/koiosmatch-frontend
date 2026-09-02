@@ -90,6 +90,10 @@ export default function AddDepartmentModal({ onClose, onCreate, onImported, loca
     // Kostenplaats (Danny 2026-07-22) — the middle cascade level; settable on
     // create too, not just via the DepartmentDetail edit path.
     costCenter: initial?.costCenter ?? '',
+    // K-249 C.4 (31-08): billingEmail joined costCenter as an editable middle-cascade
+    // field (no input on this modal yet — same as costCenter used to be — but the
+    // payload shape must carry it since DepartmentPayload now requires it).
+    billingEmail: initial?.billingEmail ?? '',
     statusId: initial?.statusId ?? (statuses[0]?.id as string | undefined) ?? null,
     customFields: initial?.customFields ?? {},
   })
