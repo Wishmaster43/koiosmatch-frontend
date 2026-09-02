@@ -165,6 +165,9 @@ export interface Application {
 }
 
 /** The enriched application model rendered by the drawer tabs. */
+// ApplicationMatchService::adviceReason keys (CMBE 7f10f04c) — an unknown key falls back to the server sentence.
+export type AdviceReasonKey = 'hard_fail' | 'strong' | 'average' | 'low'
+
 export interface ApplicationDetail extends Application {
   candidate: {
     name: string; initials: string; function: string
@@ -208,7 +211,11 @@ export interface ApplicationDetail extends Application {
   matchSource: string
   aiScore: number | null
   // AI reject advice + the prior rejection summary (present once rejected).
-  ai?: { advice?: string; advice_reason?: string; auto_reject_eligible?: boolean }
+  ai?: {
+    advice?: string; advice_reason?: string; auto_reject_eligible?: boolean
+    // Translated FE-side via rejection.adviceReasons.<key>; the server sentence stays the fallback.
+    advice_reason_key?: AdviceReasonKey; advice_reason_criterion?: string
+  }
   // Rejection trail — ApplicationDetailResource::rejection() sends all five
   // fields once rejected; channel/sent_at were dropped on the floor before
   // (RejectionSummary now renders them), so they are typed properly here
@@ -349,7 +356,12 @@ export interface ApiApplication {
   task?: string
   ai_task?: string
   // ApplicationMatchService::ai (detail resource): score-band advice + the hard-fail flag; `task` is the list shape.
-  ai?: { task?: string; advice?: string | null; advice_reason?: string | null; auto_reject_eligible?: boolean }
+  ai?: {
+    task?: string; advice?: string | null; advice_reason?: string | null
+    // DEMO-TAAL (CMBE 7f10f04c): stable key + failed-criterion label so the FE translates the reason.
+    advice_reason_key?: string | null; advice_reason_criterion?: string | null
+    auto_reject_eligible?: boolean
+  }
   phase_key?: string
   stage?: string
   phase?: string

@@ -433,6 +433,12 @@
     "aiAdvice": "Koios adviseert afwijzen",
     "aiAuto": "Harde criteria niet gehaald. Auto-afwijzen mogelijk.",
     "aiConfirm": "Beoordeel en bevestig voordat er een bericht uitgaat.",
+    "adviceReasons": {
+      "hard_fail": "Hard criterium niet gehaald: {{criterion}}.",
+      "strong": "Sterke match op de geconfigureerde criteria.",
+      "average": "Gemiddelde match, handmatige beoordeling aangeraden.",
+      "low": "Lage match op de geconfigureerde criteria."
+    },
     "done": "Sollicitatie afgewezen",
     "sentOn": "Bericht verstuurd op {{date}}",
     "notSent": "Nog geen bericht verstuurd",

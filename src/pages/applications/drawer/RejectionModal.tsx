@@ -15,6 +15,7 @@ import { Caption } from '@/components/ui/typography'
 import type { ApplicationDetail } from '@/types/application'
 import type { Id } from '@/types/common'
 import Button from '@/components/ui/Button'
+import { resolveAdviceReason } from './applicationAiInsights'
 
 interface RejectionReason { id?: Id; name?: string; label?: string }
 // Moved from RejectionBlock (now deleted) — the shape the confirm submits.
@@ -101,6 +102,8 @@ export default function RejectionModal({ application: a, onCancel, onConfirm, su
   // S34: whether Koios advises rejecting this application — drives both the
   // existing advice block and the new reason-field proposal badge below.
   const koiosAdvisesReject = !isCorrection && a.ai?.advice === 'reject'
+  // DEMO-TAAL: the reason sentence in the user's language (key-driven, server sentence as fallback).
+  const adviceReason = resolveAdviceReason(a.ai, t)
 
   const reason = reasons.find(r => String(r.id) === String(reasonId))
   const reasonLabel = reason?.name ?? reason?.label ?? ''
@@ -134,7 +137,7 @@ export default function RejectionModal({ application: a, onCancel, onConfirm, su
               <KoiosAiMark size={18} />
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--color-primary-text)' }}>{t('rejection.aiAdvice')}</div>
-                {a.ai?.advice_reason && <div style={{ fontSize: 12, color: 'var(--text)', marginTop: 2 }}>{a.ai.advice_reason}</div>}
+                {adviceReason && <div style={{ fontSize: 12, color: 'var(--text)', marginTop: 2 }}>{adviceReason}</div>}
                 <Caption as="div" style={{ marginTop: 3 }}>
                   {a.ai?.auto_reject_eligible ? t('rejection.aiAuto') : t('rejection.aiConfirm')}
                 </Caption>

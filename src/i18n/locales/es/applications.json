@@ -412,6 +412,12 @@
     "aiAdvice": "Koios aconseja rechazar",
     "aiAuto": "Criterios estrictos no cumplidos. Apto para rechazo automático.",
     "aiConfirm": "Revisa y confirma antes de enviar un mensaje.",
+    "adviceReasons": {
+      "hard_fail": "Criterio obligatorio no cumplido: {{criterion}}.",
+      "strong": "Coincidencia fuerte con los criterios configurados.",
+      "average": "Coincidencia media, se recomienda revisión manual.",
+      "low": "Coincidencia baja con los criterios configurados."
+    },
     "done": "Candidatura rechazada",
     "sentOn": "Mensaje enviado el {{date}}",
     "notSent": "Aún no se ha enviado ningún mensaje",

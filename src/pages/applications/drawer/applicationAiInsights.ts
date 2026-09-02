@@ -62,3 +62,17 @@ export function buildApplicationAdviceInsights(a: ApplicationDetail, t: Tx, now:
 
   return insights
 }
+
+/**
+ * resolveAdviceReason — the advice sentence for the reject modal in the USER's
+ * language (DEMO-TAAL): a known advice_reason_key renders rejection.adviceReasons.<key>
+ * (with the failed criterion interpolated), and the server's own sentence is the
+ * fallback when no key came along (older payloads). Null when there is nothing.
+ */
+export function resolveAdviceReason(ai: ApplicationDetail['ai'], t: Tx): string | null {
+  if (!ai) return null
+  if (ai.advice_reason_key) {
+    return t(`rejection.adviceReasons.${ai.advice_reason_key}`, { criterion: ai.advice_reason_criterion ?? '', defaultValue: ai.advice_reason ?? '' })
+  }
+  return ai.advice_reason || null
+}

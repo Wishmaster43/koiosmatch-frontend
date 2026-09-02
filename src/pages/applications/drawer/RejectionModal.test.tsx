@@ -179,6 +179,14 @@ describe('RejectionModal · S34 Koios proposal at the reason field', () => {
     expect(screen.getByText('rejection.confirm').closest('button')).toBeDisabled()
   })
 
+  it('renders the advice reason from its key (translated), never the raw server sentence, when a key is present', async () => {
+    render(<RejectionModal application={app({ ai: { advice: 'reject', advice_reason: 'Hard criterium niet gehaald: BIG.', advice_reason_key: 'hard_fail', advice_reason_criterion: 'BIG', auto_reject_eligible: true } })}
+      onCancel={vi.fn()} onConfirm={vi.fn()} />)
+    await screen.findByRole('button', { name: 'rejection.reasonPlaceholder' })
+    expect(screen.getByText('rejection.adviceReasons.hard_fail')).toBeInTheDocument()
+    expect(screen.queryByText('Hard criterium niet gehaald: BIG.')).toBeNull()
+  })
+
   it('hides the badge once a reason is picked', async () => {
     const user = userEvent.setup()
     render(<RejectionModal application={app({ ai: { advice: 'reject', advice_reason: 'Hard criterium gefaald' } })} onCancel={vi.fn()} onConfirm={vi.fn()} />)

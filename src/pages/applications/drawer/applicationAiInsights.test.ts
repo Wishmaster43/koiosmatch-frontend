@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest'
-import { buildApplicationAdviceInsights } from './applicationAiInsights'
+import { describe, it, expect, vi } from 'vitest'
+import { buildApplicationAdviceInsights, resolveAdviceReason } from './applicationAiInsights'
 import type { ApplicationDetail } from '@/types/application'
 
 // Fake translate: returns the bare key, or "key|{...opts}" when interpolated.
@@ -52,5 +52,25 @@ describe('buildApplicationAdviceInsights', () => {
   it('never emits the AI task itself — that row comes from the shared table resolver', () => {
     const insights = buildApplicationAdviceInsights(base({ task: 'Bel de kandidaat terug' }), t)
     expect(insights.every(i => i.text !== 'Bel de kandidaat terug' && i.type !== 'drawer.task')).toBe(true)
+  })
+})
+
+// DEMO-TAAL (CMBE 7f10f04c): the advice sentence is key-driven with the server
+// sentence as the fallback for older payloads — and never a raw t() of an unknown key.
+describe('resolveAdviceReason', () => {
+  const t = vi.fn((key: string, opts?: Record<string, unknown>) => `${key}|${String(opts?.criterion ?? '')}|${String(opts?.defaultValue ?? '')}`)
+
+  it('translates a known key with the failed criterion and the server sentence as defaultValue', () => {
+    const out = resolveAdviceReason({ advice: 'reject', advice_reason: 'Hard criterium niet gehaald: BIG.', advice_reason_key: 'hard_fail', advice_reason_criterion: 'BIG' }, t)
+    expect(out).toBe('rejection.adviceReasons.hard_fail|BIG|Hard criterium niet gehaald: BIG.')
+  })
+
+  it('falls back to the server sentence when no key came along', () => {
+    expect(resolveAdviceReason({ advice: 'reject', advice_reason: 'Lage match op de geconfigureerde criteria.' }, t)).toBe('Lage match op de geconfigureerde criteria.')
+  })
+
+  it('returns null when there is no advice at all', () => {
+    expect(resolveAdviceReason(undefined, t)).toBeNull()
+    expect(resolveAdviceReason({ advice: 'proceed' }, t)).toBeNull()
   })
 })

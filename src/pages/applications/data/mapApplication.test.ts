@@ -510,6 +510,16 @@ describe('mapApplicationDetail · ai advice passthrough (S34)', () => {
     expect(d.ai).toEqual({ advice: undefined, advice_reason: undefined, auto_reject_eligible: false })
   })
 
+  it('passes a known advice_reason_key + criterion through and drops an unknown key (DEMO-TAAL, CMBE 7f10f04c)', () => {
+    const known = mapApplicationDetail({ id: 1, ai: { advice: 'reject', advice_reason: 'Hard criterium niet gehaald: BIG.', advice_reason_key: 'hard_fail', advice_reason_criterion: 'BIG', auto_reject_eligible: true } })
+    expect(known.ai?.advice_reason_key).toBe('hard_fail')
+    expect(known.ai?.advice_reason_criterion).toBe('BIG')
+    const unknown = mapApplicationDetail({ id: 1, ai: { advice: 'reject', advice_reason: 'Iets nieuws.', advice_reason_key: 'brand_new', advice_reason_criterion: null } })
+    expect(unknown.ai?.advice_reason_key).toBeUndefined()
+    expect(unknown.ai?.advice_reason_criterion).toBeUndefined()
+    expect(unknown.ai?.advice_reason).toBe('Iets nieuws.')
+  })
+
   it('maps no advice block when the backend sends none or only the list-shaped task', () => {
     expect(mapApplicationDetail({ id: 1 }).ai).toBeUndefined()
     expect(mapApplicationDetail({ id: 1, ai: { task: 'Bel de kandidaat' } }).ai).toBeUndefined()

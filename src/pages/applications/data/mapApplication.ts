@@ -9,7 +9,7 @@ import type { LookupItem } from '@/context/LookupsContext'
 import type {
   ApiApplication, Application, ApplicationDetail, ApiAppCandidate, ApiAppVacancy, ApplicationInterview,
   ApplicationStageDuration, ApplicationMatchSummary,
-} from '@/types/application'
+ AdviceReasonKey } from '@/types/application'
 
 /**
  * INTERVIEW-PHASE-1: raw interview block → the UI model. The list contract
@@ -226,6 +226,10 @@ export function mapMatchSummary(raw?: ApiApplication['match']): ApplicationMatch
  * nested objects (candidate, vacancy, interviews, appointments, timeline, match).
  * Defensive: every nested list defaults to [] so a tab never crashes.
  */
+// The advice-reason keys the backend may send (ApplicationMatchService::adviceReason).
+const ADVICE_REASON_KEYS: readonly AdviceReasonKey[] = ['hard_fail', 'strong', 'average', 'low']
+const isAdviceReasonKey = (v: unknown): v is AdviceReasonKey => typeof v === 'string' && (ADVICE_REASON_KEYS as readonly string[]).includes(v)
+
 export function mapApplicationDetail(raw: ApiApplication = {}, funnelTypes: LookupItem[] = []): ApplicationDetail {
   const base = mapApplication(raw, funnelTypes)
   const cand: ApiAppCandidate = raw.candidate ?? {}
@@ -318,7 +322,10 @@ export function mapApplicationDetail(raw: ApiApplication = {}, funnelTypes: Look
     // and the `advice_reason &&` guard behave exactly as their types promise.
     ai: raw.ai && (raw.ai.advice != null || raw.ai.advice_reason != null || raw.ai.auto_reject_eligible != null)
       ? { advice: raw.ai.advice ?? undefined, advice_reason: raw.ai.advice_reason ?? undefined,
-          auto_reject_eligible: Boolean(raw.ai.auto_reject_eligible) }
+          auto_reject_eligible: Boolean(raw.ai.auto_reject_eligible),
+          // DEMO-TAAL (CMBE 7f10f04c): only a KNOWN key passes, so the modal never t()s a raw server value.
+          advice_reason_key: isAdviceReasonKey(raw.ai.advice_reason_key) ? raw.ai.advice_reason_key : undefined,
+          advice_reason_criterion: raw.ai.advice_reason_criterion ?? undefined }
       : undefined,
     // Rejection trail (reason + toelichting/note + channel/sent_at) — S9 finding:
     // this was NEVER mapped, so a rejected application always showed just the

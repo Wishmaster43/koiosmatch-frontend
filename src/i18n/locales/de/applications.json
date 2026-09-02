@@ -413,6 +413,12 @@
     "aiAdvice": "Koios empfiehlt Ablehnung",
     "aiAuto": "Harte Kriterien nicht erfüllt. Für Auto-Ablehnung geeignet.",
     "aiConfirm": "Prüfen und bestätigen, bevor eine Nachricht gesendet wird.",
+    "adviceReasons": {
+      "hard_fail": "Hartes Kriterium nicht erfüllt: {{criterion}}.",
+      "strong": "Starke Übereinstimmung mit den konfigurierten Kriterien.",
+      "average": "Mittlere Übereinstimmung, manuelle Prüfung empfohlen.",
+      "low": "Geringe Übereinstimmung mit den konfigurierten Kriterien."
+    },
     "done": "Bewerbung abgelehnt",
     "sentOn": "Nachricht gesendet am {{date}}",
     "notSent": "Noch keine Nachricht gesendet",
