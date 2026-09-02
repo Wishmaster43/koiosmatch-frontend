@@ -91,10 +91,13 @@ compliant alternative.
     meeste willen — dat zijn wel Koios Tokens").** So the workflow-versus-code
     choice is a COMMERCIAL choice as well as a product one: a workflow run is
     billable consumption, plumbing and mass sweeps are not. **Unit names since
-    PRIJSMODEL-C (Danny 30-08, staffels):** the workflow unit is a **workflow-run**
-    (one module execution; wait/failed/plumbing steps do not count) and the AI unit
-    is a **Koios AI-token** (weighted: chat 3, other actions 1, flavour slim ×2 /
-    max ×5). A bare "Koios Token" as a unit name in code or copy is a finding
+    PRIJSMODEL-C (Danny 30-08, staffels) — label updated by K-242 (Danny 31-08,
+    verbatim "WhatsApp-Tokens worden gewoon Workflowtokens!"):** the workflow unit is
+    a **workflow-token** (user-facing label "Workflow-tokens"; unit KEY stays
+    `workflow_run`; one module execution — wait/failed/plumbing steps do not count;
+    a WhatsApp-Web send bills as ONE workflow-token, there is no separate WhatsApp
+    token, meter or budget knob any more) and the AI unit is a **Koios AI-token**
+    (weighted: chat 3, other actions 1, flavour slim ×2 / max ×5). A bare "Koios Token" as a unit name in code or copy is a finding
     (13 keys ×5 locales renamed in f34a13e6; contract in
     koiosmatch-api/docs/plans/PRIJSMODEL-C.md). And never quietly move
     a high-frequency, per-record automation into a workflow "because it is
