@@ -532,7 +532,9 @@
     "tabAdvanced": "Avancé",
     "tabTest": "Tester",
     "tabInstructions": "Instructions IA",
-    "tabTranslations": "Traductions"
+    "tabTranslations": "Traductions",
+    "tabRequests": "Requêtes",
+    "requestsPickWebhook": "Choisissez d'abord un webhook dans l'onglet Paramètres."
   },
   "translations": {
     "companyLanguage": "Langue de l'agence",

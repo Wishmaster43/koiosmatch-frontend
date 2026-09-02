@@ -4,10 +4,11 @@
  * FieldInput) and the execution-output tab. For the AI agent module it also
  * renders the Standard/Advanced/Test/Output tabs. Extracted from WorkflowCanvasEditor.
  */
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, lazy, Suspense } from 'react'
 import { Zap, Trash2, Play } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import api, { unwrapList } from '@/lib/api'
 import { SectionTitle, Caption, BodyText } from '@/components/ui/typography'
 import Button from '@/components/ui/Button'
 import DrawerTabs from '@/components/drawer/DrawerTabs'
@@ -19,6 +20,13 @@ import AgentTestPanel from './AgentTestPanel'
 import OutputTree from './OutputTree'
 import FanoutSummary, { type WaFanout } from './FanoutSummary'
 import type { FlowNode, WorkflowField, WorkflowVarGroup } from '@/types/workflow'
+
+// WEBHOOK-LOG-FE-2: lazy, not a static import — WebhookRequestsPanel pulls in
+// @/lib/datetime, whose i18n import has a real-instance initialising side
+// effect (BARREL-DATETIME-LES, §2) that would leak into every ConfigPanel test
+// suite even for non-webhook nodes. Loaded only when this step's Verzoeken tab
+// actually renders.
+const WebhookRequestsLog = lazy(() => import('@/components/webhooks/WebhookRequestsPanel').then(m => ({ default: m.WebhookRequestsLog })))
 
 // The workflow editor's right-side module configuration panel.
 export default function ConfigPanel({ node, onUpdate, onDelete, onTabChange, variables = [] }: {
@@ -35,7 +43,21 @@ export default function ConfigPanel({ node, onUpdate, onDelete, onTabChange, var
   // useModuleCatalog shares one in-flight promise across every caller.
   const { catalog } = useModuleCatalog()
   const isAgent = node?.data.type === 'ai_agent'
+  const isWebhookTrigger = node?.data.type === 'webhook'
   const [activeTab, setActiveTab] = useState(() => isAgent ? 'general' : 'settings')
+  // WEBHOOK-LOG-FE-2: the "Verzoeken" tab needs the picked webhook's NAME (the
+  // config only holds its id) — same /webhooks list the webhook_select field
+  // reads (WebhookSelectField), fetched independently here for the same reason
+  // that field fetches its own copy: no shared list cache exists yet.
+  const [webhooks, setWebhooks] = useState<Array<{ id?: string | number; name?: string }>>([])
+  useEffect(() => {
+    if (!isWebhookTrigger) return
+    let alive = true
+    api.get('/webhooks')
+      .then(r => { if (alive) setWebhooks(unwrapList<{ id?: string | number; name?: string }>(r).rows) })
+      .catch(() => {})
+    return () => { alive = false }
+  }, [isWebhookTrigger])
 
   // Widen panel for ai_agent by emitting sentinel; narrow for all other modules.
   // Stable identity (useCallback) so effects that call it can list it as a dep.
@@ -217,6 +239,9 @@ export default function ConfigPanel({ node, onUpdate, onDelete, onTabChange, var
             { id: 'execution',  label: output ? `${t('config.tabExecution')} (${Array.isArray(output) ? output.length : 1})` : t('config.tabExecution') },
           ] : [
             { id: 'settings', label: t('config.tabSettings') },
+            // WEBHOOK-LOG-FE-2: the Webhook Trigger step gets its own "Verzoeken"
+            // tab, reaching the same per-webhook request log Settings shows.
+            ...(isWebhookTrigger ? [{ id: 'requests', label: t('config.tabRequests') }] : []),
             // 02-09: a "Vertalingen" tab only when this module's schema actually
             // declares a translations-tab field AND its showIf currently passes
             // (e.g. whatsapp_send's translations field only applies to the
@@ -329,6 +354,18 @@ export default function ConfigPanel({ node, onUpdate, onDelete, onTabChange, var
             )
           )}
         </div>
+      )}
+      {/* WEBHOOK-LOG-FE-2: the "Verzoeken" tab — the same per-webhook request log
+          Settings → Integraties → Webhooks shows, for the webhook this step picked.
+          No webhook picked yet ⇒ a calm pointer to Settings, never an empty table
+          (§3 no fake affordance). */}
+      {isWebhookTrigger && activeTab === 'requests' && (
+        config?.webhook_id
+          ? <Suspense fallback={null}>
+              <WebhookRequestsLog webhookId={config.webhook_id as string | number}
+                webhookName={webhooks.find(h => String(h.id) === String(config.webhook_id))?.name ?? String(config.webhook_id)} />
+            </Suspense>
+          : <div style={{ padding: 16 }}><Caption>{t('config.requestsPickWebhook')}</Caption></div>
       )}
       {/* 02-09: the "Vertalingen" tab — reuses the shared field renderer so hint/
           required decoration stays identical to the main settings list. */}

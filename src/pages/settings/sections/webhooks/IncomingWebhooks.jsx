@@ -15,7 +15,7 @@ import { useConfirm } from '@/hooks/useConfirm'
 import Button from '@/components/ui/Button'
 import { PageTitle, SectionTitle, Caption, Mono } from '@/components/ui/typography'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
-import WebhookRequestsPanel from './WebhookRequestsPanel'
+import WebhookRequestsPanel from '@/components/webhooks/WebhookRequestsPanel'
 // DATUM-1: every user-visible date rides the house formatter, never toLocaleDateString.
 import { useDateFormat } from '@/lib/datetime'
 import { publicApiUrl } from '@/lib/publicApiUrl'

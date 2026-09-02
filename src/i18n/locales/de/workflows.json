@@ -532,7 +532,9 @@
     "tabAdvanced": "Erweitert",
     "tabTest": "Testen",
     "tabInstructions": "KI-Anweisungen",
-    "tabTranslations": "Übersetzungen"
+    "tabTranslations": "Übersetzungen",
+    "tabRequests": "Anfragen",
+    "requestsPickWebhook": "Wählen Sie zuerst einen Webhook auf dem Tab Einstellungen."
   },
   "translations": {
     "companyLanguage": "Bürosprache",

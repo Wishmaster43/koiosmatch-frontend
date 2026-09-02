@@ -25,12 +25,7 @@ export const deleteSubscription = (id) => api.delete(`/webhook-subscriptions/${i
 // Rotate the signing secret; response carries the new plaintext secret once.
 export const regenerateSecret = (id) => api.post(`/webhook-subscriptions/${id}/regenerate-secret`).then((r) => r.data)
 
-// INBOUND webhook request log (K-117): paginated summary rows, newest first,
-// deliberately WITHOUT headers/body (list is a summary; body/headers are detail-only).
-export const listWebhookRequests = (webhookId, page = 1, perPage = 50) =>
-  api.get(`/webhooks/${webhookId}/requests`, { params: { page, per_page: perPage } }).then(unwrapList)
-
-// One request's full detail (headers/query/body/response_body). Resolved by the
-// PARENT webhook (kind-door-ouder, IDOR) — a request under the wrong webhook 404s.
-export const getWebhookRequest = (webhookId, requestId) =>
-  api.get(`/webhooks/${webhookId}/requests/${requestId}`).then(unwrap)
+// INBOUND webhook request log (K-117): moved to components/webhooks (shared by
+// Settings and the workflow editor's config panel, WEBHOOK-LOG-FE-2) — re-exported
+// here so this module's existing importers/tests keep resolving unchanged.
+export { listWebhookRequests, getWebhookRequest } from '@/components/webhooks/webhookRequestsApi'

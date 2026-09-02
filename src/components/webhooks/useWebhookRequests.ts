@@ -5,7 +5,7 @@
  * that resolves after the webhook changes or the component unmounts (§9).
  */
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { listWebhookRequests } from './webhooksApi'
+import { listWebhookRequests } from './webhookRequestsApi'
 import type { WebhookRequestRow } from './webhookRequestTypes'
 
 interface RequestsResult {

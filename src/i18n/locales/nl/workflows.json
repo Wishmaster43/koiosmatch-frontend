@@ -567,7 +567,9 @@
     "tabAdvanced": "Geavanceerd",
     "tabTest": "Testen",
     "tabInstructions": "AI-instructies",
-    "tabTranslations": "Vertalingen"
+    "tabTranslations": "Vertalingen",
+    "tabRequests": "Verzoeken",
+    "requestsPickWebhook": "Kies eerst een webhook op het tabblad Instellingen."
   },
   "translations": {
     "companyLanguage": "Bedrijfstaal",

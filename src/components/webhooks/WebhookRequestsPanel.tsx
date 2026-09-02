@@ -2,7 +2,11 @@
  * WebhookRequestsPanel — the per-webhook "Verzoeken" (requests) drill-in
  * (WEBHOOK-LOG-FE-1): every request this inbound webhook received, newest
  * first, server-paginated. Row click opens WebhookRequestDetailPanel (a second
- * FloatingPanel, stacked above this one). Handles all four UI states.
+ * FloatingPanel, stacked above this one). Handles all four UI states. The table
+ * body is the named export `WebhookRequestsLog` (WEBHOOK-LOG-FE-2) so the
+ * workflow editor's Webhook Trigger config panel can embed the same log
+ * without the FloatingPanel/onClose shell; this default export stays the
+ * Settings overlay, unchanged.
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -23,15 +27,20 @@ import type { WebhookRequestRow } from './webhookRequestTypes'
 
 const PAGE_SIZE_OPTIONS = [25, 50, 100] // contract cap: ≤100 per page
 
-// Per-webhook requests drill-in (see the module doc above): server-paginated, newest first, with all four UI states handled.
-export default function WebhookRequestsPanel({ webhookId, webhookName, onClose }: {
+// The request log's table body: states, columns, pagination, retention line and
+// the detail drill-in. Shared by the Settings overlay below and the workflow
+// editor's Webhook Trigger config panel (WEBHOOK-LOG-FE-2) — same webhook, same log.
+export function WebhookRequestsLog({ webhookId, webhookName }: {
   webhookId: string | number
   webhookName: string
-  onClose: () => void
 }) {
   const { t } = useTranslation('settings')
   const { formatDateTime } = useDateFormat()
   const { page, setPage, pageSize, setPageSize, result, phase, reload } = useWebhookRequests(webhookId)
+  // Accessible name for the log region: role="region" (unlike a generic div, this
+  // role DOES expose aria-label as its accessible name) so a caller without the
+  // FloatingPanel shell — the workflow editor's config panel — still names it.
+  const tableLabel = t('webhooks.incoming.requests.title', { name: webhookName })
   // The currently drilled-into request id, if any (opens the detail panel).
   const [detailId, setDetailId] = useState<string | number | null>(null)
 
@@ -64,45 +73,58 @@ export default function WebhookRequestsPanel({ webhookId, webhookName, onClose }
   ]
 
   return (
-    <>
-      <FloatingPanel open onClose={onClose}
-        title={t('webhooks.incoming.requests.title', { name: webhookName })}
-        width={860} persistKey="webhook-requests-list" bodyStyle={{ display: 'flex', flexDirection: 'column', padding: 0 }}
-        scrollBody={false}>
-        <div style={{ padding: '12px 20px 0' }}>
-          <Caption>{t('webhooks.incoming.requests.subtitle')}</Caption>
+    <div role="region" aria-label={tableLabel} style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
+      <div style={{ padding: '12px 20px 0' }}>
+        <Caption>{t('webhooks.incoming.requests.subtitle')}</Caption>
+      </div>
+
+      {phase === 'error' ? (
+        <div style={{ padding: '24px 20px', textAlign: 'center' }}>
+          <BodyText style={{ color: 'var(--text-muted)', marginBottom: 12 }}>{t('webhooks.incoming.requests.loadError')}</BodyText>
+          <Button variant="secondary" onClick={reload}>
+            <RefreshCw size={13} /> {t('webhooks.incoming.requests.retry')}
+          </Button>
         </div>
-
-        {phase === 'error' ? (
-          <div style={{ padding: '24px 20px', textAlign: 'center' }}>
-            <BodyText style={{ color: 'var(--text-muted)', marginBottom: 12 }}>{t('webhooks.incoming.requests.loadError')}</BodyText>
-            <Button variant="secondary" onClick={reload}>
-              <RefreshCw size={13} /> {t('webhooks.incoming.requests.retry')}
-            </Button>
-          </div>
-        ) : (
-          <div style={{ flex: 1, overflow: 'auto', padding: '10px 20px 0' }}>
-            <DataTable columns={columns} rows={result.rows} onRowClick={r => setDetailId(r.id)}
-              loading={phase === 'loading'} loadingText={t('webhooks.incoming.requests.loading')}
-              emptyText={t('webhooks.incoming.requests.empty')} />
-          </div>
-        )}
-
-        {phase !== 'error' && result.total > 0 && (
-          <PaginationBar page={page} totalPages={result.lastPage} totalRows={result.total}
-            pageSize={pageSize} onPageChange={setPage} onPageSizeChange={setPageSize}
-            pageSizeOptions={PAGE_SIZE_OPTIONS} />
-        )}
-
-        {/* Retention note — always visible, per the backend's write-time 30-day retention. */}
-        <div style={{ padding: '8px 20px 14px' }}>
-          <Caption>{t('webhooks.incoming.requests.retention')}</Caption>
+      ) : (
+        <div style={{ flex: 1, overflow: 'auto', padding: '10px 20px 0' }}>
+          <DataTable columns={columns} rows={result.rows} onRowClick={r => setDetailId(r.id)}
+            loading={phase === 'loading'} loadingText={t('webhooks.incoming.requests.loading')}
+            emptyText={t('webhooks.incoming.requests.empty')} />
         </div>
-      </FloatingPanel>
+      )}
+
+      {phase !== 'error' && result.total > 0 && (
+        <PaginationBar page={page} totalPages={result.lastPage} totalRows={result.total}
+          pageSize={pageSize} onPageChange={setPage} onPageSizeChange={setPageSize}
+          pageSizeOptions={PAGE_SIZE_OPTIONS} />
+      )}
+
+      {/* Retention note — always visible, per the backend's write-time 30-day retention. */}
+      <div style={{ padding: '8px 20px 14px' }}>
+        <Caption>{t('webhooks.incoming.requests.retention')}</Caption>
+      </div>
 
       {detailId != null && (
         <WebhookRequestDetailPanel webhookId={webhookId} requestId={detailId} onClose={() => setDetailId(null)} />
       )}
-    </>
+    </div>
+  )
+}
+
+// Per-webhook requests drill-in shell (see the module doc above): the Settings
+// FloatingPanel overlay wrapping WebhookRequestsLog above.
+export default function WebhookRequestsPanel({ webhookId, webhookName, onClose }: {
+  webhookId: string | number
+  webhookName: string
+  onClose: () => void
+}) {
+  const { t } = useTranslation('settings')
+  return (
+    <FloatingPanel open onClose={onClose}
+      title={t('webhooks.incoming.requests.title', { name: webhookName })}
+      width={860} persistKey="webhook-requests-list" bodyStyle={{ display: 'flex', flexDirection: 'column', padding: 0 }}
+      scrollBody={false}>
+      <WebhookRequestsLog webhookId={webhookId} webhookName={webhookName} />
+    </FloatingPanel>
   )
 }

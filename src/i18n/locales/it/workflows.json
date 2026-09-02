@@ -567,7 +567,9 @@
     "tabAdvanced": "Avanzate",
     "tabTest": "Test",
     "tabInstructions": "Istruzioni AI",
-    "tabTranslations": "Traduzioni"
+    "tabTranslations": "Traduzioni",
+    "tabRequests": "Richieste",
+    "requestsPickWebhook": "Scegli prima un webhook nella scheda Impostazioni."
   },
   "translations": {
     "companyLanguage": "Lingua dell'agenzia",

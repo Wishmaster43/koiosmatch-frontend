@@ -17,7 +17,7 @@ import CalloutBox from '@/components/ui/CalloutBox'
 import WorkflowRefs from './WorkflowRefs'
 import { Caption, GroupLabel, Mono } from '@/components/ui/typography'
 import { useDateFormat } from '@/lib/datetime'
-import { getWebhookRequest } from './webhooksApi'
+import { getWebhookRequest } from './webhookRequestsApi'
 import { statusChipColor } from './webhookRequestStatus'
 import type { WebhookRequestDetail } from './webhookRequestTypes'
 
