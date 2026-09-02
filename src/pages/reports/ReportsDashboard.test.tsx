@@ -73,15 +73,15 @@ function setSuccess() {
 // this file (RAPPORTEN-DASHBOARD-1's own "no padded zero" test) — the
 // zero-count/calm-tint case gets its own dedicated fixture below.
 const HUB_CARDS = [
-  { key: 'candidates_no_follow_up', label: 'Kandidaten zonder opvolging', count: 3, report: 'candidates', filters: { no_contact_due: 1 } },
-  { key: 'vacancies_stale_online', label: 'Vacatures online zonder sollicitanten', count: 6, report: 'vacancies', filters: { stale_online: 1 } },
-  { key: 'matches_expiring', label: 'Matches die aflopen', count: 5, report: 'matches', filters: {} },
-  { key: 'tasks_overdue', label: 'Taken over tijd', count: 2, report: 'tasks', filters: { overdue: 1 } },
-  { key: 'customers_no_contact', label: 'Klanten lang geen contact', count: 7, report: 'customers', filters: {} },
-  { key: 'leads_pending', label: 'Leads te lang pending', count: 1, report: 'candidates', filters: {} },
-  { key: 'documents_expiring', label: 'Kandidaten met verlopend document', count: 9, report: 'candidates', filters: {} },
-  { key: 'vacancies_open', label: 'Openstaande posities', count: 8, report: 'vacancies', filters: {} },
-  { key: 'conversations_unanswered', label: 'Conversaties zonder reactie', count: 4, report: 'conversations', filters: {} },
+  { key: 'candidates_no_follow_up', label: 'SERVER Kandidaten zonder opvolging', count: 3, report: 'candidates', filters: { no_contact_due: 1 } },
+  { key: 'vacancies_stale_online', label: 'SERVER Vacatures online zonder sollicitanten', count: 6, report: 'vacancies', filters: { stale_online: 1 } },
+  { key: 'matches_expiring', label: 'SERVER Matches die aflopen', count: 5, report: 'matches', filters: {} },
+  { key: 'tasks_overdue', label: 'SERVER Taken over tijd', count: 2, report: 'tasks', filters: { overdue: 1 } },
+  { key: 'customers_no_contact', label: 'SERVER Klanten lang geen contact', count: 7, report: 'customers', filters: {} },
+  { key: 'leads_pending', label: 'SERVER Leads te lang pending', count: 1, report: 'candidates', filters: {} },
+  { key: 'documents_expiring', label: 'SERVER Kandidaten met verlopend document', count: 9, report: 'candidates', filters: {} },
+  { key: 'vacancies_open', label: 'SERVER Openstaande posities', count: 8, report: 'vacancies', filters: {} },
+  { key: 'conversations_unanswered', label: 'SERVER Conversaties zonder reactie', count: 4, report: 'conversations', filters: {} },
 ]
 
 function renderDashboard() {
@@ -205,6 +205,21 @@ describe('ReportsDashboard · attention block (PART A)', () => {
     renderDashboard()
     await userEvent.click(screen.getByRole('button', { name: '4 Conversaties zonder reactie' }))
     expect(mockNavigate).toHaveBeenCalledWith('reports.whatsapp')
+  })
+
+  it('renders the conversations signal as a plain, non-clickable row without the WhatsApp module', () => {
+    setSuccess()
+    mockHasModule.mockImplementation((m: string) => m !== 'whatsapp')
+    renderDashboard()
+    // The count still shows (honest), but nothing pretends to be a link to a 403 page.
+    expect(screen.getByText('Conversaties zonder reactie')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: '4 Conversaties zonder reactie' })).not.toBeInTheDocument()
+  })
+
+  it('translates the labels itself instead of echoing the server label', () => {
+    setSuccess()
+    renderDashboard()
+    expect(screen.queryByText(/^SERVER /)).not.toBeInTheDocument()
   })
 
   it('still renders the KPI band when the hub errors, and shows the error block', () => {

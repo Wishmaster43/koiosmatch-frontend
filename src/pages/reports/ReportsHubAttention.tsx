@@ -17,22 +17,27 @@ import ReportChartCard from './ReportChartCard'
 import ReportStateBlock from './ReportStateBlock'
 import { useReportsHub, isReportsHubForbidden } from './useReportsHub'
 import { useNavigation } from '@/context/NavigationContext'
+import { useAuth } from '@/context/AuthContext'
 import type { ReportId } from './reportIds'
 import { REPORT_IDS } from './reportIds'
 
-// A signal's `report` is not always a live reports.<id> route: the
-// conversations signal has no own page, so it lands on the WhatsApp report.
-// Flagged for Danny (CEL-DOORKLIK-CANON: a new cell link is asked, not guessed).
-const REPORT_FALLBACK: Record<string, ReportId> = { conversations: 'whatsapp' }
-function resolveReportId(report: string): ReportId {
+// A signal's `report` is not always a live reports.<id> route: the conversations
+// signal lands on the WhatsApp report (CMBE: same ConversationsReport source),
+// but only when the tenant has that module — otherwise the row is honestly
+// non-clickable, and so is any unknown future signal (CEL-DOORKLIK-CANON: no
+// link beats a guessed one).
+function resolveReportId(report: string, hasWhatsapp: boolean): ReportId | null {
   if ((REPORT_IDS as readonly string[]).includes(report)) return report as ReportId
-  return REPORT_FALLBACK[report] ?? 'candidates'
+  if (report === 'conversations') return hasWhatsapp ? 'whatsapp' : null
+  return null
 }
 
 // The attention list block: only non-zero signals, each a real button row.
 export default function ReportsHubAttention() {
   const { t } = useTranslation('analytics')
   const { navigate } = useNavigation()
+  const auth = useAuth()
+  const hasWhatsapp = (auth?.hasModule ?? (() => false))('whatsapp')
   const { data, loading, error, errorObject, refetch } = useReportsHub()
 
   // No reports.view: the block is simply absent — the KPI band above stays.
@@ -47,15 +52,23 @@ export default function ReportsHubAttention() {
       {signals.map(s => {
         // DEMO-TAAL/§5: the i18n key is the label; the server's Dutch label only backs an unmapped key.
         const label = t(`hub.attention.cards.${s.key}`, { defaultValue: s.label })
+        const target = resolveReportId(s.report, hasWhatsapp)
+        const body = (
+          <span style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
+            <Mono style={{ color: 'var(--color-warning-text)', fontWeight: 600, minWidth: 28, textAlign: 'right' }}>{s.count}</Mono>
+            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{label}</span>
+          </span>
+        )
+        // No reachable report: the count still shows, but nothing pretends to be a link.
+        if (!target) {
+          return <div key={s.key} style={{ display: 'flex', alignItems: 'center', height: 28, padding: '0 8px' }}>{body}</div>
+        }
         return (
           <Button key={s.key} variant="ghost" size="sm"
-            onClick={() => navigate(`reports.${resolveReportId(s.report)}`)}
+            onClick={() => navigate(`reports.${target}`)}
             aria-label={`${s.count} ${label}`}
             style={{ width: '100%', justifyContent: 'space-between', padding: '0 8px' }}>
-            <span style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
-              <Mono style={{ color: 'var(--color-warning-text)', fontWeight: 600, minWidth: 28, textAlign: 'right' }}>{s.count}</Mono>
-              <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{label}</span>
-            </span>
+            {body}
             <ChevronRight size={14} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
           </Button>
         )
