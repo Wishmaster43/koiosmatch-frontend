@@ -53,6 +53,15 @@ const slugify = (s) => {
 // entity (optioneel): scopes a shared lookup (e.g. /note-types) to one owning entity —
 // GET reads `?entity=X`, POST/PUT writes send `entity: X` so create/edit stay scoped
 // (mirrors NoteType::ENTITIES on the backend; NOTE-TYPES-2/3)
+// fetchEntity (optioneel): the `?entity=` param sent on GET only — defaults to
+// `entity`. Lets a caller write rows scoped to `entity` while reading a DIFFERENT
+// slice of the response (postFilter below), e.g. a "General" tab that reads the
+// unscoped list (every row) but only ever writes/shows the entity-less ones
+// (NOTE-TYPES-3: GET ?entity=X already merges in the global/null rows server-side).
+// postFilter (optioneel): (item) => bool, applied to the fetched rows client-side —
+// splits a merged entity+global response into the "this entity only" vs "global
+// only" slice a tab actually wants to show, so global rows don't render twice
+// (once under their own entity tab, once under General).
 // notFoundNotice (optioneel): a lookup requested from the backend but not deployed
 // yet 404s on GET — pass a calm i18n message and the editor shows it instead of an
 // empty list + live CRUD buttons that would silently fail (§3 no fake affordances).
@@ -71,7 +80,7 @@ const slugify = (s) => {
 // a bespoke glyph rather than the generic extraField/flagField/numberField badges
 // (NATION-FLAG-1: a flag emoji derived from item.country_code).
 
-export default function StatusListEditor({ title, subtitle, endpoint, addLabel, withColor = true, compact = false, extraField = null, flagField = null, flagFields = null, numberField = null, defaultField = null, defaultFields = null, withIcon = false, iconPicker = null, allowAdd = true, showRank = false, entity = null, notFoundNotice = null, withValueSlug = false, reorderable = true, rowPrefix = null }) {
+export default function StatusListEditor({ title, subtitle, endpoint, addLabel, withColor = true, compact = false, extraField = null, flagField = null, flagFields = null, numberField = null, defaultField = null, defaultFields = null, withIcon = false, iconPicker = null, allowAdd = true, showRank = false, entity = null, fetchEntity = undefined, postFilter = null, notFoundNotice = null, withValueSlug = false, reorderable = true, rowPrefix = null }) {
   const { t } = useTranslation('settings')
   // defaultField (singular) is sugar for a one-element defaultFields array — both
   // props stay supported so existing callers are untouched (DEFAULT-UNDO, 04-08).
@@ -116,8 +125,9 @@ export default function StatusListEditor({ title, subtitle, endpoint, addLabel, 
     setLoadError(false)
     setNotFound(false)
     setItems([])
-    api.get(endpoint, entity ? { params: { entity } } : undefined)
-      .then(r => { if (alive) setItems(unwrapList(r).rows) })
+    const readEntity = fetchEntity !== undefined ? fetchEntity : entity
+    api.get(endpoint, readEntity ? { params: { entity: readEntity } } : undefined)
+      .then(r => { if (alive) setItems(postFilter ? unwrapList(r).rows.filter(postFilter) : unwrapList(r).rows) })
       // A 404 means this lookup isn't deployed on the backend yet — surface the calm
       // notice when the caller opted in; every other/unscoped lookup keeps swallowing
       // silently as before (its endpoint always exists). Any OTHER failure (500/network)
@@ -130,7 +140,7 @@ export default function StatusListEditor({ title, subtitle, endpoint, addLabel, 
       })
       .finally(() => { if (alive) setLoading(false) })
     return () => { alive = false }
-  }, [endpoint, entity, notFoundNotice])
+  }, [endpoint, entity, fetchEntity, postFilter, notFoundNotice])
 
   // Open the modal blank (create) or prefilled with an existing item (edit).
   const openCreate = () => { setEditing(null); setDraft(emptyDraft()); setShowModal(true) }

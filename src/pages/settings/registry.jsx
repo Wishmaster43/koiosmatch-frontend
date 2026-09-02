@@ -482,6 +482,9 @@ export const NAV_GROUPS = [
     // that entity grows a real FE reader.
     key: 'note_types', icon: MessageSquare,
     items: [
+      // General (entity=null) comes first — the global rows every entity tab used to
+      // inherit silently via the backend's ?entity= merge (NOTE-TYPES-3).
+      { id: 'nt_general', icon: MessageSquare, render: () => <NoteTypesSettings entity={null} /> },
       { id: 'nt_candidate', icon: Users, render: () => <NoteTypesSettings entity="candidate" /> },
       { id: 'nt_application', icon: ClipboardList, render: () => <NoteTypesSettings entity="application" /> },
       { id: 'nt_customer', icon: Building2, render: () => <NoteTypesSettings entity="customer" /> },

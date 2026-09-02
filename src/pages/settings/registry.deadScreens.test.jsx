@@ -91,7 +91,9 @@ describe('settings registry offers no screen without a consumer', () => {
   })
 
   it('every note-type sub-tab has an entity some screen actually reads', () => {
-    const offered = itemIds('note_types').map(id => id.replace(/^nt_/, ''))
+    // NOTE-TYPES-3 (02-09): 'general' is the entity-less tab (global rows, entity null)
+    // that every reader merges in server-side — it has no reader of its own by design.
+    const offered = itemIds('note_types').map(id => id.replace(/^nt_/, '')).filter(e => e !== 'general')
     expect(offered.length).toBeGreaterThan(0)
     const withoutReader = offered.filter(entity => !NOTE_TYPE_READERS.has(entity))
     expect(withoutReader).toEqual([])
