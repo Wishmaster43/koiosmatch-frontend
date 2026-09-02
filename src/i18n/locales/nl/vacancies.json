@@ -438,7 +438,9 @@
     "required": "Titel is verplicht."
   },
   "map": {
-    "pointCount": "{{count}} vacatures op de kaart"
+    "pointCount": "{{count}} vacatures op de kaart",
+    "pendingGeocode_one": "{{count}} vacature staat nog niet op de kaart. Het adres wordt automatisch verwerkt.",
+    "pendingGeocode_other": "{{count}} vacatures staan nog niet op de kaart. Adressen worden automatisch verwerkt."
   },
   "ai": {
     "title": "Koios AI adviseert",

@@ -438,7 +438,9 @@
     "required": "Title is required."
   },
   "map": {
-    "pointCount": "{{count}} vacancies on the map"
+    "pointCount": "{{count}} vacancies on the map",
+    "pendingGeocode_one": "{{count}} vacancy is not on the map yet. The address is processed automatically.",
+    "pendingGeocode_other": "{{count}} vacancies are not on the map yet. Addresses are processed automatically."
   },
   "ai": {
     "title": "Koios AI advises",

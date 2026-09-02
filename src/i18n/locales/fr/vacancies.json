@@ -438,7 +438,9 @@
     "required": "Le titre est requis."
   },
   "map": {
-    "pointCount": "{{count}} postes sur la carte"
+    "pointCount": "{{count}} postes sur la carte",
+    "pendingGeocode_one": "{{count}} poste n'est pas encore sur la carte. L'adresse est traitée automatiquement.",
+    "pendingGeocode_other": "{{count}} postes ne sont pas encore sur la carte. Les adresses sont traitées automatiquement."
   },
   "ai": {
     "title": "Koios AI conseille",

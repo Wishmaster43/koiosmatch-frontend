@@ -531,6 +531,8 @@
     "phone": "Téléphone",
     "email": "E-mail",
     "mapNoCoords": "Aucun emplacement avec des coordonnées pour l'instant. Renseignez l'adresse d'un emplacement et il apparaîtra automatiquement sur la carte.",
+    "mapPending_one": "{{count}} emplacement n'est pas encore sur la carte. L'adresse est traitée automatiquement.",
+    "mapPending_other": "{{count}} emplacements ne sont pas encore sur la carte. Les adresses sont traitées automatiquement.",
     "color": "Couleur",
     "icon": "Icône",
     "colorHint": "La couleur et l’icône rendent un site reconnaissable dans les listes et sur la carte.",

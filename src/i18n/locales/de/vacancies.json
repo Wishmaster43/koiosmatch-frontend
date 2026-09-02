@@ -438,7 +438,9 @@
     "required": "Titel ist erforderlich."
   },
   "map": {
-    "pointCount": "{{count}} Stellen auf der Karte"
+    "pointCount": "{{count}} Stellen auf der Karte",
+    "pendingGeocode_one": "{{count}} Stelle ist noch nicht auf der Karte. Die Adresse wird automatisch verarbeitet.",
+    "pendingGeocode_other": "{{count}} Stellen sind noch nicht auf der Karte. Adressen werden automatisch verarbeitet."
   },
   "ai": {
     "title": "Koios AI empfiehlt",

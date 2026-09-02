@@ -553,6 +553,8 @@
     "phone": "Telefoon",
     "email": "E-mailadres",
     "mapNoCoords": "Nog geen vestigingen met coördinaten. Vul het adres van een locatie in, dan verschijnt die automatisch op de kaart.",
+    "mapPending_one": "{{count}} vestiging staat nog niet op de kaart. Het adres wordt automatisch verwerkt.",
+    "mapPending_other": "{{count}} vestigingen staan nog niet op de kaart. Adressen worden automatisch verwerkt.",
     "color": "Kleur",
     "icon": "Icoon",
     "colorHint": "Kleur en icoon maken een vestiging herkenbaar in lijsten en op de kaart.",

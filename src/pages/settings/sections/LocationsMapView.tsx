@@ -7,7 +7,8 @@
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import RadiusMapPanel, { type MapPoint } from '@/components/map/RadiusMapPanel'
-import { toCoord } from '@/lib/coords'
+import PendingGeocodeBanner from '@/components/map/PendingGeocodeBanner'
+import { countPendingGeocode, toCoord } from '@/lib/coords'
 import type { Id } from '@/types/common'
 
 // Minimal row shape — the settings section passes raw API rows (host file is .jsx)
@@ -50,9 +51,14 @@ export default function LocationsMapView({ locations }: { locations: LocationRow
   // Local radius filter — the circle drawn on the map always tells the truth.
   const points = useMemo(() => allPoints.filter(p => distanceKm(center, p) <= radiusKm), [allPoints, center, radiusKm])
 
-  // Honest empty note: no geocoded rows yet (either no locations, or none with an address).
+  // Rij 34: offices with an address but no coordinates yet are still queued for the geocoder.
+  const pending = countPendingGeocode(locations)
+  const banner = <PendingGeocodeBanner count={pending} padded={false} label={t('locations.mapPending', { count: pending })} />
+
+  // Honest empty state: addresses filled but still processing → the banner (not the
+  // "fill in an address" note, which would be untrue); nothing addressed → the note.
   if (allPoints.length === 0) {
-    return (
+    return pending > 0 ? banner : (
       <p style={{ fontSize: 13, color: 'var(--text-muted)', fontStyle: 'italic', padding: '24px 0' }}>
         {t('locations.mapNoCoords')}
       </p>
@@ -62,6 +68,7 @@ export default function LocationsMapView({ locations }: { locations: LocationRow
   return (
     // Fixed panel height so the flex-filling map gets room inside the settings column.
     <div style={{ display: 'flex', flexDirection: 'column', height: 520 }}>
+      {banner}
       <RadiusMapPanel points={points} center={center} radiusKm={radiusKm} padded={false}
         onCenterChange={(lat, lng) => setCenter({ lat, lng })} onRadiusChange={setRadiusKm}
         onPick={() => { /* settings has no drawer to open — tooltip carries the info */ }} />

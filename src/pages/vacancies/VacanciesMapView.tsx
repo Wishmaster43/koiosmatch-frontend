@@ -5,6 +5,8 @@
  */
 import { useTranslation } from 'react-i18next'
 import RadiusMapPanel, { type MapPoint } from '@/components/map/RadiusMapPanel'
+import PendingGeocodeBanner from '@/components/map/PendingGeocodeBanner'
+import { countPendingGeocode } from '@/lib/coords'
 import type { Vacancy } from '@/types/vacancy'
 import type { Id } from '@/types/common'
 
@@ -33,9 +35,15 @@ export default function VacanciesMapView({ rows, center, radiusKm, onCenterChang
       color: v.statusColor || '#9CA3AF',
     }))
 
+  // Rij 34: addressed rows still waiting for the background geocoder get one calm line above the map.
+  const pending = countPendingGeocode(rows)
+
   return (
-    <RadiusMapPanel points={points} center={center} radiusKm={radiusKm} padded={padded} onClearRadius={onClearRadius}
-      onCenterChange={onCenterChange} onRadiusChange={onRadiusChange} onPick={onPick}
-      pointsLabel={t('vacancies:map.pointCount', { count: points.length })} />
+    <>
+      <PendingGeocodeBanner count={pending} padded={padded} label={t('vacancies:map.pendingGeocode', { count: pending })} />
+      <RadiusMapPanel points={points} center={center} radiusKm={radiusKm} padded={padded} onClearRadius={onClearRadius}
+        onCenterChange={onCenterChange} onRadiusChange={onRadiusChange} onPick={onPick}
+        pointsLabel={t('vacancies:map.pointCount', { count: points.length })} />
+    </>
   )
 }

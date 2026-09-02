@@ -531,6 +531,8 @@
     "phone": "Teléfono",
     "email": "Correo electrónico",
     "mapNoCoords": "Aún no hay ubicaciones con coordenadas: introduce la dirección de una ubicación y aparecerá automáticamente en el mapa.",
+    "mapPending_one": "{{count}} ubicación aún no aparece en el mapa. La dirección se procesa automáticamente.",
+    "mapPending_other": "{{count}} ubicaciones aún no aparecen en el mapa. Las direcciones se procesan automáticamente.",
     "color": "Color",
     "icon": "Icono",
     "colorHint": "El color y el icono hacen reconocible una sede en listas y en el mapa.",

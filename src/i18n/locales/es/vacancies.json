@@ -438,7 +438,9 @@
     "required": "El título es obligatorio."
   },
   "map": {
-    "pointCount": "{{count}} vacantes en el mapa"
+    "pointCount": "{{count}} vacantes en el mapa",
+    "pendingGeocode_one": "{{count}} vacante aún no aparece en el mapa. La dirección se procesa automáticamente.",
+    "pendingGeocode_other": "{{count}} vacantes aún no aparecen en el mapa. Las direcciones se procesan automáticamente."
   },
   "ai": {
     "title": "Koios AI aconseja",

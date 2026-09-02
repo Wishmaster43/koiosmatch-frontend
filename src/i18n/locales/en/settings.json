@@ -553,6 +553,8 @@
     "phone": "Phone",
     "email": "Email",
     "mapNoCoords": "No locations with coordinates yet. Fill in a location's address and it will appear on the map automatically.",
+    "mapPending_one": "{{count}} location is not on the map yet. The address is processed automatically.",
+    "mapPending_other": "{{count}} locations are not on the map yet. Addresses are processed automatically.",
     "color": "Colour",
     "icon": "Icon",
     "colorHint": "Colour and icon make a branch recognisable in lists and on the map.",

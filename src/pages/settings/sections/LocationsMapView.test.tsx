@@ -39,3 +39,27 @@ describe('LocationsMapView', () => {
     expect(screen.queryByText('Leeg')).toBeNull()
   })
 })
+
+// Rij 34 (Danny 02-09, "banner ja"): offices with an address but no coordinates yet.
+describe('LocationsMapView · pending-geocode banner', () => {
+  it('shows the banner next to the located offices when one addressed office is still unlocated', () => {
+    render(<LocationsMapView locations={[
+      { id: '1', name: 'Yesway Breda', city: 'Breda', lat: '51.5719', lng: '4.7683' },
+      { id: '5', name: 'Yesway Zwolle', city: 'Zwolle', lat: null, lng: null },
+    ] as never} />)
+    expect(screen.getByText('locations.mapPending')).toBeInTheDocument()
+    expect(screen.getByText('Yesway Breda')).toBeInTheDocument()
+  })
+
+  it('replaces the "fill in an address" note with the banner when every addressed office is still processing', () => {
+    render(<LocationsMapView locations={[{ id: '5', name: 'Yesway Zwolle', city: 'Zwolle', lat: null, lng: null }] as never} />)
+    expect(screen.getByText('locations.mapPending')).toBeInTheDocument()
+    expect(screen.queryByText('locations.mapNoCoords')).toBeNull()
+  })
+
+  it('keeps the note, without a banner, when no office has an address', () => {
+    render(<LocationsMapView locations={[{ id: '3', name: 'Zonder adres', city: '', lat: null, lng: null }] as never} />)
+    expect(screen.getByText('locations.mapNoCoords')).toBeInTheDocument()
+    expect(screen.queryByText('locations.mapPending')).toBeNull()
+  })
+})
