@@ -62,45 +62,121 @@ describe('WorkflowRelationsView', () => {
     fireEvent.click(toggle)
     await waitFor(() => expect(api.put).toHaveBeenCalledWith('/workflows/p1', { status: 'inactive', active: false }))
   })
+
+  // Regression (verifier findings 1+2): the toggle must visually flip on the
+  // row it was clicked from — not just fire the PUT — whether that row came
+  // from the served `tree` or from the K-254 `called_by` list.
+  it('flips a tree-node toggle visually, not just the PUT call', async () => {
+    mockedGet.mockResolvedValue({ data: {
+      parents: [], children: [{ id: 'c1', name: 'Kindflow', status: 'active' }],
+      tree: { id: 'wf-1', name: 'Root', status: 'active', children: [
+        { id: 'c1', name: 'Kindflow', status: 'active', children: [] },
+      ] },
+    } })
+    render(<WorkflowRelationsView workflowId="wf-1" />)
+    const toggle = await screen.findByRole('switch')
+    expect(toggle).toHaveAttribute('aria-checked', 'true')
+
+    fireEvent.click(toggle)
+    await waitFor(() => expect(api.put).toHaveBeenCalledWith('/workflows/c1', { status: 'inactive', active: false }))
+    expect(toggle).toHaveAttribute('aria-checked', 'false')
+  })
+
+  it('flips a called_by row toggle visually (the default K-254 parents path)', async () => {
+    mockedGet.mockResolvedValue({ data: {
+      parents: [], called_by: [{ id: 'p9', name: 'Beller', status: 'active' }], children: [],
+    } })
+    render(<WorkflowRelationsView workflowId="wf-1" />)
+    const toggle = await screen.findByRole('switch')
+    expect(toggle).toHaveAttribute('aria-checked', 'true')
+
+    fireEvent.click(toggle)
+    await waitFor(() => expect(api.put).toHaveBeenCalledWith('/workflows/p9', { status: 'inactive', active: false }))
+    expect(toggle).toHaveAttribute('aria-checked', 'false')
+  })
 })
 
 // WF-WACHTRIJ-FE-1: the queue badge per related workflow (K-171) — only ever
 // renders when there is something in the queue, never a noisy "0".
-// WF-RELATIONS-BOOM-1: the recursive tree — lazy expand fetches the CHILD's own
-// relations, a failing relation carries the visible warning marker, and a cycle
-// renders the loop marker instead of an expander.
+// K-254: the recursive tree now comes fully served in ONE response (`tree`,
+// server-built, max depth 5) — no more lazy per-node fetch. A failing relation
+// still carries the visible warning marker, a cycle still renders the loop
+// marker instead of an expander, and a truncated node shows a caption instead
+// of recursing further.
 describe('WorkflowRelationsView · recursive tree', () => {
   it('renders the warning marker on a child whose last run failed', async () => {
-    mockedGet.mockResolvedValue({ data: { parents: [], children: [
-      { id: 'c1', name: 'Kindflow', status: 'active', last_run_status: 'failed' },
-    ] } })
+    mockedGet.mockResolvedValue({ data: {
+      parents: [],
+      children: [{ id: 'c1', name: 'Kindflow', status: 'active', last_run_status: 'failed' }],
+      tree: { id: 'wf-1', name: 'Root', status: 'active', children: [
+        { id: 'c1', name: 'Kindflow', status: 'active', children: [] },
+      ] },
+    } })
     render(<WorkflowRelationsView workflowId="wf-1" />)
     expect(await screen.findByRole('img', { name: 'Laatste run mislukt' })).toBeInTheDocument()
   })
 
-  it('expanding a child fetches THAT workflow\'s relations and renders its nested child', async () => {
-    mockedGet.mockImplementation((url: string) => {
-      if (url === '/workflows/wf-1/relations') return Promise.resolve({ data: { parents: [], children: [{ id: 'c1', name: 'Kindflow', status: 'active' }] } })
-      if (url === '/workflows/c1/relations') return Promise.resolve({ data: { parents: [], children: [{ id: 'g1', name: 'Kleinkindflow', status: 'active' }] } })
-      return Promise.resolve({ data: { parents: [], children: [] } })
-    })
+  it('a served tree renders its nested grandchild in a single fetch', async () => {
+    mockedGet.mockResolvedValue({ data: {
+      parents: [],
+      children: [{ id: 'c1', name: 'Kindflow', status: 'active' }],
+      tree: { id: 'wf-1', name: 'Root', status: 'active', children: [
+        { id: 'c1', name: 'Kindflow', status: 'active', children: [
+          { id: 'g1', name: 'Kleinkindflow', status: 'active', children: [] },
+        ] },
+      ] },
+    } })
     render(<WorkflowRelationsView workflowId="wf-1" />)
     fireEvent.click(await screen.findByRole('button', { name: 'Onderliggende workflows tonen' }))
     expect(await screen.findByText('Kleinkindflow')).toBeInTheDocument()
-    expect(mockedGet).toHaveBeenCalledWith('/workflows/c1/relations')
+    // ONE relations fetch total — the whole tree came served, no per-node call
+    // (other GETs may still fire for the per-row queue badge, unrelated to the tree).
+    expect(mockedGet.mock.calls.filter(c => c[0] === '/workflows/wf-1/relations')).toHaveLength(1)
+    expect(mockedGet).not.toHaveBeenCalledWith('/workflows/c1/relations')
+    expect(mockedGet).not.toHaveBeenCalledWith('/workflows/g1/relations')
   })
 
   it('a cycle back to an ancestor renders the loop marker, never an expander', async () => {
-    mockedGet.mockImplementation((url: string) => {
-      if (url === '/workflows/wf-1/relations') return Promise.resolve({ data: { parents: [], children: [{ id: 'c1', name: 'Kindflow', status: 'active' }] } })
-      if (url === '/workflows/c1/relations') return Promise.resolve({ data: { parents: [], children: [{ id: 'wf-1', name: 'Rootflow', status: 'active' }] } })
-      return Promise.resolve({ data: { parents: [], children: [] } })
-    })
+    mockedGet.mockResolvedValue({ data: {
+      parents: [],
+      children: [{ id: 'c1', name: 'Kindflow', status: 'active' }],
+      tree: { id: 'wf-1', name: 'Root', status: 'active', children: [
+        { id: 'c1', name: 'Kindflow', status: 'active', children: [
+          { id: 'wf-1', name: 'Rootflow', status: 'active', cycle: true, children: [] },
+        ] },
+      ] },
+    } })
     render(<WorkflowRelationsView workflowId="wf-1" />)
     fireEvent.click(await screen.findByRole('button', { name: 'Onderliggende workflows tonen' }))
     expect(await screen.findByRole('img', { name: 'Deze workflow zit al in deze tak (lus)' })).toBeInTheDocument()
     // The looping row offers NO further expander (one expander total: the outer child's, now collapsed-state toggled).
     expect(screen.getAllByRole('button', { name: /Onderliggende workflows/ })).toHaveLength(1)
+  })
+
+  it('a truncated node shows a caption instead of recursing further', async () => {
+    mockedGet.mockResolvedValue({ data: {
+      parents: [],
+      children: [{ id: 'c1', name: 'Kindflow', status: 'active' }],
+      tree: { id: 'wf-1', name: 'Root', status: 'active', children: [
+        { id: 'c1', name: 'Kindflow', status: 'active', truncated: true, children: [] },
+      ] },
+    } })
+    render(<WorkflowRelationsView workflowId="wf-1" />)
+    await screen.findByText('Kindflow')
+    expect(screen.getByText('Al hierboven getoond')).toBeInTheDocument()
+  })
+
+  it('shows the call mode chip next to a node the workflow itself calls', async () => {
+    mockedGet.mockResolvedValue({ data: {
+      parents: [],
+      children: [{ id: 'c1', name: 'Kindflow', status: 'active' }],
+      calls: [{ id: 'c1', name: 'Kindflow', status: 'active', mode: 'sync' }],
+      tree: { id: 'wf-1', name: 'Root', status: 'active', children: [
+        { id: 'c1', name: 'Kindflow', status: 'active', children: [] },
+      ] },
+    } })
+    render(<WorkflowRelationsView workflowId="wf-1" />)
+    expect(await screen.findByText('direct')).toBeInTheDocument()
   })
 })
 

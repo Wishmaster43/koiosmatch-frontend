@@ -389,7 +389,8 @@
       "copyId": "Zum Kopieren der ID klicken",
       "processed": "Verarbeitet",
       "lineage": "Herkunft",
-      "parentRunId": "Übergeordnete Run-ID"
+      "parentRunId": "Übergeordnete Run-ID",
+      "childRuns": "Kind-Runs"
     },
     "openHistory": "In Verlauf anzeigen",
     "dryRun": {

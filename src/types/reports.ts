@@ -137,6 +137,8 @@ export interface RunRow {
   parent_run_id?: string | number | null
   parent_workflow_id?: string | number | null
   call_chain?: Array<{ id?: string | number; name?: string } | string | number>
+  // K-254: GET /workflow-runs/{id} (detail only — list rows carry [] on purpose).
+  child_runs?: Array<{ id?: string | number; workflow_id?: string | number; status?: string }>
   [key: string]: unknown
 }
 

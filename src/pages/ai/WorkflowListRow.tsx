@@ -132,6 +132,11 @@ export default function WorkflowListRow({ workflow, folderName, onRun, onEdit, o
   metaParts.push(workflow.last_run ? formatDateTime(workflow.last_run.time) : t('page.notRun'))
   if (folderName) metaParts.push(folderName)
   if (workflow.updated_at) metaParts.push(t('list.updated', { date: formatDateTime(workflow.updated_at) }))
+  // K-254: existing-target call-graph counters — never a noisy "0" (§SCHERMWAARHEID).
+  const calls = workflow.relations_summary?.calls ?? 0
+  const calledBy = workflow.relations_summary?.called_by ?? 0
+  if (calls > 0) metaParts.push(t('list.relationsCalls', { count: calls }))
+  if (calledBy > 0) metaParts.push(t('list.relationsCalledBy', { count: calledBy }))
 
   // Run stays a distinct action (stopPropagation) even though the row opens the editor.
   const handleRun = async (e: MouseEvent) => {

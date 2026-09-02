@@ -33,6 +33,32 @@ export default function RunDetailDrawer({ run, onClose, zIndex = 50 }: {
   const [stopError, setStopError] = useState<string | null>(null)
   const shown = live ?? run
 
+  // K-254 (WF-RELATIONS-FE-2): the run DETAIL carries fields the list row never
+  // does (parent_run_id/parent_workflow_id/call_chain/child_runs) — fetched once
+  // on open, quiet on failure (the drawer already works without it). Detail wins
+  // over the list row for these specific keys only.
+  const [detail, setDetail] = useState<RunRow | null>(null)
+  useEffect(() => {
+    if (run.id == null) return
+    let alive = true
+    // Promise.resolve(...) so a test double that doesn't return a promise (or
+    // throws synchronously) never crashes the effect — quiet on failure by design.
+    Promise.resolve(api.get(`/workflow-runs/${run.id}`)).then(res => {
+      if (!alive) return
+      const body = res?.data as { data?: RunRow } | RunRow | undefined
+      const row = ((body as { data?: RunRow })?.data ?? body) as RunRow | undefined
+      if (row) setDetail(row)
+    }).catch(() => {})
+    return () => { alive = false }
+  }, [run.id])
+  const enriched: RunRow = {
+    ...shown,
+    parent_run_id: detail?.parent_run_id ?? shown.parent_run_id,
+    parent_workflow_id: detail?.parent_workflow_id ?? shown.parent_workflow_id,
+    call_chain: detail?.call_chain ?? shown.call_chain,
+    child_runs: detail?.child_runs ?? shown.child_runs,
+  }
+
   // One fetch of this run's fresh row — shared by the poll interval AND the
   // immediate refresh right after a successful stop (no waiting out the 3s tick).
   // Resolves the fresh row (or undefined) so callers can react to its status.
@@ -180,7 +206,7 @@ export default function RunDetailDrawer({ run, onClose, zIndex = 50 }: {
 
           {/* WF-RELATIONS-FE-1: the call-chain lineage — renders nothing for a
               root-level run (no parent), the honest empty case. */}
-          <RunLineage run={shown} />
+          <RunLineage run={enriched} />
 
           {/* Step results with expandable INPUT/OUTPUT */}
           {steps.length > 0 && (

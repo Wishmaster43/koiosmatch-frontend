@@ -12,11 +12,17 @@
  * raw context, set by WorkflowCallModule) — until CMBE adds them, every real
  * run renders nothing here. The read below already matches the engine's field
  * names, so this lights up the moment the presenter ships them.
+ *
+ * K-254 (WF-RELATIONS-FE-2): below the breadcrumb, a "Kind-runs" list renders
+ * when `child_runs` (GET /workflow-runs/{id} detail only) is non-empty — status
+ * badge + a short mono id. NOT clickable: there is no run deep-link route yet,
+ * so this is a status glance only, never a fake affordance (§3).
  */
 import { ChevronRight } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import EntityLink from '@/components/ui/EntityLink'
 import { GroupLabel, Mono, Caption } from '@/components/ui/typography'
+import { StatusBadge } from './runFormat'
 import type { RunRow } from '@/types/reports'
 
 // One call-chain entry can arrive as a bare id or an {id, name} object.
@@ -29,7 +35,8 @@ export default function RunLineage({ run }: { run: RunRow }) {
   const ctx = run.context ?? {}
   const parentRunId = run.parent_run_id ?? ctx.parent_run_id ?? null
   const chain = run.call_chain ?? ctx.call_chain ?? []
-  if (parentRunId == null && chain.length === 0) return null
+  const childRuns = run.child_runs ?? []
+  if (parentRunId == null && chain.length === 0 && childRuns.length === 0) return null
 
   const entries = chain.map(asEntry)
   return (
@@ -49,6 +56,19 @@ export default function RunLineage({ run }: { run: RunRow }) {
         <Caption as="div" style={{ marginTop: 6 }}>
           {t('runs.drawer.parentRunId')}: <Mono>{String(parentRunId)}</Mono>
         </Caption>
+      )}
+      {childRuns.length > 0 && (
+        <div style={{ marginTop: 10 }}>
+          <GroupLabel style={{ marginBottom: 6 }}>{t('runs.drawer.childRuns')}</GroupLabel>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+            {childRuns.map((c, i) => (
+              <div key={c.id != null ? String(c.id) : i} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                {c.status && <StatusBadge status={c.status} />}
+                {c.id != null && <Mono>{String(c.id).slice(0, 8)}</Mono>}
+              </div>
+            ))}
+          </div>
+        </div>
       )}
     </div>
   )

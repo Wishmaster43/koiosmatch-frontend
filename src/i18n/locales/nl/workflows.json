@@ -329,7 +329,11 @@
     "archivedBadge": "Gearchiveerd",
     "restore": "Herstellen",
     "restoreWorkflow": "Workflow herstellen",
-    "archiveWorkflow": "Workflow archiveren"
+    "archiveWorkflow": "Workflow archiveren",
+    "relationsCalls_one": "roept {{count}} workflow aan",
+    "relationsCalls_other": "roept {{count}} workflows aan",
+    "relationsCalledBy_one": "{{count}}× aangeroepen",
+    "relationsCalledBy_other": "{{count}}× aangeroepen"
   },
   "page": {
     "notRun": "Nog niet uitgevoerd",
@@ -922,7 +926,16 @@
     "Vertalingen": "Vertalingen",
     "text": "Berichttekst",
     "subject": "Onderwerp",
-    "body": "Bericht"
+    "body": "Bericht",
+    "Uitvoering": "Uitvoering",
+    "Stop bij mislukt kind (sync)": "Stop bij mislukt kind (sync)",
+    "Huidige records meesturen": "Huidige records meesturen",
+    "Extra gegevens": "Extra gegevens",
+    "Aangeroepen workflow": "Aangeroepen workflow",
+    "In wachtrij gezet": "In wachtrij gezet",
+    "Direct uitgevoerd (sync)": "Direct uitgevoerd (sync)",
+    "Kind-run id": "Kind-run id",
+    "Uitkomst kind-run (sync)": "Uitkomst kind-run (sync)"
   },
   "fieldOptions": {
     "Array (meerdere bundles)": "Array (meerdere bundles)",
@@ -1094,7 +1107,9 @@
     "automatic": "Automatisch",
     "WhatsApp-storing": "WhatsApp-storing",
     "WhatsApp hersteld": "WhatsApp hersteld",
-    "match_and_candidate_owner": "eigenaar match én kandidaat"
+    "match_and_candidate_owner": "eigenaar match én kandidaat",
+    "queue": "Wachtrij (asynchroon)",
+    "sync": "Direct (wachten op het kind)"
   },
   "agentTest": {
     "title": "Test-variabelen",
@@ -1225,7 +1240,11 @@
     "De genummerde stappen die de AI-agent doorloopt, elk met een optioneel outputveld en variabele-chips": "De genummerde stappen die de AI-agent doorloopt, elk met een optioneel outputveld en variabele-chips.",
     "Extra persona- en toonaanwijzingen voor de AI-agent, naast de instructies hierboven Het runtime-antwoordcontract wordt automatisch toegevoegd": "Extra persona- en toonaanwijzingen voor de AI-agent, naast de instructies hierboven. Het runtime-antwoordcontract wordt automatisch toegevoegd.",
     "Volgt standaard de tenant-instelling; deze vacature kan dat hier overschrijven": "Volgt standaard de tenant-instelling; deze vacature kan dat hier overschrijven.",
-    "Verplicht als de gekozen agent geen intro-template heeft; een verse sollicitant zit buiten het 24-uursvenster, dus een sessietekst als intro faalt": "Verplicht als de gekozen agent geen intro-template heeft; een verse sollicitant zit buiten het 24-uursvenster, dus een sessietekst als intro faalt."
+    "Verplicht als de gekozen agent geen intro-template heeft; een verse sollicitant zit buiten het 24-uursvenster, dus een sessietekst als intro faalt": "Verplicht als de gekozen agent geen intro-template heeft; een verse sollicitant zit buiten het 24-uursvenster, dus een sessietekst als intro faalt.",
+    "queue (standaard) = wachtrij, deze stap wacht niet sync = direct uitvoeren; de uitkomst van het kind komt terug in deze stap": "queue (standaard) = wachtrij, deze stap wacht niet. sync = direct uitvoeren; de uitkomst van het kind komt terug in deze stap.",
+    "Alleen bij direct uitvoeren een mislukte kind-workflow laat deze stap mislukken Uit = doorgaan; de uitkomst staat in child_run_status": "Alleen bij direct uitvoeren: een mislukte kind-workflow laat deze stap mislukken. Uit = doorgaan; de uitkomst staat in child_run_status.",
+    "Standaard aan de kandidaten/records van deze stap reizen mee als context van het kind": "Standaard aan: de kandidaten/records van deze stap reizen mee als context van het kind.",
+    "Extra sleutel/waarde-paren voor het kind ({{trigger*}} wordt hier al opgelost)": "Extra sleutel/waarde-paren voor het kind ({{trigger.*}} wordt hier al opgelost)."
   },
   "triggers": {
     "events": {
@@ -1296,7 +1315,10 @@
     "childFailing": "Laatste run mislukt",
     "expand": "Onderliggende workflows tonen",
     "collapse": "Onderliggende workflows verbergen",
-    "cycle": "Deze workflow zit al in deze tak (lus)"
+    "cycle": "Deze workflow zit al in deze tak (lus)",
+    "truncated": "Al hierboven getoond",
+    "modeQueue": "wachtrij",
+    "modeSync": "direct"
   },
   "notFound": {
     "title": "Workflow niet gevonden",

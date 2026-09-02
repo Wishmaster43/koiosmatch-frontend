@@ -268,7 +268,11 @@
     "archivedBadge": "Archivé",
     "restore": "Restaurer",
     "restoreWorkflow": "Restaurer le workflow",
-    "archiveWorkflow": "Archiver le workflow"
+    "archiveWorkflow": "Archiver le workflow",
+    "relationsCalls_one": "appelle {{count}} workflow",
+    "relationsCalls_other": "appelle {{count}} workflows",
+    "relationsCalledBy_one": "appelé {{count}} fois",
+    "relationsCalledBy_other": "appelé {{count}} fois"
   },
   "page": {
     "notRun": "Pas encore exécuté",
@@ -887,7 +891,16 @@
     "Vertalingen": "Traductions",
     "text": "Texte du message",
     "subject": "Objet",
-    "body": "Message"
+    "body": "Message",
+    "Uitvoering": "Exécution",
+    "Stop bij mislukt kind (sync)": "Arrêter si l'enfant échoue (sync)",
+    "Huidige records meesturen": "Transmettre les enregistrements actuels",
+    "Extra gegevens": "Données supplémentaires",
+    "Aangeroepen workflow": "Workflow appelé",
+    "In wachtrij gezet": "Mis en file d'attente",
+    "Direct uitgevoerd (sync)": "Exécuté directement (sync)",
+    "Kind-run id": "Id du run enfant",
+    "Uitkomst kind-run (sync)": "Résultat du run enfant (sync)"
   },
   "fieldOptions": {
     "Array (meerdere bundles)": "Tableau (plusieurs bundles)",
@@ -1059,7 +1072,9 @@
     "automatic": "Automatique",
     "WhatsApp-storing": "Panne WhatsApp",
     "WhatsApp hersteld": "WhatsApp rétabli",
-    "match_and_candidate_owner": "propriétaire du match et du candidat"
+    "match_and_candidate_owner": "propriétaire du match et du candidat",
+    "queue": "File d'attente (asynchrone)",
+    "sync": "Direct (attendre l'enfant)"
   },
   "agentTest": {
     "title": "Variables de test",
@@ -1225,7 +1240,11 @@
     "De genummerde stappen die de AI-agent doorloopt, elk met een optioneel outputveld en variabele-chips": "Les étapes numérotées que l'agent IA parcourt, chacune avec un champ de sortie optionnel et des jetons de variables.",
     "Extra persona- en toonaanwijzingen voor de AI-agent, naast de instructies hierboven Het runtime-antwoordcontract wordt automatisch toegevoegd": "Indications supplémentaires de persona et de ton pour l'agent IA, en plus des instructions ci-dessus. Le contrat de réponse d'exécution est ajouté automatiquement.",
     "Volgt standaard de tenant-instelling; deze vacature kan dat hier overschrijven": "Suit par défaut le paramètre du client ; cette offre peut le remplacer ici.",
-    "Verplicht als de gekozen agent geen intro-template heeft; een verse sollicitant zit buiten het 24-uursvenster, dus een sessietekst als intro faalt": "Obligatoire si l'agent choisi n'a pas de modèle d'introduction ; un candidat récent se trouve hors de la fenêtre de 24 heures, donc un texte de session comme intro échoue."
+    "Verplicht als de gekozen agent geen intro-template heeft; een verse sollicitant zit buiten het 24-uursvenster, dus een sessietekst als intro faalt": "Obligatoire si l'agent choisi n'a pas de modèle d'introduction ; un candidat récent se trouve hors de la fenêtre de 24 heures, donc un texte de session comme intro échoue.",
+    "queue (standaard) = wachtrij, deze stap wacht niet sync = direct uitvoeren; de uitkomst van het kind komt terug in deze stap": "queue (par défaut) = file d'attente, cette étape n'attend pas. sync = exécution directe ; le résultat de l'enfant revient dans cette étape.",
+    "Alleen bij direct uitvoeren een mislukte kind-workflow laat deze stap mislukken Uit = doorgaan; de uitkomst staat in child_run_status": "Uniquement en exécution directe : un workflow enfant en échec fait échouer cette étape. Désactivé = continuer ; le résultat est dans child_run_status.",
+    "Standaard aan de kandidaten/records van deze stap reizen mee als context van het kind": "Activé par défaut : les candidats/enregistrements de cette étape voyagent comme contexte de l'enfant.",
+    "Extra sleutel/waarde-paren voor het kind ({{trigger*}} wordt hier al opgelost)": "Paires clé/valeur supplémentaires pour l'enfant ({{trigger.*}} est déjà résolu ici)."
   },
   "triggers": {
     "events": {
@@ -1296,7 +1315,10 @@
     "childFailing": "Dernière exécution échouée",
     "expand": "Afficher les workflows imbriqués",
     "collapse": "Masquer les workflows imbriqués",
-    "cycle": "Ce workflow figure déjà dans cette branche (boucle)"
+    "cycle": "Ce workflow figure déjà dans cette branche (boucle)",
+    "truncated": "Déjà affiché ci-dessus",
+    "modeQueue": "file d'attente",
+    "modeSync": "direct"
   },
   "notFound": {
     "title": "Workflow introuvable",

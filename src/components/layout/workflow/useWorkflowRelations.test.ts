@@ -34,6 +34,32 @@ describe('useWorkflowRelations', () => {
     expect(result.current.error).toBe(false)
   })
 
+  // K-254 (WF-RELATIONS-FE-2): the same response also carries calls/called_by/tree.
+  it('exposes calls, called_by and the always-present tree tolerantly', async () => {
+    mockedGet.mockResolvedValue({ data: {
+      parents: [], children: [],
+      calls: [{ id: 'c1', name: 'Kindflow', status: 'active', mode: 'sync' }],
+      called_by: [{ id: 'p1', name: 'Ouderflow', status: 'active' }],
+      tree: { id: 'wf-1', name: 'Root', status: 'active', children: [] },
+    } })
+    const { result } = renderHook(() => useWorkflowRelations('wf-1'))
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    expect(result.current.calls).toEqual([expect.objectContaining({ id: 'c1', mode: 'sync' })])
+    expect(result.current.calledBy).toEqual([expect.objectContaining({ id: 'p1' })])
+    expect(result.current.tree).toEqual(expect.objectContaining({ id: 'wf-1', children: [] }))
+  })
+
+  // Missing calls/called_by/tree on an older-shaped response still resolves to
+  // the honest empty/null case — never a fabricated value.
+  it('falls back to empty/null when calls/called_by/tree are absent', async () => {
+    mockedGet.mockResolvedValue({ data: { parents: [], children: [] } })
+    const { result } = renderHook(() => useWorkflowRelations('wf-1'))
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    expect(result.current.calls).toEqual([])
+    expect(result.current.calledBy).toEqual([])
+    expect(result.current.tree).toBeNull()
+  })
+
   it('empty tree: both lists resolve empty, no error', async () => {
     mockedGet.mockResolvedValue({ data: { parents: [], children: [] } })
     const { result } = renderHook(() => useWorkflowRelations('wf-1'))
@@ -58,7 +84,7 @@ describe('useWorkflowRelations', () => {
     const { result } = renderHook(() => useWorkflowRelations('wf-1'))
     await waitFor(() => expect(result.current.loading).toBe(false))
 
-    await act(async () => { await result.current.toggleStatus(result.current.parents[0], 'parents') })
+    await act(async () => { await result.current.toggleStatus(result.current.parents[0]) })
 
     expect(mockedPut).toHaveBeenCalledWith('/workflows/p1', { status: 'inactive', active: false })
     expect(result.current.parents[0].status).toBe('inactive')
@@ -72,7 +98,7 @@ describe('useWorkflowRelations', () => {
     const { result } = renderHook(() => useWorkflowRelations('wf-1'))
     await waitFor(() => expect(result.current.loading).toBe(false))
 
-    await act(async () => { await result.current.toggleStatus(result.current.parents[0], 'parents') })
+    await act(async () => { await result.current.toggleStatus(result.current.parents[0]) })
 
     expect(result.current.parents[0].status).toBe('active')
   })

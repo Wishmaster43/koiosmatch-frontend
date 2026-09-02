@@ -23,6 +23,9 @@ export interface WorkflowLastRun { time?: string; ok?: boolean; candidates?: num
 
 // One row of a workflow's parent/child tree (WF-RELATIONS-FE-1,
 // GET /workflows/{id}/relations → { parents: [...], children: [...] }).
+// K-254 (WF-RELATIONS-FE-2) adds the call-graph fields: `mode` on a `calls`/`called_by`
+// row (workflow_call's queue|sync), and the tree-shape flags `cycle`/`truncated`/`children`
+// used by GET /workflows/{id}/relations' always-present `tree` node.
 export interface WorkflowRelation {
   id: string | number
   name?: string
@@ -30,6 +33,10 @@ export interface WorkflowRelation {
   runs_count?: number
   last_run_at?: string | null
   last_run_status?: string | null
+  mode?: string
+  cycle?: boolean
+  truncated?: boolean
+  children?: WorkflowRelation[]
 }
 
 // A normalized workflow (editor/UI shape).
@@ -59,6 +66,11 @@ export interface Workflow {
   created_at?: string
   updated_at?: string         // shown (formatted) in the list-row meta line
   runs_count?: number
+  // K-254: GET /workflows list rows carry a summary count; GET /workflows/{id} carries
+  // the full call-graph rows (existing targets only — see WorkflowRelation).
+  calls?: WorkflowRelation[]
+  called_by?: WorkflowRelation[]
+  relations_summary?: { calls?: number; called_by?: number }
   [k: string]: unknown
 }
 

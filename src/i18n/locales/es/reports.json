@@ -389,7 +389,8 @@
       "copyId": "Haz clic para copiar el ID",
       "processed": "Procesado",
       "lineage": "Origen",
-      "parentRunId": "ID de la ejecución superior"
+      "parentRunId": "ID de la ejecución superior",
+      "childRuns": "Ejecuciones hijas"
     },
     "openHistory": "Ver en el historial",
     "dryRun": {

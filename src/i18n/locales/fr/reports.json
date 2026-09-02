@@ -389,7 +389,8 @@
       "copyId": "Cliquez pour copier l'ID",
       "processed": "Traité",
       "lineage": "Origine",
-      "parentRunId": "ID de l'exécution parente"
+      "parentRunId": "ID de l'exécution parente",
+      "childRuns": "Runs enfants"
     },
     "openHistory": "Voir dans l'historique",
     "dryRun": {

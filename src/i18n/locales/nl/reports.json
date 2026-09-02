@@ -389,7 +389,8 @@
       "copyId": "Klik om het ID te kopiëren",
       "processed": "Verwerkt",
       "lineage": "Herkomst",
-      "parentRunId": "Ouder-run-ID"
+      "parentRunId": "Ouder-run-ID",
+      "childRuns": "Kind-runs"
     },
     "openHistory": "Bekijk in geschiedenis",
     "dryRun": {

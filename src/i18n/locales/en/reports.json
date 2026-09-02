@@ -389,7 +389,8 @@
       "copyId": "Click to copy the ID",
       "processed": "Processed",
       "lineage": "Lineage",
-      "parentRunId": "Parent run ID"
+      "parentRunId": "Parent run ID",
+      "childRuns": "Child runs"
     },
     "openHistory": "View in history",
     "dryRun": {

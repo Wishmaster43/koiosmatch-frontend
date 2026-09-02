@@ -64,3 +64,24 @@ describe('RunDetailDrawer — stop button', () => {
     expect(await screen.findByText('Run is al klaar')).toBeInTheDocument()
   })
 })
+
+// K-254 (WF-RELATIONS-FE-2): the run DETAIL fetch, once per open.
+describe('RunDetailDrawer — run detail fetch', () => {
+  beforeEach(() => {
+    vi.mocked(api.get).mockReset()
+    vi.mocked(api.post).mockReset()
+  })
+
+  it('requests GET /workflow-runs/{id} once when opened', async () => {
+    vi.mocked(api.get).mockResolvedValue({ data: { id: 5, child_runs: [] } })
+    render(<RunDetailDrawer run={{ ...baseRun, status: 'success' }} onClose={() => {}} />)
+    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/workflow-runs/5'))
+    expect(vi.mocked(api.get).mock.calls.filter(c => c[0] === '/workflow-runs/5')).toHaveLength(1)
+  })
+
+  it('merges the fetched child_runs into the run shown to RunLineage', async () => {
+    vi.mocked(api.get).mockResolvedValue({ data: { id: 5, child_runs: [{ id: 'child-1', status: 'completed' }] } })
+    render(<RunDetailDrawer run={{ ...baseRun, status: 'success' }} onClose={() => {}} />)
+    expect(await screen.findByText('runs.drawer.childRuns')).toBeInTheDocument()
+  })
+})

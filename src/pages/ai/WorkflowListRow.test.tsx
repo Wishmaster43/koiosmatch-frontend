@@ -172,3 +172,24 @@ describe('WorkflowListRow · seeded workflow name i18n (LOOKUP-I18N-1)', () => {
     await i18n.changeLanguage('nl')
   })
 })
+
+// K-254 (WF-RELATIONS-FE-2): the call-graph counters — only shown when > 0
+// (a counter never renders "0", §SCHERMWAARHEID).
+describe('WorkflowListRow · relations_summary counters', () => {
+  it('shows both counters when the workflow calls others and is called by others', () => {
+    const workflow: Workflow = { ...baseWorkflow, relations_summary: { calls: 2, called_by: 1 } }
+    render(<WorkflowListRow workflow={workflow} onRun={vi.fn()} onEdit={vi.fn()} onToggleStatus={vi.fn()} />)
+    expect(screen.getByText(/roept 2 workflows aan/)).toBeInTheDocument()
+    expect(screen.getByText(/1× aangeroepen/)).toBeInTheDocument()
+  })
+
+  it('shows neither counter when relations_summary is absent or zero', () => {
+    const workflow: Workflow = { ...baseWorkflow, relations_summary: { calls: 0, called_by: 0 } }
+    render(<WorkflowListRow workflow={workflow} onRun={vi.fn()} onEdit={vi.fn()} onToggleStatus={vi.fn()} />)
+    expect(screen.queryByText(/aangeroepen/)).not.toBeInTheDocument()
+    // The zero case would render the PLURAL ('roept 0 workflows aan'), so assert on the
+    // count itself — a singular-only regex silently passed while a 0 counter rendered.
+    expect(screen.queryByText(/roept 0/)).not.toBeInTheDocument()
+    expect(screen.queryByText(/workflows? aan/)).not.toBeInTheDocument()
+  })
+})

@@ -46,4 +46,26 @@ describe('RunLineage', () => {
     render(<RunLineage run={run} />)
     expect(screen.getByText(/r-only/)).toBeInTheDocument()
   })
+
+  // K-254 (WF-RELATIONS-FE-2): child_runs list, detail-only field.
+  it('renders a status badge + short mono id per child run', () => {
+    const run: RunRow = {
+      id: 6,
+      child_runs: [{ id: 'abcdef1234567890', workflow_id: 'wf-child', status: 'completed' }],
+    }
+    render(<RunLineage run={run} />)
+    expect(screen.getByText('runs.drawer.childRuns')).toBeInTheDocument()
+    expect(screen.getByText('abcdef12')).toBeInTheDocument()
+  })
+
+  it('a root-level run WITH child runs still renders (not the honest-empty case)', () => {
+    const run: RunRow = { id: 7, child_runs: [{ id: 'child-1', status: 'running' }] }
+    render(<RunLineage run={run} />)
+    expect(screen.getByText('runs.drawer.childRuns')).toBeInTheDocument()
+  })
+
+  it('a root-level run with NO parent and NO child runs still renders nothing', () => {
+    const { container } = render(<RunLineage run={{ id: 8, child_runs: [] }} />)
+    expect(container).toBeEmptyDOMElement()
+  })
 })

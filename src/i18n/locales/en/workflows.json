@@ -272,7 +272,11 @@
     "archivedBadge": "Archived",
     "restore": "Restore",
     "restoreWorkflow": "Restore workflow",
-    "archiveWorkflow": "Archive workflow"
+    "archiveWorkflow": "Archive workflow",
+    "relationsCalls_one": "calls {{count}} workflow",
+    "relationsCalls_other": "calls {{count}} workflows",
+    "relationsCalledBy_one": "called {{count}} time",
+    "relationsCalledBy_other": "called {{count}} times"
   },
   "page": {
     "notRun": "Not run yet",
@@ -887,7 +891,16 @@
     "Vertalingen": "Translations",
     "text": "Message text",
     "subject": "Subject",
-    "body": "Message"
+    "body": "Message",
+    "Uitvoering": "Execution",
+    "Stop bij mislukt kind (sync)": "Stop when the child fails (sync)",
+    "Huidige records meesturen": "Pass the current records along",
+    "Extra gegevens": "Extra data",
+    "Aangeroepen workflow": "Called workflow",
+    "In wachtrij gezet": "Queued",
+    "Direct uitgevoerd (sync)": "Ran directly (sync)",
+    "Kind-run id": "Child run id",
+    "Uitkomst kind-run (sync)": "Child run outcome (sync)"
   },
   "fieldOptions": {
     "Array (meerdere bundles)": "Array (multiple bundles)",
@@ -1059,7 +1072,9 @@
     "automatic": "Automatic",
     "WhatsApp-storing": "WhatsApp outage",
     "WhatsApp hersteld": "WhatsApp restored",
-    "match_and_candidate_owner": "match and candidate owner"
+    "match_and_candidate_owner": "match and candidate owner",
+    "queue": "Queue (asynchronous)",
+    "sync": "Direct (wait for the child)"
   },
   "agentTest": {
     "title": "Test variables",
@@ -1225,7 +1240,11 @@
     "De genummerde stappen die de AI-agent doorloopt, elk met een optioneel outputveld en variabele-chips": "The numbered steps the AI agent walks through, each with an optional output field and variable chips.",
     "Extra persona- en toonaanwijzingen voor de AI-agent, naast de instructies hierboven Het runtime-antwoordcontract wordt automatisch toegevoegd": "Extra persona and tone guidance for the AI agent, alongside the instructions above. The runtime reply contract is added automatically.",
     "Volgt standaard de tenant-instelling; deze vacature kan dat hier overschrijven": "Follows the tenant setting by default; this vacancy can override it here.",
-    "Verplicht als de gekozen agent geen intro-template heeft; een verse sollicitant zit buiten het 24-uursvenster, dus een sessietekst als intro faalt": "Required if the chosen agent has no intro template; a fresh applicant sits outside the 24-hour window, so a session text as intro fails."
+    "Verplicht als de gekozen agent geen intro-template heeft; een verse sollicitant zit buiten het 24-uursvenster, dus een sessietekst als intro faalt": "Required if the chosen agent has no intro template; a fresh applicant sits outside the 24-hour window, so a session text as intro fails.",
+    "queue (standaard) = wachtrij, deze stap wacht niet sync = direct uitvoeren; de uitkomst van het kind komt terug in deze stap": "queue (default) = queue, this step doesn't wait. sync = run directly; the child's outcome comes back into this step.",
+    "Alleen bij direct uitvoeren een mislukte kind-workflow laat deze stap mislukken Uit = doorgaan; de uitkomst staat in child_run_status": "Only for direct execution: a failed child workflow fails this step. Off = continue; the outcome is in child_run_status.",
+    "Standaard aan de kandidaten/records van deze stap reizen mee als context van het kind": "On by default: this step's candidates/records travel along as the child's context.",
+    "Extra sleutel/waarde-paren voor het kind ({{trigger*}} wordt hier al opgelost)": "Extra key/value pairs for the child ({{trigger.*}} is already resolved here)."
   },
   "triggers": {
     "events": {
@@ -1296,7 +1315,10 @@
     "childFailing": "Last run failed",
     "expand": "Show nested workflows",
     "collapse": "Hide nested workflows",
-    "cycle": "This workflow already appears in this branch (loop)"
+    "cycle": "This workflow already appears in this branch (loop)",
+    "truncated": "Already shown above",
+    "modeQueue": "queue",
+    "modeSync": "direct"
   },
   "notFound": {
     "title": "Workflow not found",
