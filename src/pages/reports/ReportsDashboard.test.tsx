@@ -214,6 +214,8 @@ describe('ReportsDashboard · attention block (PART A)', () => {
     // The count still shows (honest), but nothing pretends to be a link to a 403 page.
     expect(screen.getByText('Conversaties zonder reactie')).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: '4 Conversaties zonder reactie' })).not.toBeInTheDocument()
+    // Restore the default so the module gate never bleeds into later cases.
+    mockHasModule.mockImplementation(() => true)
   })
 
   it('translates the labels itself instead of echoing the server label', () => {
