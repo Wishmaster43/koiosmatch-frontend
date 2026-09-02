@@ -496,3 +496,22 @@ describe('mapInterview · the real InterviewSessionResource payload', () => {
     })
   })
 })
+
+// S34 (02-09): the detail resource's `ai` advice block was emitted by the backend
+// but dropped by the mapper, so the reject modal's Koios advice card never rendered.
+describe('mapApplicationDetail · ai advice passthrough (S34)', () => {
+  it('maps advice, advice_reason and auto_reject_eligible from the detail resource', () => {
+    const d = mapApplicationDetail({ id: 1, ai: { advice: 'reject', advice_reason: 'Hard criterium niet gehaald: BIG.', auto_reject_eligible: true } })
+    expect(d.ai).toEqual({ advice: 'reject', advice_reason: 'Hard criterium niet gehaald: BIG.', auto_reject_eligible: true })
+  })
+
+  it('collapses server nulls to undefined so the "advice === reject" gate stays honest', () => {
+    const d = mapApplicationDetail({ id: 1, ai: { advice: null, advice_reason: null, auto_reject_eligible: false } })
+    expect(d.ai).toEqual({ advice: undefined, advice_reason: undefined, auto_reject_eligible: false })
+  })
+
+  it('maps no advice block when the backend sends none or only the list-shaped task', () => {
+    expect(mapApplicationDetail({ id: 1 }).ai).toBeUndefined()
+    expect(mapApplicationDetail({ id: 1, ai: { task: 'Bel de kandidaat' } }).ai).toBeUndefined()
+  })
+})

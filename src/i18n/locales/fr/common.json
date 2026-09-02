@@ -583,6 +583,7 @@
   "discardChangesConfirm": "Vous avez du texte non enregistré. Fermer sans enregistrer ?",
   "koiosSuggested": "Proposé par Koios AI selon l'historique du candidat",
   "koiosSuggestedOwnerAgent": "Proposé par Koios AI selon le propriétaire de l'offre",
+  "koiosRejectAdvice": "Koios AI propose un refus. Choisissez vous-même le motif dans la liste.",
   "dragList": {
     "moveUp": "Déplacer vers le haut",
     "moveDown": "Déplacer vers le bas"

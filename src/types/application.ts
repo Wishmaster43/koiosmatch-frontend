@@ -348,7 +348,8 @@ export interface ApiApplication {
   } | null
   task?: string
   ai_task?: string
-  ai?: { task?: string }
+  // ApplicationMatchService::ai (detail resource): score-band advice + the hard-fail flag; `task` is the list shape.
+  ai?: { task?: string; advice?: string | null; advice_reason?: string | null; auto_reject_eligible?: boolean }
   phase_key?: string
   stage?: string
   phase?: string

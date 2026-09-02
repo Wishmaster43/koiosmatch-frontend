@@ -311,6 +311,15 @@ export function mapApplicationDetail(raw: ApiApplication = {}, funnelTypes: Look
     // the NORMAL case — only the public careersite apply ever writes it — so it means
     // "no consent recorded", not "consent refused" (see types/application.ts).
     interviewConsentGivenAt: raw.interview_consent_given_at ?? null,
+    // S34 (02-09): the Koios reject advice (ApplicationMatchService::ai → advice/
+    // advice_reason/auto_reject_eligible) was emitted by the backend but never
+    // mapped, so RejectionModal's advice card and its proposal badge could never
+    // render. Nulls collapse to undefined so the card's `advice === 'reject'` gate
+    // and the `advice_reason &&` guard behave exactly as their types promise.
+    ai: raw.ai && (raw.ai.advice != null || raw.ai.advice_reason != null || raw.ai.auto_reject_eligible != null)
+      ? { advice: raw.ai.advice ?? undefined, advice_reason: raw.ai.advice_reason ?? undefined,
+          auto_reject_eligible: Boolean(raw.ai.auto_reject_eligible) }
+      : undefined,
     // Rejection trail (reason + toelichting/note + channel/sent_at) — S9 finding:
     // this was NEVER mapped, so a rejected application always showed just the
     // "Afgewezen" badge with no reason/note, even though ApplicationDetailResource

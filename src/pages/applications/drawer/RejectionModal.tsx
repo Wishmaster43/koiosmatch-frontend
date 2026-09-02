@@ -7,6 +7,7 @@ import { XCircle, X, Edit2, Save } from 'lucide-react'
 import api, { unwrapList } from '@/lib/api'
 import FloatingPanel from '@/components/ui/FloatingPanel'
 import KoiosAiMark from '@/components/ui/KoiosAiMark'
+import KoiosSuggestionBadge from '@/components/ui/KoiosSuggestionBadge'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import RichTextEditor from '@/components/ui/RichTextEditor'
 import SafeHtml from '@/components/ui/SafeHtml'
@@ -55,6 +56,12 @@ interface Props {
  * correction" instead of "reject". The caller's onConfirm still receives the
  * exact same payload shape; only ITS request differs (PATCH vs POST).
  *
+ * S34 (Danny 02-09): while Koios advises rejection and no reason is picked
+ * yet, the shared KoiosSuggestionBadge sits under the reason field as a
+ * visible PROPOSAL of the DECISION (reject) — the reason itself is never
+ * pre-filled ("het systeem gokt nooit stil": no reliable mapping exists from
+ * a failed criterion to the tenant's reason list). Picking a reason clears it.
+ *
  * V-appdetail-4: the note already had an expand (`noteExpanded` +
  * RichTextEditor's `onToggleExpand`, unchanged here). It deliberately does NOT
  * get the second-screen pop-out: `note`/`draftNote` are un-persisted draft
@@ -91,6 +98,10 @@ export default function RejectionModal({ application: a, onCancel, onConfirm, su
     return () => { aliveRef.current = false }
   }, [])
 
+  // S34: whether Koios advises rejecting this application — drives both the
+  // existing advice block and the new reason-field proposal badge below.
+  const koiosAdvisesReject = !isCorrection && a.ai?.advice === 'reject'
+
   const reason = reasons.find(r => String(r.id) === String(reasonId))
   const reasonLabel = reason?.name ?? reason?.label ?? ''
 
@@ -118,14 +129,14 @@ export default function RejectionModal({ application: a, onCancel, onConfirm, su
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           {/* AI advice — a decision aid for the ORIGINAL reject only; irrelevant
               once already rejected, so correction mode never shows it. */}
-          {!isCorrection && a.ai?.advice === 'reject' && (
+          {koiosAdvisesReject && (
             <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start', background: 'var(--color-primary-bg)', borderRadius: 8, padding: '8px 10px' }}>
               <KoiosAiMark size={18} />
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--color-primary-text)' }}>{t('rejection.aiAdvice')}</div>
-                {a.ai.advice_reason && <div style={{ fontSize: 12, color: 'var(--text)', marginTop: 2 }}>{a.ai.advice_reason}</div>}
+                {a.ai?.advice_reason && <div style={{ fontSize: 12, color: 'var(--text)', marginTop: 2 }}>{a.ai.advice_reason}</div>}
                 <Caption as="div" style={{ marginTop: 3 }}>
-                  {a.ai.auto_reject_eligible ? t('rejection.aiAuto') : t('rejection.aiConfirm')}
+                  {a.ai?.auto_reject_eligible ? t('rejection.aiAuto') : t('rejection.aiConfirm')}
                 </Caption>
               </div>
             </div>
@@ -138,6 +149,9 @@ export default function RejectionModal({ application: a, onCancel, onConfirm, su
             <CreatableSelect allowCreate={false} value={reasonId || null} onChange={setReasonId}
               placeholder={t('rejection.reasonPlaceholder')}
               options={reasons.map(r => ({ value: String(r.id ?? ''), label: r.name ?? r.label ?? '' }))} />
+            {/* S34: the proposal is the DECISION (reject), the reason stays
+                empty — it goes away as soon as the recruiter picks a reason. */}
+            {koiosAdvisesReject && !reasonId && <KoiosSuggestionBadge labelKey="koiosRejectAdvice" />}
           </div>
 
           {/* Note — collapsed by default (profile-text pattern, §3A/§4): read-only

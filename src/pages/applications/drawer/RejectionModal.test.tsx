@@ -158,3 +158,44 @@ describe('RejectionModal · mode="correct" (W28)', () => {
     expect(screen.queryByText('rejection.saveCorrection')).toBeNull()
   })
 })
+
+describe('RejectionModal · S34 Koios proposal at the reason field', () => {
+  // Positive render of the advice card itself (the verifier found only the negative
+  // correction-mode assertion existed, so deleting the card would have gone unnoticed).
+  it('renders the Koios advice card with its reason text in reject mode', async () => {
+    render(<RejectionModal application={app({ ai: { advice: 'reject', advice_reason: 'Hard criterium niet gehaald: BIG.', auto_reject_eligible: true } })}
+      onCancel={vi.fn()} onConfirm={vi.fn()} />)
+    await screen.findByRole('button', { name: 'rejection.reasonPlaceholder' })
+    expect(screen.getByText('rejection.aiAdvice')).toBeInTheDocument()
+    expect(screen.getByText('Hard criterium niet gehaald: BIG.')).toBeInTheDocument()
+    expect(screen.getByText('rejection.aiAuto')).toBeInTheDocument()
+  })
+
+  it('shows the Koios suggestion badge under the reason field while Koios advises rejection and nothing is picked', async () => {
+    render(<RejectionModal application={app({ ai: { advice: 'reject', advice_reason: 'Hard criterium gefaald' } })} onCancel={vi.fn()} onConfirm={vi.fn()} />)
+    await screen.findByRole('button', { name: 'rejection.reasonPlaceholder' })
+    expect(screen.getByTestId('koios-suggestion')).toHaveTextContent('koiosRejectAdvice')
+    expect(screen.getByRole('button', { name: 'rejection.reasonPlaceholder' })).toBeInTheDocument()
+    expect(screen.getByText('rejection.confirm').closest('button')).toBeDisabled()
+  })
+
+  it('hides the badge once a reason is picked', async () => {
+    const user = userEvent.setup()
+    render(<RejectionModal application={app({ ai: { advice: 'reject', advice_reason: 'Hard criterium gefaald' } })} onCancel={vi.fn()} onConfirm={vi.fn()} />)
+    await user.click(await screen.findByRole('button', { name: 'rejection.reasonPlaceholder' }))
+    await user.click(await screen.findByRole('button', { name: 'Niet gekwalificeerd' }))
+    expect(screen.queryByTestId('koios-suggestion')).toBeNull()
+  })
+
+  it('shows no badge without a Koios advice', async () => {
+    render(<RejectionModal application={app()} onCancel={vi.fn()} onConfirm={vi.fn()} />)
+    await screen.findByRole('button', { name: 'rejection.reasonPlaceholder' })
+    expect(screen.queryByTestId('koios-suggestion')).toBeNull()
+  })
+
+  it('shows no badge in correction mode even with an advice', async () => {
+    render(<RejectionModal application={rejectedApp()} mode="correct" onCancel={vi.fn()} onConfirm={vi.fn()} />)
+    await screen.findByRole('button', { name: 'rejection.reasonPlaceholder' })
+    expect(screen.queryByTestId('koios-suggestion')).toBeNull()
+  })
+})
