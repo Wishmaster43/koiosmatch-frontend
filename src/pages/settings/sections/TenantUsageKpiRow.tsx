@@ -42,7 +42,8 @@ export default function TenantUsageKpiRow({ usage, loading }: Props) {
   const aiUsed = usage?.billing?.ai?.used
   const aiBudget = usage?.billing?.ai?.budget
   const aiOver = usage?.billing?.ai?.over
-  const waTokens = usage?.whatsapp?.tokens
+  // K-242 (02-09): the WhatsApp Tokens meter is retired — a wa_web message
+  // now counts as a Workflow-token, so `usage.whatsapp` is message-count info only.
   const waChannels = usage?.whatsapp?.by_channel ?? []
   const workflowBillable = usage?.billing?.workflow?.billable_credits
 
@@ -97,7 +98,6 @@ export default function TenantUsageKpiRow({ usage, loading }: Props) {
         {[
           { key: 'workflow', label: t('usage.kpi.workflowLabel'), used: workflowCredits, budget: workflowIncluded, over: workflowBillable, amount: workflowAmount },
           { key: 'ai', label: t('usage.kpi.aiMeterLabel'), used: aiUsed, budget: aiBudget, over: aiOver },
-          { key: 'whatsapp', label: t('usage.kpi.waWebLabel'), used: waTokens?.used, budget: waTokens?.budget, over: waTokens?.over, amount: waTokens?.over_amount },
         ].map(m => (
           <div key={m.key} style={{ width: 300 }}>
             {(m.budget ?? 0) > 0 ? (
@@ -129,9 +129,6 @@ export default function TenantUsageKpiRow({ usage, loading }: Props) {
           {waChannels.map(ch => (
             <Caption as="div" key={ch.channel}>
               {(ch.label ?? ch.channel)}: {formatNumber(ch.messages ?? 0)} {t('usage.kpi.waMessages')}
-              {ch.channel === 'wa_web'
-                ? ` · ${formatNumber(ch.tokens ?? 0)} ${t('usage.kpi.waTokens')}`
-                : ` · ${formatCurrency(ch.amount ?? 0)} ${t('usage.kpi.waProviderBilled')}`}
             </Caption>
           ))}
         </div>

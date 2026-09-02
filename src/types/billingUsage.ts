@@ -138,27 +138,20 @@ export interface BillingUsageSubscription {
   // are still present, now optional, on BillingUsageTierMeter itself).
   ai?: BillingUsageAiMeter
   workflow?: BillingUsageWorkflowMeter
-  // Third meter (CMBE, F5 handoff 25-08) — WhatsApp Tokens (1 wa_web message = 1
-  // token). Presence-gated: absent until the backend ships it, never assumed.
-  // Unchanged shape per DEEL C ("whatsapp and users blocks unchanged").
-  whatsapp?: BillingUsageSubscriptionMeter
   // K-167 users line (included/active/extra/extra_amount) — unchanged shape, now typed.
   users?: BillingUsageUsers
 }
 
-// WhatsApp usage per channel (CMBE, F5 handoff 25-08) — 1 WhatsApp Token = 1
-// message sent via wa_web; waba/waba_coex channels are billed by the provider,
-// not by Koios Tokens, so they still carry their own `amount` line.
+// WhatsApp usage per channel (K-242, 02-09) — INFO ONLY, no longer a meter: a
+// wa_web message now counts as a Workflow-token in the `workflow` block above,
+// so this block carries just the message count per channel (no tokens/amount).
 export interface BillingUsageWhatsappChannel {
   channel: string
   label?: string
   messages?: number
-  tokens?: number
-  amount?: number
 }
 export interface BillingUsageWhatsapp {
   by_channel?: BillingUsageWhatsappChannel[]
-  tokens?: { used?: number; budget?: number; over?: number; over_amount?: number; price_cents?: number }
 }
 
 export interface BillingUsageResponse {
@@ -239,10 +232,10 @@ export interface AdminUsageMonth {
 export interface AdminTenantUsage {
   ai?: { tokens?: number; requests?: number }
   // CMBE c963cdb1: same shape as the tenant-facing /billing/usage whatsapp block,
-  // scoped to the viewed tenant (isolation-tested server-side).
+  // scoped to the viewed tenant (isolation-tested server-side). K-242 (02-09):
+  // `tokens` meter retired — a wa_web message now counts as a Workflow-token.
   whatsapp?: {
     business_numbers?: number
-    tokens?: { used?: number; budget?: number; over?: number; over_amount?: number; price_cents?: number }
     by_channel?: BillingUsageWhatsappChannel[]
   }
   planning?: { processed_hours?: number }
@@ -281,10 +274,9 @@ export interface BillingBudgetEntry {
   // ai_token_budget is GONE (PRIJSMODEL-C): AI capacity is now the staffel
   // picked on /admin/billing-tiers, no separate raw-token budget knob here.
   // Renamed from workflow_credit_budget (PRIJSMODEL-C): included workflow runs.
+  // whatsapp_token_budget RETIRED (K-242, 02-09): folded into this bundle —
+  // a wa_web message now counts as a Workflow-token, a PUT with the old knob 422s.
   included_workflow_runs?: number
-  // K-196 (Danny 25-08): the WhatsApp Token budget, the third meter next to AI
-  // tokens and Koios Tokens (WhatsApp Web traffic costs real performance).
-  whatsapp_token_budget?: number
   // Read-only (PRIJSMODEL-C): the package's AI staffel key, shown as a Caption
   // next to the row — never an input, never sent back on PUT.
   ai_tier_key?: BillingAiTierKey
@@ -317,13 +309,13 @@ export interface AdminBillingBudgetsResponse {
 // one override field back to the package default (never the whole entry).
 export interface AdminBillingBudgetsUpdate {
   packages?: Partial<Record<BillingPackageKey, {
-    included_workflow_runs?: number; whatsapp_token_budget?: number
+    included_workflow_runs?: number
     // null = clear to "no package value" (unlimited) — the controller writes
     // per-knob (array_key_exists), so an omitted knob stays untouched.
     included_users?: number | null; extra_user_price_cents?: number | null
   }>>
   tenants?: Record<string, {
-    included_workflow_runs?: number | null; whatsapp_token_budget?: number | null
+    included_workflow_runs?: number | null
     included_users?: number | null; extra_user_price_cents?: number | null
   }>
 }

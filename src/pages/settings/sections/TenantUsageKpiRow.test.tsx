@@ -70,9 +70,9 @@ describe('TenantUsageKpiRow', () => {
       ai: { tokens: 100 },
       billing: { workflow: { credits: 620, included_budget: 0, billable_credits: 620, amount: 62 } },
     }} />)
-    // All three meters (workflow/ai/whatsapp) carry no budget in this fixture -
-    // each renders the honest caption and none paints an over-budget line.
-    expect(screen.getAllByText(/budgetStatus\.noBudget/).length).toBe(3)
+    // Both meters (workflow/ai — WhatsApp is retired, K-242) carry no budget
+    // in this fixture: each renders the honest caption, none over-budget.
+    expect(screen.getAllByText(/budgetStatus\.noBudget/).length).toBe(2)
     expect(document.body.textContent).not.toMatch(/billing\.usage\.plan\.overBudget/)
   })
 
@@ -90,20 +90,19 @@ describe('TenantUsageKpiRow', () => {
     expect(document.body.textContent).not.toMatch(/€\s?0,00/)
   })
 
-  // CMBE c963cdb1: the WhatsApp split renders wa_web as tokens and waba as
-  // provider-billed - Danny's "Ik wil WA-Web en WABA zien".
-  it('renders the WhatsApp channel split: wa_web tokens vs waba provider-billed', () => {
+  // K-242 (02-09): the WhatsApp Tokens meter is retired — `by_channel` is
+  // message-count INFO only now (no per-channel tokens/amount, no meter).
+  it('renders the WhatsApp channel split as plain message counts, no tokens meter', () => {
     render(<TenantUsageKpiRow loading={false} usage={{
       ai: { tokens: 100 },
-      whatsapp: { business_numbers: 2, tokens: { used: 250, budget: 4500, over: 0 }, by_channel: [
-        { channel: 'wa_web', label: 'WhatsApp Web', messages: 250, tokens: 250 },
-        { channel: 'waba', label: 'WABA', messages: 40, amount: 12.5 },
+      whatsapp: { business_numbers: 2, by_channel: [
+        { channel: 'wa_web', label: 'WhatsApp Web', messages: 250 },
+        { channel: 'waba', label: 'WABA', messages: 40 },
       ] },
       billing: { workflow: { credits: 10, included_budget: 500, billable_credits: 0, amount: 0 } },
     }} />)
     expect(screen.getByText(/WhatsApp Web: 250/)).toBeInTheDocument()
-    expect(screen.getByText(/waTokens/)).toBeInTheDocument()
     expect(screen.getByText(/WABA: 40/)).toBeInTheDocument()
-    expect(screen.getByText(/waProviderBilled/)).toBeInTheDocument()
+    expect(screen.queryByText(/waTokens|waProviderBilled/)).toBeNull()
   })
 })

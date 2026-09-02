@@ -145,11 +145,12 @@ describe('BillingUsageSettings — Per gebruiker renders ai.per_user with succes
 })
 
 describe('BillingUsageSettings — vocabulary keys exist in all five locales', () => {
-  it.each(['nl', 'en', 'de', 'fr', 'es'])('%s carries the Koios Tokens / AI-tokens / WhatsApp Tokens vocabulary', (loc) => {
+  it.each(['nl', 'en', 'de', 'fr', 'es'])('%s carries the Workflow-tokens / AI-tokens vocabulary', (loc) => {
     const bundle = i18n.getResourceBundle(loc, 'settings')
     expect(bundle?.billing?.usage?.plan?.workflowMeter).toBeTruthy()
     expect(bundle?.billing?.usage?.plan?.aiMeter).toBeTruthy()
-    expect(bundle?.billing?.usage?.plan?.whatsappMeter).toBeTruthy()
+    // K-242 (02-09): the WhatsApp Tokens meter is retired — no vocabulary key for it any more.
+    expect(bundle?.billing?.usage?.plan?.whatsappMeter).toBeUndefined()
     // The rename target — "credits" no longer appears in the plan title/notice.
     expect(String(bundle?.billing?.usage?.plan?.title ?? '')).not.toMatch(/credit/i)
     expect(String(bundle?.billing?.usage?.plan?.notice ?? '')).not.toMatch(/credit/i)
@@ -164,8 +165,9 @@ describe('BillingUsageSettings — WhatsApp tab is presence-based', () => {
     expect(await screen.findByText(t('billing.usage.whatsapp.fallbackCaption'))).toBeInTheDocument()
   })
 
+  // K-242 (02-09): by_channel is INFO only now (message counts) — no tokens/amount.
   it('renders the per-channel table when whatsapp.by_channel is present', async () => {
-    mockApi(billingUsage({ whatsapp: { by_channel: [{ channel: 'wa_web', messages: 12, tokens: 12, amount: 1.2 }], tokens: { used: 12, budget: 100 } } }))
+    mockApi(billingUsage({ whatsapp: { by_channel: [{ channel: 'wa_web', messages: 12 }] } }))
     renderPage()
     await userEvent.click(screen.getByRole('tab', { name: t('billing.usage.tabs.whatsapp') }))
     expect(await screen.findByText('WA Web')).toBeInTheDocument()

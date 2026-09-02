@@ -1,11 +1,14 @@
 /**
- * SubscriptionCard (PRIJSMODEL-C assembler, TASK G) — package head + three
- * consumption meters (AI tokens, workflow runs, WhatsApp Tokens) + the users
- * line. AI/workflow render through the shared <TierMeter> once the backend
- * ships tier fields; presence-gated fallback keeps the older CREDITS-2
- * MeterBar rendering alive for a subscription that has none of tier/allowance/
- * state yet, so nothing regresses before BE lands. Data arrives as a prop
- * (lifted out of UsageOverviewSection's /billing/usage fetch) — no request here.
+ * SubscriptionCard (PRIJSMODEL-C assembler, TASK G) — package head + two
+ * consumption meters (AI tokens, workflow runs) + the users line. AI/workflow
+ * render through the shared <TierMeter> once the backend ships tier fields;
+ * presence-gated fallback keeps the older CREDITS-2 MeterBar rendering alive
+ * for a subscription that has none of tier/allowance/state yet, so nothing
+ * regresses before BE lands. Data arrives as a prop (lifted out of
+ * UsageOverviewSection's /billing/usage fetch) — no request here.
+ * K-242 (02-09): the third WhatsApp Tokens meter is RETIRED — a wa_web
+ * message now counts as a Workflow-token, so the workflow meter already
+ * covers it; the backend no longer sends `subscription.whatsapp`.
  */
 import { useTranslation } from 'react-i18next'
 import { useNumberFormat } from '@/lib/formatters'
@@ -28,21 +31,14 @@ interface SubscriptionCardProps {
   onDrillWorkflow?: () => void
 }
 
-// A meter renders only once the server sent a budget for it — an absent
-// WhatsApp meter (CMBE not live yet) must not draw a fake 0/0 bar (§3).
-function hasMeter(meter?: { budget?: number; used?: number }): boolean {
-  return !!meter && (meter.budget !== undefined || meter.used !== undefined)
-}
-
 // A tier-shaped meter has arrived once the server sends any of tier/allowance/
 // state — the fallback below stays alive for an older response that has none.
 function hasTierFields(meter?: BillingUsageTierMeter | null): boolean {
   return !!meter && (meter.tier !== undefined || meter.allowance !== undefined || meter.state !== undefined)
 }
 
-// One meter bar — the pre-PRIJSMODEL-C fallback for AI/workflow, and the
-// still-current WhatsApp Tokens rendering (K-196, unchanged). Exported for
-// TenantUsageKpiRow.
+// One meter bar — the pre-PRIJSMODEL-C fallback for AI/workflow meters
+// without tier fields yet. Exported for TenantUsageKpiRow.
 export function MeterBar({ label, used, budget, onDrill }: { label: string; used?: number; budget?: number; onDrill?: () => void }) {
   const { t } = useTranslation('settings')
   const { formatNumber } = useNumberFormat()
@@ -94,8 +90,9 @@ function OverBudgetLine({ meterLabel, over, amount, t, formatNumber, formatCurre
   )
 }
 
-// Package head + the three consumption meters — AI and workflow via TierMeter
-// (or the CREDITS-2 fallback), WhatsApp via the existing MeterBar, users last.
+// Package head + the two consumption meters — AI and workflow via TierMeter (or the
+// CREDITS-2 fallback), users last. K-242: WhatsApp-Web sends bill as workflow-tokens,
+// so the separate WhatsApp meter is gone.
 export default function SubscriptionCard({ subscription, phase, onDrillAi, onDrillWorkflow }: SubscriptionCardProps) {
   const { t } = useTranslation('settings')
   const { formatCurrency, formatNumber } = useNumberFormat()
@@ -136,22 +133,6 @@ export default function SubscriptionCard({ subscription, phase, onDrillAi, onDri
             <MeterBar label={t('billing.usage.plan.workflowMeter')} used={subscription.workflow?.used} budget={subscription.workflow?.budget} onDrill={onDrillWorkflow} />
           )}
 
-          {/* Third meter (CMBE, F5 25-08) — WhatsApp Tokens, unchanged K-196 view. */}
-          {hasMeter(subscription.whatsapp) && (
-            <>
-              <MeterBar label={t('billing.usage.plan.whatsappMeter')} used={subscription.whatsapp?.used} budget={subscription.whatsapp?.budget} />
-              {/* K-204: the € 0,01/token price — measured bug (Danny: "elke keer
-                  is de 0,01 weg"): price_cents arrived on the wire but nothing
-                  ever rendered it. Cents → euros at the boundary, 2 decimals so
-                  a 1-cent price never rounds to "€ 0,00". */}
-              {subscription.whatsapp?.price_cents != null && (
-                <p style={{ ...notice, marginTop: -10 }}>
-                  {t('billing.usage.whatsapp.priceCaption', { amount: formatCurrency(subscription.whatsapp.price_cents / 100, 'EUR', 2, 2) })}
-                </p>
-              )}
-            </>
-          )}
-
           {/* Fallback-only over-budget lines — TierMeter carries its own state
               copy (warn/blocked/overage) once tier fields have landed. */}
           {!hasTierFields(subscription.ai) && (
@@ -160,7 +141,6 @@ export default function SubscriptionCard({ subscription, phase, onDrillAi, onDri
           {!hasTierFields(subscription.workflow) && (
             <OverBudgetLine meterLabel={t('billing.usage.plan.workflowMeter')} over={subscription.workflow?.over} amount={subscription.workflow?.over_amount} t={t} formatNumber={formatNumber} formatCurrency={formatCurrency} />
           )}
-          <OverBudgetLine meterLabel={t('billing.usage.plan.whatsappMeter')} over={subscription.whatsapp?.over} amount={subscription.whatsapp?.over_amount} t={t} formatNumber={formatNumber} formatCurrency={formatCurrency} />
 
           <SubscriptionUsersLine users={subscription.users} />
         </>

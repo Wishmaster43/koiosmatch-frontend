@@ -5,6 +5,8 @@
  * PRIJSMODEL-C (30-08): ai_token_budget is gone (AI capacity is a staffel now,
  * shown read-only via ai_tier_key); workflow_credit_budget is renamed
  * included_workflow_runs.
+ * K-242 (02-09): whatsapp_token_budget is RETIRED — a PUT body never carries
+ * it any more (folded into included_workflow_runs server-side).
  */
 import { describe, it, expect, afterEach, vi } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
@@ -77,8 +79,25 @@ describe('BillingBudgetsCard', () => {
     await userEvent.click(screen.getByRole('button', { name: t('common.save') }))
 
     await waitFor(() => expect(api.put).toHaveBeenCalledWith('/admin/billing-budgets', expect.objectContaining({
-      packages: expect.objectContaining({ core: { included_workflow_runs: 1500, whatsapp_token_budget: 0 } }),
+      packages: expect.objectContaining({ core: { included_workflow_runs: 1500 } }),
     })))
+  })
+
+  it('never sends the retired whatsapp_token_budget knob (K-242)', async () => {
+    mockGet()
+    vi.mocked(api.put).mockResolvedValue({ data: budgets })
+    render(<BillingBudgetsCard />)
+
+    const inputs = await screen.findAllByLabelText(t('billingBudgets.workflowBudgetLabel'))
+    await userEvent.clear(inputs[0])
+    await userEvent.type(inputs[0], '1500')
+    await userEvent.click(screen.getByRole('button', { name: t('common.save') }))
+
+    await waitFor(() => expect(api.put).toHaveBeenCalled())
+    const body = vi.mocked(api.put).mock.calls[0][1] as { packages?: Record<string, unknown> }
+    for (const pkg of Object.values(body.packages ?? {})) {
+      expect(pkg).not.toHaveProperty('whatsapp_token_budget')
+    }
   })
 
   it('PUTs null fields for a tenant override clear', async () => {
@@ -98,21 +117,7 @@ describe('BillingBudgetsCard', () => {
     await userEvent.click(screen.getByRole('button', { name: t('common.save') }))
 
     await waitFor(() => expect(api.put).toHaveBeenCalledWith('/admin/billing-budgets', expect.objectContaining({
-      tenants: { 't-1': { included_workflow_runs: null, whatsapp_token_budget: null } },
-    })))
-  })
-
-  it('PUTs the WhatsApp Token budget as its own package field (K-196)', async () => {
-    mockGet()
-    vi.mocked(api.put).mockResolvedValue({ data: budgets })
-    render(<BillingBudgetsCard />)
-    // Three package rows carry this label; the first one is core, like the sibling tests.
-    const fields = await screen.findAllByLabelText(t('billingBudgets.whatsappBudgetLabel'))
-    await userEvent.clear(fields[0])
-    await userEvent.type(fields[0], '750')
-    await userEvent.click(screen.getByRole('button', { name: t('common.save') }))
-    await waitFor(() => expect(api.put).toHaveBeenCalledWith('/admin/billing-budgets', expect.objectContaining({
-      packages: expect.objectContaining({ core: expect.objectContaining({ whatsapp_token_budget: 750 }) }),
+      tenants: { 't-1': { included_workflow_runs: null } },
     })))
   })
 })

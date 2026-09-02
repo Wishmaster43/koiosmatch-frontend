@@ -1,15 +1,19 @@
 /**
  * BillingBudgetsCard (CREDITS-2-FE deel 2, Danny: "vul beiden en toon ze hier") —
  * superadmin monthly package budgets, lives inside ModulesSettings alongside
- * PlatformPricingCard. GET /admin/billing-budgets returns the three package
- * defaults (included workflow runs + WhatsApp Token budget + the EUR cost/sale
- * value, MARGEGEHEIM insight only) and any per-tenant overrides; PUT writes back
+ * PlatformPricingCard. GET /admin/billing-budgets returns the package defaults
+ * (included workflow-tokens + the EUR cost/sale value, MARGEGEHEIM insight only)
+ * and any per-tenant overrides; PUT writes back
  * { packages?, tenants? }. A tenant override with a null field clears that
  * field back to the package default — never a whole-entry wipe.
  * SaveButton-patroon: optimistic edit, saved-state confirmation, 422 → notice.
  * PRIJSMODEL-C (30-08): the AI-token budget knob is GONE — AI capacity is now
  * the staffel picked on /admin/billing-tiers; this card shows the package's
  * resulting ai_tier_key read-only (Caption), never an input, never PUT'd.
+ * K-242 (02-09, Danny: "WhatsApp-Tokens worden gewoon Workflowtokens!"): the
+ * separate WhatsApp Token budget is RETIRED — it is folded into the package's
+ * included_workflow_runs bundle server-side, so this card no longer sends or
+ * shows whatsapp_token_budget; a PUT still carrying it now 422s.
  */
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -27,12 +31,12 @@ import type {
 } from '@/types/billingUsage'
 import { PACKAGE_KEYS, card, sub, label, inputWrap, inputStyle } from './billingCardStyles'
 
-// A package row's two editable numbers, blank = 0 for an empty field.
+// A package row's editable number, blank = 0 for an empty field.
 // ai_token_budget dropped (PRIJSMODEL-C): read-only ai_tier_key replaces it.
-type PackageDraft = { included_workflow_runs: string; whatsapp_token_budget: string }
+// whatsapp_token_budget RETIRED (K-242): folded into included_workflow_runs.
+type PackageDraft = { included_workflow_runs: string }
 const draftFromEntry = (entry?: BillingBudgetEntry): PackageDraft => ({
   included_workflow_runs: entry?.included_workflow_runs != null ? String(entry.included_workflow_runs) : '',
-  whatsapp_token_budget: entry?.whatsapp_token_budget != null ? String(entry.whatsapp_token_budget) : '',
 })
 
 // See the file's top doc above; superadmin package/tenant budget editor with the SaveButton optimistic-confirm pattern.
@@ -51,7 +55,7 @@ export default function BillingBudgetsCard() {
   // Per-tenant override state, owned by the child so this card stays under the
   // §3 400-line split trigger; lifted here only for the shared Save action.
   const [tenantId, setTenantId] = useState<string | null>(null)
-  const [tenantDraft, setTenantDraft] = useState<{ included_workflow_runs: string; whatsapp_token_budget: string }>({ included_workflow_runs: '', whatsapp_token_budget: '' })
+  const [tenantDraft, setTenantDraft] = useState<{ included_workflow_runs: string }>({ included_workflow_runs: '' })
   const [tenantDirty, setTenantDirty] = useState(false)
 
   // Load package defaults + existing tenant overrides.
@@ -76,7 +80,6 @@ export default function BillingBudgetsCard() {
   const packagesDirty = PACKAGE_KEYS.some((key) => {
     const saved = draftFromEntry(data?.packages?.[key])
     return saved.included_workflow_runs !== drafts[key].included_workflow_runs
-      || saved.whatsapp_token_budget !== drafts[key].whatsapp_token_budget
   })
   const hasChange = packagesDirty || tenantDirty
 
@@ -89,7 +92,6 @@ export default function BillingBudgetsCard() {
       for (const key of PACKAGE_KEYS) {
         body.packages[key] = {
           included_workflow_runs: Number(drafts[key].included_workflow_runs) || 0,
-          whatsapp_token_budget: Number(drafts[key].whatsapp_token_budget) || 0,
         }
       }
     }
@@ -97,7 +99,6 @@ export default function BillingBudgetsCard() {
       body.tenants = {
         [tenantId]: {
           included_workflow_runs: tenantDraft.included_workflow_runs === '' ? null : Number(tenantDraft.included_workflow_runs),
-          whatsapp_token_budget: tenantDraft.whatsapp_token_budget === '' ? null : Number(tenantDraft.whatsapp_token_budget),
         },
       }
     }
@@ -155,16 +156,6 @@ export default function BillingBudgetsCard() {
                     <input id={`billing-budget-wf-${key}`} type="number" min={0} step={1}
                       value={drafts[key].included_workflow_runs}
                       onChange={(e) => setDrafts((prev) => ({ ...prev, [key]: { ...prev[key], included_workflow_runs: e.target.value } }))}
-                      style={inputStyle} />
-                  </div>
-                </div>
-                {/* K-196: the WhatsApp Token budget, the meter for WhatsApp Web traffic. */}
-                <div style={{ flex: '1 1 160px', minWidth: 140 }}>
-                  <label style={label} htmlFor={`billing-budget-wa-${key}`}>{t('billingBudgets.whatsappBudgetLabel')}</label>
-                  <div style={inputWrap}>
-                    <input id={`billing-budget-wa-${key}`} type="number" min={0} step={1}
-                      value={drafts[key].whatsapp_token_budget}
-                      onChange={(e) => setDrafts((prev) => ({ ...prev, [key]: { ...prev[key], whatsapp_token_budget: e.target.value } }))}
                       style={inputStyle} />
                   </div>
                 </div>

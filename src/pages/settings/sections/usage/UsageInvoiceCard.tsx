@@ -1,7 +1,7 @@
 /**
  * UsageInvoiceCard (F5, "Factuurvoorschot") — a provisional invoice total for
  * the selected period, fed by GET /billing/usage ONLY (workflow.amount +
- * ai.amount + whatsapp, when present). Replaces the old "Koios AI-facturatie"
+ * ai.amount; K-242 folded WhatsApp into the workflow line). Replaces the old "Koios AI-facturatie"
  * card (GET /ai/koios/usage/billing?month=): that endpoint used a DIFFERENT
  * axis (calendar month, never the period picker) and a different price knob
  * (workflow_module_usage legacy runs vs workflow_credit_log), so mixing it in
@@ -15,6 +15,8 @@ import { useNumberFormat } from '@/lib/formatters'
 import { SectionTitle, Caption, Mono } from '@/components/ui/typography'
 import { card, sub, notice } from '../usageCardStyles'
 import type { BillingUsageResponse } from '@/types/billingUsage'
+// K-242 (02-09): WhatsApp Tokens fold into the workflow amount — `whatsapp.by_channel`
+// is INFO only now (message counts), so it no longer contributes its own invoice line.
 
 interface UsageInvoiceCardProps {
   data: BillingUsageResponse['data'] | undefined
@@ -28,8 +30,7 @@ export default function UsageInvoiceCard({ data, phase }: UsageInvoiceCardProps)
 
   const workflowAmount = data?.workflow?.amount ?? 0
   const aiAmount = data?.ai?.amount ?? 0
-  const whatsappAmount = (data?.whatsapp?.by_channel ?? []).reduce((sum, c) => sum + (c.amount ?? 0), 0)
-  const total = Math.round((workflowAmount + aiAmount + whatsappAmount) * 100) / 100
+  const total = Math.round((workflowAmount + aiAmount) * 100) / 100
 
   return (
     <div style={card}>
@@ -50,12 +51,6 @@ export default function UsageInvoiceCard({ data, phase }: UsageInvoiceCardProps)
               <span>{t('billing.usage.invoice.aiLine')}</span>
               <Mono>{formatCurrency(aiAmount)}</Mono>
             </div>
-            {data?.whatsapp?.by_channel && (
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12 }}>
-                <span>{t('billing.usage.invoice.whatsappLine')}</span>
-                <Mono>{formatCurrency(whatsappAmount)}</Mono>
-              </div>
-            )}
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, fontWeight: 700, paddingTop: 6, borderTop: '1px solid var(--border)' }}>
               <span>{t('billing.usage.invoice.totalLabel')}</span>
               <Mono>{formatCurrency(total)}</Mono>

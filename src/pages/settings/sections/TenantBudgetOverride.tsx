@@ -14,7 +14,9 @@ import type { BillingBudgetEntry } from '@/types/billingUsage'
 
 // ai_token_budget dropped (PRIJSMODEL-C): AI capacity is a staffel now, not a
 // raw-token budget knob here. workflow_credit_budget renamed to included_workflow_runs.
-interface Draft { included_workflow_runs: string; whatsapp_token_budget: string }
+// whatsapp_token_budget RETIRED (K-242, 02-09): WhatsApp usage folds into the
+// workflow-run bundle now — a PUT still sending it 422s.
+interface Draft { included_workflow_runs: string }
 
 const label = { fontSize: 12, color: 'var(--text-muted)', marginBottom: 4, display: 'block' }
 // Color lives on the WRAP, not the input — mirrors BillingBudgetsCard's split.
@@ -23,7 +25,6 @@ const inputStyle = { border: 'none', outline: 'none', background: 'transparent',
 
 const draftFromEntry = (entry?: BillingBudgetEntry): Draft => ({
   included_workflow_runs: entry?.included_workflow_runs != null ? String(entry.included_workflow_runs) : '',
-  whatsapp_token_budget: entry?.whatsapp_token_budget != null ? String(entry.whatsapp_token_budget) : '',
 })
 
 interface Props {
@@ -34,13 +35,13 @@ interface Props {
   onDraftChange: (draft: Draft) => void
 }
 
-// Super-admin per-tenant budget override: search-picks a tenant, then edits its workflow-credit/WhatsApp-token budget draft.
+// Super-admin per-tenant budget override: search-picks a tenant, then edits its workflow-token budget draft (K-242: one unit).
 export default function TenantBudgetOverride({ tenants, tenantId, onTenantIdChange, draft, onDraftChange }: Props) {
   const { t } = useTranslation('settings')
   const { options, onSearch } = useTenantSearch()
   const [pickedLabel, setPickedLabel] = useState('')
 
-  // Picking a tenant seeds the two fields from its existing override, if any.
+  // Picking a tenant seeds the field from its existing override, if any.
   const pickTenant = (id: string) => {
     const found = options.find((o) => o.value === id)
     onTenantIdChange(id)
@@ -71,17 +72,6 @@ export default function TenantBudgetOverride({ tenants, tenantId, onTenantIdChan
               <input id="tenant-budget-wf" type="number" min={0} step={1}
                 value={draft.included_workflow_runs}
                 onChange={(e) => onDraftChange({ ...draft, included_workflow_runs: e.target.value })}
-                placeholder={t('billingBudgets.tenantClearPlaceholder')}
-                style={inputStyle} />
-            </div>
-          </div>
-          {/* K-196: the WhatsApp Token budget; empty falls back to the package. */}
-          <div style={{ flex: '1 1 160px', minWidth: 140 }}>
-            <label style={label} htmlFor="tenant-budget-wa">{t('billingBudgets.whatsappBudgetLabel')}</label>
-            <div style={inputWrap}>
-              <input id="tenant-budget-wa" type="number" min={0} step={1}
-                value={draft.whatsapp_token_budget}
-                onChange={(e) => onDraftChange({ ...draft, whatsapp_token_budget: e.target.value })}
                 placeholder={t('billingBudgets.tenantClearPlaceholder')}
                 style={inputStyle} />
             </div>

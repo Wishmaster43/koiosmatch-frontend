@@ -1,10 +1,11 @@
 /**
  * UsageWhatsAppTab (F5, "WhatsApp") — presence-based: once GET /billing/usage
  * carries `whatsapp.by_channel` (CMBE, F5 handoff 25-08) this renders a table
- * per channel (waba / waba_coex / wa_web) with WhatsApp Tokens (1 wa_web
- * message = 1 token) + the tokens meter; until then it falls back to the
- * existing GET /settings/messaging-costs by_number card, with an honest
- * "this month" caption since that endpoint has no period param.
+ * per channel (waba / waba_coex / wa_web) with the message count; until then
+ * it falls back to the existing GET /settings/messaging-costs by_number card,
+ * with an honest "this month" caption since that endpoint has no period param.
+ * K-242 (02-09): `by_channel` is INFO only now — no more tokens/amount/meter,
+ * a wa_web message counts as a Workflow-token in the `workflow` block instead.
  */
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -14,7 +15,6 @@ import DataTable from '@/components/ui/DataTable'
 import type { Column } from '@/components/ui/DataTable'
 import { SectionTitle } from '@/components/ui/typography'
 import { card, sub, notice, Tile } from '../usageCardStyles'
-import { MeterBar } from './SubscriptionCard'
 import type { BillingUsageWhatsapp, BillingUsageWhatsappChannel } from '@/types/billingUsage'
 
 interface MessagingCosts {
@@ -62,40 +62,13 @@ export default function UsageWhatsAppTab({ whatsapp }: UsageWhatsAppTabProps) {
   const channelColumns: Column<BillingUsageWhatsappChannel>[] = [
     { key: 'channel', header: t('billing.usage.whatsapp.colChannel'), render: (r) => tc(`conversations.channel.${r.channel}`, { defaultValue: r.label ?? r.channel }) },
     { key: 'messages', header: t('billing.usage.whatsapp.colMessages'), align: 'right', render: (r) => formatNumber(r.messages) },
-    { key: 'tokens', header: t('billing.usage.whatsapp.colTokens'), align: 'right', render: (r) => formatNumber(r.tokens) },
-    { key: 'amount', header: t('billing.usage.whatsapp.colCost'), align: 'right', render: (r) => formatCurrency(r.amount) },
   ]
 
   if (hasChannelData) {
-    const tokens = whatsapp?.tokens
     return (
       <div style={card}>
         <SectionTitle style={{ marginBottom: 4 }}>{t('billing.usage.whatsapp.title')}</SectionTitle>
         <div style={sub}>{t('billing.usage.whatsapp.subtitle')}</div>
-
-        {tokens && (
-          <div style={{ marginBottom: 14 }}>
-            <MeterBar label={t('billing.usage.whatsapp.tokensMeterLabel')} used={tokens.used} budget={tokens.budget} />
-            {/* K-204: the € 0,01/token price — measured bug (Danny: "elke keer
-                is de 0,01 weg"): price_cents arrived on the wire but nothing
-                ever rendered it. Cents → euros at the boundary, 2 decimals so
-                a 1-cent price never rounds to "€ 0,00". */}
-            {tokens.price_cents != null && (
-              <p style={notice}>
-                {t('billing.usage.whatsapp.priceCaption', { amount: formatCurrency(tokens.price_cents / 100, 'EUR', 2, 2) })}
-              </p>
-            )}
-            {(tokens.over ?? 0) > 0 && (
-              <p style={{ ...notice, color: 'var(--color-danger-text)' }}>
-                {t('billing.usage.plan.overBudget', {
-                  meter: t('billing.usage.whatsapp.tokensMeterLabel'),
-                  n: formatNumber(tokens.over ?? 0),
-                  amount: formatCurrency(tokens.over_amount),
-                })}
-              </p>
-            )}
-          </div>
-        )}
 
         <DataTable columns={channelColumns} rows={whatsapp!.by_channel!} getRowId={(r) => r.channel}
           emptyText={t('billing.usage.whatsapp.empty')} />

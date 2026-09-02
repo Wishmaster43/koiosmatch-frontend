@@ -74,15 +74,11 @@ describe('SubscriptionCard', () => {
     expect(screen.queryByText(/boven budget|over budget/i)).toBeNull()
   })
 
-  // K-204 regression: price_cents arrived on the wire but nothing ever
-  // rendered it (Danny: "elke keer is de 0,01 weg") — the WhatsApp meter now
-  // shows the per-token EUR price, converted from cents at the boundary.
-  it('shows the WhatsApp per-token price when price_cents is present', () => {
-    const withWhatsapp = { ...subscription, whatsapp: { budget: 250, used: 10, over: 0, over_amount: 0, price_cents: 1 } }
-    render(<SubscriptionCard subscription={withWhatsapp} phase="ready" />)
-    const eur = formatCurrency(0.01, 'EUR', 'nl-NL', 2, 2).replace(/\u00A0/g, ' ')
-    const match = screen.getAllByText((_, el) => el?.textContent?.replace(/\u00A0/g, ' ').includes(eur) ?? false)
-    expect(match.length).toBeGreaterThan(0)
+  // K-242 (02-09): the WhatsApp Tokens meter is retired -- even when the
+  // (now unused) whatsapp field is present on a stale prop, nothing renders it.
+  it('never renders a WhatsApp Tokens meter (K-242, folded into workflow)', () => {
+    render(<SubscriptionCard subscription={subscription} phase="ready" />)
+    expect(screen.queryByText(t('billing.usage.plan.whatsappMeter'))).toBeNull()
   })
 
   // Danny 24-08: the meter is a gateway — clicking it drills into the daily

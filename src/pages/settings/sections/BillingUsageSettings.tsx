@@ -16,9 +16,10 @@
  *   - WhatsApp:     whatsapp.by_channel when present, else the legacy
  *                    messaging-costs by_number card (own component fetch).
  *
- * ONE vocabulary everywhere (settings.json billing.usage.*): "workflow-runs" (formerly "Koios Tokens") =
- * workflow executions, "AI-tokens" = Claude tokens, "WhatsApp Tokens" = wa_web
- * messages (§0.11 — never call the workflow unit anything else). The old
+ * ONE vocabulary everywhere (settings.json billing.usage.*): "Workflow-tokens" (formerly
+ * "Koios Tokens"/"workflow-runs") = workflow executions INCLUDING wa_web sends (K-242, one
+ * unit; key stays workflow_run), "AI-tokens" = Claude tokens (§0.11 — never call the
+ * workflow unit anything else). The old
  * "Koios AI-facturatie" card (GET /ai/koios/usage/billing?month=) is dropped —
  * see UsageInvoiceCard's header comment for why it doesn't come back as a
  * fourth source. The native month input and the inline QuickViewToggle period
