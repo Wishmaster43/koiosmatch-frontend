@@ -272,3 +272,12 @@ describe('mapCandidate — private bank account (BANK-1)', () => {
     expect(r.iban).toBe('')
   })
 })
+
+// AVG-RET-2-TAAL-1: preferred_language maps to preferredLanguage; null/absent = '' (agency default).
+describe('mapCandidate · preferredLanguage', () => {
+  it('maps the code and collapses null/absent to the empty agency-default value', () => {
+    expect(mapCandidate({ id: 'c1', preferred_language: 'pl' }).preferredLanguage).toBe('pl')
+    expect(mapCandidate({ id: 'c2', preferred_language: null }).preferredLanguage).toBe('')
+    expect(mapCandidate({ id: 'c3' }).preferredLanguage).toBe('')
+  })
+})

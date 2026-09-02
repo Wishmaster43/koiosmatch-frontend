@@ -410,7 +410,8 @@
       "restoreFailed": "Error al restaurar.",
       "linkedin": "LinkedIn",
       "openLinkedin": "Abrir en LinkedIn",
-      "freeText": "Texto libre"
+      "freeText": "Texto libre",
+      "preferredLanguage": "Idioma preferido"
     },
     "deleteConfirm": "¿Eliminar este contacto?",
     "saveFailed": "Error al guardar.",
@@ -760,7 +761,9 @@
     "contactCouplingFailed": "La sede \"{{name}}\" se creó, pero no se pudo vincular el contacto. Vincúlalo manualmente más tarde desde la sede.",
     "contactCreateFailed": "La sede \"{{name}}\" se creó, pero no se pudo crear el nuevo contacto. Añádelo manualmente y vincúlalo desde la sede más tarde.",
     "linkedin": "LinkedIn",
-    "linkedinPlaceholder": "linkedin.com/in/usuario"
+    "linkedinPlaceholder": "linkedin.com/in/usuario",
+    "preferredLanguage": "Idioma preferido",
+    "preferredLanguageDefault": "Predeterminado de la agencia"
   },
   "changelog": {
     "loading": "Cargando…",

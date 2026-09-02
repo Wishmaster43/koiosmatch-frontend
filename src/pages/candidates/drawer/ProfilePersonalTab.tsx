@@ -7,12 +7,14 @@
 import { useState } from 'react'
 import type { ComponentType } from 'react'
 import { useTranslation } from 'react-i18next'
+import { BodyText, Caption } from '@/components/ui/typography'
 import { Cake } from 'lucide-react'
 import DatePicker from 'react-datepicker'
 import { useDateFormat, calcAge, daysUntilBirthday } from '@/lib/datetime'
 import { toLocalIsoDate } from '@/lib/localDate'
 import { useGenders } from '@/lib/useGenders'
 import { useNationalities } from '@/lib/useNationalities'
+import { useMessagingLanguageOptions } from '@/lib/useMessagingLanguageOptions'
 import CreatableSelectJs from '@/components/ui/CreatableSelect'
 import LookupIcon from '@/components/ui/LookupIcon'
 import { FieldRow, EditControls, GroupCard, GroupHeader, inputStyle } from './profileFieldShared'
@@ -30,7 +32,8 @@ const CreatableSelect = CreatableSelectJs as unknown as ComponentType<AnyProps>
 // i.e. "I'm missing the source"): buried between gender/nationality/birthdate it
 // read as a property of the PERSON, while it describes the DOSSIER. It now sits
 // with its own stamps in CandidateOriginCard ("Herkomst" — "Origin").
-type PersonalKey = 'gender' | 'nationality' | 'dob' | 'placeOfBirth'
+// AVG-RET-2-TAAL-1: preferredLanguage is additive, appended after placeOfBirth.
+type PersonalKey = 'gender' | 'nationality' | 'dob' | 'placeOfBirth' | 'preferredLanguage'
 type PersonalForm = Record<PersonalKey, string>
 
 // Only gender/dob are ever tenant-required among this tab's fields (mirrors
@@ -49,11 +52,14 @@ export default function ProfilePersonalTab({ c, onSave, autoEditSignal }: {
   // nationality name to its ISO-2 flag emoji (derived from country_code) — fed to
   // the shared LookupIcon, which renders emoji/free-text as-is.
   const { nationalityOptions, flags } = useNationalities()
+  // AVG-RET-2-TAAL-1: shared messaging-language picker options + label lookup.
+  const { options: languageOptions, labelFor: languageLabelFor } = useMessagingLanguageOptions()
   const requiredKeys = useProfileRequiredKeys(c.phase)
   const isReq = (key: PersonalKey) => { const bk = REQ_MAP[key]; return !!bk && requiredKeys.includes(bk) }
 
   const emptyForm = (): PersonalForm => ({
     gender: c.gender ?? '', nationality: c.nationality ?? '', dob: c.dob ?? '', placeOfBirth: c.placeOfBirth ?? '',
+    preferredLanguage: c.preferredLanguage ?? '',
   })
   const [editing, setEditing] = useState(false)
   // Open edit mode when the parent bumps the signal (e.g. right after Lead→Kandidaat convert).
@@ -99,6 +105,13 @@ export default function ProfilePersonalTab({ c, onSave, autoEditSignal }: {
         customInput={<input style={inputStyle} />}
       />
     )
+    // AVG-RET-2-TAAL-1: optional, clearable — empty means agency default.
+    if (key === 'preferredLanguage') return (
+      <CreatableSelect value={form.preferredLanguage || null} onChange={(v: string) => setF('preferredLanguage', v ?? '')}
+        allowCreate={false} clearable clearLabel={t('profile.preferredLanguage')}
+        placeholder={t('profile.preferredLanguageDefault')} style={inputStyle}
+        options={languageOptions} />
+    )
     return <input value={form[key]} onChange={e => setF(key, e.target.value)} style={inputStyle} />
   }
 
@@ -143,6 +156,12 @@ export default function ProfilePersonalTab({ c, onSave, autoEditSignal }: {
         </span>
       )
     }
+    // AVG-RET-2-TAAL-1: empty shows the italic "agency default" placeholder.
+    if (key === 'preferredLanguage') {
+      return v
+        ? <BodyText as="span">{languageLabelFor(String(v))}</BodyText>
+        : <Caption as="span" style={{ fontStyle: 'italic' }}>{t('profile.preferredLanguageDefault')}</Caption>
+    }
     return <span style={{ fontSize: 12, color: v ? 'var(--text)' : 'var(--text-muted)' }}>{v || '-'}</span>
   }
 
@@ -162,6 +181,7 @@ export default function ProfilePersonalTab({ c, onSave, autoEditSignal }: {
         {field('nationality', t('profile.nationality'))}
         {field('dob', t('profile.dob'))}
         {field('placeOfBirth', t('profile.placeOfBirth'))}
+        {field('preferredLanguage', t('profile.preferredLanguage'))}
       </GroupCard>
     </div>
   )

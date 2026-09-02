@@ -15,6 +15,8 @@ import SubTabBar from '@/components/drawer/SubTabBar'
 import SectionCard from '@/components/ui/SectionCard'
 import Toggle from '@/components/ui/Toggle'
 import RetentionConsentBlock from './RetentionConsentBlock'
+import { useAllSettings } from '@/lib/settings/useAllSettings'
+import { DEFAULT_MESSAGING_LANGUAGE } from '@/modules/messagingLanguages'
 import CandidateTasks from './CandidateTasks'
 import ConversationsSection from '@/components/drawer/ConversationsSection'
 import DrawerAddButton from './DrawerAddButton'
@@ -94,9 +96,12 @@ export default function CommunicationTab({ c, onSave, onEditStatusEvent, initial
   // caller can ask for without adding a second refetch contract to it).
   const [showStartModal, setShowStartModal] = useState(false)
   const [convRefreshKey, setConvRefreshKey] = useState(0)
+  // AVG-RET-2-TAAL-1: the agency default backs a candidate without an own preferred language.
+  const settingsValues = useAllSettings()
 
   // Channel consent (AVG) — nested `consent.{channel}_*` (C-11). Toggling saves the
   // full consent object; the server stamps `*_consent_at` on a flip (shown inline).
+
   const consent = c.consent as unknown as Record<string, unknown>
   const CONSENT_CH = [
     { key: 'whatsapp_opt_in',   at: 'whatsapp_consent_at',   label: t('communication.consentWhatsapp'),   dflt: true },
@@ -290,7 +295,7 @@ export default function CommunicationTab({ c, onSave, onEditStatusEvent, initial
           {/* AVG-bewaartermijn — its OWN clearly bounded block (Danny 24-07: the
               loose text line under the channel consents was unreadable). The consent's
               own validity (it LAPSES, Danny 2026-08-02) lives in RetentionConsentBlock. */}
-          <RetentionConsentBlock
+          <RetentionConsentBlock messagingLanguage={c.preferredLanguage || String(settingsValues['candidate_messaging_language_default'] ?? '') || DEFAULT_MESSAGING_LANGUAGE}
             optIn={!!c.consent.retentionOptIn}
             consentAt={c.consent.retentionConsentAt ?? null}
             expiresAt={c.retentionExpiresAt ?? null}

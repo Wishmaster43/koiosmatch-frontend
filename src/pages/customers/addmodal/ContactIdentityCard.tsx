@@ -28,12 +28,16 @@ interface ContactIdentityCardProps {
   allowFreeEntry: boolean
   gender: string; onGenderChange: (v: string) => void
   genders: OptionRow[]
+  // AVG-RET-2-TAAL-1: preferred messaging language ('' = agency default).
+  preferredLanguage: string; onPreferredLanguageChange: (v: string) => void
+  languageOptions: OptionRow[]
 }
 
 // Pure presentational "Persoon" card: first/middle/last name, function and gender.
 export default function ContactIdentityCard({
   firstName, onFirstNameChange, firstNameError, middleName, onMiddleNameChange, lastName, onLastNameChange, lastNameError,
   role, onRoleChange, contactFunctions, allowFreeEntry, gender, onGenderChange, genders,
+  preferredLanguage, onPreferredLanguageChange, languageOptions,
 }: ContactIdentityCardProps) {
   const { t } = useTranslation(['customers', 'common'])
   return (
@@ -75,6 +79,14 @@ export default function ContactIdentityCard({
             <CreatableSelect value={gender || null} onChange={onGenderChange} allowCreate={false}
               clearable clearLabel={t('subModal.gender')}
               placeholder={t('subModal.noneOption')} style={CREATABLE_STYLE} options={genders} />
+          </FieldRow>
+        </div>
+        {/* AVG-RET-2-TAAL-1: optional, clearable — empty means agency default. */}
+        <div style={row2}>
+          <FieldRow label={t('subModal.preferredLanguage')}>
+            <CreatableSelect value={preferredLanguage || null} onChange={onPreferredLanguageChange} allowCreate={false}
+              clearable clearLabel={t('subModal.preferredLanguage')}
+              placeholder={t('subModal.preferredLanguageDefault')} style={CREATABLE_STYLE} options={languageOptions} />
           </FieldRow>
         </div>
       </div>

@@ -212,6 +212,8 @@ export interface Candidate {
   address: string
   gender: string
   nationality: string
+  // AVG-RET-2-TAAL-1: preferred messaging language ('' = agency default).
+  preferredLanguage: string
   dob: string
   placeOfBirth: string
   linkedin: string
@@ -419,6 +421,8 @@ export interface ApiCandidate {
   gender?: string
   sex?: string
   nationality?: string
+  // AVG-RET-2-TAAL-1: null = agency default.
+  preferred_language?: string | null
   date_of_birth?: string
   dob?: string
   birthdate?: string

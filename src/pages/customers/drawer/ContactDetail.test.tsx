@@ -590,3 +590,19 @@ describe('ContactDetail · free-text block (CONTACT-TEKST-1)', () => {
     expect(screen.getByTitle(cm('openSecondScreen'))).toBeInTheDocument()
   })
 })
+
+// AVG-RET-2-TAAL-1: one additive row on the frozen contact card — name when set, agency default when empty.
+describe('ContactDetail · preferred language row', () => {
+  it('shows the stored code by display name', () => {
+    render(<ContactDetail contact={baseContact({ preferredLanguage: 'pl' })} locations={locations} departments={departments} statuses={statuses}
+      onSave={vi.fn()} onDelete={vi.fn()} close={vi.fn()} />)
+    expect(screen.getByText(ct('contacts.detail.preferredLanguage'))).toBeInTheDocument()
+    expect(screen.getByText('Pools (PL)')).toBeInTheDocument()
+  })
+
+  it('shows the agency-default placeholder when no language is set', () => {
+    render(<ContactDetail contact={baseContact()} locations={locations} departments={departments} statuses={statuses}
+      onSave={vi.fn()} onDelete={vi.fn()} close={vi.fn()} />)
+    expect(screen.getByText(i18n.t('profile.preferredLanguageDefault', { ns: 'candidates' }))).toBeInTheDocument()
+  })
+})

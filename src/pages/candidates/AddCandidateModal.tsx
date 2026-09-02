@@ -68,6 +68,8 @@ interface AppUser { id: Id; name?: string; firstname?: string; lastname?: string
 export interface FormState {
   firstName: string; middleName: string; lastName: string; functionTitle: string
   email: string; phone: string; mobile: string; dateOfBirth: string; gender: string
+  // AVG-RET-2-TAAL-1: preferred messaging language ('' = agency default).
+  preferredLanguage: string
   street: string; houseNumber: string; houseNumberSuffix: string; postalCode: string; city: string; province: string
   // COUNTRY-1: home-address country (ISO-2 code, empty until picked).
   country: string
@@ -148,7 +150,7 @@ export default function AddCandidateModal({ onClose, onCreated, onImported }: Ad
     firstName: '', middleName: '', lastName: '',
     functionTitle: '',
     email: '', phone: '', mobile: '',
-    dateOfBirth: '', gender: '',
+    dateOfBirth: '', gender: '', preferredLanguage: '',
     street: '', houseNumber: '', houseNumberSuffix: '', postalCode: '', city: '', province: '', country: '',
     // Owner defaults to the logged-in user; recruiter can change it.
     ownerId: me?.id ?? '',

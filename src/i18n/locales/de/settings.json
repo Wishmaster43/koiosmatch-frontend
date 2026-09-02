@@ -185,6 +185,7 @@
     "kpis_opportunities": "Chancen",
     "kpis_vacancies": "Stellen",
     "email_log": "E-Mail-Protokoll",
+    "messaging_language": "Nachrichtensprache",
     "whatsapp_log": "Nachrichtenprotokoll",
     "appointment_types": "Terminarten",
     "appointment_locations": "Terminorte",
@@ -3848,5 +3849,11 @@
     "freeEntry": "Freie Eingabe erlauben",
     "freeEntryHint": "An: Benutzer können eine eigene Quelle eingeben (Combobox). Aus: nur aus der Liste wählen (strikte Auswahl).",
     "confirmFreeEntry": "Sind Sie sicher? Freie Eingabe erlaubt Quellen außerhalb der Liste. Das kann den Quellenbericht fragmentieren."
+  },
+  "messagingLanguage": {
+    "title": "Nachrichtensprache",
+    "subtitle": "Die Standardsprache für Nachrichten an Kandidaten und Kontaktpersonen ohne eigene bevorzugte Sprache.",
+    "label": "Standardsprache",
+    "saveFailed": "Speichern fehlgeschlagen."
   }
 }

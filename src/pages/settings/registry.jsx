@@ -103,6 +103,7 @@ import ExportSettings from './sections/ExportSettings'
 import FacebookLeadsSettings from './sections/FacebookLeadsSettings'
 import ApiKeysSettings from './sections/apikeys'
 import EmailLog from './sections/EmailLog'
+import MessagingLanguageSettings from './sections/communication/MessagingLanguageSettings'
 import WhatsAppLog from './sections/WhatsAppLog'
 import { WaMessageTypeSettings } from './sections/WaMessageTypeSettings'
 import KoiosSettings from './sections/koios'
@@ -644,6 +645,8 @@ export const NAV_GROUPS = [
       { id: 'email_candidates', icon: Mail, render: () => <EmailSettings context="kandidaten" /> },
       { id: 'email_planning', icon: Mail, render: () => <EmailSettings context="planning" /> },
       { id: 'email_log', icon: ClipboardList, component: EmailLog },
+      // AVG-RET-2-TAAL-1: agency-wide candidate/contact messaging-language default.
+      { id: 'messaging_language', icon: Languages, component: MessagingLanguageSettings },
     ],
   },
   {

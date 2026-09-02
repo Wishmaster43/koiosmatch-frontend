@@ -185,6 +185,7 @@
     "kpis_opportunities": "Oportunidades",
     "kpis_vacancies": "Vagas",
     "email_log": "Registo de e-mail",
+    "messaging_language": "Idioma das mensagens",
     "whatsapp_log": "Registo de mensagens",
     "appointment_types": "Tipos de marcação",
     "appointment_locations": "Locais de marcação",
@@ -3848,5 +3849,11 @@
     "freeEntry": "Permitir entrada livre",
     "freeEntryHint": "Ativado: os utilizadores podem escrever a sua própria origem (combobox). Desativado: só é possível escolher da lista (dropdown estrita).",
     "confirmFreeEntry": "Tem a certeza? A entrada livre permite que os utilizadores escrevam origens que não estão na lista. Isto pode fragmentar o relatório de origens."
+  },
+  "messagingLanguage": {
+    "title": "Idioma das mensagens",
+    "subtitle": "O idioma predefinido para mensagens a candidatos e pessoas de contacto sem idioma preferido próprio.",
+    "label": "Idioma predefinido",
+    "saveFailed": "Falha ao guardar."
   }
 }

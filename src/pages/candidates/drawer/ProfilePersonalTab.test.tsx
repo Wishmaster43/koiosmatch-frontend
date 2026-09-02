@@ -38,9 +38,12 @@ describe('ProfilePersonalTab · own fields, own pencil, own request shape', () =
 
   const candidate = { id: 1, gender: 'male', nationality: 'Nederlands', dob: '1990-01-01', placeOfBirth: 'Utrecht', phase: 'candidate' } as unknown as Candidate
 
-  it('renders exactly its own four fields, no bron and nothing from Address/Contact', () => {
+  it('renders exactly its own five fields, no bron and nothing from Address/Contact', () => {
     render(<ProfilePersonalTab c={candidate} />)
     expect(screen.getByText('Geslacht')).toBeInTheDocument()
+    // AVG-RET-2-TAAL-1: the additive preferred-language row (empty = agency default).
+    expect(screen.getByText('Voorkeurstaal')).toBeInTheDocument()
+    expect(screen.getByText('Bureaustandaard')).toBeInTheDocument()
     expect(screen.getByText('Nationaliteit')).toBeInTheDocument()
     expect(screen.getByText('Geboortedatum')).toBeInTheDocument()
     expect(screen.getByText('Geboorteplaats')).toBeInTheDocument()
@@ -73,7 +76,31 @@ describe('ProfilePersonalTab · own fields, own pencil, own request shape', () =
     expect(onSave).toHaveBeenCalledTimes(1)
     // No `source` key: this tab no longer owns that field, so its payload
     // must not carry it (a stray key here would silently resurrect the bug).
-    expect(onSave).toHaveBeenCalledWith({ gender: 'male', nationality: 'Nederlands', dob: '1990-01-01', placeOfBirth: 'Amsterdam' })
+    expect(onSave).toHaveBeenCalledWith({ gender: 'male', nationality: 'Nederlands', dob: '1990-01-01', placeOfBirth: 'Amsterdam', preferredLanguage: '' })
+  })
+
+  // AVG-RET-2-TAAL-1: picking a language saves its CODE; the row then shows the display name.
+  it('saves the picked preferred language as a code and renders its name', async () => {
+    const user = userEvent.setup()
+    const onSave = vi.fn()
+    render(<ProfilePersonalTab c={candidate} onSave={onSave} />)
+    await user.click(screen.getByTitle('Bewerken'))
+    await user.click(screen.getByRole('button', { name: 'Bureaustandaard' }))
+    await user.click(await screen.findByRole('button', { name: /^Pools \(PL\)/ }))
+    await user.click(screen.getByTitle('Opslaan'))
+    expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ preferredLanguage: 'pl' }))
+  })
+
+  it('shows the stored preferred language by name and lets the recruiter clear it back to the agency default', async () => {
+    const user = userEvent.setup()
+    const onSave = vi.fn()
+    const withLang = { ...candidate, preferredLanguage: 'pl' } as unknown as Candidate
+    render(<ProfilePersonalTab c={withLang} onSave={onSave} />)
+    expect(screen.getByText('Pools (PL)')).toBeInTheDocument()
+    await user.click(screen.getByTitle('Bewerken'))
+    await user.click(screen.getByRole('button', { name: 'Voorkeurstaal wissen' }))
+    await user.click(screen.getByTitle('Opslaan'))
+    expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ preferredLanguage: '' }))
   })
 
   it('cancel restores the original values without calling onSave', async () => {

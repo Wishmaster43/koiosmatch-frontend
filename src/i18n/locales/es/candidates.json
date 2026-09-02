@@ -231,7 +231,9 @@
       "cardWork": "Trabajo",
       "cardAddress": "Dirección",
       "addressExpand": "Añadir dirección",
-      "linkedinPlaceholder": "linkedin.com/in/usuario"
+      "linkedinPlaceholder": "linkedin.com/in/usuario",
+      "preferredLanguage": "Idioma preferido",
+      "preferredLanguageDefault": "Predeterminado de la agencia"
     },
     "gender": {
       "male": "Hombre",
@@ -440,7 +442,9 @@
     "sourcePlaceholder": "P. ej. sitio web, Indeed, recomendación",
     "createdBy": "Creado por",
     "createdAt": "Creado el",
-    "readOnlyStamp": "Solo lectura. Establecido por el sistema"
+    "readOnlyStamp": "Solo lectura. Establecido por el sistema",
+    "preferredLanguage": "Idioma preferido",
+    "preferredLanguageDefault": "Predeterminado de la agencia"
   },
   "addFields": {
     "functionTitle": "Puesto",
@@ -607,7 +611,8 @@
     "timelineApplicationGeneric": "Solicitud",
     "searchPlaceholder": "Buscar notas…",
     "deleteNote": "Eliminar nota",
-    "deleteConfirm": "¿Seguro que quieres eliminar esta nota?"
+    "deleteConfirm": "¿Seguro que quieres eliminar esta nota?",
+    "messagingLanguage": "Idioma de los mensajes: {{language}}"
   },
   "statistics": {
     "placements": "Matches",

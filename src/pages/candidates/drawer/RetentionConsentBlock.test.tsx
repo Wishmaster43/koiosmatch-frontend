@@ -164,3 +164,15 @@ describe('RetentionConsentBlock · toggle, gating and a11y', () => {
     expect(await screen.findByText('communication.retentionUntil|01-01-2027')).toBeInTheDocument()
   })
 })
+
+// AVG-RET-2-TAAL-1: the block names the language Koios will message this candidate in.
+describe('RetentionConsentBlock · messaging language line', () => {
+  it('renders the language line when a code is passed, and nothing without one', async () => {
+    const { unmount } = render(block({ messagingLanguage: 'pl' }))
+    expect(await screen.findByText(/communication\.messagingLanguage/)).toBeInTheDocument()
+    unmount()
+    render(block())
+    await screen.findAllByText(/communication\.retention/)
+    expect(screen.queryByText(/communication\.messagingLanguage/)).toBeNull()
+  })
+})

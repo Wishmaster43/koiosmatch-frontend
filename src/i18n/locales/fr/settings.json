@@ -185,6 +185,7 @@
     "kpis_opportunities": "Opportunités",
     "kpis_vacancies": "Postes",
     "email_log": "Journal e-mail",
+    "messaging_language": "Langue des messages",
     "whatsapp_log": "Journal des messages",
     "appointment_types": "Types de rendez-vous",
     "appointment_locations": "Lieux de rendez-vous",
@@ -3848,5 +3849,11 @@
     "freeEntry": "Autoriser la saisie libre",
     "freeEntryHint": "Activé : les utilisateurs peuvent saisir leur propre source (combobox). Désactivé : choisir uniquement dans la liste.",
     "confirmFreeEntry": "Êtes-vous sûr ? La saisie libre autorise des sources hors liste. Cela peut fragmenter le rapport des sources."
+  },
+  "messagingLanguage": {
+    "title": "Langue des messages",
+    "subtitle": "La langue par défaut des messages aux candidats et contacts sans langue préférée propre.",
+    "label": "Langue par défaut",
+    "saveFailed": "L'enregistrement a échoué."
   }
 }

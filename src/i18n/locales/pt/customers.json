@@ -410,7 +410,8 @@
       "restoreFailed": "Falha ao restaurar.",
       "linkedin": "LinkedIn",
       "openLinkedin": "Abrir no LinkedIn",
-      "freeText": "Texto livre"
+      "freeText": "Texto livre",
+      "preferredLanguage": "Idioma preferido"
     },
     "deleteConfirm": "Eliminar esta pessoa de contacto?",
     "saveFailed": "Falha ao guardar.",
@@ -760,7 +761,9 @@
     "contactCouplingFailed": "A localização \"{{name}}\" foi criada, mas a ligação da pessoa de contacto falhou. Ligue-a mais tarde manualmente através da localização.",
     "contactCreateFailed": "A localização \"{{name}}\" foi criada, mas a criação da nova pessoa de contacto falhou. Adicione-a mais tarde manualmente e ligue-a através da localização.",
     "linkedin": "LinkedIn",
-    "linkedinPlaceholder": "linkedin.com/in/nomedeutilizador"
+    "linkedinPlaceholder": "linkedin.com/in/nomedeutilizador",
+    "preferredLanguage": "Idioma preferido",
+    "preferredLanguageDefault": "Predefinição da agência"
   },
   "changelog": {
     "loading": "A carregar…",

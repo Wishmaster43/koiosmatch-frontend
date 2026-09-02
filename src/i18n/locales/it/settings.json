@@ -185,6 +185,7 @@
     "kpis_opportunities": "Opportunità",
     "kpis_vacancies": "Posizioni",
     "email_log": "Registro e-mail",
+    "messaging_language": "Lingua dei messaggi",
     "whatsapp_log": "Registro messaggi",
     "appointment_types": "Tipi di appuntamento",
     "appointment_locations": "Luoghi appuntamento",
@@ -3848,5 +3849,11 @@
     "freeEntry": "Consenti inserimento libero",
     "freeEntryHint": "Attivo: gli utenti possono digitare una fonte propria (combobox). Disattivo: si può scegliere solo dall'elenco (menu a tendina rigido).",
     "confirmFreeEntry": "Sei sicuro? L'inserimento libero permette agli utenti di digitare fonti non presenti nell'elenco. Questo può frammentare il report Fonti."
+  },
+  "messagingLanguage": {
+    "title": "Lingua dei messaggi",
+    "subtitle": "La lingua predefinita per i messaggi a candidati e referenti senza una lingua preferita propria.",
+    "label": "Lingua predefinita",
+    "saveFailed": "Salvataggio non riuscito."
   }
 }

@@ -51,6 +51,7 @@ const fullPayload: ContactPayload = {
   linkedin: 'anna-bakker-123',
   // CONTACT-GESLACHT-1: the gender VALUE SLUG, not an id.
   gender: 'female',
+  preferredLanguage: 'pl',
   locationId: 'loc1', departmentId: 'dep1', locationIds: ['loc1'], departmentIds: ['dep1'], statusId: 'st1', isPrimary: true, customFields: { badge: 'vip' },
 }
 
@@ -89,6 +90,7 @@ describe('useCustomerContacts · create payload mapping (toApi)', () => {
       first_name: 'Anna', middle_name: 'de', last_name: 'Bakker', email: 'anna@bakker.nl', phone: '0301234567', mobile: '0612345678', function: 'Manager',
       linkedin_slug: 'anna-bakker-123',
       gender: 'female',
+      preferred_language: 'pl',
       customer_location_id: 'loc1', customer_department_id: 'dep1', status_id: 'st1', is_primary: true,
       location_ids: ['loc1'], department_ids: ['dep1'],
       custom_fields: { badge: 'vip' },

@@ -410,7 +410,8 @@
       "restoreFailed": "Ripristino non riuscito.",
       "linkedin": "LinkedIn",
       "openLinkedin": "Apri su LinkedIn",
-      "freeText": "Testo libero"
+      "freeText": "Testo libero",
+      "preferredLanguage": "Lingua preferita"
     },
     "deleteConfirm": "Eliminare questo referente?",
     "saveFailed": "Salvataggio non riuscito.",
@@ -760,7 +761,9 @@
     "contactCouplingFailed": "La sede \"{{name}}\" è stata creata, ma il collegamento del referente non è riuscito. Collegalo manualmente in seguito tramite la sede.",
     "contactCreateFailed": "La sede \"{{name}}\" è stata creata, ma la creazione del nuovo referente non è riuscita. Aggiungilo manualmente in seguito e collegalo tramite la sede.",
     "linkedin": "LinkedIn",
-    "linkedinPlaceholder": "linkedin.com/in/nomeutente"
+    "linkedinPlaceholder": "linkedin.com/in/nomeutente",
+    "preferredLanguage": "Lingua preferita",
+    "preferredLanguageDefault": "Predefinito dell'agenzia"
   },
   "changelog": {
     "loading": "Caricamento…",

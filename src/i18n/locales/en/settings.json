@@ -185,6 +185,7 @@
     "kpis_opportunities": "Opportunities",
     "kpis_vacancies": "Vacancies",
     "email_log": "Email log",
+    "messaging_language": "Message language",
     "whatsapp_log": "Message log",
     "appointment_types": "Appointment types",
     "appointment_locations": "Appointment locations",
@@ -3848,5 +3849,11 @@
     "freeEntry": "Allow free entry",
     "freeEntryHint": "On: users can type their own source (combobox). Off: pick from the list only (strict dropdown).",
     "confirmFreeEntry": "Are you sure? Free entry lets users type sources that aren’t in the list. This can fragment the Sources report."
+  },
+  "messagingLanguage": {
+    "title": "Message language",
+    "subtitle": "The default language for messages to candidates and contacts without a preferred language of their own.",
+    "label": "Default language",
+    "saveFailed": "Saving failed."
   }
 }

@@ -47,6 +47,8 @@ export interface ContactPayload {
   // CONTACT-GESLACHT-1: the candidate_genders VALUE SLUG (male|female|other). The
   // backend validates it with `exists:candidate_genders,value` — sending an id 422s.
   gender: string
+  // AVG-RET-2-TAAL-1: preferred messaging language ('' = agency default).
+  preferredLanguage?: string
   role: string
   locationId: Id | null
   departmentId: Id | null
@@ -241,6 +243,8 @@ const toApi = (p: Partial<ContactPayload>) => ({
   ...(p.linkedin !== undefined ? { linkedin_slug: toLinkedinSlug(p.linkedin) || null } : {}),
   // Empty string → null: the column is nullable, but '' fails the exists: rule.
   ...(p.gender !== undefined ? { gender: p.gender || null } : {}),
+  // AVG-RET-2-TAAL-1: empty string → null (agency default), mirroring gender above.
+  ...(p.preferredLanguage !== undefined ? { preferred_language: p.preferredLanguage || null } : {}),
   ...(p.role !== undefined ? { function: p.role } : {}),
   ...(p.locationId !== undefined ? { customer_location_id: p.locationId || null } : {}),
   ...(p.departmentId !== undefined ? { customer_department_id: p.departmentId || null } : {}),

@@ -48,6 +48,7 @@ import { useBackofficeLinksVisible } from '@/components/drawer/useBackofficeLink
 import ArchivedBanner from '@/components/drawer/ArchivedBanner'
 import ChangelogPopover from '@/components/drawer/ChangelogPopover'
 import ChangelogTab from './ChangelogTab'
+import { useMessagingLanguageOptions } from '@/lib/useMessagingLanguageOptions'
 import EntityTasksTab from '@/components/drawer/tabs/EntityTasksTab'
 import MergeContactModal from './MergeContactModal'
 // SCOPED-LIST-TAB-1: this contact's own Kansen sub-tab, mirrors Location/
@@ -122,6 +123,8 @@ export default function ContactDetail({ contact, locations, departments, statuse
   // CONTACT-GESLACHT-1: the SAME tenant /genders lookup a candidate uses — three
   // hardcoded options would be a second, drifting vocabulary.
   const { genders } = useGenders()
+  // AVG-RET-2-TAAL-1: shared messaging-language picker options + label lookup.
+  const { options: languageOptions, labelFor: languageLabelFor } = useMessagingLanguageOptions()
   // Merge is destructive and irreversible, so it is permission-gated in the UI
   // (customers.update — the route's own middleware; the backend re-checks anyway, §7).
   const auth = useAuth()
@@ -158,6 +161,15 @@ export default function ContactDetail({ contact, locations, departments, statuse
         const hit = genders.find(g => g.value === slug || g.label === slug)
         return <span style={{ color: slug ? 'var(--text)' : 'var(--text-muted)' }}>{hit?.label ?? slug ?? '—'}</span>
       } },
+    // AVG-RET-2-TAAL-1: optional, clearable — empty means agency default.
+    { key: 'preferredLanguage', label: t('contacts.detail.preferredLanguage'), type: 'creatable', allowCreate: false,
+      clearable: true, options: languageOptions,
+      renderValue: v => {
+        const code = String(v ?? '')
+        return code
+          ? <span style={{ color: 'var(--text)' }}>{languageLabelFor(code)}</span>
+          : <span style={{ fontStyle: 'italic', color: 'var(--text-muted)' }}>{t('candidates:profile.preferredLanguageDefault')}</span>
+      } },
     { key: 'role', label: t('contacts.detail.role'), type: 'creatable', options: contactFunctions, allowCreate: allowFreeEntry },
     { key: 'email', label: t('contacts.detail.email'), type: 'text',
       renderValue: v => emailValue(v, t('contacts.detail.email')) },
@@ -180,6 +192,7 @@ export default function ContactDetail({ contact, locations, departments, statuse
     middleName: contact.middleName,
     lastName: contact.lastName,
     gender: contact.gender,
+    preferredLanguage: contact.preferredLanguage,
     role: contact.role,
     email: contact.email,
     mobile: contact.mobile,
@@ -200,6 +213,7 @@ export default function ContactDetail({ contact, locations, departments, statuse
       onSave(contact.id as Id, {
         firstName: v.firstName as string, middleName: v.middleName as string, lastName: v.lastName as string,
         gender: v.gender as string,
+        preferredLanguage: v.preferredLanguage as string,
         role: v.role as string, email: v.email as string,
         mobile: v.mobile as string, phone: v.phone as string,
         linkedin: v.linkedin as string,

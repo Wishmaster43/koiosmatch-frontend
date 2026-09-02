@@ -410,7 +410,8 @@
       "restoreFailed": "Wiederherstellen fehlgeschlagen.",
       "linkedin": "LinkedIn",
       "openLinkedin": "Auf LinkedIn öffnen",
-      "freeText": "Freitext"
+      "freeText": "Freitext",
+      "preferredLanguage": "Bevorzugte Sprache"
     },
     "deleteConfirm": "Diesen Kontakt löschen?",
     "saveFailed": "Speichern fehlgeschlagen.",
@@ -760,7 +761,9 @@
     "contactCouplingFailed": "Standort „{{name}}\" wurde angelegt, aber die Verknüpfung mit der Kontaktperson ist fehlgeschlagen. Verknüpfen Sie sie später manuell über den Standort.",
     "contactCreateFailed": "Standort „{{name}}\" wurde angelegt, aber das Anlegen der neuen Kontaktperson ist fehlgeschlagen. Fügen Sie sie später manuell hinzu und verknüpfen Sie sie über den Standort.",
     "linkedin": "LinkedIn",
-    "linkedinPlaceholder": "linkedin.com/in/benutzername"
+    "linkedinPlaceholder": "linkedin.com/in/benutzername",
+    "preferredLanguage": "Bevorzugte Sprache",
+    "preferredLanguageDefault": "Bürostandard"
   },
   "changelog": {
     "loading": "Wird geladen…",

@@ -8,6 +8,8 @@ interface RetentionConsentBlockProps {
   expiresAt: string | null
   /** Flip the opt-in; the parent maps it onto the consent patch. */
   onToggle: (next: boolean) => void
+  /** AVG-RET-2-TAAL-1: the language Koios will message this candidate in (own preference or the agency default). */
+  messagingLanguage?: string
 }
 
 /**
@@ -30,10 +32,13 @@ import { useDateFormat } from '@/lib/datetime'
 import { useAuth } from '@/context/AuthContext'
 import { resolveRetentionConsent } from './retentionConsent'
 import { useRetentionConsentMonths } from './useRetentionConsentMonths'
+import { useMessagingLanguageOptions } from '@/lib/useMessagingLanguageOptions'
 
 // See the file's top doc above; the retention opt-in toggle plus its consent/expiry facts, gated on the tenant validity-window lookup.
-export default function RetentionConsentBlock({ optIn, consentAt, expiresAt, onToggle }: RetentionConsentBlockProps) {
+export default function RetentionConsentBlock({ optIn, consentAt, expiresAt, onToggle, messagingLanguage }: RetentionConsentBlockProps) {
   const { t } = useTranslation('candidates')
+  // The language line shows a display name, never the bare code.
+  const { labelFor: languageLabelFor } = useMessagingLanguageOptions()
   const { formatDate } = useDateFormat()
   const statusId = useId()
   // Tenant validity window — loading/error are surfaced, never guessed away.
@@ -117,6 +122,10 @@ export default function RetentionConsentBlock({ optIn, consentAt, expiresAt, onT
           border: `1px solid color-mix(in srgb, ${dossier.tone} 35%, transparent)` }}>
           {dossier.label}
         </div>
+      )}
+      {/* AVG-RET-2-TAAL-1: which language the retention ask (and every message) goes out in. */}
+      {messagingLanguage && (
+        <Caption as="div" style={{ marginTop: 8 }}>{t('communication.messagingLanguage', { language: languageLabelFor(messagingLanguage) })}</Caption>
       )}
     </div>
   )

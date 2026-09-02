@@ -184,6 +184,8 @@ export function mapCandidate(c: ApiCandidate): Candidate {
     address:         [c.street, c.city].filter(Boolean).join(', ') || c.address || c.city || '-',
     gender:          c.gender ?? c.sex ?? '-',
     nationality:     c.nationality ?? '-',
+    // AVG-RET-2-TAAL-1: preferred messaging language ('' = agency default).
+    preferredLanguage: c.preferred_language ?? '',
     dob:             c.date_of_birth ?? c.dob ?? c.birthdate ?? '-',
     placeOfBirth:    c.place_of_birth ?? c.placeOfBirth ?? '',
     linkedin:        c.linkedin ?? '',

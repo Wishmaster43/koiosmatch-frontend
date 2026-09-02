@@ -5,6 +5,7 @@
  */
 import { useTranslation } from 'react-i18next'
 import type { FormState } from '../AddCandidateModal'
+import { useMessagingLanguageOptions } from '@/lib/useMessagingLanguageOptions'
 import { Field, CvField, TextField, CreatableSelect, cardHead, cardBox, row, type FieldOption } from './fields'
 
 interface PersonalCardProps {
@@ -18,6 +19,8 @@ interface PersonalCardProps {
 // Add-candidate modal card: the personal-details fields (name/gender/birthdate/…), required-ness driven by isReq.
 export default function PersonalCard({ form, errors, set, isReq, genderOptions }: PersonalCardProps) {
   const { t } = useTranslation(['candidates', 'common'])
+  // AVG-RET-2-TAAL-1: shared messaging-language picker options.
+  const { options: languageOptions } = useMessagingLanguageOptions()
   return (
     <div style={{ gridColumn: '1 / -1' }}>
       <div style={cardHead}>{t('modal.fields.cardPersonal')}</div>
@@ -48,6 +51,12 @@ export default function PersonalCard({ form, errors, set, isReq, genderOptions }
               placeholder={t('common:select')} options={genderOptions} menuWidth={220} />
           </Field>
         </div>
+        {/* AVG-RET-2-TAAL-1: optional, clearable — empty means agency default. */}
+        <Field label={t('modal.fields.preferredLanguage')}>
+          <CreatableSelect value={form.preferredLanguage || null} onChange={(v: string) => set('preferredLanguage', v ?? '')}
+            allowCreate={false} clearable clearLabel={t('modal.fields.preferredLanguage')}
+            placeholder={t('modal.fields.preferredLanguageDefault')} options={languageOptions} menuWidth={220} />
+        </Field>
       </div>
     </div>
   )

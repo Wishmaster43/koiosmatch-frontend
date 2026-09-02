@@ -71,6 +71,7 @@ import type { Id, LookupOption } from '@/types/common'
 import Button from '@/components/ui/Button'
 import ModalFooter from '@/components/ui/ModalFooter'
 import { tintBorder } from '@/lib/tint'
+import { useMessagingLanguageOptions } from '@/lib/useMessagingLanguageOptions'
 
 interface OptionRow { id: Id; name: string }
 
@@ -87,6 +88,7 @@ const normalizeDigits = (v: string) => String(v ?? '').replace(/\D/g, '')
 // 422 field-error keys are snake_case; map them back to this form's field names.
 const API_TO_FORM: Record<string, string> = {
   first_name: 'firstName', middle_name: 'middleName', last_name: 'lastName', email: 'email', phone: 'phone', mobile: 'mobile', gender: 'gender',
+  preferred_language: 'preferredLanguage',
   function: 'role', customer_location_id: 'locationId', customer_department_id: 'departmentId',
   status_id: 'statusId', is_primary: 'isPrimary',
   // CONTACT-LINKEDIN-1: the backend validation rule/column is `linkedin_slug`.
@@ -160,6 +162,7 @@ export default function AddContactPersonModal({
     // pasted full URL — gets stripped to the clean slug at the save boundary.
     linkedin: initial?.linkedin ?? '',
     gender: initial?.gender ?? '',
+    preferredLanguage: initial?.preferredLanguage ?? '',
     role: initial?.role ?? '',
     locationId: initial?.locationId ?? lockLocationId ?? null,
     departmentId: initial?.departmentId ?? lockDepartmentId ?? null,
@@ -312,6 +315,8 @@ export default function AddContactPersonModal({
   const mobileMessage = mobileDup ? t('subModal.duplicate.mobile', { name: mobileDup.name }) : fieldMessages.mobile
   // Contact-function/gender option rows for ContactIdentityCard.
   const genderOptions = genders.map(g => ({ value: g.value, label: g.label }))
+  // AVG-RET-2-TAAL-1: shared messaging-language picker options.
+  const { options: languageOptions } = useMessagingLanguageOptions()
 
   return (
     // POPUP-SLEEP-1: swapped the bespoke overlay/panel shell for the shared
@@ -365,6 +370,7 @@ export default function AddContactPersonModal({
                 lastName={form.lastName} onLastNameChange={v => set('lastName', v)} lastNameError={errors.lastName}
                 role={form.role} onRoleChange={v => set('role', v)} contactFunctions={contactFunctions} allowFreeEntry={allowFreeEntry}
                 gender={form.gender} onGenderChange={v => set('gender', v)} genders={genderOptions}
+                preferredLanguage={form.preferredLanguage ?? ''} onPreferredLanguageChange={v => set('preferredLanguage', v)} languageOptions={languageOptions}
               />
 
               {/* Contact — e-mail/telefoon/mobiel (Danny 27-07: exact card the request named)

@@ -410,7 +410,8 @@
       "restoreFailed": "Herstellen is mislukt.",
       "linkedin": "LinkedIn",
       "openLinkedin": "Openen op LinkedIn",
-      "freeText": "Vrije tekst"
+      "freeText": "Vrije tekst",
+      "preferredLanguage": "Voorkeurstaal"
     },
     "deleteConfirm": "Deze contactpersoon verwijderen?",
     "saveFailed": "Opslaan is mislukt.",
@@ -760,7 +761,9 @@
     "contactCouplingFailed": "Locatie \"{{name}}\" is aangemaakt, maar het koppelen van de contactpersoon is mislukt. Koppel deze later handmatig via de locatie.",
     "contactCreateFailed": "Locatie \"{{name}}\" is aangemaakt, maar het aanmaken van de nieuwe contactpersoon is mislukt. Voeg deze later handmatig toe en koppel via de locatie.",
     "linkedin": "LinkedIn",
-    "linkedinPlaceholder": "linkedin.com/in/gebruikersnaam"
+    "linkedinPlaceholder": "linkedin.com/in/gebruikersnaam",
+    "preferredLanguage": "Voorkeurstaal",
+    "preferredLanguageDefault": "Bureaustandaard"
   },
   "changelog": {
     "loading": "Laden…",

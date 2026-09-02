@@ -231,7 +231,9 @@
       "cardWork": "Arbeit",
       "cardAddress": "Adresse",
       "addressExpand": "Adresse hinzufügen",
-      "linkedinPlaceholder": "linkedin.com/in/benutzername"
+      "linkedinPlaceholder": "linkedin.com/in/benutzername",
+      "preferredLanguage": "Bevorzugte Sprache",
+      "preferredLanguageDefault": "Bürostandard"
     },
     "gender": {
       "male": "Männlich",
@@ -440,7 +442,9 @@
     "sourcePlaceholder": "z. B. Website, Indeed, Empfehlung",
     "createdBy": "Erstellt von",
     "createdAt": "Erstellt am",
-    "readOnlyStamp": "Schreibgeschützt. Vom System gesetzt"
+    "readOnlyStamp": "Schreibgeschützt. Vom System gesetzt",
+    "preferredLanguage": "Bevorzugte Sprache",
+    "preferredLanguageDefault": "Bürostandard"
   },
   "addFields": {
     "functionTitle": "Berufsbezeichnung",
@@ -607,7 +611,8 @@
     "timelineApplicationGeneric": "Bewerbung",
     "searchPlaceholder": "Notizen suchen…",
     "deleteNote": "Notiz löschen",
-    "deleteConfirm": "Möchten Sie diese Notiz wirklich löschen?"
+    "deleteConfirm": "Möchten Sie diese Notiz wirklich löschen?",
+    "messagingLanguage": "Nachrichtensprache: {{language}}"
   },
   "statistics": {
     "placements": "Matches",

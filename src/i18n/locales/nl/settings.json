@@ -185,6 +185,7 @@
     "kpis_opportunities": "Kansen",
     "kpis_vacancies": "Vacatures",
     "email_log": "E-mail-log",
+    "messaging_language": "Berichttaal",
     "whatsapp_log": "Berichtenlog",
     "appointment_types": "Afspraaktypes",
     "appointment_locations": "Afspraaklocaties",
@@ -3848,5 +3849,11 @@
     "freeEntry": "Vrije invoer toestaan",
     "freeEntryHint": "Aan: gebruikers kunnen een eigen bron typen (combobox). Uit: alleen kiezen uit de lijst (strikte dropdown).",
     "confirmFreeEntry": "Weet je het zeker? Vrije invoer laat gebruikers bronnen typen die niet in de lijst staan. Dit kan het bronnenrapport laten fragmenteren."
+  },
+  "messagingLanguage": {
+    "title": "Berichttaal",
+    "subtitle": "De standaardtaal voor berichten aan kandidaten en contactpersonen zonder eigen voorkeurstaal.",
+    "label": "Standaardtaal",
+    "saveFailed": "Opslaan is mislukt."
   }
 }

@@ -254,7 +254,9 @@
       "cardWork": "Trabalho",
       "cardAddress": "Morada",
       "addressExpand": "Adicionar morada",
-      "linkedinPlaceholder": "linkedin.com/in/nomeutilizador"
+      "linkedinPlaceholder": "linkedin.com/in/nomeutilizador",
+      "preferredLanguage": "Idioma preferido",
+      "preferredLanguageDefault": "Predefinição da agência"
     },
     "gender": {
       "male": "Masculino",
@@ -463,7 +465,9 @@
     "sourcePlaceholder": "P. ex. website, Indeed, referência",
     "createdBy": "Criado por",
     "createdAt": "Criado em",
-    "readOnlyStamp": "Apenas leitura. Definido pelo sistema"
+    "readOnlyStamp": "Apenas leitura. Definido pelo sistema",
+    "preferredLanguage": "Idioma preferido",
+    "preferredLanguageDefault": "Predefinição da agência"
   },
   "addFields": {
     "functionTitle": "Cargo",
@@ -630,7 +634,8 @@
     "timelineApplicationGeneric": "Candidatura",
     "searchPlaceholder": "Pesquisar notas…",
     "deleteNote": "Eliminar nota",
-    "deleteConfirm": "Tem a certeza de que quer eliminar esta nota?"
+    "deleteConfirm": "Tem a certeza de que quer eliminar esta nota?",
+    "messagingLanguage": "Idioma das mensagens: {{language}}"
   },
   "statistics": {
     "placements": "Matches",

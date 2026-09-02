@@ -410,7 +410,8 @@
       "restoreFailed": "Restoring failed.",
       "linkedin": "LinkedIn",
       "openLinkedin": "Open on LinkedIn",
-      "freeText": "Free text"
+      "freeText": "Free text",
+      "preferredLanguage": "Preferred language"
     },
     "deleteConfirm": "Delete this contact?",
     "saveFailed": "Saving failed.",
@@ -760,7 +761,9 @@
     "contactCouplingFailed": "Location \"{{name}}\" was created, but linking the contact failed. Link it manually from the location later.",
     "contactCreateFailed": "Location \"{{name}}\" was created, but creating the new contact failed. Add it manually and link it from the location later.",
     "linkedin": "LinkedIn",
-    "linkedinPlaceholder": "linkedin.com/in/username"
+    "linkedinPlaceholder": "linkedin.com/in/username",
+    "preferredLanguage": "Preferred language",
+    "preferredLanguageDefault": "Agency default"
   },
   "changelog": {
     "loading": "Loading…",

@@ -136,6 +136,8 @@ export function mapContact(p: ApiContact = {}): Contact {
     // CONTACT-GESLACHT-1: the gender VALUE SLUG (male|female|other) straight off the
     // resource — never an id, so the /genders lookup resolves label+colour from it.
     gender: p.gender ?? '',
+    // AVG-RET-2-TAAL-1: preferred messaging language ('' = agency default).
+    preferredLanguage: p.preferred_language ?? '',
     isPrimary: Boolean(p.is_primary ?? p.isPrimary),
     locationId: p.customer_location_id ?? p.location_id ?? p.locationId ?? null,
     locationName: p.location_name ?? p.location?.name ?? locations[0]?.name ?? '',

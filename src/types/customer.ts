@@ -43,6 +43,8 @@ export interface Contact {
   // column, NOT a gender_id. Label/colour resolve through the shared /genders lookup
   // exactly like a candidate, so the option list is never hardcoded here.
   gender: string
+  // AVG-RET-2-TAAL-1: preferred messaging language ('' = agency default).
+  preferredLanguage?: string
   isPrimary: boolean
   // Derived PRIMARY link (first of the full set below) — kept for the single-value
   // pickers/filters (e.g. LocationContacts' "belongs to this location" scoping).
@@ -324,6 +326,8 @@ export interface ApiContact {
   linkedin_slug?: string | null
   // CONTACT-GESLACHT-1: the candidate_genders value slug (male|female|other), NOT an id.
   gender?: string | null
+  // AVG-RET-2-TAAL-1: null = agency default.
+  preferred_language?: string | null
   // The owning customer (CustomerContactResource `customer_id`) — scopes the merge route.
   customer_id?: Id
   is_primary?: unknown; isPrimary?: unknown

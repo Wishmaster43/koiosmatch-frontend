@@ -14,7 +14,7 @@ import type { FormState } from '../AddCandidateModal'
 // An untouched create form — the state buildCvPrefill maps against.
 const emptyForm = (over: Partial<FormState> = {}): FormState => ({
   firstName: '', middleName: '', lastName: '', functionTitle: '',
-  email: '', phone: '', mobile: '', dateOfBirth: '', gender: '',
+  email: '', phone: '', mobile: '', dateOfBirth: '', gender: '', preferredLanguage: '',
   street: '', houseNumber: '', houseNumberSuffix: '', postalCode: '', city: '', province: '', country: '',
   ownerId: '', summary: '', linkedin: '', ...over,
 })

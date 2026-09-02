@@ -19,6 +19,7 @@ const API_TO_FORM: Record<string, string> = {
   first_name: 'firstName', last_name: 'lastName', middle_name: 'middleName',
   email: 'email', phone: 'phone', mobile: 'mobile', function_title: 'functionTitle',
   date_of_birth: 'dateOfBirth', gender: 'gender',
+  preferred_language: 'preferredLanguage',
   street: 'street', house_number: 'houseNumber',
   house_number_suffix: 'houseNumberSuffix', postal_code: 'postalCode',
   city: 'city', province: 'province', country: 'country', owner_id: 'ownerId',
@@ -90,6 +91,8 @@ export function useCreateCandidateSubmit({
         mobile:              canonicalMobile || null,
         date_of_birth:       form.dateOfBirth || null,
         gender:              form.gender || null,
+        // AVG-RET-2-TAAL-1: only rides along when explicitly picked (empty = agency default).
+        ...(form.preferredLanguage ? { preferred_language: form.preferredLanguage } : {}),
         street:              form.street || null,
         house_number:        form.houseNumber || null,
         house_number_suffix: form.houseNumberSuffix || null,

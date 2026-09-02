@@ -81,6 +81,7 @@ export const buildCandidatePatch = (patch: Record<string, unknown>): Record<stri
   if ('title'          in patch) body.function_title  = patch.title
   if ('gender'            in patch) body.gender            = patch.gender
   if ('nationality'       in patch) body.nationality       = patch.nationality
+  if ('preferredLanguage' in patch) body.preferred_language = patch.preferredLanguage === '' ? null : patch.preferredLanguage
   if ('dob'               in patch) body.date_of_birth     = patch.dob
   if ('placeOfBirth'      in patch) body.place_of_birth    = patch.placeOfBirth
   if ('email'             in patch) body.email             = patch.email
