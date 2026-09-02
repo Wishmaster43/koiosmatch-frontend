@@ -566,20 +566,19 @@
     "tabTranslations": "Vertalingen"
   },
   "translations": {
-    "languages": {
-      "nl": "Nederlands",
-      "en": "Engels",
-      "de": "Duits",
-      "fr": "Frans",
-      "es": "Spaans",
-      "pl": "Pools",
-      "ro": "Roemeens"
-    },
+    "companyLanguage": "Bedrijfstaal",
+    "editOnSettings": "Bewerken op het tabblad Instellingen.",
+    "empty": "Nog geen vertalingen toegevoegd.",
+    "noText": "Nog geen tekst",
     "fields": {
       "text": "Berichttekst",
       "subject": "Onderwerp",
       "body": "Bericht"
-    }
+    },
+    "addLanguage": "Taal toevoegen",
+    "pickLanguage": "Kies een taal",
+    "removeLanguage": "{{language}} verwijderen",
+    "fallbackHint": "Staat de voorkeurstaal van een kandidaat hier niet bij, dan krijgt die de bedrijfstaal van het tabblad Instellingen."
   },
   "fieldLabels": {
     "Aan": "Aan",
@@ -1227,7 +1226,7 @@
     "Extra persona- en toonaanwijzingen voor de AI-agent, naast de instructies hierboven Het runtime-antwoordcontract wordt automatisch toegevoegd": "Extra persona- en toonaanwijzingen voor de AI-agent, naast de instructies hierboven. Het runtime-antwoordcontract wordt automatisch toegevoegd.",
     "Volgt standaard de tenant-instelling; deze vacature kan dat hier overschrijven": "Volgt standaard de tenant-instelling; deze vacature kan dat hier overschrijven.",
     "Verplicht als de gekozen agent geen intro-template heeft; een verse sollicitant zit buiten het 24-uursvenster, dus een sessietekst als intro faalt": "Verplicht als de gekozen agent geen intro-template heeft; een verse sollicitant zit buiten het 24-uursvenster, dus een sessietekst als intro faalt.",
-    "Leeg = de tekst van het tabblad Instellingen (bureautaal)": "Leeg = de tekst van het tabblad Instellingen (bureautaal)."
+    "Leeg = de tekst van het tabblad Instellingen (bedrijfstaal) Staat de voorkeurstaal van de kandidaat hier niet bij, dan krijgt die de bedrijfstaal": "Leeg = de tekst van het tabblad Instellingen (bedrijfstaal). Staat de voorkeurstaal van de kandidaat hier niet bij, dan krijgt die de bedrijfstaal."
   },
   "triggers": {
     "events": {

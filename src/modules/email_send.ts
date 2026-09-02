@@ -26,8 +26,8 @@ export default {
     // overrides for subject + body, on their own "Vertalingen" tab (MODULE-FACE-BEVRIES —
     // main tab stays untouched). Empty per-field = falls back to subject/body (bureau language).
     { key: 'translations', label: 'Vertalingen', type: 'translations', tab: 'translations',
-      fields: ['subject', 'body'], languages: MESSAGING_LANGUAGES,
-      help: 'Leeg = de tekst van het tabblad Instellingen (bureautaal).' },
+      fields: ['subject', 'body'], languages: MESSAGING_LANGUAGES, mainFields: { subject: 'subject', body: 'body' },
+      help: 'Leeg = de tekst van het tabblad Instellingen (bedrijfstaal). Staat de voorkeurstaal van de kandidaat hier niet bij, dan krijgt die de bedrijfstaal.' },
     // Which mail sender/context this send uses (Settings → Communicatie contexts).
     { key: 'sender_context',       label: 'Afzender-context',       type: 'select', options: ['kandidaten','algemeen'], default: 'kandidaten' },
     // Tenant-lookup message purpose (message_purposes) — same lookup as whatsapp_send's

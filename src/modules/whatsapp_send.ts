@@ -77,9 +77,13 @@ export default {
     // 02-09 (Danny, verbatim: "vertaling moet wel in de workflow staan"): per-language
     // overrides for the session text, on their own "Vertalingen" tab (MODULE-FACE-BEVRIES —
     // main tab stays untouched). Empty per-field = falls back to session_text (bureau language).
+    // Only shown for the free-text session format (Danny 02-09: "Vertaling is
+    // alleen als het vrij tekst module is. Bij template kan dit niet.") — a
+    // template's variables come from Meta's approved template, not free text.
     { key: 'translations', label: 'Vertalingen', type: 'translations', tab: 'translations',
-      fields: ['text'], languages: MESSAGING_LANGUAGES,
-      help: 'Leeg = de tekst van het tabblad Instellingen (bureautaal).' },
+      fields: ['text'], languages: MESSAGING_LANGUAGES, mainFields: { text: 'session_text' },
+      showIf: { key: 'message_type', value: 'session' },
+      help: 'Leeg = de tekst van het tabblad Instellingen (bedrijfstaal). Staat de voorkeurstaal van de kandidaat hier niet bij, dan krijgt die de bedrijfstaal.' },
     // Danny's own message classification (NOT the send format above) — drives queue
     // order in the WABA batch (Wachtrij tab). Tenant lookup, CRUD'd via Settings.
     { key: 'priority_type',       label: 'Berichttype (classificatie)', type: 'lookup_select', endpoint: '/whatsapp-message-types' },

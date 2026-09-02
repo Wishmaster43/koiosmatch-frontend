@@ -531,20 +531,19 @@
     "tabTranslations": "Übersetzungen"
   },
   "translations": {
-    "languages": {
-      "nl": "Niederländisch",
-      "en": "Englisch",
-      "de": "Deutsch",
-      "fr": "Französisch",
-      "es": "Spanisch",
-      "pl": "Polnisch",
-      "ro": "Rumänisch"
-    },
+    "companyLanguage": "Bürosprache",
+    "editOnSettings": "Auf dem Tab Einstellungen bearbeiten.",
+    "empty": "Noch keine Übersetzungen hinzugefügt.",
+    "noText": "Noch kein Text",
     "fields": {
       "text": "Nachrichtentext",
       "subject": "Betreff",
       "body": "Nachricht"
-    }
+    },
+    "addLanguage": "Sprache hinzufügen",
+    "pickLanguage": "Sprache wählen",
+    "removeLanguage": "{{language}} entfernen",
+    "fallbackHint": "Fehlt die bevorzugte Sprache eines Kandidaten hier, erhält er die Bürosprache vom Tab Einstellungen."
   },
   "fieldLabels": {
     "Aan": "An",
@@ -1227,7 +1226,7 @@
     "Extra persona- en toonaanwijzingen voor de AI-agent, naast de instructies hierboven Het runtime-antwoordcontract wordt automatisch toegevoegd": "Zusätzliche Persona- und Tonhinweise für den KI-Agenten, neben den obigen Anweisungen. Der Laufzeit-Antwortvertrag wird automatisch hinzugefügt.",
     "Volgt standaard de tenant-instelling; deze vacature kan dat hier overschrijven": "Folgt standardmäßig der Mandanteneinstellung; diese Vakanz kann dies hier überschreiben.",
     "Verplicht als de gekozen agent geen intro-template heeft; een verse sollicitant zit buiten het 24-uursvenster, dus een sessietekst als intro faalt": "Erforderlich, wenn der gewählte Agent keine Intro-Vorlage hat; ein neuer Bewerber befindet sich außerhalb des 24-Stunden-Fensters, sodass ein Sitzungstext als Intro fehlschlägt.",
-    "Leeg = de tekst van het tabblad Instellingen (bureautaal)": "Leer = der Text auf dem Tab Einstellungen (Bürosprache)."
+    "Leeg = de tekst van het tabblad Instellingen (bedrijfstaal) Staat de voorkeurstaal van de kandidaat hier niet bij, dan krijgt die de bedrijfstaal": "Leer = der Text auf dem Tab Einstellungen (Bürosprache). Fehlt die bevorzugte Sprache des Kandidaten hier, erhält er die Bürosprache."
   },
   "triggers": {
     "events": {

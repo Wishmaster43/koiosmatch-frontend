@@ -4,7 +4,7 @@
  * FieldInput) and the execution-output tab. For the AI agent module it also
  * renders the Standard/Advanced/Test/Output tabs. Extracted from WorkflowCanvasEditor.
  */
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Zap, Trash2, Play } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
@@ -37,11 +37,12 @@ export default function ConfigPanel({ node, onUpdate, onDelete, onTabChange, var
   const isAgent = node?.data.type === 'ai_agent'
   const [activeTab, setActiveTab] = useState(() => isAgent ? 'general' : 'settings')
 
-  // Widen panel for ai_agent by emitting sentinel; narrow for all other modules
-  const switchTab = (id: string) => {
+  // Widen panel for ai_agent by emitting sentinel; narrow for all other modules.
+  // Stable identity (useCallback) so effects that call it can list it as a dep.
+  const switchTab = useCallback((id: string) => {
     setActiveTab(id)
     onTabChange?.(isAgent ? '__wide__' : id)
-  }
+  }, [isAgent, onTabChange])
 
   // Reset to correct first tab when node changes
   useEffect(() => {
@@ -49,6 +50,30 @@ export default function ConfigPanel({ node, onUpdate, onDelete, onTabChange, var
     setActiveTab(first)
     onTabChange?.(node?.data.type === 'ai_agent' ? '__wide__' : first)
   }, [node?.id]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // 02-09: the translations tab can vanish from under the user (e.g. flipping
+  // whatsapp_send's format from session to template) — fall back honestly to
+  // Settings rather than leaving the tab bar showing an emptied-out pane. Hooks
+  // must stay unconditional, so this lives above the `!node` early return —
+  // it recomputes the field's own showIf inline rather than calling
+  // `fieldsForTab` (defined further below, after that return).
+  const nodeSchema = node ? (MODULE_SCHEMAS[node.data.type ?? ''] || []) : []
+  const nodeConfig = node?.data.config as Record<string, unknown> | undefined
+  const translationsFieldCount = nodeSchema.filter(field => {
+    const f = field as WorkflowField & { tab?: string }
+    if (f.tab !== 'translations') return false
+    const showIf = field.showIf as { key: string; value: unknown } | undefined
+    if (!showIf) return true
+    const ctrl = nodeSchema.find(s => s.key === showIf.key)
+    const cur  = nodeConfig?.[showIf.key] ?? ctrl?.default
+    const want = showIf.value
+    return Array.isArray(want) ? want.includes(cur) : cur === want
+  }).length
+  useEffect(() => {
+    if (!isAgent && activeTab === 'translations' && translationsFieldCount === 0) {
+      switchTab('settings')
+    }
+  }, [isAgent, activeTab, translationsFieldCount, switchTab])
 
   if (!node) {
     return (
@@ -127,12 +152,17 @@ export default function ConfigPanel({ node, onUpdate, onDelete, onTabChange, var
       {fields.map(field => {
         const isRequired = !!(field as WorkflowField & { required?: boolean }).required
         const isEmpty    = fieldValue(field.key) == null || fieldValue(field.key) === ''
+        // 02-09: the translations tab IS the field's label — no repeated
+        // "VERTALINGEN" caption above the content (MODULE-FACE-BEVRIES).
+        const isTranslations = field.type === 'translations'
         return (
           <div key={field.key}>
-            <label style={{ display: 'block', fontSize: 10, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>
-              {fieldLabel(t, field.label as string | undefined)}
-              {isRequired && <span style={{ color: 'var(--color-danger-text)', marginLeft: 3 }}>*</span>}
-            </label>
+            {!isTranslations && (
+              <label style={{ display: 'block', fontSize: 10, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>
+                {fieldLabel(t, field.label as string | undefined)}
+                {isRequired && <span style={{ color: 'var(--color-danger-text)', marginLeft: 3 }}>*</span>}
+              </label>
+            )}
             <FieldInput field={field as WorkflowField} value={fieldValue(field.key)} variables={variables} config={config}
               instructionOutputFields={instructionOutputFields}
               onChange={(key, val) => onUpdate(node.id, key, val)} />
@@ -188,9 +218,12 @@ export default function ConfigPanel({ node, onUpdate, onDelete, onTabChange, var
           ] : [
             { id: 'settings', label: t('config.tabSettings') },
             // 02-09: a "Vertalingen" tab only when this module's schema actually
-            // declares a translations-tab field (whatsapp_send/email_send today) —
-            // never shown on modules with nothing to translate.
-            ...(schema.some(f => (f as WorkflowField & { tab?: string }).tab === 'translations')
+            // declares a translations-tab field AND its showIf currently passes
+            // (e.g. whatsapp_send's translations field only applies to the
+            // free-text 'session' format, never to 'template' — Danny: "Bij
+            // template kan dit niet.") — never shown on modules/states with
+            // nothing to translate.
+            ...(translationsFieldCount > 0
               ? [{ id: 'translations', label: t('config.tabTranslations') }]
               : []),
             { id: 'execution',   label: output ? `${t('config.tabExecution')} (${Array.isArray(output) ? output.length : 1})` : t('config.tabExecution') },

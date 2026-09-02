@@ -531,20 +531,19 @@
     "tabTranslations": "Traductions"
   },
   "translations": {
-    "languages": {
-      "nl": "Néerlandais",
-      "en": "Anglais",
-      "de": "Allemand",
-      "fr": "Français",
-      "es": "Espagnol",
-      "pl": "Polonais",
-      "ro": "Roumain"
-    },
+    "companyLanguage": "Langue de l'agence",
+    "editOnSettings": "Modifier dans l'onglet Paramètres.",
+    "empty": "Aucune traduction ajoutée pour l'instant.",
+    "noText": "Pas encore de texte",
     "fields": {
       "text": "Texte du message",
       "subject": "Objet",
       "body": "Message"
-    }
+    },
+    "addLanguage": "Ajouter une langue",
+    "pickLanguage": "Choisir une langue",
+    "removeLanguage": "Supprimer {{language}}",
+    "fallbackHint": "Si la langue préférée d'un candidat n'apparaît pas ici, il reçoit la langue de l'agence de l'onglet Paramètres."
   },
   "fieldLabels": {
     "Aan": "À",
@@ -1227,7 +1226,7 @@
     "Extra persona- en toonaanwijzingen voor de AI-agent, naast de instructies hierboven Het runtime-antwoordcontract wordt automatisch toegevoegd": "Indications supplémentaires de persona et de ton pour l'agent IA, en plus des instructions ci-dessus. Le contrat de réponse d'exécution est ajouté automatiquement.",
     "Volgt standaard de tenant-instelling; deze vacature kan dat hier overschrijven": "Suit par défaut le paramètre du client ; cette offre peut le remplacer ici.",
     "Verplicht als de gekozen agent geen intro-template heeft; een verse sollicitant zit buiten het 24-uursvenster, dus een sessietekst als intro faalt": "Obligatoire si l'agent choisi n'a pas de modèle d'introduction ; un candidat récent se trouve hors de la fenêtre de 24 heures, donc un texte de session comme intro échoue.",
-    "Leeg = de tekst van het tabblad Instellingen (bureautaal)": "Vide = le texte de l'onglet Paramètres (langue de l'agence)."
+    "Leeg = de tekst van het tabblad Instellingen (bedrijfstaal) Staat de voorkeurstaal van de kandidaat hier niet bij, dan krijgt die de bedrijfstaal": "Vide = le texte de l'onglet Paramètres (langue de l'agence). Si la langue préférée du candidat n'apparaît pas ici, il reçoit la langue de l'agence."
   },
   "triggers": {
     "events": {

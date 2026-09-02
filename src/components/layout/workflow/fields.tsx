@@ -147,7 +147,7 @@ export function FieldInput({ field, value, onChange, variables, config, instruct
   if (field.type === 'translations') {
     // 02-09: per-language message overrides (whatsapp_send/email_send's own
     // "Vertalingen" tab) — a dedicated multi-language sub-editor, not a plain control.
-    return <TranslationsField field={field} value={value} onChange={onChange} />
+    return <TranslationsField field={field} value={value} onChange={onChange} config={config} />
   }
   if (field.type === 'textarea') {
     // Attach the variable picker when upstream modules expose fields to reference.
