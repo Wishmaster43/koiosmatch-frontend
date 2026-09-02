@@ -1225,8 +1225,7 @@
     "De genummerde stappen die de AI-agent doorloopt, elk met een optioneel outputveld en variabele-chips": "The numbered steps the AI agent walks through, each with an optional output field and variable chips.",
     "Extra persona- en toonaanwijzingen voor de AI-agent, naast de instructies hierboven Het runtime-antwoordcontract wordt automatisch toegevoegd": "Extra persona and tone guidance for the AI agent, alongside the instructions above. The runtime reply contract is added automatically.",
     "Volgt standaard de tenant-instelling; deze vacature kan dat hier overschrijven": "Follows the tenant setting by default; this vacancy can override it here.",
-    "Verplicht als de gekozen agent geen intro-template heeft; een verse sollicitant zit buiten het 24-uursvenster, dus een sessietekst als intro faalt": "Required if the chosen agent has no intro template; a fresh applicant sits outside the 24-hour window, so a session text as intro fails.",
-    "Leeg = de tekst van het tabblad Instellingen (bedrijfstaal) Staat de voorkeurstaal van de kandidaat hier niet bij, dan krijgt die de bedrijfstaal": "Empty = the text on the Settings tab (agency language). If the candidate's preferred language is not listed here, they receive the agency language."
+    "Verplicht als de gekozen agent geen intro-template heeft; een verse sollicitant zit buiten het 24-uursvenster, dus een sessietekst als intro faalt": "Required if the chosen agent has no intro template; a fresh applicant sits outside the 24-hour window, so a session text as intro fails."
   },
   "triggers": {
     "events": {

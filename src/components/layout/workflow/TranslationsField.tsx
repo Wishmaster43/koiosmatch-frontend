@@ -157,7 +157,7 @@ export function TranslationsField({ field, value, onChange, config }: {
         {adding
           ? <CreatableSelect allowCreate={false} value={null} placeholder={t('translations.pickLanguage')}
               options={candidates} onChange={addLanguage} />
-          : <DrawerAddButton label={t('translations.addLanguage')} onClick={() => setAdding(true)} />}
+          : <div style={{ alignSelf: 'flex-start' }}><DrawerAddButton label={t('translations.addLanguage')} onClick={() => setAdding(true)} /></div>}
         <Caption as="div">{t('translations.fallbackHint')}</Caption>
       </div>
     </div>

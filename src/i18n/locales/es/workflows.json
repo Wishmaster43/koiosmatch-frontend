@@ -1225,8 +1225,7 @@
     "De genummerde stappen die de AI-agent doorloopt, elk met een optioneel outputveld en variabele-chips": "Los pasos numerados que recorre el agente de IA, cada uno con un campo de salida opcional y chips de variables.",
     "Extra persona- en toonaanwijzingen voor de AI-agent, naast de instructies hierboven Het runtime-antwoordcontract wordt automatisch toegevoegd": "Indicaciones adicionales de persona y tono para el agente de IA, además de las instrucciones anteriores. El contrato de respuesta en tiempo de ejecución se añade automáticamente.",
     "Volgt standaard de tenant-instelling; deze vacature kan dat hier overschrijven": "Sigue de forma predeterminada el ajuste del inquilino; esta vacante puede anularlo aquí.",
-    "Verplicht als de gekozen agent geen intro-template heeft; een verse sollicitant zit buiten het 24-uursvenster, dus een sessietekst als intro faalt": "Obligatorio si el agente elegido no tiene una plantilla de introducción; un candidato reciente está fuera de la ventana de 24 horas, por lo que un texto de sesión como introducción falla.",
-    "Leeg = de tekst van het tabblad Instellingen (bedrijfstaal) Staat de voorkeurstaal van de kandidaat hier niet bij, dan krijgt die de bedrijfstaal": "Vacío = el texto de la pestaña Configuración (idioma de la agencia). Si el idioma preferido del candidato no aparece aquí, recibe el idioma de la agencia."
+    "Verplicht als de gekozen agent geen intro-template heeft; een verse sollicitant zit buiten het 24-uursvenster, dus een sessietekst als intro faalt": "Obligatorio si el agente elegido no tiene una plantilla de introducción; un candidato reciente está fuera de la ventana de 24 horas, por lo que un texto de sesión como introducción falla."
   },
   "triggers": {
     "events": {

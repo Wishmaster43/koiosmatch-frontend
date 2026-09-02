@@ -82,8 +82,7 @@ export default {
     // template's variables come from Meta's approved template, not free text.
     { key: 'translations', label: 'Vertalingen', type: 'translations', tab: 'translations',
       fields: ['text'], languages: MESSAGING_LANGUAGES, mainFields: { text: 'session_text' },
-      showIf: { key: 'message_type', value: 'session' },
-      help: 'Leeg = de tekst van het tabblad Instellingen (bedrijfstaal). Staat de voorkeurstaal van de kandidaat hier niet bij, dan krijgt die de bedrijfstaal.' },
+      showIf: { key: 'message_type', value: 'session' } },
     // Danny's own message classification (NOT the send format above) — drives queue
     // order in the WABA batch (Wachtrij tab). Tenant lookup, CRUD'd via Settings.
     { key: 'priority_type',       label: 'Berichttype (classificatie)', type: 'lookup_select', endpoint: '/whatsapp-message-types' },
