@@ -14,8 +14,9 @@ export default function SettingsChangelogButton() {
   const { t } = useTranslation('settings')
   return (
     <ChangelogPopover label={t('audit.title')}>
-      {/* log_name, not subject_type: settings audit manually without performedOn,
-          so their subject_type is NULL (verified 14-08) — the type filter finds nothing. */}
+      {/* log_name 'settings' is the ONE source since SETTINGS-AUDIT-1 (K-251, 02-09):
+          every Setting write is audited on the model (subject_type=Setting, secrets
+          masked); the old manual bulk entries are gone, so nothing else carries it. */}
       <EntityChangelog logName="settings" />
     </ChangelogPopover>
   )
