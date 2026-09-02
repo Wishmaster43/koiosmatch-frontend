@@ -1,0 +1,356 @@
+{
+  "title": "Match",
+  "loading": "Caricamento match…",
+  "empty": "Ancora nessun match.",
+  "error": "Impossibile caricare i match.",
+  "cols": {
+    "candidate": "Candidato",
+    "referenceNumber": "N. rif.",
+    "vacancy": "Posizione",
+    "client": "Cliente",
+    "score": "Match",
+    "stage": "Fase",
+    "coupling": "Collegamento",
+    "owner": "Responsabile",
+    "date": "Creato",
+    "status": "Stato",
+    "contractForm": "Tipo di contratto",
+    "type": "Tipo"
+  },
+  "insights": {
+    "stage": "Fase",
+    "owner": "Responsabile",
+    "clearFilter": "Cancella filtro",
+    "status": "Stato",
+    "client": "Cliente"
+  },
+  "kpi": {
+    "total": "Totale",
+    "active": "Match attivi",
+    "hired": "Assunto",
+    "avgScore": "Punteggio medio",
+    "closed": "Chiusi",
+    "newThisMonth": "Nuovi questo mese",
+    "unscored": "Senza punteggio",
+    "scored": "Con punteggio",
+    "pendingApproval": "Da valutare"
+  },
+  "drawer": {
+    "label": "Match",
+    "createdAt": "Creato il {{date}}",
+    "archive": "Archivia",
+    "archiveConfirm": "Vuoi archiviare questo match? Potrai ripristinarlo in seguito.",
+    "archived": "Match archiviato.",
+    "archiveFailed": "Impossibile archiviare il match.",
+    "archiveBlockedActiveContract": "Questo match ha un contratto attivo. Terminalo prima.",
+    "archivedBanner": {
+      "since": "Archiviato dal {{date}}",
+      "flag": "Archiviato",
+      "restore": "Ripristina",
+      "restored": "Match ripristinato.",
+      "restoreFailed": "Impossibile ripristinare il match."
+    },
+    "tabs": {
+      "overview": "Panoramica",
+      "statistics": "Statistiche",
+      "relations": "Relazioni",
+      "changelog": "Modifiche",
+      "extra": "Extra",
+      "timeline": "Cronologia"
+    },
+    "sectionDetails": "Dati del match",
+    "fields": {
+      "candidate": "Candidato",
+      "vacancy": "Posizione",
+      "client": "Cliente",
+      "owner": "Responsabile",
+      "score": "Punteggio",
+      "stage": "Fase",
+      "created": "Creato",
+      "status": "Stato",
+      "lastSynced": "Ultima sincronizzazione",
+      "lastSyncedHelloflex": "Ultima sincronizzazione con HelloFlex",
+      "branch": "Sede",
+      "customerLocation": "Posizione",
+      "customerDepartment": "Reparto",
+      "contactPerson": "Referente",
+      "terminated": "Terminato",
+      "renewals": "Rinnovi"
+    },
+    "openCandidate": "Apri candidato",
+    "openVacancy": "Apri posizione",
+    "openClient": "Apri cliente",
+    "contract": {
+      "title": "Contratto e finanza",
+      "groupContract": "Contratto",
+      "groupFinancial": "Finanza",
+      "contractType": "Tipo di contratto",
+      "cao": "CCNL",
+      "startDate": "Data di inizio",
+      "endDate": "Data di fine",
+      "hoursPerWeek": "Ore a settimana",
+      "scale": "Scala",
+      "step": "Livello",
+      "purchaseRate": "Tariffa di acquisto",
+      "sellRate": "Tariffa di vendita",
+      "margin": "Margine",
+      "costCenter": "Centro di costo",
+      "billingEmails": "E-mail di fatturazione, una per riga o separate da virgola",
+      "remarks": "Osservazioni",
+      "loading": "Caricamento dati contrattuali…",
+      "error": "Impossibile caricare i dati contrattuali.",
+      "unavailable": "I dati contrattuali non sono ancora disponibili (collegamento non configurato).",
+      "saveError": "Impossibile salvare la modifica.",
+      "saved": "Dati contrattuali salvati.",
+      "functionTitle": "Titolo della funzione",
+      "surcharge": "Supplemento",
+      "contractForm": "Tipo di contratto",
+      "billingSource": "Ripreso da",
+      "billingSourceValues": {
+        "department": "reparto",
+        "location": "sede",
+        "customer": "cliente",
+        "manual": "manuale"
+      }
+    },
+    "ownerUnassigned": "Nessun responsabile",
+    "terminate": {
+      "button": "Termina",
+      "modalTitle": "Termina match",
+      "reasonLabel": "Motivo",
+      "reasonPlaceholder": "Scegli un motivo…",
+      "noReasonsConfigured": "Nessun motivo di cessazione ancora impostato.",
+      "effectiveDateLabel": "Data di fine",
+      "noteLabel": "Nota (opzionale)",
+      "notePlaceholder": "Aggiungi una nota…",
+      "noteCounter": "{{count}}/{{max}}",
+      "confirm": "Conferma cessazione",
+      "success": "Match terminato.",
+      "error": "Non è stato possibile terminare il match.",
+      "reasonLine": "{{date}} · {{reason}}",
+      "reasonLineNoDate": "Motivo: {{reason}}"
+    },
+    "remarks": {
+      "title": "Osservazioni",
+      "saved": "Osservazioni salvate.",
+      "saveError": "Impossibile salvare le osservazioni.",
+      "deprecated": "Questo campo verrà rimosso. Sposta il testo su Note. Lì otterrà un autore, una data, un tipo e un canale, e comparirà nella cronologia.",
+      "moveToNotes": "Sposta nelle note",
+      "moving": "Spostamento in corso…",
+      "moved": "L'osservazione è stata spostata nelle note.",
+      "moveError": "Lo spostamento nelle note non è riuscito. Il testo non è stato modificato.",
+      "moveClearError": "La nota è stata salvata, ma non è stato possibile svuotare il vecchio campo. Il testo ora esiste in due posti."
+    },
+    "duration": {
+      "unit": {
+        "days": "{{count}} giorno",
+        "weeks": "{{count}} settimana",
+        "months": "{{count}} mese"
+      },
+      "remaining": "ancora {{pct}}% da percorrere",
+      "progressLabel": "Avanzamento contratto"
+    },
+    "ordinal": {
+      "candidate": "Match {{position}} di {{total}} per questo candidato",
+      "client": "Match {{position}} di {{total}} per questo cliente",
+      "location": "Match {{position}} di {{total}} in questa sede",
+      "department": "Match {{position}} di {{total}} in questo reparto"
+    },
+    "statistics": {
+      "empty": "Ancora nessuna statistica di match disponibile.",
+      "onlyMatch": "Nessun altro match trovato.",
+      "openMatch": "Apri match"
+    },
+    "matchText": {
+      "title": "Testo del match",
+      "saved": "Testo del match salvato.",
+      "saveError": "Impossibile salvare il testo del match."
+    },
+    "renew": {
+      "button": "Rinnova",
+      "modalTitle": "Rinnova match",
+      "confirm": "Conferma rinnovo",
+      "currentEndDate": "Data di fine attuale: {{date}}",
+      "newEndDateLabel": "Nuova data di fine",
+      "noCurrentEndDate": "Nessuna data di fine impostata (continuativo).",
+      "mustBeAfterCurrent": "La nuova data di fine deve essere successiva a quella attuale.",
+      "success": "Match rinnovato.",
+      "error": "Non è stato possibile rinnovare il match.",
+      "disabledArchived": "Match archiviato. Ripristina prima.",
+      "disabledClosed": "Questo match è già terminato.",
+      "renewalCount_ordinal_other": "{{count}}° rinnovo"
+    }
+  },
+  "approval": {
+    "status": {
+      "pending": "In attesa",
+      "approved": "Approvato",
+      "rejected": "Respinto"
+    },
+    "approve": "Approva",
+    "reject": "Respingi",
+    "reasonPlaceholder": "Motivo del rifiuto…",
+    "confirmReject": "Conferma rifiuto",
+    "alreadyReviewed": "Questo match è già stato valutato.",
+    "error": "La valutazione non è stata applicata.",
+    "badgeLabel": "Valutazione",
+    "badgeWithLabel": "Valutazione: {{status}}"
+  },
+  "changelog": {
+    "loading": "Caricamento cronologia…",
+    "error": "Il registro delle modifiche non è stato caricato.",
+    "empty": "Nessuna modifica registrata finora.",
+    "system": "Sistema",
+    "actions": {
+      "updated": "Aggiornato",
+      "created": "Creato",
+      "deleted": "Archiviato",
+      "restored": "Ripristinato"
+    },
+    "emptyValue": "Vuoto",
+    "updatedValue": "aggiornato",
+    "fields": {
+      "reference_number": "Numero di riferimento",
+      "candidate_id": "Candidato",
+      "vacancy_id": "Posizione",
+      "application_id": "Candidatura",
+      "match_score": "Punteggio",
+      "owner_id": "Responsabile",
+      "status": "Stato",
+      "helloflex_contract_guid": "Contratto HelloFlex",
+      "contract_status": "Stato contratto",
+      "contract_sent_at": "Contratto inviato il",
+      "ended_at": "Terminato il",
+      "customer_id": "Cliente",
+      "customer_location_id": "Sede",
+      "customer_department_id": "Reparto",
+      "contact_id": "Referente",
+      "branch_id": "Filiale",
+      "function_title": "Titolo funzione",
+      "contract_form": "Tipo di contratto",
+      "contract_type": "Categoria di contratto",
+      "start_date": "Data di inizio",
+      "end_date": "Data di fine",
+      "hours_per_week": "Ore a settimana",
+      "cao": "CCNL",
+      "scale": "Livello retributivo",
+      "step": "Scatto",
+      "surcharge": "Maggiorazione",
+      "purchase_rate": "Tariffa di acquisto",
+      "sell_rate": "Tariffa di vendita",
+      "cost_center": "Centro di costo",
+      "billing_emails": "E-mail di fatturazione",
+      "remarks": "Osservazioni",
+      "match_text": "Testo del match",
+      "approval_status": "Valutazione",
+      "approval_rejected_reason": "Motivo del rifiuto",
+      "custom_fields": "Campi personalizzati",
+      "pending_erase_at": "Nel cestino dal",
+      "replaces_match_id": "Sostituisce il match"
+    }
+  },
+  "bulk": {
+    "selected": "{{count}} selezionati",
+    "actions": "Azioni di massa",
+    "deselect": "Deseleziona",
+    "mutateError": "La modifica non è stata applicata.",
+    "couple": "Collega al backoffice",
+    "target": {
+      "helloflex": "HelloFlex",
+      "shiftmanager": "Shiftmanager"
+    },
+    "coupleQueued": "{{count}} match messi in coda per il collegamento con {{target}}.",
+    "coupleUnavailable": "Il collegamento al backoffice non è ancora disponibile.",
+    "noPermission": "Non hai i permessi per le azioni di massa.",
+    "coupleQueuedPartial": "{{queued}} di {{total}} messi in coda per il collegamento con {{target}}; {{skipped}} saltati.",
+    "coupleQueuedPartialReasoned": "{{queued}} di {{total}} messi in coda per il collegamento con {{target}}; {{skipped}} saltati ({{breakdown}}).",
+    "skipReasons": {
+      "helloflex_contract_type_unmapped": "nessun tipo di contratto HelloFlex collegato"
+    }
+  },
+  "filters": {
+    "stage": "Fase",
+    "owner": "Responsabile",
+    "status": "Stato",
+    "client": "Cliente",
+    "moreFilters": "Altri filtri",
+    "moreFiltersTitle": "Altri filtri",
+    "removeFilter": "Rimuovi il filtro '{{label}}'",
+    "scoreState": "Punteggio",
+    "dateRange": "Intervallo di date",
+    "archived": "Archiviato",
+    "categories": {
+      "match": "Match",
+      "organisation": "Organizzazione",
+      "display": "Visualizzazione"
+    }
+  },
+  "view": {
+    "matches": "Match",
+    "board": "Board",
+    "archived": "Archiviato"
+  },
+  "quickView": {
+    "pendingApproval": "Da valutare"
+  },
+  "board": {
+    "empty": "Nessun match"
+  },
+  "page": {
+    "searchPlaceholder": "Cerca candidato, posizione o cliente…",
+    "openNotFound": "Match non trovato. Potrebbe essere stato rimosso."
+  },
+  "add": {
+    "button": "Nuovo match"
+  },
+  "type": {
+    "application": "Tramite candidatura",
+    "direct": "Diretto"
+  },
+  "notes": {
+    "title": "Note",
+    "type": "Tipo",
+    "new": "Nuova nota",
+    "empty": "Ancora nessuna nota.",
+    "placeholder": "Scrivi una nota…",
+    "save": "Salva",
+    "cancel": "Annulla",
+    "searchPlaceholder": "Cerca note…",
+    "loading": "Caricamento note…",
+    "loadError": "Non è stato possibile caricare le note.",
+    "edit": "Modifica",
+    "deleteNote": "Elimina nota",
+    "deleteConfirm": "Eliminare questa nota?"
+  },
+  "ai": {
+    "title": "Koios AI consiglia",
+    "beta": "Beta",
+    "refresh": "Aggiorna",
+    "analyzing": "Koios AI sta analizzando il match…",
+    "scoreLabel": "Punteggio",
+    "scoreGood": "Match forte ({{score}}).",
+    "scoreAverage": "Match nella media ({{score}}). Verifica l'idoneità.",
+    "scorePoor": "Match debole ({{score}}). Richiede attenzione.",
+    "scoreUnknown": "Nessun punteggio disponibile ancora.",
+    "windowLabel": "Periodo contrattuale",
+    "windowExpired": "La data di fine è già passata da {{days}} giorno/i.",
+    "windowWarning": "Mancano {{days}} giorno/i alla data di fine. Rinnova o concludi per tempo.",
+    "windowFine": "Il periodo contrattuale procede bene.",
+    "windowUnknown": "Nessuna data di fine nota."
+  },
+  "koios": {
+    "reasons": {
+      "endDateApproaching": "La data di fine del contratto si avvicina o è già trascorsa. Valuta un rinnovo."
+    }
+  },
+  "popout": {
+    "textWindowTitle": "Testo del match: {{name}}",
+    "loadError": "Non è stato possibile caricare questo match."
+  },
+  "lookupSeeds": {
+    "statuses": {
+      "open": "Attivo",
+      "closed": "Chiuso"
+    }
+  }
+}

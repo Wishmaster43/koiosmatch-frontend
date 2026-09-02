@@ -1,0 +1,407 @@
+{
+  "candidates": {
+    "title": "Dettagli: Candidati",
+    "summary": "{{shown}} di {{total}} candidati",
+    "search": "Cerca per nome, email, posizione...",
+    "loading": "Caricamento candidati...",
+    "empty": "Nessun candidato trovato",
+    "emptyHint": "Modifica i filtri o la ricerca",
+    "unknown": "sconosciuto",
+    "more": "+{{count}} altri",
+    "cols": {
+      "name": "Nome",
+      "status": "Stato",
+      "position": "Posizione",
+      "mobile": "Cellulare",
+      "registration": "Registrazione",
+      "lastLogin": "Ultimo accesso",
+      "plannedShift": "Turno pianificato",
+      "lastShift": "Ultimo turno",
+      "shifts": "Turni",
+      "features": "Caratteristiche",
+      "globalRates": "Tariffe globali"
+    },
+    "filters": {
+      "year": "Anno di registrazione",
+      "status": "Stato",
+      "position": "Posizione",
+      "features": "Caratteristiche"
+    },
+    "status": {
+      "actief": "Attivo",
+      "nietactief": "Non attivo",
+      "extern": "Esterno",
+      "intake": "Intake",
+      "verwijderd": "Eliminato",
+      "onbekend": "Sconosciuto"
+    },
+    "loadError": "Impossibile caricare i candidati."
+  },
+  "customers": {
+    "title": "Dettagli: Clienti",
+    "summary": "{{shown}} di {{total}} clienti",
+    "search": "Cerca per nome, numero debitore, account manager…",
+    "loading": "Caricamento clienti…",
+    "empty": "Nessun cliente trovato",
+    "loadError": "Impossibile caricare i clienti.",
+    "statusActive": "Attivo",
+    "statusInactive": "Inattivo",
+    "cols": {
+      "name": "Nome",
+      "debtorNumber": "N. debitore",
+      "status": "Stato",
+      "accountManager": "Account manager",
+      "locations": "Sedi",
+      "departments": "Reparti"
+    },
+    "filters": {
+      "status": "Stato"
+    }
+  },
+  "common": {
+    "loadingShort": "Caricamento…",
+    "statusActive": "Attivo",
+    "statusInactive": "Inattivo"
+  },
+  "contacts": {
+    "title": "Referenti",
+    "summary": "{{shown}} di {{total}} referenti",
+    "search": "Cerca per nome, email, sede…",
+    "loading": "Caricamento referenti…",
+    "empty": "Nessun referente trovato",
+    "cols": {
+      "customer": "Cliente",
+      "name": "Nome",
+      "email": "Email",
+      "phone": "Telefono",
+      "planningContact": "Referente pianificazione"
+    },
+    "filters": {
+      "customer": "Cliente",
+      "planningContact": "Referente pianificazione"
+    },
+    "planningYes": "Referente pianificazione",
+    "planningNo": "Non referente pianificazione",
+    "yes": "Sì",
+    "no": "No"
+  },
+  "departments": {
+    "title": "Dettagli: Reparti",
+    "summary": "{{shown}} di {{total}} reparti",
+    "search": "Cerca per nome, sede, centro di costo…",
+    "loading": "Caricamento reparti…",
+    "empty": "Nessun reparto trovato",
+    "cols": {
+      "customer": "Cliente",
+      "location": "Sede",
+      "department": "Reparto",
+      "costCenter": "Centro di costo"
+    },
+    "filters": {
+      "customer": "Cliente",
+      "locationStatus": "Stato sede"
+    }
+  },
+  "locations": {
+    "title": "Dettagli: Sedi",
+    "summary": "{{shown}} di {{total}} sedi",
+    "search": "Cerca per nome, cliente, indirizzo…",
+    "loading": "Caricamento sedi…",
+    "empty": "Nessuna sede trovata",
+    "cols": {
+      "customer": "Cliente",
+      "location": "Sede",
+      "address": "Indirizzo",
+      "status": "Stato",
+      "departments": "Reparti"
+    },
+    "filters": {
+      "customer": "Cliente",
+      "status": "Stato"
+    }
+  },
+  "dr": {
+    "close": "Chiudi",
+    "remarks": "Osservazioni",
+    "externalId": "ID esterno",
+    "customer": "Cliente",
+    "location": "Sede",
+    "costCenter": "Centro di costo",
+    "address": "Indirizzo",
+    "departments": "Reparti",
+    "email": "Email",
+    "mobile": "Cellulare",
+    "phone": "Telefono"
+  },
+  "candidateDrawer": {
+    "unknownName": "Sconosciuto",
+    "candidateFallback": "candidato",
+    "default": "Predefinito",
+    "tabs": {
+      "general": "Generale",
+      "conversation": "Conversazione",
+      "history": "Cronologia"
+    },
+    "sections": {
+      "contact": "Contatto",
+      "timeline": "Cronologia",
+      "stats": "Statistiche",
+      "features": "Caratteristiche",
+      "globalRole": "Ruolo globale"
+    },
+    "fields": {
+      "mobile": "Cellulare",
+      "email": "Email",
+      "city": "Città",
+      "registrationDate": "Data di registrazione",
+      "lastLogin": "Ultimo accesso",
+      "plannedShift": "Turno pianificato",
+      "lastShift": "Ultimo turno",
+      "endEmployment": "Fine del rapporto di lavoro"
+    },
+    "stats": {
+      "worked": "Turni lavorati",
+      "noShows": "Mancate presenze",
+      "cancellations": "Cancellazioni"
+    },
+    "conversationComing": "La conversazione arriva presto",
+    "conversationDesc": "Conversazioni WhatsApp tra Yessy AI e {{name}}",
+    "historyComing": "La cronologia turni arriva presto",
+    "historyDesc": "Tutti i turni lavorati da {{name}}"
+  },
+  "customerDrawer": {
+    "debtorNumber": "N. debitore",
+    "accountManager": "Account manager",
+    "locations": "Sedi",
+    "departments": "Reparti",
+    "noLocations": "Nessuna sede nota"
+  },
+  "contactDrawer": {
+    "contactInfo": "Dati di contatto",
+    "function": "Posizione",
+    "salutation": "Formula di apertura",
+    "planningContact": "Referente pianificazione",
+    "noPlanningContact": "Non referente pianificazione",
+    "sendEmail": "Invia email",
+    "call": "Chiama"
+  },
+  "departmentDrawer": {
+    "info": "Dati del reparto",
+    "name": "Nome del reparto"
+  },
+  "locationDrawer": {
+    "info": "Dati della sede",
+    "departmentsCount": "Reparti ({{count}})"
+  },
+  "report": {
+    "title": "Report candidati",
+    "activeWord": "attivo",
+    "deregisteredWord": "cancellato",
+    "totalWord": "totale",
+    "loadError": "Impossibile caricare i candidati.",
+    "unitCandidates": "candidati",
+    "unknown": "Sconosciuto",
+    "loginGroups": {
+      "lt7": "Meno di 7 giorni",
+      "d8to14": "Da 8 a 14 giorni",
+      "d15to21": "Da 15 a 21 giorni",
+      "d22to30": "Da 22 a 30 giorni",
+      "d31to60": "Da 31 a 60 giorni",
+      "d61to90": "Da 61 a 90 giorni",
+      "gt90": "Più di 90 giorni",
+      "never": "Mai"
+    },
+    "charts": {
+      "perPosition": "Per posizione",
+      "lastLogin": "Ultimo accesso",
+      "newPerMonth": "Nuovi candidati al mese",
+      "newPerWeek": "Nuovi candidati alla settimana",
+      "endPerMonth": "Cancellati al mese",
+      "endPerWeek": "Cancellati alla settimana",
+      "topCities": "Top {{n}} città"
+    },
+    "sub": {
+      "position": "Posizione",
+      "lastLogin": "Ultimo accesso",
+      "regMonth": "Mese di registrazione",
+      "regWeek": "Settimana di registrazione",
+      "city": "Città",
+      "endMonth": "Mese di cancellazione",
+      "endWeek": "Settimana di cancellazione",
+      "kpi": "KPI"
+    },
+    "filters": {
+      "view": "Visualizzazione",
+      "numbers": "Numeri",
+      "percentages": "Percentuali",
+      "year": "Anno",
+      "status": "Stato",
+      "position": "Posizione"
+    }
+  },
+  "kpiRow": {
+    "attention": "Candidati da monitorare",
+    "attentionNote": "Attivo · nuovo · non pianificato",
+    "active": "Candidati attivi",
+    "activeNote": "{{planned}} / {{total}} pianificati",
+    "inactive": "Candidati non attivi",
+    "intake": "Candidati in intake",
+    "newThisMonth": "Nuovi {{month}} (media {{avg}}/mese)",
+    "drillActive": "Attivo",
+    "drillInactive": "Non attivo",
+    "drillIntake": "Intake",
+    "drillNewIn": "Nuovi in {{month}}"
+  },
+  "drilldown": {
+    "searchFull": "Cerca per nome, funzione, cellulare o e-mail...",
+    "searchShort": "Cerca per nome, funzione o e-mail...",
+    "candidatesCount": "{{count}} candidati",
+    "shownOf": "{{shown}} di {{total}} mostrati",
+    "notPlanned": "Non pianificato",
+    "registered": "Registrato",
+    "deregistered": "Cancellato",
+    "kpiPerMonth": "KPI: {{target}}/mese",
+    "atKpi": "✓ KPI",
+    "calcLabel": "Calcolo:",
+    "calcBody": "totale nuovi candidati in {{year}} fino a {{month}} ({{total}}) diviso per il numero di mesi ({{months}}) = {{avg}}/mese.",
+    "kpiGoal": "L'obiettivo KPI è {{target}} al mese.",
+    "newThisMonth": "Nuovi questo mese",
+    "avgPerMonthLabel": "Media /mese",
+    "kpiTargetLabel": "Obiettivo KPI /mese",
+    "perMonthYear": "Per mese: {{year}}",
+    "kpiGoalFoot": "Obiettivo KPI: {{target}} nuovi candidati al mese",
+    "fields": {
+      "position": "Funzione",
+      "mobile": "Cellulare",
+      "email": "E-mail",
+      "registered": "Registrato",
+      "lastLogin": "Ultimo accesso",
+      "plannedOn": "Pianificato il",
+      "lastShift": "Ultimo turno",
+      "shiftsWorked": "Turni lavorati",
+      "noShows": "No-show"
+    },
+    "timesWorked": "lavorato {{n}}×",
+    "lastLogin": "Ultimo accesso",
+    "viewDetails": "Vai alla tabella candidati"
+  },
+  "messages": {
+    "title": "Dettagli: messaggi",
+    "summary": "{{shown}} di {{total}} messaggi",
+    "search": "Cerca per nome, oggetto, workflow...",
+    "loading": "Caricamento messaggi...",
+    "empty": "Nessun messaggio trovato",
+    "cols": {
+      "sent": "Inviato",
+      "recipient": "Destinatario",
+      "channel": "Canale",
+      "subject": "Oggetto",
+      "status": "Stato",
+      "workflow": "Workflow"
+    },
+    "channel": {
+      "whatsapp": "WhatsApp",
+      "email": "E-mail",
+      "sms": "SMS"
+    },
+    "status": {
+      "sent": "Inviato",
+      "delivered": "Consegnato",
+      "read": "Letto",
+      "failed": "Non riuscito",
+      "pending": "In coda",
+      "bounced": "Respinto"
+    },
+    "filters": {
+      "channel": "Canale",
+      "status": "Stato",
+      "workflow": "Workflow"
+    },
+    "drawer": {
+      "recipient": "Destinatario",
+      "name": "Nome",
+      "mobile": "Cellulare",
+      "email": "E-mail",
+      "timeline": "Cronologia",
+      "sentAt": "Inviato il",
+      "deliveredAt": "Consegnato il",
+      "readAt": "Letto il",
+      "workflow": "Workflow",
+      "template": "Template",
+      "body": "Contenuto del messaggio",
+      "error": "Messaggio di errore",
+      "messageFallback": "Messaggio #{{id}}"
+    }
+  },
+  "runs": {
+    "title": "Dettagli: esecuzioni",
+    "summary": "{{shown}} di {{total}} esecuzioni",
+    "search": "Cerca per workflow, trigger, errore...",
+    "loading": "Caricamento esecuzioni...",
+    "empty": "Nessuna esecuzione trovata",
+    "editorTitle": "Esecuzioni",
+    "editorEmpty": "Ancora nessuna esecuzione per questo workflow",
+    "editorCount_one": "{{count}} esecuzione",
+    "editorCount_other": "{{count}} esecuzioni",
+    "cols": {
+      "started": "Avviato",
+      "workflow": "Workflow",
+      "status": "Stato",
+      "candidates": "Candidati",
+      "duration": "Durata",
+      "trigger": "Trigger",
+      "expand": "Espandi/comprimi riga"
+    },
+    "status": {
+      "success": "Riuscita",
+      "failed": "Non riuscita",
+      "running": "In corso",
+      "pending": "In coda",
+      "cancelled": "Interrotta",
+      "waiting": "In attesa",
+      "skipped": "Saltata"
+    },
+    "filters": {
+      "status": "Stato",
+      "workflow": "Workflow",
+      "range": "Periodo"
+    },
+    "drawer": {
+      "startedColon": "Avviato:",
+      "candidates": "Candidati",
+      "candidate": "Candidato",
+      "duration": "Durata",
+      "timeline": "Cronologia",
+      "started": "Avviato",
+      "finished": "Completato",
+      "trigger": "Trigger",
+      "createdBy": "Creato da",
+      "stepResults": "Risultati dei passaggi",
+      "step": "Passaggio {{n}}",
+      "input": "Input",
+      "output": "Output",
+      "noData": "Nessun dato",
+      "error": "Messaggio di errore",
+      "workflowFallback": "Workflow #{{id}}",
+      "attempts": "Tentativo {{count}}",
+      "nextAttempt": "Prossimo tentativo alle {{time}}",
+      "runId": "ID esecuzione",
+      "copyId": "Clicca per copiare l'ID",
+      "processed": "Elaborati",
+      "lineage": "Origine",
+      "parentRunId": "ID esecuzione padre",
+      "childRuns": "Esecuzioni figlie"
+    },
+    "openHistory": "Visualizza nella cronologia",
+    "dryRun": {
+      "banner": "Prova: passaggi di invio saltati"
+    }
+  },
+  "messageDetail": "Dettaglio messaggio",
+  "locationsPage": {
+    "status": {
+      "active": "Attivo",
+      "inactive": "Inattivo"
+    }
+  }
+}

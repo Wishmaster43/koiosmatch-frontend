@@ -1,0 +1,274 @@
+{
+  "title": "Opportunità",
+  "loading": "Caricamento opportunità…",
+  "empty": "Nessuna opportunità ancora.",
+  "error": "Impossibile caricare le opportunità.",
+  "pickClientFirst": "Seleziona prima un cliente",
+  "page": {
+    "add": "Nuova opportunità",
+    "selected": "{{count}} selezionati",
+    "clearSelection": "Cancella selezione",
+    "searchPlaceholder": "Cerca opportunità, descrizione, nota…"
+  },
+  "cols": {
+    "title": "Opportunità",
+    "referenceNumber": "N. riferimento",
+    "client": "Cliente",
+    "stage": "Fase",
+    "value": "Valore",
+    "owner": "Responsabile",
+    "date": "Creato",
+    "hoursValue": "{{count}} h",
+    "expectedClose": "Chiusura prevista",
+    "startDate": "Data inizio",
+    "endDate": "Data fine"
+  },
+  "insights": {
+    "stage": "Fase",
+    "owner": "Responsabile",
+    "client": "Cliente",
+    "clearFilter": "Cancella filtro"
+  },
+  "kpi": {
+    "total": "Opportunità",
+    "open": "Aperte",
+    "pipeline": "Valore pipeline (€)",
+    "pipelineHours": "Pipeline (ore)",
+    "avg": "Valore medio (€)",
+    "avgHours": "Ore medie",
+    "won": "Vinte",
+    "lost": "Perse",
+    "winRate": "Tasso di vittoria (%)"
+  },
+  "drawer": {
+    "entityLabel": "Opportunità",
+    "stage": "Fase",
+    "owner": "Responsabile",
+    "client": "Cliente",
+    "selectStage": "Seleziona fase",
+    "selectOwner": "Seleziona responsabile",
+    "selectClient": "Seleziona cliente",
+    "createdAt": "Creato il {{date}}",
+    "archive": "Archivia",
+    "archiveConfirm": "Archiviare questa opportunità? Potrai ripristinarla in seguito.",
+    "archived": "Opportunità archiviata.",
+    "archiveFailed": "Impossibile archiviare l'opportunità.",
+    "archivedBanner": {
+      "since": "Archiviata dal {{date}}",
+      "flag": "Archiviata",
+      "restore": "Ripristina",
+      "restored": "Opportunità ripristinata.",
+      "restoreFailed": "Impossibile ripristinare l'opportunità."
+    },
+    "markWon": "Vinta",
+    "markLost": "Persa",
+    "expectedCloseOn": "Chiusura prevista il {{date}}",
+    "tabs": {
+      "details": "Dettagli",
+      "statistics": "Statistiche",
+      "notes": "Note",
+      "tasks": "Attività",
+      "changelog": "Modifiche",
+      "extra": "Extra",
+      "customer": "Cliente",
+      "conversation": "Conversazione",
+      "timeline": "Cronologia"
+    },
+    "tags": "Tag",
+    "ordinal": {
+      "client": "Opportunità {{position}} di {{total}} per questo cliente"
+    },
+    "statistics": {
+      "empty": "Nessuna statistica sulle opportunità disponibile ancora.",
+      "onlyOpportunity": "Nessun'altra opportunità trovata.",
+      "openOpportunity": "Apri opportunità"
+    }
+  },
+  "email": {
+    "loading": "Caricamento e-mail…",
+    "error": "Impossibile caricare le e-mail.",
+    "noAccess": "Nessun accesso al registro e-mail.",
+    "empty": "Nessuna e-mail per questa opportunità ancora.",
+    "showingOf": "Prime {{shown}} di {{total}} e-mail.",
+    "body": {
+      "loading": "Caricamento messaggio…",
+      "error": "Impossibile caricare il messaggio.",
+      "noAccess": "Nessun accesso a questo messaggio."
+    }
+  },
+  "notes": {
+    "title": "Note",
+    "new": "Nuova nota",
+    "type": "Tipo",
+    "empty": "Nessuna nota ancora.",
+    "placeholder": "Scrivi una nota…",
+    "loadError": "Caricamento note non riuscito",
+    "searchPlaceholder": "Cerca note…",
+    "deleteNote": "Elimina nota",
+    "deleteConfirm": "Eliminare questa nota?"
+  },
+  "tasks": {
+    "loading": "Caricamento attività…",
+    "error": "Impossibile caricare le attività.",
+    "empty": "Nessuna attività collegata ancora.",
+    "newTask": "Nuova attività",
+    "open": "Aperte",
+    "history": "Cronologia",
+    "openTask": "Apri attività",
+    "searchPlaceholder": "Cerca attività…"
+  },
+  "details": {
+    "stage": "Fase",
+    "value": "Valore",
+    "currency": "Valuta",
+    "hours": "Ore",
+    "hoursPeriod": "Ore per",
+    "periods": {
+      "week": "Per settimana",
+      "month": "Per mese",
+      "total": "Totale"
+    },
+    "startDate": "Data inizio",
+    "endDate": "Data fine",
+    "serviceType": "Servizio",
+    "agreementType": "Contratto",
+    "expectedClose": "Chiusura prevista",
+    "client": "Cliente",
+    "location": "Sede",
+    "department": "Reparto",
+    "contact": "Referente",
+    "openCustomer": "Apri cliente",
+    "owner": "Responsabile",
+    "created": "Creato",
+    "groups": {
+      "deal": "Trattativa",
+      "opportunityDescription": "Descrizione opportunità"
+    }
+  },
+  "changelog": {
+    "loading": "Caricamento…",
+    "error": "Impossibile caricare le modifiche.",
+    "empty": "Nessuna modifica ancora.",
+    "system": "Sistema",
+    "actions": {
+      "updated": "Aggiornato",
+      "created": "Creato",
+      "deleted": "Archiviato",
+      "restored": "Ripristinato"
+    },
+    "emptyValue": "Vuoto",
+    "updatedValue": "aggiornato",
+    "fields": {
+      "reference_number": "Numero di riferimento",
+      "title": "Titolo",
+      "description": "Descrizione",
+      "customer_id": "Cliente",
+      "opportunity_stage_id": "Fase",
+      "lost_reason": "Motivo perdita",
+      "lost_note": "Nota sulla perdita",
+      "stage_changed_at": "Fase modificata il",
+      "deal_type_id": "Tipo di trattativa",
+      "value": "Valore",
+      "currency": "Valuta",
+      "owner_id": "Responsabile",
+      "location_id": "Sede",
+      "customer_location_id": "Locazione",
+      "hours": "Ore",
+      "hours_period": "Ore per",
+      "start_date": "Data inizio",
+      "end_date": "Data fine",
+      "service_type_id": "Servizio",
+      "agreement_type_id": "Contratto",
+      "department_id": "Reparto",
+      "contact_id": "Referente",
+      "tags": "Tag",
+      "custom_fields": "Campi personalizzati",
+      "expected_close_at": "Chiusura prevista",
+      "created_by": "Creato da",
+      "pending_erase_at": "Nel cestino dal",
+      "converted_type": "Tipo convertito",
+      "converted_id": "Record convertito",
+      "converted_at": "Convertito il"
+    }
+  },
+  "modal": {
+    "title": "Nuova opportunità",
+    "editTitle": "Modifica opportunità",
+    "titlePlaceholder": "Es. 5 addetti al magazzino per Logistica Nord",
+    "required": "Il titolo è obbligatorio",
+    "create": "Crea",
+    "creating": "In corso…",
+    "save": "Salva",
+    "saving": "In corso…",
+    "cancel": "Annulla",
+    "groups": {
+      "general": "Generale",
+      "dealStage": "Valore e fase",
+      "description": "Descrizione"
+    },
+    "fields": {
+      "title": "Titolo",
+      "client": "Cliente",
+      "stage": "Fase",
+      "serviceType": "Servizio",
+      "agreementType": "Contratto",
+      "value": "Valore (€)",
+      "hours": "Ore",
+      "startDate": "Data inizio",
+      "endDate": "Data fine",
+      "expectedClose": "Chiusura prevista",
+      "owner": "Responsabile",
+      "location": "Sede",
+      "department": "Reparto",
+      "contact": "Referente",
+      "branch": "Sede"
+    }
+  },
+  "view": {
+    "table": "Vista elenco",
+    "board": "Vista bacheca",
+    "archived": "Archiviate"
+  },
+  "koios": {
+    "reasons": {
+      "expectedCloseOverdue": "La data di chiusura prevista è passata. Segui questa opportunità."
+    }
+  },
+  "ai": {
+    "title": "Koios AI consiglia",
+    "beta": "Beta",
+    "refresh": "Aggiorna",
+    "analyzing": "Koios AI sta analizzando l'opportunità…",
+    "dealHealthLabel": "Entità trattativa",
+    "dealHealthSet": "Un valore o un numero di ore sono stati registrati.",
+    "dealHealthMissing": "Nessun valore o numero di ore ancora registrato.",
+    "closeWindowLabel": "Data di chiusura",
+    "closeWindowTerminal": "Questa opportunità è chiusa (vinta o persa). Nessun altro consiglio.",
+    "closeWindowUnknown": "Nessuna data di chiusura prevista nota.",
+    "closeWindowOverdue": "La data di chiusura prevista è passata di {{days}} giorno/i.",
+    "closeWindowUpcoming": "Mancano {{days}} giorno/i alla chiusura prevista."
+  },
+  "richText": {
+    "empty": "Nessuna informazione registrata"
+  },
+  "filters": {
+    "archived": "Archiviato",
+    "categories": {
+      "lifecycle": "Ciclo di vita",
+      "organisation": "Organizzazione",
+      "display": "Visualizzazione"
+    }
+  },
+  "popout": {
+    "textWindowTitle": "Testo opportunità {{name}}",
+    "loadError": "Non è stato possibile caricare questa opportunità."
+  },
+  "conversation": {
+    "noContact": "Collega prima un referente a questa opportunità per vedere la conversazione.",
+    "emailSectionLabel": "E-mail",
+    "noCustomer": "Questa opportunità ha un referente ma nessun cliente collegato. Collega prima il cliente per vedere la conversazione."
+  },
+  "conversations": {
+    "start": "Avvia conversazione"
+  }
+}

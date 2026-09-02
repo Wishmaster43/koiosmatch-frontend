@@ -1,0 +1,191 @@
+{
+  "tabs": {
+    "overview": "Panoramica",
+    "messages": "Messaggi",
+    "queue": "Coda",
+    "escalations": "Escalation"
+  },
+  "drill": {
+    "noDetail": "Ancora nessun dato di dettaglio per questo KPI. Il backend lo fornirà a breve."
+  },
+  "overview": {
+    "statusTitle": "Stato messaggi",
+    "reasonsTitle": "Motivi di escalation",
+    "channelTitle": "Per canale (oggi)",
+    "channelActivityTitle": "Messaggi per canale, ultimi 14 giorni"
+  },
+  "filters": {
+    "status": "Stato",
+    "direction": "Direzione",
+    "number": "Numero",
+    "dateRange": "Periodo",
+    "sort": "Ordinamento",
+    "sortAsc": "Prima i più vecchi",
+    "sortDesc": "Prima i più recenti",
+    "categories": {
+      "message": "Messaggio",
+      "organisation": "Organizzazione",
+      "display": "Visualizzazione"
+    }
+  },
+  "msgStatus": {
+    "read": "Letto",
+    "delivered": "Consegnato",
+    "sent": "Inviato",
+    "failed": "Non riuscito",
+    "received": "Ricevuto"
+  },
+  "msgDirection": {
+    "inbound": "In entrata",
+    "outbound": "In uscita"
+  },
+  "title": "WhatsApp",
+  "updatedAt": "Aggiornato alle {{time}}",
+  "refresh": "Aggiorna",
+  "loading": "Caricamento…",
+  "outbound": "In uscita",
+  "inbound": "In entrata",
+  "chartTitle": "Attività messaggi, ultimi 14 giorni",
+  "kpi": {
+    "messagesToday": "Messaggi oggi",
+    "candidatesContacted": "Candidati contattati",
+    "shiftsFilled": "Turni coperti via WA",
+    "openEscalations": "Escalation aperte",
+    "sentToday": "Inviati oggi",
+    "receivedToday": "Ricevuti oggi",
+    "queuedToday": "In coda (oggi)",
+    "failedToday": "Invii falliti (oggi)",
+    "noReplyEscalations": "Escalato, nessuna risposta"
+  },
+  "feed": {
+    "empty": "Nessun messaggio"
+  },
+  "escalations": {
+    "title": "Escalation",
+    "loading": "Recupero in corso…",
+    "empty": "Nessuna escalation aperta"
+  },
+  "reasons": {
+    "failed_delivery": "Non consegnato",
+    "no_reply": "Nessuna risposta",
+    "negative_response": "Risposta negativa"
+  },
+  "noConn": {
+    "title": "Nessuna connessione WhatsApp",
+    "desc": "Per questa agenzia non è ancora stata configurata una connessione WhatsApp Business. Configura una connessione tramite il backend per vedere qui messaggi e statistiche.",
+    "hintLabel": "Come risolvere",
+    "hint": "Vai su Impostazioni → WhatsApp per creare una connessione Business, oppure chiedi all'amministratore di questa agenzia di farlo."
+  },
+  "queue": {
+    "active": "Attivo",
+    "finished": "Concluso",
+    "loading": "Caricamento coda…",
+    "empty": "Nessun messaggio in coda oggi.",
+    "notAvailable": "Coda non ancora disponibile",
+    "notAvailableDesc": "Questa funzione sarà fornita a breve dal backend.",
+    "error": "Impossibile caricare la coda.",
+    "priority": "Priorità",
+    "tempo": "Ritmo",
+    "sent": "inviati",
+    "skipped": "saltati",
+    "failed": "falliti",
+    "priorityLevel": {
+      "high": "Alta",
+      "normal": "Normale",
+      "low": "Bassa"
+    },
+    "wabaTitle": "Coda WABA"
+  },
+  "messages": {
+    "date": "Data",
+    "recipient": "Destinatario",
+    "direction": "Direzione",
+    "status": "Stato",
+    "body": "Messaggio",
+    "unknownRecipient": "Destinatario sconosciuto",
+    "openConversation": "Apri conversazione",
+    "loadMore": "Carica altri",
+    "loadingMore": "Caricamento…",
+    "loadMoreExhausted": "Nessun messaggio più vecchio",
+    "channel": "Canale",
+    "type": "Tipo",
+    "purpose": "Scopo",
+    "template": "Template",
+    "sentBy": "Inviato da",
+    "automatic": "Automatico",
+    "priority": "Priorità"
+  },
+  "waWebQueue": {
+    "title": "Coda WhatsApp Web",
+    "filterStatus": "Stato",
+    "status": {
+      "queued": "In coda",
+      "sending": "In invio",
+      "sent": "Inviato",
+      "failed": "Non riuscito",
+      "paused": "In pausa",
+      "canceled": "Annullato"
+    },
+    "column": {
+      "number": "Numero",
+      "candidate": "Candidato",
+      "type": "Tipo",
+      "priority": "Priorità",
+      "status": "Stato",
+      "holdReason": "Motivo dell'attesa",
+      "scheduledAt": "Pianificato per",
+      "attempts": "Tentativi",
+      "actions": "Azioni"
+    },
+    "noCandidate": "Nessun candidato",
+    "reason": {
+      "scheduled": "Pianificato nel futuro",
+      "rate_limit": "Limite numero raggiunto",
+      "priority_wait": "In attesa di priorità più alta",
+      "ready": "Pronto per l'invio",
+      "new_number_hourly": "Limite di riscaldamento (orario)",
+      "new_number_daily": "Limite di riscaldamento (giornaliero)",
+      "new_number_weekly": "Limite di riscaldamento (settimanale)"
+    },
+    "action": {
+      "sendNow": "Invia ora",
+      "pause": "Metti in pausa",
+      "retry": "Riprova",
+      "cancel": "Annulla"
+    },
+    "statsLoading": "Caricamento statistiche…",
+    "noDevices": "Nessun numero WhatsApp Web collegato.",
+    "statValue": "{{count}} in coda",
+    "estDrain": "± {{hours}} ore per svuotarsi",
+    "rateAndDrain": "{{rate}} all'ora · ± {{hours}} ore per svuotarsi",
+    "rateLimit": "{{rate}} all'ora",
+    "loading": "Caricamento coda…",
+    "error": "Impossibile caricare la coda.",
+    "empty": "Nulla in coda."
+  },
+  "conversations": {
+    "title": "Conversazioni",
+    "column": {
+      "counterpart": "Contatto",
+      "number": "Numero",
+      "channel": "Canale",
+      "lastMessage": "Ultimo messaggio",
+      "flags": "Segnali"
+    },
+    "flagUnanswered": "Senza risposta",
+    "flagEscalated": "Escalato",
+    "loading": "Caricamento conversazioni…",
+    "error": "Impossibile caricare le conversazioni.",
+    "empty": "Ancora nessuna conversazione.",
+    "tabThread": "Conversazione",
+    "openInDossier": "Apri nel dossier candidato",
+    "loadOlder": "Carica messaggi più vecchi",
+    "threadError": "Impossibile caricare la conversazione.",
+    "noMessages": "Ancora nessun messaggio in questa conversazione.",
+    "searchLabel": "Cerca",
+    "searchPlaceholder": "Cerca per nome o numero…",
+    "filterEscalated": "Escalato",
+    "filterUnanswered": "Senza risposta",
+    "filterActive": "Attivo"
+  }
+}

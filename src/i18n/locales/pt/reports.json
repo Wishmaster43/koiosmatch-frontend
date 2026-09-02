@@ -1,0 +1,407 @@
+{
+  "candidates": {
+    "title": "Detalhes: Candidatos",
+    "summary": "{{shown}} de {{total}} candidatos",
+    "search": "Pesquisar por nome, e-mail, função...",
+    "loading": "A carregar candidatos...",
+    "empty": "Nenhum candidato encontrado",
+    "emptyHint": "Ajuste os filtros ou a pesquisa",
+    "unknown": "desconhecido",
+    "more": "+{{count}} mais",
+    "cols": {
+      "name": "Nome",
+      "status": "Estado",
+      "position": "Função",
+      "mobile": "Telemóvel",
+      "registration": "Registo",
+      "lastLogin": "Último início de sessão",
+      "plannedShift": "Turno planeado",
+      "lastShift": "Último turno",
+      "shifts": "Turnos",
+      "features": "Características",
+      "globalRates": "Tarifas globais"
+    },
+    "filters": {
+      "year": "Ano de registo",
+      "status": "Estado",
+      "position": "Função",
+      "features": "Características"
+    },
+    "status": {
+      "actief": "Ativo",
+      "nietactief": "Inativo",
+      "extern": "Externo",
+      "intake": "Intake",
+      "verwijderd": "Eliminado",
+      "onbekend": "Desconhecido"
+    },
+    "loadError": "Não foi possível carregar os candidatos."
+  },
+  "customers": {
+    "title": "Detalhes: Clientes",
+    "summary": "{{shown}} de {{total}} clientes",
+    "search": "Pesquisar por nome, número de devedor, gestor de conta…",
+    "loading": "A carregar clientes…",
+    "empty": "Nenhum cliente encontrado",
+    "loadError": "Não foi possível carregar os clientes.",
+    "statusActive": "Ativo",
+    "statusInactive": "Inativo",
+    "cols": {
+      "name": "Nome",
+      "debtorNumber": "N.º de devedor",
+      "status": "Estado",
+      "accountManager": "Gestor de conta",
+      "locations": "Localizações",
+      "departments": "Departamentos"
+    },
+    "filters": {
+      "status": "Estado"
+    }
+  },
+  "common": {
+    "loadingShort": "A carregar…",
+    "statusActive": "Ativo",
+    "statusInactive": "Inativo"
+  },
+  "contacts": {
+    "title": "Pessoas de contacto",
+    "summary": "{{shown}} de {{total}} pessoas de contacto",
+    "search": "Pesquisar por nome, e-mail, localização…",
+    "loading": "A carregar pessoas de contacto…",
+    "empty": "Nenhuma pessoa de contacto encontrada",
+    "cols": {
+      "customer": "Cliente",
+      "name": "Nome",
+      "email": "E-mail",
+      "phone": "Telefone",
+      "planningContact": "Contacto de planeamento"
+    },
+    "filters": {
+      "customer": "Cliente",
+      "planningContact": "Contacto de planeamento"
+    },
+    "planningYes": "Contacto de planeamento",
+    "planningNo": "Sem contacto de planeamento",
+    "yes": "Sim",
+    "no": "Não"
+  },
+  "departments": {
+    "title": "Detalhes: Departamentos",
+    "summary": "{{shown}} de {{total}} departamentos",
+    "search": "Pesquisar por nome, localização, centro de custo…",
+    "loading": "A carregar departamentos…",
+    "empty": "Nenhum departamento encontrado",
+    "cols": {
+      "customer": "Cliente",
+      "location": "Localização",
+      "department": "Departamento",
+      "costCenter": "Centro de custo"
+    },
+    "filters": {
+      "customer": "Cliente",
+      "locationStatus": "Estado da localização"
+    }
+  },
+  "locations": {
+    "title": "Detalhes: Localizações",
+    "summary": "{{shown}} de {{total}} localizações",
+    "search": "Pesquisar por nome, cliente, morada…",
+    "loading": "A carregar localizações…",
+    "empty": "Nenhuma localização encontrada",
+    "cols": {
+      "customer": "Cliente",
+      "location": "Localização",
+      "address": "Morada",
+      "status": "Estado",
+      "departments": "Departamentos"
+    },
+    "filters": {
+      "customer": "Cliente",
+      "status": "Estado"
+    }
+  },
+  "dr": {
+    "close": "Fechar",
+    "remarks": "Observações",
+    "externalId": "ID externo",
+    "customer": "Cliente",
+    "location": "Localização",
+    "costCenter": "Centro de custo",
+    "address": "Morada",
+    "departments": "Departamentos",
+    "email": "E-mail",
+    "mobile": "Telemóvel",
+    "phone": "Telefone"
+  },
+  "candidateDrawer": {
+    "unknownName": "Desconhecido",
+    "candidateFallback": "candidato",
+    "default": "Padrão",
+    "tabs": {
+      "general": "Geral",
+      "conversation": "Conversa",
+      "history": "Histórico"
+    },
+    "sections": {
+      "contact": "Contacto",
+      "timeline": "Cronologia",
+      "stats": "Estatísticas",
+      "features": "Características",
+      "globalRole": "Função global"
+    },
+    "fields": {
+      "mobile": "Telemóvel",
+      "email": "E-mail",
+      "city": "Localidade",
+      "registrationDate": "Data de registo",
+      "lastLogin": "Último início de sessão",
+      "plannedShift": "Turno planeado",
+      "lastShift": "Último turno",
+      "endEmployment": "Fim do vínculo laboral"
+    },
+    "stats": {
+      "worked": "Turnos trabalhados",
+      "noShows": "Faltas de comparência",
+      "cancellations": "Cancelamentos"
+    },
+    "conversationComing": "Conversa brevemente disponível",
+    "conversationDesc": "Conversas de WhatsApp entre a Yessy AI e {{name}}",
+    "historyComing": "Histórico de turnos brevemente disponível",
+    "historyDesc": "Todos os turnos trabalhados por {{name}}"
+  },
+  "customerDrawer": {
+    "debtorNumber": "N.º de devedor",
+    "accountManager": "Gestor de conta",
+    "locations": "Localizações",
+    "departments": "Departamentos",
+    "noLocations": "Nenhuma localização conhecida"
+  },
+  "contactDrawer": {
+    "contactInfo": "Dados de contacto",
+    "function": "Função",
+    "salutation": "Tratamento",
+    "planningContact": "Contacto de planeamento",
+    "noPlanningContact": "Sem contacto de planeamento",
+    "sendEmail": "Enviar e-mail",
+    "call": "Ligar"
+  },
+  "departmentDrawer": {
+    "info": "Dados do departamento",
+    "name": "Nome do departamento"
+  },
+  "locationDrawer": {
+    "info": "Dados da localização",
+    "departmentsCount": "Departamentos ({{count}})"
+  },
+  "report": {
+    "title": "Relatório de candidatos",
+    "activeWord": "ativo",
+    "deregisteredWord": "cancelado",
+    "totalWord": "total",
+    "loadError": "Não foi possível carregar os candidatos.",
+    "unitCandidates": "candidatos",
+    "unknown": "Desconhecido",
+    "loginGroups": {
+      "lt7": "Menos de 7 dias",
+      "d8to14": "8 a 14 dias",
+      "d15to21": "15 a 21 dias",
+      "d22to30": "22 a 30 dias",
+      "d31to60": "31 a 60 dias",
+      "d61to90": "61 a 90 dias",
+      "gt90": "Mais de 90 dias",
+      "never": "Nunca"
+    },
+    "charts": {
+      "perPosition": "Por função",
+      "lastLogin": "Último início de sessão",
+      "newPerMonth": "Novos candidatos por mês",
+      "newPerWeek": "Novos candidatos por semana",
+      "endPerMonth": "Cancelados por mês",
+      "endPerWeek": "Cancelados por semana",
+      "topCities": "Top {{n}} localidades"
+    },
+    "sub": {
+      "position": "Função",
+      "lastLogin": "Último início de sessão",
+      "regMonth": "Mês de registo",
+      "regWeek": "Semana de registo",
+      "city": "Localidade",
+      "endMonth": "Mês de cancelamento",
+      "endWeek": "Semana de cancelamento",
+      "kpi": "KPI"
+    },
+    "filters": {
+      "view": "Visualização",
+      "numbers": "Números",
+      "percentages": "Percentagens",
+      "year": "Ano",
+      "status": "Estado",
+      "position": "Função"
+    }
+  },
+  "kpiRow": {
+    "attention": "Candidatos a acompanhar",
+    "attentionNote": "Ativo · novo · não planeado",
+    "active": "Candidatos ativos",
+    "activeNote": "{{planned}} / {{total}} planeados",
+    "inactive": "Candidatos inativos",
+    "intake": "Candidatos em intake",
+    "newThisMonth": "Novos {{month}} (méd. {{avg}}/mês)",
+    "drillActive": "Ativo",
+    "drillInactive": "Inativo",
+    "drillIntake": "Intake",
+    "drillNewIn": "Novos em {{month}}"
+  },
+  "drilldown": {
+    "searchFull": "Pesquisar por nome, função, telemóvel ou e-mail...",
+    "searchShort": "Pesquisar por nome, função ou e-mail…",
+    "candidatesCount": "{{count}} candidatos",
+    "shownOf": "{{shown}} de {{total}} apresentados",
+    "notPlanned": "Não planeado",
+    "registered": "Registado",
+    "deregistered": "Cancelado",
+    "kpiPerMonth": "KPI: {{target}}/mês",
+    "atKpi": "✓ KPI",
+    "calcLabel": "Cálculo:",
+    "calcBody": "total de novos candidatos em {{year}} até {{month}} ({{total}}) dividido pelo número de meses ({{months}}) = {{avg}}/mês.",
+    "kpiGoal": "O objetivo de KPI é {{target}} por mês.",
+    "newThisMonth": "Novos este mês",
+    "avgPerMonthLabel": "Média /mês",
+    "kpiTargetLabel": "Objetivo de KPI /mês",
+    "perMonthYear": "Por mês: {{year}}",
+    "kpiGoalFoot": "Objetivo de KPI: {{target}} novos candidatos por mês",
+    "fields": {
+      "position": "Função",
+      "mobile": "Telemóvel",
+      "email": "E-mail",
+      "registered": "Registado",
+      "lastLogin": "Último início de sessão",
+      "plannedOn": "Planeado para",
+      "lastShift": "Último turno",
+      "shiftsWorked": "Turnos trabalhados",
+      "noShows": "Faltas"
+    },
+    "timesWorked": "trabalhou {{n}}×",
+    "lastLogin": "Último início de sessão",
+    "viewDetails": "Ir para a tabela de candidatos"
+  },
+  "messages": {
+    "title": "Detalhes: Mensagens",
+    "summary": "{{shown}} de {{total}} mensagens",
+    "search": "Pesquisar por nome, assunto, workflow…",
+    "loading": "A carregar mensagens…",
+    "empty": "Nenhuma mensagem encontrada",
+    "cols": {
+      "sent": "Enviado",
+      "recipient": "Destinatário",
+      "channel": "Canal",
+      "subject": "Assunto",
+      "status": "Estado",
+      "workflow": "Workflow"
+    },
+    "channel": {
+      "whatsapp": "WhatsApp",
+      "email": "E-mail",
+      "sms": "SMS"
+    },
+    "status": {
+      "sent": "Enviado",
+      "delivered": "Entregue",
+      "read": "Lido",
+      "failed": "Falhado",
+      "pending": "Em fila",
+      "bounced": "Devolvido"
+    },
+    "filters": {
+      "channel": "Canal",
+      "status": "Estado",
+      "workflow": "Workflow"
+    },
+    "drawer": {
+      "recipient": "Destinatário",
+      "name": "Nome",
+      "mobile": "Telemóvel",
+      "email": "E-mail",
+      "timeline": "Cronologia",
+      "sentAt": "Enviado em",
+      "deliveredAt": "Entregue em",
+      "readAt": "Lido em",
+      "workflow": "Workflow",
+      "template": "Template",
+      "body": "Conteúdo da mensagem",
+      "error": "Mensagem de erro",
+      "messageFallback": "Mensagem #{{id}}"
+    }
+  },
+  "runs": {
+    "title": "Detalhes: Execuções",
+    "summary": "{{shown}} de {{total}} execuções",
+    "search": "Pesquisar por workflow, trigger, erro…",
+    "loading": "A carregar execuções…",
+    "empty": "Nenhuma execução encontrada",
+    "editorTitle": "Execuções",
+    "editorEmpty": "Ainda não há execuções para este workflow",
+    "editorCount_one": "{{count}} execução",
+    "editorCount_other": "{{count}} execuções",
+    "cols": {
+      "started": "Iniciado",
+      "workflow": "Workflow",
+      "status": "Estado",
+      "candidates": "Candidatos",
+      "duration": "Duração",
+      "trigger": "Trigger",
+      "expand": "Expandir/colapsar linha"
+    },
+    "status": {
+      "success": "Concluído com sucesso",
+      "failed": "Falhou",
+      "running": "Em curso",
+      "pending": "Em fila",
+      "cancelled": "Cancelado",
+      "waiting": "A aguardar",
+      "skipped": "Ignorado"
+    },
+    "filters": {
+      "status": "Estado",
+      "workflow": "Workflow",
+      "range": "Período"
+    },
+    "drawer": {
+      "startedColon": "Iniciado:",
+      "candidates": "Candidatos",
+      "candidate": "Candidato",
+      "duration": "Duração",
+      "timeline": "Cronologia",
+      "started": "Iniciado",
+      "finished": "Concluído",
+      "trigger": "Trigger",
+      "createdBy": "Criado por",
+      "stepResults": "Resultados dos passos",
+      "step": "Passo {{n}}",
+      "input": "Input",
+      "output": "Output",
+      "noData": "Sem dados",
+      "error": "Mensagem de erro",
+      "workflowFallback": "Workflow #{{id}}",
+      "attempts": "Tentativa {{count}}",
+      "nextAttempt": "Próxima tentativa às {{time}}",
+      "runId": "ID da execução",
+      "copyId": "Clique para copiar o ID",
+      "processed": "Processado",
+      "lineage": "Origem",
+      "parentRunId": "ID da execução principal",
+      "childRuns": "Execuções derivadas"
+    },
+    "openHistory": "Ver no histórico",
+    "dryRun": {
+      "banner": "Execução de teste: passos de envio ignorados"
+    }
+  },
+  "messageDetail": "Detalhe da mensagem",
+  "locationsPage": {
+    "status": {
+      "active": "Ativo",
+      "inactive": "Inativo"
+    }
+  }
+}

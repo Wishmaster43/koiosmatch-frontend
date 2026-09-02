@@ -1,0 +1,276 @@
+{
+  "title": "Tarefas",
+  "loading": "A carregar tarefas…",
+  "empty": "Ainda não há tarefas.",
+  "error": "Não foi possível carregar as tarefas.",
+  "add": "Nova tarefa",
+  "bureau": "Agência",
+  "overdue": "Em atraso",
+  "view": {
+    "table": "Vista em lista",
+    "board": "Vista de quadro",
+    "archived": "Arquivadas"
+  },
+  "cols": {
+    "task": "Tarefa",
+    "referenceNumber": "N.º de referência",
+    "type": "Tipo",
+    "status": "Estado",
+    "priority": "Prioridade",
+    "links": "Ligação",
+    "assignee": "Atribuído a",
+    "due": "Data de vencimento",
+    "created": "Criado",
+    "team": "Departamento"
+  },
+  "kpi": {
+    "open": "Abertas",
+    "overdue": "Em atraso",
+    "dueToday": "Hoje",
+    "completed": "Concluídas"
+  },
+  "insights": {
+    "status": "Estado",
+    "priority": "Prioridade",
+    "type": "Tipo",
+    "clearFilter": "Limpar filtro"
+  },
+  "board": {
+    "empty": "Arraste tarefas para aqui"
+  },
+  "drawer": {
+    "label": "Tarefa",
+    "createdAt": "Criada a {{date}}",
+    "archivedBanner": {
+      "since": "Arquivada a {{date}}",
+      "flag": "Arquivada",
+      "restore": "Restaurar",
+      "restored": "Tarefa restaurada.",
+      "restoreFailed": "Falha ao restaurar. Tente novamente."
+    },
+    "markDone": "Marcar como concluída",
+    "tags": "Etiquetas",
+    "tabs": {
+      "details": "Detalhes",
+      "links": "Ligações",
+      "activity": "Atividade",
+      "extra": "Extra",
+      "notes": "Notas",
+      "related": "Relacionado",
+      "timeline": "Cronologia"
+    },
+    "lookupNotReady": "Ainda não é possível guardar. Esta opção ainda não está disponível. Tente novamente daqui a pouco."
+  },
+  "bulk": {
+    "selected": "{{count}} selecionada(s)",
+    "actions": "Ações em massa",
+    "deselect": "Anular seleção",
+    "changeStatus": "Alterar estado",
+    "changePriority": "Alterar prioridade",
+    "changeAssignee": "Atribuir a",
+    "searchStatus": "Pesquisar estado…",
+    "searchPriority": "Pesquisar prioridade…",
+    "searchAssignee": "Pesquisar utilizador…",
+    "noUsers": "Nenhum utilizador",
+    "archive": "Arquivar",
+    "done": "{{count}} tarefas atualizadas"
+  },
+  "details": {
+    "title": "Detalhes da tarefa",
+    "type": "Tipo de atividade",
+    "status": "Estado",
+    "priority": "Prioridade",
+    "due": "Data de vencimento",
+    "dueTime": "Hora",
+    "assignee": "Atribuído a",
+    "owner": "Criado por",
+    "description": "Descrição da tarefa",
+    "location": "Filial",
+    "locationPlaceholder": "Escolha uma filial",
+    "team": "Departamento",
+    "teamPlaceholder": "Escolha um departamento",
+    "subtasks": {
+      "title": "Subtarefas",
+      "loading": "A carregar subtarefas…",
+      "error": "Não foi possível carregar as subtarefas.",
+      "empty": "Ainda não há subtarefas.",
+      "parentLabel": "Tarefa principal",
+      "progressLabel": "{{done}}/{{total}} subtarefas concluídas",
+      "add": "Adicionar subtarefa",
+      "openFull": "Abrir como tarefa"
+    }
+  },
+  "comments": {
+    "send": "Publicar"
+  },
+  "links": {
+    "title": "Ligações",
+    "empty": "Ainda não há ligações.",
+    "add": "Adicionar ligação",
+    "selectEntity": "Selecionar…",
+    "remove": "Remover",
+    "candidate": "Candidato",
+    "application": "Candidatura",
+    "vacancy": "Vaga",
+    "match": "Match",
+    "customer": "Cliente",
+    "location": "Localização",
+    "customer_location": "Localização do cliente",
+    "department": "Departamento",
+    "contact": "Pessoa de contacto",
+    "workflow": "Workflow",
+    "open": "Abrir",
+    "loadError": "Não foi possível carregar os resultados.",
+    "linkType": "Tipo de ligação",
+    "opportunity": "Oportunidade",
+    "outreach_campaign": "Lista de chamadas",
+    "conversation": "Conversa",
+    "task": "Tarefa"
+  },
+  "modal": {
+    "title": "Nova tarefa",
+    "editTitle": "Editar tarefa",
+    "loadingTask": "A carregar tarefa…",
+    "type": "Tipo de atividade",
+    "typePlaceholder": "Escolha o tipo",
+    "titleLabel": "Título",
+    "titlePlaceholder": "Preencher",
+    "assignee": "Atribuir a",
+    "assigneePlaceholder": "Agência (ninguém)",
+    "status": "Estado",
+    "due": "Data de vencimento",
+    "dueTime": "Hora",
+    "priority": "Prioridade",
+    "description": "Descrição",
+    "descriptionPlaceholder": "Preencher",
+    "charsLeft": "Caracteres disponíveis: {{count}}",
+    "detailsTitle": "Detalhes da tarefa",
+    "owner": "Criado por",
+    "candidate": "Candidato",
+    "candidatePlaceholder": "Selecionar candidato",
+    "customer": "Cliente",
+    "customerPlaceholder": "Selecionar cliente",
+    "contact": "Pessoa de contacto",
+    "contactPlaceholder": "Selecionar pessoa de contacto",
+    "create": "Registar",
+    "save": "Guardar",
+    "saving": "A guardar…",
+    "cancel": "Cancelar",
+    "required": "Obrigatório",
+    "cardTask": "Tarefa",
+    "cardPlanning": "Planeamento",
+    "cardLink": "Ligação",
+    "cardAssignment": "Atribuição",
+    "duePlaceholder": "dd-mm-aaaa",
+    "otherLinks": "Outras ligações",
+    "assigneeUnassigned": "Agência (ninguém atribuído)",
+    "assigneeUnassignedHint": "Ninguém é responsável: a tarefa permanece na agência até um colega a assumir.",
+    "assigneeWithRole": "{{name}} · {{role}}",
+    "assigneeEmpty": "Ainda não há colegas para atribuir. Só é possível escolher a agência.",
+    "assigneeLoadError": "Não foi possível carregar os colegas.",
+    "team": "Departamento",
+    "teamPlaceholder": "Escolha um departamento",
+    "teamHint": "Onde a tarefa aguarda, por exemplo Backoffice. O departamento mantém-se assim que um colega assume a tarefa.",
+    "teamEmpty": "Ainda não há departamentos internos configurados.",
+    "teamLoadError": "Não foi possível carregar os departamentos internos.",
+    "addSubtaskTitle": "Nova subtarefa"
+  },
+  "page": {
+    "searchPlaceholder": "Pesquisar tarefa, descrição, comentário…"
+  },
+  "related": {
+    "title": "Tarefas deste candidato",
+    "open": "Abrir",
+    "history": "Histórico",
+    "empty": "Sem tarefas nesta vista.",
+    "loading": "A carregar tarefas…",
+    "error": "Não foi possível carregar as tarefas relacionadas.",
+    "titles": {
+      "candidate": "Tarefas deste candidato",
+      "customer": "Tarefas deste cliente",
+      "location": "Tarefas desta localização",
+      "department": "Tarefas deste departamento",
+      "contact": "Tarefas desta pessoa de contacto",
+      "assignee": "Tarefas deste recrutador"
+    },
+    "searchPlaceholder": "Pesquisar tarefas…",
+    "allStatuses": "Todos os estados"
+  },
+  "notes": {
+    "title": "Notas",
+    "type": "Tipo",
+    "new": "Nova nota",
+    "empty": "Ainda não há notas.",
+    "placeholder": "Escreva uma nota…",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "searchPlaceholder": "Pesquisar notas…",
+    "loading": "A carregar notas…",
+    "loadError": "Não foi possível carregar as notas.",
+    "edit": "Editar",
+    "deleteNote": "Eliminar nota",
+    "deleteConfirm": "Eliminar esta nota?"
+  },
+  "koios": {
+    "reasons": {
+      "overdue": "Esta tarefa está fora do prazo."
+    }
+  },
+  "ai": {
+    "title": "O Koios AI aconselha",
+    "beta": "Beta",
+    "refresh": "Atualizar",
+    "analyzing": "O Koios AI está a analisar esta tarefa…",
+    "dueLabel": "Prazo",
+    "dueUnset": "Ainda não foi definida uma data de vencimento para esta tarefa.",
+    "dueToday": "Esta tarefa vence hoje.",
+    "dueOverdue": "Esta tarefa está {{count}} dia(s) em atraso.",
+    "dueUpcoming": "Esta tarefa vence dentro de {{count}} dia(s).",
+    "assigneeLabel": "Atribuição",
+    "unassigned": "Esta tarefa ainda está com a Agência. Ainda não atribuída a um colaborador específico.",
+    "assignedTo": "Atribuída a {{name}}.",
+    "linksLabel": "Ligação",
+    "noLinks": "Esta tarefa não está ligada a nenhum registo. Ligue um candidato, cliente ou outro registo para dar contexto.",
+    "linked": "Associado a {{count}} registo(s)."
+  },
+  "filters": {
+    "team": "Equipa",
+    "linkedEntity": "Entidade associada",
+    "deadlineRange": "Período do prazo",
+    "archived": "Arquivado",
+    "categories": {
+      "work": "Trabalho",
+      "organisation": "Organização",
+      "display": "Visualização"
+    }
+  },
+  "popout": {
+    "textWindowTitle": "Descrição da tarefa: {{name}}",
+    "loadError": "Não foi possível carregar esta tarefa."
+  },
+  "changelog": {
+    "loading": "A carregar histórico…",
+    "error": "Não foi possível carregar o registo de alterações.",
+    "empty": "Ainda não há alterações registadas.",
+    "system": "Sistema",
+    "emptyValue": "Vazio",
+    "updatedValue": "atualizado",
+    "fields": {
+      "title": "Título",
+      "description": "Descrição",
+      "status": "Estado",
+      "priority": "Prioridade",
+      "due_date": "Prazo",
+      "assignee_id": "Responsável"
+    },
+    "actions": {
+      "updated": "Atualizado",
+      "created": "Criado",
+      "deleted": "Arquivado",
+      "restored": "Restaurado"
+    }
+  },
+  "cellLinks": {
+    "openLink": "Abrir registo associado"
+  }
+}

@@ -1,0 +1,149 @@
+{
+  "title": "Koios AI",
+  "subtitle": "Modelos, estado de ligação e tarifas para o assistente Koios.",
+  "loading": "A carregar…",
+  "loadError": "Não foi possível carregar as definições do Koios.",
+  "unavailable": "O Koios não está disponível para esta organização.",
+  "status": {
+    "title": "Estado",
+    "connection": "Ligação",
+    "connected": "Ligado",
+    "notConnected": "Não ligado",
+    "policy": "Política carregada",
+    "loaded": "Carregado",
+    "notLoaded": "Não carregado",
+    "live": "Verificação em direto",
+    "liveOk": "A funcionar",
+    "liveBad": "A falhar"
+  },
+  "models": {
+    "title": "Modelos",
+    "active": "Modelo ativo",
+    "selectable": "Modelos selecionáveis",
+    "pickHint": "Escolha o nível de IA para a sua agência.",
+    "tier": {
+      "fast": "Rápido",
+      "smart": "Inteligente",
+      "max": "Máximo"
+    },
+    "tierDesc": {
+      "fast": "Maior volume, tarifa mais baixa. Ótimo para trabalho de rotina.",
+      "smart": "O padrão: boa qualidade a uma tarifa média.",
+      "max": "Melhor qualidade para o trabalho mais difícil. Tarifa mais elevada."
+    },
+    "saveError": "Não foi possível alterar o modelo. Tente novamente.",
+    "unknownTier": "Modelo desconhecido",
+    "activeUnknown": "Nenhum nível ativo conhecido. Escolha um nível abaixo.",
+    "tierHint": {
+      "snel": "Maior volume, tarifa mais baixa. Ótimo para trabalho de rotina.",
+      "slim": "O padrão: boa qualidade a uma tarifa média.",
+      "max": "Melhor qualidade para o trabalho mais difícil. Tarifa mais elevada."
+    }
+  },
+  "voice": {
+    "start": "Dite a sua mensagem",
+    "stop": "Parar de ouvir",
+    "denied": "Microfone recusado. Permita o acesso no seu navegador",
+    "insecureContext": "O ditado requer uma ligação segura (https). Indisponível nesta página",
+    "errorServiceNotAllowed": "O reconhecimento de voz foi bloqueado pelo navegador. Serviço não permitido",
+    "errorAudioCapture": "Nenhum microfone encontrado. Verifique o seu dispositivo",
+    "errorNetwork": "Erro de rede durante o reconhecimento de voz. Tente novamente",
+    "errorGeneric": "O reconhecimento de voz falhou. Tente novamente"
+  },
+  "tabs": {
+    "overview": "Visão geral",
+    "learning": "Relatório de aprendizagem",
+    "capabilities": "Matriz de ferramentas",
+    "feedback": "Feedback"
+  },
+  "learning": {
+    "loading": "A carregar relatório…",
+    "loadError": "Não foi possível carregar o relatório de aprendizagem.",
+    "retry": "Tentar novamente",
+    "topQuestions": "Perguntas mais frequentes",
+    "noQuestions": "Ainda não há perguntas registadas neste período.",
+    "failureReasons": "Motivos de falha",
+    "noFailures": "Nenhuma falha registada neste período.",
+    "failureRefusal": "Recusado",
+    "failureBudget": "Limite de orçamento",
+    "failureToolError": "Erro de ferramenta",
+    "failureNoResult": "Sem resultado",
+    "deniedNotTracked": "Os pedidos de ferramentas recusados ainda não são registados separadamente.",
+    "feedback": "Feedback",
+    "noFeedback": "Ainda não há feedback neste período.",
+    "downPct": "{{pct}} das respostas recebeu um voto negativo.",
+    "suggestions": "Sugestões",
+    "noSuggestions": "Sem sugestões para este período."
+  },
+  "capabilities": {
+    "title": "Matriz de ferramentas",
+    "subtitle": "Que ferramentas o Koios pode usar para a sua organização.",
+    "loading": "A carregar matriz de ferramentas…",
+    "loadError": "Não foi possível carregar a matriz de ferramentas.",
+    "empty": "Ainda não há ferramentas disponíveis.",
+    "confirmRequired": "Confirmação necessária",
+    "disabledForMe": "Desativado para si",
+    "connectionNeeded": "Ligação necessária",
+    "connectionSectionMissing": "Este ecrã de definições de ligação ainda não está disponível.",
+    "resetToDefault": "Padrão",
+    "toggleAria": "Ativar ou desativar {{label}}",
+    "otherGroup": "Outros",
+    "saveError": "Não foi possível guardar a definição da ferramenta.",
+    "showMore": "Mais",
+    "showLess": "Menos",
+    "groups": {
+      "candidates": "Candidatos",
+      "vacancies": "Vagas",
+      "applications": "Candidaturas",
+      "customers": "Clientes",
+      "matches": "Matches",
+      "tasks": "Tarefas",
+      "calllists": "Listas de chamadas",
+      "notes": "Notas",
+      "reports": "Relatórios",
+      "appointments": "Marcações",
+      "workflows": "Workflows",
+      "opportunities": "Oportunidades",
+      "departments": "Departamentos",
+      "locations": "Localizações",
+      "contacts": "Pessoas de contacto",
+      "whatsapp": "WhatsApp",
+      "shiftmanager": "ShiftManager",
+      "helloflex": "HelloFlex",
+      "pdok": "PDOK",
+      "other": "Outros"
+    },
+    "kindRead": "Ler",
+    "kindWrite": "Editar",
+    "searchPlaceholder": "Pesquisar uma ferramenta…",
+    "noResults": "Nenhuma ferramenta encontrada."
+  },
+  "feedbackAdmin": {
+    "summaryTitle": "Resumo do feedback",
+    "total": "Total",
+    "downPct": "Voto negativo",
+    "listTitle": "Feedback",
+    "loading": "A carregar feedback…",
+    "loadError": "Não foi possível carregar o resumo de feedback.",
+    "retry": "Tentar novamente",
+    "empty": "Ainda não há feedback registado.",
+    "noComment": "Não foi deixado nenhum comentário.",
+    "surfaces": {
+      "chat": "Chat",
+      "note_assist": "Assistente de notas",
+      "generate": "Gerar",
+      "conversation_assist": "Assistente de conversa",
+      "report_advice": "Aconselhamento de relatórios"
+    }
+  },
+  "modeDefault": {
+    "title": "Modo predefinido do Koios",
+    "desc": "A predefinição da agência para Wizard/Auto; os utilizadores podem divergir disto no seu próprio perfil.",
+    "wizard": "Wizard (confirmar cada ação)",
+    "auto": "Auto (executar imediatamente)",
+    "autoMessages": "Enviar mensagens diretamente no modo Auto",
+    "deviationHint": "Os utilizadores podem definir isto de forma diferente no seu próprio perfil.",
+    "noPermission": "Não tem permissão para alterar isto.",
+    "saveError": "Não foi possível guardar."
+  }
+}

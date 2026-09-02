@@ -1,0 +1,215 @@
+{
+  "title": "Liste di chiamate",
+  "new": "Nuova lista di chiamate",
+  "empty": "Ancora nessuna lista di chiamate.",
+  "loadError": "Caricamento delle liste di chiamate non riuscito.",
+  "retry": "Riprova",
+  "count_one": "{{count}} lista di chiamate",
+  "count_other": "{{count}} liste di chiamate",
+  "col": {
+    "name": "Nome",
+    "channel": "Canale",
+    "status": "Stato",
+    "targets": "Obiettivi",
+    "owner": "Responsabile",
+    "created": "Creata il"
+  },
+  "channel": {
+    "call": "Chiamata",
+    "email": "E-mail",
+    "whatsapp": "WhatsApp"
+  },
+  "status": {
+    "draft": "Bozza",
+    "active": "Attiva",
+    "done": "Conclusa"
+  },
+  "view": {
+    "table": "Tabella",
+    "board": "Board",
+    "archived": "Archiviate"
+  },
+  "board": {
+    "empty": "Vuoto"
+  },
+  "archivedEmpty": "Nessuna lista di chiamate archiviata.",
+  "moveError": "Spostamento non riuscito.",
+  "insights": {
+    "status": "Stato",
+    "channel": "Canale",
+    "clearFilter": "Rimuovi filtro"
+  },
+  "kpi": {
+    "total": "Totale",
+    "totalSub": "tutte le liste di chiamate",
+    "active": "Attive",
+    "activeSub": "liste di chiamate in corso",
+    "targets": "Obiettivi",
+    "targetsSub": "totale candidati"
+  },
+  "bulk": {
+    "selected": "{{count}} selezionati",
+    "actions": "Azioni di massa",
+    "deselect": "Deseleziona",
+    "changeStatus": "Cambia stato",
+    "searchStatus": "Cerca uno stato…",
+    "archive": "Archivia",
+    "done": "{{count}} aggiornati",
+    "mutateError": "Azione non riuscita. Riprova.",
+    "archiveError": "Archiviazione non riuscita."
+  },
+  "create": {
+    "title": "Nuova lista di chiamate",
+    "generalCard": "Generale",
+    "sourceCard": "Origine",
+    "name": "Nome",
+    "namePlaceholder": "Es. Lista di chiamate assistenti disponibili",
+    "channel": "Canale",
+    "pool": "Pool di origine (opzionale)",
+    "poolNone": "Nessuno, compila più tardi",
+    "poolHint": "Scegli un pool di talenti per popolare subito la lista di chiamate con dei candidati.",
+    "submit": "Crea lista di chiamate",
+    "saving": "Creazione…",
+    "error": "Creazione non riuscita. Riprova."
+  },
+  "page": {
+    "searchPlaceholder": "Cerca lista di chiamate, pool o candidato…"
+  },
+  "drawer": {
+    "label": "Lista di chiamate",
+    "createdAt": "Creata il {{date}}",
+    "archivedBanner": {
+      "since": "Archiviata il {{date}}",
+      "flag": "Archiviata",
+      "restore": "Ripristina",
+      "restored": "Lista di chiamate ripristinata.",
+      "restoreFailed": "Ripristino non riuscito. Riprova."
+    },
+    "tabs": {
+      "targets": "Lista di chiamate",
+      "extra": "Extra",
+      "stats": "Statistiche",
+      "timeline": "Cronologia"
+    },
+    "loading": "Caricamento…",
+    "error": "Caricamento della lista di chiamate non riuscito.",
+    "empty": "Ancora nessun candidato in questa lista.",
+    "progress": "{{done}} di {{total}} gestiti",
+    "target": {
+      "todo": "Da fare",
+      "contacted": "Contattato",
+      "answered": "Risposto",
+      "skipped": "Saltato"
+    },
+    "action": {
+      "contacted": "Segna come contattato",
+      "answered": "Segna come risposto",
+      "skipped": "Salta",
+      "reset": "Torna a da fare",
+      "newTask": "Nuova attività",
+      "makeMatch": "Crea match",
+      "openCandidate": "Apri candidato"
+    },
+    "outcomeLabel": "Esito",
+    "matchPick": "Scegli una posizione…",
+    "matchConfirm": "Crea match",
+    "matchCreated": "Match creato.",
+    "matchFailed": "Creazione del match non riuscita.",
+    "owner": "Responsabile",
+    "selectOwner": "Scegli responsabile",
+    "stats": {
+      "error": "Caricamento delle statistiche non riuscito.",
+      "byStatus": "Stato",
+      "byOutcome": "Esito",
+      "byAssignee": "Assegnato a",
+      "total": "Totale",
+      "reached": "Raggiunti",
+      "axis": {
+        "status": "stato",
+        "outcome": "esito",
+        "assignee": "assegnato a"
+      },
+      "filteredBy": "Filtrato per {{axis}}: {{value}}",
+      "noMatches": "Nessun candidato soddisfa questo filtro."
+    },
+    "note": {
+      "empty": "Ancora nessuna nota.",
+      "placeholder": "Aggiungi una nota…",
+      "saveFailed": "Salvataggio della nota non riuscito.",
+      "title": "Nota",
+      "windowTitle": "Nota, {{name}}"
+    },
+    "assign": {
+      "button": "Assegna",
+      "selected": "{{count}} selezionati",
+      "confirm": "Conferma assegnazione",
+      "resultPartial": "{{updated}} assegnati, {{skipped}} saltati",
+      "resultAll": "{{count}} assegnati",
+      "failed": "Assegnazione non riuscita. Riprova.",
+      "assignedTo": "Assegnato a {{name}}",
+      "axisLabel": "Assegna a",
+      "axis": {
+        "person": "Persona",
+        "team": "Team",
+        "role": "Ruolo"
+      },
+      "pickPerson": "Scegli un collega…",
+      "pickTeam": "Scegli un team…",
+      "pickRole": "Scegli un ruolo…",
+      "roleModeLabel": "Assegnazione per ruolo",
+      "roleMode": {
+        "all": "Tutti quelli con questo ruolo",
+        "one": "Una persona con questo ruolo"
+      },
+      "assignAllMatching": "Assegna tutti in questa selezione ({{count}})"
+    }
+  },
+  "changelog": {
+    "loading": "Caricamento…",
+    "error": "Caricamento del registro modifiche non riuscito.",
+    "empty": "Ancora nessuna modifica.",
+    "system": "Sistema",
+    "emptyValue": "Vuoto",
+    "updatedValue": "aggiornato",
+    "actions": {
+      "created": "Creata",
+      "updated": "Aggiornata",
+      "deleted": "Archiviata",
+      "restored": "Ripristinata"
+    },
+    "fields": {
+      "name": "Nome",
+      "channel": "Canale",
+      "status": "Stato",
+      "source_pool_id": "Pool di origine",
+      "owner_id": "Responsabile",
+      "created_by": "Creata da",
+      "custom_fields": "Campi personalizzati",
+      "reference_number": "Numero"
+    }
+  },
+  "koios": {
+    "reasons": {
+      "noTargets": "Questa lista di chiamate attiva non ha ancora contatti caricati.",
+      "staleDraft": "Questa bozza ha contatti caricati ma non è mai stata attivata."
+    }
+  },
+  "filters": {
+    "owner": "Responsabile",
+    "targetGroup": "Gruppo target",
+    "archived": "Archiviate",
+    "categories": {
+      "campaign": "Campagna",
+      "organisation": "Organizzazione",
+      "display": "Visualizzazione"
+    }
+  },
+  "lookupSeeds": {
+    "outcomes": {
+      "no_answer": "Nessuna risposta",
+      "callback": "Richiamare",
+      "not_interested": "Non interessato",
+      "interested": "Interessato"
+    }
+  }
+}

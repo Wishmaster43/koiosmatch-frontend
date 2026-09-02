@@ -1,0 +1,149 @@
+{
+  "title": "Koios AI",
+  "subtitle": "Modelli, stato della connessione e tariffe per l'assistente Koios.",
+  "loading": "Caricamento…",
+  "loadError": "Impossibile caricare le impostazioni di Koios.",
+  "unavailable": "Koios non è disponibile per questa organizzazione.",
+  "status": {
+    "title": "Stato",
+    "connection": "Connessione",
+    "connected": "Connesso",
+    "notConnected": "Non collegato",
+    "policy": "Policy caricata",
+    "loaded": "Caricato",
+    "notLoaded": "Non caricato",
+    "live": "Verifica live",
+    "liveOk": "Funziona",
+    "liveBad": "Non funziona"
+  },
+  "models": {
+    "title": "Modelli",
+    "active": "Modello attivo",
+    "selectable": "Modelli selezionabili",
+    "pickHint": "Scegli il livello AI per la tua agenzia.",
+    "tier": {
+      "fast": "Veloce",
+      "smart": "Smart",
+      "max": "Max"
+    },
+    "tierDesc": {
+      "fast": "Volume più alto, tariffa più bassa. Ottimo per il lavoro di routine.",
+      "smart": "Lo standard: qualità solida a una tariffa media.",
+      "max": "Migliore qualità per il lavoro più difficile. Tariffa più alta."
+    },
+    "saveError": "La modifica del modello non è riuscita. Riprova.",
+    "unknownTier": "Modello sconosciuto",
+    "activeUnknown": "Nessun livello attivo noto. Scegline uno qui sotto.",
+    "tierHint": {
+      "snel": "Volume più alto, tariffa più bassa. Ottimo per il lavoro di routine.",
+      "slim": "Lo standard: qualità solida a una tariffa media.",
+      "max": "Migliore qualità per il lavoro più difficile. Tariffa più alta."
+    }
+  },
+  "voice": {
+    "start": "Detta il tuo messaggio",
+    "stop": "Interrompi l'ascolto",
+    "denied": "Microfono negato. Consenti l'accesso nel tuo browser",
+    "insecureContext": "La dettatura richiede una connessione sicura (https). Non disponibile in questa pagina",
+    "errorServiceNotAllowed": "Il riconoscimento vocale è stato bloccato dal browser. Servizio non consentito",
+    "errorAudioCapture": "Nessun microfono trovato. Controlla il tuo dispositivo",
+    "errorNetwork": "Errore di rete durante il riconoscimento vocale. Riprova",
+    "errorGeneric": "Il riconoscimento vocale non è riuscito. Riprova"
+  },
+  "tabs": {
+    "overview": "Panoramica",
+    "learning": "Report di apprendimento",
+    "capabilities": "Matrice strumenti",
+    "feedback": "Feedback"
+  },
+  "learning": {
+    "loading": "Caricamento report…",
+    "loadError": "Il report di apprendimento non è stato caricato.",
+    "retry": "Riprova",
+    "topQuestions": "Domande più frequenti",
+    "noQuestions": "Nessuna domanda registrata in questo periodo.",
+    "failureReasons": "Motivi di fallimento",
+    "noFailures": "Nessun fallimento registrato in questo periodo.",
+    "failureRefusal": "Rifiutato",
+    "failureBudget": "Limite di budget",
+    "failureToolError": "Errore dello strumento",
+    "failureNoResult": "Nessun risultato",
+    "deniedNotTracked": "Le richieste di strumenti rifiutate non sono ancora tracciate separatamente.",
+    "feedback": "Feedback",
+    "noFeedback": "Nessun feedback ancora in questo periodo.",
+    "downPct": "{{pct}} delle risposte ha ricevuto un pollice verso il basso.",
+    "suggestions": "Suggerimenti",
+    "noSuggestions": "Nessun suggerimento per questo periodo."
+  },
+  "capabilities": {
+    "title": "Matrice strumenti",
+    "subtitle": "Quali strumenti Koios può usare per la tua organizzazione.",
+    "loading": "Caricamento matrice strumenti…",
+    "loadError": "La matrice strumenti non è stata caricata.",
+    "empty": "Non ci sono ancora strumenti disponibili.",
+    "confirmRequired": "Conferma richiesta",
+    "disabledForMe": "Disattivato per te",
+    "connectionNeeded": "Collegamento necessario",
+    "connectionSectionMissing": "La schermata di impostazioni di questo collegamento non è ancora disponibile.",
+    "resetToDefault": "Predefinito",
+    "toggleAria": "Attiva o disattiva {{label}}",
+    "otherGroup": "Altro",
+    "saveError": "Il salvataggio dell'impostazione dello strumento non è riuscito.",
+    "showMore": "Altro",
+    "showLess": "Meno",
+    "groups": {
+      "candidates": "Candidati",
+      "vacancies": "Posizioni",
+      "applications": "Candidature",
+      "customers": "Clienti",
+      "matches": "Match",
+      "tasks": "Attività",
+      "calllists": "Liste di chiamate",
+      "notes": "Note",
+      "reports": "Report",
+      "appointments": "Appuntamenti",
+      "workflows": "Workflow",
+      "opportunities": "Opportunità",
+      "departments": "Reparti",
+      "locations": "Sedi",
+      "contacts": "Referenti",
+      "whatsapp": "WhatsApp",
+      "shiftmanager": "ShiftManager",
+      "helloflex": "HelloFlex",
+      "pdok": "PDOK",
+      "other": "Altro"
+    },
+    "kindRead": "Lettura",
+    "kindWrite": "Modifica",
+    "searchPlaceholder": "Cerca uno strumento…",
+    "noResults": "Nessuno strumento trovato."
+  },
+  "feedbackAdmin": {
+    "summaryTitle": "Riepilogo feedback",
+    "total": "Totale",
+    "downPct": "Pollice verso il basso",
+    "listTitle": "Feedback",
+    "loading": "Caricamento feedback…",
+    "loadError": "La panoramica del feedback non è stata caricata.",
+    "retry": "Riprova",
+    "empty": "Nessun feedback ancora registrato.",
+    "noComment": "Nessun commento lasciato.",
+    "surfaces": {
+      "chat": "Chat",
+      "note_assist": "Assistente note",
+      "generate": "Generazione",
+      "conversation_assist": "Assistente conversazioni",
+      "report_advice": "Consigli sui report"
+    }
+  },
+  "modeDefault": {
+    "title": "Modalità predefinita Koios",
+    "desc": "Lo standard a livello di agenzia per Wizard/Auto; gli utenti possono discostarsene nel proprio profilo.",
+    "wizard": "Wizard (conferma ogni azione)",
+    "auto": "Auto (esegui subito)",
+    "autoMessages": "Invia i messaggi subito in Auto",
+    "deviationHint": "Gli utenti possono impostarlo diversamente nel proprio profilo.",
+    "noPermission": "Non hai i permessi per modificare questo.",
+    "saveError": "Il salvataggio non è riuscito."
+  }
+}

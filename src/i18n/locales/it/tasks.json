@@ -1,0 +1,276 @@
+{
+  "title": "Attività",
+  "loading": "Caricamento attività…",
+  "empty": "Nessuna attività ancora.",
+  "error": "Impossibile caricare le attività.",
+  "add": "Nuova attività",
+  "bureau": "Agenzia",
+  "overdue": "In ritardo",
+  "view": {
+    "table": "Vista elenco",
+    "board": "Vista bacheca",
+    "archived": "Archiviate"
+  },
+  "cols": {
+    "task": "Attività",
+    "referenceNumber": "N. riferimento",
+    "type": "Tipo",
+    "status": "Stato",
+    "priority": "Priorità",
+    "links": "Collegamento",
+    "assignee": "Assegnato a",
+    "due": "Data di scadenza",
+    "created": "Creato il",
+    "team": "Reparto"
+  },
+  "kpi": {
+    "open": "Aperte",
+    "overdue": "In ritardo",
+    "dueToday": "Scadenza oggi",
+    "completed": "Completate"
+  },
+  "insights": {
+    "status": "Stato",
+    "priority": "Priorità",
+    "type": "Tipo",
+    "clearFilter": "Cancella filtro"
+  },
+  "board": {
+    "empty": "Trascina qui le attività"
+  },
+  "drawer": {
+    "label": "Attività",
+    "createdAt": "Creata il {{date}}",
+    "archivedBanner": {
+      "since": "Archiviata il {{date}}",
+      "flag": "Archiviata",
+      "restore": "Ripristina",
+      "restored": "Attività ripristinata.",
+      "restoreFailed": "Ripristino non riuscito. Riprova."
+    },
+    "markDone": "Segna come completata",
+    "tags": "Tag",
+    "tabs": {
+      "details": "Dettagli",
+      "links": "Collegamenti",
+      "activity": "Attività",
+      "extra": "Extra",
+      "notes": "Note",
+      "related": "Correlati",
+      "timeline": "Cronologia"
+    },
+    "lookupNotReady": "Non ancora salvabile. Questa opzione non è ancora disponibile. Riprova tra poco."
+  },
+  "bulk": {
+    "selected": "{{count}} selezionati",
+    "actions": "Azioni di massa",
+    "deselect": "Deseleziona",
+    "changeStatus": "Cambia stato",
+    "changePriority": "Cambia priorità",
+    "changeAssignee": "Assegna a",
+    "searchStatus": "Cerca stato…",
+    "searchPriority": "Cerca priorità…",
+    "searchAssignee": "Cerca utente…",
+    "noUsers": "Nessun utente",
+    "archive": "Archivia",
+    "done": "{{count}} attività aggiornate"
+  },
+  "details": {
+    "title": "Dettagli attività",
+    "type": "Tipo di attività",
+    "status": "Stato",
+    "priority": "Priorità",
+    "due": "Data di scadenza",
+    "dueTime": "Ora",
+    "assignee": "Assegnato a",
+    "owner": "Creato da",
+    "description": "Descrizione attività",
+    "location": "Sede",
+    "locationPlaceholder": "Scegli una sede",
+    "team": "Reparto",
+    "teamPlaceholder": "Scegli un reparto",
+    "subtasks": {
+      "title": "Sottoattività",
+      "loading": "Caricamento sottoattività…",
+      "error": "Impossibile caricare le sottoattività.",
+      "empty": "Nessuna sottoattività ancora.",
+      "parentLabel": "Attività principale",
+      "progressLabel": "{{done}}/{{total}} sottoattività completate",
+      "add": "Aggiungi sottoattività",
+      "openFull": "Apri come attività"
+    }
+  },
+  "comments": {
+    "send": "Pubblica"
+  },
+  "links": {
+    "title": "Collegamenti",
+    "empty": "Nessun collegamento ancora.",
+    "add": "Aggiungi collegamento",
+    "selectEntity": "Seleziona…",
+    "remove": "Rimuovi",
+    "candidate": "Candidato",
+    "application": "Candidatura",
+    "vacancy": "Posizione",
+    "match": "Match",
+    "customer": "Cliente",
+    "location": "Posizione",
+    "customer_location": "Sede del cliente",
+    "department": "Reparto",
+    "contact": "Referente",
+    "workflow": "Workflow",
+    "open": "Apri",
+    "loadError": "Impossibile caricare i risultati.",
+    "linkType": "Tipo di collegamento",
+    "opportunity": "Opportunità",
+    "outreach_campaign": "Lista di chiamate",
+    "conversation": "Conversazione",
+    "task": "Attività"
+  },
+  "modal": {
+    "title": "Nuova attività",
+    "editTitle": "Modifica attività",
+    "loadingTask": "Caricamento attività…",
+    "type": "Tipo di attività",
+    "typePlaceholder": "Scegli tipo",
+    "titleLabel": "Titolo",
+    "titlePlaceholder": "Inserisci…",
+    "assignee": "Assegna a",
+    "assigneePlaceholder": "Agenzia (nessuno)",
+    "status": "Stato",
+    "due": "Data di scadenza",
+    "dueTime": "Ora",
+    "priority": "Priorità",
+    "description": "Descrizione",
+    "descriptionPlaceholder": "Inserisci…",
+    "charsLeft": "Caratteri disponibili: {{count}}",
+    "detailsTitle": "Dettagli attività",
+    "owner": "Creato da",
+    "candidate": "Candidato",
+    "candidatePlaceholder": "Seleziona candidato",
+    "customer": "Cliente",
+    "customerPlaceholder": "Seleziona cliente",
+    "contact": "Referente",
+    "contactPlaceholder": "Seleziona referente",
+    "create": "Crea",
+    "save": "Salva",
+    "saving": "Salvataggio…",
+    "cancel": "Annulla",
+    "required": "Obbligatorio",
+    "cardTask": "Attività",
+    "cardPlanning": "Pianificazione",
+    "cardLink": "Collegamento",
+    "cardAssignment": "Assegnazione",
+    "duePlaceholder": "gg-mm-aaaa",
+    "otherLinks": "Altri collegamenti",
+    "assigneeUnassigned": "Agenzia (nessuno assegnato)",
+    "assigneeUnassignedHint": "Nessuno è responsabile: l'attività resta all'agenzia finché un collega non la prende in carico.",
+    "assigneeWithRole": "{{name}} · {{role}}",
+    "assigneeEmpty": "Ancora nessun collega a cui assegnare. Puoi scegliere solo l'agenzia.",
+    "assigneeLoadError": "Impossibile caricare i colleghi.",
+    "team": "Reparto",
+    "teamPlaceholder": "Scegli un reparto",
+    "teamHint": "Dove l'attività è in attesa, ad esempio Backoffice. Il reparto resta invariato quando un collega prende in carico l'attività.",
+    "teamEmpty": "Non sono ancora stati impostati reparti interni.",
+    "teamLoadError": "Impossibile caricare i reparti interni.",
+    "addSubtaskTitle": "Nuova sottoattività"
+  },
+  "page": {
+    "searchPlaceholder": "Cerca attività, descrizione, commento…"
+  },
+  "related": {
+    "title": "Attività di questo candidato",
+    "open": "Aperte",
+    "history": "Storico",
+    "empty": "Nessuna attività in questa vista.",
+    "loading": "Caricamento attività…",
+    "error": "Impossibile caricare le attività correlate.",
+    "titles": {
+      "candidate": "Attività di questo candidato",
+      "customer": "Attività di questo cliente",
+      "location": "Attività di questa sede",
+      "department": "Attività di questo reparto",
+      "contact": "Attività di questo referente",
+      "assignee": "Attività di questo recruiter"
+    },
+    "searchPlaceholder": "Cerca nelle attività…",
+    "allStatuses": "Tutti gli stati"
+  },
+  "notes": {
+    "title": "Note",
+    "type": "Tipo",
+    "new": "Nuova nota",
+    "empty": "Nessuna nota ancora.",
+    "placeholder": "Scrivi una nota…",
+    "save": "Salva",
+    "cancel": "Annulla",
+    "searchPlaceholder": "Cerca note…",
+    "loading": "Caricamento note…",
+    "loadError": "Impossibile caricare le note.",
+    "edit": "Modifica",
+    "deleteNote": "Elimina nota",
+    "deleteConfirm": "Eliminare questa nota?"
+  },
+  "koios": {
+    "reasons": {
+      "overdue": "Questa attività ha superato la scadenza."
+    }
+  },
+  "ai": {
+    "title": "Koios AI consiglia",
+    "beta": "Beta",
+    "refresh": "Aggiorna",
+    "analyzing": "Koios AI sta analizzando questa attività…",
+    "dueLabel": "Scadenza",
+    "dueUnset": "Non è ancora stata impostata una data di scadenza per questa attività.",
+    "dueToday": "Questa attività scade oggi.",
+    "dueOverdue": "Questa attività è in ritardo di {{count}} giorno/i.",
+    "dueUpcoming": "Questa attività scade tra {{count}} giorno/i.",
+    "assigneeLabel": "Assegnazione",
+    "unassigned": "Questa attività è ancora presso l'Agenzia. Non ancora assegnata a un collaboratore specifico.",
+    "assignedTo": "Assegnata a {{name}}.",
+    "linksLabel": "Collegamento",
+    "noLinks": "Questa attività non è collegata a nessun record. Collega un candidato, un cliente o un altro record per il contesto.",
+    "linked": "Collegato a {{count}} record."
+  },
+  "filters": {
+    "team": "Team",
+    "linkedEntity": "Entità collegata",
+    "deadlineRange": "Periodo scadenza",
+    "archived": "Archiviato",
+    "categories": {
+      "work": "Lavoro",
+      "organisation": "Organizzazione",
+      "display": "Visualizzazione"
+    }
+  },
+  "popout": {
+    "textWindowTitle": "Descrizione attività: {{name}}",
+    "loadError": "Non è stato possibile caricare questa attività."
+  },
+  "changelog": {
+    "loading": "Caricamento cronologia…",
+    "error": "Impossibile caricare il registro delle modifiche.",
+    "empty": "Nessuna modifica registrata finora.",
+    "system": "Sistema",
+    "emptyValue": "Vuoto",
+    "updatedValue": "aggiornato",
+    "fields": {
+      "title": "Titolo",
+      "description": "Descrizione",
+      "status": "Stato",
+      "priority": "Priorità",
+      "due_date": "Scadenza",
+      "assignee_id": "Assegnatario"
+    },
+    "actions": {
+      "updated": "Aggiornato",
+      "created": "Creato",
+      "deleted": "Archiviato",
+      "restored": "Ripristinato"
+    }
+  },
+  "cellLinks": {
+    "openLink": "Apri record collegato"
+  }
+}

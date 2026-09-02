@@ -1,0 +1,215 @@
+{
+  "title": "Listas de chamadas",
+  "new": "Nova lista de chamadas",
+  "empty": "Ainda não há listas de chamadas.",
+  "loadError": "Falha ao carregar as listas de chamadas.",
+  "retry": "Tentar novamente",
+  "count_one": "{{count}} lista de chamadas",
+  "count_other": "{{count}} listas de chamadas",
+  "col": {
+    "name": "Nome",
+    "channel": "Canal",
+    "status": "Estado",
+    "targets": "Alvos",
+    "owner": "Responsável",
+    "created": "Criado"
+  },
+  "channel": {
+    "call": "Chamada",
+    "email": "E-mail",
+    "whatsapp": "WhatsApp"
+  },
+  "status": {
+    "draft": "Rascunho",
+    "active": "Ativo",
+    "done": "Concluído"
+  },
+  "view": {
+    "table": "Tabela",
+    "board": "Quadro",
+    "archived": "Arquivado"
+  },
+  "board": {
+    "empty": "Vazio"
+  },
+  "archivedEmpty": "Não há listas de chamadas arquivadas.",
+  "moveError": "Falha ao mover.",
+  "insights": {
+    "status": "Estado",
+    "channel": "Canal",
+    "clearFilter": "Limpar filtro"
+  },
+  "kpi": {
+    "total": "Total",
+    "totalSub": "todas as listas de chamadas",
+    "active": "Ativo",
+    "activeSub": "listas de chamadas em curso",
+    "targets": "Alvos",
+    "targetsSub": "total de candidatos"
+  },
+  "bulk": {
+    "selected": "{{count}} selecionado(s)",
+    "actions": "Ações em massa",
+    "deselect": "Anular seleção",
+    "changeStatus": "Alterar estado",
+    "searchStatus": "Pesquisar um estado…",
+    "archive": "Arquivar",
+    "done": "{{count}} atualizado(s)",
+    "mutateError": "Ação falhou. Tente novamente.",
+    "archiveError": "Falha ao arquivar."
+  },
+  "create": {
+    "title": "Nova lista de chamadas",
+    "generalCard": "Geral",
+    "sourceCard": "Origem",
+    "name": "Nome",
+    "namePlaceholder": "Por exemplo, Lista de chamadas cuidadores disponíveis",
+    "channel": "Canal",
+    "pool": "Pool de origem (opcional)",
+    "poolNone": "Nenhum, preencher mais tarde",
+    "poolHint": "Escolha um pool de talentos para preencher a lista de chamadas com candidatos de imediato.",
+    "submit": "Criar lista de chamadas",
+    "saving": "A criar…",
+    "error": "Falha ao criar. Tente novamente."
+  },
+  "page": {
+    "searchPlaceholder": "Pesquisar lista de chamadas, pool ou candidato…"
+  },
+  "drawer": {
+    "label": "Lista de chamadas",
+    "createdAt": "Criado em {{date}}",
+    "archivedBanner": {
+      "since": "Arquivado em {{date}}",
+      "flag": "Arquivado",
+      "restore": "Restaurar",
+      "restored": "Lista de chamadas restaurada.",
+      "restoreFailed": "Falha ao restaurar. Tente novamente."
+    },
+    "tabs": {
+      "targets": "Lista de chamadas",
+      "extra": "Extra",
+      "stats": "Estatísticas",
+      "timeline": "Cronologia"
+    },
+    "loading": "A carregar…",
+    "error": "Falha ao carregar a lista de chamadas.",
+    "empty": "Ainda não há candidatos nesta lista.",
+    "progress": "{{done}} de {{total}} tratados",
+    "target": {
+      "todo": "Por fazer",
+      "contacted": "Contactado",
+      "answered": "Respondido",
+      "skipped": "Ignorado"
+    },
+    "action": {
+      "contacted": "Marcar como contactado",
+      "answered": "Marcar como respondido",
+      "skipped": "Ignorar",
+      "reset": "Voltar a por fazer",
+      "newTask": "Nova tarefa",
+      "makeMatch": "Criar match",
+      "openCandidate": "Abrir candidato"
+    },
+    "outcomeLabel": "Resultado",
+    "matchPick": "Escolher uma vaga…",
+    "matchConfirm": "Criar match",
+    "matchCreated": "Match criado.",
+    "matchFailed": "Falha ao criar o match.",
+    "owner": "Responsável",
+    "selectOwner": "Escolher responsável",
+    "stats": {
+      "error": "Falha ao carregar as estatísticas.",
+      "byStatus": "Estado",
+      "byOutcome": "Resultado",
+      "byAssignee": "Atribuído a",
+      "total": "Total",
+      "reached": "Alcançado",
+      "axis": {
+        "status": "estado",
+        "outcome": "resultado",
+        "assignee": "atribuído a"
+      },
+      "filteredBy": "Filtrado por {{axis}}: {{value}}",
+      "noMatches": "Nenhum candidato corresponde a este filtro."
+    },
+    "note": {
+      "empty": "Ainda não há nota.",
+      "placeholder": "Adicionar uma nota…",
+      "saveFailed": "Falha ao guardar a nota.",
+      "title": "Nota",
+      "windowTitle": "Nota, {{name}}"
+    },
+    "assign": {
+      "button": "Atribuir",
+      "selected": "{{count}} selecionado(s)",
+      "confirm": "Confirmar atribuição",
+      "resultPartial": "{{updated}} atribuído(s), {{skipped}} ignorado(s)",
+      "resultAll": "{{count}} atribuído(s)",
+      "failed": "Falha ao atribuir. Tente novamente.",
+      "assignedTo": "Atribuído a {{name}}",
+      "axisLabel": "Atribuir a",
+      "axis": {
+        "person": "Pessoa",
+        "team": "Equipa",
+        "role": "Função"
+      },
+      "pickPerson": "Escolher um colega…",
+      "pickTeam": "Escolher uma equipa…",
+      "pickRole": "Escolher uma função…",
+      "roleModeLabel": "Atribuição por função",
+      "roleMode": {
+        "all": "Todos com esta função",
+        "one": "Uma pessoa com esta função"
+      },
+      "assignAllMatching": "Atribuir todos nesta seleção ({{count}})"
+    }
+  },
+  "changelog": {
+    "loading": "A carregar…",
+    "error": "Falha ao carregar o registo de alterações.",
+    "empty": "Ainda não há alterações.",
+    "system": "Sistema",
+    "emptyValue": "Vazio",
+    "updatedValue": "atualizado",
+    "actions": {
+      "created": "Criado",
+      "updated": "Atualizado",
+      "deleted": "Arquivado",
+      "restored": "Restaurado"
+    },
+    "fields": {
+      "name": "Nome",
+      "channel": "Canal",
+      "status": "Estado",
+      "source_pool_id": "Pool de origem",
+      "owner_id": "Responsável",
+      "created_by": "Criado por",
+      "custom_fields": "Campos extra",
+      "reference_number": "Número"
+    }
+  },
+  "koios": {
+    "reasons": {
+      "noTargets": "Esta lista de chamadas ativa ainda não tem contactos carregados.",
+      "staleDraft": "Este rascunho tem contactos carregados mas nunca foi ativado."
+    }
+  },
+  "filters": {
+    "owner": "Responsável",
+    "targetGroup": "Grupo-alvo",
+    "archived": "Arquivado",
+    "categories": {
+      "campaign": "Campanha",
+      "organisation": "Organização",
+      "display": "Visualização"
+    }
+  },
+  "lookupSeeds": {
+    "outcomes": {
+      "no_answer": "Sem resposta",
+      "callback": "Voltar a ligar",
+      "not_interested": "Sem interesse",
+      "interested": "Com interesse"
+    }
+  }
+}

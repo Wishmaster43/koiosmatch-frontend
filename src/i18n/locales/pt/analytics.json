@@ -1,0 +1,580 @@
+{
+  "title": "Relatórios",
+  "thresholdDays": "Limiar: {{n}} dias",
+  "drill": {
+    "breakdown": "Distribuição",
+    "records": "Registos subjacentes",
+    "loading": "A carregar…",
+    "noRecords": "Sem registos subjacentes.",
+    "koios": "Conselho Koios AI",
+    "noAdvice": "A Koios ainda não tem conselhos para este número.",
+    "search": "Pesquisar…",
+    "shownOf": "{{shown}} de {{total}} apresentados"
+  },
+  "tabs": {
+    "candidates": "Candidatos",
+    "applications": "Candidaturas",
+    "customers": "Clientes",
+    "vacancies": "Vagas",
+    "opportunities": "Oportunidades",
+    "tasks": "Tarefas",
+    "matches": "Matches",
+    "outreach": "Listas de chamadas",
+    "whatsapp": "WhatsApp"
+  },
+  "candidates": {
+    "loading": "A carregar candidatos…",
+    "error": "Não foi possível carregar os candidatos",
+    "empty": "Sem candidatos neste período",
+    "total": "Total de entradas",
+    "series": "Candidatos ao longo do tempo",
+    "window": "Candidatos de {{from}} a {{to}}",
+    "axes": {
+      "status": "Estado",
+      "phase": "Fase",
+      "source": "Origem",
+      "owner": "Responsável",
+      "branch": "Filial",
+      "ownerNone": "Sem responsável",
+      "branchNone": "Sem filial",
+      "sourceNone": "Sem origem",
+      "phaseLead": "Ainda lead",
+      "contractForm": "Tipo de contrato",
+      "contractFormNone": "Sem tipo de contrato"
+    },
+    "kpiOrderFellBack": "Um cartão de KPI configurado nas Definições já não existe e foi reposto para a predefinição.",
+    "viewSwitch": {
+      "ariaLabel": "População",
+      "candidates": "Candidatos",
+      "leads": "Leads"
+    },
+    "kpi": {
+      "inflow": "Entradas",
+      "outflow": "Saídas",
+      "noFollowup": "Sem seguimento",
+      "statusStale": "Demasiado tempo no mesmo estado",
+      "noCv": "Sem CV",
+      "documentExpiring": "Documentos a expirar",
+      "availabilityDue": "Disponibilidade a aproximar-se",
+      "noContact": "Há muito sem contacto",
+      "activeConversations": "Conversas ativas"
+    }
+  },
+  "intakes": {
+    "by": {
+      "function": "Função"
+    }
+  },
+  "comingSoon": "{{label}}. Brevemente",
+  "period": {
+    "label": "Período",
+    "day": "Dia",
+    "week": "Semana",
+    "month": "Mês"
+  },
+  "dashboard": {
+    "vacancies": "Total de vagas"
+  },
+  "vacancies": {
+    "title": "Vagas",
+    "subtitle": "Procura e preenchimento por vaga",
+    "loading": "A carregar vagas…",
+    "error": "Não foi possível carregar as vagas",
+    "empty": "Sem vagas neste período",
+    "series": "Vagas ao longo do tempo",
+    "window": "Vagas de {{from}} a {{to}}",
+    "daysValue": "{{days}} dias",
+    "filledYes": "Preenchida",
+    "filledNo": "Aberta",
+    "summary": {
+      "total": "Total",
+      "open": "Aberta",
+      "filled": "Preenchida",
+      "fillRate": "Taxa de preenchimento",
+      "avgTimeToFill": "Tempo médio de preenchimento",
+      "openRate": "Percentagem de abertas",
+      "customersCount": "Número de clientes",
+      "topIndustry": "Maior setor",
+      "topOwner": "Maior responsável",
+      "staleOnline": "Online, sem candidatos",
+      "longConcept": "Há muito tempo em rascunho",
+      "noMatches": "Sem matches",
+      "topFunction": "Maior função",
+      "topBranch": "Maior filial",
+      "adviceStale": "Desatualizada (conselho)",
+      "closingSoon": "Fecha em breve"
+    },
+    "cols": {
+      "vacancy": "Vaga",
+      "customer": "Cliente",
+      "status": "Estado",
+      "applications": "Candidaturas",
+      "matched": "Com match",
+      "filled": "Preenchida",
+      "timeToFill": "Tempo de preenchimento"
+    },
+    "noApplicants": {
+      "title": "Vagas sem candidaturas ({{count}})",
+      "subtitle": "Contadas a partir das vagas acima: zero candidaturas recebidas neste período.",
+      "empty": "Todas as vagas neste período receberam pelo menos uma candidatura."
+    },
+    "kpiOrderFellBack": "Um cartão de KPI configurado nas Definições já não existe e foi reposto para a predefinição.",
+    "depth": {
+      "ttf": {
+        "title": "Tempo de preenchimento decomposto (mediana, dias)",
+        "publishedToFirst": "Publicação até à primeira candidatura",
+        "firstToProposal": "Primeira candidatura até à proposta",
+        "proposalToMatch": "Proposta até à colocação"
+      },
+      "aging": {
+        "title": "Vagas abertas há mais tempo (top 20)",
+        "cols": {
+          "vacancy": "Vaga",
+          "recruiter": "Recrutador",
+          "daysOpen": "Dias em aberto",
+          "inProcess": "Candidatos em processo",
+          "applications": "Candidaturas"
+        }
+      },
+      "fillRateSeries": {
+        "title": "Taxa de preenchimento, últimos 14 dias"
+      },
+      "fillRateBranch": {
+        "title": "Taxa de preenchimento por filial (filial da vaga)",
+        "cols": {
+          "branch": "Filial",
+          "total": "Total",
+          "filled": "Preenchidas",
+          "rate": "Taxa de preenchimento"
+        }
+      },
+      "fixedWindow": "Janela fixa, não segue os filtros deste relatório.",
+      "noBranch": "Sem filial",
+      "unknown": "Desconhecido"
+    },
+    "kpi": {
+      "total": "Total",
+      "open": "Aberta",
+      "filled": "Preenchida",
+      "fillRate": "Taxa de preenchimento",
+      "staleOnline": "Online sem candidatos",
+      "longConcept": "Há muito tempo em rascunho",
+      "noMatches": "Sem matches",
+      "closingSoon": "Fecha em breve",
+      "customersCount": "Clientes com vagas",
+      "customersCountDrillSub": "Vagas destes clientes"
+    }
+  },
+  "matches": {
+    "title": "Matches",
+    "subtitle": "Origem e estado dos matches",
+    "loading": "A carregar matches…",
+    "error": "Não foi possível carregar os matches",
+    "empty": "Sem matches neste período",
+    "total": "Total de matches",
+    "window": "Matches de {{from}} a {{to}}",
+    "series": "Matches ao longo do tempo",
+    "viaFunnel": "Via candidatura",
+    "direct": "Direto",
+    "avgDuration": "Duração média do match",
+    "daysValue": "{{days}} dias",
+    "durationNote": "A duração do match fica disponível assim que a integração com a HelloFlex fornecer as datas de início/fim.",
+    "axes": {
+      "contractForm": "Tipo de contrato",
+      "origin": "Origem",
+      "stopReason": "Motivo de paragem (terminações)"
+    },
+    "placements": {
+      "title": "Estado do match",
+      "sent": "Enviado",
+      "active": "Ativo",
+      "ended": "Terminado",
+      "none": "Sem contrato"
+    },
+    "terminations": {
+      "title": "Motivos de terminação",
+      "total": "Total de terminações",
+      "rate": "Percentagem de terminações",
+      "topReason": "Maior motivo"
+    },
+    "summary": {
+      "noContract": "Sem contrato",
+      "topContractForm": "Maior tipo de contrato",
+      "funnelRate": "Percentagem via candidatura"
+    },
+    "kpiOrderFellBack": "Um cartão de KPI configurado nas Definições já não existe e foi reposto para a predefinição.",
+    "kpi": {
+      "total": "Total",
+      "newInPeriod": "Novos no período",
+      "active": "Ativos",
+      "expiringSoon": "Termina em breve",
+      "terminatedInPeriod": "Terminados no período",
+      "renewalsInPeriod": "Renovações no período",
+      "withoutEndDate": "Sem data de fim",
+      "avgDurationDays": "Duração média",
+      "reachRate": "Percentagem com contrato"
+    }
+  },
+  "outreach": {
+    "loading": "A carregar outreach…",
+    "error": "Não foi possível carregar o outreach",
+    "empty": "Sem alvos de lista de chamadas neste período",
+    "series": "Alvos de lista de chamadas ao longo do tempo",
+    "window": "Alvos de lista de chamadas de {{from}} a {{to}}",
+    "axes": {
+      "campaign": "Lista de chamadas",
+      "channel": "Canal",
+      "outcome": "Resultado"
+    },
+    "kpi": {
+      "totalTargets": "Total de alvos",
+      "openTodo": "Por fazer em aberto",
+      "calledInPeriod": "Contactado no período",
+      "reached": "Contactado com sucesso",
+      "notReached": "Não contactado",
+      "conversionPct": "Conversão",
+      "campaignsActive": "Campanhas ativas",
+      "campaignsDoneInPeriod": "Campanhas concluídas no período",
+      "dueToday": "Vence hoje"
+    },
+    "kpiOrderFellBack": "Um cartão de KPI configurado em Definições já não existe e foi reposto para o padrão.",
+    "depth": {
+      "channelFunnel": {
+        "title": "Funil por canal",
+        "total": "Abordado",
+        "reached": "Contactado com sucesso",
+        "applied": "Candidatou-se",
+        "placed": "Colocado"
+      },
+      "channel": {
+        "call": "Chamada",
+        "email": "E-mail",
+        "whatsapp": "WhatsApp",
+        "none": "Sem canal"
+      },
+      "campaignSeries": {
+        "title": "Top 5 listas de chamadas por dia"
+      },
+      "heatmap": {
+        "title": "Melhor momento de contacto (% contactado)",
+        "part": {
+          "morning": "Manhã",
+          "afternoon": "Tarde",
+          "evening": "Noite"
+        },
+        "weekday": "Dia",
+        "attempts_one": "{{count}} tentativa",
+        "attempts_other": "{{count}} tentativas",
+        "noData": "Sem tentativas"
+      }
+    }
+  },
+  "whatsapp": {
+    "loading": "A carregar WhatsApp…",
+    "error": "Não foi possível carregar o WhatsApp",
+    "empty": "Sem conversas de WhatsApp neste período",
+    "series": "Mensagens ao longo do tempo",
+    "inbound": "Recebidas",
+    "outbound": "Enviadas",
+    "window": "Conversas de WhatsApp de {{from}} a {{to}}",
+    "topConversations": "Conversas mais ativas",
+    "axes": {
+      "direction": "Direção",
+      "type": "Tipo de mensagem",
+      "escalated": "Escalado",
+      "owner": "Responsável",
+      "escalatedAny": "Todos",
+      "directionValues": {
+        "inbound": "Recebidas",
+        "outbound": "Enviadas"
+      },
+      "channel": "Canal",
+      "escalatedValues": {
+        "escalated": "Escalonamento em aberto",
+        "normal": "Normal"
+      },
+      "typeNone": "Desconhecido"
+    },
+    "kpi": {
+      "conversationsTotal": "Total de conversas",
+      "active7d": "Ativo (7 dias)",
+      "newInPeriod": "Novo no período",
+      "inboundInPeriod": "Recebidas no período",
+      "outboundInPeriod": "Enviadas no período",
+      "appEchoesInPeriod": "Via aplicação no período",
+      "escalationsOpen": "Escalonamentos em aberto",
+      "unansweredOverWindow": "Sem resposta acima do limite",
+      "avgFirstResponseMinutes": "Tempo médio de primeira resposta",
+      "minutesUnit": "minutos"
+    },
+    "kpiOrderFellBack": "Um cartão de KPI configurado em Definições já não existe e foi reposto para o padrão.",
+    "channel": {
+      "waba": "WABA",
+      "waba_coex": "WABA · local",
+      "wa_web": "WA Web"
+    }
+  },
+  "applications": {
+    "loading": "A carregar candidaturas…",
+    "error": "Não foi possível carregar as candidaturas",
+    "empty": "Sem candidaturas neste período",
+    "total": "Total de candidaturas",
+    "series": "Candidaturas ao longo do tempo",
+    "window": "Candidaturas de {{from}} a {{to}}",
+    "axes": {
+      "bucket": "Funil",
+      "stage": "Fase",
+      "source": "Origem",
+      "owner": "Responsável",
+      "customer": "Cliente",
+      "vacancy": "Vaga",
+      "stageDuration": "Tempo excessivo na fase",
+      "customerNone": "Sem cliente",
+      "stageNone": "Sem fase",
+      "rejectionReason": "Motivo de rejeição",
+      "directEntries": "das quais {{count}} entraram diretamente"
+    },
+    "buckets": {
+      "active": "Ativo",
+      "matched": "Com match",
+      "rejected": "Rejeitado",
+      "placed": "Colocado"
+    },
+    "kpiOrderFellBack": "Um cartão de KPI configurado em Definições já não existe e foi reposto para o padrão.",
+    "kpi": {
+      "total": "Total de candidaturas",
+      "new": "Novo",
+      "active": "Ativo",
+      "matched": "Com match",
+      "rejected": "Rejeitado",
+      "conversionPct": "Conversão",
+      "avgDaysToMatch": "Média de dias até match",
+      "tooLongInStage": "Tempo excessivo na fase",
+      "missingAppointment": "Falta marcação",
+      "daysUnit": "dias"
+    },
+    "intakes": {
+      "title": "Intakes",
+      "planned": "Planeado",
+      "doneInPeriod": "Concluído no período",
+      "byRecruiter": "Por recrutador",
+      "byBranch": "Por filial"
+    }
+  },
+  "opportunities": {
+    "loading": "A carregar oportunidades…",
+    "error": "Não foi possível carregar as oportunidades",
+    "empty": "Sem oportunidades neste período",
+    "total": "Total de oportunidades",
+    "series": "Oportunidades ao longo do tempo",
+    "window": "Oportunidades de {{from}} a {{to}}",
+    "summary": {
+      "open": "Em aberto",
+      "won": "Ganhas",
+      "lost": "Perdidas",
+      "winRate": "Taxa de sucesso",
+      "openValue": "Valor em aberto",
+      "wonValue": "Valor ganho",
+      "topStage": "Maior fase",
+      "topCustomer": "Maior cliente",
+      "staleDeal": "Oportunidades paradas",
+      "closingSoon": "Fecha em breve"
+    },
+    "stale": {
+      "untouched": "Sem atividade",
+      "overdue": "Atrasado"
+    },
+    "forecastCount": "Negócios previstos",
+    "forecastValue": "Valor previsto",
+    "kpiOrderFellBack": "Um cartão de KPI configurado em Definições já não existe e foi reposto para o padrão.",
+    "axes": {
+      "value": "Valor do pipeline"
+    },
+    "kpi": {
+      "total": "Total",
+      "open": "Em aberto",
+      "won": "Ganhas",
+      "lost": "Perdidas",
+      "winRate": "Taxa de sucesso",
+      "openValue": "Valor do pipeline em aberto",
+      "stale": "Sem atualização",
+      "closingSoon": "Fecha em breve",
+      "overdue": "Atrasado"
+    }
+  },
+  "tasks": {
+    "loading": "A carregar tarefas…",
+    "error": "Não foi possível carregar as tarefas",
+    "empty": "Sem tarefas neste período",
+    "total": "Total de tarefas",
+    "series": "Tarefas ao longo do tempo",
+    "window": "Tarefas de {{from}} a {{to}}",
+    "summary": {
+      "open": "Em aberto",
+      "done": "Concluído",
+      "overdue": "Atrasado",
+      "doneRate": "Percentagem de conclusão",
+      "topStatus": "Maior estado",
+      "topType": "Maior tipo",
+      "topPriority": "Maior prioridade",
+      "topAssignee": "Maior responsável"
+    },
+    "axes": {
+      "status": "Estado",
+      "type": "Tipo",
+      "priority": "Prioridade",
+      "assignee": "Atribuído a",
+      "team": "Departamento",
+      "branch": "Filial"
+    },
+    "unassigned": "Não atribuído",
+    "noTeam": "Sem departamento",
+    "noBranch": "Sem filial",
+    "overdueRate": "Percentagem de atraso",
+    "kpiOrderFellBack": "Um cartão de KPI configurado nas Definições já não existe e foi reposto para o padrão.",
+    "kpi": {
+      "total": "Total de tarefas",
+      "open": "Aberta",
+      "overdue": "Atrasada",
+      "doneInPeriod": "Concluídas no período",
+      "createdInPeriod": "Criadas no período",
+      "dueToday": "Vence hoje",
+      "dueThisWeek": "Vence esta semana",
+      "withoutAssignee": "Sem responsável",
+      "avgCompletionDays": "Tempo médio de conclusão",
+      "daysValue": "{{days}} dias"
+    },
+    "filters": {
+      "typeNone": "Sem tipo",
+      "priorityNone": "Sem prioridade"
+    }
+  },
+  "customers": {
+    "loading": "A carregar clientes…",
+    "error": "Não foi possível carregar os clientes",
+    "empty": "Sem clientes neste período",
+    "total": "Total de entradas",
+    "series": "Entradas ao longo do tempo",
+    "window": "Entradas de {{from}} a {{to}}",
+    "axes": {
+      "status": "Estado",
+      "phase": "Fase",
+      "industry": "Setor",
+      "owner": "Responsável",
+      "branch": "Filial"
+    },
+    "kpiOrderFellBack": "Um cartão de KPI configurado nas Definições já não existe e foi reposto para o padrão.",
+    "viewSwitch": {
+      "ariaLabel": "População",
+      "customers": "Clientes",
+      "prospects": "Prospects"
+    },
+    "kpis": {
+      "contractEnding": "Contrato a terminar em breve",
+      "noContact": "Sem contacto há muito tempo",
+      "taskOverdue": "Tarefas atrasadas",
+      "priceAgreementEnding": "Acordos de preço a expirar",
+      "vacancyStale": "Vaga online sem candidatos",
+      "departmentsWithoutPlacement": "Departamentos sem colocação",
+      "customersWithoutVacancies": "Clientes sem vagas",
+      "customersWithoutApplications": "Clientes sem candidaturas",
+      "matchesStoppedEarly": "Matches interrompidos precocemente"
+    },
+    "signalSnapshot": "Situação atual",
+    "depth": {
+      "concentration": {
+        "title": "Concentração de clientes (top 5)",
+        "byPlacements": "Por colocações",
+        "byVacancies": "Por vagas",
+        "share": "Top 5 = {{pct}} do total",
+        "others": "Outros clientes"
+      },
+      "cohorts": {
+        "title": "Prospect para cliente por coorte mensal",
+        "prospects": "Prospects",
+        "converted": "Convertidos",
+        "rate": "Conversão %"
+      },
+      "churn": {
+        "title": "Clientes perdidos por mês",
+        "series": "Perdidos"
+      },
+      "byOwnerPeriod": {
+        "title": "Novos clientes por account manager por mês"
+      },
+      "unassigned": "Não atribuído",
+      "unknown": "Desconhecido",
+      "fixedWindow12": "Período fixo de 12 meses, não segue os filtros deste relatório.",
+      "fixedWindow6": "Período fixo de 6 meses, não segue os filtros deste relatório."
+    },
+    "windowWithTotal": "Entradas de {{from}} a {{to}}: {{total}} novos clientes"
+  },
+  "leads": {
+    "loading": "A carregar leads…",
+    "error": "Não foi possível carregar os leads",
+    "empty": "Sem leads neste período",
+    "total": "Total de leads",
+    "series": "Leads ao longo do tempo",
+    "window": "Leads de {{from}} a {{to}}",
+    "kpiOrderFellBack": "Um cartão de KPI configurado nas Definições já não existe e foi reposto para o padrão."
+  },
+  "prospects": {
+    "loading": "A carregar prospects…",
+    "error": "Não foi possível carregar os prospects",
+    "empty": "Sem prospects neste período",
+    "total": "Total de prospects",
+    "series": "Prospects ao longo do tempo",
+    "window": "Prospects de {{from}} a {{to}}",
+    "kpiOrderFellBack": "Um cartão de KPI configurado nas Definições já não existe e foi reposto para o padrão."
+  },
+  "compare": {
+    "label": "Comparar com",
+    "mode": {
+      "off": "Sem comparação",
+      "previous_period": "Período anterior",
+      "previous_year": "Ano anterior",
+      "custom": "Período personalizado"
+    },
+    "rangeSeparator": "até",
+    "previousValue": "anterior: {{value}}"
+  },
+  "hub": {
+    "attention": {
+      "title": "Requer atenção",
+      "error": "Não foi possível carregar os sinais de atenção",
+      "cards": {
+        "candidates_no_follow_up": "Candidatos sem acompanhamento",
+        "vacancies_stale_online": "Vagas online sem candidatos",
+        "matches_expiring": "Matches a terminar em breve",
+        "tasks_overdue": "Tarefas atrasadas",
+        "customers_no_contact": "Clientes sem contacto recente",
+        "leads_pending": "Leads pendentes há demasiado tempo",
+        "documents_expiring": "Candidatos com documento a expirar",
+        "vacancies_open": "Posições em aberto",
+        "conversations_unanswered": "Conversas sem resposta"
+      },
+      "empty": "Sem pontos de atenção: tudo em dia.",
+      "loading": "A carregar pontos de atenção…"
+    },
+    "charts": {
+      "applicationsTrend": "Candidaturas ao longo do tempo",
+      "applicationsFunnel": "Funil de candidaturas",
+      "candidatesBySource": "Candidatos por origem",
+      "vacanciesFillRate": "Taxa de preenchimento de vagas",
+      "matchesUnderContract": "Matches sob contrato",
+      "tasksByStatus": "Tarefas por estado",
+      "bucket": {
+        "active": "Ativo",
+        "matched": "Correspondido",
+        "placed": "Colocado",
+        "rejected": "Rejeitado"
+      },
+      "underContract": {
+        "sent": "Enviado",
+        "active": "Ativo",
+        "ended": "Terminado"
+      }
+    },
+    "openReport": "Abrir relatório"
+  }
+}

@@ -1,0 +1,356 @@
+{
+  "title": "Matches",
+  "loading": "A carregar matches…",
+  "empty": "Ainda não há matches.",
+  "error": "Não foi possível carregar os matches.",
+  "cols": {
+    "candidate": "Candidato",
+    "referenceNumber": "N.º ref.",
+    "vacancy": "Vaga",
+    "client": "Cliente",
+    "score": "Match",
+    "stage": "Fase",
+    "coupling": "Ligação",
+    "owner": "Responsável",
+    "date": "Criado",
+    "status": "Estado",
+    "contractForm": "Tipo de contrato",
+    "type": "Tipo"
+  },
+  "insights": {
+    "stage": "Fase",
+    "owner": "Responsável",
+    "clearFilter": "Limpar filtro",
+    "status": "Estado",
+    "client": "Cliente"
+  },
+  "kpi": {
+    "total": "Total",
+    "active": "Matches ativos",
+    "hired": "Contratados",
+    "avgScore": "Pontuação média",
+    "closed": "Encerrados",
+    "newThisMonth": "Novos este mês",
+    "unscored": "Sem pontuação",
+    "scored": "Com pontuação",
+    "pendingApproval": "Por avaliar"
+  },
+  "drawer": {
+    "label": "Match",
+    "createdAt": "Criado em {{date}}",
+    "archive": "Arquivar",
+    "archiveConfirm": "Arquivar este match? Pode restaurá-lo depois.",
+    "archived": "Match arquivado.",
+    "archiveFailed": "Não foi possível arquivar o match.",
+    "archiveBlockedActiveContract": "Este match tem um contrato ativo. Termine-o primeiro.",
+    "archivedBanner": {
+      "since": "Arquivado desde {{date}}",
+      "flag": "Arquivado",
+      "restore": "Restaurar",
+      "restored": "Match restaurado.",
+      "restoreFailed": "Não foi possível restaurar o match."
+    },
+    "tabs": {
+      "overview": "Resumo",
+      "statistics": "Estatísticas",
+      "relations": "Relações",
+      "changelog": "Alterações",
+      "extra": "Extra",
+      "timeline": "Cronologia"
+    },
+    "sectionDetails": "Dados do match",
+    "fields": {
+      "candidate": "Candidato",
+      "vacancy": "Vaga",
+      "client": "Cliente",
+      "owner": "Responsável",
+      "score": "Pontuação",
+      "stage": "Fase",
+      "created": "Criado",
+      "status": "Estado",
+      "lastSynced": "Última sincronização",
+      "lastSyncedHelloflex": "Última sincronização com o HelloFlex",
+      "branch": "Filial",
+      "customerLocation": "Localização",
+      "customerDepartment": "Departamento",
+      "contactPerson": "Pessoa de contacto",
+      "terminated": "Terminado",
+      "renewals": "Renovações"
+    },
+    "openCandidate": "Abrir candidato",
+    "openVacancy": "Abrir vaga",
+    "openClient": "Abrir cliente",
+    "contract": {
+      "title": "Contrato e financeiro",
+      "groupContract": "Contrato",
+      "groupFinancial": "Financeiro",
+      "contractType": "Tipo de contrato",
+      "cao": "CCT",
+      "startDate": "Data de início",
+      "endDate": "Data de fim",
+      "hoursPerWeek": "Horas por semana",
+      "scale": "Escalão",
+      "step": "Nível",
+      "purchaseRate": "Tarifa de compra",
+      "sellRate": "Tarifa de venda",
+      "margin": "Margem",
+      "costCenter": "Centro de custo",
+      "billingEmails": "E-mail(s) de faturação, um por linha ou separados por vírgula",
+      "remarks": "Observações",
+      "loading": "A carregar os dados do contrato…",
+      "error": "Não foi possível carregar os dados do contrato.",
+      "unavailable": "Os dados do contrato ainda não estão disponíveis (ligação não configurada).",
+      "saveError": "Não foi possível guardar a alteração.",
+      "saved": "Dados do contrato guardados.",
+      "functionTitle": "Título da função",
+      "surcharge": "Suplemento",
+      "contractForm": "Tipo de contrato",
+      "billingSource": "Copiado de",
+      "billingSourceValues": {
+        "department": "departamento",
+        "location": "localização",
+        "customer": "cliente",
+        "manual": "manual"
+      }
+    },
+    "ownerUnassigned": "Sem responsável",
+    "terminate": {
+      "button": "Terminar",
+      "modalTitle": "Terminar match",
+      "reasonLabel": "Motivo",
+      "reasonPlaceholder": "Escolha um motivo…",
+      "noReasonsConfigured": "Ainda não há motivos de rescisão configurados.",
+      "effectiveDateLabel": "Data de fim",
+      "noteLabel": "Nota (opcional)",
+      "notePlaceholder": "Adicionar uma nota…",
+      "noteCounter": "{{count}}/{{max}}",
+      "confirm": "Confirmar rescisão",
+      "success": "Match terminado.",
+      "error": "Não foi possível terminar o match.",
+      "reasonLine": "{{date}} · {{reason}}",
+      "reasonLineNoDate": "Motivo: {{reason}}"
+    },
+    "remarks": {
+      "title": "Observações",
+      "saved": "Observações guardadas.",
+      "saveError": "Não foi possível guardar as observações.",
+      "deprecated": "Este campo vai deixar de existir. Mova o texto para Notas. Lá, fica com um autor, uma data, um tipo e um canal, e aparece na cronologia.",
+      "moveToNotes": "Mover para notas",
+      "moving": "A mover…",
+      "moved": "A observação foi movida para as notas.",
+      "moveError": "Não foi possível mover para as notas. O texto não foi alterado.",
+      "moveClearError": "A nota foi guardada, mas não foi possível limpar o campo antigo. O texto existe agora em dois locais."
+    },
+    "duration": {
+      "unit": {
+        "days": "{{count}} dia",
+        "weeks": "{{count}} semana",
+        "months": "{{count}} mês"
+      },
+      "remaining": "faltam {{pct}}%",
+      "progressLabel": "Progresso do contrato"
+    },
+    "ordinal": {
+      "candidate": "Match {{position}} de {{total}} para este candidato",
+      "client": "Match {{position}} de {{total}} para este cliente",
+      "location": "Match {{position}} de {{total}} nesta localização",
+      "department": "Match {{position}} de {{total}} neste departamento"
+    },
+    "statistics": {
+      "empty": "Ainda não há estatísticas de matches disponíveis.",
+      "onlyMatch": "Não foram encontrados outros matches.",
+      "openMatch": "Abrir match"
+    },
+    "matchText": {
+      "title": "Texto do match",
+      "saved": "Texto do match guardado.",
+      "saveError": "Não foi possível guardar o texto do match."
+    },
+    "renew": {
+      "button": "Renovar",
+      "modalTitle": "Renovar match",
+      "confirm": "Confirmar renovação",
+      "currentEndDate": "Data de fim atual: {{date}}",
+      "newEndDateLabel": "Nova data de fim",
+      "noCurrentEndDate": "Sem data de fim definida (contínuo).",
+      "mustBeAfterCurrent": "A nova data de fim tem de ser posterior à data de fim atual.",
+      "success": "Match renovado.",
+      "error": "Não foi possível renovar o match.",
+      "disabledArchived": "Match arquivado. Restaure primeiro.",
+      "disabledClosed": "Este match já foi terminado.",
+      "renewalCount_ordinal_other": "{{count}}.ª renovação"
+    }
+  },
+  "approval": {
+    "status": {
+      "pending": "Em avaliação",
+      "approved": "Aprovado",
+      "rejected": "Rejeitado"
+    },
+    "approve": "Aprovar",
+    "reject": "Rejeitar",
+    "reasonPlaceholder": "Motivo da rejeição…",
+    "confirmReject": "Confirmar rejeição",
+    "alreadyReviewed": "Este match já foi avaliado.",
+    "error": "Não foi possível aplicar a avaliação.",
+    "badgeLabel": "Avaliação",
+    "badgeWithLabel": "Avaliação: {{status}}"
+  },
+  "changelog": {
+    "loading": "A carregar histórico…",
+    "error": "Não foi possível carregar o registo de alterações.",
+    "empty": "Ainda não há alterações registadas.",
+    "system": "Sistema",
+    "actions": {
+      "updated": "Atualizado",
+      "created": "Criado",
+      "deleted": "Arquivado",
+      "restored": "Restaurado"
+    },
+    "emptyValue": "Vazio",
+    "updatedValue": "atualizado",
+    "fields": {
+      "reference_number": "Número de referência",
+      "candidate_id": "Candidato",
+      "vacancy_id": "Vaga",
+      "application_id": "Candidatura",
+      "match_score": "Pontuação",
+      "owner_id": "Responsável",
+      "status": "Estado",
+      "helloflex_contract_guid": "Contrato HelloFlex",
+      "contract_status": "Estado do contrato",
+      "contract_sent_at": "Contrato enviado em",
+      "ended_at": "Terminado em",
+      "customer_id": "Cliente",
+      "customer_location_id": "Localização",
+      "customer_department_id": "Departamento",
+      "contact_id": "Pessoa de contacto",
+      "branch_id": "Filial",
+      "function_title": "Título da função",
+      "contract_form": "Tipo de contrato",
+      "contract_type": "Modalidade de contrato",
+      "start_date": "Data de início",
+      "end_date": "Data de fim",
+      "hours_per_week": "Horas por semana",
+      "cao": "CCT",
+      "scale": "Escalão",
+      "step": "Nível",
+      "surcharge": "Sobretaxa",
+      "purchase_rate": "Tarifa de compra",
+      "sell_rate": "Tarifa de venda",
+      "cost_center": "Centro de custos",
+      "billing_emails": "E-mail(s) de faturação",
+      "remarks": "Observações",
+      "match_text": "Texto do match",
+      "approval_status": "Avaliação",
+      "approval_rejected_reason": "Motivo de rejeição",
+      "custom_fields": "Campos personalizados",
+      "pending_erase_at": "Na reciclagem a partir de",
+      "replaces_match_id": "Substitui o match"
+    }
+  },
+  "bulk": {
+    "selected": "{{count}} selecionado(s)",
+    "actions": "Ações em massa",
+    "deselect": "Anular seleção",
+    "mutateError": "Não foi possível aplicar a alteração.",
+    "couple": "Ligar ao backoffice",
+    "target": {
+      "helloflex": "HelloFlex",
+      "shiftmanager": "Shiftmanager"
+    },
+    "coupleQueued": "{{count}} match(es) colocado(s) em fila para ligação com {{target}}.",
+    "coupleUnavailable": "A ligação ao backoffice ainda não está disponível.",
+    "noPermission": "Não tem permissões para ações em massa.",
+    "coupleQueuedPartial": "{{queued}} de {{total}} colocado(s) em fila para ligação com {{target}}; {{skipped}} ignorado(s).",
+    "coupleQueuedPartialReasoned": "{{queued}} de {{total}} colocado(s) em fila para ligação com {{target}}; {{skipped}} ignorado(s) ({{breakdown}}).",
+    "skipReasons": {
+      "helloflex_contract_type_unmapped": "nenhum tipo de contrato HelloFlex associado"
+    }
+  },
+  "filters": {
+    "stage": "Fase",
+    "owner": "Responsável",
+    "status": "Estado",
+    "client": "Cliente",
+    "moreFilters": "Mais filtros",
+    "moreFiltersTitle": "Mais filtros",
+    "removeFilter": "Remover filtro '{{label}}'",
+    "scoreState": "Pontuação",
+    "dateRange": "Intervalo de datas",
+    "archived": "Arquivado",
+    "categories": {
+      "match": "Match",
+      "organisation": "Organização",
+      "display": "Visualização"
+    }
+  },
+  "view": {
+    "matches": "Matches",
+    "board": "Board",
+    "archived": "Arquivado"
+  },
+  "quickView": {
+    "pendingApproval": "Por avaliar"
+  },
+  "board": {
+    "empty": "Sem matches"
+  },
+  "page": {
+    "searchPlaceholder": "Pesquisar candidato, vaga ou cliente…",
+    "openNotFound": "Match não encontrado. Pode ter sido eliminado."
+  },
+  "add": {
+    "button": "Novo match"
+  },
+  "type": {
+    "application": "Via candidatura",
+    "direct": "Direto"
+  },
+  "notes": {
+    "title": "Notas",
+    "type": "Tipo",
+    "new": "Nova nota",
+    "empty": "Ainda não há notas.",
+    "placeholder": "Escreva uma nota…",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "searchPlaceholder": "Pesquisar notas…",
+    "loading": "A carregar notas…",
+    "loadError": "Não foi possível carregar as notas.",
+    "edit": "Editar",
+    "deleteNote": "Eliminar nota",
+    "deleteConfirm": "Eliminar esta nota?"
+  },
+  "ai": {
+    "title": "A Koios AI aconselha",
+    "beta": "Beta",
+    "refresh": "Atualizar",
+    "analyzing": "A Koios AI está a analisar o match…",
+    "scoreLabel": "Pontuação",
+    "scoreGood": "Match forte ({{score}}).",
+    "scoreAverage": "Match médio ({{score}}). Verifique a adequação.",
+    "scorePoor": "Match fraco ({{score}}). Necessita de atenção extra.",
+    "scoreUnknown": "Ainda não há pontuação conhecida.",
+    "windowLabel": "Período do contrato",
+    "windowExpired": "A data de fim já passou há {{days}} dia(s).",
+    "windowWarning": "Faltam {{days}} dia(s) até à data de fim. Renove ou conclua a tempo.",
+    "windowFine": "O período do contrato está a correr bem.",
+    "windowUnknown": "Não há data de fim conhecida."
+  },
+  "koios": {
+    "reasons": {
+      "endDateApproaching": "A data de fim do contrato está a aproximar-se ou já passou. Considere renovar."
+    }
+  },
+  "popout": {
+    "textWindowTitle": "Texto do match: {{name}}",
+    "loadError": "Não foi possível carregar este match."
+  },
+  "lookupSeeds": {
+    "statuses": {
+      "open": "Ativo",
+      "closed": "Encerrado"
+    }
+  }
+}

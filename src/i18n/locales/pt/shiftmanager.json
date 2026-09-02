@@ -1,0 +1,443 @@
+{
+  "comingSoon": "{{label}}. Brevemente",
+  "shiftAnalysis": {
+    "title": "Análise de turnos dos candidatos",
+    "subtitle": "Tendência e sinais de atenção por candidato com base nas horas planeadas e trabalhadas.",
+    "loading": "A carregar análise…",
+    "error": "Não foi possível carregar a análise de turnos.",
+    "unavailable": "Esta análise aguarda o feed de turnos do backend. Assim que estiver disponível, as tendências e os sinais de atenção aparecem aqui.",
+    "empty": "Nenhum candidato com sinal de atenção.",
+    "hours": "{{n}} h",
+    "cols": {
+      "name": "Nome",
+      "position": "Função",
+      "avgHours": "Méd. horas",
+      "upcoming": "Próximas horas",
+      "alarm": "Sinal"
+    },
+    "alarm": {
+      "wegvallend": "Em queda",
+      "daling": "Forte diminuição",
+      "opkomend": "Em ascensão",
+      "nieuw_inactief": "Novo e inativo"
+    },
+    "kpi": {
+      "wegvallend": "Em queda",
+      "daling": "Forte diminuição",
+      "opkomend": "Em ascensão",
+      "nieuwInactief": "Novo e inativo"
+    },
+    "plannedTitle": "UZK planeado por mês",
+    "matrixTitle": "Por candidato por mês",
+    "candidate": "Candidato",
+    "total": "Total",
+    "metric": {
+      "prognose_hours": "Horas previstas",
+      "prognose_shifts": "Turnos previstos",
+      "werkelijk_hours": "Horas reais",
+      "werkelijk_shifts": "Turnos reais"
+    },
+    "allForms": "Todos"
+  },
+  "orders": {
+    "title": "Detalhes: Turnos",
+    "count": "{{count}} turnos",
+    "loading": "A obter turnos…",
+    "empty": "Nenhum turno encontrado",
+    "allMonths": "Todos os meses",
+    "search": "Pesquisar por ID ext., ref. de ordem, cliente…",
+    "status": {
+      "open": "Aberto",
+      "prognosis": "Previsão",
+      "completed": "Real",
+      "in_process": "Em curso",
+      "cancelled": "Cancelado"
+    },
+    "cols": {
+      "extId": "ID ext.",
+      "orderRef": "Ref. de ordem",
+      "status": "Estado",
+      "customer": "Cliente",
+      "location": "Localização",
+      "date": "Data",
+      "start": "Início",
+      "end": "Fim",
+      "hoursCand": "Horas cand.",
+      "hoursCust": "Horas cliente",
+      "ccCand": "CC cand.",
+      "ccCust": "CC cliente"
+    },
+    "filterStatus": "Estado",
+    "drawer": {
+      "title": "Detalhes do turno",
+      "identification": "Identificação",
+      "shiftId": "ID do turno",
+      "externalId": "ID externo",
+      "scheduledId": "ID agendado",
+      "orderRef": "Ref. de ordem",
+      "planning": "Planeamento",
+      "date": "Data",
+      "startTime": "Hora de início",
+      "endTime": "Hora de fim",
+      "jobType": "Função",
+      "persons": "Número de pessoas",
+      "status": "Estado",
+      "customerLocation": "Cliente e localização",
+      "customer": "Cliente",
+      "location": "Localização",
+      "address": "Morada",
+      "hours": "Horas",
+      "hoursCand": "Horas do candidato",
+      "hoursCust": "Horas do cliente",
+      "ccCand": "Centro de custo cand.",
+      "ccCust": "Centro de custo cliente",
+      "candidates": "Candidatos",
+      "notes": "Notas"
+    },
+    "filterMonth": "Mês"
+  },
+  "shiftsDrawer": {
+    "count": "{{count}} turnos",
+    "loadError": "Não foi possível carregar os turnos.",
+    "loading": "A carregar…",
+    "empty": "Nenhum turno encontrado",
+    "search": "Pesquisar por função, localização, ref. de ordem, candidato…",
+    "shownOf": "{{shown}} de {{total}} mostrados",
+    "close": "Fechar",
+    "unknown": "Desconhecido",
+    "noCandidate": "Ainda sem candidato associado",
+    "hoursUnit": "{{n}} h",
+    "status": {
+      "in_process": "Previsão",
+      "completed": "Real",
+      "open": "Sem candidato",
+      "verwijderd": "Não preenchido",
+      "niet_factureerbaar": "Não faturável"
+    },
+    "fields": {
+      "email": "E-mail",
+      "mobile": "Telemóvel",
+      "scheduled": "Agendado",
+      "workedHours": "Horas trabalhadas",
+      "contract": "Contrato",
+      "date": "Data",
+      "persons": "Pessoas",
+      "customerId": "ID do cliente",
+      "location": "Localização",
+      "place": "Localidade",
+      "orderRef": "Ref. de ordem",
+      "subject": "Assunto",
+      "shiftIdExt": "ID do turno (externo)",
+      "orderIdExt": "ID da ordem (externo)",
+      "rate": "Tarifa",
+      "pickup": "Recolha"
+    },
+    "byCustomer": "Por cliente",
+    "byFunction": "Por função",
+    "byLocation": "Por localização",
+    "countCol": "Quantidade",
+    "totalRow": "Total",
+    "viewTotals": "Totais",
+    "viewDetails": "Detalhes",
+    "metricLabel": "Série",
+    "byHours": "Horas"
+  },
+  "charts": {
+    "hours": "Número de horas",
+    "shifts": "Número de turnos",
+    "loading": "A carregar…",
+    "loadError": "Falha ao carregar",
+    "perMonthUnit": "mês",
+    "perQuarterUnit": "trimestre",
+    "periodLabel": "{{years}}: por {{unit}}",
+    "filters": {
+      "period": "Período",
+      "month": "Por mês",
+      "quarter": "Por trimestre",
+      "years": "Anos",
+      "months": "Meses",
+      "series": "Séries",
+      "jobType": "Função",
+      "customer": "Cliente",
+      "location": "Localização"
+    },
+    "series": {
+      "totaal": "Total",
+      "niet_ingevuld": "Não preenchido",
+      "geen_kandidaat": "Sem candidato",
+      "prognose": "Previsão",
+      "werkelijk": "Real"
+    },
+    "hoursTable": "Horas por mês",
+    "shiftsTable": "Turnos por mês",
+    "periodCol": "Período",
+    "totalRow": "Total",
+    "asValues": "Valores",
+    "asPct": "%",
+    "asDelta": "Δ",
+    "multiYearMetric": "Série:",
+    "byCustomerTitle": "Sem candidato por cliente",
+    "byFunctionTitle": "Turnos em aberto por função",
+    "inHours": "Em horas",
+    "inShifts": "Em turnos",
+    "unitToggleLabel": "Unidade: horas ou turnos",
+    "colHours": "Horas",
+    "colShifts": "Turnos",
+    "lastSync": "Última sincronização: {{time}}",
+    "sync": {
+      "button": "Sincronizar",
+      "busy": "A sincronizar…",
+      "choose": "Escolha a conta Shiftmanager…",
+      "noPermission": "Sem permissão para sincronizar",
+      "noConnection": "Nenhuma ligação Shiftmanager ativa encontrada",
+      "started": "Sincronização iniciada. Pode demorar alguns minutos",
+      "failed": "Falha na sincronização",
+      "tooManyRequests": "Demasiadas tentativas, tente novamente em {{secs}}s"
+    },
+    "empty": "—"
+  },
+  "customersReport": {
+    "title": "Relatório de clientes",
+    "activeWord": "ativo",
+    "inactiveWord": "inativo",
+    "totalWord": "total",
+    "filterStatus": "Estado do cliente",
+    "drill": {
+      "activeCustomers": "Clientes ativos",
+      "allLocations": "Todas as localizações",
+      "allDepartments": "Todos os departamentos",
+      "customersWithoutLocation": "Clientes sem localização"
+    },
+    "sub": {
+      "locations": "{{count}} localizações",
+      "avgPerCustomer": "méd. {{n}} por cliente",
+      "avgPerLocation": "méd. {{n}} por localização",
+      "notLinked": "Ainda não associado",
+      "noLocationsLinked": "Nenhuma localização associada"
+    }
+  },
+  "locationsReport": {
+    "title": "Relatório de localizações",
+    "activeWord": "ativo",
+    "inactiveWord": "inativo",
+    "totalWord": "total",
+    "filterStatus": "Estado da localização",
+    "kpi": {
+      "activeLocations": "Localizações ativas",
+      "totalDepartments": "Total de departamentos",
+      "uniqueCustomers": "Clientes únicos",
+      "withoutDepartment": "Sem departamento"
+    },
+    "drill": {
+      "activeLocations": "Filiais ativas",
+      "allDepartments": "Todos os departamentos",
+      "customers": "Clientes",
+      "locationsWithoutDepartment": "Filiais sem departamento"
+    },
+    "sub": {
+      "avgPerLocation": "média de {{n}} por filial",
+      "notConfigured": "Ainda não configurado",
+      "allConfigured": "Tudo configurado"
+    },
+    "badge": {
+      "active": "ativo",
+      "noDepartments": "Sem departamentos"
+    }
+  },
+  "departmentsReport": {
+    "title": "Relatório de departamentos",
+    "count": "{{count}} departamentos",
+    "filterCustomer": "Cliente",
+    "kpi": {
+      "totalDepartments": "Total de departamentos",
+      "uniqueLocations": "Filiais únicas",
+      "uniqueCustomers": "Clientes únicos",
+      "withCostCenter": "Com centro de custo"
+    },
+    "sub": {
+      "avgPerLocation": "média de {{n}} por filial",
+      "linkedPct": "{{pct}}% associados"
+    }
+  },
+  "dashboard": {
+    "recentRuns": "Execuções recentes",
+    "recentConversations": "Conversas recentes",
+    "viewAll": "Ver tudo →",
+    "candidates": "{{n}} candidatos",
+    "stats": {
+      "openHours": "Número de horas em aberto",
+      "hoursThisMonth": "Horas no mês atual",
+      "occupancy": "Taxa de ocupação",
+      "messagesSent": "Mensagens enviadas",
+      "responseRate": "Taxa de resposta",
+      "newThisMonth": "Novos este mês",
+      "avgTarget": "média {{avg}} · objetivo {{target}}",
+      "active": "Ativo",
+      "totalCandidates": "Candidatos",
+      "neverWorked": "Nunca trabalhou",
+      "workedThisMonth": "Trabalhou este mês",
+      "avgOnly": "média {{avg}}",
+      "workedActive": "Trabalhou / Ativo",
+      "planned": "Planeado (futuro)",
+      "unknownFunction": "Desconhecido",
+      "otherFunctions": "Outros",
+      "idle": "Sem atividade recente",
+      "workedThisMonthHint": "Efetivamente realizou um turno este mês",
+      "plannedHint": "Está previsto no planeamento, mas ainda não trabalhou este mês",
+      "neverWorkedHint": "Está ativo, mas nunca realizou um turno",
+      "idleHint": "Já trabalhou antes, mas não este mês nem tem nada planeado",
+      "inactive": "Inativo",
+      "openShifts": "Turnos em aberto",
+      "shiftsThisMonth": "Turnos no mês atual",
+      "activeCustomers": "Clientes ativos",
+      "actualHours": "Horas reais",
+      "fillRate": "Taxa de preenchimento (este mês)",
+      "forecastMonth": "Previsão para este mês",
+      "actualMonth": "Real este mês",
+      "unfilled": "Não preenchido",
+      "customersWithOpen": "Clientes com turnos em aberto",
+      "attentionCandidates": "Candidatos a atenção",
+      "attnNewNotPlanned": "Novo e não planeado",
+      "attnNeverLoggedIn": "Ativo e nunca iniciou sessão",
+      "openByFunction": "Em aberto por função"
+    },
+    "statSub": {
+      "urgent": "{{n}} urgente",
+      "prevMonth": "{{pct}} mês anterior",
+      "thisMonth": "Este mês",
+      "historicAvg": "média de {{pct}} histórica"
+    },
+    "charts": {
+      "byFunction": "Por função",
+      "byStatus": "Por estado",
+      "activity": "Atividade",
+      "byCustomer": "Por cliente"
+    }
+  },
+  "customersPage": {},
+  "locationsPage": {
+    "drawerTitle": "Filial",
+    "kpi": {
+      "total": "Total de filiais",
+      "active": "Ativo",
+      "departments": "Departamentos",
+      "linkedCustomers": "Clientes associados"
+    },
+    "cols": {
+      "location": "Filial",
+      "customer": "Cliente",
+      "city": "Cidade",
+      "departments": "Departamentos",
+      "shifts": "Turnos",
+      "status": "Estado"
+    },
+    "filter": {
+      "status": "Estado",
+      "customer": "Cliente",
+      "city": "Cidade"
+    },
+    "empty": "Nenhuma filial encontrada",
+    "count": "{{count}} filiais",
+    "statusUnknown": "Desconhecido",
+    "drawer": {
+      "customer": "Cliente",
+      "linkedCustomer": "Cliente associado",
+      "contactDetails": "Dados de contacto",
+      "address": "Morada",
+      "phone": "Telefone",
+      "email": "E-mail",
+      "departments": "Departamentos",
+      "noDepartments": "Nenhum departamento associado",
+      "activeShifts": "Turnos ativos"
+    }
+  },
+  "contactsPage": {
+    "drawerTitle": "Pessoa de contacto",
+    "planningContact": "Contacto de planeamento",
+    "noPlanningContact": "Sem contacto de planeamento",
+    "contactDetails": "Dados de contacto",
+    "email": "E-mail",
+    "phone": "Telefone",
+    "customer": "Cliente",
+    "linkedCustomer": "Cliente associado",
+    "location": "Filial",
+    "workLocation": "Local de trabalho",
+    "yes": "Sim",
+    "no": "Não",
+    "empty": "Nenhuma pessoa de contacto encontrada",
+    "count": "{{count}} pessoas de contacto",
+    "kpi": {
+      "contacts": "Pessoas de contacto",
+      "planningContacts": "Contacto de planeamento",
+      "customers": "Clientes"
+    },
+    "cols": {
+      "name": "Nome",
+      "customer": "Cliente",
+      "location": "Filial",
+      "email": "E-mail",
+      "phone": "Telefone",
+      "planning": "Contacto de planeamento"
+    }
+  },
+  "departmentsPage": {
+    "status": {
+      "active": "Ativo",
+      "inactive": "Inativo"
+    },
+    "drawerTitle": "Departamento",
+    "customer": "Cliente",
+    "linkedCustomer": "Cliente associado",
+    "location": "Filial",
+    "employees": "Colaboradores",
+    "shifts": "Turnos",
+    "notes": "Notas",
+    "noNotes": "Ainda sem notas",
+    "empty": "Nenhum departamento encontrado",
+    "count": "{{count}} departamentos",
+    "kpi": {
+      "total": "Total de departamentos",
+      "active": "Ativo",
+      "employees": "Colaboradores",
+      "linkedCustomers": "Clientes associados"
+    },
+    "cols": {
+      "department": "Departamento",
+      "customer": "Cliente",
+      "location": "Filial",
+      "employees": "Colaboradores",
+      "shifts": "Turnos",
+      "status": "Estado"
+    },
+    "filter": {
+      "status": "Estado",
+      "customer": "Cliente",
+      "location": "Filial"
+    },
+    "costCenter": "Centro de custo"
+  },
+  "candidatesPage": {
+    "kpi": {
+      "noShows": "Faltas (no-shows)",
+      "noShowsSub": "Candidatos com pelo menos 1 falta (no-show)",
+      "cancellations": "Cancelamentos",
+      "cancellationsSub": "Candidatos com pelo menos 1 cancelamento",
+      "endingSoon": "Saída < 30 dias",
+      "endingSoonSub": "Data de saída dentro de 30 dias"
+    },
+    "cols": {
+      "endEmployment": "Data de saída"
+    }
+  },
+  "monthlyKpi": {
+    "averageCalc": "Cálculo da média"
+  },
+  "savedFilters": {
+    "title": "Filtros guardados",
+    "load": "Carregar filtro…",
+    "namePlaceholder": "Nome do filtro",
+    "save": "Guardar",
+    "delete": "Eliminar",
+    "setDefault": "Definir como predefinição"
+  }
+}
