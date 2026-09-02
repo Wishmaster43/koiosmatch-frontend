@@ -10,6 +10,7 @@ import { Building2, Upload, CheckCircle2 } from 'lucide-react'
 import FloatingPanel from '@/components/ui/FloatingPanel'
 import { tintBorder } from '@/lib/tint'
 import { useIndustries } from '@/lib/useIndustries'
+import { useCustomerSources } from '@/lib/useCustomerSources'
 import { useLocations } from '@/lib/useLocations'
 import { useCustomerPhases } from '@/lib/useCustomerPhases'
 import { useAuth } from '@/context/AuthContext'
@@ -68,6 +69,8 @@ export interface CustomerForm {
   // dedupe key (customer_dedupe_keys). Optional; a brand-new prospect may not have one yet.
   cocNumber: string
   vatNumber: string
+  // CUST-SOURCE-FE-1: acquisition source name, optional like industry.
+  source: string
 }
 interface ModalUser { id: Id; name: string }
 
@@ -86,6 +89,8 @@ const API_TO_FORM: Record<string, string> = {
   postcode: 'postalCode', province: 'province', country: 'country',
   // CUST-DUP-FE-1: coc_number is validated by StoreCustomerRequest (string|max:32).
   coc_number: 'cocNumber',
+  // CUST-SOURCE-FE-1: 422 on `source` (ValidCustomerSource, mirrors application source).
+  source: 'source',
 }
 
 // VALIDATIE-LIVE-1-rest: billingEmail is the only field here the backend
@@ -155,6 +160,8 @@ export default function AddCustomerModal({ onClose, onCreate, onImported, users 
 }) {
   const { t } = useTranslation(['customers', 'common'])
   const { industryOptions: industries } = useIndustries()
+  // CUST-SOURCE-FE-1: acquisition-source picker, same tenant-lookup shape as industry.
+  const { sources: sourceOptions, allowFreeEntry: sourceAllowFreeEntry } = useCustomerSources()
   // KLANT-FASE-1: the lifecycle-phase lookup + the is_default phase a new customer starts in.
   const { phases, defaultPhase } = useCustomerPhases()
   // The tenant's own establishments (GET /locations) — same source as OverviewTab's Vestiging ("Branch") picker.
@@ -332,7 +339,8 @@ export default function AddCustomerModal({ onClose, onCreate, onImported, users 
                 links" — "company text on the left" — it fills the gap under the
                 address instead of stretching the right). */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-              <CustomerCompanyCard form={form} set={set} errors={errors} industries={industries} />
+              <CustomerCompanyCard form={form} set={set} errors={errors} industries={industries}
+                sources={sourceOptions} sourceAllowFreeEntry={sourceAllowFreeEntry} />
               {/* KLANT-ADRES-1 (Danny 02-08): the customer's own visiting address, the
                   same full-width card/field grouping as AddCandidateModal's AddressCard. */}
               <CustomerAddressCard form={form} set={set} provinces={provinces} />

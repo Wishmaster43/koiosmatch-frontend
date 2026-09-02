@@ -253,7 +253,9 @@ export default function EditableFieldTable({
     if (f.type === 'creatable') {
       // Lookup combobox that can also add a free-text value (tenant `allowCreate`).
       const opts = (f.options ?? []).map(o => (typeof o === 'string' ? o : { value: o.value, label: String(o.label ?? o.value) }))
-      return <CreatableSelect value={(v as string) ?? ''} onChange={val => setF(f.key, val)} options={opts} placeholder={t('select')} allowCreate={f.allowCreate !== false} style={compact} />
+      // VAC-CLEAR-1: an optional creatable row is clearable when the config says so (same forwarding as the select branch).
+      return <CreatableSelect value={(v as string) ?? ''} onChange={val => setF(f.key, val)} options={opts} placeholder={t('select')} allowCreate={f.allowCreate !== false} style={compact}
+        clearable={f.clearable} clearLabel={f.clearable && typeof f.label === 'string' ? f.label : undefined} />
     }
     if (f.type === 'date')     return <DateField value={v as string | undefined} onChange={val => setF(f.key, val)} style={compact} />
     if (f.type === 'textarea') return <textarea value={(v as string) ?? ''} onChange={e => setF(f.key, e.target.value)} rows={3} style={{ ...compact, resize: 'vertical' }} />

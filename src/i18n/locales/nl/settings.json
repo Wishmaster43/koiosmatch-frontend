@@ -88,6 +88,7 @@
     "vacancy": "Vacature",
     "assessment_criteria": "Beoordelingscriteria",
     "application_sources": "Bronnen",
+    "customer_sources": "Klantbronnen",
     "rejection": "Afwijsredenen",
     "application_proposal": "Voorstellen",
     "application_required_fields": "Verplichte velden",
@@ -3839,5 +3840,13 @@
         "functie": "Functie"
       }
     }
+  },
+  "customerSourcesSettings": {
+    "title": "Klantbronnen",
+    "subtitle": "Beheer de lijst met acquisitiebronnen (bijv. LinkedIn, Google, Website leads) die wordt gebruikt bij het bronveld van klanten, en of gebruikers vrije waarden mogen invoeren.",
+    "add": "Bron toevoegen",
+    "freeEntry": "Vrije invoer toestaan",
+    "freeEntryHint": "Aan: gebruikers kunnen een eigen bron typen (combobox). Uit: alleen kiezen uit de lijst (strikte dropdown).",
+    "confirmFreeEntry": "Weet je het zeker? Vrije invoer laat gebruikers bronnen typen die niet in de lijst staan. Dit kan het bronnenrapport laten fragmenteren."
   }
 }

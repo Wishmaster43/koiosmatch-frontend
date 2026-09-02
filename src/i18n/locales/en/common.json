@@ -638,6 +638,11 @@
       "werkzoeken": "Werkzoeken",
       "werkzoekenNl": "Werkzoeken.nl"
     },
+    "customerSources": {
+      "linkedin": "LinkedIn",
+      "google": "Google",
+      "websiteLeads": "Website leads"
+    },
     "candidateTypes": {
       "on_call": "On-call worker",
       "freelance": "Freelancer",

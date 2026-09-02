@@ -638,6 +638,11 @@
       "werkzoeken": "werkzoeken",
       "werkzoekenNl": "Werkzoeken.nl"
     },
+    "customerSources": {
+      "linkedin": "LinkedIn",
+      "google": "Google",
+      "websiteLeads": "Lead dal sito web"
+    },
     "candidateTypes": {
       "flex_services": "Servizi flessibili",
       "freelance": "Freelance",

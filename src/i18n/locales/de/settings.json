@@ -85,6 +85,7 @@
     "candidate_status": "Kandidatenstatus",
     "vacancy": "Stelle",
     "application_sources": "Quellen",
+    "customer_sources": "Kundenquellen",
     "rejection": "Ablehnungsgründe",
     "application_proposal": "Vorschläge",
     "application_required_fields": "Pflichtfelder",
@@ -3839,5 +3840,13 @@
         "functie": "Funktion"
       }
     }
+  },
+  "customerSourcesSettings": {
+    "title": "Kundenquellen",
+    "subtitle": "Verwalten Sie die Liste der Akquisequellen (z. B. LinkedIn, Google, Website leads), die im Quellenfeld von Kunden verwendet wird, und ob Benutzer freie Werte eingeben dürfen.",
+    "add": "Quelle hinzufügen",
+    "freeEntry": "Freie Eingabe erlauben",
+    "freeEntryHint": "An: Benutzer können eine eigene Quelle eingeben (Combobox). Aus: nur aus der Liste wählen (strikte Auswahl).",
+    "confirmFreeEntry": "Sind Sie sicher? Freie Eingabe erlaubt Quellen außerhalb der Liste. Das kann den Quellenbericht fragmentieren."
   }
 }

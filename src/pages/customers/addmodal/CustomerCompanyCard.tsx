@@ -20,10 +20,13 @@ interface CustomerCompanyCardProps {
   // {value,label} lookup — matches the original inline CreatableSelect usage.
   // { value: the stored seed name, label: translated for display }
   industries: Array<{ value: string; label: string }>
+  // CUST-SOURCE-FE-1: acquisition-source lookup options + its own free-entry flag.
+  sources: Array<{ value: string; label: string }>
+  sourceAllowFreeEntry: boolean
 }
 
-// The company-details card fields; industries come from the tenant lookup as plain seed names, translated only for display.
-export default function CustomerCompanyCard({ form, set, errors, industries }: CustomerCompanyCardProps) {
+// The company-details card fields; industries/sources come from tenant lookups as plain seed names, translated only for display.
+export default function CustomerCompanyCard({ form, set, errors, industries, sources, sourceAllowFreeEntry }: CustomerCompanyCardProps) {
   const { t } = useTranslation(['customers', 'common'])
   return (
     <div>
@@ -64,6 +67,14 @@ export default function CustomerCompanyCard({ form, set, errors, industries }: C
           <CreatableSelect value={form.industry || null} onChange={v => set('industry', v)} allowCreate={false}
             clearable clearLabel={t('modal.fields.industry')}
             placeholder={t('modal.fields.selectIndustry')} options={industries} />
+        </FieldRow>
+        {/* CUST-SOURCE-FE-1: acquisition source — searchable tenant lookup, optional
+            like industry (§3A "the system never silently guesses"). Placed next to
+            industry per the brief's "details column" ordering. */}
+        <FieldRow label={t('modal.fields.source')}>
+          <CreatableSelect value={form.source || null} onChange={v => set('source', v)} allowCreate={sourceAllowFreeEntry}
+            clearable clearLabel={t('modal.fields.source')}
+            placeholder={t('modal.fields.selectSource')} options={sources} />
         </FieldRow>
         <FieldRow label={t('overview.employeeCount')}>
           <TextField type="number" value={form.employeeCount} onChange={v => set('employeeCount', v)} />

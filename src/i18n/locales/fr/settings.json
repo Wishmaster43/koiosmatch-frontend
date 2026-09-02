@@ -85,6 +85,7 @@
     "candidate_status": "Statut candidat",
     "vacancy": "Offre",
     "application_sources": "Sources",
+    "customer_sources": "Sources clients",
     "rejection": "Motifs de refus",
     "application_proposal": "Propositions",
     "application_required_fields": "Champs obligatoires",
@@ -3839,5 +3840,13 @@
         "functie": "Fonction"
       }
     }
+  },
+  "customerSourcesSettings": {
+    "title": "Sources clients",
+    "subtitle": "Gérez la liste des sources d'acquisition (ex. LinkedIn, Google, Website leads) utilisée dans le champ source des clients, et si les utilisateurs peuvent saisir des valeurs libres.",
+    "add": "Ajouter une source",
+    "freeEntry": "Autoriser la saisie libre",
+    "freeEntryHint": "Activé : les utilisateurs peuvent saisir leur propre source (combobox). Désactivé : choisir uniquement dans la liste.",
+    "confirmFreeEntry": "Êtes-vous sûr ? La saisie libre autorise des sources hors liste. Cela peut fragmenter le rapport des sources."
   }
 }

@@ -88,6 +88,7 @@
     "vacancy": "Vaga",
     "assessment_criteria": "Critérios de avaliação",
     "application_sources": "Origens",
+    "customer_sources": "Origens de clientes",
     "rejection": "Motivos de rejeição",
     "application_proposal": "Propostas",
     "application_required_fields": "Campos obrigatórios",
@@ -3839,5 +3840,13 @@
         "functie": "Função"
       }
     }
+  },
+  "customerSourcesSettings": {
+    "title": "Origens de clientes",
+    "subtitle": "Faça a gestão da lista de origens de aquisição (por exemplo, LinkedIn, Google, Website leads) usada no campo de origem dos clientes, e se os utilizadores podem introduzir valores livres.",
+    "add": "Adicionar origem",
+    "freeEntry": "Permitir entrada livre",
+    "freeEntryHint": "Ativado: os utilizadores podem escrever a sua própria origem (combobox). Desativado: só é possível escolher da lista (dropdown estrita).",
+    "confirmFreeEntry": "Tem a certeza? A entrada livre permite que os utilizadores escrevam origens que não estão na lista. Isto pode fragmentar o relatório de origens."
   }
 }

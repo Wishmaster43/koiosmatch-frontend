@@ -20,7 +20,7 @@ import { WORKFLOW_SEED_LABELS } from './lookupSeedCatalogueWorkflows'
 
 // Families whose rows have no stable value; their key is derived from the seed label.
 export const LABEL_KEYED: ReadonlySet<string> = new Set([
-  'candidateSources', 'channels', 'contactFunctions', 'documentTypes', 'driverLicenses', 'educationLevels', 'escalationReasons', 'functions', 'industries', 'languageLevels', 'languages', 'nationalities', 'pools', 'rejectionReasons', 'seniorityLevels', 'skillLevels', 'vacancyStatuses',
+  'candidateSources', 'customerSources', 'channels', 'contactFunctions', 'documentTypes', 'driverLicenses', 'educationLevels', 'escalationReasons', 'functions', 'industries', 'languageLevels', 'languages', 'nationalities', 'pools', 'rejectionReasons', 'seniorityLevels', 'skillLevels', 'vacancyStatuses',
   // WORKFLOW-I18N-1 (25-08): workflowFolders/workflowNames DO carry a stable slug
   // (folder.key / workflow.template_key), but the match is deliberately on the LABEL —
   // "does this still read as what we seeded" is exactly the LABEL_KEYED semantic, and it
@@ -41,6 +41,12 @@ export const SEED_LABELS: Record<string, Record<string, string>> = {
     kennismaking: "Kennismaking",
     belafspraak: "Belafspraak",
     online: "Online gesprek",
+  },
+  // CUST-SOURCE-FE-1: the /customer-sources seed (LinkedIn · Google · Website leads).
+  customerSources: {
+    linkedin: "LinkedIn",
+    google: "Google",
+    websiteLeads: "Website leads",
   },
   candidateSources: {
     careersite: "Careersite",

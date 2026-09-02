@@ -52,6 +52,7 @@ import ProvincesSettings from './sections/ProvincesSettings'
 import FunctionsSettings from './sections/FunctionsSettings'
 import ContactFunctionsSettings from './sections/ContactFunctionsSettings'
 import ApplicationSourcesSettings from './sections/ApplicationSourcesSettings'
+import CustomerSourcesSettings from './sections/customers/CustomerSourcesSettings'
 import { VacancyStatusSettings, VacancyPhaseSettings, VacancySenioritySettings, VacancyEducationSettings, VacancyChannelSettings, VacancyApplicationDefaultsSettings } from './sections/VacancySettings'
 import VacancyDefaultStatusSettings from './sections/VacancyDefaultStatusSettings'
 import VacancyMatchingSettings from './sections/VacancyMatchingSettings'
@@ -278,6 +279,9 @@ export const NAV_GROUPS = [
       // candidate phase editor, so both read as "the same thing on another entity".
       { id: 'customer_phases', icon: Target, component: CustomerPhasesSettings },
       { id: 'customer_statuses', icon: Tags, component: CustomerStatusesSettings },
+      // CUST-SOURCE-FE-1: acquisition-source lookup mirroring application_sources
+      // above — same Radio icon, so it reads as "the same thing on another entity".
+      { id: 'customer_sources', icon: Radio, component: CustomerSourcesSettings },
       // Customer half of the blacklist-reason vocabulary (KLANT-BLACKLIST-1) — lives
       // HERE, not as a sub-tab under candidates (translated: "customer with
       // customer" — verbatim: "klant bij klant", Danny 2026-08-05).

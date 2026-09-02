@@ -118,6 +118,15 @@ describe('useCustomerRecord · updateCustomer', () => {
     expect(mockedPatch).not.toHaveBeenCalled()
   })
 
+  // CUST-SOURCE-FE-1: the drawer's source picker must actually reach the PATCH
+  // body — FIELD_MAP is an allowlist, so a missing entry would silently drop it.
+  it('maps source to its API key', async () => {
+    mockedPatch.mockResolvedValue({})
+    const r = harness([customer({ id: 1, source: '' })])
+    act(() => { r.result.current.record.updateCustomer(1, { source: 'Google' }) })
+    expect(mockedPatch).toHaveBeenCalledWith('/customers/1', { source: 'Google' })
+  })
+
   // JOB-CONTACT-1 (Danny 28-07): the customer's own e-mail/phone Contact card —
   // FIELD_MAP must send the exact API keys, not silently drop them.
   it('maps email/phone to their API keys', async () => {
@@ -262,6 +271,29 @@ describe('useCustomerRecord · customer phase (KLANT-FASE-1)', () => {
       })
     })
     expect(vi.mocked(api.post).mock.calls[0][1]).not.toHaveProperty('vat_number')
+  })
+
+  // CUST-SOURCE-FE-1: acquisition source rides the create body like industry —
+  // asserts the REQUEST (§13), and its absence when left empty.
+  it('sends source on the create body once picked, omits it when empty', async () => {
+    vi.mocked(api.post).mockResolvedValue({ data: { id: 15, name: 'Nieuw' } })
+    const r = harness([])
+    await act(async () => {
+      await r.result.current.record.handleCreate({
+        name: 'Nieuw', debtorNumber: '', status: 'active', ownerId: '', industry: '', city: '', phase: '',
+        source: 'LinkedIn',
+      })
+    })
+    expect(vi.mocked(api.post)).toHaveBeenCalledWith('/customers', expect.objectContaining({ source: 'LinkedIn' }))
+
+    vi.mocked(api.post).mockClear()
+    vi.mocked(api.post).mockResolvedValue({ data: { id: 16, name: 'Leeg' } })
+    await act(async () => {
+      await r.result.current.record.handleCreate({
+        name: 'Leeg', debtorNumber: '', status: 'active', ownerId: '', industry: '', city: '', phase: '', source: '',
+      })
+    })
+    expect(vi.mocked(api.post).mock.calls[0][1]).not.toHaveProperty('source')
   })
 
   it('CLEAR-SWEEP: omits industry and owner_id from the create body when cleared back to empty', async () => {

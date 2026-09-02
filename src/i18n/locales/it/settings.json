@@ -88,6 +88,7 @@
     "vacancy": "Posizione",
     "assessment_criteria": "Criteri di valutazione",
     "application_sources": "Fonti",
+    "customer_sources": "Fonti clienti",
     "rejection": "Motivi di rifiuto",
     "application_proposal": "Proposte",
     "application_required_fields": "Campi obbligatori",
@@ -3839,5 +3840,13 @@
         "functie": "Funzione"
       }
     }
+  },
+  "customerSourcesSettings": {
+    "title": "Fonti clienti",
+    "subtitle": "Gestisci l'elenco delle fonti di acquisizione (ad es. LinkedIn, Google, Website leads) usato nel campo fonte dei clienti, e se gli utenti possono inserire valori liberi.",
+    "add": "Aggiungi fonte",
+    "freeEntry": "Consenti inserimento libero",
+    "freeEntryHint": "Attivo: gli utenti possono digitare una fonte propria (combobox). Disattivo: si può scegliere solo dall'elenco (menu a tendina rigido).",
+    "confirmFreeEntry": "Sei sicuro? L'inserimento libero permette agli utenti di digitare fonti non presenti nell'elenco. Questo può frammentare il report Fonti."
   }
 }

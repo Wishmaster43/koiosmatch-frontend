@@ -58,6 +58,7 @@ import { useAllSettings, getBoolSetting } from '@/lib/settings/useAllSettings'
 import { useIdentifierValidation } from '@/hooks/useIdentifierValidation'
 import { useProvinces } from '@/hooks/useProvinces'
 import { getCountryOptions } from '@/lib/countries'
+import { useCustomerSources } from '@/lib/useCustomerSources'
 import EditableRichTextField from './EditableRichTextField'
 import { buildCustomerAdviceInsights } from './customerAiInsights'
 import type { Customer } from '@/types/customer'
@@ -70,6 +71,8 @@ export default function OverviewTab({ c, onSave }: { c: Customer; onSave?: (valu
   // uses — the drawer block below prepends its advice so the two never disagree.
   const resolveAdvice = useCustomerAdvice()
   const { industryOptions } = useIndustries()
+  // CUST-SOURCE-FE-1: acquisition-source picker, same tenant-lookup shape as industry.
+  const { sources: sourceOptions, allowFreeEntry: sourceAllowFreeEntry } = useCustomerSources()
   // The tenant's own establishments (GET /locations) — the same source the match
   // form's Vestiging picker uses, so both screens offer exactly one list.
   const branchOptions = useLocations().map(l => ({ value: String(l.value), label: l.label }))
@@ -126,6 +129,9 @@ export default function OverviewTab({ c, onSave }: { c: Customer; onSave?: (valu
   const fields: FieldRow[] = [
     // Options carry { value: stored name, label: translated } so saving never writes a translation.
     { key: 'industry',      label: t('overview.industry'),      type: 'select', options: industryOptions, group: gDetails },
+    // CUST-SOURCE-FE-1: acquisition-source field — additive-only per the frozen
+    // customer drawer (§3B), a searchable/creatable picker like industry above.
+    { key: 'source', label: t('overview.source'), type: 'creatable', options: sourceOptions, allowCreate: sourceAllowFreeEntry, clearable: true, group: gDetails },
     { key: 'employeeCount', label: t('overview.employeeCount'), inputType: 'number', group: gDetails },
     // KLANT-KVK-1 (backend 28-07): the customer's HEAD registration numbers, linked
     // through to the public registers. A location carries the sub-number under it —

@@ -29,6 +29,12 @@ import { useCustomerAdvice } from '@/lib/useCustomerAdvice'
 import type { Customer } from '@/types/customer'
 
 vi.mock('@/lib/useIndustries', () => ({ useIndustries: () => ({ industries: ['Zorg', 'IT'], industryOptions: ['Zorg', 'IT'].map(n => ({ value: n, label: n })) }) }))
+// CUST-SOURCE-FE-1: the acquisition-source picker, same shape as industry above.
+vi.mock('@/lib/useCustomerSources', () => ({
+  useCustomerSources: () => ({
+    sources: ['LinkedIn', 'Google'].map(n => ({ value: n, label: n })), allowFreeEntry: false, invalidate: vi.fn(),
+  }),
+}))
 // useLocations is react-query-backed — mocked directly so this test doesn't need
 // a QueryClientProvider ancestor (mirrors AddCustomerModal.test.tsx).
 vi.mock('@/lib/useLocations', () => ({
@@ -119,6 +125,26 @@ describe('OverviewTab · Contact card', () => {
     await user.click(screen.getByTitle(cm('save')))
 
     expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ email: 'nieuw@rivas.nl', phone: '030-1234567' }))
+  })
+})
+
+// CUST-SOURCE-FE-1: the additive source field row in the Gegevens card — a
+// searchable/creatable picker like industry. Asserts the SAVED PATCH value (§13).
+describe('OverviewTab · acquisition source field (CUST-SOURCE-FE-1)', () => {
+  it('renders the current source and PATCHes a newly picked one', async () => {
+    const user = userEvent.setup()
+    const onSave = vi.fn()
+    render(<OverviewTab c={customer({ source: 'LinkedIn' } as Partial<Customer>)} onSave={onSave} />)
+    expect(screen.getByText('LinkedIn')).toBeInTheDocument()
+
+    // The Gegevens card (industry/source/employeeCount/...) is the FIRST block, so
+    // its own pencil is the first "edit" title in document order.
+    await user.click(screen.getAllByTitle(cm('edit'))[0])
+    await user.click(screen.getByRole('button', { name: 'LinkedIn' }))
+    await user.click(await screen.findByRole('button', { name: 'Google' }))
+    await user.click(screen.getByTitle(cm('save')))
+
+    expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ source: 'Google' }))
   })
 })
 

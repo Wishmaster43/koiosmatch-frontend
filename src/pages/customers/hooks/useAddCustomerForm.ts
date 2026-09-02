@@ -28,6 +28,9 @@ export function useAddCustomerForm({ defaultPhase, defaultStatusValue, meIsAssig
     branchId: '', website: '', employeeCount: '', toneOfVoice: '', costCenter: '', billingEmail: '',
     street: '', houseNumber: '', houseNumberSuffix: '', postalCode: '', province: '', country: '',
     cocNumber: '', vatNumber: '',
+    // CUST-SOURCE-FE-1: acquisition source, empty until the recruiter picks one —
+    // the app never guesses (§3A "the system never silently guesses").
+    source: '',
   })
 
   // The lookup arrives async (one cached GET), so seed the default phase once it lands —

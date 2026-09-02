@@ -46,6 +46,9 @@ interface CreateForm {
   name: string; debtorNumber?: string; status: string; ownerId: string; industry: string; city: string
   // KLANT-FASE-1: lifecycle phase slug picked in the create modal (is_default preselected).
   phase?: string
+  // CUST-SOURCE-FE-1: acquisition-source name picked in the create modal, optional
+  // like industry.
+  source?: string
   branchId?: string; website?: string; employeeCount?: string
   toneOfVoice?: string; costCenter?: string; billingEmail?: string
   // KLANT-ADRES-1 (Danny 02-08): the customer's own visiting address, collected by
@@ -78,6 +81,8 @@ const OPTIONAL_CREATE_FIELDS: Array<[keyof CreateForm, string]> = [
   // CUST-CREATE-VELDEN (Danny 27-08 via adviezen-akkoord): the VAT number joins
   // the create popup; StoreCustomerRequest already accepts vat_number.
   ['vatNumber', 'vat_number'],
+  // CUST-SOURCE-FE-1: acquisition source, optional like the rest above.
+  ['source', 'source'],
 ]
 
 interface Args {
@@ -90,6 +95,8 @@ interface Args {
 // UI field name → API field name for the single-record PATCH.
 const FIELD_MAP: Record<string, string> = {
   name: 'name', debtorNumber: 'debtor_number', city: 'city', industry: 'industry',
+  // CUST-SOURCE-FE-1: the drawer's source picker, matched by name like industry.
+  source: 'source',
   // KLANT-ADRES-1 / KLANT-KVK-1 (backend 28-07): the customer's own address + head
   // registration. Every key here is validated by CustomerRequest::sharedRules — a key
   // MISSING from that list is silently dropped by Laravel, so this map and those rules

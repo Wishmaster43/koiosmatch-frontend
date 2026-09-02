@@ -263,6 +263,9 @@ export interface Customer {
   lng: number | null
   distanceKm: number | null
   industry: string
+  // CUST-SOURCE-FE-1: acquisition-source NAME (customer_sources lookup) — matched
+  // by name like industry/functions, never a foreign key.
+  source: string
   website: string
   employeeCount: string | number
   toneOfVoice: string
@@ -404,6 +407,8 @@ export interface ApiCustomer {
   postcode?: string; postal_code?: string; state?: string; country?: string
   coc_number?: string; vat_number?: string
   city?: string; industry?: { name?: string } | string; website?: string
+  // CUST-SOURCE-FE-1: acquisition-source name, plain string like industry.
+  source?: string | null
   // JOB-CONTACT-1: the customer's own contact fields (CustomerDetailResource).
   email?: string; phone?: string
   // STRAAL-1: geocoded coordinates + radius distance from the server.

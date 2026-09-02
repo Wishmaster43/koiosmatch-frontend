@@ -289,6 +289,8 @@ export function mapCustomer(c: ApiCustomer = {}): Customer {
     lng: toCoord(c.lng),
     distanceKm: toCoord(c.distance_km),
     industry: (c.industry && typeof c.industry === 'object') ? (c.industry.name ?? '') : (c.industry ?? ''),
+    // CUST-SOURCE-FE-1: plain acquisition-source name, matched by name like industry.
+    source: c.source ?? '',
     website: c.website ?? '',
     employeeCount: c.employee_count ?? c.employeeCount ?? '',
     toneOfVoice: c.tone_of_voice ?? c.toneOfVoice ?? '',

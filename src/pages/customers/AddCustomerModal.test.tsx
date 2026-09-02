@@ -30,6 +30,12 @@ vi.mock('@/pages/settings/sections/import/importApi', async (importOriginal) => 
 })
 
 vi.mock('@/lib/useIndustries', () => ({ useIndustries: () => ({ industries: ['Zorg', 'IT'], industryOptions: ['Zorg', 'IT'].map(n => ({ value: n, label: n })) }) }))
+// CUST-SOURCE-FE-1: the acquisition-source picker, same shape as industry above.
+vi.mock('@/lib/useCustomerSources', () => ({
+  useCustomerSources: () => ({
+    sources: ['LinkedIn', 'Google'].map(n => ({ value: n, label: n })), allowFreeEntry: false, invalidate: vi.fn(),
+  }),
+}))
 // useLocations is react-query-backed (@tanstack/react-query) — mocked directly
 // so this test doesn't need a QueryClientProvider ancestor.
 vi.mock('@/lib/useLocations', () => ({
@@ -569,6 +575,31 @@ describe('AddCustomerModal · KvK number field (CUST-DUP-FE-1)', () => {
     await user.type(screen.getByLabelText(ct('overview.coc'), { exact: false }), '12345678')
     await user.click(screen.getByRole('button', { name: ct('modal.create') }))
     expect(onCreate).toHaveBeenCalledWith(expect.objectContaining({ cocNumber: '12345678' }))
+  })
+})
+
+// CUST-SOURCE-FE-1: acquisition source is a searchable/creatable picker like
+// industry — picking one hands it to onCreate; leaving it untouched sends the
+// empty default (filtered out of the real POST body downstream, useCustomerRecord.test.ts).
+describe('AddCustomerModal · acquisition source field (CUST-SOURCE-FE-1)', () => {
+  it('picking a source hands it to onCreate', async () => {
+    const onCreate = vi.fn().mockResolvedValue(undefined)
+    const user = userEvent.setup()
+    render(<AddCustomerModal onClose={() => {}} onCreate={onCreate} users={users} statuses={statuses} />)
+    await user.type(screen.getByLabelText(ct('modal.fields.name'), { exact: false }), 'Rivas Zorggroep')
+    await user.click(screen.getByRole('button', { name: new RegExp(ct('modal.fields.source')) }))
+    await user.click(await screen.findByRole('button', { name: 'LinkedIn' }))
+    await user.click(screen.getByRole('button', { name: ct('modal.create') }))
+    expect(onCreate).toHaveBeenCalledWith(expect.objectContaining({ source: 'LinkedIn' }))
+  })
+
+  it('leaves source empty when never touched', async () => {
+    const onCreate = vi.fn().mockResolvedValue(undefined)
+    const user = userEvent.setup()
+    render(<AddCustomerModal onClose={() => {}} onCreate={onCreate} users={users} statuses={statuses} />)
+    await user.type(screen.getByLabelText(ct('modal.fields.name'), { exact: false }), 'Rivas Zorggroep')
+    await user.click(screen.getByRole('button', { name: ct('modal.create') }))
+    expect(onCreate).toHaveBeenCalledWith(expect.objectContaining({ source: '' }))
   })
 })
 

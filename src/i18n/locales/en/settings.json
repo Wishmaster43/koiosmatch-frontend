@@ -88,6 +88,7 @@
     "vacancy": "Vacancy",
     "assessment_criteria": "Assessment criteria",
     "application_sources": "Sources",
+    "customer_sources": "Customer sources",
     "rejection": "Rejection reasons",
     "application_proposal": "Proposals",
     "application_required_fields": "Required fields",
@@ -3839,5 +3840,13 @@
         "functie": "Function"
       }
     }
+  },
+  "customerSourcesSettings": {
+    "title": "Customer sources",
+    "subtitle": "Manage the list of acquisition sources (e.g. LinkedIn, Google, Website leads) used on the customer source field, and whether users can enter free values.",
+    "add": "Add source",
+    "freeEntry": "Allow free entry",
+    "freeEntryHint": "On: users can type their own source (combobox). Off: pick from the list only (strict dropdown).",
+    "confirmFreeEntry": "Are you sure? Free entry lets users type sources that aren’t in the list. This can fragment the Sources report."
   }
 }
