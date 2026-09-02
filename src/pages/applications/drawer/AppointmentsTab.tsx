@@ -5,6 +5,8 @@
  * used to be a hand-rolled free-text composer showing raw ISO datetimes). Reads
  * straight from /candidates/{id}/appointments so it always reflects the shared
  * appointments entity, not a stale copy nested under the application.
+ * S34: once the application is rejected, this tab goes read-only — history
+ * stays readable but the new/edit affordances switch off (§3 no fake affordances).
  */
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -15,7 +17,7 @@ import { useAppointmentTypes } from '@/lib/useAppointmentTypes'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 import Button from '@/components/ui/Button'
 import StatusFilterSelect, { useStatusFilter } from '@/components/drawer/StatusFilterSelect'
-import { SectionTitle } from '@/components/ui/typography'
+import { SectionTitle, Caption } from '@/components/ui/typography'
 import SoftChip from '@/components/ui/SoftChip'
 import { PlanIntakeModal } from '@/pages/candidates/shared'
 import type { ExistingAppointment } from '@/pages/candidates/shared'
@@ -92,12 +94,19 @@ export default function AppointmentsTab({ application: a }: { application: Appli
         .some(v => String(v ?? '').toLowerCase().includes(q)))
     : byStatus
 
+  // S34: rejected applications keep appointment history readable but stop new/edit.
+  const rejected = a.bucket === 'rejected'
+
   // New-appointment button — the house DrawerAddButton short (soft-tint primary),
-  // disabled when the application has no candidate link.
+  // disabled when the application has no candidate link, or once rejected.
   const newButton = (
-    <DrawerAddButton onClick={() => setCreating(true)} disabled={a.candidateId == null}
+    <DrawerAddButton onClick={() => setCreating(true)} disabled={a.candidateId == null || rejected}
+      title={rejected ? t('appointments.rejectedNotice') : undefined}
       label={t('appointments.new')} short />
   )
+
+  // S34 read-only notice, shown under the toolbar once the application is rejected.
+  const rejectedNotice = rejected && <Caption as="div">{t('appointments.rejectedNotice')}</Caption>
 
   // Toolbar: search (left, growing) → status filter → add (right) — the house order (§4).
   const toolbar = (
@@ -136,13 +145,15 @@ export default function AppointmentsTab({ application: a }: { application: Appli
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         {toolbar}
+        {rejectedNotice}
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: 52, textAlign: 'center', color: 'var(--text-muted)' }}>
           <span style={{ width: 56, height: 56, borderRadius: '50%', border: '1px solid var(--border)',
             display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 14 }}>
             <Calendar size={22} style={{ opacity: 0.6 }} />
           </span>
           <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)' }}>{t('appointments.empty')}</div>
-          <div style={{ fontSize: 12, marginTop: 4, maxWidth: 260 }}>{t('appointments.hint')}</div>
+          {/* The planning hint invites booking — suppress it once rejected (S34). */}
+          {!rejected && <div style={{ fontSize: 12, marginTop: 4, maxWidth: 260 }}>{t('appointments.hint')}</div>}
         </div>
         {creating && a.candidateId != null && (
           <PlanIntakeModal candidateId={a.candidateId} applicationId={a.id ?? null} defaultVacancyId={a.vacancyId} mode="appointment"
@@ -155,6 +166,7 @@ export default function AppointmentsTab({ application: a }: { application: Appli
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
       {toolbar}
+      {rejectedNotice}
       {visible.length === 0 && (
         <div style={{ padding: '28px 0', textAlign: 'center', fontSize: 12, color: 'var(--text-muted)' }}>{t('appointments.noMatches')}</div>
       )}
@@ -173,8 +185,8 @@ export default function AppointmentsTab({ application: a }: { application: Appli
               {ap.duration_min != null && <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><Clock size={12} /> {t('appointments.durationMin', { count: ap.duration_min })}</span>}
               {ap.owner?.name && <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><User size={12} /> {t('appointments.with')}: {ap.owner.name}</span>}
               {ap.location_name && <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><MapPin size={12} /> {ap.location_name}</span>}
-              {/* Edit: opens the same shared modal, prefilled → PATCH. */}
-              {a.candidateId != null && (
+              {/* Edit: opens the same shared modal, prefilled → PATCH. Off once rejected (S34). */}
+              {a.candidateId != null && !rejected && (
                 <Button variant="secondary" size="sm" iconOnly style={{ marginLeft: 'auto' }}
                   onClick={() => setEditing({
                     id: ap.id, scheduled_at: ap.scheduled_at, duration_min: ap.duration_min, modality: ap.modality,

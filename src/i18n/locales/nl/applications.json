@@ -366,6 +366,7 @@
     "cancel": "Annuleren",
     "durationMin": "{{count}} min",
     "loadError": "Afspraken laden is mislukt.",
+    "rejectedNotice": "Deze sollicitatie is afgewezen. Afspraken zijn alleen te bekijken.",
     "searchPlaceholder": "Zoeken...",
     "statuses": {
       "planned": "Gepland",

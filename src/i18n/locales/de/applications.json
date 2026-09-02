@@ -366,6 +366,7 @@
     "cancel": "Abbrechen",
     "durationMin": "{{count}} Min.",
     "loadError": "Termine laden ist fehlgeschlagen.",
+    "rejectedNotice": "Diese Bewerbung wurde abgelehnt. Termine sind nur einsehbar.",
     "searchPlaceholder": "Suchen...",
     "statuses": {
       "planned": "Geplant",

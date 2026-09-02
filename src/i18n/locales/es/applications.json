@@ -366,6 +366,7 @@
     "cancel": "Cancelar",
     "durationMin": "{{count}} min",
     "loadError": "Error al cargar las citas.",
+    "rejectedNotice": "Esta candidatura fue rechazada. Las citas son solo de lectura.",
     "searchPlaceholder": "Buscar...",
     "statuses": {
       "planned": "Programada",

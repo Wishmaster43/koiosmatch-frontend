@@ -366,6 +366,7 @@
     "cancel": "Annuler",
     "durationMin": "{{count}} min",
     "loadError": "Échec du chargement des rendez-vous.",
+    "rejectedNotice": "Cette candidature a été refusée. Les rendez-vous sont en lecture seule.",
     "searchPlaceholder": "Rechercher...",
     "statuses": {
       "planned": "Planifié",

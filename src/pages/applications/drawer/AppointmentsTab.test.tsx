@@ -135,4 +135,41 @@ describe('AppointmentsTab', () => {
     expect(shown.existingId).toBe('a1')
     expect(shown.mode).toBe('appointment')
   })
+
+  // S34: a rejected application's appointments tab is read-only.
+  it('rejected + empty: disables the add button, shows the notice, hides the planning hint', async () => {
+    mockGet.mockResolvedValue({ data: { data: [] } })
+    render(<AppointmentsTab application={app({ bucket: 'rejected' })} />)
+    await waitFor(() => expect(screen.getByRole('button', { name: 'appointments.new' })).toBeDisabled())
+    expect(screen.getByText('appointments.rejectedNotice')).toBeInTheDocument()
+    expect(screen.queryByText('appointments.hint')).not.toBeInTheDocument()
+  })
+
+  it('rejected + one linked row: keeps the history readable but hides the pencil', async () => {
+    mockGet.mockResolvedValue({
+      data: {
+        data: [
+          { id: 'a1', application_id: 5, type: 'intake_flex', scheduled_at: '2026-07-15T10:45:00+00:00', status: 'planned' },
+        ],
+      },
+    })
+    render(<AppointmentsTab application={app({ bucket: 'rejected' })} />)
+    await waitFor(() => screen.getByText('Type:intake_flex'))
+    expect(screen.queryByLabelText('common:edit')).not.toBeInTheDocument()
+    expect(screen.getByText('appointments.rejectedNotice')).toBeInTheDocument()
+  })
+
+  it('not rejected: no notice and the pencil stays', async () => {
+    mockGet.mockResolvedValue({
+      data: {
+        data: [
+          { id: 'a1', application_id: 5, type: 'intake_flex', scheduled_at: '2026-07-15T10:45:00+00:00', status: 'planned' },
+        ],
+      },
+    })
+    render(<AppointmentsTab application={app()} />)
+    await waitFor(() => screen.getByText('Type:intake_flex'))
+    expect(screen.queryByText('appointments.rejectedNotice')).not.toBeInTheDocument()
+    expect(screen.getByLabelText('common:edit')).toBeInTheDocument()
+  })
 })
