@@ -488,7 +488,15 @@
     "revokeConfirm": "Diesen Vorschlag widerrufen? Der Empfänger kann die geteilten Daten dann nicht mehr einsehen.",
     "revoked_toast": "Vorschlag widerrufen",
     "variantChipProposal": "Vorschlags-Lebenslauf",
-    "variantChipFull": "Vollständiger Lebenslauf"
+    "variantChipFull": "Vollständiger Lebenslauf",
+    "sendEmail": "Direkt per E-Mail versenden",
+    "sentByKoiosInfo": "Koios versendet diese Nachricht selbst per E-Mail. Schalten Sie den Schalter aus, um nur den Vorschlag zu erfassen und den Link selbst zu teilen.",
+    "sendStatus": {
+      "sent": "Gesendet",
+      "failed": "Fehlgeschlagen",
+      "no_consent": "Keine Einwilligung",
+      "not_sent": "Nicht gesendet"
+    }
   },
   "restore": {
     "button": "Wiederherstellen",

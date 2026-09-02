@@ -508,7 +508,15 @@
     "revokeConfirm": "Revoke this proposal? The recipient will no longer be able to view the shared details.",
     "revoked_toast": "Proposal revoked",
     "variantChipProposal": "Proposal CV",
-    "variantChipFull": "Full CV"
+    "variantChipFull": "Full CV",
+    "sendEmail": "Send directly by e-mail",
+    "sentByKoiosInfo": "Koios sends this message itself by e-mail. Turn the switch off to only record the proposal and share the link yourself.",
+    "sendStatus": {
+      "sent": "Sent",
+      "failed": "Failed",
+      "no_consent": "No consent",
+      "not_sent": "Not sent"
+    }
   },
   "restore": {
     "button": "Restore",

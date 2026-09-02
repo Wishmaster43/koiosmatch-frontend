@@ -27,11 +27,32 @@ import { notifyError, notifySuccess } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
 import { Caption } from '@/components/ui/typography'
 import { useProposals } from './useProposals'
+import type { Proposal } from './useProposals'
 import type { Id } from '@/types/common'
 import type { ApplicationDetail } from '@/types/application'
+import type { TFunction } from 'i18next'
 
 interface ProposalsBlockProps {
   application: ApplicationDetail
+}
+
+// K-248: resolves a proposal's delivery-truth chip, or null for a legacy row
+// with neither send_status nor sent_at. sent/failed/no_consent/not_sent are the
+// only values the backend stamps (ApplicationProposalResource); a failed send
+// carries send_error as the chip's tooltip.
+function sendStatusChip(p: Proposal, t: TFunction) {
+  const status = p.send_status ?? (p.sent_at ? 'sent' : null)
+  if (!status) return null
+  const colorByStatus: Record<string, string> = {
+    sent: 'var(--color-success)',
+    failed: 'var(--color-danger)',
+    no_consent: 'var(--color-warning)',
+    not_sent: 'var(--text-muted)',
+  }
+  return (
+    <SoftChip label={t(`propose.sendStatus.${status}`)} color={colorByStatus[status]}
+      title={status === 'failed' && p.send_error ? p.send_error : undefined} />
+  )
 }
 
 // Renders the recorded-proposal history (see file docblock above); stays invisible
@@ -87,6 +108,11 @@ export default function ProposalsBlock({ application }: ProposalsBlockProps) {
                 {p.recipient_email && <Caption as="div">{p.recipient_email}</Caption>}
               </div>
               <SoftChip label={p.cv_variant === 'full' ? t('propose.variantChipFull') : t('propose.variantChipProposal')} color="var(--color-primary)" />
+              {/* K-248 PROPOSE-SEND-1: the delivery-truth chip — sent/failed/no_consent/
+                  not_sent as stamped by the backend after the mailer reported. A null
+                  status (rows older than the column) falls back to sent_at, mirroring
+                  the resource's own fallback (ApplicationProposalResource::send_status). */}
+              {sendStatusChip(p, t)}
               <Caption as="div" style={{ minWidth: 90 }}>
                 {p.sent_at ? t('propose.sentOn', { date: formatDate(p.sent_at) }) : '—'}
               </Caption>

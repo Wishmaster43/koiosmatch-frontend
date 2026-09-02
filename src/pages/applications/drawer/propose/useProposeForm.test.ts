@@ -188,7 +188,26 @@ describe('useProposeForm', () => {
       cv_variant: 'full',
       subject: result.current.subject,
       body: result.current.body,
+      send: true,
     })
+  })
+
+  // K-248 PROPOSE-SEND-1: `send` defaults to true and follows the sendEmail
+  // toggle — false records the proposal + share link only, no mail.
+  it('POSTs send:true by default and send:false once the toggle is switched off', async () => {
+    settingsFixture = {}
+    const { result } = renderHook(() => useProposeForm(app()), { wrapper })
+    await waitFor(() => expect(result.current.candidateLoading).toBe(false))
+    act(() => { result.current.setConsentConfirmed(true) })
+    await waitFor(() => expect(result.current.disabledReason).toBeNull())
+    expect(result.current.sendEmail).toBe(true)
+
+    await act(async () => { await result.current.submit() })
+    expect(apiPost).toHaveBeenCalledWith('/applications/1/propose', expect.objectContaining({ send: true }))
+
+    act(() => { result.current.setSendEmail(false) })
+    await act(async () => { await result.current.submit() })
+    expect(apiPost).toHaveBeenLastCalledWith('/applications/1/propose', expect.objectContaining({ send: false }))
   })
 
   // Regression (25-07): the "motivatiebrief meesturen" checkbox changed nothing —

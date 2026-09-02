@@ -18,6 +18,10 @@ export interface Proposal {
   recipient_name: string | null
   recipient_email: string | null
   cv_variant: 'proposal' | 'full'
+  // K-248 PROPOSE-SEND-1: the delivery truth, stamped after the mailer reported
+  // (null on rows older than the column — ProposalsBlock falls back to sent_at).
+  send_status: 'sent' | 'failed' | 'no_consent' | 'not_sent' | null
+  send_error: string | null
   sent_at: string | null
   revoked_at: string | null
   opened_at: string | null

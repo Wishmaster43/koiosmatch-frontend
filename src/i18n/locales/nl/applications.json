@@ -508,7 +508,15 @@
     "revokeConfirm": "Dit voorstel intrekken? De ontvanger kan de gedeelde gegevens dan niet meer bekijken.",
     "revoked_toast": "Voorstel ingetrokken",
     "variantChipProposal": "Voorstel-cv",
-    "variantChipFull": "Volledig cv"
+    "variantChipFull": "Volledig cv",
+    "sendEmail": "Direct versturen via e-mail",
+    "sentByKoiosInfo": "Koios verstuurt dit bericht zelf via e-mail. Zet de schakelaar uit om alleen vast te leggen en de deellink zelf te delen.",
+    "sendStatus": {
+      "sent": "Verzonden",
+      "failed": "Mislukt",
+      "no_consent": "Geen toestemming",
+      "not_sent": "Niet verzonden"
+    }
   },
   "restore": {
     "button": "Herstellen",

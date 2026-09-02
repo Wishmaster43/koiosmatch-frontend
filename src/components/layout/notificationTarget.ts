@@ -55,6 +55,10 @@ export const CUSTOM_TYPE_TARGETS: Record<string, (meta: Record<string, unknown>)
   'opportunity.won': (meta) => (meta.opportunity_id != null ? { page: 'opportunities', id: String(meta.opportunity_id) } : null),
   'opportunity.lost': (meta) => (meta.opportunity_id != null ? { page: 'opportunities', id: String(meta.opportunity_id) } : null),
   'appointment.today': (meta) => (meta.candidate_id != null ? { page: 'candidates', id: String(meta.candidate_id) } : null),
+  // K-248 PROPOSE-SEND-1: a failed proposal send bells the proposer — meta
+  // carries application_id (ProposalService::notifySendFailed) alongside the
+  // generic meta.type/id pointer, so this is belt-and-braces with the generic path.
+  'proposal.send_failed': (meta) => (meta.application_id != null ? { page: 'applications', id: String(meta.application_id) } : null),
 }
 
 // Pure: resolve a notification into a navigable {page, id}, or null when nothing

@@ -22,7 +22,8 @@ const app = { id: 1 } as ApplicationDetail
 
 const proposal = (over: Partial<Proposal> = {}): Proposal => ({
   id: 'p1', recipient_name: 'Piet Klaassen', recipient_email: 'piet@zorggroep.nl',
-  cv_variant: 'proposal', sent_at: '2026-07-20', revoked_at: null, opened_at: null,
+  cv_variant: 'proposal', send_status: 'sent', send_error: null,
+  sent_at: '2026-07-20', revoked_at: null, opened_at: null,
   open_count: 0, is_valid: true, share_url: null, share_expires_at: null, ...over,
 })
 
@@ -155,5 +156,29 @@ describe('ProposalsBlock', () => {
     render(<ProposalsBlock application={app} />)
     expect(screen.queryByRole('button', { name: 'propose.copyLink' })).toBeNull()
     expect(screen.queryByRole('link', { name: 'propose.openLink' })).toBeNull()
+  })
+
+  // K-248 PROPOSE-SEND-1: the delivery-truth chip renders the send_status label
+  // and, on a failed send, the send_error as its tooltip (title attribute).
+  it('shows the send-status chip with the send_error as a tooltip on failure', () => {
+    setProposals([proposal({ send_status: 'failed', send_error: 'SMTP timeout' })])
+    render(<ProposalsBlock application={app} />)
+    const chip = screen.getByText('propose.sendStatus.failed')
+    expect(chip.closest('[title]')).toHaveAttribute('title', 'SMTP timeout')
+  })
+
+  // A legacy row (send_status null) falls back to sent_at, mirroring the
+  // backend resource's own fallback.
+  it('falls back to a sent chip when send_status is null but sent_at is set', () => {
+    setProposals([proposal({ send_status: null, sent_at: '2026-07-20' })])
+    render(<ProposalsBlock application={app} />)
+    expect(screen.getByText('propose.sendStatus.sent')).toBeInTheDocument()
+  })
+
+  // A never-sent legacy row (neither send_status nor sent_at) shows no chip.
+  it('shows no send-status chip when neither send_status nor sent_at is set', () => {
+    setProposals([proposal({ send_status: null, sent_at: null })])
+    render(<ProposalsBlock application={app} />)
+    expect(screen.queryByText(/propose\.sendStatus\./)).toBeNull()
   })
 })

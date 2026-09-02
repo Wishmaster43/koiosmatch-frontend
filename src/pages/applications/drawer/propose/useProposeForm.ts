@@ -6,11 +6,11 @@
  * submit(): CV download + POST /applications/{id}/propose (the real recording
  * endpoint) + an optional funnel-phase move.
  *
- * Koios still never SENDS anything itself — the propose endpoint only records
- * the proposal (recipient, cv variant, drafted subject/body), so submit()
- * downloads a PDF client-side and records what happened; it never claims a
- * message went out. That is a MAIL-PROVIDER gap, not a link gap: the share link
- * itself shipped, and ProposalsBlock hands it to the recruiter to send.
+ * K-248 PROPOSE-SEND-1 (Danny 31-08 "Koios verstuurt zelf"): the propose endpoint
+ * records the proposal AND, with `send` on (the modal's toggle, default on), the
+ * backend sends the e-mail itself — consent-gated, sent_at only after a landed send,
+ * send_status/send_error telling the truth on the row. submit() still downloads the
+ * PDF client-side; with `send` off it only records (the share link stays).
  */
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -122,6 +122,9 @@ export function useProposeForm(application: ApplicationDetail) {
   const [subject, setSubjectState] = useState('')
   const [body, setBodyState] = useState('')
   const [consentConfirmed, setConsentConfirmed] = useState(false)
+  // K-248 PROPOSE-SEND-1: whether Koios sends the mail itself (default ON) —
+  // POST /propose's `send` flag; off records the proposal + share link only.
+  const [sendEmail, setSendEmail] = useState(true)
   const [submitting, setSubmitting] = useState(false)
   const [copied, setCopied] = useState(false)
   // V-appdetail-5: the freshly recorded proposal's own recipient-facing link —
@@ -221,8 +224,8 @@ export function useProposeForm(application: ApplicationDetail) {
     try {
       // 1. Record the proposal via the real endpoint (gate applications.update)
       // BEFORE anything leaves the app (DEFECT 3, §8): recipient, cv variant and
-      // the drafted subject/body. This only RECORDS the proposal; the backend
-      // does not send an e-mail itself. If this fails (403/422), no CV full of
+      // the drafted subject/body. With `send` on the backend also SENDS the e-mail
+      // (K-248); a failed record (403/422) sends nothing, so no CV full of
       // special-category data has left the recruiter's browser — the AVG trail
       // never has a gap.
       const res = await api.post(`/applications/${application.id}/propose`, {
@@ -232,6 +235,7 @@ export function useProposeForm(application: ApplicationDetail) {
         // The recorded body is what was actually shared, motivation letter included
         // when ticked — so the proposal history matches what the customer received.
         body: composedBody(),
+        send: sendEmail,
       })
       // V-appdetail-5: PROPOSE-SHARE-LINK-1 shipped — the response's own record
       // carries the same recipient-facing share_url ProposalsBlock renders (never
@@ -300,6 +304,7 @@ export function useProposeForm(application: ApplicationDetail) {
     includeMotivation, setIncludeMotivation, hasMotivation,
     subject, setSubject, body, setBody,
     consentConfirmed, setConsentConfirmed,
+    sendEmail, setSendEmail,
     disabledReason, submitting, submit,
     copyMessage, copied,
     shareUrl, copyShareLink, shareLinkCopied,

@@ -488,7 +488,15 @@
     "revokeConfirm": "¿Revocar esta propuesta? El destinatario ya no podrá ver los datos compartidos.",
     "revoked_toast": "Propuesta revocada",
     "variantChipProposal": "CV propuesta",
-    "variantChipFull": "CV completo"
+    "variantChipFull": "CV completo",
+    "sendEmail": "Enviar directamente por correo",
+    "sentByKoiosInfo": "Koios envía este mensaje por correo electrónico. Desactiva el interruptor para solo registrar la propuesta y compartir el enlace tú mismo.",
+    "sendStatus": {
+      "sent": "Enviado",
+      "failed": "Fallido",
+      "no_consent": "Sin consentimiento",
+      "not_sent": "No enviado"
+    }
   },
   "restore": {
     "button": "Restaurar",

@@ -19,6 +19,7 @@ import { useProposeForm } from './useProposeForm'
 import type { ApplicationDetail } from '@/types/application'
 import Button from '@/components/ui/Button'
 import CalloutBox from '@/components/ui/CalloutBox'
+import Toggle from '@/components/ui/Toggle'
 
 // r6: the identity comes from the typography module; only the layout margin is local.
 const sectionTitle = { ...sectionTitleStyle, fontSize: 12, marginBottom: 6 } as const
@@ -183,6 +184,14 @@ export default function ProposeCandidateModal({ application: a, onClose }: Props
               expanded={bodyExpanded} onToggleExpand={() => setBodyExpanded(v => !v)} />
           </div>
 
+          {/* K-248 PROPOSE-SEND-1: send-it-yourself toggle — Koios sends the mail via
+              the tenant/sender mailbox by default; switching it off records the
+              proposal + share link only, so the recruiter shares it themselves. */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+            <div style={sectionTitle}>{t('propose.sendEmail')}</div>
+            <Toggle checked={form.sendEmail} onChange={form.setSendEmail} ariaLabel={t('propose.sendEmail')} />
+          </div>
+
           {/* 5. AVG (GDPR) confirmation — required tick; the primary action stays disabled
               without it (see disabledText above). */}
           <label style={{ display: 'flex', alignItems: 'flex-start', gap: 8, fontSize: 12, color: 'var(--text)' }}>
@@ -192,12 +201,12 @@ export default function ProposeCandidateModal({ application: a, onClose }: Props
           </label>
         </div>
 
-        {/* The honest line — Koios prepares the CV + message, it does not send them
-            itself. Never a Verzenden button. Shared CalloutBox (§4 feedback atom) —
+        {/* The honest line — with the send toggle on, Koios sends the mail itself
+            (K-248); off, it only records. Shared CalloutBox (§4 feedback atom) —
             the hand-rolled tint banner here double-prefixed tintBorder into
             invalid CSS and dodged the lint via a token const (Opus-controle). */}
         <div style={{ marginTop: 16 }}>
-          <CalloutBox variant="info">{t('propose.notSentYet')}</CalloutBox>
+          <CalloutBox variant="info">{form.sendEmail ? t('propose.sentByKoiosInfo') : t('propose.notSentYet')}</CalloutBox>
         </div>
 
         {/* V-appdetail-5: on success, hand over the recorded proposal's own share
