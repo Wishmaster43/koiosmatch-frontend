@@ -780,7 +780,9 @@
     "updatedValue": "bijgewerkt"
   },
   "map": {
-    "pointCount": "{{count}} klanten op de kaart"
+    "pointCount": "{{count}} klanten op de kaart",
+    "pendingGeocode_one": "{{count}} klant staat nog niet op de kaart. Het adres wordt automatisch verwerkt.",
+    "pendingGeocode_other": "{{count}} klanten staan nog niet op de kaart. Adressen worden automatisch verwerkt."
   },
   "ai": {
     "title": "Koios AI adviseert",

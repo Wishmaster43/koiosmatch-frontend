@@ -35,3 +35,34 @@ describe('CustomersMapView · PDOK-LATLNG-1', () => {
     expect(screen.queryByText('Geen coords')).toBeNull()
   })
 })
+
+// PENDING-GEOCODE-1 (Danny 02-09): banner for rows that have an address but no
+// coordinates yet; address-less rows never count.
+describe('CustomersMapView · pending geocode banner', () => {
+  it('shows the banner and still renders the geocoded row when one row is pending', () => {
+    const rows = [
+      { id: 'c1', name: 'Zorggroep A', lat: '52.0907', lng: '5.1214', city: 'Utrecht' },
+      { id: 'c3', name: 'Nog niet geocode', lat: null, lng: null, city: 'Zwolle' },
+    ] as unknown as Customer[]
+    render(<CustomersMapView rows={rows} {...base} />)
+    expect(screen.getByText('customers:map.pendingGeocode')).toBeInTheDocument()
+    expect(screen.getByText('Zorggroep A')).toBeInTheDocument()
+  })
+
+  it('shows no banner once every addressed row has coordinates', () => {
+    const rows = [
+      { id: 'c1', name: 'Zorggroep A', lat: '52.0907', lng: '5.1214', city: 'Utrecht' },
+      { id: 'c2', name: 'Zorggroep B', lat: 51.92, lng: 4.47, city: 'Rotterdam' },
+    ] as unknown as Customer[]
+    render(<CustomersMapView rows={rows} {...base} />)
+    expect(screen.queryByText('customers:map.pendingGeocode')).toBeNull()
+  })
+
+  it('does not count a row with no address at all', () => {
+    const rows = [
+      { id: 'c4', name: 'Zonder adres', lat: null, lng: null, city: null },
+    ] as unknown as Customer[]
+    render(<CustomersMapView rows={rows} {...base} />)
+    expect(screen.queryByText('customers:map.pendingGeocode')).toBeNull()
+  })
+})

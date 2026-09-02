@@ -780,7 +780,9 @@
     "updatedValue": "actualizado"
   },
   "map": {
-    "pointCount": "{{count}} clientes en el mapa"
+    "pointCount": "{{count}} clientes en el mapa",
+    "pendingGeocode_one": "{{count}} cliente aún no aparece en el mapa. La dirección se procesa automáticamente.",
+    "pendingGeocode_other": "{{count}} clientes aún no aparecen en el mapa. Las direcciones se procesan automáticamente."
   },
   "ai": {
     "title": "Koios AI aconseja",

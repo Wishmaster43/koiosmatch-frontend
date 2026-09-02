@@ -1035,7 +1035,9 @@
     "contractForm": "Contract form"
   },
   "map": {
-    "pointCount": "{{count}} candidates on the map"
+    "pointCount": "{{count}} candidates on the map",
+    "pendingGeocode_one": "{{count}} candidate is not on the map yet. The address is processed automatically.",
+    "pendingGeocode_other": "{{count}} candidates are not on the map yet. Addresses are processed automatically."
   },
   "vacancySearch": {
     "noLocation": "This candidate has no location coordinates yet. Update the address first, then the map will appear here.",

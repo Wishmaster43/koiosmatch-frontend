@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { toCoord } from './coords'
+import { toCoord, countPendingGeocode } from './coords'
 
 // PDOK-LATLNG-1: Laravel serialises decimal columns as strings — the exact case
 // that made the PDOK panel show "not geocoded" for geocoded candidates.
@@ -22,5 +22,25 @@ describe('toCoord', () => {
     expect(toCoord('abc')).toBeNull()
     expect(toCoord(NaN)).toBeNull()
     expect(toCoord(Infinity)).toBeNull()
+  })
+})
+
+// PENDING-GEOCODE-1 (Danny 02-09): city-with-no-coords rows are "pending"; a row
+// with no address at all can never land on the map and must not be counted.
+describe('countPendingGeocode', () => {
+  it('counts a row with a city but null coordinates', () => {
+    expect(countPendingGeocode([{ city: 'Utrecht', lat: null, lng: null }])).toBe(1)
+  })
+
+  it('does not count a row whose coordinates arrive as numeric strings', () => {
+    expect(countPendingGeocode([{ city: 'Utrecht', lat: '52.09', lng: '5.12' }])).toBe(0)
+  })
+
+  it('ignores a row with no city and no coordinates', () => {
+    expect(countPendingGeocode([{ city: null, lat: null, lng: null }])).toBe(0)
+  })
+
+  it('returns 0 for an empty list', () => {
+    expect(countPendingGeocode([])).toBe(0)
   })
 })

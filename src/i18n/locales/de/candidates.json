@@ -1035,7 +1035,9 @@
     "integrations": "Verknüpfungen öffnen"
   },
   "map": {
-    "pointCount": "{{count}} Kandidaten auf der Karte"
+    "pointCount": "{{count}} Kandidaten auf der Karte",
+    "pendingGeocode_one": "{{count}} Kandidat ist noch nicht auf der Karte. Die Adresse wird automatisch verarbeitet.",
+    "pendingGeocode_other": "{{count}} Kandidaten sind noch nicht auf der Karte. Adressen werden automatisch verarbeitet."
   },
   "vacancySearch": {
     "noLocation": "Dieser Kandidat hat noch keine Standortkoordinaten. Aktualisieren Sie zuerst die Adresse, dann erscheint hier die Karte.",

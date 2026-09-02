@@ -4,10 +4,11 @@
  * to the shared RadiusMapPanel; the host page owns centre/radius and the drawer.
  */
 import { useTranslation } from 'react-i18next'
+import PendingGeocodeBanner from '@/components/map/PendingGeocodeBanner'
 import RadiusMapPanel, { type MapPoint } from '@/components/map/RadiusMapPanel'
 import { NEUTRAL_AVATAR } from '@/components/ui/Avatar'
 import { useLookups } from '@/context/LookupsContext'
-import { toCoord } from '@/lib/coords'
+import { countPendingGeocode, toCoord } from '@/lib/coords'
 import type { Candidate } from '@/types/candidate'
 import type { Id } from '@/types/common'
 
@@ -39,9 +40,16 @@ export default function CandidatesMapView({ rows, center, radiusKm, onCenterChan
       color: c.status ? statusMeta(c.status).color : NEUTRAL_AVATAR,
     }))
 
+  // PENDING-GEOCODE-1: rows with an address but no coordinates yet — the queue
+  // fills them in automatically; address-less rows are a different problem.
+  const pending = countPendingGeocode(rows)
+
   return (
-    <RadiusMapPanel points={points} center={center} radiusKm={radiusKm} padded={padded} onClearRadius={onClearRadius}
-      onCenterChange={onCenterChange} onRadiusChange={onRadiusChange} onPick={onPick}
-      pointsLabel={t('candidates:map.pointCount', { count: points.length })} />
+    <>
+      <PendingGeocodeBanner count={pending} padded={padded} label={t('candidates:map.pendingGeocode', { count: pending })} />
+      <RadiusMapPanel points={points} center={center} radiusKm={radiusKm} padded={padded} onClearRadius={onClearRadius}
+        onCenterChange={onCenterChange} onRadiusChange={onRadiusChange} onPick={onPick}
+        pointsLabel={t('candidates:map.pointCount', { count: points.length })} />
+    </>
   )
 }

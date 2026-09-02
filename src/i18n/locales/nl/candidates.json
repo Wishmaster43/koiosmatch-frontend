@@ -1035,7 +1035,9 @@
     "contractForm": "Contractvorm"
   },
   "map": {
-    "pointCount": "{{count}} kandidaten op de kaart"
+    "pointCount": "{{count}} kandidaten op de kaart",
+    "pendingGeocode_one": "{{count}} kandidaat staat nog niet op de kaart. Het adres wordt automatisch verwerkt.",
+    "pendingGeocode_other": "{{count}} kandidaten staan nog niet op de kaart. Adressen worden automatisch verwerkt."
   },
   "vacancySearch": {
     "noLocation": "Deze kandidaat heeft nog geen locatie(-coördinaten). Werk eerst het adres bij, dan verschijnt hier de kaart.",

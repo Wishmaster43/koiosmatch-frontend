@@ -1035,7 +1035,9 @@
     "integrations": "Abrir integraciones"
   },
   "map": {
-    "pointCount": "{{count}} candidatos en el mapa"
+    "pointCount": "{{count}} candidatos en el mapa",
+    "pendingGeocode_one": "{{count}} candidato aún no aparece en el mapa. La dirección se procesa automáticamente.",
+    "pendingGeocode_other": "{{count}} candidatos aún no aparecen en el mapa. Las direcciones se procesan automáticamente."
   },
   "vacancySearch": {
     "noLocation": "Este candidato aún no tiene coordenadas de ubicación. Actualiza primero la dirección, luego aparecerá el mapa aquí.",

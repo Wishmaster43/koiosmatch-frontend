@@ -780,7 +780,9 @@
     "updatedValue": "updated"
   },
   "map": {
-    "pointCount": "{{count}} customers on the map"
+    "pointCount": "{{count}} customers on the map",
+    "pendingGeocode_one": "{{count}} customer is not on the map yet. The address is processed automatically.",
+    "pendingGeocode_other": "{{count}} customers are not on the map yet. Addresses are processed automatically."
   },
   "ai": {
     "title": "Koios AI advises",

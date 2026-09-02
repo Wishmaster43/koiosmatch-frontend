@@ -36,3 +36,34 @@ describe('CandidatesMapView · PDOK-LATLNG-1', () => {
     expect(screen.queryByText('Geen coords')).toBeNull()
   })
 })
+
+// PENDING-GEOCODE-1 (Danny 02-09): banner for rows that have an address but no
+// coordinates yet; address-less rows never count.
+describe('CandidatesMapView · pending geocode banner', () => {
+  it('shows the banner and still renders the geocoded row when one row is pending', () => {
+    const rows = [
+      { id: 'k1', name: 'Ismail Eddahchouri', lat: '52.0907', lng: '5.1214', city: 'Utrecht' },
+      { id: 'k3', name: 'Nog niet geocode', lat: null, lng: null, city: 'Zwolle' },
+    ] as unknown as Candidate[]
+    render(<CandidatesMapView rows={rows} {...base} />)
+    expect(screen.getByText('candidates:map.pendingGeocode')).toBeInTheDocument()
+    expect(screen.getByText('Ismail Eddahchouri')).toBeInTheDocument()
+  })
+
+  it('shows no banner once every addressed row has coordinates', () => {
+    const rows = [
+      { id: 'k1', name: 'Ismail Eddahchouri', lat: '52.0907', lng: '5.1214', city: 'Utrecht' },
+      { id: 'k2', name: 'Sara de Vries', lat: 51.92, lng: 4.47, city: 'Rotterdam' },
+    ] as unknown as Candidate[]
+    render(<CandidatesMapView rows={rows} {...base} />)
+    expect(screen.queryByText('candidates:map.pendingGeocode')).toBeNull()
+  })
+
+  it('does not count a row with no address at all', () => {
+    const rows = [
+      { id: 'k4', name: 'Zonder adres', lat: null, lng: null, city: null },
+    ] as unknown as Candidate[]
+    render(<CandidatesMapView rows={rows} {...base} />)
+    expect(screen.queryByText('candidates:map.pendingGeocode')).toBeNull()
+  })
+})
