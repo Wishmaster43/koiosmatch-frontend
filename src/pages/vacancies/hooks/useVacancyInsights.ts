@@ -35,6 +35,8 @@ interface VacancyStatsShape {
   // V28: counts per shared /functions name (function_title); null (no function set)
   // arrives as its own resolved bucket (label 'Geen functie') — see categoryData below
   // for why the FE never makes that particular bucket clickable.
+  // V28 (02-09): by_function is the server's name; by_category stays a deprecated alias.
+  by_function?: Array<{ value?: string | null; label?: string; count?: number }>
   by_category?: Array<{ value?: string | null; label?: string; count?: number }>
   // VAC-STATS-BYAGENT-1 (BE ticket, not yet delivered 22-07): counts grouped by
   // ai_agent_id, id: null = the "Geen agent" bucket. Until this lands, agentData
@@ -116,8 +118,10 @@ export function useVacancyInsights({ stats, vacancies, statuses, phases, statusM
   // No page-scope fallback: function_title isn't on the list row (VacancyListResource),
   // only the stats aggregate carries it, so an empty stats response means an empty donut.
   const categoryData = useMemo<Aggregate[]>(() => {
-    if (!s?.by_category) return []
-    return s.by_category
+    // V28 (02-09): the server's name is by_function; by_category is a deprecated alias.
+    const rows = s?.by_function ?? s?.by_category
+    if (!rows) return []
+    return rows
       .filter(o => o.value != null && o.value !== '')
       .map(o => ({ name: seedLabel('functions', { label: o.label || String(o.value) }), key: String(o.value), value: o.count ?? 0 }))
   }, [s, seedLabel])

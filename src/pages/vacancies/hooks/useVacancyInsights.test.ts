@@ -58,6 +58,14 @@ describe('useVacancyInsights · published donut (V27)', () => {
 })
 
 describe('useVacancyInsights · functie donut (V28)', () => {
+  // V28 (02-09): by_function is the server's name; the deprecated by_category alias
+  // still feeds the donut until the backend drops it.
+  it('prefers by_function over the deprecated by_category alias', () => {
+    const stats = { by_function: [{ value: 'Chauffeur', label: 'Chauffeur', count: 4 }], by_category: [{ value: 'Oud', label: 'Oud', count: 1 }] }
+    const { result } = renderHook(() => useVacancyInsights({ stats, vacancies: [], statuses: [], phases, statusMeta, t }))
+    expect(result.current.categoryData).toEqual([{ name: 'Chauffeur', key: 'Chauffeur', value: 4 }])
+  })
+
   it('maps by_category into donut segments, real values only', () => {
     const stats = { by_category: [{ value: 'Verpleegkundige', label: 'Verpleegkundige', count: 4 }, { value: 'Arts', label: 'Arts', count: 2 }] }
     const { result } = renderHook(() => useVacancyInsights({ stats, vacancies: [], statuses: [], phases, statusMeta, t }))
