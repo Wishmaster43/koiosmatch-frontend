@@ -5,7 +5,7 @@
  */
 import { describe, it, expect } from 'vitest'
 import { render, screen } from '@testing-library/react'
-import { PageTitle, SectionTitle, BodyText, Caption, GroupLabel, Mono } from './typography'
+import { PageTitle, SectionTitle, BodyText, Caption, GroupLabel, FormLabel, Mono } from './typography'
 
 describe('typography atoms', () => {
   it('PageTitle renders 15/600 on the text token, h2 by default, any tag via as', () => {
@@ -16,6 +16,16 @@ describe('typography atoms', () => {
     expect(el.style.color).toBe('var(--text)')
     render(<PageTitle as="h1">Hoofd</PageTitle>)
     expect(screen.getByRole('heading', { level: 1, name: 'Hoofd' })).toBeInTheDocument()
+  })
+
+  it('FormLabel is the 12/500 muted field label, a <label> by default so htmlFor reaches its field', () => {
+    render(<><FormLabel htmlFor="f1">Naam</FormLabel><input id="f1" /></>)
+    const el = screen.getByText('Naam')
+    expect(el.tagName).toBe('LABEL')
+    expect(el.style.fontSize).toBe('12px')
+    expect(el.style.fontWeight).toBe('500')
+    expect(el.style.color).toBe('var(--text-muted)')
+    expect(screen.getByLabelText('Naam')).toBeInTheDocument()
   })
 
   it('Caption is the 11px muted meta line', () => {

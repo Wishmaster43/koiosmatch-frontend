@@ -17,7 +17,7 @@ import { notifyError } from '@/lib/notify'
 import { loadSettings, saveSettings } from '../lib/settingsApi'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import Button from '@/components/ui/Button'
-import { PageTitle } from '@/components/ui/typography'
+import { PageTitle, formLabelStyle } from '@/components/ui/typography'
 import { publicApiUrl } from '@/lib/publicApiUrl'
 
 // The exact placeholder the backend masks a stored secret with (SettingController::MASK) —
@@ -26,7 +26,8 @@ const MASK = '••••••••'
 
 
 
-const labelStyle = { fontSize: 12, fontWeight: 500, color: 'var(--text-muted)', marginBottom: 4, display: 'block' }
+// Shared FormLabel identity (12/500/muted) + this file's own layout (§4: identity from the atom, layout local).
+const labelStyle = { ...formLabelStyle, marginBottom: 4, display: 'block' }
 // Canon field style (G33/fieldMetrics) — was its own padding-8/12 copy.
 const inputStyle = fieldInputStyle
 

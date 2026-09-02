@@ -51,6 +51,8 @@ export const captionStyle: CSSProperties = { fontSize: 11, fontWeight: 400, colo
 // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- the canonical GroupLabel style identity itself, not a hand-styled copy
 export const groupLabelStyle: CSSProperties = { fontSize: 11, fontWeight: 600, color: 'var(--text-muted)',
   textTransform: 'uppercase', letterSpacing: '0.04em' }
+// eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- the canonical FormLabel style identity itself, not a hand-styled copy
+export const formLabelStyle: CSSProperties = { fontSize: 12, fontWeight: 500, color: 'var(--text-muted)' }
 
 export const PageTitle = make(pageTitleStyle, 'h2')
 export const SectionTitle = make(sectionTitleStyle, 'h3')
@@ -58,6 +60,11 @@ export const BodyText = make(bodyTextStyle, 'p')
 export const Caption = make(captionStyle, 'span')
 // Uppercase group label (the 11px/600 tracked heading the settings cards use).
 export const GroupLabel = make(groupLabelStyle, 'div')
+
+// 12px/500/muted form-field label — the identity eight files hand-copied before
+// this atom existed (measured 02-09: `fontSize: 12, fontWeight: 500, color: 'var(--text-muted)'`).
+// Defaults to a <label> tag so `htmlFor` wires it to its field like a real label.
+export const FormLabel = make(formLabelStyle, 'label')
 // Numbers/IDs/code — JetBrains Mono per §1; size rides with the surrounding text.
 // The raw identity is exported for style-object contexts (r6: an <input>'s style
 // can't wrap a component) — JSX renders the <Mono> atom, never this directly.

@@ -12,6 +12,7 @@ import EventCatalog from './EventCatalog'
 import OneTimeSecretReveal from '@/pages/settings/components/OneTimeSecretReveal'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import Button from '@/components/ui/Button'
+import { formLabelStyle } from '@/components/ui/typography'
 
 // Two-phase inline create view: the subscription form, then a one-time secret reveal that is never persisted client-side.
 export default function WebhookCreate({ onBack, onCreated }) {
@@ -48,7 +49,8 @@ export default function WebhookCreate({ onBack, onCreated }) {
   // Canon field style (G33/fieldMetrics) — was its own height-38/padding-11 copy
   // (one of only two 38px outliers on the whole platform; 34 is the majority).
   const inputStyle = fieldInputStyle
-  const labelStyle = { fontSize: 12, fontWeight: 500, color: 'var(--text-muted)', marginBottom: 5, display: 'block' }
+  // Shared FormLabel identity (12/500/muted) + this file's own layout (§4: identity from the atom, layout local).
+  const labelStyle = { ...formLabelStyle, marginBottom: 5, display: 'block' }
 
   return (
     <div>

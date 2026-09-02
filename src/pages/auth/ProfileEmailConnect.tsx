@@ -24,7 +24,7 @@ import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import Button from '@/components/ui/Button'
 import Spinner from '@/components/ui/Spinner'
 import SegmentedControl from '@/components/ui/SegmentedControl'
-import { SectionTitle } from '@/components/ui/typography'
+import { SectionTitle, formLabelStyle } from '@/components/ui/typography'
 
 const PROVIDERS = [
   { id: 'office', label: 'Office 365' },
@@ -34,7 +34,8 @@ const PROVIDERS = [
 
 // Canon field style (G33/fieldMetrics) — was its own height-36 copy.
 const inputStyle: CSSProperties = fieldInputStyle
-const labelStyle: CSSProperties = { fontSize: 12, fontWeight: 500, color: 'var(--text-muted)', marginBottom: 5, display: 'block' }
+// Shared FormLabel identity (12/500/muted) + this file's own layout (§4: identity from the atom, layout local).
+const labelStyle: CSSProperties = { ...formLabelStyle, marginBottom: 5, display: 'block' }
 
 // The signed-in user's personal mailbox connector (OAuth for Office 365/Gmail, manual form for SMTP), distinct from the tenant-wide sender in Settings (see file header).
 export default function ProfileEmailConnect() {

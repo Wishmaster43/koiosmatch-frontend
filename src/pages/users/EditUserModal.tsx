@@ -21,7 +21,7 @@ import { useLiveFieldValidation } from '@/hooks/useLiveFieldValidation'
 import { isValidEmailFormat } from '@/lib/contactFieldValidation'
 import { useUserBranches } from './hooks/useUserBranches'
 import type { ManagedUser } from '@/types/api'
-import { PageTitle, Caption } from '@/components/ui/typography'
+import { PageTitle, Caption, formLabelStyle } from '@/components/ui/typography'
 
 // VALIDATIE-LIVE-1-rest: `email` is the only field here the backend validates
 // with a shape rule (UserController's inline PATCH rules — `'email' =>
@@ -94,8 +94,9 @@ export default function EditUserModal({ user, onClose, onSaved }: {
 
   // Canon field style (G33/fieldMetrics) — was its own padding-8/radius-8 copy.
   const inputStyle: CSSProperties = fieldInputStyle
+  // Shared FormLabel identity (12/500/muted) + this file's own layout (§4: identity from the atom, layout local).
   const labelStyle: CSSProperties = {
-    display: 'block', fontSize: 12, fontWeight: 500, color: 'var(--text-muted)', marginBottom: 5,
+    display: 'block', ...formLabelStyle, marginBottom: 5,
   }
 
   return (

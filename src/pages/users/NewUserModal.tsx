@@ -24,7 +24,7 @@ import { useLiveFieldValidation } from '@/hooks/useLiveFieldValidation'
 import { isValidEmailFormat } from '@/lib/contactFieldValidation'
 import { roleLabel } from './usersParts'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
-import { BodyText, Caption, GroupLabel } from '@/components/ui/typography'
+import { BodyText, Caption, GroupLabel, formLabelStyle } from '@/components/ui/typography'
 
 // VALIDATIE-LIVE-1-rest: `email` is the only field here the backend validates
 // with a shape rule (UserController's inline POST rules — `'email' =>
@@ -128,7 +128,8 @@ export default function NewUserModal({ onClose, onCreated }: {
 
   // Field faces come from fieldMetrics' canon (§4 2b) — never a local copy.
   const input: CSSProperties = fieldInputStyle
-  const label: CSSProperties = { display: 'block', fontSize: 12, fontWeight: 500, color: 'var(--text-muted)', marginBottom: 5 }
+  // Shared FormLabel identity (12/500/muted) + this file's own layout (§4: identity from the atom, layout local).
+  const label: CSSProperties = { display: 'block', ...formLabelStyle, marginBottom: 5 }
 
   return (
     // POPUP-SLEEP-1: migrated onto the shared FloatingPanel shell — draggable

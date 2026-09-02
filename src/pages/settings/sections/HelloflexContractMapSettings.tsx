@@ -24,7 +24,7 @@ import { loadSettings, saveSettings } from '../lib/settingsApi'
 import { notifyError } from '@/lib/notify'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import Button from '@/components/ui/Button'
-import { PageTitle } from '@/components/ui/typography'
+import { PageTitle, formLabelStyle } from '@/components/ui/typography'
 
 const SETTINGS_KEY = 'helloflex_contract_type_map'
 
@@ -33,7 +33,8 @@ const SETTINGS_KEY = 'helloflex_contract_type_map'
 interface MapRow { guid: string; label: string }
 type ContractMap = Record<string, MapRow>
 
-const labelStyle = { fontSize: 12, fontWeight: 500, color: 'var(--text-muted)', marginBottom: 4, display: 'block' }
+// Shared FormLabel identity (12/500/muted) + this file's own layout (§4: identity from the atom, layout local).
+const labelStyle = { ...formLabelStyle, marginBottom: 4, display: 'block' }
 
 // One row per tenant contract-form, mapping to a HelloFlex GUID + label (see file
 // docblock above); an empty mapping is a legal saved state, not a bug.

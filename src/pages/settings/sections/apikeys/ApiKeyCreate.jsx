@@ -16,7 +16,7 @@ import SearchSelect from '@/components/ui/SearchSelect'
 import OneTimeSecretReveal from '@/pages/settings/components/OneTimeSecretReveal'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import Button from '@/components/ui/Button'
-import { Caption } from '@/components/ui/typography'
+import { Caption, formLabelStyle } from '@/components/ui/typography'
 
 // Two-phase inline view (see the module doc above): the create form, then the one-time secret reveal — no modal, so the whole overview stays readable.
 export default function ApiKeyCreate({ onBack, onCreated }) {
@@ -51,7 +51,8 @@ export default function ApiKeyCreate({ onBack, onCreated }) {
   // Canon field style (G33/fieldMetrics) — was its own height-38/padding-11 copy
   // (one of only two 38px outliers on the whole platform; 34 is the majority).
   const inputStyle = fieldInputStyle
-  const labelStyle = { fontSize: 12, fontWeight: 500, color: 'var(--text-muted)', marginBottom: 5, display: 'block' }
+  // Shared FormLabel identity (12/500/muted) + this file's own layout (§4: identity from the atom, layout local).
+  const labelStyle = { ...formLabelStyle, marginBottom: 5, display: 'block' }
   const fieldGrid = { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }
 
   return (

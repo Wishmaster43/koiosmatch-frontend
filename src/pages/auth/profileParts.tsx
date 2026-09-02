@@ -6,6 +6,7 @@
  */
 import type { ComponentType, CSSProperties, ReactNode } from 'react'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
+import { FormLabel } from '@/components/ui/typography'
 
 type IconComp = ComponentType<{ size?: number }>
 
@@ -88,9 +89,10 @@ export function Section({ title, children }: { title: ReactNode; children: React
 export function Field({ label, children }: { label: ReactNode; children: ReactNode }) {
   return (
     <div style={{ marginBottom: 16 }}>
-      <label style={{ display: 'block', fontSize: 12, fontWeight: 500, color: 'var(--text-muted)', marginBottom: 6 }}>
+      {/* Field label — the shared FormLabel atom (12/500/muted) */}
+      <FormLabel style={{ display: 'block', marginBottom: 6 }}>
         {label}
-      </label>
+      </FormLabel>
       {children}
     </div>
   )
