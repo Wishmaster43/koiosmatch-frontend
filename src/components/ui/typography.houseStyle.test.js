@@ -147,7 +147,7 @@ const SECTION_TITLE_ALLOWLIST = {
 
 // Frozen Caption (11px/text-muted) allowlist — measured 2026-08-20. Shrink-only.
 const CAPTION_ALLOWLIST = {
-  'components/ai/AIManagementTabs.tsx': 1,
+  'components/ai/management/tabs/ToolsTab.tsx': 1,
   'components/ai/management/AgentForm.tsx': 2,
   'components/ai/management/InterviewFlowSection.tsx': 1,
   'components/ai/management/shared.tsx': 1,
