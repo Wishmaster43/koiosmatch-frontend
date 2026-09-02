@@ -400,7 +400,8 @@
       "linkedByOn": "Gekoppeld door {{name}} op {{date}}",
       "statusLinked": "Gekoppeld",
       "statusPending": "In behandeling",
-      "statusFailed": "Mislukt"
+      "statusFailed": "Mislukt",
+      "syncNow": "Nu synchroniseren"
     },
     "pdok": {
       "name": "PDOK",
@@ -412,7 +413,8 @@
     },
     "statusIcons": {
       "linked": "{{system}} gekoppeld",
-      "failed": "{{system}} synchronisatie mislukt: {{error}}"
+      "failed": "{{system}} synchronisatie mislukt: {{error}}",
+      "failedNoReason": "{{system}} synchronisatie mislukt"
     }
   },
   "breadcrumb": "Kruimelpad",

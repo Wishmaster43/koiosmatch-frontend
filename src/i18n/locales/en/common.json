@@ -400,7 +400,8 @@
       "linkedByOn": "Linked by {{name}} on {{date}}",
       "statusLinked": "Linked",
       "statusPending": "Pending",
-      "statusFailed": "Failed"
+      "statusFailed": "Failed",
+      "syncNow": "Sync now"
     },
     "pdok": {
       "name": "PDOK",
@@ -412,7 +413,8 @@
     },
     "statusIcons": {
       "linked": "{{system}} linked",
-      "failed": "{{system}} sync failed: {{error}}"
+      "failed": "{{system}} sync failed: {{error}}",
+      "failedNoReason": "{{system}} sync failed"
     }
   },
   "breadcrumb": "Breadcrumb",

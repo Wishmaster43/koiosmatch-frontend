@@ -30,6 +30,7 @@ import { PreferencesTab, ZzpTab } from './drawer/PreferencesZzpTabs'
 import CommunicationTab from './drawer/CommunicationTab'
 import DocumentsSection from './drawer/DocumentsSection'
 import IntegrationsTab from './drawer/IntegrationsTab'
+import BackofficeLinkStatusIcons from './drawer/BackofficeLinkStatusIcons'
 import StatisticsTab from './drawer/StatisticsTab'
 import ChangelogPopover from '@/components/drawer/ChangelogPopover'
 import ChangelogTab from './drawer/ChangelogTab'
@@ -298,6 +299,10 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
             <CandidateTitle c={c} editing={headerEdit.headerEditing} hf={headerEdit.hf} setHF={headerEdit.setHF} />
           )}
           titleActions={<>
+            {/* K-250 K6: subtle backoffice-coupling status icons (linked/failed only),
+                clicking jumps to the Links tab — additive, frozen-header safe. */}
+            <BackofficeLinkStatusIcons helloflexLink={c.helloflexLink} shiftmanagerLink={c.shiftmanagerLink}
+              onOpenIntegrations={() => setActiveTab('integrations')} />
             {/* Danny 27-07: the shared house ChangelogPopover shell (§3A(d)) — the
                 candidate's own ChangelogTab supplies the content (field diffs, date
                 filter, CSV export); this drawer stays the reference implementation. */}

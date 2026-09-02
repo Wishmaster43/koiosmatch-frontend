@@ -400,7 +400,8 @@
       "linkedByOn": "Connecté par {{name}} le {{date}}",
       "statusLinked": "Connecté",
       "statusPending": "En cours",
-      "statusFailed": "Échec"
+      "statusFailed": "Échec",
+      "syncNow": "Synchroniser maintenant"
     },
     "pdok": {
       "name": "PDOK",
@@ -412,7 +413,8 @@
     },
     "statusIcons": {
       "linked": "{{system}} lié",
-      "failed": "Échec de la synchronisation {{system}} : {{error}}"
+      "failed": "Échec de la synchronisation {{system}} : {{error}}",
+      "failedNoReason": "Synchronisation {{system}} échouée"
     }
   },
   "breadcrumb": "Fil d’Ariane",

@@ -79,6 +79,12 @@ export function HelloflexCard({ status, link, canLink, busy, onLink }: CardProps
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
             <SoftChip label={t('backofficeLinks.common.statusLinked')} color="var(--color-success)" />
             {link?.externalId && <Mono style={{ fontSize: 12 }}>{link.externalId}</Mono>}
+            {/* K6 (02-09): a linked record can be pushed again on demand — same generic
+                POST /sync/{entity}/{id} {system} the coupling itself uses. */}
+            <Button variant="secondary" size="sm" onClick={onLink} disabled={busy || !canLink} style={{ flexShrink: 0 }}>
+              {busy ? <Spinner size={11} /> : <RefreshCw size={11} />}
+              {t('backofficeLinks.common.syncNow')}
+            </Button>
           </div>
           <LinkedByLine link={link} />
           {/* MATCHES 16 (21-08): sync metadata lives with the coupling, not on the

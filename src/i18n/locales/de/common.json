@@ -400,7 +400,8 @@
       "linkedByOn": "Verknüpft von {{name}} am {{date}}",
       "statusLinked": "Verknüpft",
       "statusPending": "In Bearbeitung",
-      "statusFailed": "Fehlgeschlagen"
+      "statusFailed": "Fehlgeschlagen",
+      "syncNow": "Jetzt synchronisieren"
     },
     "pdok": {
       "name": "PDOK",
@@ -412,7 +413,8 @@
     },
     "statusIcons": {
       "linked": "{{system}} verknüpft",
-      "failed": "{{system}} Synchronisierung fehlgeschlagen: {{error}}"
+      "failed": "{{system}} Synchronisierung fehlgeschlagen: {{error}}",
+      "failedNoReason": "{{system}} Synchronisation fehlgeschlagen"
     }
   },
   "breadcrumb": "Brotkrümelnavigation",
