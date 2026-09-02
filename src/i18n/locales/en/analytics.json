@@ -537,5 +537,44 @@
     },
     "rangeSeparator": "through",
     "previousValue": "previous: {{value}}"
+  },
+  "hub": {
+    "attention": {
+      "title": "Needs attention",
+      "error": "Could not load the attention signals",
+      "cards": {
+        "candidates_no_follow_up": "Candidates without follow-up",
+        "vacancies_stale_online": "Vacancies online without applicants",
+        "matches_expiring": "Matches ending soon",
+        "tasks_overdue": "Overdue tasks",
+        "customers_no_contact": "Customers without recent contact",
+        "leads_pending": "Leads pending too long",
+        "documents_expiring": "Candidates with an expiring document",
+        "vacancies_open": "Open positions",
+        "conversations_unanswered": "Conversations without a reply"
+      },
+      "empty": "Nothing needs attention: all caught up.",
+      "loading": "Loading attention points…"
+    },
+    "charts": {
+      "applicationsTrend": "Applications over time",
+      "applicationsFunnel": "Applications funnel",
+      "candidatesBySource": "Candidates by source",
+      "vacanciesFillRate": "Vacancy fill rate",
+      "matchesUnderContract": "Matches under contract",
+      "tasksByStatus": "Tasks by status",
+      "bucket": {
+        "active": "Active",
+        "matched": "Matched",
+        "placed": "Placed",
+        "rejected": "Rejected"
+      },
+      "underContract": {
+        "sent": "Sent",
+        "active": "Active",
+        "ended": "Ended"
+      }
+    },
+    "openReport": "Open report"
   }
 }

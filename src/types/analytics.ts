@@ -506,3 +506,13 @@ export interface TasksReportData {
 // One axis bar, shared by the five thin reports.
 export interface ThinSegment { value: string; label: string; count: number; color?: string | null }
 
+// ── Reports hub (GET /reports, REPORTS-HUB-1) ────────────────────────────────
+// Hand-written from the backend Service (App\Services\Report\ReportsHubService) —
+// no 2xx schema in the generated spec yet, §10. Nine cross-domain signal cards,
+// tenant-wide totals, each deep-linking into the sub-report + filter its own count
+// was computed with. `label` is the server's Dutch label — deliberately not the
+// primary source (DEMO-TAAL/§5): the frontend translates by `key` and falls back
+// to this only when a key has no i18n entry yet.
+export interface ReportsHubCard { key: string; label: string; count: number; report: string; filters: Record<string, unknown> }
+
+export interface ReportsHubData { signals: ReportsHubCard[] }

@@ -537,5 +537,44 @@
     },
     "rangeSeparator": "tot en met",
     "previousValue": "vorige: {{value}}"
+  },
+  "hub": {
+    "attention": {
+      "title": "Vraagt aandacht",
+      "error": "De aandachtssignalen konden niet worden geladen",
+      "cards": {
+        "candidates_no_follow_up": "Kandidaten zonder opvolging",
+        "vacancies_stale_online": "Vacatures online zonder sollicitanten",
+        "matches_expiring": "Matches die aflopen",
+        "tasks_overdue": "Taken over tijd",
+        "customers_no_contact": "Klanten lang geen contact",
+        "leads_pending": "Leads te lang pending",
+        "documents_expiring": "Kandidaten met verlopend document",
+        "vacancies_open": "Openstaande posities",
+        "conversations_unanswered": "Conversaties zonder reactie"
+      },
+      "empty": "Geen aandachtspunten: alles is bij.",
+      "loading": "Aandachtspunten laden…"
+    },
+    "charts": {
+      "applicationsTrend": "Sollicitaties over tijd",
+      "applicationsFunnel": "Sollicitatiefunnel",
+      "candidatesBySource": "Kandidaten per bron",
+      "vacanciesFillRate": "Vervullingspercentage vacatures",
+      "matchesUnderContract": "Matches onder contract",
+      "tasksByStatus": "Taken per status",
+      "bucket": {
+        "active": "Actief",
+        "matched": "Gematcht",
+        "placed": "Geplaatst",
+        "rejected": "Afgewezen"
+      },
+      "underContract": {
+        "sent": "Verstuurd",
+        "active": "Actief",
+        "ended": "Beëindigd"
+      }
+    },
+    "openReport": "Rapport openen"
   }
 }

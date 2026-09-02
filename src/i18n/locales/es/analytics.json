@@ -537,5 +537,44 @@
     },
     "rangeSeparator": "hasta",
     "previousValue": "anterior: {{value}}"
+  },
+  "hub": {
+    "attention": {
+      "title": "Requiere atención",
+      "error": "No se pudieron cargar las señales de atención",
+      "cards": {
+        "candidates_no_follow_up": "Candidatos sin seguimiento",
+        "vacancies_stale_online": "Vacantes publicadas sin candidatos",
+        "matches_expiring": "Coincidencias que finalizan pronto",
+        "tasks_overdue": "Tareas vencidas",
+        "customers_no_contact": "Clientes sin contacto reciente",
+        "leads_pending": "Leads pendientes demasiado tiempo",
+        "documents_expiring": "Candidatos con un documento por vencer",
+        "vacancies_open": "Puestos abiertos",
+        "conversations_unanswered": "Conversaciones sin respuesta"
+      },
+      "empty": "Nada requiere atención: todo al día.",
+      "loading": "Cargando puntos de atención…"
+    },
+    "charts": {
+      "applicationsTrend": "Solicitudes a lo largo del tiempo",
+      "applicationsFunnel": "Embudo de solicitudes",
+      "candidatesBySource": "Candidatos por fuente",
+      "vacanciesFillRate": "Tasa de cobertura de vacantes",
+      "matchesUnderContract": "Coincidencias bajo contrato",
+      "tasksByStatus": "Tareas por estado",
+      "bucket": {
+        "active": "Activa",
+        "matched": "Emparejada",
+        "placed": "Colocada",
+        "rejected": "Rechazada"
+      },
+      "underContract": {
+        "sent": "Enviado",
+        "active": "Activo",
+        "ended": "Finalizado"
+      }
+    },
+    "openReport": "Abrir informe"
   }
 }

@@ -13,6 +13,7 @@
  */
 import { useTranslation } from 'react-i18next'
 import ReportKpiBand from './ReportKpiBand'
+import ReportsHubCharts from './ReportsHubCharts'
 import type { KpiSpec } from '@/components/insights/InsightsRow'
 import { useNavigation } from '@/context/NavigationContext'
 import { useAuth } from '@/context/AuthContext'
@@ -88,6 +89,10 @@ export default function ReportsDashboard({ period }: { period: ReportPeriod }) {
   return (
     <div>
       <ReportKpiBand kpis={kpis} />
+      {/* PART A+B (Danny 24-08): attention signals + dashboard-style chart grid — the
+          "#reports moet ook iets tonen" build. Chart grid reuses the SAME hook results
+          the KPI band above already fetched (no second request per endpoint). */}
+      <ReportsHubCharts applications={applications} vacancies={vacancies} matches={matches} tasks={tasks} candidates={candidates} />
     </div>
   )
 }

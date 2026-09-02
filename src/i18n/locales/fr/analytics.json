@@ -537,5 +537,44 @@
     },
     "rangeSeparator": "au",
     "previousValue": "precedent : {{value}}"
+  },
+  "hub": {
+    "attention": {
+      "title": "Nécessite une attention",
+      "error": "Les signaux d'attention n'ont pas pu être chargés",
+      "cards": {
+        "candidates_no_follow_up": "Candidats sans suivi",
+        "vacancies_stale_online": "Offres en ligne sans candidats",
+        "matches_expiring": "Correspondances qui expirent bientôt",
+        "tasks_overdue": "Tâches en retard",
+        "customers_no_contact": "Clients sans contact récent",
+        "leads_pending": "Prospects en attente trop longtemps",
+        "documents_expiring": "Candidats avec un document expirant",
+        "vacancies_open": "Postes ouverts",
+        "conversations_unanswered": "Conversations sans réponse"
+      },
+      "empty": "Rien ne requiert d'attention : tout est à jour.",
+      "loading": "Chargement des points d'attention…"
+    },
+    "charts": {
+      "applicationsTrend": "Candidatures dans le temps",
+      "applicationsFunnel": "Entonnoir des candidatures",
+      "candidatesBySource": "Candidats par source",
+      "vacanciesFillRate": "Taux de pourvoi des postes",
+      "matchesUnderContract": "Correspondances sous contrat",
+      "tasksByStatus": "Tâches par statut",
+      "bucket": {
+        "active": "Active",
+        "matched": "Correspondante",
+        "placed": "Placée",
+        "rejected": "Refusée"
+      },
+      "underContract": {
+        "sent": "Envoyé",
+        "active": "Actif",
+        "ended": "Terminé"
+      }
+    },
+    "openReport": "Ouvrir le rapport"
   }
 }
