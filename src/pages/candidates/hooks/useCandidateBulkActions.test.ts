@@ -71,6 +71,8 @@ describe('useCandidateBulkActions · bulkSetOwner (bulkMutate optimistic/reconci
     const r = harness([cand({ id: 1, owner: 'Old' }), cand({ id: 2, owner: 'Old' })])
     act(() => r.result.current.setSelectedIds(new Set([1, 2])))
     act(() => r.result.current.actions.bulkSetOwner({ id: 9, name: 'New Owner' }))
+    // Request-asserting (§13): POST /candidates/bulk/owner with the exact ids + owner_id body.
+    expect(post).toHaveBeenCalledWith('/candidates/bulk/owner', { candidate_ids: [1, 2], owner_id: 9 })
     expect(rowOf(r, 1)?.owner).toBe('New Owner') // optimistic on both
     expect(rowOf(r, 2)?.owner).toBe('New Owner')
     // Job 42: 1 of 2 confirmed → a partial reconcile now WARNS with the shared
@@ -85,6 +87,7 @@ describe('useCandidateBulkActions · bulkSetOwner (bulkMutate optimistic/reconci
     const r = harness([cand({ id: 1, owner: 'Old' })])
     act(() => r.result.current.setSelectedIds(new Set([1])))
     act(() => r.result.current.actions.bulkSetOwner({ id: 9, name: 'New Owner' }))
+    expect(post).toHaveBeenCalledWith('/candidates/bulk/owner', { candidate_ids: [1], owner_id: 9 })
     await waitFor(() => expect(notify).toHaveBeenCalledWith('success', 'bulk.ownerChanged'))
   })
 
@@ -93,6 +96,7 @@ describe('useCandidateBulkActions · bulkSetOwner (bulkMutate optimistic/reconci
     const r = harness([cand({ id: 1, owner: 'Old' })])
     act(() => r.result.current.setSelectedIds(new Set([1])))
     act(() => r.result.current.actions.bulkSetOwner({ id: 9, name: 'New' }))
+    expect(post).toHaveBeenCalledWith('/candidates/bulk/owner', { candidate_ids: [1], owner_id: 9 })
     await waitFor(() => expect(notify).toHaveBeenCalledWith('error', 'bulk.mutateError'))
     expect(rowOf(r, 1)?.owner).toBe('Old')
   })

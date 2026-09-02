@@ -220,6 +220,21 @@ describe('AddShiftModal · candidate search (SUGGESTIES mock removed)', () => {
   })
 })
 
+// E3 audit: the notes field is now controlled state that rides into onAdd's payload
+// (PlanningShiftController accepts `notes`). The SAVE seam itself is still gated by
+// PLANNING-PERSIST-1 (disabled Save + honest notice, see the next describe), so no
+// submit test can exist yet — this only pins that the field is labelled and editable;
+// the payload assertion joins the persist test the day the gate opens.
+describe('AddShiftModal · notes field (E3 audit)', () => {
+  it('is a labelled, editable field (save seam still gated by PLANNING-PERSIST-1)', async () => {
+    const user = userEvent.setup()
+    render(<AddShiftModal date={new Date()} onClose={noop} onAdd={noop} />)
+    const textarea = screen.getByLabelText('notePlaceholder') as HTMLTextAreaElement
+    await user.type(textarea, 'Bring own PPE')
+    expect(textarea).toHaveValue('Bring own PPE')
+  })
+})
+
 describe('AddShiftModal · not-yet-persisted gate (PLANNING-PERSIST-1)', () => {
   it('disables Save with an honest tooltip and shows the preview notice', () => {
     render(<AddShiftModal date={new Date()} onClose={noop} onAdd={noop} />)

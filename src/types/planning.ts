@@ -27,6 +27,10 @@ export interface Shift {
   // picked from usePlanningOrdersList in AddShiftModal — optional because the
   // legacy in-memory rows this type also describes predate the order model.
   orderId?: string
+  // Free-text shift notes — backend PlanningShiftController accepts a plain
+  // `notes` string (nullable), so this travels with the payload the same way
+  // orderId does, even while Save itself stays disabled (PLANNING-PERSIST-1).
+  notes?: string
 }
 
 // A new shift before it gets an id (what the add-modal emits).

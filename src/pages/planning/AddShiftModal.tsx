@@ -94,6 +94,9 @@ export default function AddShiftModal({ date, onClose, onAdd }: { date: Date; on
   const [candidate,   setCandidate]   = useState<ShiftCandidateOption | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [color,       setColor]       = useState('var(--color-success)')
+  // Backend accepts a plain notes string (PlanningShiftController) — controlled
+  // so typed text survives into the payload instead of being silently dropped.
+  const [notes,       setNotes]       = useState('')
   // "Open dienst" mode — was a fully decorative, unwired `<select>` before (no
   // value/onChange at all); now a controlled searchable picker for the same
   // three labels, still LOCAL UI state only (never part of the onAdd payload —
@@ -121,7 +124,7 @@ export default function AddShiftModal({ date, onClose, onAdd }: { date: Date; on
     // orderId travels with the payload from day one, even while onAdd itself is
     // still the local in-memory sink — so wiring the real POST later is a body
     // change, not a hunt for where the picked order went.
-    onAdd({ title, location: customerName, candidate: candidate?.name || '', start, end, color, date, orderId })
+    onAdd({ title, location: customerName, candidate: candidate?.name || '', start, end, color, date, orderId, notes })
     onClose()
   }
 
@@ -309,7 +312,8 @@ export default function AddShiftModal({ date, onClose, onAdd }: { date: Date; on
               <div>
                 <div style={cardHead}>{t('notes')}</div>
                 <div style={cardBox}>
-                  <textarea style={{ ...INPUT, height: 70, resize: 'none' }} placeholder={t('notePlaceholder')} aria-label={t('notePlaceholder')} />
+                  <textarea style={{ ...INPUT, height: 70, resize: 'none' }} value={notes} onChange={e => setNotes(e.target.value)}
+                    placeholder={t('notePlaceholder')} aria-label={t('notePlaceholder')} />
                 </div>
               </div>
 

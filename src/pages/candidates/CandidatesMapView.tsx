@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next'
 import RadiusMapPanel, { type MapPoint } from '@/components/map/RadiusMapPanel'
 import { NEUTRAL_AVATAR } from '@/components/ui/Avatar'
 import { useLookups } from '@/context/LookupsContext'
+import { toCoord } from '@/lib/coords'
 import type { Candidate } from '@/types/candidate'
 import type { Id } from '@/types/common'
 
@@ -26,10 +27,14 @@ export default function CandidatesMapView({ rows, center, radiusKm, onCenterChan
   const { statusMeta } = useLookups() as unknown as { statusMeta: (v?: string | null) => { color: string } }
 
   // Only rows with geocoded coordinates land on the map (PDOK fills them on save).
+  // PDOK-LATLNG-1 (§10): Laravel serialises DECIMAL columns as JSON strings, so a
+  // `typeof === 'number'` check silently drops real coordinates — toCoord coerces
+  // both number and numeric-string, mirroring CustomersMapView.
   const points: MapPoint[] = rows
-    .filter(c => typeof c.lat === 'number' && typeof c.lng === 'number')
-    .map(c => ({
-      id: c.id, lat: c.lat as number, lng: c.lng as number, label: c.name,
+    .map(c => ({ c, lat: toCoord(c.lat), lng: toCoord(c.lng) }))
+    .filter(({ lat, lng }) => lat != null && lng != null)
+    .map(({ c, lat, lng }) => ({
+      id: c.id, lat: lat as number, lng: lng as number, label: c.name,
       sub: [c.city, c.distanceKm != null ? t('common:map.kmAway', { km: c.distanceKm }) : null].filter(Boolean).join(' · '),
       color: c.status ? statusMeta(c.status).color : NEUTRAL_AVATAR,
     }))
