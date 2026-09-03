@@ -131,10 +131,8 @@ export function liveFromError(e: unknown): LiveBlockers | null {
 // one stage carries is_rejected (backend singleton guard); if a stale/multi-flagged
 // list is ever passed, take the first by sort order (the array is assumed
 // pre-sorted, mirrors LookupsContext.normalize()'s ordering). `funnelTypes`
-// defaults to the seed here for a DIFFERENT reason than needsLiveCheck/
-// fetchLiveBlockers above: this function's only caller (ArchiveGuardModal) does
-// not thread the live lookup through yet — out of HERAUDIT-2-REST-FE's scope
-// (named callers were the drawer/bulk archive hooks, not the resolve modal).
+// defaults to the seed only as the pre-load fallback — ArchiveGuardModal now
+// threads the live tenant lookup through from CandidatesPage (HERAUDIT-2-REST-b).
 // Mirrors ApplicationsPage.handleMove's own phase-move call (same endpoint/body).
 export async function resolveApplication(id: Id, funnelTypes: LookupItem[] = DEFAULT_FUNNEL_TYPES): Promise<boolean> {
   const rejectedKey = funnelTypes.find(f => f.is_rejected)?.value ?? 'rejected'

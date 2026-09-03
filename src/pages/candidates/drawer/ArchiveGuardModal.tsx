@@ -15,7 +15,9 @@ import FloatingPanel from '@/components/ui/FloatingPanel'
 import { resolveApplication, resolveMatch } from '../data/archiveGuard'
 import type { BlockingApplication, BlockingMatch } from '../data/archiveGuard'
 import Button from '@/components/ui/Button'
-import { BodyText, GroupLabel } from '@/components/ui/typography'
+import { BodyText, GroupLabel, PageTitle } from '@/components/ui/typography'
+import { DEFAULT_FUNNEL_TYPES } from '@/context/LookupsContext'
+import type { LookupItem } from '@/context/LookupsContext'
 
 const sectionHeader: React.CSSProperties = {
   display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6, gap: 8,
@@ -33,6 +35,10 @@ interface Props {
   aggregate?: { blockedCount: number; totalCount: number }
   applications: BlockingApplication[]
   matches: BlockingMatch[]
+  // The live tenant funnel lookup (HERAUDIT-2-REST-b) — resolveApplication reads
+  // its is_rejected-flagged stage from here, never the seed default, so the PATCH
+  // carries the tenant's actual renamed rejected-stage slug.
+  funnelTypes?: LookupItem[]
   onClose: () => void
   // Called once every blocker resolved cleanly — the caller then proceeds.
   onResolved: () => void
@@ -40,7 +46,7 @@ interface Props {
 
 // Blocks archive/prullenbak while a live application or active match still
 // hangs on the candidate(s); "resolve all" walks each blocker before proceeding.
-export default function ArchiveGuardModal({ mode, candidateName, aggregate, applications: initialApps, matches: initialMatches, onClose, onResolved }: Props) {
+export default function ArchiveGuardModal({ mode, candidateName, aggregate, applications: initialApps, matches: initialMatches, funnelTypes = DEFAULT_FUNNEL_TYPES, onClose, onResolved }: Props) {
   const { t } = useTranslation(['candidates', 'common'])
   const [applications, setApplications] = useState(initialApps)
   const [matches, setMatches] = useState(initialMatches)
@@ -55,7 +61,7 @@ export default function ArchiveGuardModal({ mode, candidateName, aggregate, appl
   // parent action only proceeds once nothing remains.
   const resolveAll = async () => {
     setResolving(true)
-    const appResults = await Promise.all(applications.map(a => resolveApplication(a.id)))
+    const appResults = await Promise.all(applications.map(a => resolveApplication(a.id, funnelTypes)))
     const stillApps = applications.filter((_, i) => !appResults[i])
 
     const matchResults = await Promise.all(matches.map(m => resolveMatch(m.id)))
@@ -78,7 +84,7 @@ export default function ArchiveGuardModal({ mode, candidateName, aggregate, appl
       header={
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <span style={{ display: 'inline-flex', width: 30, height: 30, borderRadius: 8, alignItems: 'center', justifyContent: 'center', background: 'var(--color-danger-bg)', color: 'var(--color-on-danger-bg)' }}><AlertTriangle size={16} /></span>
-          <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{t('archiveGuard.title')}</span>
+          <PageTitle as="span">{t('archiveGuard.title')}</PageTitle>
         </div>
       }>
 

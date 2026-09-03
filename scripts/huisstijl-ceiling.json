@@ -330,7 +330,7 @@
   "src/pages/candidates/data/mapCandidate.test.js": 2,
   "src/pages/candidates/drawer/ApplicationRow.test.tsx": 1,
   "src/pages/candidates/drawer/ApplicationRow.tsx": 10,
-  "src/pages/candidates/drawer/ArchiveGuardModal.tsx": 1,
+  "src/pages/candidates/drawer/ArchiveGuardModal.tsx": 0,
   "src/pages/candidates/drawer/AvailabilityEditor.tsx": 5,
   "src/pages/candidates/drawer/BackofficeLinkStatusIcons.tsx": 1,
   "src/pages/candidates/drawer/CandidateHeaderBits.tsx": 5,

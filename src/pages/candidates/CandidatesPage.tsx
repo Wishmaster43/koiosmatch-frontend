@@ -461,7 +461,7 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
             component purely for CandidatesPage size discipline (§0.3). */}
         <CandidateLifecycleModals
           eraseTarget={eraseTarget} onCloseErase={() => setEraseTarget(null)} onConfirmErase={confirmHardDelete}
-          archiveGuard={archiveGuard} onCloseArchiveGuard={() => setArchiveGuard(null)} onResolveArchiveGuard={resolveArchiveGuard}
+          archiveGuard={archiveGuard} onCloseArchiveGuard={() => setArchiveGuard(null)} onResolveArchiveGuard={resolveArchiveGuard} funnelTypes={funnelTypes}
           bulkArchiveGuard={bulkArchiveGuard} onCloseBulkArchiveGuard={() => setBulkArchiveGuard(null)} onResolveBulkArchiveGuard={resolveBulkArchiveGuard}
           bulkMergeTarget={bulkMergeTarget} onCloseBulkMerge={resolveBulkMerge} onMergedBulk={handleBulkMerged}
         />

@@ -12,6 +12,7 @@ import MergeCandidateModal from './drawer/MergeCandidateModal'
 import type { ArchiveGuardTarget } from './hooks/useCandidateDrawerActions'
 import type { BulkArchiveGuardTarget, BulkMergeTarget } from './hooks/useCandidateBulkActions'
 import type { Id } from '@/types/common'
+import type { LookupItem } from '@/context/LookupsContext'
 
 interface Props {
   eraseTarget: { id: Id; name: string } | null
@@ -20,6 +21,9 @@ interface Props {
   archiveGuard: ArchiveGuardTarget | null
   onCloseArchiveGuard: () => void
   onResolveArchiveGuard: () => void
+  // Live tenant funnel lookup (HERAUDIT-2-REST-b) — passed through to the
+  // guard popup so its "resolve" step PATCHes the tenant's real rejected slug.
+  funnelTypes?: LookupItem[]
   bulkArchiveGuard: BulkArchiveGuardTarget | null
   onCloseBulkArchiveGuard: () => void
   onResolveBulkArchiveGuard: () => void
@@ -34,7 +38,7 @@ interface Props {
 // (erase preview, single/bulk archive guard, bulk merge) — pure wiring, no logic.
 export default function CandidateLifecycleModals({
   eraseTarget, onCloseErase, onConfirmErase,
-  archiveGuard, onCloseArchiveGuard, onResolveArchiveGuard,
+  archiveGuard, onCloseArchiveGuard, onResolveArchiveGuard, funnelTypes,
   bulkArchiveGuard, onCloseBulkArchiveGuard, onResolveBulkArchiveGuard,
   bulkMergeTarget, onCloseBulkMerge, onMergedBulk,
 }: Props) {
@@ -50,14 +54,14 @@ export default function CandidateLifecycleModals({
           live application or active match hangs on this candidate. */}
       {archiveGuard && (
         <ArchiveGuardModal mode={archiveGuard.mode} candidateName={archiveGuard.candidateName}
-          applications={archiveGuard.applications} matches={archiveGuard.matches}
+          applications={archiveGuard.applications} matches={archiveGuard.matches} funnelTypes={funnelTypes}
           onClose={onCloseArchiveGuard} onResolved={onResolveArchiveGuard} />
       )}
       {/* Same popup, bulk/aggregate mode — N of the selection are blocked. */}
       {bulkArchiveGuard && (
         <ArchiveGuardModal mode="archive"
           aggregate={{ blockedCount: bulkArchiveGuard.blockedCount, totalCount: bulkArchiveGuard.totalCount }}
-          applications={bulkArchiveGuard.applications} matches={bulkArchiveGuard.matches}
+          applications={bulkArchiveGuard.applications} matches={bulkArchiveGuard.matches} funnelTypes={funnelTypes}
           onClose={onCloseBulkArchiveGuard} onResolved={onResolveBulkArchiveGuard} />
       )}
       {/* Bulk-merge (punt 4) — prefilled with both selected rows, so it opens straight
