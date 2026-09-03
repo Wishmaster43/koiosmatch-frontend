@@ -237,6 +237,7 @@ describe('house token pairs stay readable (defaults, light theme)', () => {
       const ch = (shift: number) => Math.round(pct * ((a >> shift) & 255) + (1 - pct) * ((b >> shift) & 255))
       return `#${[16, 8, 0].map(sh => ch(sh).toString(16).padStart(2, '0')).join('')}`
     }
+    /* eslint-disable no-restricted-syntax -- brand fixtures are the algorithm's INPUTS (a tenant's hex), not UI colours */
     const brands = [
       { name: 'default primary', hex: '#19A5CA', lightFloor: 4.5 },
       { name: 'AENF yellow', hex: '#F5C400', lightFloor: 4.5 },
@@ -246,6 +247,7 @@ describe('house token pairs stay readable (defaults, light theme)', () => {
       { name: 'white-ish', hex: '#F0F0F0', lightFloor: 4.5 },
       { name: 'near-black', hex: '#1F2937', lightFloor: 4.5 },
     ]
+    /* eslint-enable no-restricted-syntax */
     // Surfaces/grounds are the runtime's own constants (applyBrandTokens) and the css tokens.
     // eslint-disable-next-line no-restricted-syntax -- the runtime surface constants, mirrored
     const surfaces = { light: { surface: '#FFFFFF', ground: token('bg') }, dark: { surface: '#13131F', ground: '#13131F' } }
