@@ -3,9 +3,14 @@
  * component tests run a key-echoing i18n stub, so THIS test proves against the
  * REAL i18n init that the keys resolve to shipped copy — a missing key would
  * echo itself here and fail loudly instead of shipping raw keys to the screen.
+ *
+ * en/de/fr load lazily (§9 bundle discipline — only nl ships eagerly), so this
+ * loads them once up front via the real loader before asserting against them.
  */
-import { describe, it, expect } from 'vitest'
-import i18n from '@/i18n'
+import { describe, it, expect, beforeAll } from 'vitest'
+import i18n, { loadLocale } from '@/i18n'
+
+beforeAll(() => Promise.all([loadLocale(i18n, 'en'), loadLocale(i18n, 'de'), loadLocale(i18n, 'fr')]))
 
 describe('C1 assistant/learning i18n keys resolve', () => {
   it('resolves the assistant block keys from the common namespace', () => {

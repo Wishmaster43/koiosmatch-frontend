@@ -21,15 +21,16 @@ const baseProps = {
 // raw Dutch registry string — the smoke suite clicks nav items by their Dutch
 // label under the default nl language, so nl must keep working too.
 describe('Sidebar — nav label i18n', () => {
-  it('reads Candidates (not Kandidaten) when the language is English', () => {
-    i18n.changeLanguage('en')
+  // Non-nl bundles load lazily through the i18n backend, so the switch must be awaited.
+  it('reads Candidates (not Kandidaten) when the language is English', async () => {
+    await i18n.changeLanguage('en')
     render(<Sidebar {...baseProps} />)
     expect(screen.getByText('Candidates')).toBeInTheDocument()
     expect(screen.queryByText('Kandidaten')).toBeNull()
   })
 
-  it('still reads Kandidaten under the default nl language', () => {
-    i18n.changeLanguage('nl')
+  it('still reads Kandidaten under the default nl language', async () => {
+    await i18n.changeLanguage('nl')
     render(<Sidebar {...baseProps} />)
     expect(screen.getByText('Kandidaten')).toBeInTheDocument()
   })

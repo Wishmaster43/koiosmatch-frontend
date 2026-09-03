@@ -27,12 +27,13 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     localStorage.setItem('km-theme', t)
   }
 
-  // Updates the language in state, persists it, and switches i18next so all
-  // translated strings re-render immediately.
+  // Updates the language in state, persists it, and switches i18next. Non-nl bundles
+  // load lazily through the i18n backend: changeLanguage() awaits them before it
+  // emits languageChanged, so no key ever flashes untranslated during the switch.
   const setLanguage = (l: string) => {
     setLanguageState(l)
     localStorage.setItem('km-language', l)
-    i18n.changeLanguage(l)
+    void i18n.changeLanguage(l)
   }
 
   // Reflects the active theme onto the document root whenever it changes, since the
