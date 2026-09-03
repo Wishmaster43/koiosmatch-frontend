@@ -99,7 +99,9 @@ export default function DashboardLayout() {
       // Apply it as navIntent so the target page receives it via the intent prop.
       if (state?.kmSynthetic && state?.kmIntentData != null) {
         setNavIntent(state.kmIntentData)
-        setActivePage(state.kmPage ?? window.location.hash.replace(/^#/, '').split(/[/?]/)[0])
+        // Same guard as the fall-through path: only a known page id becomes the active page.
+        const intentPage = state.kmPage ?? window.location.hash.replace(/^#/, '').split(/[/?]/)[0]
+        if (intentPage && PAGE_TITLES[intentPage]) setActivePage(intentPage)
         return
       }
       // Synthetic announcements (kmSynthetic) are for hash-derived listeners

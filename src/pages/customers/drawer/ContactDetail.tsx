@@ -367,7 +367,8 @@ export default function ContactDetail({ contact, locations, departments, statuse
           // never gated on data presence) and BEFORE 'links', per tab-order canon.
           { id: 'notes', label: t('contacts.detail.subtabs.notes') },
           // TIJDLIJN-SUBDRILL-1: timeline second-to-last, before Koppelingen (§3A(d)).
-          { id: 'timeline', label: t('drawer.tabs.timeline') },
+          // DD-FE-6 (no empty tabs): the panel needs the customer id for the nested /activity route.
+          ...(contact.customerId != null ? [{ id: 'timeline', label: t('drawer.tabs.timeline') }] : []),
           ...(showKoppelingen ? [{ id: 'links', label: t('common:backofficeLinks.tabLabel') }] : []),
         ]}
         active={subTab}

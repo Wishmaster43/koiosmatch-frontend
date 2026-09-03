@@ -60,7 +60,7 @@ export default function MatchRenewalsBlock({ renewals }: MatchRenewalsBlockProps
               </div>
               {/* Metadata row: created date + user name (Caption style). */}
               {(renewal.created_at || createdByName) && (
-                <Caption as="div" style={{ marginLeft: CANON_LABEL_STYLE.width as number }}>
+                <Caption as="div" style={{ marginLeft: (CANON_LABEL_STYLE.width as number) + 12 }}>
                   {renewal.created_at ? formatDate(renewal.created_at) : '—'}
                   {createdByName && (
                     <>

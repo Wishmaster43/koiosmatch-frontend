@@ -103,7 +103,7 @@ describe('NotificationBell · focus trap (§6 WCAG 2.2 AA)', () => {
     render(<NotificationBell />)
     fireEvent.click(screen.getByRole('button', { name: /notificat/i }))
     const panel = screen.getByRole('dialog', { name: /notificat/i })
-    expect(panel).toHaveAttribute('aria-modal', 'true')
+    expect(panel).not.toHaveAttribute('aria-modal')
     expect(panel).toHaveAttribute('tabindex', '-1')
   })
 
@@ -174,7 +174,9 @@ describe('NotificationBell row click-through', () => {
     window.addEventListener('popstate', onPopState)
     render(<NotificationBell />)
     fireEvent.click(screen.getByRole('button', { name: /notificat/i }))
-    const row = screen.getByText('System message').closest('[role="menuitem"]') as HTMLElement
+    // A row without a target is plain content: no button role, default cursor.
+    const row = screen.getByText('System message').closest('[tabindex="-1"]') as HTMLElement
+    expect(row).not.toHaveAttribute('role')
     expect(row).toHaveStyle({ cursor: 'default' })
     fireEvent.click(row)
     expect(window.location.hash).toBe('')

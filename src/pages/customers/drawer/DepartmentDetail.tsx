@@ -278,7 +278,8 @@ export default function DepartmentDetail({ department, locations, statuses, cont
           { id: 'tasks',     label: t('drawer.tabs.tasks') },
           ...(customFieldDefs.length > 0 ? [{ id: 'extra', label: t('drawer.tabs.extra') }] : []),
           // TIJDLIJN-SUBDRILL-1: timeline second-to-last, before Koppelingen (§3A(d)).
-          { id: 'timeline',  label: t('drawer.tabs.timeline') },
+          // DD-FE-6 (no empty tabs): the panel needs the customer id for the nested /activity route.
+          ...(customerId != null ? [{ id: 'timeline', label: t('drawer.tabs.timeline') }] : []),
           // EXTRACT-1: the shared Koppelingen sub-tab, last when it has content.
           // DD-FE-6 ("no empty tabs"): hidden when no connector app is enabled.
           ...(showKoppelingen ? [{ id: 'links', label: t('common:backofficeLinks.tabLabel') }] : []),

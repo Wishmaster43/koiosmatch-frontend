@@ -105,8 +105,9 @@ export default function NotificationBell() {
       </button>
 
       {open && (
-        // HUISSTIJL-1: dropdown panel — z-popover ladder tier, shadow-float role.
-        <div ref={panelRef} role="dialog" aria-modal="true" aria-label={t('notifications.title')} tabIndex={-1} style={{
+        // HUISSTIJL-1: dropdown panel — z-popover ladder tier, shadow-float role. Non-modal on
+        // purpose (outside click still closes it, nothing else is inerted), so no aria-modal.
+        <div ref={panelRef} role="dialog" aria-label={t('notifications.title')} tabIndex={-1} style={{
           position: 'absolute', right: 0, top: 38, width: 360, maxHeight: 420, overflowY: 'auto', zIndex: 'var(--z-popover)',
           background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12,
           boxShadow: 'var(--shadow-float)',
@@ -130,7 +131,7 @@ export default function NotificationBell() {
               return (
                 <div
                   key={n.id ?? i}
-                  role="menuitem"
+                  role={clickable ? 'button' : undefined}
                   tabIndex={clickable ? 0 : -1}
                   onClick={clickable ? () => { if (target) navigateToNotificationTarget(target); else window.open(href!, '_blank', 'noopener,noreferrer'); setOpen(false) } : undefined}
                   onKeyDown={clickable ? (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); if (target) navigateToNotificationTarget(target); else window.open(href!, '_blank', 'noopener,noreferrer'); setOpen(false) } } : undefined}
