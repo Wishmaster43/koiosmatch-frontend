@@ -16,7 +16,7 @@ import {
   type SettingsNavGroup,
   type SettingsTranslate,
 } from './settingsSearchIndex'
-import { useEscapeLayer } from '@/hooks/useEscapeLayer'
+import { useFocusTrap } from '@/hooks/useFocusTrap'
 
 /** Props: the palette is fully controlled by the settings page. */
 interface SettingsSearchProps {
@@ -35,6 +35,7 @@ export default function SettingsSearch({ open, onClose, groups, onSelect }: Sett
   const [active, setActive] = useState(0)
   const inputRef = useRef<HTMLInputElement>(null)
   const activeRef = useRef<HTMLButtonElement>(null)
+  const dialogRef = useFocusTrap<HTMLDivElement>(onClose)
 
   // Rebuild the searchable index whenever the visible registry or the language changes.
   const entries = useMemo(
@@ -48,20 +49,15 @@ export default function SettingsSearch({ open, onClose, groups, onSelect }: Sett
   // Reset the highlight on every new query so Enter never picks a stale row.
   useEffect(() => { setActive(0) }, [query])
 
-  // Open with an empty query and the caret in the field.
+  // Reset query on open; useFocusTrap handles focus management automatically.
   useEffect(() => {
     if (!open) return
     setQuery('')
-    const focusTimer = setTimeout(() => inputRef.current?.focus(), 0)
-    return () => clearTimeout(focusTimer)
   }, [open])
 
   // Keep the keyboard-highlighted row inside the scroll viewport (guarded: jsdom
   // and older engines do not implement scrollIntoView, and this is cosmetic).
   useEffect(() => { activeRef.current?.scrollIntoView?.({ block: 'nearest' }) }, [active])
-
-  // Escape layer: closes the palette (one-stage).
-  useEscapeLayer(open, onClose)
 
   if (!open) return null
 
@@ -85,7 +81,7 @@ export default function SettingsSearch({ open, onClose, groups, onSelect }: Sett
       position: 'fixed', inset: 0, zIndex: 'var(--z-overlay)', background: 'rgba(17,24,39,0.35)',
       display: 'flex', alignItems: 'flex-start', justifyContent: 'center', paddingTop: '12vh',
     }}>
-      <div role="dialog" aria-modal="true" aria-label={t('shell.search')}
+      <div ref={dialogRef} role="dialog" aria-modal="true" aria-label={t('shell.search')} tabIndex={-1}
         onMouseDown={e => e.stopPropagation()} style={{
           width: 'min(560px, 92vw)', background: 'var(--surface)', borderRadius: 14,
           boxShadow: 'var(--shadow-modal)', overflow: 'hidden',

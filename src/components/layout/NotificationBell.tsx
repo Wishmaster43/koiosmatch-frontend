@@ -25,6 +25,7 @@ import { useTranslation } from 'react-i18next'
 import { useDateFormat } from '@/lib/datetime'
 import { Bell, ExternalLink } from 'lucide-react'
 import { useNotifications } from '@/hooks/useNotifications'
+import { useFocusTrap } from '@/hooks/useFocusTrap'
 // PORTAL-MARKER-1: a click inside an open portalled picker menu is never "outside".
 import { isInsideDropdownPortal } from '@/lib/useDropdownPlacement'
 import { SectionTitle, BodyText, Caption } from '@/components/ui/typography'
@@ -51,6 +52,7 @@ export default function NotificationBell() {
   const { items, unseen, markAllSeen } = useNotifications()
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
+  const panelRef = useFocusTrap<HTMLDivElement>(() => setOpen(false))
 
   // Close the panel on an outside click.
   useEffect(() => {
@@ -104,7 +106,7 @@ export default function NotificationBell() {
 
       {open && (
         // HUISSTIJL-1: dropdown panel — z-popover ladder tier, shadow-float role.
-        <div role="menu" style={{
+        <div ref={panelRef} role="dialog" aria-modal="true" aria-label={t('notifications.title')} tabIndex={-1} style={{
           position: 'absolute', right: 0, top: 38, width: 360, maxHeight: 420, overflowY: 'auto', zIndex: 'var(--z-popover)',
           background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12,
           boxShadow: 'var(--shadow-float)',

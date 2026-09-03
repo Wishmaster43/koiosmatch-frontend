@@ -41,6 +41,48 @@ function renderPalette(onSelect = vi.fn()) {
   return { input: screen.getByPlaceholderText(settingsNl.shell.search), onSelect }
 }
 
+describe('SettingsSearch · focus trap (§6 WCAG 2.2 AA)', () => {
+  it('renders the dialog with proper semantics', () => {
+    const { input } = renderPalette()
+    const dialog = input.closest('[role="dialog"]')
+    expect(dialog).toHaveAttribute('aria-modal', 'true')
+    expect(dialog).toHaveAttribute('aria-label')
+    expect(dialog).toHaveAttribute('tabindex', '-1')
+  })
+
+  it('closes on Escape', () => {
+    const onClose = vi.fn()
+    const i18n = createInstance()
+    i18n.use(initReactI18next).init({
+      lng: 'nl',
+      resources: { nl: { settings: settingsNl, settingsSearch: settingsSearchNl } },
+      ns: ['settings', 'settingsSearch'],
+      defaultNS: 'settings',
+      interpolation: { escapeValue: false },
+    })
+    const groups = [{ key: 'test', items: [{ id: 'test_item' }] }]
+    render(
+      <I18nextProvider i18n={i18n}>
+        <SettingsSearch open onClose={onClose} groups={groups} onSelect={vi.fn()} />
+      </I18nextProvider>,
+    )
+    fireEvent.keyDown(screen.getByRole('dialog'), { key: 'Escape' })
+    expect(onClose).toHaveBeenCalledTimes(1)
+  })
+
+  it('keeps keyboard focus within the dialog on Tab', () => {
+    const { input } = renderPalette()
+    const dialog = screen.getByRole('dialog')
+    const listbox = dialog.querySelector('[role="listbox"]')
+    expect(listbox).toBeInTheDocument()
+    // The input and listbox are both focusable; Tab handling in useFocusTrap keeps focus inside
+    fireEvent.keyDown(input, { key: 'Tab' })
+    // Focus should remain within the dialog (not escape to document.body)
+    const activeEl = document.activeElement
+    expect(dialog?.contains(activeEl)).toBe(true)
+  })
+})
+
 describe('SettingsSearch', () => {
   it('finds the e-mail settings when typing "email" (regression: Dutch labels spell it "E-mail")', () => {
     const { input } = renderPalette()

@@ -94,6 +94,47 @@ describe('resolveNotificationTarget', () => {
   })
 })
 
+describe('NotificationBell · focus trap (§6 WCAG 2.2 AA)', () => {
+  it('renders the panel with proper dialog semantics', () => {
+    vi.spyOn(useNotificationsModule, 'useNotifications').mockReturnValue({
+      items: [{ id: 1, title: 'Test notification', entity_type: 'task', entity_id: '1', seen: false }],
+      unseen: 1, markAllSeen: vi.fn(), reload: vi.fn(),
+    } as unknown as ReturnType<typeof useNotificationsModule.useNotifications>)
+    render(<NotificationBell />)
+    fireEvent.click(screen.getByRole('button', { name: /notificat/i }))
+    const panel = screen.getByRole('dialog', { name: /notificat/i })
+    expect(panel).toHaveAttribute('aria-modal', 'true')
+    expect(panel).toHaveAttribute('tabindex', '-1')
+  })
+
+  it('closes on Escape via the focus trap', () => {
+    vi.spyOn(useNotificationsModule, 'useNotifications').mockReturnValue({
+      items: [{ id: 1, title: 'Test', entity_type: 'task', entity_id: '1', seen: false }],
+      unseen: 1, markAllSeen: vi.fn(), reload: vi.fn(),
+    } as unknown as ReturnType<typeof useNotificationsModule.useNotifications>)
+    render(<NotificationBell />)
+    const trigger = screen.getByRole('button', { name: /notificat/i })
+    fireEvent.click(trigger)
+    expect(screen.getByRole('dialog')).toBeInTheDocument()
+    fireEvent.keyDown(screen.getByRole('dialog'), { key: 'Escape' })
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+  })
+
+  it('returns focus to the trigger button on close', () => {
+    vi.spyOn(useNotificationsModule, 'useNotifications').mockReturnValue({
+      items: [{ id: 1, title: 'Test', entity_type: 'task', entity_id: '1', seen: false }],
+      unseen: 1, markAllSeen: vi.fn(), reload: vi.fn(),
+    } as unknown as ReturnType<typeof useNotificationsModule.useNotifications>)
+    render(<NotificationBell />)
+    const trigger = screen.getByRole('button', { name: /notificat/i })
+    trigger.focus()
+    fireEvent.click(trigger)
+    fireEvent.keyDown(screen.getByRole('dialog'), { key: 'Escape' })
+    // After closing via Escape, focus should return to the trigger button
+    expect(document.activeElement).toBe(trigger)
+  })
+})
+
 describe('NotificationBell row click-through', () => {
   it('navigates (hash + popstate) when a row has a resolvable target', () => {
     vi.spyOn(useNotificationsModule, 'useNotifications').mockReturnValue({
