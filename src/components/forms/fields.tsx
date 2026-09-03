@@ -104,12 +104,19 @@ export function Field({ label, required, children }: { label: ReactNode; require
   )
 }
 
+// REQUIRED-A11Y-3: the required flags Field/FieldRow clone onto a kit control; every control
+// below forwards them to its native element, else the clone lands on nothing (measured 03-09:
+// the customer-name field showed an asterisk and zero aria-required on screen).
+type RequiredProps = { required?: boolean; 'aria-required'?: boolean }
+const requiredAttrs = ({ required, 'aria-required': ariaRequired }: RequiredProps) =>
+  ({ required: required || undefined, 'aria-required': (ariaRequired || required) || undefined })
+
 // Single-line text input on the shared field style, with an optional error-border variant.
-export function TextField({ id, value, onChange, placeholder, type = 'text', error, style }: {
+export function TextField({ id, value, onChange, placeholder, type = 'text', error, style, ...req }: {
   id?: string; value?: string; onChange: (v: string) => void; placeholder?: string; type?: string; error?: boolean; style?: CSSProperties
-}) {
+} & RequiredProps) {
   return (
-    <input id={id} type={type} value={value ?? ''} placeholder={placeholder} aria-label={placeholder}
+    <input id={id} type={type} value={value ?? ''} placeholder={placeholder} aria-label={placeholder} {...requiredAttrs(req)}
       onChange={e => onChange(e.target.value)}
       // The error state replaces the whole `border` shorthand rather than only its
       // colour: React warns when a longhand is removed while the shorthand is still
@@ -119,11 +126,11 @@ export function TextField({ id, value, onChange, placeholder, type = 'text', err
 }
 
 // Multi-line text input on the shared field style, vertically resizable only.
-export function TextArea({ id, value, onChange, placeholder, rows = 3, style }: {
+export function TextArea({ id, value, onChange, placeholder, rows = 3, style, ...req }: {
   id?: string; value?: string; onChange: (v: string) => void; placeholder?: string; rows?: number; style?: CSSProperties
-}) {
+} & RequiredProps) {
   return (
-    <textarea id={id} value={value ?? ''} placeholder={placeholder} aria-label={placeholder} rows={rows}
+    <textarea id={id} value={value ?? ''} placeholder={placeholder} aria-label={placeholder} rows={rows} {...requiredAttrs(req)}
       onChange={e => onChange(e.target.value)}
       style={{ ...inputStyle, resize: 'vertical', ...style }} />
   )
@@ -136,20 +143,20 @@ export function TextArea({ id, value, onChange, placeholder, rows = 3, style }: 
 // reaches the trigger directly, since a <button> — unlike a native <select> — is
 // not labelable via `htmlFor`; `placeholder` still carries the name for callers
 // that render this standalone (no wrapping <Field>), same as TextField/TextArea.
-export function SelectField({ id, value, onChange, options = [], placeholder, style, 'aria-labelledby': ariaLabelledBy }: {
+export function SelectField({ id, value, onChange, options = [], placeholder, style, 'aria-labelledby': ariaLabelledBy, ...req }: {
   id?: string; value?: string; onChange: (v: string) => void; options?: Array<string | SelectOption>; placeholder?: string; style?: CSSProperties; 'aria-labelledby'?: string
-}) {
+} & RequiredProps) {
   return (
-    <CreatableSelect id={id} aria-labelledby={ariaLabelledBy} value={value ?? ''} onChange={onChange}
+    <CreatableSelect id={id} aria-labelledby={ariaLabelledBy} aria-required={requiredAttrs(req)['aria-required']} value={value ?? ''} onChange={onChange}
       options={options as Array<string | { value: string; label: string }>} placeholder={placeholder} allowCreate={false}
       style={{ ...inputStyle, cursor: 'pointer', ...style }} />
   )
 }
 
 // Date input wrapping the shared DatePicker instance, formatted dd-MM-yyyy for every date field in the app.
-export function DateField({ id, value, onChange, placeholder, style }: {
+export function DateField({ id, value, onChange, placeholder, style, ...req }: {
   id?: string; value?: string | number | Date | null; onChange: (v: string) => void; placeholder?: string; style?: CSSProperties
-}) {
+} & RequiredProps) {
   return (
     <DatePicker
       id={id}
@@ -162,17 +169,17 @@ export function DateField({ id, value, onChange, placeholder, style }: {
       placeholderText={placeholder}
       portalId="datepicker-portal"
       popperPlacement="bottom-start"
-      customInput={<input style={{ ...inputStyle, ...style }} />}
+      customInput={<input style={{ ...inputStyle, ...style }} {...requiredAttrs(req)} />}
     />
   )
 }
 
 // Checkbox input on the shared accent colour; disabled also flips the cursor to default.
-export function CheckboxField({ id, checked, onChange, disabled }: {
+export function CheckboxField({ id, checked, onChange, disabled, ...req }: {
   id?: string; checked?: boolean; onChange: (v: boolean) => void; disabled?: boolean
-}) {
+} & RequiredProps) {
   return (
-    <input id={id} type="checkbox" checked={!!checked} disabled={disabled}
+    <input id={id} type="checkbox" checked={!!checked} disabled={disabled} {...requiredAttrs(req)}
       onChange={e => onChange(e.target.checked)}
       style={{ width: 14, height: 14, accentColor: 'var(--color-primary)', cursor: disabled ? 'default' : 'pointer' }} />
   )

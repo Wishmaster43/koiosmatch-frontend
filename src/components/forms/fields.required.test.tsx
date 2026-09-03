@@ -7,7 +7,7 @@
  */
 import { describe, it, expect } from 'vitest'
 import { render, screen } from '@testing-library/react'
-import { Field, FieldRow } from './fields'
+import { Field, FieldRow, TextField, SelectField } from './fields'
 
 // Stand-in for a custom picker (CreatableSelect/SearchSelect/SelectMenu/…): a
 // component child that spreads whatever Field/FieldRow clones onto it, proving
@@ -68,5 +68,32 @@ describe('Field/FieldRow · required reaches assistive tech (REQUIRED-A11Y-1)', 
   it('FieldRow: the asterisk stays aria-hidden (the control carries the real signal)', () => {
     render(<FieldRow label="Name" required><input /></FieldRow>)
     expect(screen.getByText('*')).toHaveAttribute('aria-hidden', 'true')
+  })
+})
+
+// REQUIRED-A11Y-3: the kit's OWN controls forward the cloned flags (the customer-name field
+// is a TextField inside a required FieldRow — that exact path showed nothing on screen).
+describe('kit controls forward required-ness (REQUIRED-A11Y-3)', () => {
+  it('TextField inside a required FieldRow renders aria-required on its input (no native required: the modals validate themselves)', () => {
+    render(<FieldRow label="Naam" required><TextField value="" onChange={() => {}} placeholder="Bedrijf" /></FieldRow>)
+    const input = screen.getByRole('textbox')
+    expect(input).toHaveAttribute('aria-required', 'true')
+    expect(input).not.toHaveAttribute('required')
+  })
+  it('an explicit required on a TextField renders both attributes', () => {
+    render(<TextField value="" onChange={() => {}} placeholder="Bedrijf" required />)
+    const input = screen.getByRole('textbox')
+    expect(input).toHaveAttribute('required')
+    expect(input).toHaveAttribute('aria-required', 'true')
+  })
+  it('SelectField inside a required Field exposes aria-required on its trigger', () => {
+    render(<Field label="Status" required><SelectField value="" onChange={() => {}} options={['a', 'b']} placeholder="Kies" /></Field>)
+    expect(screen.getByRole('button', { name: /Kies|Status/ })).toHaveAttribute('aria-required', 'true')
+  })
+  it('a TextField without the flag carries neither attribute', () => {
+    render(<FieldRow label="Notitie"><TextField value="" onChange={() => {}} placeholder="Vrij" /></FieldRow>)
+    const input = screen.getByRole('textbox')
+    expect(input).not.toHaveAttribute('required')
+    expect(input).not.toHaveAttribute('aria-required')
   })
 })
