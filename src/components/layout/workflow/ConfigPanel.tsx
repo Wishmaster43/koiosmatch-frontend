@@ -362,7 +362,7 @@ export default function ConfigPanel({ node, onUpdate, onDelete, onTabChange, var
       {isWebhookTrigger && activeTab === 'requests' && (
         config?.webhook_id
           ? <Suspense fallback={null}>
-              <WebhookRequestsLog webhookId={config.webhook_id as string | number}
+              <WebhookRequestsLog compact webhookId={config.webhook_id as string | number}
                 webhookName={webhooks.find(h => String(h.id) === String(config.webhook_id))?.name ?? String(config.webhook_id)} />
             </Suspense>
           : <div style={{ padding: 16 }}><Caption>{t('config.requestsPickWebhook')}</Caption></div>

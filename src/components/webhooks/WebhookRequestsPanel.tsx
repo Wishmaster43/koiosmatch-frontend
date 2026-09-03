@@ -30,9 +30,11 @@ const PAGE_SIZE_OPTIONS = [25, 50, 100] // contract cap: ≤100 per page
 // The request log's table body: states, columns, pagination, retention line and
 // the detail drill-in. Shared by the Settings overlay below and the workflow
 // editor's Webhook Trigger config panel (WEBHOOK-LOG-FE-2) — same webhook, same log.
-export function WebhookRequestsLog({ webhookId, webhookName }: {
+export function WebhookRequestsLog({ webhookId, webhookName, compact = false }: {
   webhookId: string | number
   webhookName: string
+  /** Panel-embedded variant (workflow editor, ~440px): drops the IP and workflows columns so the table fits. */
+  compact?: boolean
 }) {
   const { t } = useTranslation('settings')
   const { formatDateTime } = useDateFormat()
@@ -48,7 +50,9 @@ export function WebhookRequestsLog({ webhookId, webhookName }: {
   // No column is sortable: the server already delivers newest-first per page, and
   // a client-side re-sort on a server-paginated list would only reorder the
   // CURRENT page (resetting on every page change) — a fake affordance (§3).
-  const columns: Column<WebhookRequestRow>[] = [
+  // audit screen-webhooklog-1: the full column set is the settings overlay's; the
+  // compact panel keeps time/method/status only (details open on row click anyway).
+  const columns: Column<WebhookRequestRow>[] = ([
     { key: 'created_at', header: t('webhooks.incoming.requests.col.time'),
       render: r => formatDateTime(r.created_at) },
     { key: 'method', header: t('webhooks.incoming.requests.col.method'),
@@ -70,7 +74,7 @@ export function WebhookRequestsLog({ webhookId, webhookName }: {
         // older rows that carry no name.
         return <WorkflowRefs ids={ids} workflows={workflows} />
       } },
-  ]
+  ] as Column<WebhookRequestRow>[]).filter(c => !compact || !['ip', 'workflow_ids'].includes(String(c.key)))
 
   return (
     <div role="region" aria-label={tableLabel} style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>

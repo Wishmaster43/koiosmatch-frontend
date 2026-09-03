@@ -415,7 +415,7 @@ export default function DataTable<Row>({
         )}
         {!loading && sortedRows.length === 0 && (
           <tr>
-            <td colSpan={totalCols} style={{ padding: '40px 10px', textAlign: 'center', fontSize: 13, color: 'var(--text-muted)' }}>
+            <td colSpan={totalCols} style={{ padding: '40px 10px', textAlign: 'center', fontSize: 13, color: 'var(--text-muted)', whiteSpace: 'normal' }}>
               {emptyText ?? t('noResults')}
             </td>
           </tr>
