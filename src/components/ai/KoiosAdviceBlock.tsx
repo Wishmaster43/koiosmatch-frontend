@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next'
 import { RefreshCw, ChevronDown } from 'lucide-react'
 import KoiosAiMark from '@/components/ui/KoiosAiMark'
 import Button from '@/components/ui/Button'
+import { GroupLabel } from '@/components/ui/typography'
 import { askKoios } from '@/lib/koiosBridge'
 import type { KoiosContextRef } from '@/types/koios'
 
@@ -72,7 +73,7 @@ export default function KoiosAdviceBlock({ namespace, insights, onRefresh, conte
           never a second stacked label next to an already-explicit heading. */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
         <KoiosAiMark size={16} title={t('common:aiGeneratedHint', { defaultValue: 'Door Koios AI gegenereerd — controleer voor gebruik.' })} />
-        <span style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)', flex: 1 }}>{t('ai.title')}</span>
+        <GroupLabel as="span" style={{ flex: 1 }}>{t('ai.title')}</GroupLabel>
         <span style={{ fontSize: 10, padding: '2px 7px', borderRadius: 99, background: 'var(--button-fill)', color: 'var(--button-ink)', fontWeight: 600 }}>{t('ai.beta')}</span>
         {onRefresh && (
           <Button variant="ghost" size="sm" iconOnly aria-label={t('ai.refresh')} disabled={loading} onClick={handleRefresh}>
@@ -105,8 +106,8 @@ export default function KoiosAdviceBlock({ namespace, insights, onRefresh, conte
                         <span style={{ fontSize: 12, color: 'var(--text)', lineHeight: 1.5, flex: 1 }}>{ins.text}</span>
                         <Button variant="ghost" size="sm"
                           onClick={() => askKoios(t('common:koios.adviceAskTemplate', { advice: ins.text }), contextRef)}
-                          title={t('koios.assistant.askKoios')}>
-                          {t('koios.assistant.askKoios')}
+                          title={t('common:koios.assistant.askKoios')}>
+                          {t('common:koios.assistant.askKoios')}
                         </Button>
                       </div>
                     )}

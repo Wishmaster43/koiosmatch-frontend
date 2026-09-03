@@ -97,7 +97,7 @@ describe('KoiosAdviceBlock', () => {
     // Open the first insight
     await user.click(screen.getByText('Completeness'))
     // Click the "Finish in the chat" button that appears
-    const askButton = screen.getByRole('button', { name: 'koios.assistant.askKoios' })
+    const askButton = screen.getByRole('button', { name: 'common:koios.assistant.askKoios' })
     await user.click(askButton)
 
     expect(onAsk).toHaveBeenCalledTimes(1)
