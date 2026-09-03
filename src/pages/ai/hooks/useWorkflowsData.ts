@@ -21,7 +21,9 @@ import { normalizeWorkflow, denormalizeWorkflow } from '../data/workflowMap'
 import type { Workflow, RawWorkflow } from '@/types/workflow'
 
 // A workflow folder (left sidebar grouping).
-// FOLDER-SLOT-1: app-gated folders arrive `locked` with the app key that unlocks them.
+// FOLDER-SLOT-1 was reversed (31-08): the server no longer lists app-gated folders at
+// all, so `locked`/`unlocked_by_app` are LEGACY optional fields kept only so an older
+// response still filters safely (measured 03-09: GET /workflow-folders omits them).
 export interface WorkflowFolder { id: string | number; name: string; locked?: boolean; unlocked_by_app?: string | null; [k: string]: unknown }
 export type FolderId = string | number | null
 
@@ -217,7 +219,9 @@ export function useWorkflowsData(showArchived: boolean) {
   }
 
   // User asked to delete a folder: confirms first, then detaches any workflows it held
-  // rather than deleting them, and surfaces the backend's 409 when it still has active ones.
+  // rather than deleting them. Measured 03-09 (COHERENCE-INVENTORY, PROBE P4): the
+  // backend always answers 200 and detaches (folder_id = null); the old 409 branch
+  // described a rule that never existed and is gone.
   const deleteFolder = (folder: WorkflowFolder) => {
     if (!canManageFolders) return
     confirm(t('page.deleteFolderConfirm', { name: seedLabel('workflowFolders', { label: folder.name }) }), async () => {
@@ -227,9 +231,7 @@ export function useWorkflowsData(showArchived: boolean) {
         setWorkflows(prev => prev.map(w => w.folder_id === folder.id ? { ...w, folder_id: null } : w))
         if (selectedFolder === folder.id) setSelectedFolder(null)
       } catch (e) {
-        // 409 = the folder still holds active workflows → backend blocks the delete (R-3).
-        const status = (e as { response?: { status?: number } })?.response?.status
-        notifyError(t(status === 409 ? 'page.deleteFolderInUse' : 'common:actionFailed'))
+        notifyError(extractApiError(e, t('common:actionFailed')))
       }
     }, { danger: true })
   }

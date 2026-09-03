@@ -356,7 +356,6 @@
     "addModuleAlert": "Aggiungi almeno un modulo alla workflow prima di salvare.",
     "saveFailed": "Salvataggio non riuscito: {{msg}}",
     "deleteFolderConfirm": "Eliminare la cartella \"{{name}}\"? Le workflow rimarranno in \"Non assegnato\".",
-    "deleteFolderInUse": "Questa cartella ha ancora workflow attive e non può essere eliminata.",
     "archiveConfirm": "Archiviare la workflow \"{{name}}\"? Le esecuzioni aperte verranno chiuse immediatamente.",
     "archiveSuccess": "Workflow archiviata.",
     "restoreSuccess": "Workflow ripristinata.",

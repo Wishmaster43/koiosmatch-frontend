@@ -356,7 +356,6 @@
     "addModuleAlert": "Voeg minimaal één module toe aan de workflow voordat je opslaat.",
     "saveFailed": "Opslaan mislukt: {{msg}}",
     "deleteFolderConfirm": "Map \"{{name}}\" verwijderen? De workflows blijven bestaan onder \"Niet toegewezen\".",
-    "deleteFolderInUse": "Deze map heeft nog actieve workflows en kan niet worden verwijderd.",
     "archiveConfirm": "Workflow \"{{name}}\" archiveren? Openstaande runs worden direct gesloten.",
     "archiveSuccess": "Workflow gearchiveerd.",
     "restoreSuccess": "Workflow hersteld.",

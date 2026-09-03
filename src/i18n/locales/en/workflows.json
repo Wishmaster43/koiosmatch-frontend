@@ -299,7 +299,6 @@
     "addModuleAlert": "Add at least one module to the workflow before saving.",
     "saveFailed": "Saving failed: {{msg}}",
     "deleteFolderConfirm": "Delete folder \"{{name}}\"? The workflows will remain under \"Unassigned\".",
-    "deleteFolderInUse": "This folder still has active workflows and can't be deleted.",
     "archiveConfirm": "Archive workflow \"{{name}}\"? Any open runs are closed immediately.",
     "archiveSuccess": "Workflow archived.",
     "restoreSuccess": "Workflow restored.",
