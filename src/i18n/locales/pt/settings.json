@@ -3353,6 +3353,10 @@
     "tabs": {
       "candidate": "Candidato",
       "customer": "Cliente"
+    },
+    "requiredToggle": {
+      "label": "Motivo obrigatório para lista negra",
+      "hint": "Se desativado, o estado pode ser definido como lista negra sem motivo."
     }
   },
   "opportunityLookups": {

@@ -17,6 +17,21 @@ vi.mock('@/lib/api', async () => {
 })
 vi.mock('@/lib/notify', () => ({ notifyError: vi.fn(), notifySuccess: vi.fn() }))
 
+// BLACKLIST-TOGGLE-1: controllable settings blob + a spy on the save path
+// (§13: assert the REQUEST), same pattern as CandidateConversionSettings.test.
+const mockSettings = vi.fn(() => ({}))
+const saveSettingsKeys = vi.fn(async () => {})
+vi.mock('@/lib/settings/useAllSettings', async () => {
+  const actual = await vi.importActual('@/lib/settings/useAllSettings')
+  return {
+    ...actual,
+    useSettingsLoaded: () => true,
+    useAllSettings: () => mockSettings(),
+    saveSettingsKeys: (...args) => saveSettingsKeys(...args),
+    invalidateAllSettingsCache: vi.fn(),
+  }
+})
+
 const st = (key, opts) => i18n.t(key, { ns: 'settings', ...opts })
 
 // eslint-disable-next-line no-restricted-syntax -- DATA: fixture row's tenant colour, not a style rule.
@@ -70,5 +85,51 @@ describe('BlacklistReasonsSettings', () => {
     fireEvent.drop(rowOf('No-show'))
 
     await waitFor(() => expect(api.put).toHaveBeenCalledWith('/candidate-blacklist-reasons/reorder', { ids: ['b2', 'b1'] }))
+  })
+})
+
+// BLACKLIST-TOGGLE-1: the tenant switch above the lookup — reads the ON state
+// from the settings blob and writes the EXACT per-entity key on toggle.
+describe('BlacklistReasonsSettings · reason-required toggle', () => {
+  it('renders ON for the candidate registration when blacklist_reason_required is \'1\'', async () => {
+    api.get.mockResolvedValue({ data: [row()] })
+    mockSettings.mockReturnValue({ blacklist_reason_required: '1' })
+    render(<BlacklistReasonsSettings />)
+
+    await screen.findByText('No-show')
+    expect(screen.getByRole('switch', { name: st('blacklistReasons.requiredToggle.label') })).toHaveAttribute('aria-checked', 'true')
+  })
+
+  it('renders OFF for the candidate registration when blacklist_reason_required is \'0\'', async () => {
+    api.get.mockResolvedValue({ data: [row()] })
+    mockSettings.mockReturnValue({ blacklist_reason_required: '0' })
+    render(<BlacklistReasonsSettings />)
+
+    await screen.findByText('No-show')
+    expect(screen.getByRole('switch', { name: st('blacklistReasons.requiredToggle.label') })).toHaveAttribute('aria-checked', 'false')
+  })
+
+  it('clicking the toggle for the candidate registration saves blacklist_reason_required', async () => {
+    api.get.mockResolvedValue({ data: [row()] })
+    mockSettings.mockReturnValue({ blacklist_reason_required: '1' })
+    const user = userEvent.setup()
+    render(<BlacklistReasonsSettings />)
+
+    await screen.findByText('No-show')
+    await user.click(screen.getByRole('switch', { name: st('blacklistReasons.requiredToggle.label') }))
+
+    await waitFor(() => expect(saveSettingsKeys).toHaveBeenCalledWith({ blacklist_reason_required: false }))
+  })
+
+  it('clicking the toggle for the customer registration saves customer_blacklist_reason_required', async () => {
+    api.get.mockResolvedValue({ data: [row()] })
+    mockSettings.mockReturnValue({ customer_blacklist_reason_required: '1' })
+    const user = userEvent.setup()
+    render(<BlacklistReasonsSettings entity="customer" />)
+
+    await screen.findByText('No-show')
+    await user.click(screen.getByRole('switch', { name: st('blacklistReasons.requiredToggle.label') }))
+
+    await waitFor(() => expect(saveSettingsKeys).toHaveBeenCalledWith({ customer_blacklist_reason_required: false }))
   })
 })

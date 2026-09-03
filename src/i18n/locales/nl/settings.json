@@ -3353,6 +3353,10 @@
     "tabs": {
       "candidate": "Kandidaat",
       "customer": "Klant"
+    },
+    "requiredToggle": {
+      "label": "Reden verplicht bij blacklist",
+      "hint": "Als dit uitstaat, kan de status op blacklist gezet worden zonder reden."
     }
   },
   "opportunityLookups": {

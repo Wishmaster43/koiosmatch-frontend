@@ -3353,6 +3353,10 @@
     "tabs": {
       "candidate": "Candidate",
       "customer": "Customer"
+    },
+    "requiredToggle": {
+      "label": "Reason required for blacklist",
+      "hint": "When off, the status can be set to blacklist without a reason."
     }
   },
   "opportunityLookups": {

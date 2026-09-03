@@ -106,7 +106,11 @@ function StatusReasonModal({
     // SE-resize, remembered position; keeps its above-the-drawer layer via Z.confirm.
     <FloatingPanel open onClose={close} title={t('drawer.statusReasonTitle')} ariaLabel={t('drawer.statusReasonTitle')}
       persistKey="candidate-status-reason" width={400} zIndex={Z.confirm} bodyStyle={{ padding: 20 }}>
-        {statusModal.needReason && (
+        {/* BLACKLIST-TOGGLE-1: blacklist keeps offering the reason picker even when the
+            tenant setting makes it OPTIONAL (needReason false) — only whether Save is
+            blocked without a value follows the setting; every other flagged status still
+            gates the field on needReason as before. */}
+        {(statusModal.needReason || statusModal.isBlacklist) && (
           <div style={{ marginBottom: 12 }}>
             <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 5 }}>
               {statusModal.isBlacklist ? t('drawer.blacklistReasonLabel') : t('drawer.reasonLabel')}

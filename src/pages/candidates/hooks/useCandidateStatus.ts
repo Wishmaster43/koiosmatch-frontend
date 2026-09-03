@@ -8,7 +8,7 @@
  */
 import { useState } from 'react'
 import { useLookups } from '@/context/LookupsContext'
-import { useAllSettings } from '@/lib/settings/useAllSettings'
+import { useAllSettings, getBoolSetting } from '@/lib/settings/useAllSettings'
 import { useCandidatePlacedMatch } from './useCandidatePlacedMatch'
 import { makeRequiredComplete } from '../drawer/candidateStatusInfo'
 import type { StatusFlags } from '../drawer/candidateStatusInfo'
@@ -35,6 +35,10 @@ export function useCandidateStatus({ c, onUpdate, onConvertIncomplete }: Args) {
     phaseMeta: (v?: string | null) => { label: string; color: string }
   }
   const allSettings = useAllSettings()
+  // BLACKLIST-TOGGLE-1: whether the blacklist reason is REQUIRED (vs. optional) is a
+  // tenant switch (Settings → Blacklist reasons); the BE guard reads the same key
+  // (default ON) — the modal keeps offering the reason field either way.
+  const blacklistReasonRequired = getBoolSetting(allSettings, 'blacklist_reason_required', true)
 
   // Optimistic overrides + the reason/date prompt (the placed→match prompt lives
   // in the useCandidatePlacedMatch sub-hook below).
@@ -110,7 +114,8 @@ export function useCandidateStatus({ c, onUpdate, onConvertIncomplete }: Args) {
       target: currentStatus,
       reason: (statusFlags.is_blacklist ? c.blacklistReason : c.statusReason) ?? '',
       date: (c.statusReturnDate ?? '').slice(0, 10),
-      needReason: !!statusFlags.requires_reason,
+      // Mirrors the BE guard's AND: the lookup's requires_reason first, then the tenant switch.
+      needReason: statusFlags.is_blacklist ? (!!statusFlags.requires_reason && blacklistReasonRequired) : !!statusFlags.requires_reason,
       needDate: !!statusFlags.expects_return_date,
       isBlacklist: !!statusFlags.is_blacklist,
     })
@@ -126,7 +131,12 @@ export function useCandidateStatus({ c, onUpdate, onConvertIncomplete }: Args) {
     const it = statuses.find(s => s.value === v) as (LookupOption & { requires_match?: unknown; requires_reason?: unknown; expects_return_date?: unknown; is_blacklist?: unknown }) | undefined
     if (it?.requires_match) { placed.setMatchChoice(null); placed.setMatchTargetStatus(v); placed.setMatchPrompt(true); return }
     if (Boolean(it?.requires_reason) || Boolean(it?.expects_return_date)) {
-      setStatusModal({ target: v, reason: '', date: '', needReason: Boolean(it?.requires_reason), needDate: Boolean(it?.expects_return_date), isBlacklist: Boolean(it?.is_blacklist) })
+      const isBlacklist = Boolean(it?.is_blacklist)
+      setStatusModal({
+        target: v, reason: '', date: '',
+        needReason: isBlacklist ? (Boolean(it?.requires_reason) && blacklistReasonRequired) : Boolean(it?.requires_reason),
+        needDate: Boolean(it?.expects_return_date), isBlacklist,
+      })
       return
     }
     setStatus(v); onUpdate?.(c.id, { status: v })

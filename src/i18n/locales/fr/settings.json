@@ -3353,6 +3353,10 @@
     "tabs": {
       "candidate": "Candidat",
       "customer": "Client"
+    },
+    "requiredToggle": {
+      "label": "Motif obligatoire pour la liste noire",
+      "hint": "Si désactivé, le statut peut passer en liste noire sans motif."
     }
   },
   "opportunityLookups": {

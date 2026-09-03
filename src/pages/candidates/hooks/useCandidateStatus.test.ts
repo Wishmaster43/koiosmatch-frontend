@@ -5,7 +5,7 @@
  * PATCH only the reason/date — never re-send `status`/`statusChangedAt` for a
  * status that didn't actually change. A real status TRANSITION still carries both.
  */
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { renderHook, act } from '@testing-library/react'
 import { useCandidateStatus } from './useCandidateStatus'
 import type { Candidate } from '@/types/candidate'
@@ -33,11 +33,15 @@ vi.mock('@/context/LookupsContext', () => ({
     phaseMeta: (v?: string | null) => ({ label: v ?? '', color: '#000' }),
   }),
 }))
-// Keep the real getJsonSetting (candidateStatusInfo's makeRequiredComplete uses it);
-// only the settings blob itself is test-controlled (same pattern as AddCandidateModal.test).
+// Keep the real getJsonSetting/getBoolSetting (candidateStatusInfo's makeRequiredComplete
+// uses the former; this file's own blacklist-toggle tests use the latter); only the
+// settings blob itself is test-controlled (same pattern as AddCandidateModal.test).
+// BLACKLIST-TOGGLE-1: module-level mutable blob so individual tests can flip the
+// `blacklist_reason_required` tenant setting without re-mocking per test.
+let mockSettings: Record<string, unknown> = {}
 vi.mock('@/lib/settings/useAllSettings', async importOriginal => {
   const actual = await importOriginal<typeof import('@/lib/settings/useAllSettings')>()
-  return { ...actual, useAllSettings: () => ({}) }
+  return { ...actual, useAllSettings: () => mockSettings }
 })
 // Network-backed hooks (Placed prompt) are irrelevant here — stub to no-ops.
 vi.mock('./useCreateMatch', () => ({ useCreateMatch: () => ({ createMatch: vi.fn(), creating: false }) }))
@@ -50,6 +54,10 @@ const candidate = (over: Partial<Candidate> = {}): Candidate => ({
   statusChangedAt: null, preferences: {},
   ...over,
 } as unknown as Candidate)
+
+// Reset the tenant settings blob before every test — leaking a flipped
+// `blacklist_reason_required` between tests would silently mask a bug.
+beforeEach(() => { mockSettings = {} })
 
 describe('useCandidateStatus · openStatusEdit (prefilled entry point)', () => {
   it('seeds the modal from the CURRENT status reason/date, without touching the status', () => {
@@ -121,6 +129,39 @@ describe('useCandidateStatus · canEditStatusReason (flag-driven, never slug-har
     const c = candidate({ status: 'available', statusReason: null, statusReturnDate: null, blacklistReason: null })
     const { result } = renderHook(() => useCandidateStatus({ c }))
     expect(result.current.canEditStatusReason).toBe(false)
+  })
+})
+
+// BLACKLIST-TOGGLE-1: needReason on a blacklist transition follows the tenant
+// setting `blacklist_reason_required` (default ON when the key is absent).
+describe('useCandidateStatus · blacklist reason-required follows the tenant setting', () => {
+  it('needReason is true for a blacklist transition when the setting is on (\'1\')', () => {
+    mockSettings = { blacklist_reason_required: '1' }
+    const onUpdate = vi.fn()
+    const c = candidate({ status: 'available', statusReason: null, statusReturnDate: null })
+    const { result } = renderHook(() => useCandidateStatus({ c, onUpdate }))
+    act(() => { result.current.changeStatus('blacklist') })
+    expect(result.current.statusModal?.needReason).toBe(true)
+    expect(result.current.statusModal?.isBlacklist).toBe(true)
+  })
+
+  it('needReason is false for a blacklist transition when the setting is off (\'0\')', () => {
+    mockSettings = { blacklist_reason_required: '0' }
+    const onUpdate = vi.fn()
+    const c = candidate({ status: 'available', statusReason: null, statusReturnDate: null })
+    const { result } = renderHook(() => useCandidateStatus({ c, onUpdate }))
+    act(() => { result.current.changeStatus('blacklist') })
+    expect(result.current.statusModal?.needReason).toBe(false)
+    expect(result.current.statusModal?.isBlacklist).toBe(true)
+  })
+
+  it('defaults needReason to true when the setting key is absent', () => {
+    mockSettings = {}
+    const onUpdate = vi.fn()
+    const c = candidate({ status: 'available', statusReason: null, statusReturnDate: null })
+    const { result } = renderHook(() => useCandidateStatus({ c, onUpdate }))
+    act(() => { result.current.changeStatus('blacklist') })
+    expect(result.current.statusModal?.needReason).toBe(true)
   })
 })
 

@@ -3353,6 +3353,10 @@
     "tabs": {
       "candidate": "Kandidat",
       "customer": "Kunde"
+    },
+    "requiredToggle": {
+      "label": "Grund bei Sperrliste erforderlich",
+      "hint": "Wenn aus, kann der Status ohne Grund auf Sperrliste gesetzt werden."
     }
   },
   "opportunityLookups": {

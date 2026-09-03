@@ -3353,6 +3353,10 @@
     "tabs": {
       "candidate": "Candidato",
       "customer": "Cliente"
+    },
+    "requiredToggle": {
+      "label": "Motivo obbligatorio per la blacklist",
+      "hint": "Se disattivato, lo stato può essere impostato su blacklist senza motivo."
     }
   },
   "opportunityLookups": {
