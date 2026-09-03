@@ -284,6 +284,8 @@
     "run": "Run",
     "folders": "Folders",
     "newFolder": "New folder",
+    "newFolderTitle": "New folder",
+    "newFolderLabel": "Name",
     "folderNamePrompt": "Folder name:",
     "allWorkflows": "All workflows",
     "unassigned": "Unassigned",

@@ -121,3 +121,82 @@ describe('WorkflowFolderSidebar — locked app-gated folders stay hidden', () =>
     expect(screen.queryByText('Koppeling Elanza')).toBeNull()
   })
 })
+
+// SPLITS-R2: folder creation uses the house-style TextPromptDialog, not the native prompt().
+describe('WorkflowFolderSidebar — folder creation flow via dialog', () => {
+  const folders: WorkflowFolder[] = [{ id: 'f1', name: 'Onboarding' }]
+  const createFolder = vi.fn()
+
+  const baseProps = {
+    folders,
+    canManageFolders: true,
+    selectedFolder: null,
+    setSelectedFolder: vi.fn(),
+    dragOverFolder: null,
+    setDragOverFolder: vi.fn(),
+    dragWf: { current: null },
+    createFolder,
+    deleteFolder: vi.fn(),
+    moveToFolder: vi.fn(),
+  }
+
+  it('opens the dialog when the "new folder" button is clicked', () => {
+    render(<WorkflowFolderSidebar {...baseProps} />)
+    const newFolderBtn = screen.getByRole('button', { name: 'Nieuwe folder' })
+    fireEvent.click(newFolderBtn)
+
+    // Dialog should open — look for the title and input field
+    expect(screen.getByText('Nieuwe map')).toBeInTheDocument()
+    expect(screen.getByLabelText('Naam')).toBeInTheDocument()
+  })
+
+  it('calls createFolder with the trimmed input when confirmed', () => {
+    createFolder.mockClear()
+    render(<WorkflowFolderSidebar {...baseProps} />)
+
+    const newFolderBtn = screen.getByRole('button', { name: 'Nieuwe folder' })
+    fireEvent.click(newFolderBtn)
+
+    const input = screen.getByLabelText('Naam') as HTMLInputElement
+    fireEvent.change(input, { target: { value: '  Test Folder  ' } })
+
+    // Use Dutch translation for confirm button
+    const confirmBtn = screen.getByRole('button', { name: 'Bevestigen' })
+    fireEvent.click(confirmBtn)
+
+    expect(createFolder).toHaveBeenCalledWith('Test Folder')
+  })
+
+  it('does not call createFolder if input is empty/whitespace', () => {
+    createFolder.mockClear()
+    render(<WorkflowFolderSidebar {...baseProps} />)
+
+    const newFolderBtn = screen.getByRole('button', { name: 'Nieuwe folder' })
+    fireEvent.click(newFolderBtn)
+
+    const input = screen.getByLabelText('Naam') as HTMLInputElement
+    fireEvent.change(input, { target: { value: '   ' } })
+
+    const confirmBtn = screen.getByRole('button', { name: 'Bevestigen' })
+    fireEvent.click(confirmBtn)
+
+    expect(createFolder).not.toHaveBeenCalled()
+  })
+
+  it('closes the dialog after cancelling without calling createFolder', () => {
+    createFolder.mockClear()
+    render(<WorkflowFolderSidebar {...baseProps} />)
+
+    const newFolderBtn = screen.getByRole('button', { name: 'Nieuwe folder' })
+    fireEvent.click(newFolderBtn)
+
+    expect(screen.getByText('Nieuwe map')).toBeInTheDocument()
+
+    const cancelBtn = screen.getByRole('button', { name: 'Annuleren' })
+    fireEvent.click(cancelBtn)
+
+    // Dialog should close (title no longer visible)
+    expect(screen.queryByText('Nieuwe map')).not.toBeInTheDocument()
+    expect(createFolder).not.toHaveBeenCalled()
+  })
+})

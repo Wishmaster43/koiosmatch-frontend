@@ -10,6 +10,7 @@ import { useTranslation } from 'react-i18next'
 import { interactive } from '@/lib/a11y'
 import { Zap, Folder, FolderPlus, Trash2 } from 'lucide-react'
 import { useSeedLabel } from '@/lib/useSeedLabel'
+import { useTextPrompt } from '@/hooks/useTextPrompt'
 import type { WorkflowFolder, FolderId } from './hooks/useWorkflowsData'
 
 // One row in the folder sidebar (built-in "All"/"Unassigned" or a tenant folder).
@@ -43,6 +44,7 @@ function SidebarRow({ label, icon, active, isDragOver, onClick, onDragOver, onDr
         <button onClick={e => { e.stopPropagation(); onDelete() }}
           onFocus={() => setFocused(true)} onBlur={() => setFocused(false)}
           aria-label={t('common:delete')} title={t('common:delete')}
+          // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax
           style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 2, display: 'flex', flexShrink: 0,
             color: showDelete ? 'var(--color-danger)' : 'transparent', opacity: showDelete ? 1 : 0 }}>
           <Trash2 size={11} />
@@ -75,15 +77,17 @@ export default function WorkflowFolderSidebar({
   // LOOKUP-I18N-1: a folder still carrying its seeded Dutch name renders in the user
   // language; a tenant rename/creation stays exactly as typed.
   const seedLabel = useSeedLabel()
+  const { prompt, dialog } = useTextPrompt()
+
   return (
     <div style={{ width: 220, flexShrink: 0, borderRight: '1px solid var(--border)', display: 'flex', flexDirection: 'column', background: 'var(--surface)' }}>
       <div style={{ padding: '16px 16px 8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', letterSpacing: '0.05em', textTransform: 'uppercase' }}>{t('page.folders')}</span>
         {canManageFolders && (
           <button onClick={() => {
-            const name = prompt(t('page.folderNamePrompt'))
-            if (name?.trim()) createFolder(name.trim())
+            prompt(t('workflows:page.newFolderTitle'), t('workflows:page.newFolderLabel'), (name) => createFolder(name))
           }} title={t('page.newFolder')} aria-label={t('page.newFolder')}
+            // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax
             style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 2, display: 'flex' }}>
             <FolderPlus size={15} />
           </button>
@@ -119,6 +123,7 @@ export default function WorkflowFolderSidebar({
           />
         ))}
       </div>
+      {dialog}
     </div>
   )
 }

@@ -280,6 +280,8 @@
     "run": "Ejecutar",
     "folders": "Carpetas",
     "newFolder": "Nueva carpeta",
+    "newFolderTitle": "Nueva carpeta",
+    "newFolderLabel": "Nombre",
     "folderNamePrompt": "Nombre de la carpeta:",
     "allWorkflows": "Todos los workflows",
     "unassigned": "Sin asignar",
