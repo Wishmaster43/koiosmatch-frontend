@@ -15,20 +15,22 @@ import { PopoutShell } from '@/pages/popout/shared'
 import { TextPopoutEditor } from '@/pages/popout/shared'
 import { useTextPopoutDraft } from '@/pages/popout/shared'
 import { useLocationTextLite, patchLocationText } from '../hooks/useCustomerTextPopout'
-import { textPopoutTopic } from '@/lib/secondScreen'
+import { textPopoutTopic, parseLocationPopoutId } from '@/lib/secondScreen'
 
 // Second-screen pop-out for a customer location's description (TEKST-POPOUT-1
 // recipe, see file docblock above): loads the location, drafts, saves and titles
 // the window with the location's own name.
 export default function CustomerLocationTextPopout({ id }: { id: string | undefined }) {
   const { t } = useTranslation('customers')
-  const { location, loading, error, reload } = useLocationTextLite(id)
+  // The composite id carries both the customer and the location id the nested route needs.
+  const parsed = parseLocationPopoutId(id)
+  const { location, loading, error, reload } = useLocationTextLite(parsed?.customerId, parsed?.locationId)
 
   // Saves the edited description to the location; reverts the draft on failure.
   const persist = useCallback((html: string, revert: () => void) => {
-    if (!id) return Promise.resolve(false)
-    return patchLocationText(id, html, t, revert)
-  }, [id, t])
+    if (!parsed) return Promise.resolve(false)
+    return patchLocationText(parsed.customerId, parsed.locationId, html, t, revert)
+  }, [parsed, t])
 
   const { text, dirty, change, save } = useTextPopoutDraft({
     topic: textPopoutTopic('customer', id ?? '', 'locationText'),

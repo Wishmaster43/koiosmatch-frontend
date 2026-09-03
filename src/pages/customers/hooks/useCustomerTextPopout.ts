@@ -100,27 +100,26 @@ export function useDepartmentTextLite(customerId: string | undefined, department
 }
 
 // K3/K4c: light identity fetch for the popped-out location omschrijving window.
-// Unlike departments, a standalone `GET /locations/{id}` route exists (no
-// customer prefix needed — LocationController::show), so this is a direct
-// single-record fetch, mirroring useCustomerTextLite rather than the
-// list-and-find department pattern above.
-export function useLocationTextLite(locationId: string | undefined) {
+// audit fe-be-route-map-1: `/locations/{id}` is the BUREAU-branch route, so a
+// customer-location id always answered 'load error'; the customer location lives
+// on the nested `GET /customers/{cid}/locations/{id}` (CustomerLocationController::showForCustomer).
+export function useLocationTextLite(customerId: string | undefined, locationId: string | undefined) {
   const [location, setLocation] = useState<LocationLite | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
 
   // Fetch this location's identity + description directly (a single-record GET exists here, unlike departments).
   const load = useCallback((signal?: AbortSignal) => {
-    if (!locationId) { setLoading(false); return }
+    if (!customerId || !locationId) { setLoading(false); return }
     setLoading(true); setError(false)
-    api.get(`/locations/${locationId}`, { signal })
+    api.get(`/customers/${customerId}/locations/${locationId}`, { signal })
       .then(r => {
         const raw = unwrap<RawLocationLite>(r)
         setLocation({ id: String(raw.id ?? locationId), name: raw.name ?? '?', description: raw.description ?? '' })
       })
       .catch((e) => { if (!signal?.aborted && e?.name !== 'CanceledError') setError(true) })
       .finally(() => setLoading(false))
-  }, [locationId])
+  }, [customerId, locationId])
 
   // §9 abort-guard (heraudit A11Y-2): a fast popout-id switch must never let the
   // previous id's stale response win — the effect owns a controller; `reload`
@@ -169,8 +168,9 @@ export function useContactTextLite(customerId: string | undefined, contactId: st
 
 // Standalone PATCH /locations/{id} — same field LocationAddressTab's
 // saveDescription writes through useCustomerLocations.update.
-export function patchLocationText(locationId: Id, html: string, t: TFunction, revert: () => void): Promise<boolean> {
-  return api.patch(`/locations/${locationId}`, { description: html })
+export function patchLocationText(customerId: Id, locationId: Id, html: string, t: TFunction, revert: () => void): Promise<boolean> {
+  // Nested customer route: `description` is validated there (CustomerLocationController::rules).
+  return api.patch(`/customers/${customerId}/locations/${locationId}`, { description: html })
     .then(() => true)
     .catch(err => { revert(); notifyError(extractApiError(err, t('common:actionFailed'))); return false })
 }

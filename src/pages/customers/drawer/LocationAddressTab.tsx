@@ -25,6 +25,7 @@ import type { Contact, Location } from '@/types/customer'
 import type { Id } from '@/types/common'
 import type { ContactPayload } from '../hooks/useCustomerContacts'
 import type { LocationPayload } from '../hooks/useCustomerLocations'
+import { locationPopoutId } from '@/lib/secondScreen'
 
 interface Props {
   location: Location
@@ -134,10 +135,11 @@ export default function LocationAddressTab({
 
       {/* Mirrors the Bedrijf tab exactly — description right after the contact block.
           K3/K4c: same second-screen icon + Koios generate the customer/department
-          description already have — 'location' is a known /ai/koios/generate entity
-          and a standalone GET/PATCH /locations/{id} route backs the pop-out window. */}
+          description already have — 'location' is a known /ai/koios/generate entity;
+          the pop-out reads and writes the NESTED /customers/{cid}/locations/{id} route
+          (audit fe-be-route-map-1), hence the composite id. */}
       <EditableRichTextField label={t('locations.detail.description')} value={l.description ?? ''} onSave={saveDescription}
-        popout={l.id != null ? { entity: 'customer', id: l.id as Id, field: 'locationText' } : undefined}
+        popout={l.id != null && customerId != null ? { entity: 'customer', id: locationPopoutId(customerId, l.id as Id), field: 'locationText' } : undefined}
         assistGenerate={l.id != null ? { entity: 'location', id: String(l.id) } : undefined} />
 
       {/* Koios advice — pure FE heuristics over this location's OWN completeness. */}

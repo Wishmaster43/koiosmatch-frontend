@@ -206,6 +206,17 @@ export const parseDepartmentPopoutId = (id: string | undefined): { customerId: s
   return customerId && departmentId ? { customerId, departmentId } : null
 }
 
+// audit fe-be-route-map-1: a customer LOCATION's pop-out used to travel under a bare
+// location id and hit the bureau-branch route; the nested customer route needs both
+// ids, so `locationText` now uses the same composite recipe as departments.
+export const locationPopoutId = (customerId: string | number, locationId: string | number): string =>
+  `${customerId}:${locationId}`
+export const parseLocationPopoutId = (id: string | undefined): { customerId: string; locationId: string } | null => {
+  if (!id) return null
+  const [customerId, locationId] = id.split(':')
+  return customerId && locationId ? { customerId, locationId } : null
+}
+
 // BELLIJST-NOTE-POPOUT-1: the same composite-id trick as `departmentPopoutId`
 // above, for the same reason — no standalone `GET /outreach-targets/{id}`
 // exists, so the popped-out window loads the CAMPAIGN detail (which already
