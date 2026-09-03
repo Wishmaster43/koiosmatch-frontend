@@ -74,7 +74,13 @@ export default function ProfilePersonalTab({ c, onSave, autoEditSignal }: {
     const e: Partial<Record<PersonalKey, boolean>> = {}
     ;(Object.keys(REQ_MAP) as PersonalKey[]).forEach(k => { if (isReq(k) && !String(form[k] ?? '').trim()) e[k] = true })
     if (Object.keys(e).length) { setErrors(e); return }
-    onSave?.(form); setEditing(false); setErrors({})
+    // KANDIDAAT-PERSOONLIJK-422: PATCH only what changed — an untouched field that
+    // drifted from its lookup (seeded 'Nederlandse' vs 'Nederlands') used to fail the
+    // whole save with a 422 on a key the recruiter never edited.
+    const before = emptyForm()
+    const changed = Object.fromEntries((Object.keys(form) as PersonalKey[]).filter(k => form[k] !== before[k]).map(k => [k, form[k]]))
+    if (Object.keys(changed).length) onSave?.(changed)
+    setEditing(false); setErrors({})
   }
   const cancel = () => { setForm(emptyForm()); setErrors({}); setEditing(false) }
 

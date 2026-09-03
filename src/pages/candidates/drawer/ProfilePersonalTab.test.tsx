@@ -63,7 +63,7 @@ describe('ProfilePersonalTab · own fields, own pencil, own request shape', () =
     expect(screen.queryByTitle('Bewerken')).toBeNull()
   })
 
-  it('sends the full personal field set on save (assert the REQUEST body)', async () => {
+  it('sends only the CHANGED personal fields on save (assert the REQUEST body)', async () => {
     const user = userEvent.setup()
     const onSave = vi.fn()
     render(<ProfilePersonalTab c={candidate} onSave={onSave} />)
@@ -74,9 +74,20 @@ describe('ProfilePersonalTab · own fields, own pencil, own request shape', () =
     await user.type(placeInput, 'Amsterdam')
     await user.click(screen.getByTitle('Opslaan'))
     expect(onSave).toHaveBeenCalledTimes(1)
-    // No `source` key: this tab no longer owns that field, so its payload
-    // must not carry it (a stray key here would silently resurrect the bug).
-    expect(onSave).toHaveBeenCalledWith({ gender: 'male', nationality: 'Nederlands', dob: '1990-01-01', placeOfBirth: 'Amsterdam', preferredLanguage: '' })
+    // KANDIDAAT-PERSOONLIJK-422: untouched keys stay out of the PATCH, so a seeded value
+    // that drifted from its lookup can no longer block an unrelated edit. No `source` key
+    // either: this tab no longer owns that field.
+    expect(onSave).toHaveBeenCalledWith({ placeOfBirth: 'Amsterdam' })
+  })
+
+  it('does not call onSave when nothing changed', async () => {
+    const user = userEvent.setup()
+    const onSave = vi.fn()
+    render(<ProfilePersonalTab c={candidate} onSave={onSave} />)
+    await user.click(screen.getByTitle('Bewerken'))
+    await user.click(screen.getByTitle('Opslaan'))
+    expect(onSave).not.toHaveBeenCalled()
+    expect(screen.getByTitle('Bewerken')).toBeInTheDocument()
   })
 
   // AVG-RET-2-TAAL-1: picking a language saves its CODE; the row then shows the display name.
@@ -88,7 +99,8 @@ describe('ProfilePersonalTab · own fields, own pencil, own request shape', () =
     await user.click(screen.getByRole('button', { name: 'Bureaustandaard' }))
     await user.click(await screen.findByRole('button', { name: /^Pools \(PL\)/ }))
     await user.click(screen.getByTitle('Opslaan'))
-    expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ preferredLanguage: 'pl' }))
+    // Only the language travels; nationality/gender/dob stay out of the body.
+    expect(onSave).toHaveBeenCalledWith({ preferredLanguage: 'pl' })
   })
 
   it('shows the stored preferred language by name and lets the recruiter clear it back to the agency default', async () => {

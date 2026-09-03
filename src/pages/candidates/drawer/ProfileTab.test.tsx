@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import ProfileTab from './ProfileTab'
 import { useWorkPermitVisibility } from './useWorkPermitVisibility'
@@ -119,9 +119,14 @@ describe('ProfileTab · one tab, one pencil per card', () => {
     const onEditSave = vi.fn()
     render(<ProfileTab c={candidate} onEditSave={onEditSave} />)
     await user.click(screen.getAllByTitle('Bewerken')[0])
+    const placeRow = screen.getByText('Geboorteplaats').parentElement as HTMLElement
+    const placeInput = within(placeRow).getByRole('textbox') as HTMLInputElement
+    await user.clear(placeInput)
+    await user.type(placeInput, 'Amsterdam')
     await user.click(screen.getByTitle('Opslaan'))
-    // No `source` key: ProfilePersonalTab no longer owns that field (§11).
-    expect(onEditSave).toHaveBeenCalledWith({ gender: 'male', nationality: 'Nederlands', dob: '1990-01-01', placeOfBirth: 'Utrecht' })
+    // KANDIDAAT-PERSOONLIJK-422: only the CHANGED key of this card travels; no `source`
+    // (ProfilePersonalTab no longer owns that field, §11) and no untouched siblings.
+    expect(onEditSave).toHaveBeenCalledWith({ placeOfBirth: 'Amsterdam' })
   })
 })
 
