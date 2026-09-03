@@ -30,7 +30,11 @@ describe('OutreachCreate · shared wide-form frame', () => {
     // Let the /pools fetch settle inside act() before asserting (avoids an
     // unwrapped state-update warning from the unrelated pool load).
     const dialog = await screen.findByRole('dialog')
-    expect(dialog).toHaveStyle({ maxWidth: '1320px', maxHeight: '94vh' })
+    // FloatingPanel (POPUP-SLEEP-1) owns the panel chrome now — asserting its
+    // draggable header composition (data-drag-handle), not FloatingPanel's own
+    // internal maxHeight implementation detail.
+    expect(dialog).toHaveStyle({ maxWidth: '1320px' })
+    expect(dialog.querySelector('[data-drag-handle]')).toBeTruthy()
     expect(dialog).toHaveAttribute('aria-label', 'create.title')
   })
 
@@ -45,8 +49,10 @@ describe('OutreachCreate · shared wide-form frame', () => {
   it('channel is a searchable CreatableSelect listing the fixed enum values', async () => {
     const user = userEvent.setup()
     render(<OutreachCreate onClose={vi.fn()} onCreated={vi.fn()} />)
-    // Trigger shows the default channel ("call"); opening it reveals the other two.
-    await user.click(screen.getByRole('button', { name: 'channel.call' }))
+    // FieldRow (§3A label-left canon) names the trigger after its field label
+    // ("create.channel"), not its current value — the searchable picker itself
+    // is unchanged, opening it still reveals the other two channel options.
+    await user.click(screen.getByRole('button', { name: 'create.channel' }))
     expect(await screen.findByRole('button', { name: 'channel.email' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'channel.whatsapp' })).toBeInTheDocument()
   })
@@ -94,12 +100,20 @@ describe('OutreachCreate · validation + submit payload (unchanged behaviour)', 
     expect(onClose).toHaveBeenCalled()
   })
 
+  it('Enter in the name field submits (SPLITS-R2 regression: TextField dropped onKeyDown)', async () => {
+    const user = userEvent.setup()
+    render(<OutreachCreate onClose={vi.fn()} onCreated={vi.fn()} />)
+    await user.type(screen.getByPlaceholderText('create.namePlaceholder'), 'Bellijst Oost{Enter}')
+    await waitFor(() => expect(createCampaign).toHaveBeenCalledWith({ name: 'Bellijst Oost', channel: 'call' }))
+  })
+
   it('includes from_pool_id when a source pool is picked (pool-seeding unchanged)', async () => {
     const user = userEvent.setup()
     render(<OutreachCreate onClose={vi.fn()} onCreated={vi.fn()} />)
     await user.type(screen.getByPlaceholderText('create.namePlaceholder'), 'Bellijst Zuid')
     // The pool list loads async from /pools — open the picker once it has arrived.
-    await user.click(screen.getByRole('button', { name: 'create.poolNone' }))
+    // FieldRow (§3A label-left canon) names the trigger after its field label.
+    await user.click(screen.getByRole('button', { name: 'create.pool' }))
     await user.click(await screen.findByRole('button', { name: 'Zorgpool Noord' }))
     await user.click(screen.getByRole('button', { name: 'create.submit' }))
     await waitFor(() => expect(createCampaign).toHaveBeenCalledWith({ name: 'Bellijst Zuid', channel: 'call', from_pool_id: 'p1' }))

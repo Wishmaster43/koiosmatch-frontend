@@ -6,7 +6,7 @@
  * each file declared its own `iStyle` / `inputStyle` / `dpInputStyle` copy.
  */
 import { useId, cloneElement, isValidElement } from 'react'
-import type { CSSProperties, ReactNode, ReactElement } from 'react'
+import type { CSSProperties, ReactNode, ReactElement, KeyboardEvent } from 'react'
 import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
 import { useTranslation } from 'react-i18next'
@@ -112,12 +112,15 @@ const requiredAttrs = ({ required, 'aria-required': ariaRequired }: RequiredProp
   ({ required: required || undefined, 'aria-required': (ariaRequired || required) || undefined })
 
 // Single-line text input on the shared field style, with an optional error-border variant.
-export function TextField({ id, value, onChange, placeholder, type = 'text', error, style, ...req }: {
+// `onKeyDown` is an optional passthrough (e.g. Enter-to-submit on a name field) — the kit
+// used to destructure a fixed prop set and silently drop it (regression found on OutreachCreate).
+export function TextField({ id, value, onChange, placeholder, type = 'text', error, style, onKeyDown, ...req }: {
   id?: string; value?: string; onChange: (v: string) => void; placeholder?: string; type?: string; error?: boolean; style?: CSSProperties
+  onKeyDown?: (e: KeyboardEvent<HTMLInputElement>) => void
 } & RequiredProps) {
   return (
     <input id={id} type={type} value={value ?? ''} placeholder={placeholder} aria-label={placeholder} {...requiredAttrs(req)}
-      onChange={e => onChange(e.target.value)}
+      onChange={e => onChange(e.target.value)} onKeyDown={onKeyDown}
       // The error state replaces the whole `border` shorthand rather than only its
       // colour: React warns when a longhand is removed while the shorthand is still
       // set, and the two can then fight over which wins on re-render.

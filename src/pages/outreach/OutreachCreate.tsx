@@ -5,46 +5,40 @@
  * Searchable dropdowns and frames around every block" — verbatim: "+ Bellijst
  * is geen popup???" / "elk scherm zoals + locatie moet net zo breed en hoog
  * worden als + match of + nieuwe kandidaat. Zoekbare dropdowns en kaders om
- * elk blokje"). Used to be an inline view that swapped
- * out the whole list (like the API-key/webhook create screens); now an
- * overlay + centred WIDE_MODAL panel like every other create flow, and the
- * list stays mounted behind it. Name + channel group into an "Algemeen" card,
- * the optional source pool into its own "Bron" card — both titled, bordered
- * cards mirroring the MatchModal/AddCandidateModal idiom instead of
- * three lonely full-width inputs. Channel and pool are searchable
- * CreatableSelect pickers (allowCreate=false — channel is a fixed backend
- * enum, pool is a real relational id) instead of a plain <select>. Behaviour
- * is unchanged: same POST payload, same onCreated callback, same pool-seeding.
+ * elk blokje"). Name + channel group into an "Algemeen" card, the optional
+ * source pool into its own "Bron" card — both titled, bordered cards
+ * mirroring the MatchModal/AddCandidateModal idiom instead of three lonely
+ * full-width inputs. Channel and pool are searchable CreatableSelect pickers
+ * (allowCreate=false — channel is a fixed backend enum, pool is a real
+ * relational id) instead of a plain <select>. Behaviour is unchanged: same
+ * POST payload, same onCreated callback, same pool-seeding.
+ *
+ * SPLITS-R2 (03-09): swapped the bespoke overlay/panel shell + local label-
+ * above `lbl` constant for the shared draggable FloatingPanel (POPUP-SLEEP-1
+ * — "alle popups sleepbaar") and the label-LEFT FieldRow canon (§3A field
+ * layout), mirroring AddDepartmentModal's composition of the two. Same
+ * focus-trap/backdrop/Esc semantics as before (FloatingPanel owns them now
+ * instead of the local useFocusTrap call); the footer becomes the shared
+ * ModalFooter.
  */
-import { useState, useRef, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { X } from 'lucide-react'
 import api from '@/lib/api'
 import { createCampaign } from './data/outreachApi'
 import type { Campaign } from './hooks/useOutreachCampaigns'
-import { useFocusTrap } from '@/hooks/useFocusTrap'
+import FloatingPanel from '@/components/ui/FloatingPanel'
 import { WIDE_MODAL } from '@/components/ui/modalMetrics'
 import { cardHead, cardBox, row2, cardPair } from '@/components/ui/modalCards'
+import { FieldRow, TextField } from '@/components/forms/fields'
 import CreatableSelect from '@/components/ui/CreatableSelect'
-import { fieldInputStyle } from '@/components/forms/fieldMetrics'
-import Button from '@/components/ui/Button'
+import ModalFooter from '@/components/ui/ModalFooter'
+import { Caption } from '@/components/ui/typography'
 
 // Fixed backend enum (not a tenant lookup) — labels via i18n, values stay literal.
 const CHANNELS = ['call', 'email', 'whatsapp'] as const
 
 interface Pool { id: string; name: string; color?: string }
 interface Props { onClose: () => void; onCreated: (c: Campaign) => void }
-
-// Shared "wide form" frame (Danny 27-07): identical overlay/panel footprint to
-// MatchModal/AddCandidateModal — WIDE_MODAL caps width/height so the
-// call-list modal reads as the same kind of screen as +Match / +Kandidaat.
-// Fullscreen modal scrim + panel — both on the CSS overlay rung; the panel sits
-// after the scrim in DOM (see render below), so it stacks above it at the same z-index.
-const overlayStyle = { position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.35)', zIndex: 'var(--z-overlay)' } as const
-const panelStyle = { position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', zIndex: 'var(--z-overlay)', width: '94vw', maxWidth: WIDE_MODAL.maxWidth, maxHeight: WIDE_MODAL.maxHeight, overflowY: 'auto', background: 'var(--surface)', borderRadius: 12, padding: 22, boxShadow: 'var(--shadow-modal)' } as const
-const lbl = { fontSize: 11, fontWeight: 600, textTransform: 'uppercase' as const, letterSpacing: '0.04em', color: 'var(--text-muted)', marginBottom: 5 }
-// Canon field style (G33/fieldMetrics) — was its own height-36 copy.
-const inputStyle = fieldInputStyle
 
 // New call-list modal on the shared wide-form frame, mirroring MatchModal/AddCandidateModal's card layout; behaviour is unchanged from the old inline view (see file header).
 export default function OutreachCreate({ onClose, onCreated }: Props) {
@@ -55,12 +49,6 @@ export default function OutreachCreate({ onClose, onCreated }: Props) {
   const [pools, setPools]   = useState<Pool[]>([])
   const [saving, setSaving] = useState(false)
   const [error, setError]   = useState(false)
-  const firstField          = useRef<HTMLInputElement>(null)
-  // Accessible dialog behaviour (§6): traps Tab, Escape closes, focus restores.
-  const panelRef = useFocusTrap<HTMLDivElement>(onClose)
-
-  // Focus the name field on open.
-  useEffect(() => { firstField.current?.focus() }, [])
 
   // Load talent pools for the optional source picker (shared /pools resource).
   useEffect(() => {
@@ -93,19 +81,10 @@ export default function OutreachCreate({ onClose, onCreated }: Props) {
   const poolOptions = [{ value: '', label: t('create.poolNone') }, ...pools.map((p) => ({ value: p.id, label: p.name }))]
 
   return (
-    <>
-      {/* Overlay dims the list behind the modal (Danny 27-07: this must be a
-          real popup, not a full-page swap) — click-through closes it. */}
-      <div style={overlayStyle} onClick={onClose} />
-      <div ref={panelRef} style={panelStyle} role="dialog" aria-modal="true" aria-label={title} tabIndex={-1}>
-        {/* Title row + close X (mirrors every other wide-form modal's header). */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-          <span style={{ fontSize: 16, fontWeight: 700, color: 'var(--text)' }}>{title}</span>
-          <Button variant="ghost" iconOnly size="sm" onClick={onClose} aria-label={t('common:close', { defaultValue: 'Close' })}>
-            <X size={16} />
-          </Button>
-        </div>
-
+    <FloatingPanel open onClose={onClose} ariaLabel={title} title={title}
+      persistKey="outreach-create" scrollBody={false}
+      width={`min(calc(100vw - 48px), ${WIDE_MODAL.maxWidth}px)`} maxWidth={`${WIDE_MODAL.maxWidth}px`}>
+      <div style={{ flex: 1, overflowY: 'auto', padding: '18px 22px', display: 'flex', flexDirection: 'column', gap: 16 }}>
         {/* Two titled cards side by side: Algemeen (name + channel) and Bron
             (optional pool) — the shared cardPair grid (§11), not a stack
             of lonely inputs. */}
@@ -114,19 +93,18 @@ export default function OutreachCreate({ onClose, onCreated }: Props) {
             <div style={cardHead}>{t('create.generalCard')}</div>
             <div style={cardBox}>
               <div style={row2}>
-                <div>
-                  <label style={lbl} htmlFor="oc-name">{t('create.name')}</label>
-                  <input id="oc-name" ref={firstField} value={name} onChange={(e) => setName(e.target.value)}
-                    placeholder={t('create.namePlaceholder')} style={inputStyle}
-                    onKeyDown={(e) => e.key === 'Enter' && submit()} />
-                </div>
-                <div>
-                  <div style={lbl}>{t('create.channel')}</div>
+                <FieldRow label={t('create.name')} required>
+                  {/* Enter-to-submit (restored SPLITS-R2 regression): the old bare input
+                      had this before the FieldRow/TextField conversion. */}
+                  <TextField value={name} onChange={setName} placeholder={t('create.namePlaceholder')}
+                    onKeyDown={e => e.key === 'Enter' && submit()} />
+                </FieldRow>
+                <FieldRow label={t('create.channel')}>
                   {/* Searchable picker (Danny 27-07) — same fixed enum values, only
                       the affordance changes from a bare <select>. */}
                   <CreatableSelect value={channel} onChange={setChannel} allowCreate={false}
                     options={CHANNELS.map((c) => ({ value: c, label: t(`channel.${c}`) }))} />
-                </div>
+                </FieldRow>
               </div>
             </div>
           </div>
@@ -134,27 +112,20 @@ export default function OutreachCreate({ onClose, onCreated }: Props) {
           <div>
             <div style={cardHead}>{t('create.sourceCard')}</div>
             <div style={cardBox}>
-              <div>
-                <div style={lbl}>{t('create.pool')}</div>
+              <FieldRow label={t('create.pool')}>
                 <CreatableSelect value={poolId} onChange={setPoolId} allowCreate={false} options={poolOptions} />
-              </div>
-              <p style={{ fontSize: 11, color: 'var(--text-muted)', margin: 0 }}>{t('create.poolHint')}</p>
+              </FieldRow>
+              {/* Caption atom (§4 typography) — was an inline 11px muted <p>. */}
+              <Caption as="p" style={{ margin: 0 }}>{t('create.poolHint')}</Caption>
             </div>
           </div>
         </div>
 
         {error && <div role="alert" style={{ fontSize: 12, color: 'var(--color-danger-text)', marginTop: 12 }}>{t('create.error')}</div>}
-
-        {/* Footer — Annuleren + primary create, BTN_H everywhere (§4/§9). */}
-        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 20 }}>
-          <Button variant="secondary" onClick={onClose}>
-            {t('common:cancel', { defaultValue: 'Cancel' })}
-          </Button>
-          <Button variant="primary" onClick={submit} disabled={saving || !canSubmit}>
-            {saving ? t('create.saving') : t('create.submit')}
-          </Button>
-        </div>
       </div>
-    </>
+
+      <ModalFooter onCancel={onClose} cancelLabel={t('common:cancel', { defaultValue: 'Cancel' })}
+        onSubmit={submit} submitLabel={saving ? t('create.saving') : t('create.submit')} disabled={saving || !canSubmit} />
+    </FloatingPanel>
   )
 }
