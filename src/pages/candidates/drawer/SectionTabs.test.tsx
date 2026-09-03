@@ -459,7 +459,7 @@ describe('SkillsTab · DOC-LANG-SKILL-LINK-1 linked-document icons + edit-form p
   // objects — the skill level's tenant icon shows next to the level text.
   it('shows the skill level\'s tenant icon next to the level text', async () => {
     vi.mocked(api.get).mockImplementation((url: string) =>
-      url === '/skill-levels'
+      url === '/skill-levels?active=1'
         ? Promise.resolve({ data: { data: [{ name: 'Gevorderd', icon: 'star' }] } })
         : Promise.resolve({ data: { data: [] } }),
     )
