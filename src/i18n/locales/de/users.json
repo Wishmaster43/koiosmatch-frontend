@@ -52,6 +52,9 @@
   "phone": "Telefonnummer",
   "changePassword": "Passwort ändern",
   "newPassword": "Neues Passwort",
+  "currentPassword": "Aktuelles Passwort",
+  "currentPasswordHint": "Um Ihre E-Mail-Adresse oder Ihr Passwort zu ändern, geben Sie zuerst Ihr aktuelles Passwort ein.",
+  "currentPasswordRequired": "Ihr aktuelles Passwort ist falsch oder fehlt.",
   "branches": {
     "title": "Standorte",
     "hint": "Legt fest, welchen Standorten dieser Benutzer zugeordnet ist. Dies schränkt bereits ein, welche Kandidaten sichtbar und bearbeitbar sind (Kandidaten außerhalb dieser Standorte sind ausgeblendet); andere Bereiche (Stellen, Kunden, …) sind noch nicht standortgebunden.",

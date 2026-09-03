@@ -10,6 +10,7 @@ import { useState } from 'react'
 import type { ChangeEvent, CSSProperties, FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import api, { unwrap } from '@/lib/api'
+import { useAuth } from '@/context/AuthContext'
 import FloatingPanel from '@/components/ui/FloatingPanel'
 import Spinner from '@/components/ui/Spinner'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
@@ -38,20 +39,29 @@ export default function EditUserModal({ user, onClose, onSaved }: {
   onSaved: (updated: ManagedUser) => void
 }) {
   const { t } = useTranslation('users')
+  const auth = useAuth()
   const locationOptions = useLocations()
   const { branches, loading: branchesLoading, saving: branchesSaving, error: branchesError, toggle: toggleBranch } = useUserBranches(user.id)
   // Fallback: split `name` when firstname/lastname arrive as a single string.
   const nameParts = (user.name ?? '').split(' ')
   const [form, setForm] = useState({
-    firstname: user.firstname ?? nameParts[0] ?? '',
-    lastname:  user.lastname  ?? nameParts.slice(1).join(' ') ?? '',
-    email:     user.email     ?? '',
-    phone:     user.phone     ?? '',
-    password:  '',
+    firstname:      user.firstname ?? nameParts[0] ?? '',
+    lastname:       user.lastname  ?? nameParts.slice(1).join(' ') ?? '',
+    email:          user.email     ?? '',
+    phone:          user.phone     ?? '',
+    password:       '',
+    currentPassword: '',
   })
   const [changePassword, setChangePassword] = useState(false)
   const [saving, setSaving] = useState(false)
   const [error,  setError]  = useState<string | null>(null)
+  // CredentialChangeGuard (CMBE 03-09): a SELF-edit that touches email or
+  // password needs the account's current password re-entered — the admin
+  // path (editing someone else) never does.
+  const isSelf = String(auth?.user?.id ?? '') === String(user.id)
+  const credentialChange = isSelf && (
+    (changePassword && form.password !== '') || form.email.trim() !== (user.email ?? '')
+  )
   // VALIDATIE-LIVE-1-rest: live, on-blur/typing format check for email — own
   // sibling hook, same idiom as AddCandidateModal.
   const { markTouched, fieldMessage, touchInvalidFields, hasFormatError } =
@@ -76,6 +86,9 @@ export default function EditUserModal({ user, onClose, onSaved }: {
         phone:     form.phone,
       }
       if (changePassword && form.password) payload.password = form.password
+      // CredentialChangeGuard: only sent when the guard actually applies —
+      // an admin editing another user's record never carries this field.
+      if (credentialChange) payload.current_password = form.currentPassword
       // PUT because that is what the generated contract documents (operations
       // .putUsersUserId; the spec lists no patch for this path). The live route accepts
       // BOTH verbs — Route::match(['put','patch'], 'users/{user}') — so the previous
@@ -85,8 +98,14 @@ export default function EditUserModal({ user, onClose, onSaved }: {
       onSaved(unwrap(res))
       onClose()
     } catch (err) {
-      const e2 = err as { response?: { data?: { message?: string } } }
-      setError(e2.response?.data?.message ?? t('saveFailed'))
+      const e2 = err as { response?: { status?: number; data?: { message?: string; code?: string } } }
+      // CredentialChangeGuard: match on the machine-readable `code`, never
+      // on the (translatable, server-language) `message` text.
+      if (e2.response?.status === 403 && e2.response?.data?.code === 'current_password_required') {
+        setError(t('currentPasswordRequired'))
+      } else {
+        setError(e2.response?.data?.message ?? t('saveFailed'))
+      }
     } finally {
       setSaving(false)
     }
@@ -189,13 +208,26 @@ export default function EditUserModal({ user, onClose, onSaved }: {
             </div>
           )}
 
+          {/* CredentialChangeGuard: self-edit touching email/password needs the
+              account's own current password re-entered before the server accepts it. */}
+          {credentialChange && (
+            <div style={{ marginBottom: 20 }}>
+              <label style={labelStyle} htmlFor="current-password">{t('currentPassword')}</label>
+              <input id="current-password" type="password" required value={form.currentPassword}
+                onChange={set('currentPassword')} style={inputStyle} autoComplete="current-password"
+                aria-label={t('currentPassword')} />
+              <Caption as="p" style={{ marginTop: 5 }}>{t('currentPasswordHint')}</Caption>
+            </div>
+          )}
+
           {error && <p style={{ fontSize: 12, color: 'var(--color-danger-text)', marginBottom: 12 }}>{error}</p>}
 
           <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
             <Button variant="secondary" onClick={onClose}>
               {t('common:cancel')}
             </Button>
-            <Button type="submit" variant="primary" disabled={saving || hasFormatError}>
+            <Button type="submit" variant="primary"
+              disabled={saving || hasFormatError || (credentialChange && form.currentPassword === '')}>
               {saving ? <><Spinner size={13} /> {t('saving')}</> : t('common:save')}
             </Button>
           </div>

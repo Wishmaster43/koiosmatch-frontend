@@ -52,6 +52,9 @@
   "phone": "Phone number",
   "changePassword": "Change password",
   "newPassword": "New password",
+  "currentPassword": "Current password",
+  "currentPasswordHint": "To change your email address or password, first enter your current password.",
+  "currentPasswordRequired": "Your current password is incorrect or missing.",
   "branches": {
     "title": "Branches",
     "hint": "Determines which branches this user is coupled to. This already limits which candidates are visible and editable (candidates outside these branches are hidden); other areas (vacancies, customers, …) aren't branch-scoped yet.",

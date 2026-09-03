@@ -3,6 +3,8 @@
  * (USERS-ROLES-LOC-1): current branches render through the shared
  * ChipMultiSelect, toggling PUTs a replace-set, and a failed PUT reverts +
  * surfaces notifyError — mirrors RoleBranchTemplate in RolesSettings.jsx.
+ * Also covers CredentialChangeGuard (CMBE 03-09): a self-edit that touches
+ * email/password carries `current_password` and the 403 code maps to copy.
  */
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen, waitFor, fireEvent } from '@testing-library/react'
@@ -21,6 +23,11 @@ vi.mock('@/lib/api', () => ({
   default: { get: vi.fn(), put: vi.fn(), patch: vi.fn() },
   unwrap: (r: { data?: { data?: unknown } }) => r?.data?.data,
   unwrapList: (r: { data?: { data?: unknown[] } }) => ({ rows: r?.data?.data ?? [] }),
+}))
+// The logged-in user id — tests override it per-case to model self vs admin edits.
+let authUserId: string = 'admin-1'
+vi.mock('@/context/AuthContext', () => ({
+  useAuth: () => ({ user: { id: authUserId } }),
 }))
 
 const testUser: ManagedUser = { id: 'u1', firstname: 'Jan', lastname: 'Jansen', email: 'jan@bedrijf.nl' }
@@ -115,5 +122,91 @@ describe('EditUserModal · branches', () => {
     await waitFor(() => expect(notifyError).toHaveBeenCalledWith('branches.saveFailed'))
     // Reverted to zero branches — the honest empty hint is back.
     expect(await screen.findByText('branches.emptyHint')).toBeInTheDocument()
+  })
+})
+
+// CredentialChangeGuard (CMBE 03-09): a SELF-edit that touches email or password
+// needs the account's own current password re-entered; the admin path (editing
+// someone else) never does. Assert the REQUEST body, never only that a callback fired.
+describe('EditUserModal · CredentialChangeGuard (CMBE 03-09)', () => {
+  it('admin editing another user changes the e-mail without the field or current_password', async () => {
+    authUserId = 'admin-1'
+    vi.mocked(api.get).mockResolvedValueOnce({ data: { data: [] } })
+    vi.mocked(api.put).mockResolvedValueOnce({ data: { data: { ...testUser, email: 'nieuw@bedrijf.nl' } } })
+    const user = userEvent.setup()
+    render(<EditUserModal user={testUser} onClose={noop} onSaved={noop} />)
+
+    const emailInput = await screen.findByDisplayValue('jan@bedrijf.nl')
+    await user.clear(emailInput)
+    await user.type(emailInput, 'nieuw@bedrijf.nl')
+    fireEvent.focusOut(emailInput)
+
+    expect(screen.queryByLabelText('currentPassword')).not.toBeInTheDocument()
+    await user.click(screen.getByText('common:save'))
+
+    await waitFor(() => expect(api.put).toHaveBeenCalledWith('/users/u1', {
+      firstname: 'Jan', lastname: 'Jansen', email: 'nieuw@bedrijf.nl', phone: '',
+    }))
+  })
+
+  it('self editing own record without touching e-mail/password never shows the field', async () => {
+    authUserId = 'u1'
+    vi.mocked(api.get).mockResolvedValueOnce({ data: { data: [] } })
+    vi.mocked(api.put).mockResolvedValueOnce({ data: { data: testUser } })
+    const user = userEvent.setup()
+    render(<EditUserModal user={testUser} onClose={noop} onSaved={noop} />)
+
+    await screen.findByDisplayValue('jan@bedrijf.nl')
+    expect(screen.queryByLabelText('currentPassword')).not.toBeInTheDocument()
+    await user.click(screen.getByText('common:save'))
+
+    await waitFor(() => expect(api.put).toHaveBeenCalledWith('/users/u1', {
+      firstname: 'Jan', lastname: 'Jansen', email: 'jan@bedrijf.nl', phone: '',
+    }))
+  })
+
+  it('self changing the e-mail shows the field, blocks Save until filled, and PUTs current_password', async () => {
+    authUserId = 'u1'
+    vi.mocked(api.get).mockResolvedValueOnce({ data: { data: [] } })
+    vi.mocked(api.put).mockResolvedValueOnce({ data: { data: { ...testUser, email: 'nieuw@bedrijf.nl' } } })
+    const user = userEvent.setup()
+    render(<EditUserModal user={testUser} onClose={noop} onSaved={noop} />)
+
+    const emailInput = await screen.findByDisplayValue('jan@bedrijf.nl')
+    await user.clear(emailInput)
+    await user.type(emailInput, 'nieuw@bedrijf.nl')
+    fireEvent.focusOut(emailInput)
+
+    const currentPasswordInput = await screen.findByLabelText('currentPassword')
+    expect(screen.getByText('common:save').closest('button')).toBeDisabled()
+
+    await user.type(currentPasswordInput, 'geheim')
+    expect(screen.getByText('common:save').closest('button')).not.toBeDisabled()
+    await user.click(screen.getByText('common:save'))
+
+    await waitFor(() => expect(api.put).toHaveBeenCalledWith('/users/u1', {
+      firstname: 'Jan', lastname: 'Jansen', email: 'nieuw@bedrijf.nl', phone: '', current_password: 'geheim',
+    }))
+  })
+
+  it('maps a 403 current_password_required response to the i18n error, matching on `code` not message text', async () => {
+    authUserId = 'u1'
+    vi.mocked(api.get).mockResolvedValueOnce({ data: { data: [] } })
+    vi.mocked(api.put).mockRejectedValueOnce({
+      response: { status: 403, data: { message: 'Server-side text that must never be matched on', code: 'current_password_required' } },
+    })
+    const user = userEvent.setup()
+    render(<EditUserModal user={testUser} onClose={noop} onSaved={noop} />)
+
+    const emailInput = await screen.findByDisplayValue('jan@bedrijf.nl')
+    await user.clear(emailInput)
+    await user.type(emailInput, 'nieuw@bedrijf.nl')
+    fireEvent.focusOut(emailInput)
+
+    const currentPasswordInput = await screen.findByLabelText('currentPassword')
+    await user.type(currentPasswordInput, 'verkeerd')
+    await user.click(screen.getByText('common:save'))
+
+    expect(await screen.findByText('currentPasswordRequired')).toBeInTheDocument()
   })
 })

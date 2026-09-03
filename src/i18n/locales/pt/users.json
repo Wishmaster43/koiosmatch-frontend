@@ -52,6 +52,9 @@
   "phone": "Número de telefone",
   "changePassword": "Alterar palavra-passe",
   "newPassword": "Nova palavra-passe",
+  "currentPassword": "Palavra-passe atual",
+  "currentPasswordHint": "Para alterar o seu endereço de e-mail ou a sua palavra-passe, introduza primeiro a sua palavra-passe atual.",
+  "currentPasswordRequired": "A sua palavra-passe atual está incorreta ou em falta.",
   "branches": {
     "title": "Filiais",
     "hint": "Determina a que filiais este utilizador está associado. Isto já limita quais os candidatos visíveis e editáveis (os candidatos fora destas filiais ficam ocultos); outras áreas (vagas, clientes, …) ainda não estão limitadas por filial.",

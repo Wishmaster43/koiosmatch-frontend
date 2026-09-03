@@ -52,6 +52,9 @@
   "phone": "Número de teléfono",
   "changePassword": "Cambiar contraseña",
   "newPassword": "Nueva contraseña",
+  "currentPassword": "Contraseña actual",
+  "currentPasswordHint": "Para cambiar tu dirección de correo electrónico o tu contraseña, introduce primero tu contraseña actual.",
+  "currentPasswordRequired": "Tu contraseña actual es incorrecta o falta.",
   "branches": {
     "title": "Sedes",
     "hint": "Determina a qué sedes está vinculado este usuario. Esto ya limita qué candidatos son visibles y editables (los candidatos fuera de estas sedes quedan ocultos); otras áreas (vacantes, clientes, …) todavía no están limitadas por sede.",

@@ -52,6 +52,9 @@
   "phone": "Numéro de téléphone",
   "changePassword": "Changer le mot de passe",
   "newPassword": "Nouveau mot de passe",
+  "currentPassword": "Mot de passe actuel",
+  "currentPasswordHint": "Pour modifier votre adresse e-mail ou votre mot de passe, saisissez d'abord votre mot de passe actuel.",
+  "currentPasswordRequired": "Votre mot de passe actuel est incorrect ou manquant.",
   "branches": {
     "title": "Sites",
     "hint": "Détermine à quels sites cet utilisateur est rattaché. Cela limite déjà les candidats visibles et modifiables (les candidats en dehors de ces sites sont masqués) ; les autres domaines (offres, clients, …) ne sont pas encore limités par site.",

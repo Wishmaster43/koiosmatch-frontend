@@ -52,6 +52,9 @@
   "phone": "Telefoonnummer",
   "changePassword": "Wachtwoord wijzigen",
   "newPassword": "Nieuw wachtwoord",
+  "currentPassword": "Huidig wachtwoord",
+  "currentPasswordHint": "Om je e-mailadres of wachtwoord te wijzigen vul je eerst je huidige wachtwoord in.",
+  "currentPasswordRequired": "Je huidige wachtwoord klopt niet of ontbreekt.",
   "branches": {
     "title": "Vestigingen",
     "hint": "Bepaalt aan welke vestigingen deze gebruiker gekoppeld is. Dit beperkt al welke kandidaten zichtbaar en bewerkbaar zijn (kandidaten buiten deze vestigingen zijn verborgen); andere onderdelen (vacatures, klanten, …) zijn nog niet vestiging-gebonden.",
