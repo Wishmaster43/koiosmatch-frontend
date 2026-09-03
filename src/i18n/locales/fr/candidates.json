@@ -1364,6 +1364,7 @@
       "never_contacted": "Aucun contact n'a jamais été enregistré. Contactez pour activer ce dossier.",
       "stale_contact": "Aucun contact enregistré depuis plus de {{months}} mois. Planifiez un appel.",
       "no_intake_planned": "Aucun entretien d'admission n'est encore planifié.",
+      "not_in_pool": "Le candidat n'est encore dans aucun vivier de talents.",
       "lead_without_funnel": "Lead sans candidature. Planifiez un entretien pour le qualifier.",
       "no_pool": "Pas encore dans un vivier de talents. Ajoutez-le pour qu'il soit trouvable."
     }

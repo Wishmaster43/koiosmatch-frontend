@@ -1364,6 +1364,7 @@
       "never_contacted": "Nunca se ha registrado contacto. Contacte para activar este expediente.",
       "stale_contact": "Sin contacto registrado desde hace más de {{months}} meses. Programe una llamada.",
       "no_intake_planned": "Aún no hay una entrevista de admisión planificada.",
+      "not_in_pool": "El candidato aún no está en ningún grupo de talento.",
       "lead_without_funnel": "Lead sin solicitud. Planifique una entrevista para calificarlo.",
       "no_pool": "Aún no está en ningún grupo de talento. Añádalo para que sea localizable."
     }

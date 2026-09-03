@@ -1364,6 +1364,7 @@
       "never_contacted": "Nog nooit contact geweest. Neem contact op om dit dossier te activeren.",
       "stale_contact": "Langer dan {{months}} maanden geen contact geregistreerd. Plan een belmoment.",
       "no_intake_planned": "Er is nog geen intake gepland.",
+      "not_in_pool": "De kandidaat zit nog in geen enkele talentenpool.",
       "lead_without_funnel": "Lead zonder sollicitatie. Plan een intake om te kwalificeren.",
       "no_pool": "Zit nog in geen enkele talentenpool. Voeg toe zodat de kandidaat vindbaar is."
     }

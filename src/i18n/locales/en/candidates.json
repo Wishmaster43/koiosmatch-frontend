@@ -1364,6 +1364,7 @@
       "never_contacted": "No contact has ever been logged. Reach out to activate this dossier.",
       "stale_contact": "No contact registered for more than {{months}} months. Schedule a call.",
       "no_intake_planned": "No intake has been planned yet.",
+      "not_in_pool": "The candidate is not in any talent pool yet.",
       "lead_without_funnel": "Lead with no application. Plan an intake to qualify them.",
       "no_pool": "Not yet in any talent pool. Add them so they can be found."
     }
