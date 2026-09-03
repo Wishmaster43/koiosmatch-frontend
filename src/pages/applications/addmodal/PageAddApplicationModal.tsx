@@ -89,7 +89,7 @@ const mapVacancyRow = (v: RawPickRow): PickOption => ({
 // showed BLANK instead of the placeholder text (i.e. "Select a
 // candidate/vacancy/recruiter"). Mirrors MatchModal's own
 // `value={x || null}` pickers (job 17/18).
-function PickField({ label, style, value, ...rest }: { label: ReactNode; style?: CSSProperties; value?: string } & AnyProps) {
+function PickField({ label, style, value, ariaRequired, ...rest }: { label: ReactNode; style?: CSSProperties; value?: string; ariaRequired?: boolean } & AnyProps) {
   // §6: a <button> trigger cannot be labelled by a bare <div>, so the picker used to
   // announce only its value ("Piet Recruiter") with no field name. CreatableSelect
   // prefixes aria-labelledby with the label, so it now reads "Recruiter, Piet Recruiter".
@@ -97,7 +97,10 @@ function PickField({ label, style, value, ...rest }: { label: ReactNode; style?:
   return (
     <div>
       <div id={labelId} style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 5 }}>{label}</div>
-      <CreatableSelect allowCreate={false} menuWidth={320} aria-labelledby={labelId} value={value || null} style={{ width: '100%', ...style }} {...rest} />
+      {/* REQUIRED-A11Y-4: forward the required-ness to CreatableSelect's own
+          'aria-required' prop, which already places it on the trigger button. */}
+      <CreatableSelect allowCreate={false} menuWidth={320} aria-labelledby={labelId} aria-required={ariaRequired || undefined}
+        value={value || null} style={{ width: '100%', ...style }} {...rest} />
     </div>
   )
 }
@@ -240,7 +243,7 @@ export default function PageAddApplicationModal({ onClose, onCreated, lockedVaca
     <div>
       <PickField label={<>{t('add.owner')}{ownerRequired && requiredMark}</>} placeholder={t('add.ownerPlaceholder')}
         clearable={!ownerRequired} clearLabel={t('add.owner')}
-        options={ownerOptions} value={ownerId} onChange={setOwnerId}
+        options={ownerOptions} value={ownerId} onChange={setOwnerId} ariaRequired={ownerRequired}
         style={errors.ownerId ? { borderColor: 'var(--color-danger)' } : undefined} />
       {errors.ownerId && !ownerId && ownerRequired && (
         <div role="alert" style={{ fontSize: 11, color: 'var(--color-danger-text)', marginTop: 4 }}>
@@ -269,10 +272,12 @@ export default function PageAddApplicationModal({ onClose, onCreated, lockedVaca
           )}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
             <div>
+              {/* REQUIRED-A11Y-4: the candidate is ALWAYS required (useCreateApplication's
+                  `create` bails out on !candidateId before anything else runs). */}
               <SearchPickField label={t('add.candidate')} placeholder={t('add.candidatePlaceholder')}
                 value={pickedCandidate} options={candidateSearch.options} onPick={pickCandidate}
                 onSearch={candidateSearch.setQuery} error={errors.candidateId}
-                searchError={candidateSearch.error} onRetry={candidateSearch.retry} />
+                searchError={candidateSearch.error} onRetry={candidateSearch.retry} ariaRequired />
               {/* NEWCAND-1: a real button (§3A), never coloured text-as-link — opens the
                   house AddCandidateModal (with its own CV-parse entry points) on top. */}
               <Button variant="secondary" size="sm" style={{ marginTop: 6 }} onClick={() => setAddingCandidate(true)}>
@@ -301,7 +306,7 @@ export default function PageAddApplicationModal({ onClose, onCreated, lockedVaca
                   placeholder={t('add.vacancyPlaceholder')}
                   value={pickedVacancy} options={vacancySearch.options} onPick={pickVacancy}
                   onSearch={vacancySearch.setQuery} error={errors.vacancyId}
-                  searchError={vacancySearch.error} onRetry={vacancySearch.retry} />
+                  searchError={vacancySearch.error} onRetry={vacancySearch.retry} ariaRequired={vacancyRequired} />
                 {errors.vacancyId && !vacancyId && vacancyRequired && (
                   <div role="alert" style={{ fontSize: 11, color: 'var(--color-danger-text)', marginTop: 4 }}>
                     {t('common:errors.fieldRequired', { field: t('add.vacancy') })}
@@ -323,7 +328,7 @@ export default function PageAddApplicationModal({ onClose, onCreated, lockedVaca
                 <PickField label={<>{t('add.phase')}{phaseRequired && requiredMark}</>} placeholder={t('add.phasePlaceholder')}
                   clearable={!phaseRequired} clearLabel={t('add.phase')}
                   options={stageOptions.map(s => ({ value: s.id, label: s.label }))}
-                  value={phaseId} onChange={setPhaseIdManual}
+                  value={phaseId} onChange={setPhaseIdManual} ariaRequired={phaseRequired}
                   style={errors.phase ? { borderColor: 'var(--color-danger)' } : undefined} />
                 {errors.phase && !phaseId && phaseRequired && (
                   <div style={{ fontSize: 11, color: 'var(--color-danger-text)', marginTop: 4 }}>
@@ -344,7 +349,7 @@ export default function PageAddApplicationModal({ onClose, onCreated, lockedVaca
             <label id={`${sourceFieldId}-label`} htmlFor={sourceFieldId} style={{ display: 'block', fontSize: 12, color: 'var(--text-muted)', marginBottom: 5 }}>
               {t('drawer.source')}{sourceRequired && requiredMark}
             </label>
-            <CreatableSelectJs id={sourceFieldId} aria-labelledby={`${sourceFieldId}-label`}
+            <CreatableSelectJs id={sourceFieldId} aria-labelledby={`${sourceFieldId}-label`} aria-required={sourceRequired}
               value={source} options={sourceOptions} onChange={setSource}
               allowCreate={sourceAllowFreeEntry} placeholder={t('drawer.source')}
               clearable={!sourceRequired} clearLabel={t('drawer.source')}

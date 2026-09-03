@@ -557,6 +557,18 @@ describe('AddApplicationModal · APP-REQUIRED-FE-1 (tenant-configurable required
     await user.click(await screen.findByRole('button', { name: 'common:save' }))
     expect(api.patch).not.toHaveBeenCalled()
   })
+
+  // REQUIRED-A11Y-4: the asterisk-only marker never reached assistive tech —
+  // this pins aria-required on the real vacancy trigger.
+  it('marks the vacancy trigger aria-required once required, and not otherwise', () => {
+    const { unmount } = render(<AddApplicationModal candidateId="cand-1" onClose={noop} onCreated={noop} />)
+    expect(screen.getByRole('button', { name: /work\.pickVacancy/ })).not.toHaveAttribute('aria-required')
+    unmount()
+
+    settingsRef.current = { application_required_fields: ['vacancy_id'] }
+    render(<AddApplicationModal candidateId="cand-1" onClose={noop} onCreated={noop} />)
+    expect(screen.getByRole('button', { name: /work\.pickVacancy/ })).toHaveAttribute('aria-required', 'true')
+  })
 })
 
 /**

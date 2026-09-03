@@ -718,3 +718,23 @@ describe('AddApplicationModal · APP-REQUIRED-FE-1 (tenant-configurable required
     expect(screen.getByText('common:errors.fieldRequired')).toBeInTheDocument()
   })
 })
+
+// REQUIRED-A11Y-4: the asterisk-only markers (requiredMark) never reached
+// assistive tech — this pins aria-required on the real triggers.
+describe('AddApplicationModal · REQUIRED-A11Y-4 (aria-required on pickers)', () => {
+  it('always marks the candidate trigger aria-required (candidate is unconditionally required)', () => {
+    render(<AddApplicationModal onClose={vi.fn()} onCreated={vi.fn()} />)
+    expect(screen.getByRole('button', { name: /add\.candidatePlaceholder/ })).toHaveAttribute('aria-required', 'true')
+  })
+
+  it('leaves the vacancy trigger without aria-required when the tenant setting omits vacancy_id', () => {
+    render(<AddApplicationModal onClose={vi.fn()} onCreated={vi.fn()} />)
+    expect(screen.getByRole('button', { name: /add\.vacancyPlaceholder/ })).not.toHaveAttribute('aria-required')
+  })
+
+  it('marks the vacancy trigger aria-required once the tenant setting lists vacancy_id', () => {
+    settingsRef.current = { application_required_fields: ['vacancy_id'] }
+    render(<AddApplicationModal onClose={vi.fn()} onCreated={vi.fn()} />)
+    expect(screen.getByRole('button', { name: /add\.vacancyPlaceholder/ })).toHaveAttribute('aria-required', 'true')
+  })
+})

@@ -32,10 +32,14 @@ const SEARCH_ERROR_KEY: Record<SearchErrorKind, string> = {
   unknown: 'add.searchError',
 }
 
-export default function SearchPickField({ label, placeholder, value, options, onPick, onSearch, error, searchError, onRetry }: {
+export default function SearchPickField({ label, placeholder, value, options, onPick, onSearch, error, searchError, onRetry, ariaRequired }: {
   label: ReactNode; placeholder?: string; value: PickOption | null; options: PickOption[]
   onPick: (opt: PickOption) => void; onSearch: (query: string) => void
   error?: boolean; searchError?: SearchErrorKind | null; onRetry: () => void
+  // REQUIRED-A11Y-4: mirrors CreatableSelect/SelectMenu/SearchSelect's own
+  // 'aria-required' prop — this field builds its OWN trigger via renderTrigger,
+  // so it never picks up SearchSelect's internal button-level attribute.
+  ariaRequired?: boolean
 }) {
   const { t } = useTranslation('applications')
   const labelId = useId()
@@ -52,6 +56,7 @@ export default function SearchPickField({ label, placeholder, value, options, on
         onToggle={(v: string) => { const opt = options.find(o => String(o.value) === v); if (opt) onPick(opt) }}
         renderTrigger={(toggle: () => void) => (
           <button type="button" id={triggerId} onClick={toggle} aria-labelledby={`${labelId} ${triggerId}`}
+            aria-required={ariaRequired || undefined}
             style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 10px', width: '100%',
               boxSizing: 'border-box', border: `1px solid ${error ? 'var(--color-danger)' : 'var(--border)'}`,
               borderRadius: 6, background: 'var(--surface)', cursor: 'pointer' }}>

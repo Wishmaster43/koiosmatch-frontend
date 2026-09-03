@@ -149,7 +149,7 @@ export default function DrawerAddApplicationModal({ candidateId, candidateOwnerI
                   staan'): an OPTIONAL vacancy must be releasable back to an open
                   application — VAC-CLEAR-1 cross, same as the intake modal. No cross
                   once the tenant made it required (APP-REQUIRED-FE-1). */}
-              <CreatableSelect id={vacancyFieldId} aria-labelledby={`${vacancyFieldId}-label`}
+              <CreatableSelect id={vacancyFieldId} aria-labelledby={`${vacancyFieldId}-label`} aria-required={vacancyRequired}
                 value={vacancyId || null} onChange={setVacancyId} onSearch={setVacancySearch}
                 placeholder={t('work.pickVacancy')} clearable={!vacancyRequired} clearLabel={t('work.vacancyOptional')}
                 allowCreate={false} menuWidth={pickerMenuWidth} style={fieldFootprint}
@@ -180,7 +180,7 @@ export default function DrawerAddApplicationModal({ candidateId, candidateOwnerI
           <div style={fieldRow}>
             <div id={`${phaseFieldId}-label`} style={CANON_LABEL_STYLE}>{t('work.phase')}{phaseRequired && requiredMark}</div>
             <div style={fieldControl}>
-              <CreatableSelect id={phaseFieldId} aria-labelledby={`${phaseFieldId}-label`}
+              <CreatableSelect id={phaseFieldId} aria-labelledby={`${phaseFieldId}-label`} aria-required={phaseRequired}
                 value={phaseId || null} onChange={setPhaseId} allowCreate={false} menuWidth={pickerMenuWidth}
                 style={fieldFootprint} options={stages.map(s => ({ value: s.id, label: s.label }))} />
             </div>
@@ -199,7 +199,7 @@ export default function DrawerAddApplicationModal({ candidateId, candidateOwnerI
           <div style={fieldRow}>
             <div id={`${ownerFieldId}-label`} style={CANON_LABEL_STYLE}>{t('work.owner')}{ownerRequired && requiredMark}</div>
             <div style={fieldControl}>
-              <CreatableSelect id={ownerFieldId} aria-labelledby={`${ownerFieldId}-label`}
+              <CreatableSelect id={ownerFieldId} aria-labelledby={`${ownerFieldId}-label`} aria-required={ownerRequired}
                 value={ownerId || null} onChange={setOwnerId} placeholder={t('work.pickOwner')}
                 allowCreate={false} menuWidth={pickerMenuWidth} style={fieldFootprint} options={userOptions} />
             </div>
@@ -219,7 +219,7 @@ export default function DrawerAddApplicationModal({ candidateId, candidateOwnerI
             <div style={fieldControl}>
               {/* §6: the picker's accessible name is the LABEL, never the picked
                   raw value — same id/aria-labelledby wiring as the sibling modal. */}
-              <CreatableSelect id={sourceFieldId} aria-labelledby={`${sourceFieldId}-label`}
+              <CreatableSelect id={sourceFieldId} aria-labelledby={`${sourceFieldId}-label`} aria-required={sourceRequired}
                 value={source || null} onChange={setSource} placeholder={t('filters.source')}
                 clearable={!sourceRequired} clearLabel={t('filters.source')}
                 allowCreate={sourceAllowFreeEntry} menuWidth={pickerMenuWidth} style={fieldFootprint}
