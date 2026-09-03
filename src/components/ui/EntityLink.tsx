@@ -34,10 +34,16 @@ export function buildEntityDeepLink(page: string, id: Id): string {
 export default function EntityLink({ page, id, children, title, hideIcon = false, tone = 'accent' }: { page: string; id?: Id | null; children: ReactNode; title?: string; hideIcon?: boolean; tone?: 'accent' | 'neutral' }) {
   const { t } = useTranslation('common')
   const { openEntity } = useNavigation()
-  // No target id (e.g. a lead without a candidate record): plain text, but KEEP
-  // the truncation contract the linked form carries — a bare fragment let long
-  // names overflow their row (Opus r3).
-  if (id == null) {
+  // LABEL-GUARD (K-292 O1): a string/number label that is empty or whitespace
+  // is not a visible name — render nothing clickable rather than an invisible
+  // hitbox around an empty name (Danny: "geen streepje-hitbox").
+  const isEmptyLabel = typeof children === 'string' || typeof children === 'number'
+    ? String(children).trim() === ''
+    : children == null || children === false
+  // No target id (e.g. a lead without a candidate record), or no visible name:
+  // plain text, but KEEP the truncation contract the linked form carries — a
+  // bare fragment let long names overflow their row (Opus r3).
+  if (id == null || isEmptyLabel) {
     return (
       <span style={{ minWidth: 0, maxWidth: '100%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
         {children}

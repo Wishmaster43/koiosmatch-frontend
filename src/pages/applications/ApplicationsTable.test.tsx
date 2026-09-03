@@ -314,7 +314,7 @@ describe('ApplicationsTable · cell deep-links (CEL-DOORKLIK-CANON)', () => {
     const row = { ...baseRow, id: 80, candidateId: 'cand-8' } as unknown as Application
     render(<ApplicationsTable rows={[row]} onSelect={onSelect} />)
 
-    await user.click(screen.getByRole('button', { name: /Open kandidaat/ }))
+    await user.click(screen.getByRole('button', { name: /Kandidaat openen/ }))
 
     expect(mockOpenEntity).toHaveBeenCalledWith('candidates', 'cand-8')
     expect(onSelect).not.toHaveBeenCalled()
@@ -335,7 +335,21 @@ describe('ApplicationsTable · cell deep-links (CEL-DOORKLIK-CANON)', () => {
   it('renders the candidate cell unwrapped when no candidateId is present', () => {
     const row = { ...baseRow, id: 82, candidateId: null } as unknown as Application
     render(<ApplicationsTable rows={[row]} />)
-    expect(screen.queryByRole('button', { name: /Open kandidaat/ })).toBeNull()
+    expect(screen.queryByRole('button', { name: /Kandidaat openen/ })).toBeNull()
     expect(screen.getByText('Jane Doe')).toBeInTheDocument()
+  })
+
+  // K-292 O1 label-guard: an id with an empty visible name is not a valid link
+  // target — no invisible hitbox around a blank name.
+  it('renders the candidate cell unwrapped when candidateId is present but the name is empty', () => {
+    const row = { ...baseRow, id: 83, candidateId: 'cand-83', candidateName: '' } as unknown as Application
+    render(<ApplicationsTable rows={[row]} />)
+    expect(screen.queryByRole('button', { name: /Kandidaat openen/ })).toBeNull()
+  })
+
+  it('renders the client cell unwrapped when customerId is present but the name is empty', () => {
+    const row = { ...baseRow, id: 84, customerId: 'cust-84', client: '' } as unknown as Application
+    render(<ApplicationsTable rows={[row]} />)
+    expect(screen.queryByRole('button', { name: /Klant openen/ })).toBeNull()
   })
 })

@@ -42,4 +42,25 @@ describe('EntityLink', () => {
     expect(screen.queryByRole('button')).toBeNull()
     expect(screen.getByText('Verzorgende IG')).toBeTruthy()
   })
+
+  // K-292 O1: an id with an empty/whitespace name is not a valid link target —
+  // no invisible hitbox, no button, no icon (label-guard, no dash placeholder).
+  it('renders nothing clickable when the id is present but the label is empty', () => {
+    render(
+      <NavigationProvider goTo={() => {}}>
+        <EntityLink page="vacancies" id="v-1">{''}</EntityLink>
+      </NavigationProvider>,
+    )
+    expect(screen.queryByRole('button')).toBeNull()
+    expect(screen.queryByRole('link')).toBeNull()
+  })
+
+  it('still renders the button when the id and a non-empty name are both present', () => {
+    render(
+      <NavigationProvider goTo={() => {}}>
+        <EntityLink page="vacancies" id="v-1">Naam</EntityLink>
+      </NavigationProvider>,
+    )
+    expect(screen.getByRole('button', { name: 'Naam' })).toBeTruthy()
+  })
 })

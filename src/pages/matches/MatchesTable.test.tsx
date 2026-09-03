@@ -266,4 +266,24 @@ describe('MatchesTable · cell deep-links (CEL-DOORKLIK-CANON)', () => {
     expect(screen.queryByRole('button', { name: /Kandidaat openen/ })).toBeNull()
     expect(screen.getByText('Jane Doe')).toBeInTheDocument()
   })
+
+  // K-292 O1 label-guard: an id with an empty visible name is not a valid link
+  // target — no invisible hitbox around a blank name / placeholder dash.
+  it('renders the candidate cell unwrapped when candidateId is present but the name is empty', () => {
+    const row = { ...baseRow, id: 74, candidateId: 'cand-74', candidate: '' }
+    render(<MatchesTable rows={[row]} />)
+    expect(screen.queryByRole('button', { name: /Kandidaat openen/ })).toBeNull()
+  })
+
+  it('renders the vacancy cell unwrapped (dash) when vacancyId is present but the name is empty', () => {
+    const row = { ...baseRow, id: 75, vacancyId: 'vac-75', vacancy: '' }
+    render(<MatchesTable rows={[row]} />)
+    expect(screen.queryByRole('button', { name: /Vacature openen/ })).toBeNull()
+  })
+
+  it('renders the client cell unwrapped when clientId is present but the name is empty', () => {
+    const row = { ...baseRow, id: 76, clientId: 'cust-76', client: '' }
+    render(<MatchesTable rows={[row]} />)
+    expect(screen.queryByRole('button', { name: /Klant openen/ })).toBeNull()
+  })
 })

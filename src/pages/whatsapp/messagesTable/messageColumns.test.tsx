@@ -95,6 +95,15 @@ describe('useMessageColumns · wire shape (WA-MSG-TABLE-2)', () => {
     expect(mockOpenEntity).toHaveBeenCalledWith('customers', 'cust-9', 'contacts')
   })
 
+  // K-292 O1 label-guard: an id with an empty visible name falls back to the
+  // plain "unknown recipient" label, never a link/button wrapped around it.
+  it('recipient: candidate-owned row with an empty name renders the plain unknown-recipient label, no link', () => {
+    const emptyNameRow: WaMessage = { ...candidateRow, id: 'm-5', candidate: { first_name: '', last_name: '' } }
+    render(<Harness messages={[emptyNameRow]} />)
+    const label = screen.getByText('messages.unknownRecipient')
+    expect(label.closest('a, button')).toBeNull()
+  })
+
   it('conversation gateway: candidate-owned row opens communication:conversations', async () => {
     const user = userEvent.setup()
     render(<Harness messages={[candidateRow]} />)

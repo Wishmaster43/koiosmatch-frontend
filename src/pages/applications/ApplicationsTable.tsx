@@ -110,7 +110,8 @@ export default function ApplicationsTable({ rows, loading, error, selectedId, on
             <span style={{ fontWeight: 500, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block', maxWidth: 150 }} title={r.candidateName}>{r.candidateName}</span>
           </span>
         )
-        if (r.candidateId == null) return content
+        // LABEL-GUARD (K-292 O1): no id, or an id with no visible name, renders plain.
+        if (r.candidateId == null || !r.candidateName) return content
         // CEL-DOORKLIK-CANON: candidate identity cell deep-links to the candidate drilldown.
         // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- cell deep-link rendered AS the cell's own identity content via the shared cellButton reset (§14 r7 necessity)
         return <button type="button" onClick={e => { e.stopPropagation(); openEntity('candidates', r.candidateId as Id) }} aria-label={r.candidateName ? `${t('drawer.openCandidate')}: ${r.candidateName}` : t('drawer.openCandidate')} style={cellButton}>{content}</button>
@@ -139,7 +140,8 @@ export default function ApplicationsTable({ rows, loading, error, selectedId, on
     { key: 'client', header: t('cols.client'), sortable: true, nowrap: true,
       render: r => {
         const content = <EntityNameCell name={r.client} textStyle={{ color: 'var(--text-muted)' }} />
-        if (r.customerId == null) return content
+        // LABEL-GUARD (K-292 O1): no id, or an id with no visible name, renders plain.
+        if (r.customerId == null || !r.client) return content
         // CEL-DOORKLIK-CANON: client cell deep-links to the customer drilldown.
         // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- cell deep-link rendered AS the cell's own identity content via the shared cellButton reset (§14 r7 necessity)
         return <button type="button" onClick={e => { e.stopPropagation(); openEntity('customers', r.customerId as Id) }} aria-label={r.client ? `${t('drawer.openCustomer')}: ${r.client}` : t('drawer.openCustomer')} style={cellButton}>{content}</button>

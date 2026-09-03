@@ -93,18 +93,23 @@ export default function ConversationsTab({ openConversationId }: { openConversat
       // own so it opens the owning customer's Contacts tab.
       key: 'counterpart', header: t('conversations.column.counterpart'),
       render: r => {
-        if (r.candidate?.id) {
-          return <EntityLink page="candidates" id={r.candidate.id} hideIcon>{counterpartName(r)}</EntityLink>
+        // LABEL-GUARD (K-292 O1): counterpartName falls back to '—' once every
+        // real name/number source is empty — that placeholder must never be the
+        // clickable label of a deep link (no dash-hitbox).
+        const name = counterpartName(r)
+        const hasName = name !== '—' && name.trim() !== ''
+        if (r.candidate?.id && hasName) {
+          return <EntityLink page="candidates" id={r.candidate.id} hideIcon>{name}</EntityLink>
         }
-        if (r.customer_contact?.id) {
+        if (r.customer_contact?.id && hasName) {
           return (
             <Button variant="ghost" size="sm" style={{ padding: 0, height: 'auto', fontWeight: 400 }}
               onClick={e => { e.stopPropagation(); openEntity('customers', r.customer_contact!.customer_id, 'contacts') }}>
-              {counterpartName(r)}
+              {name}
             </Button>
           )
         }
-        return counterpartName(r)
+        return name
       },
     },
     { key: 'wa_number', header: t('conversations.column.number'), render: r => r.wa_number ?? '—' },

@@ -93,7 +93,8 @@ export default function MatchesTable({
             <span style={{ fontWeight: 500, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block', maxWidth: 150 }} title={r.candidate}>{r.candidate}</span>
           </span>
         )
-        if (r.candidateId == null) return content
+        // LABEL-GUARD (K-292 O1): no id, or an id with no visible name, renders plain.
+        if (r.candidateId == null || !r.candidate) return content
         // CEL-DOORKLIK-CANON: candidate identity cell deep-links to the candidate drilldown.
         // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- cell deep-link rendered AS the cell's own identity content via the shared cellButton reset (§14 r7 necessity)
         return <button type="button" onClick={e => { e.stopPropagation(); openEntity('candidates', r.candidateId as Id) }} aria-label={r.candidate ? `${t('drawer.openCandidate')}: ${r.candidate}` : t('drawer.openCandidate')} style={cellButton}>{content}</button>
@@ -117,7 +118,9 @@ export default function MatchesTable({
     { key: 'vacancy', header: t('cols.vacancy'), sortable: true, nowrap: false,
       render: r => {
         const text = r.vacancy || '—'
-        if (r.vacancyId == null) return text
+        // LABEL-GUARD (K-292 O1): an id with no visible name (dash fallback) is not
+        // a valid link target — no invisible hitbox around the placeholder dash.
+        if (r.vacancyId == null || !r.vacancy) return text
         // CEL-DOORKLIK-CANON: vacancy cell deep-links to the vacancy drilldown.
         // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- cell deep-link rendered AS the cell's own text content via the shared cellButton reset (§14 r7 necessity)
         return <button type="button" onClick={e => { e.stopPropagation(); openEntity('vacancies', r.vacancyId as Id) }} aria-label={r.vacancy ? `${t('drawer.openVacancy')}: ${r.vacancy}` : t('drawer.openVacancy')} style={cellButton}>{text}</button>
@@ -127,7 +130,8 @@ export default function MatchesTable({
     { key: 'client',  header: t('cols.client'),  sortable: true, nowrap: true,
       render: r => {
         const content = <EntityNameCell name={r.client} textStyle={{ color: 'var(--text-muted)' }} />
-        if (r.clientId == null) return content
+        // LABEL-GUARD (K-292 O1): no id, or an id with no visible name, renders plain.
+        if (r.clientId == null || !r.client) return content
         // CEL-DOORKLIK-CANON: client cell deep-links to the customer drilldown.
         // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- cell deep-link rendered AS the cell's own identity content via the shared cellButton reset (§14 r7 necessity)
         return <button type="button" onClick={e => { e.stopPropagation(); openEntity('customers', r.clientId as Id) }} aria-label={r.client ? `${t('drawer.openClient')}: ${r.client}` : t('drawer.openClient')} style={cellButton}>{content}</button>

@@ -92,7 +92,8 @@ export default function OpportunitiesTable({ rows, loading, error, onRowClick, s
     { key: 'client', header: t('cols.client'), sortable: true, nowrap: true,
       render: r => {
         const cell = <EntityNameCell name={r.client} textStyle={{ color: 'var(--text-muted)' }} />
-        if (r.clientId == null) return cell
+        // LABEL-GUARD (K-292 O1): no id, or an id with no visible name, renders plain.
+        if (r.clientId == null || !r.client) return cell
         // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- cell deep-link rendered AS the cell's own chip content via the shared cellButton reset; Button's fixed sm chrome cannot sit invisibly inside a dense table cell (§14 r7 necessity)
         return <button type="button" onClick={e => { e.stopPropagation(); openEntity('customers', r.clientId) }} aria-label={r.client ? `${t('details.openCustomer')}: ${r.client}` : t('details.openCustomer')} style={cellButton}>{cell}</button>
       } },

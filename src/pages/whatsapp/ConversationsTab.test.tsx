@@ -58,6 +58,22 @@ describe('ConversationsTab', () => {
     expect(mockThread).toHaveBeenCalledWith('conv-1')
   })
 
+  // K-292 O1 label-guard: an id with no resolvable name (every fallback source
+  // empty) renders the plain placeholder dash, never a link/button around it.
+  it('a candidate thread with no resolvable name renders a plain dash, never a link', () => {
+    const blankRow = row({ candidate: { id: 'cand-2', full_name: '' }, wa_number: null })
+    mockConversations.mockReturnValue({ data: [blankRow], isLoading: false, isError: false })
+    mockThread.mockReturnValue(noThread)
+    render(<ConversationsTab />)
+    // wa_number is also null here, so both the counterpart and number columns
+    // render the house dash — assert the first (counterpart) cell specifically,
+    // and that it carries no button of its own (the "Laatste bericht" column's
+    // own sort-header button is unrelated to this cell's guard).
+    const firstCell = document.querySelector('tbody tr td') as HTMLElement
+    expect(firstCell.textContent).toBe('—')
+    expect(firstCell.querySelector('button, a')).toBeNull()
+  })
+
   it('a customer-contact thread deep-links to the owning customer\'s Contacts tab (CEL-DOORKLIK-CANON)', async () => {
     const contactRow = row({
       candidate: null,

@@ -44,14 +44,16 @@ const contactName = (m: WaMessage) => [m.customer_contact?.first_name, m.custome
 function RecipientCell({ message }: { message: WaMessage }) {
   const { t } = useTranslation('whatsapp')
   const { openEntity } = useNavigation()
-  const nameNode = message.candidate_id != null ? (
-    <EntityLink page="candidates" id={message.candidate_id} hideIcon>
-      {candidateName(message) || t('messages.unknownRecipient')}
-    </EntityLink>
-  ) : message.customer_contact ? (
+  // LABEL-GUARD (K-292 O1): an id with no real name falls through to the plain
+  // "unknown recipient" text, never a link wrapped around that fallback label.
+  const candName = candidateName(message)
+  const contName = contactName(message)
+  const nameNode = message.candidate_id != null && candName ? (
+    <EntityLink page="candidates" id={message.candidate_id} hideIcon>{candName}</EntityLink>
+  ) : message.customer_contact && contName ? (
     <Button variant="ghostAccent" size="sm" style={{ padding: 0, height: 'auto', justifyContent: 'flex-start' }}
       onClick={e => { e.stopPropagation(); openEntity('customers', message.customer_contact!.customer_id, 'contacts') }}>
-      {contactName(message) || t('messages.unknownRecipient')}
+      {contName}
     </Button>
   ) : (
     <span>{t('messages.unknownRecipient')}</span>
