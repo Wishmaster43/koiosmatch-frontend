@@ -1,7 +1,7 @@
 // DataTable — the shared, column-driven list table (§4 HUISSTIJL-1): sorting,
 // selection, virtualization and the loading/empty/error states live here once so
 // no entity page re-implements table chrome; a caller only declares columns.
-import { useState, useMemo, useRef, useCallback } from 'react'
+import { useState, useMemo, useRef, useCallback, useEffect } from 'react'
 import type { CSSProperties, ReactNode, RefObject } from 'react'
 import SortCaret from './SortCaret'
 import { useTranslation } from 'react-i18next'
@@ -234,18 +234,24 @@ export default function DataTable<Row>({
   // memo on every DataTable render. Reading the latest callback via a ref keeps
   // TableRow's props — and therefore its memo — stable regardless of the caller.
   const onRowClickRef = useRef(onRowClick)
-  onRowClickRef.current = onRowClick
   // Wraps onRowClick in a ref-read callback with an empty deps array, so its identity never changes across renders; a fresh function per render would defeat every row's memoization.
   const stableRowClick = useCallback((row: Row) => onRowClickRef.current?.(row), [])
   const onToggleRowRef = useRef(onToggleRow)
-  onToggleRowRef.current = onToggleRow
   // Job 43 (shift-click range selection): refs so the stable callback below always
   // reads the LATEST page order/selection without being recreated (which would bust
   // every row's memo — see the docblock at the top of this file).
   const pageIdsRef = useRef(pageIds)
-  pageIdsRef.current = pageIds
   const selectedIdsRef = useRef(selectedIds)
-  selectedIdsRef.current = selectedIds
+  // These four refs are only ever read from click/keyboard handlers fired after paint
+  // (stableRowClick / stableToggleRow above), never during render — so writing them in
+  // an effect (post-commit) rather than during render keeps React's render phase free of
+  // side effects read only from post-paint DOM handlers, so the passive flush is ordered before any realistic interaction (frontend-security-quality-3).
+  useEffect(() => {
+    onRowClickRef.current = onRowClick
+    onToggleRowRef.current = onToggleRow
+    pageIdsRef.current = pageIds
+    selectedIdsRef.current = selectedIds
+  })
   // The last row checkbox the user explicitly clicked (plain or shift) — the anchor
   // a subsequent shift-click ranges from. A ref, not state: it never needs to render.
   const lastClickedIdRef = useRef<RowId | null>(null)
