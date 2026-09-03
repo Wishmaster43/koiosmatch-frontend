@@ -42,9 +42,10 @@ export interface LiveBlockers { applications: BlockingApplication[]; matches: Bl
 // net if this heuristic ever misses a live link). "Terminal" is FLAG-driven
 // (is_match/is_rejected on the tenant funnel lookup), never the literal
 // 'hired'/'rejected' key (A1) — a tenant may rename either slug. `funnelTypes`
-// defaults to the seed because the two callers of this pure helper
-// (useCandidateDrawerActions/useCandidateBulkActions) don't thread the live
-// tenant lookup through yet — follow-up, out of this change's file scope.
+// defaults to the seed only as the PRE-LOAD fallback (LookupsContext hasn't
+// fetched yet) — both callers (useCandidateDrawerActions.guardedLifecycle,
+// useCandidateArchiveBulk.bulkArchive) now thread the live tenant lookup
+// through (HERAUDIT-2-REST-FE).
 export const needsLiveCheck = (c?: Candidate | null, funnelTypes: LookupItem[] = DEFAULT_FUNNEL_TYPES, statuses: LookupItem[] = DEFAULT_STATUSES): boolean => {
   if (!c) return false
   const meta = funnelTypes.find(f => f.value === c.stage)
@@ -62,8 +63,9 @@ export const needsLiveCheck = (c?: Candidate | null, funnelTypes: LookupItem[] =
 // the literal 'hired'/'rejected' key (A1, mirrors needsLiveCheck above) — the old
 // hardcoded check made a tenant-renamed terminal stage permanently unarchivable
 // (the WRITE side already resolved flags; this READ side didn't). `funnelTypes`
-// defaults to the seed for the same reason as needsLiveCheck: fetchLiveBlockers'
-// two callers don't thread the live tenant lookup through yet.
+// defaults to the seed only as the pre-load fallback, same as needsLiveCheck
+// above — fetchLiveBlockers' two callers now thread the live tenant lookup
+// through (HERAUDIT-2-REST-FE).
 const isLiveApplication = async (id: Id, funnelTypes: LookupItem[] = DEFAULT_FUNNEL_TYPES): Promise<boolean> => {
   try {
     const r = await api.get(`/applications/${id}`)
@@ -129,7 +131,10 @@ export function liveFromError(e: unknown): LiveBlockers | null {
 // one stage carries is_rejected (backend singleton guard); if a stale/multi-flagged
 // list is ever passed, take the first by sort order (the array is assumed
 // pre-sorted, mirrors LookupsContext.normalize()'s ordering). `funnelTypes`
-// defaults to the seed for the same reason as needsLiveCheck above.
+// defaults to the seed here for a DIFFERENT reason than needsLiveCheck/
+// fetchLiveBlockers above: this function's only caller (ArchiveGuardModal) does
+// not thread the live lookup through yet — out of HERAUDIT-2-REST-FE's scope
+// (named callers were the drawer/bulk archive hooks, not the resolve modal).
 // Mirrors ApplicationsPage.handleMove's own phase-move call (same endpoint/body).
 export async function resolveApplication(id: Id, funnelTypes: LookupItem[] = DEFAULT_FUNNEL_TYPES): Promise<boolean> {
   const rejectedKey = funnelTypes.find(f => f.is_rejected)?.value ?? 'rejected'

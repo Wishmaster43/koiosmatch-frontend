@@ -280,7 +280,11 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
     dialog: lifecycleConfirmDialog,
   } = useCandidateDrawerActions({ candidates, setCandidates, setTotal,
     notifyMsg: m => notify(m.type, m.text, m.action), t,
-    markGoneClose: () => markGoneCloseRef.current() })
+    markGoneClose: () => markGoneCloseRef.current(),
+    // HERAUDIT-2-REST-FE: thread the live tenant funnel lookup (already read via
+    // useLookups() above) so the drawer's archive guard judges terminal stages
+    // against the SAME lookup as the bulk-archive path, never the seed fallback.
+    funnelTypes })
   // Open a candidate drawer when arriving via a dashboard/cross-entity link ({ open: id }).
   // The intent may carry a drawer tab (a conversation deep link lands on
   // Communicatie › Conversaties) — forward it, never drop it (WHATSAPP-PAGINA-ONDERZOEK-1).

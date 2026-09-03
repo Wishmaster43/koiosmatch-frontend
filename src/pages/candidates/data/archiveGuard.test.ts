@@ -81,6 +81,16 @@ describe('needsLiveCheck', () => {
     // treated as a non-terminal (unknown) stage, not silently matched by the old key.
     expect(needsLiveCheck({ stage: 'hired', status: 'available' } as Candidate, RENAMED_FUNNEL)).toBe(true)
   })
+
+  // HERAUDIT-2-REST-FE acceptance case: an is_rejected NON-seed stage value reads
+  // as terminal (false = no live check needed) under the TENANT lookup, and as
+  // still-live (true) under the seed — because the seed simply doesn't know the
+  // tenant's renamed slug. This is exactly the false-positive archive block the
+  // ticket describes for a caller that fell back to the seed.
+  it('is_rejected on a non-seed stage value: false (terminal) under the tenant lookup, true (unknown → still live) under the seed', () => {
+    expect(needsLiveCheck({ stage: 'afgewezen', status: 'available' } as Candidate, RENAMED_FUNNEL)).toBe(false)
+    expect(needsLiveCheck({ stage: 'afgewezen', status: 'available' } as Candidate)).toBe(true)
+  })
 })
 
 describe('fetchLiveBlockers', () => {

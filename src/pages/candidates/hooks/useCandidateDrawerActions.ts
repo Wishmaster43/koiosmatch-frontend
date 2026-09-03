@@ -23,6 +23,7 @@ import { needsLiveCheck, fetchLiveBlockers, liveFromError } from '../data/archiv
 import type { BlockingApplication, BlockingMatch } from '../data/archiveGuard'
 import type { Candidate } from '@/types/candidate'
 import type { Id } from '@/types/common'
+import type { LookupItem } from '@/context/LookupsContext'
 
 // The archive-guard modal's target: which candidate, which flow (archive vs
 // trash) and the blockers to list + resolve.
@@ -45,10 +46,16 @@ interface Args {
   // of a push, so a stale `?open=<dead-id>` never survives a "record gone" close
   // for back to re-trigger — optional so callers without a URL sync still work.
   markGoneClose?: () => void
+  // The live tenant funnel lookup (LookupsContext), threaded from CandidatesPage
+  // (which already reads useLookups()) so the archive guard judges terminal
+  // stages against the TENANT lookup, never the DEFAULT_FUNNEL_TYPES seed
+  // (HERAUDIT-2-REST-FE) — optional so a caller without the provider (tests)
+  // still falls back to archiveGuard's own seed default.
+  funnelTypes?: LookupItem[]
 }
 
 // Drawer selection + lifecycle actions for CandidatesPage: open/close, in-place patch, archive/restore/delete, all optimistic against the list.
-export function useCandidateDrawerActions({ candidates, setCandidates, setTotal, notifyMsg, t, markGoneClose }: Args) {
+export function useCandidateDrawerActions({ candidates, setCandidates, setTotal, notifyMsg, t, markGoneClose, funnelTypes }: Args) {
   const [selected,       setSelected]       = useState<Candidate | null>(null)
   const [detail,         setDetail]         = useState<Candidate | null>(null)
   const [drawerExpanded, setDrawerExpanded] = useState(false)
@@ -152,8 +159,8 @@ export function useCandidateDrawerActions({ candidates, setCandidates, setTotal,
   // the native window.confirm() this used to call (§0 restschuld cleanup).
   const guardedLifecycle = async (id: Id, mode: 'archive' | 'trash', confirmKey: string, proceed: () => void) => {
     const cand = candidates.find(x => x.id === id)
-    if (needsLiveCheck(cand)) {
-      const blockers = await fetchLiveBlockers(id)
+    if (needsLiveCheck(cand, funnelTypes)) {
+      const blockers = await fetchLiveBlockers(id, funnelTypes)
       if (blockers.applications.length || blockers.matches.length) {
         setArchiveGuard({ candidateId: id, candidateName: cand?.name ?? '', mode, ...blockers })
         return

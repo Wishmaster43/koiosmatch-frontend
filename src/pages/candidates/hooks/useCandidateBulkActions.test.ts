@@ -41,6 +41,14 @@ const FUNNEL: LookupItem[] = [
 ]
 const CANDIDATE_TYPES: LookupOption[] = [{ value: 'flex', label: 'Flex' }, { value: 'zzp', label: 'ZZP' }]
 
+// HERAUDIT-2-REST-FE: a tenant-renamed terminal slug the SEED (DEFAULT_FUNNEL_TYPES)
+// does not know — proves fetchLiveBlockers' full per-application check receives the
+// SAME tenant funnelTypes as the row-level pre-filter, not archiveGuard's own seed.
+const TENANT_RENAMED_FUNNEL: LookupItem[] = [
+  { value: 'voorgesteld', label: 'Voorgesteld', color: 'slate' },
+  { value: 'ingevuld',    label: 'Ingevuld',    color: 'slate', is_match: true },
+]
+
 const cand = (overrides: Partial<Candidate> = {}): Candidate => ({
   id: 1, name: 'Test candidate', stage: '', status: 'available',
   pools: [], tags: [], candidateTypes: [], owner: '',
@@ -53,7 +61,7 @@ const cand = (overrides: Partial<Candidate> = {}): Candidate => ({
 // r2-react-query-1: wrapped in a real QueryClientProvider now that bulkMutate
 // invalidates the stats query — `queryClient` is returned so a test can spy on
 // invalidateQueries directly (mirrors useCandidateMutations.test.ts's harness).
-function harness(initial: Candidate[], filterArgs: { filterParams?: Record<string, unknown>; filteredTotal?: number; onFilteredMutated?: () => void } = {}) {
+function harness(initial: Candidate[], filterArgs: { filterParams?: Record<string, unknown>; filteredTotal?: number; onFilteredMutated?: () => void; funnelTypes?: LookupItem[] } = {}) {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   const wrapper = ({ children }: { children: ReactNode }) => createElement(QueryClientProvider, { client: queryClient }, children)
   const rendered = renderHook(() => {
@@ -389,6 +397,33 @@ describe('useCandidateBulkActions · bulkArchive (guard)', () => {
     await act(async () => { r.result.current.actions.resolveBulkArchiveGuard() })
     await waitFor(() => expect(notify).toHaveBeenCalledWith('success', expect.any(String)))
     expect(r.result.current.candidates).toHaveLength(0)
+  })
+
+  // HERAUDIT-2-REST-FE: fetchLiveBlockers' full per-application check used to fall
+  // back to the DEFAULT_FUNNEL_TYPES seed even though the row-level pre-filter just
+  // above already received the live tenant lookup — a tenant-renamed terminal phase
+  // then read as "still live" (false-positive block). This proves the fix: the same
+  // funnelTypes now reaches BOTH the pre-filter and the full check.
+  it('resolves a tenant-renamed terminal application phase as NOT a blocker (fetchLiveBlockers now shares the pre-filter\'s tenant funnelTypes)', async () => {
+    get.mockImplementation((url: string) => {
+      if (url === '/candidates/1') return Promise.resolve({ data: { data: {
+        applications: [{ id: 'a1', vacancyTitle: 'X', stageLabel: 'Y', stageColor: null }], matches: [],
+      } } })
+      // The nested application's authoritative phase uses the TENANT's renamed
+      // terminal slug — DEFAULT_FUNNEL_TYPES (the seed) does not know it.
+      if (url === '/applications/a1') return Promise.resolve({ data: { data: { phase_key: 'ingevuld' } } })
+      return Promise.reject(new Error('unexpected ' + url))
+    })
+    post.mockResolvedValue({ data: { archived: [1] } })
+    const r = harness([cand({ id: 1, stage: 'voorgesteld', status: 'available' })], { funnelTypes: TENANT_RENAMED_FUNNEL })
+    act(() => r.result.current.setSelectedIds(new Set([1])))
+    await act(async () => { await r.result.current.actions.bulkArchive() })
+    expect(get).toHaveBeenCalledWith('/candidates/1')
+    expect(get).toHaveBeenCalledWith('/applications/a1')
+    // No blocker found under the tenant lookup → the guard modal never opens.
+    expect(r.result.current.actions.bulkArchiveGuard).toBeNull()
+    act(() => r.result.current.actions.dialog.props.onConfirm())
+    await waitFor(() => expect(notify).toHaveBeenCalledWith('success', expect.any(String)))
   })
 
   it('a 409 with a forward-compat `live` payload on the real call re-opens the guard (safety net for a missed pre-check)', async () => {

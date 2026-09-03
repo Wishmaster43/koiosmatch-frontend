@@ -85,7 +85,11 @@ export function useCandidateArchiveBulk({
     const byId = new Map(candidates.map(c => [c.id, c]))
     const risky = ids.filter(id => needsLiveCheck(byId.get(id), funnelTypes))
     const toCheck = risky.slice(0, BULK_GUARD_CHECK_CAP)
-    const checks = await Promise.all(toCheck.map(async id => ({ id, blockers: await fetchLiveBlockers(id) })))
+    // HERAUDIT-2-REST-FE: the full live-blockers fetch must judge terminal stages
+    // against the SAME tenant funnelTypes as the row-level pre-filter above — it
+    // used to fall back to the DEFAULT_FUNNEL_TYPES seed here, so a tenant-renamed
+    // terminal stage could still show up as a false-positive blocker.
+    const checks = await Promise.all(toCheck.map(async id => ({ id, blockers: await fetchLiveBlockers(id, funnelTypes) })))
     const blocked = checks.filter(c => c.blockers.applications.length || c.blockers.matches.length)
     if (blocked.length) {
       const name = (id: Id) => byId.get(id)?.name
