@@ -4,6 +4,7 @@
     "location": "Sede"
   },
   "addShift": "Aggiungi turno",
+  "addShiftForbidden": "Non hai i permessi per creare un nuovo turno.",
   "loadErrorShifts": "Impossibile caricare i turni.",
   "previewSaveTitle": "Non ancora collegato. Questo turno non verrà salvato.",
   "sectionOrder": "Ordine",

@@ -8,6 +8,8 @@ import { useState, useMemo, useEffect, useRef } from 'react'
 import { bureauNow } from '@/lib/bureauTime'
 import { useTranslation } from 'react-i18next'
 import { useRightPanel } from '@/context/RightPanelContext'
+import { useAuth } from '@/context/AuthContext'
+import { notifyError } from '@/lib/notify'
 import { ChevronLeft, ChevronRight, Plus, AlertCircle } from 'lucide-react'
 import { monthName, formatDate, getViewRange } from './helpers'
 import { usePlanningBoard } from './hooks/usePlanningBoard'
@@ -74,6 +76,10 @@ export default function PlanningPage({ intent }: { intent?: PlanningIntent | nul
   const { t } = useTranslation('planning')
   // App-wide active locale (DATUM-1/LANE-B) — feeds the month-name header label.
   const { formatTime, locale } = useDateFormat()
+  // RIGHTS-GATE-OPENERS-1: mirrors planning.create permission (backend:
+  // pools.php:147 POST /planning/shifts).
+  const auth = useAuth()
+  const canCreateShift = auth?.hasPermission?.('planning.create') ?? false
   const [view,       setView]       = useState('month')
   // Lazy init from a `{ date }` intent so a tile click fetches the intent's
   // window directly, instead of today's window first and the intent's second.
@@ -214,8 +220,12 @@ export default function PlanningPage({ intent }: { intent?: PlanningIntent | nul
           onChange={v => setView(v as typeof view)}
           options={VIEW_IDS.map(v => ({ value: v, label: t(`views.${v}`) }))} />
 
-        {/* Add button */}
-        <Button variant="primary" size="sm" onClick={() => setModal(new Date())}>
+        {/* Add button — an unauthorized click gets an honest toast instead of a
+            silent no-op; the button itself always renders (§3, RIGHTS-GATE-OPENERS-1). */}
+        <Button variant="primary" size="sm" onClick={() => {
+          if (!canCreateShift) { notifyError(t('addShiftForbidden')); return }
+          setModal(new Date())
+        }}>
           <Plus size={14} /> {t('addShift')}
         </Button>
       </div>

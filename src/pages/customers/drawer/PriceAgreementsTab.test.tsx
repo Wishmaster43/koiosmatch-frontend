@@ -29,6 +29,11 @@ declare const process: { env: Record<string, string | undefined> }
 // useLocations is react-query-backed (the Facturatie block's Vestiging picker uses it),
 // so it is mocked here rather than wrapping this test in a QueryClientProvider.
 vi.mock('@/lib/useLocations', () => ({ useLocations: () => [{ value: 'loc-1', label: 'Vestiging Noord' }] }))
+// RIGHTS-GATE-OPENERS-1: wrapped in vi.fn() so the create-permission test below
+// can override hasPermission — defaults to true (every other test in this file
+// assumes the happy path, unrelated to the add gate).
+vi.mock('@/context/AuthContext', () => ({ useAuth: vi.fn(() => ({ hasPermission: () => true })) }))
+import { useAuth } from '@/context/AuthContext'
 // toLocalIsoDate is re-implemented here (NOT vi.importActual — that would load the
 // real '@/lib/datetime', which itself imports '@/i18n' as a side effect, exactly
 // what the comment above is avoiding) so `todayIso` still computes for real.
@@ -362,5 +367,23 @@ describe('PriceAgreementsTab · K11a no duplicate "Prijsafspraken" heading', () 
     expect(tab).toHaveTextContent('1')
     // No second, standalone occurrence of the same label outside the tab strip.
     expect(screen.getAllByText('drawer.tabs.priceAgreements')).toHaveLength(1)
+  })
+})
+
+// RIGHTS-GATE-OPENERS-1: the "+ Prijsafspraak toevoegen" opener hides without
+// customers.update — never a dead button (§3).
+describe('PriceAgreementsTab · add gate (RIGHTS-GATE-OPENERS-1)', () => {
+  it('hides the opener without customers.update', () => {
+    vi.mocked(usePriceAgreements).mockReturnValue(baseHook)
+    vi.mocked(useAuth).mockReturnValue({ hasPermission: () => false } as unknown as ReturnType<typeof useAuth>)
+    render(<PriceAgreementsTab customerId="cust-1" />)
+    expect(screen.queryByRole('button', { name: 'priceAgreements.add' })).toBeNull()
+  })
+
+  it('shows the opener with customers.update', () => {
+    vi.mocked(usePriceAgreements).mockReturnValue(baseHook)
+    vi.mocked(useAuth).mockReturnValue({ hasPermission: () => true } as unknown as ReturnType<typeof useAuth>)
+    render(<PriceAgreementsTab customerId="cust-1" />)
+    expect(screen.getByRole('button', { name: 'priceAgreements.add' })).toBeInTheDocument()
   })
 })

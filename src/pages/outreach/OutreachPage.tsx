@@ -55,6 +55,15 @@ export default function OutreachPage({ intent }: { intent?: unknown } = {}) {
   const canRestore = hasPermission?.('outreach.update') ?? false
   // Mark-for-erasure stays delete-class (tenant-admin-seeded) — HIDDEN without it (§7).
   const canMarkDeletion = hasPermission?.('outreach.delete') ?? false
+  // RIGHTS-GATE-OPENERS-1: mirrors outreach.create permission (backend:
+  // tasks-outreach.php:118 POST /outreach-campaigns).
+  const canCreateOutreach = hasPermission?.('outreach.create') ?? false
+  // An unauthorized click gets an honest toast instead of a silent no-op — the
+  // toolbar's create button itself always renders (§3).
+  const handleCreateOpen = () => {
+    if (!canCreateOutreach) { notifyError(t('page.createForbidden')); return }
+    setCreating(true)
+  }
   const { campaigns, loading, error, reload, add, patch, drop } = useOutreachCampaigns()
   // Marks the campaigns list stale while the drawer session mutates targets.
   const drawerDirtyRef = useRef(false)
@@ -112,7 +121,7 @@ export default function OutreachPage({ intent }: { intent?: unknown } = {}) {
     channelOptions: channelData.map(d => ({ value: d.key, label: d.name, count: d.value })),
     ownerOptions, targetGroupOptions,
   }), [t, selectedStatus, selectedChannel, selectedOwner, selectedTargetGroup, showArchived, statusData, channelData, ownerOptions, targetGroupOptions,
-    setSelectedStatus, setSelectedChannel, setSelectedOwner, setSelectedTargetGroup])
+    setSelectedStatus, setSelectedChannel, setSelectedOwner, setSelectedTargetGroup, setShowArchived])
 
   // Publish the current filter groups into the shared right panel; unregister on
   // unmount/change so a stale group set never lingers there.
@@ -205,7 +214,7 @@ export default function OutreachPage({ intent }: { intent?: unknown } = {}) {
 
           {/* Toolbar — create on the LEFT, archived toggle + view toggle on the RIGHT (mirror Opportunities) */}
           <OutreachToolbar
-            onCreate={() => setCreating(true)}
+            onCreate={handleCreateOpen}
             searchEpoch={filters.searchEpoch}
             onSearch={filters.setQuery}
             anyFilterActive={filters.anyFilterActive}

@@ -12,7 +12,8 @@
     "empty": "No customers found.",
     "loading": "Loading…",
     "loadError": "Failed to load customers.",
-    "archivedView": "Archived"
+    "archivedView": "Archived",
+    "createForbidden": "You don't have permission to create a new customer."
   },
   "cols": {
     "name": "Name",

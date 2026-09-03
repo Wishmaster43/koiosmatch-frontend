@@ -12,7 +12,8 @@
     "empty": "Geen klanten gevonden.",
     "loading": "Laden…",
     "loadError": "Klanten laden is mislukt.",
-    "archivedView": "Gearchiveerd"
+    "archivedView": "Gearchiveerd",
+    "createForbidden": "Je hebt geen rechten om een nieuwe klant aan te maken."
   },
   "cols": {
     "name": "Naam",

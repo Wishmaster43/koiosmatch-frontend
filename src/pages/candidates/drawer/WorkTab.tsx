@@ -45,6 +45,8 @@ export default function WorkTab({ c, onRefresh, initialSubTab }: { c: Candidate;
   // applications.view guards GET /applications/{id} — the ONE request the row's
   // expand panel makes, so without it the chevron is not offered at all (§3).
   const canViewApplications = auth?.hasPermission?.('applications.view') ?? false
+  // RIGHTS-GATE-OPENERS-1: mirrors applications.create permission (backend: applications-matches.php:34 POST /applications).
+  const canCreateApplication = auth?.hasPermission?.('applications.create') ?? false
   // Local copy of the applications so a create shows immediately (re-fetched from
   // the candidate detail after a POST — the BE may add a vacancy-less intake row).
   const [apps, setApps] = useState<AppRow[]>((c.applications ?? []) as unknown as AppRow[])
@@ -209,10 +211,12 @@ export default function WorkTab({ c, onRefresh, initialSubTab }: { c: Candidate;
               style={{ flex: 1, border: 'none', background: 'transparent', outline: 'none', fontSize: 12, color: 'var(--text)' }} />
           </div>
           <StatusFilterSelect value={stageFilter} onToggle={toggleStage} statuses={stageOptions} />
-          <div style={{ display: 'flex', gap: 6 }}>
-            <DrawerAddButton onClick={() => setModal('apply')} label={t('work.addApplication')} />
-            <DrawerAddButton onClick={() => setModal('intake')} icon={CalendarPlus} label={t('work.planIntake')} />
-          </div>
+          {canCreateApplication && (
+            <div style={{ display: 'flex', gap: 6 }}>
+              <DrawerAddButton onClick={() => setModal('apply')} label={t('work.addApplication')} />
+              <DrawerAddButton onClick={() => setModal('intake')} icon={CalendarPlus} label={t('work.planIntake')} />
+            </div>
+          )}
         </div>
         <div style={sectionBlock}>
         <div style={{ border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden' }}>

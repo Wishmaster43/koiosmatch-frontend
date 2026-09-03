@@ -8,7 +8,8 @@
     "add": "Neue Chance",
     "selected": "{{count}} ausgewählt",
     "clearSelection": "Auswahl aufheben",
-    "searchPlaceholder": "Chance, Beschreibung, Notiz suchen…"
+    "searchPlaceholder": "Chance, Beschreibung, Notiz suchen…",
+    "createForbidden": "Sie sind nicht berechtigt, eine neue Chance anzulegen."
   },
   "cols": {
     "title": "Chance",

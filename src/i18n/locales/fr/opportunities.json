@@ -8,7 +8,8 @@
     "add": "Nouvelle opportunité",
     "selected": "{{count}} sélectionné(e)s",
     "clearSelection": "Effacer la sélection",
-    "searchPlaceholder": "Rechercher une opportunité, une description, une note…"
+    "searchPlaceholder": "Rechercher une opportunité, une description, une note…",
+    "createForbidden": "Vous n'êtes pas autorisé à créer une nouvelle opportunité."
   },
   "cols": {
     "title": "Opportunité",

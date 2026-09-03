@@ -59,14 +59,14 @@ vi.mock('./MatchModal', () => ({
 
 const candidate = (applications: unknown[], matches: unknown[] = []): Candidate => ({ id: 9, matches, applications } as unknown as Candidate)
 
-// Default: a recruiter WITH applications.update (pencil + unlink visible). The
+// Default: a recruiter WITH applications.create + applications.update (add + pencil + unlink visible). The
 // permission test below overrides it.
 beforeEach(() => {
   vi.mocked(api.delete).mockClear()
   vi.mocked(api.get).mockClear()
   openEntity.mockClear()
   vi.mocked(notifyError).mockClear()
-  vi.mocked(useAuth).mockReturnValue({ hasPermission: (p: string) => p === 'applications.update' } as unknown as ReturnType<typeof useAuth>)
+  vi.mocked(useAuth).mockReturnValue({ hasPermission: (p: string) => ['applications.create', 'applications.update'].includes(p) } as unknown as ReturnType<typeof useAuth>)
 })
 
 describe('WorkTab', () => {
@@ -239,6 +239,20 @@ describe('WorkTab · sub-tabs (kandidaten-ronde-2, punt C)', () => {
     render(<WorkTab c={candidate([])} />)
     const tabs = screen.getAllByRole('tab').map(el => el.textContent)
     expect(tabs).toEqual(['sections.applications', 'sections.placements', 'sections.pools'])
+  })
+
+  // RIGHTS-GATE-OPENERS-1: applications.create gates the "+ Solliciteren" and
+  // "Intake plannen" openers — hidden without it, never a dead button (§3).
+  it('hides both application openers without applications.create, shows them with it', () => {
+    vi.mocked(useAuth).mockReturnValue({ hasPermission: () => false } as unknown as ReturnType<typeof useAuth>)
+    const { rerender } = render(<WorkTab c={candidate([])} />)
+    expect(screen.queryByRole('button', { name: 'work.addApplication' })).toBeNull()
+    expect(screen.queryByRole('button', { name: 'work.planIntake' })).toBeNull()
+
+    vi.mocked(useAuth).mockReturnValue({ hasPermission: (p: string) => p === 'applications.create' } as unknown as ReturnType<typeof useAuth>)
+    rerender(<WorkTab c={candidate([])} />)
+    expect(screen.getByRole('button', { name: 'work.addApplication' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'work.planIntake' })).toBeInTheDocument()
   })
 })
 

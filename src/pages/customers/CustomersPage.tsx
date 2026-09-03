@@ -172,6 +172,13 @@ export default function CustomersPage({ intent }: { intent?: CustomerIntent } = 
   const notify = (type: string, text: string) => { setActionMsg({ type, text }); if (msgTimer.current) clearTimeout(msgTimer.current); msgTimer.current = setTimeout(() => setActionMsg(null), 4000) }
   useEffect(() => () => { if (msgTimer.current) clearTimeout(msgTimer.current) }, [])
 
+  // RIGHTS-GATE-OPENERS-1: mirrors customers.create permission (backend: customers.php:96 POST /customers).
+  const canCreateCustomer = hasPermission('customers.create')
+  const handleAddOpen = () => {
+    if (!canCreateCustomer) { notify('error', t('page.createForbidden')); return }
+    setAddOpen(true)
+  }
+
   // ── Data layer (§3): list/stats · record/drawer · bulk actions ──
   const { customers, setCustomers, loading, error, total, setTotal, lastPage, stats, refresh, rowsEpoch, fetching } =
     useCustomersData({ filterParams, page, pageSize, t })
@@ -288,7 +295,7 @@ export default function CustomersPage({ intent }: { intent?: CustomerIntent } = 
               onGeocode: bulkGeocode, onCoupleBackoffice: bulkCoupleBackoffice, selectedTags,
             }}
             canArchive={hasPermission('customers.delete')} canGeocode={hasPermission('customers.update')}
-            users={users} statuses={statuses} onAdd={() => setAddOpen(true)}
+            users={users} statuses={statuses} onAdd={handleAddOpen}
             searchEpoch={searchEpoch} globalSearch={globalSearch} onSearch={setGlobalSearch}
             anyFilterActive={anyFilterActive} onClearAllFilters={clearAllFilters}
             showArchived={showArchived} setShowArchived={setShowArchived}

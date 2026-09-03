@@ -4,6 +4,7 @@
     "location": "Location"
   },
   "addShift": "Add shift",
+  "addShiftForbidden": "You don't have permission to create a new shift.",
   "loadErrorShifts": "Could not load shifts.",
   "previewSaveTitle": "Not connected yet. This shift will not be saved.",
   "sectionOrder": "Order",

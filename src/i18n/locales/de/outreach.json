@@ -73,7 +73,8 @@
     "error": "Erstellung fehlgeschlagen. Bitte erneut versuchen."
   },
   "page": {
-    "searchPlaceholder": "Anrufliste, Pool oder Kandidat suchen…"
+    "searchPlaceholder": "Anrufliste, Pool oder Kandidat suchen…",
+    "createForbidden": "Sie sind nicht berechtigt, eine neue Anrufliste anzulegen."
   },
   "drawer": {
     "label": "Anrufliste",

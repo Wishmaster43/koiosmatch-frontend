@@ -12,7 +12,8 @@
     "empty": "Keine Kunden gefunden.",
     "loading": "Lädt…",
     "loadError": "Kunden konnten nicht geladen werden.",
-    "archivedView": "Archiviert"
+    "archivedView": "Archiviert",
+    "createForbidden": "Sie sind nicht berechtigt, einen neuen Kunden anzulegen."
   },
   "cols": {
     "name": "Name",

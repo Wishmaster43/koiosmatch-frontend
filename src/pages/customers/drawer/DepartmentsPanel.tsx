@@ -31,6 +31,7 @@
 import { useState, type ComponentType } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Search, Building, Archive } from 'lucide-react'
+import { useAuth } from '@/context/AuthContext'
 import DataTable from '@/components/ui/DataTable'
 import type { Column } from '@/components/ui/DataTable'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
@@ -113,6 +114,8 @@ export default function DepartmentsPanel({
   onAdd, onUpdate, onRemove, onAddContact, onUpdateContact, onRemoveContact,
 }: Props) {
   const { t } = useTranslation('customers')
+  // RIGHTS-GATE-OPENERS-1: mirrors customers.update permission (backend: customers.php:228 POST /customers/{id}/departments).
+  const canAddDepartment = (useAuth() as unknown as { hasPermission?: (p: string) => boolean })?.hasPermission?.('customers.update') ?? false
   const [search, setSearch] = useState('')
   const [adding, setAdding] = useState(false)
   // ARCHIVE-SUBENTITY-1: "Gearchiveerd" quick-view — REPLACES the live rows with the
@@ -222,7 +225,7 @@ export default function DepartmentsPanel({
         <QuickViewToggle iconOnly active={showArchived} onToggle={() => setShowArchived(v => !v)}
           label={t('departments.archivedView')} color="var(--color-archive)" icon={Archive} />
         {/* DRAWER-ADD-SHORT-1 (Danny 05-08): short in this drawer sub-tab's toolbar. */}
-        <DrawerAddButton onClick={() => setAdding(true)} label={t('departments.add')} short />
+        {canAddDepartment && <DrawerAddButton onClick={() => setAdding(true)} label={t('departments.add')} short />}
       </div>
 
       {/* Horizontal scroll owned here, same as ContactsPanel — neither DataTable nor the

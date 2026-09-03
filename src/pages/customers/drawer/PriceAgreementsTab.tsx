@@ -15,6 +15,7 @@
 import { useState, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { AlertTriangle, Search } from 'lucide-react'
+import { useAuth } from '@/context/AuthContext'
 import CopyIconButton from '@/components/ui/CopyIconButton'
 // House "+ action" trigger (Danny 27-07: "+ Prijsafspraak toevoegen moet ook
 // knopje zijn!!! zoals in kandidaat drill down" — + Add price agreement must also
@@ -55,6 +56,8 @@ const searchInput = { flex: 1, border: 'none', background: 'transparent', outlin
 // Facturatie sub-tab (billing settings + the customer's own invoice address).
 export default function PriceAgreementsTab({ customerId, c, onSave }: { customerId?: Id; c?: Customer; onSave?: (values: Record<string, unknown>) => void }) {
   const { t, i18n } = useTranslation('customers')
+  // RIGHTS-GATE-OPENERS-1: mirrors customers.update permission (backend: customers.php:228 POST /customers/{id}/price-agreements).
+  const canAddPriceAgreement = (useAuth() as unknown as { hasPermission?: (p: string) => boolean })?.hasPermission?.('customers.update') ?? false
   const { agreements, loading, error, reload, add, update, remove } = usePriceAgreements(customerId)
   // Same establishment list the match form uses, so both offer exactly one source.
   const branchOptions = useLocations().map(l => ({ value: String(l.value), label: l.label }))
@@ -218,7 +221,7 @@ export default function PriceAgreementsTab({ customerId, c, onSave }: { customer
             style={searchInput} />
         </div>
         <StatusFilterSelect value={statusFilter} onToggle={toggleStatus} statuses={derivedStatuses} />
-        {!adding && (
+        {canAddPriceAgreement && !adding && (
           // DRAWER-ADD-SHORT-1 (Danny 05-08): short in this drawer sub-tab's toolbar.
           <DrawerAddButton onClick={() => { setDraft(emptyDraft()); setAdding(true) }} label={t('priceAgreements.add')} short />
         )}

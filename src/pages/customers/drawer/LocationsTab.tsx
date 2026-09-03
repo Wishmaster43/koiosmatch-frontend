@@ -13,6 +13,7 @@
 import { useState, type ComponentType } from 'react'
 import { useTranslation } from 'react-i18next'
 import { MapPin, Search, Archive } from 'lucide-react'
+import { useAuth } from '@/context/AuthContext'
 import DataTable from '@/components/ui/DataTable'
 import type { Column } from '@/components/ui/DataTable'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
@@ -87,6 +88,8 @@ export default function LocationsTab({
   onRemoveContact,
 }: Props) {
   const { t } = useTranslation('customers')
+  // RIGHTS-GATE-OPENERS-1: mirrors customers.update permission (backend: customers.php:228 POST /customers/{id}/locations).
+  const canAddLocation = (useAuth() as unknown as { hasPermission?: (p: string) => boolean })?.hasPermission?.('customers.update') ?? false
   const [adding, setAdding] = useState(false)
   const [search, setSearch] = useState('')
   // The host owns which location is open (DRILL-PAGER-1, mirrors ContactsTab) — the
@@ -190,7 +193,7 @@ export default function LocationsTab({
           <QuickViewToggle iconOnly active={showArchived} onToggle={() => setShowArchived(v => !v)}
             label={t('locations.archivedView')} color="var(--color-archive)" icon={Archive} />
           {/* DRAWER-ADD-SHORT-1 (Danny 05-08): short in this drawer sub-tab's toolbar. */}
-          <DrawerAddButton onClick={() => setAdding(true)} label={t('locations.add')} short />
+          {canAddLocation && <DrawerAddButton onClick={() => setAdding(true)} label={t('locations.add')} short />}
         </div>
         <DataTable columns={columns} rows={visible} onRowClick={l => setOpenId(l.id as Id)} emptyText={t('locations.empty')} />
       </div>

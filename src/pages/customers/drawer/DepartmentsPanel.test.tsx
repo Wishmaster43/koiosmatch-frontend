@@ -49,6 +49,11 @@ vi.mock('@/lib/api', () => ({
 vi.mock('@/lib/useCustomFields', () => ({ useCustomFields: () => ({ fields: [] }) }))
 vi.mock('@/lib/useContactFunctions', () => ({ useContactFunctions: () => ({ contactFunctions: [], allowFreeEntry: false }) }))
 vi.mock('@/lib/notify', () => ({ notifyError: vi.fn(), notifySuccess: vi.fn() }))
+// RIGHTS-GATE-OPENERS-1: wrapped in vi.fn() so the create-permission test below
+// can override hasPermission — defaults to true (every other test in this file
+// assumes the happy path, unrelated to the add gate).
+vi.mock('@/context/AuthContext', () => ({ useAuth: vi.fn(() => ({ hasPermission: () => true })) }))
+import { useAuth } from '@/context/AuthContext'
 
 const ct = (key: string, opts?: Record<string, unknown>) => i18n.t(key, { ns: 'customers', ...opts })
 const cm = (key: string, opts?: Record<string, unknown>) => i18n.t(key, { ns: 'common', ...opts })
@@ -315,5 +320,21 @@ describe('DepartmentsPanel · Gearchiveerd quick-view (ARCHIVE-SUBENTITY-1)', ()
     await user.click(screen.getByRole('button', { name: ct('departments.archivedView') }))
 
     await waitFor(() => expect(api.get).toHaveBeenCalledWith('/customers/cust-1/departments', expect.objectContaining({ params: { include_archived: 1 } })))
+  })
+})
+
+// RIGHTS-GATE-OPENERS-1: the "+ afdeling" opener hides without customers.update
+// — never a dead button (§3).
+describe('DepartmentsPanel · add gate (RIGHTS-GATE-OPENERS-1)', () => {
+  it('hides the opener without customers.update', () => {
+    vi.mocked(useAuth).mockReturnValue({ hasPermission: () => false } as unknown as ReturnType<typeof useAuth>)
+    render(<Host {...base} scope="customer" customerId="cust-1" departments={[department()]} />)
+    expect(screen.queryByRole('button', { name: ct('departments.add') })).toBeNull()
+  })
+
+  it('shows the opener with customers.update', () => {
+    vi.mocked(useAuth).mockReturnValue({ hasPermission: () => true } as unknown as ReturnType<typeof useAuth>)
+    render(<Host {...base} scope="customer" customerId="cust-1" departments={[department()]} />)
+    expect(screen.getByRole('button', { name: ct('departments.add') })).toBeInTheDocument()
   })
 })

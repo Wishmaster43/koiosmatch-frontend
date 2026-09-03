@@ -63,6 +63,8 @@ function TasksPageInner({ intent }: { intent?: unknown }) {
   const canArchive = (auth as unknown as { hasPermission?: (p: string) => boolean })?.hasPermission?.('tasks.update') ?? false
   // TRASH-OVERAL-2: mark-for-erasure is delete-class — its own permission (§7).
   const canMarkDeletion = (auth as unknown as { hasPermission?: (p: string) => boolean })?.hasPermission?.('tasks.delete') ?? false
+  // RIGHTS-GATE-OPENERS-1: mirrors tasks.create permission (backend: tasks-outreach.php:67 POST /tasks).
+  const canCreateTask = (auth as unknown as { hasPermission?: (p: string) => boolean })?.hasPermission?.('tasks.create') ?? false
   const { data: users = [] } = useUsers() as { data?: UserLike[] }
   const { t } = useTranslation(['tasks', 'common'])
   // Scroll container for row virtualization (F-11): DataTable virtualizes against it.
@@ -213,9 +215,11 @@ function TasksPageInner({ intent }: { intent?: unknown }) {
         <div style={{ display: 'flex', alignItems: 'center', gap: 10,
           padding: '0 24px 12px', minHeight: 36, flexShrink: 0 }}>
           {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
-          <Button variant="primary" size="md" onClick={() => setAddOpen(true)}>
-            <Plus size={15} /> {t('add')}
-          </Button>
+          {canCreateTask && (
+            <Button variant="primary" size="md" onClick={() => setAddOpen(true)}>
+              <Plus size={15} /> {t('add')}
+            </Button>
+          )}
           <HeaderSearch key={searchEpoch} onSearch={setQuery} placeholder={t('page.searchPlaceholder')} width={280} />
             <ClearFiltersButton active={anyFilterActive} onClear={clearAllFilters} />
           <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 8 }}>

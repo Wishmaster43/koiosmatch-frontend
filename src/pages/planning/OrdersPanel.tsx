@@ -13,6 +13,7 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Plus, ClipboardList, Pencil, Trash2 } from 'lucide-react'
+import { useAuth } from '@/context/AuthContext'
 import { usePlanningOrdersList, useDeletePlanningOrder } from './hooks/usePlanningOrders'
 import type { PlanningOrderRow } from './hooks/usePlanningOrders'
 import AddOrderModal from './AddOrderModal'
@@ -22,6 +23,10 @@ import Button from '@/components/ui/Button'
 // Planning orders list + create/edit/delete, entirely real data (see the module doc comment above).
 export default function OrdersPanel() {
   const { t } = useTranslation('planning')
+  // RIGHTS-GATE-OPENERS-1: mirrors planning.create permission (backend:
+  // pools.php:127 POST /planning/orders) — hidden without it, never a dead button (§3).
+  const auth = useAuth()
+  const canCreate = auth?.hasPermission?.('planning.create') ?? false
   const { orders, loading, error } = usePlanningOrdersList()
   const [addOpen, setAddOpen] = useState(false)
   const [editing, setEditing] = useState<PlanningOrderRow | null>(null)
@@ -46,9 +51,11 @@ export default function OrdersPanel() {
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
       <div style={{ display: 'flex', alignItems: 'center', padding: '14px 20px', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
         <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)', flex: 1 }}>{t('order.listTitle')}</span>
-        <Button variant="primary" size="sm" onClick={() => setAddOpen(true)}>
-          <Plus size={14} /> {t('order.addOrder')}
-        </Button>
+        {canCreate && (
+          <Button variant="primary" size="sm" onClick={() => setAddOpen(true)}>
+            <Plus size={14} /> {t('order.addOrder')}
+          </Button>
+        )}
       </div>
 
       <div style={{ flex: 1, overflowY: 'auto', padding: 16 }}>

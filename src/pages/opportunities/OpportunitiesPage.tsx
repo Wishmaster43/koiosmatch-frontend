@@ -7,6 +7,7 @@ import { useState, useEffect, useMemo, useRef } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
 import { LayoutList, Kanban, Archive, Trash2 } from 'lucide-react'
+import { notifyError } from '@/lib/notify'
 import { useAuth } from '@/context/AuthContext'
 import { useRightPanel } from '@/context/RightPanelContext'
 import { usePublishSelection } from '@/context/SelectionContext'
@@ -57,6 +58,10 @@ export default function OpportunitiesPage({ intent }: { intent?: unknown } = {})
   const auth = useAuth()
   // Archive/restore is authorization-gated in the UI; the backend re-checks (§7).
   const hasPermission = auth?.hasPermission ?? (() => false)
+  // RIGHTS-GATE-OPENERS-1: mirrors opportunities.update permission (backend:
+  // opportunities.php:57-58 POST /opportunities — there is no opportunities.create,
+  // the create route sits in the opportunities.update group, same reasoning as matches).
+  const canCreateOpportunity = hasPermission('opportunities.update')
   const { registerFilters, unregisterFilters } = useRightPanel()
   // Tenant setting: show the deal magnitude in hours instead of euro (Settings → Kansen, "Opportunities").
   const valueInHours = getBoolSetting(useAllSettings(), 'opportunity_value_in_hours', false)
@@ -274,7 +279,12 @@ export default function OpportunitiesPage({ intent }: { intent?: unknown } = {})
           <div style={{ display: 'flex', alignItems: 'center', gap: 10,
             padding: '0 24px 12px', minHeight: 36, flexShrink: 0 }}>
             {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
-            <Button variant="primary" size="md" onClick={() => setAddOpen(true)}>
+            {/* RIGHTS-GATE-OPENERS-1: an unauthorized click gets an honest toast instead
+                of a silent no-op — the button itself always renders (§3). */}
+            <Button variant="primary" size="md" onClick={() => {
+              if (!canCreateOpportunity) { notifyError(t('page.createForbidden')); return }
+              setAddOpen(true)
+            }}>
               + {t('page.add')}
             </Button>
             <HeaderSearch key={searchEpoch} onSearch={setQuery} placeholder={t('page.searchPlaceholder')} width={280} />

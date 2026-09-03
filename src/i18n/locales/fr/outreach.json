@@ -73,7 +73,8 @@
     "error": "Échec de la création. Veuillez réessayer."
   },
   "page": {
-    "searchPlaceholder": "Rechercher une liste d'appel, un pool ou un candidat…"
+    "searchPlaceholder": "Rechercher une liste d'appel, un pool ou un candidat…",
+    "createForbidden": "Vous n'êtes pas autorisé à créer une nouvelle liste d'appels."
   },
   "drawer": {
     "label": "Liste d'appel",

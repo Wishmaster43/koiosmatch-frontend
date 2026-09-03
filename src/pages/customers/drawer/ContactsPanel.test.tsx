@@ -46,6 +46,11 @@ vi.mock('@/lib/api', () => ({
 vi.mock('@/lib/useCustomFields', () => ({ useCustomFields: () => ({ fields: [] }) }))
 vi.mock('@/lib/useContactFunctions', () => ({ useContactFunctions: () => ({ contactFunctions: [], allowFreeEntry: false }) }))
 vi.mock('@/lib/notify', () => ({ notifyError: vi.fn(), notifySuccess: vi.fn() }))
+// RIGHTS-GATE-OPENERS-1: wrapped in vi.fn() so the create-permission test below
+// can override hasPermission — defaults to true (every other test in this file
+// assumes the happy path, unrelated to the couple/add gate).
+vi.mock('@/context/AuthContext', () => ({ useAuth: vi.fn(() => ({ hasPermission: () => true })) }))
+import { useAuth } from '@/context/AuthContext'
 
 const ct = (key: string, opts?: Record<string, unknown>) => i18n.t(key, { ns: 'customers', ...opts })
 const cm = (key: string, opts?: Record<string, unknown>) => i18n.t(key, { ns: 'common', ...opts })
@@ -545,5 +550,23 @@ describe('ContactsPanel · Gearchiveerd quick-view (ARCHIVE-SUBENTITY-1)', () =>
     await user.click(screen.getByRole('button', { name: ct('contacts.archivedView') }))
 
     await waitFor(() => expect(api.get).toHaveBeenCalledWith('/customers/cust-1/contacts', expect.objectContaining({ params: { include_archived: 1 } })))
+  })
+})
+
+// RIGHTS-GATE-OPENERS-1: the "couple" (icon-only) and "+ contactpersoon" openers
+// both hide without customers.update — never a dead button (§3).
+describe('ContactsPanel · couple/add gate (RIGHTS-GATE-OPENERS-1)', () => {
+  it('hides both openers without customers.update', () => {
+    vi.mocked(useAuth).mockReturnValue({ hasPermission: () => false } as unknown as ReturnType<typeof useAuth>)
+    render(<ContactsPanel {...base} openId={null} onOpenChange={vi.fn()} scope="location" scopeId="loc-1" scopeName="Vestiging Noord" contacts={[contact()]} />)
+    expect(screen.queryByRole('button', { name: ct('locations.detail.coupleAction') })).toBeNull()
+    expect(screen.queryByRole('button', { name: ct('contacts.add') })).toBeNull()
+  })
+
+  it('shows both openers with customers.update', () => {
+    vi.mocked(useAuth).mockReturnValue({ hasPermission: () => true } as unknown as ReturnType<typeof useAuth>)
+    render(<ContactsPanel {...base} openId={null} onOpenChange={vi.fn()} scope="location" scopeId="loc-1" scopeName="Vestiging Noord" contacts={[contact()]} />)
+    expect(screen.getByRole('button', { name: ct('locations.detail.coupleAction') })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: ct('contacts.add') })).toBeInTheDocument()
   })
 })

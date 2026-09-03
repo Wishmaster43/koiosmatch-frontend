@@ -24,6 +24,7 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Search, Link2, Archive } from 'lucide-react'
+import { useAuth } from '@/context/AuthContext'
 import DataTable from '@/components/ui/DataTable'
 import DrawerAddButton from '@/components/drawer/DrawerAddButton'
 import QuickViewToggle from '@/components/ui/QuickViewToggle'
@@ -96,6 +97,8 @@ export default function ContactsPanel({
   canLinkBackoffice = false, openId, onOpenChange, trail = [], onAdd, onUpdate, onRemove,
 }: Props) {
   const { t } = useTranslation('customers')
+  // RIGHTS-GATE-OPENERS-1: mirrors customers.update permission (backend: customers.php:228 POST/PATCH /customers/{id}/contacts).
+  const canAddContact = (useAuth() as unknown as { hasPermission?: (p: string) => boolean })?.hasPermission?.('customers.update') ?? false
   // ARCHIVE-SUBENTITY-1: the fetch needs a real customerId; fall back to a live row's
   // own `customerId` when the host has not threaded the prop explicitly yet.
   const effectiveCustomerId = customerId ?? contacts.find(c => c.customerId != null)?.customerId ?? undefined
@@ -209,13 +212,13 @@ export default function ContactsPanel({
             Icon-only (Danny 03-08): with search + filter + two buttons the scoped row
             overflowed and clipped the primary add button — the SECONDARY action gives up
             its text (kept as title/aria-label), the primary "+ contactpersoon" never does. */}
-        {scope !== 'customer' && (
+        {canAddContact && scope !== 'customer' && (
           <DrawerAddButton onClick={() => setModal('couple')} icon={Link2} iconOnly
             label={t(scope === 'location' ? 'locations.detail.coupleAction' : 'departments.detail.coupleAction')} />
         )}
         {/* DRAWER-ADD-SHORT-1 (Danny 05-08): short in this drawer sub-tab's toolbar —
             the couple button above stays icon-only/full (a link action, not "new"). */}
-        <DrawerAddButton onClick={() => setModal('add')} label={t('contacts.add')} short />
+        {canAddContact && <DrawerAddButton onClick={() => setModal('add')} label={t('contacts.add')} short />}
       </div>
 
       {/* Horizontal scroll owned here: neither DataTable nor the drawer shell wraps the

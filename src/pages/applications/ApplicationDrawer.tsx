@@ -7,6 +7,7 @@ import { useState, useEffect } from 'react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Unlink, ArchiveRestore, Edit2, Save, Send, X, XCircle } from 'lucide-react'
+import { useAuth } from '@/context/AuthContext'
 import { useLookups } from '@/context/LookupsContext'
 import { useDateFormat } from '@/lib/datetime'
 import { useCustomFields } from '@/lib/useCustomFields'
@@ -88,6 +89,8 @@ interface ApplicationDrawerProps {
 export default function ApplicationDrawer({ application: a, onClose, expanded, onToggleExpand, onReject, onAdjustScore, onPhaseChange, onOwnerChange, onLinkVacancy, onUpdateSource, users, onDetach, onRestore, canManage, onUpdateCustomFields, initialTab, onCandidateUpdated, detailPhase }: ApplicationDrawerProps) {
   const { t } = useTranslation('applications')
   const { formatDate, formatDateTime } = useDateFormat()
+  // RIGHTS-GATE-OPENERS-1: mirrors applications.update permission (backend: applications-matches.php:35 POST/DELETE /applications/{id}/*).
+  const canManageApplication = (useAuth() as unknown as { hasPermission?: (p: string) => boolean })?.hasPermission?.('applications.update') ?? false
   // S15: the reason-required detach confirm modal (footer "Ontkoppelen").
   const [detachModalOpen, setDetachModalOpen] = useState(false)
   // APP-REJECT-GUARD-1: the reject confirm modal — opened either from the
@@ -143,8 +146,8 @@ export default function ApplicationDrawer({ application: a, onClose, expanded, o
   ]
   // Gate for the "Voorstellen aan klant" header action (Danny 25-07): needs both
   // a candidate and a customer to propose to, and is pointless once archived or
-  // already rejected.
-  const canPropose = canManage && a.candidateId != null && a.customerId != null && !a.archived && a.bucket !== 'rejected'
+  // already rejected. RIGHTS-GATE-OPENERS-1: also requires applications.update permission.
+  const canPropose = canManageApplication && canManage && a.candidateId != null && a.customerId != null && !a.archived && a.bucket !== 'rejected'
 
   // Map a tab id to its content component. `setActiveTab` (from EntityDrawer's
   // own render callback, S2/S3) lets the Sollicitatie tab's status strip jump
@@ -203,7 +206,7 @@ export default function ApplicationDrawer({ application: a, onClose, expanded, o
               {/* Afwijzen (Danny 25-07): the reject FORM moved out of the tab into
                   this footer button + confirm modal — hidden once already rejected
                   or matched (a match can no longer be rejected). */}
-              {a.bucket !== 'rejected' && a.bucket !== 'matched' && (
+              {canManageApplication && a.bucket !== 'rejected' && a.bucket !== 'matched' && (
                 <Button variant="dangerSoft" onClick={() => setRejectModalOpen(true)}>
                   <XCircle size={12} /> {t('rejection.action')}
                 </Button>
@@ -214,10 +217,12 @@ export default function ApplicationDrawer({ application: a, onClose, expanded, o
               {/* Disabled renders the uniform house recipe (grey fill). Supersedes the
                   earlier bespoke unfilled ghost documented here as a §3 honest gate —
                   ONE disabled look app-wide outweighs the local nuance (batch B R5). */}
-              <Button variant="dangerSoft" onClick={() => a.vacancyId != null && setDetachModalOpen(true)} disabled={a.vacancyId == null}
-                title={a.vacancyId == null ? t('detach.nothingLinked') : undefined}>
-                <Unlink size={12} /> {t('detach.button')}
-              </Button>
+              {canManageApplication && (
+                <Button variant="dangerSoft" onClick={() => a.vacancyId != null && setDetachModalOpen(true)} disabled={a.vacancyId == null}
+                  title={a.vacancyId == null ? t('detach.nothingLinked') : undefined}>
+                  <Unlink size={12} /> {t('detach.button')}
+                </Button>
+              )}
               </>
             ) : null}
           </div>

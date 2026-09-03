@@ -76,8 +76,16 @@ vi.mock('@/lib/useLocations', () => ({
 }))
 // user.branch_ids empty ⇒ unrestricted (every location offered) — the widest,
 // least-surprising default for a test that doesn't care about that narrowing.
+// RIGHTS-GATE-OPENERS-1: wrapped in vi.fn() so the create-permission test below
+// can override hasPermission per render without touching the other tests' default.
 vi.mock('@/context/AuthContext', () => ({
-  useAuth: () => ({ user: { branch_ids: [] }, hasPermission: () => true }),
+  useAuth: vi.fn(() => ({ user: { branch_ids: [] }, hasPermission: () => true })),
+}))
+import { useAuth } from '@/context/AuthContext'
+// Minimal stand-in so the create-gate test can prove the modal opened without
+// mounting the real form (its own lookups/API calls are a different file's scope).
+vi.mock('./AddCustomerModal', () => ({
+  default: () => <div data-testid="add-customer-modal" />,
 }))
 // Capture the registered filter groups so the 'branch' group's onToggle can be
 // invoked directly — the real picker renders in DashboardLayout, not this page.
@@ -253,5 +261,41 @@ describe('CustomersPage · cross-entity intent forwards the drawer tab', () => {
     render(<CustomersPage intent={{ open: 'c-7', tab: 'vacancies' }} />)
     await waitFor(() => expect(selectCustomerSpy).toHaveBeenCalledWith({ id: 'c-7' }, 'vacancies'))
     await waitFor(() => expect(apiGet).toHaveBeenCalled())
+  })
+})
+
+// RIGHTS-GATE-OPENERS-1: the toolbar's "+ Nieuwe klant" button always renders
+// (§3 — never a dead affordance); an unauthorized click surfaces an honest
+// forbidden message instead of opening the modal, mirroring CandidatesPage's
+// canCreateCandidate gate.
+describe('CustomersPage · create gate (RIGHTS-GATE-OPENERS-1)', () => {
+  it('blocks the create modal and shows the forbidden message without customers.create', async () => {
+    useCustomersDataMock.mockReturnValue(baseResult)
+    // mockReturnValue (not -Once): the component re-renders several times
+    // before the click (filter registration, data effects) — a one-shot
+    // override would only cover the FIRST render and flip back to the
+    // factory default on the ones that matter.
+    vi.mocked(useAuth).mockReturnValue({ user: { branch_ids: [] }, hasPermission: () => false } as unknown as ReturnType<typeof useAuth>)
+    const user = userEvent.setup()
+    render(<CustomersPage />)
+    await waitFor(() => expect(apiGet).toHaveBeenCalled())
+
+    await user.click(screen.getByRole('button', { name: `+ ${cu('page.add')}` }))
+    expect(screen.getByText(cu('page.createForbidden'))).toBeInTheDocument()
+    expect(screen.queryByTestId('add-customer-modal')).toBeNull()
+  })
+
+  it('opens the create modal with customers.create', async () => {
+    useCustomersDataMock.mockReturnValue(baseResult)
+    // Explicit (not relying on the previous test's override having reset) —
+    // every test states its own auth state.
+    vi.mocked(useAuth).mockReturnValue({ user: { branch_ids: [] }, hasPermission: () => true } as unknown as ReturnType<typeof useAuth>)
+    const user = userEvent.setup()
+    render(<CustomersPage />)
+    await waitFor(() => expect(apiGet).toHaveBeenCalled())
+
+    await user.click(screen.getByRole('button', { name: `+ ${cu('page.add')}` }))
+    expect(screen.getByTestId('add-customer-modal')).toBeInTheDocument()
+    expect(screen.queryByText(cu('page.createForbidden'))).toBeNull()
   })
 })

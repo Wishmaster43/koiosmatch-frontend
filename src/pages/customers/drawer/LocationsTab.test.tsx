@@ -32,6 +32,7 @@ vi.mock('@/lib/useCustomFields', () => ({
 }))
 vi.mock('@/lib/useLocations', () => ({ useLocations: () => [] }))
 vi.mock('@/lib/notify', () => ({ notifyError: vi.fn(), notifySuccess: vi.fn() }))
+vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ hasPermission: () => true }) }))
 
 const location = (overrides: Partial<Location> = {}): Location => ({
   id: 'loc-1', helloflexLink: null, shiftmanagerLink: null, name: 'Hoofdlocatie',

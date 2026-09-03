@@ -73,7 +73,8 @@
     "error": "Aanmaken is mislukt. Probeer het opnieuw."
   },
   "page": {
-    "searchPlaceholder": "Zoek bellijst, pool of kandidaat…"
+    "searchPlaceholder": "Zoek bellijst, pool of kandidaat…",
+    "createForbidden": "Je hebt geen rechten om een nieuwe bellijst aan te maken."
   },
   "drawer": {
     "label": "Bellijst",
