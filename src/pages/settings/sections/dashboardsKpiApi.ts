@@ -46,9 +46,16 @@ export const fetchDashboardKpiCatalog = (signal?: AbortSignal): Promise<Dashboar
   })
 
 // GET /dashboard/kpis/{role} — the tenant's current ordered+visible list for
-// one role, translated server→local at this seam.
+// one role, translated server→local at this seam. K2-FE-GOLF-1 (measured 03-09):
+// DashboardKpiSettingsController answers `{ data: [key, …] }` — a bare array — so
+// reading `.kpis` off it always yielded [] and every role looked unconfigured.
+// Both shapes are accepted so an envelope change can never blank the list again.
 export const fetchDashboardKpisRole = (role: string, signal?: AbortSignal): Promise<string[]> =>
-  api.get(`/dashboard/kpis/${role}`, { signal }).then((res) => serverKeysToLocal(unwrap<{ kpis?: string[] }>(res)?.kpis ?? []))
+  api.get(`/dashboard/kpis/${role}`, { signal }).then((res) => {
+    const raw = unwrap<string[] | { kpis?: string[] }>(res)
+    const keys = Array.isArray(raw) ? raw : raw?.kpis ?? []
+    return serverKeysToLocal(keys)
+  })
 
 // PUT /dashboard/kpis/{role} — persist one role's FULL ordered+visible list
 // (settings.update). Takes LOCAL tile ids; the wire gets server keys — an
