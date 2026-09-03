@@ -82,6 +82,27 @@ describe('WorkflowRelationsView', () => {
     expect(toggle).toHaveAttribute('aria-checked', 'false')
   })
 
+  // WF-RELATIONS-FIX-1 regression: the server always sends BOTH `parents` (rich:
+  // runs_count/last_run_at/last_run_status) and `called_by` (the same calling
+  // workflows, stripped) — this is the only shape the real API returns. The
+  // rich row must win, and an id present only in `called_by` still appears.
+  it('prefers the rich parents row over the stripped called_by row for the same id, and still shows a called_by-only id', async () => {
+    mockedGet.mockResolvedValue({ data: {
+      parents: [{ id: 'p1', name: 'Ouderflow', status: 'active', runs_count: 7, last_run_at: '2026-08-20T10:00:00Z', last_run_status: 'success' }],
+      called_by: [
+        { id: 'p1', name: 'Ouderflow', status: 'active' },
+        { id: 'p2', name: 'Tweede ouder', status: 'inactive' },
+      ],
+      children: [],
+    } })
+    render(<WorkflowRelationsView workflowId="wf-1" />)
+    // Run stats only exist on the rich `parents` row — a stripped called_by hit
+    // would render "0 uitvoeringen" and no last-run status badge.
+    expect(await screen.findByText('7 uitvoeringen')).toBeInTheDocument()
+    expect(screen.getByText('Geslaagd')).toBeInTheDocument()
+    expect(screen.getByText('Tweede ouder')).toBeInTheDocument()
+  })
+
   it('flips a called_by row toggle visually (the default K-254 parents path)', async () => {
     mockedGet.mockResolvedValue({ data: {
       parents: [], called_by: [{ id: 'p9', name: 'Beller', status: 'active' }], children: [],

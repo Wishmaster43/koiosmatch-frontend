@@ -34,11 +34,29 @@ describe('RunLineage', () => {
   })
 
   it('also reads promoted top-level fields (parent_run_id/call_chain not nested under context)', () => {
-    const run: RunRow = { id: 4, parent_run_id: 'r-parent-2', call_chain: ['wf-only-id'] }
+    const run: RunRow = { id: 4, parent_run_id: 'r-parent-2', call_chain: ['a1b2c3d4-e5f6-47a8-9abc-1234567890ab'] }
     render(<RunLineage run={run} />)
-    // A bare id (no name) still renders honestly as its own label.
-    expect(screen.getByText('wf-only-id')).toBeInTheDocument()
+    // A bare id with no resolvable name renders as a short chip (first 8
+    // chars), never the full uuid (RUN-LINEAGE-CONTRACT-1).
+    expect(screen.getByText('a1b2c3d4')).toBeInTheDocument()
+    expect(screen.queryByText('a1b2c3d4-e5f6-47a8-9abc-1234567890ab')).not.toBeInTheDocument()
     expect(screen.getByText(/r-parent-2/)).toBeInTheDocument()
+  })
+
+  // WF-RELATIONS-FIX-1: call_chain is id-only from the server — a caller can
+  // resolve names via a map built from data it already has (e.g. a runs list).
+  it('resolves an id-only call_chain entry through the workflowNames map', () => {
+    const run: RunRow = { id: 9, call_chain: ['wf-root'] }
+    render(<RunLineage run={run} workflowNames={{ 'wf-root': 'Rootflow' }} />)
+    expect(screen.getByText('Rootflow')).toBeInTheDocument()
+    expect(screen.queryByText('wf-root')).not.toBeInTheDocument()
+  })
+
+  it('falls back to the short id chip when the id is absent from workflowNames too', () => {
+    const run: RunRow = { id: 10, call_chain: ['12345678-abcd-ef00-0000-000000000000'] }
+    render(<RunLineage run={run} workflowNames={{ 'some-other-id': 'Andereflow' }} />)
+    expect(screen.getByText('12345678')).toBeInTheDocument()
+    expect(screen.queryByText('12345678-abcd-ef00-0000-000000000000')).not.toBeInTheDocument()
   })
 
   it('shows the parent run id even with an empty call chain', () => {

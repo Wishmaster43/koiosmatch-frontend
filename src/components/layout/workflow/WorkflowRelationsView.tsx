@@ -145,6 +145,17 @@ function TreeNode({ node, flatChildren, calls, onToggle }: {
   )
 }
 
+// WF-RELATIONS-FIX-1: the server builds BOTH `parents` (rich: runs_count/
+// last_run_at/last_run_status via $describe) and `called_by` (the SAME calling
+// workflows, stripped to {id,name,status}) from one query — so the rich row
+// always wins; `called_by` only fills in an id that `parents` doesn't cover
+// (a shape the API allows even though today's controller never produces one).
+function mergeParentRows(parents: WorkflowRelation[], calledBy: WorkflowRelation[]): WorkflowRelation[] {
+  const richIds = new Set(parents.map(p => String(p.id)))
+  const extra = calledBy.filter(c => !richIds.has(String(c.id)))
+  return [...parents, ...extra]
+}
+
 // One "Ouders"/"Kinderen" section — an honest empty line when there are none.
 function RelationSection({ title, Icon, rows, emptyLabel, onToggle }: {
   title: string
@@ -173,9 +184,8 @@ function RelationSection({ title, Icon, rows, emptyLabel, onToggle }: {
 export default function WorkflowRelationsView({ workflowId }: { workflowId?: string | number }) {
   const { t } = useTranslation('workflows')
   const { parents, children, calls, calledBy, tree, loading, error, retry, toggleStatus } = useWorkflowRelations(workflowId)
-  // K-254: parents section prefers `called_by` (the workflow_call relation)
-  // once it's non-empty, else falls back to the existing structural `parents`.
-  const parentRows = calledBy.length > 0 ? calledBy : parents
+  // WF-RELATIONS-FIX-1: rich `parents` rows win; `called_by`-only ids append.
+  const parentRows = mergeParentRows(parents, calledBy)
 
   return (
     <div style={{ flex: 1, overflow: 'auto', padding: '20px 24px', background: 'var(--bg)' }}>
