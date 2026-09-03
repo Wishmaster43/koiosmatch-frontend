@@ -111,7 +111,8 @@
         "location": "site",
         "customer": "client",
         "manual": "manuel"
-      }
+      },
+      "renewals": "Prolongations"
     },
     "ownerUnassigned": "Aucun responsable",
     "terminate": {

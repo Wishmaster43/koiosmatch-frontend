@@ -36,6 +36,10 @@ vi.mock('@/lib/useContractTypes', () => ({ useContractTypes: () => ({ types: ['Z
 vi.mock('@/hooks/useMatchStopReasons', () => ({
   useMatchStopReasons: () => ({ reasons: [{ value: 'assignment_ended', label: 'Opdracht beëindigd' }], loading: false }),
 }))
+// MATCH-RENEWAL-1: user lookups for resolving created_by user IDs in the renewals block.
+vi.mock('@/lib/queries', () => ({
+  useUsers: () => ({ data: [{ id: 'u1', name: 'Alice Smith' }, { id: 'u2', name: 'Bob Jones' }] }),
+}))
 
 afterEach(() => vi.clearAllMocks())
 
@@ -309,5 +313,50 @@ describe('OverviewTab · termination read-back (MATCH-DRILL-2)', () => {
     await waitFor(() => expect(mockedGet).toHaveBeenCalledWith('/matches/m1'))
     expect(screen.queryByText(i18n.t('matches:drawer.fields.terminated'))).not.toBeInTheDocument()
     expect(screen.queryByText(i18n.t('matches:drawer.fields.renewals'))).not.toBeInTheDocument()
+  })
+})
+
+// MATCH-RENEWAL-1: the renewal history chain — rendered as a compact block
+// showing each renewal's dates, creation timestamp, and creator user name.
+describe('OverviewTab · renewal history (MATCH-RENEWAL-1)', () => {
+  it('renders the renewals block with formatted date range and sequence number', async () => {
+    mockedGet.mockResolvedValue({
+      data: {
+        data: {
+          renewals: [
+            { id: 'r1', sequence: 1, old_end_date: '2026-06-30', new_end_date: '2026-12-31', created_by: 'u1', created_at: '2026-06-29T14:30:00Z' },
+          ],
+        },
+      },
+    })
+    renderTab(baseMatch)
+    // Sequence number + formatted date range (label-left / value-right canon).
+    expect(await screen.findByText('#1')).toBeInTheDocument()
+    expect(screen.getByText('30-06-2026 → 31-12-2026')).toBeInTheDocument()
+    // Metadata row: creation timestamp + user name.
+    expect(screen.getByText('29-06-2026 · Alice Smith')).toBeInTheDocument()
+  })
+
+  it('hides the renewals block when there are no renewals', async () => {
+    mockedGet.mockResolvedValue({ data: { data: { renewals: [] } } })
+    renderTab(baseMatch)
+    await waitFor(() => expect(mockedGet).toHaveBeenCalledWith('/matches/m1'))
+    expect(screen.queryByText(i18n.t('matches:drawer.contract.renewals'))).not.toBeInTheDocument()
+  })
+
+  it('renders multiple renewal records with their own sequence numbers', async () => {
+    mockedGet.mockResolvedValue({
+      data: {
+        data: {
+          renewals: [
+            { id: 'r1', sequence: 1, old_end_date: '2026-06-30', new_end_date: '2026-12-31', created_by: 'u1', created_at: '2026-06-29' },
+            { id: 'r2', sequence: 2, old_end_date: '2026-12-31', new_end_date: '2027-06-30', created_by: 'u2', created_at: '2026-12-30' },
+          ],
+        },
+      },
+    })
+    renderTab(baseMatch)
+    expect(await screen.findByText('#1')).toBeInTheDocument()
+    expect(screen.getByText('#2')).toBeInTheDocument()
   })
 })

@@ -22,6 +22,16 @@ export interface MatchContractLine {
   sortOrder?: number
 }
 
+// One renewal record from the renewals chain (MATCH-RENEWAL-1).
+export interface MatchRenewal {
+  id?: Id
+  sequence?: number
+  old_end_date?: string | null
+  new_end_date?: string | null
+  created_by?: string | number | null
+  created_at?: string | null
+}
+
 // The raw match as it can arrive from the API (snake_case-tolerant, nested or flat).
 export interface RawMatch {
   id?: string | number
@@ -108,6 +118,8 @@ export interface RawMatch {
   // at all (no /renew or detail 2xx schema is typed); hand-written per the
   // WORKLIST field name (AttachesMatchParityFields).
   renewal_count?: number | null
+  // MATCH-RENEWAL-1: the renewal history chain — detail-only, array of renewal records.
+  renewals?: MatchRenewal[]
   [k: string]: unknown
 }
 

@@ -111,7 +111,8 @@
         "location": "Standort",
         "customer": "Kunde",
         "manual": "manuell"
-      }
+      },
+      "renewals": "Verlängerungen"
     },
     "ownerUnassigned": "Kein Inhaber",
     "terminate": {

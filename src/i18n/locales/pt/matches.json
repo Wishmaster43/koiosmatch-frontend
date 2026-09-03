@@ -111,7 +111,8 @@
         "location": "localização",
         "customer": "cliente",
         "manual": "manual"
-      }
+      },
+      "renewals": "Prorrogações"
     },
     "ownerUnassigned": "Sem responsável",
     "terminate": {

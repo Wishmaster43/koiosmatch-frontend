@@ -12,7 +12,7 @@
  */
 import { useState, useEffect, useCallback } from 'react'
 import api, { unwrap, isServiceUnavailable } from '@/lib/api'
-import type { MatchRow, MatchContractForm } from '@/types/match'
+import type { MatchRow, MatchContractForm, MatchRenewal } from '@/types/match'
 import type { Id } from '@/types/common'
 
 // MATCH-SOORT-1: one CONTRACTREGELS row as read here — detail-only, echoed with
@@ -104,18 +104,28 @@ export interface MatchTermination {
   effectiveDate: string | null
   terminatedAt: string | null
   renewalCount: number | null
+  renewals: MatchRenewal[]
 }
-// Pull the nested termination block plus the renewal counter off a detail row.
+// Pull the nested termination block plus the renewal counter and chain off a detail row.
 function pickTermination(d: Record<string, unknown>): MatchTermination | null {
   const term = (d.termination ?? null) as Record<string, unknown> | null
   const renewal = d.renewal_count != null ? Number(d.renewal_count) : null
-  if (!term && renewal == null) return null
+  const renewals = Array.isArray(d.renewals) ? (d.renewals as Array<Record<string, unknown>>).map(r => ({
+    id: r.id as Id | undefined,
+    sequence: r.sequence != null ? Number(r.sequence) : undefined,
+    old_end_date: (r.old_end_date as string) ?? null,
+    new_end_date: (r.new_end_date as string) ?? null,
+    created_by: r.created_by as string | number | null ?? null,
+    created_at: (r.created_at as string) ?? null,
+  })) : []
+  if (!term && renewal == null && renewals.length === 0) return null
   return {
     stopReason: (term?.stop_reason as string) ?? null,
     stopReasonLabel: (term?.stop_reason_label as string) ?? null,
     effectiveDate: (term?.effective_date as string) ?? null,
     terminatedAt: (term?.terminated_at as string) ?? null,
     renewalCount: renewal,
+    renewals,
   }
 }
 

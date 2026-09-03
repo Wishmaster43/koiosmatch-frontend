@@ -74,6 +74,7 @@ import { buildMatchAdviceInsights } from './matchAiInsights'
 import MatchDurationBar from './MatchDurationBar'
 import MatchTextBlock from './MatchTextBlock'
 import MatchRemarksBlock from './MatchRemarksBlock'
+import MatchRenewalsBlock from './MatchRenewalsBlock'
 import type { MatchRow } from '@/types/match'
 
 // One read-only field row: label LEFT (canon width), value right — the
@@ -300,6 +301,12 @@ export default function OverviewTab({ match, onUpdate, onOpenNotes }: OverviewTa
             {contract.billing_source ? t(`drawer.contract.billingSourceValues.${contract.billing_source}`) : dash}
           </Field>
         </>
+      )}
+
+      {/* MATCH-RENEWAL-1: renewal history chain — compact block showing each renewal.
+          Only renders when termination data is loaded and renewals exist. */}
+      {!contractLoading && termination?.renewals && termination.renewals.length > 0 && (
+        <MatchRenewalsBlock renewals={termination.renewals} />
       )}
 
       {/* DRILLDOWN-VOLGORDE-CANON (Danny 21-08): information → TEXT with pop-out

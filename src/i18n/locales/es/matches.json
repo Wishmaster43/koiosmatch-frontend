@@ -111,7 +111,8 @@
         "location": "sede",
         "customer": "cliente",
         "manual": "manual"
-      }
+      },
+      "renewals": "Prórrogas"
     },
     "ownerUnassigned": "Sin responsable",
     "terminate": {

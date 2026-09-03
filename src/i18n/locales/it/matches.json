@@ -111,7 +111,8 @@
         "location": "sede",
         "customer": "cliente",
         "manual": "manuale"
-      }
+      },
+      "renewals": "Proroghe"
     },
     "ownerUnassigned": "Nessun responsabile",
     "terminate": {

@@ -111,7 +111,8 @@
         "location": "locatie",
         "customer": "klant",
         "manual": "handmatig"
-      }
+      },
+      "renewals": "Verlengingen"
     },
     "ownerUnassigned": "Geen eigenaar",
     "terminate": {

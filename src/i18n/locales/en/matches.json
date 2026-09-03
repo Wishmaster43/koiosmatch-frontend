@@ -111,7 +111,8 @@
         "location": "location",
         "customer": "customer",
         "manual": "manual"
-      }
+      },
+      "renewals": "Renewals"
     },
     "ownerUnassigned": "No owner",
     "terminate": {
