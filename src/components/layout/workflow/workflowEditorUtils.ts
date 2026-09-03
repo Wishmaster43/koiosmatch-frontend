@@ -62,6 +62,37 @@ export function buildVarFields(nodeId: string, out: unknown): WorkflowVarField[]
     : [{ token: `{{${nodeId}}}`, label: '' }]
 }
 
+// audit module-schema-reconcile-4 (CMBE 686d8b74, measured 03-09): the applicant_event
+// card lists human labels; the dispatcher fires application.created / application.
+// stage_changed and filters a stage change on `trigger_config.conditions.stage_flag`,
+// a FLAG of the stage moved to (is_rejected / is_match) — never a slug, because stage
+// slugs are tenant-configurable (§3B). No application.rejected/hired event exists.
+export const APPLICANT_EVENT_KEYS: Record<string, Record<string, unknown>> = {
+  'nieuwe sollicitatie': { event: 'application.created' },
+  'fase gewijzigd':      { event: 'application.stage_changed' },
+  'afgewezen':           { event: 'application.stage_changed', conditions: { stage_flag: 'is_rejected' } },
+  'aangenomen':          { event: 'application.stage_changed', conditions: { stage_flag: 'is_match' } },
+}
+
+// The inbound-webhook route and the event dispatcher match on the WORKFLOW's
+// trigger_type/trigger_config, not on the start card's own config — so a graph whose
+// first step is the webhook or applicant_event card persists that card AS the trigger.
+// Returns null for every other start card (the header trigger picker then rules).
+export function deriveStartTrigger(steps: Array<{ type?: string; config?: Record<string, unknown> }>):
+  { trigger: string; triggerConfig: Record<string, unknown> } | null {
+  const first = steps[0]
+  if (!first) return null
+  if (first.type === 'webhook') {
+    const webhookId = first.config?.webhook_id
+    return webhookId ? { trigger: 'Webhook', triggerConfig: { webhook_id: webhookId } } : null
+  }
+  if (first.type === 'applicant_event') {
+    const mapped = APPLICANT_EVENT_KEYS[String(first.config?.event ?? '')]
+    return mapped ? { trigger: 'Event', triggerConfig: { ...mapped } } : null
+  }
+  return null
+}
+
 // Build the persistable snapshot the same way handleSave does, so the dirty-check
 // (item 19) and the baseline it's compared against serialize identically — no
 // false "dirty" from a shape mismatch between the raw workflow prop and the
@@ -71,6 +102,9 @@ export function computeWorkflowSnapshot(
   scheduleConfig: ScheduleConfig | null, webhookId: string | number | null, status: string,
 ): string {
   const steps = flowToSteps(nodes, edges)
+  // A webhook/applicant_event start card overrides the header trigger (see deriveStartTrigger).
+  const start = deriveStartTrigger(steps)
+  if (start) return JSON.stringify({ name, trigger: start.trigger, trigger_config: start.triggerConfig, status, steps })
   let triggerConfig: Record<string, unknown> | undefined
   // AI-AGENTS-3: a webhook trigger set via the ScheduleModal's agent picker carries
   // scheduleConfig.agent — checked BEFORE the legacy webhook_id flavor (both share

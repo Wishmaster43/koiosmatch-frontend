@@ -14,7 +14,7 @@ import { defaultConfigFor } from './moduleDefaults'
 import { useWorkflowRunControl } from './useWorkflowRunControl'
 import { TERMINAL } from './useWorkflowRun'
 import { useOutputSeeding } from './useOutputSeeding'
-import { buildVarFields, computeWorkflowSnapshot } from './workflowEditorUtils'
+import { buildVarFields, computeWorkflowSnapshot, deriveStartTrigger } from './workflowEditorUtils'
 import type { Workflow, FlowNode, FlowEdge, FlowNodeData, EdgeFilters, FilterConditionGroup, ScheduleConfig,
   WorkflowVarGroup } from '@/types/workflow'
 
@@ -332,6 +332,15 @@ export function useWorkflowEditor({ workflow, onSave, initialRunId = null }: {
   // the dirty-check baseline so the just-saved state no longer reads as unsaved.
   const handleSave = useCallback((closeAfter = false) => {
     const steps = flowToSteps(nodes, edges)
+    // audit module-schema-reconcile-4: a webhook/applicant_event START card is the
+    // trigger the inbound route and the dispatcher match on — persist it as such.
+    const start = deriveStartTrigger(steps)
+    if (start) {
+      onSave({ ...workflow, name, trigger: start.trigger, trigger_config: start.triggerConfig, status, steps }, closeAfter)
+      savedSnapshotRef.current = computeWorkflowSnapshot(nodes, edges, name, trigger, scheduleConfig, webhookId, status)
+      if (!closeAfter) { setSaved(true); setTimeout(() => setSaved(false), 2000) }
+      return
+    }
     let nextTriggerConfig: Record<string, unknown> | undefined = undefined
     // Same branch order as computeWorkflowSnapshot — agent flavor first (see there).
     if (trigger === 'Webhook' && scheduleConfig?.agent) nextTriggerConfig = { agent: scheduleConfig.agent }
