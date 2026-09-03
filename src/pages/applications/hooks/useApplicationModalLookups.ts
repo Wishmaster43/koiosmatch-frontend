@@ -1,12 +1,24 @@
 /**
  * useApplicationModalLookups — APPMODAL-SPLIT-1: the tenant-lookup wiring for
- * AddApplicationModal (vacancy/stage/user/source/custom-field lookups, the
- * APP-REQUIRED-FE-1 required-fields flags and the AXIS-MATRIX-2 preflight),
- * extracted out of the container so it only wires the form hook + JSX.
- * Mirrors pages/vacancies/addmodal/useAddVacancyLookups's role for that form.
+ * the candidate-drawer context of AddApplicationModal (vacancy/stage/user/source/
+ * custom-field lookups, the APP-REQUIRED-FE-1 required-fields flags and the
+ * AXIS-MATRIX-2 preflight), extracted out of the container so it only wires the
+ * form hook + JSX. Mirrors pages/vacancies/addmodal/useAddVacancyLookups's role
+ * for that form.
+ *
+ * ADDAPPLICATION-TWIN-1: relocated verbatim from pages/candidates/hooks — this
+ * hook backs the DRAWER context only (pages/applications/addmodal/
+ * DrawerAddApplicationModal); the page-toolbar context has its own equivalent,
+ * useApplicationOwnerAndStage, since the two contexts pick different entities
+ * (this one takes a fixed candidateId, the page context also picks the
+ * candidate). `useVacancyOptions` comes from the candidates public surface
+ * (§2, `@/pages/candidates/shared`) — the candidate-drawer test file mocks
+ * that barrel flat (AddCandidateModal + useVacancyOptions together) so it
+ * never eagerly evaluates the barrel's other ~40 re-exports, one of which
+ * carries a real i18n-init side effect (mirrors BARREL-DATETIME-LES, §2).
  */
 import { useState } from 'react'
-import { useVacancyOptions } from './useVacancyOptions'
+import { useVacancyOptions } from '@/pages/candidates/shared'
 import { useApplicationStages } from '@/hooks/useApplicationStages'
 import { useActionRulePreflight } from '@/components/actionrules'
 import { useAuth } from '@/context/AuthContext'

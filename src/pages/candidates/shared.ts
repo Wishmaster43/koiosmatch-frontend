@@ -41,4 +41,8 @@ export { useCandidateRecord } from './hooks/useCandidateMutations'
 export { useCandidateNotes } from './hooks/useCandidateNotes'
 export type { CandidateNote } from './hooks/useCandidateNotes'
 export { useVacancyOptions } from './hooks/useVacancyOptions'
+// ADDAPPLICATION-TWIN-1: the merged applications/AddApplicationModal's drawer-context
+// hooks (now living under pages/applications/hooks) read the vacancy option shape
+// from here — a deliberate barrel extension, not a bypass.
+export type { VacancyOption } from './hooks/useVacancyOptions'
 export { getVacancyTabDefaults } from './lib/vacancyTabVisibility'

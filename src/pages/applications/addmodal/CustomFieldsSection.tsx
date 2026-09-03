@@ -2,6 +2,9 @@
  * CustomFieldsSection — the "Extra" tenant-custom-fields block for
  * AddApplicationModal (§3A(f): rendered only once ≥1 active def exists).
  * Extracted verbatim (R6) from that file — behaviour is unchanged, only the location.
+ * ADDAPPLICATION-TWIN-1: `hasError` is now optional — the candidate-drawer
+ * context (which never had a POST-level "custom_fields" 422 border) simply
+ * omits it, same as before the two AddApplicationModal implementations merged.
  */
 import { useTranslation } from 'react-i18next'
 import RichTextEditor from '@/components/ui/RichTextEditor'
@@ -16,7 +19,7 @@ export default function CustomFieldsSection({
   textCustomFields: CustomFieldDef[]
   customFieldValues: Record<string, unknown>
   setCustomField: (key: string, v: unknown) => void
-  hasError: boolean
+  hasError?: boolean
 }) {
   const { t } = useTranslation('applications')
   return (

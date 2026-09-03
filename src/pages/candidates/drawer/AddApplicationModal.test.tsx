@@ -24,12 +24,24 @@ import userEvent from '@testing-library/user-event'
 import AddApplicationModal from './AddApplicationModal'
 import api from '@/lib/api'
 import { useActionRulePreflight } from '@/components/actionrules'
-import { useVacancyOptions } from '../hooks/useVacancyOptions'
+import { useVacancyOptions } from '@/pages/candidates/shared'
 import { useUsers } from '@/lib/queries'
 import { useAuth } from '@/context/AuthContext'
 import { useCustomFields } from '@/lib/useCustomFields'
 
-vi.mock('../hooks/useVacancyOptions', () => ({ useVacancyOptions: vi.fn() }))
+// ADDAPPLICATION-TWIN-1: this file renders the real component tree through
+// pages/applications/AddApplicationModal (the merged dispatcher), which reaches
+// the candidates public surface (§2, `@/pages/candidates/shared`) two ways: this
+// component's own `useVacancyOptions` (drawer context), and — for the dispatcher's
+// OTHER context ('page') — `AddCandidateModal`. That barrel eagerly re-exports
+// ~40 candidate-drawer modules whenever ANY one name is imported from it, one of
+// which pulls in @/lib/datetime → a REAL i18n.init() (mirrors BARREL-DATETIME-LES,
+// CLAUDE.md §2) that overrides every t() in this test process with actual locale
+// strings instead of raw keys. Measured live: every assertion here expects the raw
+// key (e.g. `work.pickVacancy`), so the barrel is mocked flat with exactly the two
+// names this render path (transitively) touches — 'page'-context AddCandidateModal
+// is dead code here, never actually under test.
+vi.mock('@/pages/candidates/shared', () => ({ AddCandidateModal: () => null, useVacancyOptions: vi.fn() }))
 // W30: no active custom-field defs by default — the "Extra" section renders
 // only once a test opts in with ≥1 def (§3A(f)).
 vi.mock('@/lib/useCustomFields', () => ({ useCustomFields: vi.fn(() => ({ fields: [] })) }))

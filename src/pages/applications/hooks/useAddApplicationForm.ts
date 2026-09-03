@@ -8,6 +8,14 @@
  * useApplicationOwnerChain, consumed here. Reference pattern:
  * pages/vacancies/addmodal/useAddVacancyForm.ts (form hook owns state, the
  * container stays thin).
+ *
+ * ADDAPPLICATION-TWIN-1: relocated verbatim from pages/candidates/hooks — this
+ * hook backs the DRAWER context of the merged AddApplicationModal
+ * (pages/applications/addmodal/DrawerAddApplicationModal). `VacancyOption`
+ * comes from the candidates public surface (§2, `@/pages/candidates/shared`)
+ * — a type-only import, erased at build time, so it carries no barrel
+ * eager-load risk (see useApplicationModalLookups' doc comment for the
+ * value-import case, which the candidate-drawer test mocks flat instead).
  */
 import { useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -15,7 +23,7 @@ import api, { unwrap } from '@/lib/api'
 import { notifyError, notifySuccess } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
 import { useApplicationOwnerChain } from './useApplicationOwnerChain'
-import type { VacancyOption } from './useVacancyOptions'
+import type { VacancyOption } from '@/pages/candidates/shared'
 import type { Id } from '@/types/common'
 
 // 422 field-error keys are snake_case; map them back to this form's field names.

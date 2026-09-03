@@ -6,10 +6,20 @@
  * user, every rung ASSIGNABLE-only), the manual-override ref that stops the
  * auto-seed once the recruiter (or an edit-mode prefill) has picked
  * explicitly, and the OWNER-DEVIATION-1 soft-warning booleans.
+ *
+ * ADDAPPLICATION-TWIN-1: relocated verbatim from pages/candidates/hooks — this
+ * is the candidate-drawer AddApplicationModal's own owner-derivation hook
+ * (distinct from pages/applications/hooks/useApplicationOwnerAndStage, the
+ * page-toolbar variant's equivalent, which also derives an owner but from a
+ * PICKED candidate rather than a fixed candidateOwnerId prop). `VacancyOption`
+ * comes from the candidates public surface (§2, `@/pages/candidates/shared`)
+ * — a type-only import, erased at build time, so it carries no barrel
+ * eager-load risk (see useApplicationModalLookups' doc comment for the
+ * value-import case, which the candidate-drawer test mocks flat instead).
  */
 import { useState, useRef, useEffect } from 'react'
 import type { Id } from '@/types/common'
-import type { VacancyOption } from './useVacancyOptions'
+import type { VacancyOption } from '@/pages/candidates/shared'
 
 export function useApplicationOwnerChain({
   pickedVacancy, candidateOwnerId, userOptions, meId, meIsAssignable,
