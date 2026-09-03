@@ -159,6 +159,10 @@ export function mapContact(p: ApiContact = {}): Contact {
     // ARCHIVE-SUBENTITY-1: same convention as mapVacancy.ts.
     archived: Boolean(p.archived ?? (p.deleted_at != null)),
     archivedAt: p.deleted_at ?? null,
+    // CONTACT-CONSENT-AS-1 (K-262): retention consent fields, mirrors mapCandidate's consent handling.
+    retentionConsent: p.retention_consent ?? undefined,
+    retentionConsentAt: p.retention_consent_at ?? null,
+    retentionWarnedAt: p.retention_warned_at ?? null,
   }
 }
 

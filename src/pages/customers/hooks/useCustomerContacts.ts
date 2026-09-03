@@ -67,6 +67,10 @@ export interface ContactPayload {
   // without touching this field; only ContactTextSection's save sends it.
   // Dossier free-text (wire key `description` since CMBE b87e3240); the separate note THREAD stays its own tab.
   description?: string
+  // CONTACT-CONSENT-AS-1 (K-262): retention consent opt-in flag. The PATCH body
+  // must contain ONLY this field (never the *_at stamps) — the backend stamps
+  // retention_consent_at and retention_warned_at server-side.
+  retentionConsent?: boolean
 }
 
 /**
@@ -263,6 +267,8 @@ const toApi = (p: Partial<ContactPayload>) => ({
   ...(p.customFields !== undefined ? { custom_fields: p.customFields } : {}),
   // CONTACT-TEKST-1: empty string → null, mirroring gender/linkedin above.
   ...(p.description !== undefined ? { description: p.description || null } : {}),
+  // CONTACT-CONSENT-AS-1 (K-262): only the flag is sent; the backend stamps the *_at fields.
+  ...(p.retentionConsent !== undefined ? { retention_consent: p.retentionConsent } : {}),
 })
 
 // The customer's live contact list: CRUD + optimistic updates, plus a listener that refetches when another surface (the merge modal) changes contacts elsewhere.

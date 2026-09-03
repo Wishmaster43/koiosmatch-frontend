@@ -857,6 +857,24 @@
     "errForbidden": "Sie sind nicht berechtigt, Kunden zusammenzuführen.",
     "errFailed": "Zusammenführen fehlgeschlagen. Bitte erneut versuchen."
   },
+  "communication": {
+    "consentTitle": "Einwilligungen",
+    "consentGivenAt": "Einwilligung am {{date}} erteilt",
+    "consentRetentionOptIn": "Darf aufbewahrt werden",
+    "retentionTitle": "DSGVO-Aufbewahrungsfrist",
+    "retentionUntil": "Aufbewahrt bis {{date}}",
+    "retentionUnlimited": "Unbegrenzt aufbewahrt (Einwilligung vom {{date}})",
+    "retentionUnknown": "Aufbewahrungsfrist unbekannt",
+    "retentionConsentNone": "Keine Aufbewahrungseinwilligung erteilt",
+    "retentionConsentLoading": "Gültigkeit wird geladen…",
+    "retentionConsentWindowUnknown": "Gültigkeit unbekannt. Einstellungen konnten nicht geladen werden",
+    "retentionConsentValidUntil": "Einwilligung gültig bis {{date}}",
+    "retentionConsentIndefinite": "Einwilligung verfällt nicht (Organisationseinstellung)",
+    "retentionConsentUndated": "Einwilligung ohne Datum. Wird als abgelaufen behandelt",
+    "retentionConsentLapsed": "Einwilligung abgelaufen am {{date}}",
+    "retentionConsentExpiryNote": "Die Aufbewahrungseinwilligung läuft automatisch ab. Ein Workflow kann die Kontaktperson bitten, sie zu verlängern; der Ablauf erfolgt in jedem Fall.",
+    "messagingLanguage": "Nachrichtensprache: {{language}}"
+  },
   "koios": {
     "reasons": {
       "noOpenVacancies": "Keine offenen Stellen. Bei diesem Kunden nachfassen."

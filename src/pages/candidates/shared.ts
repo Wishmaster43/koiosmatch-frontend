@@ -46,3 +46,7 @@ export { useVacancyOptions } from './hooks/useVacancyOptions'
 // from here — a deliberate barrel extension, not a bypass.
 export type { VacancyOption } from './hooks/useVacancyOptions'
 export { getVacancyTabDefaults } from './lib/vacancyTabVisibility'
+// CONTACT-CONSENT-AS-1 (K-262): the retention consent resolution and months-loading
+// hook are now shared by both the candidate's RetentionConsentBlock and the contact's.
+export { resolveRetentionConsent, type RetentionConsentState } from './drawer/retentionConsent'
+export { useRetentionConsentMonths } from './drawer/useRetentionConsentMonths'

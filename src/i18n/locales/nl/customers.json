@@ -857,6 +857,24 @@
     "errForbidden": "Je hebt geen rechten om klanten samen te voegen.",
     "errFailed": "Samenvoegen mislukt. Probeer het opnieuw."
   },
+  "communication": {
+    "consentTitle": "Toestemmingen",
+    "consentGivenAt": "Toestemming gegeven op {{date}}",
+    "consentRetentionOptIn": "Mag bewaard blijven",
+    "retentionTitle": "AVG-bewaartermijn",
+    "retentionUntil": "Bewaren tot {{date}}",
+    "retentionUnlimited": "Onbeperkt bewaard (toestemming op {{date}})",
+    "retentionUnknown": "Bewaartermijn onbekend",
+    "retentionConsentNone": "Geen bewaartoestemming gegeven",
+    "retentionConsentLoading": "Geldigheid wordt geladen…",
+    "retentionConsentWindowUnknown": "Geldigheid onbekend. Instellingen niet geladen",
+    "retentionConsentValidUntil": "Toestemming geldig tot {{date}}",
+    "retentionConsentIndefinite": "Toestemming verloopt niet (instelling van de organisatie)",
+    "retentionConsentUndated": "Toestemming zonder datum. Telt als verlopen",
+    "retentionConsentLapsed": "Toestemming verlopen op {{date}}",
+    "retentionConsentExpiryNote": "De bewaartoestemming verloopt automatisch. Een workflow kan de contactpersoon om verlenging vragen; het verlopen zelf gebeurt hoe dan ook.",
+    "messagingLanguage": "Berichttaal: {{language}}"
+  },
   "koios": {
     "reasons": {
       "noOpenVacancies": "Geen openstaande vacatures. Neem contact op met deze klant."

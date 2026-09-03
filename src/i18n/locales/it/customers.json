@@ -857,6 +857,24 @@
     "errForbidden": "Non hai i permessi per unire i clienti.",
     "errFailed": "Unione non riuscita. Riprova."
   },
+  "communication": {
+    "consentTitle": "Consensi",
+    "consentGivenAt": "Consenso dato il {{date}}",
+    "consentRetentionOptIn": "Può essere conservato",
+    "retentionTitle": "Periodo di conservazione RGPD",
+    "retentionUntil": "Conservato fino al {{date}}",
+    "retentionUnlimited": "Conservato indefinitamente (consenso del {{date}})",
+    "retentionUnknown": "Periodo di conservazione sconosciuto",
+    "retentionConsentNone": "Nessun consenso di conservazione dato",
+    "retentionConsentLoading": "Convalida in corso…",
+    "retentionConsentWindowUnknown": "Validità sconosciuta. Impossibile caricare le impostazioni",
+    "retentionConsentValidUntil": "Consenso valido fino al {{date}}",
+    "retentionConsentIndefinite": "Il consenso non scade (impostazione dell'organizzazione)",
+    "retentionConsentUndated": "Consenso senza data. Trattato come scaduto",
+    "retentionConsentLapsed": "Consenso scaduto il {{date}}",
+    "retentionConsentExpiryNote": "Il consenso di conservazione scade automaticamente. Un workflow può chiedere al referente di rinnovarlo; la scadenza avviene comunque.",
+    "messagingLanguage": "Lingua di messaggistica: {{language}}"
+  },
   "koios": {
     "reasons": {
       "noOpenVacancies": "Nessuna posizione aperta. Contatta questo cliente."

@@ -626,3 +626,52 @@ describe('ContactDetail · preferred language row', () => {
     expect(screen.getByText(i18n.t('profile.preferredLanguageDefault', { ns: 'candidates' }))).toBeInTheDocument()
   })
 })
+
+// CONTACT-CONSENT-AS-1 (K-262): the shared RetentionConsentBlock renders in the
+// data tab with customers namespace and customers.update permission gate. The PATCH
+// body must contain ONLY { retention_consent: boolean }, never the *_at stamps.
+describe('ContactDetail · retention consent block', () => {
+  it('renders the block in the data tab with a consented contact', async () => {
+    render(<ContactDetail contact={baseContact({ retentionConsent: true, retentionConsentAt: '2026-01-15T10:00:00Z' })}
+      locations={locations} departments={departments} statuses={statuses}
+      onSave={vi.fn()} onDelete={vi.fn()} close={vi.fn()} />)
+    // The block should be visible in the data tab (default when component mounts).
+    await waitFor(() => {
+      expect(screen.getByText(ct('communication.retentionTitle'))).toBeInTheDocument()
+    })
+  })
+
+  it('sends ONLY { retention_consent: boolean } on toggle, never the *_at stamps', async () => {
+    const user = userEvent.setup()
+    const onSave = vi.fn()
+    render(<QueryClientProvider client={new QueryClient()}>
+      <ContactDetail contact={baseContact({ retentionConsent: false })}
+        locations={locations} departments={departments} statuses={statuses}
+        onSave={onSave} onDelete={vi.fn()} close={vi.fn()} />
+    </QueryClientProvider>)
+
+    // Find and click the consent toggle (aria-label from the shared block).
+    await waitFor(() => {
+      const toggle = screen.getByLabelText(ct('communication.consentRetentionOptIn'))
+      expect(toggle).toBeInTheDocument()
+    })
+    const toggle = screen.getByLabelText(ct('communication.consentRetentionOptIn'))
+    await user.click(toggle)
+
+    // Verify the PATCH body contains ONLY retention_consent (no retention_consent_at or retention_warned_at).
+    expect(onSave).toHaveBeenCalledWith('c1', { retentionConsent: true })
+  })
+
+  it('displays the house formatter date via RetentionConsentBlock (date formatting tested separately)', async () => {
+    // The shared RetentionConsentBlock handles date formatting (tested in RetentionConsentBlock.test.tsx).
+    // This test just verifies the block is rendered with the correct contact data.
+    render(<ContactDetail contact={baseContact({ retentionConsent: true, retentionConsentAt: '2026-01-15T10:00:00Z' })}
+      locations={locations} departments={departments} statuses={statuses}
+      onSave={vi.fn()} onDelete={vi.fn()} close={vi.fn()} />)
+
+    await waitFor(() => {
+      // Block should be present when consent is set.
+      expect(screen.getByText(ct('communication.retentionTitle'))).toBeInTheDocument()
+    })
+  })
+})

@@ -857,6 +857,24 @@
     "errForbidden": "Não tem permissões para unir clientes.",
     "errFailed": "Falha ao unir. Tente novamente."
   },
+  "communication": {
+    "consentTitle": "Consentimentos",
+    "consentGivenAt": "Consentimento dado em {{date}}",
+    "consentRetentionOptIn": "Pode ser conservado",
+    "retentionTitle": "Prazo de conservação RGPD",
+    "retentionUntil": "Conservar até {{date}}",
+    "retentionUnlimited": "Conservado indefinidamente (consentimento de {{date}})",
+    "retentionUnknown": "Prazo de conservação desconhecido",
+    "retentionConsentNone": "Sem consentimento de conservação",
+    "retentionConsentLoading": "A validar…",
+    "retentionConsentWindowUnknown": "Validade desconhecida. Não foi possível carregar as definições",
+    "retentionConsentValidUntil": "Consentimento válido até {{date}}",
+    "retentionConsentIndefinite": "O consentimento não expira (definição organizacional)",
+    "retentionConsentUndated": "Consentimento sem data. Tratado como expirado",
+    "retentionConsentLapsed": "Consentimento expirado em {{date}}",
+    "retentionConsentExpiryNote": "O consentimento de conservação expira automaticamente. Um workflow pode pedir à pessoa de contacto para o renovar; a expiração ocorre de qualquer forma.",
+    "messagingLanguage": "Idioma de mensagens: {{language}}"
+  },
   "koios": {
     "reasons": {
       "noOpenVacancies": "Sem vagas em aberto. Contacte este cliente."

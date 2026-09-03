@@ -857,6 +857,24 @@
     "errForbidden": "You are not allowed to merge customers.",
     "errFailed": "Merge failed. Please try again."
   },
+  "communication": {
+    "consentTitle": "Consents",
+    "consentGivenAt": "Consent given on {{date}}",
+    "consentRetentionOptIn": "May be kept on file",
+    "retentionTitle": "GDPR retention period",
+    "retentionUntil": "Retained until {{date}}",
+    "retentionUnlimited": "Retained indefinitely (consent from {{date}})",
+    "retentionUnknown": "Retention period unknown",
+    "retentionConsentNone": "No retention consent given",
+    "retentionConsentLoading": "Validating…",
+    "retentionConsentWindowUnknown": "Validity unknown. Settings could not be loaded",
+    "retentionConsentValidUntil": "Consent valid until {{date}}",
+    "retentionConsentIndefinite": "Consent does not expire (organization setting)",
+    "retentionConsentUndated": "Consent without date. Treated as expired",
+    "retentionConsentLapsed": "Consent expired on {{date}}",
+    "retentionConsentExpiryNote": "Retention consent expires automatically. A workflow can ask the contact person to renew it; the expiry itself happens either way.",
+    "messagingLanguage": "Messaging language: {{language}}"
+  },
   "koios": {
     "reasons": {
       "noOpenVacancies": "No open vacancies. Follow up with this customer."

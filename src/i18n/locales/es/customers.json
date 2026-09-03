@@ -857,6 +857,24 @@
     "errForbidden": "No tienes permiso para fusionar clientes.",
     "errFailed": "Error al fusionar. Inténtalo de nuevo."
   },
+  "communication": {
+    "consentTitle": "Consentimientos",
+    "consentGivenAt": "Consentimiento dado el {{date}}",
+    "consentRetentionOptIn": "Puede conservarse",
+    "retentionTitle": "Plazo de conservación RGPD",
+    "retentionUntil": "Conservado hasta {{date}}",
+    "retentionUnlimited": "Conservado indefinidamente (consentimiento del {{date}})",
+    "retentionUnknown": "Plazo de conservación desconocido",
+    "retentionConsentNone": "Sin consentimiento de conservación",
+    "retentionConsentLoading": "Validando…",
+    "retentionConsentWindowUnknown": "Validez desconocida. No se pudieron cargar los parámetros",
+    "retentionConsentValidUntil": "Consentimiento válido hasta {{date}}",
+    "retentionConsentIndefinite": "El consentimiento no caduca (configuración de la organización)",
+    "retentionConsentUndated": "Consentimiento sin fecha. Tratado como caducado",
+    "retentionConsentLapsed": "Consentimiento caducado el {{date}}",
+    "retentionConsentExpiryNote": "El consentimiento de conservación caduca automáticamente. Un flujo de trabajo puede pedir a la persona de contacto que lo renueve; la caducidad se produce en cualquier caso.",
+    "messagingLanguage": "Idioma de mensajería: {{language}}"
+  },
   "koios": {
     "reasons": {
       "noOpenVacancies": "Sin vacantes abiertas. Haz seguimiento a este cliente."

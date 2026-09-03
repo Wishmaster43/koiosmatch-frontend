@@ -300,6 +300,8 @@ export default function CommunicationTab({ c, onSave, onEditStatusEvent, initial
             consentAt={c.consent.retentionConsentAt ?? null}
             expiresAt={c.retentionExpiresAt ?? null}
             onToggle={setRetentionOptIn}
+            namespace="candidates"
+            viewPermission="candidates.delete"
           />
         </SectionCard>
       )}

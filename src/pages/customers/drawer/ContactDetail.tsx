@@ -40,6 +40,8 @@ import DrillPager, { type DrillPagerProps } from '@/components/drawer/DrillPager
 import ContactLinkSection from './ContactLinkSection'
 // CONTACT-TEKST-1: the free-text block (canon order: info → text → koios → branch, §3A).
 import ContactTextSection from './ContactTextSection'
+// CONTACT-CONSENT-AS-1 (K-262): the shared retention consent block (mirrored from candidates).
+import RetentionConsentBlock from '@/components/drawer/RetentionConsentBlock'
 import { emailValue, phoneValue, linkedinValue, LinkedinMark } from '@/components/drawer/contactLinks'
 import SubTabBar from '@/components/drawer/SubTabBar'
 import CustomFieldsTab from '@/components/drawer/CustomFieldsTab'
@@ -387,6 +389,18 @@ export default function ContactDetail({ contact, locations, departments, statuse
               field card and above the Vestiging (location/department) coupling. */}
           <ContactTextSection contactId={contact.id as Id} customerId={contact.customerId}
             value={contact.description ?? ''} onSave={html => onSave(contact.id as Id, { description: html })} />
+
+          {/* CONTACT-CONSENT-AS-1 (K-262): retention consent block, added to the data
+              tab as an additive section. Uses namespace='customers' and viewPermission=
+              'customers.update' (the same gate as other edits on this contact). */}
+          <RetentionConsentBlock
+            optIn={contact.retentionConsent ?? false}
+            consentAt={contact.retentionConsentAt ?? null}
+            expiresAt={null}
+            onToggle={val => onSave(contact.id as Id, { retentionConsent: val })}
+            namespace="customers"
+            viewPermission="customers.update"
+          />
 
           {/* Koppeling — same shape and behaviour as "+ Vestiging" (Danny 28-07). */}
           <ContactLinkSection locationIds={linkedLocationIds} departmentIds={linkedDepartmentIds}

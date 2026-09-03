@@ -857,6 +857,24 @@
     "errForbidden": "Vous n'êtes pas autorisé à fusionner des clients.",
     "errFailed": "Échec de la fusion. Veuillez réessayer."
   },
+  "communication": {
+    "consentTitle": "Consentements",
+    "consentGivenAt": "Consentement donné le {{date}}",
+    "consentRetentionOptIn": "Peut être conservé",
+    "retentionTitle": "Durée de conservation RGPD",
+    "retentionUntil": "Conservé jusqu'au {{date}}",
+    "retentionUnlimited": "Conservé indéfiniment (consentement du {{date}})",
+    "retentionUnknown": "Durée de conservation inconnue",
+    "retentionConsentNone": "Aucun consentement de conservation donné",
+    "retentionConsentLoading": "Validation en cours…",
+    "retentionConsentWindowUnknown": "Validité inconnue. Les paramètres n'ont pas pu être chargés",
+    "retentionConsentValidUntil": "Consentement valide jusqu'au {{date}}",
+    "retentionConsentIndefinite": "Le consentement n'expire pas (paramètre organisationnel)",
+    "retentionConsentUndated": "Consentement sans date. Traité comme expiré",
+    "retentionConsentLapsed": "Consentement expiré le {{date}}",
+    "retentionConsentExpiryNote": "Le consentement de conservation expire automatiquement. Un workflow peut demander à la personne de contact de le renouveler ; l'expiration a lieu dans tous les cas.",
+    "messagingLanguage": "Langue de messagerie : {{language}}"
+  },
   "koios": {
     "reasons": {
       "noOpenVacancies": "Aucune offre ouverte. Relancez ce client."

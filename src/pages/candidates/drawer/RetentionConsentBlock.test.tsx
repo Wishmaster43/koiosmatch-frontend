@@ -47,7 +47,7 @@ beforeEach(() => {
 afterEach(() => { vi.useRealTimers() })
 
 const block = (props: Partial<React.ComponentProps<typeof RetentionConsentBlock>> = {}) => (
-  <RetentionConsentBlock optIn={false} consentAt={null} expiresAt={null} onToggle={vi.fn()} {...props} />
+  <RetentionConsentBlock optIn={false} consentAt={null} expiresAt={null} onToggle={vi.fn()} namespace="candidates" viewPermission="candidates.delete" {...props} />
 )
 
 describe('RetentionConsentBlock · the tenant window comes from the API', () => {

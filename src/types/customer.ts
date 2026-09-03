@@ -79,6 +79,11 @@ export interface Contact {
   // (not every existing test fixture sets it) — read defensively as `?? false`.
   archived?: boolean
   archivedAt?: string | null
+  // CONTACT-CONSENT-AS-1 (K-262): the contact's retention-consent facts, mirroring
+  // the candidate's own consent.retention_opt_in / retention_consent_at / retention_warned_at.
+  retentionConsent?: boolean
+  retentionConsentAt?: string | null
+  retentionWarnedAt?: string | null
 }
 
 /** A department nested under a location (flat UI shape). SUB-STATUS-1: lifecycle status. */
@@ -352,6 +357,10 @@ export interface ApiContact {
   backoffice_links?: ApiBackofficeLink[]
   // ARCHIVE-SUBENTITY-1: derived boolean + the raw timestamp (CustomerContactResource).
   archived?: boolean; deleted_at?: string | null
+  // CONTACT-CONSENT-AS-1 (K-262): retention consent fields (CustomerContactResource).
+  retention_consent?: boolean | null
+  retention_consent_at?: string | null
+  retention_warned_at?: string | null
   [k: string]: unknown
 }
 
