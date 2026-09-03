@@ -4,6 +4,7 @@
  */
 import { useTranslation } from 'react-i18next'
 import { Check } from 'lucide-react'
+import { Caption } from '@/components/ui/typography'
 
 // Built-in tool ids; label/description come from t('ai.tools.items.<id>.*').
 const BUILTIN_TOOLS = ['shift_lookup', 'candidate_status', 'send_whatsapp', 'update_candidate', 'knowledge_search', 'calendar_check']
@@ -30,13 +31,13 @@ export function ToolsTab() {
             style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderRadius: 9, cursor: 'not-allowed', opacity: 0.7,
               background: on ? 'var(--color-primary-bg)' : 'var(--bg)',
               border: `1px solid ${on ? 'var(--color-primary)' : 'var(--border)'}` }}>
-            <div style={{ width: 16, height: 16, borderRadius: 4, border: `2px solid ${on ? 'var(--color-primary)' : 'var(--border)'}`, background: on ? 'var(--color-primary)' : 'transparent', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              {on && <Check size={9} color="white" />}
+            <div style={{ width: 16, height: 16, borderRadius: 4, border: `2px solid ${on ? 'var(--color-primary)' : 'var(--border)'}`, background: on ? 'var(--button-fill)' : 'transparent', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              {on && <Check size={9} color="var(--button-ink)" />}
             </div>
             <div>
               {/* Text-colour accent uses the AA-contrast text token, not the raw brand primary. */}
               <div style={{ fontSize: 12, fontWeight: 500, color: on ? 'var(--color-primary-text)' : 'var(--text)' }}>{t(`ai.tools.items.${toolId}.label`)}</div>
-              <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 1 }}>{t(`ai.tools.items.${toolId}.description`)}</div>
+              <Caption as="div" style={{ marginTop: 1 }}>{t(`ai.tools.items.${toolId}.description`)}</Caption>
             </div>
           </div>
         )

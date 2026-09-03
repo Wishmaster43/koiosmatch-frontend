@@ -53,7 +53,8 @@ export default function RolesSettings() {
         setIconOptions(list.map(x => (typeof x === 'string' ? x : x.name ?? x.value)).filter((x): x is string => Boolean(x)))
       }
     }).catch(err => notifyError(extractApiError(err, t('common:actionFailed'))))
-  }, [reloadKey])
+    // `t` is stable per language; a language switch re-runs the load, which is harmless.
+  }, [reloadKey, t])
 
   // User submitted the "new role" field: creates it and appends the server's own row.
   const createRole = async () => {

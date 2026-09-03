@@ -62,7 +62,8 @@ export default function IncomingWebhooks() {
       .then((res) => setWebhooks(unwrapList(res).rows))
       .catch(err => notifyError(extractApiError(err, t('common:actionFailed'))))
       .finally(() => setLoading(false))
-  }, [])
+    // `t` is stable per language; a language switch re-runs the load, which is harmless.
+  }, [t])
 
   // Create a new inbound webhook (name + optional description).
   const create = async () => {

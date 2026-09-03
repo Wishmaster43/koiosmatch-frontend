@@ -51,7 +51,6 @@ export const captionStyle: CSSProperties = { fontSize: 11, fontWeight: 400, colo
 // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- the canonical GroupLabel style identity itself, not a hand-styled copy
 export const groupLabelStyle: CSSProperties = { fontSize: 11, fontWeight: 600, color: 'var(--text-muted)',
   textTransform: 'uppercase', letterSpacing: '0.04em' }
-// eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- the canonical FormLabel style identity itself, not a hand-styled copy
 export const formLabelStyle: CSSProperties = { fontSize: 12, fontWeight: 500, color: 'var(--text-muted)' }
 
 export const PageTitle = make(pageTitleStyle, 'h2')
