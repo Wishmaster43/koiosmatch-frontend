@@ -15,8 +15,10 @@ import CustomerNotesTab from './CustomerNotesTab'
 import api from '@/lib/api'
 
 vi.mock('@/lib/useNoteTypes', () => ({ useNoteTypes: () => ({ types: [], writableTypes: [] }) }))
-// NOTITIE-DOORLINK-1: the additive linked-notes section needs a QueryClientProvider (react-query) this test tree doesn't set up — out of scope here (its own suite covers it), stub to a marker so it never touches useNoteFeed.
-vi.mock('@/components/drawer/tabs/notes/NoteFeedList', () => ({ default: () => <div data-testid="note-feed-list-stub" /> }))
+// K-288: the linked-notes feed is now its own sub-tab (LinkedNotesTab), built in a
+// parallel lane with its own suite — stub it here so this file never touches its
+// internals (react-query, useNoteFeed, …).
+vi.mock('@/components/drawer/tabs/notes/LinkedNotesTab', () => ({ default: () => <div data-testid="linked-notes-tab" /> }))
 vi.mock('@/lib/abortError', () => ({ isAbortError: () => false }))
 // The shared NotesTab pulls in @/lib/datetime, which imports the REAL i18n runtime
 // as a side effect — mocked here (mirrors OpportunitiesTab.test.tsx) so t() keeps
@@ -149,5 +151,21 @@ describe('CustomerNotesTab · K17 timeline embed vs fallback', () => {
 
     await waitFor(() => expect(api.get).toHaveBeenCalledWith('/customers/cust-1/activity', expect.anything()))
     expect(await screen.findByText('Klant aangemaakt')).toBeInTheDocument()
+  })
+})
+
+/** K-288: the linked-notes feed moved out of the Notities section into its own
+ *  sub-tab, right after Notities. */
+describe('CustomerNotesTab · linkedNotes sub-tab (K-288)', () => {
+  it('renders the LinkedNotesTab stub when the sub-tab is picked', async () => {
+    const user = userEvent.setup()
+    render(<CustomerNotesTab customerId="cust-1" customerName="Acme Zorg" notes={[]} onAddNote={vi.fn()} c={customer} onSave={vi.fn()} />)
+    await user.click(screen.getByText('notes.linkedNotes'))
+    expect(await screen.findByTestId('linked-notes-tab')).toBeInTheDocument()
+  })
+
+  it('the Notities sub-tab no longer renders the linked-notes feed inline', () => {
+    render(<CustomerNotesTab customerId="cust-1" customerName="Acme Zorg" notes={[]} onAddNote={vi.fn()} c={customer} onSave={vi.fn()} />)
+    expect(screen.queryByTestId('linked-notes-tab')).not.toBeInTheDocument()
   })
 })

@@ -13,6 +13,7 @@ import DatePicker from 'react-datepicker'
 import SelectMenu from '@/components/ui/SelectMenu'
 import SelectAllRow from '@/components/ui/SelectAllRow'
 import Slider from '@/components/ui/Slider'
+import Toggle from '@/components/ui/Toggle'
 import Button from '@/components/ui/Button'
 import CountBadge from '@/components/ui/CountBadge'
 import { parseDate } from '@/components/forms/fields'
@@ -118,7 +119,21 @@ export interface DrawerDateFilterConfig {
   placeholder: string
 }
 
-export type DrawerFilterConfig = DrawerSingleFilterConfig | DrawerMultiFilterConfig | DrawerRangeFilterConfig | DrawerDateFilterConfig
+// Toggle row (K-288, linked-notes "Alleen directe notities" switch) — a single
+// boolean, the shared Toggle atom. Minimal by design: no options/all-label, just
+// value + onChange, mirrored on the NoteFeedList section's own Toggle usage.
+export interface DrawerToggleFilterConfig {
+  type: 'toggle'
+  key: string
+  label: ReactNode
+  value: boolean
+  onChange: (value: boolean) => void
+  // Accessible name for the switch itself (label above is visual only — Toggle
+  // has no <label> association of its own, mirrors every other Toggle call site).
+  ariaLabel: string
+}
+
+export type DrawerFilterConfig = DrawerSingleFilterConfig | DrawerMultiFilterConfig | DrawerRangeFilterConfig | DrawerDateFilterConfig | DrawerToggleFilterConfig
 
 interface DrawerFilterMenuProps {
   filters: DrawerFilterConfig[]
@@ -204,6 +219,12 @@ function DrawerRangeFilterRow({ config }: { config: DrawerRangeFilterConfig }) {
 // Bare filter-bar date input (mirrors VacancySearchFilters' own filterInput look)
 // — the CONTROL_WIDTH constant keeps it flush with the single-select row above it.
 const dateInputStyle = { padding: '6px 9px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 7, background: 'var(--surface)', color: 'var(--text)', outline: 'none', width: CONTROL_WIDTH }
+
+// Toggle row: the shared Toggle atom — a single switch, no label repeated inside
+// (the group heading above already shows it).
+function DrawerToggleFilterRow({ config }: { config: DrawerToggleFilterConfig }) {
+  return <Toggle checked={config.value} onChange={config.onChange} ariaLabel={config.ariaLabel} />
+}
 
 // Date row: the shared react-datepicker convention (DD-MM-YYYY). Renders via the
 // app-wide #datepicker-portal node, not inline — see DrawerDateFilterConfig's doc
@@ -310,12 +331,14 @@ export default function DrawerFilterMenu({ filters, label, title, clearAllLabel 
   const activeCount = filters.reduce((sum, f) => {
     if (f.type === 'multi') return sum + f.selected.length
     if (f.type === 'range') return sum + (f.active ? 1 : 0)
+    if (f.type === 'toggle') return sum + (f.value ? 1 : 0)
     return sum + (f.value !== '' ? 1 : 0)
   }, 0)
   // Clear every active filter at once — generic over whatever the host passed in.
   const clearAll = () => filters.forEach(f => {
     if (f.type === 'multi') f.selected.forEach(v => f.onToggle(v))
     else if (f.type === 'range') { if (f.active) f.onReset() }
+    else if (f.type === 'toggle') { if (f.value) f.onChange(false) }
     else if (f.value !== '') f.onChange('')
   })
 
@@ -392,6 +415,8 @@ export default function DrawerFilterMenu({ filters, label, title, clearAllLabel 
                   <DrawerMultiFilterRow config={f} />
                 ) : f.type === 'range' ? (
                   <DrawerRangeFilterRow config={f} />
+                ) : f.type === 'toggle' ? (
+                  <DrawerToggleFilterRow config={f} />
                 ) : (
                   <DrawerDateFilterRow config={f} />
                 )}

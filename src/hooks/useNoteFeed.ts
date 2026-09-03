@@ -54,6 +54,15 @@ export interface NoteFeedItem {
   updated_at: string
   is_direct: boolean
   principals: Array<{ type: string; id: string; label: string | null }>
+  // K-288 / bundle H (tolerant — absent until the backend field lands): the
+  // note's own author id and a server-computed "may this reader edit it"
+  // flag (own note or <host-family>.notes.manage_all). `can_manage` is the
+  // ONLY gate the linked-notes subtab uses for its pencil/pop-out actions —
+  // never guessed from the author name.
+  author_id?: string | null
+  can_manage?: boolean
+  // Bundle H, application notes only for now — optional/tolerant elsewhere.
+  title?: string | null
 }
 
 const PER_PAGE = 25
@@ -70,8 +79,10 @@ export interface UseNoteFeedResult {
 
 // Fetches one principal's cross-source note feed. `onlyLinked` requests the
 // chain-linked subset server-side (only_linked=1 — live since BE 97a1aac1;
-// the response then carries ONLY is_direct:false rows).
-export function useNoteFeed(entity: NoteFeedEntity, id: Id | null | undefined, onlyLinked: boolean, sub?: NoteFeedSubScope): UseNoteFeedResult {
+// the response then carries ONLY is_direct:false rows). `sourceType` (K-288,
+// bundle H) filters server-side to one source family (`?source_type=candidate`
+// etc.) — omitted/null returns every family, mirroring the LinkedNotesTab filter.
+export function useNoteFeed(entity: NoteFeedEntity, id: Id | null | undefined, onlyLinked: boolean, sub?: NoteFeedSubScope, sourceType?: string | null): UseNoteFeedResult {
   // Sub-entity feeds nest under the owning CUSTOMER — `id` is then the customer
   // id and `entity` must be 'customers'; a sub-scope under 'candidates' would
   // silently hit the customer route, so it is rejected loudly in dev.
@@ -80,11 +91,16 @@ export function useNoteFeed(entity: NoteFeedEntity, id: Id | null | undefined, o
   }
   const path = sub ? `/customers/${id}/${sub.kind}/${sub.id}/note-feed` : `/${entity}/${id}/note-feed`
   const query = useInfiniteQuery({
-    queryKey: ['note-feed', entity, id, onlyLinked, sub?.kind, sub?.id],
+    queryKey: ['note-feed', entity, id, onlyLinked, sub?.kind, sub?.id, sourceType],
     queryFn: async ({ pageParam, signal }) => {
       const res = await api.get(path, {
         signal,
-        params: { ...(onlyLinked ? { only_linked: 1 } : {}), per_page: PER_PAGE, page: pageParam },
+        params: {
+          ...(onlyLinked ? { only_linked: 1 } : {}),
+          ...(sourceType ? { source_type: sourceType } : {}),
+          per_page: PER_PAGE,
+          page: pageParam,
+        },
       })
       return unwrapList<NoteFeedItem>(res)
     },

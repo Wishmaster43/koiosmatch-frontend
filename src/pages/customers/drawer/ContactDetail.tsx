@@ -62,8 +62,8 @@ import ContactConversationsSection from './ContactConversationsSection'
 // CONTACT-NOTITIES-2: this contact's own Notities sub-tab, mirrors ScopedNotesTab's
 // identical wiring (§3A — shared notes-tab family, never a forked composer/list).
 import ContactNotesTab from './ContactNotesTab'
-// NOTITIE-DOORLINK-1: read-only linked-notes feed under the contact's own notes.
-import NoteFeedList from '@/components/drawer/tabs/notes/NoteFeedList'
+// K-288: linked-notes feed moved out of the Notities section into its own sub-tab.
+import LinkedNotesTab from '@/components/drawer/tabs/notes/LinkedNotesTab'
 // TIJDLIJN-SUBDRILL-1: the contact's own activity log (LOC-DEPT-CHANGELOG-1).
 import SubEntityTimelineTab from './SubEntityTimelineTab'
 import { useCustomFields } from '@/lib/useCustomFields'
@@ -121,7 +121,8 @@ export default function ContactDetail({ contact, locations, departments, statuse
   // Gegevens and Taken respectively (§3A — same shared tabs Location/DepartmentDetail carry).
   // CONTACT-NOTITIES-2: 'notes' joins right before 'links' (tab-order canon, §3A).
   // TIJDLIJN-SUBDRILL-1: 'timeline' second-to-last, before 'links'.
-  const [subTab, setSubTab] = useState<'data' | 'opportunities' | 'tasks' | 'conversations' | 'extra' | 'notes' | 'timeline' | 'links'>('data')
+  // K-288: 'linkedNotes' added right after 'notes' — the linked-notes feed's own sub-tab.
+  const [subTab, setSubTab] = useState<'data' | 'opportunities' | 'tasks' | 'conversations' | 'extra' | 'notes' | 'linkedNotes' | 'timeline' | 'links'>('data')
   // Contact function (job title) is a lookup combobox, split from the candidate
   // function list (FUNCTIONS-SPLIT-1) — never a plain free-text field.
   const { contactFunctions, allowFreeEntry } = useContactFunctions()
@@ -368,6 +369,8 @@ export default function ContactDetail({ contact, locations, departments, statuse
           // CONTACT-NOTITIES-2: always visible (mirrors the 'data'/'tasks' siblings,
           // never gated on data presence) and BEFORE 'links', per tab-order canon.
           { id: 'notes', label: t('contacts.detail.subtabs.notes') },
+          // K-288: linked-notes feed's own sub-tab, right after Notities.
+          { id: 'linkedNotes', label: t('notes.linkedNotes') },
           // TIJDLIJN-SUBDRILL-1: timeline second-to-last, before Koppelingen (§3A(d)).
           // DD-FE-6 (no empty tabs): the panel needs the customer id for the nested /activity route.
           ...(contact.customerId != null ? [{ id: 'timeline', label: t('drawer.tabs.timeline') }] : []),
@@ -459,13 +462,13 @@ export default function ContactDetail({ contact, locations, departments, statuse
           see useContactNotes' docblock). customerId can be null on legacy/edge data
           (mirrors the conversations/changelog gating above). */}
       {subTab === 'notes' && contact.customerId != null && (
-        <>
-          <ContactNotesTab contactId={contact.id as Id} customerId={contact.customerId} />
-          {/* NOTITIE-DOORLINK-1 (CMBE 64d976ff): chain-linked notes naming this
-              contact as principal — additive section on the frozen family (§3B). */}
-          <NoteFeedList entity="customers" id={contact.customerId}
-            sub={{ kind: 'contacts', id: contact.id as Id }} />
-        </>
+        <ContactNotesTab contactId={contact.id as Id} customerId={contact.customerId} />
+      )}
+      {/* K-288: chain-linked notes naming this contact as principal (CMBE 64d976ff),
+          now its own sub-tab instead of an inline section under Notities. */}
+      {subTab === 'linkedNotes' && contact.customerId != null && (
+        <LinkedNotesTab entity="customers" id={contact.customerId}
+          sub={{ kind: 'contacts', id: contact.id as Id }} />
       )}
       {subTab === 'timeline' && contact.customerId != null && (
         <SubEntityTimelineTab endpoint={`/customers/${contact.customerId}/contacts/${contact.id}/activity`} />

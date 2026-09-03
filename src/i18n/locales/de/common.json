@@ -555,7 +555,20 @@
       "loadMore": "Mehr laden",
       "loadingMore": "Wird geladen…",
       "sourceDeleted": "{{label}} (gelöscht)",
-      "masked": "Inhalt ausgeblendet (keine Kandidatenrechte)"
+      "masked": "Inhalt ausgeblendet (keine Kandidatenrechte)",
+      "allSources": "Alle Quellen",
+      "search": "Verknüpfte Notizen suchen…",
+      "filterLabel": "Quelle",
+      "saveError": "Speichern fehlgeschlagen – bitte erneut versuchen.",
+      "sourceType": {
+        "candidate": "Kandidat",
+        "customer": "Kunde",
+        "application": "Bewerbung",
+        "match": "Match",
+        "opportunity": "Chance",
+        "vacancy": "Stelle",
+        "task": "Aufgabe"
+      }
     },
     "editedBy": "bearbeitet von {{name}}",
     "allTypes": "Alle Typen",

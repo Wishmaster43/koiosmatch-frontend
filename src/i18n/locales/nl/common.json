@@ -555,7 +555,20 @@
       "loadMore": "Meer laden",
       "loadingMore": "Laden…",
       "sourceDeleted": "{{label}} (verwijderd)",
-      "masked": "Inhoud afgeschermd (geen kandidaat-rechten)"
+      "masked": "Inhoud afgeschermd (geen kandidaat-rechten)",
+      "allSources": "Alle bronnen",
+      "search": "Zoek gekoppelde notities…",
+      "filterLabel": "Bron",
+      "saveError": "Opslaan is niet gelukt. Probeer het opnieuw.",
+      "sourceType": {
+        "candidate": "Kandidaat",
+        "customer": "Klant",
+        "application": "Sollicitatie",
+        "match": "Match",
+        "opportunity": "Kans",
+        "vacancy": "Vacature",
+        "task": "Taak"
+      }
     },
     "editedBy": "bewerkt door {{name}}",
     "allTypes": "Alle types",

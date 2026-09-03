@@ -582,6 +582,7 @@
   },
   "notes": {
     "notes": "Notes",
+    "linkedNotes": "Linked notes",
     "newNote": "New note",
     "type": "Type",
     "save": "Save",

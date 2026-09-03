@@ -555,7 +555,20 @@
       "loadMore": "Charger plus",
       "loadingMore": "Chargement…",
       "sourceDeleted": "{{label}} (supprimé)",
-      "masked": "Contenu masqué (pas d’accès candidats)"
+      "masked": "Contenu masqué (pas d’accès candidats)",
+      "allSources": "Toutes les sources",
+      "search": "Rechercher des notes liées…",
+      "filterLabel": "Source",
+      "saveError": "Échec de l'enregistrement. Veuillez réessayer.",
+      "sourceType": {
+        "candidate": "Candidat",
+        "customer": "Client",
+        "application": "Candidature",
+        "match": "Match",
+        "opportunity": "Opportunité",
+        "vacancy": "Poste",
+        "task": "Tâche"
+      }
     },
     "editedBy": "modifié par {{name}}",
     "allTypes": "Tous les types",

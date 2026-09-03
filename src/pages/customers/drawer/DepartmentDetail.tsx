@@ -269,6 +269,8 @@ export default function DepartmentDetail({ department, locations, statuses, cont
           // drawer.tabs.notes/documents keys (already five-locale complete) —
           // right after Sollicitaties, per Danny's ask.
           { id: 'notes',     label: t('drawer.tabs.notes') },
+          // K-288: linked-notes feed's own sub-tab, right after Notities.
+          { id: 'linkedNotes', label: t('notes.linkedNotes') },
           { id: 'documents', label: t('drawer.tabs.documents') },
           { id: 'matches',   label: t('drawer.tabs.matches') },
           // SCOPED-LIST-TAB-1: reuses the existing top-level drawer.tabs.opportunities

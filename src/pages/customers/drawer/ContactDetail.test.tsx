@@ -56,6 +56,11 @@ const mockUseApps = vi.fn<() => { isAppEnabled: (id: string) => boolean }>()
 vi.mock('@/context/AppsContext', () => ({ useApps: () => mockUseApps() }))
 beforeEach(() => { mockUseApps.mockReturnValue({ isAppEnabled: () => false }) })
 
+// K-288: the linked-notes feed is now its own sub-tab (LinkedNotesTab), built in a
+// parallel lane with its own suite — stub it here so this file never touches its
+// internals (react-query, useNoteFeed, …).
+vi.mock('@/components/drawer/tabs/notes/LinkedNotesTab', () => ({ default: () => <div data-testid="linked-notes-tab" /> }))
+
 // Resolve the active locale's own copy so assertions never guess/hardcode a language.
 const ct = (key: string, opts?: Record<string, unknown>) => i18n.t(key, { ns: 'customers', ...opts })
 const cm = (key: string, opts?: Record<string, unknown>) => i18n.t(key, { ns: 'common', ...opts })
@@ -494,6 +499,19 @@ describe('ContactDetail · timeline tab (TIJDLIJN-SUBDRILL-1)', () => {
 
     // Verify the endpoint is called when the tab opens.
     await waitFor(() => expect(vi.mocked(api.get)).toHaveBeenCalledWith('/customers/cust-1/contacts/c1/activity', expect.anything()))
+  })
+})
+
+/** K-288: the linked-notes feed moved out of the Notities sub-tab into its own
+ *  sub-tab, right after Notities. */
+describe('ContactDetail · linkedNotes sub-tab (K-288)', () => {
+  it('renders the LinkedNotesTab stub when the sub-tab is clicked', async () => {
+    const user = userEvent.setup()
+    render(<ContactDetail contact={baseContact()} locations={locations} departments={departments} statuses={statuses}
+      onSave={vi.fn()} onDelete={vi.fn()} close={vi.fn()} />)
+
+    await user.click(screen.getByRole('tab', { name: ct('notes.linkedNotes') }))
+    expect(await screen.findByTestId('linked-notes-tab')).toBeInTheDocument()
   })
 })
 

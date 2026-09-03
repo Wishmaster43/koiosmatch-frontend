@@ -555,7 +555,20 @@
       "loadMore": "Carregar mais",
       "loadingMore": "A carregar…",
       "sourceDeleted": "{{label}} (eliminado)",
-      "masked": "Conteúdo ocultado (sem acesso ao candidato)"
+      "masked": "Conteúdo ocultado (sem acesso ao candidato)",
+      "allSources": "Todas as fontes",
+      "search": "Pesquisar notas associadas…",
+      "filterLabel": "Fonte",
+      "saveError": "Não foi possível guardar. Tente novamente.",
+      "sourceType": {
+        "candidate": "Candidato",
+        "customer": "Cliente",
+        "application": "Candidatura",
+        "match": "Match",
+        "opportunity": "Oportunidade",
+        "vacancy": "Vaga",
+        "task": "Tarefa"
+      }
     },
     "editedBy": "editado por {{name}}",
     "allTypes": "Todos os tipos",

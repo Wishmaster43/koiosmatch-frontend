@@ -555,7 +555,20 @@
       "loadMore": "Carica altro",
       "loadingMore": "Caricamento…",
       "sourceDeleted": "{{label}} (eliminato)",
-      "masked": "Contenuto oscurato (nessun accesso al candidato)"
+      "masked": "Contenuto oscurato (nessun accesso al candidato)",
+      "allSources": "Tutte le fonti",
+      "search": "Cerca note collegate…",
+      "filterLabel": "Fonte",
+      "saveError": "Salvataggio non riuscito. Riprova.",
+      "sourceType": {
+        "candidate": "Candidato",
+        "customer": "Cliente",
+        "application": "Candidatura",
+        "match": "Match",
+        "opportunity": "Opportunità",
+        "vacancy": "Posizione",
+        "task": "Attività"
+      }
     },
     "editedBy": "modificato da {{name}}",
     "allTypes": "Tutti i tipi",

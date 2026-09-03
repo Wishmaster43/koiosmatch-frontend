@@ -44,10 +44,10 @@ vi.mock('@/pages/candidates/hooks/useCandidateNotes', () => ({
   }),
 }))
 vi.mock('./CandidateTasks', () => ({ default: () => <div data-testid="candidate-tasks-stub" /> }))
-// NOTITIE-DOORLINK-1: the additive linked-notes section needs a QueryClientProvider
-// (react-query) this test tree doesn't set up — out of scope here (its own suite
-// covers it), stub to a marker so it never touches useNoteFeed.
-vi.mock('@/components/drawer/tabs/notes/NoteFeedList', () => ({ default: () => <div data-testid="note-feed-list-stub" /> }))
+// K-288: the linked-notes feed is now its own sub-tab (LinkedNotesTab), built in a
+// parallel lane with its own suite — stub it here so this file never touches its
+// internals (react-query, useNoteFeed, …).
+vi.mock('@/components/drawer/tabs/notes/LinkedNotesTab', () => ({ default: () => <div data-testid="linked-notes-tab" /> }))
 
 const candidate = (consent: Record<string, unknown> = {}, extra: Partial<Candidate> = {}): Candidate =>
   ({ id: 1, consent, timeline: [], name: 'Piet', initials: 'PJ', ownerInitials: 'AB', ...extra } as unknown as Candidate)
@@ -420,5 +420,26 @@ describe('CommunicationTab · notes load failure (Class B)', () => {
     render(<CommunicationTab c={candidate()} />)
     expect(screen.getByText('communication.notesLoadError')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'common:error.retry' })).toBeInTheDocument()
+  })
+})
+
+// K-288: the linked-notes feed moved out of the Notities section into its own
+// sub-tab, right after Notities — same deep-link validation as every other tab.
+describe('CommunicationTab · linkedNotes sub-tab (K-288)', () => {
+  it('renders the LinkedNotesTab stub when the sub-tab is clicked', async () => {
+    const user = userEvent.setup()
+    render(<CommunicationTab c={candidate()} />)
+    await user.click(screen.getByRole('tab', { name: 'sections.linkedNotes' }))
+    expect(screen.getByTestId('linked-notes-tab')).toBeInTheDocument()
+  })
+
+  it('lands on linkedNotes via the deep-link initialSubTab prop', () => {
+    render(<CommunicationTab c={candidate()} initialSubTab="linkedNotes" />)
+    expect(screen.getByTestId('linked-notes-tab')).toBeInTheDocument()
+  })
+
+  it('the Notities sub-tab no longer renders the linked-notes feed inline', () => {
+    render(<CommunicationTab c={candidate()} />)
+    expect(screen.queryByTestId('linked-notes-tab')).not.toBeInTheDocument()
   })
 })

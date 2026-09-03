@@ -78,6 +78,8 @@ import ScopedApplicationsTab from './ScopedApplicationsTab'
 // NOTES-LOC-DEPT-1/DOCS-LOC-DEPT-1: this location's own Notities/Documenten
 // sub-tabs (§3A — shared config-driven surfaces, never a forked copy).
 import ScopedNotesTab from './ScopedNotesTab'
+// K-288: linked-notes feed moved out of ScopedNotesTab into its own sub-tab.
+import LinkedNotesTab from '@/components/drawer/tabs/notes/LinkedNotesTab'
 import ScopedDocumentsTab from './ScopedDocumentsTab'
 import type { ContactPayload } from '../hooks/useCustomerContacts'
 import type { DeleteResult } from '../hooks/subEntityDelete'
@@ -184,7 +186,8 @@ export default function LocationDetail({
   // WORKLIST note about "no location Taken ("Tasks") tab" is now superseded by that ticket).
   // NOTES-LOC-DEPT-1/DOCS-LOC-DEPT-1 added 'notes'/'documents', right after 'applications'.
   // TIJDLIJN-SUBDRILL-1: 'timeline' second-to-last, before 'links'.
-  const [subTab, setSubTab] = useState<'address' | 'departments' | 'contacts' | 'vacancies' | 'applications' | 'notes' | 'documents' | 'matches' | 'opportunities' | 'tasks' | 'extra' | 'timeline' | 'links'>('address')
+  // K-288: 'linkedNotes' added right after 'notes' — the linked-notes feed's own sub-tab.
+  const [subTab, setSubTab] = useState<'address' | 'departments' | 'contacts' | 'vacancies' | 'applications' | 'notes' | 'linkedNotes' | 'documents' | 'matches' | 'opportunities' | 'tasks' | 'extra' | 'timeline' | 'links'>('address')
 
   const statusOptions = statuses.map(s => ({ value: String(s.id ?? s.value), label: s.label }))
 
@@ -295,6 +298,8 @@ export default function LocationDetail({
           // drawer.tabs.notes/documents keys (already five-locale complete) —
           // right after Sollicitaties, per Danny's ask.
           { id: 'notes',       label: t('drawer.tabs.notes') },
+          // K-288: linked-notes feed's own sub-tab, right after Notities.
+          { id: 'linkedNotes', label: t('notes.linkedNotes') },
           { id: 'documents',   label: t('drawer.tabs.documents') },
           { id: 'matches',     label: t('drawer.tabs.matches') },
           // SCOPED-LIST-TAB-1: reuses the existing top-level drawer.tabs.opportunities
@@ -356,6 +361,11 @@ export default function LocationDetail({
           departments' notes/documents — a department is a leaf, nothing rolls up
           under it). Mounted only while active, mirrors ScopedApplicationsTab. */}
       {subTab === 'notes' && <ScopedNotesTab scope="location" id={l.id as Id} customerId={customerId} />}
+      {/* K-288: notes written elsewhere in the chain that name this location as
+          principal (NOTITIE-DOORLINK-1) — now its own sub-tab, right after Notities. */}
+      {subTab === 'linkedNotes' && customerId != null && (
+        <LinkedNotesTab entity="customers" id={customerId} sub={{ kind: 'locations', id: l.id as Id }} />
+      )}
       {subTab === 'documents' && <ScopedDocumentsTab scope="location" id={l.id as Id} customerId={customerId} />}
       {subTab === 'matches' && <ScopedMatchesTab scope="location" id={l.id as Id} customerId={customerId} />}
       {/* SCOPED-LIST-TAB-1: read-only, opens the real opportunity on row-click.

@@ -48,6 +48,22 @@ describe('useNoteFeed', () => {
     expect(url).toBe('/customers/cu1/locations/loc9/note-feed')
   })
 
+  it('adds source_type to the request when a filter is passed (K-288)', async () => {
+    vi.mocked(api.get).mockResolvedValueOnce({ data: { data: [], current_page: 1, last_page: 1, total: 0, per_page: 25 } } as never)
+    renderHook(() => useNoteFeed('candidates', 'c1', true, undefined, 'application'), { wrapper })
+    await waitFor(() => expect(api.get).toHaveBeenCalled())
+    const [, config] = vi.mocked(api.get).mock.calls[0]
+    expect(config?.params).toEqual({ only_linked: 1, source_type: 'application', per_page: 25, page: 1 })
+  })
+
+  it('omits source_type when no filter is passed', async () => {
+    vi.mocked(api.get).mockResolvedValueOnce({ data: { data: [], current_page: 1, last_page: 1, total: 0, per_page: 25 } } as never)
+    renderHook(() => useNoteFeed('candidates', 'c1', true), { wrapper })
+    await waitFor(() => expect(api.get).toHaveBeenCalled())
+    const [, config] = vi.mocked(api.get).mock.calls[0]
+    expect(config?.params).not.toHaveProperty('source_type')
+  })
+
   it('does not fetch while id is null/undefined', () => {
     renderHook(() => useNoteFeed('candidates', undefined, false), { wrapper })
     expect(api.get).not.toHaveBeenCalled()

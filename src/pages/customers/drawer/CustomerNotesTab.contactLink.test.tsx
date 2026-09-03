@@ -13,8 +13,10 @@ import i18n from '@/i18n'
 import CustomerNotesTab from './CustomerNotesTab'
 import type { Customer, CustomerNote } from '@/types/customer'
 
-// NOTITIE-DOORLINK-1: the additive linked-notes section needs a QueryClientProvider (react-query) this test tree doesn't set up — out of scope here (its own suite covers it), stub to a marker so it never touches useNoteFeed.
-vi.mock('@/components/drawer/tabs/notes/NoteFeedList', () => ({ default: () => <div data-testid="note-feed-list-stub" /> }))
+// K-288: the linked-notes feed is now its own sub-tab (LinkedNotesTab), built in a
+// parallel lane with its own suite — stub it here so this file never touches its
+// internals (react-query, useNoteFeed, …).
+vi.mock('@/components/drawer/tabs/notes/LinkedNotesTab', () => ({ default: () => <div data-testid="linked-notes-tab" /> }))
 vi.mock('@/lib/useNoteTypes', () => ({
   useNoteTypes: () => ({ types: [], writableTypes: [] }),
   // The shared NotesTab reads this directly (system-event rows) — must ride along.

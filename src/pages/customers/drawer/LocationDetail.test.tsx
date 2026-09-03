@@ -89,6 +89,12 @@ vi.mock('./ScopedNotesTab', () => ({
   default: ({ scope, id, customerId }: { scope: string; id?: string; customerId?: string }) =>
     <div data-testid="scoped-notes">{scope}:{id}:{customerId}</div>,
 }))
+// K-288: linked-notes feed's own sub-tab — same stub convention as ScopedNotesTab
+// above, this file only proves LocationDetail's OWN wiring (entity/id/sub).
+vi.mock('@/components/drawer/tabs/notes/LinkedNotesTab', () => ({
+  default: ({ entity, id, sub }: { entity: string; id?: string; sub?: { kind: string; id?: string } }) =>
+    <div data-testid="linked-notes-tab">{entity}:{id}:{sub?.kind}:{sub?.id}</div>,
+}))
 vi.mock('./ScopedDocumentsTab', () => ({
   default: ({ scope, id, customerId }: { scope: string; id?: string; customerId?: string }) =>
     <div data-testid="scoped-documents">{scope}:{id}:{customerId}</div>,
@@ -732,6 +738,18 @@ describe('LocationDetail · Notities/Documenten sub-tabs (NOTES-LOC-DEPT-1/DOCS-
     render(<LocationDetail location={location()} onSave={vi.fn()} {...baseProps} />)
     await user.click(screen.getByRole('tab', { name: ct('drawer.tabs.documents') }))
     expect(screen.getByTestId('scoped-documents')).toHaveTextContent('location:loc-1:cust-1')
+  })
+})
+
+/** K-288: the linked-notes feed (NOTITIE-DOORLINK-1) moved out of ScopedNotesTab
+ *  into its own sub-tab, right after Notities — wired with the customer id +
+ *  the "locations" sub kind + this location's own id. */
+describe('LocationDetail · linkedNotes sub-tab (K-288)', () => {
+  it('wires entity/id/sub into LinkedNotesTab', async () => {
+    const user = userEvent.setup()
+    render(<LocationDetail location={location()} onSave={vi.fn()} {...baseProps} />)
+    await user.click(screen.getByRole('tab', { name: ct('notes.linkedNotes') }))
+    expect(screen.getByTestId('linked-notes-tab')).toHaveTextContent('customers:cust-1:locations:loc-1')
   })
 })
 

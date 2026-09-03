@@ -1,22 +1,21 @@
 /**
- * ScopedNotesTab — pins for the NOTITIE-DOORLINK-1 sub-entity mounts (r2-N3):
- * the scope→route-kind mapping and the sibling render of the linked-notes
- * section (it must survive an own-notes load failure). Also pins NOTE-TYPE-
- * WIDEN-1 (BUG-NOTE-SCOPE-1): the component must wire useNoteTypesFor with the
- * WIDENED entity set for its scope, never the bare scope alone — the exact
- * regression commit bdce7008 introduced. The hook's own real fetch/merge/label
- * resolution (both GETs firing, union order, labelOf) is pinned separately in
- * src/lib/useNoteTypes.widen.test.tsx; here we pin the component's WIRING.
+ * ScopedNotesTab — pins NOTE-TYPE-WIDEN-1 (BUG-NOTE-SCOPE-1): the component must
+ * wire useNoteTypesFor with the WIDENED entity set for its scope, never the bare
+ * scope alone — the exact regression commit bdce7008 introduced. The hook's own
+ * real fetch/merge/label resolution (both GETs firing, union order, labelOf) is
+ * pinned separately in src/lib/useNoteTypes.widen.test.tsx; here we pin the
+ * component's WIRING.
+ *
+ * K-288: the linked-notes feed (NOTITIE-DOORLINK-1) this file used to pin as a
+ * sibling mount moved OUT of this component into its own sub-tab on the host
+ * (LocationDetail/DepartmentDetail) — that coverage now lives in those files'
+ * own test suites.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import { createElement } from 'react'
 import ScopedNotesTab from './ScopedNotesTab'
 
-const feedProps = vi.fn()
-vi.mock('@/components/drawer/tabs/notes/NoteFeedList', () => ({
-  default: (props: Record<string, unknown>) => { feedProps(props); return createElement('div', null, 'FEED') },
-}))
 // Stub renders each note's resolved label via chipTypes (mirrors NoteRow's own
 // lookup) so a test can assert the WIDENED label shows, not a raw type slug.
 vi.mock('@/components/drawer/tabs/NotesTab', () => ({
@@ -35,34 +34,7 @@ vi.mock('../hooks/useCustomerDrawerData', () => ({
 import { useScopedCustomerNotes } from '../hooks/useCustomerDrawerData'
 import { useNoteTypesFor } from '@/lib/useNoteTypes'
 
-beforeEach(() => { feedProps.mockClear(); vi.mocked(useNoteTypesFor).mockClear() })
-
-describe('ScopedNotesTab · linked-notes mount', () => {
-  it('maps scope=location to the locations feed kind under the owning customer', () => {
-    render(createElement(ScopedNotesTab, { scope: 'location', id: 'loc9', customerId: 'cu1' }))
-    expect(feedProps).toHaveBeenCalledWith(expect.objectContaining({
-      entity: 'customers', id: 'cu1', sub: { kind: 'locations', id: 'loc9' },
-    }))
-  })
-
-  it('maps scope=department to the departments feed kind', () => {
-    render(createElement(ScopedNotesTab, { scope: 'department', id: 'dep3', customerId: 'cu1' }))
-    expect(feedProps).toHaveBeenCalledWith(expect.objectContaining({
-      sub: { kind: 'departments', id: 'dep3' },
-    }))
-  })
-
-  it('renders the linked-notes section even while the own-notes load FAILED (sibling mount)', async () => {
-    vi.mocked(useScopedCustomerNotes).mockReturnValueOnce({ notes: [], loading: false, error: true, reload: vi.fn() } as never)
-    render(createElement(ScopedNotesTab, { scope: 'location', id: 'loc9', customerId: 'cu1' }))
-    await waitFor(() => expect(screen.getByText('FEED')).toBeInTheDocument())
-  })
-
-  it('omits the feed without a customerId (no route to build)', () => {
-    render(createElement(ScopedNotesTab, { scope: 'location', id: 'loc9' }))
-    expect(feedProps).not.toHaveBeenCalled()
-  })
-})
+beforeEach(() => { vi.mocked(useNoteTypesFor).mockClear() })
 
 describe('ScopedNotesTab · NOTE-TYPE-WIDEN-1 (BUG-NOTE-SCOPE-1)', () => {
   it('scope=location widens useNoteTypesFor to [customer,location], and a historical "contract" note (a customer-level type) renders its resolved label, not the raw slug', () => {

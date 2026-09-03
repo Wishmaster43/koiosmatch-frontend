@@ -10,7 +10,8 @@ import { useTranslation } from 'react-i18next'
 import { MessageCircle, Briefcase } from 'lucide-react'
 import { useDateFormat } from '@/lib/datetime'
 import NotesTabJs from '@/components/drawer/tabs/NotesTab'
-import NoteFeedList from '@/components/drawer/tabs/notes/NoteFeedList'
+// K-288: linked-notes feed moved out of the Notities section into its own sub-tab.
+import LinkedNotesTab from '@/components/drawer/tabs/notes/LinkedNotesTab'
 import SubTabBar from '@/components/drawer/SubTabBar'
 import SectionCard from '@/components/ui/SectionCard'
 import Toggle from '@/components/ui/Toggle'
@@ -44,7 +45,8 @@ function matchContext(ev: Record<string, unknown>): Record<string, unknown> | nu
 }
 
 // Known sub-tab ids (deep-link validation lives here, not in the drawer).
-const KNOWN_SUB_TABS = ['conversations', 'notes', 'tasks', 'timeline', 'consent'] as const
+// K-288: 'linkedNotes' added after 'notes' — the linked-notes feed's own sub-tab.
+const KNOWN_SUB_TABS = ['conversations', 'notes', 'linkedNotes', 'tasks', 'timeline', 'consent'] as const
 
 export default function CommunicationTab({ c, onSave, onEditStatusEvent, initialSubTab, onRefresh }: { c: Candidate; onSave?: (consent: Record<string, unknown>) => void
   // Optional (Danny 2026-07-20, job A): forwarded to the shared NotesTab so the
@@ -263,6 +265,7 @@ export default function CommunicationTab({ c, onSave, onEditStatusEvent, initial
         tabs={[
           { id: 'conversations', label: t('sections.conversations') },
           { id: 'notes',         label: t('sections.notes') },
+          { id: 'linkedNotes',   label: t('sections.linkedNotes') },
           { id: 'tasks',         label: t('drawer.tasksTitle') },
           { id: 'timeline',      label: t('sections.timeline') },
           { id: 'consent',       label: t('communication.consentTitle') },
@@ -321,14 +324,10 @@ export default function CommunicationTab({ c, onSave, onEditStatusEvent, initial
         </p>
       )}
       {/* Notes / timeline / conversations — one NotesTab section per sub-tab. */}
-      {subTab === 'notes'         && (
-        <>
-          <NotesTab {...notesProps} showTimeline={false} showConversations={false} />
-          {/* NOTITIE-DOORLINK-1 (additive, frozen screen §GO 28-08): notes filed on a
-              linked application/match/vacancy/… that reached this candidate. */}
-          <NoteFeedList entity="candidates" id={c.id} />
-        </>
-      )}
+      {subTab === 'notes'         && <NotesTab {...notesProps} showTimeline={false} showConversations={false} />}
+      {/* K-288: linked-notes feed (notes filed on a linked application/match/vacancy/…
+          that reached this candidate) is now its own sub-tab, next to Notities. */}
+      {subTab === 'linkedNotes'   && <LinkedNotesTab entity="candidates" id={c.id} />}
       {subTab === 'timeline'      && <NotesTab {...notesProps} showNotes={false} showConversations={false} />}
       {subTab === 'conversations' && (
         <>

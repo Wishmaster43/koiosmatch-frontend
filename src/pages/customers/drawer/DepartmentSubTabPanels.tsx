@@ -12,6 +12,8 @@
 import ScopedVacanciesTab from './ScopedVacanciesTab'
 import ScopedApplicationsTab from './ScopedApplicationsTab'
 import ScopedNotesTab from './ScopedNotesTab'
+// K-288: linked-notes feed moved out of ScopedNotesTab into its own sub-tab.
+import LinkedNotesTab from '@/components/drawer/tabs/notes/LinkedNotesTab'
 import ScopedDocumentsTab from './ScopedDocumentsTab'
 import ScopedMatchesTab from './ScopedMatchesTab'
 import ScopedOpportunitiesTab from './ScopedOpportunitiesTab'
@@ -24,7 +26,8 @@ import type { Department } from '@/types/customer'
 import type { Id } from '@/types/common'
 
 type Tx = (key: string, opts?: Record<string, unknown>) => string
-export type DepartmentSubTab = 'data' | 'contacts' | 'vacancies' | 'applications' | 'notes' | 'documents' | 'matches' | 'opportunities' | 'tasks' | 'extra' | 'timeline' | 'links'
+// K-288: 'linkedNotes' added right after 'notes' — the linked-notes feed's own sub-tab.
+export type DepartmentSubTab = 'data' | 'contacts' | 'vacancies' | 'applications' | 'notes' | 'linkedNotes' | 'documents' | 'matches' | 'opportunities' | 'tasks' | 'extra' | 'timeline' | 'links'
 
 // Renders the active non-data, non-contacts sub-tab body for DepartmentDetail.
 export default function DepartmentSubTabPanels({ subTab, department, customerId, customerName, canLinkBackoffice, showKoppelingen, onSave, t }: {
@@ -53,6 +56,11 @@ export default function DepartmentSubTabPanels({ subTab, department, customerId,
           — a department is a LEAF, so neither scoped fetch adds a rollup param
           (mirrors LocationDetail's identical wiring, minus the rollup). */}
       {subTab === 'notes' && <ScopedNotesTab scope="department" id={department.id as Id} customerId={customerId} />}
+      {/* K-288: notes written elsewhere in the chain that name this department as
+          principal (NOTITIE-DOORLINK-1) — now its own sub-tab, right after Notities. */}
+      {subTab === 'linkedNotes' && customerId != null && (
+        <LinkedNotesTab entity="customers" id={customerId} sub={{ kind: 'departments', id: department.id as Id }} />
+      )}
       {subTab === 'documents' && <ScopedDocumentsTab scope="department" id={department.id as Id} customerId={customerId} />}
       {subTab === 'matches' && <ScopedMatchesTab scope="department" id={department.id as Id} customerId={customerId} />}
       {/* SCOPED-LIST-TAB-1: read-only, opens the real opportunity on row-click.

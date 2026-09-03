@@ -266,6 +266,50 @@ describe('DrawerFilterMenu · range row', () => {
   })
 })
 
+/**
+ * K-288 (linked-notes "Alleen directe notities" switch): a minimal boolean row
+ * — the shared Toggle atom, no options/all-label, same badge/clear-all wiring
+ * as every other row type.
+ */
+describe('DrawerFilterMenu · toggle row', () => {
+  const makeToggleFilters = (over: Partial<{ value: boolean; onChange: (v: boolean) => void }> = {}): DrawerFilterConfig[] => [{
+    type: 'toggle', key: 'onlyDirect', label: 'Only direct', ariaLabel: 'Only direct',
+    value: over.value ?? false, onChange: over.onChange ?? vi.fn(),
+  }]
+
+  it('renders a switch reflecting the current value', async () => {
+    const user = userEvent.setup()
+    render(<DrawerFilterMenu filters={makeToggleFilters({ value: true })} label="Filter" title="Filters" clearAllLabel="Clear all" />)
+    await user.click(screen.getByRole('button', { name: 'Filter' }))
+    expect(screen.getByRole('switch', { name: 'Only direct' })).toBeChecked()
+  })
+
+  it('clicking the switch calls onChange with the flipped value', async () => {
+    const user = userEvent.setup()
+    const onChange = vi.fn()
+    render(<DrawerFilterMenu filters={makeToggleFilters({ onChange })} label="Filter" title="Filters" clearAllLabel="Clear all" />)
+    await user.click(screen.getByRole('button', { name: 'Filter' }))
+    await user.click(screen.getByRole('switch', { name: 'Only direct' }))
+    expect(onChange).toHaveBeenCalledWith(true)
+  })
+
+  it('the badge counts an ON toggle as 1, an OFF one as 0', () => {
+    const { rerender } = render(<DrawerFilterMenu filters={makeToggleFilters({ value: false })} label="Filter" title="Filters" clearAllLabel="Clear all" />)
+    expect(screen.queryByText('1')).toBeNull()
+    rerender(<DrawerFilterMenu filters={makeToggleFilters({ value: true })} label="Filter" title="Filters" clearAllLabel="Clear all" />)
+    expect(screen.getByText('1')).toBeInTheDocument()
+  })
+
+  it('clear-all switches an ON toggle back off', async () => {
+    const user = userEvent.setup()
+    const onChange = vi.fn()
+    render(<DrawerFilterMenu filters={makeToggleFilters({ value: true, onChange })} label="Filter" title="Filters" clearAllLabel="Clear all" />)
+    await user.click(screen.getByRole('button', { name: 'Filter' }))
+    await user.click(screen.getByRole('button', { name: 'Clear all' }))
+    expect(onChange).toHaveBeenCalledWith(false)
+  })
+})
+
 describe('DrawerFilterMenu · date row', () => {
   const makeDateFilters = (over: Partial<{ value: string; onChange: (v: string) => void }> = {}): DrawerFilterConfig[] => [{
     type: 'date', key: 'availableFrom', label: 'Available from', value: over.value ?? '',

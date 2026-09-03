@@ -13,8 +13,6 @@ import type { ComponentType } from 'react'
 import { useTranslation } from 'react-i18next'
 import api from '@/lib/api'
 import NotesTabJs from '@/components/drawer/tabs/NotesTab'
-// NOTITIE-DOORLINK-1: the location/department's own linked-notes feed section.
-import NoteFeedList from '@/components/drawer/tabs/notes/NoteFeedList'
 import { useNoteTypesFor } from '@/lib/useNoteTypes'
 import type { NoteTypeEntity } from '@/lib/useNoteTypes'
 import { initialsOf } from '@/lib/initials'
@@ -80,41 +78,32 @@ export default function ScopedNotesTab({ scope, id, customerId }: {
       .catch(err => notifyError(extractApiError(err, t('common:actionFailed'))))
   }
 
-  // Four explicit UI states (§3) for the OWN-notes fetch only — rendered as a sibling
-  // to NoteFeedList below, so a failed own-notes load never hides the independent
-  // chain-linked-notes section (mirrors ContactDetail.tsx:432's sibling mount).
+  // Four explicit UI states (§3) for the OWN-notes fetch.
+  // K-288: the linked-notes feed (NOTITIE-DOORLINK-1) that used to render as a
+  // sibling here moved to its own sub-tab on the host (LocationDetail/DepartmentDetail).
+  if (loading) {
+    return <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('page.loading')}</div>
+  }
+  if (error) {
+    return <div style={{ fontSize: 12, color: 'var(--color-danger-text)' }}>{t('scopedList.loadError')}</div>
+  }
   return (
-    <>
-    {loading ? (
-      <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('page.loading')}</div>
-    ) : error ? (
-      <div style={{ fontSize: 12, color: 'var(--color-danger-text)' }}>{t('scopedList.loadError')}</div>
-    ) : (
-      <NotesTab
-        notes={notes} onAddNote={addNote}
-        popout={customerId ? { entity: 'customer', id: customerId } : undefined}
-        onEditNote={(i: number, payload: { type: string; title: string; body: string; language?: string }) => editNote(notes[i]?.id as Id | undefined, payload)}
-        onDeleteNote={(i: number) => deleteNote(notes[i]?.id as Id | undefined)}
-        noteTypes={noteTypes} chipTypes={chipTypes}
-        authorInitials={authorInitials}
-        showTimeline={false} showConversations={false}
-        labels={{
-          notes: t('notes.notes'), newNote: t('notes.newNote'), type: t('notes.type'),
-          save: t('notes.save'), cancel: t('notes.cancel'), edit: t('notes.edit'),
-          notesEmpty: t('notes.notesEmpty'),
-          notePlaceholder: () => t('notes.notePlaceholder'),
-          searchPlaceholder: t('notes.searchPlaceholder'),
-          deleteNote: t('notes.deleteNote'), deleteConfirm: t('notes.deleteConfirm'),
-        }}
-      />
-    )}
-    {/* NOTITIE-DOORLINK-1 (CMBE 64d976ff): notes written elsewhere in the chain
-        that name THIS location/department as principal — read-only, under the
-        entity's own notes. */}
-    {customerId != null && (
-      <NoteFeedList entity="customers" id={customerId}
-        sub={{ kind: scope === 'location' ? 'locations' : 'departments', id }} />
-    )}
-  </>
+    <NotesTab
+      notes={notes} onAddNote={addNote}
+      popout={customerId ? { entity: 'customer', id: customerId } : undefined}
+      onEditNote={(i: number, payload: { type: string; title: string; body: string; language?: string }) => editNote(notes[i]?.id as Id | undefined, payload)}
+      onDeleteNote={(i: number) => deleteNote(notes[i]?.id as Id | undefined)}
+      noteTypes={noteTypes} chipTypes={chipTypes}
+      authorInitials={authorInitials}
+      showTimeline={false} showConversations={false}
+      labels={{
+        notes: t('notes.notes'), newNote: t('notes.newNote'), type: t('notes.type'),
+        save: t('notes.save'), cancel: t('notes.cancel'), edit: t('notes.edit'),
+        notesEmpty: t('notes.notesEmpty'),
+        notePlaceholder: () => t('notes.notePlaceholder'),
+        searchPlaceholder: t('notes.searchPlaceholder'),
+        deleteNote: t('notes.deleteNote'), deleteConfirm: t('notes.deleteConfirm'),
+      }}
+    />
   )
 }
