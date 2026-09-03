@@ -4,7 +4,6 @@
     "location": "Localização"
   },
   "addShift": "Adicionar turno",
-  "previewNotice": "Os turnos aqui apresentados são o seu planeamento real. Adicionar um novo turno neste calendário ainda não é guardado.",
   "loadErrorShifts": "Não foi possível carregar os turnos.",
   "previewSaveTitle": "Ainda não ligado. Este turno não será guardado.",
   "sectionOrder": "Encomenda",
@@ -116,5 +115,6 @@
   },
   "prevPeriod": "Período anterior",
   "nextPeriod": "Próximo período",
-  "viewSwitcher": "Vista"
+  "viewSwitcher": "Vista",
+  "pickOrderFirst": "Escolha primeiro uma ordem"
 }

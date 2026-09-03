@@ -4,7 +4,6 @@
     "location": "Locatie"
   },
   "addShift": "Dienst toevoegen",
-  "previewNotice": "De diensten hier zijn je echte planning. Een nieuwe dienst toevoegen in deze kalender wordt nog niet opgeslagen.",
   "loadErrorShifts": "Diensten konden niet worden geladen.",
   "previewSaveTitle": "Nog niet gekoppeld. Deze dienst wordt niet opgeslagen.",
   "sectionOrder": "Order",
@@ -116,5 +115,6 @@
   },
   "prevPeriod": "Vorige periode",
   "nextPeriod": "Volgende periode",
-  "viewSwitcher": "Weergave"
+  "viewSwitcher": "Weergave",
+  "pickOrderFirst": "Kies eerst een opdracht"
 }

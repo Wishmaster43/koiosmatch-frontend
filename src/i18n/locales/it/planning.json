@@ -4,7 +4,6 @@
     "location": "Sede"
   },
   "addShift": "Aggiungi turno",
-  "previewNotice": "I turni qui mostrati sono la tua pianificazione reale. Aggiungere un nuovo turno in questo calendario non viene ancora salvato.",
   "loadErrorShifts": "Impossibile caricare i turni.",
   "previewSaveTitle": "Non ancora collegato. Questo turno non verrà salvato.",
   "sectionOrder": "Ordine",
@@ -116,5 +115,6 @@
   },
   "prevPeriod": "Periodo precedente",
   "nextPeriod": "Periodo successivo",
-  "viewSwitcher": "Visualizzazione"
+  "viewSwitcher": "Visualizzazione",
+  "pickOrderFirst": "Scegli prima un ordine"
 }

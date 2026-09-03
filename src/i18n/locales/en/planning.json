@@ -4,7 +4,6 @@
     "location": "Location"
   },
   "addShift": "Add shift",
-  "previewNotice": "Shifts shown here are your real schedule. Adding a new shift in this calendar is not saved yet.",
   "loadErrorShifts": "Could not load shifts.",
   "previewSaveTitle": "Not connected yet. This shift will not be saved.",
   "sectionOrder": "Order",
@@ -116,5 +115,6 @@
   },
   "prevPeriod": "Previous period",
   "nextPeriod": "Next period",
-  "viewSwitcher": "View"
+  "viewSwitcher": "View",
+  "pickOrderFirst": "Pick an order first"
 }

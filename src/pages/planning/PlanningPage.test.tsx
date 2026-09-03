@@ -1,13 +1,16 @@
 /**
- * PlanningPage — two regressions covered:
- *  - PLANNING-PERSIST-1 (CMFE audit 2026-07-28): the honest, translated notice
- *    that the ADD side of this screen (AddShiftModal's Save) still doesn't
- *    persist, so nobody mistakes it for a fully wired calendar.
- *  - the READ side (this follow-up): the shift list/board now comes from
- *    usePlanningBoard (GET /planning/board), not a hardcoded demo array — the
- *    hook itself is mocked here (its own request/mapping contract is covered by
+ * PlanningPage — regressions covered:
+ *  - the READ side: the shift list/board comes from usePlanningBoard
+ *    (GET /planning/board), not a hardcoded demo array — the hook itself is
+ *    mocked here (its own request/mapping contract is covered by
  *    hooks/usePlanningBoard.test.ts) so this file only asserts the page wires
  *    loading/error/success through honestly.
+ *  - PLANNING-PERSIST-1-staart (CMFE audit 2026-09-04): the CREATE side now
+ *    really persists (AddShiftModal POSTs /planning/shifts), so the old
+ *    page-level "not saved yet" banner is gone — a regression test below pins
+ *    that it never comes back.
+ *  - ORDERS-PANEL-1 (CMFE audit 2026-09-04): the Orders segment switches this
+ *    page into OrdersPanel, wired to the real order list.
  * react-i18next is mocked to return the raw key so the assertion targets a stable
  * key, not locale copy.
  */
@@ -28,17 +31,28 @@ vi.mock('@/lib/datetime', () => ({ useDateFormat: () => ({ formatTime: (v: strin
 const mockUsePlanningBoard = vi.fn()
 vi.mock('./hooks/usePlanningBoard', () => ({ usePlanningBoard: (...args: unknown[]) => mockUsePlanningBoard(...args) }))
 
+// Real order list behind the Orders segment (OrdersPanel + AddShiftModal both
+// import this) — mocked here so this file stays about PAGE-level wiring; the
+// hook's own request shape is covered in ./hooks/usePlanningOrders.test.tsx
+// and OrdersPanel's own UI states in ./OrdersPanel.test.tsx.
+const mockUsePlanningOrdersList = vi.fn()
+vi.mock('./hooks/usePlanningOrders', () => ({
+  usePlanningOrdersList: () => mockUsePlanningOrdersList(),
+  useDeletePlanningOrder: () => ({ mutateAsync: vi.fn(), isPending: false }),
+}))
+
 // Staffing drawer stubbed to a marker so the intent tests can assert it opened
 // for the right shift without pulling in its own full data/API wiring.
 vi.mock('./ShiftStaffingDrawer', () => ({
   default: ({ shift }: { shift: { id: string } }) => <div data-testid="staffing-drawer">{shift.id}</div>,
 }))
 
-describe('PlanningPage · not-yet-persisted gate (PLANNING-PERSIST-1)', () => {
-  it('shows the calm notice explaining adding a shift here is not saved yet', () => {
+describe('PlanningPage · create side really persists (PLANNING-PERSIST-1-staart)', () => {
+  it('never shows the old "not saved yet" preview banner — Save really POSTs to /planning/shifts now', () => {
     mockUsePlanningBoard.mockReturnValue({ shifts: [], loading: false, error: false })
+    mockUsePlanningOrdersList.mockReturnValue({ orders: [], loading: false, error: false })
     render(<PlanningPage />)
-    expect(screen.getByText('previewNotice')).toBeInTheDocument()
+    expect(screen.queryByText('previewNotice')).toBeNull()
   })
 })
 
@@ -111,5 +125,43 @@ describe('PlanningPage · nav intent (PLANNING-INTENT-1)', () => {
     })
     rerender(<PlanningPage intent={{ open: 'sh-9', date: '2026-09-15' }} />)
     expect(screen.getByTestId('staffing-drawer')).toHaveTextContent('sh-9')
+  })
+})
+
+// One real order row (PlanningOrderRow shape) reused across the Orders-view
+// wiring tests below.
+const ORDER_ROW = {
+  id: 'o1', customer_id: 'c1', client: 'Rivas Zorggroep', customer_location_id: null,
+  location: null, customer_department_id: null, department: null, owner_id: null,
+  function: null, reference: null, subject: 'ICU dayshift', description: null,
+  cost_center: null, status: 'open', notes: null, shifts_count: 2, created_at: '2026-08-01T00:00:00Z',
+}
+
+describe('PlanningPage · Orders view (ORDERS-PANEL-1 wiring)', () => {
+  it('switching to the Orders segment renders OrdersPanel, wired to the real order list', () => {
+    mockUsePlanningBoard.mockReturnValue({ shifts: [], loading: false, error: false })
+    mockUsePlanningOrdersList.mockReturnValue({ orders: [ORDER_ROW], loading: false, error: false })
+    render(<PlanningPage />)
+    // The Orders segment's accessible name, as the mocked t()=key identity
+    // actually renders it — never assumed translated copy.
+    fireEvent.click(screen.getByRole('radio', { name: 'views.orders' }))
+    expect(mockUsePlanningOrdersList).toHaveBeenCalled()
+    expect(screen.getByText('ICU dayshift')).toBeInTheDocument()
+  })
+
+  it('shows the honest empty state when there are no real orders yet', () => {
+    mockUsePlanningBoard.mockReturnValue({ shifts: [], loading: false, error: false })
+    mockUsePlanningOrdersList.mockReturnValue({ orders: [], loading: false, error: false })
+    render(<PlanningPage />)
+    fireEvent.click(screen.getByRole('radio', { name: 'views.orders' }))
+    expect(screen.getByText('order.empty')).toBeInTheDocument()
+  })
+
+  it('shows the honest error state when the order list fails to load', () => {
+    mockUsePlanningBoard.mockReturnValue({ shifts: [], loading: false, error: false })
+    mockUsePlanningOrdersList.mockReturnValue({ orders: [], loading: false, error: true })
+    render(<PlanningPage />)
+    fireEvent.click(screen.getByRole('radio', { name: 'views.orders' }))
+    expect(screen.getByRole('alert')).toHaveTextContent('order.errorList')
   })
 })

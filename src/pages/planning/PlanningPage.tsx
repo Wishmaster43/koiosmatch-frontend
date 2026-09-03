@@ -1,14 +1,14 @@
 /**
  * PlanningPage — the shift calendar (month/week/day/list). Reads real shifts
- * from GET /planning/board; the CREATE side (AddShiftModal) stays disabled
- * until an order-creation flow exists — see the mapBoardShift comment below
- * for the honest read/write split.
+ * from GET /planning/board; the CREATE side (AddShiftModal) now really POSTs
+ * to /planning/shifts (PLANNING-PERSIST-1-staart) — see the mapBoardShift
+ * comment below for how the board resource maps onto the calendar views.
  */
 import { useState, useMemo, useEffect, useRef } from 'react'
 import { bureauNow } from '@/lib/bureauTime'
 import { useTranslation } from 'react-i18next'
 import { useRightPanel } from '@/context/RightPanelContext'
-import { ChevronLeft, ChevronRight, Plus, Info, AlertCircle } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Plus, AlertCircle } from 'lucide-react'
 import { monthName, formatDate, getViewRange } from './helpers'
 import { usePlanningBoard } from './hooks/usePlanningBoard'
 import { useDateFormat } from '@/lib/datetime'
@@ -21,7 +21,7 @@ import type { Shift } from '@/types/planning'
 import type { PlanningBoardShift } from './hooks/usePlanningBoard'
 import Button from '@/components/ui/Button'
 import SegmentedControl from '@/components/ui/SegmentedControl'
-import { PageTitle, Caption } from '@/components/ui/typography'
+import { PageTitle } from '@/components/ui/typography'
 import { tintBg } from '@/lib/tint'
 
 // ── Real shifts (PLANNING-PERSIST-1 follow-up — read side) ────────────────────
@@ -34,9 +34,11 @@ import { tintBg } from '@/lib/tint'
 // times all come straight off the board resource; a shift with nobody on it
 // renders with an empty candidate line (open_spots > 0), never a fabricated name.
 //
-// The CREATE side stays a separate, still-gated concern: AddShiftModal's Save
-// button is disabled (no order-creation flow exists in this UI yet — see its own
-// header) — this page's banner below now only speaks to THAT, not to what's shown.
+// The CREATE side (AddShiftModal) is a separate concern that now really
+// persists: Save POSTs to /planning/shifts (PLANNING-PERSIST-1-staart) and its
+// own useCreatePlanningShift mutation invalidates the ['planning','board']
+// query on success, so a newly created shift shows up here via the normal
+// GET /planning/board refetch — no local list to keep in sync by hand.
 function mapBoardShift(s: PlanningBoardShift, formatTime: (v: string | null | undefined) => string): Shift {
   const candidateNames = s.assigned.map(a => a.candidate).filter((n): n is string => !!n).join(', ')
   return {
@@ -173,12 +175,13 @@ export default function PlanningPage({ intent }: { intent?: PlanningIntent | nul
 
   const handleDayClick = (date: Date) => setModal(date)
 
-  // AddShiftModal's Save is disabled (its own header explains why: no
-  // order-creation flow exists yet), so this never actually fires from a real
-  // click — kept only so the prop stays wired and reactivates for free the
-  // moment a real create path lands, per its own PLANNING-PERSIST-1 comment.
-  // It deliberately does NOT touch `shifts` anymore: that list is server data
-  // now (usePlanningBoard), not local state a demo row could be appended to.
+  // AddShiftModal's Save really POSTs to /planning/shifts now
+  // (PLANNING-PERSIST-1-staart) and its own mutation invalidates the
+  // ['planning','board'] query on success, so this page's board data
+  // (usePlanningBoard) refetches on its own the moment a shift is created.
+  // handleAdd stays a no-op on purpose: there is no local shift list left to
+  // append to (that list is server data now) — the prop stays wired only to
+  // satisfy AddShiftModal's `onAdd` contract, not because this page needs it.
   // Takes no parameter on purpose: an unused named argument only exists to be
   // linted away later, and a no-arg function still satisfies the prop's type.
   const handleAdd = () => {}
@@ -215,15 +218,6 @@ export default function PlanningPage({ intent }: { intent?: PlanningIntent | nul
         <Button variant="primary" size="sm" onClick={() => setModal(new Date())}>
           <Plus size={14} /> {t('addShift')}
         </Button>
-      </div>
-
-      {/* Not-yet-persisted gate (PLANNING-PERSIST-1, §3) — only the ADD side is
-          still fake (AddShiftModal's Save stays disabled); the shifts below are
-          this tenant's real schedule now (usePlanningBoard). */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 20px',
-        background: tintBg('var(--text-muted)'), flexShrink: 0 }}>
-        <Info size={12} style={{ color: 'var(--text-muted)', flexShrink: 0 }} aria-hidden="true" />
-        <Caption as="span" style={{ fontStyle: 'italic' }}>{t('previewNotice')}</Caption>
       </div>
 
       {/* Load-error state (§3: four honest states) — the board fetch failed;

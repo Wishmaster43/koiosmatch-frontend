@@ -27,39 +27,48 @@
  * gap:12 now spaces stacked fields, matching how @/components/forms/fields'
  * shared Field (used by every other modal) already works.
  *
- * PLANNING-PERSIST-1 (CMFE audit 2026-07-28): `onAdd` only ever reached
- * PlanningPage's local, in-memory shift array — there is no PATCH/POST call
- * anywhere in this component, and PlanningPage itself never fetches shifts from
- * a server either (see its own file header). A real backend Planning API exists
- * (`/planning/orders`, `/planning/shifts`, `/planning/schedules`,
- * `/planning/assignments`) but its create bodies and success responses aren't in
- * the generated OpenAPI spec, and this modal's flat order/shift/candidate form
- * doesn't map onto that order→shift→schedule model without new product
- * decisions. Per §3 (no fake affordances), the Save button below stays disabled
- * with an honest, translated notice instead of inventing that integration —
- * `handleSave` itself is kept so it reactivates for free the moment a real save
- * path lands.
+ * PLANNING-PERSIST-1 (CMFE audit 2026-07-28): `onAdd` used to only ever reach
+ * PlanningPage's local, in-memory shift array — no PATCH/POST call anywhere in
+ * this component. A real backend Planning API exists (`/planning/orders`,
+ * `/planning/shifts`, `/planning/schedules`, `/planning/assignments`).
  *
- * PLANNING-ORDER-CREATE-1 (2026-08-14): the ONE previously missing piece — an
- * order to hang a shift on — is now real (OrdersPanel + AddOrderModal, POST
- * /planning/orders). This modal's "sectionOrder" card now includes a real,
- * searchable order picker sourced from usePlanningOrdersList (no demo data),
- * so a freshly created order is immediately selectable here. The picker is
- * local UI state, same as every other field in this form, until POST
- * /planning/shifts itself gets wired (still gated by the notice above — the
- * shift body/response shape work is separate from the order-creation gap).
+ * PLANNING-ORDER-CREATE-1 (2026-08-14): the order-to-hang-a-shift-on gap closed
+ * (OrdersPanel + AddOrderModal, POST /planning/orders) — this modal's
+ * "sectionOrder" card gained a real, searchable order picker.
+ *
+ * PLANNING-PERSIST-1-staart (CMFE audit 2026-09-04): the remaining gap — Save
+ * itself — is now wired. `handleSave` POSTs to `/planning/shifts`
+ * (useCreatePlanningShift, verified against PlanningShiftController::validated,
+ * read-only) with the exact fields that route accepts: the required
+ * `planning_order_id` + `start_time`, and the optional `customer_department_id`
+ * / `function` / `end_time` / `number_persons` / `notes` this form already
+ * collects. Save stays disabled only while the one required picker (order) is
+ * empty, and shows loading/error/success instead of the old permanent notice.
+ *
+ * PLANNING-PERSIST-1-staart fixronde (CMFE audit 2026-09-04, same day): two
+ * data-coherence corrections on top of the above. (1) `customer_department_id`
+ * used to come from an independently-picked customer, while the backend
+ * validates it against the SELECTED ORDER's own customer — `departmentCustomerId`
+ * now derives from the picked order (falling back to the manual pick only while
+ * no order is chosen), and `handleOrderChange` resets any stale department.
+ * (2) the number-of-people field is now a raw string (`personCount`), not a
+ * number — `Number('')` is `0`, not `NaN`, so the old numeric state silently
+ * turned "cleared" into a fake valid `0`; `personCountValid` gates both Save
+ * and the submitted body.
  */
 import { useState } from 'react'
 import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
-import { X, Save, Search, Info } from 'lucide-react'
-import { formatDate } from './helpers'
+import { X, Save, Search, AlertCircle } from 'lucide-react'
+import { formatDate, toIsoDate } from './helpers'
 import { useDateFormat } from '@/lib/datetime'
 import { useFunctions } from '@/lib/useFunctions'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import { useShiftCustomers, useShiftDepartments, useShiftCandidateSearch } from './hooks/useShiftLookups'
 import { usePlanningOrdersList } from './hooks/usePlanningOrders'
+import { useCreatePlanningShift } from './hooks/usePlanningShifts'
 import type { ShiftCandidateOption } from './hooks/useShiftLookups'
+import { extractApiError } from '@/lib/extractApiError'
 import { Field, Avatar, CandidateRow, colorFor, getInitials } from './AddShiftModalFields'
 import { WIDE_MODAL } from '@/components/ui/modalMetrics'
 import FloatingPanel from '@/components/ui/FloatingPanel'
@@ -90,7 +99,10 @@ export default function AddShiftModal({ date, onClose, onAdd }: { date: Date; on
   const [customerId,  setCustomerId]  = useState('')
   const [departmentId,setDepartmentId]= useState('')
   const [address,     setAddress]     = useState('')
-  const [personCount, setPersonCount] = useState(1)
+  // Raw input text, not a number — Number('') is 0, not NaN, so a numeric
+  // state var would silently turn "cleared" into a fake valid value; keeping
+  // the raw string lets canSave/handleSave tell "empty" from "a real number".
+  const [personCount, setPersonCount] = useState('1')
   const [candidate,   setCandidate]   = useState<ShiftCandidateOption | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [color,       setColor]       = useState('var(--color-success)')
@@ -107,12 +119,22 @@ export default function AddShiftModal({ date, onClose, onAdd }: { date: Date; on
 
   // Real lookups (PLAN-LOOKUP-1) — see ./hooks/useShiftLookups for sourcing.
   const { customers, loading: customersLoading, error: customersError } = useShiftCustomers()
-  const { departments, loading: departmentsLoading, error: departmentsError } = useShiftDepartments(customerId)
   const { functions } = useFunctions()
   // PLANNING-ORDER-CREATE-1: the real order list, so a just-created order is
   // immediately pickable here — no demo/hardcoded options.
   const { orders, loading: ordersLoading, error: ordersError } = usePlanningOrdersList()
+  // PLANNING-PERSIST-1-staart: PlanningShiftController validates
+  // customer_department_id against the ORDER's own customer (planning_order_id),
+  // never the independently-picked one — so department options are scoped to
+  // the SELECTED ORDER's customer, falling back to the manual customer pick
+  // only while no order has been chosen yet.
+  const selectedOrder = orders.find(o => String(o.id) === orderId)
+  const departmentCustomerId = selectedOrder?.customer_id != null ? String(selectedOrder.customer_id) : customerId
+  const { departments, loading: departmentsLoading, error: departmentsError } = useShiftDepartments(departmentCustomerId)
   const { candidates, loading: candidatesLoading, error: candidatesError } = useShiftCandidateSearch(searchQuery)
+  // PLANNING-PERSIST-1-staart: the real create mutation — POST /planning/shifts.
+  const createShift = useCreatePlanningShift()
+  const [saveError, setSaveError] = useState<string | null>(null)
 
   const customerName = customers.find(c => String(c.id) === customerId)?.name ?? ''
 
@@ -120,12 +142,49 @@ export default function AddShiftModal({ date, onClose, onAdd }: { date: Date; on
   // the old customer) — mirrors AddOpportunityModal's cascade reset.
   const handleCustomerChange = (id: string) => { setCustomerId(id); setDepartmentId('') }
 
-  const handleSave = () => {
-    // orderId travels with the payload from day one, even while onAdd itself is
-    // still the local in-memory sink — so wiring the real POST later is a body
-    // change, not a hunt for where the picked order went.
-    onAdd({ title, location: customerName, candidate: candidate?.name || '', start, end, color, date, orderId, notes })
-    onClose()
+  // A new order can point at a different customer than the previous one, so any
+  // previously picked department may no longer belong to it — reset it here
+  // rather than letting a now-mismatched department reach the save payload.
+  const handleOrderChange = (id: string) => { setOrderId(id); setDepartmentId('') }
+
+  // Number-of-people is a raw string (see the state comment above) — only a
+  // finite integer >= 1 is a real value; an empty/garbage field omits the key
+  // entirely rather than sending a fabricated 0/NaN.
+  const personCountNum = Number(personCount)
+  const personCountValid = personCount.trim() !== '' && Number.isInteger(personCountNum) && personCountNum >= 1
+
+  // The order is the ONE field PlanningShiftController requires beyond
+  // start_time (always filled, default '07:00') — Save stays disabled until
+  // it is picked, an honest gate instead of the old permanent notice. The
+  // person-count field must also hold a real value, not be mid-clear.
+  const canSave = Boolean(orderId) && personCountValid && !createShift.isPending
+
+  const handleSave = async () => {
+    if (!canSave) return
+    setSaveError(null)
+    // Exactly the fields PlanningShiftController::validated() accepts —
+    // combining the calendar date with the picked start/end time strings.
+    const body = {
+      planning_order_id: orderId,
+      customer_department_id: departmentId || null,
+      function: jobType || null,
+      start_time: `${toIsoDate(date)}T${start}:00`,
+      end_time: `${toIsoDate(date)}T${end}:00`,
+      number_persons: personCountNum,
+      notes: notes || null,
+    }
+    try {
+      await createShift.mutateAsync(body)
+      // Relays the created shift's local echo to the caller. The calendar
+      // itself already refreshes on its own: useCreatePlanningShift's onSuccess
+      // invalidates the ['planning','board'] query, so PlanningPage's usePlanningBoard
+      // refetches without this callback's help — onAdd exists only so a future/other
+      // caller can react to a create without reaching into react-query's cache.
+      onAdd({ title, location: customerName, candidate: candidate?.name || '', start, end, color, date, orderId, notes })
+      onClose()
+    } catch (err) {
+      setSaveError(extractApiError(err, t('common:errorGeneric')))
+    }
   }
 
   return (
@@ -144,25 +203,27 @@ export default function AddShiftModal({ date, onClose, onAdd }: { date: Date; on
             <span style={{ fontSize: 12, color: 'var(--text-muted)', marginLeft: 10 }}>{formatDate(date, locale)}</span>
           </div>
           <div style={{ marginLeft: 'auto', display: 'flex', gap: 8 }}>
-            {/* PLANNING-PERSIST-1 (§3) — disabled + an honest title until a real save
-                path exists (see the file header); onClick stays wired so it reactivates
-                for free the moment that path lands. */}
-            <Button variant="primary" onClick={handleSave} disabled title={t('previewSaveTitle')}>
-              <Save size={13} /> {t('common:save')}
+            {/* PLANNING-PERSIST-1-staart: real POST /planning/shifts. Disabled only
+                while the required order picker is empty, or while the request is
+                in flight — an honest gate, not a permanent notice. */}
+            <Button variant="primary" onClick={handleSave} disabled={!canSave}
+              title={!orderId ? t('pickOrderFirst') : undefined}>
+              <Save size={13} /> {createShift.isPending ? t('common:saving') : t('common:save')}
             </Button>
           </div>
         </div>
       }>
 
-          {/* Not-yet-persisted gate (PLANNING-PERSIST-1, §3) — mirrors the calm notice
-              pattern from candidates/drawer/PlanningTab.tsx: Info icon + italic muted
-              text, so opening this modal directly (without seeing PlanningPage's own
-              banner) still tells the truth about what Save does right now. */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 20px',
-            background: tint('var(--text-muted)', 8), flexShrink: 0 }}>
-            <Info size={12} style={{ color: 'var(--text-muted)', flexShrink: 0 }} aria-hidden="true" />
-            <Caption style={{ fontStyle: 'italic' }}>{t('previewNotice')}</Caption>
-          </div>
+          {/* Save-failure notice (PLANNING-PERSIST-1-staart, §3 honest errors) — only
+              shown once a save actually failed; the calm not-yet-persisted banner it
+              replaces is gone now that Save really persists. */}
+          {saveError && (
+            <div role="alert" style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 20px',
+              background: tint('var(--color-danger)', 8), flexShrink: 0 }}>
+              <AlertCircle size={12} style={{ color: 'var(--color-danger-text)', flexShrink: 0 }} aria-hidden="true" />
+              <Caption style={{ color: 'var(--color-danger-text)' }}>{saveError}</Caption>
+            </div>
+          )}
 
           {/* Body: 3 kolommen */}
           <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
@@ -179,7 +240,7 @@ export default function AddShiftModal({ date, onClose, onAdd }: { date: Date; on
                 <div style={cardHead}>{t('sectionOrder')}</div>
                 <div style={cardBox}>
                   <Field label={t('order.listTitle')}>
-                    <CreatableSelect value={orderId || null} onChange={setOrderId} allowCreate={false}
+                    <CreatableSelect value={orderId || null} onChange={handleOrderChange} allowCreate={false}
                       clearable clearLabel={t('order.noOrder')}
                       placeholder={ordersLoading ? t('common:loading') : ordersError ? t('common:errorGeneric') : orders.length === 0 ? t('common:noResults') : t('common:select')}
                       options={orders.map(o => ({ value: String(o.id), label: o.subject || o.function || o.reference || o.client || t('order.listTitle') }))} />
@@ -193,15 +254,17 @@ export default function AddShiftModal({ date, onClose, onAdd }: { date: Date; on
                       options={customers.map(c => ({ value: String(c.id), label: c.name }))} />
                   </Field>
                   <Field label={t('fDepartment')}>
-                    {/* Options stay empty until a customer is picked (mirrors the old
-                        disabled select) — nothing selectable, not just visually greyed. */}
+                    {/* Options stay empty until a customer is known — either picked
+                        directly, or derived from the selected order's own customer
+                        (departmentCustomerId above) — nothing selectable, not just
+                        visually greyed. */}
                     <CreatableSelect value={departmentId || null} onChange={setDepartmentId} allowCreate={false}
-                      placeholder={!customerId ? t('pickCustomerFirst')
+                      placeholder={!departmentCustomerId ? t('pickCustomerFirst')
                         : departmentsLoading ? t('common:loading')
                         : departmentsError ? t('common:errorGeneric')
                         : departments.length === 0 ? t('common:noResults')
                         : t('common:select')}
-                      options={!customerId ? [] : departments.map(d => ({ value: String(d.id), label: d.name }))} />
+                      options={!departmentCustomerId ? [] : departments.map(d => ({ value: String(d.id), label: d.name }))} />
                   </Field>
                   <Field label={t('fAssignment')}><input style={INPUT} /></Field>
                   <Field label={t('fContact')}><input style={INPUT} placeholder={t('contactPlaceholder')} /></Field>
@@ -258,7 +321,7 @@ export default function AddShiftModal({ date, onClose, onAdd }: { date: Date; on
                     </Field>
                     <Field label={t('fPersons')}>
                       <input type="number" style={INPUT} value={personCount} min={1} max={20}
-                        onChange={e => setPersonCount(Number(e.target.value))} />
+                        onChange={e => setPersonCount(e.target.value)} />
                     </Field>
                   </div>
 

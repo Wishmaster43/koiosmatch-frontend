@@ -1,6 +1,5 @@
 {
   "addShift": "Añadir turno",
-  "previewNotice": "Los turnos mostrados aquí son tu planificación real. Añadir un turno nuevo en este calendario todavía no se guarda.",
   "loadErrorShifts": "No se pudieron cargar los turnos.",
   "previewSaveTitle": "Aún no conectado. Este turno no se guardará.",
   "sectionOrder": "Pedido",
@@ -116,5 +115,6 @@
   },
   "prevPeriod": "Período anterior",
   "nextPeriod": "Período siguiente",
-  "viewSwitcher": "Vista"
+  "viewSwitcher": "Vista",
+  "pickOrderFirst": "Seleccione primero un pedido"
 }

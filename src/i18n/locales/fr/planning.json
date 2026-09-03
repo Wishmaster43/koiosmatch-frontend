@@ -1,6 +1,5 @@
 {
   "addShift": "Ajouter une mission",
-  "previewNotice": "Les missions affichées ici sont votre planning réel. Ajouter une nouvelle mission dans ce calendrier n'est pas encore enregistré.",
   "loadErrorShifts": "Impossible de charger les missions.",
   "previewSaveTitle": "Pas encore connecté. Cette mission ne sera pas enregistrée.",
   "sectionOrder": "Commande",
@@ -116,5 +115,6 @@
   },
   "prevPeriod": "Période précédente",
   "nextPeriod": "Période suivante",
-  "viewSwitcher": "Affichage"
+  "viewSwitcher": "Affichage",
+  "pickOrderFirst": "Sélectionnez d'abord une commande"
 }

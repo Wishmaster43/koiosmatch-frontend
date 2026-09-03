@@ -1,6 +1,5 @@
 {
   "addShift": "Einsatz hinzufügen",
-  "previewNotice": "Die hier gezeigten Einsätze sind Ihr echter Dienstplan. Ein neuer Einsatz in diesem Kalender wird noch nicht gespeichert.",
   "loadErrorShifts": "Einsätze konnten nicht geladen werden.",
   "previewSaveTitle": "Noch nicht verbunden. Dieser Einsatz wird nicht gespeichert.",
   "sectionOrder": "Auftrag",
@@ -116,5 +115,6 @@
   },
   "prevPeriod": "Vorheriger Zeitraum",
   "nextPeriod": "Nächster Zeitraum",
-  "viewSwitcher": "Ansicht"
+  "viewSwitcher": "Ansicht",
+  "pickOrderFirst": "Zuerst einen Auftrag wählen"
 }
