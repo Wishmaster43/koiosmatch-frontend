@@ -36,15 +36,10 @@ import { useApplicationModalLookups } from '../hooks/useApplicationModalLookups'
 import { useAddApplicationForm } from '../hooks/useAddApplicationForm'
 import ApplicationCustomFieldsSection from './ApplicationCustomFieldsSection'
 import { CANON_LABEL_STYLE } from '@/components/drawer/fieldRowCanon'
+import { requiredMark } from '@/components/forms/fields'
 import type { Id } from '@/types/common'
 import Button from '@/components/ui/Button'
 import { tintBg, tintBorder } from '@/lib/tint'
-
-// APP-REQUIRED-FE-1: red asterisk after a label whose field the tenant marked
-// required (Settings → Sollicitaties → Verplichte velden) — same visual token
-// the shared Label/FieldRow components use, kept local since neither picker row
-// in this modal is built from those components (custom CANON_LABEL_STYLE rows).
-const requiredMark = <span aria-hidden="true" style={{ color: 'var(--color-danger-text)', marginLeft: 2 }}>*</span>
 
 // Label-left canon (P32, batch 5): label column fixed at CANON_LABEL_WIDTH, control fills the rest.
 const fieldRow: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: 10 }

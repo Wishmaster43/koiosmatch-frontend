@@ -26,6 +26,7 @@ import SearchPickField from './addmodal/SearchPickField'
 import { useSearchOptions } from './addmodal/useSearchOptions'
 import type { PickOption, RawPickRow } from './addmodal/types'
 import CustomFieldsSection from './addmodal/CustomFieldsSection'
+import { requiredMark } from '@/components/forms/fields'
 // R6: owner-derivation/preflight/stage-seeding effects and the POST submit now
 // live in their own hooks (extracted verbatim, behaviour unchanged).
 import { useApplicationOwnerAndStage } from './hooks/useApplicationOwnerAndStage'
@@ -43,11 +44,6 @@ type AnyProps = Record<string, unknown>
 const CreatableSelect = CreatableSelectJs as unknown as ComponentType<AnyProps>
 
 interface AppUser { id: Id; name?: string }
-
-// APP-REQUIRED-FE-1: red asterisk after a label whose field the tenant marked
-// required (Settings → Sollicitaties → Verplichte velden) — same visual token
-// the shared Label/FieldRow components use (components/forms/fields.tsx).
-const requiredMark = <span aria-hidden="true" style={{ color: 'var(--color-danger-text)', marginLeft: 2 }}>*</span>
 
 // ownerId/ownerName (APP-OWNER-1): both /candidates and /vacancies already carry
 // an `owner` object (CandidateListResource / VacancyListResource) — captured here

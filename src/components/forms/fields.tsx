@@ -26,6 +26,11 @@ export interface SelectOption { value: string; label?: ReactNode }
 // 8/11, background var(--surface)) before the platform-wide sweep.
 export const inputStyle: CSSProperties = fieldInputStyle
 
+// Red asterisk marking a required field; used in Label/FieldRow/Field and inline
+// form labels throughout the app. aria-hidden keeps it from doubling screen-reader
+// announcements of field names that already carry a 'required' attribute.
+export const requiredMark = <span aria-hidden="true" style={{ color: 'var(--color-danger-text)', marginLeft: 2 }}>*</span>
+
 /** Parse any date-ish value into a Date, or null when invalid/empty. */
 export function parseDate(value?: string | number | Date | null): Date | null {
   if (!value) return null
@@ -38,7 +43,7 @@ export function Label({ children, required, htmlFor, id }: { children: ReactNode
   return (
     <label id={id} htmlFor={htmlFor} style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', display: 'block',
       marginBottom: 5, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-      {children}{required && <span style={{ color: 'var(--color-danger-text)', marginLeft: 2 }}>*</span>}
+      {children}{required && requiredMark}
     </label>
   )
 }
@@ -56,7 +61,7 @@ export function FieldRow({ label, required, children }: { label: ReactNode; requ
   return (
     <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
       <label id={labelId} htmlFor={id} style={{ ...CANON_LABEL_STYLE, paddingTop: 8 }}>
-        {label}{required && <span style={{ color: 'var(--color-danger-text)', marginLeft: 2 }}>*</span>}
+        {label}{required && requiredMark}
       </label>
       <div style={{ flex: 1, minWidth: 0 }}>{child}</div>
     </div>
