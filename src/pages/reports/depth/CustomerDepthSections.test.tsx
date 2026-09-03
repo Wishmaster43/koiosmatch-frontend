@@ -7,7 +7,8 @@ import i18n from '@/i18n'
 
 // Assertions below expect the English strings — pin the language before each
 // test, mirroring the repo's own precedent (InvoiceCompanySettings.test.tsx).
-beforeEach(() => { i18n.changeLanguage('en') })
+// Non-nl bundles load lazily through the i18n backend, so the switch must be awaited.
+beforeEach(async () => { await i18n.changeLanguage('en') })
 
 // recharts needs real layout (jsdom gives every chart 0×0, so nothing renders
 // inside a ResponsiveContainer) — stub it down to plain nodes carrying the

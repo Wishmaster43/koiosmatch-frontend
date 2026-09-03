@@ -56,8 +56,10 @@ const ct = (key: string, opts?: Record<string, unknown>) => i18n.t(key, { ns: 'c
 const st = (key: string, opts?: Record<string, unknown>) => i18n.t(key, { ns: 'settings', ...opts })
 // The location trigger's accessible name is now its field LABEL (aria-labelledby
 // self-reference drops the button's own visible text), not the selected value —
-// the label doubles as the picker's placeholder (same i18n key), "*" for required.
-const locationTriggerName = () => `${ct('subModal.selectLocation')}*`
+// the label doubles as the picker's placeholder (same i18n key). The required
+// asterisk is the shared form-kit mark and aria-hidden (5a2b6cb1), so it is no
+// longer part of the accessible name.
+const locationTriggerName = () => ct('subModal.selectLocation')
 
 const locations = [{ id: 'loc-1', name: 'Locatie Noord' }, { id: 'loc-2', name: 'Locatie Zuid' }]
 const statuses = [{ value: 'st-1', label: 'Actief' }]

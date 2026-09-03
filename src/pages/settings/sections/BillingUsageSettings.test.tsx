@@ -7,7 +7,7 @@
 import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest'
 import { render, screen, waitFor, act } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import i18n from '@/i18n'
+import i18n, { loadLocale } from '@/i18n'
 import api from '@/lib/api'
 import { RightPanelProvider } from '@/context/RightPanelContext'
 import BillingUsageSettings from './BillingUsageSettings'
@@ -145,7 +145,9 @@ describe('BillingUsageSettings — Per gebruiker renders ai.per_user with succes
 })
 
 describe('BillingUsageSettings — vocabulary keys exist in all seven locales', () => {
-  it.each(['nl', 'en', 'de', 'fr', 'es', 'it', 'pt'])('%s carries the Workflow-tokens / AI-tokens vocabulary', (loc) => {
+  // Non-nl bundles load lazily through the i18n backend (7f29c834): load before reading.
+  it.each(['nl', 'en', 'de', 'fr', 'es', 'it', 'pt'])('%s carries the Workflow-tokens / AI-tokens vocabulary', async (loc) => {
+    await loadLocale(i18n, loc)
     const bundle = i18n.getResourceBundle(loc, 'settings')
     expect(bundle?.billing?.usage?.plan?.workflowMeter).toBeTruthy()
     expect(bundle?.billing?.usage?.plan?.aiMeter).toBeTruthy()
