@@ -6,7 +6,7 @@
  * status that didn't actually change. A real status TRANSITION still carries both.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { renderHook, act } from '@testing-library/react'
+import { renderHook, act, waitFor } from '@testing-library/react'
 import { useCandidateStatus } from './useCandidateStatus'
 import type { Candidate } from '@/types/candidate'
 
@@ -177,5 +177,29 @@ describe('useCandidateStatus · requires_match writes the picked value', () => {
     act(() => { result.current.setMatchChoice('m-1') })
     await act(async () => { await result.current.confirmPlacedMatch() })
     expect(onUpdate).toHaveBeenCalledWith('c1', { status: 'ingezet', match_id: 'm-1' })
+  })
+})
+
+// STATUS-OVERRIDE-REVERT-1: the drawer's local status override used to survive a
+// rejected PATCH (the page-level revert can't reach it) — a refused status stayed
+// showing in the picker while the record itself reverted. onUpdate now resolves
+// true/false, and the override clears itself on false.
+describe('useCandidateStatus · STATUS-OVERRIDE-REVERT-1 (override clears on a rejected PATCH)', () => {
+  it('changeStatus reverts the override when onUpdate resolves false', async () => {
+    const onUpdate = vi.fn().mockResolvedValue(false)
+    const c = candidate({ status: 'sick' }) // flag-less target ('available') so the PATCH fires straight away
+    const { result } = renderHook(() => useCandidateStatus({ c, onUpdate }))
+    act(() => { result.current.changeStatus('available') })
+    expect(result.current.currentStatus).toBe('available') // optimistic
+    await waitFor(() => expect(result.current.currentStatus).toBe('sick')) // reverted to the record's own value
+  })
+
+  it('changeStatus keeps the override when onUpdate resolves true (saved)', async () => {
+    const onUpdate = vi.fn().mockResolvedValue(true)
+    const c = candidate({ status: 'sick' })
+    const { result } = renderHook(() => useCandidateStatus({ c, onUpdate }))
+    act(() => { result.current.changeStatus('available') })
+    await act(async () => { await Promise.resolve() })
+    expect(result.current.currentStatus).toBe('available')
   })
 })

@@ -166,7 +166,10 @@ export function useCustomerRecord({ setCustomers, setTotal, users, t }: Args) {
   }
 
   // Optimistic update of one customer (table + open drawer stay in sync), then PATCH.
-  const updateCustomer = (id: Id | undefined, patch: Record<string, unknown>) => {
+  // STATUS-OVERRIDE-REVERT-1: resolves true (saved) / false (rejected) so a
+  // drawer-local override (useCustomerDrawerActions' status/phase/owner) can
+  // clear itself when the write is refused — existing callers ignore the return.
+  const updateCustomer = (id: Id | undefined, patch: Record<string, unknown>): Promise<boolean> => {
     // Bug class fix: this used to `.catch(() => notifyError(...))` with no revert,
     // so a rejected PATCH left the new value on screen in all three slices as if
     // the server had saved it. Snapshot ONLY the fields this patch overwrites (never
@@ -195,14 +198,14 @@ export function useCustomerRecord({ setCustomers, setTotal, users, t }: Args) {
 
     const body: Record<string, unknown> = {}
     Object.keys(patch).forEach(k => { if (FIELD_MAP[k]) body[FIELD_MAP[k]] = patch[k] })
-    if (Object.keys(body).length) {
-      api.patch(`/customers/${id}`, body).catch(err => {
-        if (beforeCustomer) setCustomers(prev => prev.map(c => c.id === id ? ({ ...c, ...beforeCustomer } as Customer) : c))
-        if (beforeSelected) setSelected(prev => (prev && prev.id === id ? ({ ...prev, ...beforeSelected } as Customer) : prev))
-        if (beforeDetail)   setDetail(prev   => (prev && prev.id === id ? ({ ...prev, ...beforeDetail } as Customer) : prev))
-        notifyError(extractApiError(err, t('common:actionFailed')))
-      })
-    }
+    if (!Object.keys(body).length) return Promise.resolve(true)
+    return api.patch(`/customers/${id}`, body).then(() => true).catch(err => {
+      if (beforeCustomer) setCustomers(prev => prev.map(c => c.id === id ? ({ ...c, ...beforeCustomer } as Customer) : c))
+      if (beforeSelected) setSelected(prev => (prev && prev.id === id ? ({ ...prev, ...beforeSelected } as Customer) : prev))
+      if (beforeDetail)   setDetail(prev   => (prev && prev.id === id ? ({ ...prev, ...beforeDetail } as Customer) : prev))
+      notifyError(extractApiError(err, t('common:actionFailed')))
+      return false
+    })
   }
 
   // TRASH-OVERAL-2: bring an archived customer back to active via the per-id route

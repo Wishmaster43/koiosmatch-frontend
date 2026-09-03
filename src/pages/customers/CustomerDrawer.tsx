@@ -96,7 +96,10 @@ interface CustomerDrawerProps {
   onClose: () => void
   expanded?: boolean
   onToggleExpand?: () => void
-  onUpdate?: (id: Id | undefined, patch: Record<string, unknown>) => void
+  // STATUS-OVERRIDE-REVERT-1: the caller may resolve true/false so a local
+  // override (useCustomerDrawerActions' status/phase/owner) can clear on a
+  // rejected PATCH.
+  onUpdate?: (id: Id | undefined, patch: Record<string, unknown>) => void | Promise<boolean>
   onAddNote?: (id: Id | undefined, payload: NotePayload) => void
   // K15NOTES: edit/delete a single existing note — mirrors onAddNote's (id, payload)
   // shape, plus the note's own id so the host can resolve which note changed.

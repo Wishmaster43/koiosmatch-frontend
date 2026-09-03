@@ -97,4 +97,19 @@ describe('useCandidateRecord · patchCandidate', () => {
     expect(() => result.current.patchCandidate('c1', { ownerId: 'gone' })).not.toThrow()
     await waitFor(() => expect(notifyError).toHaveBeenCalledWith('common:actionFailed'))
   })
+
+  // STATUS-OVERRIDE-REVERT-1: CandidatesPage.updateCandidate now returns this
+  // resolved value straight through so a drawer-local override (e.g.
+  // useCandidateStatus's status/phase) can clear itself on a rejection.
+  it('resolves true on a successful save', async () => {
+    apiPatch.mockResolvedValue({ data: { data: {} } })
+    const { result } = renderHook(() => useCandidateRecord(), { wrapper })
+    await expect(result.current.patchCandidate('c1', { ownerId: 'u2' })).resolves.toBe(true)
+  })
+
+  it('resolves false on a rejected save', async () => {
+    apiPatch.mockRejectedValue({ response: { data: {} } })
+    const { result } = renderHook(() => useCandidateRecord(), { wrapper })
+    await expect(result.current.patchCandidate('c1', { ownerId: 'gone' })).resolves.toBe(false)
+  })
 })

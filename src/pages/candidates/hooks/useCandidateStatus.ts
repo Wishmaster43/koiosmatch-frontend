@@ -23,7 +23,9 @@ export interface StatusModalState {
 
 interface Args {
   c: Candidate | null
-  onUpdate?: (id: Id, patch: Record<string, unknown>) => void
+  // STATUS-OVERRIDE-REVERT-1: onUpdate may resolve true/false (saved/rejected) —
+  // the phase/status overrides below clear themselves on a rejection.
+  onUpdate?: (id: Id, patch: Record<string, unknown>) => void | Promise<boolean>
   // Called when a convert lands on a phase whose required fields are incomplete.
   onConvertIncomplete?: (setActiveTab?: (id: string) => void) => void
 }
@@ -77,12 +79,20 @@ export function useCandidateStatus({ c, onUpdate, onConvertIncomplete }: Args) {
     const defStatus = statuses.find(s => s.value === def) as (LookupOption & { requires_match?: unknown; requires_reason?: unknown; expects_return_date?: unknown; is_blacklist?: unknown }) | undefined
     const wantsDefault = !(status ?? c.status) && def !== 'none' && defStatus && !defStatus.requires_match && !defStatus.is_blacklist
     const needsPrompt = wantsDefault && (Boolean(defStatus.requires_reason) || Boolean(defStatus.expects_return_date))
-    if (wantsDefault && !needsPrompt) {
+    const statusWasSet = Boolean(wantsDefault && !needsPrompt)
+    if (statusWasSet) {
       setStatus(def)
       patch.status = def
     }
     setPhase(nextPhase.value)
-    onUpdate?.(c.id, patch)
+    // STATUS-OVERRIDE-REVERT-1: a rejected PATCH must clear both local overrides
+    // this convert set, so the badge falls back to the (reverted) record value.
+    Promise.resolve(onUpdate?.(c.id, patch)).then(ok => {
+      if (ok === false) {
+        setPhase(null)
+        if (statusWasSet) setStatus(null)
+      }
+    })
     // A reason/date-flagged default can't be set silently (that's how the reason-less
     // seed rows happened) — open the usual prompt so the reason lands properly.
     if (needsPrompt) {
@@ -139,7 +149,10 @@ export function useCandidateStatus({ c, onUpdate, onConvertIncomplete }: Args) {
       })
       return
     }
-    setStatus(v); onUpdate?.(c.id, { status: v })
+    setStatus(v)
+    // STATUS-OVERRIDE-REVERT-1: clear the override on a rejected PATCH so the
+    // picker falls back to the (reverted) record value instead of the refused one.
+    Promise.resolve(onUpdate?.(c.id, { status: v })).then(ok => { if (ok === false) setStatus(null) })
   }
 
   // Confirm a reason/return-date change. Blacklist carries the lookup-backed
@@ -163,8 +176,9 @@ export function useCandidateStatus({ c, onUpdate, onConvertIncomplete }: Args) {
     // `statusChangedAt` from the patch so an unchanged status never re-fires as a
     // "status changed" signal. N-1: the status note is written CENTRALLY by the
     // backend guard on an ACTUAL status-changing PATCH.
-    onUpdate?.(c.id, { ...(changed ? { status: statusModal.target, statusChangedAt: new Date().toISOString() } : {}),
-      ...reasonPatch, statusReturnDate: statusModal.date || null, ...prefPatch })
+    // STATUS-OVERRIDE-REVERT-1: clear the override on a rejected PATCH, same as changeStatus.
+    Promise.resolve(onUpdate?.(c.id, { ...(changed ? { status: statusModal.target, statusChangedAt: new Date().toISOString() } : {}),
+      ...reasonPatch, statusReturnDate: statusModal.date || null, ...prefPatch })).then(ok => { if (ok === false) setStatus(null) })
     setStatusModal(null)
   }
 

@@ -54,7 +54,10 @@ interface AppUser { id: Id; name: string; [k: string]: unknown }
 // Still-untyped JS components — declare the props this page passes (typed boundary).
 const CandidateDrawer = CandidateDrawerJs as ComponentType<{
   candidate: Candidate | null; onClose: () => void; expanded: boolean
-  onToggleExpand: () => void; onUpdate: (id: Id, patch: Record<string, unknown>) => void
+  // STATUS-OVERRIDE-REVERT-1: resolves the patch's success (true) or rejection
+  // (false) so a drawer-local override (e.g. useCandidateStatus's status/phase)
+  // can clear itself when the write is refused — existing callers ignore it.
+  onToggleExpand: () => void; onUpdate: (id: Id, patch: Record<string, unknown>) => void | Promise<boolean>
   onArchive?: (id: Id) => void; onMarkDeletion?: (id: Id) => void; onRestore?: (id: Id) => void; onHardDelete?: (id: Id) => void
   onMerged?: (survivorId: Id) => void
   // Pure record refresh (P1 fix): refetches + replaces the drawer's record after a
@@ -309,7 +312,9 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
 
   // Header/profile edits in the drawer flow back here: optimistic locally, then PATCH.
   // `patch` is a dynamic UI edit (UI field names, some outside Candidate) → cast on merge.
-  const updateCandidate = (id: Id, patch: Record<string, unknown>) => {
+  // STATUS-OVERRIDE-REVERT-1: returns patchCandidate's resolved boolean (true =
+  // saved, false = reverted) so a caller-side local override can clear itself.
+  const updateCandidate = (id: Id, patch: Record<string, unknown>): Promise<boolean> => {
     // OPTIMISTIC-REVERT-1 (audit 2026-07-27): snapshot ONLY the keys this patch
     // overwrites, in every slice that shows them, so a refused PATCH puts the old
     // values back instead of leaving a rejected edit on screen until the drawer is
@@ -333,7 +338,7 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
     setSelected(prev => (prev && prev.id === id ? mergePatch(prev as unknown as Record<string, unknown>, patch) as unknown as Candidate : prev))
     setDetail(prev  => (prev && prev.id === id ? mergePatch(prev as unknown as Record<string, unknown>, patch) as unknown as Candidate : prev))
 
-    patchCandidate(id, patch, () => {
+    return patchCandidate(id, patch, () => {
       if (beforeRow) setCandidates(prev => prev.map(x => x.id === id ? { ...x, ...beforeRow } as Candidate : x))
       if (beforeSelected) setSelected(prev => (prev && prev.id === id ? { ...prev, ...beforeSelected } as Candidate : prev))
       if (beforeDetail) setDetail(prev => (prev && prev.id === id ? { ...prev, ...beforeDetail } as Candidate : prev))

@@ -24,7 +24,9 @@ interface UseCustomerDrawerActionsArgs {
   // useState calls it replaces in the container, BEFORE the container's own
   // `if (!c) return null` guard.
   c: Customer | null
-  onUpdate?: (id: Id | undefined, patch: Record<string, unknown>) => void
+  // STATUS-OVERRIDE-REVERT-1: onUpdate may resolve true/false (saved/rejected) —
+  // the status/phase/owner overrides below clear themselves on a rejection.
+  onUpdate?: (id: Id | undefined, patch: Record<string, unknown>) => void | Promise<boolean>
   onClose: () => void
   users: DrawerUser[]
   statuses: LookupOption[]
@@ -131,7 +133,10 @@ export function useCustomerDrawerActions({ c, onUpdate, onClose, users, statuses
       setBlacklistModal({ target: v, reason: (c?.blacklistReason ?? ''), needReason: blacklistReasonRequired })
       return
     }
-    setStatus(v); onUpdate?.(c?.id, { status: v })
+    setStatus(v)
+    // STATUS-OVERRIDE-REVERT-1: clear the override on a rejected PATCH so the
+    // picker falls back to the (reverted) record value instead of the refused one.
+    Promise.resolve(onUpdate?.(c?.id, { status: v })).then(ok => { if (ok === false) setStatus(null) })
   }
   // Confirm the blacklist prompt: one PATCH carrying both the new status and the
   // reason. Cancel (closing without confirming) never patches — the picker keeps
@@ -139,9 +144,10 @@ export function useCustomerDrawerActions({ c, onUpdate, onClose, users, statuses
   const confirmBlacklist = () => {
     if (!blacklistModal || !c) return
     // Local override mirrors changeStatus above: updateCustomer reverts the record slices on
-    // a rejected PATCH but cannot reach this override (STATUS-OVERRIDE-REVERT-1, WORKLIST).
+    // a rejected PATCH, and now clears this override too (STATUS-OVERRIDE-REVERT-1).
     setStatus(blacklistModal.target)
-    onUpdate?.(c.id, { status: blacklistModal.target, blacklistReason: blacklistModal.reason || null })
+    Promise.resolve(onUpdate?.(c.id, { status: blacklistModal.target, blacklistReason: blacklistModal.reason || null }))
+      .then(ok => { if (ok === false) setStatus(null) })
     setBlacklistModal(null)
   }
   // KLANT-FASE-1: phase is its own axis next to status — shown as a read-only badge
@@ -182,7 +188,14 @@ export function useCustomerDrawerActions({ c, onUpdate, onClose, users, statuses
     const wantsDefault = !(status ?? c.status) && def !== 'none' && statuses.some(s => s.value === def)
     if (wantsDefault) { setStatus(def); patch.status = def }
     setPhase(targetPhase.value)
-    onUpdate?.(c.id, patch)
+    // STATUS-OVERRIDE-REVERT-1: a rejected PATCH must clear both local overrides
+    // this convert set, so the badge falls back to the (reverted) record value.
+    Promise.resolve(onUpdate?.(c.id, patch)).then(ok => {
+      if (ok === false) {
+        setPhase(null)
+        if (wantsDefault) setStatus(null)
+      }
+    })
   }
 
   // Owner (account manager) picker — a fallback entry ONLY when the current
@@ -201,7 +214,12 @@ export function useCustomerDrawerActions({ c, onUpdate, onClose, users, statuses
   const onOwnerChange = (id: string) => {
     if (id === '__current') return
     const u = users.find(x => String(x.id) === id)
-    if (u) { setOwner({ ...u }); onUpdate?.(c?.id, { ownerId: u.id, owner: u.name, ownerInitials: initialsOf(u.name), ownerColor: u.avatar_color ?? null }) }
+    if (!u) return
+    setOwner({ ...u })
+    // STATUS-OVERRIDE-REVERT-1: clear the override on a rejected PATCH so the
+    // picker falls back to the (reverted) record's owner instead of the refused one.
+    Promise.resolve(onUpdate?.(c?.id, { ownerId: u.id, owner: u.name, ownerInitials: initialsOf(u.name), ownerColor: u.avatar_color ?? null }))
+      .then(ok => { if (ok === false) setOwner(null) })
   }
 
   return {

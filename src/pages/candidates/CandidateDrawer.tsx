@@ -87,7 +87,9 @@ interface CandidateDrawerProps {
   onClose: () => void
   expanded: boolean
   onToggleExpand: () => void
-  onUpdate?: (id: Id, patch: Record<string, unknown>) => void
+  // STATUS-OVERRIDE-REVERT-1: the caller may resolve true/false so a local
+  // override (useCandidateStatus's phase/status) can clear on a rejected PATCH.
+  onUpdate?: (id: Id, patch: Record<string, unknown>) => void | Promise<boolean>
   // Soft-delete → archived (Gearchiveerd view); backend re-checks live links (§3B).
   onArchive?: (id: Id) => void
   // Archived candidates only: bring back (restore) or permanently delete (admin-only, ARCH-2).

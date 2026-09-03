@@ -38,6 +38,9 @@ const customer = (): Customer => ({
 
 const statuses: LookupOption[] = [
   { value: 'available', label: 'Available' },
+  // Flag-less second option — STATUS-OVERRIDE-REVERT-1 below needs a plain
+  // transition target distinct from the customer's own starting status.
+  { value: 'inactive', label: 'Inactive' },
   { value: 'bl', label: 'Blacklist', isBlacklist: true },
 ]
 
@@ -98,5 +101,38 @@ describe('useCustomerDrawerActions · blacklist status prompt', () => {
     act(() => { hook.result.current.setBlacklistModal(m => m && ({ ...m, reason: 'ab' })) })
     await new Promise(r => setTimeout(r, 20))
     expect(mockedGet).toHaveBeenCalledTimes(1)
+  })
+})
+
+// STATUS-OVERRIDE-REVERT-1 (WORKLIST, 04-09): the local status override used to
+// survive a rejected PATCH — updateCustomer reverts the record slices, but the
+// drawer's own optimistic override lives in separate state it can't reach, so
+// the picker kept showing the refused status. onUpdate now resolves true/false,
+// and the override clears itself on false.
+describe('useCustomerDrawerActions · STATUS-OVERRIDE-REVERT-1 (override clears on a rejected PATCH)', () => {
+  it('changeStatus reverts the override when onUpdate resolves false', async () => {
+    const onUpdate = vi.fn().mockResolvedValue(false)
+    const { hook } = harness(customer(), onUpdate)
+    act(() => { hook.result.current.changeStatus('inactive') })
+    expect(hook.result.current.currentStatus).toBe('inactive') // optimistic
+    await waitFor(() => expect(hook.result.current.currentStatus).toBe('available')) // reverted
+  })
+
+  it('confirmBlacklist reverts the override when onUpdate resolves false', async () => {
+    const onUpdate = vi.fn().mockResolvedValue(false)
+    const { hook } = harness(customer(), onUpdate)
+    act(() => { hook.result.current.changeStatus('bl') })
+    act(() => { hook.result.current.setBlacklistModal(m => m && ({ ...m, reason: 'Fraude' })) })
+    act(() => { hook.result.current.confirmBlacklist() })
+    expect(hook.result.current.currentStatus).toBe('bl') // optimistic
+    await waitFor(() => expect(hook.result.current.currentStatus).toBe('available')) // reverted
+  })
+
+  it('changeStatus keeps the override when onUpdate resolves true (saved)', async () => {
+    const onUpdate = vi.fn().mockResolvedValue(true)
+    const { hook } = harness(customer(), onUpdate)
+    act(() => { hook.result.current.changeStatus('inactive') })
+    await act(async () => { await Promise.resolve() })
+    expect(hook.result.current.currentStatus).toBe('inactive')
   })
 })

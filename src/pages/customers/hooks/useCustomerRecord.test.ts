@@ -97,6 +97,21 @@ describe('useCustomerRecord · updateCustomer', () => {
     expect(notifyError).toHaveBeenCalledWith('Naam is verplicht')
   })
 
+  // STATUS-OVERRIDE-REVERT-1: the resolved boolean lets a drawer-local override
+  // (useCustomerDrawerActions' status/phase/owner) clear itself when the write
+  // is refused — the page-level revert above can't reach that separate state.
+  it('resolves true on a successful save', async () => {
+    mockedPatch.mockResolvedValueOnce({})
+    const r = harness([customer({ id: 1, name: 'Old name' })])
+    await expect(act(() => r.result.current.record.updateCustomer(1, { name: 'New name' }))).resolves.toBe(true)
+  })
+
+  it('resolves false on a rejected save', async () => {
+    mockedPatch.mockRejectedValueOnce({ response: { status: 422, data: { message: 'Naam is verplicht' } } })
+    const r = harness([customer({ id: 1, name: 'Old name' })])
+    await expect(act(() => r.result.current.record.updateCustomer(1, { name: '' }))).resolves.toBe(false)
+  })
+
   it('reverts the open drawer (selected + detail) alongside the list row on failure', async () => {
     mockedGet.mockResolvedValue({ data: { id: 1, name: 'Old name' } })
     const r = harness([customer({ id: 1, name: 'Old name' })])
