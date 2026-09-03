@@ -55,11 +55,16 @@ export default function EditUserModal({ user, onClose, onSaved }: {
   const [changePassword, setChangePassword] = useState(false)
   const [saving, setSaving] = useState(false)
   const [error,  setError]  = useState<string | null>(null)
+  // Stale-diff fallback (mirrors useProfileForm): a 403 current_password_required
+  // means the backend saw a credential change our local diff missed — force the
+  // field to render regardless of what credentialChange itself computes.
+  const [forceCurrentPassword, setForceCurrentPassword] = useState(false)
   // CredentialChangeGuard (CMBE 03-09): a SELF-edit that touches email or
   // password needs the account's current password re-entered — the admin
   // path (editing someone else) never does.
   const isSelf = String(auth?.user?.id ?? '') === String(user.id)
   const credentialChange = isSelf && (
+    forceCurrentPassword ||
     (changePassword && form.password !== '') || form.email.trim() !== (user.email ?? '')
   )
   // VALIDATIE-LIVE-1-rest: live, on-blur/typing format check for email — own
@@ -103,6 +108,7 @@ export default function EditUserModal({ user, onClose, onSaved }: {
       // on the (translatable, server-language) `message` text.
       if (e2.response?.status === 403 && e2.response?.data?.code === 'current_password_required') {
         setError(t('currentPasswordRequired'))
+        setForceCurrentPassword(true)
       } else {
         setError(e2.response?.data?.message ?? t('saveFailed'))
       }

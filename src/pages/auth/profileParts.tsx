@@ -87,12 +87,14 @@ export function Section({ title, children }: { title: ReactNode; children: React
   )
 }
 
-// Labelled form field — label above the control.
-export function Field({ label, children }: { label: ReactNode; children: ReactNode }) {
+// Labelled form field — label above the control. `htmlFor` is optional and only
+// needed when the control has a matching `id` (e.g. CredentialChangeGuard's
+// current-password field) — most fields here rely on aria-label instead.
+export function Field({ label, htmlFor, children }: { label: ReactNode; htmlFor?: string; children: ReactNode }) {
   return (
     <div style={{ marginBottom: 16 }}>
       {/* Field label — the shared FormLabel atom (12/500/muted) */}
-      <FormLabel style={{ display: 'block', marginBottom: 6 }}>
+      <FormLabel htmlFor={htmlFor} style={{ display: 'block', marginBottom: 6 }}>
         {label}
       </FormLabel>
       {children}

@@ -130,6 +130,7 @@ describe('EditUserModal · branches', () => {
 // someone else) never does. Assert the REQUEST body, never only that a callback fired.
 describe('EditUserModal · CredentialChangeGuard (CMBE 03-09)', () => {
   it('admin editing another user changes the e-mail without the field or current_password', async () => {
+    vi.mocked(api.put).mockClear()
     authUserId = 'admin-1'
     vi.mocked(api.get).mockResolvedValueOnce({ data: { data: [] } })
     vi.mocked(api.put).mockResolvedValueOnce({ data: { data: { ...testUser, email: 'nieuw@bedrijf.nl' } } })
@@ -150,6 +151,7 @@ describe('EditUserModal · CredentialChangeGuard (CMBE 03-09)', () => {
   })
 
   it('self editing own record without touching e-mail/password never shows the field', async () => {
+    vi.mocked(api.put).mockClear()
     authUserId = 'u1'
     vi.mocked(api.get).mockResolvedValueOnce({ data: { data: [] } })
     vi.mocked(api.put).mockResolvedValueOnce({ data: { data: testUser } })
@@ -166,6 +168,7 @@ describe('EditUserModal · CredentialChangeGuard (CMBE 03-09)', () => {
   })
 
   it('self changing the e-mail shows the field, blocks Save until filled, and PUTs current_password', async () => {
+    vi.mocked(api.put).mockClear()
     authUserId = 'u1'
     vi.mocked(api.get).mockResolvedValueOnce({ data: { data: [] } })
     vi.mocked(api.put).mockResolvedValueOnce({ data: { data: { ...testUser, email: 'nieuw@bedrijf.nl' } } })
@@ -190,6 +193,7 @@ describe('EditUserModal · CredentialChangeGuard (CMBE 03-09)', () => {
   })
 
   it('maps a 403 current_password_required response to the i18n error, matching on `code` not message text', async () => {
+    vi.mocked(api.put).mockClear()
     authUserId = 'u1'
     vi.mocked(api.get).mockResolvedValueOnce({ data: { data: [] } })
     vi.mocked(api.put).mockRejectedValueOnce({
@@ -208,5 +212,77 @@ describe('EditUserModal · CredentialChangeGuard (CMBE 03-09)', () => {
     await user.click(screen.getByText('common:save'))
 
     expect(await screen.findByText('currentPasswordRequired')).toBeInTheDocument()
+  })
+
+  // String() coercion: auth.user.id can arrive as a NUMBER (super-admin/session
+  // shapes vary) while the row's `user.id` is always a string — a strict `===`
+  // without coercion would misclassify a self-edit as an admin-editing-another-user
+  // edit and silently skip the guard.
+  it('treats a numeric auth id as the same account as a string row id (String() coercion)', async () => {
+    vi.mocked(api.put).mockClear()
+    authUserId = 1 as unknown as string
+    vi.mocked(api.get).mockResolvedValueOnce({ data: { data: [] } })
+    // No save is clicked in this test (it only proves the field renders) — do
+    // NOT queue a put response here, or the unconsumed FIFO entry shifts every
+    // later test's mockResolvedValueOnce/mockRejectedValueOnce by one slot.
+    const user = userEvent.setup()
+    render(<EditUserModal user={{ ...testUser, id: '1' }} onClose={noop} onSaved={noop} />)
+
+    const emailInput = await screen.findByDisplayValue('jan@bedrijf.nl')
+    await user.clear(emailInput)
+    await user.type(emailInput, 'nieuw@bedrijf.nl')
+    fireEvent.focusOut(emailInput)
+
+    // The guard fired (field rendered), proving isSelf recognised 1 === '1'.
+    expect(await screen.findByLabelText('currentPassword')).toBeInTheDocument()
+  })
+
+  // A checked "change password" with a filled new password is a credential change
+  // in its own right, independent of any e-mail edit.
+  it('checking change-password with a filled new password shows the field and PUTs current_password', async () => {
+    vi.mocked(api.put).mockClear()
+    authUserId = 'u1'
+    vi.mocked(api.get).mockResolvedValueOnce({ data: { data: [] } })
+    vi.mocked(api.put).mockResolvedValueOnce({ data: { data: testUser } })
+    const user = userEvent.setup()
+    render(<EditUserModal user={testUser} onClose={noop} onSaved={noop} />)
+
+    await screen.findByDisplayValue('jan@bedrijf.nl')
+    await user.click(screen.getByText('changePassword'))
+    await user.type(screen.getByLabelText('newPassword'), 'nieuwgeheim')
+
+    const currentPasswordInput = await screen.findByLabelText('currentPassword')
+    await user.type(currentPasswordInput, 'geheim')
+    await user.click(screen.getByText('common:save'))
+
+    await waitFor(() => expect(api.put).toHaveBeenCalledWith('/users/u1', {
+      firstname: 'Jan', lastname: 'Jansen', email: 'jan@bedrijf.nl', phone: '',
+      password: 'nieuwgeheim', current_password: 'geheim',
+    }))
+  })
+
+  // A DIFFERENT 403 code must never be mistaken for the current-password guard —
+  // the server's own (translated) message renders instead.
+  it('a 403 with a different code renders the server message, not currentPasswordRequired', async () => {
+    vi.mocked(api.put).mockClear()
+    authUserId = 'u1'
+    vi.mocked(api.get).mockResolvedValueOnce({ data: { data: [] } })
+    vi.mocked(api.put).mockRejectedValueOnce({
+      response: { status: 403, data: { message: 'E-mail already in use', code: 'email_taken' } },
+    })
+    const user = userEvent.setup()
+    render(<EditUserModal user={testUser} onClose={noop} onSaved={noop} />)
+
+    const emailInput = await screen.findByDisplayValue('jan@bedrijf.nl')
+    await user.clear(emailInput)
+    await user.type(emailInput, 'nieuw@bedrijf.nl')
+    fireEvent.focusOut(emailInput)
+
+    const currentPasswordInput = await screen.findByLabelText('currentPassword')
+    await user.type(currentPasswordInput, 'geheim')
+    await user.click(screen.getByText('common:save'))
+
+    expect(await screen.findByText('E-mail already in use')).toBeInTheDocument()
+    expect(screen.queryByText('currentPasswordRequired')).not.toBeInTheDocument()
   })
 })

@@ -19,6 +19,18 @@ export function useProfileForm() {
   const [saving, setSaving] = useState(false)
   const [saved,  setSaved]  = useState(false)
   const [error,  setError]  = useState<string | null>(null)
+  // CredentialChangeGuard (CMBE bundle B, mirrors EditUserModal): this form only
+  // ever touches e-mail (no password field here), so the guard's condition is the
+  // e-mail diff alone. Tracked separately from `form` since it is never part of the payload.
+  const [currentPassword, setCurrentPassword] = useState('')
+  // originalEmail anchors the diff to the last-synced /auth/me value, not the
+  // in-progress form — otherwise a re-render after a failed save would compare
+  // the form against itself.
+  const [originalEmail, setOriginalEmail] = useState('')
+  // Stale-diff fallback: a 403 current_password_required means the backend saw a
+  // credential change our local diff missed (e.g. an out-of-date originalEmail) —
+  // force the field to render regardless of what credentialChange computes.
+  const [forceCurrentPassword, setForceCurrentPassword] = useState(false)
 
   // Avatar upload — instant local preview, then persist (mirrors the logo upload).
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null)
@@ -42,22 +54,39 @@ export function useProfileForm() {
       phone:            user.phone            ?? '',
       default_per_page: user.default_per_page ?? 500,
     })
+    setOriginalEmail(user.email ?? '')
   }, [user?.id, user?.firstname, user?.lastname, user?.email, user?.phone, user?.default_per_page])
 
   // Build a change handler for a single text field.
   const set = (k: keyof ProfileFormData) => (e: ChangeEvent<HTMLInputElement>) =>
     setForm(f => ({ ...f, [k]: e.target.value }))
 
+  // CredentialChangeGuard: this form has no password field, so the only credential
+  // change it can produce is an e-mail edit — diffed against the last-synced value.
+  // `forceCurrentPassword` covers a stale local diff the server still rejected.
+  const credentialChange = form.email.trim() !== originalEmail || forceCurrentPassword
+
   // Persist profile fields, then refresh the cached user.
   const handleSave = async () => {
     setSaving(true); setError(null); setSaved(false)
     try {
-      await api.put('/auth/me', form)
+      // CredentialChangeGuard: only carry current_password when the guard applies.
+      const payload = credentialChange ? { ...form, current_password: currentPassword } : form
+      await api.put('/auth/me', payload)
+      setForceCurrentPassword(false); setCurrentPassword('')
       await refreshUser?.()
       setSaved(true)
       setTimeout(() => setSaved(false), 2500)
-    } catch {
-      setError(t('profile.saveFailed'))
+    } catch (err) {
+      const e2 = err as { response?: { status?: number; data?: { code?: string } } }
+      // CredentialChangeGuard: match on the machine-readable `code`, never the
+      // (translatable, server-language) `message` text — mirrors EditUserModal.
+      if (e2.response?.status === 403 && e2.response?.data?.code === 'current_password_required') {
+        setError(t('profile.currentPasswordRequired'))
+        setForceCurrentPassword(true)
+      } else {
+        setError(t('profile.saveFailed'))
+      }
     } finally {
       setSaving(false)
     }
@@ -112,5 +141,8 @@ export function useProfileForm() {
     .filter(Boolean).map(n => n[0]).join('').toUpperCase() || '?'
 
   return { user, form, setForm, set, saving, saved, error, handleSave,
-           photo, avatarBusy, fileRef, onPickAvatar, removeAvatar, initials }
+           photo, avatarBusy, fileRef, onPickAvatar, removeAvatar, initials,
+           // CredentialChangeGuard: the "current password" field only ever
+           // appears when the e-mail actually changed (or a stale-diff 403 forced it).
+           currentPassword, setCurrentPassword, credentialChange }
 }

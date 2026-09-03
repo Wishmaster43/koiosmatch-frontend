@@ -46,7 +46,8 @@ export default function ProfilePage() {
 
   // Data layer: the profile form (synced from /auth/me), save, and avatar upload/remove.
   const { user, form, setForm, set, saving, saved, error, handleSave,
-          photo, avatarBusy, fileRef, onPickAvatar, removeAvatar, initials } = useProfileForm()
+          photo, avatarBusy, fileRef, onPickAvatar, removeAvatar, initials,
+          currentPassword, setCurrentPassword, credentialChange } = useProfileForm()
 
   // K-193 fase 2b: the WhatsApp Web tab shows only when the tenant has the
   // whatsapp_web module AND the role's page.whatsapp permission allows it
@@ -103,7 +104,9 @@ export default function ProfilePage() {
       {/* Each tab routes to its own component; state stays here. */}
       {tab === 'profile' && (
         <ProfileDetailsTab form={form} onField={set} onSave={handleSave}
-          saving={saving} saved={saved} error={error} user={user} />
+          saving={saving} saved={saved} error={error} user={user}
+          credentialChange={credentialChange} currentPassword={currentPassword}
+          onCurrentPasswordChange={e => setCurrentPassword(e.target.value)} />
       )}
 
       {tab === 'email' && (

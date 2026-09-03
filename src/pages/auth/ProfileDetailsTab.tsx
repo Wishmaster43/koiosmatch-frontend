@@ -7,6 +7,7 @@ import type { ChangeEvent, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { User, Mail, Phone, Check, Shield, MapPin } from 'lucide-react'
 import { Section, Field, Pill, ROLE_META, inputStyle } from './profileParts'
+import { Caption } from '@/components/ui/typography'
 import Spinner from '@/components/ui/Spinner'
 import SaveButton from '@/components/ui/SaveButton'
 
@@ -21,10 +22,17 @@ interface ProfileDetailsTabProps {
   saved?: boolean
   error?: ReactNode
   user?: ProfileUser | null
+  // CredentialChangeGuard (CMBE bundle B): re-entering the current password is
+  // required only once the e-mail actually changed (or the server flagged a
+  // stale diff via a 403) — mirrors EditUserModal's self-edit guard.
+  credentialChange?: boolean
+  currentPassword?: string
+  onCurrentPasswordChange?: (e: ChangeEvent<HTMLInputElement>) => void
 }
 
 // The editable personal-info form plus a read-only roles/locations access card.
-export default function ProfileDetailsTab({ form, onField, onSave, saving, saved, error, user }: ProfileDetailsTabProps) {
+export default function ProfileDetailsTab({ form, onField, onSave, saving, saved, error, user,
+  credentialChange, currentPassword, onCurrentPasswordChange }: ProfileDetailsTabProps) {
   const { t } = useTranslation('auth')
   const { t: tUsers } = useTranslation('users')
 
@@ -66,12 +74,25 @@ export default function ProfileDetailsTab({ form, onField, onSave, saving, saved
           </div>
         </Field>
 
+        {/* CredentialChangeGuard: appears only once an e-mail change (or a
+            server-flagged stale diff) requires re-entering the current password. */}
+        {credentialChange && (
+          <Field label={t('profile.currentPassword')} htmlFor="current-password">
+            <input id="current-password" type="password" required value={currentPassword ?? ''}
+              onChange={onCurrentPasswordChange} style={inputStyle} autoComplete="current-password"
+              aria-label={t('profile.currentPassword')} />
+            <Caption as="p" style={{ marginTop: 5 }}>{t('profile.currentPasswordHint')}</Caption>
+          </Field>
+        )}
+
         {error && (
           <p style={{ fontSize: 12, color: 'var(--color-danger-text)', marginTop: 4 }}>{error}</p>
         )}
 
-        {/* The saved-state pair is defined ONCE in SaveButton (§4) — never re-approximated. */}
-        <SaveButton saved={saved} onClick={onSave} disabled={saving} style={{ marginTop: 8, gap: 6 }}>
+        {/* The saved-state pair is defined ONCE in SaveButton (§4) — never re-approximated.
+            CredentialChangeGuard: blocked until the current password is filled in. */}
+        <SaveButton saved={saved} onClick={onSave}
+          disabled={saving || (!!credentialChange && !currentPassword)} style={{ marginTop: 8, gap: 6 }}>
           {saving
             ? <><Spinner size={13} /> {t('profile.saving')}</>
             : saved
