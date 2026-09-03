@@ -177,7 +177,7 @@
      calendar, visible only with both open). */
   --z-drawer: 100;   /* entity drawers, right filter panel        */
   --z-overlay: 200;  /* modal backdrops + dialogs, panel band 201-298 */
-  --z-popover: 300;  /* dropdown portals (must beat every dialog) */
+  --z-popover: 360;  /* dropdown portals (must beat every dialog, incl. the confirm layer 350 — DROPDOWN-ABOVE-CONFIRM-1) */
   --z-confirm: 350;  /* confirm-on-top-of-modal (own rung — used to TIE popover at 300, resolved only by DOM-order accident) */
   --z-toast: 400;    /* notifications, always on top              */
   /* MOTION: one duration + easing pair; scattered 0.1s/0.15s/0.2s snippets

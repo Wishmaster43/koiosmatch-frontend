@@ -5,7 +5,8 @@
  * so numbers must exist; but the VALUES are the ladder's, one to one. Change
  * them TOGETHER with index.css or stacking silently inverts (Opus E2).
  * Note: dropdown PORTALS do not use Z.popover — they sit on var(--z-popover)
- * (300) at body level so they beat every dialog in the band below.
+ * (360) at body level so they beat every dialog, the confirm layer (350) included:
+ * measured 04-09, a reason picker inside a Z.confirm panel sat UNDER the panel at 300.
  */
 export const Z = {
   /** In-flow popovers under a dialog band (rare; portalled dropdowns use the CSS rung). */
@@ -23,7 +24,7 @@ export const Z = {
 // climbing above the confirm layer.
 let floatingTop: number = Z.modal
 export function nextFloatingZ(): number {
-  // The band stays 201-298: below var(--z-popover) (300), so a dropdown opened
+  // The band stays 201-298: below var(--z-popover) (360), so a dropdown opened
   // FROM a floating panel always paints above every panel.
   floatingTop = floatingTop >= 298 ? Z.modal : floatingTop + 1
   return floatingTop
