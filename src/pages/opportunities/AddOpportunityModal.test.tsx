@@ -16,20 +16,35 @@ import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import AddOpportunityModal from './AddOpportunityModal'
 import api from '@/lib/api'
+import { useOpportunityLostReasons } from '@/lib/useOpportunityLostReasons'
 import type { Opportunity } from '@/types/opportunity'
 
 /* eslint-disable no-restricted-syntax -- fixture DATA mirroring the seed stage colours, not UI styling */
-vi.mock('@/lib/useOpportunityStages', () => ({
-  useOpportunityStages: () => ({ stages: [
+vi.mock('@/lib/useOpportunityStages', () => {
+  // A STABLE array reference (built once, at module-eval time) — the modal's own
+  // stageId-resolve effect depends on `[stages]`; a fresh array literal on every
+  // call (the old inline shape) re-fires that effect on every render and silently
+  // resets a manually-picked stage back to `existing.stageValue` (mirrors the real
+  // hook's memoized `stages`, which is stable across renders in production).
+  const STAGES = [
     { id: 'stage-1', value: 'lead', label: 'Lead', color: '#94A3B8' },
     { id: 'stage-2', value: 'won', label: 'Gewonnen', color: '#79B58E' },
-  ] }),
-}))
+    // OPP-LOST-FE-1: the one is_lost stage the guard tests below target — colour
+    // mirrors DEFAULT_OPPORTUNITY_STAGES's own 'lost' seed entry.
+    { id: 'stage-3', value: 'lost', label: 'Verloren', color: '#D98A8A', isLost: true },
+  ]
+  // `stagesRef` lets a test hand the modal a NEW array reference (a lookup refresh).
+  const stagesRef = { current: STAGES }
+  return { useOpportunityStages: () => ({ stages: stagesRef.current }), __stagesRef: stagesRef, __STAGES: STAGES }
+})
 /* eslint-enable no-restricted-syntax */
 vi.mock('@/lib/useOpportunityLookups', () => ({
   useOpportunityServiceTypes: () => ({ serviceTypes: [{ id: 'svc-1', value: 'zorg', label: 'Zorg' }] }),
   useOpportunityAgreementTypes: () => ({ agreementTypes: [{ id: 'agr-1', value: 'framework', label: 'Mantelovereenkomst' }] }),
 }))
+// OPP-LOST-FE-1: the tenant's curated lost reasons — a plain vi.fn() so each guard
+// test below can control reasons/loading independently (mirrors useOpportunitiesData.test.tsx).
+vi.mock('@/lib/useOpportunityLostReasons', () => ({ useOpportunityLostReasons: vi.fn() }))
 // The customer→location→department→contact cascade (a different file's scope,
 // network-backed) — a minimal fixture, mirrors MatchModal.test.tsx.
 vi.mock('./hooks/useCustomerCascade', () => ({
@@ -77,8 +92,14 @@ const noop = () => {}
 // renders too — the trigger is always the FIRST button (DOM order), the clear
 // cross (when present) the second, so this picks index 0 explicitly.
 const fieldTrigger = (label: string) => within(screen.getByText(label).parentElement as HTMLElement).getAllByRole('button')[0]
+const mockedLostReasons = vi.mocked(useOpportunityLostReasons)
 
-beforeEach(() => vi.clearAllMocks())
+beforeEach(() => {
+  vi.clearAllMocks()
+  // OPP-LOST-FE-1: no curated reasons by default — the guard describe block below
+  // overrides this per test when it needs the gate (or the loading race) to fire.
+  mockedLostReasons.mockReturnValue({ reasons: [], loading: false, invalidate: vi.fn() })
+})
 
 describe('AddOpportunityModal · house wide frame (Danny 27-07)', () => {
   it('renders on the shared WIDE_MODAL frame with the two titled cards', () => {
@@ -361,5 +382,121 @@ describe('AddOpportunityModal · edit mode (existing prop) — PATCH, never POST
     expect(api.patch).toHaveBeenCalledWith('/opportunities/opp-9', expect.objectContaining({
       description: '<p>Bestaande kanstekst</p>',
     }))
+  })
+})
+
+// OPP-LOST-FE-1: the edit-mode 'Waarde & fase' Fase picker is a THIRD path that can
+// move an opportunity onto an is_lost stage (board drag + drawer picker were already
+// gated in useOpportunitiesData — this modal's own save was not). Reuses the exact
+// shared modal/hook, gated by the extracted lostReasonGuard.needsLostReason helper.
+describe('AddOpportunityModal · OPP-LOST-FE-1 lost-reason guard on save', () => {
+  const existing = {
+    id: 'opp-9', title: 'Bestaande kans', clientId: 'cust-1', stageValue: 'lead',
+    value: null, hours: null, startDate: null, endDate: null, expectedCloseAt: null,
+    ownerId: null, serviceTypeId: null, agreementTypeId: null,
+    locationId: null, departmentId: null, contactId: null,
+  } as unknown as Opportunity
+
+  it('picking a lost stage with reasons configured opens the confirm modal; confirm stays disabled until a reason is picked, then PATCHes stage + lost_reason', async () => {
+    const user = userEvent.setup()
+    mockedLostReasons.mockReturnValue({ reasons: [{ value: 'Budget', label: 'Budget' }], loading: false, invalidate: vi.fn() })
+    render(<AddOpportunityModal onClose={noop} existing={existing} customers={[{ id: 'cust-1', name: 'Acme' }]} />)
+
+    await user.click(fieldTrigger('modal.fields.stage'))
+    await user.click(await screen.findByRole('button', { name: 'Verloren' }))
+
+    // The save itself must NOT PATCH yet — it opens the shared confirm first.
+    await user.click(screen.getByRole('button', { name: 'modal.save' }))
+    expect(api.patch).not.toHaveBeenCalled()
+
+    const confirmBtn = await screen.findByRole('button', { name: 'lost.confirm' })
+    expect(confirmBtn).toBeDisabled()
+
+    await user.click(await screen.findByRole('button', { name: 'lost.reasonPlaceholder' }))
+    await user.click(await screen.findByRole('button', { name: 'Budget' }))
+    expect(confirmBtn).toBeEnabled()
+
+    await user.click(confirmBtn)
+    expect(api.patch).toHaveBeenCalledWith('/opportunities/opp-9', expect.objectContaining({
+      opportunity_stage_id: 'stage-3', lost_reason: 'Budget',
+    }))
+  })
+
+  it('cancel: no PATCH fires, the confirm closes back onto the untouched form', async () => {
+    const user = userEvent.setup()
+    mockedLostReasons.mockReturnValue({ reasons: [{ value: 'Budget', label: 'Budget' }], loading: false, invalidate: vi.fn() })
+    render(<AddOpportunityModal onClose={noop} existing={existing} customers={[{ id: 'cust-1', name: 'Acme' }]} />)
+
+    await user.click(fieldTrigger('modal.fields.stage'))
+    await user.click(await screen.findByRole('button', { name: 'Verloren' }))
+    await user.click(screen.getByRole('button', { name: 'modal.save' }))
+
+    await user.click(await screen.findByRole('button', { name: 'common:cancel' }))
+    expect(api.patch).not.toHaveBeenCalled()
+    // The confirm popup itself is gone — the form stays open, stage pick untouched.
+    expect(screen.queryByRole('button', { name: 'lost.confirm' })).not.toBeInTheDocument()
+    expect(fieldTrigger('modal.fields.stage')).toHaveTextContent('Verloren')
+  })
+
+  it('no reasons configured: saving a lost stage PATCHes directly, without lost_reason (empty list = no gate, per the lookup\'s own contract)', async () => {
+    const user = userEvent.setup()
+    mockedLostReasons.mockReturnValue({ reasons: [], loading: false, invalidate: vi.fn() })
+    render(<AddOpportunityModal onClose={noop} existing={existing} customers={[{ id: 'cust-1', name: 'Acme' }]} />)
+
+    await user.click(fieldTrigger('modal.fields.stage'))
+    await user.click(await screen.findByRole('button', { name: 'Verloren' }))
+    await user.click(screen.getByRole('button', { name: 'modal.save' }))
+
+    expect(api.patch).toHaveBeenCalledWith('/opportunities/opp-9', expect.objectContaining({ opportunity_stage_id: 'stage-3' }))
+    const body = vi.mocked(api.patch).mock.calls[0][1] as Record<string, unknown>
+    expect('lost_reason' in body).toBe(false)
+  })
+
+  it('LOADING RACE: while the reasons lookup is still loading, save stays disabled and no PATCH fires — once it resolves, save proceeds', async () => {
+    const user = userEvent.setup()
+    mockedLostReasons.mockReturnValue({ reasons: [], loading: true, invalidate: vi.fn() })
+    const { rerender } = render(<AddOpportunityModal onClose={noop} existing={existing} customers={[{ id: 'cust-1', name: 'Acme' }]} />)
+
+    await user.click(fieldTrigger('modal.fields.stage'))
+    await user.click(await screen.findByRole('button', { name: 'Verloren' }))
+
+    const saveBtn = screen.getByRole('button', { name: 'modal.save' })
+    expect(saveBtn).toBeDisabled()
+    await user.click(saveBtn)
+    expect(api.patch).not.toHaveBeenCalled()
+
+    // The lookup resolves with no curated reasons — a re-render picks up the new value.
+    mockedLostReasons.mockReturnValue({ reasons: [], loading: false, invalidate: vi.fn() })
+    rerender(<AddOpportunityModal onClose={noop} existing={existing} customers={[{ id: 'cust-1', name: 'Acme' }]} />)
+
+    expect(screen.getByRole('button', { name: 'modal.save' })).toBeEnabled()
+    await user.click(screen.getByRole('button', { name: 'modal.save' }))
+    expect(api.patch).toHaveBeenCalledWith('/opportunities/opp-9', expect.objectContaining({ opportunity_stage_id: 'stage-3' }))
+  })
+})
+
+// Review 03-09: `stages` changes reference when the lookup lands or the language switches;
+// the edit-mode stage resolver must not overwrite a stage the user picked meanwhile.
+describe('AddOpportunityModal · a stages refresh never overwrites a manual stage pick', () => {
+  const existing = {
+    id: 'opp-9', title: 'Bestaande kans', clientId: 'cust-1', stageValue: 'lead',
+    value: null, hours: null, startDate: null, endDate: null, expectedCloseAt: null,
+    ownerId: null, serviceTypeId: null, agreementTypeId: null,
+    locationId: null, departmentId: null, contactId: null,
+  } as unknown as Opportunity
+
+  it('keeps the picked stage after the stages array changes reference', async () => {
+    const user = userEvent.setup()
+    const mod = await import('@/lib/useOpportunityStages') as unknown as { __stagesRef: { current: unknown[] }; __STAGES: unknown[] }
+    const { rerender } = render(<AddOpportunityModal onClose={noop} existing={existing} customers={[{ id: 'cust-1', name: 'Acme' }]} />)
+    expect(fieldTrigger('modal.fields.stage')).toHaveTextContent('Lead')
+    await user.click(fieldTrigger('modal.fields.stage'))
+    await user.click(await screen.findByRole('button', { name: 'Gewonnen' }))
+    expect(fieldTrigger('modal.fields.stage')).toHaveTextContent('Gewonnen')
+    // The lookup lands again (new array reference): the manual pick must survive.
+    mod.__stagesRef.current = [...mod.__STAGES]
+    rerender(<AddOpportunityModal onClose={noop} existing={existing} customers={[{ id: 'cust-1', name: 'Acme' }]} />)
+    expect(fieldTrigger('modal.fields.stage')).toHaveTextContent('Gewonnen')
+    mod.__stagesRef.current = mod.__STAGES
   })
 })

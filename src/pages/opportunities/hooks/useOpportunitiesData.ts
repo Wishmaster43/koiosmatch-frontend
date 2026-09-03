@@ -31,6 +31,7 @@ import { extractApiError } from '@/lib/extractApiError'
 import { useUsers } from '@/lib/queries'
 import { useOpportunityStages } from '@/lib/useOpportunityStages'
 import { useOpportunityLostReasons } from '@/lib/useOpportunityLostReasons'
+import { needsLostReason as stageNeedsLostReason } from './lostReasonGuard'
 import { mapOpportunity } from '../data/mapOpportunity'
 import type { Opportunity, ApiOpportunity } from '@/types/opportunity'
 import type { Id } from '@/types/common'
@@ -170,9 +171,11 @@ export function useOpportunitiesData(includeArchived: boolean = false, branchIds
   // has curated ≥1 reason (empty list = the field doesn't bind, no gate).
   const [pendingLost, setPendingLost] = useState<{ id: Id; stageValue: string | number } | null>(null)
 
-  // Whether moving to `stageValue` needs the lost-reason confirm first.
+  // Whether moving to `stageValue` needs the lost-reason confirm first — reads the
+  // shared lostReasonGuard so this rule and AddOpportunityModal's own save-time
+  // gate can never drift apart.
   const needsLostReason = (stageValue: string | number) =>
-    Boolean(stages.find(x => x.value === stageValue)?.isLost) && lostReasons.length > 0
+    stageNeedsLostReason(stages.find(x => x.value === stageValue), lostReasons)
 
   // Move to a new stage optimistically, then PATCH — the shared move applied
   // directly (non-lost stages) or after the lost-reason confirm. Bug class fix

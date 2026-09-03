@@ -3,12 +3,17 @@
  * deal-stage cascade (customer → location → department → contact) and the
  * rich-text description. Mirrors the house create/edit modal pattern (§3A).
  */
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import api, { unwrap } from '@/lib/api'
 import { useAuth } from '@/context/AuthContext'
 import { useOpportunityStages } from '@/lib/useOpportunityStages'
 import { useOpportunityServiceTypes, useOpportunityAgreementTypes } from '@/lib/useOpportunityLookups'
+// OPP-LOST-FE-1: the tenant's curated lost reasons + the shared stage-change gate
+// (extracted to lostReasonGuard so this modal and useOpportunitiesData's own
+// board/drawer guard read one rule, never two forked copies).
+import { useOpportunityLostReasons } from '@/lib/useOpportunityLostReasons'
+import { needsLostReason } from './hooks/lostReasonGuard'
 // K2: the tenant's own establishments (Vestiging) — the same shared lookup
 // MatchModal uses for its own branch picker (mirrors §3A, one hook not a copy).
 import { useLocations } from '@/lib/useLocations'
@@ -22,6 +27,7 @@ import { hasDescriptionText } from './data/descriptionText'
 import OpportunityGeneralCard from './addmodal/OpportunityGeneralCard'
 import OpportunityDealStageCard from './addmodal/OpportunityDealStageCard'
 import OpportunityDescriptionCard from './addmodal/OpportunityDescriptionCard'
+import OpportunityLostReasonModal from './drawer/OpportunityLostReasonModal'
 import { WIDE_MODAL } from '@/components/ui/modalMetrics'
 import { tintBorder } from '@/lib/tint'
 import FloatingPanel from '@/components/ui/FloatingPanel'
@@ -114,6 +120,10 @@ export default function AddOpportunityModal({ onClose, onCreated, users = [], cu
   const { stages } = useOpportunityStages()
   const { serviceTypes }   = useOpportunityServiceTypes()
   const { agreementTypes } = useOpportunityAgreementTypes()
+  // OPP-LOST-FE-1: the picker in the 'Waarde & fase' card below can target an
+  // is_lost stage from EITHER mode (create or edit) — same curated-reasons lookup
+  // the board/drawer guard reads.
+  const { reasons: lostReasons, loading: lostReasonsLoading } = useOpportunityLostReasons()
   // Owner defaults to the logged-in user (still changeable below).
   const { user: me } = useAuth() as unknown as { user: { id?: Id; name?: string } | null }
 
@@ -123,6 +133,8 @@ export default function AddOpportunityModal({ onClose, onCreated, users = [], cu
   // fall through the apiErrors branch silently — the button just stopped spinning
   // with no feedback. Now every failure shows something inline; modal stays open.
   const [createError, setCreateError] = useState<string | null>(null)
+  // OPP-LOST-FE-1: the save is waiting on the shared lost-reason confirm popup.
+  const [showLostReasonModal, setShowLostReasonModal] = useState(false)
   const [form, setForm] = useState<OppForm>({
     title: existing?.title ?? '',
     clientId: existing ? String(existing.clientId ?? '') : (defaultCustomerId != null ? String(defaultCustomerId) : ''),
@@ -151,10 +163,21 @@ export default function AddOpportunityModal({ onClose, onCreated, users = [], cu
   // value and the Fase select silently reverted to unselected (Danny would have
   // shipped a save that WIPED the existing stage). Only accept an id-bearing
   // match, so the seed pass is a no-op and the real pass is the only one that writes.
+  // Review 03-09: `stages` changes reference when the lookup lands or the language
+  // switches; resolving must never overwrite a stage the user has picked meanwhile,
+  // so it only writes while the field still holds the value it resolved last time.
+  const autoStageRef = useRef<string>('')
   useEffect(() => {
     if (!existing?.stageValue) return
     const match = stages.find(s => s.value === existing.stageValue)
-    if (match?.id) setForm(f => (f.stageId === String(match.id) ? f : { ...f, stageId: String(match.id) }))
+    if (!match?.id) return
+    const id = String(match.id)
+    setForm(f => {
+      if (f.stageId === id) return f
+      if (f.stageId !== '' && f.stageId !== autoStageRef.current) return f
+      autoStageRef.current = id
+      return { ...f, stageId: id }
+    })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [stages])
 
@@ -199,10 +222,19 @@ export default function AddOpportunityModal({ onClose, onCreated, users = [], cu
   // Picking a different location invalidates the department picked under it.
   const handleLocationChange = (v: string) => { setLocationId(v); setDepartmentId('') }
 
-  // Build the create/update body (every field conditionally null-guarded) and
-  // POST or PATCH depending on whether an existing Kans is being edited.
-  const handleSubmit = async () => {
-    if (!form.title.trim()) { setErrors({ title: true }); return }
+  // OPP-LOST-FE-1: resolve the picked stage back to its lookup record — form.stageId
+  // keys on the stage id (see stageOptions below, `String(s.id ?? s.value)`), not the
+  // stable value slug useOpportunitiesData's board/drawer guard reads.
+  const pickedStage = stages.find(s => String(s.id ?? s.value) === form.stageId)
+  const stageNeedsLostReason = needsLostReason(pickedStage, lostReasons)
+  // LOADING RACE: a save targeting an is_lost stage waits for the reasons lookup —
+  // never pass ungated just because `lostReasons` is momentarily [] while loading.
+  const lostReasonsPending = Boolean(pickedStage?.isLost) && lostReasonsLoading
+
+  // Build the create/update body (every field conditionally null-guarded) and POST
+  // or PATCH depending on whether an existing Kans is being edited. `lostReason`
+  // rides the body only once OpportunityLostReasonModal has supplied one below.
+  const save = async (lostReason?: string) => {
     setSaving(true)
     setCreateError(null)
     try {
@@ -228,6 +260,8 @@ export default function AddOpportunityModal({ onClose, onCreated, users = [], cu
         // OPP-DESCRIPTION-1: an empty/whitespace-only draft is OMITTED entirely
         // (never `description: ''`) — mirrors +Match's own text-block contract.
         ...(hasDescriptionText(description) ? { description } : {}),
+        // OPP-LOST-FE-1: the confirmed lost reason, only once the guard gated this save.
+        ...(lostReason !== undefined ? { lost_reason: lostReason } : {}),
       }
       const r = existing
         ? await api.patch(`/opportunities/${existing.id}`, body)
@@ -248,10 +282,27 @@ export default function AddOpportunityModal({ onClose, onCreated, users = [], cu
       }
     } finally {
       setSaving(false)
+      setShowLostReasonModal(false)
     }
   }
 
-  const canSubmit = !!form.title.trim()
+  // Footer entry point: gate on the shared lost-reason confirm before the first
+  // PATCH/POST attempt whenever the picked stage is is_lost with curated reasons
+  // (create or edit — both reach the same 'Waarde & fase' stage picker).
+  const handleSubmit = () => {
+    if (!form.title.trim()) { setErrors({ title: true }); return }
+    if (stageNeedsLostReason) { setShowLostReasonModal(true); return }
+    void save()
+  }
+  // Confirm from OpportunityLostReasonModal: re-run the save WITH the picked reason.
+  const confirmLostReason = (reason: string) => { void save(reason) }
+  // Cancel: no request fires — the form (including the stage pick) stays as-is.
+  const cancelLostReason = () => setShowLostReasonModal(false)
+
+  // OPP-LOST-FE-1: disabled while the reasons lookup is still resolving for a
+  // targeted lost stage (the loading-race guard above) — the existing disabled
+  // affordance covers it, no separate spinner needed.
+  const canSubmit = !!form.title.trim() && !lostReasonsPending
   const stageOptions     = stages.map(s => ({ value: String(s.id ?? s.value), label: s.label }))
   const serviceOptions   = serviceTypes.map(s => ({ value: String(s.id ?? s.value), label: s.label }))
   const agreementOptions = agreementTypes.map(a => ({ value: String(a.id ?? a.value), label: a.label }))
@@ -268,10 +319,13 @@ export default function AddOpportunityModal({ onClose, onCreated, users = [], cu
   const title = t(isEdit ? 'modal.editTitle' : 'modal.title')
 
   return (
-    // POPUP-SLEEP-1: migrated onto the shared FloatingPanel shell — draggable header,
-    // SE-resize, remembered position. K1 (Danny's screenshot 08-08): the width prop
-    // now literally mirrors MatchModal's own footprint (`94vw`, same WIDE_MODAL
-    // maxWidth) instead of a near-equivalent calc() — one frame, one source.
+    // A fragment: OpportunityLostReasonModal (OPP-LOST-FE-1) renders as its own
+    // sibling FloatingPanel on top, mirroring OpportunitiesPage's board-move gate.
+    <>
+    {/* POPUP-SLEEP-1: migrated onto the shared FloatingPanel shell — draggable header,
+        SE-resize, remembered position. K1 (Danny's screenshot 08-08): the width prop
+        now literally mirrors MatchModal's own footprint (`94vw`, same WIDE_MODAL
+        maxWidth) instead of a near-equivalent calc() — one frame, one source. */}
     <FloatingPanel open onClose={onClose} title={title} ariaLabel={title}
       persistKey="add-opportunity" scrollBody={false}
       width="94vw" maxWidth={`${WIDE_MODAL.maxWidth}px`}>
@@ -336,5 +390,12 @@ export default function AddOpportunityModal({ onClose, onCreated, users = [], cu
           onSubmit={handleSubmit} submitLabel={isEdit ? t('modal.save') : t('modal.create')}
           disabled={!canSubmit} busy={saving} />
     </FloatingPanel>
+
+    {/* OPP-LOST-FE-1: the shared confirm — reuses the exact board/drawer modal so
+        the idiom (searchable reason picker, danger confirm) never forks per surface. */}
+    {showLostReasonModal && (
+      <OpportunityLostReasonModal onCancel={cancelLostReason} onConfirm={confirmLostReason} submitting={saving} />
+    )}
+    </>
   )
 }
