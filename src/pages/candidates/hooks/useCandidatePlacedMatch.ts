@@ -15,9 +15,11 @@ import type { Id } from '@/types/common'
 
 interface Args {
   c: Candidate | null
-  onUpdate?: (id: Id, patch: Record<string, unknown>) => void
+  // STATUS-OVERRIDE-REVERT-1b: onUpdate may resolve true/false (saved/rejected) —
+  // the placed-status override below clears itself on a rejection.
+  onUpdate?: (id: Id, patch: Record<string, unknown>) => void | Promise<boolean>
   // The parent's optimistic status setter — 'placed' must reflect in the same session.
-  setStatus: (v: string) => void
+  setStatus: (v: string | null) => void
 }
 
 export function useCandidatePlacedMatch({ c, onUpdate, setStatus }: Args) {
@@ -37,7 +39,10 @@ export function useCandidatePlacedMatch({ c, onUpdate, setStatus }: Args) {
     let mid = matchChoice
     if (!mid && newMatchVacancyId) mid = await createMatch(newMatchVacancyId)
     if (!mid) return
-    setStatus(matchTargetStatus); onUpdate?.(c.id, { status: matchTargetStatus, match_id: mid })
+    setStatus(matchTargetStatus)
+    // STATUS-OVERRIDE-REVERT-1b: clear the override on a rejected PATCH so the
+    // badge falls back to the (reverted) record value instead of the refused one.
+    Promise.resolve(onUpdate?.(c.id, { status: matchTargetStatus, match_id: mid })).then(ok => { if (ok === false) setStatus(null) })
     setMatchPrompt(false); setMatchChoice(null); setNewMatchVacancyId('')
   }
 

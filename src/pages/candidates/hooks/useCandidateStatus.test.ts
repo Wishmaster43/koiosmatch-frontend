@@ -203,3 +203,27 @@ describe('useCandidateStatus · STATUS-OVERRIDE-REVERT-1 (override clears on a r
     expect(result.current.currentStatus).toBe('available')
   })
 })
+
+// STATUS-OVERRIDE-REVERT-1b: useCandidatePlacedMatch's own optimistic status
+// override (set via confirmPlacedMatch) used to survive a rejected PATCH the
+// same way the parent's did before STATUS-OVERRIDE-REVERT-1 — it now clears too.
+describe('useCandidateStatus · STATUS-OVERRIDE-REVERT-1b (placed-match override clears on a rejected PATCH)', () => {
+  it('confirmPlacedMatch reverts the override when onUpdate resolves false', async () => {
+    const onUpdate = vi.fn().mockResolvedValue(false)
+    const { result } = renderHook(() => useCandidateStatus({ c: candidate({ status: 'available' }), onUpdate }))
+    act(() => { result.current.changeStatus('ingezet') })
+    act(() => { result.current.setMatchChoice('m-1') })
+    await act(async () => { await result.current.confirmPlacedMatch() })
+    await waitFor(() => expect(result.current.currentStatus).toBe('available')) // reverted
+  })
+
+  it('confirmPlacedMatch keeps the override when onUpdate resolves true (saved)', async () => {
+    const onUpdate = vi.fn().mockResolvedValue(true)
+    const { result } = renderHook(() => useCandidateStatus({ c: candidate({ status: 'available' }), onUpdate }))
+    act(() => { result.current.changeStatus('ingezet') })
+    act(() => { result.current.setMatchChoice('m-1') })
+    await act(async () => { await result.current.confirmPlacedMatch() })
+    await act(async () => { await Promise.resolve() })
+    expect(result.current.currentStatus).toBe('ingezet')
+  })
+})
