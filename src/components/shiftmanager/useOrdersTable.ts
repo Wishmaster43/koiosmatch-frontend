@@ -34,8 +34,11 @@ export function useOrdersTable({ selectedMonth, search, selectedStatuses, sort }
   // Reset to the first page when the month or page size changes.
   useEffect(() => { setPage(1) }, [selectedMonth, pageSize])
 
-  // Load the rows for the current month/page/size.
+  // Load the rows for the current month/page/size. The alive guard (§9, audit
+  // r2-context-sm-4) drops a slower earlier response so fast paging can never let a
+  // stale page overwrite the one the user is looking at.
   useEffect(() => {
+    let alive = true
     dispatch({ rows: [], loading: true, total: 0, lastPage: 1 })
     api.get('/sm_reports/shifts-per-month/detail', {
       params: {
@@ -44,6 +47,7 @@ export function useOrdersTable({ selectedMonth, search, selectedStatuses, sort }
       },
     })
       .then(res => {
+        if (!alive) return
         const body = res.data
         dispatch({
           rows:     body?.data ?? (Array.isArray(body) ? body : []),
@@ -52,7 +56,8 @@ export function useOrdersTable({ selectedMonth, search, selectedStatuses, sort }
           lastPage: body?.meta?.last_page ?? body?.last_page ?? 1,
         })
       })
-      .catch(() => dispatch({ rows: [], loading: false, total: 0, lastPage: 1 }))
+      .catch(() => { if (alive) dispatch({ rows: [], loading: false, total: 0, lastPage: 1 }) })
+    return () => { alive = false }
   }, [selectedMonth, page, pageSize])
 
   // Persist the chosen page size on the user profile.

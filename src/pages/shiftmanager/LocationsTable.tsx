@@ -12,6 +12,7 @@ import type { Column } from '@/components/ui/DataTable'
 import StatusPill from '@/components/ui/StatusPill'
 import { ac, Avatar } from './locationParts'
 import type { SmLocationRow } from '@/types/shiftmanager'
+import CopyIconButton from '@/components/ui/CopyIconButton'
 
 const mutedCell: CSSProperties = { color: 'var(--text-muted)', fontSize: 12 }
 
@@ -45,7 +46,13 @@ export default function LocationsTable({ rows, loading, selectedId, onSelect }: 
           <Avatar label={l.name} size={30} />
           <div>
             <div style={{ fontWeight: 500, color: 'var(--text)' }}>{l.name}</div>
-            {l.address && <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{l.address}</div>}
+            {/* ADRES-KOPIEER canon: a table cell showing an address carries the shared copy button. */}
+            {l.address && (
+              <div style={{ fontSize: 11, color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 4 }}>
+                <span>{l.address}</span>
+                <CopyIconButton value={l.address} label={t('common:copyAddress.copy')} copiedLabel={t('common:copyAddress.copied')} />
+              </div>
+            )}
           </div>
         </div>
       ),

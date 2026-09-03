@@ -10,6 +10,7 @@ import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { Section, formatDate, formatTime, formatHours } from './ordersTableParts'
 import type { OrderRow } from '@/types/shiftmanager'
 import { BodyText, Caption } from '@/components/ui/typography'
+import CopyIconButton from '@/components/ui/CopyIconButton'
 
 // Labelled value, dash when empty — module scope (props-only), so React never
 // recreates the component type per render (react-hooks/static-components).
@@ -75,7 +76,13 @@ export default function OrderDetailDrawer({ row, onClose }: { row: OrderRow | nu
           <Section title={t('orders.drawer.customerLocation')}>
             <Field label={t('orders.drawer.customer')}     value={customer?.name} />
             <Field label={t('orders.drawer.location')}     value={loc?.name} />
-            <Field label={t('orders.drawer.address')}      value={loc?.address} />
+            {/* ADRES-KOPIEER canon: every address display carries the shared copy button. */}
+            <Field label={t('orders.drawer.address')}      value={loc?.address ? (
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                {loc.address}
+                <CopyIconButton value={loc.address} label={t('common:copyAddress.copy')} copiedLabel={t('common:copyAddress.copied')} />
+              </span>
+            ) : undefined} />
           </Section>
 
           <Section title={t('orders.drawer.hours')}>

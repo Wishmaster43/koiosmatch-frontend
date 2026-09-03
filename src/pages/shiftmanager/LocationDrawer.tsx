@@ -11,6 +11,7 @@ import { Avatar, StatusBadge, ac } from './locationParts'
 import type { SmLocationRow } from '@/types/shiftmanager'
 import ChangelogPopover from '@/components/drawer/ChangelogPopover'
 import EntityChangelog from '@/components/drawer/EntityChangelog'
+import CopyIconButton from '@/components/ui/CopyIconButton'
 
 // The read-only location detail slide-in; renders nothing without a location.
 export default function LocationDrawer({ loc, onClose }: { loc: SmLocationRow | null; onClose: () => void }) {
@@ -82,7 +83,11 @@ export default function LocationDrawer({ loc, onClose }: { loc: SmLocationRow | 
               </div>
               <div>
                 <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('locationsPage.drawer.address')}</div>
-                <div style={{ fontSize: 13, color: 'var(--text)' }}>{loc.address}, {loc.city}</div>
+                {/* ADRES-KOPIEER canon: every address display carries the shared copy button. */}
+                <div style={{ fontSize: 13, color: 'var(--text)', display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <span>{loc.address}, {loc.city}</span>
+                  <CopyIconButton value={`${loc.address}, ${loc.city}`} label={t('common:copyAddress.copy')} copiedLabel={t('common:copyAddress.copied')} />
+                </div>
               </div>
             </div>
             {loc.phone && (
