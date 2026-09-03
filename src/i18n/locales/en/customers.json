@@ -116,7 +116,11 @@
     "deletedNamed": "{{name}} deleted",
     "deleteFailed": "Deleting failed (possibly active links).",
     "deleteBlocked": "Cannot delete {{name}}: active links still exist.",
-    "photoChange": "Change photo"
+    "photoChange": "Change photo",
+    "blacklistReasonTitle": "Blacklist reason",
+    "blacklistReasonLabel": "Reason",
+    "blacklistReasonPick": "Pick a reason…",
+    "blacklistReasonOptionalHint": "A reason is optional for this tenant"
   },
   "overview": {
     "general": "General",

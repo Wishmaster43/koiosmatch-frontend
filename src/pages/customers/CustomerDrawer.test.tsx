@@ -66,7 +66,12 @@ vi.mock('@/lib/useCustomerPhases', () => ({
 // its default-status-on-convert key. Defaults to {} (no setting configured) so
 // existing tests below are unaffected; individual tests override per case.
 const mockUseAllSettings = vi.fn((): Record<string, unknown> => ({}))
-vi.mock('@/lib/settings/useAllSettings', () => ({ useAllSettings: () => mockUseAllSettings() }))
+// KLANT-BLACKLIST-PROMPT-1: useCustomerDrawerActions now also reads getBoolSetting
+// from this module — re-export the real (pure) helper alongside the mocked hook.
+vi.mock('@/lib/settings/useAllSettings', async () => {
+  const actual = await vi.importActual<typeof import('@/lib/settings/useAllSettings')>('@/lib/settings/useAllSettings')
+  return { ...actual, useAllSettings: () => mockUseAllSettings() }
+})
 // Session + tenant plumbing the shell reads; no module/permission is needed by
 // default. Wrapped in vi.fn() (mirrors mockUseCustomerPhases below) so the
 // DELETE-ICON-1 tests can override hasPermission per case. Explicit return type

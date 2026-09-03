@@ -31,6 +31,7 @@ import { useCustomFields } from '@/lib/useCustomFields'
 import { initialsOf } from '@/lib/initials'
 import ChangelogPopover from '@/components/drawer/ChangelogPopover'
 import { useCustomerDrawerActions } from './hooks/useCustomerDrawerActions'
+import CustomerStatusReasonModal from './drawer/CustomerStatusReasonModal'
 import ChangelogTab from './drawer/ChangelogTab'
 import OverviewTab from './drawer/OverviewTab'
 import LocationsTab from './drawer/LocationsTab'
@@ -164,6 +165,7 @@ export default function CustomerDrawer({
   // hooks), same as the useState calls it replaces, before the null check below.
   const {
     currentStatus, currentTags, changeStatus,
+    blacklistModal, setBlacklistModal, confirmBlacklist, blacklistReasons,
     currentPhase, phaseInfo, showStatus,
     targetPhase, isEntryPhase, doConvertPhase,
     ownerOptions, ownerValue, onOwnerChange,
@@ -398,6 +400,14 @@ export default function CustomerDrawer({
     />
     {/* DELETE-ICON-1: the shared confirm dialog, mounted once per drawer. */}
     {deleteDialog}
+    {/* KLANT-BLACKLIST-PROMPT-1: the blacklist status-reason prompt, mounted only
+        while open (mirrors CandidateStatusModals' fresh-mount-per-open pattern). */}
+    {blacklistModal && (
+      <CustomerStatusReasonModal state={blacklistModal} reasons={blacklistReasons}
+        onChangeReason={reason => setBlacklistModal(m => m && ({ ...m, reason }))}
+        onCancel={() => setBlacklistModal(null)}
+        onConfirm={confirmBlacklist} />
+    )}
     {/* KLANT-SAMENVOEGEN-1: the open record is always the SURVIVOR (see the modal's own
         docblock for the measured route direction), so its id never changes here — no
         reselect needed, only a refresh of the sub-entity data that may have just moved

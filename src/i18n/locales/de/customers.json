@@ -116,7 +116,11 @@
     "deletedNamed": "{{name}} gelöscht",
     "deleteFailed": "Löschen fehlgeschlagen (möglicherweise aktive Verknüpfungen).",
     "deleteBlocked": "{{name}} kann nicht gelöscht werden: es bestehen noch aktive Verknüpfungen.",
-    "photoChange": "Foto ändern"
+    "photoChange": "Foto ändern",
+    "blacklistReasonTitle": "Grund für Blacklist",
+    "blacklistReasonLabel": "Grund",
+    "blacklistReasonPick": "Grund wählen…",
+    "blacklistReasonOptionalHint": "Ein Grund ist für diesen Mandanten optional"
   },
   "overview": {
     "general": "Allgemein",

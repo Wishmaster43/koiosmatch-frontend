@@ -258,6 +258,8 @@ export function mapCustomer(c: ApiCustomer = {}): Customer {
     helloflexLink: backofficeLinkOf(c.backoffice_links, 'helloflex'),
     shiftmanagerLink: backofficeLinkOf(c.backoffice_links, 'shiftmanager'),
     status: statusValue,
+    // KLANT-BLACKLIST-PROMPT-1: the lookup-backed blacklist reason (mirrors the candidate mapper).
+    blacklistReason: c.blacklist_reason ?? null,
     statusLabel: (status && typeof status === 'object') ? status.label : c.status_label,
     statusColor: (status && typeof status === 'object') ? status.color : c.status_color,
     // KLANT-FASE-1: the lifecycle phase slug. Both resources send a bare string, but

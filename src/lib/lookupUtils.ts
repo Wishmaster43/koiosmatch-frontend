@@ -40,6 +40,11 @@ export function normalizeOptions(raw: unknown, fallback: LookupOption[] | null =
       // mapper used to drop it, so a consumer's "default" fallback silently degraded to
       // "whatever sorts first" instead of the tenant's actually-flagged default.
       ...(it.is_default != null ? { isDefault: Boolean(it.is_default) } : {}),
+      // KLANT-BLACKLIST-PROMPT-1: pass `is_blacklist` through (customer statuses
+      // now carry the same flag the candidate status lookup already exposed) —
+      // this was previously dropped here, so a customer-status consumer never
+      // saw the flag even though CustomerLookupController already emits it.
+      ...(it.is_blacklist != null ? { isBlacklist: Boolean(it.is_blacklist) } : {}),
     }))
 }
 

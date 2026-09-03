@@ -116,7 +116,11 @@
     "deletedNamed": "{{name}} eliminado",
     "deleteFailed": "Error al eliminar (posibles vínculos activos).",
     "deleteBlocked": "No se puede eliminar a {{name}}: aún existen vínculos activos.",
-    "photoChange": "Cambiar foto"
+    "photoChange": "Cambiar foto",
+    "blacklistReasonTitle": "Motivo de la lista negra",
+    "blacklistReasonLabel": "Motivo",
+    "blacklistReasonPick": "Elige un motivo…",
+    "blacklistReasonOptionalHint": "Un motivo es opcional para esta organización"
   },
   "overview": {
     "general": "General",

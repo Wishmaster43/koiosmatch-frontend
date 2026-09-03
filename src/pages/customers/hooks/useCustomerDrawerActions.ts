@@ -5,16 +5,17 @@
  * extraction — behaviour unchanged); the container still owns tab rendering
  * and JSX composition.
  */
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useAllSettings } from '@/lib/settings/useAllSettings'
+import { useAllSettings, getBoolSetting } from '@/lib/settings/useAllSettings'
 import { useCustomerPhases } from '@/lib/useCustomerPhases'
 import { initialsOf } from '@/lib/initials'
-import api from '@/lib/api'
+import api, { unwrapList } from '@/lib/api'
 import { notifyError, notifySuccess } from '@/lib/notify'
 import { useConfirm } from '@/hooks/useConfirm'
 import type { Customer } from '@/types/customer'
 import type { Id, LookupOption } from '@/types/common'
+import type { CustomerBlacklistModalState, BlacklistReasonOption } from '../drawer/CustomerStatusReasonModal'
 
 interface DrawerUser { id: Id; name: string; avatar_color?: string }
 
@@ -40,6 +41,10 @@ export function useCustomerDrawerActions({ c, onUpdate, onClose, users, statuses
   // useCandidateStatus.ts reads its own (mirrors DEFAULT-STATUS-1) — used by
   // doConvertPhase below to apply the configured default status on convert.
   const allSettings = useAllSettings()
+  // KLANT-BLACKLIST-PROMPT-1: whether the blacklist reason is REQUIRED (vs.
+  // optional) is a tenant switch, mirrored from the candidate axis's own key;
+  // the BE guard reads the same setting (default ON).
+  const blacklistReasonRequired = getBoolSetting(allSettings, 'customer_blacklist_reason_required', true)
 
   // Header overrides — reset when a different customer is shown (during render).
   const [status, setStatus] = useState<string | null>(null)
@@ -51,8 +56,37 @@ export function useCustomerDrawerActions({ c, onUpdate, onClose, users, statuses
   const [headerEditing, setHeaderEditing] = useState(false)
   const [headerName,    setHeaderName]    = useState('')
   const [logoUrl,       setLogoUrl]       = useState<string | null>(null)
+  // KLANT-BLACKLIST-PROMPT-1: the blacklist status-reason prompt (mirrors the
+  // candidate axis's statusModal) — set only when the picked status carries
+  // `isBlacklist`; the PATCH is deferred to confirmBlacklist below.
+  const [blacklistModal, setBlacklistModal] = useState<CustomerBlacklistModalState | null>(null)
+  const [blacklistReasons, setBlacklistReasons] = useState<BlacklistReasonOption[]>([])
   const [prevId, setPrevId] = useState<Id | undefined>(c?.id)
-  if (c?.id !== prevId) { setPrevId(c?.id); setStatus(null); setPhase(null); setOwner(null); setTags(null); setHeaderEditing(false); setLogoUrl(null) }
+  if (c?.id !== prevId) { setPrevId(c?.id); setStatus(null); setPhase(null); setOwner(null); setTags(null); setHeaderEditing(false); setLogoUrl(null); setBlacklistModal(null) }
+
+  // Loads the blacklist-reason tenant lookup once, the first time the prompt opens
+  // (mirrors CandidateStatusModals) — the backend validates against these names
+  // rather than accepting free text.
+  // Keyed on an OPEN boolean plus a loaded ref, never on the modal object: every reason
+  // keystroke replaces that object, which re-fired the GET on tenants with an empty lookup.
+  const blacklistOpen = Boolean(blacklistModal)
+  const blacklistReasonsLoaded = useRef(false)
+  useEffect(() => {
+    if (!blacklistOpen || blacklistReasonsLoaded.current) return
+    let alive = true
+    api.get('/customer-blacklist-reasons')
+      .then(r => {
+        if (!alive) return
+        blacklistReasonsLoaded.current = true
+        setBlacklistReasons(
+          ((unwrapList(r).rows) as Array<{ name?: string }>)
+            .filter(x => x.name)
+            .map(x => ({ value: String(x.name), label: String(x.name) })),
+        )
+      })
+      .catch(() => { if (alive) { blacklistReasonsLoaded.current = true; setBlacklistReasons([]) } })
+    return () => { alive = false }
+  }, [blacklistOpen])
 
   // DELETE-ICON-1: the house confirm dialog (§0 restschuld) — same shared hook the
   // candidate drawer's own trash icon and OpportunitiesTab's delete already use.
@@ -87,7 +121,29 @@ export function useCustomerDrawerActions({ c, onUpdate, onClose, users, statuses
 
   const currentStatus = status ?? c?.status
   const currentTags   = tags ?? (c?.tags as string[]) ?? []
-  const changeStatus  = (v: string) => { setStatus(v); onUpdate?.(c?.id, { status: v }) }
+  // KLANT-BLACKLIST-PROMPT-1: a status flagged `isBlacklist` opens the reason
+  // prompt instead of patching immediately — status AND blacklist_reason travel
+  // in ONE PATCH (the BE guard validates the transition together with the
+  // reason). Every other status keeps patching directly, unchanged.
+  const changeStatus  = (v: string) => {
+    const picked = statuses.find(s => String(s.value) === v)
+    if (picked?.isBlacklist) {
+      setBlacklistModal({ target: v, reason: (c?.blacklistReason ?? ''), needReason: blacklistReasonRequired })
+      return
+    }
+    setStatus(v); onUpdate?.(c?.id, { status: v })
+  }
+  // Confirm the blacklist prompt: one PATCH carrying both the new status and the
+  // reason. Cancel (closing without confirming) never patches — the picker keeps
+  // showing the unchanged status.
+  const confirmBlacklist = () => {
+    if (!blacklistModal || !c) return
+    // Local override mirrors changeStatus above: updateCustomer reverts the record slices on
+    // a rejected PATCH but cannot reach this override (STATUS-OVERRIDE-REVERT-1, WORKLIST).
+    setStatus(blacklistModal.target)
+    onUpdate?.(c.id, { status: blacklistModal.target, blacklistReason: blacklistModal.reason || null })
+    setBlacklistModal(null)
+  }
   // KLANT-FASE-1: phase is its own axis next to status — shown as a read-only badge
   // (KLANT-FASE-CONVERT-1 below), backed by the `phase` column (PATCH /customers/{id}).
   const currentPhase  = phase ?? c?.phase
@@ -115,8 +171,9 @@ export function useCustomerDrawerActions({ c, onUpdate, onClose, users, statuses
   // but ONLY when the customer has no status yet. Unlike the candidate axis, an
   // absent setting (or one pointing at a since-deleted status) leaves the status
   // untouched — 'none' is the honest default here (today's behaviour), never a
-  // guessed real value; the customer status lookup also carries none of the
-  // candidate's requires_match/is_blacklist flags, so no extra guard is needed.
+  // guessed real value. KLANT-BLACKLIST-PROMPT-1: unlike doConvert's own default
+  // this convert path never applies a blacklist default (`def` is a tenant
+  // setting, never a stray "blacklist" slug), so no extra guard is needed here.
   const doConvertPhase = () => {
     if (!targetPhase || !c) return
     const patch: Record<string, unknown> = { phase: targetPhase.value }
@@ -157,5 +214,7 @@ export function useCustomerDrawerActions({ c, onUpdate, onClose, users, statuses
     requestDelete, deleteDialog,
     showMerge, setShowMerge,
     setTags,
+    // KLANT-BLACKLIST-PROMPT-1: the blacklist status-reason prompt state + actions.
+    blacklistModal, setBlacklistModal, confirmBlacklist, blacklistReasons,
   }
 }

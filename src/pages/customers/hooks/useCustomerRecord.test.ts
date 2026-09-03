@@ -127,6 +127,15 @@ describe('useCustomerRecord · updateCustomer', () => {
     expect(mockedPatch).toHaveBeenCalledWith('/customers/1', { source: 'Google' })
   })
 
+  // KLANT-BLACKLIST-PROMPT-1: status + blacklistReason travel in ONE PATCH — the
+  // BE guard validates the transition together with the reason (CustomerStatusGuard).
+  it('maps blacklistReason to blacklist_reason alongside status in one PATCH', async () => {
+    mockedPatch.mockResolvedValue({})
+    const r = harness([customer({ id: 1, status: 'available' })])
+    act(() => { r.result.current.record.updateCustomer(1, { status: 'bl', blacklistReason: 'Fraude' }) })
+    expect(mockedPatch).toHaveBeenCalledWith('/customers/1', { status: 'bl', blacklist_reason: 'Fraude' })
+  })
+
   // JOB-CONTACT-1 (Danny 28-07): the customer's own e-mail/phone Contact card —
   // FIELD_MAP must send the exact API keys, not silently drop them.
   it('maps email/phone to their API keys', async () => {

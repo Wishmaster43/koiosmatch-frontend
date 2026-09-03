@@ -116,7 +116,11 @@
     "deletedNamed": "{{name}} eliminado",
     "deleteFailed": "Falha ao eliminar (possivelmente há ligações ativas).",
     "deleteBlocked": "Não é possível eliminar {{name}}: ainda existem ligações ativas.",
-    "photoChange": "Alterar foto"
+    "photoChange": "Alterar foto",
+    "blacklistReasonTitle": "Motivo da lista negra",
+    "blacklistReasonLabel": "Motivo",
+    "blacklistReasonPick": "Escolha um motivo…",
+    "blacklistReasonOptionalHint": "Um motivo é opcional para este tenant"
   },
   "overview": {
     "general": "Geral",

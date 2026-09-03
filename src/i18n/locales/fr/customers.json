@@ -116,7 +116,11 @@
     "deletedNamed": "{{name}} supprimé",
     "deleteFailed": "Échec de la suppression (liens actifs possibles).",
     "deleteBlocked": "Impossible de supprimer {{name}} : des liens actifs existent encore.",
-    "photoChange": "Modifier la photo"
+    "photoChange": "Modifier la photo",
+    "blacklistReasonTitle": "Raison de la liste noire",
+    "blacklistReasonLabel": "Raison",
+    "blacklistReasonPick": "Choisir une raison…",
+    "blacklistReasonOptionalHint": "Une raison est facultative pour ce locataire"
   },
   "overview": {
     "general": "Général",

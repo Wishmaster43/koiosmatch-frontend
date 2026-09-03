@@ -111,6 +111,9 @@ const FIELD_MAP: Record<string, string> = {
   // `phase` against customer_phases.value.
   phase: 'phase',
   status: 'status', ownerId: 'owner_id', website: 'website', employeeCount: 'employee_count',
+  // KLANT-BLACKLIST-PROMPT-1: the lookup-backed blacklist reason, validated by the
+  // BE guard against customer_blacklist_reasons.name (mirrors the candidate hook).
+  blacklistReason: 'blacklist_reason',
   toneOfVoice: 'tone_of_voice', description: 'description', recruitmentProblems: 'recruitment_problems',
   hideCompanyName: 'hide_company_name', hasCareerPage: 'has_career_page',
   showInVacancies: 'show_in_my_vacancies', excludeFromSourcing: 'exclude_from_sourcing', tags: 'tags',

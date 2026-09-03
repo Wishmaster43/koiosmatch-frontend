@@ -14,5 +14,9 @@ export interface LookupOption {
   label: string
   color?: string
   count?: number
+  // KLANT-BLACKLIST-PROMPT-1: passed through by normalizeOptions when the lookup
+  // row carries `is_blacklist` (customer/candidate statuses) — drives the
+  // status-reason prompt gate.
+  isBlacklist?: boolean
   [k: string]: unknown
 }

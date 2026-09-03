@@ -116,7 +116,11 @@
     "deletedNamed": "{{name}} verwijderd",
     "deleteFailed": "Verwijderen is mislukt (mogelijk actieve koppelingen).",
     "deleteBlocked": "{{name}} kan niet verwijderd worden: er zijn nog actieve koppelingen.",
-    "photoChange": "Foto wijzigen"
+    "photoChange": "Foto wijzigen",
+    "blacklistReasonTitle": "Reden voor blacklist",
+    "blacklistReasonLabel": "Reden",
+    "blacklistReasonPick": "Kies een reden…",
+    "blacklistReasonOptionalHint": "Een reden is optioneel voor deze tenant"
   },
   "overview": {
     "general": "Algemeen",
