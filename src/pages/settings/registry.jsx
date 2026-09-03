@@ -475,13 +475,10 @@ export const NAV_GROUPS = [
     //                 on outreach-campaigns, and no FE notes surface on OutreachDrawer either.
     //                 This is a backend-first gap (schema + controller + route), not just a
     //                 missing FE tab — see the worklist row.
-    //   • location / department — deliberately NEVER get their own tab. Their notes are
-    //                 CustomerNote rows (CustomerLocationController::notes / Customer
-    //                 DepartmentController::notes just filter by location/department id) and
-    //                 CustomerController::addNote validates `type` against entity=customer
-    //                 (or entity=contact when customer_contact_id is filled) regardless of
-    //                 which level the note is linked to — there is no separate location/
-    //                 department scope to configure. nt_customer already covers them.
+    //   • location / department — NOW offered (NOTES-LOC-DEPT-1, 2026-09-02). Both
+    //                 ScopedNotesTab (location/department drill-down's notes sub-tabs)
+    //                 and the backend support per-entity note-type configs for locations
+    //                 and departments, just as they do for other entities.
     // No tenant data is deleted for a withheld entity: the rows stay in note_types and the
     // endpoint keeps serving them, so re-adding one line here restores the editor the day
     // that entity grows a real FE reader.
@@ -493,6 +490,8 @@ export const NAV_GROUPS = [
       { id: 'nt_candidate', icon: Users, render: () => <NoteTypesSettings entity="candidate" /> },
       { id: 'nt_application', icon: ClipboardList, render: () => <NoteTypesSettings entity="application" /> },
       { id: 'nt_customer', icon: Building2, render: () => <NoteTypesSettings entity="customer" /> },
+      { id: 'nt_location', icon: MapPin, render: () => <NoteTypesSettings entity="location" /> },
+      { id: 'nt_department', icon: Factory, render: () => <NoteTypesSettings entity="department" /> },
       { id: 'nt_contact', icon: Users, render: () => <NoteTypesSettings entity="contact" /> },
       { id: 'nt_opportunity', icon: Target, render: () => <NoteTypesSettings entity="opportunity" /> },
       { id: 'nt_vacancy', icon: Briefcase, render: () => <NoteTypesSettings entity="vacancy" /> },

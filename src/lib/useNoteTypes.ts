@@ -27,7 +27,7 @@ import { toLookupOption } from './lookupOption'
 // Mirrors the backend NoteType::ENTITIES whitelist (koiosmatch-api NoteType.php) —
 // the only entities a note type can be scoped to. 'vacancy' added 2026-08-02
 // (VACANCY-NOTE-TYPE-1) once vacancy_notes gained its own `type` column.
-export type NoteTypeEntity = 'candidate' | 'application' | 'match' | 'task' | 'customer' | 'contact' | 'opportunity' | 'vacancy'
+export type NoteTypeEntity = 'candidate' | 'application' | 'match' | 'task' | 'customer' | 'contact' | 'opportunity' | 'vacancy' | 'location' | 'department'
 
 // Seed defaults. VALUES are the API slugs (mirror the backend note_types seed) — the old
 // Dutch-label-as-value fallback made a note 422 ("type invalid") whenever the lookup hadn't

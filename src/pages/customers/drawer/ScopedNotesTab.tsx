@@ -37,9 +37,10 @@ export default function ScopedNotesTab({ scope, id, customerId }: {
   const { t } = useTranslation('customers')
   const auth = useAuth()
   const authorInitials = initialsOf(auth?.user?.name ?? '')
-  // Location/department notes never switch note-type scope (only a customer_contact_id
-  // link does, per CustomerController::addNote's own condition) — always 'customer' types.
-  const { writableTypes: noteTypes, types: chipTypes } = useNoteTypes('customer')
+  // Per-entity note types — location and department now have their own separate
+  // note-type configurations (NOTES-LOC-DEPT-1, 2026-09-02: backend supports
+  // GET /note-types?entity=location/department; frontend mirrors the scope).
+  const { writableTypes: noteTypes, types: chipTypes } = useNoteTypes(scope)
   const { notes, loading, error, reload } = useScopedCustomerNotes(customerId, scope, id)
 
   // Pinned to THIS level — writes through the SAME endpoint the customer-level

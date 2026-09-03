@@ -80,12 +80,30 @@ const DOC_TYPE_READERS = new Set([
   ...(SOME_READER_USES_DOC_TYPE_SCOPE_PROP ? DOC_TYPE_SCOPE_FORWARDED_LITERALS : []),
 ])
 
+// NOTE-SCOPE-1: ScopedNotesTab reads `useNoteTypes(scope)` — a PROP, not a literal —
+// so the generic scan above can't see 'location'/'department' directly. Verify the
+// indirection: (a) some file calls the hook with the `scope` identifier, and (b) some
+// file assigns one of the two literals to the `scope` parameter when calling
+// ScopedNotesTab (mirroring DOCTYPE-SCOPE-1's pattern).
+const SOME_READER_USES_NOTE_SCOPE_PROP = SOURCES.some(src => /useNoteTypes\(\s*scope\s*\)/.test(src))
+const NOTE_SCOPE_FORWARDED_LITERALS = new Set()
+SOURCES.forEach(src => {
+  const assignments = src.match(/<ScopedNotesTab[^>]*\bscope\s*=\s*[^\s>]+/g) ?? []
+  assignments.forEach(a => { for (const m of a.matchAll(/['"](location|department)['"]/g)) NOTE_SCOPE_FORWARDED_LITERALS.add(m[1]) })
+})
+const NOTE_TYPE_READERS_WITH_SCOPE = new Set([
+  ...NOTE_TYPE_READERS,
+  ...(SOME_READER_USES_NOTE_SCOPE_PROP ? NOTE_SCOPE_FORWARDED_LITERALS : []),
+])
+
 const itemIds = key => NAV_GROUPS.find(g => g.key === key).items.map(i => i.id)
 
 describe('settings registry offers no screen without a consumer', () => {
   it('measured the source tree (guards the regexes themselves against silent zero-matches)', () => {
     expect(SOURCES.length).toBeGreaterThan(100)
     expect(NOTE_TYPE_READERS.size).toBeGreaterThan(0)
+    expect(SOME_READER_USES_NOTE_SCOPE_PROP).toBe(true) // ScopedNotesTab uses useNoteTypes(scope)
+    expect(NOTE_SCOPE_FORWARDED_LITERALS.size).toBeGreaterThan(0) // 'location' and 'department' literals
     expect(MODULE_VIEW_RENDERERS.size).toBeGreaterThan(0)
     expect(DOC_TYPE_READERS.size).toBeGreaterThan(0)
   })
@@ -95,7 +113,7 @@ describe('settings registry offers no screen without a consumer', () => {
     // that every reader merges in server-side — it has no reader of its own by design.
     const offered = itemIds('note_types').map(id => id.replace(/^nt_/, '')).filter(e => e !== 'general')
     expect(offered.length).toBeGreaterThan(0)
-    const withoutReader = offered.filter(entity => !NOTE_TYPE_READERS.has(entity))
+    const withoutReader = offered.filter(entity => !NOTE_TYPE_READERS_WITH_SCOPE.has(entity))
     expect(withoutReader).toEqual([])
   })
 

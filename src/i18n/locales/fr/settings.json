@@ -211,6 +211,8 @@
     "nt_candidate": "Candidats",
     "nt_application": "Candidatures",
     "nt_customer": "Clients",
+    "nt_location": "Sites",
+    "nt_department": "Départements",
     "nt_contact": "Contacts",
     "nt_opportunity": "Opportunités",
     "nt_vacancy": "Postes",
