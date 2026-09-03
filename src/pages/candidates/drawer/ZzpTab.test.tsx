@@ -124,7 +124,7 @@ describe('ZzpTab · Adres composite (1.1.1/1.1.2)', () => {
     await user.click(screen.getByTitle('save'))
     expect(onSave).toHaveBeenCalledWith({
       street: 'Kerkstraat', house_number: '12', house_number_suffix: 'a',
-      postal_code: '1234 AB', city: 'Utrecht', province: 'Utrecht', country: 'NL',
+      postcode: '1234 AB', city: 'Utrecht', province: 'Utrecht', country: 'NL',
     })
   })
 

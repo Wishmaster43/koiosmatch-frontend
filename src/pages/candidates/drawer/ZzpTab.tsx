@@ -212,7 +212,8 @@ export function ZzpTab({ c, onSave }: { c: Candidate; onSave?: (v: Record<string
   }
   const handleSaveAddress = (v: ZzpAddressValues) => onSave?.({
     street: v.street, house_number: v.houseNumber, house_number_suffix: v.houseNumberSuffix,
-    postal_code: v.postalCode, city: v.city, province: v.province, country: v.country,
+    // AUDIT 03-09 (types-drift-2): top-level candidate address → the request key is `postcode`.
+    postcode: v.postalCode, city: v.city, province: v.province, country: v.country,
   })
 
   // BUSINESS-EMAIL-DUP-1 (task 1.1.5): format check + an async, on-save-only

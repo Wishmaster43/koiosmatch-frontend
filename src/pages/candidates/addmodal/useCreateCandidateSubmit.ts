@@ -21,7 +21,7 @@ const API_TO_FORM: Record<string, string> = {
   date_of_birth: 'dateOfBirth', gender: 'gender',
   preferred_language: 'preferredLanguage',
   street: 'street', house_number: 'houseNumber',
-  house_number_suffix: 'houseNumberSuffix', postal_code: 'postalCode',
+  house_number_suffix: 'houseNumberSuffix', postal_code: 'postalCode', postcode: 'postalCode',
   city: 'city', province: 'province', country: 'country', owner_id: 'ownerId',
   // CONTACT-LINKEDIN-1: the backend validation rule/column is `linkedin_slug`.
   linkedin_slug: 'linkedin',
@@ -96,7 +96,9 @@ export function useCreateCandidateSubmit({
         street:              form.street || null,
         house_number:        form.houseNumber || null,
         house_number_suffix: form.houseNumberSuffix || null,
-        postal_code:         form.postalCode || null,
+        // AUDIT 03-09 (types-drift-2, measured on demo): the request validates `postcode`; the
+        // resource echoes it as `postal_code`. Sending the resource key silently dropped the value.
+        postcode:            form.postalCode || null,
         city:                form.city || null,
         province:            form.province || null,
         // COUNTRY-1: only rides along when actually picked (mirrors every other optional field).
