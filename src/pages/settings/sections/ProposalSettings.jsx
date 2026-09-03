@@ -53,14 +53,18 @@ export default function ProposalSettings() {
   const values = useAllSettings()
   const stored = getJsonSetting(values, SETTINGS_KEY, {})
   const persisted = { ...DEFAULTS, ...stored }
-  const { data: users } = useUsers()
+  const { data: users, isSuccess, isPlaceholderData } = useUsers()
+  // Measured (query-core 5.101): placeholderData forces status 'success' while the GET is
+  // still pending, so isSuccess alone is true throughout the load window — the list only
+  // counts as loaded once it is no longer the placeholder.
+  const usersLoaded = isSuccess && !isPlaceholderData
   const senderOptions = (users ?? []).map(u => ({ value: u.id, label: u.name }))
 
   // VOORSTEL-AFZENDER-FE-1: the stored default sender, '' meaning "the proposer".
   const defaultSenderId = typeof values[SENDER_SETTING_KEY] === 'string' ? values[SENDER_SETTING_KEY] : ''
-  // Only flags stale once the users list has actually loaded — before that a
-  // real uuid would falsely read as "not found".
-  const senderStale = Boolean(defaultSenderId) && Array.isArray(users) && !users.some(u => u.id === defaultSenderId)
+  // Only flags stale once the users list has REALLY loaded (see usersLoaded above):
+  // during the placeholder window and on error a real uuid must never read as "no such user".
+  const senderStale = Boolean(defaultSenderId) && usersLoaded && !users.some(u => u.id === defaultSenderId)
 
   // Commits the default sender immediately (small, discrete pick — no draft buffer),
   // mirroring the sets_phase/variant toggles below.
@@ -198,7 +202,7 @@ export default function ProposalSettings() {
         <label style={labelStyle}>{t('proposal.defaultSenderTitle')}</label>
         <p style={hintStyle}>{t('proposal.defaultSenderSubtitle')}</p>
         {canEdit ? (
-          <CreatableSelect allowCreate={false} value={defaultSenderId || null}
+          <CreatableSelect allowCreate={false} value={senderOptions.some(o => o.value === defaultSenderId) ? defaultSenderId : null}
             onChange={chooseSender} options={senderOptions}
             placeholder={t('proposal.defaultSenderSelf')}
             clearable clearLabel={t('proposal.defaultSenderTitle')} />

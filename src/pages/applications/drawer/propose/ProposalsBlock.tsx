@@ -117,8 +117,10 @@ export default function ProposalsBlock({ application }: ProposalsBlockProps) {
                 {p.sent_at ? t('propose.sentOn', { date: formatDate(p.sent_at) }) : '—'}
               </Caption>
               {/* VOORSTEL-AFZENDER-FE-1: the resolved sender, only when the API
-                  carries one — nothing for a null (older row or unresolved). */}
-              {p.sender && <Caption as="div">{t('propose.sentBy', { name: p.sender.name })}</Caption>}
+                  carries one AND it has a name — nothing for a null sender
+                  (older row or unresolved), and nothing for a blank "sent by "
+                  when the resolved sender row itself has no stored name. */}
+              {p.sender?.name && <Caption as="div">{t('propose.sentBy', { name: p.sender.name })}</Caption>}
               {/* Open-state line: revoked > opened (+ count) > not opened yet — one of
                   the three always renders now that opened_at reflects a real customer
                   visit (PROPOSE-SHARE-URL-1), regardless of whether THIS viewer holds

@@ -75,7 +75,9 @@ export function useProposeForm(application: ApplicationDetail) {
   const proposalSettings = getJsonSetting<ApplicationProposalSettings>(settingsValues, 'application_proposal', {})
   // Tenant users, for resolving the picked sender's display name (recruiter token
   // + the modal's picker options) — same cached list every owner/recruiter picker uses.
-  const { data: users } = useUsers() as { data?: Array<{ id: string; name: string }> }
+  const { data: users, isSuccess: usersSuccess, isPlaceholderData: usersPlaceholder } = useUsers() as { data?: Array<{ id: string; name: string }>; isSuccess?: boolean; isPlaceholderData?: boolean }
+  // Loaded = a real (non-placeholder) success; placeholderData reports 'success' while pending.
+  const usersLoading = !usersSuccess || Boolean(usersPlaceholder)
 
   // Contacts — a direct fetch rather than useCustomerCascade: that shared hook
   // exposes no loading flag, and this form must show an honest loading/error/
@@ -331,7 +333,7 @@ export function useProposeForm(application: ApplicationDetail) {
     includeMotivation, setIncludeMotivation, hasMotivation,
     subject, setSubject, body, setBody,
     consentConfirmed, setConsentConfirmed,
-    senderUserId, setSenderUserId, users,
+    senderUserId, setSenderUserId, users, usersLoading,
     sendEmail, setSendEmail,
     disabledReason, submitting, submit,
     copyMessage, copied,

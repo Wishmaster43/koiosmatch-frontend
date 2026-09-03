@@ -191,4 +191,12 @@ describe('ProposalsBlock · sender line', () => {
     expect(screen.getByText('propose.sentBy:{"name":"Sara Demo"}')).toBeInTheDocument()
     expect(screen.getAllByText(/propose\.sentBy/)).toHaveLength(1)
   })
+
+  // ApplicationProposalResource sends `name => sender_name ?? null` — a resolved
+  // sender row can itself carry a null name. Never render a blank "sent by ".
+  it('shows nothing when the sender resolves but carries no name', () => {
+    setProposals([proposal({ id: 'p1', sender: { id: 'u1', name: null } })])
+    render(<ProposalsBlock application={app} />)
+    expect(screen.queryByText(/propose\.sentBy/)).toBeNull()
+  })
 })

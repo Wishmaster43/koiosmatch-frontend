@@ -4,7 +4,7 @@
  * and that the primary action is disabled without a contact / without the AVG
  * consent tick.
  */
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, afterEach } from 'vitest'
 import userEvent from '@testing-library/user-event'
 import { render, screen } from '@testing-library/react'
 import ProposeCandidateModal from './ProposeCandidateModal'
@@ -52,6 +52,7 @@ const { formFixture } = vi.hoisted(() => ({
     shareUrl: null as string | null, copyShareLink: vi.fn(), shareLinkCopied: false,
     // VOORSTEL-AFZENDER-FE-1: sender picker state + the tenant users it lists.
     senderUserId: '', setSenderUserId: vi.fn(), users: [{ id: 'u2', name: 'Sara Demo' }],
+    usersLoading: false,
   },
 }))
 vi.mock('./useProposeForm', () => ({ useProposeForm: () => formFixture }))
@@ -60,6 +61,9 @@ const app = (over: Partial<ApplicationDetail> = {}): ApplicationDetail => ({
   id: 1, candidateId: 'c1', customerId: 'k1', candidateName: 'Jan de Vries', vacancyTitle: 'Verpleegkundige',
   client: 'Zorggroep Noord', bucket: 'active', archived: false, ...over,
 } as unknown as ApplicationDetail)
+
+// Tests mutate the shared fixture in place; restore here so a throwing test can never leak state.
+afterEach(() => { formFixture.senderUserId = ''; formFixture.usersLoading = false })
 
 describe('ProposeCandidateModal', () => {
   it('never renders a button whose label suggests the message is actually sent', () => {
@@ -151,5 +155,45 @@ describe('ProposeCandidateModal · sender', () => {
     await user.click(screen.getByRole('button', { name: 'propose.onBehalfOfSelf' }))
     await user.click(await screen.findByRole('button', { name: 'Sara Demo' }))
     expect(formFixture.setSenderUserId).toHaveBeenCalledWith('u2')
+  })
+
+  // VAC-CLEAR-1: an optional picker with a value set must be clearable, and the
+  // clear must actually reach the underlying form state (never a no-op onChange).
+  it('clears the picked sender back to the "self" placeholder', async () => {
+    formFixture.senderUserId = 'u2'
+    const user = userEvent.setup()
+    const { rerender } = render(<ProposeCandidateModal application={app()} onClose={vi.fn()} />)
+    // CreatableSelect names its clear cross t('clearField', { field: clearLabel }) —
+    // clearLabel here is the mocked t's echo of t('propose.onBehalfOf').
+    const clearName = 'clearField:{"field":"propose.onBehalfOf"}'
+    await user.click(screen.getByRole('button', { name: clearName }))
+    expect(formFixture.setSenderUserId).toHaveBeenCalledWith('')
+
+    // The fixture doesn't wire setSenderUserId back into state itself — simulate
+    // the commit and re-render to assert the trigger falls back to the placeholder.
+    formFixture.senderUserId = ''
+    rerender(<ProposeCandidateModal application={app()} onClose={vi.fn()} />)
+    expect(screen.getByRole('button', { name: 'propose.onBehalfOfSelf' })).toBeInTheDocument()
+  })
+
+  // An id that no longer matches any option (users still loading, or a stale
+  // tenant default) must never leak the raw uuid into the trigger's text.
+  it('shows the placeholder, not the raw uuid, for a sender id with no matching option', () => {
+    formFixture.senderUserId = 'u-unknown'
+    render(<ProposeCandidateModal application={app()} onClose={vi.fn()} />)
+    expect(screen.getByRole('button', { name: 'propose.onBehalfOfSelf' })).toBeInTheDocument()
+    expect(screen.queryByText('u-unknown')).toBeNull()
+    formFixture.senderUserId = ''
+  })
+})
+
+// While the tenant users are still loading, a preselected default must not be shown as "self".
+describe('ProposeCandidateModal · sender picker while users load', () => {
+  it('shows the loading caption instead of the picker (never "self" for a preselected id)', () => {
+    formFixture.senderUserId = 'u2'
+    formFixture.usersLoading = true
+    render(<ProposeCandidateModal application={app()} onClose={vi.fn()} />)
+    expect(screen.getAllByText('propose.loading').length).toBeGreaterThan(0)
+    expect(screen.queryByText('propose.onBehalfOfSelf')).toBeNull()
   })
 })

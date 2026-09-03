@@ -87,6 +87,12 @@ export default function ProposeCandidateModal({ application: a, onClose }: Props
   const contactOptions = form.contacts.map(c => ({ value: c.id, label: contactOptionLabel(c) }))
   // VOORSTEL-AFZENDER-FE-1: tenant users as the sender picker's options.
   const senderOptions = (form.users ?? []).map((u: { id: string; name: string }) => ({ value: u.id, label: u.name }))
+  // Only pass a value CreatableSelect can resolve to a label — while the users
+  // list is still loading, or the stale tenant default no longer matches a real
+  // user, senderOptions won't contain it and the trigger would otherwise print
+  // the raw uuid (CreatableSelect.tsx:211 `value || placeholder`). The
+  // underlying form.senderUserId stays untouched, so submit() still POSTs it.
+  const senderDisplayValue = senderOptions.some(o => o.value === form.senderUserId) ? form.senderUserId : ''
 
   // Human-readable reason the primary action is disabled (§3 — never a bare
   // greyed-out button with no explanation).
@@ -142,9 +148,15 @@ export default function ProposeCandidateModal({ application: a, onClose }: Props
               out in the name of; empty = the recruiter recording this proposal. */}
           <div>
             <div style={sectionTitle}>{t('propose.onBehalfOf')}</div>
-            <CreatableSelect allowCreate={false} value={form.senderUserId || null}
-              onChange={form.setSenderUserId} options={senderOptions}
-              placeholder={t('propose.onBehalfOfSelf')} clearable clearLabel={t('propose.onBehalfOf')} />
+            {/* While the users list loads, a preselected tenant default must not read as "self":
+                the loading caption mirrors the recipient picker above. */}
+            {form.usersLoading ? (
+              <Caption as="div">{t('propose.loading')}</Caption>
+            ) : (
+              <CreatableSelect allowCreate={false} value={senderDisplayValue || null}
+                onChange={form.setSenderUserId} options={senderOptions}
+                placeholder={t('propose.onBehalfOfSelf')} clearable clearLabel={t('propose.onBehalfOf')} />
+            )}
             <Caption as="div" style={{ marginTop: 6 }}>{t('propose.onBehalfOfHint')}</Caption>
           </div>
 

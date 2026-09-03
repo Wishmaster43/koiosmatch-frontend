@@ -35,7 +35,10 @@ export interface Proposal {
   share_expires_at: string | null
   // VOORSTEL-AFZENDER-FE-1: the resolved sender at record time — null both for
   // proposals recorded before the field existed and for a stale/never-set default.
-  sender: { id: string; name: string } | null
+  // `name` itself can also be null: ApplicationProposalResource sends
+  // `name => sender_name ?? null`, so a sender row with no stored name resolves
+  // to an id-only object here — ProposalsBlock must not render a blank "sent by ".
+  sender: { id: string; name: string | null } | null
 }
 
 export function useProposals(applicationId: Id | null | undefined) {
