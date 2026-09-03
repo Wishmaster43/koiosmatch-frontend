@@ -29,6 +29,9 @@ import CandidateCustomRequiredFields from './candidates/CandidateCustomRequiredF
 import RequiredFieldsGroup, { type PhaseColumn } from './candidates/RequiredFieldsGroup'
 import { CANDIDATE_FIELD_GROUPS, normalizeRequiredFieldKeys } from './candidates/requiredFieldsCatalog'
 import Button from '@/components/ui/Button'
+import { notifyError } from '@/lib/notify'
+import { extractApiError } from '@/lib/extractApiError'
+// audit r2-ui-states-3: a failed save must tell the admin, not silently revert (the api client's toast is DEV-only).
 
 const KEY = 'candidate_required_fields'
 
@@ -59,7 +62,7 @@ export default function CandidateRequiredFieldsSettings() {
     for (const [p, list] of Object.entries(cfg)) next[p] = normalizeRequiredFieldKeys(list ?? [])
     const current = next[phase] ?? []
     next[phase] = current.includes(field) ? current.filter(x => x !== field) : [...current, field]
-    saveSettingsKeys({ [KEY]: next }).catch(() => {})
+    saveSettingsKeys({ [KEY]: next }).catch(err => notifyError(extractApiError(err, t('common:actionFailed'))))
   }
 
   // Open the blocks that already have something required (computed once, on mount), so a

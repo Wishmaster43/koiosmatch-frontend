@@ -52,6 +52,9 @@ vi.mock('@/lib/api', async () => {
 })
 
 // Two tenant phases — the real lookup shape, never a hardcoded pair inside the screen.
+const notifyError = vi.hoisted(() => vi.fn())
+vi.mock('@/lib/notify', () => ({ notifyError, notifySuccess: vi.fn(), notify: vi.fn() }))
+
 vi.mock('@/context/LookupsContext', () => ({
   useLookups: () => ({
     phases: [{ value: 'lead', label: 'Lead' }, { value: 'candidate', label: 'Kandidaat' }],
@@ -284,5 +287,18 @@ describe('the two halves of the screen are wired to different stores', () => {
     await user.click(screen.getByRole('switch', { name: `${ct('candidates:modal.fields.mobile')} — Lead` }))
     expect(postMock).toHaveBeenCalledTimes(1)
     expect(patchMock).not.toHaveBeenCalled()
+  })
+})
+
+// audit r2-ui-states-3: a rejected save must surface a notice — it used to be swallowed.
+describe('a failed save tells the admin', () => {
+  it('calls notifyError when the settings POST rejects', async () => {
+    const user = userEvent.setup()
+    // Seed a stored value so the phase block is expanded (collapsed = unmounted toggles).
+    blobRef.current = { candidate_required_fields: { lead: ['first_name'], candidate: ['first_name', 'email'] } }
+    postMock.mockRejectedValueOnce(new Error('boom'))
+    render(<CandidateRequiredFieldsSettings />)
+    await user.click(screen.getByRole('switch', { name: `${ct('candidates:modal.fields.mobile')} — Kandidaat` }))
+    await waitFor(() => expect(notifyError).toHaveBeenCalledWith(expect.any(String)))
   })
 })

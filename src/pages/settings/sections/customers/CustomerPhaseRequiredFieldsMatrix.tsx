@@ -18,6 +18,9 @@ import { useAllSettings, useSettingsLoaded, getJsonSetting, saveSettingsKeys } f
 import { useCustomerPhases } from '@/lib/useCustomerPhases'
 import { PermissionToggle } from '@/pages/settings/components/SettingsControls'
 import { CUSTOMER_FIELDS } from './requiredFieldsCatalog'
+import { notifyError } from '@/lib/notify'
+import { extractApiError } from '@/lib/extractApiError'
+// audit r2-ui-states-3: a failed save must tell the admin, not silently revert (the api client's toast is DEV-only).
 
 const KEY = 'customer_required_fields'
 
@@ -41,7 +44,7 @@ export default function CustomerPhaseRequiredFieldsMatrix() {
     if (!loaded) return
     const cur = cfg[phase] ?? []
     const next = cur.includes(field) ? cur.filter(x => x !== field) : [...cur, field]
-    saveSettingsKeys({ [KEY]: { ...cfg, [phase]: next } }).catch(() => {})
+    saveSettingsKeys({ [KEY]: { ...cfg, [phase]: next } }).catch(err => notifyError(extractApiError(err, t('common:actionFailed'))))
   }
 
   const cell = { padding: '8px 12px', fontSize: 13, borderBottom: '1px solid var(--border)', textAlign: 'center' as const }

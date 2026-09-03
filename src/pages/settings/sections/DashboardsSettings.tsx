@@ -47,6 +47,9 @@ import RolePicker from './dashboards/RolePicker'
 import KpiOrderList from './dashboards/KpiOrderList'
 import BlockGroupList from './dashboards/BlockGroupList'
 import type { OnOffFilter } from './dashboards/catalog'
+import { notifyError } from '@/lib/notify'
+import { extractApiError } from '@/lib/extractApiError'
+// audit r2-ui-states-3: a failed save must tell the admin, not silently revert (the api client's toast is DEV-only).
 
 // The eight roles the KPI-catalog endpoints know (config/dashboard_kpis.php keys):
 // seven match a DashboardType string exactly, anything else (admin, management,
@@ -166,7 +169,7 @@ export default function DashboardsSettings() {
     }
     setOrder(prev => {
       const next = { ...prev, [type]: nextIds }
-      saveSettingsKeys({ [DASHBOARD_KPI_ORDER_KEY]: next }).catch(() => {})
+      saveSettingsKeys({ [DASHBOARD_KPI_ORDER_KEY]: next }).catch(err => notifyError(extractApiError(err, t('common:actionFailed'))))
       return next
     })
   }
@@ -197,7 +200,7 @@ export default function DashboardsSettings() {
       const list = forType[kind] ?? []
       const nextList = list.includes(id) ? list.filter(x => x !== id) : [...list, id]
       const next = { ...prev, [type]: { ...forType, [kind]: nextList } }
-      saveSettingsKeys({ [KEY]: next }).catch(() => {})
+      saveSettingsKeys({ [KEY]: next }).catch(err => notifyError(extractApiError(err, t('common:actionFailed'))))
       return next
     })
   }

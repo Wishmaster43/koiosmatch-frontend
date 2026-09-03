@@ -12,6 +12,9 @@ import { useTranslation } from 'react-i18next'
 import { useAllSettings, useSettingsLoaded, getJsonSetting, saveSettingsKeys } from '@/lib/settings/useAllSettings'
 import { PermissionToggle } from '@/pages/settings/components/SettingsControls'
 import type { RequiredFieldDef } from './requiredFieldsCatalog'
+import { notifyError } from '@/lib/notify'
+import { extractApiError } from '@/lib/extractApiError'
+// audit r2-ui-states-3: a failed save must tell the admin, not silently revert (the api client's toast is DEV-only).
 
 export default function FlatRequiredFieldsToggleList({ settingKey, fields, hintKey }: {
   /** The tenant setting key, e.g. `customer_location_required_fields`. */
@@ -36,7 +39,7 @@ export default function FlatRequiredFieldsToggleList({ settingKey, fields, hintK
   const toggle = (field: string) => {
     if (!loaded) return
     const next = list.includes(field) ? list.filter(x => x !== field) : [...list, field]
-    saveSettingsKeys({ [settingKey]: next }).catch(() => {})
+    saveSettingsKeys({ [settingKey]: next }).catch(err => notifyError(extractApiError(err, t('common:actionFailed'))))
   }
 
   const row = { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 12px', fontSize: 13, borderBottom: '1px solid var(--border)' }

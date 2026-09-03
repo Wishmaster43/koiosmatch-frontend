@@ -26,6 +26,9 @@ vi.mock('@/components/webhooks/WebhookRequestsPanel', () => ({
   ),
 }))
 
+const notifyError = vi.hoisted(() => vi.fn())
+vi.mock('@/lib/notify', () => ({ notifyError, notifySuccess: vi.fn(), notify: vi.fn() }))
+
 import api from '@/lib/api'
 
 const st = (key, opts) => i18n.t(key, { ns: 'settings', ...opts })
@@ -43,5 +46,20 @@ describe('IncomingWebhooks — request-log open wiring', () => {
     await user.click(screen.getByRole('button', { name: st('webhooks.incoming.requests.viewButton') }))
 
     expect(screen.getByText('panel-open: ATS integration')).toBeInTheDocument()
+  })
+})
+
+// audit r2-ui-states-3: a rejected delete must surface a notice — it used to be swallowed.
+describe('IncomingWebhooks — a failed delete tells the admin', () => {
+  it('calls notifyError when the DELETE rejects after the confirm dialog', async () => {
+    api.get.mockResolvedValue({ data: [{ id: 'wh-1', name: 'ATS integration', token: 'tok-1' }] })
+    api.delete.mockRejectedValueOnce(new Error('boom'))
+    const user = userEvent.setup()
+    render(<IncomingWebhooks />)
+    await waitFor(() => expect(screen.getByText('ATS integration')).toBeInTheDocument())
+    await user.click(screen.getByRole('button', { name: st('webhooks.incoming.removeConfirm') }))
+    await user.click(screen.getByRole('button', { name: i18n.t('confirm') }))
+    await waitFor(() => expect(api.delete).toHaveBeenCalledWith('/webhooks/wh-1'))
+    await waitFor(() => expect(notifyError).toHaveBeenCalledWith(expect.any(String)))
   })
 })

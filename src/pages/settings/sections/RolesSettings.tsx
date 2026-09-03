@@ -17,6 +17,9 @@ import Spinner from '@/components/ui/Spinner'
 import { tintBg, tintBorder } from '@/lib/tint'
 import { PageTitle } from '@/components/ui/typography'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
+import { notifyError } from '@/lib/notify'
+import { extractApiError } from '@/lib/extractApiError'
+// audit r2-ui-states-3: a failed save must tell the admin, not silently revert (the api client's toast is DEV-only).
 
 // Thin container: owns the roles/permissions fetch and create/delete, and delegates
 // the actual permission editing to RoleDetail (see file docblock above).
@@ -49,7 +52,7 @@ export default function RolesSettings() {
       if (Array.isArray(list) && list.length) {
         setIconOptions(list.map(x => (typeof x === 'string' ? x : x.name ?? x.value)).filter((x): x is string => Boolean(x)))
       }
-    }).catch(() => {})
+    }).catch(err => notifyError(extractApiError(err, t('common:actionFailed'))))
   }, [reloadKey])
 
   // User submitted the "new role" field: creates it and appends the server's own row.

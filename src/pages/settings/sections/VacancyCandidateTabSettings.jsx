@@ -34,6 +34,9 @@ import SubTabBar from '@/components/drawer/SubTabBar'
 import { Toggle } from '../components/SettingsKit'
 import LookupChipSelect from '../components/LookupChipSelect'
 import SegmentedControl from '@/components/ui/SegmentedControl'
+import { notifyError } from '@/lib/notify'
+import { extractApiError } from '@/lib/extractApiError'
+// audit r2-ui-states-3: a failed save must tell the admin, not silently revert (the api client's toast is DEV-only).
 
 const KEY = 'vacancy_candidate_tab'
 
@@ -105,7 +108,7 @@ function VacancyCandidateTabSettingsInner() {
   // never the seeded defaults: spreading `cfg` wrote the FE 'available' status seed
   // into the setting on any unrelated toggle, re-narrowing the candidate tab below
   // the leads counter (LEADS-PARITY-1, Opus wave-B2).
-  const persist = (patch) => saveSettingsKeys({ [KEY]: { ...(stored ?? {}), ...patch } }).catch(() => {})
+  const persist = (patch) => saveSettingsKeys({ [KEY]: { ...(stored ?? {}), ...patch } }).catch(err => notifyError(extractApiError(err, t('common:actionFailed'))))
   const toggleIn = (key) => (value) =>
     persist({ [key]: cfg[key].includes(value) ? cfg[key].filter(v => v !== value) : [...cfg[key], value] })
   // Flip one boolean leads-criteria key (apply_radius / exclude_already_applied /

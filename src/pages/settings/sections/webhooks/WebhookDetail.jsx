@@ -14,6 +14,9 @@ import Button from '@/components/ui/Button'
 import SaveButton from '@/components/ui/SaveButton'
 import { SectionTitle, BodyText, Mono } from '@/components/ui/typography'
 import { tintBorder } from '@/lib/tint'
+import { notifyError } from '@/lib/notify'
+import { extractApiError } from '@/lib/extractApiError'
+// audit r2-ui-states-3: a failed save must tell the admin, not silently revert (the api client's toast is DEV-only).
 
 /**
  * WebhookDetail — the per-subscription detail (replaces the list). A header
@@ -71,7 +74,7 @@ export default function WebhookDetail({ subId, listRow, onBack, onPatch, onDelet
 
   // Header actions.
   const regenerate = async () => { try { const res = await regenerateSecret(subId); setSecret(res?.secret ?? null) } catch { /* noop */ } }
-  const toggleStatus = () => applyUpdate({ status: (sub?.status ?? 'active') === 'active' ? 'disabled' : 'active' }).catch(() => {})
+  const toggleStatus = () => applyUpdate({ status: (sub?.status ?? 'active') === 'active' ? 'disabled' : 'active' }).catch(err => notifyError(extractApiError(err, t('common:actionFailed'))))
   // Confirms then deletes the subscription, bubbling the removal back to the list.
   const remove = () => {
     confirm(t('webhooks.outgoing.deleteConfirm', { name: sub?.name ?? '' }), async () => {

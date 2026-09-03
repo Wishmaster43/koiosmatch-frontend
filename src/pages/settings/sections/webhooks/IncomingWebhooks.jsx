@@ -19,6 +19,9 @@ import WebhookRequestsPanel from '@/components/webhooks/WebhookRequestsPanel'
 // DATUM-1: every user-visible date rides the house formatter, never toLocaleDateString.
 import { useDateFormat } from '@/lib/datetime'
 import { publicApiUrl } from '@/lib/publicApiUrl'
+import { notifyError } from '@/lib/notify'
+import { extractApiError } from '@/lib/extractApiError'
+// audit r2-ui-states-3: a failed save must tell the admin, not silently revert (the api client's toast is DEV-only).
 
 // Inbound webhook URLs are pasted into external systems — absolute, never /api-relative.
 const BASE_URL = publicApiUrl('/webhook')
@@ -50,14 +53,14 @@ export default function IncomingWebhooks() {
     const description = editDesc.trim() || null
     setWebhooks((prev) => prev.map((w) => (w.id === id ? { ...w, name: nm, description } : w)))
     setEditId(null)
-    await api.patch(`/webhooks/${id}`, { name: nm, description }).catch(() => {})
+    await api.patch(`/webhooks/${id}`, { name: nm, description }).catch(err => notifyError(extractApiError(err, t('common:actionFailed'))))
   }
 
   // Load the inbound webhooks for the active tenant.
   useEffect(() => {
     api.get('/webhooks')
       .then((res) => setWebhooks(unwrapList(res).rows))
-      .catch(() => {})
+      .catch(err => notifyError(extractApiError(err, t('common:actionFailed'))))
       .finally(() => setLoading(false))
   }, [])
 
@@ -77,7 +80,7 @@ export default function IncomingWebhooks() {
   // User asked to delete a webhook: confirms first (destructive), then removes it.
   const remove = (id) => {
     confirm(t('webhooks.incoming.removeConfirm'), async () => {
-      await api.delete(`/webhooks/${id}`).catch(() => {})
+      await api.delete(`/webhooks/${id}`).catch(err => notifyError(extractApiError(err, t('common:actionFailed'))))
       setWebhooks((prev) => prev.filter((w) => w.id !== id))
     }, { danger: true })
   }

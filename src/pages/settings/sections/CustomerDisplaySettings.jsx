@@ -49,6 +49,9 @@ import { VacancyLookupsProvider, useVacancyLookups } from '@/context/VacancyLook
 import SchemaSection from '../components/SchemaSection'
 import DefaultStatusFilterPicker from '../components/DefaultStatusFilterPicker'
 import customerDisplay from '../schemas/customerDisplay'
+import { notifyError } from '@/lib/notify'
+import { extractApiError } from '@/lib/extractApiError'
+// audit r2-ui-states-3: a failed save must tell the admin, not silently revert (the api client's toast is DEV-only).
 
 // Build one tab's schema variant: same field definitions (customerDisplay stays the
 // single source of truth for keys/defaults), filtered to this tab's `group`, with
@@ -96,7 +99,7 @@ function CustomerDisplaySettingsInner() {
 
   // Immediate-persist setter for one tab's default-filter key — always the exact key,
   // never a partial merge risk (mirrors VacancyCandidateTabSettings' persist()).
-  const setDefaultFilter = (key) => (val) => saveSettingsKeys({ [key]: val }).catch(() => {})
+  const setDefaultFilter = (key) => (val) => saveSettingsKeys({ [key]: val }).catch(err => notifyError(extractApiError(err, t('common:actionFailed'))))
 
   return (
     <div style={{ maxWidth: 720 }}>

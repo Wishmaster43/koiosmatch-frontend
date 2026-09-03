@@ -23,6 +23,9 @@ import { VacancyLookupsProvider, useVacancyLookups } from '@/context/VacancyLook
 import { getVacancyTabDefaults } from '@/pages/candidates/shared'
 import SubTabBar from '@/components/drawer/SubTabBar'
 import LookupChipSelect from '../components/LookupChipSelect'
+import { notifyError } from '@/lib/notify'
+import { extractApiError } from '@/lib/extractApiError'
+// audit r2-ui-states-3: a failed save must tell the admin, not silently revert (the api client's toast is DEV-only).
 
 const KEY = 'candidate_vacancy_tab'
 
@@ -55,7 +58,7 @@ function CandidateVacancyTabSettingsInner() {
   // Toggle one value in one of the four arrays; always persists the FULL current
   // config (all four keys explicit), never a partial write — immediate-save, no
   // separate save button (Danny confirmed).
-  const persist = (patch) => saveSettingsKeys({ [KEY]: { ...cfg, ...patch } }).catch(() => {})
+  const persist = (patch) => saveSettingsKeys({ [KEY]: { ...cfg, ...patch } }).catch(err => notifyError(extractApiError(err, t('common:actionFailed'))))
   const toggleIn = (key) => (value) =>
     persist({ [key]: cfg[key].includes(value) ? cfg[key].filter(v => v !== value) : [...cfg[key], value] })
 

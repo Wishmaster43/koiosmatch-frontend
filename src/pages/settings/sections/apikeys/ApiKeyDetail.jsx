@@ -21,6 +21,9 @@ import { BTN_H } from '@/config/buttonMetrics'
 import Button from '@/components/ui/Button'
 import { Mono } from '@/components/ui/typography'
 import { tintBorder } from '@/lib/tint'
+import { notifyError } from '@/lib/notify'
+import { extractApiError } from '@/lib/extractApiError'
+// audit r2-ui-states-3: a failed save must tell the admin, not silently revert (the api client's toast is DEV-only).
 
 // Owns one API key's full lifecycle: fetch full detail, edit, status toggle, secret regeneration and deletion, bubbling changes back to the list.
 export default function ApiKeyDetail({ keyId, listRow, onBack, onPatch, onDelete }) {
@@ -63,7 +66,7 @@ export default function ApiKeyDetail({ keyId, listRow, onBack, onPatch, onDelete
   // Flip active ⇄ disabled and persist it immediately.
   const toggleStatus = () => {
     const next = (apiKey?.status ?? 'active') === 'active' ? 'disabled' : 'active'
-    applyUpdate({ status: next }).catch(() => {})
+    applyUpdate({ status: next }).catch(err => notifyError(extractApiError(err, t('common:actionFailed'))))
   }
   // Confirm, then delete the key for real and let the parent list drop the row.
   const remove = () => {

@@ -7,6 +7,10 @@
  */
 import { useState } from 'react'
 import { Check, Copy, ExternalLink } from 'lucide-react'
+import { notifyError } from '@/lib/notify'
+import { extractApiError } from '@/lib/extractApiError'
+import { useTranslation } from 'react-i18next'
+// audit r2-ui-states-3: a failed save must tell the admin, not silently revert (the api client's toast is DEV-only).
 
 interface UrlRowProps {
   label: string
@@ -22,6 +26,8 @@ interface UrlRowProps {
 
 // One labelled URL row with copy-to-clipboard and an open action that can be disabled with a notice instead of silently doing nothing.
 export default function UrlRow({ label, url, notice, disabledOpen, copyLabel, copiedLabel, openLabel }: UrlRowProps) {
+  // Error copy for a failed save (shared common namespace).
+  const { t } = useTranslation()
   const [copied, setCopied] = useState(false)
 
   // Copy the URL with a 2s "copied" confirmation; guard environments without the Clipboard API
@@ -31,7 +37,7 @@ export default function UrlRow({ label, url, notice, disabledOpen, copyLabel, co
     navigator.clipboard.writeText(url).then(() => {
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
-    }).catch(() => {})
+    }).catch(err => notifyError(extractApiError(err, t('common:actionFailed'))))
   }
 
   return (

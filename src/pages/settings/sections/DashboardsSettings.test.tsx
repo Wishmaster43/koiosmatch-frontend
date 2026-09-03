@@ -45,6 +45,9 @@ const mockFetchCatalog = vi.hoisted(() => vi.fn<(signal?: AbortSignal) => Promis
 })))
 const mockFetchKpisRole = vi.hoisted(() => vi.fn<(role: string, signal?: AbortSignal) => Promise<string[]>>(async () => { throw new Error('no route (pre-K-173 server)') }))
 const mockPutKpisRole = vi.hoisted(() => vi.fn<(role: string, kpis: string[]) => Promise<void>>(async () => {}))
+const notifyError = vi.hoisted(() => vi.fn())
+vi.mock('@/lib/notify', () => ({ notifyError, notifySuccess: vi.fn(), notify: vi.fn() }))
+
 vi.mock('./dashboardsKpiApi', () => ({
   fetchDashboardKpiCatalog: (signal?: AbortSignal) => mockFetchCatalog(signal),
   fetchDashboardKpisRole: (role: string, signal?: AbortSignal) => mockFetchKpisRole(role, signal),
@@ -140,6 +143,14 @@ describe('DashboardsSettings — KPI toggle save path (§13, request body)', () 
     const row = screen.getByText(dt('kpi.occupancy')).closest('[data-kpi-row]') as HTMLElement
     return within(row).getByRole('switch')
   }
+
+  // audit r2-ui-states-3: a rejected save must surface a notice — it used to be swallowed.
+  it('calls notifyError when saveSettingsKeys rejects on a KPI toggle', async () => {
+    saveSettingsKeys.mockRejectedValueOnce(new Error('boom'))
+    const toggle = await occupancyToggle()
+    await userEvent.click(toggle)
+    await waitFor(() => expect(notifyError).toHaveBeenCalledWith(expect.any(String)))
+  })
 
   it('toggling a KPI off PATCHes the exact { type: { kpis: [id] } } hidden-map body', async () => {
     const toggle = await occupancyToggle()
