@@ -21,8 +21,9 @@ describe('KoiosContextChips', () => {
   // A type the backend cannot resolve yet (koiosContextTypes: only 'candidate'
   // today) renders dashed + tooltipped, never solid — the pin stays visible but
   // honest about not being sent.
+  // 'task' is not in ContextRefResolver::TYPES (candidate/vacancy/customer/match/opportunity are).
   it('renders an unresolvable type as a dashed, tooltipped chip', () => {
-    render(<KoiosContextChips chips={[{ ref: { type: 'vacancy', id: 'v1', label: 'Verpleegkundige' }, onRemove: vi.fn() }]} t={t} />)
+    render(<KoiosContextChips chips={[{ ref: { type: 'task', id: 't1', label: 'Verpleegkundige' }, onRemove: vi.fn() }]} t={t} />)
     const chip = screen.getByText('Verpleegkundige').closest('span')
     expect(chip).toHaveAttribute('title', 'koios.contextPending')
     // jsdom can't resolve var() inside the `border` shorthand for toHaveStyle's
