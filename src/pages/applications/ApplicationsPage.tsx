@@ -2,14 +2,15 @@
  * ApplicationsPage — thin container (§0.3 split, mirrors CandidatesPage): owns
  * the UI/view state (page, view mode, selection) and composes the filters hook,
  * the data hook, the drawer-actions hook, the bulk-actions hook and the pure
- * insights builder, then renders the insights row + table/board + drawer. Heavy
- * logic lives in ./hooks and ./data.
+ * insights builder, then renders the list panel + drawer. The list chrome
+ * (insights row, toolbar, table/board + pagination) lives in
+ * ./ApplicationsListPanel (§0.3 split, mirrors CandidatesListPanel) — a dumb
+ * rendering cluster fed entirely by props/callbacks from here. Heavy logic
+ * lives in ./hooks and ./data.
  */
 import { useState, useEffect, useMemo, useRef } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
-import { LayoutList, Kanban, Plus, Archive, MessageCircle, Pause, Users, X } from 'lucide-react'
-import ViewModeToggle from '@/components/ui/ViewModeToggle'
 import { useRightPanel } from '@/context/RightPanelContext'
 import { useLookups } from '@/context/LookupsContext'
 import { useAuth } from '@/context/AuthContext'
@@ -25,21 +26,11 @@ import { useApplicationsData, APPLICATIONS_MAX_PER_PAGE } from './hooks/useAppli
 import type { AppSort } from './hooks/useApplicationsData'
 import { useApplicationDrawerActions } from './hooks/useApplicationDrawerActions'
 import { useApplicationBulkActions } from './hooks/useApplicationBulkActions'
-import InsightsRow from '@/components/insights/InsightsRow'
-import ApplicationsTable from './ApplicationsTable'
-import ApplicationsBoard from './ApplicationsBoard'
+import ApplicationsListPanel from './ApplicationsListPanel'
 import type { BoardPhase } from './ApplicationsBoard'
 import ApplicationDrawer from './ApplicationDrawer'
-import ApplicationsBulkBar from './ApplicationsBulkBar'
 import AddApplicationModal from './AddApplicationModal'
 import PhaseChangeAppointmentWarning from './PhaseChangeAppointmentWarning'
-import PaginationBar from '@/components/ui/PaginationBar'
-import HeaderSearch from '@/components/ui/HeaderSearch'
-import ClearFiltersButton from '@/components/ui/ClearFiltersButton'
-import QuickViewToggle from '@/components/ui/QuickViewToggle'
-import { BTN_H } from '@/config/buttonMetrics'
-// W31 remnant: the paused quick-view wears the SAME colour as the paused chip.
-import { interviewCategoryColor } from './data/applicationsShared'
 import {
   buildPhaseData, buildOwnerData, buildSourceData, buildOwnerDataFromStats, buildSourceDataFromStats,
   buildVacOptions, buildClientOptions, buildBucketData, asOptions,
@@ -48,14 +39,12 @@ import {
 import { buildApplicationFilterGroups } from './data/applicationFilterGroups'
 import type { Application } from '@/types/application'
 import type { Id } from '@/types/common'
-import Button from '@/components/ui/Button'
-import { tintBg, tintBorder } from '@/lib/tint'
 
 // Right-panel multi-toggle for a filter dimension.
 const tog = (set: Dispatch<SetStateAction<string[]>>) => (v: string) => set(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v])
 
 // Thin container: wires the filters/data/drawer-action/bulk-action hooks together and
-// renders the insights strip plus table/board — the mutation and aggregation logic all lives in those hooks.
+// renders the list panel plus drawer — the mutation and aggregation logic all lives in those hooks.
 export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) {
   const { t } = useTranslation('applications')
   const auth = useAuth()
@@ -301,112 +290,36 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
 
   return (
     <div style={{ display: 'flex', height: '100%', background: 'var(--bg)', overflow: 'hidden' }}>
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, overflow: 'hidden' }}>
 
-        {/* Insights strip (donuts + KPIs) */}
-        <InsightsRow donuts={insightDonuts} kpis={insightKpis} clearTitle={t('insights.clearFilter')}
-          // Data honesty (STATS-OOM-1, mirrors CandidatesPage): owner/source/avgScore/
-          // aiTasks are real server-wide totals now (W27) — the notice only fires when
-          // `/applications/stats` itself failed AND the wideRows fallback it's using
-          // instead is itself an incomplete sample (statsFailed && wideIsPartial).
-          // VESTIGING-2: an explicit branch filter EXCLUDES applications with no
-          // branch yet — a resulting empty list must say so, not read as "nothing here".
-          // S-board-1: the board view's columns are built straight from `wideRows`
-          // (no stats-backed bucket source there), so a capped sample must be
-          // disclosed regardless of whether /applications/stats itself is healthy —
-          // stats health only matters for the table view's fallback path above.
-          notice={(statsFailed && wideIsPartial) ? t('insights.pageScopeNotice')
-            : (view === 'board' && wideIsPartial) ? t('insights.pageScopeNotice')
-            : (selectedBranch.length > 0 && total === 0 ? t('common:filters.branchExcludesUnassigned') : undefined)} />
-
-        {/* Tab bar — add + buckets + view toggle */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, justifyContent: 'space-between',
-          padding: '0 24px 12px', minHeight: 36, flexShrink: 0 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
-            <Button variant="primary" size="md" onClick={() => setAddOpen(true)}>
-              <Plus size={14} /> {t('add.button')}
-            </Button>
-            {/* Shared header search (T10) — debounced, client-side text filter. */}
-            <HeaderSearch key={searchEpoch} onSearch={setQuery} placeholder={t('page.searchPlaceholder')} width={300} />
-            <ClearFiltersButton active={anyFilterActive} onClear={clearAllFilters} />
-            {/* 11.1: the candidates-bulk deep-link scope — a soft chip (§4 convention)
-                showing the selection-based filter is active, clearable on its own
-                (independent of the general clear-filters button above). */}
-            {selectedCandidateIds.length > 0 && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 10px', borderRadius: 7,
-                // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- tintBg/tintBorder ARE the canonical §4 tint helpers; the primary token here is only their argument, not a hand-painted fill
-                background: tintBg('var(--color-primary)'),
-                border: tintBorder('var(--color-primary)'),
-                color: 'var(--color-primary-text)', fontSize: 12, fontWeight: 500 }}>
-                <Users size={13} />
-                {t('page.scopedBySelection', { count: selectedCandidateIds.length })}
-                <Button variant="ghostAccent" iconOnly size="sm" onClick={() => setSelectedCandidateIds([])}
-                  aria-label={t('page.clearScope')}>
-                  <X size={13} />
-                </Button>
-              </div>
-            )}
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          {/* No status bucket tabs here (Danny 14-08, "moet een donut worden!!"):
-              the active/matched/rejected dimension moved to the insights-row
-              donut (see bucketData/buildBucketData) and the right filter panel's
-              bucket group — the state itself (`bucket`) is unchanged, only the
-              toolbar control was removed to stop the duplication. */}
-          {/* Archived (detached) view — shared quick-view toggle (§4). */}
-          <QuickViewToggle active={showArchived} onToggle={() => setShowArchived(v => !v)}
-            label={t('archived.toggle')} color="var(--color-archive)" icon={Archive} />
-          {/* INTERVIEW-PHASE-1 quick-views onto the universal category filter — the
-              shared toggle (§4), never hand-rolled. Mutually exclusive: each toggle
-              clears its sibling before flipping on (matches the server's single-value
-              interview_status; both narrow to interview_status=busy|paused). */}
-          <QuickViewToggle active={interviewBusy} onToggle={() => { setInterviewPaused(false); setInterviewBusy(v => !v) }}
-            label={t('interview.filterBusy')} color="var(--color-info)" icon={MessageCircle} />
-          {/* W27: "Paused" — was missing entirely (no client or server filter for it);
-              now a real server-side interview_status=paused quick-view. */}
-          <QuickViewToggle active={interviewPaused} onToggle={() => { setInterviewBusy(false); setInterviewPaused(v => !v) }}
-            label={t('interview.category.paused')} color={interviewCategoryColor('paused')} icon={Pause} />
-          {/* Table/board switcher — shared soft-tint component (§4), never a solid fill. */}
-          <ViewModeToggle value={view} onChange={setView} options={[
-            { id: 'table', icon: LayoutList, label: t('view.table') },
-            { id: 'board', icon: Kanban, label: t('view.board') },
-          ]} />
-          </div>
-        </div>
-
-        {/* Content — BOTH views stay mounted, the inactive one is display:none
-            (APPS-VIRT-1): unmounting the table remounted the scroll container and
-            @tanstack/react-virtual measured 0 height → 0 rows after board→table.
-            Hiding instead keeps the virtualizer's measurements AND the board's
-            drag state alive across toggles. */}
-        <div style={{ display: view === 'table' ? 'contents' : 'none' }}>
-            {/* Bulk action bar — shown above the table when ≥1 row is selected. */}
-            {selectedIds.size > 0 && (
-              <div style={{ padding: '8px 24px 0' }}>
-                <ApplicationsBulkBar count={selectedIds.size} onClear={() => setSelectedIds(new Set())}
-                  onSetPhase={bulkSetPhase} onDetach={bulkDetach} canManage={canManage} phases={funnelTypes} />
-              </div>
-            )}
-            {/* Virtualized (F-7): tableScrollRef is the scroll container DataTable measures against. */}
-            <div ref={tableScrollRef} style={{ flex: 1, overflow: 'auto', padding: '0 24px 16px' }}>
-              <ApplicationsTable rows={tableRows} loading={loading} error={error}
-                selectedId={selected?.id} onSelect={selectApplication} stickyHeader
-                selectable selectedIds={selectedIds} onToggleRow={toggleRow} onToggleAll={toggleAll}
-                selectionBusy={fetching}
-                scrollParentRef={tableScrollRef} sort={sort} onSortChange={setSort} />
-            </div>
-            <PaginationBar page={page} totalPages={lastPage} totalRows={total}
-              pageSize={pageSize} onPageChange={setPage} pageSizeOptions={pageSizeOptions}
-              // useListPageSize's setPageSize already clamps to APPLICATIONS_MAX_PER_PAGE.
-              onPageSizeChange={n => { setPageSizeClamped(n); setPage(1) }} />
-        </div>
-        {view === 'board' && (
-          <ApplicationsBoard rows={boardRows} phases={phases} onMove={handleMove}
-            selectedId={selected?.id} onSelect={selectApplication}
-            loading={wideLoading} error={wideError} />
-        )}
-      </div>
+      {/* List chrome (insights row, toolbar, table/board + pagination) — §0.3
+          split into a dumb rendering cluster, mirrors CandidatesListPanel. */}
+      <ApplicationsListPanel
+        insightDonuts={insightDonuts} insightKpis={insightKpis}
+        statsFailed={statsFailed} wideIsPartial={wideIsPartial}
+        // VESTIGING-2: an explicit branch filter excludes applications with no
+        // branch yet — a resulting empty list must say so (see the panel's own notice logic).
+        branchFilterExcludesAll={selectedBranch.length > 0 && total === 0}
+        onAddOpen={() => setAddOpen(true)}
+        searchEpoch={searchEpoch} onSearch={setQuery}
+        anyFilterActive={anyFilterActive} onClearFilters={clearAllFilters}
+        candidateScopeCount={selectedCandidateIds.length} onClearCandidateScope={() => setSelectedCandidateIds([])}
+        showArchived={showArchived} onToggleArchived={() => setShowArchived(v => !v)}
+        interviewBusy={interviewBusy} onToggleInterviewBusy={() => { setInterviewPaused(false); setInterviewBusy(v => !v) }}
+        interviewPaused={interviewPaused} onToggleInterviewPaused={() => { setInterviewBusy(false); setInterviewPaused(v => !v) }}
+        view={view} onViewChange={setView}
+        selectedCount={selectedIds.size} onClearSelection={() => setSelectedIds(new Set())}
+        onBulkSetPhase={bulkSetPhase} onBulkDetach={bulkDetach} canManage={canManage} funnelPhases={funnelTypes}
+        tableScrollRef={tableScrollRef} tableRows={tableRows} loading={loading} error={error}
+        selectedId={selected?.id} onSelect={selectApplication}
+        selectedIds={selectedIds} onToggleRow={toggleRow} onToggleAll={toggleAll} selectionBusy={fetching}
+        sort={sort} onSortChange={setSort}
+        page={page} lastPage={lastPage} total={total} pageSize={pageSize} pageSizeOptions={pageSizeOptions}
+        onPageChange={setPage}
+        // useListPageSize's setPageSize already clamps to APPLICATIONS_MAX_PER_PAGE.
+        onPageSizeChange={n => { setPageSizeClamped(n); setPage(1) }}
+        boardRows={boardRows} boardPhases={phases} onMove={handleMove}
+        wideLoading={wideLoading} wideError={wideError}
+      />
 
       {/* Detail drawer */}
       <ApplicationDrawer
