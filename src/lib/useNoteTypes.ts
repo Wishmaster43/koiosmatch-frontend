@@ -14,13 +14,18 @@
  * Fetch/cache/dedupe lives in useCachedLookup (audit item 8) — one GET per entity
  * per session, shared across every mounted consumer of that entity (the `?entity=`
  * query string is part of the cache key, so entities never share a cache slot).
+ *
+ * `useNoteTypesFor([...entities])` (NOTE-TYPE-WIDEN-1) is the WIDENING sibling for a
+ * note composed on a deeper entity that must also accept its shallower entities' types
+ * — see that function's own docblock for the backend rule it mirrors.
  */
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useQueries } from '@tanstack/react-query'
 import type { AxiosResponse } from 'axios'
 import { useCachedLookup } from './useCachedLookup'
 import type { LookupOption } from '@/types/common'
-import { unwrapList } from '@/lib/api'
+import api, { getActiveTenantId, unwrapList } from '@/lib/api'
 import { translateSeedList } from './lookupSeedI18n'
 import { toLookupOption } from './lookupOption'
 
@@ -67,6 +72,23 @@ const mapNoteTypes = (res: AxiosResponse): LookupOption[] | null => {
   return unique.length ? unique : null
 }
 
+// Shared label/colour resolver + writable-types filter, built once so useNoteTypes
+// and useNoteTypesFor (the widened union below) derive identical behaviour instead
+// of two hand-copied resolvers drifting apart.
+function buildNoteTypeHelpers(types: LookupOption[]) {
+  // Resolve a stored value/slug to its label/colour; fall back to the raw value.
+  const find = (value?: string | null) => {
+    const v = norm(value)
+    return v ? types.find(x => norm(x.value) === v || norm(x.label) === v) : undefined
+  }
+  const labelOf = (value?: string | null): string => find(value)?.label ?? value ?? ''
+  const colorOf = (value?: string | null): string | undefined => find(value)?.color
+  // Composer options: system-written categories (Statuswissel) are never offered
+  // as a writable type — the seeded lookup DOES contain them for display resolution.
+  const writableTypes = types.filter(nt => !SYSTEM_NOTE_TYPES.has(nt.value))
+  return { labelOf, colorOf, writableTypes }
+}
+
 // entity is required — every caller scopes to its own owning entity (candidate/
 // application/customer/opportunity/…), never the old flat cross-entity fetch.
 export function useNoteTypes(entity: NoteTypeEntity) {
@@ -76,18 +98,66 @@ export function useNoteTypes(entity: NoteTypeEntity) {
   const { data: rawTypes } = useCachedLookup(`/note-types?entity=${entity}`, mapNoteTypes, DEFAULT_NOTE_TYPES)
   // Seeded defaults render in the user language; a tenant value stays as typed (LOOKUP-I18N-1).
   const types = useMemo(() => translateSeedList(t, 'noteTypes', rawTypes), [rawTypes, t])
-
-  // Resolve a stored value/slug to its label/colour; fall back to the raw value.
-  const find = (value?: string | null) => {
-    const v = norm(value)
-    return v ? types.find(x => norm(x.value) === v || norm(x.label) === v) : undefined
-  }
-  const labelOf = (value?: string | null): string => find(value)?.label ?? value ?? ''
-  const colorOf = (value?: string | null): string | undefined => find(value)?.color
-
-  // Composer options: system-written categories (Statuswissel) are never offered
-  // as a writable type — the seeded lookup DOES contain them for display resolution.
-  const writableTypes = useMemo(() => types.filter(nt => !SYSTEM_NOTE_TYPES.has(nt.value)), [types])
+  const { labelOf, colorOf, writableTypes } = useMemo(() => buildNoteTypeHelpers(types), [types])
 
   return { types, writableTypes, labelOf, colorOf }
+}
+
+/**
+ * useNoteTypesFor — the WIDENING union across several owning entities
+ * (BUG-NOTE-SCOPE-1: backend CustomerController::addNote/updateNote,
+ * koiosmatch-api/app/Http/Controllers/CustomerController.php:459-473). A location
+ * note accepts note types scoped to entity in ['customer','location']; a department
+ * note accepts ['customer','location','department'] — a deeper link WIDENS the
+ * accepted set, it never narrows it. Plain `useNoteTypes(entity)` only ever fetches
+ * ONE entity's list, which silently drops the shallower entities' types out of both
+ * the composer's option list and the label/colour resolver (a historical note typed
+ * on the shallower entity then renders as a raw, uncoloured slug).
+ *
+ * Fetches every requested entity in parallel via React Query's `useQueries` — plain
+ * `useCachedLookup` is a hook and cannot be called a variable number of times per
+ * render without breaking Rules of Hooks, which a caller-supplied `entities` array
+ * would require. The result is merged in call order (customer → location →
+ * department, matching the widening rule), de-duplicated by value (first entity
+ * wins a clash). This hook's cache is React Query's own — separate from
+ * useCachedLookup's module-scope Map — but the query key still carries the tenant
+ * id, mirroring useCachedLookup's own `${tenantId}:${url}` scoping, so a bureau
+ * switch never leaks another tenant's rows.
+ */
+export function useNoteTypesFor(entities: NoteTypeEntity[]) {
+  const { t } = useTranslation('common')
+  const tenantId = getActiveTenantId() ?? 'none'
+  const results = useQueries({
+    queries: entities.map(entity => ({
+      queryKey: ['note-types', tenantId, entity],
+      queryFn: async ({ signal }: { signal?: AbortSignal }) => {
+        const res = await api.get(`/note-types?entity=${entity}`, { signal })
+        return mapNoteTypes(res) ?? DEFAULT_NOTE_TYPES
+      },
+      placeholderData: DEFAULT_NOTE_TYPES,
+    })),
+  })
+  // `isLoading` (isPending && isFetching) goes false as soon as `placeholderData`
+  // supplies non-undefined data — before the REAL fetch has actually settled.
+  // `isFetching` stays accurate through the seed-vs-real-data transition.
+  const loading = results.some(r => r.isFetching)
+
+  // Union in entity order, de-duped by value — a type seeded on more than one
+  // entity (e.g. 'general') appears once, from the first (shallowest) entity.
+  const rawTypes = useMemo(() => {
+    const seen = new Set<string>()
+    const out: LookupOption[] = []
+    for (const r of results) {
+      for (const item of (r.data ?? DEFAULT_NOTE_TYPES)) {
+        if (!seen.has(item.value)) { seen.add(item.value); out.push(item) }
+      }
+    }
+    return out
+  }, [results])
+
+  // Seeded defaults render in the user language; a tenant value stays as typed (LOOKUP-I18N-1).
+  const types = useMemo(() => translateSeedList(t, 'noteTypes', rawTypes), [rawTypes, t])
+  const { labelOf, colorOf, writableTypes } = useMemo(() => buildNoteTypeHelpers(types), [types])
+
+  return { types, writableTypes, labelOf, colorOf, loading }
 }

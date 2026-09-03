@@ -15,7 +15,8 @@ import api from '@/lib/api'
 import NotesTabJs from '@/components/drawer/tabs/NotesTab'
 // NOTITIE-DOORLINK-1: the location/department's own linked-notes feed section.
 import NoteFeedList from '@/components/drawer/tabs/notes/NoteFeedList'
-import { useNoteTypes } from '@/lib/useNoteTypes'
+import { useNoteTypesFor } from '@/lib/useNoteTypes'
+import type { NoteTypeEntity } from '@/lib/useNoteTypes'
 import { initialsOf } from '@/lib/initials'
 import { notifyError } from '@/lib/notify'
 import { extractApiError } from '@/lib/extractApiError'
@@ -37,10 +38,17 @@ export default function ScopedNotesTab({ scope, id, customerId }: {
   const { t } = useTranslation('customers')
   const auth = useAuth()
   const authorInitials = initialsOf(auth?.user?.name ?? '')
-  // Per-entity note types — location and department now have their own separate
-  // note-type configurations (NOTES-LOC-DEPT-1, 2026-09-02: backend supports
-  // GET /note-types?entity=location/department; frontend mirrors the scope).
-  const { writableTypes: noteTypes, types: chipTypes } = useNoteTypes(scope)
+  // BUG-NOTE-SCOPE-1 (backend CustomerController::addNote/updateNote): a location
+  // note accepts types scoped to ['customer','location']; a department note accepts
+  // ['customer','location','department'] — a deeper link WIDENS the accepted set,
+  // it never narrows it. useNoteTypesFor fetches and merges every entity in that
+  // widened set so the composer offers, and historical notes correctly resolve,
+  // the full accepted vocabulary — not just this scope's own (NOTE-TYPE-WIDEN-1,
+  // restoring what commit bdce7008 narrowed back to useNoteTypes(scope) alone).
+  const scopeEntities: NoteTypeEntity[] = scope === 'department'
+    ? ['customer', 'location', 'department']
+    : ['customer', 'location']
+  const { writableTypes: noteTypes, types: chipTypes } = useNoteTypesFor(scopeEntities)
   const { notes, loading, error, reload } = useScopedCustomerNotes(customerId, scope, id)
 
   // Pinned to THIS level — writes through the SAME endpoint the customer-level

@@ -479,6 +479,13 @@ export const NAV_GROUPS = [
     //                 ScopedNotesTab (location/department drill-down's notes sub-tabs)
     //                 and the backend support per-entity note-type configs for locations
     //                 and departments, just as they do for other entities.
+    //                 Each tab below still manages that ONE entity's OWN list — the
+    //                 editor never merges. The WIDENING happens only on read, in the
+    //                 composer: BUG-NOTE-SCOPE-1 (backend CustomerController::addNote/
+    //                 updateNote) accepts a location note's type from {customer,location}
+    //                 and a department note's type from {customer,location,department},
+    //                 so ScopedNotesTab calls useNoteTypesFor([...]) with that widened
+    //                 set instead of useNoteTypes(scope) alone (NOTE-TYPE-WIDEN-1).
     // No tenant data is deleted for a withheld entity: the rows stay in note_types and the
     // endpoint keeps serving them, so re-adding one line here restores the editor the day
     // that entity grows a real FE reader.
