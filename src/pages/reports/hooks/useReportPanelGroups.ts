@@ -1,38 +1,22 @@
 /**
  * useReportPanelGroups — owns the right-hand filter panel for ReportsPage
  * (extracted from ReportsPage.tsx, §3: > ~400 lines = split). Holds every
- * panel-driven filter dimension's state, the lookup sources that feed their
- * option lists, the compare radio/date-range groups, the reset-on-report-switch
- * effect, and the group assembly + its registration into RightPanelContext.
- * Returns the `filters` object the active report's own hook/drill reads —
- * ReportsPage stays a thin container that only resolves the active report and
- * renders it.
+ * panel-driven filter dimension's state and the reset-on-report-switch effect;
+ * option lists come from useReportFilterOptions.ts and group assembly is the
+ * pure buildReportPanelGroups (../data/reportPanelGroups) — this hook wires
+ * state + options into that builder and registers the result into
+ * RightPanelContext. Returns the `filters` object the active report's own
+ * hook/drill reads — ReportsPage stays a thin container that only resolves
+ * the active report and renders it.
  */
 import { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useRightPanel } from '@/context/RightPanelContext'
-import { useLookups } from '@/context/LookupsContext'
-import { useCustomerLookups } from '@/lib/useCustomerLookups'
-import { useUsers } from '@/lib/queries'
-import { useLocations } from '@/lib/useLocations'
-import { useMatchStatuses } from '@/lib/useMatchStatuses'
-import { useCustomerOptions } from '@/hooks/useCustomerOptions'
-import { useApplicationSources } from '@/lib/useApplicationSources'
-import { useApplicationStages } from '@/hooks/useApplicationStages'
-import { useRejectionReasons } from '@/lib/useRejectionReasons'
-import { useTeams } from '@/lib/useTeams'
-import { useOpportunityStages } from '@/lib/useOpportunityStages'
-import { useOutreachStatuses } from '@/lib/useOutreachStatuses'
-import { useMatchStopReasons } from '@/hooks/useMatchStopReasons'
-import { useWaMessageTypes } from '@/hooks/useWaMessageTypes'
-import {
-  useVacancyStatusIdOptions, useTaskStatusIdOptions, useTaskTypeIdOptions, useTaskPriorityIdOptions,
-} from '../reportStatusLookups'
-import { isFilterableReport, CUSTOMER_FILTERABLE_REPORT_IDS, acceptsStatusBranchFilter } from '../reportFilterParams'
-import { COMPARE_OFF } from '../reportCompareMode'
+import { useReportFilterOptions } from './useReportFilterOptions'
+import { buildReportPanelGroups } from '../data/reportPanelGroups'
+import { isFilterableReport, acceptsStatusBranchFilter } from '../reportFilterParams'
 import type { ReportCompareMode } from '../reportCompareMode'
 import type { ReportFilterState } from '../reportFilterParams'
-import type { ReportFilterGroup } from '@/types/reports'
 import type { ReportId } from '../reportIds'
 import type { ReportPeriod } from '@/types/analytics'
 
@@ -88,7 +72,6 @@ export function useReportPanelGroups({ active, period, setPeriod, compareInPanel
     valueMin, valueMax,
   }), [status, ownerId, locationId, customerId, source, phase, contractForm, stage, rejectionReason,
     taskType, priority, teamId, direction, escalated, customerIds, origin, stopReason, messageType, valueMin, valueMax])
-  const acceptsCustomer = (CUSTOMER_FILTERABLE_REPORT_IDS as readonly string[]).includes(active)
   const acceptsStatusBranch = acceptsStatusBranchFilter(active)
 
   // Reset every dimension on EVERY report switch: vocabularies are per report
@@ -105,294 +88,30 @@ export function useReportPanelGroups({ active, period, setPeriod, compareInPanel
     setValueMin(null); setValueMax(null)
   }, [active])
 
-  // Lookup sources for the filter options — each entity keeps its OWN status
-  // vocabulary (deployability/vacancy lifecycle/funnel bucket/match state/task
-  // board), while owner (users) and branch (locations) are shared tenant lookups.
-  // Vacancy/task statuses are validated by the backend against their raw lookup
-  // ID, never the slug (see reportStatusLookups.ts) — a dedicated fetch, not the
-  // page-scoped VacancyLookupsContext/TaskLookupsContext (unmounted here).
-  const { statuses: candidateStatuses, phases: tenantPhases, candidateTypes } = useLookups()
-  const { statuses: customerStatuses } = useCustomerLookups()
-  const { data: users = [] } = useUsers() as { data?: Array<{ id?: string | number; name?: string }> }
-  const locations = useLocations()
-  const vacancyStatusOptions = useVacancyStatusIdOptions()
-  const taskStatusOptions = useTaskStatusIdOptions()
-  const taskTypeOptions = useTaskTypeIdOptions()
-  const taskPriorityOptions = useTaskPriorityIdOptions()
-  const { statuses: matchStatusesRaw } = useMatchStatuses()
-  // Reshapes the raw match-status lookup into the panel's {value,label} option shape.
-  const matchStatusOptions = useMemo(() => matchStatusesRaw.map(s => ({ value: s.value, label: s.label })), [matchStatusesRaw])
-  const { stages: opportunityStages } = useOpportunityStages()
-  const { statuses: outreachStatuses } = useOutreachStatuses()
-  // The applications panel filter narrows on the FLAG-derived funnel bucket
-  // (active/matched/rejected/placed, ApplicationsReport::BUCKET_VALUES) — a fixed,
-  // non-tenant vocabulary, so its options are i18n labels, never a lookup fetch.
-  const applicationBucketOptions = useMemo(
-    () => (['active', 'matched', 'rejected', 'placed'] as const).map(k => ({ value: k, label: t(`applications.buckets.${k}`) })),
-    [t],
-  )
-  const customerOptions = useCustomerOptions(filterable && acceptsCustomer)
-  const statusOptions = active === 'customers' ? customerStatuses
-    : active === 'vacancies' ? vacancyStatusOptions
-    : active === 'applications' ? applicationBucketOptions
-    : active === 'matches' ? matchStatusOptions
-    : active === 'tasks' ? taskStatusOptions
-    : active === 'opportunities' ? opportunityStages
-    : active === 'outreach' ? outreachStatuses
-    : candidateStatuses
-  // Maps tenant users to owner options, dropping any without an id so the panel never
-  // offers a selectable empty value.
-  const ownerOptions = useMemo(() => users.map(u => ({ value: u.id ?? '', label: u.name || '—' })).filter(o => o.value !== ''), [users])
-  const branchOptions = useMemo(() => locations.map(l => ({ value: l.value, label: l.label })), [locations])
+  // Every report's option list (status/owner/branch/customer + WAVE 1c per-page
+  // vocabularies) — split into its own hook (useReportFilterOptions.ts).
+  const options = useReportFilterOptions(active, filterable)
 
-  // WAVE 1c per-page vocabulary sources — only fetched behind `filterable` /
-  // the exact report(s) that read them, so an unrelated report never fires an
-  // extra GET it will never use.
-  // LOOKUP-I18N-1: useApplicationSources already returns { value, label } rows
-  // (value = raw backend name for the filter param, label = translated display) —
-  // no local remap needed any more.
-  const { sources: sourceOptions } = useApplicationSources()
-  const phaseOptions = useMemo(() => tenantPhases.map(p => ({ value: p.value, label: p.label })), [tenantPhases])
-  // 'none' sentinel mirrors the backend's own "no contract form" bucket both
-  // candidates and matches already draw (AppliesReportFilters.php contract_form.*).
-  const contractFormOptions = useMemo(
-    () => [{ value: 'none', label: t('candidates.axes.contractFormNone') }, ...candidateTypes.map(c => ({ value: c.value, label: c.label }))],
-    [candidateTypes, t],
-  )
-  const { stages: applicationStages } = useApplicationStages()
-  // Prepends the 'none' sentinel (mirrors the backend's own "no stage" bucket) ahead
-  // of the tenant's own funnel stages.
-  const stageOptions = useMemo(
-    () => [{ value: 'none', label: t('applications.axes.stageNone') }, ...applicationStages.map(s => ({ value: s.value, label: s.label }))],
-    [applicationStages, t],
-  )
-  const { reasons: rejectionReasonOptions } = useRejectionReasons()
-  const { teams } = useTeams()
-  // Prepends the 'none' sentinel for tasks that have no team assigned.
-  const teamOptions = useMemo(
-    () => [{ value: 'none', label: t('tasks.noTeam') }, ...teams.map(tm => ({ value: tm.value, label: tm.label }))],
-    [teams, t],
-  )
-  // Prepends the 'none' sentinel ahead of the shared task-type lookup options.
-  const taskTypePanelOptions = useMemo(
-    () => [{ value: 'none', label: t('tasks.filters.typeNone') }, ...taskTypeOptions], [taskTypeOptions, t],
-  )
-  // Prepends the 'none' sentinel ahead of the shared task-priority lookup options.
-  const taskPriorityPanelOptions = useMemo(
-    () => [{ value: 'none', label: t('tasks.filters.priorityNone') }, ...taskPriorityOptions], [taskPriorityOptions, t],
-  )
-  // Static, translated inbound/outbound options — not a tenant lookup, so built inline.
-  const directionOptions = useMemo(
-    () => (['inbound', 'outbound'] as const).map(v => ({ value: v, label: t(`whatsapp.axes.directionValues.${v}`) })), [t],
-  )
-  // Tenant stop reasons (no seed by design — see the hook doc) for the scoped
-  // terminations filter; tenant WhatsApp message types for the type[] filter.
-  const { reasons: stopReasonRows } = useMatchStopReasons()
-  const stopReasonOptions = useMemo(
-    () => (stopReasonRows ?? []).map(r => ({ value: r.value, label: r.label })), [stopReasonRows])
-  const { data: waTypeRows } = useWaMessageTypes()
-  const waTypeOptions = useMemo(
-    // 'none' first: the server's TYPE_NONE sentinel (WhatsappReport, CMBE-gemeten
-    // 27-08) folds NULL/empty message_type; label mirrors the by_type axis bucket.
-    () => [{ value: 'none', label: t('whatsapp.axes.typeNone') }, ...(waTypeRows ?? []).flatMap(r => (r.value ? [{ value: r.value, label: r.label }] : []))], [waTypeRows, t])
-  // Static, translated match-origin options (funnel vs. direct match) — not a lookup.
-  const originOptions = useMemo(
-    () => [{ value: 'funnel', label: t('matches.viaFunnel') }, { value: 'direct', label: t('matches.direct') }], [t],
-  )
-
-  // Right-hand filter panel (DashboardLayout renders whatever is registered
-  // here). The period group is universal — every `/reports/*` endpoint reads it.
-  // `noChip` keeps the always-on period value out of the removable-chip row
-  // (there is nothing honest to "remove" to — every report always has a period).
-  // `buildReportQueryParams` shows, in one place, exactly which of this state
-  // reaches the server — every group below is gated to the exact report(s)
-  // whose backend rule set actually reads it (a report must never show a field
-  // the server silently drops).
-  const panelGroups: ReportFilterGroup[] = useMemo(() => {
-    const groups: ReportFilterGroup[] = [{
-      key: 'period',
-      label: t('period.label'),
-      type: 'radio',
-      noChip: true,
-      selected: [period],
-      onToggle: (v: string | number) => setPeriod(String(v) as ReportPeriod),
-      options: [
-        { value: 'day', label: t('period.day') },
-        { value: 'week', label: t('period.week') },
-        { value: 'month', label: t('period.month') },
-      ],
-    }]
-    // Compare group (RAPPORT-COMPARE-2) — radio like the period group; a custom
-    // window adds the shared date-range group underneath. noChip mirrors period:
-    // "off" is the empty state, the radio itself is the one honest control.
-    if (compareInPanel) {
-      groups.push({
-        key: 'compare',
-        label: t('compare.label'),
-        type: 'radio',
-        noChip: true,
-        selected: [compareMode.kind],
-        onToggle: (v: string | number) => {
-          const kind = String(v)
-          if (kind === 'previous_period') setCompareMode({ kind: 'previous_period' })
-          else if (kind === 'previous_year') setCompareMode({ kind: 'previous_year' })
-          else if (kind === 'custom') setCompareMode({ kind: 'custom', from: '', to: '' })
-          else setCompareMode(COMPARE_OFF)
-        },
-        options: (['off', 'previous_period', 'previous_year', 'custom'] as const)
-          .map(value => ({ value, label: t(`compare.mode.${value}`) })),
-      })
-      if (compareMode.kind === 'custom') {
-        groups.push({
-          key: 'compareRange',
-          label: t('compare.mode.custom'),
-          type: 'date-range',
-          from: compareMode.from,
-          to: compareMode.to,
-          onFromChange: (v: string) => setCompareMode({ kind: 'custom', from: v, to: compareMode.kind === 'custom' ? compareMode.to : '' }),
-          onToChange: (v: string) => setCompareMode({ kind: 'custom', from: compareMode.kind === 'custom' ? compareMode.from : '', to: v }),
-        })
-      }
-    }
-    if (filterable) {
-      // Each report's own axis vocabulary for the status/owner labels — candidates/
-      // customers keep their existing `<ns>.axes.*` pair; applications/tasks have
-      // their own analytics.json axis labels; vacancies/matches/opportunities/
-      // outreach have no dedicated axis label yet so they borrow the generic
-      // `customers.axes.*` pair — the same fallback VacancyReportAxes already
-      // uses for its own bars.
-      const axisNs = active === 'customers' ? 'customers' : 'candidates'
-      const statusLabel = active === 'customers' || active === 'candidates' ? t(`${axisNs}.axes.status`)
-        : active === 'applications' ? t('applications.axes.bucket')
-        : active === 'tasks' ? t('tasks.axes.status')
-        : t('customers.axes.status')
-      const ownerLabel = active === 'customers' || active === 'candidates' ? t(`${axisNs}.axes.owner`)
-        : active === 'applications' ? t('applications.axes.owner')
-        : active === 'tasks' ? t('tasks.axes.assignee')
-        : active === 'whatsapp' ? t('whatsapp.axes.owner')
-        : t('customers.axes.owner')
-      const branchLabel = active === 'tasks' ? t('tasks.axes.branch') : t('common:filters.branch')
-      // WHATSAPP-NARROW-1: whatsapp's own route drops status[]/location_id[] —
-      // acceptsStatusBranch mirrors that so the panel never shows a dimension the
-      // server would 422 or silently drop (reportFilterParams.ts).
-      if (acceptsStatusBranch) {
-        groups.push(
-          {
-            key: 'status', type: 'search-select', label: statusLabel,
-            selected: status, onToggle: (v: string | number) => setStatus(s => s.includes(v) ? s.filter(x => x !== v) : [...s, v]),
-            options: statusOptions,
-          },
-        )
-      }
-      groups.push({
-        key: 'owner', type: 'search-select', label: ownerLabel,
-        selected: ownerId, onToggle: (v: string | number) => setOwnerId(s => s.includes(v) ? s.filter(x => x !== v) : [...s, v]),
-        options: ownerOptions,
-      })
-      if (acceptsStatusBranch) {
-        groups.push({
-          key: 'branch', type: 'search-select', label: branchLabel,
-          selected: locationId, onToggle: (v: string | number) => setLocationId(s => s.includes(v) ? s.filter(x => x !== v) : [...s, v]),
-          options: branchOptions,
-        })
-      }
-      // customer_id[] only exists on the reports whose table actually carries a
-      // customer/client FK (vacancies' client_id, applications' inherited via the
-      // vacancy, opportunities' own customer_id) — see reportFilterParams.ts's
-      // CUSTOMER_FILTERABLE_REPORT_IDS.
-      if (acceptsCustomer) {
-        groups.push({
-          key: 'customer', type: 'search-select', label: t('applications.axes.customer'),
-          selected: customerId, onToggle: (v: string | number) => setCustomerId(s => s.includes(v) ? s.filter(x => x !== v) : [...s, v]),
-          options: customerOptions,
-        })
-      }
-      // WAVE 1c: the per-page extra dimensions, gated to the exact report(s)
-      // whose segmentQuery() reads them (mirrors buildReportQueryParams's own gate).
-      if (active === 'candidates') {
-        groups.push(
-          { key: 'source', type: 'search-select', label: t('candidates.axes.source'),
-            selected: source, onToggle: (v: string | number) => setSource(s => s.includes(v) ? s.filter(x => x !== v) : [...s, v]), options: sourceOptions },
-          { key: 'phase', type: 'search-select', label: t('candidates.axes.phase'),
-            selected: phase, onToggle: (v: string | number) => setPhase(s => s.includes(v) ? s.filter(x => x !== v) : [...s, v]), options: phaseOptions },
-          { key: 'contractForm', type: 'search-select', label: t('candidates.axes.contractForm'),
-            selected: contractForm, onToggle: (v: string | number) => setContractForm(s => s.includes(v) ? s.filter(x => x !== v) : [...s, v]), options: contractFormOptions },
-        )
-      }
-      if (active === 'applications') {
-        groups.push(
-          { key: 'stage', type: 'search-select', label: t('applications.axes.stage'),
-            selected: stage, onToggle: (v: string | number) => setStage(s => s.includes(v) ? s.filter(x => x !== v) : [...s, v]), options: stageOptions },
-          { key: 'source', type: 'search-select', label: t('applications.axes.source'),
-            selected: source, onToggle: (v: string | number) => setSource(s => s.includes(v) ? s.filter(x => x !== v) : [...s, v]), options: sourceOptions },
-          { key: 'rejectionReason', type: 'search-select', label: t('applications.axes.rejectionReason'),
-            selected: rejectionReason, onToggle: (v: string | number) => setRejectionReason(s => s.includes(v) ? s.filter(x => x !== v) : [...s, v]), options: rejectionReasonOptions },
-          // vacancy_id[] stays UNWIRED: no shared vacancy-options lookup hook
-          // exists today (a search-select over GET /vacancies?per_page=… is not
-          // allowed per §4 — every filterable list already has its own combobox
-          // hook, and building a new one is out of this wave's file list).
-        )
-      }
-      if (active === 'matches') {
-        groups.push(
-          { key: 'customerIds', type: 'search-select', label: t('applications.axes.customer'),
-            selected: customerIds, onToggle: (v: string | number) => setCustomerIds(s => s.includes(v) ? s.filter(x => x !== v) : [...s, v]), options: customerOptions },
-          { key: 'origin', type: 'search-select', label: t('matches.axes.origin'),
-            selected: origin, onToggle: (v: string | number) => setOrigin(s => s.includes(v) ? s.filter(x => x !== v) : [...s, v]), options: originOptions },
-          { key: 'contractForm', type: 'search-select', label: t('matches.axes.contractForm'),
-            selected: contractForm, onToggle: (v: string | number) => setContractForm(s => s.includes(v) ? s.filter(x => x !== v) : [...s, v]), options: contractFormOptions },
-          // stop_reason: CMBE-gemeten 27-08 — the server applies it to the
-          // terminations slice + its drill ONLY (deliberate: the column lives on
-          // match_terminations). The label carries that scope so the picker
-          // promises exactly what it filters (§3 honest affordance).
-          { key: 'stopReason', type: 'search-select', label: t('matches.axes.stopReason'),
-            selected: stopReason, onToggle: (v: string | number) => setStopReason(s => s.includes(v) ? s.filter(x => x !== v) : [...s, v]), options: stopReasonOptions },
-        )
-      }
-      if (active === 'tasks') {
-        groups.push(
-          { key: 'taskType', type: 'search-select', label: t('tasks.axes.type'),
-            selected: taskType, onToggle: (v: string | number) => setTaskType(s => s.includes(v) ? s.filter(x => x !== v) : [...s, v]), options: taskTypePanelOptions },
-          { key: 'priority', type: 'search-select', label: t('tasks.axes.priority'),
-            selected: priority, onToggle: (v: string | number) => setPriority(s => s.includes(v) ? s.filter(x => x !== v) : [...s, v]), options: taskPriorityPanelOptions },
-          { key: 'team', type: 'search-select', label: t('tasks.axes.team'),
-            selected: teamId, onToggle: (v: string | number) => setTeamId(s => s.includes(v) ? s.filter(x => x !== v) : [...s, v]), options: teamOptions },
-        )
-      }
-      if (active === 'whatsapp') {
-        groups.push(
-          { key: 'direction', type: 'search-select', label: t('whatsapp.axes.direction'),
-            selected: direction, onToggle: (v: string | number) => setDirection(s => s.includes(v) ? s.filter(x => x !== v) : [...s, v]), options: directionOptions },
-          // type[] is first-class server-side (message_type filter + by_type axis,
-          // CMBE-gemeten 27-08); options are the tenant message-type lookup.
-          { key: 'messageType', type: 'search-select', label: t('whatsapp.axes.type'),
-            selected: messageType, onToggle: (v: string | number) => setMessageType(s => s.includes(v) ? s.filter(x => x !== v) : [...s, v]), options: waTypeOptions },
-          { key: 'escalated', type: 'radio', label: t('whatsapp.axes.escalated'), noChip: escalated === null,
-            selected: [escalated === null ? 'any' : escalated ? 'true' : 'false'],
-            onToggle: (v: string | number) => setEscalated(v === 'any' ? null : v === 'true'),
-            options: [
-              { value: 'any', label: t('whatsapp.axes.escalatedAny') },
-              { value: 'true', label: t('common:yes') },
-              { value: 'false', label: t('common:no') },
-            ] },
-        )
-      }
-      if (active === 'opportunities') {
-        groups.push({
-          key: 'value', type: 'number-range', label: t('opportunities.axes.value'),
-          min: valueMin, max: valueMax,
-          onMinChange: (v: number | null) => setValueMin(v), onMaxChange: (v: number | null) => setValueMax(v),
-        })
-      }
-    }
-    return groups
-  }, [t, period, filterable, active, status, ownerId, locationId, customerId, acceptsCustomer, acceptsStatusBranch,
-    statusOptions, ownerOptions, branchOptions, customerOptions, compareInPanel, compareMode,
-    source, phase, contractForm, stage, rejectionReason, taskType, priority, teamId, direction, escalated,
-    customerIds, origin, stopReason, stopReasonOptions, messageType, waTypeOptions, valueMin, valueMax,
-    sourceOptions, phaseOptions, contractFormOptions, stageOptions, rejectionReasonOptions,
-    taskTypePanelOptions, taskPriorityPanelOptions, teamOptions, directionOptions, originOptions,
-    setPeriod, setCompareMode])
+  // Group assembly is the pure builder (../data/reportPanelGroups) — state,
+  // options and `t` in, group config out. Memoised on every value the builder
+  // reads so a stale panel never lingers after a toggle.
+  const panelGroups = useMemo(() => buildReportPanelGroups({
+    t, active, filterable, acceptsStatusBranch, period, setPeriod,
+    compareInPanel, compareMode, setCompareMode,
+    filters: {
+      status, setStatus, ownerId, setOwnerId, locationId, setLocationId, customerId, setCustomerId,
+      source, setSource, phase, setPhase, contractForm, setContractForm,
+      stage, setStage, rejectionReason, setRejectionReason,
+      taskType, setTaskType, priority, setPriority, teamId, setTeamId,
+      direction, setDirection, escalated, setEscalated,
+      customerIds, setCustomerIds, stopReason, setStopReason, messageType, setMessageType,
+      origin, setOrigin, valueMin, setValueMin, valueMax, setValueMax,
+    },
+    options,
+  }), [t, active, filterable, acceptsStatusBranch, period, setPeriod, compareInPanel, compareMode, setCompareMode,
+    status, ownerId, locationId, customerId, source, phase, contractForm, stage, rejectionReason,
+    taskType, priority, teamId, direction, escalated, customerIds, stopReason, messageType, origin,
+    valueMin, valueMax, options])
 
   // Registration into the shared right panel — the same panel every other page
   // renders through. Unregisters on unmount so the panel never shows a stale group.
