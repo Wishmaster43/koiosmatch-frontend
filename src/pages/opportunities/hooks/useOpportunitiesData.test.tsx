@@ -21,6 +21,7 @@ vi.mock('@/lib/queries', () => ({ useUsers: () => ({ data: [] }) }))
 // eslint-disable-next-line no-restricted-syntax -- test fixture hex, not a UI colour
 const DEFAULT_STAGE_COLOR = '#9CA3AF'
 vi.mock('@/lib/useOpportunityStages', () => ({ useOpportunityStages: vi.fn() }))
+vi.mock('@/lib/useOpportunityLostReasons', () => ({ useOpportunityLostReasons: vi.fn() }))
 vi.mock('@/lib/api', async () => {
   const actual = await vi.importActual<typeof import('@/lib/api')>('@/lib/api')
   return { ...actual, default: { get: vi.fn(), patch: vi.fn() } }
@@ -29,10 +30,12 @@ vi.mock('@/lib/notify', () => ({ notifyError: vi.fn(), notifySuccess: vi.fn() })
 
 import api from '@/lib/api'
 import { useOpportunityStages } from '@/lib/useOpportunityStages'
+import { useOpportunityLostReasons } from '@/lib/useOpportunityLostReasons'
 import { notifyError } from '@/lib/notify'
 const mockedGet = vi.mocked(api.get)
 const mockedPatch = vi.mocked(api.patch)
 const mockedStages = vi.mocked(useOpportunityStages)
+const mockedLostReasons = vi.mocked(useOpportunityLostReasons)
 
 // react-query needs a client in the tree; retry:false keeps failed-fetch tests fast.
 function wrapper({ children }: { children: ReactNode }) {
@@ -44,6 +47,9 @@ function wrapper({ children }: { children: ReactNode }) {
 // overrides it with real stage/id pairs so the PATCH branch (`if (s?.id)`) fires.
 beforeEach(() => {
   mockedStages.mockReturnValue({ stages: [], stageMeta: () => ({ value: '', label: '', color: DEFAULT_STAGE_COLOR }) })
+  // Default: no curated lost reasons — every handleMove/handleMove-gating test
+  // below overrides this when it needs the gate to actually fire.
+  mockedLostReasons.mockReturnValue({ reasons: [], loading: false, invalidate: vi.fn() })
 })
 
 // Each test's own react-query cache is fresh, but the mocked api.get call log
@@ -253,5 +259,94 @@ describe('useOpportunitiesData · handleMove (board drag revert-on-failure)', ()
     await waitFor(() => expect(result.current.rows[0].stageValue).toBe('lead')) // reverted
     expect(result.current.rows[0].title).toBe('Deal A') // untouched field survives the revert
     expect(notifyError).toHaveBeenCalledWith('Fase mag niet worden overgeslagen')
+  })
+})
+
+// OPP-LOST-FE-1: moving to an is_lost stage gates on a lost-reason confirm when
+// the tenant has curated ≥1 reason; an empty reason list proceeds immediately
+// (backend contract: "the agency curates first").
+describe('useOpportunitiesData · lost-reason gate (OPP-LOST-FE-1)', () => {
+  const wireLostStage = () => mockedStages.mockReturnValue({
+    stages: [
+      { value: 'lead', label: 'Lead', color: DEFAULT_STAGE_COLOR, id: 's1' },
+      { value: 'lost', label: 'Lost', color: DEFAULT_STAGE_COLOR, id: 's3', isLost: true },
+    ],
+    stageMeta: (v?: string | null) => (v === 'lost'
+      ? { value: 'lost', label: 'Lost', color: DEFAULT_STAGE_COLOR }
+      : { value: 'lead', label: 'Lead', color: DEFAULT_STAGE_COLOR }),
+  })
+
+  it('board move to a lost stage with curated reasons does NOT PATCH until confirmLost, then sends { opportunity_stage_id, lost_reason }', async () => {
+    mockedGet.mockResolvedValue({ data: { data: [{ id: 'o1', title: 'Deal A', stage: { value: 'lead', label: 'Lead', color: DEFAULT_STAGE_COLOR } }] } })
+    mockedPatch.mockResolvedValue({})
+    wireLostStage()
+    mockedLostReasons.mockReturnValue({ reasons: [{ value: 'Budget', label: 'Budget' }], loading: false, invalidate: vi.fn() })
+    const { result } = renderHook(() => useOpportunitiesData(), { wrapper })
+    await waitFor(() => expect(result.current.loading).toBe(false))
+
+    act(() => { result.current.handleMove('o1', 'lost') })
+    expect(mockedPatch).not.toHaveBeenCalled()
+    expect(result.current.pendingLost).toEqual({ id: 'o1', stageValue: 'lost' })
+    expect(result.current.rows[0].stageValue).toBe('lead') // unchanged until confirm
+
+    act(() => { result.current.confirmLost('Budget') })
+    expect(mockedPatch).toHaveBeenCalledWith('/opportunities/o1', { opportunity_stage_id: 's3', lost_reason: 'Budget' })
+    await waitFor(() => expect(result.current.rows[0].stageValue).toBe('lost'))
+    expect(result.current.pendingLost).toBeNull()
+  })
+
+  it('cancelLost drops the pending move — no PATCH, the row keeps its stage', async () => {
+    mockedGet.mockResolvedValue({ data: { data: [{ id: 'o1', title: 'Deal A', stage: { value: 'lead', label: 'Lead', color: DEFAULT_STAGE_COLOR } }] } })
+    wireLostStage()
+    mockedLostReasons.mockReturnValue({ reasons: [{ value: 'Budget', label: 'Budget' }], loading: false, invalidate: vi.fn() })
+    const { result } = renderHook(() => useOpportunitiesData(), { wrapper })
+    await waitFor(() => expect(result.current.loading).toBe(false))
+
+    act(() => { result.current.handleMove('o1', 'lost') })
+    expect(result.current.pendingLost).toEqual({ id: 'o1', stageValue: 'lost' })
+
+    act(() => { result.current.cancelLost() })
+    expect(result.current.pendingLost).toBeNull()
+    expect(mockedPatch).not.toHaveBeenCalled()
+    expect(result.current.rows[0].stageValue).toBe('lead')
+  })
+
+  it('moving to a lost stage with an EMPTY reason list PATCHes immediately, without lost_reason', async () => {
+    mockedGet.mockResolvedValue({ data: { data: [{ id: 'o1', title: 'Deal A', stage: { value: 'lead', label: 'Lead', color: DEFAULT_STAGE_COLOR } }] } })
+    mockedPatch.mockResolvedValue({})
+    wireLostStage()
+    mockedLostReasons.mockReturnValue({ reasons: [], loading: false, invalidate: vi.fn() })
+    const { result } = renderHook(() => useOpportunitiesData(), { wrapper })
+    await waitFor(() => expect(result.current.loading).toBe(false))
+
+    act(() => { result.current.handleMove('o1', 'lost') })
+    expect(mockedPatch).toHaveBeenCalledWith('/opportunities/o1', { opportunity_stage_id: 's3' })
+    expect(result.current.pendingLost).toBeNull()
+    await waitFor(() => expect(result.current.rows[0].stageValue).toBe('lost'))
+  })
+
+  it('moving to a NON-lost stage is unchanged: immediate PATCH, no gate', async () => {
+    mockedGet.mockResolvedValue({ data: { data: [{ id: 'o1', title: 'Deal A', stage: { value: 'lost', label: 'Lost', color: DEFAULT_STAGE_COLOR } }] } })
+    mockedPatch.mockResolvedValue({})
+    wireLostStage()
+    mockedLostReasons.mockReturnValue({ reasons: [{ value: 'Budget', label: 'Budget' }], loading: false, invalidate: vi.fn() })
+    const { result } = renderHook(() => useOpportunitiesData(), { wrapper })
+    await waitFor(() => expect(result.current.loading).toBe(false))
+
+    act(() => { result.current.handleMove('o1', 'lead') })
+    expect(mockedPatch).toHaveBeenCalledWith('/opportunities/o1', { opportunity_stage_id: 's1' })
+    expect(result.current.pendingLost).toBeNull()
+  })
+
+  it('the drawer picker (updateOpportunity with stageValue) gates the same way as the board', async () => {
+    mockedGet.mockResolvedValue({ data: { data: [{ id: 'o1', title: 'Deal A', stage: { value: 'lead', label: 'Lead', color: DEFAULT_STAGE_COLOR } }] } })
+    wireLostStage()
+    mockedLostReasons.mockReturnValue({ reasons: [{ value: 'Budget', label: 'Budget' }], loading: false, invalidate: vi.fn() })
+    const { result } = renderHook(() => useOpportunitiesData(), { wrapper })
+    await waitFor(() => expect(result.current.loading).toBe(false))
+
+    act(() => { result.current.updateOpportunity('o1', { stageValue: 'lost' }) })
+    expect(mockedPatch).not.toHaveBeenCalled()
+    expect(result.current.pendingLost).toEqual({ id: 'o1', stageValue: 'lost' })
   })
 })

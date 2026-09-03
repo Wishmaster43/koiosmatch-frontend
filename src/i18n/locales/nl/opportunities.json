@@ -270,5 +270,12 @@
   },
   "conversations": {
     "start": "Conversatie starten"
+  },
+  "lost": {
+    "modalTitle": "Kans verloren",
+    "reason": "Reden",
+    "reasonPlaceholder": "Selecteer reden",
+    "confirm": "Als verloren markeren",
+    "reasonLabel": "Verliesreden"
   }
 }

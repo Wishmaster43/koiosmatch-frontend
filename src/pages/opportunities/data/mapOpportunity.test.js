@@ -149,3 +149,15 @@ describe('mapOpportunity · lifecycle (TRASH-OVERAL-2)', () => {
     expect(mapOpportunity({ id: 'o1' }).pendingEraseAt).toBeNull()
   })
 })
+
+// OPP-LOST-FE-1: the lost-stage reason NAME maps through; absent = ''.
+describe('mapOpportunity · lostReason (OPP-LOST-FE-1)', () => {
+  it('maps lost_reason straight through', () => {
+    expect(mapOpportunity({ id: 'o1', lost_reason: 'Budget' }).lostReason).toBe('Budget')
+  })
+
+  it('coalesces a missing/null lost_reason to an empty string', () => {
+    expect(mapOpportunity({ id: 'o1' }).lostReason).toBe('')
+    expect(mapOpportunity({ id: 'o1', lost_reason: null }).lostReason).toBe('')
+  })
+})

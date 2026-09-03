@@ -40,6 +40,9 @@ export default function OpportunityLookupsSettings() {
     { id: 'serviceTypes', label: t('opportunityLookups.tabs.serviceTypes') },
     { id: 'agreementTypes', label: t('opportunityLookups.tabs.agreementTypes') },
     { id: 'dealTypes', label: t('opportunityLookups.tabs.dealTypes') },
+    // OPP-LOST-FE-1: the lost-reason lookup a recruiter picks from when a Kans
+    // moves to an is_lost stage (rejection-reasons contract, see RejectionSettings.jsx).
+    { id: 'lostReasons', label: t('opportunityLookups.tabs.lostReasons') },
   ]
 
   return (
@@ -80,6 +83,13 @@ export default function OpportunityLookupsSettings() {
                 { value: 'hours', label: t('opportunityLookups.dealTypes.unitHours') },
                 { value: 'quote', label: t('opportunityLookups.dealTypes.unitQuote') },
               ] }} />
+        )}
+        {activeTab === 'lostReasons' && (
+          // OPP-LOST-FE-1: rejection-reasons contract ({id, name, color, in_use}) —
+          // reorderable off, mirrors RejectionSettings.jsx (SimpleLookupController family).
+          <StatusListEditor reorderable={false} withColor
+            title={t('opportunityLookups.lostReasons.title')} subtitle={t('opportunityLookups.lostReasons.subtitle')}
+            endpoint="/opportunity-lost-reasons" addLabel={t('opportunityLookups.add')} />
         )}
       </div>
     </div>

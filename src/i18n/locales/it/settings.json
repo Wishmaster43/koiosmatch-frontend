@@ -3353,7 +3353,8 @@
       "stages": "Fasi",
       "serviceTypes": "Tipi di servizio",
       "agreementTypes": "Tipi di accordo",
-      "dealTypes": "Tipi di deal"
+      "dealTypes": "Tipi di deal",
+      "lostReasons": "Motivi di perdita"
     },
     "add": "Aggiungi valore",
     "stages": {
@@ -3379,6 +3380,10 @@
       "unitEuro": "Euro",
       "unitHours": "Ore",
       "unitQuote": "Preventivo"
+    },
+    "lostReasons": {
+      "title": "Motivi di perdita",
+      "subtitle": "I motivi tra cui un recruiter sceglie quando un'opportunità viene persa. Senza motivi non viene chiesto nulla."
     }
   },
   "dashboards": {

@@ -21,6 +21,7 @@ import QuickViewToggle from '@/components/ui/QuickViewToggle'
 import OpportunitiesTable from './OpportunitiesTable'
 import OpportunitiesBoard from './OpportunitiesBoard'
 import OpportunityDrawer from './OpportunityDrawer'
+import OpportunityLostReasonModal from './drawer/OpportunityLostReasonModal'
 import AddOpportunityModal from './AddOpportunityModal'
 import PaginationBar from '@/components/ui/PaginationBar'
 import { useOpportunitiesData, OPPORTUNITIES_MAX_PER_PAGE } from './hooks/useOpportunitiesData'
@@ -86,6 +87,7 @@ export default function OpportunitiesPage({ intent }: { intent?: unknown } = {})
     selected, drawerExpanded, setDrawerExpanded,
     selectedIds, toggleRow, toggleAll, clearSelection,
     selectOpportunity, closeDrawer, handleCreated, handleMove, updateOpportunity, reload,
+    pendingLost, confirmLost, cancelLost,
   } = useOpportunitiesData(showArchived || showTrash, selectedBranch, refQuery)
   // KOIOS-SELECTIE-CONTEXT-1: mirror the selection into Koios AI's context chip.
   usePublishSelection('opportunities', selectedIds)
@@ -363,6 +365,10 @@ export default function OpportunitiesPage({ intent }: { intent?: unknown } = {})
           }}
         />
         {archiveConfirmDialog}
+        {/* OPP-LOST-FE-1: the lost-reason confirm — gates a board drag or the
+            drawer's stage picker moving to an is_lost stage (mirrors the
+            application reject flow). */}
+        {pendingLost && <OpportunityLostReasonModal onCancel={cancelLost} onConfirm={confirmLost} />}
       </div>
     </>
   )

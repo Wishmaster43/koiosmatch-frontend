@@ -46,7 +46,7 @@ function opportunity(): Opportunity {
     id: OPP_ID, title: 'Deal', description: '', initials: 'DA', client: 'Acme', clientId: 'c1',
     stage: 'Open', stageValue: 'open',
     // eslint-disable-next-line no-restricted-syntax -- seed DATA fixture hex mirroring a tenant stage-lookup colour, not UI styling
-    stageColor: '#6FA8C4', value: null, currency: 'EUR', owner: '', ownerId: null,
+    stageColor: '#6FA8C4', lostReason: '', value: null, currency: 'EUR', owner: '', ownerId: null,
     date: '2026-01-01', expectedCloseAt: null, dealTypeUnit: null, archived: false, archivedAt: null,
     lifecycle: 'active', pendingEraseAt: null, hours: null, hoursPeriod: 'week', startDate: null, endDate: null,
     serviceType: '', serviceTypeValue: null, serviceTypeColor: '', serviceTypeId: null,

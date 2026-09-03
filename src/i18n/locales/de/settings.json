@@ -3353,7 +3353,8 @@
       "stages": "Phasen",
       "serviceTypes": "Dienstarten",
       "agreementTypes": "Vertragsarten",
-      "dealTypes": "Deal-Typen"
+      "dealTypes": "Deal-Typen",
+      "lostReasons": "Verlustgründe"
     },
     "add": "Wert hinzufügen",
     "stages": {
@@ -3379,6 +3380,10 @@
       "unitEuro": "Euro",
       "unitHours": "Stunden",
       "unitQuote": "Angebot"
+    },
+    "lostReasons": {
+      "title": "Verlustgründe",
+      "subtitle": "Die Gründe, aus denen ein Recruiter wählt, wenn eine Chance verloren geht. Ohne Gründe wird nicht danach gefragt."
     }
   },
   "dashboards": {

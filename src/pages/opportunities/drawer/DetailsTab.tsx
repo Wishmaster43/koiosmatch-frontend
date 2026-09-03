@@ -93,6 +93,12 @@ export default function DetailsTab({ opportunity: o, onUpdate, stages = [] }: De
           11px labels (candidate ProfileTab convention). */}
       <EditableFieldTable title={t('details.groups.deal')} fields={dealFields} value={dealValue}
         onSave={onUpdate ? saveDeal : undefined} />
+      {/* OPP-LOST-FE-1: the lost reason, read-only, additive — rendered only
+          once the stage move actually recorded one (never an empty row). */}
+      {o.lostReason && (
+        <EditableFieldTable fields={[{ key: 'lostReason', label: t('lost.reasonLabel') }]}
+          value={{ lostReason: o.lostReason }} />
+      )}
       {/* Organisation card dropped (Danny 2026-07-13): phase/owner/created all live in the drawer header already. */}
       {/* (2) VRIJE TEKST — the "Kansomschrijving" (OPP-DESCRIPTION-1), own pencil/save/✕
           and second-screen pop-out (TEKST-POPOUT-1), independent of the

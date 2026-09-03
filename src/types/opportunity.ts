@@ -21,6 +21,9 @@ export interface Opportunity {
   stage: string
   stageValue: string | number | null
   stageColor: string
+  // OPP-LOST-FE-1: the lost-reason NAME (tenant lookup) recorded when the stage
+  // moved to an is_lost stage; '' = none (mirrors application rejection.reason).
+  lostReason: string
   value: number | null
   currency: string
   owner: string
@@ -89,6 +92,8 @@ export interface ApiOpportunity {
   stage_label?: string
   stage_color?: string
   status?: string
+  // OPP-LOST-FE-1: the reason NAME (nullable), posted/received verbatim.
+  lost_reason?: string | null
   customer_id?: Id
   client_id?: Id
   value?: number | null

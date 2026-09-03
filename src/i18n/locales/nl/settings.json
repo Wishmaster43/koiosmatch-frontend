@@ -3353,7 +3353,8 @@
       "stages": "Fases",
       "serviceTypes": "Dienstsoorten",
       "agreementTypes": "Overeenkomsttypen",
-      "dealTypes": "Dealtypen"
+      "dealTypes": "Dealtypen",
+      "lostReasons": "Verliesredenen"
     },
     "add": "Waarde toevoegen",
     "stages": {
@@ -3379,6 +3380,10 @@
       "unitEuro": "Euro",
       "unitHours": "Uren",
       "unitQuote": "Offerte"
+    },
+    "lostReasons": {
+      "title": "Verliesredenen",
+      "subtitle": "De redenen waaruit een recruiter kiest wanneer een kans verloren gaat. Zonder redenen wordt er niet om gevraagd."
     }
   },
   "dashboards": {

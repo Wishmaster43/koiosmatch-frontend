@@ -65,6 +65,25 @@ describe('OpportunityLookupsSettings', () => {
     expect(api.get).toHaveBeenCalledWith('/opportunity-deal-types', undefined)
   })
 
+  // OPP-LOST-FE-1: fifth sub-tab, the lost-reason lookup a recruiter picks from
+  // when a Kans moves to an is_lost stage (rejection-reasons contract, reorderable off).
+  it('switching to the lost-reasons tab GETs /opportunity-lost-reasons', async () => {
+    api.get.mockImplementation((endpoint) => {
+      if (endpoint === '/opportunity-lost-reasons') {
+        return Promise.resolve({ data: [{ id: 'r1', name: 'Budget', in_use: false }] })
+      }
+      return Promise.resolve({ data: [row()] })
+    })
+    const user = userEvent.setup()
+    render(<OpportunityLookupsSettings />)
+
+    await screen.findByText('Lead')
+    await user.click(screen.getByRole('tab', { name: st('opportunityLookups.tabs.lostReasons') }))
+
+    await screen.findByText('Budget')
+    expect(api.get).toHaveBeenCalledWith('/opportunity-lost-reasons', undefined)
+  })
+
   // is_won/is_lost (04-08): real consumers — OpportunitiesInsightsRow's won/lost/open
   // KPI counts and OpportunitiesTable's isTerminalStage() both key off these flags
   // (via useOpportunityStages), so the stages tab wires them as flagFields.

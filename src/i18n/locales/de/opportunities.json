@@ -270,5 +270,12 @@
   },
   "conversations": {
     "start": "Gespräch starten"
+  },
+  "lost": {
+    "modalTitle": "Chance verloren",
+    "reason": "Grund",
+    "reasonPlaceholder": "Grund auswählen",
+    "confirm": "Als verloren markieren",
+    "reasonLabel": "Verlustgrund"
   }
 }

@@ -30,6 +30,7 @@ import { isAbortError } from '@/lib/abortError'
 import { extractApiError } from '@/lib/extractApiError'
 import { useUsers } from '@/lib/queries'
 import { useOpportunityStages } from '@/lib/useOpportunityStages'
+import { useOpportunityLostReasons } from '@/lib/useOpportunityLostReasons'
 import { mapOpportunity } from '../data/mapOpportunity'
 import type { Opportunity, ApiOpportunity } from '@/types/opportunity'
 import type { Id } from '@/types/common'
@@ -62,6 +63,10 @@ export function useOpportunitiesData(includeArchived: boolean = false, branchIds
   const { t } = useTranslation()
   const { data: users = [] } = useUsers() as { data?: AppUser[] }
   const { stages, stageMeta } = useOpportunityStages()
+  // OPP-LOST-FE-1: the tenant's curated lost reasons — an EMPTY list means the
+  // field does not bind yet (backend contract), so a lost-stage move proceeds
+  // without gating at all.
+  const { reasons: lostReasons } = useOpportunityLostReasons()
 
   const queryClient = useQueryClient()
   const [customers, setCustomers] = useState<PageCustomer[]>([])
@@ -159,31 +164,77 @@ export function useOpportunitiesData(includeArchived: boolean = false, branchIds
   // A freshly created opportunity: prepend + open its drawer (modal close is the page's).
   const handleCreated = (o: Opportunity) => { setRows(prev => [o, ...prev]); selectOpportunity(o) }
 
-  // Board drag-and-drop: move to a new stage optimistically, then PATCH. Bug class
-  // fix: this used to `.catch(() => notifyError(...))` with no revert, so a rejected
-  // move (e.g. a backend stage-transition guard) left the card sitting in the new
-  // column as if the server had accepted it. Snapshot ONLY the stage fields the
-  // optimistic write is about to overwrite and put them back on failure, mirroring
-  // useApplicationDrawerActions.handleMove.
-  const handleMove = (id: Id, stageValue: string | number) => {
+  // OPP-LOST-FE-1: a stage move a recruiter is mid-way through, waiting on the
+  // lost-reason confirm (board drag or the drawer's stage picker) — null once
+  // no move is pending. Only set when the target stage is_lost AND the tenant
+  // has curated ≥1 reason (empty list = the field doesn't bind, no gate).
+  const [pendingLost, setPendingLost] = useState<{ id: Id; stageValue: string | number } | null>(null)
+
+  // Whether moving to `stageValue` needs the lost-reason confirm first.
+  const needsLostReason = (stageValue: string | number) =>
+    Boolean(stages.find(x => x.value === stageValue)?.isLost) && lostReasons.length > 0
+
+  // Move to a new stage optimistically, then PATCH — the shared move applied
+  // directly (non-lost stages) or after the lost-reason confirm. Bug class fix
+  // (2026-07-27): this used to `.catch(() => notifyError(...))` with no revert,
+  // so a rejected move (e.g. a backend stage-transition guard) left the card
+  // sitting in the new column as if the server had accepted it. Snapshot ONLY
+  // the stage fields the optimistic write is about to overwrite and put them
+  // back on failure, mirroring useApplicationDrawerActions.handleMove.
+  const applyStageMove = (id: Id, stageValue: string | number, lostReason?: string) => {
     // A stage without a persistable id (seed fallback) cannot be PATCHed - refuse
     // the move honestly instead of letting an optimistic write pretend it saved.
     const s = stages.find(x => x.value === stageValue)
     if (!s?.id) { notifyError(t('common:actionFailed')); return }
     const m = stageMeta(String(stageValue))
     const before = rows.find(r => r.id === id)
-    const beforeStage = before ? { stage: before.stage, stageValue: before.stageValue, stageColor: before.stageColor } : undefined
-    setRows(prev => prev.map(r => r.id === id ? ({ ...r, stage: m.label, stageValue, stageColor: m.color } as Opportunity) : r))
-    api.patch(`/opportunities/${id}`, { opportunity_stage_id: s.id }).catch(err => {
-      if (beforeStage) setRows(prev => prev.map(r => r.id === id ? ({ ...r, ...beforeStage } as Opportunity) : r))
+    const beforeStage = before
+      ? { stage: before.stage, stageValue: before.stageValue, stageColor: before.stageColor, lostReason: before.lostReason }
+      : undefined
+    const local: Partial<Opportunity> = { stage: m.label, stageValue, stageColor: m.color }
+    if (lostReason !== undefined) local.lostReason = lostReason
+    setRows(prev => prev.map(r => r.id === id ? ({ ...r, ...local } as Opportunity) : r))
+    setSelected(prev => (prev && prev.id === id ? ({ ...prev, ...local } as Opportunity) : prev))
+    const body: Record<string, unknown> = { opportunity_stage_id: s.id }
+    if (lostReason !== undefined) body.lost_reason = lostReason
+    api.patch(`/opportunities/${id}`, body).catch(err => {
+      if (beforeStage) {
+        setRows(prev => prev.map(r => r.id === id ? ({ ...r, ...beforeStage } as Opportunity) : r))
+        setSelected(prev => (prev && prev.id === id ? ({ ...prev, ...beforeStage } as Opportunity) : prev))
+      }
       notifyError(extractApiError(err, t('common:actionFailed')))
     })
   }
+
+  // Board drag-and-drop entry point: gates on a lost-reason confirm when needed.
+  const handleMove = (id: Id, stageValue: string | number) => {
+    if (needsLostReason(stageValue)) { setPendingLost({ id, stageValue }); return }
+    applyStageMove(id, stageValue)
+  }
+
+  // Confirms the pending lost move with the picked reason; cancel just drops it
+  // (the card/picker stays on its old stage — no optimistic write ever ran).
+  const confirmLost = (reason: string) => {
+    if (!pendingLost) return
+    applyStageMove(pendingLost.id, pendingLost.stageValue, reason)
+    setPendingLost(null)
+  }
+  const cancelLost = () => setPendingLost(null)
 
   // Header/picker edits: optimistic locally, then PATCH (UI keys → API keys).
   // On failure the local state reverts to its pre-edit snapshot AND shows the error —
   // an optimistic edit that silently sticks around after a failed save is worse than none.
   const updateOpportunity = (id: Id | undefined, patch: Record<string, unknown>) => {
+    // OPP-LOST-FE-1: the drawer's header stage picker sends a bare { stageValue }
+    // patch (OpportunityDrawer.tsx meta.onChange) — gate it the same as the board
+    // drag when the target is an is_lost stage with curated reasons; a patch that
+    // already carries lostReason (the confirmLost path never calls this function,
+    // but a future caller might) skips the gate.
+    if (id !== undefined && 'stageValue' in patch && !('lostReason' in patch)
+      && needsLostReason(patch.stageValue as string | number)) {
+      setPendingLost({ id, stageValue: patch.stageValue as string | number })
+      return
+    }
     const previous = rows.find(x => x.id === id)
     const local: Record<string, unknown> = { ...patch }
     if ('stageValue' in patch) { const m = stageMeta(patch.stageValue as string); local.stage = m.label; local.stageColor = m.color }
@@ -246,5 +297,7 @@ export function useOpportunitiesData(includeArchived: boolean = false, branchIds
     selected, drawerExpanded, setDrawerExpanded,
     selectedIds, toggleRow, toggleAll, clearSelection,
     selectOpportunity, closeDrawer, handleCreated, handleMove, updateOpportunity, reload,
+    // OPP-LOST-FE-1: the pending lost-reason confirm (board move or drawer picker).
+    pendingLost, confirmLost, cancelLost,
   }
 }

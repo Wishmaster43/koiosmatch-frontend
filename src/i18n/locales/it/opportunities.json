@@ -270,5 +270,12 @@
   },
   "conversations": {
     "start": "Avvia conversazione"
+  },
+  "lost": {
+    "modalTitle": "Opportunità persa",
+    "reason": "Motivo",
+    "reasonPlaceholder": "Seleziona un motivo",
+    "confirm": "Segna come persa",
+    "reasonLabel": "Motivo della perdita"
   }
 }

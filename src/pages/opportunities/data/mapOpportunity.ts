@@ -49,6 +49,8 @@ export function mapOpportunity(o: ApiOpportunity): Opportunity {
     stageValue: stageObj?.value ?? o.stage_value ?? null,
     // eslint-disable-next-line no-restricted-syntax -- DATA fallback, not a UI colour choice
     stageColor: stageObj?.color ?? o.stage_color ?? '#6E8FD6',
+    // OPP-LOST-FE-1: the reason NAME recorded on the lost transition; '' = none.
+    lostReason: o.lost_reason ?? '',
     value:      num(rawValue),
     currency:   o.currency ?? 'EUR',
     owner:      ownerObj?.name ?? o.owner_name ?? '',

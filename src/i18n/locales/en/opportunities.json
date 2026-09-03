@@ -270,5 +270,12 @@
   },
   "conversations": {
     "start": "Start conversation"
+  },
+  "lost": {
+    "modalTitle": "Opportunity lost",
+    "reason": "Reason",
+    "reasonPlaceholder": "Select a reason",
+    "confirm": "Mark as lost",
+    "reasonLabel": "Lost reason"
   }
 }

@@ -3353,7 +3353,8 @@
       "stages": "Stages",
       "serviceTypes": "Service types",
       "agreementTypes": "Agreement types",
-      "dealTypes": "Deal types"
+      "dealTypes": "Deal types",
+      "lostReasons": "Lost reasons"
     },
     "add": "Add value",
     "stages": {
@@ -3379,6 +3380,10 @@
       "unitEuro": "Euro",
       "unitHours": "Hours",
       "unitQuote": "Quote"
+    },
+    "lostReasons": {
+      "title": "Lost reasons",
+      "subtitle": "The reasons a recruiter picks from when an opportunity is lost. Without reasons, none is asked."
     }
   },
   "dashboards": {

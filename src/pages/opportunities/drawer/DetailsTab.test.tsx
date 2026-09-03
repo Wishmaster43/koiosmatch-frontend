@@ -177,3 +177,18 @@ describe('DetailsTab · vestiging last, read-only (DRILLDOWN-VOLGORDE-CANON)', (
 function overdueDealStages(): Opportunity {
   return { ...baseOpportunity, stageValue: 'open', expectedCloseAt: '2026-01-01' } as unknown as Opportunity
 }
+
+// OPP-LOST-FE-1: the read-only lost-reason row — additive, shown only when set.
+describe('DetailsTab · lost reason (OPP-LOST-FE-1)', () => {
+  it('shows the lost-reason row when the deal carries one', () => {
+    const withReason = { ...baseOpportunity, lostReason: 'Budget' } as unknown as Opportunity
+    render(<DetailsTab opportunity={withReason} onUpdate={vi.fn()} />)
+    expect(screen.getByText(i18n.t('lost.reasonLabel', { ns: 'opportunities' }))).toBeInTheDocument()
+    expect(screen.getByText('Budget')).toBeInTheDocument()
+  })
+
+  it('renders no lost-reason row at all when unset', () => {
+    render(<DetailsTab opportunity={baseOpportunity} onUpdate={vi.fn()} />)
+    expect(screen.queryByText(i18n.t('lost.reasonLabel', { ns: 'opportunities' }))).toBeNull()
+  })
+})
