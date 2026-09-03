@@ -8,9 +8,9 @@
  *   SMOKE_APP=http://localhost:5173 node e2e/probe-page.mjs '#tasks' '#customers'
  */
 import { chromium } from 'playwright'
+import { CREDS } from './lib.mjs'
 
 const APP = process.env.SMOKE_APP ?? 'http://localhost:5173'
-const CREDS = { email: process.env.SMOKE_EMAIL ?? 'danny@koios.nl', password: process.env.SMOKE_PASSWORD ?? 'password123' }
 const LANG = process.env.PROBE_LANG ?? 'en'
 const hashes = process.argv.slice(2)
 

@@ -6,9 +6,9 @@
  *   node e2e/probe-lookups.mjs > lookups.json
  */
 import { chromium } from 'playwright'
+import { CREDS } from './lib.mjs'
 
 const APP = process.env.SMOKE_APP ?? 'http://localhost:5173'
-const CREDS = { email: process.env.SMOKE_EMAIL ?? 'danny@koios.nl', password: process.env.SMOKE_PASSWORD ?? 'password123' }
 
 // Every lookup endpoint the frontend reads (grepped from the hooks + the two contexts).
 const ENDPOINTS = [

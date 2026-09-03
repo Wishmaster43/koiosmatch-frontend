@@ -7,9 +7,9 @@
  * Read-only GETs; never saves, never runs anything (API-CREDITS-1).
  */
 import { chromium } from 'playwright'
+import { CREDS } from './lib.mjs'
 
 const APP = process.env.SMOKE_APP ?? 'http://localhost:5173'
-const CREDS = { email: process.env.SMOKE_EMAIL ?? 'danny@koios.nl', password: process.env.SMOKE_PASSWORD ?? 'password123' }
 
 const browser = await chromium.launch()
 const page = await browser.newPage()

@@ -7,10 +7,34 @@
  * Dev-tool only — never bundled with the app.
  */
 import { chromium } from 'playwright'
+import { readFileSync } from 'node:fs'
+import { fileURLToPath } from 'node:url'
+import { dirname, join } from 'node:path'
 
-export const API = process.env.SMOKE_API ?? 'http://koiosmatch-api.test/api'
-export const APP = process.env.SMOKE_APP ?? 'http://localhost:5173'
-export const CREDS = { email: process.env.SMOKE_EMAIL ?? 'danny@koios.nl', password: process.env.SMOKE_PASSWORD ?? 'password123' }
+// audit frontend-security-quality-8: no credential literal lives in the repo. Values come
+// from the environment, else from the untracked e2e/.env.local (KEY=VALUE lines, covered
+// by the .env.* gitignore rule); a missing credential fails fast with a clear message.
+const localEnv = (() => {
+  try {
+    const file = join(dirname(fileURLToPath(import.meta.url)), '.env.local')
+    return Object.fromEntries(readFileSync(file, 'utf8').split('\n')
+      .map(l => l.trim()).filter(l => l && !l.startsWith('#'))
+      .map(l => { const i = l.indexOf('='); return [l.slice(0, i).trim(), l.slice(i + 1).trim()] }))
+  } catch { return {} }
+})()
+// An empty exported variable counts as unset, so the local file can still fill it in.
+const env = (key) => process.env[key] || localEnv[key]
+const required = (key) => {
+  const v = env(key)
+  if (!v) throw new Error(`[e2e] ${key} is not set — export it or put it in e2e/.env.local (untracked)`)
+  return v
+}
+
+export const API = env('SMOKE_API') ?? 'http://koiosmatch-api.test/api'
+export const APP = env('SMOKE_APP') ?? 'http://localhost:5173'
+export const CREDS = { email: required('SMOKE_EMAIL'), password: required('SMOKE_PASSWORD') }
+// The seeded MFA demo user the mfa flow logs in as (demo tenant); same source, same rule.
+export const MFA_USER = { email: env('SMOKE_MFA_EMAIL') ?? 'sara@demo.nl', password: required('SMOKE_MFA_PASSWORD') }
 
 // One booted context: browser + page with auth seeded and error collectors attached.
 // Cookie-only (H3, 2026-07-08): the Bearer flow was removed from the app, so the

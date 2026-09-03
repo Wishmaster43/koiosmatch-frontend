@@ -7,9 +7,9 @@
  *   SMOKE_APP=http://localhost:5173 node e2e/harvest-demo-texts.mjs > inventory.json
  */
 import { chromium } from 'playwright'
+import { CREDS } from './lib.mjs'
 
 const APP = process.env.SMOKE_APP ?? 'http://localhost:5173'
-const CREDS = { email: process.env.SMOKE_EMAIL ?? 'danny@koios.nl', password: process.env.SMOKE_PASSWORD ?? 'password123' }
 
 // Entity list endpoints + which fields of the DETAIL payload carry free text.
 const SOURCES = [

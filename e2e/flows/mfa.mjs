@@ -6,9 +6,8 @@
  */
 import { createHmac } from 'node:crypto'
 import { chromium } from 'playwright'
-import { API, APP, expect, sleep } from '../lib.mjs'
+import { API, APP, expect, sleep, MFA_USER } from '../lib.mjs'
 
-const MFA_USER = { email: 'sara@demo.nl', password: 'password123' }
 
 // RFC 4648 base32 → bytes (TOTP secrets are base32).
 function base32Decode(s) {
