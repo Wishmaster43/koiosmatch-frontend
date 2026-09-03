@@ -112,6 +112,21 @@ describe('SelectMenu · optional option icon (S-icon-1)', () => {
   })
 })
 
+// REQUIRED-A11Y-2: SelectMenu forwards `aria-required` onto its trigger so a
+// required picker announces to assistive tech (fields.tsx clones it from
+// Field/FieldRow onto the child it wraps).
+describe('SelectMenu · aria-required forwarding (REQUIRED-A11Y-2)', () => {
+  it('sets aria-required="true" on the trigger when aria-required is passed', () => {
+    render(<SelectMenu value={null} onChange={() => {}} options={['a', 'b']} placeholder="Pick" aria-required />)
+    expect(screen.getByRole('button', { name: 'Pick' })).toHaveAttribute('aria-required', 'true')
+  })
+
+  it('omits aria-required from the trigger when not passed', () => {
+    render(<SelectMenu value={null} onChange={() => {}} options={['a', 'b']} placeholder="Pick" />)
+    expect(screen.getByRole('button', { name: 'Pick' })).not.toHaveAttribute('aria-required')
+  })
+})
+
 describe('SelectMenu · keyboard + focus (§6 WCAG 2.2 AA), continued', () => {
   it('does not steal focus from another element when closed by an outside click', async () => {
     const user = userEvent.setup()

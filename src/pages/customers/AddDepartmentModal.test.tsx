@@ -58,11 +58,9 @@ const st = (key: string, opts?: Record<string, unknown>) => i18n.t(key, { ns: 's
 // self-reference drops the button's own visible text), not the selected value —
 // the label doubles as the picker's placeholder (same i18n key). The required
 // asterisk is the shared form-kit mark and aria-hidden (5a2b6cb1) — legitimate
-// only once the control itself carries `aria-required` (REQUIRED-A11Y-1). MEASURED
-// gap, still open: `FieldRow` (fields.tsx) now clones `aria-required` onto its
-// child, but this field's child is `CreatableSelect`, which does not declare or
-// forward an `aria-required` prop onto its `<button>` trigger — see the
-// `it.todo` below, which tracks re-enabling this once CreatableSelect forwards it.
+// only once the control itself carries `aria-required` (REQUIRED-A11Y-1),
+// which reaches the trigger because CreatableSelect now forwards the prop
+// (REQUIRED-A11Y-2) — see the assertion at the bottom of the describe block below.
 const locationTriggerName = () => ct('subModal.selectLocation')
 
 const locations = [{ id: 'loc-1', name: 'Locatie Noord' }, { id: 'loc-2', name: 'Locatie Zuid' }]
@@ -178,12 +176,14 @@ describe('AddDepartmentModal', () => {
     expect(onCreate).toHaveBeenCalledWith(expect.objectContaining({ name: 'Thuiszorg', locationId: 'loc-1' }))
   })
 
-  // REQUIRED-A11Y-1: the required asterisk next to "Kies locatie" is aria-hidden
-  // (5a2b6cb1), so aria-required on the trigger itself is now the ONLY signal that
-  // reaches assistive tech — and today nothing sets it (CreatableSelect gap, see
-  // the comment on locationTriggerName above). This assertion is the real
-  // regression check; `.todo` keeps the suite green while the gap is open.
-  it.todo('the location trigger exposes aria-required="true" (blocked on CreatableSelect forwarding it, out of REQUIRED-A11Y-1 scope)')
+  // REQUIRED-A11Y-1 + REQUIRED-A11Y-2: the required asterisk next to "Kies locatie"
+  // is aria-hidden (5a2b6cb1), so aria-required on the trigger itself is the ONLY
+  // signal that reaches assistive tech — CreatableSelect now forwards it onto its
+  // `<button>` trigger, closing the gap the earlier `.todo` tracked.
+  it('the location trigger exposes aria-required="true"', () => {
+    render(<AddDepartmentModal onClose={() => {}} locations={locations} statuses={statuses} />)
+    expect(screen.getByRole('button', { name: locationTriggerName() })).toHaveAttribute('aria-required', 'true')
+  })
 })
 
 // COLLAPSIBLE-TEXT-1 (Danny 02-08, second round): Omschrijving gets the exact same

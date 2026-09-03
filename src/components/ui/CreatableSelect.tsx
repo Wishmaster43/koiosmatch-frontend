@@ -53,6 +53,9 @@ interface CreatableSelectProps {
   // without it the picker announced its value with no field name.
   id?: string
   'aria-labelledby'?: string
+  // REQUIRED-A11Y-2: forwarded onto the trigger button so a required picker
+  // announces to assistive tech (fields.tsx clones this from Field/FieldRow).
+  'aria-required'?: boolean
   value?: string | null
   options?: Array<string | CreatableOption>
   onChange: (value: string) => void
@@ -85,7 +88,7 @@ interface CreatableSelectProps {
 // The house searchable-dropdown that can also add a value (never a bare <select>,
 // §3A) — owns its own open/close, outside-click, Escape and focus-restore wiring.
 export default function CreatableSelect({
-  id, 'aria-labelledby': ariaLabelledBy,
+  id, 'aria-labelledby': ariaLabelledBy, 'aria-required': ariaRequired,
   value, options = [], onChange, placeholder, allowCreate = true, menuWidth = 220, style,
   clearable = false, clearLabel, renderTrigger, onSearch,
 }: CreatableSelectProps) {
@@ -187,7 +190,7 @@ export default function CreatableSelect({
         // tell a screen reader it opens a list — the part that was missing entirely once a
         // native <select> was replaced by this (measured 27-07).
         <button type="button" ref={triggerRef} onClick={() => setOpen(o => !o)}
-          id={triggerId} aria-labelledby={labelledBy}
+          id={triggerId} aria-labelledby={labelledBy} aria-required={ariaRequired || undefined}
           aria-expanded={open} aria-haspopup="listbox" aria-controls={open ? listId : undefined}
           style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 10px', width: '100%',
             boxSizing: 'border-box', border: '1px solid var(--border)', borderRadius: 6,

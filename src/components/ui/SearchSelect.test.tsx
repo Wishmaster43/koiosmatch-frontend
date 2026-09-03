@@ -173,3 +173,18 @@ describe('SearchSelect · disabled', () => {
     expect(screen.getByPlaceholderText('search')).toBeInTheDocument()
   })
 })
+
+// REQUIRED-A11Y-2: SearchSelect forwards `aria-required` onto the default
+// single-pick FIELD trigger (the `closeOnToggle` role) so a required picker
+// announces to assistive tech.
+describe('SearchSelect · aria-required forwarding (REQUIRED-A11Y-2)', () => {
+  it('sets aria-required="true" on the closeOnToggle field trigger when aria-required is passed', () => {
+    render(<SearchSelect triggerLabel="Kies" options={['A', 'B']} onToggle={() => {}} closeOnToggle aria-required />)
+    expect(screen.getByRole('button', { name: 'Kies' })).toHaveAttribute('aria-required', 'true')
+  })
+
+  it('omits aria-required from the field trigger when not passed', () => {
+    render(<SearchSelect triggerLabel="Kies" options={['A', 'B']} onToggle={() => {}} closeOnToggle />)
+    expect(screen.getByRole('button', { name: 'Kies' })).not.toHaveAttribute('aria-required')
+  })
+})

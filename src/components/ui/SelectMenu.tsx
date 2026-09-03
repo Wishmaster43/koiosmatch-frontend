@@ -36,6 +36,9 @@ interface SelectMenuProps {
   // picker (a <button> is not labelable — see CreatableSelect for the full note).
   id?: string
   'aria-labelledby'?: string
+  // REQUIRED-A11Y-2: forwarded onto the trigger button so a required picker
+  // announces to assistive tech (fields.tsx clones this from Field/FieldRow).
+  'aria-required'?: boolean
   value?: string | null
   options?: Array<string | SelectOption>
   onChange: (value: string) => void
@@ -47,7 +50,7 @@ interface SelectMenuProps {
 }
 
 // Trigger button + portal checklist; closes on outside click/Escape and returns focus to the trigger so keyboard users keep their place.
-export default function SelectMenu({ id, 'aria-labelledby': ariaLabelledBy, value, options = [], onChange, placeholder, leading, menuWidth = 170, style }: SelectMenuProps) {
+export default function SelectMenu({ id, 'aria-labelledby': ariaLabelledBy, 'aria-required': ariaRequired, value, options = [], onChange, placeholder, leading, menuWidth = 170, style }: SelectMenuProps) {
   const listId = useId()
   const autoId = useId()
   const triggerId = id ?? autoId
@@ -121,7 +124,7 @@ export default function SelectMenu({ id, 'aria-labelledby': ariaLabelledBy, valu
           here vs var(--surface)/r6 there) — background var(--surface), border
           1px solid var(--border), radius 6, padding '6px 10px'. */}
       <button ref={triggerRef} type="button" onClick={() => setOpen(o => !o)}
-        id={triggerId} aria-labelledby={labelledBy}
+        id={triggerId} aria-labelledby={labelledBy} aria-required={ariaRequired || undefined}
         aria-expanded={open} aria-haspopup="listbox" aria-controls={open ? listId : undefined}
         style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 10px', width: '100%',
           border: '1px solid var(--border)', borderRadius: 6, background: 'var(--surface)', cursor: 'pointer' , ...style }}>

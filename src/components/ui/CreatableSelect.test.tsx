@@ -282,3 +282,19 @@ describe('CreatableSelect · optional option icon (S-icon-1)', () => {
     expect(screen.getByRole('button', { name: 'Alpha' })).toBeInTheDocument()
   })
 })
+
+// REQUIRED-A11Y-2: CreatableSelect forwards `aria-required` onto its trigger so
+// a required picker announces to assistive tech (fields.tsx clones it from
+// Field/FieldRow onto the child it wraps — AddDepartmentModal's location field
+// is the real-world regression this closes).
+describe('CreatableSelect · aria-required forwarding (REQUIRED-A11Y-2)', () => {
+  it('sets aria-required="true" on the trigger when aria-required is passed', () => {
+    render(<CreatableSelect value={null} onChange={() => {}} options={['A', 'B']} placeholder="Select" aria-required />)
+    expect(screen.getByRole('button', { name: 'Select' })).toHaveAttribute('aria-required', 'true')
+  })
+
+  it('omits aria-required from the trigger when not passed', () => {
+    render(<CreatableSelect value={null} onChange={() => {}} options={['A', 'B']} placeholder="Select" />)
+    expect(screen.getByRole('button', { name: 'Select' })).not.toHaveAttribute('aria-required')
+  })
+})

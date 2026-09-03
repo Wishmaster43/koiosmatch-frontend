@@ -66,6 +66,11 @@ interface SearchSelectProps {
   // matters most — opening is gated centrally below, so no callsite ever needs
   // its own onClick guard again.
   disabled?: boolean
+  // REQUIRED-A11Y-2: forwarded onto the default single-pick FIELD trigger (the
+  // `closeOnToggle` role — see below) so a required picker announces to
+  // assistive tech. Not applied to the add-affordance/DrawerAddButton role or a
+  // caller-supplied `renderTrigger`, which are not form-field controls.
+  'aria-required'?: boolean
   // "Select all / clear all" row above the option list (Danny punt 7). Left
   // undefined it resolves to `!closeOnToggle`: this component IS the house
   // multi-select checklist, and `closeOnToggle` is precisely the flag the
@@ -80,6 +85,7 @@ interface SearchSelectProps {
 // picker uses instead of a native <select> (§3A canon).
 export default function SearchSelect({
   triggerLabel, options = [], selected = [], onToggle, searchable = true, width = 280, onSearch, renderTrigger, menuAlign = 'left', closeOnToggle = false, disabled = false, selectAll, triggerAriaLabel,
+  'aria-required': ariaRequired,
 }: SearchSelectProps) {
   const { t } = useTranslation('common')
   const [open, setOpen] = useState(false)
@@ -178,7 +184,7 @@ export default function SearchSelect({
             // renderTrigger call site this default face replaces should adopt THIS,
             // never hand-paint its own copy. Block form: style spans several lines.
             /* eslint-disable huisstijlLegacy/no-restricted-syntax */
-            <button type="button" onClick={toggle} disabled={disabled} aria-label={triggerAriaLabel}
+            <button type="button" onClick={toggle} disabled={disabled} aria-label={triggerAriaLabel} aria-required={ariaRequired || undefined}
               style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 10px',
                 border: '1px solid var(--border)', borderRadius: 6, background: 'var(--surface)',
                 cursor: disabled ? 'default' : 'pointer', opacity: disabled ? 0.6 : 1 }}>
