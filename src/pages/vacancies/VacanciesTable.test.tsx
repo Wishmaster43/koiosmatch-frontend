@@ -28,9 +28,38 @@ vi.mock('@/lib/settings/useAllSettings', async importOriginal => {
   const actual = await importOriginal<typeof import('@/lib/settings/useAllSettings')>()
   return { ...actual, useAllSettings: () => ({}) }
 })
-// Identity date formatter — this test doesn't cover date rendering. Keep the
-// REAL relativeAge (pure, no i18n) so the new age column can be exercised.
-vi.mock('@/lib/datetime', async importOriginal => {
+
+// Mock useVacancyLeads so the leads panel can expand without a live API call.
+// Each test wires its own lead rows via the mock.
+const mockUseVacancyLeads = vi.fn()
+vi.mock('./hooks/useVacancyLeads', () => ({
+  useVacancyLeads: (vacancyId: unknown, enabled: unknown) => mockUseVacancyLeads(vacancyId, enabled),
+}))
+
+// Mock useLookups and useSeedLabel so the VacancyLeadsPanel can resolve phase and source labels.
+vi.mock('@/context/LookupsContext', () => ({
+  useLookups: () => ({
+    phaseMeta: (v?: string) => ({ label: v === 'candidate' ? 'Candidate' : 'Lead', color: '#000' }),
+  }),
+}))
+vi.mock('@/lib/useSeedLabel', async (importOriginal) => {
+  // Keep the REAL useSeedLabel for vacancyStatuses (the existing i18n test needs it),
+  // but stub candidateSources for the VacancyLeadsPanel test.
+  const actual = await importOriginal<typeof import('@/lib/useSeedLabel')>()
+  return {
+    useSeedLabel: () => (namespace: string, options: { label?: string; value?: string }) => {
+      if (namespace === 'candidateSources') {
+        return options.label === 'website' ? 'Website' : options.label
+      }
+      // Delegate to the real useSeedLabel for all other namespaces.
+      return actual.useSeedLabel()(namespace, options as Parameters<ReturnType<typeof actual.useSeedLabel>>[1])
+    },
+  }
+})
+
+// Mock useDateFormat for the VacancyLeadsPanel's date display. Keep the REAL
+// daysSince (pure, no i18n) so the age column can be exercised.
+vi.mock('@/lib/datetime', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@/lib/datetime')>()
   return {
     ...actual,
@@ -120,6 +149,34 @@ describe('VacanciesTable · Leads count deep-link (VACANCY-MATCH-COUNT-1, Danny 
     // Located via the explanatory title (unique text) rather than the dash glyph
     // itself, which several other empty cells in the row also render.
     expect(screen.getByTitle(nlVacancies.columns.leadsUnknown)).toBeInTheDocument()
+  })
+
+  it('expanding the leads cell and clicking a lead row deep-links to the candidate and never fires the table row click', async () => {
+    const user = userEvent.setup()
+    const onSelect = vi.fn()
+    const row = {
+      id: 'v1', title: 'Verpleegkundige', leadsCount: 1, created: '2024-02-01', createdSort: '2024-02-01',
+    } as unknown as Vacancy
+    mockUseVacancyLeads.mockReturnValue({
+      rows: [{ id: 'c1', name: 'Jane Doe', phase: 'candidate', source: 'website', createdAt: '2024-01-15' }],
+      loading: false,
+      error: null,
+    })
+    render(<VacanciesTable rows={[row]} onSelect={onSelect} />)
+
+    // Expand the leads cell by clicking the chevron button.
+    const expandBtn = screen.getByRole('button', { name: /Leads tonen/ })
+    await user.click(expandBtn)
+
+    // The panel is now open; the lead row should be visible with Jane Doe's name.
+    const janeRow = screen.getByText('Jane Doe').closest('tr')
+    expect(janeRow).toBeTruthy()
+    await user.click(janeRow!)
+
+    // stopPropagation on the panel's span must stop the table's row onClick firing.
+    expect(onSelect).not.toHaveBeenCalled()
+    // The candidate deep-link must have fired.
+    expect(openEntity).toHaveBeenCalledWith('candidates', 'c1')
   })
 })
 

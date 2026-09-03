@@ -598,5 +598,16 @@
   },
   "cellLinks": {
     "openCustomer": "Ouvrir le client"
+  },
+  "leadsExpand": {
+    "expandLabel": "Afficher les leads",
+    "collapseLabel": "Masquer les leads",
+    "loading": "Chargement des leads…",
+    "empty": "Aucun lead trouvé.",
+    "error": "Impossible de charger les leads.",
+    "colName": "Nom",
+    "colPhase": "Phase",
+    "colSource": "Source",
+    "colCreated": "Créé le"
   }
 }

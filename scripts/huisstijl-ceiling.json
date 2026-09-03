@@ -726,6 +726,7 @@
   "src/pages/vacancies/VacanciesMapView.tsx": 1,
   "src/pages/vacancies/VacanciesPage.tsx": 1,
   "src/pages/vacancies/VacanciesTable.tsx": 4,
+  "src/pages/vacancies/VacancyLeadsPanel.tsx": 0,
   "src/pages/vacancies/VacancyDrawer.tsx": 2,
   "src/pages/whatsapp/components.test.tsx": 4,
   "src/pages/whatsapp/hooks/useEscalationReasons.test.ts": 4,

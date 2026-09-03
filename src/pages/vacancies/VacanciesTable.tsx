@@ -3,15 +3,18 @@
  * below, right above the component, for the column contract it declares.
  */
 import type { RefObject } from 'react'
+import { useState } from 'react'
 import { cellButton } from '@/components/ui/cellButton'
 import { useTranslation } from 'react-i18next'
-import { Globe } from 'lucide-react'
+import { Globe, ChevronRight, ChevronDown } from 'lucide-react'
 import DataTable from '@/components/ui/DataTable'
 import type { Column, ControlledSort } from '@/components/ui/DataTable'
 import Avatar, { NEUTRAL_AVATAR } from '@/components/ui/Avatar'
 import StatusPill from '@/components/ui/StatusPill'
 import SoftChip from '@/components/ui/SoftChip'
 import AiAgentAvatar from '@/components/ui/AiAgentAvatar'
+import Button from '@/components/ui/Button'
+import FloatingPanel from '@/components/ui/FloatingPanel'
 import { makeKoiosColumn } from '@/components/ui/koiosColumn'
 import { useDateFormat, daysSince } from '@/lib/datetime'
 import { useSeedLabel } from '@/lib/useSeedLabel'
@@ -20,6 +23,7 @@ import { useNavigation } from '@/context/NavigationContext'
 import EntityNameCell from '@/components/ui/EntityNameCell'
 import { useAllSettings, getBoolSetting } from '@/lib/settings/useAllSettings'
 import { useVacancyAdvice } from '@/lib/useVacancyAdvice'
+import VacancyLeadsPanel from './VacancyLeadsPanel'
 import type { Vacancy } from '@/types/vacancy'
 import type { Id } from '@/types/common'
 // Raw mono identity from the typography atom (HUISSTIJL: the font name lives in ONE place).
@@ -101,6 +105,8 @@ export default function VacanciesTable({ rows, loading, selectedId, onSelect, on
   // The ONE shared Koios advice resolver (KOIOS-ADVIES-OVERAL-1) — the drawer
   // calls the same hook, so table and drill-down can never disagree.
   const adviceOf = useVacancyAdvice()
+  // V14: which row's Leads panel is expanded (one at a time, mirrors CustomerApplicationsList).
+  const [expandedLeadsId, setExpandedLeadsId] = useState<Id | null>(null)
 
   // Column order mirrors the candidates blueprint (§3A): identity → client → status
   // → counts → dates → owner LAST (Danny 2026-07-14 table standardization).
@@ -196,13 +202,15 @@ export default function VacanciesTable({ rows, loading, selectedId, onSelect, on
         // weg", the 22-08 fresh-only removal was not enough): the caveat rides as the
         // hover title/aria-label on the cell itself, never as a visual marker.
         const dot = null
-        return onOpenCandidateSearch ? (
+        const id = r.id as Id
+        const isExpanded = expandedLeadsId === id
+        const countCell = onOpenCandidateSearch ? (
           // A not-yet-computed count stays muted: the dash is genuinely less
           // certain than a real number, which is a meaning worth colouring.
           // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- count deep-link rendered AS the cell's own mono number; Button's fixed sm footprint cannot sit inside a 12px table cell (§14 r7 necessity)
           <button type="button" style={{ ...leadsBtn, color: known ? 'var(--text)' : 'var(--text-muted)' }}
             aria-label={t('columns.leadsOpenSearch')} title={title}
-            onClick={e => { e.stopPropagation(); onOpenCandidateSearch(r.id as Id) }}
+            onClick={e => { e.stopPropagation(); onOpenCandidateSearch(id) }}
             onFocus={e => { e.currentTarget.style.textDecoration = 'underline' }}
             onBlur={e => { e.currentTarget.style.textDecoration = 'none' }}
             onMouseEnter={e => { e.currentTarget.style.textDecoration = 'underline' }}
@@ -210,6 +218,30 @@ export default function VacanciesTable({ rows, loading, selectedId, onSelect, on
             {label}{dot}
           </button>
         ) : <span title={title} style={!known ? { color: 'var(--text-muted)' } : undefined}>{label}{dot}</span>
+        return (
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 2, position: 'relative' }}>
+            {countCell}
+            {/* V14: expand toggle for the appointment-tied leads list (VAC-LEADS-1) —
+                a DIFFERENT population than the count above (see useVacancyLeads docblock). */}
+            <span style={{ position: 'relative', display: 'inline-flex' }}>
+              <Button variant="secondary" iconOnly size="sm" onClick={e => { e.stopPropagation(); setExpandedLeadsId(isExpanded ? null : id) }}
+                aria-label={isExpanded ? t('leadsExpand.collapseLabel') : t('leadsExpand.expandLabel')}
+                title={isExpanded ? t('leadsExpand.collapseLabel') : t('leadsExpand.expandLabel')}
+                aria-expanded={isExpanded} aria-haspopup="dialog"
+                style={{ height: 18, width: 18, minWidth: 18, border: 'none' }}>
+                {isExpanded ? <ChevronDown size={12} aria-hidden="true" /> : <ChevronRight size={12} aria-hidden="true" />}
+              </Button>
+              {/* Stop propagation so clicks inside the panel don't fire the row's own onClick */}
+              <span onClick={e => e.stopPropagation()} onKeyDown={e => e.stopPropagation()}>
+                <FloatingPanel open={isExpanded} onClose={() => setExpandedLeadsId(null)}
+                  ariaLabel={t('leadsExpand.expandLabel')} width={340} persistKey="vacancy-leads-row"
+                  bodyStyle={{ padding: 0 }} hideClose>
+                  <VacancyLeadsPanel vacancyId={id} />
+                </FloatingPanel>
+              </span>
+            </span>
+          </span>
+        )
       },
     },
     {

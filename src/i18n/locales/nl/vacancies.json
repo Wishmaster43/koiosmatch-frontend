@@ -598,5 +598,16 @@
   },
   "cellLinks": {
     "openCustomer": "Open klant"
+  },
+  "leadsExpand": {
+    "expandLabel": "Leads tonen",
+    "collapseLabel": "Leads verbergen",
+    "loading": "Leads laden…",
+    "empty": "Geen leads gevonden.",
+    "error": "Leads konden niet worden geladen.",
+    "colName": "Naam",
+    "colPhase": "Fase",
+    "colSource": "Bron",
+    "colCreated": "Aangemaakt"
   }
 }
