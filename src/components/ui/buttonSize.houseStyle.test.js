@@ -30,14 +30,16 @@ function walkSourceFiles(dir, out = []) {
 // The NINE legitimate page-toolbar "+ Nieuw" sites (maatwet: md beside the 34px
 // search chrome) — frozen; a file may only DROP OFF this list, never grow.
 const MD_ALLOWLIST = {
-  'src/pages/applications/ApplicationsPage.tsx': 1,
+  // A-5 (3f5640f0): the page toolbar moved into the list panel with its one md '+ Nieuw'.
+  'src/pages/applications/ApplicationsListPanel.tsx': 1,
   'src/pages/candidates/CandidatesToolbar.tsx': 1,
     // Auth submits (r2): the page's one primary action, full-width — md replaced a hand-painted 44px, a shrink toward canon.
     'src/pages/auth/LoginPage.tsx': 2,
   'src/pages/customers/CustomersToolbar.tsx': 1,
   'src/pages/matches/MatchesPage.tsx': 1,
   'src/pages/opportunities/OpportunitiesPage.tsx': 1,
-  'src/pages/outreach/OutreachPage.tsx': 1,
+  // SPLITS-R2 (d6353084): the outreach toolbar (one md '+ Nieuw') lives in parts/ now.
+  'src/pages/outreach/parts/OutreachToolbar.tsx': 1,
   'src/pages/tasks/TasksPage.tsx': 1,
   'src/pages/users/UsersPage.tsx': 1,
   'src/pages/vacancies/VacanciesToolbar.tsx': 1,
