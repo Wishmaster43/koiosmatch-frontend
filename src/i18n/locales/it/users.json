@@ -1,5 +1,7 @@
 {
   "newUser": "Nuovo utente",
+  "cardPersonal": "Personale",
+  "cardContact": "Contatto",
   "firstName": "Nome",
   "lastName": "Cognome",
   "email": "Indirizzo e-mail",

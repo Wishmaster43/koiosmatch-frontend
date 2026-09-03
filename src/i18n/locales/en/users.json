@@ -1,5 +1,7 @@
 {
   "newUser": "New user",
+  "cardPersonal": "Personal",
+  "cardContact": "Contact",
   "firstName": "First name",
   "lastName": "Last name",
   "email": "Email address",

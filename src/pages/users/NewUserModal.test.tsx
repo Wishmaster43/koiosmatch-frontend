@@ -107,9 +107,9 @@ describe('NewUserModal', () => {
     const onCreated = vi.fn()
     render(<NewUserModal onClose={noop} onCreated={onCreated} />)
 
-    await user.type(screen.getByLabelText('firstName'), 'Jan')
-    await user.type(screen.getByLabelText('email'), 'jan@bedrijf.nl')
-    await user.type(screen.getByLabelText('password'), 'wachtwoord123')
+    await user.type(screen.getByLabelText('firstName', { exact: false }), 'Jan')
+    await user.type(screen.getByLabelText('email', { exact: false }), 'jan@bedrijf.nl')
+    await user.type(screen.getByLabelText('password', { exact: false }), 'wachtwoord123')
     await pickRole(user, 'backoffice')
     await user.click(screen.getByRole('button', { name: 'create' }))
 
@@ -137,9 +137,9 @@ describe('NewUserModal', () => {
     render(<NewUserModal onClose={noop} onCreated={onCreated} />)
 
     await pickRole(user, 'recruiter')
-    await user.type(screen.getByLabelText('firstName'), 'Kelly')
-    await user.type(screen.getByLabelText('email'), 'kelly@bedrijf.nl')
-    await user.type(screen.getByLabelText('password'), 'wachtwoord123')
+    await user.type(screen.getByLabelText('firstName', { exact: false }), 'Kelly')
+    await user.type(screen.getByLabelText('email', { exact: false }), 'kelly@bedrijf.nl')
+    await user.type(screen.getByLabelText('password', { exact: false }), 'wachtwoord123')
     await user.click(screen.getByRole('button', { name: 'create' }))
 
     await waitFor(() => expect(api.post).toHaveBeenCalledWith('/users', expect.objectContaining({ role: 'recruiter', create_agent: true })))
@@ -152,9 +152,9 @@ describe('NewUserModal', () => {
     const user = userEvent.setup()
     render(<NewUserModal onClose={noop} onCreated={noop} />)
 
-    await user.type(screen.getByLabelText('firstName'), 'Jan')
-    await user.type(screen.getByLabelText('email'), 'jan@bedrijf.nl')
-    await user.type(screen.getByLabelText('password'), 'wachtwoord123')
+    await user.type(screen.getByLabelText('firstName', { exact: false }), 'Jan')
+    await user.type(screen.getByLabelText('email', { exact: false }), 'jan@bedrijf.nl')
+    await user.type(screen.getByLabelText('password', { exact: false }), 'wachtwoord123')
     await pickRole(user, 'backoffice')
     await user.click(screen.getByRole('button', { name: 'create' }))
 
@@ -175,13 +175,13 @@ describe('NewUserModal · live e-mail format validation (VALIDATIE-LIVE-1-rest)'
     const user = userEvent.setup()
     render(<NewUserModal onClose={noop} onCreated={noop} />)
 
-    await user.type(screen.getByLabelText('firstName'), 'Jan')
-    const emailField = screen.getByLabelText('email')
+    await user.type(screen.getByLabelText('firstName', { exact: false }), 'Jan')
+    const emailField = screen.getByLabelText('email', { exact: false })
     await user.type(emailField, 'not-an-email')
     fireEvent.focusOut(emailField)
 
     expect(await screen.findByText('validation.emailFormat')).toBeInTheDocument()
-    await user.type(screen.getByLabelText('password'), 'wachtwoord123')
+    await user.type(screen.getByLabelText('password', { exact: false }), 'wachtwoord123')
     expect(screen.getByRole('button', { name: 'create' })).toBeDisabled()
     expect(api.post).not.toHaveBeenCalled()
   })
@@ -191,11 +191,11 @@ describe('NewUserModal · live e-mail format validation (VALIDATIE-LIVE-1-rest)'
     const user = userEvent.setup()
     render(<NewUserModal onClose={noop} onCreated={noop} />)
 
-    await user.type(screen.getByLabelText('firstName'), 'Jan')
-    const emailField = screen.getByLabelText('email')
+    await user.type(screen.getByLabelText('firstName', { exact: false }), 'Jan')
+    const emailField = screen.getByLabelText('email', { exact: false })
     await user.type(emailField, 'jan@bedrijf.nl')
     fireEvent.focusOut(emailField)
-    await user.type(screen.getByLabelText('password'), 'wachtwoord123')
+    await user.type(screen.getByLabelText('password', { exact: false }), 'wachtwoord123')
     await user.click(screen.getByRole('button', { name: 'create' }))
 
     await waitFor(() => expect(api.post).toHaveBeenCalled())

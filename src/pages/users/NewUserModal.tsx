@@ -6,7 +6,7 @@
  * UsersPage.
  */
 import { useState, useEffect, useId } from 'react'
-import type { ChangeEvent, CSSProperties, FormEvent } from 'react'
+import type { CSSProperties, FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import api, { unwrap } from '@/lib/api'
 import FloatingPanel from '@/components/ui/FloatingPanel'
@@ -24,7 +24,11 @@ import { useLiveFieldValidation } from '@/hooks/useLiveFieldValidation'
 import { isValidEmailFormat } from '@/lib/contactFieldValidation'
 import { roleLabel } from './usersParts'
 import { fieldInputStyle } from '@/components/forms/fieldMetrics'
-import { BodyText, Caption, GroupLabel, formLabelStyle } from '@/components/ui/typography'
+import { Caption, GroupLabel, formLabelStyle } from '@/components/ui/typography'
+// FIELD-LAYOUT canon (Danny 13-08): every field is a label-LEFT row from the
+// shared form kit — mirrors AddCandidateModal's cards (src/pages/candidates/addmodal/).
+import { FieldRow, TextField, CheckboxField } from '@/components/forms/fields'
+import FieldNotice from '@/components/ui/FieldNotice'
 
 // VALIDATIE-LIVE-1-rest: `email` is the only field here the backend validates
 // with a shape rule (UserController's inline POST rules — `'email' =>
@@ -86,8 +90,10 @@ export default function NewUserModal({ onClose, onCreated }: {
   const toggleBranch = (id: string) =>
     setChosenBranches(effectiveBranches.includes(id) ? effectiveBranches.filter(x => x !== id) : [...effectiveBranches, id])
 
-  const set = (k: keyof typeof form) => (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
-    setForm(f => ({ ...f, [k]: e.target.value }))
+  // Form-field setter: the kit's TextField reports the new VALUE directly, not
+  // a ChangeEvent like a native onChange handler would.
+  const set = (k: keyof typeof form) => (v: string) =>
+    setForm(f => ({ ...f, [k]: v }))
   // The role picker is now the house CreatableSelect (string) => void — same
   // shape the native select's onChange already produced (e.target.value).
   const setRole = (v: string) => setForm(f => ({ ...f, role: v }))
@@ -137,27 +143,27 @@ export default function NewUserModal({ onClose, onCreated }: {
     <FloatingPanel open onClose={onClose} title={t('newUser')} ariaLabel={t('newUser')}
       persistKey="new-user" width={420} bodyStyle={{ padding: '20px 24px 24px' }}>
         <form onSubmit={handleSubmit}>
+          {/* Name row (FIELD-LAYOUT canon: label left of every field). */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
-            <div>
-              <label style={label}>{t('firstName')}</label>
-              <input required value={form.firstname} onChange={set('firstname')} style={input} placeholder={t('common:placeholders.firstName')} aria-label={t('firstName')} />
-            </div>
-            <div>
-              <label style={label}>{t('lastName')}</label>
-              <input value={form.lastname} onChange={set('lastname')} style={input} placeholder={t('common:placeholders.lastName')} aria-label={t('lastName')} />
-            </div>
+            <FieldRow label={t('firstName')} required>
+              <TextField value={form.firstname} onChange={set('firstname')} placeholder={t('common:placeholders.firstName')} />
+            </FieldRow>
+            <FieldRow label={t('lastName')}>
+              <TextField value={form.lastname} onChange={set('lastname')} placeholder={t('common:placeholders.lastName')} />
+            </FieldRow>
           </div>
           {/* E-mail — VALIDATIE-LIVE-1-rest: blur marks it touched so a live
               format error renders inline instead of only bouncing back as a 422. */}
           <div style={{ marginBottom: 12 }} onBlur={() => markTouched('email')}>
-            <label style={label}>{t('email')}</label>
-            <input required type="email" value={form.email} onChange={set('email')} placeholder={t('common:placeholders.emailExample')} aria-label={t('email')}
-              style={{ ...input, ...(fieldMessage('email') ? { borderColor: 'var(--color-danger)' } : {}) }} />
-            {fieldMessage('email') && <p style={{ fontSize: 11, color: 'var(--color-danger-text)', marginTop: 5 }}>{fieldMessage('email')}</p>}
+            <FieldRow label={t('email')} required>
+              <TextField type="email" value={form.email} onChange={set('email')} placeholder={t('common:placeholders.emailExample')} error={!!fieldMessage('email')} />
+            </FieldRow>
+            <FieldNotice text={fieldMessage('email')} />
           </div>
           <div style={{ marginBottom: 12 }}>
-            <label style={label}>{t('password')}</label>
-            <input required type="password" value={form.password} onChange={set('password')} style={input} placeholder={t('pwPlaceholder')} aria-label={t('password')} />
+            <FieldRow label={t('password')} required>
+              <TextField type="password" autoComplete="new-password" value={form.password} onChange={set('password')} placeholder={t('pwPlaceholder')} />
+            </FieldRow>
           </div>
           <div style={{ marginBottom: 12 }}>
             <label id={roleLabelId} style={label}>{t('role')}</label>
@@ -179,12 +185,10 @@ export default function NewUserModal({ onClose, onCreated }: {
               create_agent: false so the recruiter can opt out per user. */}
           {isAgentRole && (
             <div style={{ marginBottom: 12, padding: '10px 12px', borderRadius: 8, background: 'var(--hover-bg)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <input type="checkbox" checked={createAgent} onChange={e => setCreateAgent(e.target.checked)}
-                  aria-label={t('agent.label')} style={{ cursor: 'pointer' }} />
-                <BodyText as="label" style={{ fontWeight: 500, cursor: 'pointer' }}>{t('agent.label')}</BodyText>
-              </div>
-              <Caption as="p" style={{ marginTop: 6, marginLeft: 24 }}>{t('agent.hint')}</Caption>
+              <FieldRow label={t('agent.label')}>
+                <CheckboxField checked={createAgent} onChange={setCreateAgent} />
+              </FieldRow>
+              <Caption as="p" style={{ marginTop: 6 }}>{t('agent.hint')}</Caption>
             </div>
           )}
 

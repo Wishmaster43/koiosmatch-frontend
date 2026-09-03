@@ -210,7 +210,9 @@ describe('EditUserModal · CredentialChangeGuard (CMBE 03-09)', () => {
     await user.type(emailInput, 'nieuw@bedrijf.nl')
     fireEvent.focusOut(emailInput)
 
-    const currentPasswordInput = await screen.findByLabelText('currentPassword')
+    // FIELD-LAYOUT canon: the FieldRow label carries a visual required-asterisk
+    // suffix, so an exact match on the bare key no longer resolves.
+    const currentPasswordInput = await screen.findByLabelText('currentPassword', { exact: false })
     expect(screen.getByText('common:save').closest('button')).toBeDisabled()
 
     await user.type(currentPasswordInput, 'geheim')
@@ -237,7 +239,7 @@ describe('EditUserModal · CredentialChangeGuard (CMBE 03-09)', () => {
     await user.type(emailInput, 'nieuw@bedrijf.nl')
     fireEvent.focusOut(emailInput)
 
-    const currentPasswordInput = await screen.findByLabelText('currentPassword')
+    const currentPasswordInput = await screen.findByLabelText('currentPassword', { exact: false })
     await user.type(currentPasswordInput, 'verkeerd')
     await user.click(screen.getByText('common:save'))
 
@@ -264,7 +266,7 @@ describe('EditUserModal · CredentialChangeGuard (CMBE 03-09)', () => {
     fireEvent.focusOut(emailInput)
 
     // The guard fired (field rendered), proving isSelf recognised 1 === '1'.
-    expect(await screen.findByLabelText('currentPassword')).toBeInTheDocument()
+    expect(await screen.findByLabelText('currentPassword', { exact: false })).toBeInTheDocument()
   })
 
   // A checked "change password" with a filled new password is a credential change
@@ -278,10 +280,10 @@ describe('EditUserModal · CredentialChangeGuard (CMBE 03-09)', () => {
     render(<EditUserModal user={testUser} onClose={noop} onSaved={noop} />)
 
     await screen.findByDisplayValue('jan@bedrijf.nl')
-    await user.click(screen.getByText('changePassword'))
-    await user.type(screen.getByLabelText('newPassword'), 'nieuwgeheim')
+    await user.click(screen.getByRole('checkbox', { name: 'changePassword' }))
+    await user.type(screen.getByLabelText('newPassword', { exact: false }), 'nieuwgeheim')
 
-    const currentPasswordInput = await screen.findByLabelText('currentPassword')
+    const currentPasswordInput = await screen.findByLabelText('currentPassword', { exact: false })
     await user.type(currentPasswordInput, 'geheim')
     await user.click(screen.getByText('common:save'))
 
@@ -308,7 +310,7 @@ describe('EditUserModal · CredentialChangeGuard (CMBE 03-09)', () => {
     await user.type(emailInput, 'nieuw@bedrijf.nl')
     fireEvent.focusOut(emailInput)
 
-    const currentPasswordInput = await screen.findByLabelText('currentPassword')
+    const currentPasswordInput = await screen.findByLabelText('currentPassword', { exact: false })
     await user.type(currentPasswordInput, 'geheim')
     await user.click(screen.getByText('common:save'))
 

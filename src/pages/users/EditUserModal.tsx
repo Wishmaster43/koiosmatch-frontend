@@ -7,23 +7,28 @@
  * Role is changed inline in the table.
  */
 import { useState } from 'react'
-import type { ChangeEvent, CSSProperties, FormEvent } from 'react'
+import type { FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import api, { unwrap } from '@/lib/api'
 import { useAuth } from '@/context/AuthContext'
 import FloatingPanel from '@/components/ui/FloatingPanel'
 import Spinner from '@/components/ui/Spinner'
-import { fieldInputStyle } from '@/components/forms/fieldMetrics'
 import { useLocations } from '@/lib/useLocations'
 import ChipMultiSelect from '@/components/ui/ChipMultiSelect'
 import ErrorBanner from '@/components/ui/ErrorBanner'
+import FieldNotice from '@/components/ui/FieldNotice'
 import Button from '@/components/ui/Button'
 import { useLiveFieldValidation } from '@/hooks/useLiveFieldValidation'
 import { isValidEmailFormat } from '@/lib/contactFieldValidation'
 import { useUserBranches } from './hooks/useUserBranches'
 import type { ManagedUser } from '@/types/api'
-import { PageTitle, Caption, BodyText, formLabelStyle } from '@/components/ui/typography'
+import { PageTitle, Caption, BodyText } from '@/components/ui/typography'
 import Toggle from '@/components/ui/Toggle'
+// FIELD-LAYOUT canon (Danny 13-08): every field is a label-LEFT row from the
+// shared form kit, grouped into titled cards — mirrors AddCandidateModal's
+// PersonalCard/ContactCard (src/pages/candidates/addmodal/).
+import { FieldRow, TextField, CheckboxField } from '@/components/forms/fields'
+import { cardHead, cardBox, row2 } from '@/components/ui/modalCards'
 
 // VALIDATIE-LIVE-1-rest: `email` is the only field here the backend validates
 // with a shape rule (UserController's inline PATCH rules — `'email' =>
@@ -73,8 +78,10 @@ export default function EditUserModal({ user, onClose, onSaved }: {
   const { markTouched, fieldMessage, touchInvalidFields, hasFormatError } =
     useLiveFieldValidation(form, t, EMAIL_VALIDATORS, EMAIL_ERROR_KEYS)
 
-  const set = (k: keyof typeof form) => (e: ChangeEvent<HTMLInputElement>) =>
-    setForm(f => ({ ...f, [k]: e.target.value }))
+  // Form-field setter: the kit's TextField reports the new VALUE directly, not
+  // a ChangeEvent like a native onChange handler would.
+  const set = (k: keyof typeof form) => (v: string) =>
+    setForm(f => ({ ...f, [k]: v }))
 
   // Validates then PUTs the profile fields (+ password when changing it) and adopts
   // the server's saved copy.
@@ -118,13 +125,6 @@ export default function EditUserModal({ user, onClose, onSaved }: {
     }
   }
 
-  // Canon field style (G33/fieldMetrics) — was its own padding-8/radius-8 copy.
-  const inputStyle: CSSProperties = fieldInputStyle
-  // Shared FormLabel identity (12/500/muted) + this file's own layout (§4: identity from the atom, layout local).
-  const labelStyle: CSSProperties = {
-    display: 'block', ...formLabelStyle, marginBottom: 5,
-  }
-
   return (
     // POPUP-SLEEP-1: migrated onto the shared FloatingPanel shell — draggable
     // header, SE-resize, remembered position; same 420px footprint as before.
@@ -141,31 +141,37 @@ export default function EditUserModal({ user, onClose, onSaved }: {
         </PageTitle>
       }>
         <form onSubmit={handleSubmit}>
-          {/* Name row */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
-            <div>
-              <label style={labelStyle}>{t('firstName')}</label>
-              <input required value={form.firstname} onChange={set('firstname')} style={inputStyle} placeholder={t('common:placeholders.firstName')} aria-label={t('firstName')} />
-            </div>
-            <div>
-              <label style={labelStyle}>{t('lastName')}</label>
-              <input value={form.lastname} onChange={set('lastname')} style={inputStyle} placeholder={t('common:placeholders.lastName')} aria-label={t('lastName')} />
-            </div>
-          </div>
-
-          {/* E-mail — VALIDATIE-LIVE-1-rest: blur marks it touched so a live
-              format error renders inline instead of only bouncing back as a 422. */}
-          <div style={{ marginBottom: 12 }} onBlur={() => markTouched('email')}>
-            <label style={labelStyle}>{t('email')}</label>
-            <input required type="email" value={form.email} onChange={set('email')} aria-label={t('email')}
-              style={{ ...inputStyle, ...(fieldMessage('email') ? { borderColor: 'var(--color-danger)' } : {}) }} />
-            {fieldMessage('email') && <p style={{ fontSize: 11, color: 'var(--color-danger-text)', marginTop: 5 }}>{fieldMessage('email')}</p>}
-          </div>
-
-          {/* Phone */}
+          {/* Personal — first/last name (FIELD-LAYOUT canon: label left, titled card). */}
           <div style={{ marginBottom: 12 }}>
-            <label style={labelStyle}>{t('phone')}</label>
-            <input type="tel" value={form.phone} onChange={set('phone')} style={inputStyle} placeholder={t('common:placeholders.phoneExample')} aria-label={t('phone')} />
+            <div style={cardHead}>{t('cardPersonal')}</div>
+            <div style={cardBox}>
+              <div style={row2}>
+                <FieldRow label={t('firstName')} required>
+                  <TextField value={form.firstname} onChange={set('firstname')} placeholder={t('common:placeholders.firstName')} />
+                </FieldRow>
+                <FieldRow label={t('lastName')}>
+                  <TextField value={form.lastname} onChange={set('lastname')} placeholder={t('common:placeholders.lastName')} />
+                </FieldRow>
+              </div>
+            </div>
+          </div>
+
+          {/* Contact — email/phone. VALIDATIE-LIVE-1-rest: blur marks e-mail
+              touched so a live format error renders inline instead of only
+              bouncing back as a 422. */}
+          <div style={{ marginBottom: 12 }}>
+            <div style={cardHead}>{t('cardContact')}</div>
+            <div style={cardBox}>
+              <div onBlur={() => markTouched('email')}>
+                <FieldRow label={t('email')} required>
+                  <TextField type="email" value={form.email} onChange={set('email')} error={!!fieldMessage('email')} />
+                </FieldRow>
+                <FieldNotice text={fieldMessage('email')} />
+              </div>
+              <FieldRow label={t('phone')}>
+                <TextField type="tel" value={form.phone} onChange={set('phone')} placeholder={t('common:placeholders.phoneExample')} />
+              </FieldRow>
+            </div>
           </div>
 
           {/* Branches (USERS-ROLES-LOC-1) — current coupling, editable via the shared
@@ -235,16 +241,15 @@ export default function EditUserModal({ user, onClose, onSaved }: {
 
           {/* Optional password reset */}
           <div style={{ marginBottom: changePassword ? 12 : 20 }}>
-            <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontSize: 13, color: 'var(--text-muted)' }}>
-              <input type="checkbox" checked={changePassword} onChange={e => setChangePassword(e.target.checked)} />
-              {t('changePassword')}
-            </label>
+            <FieldRow label={t('changePassword')}>
+              <CheckboxField checked={changePassword} onChange={setChangePassword} />
+            </FieldRow>
           </div>
           {changePassword && (
             <div style={{ marginBottom: 20 }}>
-              <label style={labelStyle}>{t('newPassword')}</label>
-              <input type="password" required={changePassword} value={form.password}
-                onChange={set('password')} style={inputStyle} placeholder={t('pwPlaceholder')} aria-label={t('newPassword')} />
+              <FieldRow label={t('newPassword')} required>
+                <TextField type="password" autoComplete="new-password" value={form.password} onChange={set('password')} placeholder={t('pwPlaceholder')} />
+              </FieldRow>
             </div>
           )}
 
@@ -252,10 +257,9 @@ export default function EditUserModal({ user, onClose, onSaved }: {
               account's own current password re-entered before the server accepts it. */}
           {credentialChange && (
             <div style={{ marginBottom: 20 }}>
-              <label style={labelStyle} htmlFor="current-password">{t('currentPassword')}</label>
-              <input id="current-password" type="password" required value={form.currentPassword}
-                onChange={set('currentPassword')} style={inputStyle} autoComplete="current-password"
-                aria-label={t('currentPassword')} />
+              <FieldRow label={t('currentPassword')} required>
+                <TextField type="password" value={form.currentPassword} onChange={set('currentPassword')} autoComplete="current-password" />
+              </FieldRow>
               <Caption as="p" style={{ marginTop: 5 }}>{t('currentPasswordHint')}</Caption>
             </div>
           )}
