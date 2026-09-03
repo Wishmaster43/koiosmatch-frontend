@@ -320,7 +320,9 @@ export default function OverviewTab({ match, onUpdate, onOpenNotes }: OverviewTa
       {/* M18: Koios AI advice — the table-identical advice row first (KOIOS-ADVIES-
           OVERAL-1; [] when there is none), then the score/contract-window heuristics. */}
       <KoiosAdviceBlock namespace="matches"
-        insights={[...adviceInsightRows(resolveAdvice(match)), ...buildMatchAdviceInsights(match, t)]} />
+        insights={[...adviceInsightRows(resolveAdvice(match)), ...buildMatchAdviceInsights(match, t)]}
+        contextRef={match.id ? { type: 'match', id: String(match.id), label: '' } : undefined}
+      />
 
       {/* REMARKS-INTO-NOTES-1: the retired Opmerkingen field. Mounted only while it
           still holds content (read-only + move-into-notes), so Matchtekst above is

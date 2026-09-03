@@ -8,6 +8,9 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { RefreshCw, ChevronDown } from 'lucide-react'
 import KoiosAiMark from '@/components/ui/KoiosAiMark'
+import Button from '@/components/ui/Button'
+import { askKoios } from '@/lib/koiosBridge'
+import type { KoiosContextRef } from '@/types/koios'
 
 /** One advisory row: a coloured dot + uppercase label (collapsed by default)
  *  that reveals `text` on click. */
@@ -28,6 +31,9 @@ interface KoiosAdviceBlockProps {
   // Anthropic credits are empty) — insights are pre-computed FE heuristics
   // passed in by the caller, never fetched here.
   onRefresh?: () => void | Promise<void>
+  // Optional context reference for the entity this advice is about (candidate, customer, etc.)
+  // — attached to the window event when an advice row's ask-button is clicked.
+  contextRef?: KoiosContextRef
 }
 
 /**
@@ -38,7 +44,7 @@ interface KoiosAdviceBlockProps {
  * collapsible dot+label rows, closed by default. §3A blueprint component —
  * extend by passing more `insights`, never fork the look.
  */
-export default function KoiosAdviceBlock({ namespace, insights, onRefresh }: KoiosAdviceBlockProps) {
+export default function KoiosAdviceBlock({ namespace, insights, onRefresh, contextRef }: KoiosAdviceBlockProps) {
   // 'common' alongside the feature namespace — the AI-Act disclosure hint
   // (AI-ACT-1) is shared copy, not per-entity.
   const { t } = useTranslation([namespace, 'common'])
@@ -69,11 +75,9 @@ export default function KoiosAdviceBlock({ namespace, insights, onRefresh }: Koi
         <span style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)', flex: 1 }}>{t('ai.title')}</span>
         <span style={{ fontSize: 10, padding: '2px 7px', borderRadius: 99, background: 'var(--button-fill)', color: 'var(--button-ink)', fontWeight: 600 }}>{t('ai.beta')}</span>
         {onRefresh && (
-          <button onClick={handleRefresh}
-            title={t('ai.refresh')} aria-label={t('ai.refresh')} disabled={loading}
-            style={{ background: 'none', border: 'none', cursor: loading ? 'default' : 'pointer', color: 'var(--text-muted)', padding: 3, display: 'flex', opacity: loading ? 0.4 : 1, borderRadius: 5 }}>
+          <Button variant="ghost" size="sm" iconOnly aria-label={t('ai.refresh')} disabled={loading} onClick={handleRefresh}>
             <RefreshCw size={12} />
-          </button>
+          </Button>
         )}
       </div>
 
@@ -87,13 +91,25 @@ export default function KoiosAdviceBlock({ namespace, insights, onRefresh }: Koi
                 return (
                   <div key={i} style={{ background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 8 }}>
                     {/* Collapsed by default: title + chevron; click reveals the text. */}
-                    <button onClick={() => setOpenIdx(open ? null : i)}
-                      style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', padding: '8px 10px', background: 'none', border: 'none', cursor: 'pointer' }}>
+                    <div onClick={() => setOpenIdx(open ? null : i)} style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', padding: '8px 10px', background: 'none', cursor: 'pointer' }}>
                       <span style={{ width: 6, height: 6, borderRadius: '50%', background: ins.color, flexShrink: 0 }} />
                       <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em', flex: 1, textAlign: 'left' }}>{ins.type}</span>
                       <ChevronDown size={13} style={{ color: 'var(--text-muted)', flexShrink: 0, transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s' }} />
-                    </button>
-                    {open && <div style={{ fontSize: 12, color: 'var(--text)', lineHeight: 1.5, padding: '0 10px 8px 24px' }}>{ins.text}</div>}
+                    </div>
+                    {/* KOIOS-ADVIES-DOORKLIK-1: the revealed advice line is a plain div
+                        with the advice text and a separate ask-Koios button that opens
+                        the Koios chat pre-seeded with a context question (never
+                        auto-sent, §0B/API-CREDITS-1: the user still presses send). */}
+                    {open && (
+                      <div style={{ padding: '0 10px 8px 24px', display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <span style={{ fontSize: 12, color: 'var(--text)', lineHeight: 1.5, flex: 1 }}>{ins.text}</span>
+                        <Button variant="ghost" size="sm"
+                          onClick={() => askKoios(t('common:koios.adviceAskTemplate', { advice: ins.text }), contextRef)}
+                          title={t('koios.assistant.askKoios')}>
+                          {t('koios.assistant.askKoios')}
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 )
               })}

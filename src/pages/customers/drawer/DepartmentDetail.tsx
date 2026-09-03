@@ -291,7 +291,7 @@ export default function DepartmentDetail({ department, locations, statuses, cont
       {/* §0.3 split: the "Gegevens" sub-tab body (field table + description + advice). */}
       {subTab === 'data' && (
         <DepartmentDataTab department={department} fields={fields} values={values}
-          onSaveFields={save} onSaveDescription={saveDescription} customerId={customerId} t={t} />
+          onSaveFields={save} onSaveDescription={saveDescription} customerId={customerId} customerName={customerName} t={t} />
       )}
 
       {/* §0.3 split: the remaining scoped-list sub-tab bodies. */}

@@ -26,6 +26,8 @@ export default function OpportunityKoiosBlock({ opportunity, stages = [] }: {
   const resolveAdvice = useOpportunityAdvice(stages)
   return (
     <KoiosAdviceBlock namespace="opportunities"
-      insights={[...adviceInsightRows(resolveAdvice(opportunity)), ...buildOpportunityAdviceInsights(opportunity, stages, t)]} />
+      insights={[...adviceInsightRows(resolveAdvice(opportunity)), ...buildOpportunityAdviceInsights(opportunity, stages, t)]}
+      contextRef={opportunity.id ? { type: 'opportunity', id: String(opportunity.id), label: opportunity.title ?? '' } : undefined}
+    />
   )
 }

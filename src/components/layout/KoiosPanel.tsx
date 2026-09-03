@@ -36,7 +36,18 @@ import KoiosVoiceButton from './koios/KoiosVoiceButton'
 import type { KoiosContextRef } from '@/types/koios'
 
 // ── Main panel ────────────────────────────────────────────────────────────────
-export default function KoiosPanel({ open, onClose, onNavigate }: { open?: boolean; onClose?: () => void; onNavigate?: (page: string, intent?: unknown) => void }) {
+export default function KoiosPanel({ open, onClose, onNavigate, initialQuestion, initialContextRef, onInitialQuestionConsumed }: {
+  open?: boolean
+  onClose?: () => void
+  onNavigate?: (page: string, intent?: unknown) => void
+  // KOIOS-ADVIES-DOORKLIK-1: a question composed elsewhere (an advice row, via
+  // src/lib/koiosBridge.ts) to prefill the composer with once the panel opens —
+  // never auto-sent (API-CREDITS-1), the user still presses send.
+  initialQuestion?: string | null
+  // Optional context ref attached to the initial question (the entity it concerns).
+  initialContextRef?: KoiosContextRef
+  onInitialQuestionConsumed?: () => void
+}) {
   const { t } = useTranslation('common')
   const locale = useLocale()
   // All chat state + the synchronous /ai/koios/chat call live in the hook.
@@ -64,6 +75,20 @@ export default function KoiosPanel({ open, onClose, onNavigate }: { open?: boole
   const [contextRefs, setContextRefs] = useState<KoiosContextRef[]>([])
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const bottomRef   = useRef<HTMLDivElement>(null)
+  // KOIOS-ADVIES-DOORKLIK-1: once the panel is open, consume a pending
+  // `initialQuestion` exactly like the assistant's own "Ask Koios" cards do
+  // (prefill + focus, never auto-send) and tell the caller it was consumed so
+  // it does not re-fire on the next open. If a context ref is attached (the
+  // entity the question concerns), add it to the context refs automatically.
+  useEffect(() => {
+    if (!open || !initialQuestion) return
+    setInput(initialQuestion)
+    if (initialContextRef) {
+      setContextRefs(prev => addContextRef(prev, initialContextRef))
+    }
+    setTimeout(() => textareaRef.current?.focus(), 50)
+    onInitialQuestionConsumed?.()
+  }, [open, initialQuestion, initialContextRef, onInitialQuestionConsumed])
   // The "@" mention picker's open/query/category state, roving-highlight wiring
   // and keydown forwarding all live in one hook (§0.3 size split, KOIOS-SEARCH-FIX-2).
   const {

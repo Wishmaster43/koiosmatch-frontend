@@ -53,7 +53,9 @@ export default function DetailsTab({ vacancy: v, onUpdate }: { vacancy: VacancyD
       {/* V11 + Danny 05-08 "Koios moet eronder komen": advisory stays at the
           bottom of the merged tab, unaffected by the sub-tab removal. */}
       <KoiosAdviceBlock namespace="vacancies"
-        insights={[...adviceInsightRows(resolveAdvice(v)), ...buildVacancyAdviceInsights(v, t)]} />
+        insights={[...adviceInsightRows(resolveAdvice(v)), ...buildVacancyAdviceInsights(v, t)]}
+        contextRef={v.id ? { type: 'vacancy', id: String(v.id), label: v.title ?? '' } : undefined}
+      />
       {/* DRILLDOWN-VOLGORDE-CANON (Danny 21-08): informatie → vrije tekst (own
           tab) → Koios AI → vestiging LAST — the bureau branch picker closes
           out the drill-down, mirroring the candidate/match canon. */}

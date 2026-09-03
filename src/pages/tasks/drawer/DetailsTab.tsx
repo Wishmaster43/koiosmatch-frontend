@@ -327,7 +327,8 @@ export default function DetailsTab({ task, onUpdate, onSubtaskCreated }: {
           OVERAL-1; [] when there is none), then the deadline/assignment/links
           heuristics from data already on the record, no AI/API call. */}
       <KoiosAdviceBlock namespace="tasks"
-        insights={[...adviceInsightRows(resolveAdvice(task)), ...buildTaskAdviceInsights(task, t)]} />
+        insights={[...adviceInsightRows(resolveAdvice(task)), ...buildTaskAdviceInsights(task, t)]}
+      />
 
       {/* T3 / TASK-LOCATION-READ-1: the Vestiging (branch) picker, below the advice
           block per Danny's layout. Previously blocked (write-only field — the

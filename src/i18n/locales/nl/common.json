@@ -257,6 +257,7 @@
     },
     "resizeHandle": "Paneelbreedte aanpassen",
     "column": "Koios",
+    "adviceAskTemplate": "Wij adviseren: {{advice}}. Waarmee kan ik je helpen, welke actie(s) kan ik ondernemen?",
     "actions": {
       "follow_up": "Opvolgen",
       "attention": "Aandacht",

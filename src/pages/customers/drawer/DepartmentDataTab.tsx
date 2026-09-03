@@ -16,13 +16,14 @@ import type { Department } from '@/types/customer'
 import type { Id } from '@/types/common'
 
 // The "Gegevens" sub-tab: field-table card + description rich-text + Koios advice.
-export default function DepartmentDataTab({ department, fields, values, onSaveFields, onSaveDescription, customerId, t }: {
+export default function DepartmentDataTab({ department, fields, values, onSaveFields, onSaveDescription, customerId, customerName, t }: {
   department: Department
   fields: FieldRow[]
   values: Record<string, unknown>
   onSaveFields: (v: Record<string, unknown>) => void
   onSaveDescription: (html: string) => void
   customerId?: Id
+  customerName?: string
   t: Tx
 }) {
   return (
@@ -50,8 +51,13 @@ export default function DepartmentDataTab({ department, fields, values, onSaveFi
 
       {/* Koios advice — pure FE completeness heuristics over this department's OWN
           fields, same slot LocationDetail/OverviewTab put it in (right after the
-          text block, before any nested-entity sections). No API call. */}
-      <KoiosAdviceBlock namespace="customers" insights={buildDepartmentAdviceInsights(department, t)} />
+          text block, before any nested-entity sections). No API call. Context ref
+          is the owning customer, since departments don't have their own Koios entity. */}
+      <KoiosAdviceBlock
+        namespace="customers"
+        insights={buildDepartmentAdviceInsights(department, t)}
+        contextRef={customerId ? { type: 'customer', id: String(customerId), label: customerName ?? '' } : undefined}
+      />
     </div>
   )
 }

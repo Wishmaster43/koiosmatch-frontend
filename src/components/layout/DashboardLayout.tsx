@@ -16,6 +16,7 @@ import KoiosPanel from './KoiosPanel'
 import ReportFilterSidebar from '../reports/ReportFilterSidebar'
 import { renderPage, PAGE_TITLES } from './appPages'
 import { NavigationProvider } from '@/context/NavigationContext'
+import { ASK_KOIOS_EVENT, type AskKoiosDetail } from '@/lib/koiosBridge'
 import { DashboardSwitcher } from '@/pages/dashboard/shared'
 import NotificationBell from '@/components/layout/NotificationBell'
 import { useTenantTheme } from '@/hooks/useTenantTheme'
@@ -25,6 +26,7 @@ import { SectionTitle } from '@/components/ui/typography'
 import { canSwitchViews, switcherTypes } from '@/pages/dashboard/shared'
 import type { DashboardType } from '@/pages/dashboard/shared'
 import type { ReportFilterGroup } from '@/types/reports'
+import type { KoiosContextRef } from '@/types/koios'
 
 // Sidebar is still JS (the other Claude owns it); accept its props loosely at this boundary.
 const SidebarTyped = Sidebar as unknown as ComponentType<Record<string, unknown>>
@@ -115,6 +117,22 @@ export default function DashboardLayout() {
   }, [])
   const [rightPanelOpen, setRightPanelOpen] = useState(false)
   const [koiosOpen,      setKoiosOpen]      = useState(false)
+  // KOIOS-ADVIES-DOORKLIK-1: a question composed elsewhere (an advice row) asks
+  // the singleton panel to open pre-filled via the shared window event — see
+  // src/lib/koiosBridge.ts. Consumed once by KoiosPanel, then cleared here.
+  const [koiosQuestion,  setKoiosQuestion]  = useState<string | null>(null)
+  const [koiosContextRef, setKoiosContextRef] = useState<KoiosContextRef | undefined>(undefined)
+  useEffect(() => {
+    const onAsk = (e: Event) => {
+      const detail = (e as CustomEvent<AskKoiosDetail>).detail
+      if (!detail?.text) return
+      setKoiosQuestion(detail.text)
+      setKoiosContextRef(detail.ref)
+      setKoiosOpen(true)
+    }
+    window.addEventListener(ASK_KOIOS_EVENT, onAsk)
+    return () => window.removeEventListener(ASK_KOIOS_EVENT, onAsk)
+  }, [])
   const auth                                = auth0
   const { logout, user, activeTenant }      = auth ?? {}
   // Dashboard view (B-27) — super-admin + management may switch/preview any role's
@@ -159,7 +177,14 @@ export default function DashboardLayout() {
       {/* ── Koios AI panel ── */}
       {/* onNavigate wires the landing-state radar's deep-links to the same page-switch
           the sidebar uses (KoiosPanel renders outside NavigationProvider's scope). */}
-      <KoiosPanel open={koiosOpen} onClose={() => setKoiosOpen(false)} onNavigate={goTo} />
+      <KoiosPanel
+        open={koiosOpen}
+        onClose={() => setKoiosOpen(false)}
+        onNavigate={goTo}
+        initialQuestion={koiosQuestion}
+        initialContextRef={koiosContextRef}
+        onInitialQuestionConsumed={() => setKoiosQuestion(null)}
+      />
 
       {/* ── Right column: topbar + content + filter panel ── */}
       <div className="km-main-bg flex flex-col flex-1 overflow-hidden" style={{ background: 'var(--bg)' }}>

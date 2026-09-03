@@ -222,9 +222,12 @@ export default function OverviewTab({ c, onSave, statuses = [] }: { c: Customer;
 
       {/* Koios AI advisory — the table-identical advice row first (KOIOS-ADVIES-
           OVERAL-1; [] when there is none), then company/location completeness +
-          relationship activity (§3A blueprint). */}
+          relationship activity (§3A blueprint). Context ref lets the user open a
+          Koios chat with this customer pre-linked. */}
       <KoiosAdviceBlock namespace="customers"
-        insights={[...adviceInsightRows(resolveAdvice(c)), ...buildCustomerAdviceInsights(c, t)]} />
+        insights={[...adviceInsightRows(resolveAdvice(c)), ...buildCustomerAdviceInsights(c, t)]}
+        contextRef={c.id ? { type: 'customer', id: String(c.id), label: c.name ?? '' } : undefined}
+      />
 
       {/* VESTIGING ("BRANCH") — which of the tenant's establishments may see this
           customer. The single routing/invoicing branch that used to sit above it

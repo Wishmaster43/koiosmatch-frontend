@@ -257,6 +257,7 @@
     },
     "resizeHandle": "Panelbreite anpassen",
     "column": "Koios",
+    "adviceAskTemplate": "Wir empfehlen: {{advice}}. Wie kann ich helfen, welche Aktion(en) kann ich ausführen?",
     "actions": {
       "follow_up": "Nachfassen",
       "attention": "Achtung",

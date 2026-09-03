@@ -257,6 +257,7 @@
     },
     "resizeHandle": "Resize panel",
     "column": "Koios",
+    "adviceAskTemplate": "We advise: {{advice}}. How can I help you, which action(s) can I take?",
     "actions": {
       "follow_up": "Follow up",
       "attention": "Attention",

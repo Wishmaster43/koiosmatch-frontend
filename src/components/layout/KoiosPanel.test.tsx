@@ -413,6 +413,46 @@ describe('KoiosPanel · landing cards close/summon (3b)', () => {
 })
 
 
+// KOIOS-ADVIES-DOORKLIK-1: when the panel is passed an initialQuestion (from an
+// advice row via the bridge), it prefills the composer and calls the consumed callback.
+describe('KoiosPanel · initial question (advice link)', () => {
+  it('shows the initialQuestion in the composer and calls onInitialQuestionConsumed once', async () => {
+    const onConsumed = vi.fn()
+    renderWithQuery(
+      <KoiosPanel
+        open
+        initialQuestion="Vraag X"
+        onInitialQuestionConsumed={onConsumed}
+        onClose={() => {}}
+        onNavigate={() => {}}
+      />,
+    )
+    await screen.findByText('common:koios.radar.empty')
+    // The question text now fills the textarea
+    const textarea = screen.getByPlaceholderText('koios.taskPlaceholder') as HTMLTextAreaElement
+    expect(textarea.value).toBe('Vraag X')
+    // The callback fired once on mount
+    expect(onConsumed).toHaveBeenCalledTimes(1)
+  })
+
+  it('adds initialContextRef to the context chips when provided', async () => {
+    const contextRef = { type: 'candidate', id: 'c-99', label: 'Piet Jansen' }
+    renderWithQuery(
+      <KoiosPanel
+        open
+        initialQuestion="Help met deze kandidaat"
+        initialContextRef={contextRef}
+        onInitialQuestionConsumed={() => {}}
+        onClose={() => {}}
+        onNavigate={() => {}}
+      />,
+    )
+    await screen.findByText('common:koios.radar.empty')
+    // The ref appears as a removable chip
+    expect(screen.getByRole('button', { name: 'remove Piet Jansen' })).toBeInTheDocument()
+  })
+})
+
 // Danny 27-08, three composer findings: stacked @'s, Tab-completion, Escape-cancel.
 describe('KoiosPanel · mention polish (27-08)', () => {
   it('the @ button never stacks a second @ while the menu is open', async () => {

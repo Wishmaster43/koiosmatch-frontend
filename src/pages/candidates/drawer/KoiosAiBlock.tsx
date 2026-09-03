@@ -10,11 +10,16 @@ import { buildCandidateAdviceInsights } from './candidateAiInsights'
 import type { Candidate } from '@/types/candidate'
 
 // Candidate drawer's Koios AI tab: see the module doc comment above for why it
-// resolves the same advice the table column shows.
+// resolves the same advice the table column shows. The block includes a context ref
+// so clicking an advice row opens the Koios chat with this candidate as context.
 export default function KoiosAiBlock({ c }: { c: Candidate }) {
   const { t } = useTranslation('candidates')
   const { formatDate } = useDateFormat()
   const resolveAdvice = useCandidateAdvice()
   const insights = buildCandidateAdviceInsights(c, t, formatDate, resolveAdvice(c))
-  return <KoiosAdviceBlock namespace="candidates" insights={insights} />
+  return <KoiosAdviceBlock
+    namespace="candidates"
+    insights={insights}
+    contextRef={c.id ? { type: 'candidate', id: String(c.id), label: c.name ?? '' } : undefined}
+  />
 }

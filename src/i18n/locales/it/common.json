@@ -257,6 +257,7 @@
     },
     "resizeHandle": "Ridimensiona pannello",
     "column": "Koios",
+    "adviceAskTemplate": "Consigliamo: {{advice}}. Come posso aiutarti, quale/i azione/i posso intraprendere?",
     "actions": {
       "follow_up": "Da seguire",
       "attention": "Attenzione",

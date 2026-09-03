@@ -142,7 +142,8 @@ export default function LocationAddressTab({
         popout={l.id != null && customerId != null ? { entity: 'customer', id: locationPopoutId(customerId, l.id as Id), field: 'locationText' } : undefined}
         assistGenerate={l.id != null ? { entity: 'location', id: String(l.id) } : undefined} />
 
-      {/* Koios advice — pure FE heuristics over this location's OWN completeness. */}
+      {/* Koios advice — pure FE heuristics over this location's OWN completeness.
+          No contextRef: locations are nested entities without their own Koios context type. */}
       <KoiosAdviceBlock namespace="customers" insights={buildLocationAdviceInsights(l, t)} />
 
       {/* Vestiging ("Branch") — which of OUR branches this site works under, and whether that is
