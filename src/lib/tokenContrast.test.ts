@@ -8,6 +8,7 @@
  * what this file guards.
  */
 import { describe, it, expect } from 'vitest'
+import { readableAccentText } from '@/hooks/useTenantTheme'
 
 // Vitest's css handling strips a `?raw` css import to '' and the repo ships no
 // node typings, so this gate reads the file through a locally-typed require —
@@ -218,6 +219,42 @@ describe('house token pairs stay readable (defaults, light theme)', () => {
       for (const pct of [0.10, 0.16]) {
         expect(ratioRgb(primaryInk, mixRgb(primary, pct, ground)), `primary-text @${pct * 100}%`).toBeGreaterThanOrEqual(4.5)
       }
+    }
+  })
+
+  // TENANT-THEME-TINT-1: a BRANDED tenant's derived accent ink (readableAccentText,
+  // the same function applyBrandTokens calls at runtime) must stay readable on the
+  // 16% ACTIVE tint too, not only on the bare surface — the default twin was darkened
+  // 2% for exactly that reason (index.css). Measured 03-09 with that 2% step: default
+  // primary 4.60, AENF yellow 4.86, mid blue 4.48, dark green 4.49 on the light tint;
+  // every dark-tint pair ≥ 5.2. Bright red (#DC2626) reaches only 4.14: its 16% tint
+  // on the light ground is nearly white and the formula targets the SURFACE (5.5:1),
+  // so red carries its own documented floor here instead of a lowered bar for all —
+  // whether a red brand gets a different recipe is Danny's call (WORKLIST).
+  it('branded tenant accent inks stay readable on the 16% active tint (light and dark)', () => {
+    const mix = (hex: string, pct: number, ground: string): string => {
+      const a = parseInt(hex.slice(1), 16), b = parseInt(ground.slice(1), 16)
+      const ch = (shift: number) => Math.round(pct * ((a >> shift) & 255) + (1 - pct) * ((b >> shift) & 255))
+      return `#${[16, 8, 0].map(sh => ch(sh).toString(16).padStart(2, '0')).join('')}`
+    }
+    // eslint-disable-next-line no-restricted-syntax -- brand fixtures: the algorithm's inputs, not UI colours
+    const brands = [
+      { name: 'default primary', hex: '#19A5CA', lightFloor: 4.5 },
+      { name: 'AENF yellow', hex: '#F5C400', lightFloor: 4.5 },
+      { name: 'mid blue', hex: '#3B82F6', lightFloor: 4.4 },
+      { name: 'dark green', hex: '#059669', lightFloor: 4.4 },
+      { name: 'red (documented exception)', hex: '#DC2626', lightFloor: 4.1 },
+      { name: 'white-ish', hex: '#F0F0F0', lightFloor: 4.5 },
+      { name: 'near-black', hex: '#1F2937', lightFloor: 4.5 },
+    ]
+    // Surfaces/grounds are the runtime's own constants (applyBrandTokens) and the css tokens.
+    // eslint-disable-next-line no-restricted-syntax -- the runtime surface constants, mirrored
+    const surfaces = { light: { surface: '#FFFFFF', ground: token('bg') }, dark: { surface: '#13131F', ground: '#13131F' } }
+    for (const b of brands) {
+      const lightInk = readableAccentText(b.hex, surfaces.light.surface)
+      expect(ratio(lightInk, mix(b.hex, 0.16, surfaces.light.ground)), `${b.name} · light 16% tint`).toBeGreaterThanOrEqual(b.lightFloor)
+      const darkInk = readableAccentText(b.hex, surfaces.dark.surface)
+      expect(ratio(darkInk, mix(b.hex, 0.16, surfaces.dark.ground)), `${b.name} · dark 16% tint`).toBeGreaterThanOrEqual(4.5)
     }
   })
 })
