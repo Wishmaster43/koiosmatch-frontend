@@ -32,15 +32,16 @@ afterEach(() => vi.clearAllMocks())
 describe('FacebookLeadsSettings — loading the stored values', () => {
   it('shows the masked "already set" badge for secrets, never the real value', async () => {
     api.get.mockResolvedValue({ data: {
-      facebook_verify_token: 'my-verify-token',
+      facebook_verify_token: '••••••••',
       facebook_dataset_id: '1234567890',
       facebook_app_secret: '••••••••',
       facebook_access_token: '••••••••',
     } })
     render(<FacebookLeadsSettings />)
 
-    expect(await screen.findByDisplayValue('my-verify-token')).toBeInTheDocument()
-    expect(screen.getAllByText(t('facebookLeads.secretSet'))).toHaveLength(2)
+    // AUDIT 03-09 (settings-coherence-1): the verify token is secret-class too — three badges, no plaintext.
+    expect(await screen.findByDisplayValue('1234567890')).toBeInTheDocument()
+    expect(screen.getAllByText(t('facebookLeads.secretSet'))).toHaveLength(3)
     // The masked placeholder value itself never leaks into an input.
     expect(screen.queryByDisplayValue('••••••••')).not.toBeInTheDocument()
   })
@@ -55,15 +56,25 @@ describe('FacebookLeadsSettings — loading the stored values', () => {
 
 describe('FacebookLeadsSettings — saving', () => {
   it('POSTs the plain keys, omitting untouched secrets (never overwrites with empty)', async () => {
-    api.get.mockResolvedValue({ data: { facebook_verify_token: 'old-token', facebook_app_secret: '••••••••' } })
+    api.get.mockResolvedValue({ data: { facebook_verify_token: '••••••••', facebook_app_secret: '••••••••', facebook_dataset_id: 'ds-1' } })
     render(<FacebookLeadsSettings />)
-    await screen.findByDisplayValue('old-token')
+    await screen.findByDisplayValue('ds-1')
 
     await userEvent.click(screen.getByRole('button', { name: t('common.save') }))
 
-    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/settings', {
-      facebook_verify_token: 'old-token', facebook_dataset_id: '',
-    }))
+    // The masked verify token is never echoed back: only the plain dataset id travels.
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/settings', { facebook_dataset_id: 'ds-1' }))
+  })
+
+  it('sends a newly typed verify token like any other secret', async () => {
+    api.get.mockResolvedValue({ data: { facebook_verify_token: '••••••••' } })
+    render(<FacebookLeadsSettings />)
+    await screen.findAllByText(t('facebookLeads.secretSet'))
+
+    await userEvent.type(screen.getByLabelText(new RegExp(t('facebookLeads.verifyToken'))), 'fresh-verify-token')
+    await userEvent.click(screen.getByRole('button', { name: t('common.save') }))
+
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/settings', expect.objectContaining({ facebook_verify_token: 'fresh-verify-token' })))
   })
 
   it('sends a newly typed secret, then clears the field back to the masked state', async () => {

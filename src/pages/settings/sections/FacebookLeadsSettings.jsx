@@ -66,6 +66,7 @@ export default function FacebookLeadsSettings() {
   const [accessToken, setAccessToken] = useState('')
   const [datasetId, setDatasetId] = useState('')
   const [appSecretSet, setAppSecretSet] = useState(false)
+  const [verifyTokenSet, setVerifyTokenSet] = useState(false)
   const [accessTokenSet, setAccessTokenSet] = useState(false)
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState(false)
@@ -81,7 +82,10 @@ export default function FacebookLeadsSettings() {
     setLoadError(false)
     loadSettings().then((s) => {
       if (!alive) return
-      setVerifyToken(s.facebook_verify_token ?? '')
+      // AUDIT 03-09 (settings-coherence-1): the verify token is a secret-class setting now —
+      // it arrives masked like the app secret, so it follows the same is-set + overwrite pattern.
+      setVerifyToken('')
+      setVerifyTokenSet(s.facebook_verify_token === MASK)
       setDatasetId(s.facebook_dataset_id ?? '')
       setAppSecretSet(s.facebook_app_secret === MASK)
       setAccessTokenSet(s.facebook_access_token === MASK)
@@ -94,7 +98,8 @@ export default function FacebookLeadsSettings() {
   // empty field means "keep the stored one" (mirrors EmailSettings' smtp_pass).
   const save = async () => {
     setSaving(true)
-    const payload = { facebook_verify_token: verifyToken, facebook_dataset_id: datasetId }
+    const payload = { facebook_dataset_id: datasetId }
+    if (verifyToken) payload.facebook_verify_token = verifyToken
     if (appSecret) payload.facebook_app_secret = appSecret
     if (accessToken) payload.facebook_access_token = accessToken
     try {
@@ -142,11 +147,10 @@ export default function FacebookLeadsSettings() {
       <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2, marginBottom: 20 }}>{t('facebookLeads.subtitle')}</p>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginBottom: 20 }}>
-        <div>
-          <label htmlFor="fb-verify-token" style={labelStyle}>{t('facebookLeads.verifyToken')}</label>
-          <input id="fb-verify-token" value={verifyToken} onChange={(e) => setVerifyToken(e.target.value)}
-            placeholder={t('facebookLeads.verifyTokenPlaceholder')} style={inputStyle} />
-        </div>
+        <SecretField id="fb-verify-token" label={t('facebookLeads.verifyToken')} value={verifyToken} onChange={setVerifyToken}
+          alreadySet={verifyTokenSet} setBadge={t('facebookLeads.secretSet')}
+          placeholderSet={t('facebookLeads.secretKeepPlaceholder')} placeholderEmpty={t('facebookLeads.verifyTokenPlaceholder')}
+          showLabel={t('facebookLeads.showSecret')} hideLabel={t('facebookLeads.hideSecret')} />
 
         <SecretField id="fb-app-secret" label={t('facebookLeads.appSecret')} value={appSecret} onChange={setAppSecret}
           alreadySet={appSecretSet} setBadge={t('facebookLeads.secretSet')}
