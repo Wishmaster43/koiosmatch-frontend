@@ -16,15 +16,9 @@ const sectionStyle = { marginTop: 12, marginBottom: 12 } as const
 const chipsRowStyle = { display: 'flex', gap: 8, flexWrap: 'wrap' as const, margin: '8px 0' }
 const rowStyle = { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 0' } as const
 
-// Map surface keys to their semantic colours (each surface gets its own hue).
-const SURFACE_COLORS: Record<string, string> = {
-  chat: 'var(--color-primary)',
-  note_assist: 'var(--color-info)',
-  generate: 'var(--color-success)',
-  conversation_assist: 'var(--color-warning)',
-  report_advice: 'var(--color-danger)',
-  interview_flows: 'var(--color-primary)',
-}
+// One tint for every surface chip: the list is a placemarker, not a status, and §4
+// spends colour only where it carries meaning (one hue per surface would be decoration).
+const SURFACE_CHIP_COLOR = 'var(--color-primary)'
 
 function SurfacesBlock({ surfaces }: { surfaces: KoiosSurface[] }) {
   const { t } = useTranslation('koios')
@@ -36,14 +30,7 @@ function SurfacesBlock({ surfaces }: { surfaces: KoiosSurface[] }) {
         {surfaces.map((surface) => {
           // Fall back to the API's label_nl only if the i18n key is missing.
           const label = t(`capabilities.surfaces.${surface.key}`, { defaultValue: surface.label_nl })
-          const color = SURFACE_COLORS[surface.key] ?? 'var(--color-primary)'
-          return (
-            <SoftChip
-              key={surface.key}
-              label={label}
-              color={color}
-            />
-          )
+          return <SoftChip key={surface.key} label={label} color={SURFACE_CHIP_COLOR} />
         })}
       </div>
     </div>
