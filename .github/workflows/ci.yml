@@ -1,0 +1,52 @@
+# CI gate (audit frontend-security-quality-5): the same checks as .githooks/pre-commit,
+# so a --no-verify commit or a push from a machine without the hook is still caught.
+# Job 'gates' mirrors the hook one-to-one; job 'tests' runs the full vitest suite,
+# which no local gate covers (finding -6).
+name: ci
+
+on:
+  push:
+    branches: [main, during-onix]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  gates:
+    name: typecheck · lint + huisstijl ceiling · i18n parity · typography ratchet · dependency audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: typecheck
+        run: npm run --silent typecheck
+      - name: eslint errors + huisstijl ceiling (shrink-only)
+        run: node scripts/huisstijl-ceiling.mjs
+      - name: i18n parity (seven locales)
+        run: npx vitest run src/i18n/localeParity.test.ts
+      - name: typography / button / em-dash ratchets
+        run: npx vitest run src/components/ui/typography.houseStyle.test.js src/components/ui/buttonSize.houseStyle.test.js src/i18n/emdash.houseStyle.test.js
+      - name: dependency audit (HIGH/CRITICAL unless allowlisted with a reason)
+        run: npm run --silent security:audit
+
+  tests:
+    name: vitest (full suite)
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      # The full suite is load-sensitive (finding -6): CI runs it alone on a fresh
+      # runner, which is the condition it is expected to be green under.
+      - run: npm test
