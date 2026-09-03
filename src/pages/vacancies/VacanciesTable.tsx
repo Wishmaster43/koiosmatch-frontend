@@ -228,7 +228,7 @@ export default function VacanciesTable({ rows, loading, selectedId, onSelect, on
                 aria-label={isExpanded ? t('leadsExpand.collapseLabel') : t('leadsExpand.expandLabel')}
                 title={isExpanded ? t('leadsExpand.collapseLabel') : t('leadsExpand.expandLabel')}
                 aria-expanded={isExpanded} aria-haspopup="dialog"
-                style={{ height: 18, width: 18, minWidth: 18, border: 'none' }}>
+                >
                 {isExpanded ? <ChevronDown size={12} aria-hidden="true" /> : <ChevronRight size={12} aria-hidden="true" />}
               </Button>
               {/* Stop propagation so clicks inside the panel don't fire the row's own onClick */}
