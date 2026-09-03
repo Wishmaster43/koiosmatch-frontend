@@ -6,6 +6,7 @@
  * TenantSwitcher below = the tenant dropdown shown at the top of the sidebar.
  */
 import { useState } from 'react'
+import { tintBg, tintBorder } from '@/lib/tint'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '@/context/AuthContext'
 import { canAccessPage } from '@/lib/access'
@@ -120,9 +121,12 @@ function SubNavItem({ item, active, onNavigate }) {
       }}
     >
       <div className="flex-shrink-0 rounded-full"
-        style={{ width: 4, height: 4, marginLeft: 2,
-          // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- chrome accent surface (active nav marker/brand dot, see the adjacent ACCENT-INK/SIDEBAR-CONTRAST comments), not an action surface
-          background: active ? 'var(--color-primary)' : 'currentColor' }} />
+        // MERKSTIP-TINT-1 (Danny 04-09: "merkstippen = tintpaar"): a placement marker
+        // wears the ACTIVE tint pair (16/50), never the raw brand fill (PRIMAIR-VLAK-1).
+        style={{ width: 4, height: 4, marginLeft: 2, boxSizing: 'border-box',
+          // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- tintBg/tintBorder ARE the canonical §4 tint helpers; the primary token here is only their argument
+          background: active ? tintBg('var(--color-primary)', true) : 'currentColor',
+          border: active ? `1px solid ${tintBorder('var(--color-primary)', true)}` : 'none' }} />
       <span style={{ fontSize: 12, fontWeight: active ? 500 : 400 }}>{item.label}</span>
     </button>
   )
@@ -192,8 +196,10 @@ function NavItem({ item, activePage, expanded, openItems, toggleOpen, onNavigate
             ) : (
               !item.soon && isActive && (
                 <span className="rounded-full"
-                  // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- chrome accent surface (active nav marker/brand dot, see the adjacent ACCENT-INK/SIDEBAR-CONTRAST comments), not an action surface
-                  style={{ width: 5, height: 5, background: 'var(--color-primary)', flexShrink: 0 }} />
+                  // MERKSTIP-TINT-1 (Danny 04-09): sub-item marker on the active tint pair, not the raw brand fill.
+                  style={{ width: 5, height: 5, boxSizing: 'border-box', flexShrink: 0,
+                    // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- tintBg/tintBorder ARE the canonical §4 tint helpers; the primary token here is only their argument
+                    background: tintBg('var(--color-primary)', true), border: `1px solid ${tintBorder('var(--color-primary)', true)}` }} />
               )
             )}
           </>

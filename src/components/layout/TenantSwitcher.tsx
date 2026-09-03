@@ -3,6 +3,7 @@
  * can search and switch tenant. Extracted from Sidebar.
  */
 import { useState, useEffect, useRef } from 'react'
+import { tintBg, tintBorder } from '@/lib/tint'
 import type { UIEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '@/context/AuthContext'
@@ -207,8 +208,9 @@ export default function TenantSwitcher({ expanded }: { expanded?: boolean }) {
                   </div>
                   {switching === tn.id
                     ? <span style={{ display: 'flex', color: 'var(--text-muted)' }}><Spinner size={13} label={t('loading')} /></span>
-                    // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- active-tenant dot: a placement marker in accent colour (nav marker), not an action surface
-                    : isActive && <div className="flex-shrink-0 rounded-full" style={{ width: 6, height: 6, background: 'var(--color-primary)' }} />}
+                    // MERKSTIP-TINT-1 (Danny 04-09): the active-tenant marker wears the active tint pair, never the raw brand fill.
+                    // eslint-disable-next-line huisstijlLegacy/no-restricted-syntax -- tintBg/tintBorder ARE the canonical §4 tint helpers; the primary token here is only their argument
+                    : isActive && <div className="flex-shrink-0 rounded-full" style={{ width: 6, height: 6, boxSizing: 'border-box', background: tintBg('var(--color-primary)', true), border: `1px solid ${tintBorder('var(--color-primary)', true)}` }} />}
                 </button>
               )
             })}
