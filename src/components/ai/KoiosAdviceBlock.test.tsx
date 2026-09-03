@@ -109,3 +109,18 @@ describe('KoiosAdviceBlock', () => {
     window.removeEventListener('km:ask-koios', onAsk)
   })
 })
+
+// A reason that already ends a sentence must not produce a double period in the question.
+describe('KoiosAdviceBlock · question composition', () => {
+  it("strips the advice text's trailing period before interpolating it", async () => {
+    const { default: userEvent } = await import('@testing-library/user-event')
+    const spy = vi.fn(); const { ASK_KOIOS_EVENT } = await import('@/lib/koiosBridge'); window.addEventListener(ASK_KOIOS_EVENT, (e: Event) => spy((e as CustomEvent).detail))
+    const { render, screen } = await import('@testing-library/react')
+    const Block = (await import('./KoiosAdviceBlock')).default
+    render(<Block namespace="candidates" insights={[{ type: 'Plan intake', color: 'var(--color-primary)', text: 'Er is nog geen intake gepland.' }]} />)
+    const rows = screen.getAllByText(/Plan intake/); rows[0].click()
+    const btn = await screen.findByRole('button', { name: 'common:koios.assistant.askKoios' })
+    await userEvent.click(btn)
+    expect(String(spy.mock.calls[0]?.[0]?.text ?? '')).not.toMatch(/\.\./)
+  })
+})

@@ -105,7 +105,7 @@ export default function KoiosAdviceBlock({ namespace, insights, onRefresh, conte
                       <div style={{ padding: '0 10px 8px 24px', display: 'flex', alignItems: 'center', gap: 8 }}>
                         <span style={{ fontSize: 12, color: 'var(--text)', lineHeight: 1.5, flex: 1 }}>{ins.text}</span>
                         <Button variant="ghost" size="sm"
-                          onClick={() => askKoios(t('common:koios.adviceAskTemplate', { advice: ins.text }), contextRef)}
+                          onClick={() => askKoios(t('common:koios.adviceAskTemplate', { advice: String(ins.text).replace(/[.!?]\s*$/, '') }), contextRef)}
                           title={t('common:koios.assistant.askKoios')}>
                           {t('common:koios.assistant.askKoios')}
                         </Button>
