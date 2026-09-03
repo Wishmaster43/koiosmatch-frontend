@@ -352,10 +352,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem('km_session')
     // Allow the MFA-gate signal to fire again in a fresh session (see api.ts).
     sessionStorage.removeItem('km_mfa_gate')
+    // AUDIT 03-09 (frontend-security-quality-1/-15, CRITICAL): the next user in this
+    // tab must never be served the previous user's (possibly another tenant's) data.
+    // Mirror setActiveTenant: drop the per-tenant app cache, clear React Query, and
+    // hard-reload so the module-scope caches (lookups, all-settings, KPI) die with it.
+    localStorage.removeItem('enabled_apps')
+    queryClient.clear()
     setUser(null)
     setActiveTenantState(null)
     setTenants([])
     setAccessiblePages([])
+    window.location.reload()
   }, [])
 
   // ── Role / permission helpers (UI gating only — NOT security) ────────────────

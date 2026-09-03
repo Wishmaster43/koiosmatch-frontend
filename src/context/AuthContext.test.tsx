@@ -15,10 +15,11 @@ import type { ReactNode } from 'react'
 import { renderHook, waitFor } from '@testing-library/react'
 import api from '@/lib/api'
 import { AuthProvider, useAuth } from './AuthContext'
+import { queryClient } from '@/lib/queryClient'
 
 vi.mock('@/lib/api', async () => {
   const actual = await vi.importActual('@/lib/api')
-  return { ...actual, default: { get: vi.fn() } }
+  return { ...actual, default: { get: vi.fn(), post: vi.fn(async () => ({ data: {} })) } }
 })
 
 const wrapper = ({ children }: { children: ReactNode }) => <AuthProvider>{children}</AuthProvider>
@@ -68,5 +69,30 @@ describe('AuthContext · dashboardType() precedence', () => {
 
     await waitFor(() => expect(result.current?.loading).toBe(false))
     expect(result.current?.dashboardType()).toBe('readonly')
+  })
+})
+
+// AUDIT 03-09 frontend-security-quality-1 (CRITICAL): logging out must leave nothing of the
+// previous user behind in this tab — React Query cache, the per-tenant app cache, storage —
+// and must hard-reload so module-scope caches restart (mirrors setActiveTenant).
+describe('AuthContext · logout leaves no cached data behind', () => {
+  it('clears the query cache and the tenant-scoped storage keys, then reloads', async () => {
+    const reload = vi.fn()
+    const original = window.location
+    Object.defineProperty(window, 'location', { configurable: true, value: { ...original, reload } })
+    const clearSpy = vi.spyOn(queryClient, 'clear')
+    localStorage.setItem('enabled_apps', '["whatsapp"]')
+    localStorage.setItem('active_tenant', 'demo')
+    queryClient.setQueryData(['users', 'demo'], [{ id: 'u1', name: 'Vorige gebruiker' }])
+    vi.mocked(api.get).mockResolvedValue({ data: { user: null } })
+    const { result } = renderHook(() => useAuth(), { wrapper })
+    await waitFor(() => expect(result.current).not.toBeNull())
+    await result.current!.logout()
+    expect(clearSpy).toHaveBeenCalled()
+    expect(queryClient.getQueryData(['users', 'demo'])).toBeUndefined()
+    expect(localStorage.getItem('enabled_apps')).toBeNull()
+    expect(localStorage.getItem('active_tenant')).toBeNull()
+    expect(reload).toHaveBeenCalled()
+    Object.defineProperty(window, 'location', { configurable: true, value: original })
   })
 })
