@@ -62,6 +62,8 @@ import ContactConversationsSection from './ContactConversationsSection'
 import ContactNotesTab from './ContactNotesTab'
 // NOTITIE-DOORLINK-1: read-only linked-notes feed under the contact's own notes.
 import NoteFeedList from '@/components/drawer/tabs/notes/NoteFeedList'
+// TIJDLIJN-SUBDRILL-1: the contact's own activity log (LOC-DEPT-CHANGELOG-1).
+import SubEntityTimelineTab from './SubEntityTimelineTab'
 import { useCustomFields } from '@/lib/useCustomFields'
 import { useContactFunctions } from '@/lib/useContactFunctions'
 import { useGenders } from '@/lib/useGenders'
@@ -116,7 +118,8 @@ export default function ContactDetail({ contact, locations, departments, statuse
   // SCOPED-LIST-TAB-1/GESPREK-CONTACT-1 added 'opportunities'/'conversations', right after
   // Gegevens and Taken respectively (§3A — same shared tabs Location/DepartmentDetail carry).
   // CONTACT-NOTITIES-2: 'notes' joins right before 'links' (tab-order canon, §3A).
-  const [subTab, setSubTab] = useState<'data' | 'opportunities' | 'tasks' | 'conversations' | 'extra' | 'notes' | 'links'>('data')
+  // TIJDLIJN-SUBDRILL-1: 'timeline' second-to-last, before 'links'.
+  const [subTab, setSubTab] = useState<'data' | 'opportunities' | 'tasks' | 'conversations' | 'extra' | 'notes' | 'timeline' | 'links'>('data')
   // Contact function (job title) is a lookup combobox, split from the candidate
   // function list (FUNCTIONS-SPLIT-1) — never a plain free-text field.
   const { contactFunctions, allowFreeEntry } = useContactFunctions()
@@ -363,6 +366,8 @@ export default function ContactDetail({ contact, locations, departments, statuse
           // CONTACT-NOTITIES-2: always visible (mirrors the 'data'/'tasks' siblings,
           // never gated on data presence) and BEFORE 'links', per tab-order canon.
           { id: 'notes', label: t('contacts.detail.subtabs.notes') },
+          // TIJDLIJN-SUBDRILL-1: timeline second-to-last, before Koppelingen (§3A(d)).
+          { id: 'timeline', label: t('drawer.tabs.timeline') },
           ...(showKoppelingen ? [{ id: 'links', label: t('common:backofficeLinks.tabLabel') }] : []),
         ]}
         active={subTab}
@@ -446,6 +451,9 @@ export default function ContactDetail({ contact, locations, departments, statuse
           <NoteFeedList entity="customers" id={contact.customerId}
             sub={{ kind: 'contacts', id: contact.id as Id }} />
         </>
+      )}
+      {subTab === 'timeline' && contact.customerId != null && (
+        <SubEntityTimelineTab endpoint={`/customers/${contact.customerId}/contacts/${contact.id}/activity`} />
       )}
       {subTab === 'links' && showKoppelingen && (
         <BackofficeLinksTab entity="contacts" id={contact.id as Id} helloflexLink={contact.helloflexLink} shiftmanagerLink={contact.shiftmanagerLink} canLink={canLinkBackoffice} />

@@ -277,6 +277,8 @@ export default function DepartmentDetail({ department, locations, statuses, cont
           // TAKEN-OP-AFDELING-1: TaskLinkResolver already knows 'department' → task_links.
           { id: 'tasks',     label: t('drawer.tabs.tasks') },
           ...(customFieldDefs.length > 0 ? [{ id: 'extra', label: t('drawer.tabs.extra') }] : []),
+          // TIJDLIJN-SUBDRILL-1: timeline second-to-last, before Koppelingen (§3A(d)).
+          { id: 'timeline',  label: t('drawer.tabs.timeline') },
           // EXTRACT-1: the shared Koppelingen sub-tab, last when it has content.
           // DD-FE-6 ("no empty tabs"): hidden when no connector app is enabled.
           ...(showKoppelingen ? [{ id: 'links', label: t('common:backofficeLinks.tabLabel') }] : []),

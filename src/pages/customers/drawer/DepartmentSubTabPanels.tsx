@@ -18,11 +18,13 @@ import ScopedOpportunitiesTab from './ScopedOpportunitiesTab'
 import EntityTasksTab from '@/components/drawer/tabs/EntityTasksTab'
 import CustomFieldsTab from '@/components/drawer/CustomFieldsTab'
 import BackofficeLinksTab from '@/components/drawer/BackofficeLinksTab'
+// TIJDLIJN-SUBDRILL-1: the department's own activity log (LOC-DEPT-CHANGELOG-1).
+import SubEntityTimelineTab from './SubEntityTimelineTab'
 import type { Department } from '@/types/customer'
 import type { Id } from '@/types/common'
 
 type Tx = (key: string, opts?: Record<string, unknown>) => string
-export type DepartmentSubTab = 'data' | 'contacts' | 'vacancies' | 'applications' | 'notes' | 'documents' | 'matches' | 'opportunities' | 'tasks' | 'extra' | 'links'
+export type DepartmentSubTab = 'data' | 'contacts' | 'vacancies' | 'applications' | 'notes' | 'documents' | 'matches' | 'opportunities' | 'tasks' | 'extra' | 'timeline' | 'links'
 
 // Renders the active non-data, non-contacts sub-tab body for DepartmentDetail.
 export default function DepartmentSubTabPanels({ subTab, department, customerId, customerName, canLinkBackoffice, showKoppelingen, onSave, t }: {
@@ -75,6 +77,10 @@ export default function DepartmentSubTabPanels({ subTab, department, customerId,
       {subTab === 'extra' && (
         <CustomFieldsTab entityType="customer_department" values={department.customFields ?? {}}
           onSave={patch => onSave(department.id as Id, { customFields: { ...department.customFields, ...patch } })} />
+      )}
+
+      {subTab === 'timeline' && customerId != null && (
+        <SubEntityTimelineTab endpoint={`/customers/${customerId}/departments/${department.id}/activity`} />
       )}
 
       {subTab === 'links' && showKoppelingen && (

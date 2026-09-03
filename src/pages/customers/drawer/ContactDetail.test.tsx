@@ -478,6 +478,26 @@ describe('ContactDetail · changelog (LOC-DEPT-CHANGELOG-1)', () => {
 })
 
 /**
+ * TIJDLIJN-SUBDRILL-1 — the timeline tab shows this contact's own activity log
+ * (LOC-DEPT-CHANGELOG-1). Proves the tab renders and GETs the correct endpoint.
+ */
+describe('ContactDetail · timeline tab (TIJDLIJN-SUBDRILL-1)', () => {
+  it('renders the timeline tab and opens it via the sub-tab bar', async () => {
+    const user = userEvent.setup()
+    render(<ContactDetail contact={baseContact()} locations={locations} departments={departments} statuses={statuses}
+      onSave={vi.fn()} onDelete={vi.fn()} close={vi.fn()} />)
+
+    // Find and click the timeline tab.
+    const timelineTab = screen.getByRole('tab', { name: ct('drawer.tabs.timeline') })
+    expect(timelineTab).toBeInTheDocument()
+    await user.click(timelineTab)
+
+    // Verify the endpoint is called when the tab opens.
+    await waitFor(() => expect(vi.mocked(api.get)).toHaveBeenCalledWith('/customers/cust-1/contacts/c1/activity', expect.anything()))
+  })
+})
+
+/**
  * SCOPED-LIST-TAB-1 — the contact's own Kansen sub-tab (mirrors Location/
  * DepartmentDetail's identical wiring). Mounts the REAL ScopedOpportunitiesTab
  * (no stub) so the assertion below proves the ACTUAL request — method + route +

@@ -493,6 +493,25 @@ describe('DepartmentDetail · changelog (LOC-DEPT-CHANGELOG-1)', () => {
 })
 
 /**
+ * TIJDLIJN-SUBDRILL-1 — the timeline tab shows this department's own activity log
+ * (LOC-DEPT-CHANGELOG-1). Proves the tab renders and GETs the correct endpoint.
+ */
+describe('DepartmentDetail · timeline tab (TIJDLIJN-SUBDRILL-1)', () => {
+  it('renders the timeline tab and opens it via the sub-tab bar', async () => {
+    const user = userEvent.setup()
+    render(<DepartmentDetail department={department()} onSave={vi.fn()} {...baseProps} />)
+
+    // Find and click the timeline tab.
+    const timelineTab = screen.getByRole('tab', { name: ct('drawer.tabs.timeline') })
+    expect(timelineTab).toBeInTheDocument()
+    await user.click(timelineTab)
+
+    // Verify the endpoint is called when the tab opens.
+    await waitFor(() => expect(vi.mocked(api.get)).toHaveBeenCalledWith('/customers/cust-1/departments/d1/activity', expect.anything()))
+  })
+})
+
+/**
  * AFDELING-SAMENVOEGEN-1 — mirrors LocationDetail's merge contract: DUPLICATE
  * in the path, SURVIVOR as `target_id` in the body.
  */

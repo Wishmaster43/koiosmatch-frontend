@@ -925,6 +925,25 @@ describe('LocationDetail · changelog (LOC-DEPT-CHANGELOG-1)', () => {
   })
 })
 
+/**
+ * TIJDLIJN-SUBDRILL-1 — the timeline tab shows this location's own activity log
+ * (LOC-DEPT-CHANGELOG-1). Proves the tab renders and GETs the correct endpoint.
+ */
+describe('LocationDetail · timeline tab (TIJDLIJN-SUBDRILL-1)', () => {
+  it('renders the timeline tab in the expected position and opens it via the sub-tab bar', async () => {
+    const user = userEvent.setup()
+    render(<LocationDetail location={location()} onSave={vi.fn()} {...baseProps} />)
+
+    // Find and click the timeline tab.
+    const timelineTab = screen.getByRole('tab', { name: ct('drawer.tabs.timeline') })
+    expect(timelineTab).toBeInTheDocument()
+    await user.click(timelineTab)
+
+    // Verify the endpoint is called when the tab opens.
+    await waitFor(() => expect(vi.mocked(api.get)).toHaveBeenCalledWith('/customers/cust-1/locations/loc-1/activity', expect.anything()))
+  })
+})
+
 /** TAKEN-OP-LOCATIE-1 — the Taken sub-tab mounts the shared EntityTasksTab with
  *  this location's own token/id (TaskLinkResolver::MODELS['customer_location']). */
 describe('LocationDetail · Taken sub-tab (TAKEN-OP-LOCATIE-1)', () => {

@@ -61,6 +61,8 @@ import ScopedMatchesTab from './ScopedMatchesTab'
 // SCOPED-LIST-TAB-1: this location's own Kansen sub-tab, right after Matches
 // (§3A — shared config-driven tab, never a forked copy — mirrors DepartmentDetail).
 import ScopedOpportunitiesTab from './ScopedOpportunitiesTab'
+// TIJDLIJN-SUBDRILL-1: the location's own activity log (LOC-DEPT-CHANGELOG-1).
+import SubEntityTimelineTab from './SubEntityTimelineTab'
 // SOLLICITATIES-SCOPE-1 (Danny asked 3x at customer level, then again here): the
 // location's own Sollicitaties sub-tab — reuses the shared CustomerApplicationsList
 // (its `vacancyIds` mode) fed by this location's OWN vacancy ids.
@@ -181,7 +183,8 @@ export default function LocationDetail({
   // added 'tasks' (KLANTLOCATIE-TAAK-1 — the
   // WORKLIST note about "no location Taken ("Tasks") tab" is now superseded by that ticket).
   // NOTES-LOC-DEPT-1/DOCS-LOC-DEPT-1 added 'notes'/'documents', right after 'applications'.
-  const [subTab, setSubTab] = useState<'address' | 'departments' | 'contacts' | 'vacancies' | 'applications' | 'notes' | 'documents' | 'matches' | 'opportunities' | 'tasks' | 'extra' | 'links'>('address')
+  // TIJDLIJN-SUBDRILL-1: 'timeline' second-to-last, before 'links'.
+  const [subTab, setSubTab] = useState<'address' | 'departments' | 'contacts' | 'vacancies' | 'applications' | 'notes' | 'documents' | 'matches' | 'opportunities' | 'tasks' | 'extra' | 'timeline' | 'links'>('address')
 
   const statusOptions = statuses.map(s => ({ value: String(s.id ?? s.value), label: s.label }))
 
@@ -300,6 +303,8 @@ export default function LocationDetail({
           // TAKEN-OP-LOCATIE-1: TaskLinkResolver already knows 'customer_location' → task_links.
           { id: 'tasks',       label: t('drawer.tabs.tasks') },
           ...(customFieldDefs.length > 0 ? [{ id: 'extra', label: t('drawer.tabs.extra') }] : []),
+          // TIJDLIJN-SUBDRILL-1: timeline second-to-last, before Koppelingen (§3A(d)).
+          { id: 'timeline',    label: t('drawer.tabs.timeline') },
           // EXTRACT-1: the shared Koppelingen sub-tab, always last (§3A/§11) — the
           // shared common:backofficeLinks.tabLabel key, not this file's own labels.
           { id: 'links', label: t('common:backofficeLinks.tabLabel') },
@@ -372,6 +377,10 @@ export default function LocationDetail({
       {subTab === 'extra' && (
         <CustomFieldsTab entityType="customer_location" values={l.customFields ?? {}}
           onSave={patch => onSave(l.id as Id, { customFields: { ...l.customFields, ...patch } })} />
+      )}
+
+      {subTab === 'timeline' && customerId != null && (
+        <SubEntityTimelineTab endpoint={`/customers/${customerId}/locations/${l.id}/activity`} />
       )}
 
       {subTab === 'links' && (
