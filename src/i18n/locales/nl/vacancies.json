@@ -542,7 +542,7 @@
     "empty": "Nog geen taken voor deze vacature",
     "loading": "Taken laden…",
     "error": "Taken konden niet worden geladen",
-    "openTask": "Open taak",
+    "openTask": "Taak openen",
     "searchPlaceholder": "Zoek taak…"
   },
   "appointmentsTab": {

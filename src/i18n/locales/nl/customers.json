@@ -267,7 +267,7 @@
         "empty": "Nog geen taken voor deze locatie",
         "loading": "Taken laden…",
         "error": "Taken konden niet worden geladen",
-        "openTask": "Open taak",
+        "openTask": "Taak openen",
         "searchPlaceholder": "Zoek taak…"
       },
       "billingEmail": "Factuur e-mailadres"
@@ -329,7 +329,7 @@
         "empty": "Nog geen taken voor deze afdeling",
         "loading": "Taken laden…",
         "error": "Taken konden niet worden geladen",
-        "openTask": "Open taak",
+        "openTask": "Taak openen",
         "searchPlaceholder": "Zoek taak…"
       },
       "mergeDepartment": "Afdeling samenvoegen",
@@ -436,7 +436,7 @@
       "empty": "Nog geen taken voor deze contactpersoon",
       "loading": "Taken laden…",
       "error": "Taken konden niet worden geladen",
-      "openTask": "Open taak",
+      "openTask": "Taak openen",
       "searchPlaceholder": "Zoek taak…"
     },
     "openContact": "Open contactpersoon",
@@ -582,6 +582,7 @@
   },
   "notes": {
     "notes": "Notities",
+    "linkedNotes": "Gekoppelde notities",
     "newNote": "Nieuwe notitie",
     "type": "Type",
     "save": "Opslaan",
@@ -819,7 +820,7 @@
     "empty": "Nog geen taken voor deze klant",
     "loading": "Taken laden…",
     "error": "Taken konden niet worden geladen",
-    "openTask": "Open taak",
+    "openTask": "Taak openen",
     "searchPlaceholder": "Zoek taak…"
   },
   "matches": {
