@@ -78,7 +78,7 @@ export default function DepartmentSubTabPanels({ subTab, department, customerId,
       )}
 
       {subTab === 'links' && showKoppelingen && (
-        <BackofficeLinksTab entity="departments" id={department.id as Id} helloflexLink={department.helloflexLink} shiftmanagerLink={department.shiftmanagerLink} canLink={canLinkBackoffice} />
+        <BackofficeLinksTab entity="departments" id={department.id as Id} helloflexLink={department.helloflexLink} shiftmanagerLink={department.shiftmanagerLink} canLink={canLinkBackoffice} refetchUrl={customerId ? `/customers/${customerId}/departments/${department.id}` : undefined} />
       )}
     </>
   )

@@ -375,7 +375,7 @@ export default function LocationDetail({
       )}
 
       {subTab === 'links' && (
-        <BackofficeLinksTab entity="locations" id={l.id as Id} helloflexLink={l.helloflexLink} shiftmanagerLink={l.shiftmanagerLink} canLink={canLinkBackoffice}>
+        <BackofficeLinksTab entity="locations" id={l.id as Id} helloflexLink={l.helloflexLink} shiftmanagerLink={l.shiftmanagerLink} canLink={canLinkBackoffice} refetchUrl={customerId ? `/customers/${customerId}/locations/${l.id}` : undefined}>
           {/* PDOK sits in Koppelingen, like every other integration (Danny 28-07).
               KLANTLOCATIE-GEOCODE-1 (backend 2026-08-01): the per-site re-geocode route
               now exists, so this card ACTS as well as reads — mirroring the customer's

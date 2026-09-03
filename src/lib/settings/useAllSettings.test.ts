@@ -14,6 +14,7 @@ import { renderHook, waitFor, act } from '@testing-library/react'
 import api, { getActiveTenantId } from '../api'
 import {
   useAllSettings, useSettingsLoaded, useSettingsLoadState, saveSettingsKeys, invalidateAllSettingsCache,
+  getBoolSetting,
 } from './useAllSettings'
 
 // The default client (get/post) and getActiveTenantId are stubbed — the latter
@@ -170,5 +171,33 @@ describe('useSettingsLoadState · load failure + retry', () => {
 
     const { result } = renderHook(() => useSettingsLoadState())
     await waitFor(() => expect(result.current.state).toBe('loaded'))
+  })
+})
+
+describe('getBoolSetting · coercing backend boolean encodings', () => {
+  it('returns the fallback when the key is absent', () => {
+    expect(getBoolSetting({}, 'missing_key', true)).toBe(true)
+    expect(getBoolSetting({}, 'missing_key', false)).toBe(false)
+    expect(getBoolSetting(null, 'any_key', true)).toBe(true)
+    expect(getBoolSetting(undefined, 'any_key', false)).toBe(false)
+  })
+
+  it('treats true (boolean) and \'true\' (string) as true', () => {
+    expect(getBoolSetting({ key: true }, 'key', false)).toBe(true)
+    expect(getBoolSetting({ key: 'true' }, 'key', false)).toBe(true)
+  })
+
+  it('treats 1 (number) and \'1\' (string) as true', () => {
+    expect(getBoolSetting({ key: 1 }, 'key', false)).toBe(true)
+    expect(getBoolSetting({ key: '1' }, 'key', false)).toBe(true)
+  })
+
+  it('treats false, \'false\', 0, \'0\', and other values as false', () => {
+    expect(getBoolSetting({ key: false }, 'key', true)).toBe(false)
+    expect(getBoolSetting({ key: 'false' }, 'key', true)).toBe(false)
+    expect(getBoolSetting({ key: 0 }, 'key', true)).toBe(false)
+    expect(getBoolSetting({ key: '0' }, 'key', true)).toBe(false)
+    expect(getBoolSetting({ key: '' }, 'key', true)).toBe(false)
+    expect(getBoolSetting({ key: 'anything-else' }, 'key', true)).toBe(false)
   })
 })

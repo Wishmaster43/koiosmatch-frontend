@@ -21,14 +21,14 @@ vi.mock('./useSmSync', () => ({ useSmSync: () => mockUseSmSync() }))
 
 beforeEach(() => {
   vi.clearAllMocks()
-  mockUseAuth.mockReturnValue({ hasPermission: () => true })
+  mockUseAuth.mockReturnValue({ isSuperAdmin: () => true })
   mockUseSmConnections.mockReturnValue({ connections: [{ value: 'c1', label: 'demo — shiftmanager (host)' }], loading: false })
   mockUseSmSync.mockReturnValue({ syncing: false, result: null, sync: mockSync })
 })
 
 describe('SmSyncButton', () => {
-  it('disables the button (never hides it) when the user lacks sync.refresh', () => {
-    mockUseAuth.mockReturnValue({ hasPermission: () => false })
+  it('disables the button (never hides it) when the user is not a superadmin', () => {
+    mockUseAuth.mockReturnValue({ isSuperAdmin: () => false })
     render(<SmSyncButton />)
     expect(screen.getByRole('button')).toBeDisabled()
   })

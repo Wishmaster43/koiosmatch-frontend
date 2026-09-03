@@ -2,10 +2,9 @@
  * SmSyncButton (SYNC-1) — the manual "Sync" action next to "Laatste sync" on the SM
  * dashboard charts. One active Shiftmanager connection syncs immediately; several open
  * a small SelectMenu picker first (never guesses which account — same rule as the
- * workflow sm_* modules' own connection_id field). Gated on the `sync.refresh`
- * permission, disabled (not hidden) with a tooltip when missing — mirrors the existing
- * retired Settings → Sync pattern rather than inventing a second convention;
- * the backend re-checks the permission + the connection regardless (§7).
+ * workflow sm_* modules' own connection_id field). Gated on superadmin role (route is
+ * backend-superadmin-only), disabled (not hidden) with a tooltip when missing — the
+ * backend re-checks the role regardless (§7).
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -20,8 +19,7 @@ import { useSmSync } from './useSmSync'
 export default function SmSyncButton() {
   const { t } = useTranslation('shiftmanager')
   const auth = useAuth()
-  const hasPermission = auth?.hasPermission ?? (() => false)
-  const canSync = hasPermission('sync.refresh')
+  const canSync = auth?.isSuperAdmin?.() ?? false
   const { connections, loading: loadingConnections } = useSmConnections()
   const { syncing, result, sync } = useSmSync()
   // The picker only replaces the button once it's actually needed (2+ connections) —

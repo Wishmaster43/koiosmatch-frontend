@@ -43,13 +43,17 @@ export interface BackofficeLinksTabProps {
   // per entity — see BackofficeEntityRegistry). The "Koppelen" buttons render
   // disabled, never gone, when false; the backend re-checks regardless (§7).
   canLink: boolean
+  // Nested entities (locations under customers, departments under customers) use
+  // a different refetch URL than the default `/{entity}/{id}` — e.g.
+  // `/customers/{customerId}/locations/{id}`. Pass it here to fix the 404.
+  refetchUrl?: string
   // Entity-specific extra cards rendered ABOVE HelloFlex/Shiftmanager (mirrors the
   // candidate's PDOK card, which stays candidate-only and is passed in here).
   children?: ReactNode
 }
 
 // Renders the koppelen tab: gates the HelloFlex/Shiftmanager cards on which connector apps are enabled, and owns the link/sync mutations below.
-export default function BackofficeLinksTab({ entity, id, helloflexLink, shiftmanagerLink, canLink, children }: BackofficeLinksTabProps) {
+export default function BackofficeLinksTab({ entity, id, helloflexLink, shiftmanagerLink, canLink, refetchUrl, children }: BackofficeLinksTabProps) {
   const { t } = useTranslation('common')
   // GATING-MATRIX (Danny 23-07): the koppel-cards gate on the CONNECTOR APP ONLY —
   // the sm/hf MODULE is the read/reports side and must NOT reveal the koppelen
@@ -79,7 +83,8 @@ export default function BackofficeLinksTab({ entity, id, helloflexLink, shiftman
   // Re-fetch the record from its own entity route and rebuild the link overrides; only overwrites state when the response genuinely carries backoffice_links.
   const refetchLinks = async () => {
     try {
-      const res = await api.get(`/${entity}/${id}`)
+      const url = refetchUrl ?? `/${entity}/${id}`
+      const res = await api.get(url)
       if (!mountedRef.current || !res) return
       const fresh = unwrap<{ backoffice_links?: ApiBackofficeLink[] | null }>(res)
       // Only a response that actually carries the relation counts as a real

@@ -190,6 +190,34 @@ describe('BackofficeLinksTab · self-refresh after a mutation (KOPPELINGEN-REFRE
     expect(mockPost).toHaveBeenCalledWith('/sm_candidates/sync/428')
     await waitFor(() => expect(mockGet).toHaveBeenCalledWith('/candidates/1'))
   })
+
+  it('uses the refetchUrl prop for nested entities (locations under customers)', async () => {
+    mockPost.mockResolvedValue({ data: { link: { status: 'pending' } } })
+    mockGet.mockResolvedValue({
+      data: { backoffice_links: [{ system: 'helloflex', status: 'linked', external_id: '555' }] },
+    })
+    const user = userEvent.setup()
+    render(<BackofficeLinksTab entity="locations" id="9" helloflexLink={null} shiftmanagerLink={null} canLink refetchUrl="/customers/42/locations/9" />)
+    const [helloflexBtn] = screen.getAllByRole('button', { name: /backofficeLinks.common.linkButton/ })
+    await user.click(helloflexBtn)
+    expect(mockPost).toHaveBeenCalledWith('/sync/locations/9', { system: 'helloflex' })
+    // The refetchUrl prop must be used, not the default /{entity}/{id}.
+    await waitFor(() => expect(mockGet).toHaveBeenCalledWith('/customers/42/locations/9'))
+  })
+
+  it('uses the refetchUrl prop for departments under customers too', async () => {
+    mockPost.mockResolvedValue({ data: { link: { status: 'pending' } } })
+    mockGet.mockResolvedValue({
+      data: { backoffice_links: [{ system: 'shiftmanager', status: 'linked', external_id: '777' }] },
+    })
+    const user = userEvent.setup()
+    render(<BackofficeLinksTab entity="departments" id="3" helloflexLink={null} shiftmanagerLink={null} canLink refetchUrl="/customers/42/departments/3" />)
+    const [, shiftmanagerBtn] = screen.getAllByRole('button', { name: /backofficeLinks.common.linkButton/ })
+    await user.click(shiftmanagerBtn)
+    expect(mockPost).toHaveBeenCalledWith('/sync/departments/3', { system: 'shiftmanager' })
+    // The refetchUrl prop must be used, not the default /{entity}/{id}.
+    await waitFor(() => expect(mockGet).toHaveBeenCalledWith('/customers/42/departments/3'))
+  })
 })
 
 describe('BackofficeLinksTab · children slot (mirrors the candidate PDOK card)', () => {

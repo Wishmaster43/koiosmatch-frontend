@@ -193,14 +193,15 @@ export function invalidateAllSettingsCache(): void {
 }
 
 /**
- * Read a boolean setting EXACTLY like the settings form coerces it (`true`/`'true'`),
- * so a toggle and the screens that read it never disagree. A stored `1`/`'1'`/other
- * truthy-but-not-"true" value reads as false here too — matching the toggle's "off".
+ * Read a boolean setting, coercing the backend's various truthy encodings.
+ * The backend writes `true`/`'true'` for explicit truths and `'1'`/`1` for
+ * boolean-class settings; both patterns must read as true. A missing key
+ * returns the fallback; any other value (false, 'false', '0', 0, etc.) reads as false.
  */
 export function getBoolSetting(values: SettingsBlob | null | undefined, key: string, fallback: boolean): boolean {
   const raw = values?.[key]
   if (raw == null) return fallback
-  return raw === true || raw === 'true'
+  return raw === true || raw === 'true' || raw === 1 || raw === '1'
 }
 
 /** Read + parse a JSON-encoded setting value, falling back when absent/invalid. */
