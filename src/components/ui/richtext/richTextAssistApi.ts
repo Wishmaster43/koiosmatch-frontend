@@ -143,7 +143,9 @@ export async function assistRichText(
 // 'department' + 'vacancy' verified live in KoiosEntityGenerateController::ENTITIES (13-08).
 export type GenerateEntity = 'candidate' | 'customer' | 'location' | 'match' | 'department' | 'vacancy'
 
-interface ApiGenerateResponse { text: string }
+// KOIOS-FEEDBACK-FE-1 (measured, KoiosEntityGenerateController): this arm also
+// returns prompt_log_id — tolerant optional so an older cached response still maps.
+interface ApiGenerateResponse { text: string; prompt_log_id?: string }
 
 /**
  * POST /ai/koios/generate — a fresh text suggestion written FROM the entity's own
@@ -159,5 +161,7 @@ export async function generateEntityText(
   const res = await api.post<ApiGenerateResponse>('/ai/koios/generate',
     { entity, id },
     { signal, timeout: 60000, quietStatuses: [402, 403, 422, 503] })
-  return { kind: 'text', text: res.data.text ?? '' }
+  const promptLogId = typeof (res.data as { prompt_log_id?: unknown }).prompt_log_id === 'string'
+    ? (res.data as { prompt_log_id: string }).prompt_log_id : undefined
+  return { kind: 'text', text: res.data.text ?? '', promptLogId }
 }

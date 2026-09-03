@@ -23,6 +23,13 @@ vi.mock('./conversationAssistApi', async (importOriginal) => {
   return { ...actual, assistConversation: vi.fn() }
 })
 
+// Stub KoiosFeedback so we only assert it RENDERS, not its internal logic
+// (which has its own dedicated test suite).
+vi.mock('@/components/layout/koios/KoiosFeedback', () => ({
+  default: ({ promptLogId, surface }: { promptLogId?: string; surface: string }) =>
+    promptLogId ? <div data-testid={`koios-feedback-${surface}`} data-prompt-log-id={promptLogId} /> : null,
+}))
+
 describe('ConversationAssistSection · request per mode', () => {
   it('calls assistConversation with {id, mode: "summarize", language} when Samenvatten is clicked', async () => {
     vi.mocked(assistConversation).mockReset()
@@ -139,5 +146,42 @@ describe('ConversationAssistSection · failure', () => {
     render(<ConversationAssistSection conversationId="conv-1" hasMessages onApply={vi.fn()} />)
     await user.click(screen.getByRole('button', { name: 'Actiepunten' }))
     expect(await screen.findByText('Koios kon geen actiepunten herkennen.')).toBeInTheDocument()
+  })
+})
+
+describe('ConversationAssistSection · KoiosFeedback mounting (KOIOS-FEEDBACK-FE-1)', () => {
+  it('mounts KoiosFeedback with surface="conversation_assist" when result carries promptLogId', async () => {
+    vi.mocked(assistConversation).mockReset()
+    const user = userEvent.setup()
+    vi.mocked(assistConversation).mockResolvedValue({ kind: 'text', text: 'Summary.', promptLogId: 'pl-conv-1' })
+    render(<ConversationAssistSection conversationId="conv-1" hasMessages onApply={vi.fn()} />)
+    await user.click(screen.getByRole('button', { name: 'Samenvatten' }))
+    await screen.findByText('Summary.')
+    expect(screen.getByTestId('koios-feedback-conversation_assist')).toBeInTheDocument()
+    expect(screen.getByTestId('koios-feedback-conversation_assist')).toHaveAttribute('data-prompt-log-id', 'pl-conv-1')
+  })
+
+  it('does NOT mount KoiosFeedback when result has no promptLogId', async () => {
+    vi.mocked(assistConversation).mockReset()
+    const user = userEvent.setup()
+    vi.mocked(assistConversation).mockResolvedValue({ kind: 'text', text: 'Summary.' })
+    render(<ConversationAssistSection conversationId="conv-1" hasMessages onApply={vi.fn()} />)
+    await user.click(screen.getByRole('button', { name: 'Samenvatten' }))
+    await screen.findByText('Summary.')
+    expect(screen.queryByTestId('koios-feedback-conversation_assist')).not.toBeInTheDocument()
+  })
+
+  it('mounts KoiosFeedback on actions mode when promptLogId is present', async () => {
+    vi.mocked(assistConversation).mockReset()
+    const user = userEvent.setup()
+    vi.mocked(assistConversation).mockResolvedValue({
+      kind: 'actions',
+      items: [{ title: 'Call back', type: 'task', due_date: '2026-09-03', note_excerpt: null }],
+      promptLogId: 'pl-conv-2',
+    })
+    render(<ConversationAssistSection conversationId="conv-1" hasMessages onApply={vi.fn()} />)
+    await user.click(screen.getByRole('button', { name: 'Actiepunten' }))
+    await screen.findByText('Call back')
+    expect(screen.getByTestId('koios-feedback-conversation_assist')).toHaveAttribute('data-prompt-log-id', 'pl-conv-2')
   })
 })

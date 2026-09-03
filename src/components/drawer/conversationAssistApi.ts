@@ -33,13 +33,17 @@ export const ACTION_TYPE_LABEL_NL: Record<ConversationAssistActionType, string> 
   task: 'Taak', whatsapp: 'WhatsApp', appointment: 'Afspraak', notification: 'Melding',
 }
 // summarize returns prose; actions returns structured items — one discriminated
-// result so the caller never has to guess the shape by mode alone.
+// result so the caller never has to guess the shape by mode alone. Both carry
+// promptLogId (KOIOS-FEEDBACK-FE-1) so KoiosFeedback can vote on this answer.
 export type ConversationAssistResult =
-  | { kind: 'text'; text: string }
-  | { kind: 'actions'; items: ConversationAssistActionItem[] }
+  | { kind: 'text'; text: string; promptLogId?: string }
+  | { kind: 'actions'; items: ConversationAssistActionItem[]; promptLogId?: string }
 
-interface ApiTextResponse { text: string }
-interface ApiActionsResponse { items: ConversationAssistActionItem[] }
+// Both mode arms also return prompt_log_id (KoiosConversationAssistController,
+// measured at lines 123/216) — tolerant optional so an older cached response
+// still maps.
+interface ApiTextResponse { text: string; prompt_log_id?: string }
+interface ApiActionsResponse { items: ConversationAssistActionItem[]; prompt_log_id?: string }
 
 /**
  * POST /ai/koios/conversations/{id}/assist — one assist call over the thread's
@@ -58,7 +62,9 @@ export async function assistConversation(
   const res = await api.post<ApiTextResponse | ApiActionsResponse>(`/ai/koios/conversations/${id}/assist`,
     { mode, language },
     { signal, timeout: 60000, quietStatuses: [402, 422, 503] })
+  const promptLogId = typeof (res.data as { prompt_log_id?: unknown }).prompt_log_id === 'string'
+    ? (res.data as { prompt_log_id: string }).prompt_log_id : undefined
   return mode === 'actions'
-    ? { kind: 'actions', items: (res.data as ApiActionsResponse).items ?? [] }
-    : { kind: 'text', text: (res.data as ApiTextResponse).text ?? '' }
+    ? { kind: 'actions', items: (res.data as ApiActionsResponse).items ?? [], promptLogId }
+    : { kind: 'text', text: (res.data as ApiTextResponse).text ?? '', promptLogId }
 }

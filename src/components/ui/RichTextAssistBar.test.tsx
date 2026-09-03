@@ -34,6 +34,13 @@ vi.mock('./richtext/AssistActionsResultsPanel', () => ({
   ),
 }))
 
+// Stub KoiosFeedback so we only assert it RENDERS, not its internal logic
+// (which has its own dedicated test suite).
+vi.mock('@/components/layout/koios/KoiosFeedback', () => ({
+  default: ({ promptLogId, surface }: { promptLogId?: string; surface: string }) =>
+    promptLogId ? <div data-testid={`koios-feedback-${surface}`} data-prompt-log-id={promptLogId} /> : null,
+}))
+
 // Minimal recognizer stand-in: jsdom ships no Web Speech API, and the shared
 // KoiosVoiceButton renders NOTHING without one (its honest gate).
 class MockSpeechRecognition {
@@ -259,5 +266,29 @@ describe('RichTextAssistBar', () => {
 
     expect(screen.getByTestId('value'))
       .toHaveTextContent('<p>Eerste zin. &lt;script&gt;alert(1)&lt;/script&gt;</p>')
+  })
+
+  // KOIOS-FEEDBACK-FE-1: the generate surface mounts KoiosFeedback when the
+  // result carries promptLogId, enabling thumbs up/down on generated text.
+  it('mounts KoiosFeedback with surface="generate" when generateEntityText returns a promptLogId', async () => {
+    const user = userEvent.setup()
+    post.mockResolvedValue({ data: { text: 'Gegenereerde tekst', prompt_log_id: 'pl-gen-1' } })
+    render(<Host initial="" generate={{ entity: 'candidate', id: 'cand-1' }} />)
+
+    await user.click(screen.getByTestId('rte-assist-generate'))
+
+    await waitFor(() => expect(screen.getByTestId('koios-feedback-generate')).toBeInTheDocument())
+    expect(screen.getByTestId('koios-feedback-generate')).toHaveAttribute('data-prompt-log-id', 'pl-gen-1')
+  })
+
+  it('does NOT mount KoiosFeedback when generateEntityText result has no promptLogId', async () => {
+    const user = userEvent.setup()
+    post.mockResolvedValue({ data: { text: 'Gegenereerde tekst' } })
+    render(<Host initial="" generate={{ entity: 'candidate', id: 'cand-1' }} />)
+
+    await user.click(screen.getByTestId('rte-assist-generate'))
+
+    await waitFor(() => expect(screen.getByTestId('rte-assist-preview')).toBeInTheDocument())
+    expect(screen.queryByTestId('koios-feedback-generate')).not.toBeInTheDocument()
   })
 })

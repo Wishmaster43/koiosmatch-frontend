@@ -20,6 +20,7 @@ import KoiosAiMark from '@/components/ui/KoiosAiMark'
 import Spinner from '@/components/ui/Spinner'
 import CalloutBox from '@/components/ui/CalloutBox'
 import Button from '@/components/ui/Button'
+import KoiosFeedback from '@/components/layout/koios/KoiosFeedback'
 import { useConversationAssist } from './useConversationAssist'
 import { formatAssistResultForDraft } from './conversationAssistApply'
 import { ACTION_TYPE_LABEL_NL } from './conversationAssistApi'
@@ -127,6 +128,13 @@ export default function ConversationAssistSection({ conversationId, hasMessages,
             )}
             <Button variant="secondary" size="sm" onClick={discard}><X size={13} /> {t('conversations.assist.discard', { defaultValue: 'Verwerpen' })}</Button>
           </div>
+        </div>
+      )}
+
+      {/* KOIOS-FEEDBACK-FE-1, second surface: mount when result has promptLogId. */}
+      {status === 'success' && result?.promptLogId && (
+        <div style={{ marginTop: 6 }}>
+          <KoiosFeedback promptLogId={result.promptLogId} surface="conversation_assist" t={t} />
         </div>
       )}
     </div>

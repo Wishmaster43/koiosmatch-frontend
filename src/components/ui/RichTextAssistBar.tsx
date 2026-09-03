@@ -89,6 +89,7 @@ import CalloutBox from './CalloutBox'
 import Button from './Button'
 import AssistTextPreview from '@/components/ui/richtext/AssistTextPreview'
 import KoiosVoiceButton from '@/components/layout/koios/KoiosVoiceButton'
+import KoiosFeedback from '@/components/layout/koios/KoiosFeedback'
 import { useRichTextAssist } from './richtext/useRichTextAssist'
 import { appendDictatedText, applyRichTextAssist, hasPlainText, toPlainText } from './richtext/richTextAssistApply'
 import type { GenerateEntity, RichTextAssistMode } from './richtext/richTextAssistApi'
@@ -267,6 +268,16 @@ export default function RichTextAssistBar({ value, onChange, plainText = false, 
                   <X size={13} /> {t('notesAssist.discard')}
                 </Button>
               </div>
+            </div>
+          )}
+
+          {/* KOIOS-FEEDBACK-FE-1, third surface: mount only for the 'generate' action —
+              improve/summarize/actions results also carry promptLogId but have no
+              surface of their own in the KoiosFeedback vocabulary, so gating on
+              mode keeps a vote correctly attributed to the answer it was cast on. */}
+          {status === 'success' && mode === 'generate' && result?.promptLogId && (
+            <div style={{ marginTop: 6 }}>
+              <KoiosFeedback promptLogId={result.promptLogId} surface="generate" t={t} />
             </div>
           )}
         </div>
