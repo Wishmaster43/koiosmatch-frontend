@@ -38,7 +38,7 @@ export function useDashboardFilterPanel({
 
   // Three filter groups (period/branch/status) in the shape the shared right panel expects.
   const filterGroups = useMemo(() => [
-    { key: 'periode', label: t('filters.periodLabel'), selected: selPeriode,
+    { key: 'period', label: t('filters.periodLabel'), selected: selPeriode,
       options: periodOptions,
       onToggle: (v: string) => setSelPeriode(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]) },
     { key: 'vestiging', label: t('filters.locationLabel'), selected: selVestiging,

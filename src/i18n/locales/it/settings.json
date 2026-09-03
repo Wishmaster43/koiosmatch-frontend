@@ -3227,7 +3227,7 @@
     "matcherEmpty": "Nessuna opzione disponibile.",
     "contentTitle": "Modello e tono del brand",
     "templateLabel": "Modello",
-    "templateHint": "Usa doppie parentesi graffe per le parti di testo che il generatore inserirà in seguito, ad esempio {{functie}} o {{locatie}}.",
+    "templateHint": "Usa doppie parentesi graffe per le parti di testo che il generatore inserirà in seguito, ad esempio {{funzione}} o {{posizione}}.",
     "toneLabel": "Tono di voce",
     "tone": {
       "neutral": "Neutro",

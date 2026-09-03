@@ -17,7 +17,7 @@ export function buildShiftsFilterGroups({
 }: BuildShiftsFilterGroupsArgs): ShiftFilterGroup[] {
   const groups: ShiftFilterGroup[] = [
     {
-      key:      "periode",
+      key:      "period",
       label:    t('charts.filters.period'),
       selected: [period],
       options:  [
@@ -27,7 +27,7 @@ export function buildShiftsFilterGroups({
       onToggle: (v) => setPeriod(v),
     },
     {
-      key:      "jaren",
+      key:      "years",
       label:    t('charts.filters.years'),
       selected: selectedYears.map(String),
       options:  YEAR_OPTIONS.map((y) => ({ value: String(y), label: String(y) })),
@@ -37,7 +37,7 @@ export function buildShiftsFilterGroups({
 
   if (period === "month") {
     groups.push({
-      key:      "maanden",
+      key:      "months",
       label:    t('charts.filters.months'),
       // selectedMonths is always the real set now (default = all 12), so no empty-means-all fallback.
       selected: selectedMonths.map(String),
@@ -47,7 +47,7 @@ export function buildShiftsFilterGroups({
   }
 
   groups.push({
-    key:      "reeksen",
+    key:      "series",
     label:    t('charts.filters.series'),
     selected: visible,
     options:  SERIES.map((s) => ({ value: s.key, label: seriesLabel(s.key) })),
@@ -60,7 +60,7 @@ export function buildShiftsFilterGroups({
 
   if (filterOptions.job_types.length > 0) {
     groups.push({
-      key:      "functie",
+      key:      "jobType",
       label:    t('charts.filters.jobType'),
       selected: selectedJobTypes,
       options:  filterOptions.job_types.map((j) => ({ value: j, label: j })),
@@ -79,7 +79,7 @@ export function buildShiftsFilterGroups({
 
     if (customerOptions.length > 0) {
       groups.push({
-        key:      "klant",
+        key:      "customer",
         label:    t('charts.filters.customer'),
         type:     "search-select",
         selected: selectedCustomers,
@@ -103,7 +103,7 @@ export function buildShiftsFilterGroups({
 
     if (locationOptions.length > 0) {
       groups.push({
-        key:      "locatie",
+        key:      "location",
         label:    t('charts.filters.location'),
         type:     "search-select",
         selected: selectedLocations,

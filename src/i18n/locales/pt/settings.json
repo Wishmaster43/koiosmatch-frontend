@@ -3227,7 +3227,7 @@
     "matcherEmpty": "Não há opções disponíveis.",
     "contentTitle": "Modelo e voz da marca",
     "templateLabel": "Modelo",
-    "templateHint": "Use chavetas duplas para partes de texto que o gerador preenche mais tarde, por exemplo {{functie}} of {{locatie}}.",
+    "templateHint": "Use chavetas duplas para partes de texto que o gerador preenche mais tarde, por exemplo {{função}} ou {{localização}}.",
     "toneLabel": "Tom de voz",
     "tone": {
       "neutral": "Neutro",
