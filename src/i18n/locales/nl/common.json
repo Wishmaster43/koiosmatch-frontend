@@ -291,6 +291,7 @@
     "effort": {
       "label": "Inspanning",
       "default": "Standaard",
+      "defaultWith": "Standaard ({{level}})",
       "low": "Laag",
       "medium": "Gemiddeld",
       "high": "Hoog",

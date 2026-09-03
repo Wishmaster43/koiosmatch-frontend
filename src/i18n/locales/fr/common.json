@@ -291,6 +291,7 @@
     "effort": {
       "label": "Effort",
       "default": "Par défaut",
+      "defaultWith": "Par défaut ({{level}})",
       "low": "Faible",
       "medium": "Moyen",
       "high": "Élevé",

@@ -81,3 +81,5 @@ declare module '@/types/koios' {
 
 // K-147: the per-chat reasoning-effort override, the server's own scale (POST /ai/koios/chat `effort`).
 export type KoiosEffort = 'low' | 'medium' | 'high' | 'xhigh' | 'max'
+// The scale in ascending order — the picker ranks levels against the package ceiling with it.
+export const KOIOS_EFFORT_LEVELS: KoiosEffort[] = ['low', 'medium', 'high', 'xhigh', 'max']

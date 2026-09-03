@@ -45,7 +45,11 @@ vi.mock('@/lib/heavyGet', () => ({ heavyGet: () => Promise.resolve({ data: { dat
 // exactly one pickable row where a test needs to insert a manual mention.
 vi.mock('@/lib/api', async () => {
   const actual = await vi.importActual<typeof import('@/lib/api')>('@/lib/api')
-  return { ...actual, default: { get: vi.fn(() => Promise.resolve({ data: { data: [] } })) } }
+  // K-147: the effort picker reads /ai/koios/capabilities — answer it with a supported
+  // scale so the toolbar control renders; every other GET stays the empty list.
+  return { ...actual, default: { get: vi.fn((url: string) => Promise.resolve(url === '/ai/koios/capabilities'
+    ? { data: { data: { effort: { supported: true, options: ['low', 'medium', 'high', 'xhigh', 'max'], default: 'high', max: 'max' } } } }
+    : { data: { data: [] } })) } }
 })
 const mockGet = api.get as unknown as ReturnType<typeof vi.fn>
 // No AuthProvider wraps this test tree, and useAuth()'s default context value
@@ -491,10 +495,18 @@ describe('KoiosPanel · mention polish (27-08)', () => {
 
 // K-147 (Danny 2026-09-02): per-message effort override.
 describe('KoiosPanel · effort picker', () => {
+  // The shared mockGet was reset by an earlier block; answer the capabilities call
+  // again here so the capabilities-driven picker renders (supported, ceiling max).
+  beforeEach(() => {
+    mockGet.mockReset()
+    mockGet.mockImplementation((url: string) => Promise.resolve(url === '/ai/koios/capabilities'
+      ? { data: { data: { effort: { supported: true, options: ['low', 'medium', 'high', 'xhigh', 'max'], default: 'high', max: 'max' } } } }
+      : { data: { data: [] } }))
+  })
   it('renders the effort selector in the toolbar', async () => {
     renderWithQuery(<KoiosPanel open onClose={() => {}} onNavigate={() => {}} />)
     await screen.findByText('common:koios.radar.empty')
-    expect(screen.getByText('koios.effort.default')).toBeInTheDocument()
+    expect(await screen.findByText('koios.effort.defaultWith')).toBeInTheDocument()
   })
 
   it('sends effort in the request body when set to a non-default value', async () => {
@@ -503,7 +515,7 @@ describe('KoiosPanel · effort picker', () => {
     await screen.findByText('common:koios.radar.empty')
     const textarea = screen.getByPlaceholderText('koios.taskPlaceholder')
     // Click the effort picker and select "Hoog" (high)
-    const effortButtons = screen.getAllByText('koios.effort.default')
+    const effortButtons = await screen.findAllByText('koios.effort.defaultWith')
     const effortButton = effortButtons[effortButtons.length - 1]
     fireEvent.click(effortButton)
     await waitFor(() => {
@@ -535,7 +547,7 @@ describe('KoiosPanel · effort picker', () => {
   it('the effort trigger is named by its label AND its current value (§6)', async () => {
     renderWithQuery(<KoiosPanel open onClose={() => {}} onNavigate={() => {}} />)
     await screen.findByText('common:koios.radar.empty')
-    const trigger = screen.getByRole('button', { name: /koios\.effort\.label.*koios\.effort\.default/ })
+    const trigger = await screen.findByRole('button', { name: /koios\.effort\.label.*koios\.effort\.defaultWith/ })
     expect(trigger).toHaveAttribute('aria-haspopup', 'listbox')
   })
 })

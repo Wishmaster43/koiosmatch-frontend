@@ -291,6 +291,7 @@
     "effort": {
       "label": "Esfuerzo",
       "default": "Predeterminado",
+      "defaultWith": "Predeterminado ({{level}})",
       "low": "Bajo",
       "medium": "Medio",
       "high": "Alto",

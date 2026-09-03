@@ -8,6 +8,7 @@
  * (WORKLIST KOIOS-CAPABILITIES-FE-1) — the single hand-typed source, never
  * re-declared per consumer.
  */
+import type { KoiosEffort } from './koiosTypes'
 import { useQuery } from '@tanstack/react-query'
 import api, { unwrap } from '@/lib/api'
 
@@ -51,6 +52,11 @@ export interface KoiosCapabilities {
   tools: KoiosCapabilityTool[]
   limits: KoiosLimits
   models: { active_flavor: string; flavors: string[] }
+  // K-147: per-chat effort scale — the tenant default and the package ceiling (CMBE 04-09:
+  // KoiosCapabilitiesController::effort()); absent on older backends, then the picker hides.
+  // `supported` follows the tenant's DEFAULT flavour (per model, e.g. Snel = Haiku has none);
+  // `supported_by_flavor` (CMBE bundle H, name may still move) answers it per flavour.
+  effort?: { supported: boolean; options: KoiosEffort[]; default: KoiosEffort; max: KoiosEffort; supported_by_flavor?: Record<string, boolean> }
 }
 
 // Shared query key — optimistic writers (the settings card's patchTool) address
