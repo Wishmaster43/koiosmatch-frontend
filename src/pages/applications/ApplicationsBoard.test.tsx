@@ -54,3 +54,20 @@ describe('ApplicationsBoard · S-board-2 candidate/vacancy deep links', () => {
     expect(goTo).toHaveBeenCalledWith('vacancies', { open: 'vac-1', tab: undefined })
   })
 })
+
+// audit a11y-2: a board card is keyboard-operable — focusable, named, Enter opens it.
+describe('ApplicationsBoard · keyboard-operable cards (WCAG 2.2 AA)', () => {
+  it('focuses the card by name and opens it with Enter', async () => {
+    const onSelect = vi.fn()
+    render(
+      <NavigationProvider goTo={vi.fn()}>
+        <ApplicationsBoard rows={[APP]} phases={PHASES} onMove={vi.fn()} onSelect={onSelect} />
+      </NavigationProvider>,
+    )
+    const card = screen.getByRole('button', { name: 'Jane Doe · Verpleegkundige IC' })
+    expect(card).toHaveAttribute('tabindex', '0')
+    card.focus()
+    await userEvent.keyboard('{Enter}')
+    expect(onSelect).toHaveBeenCalledWith(APP)
+  })
+})

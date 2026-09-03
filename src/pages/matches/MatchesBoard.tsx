@@ -9,6 +9,7 @@ import type { MatchRow } from '@/types/match'
 import type { Id } from '@/types/common'
 import { useDragAutoScroll } from '@/lib/useDragAutoScroll'
 import { tintBg, chipInk } from '@/lib/tint'
+import { activatableCardProps } from '@/components/ui/activatableCard'
 
 export interface BoardColumn { key: string; label: string; color: string }
 
@@ -19,6 +20,7 @@ function BoardCard({ match, onDragStart, onClick, selected }: {
 }) {
   return (
     <div draggable onDragStart={e => onDragStart(e, match.id)} onClick={() => onClick(match)}
+      {...activatableCardProps(() => onClick(match), [match.candidateName, match.vacancy].filter(Boolean).map(String).join(' · '))}
       style={{ background: 'var(--surface)', borderRadius: 10, padding: '12px 14px', marginBottom: 8,
         cursor: 'grab', userSelect: 'none',
         border: `1px solid ${selected ? 'var(--color-primary)' : 'var(--border)'}` }}>

@@ -17,6 +17,7 @@ import type { Task } from '@/types/task'
 import type { Id } from '@/types/common'
 import { useDragAutoScroll } from '@/lib/useDragAutoScroll'
 import { tintBg, chipInk } from '@/lib/tint'
+import { activatableCardProps } from '@/components/ui/activatableCard'
 
 export interface BoardColumn { key: string | number; label: string; color: string }
 type FormatDate = (v?: string | number | Date | null) => string
@@ -28,6 +29,7 @@ function BoardCard({ task, onDragStart, onClick, selected, formatDate, formatDat
 }) {
   return (
     <div draggable onDragStart={e => onDragStart(e, task.id)} onClick={() => onClick(task)}
+      {...activatableCardProps(() => onClick(task), task.title ?? '')}
       style={{ background: 'var(--surface)', borderRadius: 10, padding: '12px 14px', marginBottom: 8,
         cursor: 'grab', userSelect: 'none',
         border: `1px solid ${selected ? 'var(--color-primary)' : 'var(--border)'}` }}>

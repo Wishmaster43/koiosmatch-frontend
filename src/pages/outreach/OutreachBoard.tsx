@@ -9,6 +9,7 @@ import { Phone, Mail, MessageCircle, Users } from 'lucide-react'
 import type { Campaign } from './hooks/useOutreachCampaigns'
 import { useDragAutoScroll } from '@/lib/useDragAutoScroll'
 import SoftChip from '@/components/ui/SoftChip'
+import { activatableCardProps } from '@/components/ui/activatableCard'
 
 // Icon + colour per outreach channel (soft-chip convention) — fixed channel enum,
 // not a tenant lookup, so these are DATA (mirrors a categorical palette, not styling).
@@ -72,6 +73,7 @@ export default function OutreachBoard({ rows, columns, onMove, onOpen }: Props) 
                 <div key={c.id} draggable
                   onDragStart={(e) => e.dataTransfer.setData('text/plain', String(c.id))}
                   onClick={() => onOpen?.(c)}
+                  {...(onOpen ? activatableCardProps(() => onOpen(c), c.name ?? '') : {})}
                   style={{ background: 'var(--surface)', borderRadius: 10, padding: '12px 14px', marginBottom: 8,
                     cursor: onOpen ? 'pointer' : 'grab', userSelect: 'none', border: '1px solid var(--border)' }}>
                   <div style={{ fontWeight: 600, fontSize: 13, color: 'var(--text)', marginBottom: 8, lineHeight: 1.3 }}>{c.name ?? '—'}</div>

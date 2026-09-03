@@ -18,6 +18,7 @@ import type { Id } from '@/types/common'
 import { useDragAutoScroll } from '@/lib/useDragAutoScroll'
 import { scoreColor } from '@/components/match/scoreColor'
 import { tintBg, chipInk } from '@/lib/tint'
+import { activatableCardProps } from '@/components/ui/activatableCard'
 
 export interface BoardPhase { key: string; label: string; color: string }
 
@@ -31,6 +32,7 @@ function BoardCard({ app, onDragStart, onClick, selected }: {
   const { t } = useTranslation(['common', 'applications'])
   return (
     <div draggable onDragStart={e => onDragStart(e, app.id)} onClick={() => onClick(app)}
+      {...activatableCardProps(() => onClick(app), [app.candidateName, app.vacancyTitle].filter(Boolean).join(' · '))}
       style={{ background: 'var(--surface)', borderRadius: 10, padding: '12px 14px', marginBottom: 8,
         cursor: 'grab', userSelect: 'none',
         border: `1px solid ${selected ? 'var(--color-primary)' : 'var(--border)'}` }}>
