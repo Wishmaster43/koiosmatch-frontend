@@ -14,6 +14,7 @@ import Avatar from '@/components/ui/Avatar'
 import EntityLink from '@/components/ui/EntityLink'
 import { GroupLabel, BodyText, Caption } from '@/components/ui/typography'
 import KoiosAiMark from '@/components/ui/KoiosAiMark'
+import KoiosFeedback from '@/components/layout/koios/KoiosFeedback'
 import { formatNumber } from '@/lib/formatters'
 import { initialsOf } from '@/lib/initials'
 
@@ -111,8 +112,13 @@ export default function ReportDrillDrawer({ drill, onClose }: { drill: DrillSpec
   // 'common' alongside the feature namespace — the AI-Act disclosure hint
   // (AI-ACT-1) is shared copy, not per-report.
   const { t } = useTranslation(['analytics', 'common'])
+  // KoiosFeedback's own t() calls are bare `koios.feedback.*` keys that only
+  // exist under the 'common' namespace (mirrors RichTextAssistBar/NoteAssistSection)
+  // — the combined `t` above defaults to 'analytics' first and would silently
+  // fall through to raw keys instead of the translated label.
+  const { t: tCommon } = useTranslation('common')
   // Data layer: the underlying records + Koios advice for the open drill (§3).
-  const { rows, rowsTotal, rowsLoading, rowsForbidden, advice, adviceLoading } = useReportDrill(drill)
+  const { rows, rowsTotal, rowsLoading, rowsForbidden, advice, adviceLoading, advicePromptLogId } = useReportDrill(drill)
 
   if (!drill) return null
 
@@ -176,6 +182,13 @@ export default function ReportDrillDrawer({ drill, onClose }: { drill: DrillSpec
             ? t('drill.loading')
             : advice ?? t('drill.noAdvice')}
         </BodyText>
+        {/* KOIOS-FEEDBACK-REPORT-ADVICE: only a fresh (non-cached) generation
+            carries a prompt_log_id to vote on. */}
+        {!adviceLoading && advicePromptLogId && (
+          <div style={{ marginTop: 8 }}>
+            <KoiosFeedback promptLogId={advicePromptLogId} surface="report_advice" t={tCommon} />
+          </div>
+        )}
       </section>
     </RightDrawer>
   )

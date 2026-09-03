@@ -138,3 +138,27 @@ describe('useReportDrill — advice degrades to null while rows are present', ()
     expect(result.current.rowsForbidden).toBe(false)
   })
 })
+
+describe('useReportDrill — advicePromptLogId (KOIOS-FEEDBACK-REPORT-ADVICE)', () => {
+  it('fresh advice carries a prompt_log_id string for the feedback widget', async () => {
+    mockedGet.mockResolvedValue({ data: { advice: 'Fresh.', prompt_log_id: '11111111-2222-3333-4444-555555555555' } })
+    const drill: DrillSpec = {
+      title: 'x', value: 1,
+      adviceEndpoint: '/reports/flow/advice', adviceParams: { period: 'month' },
+    }
+    const { result } = renderHook(() => useReportDrill(drill), { wrapper: makeWrapper() })
+    await waitFor(() => expect(result.current.advice).toBe('Fresh.'))
+    expect(result.current.advicePromptLogId).toBe('11111111-2222-3333-4444-555555555555')
+  })
+
+  it('cached advice has a null prompt_log_id (no feedback widget)', async () => {
+    mockedGet.mockResolvedValue({ data: { advice: 'Cached.', prompt_log_id: null } })
+    const drill: DrillSpec = {
+      title: 'x', value: 1,
+      adviceEndpoint: '/reports/flow/advice', adviceParams: { period: 'month' },
+    }
+    const { result } = renderHook(() => useReportDrill(drill), { wrapper: makeWrapper() })
+    await waitFor(() => expect(result.current.advice).toBe('Cached.'))
+    expect(result.current.advicePromptLogId).toBeNull()
+  })
+})

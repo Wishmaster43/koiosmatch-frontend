@@ -35,14 +35,20 @@ export function useReportDrill(drill: DrillSpec | null) {
     },
   })
 
-  // Koios AI advice for the open drill (idle until a drill with an advice endpoint opens).
+  // Koios AI advice for the open drill (idle until a drill with an advice endpoint
+  // opens). KOIOS-FEEDBACK-REPORT-ADVICE: the response also carries `prompt_log_id`
+  // (KoiosReportAdviceController.php:215/:273) — null when the advice came from
+  // cache, a uuid string on a fresh generation. Only a fresh generation has a
+  // logged prompt to vote on, so both fields ride the same query result.
   const adviceQ = useQuery({
     queryKey: ['report-drill', 'advice', drill?.adviceEndpoint, drill?.adviceParams],
     enabled: !!drill?.adviceEndpoint,
     queryFn: async ({ signal }) => {
-      if (!drill?.adviceEndpoint) return null
+      if (!drill?.adviceEndpoint) return { advice: null as string | null, promptLogId: null as string | null }
       const r = await api.get(drill.adviceEndpoint, { params: drill.adviceParams, signal })
-      return (r.data?.advice ?? r.data?.data?.advice ?? (typeof r.data === 'string' ? r.data : null)) as string | null
+      const advice = (r.data?.advice ?? r.data?.data?.advice ?? (typeof r.data === 'string' ? r.data : null)) as string | null
+      const promptLogId = (r.data?.prompt_log_id ?? r.data?.data?.prompt_log_id ?? null) as string | null
+      return { advice, promptLogId }
     },
   })
 
@@ -51,7 +57,10 @@ export function useReportDrill(drill: DrillSpec | null) {
     rowsTotal:     rowsQ.data?.total ?? 0,
     rowsLoading:   rowsQ.isLoading,
     rowsForbidden: isForbidden(rowsQ.error),
-    advice:        adviceQ.data ?? null,
+    advice:        adviceQ.data?.advice ?? null,
     adviceLoading: adviceQ.isLoading,
+    // Only a string (fresh generation) enables the feedback widget — a cached
+    // answer has no prompt log to attach a vote to.
+    advicePromptLogId: typeof adviceQ.data?.promptLogId === 'string' ? adviceQ.data.promptLogId : null,
   }
 }
