@@ -13,10 +13,9 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { RefreshCw } from 'lucide-react'
-import api, { unwrap } from '@/lib/api'
+import { postGeocode } from './geocodeApi'
 import Button from '@/components/ui/Button'
 import { notifySuccess, notifyError } from '@/lib/notify'
-import { toCoord } from '@/lib/coords'
 import { useAuth } from '@/context/AuthContext'
 
 export interface GeocodeButtonProps {
@@ -60,14 +59,11 @@ export default function GeocodeButton({ endpoint, permission, disabled = false, 
     if (disabled || loading) return
     setLoading(true)
     try {
-      const res = await api.post(endpoint)
-      const body = unwrap<{ lat?: unknown; lng?: unknown; geocoded?: boolean }>(res) ?? {}
-      const lat = toCoord(body.lat)
-      const lng = toCoord(body.lng)
+      const { lat, lng, notFound } = await postGeocode(endpoint)
       if (lat != null && lng != null) {
         onResult?.(lat, lng)
         notifySuccess(t('geocode.updated'))
-      } else if (body.geocoded === false) {
+      } else if (notFound) {
         notifyError(t('geocode.notFound'))
       } else {
         notifySuccess(t('geocode.started'))
