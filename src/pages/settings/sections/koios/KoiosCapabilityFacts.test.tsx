@@ -274,6 +274,58 @@ describe('KoiosCapabilityFacts', () => {
     expect(screen.getByText('82,5%')).toBeInTheDocument()
   })
 
+  it('renders the current object rate-limit shape ({ count, per })', () => {
+    const i18n = createI18nInstance()
+    const limits: KoiosLimits = {
+      max_tokens_per_request: 1000,
+      monthly_budget_cents: 100,
+      warn_at_pct: 50,
+      rate_limits: { chat: { count: 20, per: 'minute' }, other: { count: 30, per: 'minute' } },
+    }
+    render(
+      <I18nextProvider i18n={i18n}>
+        <KoiosCapabilityFacts limits={limits} />
+      </I18nextProvider>,
+    )
+    // The BE's new object shape renders through the same translated phrase.
+    expect(screen.getByText('20 per minute')).toBeInTheDocument()
+    expect(screen.getByText('30 per minute')).toBeInTheDocument()
+  })
+
+  it('renders a zero-count object rate limit instead of hiding it', () => {
+    const i18n = createI18nInstance()
+    const limits: KoiosLimits = {
+      max_tokens_per_request: 1000,
+      monthly_budget_cents: 100,
+      warn_at_pct: 50,
+      rate_limits: { chat: { count: 0, per: 'minute' }, other: '' },
+    }
+    render(
+      <I18nextProvider i18n={i18n}>
+        <KoiosCapabilityFacts limits={limits} />
+      </I18nextProvider>,
+    )
+    // A real 0 count still renders — the object shape is never truthy-hidden.
+    expect(screen.getByText('0 per minute')).toBeInTheDocument()
+  })
+
+  it('renders object rate limits for hour and second units', () => {
+    const i18n = createI18nInstance()
+    const limits: KoiosLimits = {
+      max_tokens_per_request: 1000,
+      monthly_budget_cents: 100,
+      warn_at_pct: 50,
+      rate_limits: { chat: { count: 5, per: 'hour' }, other: { count: 2, per: 'second' } },
+    }
+    render(
+      <I18nextProvider i18n={i18n}>
+        <KoiosCapabilityFacts limits={limits} />
+      </I18nextProvider>,
+    )
+    expect(screen.getByText('5 per hour')).toBeInTheDocument()
+    expect(screen.getByText('2 per second')).toBeInTheDocument()
+  })
+
   it('falls back to the raw string when a rate limit cannot be parsed', () => {
     const i18n = createI18nInstance()
     const limits: KoiosLimits = {

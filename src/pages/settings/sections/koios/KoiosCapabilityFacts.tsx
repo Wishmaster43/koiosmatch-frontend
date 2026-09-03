@@ -10,7 +10,7 @@ import { formatCurrency } from '@/lib/formatters'
 import SoftChip from '@/components/ui/SoftChip'
 import { GroupLabel, Caption, BodyText } from '@/components/ui/typography'
 import { CANON_LABEL_STYLE } from '@/components/drawer/fieldRowCanon'
-import type { KoiosSurface, KoiosLimits } from '@/components/layout/koios/useKoiosToolCapabilities'
+import type { KoiosSurface, KoiosLimits, KoiosRateLimit } from '@/components/layout/koios/useKoiosToolCapabilities'
 
 const sectionStyle = { marginTop: 12, marginBottom: 12 } as const
 const chipsRowStyle = { display: 'flex', gap: 8, flexWrap: 'wrap' as const, margin: '8px 0' }
@@ -44,7 +44,7 @@ type RateUnit = 'perMinute' | 'perHour' | 'perSecond'
 const RATE_UNIT_KEY: Record<string, RateUnit> = {
   min: 'perMinute', minute: 'perMinute',
   hour: 'perHour', h: 'perHour',
-  s: 'perSecond', sec: 'perSecond',
+  s: 'perSecond', sec: 'perSecond', second: 'perSecond',
 }
 
 // Tolerant parse of a backend rate-limit string ("20/min", "30 / hour") into a
@@ -55,6 +55,15 @@ function parseRateLimit(raw: string): { count: number; unit: RateUnit } | null {
   if (!match) return null
   const unit = RATE_UNIT_KEY[match[2].toLowerCase()]
   return unit ? { count: Number(match[1]), unit } : null
+}
+
+// Normalises either shape the backend has shipped — the current { count, per }
+// object, or the legacy compact string — into a count + unit pair. Returns null
+// for an unrecognised value so the caller can fall back to an honest raw render.
+function normalizeRateLimit(value: KoiosRateLimit): { count: number; unit: RateUnit } | null {
+  if (typeof value === 'string') return parseRateLimit(value)
+  const unit = RATE_UNIT_KEY[value.per]
+  return unit ? { count: value.count, unit } : null
 }
 
 function LimitsBlock({ limits }: { limits?: KoiosLimits }) {
@@ -68,13 +77,17 @@ function LimitsBlock({ limits }: { limits?: KoiosLimits }) {
   const budgetEuro = monthly_budget_cents != null ? monthly_budget_cents / 100 : null
   const budgetStr = budgetEuro !== null ? formatCurrency(budgetEuro, 'EUR', locale) : '—'
 
-  // Renders a "20/min" rate-limit string as a translated, locale-formatted phrase.
-  // An unparseable string still renders verbatim (honest fallback, never hides data).
-  const renderRate = (raw: string) => {
-    const parsed = parseRateLimit(raw)
-    if (!parsed) return raw
+  // Renders a rate limit (object or legacy string) as a translated, locale-formatted
+  // phrase. An unparseable value still renders verbatim (honest fallback, never hides data).
+  const renderRate = (value: KoiosRateLimit) => {
+    const parsed = normalizeRateLimit(value)
+    if (!parsed) return typeof value === 'string' ? value : String(value.count)
     return t(`capabilities.facts.${parsed.unit}`, { count: new Intl.NumberFormat(locale).format(parsed.count) })
   }
+
+  // A rate limit is "configured" unless it is the legacy empty string — the
+  // object shape always carries a real count (0 renders, per the falsy-check rule above).
+  const isRateConfigured = (value: KoiosRateLimit | undefined) => value != null && value !== ''
 
   return (
     <div style={sectionStyle}>
@@ -99,13 +112,13 @@ function LimitsBlock({ limits }: { limits?: KoiosLimits }) {
           </div>
         )}
         {/* Empty string means "not configured" (distinct from a real numeric 0 above). */}
-        {rate_limits?.chat != null && rate_limits.chat !== '' && (
+        {isRateConfigured(rate_limits?.chat) && (
           <div style={rowStyle}>
             <Caption style={CANON_LABEL_STYLE}>{t('capabilities.facts.rateChat')}</Caption>
             <BodyText>{renderRate(rate_limits.chat)}</BodyText>
           </div>
         )}
-        {rate_limits?.other != null && rate_limits.other !== '' && (
+        {isRateConfigured(rate_limits?.other) && (
           <div style={rowStyle}>
             <Caption style={CANON_LABEL_STYLE}>{t('capabilities.facts.rateOther')}</Caption>
             <BodyText>{renderRate(rate_limits.other)}</BodyText>

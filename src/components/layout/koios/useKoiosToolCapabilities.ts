@@ -31,14 +31,18 @@ export interface KoiosSurface {
   endpoint: string
 }
 
-// Rate limits (e.g., "20/min", "30/min").
+// One rate limit as the backend now shapes it: a count + unit object. The
+// legacy compact string ("20/min") is still accepted for older payloads.
+export type KoiosRateLimit = { count: number; per: 'minute' | 'hour' | 'second' } | string
+
+// Rate limits (e.g., { count: 20, per: 'minute' }, or legacy "20/min").
 export interface KoiosLimits {
   max_tokens_per_request: number
   monthly_budget_cents: number
   warn_at_pct: number
   rate_limits: {
-    chat: string
-    other: string
+    chat: KoiosRateLimit
+    other: KoiosRateLimit
   }
 }
 
