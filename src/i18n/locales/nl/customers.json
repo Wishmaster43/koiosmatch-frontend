@@ -162,7 +162,8 @@
       "usesVisitAddress": "Leeg. De factuur gaat naar het bezoekadres.",
       "visitEmpty": "Geen bezoekadres ingevuld",
       "hint": "Laat dit leeg als de factuur naar het bezoekadres mag. Vul het alleen in bij een afwijkend adres of een postbus."
-    }
+    },
+    "blacklistReason": "Blacklist-reden"
   },
   "richText": {
     "empty": "Nog niet ingevuld."

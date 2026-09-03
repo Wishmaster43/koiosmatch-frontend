@@ -162,7 +162,8 @@
       "usesVisitAddress": "Empty. Invoices go to the visit address.",
       "visitEmpty": "No visit address on file",
       "hint": "Leave this empty to invoice the visit address. Fill it in only for a different address or a PO box."
-    }
+    },
+    "blacklistReason": "Blacklist reason"
   },
   "richText": {
     "empty": "Not filled in yet."

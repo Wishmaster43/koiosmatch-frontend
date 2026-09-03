@@ -227,7 +227,7 @@ export default function CustomerDrawer({
 
   const renderTab = (id: string, setActiveTab?: (id: string) => void): ReactNode => {
     switch (id) {
-      case 'overview':      return <OverviewTab c={c} onSave={v => onUpdate?.(c.id, v)} />
+      case 'overview':      return <OverviewTab c={c} onSave={v => onUpdate?.(c.id, v)} statuses={statuses} />
       case 'locations':     return (
         <LocationsTab
           customerId={c.id} customerName={c.name} locations={locationsApi.locations} departments={departmentsApi.departments} contacts={contactsApi.contacts}

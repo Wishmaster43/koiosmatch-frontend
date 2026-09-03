@@ -126,7 +126,8 @@ export function useCustomerDrawerActions({ c, onUpdate, onClose, users, statuses
   // KLANT-BLACKLIST-PROMPT-1: a status flagged `isBlacklist` opens the reason
   // prompt instead of patching immediately — status AND blacklist_reason travel
   // in ONE PATCH (the BE guard validates the transition together with the
-  // reason). Every other status keeps patching directly, unchanged.
+  // reason). Every other status clears the blacklist reason (send null) so no
+  // stale reason stays on file when the customer leaves the blacklist.
   const changeStatus  = (v: string) => {
     const picked = statuses.find(s => String(s.value) === v)
     if (picked?.isBlacklist) {
@@ -136,7 +137,7 @@ export function useCustomerDrawerActions({ c, onUpdate, onClose, users, statuses
     setStatus(v)
     // STATUS-OVERRIDE-REVERT-1: clear the override on a rejected PATCH so the
     // picker falls back to the (reverted) record value instead of the refused one.
-    Promise.resolve(onUpdate?.(c?.id, { status: v })).then(ok => { if (ok === false) setStatus(null) })
+    Promise.resolve(onUpdate?.(c?.id, { status: v, blacklistReason: null })).then(ok => { if (ok === false) setStatus(null) })
   }
   // Confirm the blacklist prompt: one PATCH carrying both the new status and the
   // reason. Cancel (closing without confirming) never patches — the picker keeps

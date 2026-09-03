@@ -162,7 +162,8 @@
       "usesVisitAddress": "Vazio. A fatura vai para a morada de visita.",
       "visitEmpty": "Nenhuma morada de visita preenchida",
       "hint": "Deixe isto vazio se a fatura puder ser enviada para a morada de visita. Preencha apenas para uma morada diferente ou um apartado."
-    }
+    },
+    "blacklistReason": "Motivo da lista negra"
   },
   "richText": {
     "empty": "Ainda não preenchido."

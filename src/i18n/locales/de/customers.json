@@ -162,7 +162,8 @@
       "usesVisitAddress": "Leer. Die Rechnung geht an die Besuchsadresse.",
       "visitEmpty": "Keine Besuchsadresse hinterlegt",
       "hint": "Leer lassen, wenn die Rechnung an die Besuchsadresse geht. Nur bei abweichender Adresse oder Postfach ausfüllen."
-    }
+    },
+    "blacklistReason": "Blacklist-Grund"
   },
   "richText": {
     "empty": "Noch nicht ausgefüllt."

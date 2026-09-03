@@ -162,7 +162,8 @@
       "usesVisitAddress": "Vide. La facture est envoyée à l'adresse de visite.",
       "visitEmpty": "Aucune adresse de visite renseignée",
       "hint": "Laissez vide pour facturer à l'adresse de visite. À remplir uniquement en cas d'adresse différente ou de boîte postale."
-    }
+    },
+    "blacklistReason": "Motif de liste noire"
   },
   "richText": {
     "empty": "Pas encore renseigné."

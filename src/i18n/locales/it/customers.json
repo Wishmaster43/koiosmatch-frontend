@@ -162,7 +162,8 @@
       "usesVisitAddress": "Vuoto. La fattura viene inviata all'indirizzo di visita.",
       "visitEmpty": "Nessun indirizzo di visita inserito",
       "hint": "Lascia vuoto se la fattura può essere inviata all'indirizzo di visita. Compila solo per un indirizzo diverso o una casella postale."
-    }
+    },
+    "blacklistReason": "Motivo blacklist"
   },
   "richText": {
     "empty": "Non ancora compilato."

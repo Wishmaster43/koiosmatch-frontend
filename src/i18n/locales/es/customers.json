@@ -162,7 +162,8 @@
       "usesVisitAddress": "Vacío: la factura se envía a la dirección de visita.",
       "visitEmpty": "No hay dirección de visita registrada",
       "hint": "Déjalo vacío para facturar a la dirección de visita. Rellénalo solo si la dirección es distinta o es un apartado de correos."
-    }
+    },
+    "blacklistReason": "Motivo de lista negra"
   },
   "richText": {
     "empty": "Aún no completado."

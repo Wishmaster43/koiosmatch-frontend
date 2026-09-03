@@ -71,6 +71,11 @@ export interface FieldRow {
   // the save. Deliberately a caller-supplied function: this table owns no
   // domain rules, it only renders the verdict and gates Save on it.
   validate?: (value: unknown, values: Values) => FieldNotice | null
+  // Read-only field that never enters edit mode — always renders its read-mode value,
+  // skips the edit control entirely. Used for derived/calculated fields that should
+  // never be user-editable but belong in the same table structure (e.g. blacklist reason
+  // when the status is flagged as blacklist).
+  readOnly?: boolean
 }
 
 /** One row's live verdict — see FieldRow.validate. */
@@ -379,13 +384,14 @@ export default function EditableFieldTable({
   // CHIP-INLINE-1 (Danny 05-08 "niet eronder maar ernaast"): chips READ as a normal
   // label-left row (they wrap in the value area); only while EDITING do they take the
   // full width — the option grid genuinely needs it (mirrors textarea/richtext).
+  // readOnly fields always render their value, never the edit control (used for derived fields).
   const renderRow = (f: FieldRow, last: boolean) => (f.type === 'textarea' || (f.type === 'chips' && editing) || f.type === 'richtext') ? (
     <div key={f.key} style={dividers
       ? { padding: '7px 12px', background: 'var(--surface)', borderBottom: !last ? '1px solid var(--border)' : 'none' }
       : { padding: '4px 0' }}>
       <span style={{ fontSize: labelFontSize, color: 'var(--text-muted)', display: 'block', marginBottom: 4 }}>{f.label}</span>
-      {editing ? renderControl(f) : renderValue(f)}
-      {editing && <FieldNotice text={noticeFor(f)?.message} severity={noticeFor(f)?.severity} />}
+      {editing && !f.readOnly ? renderControl(f) : renderValue(f)}
+      {editing && !f.readOnly && <FieldNotice text={noticeFor(f)?.message} severity={noticeFor(f)?.severity} />}
     </div>
   ) : (
     <div key={f.key} style={dividers
@@ -394,8 +400,9 @@ export default function EditableFieldTable({
       {/* Canon label span — the same flex/gap-5 anatomy as the candidate's FieldRow. */}
       <span style={{ fontSize: labelFontSize, color: 'var(--text-muted)', width: labelWidth, flexShrink: 0, display: 'flex', alignItems: 'center', gap: 5 }}>{f.label}</span>
       {/* Canon value wrapper (flex 1 / minWidth 0); the row's own minHeight centres it.
-          A live format verdict renders directly under the control, never over it. */}
-      {editing
+          A live format verdict renders directly under the control, never over it. readOnly
+          fields skip the control and always show their value. */}
+      {editing && !f.readOnly
         ? <div style={{ flex: 1, minWidth: 0 }}>{renderControl(f)}<FieldNotice text={noticeFor(f)?.message} severity={noticeFor(f)?.severity} /></div>
         : <div style={{ flex: 1, minWidth: 0 }}>{renderValue(f)}</div>}
     </div>

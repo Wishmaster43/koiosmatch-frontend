@@ -65,7 +65,7 @@ import type { Customer } from '@/types/customer'
 
 // The customer overview tab: grouped field cards.
 // + the standalone rich-text Teksten section.
-export default function OverviewTab({ c, onSave }: { c: Customer; onSave?: (values: Record<string, unknown>) => void }) {
+export default function OverviewTab({ c, onSave, statuses = [] }: { c: Customer; onSave?: (values: Record<string, unknown>) => void; statuses?: Array<{ value: string; label: string; isBlacklist?: boolean; [k: string]: unknown }> }) {
   const { t, i18n } = useTranslation('customers')
   // KOIOS-ADVIES-OVERAL-1: the SAME resolver the customers table's Koios column
   // uses — the drawer block below prepends its advice so the two never disagree.
@@ -119,6 +119,10 @@ export default function OverviewTab({ c, onSave }: { c: Customer; onSave?: (valu
   const gContact = t('overview.contact')
   const gBranch  = t('overview.branch')
 
+  // Check if the current status is flagged as blacklist — used to conditionally show
+  // the blacklistReason field (KLANT-BLACKLIST-PROMPT-1).
+  const currentStatusIsBlacklist = statuses.find(s => s.value === c.status)?.isBlacklist ?? false
+
   // Field schema → grouped titled cards. Keys match the flat customer shape and
   // are translated to API keys in the page's updateCustomer. Description/
   // recruitmentProblems live in their own Teksten blocks below, not here.
@@ -126,7 +130,7 @@ export default function OverviewTab({ c, onSave }: { c: Customer; onSave?: (valu
   // Adres · Contact · Vestiging ("Details · Address · Contact · Branch"),
   // mirroring the candidate drawer's grouping. Keys match the flat customer
   // shape and are translated to API keys in the page's updateCustomer.
-  const fields: FieldRow[] = [
+  const baseFields: FieldRow[] = [
     // Options carry { value: stored name, label: translated } so saving never writes a translation.
     { key: 'industry',      label: t('overview.industry'),      type: 'select', options: industryOptions, group: gDetails },
     // CUST-SOURCE-FE-1: acquisition-source field — additive-only per the frozen
@@ -179,6 +183,12 @@ export default function OverviewTab({ c, onSave }: { c: Customer; onSave?: (valu
 
   ]
 
+  // Add the blacklist reason field when both conditions hold: current status is
+  // blacklist AND there is a non-empty reason stored (KLANT-BLACKLIST-PROMPT-1).
+  const fields: FieldRow[] = currentStatusIsBlacklist && c.blacklistReason
+    ? [...baseFields, { key: 'blacklistReason', label: t('overview.blacklistReason'), readOnly: true, group: gDetails }]
+    : baseFields
+
   // Per-block rendering: the group title moves to the table's own header row, next to
   // that block's pencil, so `group` is cleared on the rows (a second in-card heading
   // would just repeat it).
@@ -190,6 +200,7 @@ export default function OverviewTab({ c, onSave }: { c: Customer; onSave?: (valu
       {/* CANON-DIVIDER-1 (Danny 05-08): no line between rows, 11px labels — matches
           the candidate ProfileTab's Persoonlijk/Adres/Contact cards exactly. */}
       <EditableFieldTable title={gDetails} fields={block(gDetails)} value={values} onSave={onSave} />
+
       <EditableFieldTable title={gAddress} fields={block(gAddress)} value={values} onSave={onSave} />
       <EditableFieldTable title={gContact} fields={block(gContact)} value={values} onSave={onSave} />
 

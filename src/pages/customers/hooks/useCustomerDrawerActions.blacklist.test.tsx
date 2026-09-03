@@ -32,8 +32,9 @@ const mockedGet = vi.mocked(api.get)
 
 beforeEach(() => { vi.clearAllMocks(); settingsBlob = {}; mockedGet.mockResolvedValue({ data: { data: [] } }) })
 
-const customer = (): Customer => ({
+const customer = (overrides: Partial<Customer> = {}): Customer => ({
   id: 1, name: 'Test customer', status: 'available', blacklistReason: null,
+  ...overrides,
 } as unknown as Customer)
 
 const statuses: LookupOption[] = [
@@ -59,6 +60,15 @@ describe('useCustomerDrawerActions · blacklist status prompt', () => {
     await waitFor(() => expect(mockedGet).toHaveBeenCalled())
   })
 
+  // CUSTOMER-BLACKLIST-REASON-DISPLAY: re-opening the status prompt on an already-
+  // blacklisted customer prefills the STORED reason instead of an empty field.
+  it('prefills the stored blacklistReason when re-opening on an already-blacklisted customer', async () => {
+    const { hook } = harness(customer({ status: 'bl', blacklistReason: 'Wanbetaling' }))
+    act(() => { hook.result.current.changeStatus('bl') })
+    expect(hook.result.current.blacklistModal).toEqual({ target: 'bl', reason: 'Wanbetaling', needReason: true })
+    await waitFor(() => expect(mockedGet).toHaveBeenCalled())
+  })
+
   it('needReason follows the customer_blacklist_reason_required tenant setting', async () => {
     settingsBlob = { customer_blacklist_reason_required: '0' }
     const { hook } = harness(customer())
@@ -77,10 +87,10 @@ describe('useCustomerDrawerActions · blacklist status prompt', () => {
     expect(hook.result.current.blacklistModal).toBeNull()
   })
 
-  it('picking a normal status still patches immediately, unchanged', () => {
+  it('picking a normal status patches with blacklistReason: null to clear any stored reason', () => {
     const { hook, onUpdate } = harness(customer())
     act(() => { hook.result.current.changeStatus('available') })
-    expect(onUpdate).toHaveBeenCalledWith(1, { status: 'available' })
+    expect(onUpdate).toHaveBeenCalledWith(1, { status: 'available', blacklistReason: null })
     expect(hook.result.current.blacklistModal).toBeNull()
   })
 

@@ -254,6 +254,32 @@ describe('OverviewTab · removing the LAST branch widens visibility (VESTIGING-2
   })
 })
 
+// CUSTOMER-BLACKLIST-REASON-DISPLAY: the read-only field in the Gegevens card
+// shows only when both the status is flagged as blacklist AND a reason is actually on file.
+describe('OverviewTab · blacklist-reason field (CUSTOMER-BLACKLIST-REASON-DISPLAY)', () => {
+  it('renders the label and stored reason when status isBlacklist and blacklistReason is set', async () => {
+    const statuses = [{ value: 'blacklist', label: 'Blacklist', isBlacklist: true }]
+    render(<OverviewTab c={customer({ status: 'blacklist', blacklistReason: 'Fraude' } as Partial<Customer>)} onSave={vi.fn()} statuses={statuses} />)
+    expect(screen.getByText(ct('overview.blacklistReason'))).toBeInTheDocument()
+    expect(screen.getByText('Fraude')).toBeInTheDocument()
+    await waitFor(() => expect(apiGet).toHaveBeenCalled())
+  })
+
+  it('renders no row when reason is set but status is NOT blacklist', async () => {
+    const statuses = [{ value: 'available', label: 'Available', isBlacklist: false }]
+    render(<OverviewTab c={customer({ status: 'available', blacklistReason: 'Fraude' } as Partial<Customer>)} onSave={vi.fn()} statuses={statuses} />)
+    expect(screen.queryByText(ct('overview.blacklistReason'))).not.toBeInTheDocument()
+    await waitFor(() => expect(apiGet).toHaveBeenCalled())
+  })
+
+  it('renders no row when status is blacklist but reason is unset', async () => {
+    const statuses = [{ value: 'blacklist', label: 'Blacklist', isBlacklist: true }]
+    render(<OverviewTab c={customer({ status: 'blacklist', blacklistReason: null } as Partial<Customer>)} onSave={vi.fn()} statuses={statuses} />)
+    expect(screen.queryByText(ct('overview.blacklistReason'))).not.toBeInTheDocument()
+    await waitFor(() => expect(apiGet).toHaveBeenCalled())
+  })
+})
+
 // KOIOS-ADVIES-OVERAL-1: the drawer's advice block shows EXACTLY the advice the
 // customers table's Koios column derives — asserted through the SAME resolver
 // (useCustomerAdvice), never a copied literal.
