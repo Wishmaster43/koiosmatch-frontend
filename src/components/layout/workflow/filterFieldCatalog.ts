@@ -17,12 +17,10 @@
  * "3. Ingeplande diensten" reads left-to-right exactly like the modules the
  * user just chained.
  *
- * Special case (BE note, FILTER-VELD-1): sm_candidates/sm_customers/sm_shifts
- * emit their fresh mirror slice under their OWN key (e.g. `sm_candidates`), not
- * flattened onto the record — meant to be promoted by a downstream Iterator
- * (`array_field: sm_candidates`). Until such an Iterator sits between it and
- * the current edge, its fields are only reachable as `sm_candidates.<field>`;
- * once promoted, they read like any other flat field.
+ * sm_candidates/sm_customers/sm_shifts fields emit their bare field key like
+ * every other module (module-schema-reconcile-5): the engine routes filter
+ * conditions on the flat `_list` regardless of module type, so no own-key
+ * prefix or downstream-Iterator unwrap check is needed here any more.
  */
 
 // The backend's per-module walk rule (BaseModule::emits) — replace/append/passthrough.
@@ -73,15 +71,6 @@ export interface FilterFieldGroup {
   fields: FilterFieldOption[]
 }
 
-// Module types whose fresh record set rides under their OWN key instead of being
-// the flat bundle shape (see file header). A future BE-added type of the same
-// shape only needs adding here — the walk logic itself never changes.
-const OWN_KEY_TYPES = new Set(['sm_candidates', 'sm_customers', 'sm_shifts'])
-
-// Strip Make-style "{{...}}" braces some configs allow around a field reference
-// (mirrors IteratorModule::execute's own trim), so "{{sm_candidates}}" still matches.
-const stripBraces = (v: string) => v.trim().replace(/^\{+|\}+$/g, '').trim()
-
 /**
  * Return one group per module in `startNodeId`'s own chain — itself first
  * (nearest), then its ancestors walked backward — furthest-first once numbered,
@@ -125,22 +114,13 @@ export function collectUpstreamFilterFields(
     const type = byId.get(id)?.type ?? ''
     const outputFields = catalog[type]?.outputFields ?? {}
 
-    // A NEARER Iterator (walked after this one, i.e. later in furthest-first
-    // order) whose `array_field` names this module's own key promotes its
-    // nested set to flat bundle fields — see file header.
-    const unwrapped = OWN_KEY_TYPES.has(type) && ordered.slice(i + 1).some(laterId => {
-      const later = byId.get(laterId)
-      if (later?.type !== 'iterator') return false
-      return stripBraces(String(later.config?.array_field ?? '')) === type
-    })
-    const prefix = OWN_KEY_TYPES.has(type) && !unwrapped ? `${type}.` : ''
-
     return {
       nodeId: id,
       moduleType: type,
       number: i + 1,
-      // Underscore keys (_list, …) are engine pipeline metadata, never user-facing fields.
-      fields: Object.entries(outputFields).filter(([key]) => !key.startsWith('_')).map(([key, label]) => ({ key: `${prefix}${key}`, label })),
+      // Underscore keys (_list, …) are engine pipeline metadata, never user-facing fields;
+      // every module (including sm_* ones) emits its bare field key.
+      fields: Object.entries(outputFields).filter(([key]) => !key.startsWith('_')).map(([key, label]) => ({ key, label })),
     }
   })
 }

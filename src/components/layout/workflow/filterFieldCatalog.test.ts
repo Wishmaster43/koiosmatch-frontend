@@ -1,12 +1,12 @@
 /**
  * Unit tests for the pure upstream-walk/collect logic (FILTER-VELD-1) — the walk
  * rule (start node's own fields + stop after the nearest `replace`), append/
- * passthrough continuation, and the sm_* own-key nesting/unwrap case are exactly
- * what the Make-style filter field picker depends on, so they're worth pinning
- * down explicitly. `collectUpstreamFilterFields` is always called with the id of
- * the node whose OUTGOING edge is being filtered (the edge's SOURCE) — the
- * backend evaluates edge filters against that node's own step output, so its
- * fields must be selectable too, not just its ancestors'.
+ * passthrough continuation, and the bare-field-key emission for sm_* modules
+ * (module-schema-reconcile-5) are exactly what the Make-style filter field picker
+ * depends on, so they're worth pinning down explicitly. `collectUpstreamFilterFields`
+ * is always called with the id of the node whose OUTGOING edge is being filtered
+ * (the edge's SOURCE) — the backend evaluates edge filters against that node's own
+ * step output, so its fields must be selectable too, not just its ancestors'.
  */
 import { describe, it, expect } from 'vitest'
 import {
@@ -15,15 +15,14 @@ import {
 } from './filterFieldCatalog'
 
 // Small shared catalog: one replace fetch, one append enrich, one passthrough
-// control step, plus the sm_candidates own-key + iterator promotion pair.
+// control step, plus an sm_candidates entry for the bare-field-key case.
 const catalog: ModuleCatalog = {
   candidate_filter: { emits: 'replace', outputFields: { id: 'Kandidaat-ID', firstname: 'Voornaam' } },
   shift_fetch:      { emits: 'append',  outputFields: { shifts_count: 'Aantal beschikbare diensten' } },
   shift_score:      { emits: 'append',  outputFields: { best_shift: 'Beste dienst' } },
   router:           { emits: 'passthrough', outputFields: {} },
   wait:             { emits: 'passthrough', outputFields: {} },
-  sm_candidates:    { emits: 'replace', outputFields: { id: 'Kandidaat-ID', name: 'Volledige naam' } },
-  iterator:         { emits: 'passthrough', outputFields: {} },
+  sm_candidates:    { emits: 'replace', outputFields: { id: 'Kandidaat-ID', name: 'Volledige naam', city: 'Plaats' } },
 }
 
 describe('collectUpstreamFilterFields', () => {
@@ -83,31 +82,14 @@ describe('collectUpstreamFilterFields', () => {
     expect(groups[1]).toMatchObject({ moduleType: 'shift_fetch' })
   })
 
-  it('sm_candidates fields are prefixed with its own key when nothing unwraps them', () => {
-    // Filtering the edge right out of sm_candidates itself — no Iterator yet.
+  it('an sm_candidates field option emits the bare field key, not a prefixed dot-path (module-schema-reconcile-5)', () => {
+    // Filtering the edge right out of sm_candidates itself — the engine routes
+    // on the flat `_list`, so no own-key prefix is emitted regardless of
+    // whether a downstream Iterator exists.
     const nodes: FilterGraphNode[] = [{ id: 'a', type: 'sm_candidates' }]
     const groups = collectUpstreamFilterFields('a', nodes, [], catalog)
-    expect(groups[0].fields.map(f => f.key)).toEqual(['sm_candidates.id', 'sm_candidates.name'])
-  })
-
-  it('sm_candidates fields flatten once a downstream Iterator promotes its own key', () => {
-    const nodes: FilterGraphNode[] = [
-      { id: 'a', type: 'sm_candidates' },
-      { id: 'it', type: 'iterator', config: { array_field: 'sm_candidates' } }, // filtering the edge OUT of it
-    ]
-    const edges: FilterGraphEdge[] = [{ source: 'a', target: 'it' }]
-    const groups = collectUpstreamFilterFields('it', nodes, edges, catalog)
-    expect(groups.find(g => g.moduleType === 'sm_candidates')?.fields.map(f => f.key)).toEqual(['id', 'name'])
-  })
-
-  it('sm_candidates stays prefixed when an Iterator promotes a DIFFERENT field', () => {
-    const nodes: FilterGraphNode[] = [
-      { id: 'a', type: 'sm_candidates' },
-      { id: 'it', type: 'iterator', config: { array_field: 'sm_shifts' } },
-    ]
-    const edges: FilterGraphEdge[] = [{ source: 'a', target: 'it' }]
-    const groups = collectUpstreamFilterFields('it', nodes, edges, catalog)
-    expect(groups.find(g => g.moduleType === 'sm_candidates')?.fields.map(f => f.key)).toEqual(['sm_candidates.id', 'sm_candidates.name'])
+    expect(groups[0].fields.map(f => f.key)).toEqual(['id', 'name', 'city'])
+    expect(groups[0].fields).toContainEqual({ key: 'city', label: 'Plaats' })
   })
 
   it('a node with no predecessors still returns its own group (itself), never throws', () => {
